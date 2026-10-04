@@ -1,0 +1,430 @@
+/* Account-panel color language shared by every cart implementation. */
+:where(.cart-panel, .page-cart-panel, .search-cart-drawer) {
+  border-color: rgba(113, 135, 166, 0.48) !important;
+  background: var(--panel-shell-bg) !important;
+  color: #263650 !important;
+  box-shadow:
+    0 28px 70px rgba(3, 15, 53, 0.3),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.82) !important;
+  backdrop-filter: blur(22px);
+}
+:where(.cart-head, .page-panel-head, .search-cart-head) {
+  border-bottom: 1px solid rgba(215, 182, 108, 0.22) !important;
+  background:
+    radial-gradient(
+      circle at 8% 10%,
+      rgba(215, 182, 108, 0.2),
+      transparent 32%
+    ),
+    linear-gradient(135deg, #173867, #0b2550 70%, #123466) !important;
+  color: #fff !important;
+}
+:where(.cart-head, .page-panel-head, .search-cart-head) small {
+  margin-top: 4px !important;
+  color: rgba(255, 255, 255, 0.74) !important;
+  font-size: 12px !important;
+  font-weight: 550 !important;
+  line-height: 1.5 !important;
+}
+:where(.cart-head, .page-panel-head, .search-cart-head) > button {
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  background: rgba(255, 255, 255, 0.07) !important;
+  color: #e5c98f !important;
+}
+:where(.cart-head, .page-panel-head, .search-cart-head) .cart-head-title {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 12px !important;
+}
+:where(.cart-head, .page-panel-head, .search-cart-head) .cart-head-title > span:last-child {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+:where(.cart-head, .page-panel-head, .search-cart-head) .cart-head-icon {
+  display: grid;
+  width: 43px;
+  height: 43px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.13);
+  color: #fff;
+  font-size: 20px;
+}
+:where(.cart-items, .page-cart-items, .search-cart-items) {
+  background: transparent !important;
+}
+:where(.cart-item, .page-cart-item, .search-cart-item) {
+  border-color: rgba(113, 135, 166, 0.2) !important;
+  background: rgba(255, 255, 255, 0.72) !important;
+  box-shadow: 0 4px 12px rgba(16, 42, 86, 0.05) !important;
+}
+:where(.cart-item, .page-cart-item, .search-cart-item) .cart-item-info {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 5px;
+}
+:where(.cart-item, .page-cart-item, .search-cart-item) .cart-item-info > strong {
+  color: #0b2868;
+  font-size: 13px;
+}
+:where(.cart-item, .page-cart-item, .search-cart-item) .cart-item-info > span {
+  color: #9a6d31;
+  font-size: 11px;
+  font-weight: 700;
+}
+:where(.cart-item, .page-cart-item, .search-cart-item) .cart-quantity {
+  display: flex;
+  width: fit-content;
+  padding: 3px;
+  align-items: center;
+  gap: 8px;
+  border-radius: 9px;
+  background: #f2eee7;
+}
+:where(.cart-item, .page-cart-item, .search-cart-item) .cart-quantity button {
+  width: 25px;
+  height: 25px;
+  padding: 0;
+  border: 0;
+  border-radius: 7px;
+  background: #fff;
+  color: #102a56;
+}
+:where(.cart-item, .page-cart-item, .search-cart-item) .cart-quantity button:hover {
+  background: #0b2868;
+  color: #fff;
+}
+:where(.cart-item, .page-cart-item, .search-cart-item) .cart-quantity b {
+  padding: 0;
+  background: transparent;
+  font-size: 12px;
+}
+:where(.cart-empty, .page-cart-empty, .search-cart-empty) {
+  color: #66758a !important;
+}
+:where(.cart-empty, .page-cart-empty, .search-cart-empty) > i,
+.cart-panel .empty-cart-icon,
+.cart-item button > i,
+.page-cart-item button > i,
+.search-cart-item button > i {
+  border: 1px solid var(--panel-icon-border) !important;
+  background: var(--panel-icon-bg) !important;
+  color: var(--panel-icon-color) !important;
+  box-shadow: none !important;
+}
+
+/* Keep destructive controls quiet: no pink circle or boxed icon on hover. */
+:where(.cart-panel, .page-cart-panel, .search-cart-drawer) .cart-remove,
+:where(.cart-panel, .page-cart-panel, .search-cart-drawer) .cart-remove:hover,
+:where(.cart-panel, .page-cart-panel, .search-cart-drawer) .cart-remove:focus,
+:where(.cart-panel, .page-cart-panel, .search-cart-drawer) .cart-remove:focus-visible,
+:where(.cart-panel, .page-cart-panel, .search-cart-drawer) .cart-remove:active {
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  transform: none !important;
+  color: #7d8999 !important;
+  outline: 0 !important;
+  -webkit-tap-highlight-color: transparent;
+}
+:where(.cart-panel, .page-cart-panel, .search-cart-drawer) .cart-remove:hover,
+:where(.cart-panel, .page-cart-panel, .search-cart-drawer) .cart-remove:focus-visible,
+:where(.cart-panel, .page-cart-panel, .search-cart-drawer) .cart-remove:active {
+  color: #a44f4f !important;
+}
+.cart-item .cart-remove > i,
+.page-cart-item .cart-remove > i,
+.search-cart-item .cart-remove > i,
+.cart-item .cart-remove:hover > i,
+.page-cart-item .cart-remove:hover > i,
+.search-cart-item .cart-remove:hover > i,
+.cart-item .cart-remove:focus > i,
+.page-cart-item .cart-remove:focus > i,
+.search-cart-item .cart-remove:focus > i,
+.cart-item .cart-remove:active > i,
+.page-cart-item .cart-remove:active > i,
+.search-cart-item .cart-remove:active > i {
+  width: auto !important;
+  height: auto !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: inherit !important;
+}
+
+/* Empty-cart CTA: same navy family as the account panel, across every page. */
+body > .cart-panel .empty-cart > a,
+.page-cart-panel .page-cart-empty > a,
+.search-cart-drawer .search-cart-empty > a {
+  display: inline-flex !important;
+  min-height: 42px !important;
+  margin-top: 18px !important;
+  padding: 0 17px !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 9px !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 12px !important;
+  background: linear-gradient(
+    120deg,
+    #173867 0%,
+    #0b2550 62%,
+    #123466 100%
+  ) !important;
+  color: #fff !important;
+  box-shadow: 0 8px 20px rgba(7, 28, 65, 0.18) !important;
+  font-size: 12px !important;
+  font-weight: 750 !important;
+  text-decoration: none !important;
+  transition:
+    transform 0.22s ease,
+    box-shadow 0.22s ease,
+    filter 0.22s ease !important;
+}
+body > .cart-panel .empty-cart > a > i,
+.page-cart-panel .page-cart-empty > a > i,
+.search-cart-drawer .search-cart-empty > a > i {
+  display: inline-block !important;
+  width: auto !important;
+  height: auto !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: #e8c66f !important;
+  font-size: 16px !important;
+  line-height: 1 !important;
+  transition: transform 0.22s ease !important;
+}
+body > .cart-panel .empty-cart > a:hover,
+.page-cart-panel .page-cart-empty > a:hover,
+.search-cart-drawer .search-cart-empty > a:hover {
+  transform: translateY(-2px) !important;
+  filter: brightness(1.08) !important;
+  box-shadow: 0 11px 25px rgba(7, 28, 65, 0.25) !important;
+}
+body > .cart-panel .empty-cart > a:hover > i,
+.page-cart-panel .page-cart-empty > a:hover > i,
+.search-cart-drawer .search-cart-empty > a:hover > i {
+  transform: translateX(-2px) !important;
+}
+:where(.cart-footer, .page-cart-footer, .search-cart-footer) {
+  border-top: 1px solid rgba(113, 135, 166, 0.2) !important;
+  background: rgba(229, 236, 245, 0.88) !important;
+  backdrop-filter: blur(14px);
+}
+:where(.cart-footer, .page-cart-footer, .search-cart-footer) strong {
+  color: #173867 !important;
+}
+:where(.cart-footer, .page-cart-footer) > small {
+  display: flex;
+  width: fit-content;
+  margin: 0 2px 12px;
+  padding: 5px 9px;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  background: #e9f2e9;
+  color: #46664d;
+  font-size: 11px;
+}
+:where(.cart-footer > a, .page-cart-footer > a, .search-cart-footer > button) {
+  background: linear-gradient(120deg, #173867, #0b2550 65%, #123466) !important;
+  color: #fff !important;
+  box-shadow: 0 8px 18px rgba(3, 15, 53, 0.16) !important;
+}
+:where(
+  .cart-footer > a,
+  .page-cart-footer > a,
+  .search-cart-footer > button
+):hover {
+  background: linear-gradient(120deg, #173867 0%, #0b2550 65%, #123466 100%) !important;
+  box-shadow: 0 10px 23px rgba(3, 15, 53, 0.23) !important;
+}
+
+/* Stable full-width checkout action across normal, hover and keyboard states. */
+:where(.cart-footer > a, .page-cart-footer > a, .search-cart-footer > button) {
+  position: relative !important;
+  display: flex !important;
+  width: 100% !important;
+  min-height: 50px !important;
+  padding: 0 18px !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 9px !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  border-radius: 13px !important;
+  background: linear-gradient(120deg, #173867 0%, #0b2550 65%, #123466 100%) !important;
+  color: #fff !important;
+  line-height: 1.5 !important;
+  text-decoration: none !important;
+  transform: translateY(0) !important;
+  transition:
+    filter 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease !important;
+}
+:where(.cart-footer > a, .page-cart-footer > a, .search-cart-footer > button):is(:hover, :focus-visible) {
+  border-color: rgba(232, 198, 111, 0.5) !important;
+  background: linear-gradient(120deg, #173867 0%, #0b2550 65%, #123466 100%) !important;
+  color: #fff !important;
+  filter: brightness(1.08);
+  transform: translateY(0) !important;
+  box-shadow:
+    0 10px 23px rgba(3, 15, 53, 0.23),
+    inset 0 1px rgba(255, 255, 255, 0.12) !important;
+}
+:where(.cart-footer > a, .page-cart-footer > a, .search-cart-footer > button)::before {
+  display: none !important;
+}
+
+/* Mobile cart follows the same below-header popover pattern as the account panel. */
+@media (max-width: 991px) {
+  body > .cart-panel,
+  .page-cart-panel,
+  .search-cart-drawer {
+    position: fixed !important;
+    z-index: 7000 !important;
+    isolation: isolate;
+    top: 74px !important;
+    right: 8px !important;
+    bottom: auto !important;
+    left: 8px !important;
+    display: flex !important;
+    width: auto !important;
+    height: auto !important;
+    max-height: calc(100dvh - 84px) !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    border: 1px solid rgba(113, 135, 166, 0.48) !important;
+    border-radius: 24px !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    transform: translateY(-10px) scale(0.985) !important;
+    transform-origin: top center !important;
+    box-shadow:
+      0 24px 60px rgba(3, 15, 53, 0.3),
+      inset 0 1px rgba(255, 255, 255, 0.9) !important;
+    transition:
+      opacity 0.25s ease,
+      visibility 0.25s ease,
+      transform 0.32s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+  }
+  body > .cart-panel.open,
+  .page-cart-panel.open,
+  .search-cart-drawer.open {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: translateY(0) !important;
+  }
+  /* Legacy index rules target #cartPanel with higher specificity; pin it to the header popover position. */
+  html body > #cartPanel.cart-panel,
+  html body > #cartPanel.cart-panel.open {
+    top: 74px !important;
+    right: 8px !important;
+    bottom: auto !important;
+    left: 8px !important;
+    width: auto !important;
+    height: auto !important;
+    max-height: calc(100dvh - 84px) !important;
+    border-bottom: 1px solid rgba(113, 135, 166, 0.48) !important;
+    border-radius: 24px !important;
+    transform: translateY(0) scale(1) !important;
+  }
+  html body > #cartPanel.cart-panel:not(.open) {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    transform: translateY(-10px) scale(0.985) !important;
+  }
+  :where(.cart-head, .page-panel-head, .search-cart-head) {
+    min-height: 100px !important;
+    flex: none !important;
+    margin: 0 !important;
+    padding: 16px 14px !important;
+    border: 5px solid transparent !important;
+    border-radius: 20px !important;
+    background:
+      radial-gradient(
+          circle at 7% 12%,
+          rgba(61, 101, 157, 0.48),
+          transparent 34%
+        )
+        padding-box,
+      linear-gradient(120deg, #244d7c 0%, #123766 34%, #08295b 100%) padding-box,
+      linear-gradient(
+          135deg,
+          #f8fbff 0%,
+          #cbd9e7 28%,
+          #829bb7 53%,
+          #eaf1f7 76%,
+          #fff 100%
+        )
+        border-box !important;
+    box-shadow:
+      0 8px 22px rgba(5, 27, 66, 0.18),
+      0 0 0 1px rgba(255, 255, 255, 0.58) !important;
+    border-radius: 20px !important;
+  }
+  :where(.cart-items, .page-cart-items, .search-cart-items) {
+    min-height: 0 !important;
+    max-height: none !important;
+    flex: 1 1 auto !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+  }
+  .search-cart-footer {
+    position: static !important;
+    right: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+    flex: none !important;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom)) !important;
+  }
+  :where(.cart-footer, .page-cart-footer) {
+    flex: none !important;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom)) !important;
+  }
+}
+
+/* Desktop cart shell uses the same border language as the account panel. */
+@media (min-width: 992px) {
+  :where(.cart-panel, .page-cart-panel, .search-cart-drawer) {
+    border: 1px solid rgba(113, 135, 166, 0.48) !important;
+    border-radius: 22px !important;
+    background: var(--panel-shell-bg) !important;
+    box-shadow:
+      0 28px 70px rgba(3, 15, 53, 0.3),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.82) !important;
+  }
+  :where(.cart-head, .page-panel-head, .search-cart-head) {
+    margin: 8px !important;
+    padding: 14px 16px !important;
+    border: 4px solid transparent !important;
+    border-radius: 16px !important;
+    background:
+      radial-gradient(
+          circle at 8% 10%,
+          rgba(61, 101, 157, 0.4),
+          transparent 34%
+        )
+        padding-box,
+      linear-gradient(120deg, #244d7c 0%, #123766 34%, #08295b 100%) padding-box,
+      linear-gradient(
+          135deg,
+          #f8fbff 0%,
+          #cbd9e7 28%,
+          #829bb7 53%,
+          #eaf1f7 76%,
+          #fff 100%
+        )
+        border-box !important;
+    box-shadow: 0 8px 20px rgba(5, 27, 66, 0.16) !important;
+  }
+}

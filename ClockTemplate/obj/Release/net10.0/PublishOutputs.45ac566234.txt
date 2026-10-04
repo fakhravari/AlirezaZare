@@ -1,0 +1,7 @@
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\PubTmp\Out\ClockTemplate.exe
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\PubTmp\Out\appsettings.json
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\PubTmp\Out\dotnet-tools.json
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\PubTmp\Out\ClockTemplate.dll
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\PubTmp\Out\ClockTemplate.deps.json
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\PubTmp\Out\ClockTemplate.runtimeconfig.json
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\PubTmp\Out\ClockTemplate.pdb

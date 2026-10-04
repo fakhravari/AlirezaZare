@@ -1,0 +1,262 @@
+/* Shared login modal. The home-page login is the reference implementation. */
+.shared-login-overlay {
+  position: fixed;
+  z-index: 10070;
+  inset: 0;
+  background: #000;
+  backdrop-filter: blur(10px);
+  opacity: 0;
+  visibility: hidden;
+  transition: 0.25s;
+}
+.shared-login-overlay.open {
+  opacity: 0.62;
+  visibility: visible;
+}
+.page-overlay.login-mode {
+  background: rgba(3, 13, 35, 0.36);
+  backdrop-filter: blur(4px);
+  opacity: 1;
+}
+.shared-login-modal {
+  position: fixed;
+  z-index: 10080;
+  top: 50%;
+  left: 50%;
+  width: min(440px, calc(100% - 28px));
+  padding: 30px;
+  border: 0;
+  border-radius: 24px;
+  background: var(--color-cream);
+  box-shadow: 0 26px 70px rgba(3, 15, 53, 0.24);
+  backdrop-filter: blur(18px);
+  overflow: hidden;
+  opacity: 0;
+  visibility: hidden;
+  transform: translate(-50%, -46%);
+  transition: 0.3s;
+}
+.shared-login-modal.open {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, -50%);
+}
+.shared-login-modal:before {
+  content: "";
+  position: absolute;
+  top: -90px;
+  left: -80px;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: rgba(232, 220, 199, 0.3);
+  pointer-events: none;
+}
+.shared-login-modal .login-close {
+  position: absolute;
+  z-index: 2;
+  top: 18px;
+  left: 18px;
+  display: grid;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: #f2eee8;
+  color: var(--color-navy);
+}
+.shared-login-modal .login-brand {
+  display: flex;
+  padding: 0 0 22px;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid #e8e2d9;
+}
+.shared-login-modal .login-brand > span {
+  display: grid;
+  width: 45px;
+  height: 45px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--color-navy);
+  color: var(--color-gold);
+  font-size: 20px;
+  font-weight: 700;
+}
+.shared-login-modal .login-brand > div {
+  display: flex;
+  flex-direction: column;
+}
+.shared-login-modal .login-brand strong {
+  font-size: 15px;
+}
+.shared-login-modal .login-brand small {
+  margin-top: 3px;
+  color: #8b949b;
+  font-size: 10px;
+}
+.shared-login-modal .login-step {
+  padding-top: 26px;
+}
+.shared-login-modal .login-step h2 {
+  margin: 0 0 7px;
+  font-size: 21px;
+  line-height: 1.7;
+}
+.shared-login-modal .login-step > p {
+  margin: 0 0 23px;
+  color: #747f87;
+  font-size: 13px;
+  line-height: 2;
+}
+.shared-login-modal #pageSentPhone,
+#loginModal #sentPhone {
+  display: inline-block;
+  direction: ltr;
+  unicode-bidi: isolate;
+  white-space: nowrap;
+}
+.shared-login-modal label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.shared-login-modal .login-input {
+  display: flex;
+  padding: 0 13px;
+  align-items: center;
+  border: 1px solid #d8d2ca;
+  border-radius: 9px;
+  background: #fff;
+  box-shadow: 0 0 0 0 rgba(184, 137, 68, 0);
+  transition:
+    border-color 0.2s,
+    background-color 0.2s,
+    box-shadow 0.2s;
+}
+.shared-login-modal .login-input i {
+  color: #9b8564;
+  font-size: 20px;
+  transition:
+    color 0.2s,
+    transform 0.2s;
+}
+.shared-login-modal .login-input input {
+  height: 52px;
+  min-width: 0;
+  flex: 1;
+  padding: 0 11px;
+  border: 0 !important;
+  background: transparent;
+  direction: ltr;
+  text-align: right;
+  outline: 0 !important;
+  box-shadow: none !important;
+}
+.shared-login-modal .login-input:focus-within,
+.login-modal .login-input:focus-within {
+  border-color: #b98944;
+  background: #fffdf8;
+  box-shadow:
+    0 0 0 3px rgba(185, 137, 68, 0.14),
+    0 5px 15px rgba(16, 42, 86, 0.08);
+}
+.shared-login-modal .login-input:focus-within i,
+.login-modal .login-input:focus-within i {
+  color: var(--color-navy);
+  transform: scale(1.06);
+}
+.shared-login-modal .login-input input:focus,
+.shared-login-modal .login-input input:focus-visible,
+.login-modal .login-input input:focus,
+.login-modal .login-input input:focus-visible {
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+}
+.shared-login-modal form > button {
+  width: 100%;
+  height: 52px;
+  margin-top: 14px;
+  border: 0;
+  border-radius: 9px;
+  background: var(--color-navy);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+}
+.shared-login-modal form > button:hover {
+  background: var(--color-blue);
+}
+.shared-login-modal form > button i {
+  margin-right: 12px;
+}
+.shared-login-modal .login-error {
+  display: block;
+  min-height: 23px;
+  color: #b64242;
+  font-size: 12px;
+}
+.shared-login-modal .login-back {
+  padding: 0 0 12px;
+  border: 0;
+  background: transparent;
+  color: #8b7659;
+  font-size: 13px;
+}
+.page-login-box.shared-login-modal .otp-input {
+  width: 100%;
+  height: 62px;
+  margin: 0 !important;
+  padding: 0 14px !important;
+  border: 1px solid rgba(124, 108, 82, 0.28) !important;
+  border-radius: 11px;
+  background: #fffdf8;
+  direction: ltr;
+  color: #172337;
+  font-size: 25px;
+  letter-spacing: 12px;
+  text-align: center;
+  outline: 0;
+}
+.page-login-box.shared-login-modal .otp-input:focus {
+  border-color: rgba(185, 137, 68, 0.76) !important;
+  background: #fffaf1;
+  box-shadow: 0 0 0 3px rgba(185, 137, 68, 0.14);
+}
+.shared-login-modal .resend-code {
+  display: flex;
+  margin-top: 18px;
+  align-items: center;
+  justify-content: space-between;
+  color: #7b8490;
+  font-size: 11px;
+}
+.shared-login-modal .resend-code button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #a28762;
+  font-size: 11px;
+}
+.shared-login-modal .resend-code button:disabled {
+  color: #aaa;
+}
+@media (max-width: 575px) {
+  .shared-login-modal {
+    padding: 24px 20px;
+  }
+  .shared-login-modal .login-close {
+    top: 13px;
+    left: 13px;
+  }
+  .shared-login-modal .login-step h2 {
+    font-size: 19px;
+  }
+  .shared-login-modal .login-step > p {
+    font-size: 12px;
+  }
+}

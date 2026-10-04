@@ -1,0 +1,8 @@
+/*
+ * Hadi Norouzi Company — shared visual system
+ *
+ * The home page is the visual reference for every page. Shared tokens,
+ * This file contains only global utilities and accessibility defaults.
+ * Shared components are linked explicitly by the MVC layout so their load
+ * order stays visible and browser downloads can run in parallel.
+ */

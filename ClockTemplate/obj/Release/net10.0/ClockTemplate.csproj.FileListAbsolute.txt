@@ -1,0 +1,185 @@
+E:\Site\ClockHadi\ClockTemplate\bin\Release\net10.0\appsettings.json
+E:\Site\ClockHadi\ClockTemplate\bin\Release\net10.0\dotnet-tools.json
+E:\Site\ClockHadi\ClockTemplate\bin\Release\net10.0\ClockTemplate.staticwebassets.runtime.json
+E:\Site\ClockHadi\ClockTemplate\bin\Release\net10.0\ClockTemplate.staticwebassets.endpoints.json
+E:\Site\ClockHadi\ClockTemplate\bin\Release\net10.0\ClockTemplate.exe
+E:\Site\ClockHadi\ClockTemplate\bin\Release\net10.0\ClockTemplate.deps.json
+E:\Site\ClockHadi\ClockTemplate\bin\Release\net10.0\ClockTemplate.runtimeconfig.json
+E:\Site\ClockHadi\ClockTemplate\bin\Release\net10.0\ClockTemplate.dll
+E:\Site\ClockHadi\ClockTemplate\bin\Release\net10.0\ClockTemplate.pdb
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\rpswa.dswa.cache.json
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\ClockTemplate.GeneratedMSBuildEditorConfig.editorconfig
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\ClockTemplate.AssemblyInfoInputs.cache
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\ClockTemplate.AssemblyInfo.cs
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\ClockTemplate.csproj.CoreCompileInputs.cache
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\ClockTemplate.MvcApplicationPartsAssemblyInfo.cache
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\ClockTemplate.RazorAssemblyInfo.cache
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\ClockTemplate.RazorAssemblyInfo.cs
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\ClockTemplate.sourcelink.json
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\rjimswa.dswa.cache.json
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\rjsmrazor.dswa.cache.json
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\rjsmcshtml.dswa.cache.json
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\scopedcss\bundle\ClockTemplate.styles.css
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\compressed\p2hpx3jhxb-{0}-zqltuijmmh-zqltuijmmh.gz
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\compressed\bpx39w0z4e-{0}-wvublzrdv8-wvublzrdv8.gz
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\compressed\el86t928v0-{0}-fijaqoo955-fijaqoo955.gz
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\compressed\pif0sf62qd-{0}-2bsukvq9vs-2bsukvq9vs.gz
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\compressed\sfwqd6fpt9-{0}-o1o13a6vjx-o1o13a6vjx.gz
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\compressed\nqil38b1bx-{0}-a28q16vo32-a28q16vo32.gz
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\compressed\nvpoit6gaf-{0}-3ajr5l1ur1-3ajr5l1ur1.gz
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\compressed\lok460v2xe-{0}-qt4gg61hoh-qt4gg61hoh.gz
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\compressed\b9ymsiagld-{0}-ntg1op5hnb-ntg1op5hnb.gz
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\compressed\m4lozbj2y4-{0}-mqq766pylp-mqq766pylp.gz
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\staticwebassets.build.json
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\staticwebassets.build.json.cache
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\staticwebassets.development.json
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\staticwebassets.build.endpoints.json
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\swae.build.ex.cache
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\staticwebassets.upToDateCheck.txt
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\ClockTemplate.dll
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\refint\ClockTemplate.dll
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\ClockTemplate.pdb
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\ClockTemplate.genruntimeconfig.cache
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\ref\ClockTemplate.dll
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\compressed\0nfvhwrcxb-{0}-4pzxrtpsbg-4pzxrtpsbg.gz
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\compressed\2crz4xyztt-{0}-9txo6d6tnm-9txo6d6tnm.gz
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\compressed\k4822b5ly8-{0}-t8q68kqrrw-t8q68kqrrw.gz
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\compressed\9ysatu4dxp-{0}-ltt67pvwrh-ltt67pvwrh.gz
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\compressed\unwldicv7c-{0}-quw98rdagl-quw98rdagl.gz
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\compressed\vkjwh3akcg-{0}-m7mth5vvbw-m7mth5vvbw.gz
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\compressed\z4xgsvi8z7-{0}-qdf6n4x9ah-qdf6n4x9ah.gz
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\compressed\nxhcxgdkz2-{0}-9uxuc4ungt-9uxuc4ungt.gz
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\compressed\r0jpas1u43-{0}-3d5n8swgmr-3d5n8swgmr.gz
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\compressed\9huchso3np-{0}-go9rxdmlk5-go9rxdmlk5.gz
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\compressed\7bn69gw3do-{0}-egb1v1ij1z-egb1v1ij1z.gz
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\compressed\rutetmd6s4-{0}-l7ycg3u8dt-l7ycg3u8dt.gz
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\compressed\mawtcn7end-{0}-4uleuxhx26-4uleuxhx26.gz
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\compressed\uydh2ba7ax-{0}-p2gcfdtxxl-p2gcfdtxxl.gz
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\compressed\h3jzhs1j0x-{0}-e1yd35ucxw-e1yd35ucxw.gz
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\compressed\f6rnj97xal-{0}-4hqf0b33tb-4hqf0b33tb.gz
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\compressed\ofpzqdrxj2-{0}-n1h01n8phv-n1h01n8phv.gz
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\compressed\syfkc8mopg-{0}-bmhx9yxb0d-bmhx9yxb0d.gz
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\compressed\ss2d6p9npo-{0}-t92wfc1kcj-t92wfc1kcj.gz
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\compressed\uxo9r1mbga-{0}-c7krcl3te5-c7krcl3te5.gz
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\compressed\iw3cdzy05t-{0}-nc6xdiliqs-nc6xdiliqs.gz
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\compressed\y79047asei-{0}-90s2n4e12i-90s2n4e12i.gz
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\compressed\1ntfy8k538-{0}-fqhjb6sgdw-fqhjb6sgdw.gz
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\compressed\9salo5sjd8-{0}-95fwuu8vwn-95fwuu8vwn.gz
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\compressed\ihfvykehxv-{0}-bkc7iuhmm3-bkc7iuhmm3.gz
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\compressed\bjrhhleswk-{0}-wlc08n4rtu-wlc08n4rtu.gz
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\compressed\0l0u2xoax6-{0}-zpyijmkh92-zpyijmkh92.gz
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\compressed\n42sgm6tjq-{0}-7uyl53q6vn-7uyl53q6vn.gz
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\compressed\3gjgjdlneq-{0}-t3o9ri838x-t3o9ri838x.gz
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\compressed\pt4uokndka-{0}-zzipt6a0cm-zzipt6a0cm.gz
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\compressed\fybbw3y520-{0}-hwlt8lh4io-hwlt8lh4io.gz
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\compressed\r0ecyppr21-{0}-0j7gd51tgi-0j7gd51tgi.gz
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\compressed\gna76eaa5r-{0}-dzyjxljvbt-dzyjxljvbt.gz
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\compressed\uv038xvae3-{0}-x40bly8xnf-x40bly8xnf.gz
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\compressed\uau5fypo29-{0}-tw13z8vba3-tw13z8vba3.gz
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\compressed\5pk0p86bqe-{0}-rad50b1m9a-rad50b1m9a.gz
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\compressed\nk9o66394b-{0}-5jn7dzfewk-5jn7dzfewk.gz
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\compressed\c5g8gj5z9m-{0}-9nod5d9rug-9nod5d9rug.gz
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\compressed\hf86ihgrj5-{0}-tfa3ypj79k-tfa3ypj79k.gz
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\compressed\nbydtzl321-{0}-hmuauyv2iv-hmuauyv2iv.gz
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\compressed\tsdcgru659-{0}-a4z5gjdsck-a4z5gjdsck.gz
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\compressed\591wz6gu17-{0}-c2edxpa5ya-c2edxpa5ya.gz
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\compressed\yxrgjl7vs6-{0}-i9r7307qbd-i9r7307qbd.gz
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\compressed\zeq5pq4ckj-{0}-noesb8ibrz-noesb8ibrz.gz
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\compressed\csdg3o8yiy-{0}-e0z6qgbe2e-e0z6qgbe2e.gz
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\compressed\172bvnvi5w-{0}-mrpdqqa91a-mrpdqqa91a.gz
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\compressed\uhb84v0g3e-{0}-2il2dwuw3t-2il2dwuw3t.gz
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\compressed\2efk6uwt9r-{0}-6g9sbed6eb-6g9sbed6eb.gz
+E:\Site\ClockHadi\ClockTemplate\obj\Release\net10.0\compressed\qi8826r3d9-{0}-61b462ogts-61b462ogts.gz
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\bin\Release\net10.0\appsettings.json
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\bin\Release\net10.0\dotnet-tools.json
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\bin\Release\net10.0\ClockTemplate.staticwebassets.runtime.json
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\bin\Release\net10.0\ClockTemplate.staticwebassets.endpoints.json
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\bin\Release\net10.0\ClockTemplate.exe
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\bin\Release\net10.0\ClockTemplate.deps.json
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\bin\Release\net10.0\ClockTemplate.runtimeconfig.json
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\bin\Release\net10.0\ClockTemplate.dll
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\bin\Release\net10.0\ClockTemplate.pdb
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\rpswa.dswa.cache.json
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\ClockTemplate.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\ClockTemplate.AssemblyInfoInputs.cache
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\ClockTemplate.AssemblyInfo.cs
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\ClockTemplate.csproj.CoreCompileInputs.cache
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\ClockTemplate.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\ClockTemplate.RazorAssemblyInfo.cache
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\ClockTemplate.RazorAssemblyInfo.cs
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\rjimswa.dswa.cache.json
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\rjsmrazor.dswa.cache.json
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\rjsmcshtml.dswa.cache.json
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\scopedcss\bundle\ClockTemplate.styles.css
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\compressed\7a7315zqhu-{0}-2ok1pd2yh1-2ok1pd2yh1.gz
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\compressed\nk9o66394b-{0}-m7a59bx357-m7a59bx357.gz
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\compressed\zeq5pq4ckj-{0}-noesb8ibrz-noesb8ibrz.gz
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\compressed\syfkc8mopg-{0}-rxd3lps2ep-rxd3lps2ep.gz
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\compressed\uo7h5mhr10-{0}-s1vch23gya-s1vch23gya.gz
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\compressed\ofpzqdrxj2-{0}-n1h01n8phv-n1h01n8phv.gz
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\compressed\f6rnj97xal-{0}-4hqf0b33tb-4hqf0b33tb.gz
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\compressed\uau5fypo29-{0}-dlrhl6de77-dlrhl6de77.gz
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\compressed\h3jzhs1j0x-{0}-e1yd35ucxw-e1yd35ucxw.gz
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\compressed\uydh2ba7ax-{0}-p2gcfdtxxl-p2gcfdtxxl.gz
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\compressed\mawtcn7end-{0}-4uleuxhx26-4uleuxhx26.gz
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\compressed\rutetmd6s4-{0}-l7ycg3u8dt-l7ycg3u8dt.gz
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\compressed\7bn69gw3do-{0}-egb1v1ij1z-egb1v1ij1z.gz
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\compressed\9huchso3np-{0}-eu912jjdd1-eu912jjdd1.gz
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\compressed\591wz6gu17-{0}-inenh80yqa-inenh80yqa.gz
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\compressed\gna76eaa5r-{0}-abu6xwoc9w-abu6xwoc9w.gz
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\compressed\r0ecyppr21-{0}-5fql5t3cz8-5fql5t3cz8.gz
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\compressed\pylks2w7y4-{0}-ajkl90xrnw-ajkl90xrnw.gz
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\compressed\fybbw3y520-{0}-476n3dpbv8-476n3dpbv8.gz
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\compressed\nxhcxgdkz2-{0}-r5zqr03b78-r5zqr03b78.gz
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\compressed\z4xgsvi8z7-{0}-qdf6n4x9ah-qdf6n4x9ah.gz
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\compressed\uv038xvae3-{0}-whd5vmqtv6-whd5vmqtv6.gz
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\compressed\yxrgjl7vs6-{0}-45okrc6obo-45okrc6obo.gz
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\compressed\1ntfy8k538-{0}-19v3h5egad-19v3h5egad.gz
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\compressed\7pzrh6k3s0-{0}-6fzuqyslym-6fzuqyslym.gz
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\compressed\9salo5sjd8-{0}-izdjeikmxm-izdjeikmxm.gz
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\compressed\df74shy93v-{0}-evnvtf123g-evnvtf123g.gz
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\compressed\9ysatu4dxp-{0}-ehg2c0p7s5-ehg2c0p7s5.gz
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\compressed\5pk0p86bqe-{0}-rad50b1m9a-rad50b1m9a.gz
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\compressed\k4822b5ly8-{0}-t8q68kqrrw-t8q68kqrrw.gz
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\compressed\csdg3o8yiy-{0}-htvbso3nz4-htvbso3nz4.gz
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\compressed\c5g8gj5z9m-{0}-t4rxi2mmey-t4rxi2mmey.gz
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\compressed\2crz4xyztt-{0}-9txo6d6tnm-9txo6d6tnm.gz
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\compressed\hf86ihgrj5-{0}-2ptsgwhcdf-2ptsgwhcdf.gz
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\compressed\ihfvykehxv-{0}-fr0usz2uhb-fr0usz2uhb.gz
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\compressed\bjrhhleswk-{0}-fvl3ru5s0n-fvl3ru5s0n.gz
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\compressed\0l0u2xoax6-{0}-av2hw00h15-av2hw00h15.gz
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\compressed\0nfvhwrcxb-{0}-4pzxrtpsbg-4pzxrtpsbg.gz
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\compressed\nbydtzl321-{0}-4hjqpic4ok-4hjqpic4ok.gz
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\compressed\n42sgm6tjq-{0}-xax3dqro72-xax3dqro72.gz
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\compressed\cejpp7pb3p-{0}-ncpvzrwxrn-ncpvzrwxrn.gz
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\compressed\uxo9r1mbga-{0}-c7krcl3te5-c7krcl3te5.gz
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\compressed\tsdcgru659-{0}-l407mkstmg-l407mkstmg.gz
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\compressed\iw3cdzy05t-{0}-nc6xdiliqs-nc6xdiliqs.gz
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\compressed\172bvnvi5w-{0}-dc8y7jb4b4-dc8y7jb4b4.gz
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\compressed\uhb84v0g3e-{0}-9ti831dcid-9ti831dcid.gz
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\compressed\2efk6uwt9r-{0}-xrckylthvr-xrckylthvr.gz
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\compressed\3gjgjdlneq-{0}-liyfhzlte3-liyfhzlte3.gz
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\compressed\pt4uokndka-{0}-zzipt6a0cm-zzipt6a0cm.gz
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\compressed\qi8826r3d9-{0}-p7aq52cczm-p7aq52cczm.gz
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\compressed\p2hpx3jhxb-{0}-zqltuijmmh-zqltuijmmh.gz
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\compressed\bpx39w0z4e-{0}-wvublzrdv8-wvublzrdv8.gz
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\compressed\el86t928v0-{0}-fijaqoo955-fijaqoo955.gz
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\compressed\pif0sf62qd-{0}-2bsukvq9vs-2bsukvq9vs.gz
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\compressed\sfwqd6fpt9-{0}-o1o13a6vjx-o1o13a6vjx.gz
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\compressed\nqil38b1bx-{0}-a28q16vo32-a28q16vo32.gz
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\compressed\nvpoit6gaf-{0}-3ajr5l1ur1-3ajr5l1ur1.gz
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\compressed\lok460v2xe-{0}-qt4gg61hoh-qt4gg61hoh.gz
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\compressed\b9ymsiagld-{0}-ntg1op5hnb-ntg1op5hnb.gz
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\compressed\m4lozbj2y4-{0}-mqq766pylp-mqq766pylp.gz
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\staticwebassets.build.json
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\staticwebassets.build.json.cache
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\staticwebassets.development.json
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\staticwebassets.build.endpoints.json
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\swae.build.ex.cache
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\staticwebassets.upToDateCheck.txt
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\ClockTemplate.dll
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\refint\ClockTemplate.dll
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\ClockTemplate.pdb
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\ClockTemplate.genruntimeconfig.cache
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\ref\ClockTemplate.dll
+C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\obj\Release\net10.0\ClockTem.C2E790E0.Up2Date

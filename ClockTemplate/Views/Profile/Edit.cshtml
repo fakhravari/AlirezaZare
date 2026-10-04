@@ -1,0 +1,17 @@
+@model PageModel
+
+<main class="profile-edit-page container">
+    <div class="profile-edit-layout">
+    <section class="profile-edit-card" aria-labelledby="profileEditTitle">
+        <div class="profile-edit-heading"><span>اطلاعات شخصی</span><h1 id="profileEditTitle">ویرایش پروفایل</h1><p>اطلاعات حساب کاربری خود را به‌روز کنید.</p></div>
+        <form id="profileEditForm" class="profile-edit-form" autocomplete="off">
+            <label>نام و نام خانوادگی<input name="fullName" value="محمدحسین فخراوری" required maxlength="100" /></label>
+            <label>شماره موبایل<input name="phone" value="۰۹۱۷۷۷۶۴۳۲۴" type="tel" inputmode="tel" dir="ltr" required maxlength="11" /></label>
+            <label>ایمیل<input name="email" type="email" placeholder="example@email.com" dir="ltr" /></label>
+            <div class="profile-edit-actions"><a href="Profile" class="profile-edit-cancel">انصراف</a><button type="submit" class="flow-button">ذخیره تغییرات <i class="bi bi-check2"></i></button></div>
+        </form>
+    </section>
+    </div>
+</main>
+
+@section Styles { <link href="~/ClockTemplate/css/pages/profile-edit.css" rel="stylesheet" asp-append-version="true" /> }

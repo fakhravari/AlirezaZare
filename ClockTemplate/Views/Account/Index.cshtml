@@ -1,0 +1,361 @@
+@model PageModel
+
+
+<main class="flow-main container">
+<nav class="cart-breadcrumb" aria-label="مسیر صفحه">
+    <ol>
+        <li>
+            <a href="Home/Index">
+                <i class="bi bi-house-door" aria-hidden="true"></i><span>خانه</span>
+            </a>
+        </li>
+        <li class="cart-breadcrumb-current">
+            <i class="bi bi-chevron-left" aria-hidden="true"></i><span aria-current="page"><i class="bi bi-person" aria-hidden="true"></i>حساب کاربری</span>
+        </li>
+    </ol>
+</nav>
+<header class="account-welcome">
+    <div class="account-welcome-copy">
+        <span class="account-welcome-brand">کمپانی هادی نوروزی</span>
+        <h1>حساب کاربری</h1>
+        <p>فضای شخصی شما؛ برای پیگیری هر انتخاب ماندگار.</p>
+        <div class="account-welcome-links">
+            <a asp-controller="Profile" asp-action="Orders"><i class="bi bi-bag-check" aria-hidden="true"></i> سفارش‌های من <i class="bi bi-arrow-left" aria-hidden="true"></i></a>
+            <a asp-controller="Profile" asp-action="Favorites"><i class="bi bi-heart" aria-hidden="true"></i> علاقه‌مندی‌ها</a>
+        </div>
+    </div>
+    <div class="account-welcome-art" aria-hidden="true">
+        <svg viewBox="0 0 280 280" fill="none" focusable="false">
+            <circle cx="140" cy="140" r="134" stroke="currentColor" opacity=".12"/>
+            <circle cx="140" cy="140" r="119" stroke="currentColor" opacity=".3"/>
+            <circle cx="140" cy="140" r="107" stroke="currentColor" stroke-width="5" stroke-dasharray="1 10.205" opacity=".55"/>
+            <circle cx="140" cy="140" r="91" stroke="currentColor" opacity=".15"/>
+            <path d="M140 42V54 M238 140H226 M140 238V226 M42 140H54" stroke="currentColor" stroke-width="3"/>
+            <path d="M140 140L91 104" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
+            <path d="M140 140L196 80" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+            <path d="M124 171L177 68" stroke="currentColor" opacity=".45"/>
+            <circle cx="140" cy="140" r="7" fill="currentColor"/>
+        </svg>
+        <span>هر لحظه، یک انتخاب ماندگار</span>
+    </div>
+</header>
+<div class="account-dashboard">
+    <aside class="account-sidebar">
+        <div class="account-profile">
+            <span class="account-profile-avatar">
+                <i class="bi bi-person"></i>
+            </span>
+            <div>
+                <small>حساب کاربری</small><strong>محمدحسین فخراوری</strong><span>مشتری کمپانی هادی نوروزی</span>
+            </div>
+            <a class="account-profile-edit" href="#profileEditDialog" data-profile-edit-trigger aria-label="ویرایش پروفایل">
+                <i class="bi bi-pencil-square" aria-hidden="true"></i><span>ویرایش پروفایل</span>
+            </a>
+        </div>
+        <nav class="account-tabs" aria-label="بخش‌های حساب">
+            <a href="Profile">
+                <i class="bi bi-person"></i>
+                <span><strong>پروفایل من</strong><small>نمای کلی حساب کاربری</small></span><i class="bi bi-chevron-left"></i>
+            </a>
+            <a href="Profile/Orders">
+                <i class="bi bi-bag-check"></i>
+                <span>
+                    <strong>سفارش‌های من</strong><small>مشاهده سوابق خرید</small>
+                </span><i class="bi bi-chevron-left"></i>
+            </a>
+            <a href="Profile/Addresses">
+                <i class="bi bi-geo-alt"></i>
+                <span>
+                    <strong>آدرس‌های من</strong><small>مدیریت اطلاعات تحویل</small>
+                </span><i class="bi bi-chevron-left"></i>
+            </a>
+            <a href="Profile/Favorites">
+                <i class="bi bi-heart"></i>
+                <span>
+                    <strong>علاقه‌مندی‌ها</strong><small>ساعت‌های ذخیره‌شده</small>
+                </span><i class="bi bi-chevron-left"></i>
+            </a>
+            <a href="Profile/Questions">
+                <i class="bi bi-chat-square-text"></i>
+                <span>
+                    <strong>دیدگاه‌ها و پرسش‌ها</strong><small>پیش‌نویس پیام‌ها</small>
+                </span><i class="bi bi-chevron-left"></i>
+            </a>
+        </nav>
+        <div class="account-sidebar-help">
+            <i class="bi bi-headset"></i>
+            <div>
+                <strong>نیاز به راهنمایی دارید؟</strong><a href="Contact">ارتباط با پشتیبانی</a>
+            </div>
+        </div>
+    </aside>
+    <div class="account-content">
+        <section id="overview" class="account-section account-overview">
+            <div class="overview-heading">
+                <div>
+                    <span>نمای کلی حساب</span>
+                    <h2>گزارش فعالیت‌های شما</h2>
+                    <p>خلاصه‌ای از خریدها و اطلاعات ذخیره‌شده در حساب کاربری</p>
+                </div><i class="bi bi-grid-1x2"></i>
+            </div>
+            <div class="account-stats">
+                <article>
+                    <span class="stat-icon stat-orders">
+                        <i class="bi bi-bag-check"></i>
+                    </span>
+                    <div>
+                        <strong id="statOrders">۰</strong><small>سفارش ثبت‌شده</small>
+                    </div>
+                </article>
+                <article>
+                    <span class="stat-icon stat-addresses">
+                        <i class="bi bi-geo-alt"></i>
+                    </span>
+                    <div>
+                        <strong id="statAddresses">۰</strong><small>آدرس ذخیره‌شده</small>
+                    </div>
+                </article>
+                <article>
+                    <span class="stat-icon stat-favorites">
+                        <i class="bi bi-heart"></i>
+                    </span>
+                    <div>
+                        <strong id="statFavorites">۰</strong><small>ساعت موردعلاقه</small>
+                    </div>
+                </article>
+                <article>
+                    <span class="stat-icon stat-questions">
+                        <i class="bi bi-chat-square-text"></i>
+                    </span>
+                    <div>
+                        <strong id="statQuestions">۰</strong><small>پیش‌نویس پیام</small>
+                    </div>
+                </article>
+            </div>
+            <div class="overview-panels">
+                <article>
+                    <div class="overview-panel-title">
+                        <i class="bi bi-clock-history"></i>
+                        <h3>فعالیت‌های اخیر</h3>
+                    </div>
+                    <div class="overview-empty">
+                        <i class="bi bi-stars"></i><strong>هنوز فعالیتی ثبت نشده است</strong>
+                        <p>پس از ثبت آدرس، ذخیره محصول یا خرید، خلاصه فعالیت‌ها اینجا نمایش داده می‌شود.</p>
+                    </div>
+                </article>
+                <article class="overview-guide">
+                    <div class="overview-panel-title">
+                        <i class="bi bi-compass"></i>
+                        <h3>شروع سریع</h3>
+                    </div>
+                    <a href="Search">
+                        <i class="bi bi-watch"></i>
+                        <span>
+                            <strong>مشاهده ساعت‌ها</strong><small>کالکشن محصولات را بررسی کنید</small>
+                        </span><i class="bi bi-arrow-left"></i>
+                    </a>
+                    <a href="Profile/Addresses">
+                        <i class="bi bi-plus-circle"></i>
+                        <span>
+                            <strong>ثبت آدرس تحویل</strong><small>برای خرید سریع‌تر آماده شوید</small>
+                        </span><i class="bi bi-arrow-left"></i>
+                    </a>
+                </article>
+            </div>
+        </section>
+        <section id="orders" class="account-section flow-card">
+            <div class="orders-heading">
+                <div><span>تاریخچه خرید</span><h2 id="ordersTitle" tabindex="-1">سفارش‌های من <small id="ordersTotal">۱۰ سفارش</small></h2></div>
+                <a href="Tracking"><i class="bi bi-geo-alt"></i> پیگیری سفارش</a>
+            </div>
+            <div class="profile-order-list">
+                <article class="profile-order-card">
+                    <header>
+                        <div><span class="order-status is-shipping"><i class="bi bi-truck"></i> در حال ارسال</span><strong>سفارش HN-۱۴۰۵۰۶۲۱</strong></div>
+                        <time datetime="2026-09-08">۱۷ شهریور ۱۴۰۵</time>
+                    </header>
+                    <div class="order-body">
+                        <div class="order-products">
+                            <img src="ClockTemplate/images/products/watch-blue.webp" alt="نوا کرونو">
+                            <div><strong>نوا کرونو</strong><small>۱ کالا · پرداخت آنلاین</small></div>
+                        </div>
+                        <div class="order-total"><small>مبلغ سفارش</small><strong>۲۴٬۵۰۰٬۰۰۰ تومان</strong></div>
+                    </div>
+                    <footer><span><i class="bi bi-box-seam"></i> تحویل به شرکت پست</span><a href="Tracking">مشاهده جزئیات <i class="bi bi-arrow-left"></i></a></footer>
+                </article>
+                <article class="profile-order-card">
+                    <header>
+                        <div><span class="order-status is-processing"><i class="bi bi-hourglass-split"></i> در حال آماده‌سازی</span><strong>سفارش HN-۱۴۰۵۰۶۱۸</strong></div>
+                        <time datetime="2026-09-05">۱۴ شهریور ۱۴۰۵</time>
+                    </header>
+                    <div class="order-body">
+                        <div class="order-products order-products-multiple">
+                            <img src="ClockTemplate/images/products/watch-cream.webp" alt="آرمان کلاسیک">
+                            <img src="ClockTemplate/images/products/watch-silver.webp" alt="آبان استیل">
+                            <div><strong>آرمان کلاسیک و آبان استیل</strong><small>۲ کالا · پرداخت آنلاین</small></div>
+                        </div>
+                        <div class="order-total"><small>مبلغ سفارش</small><strong>۴۶٬۰۰۰٬۰۰۰ تومان</strong></div>
+                    </div>
+                    <footer><span><i class="bi bi-shield-check"></i> اصالت کالا تأیید شد</span><a href="Tracking">مشاهده جزئیات <i class="bi bi-arrow-left"></i></a></footer>
+                </article>
+                <article class="profile-order-card">
+                    <header>
+                        <div><span class="order-status is-delivered"><i class="bi bi-check2-circle"></i> تحویل‌شده</span><strong>سفارش HN-۱۴۰۵۰۵۹۲</strong></div>
+                        <time datetime="2026-08-22">۳۱ مرداد ۱۴۰۵</time>
+                    </header>
+                    <div class="order-body">
+                        <div class="order-products">
+                            <img src="ClockTemplate/images/products/watch-story.webp" alt="میراث اتوماتیک">
+                            <div><strong>میراث اتوماتیک</strong><small>۱ کالا · پرداخت آنلاین</small></div>
+                        </div>
+                        <div class="order-total"><small>مبلغ سفارش</small><strong>۲۶٬۰۰۰٬۰۰۰ تومان</strong></div>
+                    </div>
+                    <footer><span><i class="bi bi-calendar-check"></i> تحویل در ۲ شهریور</span><a href="Product?id=5">خرید مجدد <i class="bi bi-arrow-left"></i></a></footer>
+                </article>
+                <article class="profile-order-card">
+                    <header><div><span class="order-status is-delivered"><i class="bi bi-check2-circle"></i> تحویل‌شده</span><strong>سفارش HN-۱۴۰۵۰۵۸۵</strong></div><time datetime="2026-08-17">۲۶ مرداد ۱۴۰۵</time></header>
+                    <div class="order-body"><div class="order-products"><img src="ClockTemplate/images/products/watch-silver.webp" alt="آبان استیل"><div><strong>آبان استیل</strong><small>۱ کالا · پرداخت آنلاین</small></div></div><div class="order-total"><small>مبلغ سفارش</small><strong>۱۸٬۷۰۰٬۰۰۰ تومان</strong></div></div>
+                    <footer><span><i class="bi bi-check2-circle"></i> سفارش با موفقیت تحویل شد</span><a href="Product?id=3">خرید مجدد <i class="bi bi-arrow-left"></i></a></footer>
+                </article>
+                <article class="profile-order-card">
+                    <header><div><span class="order-status is-delivered"><i class="bi bi-check2-circle"></i> تحویل‌شده</span><strong>سفارش HN-۱۴۰۵۰۵۷۲</strong></div><time datetime="2026-08-08">۱۷ مرداد ۱۴۰۵</time></header>
+                    <div class="order-body"><div class="order-products order-products-multiple"><img src="ClockTemplate/images/products/watch-blue.webp" alt="نوا کرونو"><img src="ClockTemplate/images/products/watch-cream.webp" alt="آرمان کلاسیک"><div><strong>نوا کرونو و آرمان کلاسیک</strong><small>۲ کالا · پرداخت آنلاین</small></div></div><div class="order-total"><small>مبلغ سفارش</small><strong>۵۱٬۲۰۰٬۰۰۰ تومان</strong></div></div>
+                    <footer><span><i class="bi bi-check2-circle"></i> سفارش با موفقیت تحویل شد</span><a href="Product?id=1">خرید مجدد <i class="bi bi-arrow-left"></i></a></footer>
+                </article>
+                <article class="profile-order-card">
+                    <header><div><span class="order-status is-delivered"><i class="bi bi-check2-circle"></i> تحویل‌شده</span><strong>سفارش HN-۱۴۰۵۰۵۴۰</strong></div><time datetime="2026-07-30">۸ مرداد ۱۴۰۵</time></header>
+                    <div class="order-body"><div class="order-products"><img src="ClockTemplate/images/products/watch-story.webp" alt="میراث اتوماتیک"><div><strong>میراث اتوماتیک</strong><small>۱ کالا · پرداخت آنلاین</small></div></div><div class="order-total"><small>مبلغ سفارش</small><strong>۲۹٬۸۰۰٬۰۰۰ تومان</strong></div></div>
+                    <footer><span><i class="bi bi-check2-circle"></i> سفارش با موفقیت تحویل شد</span><a href="Product?id=5">خرید مجدد <i class="bi bi-arrow-left"></i></a></footer>
+                </article>
+                <article class="profile-order-card">
+                    <header><div><span class="order-status is-delivered"><i class="bi bi-check2-circle"></i> تحویل‌شده</span><strong>سفارش HN-۱۴۰۵۰۴۹۸</strong></div><time datetime="2026-07-21">۳۰ تیر ۱۴۰۵</time></header>
+                    <div class="order-body"><div class="order-products"><img src="ClockTemplate/images/products/watch-cream.webp" alt="آرمان کلاسیک"><div><strong>آرمان کلاسیک</strong><small>۱ کالا · پرداخت آنلاین</small></div></div><div class="order-total"><small>مبلغ سفارش</small><strong>۲۲٬۴۰۰٬۰۰۰ تومان</strong></div></div>
+                    <footer><span><i class="bi bi-check2-circle"></i> سفارش با موفقیت تحویل شد</span><a href="Product?id=2">خرید مجدد <i class="bi bi-arrow-left"></i></a></footer>
+                </article>
+                <article class="profile-order-card">
+                    <header><div><span class="order-status is-delivered"><i class="bi bi-check2-circle"></i> تحویل‌شده</span><strong>سفارش HN-۱۴۰۵۰۴۶۱</strong></div><time datetime="2026-07-08">۱۷ تیر ۱۴۰۵</time></header>
+                    <div class="order-body"><div class="order-products order-products-multiple"><img src="ClockTemplate/images/products/watch-silver.webp" alt="آبان استیل"><img src="ClockTemplate/images/products/watch-story.webp" alt="میراث اتوماتیک"><div><strong>آبان استیل و میراث اتوماتیک</strong><small>۲ کالا · پرداخت آنلاین</small></div></div><div class="order-total"><small>مبلغ سفارش</small><strong>۴۳٬۶۰۰٬۰۰۰ تومان</strong></div></div>
+                    <footer><span><i class="bi bi-check2-circle"></i> سفارش با موفقیت تحویل شد</span><a href="Product?id=3">خرید مجدد <i class="bi bi-arrow-left"></i></a></footer>
+                </article>
+                <article class="profile-order-card">
+                    <header><div><span class="order-status is-delivered"><i class="bi bi-check2-circle"></i> تحویل‌شده</span><strong>سفارش HN-۱۴۰۵۰۴۲۲</strong></div><time datetime="2026-06-22">۱ تیر ۱۴۰۵</time></header>
+                    <div class="order-body"><div class="order-products"><img src="ClockTemplate/images/products/watch-blue.webp" alt="نوا کرونو"><div><strong>نوا کرونو</strong><small>۱ کالا · پرداخت آنلاین</small></div></div><div class="order-total"><small>مبلغ سفارش</small><strong>۲۵٬۹۰۰٬۰۰۰ تومان</strong></div></div>
+                    <footer><span><i class="bi bi-check2-circle"></i> سفارش با موفقیت تحویل شد</span><a href="Product?id=1">خرید مجدد <i class="bi bi-arrow-left"></i></a></footer>
+                </article>
+                <article class="profile-order-card">
+                    <header><div><span class="order-status is-delivered"><i class="bi bi-check2-circle"></i> تحویل‌شده</span><strong>سفارش HN-۱۴۰۵۰۳۸۹</strong></div><time datetime="2026-06-09">۱۹ خرداد ۱۴۰۵</time></header>
+                    <div class="order-body"><div class="order-products"><img src="ClockTemplate/images/products/watch-story.webp" alt="میراث اتوماتیک"><div><strong>میراث اتوماتیک</strong><small>۱ کالا · پرداخت آنلاین</small></div></div><div class="order-total"><small>مبلغ سفارش</small><strong>۳۱٬۵۰۰٬۰۰۰ تومان</strong></div></div>
+                    <footer><span><i class="bi bi-check2-circle"></i> سفارش با موفقیت تحویل شد</span><a href="Product?id=5">خرید مجدد <i class="bi bi-arrow-left"></i></a></footer>
+                </article>
+            </div>
+        </section>
+        <section id="addresses" class="account-section">
+            <div class="account-section-heading">
+                <h2>آدرس‌های من</h2><button id="newAddress" class="flow-button" type="button"><i class="bi bi-plus-lg"></i> آدرس جدید</button>
+            </div>
+            <div id="addressList"></div>
+        </section>
+        <section id="favorites" class="account-section">
+            <h2>لیست علاقه‌مندی‌ها</h2>
+            <div id="favoritesView"></div>
+        </section>
+        <section id="questions" class="account-section">
+            <h2>دیدگاه‌ها و پرسش‌ها</h2>
+            <form id="questionForm" class="flow-card">
+                <label for="questionProduct">محصول<select id="questionProduct" name="product" required></select></label>
+                <label>
+                    نوع پیام
+                    <select name="kind">
+                        <option>پرسش</option><option>دیدگاه</option>
+                    </select>
+                </label><label>متن پیام<textarea name="message" maxlength="2000" rows="4" required placeholder="پرسش یا تجربه خود را بنویسید"></textarea></label><button class="flow-button">ذخیره پیش‌نویس</button>
+                <p>پیش‌نویس فقط برای شما ذخیره می‌شود؛ برای دریافت پاسخ از فروشگاه با پشتیبانی تماس بگیرید.</p>
+            </form>
+            <div id="questionList"></div>
+        </section>
+        <p id="accountStatus" role="status"></p>
+    </div>
+</div>
+<dialog id="addressDialog" class="address-dialog" aria-labelledby="addressDialogTitle">
+    <div class="address-dialog-heading">
+        <div class="address-dialog-title">
+            <span class="address-dialog-icon">
+                <i class="bi bi-geo-alt"></i>
+            </span>
+            <div>
+                <span class="address-dialog-kicker">اطلاعات تحویل سفارش</span>
+                <h2 id="addressDialogTitle">تعریف آدرس جدید</h2>
+                <p>مشخصات گیرنده و محل تحویل را با دقت وارد کنید.</p>
+            </div>
+        </div>
+        <button class="site-modal-close" id="closeAddress" type="button" aria-label="بستن">
+            <i class="bi bi-x-lg"></i>
+        </button>
+    </div>
+    <partial name="_AddressForm" />
+</dialog>
+<dialog id="profileEditDialog" class="shared-login-modal profile-edit-dialog" aria-labelledby="profileEditDialogTitle">
+    <button class="login-close" type="button" data-profile-edit-close aria-label="بستن"><i class="bi bi-x-lg"></i></button>
+    <div class="login-brand"><span><i class="bi bi-person"></i></span><div><strong>کمپانی هادی نوروزی</strong><small>مدیریت اطلاعات حساب کاربری</small></div></div>
+    <div class="login-step">
+        <span class="profile-edit-kicker">اطلاعات شخصی</span>
+        <h2 id="profileEditDialogTitle">ویرایش پروفایل</h2>
+        <p>اطلاعات شخصی خود را برای تجربه خرید بهتر به‌روز کنید.</p>
+        <form id="profileEditModalForm" class="profile-edit-form" autocomplete="off" novalidate>
+            <label>نام<span class="login-input"><input name="firstName" value="محمدحسین" required maxlength="50" /><i class="bi bi-person" aria-hidden="true"></i></span><small class="profile-edit-validation field-validation-valid" data-profile-edit-error="firstName"></small></label>
+            <label>نام خانوادگی<span class="login-input"><input name="lastName" value="فخراوری" required maxlength="50" /><i class="bi bi-person" aria-hidden="true"></i></span><small class="profile-edit-validation field-validation-valid" data-profile-edit-error="lastName"></small></label>
+            <fieldset class="profile-edit-gender"><legend>جنسیت</legend><div><label><input type="radio" name="gender" value="male" checked /><span>آقا</span></label><label><input type="radio" name="gender" value="female" /><span>خانم</span></label></div><small class="profile-edit-validation field-validation-valid" data-profile-edit-error="gender"></small></fieldset>
+            <label>ایمیل<span class="login-input"><input name="email" type="email" placeholder="example@email.com" dir="ltr" /><i class="bi bi-envelope" aria-hidden="true"></i></span><small class="profile-edit-validation field-validation-valid" data-profile-edit-error="email"></small></label>
+            <label class="profile-edit-full">شماره موبایل <small>قابل تغییر نیست</small><span class="login-input"><input name="phone" value="۰۹۱۷۷۷۶۴۳۲۴" type="tel" dir="ltr" readonly aria-readonly="true" /><i class="bi bi-phone" aria-hidden="true"></i></span></label>
+            <button class="profile-edit-full" type="submit">ذخیره تغییرات <i class="bi bi-check2"></i></button>
+        </form>
+    </div>
+</dialog>
+<partial name="_RelatedLinks" />
+</main>
+
+
+@section Styles {
+    <link href="ClockTemplate/css/pages/pages.css?v=12" rel="stylesheet"/>
+    <link href="ClockTemplate/css/pages/checkout.css?v=2" rel="stylesheet">
+    <link href="ClockTemplate/css/pages/account-page.css" rel="stylesheet" asp-append-version="true">
+}
+
+@section Scripts {
+    <script src="ClockTemplate/js/pages/page-content.js?v=1"></script>
+    <script src="ClockTemplate/js/pages/iran-places.js"></script>
+    <script src="ClockTemplate/js/pages/address-fields.js"></script>
+    <script src="ClockTemplate/js/pages/account-page.js" asp-append-version="true"></script>
+    <script src="ClockTemplate/js/pages/orders-pagination.js" asp-append-version="true"></script>
+    <script>
+      (() => {
+        const dialog = document.getElementById('profileEditDialog');
+        const form = document.getElementById('profileEditModalForm');
+        if (!dialog || !form) return;
+        const setError = (name, message) => {
+          const host = form.querySelector(`[data-profile-edit-error="${name}"]`);
+          const control = form.querySelector(`[name="${name}"]`);
+          host.textContent = message;
+          host.className = `profile-edit-validation ${message ? 'field-validation-error' : 'field-validation-valid'}`;
+          if (name === 'gender') form.querySelector('.profile-edit-gender').classList.toggle('is-invalid', Boolean(message));
+          else control.classList.toggle('input-validation-error', Boolean(message));
+        };
+        const validate = () => {
+          const firstName = form.elements.firstName.value.trim();
+          const lastName = form.elements.lastName.value.trim();
+          const email = form.elements.email;
+          const gender = form.querySelector('[name="gender"]:checked');
+          setError('firstName', firstName ? '' : 'نام را وارد کنید.');
+          setError('lastName', lastName ? '' : 'نام خانوادگی را وارد کنید.');
+          setError('email', !email.value || email.validity.valid ? '' : 'ایمیل را با قالب صحیح وارد کنید.');
+          setError('gender', gender ? '' : 'جنسیت را انتخاب کنید.');
+          return firstName && lastName && (!email.value || email.validity.valid) && gender;
+        };
+        document.querySelectorAll('[data-profile-edit-trigger]').forEach(trigger => trigger.addEventListener('click', event => { event.preventDefault(); dialog.showModal(); }));
+        document.querySelectorAll('[data-profile-edit-close]').forEach(close => close.addEventListener('click', () => dialog.close()));
+        form.addEventListener('input', validate);
+        form.addEventListener('change', validate);
+        form.addEventListener('submit', event => { event.preventDefault(); if (!validate()) return; dialog.close(); });
+      })();
+    </script>
+}
