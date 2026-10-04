@@ -1,5 +1,0 @@
-C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\wwwroot\ClockTemplate\css\pages\consultation.css
-C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\wwwroot\ClockTemplate\css\pages\repair-service-options.css
-C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\wwwroot\ClockTemplate\js\pages\consultation.js
-C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\wwwroot\ClockTemplate\js\pages\repair.js
-C:\Users\Fakhravari\Desktop\New folder (2)\ClockTemplate\wwwroot\ClockTemplate\css\pages\repair.css
