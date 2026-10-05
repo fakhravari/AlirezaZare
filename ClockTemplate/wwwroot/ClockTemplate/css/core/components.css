@@ -1,0 +1,197 @@
+/* Shared UI components. Page styles only customize the component variables. */
+.ui-surface-card {
+  /* The legacy layout outline is !important; keep the shared component authoritative. */
+  border: 1px solid var(--widget-border, var(--color-card-border)) !important;
+  border-radius: var(--radius-card);
+  background: var(--surface-raised);
+  box-shadow: var(--shadow-card);
+}
+
+.ui-surface-card--interactive {
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast);
+}
+
+.ui-surface-card--interactive:hover {
+  border-color: var(--widget-border-strong, var(--color-card-border-hover)) !important;
+  box-shadow: var(--shadow-card-hover);
+}
+
+.ui-icon-tile {
+  display: grid;
+  width: var(--ui-icon-tile-size, 48px);
+  height: var(--ui-icon-tile-size, 48px);
+  place-items: center;
+  border: 1px solid var(--ui-icon-tile-border, var(--color-card-icon-border));
+  border-radius: var(--ui-icon-tile-radius, 13px);
+  background: var(--ui-icon-tile-bg, var(--color-card-icon-bg));
+  color: var(--ui-icon-tile-color, var(--color-card-icon));
+  font-size: var(--ui-icon-tile-font-size, 23px);
+  line-height: 1;
+}
+
+.contact-submit,
+.form-confirm-accept {
+  border-color: var(--action-submit-border) !important;
+  background: var(--action-submit-bg) !important;
+  color: var(--color-white) !important;
+  box-shadow: var(--action-submit-shadow);
+}
+
+.contact-submit:hover,
+.form-confirm-accept:hover {
+  border-color: var(--action-submit-border) !important;
+  background: var(--action-submit-bg-hover) !important;
+}
+
+.contact-submit:focus-visible,
+.form-confirm-accept:focus-visible {
+  outline: 0;
+  box-shadow: 0 0 0 4px var(--action-submit-ring), var(--action-submit-shadow);
+}
+
+/* Shared success-message presentation for the contact form. */
+.contact-form-status {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-family: var(--font-body);
+}
+
+.contact-form-status > i {
+  display: grid !important;
+  width: 42px !important;
+  height: 42px !important;
+  flex: 0 0 42px !important;
+  place-items: center;
+  border-radius: 50%;
+  background: #3d8452;
+  color: var(--color-white);
+  font-size: 22px !important;
+  line-height: 1 !important;
+}
+
+.contact-form-status > i::before {
+  line-height: 1;
+}
+
+.contact-form-status > span > span:first-child {
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.55;
+}
+
+.contact-form-status > span > span:last-child {
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.contact-form-status:not(.is-error) > i {
+  background: #3d8452;
+  color: var(--color-white);
+}
+
+.contact-form-status.is-error {
+  border-color: #ddb0aa !important;
+  background: #fff2f0 !important;
+  color: #8c3e35 !important;
+}
+
+.contact-form-status.is-error > i {
+  background: #b94f45 !important;
+  color: var(--color-white) !important;
+}
+
+.ui-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--ui-scroll-thumb, #b89a64) var(--ui-scroll-track, transparent);
+  scrollbar-gutter: stable;
+  overscroll-behavior-y: contain;
+}
+
+/* Reusable dark scrollbar for scrollable panels on light surfaces. */
+.ui-scrollbar--navy {
+  --ui-scroll-width: 4px;
+  --ui-scroll-track: transparent;
+  --ui-scroll-track-margin: 5px;
+  --ui-scroll-thumb-min-height: 42px;
+  --ui-scroll-thumb-border: 1px solid transparent;
+  --ui-scroll-thumb: linear-gradient(180deg, #1b4267, #0e263f) padding-box;
+  --ui-scroll-thumb-hover: linear-gradient(180deg, #285274, #173653) padding-box;
+  --ui-scroll-thumb-shadow: 0 1px 4px rgba(14, 38, 63, .18);
+  scrollbar-color: #173653 transparent;
+}
+
+/* Keep a visible but restrained scrollbar on dark panels. */
+.ui-scrollbar--gold-on-dark {
+  --ui-scroll-width: 4px;
+  --ui-scroll-track: rgba(225, 196, 140, 0.1);
+  --ui-scroll-track-margin: 5px;
+  --ui-scroll-thumb-min-height: 42px;
+  --ui-scroll-thumb-border: 1px solid rgba(16, 39, 61, 0.82);
+  --ui-scroll-thumb: linear-gradient(180deg, #e1c48c, #b88b4d) padding-box;
+  --ui-scroll-thumb-hover: linear-gradient(180deg, #f0d69e, #c99d5d) padding-box;
+  --ui-scroll-thumb-shadow: 0 1px 4px rgba(0, 0, 0, 0.22);
+  scrollbar-color: #d7b66c rgba(225, 196, 140, 0.1);
+}
+
+.ui-scrollbar::-webkit-scrollbar {
+  width: var(--ui-scroll-width, 5px);
+  height: var(--ui-scroll-height, 5px);
+}
+
+.ui-scrollbar::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.ui-scrollbar::-webkit-scrollbar-track {
+  margin-block: var(--ui-scroll-track-margin, 0);
+  border-radius: 999px;
+  background: var(--ui-scroll-track, transparent);
+  box-shadow: none;
+}
+
+.ui-scrollbar::-webkit-scrollbar-thumb {
+  min-height: var(--ui-scroll-thumb-min-height, 44px);
+  border: var(--ui-scroll-thumb-border, 0 solid transparent);
+  border-radius: 999px;
+  background: var(--ui-scroll-thumb, #b89a64);
+  box-shadow: var(--ui-scroll-thumb-shadow, none);
+}
+
+.ui-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--ui-scroll-thumb-hover, #967440);
+}
+/* Compact navigation actions used for contextual edit and manage links. */
+.ui-inline-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 7px 11px;
+  border: 1px solid rgba(181, 149, 98, 0.42);
+  border-radius: 10px;
+  background: linear-gradient(145deg, #fffdf8, #f6efe3);
+  color: #765225;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.5;
+  text-decoration: none;
+  transition: border-color .2s ease, background-color .2s ease, box-shadow .2s ease, transform .2s ease;
+}
+
+.ui-inline-action > i:first-child { color: #a57b40; font-size: 15px; }
+.ui-inline-action > i:last-child { color: #94713d; font-size: 12px; transition: transform .2s ease; }
+
+.ui-inline-action:hover {
+  border-color: #b7955c;
+  background: #fffaf2;
+  color: #5f411c;
+  box-shadow: 0 6px 14px -10px rgba(15, 39, 70, .55);
+  transform: translateY(-1px);
+}
+
+.ui-inline-action:hover > i:last-child { transform: translateX(-2px); }

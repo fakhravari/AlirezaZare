@@ -1,0 +1,1747 @@
+﻿@model PageModel
+
+@section Hero {
+    <section class="electrical-showcase" aria-label="دسته‌بندی و پیشنهادهای فروشگاه">
+        <div class="electrical-home-row">
+            <aside class="electrical-category-menu" id="productCategories" aria-label="مگامنوی دسته‌بندی قطعات">
+                <div class="electrical-category-heading"><span><i class="bi bi-list"></i></span> دسته‌بندی قطعات</div>
+                <button class="active" type="button" data-category="tools" aria-expanded="false"><i class="bi bi-lightning-charge"></i><span>ابزار برقی</span><i class="bi bi-chevron-left"></i></button>
+                <button type="button" data-category="hand-tools" aria-expanded="false"><i class="bi bi-tools"></i><span>ابزار دستی</span><i class="bi bi-chevron-left"></i></button>
+                <button type="button" data-category="components" aria-expanded="false"><i class="bi bi-cpu"></i><span>قطعات الکترونیکی</span><i class="bi bi-chevron-left"></i></button>
+                <button type="button" data-category="cables" aria-expanded="false"><i class="bi bi-plug"></i><span>سیم، کابل و اتصالات</span><i class="bi bi-chevron-left"></i></button>
+                <button type="button" data-category="lighting" aria-expanded="false"><i class="bi bi-lightbulb"></i><span>روشنایی و لامپ</span><i class="bi bi-chevron-left"></i></button>
+                <button type="button" data-category="switchgear" aria-expanded="false"><i class="bi bi-toggle-on"></i><span>کلید و تجهیزات برقی</span><i class="bi bi-chevron-left"></i></button>
+                <button type="button" data-category="safety" aria-expanded="false"><i class="bi bi-shield-check"></i><span>ایمنی و حفاظت</span><i class="bi bi-chevron-left"></i></button>
+                <button type="button" data-category="measurement" aria-expanded="false"><i class="bi bi-speedometer2"></i><span>اندازه‌گیری</span><i class="bi bi-chevron-left"></i></button>
+                <div class="electrical-submenu" id="electricalSubmenu" hidden></div>
+            </aside>
+        <div id="heroSwiper" class="swiper hero-swiper electrical-swiper">
+            <div class="swiper-wrapper">
+                <article class="swiper-slide electrical-slide electrical-slide-tools">
+                    <img class="electrical-banner-image" src="ClockTemplate/images/banners/electrical-tools.png" alt="ابزار برقی، دریل و تجهیزات اندازه‌گیری" fetchpriority="high"/>
+                    <div class="electrical-copy">
+                        <span class="electrical-kicker"><i class="bi bi-lightning-charge-fill"></i> انتخاب حرفه‌ای‌ها</span>
+                        <h1>ابزار برقی،<br/><em>قدرتِ انجام کار</em></h1>
+                        <p>دریل، فرز، دستگاه جوش و ابزارهای کارگاهی از برندهای معتبر، همراه با ضمانت و ارسال سریع.</p>
+                        <a class="electrical-cta" href="Search">مشاهده ابزارها <i class="bi bi-arrow-left"></i></a>
+                    </div>
+                    <span class="electrical-slide-index">01 <i></i> 03</span>
+                </article>
+                <article class="swiper-slide electrical-slide electrical-slide-parts">
+                    <img class="electrical-banner-image" src="ClockTemplate/images/banners/electrical-components.png" alt="قطعات الکترونیکی و برد مدار چاپی" loading="lazy"/>
+                    <div class="electrical-copy">
+                        <span class="electrical-kicker"><i class="bi bi-cpu-fill"></i> دنیای قطعات الکترونیک</span>
+                        <h2>قطعه‌ی درست،<br/><em>مدارِ مطمئن</em></h2>
+                        <p>انواع مقاومت، خازن، آی‌سی، رله و ماژول‌های کاربردی برای تعمیرکاران و سازندگان.</p>
+                        <a class="electrical-cta" href="Search">خرید قطعات <i class="bi bi-arrow-left"></i></a>
+                    </div>
+                    <span class="electrical-slide-index">02 <i></i> 03</span>
+                </article>
+                <article class="swiper-slide electrical-slide electrical-slide-lighting">
+                    <img class="electrical-banner-image" src="ClockTemplate/images/banners/electrical-lighting.png" alt="لامپ‌های LED، چراغ کارگاهی و کابل برق" loading="lazy"/>
+                    <div class="electrical-copy">
+                        <span class="electrical-kicker"><i class="bi bi-lightbulb-fill"></i> روشنایی کم‌مصرف</span>
+                        <h2>نور بهتر،<br/><em>مصرف کمتر</em></h2>
+                        <p>لامپ LED، پنل و چراغ‌های کارگاهی برای خانه، فروشگاه و محیط‌های صنعتی.</p>
+                        <a class="electrical-cta" href="Search">دیدن محصولات روشنایی <i class="bi bi-arrow-left"></i></a>
+                    </div>
+                    <span class="electrical-slide-index">03 <i></i> 03</span>
+                </article>
+            </div>
+            <button class="electrical-arrow electrical-prev" type="button" aria-label="اسلاید قبلی"><i class="bi bi-chevron-right"></i></button>
+            <button class="electrical-arrow electrical-next" type="button" aria-label="اسلاید بعدی"><i class="bi bi-chevron-left"></i></button>
+            <div class="swiper-pagination" aria-label="انتخاب اسلاید"></div>
+        </div>
+        </div>
+    </section>
+}
+
+
+<section class="featured-products py-section" id="featured">
+    <div class="container">
+        <div class="section-head row align-items-end g-4 mb-5">
+            <div class="col-lg-7">
+                <span class="eyebrow">پیشنهادهای محدود این هفته</span>
+                <h2>فرصت‌های <em>ویژه خرید</em></h2>
+            </div>
+            <div class="col-lg-5">
+                <p>
+                    ساعت‌های منتخب با تخفیف واقعی و موجودی محدود؛ قیمت‌ها تا پایان
+                    زمان کمپین یا اتمام موجودی معتبر هستند.
+                </p>
+            </div>
+        </div>
+        <div class="row g-4">
+            <div class="col-lg-7">
+                <article class="featured-main">
+                    <img
+                        loading="lazy"
+                        decoding="async"
+                        src="ClockTemplate/images/products/watch-blue.webp"
+                        alt="ساعت نوا کرونو ویژه"/>
+                    <div class="featured-badge">٪۱۵<br/><small>تخفیف</small></div>
+                    <div class="featured-content">
+                        <small>LIMITED EDITION / 01</small>
+                        <h3>نوا کرونو، نسخه شب</h3>
+                        <p>قاب استیل ضدخش، صفحه سرمه‌ای و مقاومت تا عمق ۵۰ متر.</p>
+                        <div class="featured-buy">
+                            <span
+                            >
+                                <del>
+                                    ۲۸,۸۰۰,۰۰۰
+                                </del
+                                ><strong>۲۴,۵۰۰,۰۰۰ تومان</strong>
+                            </span
+                            >
+                            <button
+                                type="button"
+                                class="add-cart light-cart"
+                                data-id="nova-night"
+                                data-name="نوا کرونو، نسخه شب"
+                                data-price="24500000"
+                                data-image="ClockTemplate/images/products/watch-blue.webp">
+                                <i class="bi bi-bag-plus"></i> افزودن به سبد
+                            </button>
+                        </div>
+                    </div>
+                </article>
+            </div>
+            <div class="col-lg-5">
+                <article class="featured-side">
+                    <div class="featured-side-image">
+                        <img
+                            loading="lazy"
+                            decoding="async"
+                            src="ClockTemplate/images/products/watch-cream.webp"
+                            alt="ساعت آرمان رزگلد"/>
+                        <span class="editor-ribbon">
+                            <i class="bi bi-feather"></i>
+                            <b>
+                                انتخاب سردبیر
+                            </b
+                            ><small>EDITOR'S PICK</small>
+                        </span
+                        >
+                    </div>
+                    <div class="featured-side-content">
+                        <span class="editor-caption">
+                            <i class="bi bi-journal-richtext"></i> پیشنهاد ویژه
+                            مجله
+                        </span
+                        >
+                        <h3>آرمان رزگلد</h3>
+                        <p>سادگی کلاسیک با جزئیات گرم و بند چرم طبیعی.</p>
+                        <span class="featured-price">
+                            ۲۱,۳۰۰,۰۰۰ تومان
+                        </span
+                        >
+                        <button
+                            type="button"
+                            class="add-cart"
+                            data-id="arman-rose"
+                            data-name="آرمان رزگلد"
+                            data-price="21300000"
+                            data-image="ClockTemplate/images/products/watch-cream.webp">
+                            <i class="bi bi-bag-plus"></i> افزودن به سبد خرید
+                        </button>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-section" id="collection">
+<div class="container">
+<div class="section-head row align-items-end g-4 mb-5">
+    <div class="col-lg-7">
+        <span class="eyebrow dark">منتخب فروشگاه هادی نوروزی</span>
+        <h2>پرفروش‌ترین <em>مدل‌های برندهای معتبر</em></h2>
+    </div>
+    <div class="col-lg-5">
+        <p>
+            منتخبی از محصولات پرتقاضای مجموعه با موجودی به‌روز، ضمانت کتبی
+            اصالت، شرایط تعویض هفت‌روزه و پشتیبانی مستقیم واحد فروش.
+        </p>
+    </div>
+</div>
+<ul class="nav product-tabs mb-4" id="productTabs">
+    <li>
+        <button type="button" class="active" data-filter="all">
+            <i class="bi bi-grid-3x3-gap-fill" aria-hidden="true"></i> همه
+        </button>
+    </li>
+    <li>
+        <button type="button" data-filter="men">
+            <i class="bi bi-watch" aria-hidden="true"></i> مردانه
+        </button>
+    </li>
+    <li>
+        <button type="button" data-filter="women">
+            <i class="bi bi-gem" aria-hidden="true"></i> زنانه
+        </button>
+    </li>
+    <li>
+        <button type="button" data-filter="classic">
+            <i class="bi bi-stars" aria-hidden="true"></i> کلاسیک
+        </button>
+    </li>
+</ul>
+<div class="row g-4" id="productGrid">
+    <div
+        class="col-md-6 col-lg-3 product-col"
+        data-category="classic men">
+        <article class="product-card">
+            <div class="product-image cream">
+                <img
+                    loading="lazy"
+                    decoding="async"
+                    src="ClockTemplate/images/products/watch-cream.webp"
+                    alt="ساعت آرمان کلاسیک"/>
+                <button
+                    type="button"
+                    class="favorite"
+                    aria-label="افزودن به علاقه‌مندی">
+                    <i class="bi bi-heart"></i>
+                </button
+                >
+                <a href="#" class="quick">
+                    مشاهده سریع
+                    <i class="bi bi-arrow-left">
+                    </i
+                    >
+                </a>
+            </div>
+            <div class="product-info">
+                <div>
+                    <small>CLASSIC 01</small>
+                    <h3>آرمان کلاسیک</h3>
+                </div>
+                <p>۱۸,۹۰۰,۰۰۰ <small>تومان</small></p>
+            </div>
+            <button
+                type="button"
+                class="add-cart"
+                data-id="arman"
+                data-name="آرمان کلاسیک"
+                data-price="18900000"
+                data-image="ClockTemplate/images/products/watch-cream.webp">
+                <i class="bi bi-bag-plus"></i> افزودن به سبد خرید
+            </button>
+        </article>
+    </div>
+    <div class="col-md-6 col-lg-3 product-col" data-category="men">
+        <article class="product-card">
+            <div class="product-image">
+                <img
+                    loading="lazy"
+                    decoding="async"
+                    src="ClockTemplate/images/products/watch-blue.webp"
+                    alt="ساعت نوا کرونو"/>
+                <span class="badge-best">
+                    پرفروش
+                </span
+                >
+                <button
+                    type="button"
+                    class="favorite"
+                    aria-label="افزودن به علاقه‌مندی">
+                    <i class="bi bi-heart"></i>
+                </button
+                >
+                <a href="#" class="quick">
+                    مشاهده سریع
+                    <i class="bi bi-arrow-left">
+                    </i
+                    >
+                </a>
+            </div>
+            <div class="product-info">
+                <div>
+                    <small>CHRONO 02</small>
+                    <h3>نوا کرونو</h3>
+                </div>
+                <p>۲۴,۵۰۰,۰۰۰ <small>تومان</small></p>
+            </div>
+            <button
+                type="button"
+                class="add-cart"
+                data-id="nova"
+                data-name="نوا کرونو"
+                data-price="24500000"
+                data-image="ClockTemplate/images/products/watch-blue.webp">
+                <i class="bi bi-bag-plus"></i> افزودن به سبد خرید
+            </button>
+        </article>
+    </div>
+    <div
+        class="col-md-6 col-lg-3 product-col"
+        data-category="women classic">
+        <article class="product-card">
+            <div class="product-image light">
+                <img
+                    loading="lazy"
+                    decoding="async"
+                    src="ClockTemplate/images/products/watch-silver.webp"
+                    alt="ساعت مهتاب مینیمال"/>
+                <button
+                    type="button"
+                    class="favorite"
+                    aria-label="افزودن به علاقه‌مندی">
+                    <i class="bi bi-heart"></i>
+                </button
+                >
+                <a href="#" class="quick">
+                    مشاهده سریع
+                    <i class="bi bi-arrow-left">
+                    </i
+                    >
+                </a>
+            </div>
+            <div class="product-info">
+                <div>
+                    <small>MINIMAL 03</small>
+                    <h3>مهتاب مینیمال</h3>
+                </div>
+                <p>۱۶,۸۰۰,۰۰۰ <small>تومان</small></p>
+            </div>
+            <button
+                type="button"
+                class="add-cart"
+                data-id="mahtab"
+                data-name="مهتاب مینیمال"
+                data-price="16800000"
+                data-image="ClockTemplate/images/products/watch-silver.webp">
+                <i class="bi bi-bag-plus"></i> افزودن به سبد خرید
+            </button>
+        </article>
+    </div>
+    <div class="col-md-6 col-lg-3 product-col" data-category="women">
+        <article class="product-card">
+            <div class="product-image warm">
+                <img
+                    loading="lazy"
+                    decoding="async"
+                    src="ClockTemplate/images/products/watch-story.webp"
+                    alt="ساعت هاله رز"/>
+                <span class="badge-new">
+                    جدید
+                </span
+                >
+                <button
+                    type="button"
+                    class="favorite"
+                    aria-label="افزودن به علاقه‌مندی">
+                    <i class="bi bi-heart"></i>
+                </button
+                >
+                <a href="#" class="quick">
+                    مشاهده سریع
+                    <i class="bi bi-arrow-left">
+                    </i
+                    >
+                </a>
+            </div>
+            <div class="product-info">
+                <div>
+                    <small>ROSE 04</small>
+                    <h3>هاله رز</h3>
+                </div>
+                <p>۲۰,۷۰۰,۰۰۰ <small>تومان</small></p>
+            </div>
+            <button
+                type="button"
+                class="add-cart"
+                data-id="haleh"
+                data-name="هاله رز"
+                data-price="20700000"
+                data-image="ClockTemplate/images/products/watch-story.webp">
+                <i class="bi bi-bag-plus"></i> افزودن به سبد خرید
+            </button>
+        </article>
+    </div>
+</div>
+<a href="Search" class="btn btn-outline-navy d-table mx-auto mt-5">
+    مشاهده همه ساعت‌ها
+    <i class="bi bi-arrow-down-left">
+    </i
+    >
+</a>
+</div>
+</section>
+
+<section class="category-showcase category-showcase-offer" id="amazing">
+    <div class="container">
+        <div class="category-showcase-head">
+            <div>
+                <span class="eyebrow dark">فرصت محدود خرید</span>
+                <h2>پیشنهاد <em>شگفت‌انگیز</em></h2>
+            </div>
+            <a href="#collection">مشاهده همه <i class="bi bi-arrow-left"></i></a>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <article class="showcase-card">
+                    <div class="product-image cream">
+                        <img
+                            loading="lazy"
+                            decoding="async"
+                            src="ClockTemplate/images/products/watch-cream.webp"
+                            alt="ساعت آرمان کلاسیک"/><span class="badge-offer">پیشنهاد ویژه</span>
+                    </div>
+                    <div class="showcase-card-body">
+                        <small>CLASSIC 01</small>
+                        <h3>آرمان کلاسیک</h3>
+                        <strong>
+                            ۱۸,۹۰۰,۰۰۰ تومان
+                        </strong
+                        >
+                        <button
+                            type="button"
+                            class="add-cart"
+                            data-id="arman-offer"
+                            data-name="آرمان کلاسیک"
+                            data-price="18900000"
+                            data-image="ClockTemplate/images/products/watch-cream.webp">
+                            <i class="bi bi-bag-plus"></i> افزودن به سبد
+                        </button>
+                    </div>
+                </article>
+            </div>
+            <div class="col-md-4">
+                <article class="showcase-card">
+                    <div class="product-image">
+                        <img
+                            loading="lazy"
+                            decoding="async"
+                            src="ClockTemplate/images/products/watch-blue.webp"
+                            alt="ساعت نوا کرونو"/><span class="badge-offer">۱۵٪ تخفیف</span>
+                    </div>
+                    <div class="showcase-card-body">
+                        <small>LIMITED 02</small>
+                        <h3>نوا کرونو شب</h3>
+                        <strong>
+                            ۲۴,۵۰۰,۰۰۰ تومان
+                        </strong
+                        >
+                        <button
+                            type="button"
+                            class="add-cart"
+                            data-id="nova-offer"
+                            data-name="نوا کرونو شب"
+                            data-price="24500000"
+                            data-image="ClockTemplate/images/products/watch-blue.webp">
+                            <i class="bi bi-bag-plus"></i> افزودن به سبد
+                        </button>
+                    </div>
+                </article>
+            </div>
+            <div class="col-md-4">
+                <article class="showcase-card">
+                    <div class="product-image warm">
+                        <img
+                            loading="lazy"
+                            decoding="async"
+                            src="ClockTemplate/images/products/watch-story.webp"
+                            alt="ساعت هاله رز"/><span class="badge-offer">قیمت ویژه</span>
+                    </div>
+                    <div class="showcase-card-body">
+                        <small>ROSE 04</small>
+                        <h3>هاله رزگلد</h3>
+                        <strong>
+                            ۲۰,۷۰۰,۰۰۰ تومان
+                        </strong
+                        >
+                        <button
+                            type="button"
+                            class="add-cart"
+                            data-id="haleh-offer"
+                            data-name="هاله رزگلد"
+                            data-price="20700000"
+                            data-image="ClockTemplate/images/products/watch-story.webp">
+                            <i class="bi bi-bag-plus"></i> افزودن به سبد
+                        </button>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="category-showcase category-showcase-best" id="bestsellers">
+<div class="container">
+<div class="category-showcase-head">
+    <div>
+        <span class="eyebrow dark">انتخاب محبوب مشتریان</span>
+        <h2>پرفروش‌ترین <em>محصولات</em></h2>
+    </div>
+    <a href="#collection">مشاهده همه <i class="bi bi-arrow-left"></i></a>
+</div>
+<div class="category-slider owl-carousel" id="bestsellersSlider">
+<div class="showcase-slide">
+    <article class="showcase-card">
+        <div class="product-image">
+            <img
+                loading="lazy"
+                decoding="async"
+                src="ClockTemplate/images/products/watch-blue.webp"
+                alt="ساعت نوا کرونو"/><span class="badge-best">پرفروش</span>
+        </div>
+        <div class="showcase-card-body">
+            <small>CHRONO 02</small>
+            <h3>نوا کرونو</h3>
+            <strong>
+                ۲۴,۵۰۰,۰۰۰ تومان
+            </strong
+            >
+            <button
+                type="button"
+                class="add-cart"
+                data-id="nova-best"
+                data-name="نوا کرونو"
+                data-price="24500000"
+                data-image="ClockTemplate/images/products/watch-blue.webp">
+                <i class="bi bi-bag-plus"></i> افزودن به سبد
+            </button>
+        </div>
+    </article>
+</div>
+<div class="showcase-slide">
+    <article class="showcase-card">
+        <div class="product-image cream">
+            <img
+                loading="lazy"
+                decoding="async"
+                src="ClockTemplate/images/products/watch-cream.webp"
+                alt="ساعت آرمان کلاسیک"/>
+        </div>
+        <div class="showcase-card-body">
+            <small>CLASSIC 01</small>
+            <h3>آرمان کلاسیک</h3>
+            <strong>
+                ۱۸,۹۰۰,۰۰۰ تومان
+            </strong
+            >
+            <button
+                type="button"
+                class="add-cart"
+                data-id="arman-best"
+                data-name="آرمان کلاسیک"
+                data-price="18900000"
+                data-image="ClockTemplate/images/products/watch-cream.webp">
+                <i class="bi bi-bag-plus"></i> افزودن به سبد
+            </button>
+        </div>
+    </article>
+</div>
+<div class="showcase-slide">
+    <article class="showcase-card">
+        <div class="product-image light">
+            <img
+                loading="lazy"
+                decoding="async"
+                src="ClockTemplate/images/products/watch-silver.webp"
+                alt="ساعت مهتاب مینیمال"/><span class="badge-best">محبوب</span>
+        </div>
+        <div class="showcase-card-body">
+            <small>MINIMAL 03</small>
+            <h3>مهتاب مینیمال</h3>
+            <strong>
+                ۱۶,۸۰۰,۰۰۰ تومان
+            </strong
+            >
+            <button
+                type="button"
+                class="add-cart"
+                data-id="mahtab-best"
+                data-name="مهتاب مینیمال"
+                data-price="16800000"
+                data-image="ClockTemplate/images/products/watch-silver.webp">
+                <i class="bi bi-bag-plus"></i> افزودن به سبد
+            </button>
+        </div>
+    </article>
+</div>
+<div class="showcase-slide">
+    <article class="showcase-card">
+        <div class="product-image warm">
+            <img
+                loading="lazy"
+                decoding="async"
+                src="ClockTemplate/images/products/watch-story.webp"
+                alt="ساعت هاله رزگلد"/><span class="badge-best">منتخب</span>
+        </div>
+        <div class="showcase-card-body">
+            <small>ROSE 04</small>
+            <h3>هاله رزگلد</h3>
+            <strong>
+                ۲۰,۷۰۰,۰۰۰ تومان
+            </strong
+            >
+            <button
+                type="button"
+                class="add-cart"
+                data-id="haleh-best"
+                data-name="هاله رزگلد"
+                data-price="20700000"
+                data-image="ClockTemplate/images/products/watch-story.webp">
+                <i class="bi bi-bag-plus"></i> افزودن به سبد
+            </button>
+        </div>
+    </article>
+</div>
+<div class="showcase-slide">
+    <article class="showcase-card">
+        <div class="product-image">
+            <img
+                loading="lazy"
+                decoding="async"
+                src="ClockTemplate/images/products/watch-blue.webp"
+                alt="ساعت نوا استیل سرمه‌ای"/><span class="badge-best">پرفروش</span>
+        </div>
+        <div class="showcase-card-body">
+            <small>NOVA STEEL</small>
+            <h3>نوا استیل سرمه‌ای</h3>
+            <strong>
+                ۲۴,۱۲۰,۰۰۰ تومان
+            </strong
+            >
+            <button
+                type="button"
+                class="add-cart"
+                data-id="nova-steel-best"
+                data-name="نوا استیل سرمه‌ای"
+                data-price="24120000"
+                data-image="ClockTemplate/images/products/watch-blue.webp">
+                <i class="bi bi-bag-plus"></i> افزودن به سبد
+            </button>
+        </div>
+    </article>
+</div>
+<div class="showcase-slide">
+    <article class="showcase-card">
+        <div class="product-image cream">
+            <img
+                loading="lazy"
+                decoding="async"
+                src="ClockTemplate/images/products/watch-cream.webp"
+                alt="ساعت آرمان بند چرمی"/><span class="badge-best">محبوب</span>
+        </div>
+        <div class="showcase-card-body">
+            <small>ARMAN LEATHER</small>
+            <h3>آرمان بند چرمی</h3>
+            <strong>
+                ۱۹,۹۰۰,۰۰۰ تومان
+            </strong
+            >
+            <button
+                type="button"
+                class="add-cart"
+                data-id="arman-leather-best"
+                data-name="آرمان بند چرمی"
+                data-price="19900000"
+                data-image="ClockTemplate/images/products/watch-cream.webp">
+                <i class="bi bi-bag-plus"></i> افزودن به سبد
+            </button>
+        </div>
+    </article>
+</div>
+<div class="showcase-slide">
+    <article class="showcase-card">
+        <div class="product-image light">
+            <img
+                loading="lazy"
+                decoding="async"
+                src="ClockTemplate/images/products/watch-silver.webp"
+                alt="ساعت آبان مینیمال"/><span class="badge-best">منتخب</span>
+        </div>
+        <div class="showcase-card-body">
+            <small>ABAN MINIMAL</small>
+            <h3>آبان مینیمال</h3>
+            <strong>
+                ۱۵,۹۰۰,۰۰۰ تومان
+            </strong
+            >
+            <button
+                type="button"
+                class="add-cart"
+                data-id="aban-best"
+                data-name="آبان مینیمال"
+                data-price="15900000"
+                data-image="ClockTemplate/images/products/watch-silver.webp">
+                <i class="bi bi-bag-plus"></i> افزودن به سبد
+            </button>
+        </div>
+    </article>
+</div>
+<div class="showcase-slide">
+    <article class="showcase-card">
+        <div class="product-image warm">
+            <img
+                loading="lazy"
+                decoding="async"
+                src="ClockTemplate/images/products/watch-story.webp"
+                alt="ساعت میراث کلاسیک"/><span class="badge-best">محدود</span>
+        </div>
+        <div class="showcase-card-body">
+            <small>MIRAS 05</small>
+            <h3>میراث کلاسیک</h3>
+            <strong>
+                ۳۱,۸۰۰,۰۰۰ تومان
+            </strong
+            >
+            <button
+                type="button"
+                class="add-cart"
+                data-id="miras-best"
+                data-name="میراث کلاسیک"
+                data-price="31800000"
+                data-image="ClockTemplate/images/products/watch-story.webp">
+                <i class="bi bi-bag-plus"></i> افزودن به سبد
+            </button>
+        </div>
+    </article>
+</div>
+</div>
+</div>
+</section>
+
+<section class="category-showcase category-showcase-new" id="newest">
+<div class="container">
+<div class="category-showcase-head">
+    <div>
+        <span class="eyebrow dark">تازه‌واردهای مجموعه</span>
+        <h2>جدیدترین <em>کالاها</em></h2>
+    </div>
+    <a href="#collection">مشاهده همه <i class="bi bi-arrow-left"></i></a>
+</div>
+<div class="category-slider owl-carousel" id="newestSlider">
+<div class="showcase-slide">
+    <article class="showcase-card">
+        <div class="product-image warm">
+            <img
+                loading="lazy"
+                decoding="async"
+                src="ClockTemplate/images/products/watch-story.webp"
+                alt="ساعت هاله رز"/><span class="badge-new">جدید</span>
+        </div>
+        <div class="showcase-card-body">
+            <small>ROSE 04</small>
+            <h3>هاله رز</h3>
+            <strong>
+                ۲۰,۷۰۰,۰۰۰ تومان
+            </strong
+            >
+            <button
+                type="button"
+                class="add-cart"
+                data-id="haleh-new"
+                data-name="هاله رز"
+                data-price="20700000"
+                data-image="ClockTemplate/images/products/watch-story.webp">
+                <i class="bi bi-bag-plus"></i> افزودن به سبد
+            </button>
+        </div>
+    </article>
+</div>
+<div class="showcase-slide">
+    <article class="showcase-card">
+        <div class="product-image light">
+            <img
+                loading="lazy"
+                decoding="async"
+                src="ClockTemplate/images/products/watch-silver.webp"
+                alt="ساعت مهتاب سیلور"/><span class="badge-new">تازه‌رسیده</span>
+        </div>
+        <div class="showcase-card-body">
+            <small>MAHTAB SILVER</small>
+            <h3>مهتاب سیلور</h3>
+            <strong>
+                ۱۷,۴۰۰,۰۰۰ تومان
+            </strong
+            >
+            <button
+                type="button"
+                class="add-cart"
+                data-id="mahtab-new"
+                data-name="مهتاب سیلور"
+                data-price="17400000"
+                data-image="ClockTemplate/images/products/watch-silver.webp">
+                <i class="bi bi-bag-plus"></i> افزودن به سبد
+            </button>
+        </div>
+    </article>
+</div>
+<div class="showcase-slide">
+    <article class="showcase-card">
+        <div class="product-image">
+            <img
+                loading="lazy"
+                decoding="async"
+                src="ClockTemplate/images/products/watch-blue.webp"
+                alt="ساعت دماوند اسپرت"/><span class="badge-new">جدید</span>
+        </div>
+        <div class="showcase-card-body">
+            <small>DAMAVAND SPORT</small>
+            <h3>دماوند اسپرت</h3>
+            <strong>
+                ۲۳,۶۰۰,۰۰۰ تومان
+            </strong
+            >
+            <button
+                type="button"
+                class="add-cart"
+                data-id="damavand-new"
+                data-name="دماوند اسپرت"
+                data-price="23600000"
+                data-image="ClockTemplate/images/products/watch-blue.webp">
+                <i class="bi bi-bag-plus"></i> افزودن به سبد
+            </button>
+        </div>
+    </article>
+</div>
+<div class="showcase-slide">
+    <article class="showcase-card">
+        <div class="product-image cream">
+            <img
+                loading="lazy"
+                decoding="async"
+                src="ClockTemplate/images/products/watch-cream.webp"
+                alt="ساعت آرمان رزگلد"/><span class="badge-new">تازه‌رسیده</span>
+        </div>
+        <div class="showcase-card-body">
+            <small>ARMAN ROSE</small>
+            <h3>آرمان رزگلد</h3>
+            <strong>
+                ۲۱,۳۰۰,۰۰۰ تومان
+            </strong
+            >
+            <button
+                type="button"
+                class="add-cart"
+                data-id="arman-new"
+                data-name="آرمان رزگلد"
+                data-price="21300000"
+                data-image="ClockTemplate/images/products/watch-cream.webp">
+                <i class="bi bi-bag-plus"></i> افزودن به سبد
+            </button>
+        </div>
+    </article>
+</div>
+<div class="showcase-slide">
+    <article class="showcase-card">
+        <div class="product-image">
+            <img
+                loading="lazy"
+                decoding="async"
+                src="ClockTemplate/images/products/watch-blue.webp"
+                alt="ساعت نوا نسخه شب"/><span class="badge-new">جدید</span>
+        </div>
+        <div class="showcase-card-body">
+            <small>NOVA NIGHT</small>
+            <h3>نوا نسخه شب</h3>
+            <strong>
+                ۲۴,۵۰۰,۰۰۰ تومان
+            </strong
+            >
+            <button
+                type="button"
+                class="add-cart"
+                data-id="nova-night-new"
+                data-name="نوا نسخه شب"
+                data-price="24500000"
+                data-image="ClockTemplate/images/products/watch-blue.webp">
+                <i class="bi bi-bag-plus"></i> افزودن به سبد
+            </button>
+        </div>
+    </article>
+</div>
+<div class="showcase-slide">
+    <article class="showcase-card">
+        <div class="product-image light">
+            <img
+                loading="lazy"
+                decoding="async"
+                src="ClockTemplate/images/products/watch-silver.webp"
+                alt="ساعت آبان مش"/><span class="badge-new">تازه‌رسیده</span>
+        </div>
+        <div class="showcase-card-body">
+            <small>ABAN MESH</small>
+            <h3>آبان بند مش</h3>
+            <strong>
+                ۱۶,۴۰۰,۰۰۰ تومان
+            </strong
+            >
+            <button
+                type="button"
+                class="add-cart"
+                data-id="aban-mesh-new"
+                data-name="آبان بند مش"
+                data-price="16400000"
+                data-image="ClockTemplate/images/products/watch-silver.webp">
+                <i class="bi bi-bag-plus"></i> افزودن به سبد
+            </button>
+        </div>
+    </article>
+</div>
+<div class="showcase-slide">
+    <article class="showcase-card">
+        <div class="product-image warm">
+            <img
+                loading="lazy"
+                decoding="async"
+                src="ClockTemplate/images/products/watch-story.webp"
+                alt="ساعت هاله کلاسیک"/><span class="badge-new">جدید</span>
+        </div>
+        <div class="showcase-card-body">
+            <small>HALEH CLASSIC</small>
+            <h3>هاله کلاسیک</h3>
+            <strong>
+                ۱۹,۸۰۰,۰۰۰ تومان
+            </strong
+            >
+            <button
+                type="button"
+                class="add-cart"
+                data-id="haleh-classic-new"
+                data-name="هاله کلاسیک"
+                data-price="19800000"
+                data-image="ClockTemplate/images/products/watch-story.webp">
+                <i class="bi bi-bag-plus"></i> افزودن به سبد
+            </button>
+        </div>
+    </article>
+</div>
+<div class="showcase-slide">
+    <article class="showcase-card">
+        <div class="product-image cream">
+            <img
+                loading="lazy"
+                decoding="async"
+                src="ClockTemplate/images/products/watch-cream.webp"
+                alt="ساعت میراث چرمی"/><span class="badge-new">نسخه محدود</span>
+        </div>
+        <div class="showcase-card-body">
+            <small>MIRAS LEATHER</small>
+            <h3>میراث چرمی</h3>
+            <strong>
+                ۲۹,۹۰۰,۰۰۰ تومان
+            </strong
+            >
+            <button
+                type="button"
+                class="add-cart"
+                data-id="miras-leather-new"
+                data-name="میراث چرمی"
+                data-price="29900000"
+                data-image="ClockTemplate/images/products/watch-cream.webp">
+                <i class="bi bi-bag-plus"></i> افزودن به سبد
+            </button>
+        </div>
+    </article>
+</div>
+</div>
+</div>
+</section>
+
+<section class="brands-section" id="brands" aria-labelledby="brandsTitle">
+    <div class="container">
+        <div class="brands-heading">
+            <span class="brands-line"></span>
+            <h2 id="brandsTitle">برندهای موجود</h2>
+            <span class="brands-line"></span>
+        </div>
+        <div class="brands-slider owl-carousel" id="brandsSlider">
+            <a
+                class="brand-card"
+                href="#collection"
+                aria-label="مشاهده محصولات Victorinox">
+                <span class="brand-image-placeholder" aria-hidden="true">
+                    تصویر برند
+                </span
+                ><strong>ویکتورینوکس</strong>
+            </a
+            >
+            <a
+                class="brand-card"
+                href="#collection"
+                aria-label="مشاهده محصولات Patek Philippe">
+                <span class="brand-image-placeholder" aria-hidden="true">
+                    تصویر برند
+                </span
+                ><strong>پتک فیلیپ</strong>
+            </a
+            >
+            <a
+                class="brand-card"
+                href="#collection"
+                aria-label="مشاهده محصولات Police">
+                <span class="brand-image-placeholder" aria-hidden="true">
+                    تصویر برند
+                </span
+                ><strong>پلیس</strong>
+            </a
+            >
+            <a
+                class="brand-card"
+                href="#collection"
+                aria-label="مشاهده محصولات Polo">
+                <span class="brand-image-placeholder" aria-hidden="true">
+                    تصویر برند
+                </span
+                ><strong>پولو</strong>
+            </a
+            >
+            <a
+                class="brand-card"
+                href="#collection"
+                aria-label="مشاهده محصولات Polo Exchange">
+                <span class="brand-image-placeholder" aria-hidden="true">
+                    تصویر برند
+                </span
+                ><strong>پولو اکسچنج</strong>
+            </a
+            >
+            <a
+                class="brand-card"
+                href="#collection"
+                aria-label="مشاهده محصولات Beverly Hills Polo Club">
+                <span class="brand-image-placeholder" aria-hidden="true">
+                    تصویر برند
+                </span
+                ><strong>بورلی هیلز</strong>
+            </a
+            >
+            <a
+                class="brand-card"
+                href="#collection"
+                aria-label="مشاهده محصولات Santa Barbara Polo">
+                <span class="brand-image-placeholder" aria-hidden="true">
+                    تصویر برند
+                </span
+                ><strong>سانتا باربارا</strong>
+            </a
+            >
+        </div>
+    </div>
+</section>
+
+
+
+<section class="recommendations py-section" id="recommendations">
+<div class="container">
+<div class="recommend-box">
+<div class="recommend-head">
+    <div>
+        <span class="eyebrow dark">پیشنهاد کمپانی هادی نوروزی</span>
+        <h2>مدل‌های مشابه <em>انتخاب‌های شما</em></h2>
+        <p>
+            این پیشنهادها براساس سبک، رنگ و بازه قیمت مدل‌های محبوب شما چیده
+            شده‌اند و با تغییر انتخاب‌ها به‌روز می‌شوند.
+        </p>
+    </div>
+    <a href="#collection">
+        مشاهده همه پیشنهادها
+        <i class="bi bi-arrow-left">
+        </i
+        >
+    </a>
+</div>
+<div class="rail-wrap">
+    <div class="product-rail" id="productRail">
+        <article class="rail-card">
+            <div class="rail-image tone-1">
+                <img
+                    loading="lazy"
+                    decoding="async"
+                    src="ClockTemplate/images/products/watch-blue.webp"
+                    alt="ساعت نوا استیل"/><span>-۱۰٪</span>
+            </div>
+            <small>NOVA STEEL</small>
+            <h3>نوا استیل سرمه‌ای</h3>
+            <p>کرنوگراف دقیق با بدنه استیل ضدخش و صفحه شب‌تاب.</p>
+            <del>
+                ۲۶,۸۰۰,۰۰۰
+            </del
+            >
+            <strong>
+                ۲۴,۱۲۰,۰۰۰ <small>تومان</small>
+            </strong
+            >
+            <button
+                type="button"
+                class="add-cart"
+                data-id="nova-steel"
+                data-name="نوا استیل سرمه‌ای"
+                data-price="24120000"
+                data-image="ClockTemplate/images/products/watch-blue.webp">
+                <i class="bi bi-bag-plus"></i> افزودن به سبد
+            </button>
+        </article>
+        <article class="rail-card">
+            <div class="rail-image tone-2">
+                <img
+                    loading="lazy"
+                    decoding="async"
+                    src="ClockTemplate/images/products/watch-cream.webp"
+                    alt="ساعت آرمان چرمی"/>
+            </div>
+            <small>ARMAN LEATHER</small>
+            <h3>آرمان بند چرمی</h3>
+            <p>طراحی کلاسیک با بند چرم طبیعی و شیشه کریستال معدنی.</p>
+            <strong>
+                ۱۹,۹۰۰,۰۰۰ <small>تومان</small>
+            </strong
+            >
+            <button
+                type="button"
+                class="add-cart"
+                data-id="arman-leather"
+                data-name="آرمان بند چرمی"
+                data-price="19900000"
+                data-image="ClockTemplate/images/products/watch-cream.webp">
+                <i class="bi bi-bag-plus"></i> افزودن به سبد
+            </button>
+        </article>
+        <article class="rail-card">
+            <div class="rail-image tone-3">
+                <img
+                    loading="lazy"
+                    decoding="async"
+                    src="ClockTemplate/images/products/watch-silver.webp"
+                    alt="ساعت مهتاب سیلور"/><span>جدید</span>
+            </div>
+            <small>MAHTAB SILVER</small>
+            <h3>مهتاب سیلور</h3>
+            <p>فرم ظریف و مینیمال، مناسب استفاده روزمره و رسمی.</p>
+            <strong>
+                ۱۷,۴۰۰,۰۰۰ <small>تومان</small>
+            </strong
+            >
+            <button
+                type="button"
+                class="add-cart"
+                data-id="mahtab-silver"
+                data-name="مهتاب سیلور"
+                data-price="17400000"
+                data-image="ClockTemplate/images/products/watch-silver.webp">
+                <i class="bi bi-bag-plus"></i> افزودن به سبد
+            </button>
+        </article>
+        <article class="rail-card">
+            <div class="rail-image tone-4">
+                <img
+                    loading="lazy"
+                    decoding="async"
+                    src="ClockTemplate/images/products/watch-story.webp"
+                    alt="ساعت هاله رز"/><span>-۱۵٪</span>
+            </div>
+            <small>HALEH ROSE</small>
+            <h3>هاله رزگلد</h3>
+            <p>ترکیب گرم رزگلد و صفحه روشن برای استایل‌های خاص.</p>
+            <del>
+                ۲۲,۷۰۰,۰۰۰
+            </del
+            >
+            <strong>
+                ۱۹,۲۹۵,۰۰۰ <small>تومان</small>
+            </strong
+            >
+            <button
+                type="button"
+                class="add-cart"
+                data-id="haleh-rose-rail"
+                data-name="هاله رزگلد"
+                data-price="19295000"
+                data-image="ClockTemplate/images/products/watch-story.webp">
+                <i class="bi bi-bag-plus"></i> افزودن به سبد
+            </button>
+        </article>
+        <article class="rail-card">
+            <div class="rail-image tone-5">
+                <img
+                    loading="lazy"
+                    decoding="async"
+                    src="ClockTemplate/images/products/watch-blue.webp"
+                    alt="ساعت دماوند اسپرت"/>
+            </div>
+            <small>DAMAVAND SPORT</small>
+            <h3>دماوند اسپرت</h3>
+            <p>مقاوم در برابر آب تا ۵۰ متر با بند سبک و بادوام.</p>
+            <strong>
+                ۲۳,۶۰۰,۰۰۰ <small>تومان</small>
+            </strong
+            >
+            <button
+                type="button"
+                class="add-cart"
+                data-id="damavand"
+                data-name="دماوند اسپرت"
+                data-price="23600000"
+                data-image="ClockTemplate/images/products/watch-blue.webp">
+                <i class="bi bi-bag-plus"></i> افزودن به سبد
+            </button>
+        </article>
+        <article class="rail-card">
+            <div class="rail-image tone-6">
+                <img
+                    loading="lazy"
+                    decoding="async"
+                    src="ClockTemplate/images/products/watch-cream.webp"
+                    alt="ساعت میراث کلاسیک"/><span>محدود</span>
+            </div>
+            <small>MIRAS 05</small>
+            <h3>میراث کلاسیک</h3>
+            <p>الهام‌گرفته از معماری ایرانی با جزئیات دست‌پرداخت.</p>
+            <strong>
+                ۳۱,۸۰۰,۰۰۰ <small>تومان</small>
+            </strong
+            >
+            <button
+                type="button"
+                class="add-cart"
+                data-id="miras"
+                data-name="میراث کلاسیک"
+                data-price="31800000"
+                data-image="ClockTemplate/images/products/watch-cream.webp">
+                <i class="bi bi-bag-plus"></i> افزودن به سبد
+            </button>
+        </article>
+        <article class="rail-card">
+            <div class="rail-image tone-7">
+                <img
+                    loading="lazy"
+                    decoding="async"
+                    src="ClockTemplate/images/products/watch-silver.webp"
+                    alt="ساعت آبان مینیمال"/>
+            </div>
+            <small>ABAN MINIMAL</small>
+            <h3>آبان مینیمال</h3>
+            <p>صفحه خلوت و بند مش؛ ساده، سبک و همیشه قابل استفاده.</p>
+            <strong>
+                ۱۵,۹۰۰,۰۰۰ <small>تومان</small>
+            </strong
+            >
+            <button
+                type="button"
+                class="add-cart"
+                data-id="aban"
+                data-name="آبان مینیمال"
+                data-price="15900000"
+                data-image="ClockTemplate/images/products/watch-silver.webp">
+                <i class="bi bi-bag-plus"></i> افزودن به سبد
+            </button>
+        </article>
+    </div>
+</div>
+</div>
+</div>
+</section>
+
+<section class="testimonials py-section" id="testimonials">
+    <div class="container">
+        <div class="testimonial-intro">
+            <div>
+                <span class="eyebrow dark">تجربه خرید از هادی نوروزی</span>
+                <h2>آنچه مشتریان ما<br/><em>می‌گویند</em></h2>
+            </div>
+            <div class="testimonial-tools">
+                <div class="rating-summary">
+                    <div class="rating-score">۴٫۹</div>
+                    <div>
+                        <div class="rating-stars" aria-label="امتیاز ۴٫۹ از ۵">
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill">
+                            </i
+                            ><i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill">
+                            </i
+                            ><i class="bi bi-star-fill"></i>
+                        </div>
+                        <strong>
+                            بر پایه بیش از ۱,۲۰۰ خرید موفق
+                        </strong
+                        ><span>کیفیت، اصالت و همراهی تا انتخاب نهایی</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="testimonial-slider-wrap">
+            <div
+                class="testimonial-grid testimonial-slider"
+                id="testimonialSlider">
+                <article class="testimonial-card featured-review">
+                    <span class="quote-mark">“</span>
+                    <div class="rating-stars" aria-label="۵ ستاره">
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill">
+                        </i
+                        ><i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill">
+                        </i
+                        ><i class="bi bi-star-fill"></i>
+                    </div>
+                    <p>
+                        برای هدیه سالگرد دنبال یک ساعت خاص بودم. سفارش به‌موقع رسید
+                        و بسته‌بندی هم واقعاً شیک و بی‌نقص بود.
+                    </p>
+                    <div class="reviewer">
+                        <span class="reviewer-avatar avatar-rose">س</span>
+                        <div>
+                            <strong>سارا محمدی</strong><small>خریدار آرمان رزگلد</small>
+                        </div>
+                        <i
+                            class="bi bi-patch-check-fill"
+                            aria-label="خرید تأییدشده">
+                        </i>
+                    </div>
+                </article>
+                <article class="testimonial-card">
+                    <span class="quote-mark">“</span>
+                    <div class="rating-stars" aria-label="۵ ستاره">
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill">
+                        </i
+                        ><i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill">
+                        </i
+                        ><i class="bi bi-star-fill"></i>
+                    </div>
+                    <p>
+                        نوا کرونو را حضوری دیدم و همان‌جا خریدم. کیفیت ساعت دقیقاً با
+                        توضیحات سایت یکی بود و کارت ضمانت هم همراه محصول تحویل شد.
+                    </p>
+                    <div class="reviewer">
+                        <span class="reviewer-avatar avatar-navy">م</span>
+                        <div>
+                            <strong>میلاد خلیلی</strong><small>خریدار نوا کرونو</small>
+                        </div>
+                        <i
+                            class="bi bi-patch-check-fill"
+                            aria-label="خرید تأییدشده">
+                        </i>
+                    </div>
+                </article>
+                <article class="testimonial-card">
+                    <span class="quote-mark">“</span>
+                    <div class="rating-stars" aria-label="۵ ستاره">
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill">
+                        </i
+                        ><i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill">
+                        </i
+                        ><i class="bi bi-star-fill"></i>
+                    </div>
+                    <p>
+                        از پاسخ‌گویی سریع و پیگیری بعد از خرید خیلی راضی بودم. برای
+                        تنظیم بند ساعت هم بدون هزینه راهنمایی‌ام کردند.
+                    </p>
+                    <div class="reviewer">
+                        <span class="reviewer-avatar avatar-cream">ن</span>
+                        <div>
+                            <strong>
+                                نیلوفر رستمی
+                            </strong
+                            ><small>خریدار مهتاب مینیمال</small>
+                        </div>
+                        <i
+                            class="bi bi-patch-check-fill"
+                            aria-label="خرید تأییدشده">
+                        </i>
+                    </div>
+                </article>
+                <article class="testimonial-card">
+                    <span class="quote-mark">“</span>
+                    <div class="rating-stars" aria-label="۵ ستاره">
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill">
+                        </i
+                        ><i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill">
+                        </i
+                        ><i class="bi bi-star-fill"></i>
+                    </div>
+                    <p>
+                        قبل از خرید درباره ضدآب بودن مدل دماوند سؤال داشتم و کامل
+                        راهنمایی شدم. ارسال هم سریع‌تر از چیزی بود که انتظار داشتم.
+                    </p>
+                    <div class="reviewer">
+                        <span class="reviewer-avatar avatar-navy">ا</span>
+                        <div>
+                            <strong>
+                                امیرعلی کیانی
+                            </strong
+                            ><small>خریدار دماوند اسپرت</small>
+                        </div>
+                        <i
+                            class="bi bi-patch-check-fill"
+                            aria-label="خرید تأییدشده">
+                        </i>
+                    </div>
+                </article>
+                <article class="testimonial-card">
+                    <span class="quote-mark">“</span>
+                    <div class="rating-stars" aria-label="۵ ستاره">
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill">
+                        </i
+                        ><i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill">
+                        </i
+                        ><i class="bi bi-star-fill"></i>
+                    </div>
+                    <p>
+                        تنوع مدل‌ها خیلی خوب بود و با کمک مشاور فروش، ساعتی انتخاب کردم
+                        که هم برای محیط کار و هم مهمانی مناسب است.
+                    </p>
+                    <div class="reviewer">
+                        <span class="reviewer-avatar avatar-rose">ل</span>
+                        <div>
+                            <strong>لیلا مرادی</strong><small>خریدار هاله رز</small>
+                        </div>
+                        <i
+                            class="bi bi-patch-check-fill"
+                            aria-label="خرید تأییدشده">
+                        </i>
+                    </div>
+                </article>
+                <article class="testimonial-card">
+                    <span class="quote-mark">“</span>
+                    <div class="rating-stars" aria-label="۵ ستاره">
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill">
+                        </i
+                        ><i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill">
+                        </i
+                        ><i class="bi bi-star-fill"></i>
+                    </div>
+                    <p>
+                        برای اولین خرید آنلاین ساعت کمی تردید داشتم، اما عکس‌ها، توضیحات
+                        و پاسخ‌گویی پشتیبانی باعث شد با خیال راحت انتخاب کنم.
+                    </p>
+                    <div class="reviewer">
+                        <span class="reviewer-avatar avatar-cream">ر</span>
+                        <div>
+                            <strong>رضا شریفی</strong><small>خریدار میراث کلاسیک</small>
+                        </div>
+                        <i
+                            class="bi bi-patch-check-fill"
+                            aria-label="خرید تأییدشده">
+                        </i>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="story" id="story">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-6">
+                <div class="story-image">
+                    <img
+                        loading="lazy"
+                        decoding="async"
+                        src="ClockTemplate/images/products/watch-story.webp"
+                        alt="کنترل کیفیت ساعت‌های اورجینال کمپانی هادی نوروزی"/><span>اصالت<br/>تضمین‌شده</span>
+                </div>
+            </div>
+            <div class="col-lg-6 story-copy">
+                <span class="eyebrow">معرفی رسمی کمپانی هادی نوروزی</span>
+                <h2>ساختار حرفه‌ای،<br/><em>خدمات قابل اعتماد</em></h2>
+                <p>
+                    <strong>کمپانی هادی نوروزی</strong> مجموعه‌ای تخصصی در حوزه
+                    واردات، تأمین و عرضه ساعت‌های اورجینال مردانه و زنانه است. محصولات
+                    پیش از تحویل، مطابق <strong>فرایند کنترل کیفی</strong> مجموعه از
+                    نظر اصالت، سلامت ظاهری و عملکرد فنی بررسی می‌شوند. واحدهای فروش و
+                    پشتیبانی کمپانی در شعب بوشهر، از مرحله انتخاب محصول تا
+                    <strong>خدمات پس از فروش</strong> پاسخ‌گوی مشتریان حقیقی و سازمانی
+                    هستند.
+                </p>
+                <a class="story-link" href="#stores">
+                    اطلاعات شعب و واحدهای ارتباطی
+                    <i class="bi bi-arrow-left">
+                    </i
+                    >
+                </a>
+                <div class="signature">
+                    HADI NOROUZI <small>ORIGINAL WATCH COMPANY</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="services py-section" id="services">
+    <div class="container">
+        <div class="services-intro">
+            <span>تعهد ما به یک خرید مطمئن</span>
+            <h2>از انتخاب تا سال‌ها پس از خرید، <em>کنار شما هستیم</em></h2>
+        </div>
+        <div class="row g-4 service-flow">
+            <div class="col-md-4">
+                <article class="service">
+                    <span>۰۱</span><i class="bi bi-patch-check"></i>
+                    <h3>اصالت تضمین‌شده</h3>
+                    <p>
+                        تمام ساعت‌ها با ضمانت اصالت و کارت گارانتی دو ساله ارائه
+                        می‌شوند.
+                    </p>
+                </article>
+            </div>
+            <div class="col-md-4">
+                <article class="service">
+                    <span>۰۲</span><i class="bi bi-box-seam"></i>
+                    <h3>ارسال امن و سریع</h3>
+                    <p>
+                        بسته‌بندی ویژه و ارسال رایگان به سراسر ایران، حداکثر طی ۴۸ ساعت.
+                    </p>
+                </article>
+            </div>
+            <div class="col-md-4">
+                <article class="service">
+                    <span>۰۳</span><i class="bi bi-stars"></i>
+                    <h3>همراهی همیشگی</h3>
+                    <p>پیگیری سفارش و پاسخ‌گویی به پرسش‌های مشتریان پس از خرید.</p>
+                </article>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section
+    class="purchase-benefits"
+    aria-label="مزیت‌های خرید از کمپانی هادی نوروزی">
+    <div class="container">
+        <div class="benefit-grid">
+            <div class="benefit">
+                <i class="bi bi-patch-check-fill"></i>
+                <div>
+                    <strong>
+                        ضمانت اصالت کالا
+                    </strong
+                    ><span>تضمین اصالت تمام ساعت‌ها</span>
+                </div>
+            </div>
+            <div class="benefit">
+                <i class="bi bi-arrow-repeat"></i>
+                <div>
+                    <strong>
+                        ۷ روز ضمانت بازگشت
+                    </strong
+                    ><span>خرید مطمئن و بدون نگرانی</span>
+                </div>
+            </div>
+            <div class="benefit">
+                <i class="bi bi-headset"></i>
+                <div>
+                    <strong>
+                        پشتیبانی ۷ روز هفته
+                    </strong
+                    ><span>پاسخ‌گویی از ۹ تا ۲۱</span>
+                </div>
+            </div>
+            <div class="benefit">
+                <i class="bi bi-credit-card-2-front"></i>
+                <div>
+                    <strong>
+                        پرداخت امن
+                    </strong
+                    ><span>درگاه بانکی و پرداخت در محل</span>
+                </div>
+            </div>
+            <div class="benefit">
+                <i class="bi bi-truck"></i>
+                <div>
+                    <strong>
+                        تحویل سریع و رایگان
+                    </strong
+                    ><span>ارسال اکسپرس به سراسر ایران</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="journal py-section" id="journal">
+    <div class="container">
+        <div
+            class="section-head d-flex justify-content-between align-items-end mb-5">
+            <div>
+                <span class="eyebrow dark">مجله تخصصی ساعت</span>
+                <h2>راهنمای خرید و <em>نگهداری ساعت</em></h2>
+            </div>
+            <a asp-controller="Magazine" asp-action="Index">مشاهده همه مطالب <i class="bi bi-arrow-left"></i></a>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-7">
+                <article class="journal-main">
+                    <img
+                        loading="lazy"
+                        decoding="async"
+                        src="ClockTemplate/images/products/watch-hero.webp"
+                        alt="راهنمای انتخاب ساعت مچی مناسب"/>
+                    <div>
+                        <small>راهنمای خرید · ۸ دقیقه مطالعه</small>
+                        <h3><a asp-controller="Magazine" asp-action="Details" asp-route-slug="choosing-watch-for-wrist" style="color: inherit; text-decoration: none;">چطور ساعت مچی مناسب استایل و اندازه مچ خود انتخاب کنیم؟</a></h3>
+                    </div>
+                </article>
+            </div>
+            <div class="col-md-5">
+                <div class="journal-list">
+                    <article>
+                        <span>۱</span>
+                        <div>
+                            <small>آموزش تخصصی</small>
+                            <h4><a asp-controller="Magazine" asp-action="Details" asp-route-slug="watch-movements" style="color: inherit; text-decoration: none;">تفاوت ساعت اتوماتیک، کوارتز و مکانیکی به زبان ساده</a></h4>
+                        </div>
+                    </article>
+                    <article>
+                        <span>۲</span>
+                        <div>
+                            <small>نگهداری</small>
+                            <h4><a asp-controller="Magazine" asp-action="Details" asp-route-slug="watch-care" style="color: inherit; text-decoration: none;">هفت نکته کاربردی برای افزایش عمر ساعت و بند چرمی</a></h4>
+                        </div>
+                    </article>
+                    <article>
+                        <span>۳</span>
+                        <div>
+                            <small>راهنمای اصالت</small>
+                            <h4><a asp-controller="Magazine" asp-action="Details" asp-route-slug="authentic-watch" style="color: inherit; text-decoration: none;">هنگام خرید ساعت اصل به چه جزئیاتی توجه کنیم؟</a></h4>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="stores py-section" id="stores">
+    <div class="container">
+        <div class="section-head row align-items-end g-4 mb-5">
+            <div class="col-lg-7">
+                <span class="eyebrow dark">شبکه فروش رسمی در بوشهر</span>
+                <h2>شعب رسمی <em>کمپانی هادی نوروزی</em></h2>
+            </div>
+            <div class="col-lg-5">
+                <p>
+                    برای مشاهده محصولات و بهره‌مندی از خدمات
+                    حضوری، به شعب معرفی‌شده در وب‌سایت رسمی کمپانی مراجعه کنید.
+                </p>
+            </div>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-4">
+                <article class="store-card">
+                    <span>شعبه اول</span><i class="bi bi-shop"></i>
+                    <h3>ساعت‌فروشی هادی نوروزی</h3>
+                    <p>بوشهر، خیابان لیان شرقی، بازار قدیم</p>
+                    <a
+                        href="https://hadinorouzi-company.com/product-category/man-watch/#"
+                        target="_blank"
+                        rel="noopener">
+                        مشاهده فروشگاه بوشهر ششم بهمن
+                        <i class="bi bi-arrow-up-left">
+                        </i
+                        >
+                    </a>
+                </article>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <article class="store-card">
+                    <span>شعبه دوم</span><i class="bi bi-building"></i>
+                    <h3>گالری ساعت نوروزی</h3>
+                    <p>بوشهر، میدان باهنر، نبش نیلوفر ۱۸</p>
+                    <a
+                        href="https://hadinorouzi-company.com/product-category/man-watch/#"
+                        target="_blank"
+                        rel="noopener">
+                        مشاهده فروشگاه بوشهر باهنر
+                        <i class="bi bi-arrow-up-left">
+                        </i
+                        >
+                    </a>
+                </article>
+            </div>
+            <div class="col-md-12 col-lg-4">
+                <article class="store-card">
+                    <span>شعبه بوشهر مال</span><i class="bi bi-geo-alt"></i>
+                    <h3>فروشگاه بوشهر مال</h3>
+                    <p>بوشهر، بزرگراه بوشهر–برازجان، مجتمع بوشهر مال</p>
+                    <a
+                        href="https://hadinorouzi-company.com/product-category/man-watch/#"
+                        target="_blank"
+                        rel="noopener">
+                        مشاهده فروشگاه بوشهر مال
+                        <i class="bi bi-arrow-up-left">
+                        </i
+                        >
+                    </a>
+                </article>
+            </div>
+        </div>
+        <div class="store-contact">
+            <a class="store-contact-card" href="tel:+989125514388">
+                <span class="store-contact-icon" aria-hidden="true">
+                    <i class="bi bi-person-badge"></i>
+                </span>
+                <span class="store-contact-copy">
+                    <small>ارتباط مستقیم</small>
+                    <strong>تماس با مدیریت</strong>
+                    <b dir="ltr">۰۹۱۲۵۵۱۴۳۸۸</b>
+                </span>
+                <i
+                    class="bi bi-telephone-outbound store-contact-action"
+                    aria-hidden="true">
+                </i>
+            </a>
+            <a class="store-contact-card" href="tel:+989177764324">
+                <span class="store-contact-icon" aria-hidden="true">
+                    <i class="bi bi-headset"></i>
+                </span>
+                <span class="store-contact-copy">
+                    <small>پاسخ‌گویی ۹ تا ۲۱</small>
+                    <strong>پشتیبانی و پیگیری سفارش</strong>
+                    <b dir="ltr">۰۹۱۷۷۷۶۴۳۲۴</b>
+                </span>
+                <i
+                    class="bi bi-telephone-outbound store-contact-action"
+                    aria-hidden="true">
+                </i>
+            </a>
+        </div>
+    </div>
+</section>
+
+<section class="newsletter">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-7">
+                <span class="eyebrow dark">سامانه اطلاع‌رسانی رسمی کمپانی</span>
+                <h2>عضویت در باشگاه مشتریان هادی نوروزی</h2>
+                <p>
+                    اطلاعیه‌های رسمی موجودی محصولات، شرایط فروش، پیشنهادهای دوره‌ای و
+                    راهنماهای تخصصی کمپانی را مستقیماً دریافت کنید.
+                </p>
+            </div>
+            <div class="col-lg-5">
+                <form id="newsletterForm" class="subscribe">
+                    <input
+                        dir="rtl"
+                        type="email"
+                        required
+                        placeholder="نشانی ایمیل شما"
+                        aria-label="نشانی ایمیل شما"/>
+                    <button type="submit" aria-label="عضویت در باشگاه مشتریان">
+                        <i class="bi bi-arrow-left"></i>
+                    </button>
+                </form>
+                <small id="formMessage"></small>
+            </div>
+        </div>
+    </div>
+</section>
+

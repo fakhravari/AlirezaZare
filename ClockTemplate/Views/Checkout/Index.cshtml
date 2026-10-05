@@ -1,0 +1,74 @@
+@model PageModel
+
+
+<main class="flow-main container invoice-page">
+    <nav class="cart-breadcrumb" aria-label="مسیر صفحه">
+        <ol>
+            <li>
+                <a href="Home/Index">
+                    <i class="bi bi-house-door" aria-hidden="true"></i><span>خانه</span>
+                </a>
+            </li>
+            <li>
+                <i class="bi bi-chevron-left" aria-hidden="true"></i>
+                <a href="Cart">
+                    <i class="bi bi-bag" aria-hidden="true"></i><span>سبد خرید</span>
+                </a>
+            </li>
+            <li class="cart-breadcrumb-current">
+                <i class="bi bi-chevron-left" aria-hidden="true"></i><span aria-current="page"><i class="bi bi-receipt" aria-hidden="true"></i>پیش‌فاکتور</span>
+            </li>
+        </ol>
+    </nav>
+    <header class="flow-heading">
+        <h1>پیش‌فاکتور و پرداخت نهایی</h1>
+        <p>محصولات و آدرس انتخاب‌شده را پیش از پرداخت بررسی کنید.</p>
+    </header>
+    <div class="flow-grid">
+        <section class="flow-card">
+            <div class="invoice-section-title">
+                <i class="bi bi-geo-alt"></i>
+                <div>
+                    <h2>آدرس انتخابی</h2>
+                    <p>پیش‌نمایش اطلاعات تحویل ثبت‌شده در سبد خرید</p>
+                </div>
+            </div>
+            <div id="checkoutAddressPreview" class="address-preview checkout-address-preview" aria-live="polite"></div>
+            <div class="invoice-section-title invoice-payment-title">
+                <i class="bi bi-credit-card"></i>
+                <div>
+                    <h2>نحوه پرداخت</h2>
+                    <p id="checkoutPaymentMethod">درگاه انتخاب‌شده در سبد خرید</p>
+                </div>
+            </div>
+            <div class="invoice-section-title invoice-products-title">
+                <i class="bi bi-bag-check"></i>
+                <h2>اقلام پیش‌فاکتور</h2>
+            </div>
+            <div id="invoiceItems"></div>
+            <a class="ui-inline-action cart-continue-link" href="Cart">
+                <i class="bi bi-pencil-square" aria-hidden="true"></i>
+                <span>ویرایش سبد خرید</span>
+                <i class="bi bi-arrow-left" aria-hidden="true"></i>
+            </a>
+        </section>
+        <aside class="flow-card cart-summary">
+            <div id="orderSummary"></div>
+            <p class="cart-shipping-note">هزینه ارسال پس از تأیید فروشگاه مشخص می‌شود.</p><button id="finalPayment" type="button" class="flow-button cart-checkout-link" disabled>پرداخت نهایی <i class="bi bi-arrow-left" aria-hidden="true"></i></button>
+            <p class="invoice-demo-note">نسخه نمایشی؛ درگاه پرداخت متصل نیست و وجهی دریافت نمی‌شود.</p>
+            <p id="paymentStatus" role="status"></p>
+        </aside>
+    </div>
+
+</main>
+
+
+@section Styles {
+    <link href="ClockTemplate/css/pages/pages.css?v=12" rel="stylesheet"/>
+    <link href="~/ClockTemplate/css/pages/checkout.css" rel="stylesheet" asp-append-version="true"/>
+}
+
+@section Scripts {
+    <script src="ClockTemplate/js/pages/page-content.js?v=1"></script>
+    <script src="ClockTemplate/js/pages/checkout.js?v=5"></script>
+}

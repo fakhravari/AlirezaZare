@@ -1,0 +1,94 @@
+@model PageModel
+
+
+<header class="page-hero brands-hero">
+    <img
+        class="hero-image"
+        src="~/ClockTemplate/images/heroes/hero-about.webp"
+        alt="ساعت‌ساز در حال بررسی یک ساعت لوکس"
+        width="1536"
+        height="1024"
+        fetchpriority="high" />
+    <div class="container">
+        <nav class="article-breadcrumb" aria-label="مسیر صفحه">
+            <a class="breadcrumb-home" asp-controller="Home" asp-action="Index">
+                <i class="bi bi-house-door" aria-hidden="true"></i>
+                <span>خانه</span>
+            </a>
+            <span class="breadcrumb-step">
+                <i class="breadcrumb-separator bi bi-chevron-left" aria-hidden="true"></i>
+                <span class="breadcrumb-current" aria-current="page">
+                    <i class="bi bi-award" aria-hidden="true"></i>
+                    <span>برندهای ساعت</span>
+                </span>
+            </span>
+        </nav>
+        <span class="page-kicker">انتخابی به وسعت جهان</span>
+        <h1>برندهای ساعت، <em>امضای متفاوت زمان</em></h1>
+        <p>
+            مجموعه‌ای منتخب از برندهای معتبر ساعت را با تضمین اصالت و اطلاعات کامل
+            محصولات برای انتخابی آگاهانه ببینید.
+        </p>
+        <div class="hero-trail">
+            <span>برندهای معتبر جهانی</span>
+            <span>تضمین اصالت کالا</span>
+            <span>پشتیبانی مشتریان</span>
+        </div>
+    </div>
+</header>
+<main>
+    <section class="page-section brands-catalogue">
+        <div class="container">
+            <div class="section-title brands-heading">
+                <div>
+                    <span>کاتالوگ برندها</span>
+                    <h2>انتخابی برای <em>هر سلیقه</em></h2>
+                </div>
+                <p>برای مشاهده مدل‌های موجود، برند موردنظر خود را انتخاب کنید.</p>
+            </div>
+            <div class="flow-cards brands-grid">
+                <a class="flow-card brand-card ui-surface-card ui-surface-card--interactive" href="Search?brand=%D9%88%DB%8C%DA%A9%D8%AA%D9%88%D8%B1%DB%8C%D9%86%D9%88%DA%A9%D8%B3">
+                    <i class="bi bi-watch ui-icon-tile" aria-hidden="true"></i>
+                    <h2>ویکتورینوکس</h2>
+                    <p>مشاهده ساعت‌های برند <i class="bi bi-arrow-left-short" aria-hidden="true"></i></p>
+                </a>
+                <a class="flow-card brand-card ui-surface-card ui-surface-card--interactive" href="Search?brand=%D9%BE%D8%AA%DA%A9%20%D9%81%DB%8C%D9%84%DB%8C%D9%BE">
+                    <i class="bi bi-watch ui-icon-tile" aria-hidden="true"></i>
+                    <h2>پتک فیلیپ</h2>
+                    <p>مشاهده ساعت‌های برند <i class="bi bi-arrow-left-short" aria-hidden="true"></i></p>
+                </a>
+                <a class="flow-card brand-card ui-surface-card ui-surface-card--interactive" href="Search?brand=%D9%BE%D9%84%DB%8C%D8%B3">
+                    <i class="bi bi-watch ui-icon-tile" aria-hidden="true"></i>
+                    <h2>پلیس</h2>
+                    <p>مشاهده ساعت‌های برند <i class="bi bi-arrow-left-short" aria-hidden="true"></i></p>
+                </a>
+                <a class="flow-card brand-card ui-surface-card ui-surface-card--interactive" href="Search?brand=%D9%BE%D9%88%D9%84%D9%88">
+                    <i class="bi bi-watch ui-icon-tile" aria-hidden="true"></i>
+                    <h2>پولو</h2>
+                    <p>مشاهده ساعت‌های برند <i class="bi bi-arrow-left-short" aria-hidden="true"></i></p>
+                </a>
+                <a class="flow-card brand-card ui-surface-card ui-surface-card--interactive" href="Search?brand=%D9%BE%D9%88%D9%84%D9%88%20%D8%A7%DA%A9%D8%B3%DA%86%D9%86%D8%AC">
+                    <i class="bi bi-watch ui-icon-tile" aria-hidden="true"></i>
+                    <h2>پولو اکسچنج</h2>
+                    <p>مشاهده ساعت‌های برند <i class="bi bi-arrow-left-short" aria-hidden="true"></i></p>
+                </a>
+                <a class="flow-card brand-card ui-surface-card ui-surface-card--interactive" href="Search?brand=%D8%A8%D9%88%D8%B1%D9%84%DB%8C%20%D9%87%DB%8C%D9%84%D8%B2">
+                    <i class="bi bi-watch ui-icon-tile" aria-hidden="true"></i>
+                    <h2>بورلی هیلز</h2>
+                    <p>مشاهده ساعت‌های برند <i class="bi bi-arrow-left-short" aria-hidden="true"></i></p>
+                </a>
+            </div>
+            <partial name="_RelatedLinks" />
+        </div>
+    </section>
+</main>
+
+
+@section Styles {
+    <link href="~/ClockTemplate/css/pages/pages.css" rel="stylesheet" asp-append-version="true" />
+    <link href="~/ClockTemplate/css/pages/brands.css" rel="stylesheet" asp-append-version="true" />
+}
+
+@section Scripts {
+    <script src="~/ClockTemplate/js/pages/page-content.js" asp-append-version="true"></script>
+}
