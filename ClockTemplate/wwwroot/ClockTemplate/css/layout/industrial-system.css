@@ -101,11 +101,16 @@ h1, h2, h3, h4, h5, h6,
 
   .home-page #mainNav .navbar-nav {
     width: max-content;
+    height: 50px;
+    padding: 3px 6px;
     margin: 0 !important;
     flex-direction: row;
     direction: rtl;
     align-items: center;
     white-space: nowrap;
+    border: 1px solid rgba(255, 255, 255, .12);
+    border-radius: 13px;
+    background: rgba(255, 255, 255, .035);
   }
 
   .home-page #mainNav .navbar-brand {
@@ -170,6 +175,11 @@ h1, h2, h3, h4, h5, h6,
     display: flex;
     align-items: center;
     gap: 8px;
+    height: 50px;
+    padding: 3px;
+    border: 1px solid rgba(255, 255, 255, .16);
+    border-radius: 13px;
+    background: rgba(255, 255, 255, .08);
   }
 
   .home-page #mainNav .account-wrap {
@@ -678,6 +688,48 @@ thead,
 .journal-connect :is(h2, h3, p),
 .featured-products :is(h2, h3, p) {
   color: #fff !important;
+}
+
+.featured-products .featured-side-content h3 {
+  color: var(--industrial-navy) !important;
+}
+
+.featured-products .featured-side-content p {
+  color: var(--industrial-steel) !important;
+}
+
+.featured-products .featured-side-content .editor-caption {
+  border: 1px solid rgba(184, 137, 0, .22);
+  background: #fff4cf;
+  color: #765900;
+}
+
+.recommendations .recommend-head > div > .eyebrow.dark {
+  border-color: rgba(16, 35, 61, .16) !important;
+  background: #fff4cf !important;
+  color: var(--industrial-navy) !important;
+  box-shadow: 0 5px 14px rgba(16, 35, 61, .06);
+}
+
+.testimonial-card .quote-mark {
+  top: 18px;
+  left: 20px;
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border: 1px solid rgba(16, 35, 61, .12);
+  border-radius: 12px;
+  background: #fff4cf;
+  color: var(--industrial-navy);
+  font-family: inherit;
+  font-size: 18px;
+  line-height: 1;
+  opacity: 1;
+}
+
+.testimonial-card .quote-mark i {
+  display: block;
 }
 
 .page-cta em,
