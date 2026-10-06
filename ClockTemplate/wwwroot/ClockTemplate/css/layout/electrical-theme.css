@@ -315,7 +315,7 @@ body {
   position: absolute;
   z-index: 5;
   top: 0;
-  right: calc(100% - 1px);
+  right: calc(100% + 6px);
   display: grid;
   width: min(760px, calc(100vw - 350px));
   height: 100%;
@@ -325,7 +325,7 @@ body {
   overflow: auto;
   border: 1px solid #e1e7e9;
   border-top: 3px solid #edc52b;
-  border-radius: 8px 0 0 8px;
+  border-radius: 8px;
   background: rgba(255,255,255,.98);
   box-shadow: 0 16px 38px rgba(23, 41, 51, .2);
   color: #34434a;
