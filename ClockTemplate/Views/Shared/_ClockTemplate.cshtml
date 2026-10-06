@@ -55,6 +55,7 @@
     <link href="~/ClockTemplate/css/layout/mobile-drawer-compact.css" rel="stylesheet" asp-append-version="true"/>
     <link href="~/ClockTemplate/css/store/pagination.css" rel="stylesheet" asp-append-version="true"/>
     <link href="~/ClockTemplate/css/layout/electrical-theme.css" rel="stylesheet" asp-append-version="true"/>
+    <link href="~/ClockTemplate/css/layout/industrial-system.css" rel="stylesheet" asp-append-version="true"/>
 </head>
 <body class="@(Model.IsHome ? "home-page" : "inner-page")">
 @if (Model.IsHome)
@@ -83,5 +84,6 @@ else
 <script src="~/ClockTemplate/js/store/catalog.js" asp-append-version="true"></script>
 <script src="~/ClockTemplate/js/store/commerce.js" asp-append-version="true"></script>
 @await RenderSectionAsync("Scripts", false)
+<script src="~/ClockTemplate/js/core/electrical-content.js" asp-append-version="true"></script>
 </body>
 </html>

@@ -1,0 +1,505 @@
+/* Unified industrial storefront theme. Loaded last to normalize legacy page styles. */
+:root {
+  --industrial-navy: #102a43;
+  --industrial-steel: #243b53;
+  --industrial-yellow: #f6c515;
+  --industrial-yellow-dark: #c99d00;
+  --industrial-bg: #f5f7f8;
+  --industrial-surface: #fff;
+  --industrial-ink: #202a33;
+  --industrial-muted: #65737d;
+  --industrial-line: #dee4e7;
+  --industrial-success: #16835a;
+  --industrial-danger: #c73e3e;
+  --industrial-shadow: 0 12px 30px rgba(16, 42, 67, .08);
+  --industrial-shadow-hover: 0 18px 42px rgba(16, 42, 67, .14);
+}
+
+html { background: var(--industrial-bg); }
+
+body {
+  background: var(--industrial-bg);
+  color: var(--industrial-ink);
+}
+
+body::selection {
+  background: var(--industrial-yellow);
+  color: var(--industrial-navy);
+}
+
+a { color: var(--industrial-steel); }
+a:hover { color: var(--industrial-navy); }
+
+h1, h2, h3, h4, h5, h6,
+.section-title,
+.flow-heading,
+.orders-heading {
+  color: var(--industrial-navy);
+}
+
+.text-muted,
+.page-section p,
+.flow-heading p,
+.section-head p {
+  color: var(--industrial-muted) !important;
+}
+
+/* Navigation */
+.inner-page #mainNav,
+.inner-page #mainNav.scrolled,
+.inner-nav,
+.search-header {
+  border-bottom: 1px solid var(--industrial-line) !important;
+  background: #fff !important;
+  box-shadow: 0 8px 24px rgba(16, 42, 67, .07) !important;
+}
+
+.inner-page #mainNav .brand,
+.inner-page #mainNav .nav-link,
+.inner-nav .brand,
+.inner-nav .nav-link {
+  color: var(--industrial-ink) !important;
+  text-shadow: none !important;
+}
+
+.inner-page #mainNav .nav-link:hover,
+.inner-page #mainNav .nav-link.active,
+.inner-nav .nav-link:hover,
+.inner-nav .nav-link.active {
+  color: var(--industrial-yellow-dark) !important;
+}
+
+.brand > span,
+.search-brand > span,
+.footer-logo > span,
+.login-brand > span {
+  border-color: var(--industrial-navy) !important;
+  background: var(--industrial-navy) !important;
+  color: var(--industrial-yellow) !important;
+  box-shadow: none !important;
+}
+
+.navbar-toggler,
+.page-menu-toggle {
+  border-color: var(--industrial-line) !important;
+  background: #fff !important;
+  color: var(--industrial-navy) !important;
+}
+
+/* Page heroes */
+.inner-page .page-hero {
+  border-bottom: 4px solid var(--industrial-yellow);
+  background-color: var(--industrial-navy);
+}
+
+.inner-page .page-hero::before {
+  background: linear-gradient(90deg, rgba(16, 42, 67, .94), rgba(16, 42, 67, .62), rgba(16, 42, 67, .28)) !important;
+}
+
+.inner-page .page-hero :is(h1, h2, p, .hero-trail, .page-kicker) {
+  color: #fff;
+}
+
+.inner-page .page-hero :is(em, .page-kicker, i) {
+  color: var(--industrial-yellow) !important;
+}
+
+.hero-trail span,
+.breadcrumb-item + .breadcrumb-item::before {
+  color: rgba(255, 255, 255, .68) !important;
+}
+
+/* Sections and surfaces */
+.page-section,
+.flow-main,
+.journal-page,
+.article-page,
+.profile-edit-page,
+.search-main {
+  background-color: var(--industrial-bg);
+}
+
+.search-intro {
+  background-image:
+    linear-gradient(90deg, rgba(16, 42, 67, .3), rgba(16, 42, 67, .93)),
+    url("../../images/heroes/hero-electrical-editorial.png") !important;
+  background-position: center !important;
+  background-size: cover !important;
+}
+
+.page-section[style] { background: #edf2f4 !important; }
+
+:is(
+  .flow-card,
+  .profile-edit-card,
+  .account-welcome,
+  .account-sidebar,
+  .account-section,
+  .contact-form,
+  .contact-info-card,
+  .branch-card,
+  .faq-item,
+  .tracking-card,
+  .shipping-card,
+  .warranty-card,
+  .invoice-card,
+  .checkout-card,
+  .address-card,
+  .journal-card,
+  .article-card,
+  .brand-card,
+  .gallery-card,
+  .filter-card,
+  .summary-card,
+  .cart-summary,
+  .product-details-card
+) {
+  border-color: var(--industrial-line) !important;
+  background: var(--industrial-surface) !important;
+  box-shadow: var(--industrial-shadow) !important;
+}
+
+:is(
+  .branch-card,
+  .journal-card,
+  .brand-card,
+  .gallery-card,
+  .address-card
+):hover {
+  border-color: var(--industrial-yellow) !important;
+  box-shadow: var(--industrial-shadow-hover) !important;
+}
+
+.ui-surface-card,
+.product-card,
+.service-card,
+.benefit,
+.store-card,
+.testimonial-card {
+  border-color: var(--industrial-line) !important;
+  background: #fff !important;
+  box-shadow: var(--industrial-shadow) !important;
+}
+
+.ui-surface-card--interactive:hover,
+.product-card:hover,
+.service-card:hover,
+.store-card:hover {
+  border-color: var(--industrial-yellow) !important;
+  box-shadow: var(--industrial-shadow-hover) !important;
+}
+
+/* Buttons and actions */
+:is(
+  .btn-primary,
+  .contact-submit,
+  .form-confirm-accept,
+  .checkout-submit,
+  .tracking-submit,
+  .profile-save,
+  .add-cart,
+  .page-cta a,
+  .featured-buy button
+) {
+  border-color: var(--industrial-yellow) !important;
+  background: var(--industrial-yellow) !important;
+  color: var(--industrial-navy) !important;
+  box-shadow: 0 8px 18px rgba(201, 157, 0, .2) !important;
+}
+
+:is(
+  .btn-primary,
+  .contact-submit,
+  .form-confirm-accept,
+  .checkout-submit,
+  .tracking-submit,
+  .profile-save,
+  .add-cart,
+  .page-cta a,
+  .featured-buy button
+):hover {
+  border-color: var(--industrial-navy) !important;
+  background: var(--industrial-navy) !important;
+  color: #fff !important;
+  transform: translateY(-1px);
+}
+
+:is(.btn-warning, .electrical-arrow, .badge-best, .featured-badge, .discount-badge) {
+  border-color: var(--industrial-yellow) !important;
+  background: var(--industrial-yellow) !important;
+  color: var(--industrial-navy) !important;
+}
+
+:is(.btn-outline-primary, .ui-inline-action, .quick, .page-action) {
+  border-color: var(--industrial-navy) !important;
+  background: #fff !important;
+  color: var(--industrial-navy) !important;
+}
+
+:is(.btn-outline-primary, .ui-inline-action, .quick, .page-action):hover {
+  border-color: var(--industrial-navy) !important;
+  background: var(--industrial-navy) !important;
+  color: #fff !important;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid rgba(246, 197, 21, .48) !important;
+  outline-offset: 2px;
+}
+
+/* Forms */
+:is(input, select, textarea):not([type="checkbox"]):not([type="radio"]):not([type="range"]) {
+  border-color: var(--industrial-line) !important;
+  background-color: #fff !important;
+  color: var(--industrial-ink) !important;
+}
+
+:is(input, select, textarea):not([type="checkbox"]):not([type="radio"]):not([type="range"]):focus {
+  border-color: var(--industrial-steel) !important;
+  box-shadow: 0 0 0 4px rgba(36, 59, 83, .1) !important;
+}
+
+label { color: var(--industrial-steel); }
+
+input[type="checkbox"],
+input[type="radio"] {
+  accent-color: var(--industrial-yellow-dark);
+}
+
+/* Product catalogue */
+.product-image,
+.product-gallery,
+.product-media {
+  background: #edf2f4 !important;
+}
+
+.product-info h3,
+.product-title,
+.product-card h3 {
+  color: var(--industrial-navy) !important;
+}
+
+.product-info > p,
+.product-price,
+.price-current {
+  color: var(--industrial-navy) !important;
+}
+
+.product-info small,
+.price-old,
+.product-meta {
+  color: var(--industrial-muted) !important;
+}
+
+.favorite {
+  border-color: var(--industrial-line) !important;
+  background: #fff !important;
+  color: var(--industrial-steel) !important;
+}
+
+.favorite:hover,
+.favorite.active {
+  border-color: var(--industrial-danger) !important;
+  color: var(--industrial-danger) !important;
+}
+
+.category-filter button.active,
+.catalogue-filter button.active,
+.account-nav a.active,
+.pagination .active > * {
+  border-color: var(--industrial-navy) !important;
+  background: var(--industrial-navy) !important;
+  color: #fff !important;
+}
+
+/* Status colors */
+.status-success,
+.in-stock,
+.order-status.success,
+.contact-form-status:not(.is-error) {
+  color: var(--industrial-success) !important;
+}
+
+.status-danger,
+.out-of-stock,
+.validation-summary-errors,
+.field-validation-error,
+.contact-form-status.is-error {
+  color: var(--industrial-danger) !important;
+}
+
+.contact-form-status:not(.is-error) > i { background: var(--industrial-success) !important; }
+.contact-form-status.is-error > i { background: var(--industrial-danger) !important; }
+
+/* Account, cart and modal panels */
+.account-panel,
+.cart-panel,
+.login-modal-content,
+.search-modal-content,
+.page-menu-drawer {
+  border-color: var(--industrial-line) !important;
+  background: #fff !important;
+  color: var(--industrial-ink) !important;
+  box-shadow: 0 24px 60px rgba(16, 42, 67, .2) !important;
+}
+
+.account-links a:hover,
+.cart-item:hover,
+.page-menu-drawer nav a:hover {
+  background: #edf2f4 !important;
+  color: var(--industrial-navy) !important;
+}
+
+.account-avatar,
+.ui-icon-tile,
+.branch-icon,
+.service-icon,
+.contact-icon {
+  border-color: #d6e0e5 !important;
+  background: #edf2f4 !important;
+  color: var(--industrial-steel) !important;
+}
+
+/* Tables, separators and pagination */
+table,
+thead,
+tbody,
+tr,
+th,
+td,
+.accordion-item,
+.list-group-item {
+  border-color: var(--industrial-line) !important;
+}
+
+thead,
+.table-light > * > * {
+  background: #edf2f4 !important;
+  color: var(--industrial-navy) !important;
+}
+
+.pagination a,
+.pagination button,
+.page-link {
+  border-color: var(--industrial-line) !important;
+  background: #fff !important;
+  color: var(--industrial-steel) !important;
+}
+
+.pagination a:hover,
+.pagination button:hover,
+.page-link:hover {
+  border-color: var(--industrial-yellow) !important;
+  color: var(--industrial-navy) !important;
+}
+
+/* Calls to action */
+.page-cta,
+.journal-connect,
+.featured-products {
+  background: linear-gradient(135deg, var(--industrial-navy), #173d5c) !important;
+  color: #fff;
+}
+
+.page-cta :is(h2, h3, p),
+.journal-connect :is(h2, h3, p),
+.featured-products :is(h2, h3, p) {
+  color: #fff !important;
+}
+
+.page-cta em,
+.journal-connect em,
+.featured-products em,
+.eyebrow,
+.page-kicker,
+.section-title > span {
+  color: var(--industrial-yellow) !important;
+}
+
+.contact-panel {
+  border-color: rgba(255, 255, 255, .12) !important;
+  background: linear-gradient(145deg, var(--industrial-steel), var(--industrial-navy)) !important;
+  color: #fff !important;
+}
+
+.contact-panel :is(h2, h3, p, strong, small) {
+  color: #fff !important;
+}
+
+.contact-panel .page-kicker,
+.contact-panel .contact-method > i {
+  color: var(--industrial-yellow) !important;
+}
+
+.contact-panel .contact-method {
+  border-color: rgba(255, 255, 255, .14) !important;
+  background: rgba(255, 255, 255, .06) !important;
+  color: #fff !important;
+}
+
+.contact-panel .contact-method:hover {
+  border-color: var(--industrial-yellow) !important;
+  background: rgba(246, 197, 21, .1) !important;
+}
+
+/* Footer */
+footer {
+  border-top: 5px solid var(--industrial-yellow) !important;
+  background: var(--industrial-navy) !important;
+  color: rgba(255, 255, 255, .76) !important;
+}
+
+footer h4,
+footer .brand,
+footer strong {
+  color: #fff !important;
+}
+
+footer a { color: rgba(255, 255, 255, .72) !important; }
+footer a:hover { color: var(--industrial-yellow) !important; }
+
+footer .socials a,
+footer .social-placeholder,
+footer .trust-badge {
+  border-color: rgba(255, 255, 255, .16) !important;
+  background: rgba(255, 255, 255, .07) !important;
+  color: var(--industrial-yellow) !important;
+}
+
+.footer-bottom {
+  border-top-color: rgba(255, 255, 255, .12) !important;
+}
+
+.back-to-top {
+  border-color: var(--industrial-yellow) !important;
+  background: var(--industrial-yellow) !important;
+  color: var(--industrial-navy) !important;
+}
+
+/* Responsive consistency */
+@media (max-width: 991px) {
+  .mobile-menu,
+  .offcanvas,
+  .page-menu-drawer {
+    background: var(--industrial-navy) !important;
+    color: #fff !important;
+  }
+
+  .mobile-menu a,
+  .mobile-menu button,
+  .offcanvas a,
+  .offcanvas button {
+    color: #fff !important;
+  }
+
+  .mobile-menu a:hover,
+  .mobile-menu button:hover,
+  .offcanvas a:hover,
+  .offcanvas button:hover {
+    color: var(--industrial-yellow) !important;
+  }
+}

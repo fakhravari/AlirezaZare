@@ -1,31 +1,30 @@
 window.HNProducts = Array.from({ length: 30 }, (_, i) => {
   const brands = [
-    "ویکتورینوکس",
-    "پتک فیلیپ",
-    "پلیس",
-    "پولو",
-    "پولو اکسچنج",
-    "بورلی هیلز",
+    "بوش",
+    "دیوالت",
+    "ماکیتا",
+    "رونیکس",
+    "توتال",
+    "کنزاکس",
   ];
-  const types = ["مردانه", "زنانه", "اسپرت", "کلاسیک"];
-  const movements = ["کوارتز", "اتوماتیک", "مکانیکی", "سولار"];
-  const straps = ["استیل", "چرم طبیعی", "سیلیکونی", "بند مش"];
+  const types = ["ابزار برقی", "اندازه‌گیری", "تعمیرات", "روشنایی"];
+  const movements = ["برقی", "شارژی", "دیجیتال", "دستی"];
+  const straps = ["کارگاهی", "خانگی", "صنعتی", "تعمیرگاهی"];
   const images = [
-    "ClockTemplate/images/products/watch-blue.webp",
-    "ClockTemplate/images/products/watch-cream.webp",
-    "ClockTemplate/images/products/watch-silver.webp",
-    "ClockTemplate/images/products/watch-story.webp",
-    "ClockTemplate/images/products/watch-hero.webp",
+    "ClockTemplate/images/products/tool-hammer-drill.png",
+    "ClockTemplate/images/products/tool-multimeter-kit.png",
+    "ClockTemplate/images/products/tool-soldering-station.png",
+    "ClockTemplate/images/products/tool-led-worklight.png",
   ];
   const names = [
-    "نوا کرونو",
-    "آرمان کلاسیک",
-    "مهتاب مینیمال",
-    "هاله رزگلد",
-    "میراث اتوماتیک",
-    "آبان استیل",
+    "دریل چکشی شارژی",
+    "کیت مولتی‌متر دیجیتال",
+    "ایستگاه هویه حرفه‌ای",
+    "چراغ کار LED",
+    "مجموعه ابزار برق‌کار",
+    "تستر و فازمتر دیجیتال",
   ];
-  const englishNames = ['Nova Chrono', 'Arman Classic', 'Mahtab Minimal', 'Haleh Rose Gold', 'Miras Automatic', 'Aban Steel'];
+  const englishNames = ['Hammer Drill', 'Digital Multimeter', 'Soldering Station', 'LED Work Light', 'Electrician Tool Set', 'Digital Tester'];
   return {
     id: i + 1,
     englishName: `${englishNames[i % englishNames.length]} ${i > 5 ? i + 1 : ""}`.trim(),

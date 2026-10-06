@@ -9,7 +9,7 @@ public sealed class ProductController : PageController
     public async Task<IActionResult> Index()
     {
         PageModel model = new(
-            new SeoModel("جستجوی پیشرفته ساعت | هادی نوروزی", "جستجو و فیلتر پیشرفته ساعت‌های کمپانی هادی نوروزی"),
+            new SeoModel("جستجوی پیشرفته برق و ابزار | هادی نوروزی", "جستجو و فیلتر ابزار برقی، قطعات الکترونیکی و تجهیزات فنی هادی نوروزی"),
             ViewName: "List");
         return await PageAsync(model);
     }
@@ -19,7 +19,7 @@ public sealed class ProductController : PageController
     {
         PageModel<ProductDetailsModel> model = new(
             new ProductDetailsModel(id),
-            new SeoModel("جزئیات ساعت | فروشگاه هادی نوروزی", "مشخصات و قیمت ساعت‌های اورجینال از برندهای معتبر"));
+            new SeoModel("جزئیات محصول | فروشگاه برق و ابزار هادی نوروزی", "مشخصات، قیمت و شرایط خرید ابزار و تجهیزات برق از برندهای معتبر"));
         return await PageAsync(model);
     }
 }

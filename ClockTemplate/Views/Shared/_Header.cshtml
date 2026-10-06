@@ -1,4 +1,19 @@
 ﻿<nav class="navbar navbar-expand-lg navbar-dark fixed-top" id="mainNav">
+    <div class="home-header-top" aria-label="جست‌وجو و پشتیبانی فروشگاه">
+        <div class="home-header-support">
+            <span class="home-header-support-icon"><i class="bi bi-telephone"></i></span>
+            <span><small>خط تلفن</small><strong>۰۲۱ ۶۶۷۳ ۲۸۳۶</strong></span>
+        </div>
+        <form class="home-header-search" action="Search" method="get" role="search">
+            <button type="submit" aria-label="جست‌وجو"><i class="bi bi-search"></i></button>
+            <input name="q" type="search" placeholder="محصول خود را جستجو کنید..." aria-label="جستجوی محصول"/>
+            <span>همه دسته‌ها <i class="bi bi-chevron-down"></i></span>
+        </form>
+        <div class="home-header-welcome">
+            <span class="home-header-welcome-icon"><i class="bi bi-person"></i></span>
+            <span><small>خوش آمدید</small><strong>ورود به حساب</strong></span>
+        </div>
+    </div>
     <div class="container">
         <a class="navbar-brand brand" href="Home/Index">
             <span>هـ</span> هادی نوروزی
@@ -29,7 +44,7 @@
                         width: min(1120px, calc(100vw - 48px)) !important;
                         min-height: 390px !important;
                         display: none;
-                        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+                        grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
                         ">
                         <li>
                             <a class="dropdown-item" href="Home/Index#brands">
