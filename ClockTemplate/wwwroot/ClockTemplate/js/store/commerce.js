@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const p=catalog.find(p=>p.id===Number(new URLSearchParams(location.search).get('id')));
     if(!p)productView.innerHTML=empty('محصول پیدا نشد');
     else{
-      document.title=`${p.name} | هادی نوروزی`;
+      document.title=`${p.name} | علی‌رضا زارع`;
       productView.innerHTML=`<div class="flow-grid"><img class="flow-photo" src="${p.image}" alt="${p.name}"><section class="flow-card"><span>${p.brand} · HN-${String(p.id).padStart(3,'0')}</span><h2>${p.name}</h2><p>طراحی ${p.type} با موتور ${p.movement} و بند ${p.strap}.</p><dl><dt>سبک</dt><dd>${p.type}</dd><dt>موتور</dt><dd>${p.movement}</dd><dt>جنس بند</dt><dd>${p.strap}</dd></dl><h2>${money(p.price*1000000)}</h2><p>اطلاعات و قیمت این کاتالوگ نمایشی است؛ برای تأیید موجودی با فروشگاه تماس بگیرید.</p><button class="flow-button" id="addProduct">افزودن به سبد خرید</button> <a href="Cart">مشاهده سبد</a><br><button class="flow-button" id="saveProduct" aria-pressed="${favorites().includes(p.id)}">${favorites().includes(p.id)?'حذف از علاقه‌مندی‌ها':'ذخیره در علاقه‌مندی‌ها'}</button><p id="productStatus" role="status"></p></section></div>`;
       document.querySelector('#addProduct').onclick=event=>{ui.cart.add({...p,price:p.price*1000000},1,event.currentTarget);document.querySelector('#productStatus').textContent='محصول به سبد خرید اضافه شد.';};
       document.querySelector('#saveProduct').onclick=e=>{let ids=favorites();ids=ids.includes(p.id)?ids.filter(i=>i!==p.id):[...ids,p.id];ui.storage.set('hn-favorites',JSON.stringify(ids));e.target.setAttribute('aria-pressed',ids.includes(p.id));e.target.textContent=ids.includes(p.id)?'حذف از علاقه‌مندی‌ها':'ذخیره در علاقه‌مندی‌ها';};

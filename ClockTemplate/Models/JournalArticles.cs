@@ -132,7 +132,7 @@ public static class JournalArticles
     private sealed record ExtraArticle(string Slug, string Category, string Title, string Summary, string Image);
 
     private static MagazineDetailsModel Create(string slug, string category, string title, string summary, string image, IReadOnlyList<MagazineSectionModel> sections) =>
-        new(slug, category, "مجله تخصصی ساعت", title, summary, "تحریریه هادی نوروزی", "", "مطالعه کوتاه", "ClockTemplate/images/heroes/hero-magazine.webp", ResolveContentImage(image), summary, sections, "برای تصمیم دقیق‌تر، مشخصات و دستورالعمل همان مدل ساعت را بررسی کنید و پرسش‌های خود را با متخصص معتبر در میان بگذارید.");
+        new(slug, category, "مجله تخصصی ساعت", title, summary, "تحریریه علی‌رضا زارع", "", "مطالعه کوتاه", "ClockTemplate/images/heroes/hero-magazine.webp", ResolveContentImage(image), summary, sections, "برای تصمیم دقیق‌تر، مشخصات و دستورالعمل همان مدل ساعت را بررسی کنید و پرسش‌های خود را با متخصص معتبر در میان بگذارید.");
 
     private static string ResolveContentImage(string image) =>
         image.StartsWith("slider-", StringComparison.OrdinalIgnoreCase)

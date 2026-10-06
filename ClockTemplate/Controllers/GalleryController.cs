@@ -10,8 +10,8 @@ public sealed class GalleryController : PageController
     public async Task<IActionResult> Index()
     {
         PageModel model = new(new SeoModel(
-            "گالری ساعت | هادی نوروزی",
-            "روایت‌های تصویری از ساعت‌ها، جزئیات طراحی و انتخاب‌های فروشگاه هادی نوروزی."));
+            "گالری ساعت | علی‌رضا زارع",
+            "روایت‌های تصویری از ساعت‌ها، جزئیات طراحی و انتخاب‌های فروشگاه علی‌رضا زارع."));
         return await PageAsync(model);
     }
 }

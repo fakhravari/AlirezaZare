@@ -9,7 +9,7 @@ public sealed class MagazineController : PageController
     [HttpGet("")]
     public async Task<IActionResult> Index()
     {
-        PageModel model = new(new SeoModel("مجله تخصصی ساعت | کمپانی هادی نوروزی", "مجله تخصصی ساعت؛ راهنمای خرید، نگهداری و تشخیص اصالت."));
+        PageModel model = new(new SeoModel("مجله تخصصی ساعت | کمپانی علی‌رضا زارع", "مجله تخصصی ساعت؛ راهنمای خرید، نگهداری و تشخیص اصالت."));
         return await PageAsync(model);
     }
 
@@ -18,7 +18,7 @@ public sealed class MagazineController : PageController
     {
         if (JournalArticles.Find(slug) is { } relatedArticle)
         {
-            return await PageAsync(new PageModel<MagazineDetailsModel>(relatedArticle, new SeoModel(relatedArticle.Title + " | مجله هادی نوروزی", relatedArticle.Summary)));
+            return await PageAsync(new PageModel<MagazineDetailsModel>(relatedArticle, new SeoModel(relatedArticle.Title + " | مجله علی‌رضا زارع", relatedArticle.Summary)));
         }
 
         if (!string.Equals(slug, "choosing-watch-for-wrist", StringComparison.OrdinalIgnoreCase))
@@ -32,7 +32,7 @@ public sealed class MagazineController : PageController
             "راهنمای جامع خرید",
             "چطور ساعت مناسب استایل و اندازه مچ خود انتخاب کنیم؟",
             "یک راهنمای مرحله‌به‌مرحله برای انتخاب قطر قاب، جنس بند، رنگ صفحه و نوع موتور؛ بدون سردرگمی میان اصطلاحات فنی.",
-            "تحریریه هادی نوروزی",
+            "تحریریه علی‌رضا زارع",
             "۱۸ مرداد ۱۴۰۵",
             "۸ دقیقه مطالعه",
             "ClockTemplate/images/heroes/hero-magazine.webp",
@@ -47,7 +47,7 @@ public sealed class MagazineController : PageController
             ],
             "ساعت مناسب باید روی مچ شما متعادل باشد، با سبک زندگی‌تان هماهنگ بماند و از فروشنده‌ای معتبر تهیه شود.");
 
-        PageModel<MagazineDetailsModel> model = new(article, new SeoModel(article.Title + " | مجله هادی نوروزی", article.Summary));
+        PageModel<MagazineDetailsModel> model = new(article, new SeoModel(article.Title + " | مجله علی‌رضا زارع", article.Summary));
 
         return await PageAsync(model);
     }

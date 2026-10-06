@@ -10,6 +10,17 @@ $(function () {
   ).matches;
   const faNumber = (number) => window.HNUI.formatNumber(number);
   const escapeHtml = (value) => window.HNUI.escapeHtml(value);
+  const storedListCount = (key) => {
+    const list = window.HNUI.storage.json(key, []);
+    return Array.isArray(list) ? new Set(list.map(String)).size : 0;
+  };
+  const renderNavCounters = () => {
+    $("#favoritesCount").text(faNumber(storedListCount("hn-favorites")));
+    $("#compareCount").text(faNumber(storedListCount("hn-compare")));
+  };
+  renderNavCounters();
+  document.addEventListener("hn:lists-change", renderNavCounters);
+  window.addEventListener("storage", renderNavCounters);
 
   const heroSwiperElement = document.querySelector("#heroSwiper");
   if (heroSwiperElement && window.Swiper) {

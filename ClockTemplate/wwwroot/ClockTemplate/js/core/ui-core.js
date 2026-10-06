@@ -18,6 +18,9 @@
     set(key, value) {
       try {
         window.localStorage.setItem(key, value);
+        if (key === "hn-favorites" || key === "hn-compare") {
+          document.dispatchEvent(new Event("hn:lists-change"));
+        }
         return true;
       } catch {
         return false;
