@@ -7,12 +7,7 @@
         <form class="home-header-search" action="Search" method="get" role="search">
             <button type="submit" aria-label="جست‌وجو"><i class="bi bi-search"></i></button>
             <input name="q" type="search" placeholder="محصول خود را جستجو کنید..." aria-label="جستجوی محصول"/>
-            <span>همه دسته‌ها <i class="bi bi-chevron-down"></i></span>
         </form>
-        <div class="home-header-welcome">
-            <span class="home-header-welcome-icon"><i class="bi bi-person"></i></span>
-            <span><small>خوش آمدید</small><strong>ورود به حساب</strong></span>
-        </div>
     </div>
     <div class="container">
         <a class="navbar-brand brand" href="Home/Index">
@@ -27,9 +22,9 @@
         </button>
         <div class="collapse navbar-collapse">
             <ul class="navbar-nav mx-auto gap-lg-2">
-                <li class="nav-item"><a class="nav-link" href="Home/Index#productCategories"><i class="bi bi-cpu ms-1" aria-hidden="true"></i> دسته‌بندی قطعات</a></li>
+                <li class="nav-item"><a class="nav-link" href="Home/Index#productCategories"><i class="bi bi-cpu nav-menu-icon" aria-hidden="true"></i><span>دسته‌بندی قطعات</span></a></li>
                 <li class="nav-item">
-                    <a class="nav-link" href="Search">فروشگاه</a>
+                    <a class="nav-link" href="Search"><i class="bi bi-shop nav-menu-icon" aria-hidden="true"></i><span>فروشگاه</span></a>
                 </li>
                 <li class="nav-item dropdown brand-dropdown">
                     <a class="nav-link dropdown-toggle"
@@ -37,7 +32,7 @@
                        role="button"
                        data-bs-toggle="dropdown"
                        aria-expanded="false">
-                        <i class="bi bi-award ms-1"></i> برند
+                        <i class="bi bi-award nav-menu-icon" aria-hidden="true"></i><span>برند</span>
                     </a>
                     <ul class="dropdown-menu brand-menu"
                         style="
@@ -255,16 +250,16 @@
                     </ul>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="Magazine">مجله ساعت</a>
+                    <a class="nav-link" href="Magazine"><i class="bi bi-journal-text nav-menu-icon" aria-hidden="true"></i><span>مجله فنی</span></a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="Gallery">گالری</a>
+                    <a class="nav-link" href="Gallery"><i class="bi bi-images nav-menu-icon" aria-hidden="true"></i><span>گالری</span></a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="About">درباره ما</a>
+                    <a class="nav-link" href="About"><i class="bi bi-info-circle nav-menu-icon" aria-hidden="true"></i><span>درباره ما</span></a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="Contact">تماس با ما</a>
+                    <a class="nav-link" href="Contact"><i class="bi bi-telephone nav-menu-icon" aria-hidden="true"></i><span>تماس با ما</span></a>
                 </li>
             </ul>
         </div>
@@ -319,7 +314,14 @@
                     </nav>
                 </div>
             </div>
-            <div class="cart-wrap" id="cartWrap">
+            <div class="nav-actions" aria-label="خرید، مقایسه و علاقه‌مندی‌ها">
+                <a class="nav-shortcut" href="Profile/Favorites" aria-label="علاقه‌مندی‌ها" title="علاقه‌مندی‌ها">
+                    <i class="bi bi-heart" aria-hidden="true"></i>
+                </a>
+                <a class="nav-shortcut" href="Search" aria-label="مقایسه محصولات" title="مقایسه محصولات">
+                    <i class="bi bi-arrow-left-right" aria-hidden="true"></i>
+                </a>
+                <div class="cart-wrap" id="cartWrap">
                 <button class="cart-btn cart-icon-theme"
                         id="cartToggle"
                         type="button"
@@ -371,6 +373,7 @@
                             </i>
                         </a>
                     </div>
+                </div>
                 </div>
             </div>
         </div>

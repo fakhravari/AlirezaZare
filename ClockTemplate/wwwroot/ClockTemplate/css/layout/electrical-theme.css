@@ -95,7 +95,7 @@ body {
   }
 
   .home-page #mainNav .collapse {
-    margin-right: 220px;
+    margin-right: 0;
   }
 
   .home-page #mainNav .nav-link {
@@ -126,9 +126,9 @@ body {
     display: grid;
     width: min(1420px, calc(100% - 56px));
     height: 85px;
-    padding: 13px 220px 13px 10px;
-    grid-template-columns: 190px minmax(360px, 1fr) 170px;
-    gap: 22px;
+    padding: 13px 220px 13px 190px;
+    grid-template-columns: minmax(260px, 480px) 180px;
+    gap: 20px;
     align-items: center;
     color: #202a33;
     transform: translateX(50%);
@@ -139,6 +139,11 @@ body {
     display: flex;
     align-items: center;
     gap: 10px;
+  }
+
+  .home-header-support {
+    grid-column: 2;
+    grid-row: 1;
   }
 
   .home-header-support > span:last-child,
@@ -175,8 +180,14 @@ body {
 
   .home-header-search {
     display: grid;
+    width: 100%;
+    max-width: 480px;
+    grid-column: 1;
+    grid-row: 1;
+    justify-self: end;
     height: 50px;
-    grid-template-columns: 48px minmax(0, 1fr) 150px;
+    grid-template-columns: 48px minmax(0, 1fr);
+    direction: ltr;
     border: 1px solid #dfe4e7;
     background: #f8f9fa;
   }
@@ -195,23 +206,16 @@ body {
     outline: 0;
     background: transparent;
     color: #202a33;
+    direction: rtl;
     font: inherit;
     font-size: 12px;
+    text-align: right;
   }
 
   .home-header-search input::placeholder {
     color: #a1a9ae;
   }
 
-  .home-header-search > span {
-    display: flex;
-    padding: 0 16px;
-    align-items: center;
-    justify-content: space-between;
-    border-right: 1px solid #dfe4e7;
-    color: #4e5960;
-    font-size: 11px;
-  }
 }
 
 @media (max-width: 991px) {
@@ -230,7 +234,7 @@ body {
   display: grid;
   height: clamp(360px, 32vw, 500px);
   grid-template-columns: 280px minmax(0, 1fr);
-  gap: 0;
+  gap: 12px;
   align-items: stretch;
   direction: rtl;
 }
@@ -243,8 +247,7 @@ body {
   padding: 10px;
   flex-direction: column;
   border: 1px solid #e5e7e9;
-  border-left: 0;
-  border-radius: 0 8px 8px 0;
+  border-radius: 8px;
   background: #fff;
   box-shadow: 10px 14px 35px rgba(28, 44, 52, .08);
 }
@@ -426,7 +429,7 @@ body {
   min-width: 0;
   height: 100%;
   overflow: hidden;
-  border-radius: 8px 0 0 8px;
+  border-radius: 8px;
   background: #e8edf0;
   box-shadow: 0 16px 42px rgba(21, 43, 58, .12);
   direction: ltr;
