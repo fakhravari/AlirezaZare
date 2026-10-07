@@ -91,6 +91,18 @@ body :not(i):not(.bi) {
   font-synthesis: none;
 }
 
+body:not(i):not(.bi) h1,
+body:not(i):not(.bi) h2,
+body:not(i):not(.bi) h3,
+body:not(i):not(.bi) h4,
+body:not(i):not(.bi) h5,
+body:not(i):not(.bi) h6,
+body:not(i):not(.bi) .section-title,
+body:not(i):not(.bi) .flow-heading,
+body:not(i):not(.bi) .orders-heading {
+  font-family: var(--font-heading) !important;
+}
+
 body::selection {
   background: var(--industrial-yellow);
   color: var(--industrial-navy);
@@ -715,6 +727,23 @@ input[type="radio"] {
 .price-old,
 .product-meta {
   color: var(--industrial-muted) !important;
+}
+
+/* Compact showcase imagery so more products fit comfortably in each row. */
+.category-showcase .showcase-card .product-image {
+  height: 230px !important;
+}
+
+@media (max-width: 1199px) {
+  .category-showcase .showcase-card .product-image {
+    height: 215px !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .category-showcase .showcase-card .product-image {
+    height: 200px !important;
+  }
 }
 
 .favorite {

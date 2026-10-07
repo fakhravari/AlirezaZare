@@ -35,8 +35,8 @@ public sealed class MagazineController : PageController
             "تحریریه علی‌رضا زارع",
             "۱۸ مرداد ۱۴۰۵",
             "۸ دقیقه مطالعه",
-            "ClockTemplate/images/heroes/hero-magazine.webp",
-            "ClockTemplate/images/products/watch-blue.webp",
+            "ClockTemplate/images/heroes/hero-electrical-editorial.png",
+            "ClockTemplate/images/products/tool-hammer-drill.png",
             "انتخاب ساعت فقط به پسندیدن ظاهر آن محدود نمی‌شود. تناسب ابعاد ساعت با مچ، هماهنگی رنگ و جنس بند با سبک پوشش و انتخاب موتور مناسب، تفاوت میان یک خرید معمولی و انتخابی ماندگار را رقم می‌زند.",
             [
                 new("مچ", "ابتدا اندازه مچ خود را بدانید", "با یک متر پارچه‌ای، محیط مچ را دقیقاً در محلی که ساعت قرار می‌گیرد اندازه بگیرید. متر نباید بیش از حد سفت یا آزاد باشد."),

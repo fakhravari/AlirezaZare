@@ -210,7 +210,7 @@ $(function () {
     $fourthItem.find(".showcase-card").attr("data-offer-index", "4");
     $fourthItem.find(".product-image").removeClass("cream").addClass("light");
     $fourthItem.find("img").attr({
-      src: "ClockTemplate/images/products/watch-silver.webp",
+      src: "ClockTemplate/images/products/tool-soldering-station.png",
       alt: "Damavand Sport watch",
     });
     $fourthItem.find(".showcase-card-body small").text("SPORT 05");
@@ -220,7 +220,7 @@ $(function () {
       "data-id": "damavand-offer",
       "data-name": "Damavand Sport",
       "data-price": "23600000",
-      "data-image": "ClockTemplate/images/products/watch-silver.webp",
+      "data-image": "ClockTemplate/images/products/tool-soldering-station.png",
     });
     $amazingItems.add($fourthItem).each(function () {
       $(this).removeClass("col-md-4").addClass("col-12 col-md-6 col-xl-3");
@@ -617,6 +617,7 @@ $(function () {
       0: { items: 1 },
       768: { items: 2 },
       1100: { items: 4 },
+      1280: { items: 5 },
     },
   };
 
@@ -1046,7 +1047,7 @@ $(function () {
       image: String(
         $cartButton.data("image") ||
           $root.find("img").first().attr("src") ||
-          "ClockTemplate/images/products/watch-blue.webp",
+          "ClockTemplate/images/products/tool-hammer-drill.png",
       ),
       code: $root.find("small").first().text() || "ORIGINAL COLLECTION",
     };

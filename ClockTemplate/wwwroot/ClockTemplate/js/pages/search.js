@@ -248,7 +248,7 @@ function updateCartCount() {
       ? cart
           .map(
             (item) =>
-              `<article class="search-cart-item"><img src="${item.image || "ClockTemplate/images/products/watch-blue.webp"}" alt=""><span><strong>${item.name || "محصول"}</strong><small>${fa(item.price)} تومان</small></span><b>${fa(item.quantity)} عدد</b></article>`,
+              `<article class="search-cart-item"><img src="${item.image || "ClockTemplate/images/products/tool-hammer-drill.png"}" alt=""><span><strong>${item.name || "محصول"}</strong><small>${fa(item.price)} تومان</small></span><b>${fa(item.quantity)} عدد</b></article>`,
           )
           .join("")
       : '<div class="search-cart-empty"><i class="bi bi-bag"></i><strong>سبد خرید شما خالی است</strong></div>';

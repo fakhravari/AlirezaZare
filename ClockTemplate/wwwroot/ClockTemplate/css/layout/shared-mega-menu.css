@@ -391,7 +391,7 @@
   }
 }
 
-/* Shared stronger palette for category and brand menus. */
+/* Shared cool neutral palette for category and brand menus. */
 @media (min-width: 992px) {
   #mainNav .mega-dropdown > .mega-menu,
   #mainNav .brand-dropdown > .brand-menu {
@@ -444,23 +444,47 @@
     background: linear-gradient(110deg, #faf7f1, #f2ece2) !important;
   }
 
-  /* Brands use the same warm gold surface family as categories. */
+  /* Keep the brand menu in the site's navy, white, and saffron palette. */
   #mainNav .brand-dropdown > .brand-menu {
-    border-color: #d7c2a0 !important;
-    background: linear-gradient(145deg, #fffdf8, #f3eadc) !important;
-    box-shadow: 0 24px 58px rgba(76, 51, 21, .18), inset 0 0 0 1px rgba(255, 255, 255, .9) !important;
+    border-color: #cbd7e2 !important;
+    border-top-color: #f6c515 !important;
+    background: #f7f9fb !important;
+    box-shadow: 0 24px 58px rgba(16, 42, 67, .18), inset 0 0 0 1px rgba(255, 255, 255, .96) !important;
   }
 
   #mainNav .brand-menu .dropdown-item {
-    border-color: #e2d3bd !important;
-    background: #fffdfa !important;
+    border-color: #dce4eb !important;
+    background: #fff !important;
+    color: #243b53 !important;
   }
 
   #mainNav .brand-menu .dropdown-item:hover,
   #mainNav .brand-menu .dropdown-item:focus-visible {
-    border-color: #bd975f !important;
-    background: #fbf1df !important;
-    box-shadow: 0 8px 18px rgba(117, 79, 28, .11), inset -3px 0 #c99b4f !important;
+    border-color: #e5b900 !important;
+    background: #fff9df !important;
+    color: #102a43 !important;
+    box-shadow: 0 8px 18px rgba(16, 42, 67, .10), inset -3px 0 #f6c515 !important;
+  }
+
+  #mainNav .brand-menu .brand-menu-icon {
+    background: #fff4c2 !important;
+    color: #8a6800 !important;
+  }
+
+  #mainNav .brand-menu .dropdown-item:hover .brand-menu-icon,
+  #mainNav .brand-menu .dropdown-item:focus-visible .brand-menu-icon {
+    background: #f6c515 !important;
+    color: #102a43 !important;
+    box-shadow: 0 3px 9px rgba(185, 143, 0, .2) !important;
+  }
+
+  #mainNav .brand-menu .dropdown-item > i {
+    color: #8091a1 !important;
+  }
+
+  #mainNav .brand-menu .dropdown-item:hover > i,
+  #mainNav .brand-menu .dropdown-item:focus-visible > i {
+    color: #9a7400 !important;
   }
 
   #mainNav .mega-dropdown > .mega-menu {

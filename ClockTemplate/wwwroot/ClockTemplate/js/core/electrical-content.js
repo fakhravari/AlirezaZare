@@ -1,15 +1,4 @@
 (() => {
-  const imageMap = new Map([
-    ["watch-blue.webp", "tool-hammer-drill.png"],
-    ["watch-cream.webp", "tool-multimeter-kit.png"],
-    ["watch-silver.webp", "tool-soldering-station.png"],
-    ["watch-story.webp", "tool-led-worklight.png"],
-    ["watch-hero.webp", "tool-hammer-drill.png"],
-    ["slider-navy-steel.webp", "tool-hammer-drill.png"],
-    ["slider-navy-chrono.webp", "tool-multimeter-kit.png"],
-    ["slider-cream-classic.webp", "tool-led-worklight.png"]
-  ]);
-
   const phraseMap = new Map([
     ["مجله ساعت", "مجله فنی"],
     ["مجله تخصصی ساعت", "مجله تخصصی برق و ابزار"],
@@ -79,21 +68,9 @@
 
   const replaceImages = root => {
     root.querySelectorAll?.("img").forEach(image => {
-      for (const [oldName, newName] of imageMap) {
-        if (image.src.includes(oldName)) {
-          image.src = `ClockTemplate/images/products/${newName}`;
-          image.alt = "ابزار و تجهیزات تخصصی برق";
-          break;
-        }
-      }
       if (servicePaths.has(location.pathname) && image.closest(".page-hero")) image.src = "ClockTemplate/images/heroes/hero-electrical-service.png";
       if (editorialPaths.has(location.pathname) && image.closest(".page-hero")) image.src = "ClockTemplate/images/heroes/hero-electrical-editorial.png";
-      if (image.closest(".page-hero")) image.alt = "تجهیزات برق، ابزار حرفه‌ای و خدمات فنی";
-    });
-    root.querySelectorAll?.("[data-image]").forEach(element => {
-      for (const [oldName, newName] of imageMap) {
-        if ((element.dataset.image || "").includes(oldName)) element.dataset.image = `ClockTemplate/images/products/${newName}`;
-      }
+      if (image.closest(".page-hero")) image.alt = "Electrical tools and professional service";
     });
   };
 

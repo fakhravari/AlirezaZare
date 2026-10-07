@@ -1,7 +1,7 @@
 /* Shared design system. The MVC home view is the visual reference. */
 :root {
   color-scheme: light;
-  --font-body: "Estedad", "Vazirmatn", Tahoma, sans-serif;
+  --font-body: "Vazirmatn", "Estedad", Tahoma, sans-serif;
   --font-heading: "Estedad", "Vazirmatn", Tahoma, sans-serif;
   --font-latin: Arial, sans-serif;
   --font-size-root: 16px;

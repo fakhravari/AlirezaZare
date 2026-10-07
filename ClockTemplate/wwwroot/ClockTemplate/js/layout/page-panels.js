@@ -84,7 +84,7 @@ document.addEventListener("DOMContentLoaded", () => {
     box.innerHTML = cart.length
       ? cart
           .map((i) => {
-            const image = String(i.image || "ClockTemplate/images/products/watch-blue.webp")
+            const image = String(i.image || "ClockTemplate/images/products/tool-hammer-drill.png")
               .replace(/[^\w.\/-]/g, "")
               .replace(
                 /^((?:ClockTemplate\/)?images\/watch-(?:blue|cream|silver|story|hero))\.(?:jpe?g|png)$/i,

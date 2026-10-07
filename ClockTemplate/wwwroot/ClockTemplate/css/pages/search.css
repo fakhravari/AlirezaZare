@@ -310,7 +310,7 @@ select {
     isolation: isolate;
     overflow: hidden;
     background-color: var(--industrial-navy);
-    background-image: linear-gradient(90deg, rgba(6, 24, 63, 0.88) 0%, rgba(8, 28, 65, 0.66) 34%, rgba(6, 24, 63, 0.38) 62%, rgba(4, 16, 40, 0.78) 100%), url("../../images/sliders/slider-navy-chrono.webp");
+    background-image: linear-gradient(90deg, rgba(6, 24, 63, 0.88) 0%, rgba(8, 28, 65, 0.66) 34%, rgba(6, 24, 63, 0.38) 62%, rgba(4, 16, 40, 0.78) 100%), url("../../images/sliders/tool-multimeter-kit.png");
     background-position: center, center;
     background-size: cover;
     color: #fff;

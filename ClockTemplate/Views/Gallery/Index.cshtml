@@ -1,4 +1,4 @@
-﻿@model PageModel
+@model PageModel
 @{
     var galleryCategories = new[] {
         new { Key = "store", Title = "تصاویر فروشگاه", Icon = "bi-shop-window" },
@@ -11,35 +11,35 @@
         new { Key = "expert-video", Title = "ویدئوهای تخصصی", Icon = "bi-camera-video" }
     };
     var galleryPosts = new[] {
-        new { Title = "روایت تصویری شعبه لیان", Category = "تصاویر فروشگاه", Key = "store", Image = "products/watch-story.webp", Size = "gallery-portrait gallery-featured", Link = "Contact", Video = (string?)null },
-        new { Title = "فضای فروشگاه علی‌رضا زارع", Category = "تصاویر فروشگاه", Key = "store", Image = "heroes/hero-contact.webp", Size = "gallery-landscape", Link = "Contact", Video = (string?)null },
-        new { Title = "آبی عمیق؛ جزئیات یک صفحه سرمه‌ای", Category = "تصاویر محصولات", Key = "products", Image = "products/watch-blue.webp", Size = "gallery-square", Link = "Product?id=1", Video = (string?)null },
-        new { Title = "استیل سرمه‌ای در نور طبیعی", Category = "تصاویر محصولات", Key = "products", Image = "sliders/slider-navy-steel.webp", Size = "gallery-landscape gallery-wide", Link = "Search", Video = (string?)null },
-        new { Title = "امضای طراحی در برندهای منتخب", Category = "تصاویر برندها", Key = "brands", Image = "products/watch-silver.webp", Size = "gallery-square", Link = "Brands", Video = (string?)null },
-        new { Title = "کلاسیک‌های ماندگار برندهای جهانی", Category = "تصاویر برندها", Key = "brands", Image = "sliders/slider-cream-classic.webp", Size = "gallery-landscape", Link = "Brands", Video = (string?)null },
-        new { Title = "قاب‌هایی از گردهمایی دوستداران ساعت", Category = "تصاویر رویدادها", Key = "events", Image = "heroes/hero-about.webp", Size = "gallery-landscape gallery-wide", Link = "About", Video = (string?)null },
-        new { Title = "نمایش تازه‌ترین انتخاب‌های فروشگاه", Category = "تصاویر رویدادها", Key = "events", Image = "heroes/hero-magazine.webp", Size = "gallery-square", Link = "Magazine", Video = (string?)null },
-        new { Title = "معرفی کالکشن کلاسیک علی‌رضا زارع", Category = "ویدئوهای معرفی", Key = "intro-video", Image = "sliders/slider-cream-classic.webp", Size = "gallery-portrait gallery-featured", Link = "Search", Video = (string?)"1_compressed.mp4" },
-        new { Title = "یک دقیقه با مجموعه کرنوگراف", Category = "ویدئوهای معرفی", Key = "intro-video", Image = "sliders/slider-navy-chrono.webp", Size = "gallery-landscape", Link = "Search", Video = (string?)"2_compressed.mp4" },
-        new { Title = "بررسی نزدیک کیفیت قاب و صفحه", Category = "بررسی محصولات", Key = "reviews", Image = "products/watch-hero.webp", Size = "gallery-square", Link = "Magazine/Details/choosing-watch-for-wrist", Video = (string?)null },
-        new { Title = "مقایسه بند چرمی و استیل روی مچ", Category = "بررسی محصولات", Key = "reviews", Image = "products/watch-cream.webp", Size = "gallery-landscape gallery-wide", Link = "Magazine/Details/watch-strap-guide", Video = (string?)null },
-        new { Title = "آموزش انتخاب اندازه مناسب قاب", Category = "آموزش‌ها", Key = "tutorials", Image = "products/watch-blue.webp", Size = "gallery-square", Link = "Magazine/Details/watch-size-measure", Video = (string?)null },
-        new { Title = "راهنمای نگهداری روزمره ساعت", Category = "آموزش‌ها", Key = "tutorials", Image = "products/watch-story.webp", Size = "gallery-landscape", Link = "Magazine/Details/watch-care", Video = (string?)null },
-        new { Title = "موتور اتوماتیک چگونه کار می‌کند؟", Category = "ویدئوهای تخصصی", Key = "expert-video", Image = "sliders/slider-navy-chrono.webp", Size = "gallery-portrait gallery-featured", Link = "Magazine/Details/watch-movements", Video = (string?)"3_compressed.mp4" },
-        new { Title = "شناخت اجزای صفحه و نمایشگرها", Category = "ویدئوهای تخصصی", Key = "expert-video", Image = "products/watch-silver.webp", Size = "gallery-landscape", Link = "Magazine/Details/watch-dial-guide", Video = (string?)"2_compressed.mp4" },
-        new { Title = "جزئیات ویترین و نورپردازی شعبه", Category = "تصاویر فروشگاه", Key = "store", Image = "heroes/hero-contact.webp", Size = "gallery-square", Link = "Contact", Video = (string?)null },
-        new { Title = "نمای نزدیک از بافت بند و قاب", Category = "تصاویر محصولات", Key = "products", Image = "products/watch-story.webp", Size = "gallery-square", Link = "Product?id=2", Video = (string?)null },
-        new { Title = "هویت بصری برندهای منتخب", Category = "تصاویر برندها", Key = "brands", Image = "products/watch-blue.webp", Size = "gallery-landscape", Link = "Brands", Video = (string?)null },
-        new { Title = "شب ساعت‌دوستان در لیان", Category = "تصاویر رویدادها", Key = "events", Image = "heroes/hero-about.webp", Size = "gallery-square", Link = "About", Video = (string?)null },
-        new { Title = "مرور سریع کالکشن تابستان", Category = "ویدئوهای معرفی", Key = "intro-video", Image = "sliders/slider-cream-classic.webp", Size = "gallery-landscape", Link = "Search", Video = (string?)"1_compressed.mp4" },
-        new { Title = "مقایسه ظرافت قاب‌های کلاسیک", Category = "بررسی محصولات", Key = "reviews", Image = "products/watch-cream.webp", Size = "gallery-square", Link = "Magazine/Details/choosing-watch-for-wrist", Video = (string?)null },
-        new { Title = "چطور ساعت را با استایل روزانه هماهنگ کنیم؟", Category = "آموزش‌ها", Key = "tutorials", Image = "products/watch-silver.webp", Size = "gallery-landscape", Link = "Magazine/Details/watch-care", Video = (string?)null },
-        new { Title = "راهنمای تصویری تنظیم بند ساعت", Category = "ویدئوهای تخصصی", Key = "expert-video", Image = "sliders/slider-navy-chrono.webp", Size = "gallery-square", Link = "Magazine/Details/watch-size-measure", Video = (string?)"3_compressed.mp4" }
+        new { Title = "روایت تصویری شعبه لیان", Category = "تصاویر فروشگاه", Key = "store", Image = "products/tool-led-worklight.png", Size = "gallery-portrait gallery-featured", Link = "Contact", Video = (string?)null },
+        new { Title = "فضای فروشگاه علی‌رضا زارع", Category = "تصاویر فروشگاه", Key = "store", Image = "heroes/hero-electrical-service.png", Size = "gallery-landscape", Link = "Contact", Video = (string?)null },
+        new { Title = "آبی عمیق؛ جزئیات یک صفحه سرمه‌ای", Category = "تصاویر محصولات", Key = "products", Image = "products/tool-hammer-drill.png", Size = "gallery-square", Link = "Product?id=1", Video = (string?)null },
+        new { Title = "استیل سرمه‌ای در نور طبیعی", Category = "تصاویر محصولات", Key = "products", Image = "sliders/tool-hammer-drill.png", Size = "gallery-landscape gallery-wide", Link = "Search", Video = (string?)null },
+        new { Title = "امضای طراحی در برندهای منتخب", Category = "تصاویر برندها", Key = "brands", Image = "products/tool-soldering-station.png", Size = "gallery-square", Link = "Brands", Video = (string?)null },
+        new { Title = "کلاسیک‌های ماندگار برندهای جهانی", Category = "تصاویر برندها", Key = "brands", Image = "sliders/tool-led-worklight.png", Size = "gallery-landscape", Link = "Brands", Video = (string?)null },
+        new { Title = "قاب‌هایی از گردهمایی دوستداران ساعت", Category = "تصاویر رویدادها", Key = "events", Image = "heroes/hero-electrical-editorial.png", Size = "gallery-landscape gallery-wide", Link = "About", Video = (string?)null },
+        new { Title = "نمایش تازه‌ترین انتخاب‌های فروشگاه", Category = "تصاویر رویدادها", Key = "events", Image = "heroes/hero-electrical-editorial.png", Size = "gallery-square", Link = "Magazine", Video = (string?)null },
+        new { Title = "معرفی کالکشن کلاسیک علی‌رضا زارع", Category = "ویدئوهای معرفی", Key = "intro-video", Image = "sliders/tool-led-worklight.png", Size = "gallery-portrait gallery-featured", Link = "Search", Video = (string?)"1_compressed.mp4" },
+        new { Title = "یک دقیقه با مجموعه کرنوگراف", Category = "ویدئوهای معرفی", Key = "intro-video", Image = "sliders/tool-multimeter-kit.png", Size = "gallery-landscape", Link = "Search", Video = (string?)"2_compressed.mp4" },
+        new { Title = "بررسی نزدیک کیفیت قاب و صفحه", Category = "بررسی محصولات", Key = "reviews", Image = "products/tool-hammer-drill.png", Size = "gallery-square", Link = "Magazine/Details/choosing-watch-for-wrist", Video = (string?)null },
+        new { Title = "مقایسه بند چرمی و استیل روی مچ", Category = "بررسی محصولات", Key = "reviews", Image = "products/tool-multimeter-kit.png", Size = "gallery-landscape gallery-wide", Link = "Magazine/Details/watch-strap-guide", Video = (string?)null },
+        new { Title = "آموزش انتخاب اندازه مناسب قاب", Category = "آموزش‌ها", Key = "tutorials", Image = "products/tool-hammer-drill.png", Size = "gallery-square", Link = "Magazine/Details/watch-size-measure", Video = (string?)null },
+        new { Title = "راهنمای نگهداری روزمره ساعت", Category = "آموزش‌ها", Key = "tutorials", Image = "products/tool-led-worklight.png", Size = "gallery-landscape", Link = "Magazine/Details/watch-care", Video = (string?)null },
+        new { Title = "موتور اتوماتیک چگونه کار می‌کند؟", Category = "ویدئوهای تخصصی", Key = "expert-video", Image = "sliders/tool-multimeter-kit.png", Size = "gallery-portrait gallery-featured", Link = "Magazine/Details/watch-movements", Video = (string?)"3_compressed.mp4" },
+        new { Title = "شناخت اجزای صفحه و نمایشگرها", Category = "ویدئوهای تخصصی", Key = "expert-video", Image = "products/tool-soldering-station.png", Size = "gallery-landscape", Link = "Magazine/Details/watch-dial-guide", Video = (string?)"2_compressed.mp4" },
+        new { Title = "جزئیات ویترین و نورپردازی شعبه", Category = "تصاویر فروشگاه", Key = "store", Image = "heroes/hero-electrical-service.png", Size = "gallery-square", Link = "Contact", Video = (string?)null },
+        new { Title = "نمای نزدیک از بافت بند و قاب", Category = "تصاویر محصولات", Key = "products", Image = "products/tool-led-worklight.png", Size = "gallery-square", Link = "Product?id=2", Video = (string?)null },
+        new { Title = "هویت بصری برندهای منتخب", Category = "تصاویر برندها", Key = "brands", Image = "products/tool-hammer-drill.png", Size = "gallery-landscape", Link = "Brands", Video = (string?)null },
+        new { Title = "شب ساعت‌دوستان در لیان", Category = "تصاویر رویدادها", Key = "events", Image = "heroes/hero-electrical-editorial.png", Size = "gallery-square", Link = "About", Video = (string?)null },
+        new { Title = "مرور سریع کالکشن تابستان", Category = "ویدئوهای معرفی", Key = "intro-video", Image = "sliders/tool-led-worklight.png", Size = "gallery-landscape", Link = "Search", Video = (string?)"1_compressed.mp4" },
+        new { Title = "مقایسه ظرافت قاب‌های کلاسیک", Category = "بررسی محصولات", Key = "reviews", Image = "products/tool-multimeter-kit.png", Size = "gallery-square", Link = "Magazine/Details/choosing-watch-for-wrist", Video = (string?)null },
+        new { Title = "چطور ساعت را با استایل روزانه هماهنگ کنیم؟", Category = "آموزش‌ها", Key = "tutorials", Image = "products/tool-soldering-station.png", Size = "gallery-landscape", Link = "Magazine/Details/watch-care", Video = (string?)null },
+        new { Title = "راهنمای تصویری تنظیم بند ساعت", Category = "ویدئوهای تخصصی", Key = "expert-video", Image = "sliders/tool-multimeter-kit.png", Size = "gallery-square", Link = "Magazine/Details/watch-size-measure", Video = (string?)"3_compressed.mp4" }
     };
 }
 
 <header class="page-hero editorial-hero">
-    <img class="hero-image" src="~/ClockTemplate/images/sliders/slider-navy-steel.webp" alt="گالری ساعت علی‌رضا زارع" />
+    <img class="hero-image" src="~/ClockTemplate/images/sliders/tool-hammer-drill.png" alt="گالری ساعت علی‌رضا زارع" />
     <div class="container">
         <nav class="article-breadcrumb" aria-label="مسیر صفحه">
             <a class="breadcrumb-home" asp-controller="Home" asp-action="Index">
