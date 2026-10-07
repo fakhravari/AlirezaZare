@@ -3670,7 +3670,7 @@ footer .copyright {
 
 .account-panel {
   position: absolute;
-  top: calc(100% + 25px);
+  top: calc(100% + 5px);
   left: 0;
   width: 315px;
   background: #fff;
@@ -3824,7 +3824,7 @@ footer .copyright {
   .account-panel {
     position: fixed !important;
     z-index: 2100;
-    top: 78px !important;
+    top: 56px !important;
     right: 12px !important;
     left: 12px !important;
     width: auto !important;
@@ -3839,7 +3839,7 @@ footer .copyright {
 
 @media (max-width: 767px) {
   .account-panel {
-    top: 72px !important;
+    top: 56px !important;
     right: 10px !important;
     left: 10px !important;
   }

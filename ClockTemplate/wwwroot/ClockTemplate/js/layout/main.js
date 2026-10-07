@@ -14,6 +14,21 @@ $(function () {
     const list = window.HNUI.storage.json(key, []);
     return Array.isArray(list) ? new Set(list.map(String)).size : 0;
   };
+  const readCompareList = () => {
+    const list = window.HNUI.storage.json("hn-compare", []);
+    return Array.isArray(list) ? [...new Set(list.map(String))] : [];
+  };
+  const syncCompareButtons = () => {
+    const selected = new Set(readCompareList());
+    $(".compare-trigger[data-product-id]").each(function () {
+      const active = selected.has(String(this.dataset.productId));
+      $(this)
+        .toggleClass("active", active)
+        .attr("aria-pressed", String(active))
+        .attr("aria-label", active ? "حذف از مقایسه" : "افزودن به مقایسه")
+        .attr("title", active ? "حذف از مقایسه" : "افزودن به مقایسه");
+    });
+  };
   const renderNavCounters = () => {
     $("#favoritesCount").text(faNumber(storedListCount("hn-favorites")));
     $("#compareCount").text(faNumber(storedListCount("hn-compare")));
@@ -21,6 +36,8 @@ $(function () {
   renderNavCounters();
   document.addEventListener("hn:lists-change", renderNavCounters);
   window.addEventListener("storage", renderNavCounters);
+  document.addEventListener("hn:lists-change", syncCompareButtons);
+  window.addEventListener("storage", syncCompareButtons);
 
   const heroSwiperElement = document.querySelector("#heroSwiper");
   if (heroSwiperElement && window.Swiper) {
@@ -616,8 +633,7 @@ $(function () {
     responsive: {
       0: { items: 1 },
       768: { items: 2 },
-      1100: { items: 4 },
-      1280: { items: 5 },
+      1100: { items: 5 },
     },
   };
 
@@ -780,54 +796,134 @@ $(function () {
   $accountPanel.on("mouseenter", clearAccountHoverTimer);
   $accountPanel.on("mouseleave", scheduleAccountClose);
 
-  const $phoneStep = $("#phoneStep");
-  const $otpStep = $("#otpStep");
-  const $phoneInput = $("#loginPhone");
-  const $otpInput = $("#loginOtp");
-  const $phoneError = $("#phoneError");
-  const $otpError = $("#otpError");
+  let loginMode = "login";
+  let pendingAuthMode = "login";
+  const $loginEmailStep = $("#loginEmailStep");
+  const $registerEmailStep = $("#registerEmailStep");
+  const $forgotPasswordStep = $("#forgotPasswordStep");
+  const $emailOtpStep = $("#emailOtpStep");
+  const $emailOtpInput = $("#loginEmailOtp");
+  const $loginEmailError = $("#loginEmailError");
+  const $registerEmailError = $("#registerEmailError");
+  const $emailOtpError = $("#emailOtpError");
   const englishDigits = (value) =>
     value.replace(/[۰-۹]/g, (digit) => "۰۱۲۳۴۵۶۷۸۹".indexOf(digit));
 
-  $("#phoneForm").on("submit", (event) => {
-    event.preventDefault();
-    const phone = englishDigits($phoneInput.val().trim());
-    if (!/^09\d{9}$/.test(phone)) {
-      $phoneError.text("شماره موبایل را با فرمت صحیح وارد کنید.");
-      return;
-    }
-    $phoneError.empty();
-    $("#sentPhone").text(phone.replace(/(\d{4})(\d{3})(\d{4})/, "$1 $2 $3"));
-    $phoneStep.addClass("d-none");
-    $otpStep.removeClass("d-none");
-    $otpInput.trigger("focus");
+  const selectLoginMode = (mode) => {
+    loginMode = mode === "register" ? "register" : "login";
+    const isLogin = loginMode === "login";
+    $("#loginModeTab")
+      .toggleClass("active", isLogin)
+      .attr("aria-selected", String(isLogin));
+    $("#registerModeTab")
+      .toggleClass("active", !isLogin)
+      .attr("aria-selected", String(!isLogin));
+    $loginEmailStep.toggleClass("d-none", !isLogin).prop("hidden", !isLogin);
+    $registerEmailStep.toggleClass("d-none", isLogin).prop("hidden", isLogin);
+    $forgotPasswordStep.addClass("d-none").prop("hidden", true);
+    $emailOtpStep.addClass("d-none").prop("hidden", true);
+    $(".login-auth-tabs").removeClass("d-none");
+    $loginEmailError.empty();
+    $registerEmailError.empty();
+    $emailOtpError.empty();
+  };
+
+  $("#loginModeTab").on("click", () => selectLoginMode("login"));
+  $("#registerModeTab").on("click", () => selectLoginMode("register"));
+
+  $("#forgotPasswordLink").on("click", () => {
+    $("#forgotPasswordEmail").val($("#loginEmail").val().trim());
+    $("#forgotPasswordError").empty();
+    $(".login-auth-tabs").addClass("d-none");
+    $loginEmailStep.addClass("d-none").prop("hidden", true);
+    $registerEmailStep.addClass("d-none").prop("hidden", true);
+    $emailOtpStep.addClass("d-none").prop("hidden", true);
+    $forgotPasswordStep.removeClass("d-none").prop("hidden", false);
+    $("#forgotPasswordEmail").trigger("focus");
   });
 
-  $("#otpForm").on("submit", (event) => {
+  $("#forgotPasswordBack").on("click", () => {
+    selectLoginMode("login");
+    $("#loginEmail").trigger("focus");
+  });
+
+  $("#forgotPasswordForm").on("submit", (event) => {
     event.preventDefault();
-    const code = englishDigits($otpInput.val().trim());
-    if (!/^\d{3}$/.test(code)) {
-      $otpError.text("کد تأیید سه‌رقمی را کامل وارد کنید.");
+    const emailInput = $("#forgotPasswordEmail")[0];
+    if (!emailInput.value.trim() || !emailInput.validity.valid) {
+      $("#forgotPasswordError").text("ایمیل را با قالب صحیح وارد کنید.");
       return;
     }
-    $otpError.empty();
+    $("#forgotPasswordError").text("ارسال ایمیل بازنشانی هنوز به سرویس ایمیل سایت متصل نشده است.");
+  });
+
+  const requestEmailCode = (mode, email) => {
+    pendingAuthMode = mode;
+    $("#sentEmail").text(email);
+    $("#emailOtpTitle").text(
+      mode === "register" ? "کد فعال‌سازی را وارد کنید" : "کد ورود را وارد کنید",
+    );
+    $(".login-auth-tabs").addClass("d-none");
+    $loginEmailStep.addClass("d-none").prop("hidden", true);
+    $registerEmailStep.addClass("d-none").prop("hidden", true);
+    $emailOtpStep.removeClass("d-none").prop("hidden", false);
+    $emailOtpInput.val("").trigger("focus");
+  };
+
+  $("#loginEmailForm").on("submit", (event) => {
+    event.preventDefault();
+    const email = $("#loginEmail").val().trim();
+    const password = $("#loginPassword").val();
+    if (!email || !$("#loginEmail")[0].validity.valid || !password) {
+      $loginEmailError.text("ایمیل معتبر و رمز عبور را وارد کنید.");
+      return;
+    }
+    $loginEmailError.text("اعتبارسنجی ورود هنوز به سرور متصل نشده است.");
+  });
+
+  $("#registerEmailForm").on("submit", (event) => {
+    event.preventDefault();
+    const emailInput = $("#registerEmail")[0];
+    const email = emailInput.value.trim();
+    const firstName = $("#registerFirstName").val().trim();
+    const lastName = $("#registerLastName").val().trim();
+    if (!firstName || !lastName || !emailInput.validity.valid) {
+      $registerEmailError.text("نام، نام خانوادگی و ایمیل معتبر را وارد کنید.");
+      return;
+    }
+    $registerEmailError.empty();
+    requestEmailCode("register", email);
+  });
+
+  $("#loginEmailOtp").on("input", function () {
+    this.value = englishDigits(this.value).replace(/\D/g, "").slice(0, 6);
+  });
+
+  $("#emailOtpForm").on("submit", (event) => {
+    event.preventDefault();
+    const code = englishDigits($emailOtpInput.val().trim());
+    if (!/^\d{6}$/.test(code)) {
+      $emailOtpError.text("کد شش‌رقمی را کامل وارد کنید.");
+      return;
+    }
+    $emailOtpError.empty();
     userLoggedIn = true;
     window.HNUI.auth.login();
     updateAccountUI();
     if (loginModal) loginModal.hide();
   });
 
-  $("#loginBack").on("click", () => {
-    $otpStep.addClass("d-none");
-    $phoneStep.removeClass("d-none");
-    $phoneInput.trigger("focus");
+  $("#loginEmailBack").on("click", () => {
+    selectLoginMode(pendingAuthMode);
+    $(pendingAuthMode === "register" ? "#registerEmail" : "#loginEmail").trigger("focus");
   });
   $loginModalElement.on("hidden.bs.modal", () => {
-    $otpStep.addClass("d-none");
-    $phoneStep.removeClass("d-none");
-    $otpInput.val("");
-    $phoneError.empty();
-    $otpError.empty();
+    $("#loginEmailForm, #registerEmailForm, #emailOtpForm, #forgotPasswordForm").each(function () {
+      this.reset();
+    });
+    $("#sentEmail").empty();
+    $emailOtpInput.val("");
+    selectLoginMode("login");
   });
   $(".account-links>a:last-child").on("click", (event) => {
     event.preventDefault();
@@ -1067,10 +1163,31 @@ $(function () {
   $(".product-card, .showcase-card, .rail-card").each(function () {
     const $card = $(this);
     const $image = $card.find(".product-image, .rail-image").first();
+    const $cartButton = $card.find(".add-cart").first();
+    const productId = String($cartButton.data("id") || "");
+    if (productId && !$image.find(".compare-trigger").length) {
+      $image.append(
+        `<button type="button" class="compare-trigger" data-product-id="${escapeHtml(productId)}" aria-label="افزودن به مقایسه" aria-pressed="false" title="افزودن به مقایسه"><i class="bi bi-arrow-left-right" aria-hidden="true"></i></button>`,
+      );
+    }
     if (!$image.find(".quick").length)
       $image.append(
         '<button type="button" class="quick">مشاهده سریع <i class="bi bi-arrow-left"></i></button>',
       );
+  });
+  syncCompareButtons();
+
+  $document.on("click", ".compare-trigger[data-product-id]", function (event) {
+    event.preventDefault();
+    event.stopPropagation();
+    const productId = String(this.dataset.productId || "");
+    if (!productId) return;
+    const selected = readCompareList();
+    const next = selected.includes(productId)
+      ? selected.filter((id) => id !== productId)
+      : [...selected, productId];
+    window.HNUI.storage.set("hn-compare", JSON.stringify(next));
+    syncCompareButtons();
   });
 
   const openQuickView = (product) => {
