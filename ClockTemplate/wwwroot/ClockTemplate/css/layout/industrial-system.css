@@ -777,6 +777,16 @@ input[type="radio"] {
   color: var(--industrial-muted) !important;
 }
 
+/* Keep the cart glyph legible on the yellow special-offer buttons. */
+.category-showcase .showcase-card-body .add-cart > i {
+  color: var(--industrial-navy) !important;
+  opacity: 1;
+}
+
+.category-showcase .showcase-card-body .add-cart:is(:hover, :focus-visible, .added) > i {
+  color: var(--industrial-yellow) !important;
+}
+
 /* One image height across every product-card layout and viewport. */
 .product-card .product-image,
 .search-product .search-product-image,
@@ -1389,22 +1399,30 @@ thead,
 .testimonial-card .quote-mark {
   top: 18px;
   left: 20px;
-  display: grid;
-  width: 38px;
-  height: 38px;
-  place-items: center;
-  border: 1px solid rgba(16, 35, 61, .12);
-  border-radius: 12px;
-  background: #fff4cf;
-  color: var(--industrial-navy);
-  font-family: inherit;
-  font-size: 18px;
+  display: block;
+  width: auto;
+  height: auto;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #8798a5;
+  font-family: Georgia, serif;
+  font-size: 54px;
+  font-weight: 700;
   line-height: 1;
-  opacity: 1;
+  opacity: .7;
 }
 
 .testimonial-card .quote-mark i {
-  display: block;
+  display: none;
+}
+
+.testimonial-card .quote-mark::before {
+  content: "“";
+}
+
+.testimonials .reviewer > i {
+  color: var(--industrial-success) !important;
 }
 
 .page-cta em,
