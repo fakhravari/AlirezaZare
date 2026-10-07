@@ -298,13 +298,43 @@ h1, h2, h3, h4, h5, h6,
   }
 
   .home-page #mainNav .account-btn {
+    display: flex;
     min-width: 142px;
     height: 46px;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
     border-color: #d6dfe4 !important;
     border-radius: 9px !important;
     background: #fff !important;
     color: var(--industrial-navy) !important;
     box-shadow: 0 5px 16px rgba(16, 42, 67, .08) !important;
+  }
+
+  .home-page #mainNav .account-btn > .bi-person {
+    display: grid;
+    width: 22px;
+    height: 22px;
+    flex: 0 0 22px;
+    place-items: center;
+    font-size: 22px !important;
+    line-height: 1;
+  }
+
+  .home-page #mainNav .account-btn > .account-label {
+    display: inline-flex;
+    align-items: center;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+
+  .home-page #mainNav .account-btn > .bi-chevron-down {
+    display: grid;
+    width: 12px;
+    height: 12px;
+    flex: 0 0 12px;
+    place-items: center;
+    line-height: 1;
   }
 
   .home-page #mainNav .account-btn:hover {
@@ -314,6 +344,7 @@ h1, h2, h3, h4, h5, h6,
 
   .home-header-search {
     overflow: hidden;
+    height: 54px;
     grid-template-columns: 48px minmax(0, 1fr) !important;
     border-color: var(--industrial-line) !important;
     border-radius: 8px;
@@ -1549,6 +1580,19 @@ footer .trust-badges .trust-badge-image {
   outline: none !important;
   box-shadow: none !important;
   border-color: var(--industrial-line) !important;
+}
+
+#loginModal .login-input:focus-within {
+  border-color: var(--industrial-line) !important;
+  background: #fff !important;
+  box-shadow: none !important;
+}
+
+#loginModal .login-input input:focus,
+#loginModal .login-input input:focus-visible {
+  border: 0 !important;
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 /* Compact the signed-in account menu on smaller screens. */
