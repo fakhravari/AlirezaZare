@@ -10,6 +10,111 @@ $(function () {
   ).matches;
   const faNumber = (number) => window.HNUI.formatNumber(number);
   const escapeHtml = (value) => window.HNUI.escapeHtml(value);
+  const headerSearchForm = document.querySelector(".home-header-search");
+  if (headerSearchForm) {
+    const searchInput = headerSearchForm.querySelector("#headerSearchInput");
+    const suggestions = headerSearchForm.querySelector(
+      "#headerSearchSuggestions",
+    );
+    const normalizeSearchText = (value) =>
+      String(value || "")
+        .toLocaleLowerCase("fa-IR")
+        .replace(/[يى]/g, "ی")
+        .replace(/ك/g, "ک")
+        .replace(/\s+/g, " ")
+        .trim();
+    const closeSuggestions = () => {
+      suggestions.hidden = true;
+      searchInput.setAttribute("aria-expanded", "false");
+    };
+    const openSuggestions = () => {
+      suggestions.hidden = false;
+      searchInput.setAttribute("aria-expanded", "true");
+    };
+    const searchUrl = (query) => `Search?q=${encodeURIComponent(query)}`;
+    const renderSuggestions = () => {
+      const query = normalizeSearchText(searchInput.value);
+      if (Array.from(query).length < 3) {
+        closeSuggestions();
+        return;
+      }
+
+      const products = Array.isArray(window.HNProducts)
+        ? window.HNProducts
+        : [];
+      const matches = products
+        .map((product) => {
+          const productName = String(product.name || "").replace(/\s+\d+$/, "");
+          const fields = [
+            productName,
+            product.brand,
+            product.type,
+            String(product.englishName || "").replace(/\s+\d+$/, ""),
+          ];
+          const normalizedFields = fields.map(normalizeSearchText);
+          const matchIndex = normalizedFields.findIndex((field) =>
+            field.includes(query),
+          );
+          return { product, matchIndex };
+        })
+        .filter(({ matchIndex }) => matchIndex >= 0)
+        .sort(
+          (a, b) =>
+            a.matchIndex - b.matchIndex ||
+            (b.product.newest || 0) - (a.product.newest || 0),
+        )
+        .filter(
+          (() => {
+            const seenNames = new Set();
+            return ({ product }) => {
+              const productName = normalizeSearchText(
+                String(product.name || "").replace(/\s+\d+$/, ""),
+              );
+              if (seenNames.has(productName)) return false;
+              seenNames.add(productName);
+              return true;
+            };
+          })(),
+        )
+        .slice(0, 5)
+        .map(({ product }) => product);
+
+      const resultMarkup = matches.length
+        ? `<div class="header-search-suggestions-head"><span><i class="bi bi-stars" aria-hidden="true"></i> پیشنهاد برای جستجوی شما</span><small>${faNumber(matches.length)} محصول</small></div><ul>${matches
+            .map(
+              (product) =>
+                `<li><a class="header-search-suggestion" role="option" href="Product?id=${encodeURIComponent(product.id)}"><span class="header-search-suggestion-image"><img src="${escapeHtml(product.image)}" alt="" loading="lazy" decoding="async"></span><span class="header-search-suggestion-copy"><strong>${escapeHtml(product.name)}</strong><small>${escapeHtml(product.brand)} <bdi>· ${escapeHtml(product.type)}</bdi></small><b>${faNumber(product.price * 1000000)} <small>تومان</small></b></span><i class="bi bi-arrow-left" aria-hidden="true"></i></a></li>`,
+            )
+            .join("")}</ul><a class="header-search-all" href="${searchUrl(searchInput.value.trim())}">مشاهده همه نتایج <i class="bi bi-arrow-left" aria-hidden="true"></i></a>`
+        : `<div class="header-search-empty"><i class="bi bi-search" aria-hidden="true"></i><span>محصولی با این عبارت پیدا نشد.</span><a href="${searchUrl(searchInput.value.trim())}">جستجو در همه محصولات <i class="bi bi-arrow-left" aria-hidden="true"></i></a></div>`;
+
+      suggestions.innerHTML = resultMarkup;
+      openSuggestions();
+    };
+
+    searchInput.addEventListener("input", renderSuggestions);
+    searchInput.addEventListener("focus", () => {
+      if (Array.from(normalizeSearchText(searchInput.value)).length >= 3)
+        renderSuggestions();
+    });
+    searchInput.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && !suggestions.hidden) {
+        event.preventDefault();
+        closeSuggestions();
+      } else if (event.key === "ArrowDown" && !suggestions.hidden) {
+        const firstSuggestion = suggestions.querySelector(
+          ".header-search-suggestion",
+        );
+        if (firstSuggestion) {
+          event.preventDefault();
+          firstSuggestion.focus();
+        }
+      }
+    });
+    document.addEventListener("click", (event) => {
+      if (!headerSearchForm.contains(event.target)) closeSuggestions();
+    });
+  }
   const storedListCount = (key) => {
     const list = window.HNUI.storage.json(key, []);
     return Array.isArray(list) ? new Set(list.map(String)).size : 0;
@@ -741,9 +846,10 @@ $(function () {
   const updateAccountUI = () => {
     $accountToggle
       .toggleClass("logged-out", !userLoggedIn)
+      .toggleClass("logged-in", userLoggedIn)
       .html(
         userLoggedIn
-          ? '<i class="bi bi-person-check"></i><span class="account-label">حساب من</span><i class="bi bi-chevron-down"></i>'
+          ? '<i class="bi bi-person"></i><span class="account-label">حساب من</span><i class="bi bi-chevron-down"></i>'
           : '<i class="bi bi-person"></i><span class="account-label">ورود / ثبت‌نام</span><i class="bi bi-chevron-down"></i>',
       );
   };

@@ -661,8 +661,8 @@ h3,
   .account-btn.logged-out,
   .page-account-toggle,
   .search-account,
-  .page-account-toggle:has(.bi-person-check),
-  .search-account:has(.bi-person-check) {
+  .page-account-toggle.logged-in,
+  .search-account.logged-in {
     width: 134px !important;
     min-width: 134px !important;
     height: 46px !important;
@@ -686,8 +686,8 @@ h3,
   .account-btn .account-label,
   .page-account-toggle > span,
   .search-account > span,
-  .page-account-toggle:has(.bi-person-check) > span,
-  .search-account:has(.bi-person-check) > span {
+  .page-account-toggle.logged-in > span,
+  .search-account.logged-in > span {
     display: inline-block !important;
     font-size: 13.5px !important;
     font-weight: 700 !important;
@@ -711,8 +711,8 @@ h3,
   .account-btn.logged-out,
   .page-account-toggle,
   .search-account,
-  .page-account-toggle:has(.bi-person-check),
-  .search-account:has(.bi-person-check) {
+  .page-account-toggle.logged-in,
+  .search-account.logged-in {
     width: 128px !important;
     min-width: 128px !important;
     padding-inline: 9px !important;

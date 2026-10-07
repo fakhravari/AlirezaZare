@@ -10722,7 +10722,6 @@ textarea:focus-visible {
 
 /* Removed features must never leave visual remnants. */
 .quick-compare,
-.compare-trigger,
 .compare-tray,
 .compare-modal,
 .finder-fab,

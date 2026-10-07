@@ -60,8 +60,8 @@
 }
 
 /* Keep the signed-in label stable on one line across inner-page headers. */
-.page-account-toggle:has(.bi-person-check),
-.search-account:has(.bi-person-check) {
+.page-account-toggle.logged-in,
+.search-account.logged-in {
   width: 128px !important;
   min-width: 128px !important;
   padding: 0 12px !important;
@@ -69,26 +69,26 @@
   gap: 8px !important;
   white-space: nowrap !important;
 }
-.page-account-toggle:has(.bi-person-check) > span,
-.search-account:has(.bi-person-check) > span {
+.page-account-toggle.logged-in > span,
+.search-account.logged-in > span {
   display: inline-block;
   white-space: nowrap;
   line-height: 1;
 }
-.page-account-toggle:has(.bi-person-check) > .bi-person-check,
-.search-account:has(.bi-person-check) > .bi-person-check {
+.page-account-toggle.logged-in > .bi-person,
+.search-account.logged-in > .bi-person {
   flex: none;
   font-size: 18px;
 }
-.page-account-toggle:has(.bi-person-check) > .bi-chevron-down,
-.search-account:has(.bi-person-check) > .bi-chevron-down {
+.page-account-toggle.logged-in > .bi-chevron-down,
+.search-account.logged-in > .bi-chevron-down {
   flex: none;
   margin-right: auto;
   font-size: 9px;
 }
 @media (max-width: 767px) {
-  .page-account-toggle:has(.bi-person-check),
-  .search-account:has(.bi-person-check) {
+  .page-account-toggle.logged-in,
+  .search-account.logged-in {
     width: 112px !important;
     min-width: 112px !important;
     padding: 0 9px !important;

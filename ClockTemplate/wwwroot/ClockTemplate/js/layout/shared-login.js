@@ -17,8 +17,9 @@ document.addEventListener("DOMContentLoaded", () => {
   modal.setAttribute("aria-hidden", "true");
   const renderAuth = () => {
     const logged = window.HNUI?.auth.isLoggedIn() ?? false;
+    trigger.classList.toggle("logged-in", logged);
     trigger.innerHTML = logged
-      ? '<i class="bi bi-person-check"></i><span>حساب من</span><i class="bi bi-chevron-down"></i>'
+      ? '<i class="bi bi-person"></i><span>حساب من</span><i class="bi bi-chevron-down"></i>'
       : '<i class="bi bi-person"></i><span>ورود / ثبت‌نام</span>';
     return logged;
   };
