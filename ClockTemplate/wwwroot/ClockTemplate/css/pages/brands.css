@@ -14,7 +14,7 @@
 
 .brands-hero .page-kicker,
 .brands-hero h1 em {
-  color: #d9b16e;
+  color: var(--industrial-yellow);
 }
 
 .brands-hero :is(.page-kicker, h1, p, .hero-trail) {
@@ -36,7 +36,7 @@
 }
 
 .brands-catalogue {
-  background: #fbf9f5;
+  background: var(--industrial-bg);
 }
 
 .brands-heading {
@@ -51,7 +51,7 @@
 }
 
 .brands-heading h2 em {
-  color: #a27d41;
+  color: var(--industrial-yellow-dark);
   font-family: inherit;
   font-style: normal;
 }
@@ -78,7 +78,7 @@
 .brands-heading > p {
   max-width: 300px;
   margin: 0 0 5px;
-  color: #718093;
+  color: var(--industrial-steel);
   font-size: 13px;
   line-height: 1.9;
 }
@@ -119,7 +119,7 @@
   position: relative;
   z-index: 1;
   margin: 20px 0 9px;
-  color: #142d49;
+  color: var(--industrial-navy);
   font-family: var(--font-heading);
   font-size: 20px;
   font-weight: 700;
@@ -134,7 +134,7 @@
   align-items: center;
   gap: 4px;
   margin: auto 0 0;
-  color: #718093;
+  color: var(--industrial-steel);
   font-family: var(--font-body);
   font-size: 12px;
   font-weight: 500;
@@ -143,7 +143,7 @@
 }
 
 .brands-grid .brand-card p > i {
-  color: #a27d41;
+  color: var(--industrial-yellow-dark);
   font-size: 19px;
   transition: transform 0.2s;
 }

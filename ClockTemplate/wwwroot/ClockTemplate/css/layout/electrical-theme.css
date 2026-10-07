@@ -70,7 +70,7 @@ body {
     right: 0;
     bottom: 0;
     left: 0;
-    width: min(1420px, calc(100% - 56px));
+    width: min(1480px, calc(100% - 56px));
     max-width: none;
     height: 60px;
     padding: 0 18px;
@@ -124,7 +124,7 @@ body {
     top: 0;
     right: 50%;
     display: grid;
-    width: min(1420px, calc(100% - 56px));
+    width: min(1480px, calc(100% - 56px));
     height: 85px;
     padding: 13px 220px 13px 190px;
     grid-template-columns: minmax(260px, 480px) 180px;
@@ -225,18 +225,26 @@ body {
 }
 
 .electrical-showcase {
-  width: min(1420px, calc(100% - 56px));
+  width: min(1480px, calc(100% - 56px));
   margin: 0 auto;
 }
 
 .electrical-home-row {
+  --electrical-showcase-height: clamp(360px, 32vw, 500px);
   position: relative;
   display: grid;
-  height: clamp(360px, 32vw, 500px);
+  height: var(--electrical-showcase-height);
   grid-template-columns: 280px minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
   gap: 12px;
   align-items: stretch;
   direction: rtl;
+}
+
+.electrical-home-row > .electrical-category-menu,
+.electrical-home-row > .electrical-swiper {
+  height: 100%;
+  min-height: 0;
 }
 
 .electrical-category-menu {
