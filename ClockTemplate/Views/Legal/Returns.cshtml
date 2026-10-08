@@ -1,0 +1,47 @@
+@model PageModel
+
+<header class="page-hero about-hero legal-hero">
+    <img class="hero-image" src="@Url.Content("~/ClockTemplate/images/heroes/hero-electrical-service.png")" alt="راهنمای بازگرداندن کالا" width="1536" height="1024" fetchpriority="high" />
+    <div class="container">
+        <nav class="article-breadcrumb" aria-label="مسیر صفحه">
+            <a class="breadcrumb-home" asp-controller="Home" asp-action="Index"><i class="bi bi-house-door" aria-hidden="true"></i><span>خانه</span></a>
+            <span class="breadcrumb-step"><i class="breadcrumb-separator bi bi-chevron-left" aria-hidden="true"></i><span class="breadcrumb-current" aria-current="page"><i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i><span>بازگرداندن کالا</span></span></span>
+        </nav>
+        <span class="page-kicker">راهنمای انصراف و پیگیری</span>
+        <h1>رویه بازگرداندن کالا</h1>
+        <p>اگر درباره خریدتان منصرف شده‌اید یا کالای دریافتی با سفارش مغایرت دارد، مسیر پیگیری را در این صفحه ببینید.</p>
+        <div class="hero-trail"><span>ثبت درخواست</span><span>بررسی شرایط</span><span>هماهنگی بازگشت</span></div>
+    </div>
+</header>
+
+<main class="flow-main container legal-main">
+    <article class="flow-card legal-document">
+        <div class="legal-note"><i class="bi bi-info-circle" aria-hidden="true"></i><p>در نسخه فعلی سایت، خرید اینترنتی و دریافت وجه فعال نیست. اگر خریدی را مستقیماً از فروشگاه انجام داده‌اید، برای پیگیری از راه‌های تماس رسمی اقدام کنید.</p></div>
+        <section class="legal-section">
+            <h2><i class="bi bi-calendar2-check" aria-hidden="true"></i> مهلت انصراف از خرید از راه دور</h2>
+            <p>در معاملات از راه دور، مصرف‌کننده اصولاً دست‌کم هفت روز کاری برای انصراف، بدون نیاز به ارائه دلیل یا پرداخت جریمه فرصت دارد. برای کالا، آغاز این مهلت از زمان تحویل است و شروع آن تابع ارائه اطلاعات الزامی معامله نیز هست. مواردی که قانون و آیین‌نامه از حق انصراف مستثنا کرده‌اند، تابع همان مقررات خواهند بود.</p>
+        </section>
+        <section class="legal-section">
+            <h2><i class="bi bi-box-seam" aria-hidden="true"></i> پیش از بازگرداندن کالا</h2>
+            <ul>
+                <li>پیش از ارسال کالا با فروشگاه تماس بگیرید و شماره سفارش یا فاکتور را اعلام کنید.</li>
+                <li>تا دریافت راهنمایی، بسته‌بندی، متعلقات و مدارک خرید را نگه دارید و کالا را به نشانی تأییدنشده نفرستید.</li>
+                <li>هزینه بازپس‌فرستادن کالا و هر هزینه دیگری مطابق مقررات لازم‌الاجرا و شرایط همان معامله تعیین می‌شود.</li>
+            </ul>
+        </section>
+        <section class="legal-section">
+            <h2><i class="bi bi-exclamation-circle" aria-hidden="true"></i> کالای معیوب یا مغایر با سفارش</h2>
+            <p>اگر کالا آسیب‌دیده، ناقص یا مغایر با سفارش به دستتان رسید، در اولین فرصت با پشتیبانی تماس بگیرید و شماره فاکتور و شرح مشکل را ارائه کنید. فروشگاه پس از بررسی، راهکار و شیوه ارسال را با شما هماهنگ می‌کند؛ حقوق قانونی مصرف‌کننده محفوظ است.</p>
+        </section>
+        <section class="legal-section">
+            <h2><i class="bi bi-cash-coin" aria-hidden="true"></i> بازپرداخت</h2>
+            <p>در صورت استفاده معتبر از حق انصراف، بازپرداخت وجه دریافتی تابع قوانین جاری است. چون پرداخت آنلاین در نسخه فعلی متصل نیست، این وب‌سایت وجهی دریافت نمی‌کند و بازپرداختی از طریق آن انجام نمی‌شود.</p>
+        </section>
+        <p class="legal-updated">آخرین بازبینی: ۱۵ مهر ۱۴۰۵</p>
+        <div class="legal-actions"><a class="flow-button" asp-controller="Contact" asp-action="Index">تماس برای پیگیری <i class="bi bi-arrow-left" aria-hidden="true"></i></a><a class="ui-inline-action" asp-controller="Faq" asp-action="Index">پرسش‌های متداول</a></div>
+    </article>
+</main>
+
+@section Styles {
+    <link href="~/ClockTemplate/css/pages/pages.css" asp-append-version="true" rel="stylesheet" />
+}

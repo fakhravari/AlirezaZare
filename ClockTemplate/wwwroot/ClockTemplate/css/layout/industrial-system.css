@@ -1993,24 +1993,28 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
 /* Reusable shop-service strip shared by shopping and product pages. */
 .purchase-benefits--showcase {
   margin-block: 34px;
-  padding-block: 24px;
+  padding-block: 32px;
   border: 1px solid rgba(20, 46, 81, .08);
-  border-radius: 20px;
-  background: linear-gradient(115deg, #f7f9fb 0%, #f4f6f8 58%, #fbfaf6 100%);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 8% 12%, rgba(246, 197, 21, .12), transparent 30%),
+    linear-gradient(115deg, #f7f9fb 0%, #f4f6f8 58%, #fbfaf6 100%);
 }
 
 .purchase-benefits--showcase .benefit-grid {
-  grid-template-columns: minmax(210px, 1.35fr) repeat(5, minmax(125px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 14px;
   align-items: stretch;
 }
 
 .purchase-benefits--showcase .benefits-intro {
   display: flex;
   min-width: 0;
-  flex-direction: column;
-  justify-content: center;
-  padding: 4px 10px;
+  grid-column: 1 / -1;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 0 4px 4px;
 }
 
 .purchase-benefits--showcase .benefits-kicker {
@@ -2031,7 +2035,7 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
 .purchase-benefits--showcase .benefits-intro h2 {
   margin: 0;
   color: var(--industrial-navy);
-  font-size: clamp(17px, 1.5vw, 21px);
+  font-size: clamp(22px, 2vw, 29px);
   font-weight: 850;
   line-height: 1.6;
 }
@@ -2042,22 +2046,25 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
 }
 
 .purchase-benefits--showcase .benefits-intro p {
-  margin: 5px 0 0;
+  max-width: 340px;
+  margin: 0;
   color: var(--industrial-muted);
-  font-size: 11px;
-  line-height: 1.8;
+  font-size: 13px;
+  line-height: 1.9;
 }
 
 .purchase-benefits--showcase .benefit {
+  flex-direction: column;
   justify-content: flex-start;
-  gap: 11px;
+  gap: 12px;
   min-width: 0;
-  min-height: 84px;
-  padding: 13px 12px;
+  min-height: 166px;
+  padding: 20px 16px;
   border: 1px solid #e0e5e9 !important;
-  border-radius: 13px;
+  border-radius: 18px;
   background: rgba(255, 255, 255, .92);
-  box-shadow: 0 5px 12px rgba(16, 42, 67, .07);
+  box-shadow: 0 8px 22px rgba(16, 42, 67, .06);
+  text-align: center;
   transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
 }
 
@@ -2069,32 +2076,160 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
 
 .purchase-benefits--showcase .benefit > i {
   display: grid;
-  width: 39px;
-  height: 39px;
-  flex: 0 0 39px;
+  width: 48px;
+  height: 48px;
+  flex: 0 0 48px;
   place-items: center;
-  border: 1px solid rgba(20, 46, 81, .07);
-  border-radius: 11px;
-  background: #edf1f5;
-  color: var(--industrial-navy);
-  font-size: 18px;
+  border: 1px solid rgba(170, 128, 20, .18);
+  border-radius: 15px;
+  background: linear-gradient(145deg, #fff8dc, #f3ead7);
+  color: #9a7100;
+  font-size: 21px;
+  box-shadow: 0 6px 14px rgba(16, 42, 67, .08);
 }
 
 .purchase-benefits--showcase .benefit > div {
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .purchase-benefits--showcase .benefit strong {
   color: var(--industrial-navy);
-  font-size: 11px;
+  font-size: 13px;
   line-height: 1.65;
 }
 
 .purchase-benefits--showcase .benefit span {
-  margin-top: 3px;
+  margin-top: 5px;
   color: var(--industrial-muted);
-  font-size: 10px;
-  line-height: 1.65;
+  font-size: 11px;
+  line-height: 1.8;
+}
+
+/* Clear, readable layout for the store's policy and help pages. */
+.legal-main {
+  max-width: 1040px;
+  padding-block: 34px 72px;
+}
+
+.legal-document {
+  padding: clamp(22px, 4vw, 42px);
+  border: 1px solid var(--industrial-line) !important;
+  border-radius: 22px;
+  background: #fff !important;
+  box-shadow: var(--industrial-shadow) !important;
+}
+
+.legal-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 28px;
+  padding: 16px 18px;
+  border: 1px solid rgba(36, 59, 83, .12);
+  border-radius: 14px;
+  background: linear-gradient(110deg, #eef3f7, #f7f8f8);
+  color: var(--industrial-steel);
+}
+
+.legal-note > i {
+  flex: 0 0 auto;
+  margin-top: 3px;
+  color: #a87800;
+  font-size: 18px;
+}
+
+.legal-note p,
+.legal-section p,
+.legal-section li {
+  margin: 0;
+  color: #4c5b65;
+  font-size: 14px;
+  line-height: 2;
+}
+
+.legal-section + .legal-section {
+  margin-top: 24px;
+  padding-top: 22px;
+  border-top: 1px solid #e7ebee;
+}
+
+.legal-section h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 10px;
+  color: var(--industrial-navy);
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.legal-section h2 i {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  place-items: center;
+  border-radius: 10px;
+  background: #fff6d6;
+  color: #947000;
+  font-size: 16px;
+}
+
+.legal-section ul {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding-inline-start: 22px;
+}
+
+.legal-updated {
+  margin: 26px 0 0;
+  color: #78858e;
+  font-size: 11px;
+}
+
+.legal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.legal-actions .flow-button {
+  display: inline-flex;
+  width: auto;
+  align-items: center;
+  gap: 10px;
+}
+
+@media (max-width: 575px) {
+  .legal-main {
+    padding-block: 22px 48px;
+  }
+
+  .legal-document {
+    padding: 18px 15px;
+    border-radius: 17px;
+  }
+
+  .legal-note {
+    gap: 9px;
+    padding: 13px;
+  }
+
+  .legal-note p,
+  .legal-section p,
+  .legal-section li {
+    font-size: 13px;
+  }
+
+  .legal-section h2 {
+    font-size: 16px;
+  }
 }
 
 @media (max-width: 1199px) {
@@ -2103,7 +2238,9 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
   }
 
   .purchase-benefits--showcase .benefits-intro {
-    grid-column: 1 / -1;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 7px;
     padding: 0 4px 5px;
   }
 }
@@ -2125,24 +2262,24 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
   }
 
   .purchase-benefits--showcase .benefit {
-    min-height: 78px;
-    gap: 8px;
-    padding: 10px 9px;
+    min-height: 142px;
+    gap: 9px;
+    padding: 14px 10px;
   }
 
   .purchase-benefits--showcase .benefit > i {
-    width: 34px;
-    height: 34px;
-    flex-basis: 34px;
-    font-size: 16px;
+    width: 40px;
+    height: 40px;
+    flex-basis: 40px;
+    font-size: 18px;
   }
 
   .purchase-benefits--showcase .benefit strong {
-    font-size: 10px;
+    font-size: 11px;
   }
 
   .purchase-benefits--showcase .benefit span {
-    font-size: 9px;
+    font-size: 10px;
   }
 }
 
@@ -2199,19 +2336,28 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
   outline-offset: 2px;
 }
 
-.home-header-search > input {
+.home-header-search > input[type="search"] {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
   height: 100%;
-  padding-inline: 16px !important;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0 24px 0 16px !important;
   border: 0 !important;
+  border-radius: 0 12px 12px 0;
   outline: none !important;
   background: transparent !important;
   color: var(--industrial-ink) !important;
   direction: rtl;
   font-size: 13px !important;
   text-align: right;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
-.home-header-search > input::placeholder {
+.home-header-search > input[type="search"]::placeholder {
   color: #84919a !important;
   opacity: 1;
 }
