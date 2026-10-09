@@ -167,8 +167,35 @@ $(function () {
   const renderNavCounters = () => {
     $("#favoritesCount").text(faNumber(storedListCount("hn-favorites")));
     $("#compareCount").text(faNumber(storedListCount("hn-compare")));
+    renderFavoritePanel();
     renderComparePanel();
     syncFavoriteButtons();
+  };
+  const renderFavoritePanel = () => {
+    const ids = readFavoriteList();
+    const products = new Map();
+    (window.HNProducts || []).forEach((product) => {
+      products.set(String(product.id), {
+        name: product.name,
+        brand: product.brand,
+        type: product.type,
+        price: Number(product.price) * 1000000,
+        image: product.image,
+      });
+    });
+    const cache = window.HNUI.storage.json("hn-product-cache", {});
+    Object.entries(cache || {}).forEach(([id, product]) => {
+      if (!products.has(String(id))) products.set(String(id), product);
+    });
+    $("#favoritesPanelCount").text(`${faNumber(ids.length)} محصول ذخیره شده`);
+    if (!ids.length) {
+      $("#favoritesPanelItems").html('<div class="compare-panel-empty"><i class="bi bi-heart" aria-hidden="true"></i><strong>هنوز محصولی ذخیره نکرده‌اید</strong><span>از روی کارت محصول، آیکن قلب را انتخاب کنید.</span></div>');
+      return;
+    }
+    $("#favoritesPanelItems").html(ids.map((id) => {
+      const product = products.get(id) || { name: "محصول منتخب", price: 0, image: "ClockTemplate/images/products/tool-hammer-drill.png" };
+      return `<article class="compare-panel-item" data-favorite-id="${escapeHtml(id)}"><img src="${escapeHtml(product.image || "ClockTemplate/images/products/tool-hammer-drill.png")}" alt="" loading="lazy"><span><strong>${escapeHtml(product.name || "محصول منتخب")}</strong><small>${faNumber(Number(product.price) * (Number(product.price) < 1000000 ? 1000000 : 1))} تومان</small></span><button type="button" data-favorite-remove="${escapeHtml(id)}" aria-label="حذف ${escapeHtml(product.name || "محصول")} از علاقه‌مندی‌ها"><i class="bi bi-x-lg" aria-hidden="true"></i></button></article>`;
+    }).join(""));
   };
   const renderComparePanel = () => {
     const ids = readCompareList();
@@ -824,6 +851,14 @@ $(function () {
   const $cartItems = $("#cartItems");
   const $cartFooter = $("#cartFooter");
   const $cartClose = $("#cartClose");
+  const $favoritesWrap = $("#favoritesWrap");
+  const $favoritesToggle = $("#favoritesToggle");
+  const $favoritesPanel = $("#favoritesPanel");
+  const setFavoriteOpen = (open) => {
+    $favoritesWrap.toggleClass("open", open);
+    $favoritesPanel.toggleClass("open", open).attr("aria-hidden", String(!open));
+    $favoritesToggle.attr("aria-expanded", String(open));
+  };
   const $compareWrap = $("#compareWrap");
   const $compareToggle = $("#compareToggle");
   const $comparePanel = $("#comparePanel");
@@ -1168,8 +1203,32 @@ $(function () {
   $cartToggle.on("click", (event) => {
     event.stopPropagation();
     setAccountOpen(false);
+    setFavoriteOpen(false);
     setCompareOpen(false);
     setCartOpen(!$cartPanel.hasClass("open"));
+  });
+  $("#favoritesClose").on("click", () => setFavoriteOpen(false));
+  $favoritesPanel.on("click", "[data-favorite-remove]", function () {
+    const removedId = String(this.dataset.favoriteRemove || "");
+    window.HNUI.storage.set("hn-favorites", JSON.stringify(readFavoriteList().filter((id) => id !== removedId)));
+  });
+  let favoriteHoverTimer = null;
+  $favoritesWrap.on("mouseenter", () => {
+    if ($window.width() <= mobileBreakpoint) return;
+    window.clearTimeout(favoriteHoverTimer);
+    setCartOpen(false);
+    setCompareOpen(false);
+    setFavoriteOpen(true);
+  });
+  $favoritesWrap.on("mouseleave", () => {
+    if ($window.width() <= mobileBreakpoint) return;
+    favoriteHoverTimer = window.setTimeout(() => {
+      if (!$favoritesWrap.is(":hover") && !$favoritesPanel.is(":hover")) setFavoriteOpen(false);
+    }, 220);
+  });
+  $favoritesPanel.on("mouseenter", () => window.clearTimeout(favoriteHoverTimer));
+  $favoritesPanel.on("mouseleave", () => {
+    if ($window.width() > mobileBreakpoint) setFavoriteOpen(false);
   });
   $("#compareClose").on("click", () => setCompareOpen(false));
   $("#comparePanel").on("click", "[data-compare-remove]", function () {
@@ -1182,6 +1241,7 @@ $(function () {
     if ($window.width() <= mobileBreakpoint) return;
     window.clearTimeout(compareHoverTimer);
     setCartOpen(false);
+    setFavoriteOpen(false);
     setCompareOpen(true);
   });
   $compareWrap.on("mouseleave", () => {
@@ -1230,6 +1290,8 @@ $(function () {
       setCartOpen(false);
     if (!$target.closest("#compareWrap, #comparePanel").length)
       setCompareOpen(false);
+    if (!$target.closest("#favoritesWrap, #favoritesPanel").length)
+      setFavoriteOpen(false);
     if (!$target.closest("#accountWrap, #accountPanel").length)
       setAccountOpen(false);
   });

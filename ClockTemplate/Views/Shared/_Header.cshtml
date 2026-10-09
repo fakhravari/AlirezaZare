@@ -319,10 +319,21 @@
                 </div>
             </div>
             <div class="nav-actions" aria-label="خرید، مقایسه و علاقه‌مندی‌ها">
-                <a class="nav-shortcut" href="Profile/Favorites" aria-label="علاقه‌مندی‌ها" title="علاقه‌مندی‌ها">
-                    <i class="bi bi-heart" aria-hidden="true"></i>
-                    <b class="nav-count" id="favoritesCount" aria-hidden="true">۰</b>
-                </a>
+                <div class="favorites-wrap" id="favoritesWrap">
+                    <a class="nav-shortcut favorites-toggle" id="favoritesToggle" href="Profile/Favorites" aria-label="علاقه‌مندی‌ها" aria-expanded="false" aria-controls="favoritesPanel" title="علاقه‌مندی‌ها">
+                        <i class="bi bi-heart" aria-hidden="true"></i>
+                        <b class="nav-count" id="favoritesCount" aria-hidden="true">۰</b>
+                    </a>
+                    <section class="compare-panel favorites-panel" id="favoritesPanel" aria-label="فهرست علاقه‌مندی‌ها" aria-hidden="true">
+                        <div class="compare-panel-head">
+                            <span><i class="bi bi-heart-fill" aria-hidden="true"></i><strong>علاقه‌مندی‌های شما</strong></span>
+                            <button type="button" id="favoritesClose" aria-label="بستن فهرست علاقه‌مندی‌ها"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
+                        </div>
+                        <p class="compare-panel-count" id="favoritesPanelCount">۰ محصول ذخیره شده</p>
+                        <div class="compare-panel-items" id="favoritesPanelItems"></div>
+                        <a class="compare-panel-link" href="Profile/Favorites">مشاهدهٔ همهٔ علاقه‌مندی‌ها <i class="bi bi-arrow-left" aria-hidden="true"></i></a>
+                    </section>
+                </div>
                 <div class="compare-wrap" id="compareWrap">
                     <a class="nav-shortcut compare-toggle" id="compareToggle" href="Compare" aria-label="مشاهده محصولات مقایسه" title="مقایسه محصولات">
                         <i class="bi bi-arrow-left-right" aria-hidden="true"></i>

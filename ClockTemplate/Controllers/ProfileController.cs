@@ -19,7 +19,7 @@ public sealed class ProfileController : PageController
     public Task<ViewResult> Addresses() => ProfilePage("آدرس‌های من", "مدیریت آدرس‌های تحویل سفارش");
 
     [HttpGet("Favorites")]
-    public Task<ViewResult> Favorites() => ProfilePage("علاقه‌مندی‌های من", "ساعت‌های ذخیره‌شده شما");
+    public Task<ViewResult> Favorites() => ProfilePage("علاقه‌مندی‌های من", "کالاهای ذخیره‌شده شما");
 
     [HttpGet("Questions")]
     public Task<ViewResult> Questions() => ProfilePage("دیدگاه‌ها و پرسش‌ها", "مدیریت پیش‌نویس دیدگاه‌ها و پرسش‌ها");

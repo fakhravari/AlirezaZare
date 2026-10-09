@@ -1,16 +1,42 @@
 @model PageModel
 
+@{
+    var profileSection = Context.Request.Path.Value?.TrimEnd('/').Split('/').LastOrDefault();
+    var profileTitle = profileSection switch
+    {
+        "Orders" => "سفارش‌های من",
+        "Addresses" => "آدرس‌های من",
+        "Favorites" => "علاقه‌مندی‌ها",
+        "Questions" => "دیدگاه‌ها و پرسش‌ها",
+        _ => "حساب کاربری"
+    };
+    var profileIcon = profileSection switch
+    {
+        "Orders" => "bi-bag-check",
+        "Addresses" => "bi-geo-alt",
+        "Favorites" => "bi-heart",
+        "Questions" => "bi-chat-square-text",
+        _ => "bi-person"
+    };
+}
 
 <main class="flow-main container">
 <nav class="cart-breadcrumb" aria-label="مسیر صفحه">
     <ol>
         <li>
-            <a href="Home/Index">
+            <a asp-controller="Home" asp-action="Index">
                 <i class="bi bi-house-door" aria-hidden="true"></i><span>خانه</span>
             </a>
         </li>
+        @if (profileSection is "Orders" or "Addresses" or "Favorites" or "Questions")
+        {
+            <li class="profile-breadcrumb-parent">
+                <i class="bi bi-chevron-left" aria-hidden="true"></i>
+                <a asp-controller="Profile" asp-action="Index">حساب کاربری</a>
+            </li>
+        }
         <li class="cart-breadcrumb-current">
-            <i class="bi bi-chevron-left" aria-hidden="true"></i><span aria-current="page"><i class="bi bi-person" aria-hidden="true"></i>حساب کاربری</span>
+            <i class="bi bi-chevron-left" aria-hidden="true"></i><span aria-current="page"><i class="bi @profileIcon" aria-hidden="true"></i>@profileTitle</span>
         </li>
     </ol>
 </nav>
@@ -25,18 +51,8 @@
         </div>
     </div>
     <div class="account-welcome-art" aria-hidden="true">
-        <svg viewBox="0 0 280 280" fill="none" focusable="false">
-            <circle cx="140" cy="140" r="134" stroke="currentColor" opacity=".12"/>
-            <circle cx="140" cy="140" r="119" stroke="currentColor" opacity=".3"/>
-            <circle cx="140" cy="140" r="107" stroke="currentColor" stroke-width="5" stroke-dasharray="1 10.205" opacity=".55"/>
-            <circle cx="140" cy="140" r="91" stroke="currentColor" opacity=".15"/>
-            <path d="M140 42V54 M238 140H226 M140 238V226 M42 140H54" stroke="currentColor" stroke-width="3"/>
-            <path d="M140 140L91 104" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
-            <path d="M140 140L196 80" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
-            <path d="M124 171L177 68" stroke="currentColor" opacity=".45"/>
-            <circle cx="140" cy="140" r="7" fill="currentColor"/>
-        </svg>
-        <span>هر لحظه، یک انتخاب ماندگار</span>
+        <span class="account-welcome-tool-icon"><i class="bi bi-tools"></i></span>
+        <span>ابزار و تجهیزات برقی</span>
     </div>
 </header>
 <div class="account-dashboard">
@@ -72,7 +88,7 @@
             <a href="Profile/Favorites">
                 <i class="bi bi-heart"></i>
                 <span>
-                    <strong>علاقه‌مندی‌ها</strong><small>ساعت‌های ذخیره‌شده</small>
+                    <strong>علاقه‌مندی‌ها</strong><small>کالاهای ذخیره‌شده</small>
                 </span><i class="bi bi-chevron-left"></i>
             </a>
             <a href="Profile/Questions">
@@ -120,7 +136,7 @@
                         <i class="bi bi-heart"></i>
                     </span>
                     <div>
-                        <strong id="statFavorites">۰</strong><small>ساعت موردعلاقه</small>
+                        <strong id="statFavorites">۰</strong><small>کالای موردعلاقه</small>
                     </div>
                 </article>
                 <article>
