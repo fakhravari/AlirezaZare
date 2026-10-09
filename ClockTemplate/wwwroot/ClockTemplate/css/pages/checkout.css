@@ -110,3 +110,62 @@
   margin-top: 7px;
   font-size: 11px;
 }
+
+.address-dialog {
+  width: min(740px, calc(100% - 28px));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+#addressForm {
+  display: grid;
+  gap: 12px;
+}
+
+.address-dialog .address-form-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 16px;
+}
+
+.address-dialog .address-form-grid > label {
+  min-width: 0;
+  margin: 0;
+  grid-column: auto;
+}
+
+.address-dialog #addressForm > label {
+  margin: 0;
+}
+
+.address-dialog #addressForm [role="status"]:empty {
+  display: none;
+}
+
+.address-dialog #addressForm .flow-button {
+  min-height: 52px;
+  margin: 0;
+}
+
+.address-dialog .flow-card input,
+.address-dialog .flow-card select,
+.address-dialog .flow-card textarea {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.address-dialog .flow-card textarea {
+  min-height: 96px;
+  resize: vertical;
+}
+
+@media (max-width: 575px) {
+  .address-dialog {
+    width: calc(100% - 20px);
+    padding: 16px;
+  }
+
+  .address-dialog .address-form-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+}

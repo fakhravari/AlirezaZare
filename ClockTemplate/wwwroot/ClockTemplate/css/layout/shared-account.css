@@ -218,6 +218,28 @@
   box-shadow: 0 6px 15px rgba(143, 69, 66, 0.08);
   transform: translateX(-2px);
 }
+
+.shared-account-card .account-user {
+  background:
+    radial-gradient(circle at 8% 10%, color-mix(in srgb, var(--color-gold) 16%, transparent), transparent 34%),
+    linear-gradient(135deg, var(--color-blue), var(--color-navy));
+}
+
+.shared-account-card .account-avatar {
+  border-color: color-mix(in srgb, var(--color-gold) 52%, white);
+  background: var(--color-gold);
+  color: var(--color-navy);
+}
+
+.shared-account-card .account-user > i {
+  color: var(--color-gold);
+}
+
+.shared-account-card .account-links a b {
+  border: 1px solid color-mix(in srgb, var(--color-gold) 35%, white);
+  background: color-mix(in srgb, var(--color-gold) 18%, white);
+  color: var(--color-navy);
+}
 @media (max-width: 991px) {
   .shared-account-card.account-panel,
   .shared-account-card.page-account-panel,

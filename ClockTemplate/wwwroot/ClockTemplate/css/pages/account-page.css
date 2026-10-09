@@ -1059,3 +1059,28 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop { background: rgba(3, 13
     padding: 16px;
   }
 }
+
+.account-stats .stat-icon {
+  border: 1px solid color-mix(in srgb, var(--color-gold) 34%, white);
+  background: color-mix(in srgb, var(--color-gold) 17%, white);
+  color: var(--color-navy);
+}
+
+.account-tabs a > i:first-child,
+.overview-guide > a > i:first-child,
+.overview-panel-title i,
+.account-sidebar-help > i {
+  color: var(--color-navy);
+}
+
+.account-tabs a[aria-current] > i:first-child {
+  border-color: var(--color-navy);
+  background: var(--color-navy);
+  color: var(--color-gold);
+}
+
+.account-tabs a[aria-current] > i:last-child,
+.overview-panel-title i,
+.overview-guide > a > i:first-child {
+  color: #b98d00;
+}
