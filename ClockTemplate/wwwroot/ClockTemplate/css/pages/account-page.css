@@ -821,7 +821,9 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop { background: rgba(3, 13
 @media (max-width: 767px) {
   .account-welcome {
     min-height: 0;
-    padding: 24px 18px;
+    margin: 12px 0 16px;
+    padding: 16px 18px;
+    border-radius: 16px;
     background-image:
       linear-gradient(270deg, rgba(16, 42, 86, .98) 0%, rgba(16, 42, 86, .92) 58%, rgba(16, 42, 86, .78) 100%),
       url("../../images/heroes/hero-electrical-service.png");
@@ -833,6 +835,16 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop { background: rgba(3, 13
     width: 100%;
     max-width: 100%;
   }
+
+  .account-welcome-brand,
+  .account-welcome p,
+  .account-welcome-art {
+    display: none;
+  }
+
+  .account-welcome h1 { margin: 0; font-size: 23px; line-height: 1.45; }
+  .account-welcome-links { gap: 8px; margin-top: 10px; }
+  .account-welcome-links a { min-height: 38px; padding: 8px 11px; font-size: 11px; }
 
   .account-welcome-art {
     display: none;
@@ -871,9 +883,12 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop { background: rgba(3, 13
 
 @media (max-width: 380px) {
   .account-welcome {
-    padding: 20px 15px;
+    margin: 10px 0 14px;
+    padding: 14px 15px;
     border-radius: 16px;
   }
+
+  .account-welcome-links { margin-top: 8px; }
 
   .account-content {
     padding: 14px 12px;

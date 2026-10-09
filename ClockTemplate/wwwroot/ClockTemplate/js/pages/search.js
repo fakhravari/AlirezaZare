@@ -83,7 +83,10 @@ function applyUrlState() {
 const fa = (n) => window.HNUI.formatNumber(n);
 function buildFilters() {
   Object.entries(filterConfig).forEach(([key, values]) => {
-    $(`#${key}Filters`).innerHTML = values
+    const searchBox = ["brand", "type"].includes(key)
+      ? `<label class="filter-search"><i class="bi bi-search" aria-hidden="true"></i><input type="search" data-filter-search="${key}" placeholder="جستجوی ${key === "brand" ? "برند" : "گروه محصول"}" aria-label="جستجو در ${key === "brand" ? "برندها" : "گروه‌های محصول"}"></label>`
+      : "";
+    $(`#${key}Filters`).innerHTML = searchBox + values
       .map(
         (value) =>
           `<label class="filter-option"><input type="checkbox" value="${value}" data-filter="${key}"><span>${value}</span></label>`,
@@ -217,6 +220,10 @@ function clearAll() {
   $$(".filter-option input").forEach((input) => (input.checked = false));
   $("#maxPrice").value = 60;
   $("#productSearch").value = "";
+  $$('[data-filter-search]').forEach((input) => {
+    input.value = "";
+    input.closest(".filter-options").querySelectorAll(".filter-option").forEach((option) => option.classList.remove("filter-option-hidden"));
+  });
   updatePrice();
   render(true, true);
 }
@@ -225,6 +232,14 @@ function updatePrice() {
   $("#maxPriceLabel").textContent = `${fa(state.maxPrice)} میلیون`;
 }
 buildFilters();
+$$("[data-filter-search]").forEach((input) => {
+  input.addEventListener("input", () => {
+    const query = input.value.trim().toLocaleLowerCase();
+    input.closest(".filter-options").querySelectorAll(".filter-option").forEach((option) => {
+      option.classList.toggle("filter-option-hidden", !option.textContent.toLocaleLowerCase().includes(query));
+    });
+  });
+});
 $$(".filter-group>button").forEach(
   (button) =>
     (button.onclick = () => {

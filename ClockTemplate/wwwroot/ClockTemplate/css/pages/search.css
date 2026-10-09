@@ -1095,6 +1095,22 @@ select {
     white-space: nowrap;
 }
 
+.filter-search {
+    position: relative;
+    display: flex;
+    min-height: 40px;
+    align-items: center;
+    margin: 2px 0 8px;
+    border: 1px solid var(--industrial-line);
+    border-radius: 10px;
+    background: #fff;
+    color: var(--industrial-muted);
+}
+.filter-search > i { position: absolute; right: 11px; font-size: 13px; }
+.filter-search input { width: 100%; min-width: 0; height: 38px; padding: 0 34px 0 10px; border: 0; border-radius: inherit; background: transparent; color: var(--industrial-navy); font: inherit; font-size: 12px; }
+.filter-search input::placeholder { color: var(--industrial-muted); }
+.filter-option-hidden { display: none !important; }
+
 /* Elevated filter choices: icon-led headings and clear selected states. */
 .filter-panel {
     padding-bottom: 0;
