@@ -11,7 +11,7 @@
         </form>
     </div>
     <div class="container">
-        <a class="navbar-brand brand" href="Home/Index">
+        <a class="navbar-brand brand" asp-controller="Home" asp-action="Index" aria-label="رفتن به صفحهٔ اصلی">
             <span>ع</span> علی‌رضا زارع
         </a>
         <button class="navbar-toggler shadow-none border-0"
@@ -324,10 +324,10 @@
                     <b class="nav-count" id="favoritesCount" aria-hidden="true">۰</b>
                 </a>
                 <div class="compare-wrap" id="compareWrap">
-                    <button class="nav-shortcut compare-toggle" id="compareToggle" type="button" aria-label="مشاهده محصولات مقایسه" title="مقایسه محصولات" aria-expanded="false" aria-controls="comparePanel">
+                    <a class="nav-shortcut compare-toggle" id="compareToggle" href="Compare" aria-label="مشاهده محصولات مقایسه" title="مقایسه محصولات">
                         <i class="bi bi-arrow-left-right" aria-hidden="true"></i>
                         <b class="nav-count" id="compareCount" aria-hidden="true">۰</b>
-                    </button>
+                    </a>
                     <section class="compare-panel" id="comparePanel" aria-label="فهرست مقایسه محصولات" aria-hidden="true">
                         <div class="compare-panel-head">
                             <span><i class="bi bi-arrow-left-right" aria-hidden="true"></i><strong>مقایسه محصولات</strong></span>

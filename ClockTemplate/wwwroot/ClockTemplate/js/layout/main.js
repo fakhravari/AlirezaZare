@@ -119,6 +119,36 @@ $(function () {
     const list = window.HNUI.storage.json(key, []);
     return Array.isArray(list) ? new Set(list.map(String)).size : 0;
   };
+  const readFavoriteList = () => {
+    const list = window.HNUI.storage.json("hn-favorites", []);
+    return Array.isArray(list) ? [...new Set(list.map(String))] : [];
+  };
+  const syncFavoriteButtons = () => {
+    const selected = new Set(readFavoriteList());
+    $(".favorite[data-product-id]").each(function () {
+      const active = selected.has(String(this.dataset.productId));
+      $(this).toggleClass("active", active).attr("aria-pressed", String(active));
+      $(this).attr("aria-label", active ? "حذف از علاقه‌مندی‌ها" : "افزودن به علاقه‌مندی‌ها");
+      $(this).find("i").attr("class", active ? "bi bi-heart-fill" : "bi bi-heart");
+    });
+  };
+  const cacheProductFromCard = (card, id) => {
+    const cartButton = card?.querySelector(".add-cart[data-id]");
+    if (!cartButton || !id) return;
+    const cache = window.HNUI.storage.json("hn-product-cache", {});
+    const name = cartButton.dataset.name || card.querySelector("h3")?.textContent.trim() || "محصول منتخب";
+    cache[String(id)] = {
+      id: String(id),
+      name,
+      brand: card.querySelector(".product-info small, small")?.textContent.trim() || "",
+      price: Number(cartButton.dataset.price) / 1000000 || 0,
+      image: cartButton.dataset.image || card.querySelector(".product-image img, .rail-image img")?.getAttribute("src") || "ClockTemplate/images/products/tool-hammer-drill.png",
+      type: "مشخصات محصول",
+      movement: "مطابق مشخصات کالا",
+      strap: "مطابق اطلاعات سازنده",
+    };
+    window.HNUI.storage.set("hn-product-cache", JSON.stringify(cache));
+  };
   const readCompareList = () => {
     const list = window.HNUI.storage.json("hn-compare", []);
     return Array.isArray(list) ? [...new Set(list.map(String))] : [];
@@ -138,6 +168,7 @@ $(function () {
     $("#favoritesCount").text(faNumber(storedListCount("hn-favorites")));
     $("#compareCount").text(faNumber(storedListCount("hn-compare")));
     renderComparePanel();
+    syncFavoriteButtons();
   };
   const renderComparePanel = () => {
     const ids = readCompareList();
@@ -1140,12 +1171,6 @@ $(function () {
     setCompareOpen(false);
     setCartOpen(!$cartPanel.hasClass("open"));
   });
-  $compareToggle.on("click", (event) => {
-    event.stopPropagation();
-    setAccountOpen(false);
-    setCartOpen(false);
-    setCompareOpen(!$comparePanel.hasClass("open"));
-  });
   $("#compareClose").on("click", () => setCompareOpen(false));
   $("#comparePanel").on("click", "[data-compare-remove]", function () {
     const removedId = String(this.dataset.compareRemove || "");
@@ -1213,25 +1238,27 @@ $(function () {
 
   $document.on("click", ".favorite", function () {
     const $button = $(this);
-    // Search owns its favorite feedback; avoid toggling the same control twice.
-    if ($button.closest("#productResults").length) return;
-    $button.toggleClass("active");
-    const isFavorite = $button.hasClass("active");
-    $button.attr({
-      "aria-pressed": String(isFavorite),
-      "aria-label": isFavorite
-        ? "حذف از علاقه‌مندی‌ها"
-        : "افزودن به علاقه‌مندی‌ها",
-    });
-    $button
-      .find("i")
-      .attr("class", isFavorite ? "bi bi-heart-fill" : "bi bi-heart");
+    const productId = String($button.attr("data-product-id") || $button.closest(".product-card, .showcase-card, .rail-card").find(".add-cart[data-id]").first().attr("data-id") || "");
+    if (!productId) return;
+    cacheProductFromCard($button.closest(".product-card, .showcase-card, .rail-card")[0], productId);
+    const selected = readFavoriteList();
+    const next = selected.includes(productId) ? selected.filter((id) => id !== productId) : [...selected, productId];
+    window.HNUI.storage.set("hn-favorites", JSON.stringify(next));
+    const isFavorite = next.includes(productId);
+    $button.attr("data-product-id", productId).toggleClass("active", isFavorite).attr("aria-pressed", String(isFavorite));
+    $button.attr("aria-label", isFavorite ? "حذف از علاقه‌مندی‌ها" : "افزودن به علاقه‌مندی‌ها");
+    $button.find("i").attr("class", isFavorite ? "bi bi-heart-fill" : "bi bi-heart");
     $("#liveToast .toast-body").text(
       isFavorite
         ? "محصول به علاقه‌مندی‌ها اضافه شد."
         : "محصول از علاقه‌مندی‌ها حذف شد.",
     );
-    bootstrap.Toast.getOrCreateInstance($("#liveToast")[0]).show();
+    const toast = $("#searchToast").length ? $("#searchToast") : $("#liveToast");
+    if (toast.is("#searchToast")) {
+      toast.text(isFavorite ? "محصول به علاقه‌مندی‌ها اضافه شد." : "محصول از علاقه‌مندی‌ها حذف شد.");
+      toast.addClass("show");
+      window.setTimeout(() => toast.removeClass("show"), 1800);
+    } else bootstrap.Toast.getOrCreateInstance(toast[0]).show();
   });
 
   const $productColumns = $(".product-col");
@@ -1350,8 +1377,9 @@ $(function () {
     if (!$image.length || !$cartButton.length) return;
     const productId = String($cartButton.data("id") || "");
     if (!$image.children(".favorite").length) {
-      $image.prepend('<button class="favorite" type="button" aria-label="افزودن به علاقه‌مندی‌ها" aria-pressed="false" title="علاقه‌مندی‌ها"><i class="bi bi-heart" aria-hidden="true"></i></button>');
+      $image.prepend(`<button class="favorite" type="button" data-product-id="${escapeHtml(productId)}" aria-label="افزودن به علاقه‌مندی‌ها" aria-pressed="false" title="علاقه‌مندی‌ها"><i class="bi bi-heart" aria-hidden="true"></i></button>`);
     }
+    $image.children(".favorite").attr("data-product-id", productId);
     if (productId && !$image.find(".compare-trigger[data-product-id]").length) {
       $image.append(
         `<button type="button" class="compare-trigger" data-product-id="${escapeHtml(productId)}" aria-label="افزودن به مقایسه" aria-pressed="false" title="افزودن به مقایسه"><i class="bi bi-arrow-left-right" aria-hidden="true"></i></button>`,
@@ -1363,9 +1391,10 @@ $(function () {
     $cartButton.attr({
       "aria-label": "افزودن به سبد خرید",
       title: "افزودن به سبد خرید",
-    }).appendTo($actions);
+    });
     $card.attr("data-action-dock-ready", "true");
     syncCompareButtons();
+    syncFavoriteButtons();
     if (!$image.find(".quick").length)
       $image.append(
         '<button type="button" class="quick">مشاهده سریع <i class="bi bi-arrow-left"></i></button>',
@@ -1389,6 +1418,7 @@ $(function () {
     event.stopPropagation();
     const productId = String(this.dataset.productId || "");
     if (!productId) return;
+    cacheProductFromCard(this.closest(".product-card, .showcase-card, .rail-card"), productId);
     const selected = readCompareList();
     const next = selected.includes(productId)
       ? selected.filter((id) => id !== productId)
