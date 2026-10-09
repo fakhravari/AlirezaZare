@@ -12,6 +12,13 @@ const state = {
   sort: "recommended",
   visible: 9,
 };
+const filterFields = {
+  brand: { fa: "برند", en: "Brand", slug: "brand" },
+  type: { fa: "گروه محصول", en: "Product group", slug: "product-group" },
+  movement: { fa: "نوع تغذیه", en: "Power type", slug: "power-type" },
+  strap: { fa: "محیط کاربرد", en: "Application environment", slug: "application-environment" },
+  price: { fa: "بازه قیمت", en: "Price range", slug: "price-range" },
+};
 const hasActiveFilters = () =>
   ["brand", "type", "movement", "strap"].some((key) => state[key].size) ||
   state.maxPrice < 60 ||
@@ -66,10 +73,10 @@ function syncUrl() {
   const params = new URLSearchParams();
   Object.entries(filterOptions).forEach(([key, options]) =>
     Object.entries(options).forEach(([id, label]) => {
-      if (state[key].has(label)) params.append(key, id);
+      if (state[key].has(label)) params.append(filterFields[key].slug, id);
     }),
   );
-  if (state.maxPrice < 60) params.set("maxPrice", String(state.maxPrice));
+  if (state.maxPrice < 60) params.set(filterFields.price.slug, String(state.maxPrice));
   if (state.query) params.set("q", state.query);
   if (state.sort !== "recommended") params.set("sort", state.sort);
   const query = params.toString();
@@ -84,16 +91,23 @@ function applyUrlState() {
   const params = new URLSearchParams(location.search);
   Object.keys(filterConfig).forEach((key) => {
     state[key].clear();
-    params.getAll(key).forEach((value) => {
+    const values = [...new Set([
+      ...params.getAll(filterFields[key].slug),
+      ...(filterFields[key].slug === key ? [] : params.getAll(key)),
+    ])];
+    values.forEach((value) => {
       // Accept slug, legacy English brand values, and Persian labels in shared links.
-      const slugValue = Object.hasOwn(filterOptions[key], value) ? filterOptions[key][value] : value;
+      const legacyOption = /^option\d+$/.test(value) ? createFilterOptions(key)[value] : undefined;
+      const slugValue = Object.hasOwn(filterOptions[key], value)
+        ? filterOptions[key][value]
+        : legacyOption || value;
       const label = key === "brand"
         ? (brandPersianLabels[slugValue] ? slugValue : Object.keys(brandPersianLabels).find((brand) => brandPersianLabels[brand] === value) || slugValue)
         : slugValue;
       if (filterConfig[key].includes(label)) state[key].add(label);
     });
   });
-  const price = Number(params.get("maxPrice"));
+  const price = Number(params.get(filterFields.price.slug) ?? params.get("maxPrice"));
   state.maxPrice =
     Number.isFinite(price) && price >= 10 && price <= 60 ? price : 60;
   state.query = params.get("q")?.trim() || "";

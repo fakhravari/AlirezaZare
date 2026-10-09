@@ -1080,7 +1080,7 @@ $(function () {
     $loginEmailStep.addClass("d-none").prop("hidden", true);
     $registerEmailStep.addClass("d-none").prop("hidden", true);
     $emailOtpStep.removeClass("d-none").prop("hidden", false);
-    $emailOtpInput.val("").trigger("focus");
+    $emailOtpInput.val("123456").trigger("focus");
   };
 
   $("#loginEmailForm").on("submit", (event) => {
@@ -1091,7 +1091,8 @@ $(function () {
       $loginEmailError.text("ایمیل معتبر و رمز عبور را وارد کنید.");
       return;
     }
-    $loginEmailError.text("اعتبارسنجی ورود هنوز به سرور متصل نشده است.");
+    $loginEmailError.empty();
+    requestEmailCode("login", email);
   });
 
   $("#registerEmailForm").on("submit", (event) => {
