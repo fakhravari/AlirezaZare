@@ -8,6 +8,10 @@
   --product-card-button-size: 14px;
 }
 
+.product-card-clickable {
+  cursor: pointer;
+}
+
 .product-card,
 .search-product.product-card {
   display: flex;

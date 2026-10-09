@@ -1464,13 +1464,53 @@ $(function () {
     if (root.matches?.(".product-card, .showcase-card, .rail-card")) decorateProductCard(root);
     root.querySelectorAll?.(".product-card, .showcase-card, .rail-card").forEach(decorateProductCard);
   };
+  const detailCardSelector = ".product-card, .showcase-card, .rail-card, .featured-main, .featured-side, .favorite-item-card, .compare-product-card";
+  const detailHrefForCard = (card) => {
+    const productLink = [...card.querySelectorAll("a[href]")].find((link) => {
+      const url = new URL(link.href, window.location.href);
+      return /\/Product\/?$/i.test(url.pathname) && url.searchParams.has("id");
+    });
+    if (productLink) return productLink.href;
+    const cartButton = card.querySelector(".add-cart[data-id]");
+    const productId = String(cartButton?.dataset.id || "");
+    const productName = String(cartButton?.dataset.name || "");
+    const product = (window.HNProducts || []).find((item) =>
+      String(item.id) === productId || (productName && item.name === productName),
+    );
+    return product ? `Product?id=${encodeURIComponent(product.id)}` : "";
+  };
+  const markDetailCards = (root = document) => {
+    const cards = [];
+    if (root.matches?.(detailCardSelector)) cards.push(root);
+    cards.push(...(root.querySelectorAll?.(detailCardSelector) || []));
+    cards.forEach((card) => {
+      const href = detailHrefForCard(card);
+      card.classList.toggle("product-card-clickable", Boolean(href));
+      if (href) card.dataset.productDetailUrl = href;
+      else delete card.dataset.productDetailUrl;
+    });
+  };
   decorateProductCards();
+  markDetailCards();
   const productCardObserver = new MutationObserver((records) => {
     records.forEach((record) => record.addedNodes.forEach((node) => {
-      if (node instanceof Element) decorateProductCards(node);
+      if (node instanceof Element) {
+        decorateProductCards(node);
+        markDetailCards(node);
+        const parentCard = node.closest(detailCardSelector);
+        if (parentCard) markDetailCards(parentCard);
+      }
     }));
   });
   productCardObserver.observe(document.body, { childList: true, subtree: true });
+  document.addEventListener("click", (event) => {
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    if (event.target.closest("a, button, input, select, textarea, summary, [role='button']")) return;
+    if (String(window.getSelection?.() || "").trim()) return;
+    const card = event.target.closest(detailCardSelector);
+    const href = card?.dataset.productDetailUrl;
+    if (href) window.location.assign(href);
+  });
   syncCompareButtons();
 
   $document.on("click", ".compare-trigger[data-product-id]", function (event) {
