@@ -4215,24 +4215,257 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
   }
 }
 
-#productView .product-detail-demo-note {
+.product-price-deal {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
+  justify-content: space-between;
   gap: 8px;
-  margin: 12px 0 14px;
-  padding: 10px 12px;
-  border: 1px solid #e7d8a6;
-  border-radius: 10px;
-  background: #fff9e6;
-  color: #735a16;
+}
+
+.product-price-deal .price-old,
+.product-detail-sale-meta .price-old {
+  color: #87929a !important;
   font-size: 11px;
+  font-weight: 600;
+  text-decoration: line-through;
+  text-decoration-color: #bd6670;
+  text-decoration-thickness: 1.5px;
+}
+
+.product-price-discount {
+  display: inline-flex;
+  min-height: 23px;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #fff0f0;
+  color: #b83242;
+  font-size: 10px;
+  font-weight: 850;
+  white-space: nowrap;
+}
+
+.product-price-current {
+  display: block;
+  color: var(--industrial-navy) !important;
+  font-size: 15px;
+  font-weight: 900;
+  line-height: 1.65;
+  white-space: nowrap;
+}
+
+.product-price-current small {
+  color: var(--industrial-muted) !important;
+  font-size: 10px !important;
+  font-weight: 600;
+}
+
+.search-product.product-card .search-product-price.has-discount {
+  display: grid;
+  gap: 2px;
+  align-content: start;
+}
+
+.search-product-image > .product-discount-badge,
+.product-detail-related-card .product-image > .product-discount-badge {
+  position: absolute;
+  z-index: 6;
+  top: 52px;
+  right: 12px;
+  display: inline-flex;
+  min-height: 26px;
+  align-items: center;
+  padding: 3px 10px;
+  border: 1px solid rgba(255, 255, 255, .65);
+  border-radius: 999px;
+  background: #b83242;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(56, 11, 18, .2);
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.product-detail-sale-meta {
+  display: flex !important;
+  align-items: center;
+  justify-content: flex-start !important;
+  gap: 10px !important;
+  margin-top: 8px;
+}
+
+#productView .product-detail-price > .product-price-current {
+  margin-top: 3px;
+  font-size: 23px;
+}
+
+#productView .product-detail-related-card .product-info > p {
+  display: grid;
+  gap: 2px;
+  margin-top: auto;
+}
+
+#productView .product-feedback-admin-reply {
+  margin: 14px 0 0;
+  padding: 13px 15px;
+  border: 1px solid #dce6eb;
+  border-right: 3px solid var(--industrial-yellow-dark);
+  border-radius: 12px;
+  background: linear-gradient(135deg, #f5f9fb, #fff);
+}
+
+#productView .product-feedback-admin-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+#productView .product-feedback-admin-meta > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--industrial-navy);
+  font-size: 12px;
+  font-weight: 850;
+}
+
+#productView .product-feedback-admin-meta > span i {
+  color: #9a7500;
+  font-size: 15px;
+}
+
+#productView .product-feedback-admin-meta > small {
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #e8f0f4;
+  color: #536a79;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+#productView .product-feedback-admin-reply > p {
+  margin: 8px 0 0;
+  color: #465b69;
+  font-size: 12px;
+  line-height: 1.95;
+}
+
+#productView .product-detail-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 9px;
+  margin-bottom: 14px;
+}
+
+#productView .product-detail-meta > .product-meta-pill {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 11px;
+  border: 1px solid #e4e9ec;
+  border-radius: 11px;
+  background: #f8fafb;
+  color: var(--industrial-navy);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+#productView .product-detail-meta > .product-meta-pill > i {
+  color: #a47b00;
+  font-size: 15px;
+}
+
+#productView .product-detail-meta .product-meta-pill > span {
+  display: grid;
+  gap: 1px;
+}
+
+#productView .product-detail-meta .product-meta-pill small {
+  color: #75828b;
+  font-size: 9px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+#productView .product-detail-meta > .product-meta-code {
+  direction: ltr;
+  text-align: left;
+}
+
+#productView .product-detail-summary > h2 {
+  margin: 13px 0 1px;
+  font-size: clamp(25px, 2.5vw, 34px);
+  font-weight: 900;
+  line-height: 1.55;
+  letter-spacing: -.035em;
+}
+
+#productView .product-detail-english-name {
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 0 13px;
+  color: #7a8790;
+  font-family: Arial, sans-serif;
+  font-size: clamp(14px, 1.35vw, 17px);
+  font-weight: 700;
+  line-height: 1.6;
+  letter-spacing: .025em;
+  overflow-wrap: anywhere;
+}
+
+#productView :is(.product-detail-content-panel, .product-detail-related) > header > span {
+  margin-bottom: 6px;
+  font-size: 12px;
+}
+
+#productView :is(.product-detail-content-panel, .product-detail-related) > header h2 {
+  font-size: clamp(21px, 2.2vw, 27px);
+  font-weight: 900;
+  line-height: 1.55;
+  letter-spacing: -.025em;
+}
+
+#productView .product-detail-tabs > a {
+  font-size: 13px;
+  font-weight: 800;
+}
+
+#productView .product-expert-grid strong,
+#productView .product-spec-group h3 {
+  font-size: 14px;
+  font-weight: 850;
+}
+
+#productView .product-spec-group :is(dt, dd) {
+  font-size: 12.5px;
   line-height: 1.8;
 }
 
-#productView .product-detail-demo-note i {
-  flex: 0 0 auto;
-  margin-top: 2px;
-  color: #a37b00;
+@media (max-width: 575px) {
+  #productView .product-detail-summary {
+    padding: 16px;
+  }
+
+  #productView .product-detail-summary > h2 {
+    font-size: clamp(23px, 6vw, 28px);
+  }
+
+  #productView .product-detail-english-name {
+    font-size: 14px;
+  }
+
+  #productView .product-detail-meta > .product-meta-pill {
+    min-height: 36px;
+    padding: 5px 8px;
+    font-size: 11px;
+  }
+
+  #productView :is(.product-detail-content-panel, .product-detail-related) > header h2 {
+    font-size: 21px;
+  }
 }
 
 #productView .product-detail-intro-points {
@@ -4256,17 +4489,6 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
   flex: 0 0 auto;
   margin-top: 4px;
   color: #21845b;
-}
-
-#productView .product-detail-sample-label {
-  display: inline-flex;
-  margin-top: 8px;
-  padding: 4px 9px;
-  border-radius: 999px;
-  background: #fff7df;
-  color: #806315;
-  font-size: 10px;
-  font-weight: 700;
 }
 
 #productView .product-feedback-form > .product-feedback-submit {

@@ -110,6 +110,26 @@ function getFiltered() {
 function card(p) {
   return `<article class="search-product product-card"><div class="search-product-image product-image"><a href="Product?id=${p.id}"><img src="${p.image}" alt="${p.name}" loading="lazy" decoding="async"></a><button class="favorite" type="button" aria-label="افزودن به علاقه‌مندی‌ها" aria-pressed="false"><i class="bi bi-heart"></i></button><button class="compare-trigger" type="button" data-product-id="${p.id}" aria-label="افزودن به مقایسه" aria-pressed="false" title="افزودن به مقایسه"><i class="bi bi-arrow-left-right" aria-hidden="true"></i></button>${p.badge ? `<span class="badge-best">${p.badge}</span>` : ""}</div><div class="search-product-body product-info"><div class="search-product-heading"><small>${p.brand} · HN-${String(p.id).padStart(3, "0")}</small><h3><a href="Product?id=${p.id}">${p.name}</a></h3></div><p class="search-product-price">${fa(p.price * 1000000)} <small>تومان</small></p></div><button class="search-add-cart add-cart" type="button" data-id="${p.id}" data-name="${p.name}" data-price="${p.price * 1000000}" data-image="${p.image}"><i class="bi bi-bag-plus"></i> افزودن به سبد خرید</button></article>`;
 }
+function applyDiscountDisplay(root) {
+  root.querySelectorAll(".search-product").forEach((productCard) => {
+    const productId = Number(productCard.querySelector(".search-add-cart")?.dataset.id);
+    const product = products.find((item) => item.id === productId);
+    const discount = Number(product?.discountPercent) || 0;
+    if (!product || discount <= 0 || discount >= 100) return;
+
+    const currentPrice = Math.round(product.price * 1000000);
+    const previousPrice = Math.round(currentPrice / (1 - discount / 100));
+    const price = productCard.querySelector(".search-product-price");
+    if (price) {
+      price.classList.add("has-discount");
+      price.innerHTML = '<span class="product-price-deal"><del class="price-old">' + fa(previousPrice) + '</del><b class="product-price-discount">٪' + fa(discount) + '</b></span><strong class="product-price-current">' + fa(currentPrice) + ' <small>تومان</small></strong>';
+    }
+    const image = productCard.querySelector(".search-product-image");
+    if (image && !image.querySelector(".product-discount-badge")) {
+      image.insertAdjacentHTML("beforeend", '<span class="product-discount-badge">٪' + fa(discount) + ' تخفیف</span>');
+    }
+  });
+}
 function scrollToResultsStart() {
   const results = document.querySelector(".results-area");
   if (!results) return;
@@ -129,6 +149,7 @@ function render(reset = false, returnToStart = false) {
   const shown = list.slice(0, state.visible);
   const finished = list.length > 0 && state.visible >= list.length;
   $("#productResults").innerHTML = shown.map(card).join("");
+  applyDiscountDisplay($("#productResults"));
   const comparedProducts = new Set(
     window.HNUI?.storage.json("hn-compare", []).map(String) || [],
   );
