@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const ui=window.HNUI;
   const read=key=>{const v=ui.storage.json(key,[]);return Array.isArray(v)?v.filter(x=>x&&typeof x==='object'):[]};
   const esc=v=>ui.escapeHtml(v);
-  const addressKey='hn-delivery-addresses', questionKey='hn-question-drafts';
+  const addressKey='hn-delivery-addresses';
   const dialog=document.querySelector('#addressDialog'),form=document.querySelector('#addressForm');
   form.querySelector('.address-form-grid').append(form.querySelector('[name="postal"]').closest('label'));
   let editing=null;
@@ -34,38 +34,27 @@ document.addEventListener('DOMContentLoaded', () => {
     if(!save(addressKey,next)){document.querySelector('#addressFormStatus').textContent='ذخیره آدرس ممکن نشد.';return}
     ui.storage.set('hn-selected-address',address.id);renderAddresses();dialog.close();status.textContent='آدرس ذخیره و برای تحویل انتخاب شد.';
   };
-  const products=window.HNProducts||[];
-  const productSelect=document.querySelector('#questionProduct');
-  productSelect.add(new Option('انتخاب محصول',''));
-  products.forEach(p=>productSelect.add(new Option(p.name,String(p.id))));
-  function renderQuestions(){
-    const host=document.querySelector('#questionList'), drafts=read(questionKey);
-    host.innerHTML=drafts.length?drafts.map(d=>`<article class="flow-card address-account-card"><h3>${esc(d.kind)} درباره ${esc(products.find(p=>String(p.id)===d.product)?.name||'محصول')}</h3><small>پیش‌نویس شخصی · ارسال نشده</small><p class="draft-text">${esc(d.message)}</p><button data-draft-delete="${esc(d.id)}">حذف پیش‌نویس</button></article>`).join(''):'<p class="account-empty-note">هنوز پیش‌نویسی ذخیره نکرده‌اید.</p>';
-    host.querySelectorAll('[data-draft-delete]').forEach(b=>b.onclick=()=>{if(save(questionKey,drafts.filter(d=>d.id!==b.dataset.draftDelete)))renderQuestions()});
-  }
   function renderOverview(){
     const values={
       statOrders:document.querySelectorAll('.profile-order-card').length,
       statAddresses:read(addressKey).length,
       statFavorites:read('hn-favorites').length,
-      statQuestions:read(questionKey).length
     };
     Object.entries(values).forEach(([id,value])=>{
       const element=document.querySelector(`#${id}`);
       if(element)element.textContent=ui.formatNumber(value);
     });
   }
-  document.querySelector('#questionForm').onsubmit=e=>{e.preventDefault();const draft=Object.fromEntries(new FormData(e.target));draft.message=draft.message.trim();if(!draft.message)return;draft.id=crypto.randomUUID();if(save(questionKey,[draft,...read(questionKey)])){renderQuestions();e.target.reset();status.textContent='پیش‌نویس ذخیره شد؛ به فروشگاه ارسال نشده است.'}};
   function navigate(){
     renderOverview();
-    const routeSection={orders:'orders',addresses:'addresses',favorites:'favorites',questions:'questions'};
+    const routeSection={orders:'orders',addresses:'addresses',favorites:'favorites'};
     const routeName=location.pathname.split('/').filter(Boolean).pop()?.toLowerCase();
     const hashSection=location.hash.slice(1);
-    const section=routeSection[routeName]||(['orders','addresses','favorites','questions'].includes(hashSection)?hashSection:'overview');
+    const section=routeSection[routeName]||(['orders','addresses','favorites'].includes(hashSection)?hashSection:'overview');
     document.querySelectorAll('.account-section').forEach(el=>el.hidden=el.id!==section);
     document.querySelectorAll('.account-tabs a').forEach(a=>{const target=a.pathname.split('/').filter(Boolean).pop()?.toLowerCase();const active=section==='overview'?target==='profile':routeSection[target]===section;if(active)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
   }
   window.addEventListener('hashchange',navigate);
-  window.addEventListener('storage',()=>{renderAddresses();renderQuestions();renderOverview()});
-  renderAddresses();renderQuestions();renderOverview();navigate();
+  window.addEventListener('storage',()=>{renderAddresses();renderOverview()});
+  renderAddresses();renderOverview();navigate();
 });

@@ -65,49 +65,55 @@
 
 .account-tabs {
   display: grid;
-  gap: 7px;
+  gap: 2px;
   margin: 12px 0;
 }
 
 .account-tabs a {
   display: grid;
-  min-height: 66px;
-  padding: 9px 10px;
-  grid-template-columns: 40px minmax(0, 1fr) 18px;
-  gap: 10px;
+  min-height: 54px;
+  padding: 6px 8px;
+  grid-template-columns: 36px minmax(0, 1fr) 16px;
+  gap: 9px;
   align-items: center;
   border: 1px solid transparent;
-  border-radius: 14px;
+  border-bottom-color: #edf1f4;
+  border-radius: 10px;
   color: var(--industrial-steel);
   transition: 0.22s ease;
 }
 
 .account-tabs a > i:first-child {
   display: grid;
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   place-items: center;
-  border-radius: 12px;
-  background: var(--industrial-bg);
-  color: var(--industrial-navy);
-  font-size: 18px;
+  border-radius: 10px;
+  background: #f4f6f8;
+  color: #64768a;
+  font-size: 16px;
 }
 
 .account-tabs a > span {
   display: flex;
   min-width: 0;
-  flex-direction: column;
-  gap: 3px;
+  align-items: center;
 }
 
 .account-tabs a strong {
   color: var(--industrial-navy);
-  font-size: 14px;
+  font-size: 13px;
+  font-weight: 650;
 }
 
 .account-tabs a small {
+  display: none !important;
   color: var(--industrial-steel);
   font-size: 12px;
+}
+
+.account-tabs a[href*="Questions"] {
+  display: none !important;
 }
 
 .account-tabs a > i:last-child {
@@ -117,20 +123,20 @@
 }
 
 .account-tabs a:hover {
-  border-color: rgba(113, 135, 166, 0.25);
-  background: rgba(255, 255, 255, 0.72);
-  transform: translateX(-2px);
+  border-color: transparent;
+  background: #f5f7f9;
+  transform: none;
 }
 
 .account-tabs a[aria-current] {
-  border-color: rgba(190, 156, 91, 0.36);
-  background: #fff;
-  box-shadow: 0 8px 22px rgba(16, 42, 86, 0.09);
+  border-color: #e8edf2;
+  background: #f7f9fb;
+  box-shadow: inset -2px 0 var(--industrial-navy);
 }
 
 .account-tabs a[aria-current] > i:first-child {
-  background: linear-gradient(145deg, var(--industrial-navy), var(--industrial-navy));
-  color: color-mix(in srgb, var(--industrial-yellow) 16%, white);
+  background: #eaf0f5;
+  color: var(--industrial-navy);
 }
 
 .account-tabs a[aria-current] strong {
@@ -138,8 +144,8 @@
 }
 
 .account-tabs a[aria-current] > i:last-child {
-  color: var(--industrial-yellow-dark);
-  transform: translateX(-3px);
+  color: #9aa8b6;
+  transform: none;
 }
 
 .account-sidebar-help {
@@ -1019,8 +1025,25 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop { background: rgba(3, 13
 }
 
 #orders .profile-order-card footer {
-  border-top-color: #edf0f3;
-  background: #f8fafb;
+  border-top: 2px solid var(--industrial-yellow) !important;
+  background: #f8fafb !important;
+  color: var(--industrial-muted) !important;
+}
+
+#orders .profile-order-card footer > span {
+  color: var(--industrial-muted) !important;
+}
+
+#orders .profile-order-card footer > span i {
+  color: var(--industrial-yellow-dark) !important;
+}
+
+#orders .profile-order-card footer > a {
+  color: var(--industrial-navy) !important;
+}
+
+#orders .profile-order-card footer > a:hover {
+  color: var(--industrial-yellow-dark) !important;
 }
 
 #orders .order-status.is-shipping {
@@ -1036,6 +1059,61 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop { background: rgba(3, 13
 #orders .order-status.is-delivered {
   background: #eaf5ee;
   color: #34704b;
+}
+
+#orders .profile-order-card {
+  transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+}
+
+#orders .profile-order-card:hover {
+  border-color: #d7e0e8;
+  box-shadow: 0 14px 28px rgba(16, 42, 67, .09);
+  transform: translateY(-2px);
+}
+
+#orders .order-body {
+  min-height: 88px;
+  background: linear-gradient(105deg, #fff 0%, #f8fafc 100%);
+}
+
+#orders .order-products {
+  gap: 12px;
+}
+
+#orders .order-product-icon {
+  display: grid;
+  flex: 0 0 48px;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  border: 1px solid #e5eaf0;
+  border-radius: 14px;
+  background: #f3f6f8;
+  color: var(--industrial-navy);
+  font-size: 20px;
+}
+
+#orders .order-total {
+  min-width: 164px;
+  padding: 9px 12px;
+  border: 1px solid #e8edf1;
+  border-radius: 12px;
+  background: #fff;
+}
+
+#orders .order-total small {
+  margin-top: 0;
+}
+
+#orders .profile-order-card footer {
+  min-height: 42px;
+  border-top-width: 1px !important;
+}
+
+@media (max-width: 640px) {
+  #orders .order-total {
+    width: 100%;
+  }
 }
 
 #orders .order-products img {
@@ -1081,12 +1159,15 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop { background: rgba(3, 13
 }
 
 .account-tabs a[aria-current] > i:first-child {
-  border-color: var(--color-navy);
-  background: var(--color-navy);
-  color: var(--color-gold);
+  border-color: #e3eaf0;
+  background: #eaf0f5;
+  color: var(--color-navy);
 }
 
-.account-tabs a[aria-current] > i:last-child,
+.account-tabs a[aria-current] > i:last-child {
+  color: #9aa8b6;
+}
+
 .overview-panel-title i,
 .overview-guide > a > i:first-child {
   color: #b98d00;
@@ -1136,40 +1217,61 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop { background: rgba(3, 13
   min-width: 0;
   flex-direction: column;
   gap: 0;
-  padding: 12px;
+  overflow: hidden;
+  padding: 0;
+  border-color: #e1e7ec;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(16, 42, 67, .06);
+  transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+}
+
+#favoritesView .favorite-item-card:hover {
+  border-color: #cbd7e1;
+  box-shadow: 0 14px 30px rgba(16, 42, 67, .1);
+  transform: translateY(-3px);
 }
 
 #favoritesView .favorite-item-card > a {
   display: flex;
   min-width: 0;
   flex-direction: column;
+  align-items: stretch;
   color: inherit;
   text-decoration: none;
 }
 
 #favoritesView .favorite-item-card .flow-photo {
+  display: block;
   width: 100%;
-  height: 180px;
+  height: clamp(210px, 22vw, 270px);
   flex: 0 0 auto;
+  max-height: none;
+  border: 0;
+  border-radius: 0;
+  background: #edf1f4;
   object-fit: cover;
+  object-position: center;
 }
 
 #favoritesView .favorite-item-card h2 {
   min-height: 58px;
-  margin: 10px 2px 4px;
+  margin: 12px 16px 4px;
+  text-align: right;
   font-size: 16px;
   line-height: 1.8;
 }
 
 #favoritesView .favorite-item-card > p {
-  margin: 5px 2px 12px;
+  margin: 5px 16px 14px;
+  text-align: right;
   font-size: 15px;
 }
 
 #favoritesView .favorite-item-card .list-remove-button {
-  width: 100%;
+  width: calc(100% - 28px);
   min-height: 40px;
-  margin-top: auto;
+  margin: auto 14px 14px;
   border-radius: 11px;
 }
 

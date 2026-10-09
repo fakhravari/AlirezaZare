@@ -21,9 +21,6 @@ public sealed class ProfileController : PageController
     [HttpGet("Favorites")]
     public Task<ViewResult> Favorites() => ProfilePage("علاقه‌مندی‌های من", "کالاهای ذخیره‌شده شما");
 
-    [HttpGet("Questions")]
-    public Task<ViewResult> Questions() => ProfilePage("دیدگاه‌ها و پرسش‌ها", "مدیریت پیش‌نویس دیدگاه‌ها و پرسش‌ها");
-
     private Task<ViewResult> ProfilePage(string title, string description)
     {
         PageModel model = new(new SeoModel($"{title} | کمپانی علی‌رضا زارع", description), "~/Views/Account/Index.cshtml");

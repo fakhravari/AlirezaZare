@@ -69,11 +69,14 @@
         ["سفارش‌های من", "Profile/Orders"],
         ["آدرس‌های من", "Profile/Addresses"],
         ["لیست علاقه‌مندی‌ها", "Profile/Favorites"],
-        ["دیدگاه‌ها و پرسش‌ها", "Profile/Questions"],
       ]);
       if (!nav.querySelector('a[href="Profile"]')) {
         nav.insertAdjacentHTML("afterbegin", '<a href="Profile"><i class="bi bi-person"></i><span>پروفایل من</span></a>');
       }
+      nav.querySelectorAll('a[href*="Questions"], a[href*="#questions"]').forEach((link) => link.remove());
+      nav.querySelectorAll("a").forEach((link) => {
+        if (link.textContent.includes("دیدگاه‌ها و پرسش‌ها")) link.remove();
+      });
       nav.querySelectorAll("a").forEach((link) => {
         const route = routes.get(link.textContent.trim());
         if (route) link.href = route;

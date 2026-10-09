@@ -7,7 +7,6 @@
         "Orders" => "سفارش‌های من",
         "Addresses" => "آدرس‌های من",
         "Favorites" => "علاقه‌مندی‌ها",
-        "Questions" => "دیدگاه‌ها و پرسش‌ها",
         _ => "حساب کاربری"
     };
     var profileIcon = profileSection switch
@@ -15,7 +14,6 @@
         "Orders" => "bi-bag-check",
         "Addresses" => "bi-geo-alt",
         "Favorites" => "bi-heart",
-        "Questions" => "bi-chat-square-text",
         _ => "bi-person"
     };
 }
@@ -28,7 +26,7 @@
                 <i class="bi bi-house-door" aria-hidden="true"></i><span>خانه</span>
             </a>
         </li>
-        @if (profileSection is "Orders" or "Addresses" or "Favorites" or "Questions")
+        @if (profileSection is "Orders" or "Addresses" or "Favorites")
         {
             <li class="profile-breadcrumb-parent">
                 <i class="bi bi-chevron-left" aria-hidden="true"></i>
@@ -71,12 +69,12 @@
         <nav class="account-tabs" aria-label="بخش‌های حساب">
             <a href="Profile">
                 <i class="bi bi-person"></i>
-                <span><strong>پروفایل من</strong><small>نمای کلی حساب کاربری</small></span><i class="bi bi-chevron-left"></i>
+                <span><strong>پروفایل من</strong></span><i class="bi bi-chevron-left"></i>
             </a>
             <a href="Profile/Orders">
                 <i class="bi bi-bag-check"></i>
                 <span>
-                    <strong>سفارش‌های من</strong><small>مشاهده سوابق خرید</small>
+                    <strong>سفارش‌های من</strong>
                 </span><i class="bi bi-chevron-left"></i>
             </a>
             <a href="Profile/Addresses">
@@ -88,13 +86,7 @@
             <a href="Profile/Favorites">
                 <i class="bi bi-heart"></i>
                 <span>
-                    <strong>علاقه‌مندی‌ها</strong><small>کالاهای ذخیره‌شده</small>
-                </span><i class="bi bi-chevron-left"></i>
-            </a>
-            <a href="Profile/Questions">
-                <i class="bi bi-chat-square-text"></i>
-                <span>
-                    <strong>دیدگاه‌ها و پرسش‌ها</strong><small>پیش‌نویس پیام‌ها</small>
+                    <strong>علاقه‌مندی‌ها</strong>
                 </span><i class="bi bi-chevron-left"></i>
             </a>
         </nav>
@@ -138,14 +130,6 @@
                     </span>
                     <div>
                         <strong id="statFavorites">۰</strong><small>کالای موردعلاقه</small>
-                    </div>
-                </article>
-                <article>
-                    <span class="stat-icon stat-questions">
-                        <i class="bi bi-chat-square-text"></i>
-                    </span>
-                    <div>
-                        <strong id="statQuestions">۰</strong><small>پیش‌نویس پیام</small>
                     </div>
                 </article>
             </div>
@@ -193,7 +177,7 @@
                     </header>
                     <div class="order-body">
                         <div class="order-products">
-                            <img src="ClockTemplate/images/products/tool-hammer-drill.png" alt="نوا کرونو">
+                            <span class="order-product-icon" aria-hidden="true"><i class="bi bi-tools"></i></span>
                             <div><strong>نوا کرونو</strong><small>۱ کالا · پرداخت آنلاین</small></div>
                         </div>
                         <div class="order-total"><small>مبلغ سفارش</small><strong>۲۴٬۵۰۰٬۰۰۰ تومان</strong></div>
@@ -207,8 +191,7 @@
                     </header>
                     <div class="order-body">
                         <div class="order-products order-products-multiple">
-                            <img src="ClockTemplate/images/products/tool-multimeter-kit.png" alt="آرمان کلاسیک">
-                            <img src="ClockTemplate/images/products/tool-soldering-station.png" alt="آبان استیل">
+                            <span class="order-product-icon" aria-hidden="true"><i class="bi bi-box-seam"></i></span>
                             <div><strong>آرمان کلاسیک و آبان استیل</strong><small>۲ کالا · پرداخت آنلاین</small></div>
                         </div>
                         <div class="order-total"><small>مبلغ سفارش</small><strong>۴۶٬۰۰۰٬۰۰۰ تومان</strong></div>
@@ -222,7 +205,7 @@
                     </header>
                     <div class="order-body">
                         <div class="order-products">
-                            <img src="ClockTemplate/images/products/tool-led-worklight.png" alt="میراث اتوماتیک">
+                            <span class="order-product-icon" aria-hidden="true"><i class="bi bi-lightning-charge"></i></span>
                             <div><strong>میراث اتوماتیک</strong><small>۱ کالا · پرداخت آنلاین</small></div>
                         </div>
                         <div class="order-total"><small>مبلغ سفارش</small><strong>۲۶٬۰۰۰٬۰۰۰ تومان</strong></div>
@@ -231,37 +214,37 @@
                 </article>
                 <article class="profile-order-card">
                     <header><div><span class="order-status is-delivered"><i class="bi bi-check2-circle"></i> تحویل‌شده</span><strong>سفارش HN-۱۴۰۵۰۵۸۵</strong></div><time datetime="2026-08-17">۲۶ مرداد ۱۴۰۵</time></header>
-                    <div class="order-body"><div class="order-products"><img src="ClockTemplate/images/products/tool-soldering-station.png" alt="آبان استیل"><div><strong>آبان استیل</strong><small>۱ کالا · پرداخت آنلاین</small></div></div><div class="order-total"><small>مبلغ سفارش</small><strong>۱۸٬۷۰۰٬۰۰۰ تومان</strong></div></div>
+                    <div class="order-body"><div class="order-products"><span class="order-product-icon" aria-hidden="true"><i class="bi bi-tools"></i></span><div><strong>آبان استیل</strong><small>۱ کالا · پرداخت آنلاین</small></div></div><div class="order-total"><small>مبلغ سفارش</small><strong>۱۸٬۷۰۰٬۰۰۰ تومان</strong></div></div>
                     <footer><span><i class="bi bi-check2-circle"></i> سفارش با موفقیت تحویل شد</span><a href="Product?id=3">خرید مجدد <i class="bi bi-arrow-left"></i></a></footer>
                 </article>
                 <article class="profile-order-card">
                     <header><div><span class="order-status is-delivered"><i class="bi bi-check2-circle"></i> تحویل‌شده</span><strong>سفارش HN-۱۴۰۵۰۵۷۲</strong></div><time datetime="2026-08-08">۱۷ مرداد ۱۴۰۵</time></header>
-                    <div class="order-body"><div class="order-products order-products-multiple"><img src="ClockTemplate/images/products/tool-hammer-drill.png" alt="نوا کرونو"><img src="ClockTemplate/images/products/tool-multimeter-kit.png" alt="آرمان کلاسیک"><div><strong>نوا کرونو و آرمان کلاسیک</strong><small>۲ کالا · پرداخت آنلاین</small></div></div><div class="order-total"><small>مبلغ سفارش</small><strong>۵۱٬۲۰۰٬۰۰۰ تومان</strong></div></div>
+                    <div class="order-body"><div class="order-products order-products-multiple"><span class="order-product-icon" aria-hidden="true"><i class="bi bi-box-seam"></i></span><div><strong>نوا کرونو و آرمان کلاسیک</strong><small>۲ کالا · پرداخت آنلاین</small></div></div><div class="order-total"><small>مبلغ سفارش</small><strong>۵۱٬۲۰۰٬۰۰۰ تومان</strong></div></div>
                     <footer><span><i class="bi bi-check2-circle"></i> سفارش با موفقیت تحویل شد</span><a href="Product?id=1">خرید مجدد <i class="bi bi-arrow-left"></i></a></footer>
                 </article>
                 <article class="profile-order-card">
                     <header><div><span class="order-status is-delivered"><i class="bi bi-check2-circle"></i> تحویل‌شده</span><strong>سفارش HN-۱۴۰۵۰۵۴۰</strong></div><time datetime="2026-07-30">۸ مرداد ۱۴۰۵</time></header>
-                    <div class="order-body"><div class="order-products"><img src="ClockTemplate/images/products/tool-led-worklight.png" alt="میراث اتوماتیک"><div><strong>میراث اتوماتیک</strong><small>۱ کالا · پرداخت آنلاین</small></div></div><div class="order-total"><small>مبلغ سفارش</small><strong>۲۹٬۸۰۰٬۰۰۰ تومان</strong></div></div>
+                    <div class="order-body"><div class="order-products"><span class="order-product-icon" aria-hidden="true"><i class="bi bi-lightning-charge"></i></span><div><strong>میراث اتوماتیک</strong><small>۱ کالا · پرداخت آنلاین</small></div></div><div class="order-total"><small>مبلغ سفارش</small><strong>۲۹٬۸۰۰٬۰۰۰ تومان</strong></div></div>
                     <footer><span><i class="bi bi-check2-circle"></i> سفارش با موفقیت تحویل شد</span><a href="Product?id=5">خرید مجدد <i class="bi bi-arrow-left"></i></a></footer>
                 </article>
                 <article class="profile-order-card">
                     <header><div><span class="order-status is-delivered"><i class="bi bi-check2-circle"></i> تحویل‌شده</span><strong>سفارش HN-۱۴۰۵۰۴۹۸</strong></div><time datetime="2026-07-21">۳۰ تیر ۱۴۰۵</time></header>
-                    <div class="order-body"><div class="order-products"><img src="ClockTemplate/images/products/tool-multimeter-kit.png" alt="آرمان کلاسیک"><div><strong>آرمان کلاسیک</strong><small>۱ کالا · پرداخت آنلاین</small></div></div><div class="order-total"><small>مبلغ سفارش</small><strong>۲۲٬۴۰۰٬۰۰۰ تومان</strong></div></div>
+                    <div class="order-body"><div class="order-products"><span class="order-product-icon" aria-hidden="true"><i class="bi bi-speedometer2"></i></span><div><strong>آرمان کلاسیک</strong><small>۱ کالا · پرداخت آنلاین</small></div></div><div class="order-total"><small>مبلغ سفارش</small><strong>۲۲٬۴۰۰٬۰۰۰ تومان</strong></div></div>
                     <footer><span><i class="bi bi-check2-circle"></i> سفارش با موفقیت تحویل شد</span><a href="Product?id=2">خرید مجدد <i class="bi bi-arrow-left"></i></a></footer>
                 </article>
                 <article class="profile-order-card">
                     <header><div><span class="order-status is-delivered"><i class="bi bi-check2-circle"></i> تحویل‌شده</span><strong>سفارش HN-۱۴۰۵۰۴۶۱</strong></div><time datetime="2026-07-08">۱۷ تیر ۱۴۰۵</time></header>
-                    <div class="order-body"><div class="order-products order-products-multiple"><img src="ClockTemplate/images/products/tool-soldering-station.png" alt="آبان استیل"><img src="ClockTemplate/images/products/tool-led-worklight.png" alt="میراث اتوماتیک"><div><strong>آبان استیل و میراث اتوماتیک</strong><small>۲ کالا · پرداخت آنلاین</small></div></div><div class="order-total"><small>مبلغ سفارش</small><strong>۴۳٬۶۰۰٬۰۰۰ تومان</strong></div></div>
+                    <div class="order-body"><div class="order-products order-products-multiple"><span class="order-product-icon" aria-hidden="true"><i class="bi bi-box-seam"></i></span><div><strong>آبان استیل و میراث اتوماتیک</strong><small>۲ کالا · پرداخت آنلاین</small></div></div><div class="order-total"><small>مبلغ سفارش</small><strong>۴۳٬۶۰۰٬۰۰۰ تومان</strong></div></div>
                     <footer><span><i class="bi bi-check2-circle"></i> سفارش با موفقیت تحویل شد</span><a href="Product?id=3">خرید مجدد <i class="bi bi-arrow-left"></i></a></footer>
                 </article>
                 <article class="profile-order-card">
                     <header><div><span class="order-status is-delivered"><i class="bi bi-check2-circle"></i> تحویل‌شده</span><strong>سفارش HN-۱۴۰۵۰۴۲۲</strong></div><time datetime="2026-06-22">۱ تیر ۱۴۰۵</time></header>
-                    <div class="order-body"><div class="order-products"><img src="ClockTemplate/images/products/tool-hammer-drill.png" alt="نوا کرونو"><div><strong>نوا کرونو</strong><small>۱ کالا · پرداخت آنلاین</small></div></div><div class="order-total"><small>مبلغ سفارش</small><strong>۲۵٬۹۰۰٬۰۰۰ تومان</strong></div></div>
+                    <div class="order-body"><div class="order-products"><span class="order-product-icon" aria-hidden="true"><i class="bi bi-tools"></i></span><div><strong>نوا کرونو</strong><small>۱ کالا · پرداخت آنلاین</small></div></div><div class="order-total"><small>مبلغ سفارش</small><strong>۲۵٬۹۰۰٬۰۰۰ تومان</strong></div></div>
                     <footer><span><i class="bi bi-check2-circle"></i> سفارش با موفقیت تحویل شد</span><a href="Product?id=1">خرید مجدد <i class="bi bi-arrow-left"></i></a></footer>
                 </article>
                 <article class="profile-order-card">
                     <header><div><span class="order-status is-delivered"><i class="bi bi-check2-circle"></i> تحویل‌شده</span><strong>سفارش HN-۱۴۰۵۰۳۸۹</strong></div><time datetime="2026-06-09">۱۹ خرداد ۱۴۰۵</time></header>
-                    <div class="order-body"><div class="order-products"><img src="ClockTemplate/images/products/tool-led-worklight.png" alt="میراث اتوماتیک"><div><strong>میراث اتوماتیک</strong><small>۱ کالا · پرداخت آنلاین</small></div></div><div class="order-total"><small>مبلغ سفارش</small><strong>۳۱٬۵۰۰٬۰۰۰ تومان</strong></div></div>
+                    <div class="order-body"><div class="order-products"><span class="order-product-icon" aria-hidden="true"><i class="bi bi-lightning-charge"></i></span><div><strong>میراث اتوماتیک</strong><small>۱ کالا · پرداخت آنلاین</small></div></div><div class="order-total"><small>مبلغ سفارش</small><strong>۳۱٬۵۰۰٬۰۰۰ تومان</strong></div></div>
                     <footer><span><i class="bi bi-check2-circle"></i> سفارش با موفقیت تحویل شد</span><a href="Product?id=5">خرید مجدد <i class="bi bi-arrow-left"></i></a></footer>
                 </article>
             </div>
@@ -275,20 +258,6 @@
         <section id="favorites" class="account-section">
             <h2>لیست علاقه‌مندی‌ها</h2>
             <div id="favoritesView"></div>
-        </section>
-        <section id="questions" class="account-section">
-            <h2>دیدگاه‌ها و پرسش‌ها</h2>
-            <form id="questionForm" class="flow-card">
-                <label for="questionProduct">محصول<select id="questionProduct" name="product" required></select></label>
-                <label>
-                    نوع پیام
-                    <select name="kind">
-                        <option>پرسش</option><option>دیدگاه</option>
-                    </select>
-                </label><label>متن پیام<textarea name="message" maxlength="2000" rows="4" required placeholder="پرسش یا تجربه خود را بنویسید"></textarea></label><button class="flow-button">ذخیره پیش‌نویس</button>
-                <p>پیش‌نویس فقط برای شما ذخیره می‌شود؛ برای دریافت پاسخ از فروشگاه با پشتیبانی تماس بگیرید.</p>
-            </form>
-            <div id="questionList"></div>
         </section>
         <p id="accountStatus" role="status"></p>
     </div>

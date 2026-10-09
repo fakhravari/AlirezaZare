@@ -9,6 +9,9 @@ document.addEventListener("DOMContentLoaded", () => {
     "beforeend",
     '<aside class="shared-account-card shared-account-popover"><div class="account-user"><span class="account-avatar">م</span><div><strong>محمدحسین فخراوری</strong><small>مشتری کمپانی علی‌رضا زارع</small></div><i class="bi bi-chevron-left"></i></div><nav class="account-links"><a href="Profile"><i class="bi bi-person"></i><span>پروفایل من</span></a><a href="Profile/Orders"><i class="bi bi-bag"></i><span>سفارش‌های من</span><b>۰</b></a><a href="Profile/Addresses"><i class="bi bi-signpost-2"></i><span>آدرس‌های من</span></a><a href="Profile/Favorites"><i class="bi bi-heart"></i><span>لیست علاقه‌مندی‌ها</span></a><a href="Profile/Questions"><i class="bi bi-chat"></i><span>دیدگاه‌ها و پرسش‌ها</span></a></nav><button class="account-logout" type="button"><i class="bi bi-box-arrow-left"></i><span>خروج از حساب کاربری</span></button></aside>',
   );
+  document.querySelectorAll(".shared-account-popover .account-links a").forEach((link) => {
+    if (link.href.includes("Questions") || link.textContent.includes("دیدگاه‌ها و پرسش‌ها")) link.remove();
+  });
   const modal = document.querySelector(".shared-login-modal"),
     overlay = document.querySelector(".shared-login-overlay"),
     accountPanel = document.querySelector(".shared-account-popover");
