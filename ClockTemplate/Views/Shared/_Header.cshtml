@@ -323,10 +323,21 @@
                     <i class="bi bi-heart" aria-hidden="true"></i>
                     <b class="nav-count" id="favoritesCount" aria-hidden="true">۰</b>
                 </a>
-                <a class="nav-shortcut" href="Search" aria-label="مقایسه محصولات" title="مقایسه محصولات">
-                    <i class="bi bi-arrow-left-right" aria-hidden="true"></i>
-                    <b class="nav-count" id="compareCount" aria-hidden="true">۰</b>
-                </a>
+                <div class="compare-wrap" id="compareWrap">
+                    <button class="nav-shortcut compare-toggle" id="compareToggle" type="button" aria-label="مشاهده محصولات مقایسه" title="مقایسه محصولات" aria-expanded="false" aria-controls="comparePanel">
+                        <i class="bi bi-arrow-left-right" aria-hidden="true"></i>
+                        <b class="nav-count" id="compareCount" aria-hidden="true">۰</b>
+                    </button>
+                    <section class="compare-panel" id="comparePanel" aria-label="فهرست مقایسه محصولات" aria-hidden="true">
+                        <div class="compare-panel-head">
+                            <span><i class="bi bi-arrow-left-right" aria-hidden="true"></i><strong>مقایسه محصولات</strong></span>
+                            <button type="button" id="compareClose" aria-label="بستن فهرست مقایسه"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
+                        </div>
+                        <p class="compare-panel-count" id="comparePanelCount">۰ محصول انتخاب شده</p>
+                        <div class="compare-panel-items" id="comparePanelItems"></div>
+                        <a class="compare-panel-link" href="Search">افزودن یا مشاهده محصولات <i class="bi bi-arrow-left" aria-hidden="true"></i></a>
+                    </section>
+                </div>
                 <div class="cart-wrap" id="cartWrap">
                 <button class="cart-btn cart-icon-theme"
                         id="cartToggle"

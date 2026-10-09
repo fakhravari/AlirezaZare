@@ -137,6 +137,36 @@ $(function () {
   const renderNavCounters = () => {
     $("#favoritesCount").text(faNumber(storedListCount("hn-favorites")));
     $("#compareCount").text(faNumber(storedListCount("hn-compare")));
+    renderComparePanel();
+  };
+  const renderComparePanel = () => {
+    const ids = readCompareList();
+    const products = new Map();
+    (window.HNProducts || []).forEach((product) => {
+      products.set(String(product.id), {
+        name: product.name,
+        price: Number(product.price) * 1000000,
+        image: product.image,
+      });
+    });
+    document.querySelectorAll(".add-cart[data-id]").forEach((button) => {
+      const card = button.closest(".product-card, .showcase-card, .rail-card");
+      const image = card?.querySelector(".product-image img, .rail-image img");
+      products.set(String(button.dataset.id), {
+        name: button.dataset.name || card?.querySelector("h3")?.textContent.trim() || "محصول منتخب",
+        price: Number(button.dataset.price) || 0,
+        image: button.dataset.image || image?.getAttribute("src") || "ClockTemplate/images/products/tool-hammer-drill.png",
+      });
+    });
+    $("#comparePanelCount").text(`${faNumber(ids.length)} محصول انتخاب شده`);
+    if (!ids.length) {
+      $("#comparePanelItems").html('<div class="compare-panel-empty"><i class="bi bi-columns-gap" aria-hidden="true"></i><strong>هنوز محصولی برای مقایسه نیست</strong><span>از روی کارت محصول، آیکن مقایسه را بزنید.</span></div>');
+      return;
+    }
+    $("#comparePanelItems").html(ids.map((id) => {
+      const product = products.get(id) || { name: "محصول منتخب", price: 0, image: "ClockTemplate/images/products/tool-hammer-drill.png" };
+      return `<article class="compare-panel-item" data-compare-id="${escapeHtml(id)}"><img src="${escapeHtml(product.image)}" alt="" loading="lazy"><span><strong>${escapeHtml(product.name)}</strong><small>${faNumber(product.price)} تومان</small></span><button type="button" data-compare-remove="${escapeHtml(id)}" aria-label="حذف ${escapeHtml(product.name)} از مقایسه"><i class="bi bi-x-lg" aria-hidden="true"></i></button></article>`;
+    }).join(""));
   };
   renderNavCounters();
   document.addEventListener("hn:lists-change", renderNavCounters);
@@ -649,7 +679,6 @@ $(function () {
       </div>
       <small>${escapeHtml(product.englishName)}</small>
       <h3>${escapeHtml(product.name)}</h3>
-      <p>ساعت اورجینال منتخب فروشگاه، همراه با ضمانت اصالت.</p>
       <strong>${faNumber(product.price * 1000000)} <small>تومان</small></strong>
       <button type="button" class="add-cart" data-id="${product.id}" data-name="${escapeHtml(product.name)}" data-price="${product.price * 1000000}" data-image="${escapeHtml(product.image)}">
         <i class="bi bi-bag-plus"></i> افزودن به سبد
@@ -764,6 +793,20 @@ $(function () {
   const $cartItems = $("#cartItems");
   const $cartFooter = $("#cartFooter");
   const $cartClose = $("#cartClose");
+  const $compareWrap = $("#compareWrap");
+  const $compareToggle = $("#compareToggle");
+  const $comparePanel = $("#comparePanel");
+  const setCompareOpen = (open) => {
+    $compareWrap.toggleClass("open", open);
+    $comparePanel.toggleClass("open", open).attr("aria-hidden", String(!open));
+    $compareToggle.attr("aria-expanded", String(open));
+  };
+  const placeComparePanel = () => {
+    if ($window.width() <= mobileBreakpoint) $comparePanel.appendTo($body);
+    else $comparePanel.appendTo($compareWrap);
+    setCompareOpen(false);
+  };
+  placeComparePanel();
   const readStoredArray = (key) => {
     try {
       const storedValue = storage.json(key, []);
@@ -1094,7 +1137,37 @@ $(function () {
   $cartToggle.on("click", (event) => {
     event.stopPropagation();
     setAccountOpen(false);
+    setCompareOpen(false);
     setCartOpen(!$cartPanel.hasClass("open"));
+  });
+  $compareToggle.on("click", (event) => {
+    event.stopPropagation();
+    setAccountOpen(false);
+    setCartOpen(false);
+    setCompareOpen(!$comparePanel.hasClass("open"));
+  });
+  $("#compareClose").on("click", () => setCompareOpen(false));
+  $("#comparePanel").on("click", "[data-compare-remove]", function () {
+    const removedId = String(this.dataset.compareRemove || "");
+    window.HNUI.storage.set("hn-compare", JSON.stringify(readCompareList().filter((id) => id !== removedId)));
+    syncCompareButtons();
+  });
+  let compareHoverTimer = null;
+  $compareWrap.on("mouseenter", () => {
+    if ($window.width() <= mobileBreakpoint) return;
+    window.clearTimeout(compareHoverTimer);
+    setCartOpen(false);
+    setCompareOpen(true);
+  });
+  $compareWrap.on("mouseleave", () => {
+    if ($window.width() <= mobileBreakpoint) return;
+    compareHoverTimer = window.setTimeout(() => {
+      if (!$compareWrap.is(":hover") && !$comparePanel.is(":hover")) setCompareOpen(false);
+    }, 220);
+  });
+  $comparePanel.on("mouseenter", () => window.clearTimeout(compareHoverTimer));
+  $comparePanel.on("mouseleave", () => {
+    if ($window.width() > mobileBreakpoint) setCompareOpen(false);
   });
   let cartHoverTimer = null;
   const clearCartHoverTimer = () => {
@@ -1130,9 +1203,12 @@ $(function () {
     const $target = $(event.target);
     if (!$target.closest("#cartWrap, #cartPanel, .add-cart").length)
       setCartOpen(false);
+    if (!$target.closest("#compareWrap, #comparePanel").length)
+      setCompareOpen(false);
     if (!$target.closest("#accountWrap, #accountPanel").length)
       setAccountOpen(false);
   });
+  $window.on("resize", placeComparePanel);
   renderCart();
 
   $document.on("click", ".favorite", function () {
@@ -1266,21 +1342,46 @@ $(function () {
     );
   });
 
-  $(".product-card, .showcase-card, .rail-card").each(function () {
-    const $card = $(this);
+  const decorateProductCard = (card) => {
+    const $card = $(card);
+    if ($card.attr("data-action-dock-ready") === "true") return;
     const $image = $card.find(".product-image, .rail-image").first();
     const $cartButton = $card.find(".add-cart").first();
+    if (!$image.length || !$cartButton.length) return;
     const productId = String($cartButton.data("id") || "");
-    if (productId && !$image.find(".compare-trigger").length) {
+    if (!$image.children(".favorite").length) {
+      $image.prepend('<button class="favorite" type="button" aria-label="افزودن به علاقه‌مندی‌ها" aria-pressed="false" title="علاقه‌مندی‌ها"><i class="bi bi-heart" aria-hidden="true"></i></button>');
+    }
+    if (productId && !$image.find(".compare-trigger[data-product-id]").length) {
       $image.append(
         `<button type="button" class="compare-trigger" data-product-id="${escapeHtml(productId)}" aria-label="افزودن به مقایسه" aria-pressed="false" title="افزودن به مقایسه"><i class="bi bi-arrow-left-right" aria-hidden="true"></i></button>`,
       );
     }
+    let $actions = $image.children(".product-card-actions");
+    if (!$actions.length) $actions = $('<div class="product-card-actions" role="group" aria-label="عملیات محصول"></div>').appendTo($image);
+    $image.children(".favorite, .compare-trigger").appendTo($actions);
+    $cartButton.attr({
+      "aria-label": "افزودن به سبد خرید",
+      title: "افزودن به سبد خرید",
+    }).appendTo($actions);
+    $card.attr("data-action-dock-ready", "true");
+    syncCompareButtons();
     if (!$image.find(".quick").length)
       $image.append(
         '<button type="button" class="quick">مشاهده سریع <i class="bi bi-arrow-left"></i></button>',
       );
+  };
+  const decorateProductCards = (root = document) => {
+    if (root.matches?.(".product-card, .showcase-card, .rail-card")) decorateProductCard(root);
+    root.querySelectorAll?.(".product-card, .showcase-card, .rail-card").forEach(decorateProductCard);
+  };
+  decorateProductCards();
+  const productCardObserver = new MutationObserver((records) => {
+    records.forEach((record) => record.addedNodes.forEach((node) => {
+      if (node instanceof Element) decorateProductCards(node);
+    }));
   });
+  productCardObserver.observe(document.body, { childList: true, subtree: true });
   syncCompareButtons();
 
   $document.on("click", ".compare-trigger[data-product-id]", function (event) {
@@ -1294,6 +1395,8 @@ $(function () {
       : [...selected, productId];
     window.HNUI.storage.set("hn-compare", JSON.stringify(next));
     syncCompareButtons();
+    setCartOpen(false);
+    setCompareOpen(true);
   });
 
   const openQuickView = (product) => {
