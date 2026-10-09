@@ -4351,6 +4351,134 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
   line-height: 1.95;
 }
 
+#productView .product-question-layout {
+  display: grid;
+  grid-template-columns: minmax(280px, .85fr) minmax(0, 1.15fr);
+  align-items: start;
+  gap: 20px;
+  direction: rtl;
+}
+
+#productView .product-question-form-column,
+#productView .product-question-list-column {
+  min-width: 0;
+}
+
+#productView .product-question-form-column {
+  padding: 17px;
+  border: 1px solid #e3e9ec;
+  border-radius: 15px;
+  background: linear-gradient(150deg, #f8fafb, #fff);
+}
+
+#productView .product-question-form-heading {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  align-items: center;
+  column-gap: 10px;
+  margin-bottom: 13px;
+}
+
+#productView .product-question-form-heading > span {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  grid-row: span 2;
+  place-items: center;
+  border-radius: 12px;
+  background: #fff1bb;
+  color: #896800;
+  font-size: 18px;
+}
+
+#productView .product-question-form-heading > strong {
+  color: var(--industrial-navy);
+  font-size: 14px;
+  font-weight: 850;
+}
+
+#productView .product-question-form-heading > small {
+  margin-top: 2px;
+  color: var(--industrial-muted);
+  font-size: 11px;
+  line-height: 1.7;
+}
+
+#productView .product-question-form-column .product-feedback-form {
+  grid-template-columns: minmax(0, 1fr);
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+#productView .product-question-form-column .product-feedback-form label {
+  grid-column: 1;
+}
+
+#productView .product-question-list-column .product-feedback-list {
+  gap: 12px;
+  margin: 0;
+}
+
+#productView .product-question-faq {
+  padding: 15px 16px;
+  border-color: #e3e9ec;
+  border-radius: 13px;
+  background: #fff;
+  box-shadow: 0 5px 16px rgba(16, 42, 67, .045);
+}
+
+#productView .product-question-faq .product-feedback-meta {
+  justify-content: flex-start;
+}
+
+#productView .product-question-faq .product-feedback-meta strong {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  color: var(--industrial-navy);
+  font-size: 12.5px;
+  line-height: 1.8;
+}
+
+#productView .product-question-faq .product-feedback-meta strong::before {
+  content: "پ";
+  display: grid;
+  width: 23px;
+  height: 23px;
+  flex: 0 0 23px;
+  place-items: center;
+  border-radius: 7px;
+  background: #fff1bb;
+  color: #896800;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+#productView .product-question-faq > p {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 9px;
+  background: #f4f8fa;
+  color: #465b69;
+}
+
+#productView .product-question-faq > p::before {
+  content: "پاسخ فروشگاه";
+  display: block;
+  margin-bottom: 4px;
+  color: #8a6a12;
+  font-size: 10px;
+  font-weight: 850;
+}
+
+@media (max-width: 767px) {
+  #productView .product-question-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 15px;
+  }
+}
+
 #productView .product-detail-meta {
   display: flex;
   flex-wrap: wrap;
