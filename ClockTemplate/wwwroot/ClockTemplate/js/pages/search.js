@@ -16,7 +16,34 @@ const hasActiveFilters = () =>
   ["brand", "type", "movement", "strap"].some((key) => state[key].size) ||
   state.maxPrice < 60 ||
   Boolean(state.query);
-// Stable URL identifiers are independent of the Persian display labels.
+const brandPersianLabels = {
+  Arva: "آروا",
+  Benning: "بننینگ",
+  Bosch: "بوش",
+  "DeWalt": "دیوالت",
+  Fluke: "فلوک",
+  GOOT: "گوت",
+  Hakko: "هاکو",
+  Knipex: "کنیپکس",
+  Kyoritsu: "کیوریتسو",
+  Makita: "ماکیتا",
+  Mastech: "مستک",
+  Philips: "فیلیپس",
+  Quick: "کوئیک",
+  Ronix: "رونیکس",
+  Stanley: "استنلی",
+  Tosan: "توسن",
+  "UNI-T": "یونی‌تی",
+  Victor: "ویکتور",
+  Weller: "ولر",
+  Wiha: "ویها",
+  YIHUA: "ییهوا",
+};
+const brandSlug = (brand) => brand.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+const brandFilterOptions = Object.fromEntries(
+  [...new Set(products.map((product) => product.brand))].map((brand) => [brandSlug(brand), brand]),
+);
+const brandDisplayName = (brand) => brandPersianLabels[brand] || brand;
 const createFilterOptions = (key) =>
   Object.fromEntries(
     [...new Set(products.map((product) => product[key]))].map((label, index) => [
@@ -25,7 +52,7 @@ const createFilterOptions = (key) =>
     ]),
   );
 const filterOptions = {
-  brand: createFilterOptions("brand"),
+  brand: brandFilterOptions,
   type: createFilterOptions("type"),
   movement: createFilterOptions("movement"),
   strap: createFilterOptions("strap"),
@@ -58,8 +85,11 @@ function applyUrlState() {
   Object.keys(filterConfig).forEach((key) => {
     state[key].clear();
     params.getAll(key).forEach((value) => {
-      // Accept old shared links, then normalize them to English in syncUrl.
-      const label = Object.hasOwn(filterOptions[key], value) ? filterOptions[key][value] : value;
+      // Accept slug, legacy English brand values, and Persian labels in shared links.
+      const slugValue = Object.hasOwn(filterOptions[key], value) ? filterOptions[key][value] : value;
+      const label = key === "brand"
+        ? (brandPersianLabels[slugValue] ? slugValue : Object.keys(brandPersianLabels).find((brand) => brandPersianLabels[brand] === value) || slugValue)
+        : slugValue;
       if (filterConfig[key].includes(label)) state[key].add(label);
     });
   });
@@ -89,7 +119,7 @@ function buildFilters() {
     $(`#${key}Filters`).innerHTML = searchBox + values
       .map(
         (value) =>
-          `<label class="filter-option"><input type="checkbox" value="${value}" data-filter="${key}"><span>${value}</span></label>`,
+          `<label class="filter-option"><input type="checkbox" value="${value}" data-filter="${key}"><span>${key === "brand" ? brandDisplayName(value) : value}</span></label>`,
       )
       .join("");
   });
@@ -184,7 +214,7 @@ function renderChips() {
   ["brand", "type", "movement", "strap"].forEach((key) =>
     state[key].forEach((value) =>
       chips.push(
-        `<button class="filter-chip" data-key="${key}" data-value="${value}">${value} ×</button>`,
+        `<button class="filter-chip" data-key="${key}" data-value="${value}">${key === "brand" ? brandDisplayName(value) : value} ×</button>`,
       ),
     ),
   );

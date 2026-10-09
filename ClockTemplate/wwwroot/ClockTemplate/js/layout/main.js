@@ -421,14 +421,14 @@ $(function () {
     $fourthItem.find(".product-image").removeClass("cream").addClass("light");
     $fourthItem.find("img").attr({
       src: "ClockTemplate/images/products/tool-soldering-station.png",
-      alt: "Damavand Sport watch",
+      alt: "ایستگاه هویه دماوند",
     });
-    $fourthItem.find(".showcase-card-body small").text("SPORT 05");
-    $fourthItem.find(".showcase-card-body h3").text("Damavand Sport");
+    $fourthItem.find(".showcase-card-body small").text("مدل ۰۵");
+    $fourthItem.find(".showcase-card-body h3").text("ایستگاه هویه دماوند");
     $fourthItem.find(".showcase-card-body strong").text("۲۳,۶۰۰,۰۰۰ تومان");
     $fourthItem.find(".add-cart").attr({
       "data-id": "damavand-offer",
-      "data-name": "Damavand Sport",
+      "data-name": "ایستگاه هویه دماوند",
       "data-price": "23600000",
       "data-image": "ClockTemplate/images/products/tool-soldering-station.png",
     });
@@ -718,7 +718,6 @@ $(function () {
           ${product.badge ? `<span class="badge-best">${escapeHtml(product.badge)}</span>` : ""}
         </div>
         <div class="showcase-card-body">
-          <small>${escapeHtml(product.englishName)}</small>
           <h3>${escapeHtml(product.name)}</h3>
           <strong>${faNumber(product.price * 1000000)} تومان</strong>
           <button type="button" class="add-cart" data-id="${product.id}" data-name="${escapeHtml(product.name)}" data-price="${product.price * 1000000}" data-image="${escapeHtml(product.image)}">
@@ -735,7 +734,6 @@ $(function () {
         </a>
         ${product.badge ? `<span>${escapeHtml(product.badge)}</span>` : ""}
       </div>
-      <small>${escapeHtml(product.englishName)}</small>
       <h3>${escapeHtml(product.name)}</h3>
       <strong>${faNumber(product.price * 1000000)} <small>تومان</small></strong>
       <button type="button" class="add-cart" data-id="${product.id}" data-name="${escapeHtml(product.name)}" data-price="${product.price * 1000000}" data-image="${escapeHtml(product.image)}">

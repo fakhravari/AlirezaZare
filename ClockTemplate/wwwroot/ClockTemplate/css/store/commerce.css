@@ -156,8 +156,6 @@
 #cartView .cart-quantity button.is-clicked,
 #cartView .cart-quantity button.is-clicked:hover,
 #cartView .cart-quantity button.is-clicked:disabled{background:#183352;color:#e8d3aa;border-color:#183352;opacity:1}
-#cartView .cart-product-english{display:block;margin-bottom:3px;color:#94794f;font-size:11px;font-weight:500;line-height:1.5;text-align:right;letter-spacing:.25px;overflow-wrap:anywhere}
-@media(max-width:575px){#cartView .cart-product-english{font-size:10px}}
 #cartView .cart-product-identity img{width:88px;height:106px;border-radius:12px}
 @media(max-width:575px){#cartView .cart-product-identity img{width:56px;height:70px}}
 @media(min-width:1200px){
@@ -173,11 +171,9 @@
   #cartView .cart-product-row .cart-quantity-value{min-width:26px}
   #cartView .cart-product-row .cart-item-remove{margin-inline-start:6px;padding-inline:7px}
 }
-#cartView .cart-product-english{font-size:13px}
 #cartView .cart-product-copy strong{font-size:16px}
 #cartView .cart-product-copy p{font-size:14px}
 @media(max-width:575px){
-  #cartView .cart-product-english{font-size:12px}
   #cartView .cart-product-copy strong{font-size:14px}
   #cartView .cart-product-copy p{font-size:12px}
 }
