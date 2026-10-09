@@ -706,9 +706,6 @@ h1, h2, h3, h4, h5, h6,
 
 :is(
   .flow-card,
-  .profile-edit-card,
-  .account-sidebar,
-  .account-section,
   .contact-form,
   .contact-info-card,
   .branch-card,
@@ -6031,4 +6028,24 @@ body,
     width: var(--site-scrollbar-size);
     height: var(--site-scrollbar-size);
   }
+}
+
+#questionForm.flow-card,
+#addresses #addressList > .flow-empty {
+  border-color: transparent !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+#mainNav .nav-actions .cart-btn.cart-icon-theme:is(:hover, :focus-visible),
+#mainNav .nav-actions .cart-wrap.open .cart-btn.cart-icon-theme,
+#mainNav .nav-actions .favorites-toggle:is(:hover, :focus-visible),
+#mainNav .nav-actions .favorites-wrap.open .favorites-toggle,
+#mainNav .nav-actions .compare-toggle:is(:hover, :focus-visible),
+#mainNav .nav-actions .compare-wrap.open .compare-toggle {
+  transform: translateY(-1px);
+  border-color: var(--industrial-yellow) !important;
+  background-color: #fff8d9 !important;
+  color: var(--industrial-yellow-dark) !important;
+  box-shadow: 0 3px 10px rgba(16, 42, 67, .12) !important;
 }

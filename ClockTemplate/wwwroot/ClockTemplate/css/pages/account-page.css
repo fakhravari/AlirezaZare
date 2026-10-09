@@ -13,7 +13,7 @@
   padding: 12px;
   border: 1px solid rgba(113, 135, 166, 0.32);
   border-radius: 24px;
-  background: linear-gradient(155deg, var(--industrial-bg), var(--industrial-bg));
+  background: linear-gradient(155deg, #fff, var(--industrial-bg));
   box-shadow: 0 18px 45px rgba(12, 35, 70, 0.1);
 }
 
@@ -175,11 +175,11 @@
 .account-content {
   min-width: 0;
   min-height: 620px;
-  padding: 28px;
-  border: 1px solid rgba(113, 135, 166, 0.28);
+  padding: 24px;
+  border: 1px solid rgba(113, 135, 166, 0.32);
   border-radius: 24px;
-  background: rgba(255, 255, 255, 0.82);
-  box-shadow: 0 18px 48px rgba(12, 35, 70, 0.08);
+  background: linear-gradient(155deg, #fff, var(--industrial-bg));
+  box-shadow: 0 18px 45px rgba(12, 35, 70, 0.1);
   font-size: 14px;
 }
 
@@ -1000,7 +1000,7 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop { background: rgba(3, 13
   font-size: 14px;
 }
 
-#orders.account-section.flow-card {
+#orders.account-section {
   padding: 0;
   border: 0;
   background: transparent;
@@ -1062,7 +1062,7 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop { background: rgba(3, 13
 }
 
 @media (max-width: 767px) {
-  #orders.account-section.flow-card {
+  #orders.account-section {
     padding: 0;
   }
 }
@@ -1123,5 +1123,69 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop { background: rgba(3, 13
   #addresses #addressList > .flow-empty {
     min-height: 190px;
     padding: 28px 12px;
+  }
+}
+
+#favoritesView .flow-cards {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+#favoritesView .favorite-item-card {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0;
+  padding: 12px;
+}
+
+#favoritesView .favorite-item-card > a {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  color: inherit;
+  text-decoration: none;
+}
+
+#favoritesView .favorite-item-card .flow-photo {
+  width: 100%;
+  height: 180px;
+  flex: 0 0 auto;
+  object-fit: cover;
+}
+
+#favoritesView .favorite-item-card h2 {
+  min-height: 58px;
+  margin: 10px 2px 4px;
+  font-size: 16px;
+  line-height: 1.8;
+}
+
+#favoritesView .favorite-item-card > p {
+  margin: 5px 2px 12px;
+  font-size: 15px;
+}
+
+#favoritesView .favorite-item-card .list-remove-button {
+  width: 100%;
+  min-height: 40px;
+  margin-top: auto;
+  border-radius: 11px;
+}
+
+@media (max-width: 991px) {
+  #favoritesView .flow-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 575px) {
+  #favoritesView .flow-cards {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  #favoritesView .favorite-item-card .flow-photo {
+    height: 200px;
   }
 }
