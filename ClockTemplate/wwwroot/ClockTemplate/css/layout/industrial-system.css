@@ -638,7 +638,6 @@ h1, h2, h3, h4, h5, h6,
 :is(
   .flow-card,
   .profile-edit-card,
-  .account-welcome,
   .account-sidebar,
   .account-section,
   .contact-form,
@@ -5146,6 +5145,23 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
     flex-basis: 56px;
   }
 
+  #productView .product-detail-image-frame {
+    height: 270px;
+    min-height: 270px;
+  }
+
+  #productView .product-detail-media-frame {
+    height: 100%;
+    min-height: 0;
+  }
+
+  #productView .product-detail-media-frame :is(img, video) {
+    height: 100%;
+    min-height: 0;
+    padding: 0;
+    object-fit: contain;
+  }
+
   #productView .product-detail-tabs {
     top: 78px;
     padding: 5px;
@@ -5215,6 +5231,8 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
 }
 
 @media (min-width: 992px) {
+  .home-page #mainNav .nav-link:is(:hover, .active, :focus-visible),
+  .home-page #mainNav .dropdown.show > .nav-link,
   .inner-page #mainNav .nav-link:is(:hover, .active, :focus-visible),
   .inner-page #mainNav .dropdown.show > .nav-link {
     border-color: rgba(246, 197, 21, .28) !important;
@@ -5222,6 +5240,7 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
     color: var(--industrial-yellow) !important;
   }
 
+  .home-page #mainNav .navbar-nav > .nav-item:first-child > .nav-link:is(:hover, .active, :focus-visible),
   .inner-page #mainNav .navbar-nav > .nav-item:first-child > .nav-link:is(:hover, .active, :focus-visible) {
     border-color: rgba(255, 223, 84, .72) !important;
     background: var(--industrial-yellow) !important;
@@ -5229,6 +5248,7 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
     box-shadow: 0 4px 14px rgba(246, 197, 21, .28);
   }
 
+  .home-page #mainNav .navbar-nav > .nav-item:first-child > .nav-link:is(:hover, .active, :focus-visible) .nav-menu-icon,
   .inner-page #mainNav .navbar-nav > .nav-item:first-child > .nav-link:is(:hover, .active, :focus-visible) .nav-menu-icon {
     color: var(--industrial-navy) !important;
     transform: scale(1.12);
@@ -5240,7 +5260,7 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
 #productView .product-detail-meta {
   display: grid;
   width: 100%;
-  grid-template-columns: minmax(95px, .8fr) minmax(210px, 2fr) minmax(112px, .9fr);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   align-items: stretch;
   gap: 9px;
 }
@@ -5255,27 +5275,68 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
 
 #productView .product-detail-meta .product-meta-pill small { font-size: 10px; }
 #productView .product-detail-meta .product-meta-pill strong { font-size: 13px; line-height: 1.5; }
-#productView .product-detail-meta > .product-meta-category { gap: 10px; }
+#productView .product-detail-meta > .product-meta-brand { grid-column: 1; grid-row: 1; }
+#productView .product-detail-meta > .product-meta-code { grid-column: 2; grid-row: 1; }
+#productView .product-detail-meta > .product-meta-category {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  min-height: 0;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  border-color: #e9dfcd;
+  background: linear-gradient(135deg, #fffdf8, #f7f3eb);
+}
+#productView .product-detail-meta .product-meta-category-content {
+  display: grid;
+  min-width: 0;
+  flex: 1;
+  gap: 8px;
+}
+#productView .product-detail-meta .product-meta-category-content > small {
+  color: #7d8790;
+  font-size: 10px;
+  font-weight: 700;
+}
 #productView .product-detail-meta .product-meta-path {
   display: flex;
   min-width: 0;
   flex-wrap: wrap;
   align-items: center;
-  gap: 3px 6px;
+  gap: 8px 22px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
   color: var(--industrial-navy);
-  font-size: 11px;
-  font-weight: 750;
-  line-height: 1.8;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.6;
 }
-#productView .product-detail-meta .product-meta-path > span { display: inline; }
-#productView .product-detail-meta .product-meta-path > i { color: #9aabb4; font-size: 9px; }
+#productView .product-detail-meta .product-meta-path > li {
+  position: relative;
+  max-width: 100%;
+  padding: 5px 10px;
+  border: 1px solid #e8e0d3;
+  border-radius: 8px;
+  background: #fff;
+  overflow-wrap: anywhere;
+}
+#productView .product-detail-meta .product-meta-path > li:not(:last-child)::after {
+  position: absolute;
+  top: 50%;
+  left: -16px;
+  color: #b3a78f;
+  content: '‹';
+  font-size: 16px;
+  font-weight: 500;
+  transform: translateY(-52%);
+}
 
 @media (max-width: 575px) {
-  #productView .product-detail-meta { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
-  #productView .product-detail-meta > .product-meta-brand { grid-column: 1; grid-row: 1; }
-  #productView .product-detail-meta > .product-meta-code { grid-column: 2; grid-row: 1; }
-  #productView .product-detail-meta > .product-meta-category { grid-column: 1 / -1; grid-row: 2; }
-#productView .product-detail-meta .product-meta-path { font-size: 10px; }
+  #productView .product-detail-meta { gap: 8px; }
+  #productView .product-detail-meta > .product-meta-category { gap: 9px; padding: 11px; }
+  #productView .product-detail-meta .product-meta-path { gap: 8px 20px; font-size: 11px; }
+  #productView .product-detail-meta .product-meta-path > li { padding: 5px 8px; }
 }
 
 #productView .product-review-layout {
@@ -5523,5 +5584,146 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
     min-height: 0;
     padding: 10px 13px;
     font-size: 14px;
+  }
+}
+
+#productView .product-detail-tabs {
+  border-color: #e9e3d8;
+  background: rgba(255, 254, 251, .97);
+  box-shadow: 0 9px 24px rgba(16, 42, 67, .07);
+}
+
+#productView .product-detail-tabs > a {
+  border: 1px solid transparent;
+}
+
+#productView .product-detail-tabs > a:is(:hover, :focus-visible, :active) {
+  border-color: #e6ddcc;
+  background: #f5f1e8;
+  color: var(--industrial-navy);
+}
+
+#productView .product-detail-tabs > a > i {
+  color: #9c8050;
+}
+
+#productView .product-detail-tabs > a > b {
+  background: #f1eee7;
+  color: #655a48;
+}
+
+#productView :is(.product-detail-content-panel, .product-detail-related) {
+  position: relative;
+  overflow: hidden;
+  border-color: #e8e2d7;
+  background: linear-gradient(145deg, #fff 0%, #fdfbf7 100%);
+  box-shadow: 0 12px 30px rgba(16, 42, 67, .06);
+}
+
+#productView :is(.product-detail-content-panel, .product-detail-related) > header {
+  border-bottom-color: #ebe6dd;
+}
+
+#productView :is(.product-detail-content-panel, .product-detail-related) > header > span {
+  width: fit-content;
+  padding: 4px 9px;
+  border: 1px solid #eee6d8;
+  border-radius: 999px;
+  background: #f8f5ef;
+  color: #91774d;
+}
+
+#productView .product-expert-grid > div {
+  border-color: #e9e5dc;
+  background: linear-gradient(145deg, #fff, #faf9f6);
+  box-shadow: 0 6px 16px rgba(16, 42, 67, .035);
+  transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+}
+
+#productView .product-expert-grid > div:hover {
+  transform: translateY(-2px);
+  border-color: #d9c9aa;
+  box-shadow: 0 10px 22px rgba(16, 42, 67, .08);
+}
+
+#productView .product-expert-grid > div > i {
+  border: 1px solid #e9e1d1;
+  background: #f4efe5;
+  color: #8d744b;
+}
+
+#productView .product-spec-group {
+  border-color: #e9e5dc;
+  background: #fcfbf8;
+}
+
+#productView .product-spec-group h3 i,
+#productView .product-feedback-empty > i {
+  color: #9b8052;
+}
+
+#productView .product-spec-group dl > div {
+  padding: 5px 9px;
+  border-bottom-color: #ece8e0;
+}
+
+#productView .product-spec-group dl > div:nth-child(even) {
+  border-radius: 7px;
+  background: #f6f5f1;
+}
+
+#productView .product-feedback-card,
+#productView .product-question-faq {
+  border-color: #e9e4db;
+  background: #fff;
+  box-shadow: 0 6px 17px rgba(16, 42, 67, .045);
+}
+
+#productView .product-feedback-form {
+  border-color: #e8e2d7;
+  border-radius: 14px;
+  background: #faf8f3;
+}
+
+#productView .product-feedback-form > .product-feedback-submit {
+  border-color: #dfd2b9;
+  background: #eee6d7;
+  box-shadow: none;
+  color: var(--industrial-navy);
+}
+
+#productView .product-feedback-form > .product-feedback-submit i {
+  color: #91774d;
+}
+
+#productView .product-feedback-form > .product-feedback-submit:hover {
+  border-color: var(--industrial-navy);
+  background: var(--industrial-navy);
+  color: #fff;
+}
+
+#productView .product-feedback-form > .product-feedback-submit:hover i {
+  color: #e6d6b7;
+}
+
+#productView .product-related-category {
+  border-color: #e8e0d2;
+  background: #f7f4ee;
+  color: #716149;
+}
+
+#productView .product-related-category i {
+  color: #9b8052;
+}
+
+@media (max-width: 575px) {
+  #productView :is(.product-detail-content-panel, .product-detail-related) {
+    padding: 17px 14px;
+    border-radius: 15px;
+  }
+
+  #productView .product-expert-grid > div {
+    min-height: 0;
+    padding: 14px;
   }
 }

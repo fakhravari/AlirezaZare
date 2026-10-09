@@ -1,30 +1,42 @@
-window.HNProducts = Array.from({ length: 30 }, (_, i) => {
-  const brands = [
-    "بوش",
-    "دیوالت",
-    "ماکیتا",
-    "رونیکس",
-    "توتال",
-    "کنزاکس",
-  ];
-  const types = ["ابزار برقی", "اندازه‌گیری", "تعمیرات", "روشنایی"];
-  const movements = ["برقی", "شارژی", "دیجیتال", "دستی"];
-  const straps = ["کارگاهی", "خانگی", "صنعتی", "تعمیرگاهی"];
+const productCatalog = [
+  ["دریل چکشی شارژی ۱۸ ولت", "18V Cordless Hammer Drill", "Bosch", "دریل چکشی", "باتری شارژی", "نصب و کارگاه", 0],
+  ["دریل پیچ‌گوشتی شارژی", "Cordless Drill Driver", "Makita", "دریل و پیچ‌گوشتی", "باتری شارژی", "نصب و تعمیر", 0],
+  ["دریل چکشی برقی", "Electric Hammer Drill", "DeWalt", "دریل چکشی", "برق شهری", "کارگاه ساختمانی", 0],
+  ["پیچ‌گوشتی شارژی دو‌سرعته", "Two-Speed Cordless Screwdriver", "Ronix", "پیچ‌گوشتی شارژی", "باتری شارژی", "نصب و مونتاژ", 0],
+  ["دریل چکشی برقی سه‌نظام اتوماتیک", "Electric Hammer Drill with Keyless Chuck", "Tosan", "دریل چکشی", "برق شهری", "تعمیر و نگهداری", 0],
+  ["مولتی‌متر دیجیتال", "Digital Multimeter", "UNI-T", "مولتی‌متر دیجیتال", "باتری‌خور", "تست و عیب‌یابی", 1],
+  ["مولتی‌متر دیجیتال کارگاهی", "Workshop Digital Multimeter", "Fluke", "مولتی‌متر دیجیتال", "باتری‌خور", "تعمیرگاه و کارگاه", 1],
+  ["مولتی‌متر دستی با نمایشگر بزرگ", "Handheld Multimeter with Large Display", "Mastech", "مولتی‌متر دیجیتال", "باتری‌خور", "تست و عیب‌یابی", 1],
+  ["کلمپ‌متر دیجیتال", "Digital Clamp Meter", "Victor", "کلمپ‌متر", "باتری‌خور", "برق صنعتی", 1],
+  ["تستر عایقی دیجیتال", "Digital Insulation Tester", "Kyoritsu", "تستر عایقی", "باتری‌خور", "تأسیسات برقی", 1],
+  ["ایستگاه هویه دیجیتال", "Digital Soldering Station", "YIHUA", "ایستگاه هویه", "برق شهری", "تعمیر برد", 2],
+  ["هویه قلمی قابل تنظیم", "Adjustable Soldering Iron", "Hakko", "هویه قلمی", "برق شهری", "مونتاژ الکترونیک", 2],
+  ["هیتر هوای گرم تعمیرات برد", "Hot Air Rework Station", "Quick", "هیتر و هویه", "برق شهری", "تعمیرات الکترونیک", 2],
+  ["ایستگاه لحیم‌کاری رومیزی", "Bench Soldering Station", "Weller", "ایستگاه هویه", "برق شهری", "مونتاژ و تعمیر", 2],
+  ["هویه قلمی سبک کارگاهی", "Lightweight Workshop Soldering Iron", "GOOT", "هویه قلمی", "برق شهری", "تعمیر برد", 2],
+  ["چراغ کار LED قابل‌حمل", "Portable LED Work Light", "Philips", "چراغ کارگاهی", "باتری شارژی", "بازرسی و تعمیر", 3],
+  ["پروژکتور LED کارگاهی", "Workshop LED Floodlight", "Arva", "پروژکتور کارگاهی", "برق شهری", "کارگاه و نصب", 3],
+  ["چراغ بازرسی شارژی", "Rechargeable Inspection Light", "Ronix", "چراغ بازرسی", "باتری شارژی", "تعمیر خودرو", 3],
+  ["چراغ کار LED پایه‌دار", "LED Work Light with Stand", "Makita", "چراغ کارگاهی", "باتری شارژی", "نصب و کارگاه", 3],
+  ["نورافکن LED قابل‌حمل", "Portable LED Floodlight", "DeWalt", "پروژکتور کارگاهی", "باتری شارژی", "محیط کارگاهی", 3],
+  ["ست پیچ‌گوشتی عایق برق‌کاری", "Insulated Electrician Screwdriver Set", "Wiha", "ابزار دستی برق‌کاری", "دستی", "نصب و برق‌کاری", 0],
+  ["ست انبر برق‌کاری", "Electrician Pliers Set", "Knipex", "ابزار دستی برق‌کاری", "دستی", "نصب و تعمیر", 0],
+  ["مجموعه ابزار عایق برق‌کار", "Insulated Electrician Tool Kit", "Stanley", "مجموعه ابزار برق‌کاری", "دستی", "تعمیر و نگهداری", 0],
+  ["ست ابزار نصب و سیم‌کشی", "Wiring and Installation Tool Set", "Tosan", "مجموعه ابزار برق‌کاری", "دستی", "سیم‌کشی و نصب", 0],
+  ["کیف ابزار برق‌کاری", "Electrician Tool Bag Set", "Ronix", "مجموعه ابزار برق‌کاری", "دستی", "کارگاه و سرویس", 0],
+  ["فازمتر دیجیتال", "Digital Voltage Tester", "UNI-T", "تستر و فازمتر", "باتری‌خور", "تست اولیه برق", 1],
+  ["تستر ولتاژ غیرتماسی", "Non-Contact Voltage Tester", "Fluke", "تستر ولتاژ", "باتری‌خور", "ایمنی و بازرسی", 1],
+  ["فازمتر القایی", "Inductive Voltage Tester", "Mastech", "فازمتر", "باتری‌خور", "تأسیسات برقی", 1],
+  ["تستر پیوستگی مدار", "Circuit Continuity Tester", "Benning", "تستر مدار", "باتری‌خور", "عیب‌یابی برق", 1],
+  ["قلم تست ولتاژ", "Voltage Detector Pen", "UNI-T", "تستر ولتاژ", "باتری‌خور", "تست و سرویس", 1],
+];
+window.HNProducts = productCatalog.map((entry, i) => {
   const images = [
     "ClockTemplate/images/products/tool-hammer-drill.png",
     "ClockTemplate/images/products/tool-multimeter-kit.png",
     "ClockTemplate/images/products/tool-soldering-station.png",
     "ClockTemplate/images/products/tool-led-worklight.png",
   ];
-  const names = [
-    "دریل چکشی شارژی",
-    "کیت مولتی‌متر دیجیتال",
-    "ایستگاه هویه حرفه‌ای",
-    "چراغ کار LED",
-    "مجموعه ابزار برق‌کار",
-    "تستر و فازمتر دیجیتال",
-  ];
-  const englishNames = ['Hammer Drill', 'Digital Multimeter', 'Soldering Station', 'LED Work Light', 'Electrician Tool Set', 'Digital Tester'];
   const productDetails = [
     {
       intro: "دریل چکشی شارژی برای سوراخ‌کاری و نصب‌های روزمره طراحی شده است. طراحی بی‌سیم، جابه‌جایی بین محل کار و خانه را ساده می‌کند؛ پیش از خرید، ظرفیت باتری و سازگاری مته با سطح موردنظر را بررسی کنید.",
@@ -97,22 +109,44 @@ window.HNProducts = Array.from({ length: 30 }, (_, i) => {
       questions: [["این تستر چه مواردی را تشخیص می‌دهد؟", "نوع تشخیص و محدودهٔ کاری را در مشخصات همان مدل بررسی کنید؛ قابلیت‌ها بین مدل‌ها متفاوت است."], ["قبل از استفاده چه کاری انجام بدهم؟", "روش تست، نشانگرها و محدودیت‌های ابزار را از راهنمای سازنده بخوانید."], ["برای بررسی برق شهر قابل استفاده است؟", "محدودهٔ ولتاژ و ردهٔ ایمنی مدل را پیش از استفاده بررسی کنید و نکات ایمنی را رعایت کنید."]],
     },
   ];
+  const [name, englishName, brand, type, movement, strap, imageIndex] = entry;
+  const categoryRoots = {
+    "دریل چکشی": "ابزار برقی",
+    "دریل و پیچ‌گوشتی": "ابزار برقی",
+    "پیچ‌گوشتی شارژی": "ابزار برقی",
+    "مولتی‌متر دیجیتال": "ابزار اندازه‌گیری",
+    "کلمپ‌متر": "ابزار اندازه‌گیری",
+    "تستر عایقی": "ابزار اندازه‌گیری",
+    "ایستگاه هویه": "لحیم‌کاری و تعمیر برد",
+    "هویه قلمی": "لحیم‌کاری و تعمیر برد",
+    "هیتر و هویه": "لحیم‌کاری و تعمیر برد",
+    "چراغ کارگاهی": "روشنایی و لامپ",
+    "پروژکتور کارگاهی": "روشنایی و لامپ",
+    "چراغ بازرسی": "روشنایی و لامپ",
+    "ابزار دستی برق‌کاری": "ابزار برق‌کار",
+    "مجموعه ابزار برق‌کاری": "ابزار برق‌کار",
+    "تستر و فازمتر": "تستر و ایمنی برق",
+    "تستر ولتاژ": "تستر و ایمنی برق",
+    "فازمتر": "تستر و ایمنی برق",
+    "تستر مدار": "تستر و ایمنی برق",
+  };
   return {
     id: i + 1,
-    englishName: `${englishNames[i % englishNames.length]} ${i > 5 ? i + 1 : ""}`.trim(),
-    name: `${names[i % names.length]} ${i > 5 ? i + 1 : ""}`.trim(),
-    brand: brands[i % brands.length],
-    type: types[i % types.length],
-    movement: movements[i % movements.length],
-    strap: straps[i % straps.length],
+    englishName,
+    name,
+    brand,
+    type,
+    movement,
+    strap,
+    categoryPath: ["ابزار و تجهیزات", categoryRoots[type] || "ابزار و تجهیزات", type],
     price: i === 0 ? 24.5 : 14 + ((i * 3) % 45),
     discountPercent: i % 5 === 0 ? 15 : i % 7 === 0 ? 10 : 0,
-    image: images[i % images.length],
+    image: images[imageIndex],
     detail: productDetails[i % productDetails.length],
     images: [0, 1, 2].map(offset => images[(i + offset) % images.length]),
     videos: [
-      { src: "ClockTemplate/videos/1_compressed.mp4", title: names[i % names.length] + "؛ ویدئوی معرفی" },
-      { src: "ClockTemplate/videos/2_compressed.mp4", title: names[i % names.length] + "؛ ویدئوی بررسی" },
+      { src: "ClockTemplate/videos/1_compressed.mp4", title: name + "؛ ویدئوی معرفی" },
+      { src: "ClockTemplate/videos/2_compressed.mp4", title: name + "؛ ویدئوی بررسی" },
     ],
     newest: 30 - i,
     badge: i % 7 === 0 ? "پرفروش" : i % 5 === 0 ? "جدید" : "",

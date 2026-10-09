@@ -17,18 +17,18 @@ const hasActiveFilters = () =>
   state.maxPrice < 60 ||
   Boolean(state.query);
 // Stable URL identifiers are independent of the Persian display labels.
+const createFilterOptions = (key) =>
+  Object.fromEntries(
+    [...new Set(products.map((product) => product[key]))].map((label, index) => [
+      `option${index + 1}`,
+      label,
+    ]),
+  );
 const filterOptions = {
-  brand: {
-    victorinox: "ویکتورینوکس",
-    patek: "پتک فیلیپ",
-    police: "پلیس",
-    polo: "پولو",
-    poloexchange: "پولو اکسچنج",
-    beverlyhills: "بورلی هیلز",
-  },
-  type: { men: "مردانه", women: "زنانه", sport: "اسپرت", classic: "کلاسیک" },
-  movement: { quartz: "کوارتز", automatic: "اتوماتیک", mechanical: "مکانیکی", solar: "سولار" },
-  strap: { steel: "استیل", leather: "چرم طبیعی", silicone: "سیلیکونی", mesh: "بند مش" },
+  brand: createFilterOptions("brand"),
+  type: createFilterOptions("type"),
+  movement: createFilterOptions("movement"),
+  strap: createFilterOptions("strap"),
 };
 const filterConfig = Object.fromEntries(
   Object.entries(filterOptions).map(([key, options]) => [key, Object.values(options)]),
