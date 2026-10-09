@@ -433,6 +433,66 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+#favorites.account-section {
+  padding: 22px;
+  border: 1px solid rgba(113, 135, 166, 0.2);
+  border-radius: 20px;
+  background: linear-gradient(145deg, #f7f9fa, #eef3f5);
+}
+
+#favoritesView .flow-cards {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+}
+
+#favoritesView .favorite-item-card {
+  display: grid;
+  grid-template-columns: minmax(190px, 30%) minmax(0, 1fr);
+  grid-template-rows: auto auto auto;
+  gap: 8px 22px;
+  align-items: center;
+  padding: 14px;
+  border-color: rgba(113, 135, 166, 0.22);
+  background: #fff;
+  box-shadow: 0 10px 26px rgba(12, 35, 70, 0.06);
+}
+
+#favoritesView .favorite-item-card > a {
+  display: contents;
+}
+
+#favoritesView .favorite-item-card .flow-photo {
+  grid-column: 1;
+  grid-row: 1 / 4;
+  display: block;
+  width: 100%;
+  height: 210px;
+  max-height: none;
+  border-radius: 14px;
+  background: #edf1f3;
+  object-fit: cover;
+}
+
+#favoritesView .favorite-item-card h2 {
+  grid-column: 2;
+  grid-row: 1;
+  align-self: end;
+  min-height: 0;
+  margin: 0;
+}
+
+#favoritesView .favorite-item-card > p {
+  grid-column: 2;
+  grid-row: 2;
+  align-self: center;
+}
+
+#favoritesView .favorite-item-card .list-remove-button {
+  grid-column: 2;
+  grid-row: 3;
+  justify-self: start;
+}
+
 .draft-text {
   overflow-wrap: anywhere;
   white-space: pre-wrap;
@@ -531,6 +591,17 @@
   .account-section .flow-cards {
     grid-template-columns: 1fr;
   }
+  #favorites.account-section {
+    padding: 16px;
+  }
+  #favoritesView .favorite-item-card {
+    grid-template-columns: minmax(105px, 34%) minmax(0, 1fr);
+    gap: 7px 13px;
+    padding: 10px;
+  }
+  #favoritesView .favorite-item-card .flow-photo {
+    height: 150px;
+  }
   .account-section-heading {
     align-items: center;
   }
@@ -543,6 +614,17 @@
 @media (max-width: 430px) {
   .account-tabs {
     grid-template-columns: 1fr;
+  }
+  #favorites.account-section {
+    padding: 13px;
+  }
+  #favoritesView .favorite-item-card {
+    grid-template-columns: minmax(88px, 32%) minmax(0, 1fr);
+    gap: 6px 10px;
+    padding: 8px;
+  }
+  #favoritesView .favorite-item-card .flow-photo {
+    height: 124px;
   }
 }
 

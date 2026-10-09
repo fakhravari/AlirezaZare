@@ -321,8 +321,8 @@
             <label>نام<span class="login-input"><input name="firstName" value="محمدحسین" required maxlength="50" /><i class="bi bi-person" aria-hidden="true"></i></span><small class="profile-edit-validation field-validation-valid" data-profile-edit-error="firstName"></small></label>
             <label>نام خانوادگی<span class="login-input"><input name="lastName" value="فخراوری" required maxlength="50" /><i class="bi bi-person" aria-hidden="true"></i></span><small class="profile-edit-validation field-validation-valid" data-profile-edit-error="lastName"></small></label>
             <fieldset class="profile-edit-gender"><legend>جنسیت</legend><div><label><input type="radio" name="gender" value="male" checked /><span>آقا</span></label><label><input type="radio" name="gender" value="female" /><span>خانم</span></label></div><small class="profile-edit-validation field-validation-valid" data-profile-edit-error="gender"></small></fieldset>
-            <label>ایمیل<span class="login-input"><input name="email" type="email" placeholder="example@email.com" dir="ltr" /><i class="bi bi-envelope" aria-hidden="true"></i></span><small class="profile-edit-validation field-validation-valid" data-profile-edit-error="email"></small></label>
-            <label class="profile-edit-full">شماره موبایل <small>قابل تغییر نیست</small><span class="login-input"><input name="phone" value="۰۹۱۷۷۷۶۴۳۲۴" type="tel" dir="ltr" readonly aria-readonly="true" /><i class="bi bi-phone" aria-hidden="true"></i></span></label>
+            <label>شماره موبایل <small>قابل ویرایش</small><span class="login-input"><input name="phone" value="۰۹۱۷۷۷۶۴۳۲۴" type="tel" inputmode="numeric" autocomplete="tel" maxlength="11" required dir="ltr" aria-describedby="profileEditPhoneError" /><i class="bi bi-phone" aria-hidden="true"></i></span><small id="profileEditPhoneError" class="profile-edit-validation field-validation-valid" data-profile-edit-error="phone" role="alert"></small></label>
+            <label class="profile-edit-full">ایمیل <small>فقط‌خواندنی</small><span class="login-input"><input name="email" type="email" value="example@email.com" dir="ltr" readonly aria-readonly="true" /><i class="bi bi-envelope" aria-hidden="true"></i></span><small class="profile-edit-validation field-validation-valid" data-profile-edit-error="email"></small></label>
             <button class="profile-edit-full" type="submit">ذخیره تغییرات <i class="bi bi-check2"></i></button>
         </form>
     </div>
@@ -348,30 +348,66 @@
         const dialog = document.getElementById('profileEditDialog');
         const form = document.getElementById('profileEditModalForm');
         if (!dialog || !form) return;
+        const storage = window.HNUI?.storage;
+        const savedProfile = storage?.json('hn-profile', {}) || {};
+        const phone = form.elements.phone;
+        const normalizePhone = value => window.HNUI.toEnglishDigits(value).replace(/\D/g, '').slice(0, 11);
+        ['firstName', 'lastName', 'email'].forEach(name => {
+          if (savedProfile[name]) form.elements[name].value = savedProfile[name];
+        });
+        if (savedProfile.phone) phone.value = normalizePhone(savedProfile.phone);
+        if (savedProfile.gender === 'male' || savedProfile.gender === 'female') {
+          const gender = form.querySelector(`[name="gender"][value="${savedProfile.gender}"]`);
+          if (gender) gender.checked = true;
+        }
         const setError = (name, message) => {
           const host = form.querySelector(`[data-profile-edit-error="${name}"]`);
           const control = form.querySelector(`[name="${name}"]`);
           host.textContent = message;
           host.className = `profile-edit-validation ${message ? 'field-validation-error' : 'field-validation-valid'}`;
           if (name === 'gender') form.querySelector('.profile-edit-gender').classList.toggle('is-invalid', Boolean(message));
-          else control.classList.toggle('input-validation-error', Boolean(message));
+          else {
+            control.classList.toggle('input-validation-error', Boolean(message));
+            control.setAttribute('aria-invalid', String(Boolean(message)));
+          }
         };
         const validate = () => {
           const firstName = form.elements.firstName.value.trim();
           const lastName = form.elements.lastName.value.trim();
           const email = form.elements.email;
+          const normalizedPhone = normalizePhone(phone.value);
           const gender = form.querySelector('[name="gender"]:checked');
           setError('firstName', firstName ? '' : 'نام را وارد کنید.');
           setError('lastName', lastName ? '' : 'نام خانوادگی را وارد کنید.');
           setError('email', !email.value || email.validity.valid ? '' : 'ایمیل را با قالب صحیح وارد کنید.');
+          setError('phone', /^09\d{9}$/.test(normalizedPhone) ? '' : 'شماره موبایل باید ۱۱ رقم و با ۰۹ شروع شود.');
           setError('gender', gender ? '' : 'جنسیت را انتخاب کنید.');
-          return firstName && lastName && (!email.value || email.validity.valid) && gender;
+          return firstName && lastName && (!email.value || email.validity.valid) && /^09\d{9}$/.test(normalizedPhone) && gender;
         };
         document.querySelectorAll('[data-profile-edit-trigger]').forEach(trigger => trigger.addEventListener('click', event => { event.preventDefault(); dialog.showModal(); }));
         document.querySelectorAll('[data-profile-edit-close]').forEach(close => close.addEventListener('click', () => dialog.close()));
+        phone.addEventListener('input', () => {
+          const normalizedPhone = normalizePhone(phone.value);
+          if (phone.value !== normalizedPhone) phone.value = normalizedPhone;
+        });
         form.addEventListener('input', validate);
         form.addEventListener('change', validate);
-        form.addEventListener('submit', event => { event.preventDefault(); if (!validate()) return; dialog.close(); });
+        form.addEventListener('submit', event => {
+          event.preventDefault();
+          if (!validate()) return;
+          const profile = {
+            firstName: form.elements.firstName.value.trim(),
+            lastName: form.elements.lastName.value.trim(),
+            email: form.elements.email.value.trim(),
+            phone: normalizePhone(phone.value),
+            gender: form.querySelector('[name="gender"]:checked').value
+          };
+          if (!storage?.set('hn-profile', JSON.stringify(profile))) return;
+          const displayName = document.querySelector('.account-profile > div strong');
+          if (displayName) displayName.textContent = `${profile.firstName} ${profile.lastName}`;
+          document.getElementById('accountStatus').textContent = 'اطلاعات پروفایل ذخیره شد.';
+          dialog.close();
+        });
       })();
     </script>
 }
