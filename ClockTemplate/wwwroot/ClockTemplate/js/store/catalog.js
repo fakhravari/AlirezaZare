@@ -78,6 +78,7 @@ window.HNProducts = Array.from({ length: 30 }, (_, i) => {
     movement: movements[i % movements.length],
     strap: straps[i % straps.length],
     price: i === 0 ? 24.5 : 14 + ((i * 3) % 45),
+    discountPercent: i % 5 === 0 ? 15 : i % 7 === 0 ? 10 : 0,
     image: images[i % images.length],
     detail: productDetails[i % productDetails.length],
     images: [0, 1, 2].map(offset => images[(i + offset) % images.length]),

@@ -4137,6 +4137,84 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
   }
 }
 
+.inner-page .search-product.product-card,
+.home-page :is(.product-card, .showcase-card, .rail-card) {
+  height: auto !important;
+  min-height: 0 !important;
+  align-self: start;
+}
+
+.inner-page .search-product.product-card .search-product-image,
+.home-page :is(.product-card .product-image, .showcase-card .product-image, .rail-card .rail-image) {
+  flex: 0 0 220px;
+  padding: 0 !important;
+  background: #edf1f3 !important;
+}
+
+.inner-page .search-product.product-card .search-product-image > a,
+.home-page :is(.product-card .product-image > a, .showcase-card .product-image > a, .rail-card .rail-image > a) {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.inner-page .search-product.product-card .search-product-image img,
+.home-page :is(.product-card .product-image img, .showcase-card .product-image img, .rail-card .rail-image img) {
+  width: 100%;
+  height: 100%;
+  padding: 0 !important;
+  object-fit: cover !important;
+  object-position: center;
+}
+
+.inner-page .search-product.product-card .product-info {
+  min-height: 0;
+  padding: 12px 14px !important;
+  flex: 0 0 auto;
+}
+
+.inner-page .search-product.product-card .product-info h3 {
+  min-height: 0;
+  margin: 0;
+}
+
+.inner-page .search-product.product-card .search-product-price {
+  min-height: 0;
+  margin: 9px 0 0;
+}
+
+.home-page :is(.product-card .product-info, .showcase-card-body) {
+  min-height: 0;
+  padding: 13px 14px !important;
+  flex: 0 0 auto;
+}
+
+.home-page :is(.product-card .product-info h3, .showcase-card-body h3, .rail-card h3) {
+  min-height: 0;
+  margin-bottom: 7px !important;
+}
+
+.home-page :is(.product-card .product-info > p, .showcase-card-body > strong, .rail-card > strong) {
+  min-height: 0;
+  margin: 8px 0 0 !important;
+}
+
+@media (max-width: 767px) {
+  .inner-page .search-product.product-card .search-product-image {
+    flex-basis: 154px;
+  }
+
+  .home-page :is(.product-card .product-image, .showcase-card .product-image, .rail-card .rail-image) {
+    flex-basis: 190px;
+  }
+}
+
+@media (max-width: 389px) {
+  .inner-page .search-product.product-card .search-product-image {
+    flex-basis: 195px;
+  }
+}
+
 #productView .product-detail-demo-note {
   display: flex;
   align-items: flex-start;
