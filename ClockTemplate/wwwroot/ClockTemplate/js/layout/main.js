@@ -189,7 +189,7 @@ $(function () {
     });
     $("#favoritesPanelCount").text(`${faNumber(ids.length)} محصول ذخیره شده`);
     if (!ids.length) {
-      $("#favoritesPanelItems").html('<div class="compare-panel-empty"><i class="bi bi-heart" aria-hidden="true"></i><strong>هنوز محصولی ذخیره نکرده‌اید</strong><span>از روی کارت محصول، آیکن قلب را انتخاب کنید.</span></div>');
+      $("#favoritesPanelItems").html('<div class="compare-panel-empty header-panel-empty"><span class="header-panel-empty-icon"><i class="bi bi-heart" aria-hidden="true"></i></span><strong>هنوز محصولی در علاقه‌مندی‌ها نیست</strong><p>برای ذخیره، آیکن قلب روی کارت محصول را بزنید.</p></div>');
       return;
     }
     $("#favoritesPanelItems").html(ids.map((id) => {
@@ -218,7 +218,7 @@ $(function () {
     });
     $("#comparePanelCount").text(`${faNumber(ids.length)} محصول انتخاب شده`);
     if (!ids.length) {
-      $("#comparePanelItems").html('<div class="compare-panel-empty"><i class="bi bi-columns-gap" aria-hidden="true"></i><strong>هنوز محصولی برای مقایسه نیست</strong><span>از روی کارت محصول، آیکن مقایسه را بزنید.</span></div>');
+      $("#comparePanelItems").html('<div class="compare-panel-empty header-panel-empty"><span class="header-panel-empty-icon"><i class="bi bi-arrow-left-right" aria-hidden="true"></i></span><strong>هنوز محصولی برای مقایسه نیست</strong><p>برای مقایسه، آیکن مقایسه روی کارت محصول را بزنید.</p></div>');
       return;
     }
     $("#comparePanelItems").html(ids.map((id) => {
@@ -1163,7 +1163,7 @@ $(function () {
     $cartFooter.toggle(cart.length > 0);
     if (!cart.length) {
       $cartItems.html(
-        '<div class="empty-cart"><span class="empty-cart-icon"><i class="bi bi-bag"></i></span><strong>سبد خرید شما خالی است</strong><p>محصولات موردعلاقه‌تان را به سبد اضافه کنید.</p></div>',
+        '<div class="empty-cart header-panel-empty"><span class="empty-cart-icon header-panel-empty-icon"><i class="bi bi-cart3" aria-hidden="true"></i></span><strong>سبد خرید شما خالی است</strong><p>برای شروع، یک محصول به سبد خرید اضافه کنید.</p></div>',
       );
       return;
     }

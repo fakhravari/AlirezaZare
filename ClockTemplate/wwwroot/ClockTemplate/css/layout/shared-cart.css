@@ -108,6 +108,8 @@
 }
 :where(.cart-empty, .page-cart-empty, .search-cart-empty) > i,
 .cart-panel .empty-cart-icon,
+.favorites-panel .header-panel-empty-icon,
+.compare-panel .header-panel-empty-icon,
 .cart-item button > i,
 .page-cart-item button > i,
 .search-cart-item button > i {
