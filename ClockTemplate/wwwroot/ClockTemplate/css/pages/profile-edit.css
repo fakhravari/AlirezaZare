@@ -7,7 +7,7 @@
 .profile-edit-heading p { margin: 0; color: var(--industrial-steel); font-size: 13px; }
 .profile-edit-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
 .profile-edit-form label { display: grid; gap: 8px; color: var(--industrial-navy); font-size: 12px; font-weight: 700; }
-.profile-edit-form input { width: 100%; min-height: 49px; padding: 11px 13px; border: 1px solid var(--industrial-bg); border-radius: 10px; background: var(--industrial-bg); color: var(--industrial-navy); font: inherit; font-size: 13px; outline: 0; }
+.profile-edit-form input { width: 100%; min-height: 49px; padding: 11px 13px; border: 1px solid var(--industrial-line); border-radius: 10px; background: #fff; color: var(--industrial-navy); font: inherit; font-size: 13px; outline: 0; }
 .profile-edit-form input:focus { border-color: var(--industrial-yellow-dark); box-shadow: 0 0 0 3px rgba(173, 137, 80, .12); }
 .profile-edit-actions { display: flex; align-items: center; justify-content: flex-end; gap: 12px; grid-column: 1 / -1; margin-top: 8px; }
 .profile-edit-cancel { padding: 13px 18px; border: 1px solid color-mix(in srgb, var(--industrial-yellow) 18%, white); border-radius: 10px; color: var(--industrial-yellow-dark); font-size: 12px; font-weight: 700; }

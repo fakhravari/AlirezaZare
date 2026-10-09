@@ -328,7 +328,7 @@
   background: linear-gradient(145deg, #f5f7f8, #eef2f4);
 }
 
-.overview-empty > i { margin-bottom: 10px; color: var(--industrial-yellow); font-size: 25px; }
+.overview-empty > i { margin-bottom: 10px; color: var(--industrial-yellow-dark); font-size: 25px; }
 .overview-empty strong { color: var(--industrial-steel); font-size: 14px; }
 .overview-empty p { max-width: 360px; margin: 7px 0 0; color: var(--industrial-steel); font-size: 12px; line-height: 1.9; }
 
@@ -348,7 +348,7 @@
 .overview-guide > a > span { display: flex; flex-direction: column; gap: 3px; }
 .overview-guide > a strong { color: var(--industrial-navy); font-size: 13px; }
 .overview-guide > a small { color: var(--industrial-steel); font-size: 11px; }
-.overview-guide > a > i:last-child { color: var(--industrial-line); font-size: 13px; }
+.overview-guide > a > i:last-child { color: var(--industrial-muted); font-size: 13px; }
 
 .account-section > h2,
 .account-section-heading h2 {
@@ -446,10 +446,17 @@
 }
 
 #favorites.account-section {
-  padding: 22px;
-  border: 1px solid rgba(113, 135, 166, 0.2);
-  border-radius: 20px;
-  background: linear-gradient(145deg, #f7f9fa, #eef3f5);
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+#questionForm.flow-card {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 #favoritesView .flow-cards {
@@ -604,7 +611,7 @@
     grid-template-columns: 1fr;
   }
   #favorites.account-section {
-    padding: 16px;
+    padding: 0;
   }
   #favoritesView .favorite-item-card {
     grid-template-columns: minmax(105px, 34%) minmax(0, 1fr);
@@ -628,7 +635,7 @@
     grid-template-columns: 1fr;
   }
   #favorites.account-section {
-    padding: 13px;
+    padding: 0;
   }
   #favoritesView .favorite-item-card {
     grid-template-columns: minmax(88px, 32%) minmax(0, 1fr);
@@ -728,7 +735,7 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop { background: rgba(3, 13
 .profile-edit-dialog .profile-edit-form label small { margin-inline-start: 5px; color: var(--industrial-yellow-dark); font-size: 10px; font-weight: 500; }
 .profile-edit-dialog .profile-edit-form input[readonly] { color: var(--industrial-steel); cursor: not-allowed; }
 .profile-edit-dialog .profile-edit-form .login-input:has(input[readonly]) { background: var(--industrial-bg); border-style: dashed; }
-.profile-edit-dialog .profile-edit-form .login-input:has(input[readonly]) i { color: var(--industrial-yellow); }
+.profile-edit-dialog .profile-edit-form .login-input:has(input[readonly]) i { color: var(--industrial-yellow-dark); }
 .profile-edit-dialog .profile-edit-form .profile-edit-validation { display: block; min-height: 17px; margin: 2px 0 0; color: #a34343; font-size: 11px; font-weight: 400; line-height: 1.6; visibility: hidden; }
 .profile-edit-dialog .profile-edit-validation.field-validation-error { visibility: visible; }
 .profile-edit-dialog .login-input:has(.input-validation-error),
@@ -994,9 +1001,9 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop { background: rgba(3, 13
 }
 
 #orders.account-section.flow-card {
-  padding: 22px;
-  border-color: #e1e7ec;
-  background: #f5f8fa;
+  padding: 0;
+  border: 0;
+  background: transparent;
   box-shadow: none;
 }
 
@@ -1056,7 +1063,7 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop { background: rgba(3, 13
 
 @media (max-width: 767px) {
   #orders.account-section.flow-card {
-    padding: 16px;
+    padding: 0;
   }
 }
 
@@ -1083,4 +1090,38 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop { background: rgba(3, 13
 .overview-panel-title i,
 .overview-guide > a > i:first-child {
   color: #b98d00;
+}
+
+#addresses .account-section-heading {
+  margin-bottom: 30px;
+  align-items: center;
+}
+
+#addresses #addressList {
+  padding: 0;
+}
+
+#addresses #addressList > .flow-empty {
+  min-height: 220px;
+  margin: 0;
+  padding: 36px 16px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+@media (max-width: 575px) {
+  #addresses .account-section-heading {
+    margin-bottom: 22px;
+  }
+
+  #addresses #addressList {
+    padding: 0;
+  }
+
+  #addresses #addressList > .flow-empty {
+    min-height: 190px;
+    padding: 28px 12px;
+  }
 }
