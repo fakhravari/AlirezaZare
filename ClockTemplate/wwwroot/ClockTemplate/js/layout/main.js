@@ -1185,7 +1185,7 @@ $(function () {
   });
   document.addEventListener("hn:cart-added", () => setCartOpen(true));
 
-  $cartItems.on("click", "[data-action]", function () {
+  $cartItems.on("click", "[data-action]", function (event) {
     const $button = $(this);
     const $row = $button.closest("[data-cart-id]");
     const item = cart.find(
@@ -1196,7 +1196,11 @@ $(function () {
       window.HNUI.cart.update(item.id, item.quantity + 1);
     if ($button.data("action") === "minus")
       window.HNUI.cart.update(item.id, item.quantity - 1);
-    if ($button.data("action") === "remove") window.HNUI.cart.remove(item.id);
+    if ($button.data("action") === "remove") {
+      event.stopPropagation();
+      window.HNUI.cart.remove(item.id);
+      setCartOpen(true);
+    }
   });
 
   $cartToggle.on("click", (event) => {
@@ -1207,9 +1211,11 @@ $(function () {
     setCartOpen(!$cartPanel.hasClass("open"));
   });
   $("#favoritesClose").on("click", () => setFavoriteOpen(false));
-  $favoritesPanel.on("click", "[data-favorite-remove]", function () {
+  $favoritesPanel.on("click", "[data-favorite-remove]", function (event) {
+    event.stopPropagation();
     const removedId = String(this.dataset.favoriteRemove || "");
     window.HNUI.storage.set("hn-favorites", JSON.stringify(readFavoriteList().filter((id) => id !== removedId)));
+    setFavoriteOpen(true);
   });
   let favoriteHoverTimer = null;
   $favoritesWrap.on("mouseenter", () => {
@@ -1230,10 +1236,12 @@ $(function () {
     if ($window.width() > mobileBreakpoint) setFavoriteOpen(false);
   });
   $("#compareClose").on("click", () => setCompareOpen(false));
-  $("#comparePanel").on("click", "[data-compare-remove]", function () {
+  $("#comparePanel").on("click", "[data-compare-remove]", function (event) {
+    event.stopPropagation();
     const removedId = String(this.dataset.compareRemove || "");
     window.HNUI.storage.set("hn-compare", JSON.stringify(readCompareList().filter((id) => id !== removedId)));
     syncCompareButtons();
+    setCompareOpen(true);
   });
   let compareHoverTimer = null;
   $compareWrap.on("mouseenter", () => {

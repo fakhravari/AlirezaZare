@@ -419,6 +419,16 @@
 .compare-detail-link { display: flex; min-height: 40px; align-items: center; justify-content: space-between; margin-top: auto; padding: 0 11px; border-radius: 10px; background: #f2f6f7; color: #193b55; font-size: 13px; font-weight: 750; text-decoration: none; }
 .compare-detail-link:hover { background: #fff3bd; color: #142e51; }
 
+.compare-category-groups { display: grid; gap: 22px; }
+.compare-category-group { overflow: hidden; padding: 18px; border: 1px solid #dfe6e9; border-radius: 20px; background: linear-gradient(145deg, #fff, #f8fafb); box-shadow: 0 12px 32px -26px #142e5180; }
+.compare-category-heading { display: flex; min-height: 58px; align-items: center; gap: 12px; margin-bottom: 16px; padding: 0 3px 15px; border-bottom: 1px solid #e8edef; }
+.compare-category-icon { display: grid; width: 42px; height: 42px; flex: 0 0 42px; place-items: center; border: 1px solid #f0df9d; border-radius: 13px; background: #fff9e4; color: #967300; font-size: 18px; }
+.compare-category-heading > span:nth-child(2) { display: grid; gap: 3px; }
+.compare-category-heading strong { color: #142e51; font-size: 16px; font-weight: 800; }
+.compare-category-heading small { color: #778591; font-size: 12px; }
+.compare-category-heading > b { margin-inline-start: auto; padding: 7px 11px; border: 1px solid #e4eaed; border-radius: 999px; background: #fff; color: #405667; font-size: 12px; white-space: nowrap; }
+.compare-category-group .compare-product-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); }
+
 @media(max-width:575px) {
   .compare-overview { flex-wrap: wrap; gap: 10px; padding: 13px; }
   .compare-overview-copy { min-width: calc(100% - 60px); }
@@ -428,4 +438,9 @@
   .compare-overview > a { flex: 1 1 145px; justify-content: center; }
   .compare-product-card { padding: 12px; }
   .compare-product-link h2 { min-height: auto; }
+  .compare-category-group { padding: 12px; border-radius: 16px; }
+  .compare-category-heading { gap: 9px; margin-bottom: 12px; }
+  .compare-category-icon { width: 36px; height: 36px; flex-basis: 36px; }
+  .compare-category-heading strong { font-size: 14px; }
+  .compare-category-heading small { font-size: 11px; }
 }

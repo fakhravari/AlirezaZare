@@ -244,14 +244,37 @@ document.addEventListener('DOMContentLoaded', () => {
     const view=document.querySelector('#compareView');
     if(!view)return;
     const savedCompare=ui.storage.json('hn-compare',[]);
+    const demoIds=['1','2','6','7','11','13','16','18','21','22'];
+    const legacyDemoIds=catalog.slice(0,3).map(product=>String(product.id));
+    if(Array.isArray(savedCompare)&&savedCompare.map(String).join(',')===legacyDemoIds.join(',')&&ui.storage.get('hn-compare-demo-seeded','')==='1'){
+      ui.storage.set('hn-compare',JSON.stringify(demoIds.filter(id=>catalog.some(product=>String(product.id)===id))));
+    }
     if((!Array.isArray(savedCompare)||savedCompare.length===0)&&ui.storage.get('hn-compare-demo-seeded','__HN_EMPTY__')==='__HN_EMPTY__'){
-      ui.storage.set('hn-compare',JSON.stringify(catalog.slice(0,3).map(product=>String(product.id))));
+      ui.storage.set('hn-compare',JSON.stringify(demoIds.filter(id=>catalog.some(product=>String(product.id)===id))));
       ui.storage.set('hn-compare-demo-seeded','1');
     }
     const ids=ui.storage.json('hn-compare',[]).map(String);
     const cache=ui.storage.json('hn-product-cache',{});
     const list=ids.map(id=>catalog.find(product=>String(product.id)===id)||cache[id]).filter(Boolean);
-    view.innerHTML=list.length?`<header class="compare-overview"><span class="compare-overview-icon"><i class="bi bi-columns-gap" aria-hidden="true"></i></span><span class="compare-overview-copy"><strong>محصول‌ها کنار هم، انتخاب آسان‌تر</strong><small>مشخصات و کاربرد هر گزینه را با هم بسنجید.</small></span><b>${fa(list.length)} محصول</b><a href="Search"><i class="bi bi-plus-lg" aria-hidden="true"></i>افزودن محصول</a></header><div class="compare-product-grid">${list.map((product,index)=>{const specs=[['دسته‌بندی',product.type||'ابزار و تجهیزات'],['نوع تغذیه',product.movement||'مطابق مشخصات کالا'],['کاربری',product.strap||'کارگاهی'],...(product.detail?.specs||[]).slice(0,3)];return `<article class="compare-product-card"><div class="compare-card-top"><span>گزینهٔ ${fa(index+1)}</span><button class="compare-remove-icon" type="button" data-compare-remove-page="${esc(product.id)}" aria-label="حذف ${esc(product.name)} از مقایسه"><i class="bi bi-trash3" aria-hidden="true"></i></button></div><a class="compare-product-link" href="Product?id=${encodeURIComponent(product.id)}"><div class="compare-product-image"><img src="${esc(product.image)}" alt="${esc(product.name)}" loading="lazy"></div><div class="compare-product-meta"><span>${esc(product.brand||'برند منتخب')}</span><small><i class="bi bi-grid-3x3-gap" aria-hidden="true"></i>${esc(product.type||'ابزار و تجهیزات')}</small></div><h2>${esc(product.name)}</h2></a><div class="compare-price"><small>قیمت محصول</small><strong>${money(Number(product.price)*1000000)}</strong></div><h3 class="compare-spec-title"><i class="bi bi-list-check" aria-hidden="true"></i>مشخصات قابل بررسی</h3><dl>${specs.map(([label,value])=>`<div><dt>${esc(label)}</dt><dd>${esc(value)}</dd></div>`).join('')}</dl><a class="compare-detail-link" href="Product?id=${encodeURIComponent(product.id)}">جزئیات محصول<i class="bi bi-arrow-left" aria-hidden="true"></i></a></article>`}).join('')}</div>`:`<div class="compare-empty"><i class="bi bi-columns-gap" aria-hidden="true"></i><h2>هنوز محصولی برای مقایسه انتخاب نکرده‌اید</h2><p>از آیکن مقایسه روی کارت محصولات استفاده کنید تا مشخصاتشان اینجا کنار هم نمایش داده شود.</p><a class="flow-button" href="Search">انتخاب محصولات <i class="bi bi-arrow-left" aria-hidden="true"></i></a></div>`;
+    const groups=new Map();
+    list.forEach(product=>{
+      const category=product.categoryPath?.[1]||product.type||'ابزار و تجهیزات';
+      if(!groups.has(category))groups.set(category,[]);
+      groups.get(category).push(product);
+    });
+    const groupIcons={
+      'ابزار برقی':'bi-lightning-charge',
+      'ابزار اندازه‌گیری':'bi-speedometer2',
+      'لحیم‌کاری و تعمیر برد':'bi-cpu',
+      'روشنایی و لامپ':'bi-lightbulb',
+      'ابزار برق‌کار':'bi-tools',
+      'تستر و ایمنی برق':'bi-shield-check',
+    };
+    const renderCard=(product,index)=>{
+      const specs=[['دسته‌بندی',product.type||'ابزار و تجهیزات'],['نوع تغذیه',product.movement||'مطابق مشخصات کالا'],['کاربری',product.strap||'کارگاهی'],...(product.detail?.specs||[]).slice(0,3)];
+      return `<article class="compare-product-card"><div class="compare-card-top"><span>گزینهٔ ${fa(index+1)}</span><button class="compare-remove-icon" type="button" data-compare-remove-page="${esc(product.id)}" aria-label="حذف ${esc(product.name)} از مقایسه"><i class="bi bi-trash3" aria-hidden="true"></i></button></div><a class="compare-product-link" href="Product?id=${encodeURIComponent(product.id)}"><div class="compare-product-image"><img src="${esc(product.image)}" alt="${esc(product.name)}" loading="lazy"></div><div class="compare-product-meta"><span>${esc(product.brand||'برند منتخب')}</span><small><i class="bi bi-grid-3x3-gap" aria-hidden="true"></i>${esc(product.type||'ابزار و تجهیزات')}</small></div><h2>${esc(product.name)}</h2></a><div class="compare-price"><small>قیمت محصول</small><strong>${money(Number(product.price)*1000000)}</strong></div><h3 class="compare-spec-title"><i class="bi bi-list-check" aria-hidden="true"></i>مشخصات قابل بررسی</h3><dl>${specs.map(([label,value])=>`<div><dt>${esc(label)}</dt><dd>${esc(value)}</dd></div>`).join('')}</dl><a class="compare-detail-link" href="Product?id=${encodeURIComponent(product.id)}">جزئیات محصول<i class="bi bi-arrow-left" aria-hidden="true"></i></a></article>`;
+    };
+    view.innerHTML=list.length?`<header class="compare-overview"><span class="compare-overview-icon"><i class="bi bi-columns-gap" aria-hidden="true"></i></span><span class="compare-overview-copy"><strong>مقایسهٔ دسته‌بندی‌شدهٔ محصولات</strong><small>هر گروه را جداگانه بررسی کنید تا انتخاب دقیق‌تری داشته باشید.</small></span><b>${fa(list.length)} محصول · ${fa(groups.size)} گروه</b><a href="Search"><i class="bi bi-plus-lg" aria-hidden="true"></i>افزودن محصول</a></header><div class="compare-category-groups">${[...groups.entries()].map(([category,products])=>`<section class="compare-category-group" aria-label="مقایسهٔ ${esc(category)}"><header class="compare-category-heading"><span class="compare-category-icon"><i class="bi ${groupIcons[category]||'bi-grid'}" aria-hidden="true"></i></span><span><strong>${esc(category)}</strong><small>مقایسهٔ محصولات هم‌دسته</small></span><b>${fa(products.length)} محصول</b></header><div class="compare-product-grid">${products.map(renderCard).join('')}</div></section>`).join('')}</div>`:`<div class="compare-empty"><i class="bi bi-columns-gap" aria-hidden="true"></i><h2>هنوز محصولی برای مقایسه انتخاب نکرده‌اید</h2><p>از آیکن مقایسه روی کارت محصولات استفاده کنید تا مشخصاتشان اینجا کنار هم نمایش داده شود.</p><a class="flow-button" href="Search">انتخاب محصولات <i class="bi bi-arrow-left" aria-hidden="true"></i></a></div>`;
     view.querySelectorAll('[data-compare-remove-page]').forEach(button=>button.onclick=()=>{const next=ui.storage.json('hn-compare',[]).map(String).filter(id=>id!==button.dataset.compareRemovePage);ui.storage.set('hn-compare',JSON.stringify(next));renderCompare();});
   };
   renderCompare();
