@@ -158,6 +158,40 @@
   color: inherit !important;
 }
 
+.compare-panel-item > .cart-remove,
+.compare-panel-item > .cart-remove:hover,
+.compare-panel-item > .cart-remove:focus,
+.compare-panel-item > .cart-remove:focus-visible,
+.compare-panel-item > .cart-remove:active {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  min-height: 32px;
+  padding: 0;
+  place-items: center;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: #7d8999;
+  transform: none;
+}
+
+.compare-panel-item > .cart-remove:is(:hover, :focus-visible, :active) {
+  color: #a44f4f;
+}
+
+.compare-panel-item > .cart-remove > i {
+  width: auto;
+  height: auto;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: inherit;
+  font-size: 16px;
+}
+
 /* Empty-cart CTA: same navy family as the account panel, across every page. */
 body > .cart-panel .empty-cart > a,
 .page-cart-panel .page-cart-empty > a,

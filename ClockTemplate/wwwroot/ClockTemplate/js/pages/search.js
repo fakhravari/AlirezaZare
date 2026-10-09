@@ -47,19 +47,69 @@ const brandPersianLabels = {
   YIHUA: "ییهوا",
 };
 const brandSlug = (brand) => brand.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-const brandFilterOptions = Object.fromEntries(
-  [...new Set(products.map((product) => product.brand))].map((brand) => [brandSlug(brand), brand]),
-);
 const brandDisplayName = (brand) => brandPersianLabels[brand] || brand;
+const filterValueMetadata = {
+  type: {
+    "ابزار دستی برق‌کاری": { en: "Electrician hand tools", slug: "electrician-hand-tools" },
+    "ایستگاه هویه": { en: "Soldering station", slug: "soldering-station" },
+    "پروژکتور کارگاهی": { en: "Workshop floodlight", slug: "workshop-floodlight" },
+    "تستر مدار": { en: "Circuit tester", slug: "circuit-tester" },
+    "تستر و فازمتر": { en: "Electrical tester", slug: "electrical-tester" },
+    "تستر ولتاژ": { en: "Voltage tester", slug: "voltage-tester" },
+    "چراغ بازرسی": { en: "Inspection light", slug: "inspection-light" },
+    "چراغ کارگاهی": { en: "Workshop light", slug: "workshop-light" },
+    "دریل چکشی": { en: "Hammer drill", slug: "hammer-drill" },
+    "دریل و پیچ‌گوشتی": { en: "Drill driver", slug: "drill-driver" },
+    "فازمتر": { en: "Voltage detector", slug: "voltage-detector" },
+    "مجموعه ابزار برق‌کاری": { en: "Electrician tool kit", slug: "electrician-tool-kit" },
+    "مولتی‌متر دیجیتال": { en: "Digital multimeter", slug: "digital-multimeter" },
+    "هویه قلمی": { en: "Soldering iron", slug: "soldering-iron" },
+    "هیتر و هویه": { en: "Hot air rework station", slug: "hot-air-rework-station" },
+  },
+  movement: {
+    "باتری شارژی": { en: "Rechargeable battery", slug: "rechargeable-battery" },
+    "باتری‌خور": { en: "Battery powered", slug: "battery-powered" },
+    "برق شهری": { en: "Mains powered", slug: "mains-powered" },
+    "دستی": { en: "Manual", slug: "manual" },
+  },
+  strap: {
+    "ایمنی و بازرسی": { en: "Safety and inspection", slug: "safety-inspection" },
+    "بازرسی و تعمیر": { en: "Inspection and repair", slug: "inspection-repair" },
+    "برق صنعتی": { en: "Industrial electrical", slug: "industrial-electrical" },
+    "تأسیسات برقی": { en: "Electrical installation", slug: "electrical-installation" },
+    "تست اولیه برق": { en: "Initial electrical testing", slug: "initial-electrical-testing" },
+    "تست و سرویس": { en: "Testing and service", slug: "testing-service" },
+    "تست و عیب‌یابی": { en: "Testing and troubleshooting", slug: "testing-troubleshooting" },
+    "تعمیر برد": { en: "Circuit board repair", slug: "circuit-board-repair" },
+    "تعمیر خودرو": { en: "Automotive repair", slug: "automotive-repair" },
+    "تعمیر و نگهداری": { en: "Maintenance and repair", slug: "maintenance-repair" },
+    "تعمیرات الکترونیک": { en: "Electronics repair", slug: "electronics-repair" },
+    "تعمیرگاه و کارگاه": { en: "Repair shop and workshop", slug: "repair-shop-workshop" },
+    "سیم‌کشی و نصب": { en: "Wiring and installation", slug: "wiring-installation" },
+    "عیب‌یابی برق": { en: "Electrical troubleshooting", slug: "electrical-troubleshooting" },
+    "کارگاه ساختمانی": { en: "Construction workshop", slug: "construction-workshop" },
+    "کارگاه و سرویس": { en: "Workshop service", slug: "workshop-service" },
+    "کارگاه و نصب": { en: "Workshop installation", slug: "workshop-installation" },
+    "محیط کارگاهی": { en: "Workshop environment", slug: "workshop-environment" },
+    "مونتاژ الکترونیک": { en: "Electronics assembly", slug: "electronics-assembly" },
+    "مونتاژ و تعمیر": { en: "Assembly and repair", slug: "assembly-repair" },
+    "نصب و برق‌کاری": { en: "Electrical installation work", slug: "electrical-installation-work" },
+    "نصب و تعمیر": { en: "Installation and repair", slug: "installation-repair" },
+    "نصب و کارگاه": { en: "Installation workshop", slug: "installation-workshop" },
+    "نصب و مونتاژ": { en: "Installation and assembly", slug: "installation-assembly" },
+  },
+};
+const filterValueMeta = (key, value) => key === "brand"
+  ? { fa: brandDisplayName(value), en: value, slug: brandSlug(value) }
+  : { fa: value, ...(filterValueMetadata[key]?.[value] || { en: value, slug: `option-${value}` }) };
 const createFilterOptions = (key) =>
   Object.fromEntries(
-    [...new Set(products.map((product) => product[key]))].map((label, index) => [
-      `option${index + 1}`,
-      label,
-    ]),
+    [...new Set(products.map((product) => product[key]))].map((label) => [filterValueMeta(key, label).slug, label]),
   );
+const createLegacyFilterOptions = (key) =>
+  Object.fromEntries([...new Set(products.map((product) => product[key]))].map((label, index) => [`option${index + 1}`, label]));
 const filterOptions = {
-  brand: brandFilterOptions,
+  brand: createFilterOptions("brand"),
   type: createFilterOptions("type"),
   movement: createFilterOptions("movement"),
   strap: createFilterOptions("strap"),
@@ -97,7 +147,7 @@ function applyUrlState() {
     ])];
     values.forEach((value) => {
       // Accept slug, legacy English brand values, and Persian labels in shared links.
-      const legacyOption = /^option\d+$/.test(value) ? createFilterOptions(key)[value] : undefined;
+      const legacyOption = /^option\d+$/.test(value) ? createLegacyFilterOptions(key)[value] : undefined;
       const slugValue = Object.hasOwn(filterOptions[key], value)
         ? filterOptions[key][value]
         : legacyOption || value;
@@ -133,7 +183,10 @@ function buildFilters() {
     $(`#${key}Filters`).innerHTML = searchBox + values
       .map(
         (value) =>
-          `<label class="filter-option"><input type="checkbox" value="${value}" data-filter="${key}"><span>${key === "brand" ? brandDisplayName(value) : value}</span></label>`,
+          (() => {
+            const metadata = filterValueMeta(key, value);
+            return `<label class="filter-option"><input type="checkbox" value="${value}" data-filter="${key}" data-value-fa="${metadata.fa}" data-value-en="${metadata.en}" data-value-slug="${metadata.slug}"><span>${metadata.fa}</span></label>`;
+          })(),
       )
       .join("");
   });

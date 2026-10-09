@@ -194,7 +194,7 @@ $(function () {
     }
     $("#favoritesPanelItems").html(ids.map((id) => {
       const product = products.get(id) || { name: "محصول منتخب", price: 0, image: "ClockTemplate/images/products/tool-hammer-drill.png" };
-      return `<article class="compare-panel-item" data-favorite-id="${escapeHtml(id)}"><img src="${escapeHtml(product.image || "ClockTemplate/images/products/tool-hammer-drill.png")}" alt="" loading="lazy"><span><strong>${escapeHtml(product.name || "محصول منتخب")}</strong><small>${faNumber(Number(product.price) * (Number(product.price) < 1000000 ? 1000000 : 1))} تومان</small></span><button type="button" data-favorite-remove="${escapeHtml(id)}" aria-label="حذف ${escapeHtml(product.name || "محصول")} از علاقه‌مندی‌ها"><i class="bi bi-x-lg" aria-hidden="true"></i></button></article>`;
+      return `<article class="compare-panel-item" data-favorite-id="${escapeHtml(id)}"><img src="${escapeHtml(product.image || "ClockTemplate/images/products/tool-hammer-drill.png")}" alt="" loading="lazy"><span><strong>${escapeHtml(product.name || "محصول منتخب")}</strong><small>${faNumber(Number(product.price) * (Number(product.price) < 1000000 ? 1000000 : 1))} تومان</small></span><button class="cart-remove" type="button" data-favorite-remove="${escapeHtml(id)}" aria-label="حذف ${escapeHtml(product.name || "محصول")} از علاقه‌مندی‌ها"><i class="bi bi-trash3" aria-hidden="true"></i></button></article>`;
     }).join(""));
   };
   const renderComparePanel = () => {
@@ -223,7 +223,7 @@ $(function () {
     }
     $("#comparePanelItems").html(ids.map((id) => {
       const product = products.get(id) || { name: "محصول منتخب", price: 0, image: "ClockTemplate/images/products/tool-hammer-drill.png" };
-      return `<article class="compare-panel-item" data-compare-id="${escapeHtml(id)}"><img src="${escapeHtml(product.image)}" alt="" loading="lazy"><span><strong>${escapeHtml(product.name)}</strong><small>${faNumber(product.price)} تومان</small></span><button type="button" data-compare-remove="${escapeHtml(id)}" aria-label="حذف ${escapeHtml(product.name)} از مقایسه"><i class="bi bi-x-lg" aria-hidden="true"></i></button></article>`;
+      return `<article class="compare-panel-item" data-compare-id="${escapeHtml(id)}"><img src="${escapeHtml(product.image)}" alt="" loading="lazy"><span><strong>${escapeHtml(product.name)}</strong><small>${faNumber(product.price)} تومان</small></span><button class="cart-remove" type="button" data-compare-remove="${escapeHtml(id)}" aria-label="حذف ${escapeHtml(product.name)} از مقایسه"><i class="bi bi-trash3" aria-hidden="true"></i></button></article>`;
     }).join(""));
   };
   renderNavCounters();
