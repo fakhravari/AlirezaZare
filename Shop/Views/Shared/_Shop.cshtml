@@ -1,0 +1,90 @@
+@model PageModel
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta name="theme-color" content="#102a56"/>
+    <meta name="description" content="@Model.Seo.Description"/>
+    <meta name="robots" content="@Model.Seo.Robots"/>
+    @if (!string.IsNullOrWhiteSpace(Model.Seo.Keywords))
+    {
+        <meta name="keywords" content="@Model.Seo.Keywords"/>
+    }
+    @if (!string.IsNullOrWhiteSpace(Model.Seo.CanonicalUrl))
+    {
+        <link rel="canonical" href="@Model.Seo.CanonicalUrl"/>
+    }
+    <meta property="og:title" content="@Model.Seo.Title"/>
+    <meta property="og:description" content="@Model.Seo.Description"/>
+    <meta property="og:type" content="website"/>
+    @if (!string.IsNullOrWhiteSpace(Model.Seo.ImageUrl))
+    {
+        <meta property="og:image" content="@Model.Seo.ImageUrl"/>
+    }
+    <base href="@Url.Content("~/")"/>
+    <title>@Model.Seo.Title</title>
+    <link href="~/Shop/vendor/fonts/fonts.css" rel="stylesheet" asp-append-version="true"/>
+    <link href="~/Shop/vendor/bootstrap/bootstrap.rtl.min.css" rel="stylesheet" asp-append-version="true"/>
+    <link
+        href="~/Shop/vendor/bootstrap-icons/bootstrap-icons.min.css"
+        asp-append-version="true"
+        rel="stylesheet"/>
+    <link href="~/Shop/vendor/owl.carousel/owl.carousel.min.css" rel="stylesheet" asp-append-version="true"/>
+    <link
+        href="~/Shop/vendor/owl.carousel/owl.theme.default.min.css"
+        asp-append-version="true"
+        rel="stylesheet"/>
+    <link href="~/Shop/vendor/swiper/swiper-bundle.min.css" rel="stylesheet" asp-append-version="true"/>
+    <link href="~/Shop/css/core/design-tokens.css" rel="stylesheet" asp-append-version="true"/>
+    <link href="~/Shop/css/core/components.css" rel="stylesheet" asp-append-version="true"/>
+    <link href="~/Shop/css/core/ui-core.css" rel="stylesheet" asp-append-version="true"/>
+    <link href="~/Shop/css/layout/shared-header.css" rel="stylesheet" asp-append-version="true"/>
+    <link href="~/Shop/css/layout/shared-account.css" rel="stylesheet" asp-append-version="true"/>
+    <link href="~/Shop/css/layout/shared-cart.css" rel="stylesheet" asp-append-version="true"/>
+    <link href="~/Shop/css/layout/shared-login.css" rel="stylesheet" asp-append-version="true"/>
+    <link href="~/Shop/css/layout/shared-footer.css" rel="stylesheet" asp-append-version="true"/>
+    <link href="~/Shop/css/layout/luxury-theme.css" rel="stylesheet" asp-append-version="true"/>
+    <link href="~/Shop/css/core/site.css" rel="stylesheet" asp-append-version="true"/>
+    <link href="~/Shop/css/layout/style.css" rel="stylesheet" asp-append-version="true"/>
+    <link href="~/Shop/css/layout/shared-mega-menu.css" rel="stylesheet" asp-append-version="true"/>
+    <link href="~/Shop/css/store/shared-product-card.css" rel="stylesheet" asp-append-version="true"/>
+    <link href="~/Shop/css/store/commerce.css" rel="stylesheet" asp-append-version="true"/>
+    @await RenderSectionAsync("Styles", false)
+    <link href="~/Shop/css/layout/mvc-layout.css" rel="stylesheet" asp-append-version="true"/>
+    <link href="~/Shop/css/layout/mobile-drawer-compact.css" rel="stylesheet" asp-append-version="true"/>
+    <link href="~/Shop/css/store/pagination.css" rel="stylesheet" asp-append-version="true"/>
+    <link href="~/Shop/css/layout/electrical-theme.css" rel="stylesheet" asp-append-version="true"/>
+    <link href="~/Shop/css/layout/industrial-system.css" rel="stylesheet" asp-append-version="true"/>
+</head>
+<body class="@(Model.IsHome ? "home-page" : "inner-page")">
+@if (Model.IsHome)
+{
+    <header class="hero" id="home">
+        <partial name="_HomeHeader"/>
+        @await RenderSectionAsync("Hero", false)
+    </header>
+}
+else
+{
+    <partial name="_InnerHeader"/>
+}
+@RenderBody()
+<partial name="_Footer"/>
+<partial name="_Panels"/>
+<button class="back-to-top" id="backToTop" type="button" aria-label="بازگشت به ابتدای صفحه" title="بازگشت به بالا" aria-hidden="true" tabindex="-1">
+    <i class="bi bi-arrow-up" aria-hidden="true"></i>
+</button>
+<script src="~/Shop/js/core/ui-core.js" asp-append-version="true"></script>
+<script src="~/Shop/vendor/jquery/jquery.min.js" asp-append-version="true"></script>
+<script src="~/Shop/vendor/owl.carousel/owl.carousel.min.js" asp-append-version="true"></script>
+<script src="~/Shop/vendor/swiper/swiper-bundle.min.js" asp-append-version="true"></script>
+<script src="~/Shop/vendor/bootstrap/bootstrap.bundle.min.js" asp-append-version="true"></script>
+<script src="~/Shop/js/layout/main.js" asp-append-version="true"></script>
+<script src="~/Shop/js/core/form-validation.js" asp-append-version="true"></script>
+<script src="~/Shop/js/store/catalog.js" asp-append-version="true"></script>
+<script src="~/Shop/js/store/commerce.js" asp-append-version="true"></script>
+@await RenderSectionAsync("Scripts", false)
+<script src="~/Shop/js/core/electrical-content.js" asp-append-version="true"></script>
+</body>
+</html>

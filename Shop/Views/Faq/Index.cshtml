@@ -1,0 +1,68 @@
+@model PageModel
+
+
+<header class="page-hero about-hero">
+    <img class="hero-image"
+         src="@Url.Content("~/Shop/images/heroes/hero-electrical-editorial.png")"
+         alt="هدست پشتیبانی در کنار ساعت" width="1536" height="1024" fetchpriority="high"/>
+    <div class="container">
+        <nav class="article-breadcrumb" aria-label="مسیر صفحه">
+            <a class="breadcrumb-home" asp-controller="Home" asp-action="Index">
+                <i class="bi bi-house-door" aria-hidden="true"></i>
+                <span>خانه</span>
+            </a>
+            <span class="breadcrumb-step">
+                <i class="breadcrumb-separator bi bi-chevron-left" aria-hidden="true"></i>
+                <span class="breadcrumb-current" aria-current="page">
+                    <i class="bi bi-question-circle" aria-hidden="true"></i>
+                    <span>پرسش‌های متداول</span>
+                </span>
+            </span>
+        </nav>
+        <span class="page-kicker">خدمات مشتریان</span>
+        <h1>پرسش‌های متداول</h1>
+        <p>
+            پاسخ پرسش‌های رایج درباره انتخاب ساعت، خرید، پیگیری سفارش، ارسال و ضمانت
+            را اینجا بخوانید. اگر به راهنمایی بیشتری نیاز داشتید، با پشتیبانی در تماس باشید.
+        </p>
+        <div class="hero-trail">
+            <span>راهنمای انتخاب ساعت</span>
+            <span>سفارش و ارسال</span>
+            <span>ضمانت و خدمات پس از فروش</span>
+        </div>
+    </div>
+</header>
+<main class="flow-main container customer-service-main">
+    <div class="flow-card">
+        <details>
+            <summary>چطور ابزار مناسب انتخاب کنم؟</summary>
+            <p>از فیلترهای صفحهٔ محصولات برای انتخاب گروه ابزار، برند، نوع تغذیه و بازهٔ قیمت استفاده کنید.</p>
+        </details>
+        <details>
+            <summary>آیا امکان خرید آنلاین وجود دارد؟</summary>
+            <p>در این نسخه می‌توانید محصول را بررسی و سبد خرید را آماده کنید؛ پرداخت واقعی فعال نیست. برای خرید با فروشگاه تماس بگیرید.</p>
+        </details>
+        <details>
+            <summary>چگونه سفارش را پیگیری کنم؟</summary>
+            <p>به صفحه پیگیری سفارش مراجعه کنید. تا اتصال سامانه آنلاین، پشتیبانی تلفنی پاسخ‌گوی شماست.</p>
+        </details>
+        <details>
+            <summary>هزینه و زمان ارسال چقدر است؟</summary>
+            <p>این موارد با توجه به مقصد و موجودی، توسط فروشگاه تأیید می‌شود.</p>
+        </details>
+        <details>
+            <summary>شرایط ضمانت و مرجوعی چیست؟</summary>
+            <p>شرایط ضمانت هر محصول روی کارت ضمانت و فاکتور درج می‌شود. راهنمای انصراف از خرید و بازگرداندن کالا را در <a asp-controller="Legal" asp-action="Returns">رویه بازگرداندن کالا</a> بخوانید.</p>
+        </details>
+    </div><a class="flow-button" href="Contact">پرسش دیگری دارید؟ <i class="bi bi-arrow-left"></i></a>
+    <partial name="_RelatedLinks" />
+</main>
+
+
+@section Styles {
+    <link href="Shop/css/pages/pages.css" asp-append-version="true" rel="stylesheet"/>
+}
+
+@section Scripts {
+    <script src="Shop/js/pages/page-content.js?v=1"></script>
+}

@@ -1,0 +1,34 @@
+@model PageModel<ProductDetailsModel>
+
+
+<main class="flow-main container">
+    <nav class="cart-breadcrumb" aria-label="مسیر صفحه">
+        <ol>
+            <li>
+                <a asp-controller="Home" asp-action="Index">
+                    <i class="bi bi-house-door" aria-hidden="true"></i><span>خانه</span>
+                </a>
+            </li>
+            <li class="cart-breadcrumb-current">
+                <i class="bi bi-chevron-left" aria-hidden="true"></i><span aria-current="page"><i class="bi bi-tools" aria-hidden="true"></i>جزئیات ابزار</span>
+            </li>
+        </ol>
+    </nav>
+    <header class="flow-heading">
+        <span>فروشگاه تخصصی برق و ابزار علی‌رضا زارع</span>
+        <h1>جزئیات محصول</h1>
+        <p>مشخصات فنی، قیمت، موجودی و ضمانت اصالت</p>
+    </header>
+    <div id="productView"></div>
+    <partial name="_RelatedLinks" />
+</main>
+
+<partial name="_PurchaseBenefits" />
+
+@section Styles {
+    <link href="Shop/css/pages/pages.css?v=12" rel="stylesheet"/>
+}
+
+@section Scripts {
+    <script src="Shop/js/pages/page-content.js?v=1"></script>
+}

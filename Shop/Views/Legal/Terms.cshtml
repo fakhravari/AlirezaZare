@@ -1,0 +1,47 @@
+@model PageModel
+
+<header class="page-hero about-hero legal-hero">
+    <img class="hero-image" src="@Url.Content("~/Shop/images/heroes/hero-electrical-editorial.png")" alt="شرایط استفاده از فروشگاه" width="1536" height="1024" fetchpriority="high" />
+    <div class="container">
+        <nav class="article-breadcrumb" aria-label="مسیر صفحه">
+            <a class="breadcrumb-home" asp-controller="Home" asp-action="Index"><i class="bi bi-house-door" aria-hidden="true"></i><span>خانه</span></a>
+            <span class="breadcrumb-step"><i class="breadcrumb-separator bi bi-chevron-left" aria-hidden="true"></i><span class="breadcrumb-current" aria-current="page"><i class="bi bi-file-earmark-text" aria-hidden="true"></i><span>شرایط استفاده</span></span></span>
+        </nav>
+        <span class="page-kicker">راهنمای استفاده از وب‌سایت</span>
+        <h1>شرایط استفاده</h1>
+        <p>با استفاده از وب‌سایت، لطفاً این نکات را درباره اطلاعات محصولات، حساب کاربری و ثبت سفارش در نظر داشته باشید.</p>
+        <div class="hero-trail"><span>اطلاعات فروشگاه</span><span>حساب و سبد خرید</span><span>ثبت سفارش</span></div>
+    </div>
+</header>
+
+<main class="flow-main container legal-main">
+    <article class="flow-card legal-document">
+        <div class="legal-note"><i class="bi bi-info-circle" aria-hidden="true"></i><p>نسخه فعلی وب‌سایت نمایشی است؛ پرداخت آنلاین متصل نیست و افزودن کالا به سبد به‌تنهایی سفارش یا تعهد خرید ایجاد نمی‌کند.</p></div>
+        <section class="legal-section">
+            <h2><i class="bi bi-shop" aria-hidden="true"></i> اطلاعات محصولات و قیمت‌ها</h2>
+            <p>مشخصات، تصاویر، قیمت و موجودی برای آشنایی و بررسی محصولات نمایش داده می‌شوند و ممکن است نیاز به تأیید فروشگاه داشته باشند. پیش از هر خرید مستقیم، مشخصات نهایی، قیمت، موجودی، هزینه و زمان ارسال را از فروشگاه بپرسید.</p>
+        </section>
+        <section class="legal-section">
+            <h2><i class="bi bi-bag-check" aria-hidden="true"></i> سبد خرید و سفارش</h2>
+            <p>سبد خرید، مقایسه و علاقه‌مندی‌ها ابزارهای کمکی همین وب‌سایت‌اند. تا زمانی که فروشگاه سفارش را از راه ارتباطی رسمی تأیید نکرده باشد، این موارد سفارش قطعی محسوب نمی‌شوند. در نسخه فعلی، درگاه پرداخت فعال نیست و وجهی از طریق سایت دریافت نمی‌شود.</p>
+        </section>
+        <section class="legal-section">
+            <h2><i class="bi bi-person-check" aria-hidden="true"></i> استفاده مسئولانه</h2>
+            <p>از وب‌سایت به شیوه‌ای استفاده کنید که به عملکرد آن، حقوق دیگران یا امنیت اطلاعات آسیب نرساند. مسئولیت صحت اطلاعاتی که در ارتباط مستقیم با فروشگاه ارائه می‌کنید بر عهده شماست؛ اطلاعات محرمانه و بانکی را از مسیرهای ناامن ارسال نکنید.</p>
+        </section>
+        <section class="legal-section">
+            <h2><i class="bi bi-c-circle" aria-hidden="true"></i> محتوا و مالکیت</h2>
+            <p>متن‌ها، طراحی و محتوای اختصاصی وب‌سایت متعلق به صاحب وب‌سایت یا صاحبان مجوز آن است. بازنشر یا استفاده تجاری از آن‌ها بدون اجازه کتبی مجاز نیست؛ حقوق قانونی اشخاص ثالث محفوظ است.</p>
+        </section>
+        <section class="legal-section">
+            <h2><i class="bi bi-arrow-repeat" aria-hidden="true"></i> به‌روزرسانی شرایط</h2>
+            <p>با اضافه‌شدن امکان ثبت سفارش و پرداخت واقعی، شرایط خرید و خدمات به‌روزرسانی و پیش از نهایی‌کردن سفارش در دسترس شما قرار می‌گیرد. خریدهای تأییدشده تابع اطلاعات و شرایط اعلام‌شده هنگام همان خرید و قوانین لازم‌الاجرا هستند.</p>
+        </section>
+        <p class="legal-updated">آخرین بازبینی: ۱۵ مهر ۱۴۰۵</p>
+        <div class="legal-actions"><a class="flow-button" asp-controller="Contact" asp-action="Index">پرسش درباره شرایط <i class="bi bi-arrow-left" aria-hidden="true"></i></a><a class="ui-inline-action" asp-controller="Legal" asp-action="Privacy">حریم خصوصی</a></div>
+    </article>
+</main>
+
+@section Styles {
+    <link href="~/Shop/css/pages/pages.css" asp-append-version="true" rel="stylesheet" />
+}

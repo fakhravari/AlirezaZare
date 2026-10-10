@@ -1,0 +1,157 @@
+@model PageModel<MagazineDetailsModel>
+@{
+    var contentImage = System.IO.Path.GetFileName(Model.Data.ContentImage);
+    var imageFolder = contentImage.StartsWith("slider-") ? "sliders" : "products";
+}
+
+<header class="page-hero article-hero">
+    <img class="hero-image" src="@Url.Content($"~/Shop/images/{imageFolder}/{contentImage}")" alt="@Model.Data.Title" />
+    <div class="container">
+        <nav class="article-breadcrumb" aria-label="مسیر صفحه">
+            <a class="breadcrumb-home" asp-controller="Home" asp-action="Index">
+                <i class="bi bi-house-door"></i><span>خانه</span>
+            </a>
+            <span class="breadcrumb-step">
+                <i class="breadcrumb-separator bi bi-chevron-left" aria-hidden="true"></i>
+                <a asp-controller="Magazine" asp-action="Index">
+                    <i class="bi bi-journal-richtext"></i><span>مجله</span>
+                </a>
+            </span>
+            <span class="breadcrumb-step">
+                <i class="breadcrumb-separator bi bi-chevron-left" aria-hidden="true"></i>
+                <a class="breadcrumb-category" asp-controller="Magazine" asp-action="Index">
+                    <i class="bi bi-bookmark-star"></i><span>@Model.Data.Category</span>
+                </a>
+            </span>
+            <span class="breadcrumb-step breadcrumb-title-step">
+                <i class="breadcrumb-separator bi bi-chevron-left" aria-hidden="true"></i>
+                <span class="breadcrumb-current breadcrumb-title" title="@Model.Data.Title">
+                    <i class="bi bi-file-earmark-text"></i><span>@Model.Data.Title</span>
+                </span>
+            </span>
+        </nav>
+        <span class="page-kicker">@Model.Data.Kicker</span>
+        <h1>@Model.Data.Title</h1>
+        <p>@Model.Data.Summary</p>
+        <div class="article-hero-meta">
+            <span><i class="bi bi-person-circle"></i> @Model.Data.Author</span>
+            @if (!string.IsNullOrWhiteSpace(Model.Data.PublishedAt)) { <span><i class="bi bi-calendar3"></i> @Model.Data.PublishedAt</span> }
+            <span><i class="bi bi-clock"></i> @Model.Data.ReadTime</span>
+        </div>
+    </div>
+</header>
+
+<main class="article-page article-enhanced" data-article-slug="@Model.Data.Slug">
+    <div class="reading-progress" aria-hidden="true"><span id="readingProgress"></span></div>
+    <section class="page-section article-content-section">
+        <div class="container">
+            <div class="article-layout">
+                <aside class="article-sidebar ui-scrollbar ui-scrollbar--gold-on-dark">
+                    <nav class="article-toc" aria-label="فهرست مطالب">
+                        <div class="article-toc-scroll ui-scrollbar ui-scrollbar--gold-on-dark">
+                            <div class="toc-heading"><span class="toc-emblem"><i class="bi bi-journal-text" aria-hidden="true"></i></span><div><small>راهنمای مطالعه</small><strong>در این مقاله می‌خوانید</strong></div></div>
+                            @for (var index = 0; index < Model.Data.Sections.Count; index++)
+                            {
+                                var item = Model.Data.Sections[index];
+                                var sectionNumber = (index + 1).ToString("00", System.Globalization.CultureInfo.GetCultureInfo("fa-IR"));
+                                <a href="#@item.Id"><span class="article-toc-index">@sectionNumber</span><span>@item.Title</span></a>
+                            }
+                            <div class="toc-footnote"><i class="bi bi-book" aria-hidden="true"></i> هر بخش، یک قدم به انتخاب بهتر</div>
+                        </div>
+                    </nav>
+                    <div class="article-share">
+                        <div class="article-share-heading">
+                            <span><i class="bi bi-send"></i></span>
+                            <div>
+                                <strong>اشتراک‌گذاری مطلب</strong>
+                                <small>برای دوستانتان بفرستید</small>
+                            </div>
+                        </div>
+                        <div class="article-share-actions">
+                            <a data-share="telegram" href="#" target="_blank" rel="noopener" aria-label="اشتراک در تلگرام"><i class="bi bi-telegram"></i><span>تلگرام</span></a>
+                            <a data-share="whatsapp" href="#" target="_blank" rel="noopener" aria-label="اشتراک در واتساپ"><i class="bi bi-whatsapp"></i><span>واتساپ</span></a>
+                            <a data-share="linkedin" href="#" target="_blank" rel="noopener" aria-label="اشتراک در لینکدین"><i class="bi bi-linkedin" aria-hidden="true"></i><span>لینکدین</span></a>
+                            <a data-share="x" href="#" target="_blank" rel="noopener" aria-label="اشتراک در ایکس"><b aria-hidden="true">𝕏</b><span>ایکس</span></a>
+                            <a data-share="facebook" href="#" target="_blank" rel="noopener" aria-label="اشتراک در فیسبوک"><i class="bi bi-facebook" aria-hidden="true"></i><span>فیسبوک</span></a>
+                            <a data-share="email" href="#" aria-label="اشتراک با ایمیل"><i class="bi bi-envelope" aria-hidden="true"></i><span>ایمیل</span></a>
+                            <button data-share="copy" type="button" aria-label="کپی لینک"><i class="bi bi-link-45deg"></i><span>کپی لینک</span></button>
+                            <button data-share="native" type="button" hidden><i class="bi bi-share" aria-hidden="true"></i><span>سایر برنامه‌ها</span></button>
+                        </div>
+                        <p class="article-share-status" role="status" aria-live="polite"></p>
+                    </div>
+                </aside>
+
+                <article class="article-body">
+                    <div class="reading-tools" aria-label="ابزارهای مطالعه">
+                        <div class="reading-tools-title">
+                            <span class="reading-tools-description">@Model.Data.Lead</span>
+                        </div>
+                        <div>
+                            <button type="button" id="articlePrint"><i class="bi bi-printer" aria-hidden="true"></i> چاپ مقاله</button>
+                        </div>
+                    </div>
+                    <figure>
+                        <img src="@Url.Content($"~/Shop/images/{imageFolder}/{contentImage}")" alt="@Model.Data.Title" loading="lazy" />
+                        <figcaption>@Model.Data.Title</figcaption>
+                    </figure>
+
+                    @foreach (MagazineSectionModel item in Model.Data.Sections)
+                    {
+                        <section class="article-section">
+                            <h2 id="@item.Id">@item.Title</h2>
+                            <p>@item.Content</p>
+                        </section>
+                    }
+
+                    <div class="article-conclusion">
+                        <span class="value-icon"><i class="bi bi-stars"></i></span>
+                        <div>
+                            <h3>جمع‌بندی</h3>
+                            <p>@Model.Data.Conclusion</p>
+                        </div>
+                    </div>
+                    <div class="article-tags">
+                        <span>برچسب‌ها:</span>
+                        <a asp-controller="Magazine" asp-action="Index">@Model.Data.Category</a>
+
+                    </div>
+                    @if (Model.Data.Slug == "solar-watch-guide")
+                    {
+                        <section class="article-checklist" aria-labelledby="solarChecklistTitle">
+                            <span class="article-eyebrow">از مطالعه تا انتخاب</span>
+                            <h2 id="solarChecklistTitle">چک‌لیست انتخاب ساعت خورشیدی</h2>
+                            <p>پیش از خرید، این موارد را برای مدل موردنظرتان بررسی کنید.</p>
+                            <label><input type="checkbox" /> شرایط و زمان شارژ را در دفترچه مدل بررسی کردم.</label>
+                            <label><input type="checkbox" /> ذخیره انرژی را با شیوه استفاده‌ام مقایسه کردم.</label>
+                            <label><input type="checkbox" /> ابعاد قاب و راحتی بند را بررسی کردم.</label>
+                            <label><input type="checkbox" /> درباره ضمانت و خدمات پس از فروش اطلاعات گرفتم.</label>
+                            <p id="articleChecklistStatus" role="status">۰ از ۴ مورد بررسی شده</p>
+                        </section>
+                    }
+                    <div class="article-next-step">
+                        <div><span class="article-eyebrow">انتخاب بعدی شما</span><h3>راهنما را خواندید؛ حالا ساعت‌ها را ببینید.</h3><p>مدل‌ها را مقایسه کنید و گزینه مناسب خود را پیدا کنید.</p></div>
+                        <a href="@Url.Content(Model.Data.Slug == "solar-watch-guide" ? "~/Search?movement=solar" : "~/Search")">مشاهده ساعت‌ها <i class="bi bi-arrow-left" aria-hidden="true"></i></a>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+    <section class="container article-related" aria-labelledby="relatedTitle">
+        <span class="article-eyebrow">ادامه مسیر مطالعه</span><h2 id="relatedTitle">این راهنماها را هم بخوانید</h2>
+        <div>
+            <a asp-controller="Magazine" asp-action="Details" asp-route-slug="watch-movements"><img src="~/Shop/images/products/tool-multimeter-kit.png" alt="ساعت با صفحه کلاسیک" loading="lazy" /><span><small>شناخت موتور</small><strong>تفاوت کوارتز، اتوماتیک و مکانیکی</strong><i class="bi bi-arrow-left" aria-hidden="true"></i></span></a>
+            <a asp-controller="Magazine" asp-action="Details" asp-route-slug="watch-care"><img src="~/Shop/images/products/tool-led-worklight.png" alt="جزئیات ساعت و بند" loading="lazy" /><span><small>مراقبت از ساعت</small><strong>نکات کاربردی نگهداری ساعت</strong><i class="bi bi-arrow-left" aria-hidden="true"></i></span></a>
+        </div>
+    </section>
+
+</main>
+
+@section Styles {
+    <link href="Shop/css/pages/pages.css?v=46" rel="stylesheet" />
+    <link href="~/Shop/css/pages/article-details.css" rel="stylesheet" asp-append-version="true" />
+}
+
+@section Scripts {
+    <script src="~/Shop/js/pages/page-content.js" asp-append-version="true"></script>
+    <script src="~/Shop/js/pages/article-details.js" asp-append-version="true"></script>
+}

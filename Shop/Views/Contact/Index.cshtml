@@ -1,0 +1,219 @@
+@model PageModel
+
+
+<header class="page-hero contact-hero">
+    <img
+        class="hero-image"
+        src="~/Shop/images/heroes/hero-electrical-service.png"
+        alt="فضای ارتباط با کمپانی علی‌رضا زارع"/>
+    <div class="container">
+        <nav class="article-breadcrumb" aria-label="مسیر صفحه">
+            <a class="breadcrumb-home" asp-controller="Home" asp-action="Index">
+                <i class="bi bi-house-door"></i>
+                <span>خانه</span>
+            </a>
+            <span class="breadcrumb-step">
+                <i class="breadcrumb-separator bi bi-chevron-left" aria-hidden="true"></i>
+                <span class="breadcrumb-current">
+                    <i class="bi bi-headset"></i>
+                    <span>ارتباط با ما</span>
+                </span>
+            </span>
+        </nav>
+        <span class="page-kicker">ارتباط مستقیم با مجموعه</span>
+        <h1>پاسخ‌گو، شفاف و <em>همیشه در دسترس</em></h1>
+        <p>
+            برای پیگیری سفارش، خدمات پس از فروش یا همکاری سازمانی با
+            واحد مربوطه در تماس باشید.
+        </p>
+        <div class="hero-trail">
+            <span>پشتیبانی شبانه‌روزی</span>
+            <span>
+                هفت روز هفته
+            </span
+            ><span>پشتیبانی مشتریان</span>
+        </div>
+    </div>
+</header>
+<main>
+    <section class="page-section">
+        <div class="container">
+            <div class="contact-layout">
+                <aside class="contact-panel">
+                    <span class="page-kicker">راه‌های ارتباطی</span>
+                    <h2>چطور می‌توانیم کمک کنیم؟</h2>
+                    <p>
+                        کارشناسان ما در کوتاه‌ترین زمان ممکن پاسخ‌گوی درخواست شما خواهند
+                        بود.
+                    </p>
+                    <a class="contact-method" href="tel:+989125514388">
+                        <i class="bi bi-person-badge">
+                        </i
+                        >
+                        <span
+                        >
+                            <small>
+                                تماس با مدیریت
+                            </small
+                            ><strong>۰۹۱۲۵۵۱۴۳۸۸</strong>
+                        </span
+                        >
+                    </a
+                    >
+                    <a class="contact-method" href="tel:+989177764324">
+                        <i class="bi bi-headset">
+                        </i
+                        >
+                        <span
+                        >
+                            <small>
+                                پشتیبانی و پیگیری سفارش
+                            </small
+                            ><strong>۰۹۱۷۷۷۶۴۳۲۴</strong>
+                        </span
+                        >
+                    </a
+                    >
+                    <div class="contact-method">
+                        <i class="bi bi-clock">
+                        </i
+                        >
+                        <span
+                        >
+                            <small>
+                                ساعات پاسخ‌گویی
+                            </small
+                            ><strong>پشتیبانی ۲۴ ساعته</strong>
+                        </span
+                        >
+                    </div>
+                </aside>
+                <div class="glass-card contact-form">
+                    <div class="section-title">
+                        <span class="page-kicker">ارسال پیام</span>
+                        <h2>درخواست خود را بنویسید</h2>
+                    </div>
+                    <form id="contactForm" novalidate>
+                        <div class="form-grid">
+                            <div class="field">
+                                <label for="contactName">
+                                    نام و نام خانوادگی
+                                </label
+                                ><input id="contactName" required placeholder="نام شما" aria-describedby="contactNameError" />
+                                <span id="contactNameError" class="field-validation-valid" role="alert"></span>
+                            </div>
+                            <div class="field">
+                                <label for="contactPhone">
+                                    شماره موبایل
+                                </label
+                                >
+                                <input
+                                    id="contactPhone"
+                                    type="tel"
+                                    required
+                                    placeholder="۰۹۱۲۱۲۳۴۵۶۷"
+                                    inputmode="numeric"
+                                    maxlength="11"
+                                    aria-describedby="contactPhoneError" />
+                                <span id="contactPhoneError" class="field-validation-valid" role="alert"></span>
+                            </div>
+                            <div class="field full">
+                                <label for="contactSubject">
+                                    موضوع درخواست
+                                </label
+                                >
+                                <select id="contactSubject" required aria-describedby="contactSubjectError">
+                                    <option value="">موضوع درخواست را انتخاب کنید</option>
+                                    <option>پیگیری سفارش</option>
+                                    <option>خدمات پس از فروش</option>
+                                    <option>همکاری سازمانی</option>
+                                </select>
+                                <span id="contactSubjectError" class="field-validation-valid" role="alert"></span>
+                            </div>
+                            <div class="field full">
+                                <label for="contactMessage">
+                                    متن پیام
+                                </label
+                                >
+                                <textarea
+                      id="contactMessage"
+                      required
+                      minlength="10"
+                      aria-describedby="contactMessageError"
+                      placeholder="چطور می‌توانیم به شما کمک کنیم؟"
+                    ></textarea>
+                                <span id="contactMessageError" class="field-validation-valid" role="alert"></span>
+                            </div>
+                            <div class="field full">
+                                <button class="submit-btn contact-submit" type="submit">
+                                    <span>ارسال درخواست</span><i class="bi bi-send" aria-hidden="true"></i>
+                                </button>
+                                <div id="contactStatus" class="contact-form-status" role="status" aria-live="polite" hidden></div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="page-section pt-0 contact-branches" aria-labelledby="branches-title">
+        <div class="container">
+            <div class="branches-heading">
+                <div><span class="branches-kicker">مراجعه حضوری</span><h2 id="branches-title">از نزدیک، همراه شما</h2></div>
+                <p>نشانی شعب رسمی علی‌رضا زارع در بوشهر</p>
+            </div>
+            <div class="branches-grid">
+                <article class="branch-card ui-surface-card ui-surface-card--interactive">
+                    <div class="branch-card-top"><span class="branch-icon ui-icon-tile"><i class="bi bi-shop" aria-hidden="true"></i></span><span class="branch-label">شعبه لیان</span></div>
+                    <h3>ساعت‌فروشی علی‌رضا زارع</h3>
+                    <div class="branch-address"><i class="bi bi-geo-alt" aria-hidden="true"></i><address>بوشهر، خیابان لیان شرقی، بازار قدیم</address></div>
+                    <a class="branch-map" href="https://www.google.com/maps/search/?api=1&amp;query=بوشهر+خیابان+لیان+شرقی+بازار+قدیم+ساعت+علی‌رضا+زارع" target="_blank" rel="noopener noreferrer">جست‌وجو روی نقشه <i class="bi bi-arrow-up-left" aria-hidden="true"></i></a>
+                </article>
+                <article class="branch-card ui-surface-card ui-surface-card--interactive">
+                    <div class="branch-card-top"><span class="branch-icon ui-icon-tile"><i class="bi bi-building" aria-hidden="true"></i></span><span class="branch-label">شعبه باهنر</span></div>
+                    <h3>گالری ساعت علی‌رضا زارع</h3>
+                    <div class="branch-address"><i class="bi bi-geo-alt" aria-hidden="true"></i><address>بوشهر، میدان باهنر، نبش نیلوفر ۱۸</address></div>
+                    <a class="branch-map" href="https://www.google.com/maps/search/?api=1&amp;query=بوشهر+میدان+باهنر+نیلوفر+۱۸+گالری+ساعت+علی‌رضا+زارع" target="_blank" rel="noopener noreferrer">جست‌وجو روی نقشه <i class="bi bi-arrow-up-left" aria-hidden="true"></i></a>
+                </article>
+                <article class="branch-card ui-surface-card ui-surface-card--interactive">
+                    <div class="branch-card-top"><span class="branch-icon ui-icon-tile"><i class="bi bi-buildings" aria-hidden="true"></i></span><span class="branch-label">شعبه بوشهر مال</span></div>
+                    <h3>فروشگاه بوشهر مال</h3>
+                    <div class="branch-address"><i class="bi bi-geo-alt" aria-hidden="true"></i><address>بوشهر، بزرگراه بوشهر–برازجان، مجتمع بوشهر مال</address></div>
+                    <a class="branch-map" href="https://www.google.com/maps/search/?api=1&amp;query=بوشهر+مجتمع+بوشهر+مال" target="_blank" rel="noopener noreferrer">جست‌وجو روی نقشه <i class="bi bi-arrow-up-left" aria-hidden="true"></i></a>
+                </article>
+            </div>
+        </div>
+    </section>
+    <section class="page-cta">
+        <div class="container">
+            <div class="cta-box">
+                <div>
+                    <h2>قبل از مراجعه حضوری تماس بگیرید</h2>
+                    <p>
+                        برای اطمینان از موجودی مدل موردنظر، کارشناسان فروش شما را
+                        راهنمایی می‌کنند.
+                    </p>
+                </div>
+                <a href="tel:+989177764324">
+                    تماس با پشتیبانی
+                    <i class="bi bi-telephone">
+                    </i
+                    >
+                </a>
+            </div>
+        </div>
+    </section>
+</main>
+
+
+@section Styles {
+    <link href="~/Shop/css/pages/contact.css" rel="stylesheet" asp-append-version="true" />
+    <link href="~/Shop/css/pages/form-confirm-dialog.css" rel="stylesheet" asp-append-version="true" />
+    <link href="Shop/css/pages/pages.css?v=44" rel="stylesheet"/>
+}
+
+@section Scripts {
+    <script src="Shop/js/pages/page-content.js?v=1"></script>
+    <script src="~/Shop/js/pages/form-confirm-dialog.js" asp-append-version="true"></script>
+    <script src="~/Shop/js/pages/contact.js" asp-append-version="true"></script>
+}
