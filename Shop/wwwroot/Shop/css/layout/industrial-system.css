@@ -1692,23 +1692,7 @@ footer .trust-badges .trust-badge-image {
 
 @media (max-width: 991px) {
   #mainNav .mobile-header-search {
-    display: grid;
-    width: 40px;
-    height: 40px;
-    flex: 0 0 40px;
-    place-items: center;
-    border: 1px solid rgba(255, 255, 255, .2);
-    border-radius: 11px;
-    background: rgba(255, 255, 255, .1);
-    color: var(--industrial-yellow);
-    font-size: 17px;
-    text-decoration: none;
-  }
-
-  #mainNav .mobile-header-search:hover,
-  #mainNav .mobile-header-search:focus-visible {
-    background: var(--industrial-yellow);
-    color: var(--industrial-navy);
+    display: none !important;
   }
 
   #mainNav,
@@ -1960,6 +1944,10 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
   box-shadow: 0 30px 90px rgba(8, 29, 49, .27);
 }
 
+#loginModal .modal-content::before {
+  content: none;
+}
+
 #loginModal .login-modal-promo {
   position: relative;
   display: flex;
@@ -2112,15 +2100,20 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
   #loginModal .login-modal-form-panel {
     min-height: 0;
     flex: 1 1 auto;
-    padding: 16px 18px 15px;
+    padding: 58px 18px 18px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
   }
 
   #loginModal .login-modal-form-panel .login-close {
-    top: -101px;
+    top: 10px;
     left: 12px;
-    background: rgba(255, 255, 255, .14) !important;
-    color: #fff !important;
-    box-shadow: none !important;
+    background: #102a43 !important;
+    color: var(--industrial-yellow) !important;
+    box-shadow: 0 4px 14px rgba(16, 42, 67, .2) !important;
   }
 }
 
@@ -7802,4 +7795,20 @@ html body :is(
   #productView .product-detail-favorite { min-height: 52px; padding-inline: 9px; font-size: 13px; }
   #productView .product-detail-tabs { gap: 7px; padding: 7px; }
   #productView .product-detail-tabs > a { min-height: 44px; padding: 8px 12px; font-size: 13px; }
+}
+
+@media (max-width: 991px) {
+  .shared-account-card .account-user {
+    grid-template-columns: 54px minmax(0, 1fr) !important;
+  }
+
+  .shared-account-card .account-user > i {
+    display: none !important;
+  }
+}
+
+@media (max-width: 575px) {
+  .shared-account-card .account-user {
+    grid-template-columns: 42px minmax(0, 1fr) !important;
+  }
 }

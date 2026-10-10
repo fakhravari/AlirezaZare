@@ -732,9 +732,33 @@ h3,
 }
 @media (max-width: 575px) {
   .page-login-box.shared-login-modal {
-    height: min(520px, calc(100dvh - 20px));
-    padding: 27px 22px;
+    box-sizing: border-box;
+    height: auto;
+    max-height: calc(100dvh - 24px);
+    padding: 62px 22px 24px;
     border-radius: 18px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .page-login-box.shared-login-modal .login-close {
+    position: sticky;
+    top: 0;
+    left: auto;
+    z-index: 5;
+    float: left;
+    display: grid;
+    width: 40px;
+    height: 40px;
+    margin: -48px 0 8px;
+    place-items: center;
+    border: 1px solid #d9e1e8;
+    border-radius: 50%;
+    background: #102a43;
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(16, 42, 67, .18);
   }
 }
 

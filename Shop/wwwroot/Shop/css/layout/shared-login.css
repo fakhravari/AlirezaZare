@@ -19,18 +19,23 @@
   opacity: 1;
 }
 .shared-login-modal {
+  box-sizing: border-box;
   position: fixed;
   z-index: 10080;
   top: 50%;
   left: 50%;
   width: min(440px, calc(100% - 28px));
+  max-height: calc(100dvh - 32px);
   padding: 30px;
   border: 0;
   border-radius: 24px;
   background: var(--color-cream);
   box-shadow: 0 26px 70px rgba(3, 15, 53, 0.24);
   backdrop-filter: blur(18px);
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
   opacity: 0;
   visibility: hidden;
   transform: translate(-50%, -46%);
@@ -247,11 +252,26 @@
 }
 @media (max-width: 575px) {
   .shared-login-modal {
-    padding: 24px 20px;
+    top: 50%;
+    width: calc(100vw - 24px);
+    max-height: calc(100dvh - 24px);
+    padding: 62px 20px 24px;
+    border-radius: 20px;
+    -webkit-overflow-scrolling: touch;
   }
   .shared-login-modal .login-close {
-    top: 13px;
-    left: 13px;
+    position: sticky;
+    top: 0;
+    left: auto;
+    z-index: 5;
+    float: left;
+    width: 40px;
+    height: 40px;
+    margin: -48px 0 8px;
+    border: 1px solid #d9e1e8;
+    background: #102a43;
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(16, 42, 67, .18);
   }
   .shared-login-modal .login-step h2 {
     font-size: 19px;
