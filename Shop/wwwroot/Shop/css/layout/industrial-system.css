@@ -498,8 +498,31 @@ h1, h2, h3, h4, h5, h6,
 }
 
 .inner-page #mainNav .category-mega-title i {
-  color: #b58a00;
-  font-size: 16px;
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  place-items: center;
+  border: 1px solid rgba(184, 132, 0, .3);
+  border-radius: 10px;
+  background: linear-gradient(145deg, #fff7d4, #ffe28a);
+  color: #8b6100;
+  font-size: 17px;
+  box-shadow: 0 3px 9px rgba(160, 116, 0, .12), inset 0 1px rgba(255, 255, 255, .9);
+  transition: transform .18s ease, background .18s ease, color .18s ease, box-shadow .18s ease;
+}
+
+.inner-page #mainNav .category-mega-group > .category-mega-title:is(:hover, :focus-visible) i {
+  transform: translateY(-1px) scale(1.05);
+  border-color: rgba(173, 123, 0, .5);
+  background: linear-gradient(145deg, #ffdf63, #f6c515);
+  color: #102a56;
+  box-shadow: 0 5px 13px rgba(166, 123, 0, .2), inset 0 1px rgba(255, 255, 255, .7);
+}
+
+.inner-page #mainNav .category-nav-dropdown > .nav-link .nav-menu-icon {
+  color: #ffd21f !important;
+  filter: drop-shadow(0 0 5px rgba(246, 197, 21, .42));
 }
 
 @media (max-width: 991.98px) {
@@ -529,7 +552,7 @@ h1, h2, h3, h4, h5, h6,
 #mainNav .nav-actions {
   display: flex;
   align-items: center;
-  gap: 9px !important;
+  gap: 13px !important;
 }
 
 #mainNav .nav-shortcut > i,
@@ -3607,6 +3630,11 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
 }
 
 /* Homepage section panels: consistent surfaces with clear visual hierarchy. */
+.home-page > section > .container {
+  width: min(1480px, calc(100% - 56px));
+  max-width: none;
+}
+
 .home-page #collection > .container,
 .home-page .category-showcase > .container,
 .home-page #brands > .container,
@@ -3681,6 +3709,13 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
   transform: translateY(-4px);
 }
 
+@media (min-width: 1200px) {
+  #amazing .row > .col-xl {
+    flex: 0 0 20%;
+    max-width: 20%;
+  }
+}
+
 .home-page .recommendations.py-section {
   padding-block: clamp(36px, 5vw, 68px);
   background: linear-gradient(180deg, #eef3f5 0%, #f5f7f8 100%);
@@ -3735,6 +3770,10 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
 }
 
 @media (max-width: 767px) {
+  .home-page > section > .container {
+    width: calc(100% - 24px);
+  }
+
   .home-page #collection > .container,
   .home-page .category-showcase > .container,
   .home-page #brands > .container,
@@ -6062,14 +6101,7 @@ body,
   color: #765700 !important;
   box-shadow: 0 0 0 5px rgba(246, 197, 21, .2), 0 7px 18px rgba(166, 123, 0, .22) !important;
   transition: background-color .3s ease, border-color .3s ease, color .3s ease, box-shadow .3s ease;
-  animation: listItemReceived 1.9s cubic-bezier(.2, .85, .25, 1);
-}
-
-@keyframes listItemReceived {
-  0% { transform: scale(1); }
-  42% { transform: scale(1.14) rotate(-4deg); }
-  72% { transform: scale(.97) rotate(2deg); }
-  100% { transform: scale(1); }
+  animation: cartReceive .46s cubic-bezier(.2, .85, .25, 1);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -6085,12 +6117,14 @@ body,
 #cartPanel .cart-item-info .cart-quantity {
   display: inline-flex !important;
   width: fit-content !important;
+  min-width: 120px !important;
   min-height: 38px;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   gap: 5px !important;
   margin-top: 7px;
-  padding: 4px !important;
+  padding: 4px 6px !important;
+  box-sizing: border-box;
   border: 1px solid #ead9a4 !important;
   border-radius: 999px !important;
   background: linear-gradient(135deg, #fffdf6, #fbf2d7) !important;
@@ -6300,14 +6334,30 @@ html body #mainNav .home-header-search > input[type="search"]:is(:focus, :focus-
   .product-card .product-image img,
   .showcase-card .product-image img,
   .rail-card .rail-image img
-),
-.inner-page .search-product.product-card .search-product-image img {
+) {
   box-sizing: border-box;
   padding: 8px !important;
   border: 1px solid #dce3e8;
   border-radius: 12px;
   background: #fff !important;
   object-fit: contain !important;
+  object-position: center;
+}
+
+/* Search cards use the entire image frame, without the padding used by home cards. */
+.inner-page .search-product.product-card .search-product-image img {
+  display: block;
+  box-sizing: border-box;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  object-fit: cover !important;
   object-position: center;
 }
 
@@ -6505,15 +6555,29 @@ html body #mainNav .home-header-search > input[type="search"]:is(:focus, :focus-
   min-width: 0;
 }
 
-/* Recommendation cards use edge-to-edge imagery within their fixed image frame. */
-#recommendations .rail-card .rail-image > img {
+/* Recommendation cards use edge-to-edge imagery, including images wrapped in product links. */
+#recommendations .rail-card .rail-image {
+  overflow: hidden;
+  padding: 0 !important;
+}
+
+#recommendations .rail-card .rail-image > a {
   display: block;
-  box-sizing: border-box;
   width: 100%;
   height: 100%;
+}
+
+#recommendations .rail-card .rail-image img {
+  display: block;
+  box-sizing: border-box;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  margin: 0 !important;
   padding: 0 !important;
   border: 0 !important;
-  border-radius: inherit;
+  border-radius: 0 !important;
   background: transparent !important;
   object-fit: cover !important;
   object-position: center;
@@ -6812,42 +6876,69 @@ html body #mainNav .home-header-search > input[type="search"]:is(:focus, :focus-
   transition: transform .2s ease, border-color .2s ease, background .2s ease, color .2s ease, box-shadow .2s ease !important;
 }
 
-#mainNav .nav-actions :is(.favorites-toggle, .compare-toggle, .cart-btn.cart-icon-theme):is(:hover, :focus-visible),
-#mainNav .nav-actions :is(.favorites-wrap.open .favorites-toggle, .compare-wrap.open .compare-toggle, .cart-wrap.open .cart-btn.cart-icon-theme) {
+#mainNav .nav-actions :is(.favorites-toggle:not(.list-received), .compare-toggle:not(.list-received), .cart-btn.cart-icon-theme:not(.cart-received)):is(:hover, :focus, :focus-visible, :active),
+#mainNav .nav-actions :is(.favorites-wrap.open .favorites-toggle:not(.list-received), .compare-wrap.open .compare-toggle:not(.list-received), .cart-wrap.open .cart-btn.cart-icon-theme:not(.cart-received)) {
   transform: translateY(-1px) !important;
   border-color: #e4bd35 !important;
   background: #fff8d9 !important;
+  background-image: none !important;
   color: #765700 !important;
   box-shadow: 0 4px 12px rgba(166, 123, 0, .14) !important;
 }
 
 #mainNav .nav-actions :is(.nav-count, .cart-btn.cart-icon-theme > b) {
-  top: -8px !important;
-  right: -6px !important;
-  min-width: 23px !important;
+  top: -10px !important;
+  bottom: auto !important;
+  left: auto !important;
+  right: -8px !important;
+  min-width: 28px !important;
   width: auto !important;
-  height: 23px !important;
-  padding: 0 5px !important;
-  border: 1px solid #d8ad16 !important;
+  height: 26px !important;
+  padding: 0 6px !important;
+  border: 2px solid var(--industrial-navy) !important;
   border-radius: 999px !important;
   background: linear-gradient(145deg, #ffe16a, #f6c515) !important;
   color: #17344b !important;
-  font-size: 11px !important;
+  font-size: 13px !important;
   font-weight: 850 !important;
   line-height: 1 !important;
   box-shadow: 0 2px 6px rgba(16, 42, 67, .18) !important;
   font-variant-numeric: tabular-nums;
 }
 
+@media (min-width: 992px) {
+  #mainNav .cart-wrap > .cart-panel,
+  #mainNav .favorites-wrap > .favorites-panel,
+  #mainNav .compare-wrap > .compare-panel {
+    top: calc(100% + 15px) !important;
+  }
+}
+
 #cartPanel .cart-head,
 :is(#favoritesPanel, #comparePanel) .compare-panel-head {
   min-height: 84px !important;
+  margin: 0 !important;
   padding: 0 22px !important;
   border-bottom: 1px solid rgba(215, 182, 108, .24) !important;
   background:
     radial-gradient(circle at 8% 10%, rgba(215, 182, 108, .2), transparent 32%),
     linear-gradient(135deg, #173867, #0b2550 70%, #123466) !important;
   color: #fff !important;
+}
+
+#cartPanel .cart-head {
+  border: 0 !important;
+  border-radius: 21px 21px 0 0 !important;
+  box-shadow: none !important;
+}
+
+#cartPanel,
+#favoritesPanel,
+#comparePanel {
+  border: 1px solid rgba(180, 137, 77, .32) !important;
+  border-radius: 22px !important;
+  background: rgba(255, 253, 249, .98) !important;
+  box-shadow: 0 28px 80px rgba(4, 20, 55, .24), 0 4px 18px rgba(4, 20, 55, .08) !important;
 }
 
 #cartPanel .cart-head .cart-head-title,
@@ -6888,12 +6979,7 @@ html body #mainNav .home-header-search > input[type="search"]:is(:focus, :focus-
 
 #cartPanel .cart-head > button,
 :is(#favoritesPanel, #comparePanel) .compare-panel-head > button {
-  width: 36px !important;
-  height: 36px !important;
-  border: 1px solid rgba(255, 255, 255, .24) !important;
-  border-radius: 50% !important;
-  background: rgba(255, 255, 255, .08) !important;
-  color: #fff !important;
+  display: none !important;
 }
 
 #cartPanel .cart-footer .cart-safety-badge {
@@ -6949,6 +7035,246 @@ html body #mainNav .home-header-search > input[type="search"]:is(:focus, :focus-
   font-size: 17px;
 }
 
+/* Make a selected compare action as clear and persistent as a saved favorite. */
+.compare-trigger.active,
+.product-card-actions > .compare-trigger.active,
+.compare-trigger.active:is(:hover, :focus-visible) {
+  border-color: var(--industrial-navy) !important;
+  background: #fff !important;
+  color: var(--industrial-navy) !important;
+  box-shadow: 0 5px 15px rgba(16, 42, 67, .16) !important;
+}
+
+.compare-trigger.active > i {
+  color: inherit !important;
+  -webkit-text-fill-color: currentColor;
+  -webkit-text-stroke: 1px currentColor;
+}
+
+.compare-trigger:not(.active) > i {
+  color: var(--industrial-navy) !important;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: .85px currentColor;
+}
+
+.compare-trigger:not(.active):is(:hover, :focus, :focus-visible, :active) {
+  border-color: #dbe3e7 !important;
+  background: #fff !important;
+  color: var(--industrial-navy) !important;
+  box-shadow: 0 5px 15px rgba(16, 42, 67, .16) !important;
+}
+
+/* Prevent inherited link/active styles from flashing navy on the header compare control. */
+html body #mainNav .nav-actions #compareToggle:not(.list-received):is(:hover, :focus, :focus-visible, :active),
+html body #mainNav .nav-actions .compare-wrap.open #compareToggle:not(.list-received) {
+  border-color: #e4bd35 !important;
+  background: #fff8d9 !important;
+  background-image: none !important;
+  color: #765700 !important;
+  box-shadow: 0 4px 12px rgba(166, 123, 0, .14) !important;
+  transform: translateY(-1px) !important;
+  transition: border-color .2s ease, color .2s ease, box-shadow .2s ease, transform .2s ease !important;
+}
+
+html body #mainNav .nav-actions #favoritesToggle:not(.list-received):is(:hover, :focus, :focus-visible, :active),
+html body #mainNav .nav-actions .favorites-wrap.open #favoritesToggle:not(.list-received),
+html body #mainNav .nav-actions #cartToggle:not(.cart-received):is(:hover, :focus, :focus-visible, :active),
+html body #mainNav .nav-actions .cart-wrap.open #cartToggle:not(.cart-received) {
+  border-color: #e4bd35 !important;
+  background: #fff8d9 !important;
+  background-image: none !important;
+  color: #765700 !important;
+  box-shadow: 0 4px 12px rgba(166, 123, 0, .14) !important;
+  transform: translateY(-1px) !important;
+  transition: border-color .2s ease, color .2s ease, box-shadow .2s ease, transform .2s ease !important;
+}
+
+/* Keep add-to-cart confirmation on product cards neutral; the gold pulse belongs to the header cart. */
+.product-card > .add-cart.added,
+.search-product.product-card > .search-add-cart.added,
+.showcase-card-body > .add-cart.added,
+.rail-card > .add-cart.added,
+.product-detail-related-card > .add-cart.added {
+  border-color: #dbe3e7 !important;
+  background: #f2f5f7 !important;
+  color: var(--industrial-navy) !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.product-card > .add-cart.added > i,
+.search-product.product-card > .search-add-cart.added > i,
+.showcase-card-body > .add-cart.added > i,
+.rail-card > .add-cart.added > i,
+.product-detail-related-card > .add-cart.added > i {
+  color: #39714e !important;
+}
+
+/* Keep favorite and compare buttons white while their symbols show selection in navy. */
+.product-card-actions > .favorite,
+.product-card-actions > .favorite:is(:hover, :focus, :focus-visible, :active),
+.product-card .product-image > .favorite,
+.product-card .product-image > .favorite:is(:hover, :focus, :focus-visible, :active),
+.showcase-card .product-image > .favorite,
+.showcase-card .product-image > .favorite:is(:hover, :focus, :focus-visible, :active),
+.rail-card .rail-image > .favorite,
+.rail-card .rail-image > .favorite:is(:hover, :focus, :focus-visible, :active),
+.search-product .search-product-image > .favorite,
+.search-product .search-product-image > .favorite:is(:hover, :focus, :focus-visible, :active) {
+  border-color: #dbe3e7 !important;
+  background: #fff !important;
+  color: var(--industrial-navy) !important;
+}
+
+.product-card-actions > .favorite.active,
+.product-card-actions > .favorite.active:is(:hover, :focus-visible),
+.product-card .product-image > .favorite.active,
+.product-card .product-image > .favorite.active:is(:hover, :focus-visible),
+.showcase-card .product-image > .favorite.active,
+.showcase-card .product-image > .favorite.active:is(:hover, :focus-visible),
+.rail-card .rail-image > .favorite.active,
+.rail-card .rail-image > .favorite.active:is(:hover, :focus-visible),
+.search-product .search-product-image > .favorite.active,
+.search-product .search-product-image > .favorite.active:is(:hover, :focus-visible) {
+  border-color: var(--industrial-navy) !important;
+  background: #fff !important;
+  color: var(--industrial-navy) !important;
+}
+
+.favorite.active > i {
+  color: var(--industrial-navy) !important;
+  -webkit-text-fill-color: currentColor !important;
+  -webkit-text-stroke: .35px currentColor;
+}
+
+.favorite:not(.active) > i {
+  color: var(--industrial-navy) !important;
+  -webkit-text-fill-color: transparent !important;
+  -webkit-text-stroke: .9px currentColor;
+}
+
+/* Fill the image frame edge to edge in the home page's special-offer cards. */
+#amazing .showcase-card .product-image {
+  overflow: hidden;
+  padding: 0 !important;
+  background: #edf1f3 !important;
+}
+
+#amazing .showcase-card .product-image > img {
+  display: block;
+  box-sizing: border-box;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  object-fit: cover !important;
+  object-position: center;
+}
+
+/* The best-seller carousel also needs edge-to-edge photos, overriding the global contained-photo rule. */
+#bestsellersSlider .showcase-card .product-image {
+  overflow: hidden;
+  padding: 0 !important;
+  background: #edf1f3 !important;
+}
+
+#bestsellersSlider .showcase-card .product-image > img {
+  display: block;
+  box-sizing: border-box;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  object-fit: cover !important;
+  object-position: center;
+}
+
+/* Apply the same full-frame crop to the newest-products carousel. */
+#newestSlider .showcase-card .product-image {
+  overflow: hidden;
+  padding: 0 !important;
+  background: #edf1f3 !important;
+}
+
+#newestSlider .showcase-card .product-image > img,
+#newestSlider .showcase-card .product-image > a > img {
+  display: block;
+  box-sizing: border-box;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  object-fit: cover !important;
+  object-position: center;
+}
+
+/* Let the header cart's add confirmation win over the generic hover theme and pulse once in gold. */
+html body #mainNav .nav-actions #cartToggle.cart-received {
+  border-color: #e5b51b !important;
+  background: #f6d75e !important;
+  background-image: none !important;
+  color: #765700 !important;
+  box-shadow: 0 0 0 5px rgba(246, 197, 21, .2), 0 7px 18px rgba(166, 123, 0, .22) !important;
+  transition: transform .2s ease, box-shadow .3s ease !important;
+  animation: cartReceive .46s cubic-bezier(.2, .85, .25, 1);
+}
+
+/* Keep the favorites and compare receive pulse gold on their header controls. */
+html body #mainNav .nav-actions :is(#favoritesToggle, #compareToggle).list-received {
+  border-color: #e5b51b !important;
+  background: #f6d75e !important;
+  background-image: none !important;
+  color: #765700 !important;
+  box-shadow: 0 0 0 5px rgba(246, 197, 21, .2), 0 7px 18px rgba(166, 123, 0, .22) !important;
+  animation: cartReceive .46s cubic-bezier(.2, .85, .25, 1);
+}
+
+/* Keep every cart drawer balanced against the shared favorites panel in RTL. */
+html body :is(
+  #cartPanel.cart-panel .cart-items,
+  .page-cart-panel .page-cart-items,
+  .search-cart-drawer .search-cart-items
+) {
+  box-sizing: border-box;
+  padding-inline: 0 !important;
+  scrollbar-gutter: stable both-edges !important;
+}
+
+html body :is(
+  #cartPanel.cart-panel .cart-items > .cart-item,
+  .page-cart-panel .page-cart-items > .page-cart-item,
+  .search-cart-drawer .search-cart-items > .search-cart-item
+) {
+  box-sizing: border-box;
+  width: 100%;
+  margin-inline: 0 !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html body #mainNav .nav-actions #cartToggle.cart-received {
+    animation: none;
+  }
+
+  html body #mainNav .nav-actions :is(#favoritesToggle, #compareToggle).list-received {
+    animation: none;
+  }
+}
+
 @media (max-width: 767px) {
   #mainNav .nav-actions :is(.favorites-toggle, .compare-toggle, .cart-btn.cart-icon-theme) {
     width: 42px !important;
@@ -6956,8 +7282,8 @@ html body #mainNav .home-header-search > input[type="search"]:is(:focus, :focus-
     height: 42px !important;
   }
   #mainNav .nav-actions :is(.nav-count, .cart-btn.cart-icon-theme > b) {
-    top: -7px !important;
-    right: -5px !important;
+    top: -9px !important;
+    right: -7px !important;
   }
 }
 

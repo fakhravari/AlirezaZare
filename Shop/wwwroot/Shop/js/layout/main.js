@@ -134,6 +134,57 @@ $(function () {
       element._listReceivedTimer = null;
     }, 2100);
   };
+  const flyProductToControl = (trigger, product, target) => {
+    if (prefersReducedMotion || !target) return;
+    const origin = trigger instanceof Element ? trigger : document.activeElement;
+    if (!(origin instanceof Element)) return;
+    const source =
+      $(origin)
+        .closest(".product-card,.showcase-card,.rail-card,.featured-main,.featured-side")
+        .find("img")
+        .first()[0] ||
+      (origin.matches(".quick-add-cart") && $("#quickViewImage")[0]) ||
+      (origin.id === "addProduct" && $("#productView .flow-photo")[0]);
+    const image = source?.currentSrc || source?.getAttribute("src") || product?.image;
+    if (!image) return;
+    const a = source?.getBoundingClientRect() || origin.getBoundingClientRect();
+    const b = target.getBoundingClientRect();
+    const startX = a.left + a.width / 2 - 31;
+    const startY = a.top + a.height / 2 - 31;
+    const endX = b.left + b.width / 2 - startX - 31;
+    const endY = b.top + b.height / 2 - startY - 31;
+    const fly = document.createElement("img");
+    fly.className = "fly-product";
+    fly.alt = "";
+    fly.setAttribute("aria-hidden", "true");
+    fly.src = image;
+    fly.style.left = `${startX}px`;
+    fly.style.top = `${startY}px`;
+    document.body.append(fly);
+    const lift = Math.min(128, Math.max(76, Math.abs(endX) * 0.12));
+    const p1 = { x: endX * 0.18, y: -lift };
+    const p2 = { x: endX * 0.82, y: endY - lift * 0.8 };
+    const offsets = [0, 0.12, 0.28, 0.46, 0.64, 0.82, 1];
+    const flightFrames = offsets.map((t) => {
+      const u = 1 - t;
+      const x = 3 * u * u * t * p1.x + 3 * u * t * t * p2.x + t * t * t * endX;
+      const y = 3 * u * u * t * p1.y + 3 * u * t * t * p2.y + t * t * t * endY;
+      const scale = t < 0.12 ? 0.78 + (t / 0.12) * 0.22 : 1 - 0.82 * Math.max(0, (t - 0.12) / 0.88);
+      const frame = {
+        transform: `translate3d(${x}px, ${y}px, 0) scale(${scale}) rotate(${t * 24}deg)`,
+        opacity: t === 0 ? 0 : t > 0.82 ? (1 - t) / 0.18 : 1,
+        filter: `drop-shadow(0 0 ${Math.round(12 * (1 - t))}px rgba(245, 190, 46, ${0.65 * (1 - t)}))`,
+        offset: t,
+      };
+      return frame;
+    });
+    const flight = fly.animate(
+      flightFrames,
+      { duration: 760, easing: "cubic-bezier(.2,.75,.2,1)", fill: "forwards" },
+    );
+    flight.onfinish = () => fly.remove();
+    flight.oncancel = () => fly.remove();
+  };
   const syncFavoriteButtons = () => {
     const selected = new Set(readFavoriteList());
     $(".favorite[data-product-id]").each(function () {
@@ -172,7 +223,9 @@ $(function () {
         .toggleClass("active", active)
         .attr("aria-pressed", String(active))
         .attr("aria-label", active ? "حذف از مقایسه" : "افزودن به مقایسه")
-        .attr("title", active ? "حذف از مقایسه" : "افزودن به مقایسه");
+        .attr("title", active ? "حذف از مقایسه" : "افزودن به مقایسه")
+        .find("i")
+        .attr("class", "bi bi-arrow-left-right");
     });
   };
   const renderNavCounters = () => {
@@ -426,31 +479,6 @@ $(function () {
     else if (type) params.set("type", type);
     location.href = `Search${params.toString() ? `?${params}` : ""}`;
   });
-
-  const $amazingItems = $("#amazing .row > div");
-  if ($amazingItems.length === 3) {
-    const $fourthItem = $amazingItems.eq(1).clone();
-    $fourthItem.find(".showcase-card").attr("data-offer-index", "4");
-    $fourthItem.find(".product-image").removeClass("cream").addClass("light");
-    $fourthItem.find("img").attr({
-      src: "Shop/images/products/tool-soldering-station.png",
-      alt: "ایستگاه هویه دماوند",
-    });
-    $fourthItem.find(".showcase-card-body small").text("مدل ۰۵");
-    $fourthItem.find(".showcase-card-body h3").text("ایستگاه هویه دماوند");
-    $fourthItem.find(".showcase-card-body strong").text("۲۳,۶۰۰,۰۰۰ تومان");
-    $fourthItem.find(".add-cart").attr({
-      "data-id": "damavand-offer",
-      "data-name": "ایستگاه هویه دماوند",
-      "data-price": "23600000",
-      "data-image": "Shop/images/products/tool-soldering-station.png",
-    });
-    $amazingItems.add($fourthItem).each(function () {
-      $(this).removeClass("col-md-4").addClass("col-12 col-md-6 col-xl-3");
-    });
-    $("#amazing .row").append($fourthItem);
-    window.HNUI?.enhance(document.querySelector("#amazing"));
-  }
 
   const storage = window.HNUI.storage;
 
@@ -721,6 +749,31 @@ $(function () {
   };
 
   const catalogProducts = window.HNProducts || [];
+  const $amazingItems = $("#amazing .row > div");
+  if ($amazingItems.length === 3 && catalogProducts.length > 15) {
+    const offerProducts = [catalogProducts[10], catalogProducts[15]];
+    $amazingItems.each(function () {
+      $(this).removeClass("col-md-4").addClass("col-12 col-md-6 col-xl");
+    });
+    offerProducts.forEach((product, index) => {
+      const $item = $amazingItems.eq(index === 0 ? 1 : 2).clone();
+      $item.find(".showcase-card").attr("data-offer-index", String(index + 4));
+      $item.find(".product-image").removeClass("cream warm light");
+      $item.find("img").attr({ src: product.image, alt: product.name });
+      $item.find(".badge-offer").text(product.badge || "\u067e\u06cc\u0634\u0646\u0647\u0627\u062f \u0648\u06cc\u0698\u0647");
+      $item.find(".showcase-card-body small").text(product.brand);
+      $item.find(".showcase-card-body h3").text(product.name);
+      $item.find(".showcase-card-body strong").text(`${faNumber(product.price * 1000000)} \u062a\u0648\u0645\u0627\u0646`);
+      $item.find(".add-cart").attr({
+        "data-id": String(product.id),
+        "data-name": product.name,
+        "data-price": String(product.price * 1000000),
+        "data-image": product.image,
+      });
+      $("#amazing .row").append($item);
+    });
+    window.HNUI?.enhance(document.querySelector("#amazing"));
+  }
   const productCardMarkup = (product) => `
     <div class="showcase-slide">
       <article class="showcase-card">
@@ -756,7 +809,7 @@ $(function () {
 
   if (catalogProducts.length >= 24) {
     $("#bestsellersSlider").append(
-      catalogProducts.slice(8, 14).map(productCardMarkup).join(""),
+      catalogProducts.slice(8, 20).map(productCardMarkup).join(""),
     );
     $("#newestSlider").append(
       catalogProducts.slice(14, 20).map(productCardMarkup).join(""),
@@ -861,7 +914,6 @@ $(function () {
   const $cartPanel = $("#cartPanel");
   const $cartItems = $("#cartItems");
   const $cartFooter = $("#cartFooter");
-  const $cartClose = $("#cartClose");
   const $favoritesWrap = $("#favoritesWrap");
   const $favoritesToggle = $("#favoritesToggle");
   const $favoritesPanel = $("#favoritesPanel");
@@ -1105,7 +1157,10 @@ $(function () {
       return;
     }
     $loginEmailError.empty();
-    requestEmailCode("login", email);
+    userLoggedIn = true;
+    window.HNUI.auth.login();
+    updateAccountUI();
+    if (loginModal) loginModal.hide();
   });
 
   $("#registerEmailForm").on("submit", (event) => {
@@ -1223,7 +1278,6 @@ $(function () {
     setCompareOpen(false);
     setCartOpen(!$cartPanel.hasClass("open"));
   });
-  $("#favoritesClose").on("click", () => setFavoriteOpen(false));
   $favoritesPanel.on("click", "[data-favorite-remove]", function (event) {
     event.stopPropagation();
     const removedId = String(this.dataset.favoriteRemove || "");
@@ -1248,7 +1302,6 @@ $(function () {
   $favoritesPanel.on("mouseleave", () => {
     if ($window.width() > mobileBreakpoint) setFavoriteOpen(false);
   });
-  $("#compareClose").on("click", () => setCompareOpen(false));
   $("#comparePanel").on("click", "[data-compare-remove]", function (event) {
     event.stopPropagation();
     const removedId = String(this.dataset.compareRemove || "");
@@ -1302,7 +1355,6 @@ $(function () {
         setCartOpen(false);
     }, 220);
   });
-  $cartClose.on("click", () => setCartOpen(false));
   $cartPanel.on("click", (event) => event.stopPropagation());
   $document.on("click", (event) => {
     const $target = $(event.target);
@@ -1331,6 +1383,7 @@ $(function () {
     if (isFavorite) {
       pulseListControl($button[0]);
       pulseListControl(document.querySelector("#favoritesToggle"));
+      flyProductToControl(this, null, document.querySelector("#favoritesToggle"));
     }
     $button.attr("aria-label", isFavorite ? "حذف از علاقه‌مندی‌ها" : "افزودن به علاقه‌مندی‌ها");
     $button.find("i").attr("class", isFavorite ? "bi bi-heart-fill" : "bi bi-heart");
@@ -1554,6 +1607,7 @@ $(function () {
     if (next.includes(productId)) {
       pulseListControl(this);
       pulseListControl(document.querySelector("#compareToggle"));
+      flyProductToControl(this, null, document.querySelector("#compareToggle"));
     }
     setCartOpen(false);
   });
@@ -1640,58 +1694,21 @@ $(function () {
   });
 
   document.addEventListener("hn:cart-added", (event) => {
-    if (prefersReducedMotion) return;
     const { product, trigger } = event.detail || {};
-    const origin = trigger instanceof Element ? trigger : document.activeElement;
-    if (!(origin instanceof Element)) return;
-    const source =
-      $(origin)
-        .closest(".product-card,.showcase-card,.rail-card,.featured-main,.featured-side")
-        .find("img")
-        .first()[0] ||
-      (origin.matches(".quick-add-cart") && $("#quickViewImage")[0]) ||
-      (origin.id === "addProduct" && $("#productView .flow-photo")[0]);
     const target = $("#cartToggle")[0];
-    const image = source?.currentSrc || source?.getAttribute("src") || product?.image;
-    if (!target || !image) return;
-    const a = source?.getBoundingClientRect() || origin.getBoundingClientRect(),
-      b = target.getBoundingClientRect(),
-      startX = a.left + a.width / 2 - 31,
-      startY = a.top + a.height / 2 - 31,
-      endX = b.left + b.width / 2 - startX - 18,
-      endY = b.top + b.height / 2 - startY - 18;
-    const $fly = $(
-      `<img class="fly-product" src="${image}" alt="">`,
-    )
-      .css({ left: startX, top: startY })
-      .appendTo($body);
-    const flight = $fly[0].animate(
-      [
-        { transform: "translate3d(0, 0, 0) scale(.86) rotate(-5deg)", opacity: 0 },
-        { transform: "translate3d(0, 0, 0) scale(1) rotate(0)", opacity: 1, offset: 0.12 },
-        {
-          transform: `translate3d(${endX * 0.46}px, ${endY * 0.46 - 54}px, 0) scale(.66) rotate(8deg)`,
-          opacity: 0.92,
-          offset: 0.54,
-        },
-        {
-          transform: `translate3d(${endX}px, ${endY}px, 0) scale(.18) rotate(22deg)`,
-          opacity: 0,
-        },
-      ],
-      { duration: 760, easing: "cubic-bezier(.2,.75,.2,1)", fill: "forwards" },
-    );
-    flight.onfinish = () => {
-      $fly.remove();
-      window.clearTimeout(target._cartReceivedTimer);
+    if (!target) return;
+
+    /* Start the same immediate receive pulse used by favorites and compare. */
+    window.clearTimeout(target._cartReceivedTimer);
+    target.classList.remove("cart-received");
+    void target.offsetWidth;
+    target.classList.add("cart-received");
+    target._cartReceivedTimer = window.setTimeout(() => {
       target.classList.remove("cart-received");
-      void target.offsetWidth;
-      target.classList.add("cart-received");
-      target._cartReceivedTimer = window.setTimeout(() => {
-        target.classList.remove("cart-received");
-        target._cartReceivedTimer = null;
-      }, 2100);
-    };
+      target._cartReceivedTimer = null;
+    }, 2100);
+
+    flyProductToControl(trigger, product, target);
   });
 });
 
