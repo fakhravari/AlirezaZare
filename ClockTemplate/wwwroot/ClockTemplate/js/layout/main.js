@@ -123,6 +123,13 @@ $(function () {
     const list = window.HNUI.storage.json("hn-favorites", []);
     return Array.isArray(list) ? [...new Set(list.map(String))] : [];
   };
+  const pulseListControl = (element) => {
+    if (!element) return;
+    element.classList.remove("list-received");
+    void element.offsetWidth;
+    element.classList.add("list-received");
+    window.setTimeout(() => element.classList.remove("list-received"), 2100);
+  };
   const syncFavoriteButtons = () => {
     const selected = new Set(readFavoriteList());
     $(".favorite[data-product-id]").each(function () {
@@ -165,8 +172,10 @@ $(function () {
     });
   };
   const renderNavCounters = () => {
-    $("#favoritesCount").text(faNumber(storedListCount("hn-favorites")));
-    $("#compareCount").text(faNumber(storedListCount("hn-compare")));
+    const favoriteCount = storedListCount("hn-favorites");
+    const compareCount = storedListCount("hn-compare");
+    $("#favoritesCount").text(faNumber(favoriteCount));
+    $("#compareCount").text(faNumber(compareCount));
     renderFavoritePanel();
     renderComparePanel();
     syncFavoriteButtons();
@@ -1315,6 +1324,10 @@ $(function () {
     window.HNUI.storage.set("hn-favorites", JSON.stringify(next));
     const isFavorite = next.includes(productId);
     $button.attr("data-product-id", productId).toggleClass("active", isFavorite).attr("aria-pressed", String(isFavorite));
+    if (isFavorite) {
+      pulseListControl($button[0]);
+      pulseListControl(document.querySelector("#favoritesToggle"));
+    }
     $button.attr("aria-label", isFavorite ? "حذف از علاقه‌مندی‌ها" : "افزودن به علاقه‌مندی‌ها");
     $button.find("i").attr("class", isFavorite ? "bi bi-heart-fill" : "bi bi-heart");
     $("#liveToast .toast-body").text(
@@ -1534,6 +1547,10 @@ $(function () {
       : [...selected, productId];
     window.HNUI.storage.set("hn-compare", JSON.stringify(next));
     syncCompareButtons();
+    if (next.includes(productId)) {
+      pulseListControl(this);
+      pulseListControl(document.querySelector("#compareToggle"));
+    }
     setCartOpen(false);
     setCompareOpen(true);
   });
