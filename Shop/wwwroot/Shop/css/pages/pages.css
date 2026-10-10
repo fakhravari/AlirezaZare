@@ -4098,3 +4098,64 @@ body {
     padding: 0;
   }
 }
+
+/* Product option selectors and price-linked variants */
+#productView .product-variant-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 18px 0;
+}
+#productView .product-variant-field {
+  min-width: 0;
+  margin: 0;
+  padding: 12px;
+  border: 1px solid #dce3eb;
+  border-radius: 14px;
+  background: #f8fafc;
+}
+#productView .product-variant-field legend {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 4px;
+  color: #102f52;
+  font-size: 13px;
+  font-weight: 800;
+}
+#productView .product-variant-required,
+#productView .product-variant-optional {
+  padding: 3px 7px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+}
+#productView .product-variant-required { color: #8b5c08; background: #fff1c2; }
+#productView .product-variant-optional { color: #627184; background: #e9eef4; }
+#productView .product-variant-choices { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 7px; }
+#productView .product-variant-choice {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 6px 9px;
+  border: 1px solid #d8e0e9;
+  border-radius: 10px;
+  color: #263d57;
+  background: #fff;
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+  transition: border-color .18s ease, background-color .18s ease, color .18s ease;
+}
+#productView .product-variant-choice:hover,
+#productView .product-variant-choice:focus-visible { border-color: #d6a92b; background: #fff9e8; outline: none; }
+#productView .product-variant-choice.is-selected { border-color: #183a65; color: #fff; background: #183a65; }
+#productView .product-variant-choice small { color: #9b6c13; font-size: 10px; white-space: nowrap; }
+#productView .product-variant-choice.is-selected small { color: #ffda70; }
+#productView .product-variant-swatch { width: 13px; height: 13px; flex: 0 0 13px; border: 1px solid #0002; border-radius: 50%; background: var(--variant-swatch); }
+#productView .product-variant-field.has-error { border-color: #c6463f; background: #fff8f7; }
+#productView .product-variant-field.has-error legend { color: #a6322d; }
+@media (max-width: 640px) {
+  #productView .product-variant-options { grid-template-columns: minmax(0, 1fr); }
+}

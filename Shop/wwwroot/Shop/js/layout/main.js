@@ -1381,7 +1381,6 @@ $(function () {
     const isFavorite = next.includes(productId);
     $button.attr("data-product-id", productId).toggleClass("active", isFavorite).attr("aria-pressed", String(isFavorite));
     if (isFavorite) {
-      pulseListControl($button[0]);
       pulseListControl(document.querySelector("#favoritesToggle"));
       flyProductToControl(this, null, document.querySelector("#favoritesToggle"));
     }
@@ -1605,7 +1604,6 @@ $(function () {
     window.HNUI.storage.set("hn-compare", JSON.stringify(next));
     syncCompareButtons();
     if (next.includes(productId)) {
-      pulseListControl(this);
       pulseListControl(document.querySelector("#compareToggle"));
       flyProductToControl(this, null, document.querySelector("#compareToggle"));
     }

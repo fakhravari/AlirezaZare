@@ -143,9 +143,23 @@ window.HNProducts = productCatalog.map((entry, i) => {
     discountPercent: i % 5 === 0 ? 15 : i % 7 === 0 ? 10 : 0,
     image: images[imageIndex],
     detail: productDetails[Math.floor(i / 5)],
-    images: [images[imageIndex]],
-    videos: [],
+    images: [images[imageIndex], ...images.filter((_, index) => index !== imageIndex)],
+    videos: ["Shop/videos/1_compressed.mp4", "Shop/videos/2_compressed.mp4", "Shop/videos/3_compressed.mp4"],
     newest: 30 - i,
+    variants: ({
+      1: {
+        color: { label: "رنگ", options: [{ value: "yellow-black", label: "زرد و مشکی", swatch: "#f4bd19", priceDelta: 0 }, { value: "blue-black", label: "آبی و مشکی", swatch: "#264d79", priceDelta: 0.35 }] },
+        size: { label: "اندازه", options: [{ value: "compact", label: "جمع‌وجور", priceDelta: 0 }, { value: "professional", label: "حرفه‌ای", priceDelta: 1.2 }] },
+      },
+      4: {
+        color: { label: "رنگ", options: [{ value: "yellow-black", label: "زرد و مشکی", swatch: "#f4bd19", priceDelta: 0 }, { value: "black", label: "مشکی", swatch: "#202b38", priceDelta: 0.25 }] },
+        size: { label: "اندازه", options: [{ value: "standard", label: "استاندارد", priceDelta: 0 }, { value: "large", label: "بزرگ", priceDelta: 0.8 }] },
+      },
+      16: {
+        color: { label: "رنگ نور", options: [{ value: "warm", label: "آفتابی", swatch: "#f5bd28", priceDelta: 0 }, { value: "neutral", label: "طبیعی", swatch: "#fff4d0", priceDelta: 0.15 }] },
+        size: { label: "اندازه", options: [{ value: "small", label: "کوچک", priceDelta: 0 }, { value: "large", label: "بزرگ", priceDelta: 0.45 }] },
+      },
+    })[i + 1] || null,
     badge: i % 7 === 0 ? "پرفروش" : i % 5 === 0 ? "جدید" : "",
   };
 });
