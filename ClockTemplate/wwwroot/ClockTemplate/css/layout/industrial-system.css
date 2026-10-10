@@ -6152,16 +6152,16 @@ body,
 }
 
 #mainNav .cart-btn.cart-icon-theme > b {
-  border: 2px solid #17344b;
-  background: linear-gradient(145deg, #ffe374, #f6c515);
-  box-shadow: 0 3px 8px rgba(16, 42, 67, .2), 0 0 0 2px rgba(255, 255, 255, .78);
+  border-color: var(--industrial-navy);
+  background: var(--industrial-yellow);
+  box-shadow: 0 2px 6px rgba(16, 42, 67, .2);
   transition: transform .2s ease, box-shadow .2s ease;
 }
 
 #mainNav .cart-btn.cart-icon-theme:hover > b,
 #mainNav .cart-wrap.open .cart-btn.cart-icon-theme > b {
   transform: scale(1.08);
-  box-shadow: 0 4px 10px rgba(16, 42, 67, .22), 0 0 0 3px rgba(246, 197, 21, .24);
+  box-shadow: 0 2px 6px rgba(16, 42, 67, .2);
 }
 
 /* Keep the header search's focus treatment on the outer frame only. */
@@ -6293,4 +6293,538 @@ html body #mainNav .home-header-search > input[type="search"]:is(:focus, :focus-
   padding-inline: 20px;
   background: #f7f4ee;
   font-size: 13px;
+}
+
+/* Preserve the full product photo and leave a clear frame around it. */
+.home-page :is(
+  .product-card .product-image img,
+  .showcase-card .product-image img,
+  .rail-card .rail-image img
+),
+.inner-page .search-product.product-card .search-product-image img {
+  box-sizing: border-box;
+  padding: 8px !important;
+  border: 1px solid #dce3e8;
+  border-radius: 12px;
+  background: #fff !important;
+  object-fit: contain !important;
+  object-position: center;
+}
+
+/* Give every header counter enough room for multi-digit quantities. */
+#mainNav .nav-count,
+#mainNav .cart-btn.cart-icon-theme > b {
+  width: max-content;
+  min-width: 28px !important;
+  height: 26px !important;
+  padding-inline: 5px !important;
+  white-space: nowrap;
+  font-size: 13px !important;
+  line-height: 1;
+}
+
+/* Turn the purchase reassurance line into a clear one-line badge. */
+.purchase-benefits--showcase .benefits-kicker {
+  display: inline-flex;
+  max-width: 100%;
+  min-height: 34px;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 13px;
+  border: 1px solid rgba(192, 147, 17, .32);
+  border-radius: 999px;
+  background: linear-gradient(135deg, #fff9df, #fff1b8);
+  box-shadow: 0 3px 10px rgba(166, 123, 0, .09);
+  color: #795c00;
+  font-size: 12px;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.purchase-benefits--showcase .benefits-kicker i {
+  flex: 0 0 auto;
+  color: #b58a00;
+  font-size: 14px;
+}
+
+/* Align the remove action with the quantity stepper on each cart row. */
+#cartPanel .cart-item > .cart-remove {
+  align-self: end;
+  margin-bottom: 2px;
+}
+
+/* Branded best sellers use the full image frame instead of the padded fit. */
+#collection .product-card .product-image > img,
+#collection .product-card .product-image > a > img {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  padding: 0 !important;
+  border: 0;
+  border-radius: 0;
+  object-fit: cover !important;
+  object-position: center;
+}
+
+/* Use the same temporary gold receive state for the header cart icon. */
+#mainNav .nav-actions .cart-btn.cart-icon-theme {
+  transition: transform .2s ease, background-color .3s ease, border-color .3s ease, color .3s ease, box-shadow .3s ease;
+}
+
+#mainNav .nav-actions .cart-btn.cart-icon-theme.cart-received {
+  border-color: #e5b51b !important;
+  background: #f6d75e !important;
+  color: #765700 !important;
+  box-shadow: 0 0 0 5px rgba(246, 197, 21, .2), 0 7px 18px rgba(166, 123, 0, .22) !important;
+}
+
+/* Keep small labels readable across the light and dark surfaces they sit on. */
+.home-page .eyebrow.dark {
+  color: #684d14 !important;
+}
+
+.home-page .recommend-head > div > .eyebrow.dark {
+  color: var(--industrial-navy) !important;
+}
+
+.inner-page main :where(.page-kicker, .article-eyebrow):not(.page-hero .page-kicker) {
+  color: #76551f !important;
+}
+
+.inner-page main .page-hero .page-kicker,
+.inner-page main .search-intro .page-kicker {
+  color: var(--industrial-yellow) !important;
+}
+
+.electrical-art-badge {
+  color: var(--industrial-navy) !important;
+}
+
+.search-main .filter-chip {
+  border-color: #d8bc68 !important;
+  background: #fff6d9 !important;
+  color: #594300 !important;
+}
+
+/* Match product copy and pricing across the cart, compare, and favorites drawers. */
+#cartPanel .cart-item-info > strong,
+:is(#favoritesPanel, #comparePanel) .compare-panel-item > span > strong {
+  font-size: 12px !important;
+  line-height: 1.6;
+}
+
+#cartPanel .cart-item-info > span,
+:is(#favoritesPanel, #comparePanel) .compare-panel-item > span > small {
+  font-size: 14px !important;
+  line-height: 1.5;
+}
+
+/* One quiet, branded delete control for all three header panels. */
+#cartPanel .cart-item > .cart-remove,
+:is(#favoritesPanel, #comparePanel) .compare-panel-item > .cart-remove,
+#cartPanel .cart-item > .cart-remove:hover,
+:is(#favoritesPanel, #comparePanel) .compare-panel-item > .cart-remove:hover,
+#cartPanel .cart-item > .cart-remove:focus,
+:is(#favoritesPanel, #comparePanel) .compare-panel-item > .cart-remove:focus,
+#cartPanel .cart-item > .cart-remove:active,
+:is(#favoritesPanel, #comparePanel) .compare-panel-item > .cart-remove:active {
+  display: grid !important;
+  width: 34px !important;
+  min-width: 34px !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  padding: 0 !important;
+  place-items: center;
+  border: 1px solid rgba(180, 137, 77, .24) !important;
+  border-radius: 10px !important;
+  background: #f8f4ec !important;
+  box-shadow: none !important;
+  color: #8a5a50 !important;
+  transform: none;
+  transition: background-color .18s ease, border-color .18s ease, color .18s ease, box-shadow .18s ease;
+}
+
+#cartPanel .cart-item > .cart-remove:is(:hover, :focus-visible, :active),
+:is(#favoritesPanel, #comparePanel) .compare-panel-item > .cart-remove:is(:hover, :focus-visible, :active) {
+  border-color: rgba(164, 79, 79, .42) !important;
+  background: #fff0ed !important;
+  color: #a44343 !important;
+}
+
+#cartPanel .cart-item > .cart-remove:focus-visible,
+:is(#favoritesPanel, #comparePanel) .compare-panel-item > .cart-remove:focus-visible {
+  box-shadow: 0 0 0 3px rgba(246, 197, 21, .25) !important;
+}
+
+#cartPanel .cart-item > .cart-remove > i,
+:is(#favoritesPanel, #comparePanel) .compare-panel-item > .cart-remove > i {
+  width: auto !important;
+  height: auto !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: inherit !important;
+  font-size: 15px !important;
+}
+
+/* Keep the item count in the same title-and-subtitle position in each drawer. */
+:is(#favoritesPanel, #comparePanel) .compare-panel-head .compare-panel-title-copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 3px;
+}
+
+:is(#favoritesPanel, #comparePanel) .compare-panel-head .compare-panel-count {
+  display: block;
+  margin: 0 !important;
+  padding: 0 !important;
+  color: rgba(255, 255, 255, .74) !important;
+  font-size: 12px !important;
+  font-weight: 550;
+  line-height: 1.5;
+}
+
+/* Let long product names use the available drawer width instead of clipping. */
+#cartPanel .cart-item-info > strong,
+:is(#favoritesPanel, #comparePanel) .compare-panel-item > span > strong {
+  display: block;
+  min-width: 0;
+  overflow: visible;
+  text-align: justify;
+  text-align-last: right;
+  text-overflow: clip;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: normal;
+  line-height: 1.75 !important;
+  text-wrap: pretty;
+}
+
+#cartPanel .cart-item-info {
+  min-width: 0;
+}
+
+/* Recommendation cards use edge-to-edge imagery within their fixed image frame. */
+#recommendations .rail-card .rail-image > img {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: inherit;
+  background: transparent !important;
+  object-fit: cover !important;
+  object-position: center;
+}
+
+/* Refine the product identity block above the detail title. */
+#productView .product-detail-summary > .product-detail-meta {
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+#productView .product-detail-meta > .product-meta-pill {
+  min-height: 62px;
+  padding: 10px 15px;
+  gap: 11px;
+  border-color: #e1e7eb;
+  border-radius: 15px;
+  background: linear-gradient(145deg, #fff, #f7f9fa);
+  box-shadow: 0 4px 12px rgba(16, 42, 67, .045), inset 0 1px #fff;
+}
+
+#productView .product-detail-meta > .product-meta-pill > i {
+  display: grid;
+  width: 31px;
+  height: 31px;
+  flex: 0 0 31px;
+  place-items: center;
+  border: 1px solid rgba(202, 159, 43, .2);
+  border-radius: 10px;
+  background: #fff8e7;
+  color: #987000;
+  font-size: 15px;
+}
+
+#productView .product-detail-meta .product-meta-pill > span {
+  gap: 3px;
+}
+
+#productView .product-detail-meta .product-meta-pill small,
+#productView .product-detail-meta .product-meta-category-content > small {
+  color: #687887;
+  font-size: 10px;
+  font-weight: 650;
+  line-height: 1.5;
+}
+
+#productView .product-detail-meta .product-meta-pill strong {
+  color: var(--industrial-navy);
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.5;
+}
+
+#productView .product-detail-meta > .product-meta-category {
+  min-height: 76px;
+  align-items: center;
+  gap: 13px;
+  padding: 12px 15px;
+  border-color: #eadfc8;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #fffefa, #f8f4eb);
+  box-shadow: 0 4px 14px rgba(110, 83, 31, .045), inset 0 1px #fff;
+}
+
+#productView .product-detail-meta > .product-meta-category > i {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  place-items: center;
+  border: 1px solid rgba(202, 159, 43, .22);
+  border-radius: 11px;
+  background: #fff6dc;
+  color: #967000;
+}
+
+#productView .product-detail-meta .product-meta-category-content {
+  gap: 7px;
+}
+
+#productView .product-detail-meta .product-meta-path {
+  justify-content: flex-start;
+  gap: 7px 20px;
+  line-height: 1.55;
+}
+
+#productView .product-detail-meta .product-meta-path > li {
+  padding: 6px 11px;
+  border-color: #e8dfd0;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, .92);
+  box-shadow: 0 2px 6px rgba(16, 42, 67, .035);
+}
+
+#productView .product-detail-summary > h2 {
+  margin-top: 22px;
+  margin-bottom: 8px;
+  line-height: 1.6;
+}
+
+@media (max-width: 575px) {
+  #productView .product-detail-summary > .product-detail-meta {
+    gap: 9px;
+    margin-bottom: 16px;
+  }
+
+  #productView .product-detail-meta > .product-meta-pill {
+    min-height: 56px;
+    padding: 8px 10px;
+    gap: 8px;
+    border-radius: 13px;
+  }
+
+  #productView .product-detail-meta > .product-meta-pill > i {
+    width: 27px;
+    height: 27px;
+    flex-basis: 27px;
+    border-radius: 9px;
+    font-size: 13px;
+  }
+
+  #productView .product-detail-meta .product-meta-pill strong {
+    font-size: 12px;
+  }
+
+  #productView .product-detail-meta > .product-meta-category {
+    min-height: 0;
+    padding: 10px;
+  }
+
+  #productView .product-detail-meta .product-meta-path {
+    gap: 7px 16px;
+  }
+
+  #productView .product-detail-meta .product-meta-path > li {
+    padding: 5px 8px;
+  }
+
+  #productView .product-detail-summary > h2 {
+    margin-top: 18px;
+  }
+}
+
+/* Recent product-detail refinements: readable navigation, RTL specs and full-width reviews. */
+#productView .product-detail-tabs {
+  gap: 8px;
+  padding: 10px;
+}
+
+#productView .product-detail-tabs > a {
+  min-height: 48px;
+  gap: 9px;
+  padding: 9px 16px;
+  font-size: 15px !important;
+  font-weight: 800;
+}
+
+#productView .product-detail-tabs > a > i {
+  font-size: 16px;
+}
+
+#productView .product-detail-tabs > a > b {
+  min-width: 24px;
+  height: 24px;
+  font-size: 12px;
+}
+
+#productView .product-spec-groups {
+  align-items: stretch;
+  gap: 16px;
+}
+
+#productView .product-spec-group {
+  direction: rtl;
+  text-align: right;
+}
+
+#productView .product-spec-group h3 {
+  justify-content: flex-start;
+  direction: rtl;
+  text-align: right;
+}
+
+#productView .product-spec-group dl,
+#productView .product-spec-group dl > div {
+  direction: rtl;
+  text-align: right;
+}
+
+#productView .product-spec-group dl > div {
+  display: grid;
+  grid-template-columns: minmax(88px, .7fr) minmax(0, 1.3fr);
+  align-items: center;
+  justify-content: initial;
+  gap: 12px;
+  padding: 9px 10px;
+}
+
+#productView .product-spec-group dt,
+#productView .product-spec-group dd {
+  min-width: 0;
+  direction: rtl;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+#productView .product-spec-group dd {
+  justify-self: stretch;
+}
+
+#productView .product-review-layout {
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 18px;
+}
+
+#productView .product-review-form-column,
+#productView .product-review-list-column,
+#productView .product-review-form-column .product-feedback-form {
+  width: 100%;
+  max-width: none;
+}
+
+#productView .product-review-form-column .product-feedback-form {
+  grid-template-columns: minmax(0, 1fr) minmax(150px, .55fr);
+}
+
+#productView .product-review-form-column .product-feedback-form .product-feedback-wide {
+  grid-column: 1 / -1;
+  width: 100%;
+}
+
+#productView .product-review-form-column .product-feedback-form textarea {
+  display: block;
+  width: 100%;
+  min-height: 130px;
+  resize: vertical;
+}
+
+#productView .product-question-faq > .product-question-user-text {
+  position: relative;
+  margin: 12px 0 0;
+  padding: 12px 15px;
+  border-inline-start: 3px solid #d6b55e;
+  border-radius: 0 10px 10px 0;
+  background: #f4f8fa;
+  color: #344b5d;
+  direction: rtl;
+  font-size: 14px;
+  line-height: 2;
+  text-align: justify;
+  text-indent: 0;
+  overflow-wrap: anywhere;
+}
+
+#productView .product-question-faq > .product-question-user-text::before {
+  display: block;
+  margin-bottom: 4px;
+  color: #7c6330;
+  content: "پرسش کاربر";
+  font-size: 11px;
+  font-weight: 800;
+}
+
+#productView .product-question-faq > .product-question-user-text::after {
+  content: none;
+}
+
+#productView .product-question-faq .product-feedback-admin-reply {
+  margin: 10px 0 0 16px;
+  padding: 11px 14px;
+  border-inline-start: 3px solid #d8bd79;
+  border-radius: 0 10px 10px 0;
+  background: #fffbf0;
+  direction: rtl;
+}
+
+#productView .product-question-faq .product-feedback-admin-reply > p {
+  margin: 5px 0 0;
+  font-size: 13px;
+  line-height: 1.9;
+  text-align: justify;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 575px) {
+  #productView .product-detail-tabs > a {
+    min-height: 46px;
+    padding: 8px 13px;
+    font-size: 14px !important;
+  }
+
+  #productView .product-spec-groups {
+    gap: 12px;
+  }
+
+  #productView .product-spec-group dl > div {
+    grid-template-columns: minmax(72px, .7fr) minmax(0, 1.3fr);
+    gap: 8px;
+    padding: 8px 7px;
+  }
+
+  #productView .product-review-form-column .product-feedback-form {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  #productView .product-review-form-column .product-feedback-form label:first-child,
+  #productView .product-review-form-column .product-feedback-form .product-feedback-wide {
+    grid-column: 1;
+  }
+
+  #productView .product-question-faq .product-feedback-admin-reply {
+    margin-inline-start: 8px;
+  }
 }

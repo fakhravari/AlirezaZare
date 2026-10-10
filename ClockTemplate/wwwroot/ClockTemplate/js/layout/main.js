@@ -125,10 +125,14 @@ $(function () {
   };
   const pulseListControl = (element) => {
     if (!element) return;
+    window.clearTimeout(element._listReceivedTimer);
     element.classList.remove("list-received");
     void element.offsetWidth;
     element.classList.add("list-received");
-    window.setTimeout(() => element.classList.remove("list-received"), 2100);
+    element._listReceivedTimer = window.setTimeout(() => {
+      element.classList.remove("list-received");
+      element._listReceivedTimer = null;
+    }, 2100);
   };
   const syncFavoriteButtons = () => {
     const selected = new Set(readFavoriteList());
@@ -196,7 +200,7 @@ $(function () {
     Object.entries(cache || {}).forEach(([id, product]) => {
       if (!products.has(String(id))) products.set(String(id), product);
     });
-    $("#favoritesPanelCount").text(`${faNumber(ids.length)} محصول ذخیره شده`);
+    $("#favoritesPanelCount").text(`${faNumber(ids.length)} محصول`);
     if (!ids.length) {
       $("#favoritesPanelItems").html('<div class="compare-panel-empty header-panel-empty"><span class="header-panel-empty-icon"><i class="bi bi-heart" aria-hidden="true"></i></span><strong>هنوز محصولی در علاقه‌مندی‌ها نیست</strong><p>برای ذخیره، آیکن قلب روی کارت محصول را بزنید.</p></div>');
       return;
@@ -225,7 +229,7 @@ $(function () {
         image: button.dataset.image || image?.getAttribute("src") || "ClockTemplate/images/products/tool-hammer-drill.png",
       });
     });
-    $("#comparePanelCount").text(`${faNumber(ids.length)} محصول انتخاب شده`);
+    $("#comparePanelCount").text(`${faNumber(ids.length)} محصول`);
     if (!ids.length) {
       $("#comparePanelItems").html('<div class="compare-panel-empty header-panel-empty"><span class="header-panel-empty-icon"><i class="bi bi-arrow-left-right" aria-hidden="true"></i></span><strong>هنوز محصولی برای مقایسه نیست</strong><p>برای مقایسه، آیکن مقایسه روی کارت محصول را بزنید.</p></div>');
       return;
@@ -1552,7 +1556,6 @@ $(function () {
       pulseListControl(document.querySelector("#compareToggle"));
     }
     setCartOpen(false);
-    setCompareOpen(true);
   });
 
   const openQuickView = (product) => {
@@ -1680,9 +1683,14 @@ $(function () {
     );
     flight.onfinish = () => {
       $fly.remove();
+      window.clearTimeout(target._cartReceivedTimer);
       target.classList.remove("cart-received");
       void target.offsetWidth;
       target.classList.add("cart-received");
+      target._cartReceivedTimer = window.setTimeout(() => {
+        target.classList.remove("cart-received");
+        target._cartReceivedTimer = null;
+      }, 2100);
     };
   });
 });
