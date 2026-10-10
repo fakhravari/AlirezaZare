@@ -7812,3 +7812,35 @@ html body :is(
     grid-template-columns: 42px minmax(0, 1fr) !important;
   }
 }
+
+.shared-account-card .account-links a.account-logout,
+.shared-account-card .account-logout {
+  margin-top: 8px;
+  border: 1px solid #efd6d3 !important;
+  background: linear-gradient(105deg, #fff8f7, #fff2f0) !important;
+  color: #a34f49 !important;
+  font-weight: 700;
+  box-shadow: inset -3px 0 #c8756e, 0 3px 10px rgba(143, 69, 66, .045) !important;
+}
+
+.shared-account-card .account-links a.account-logout > i,
+.shared-account-card .account-logout > i {
+  border-color: #efd2ce !important;
+  background: #fbe7e4 !important;
+  color: #a34f49 !important;
+}
+
+.shared-account-card .account-links a.account-logout:hover,
+.shared-account-card .account-logout:hover {
+  border-color: #dfb4af !important;
+  background: #fff0ee !important;
+  color: #8e3e39 !important;
+  box-shadow: inset -3px 0 #b75e57, 0 7px 16px rgba(143, 69, 66, .1) !important;
+}
+
+@media (max-width: 991px) {
+  .shared-account-card .account-links a.account-logout,
+  .shared-account-card .account-logout {
+    margin-top: 6px;
+  }
+}
