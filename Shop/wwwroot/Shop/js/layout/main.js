@@ -24,22 +24,37 @@ $(function () {
         .replace(/\s+/g, " ")
         .trim();
     const recentSearchKey = "hn-header-recent-searches";
-    const popularSearches = ["دریل شارژی", "مولتی‌متر دیجیتال", "ست مته و سری", "ایستگاه هویه", "چراغ کارگاهی"];
+    const popularSearches = [
+      "دریل شارژی",
+      "مولتی‌متر دیجیتال",
+      "ست مته و سری",
+      "ایستگاه هویه",
+      "چراغ کارگاهی",
+    ];
     const readRecentSearches = () => {
       const searches = window.HNUI.storage.json(recentSearchKey, []);
-      return Array.isArray(searches) ? searches.filter((item) => typeof item === "string").slice(0, 6) : [];
+      return Array.isArray(searches)
+        ? searches.filter((item) => typeof item === "string").slice(0, 6)
+        : [];
     };
     const rememberSearch = (value) => {
-      const query = String(value || "").trim().slice(0, 80);
+      const query = String(value || "")
+        .trim()
+        .slice(0, 80);
       if (Array.from(query).length < 2) return;
-      const recent = readRecentSearches().filter((item) => normalizeSearchText(item) !== normalizeSearchText(query));
-      window.HNUI.storage.set(recentSearchKey, JSON.stringify([query, ...recent].slice(0, 6)));
+      const recent = readRecentSearches().filter(
+        (item) => normalizeSearchText(item) !== normalizeSearchText(query),
+      );
+      window.HNUI.storage.set(
+        recentSearchKey,
+        JSON.stringify([query, ...recent].slice(0, 6)),
+      );
     };
     const quickSearchLink = (query, icon) =>
       `<a class="header-search-quick-chip" data-search-query="${escapeHtml(query)}" href="${searchUrl(query)}"><i class="bi ${icon}" aria-hidden="true"></i><span>${escapeHtml(query)}</span></a>`;
     const renderQuickSearchPanel = () => {
       const recent = readRecentSearches();
-      suggestions.innerHTML = `<section class="header-search-quick-section" aria-labelledby="recentSearchesTitle"><div class="header-search-quick-heading"><strong id="recentSearchesTitle"><i class="bi bi-clock-history" aria-hidden="true"></i> جستجوهای اخیر</strong>${recent.length ? '<button type="button" data-clear-search-history>پاک‌کردن</button>' : ''}</div>${recent.length ? `<div class="header-search-quick-chips">${recent.map((query) => quickSearchLink(query, "bi-clock-history")).join("")}</div>` : '<p class="header-search-quick-empty">جستجوهای اخیر اینجا نمایش داده می‌شوند.</p>'}</section><section class="header-search-quick-section" aria-labelledby="popularSearchesTitle"><div class="header-search-quick-heading"><strong id="popularSearchesTitle"><i class="bi bi-graph-up-arrow" aria-hidden="true"></i> جستجوهای پرتکرار</strong></div><div class="header-search-quick-chips">${popularSearches.map((query) => quickSearchLink(query, "bi-arrow-up-right")).join("")}</div></section>`;
+      suggestions.innerHTML = `<section class="header-search-quick-section" aria-labelledby="recentSearchesTitle"><div class="header-search-quick-heading"><strong id="recentSearchesTitle"><i class="bi bi-clock-history" aria-hidden="true"></i> جستجوهای اخیر</strong>${recent.length ? '<button type="button" data-clear-search-history>پاک‌کردن</button>' : ""}</div>${recent.length ? `<div class="header-search-quick-chips">${recent.map((query) => quickSearchLink(query, "bi-clock-history")).join("")}</div>` : '<p class="header-search-quick-empty">جستجوهای اخیر اینجا نمایش داده می‌شوند.</p>'}</section><section class="header-search-quick-section" aria-labelledby="popularSearchesTitle"><div class="header-search-quick-heading"><strong id="popularSearchesTitle"><i class="bi bi-graph-up-arrow" aria-hidden="true"></i> جستجوهای پرتکرار</strong></div><div class="header-search-quick-chips">${popularSearches.map((query) => quickSearchLink(query, "bi-arrow-up-right")).join("")}</div></section>`;
       openSuggestions();
     };
     const closeSuggestions = () => {
@@ -104,16 +119,22 @@ $(function () {
               (product) =>
                 `<li><a class="header-search-suggestion" role="option" href="Product?id=${encodeURIComponent(product.id)}"><span class="header-search-suggestion-image"><img src="${escapeHtml(product.image)}" alt="" loading="lazy" decoding="async"></span><span class="header-search-suggestion-copy"><strong>${escapeHtml(product.name)}</strong><small>${escapeHtml(product.brand)} <bdi>· ${escapeHtml(product.type)}</bdi></small><b>${faNumber(product.price * 1000000)} <small>تومان</small></b></span><i class="bi bi-arrow-left" aria-hidden="true"></i></a></li>`,
             )
-            .join("")}</ul><a class="header-search-all" href="${searchUrl(searchInput.value.trim())}">مشاهده همه نتایج <i class="bi bi-arrow-left" aria-hidden="true"></i></a>`
+            .join(
+              "",
+            )}</ul><a class="header-search-all" href="${searchUrl(searchInput.value.trim())}">مشاهده همه نتایج <i class="bi bi-arrow-left" aria-hidden="true"></i></a>`
         : `<div class="header-search-empty"><i class="bi bi-search" aria-hidden="true"></i><span>محصولی با این عبارت پیدا نشد.</span><a href="${searchUrl(searchInput.value.trim())}">جستجو در همه محصولات <i class="bi bi-arrow-left" aria-hidden="true"></i></a></div>`;
 
       suggestions.innerHTML = resultMarkup;
-      suggestions.querySelectorAll('[role="option"]').forEach((option) => option.removeAttribute("role"));
+      suggestions
+        .querySelectorAll('[role="option"]')
+        .forEach((option) => option.removeAttribute("role"));
       openSuggestions();
     };
 
     searchInput.addEventListener("input", renderSuggestions);
-    headerSearchForm.addEventListener("submit", () => rememberSearch(searchInput.value));
+    headerSearchForm.addEventListener("submit", () =>
+      rememberSearch(searchInput.value),
+    );
     suggestions.addEventListener("click", (event) => {
       const clearHistory = event.target.closest("[data-clear-search-history]");
       if (clearHistory) {
@@ -168,16 +189,20 @@ $(function () {
   };
   const flyProductToControl = (trigger, product, target) => {
     if (prefersReducedMotion || !target) return;
-    const origin = trigger instanceof Element ? trigger : document.activeElement;
+    const origin =
+      trigger instanceof Element ? trigger : document.activeElement;
     if (!(origin instanceof Element)) return;
     const source =
       $(origin)
-        .closest(".product-card,.showcase-card,.rail-card,.featured-main,.featured-side")
+        .closest(
+          ".product-card,.showcase-card,.rail-card,.featured-main,.featured-side",
+        )
         .find("img")
         .first()[0] ||
       (origin.matches(".quick-add-cart") && $("#quickViewImage")[0]) ||
       (origin.id === "addProduct" && $("#productView .flow-photo")[0]);
-    const image = source?.currentSrc || source?.getAttribute("src") || product?.image;
+    const image =
+      source?.currentSrc || source?.getAttribute("src") || product?.image;
     if (!image) return;
     const a = source?.getBoundingClientRect() || origin.getBoundingClientRect();
     const b = target.getBoundingClientRect();
@@ -201,7 +226,10 @@ $(function () {
       const u = 1 - t;
       const x = 3 * u * u * t * p1.x + 3 * u * t * t * p2.x + t * t * t * endX;
       const y = 3 * u * u * t * p1.y + 3 * u * t * t * p2.y + t * t * t * endY;
-      const scale = t < 0.12 ? 0.78 + (t / 0.12) * 0.22 : 1 - 0.82 * Math.max(0, (t - 0.12) / 0.88);
+      const scale =
+        t < 0.12
+          ? 0.78 + (t / 0.12) * 0.22
+          : 1 - 0.82 * Math.max(0, (t - 0.12) / 0.88);
       const frame = {
         transform: `translate3d(${x}px, ${y}px, 0) scale(${scale}) rotate(${t * 24}deg)`,
         opacity: t === 0 ? 0 : t > 0.82 ? (1 - t) / 0.18 : 1,
@@ -210,10 +238,11 @@ $(function () {
       };
       return frame;
     });
-    const flight = fly.animate(
-      flightFrames,
-      { duration: 760, easing: "cubic-bezier(.2,.75,.2,1)", fill: "forwards" },
-    );
+    const flight = fly.animate(flightFrames, {
+      duration: 760,
+      easing: "cubic-bezier(.2,.75,.2,1)",
+      fill: "forwards",
+    });
     flight.onfinish = () => fly.remove();
     flight.oncancel = () => fly.remove();
   };
@@ -221,22 +250,39 @@ $(function () {
     const selected = new Set(readFavoriteList());
     $(".favorite[data-product-id]").each(function () {
       const active = selected.has(String(this.dataset.productId));
-      $(this).toggleClass("active", active).attr("aria-pressed", String(active));
-      $(this).attr("aria-label", active ? "حذف از علاقه‌مندی‌ها" : "افزودن به علاقه‌مندی‌ها");
-      $(this).find("i").attr("class", active ? "bi bi-heart-fill" : "bi bi-heart");
+      $(this)
+        .toggleClass("active", active)
+        .attr("aria-pressed", String(active));
+      $(this).attr(
+        "aria-label",
+        active ? "حذف از علاقه‌مندی‌ها" : "افزودن به علاقه‌مندی‌ها",
+      );
+      $(this)
+        .find("i")
+        .attr("class", active ? "bi bi-heart-fill" : "bi bi-heart");
     });
   };
   const cacheProductFromCard = (card, id) => {
     const cartButton = card?.querySelector(".add-cart[data-id]");
     if (!cartButton || !id) return;
     const cache = window.HNUI.storage.json("hn-product-cache", {});
-    const name = cartButton.dataset.name || card.querySelector("h3")?.textContent.trim() || "محصول منتخب";
+    const name =
+      cartButton.dataset.name ||
+      card.querySelector("h3")?.textContent.trim() ||
+      "محصول منتخب";
     cache[String(id)] = {
       id: String(id),
       name,
-      brand: card.querySelector(".product-info small, small")?.textContent.trim() || "",
+      brand:
+        card.querySelector(".product-info small, small")?.textContent.trim() ||
+        "",
       price: Number(cartButton.dataset.price) / 1000000 || 0,
-      image: cartButton.dataset.image || card.querySelector(".product-image img, .rail-image img")?.getAttribute("src") || "Shop/images/products/tool-hammer-drill.png",
+      image:
+        cartButton.dataset.image ||
+        card
+          .querySelector(".product-image img, .rail-image img")
+          ?.getAttribute("src") ||
+        "Shop/images/products/tool-hammer-drill.png",
       type: "مشخصات محصول",
       movement: "مطابق مشخصات کالا",
       strap: "مطابق اطلاعات سازنده",
@@ -287,13 +333,23 @@ $(function () {
     });
     $("#favoritesPanelCount").text(`${faNumber(ids.length)} محصول`);
     if (!ids.length) {
-      $("#favoritesPanelItems").html('<div class="compare-panel-empty header-panel-empty"><span class="header-panel-empty-icon"><i class="bi bi-heart" aria-hidden="true"></i></span><strong>هنوز محصولی در علاقه‌مندی‌ها نیست</strong><p>برای ذخیره، آیکن قلب روی کارت محصول را بزنید.</p></div>');
+      $("#favoritesPanelItems").html(
+        '<div class="compare-panel-empty header-panel-empty"><span class="header-panel-empty-icon"><i class="bi bi-heart" aria-hidden="true"></i></span><strong>هنوز محصولی در علاقه‌مندی‌ها نیست</strong><p>برای ذخیره، آیکن قلب روی کارت محصول را بزنید.</p></div>',
+      );
       return;
     }
-    $("#favoritesPanelItems").html(ids.map((id) => {
-      const product = products.get(id) || { name: "محصول منتخب", price: 0, image: "Shop/images/products/tool-hammer-drill.png" };
-      return `<article class="compare-panel-item" data-favorite-id="${escapeHtml(id)}"><img src="${escapeHtml(product.image || "Shop/images/products/tool-hammer-drill.png")}" alt="" loading="lazy"><span><strong>${escapeHtml(product.name || "محصول منتخب")}</strong><small>${faNumber(Number(product.price) * (Number(product.price) < 1000000 ? 1000000 : 1))} تومان</small></span><button class="cart-remove" type="button" data-favorite-remove="${escapeHtml(id)}" aria-label="حذف ${escapeHtml(product.name || "محصول")} از علاقه‌مندی‌ها"><i class="bi bi-trash3" aria-hidden="true"></i></button></article>`;
-    }).join(""));
+    $("#favoritesPanelItems").html(
+      ids
+        .map((id) => {
+          const product = products.get(id) || {
+            name: "محصول منتخب",
+            price: 0,
+            image: "Shop/images/products/tool-hammer-drill.png",
+          };
+          return `<article class="compare-panel-item" data-favorite-id="${escapeHtml(id)}"><img src="${escapeHtml(product.image || "Shop/images/products/tool-hammer-drill.png")}" alt="" loading="lazy"><span><strong>${escapeHtml(product.name || "محصول منتخب")}</strong><small>${faNumber(Number(product.price) * (Number(product.price) < 1000000 ? 1000000 : 1))} تومان</small></span><button class="cart-remove" type="button" data-favorite-remove="${escapeHtml(id)}" aria-label="حذف ${escapeHtml(product.name || "محصول")} از علاقه‌مندی‌ها"><i class="bi bi-trash3" aria-hidden="true"></i></button></article>`;
+        })
+        .join(""),
+    );
   };
   const renderComparePanel = () => {
     const ids = readCompareList();
@@ -309,20 +365,36 @@ $(function () {
       const card = button.closest(".product-card, .showcase-card, .rail-card");
       const image = card?.querySelector(".product-image img, .rail-image img");
       products.set(String(button.dataset.id), {
-        name: button.dataset.name || card?.querySelector("h3")?.textContent.trim() || "محصول منتخب",
+        name:
+          button.dataset.name ||
+          card?.querySelector("h3")?.textContent.trim() ||
+          "محصول منتخب",
         price: Number(button.dataset.price) || 0,
-        image: button.dataset.image || image?.getAttribute("src") || "Shop/images/products/tool-hammer-drill.png",
+        image:
+          button.dataset.image ||
+          image?.getAttribute("src") ||
+          "Shop/images/products/tool-hammer-drill.png",
       });
     });
     $("#comparePanelCount").text(`${faNumber(ids.length)} محصول`);
     if (!ids.length) {
-      $("#comparePanelItems").html('<div class="compare-panel-empty header-panel-empty"><span class="header-panel-empty-icon"><i class="bi bi-arrow-left-right" aria-hidden="true"></i></span><strong>هنوز محصولی برای مقایسه نیست</strong><p>برای مقایسه، آیکن مقایسه روی کارت محصول را بزنید.</p></div>');
+      $("#comparePanelItems").html(
+        '<div class="compare-panel-empty header-panel-empty"><span class="header-panel-empty-icon"><i class="bi bi-arrow-left-right" aria-hidden="true"></i></span><strong>هنوز محصولی برای مقایسه نیست</strong><p>برای مقایسه، آیکن مقایسه روی کارت محصول را بزنید.</p></div>',
+      );
       return;
     }
-    $("#comparePanelItems").html(ids.map((id) => {
-      const product = products.get(id) || { name: "محصول منتخب", price: 0, image: "Shop/images/products/tool-hammer-drill.png" };
-      return `<article class="compare-panel-item" data-compare-id="${escapeHtml(id)}"><img src="${escapeHtml(product.image)}" alt="" loading="lazy"><span><strong>${escapeHtml(product.name)}</strong><small>${faNumber(product.price)} تومان</small></span><button class="cart-remove" type="button" data-compare-remove="${escapeHtml(id)}" aria-label="حذف ${escapeHtml(product.name)} از مقایسه"><i class="bi bi-trash3" aria-hidden="true"></i></button></article>`;
-    }).join(""));
+    $("#comparePanelItems").html(
+      ids
+        .map((id) => {
+          const product = products.get(id) || {
+            name: "محصول منتخب",
+            price: 0,
+            image: "Shop/images/products/tool-hammer-drill.png",
+          };
+          return `<article class="compare-panel-item" data-compare-id="${escapeHtml(id)}"><img src="${escapeHtml(product.image)}" alt="" loading="lazy"><span><strong>${escapeHtml(product.name)}</strong><small>${faNumber(product.price)} تومان</small></span><button class="cart-remove" type="button" data-compare-remove="${escapeHtml(id)}" aria-label="حذف ${escapeHtml(product.name)} از مقایسه"><i class="bi bi-trash3" aria-hidden="true"></i></button></article>`;
+        })
+        .join(""),
+    );
   };
   renderNavCounters();
   document.addEventListener("hn:lists-change", renderNavCounters);
@@ -387,18 +459,48 @@ $(function () {
   if (categoryRow && categoryMenu && categoryPanel) {
     const categoryContent = {
       tools: [
-        ["دریل و پیچ‌گوشتی", "دریل چکشی", "دریل شارژی", "پیچ‌گوشتی برقی", "دریل بتن‌کن"],
+        [
+          "دریل و پیچ‌گوشتی",
+          "دریل چکشی",
+          "دریل شارژی",
+          "پیچ‌گوشتی برقی",
+          "دریل بتن‌کن",
+        ],
         ["برش و سایش", "فرز و مینی‌فرز", "اره عمودبر", "اره گردبر", "صفحه برش"],
-        ["تجهیزات کارگاهی", "دستگاه جوش", "کارواش", "کمپرسور باد", "لوازم جانبی ابزار"],
+        [
+          "تجهیزات کارگاهی",
+          "دستگاه جوش",
+          "کارواش",
+          "کمپرسور باد",
+          "لوازم جانبی ابزار",
+        ],
       ],
       "hand-tools": [
-        ["ابزارهای دستی", "انواع آچار", "پیچ‌گوشتی دستی", "انبردست و سیم‌چین", "چکش و تبر"],
+        [
+          "ابزارهای دستی",
+          "انواع آچار",
+          "پیچ‌گوشتی دستی",
+          "انبردست و سیم‌چین",
+          "چکش و تبر",
+        ],
         ["اندازه‌گیری دستی", "متر و خط‌کش", "تراز دستی", "گونیا", "کولیس"],
-        ["لوازم کارگاهی", "جعبه ابزار", "گیره و پیچ‌دستی", "تیغه و مته", "متعلقات"],
+        [
+          "لوازم کارگاهی",
+          "جعبه ابزار",
+          "گیره و پیچ‌دستی",
+          "تیغه و مته",
+          "متعلقات",
+        ],
       ],
       components: [
         ["قطعات پایه", "مقاومت", "خازن", "دیود و LED", "سلف و ترانس"],
-        ["قطعات نیمه‌رسانا", "آی‌سی", "ترانزیستور", "رگولاتور", "ماژول‌های آماده"],
+        [
+          "قطعات نیمه‌رسانا",
+          "آی‌سی",
+          "ترانزیستور",
+          "رگولاتور",
+          "ماژول‌های آماده",
+        ],
         ["برد و اتصال", "بردبورد", "برد مدار چاپی", "رله", "سنسور"],
       ],
       cables: [
@@ -413,13 +515,31 @@ $(function () {
       ],
       switchgear: [
         ["کلید و پریز", "کلید برق", "پریز توکار", "پریز صنعتی", "دیمر"],
-        ["حفاظت مدار", "فیوز مینیاتوری", "محافظ جان", "کلید اتوماتیک", "تابلو برق"],
+        [
+          "حفاظت مدار",
+          "فیوز مینیاتوری",
+          "محافظ جان",
+          "کلید اتوماتیک",
+          "تابلو برق",
+        ],
         ["کنترل صنعتی", "کنتاکتور", "تایمر", "شستی و سیگنال", "ترموستات"],
       ],
       safety: [
         ["تجهیزات حفاظت", "دستکش عایق", "عینک ایمنی", "کفش کار", "ماسک"],
-        ["محافظت برق", "محافظ ولتاژ", "ارت و اتصال زمین", "صاعقه‌گیر", "سرج ارستر"],
-        ["ایمنی کارگاه", "کلاه ایمنی", "لباس کار", "جعبه کمک‌های اولیه", "نوار هشدار"],
+        [
+          "محافظت برق",
+          "محافظ ولتاژ",
+          "ارت و اتصال زمین",
+          "صاعقه‌گیر",
+          "سرج ارستر",
+        ],
+        [
+          "ایمنی کارگاه",
+          "کلاه ایمنی",
+          "لباس کار",
+          "جعبه کمک‌های اولیه",
+          "نوار هشدار",
+        ],
       ],
       measurement: [
         ["ابزار اندازه‌گیری", "مولتی‌متر", "آمپرمتر", "ولت‌متر", "کلمپ‌متر"],
@@ -428,7 +548,9 @@ $(function () {
       ],
     };
 
-    const triggers = [...categoryMenu.querySelectorAll("button[data-category]")];
+    const triggers = [
+      ...categoryMenu.querySelectorAll("button[data-category]"),
+    ];
     triggers.forEach((trigger) =>
       trigger.setAttribute("aria-controls", "electricalSubmenu"),
     );
@@ -913,9 +1035,15 @@ $(function () {
       if (!$card.length) return;
       $card.find("img").attr({ src: product.image, alt: product.name });
       $card.find("h3").text(product.name);
-      $card.find(".featured-content > p, .featured-side-content > p").text(product.detail?.intro || product.type);
-      $card.find(".featured-content > small").text(`${product.brand} · ${product.type}`);
-      $card.find(".featured-price, .featured-buy strong").text(`${faNumber(product.price * 1000000)} تومان`);
+      $card
+        .find(".featured-content > p, .featured-side-content > p")
+        .text(product.detail?.intro || product.type);
+      $card
+        .find(".featured-content > small")
+        .text(`${product.brand} · ${product.type}`);
+      $card
+        .find(".featured-price, .featured-buy strong")
+        .text(`${faNumber(product.price * 1000000)} تومان`);
       $card.find(".add-cart").attr({
         "data-id": String(product.id),
         "data-name": product.name,
@@ -926,22 +1054,32 @@ $(function () {
   }
   const $amazingItems = $("#amazing .row > div");
   if ($amazingItems.length === 3 && catalogProducts.length > 15) {
-    [catalogProducts[0], catalogProducts[5], catalogProducts[10]].forEach((product, index) => {
-      const $item = $amazingItems.eq(index);
-      $item.removeClass("col-md-4").addClass("col-12 col-md-6 col-xl");
-      $item.find(".product-image").removeClass("cream warm light");
-      $item.find("img").attr({ src: product.image, alt: product.name });
-      $item.find(".badge-offer").text(product.discountPercent ? `${faNumber(product.discountPercent)}٪ تخفیف` : "پیشنهاد ویژه");
-      $item.find(".showcase-card-body small").text(product.brand);
-      $item.find(".showcase-card-body h3").text(product.name);
-      $item.find(".showcase-card-body strong").text(`${faNumber(product.price * 1000000)} تومان`);
-      $item.find(".add-cart").attr({
-        "data-id": String(product.id),
-        "data-name": product.name,
-        "data-price": String(product.price * 1000000),
-        "data-image": product.image,
-      });
-    });
+    [catalogProducts[0], catalogProducts[5], catalogProducts[10]].forEach(
+      (product, index) => {
+        const $item = $amazingItems.eq(index);
+        $item.removeClass("col-md-4").addClass("col-12 col-md-6 col-xl");
+        $item.find(".product-image").removeClass("cream warm light");
+        $item.find("img").attr({ src: product.image, alt: product.name });
+        $item
+          .find(".badge-offer")
+          .text(
+            product.discountPercent
+              ? `${faNumber(product.discountPercent)}٪ تخفیف`
+              : "پیشنهاد ویژه",
+          );
+        $item.find(".showcase-card-body small").text(product.brand);
+        $item.find(".showcase-card-body h3").text(product.name);
+        $item
+          .find(".showcase-card-body strong")
+          .text(`${faNumber(product.price * 1000000)} تومان`);
+        $item.find(".add-cart").attr({
+          "data-id": String(product.id),
+          "data-name": product.name,
+          "data-price": String(product.price * 1000000),
+          "data-image": product.image,
+        });
+      },
+    );
     window.HNUI?.enhance(document.querySelector("#amazing"));
   }
   const productCardMarkup = (product) => `
@@ -978,9 +1116,15 @@ $(function () {
     </article>`;
 
   if (catalogProducts.length >= 24) {
-    $("#bestsellersSlider").html(catalogProducts.slice(0, 12).map(productCardMarkup).join(""));
-    $("#newestSlider").html(catalogProducts.slice(14, 20).map(productCardMarkup).join(""));
-    $("#productRail").html(catalogProducts.slice(20, 25).map(railCardMarkup).join(""));
+    $("#bestsellersSlider").html(
+      catalogProducts.slice(0, 12).map(productCardMarkup).join(""),
+    );
+    $("#newestSlider").html(
+      catalogProducts.slice(14, 20).map(productCardMarkup).join(""),
+    );
+    $("#productRail").html(
+      catalogProducts.slice(20, 25).map(railCardMarkup).join(""),
+    );
   }
 
   initOwlCarousel($("#productRail"), {
@@ -1083,7 +1227,9 @@ $(function () {
   const $favoritesPanel = $("#favoritesPanel");
   const setFavoriteOpen = (open) => {
     $favoritesWrap.toggleClass("open", open);
-    $favoritesPanel.toggleClass("open", open).attr("aria-hidden", String(!open));
+    $favoritesPanel
+      .toggleClass("open", open)
+      .attr("aria-hidden", String(!open));
     $favoritesToggle.attr("aria-expanded", String(open));
   };
   const $compareWrap = $("#compareWrap");
@@ -1248,9 +1394,6 @@ $(function () {
   const $loginEmailError = $("#loginEmailError");
   const $registerEmailError = $("#registerEmailError");
   const $emailOtpError = $("#emailOtpError");
-  const englishDigits = (value) =>
-    value.replace(/[۰-۹]/g, (digit) => "۰۱۲۳۴۵۶۷۸۹".indexOf(digit));
-
   const selectLoginMode = (mode) => {
     loginMode = mode === "register" ? "register" : "login";
     const isLogin = loginMode === "login";
@@ -1296,14 +1439,18 @@ $(function () {
       $("#forgotPasswordError").text("ایمیل را با قالب صحیح وارد کنید.");
       return;
     }
-    $("#forgotPasswordError").text("ارسال ایمیل بازنشانی هنوز به سرویس ایمیل سایت متصل نشده است.");
+    $("#forgotPasswordError").text(
+      "ارسال ایمیل بازنشانی هنوز به سرویس ایمیل سایت متصل نشده است.",
+    );
   });
 
   const requestEmailCode = (mode, email) => {
     pendingAuthMode = mode;
     $("#sentEmail").text(email);
     $("#emailOtpTitle").text(
-      mode === "register" ? "کد فعال‌سازی را وارد کنید" : "کد ورود را وارد کنید",
+      mode === "register"
+        ? "کد فعال‌سازی را وارد کنید"
+        : "کد ورود را وارد کنید",
     );
     $(".login-auth-tabs").addClass("d-none");
     $loginEmailStep.addClass("d-none").prop("hidden", true);
@@ -1342,12 +1489,14 @@ $(function () {
   });
 
   $("#loginEmailOtp").on("input", function () {
-    this.value = englishDigits(this.value).replace(/\D/g, "").slice(0, 6);
+    this.value = window.HNUI.toEnglishDigits(this.value)
+      .replace(/\D/g, "")
+      .slice(0, 6);
   });
 
   $("#emailOtpForm").on("submit", (event) => {
     event.preventDefault();
-    const code = englishDigits($emailOtpInput.val().trim());
+    const code = window.HNUI.toEnglishDigits($emailOtpInput.val().trim());
     if (!/^\d{6}$/.test(code)) {
       $emailOtpError.text("کد شش‌رقمی را کامل وارد کنید.");
       return;
@@ -1361,10 +1510,14 @@ $(function () {
 
   $("#loginEmailBack").on("click", () => {
     selectLoginMode(pendingAuthMode);
-    $(pendingAuthMode === "register" ? "#registerEmail" : "#loginEmail").trigger("focus");
+    $(
+      pendingAuthMode === "register" ? "#registerEmail" : "#loginEmail",
+    ).trigger("focus");
   });
   $loginModalElement.on("hidden.bs.modal", () => {
-    $("#loginEmailForm, #registerEmailForm, #emailOtpForm, #forgotPasswordForm").each(function () {
+    $(
+      "#loginEmailForm, #registerEmailForm, #emailOtpForm, #forgotPasswordForm",
+    ).each(function () {
       this.reset();
     });
     $("#sentEmail").empty();
@@ -1445,7 +1598,10 @@ $(function () {
   $favoritesPanel.on("click", "[data-favorite-remove]", function (event) {
     event.stopPropagation();
     const removedId = String(this.dataset.favoriteRemove || "");
-    window.HNUI.storage.set("hn-favorites", JSON.stringify(readFavoriteList().filter((id) => id !== removedId)));
+    window.HNUI.storage.set(
+      "hn-favorites",
+      JSON.stringify(readFavoriteList().filter((id) => id !== removedId)),
+    );
     setFavoriteOpen(true);
   });
   let favoriteHoverTimer = null;
@@ -1459,17 +1615,23 @@ $(function () {
   $favoritesWrap.on("mouseleave", () => {
     if ($window.width() <= mobileBreakpoint) return;
     favoriteHoverTimer = window.setTimeout(() => {
-      if (!$favoritesWrap.is(":hover") && !$favoritesPanel.is(":hover")) setFavoriteOpen(false);
+      if (!$favoritesWrap.is(":hover") && !$favoritesPanel.is(":hover"))
+        setFavoriteOpen(false);
     }, 220);
   });
-  $favoritesPanel.on("mouseenter", () => window.clearTimeout(favoriteHoverTimer));
+  $favoritesPanel.on("mouseenter", () =>
+    window.clearTimeout(favoriteHoverTimer),
+  );
   $favoritesPanel.on("mouseleave", () => {
     if ($window.width() > mobileBreakpoint) setFavoriteOpen(false);
   });
   $("#comparePanel").on("click", "[data-compare-remove]", function (event) {
     event.stopPropagation();
     const removedId = String(this.dataset.compareRemove || "");
-    window.HNUI.storage.set("hn-compare", JSON.stringify(readCompareList().filter((id) => id !== removedId)));
+    window.HNUI.storage.set(
+      "hn-compare",
+      JSON.stringify(readCompareList().filter((id) => id !== removedId)),
+    );
     syncCompareButtons();
     setCompareOpen(true);
   });
@@ -1484,7 +1646,8 @@ $(function () {
   $compareWrap.on("mouseleave", () => {
     if ($window.width() <= mobileBreakpoint) return;
     compareHoverTimer = window.setTimeout(() => {
-      if (!$compareWrap.is(":hover") && !$comparePanel.is(":hover")) setCompareOpen(false);
+      if (!$compareWrap.is(":hover") && !$comparePanel.is(":hover"))
+        setCompareOpen(false);
     }, 220);
   });
   $comparePanel.on("mouseenter", () => window.clearTimeout(compareHoverTimer));
@@ -1536,28 +1699,59 @@ $(function () {
 
   $document.on("click", ".favorite", function () {
     const $button = $(this);
-    const productId = String($button.attr("data-product-id") || $button.closest(".product-card, .showcase-card, .rail-card").find(".add-cart[data-id]").first().attr("data-id") || "");
+    const productId = String(
+      $button.attr("data-product-id") ||
+        $button
+          .closest(".product-card, .showcase-card, .rail-card")
+          .find(".add-cart[data-id]")
+          .first()
+          .attr("data-id") ||
+        "",
+    );
     if (!productId) return;
-    cacheProductFromCard($button.closest(".product-card, .showcase-card, .rail-card")[0], productId);
+    cacheProductFromCard(
+      $button.closest(".product-card, .showcase-card, .rail-card")[0],
+      productId,
+    );
     const selected = readFavoriteList();
-    const next = selected.includes(productId) ? selected.filter((id) => id !== productId) : [...selected, productId];
+    const next = selected.includes(productId)
+      ? selected.filter((id) => id !== productId)
+      : [...selected, productId];
     window.HNUI.storage.set("hn-favorites", JSON.stringify(next));
     const isFavorite = next.includes(productId);
-    $button.attr("data-product-id", productId).toggleClass("active", isFavorite).attr("aria-pressed", String(isFavorite));
+    $button
+      .attr("data-product-id", productId)
+      .toggleClass("active", isFavorite)
+      .attr("aria-pressed", String(isFavorite));
     if (isFavorite) {
       pulseListControl(document.querySelector("#favoritesToggle"));
-      flyProductToControl(this, null, document.querySelector("#favoritesToggle"));
+      flyProductToControl(
+        this,
+        null,
+        document.querySelector("#favoritesToggle"),
+      );
     }
-    $button.attr("aria-label", isFavorite ? "حذف از علاقه‌مندی‌ها" : "افزودن به علاقه‌مندی‌ها");
-    $button.find("i").attr("class", isFavorite ? "bi bi-heart-fill" : "bi bi-heart");
+    $button.attr(
+      "aria-label",
+      isFavorite ? "حذف از علاقه‌مندی‌ها" : "افزودن به علاقه‌مندی‌ها",
+    );
+    $button
+      .find("i")
+      .attr("class", isFavorite ? "bi bi-heart-fill" : "bi bi-heart");
     $("#liveToast .toast-body").text(
       isFavorite
         ? "محصول به علاقه‌مندی‌ها اضافه شد."
         : "محصول از علاقه‌مندی‌ها حذف شد.",
     );
-    const toast = $("#searchToast").length ? $("#searchToast") : $("#liveToast");
+    const toast = $("#searchToast").length
+      ? $("#searchToast")
+      : $("#liveToast");
     if (toast.is("#searchToast")) {
-      toast.text(isFavorite ? "محصول به علاقه‌مندی‌ها اضافه شد." : "محصول از علاقه‌مندی‌ها حذف شد.");
+      toast.text(
+        isFavorite
+          ? "محصول به علاقه‌مندی‌ها اضافه شد."
+          : "محصول از علاقه‌مندی‌ها حذف شد.",
+      );
       toast.addClass("show");
       window.setTimeout(() => toast.removeClass("show"), 1800);
     } else bootstrap.Toast.getOrCreateInstance(toast[0]).show();
@@ -1688,7 +1882,9 @@ $(function () {
     if (!$image.length || !$cartButton.length) return;
     const productId = String($cartButton.data("id") || "");
     if (!$image.children(".favorite").length) {
-      $image.prepend(`<button class="favorite" type="button" data-product-id="${escapeHtml(productId)}" aria-label="افزودن به علاقه‌مندی‌ها" aria-pressed="false" title="علاقه‌مندی‌ها"><i class="bi bi-heart" aria-hidden="true"></i></button>`);
+      $image.prepend(
+        `<button class="favorite" type="button" data-product-id="${escapeHtml(productId)}" aria-label="افزودن به علاقه‌مندی‌ها" aria-pressed="false" title="علاقه‌مندی‌ها"><i class="bi bi-heart" aria-hidden="true"></i></button>`,
+      );
     }
     $image.children(".favorite").attr("data-product-id", productId);
     if (productId && !$image.find(".compare-trigger[data-product-id]").length) {
@@ -1697,7 +1893,10 @@ $(function () {
       );
     }
     let $actions = $image.children(".product-card-actions");
-    if (!$actions.length) $actions = $('<div class="product-card-actions" role="group" aria-label="عملیات محصول"></div>').appendTo($image);
+    if (!$actions.length)
+      $actions = $(
+        '<div class="product-card-actions" role="group" aria-label="عملیات محصول"></div>',
+      ).appendTo($image);
     $image.children(".favorite, .compare-trigger").appendTo($actions);
     $cartButton.attr({
       "aria-label": "افزودن به سبد خرید",
@@ -1712,10 +1911,14 @@ $(function () {
       );
   };
   const decorateProductCards = (root = document) => {
-    if (root.matches?.(".product-card, .showcase-card, .rail-card")) decorateProductCard(root);
-    root.querySelectorAll?.(".product-card, .showcase-card, .rail-card").forEach(decorateProductCard);
+    if (root.matches?.(".product-card, .showcase-card, .rail-card"))
+      decorateProductCard(root);
+    root
+      .querySelectorAll?.(".product-card, .showcase-card, .rail-card")
+      .forEach(decorateProductCard);
   };
-  const detailCardSelector = ".product-card, .showcase-card, .rail-card, .featured-main, .featured-side, .favorite-item-card, .compare-product-card";
+  const detailCardSelector =
+    ".product-card, .showcase-card, .rail-card, .featured-main, .featured-side, .favorite-item-card, .compare-product-card";
   const detailHrefForCard = (card) => {
     const productLink = [...card.querySelectorAll("a[href]")].find((link) => {
       const url = new URL(link.href, window.location.href);
@@ -1725,8 +1928,10 @@ $(function () {
     const cartButton = card.querySelector(".add-cart[data-id]");
     const productId = String(cartButton?.dataset.id || "");
     const productName = String(cartButton?.dataset.name || "");
-    const product = (window.HNProducts || []).find((item) =>
-      String(item.id) === productId || (productName && item.name === productName),
+    const product = (window.HNProducts || []).find(
+      (item) =>
+        String(item.id) === productId ||
+        (productName && item.name === productName),
     );
     return product ? `Product?id=${encodeURIComponent(product.id)}` : "";
   };
@@ -1744,19 +1949,36 @@ $(function () {
   decorateProductCards();
   markDetailCards();
   const productCardObserver = new MutationObserver((records) => {
-    records.forEach((record) => record.addedNodes.forEach((node) => {
-      if (node instanceof Element) {
-        decorateProductCards(node);
-        markDetailCards(node);
-        const parentCard = node.closest(detailCardSelector);
-        if (parentCard) markDetailCards(parentCard);
-      }
-    }));
+    records.forEach((record) =>
+      record.addedNodes.forEach((node) => {
+        if (node instanceof Element) {
+          decorateProductCards(node);
+          markDetailCards(node);
+          const parentCard = node.closest(detailCardSelector);
+          if (parentCard) markDetailCards(parentCard);
+        }
+      }),
+    );
   });
-  productCardObserver.observe(document.body, { childList: true, subtree: true });
+  productCardObserver.observe(document.body, {
+    childList: true,
+    subtree: true,
+  });
   document.addEventListener("click", (event) => {
-    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-    if (event.target.closest("a, button, input, select, textarea, summary, [role='button']")) return;
+    if (
+      event.button !== 0 ||
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.altKey
+    )
+      return;
+    if (
+      event.target.closest(
+        "a, button, input, select, textarea, summary, [role='button']",
+      )
+    )
+      return;
     if (String(window.getSelection?.() || "").trim()) return;
     const card = event.target.closest(detailCardSelector);
     const href = card?.dataset.productDetailUrl;
@@ -1769,7 +1991,10 @@ $(function () {
     event.stopPropagation();
     const productId = String(this.dataset.productId || "");
     if (!productId) return;
-    cacheProductFromCard(this.closest(".product-card, .showcase-card, .rail-card"), productId);
+    cacheProductFromCard(
+      this.closest(".product-card, .showcase-card, .rail-card"),
+      productId,
+    );
     const selected = readCompareList();
     const next = selected.includes(productId)
       ? selected.filter((id) => id !== productId)
@@ -1790,7 +2015,9 @@ $(function () {
       alt: product.name,
     });
     $("#quickViewTitle").text(product.name);
-    $("#quickViewCode").text(`${product.brand ? `${product.brand} · ` : ""}${product.code}`);
+    $("#quickViewCode").text(
+      `${product.brand ? `${product.brand} · ` : ""}${product.code}`,
+    );
     $("#quickViewPrice").text(`${faNumber(product.price)} تومان`);
     $(".quick-description").text(
       product.detail?.intro || "مشخصات این مدل را پیش از انتخاب بررسی کنید.",
@@ -1802,17 +2029,18 @@ $(function () {
     ].filter(([, value]) => value);
     $("#quickViewSpecs").html(
       quickSpecs
-        .map(([label, value]) => `<div><i class="bi bi-info-circle" aria-hidden="true"></i><span>${escapeHtml(label)}</span><b>${escapeHtml(value)}</b></div>`)
+        .map(
+          ([label, value]) =>
+            `<div><i class="bi bi-info-circle" aria-hidden="true"></i><span>${escapeHtml(label)}</span><b>${escapeHtml(value)}</b></div>`,
+        )
         .join(""),
     );
-    $("#interactiveViewer")
-      .removeClass("auto-spin zoomed")
-      .css({
-        "--rx": "0deg",
-        "--ry": "0deg",
-        "--scale": "1",
-        "--shine": "-55%",
-      });
+    $("#interactiveViewer").removeClass("auto-spin zoomed").css({
+      "--rx": "0deg",
+      "--ry": "0deg",
+      "--scale": "1",
+      "--shine": "-55%",
+    });
     quickViewModal.show();
   };
   $document.on("click", ".quick", function (event) {
@@ -1882,5 +2110,3 @@ $(function () {
     flyProductToControl(trigger, product, target);
   });
 });
-
-

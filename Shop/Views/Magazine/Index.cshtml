@@ -1,6 +1,8 @@
+@using System.Globalization
 @model PageModel
 @{
-    var posts = new[] {
+    var posts = new[]
+    {
         new { Slug = "choosing-work-drill", Branch = "buying", Topic = "tools", Category = "راهنمای خرید", Title = "راهنمای انتخاب دریل برای خانه و کارگاه", Summary = "از نوع کار و منبع تغذیه تا سه‌نظام و متعلقات؛ معیارهای انتخاب یک دریل متناسب با نیازتان.", Image = "tool-hammer-drill.png" },
         new { Slug = "multimeter-buying-guide", Branch = "buying", Topic = "measurement", Category = "راهنمای خرید", Title = "چطور مولتی‌متر مناسب انتخاب کنیم؟", Summary = "نوع اندازه‌گیری، رده ایمنی و کیفیت پراب‌ها را پیش از خرید مولتی‌متر بررسی کنید.", Image = "tool-multimeter-kit.png" },
         new { Slug = "soldering-station-basics", Branch = "education", Topic = "soldering", Category = "آموزش تخصصی", Title = "راهنمای انتخاب ایستگاه لحیم‌کاری", Summary = "توان، کنترل دما و نوع نوک هویه را با کارتان هماهنگ کنید.", Image = "tool-soldering-station.png" },
@@ -14,16 +16,23 @@
         new { Slug = "workshop-lighting-guide", Branch = "education", Topic = "lighting", Category = "آموزش تخصصی", Title = "روشنایی کارگاه را چطور بهتر برنامه‌ریزی کنیم؟", Summary = "ترکیب نور عمومی و موضعی، خیرگی و سایه را کاهش می‌دهد و دید محل کار را بهتر می‌کند.", Image = "tool-led-worklight.png" },
         new { Slug = "soldering-station-setup", Branch = "education", Topic = "soldering", Category = "آموزش تخصصی", Title = "آماده‌سازی میز تعمیر برد", Summary = "چیدمان ابزار، نور و تهویه مناسب، فرایند تعمیرات الکترونیک را ایمن‌تر و دقیق‌تر می‌کند.", Image = "tool-soldering-station.png" }
     };
-    var postCount = posts.Length.ToString("N0", System.Globalization.CultureInfo.InvariantCulture)
+    var postCount = posts.Length.ToString("N0", CultureInfo.InvariantCulture)
         .Replace("0", "۰").Replace("1", "۱").Replace("2", "۲").Replace("3", "۳").Replace("4", "۴")
         .Replace("5", "۵").Replace("6", "۶").Replace("7", "۷").Replace("8", "۸").Replace("9", "۹");
 }
 <header class="page-hero editorial-hero">
-    <img class="hero-image" src="~/Shop/images/heroes/hero-electrical-editorial.png" alt="مجله تخصصی برق و ابزار علی‌رضا زارع" />
+    <img class="hero-image" src="~/Shop/images/heroes/hero-electrical-editorial.png" alt="مجله تخصصی برق و ابزار علی‌رضا زارع"/>
     <div class="container">
         <nav class="article-breadcrumb" aria-label="مسیر صفحه">
-            <a class="breadcrumb-home" asp-controller="Home" asp-action="Index"><i class="bi bi-house-door"></i><span>خانه</span></a>
-            <span class="breadcrumb-step"><i class="breadcrumb-separator bi bi-chevron-left" aria-hidden="true"></i><span class="breadcrumb-current" aria-current="page"><i class="bi bi-journal-richtext"></i><span>مجله</span></span></span>
+            <a class="breadcrumb-home" asp-controller="Home" asp-action="Index">
+                <i class="bi bi-house-door"></i><span>خانه</span>
+            </a>
+            <span class="breadcrumb-step">
+                <i class="breadcrumb-separator bi bi-chevron-left" aria-hidden="true"></i>
+                <span class="breadcrumb-current" aria-current="page">
+                    <i class="bi bi-journal-richtext"></i><span>مجله</span>
+                </span>
+            </span>
         </nav>
         <span class="page-kicker">دانش فنی و راهنمای خرید</span>
         <h1>مجله برق و <em>ابزار</em></h1>
@@ -36,13 +45,21 @@
             <div class="journal-categories-scroll ui-scrollbar ui-scrollbar--navy">
                 <h2>دسته‌بندی مجله</h2>
                 <button type="button" class="is-active journal-all" data-journal-filter="all" aria-pressed="true">همه مطالب <span>@postCount</span></button>
-                <div class="journal-branch"><button type="button" data-journal-filter="buying" aria-pressed="false"><i class="bi bi-cart-check" aria-hidden="true"></i> راهنمای خرید</button></div>
-                <div class="journal-branch"><button type="button" data-journal-filter="education" aria-pressed="false"><i class="bi bi-mortarboard" aria-hidden="true"></i> آموزش تخصصی</button></div>
-                <div class="journal-branch"><button type="button" data-journal-filter="safety" aria-pressed="false"><i class="bi bi-shield-check" aria-hidden="true"></i> ایمنی و نگهداری</button></div>
+                <div class="journal-branch">
+                    <button type="button" data-journal-filter="buying" aria-pressed="false"><i class="bi bi-cart-check" aria-hidden="true"></i> راهنمای خرید</button>
+                </div>
+                <div class="journal-branch">
+                    <button type="button" data-journal-filter="education" aria-pressed="false"><i class="bi bi-mortarboard" aria-hidden="true"></i> آموزش تخصصی</button>
+                </div>
+                <div class="journal-branch">
+                    <button type="button" data-journal-filter="safety" aria-pressed="false"><i class="bi bi-shield-check" aria-hidden="true"></i> ایمنی و نگهداری</button>
+                </div>
             </div>
         </aside>
         <div class="journal-results">
-            <div class="journal-results-heading"><h2 id="archive-title" tabindex="-1">راهنماهای ابزار و تجهیزات</h2><span id="journal-count" class="journal-count-badge" role="status" aria-live="polite">@posts.Length مطلب</span></div>
+            <div class="journal-results-heading">
+                <h2 id="archive-title" tabindex="-1">راهنماهای ابزار و تجهیزات</h2><span id="journal-count" class="journal-count-badge" role="status" aria-live="polite">@posts.Length مطلب</span>
+            </div>
             <div class="journal-grid">
                 @{ var postIndex = 0; }
                 @foreach (var post in posts)
@@ -51,8 +68,19 @@
                     var readingMinutes = 4 + postIndex % 4;
                     <article class="journal-post" data-branch="@post.Branch" data-topic="@post.Topic">
                         <a asp-controller="Magazine" asp-action="Details" asp-route-slug="@post.Slug">
-                            <div class="journal-post-image"><img src="@Url.Content("~/Shop/images/products/" + post.Image)" alt="@post.Title" loading="lazy" /></div>
-                            <div class="journal-post-copy"><span class="journal-kicker">@post.Category</span><h3>@post.Title</h3><p>@post.Summary</p><div class="journal-post-meta"><span><i class="bi bi-calendar3"></i>@publishedAt.ToString("yyyy/MM/dd", System.Globalization.CultureInfo.InvariantCulture)</span><span><i class="bi bi-clock"></i>@readingMinutes دقیقه مطالعه</span></div><span class="journal-read">خواندن مطلب <i class="bi bi-arrow-left" aria-hidden="true"></i></span></div>
+                            <div class="journal-post-image">
+                                <img src="@Url.Content("~/Shop/images/products/" + post.Image)" alt="@post.Title" loading="lazy"/>
+                            </div>
+                            <div class="journal-post-copy">
+                                <span class="journal-kicker">@post.Category</span>
+                                <h3>@post.Title</h3>
+                                <p>@post.Summary</p>
+                                <div class="journal-post-meta">
+                                    <span>
+                                        <i class="bi bi-calendar3"></i>@publishedAt.ToString("yyyy/MM/dd", CultureInfo.InvariantCulture)
+                                    </span><span><i class="bi bi-clock"></i>@readingMinutes دقیقه مطالعه</span>
+                                </div><span class="journal-read">خواندن مطلب <i class="bi bi-arrow-left" aria-hidden="true"></i></span>
+                            </div>
                         </a>
                     </article>
                     postIndex++;
@@ -62,10 +90,12 @@
         </div>
     </section>
 </main>
+
 @section Styles {
-    <link href="~/Shop/css/pages/pages.css" rel="stylesheet" asp-append-version="true" />
-    <link href="~/Shop/css/pages/magazine-luxury.css" rel="stylesheet" asp-append-version="true" />
+    <link href="~/Shop/css/pages/pages.css" rel="stylesheet" asp-append-version="true"/>
+    <link href="~/Shop/css/pages/magazine-luxury.css" rel="stylesheet" asp-append-version="true"/>
 }
+
 @section Scripts {
     <script src="~/Shop/js/pages/magazine.js" asp-append-version="true"></script>
 }

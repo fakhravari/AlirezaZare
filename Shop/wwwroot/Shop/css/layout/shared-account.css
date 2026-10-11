@@ -235,7 +235,11 @@
 
 .shared-account-card .account-user {
   background:
-    radial-gradient(circle at 8% 10%, color-mix(in srgb, var(--color-gold) 16%, transparent), transparent 34%),
+    radial-gradient(
+      circle at 8% 10%,
+      color-mix(in srgb, var(--color-gold) 16%, transparent),
+      transparent 34%
+    ),
     linear-gradient(135deg, var(--color-blue), var(--color-navy));
 }
 

@@ -1,6 +1,10 @@
 @media (max-width: 991px) {
-  .mobile-menu .offcanvas-header { padding: 16px 20px; }
-  .mobile-menu .offcanvas-body { padding-top: 7px; }
+  .mobile-menu .offcanvas-header {
+    padding: 16px 20px;
+  }
+  .mobile-menu .offcanvas-body {
+    padding-top: 7px;
+  }
   .mobile-menu .offcanvas-body > a,
   .mobile-menu .mobile-category-toggle,
   .mobile-menu .mobile-category > button {
@@ -17,6 +21,14 @@
     font-size: 14px;
   }
 
-  .mobile-menu .mobile-submenu { padding-top: 4px; padding-bottom: 8px; }
-  .mobile-menu .mobile-submenu a { min-height: 38px; padding-top: 7px; padding-bottom: 7px; font-size: 13px; }
+  .mobile-menu .mobile-submenu {
+    padding-top: 4px;
+    padding-bottom: 8px;
+  }
+  .mobile-menu .mobile-submenu a {
+    min-height: 38px;
+    padding-top: 7px;
+    padding-bottom: 7px;
+    font-size: 13px;
+  }
 }

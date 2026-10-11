@@ -25,9 +25,11 @@ body .site-pagination {
   border: 1px solid #e1d5c3;
   border-radius: 16px;
   background: #fffdf8;
-  box-shadow: 0 8px 24px rgba(16, 39, 61, .05);
+  box-shadow: 0 8px 24px rgba(16, 39, 61, 0.05);
 }
-body .site-pagination[hidden] { display: none; }
+body .site-pagination[hidden] {
+  display: none;
+}
 body .site-pagination button {
   display: inline-flex;
   align-items: center;
@@ -42,9 +44,16 @@ body .site-pagination button {
   color: #18354e;
   box-shadow: none;
   cursor: pointer;
-  transition: background .2s, color .2s, border-color .2s;
+  transition:
+    background 0.2s,
+    color 0.2s,
+    border-color 0.2s;
 }
-body .site-pagination button:hover:not(:disabled) { background: #f3eadb; border-color: #dcc69f; transform: none; }
+body .site-pagination button:hover:not(:disabled) {
+  background: #f3eadb;
+  border-color: #dcc69f;
+  transform: none;
+}
 body .site-pagination button[aria-current="page"],
 body .site-pagination button.page-number.active,
 body .site-pagination button[aria-current="page"]:hover,
@@ -54,15 +63,50 @@ body .site-pagination button.page-number.active:hover {
   color: #f4d89d;
   box-shadow: 0 4px 10px #15334d18;
 }
-body .site-pagination button:disabled { opacity: .35; cursor: default; }
-body .site-pagination button:focus-visible { outline: 2px solid #ad8649; outline-offset: 3px; }
-body .site-pagination > span { display: grid; min-width: 20px; min-height: 44px; place-items: center; color: #968265; }
-body .journal-paging.site-pagination { margin-top: 28px; }
-body .orders-pagination { justify-content: center; flex-direction: column; }
-body .orders-pagination p, body .blog-page-status { margin: 0; color: #73808c; text-align: center; }
-@media (max-width: 575px) {
-  body .site-pagination { gap: 4px; padding: 6px; border-radius: 13px; }
-  body .site-pagination button { min-width: 40px; padding-inline: 10px; }
-  body .site-pagination .page-step span { display: inline; }
+body .site-pagination button:disabled {
+  opacity: 0.35;
+  cursor: default;
 }
-@media (prefers-reduced-motion: reduce) { body .site-pagination button { transition: none; } }
+body .site-pagination button:focus-visible {
+  outline: 2px solid #ad8649;
+  outline-offset: 3px;
+}
+body .site-pagination > span {
+  display: grid;
+  min-width: 20px;
+  min-height: 44px;
+  place-items: center;
+  color: #968265;
+}
+body .journal-paging.site-pagination {
+  margin-top: 28px;
+}
+body .orders-pagination {
+  justify-content: center;
+  flex-direction: column;
+}
+body .orders-pagination p,
+body .blog-page-status {
+  margin: 0;
+  color: #73808c;
+  text-align: center;
+}
+@media (max-width: 575px) {
+  body .site-pagination {
+    gap: 4px;
+    padding: 6px;
+    border-radius: 13px;
+  }
+  body .site-pagination button {
+    min-width: 40px;
+    padding-inline: 10px;
+  }
+  body .site-pagination .page-step span {
+    display: inline;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  body .site-pagination button {
+    transition: none;
+  }
+}

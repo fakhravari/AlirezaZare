@@ -8,11 +8,17 @@
 }
 
 .ui-surface-card--interactive {
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast);
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast);
 }
 
 .ui-surface-card--interactive:hover {
-  border-color: var(--widget-border-strong, var(--color-card-border-hover)) !important;
+  border-color: var(
+    --widget-border-strong,
+    var(--color-card-border-hover)
+  ) !important;
   box-shadow: var(--shadow-card-hover);
 }
 
@@ -46,7 +52,9 @@
 .contact-submit:focus-visible,
 .form-confirm-accept:focus-visible {
   outline: 0;
-  box-shadow: 0 0 0 4px var(--action-submit-ring), var(--action-submit-shadow);
+  box-shadow:
+    0 0 0 4px var(--action-submit-ring),
+    var(--action-submit-shadow);
 }
 
 /* Shared success-message presentation for the contact form. */
@@ -103,7 +111,8 @@
 
 .ui-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: var(--ui-scroll-thumb, #b89a64) var(--ui-scroll-track, transparent);
+  scrollbar-color: var(--ui-scroll-thumb, #b89a64)
+    var(--ui-scroll-track, transparent);
   scrollbar-gutter: stable;
   overscroll-behavior-y: contain;
 }
@@ -117,7 +126,7 @@
   --ui-scroll-thumb-border: 1px solid transparent;
   --ui-scroll-thumb: linear-gradient(180deg, #1b4267, #0e263f) padding-box;
   --ui-scroll-thumb-hover: linear-gradient(180deg, #285274, #173653) padding-box;
-  --ui-scroll-thumb-shadow: 0 1px 4px rgba(14, 38, 63, .18);
+  --ui-scroll-thumb-shadow: 0 1px 4px rgba(14, 38, 63, 0.18);
   scrollbar-color: #173653 transparent;
 }
 
@@ -180,18 +189,31 @@
   font-weight: 700;
   line-height: 1.5;
   text-decoration: none;
-  transition: border-color .2s ease, background-color .2s ease, box-shadow .2s ease, transform .2s ease;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
 }
 
-.ui-inline-action > i:first-child { color: #a57b40; font-size: 15px; }
-.ui-inline-action > i:last-child { color: #94713d; font-size: 12px; transition: transform .2s ease; }
+.ui-inline-action > i:first-child {
+  color: #a57b40;
+  font-size: 15px;
+}
+.ui-inline-action > i:last-child {
+  color: #94713d;
+  font-size: 12px;
+  transition: transform 0.2s ease;
+}
 
 .ui-inline-action:hover {
   border-color: #b7955c;
   background: #fffaf2;
   color: #5f411c;
-  box-shadow: 0 6px 14px -10px rgba(15, 39, 70, .55);
+  box-shadow: 0 6px 14px -10px rgba(15, 39, 70, 0.55);
   transform: translateY(-1px);
 }
 
-.ui-inline-action:hover > i:last-child { transform: translateX(-2px); }
+.ui-inline-action:hover > i:last-child {
+  transform: translateX(-2px);
+}

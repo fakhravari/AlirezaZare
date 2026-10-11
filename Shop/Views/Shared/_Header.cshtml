@@ -1,375 +1,419 @@
 ﻿<nav class="navbar navbar-expand-lg navbar-dark fixed-top" id="mainNav">
-    <div class="home-header-top" aria-label="جست‌وجو و پشتیبانی فروشگاه">
-        <div class="home-header-support">
-            <span class="home-header-support-icon"><i class="bi bi-telephone"></i></span>
-            <span><small>پشتیبانی ۲۴ ساعته</small><strong>۰۲۱ ۶۶۷۳ ۲۸۳۶</strong></span>
-        </div>
-        <form class="home-header-search" action="Search" method="get" role="search">
-            <button type="submit" aria-label="جست‌وجو"><i class="bi bi-search" aria-hidden="true"></i></button>
-            <input id="headerSearchInput" name="q" type="search" placeholder="نام محصول، برند یا دسته را جستجو کنید..." aria-label="جستجوی محصول" aria-controls="headerSearchSuggestions" aria-autocomplete="list" autocomplete="off"/>
-            <div class="header-search-suggestions" id="headerSearchSuggestions" role="region" aria-label="پیشنهادهای جستجو" hidden></div>
-        </form>
+<div class="home-header-top" aria-label="جست‌وجو و پشتیبانی فروشگاه">
+    <div class="home-header-support">
+        <span class="home-header-support-icon">
+            <i class="bi bi-telephone"></i>
+        </span>
+        <span>
+            <small>پشتیبانی ۲۴ ساعته</small><strong>۰۲۱ ۶۶۷۳ ۲۸۳۶</strong>
+        </span>
     </div>
-    <div class="container">
-        <a class="navbar-brand brand" asp-controller="Home" asp-action="Index" aria-label="رفتن به صفحهٔ اصلی">
-            <span>ع</span> علی‌رضا زارع
-        </a>
-        <button class="navbar-toggler shadow-none border-0"
-                type="button"
-                data-bs-toggle="offcanvas"
-                data-bs-target="#mobileMenu"
-                aria-label="باز کردن منو">
-            <i class="bi bi-list"></i>
+    <form class="home-header-search" action="Search" method="get" role="search">
+        <button type="submit" aria-label="جست‌وجو">
+            <i class="bi bi-search" aria-hidden="true"></i>
         </button>
-        <div class="home-nav-groups">
-            <div class="home-nav-menu-group">
-        <div class="collapse navbar-collapse">
-            <ul class="navbar-nav mx-auto gap-lg-2">
-                @if (ViewData["HeaderVariant"]?.ToString() == "inner")
-                {
-                    <li class="nav-item dropdown category-nav-dropdown">
-                        <button class="nav-link dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-grid nav-menu-icon" aria-hidden="true"></i><span>دسته‌بندی قطعات</span>
-                        </button>
-                        <div class="dropdown-menu category-nav-mega" aria-label="دسته‌بندی محصولات">
-                            <aside class="category-mega-sidebar" aria-label="گروه‌های محصول">
-                                <button type="button" data-mega-category="tools"><i class="bi bi-lightning-charge"></i><span>ابزار برقی</span><i class="bi bi-chevron-left"></i></button>
-                                <button type="button" data-mega-category="hand-tools"><i class="bi bi-tools"></i><span>ابزار دستی</span><i class="bi bi-chevron-left"></i></button>
-                                <button type="button" data-mega-category="components"><i class="bi bi-cpu"></i><span>قطعات الکترونیکی</span><i class="bi bi-chevron-left"></i></button>
-                                <button type="button" data-mega-category="cables"><i class="bi bi-plug"></i><span>سیم، کابل و اتصالات</span><i class="bi bi-chevron-left"></i></button>
-                                <button type="button" data-mega-category="lighting"><i class="bi bi-lightbulb"></i><span>روشنایی و لامپ</span><i class="bi bi-chevron-left"></i></button>
-                                <button type="button" data-mega-category="switchgear"><i class="bi bi-toggle-on"></i><span>کلید و تجهیزات برق</span><i class="bi bi-chevron-left"></i></button>
-                                <button type="button" data-mega-category="safety"><i class="bi bi-shield-check"></i><span>ایمنی و حفاظت</span><i class="bi bi-chevron-left"></i></button>
-                                <button type="button" data-mega-category="measurement"><i class="bi bi-speedometer2"></i><span>ابزار اندازه‌گیری</span><i class="bi bi-chevron-left"></i></button>
-                            </aside>
-                            <div class="category-mega-content">
-                                <div class="category-mega-panels" aria-live="polite"><p class="category-mega-hint">برای دیدن زیرشاخه‌ها، یک گروه را انتخاب کنید.</p></div>
-                                <a class="category-mega-all" href="Search">مشاهدهٔ همهٔ محصولات <i class="bi bi-arrow-left"></i></a>
-                            </div>
-                        </div>
-                    </li>
-                }
-                <li class="nav-item">
-                    <a class="nav-link" href="Search"><i class="bi bi-shop nav-menu-icon" aria-hidden="true"></i><span>فروشگاه</span></a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="Home/Index#bestsellers"><i class="bi bi-stars nav-menu-icon" aria-hidden="true"></i><span>پرفروش‌ها</span></a>
-                </li>
-                <li class="nav-item dropdown brand-dropdown">
-                    <a class="nav-link dropdown-toggle"
-                       href="Home/Index#brands"
-                       role="button"
-                       data-bs-toggle="dropdown"
-                       aria-expanded="false">
-                        <i class="bi bi-award nav-menu-icon" aria-hidden="true"></i><span>برند</span>
-                    </a>
-                    <ul class="dropdown-menu brand-menu"
-                        style="
+        <input id="headerSearchInput" name="q" type="search" placeholder="نام محصول، برند یا دسته را جستجو کنید..." aria-label="جستجوی محصول" aria-controls="headerSearchSuggestions" aria-autocomplete="list" autocomplete="off"/>
+        <div class="header-search-suggestions" id="headerSearchSuggestions" role="region" aria-label="پیشنهادهای جستجو" hidden></div>
+    </form>
+</div>
+<div class="container">
+<a class="navbar-brand brand" asp-controller="Home" asp-action="Index" aria-label="رفتن به صفحهٔ اصلی">
+    <span>ع</span> علی‌رضا زارع
+</a>
+<button class="navbar-toggler shadow-none border-0"
+        type="button"
+        data-bs-toggle="offcanvas"
+        data-bs-target="#mobileMenu"
+        aria-label="باز کردن منو">
+    <i class="bi bi-list"></i>
+</button>
+<div class="home-nav-groups">
+<div class="home-nav-menu-group">
+<div class="collapse navbar-collapse">
+<ul class="navbar-nav mx-auto gap-lg-2">
+@if (ViewData["HeaderVariant"]?.ToString() == "inner")
+{
+    <li class="nav-item dropdown category-nav-dropdown">
+        <button class="nav-link dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="bi bi-grid nav-menu-icon" aria-hidden="true"></i><span>دسته‌بندی قطعات</span>
+        </button>
+        <div class="dropdown-menu category-nav-mega" aria-label="دسته‌بندی محصولات">
+            <aside class="category-mega-sidebar" aria-label="گروه‌های محصول">
+                <button type="button" data-mega-category="tools">
+                    <i class="bi bi-lightning-charge"></i><span>ابزار برقی</span><i class="bi bi-chevron-left"></i>
+                </button>
+                <button type="button" data-mega-category="hand-tools">
+                    <i class="bi bi-tools"></i><span>ابزار دستی</span><i class="bi bi-chevron-left"></i>
+                </button>
+                <button type="button" data-mega-category="components">
+                    <i class="bi bi-cpu"></i><span>قطعات الکترونیکی</span><i class="bi bi-chevron-left"></i>
+                </button>
+                <button type="button" data-mega-category="cables">
+                    <i class="bi bi-plug"></i><span>سیم، کابل و اتصالات</span><i class="bi bi-chevron-left"></i>
+                </button>
+                <button type="button" data-mega-category="lighting">
+                    <i class="bi bi-lightbulb"></i><span>روشنایی و لامپ</span><i class="bi bi-chevron-left"></i>
+                </button>
+                <button type="button" data-mega-category="switchgear">
+                    <i class="bi bi-toggle-on"></i><span>کلید و تجهیزات برق</span><i class="bi bi-chevron-left"></i>
+                </button>
+                <button type="button" data-mega-category="safety">
+                    <i class="bi bi-shield-check"></i><span>ایمنی و حفاظت</span><i class="bi bi-chevron-left"></i>
+                </button>
+                <button type="button" data-mega-category="measurement">
+                    <i class="bi bi-speedometer2"></i><span>ابزار اندازه‌گیری</span><i class="bi bi-chevron-left"></i>
+                </button>
+            </aside>
+            <div class="category-mega-content">
+                <div class="category-mega-panels" aria-live="polite">
+                    <p class="category-mega-hint">برای دیدن زیرشاخه‌ها، یک گروه را انتخاب کنید.</p>
+                </div>
+                <a class="category-mega-all" href="Search">مشاهدهٔ همهٔ محصولات <i class="bi bi-arrow-left"></i></a>
+            </div>
+        </div>
+    </li>
+}
+<li class="nav-item">
+    <a class="nav-link" href="Search">
+        <i class="bi bi-shop nav-menu-icon" aria-hidden="true"></i><span>فروشگاه</span>
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="Home/Index#bestsellers">
+        <i class="bi bi-stars nav-menu-icon" aria-hidden="true"></i><span>پرفروش‌ها</span>
+    </a>
+</li>
+<li class="nav-item dropdown brand-dropdown">
+<a class="nav-link dropdown-toggle"
+   href="Home/Index#brands"
+   role="button"
+   data-bs-toggle="dropdown"
+   aria-expanded="false">
+    <i class="bi bi-award nav-menu-icon" aria-hidden="true"></i><span>برند</span>
+</a>
+<ul class="dropdown-menu brand-menu"
+    style="
                         width: min(1120px, calc(100vw - 48px)) !important;
                         min-height: 390px !important;
                         display: none;
                         grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
                         ">
-                        <li>
-                            <a class="dropdown-item" href="Home/Index#brands">
-                                <span class="brand-menu-icon">
-                                    <i class="bi bi-shield-plus" aria-hidden="true"></i>
-                                </span>
-                                <span>
-                                    <strong>
-                                        بوش
-                                    </strong><small>BOSCH</small>
-                                </span>
-                                <i class="bi bi-chevron-left">
-                                </i>
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="Home/Index#brands">
-                                <span class="brand-menu-icon">
-                                    <i class="bi bi-gem" aria-hidden="true"></i>
-                                </span>
-                                <span>
-                                    <strong>
-                                        ماکیتا
-                                    </strong><small>MAKITA</small>
-                                </span>
-                                <i class="bi bi-chevron-left">
-                                </i>
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="Home/Index#brands">
-                                <span class="brand-menu-icon">
-                                    <i class="bi bi-shield-lock" aria-hidden="true"></i>
-                                </span>
-                                <span>
-                                    <strong>دیوالت</strong><small>DEWALT</small>
-                                </span>
-                                <i class="bi bi-chevron-left">
-                                </i>
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="Home/Index#brands">
-                                <span class="brand-menu-icon">
-                                    <i class="bi bi-trophy" aria-hidden="true"></i>
-                                </span>
-                                <span>
-                                    <strong>رونیکس</strong><small>RONIX</small>
-                                </span>
-                                <i class="bi bi-chevron-left">
-                                </i>
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="Home/Index#brands">
-                                <span class="brand-menu-icon">
-                                    <i class="bi bi-arrow-left-right" aria-hidden="true"></i>
-                                </span>
-                                <span>
-                                    <strong>
-                                        توسن
-                                    </strong><small>TOSAN</small>
-                                </span>
-                                <i class="bi bi-chevron-left">
-                                </i>
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="Home/Index#brands">
-                                <span class="brand-menu-icon">
-                                    <i class="bi bi-stars" aria-hidden="true"></i>
-                                </span>
-                                <span>
-                                    <strong>
-                                        یونی‌تی
-                                    </strong><small>UNI-T</small>
-                                </span>
-                                <i class="bi bi-chevron-left">
-                                </i>
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="Home/Index#brands">
-                                <span class="brand-menu-icon">
-                                    <i class="bi bi-sun" aria-hidden="true"></i>
-                                </span>
-                                <span>
-                                    <strong>
-                                        فلوک
-                                    </strong><small>FLUKE</small>
-                                </span>
-                                <i class="bi bi-chevron-left">
-                                </i>
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="Home/Index#brands">
-                                <span class="brand-menu-icon">
-                                    <i class="bi bi-tools" aria-hidden="true"></i>
-                                </span>
-                                <span>
-                                    <strong>مستک</strong><small>MASTECH</small>
-                                </span>
-                                <i class="bi bi-chevron-left">
-                                </i>
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="Home/Index#brands">
-                                <span class="brand-menu-icon">
-                                    <i class="bi bi-circle" aria-hidden="true"></i>
-                                </span>
-                                <span>
-                                    <strong>کیوریتسو</strong><small>KYORITSU</small>
-                                </span>
-                                <i class="bi bi-chevron-left">
-                                </i>
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="Home/Index#brands">
-                                <span class="brand-menu-icon">
-                                    <i class="bi bi-thermometer-half" aria-hidden="true"></i>
-                                </span>
-                                <span>
-                                    <strong>یوهوا</strong><small>YIHUA</small>
-                                </span>
-                                <i class="bi bi-chevron-left">
-                                </i>
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="Home/Index#brands">
-                                <span class="brand-menu-icon">
-                                    <i class="bi bi-calculator" aria-hidden="true"></i>
-                                </span>
-                                <span>
-                                        <strong>هاکو</strong><small>HAKKO</small>
-                                </span>
-                                <i class="bi bi-chevron-left">
-                                </i>
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="Home/Index#brands">
-                                <span class="brand-menu-icon">
-                                    <i class="bi bi-compass" aria-hidden="true"></i>
-                                </span>
-                                <span>
-                                        <strong>ولر</strong><small>WELLER</small>
-                                </span>
-                                <i class="bi bi-chevron-left">
-                                </i>
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="Home/Index#brands">
-                                <span class="brand-menu-icon">
-                                    <i class="bi bi-globe2" aria-hidden="true"></i>
-                                </span>
-                                <span>
-                                        <strong>فیلیپس</strong><small>PHILIPS</small>
-                                </span>
-                                <i class="bi bi-chevron-left">
-                                </i>
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="Home/Index#brands">
-                                <span class="brand-menu-icon">
-                                    <i class="bi bi-wind" aria-hidden="true"></i>
-                                </span>
-                                <span>
-                                        <strong>وایها</strong><small>WIHA</small>
-                                </span>
-                                <i class="bi bi-chevron-left">
-                                </i>
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="Home/Index#brands">
-                                <span class="brand-menu-icon">
-                                    <i class="bi bi-diamond" aria-hidden="true"></i>
-                                </span>
-                                <span>
-                                        <strong>کنیپکس</strong><small>KNIPEX</small>
-                                </span>
-                                <i class="bi bi-chevron-left">
-                                </i>
-                            </a>
-                        </li>
-                        <li class="brand-menu-footer">
-                            <a href="Home/Index#brands">
-                                <span>
-                                    مشاهده همه برندها
-                                </span><i class="bi bi-arrow-left"></i>
-                            </a>
-                            <span class="brand-trust">
-                                <i class="bi bi-shield-check">
-                                </i>
-                                <span>
-                                    <strong>
-                                        برندهای ابزار
-                                    </strong><small>ابزار و تجهیزات برق</small>
-                                </span>
-                            </span>
-                        </li>
-                    </ul>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="Magazine"><i class="bi bi-journal-text nav-menu-icon" aria-hidden="true"></i><span>مجله فنی</span></a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="About"><i class="bi bi-info-circle nav-menu-icon" aria-hidden="true"></i><span>درباره ما</span></a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="Contact"><i class="bi bi-telephone nav-menu-icon" aria-hidden="true"></i><span>تماس با ما</span></a>
-                </li>
-            </ul>
-        </div>
-            </div>
-            <div class="home-nav-action-group">
-        <div class="nav-tools">
-            <div class="account-wrap" id="accountWrap">
-                <button class="account-btn logged-out"
-                        id="accountToggle"
-                        type="button"
-                        aria-label="حساب کاربری"
-                        aria-expanded="false"
-                        aria-controls="accountPanel">
-                    <i class="bi bi-person">
-                    </i>
-                    <span class="account-label">
-                        ورود / ثبت‌نام
-                    </span><i class="bi bi-chevron-down"></i>
-                </button>
-                <div class="account-panel shared-account-card" id="accountPanel">
-                    <div class="account-user">
-                        <div class="account-avatar">م</div>
-                        <div>
-                            <strong>
-                                محمدحسین فخراوری
-                            </strong><small>مشتری کمپانی علی‌رضا زارع</small>
-                        </div>
-                        <i class="bi bi-chevron-left"></i>
+<li>
+    <a class="dropdown-item" href="Home/Index#brands">
+        <span class="brand-menu-icon">
+            <i class="bi bi-shield-plus" aria-hidden="true"></i>
+        </span>
+        <span>
+            <strong>
+                بوش
+            </strong><small>BOSCH</small>
+        </span>
+        <i class="bi bi-chevron-left">
+        </i>
+    </a>
+</li>
+<li>
+    <a class="dropdown-item" href="Home/Index#brands">
+        <span class="brand-menu-icon">
+            <i class="bi bi-gem" aria-hidden="true"></i>
+        </span>
+        <span>
+            <strong>
+                ماکیتا
+            </strong><small>MAKITA</small>
+        </span>
+        <i class="bi bi-chevron-left">
+        </i>
+    </a>
+</li>
+<li>
+    <a class="dropdown-item" href="Home/Index#brands">
+        <span class="brand-menu-icon">
+            <i class="bi bi-shield-lock" aria-hidden="true"></i>
+        </span>
+        <span>
+            <strong>دیوالت</strong><small>DEWALT</small>
+        </span>
+        <i class="bi bi-chevron-left">
+        </i>
+    </a>
+</li>
+<li>
+    <a class="dropdown-item" href="Home/Index#brands">
+        <span class="brand-menu-icon">
+            <i class="bi bi-trophy" aria-hidden="true"></i>
+        </span>
+        <span>
+            <strong>رونیکس</strong><small>RONIX</small>
+        </span>
+        <i class="bi bi-chevron-left">
+        </i>
+    </a>
+</li>
+<li>
+    <a class="dropdown-item" href="Home/Index#brands">
+        <span class="brand-menu-icon">
+            <i class="bi bi-arrow-left-right" aria-hidden="true"></i>
+        </span>
+        <span>
+            <strong>
+                توسن
+            </strong><small>TOSAN</small>
+        </span>
+        <i class="bi bi-chevron-left">
+        </i>
+    </a>
+</li>
+<li>
+    <a class="dropdown-item" href="Home/Index#brands">
+        <span class="brand-menu-icon">
+            <i class="bi bi-stars" aria-hidden="true"></i>
+        </span>
+        <span>
+            <strong>
+                یونی‌تی
+            </strong><small>UNI-T</small>
+        </span>
+        <i class="bi bi-chevron-left">
+        </i>
+    </a>
+</li>
+<li>
+    <a class="dropdown-item" href="Home/Index#brands">
+        <span class="brand-menu-icon">
+            <i class="bi bi-sun" aria-hidden="true"></i>
+        </span>
+        <span>
+            <strong>
+                فلوک
+            </strong><small>FLUKE</small>
+        </span>
+        <i class="bi bi-chevron-left">
+        </i>
+    </a>
+</li>
+<li>
+    <a class="dropdown-item" href="Home/Index#brands">
+        <span class="brand-menu-icon">
+            <i class="bi bi-tools" aria-hidden="true"></i>
+        </span>
+        <span>
+            <strong>مستک</strong><small>MASTECH</small>
+        </span>
+        <i class="bi bi-chevron-left">
+        </i>
+    </a>
+</li>
+<li>
+    <a class="dropdown-item" href="Home/Index#brands">
+        <span class="brand-menu-icon">
+            <i class="bi bi-circle" aria-hidden="true"></i>
+        </span>
+        <span>
+            <strong>کیوریتسو</strong><small>KYORITSU</small>
+        </span>
+        <i class="bi bi-chevron-left">
+        </i>
+    </a>
+</li>
+<li>
+    <a class="dropdown-item" href="Home/Index#brands">
+        <span class="brand-menu-icon">
+            <i class="bi bi-thermometer-half" aria-hidden="true"></i>
+        </span>
+        <span>
+            <strong>یوهوا</strong><small>YIHUA</small>
+        </span>
+        <i class="bi bi-chevron-left">
+        </i>
+    </a>
+</li>
+<li>
+    <a class="dropdown-item" href="Home/Index#brands">
+        <span class="brand-menu-icon">
+            <i class="bi bi-calculator" aria-hidden="true"></i>
+        </span>
+        <span>
+            <strong>هاکو</strong><small>HAKKO</small>
+        </span>
+        <i class="bi bi-chevron-left">
+        </i>
+    </a>
+</li>
+<li>
+    <a class="dropdown-item" href="Home/Index#brands">
+        <span class="brand-menu-icon">
+            <i class="bi bi-compass" aria-hidden="true"></i>
+        </span>
+        <span>
+            <strong>ولر</strong><small>WELLER</small>
+        </span>
+        <i class="bi bi-chevron-left">
+        </i>
+    </a>
+</li>
+<li>
+    <a class="dropdown-item" href="Home/Index#brands">
+        <span class="brand-menu-icon">
+            <i class="bi bi-globe2" aria-hidden="true"></i>
+        </span>
+        <span>
+            <strong>فیلیپس</strong><small>PHILIPS</small>
+        </span>
+        <i class="bi bi-chevron-left">
+        </i>
+    </a>
+</li>
+<li>
+    <a class="dropdown-item" href="Home/Index#brands">
+        <span class="brand-menu-icon">
+            <i class="bi bi-wind" aria-hidden="true"></i>
+        </span>
+        <span>
+            <strong>وایها</strong><small>WIHA</small>
+        </span>
+        <i class="bi bi-chevron-left">
+        </i>
+    </a>
+</li>
+<li>
+    <a class="dropdown-item" href="Home/Index#brands">
+        <span class="brand-menu-icon">
+            <i class="bi bi-diamond" aria-hidden="true"></i>
+        </span>
+        <span>
+            <strong>کنیپکس</strong><small>KNIPEX</small>
+        </span>
+        <i class="bi bi-chevron-left">
+        </i>
+    </a>
+</li>
+<li class="brand-menu-footer">
+    <a href="Home/Index#brands">
+        <span>
+            مشاهده همه برندها
+        </span><i class="bi bi-arrow-left"></i>
+    </a>
+    <span class="brand-trust">
+        <i class="bi bi-shield-check">
+        </i>
+        <span>
+            <strong>
+                برندهای ابزار
+            </strong><small>ابزار و تجهیزات برق</small>
+        </span>
+    </span>
+</li>
+</ul>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="Magazine">
+        <i class="bi bi-journal-text nav-menu-icon" aria-hidden="true"></i><span>مجله فنی</span>
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="About">
+        <i class="bi bi-info-circle nav-menu-icon" aria-hidden="true"></i><span>درباره ما</span>
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="Contact">
+        <i class="bi bi-telephone nav-menu-icon" aria-hidden="true"></i><span>تماس با ما</span>
+    </a>
+</li>
+</ul>
+</div>
+</div>
+<div class="home-nav-action-group">
+    <div class="nav-tools">
+        <div class="account-wrap" id="accountWrap">
+            <button class="account-btn logged-out"
+                    id="accountToggle"
+                    type="button"
+                    aria-label="حساب کاربری"
+                    aria-expanded="false"
+                    aria-controls="accountPanel">
+                <i class="bi bi-person">
+                </i>
+                <span class="account-label">
+                    ورود / ثبت‌نام
+                </span><i class="bi bi-chevron-down"></i>
+            </button>
+            <div class="account-panel shared-account-card" id="accountPanel">
+                <div class="account-user">
+                    <div class="account-avatar">م</div>
+                    <div>
+                        <strong>
+                            محمدحسین فخراوری
+                        </strong><small>مشتری کمپانی علی‌رضا زارع</small>
                     </div>
-                    <nav class="account-links" aria-label="منوی حساب کاربری">
-                        <a href="Profile">
-                            <i class="bi bi-person"></i><span>پروفایل من</span>
-                        </a>
-                        <a href="Profile/Orders">
-                            <i class="bi bi-bag"></i>
-                            <span>
-                                سفارش‌های من
-                            </span><b>۰</b>
-                        </a>
-                        <a href="Profile/Addresses">
-                            <i class="bi bi-signpost-2"></i><span>آدرس‌های من</span>
-                        </a>
-                        <a href="Profile/Favorites">
-                            <i class="bi bi-heart">
-                            </i><span>لیست علاقه‌مندی‌ها</span>
-                        </a>
-                        <a class="account-logout" href="#">
-                            <i class="bi bi-box-arrow-left">
-                            </i><span>خروج از حساب کاربری</span>
-                        </a>
-                    </nav>
+                    <i class="bi bi-chevron-left"></i>
                 </div>
+                <nav class="account-links" aria-label="منوی حساب کاربری">
+                    <a href="Profile">
+                        <i class="bi bi-person"></i><span>پروفایل من</span>
+                    </a>
+                    <a href="Profile/Orders">
+                        <i class="bi bi-bag"></i>
+                        <span>
+                            سفارش‌های من
+                        </span><b>۰</b>
+                    </a>
+                    <a href="Profile/Addresses">
+                        <i class="bi bi-signpost-2"></i><span>آدرس‌های من</span>
+                    </a>
+                    <a href="Profile/Favorites">
+                        <i class="bi bi-heart">
+                        </i><span>لیست علاقه‌مندی‌ها</span>
+                    </a>
+                    <a class="account-logout" href="#">
+                        <i class="bi bi-box-arrow-left">
+                        </i><span>خروج از حساب کاربری</span>
+                    </a>
+                </nav>
             </div>
-            <a class="mobile-header-search" href="Search" aria-label="جستجوی محصولات" title="جستجوی محصولات">
-                <i class="bi bi-search" aria-hidden="true"></i>
-            </a>
-            <div class="nav-actions" aria-label="خرید، مقایسه و علاقه‌مندی‌ها">
-                <div class="favorites-wrap" id="favoritesWrap">
-                    <a class="nav-shortcut favorites-toggle" id="favoritesToggle" href="Profile/Favorites" aria-label="علاقه‌مندی‌ها" aria-expanded="false" aria-controls="favoritesPanel" title="علاقه‌مندی‌ها">
-                        <i class="bi bi-heart" aria-hidden="true"></i>
-                        <b class="nav-count" id="favoritesCount" aria-hidden="true">۰</b>
-                    </a>
-                    <section class="compare-panel favorites-panel" id="favoritesPanel" aria-label="فهرست علاقه‌مندی‌ها" aria-hidden="true">
-                        <div class="compare-panel-head">
-                            <span><i class="bi bi-heart-fill" aria-hidden="true"></i><span class="compare-panel-title-copy"><strong>علاقه‌مندی‌های شما</strong><small class="compare-panel-count" id="favoritesPanelCount">۰ محصول</small></span></span>
-                        </div>
-                        <div class="compare-panel-items" id="favoritesPanelItems"></div>
-                        <a class="compare-panel-link" href="Profile/Favorites">مشاهدهٔ همهٔ علاقه‌مندی‌ها <i class="bi bi-arrow-left" aria-hidden="true"></i></a>
-                    </section>
-                </div>
-                <div class="compare-wrap" id="compareWrap">
-                    <a class="nav-shortcut compare-toggle" id="compareToggle" href="Compare" aria-label="مشاهده محصولات مقایسه" title="مقایسه محصولات">
-                        <i class="bi bi-arrow-left-right" aria-hidden="true"></i>
-                        <b class="nav-count" id="compareCount" aria-hidden="true">۰</b>
-                    </a>
-                    <section class="compare-panel" id="comparePanel" aria-label="فهرست مقایسه محصولات" aria-hidden="true">
-                        <div class="compare-panel-head">
-                            <span><i class="bi bi-arrow-left-right" aria-hidden="true"></i><span class="compare-panel-title-copy"><strong>مقایسه محصولات</strong><small class="compare-panel-count" id="comparePanelCount">۰ محصول</small></span></span>
-                        </div>
-                        <div class="compare-panel-items" id="comparePanelItems"></div>
-                        <a class="compare-panel-link" href="Search">افزودن یا مشاهده محصولات <i class="bi bi-arrow-left" aria-hidden="true"></i></a>
-                    </section>
-                </div>
-                <div class="cart-wrap" id="cartWrap">
+        </div>
+        <a class="mobile-header-search" href="Search" aria-label="جستجوی محصولات" title="جستجوی محصولات">
+            <i class="bi bi-search" aria-hidden="true"></i>
+        </a>
+        <div class="nav-actions" aria-label="خرید، مقایسه و علاقه‌مندی‌ها">
+            <div class="favorites-wrap" id="favoritesWrap">
+                <a class="nav-shortcut favorites-toggle" id="favoritesToggle" href="Profile/Favorites" aria-label="علاقه‌مندی‌ها" aria-expanded="false" aria-controls="favoritesPanel" title="علاقه‌مندی‌ها">
+                    <i class="bi bi-heart" aria-hidden="true"></i>
+                    <b class="nav-count" id="favoritesCount" aria-hidden="true">۰</b>
+                </a>
+                <section class="compare-panel favorites-panel" id="favoritesPanel" aria-label="فهرست علاقه‌مندی‌ها" aria-hidden="true">
+                    <div class="compare-panel-head">
+                        <span>
+                            <i class="bi bi-heart-fill" aria-hidden="true"></i>
+                            <span class="compare-panel-title-copy">
+                                <strong>علاقه‌مندی‌های شما</strong><small class="compare-panel-count" id="favoritesPanelCount">۰ محصول</small>
+                            </span>
+                        </span>
+                    </div>
+                    <div class="compare-panel-items" id="favoritesPanelItems"></div>
+                    <a class="compare-panel-link" href="Profile/Favorites">مشاهدهٔ همهٔ علاقه‌مندی‌ها <i class="bi bi-arrow-left" aria-hidden="true"></i></a>
+                </section>
+            </div>
+            <div class="compare-wrap" id="compareWrap">
+                <a class="nav-shortcut compare-toggle" id="compareToggle" href="Compare" aria-label="مشاهده محصولات مقایسه" title="مقایسه محصولات">
+                    <i class="bi bi-arrow-left-right" aria-hidden="true"></i>
+                    <b class="nav-count" id="compareCount" aria-hidden="true">۰</b>
+                </a>
+                <section class="compare-panel" id="comparePanel" aria-label="فهرست مقایسه محصولات" aria-hidden="true">
+                    <div class="compare-panel-head">
+                        <span>
+                            <i class="bi bi-arrow-left-right" aria-hidden="true"></i>
+                            <span class="compare-panel-title-copy">
+                                <strong>مقایسه محصولات</strong><small class="compare-panel-count" id="comparePanelCount">۰ محصول</small>
+                            </span>
+                        </span>
+                    </div>
+                    <div class="compare-panel-items" id="comparePanelItems"></div>
+                    <a class="compare-panel-link" href="Search">افزودن یا مشاهده محصولات <i class="bi bi-arrow-left" aria-hidden="true"></i></a>
+                </section>
+            </div>
+            <div class="cart-wrap" id="cartWrap">
                 <button class="cart-btn cart-icon-theme"
                         id="cartToggle"
                         type="button"
@@ -406,9 +450,13 @@
                                 <span>مبلغ قابل پرداخت</span><strong id="cartTotal">۰ تومان</strong>
                             </div>
                             <div class="cart-safety-badge" role="note" aria-label="خرید امن با ضمانت اصالت کالا">
-                            <span class="cart-safety-icon" aria-hidden="true"><i class="bi bi-shield-check"></i></span>
-                            <span class="cart-safety-copy"><strong>خرید امن</strong><small>ضمانت اصالت کالا</small></span>
-                            <i class="bi bi-check-circle-fill cart-safety-check" aria-hidden="true"></i>
+                                <span class="cart-safety-icon" aria-hidden="true">
+                                    <i class="bi bi-shield-check"></i>
+                                </span>
+                                <span class="cart-safety-copy">
+                                    <strong>خرید امن</strong><small>ضمانت اصالت کالا</small>
+                                </span>
+                                <i class="bi bi-check-circle-fill cart-safety-check" aria-hidden="true"></i>
                             </div>
                         </div>
                         <a href="#">
@@ -418,10 +466,10 @@
                         </a>
                     </div>
                 </div>
-                </div>
-            </div>
-        </div>
             </div>
         </div>
     </div>
+</div>
+</div>
+</div>
 </nav>

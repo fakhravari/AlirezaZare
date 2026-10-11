@@ -3,35 +3,56 @@ document.addEventListener("DOMContentLoaded", () => {
   if (share) {
     const url = encodeURIComponent(window.location.href);
     const title = encodeURIComponent(document.title);
-    share.querySelector('[data-share="telegram"]')?.setAttribute("href", `https://t.me/share/url?url=${url}&text=${title}`);
-    share.querySelector('[data-share="whatsapp"]')?.setAttribute("href", `https://wa.me/?text=${title}%20${url}`);
+    share
+      .querySelector('[data-share="telegram"]')
+      ?.setAttribute("href", `https://t.me/share/url?url=${url}&text=${title}`);
+    share
+      .querySelector('[data-share="whatsapp"]')
+      ?.setAttribute("href", `https://wa.me/?text=${title}%20${url}`);
     const destinations = {
       linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${url}`,
       x: `https://twitter.com/intent/tweet?url=${url}&text=${title}`,
       facebook: `https://www.facebook.com/sharer/sharer.php?u=${url}`,
       email: `mailto:?subject=${title}&body=${title}%0A${url}`,
     };
-    Object.entries(destinations).forEach(([name, href]) => share.querySelector(`[data-share="${name}"]`)?.setAttribute('href', href));
+    Object.entries(destinations).forEach(([name, href]) =>
+      share.querySelector(`[data-share="${name}"]`)?.setAttribute("href", href),
+    );
     const nativeShare = share.querySelector('[data-share="native"]');
-    if (nativeShare && typeof navigator.share === 'function') {
+    if (nativeShare && typeof navigator.share === "function") {
       nativeShare.hidden = false;
-      nativeShare.addEventListener('click', async () => {
-        try { await navigator.share({ title: document.title, url: window.location.href }); }
-        catch (error) { if (error.name !== 'AbortError') share.querySelector('.article-share-status').textContent = 'اشتراک‌گذاری انجام نشد؛ از کپی لینک استفاده کنید.'; }
+      nativeShare.addEventListener("click", async () => {
+        try {
+          await navigator.share({
+            title: document.title,
+            url: window.location.href,
+          });
+        } catch (error) {
+          if (error.name !== "AbortError")
+            share.querySelector(".article-share-status").textContent =
+              "اشتراک‌گذاری انجام نشد؛ از کپی لینک استفاده کنید.";
+        }
       });
     }
-    share.querySelector('[data-share="copy"]')?.addEventListener("click", async (event) => {
-      const button = event.currentTarget;
-      const status = share.querySelector(".article-share-status");
-      try { await navigator.clipboard.writeText(window.location.href); }
-      catch { status.textContent = 'کپی خودکار ممکن نشد؛ لینک را از نوار آدرس کپی کنید.'; return; }
-      status.textContent = "لینک مطلب کپی شد.";
-      button.classList.add("copied");
-      setTimeout(() => {
-        status.textContent = "";
-        button.classList.remove("copied");
-      }, 2200);
-    });
+    share
+      .querySelector('[data-share="copy"]')
+      ?.addEventListener("click", async (event) => {
+        const button = event.currentTarget;
+        const status = share.querySelector(".article-share-status");
+        try {
+          await navigator.clipboard.writeText(window.location.href);
+        } catch {
+          status.textContent =
+            "کپی خودکار ممکن نشد؛ لینک را از نوار آدرس کپی کنید.";
+          return;
+        }
+        status.textContent = "لینک مطلب کپی شد.";
+        button.classList.add("copied");
+        setTimeout(() => {
+          status.textContent = "";
+          button.classList.remove("copied");
+        }, 2200);
+      });
   }
 
   const form = document.querySelector("#contactForm");
@@ -106,8 +127,8 @@ document.addEventListener("DOMContentLoaded", () => {
     list
       .slice((currentPage - 1) * perPage, currentPage * perPage)
       .forEach((card) => (card.hidden = false));
-      nav.innerHTML = `<button type="button" class="page-step" data-page="${currentPage - 1}" ${currentPage === 1 ? "disabled" : ""} aria-label="صفحه قبل"><i class="bi bi-chevron-right"></i><span>قبلی</span></button>${Array.from({ length: totalPages }, (_, index) => `<button type="button" class="page-number${index + 1 === currentPage ? " active" : ""}" data-page="${index + 1}" ${index + 1 === currentPage ? 'aria-current="page"' : ""}>${window.HNUI.formatNumber(index + 1)}</button>`).join("")}<button type="button" class="page-step" data-page="${currentPage + 1}" ${currentPage === totalPages ? "disabled" : ""} aria-label="صفحه بعد"><span>بعدی</span><i class="bi bi-chevron-left"></i></button>`;
-      status.textContent = `صفحه ${window.HNUI.formatNumber(currentPage)} از ${window.HNUI.formatNumber(totalPages)} — ${window.HNUI.formatNumber(list.length)} مطلب`;
+    nav.innerHTML = `<button type="button" class="page-step" data-page="${currentPage - 1}" ${currentPage === 1 ? "disabled" : ""} aria-label="صفحه قبل"><i class="bi bi-chevron-right"></i><span>قبلی</span></button>${Array.from({ length: totalPages }, (_, index) => `<button type="button" class="page-number${index + 1 === currentPage ? " active" : ""}" data-page="${index + 1}" ${index + 1 === currentPage ? 'aria-current="page"' : ""}>${window.HNUI.formatNumber(index + 1)}</button>`).join("")}<button type="button" class="page-step" data-page="${currentPage + 1}" ${currentPage === totalPages ? "disabled" : ""} aria-label="صفحه بعد"><span>بعدی</span><i class="bi bi-chevron-left"></i></button>`;
+    status.textContent = `صفحه ${window.HNUI.formatNumber(currentPage)} از ${window.HNUI.formatNumber(totalPages)} — ${window.HNUI.formatNumber(list.length)} مطلب`;
     nav.querySelectorAll("button[data-page]").forEach((button) =>
       button.addEventListener("click", () => {
         if (button.disabled) return;

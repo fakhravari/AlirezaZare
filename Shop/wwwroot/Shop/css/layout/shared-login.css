@@ -271,7 +271,7 @@
     border: 1px solid #d9e1e8;
     background: #102a43;
     color: #fff;
-    box-shadow: 0 4px 14px rgba(16, 42, 67, .18);
+    box-shadow: 0 4px 14px rgba(16, 42, 67, 0.18);
   }
   .shared-login-modal .login-step h2 {
     font-size: 19px;

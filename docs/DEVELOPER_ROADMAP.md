@@ -2,6 +2,8 @@
 
 این سند نقطهٔ شروع هر توسعه‌دهنده یا ایجنتی است که باید ساختار پروژه، محل کد هر قابلیت و مسیر امن اعمال تغییر را بفهمد. این نقشه وضعیت فعلی مخزن را توصیف می‌کند؛ موارد بخش «رودمپ پیشنهادی» هدف‌های آینده‌اند، نه قابلیت‌های تکمیل‌شده.
 
+برای راهنمای عمیق selectorها، breakpointها، landmarkهای route، state/eventهای JavaScript و روند مرحله‌به‌مرحلهٔ عیب‌یابی UI، مرجع مکمل [`UI_LAYER_REFERENCE.md`](UI_LAYER_REFERENCE.md) را نیز بخوانید. اطلاعات آن snapshot از کد فعلی است و باید همراه تغییر معماری/asset به‌روز بماند.
+
 ## ۱. خلاصهٔ معماری فعلی
 
 - راه‌حل: `Shop.sln`؛ پروژهٔ اجرایی: `Shop/Shop.csproj` با `Microsoft.NET.Sdk.Web` و هدف `net10.0`.
@@ -43,6 +45,7 @@
 | مجله | `/Magazine`, `/Magazine/Details/{slug}` | `MagazineController`، `Views/Magazine/`، دادهٔ مقاله در `Models/JournalArticles.cs` |
 | محتوا/خدمات | `/About`, `/Brands`, `/Contact`, `/Faq`, `/Shipping`, `/Tracking`, `/Warranty` | Controller و View هم‌نام |
 | قوانین | `/Legal/Privacy`, `/Legal/Terms`, `/Legal/Returns` | `LegalController` و Viewهای `Views/Legal/` |
+| خطا | `/Error` | `ErrorController` → `Views/Error/Index.cshtml` |
 
 Routeهای attribute-based مانند `Profile` و `Magazine` را کنار route پیش‌فرض در `Program.cs` بررسی کنید. مسیر و محتوای لینک‌ها ممکن است در JavaScript نیز normalize شود؛ قبل از تغییر URLها، Controller، Razor و `js/store/commerce.js` را با هم دنبال کنید.
 
@@ -53,6 +56,21 @@ Routeهای attribute-based مانند `Profile` و `Magazine` را کنار rou
 - `_Header.cshtml` برای برخی اجزای هدر بر اساس `ViewData["HeaderVariant"]` markup متفاوت دارد. منوی خانه و منوی صفحات داخلی الزاماً DOM/CSS یکسان ندارند؛ تغییر ظاهری هدر باید هر دو حالت را بررسی کند.
 - `_Panels.cshtml`، `_Footer.cshtml` و partialهایی مانند `_AddressForm.cshtml` را پیش از ساخت markup مشابه بررسی کنید.
 - Viewهای صفحه می‌توانند `@section Styles` و `@section Scripts` تعریف کنند. ترتیب نهایی را از محل `RenderSectionAsync` در `_Shop.cshtml` بخوانید؛ بخش `Styles` پیش از بعضی layout stylesheetهای پایانی وارد می‌شود و ممکن است توسط آن‌ها override شود.
+
+### درخت پوسته و partialهای مشترک
+
+ساختار کلی رندر چنین است: `_ViewStart` → `_Shop` → یکی از `_HomeHeader`/`_InnerHeader` → `_Header` → محتوای View با `RenderBody` → `_Footer` و `_Panels`. `_Panels` بیرون از محتوای صفحه درج می‌شود؛ پس مشکل z-index، overlay، scroll lock یا عرض پنل ممکن است از پوسته باشد، نه از View مسیر فعلی.
+
+| Partial | وظیفه و مصرف | مالکیت استایل/رفتار برای ردیابی |
+|---|---|---|
+| `_Header.cshtml` با `_HomeHeader` و `_InnerHeader` | هدر و ناوبری؛ markup مگامنو در خانه و صفحات داخلی متفاوت است | `layout/shared-header.css`, `shared-mega-menu.css`, `electrical-theme.css`, `industrial-system.css`; تعامل‌ها عمدتاً `js/layout/main.js` |
+| `_Panels.cshtml` | منوی موبایل، ورود، سبد، حساب، علاقه‌مندی/مقایسه و quick view | CSSهای `layout/shared-*.css`, `style.css`, `mobile-drawer-compact.css`; رفتار عمدتاً `js/layout/main.js` و `js/store/commerce.js`؛ فعال‌بودن فایل را در Network تأیید کنید |
+| `_Footer.cshtml` | فوتر مشترک | `layout/shared-footer.css` و قواعد پوسته؛ معمولاً رفتار اختصاصی صفحه ندارد |
+| `_AddressForm.cshtml` | فرم مشترک آدرس در پروفایل/سبد/تسویه | `pages/checkout.css`, `pages/account-page.css`; `js/pages/address-fields.js`, `iran-places.js` به‌علاوهٔ کد صفحه |
+| `_PurchaseBenefits.cshtml` | بلوک مزیت/خرید مطمئن در خانه و مسیرهای فروشگاهی | قوانین `.purchase-benefits` در `layout/style.css` و overrideهای `industrial-system.css`; مالک JS ندارد |
+| `_RelatedLinks.cshtml` | نوار لینک‌های مرتبط در چند صفحه | پایه در `store/commerce.css` و اصلاح‌های صفحه در `pages/pages.css`; مالک JS ندارد |
+
+این جدول نقطهٔ شروع است، نه تضمین انحصاری‌بودن selector؛ برای هر تغییر، `rg` روی کلاس/ID واقعی markup را در تمام CSSها اجرا کنید.
 
 ## ۵. قرارداد استایل و دیزاین‌سیستم
 
@@ -66,6 +84,18 @@ Routeهای attribute-based مانند `Profile` و `Magazine` را کنار rou
 - سطح روشن: `--color-cream` / `--industrial-bg`
 - سفید، متن، متن کمکی و خط: `--color-surface`, `--color-ink`, `--color-muted`, `--color-line`
 - شعاع و سایه: `--radius-*`, `--shadow-card`, `--shadow-card-hover`
+
+مقادیر کلیدی فعلی و معنای توکن canonical:
+
+| نقش | توکن | مقدار فعلی |
+|---|---|---|
+| سرمه‌ای | `--color-navy` | `#102a43` |
+| آبی-خاکستری | `--color-blue` | `#243b53` |
+| تأکید زرد | `--color-gold` | `#f6c515` |
+| زمینهٔ روشن | `--color-cream` | `#f5f7f8` |
+| سطح / متن / متن کمکی / خط | `--color-surface`, `--color-ink`, `--color-muted`, `--color-line` | `#fff`, `#202a33`, `#65737d`, `#dee4e7` |
+
+از توکن‌های `--color-*` به‌عنوان مرجع جدید استفاده کنید. aliasهای سازگاری قدیمی هم‌معنی ظاهری قابل‌حدس ندارند؛ برای نمونه `--cream` در فایل فعلی به `--color-gold` وصل است، درحالی‌که `--cream2` به زمینهٔ روشن وصل می‌شود. پیش از استفاده alias را در `design-tokens.css` دنبال کنید.
 
 `core/components.css` اجزای پایه‌ای مانند `.ui-surface-card` و `.ui-icon-tile` را تعریف می‌کند. اگر یک جزء در چند صفحه مشترک است، ابتدا امکان اصلاح همین مؤلفه و توکن‌هایش را بسنجید.
 
@@ -104,7 +134,7 @@ Routeهای attribute-based مانند `Profile` و `Magazine` را کنار rou
 | `/Compare` مقایسه | `Views/Compare/Index.cshtml` | `pages/pages.css` |
 | `/Favorites` علاقه‌مندی | `Views/Favorites/Index.cshtml` | `pages/pages.css` |
 | `/Profile`, `/Profile/Orders`, `/Profile/Addresses`, `/Profile/Favorites` | `Views/Account/Index.cshtml` | `pages/account-page.css`, `pages/checkout.css`, `pages/pages.css` |
-| `/Profile/Edit` | — | Controller فعلی به `/Profile` redirect می‌کند؛ `Views/Profile/Edit.cshtml` را مسیر فعال فرض نکنید |
+| `/Profile/Edit` | — | Controller فعلی به `/Profile` redirect می‌کند؛ `Views/Profile/Edit.cshtml` و `pages/profile-edit.css` در مسیر فعال بارگذاری نمی‌شوند |
 | `/Magazine` | `Views/Magazine/Index.cshtml` | `pages/magazine-luxury.css`, `pages/pages.css` |
 | `/Magazine/Details/{slug}` | `Views/Magazine/Details.cshtml` | `pages/article-details.css`, `pages/pages.css` |
 | `/About` | `Views/About/Index.cshtml` | `pages/pages.css` |
@@ -113,6 +143,27 @@ Routeهای attribute-based مانند `Profile` و `Magazine` را کنار rou
 | `/Faq`, `/Shipping`, `/Warranty` | View هم‌نام | `pages/pages.css` |
 | `/Tracking` | `Views/Tracking/Index.cshtml` | `pages/pages.css`, `pages/tracking.css` |
 | `/Legal/Privacy`, `/Legal/Terms`, `/Legal/Returns` | View هم‌نام در `Views/Legal/` | `pages/pages.css` |
+| `/Error` | `Views/Error/Index.cshtml` | CSS اختصاصی ندارد؛ از پوسته و قواعد عمومی استفاده می‌کند |
+
+### landmarkهای ساختاری Viewها
+
+این landmarkها ریشه‌های فعلی markup هستند و برای یافتن سریع محدودهٔ صفحه در DevTools یا `rg` به‌کار می‌روند؛ بخش‌های ساخته‌شده با JavaScript ممکن است پس از load به آن‌ها اضافه شوند.
+
+| صفحه/گروه | landmarkهای اصلی در Razor |
+|---|---|
+| خانه | `section.electrical-showcase`, `section.py-section`, کارت‌ها و sliderهای محصول |
+| جستجو | `section.search-intro` → `main.search-main` → `section.results-area` |
+| جزئیات محصول | `main.flow-main`; بخش فروشگاهی و دادهٔ محصول را در `Views/Product/Details.cshtml` و rendererهای `commerce.js` با هم دنبال کنید |
+| سبد | `main.flow-main`, `section.cart-address-section`, `section.cart-payment-section`; فرم آدرس partial مشترک است |
+| تسویه | `main.flow-main.invoice-page`, کارت‌های invoice و فرم/انتخاب آدرس |
+| مقایسه / علاقه‌مندی | `main.flow-main.compare-page` / `main.flow-main`; محتوای لیست از state فروشگاهی رندر می‌شود |
+| پروفایل و زیربخش‌ها | `main.flow-main`, `section.account-section`, کارت‌های overview/order؛ route تعیین می‌کند کدام بخش فعال باشد |
+| مجله | فهرست: `main.journal-page` و `article.journal-post`; مقاله: `main.article-page`, `article.article-body`, `section.article-section` |
+| معرفی/برند/تماس/FAQ | hero و breadcrumb در Viewهای مربوط؛ محتوای اصلی عمدتاً `section.page-section` یا `main.flow-main`; Contact فرم و CTA جدا دارد |
+| ارسال/رهگیری/ضمانت | `main.flow-main`; محتوای خدمات در کارت/فرم و `_RelatedLinks` مشترک |
+| قوانین | `main.flow-main` → `article.flow-card` → `section.legal-section` |
+| خطا | `main.container.py-5` با عنوان، توضیح و لینک بازگشت |
+| ویرایش پروفایل | `main.profile-edit-page`; View موجود است اما route فعلی redirect می‌کند و معمولاً رندر نمی‌شود |
 
 ### روند عیب‌یابی تداخل CSS
 
@@ -179,8 +230,9 @@ Routeهای attribute-based مانند `Profile` و `Magazine` را کنار rou
 | `/Contact` | `contact.js`, `form-confirm-dialog.js`, `page-content.js` | اعتبارسنجی عمومی در `form-validation.js` |
 | `/About`, `/Brands`, `/Faq`, `/Shipping`, `/Tracking`, `/Warranty` | `page-content.js` | محتوای مشترک در `electrical-content.js` |
 | قوانین | script اختصاصی ندارد | فقط رفتارهای عمومی layout |
+| `/Error` | script اختصاصی ندارد | فقط رفتارهای عمومی layout |
 
-چهار فایل `layout/page-mega-menu.js`, `page-panels.js`, `shared-login.js`, `site-layout.js` در مسیر assetهای فعلی از `_Shop.cshtml` یا Viewهای صفحه مستقیم ارجاع ندارند. قبل از افزودن قابلیت به آن‌ها، مصرف واقعی را با جستجوی نام فایل/توابع، partialها و درخواست‌های Network تأیید کنید؛ وجود فایل به معنای اجرای آن نیست. رفتارهای مشابه ممکن است در `layout/main.js` قرار گرفته باشند.
+نسخه‌های قدیمی `layout/page-mega-menu.js`, `page-panels.js`, `shared-login.js` و `site-layout.js` پس از تأیید نبود ارجاع در layout/View/scriptهای پروژه حذف شدند. پیاده‌سازی فعال header، mega-menu و پنل‌های حساب/سبد در `layout/main.js` و markup فعلی در partialهای Shared است؛ برای قابلیت تازه، همان مسیر فعال را توسعه دهید و نسخهٔ موازی نسازید.
 
 ## ۷. روش کار روی قابلیت‌ها
 

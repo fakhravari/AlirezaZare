@@ -3,8 +3,18 @@
         <label>عنوان آدرس<input name="title" placeholder="مثلاً خانه یا محل کار" maxlength="40" required autofocus></label>
         <label>نام گیرنده<input name="recipient" autocomplete="name" maxlength="100" required></label>
         <label>شماره همراه<input name="phone" type="tel" inputmode="tel" autocomplete="tel" pattern="[0-9۰-۹٠-٩]{11}" maxlength="11" required></label>
-        <label>استان<select name="province" autocomplete="address-level1" required><option value="">انتخاب استان</option></select></label>
-        <label>شهر<select name="city" autocomplete="address-level2" required disabled><option value="">ابتدا استان را انتخاب کنید</option></select></label>
+        <label>
+            استان
+            <select name="province" autocomplete="address-level1" required>
+                <option value="">انتخاب استان</option>
+            </select>
+        </label>
+        <label>
+            شهر
+            <select name="city" autocomplete="address-level2" required disabled>
+                <option value="">ابتدا استان را انتخاب کنید</option>
+            </select>
+        </label>
     </div>
     <label>نشانی کامل<textarea name="street" autocomplete="street-address" rows="3" maxlength="400" required></textarea></label>
     <label>کد پستی<input name="postal" inputmode="numeric" autocomplete="postal-code" pattern="[0-9۰-۹٠-٩]{10}" maxlength="10" required></label>

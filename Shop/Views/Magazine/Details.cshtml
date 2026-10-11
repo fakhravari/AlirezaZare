@@ -1,3 +1,4 @@
+@using System.Globalization
 @model PageModel<MagazineDetailsModel>
 @{
     var contentImage = System.IO.Path.GetFileName(Model.Data.ContentImage);
@@ -5,7 +6,7 @@
 }
 
 <header class="page-hero article-hero">
-    <img class="hero-image" src="@Url.Content($"~/Shop/images/{imageFolder}/{contentImage}")" alt="@Model.Data.Title" />
+    <img class="hero-image" src="@Url.Content($"~/Shop/images/{imageFolder}/{contentImage}")" alt="@Model.Data.Title"/>
     <div class="container">
         <nav class="article-breadcrumb" aria-label="مسیر صفحه">
             <a class="breadcrumb-home" asp-controller="Home" asp-action="Index">
@@ -34,48 +35,86 @@
         <h1>@Model.Data.Title</h1>
         <p>@Model.Data.Summary</p>
         <div class="article-hero-meta">
-            <span><i class="bi bi-person-circle"></i> @Model.Data.Author</span>
-            @if (!string.IsNullOrWhiteSpace(Model.Data.PublishedAt)) { <span><i class="bi bi-calendar3"></i> @Model.Data.PublishedAt</span> }
-            <span><i class="bi bi-clock"></i> @Model.Data.ReadTime</span>
+            <span>
+                <i class="bi bi-person-circle"></i> @Model.Data.Author
+            </span>
+            @if (!string.IsNullOrWhiteSpace(Model.Data.PublishedAt))
+            {
+                <span>
+                    <i class="bi bi-calendar3"></i> @Model.Data.PublishedAt
+                </span>
+            }
+            <span>
+                <i class="bi bi-clock"></i> @Model.Data.ReadTime
+            </span>
         </div>
     </div>
 </header>
 
 <main class="article-page article-enhanced" data-article-slug="@Model.Data.Slug">
-    <div class="reading-progress" aria-hidden="true"><span id="readingProgress"></span></div>
+    <div class="reading-progress" aria-hidden="true">
+        <span id="readingProgress"></span>
+    </div>
     <section class="page-section article-content-section">
         <div class="container">
             <div class="article-layout">
                 <aside class="article-sidebar ui-scrollbar ui-scrollbar--gold-on-dark">
                     <nav class="article-toc" aria-label="فهرست مطالب">
                         <div class="article-toc-scroll ui-scrollbar ui-scrollbar--gold-on-dark">
-                            <div class="toc-heading"><span class="toc-emblem"><i class="bi bi-journal-text" aria-hidden="true"></i></span><div><small>راهنمای مطالعه</small><strong>در این مقاله می‌خوانید</strong></div></div>
+                            <div class="toc-heading">
+                                <span class="toc-emblem">
+                                    <i class="bi bi-journal-text" aria-hidden="true"></i>
+                                </span>
+                                <div>
+                                    <small>راهنمای مطالعه</small><strong>در این مقاله می‌خوانید</strong>
+                                </div>
+                            </div>
                             @for (var index = 0; index < Model.Data.Sections.Count; index++)
                             {
                                 var item = Model.Data.Sections[index];
-                                var sectionNumber = (index + 1).ToString("00", System.Globalization.CultureInfo.GetCultureInfo("fa-IR"));
-                                <a href="#@item.Id"><span class="article-toc-index">@sectionNumber</span><span>@item.Title</span></a>
+                                var sectionNumber = (index + 1).ToString("00", CultureInfo.GetCultureInfo("fa-IR"));
+                                <a href="#@item.Id">
+                                    <span class="article-toc-index">@sectionNumber</span><span>@item.Title</span>
+                                </a>
                             }
                             <div class="toc-footnote"><i class="bi bi-book" aria-hidden="true"></i> هر بخش، یک قدم به انتخاب بهتر</div>
                         </div>
                     </nav>
                     <div class="article-share">
                         <div class="article-share-heading">
-                            <span><i class="bi bi-send"></i></span>
+                            <span>
+                                <i class="bi bi-send"></i>
+                            </span>
                             <div>
                                 <strong>اشتراک‌گذاری مطلب</strong>
                                 <small>برای دوستانتان بفرستید</small>
                             </div>
                         </div>
                         <div class="article-share-actions">
-                            <a data-share="telegram" href="#" target="_blank" rel="noopener" aria-label="اشتراک در تلگرام"><i class="bi bi-telegram"></i><span>تلگرام</span></a>
-                            <a data-share="whatsapp" href="#" target="_blank" rel="noopener" aria-label="اشتراک در واتساپ"><i class="bi bi-whatsapp"></i><span>واتساپ</span></a>
-                            <a data-share="linkedin" href="#" target="_blank" rel="noopener" aria-label="اشتراک در لینکدین"><i class="bi bi-linkedin" aria-hidden="true"></i><span>لینکدین</span></a>
-                            <a data-share="x" href="#" target="_blank" rel="noopener" aria-label="اشتراک در ایکس"><b aria-hidden="true">𝕏</b><span>ایکس</span></a>
-                            <a data-share="facebook" href="#" target="_blank" rel="noopener" aria-label="اشتراک در فیسبوک"><i class="bi bi-facebook" aria-hidden="true"></i><span>فیسبوک</span></a>
-                            <a data-share="email" href="#" aria-label="اشتراک با ایمیل"><i class="bi bi-envelope" aria-hidden="true"></i><span>ایمیل</span></a>
-                            <button data-share="copy" type="button" aria-label="کپی لینک"><i class="bi bi-link-45deg"></i><span>کپی لینک</span></button>
-                            <button data-share="native" type="button" hidden><i class="bi bi-share" aria-hidden="true"></i><span>سایر برنامه‌ها</span></button>
+                            <a data-share="telegram" href="#" target="_blank" rel="noopener" aria-label="اشتراک در تلگرام">
+                                <i class="bi bi-telegram"></i><span>تلگرام</span>
+                            </a>
+                            <a data-share="whatsapp" href="#" target="_blank" rel="noopener" aria-label="اشتراک در واتساپ">
+                                <i class="bi bi-whatsapp"></i><span>واتساپ</span>
+                            </a>
+                            <a data-share="linkedin" href="#" target="_blank" rel="noopener" aria-label="اشتراک در لینکدین">
+                                <i class="bi bi-linkedin" aria-hidden="true"></i><span>لینکدین</span>
+                            </a>
+                            <a data-share="x" href="#" target="_blank" rel="noopener" aria-label="اشتراک در ایکس">
+                                <b aria-hidden="true">𝕏</b><span>ایکس</span>
+                            </a>
+                            <a data-share="facebook" href="#" target="_blank" rel="noopener" aria-label="اشتراک در فیسبوک">
+                                <i class="bi bi-facebook" aria-hidden="true"></i><span>فیسبوک</span>
+                            </a>
+                            <a data-share="email" href="#" aria-label="اشتراک با ایمیل">
+                                <i class="bi bi-envelope" aria-hidden="true"></i><span>ایمیل</span>
+                            </a>
+                            <button data-share="copy" type="button" aria-label="کپی لینک">
+                                <i class="bi bi-link-45deg"></i><span>کپی لینک</span>
+                            </button>
+                            <button data-share="native" type="button" hidden>
+                                <i class="bi bi-share" aria-hidden="true"></i><span>سایر برنامه‌ها</span>
+                            </button>
                         </div>
                         <p class="article-share-status" role="status" aria-live="polite"></p>
                     </div>
@@ -91,11 +130,11 @@
                         </div>
                     </div>
                     <figure>
-                        <img src="@Url.Content($"~/Shop/images/{imageFolder}/{contentImage}")" alt="@Model.Data.Title" loading="lazy" />
+                        <img src="@Url.Content($"~/Shop/images/{imageFolder}/{contentImage}")" alt="@Model.Data.Title" loading="lazy"/>
                         <figcaption>@Model.Data.Title</figcaption>
                     </figure>
 
-                    @foreach (MagazineSectionModel item in Model.Data.Sections)
+                    @foreach (var item in Model.Data.Sections)
                     {
                         <section class="article-section">
                             <h2 id="@item.Id">@item.Title</h2>
@@ -104,7 +143,9 @@
                     }
 
                     <div class="article-conclusion">
-                        <span class="value-icon"><i class="bi bi-stars"></i></span>
+                        <span class="value-icon">
+                            <i class="bi bi-stars"></i>
+                        </span>
                         <div>
                             <h3>جمع‌بندی</h3>
                             <p>@Model.Data.Conclusion</p>
@@ -116,7 +157,11 @@
 
                     </div>
                     <div class="article-next-step">
-                        <div><span class="article-eyebrow">انتخاب بعدی شما</span><h3>راهنما را خواندید؛ حالا ابزارها را بررسی کنید.</h3><p>مشخصات محصولات را مقایسه کنید و گزینه مناسب کارتان را پیدا کنید.</p></div>
+                        <div>
+                            <span class="article-eyebrow">انتخاب بعدی شما</span>
+                            <h3>راهنما را خواندید؛ حالا ابزارها را بررسی کنید.</h3>
+                            <p>مشخصات محصولات را مقایسه کنید و گزینه مناسب کارتان را پیدا کنید.</p>
+                        </div>
                         <a href="@Url.Content("~/Search")">مشاهده محصولات <i class="bi bi-arrow-left" aria-hidden="true"></i></a>
                     </div>
                 </article>
@@ -124,18 +169,29 @@
         </div>
     </section>
     <section class="container article-related" aria-labelledby="relatedTitle">
-        <span class="article-eyebrow">ادامه مسیر مطالعه</span><h2 id="relatedTitle">این راهنماها را هم بخوانید</h2>
+        <span class="article-eyebrow">ادامه مسیر مطالعه</span>
+        <h2 id="relatedTitle">این راهنماها را هم بخوانید</h2>
         <div>
-            <a asp-controller="Magazine" asp-action="Details" asp-route-slug="multimeter-buying-guide"><img src="~/Shop/images/products/tool-multimeter-kit.png" alt="مولتی‌متر دیجیتال و پراب‌های اندازه‌گیری" loading="lazy" /><span><small>راهنمای خرید</small><strong>چطور مولتی‌متر مناسب انتخاب کنیم؟</strong><i class="bi bi-arrow-left" aria-hidden="true"></i></span></a>
-            <a asp-controller="Magazine" asp-action="Details" asp-route-slug="electrical-tool-safety"><img src="~/Shop/images/products/tool-led-worklight.png" alt="ابزار و تجهیزات ایمنی کارگاهی" loading="lazy" /><span><small>ایمنی و نگهداری</small><strong>چک‌لیست ایمنی کار با ابزار برقی</strong><i class="bi bi-arrow-left" aria-hidden="true"></i></span></a>
+            <a asp-controller="Magazine" asp-action="Details" asp-route-slug="multimeter-buying-guide">
+                <img src="~/Shop/images/products/tool-multimeter-kit.png" alt="مولتی‌متر دیجیتال و پراب‌های اندازه‌گیری" loading="lazy"/>
+                <span>
+                    <small>راهنمای خرید</small><strong>چطور مولتی‌متر مناسب انتخاب کنیم؟</strong><i class="bi bi-arrow-left" aria-hidden="true"></i>
+                </span>
+            </a>
+            <a asp-controller="Magazine" asp-action="Details" asp-route-slug="electrical-tool-safety">
+                <img src="~/Shop/images/products/tool-led-worklight.png" alt="ابزار و تجهیزات ایمنی کارگاهی" loading="lazy"/>
+                <span>
+                    <small>ایمنی و نگهداری</small><strong>چک‌لیست ایمنی کار با ابزار برقی</strong><i class="bi bi-arrow-left" aria-hidden="true"></i>
+                </span>
+            </a>
         </div>
     </section>
 
 </main>
 
 @section Styles {
-    <link href="Shop/css/pages/pages.css?v=46" rel="stylesheet" />
-    <link href="~/Shop/css/pages/article-details.css" rel="stylesheet" asp-append-version="true" />
+    <link href="Shop/css/pages/pages.css?v=46" rel="stylesheet"/>
+    <link href="~/Shop/css/pages/article-details.css" rel="stylesheet" asp-append-version="true"/>
 }
 
 @section Scripts {

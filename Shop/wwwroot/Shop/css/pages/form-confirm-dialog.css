@@ -1,1 +1,103 @@
-.form-confirm-overlay{position:fixed;inset:0;z-index:10050;display:grid;place-items:center;padding:20px;background:rgba(5,20,36,.68);backdrop-filter:blur(7px);opacity:0;visibility:hidden;transition:opacity .22s ease,visibility .22s ease}.form-confirm-overlay.is-open{opacity:1;visibility:visible}.form-confirm-dialog{width:min(100%,440px);padding:30px;border:1px solid rgba(214,180,111,.5);border-radius:22px;background:linear-gradient(145deg,#fff,var(--industrial-bg));box-shadow:0 28px 80px rgba(3,18,33,.3);color:var(--industrial-navy);text-align:center;transform:translateY(16px) scale(.97);transition:transform .22s ease}.form-confirm-overlay.is-open .form-confirm-dialog{transform:translateY(0) scale(1)}.form-confirm-icon{display:grid;width:64px;height:64px;margin:0 auto 18px;place-items:center;border-radius:18px;background:var(--industrial-navy);color:var(--industrial-yellow);font-size:28px;box-shadow:0 10px 24px rgba(16,45,75,.2)}.form-confirm-dialog h2{margin:0 0 10px;color:var(--industrial-navy);font-size:22px;font-weight:800}.form-confirm-dialog p{margin:0;color:var(--industrial-steel);font-size:13px;line-height:2}.form-confirm-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:25px}.form-confirm-actions button{min-height:48px;border-radius:11px;font:inherit;font-size:13px;font-weight:800;cursor:pointer;transition:.2s ease}.form-confirm-accept{border:1px solid var(--industrial-yellow-dark);background:var(--industrial-yellow-dark);color:#fff}.form-confirm-accept:hover{border-color:var(--industrial-navy);background:var(--industrial-navy)}.form-confirm-cancel{border:1px solid var(--industrial-line);background:#fff;color:var(--industrial-steel)}.form-confirm-cancel:hover{border-color:var(--industrial-yellow-dark);color:var(--industrial-navy)}body.has-form-confirm{overflow:hidden}@media(max-width:480px){.form-confirm-dialog{padding:24px 18px;border-radius:18px}.form-confirm-actions{grid-template-columns:1fr}}
+.form-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10050;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(5, 20, 36, 0.68);
+  backdrop-filter: blur(7px);
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.22s ease,
+    visibility 0.22s ease;
+}
+.form-confirm-overlay.is-open {
+  opacity: 1;
+  visibility: visible;
+}
+.form-confirm-dialog {
+  width: min(100%, 440px);
+  padding: 30px;
+  border: 1px solid rgba(214, 180, 111, 0.5);
+  border-radius: 22px;
+  background: linear-gradient(145deg, #fff, var(--industrial-bg));
+  box-shadow: 0 28px 80px rgba(3, 18, 33, 0.3);
+  color: var(--industrial-navy);
+  text-align: center;
+  transform: translateY(16px) scale(0.97);
+  transition: transform 0.22s ease;
+}
+.form-confirm-overlay.is-open .form-confirm-dialog {
+  transform: translateY(0) scale(1);
+}
+.form-confirm-icon {
+  display: grid;
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 18px;
+  place-items: center;
+  border-radius: 18px;
+  background: var(--industrial-navy);
+  color: var(--industrial-yellow);
+  font-size: 28px;
+  box-shadow: 0 10px 24px rgba(16, 45, 75, 0.2);
+}
+.form-confirm-dialog h2 {
+  margin: 0 0 10px;
+  color: var(--industrial-navy);
+  font-size: 22px;
+  font-weight: 800;
+}
+.form-confirm-dialog p {
+  margin: 0;
+  color: var(--industrial-steel);
+  font-size: 13px;
+  line-height: 2;
+}
+.form-confirm-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 25px;
+}
+.form-confirm-actions button {
+  min-height: 48px;
+  border-radius: 11px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+.form-confirm-accept {
+  border: 1px solid var(--industrial-yellow-dark);
+  background: var(--industrial-yellow-dark);
+  color: #fff;
+}
+.form-confirm-accept:hover {
+  border-color: var(--industrial-navy);
+  background: var(--industrial-navy);
+}
+.form-confirm-cancel {
+  border: 1px solid var(--industrial-line);
+  background: #fff;
+  color: var(--industrial-steel);
+}
+.form-confirm-cancel:hover {
+  border-color: var(--industrial-yellow-dark);
+  color: var(--industrial-navy);
+}
+body.has-form-confirm {
+  overflow: hidden;
+}
+@media (max-width: 480px) {
+  .form-confirm-dialog {
+    padding: 24px 18px;
+    border-radius: 18px;
+  }
+  .form-confirm-actions {
+    grid-template-columns: 1fr;
+  }
+}

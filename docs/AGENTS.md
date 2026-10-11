@@ -1,6 +1,6 @@
 # Repository Guide for Coding Agents
 
-Read `DEVELOPER_ROADMAP.md` before making non-trivial changes. It documents the current architecture, page-to-CSS/JS ownership map, asset loading order, design system, conflict-debugging workflow, and validation workflow.
+Read `DEVELOPER_ROADMAP.md` before making non-trivial changes. For UI/CSS/JS work, also read `UI_LAYER_REFERENCE.md`; it contains the detailed page landmarks, stylesheet/component ownership, responsive breakpoints, runtime state/events, and conflict-debugging checklist.
 
 ## Required workflow
 

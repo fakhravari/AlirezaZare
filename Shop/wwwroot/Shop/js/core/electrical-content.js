@@ -18,8 +18,14 @@
     ["ساعت‌های منتخب", "ابزارهای منتخب"],
     ["تمام ساعت‌ها", "تمام محصولات"],
     ["ساعت‌های اورجینال", "ابزار و قطعات اصل"],
-    ["ساعت‌های اورجینال مردانه و زنانه", "ابزار برقی، قطعات الکترونیکی و تجهیزات روشنایی"],
-    ["واردات، تأمین و عرضه ساعت‌های اورجینال مردانه و زنانه است.", "تأمین و عرضه ابزار برقی، قطعات الکترونیکی و تجهیزات تخصصی موردنیاز صنعتگران است."],
+    [
+      "ساعت‌های اورجینال مردانه و زنانه",
+      "ابزار برقی، قطعات الکترونیکی و تجهیزات روشنایی",
+    ],
+    [
+      "واردات، تأمین و عرضه ساعت‌های اورجینال مردانه و زنانه است.",
+      "تأمین و عرضه ابزار برقی، قطعات الکترونیکی و تجهیزات تخصصی موردنیاز صنعتگران است.",
+    ],
     ["هر ساعت", "هر ابزار"],
     ["انتخاب ساعت", "انتخاب ابزار"],
     ["خرید ساعت", "خرید ابزار"],
@@ -38,8 +44,14 @@
     ["مهتاب مینیمال", "ایستگاه هویه دیجیتال"],
     ["هاله رز", "چراغ کار LED"],
     ["میراث کلاسیک", "ست ابزار برق‌کار"],
-    ["قاب استیل ضدخش، صفحه سرمه‌ای و مقاومت تا عمق ۵۰ متر.", "موتور قدرتمند، سه‌نظام مقاوم و باتری بادوام برای کارهای نصب و کارگاهی."],
-    ["سادگی کلاسیک با جزئیات گرم و بند چرم طبیعی.", "اندازه‌گیری دقیق ولتاژ، جریان و مقاومت همراه با پراب‌های ایمن."],
+    [
+      "قاب استیل ضدخش، صفحه سرمه‌ای و مقاومت تا عمق ۵۰ متر.",
+      "موتور قدرتمند، سه‌نظام مقاوم و باتری بادوام برای کارهای نصب و کارگاهی.",
+    ],
+    [
+      "سادگی کلاسیک با جزئیات گرم و بند چرم طبیعی.",
+      "اندازه‌گیری دقیق ولتاژ، جریان و مقاومت همراه با پراب‌های ایمن.",
+    ],
     ["راهنمای خرید و نگهداری ساعت", "راهنمای خرید، تعمیر و نگهداری ابزار"],
     ["راهنمای انتخاب ساعت مچی مناسب", "راهنمای انتخاب ابزار مناسب هر پروژه"],
     ["ضمانت اصالت تمام ساعت‌ها", "تضمین اصالت تمام ابزارها و قطعات"],
@@ -49,40 +61,60 @@
     ["ساعت مردانه", "ابزار برقی"],
     ["ساعت زنانه", "ابزار دستی"],
     ["ساعت کلاسیک", "قطعات الکترونیکی"],
-    ["ساعت اسپرت", "تجهیزات روشنایی"]
+    ["ساعت اسپرت", "تجهیزات روشنایی"],
   ]);
 
-  const servicePaths = new Set(["/Contact", "/Faq", "/Warranty", "/Tracking", "/Shipping"]);
-  const editorialPaths = new Set(["/About", "/Brands", "/Gallery", "/Magazine"]);
+  const servicePaths = new Set([
+    "/Contact",
+    "/Faq",
+    "/Warranty",
+    "/Tracking",
+    "/Shipping",
+  ]);
+  const editorialPaths = new Set([
+    "/About",
+    "/Brands",
+    "/Gallery",
+    "/Magazine",
+  ]);
 
-  const replaceText = root => {
+  const replaceText = (root) => {
     const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
     const nodes = [];
     while (walker.nextNode()) nodes.push(walker.currentNode);
-    nodes.forEach(node => {
+    nodes.forEach((node) => {
       let value = node.nodeValue;
-      phraseMap.forEach((replacement, phrase) => { value = value.split(phrase).join(replacement); });
+      phraseMap.forEach((replacement, phrase) => {
+        value = value.split(phrase).join(replacement);
+      });
       node.nodeValue = value;
     });
   };
 
-  const replaceImages = root => {
-    root.querySelectorAll?.("img").forEach(image => {
-      if (servicePaths.has(location.pathname) && image.closest(".page-hero")) image.src = "Shop/images/heroes/hero-electrical-service.png";
-      if (editorialPaths.has(location.pathname) && image.closest(".page-hero")) image.src = "Shop/images/heroes/hero-electrical-editorial.png";
-      if (image.closest(".page-hero")) image.alt = "Electrical tools and professional service";
+  const replaceImages = (root) => {
+    root.querySelectorAll?.("img").forEach((image) => {
+      if (servicePaths.has(location.pathname) && image.closest(".page-hero"))
+        image.src = "Shop/images/heroes/hero-electrical-service.png";
+      if (editorialPaths.has(location.pathname) && image.closest(".page-hero"))
+        image.src = "Shop/images/heroes/hero-electrical-editorial.png";
+      if (image.closest(".page-hero"))
+        image.alt = "Electrical tools and professional service";
     });
   };
 
-  const apply = root => {
+  const apply = (root) => {
     replaceText(root);
     replaceImages(root);
   };
 
   document.addEventListener("DOMContentLoaded", () => {
     apply(document.body);
-    new MutationObserver(records => records.forEach(record => record.addedNodes.forEach(node => {
-      if (node.nodeType === Node.ELEMENT_NODE) apply(node);
-    }))).observe(document.body, { childList: true, subtree: true });
+    new MutationObserver((records) =>
+      records.forEach((record) =>
+        record.addedNodes.forEach((node) => {
+          if (node.nodeType === Node.ELEMENT_NODE) apply(node);
+        }),
+      ),
+    ).observe(document.body, { childList: true, subtree: true });
   });
 })();

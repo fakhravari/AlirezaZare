@@ -107,7 +107,10 @@
       if (!safeProduct) return items;
       const existing = items.find((item) => item.id === safeProduct.id);
       if (existing) {
-        existing.quantity = Math.min(99, existing.quantity + safeProduct.quantity);
+        existing.quantity = Math.min(
+          99,
+          existing.quantity + safeProduct.quantity,
+        );
       } else {
         items.push(safeProduct);
       }
@@ -254,18 +257,36 @@
   const toPersianDigits = (value) =>
     String(value).replace(/[0-9]/g, (digit) => "۰۱۲۳۴۵۶۷۸۹"[digit]);
 
-  const persianDigits = "\u06F0\u06F1\u06F2\u06F3\u06F4\u06F5\u06F6\u06F7\u06F8\u06F9";
-  const arabicDigits = "\u0660\u0661\u0662\u0663\u0664\u0665\u0666\u0667\u0668\u0669";
-  const toEnglishDigits = (value) => String(value)
-    .replace(/[\u06F0-\u06F9]/g, (digit) => String(persianDigits.indexOf(digit)))
-    .replace(/[\u0660-\u0669]/g, (digit) => String(arabicDigits.indexOf(digit)));
+  const persianDigits =
+    "\u06F0\u06F1\u06F2\u06F3\u06F4\u06F5\u06F6\u06F7\u06F8\u06F9";
+  const arabicDigits =
+    "\u0660\u0661\u0662\u0663\u0664\u0665\u0666\u0667\u0668\u0669";
+  const toEnglishDigits = (value) =>
+    String(value)
+      .replace(/[\u06F0-\u06F9]/g, (digit) =>
+        String(persianDigits.indexOf(digit)),
+      )
+      .replace(/[\u0660-\u0669]/g, (digit) =>
+        String(arabicDigits.indexOf(digit)),
+      );
   const formatNumber = (value) => Number(value).toLocaleString("fa-IR");
-  const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, (character) =>
-    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character]);
+  const escapeHtml = (value) =>
+    String(value ?? "").replace(
+      /[&<>"']/g,
+      (character) =>
+        ({
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#39;",
+        })[character],
+    );
 
   const localizeVisibleDigits = (root = document.body) => {
     if (!root) return;
-    const excluded = "SCRIPT, STYLE, NOSCRIPT, TEXTAREA, INPUT, SELECT, OPTION, CODE, PRE";
+    const excluded =
+      "SCRIPT, STYLE, NOSCRIPT, TEXTAREA, INPUT, SELECT, OPTION, CODE, PRE";
     const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
     const textNodes = [];
     let node;
@@ -284,7 +305,10 @@
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         mutation.addedNodes.forEach((addedNode) => {
-          if (addedNode.nodeType === Node.ELEMENT_NODE || addedNode.nodeType === Node.TEXT_NODE)
+          if (
+            addedNode.nodeType === Node.ELEMENT_NODE ||
+            addedNode.nodeType === Node.TEXT_NODE
+          )
             localizeVisibleDigits(addedNode);
         });
       });
@@ -306,7 +330,8 @@
       backToTop.addEventListener("click", () => {
         window.scrollTo({
           top: 0,
-          behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+          behavior: window.matchMedia("(prefers-reduced-motion: reduce)")
+            .matches
             ? "auto"
             : "smooth",
         });

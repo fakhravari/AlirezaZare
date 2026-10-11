@@ -56,14 +56,22 @@
         <div class="payment-methods" role="radiogroup" aria-labelledby="paymentMethodTitle">
             <label class="payment-method">
                 <input type="radio" name="paymentMethod" value="zarinpal" checked required>
-                <span class="payment-method-icon"><i class="bi bi-shield-check"></i></span>
-                <span><strong>زرین‌پال</strong><small>پرداخت امن و آنلاین</small></span>
+                <span class="payment-method-icon">
+                    <i class="bi bi-shield-check"></i>
+                </span>
+                <span>
+                    <strong>زرین‌پال</strong><small>پرداخت امن و آنلاین</small>
+                </span>
                 <i class="bi bi-check-circle-fill payment-method-check" aria-hidden="true"></i>
             </label>
             <label class="payment-method is-disabled" aria-disabled="true">
                 <input type="radio" name="paymentMethod" value="snappay" disabled>
-                <span class="payment-method-icon"><i class="bi bi-clock-history"></i></span>
-                <span><strong>اسنپ‌پی</strong><small>به‌زودی فعال می‌شود</small></span>
+                <span class="payment-method-icon">
+                    <i class="bi bi-clock-history"></i>
+                </span>
+                <span>
+                    <strong>اسنپ‌پی</strong><small>به‌زودی فعال می‌شود</small>
+                </span>
                 <span class="payment-method-soon">به‌زودی</span>
             </label>
         </div>
@@ -86,12 +94,12 @@
                 <i class="bi bi-x-lg"></i>
             </button>
         </div>
-        <partial name="_AddressForm" />
+        <partial name="_AddressForm"/>
     </dialog>
-    <partial name="_RelatedLinks" />
+    <partial name="_RelatedLinks"/>
 </main>
 
-<partial name="_PurchaseBenefits" />
+<partial name="_PurchaseBenefits"/>
 
 @section Styles {
     <link href="Shop/css/pages/pages.css?v=12" rel="stylesheet"/>

@@ -62,7 +62,7 @@ body {
     padding: 0;
     border-bottom: 1px solid #e7e9eb;
     background: #fff;
-    box-shadow: 0 7px 24px rgba(25, 36, 43, .08);
+    box-shadow: 0 7px 24px rgba(25, 36, 43, 0.08);
   }
 
   .home-page #mainNav > .container {
@@ -215,7 +215,6 @@ body {
   .home-header-search input::placeholder {
     color: #a1a9ae;
   }
-
 }
 
 @media (max-width: 991px) {
@@ -257,7 +256,7 @@ body {
   border: 1px solid #e5e7e9;
   border-radius: 8px;
   background: #fff;
-  box-shadow: 10px 14px 35px rgba(28, 44, 52, .08);
+  box-shadow: 10px 14px 35px rgba(28, 44, 52, 0.08);
 }
 
 .electrical-category-heading {
@@ -299,7 +298,9 @@ body {
   font-size: 12px;
   font-weight: 650;
   text-align: right;
-  transition: background .18s ease, color .18s ease;
+  transition:
+    background 0.18s ease,
+    color 0.18s ease;
 }
 
 .electrical-category-menu > button > i:first-child {
@@ -337,8 +338,8 @@ body {
   border: 1px solid #e1e7e9;
   border-top: 3px solid #edc52b;
   border-radius: 8px;
-  background: rgba(255,255,255,.98);
-  box-shadow: 0 16px 38px rgba(23, 41, 51, .2);
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 16px 38px rgba(23, 41, 51, 0.2);
   color: #34434a;
 }
 
@@ -411,8 +412,13 @@ body {
   border-radius: 50%;
   background: #fff;
   color: #23495d;
-  box-shadow: inset 0 0 0 4px #fff, 0 0 0 2px #f5e6a6;
-  transition: transform .2s ease, background .2s ease, color .2s ease;
+  box-shadow:
+    inset 0 0 0 4px #fff,
+    0 0 0 2px #f5e6a6;
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    color 0.2s ease;
 }
 
 .electrical-story > span > i {
@@ -439,7 +445,7 @@ body {
   overflow: hidden;
   border-radius: 8px;
   background: #e8edf0;
-  box-shadow: 0 16px 42px rgba(21, 43, 58, .12);
+  box-shadow: 0 16px 42px rgba(21, 43, 58, 0.12);
   direction: ltr;
 }
 
@@ -471,7 +477,9 @@ body {
 }
 
 .electrical-slide::before {
-  background-image: linear-gradient(rgba(32, 61, 76, .045) 1px, transparent 1px), linear-gradient(90deg, rgba(32, 61, 76, .045) 1px, transparent 1px);
+  background-image:
+    linear-gradient(rgba(32, 61, 76, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(32, 61, 76, 0.045) 1px, transparent 1px);
   background-size: 34px 34px;
   mask-image: linear-gradient(90deg, transparent, #000 45%, #000);
 }
@@ -481,12 +489,18 @@ body {
   width: 70%;
   height: 140%;
   border-radius: 50%;
-  background: rgba(255, 255, 255, .56);
+  background: rgba(255, 255, 255, 0.56);
 }
 
-.electrical-slide-tools { background: linear-gradient(115deg, #fff4bf, #f5e493 58%, #fff9dc); }
-.electrical-slide-parts { background: linear-gradient(115deg, #fff5c5, #f7e7a2 58%, #fff9df); }
-.electrical-slide-lighting { background: linear-gradient(115deg, #f9edb5, #f2dd75 58%, #fff6d2); }
+.electrical-slide-tools {
+  background: linear-gradient(115deg, #fff4bf, #f5e493 58%, #fff9dc);
+}
+.electrical-slide-parts {
+  background: linear-gradient(115deg, #fff5c5, #f7e7a2 58%, #fff9df);
+}
+.electrical-slide-lighting {
+  background: linear-gradient(115deg, #f9edb5, #f2dd75 58%, #fff6d2);
+}
 
 .electrical-copy {
   width: min(54%, 570px);
@@ -502,7 +516,9 @@ body {
   font-weight: 800;
 }
 
-.electrical-kicker i { font-size: 16px; }
+.electrical-kicker i {
+  font-size: 16px;
+}
 
 .electrical-copy h1,
 .electrical-copy h2 {
@@ -510,7 +526,7 @@ body {
   color: #203642;
   font-size: clamp(29px, 3.3vw, 45px);
   font-weight: 800;
-  letter-spacing: -.04em;
+  letter-spacing: -0.04em;
   line-height: 1.45;
   text-shadow: none;
 }
@@ -542,10 +558,16 @@ body {
   font-size: 13px;
   font-weight: 700;
   text-decoration: none;
-  transition: background .2s ease, transform .2s ease;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
 }
 
-.electrical-cta:hover { transform: translateY(-2px); background: #947300; color: #fff; }
+.electrical-cta:hover {
+  transform: translateY(-2px);
+  background: #947300;
+  color: #fff;
+}
 
 .electrical-art {
   position: relative;
@@ -560,9 +582,14 @@ body {
   position: absolute;
   width: 224px;
   height: 224px;
-  border: 1px solid rgba(35, 73, 93, .18);
+  border: 1px solid rgba(35, 73, 93, 0.18);
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(255,255,255,.92) 0 42%, rgba(255,255,255,.35) 43% 58%, transparent 59%);
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.92) 0 42%,
+    rgba(255, 255, 255, 0.35) 43% 58%,
+    transparent 59%
+  );
   content: "";
 }
 
@@ -570,7 +597,7 @@ body {
   z-index: 1;
   color: #315c70;
   font-size: 132px;
-  filter: drop-shadow(0 16px 13px rgba(28, 53, 67, .2));
+  filter: drop-shadow(0 16px 13px rgba(28, 53, 67, 0.2));
 }
 
 .electrical-art-badge {
@@ -582,12 +609,12 @@ body {
   width: 54px;
   height: 54px;
   place-items: center;
-  border: 4px solid rgba(255,255,255,.84);
+  border: 4px solid rgba(255, 255, 255, 0.84);
   border-radius: 50%;
   background: #edc52b;
   color: #fff;
   font-size: 24px;
-  box-shadow: 0 8px 20px rgba(82, 66, 44, .18);
+  box-shadow: 0 8px 20px rgba(82, 66, 44, 0.18);
 }
 
 .electrical-art-label {
@@ -595,9 +622,11 @@ body {
   z-index: 2;
   bottom: 11px;
   left: 0;
-  color: rgba(35, 73, 93, .62);
-  font: 800 13px/1.4 Arial, sans-serif;
-  letter-spacing: .16em;
+  color: rgba(35, 73, 93, 0.62);
+  font:
+    800 13px/1.4 Arial,
+    sans-serif;
+  letter-spacing: 0.16em;
   text-align: left;
 }
 
@@ -606,11 +635,21 @@ body {
   z-index: -1;
   width: 130px;
   height: 58px;
-  border: 1px solid rgba(35, 73, 93, .2);
+  border: 1px solid rgba(35, 73, 93, 0.2);
 }
 
-.circuit-one { top: 26px; left: -5px; border-right: 0; border-bottom: 0; }
-.circuit-two { right: -14px; bottom: 31px; border-left: 0; border-top: 0; }
+.circuit-one {
+  top: 26px;
+  left: -5px;
+  border-right: 0;
+  border-bottom: 0;
+}
+.circuit-two {
+  right: -14px;
+  bottom: 31px;
+  border-left: 0;
+  border-top: 0;
+}
 
 .electrical-slide-index {
   position: absolute;
@@ -621,11 +660,18 @@ body {
   gap: 9px;
   color: #718089;
   direction: ltr;
-  font: 700 11px Arial, sans-serif;
+  font:
+    700 11px Arial,
+    sans-serif;
   transform: translateX(-50%);
 }
 
-.electrical-slide-index i { width: 22px; height: 3px; border-radius: 3px; background: #edc52b; }
+.electrical-slide-index i {
+  width: 22px;
+  height: 3px;
+  border-radius: 3px;
+  background: #edc52b;
+}
 
 .electrical-arrow {
   position: absolute;
@@ -641,12 +687,21 @@ body {
   color: #fff;
   font-size: 18px;
   transform: translateY(-50%);
-  transition: background .2s ease, transform .2s ease;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
 }
 
-.electrical-arrow:hover { background: #203b49; transform: translateY(-50%) scale(1.06); }
-.electrical-prev { right: 12px; }
-.electrical-next { left: 12px; }
+.electrical-arrow:hover {
+  background: #203b49;
+  transform: translateY(-50%) scale(1.06);
+}
+.electrical-prev {
+  right: 12px;
+}
+.electrical-next {
+  left: 12px;
+}
 
 .electrical-swiper .swiper-pagination {
   right: 50%;
@@ -663,41 +718,137 @@ body {
   height: 8px;
   margin: 0 !important;
   background: #87959b;
-  opacity: .45;
+  opacity: 0.45;
 }
 
-.electrical-swiper .swiper-pagination-bullet-active { width: 22px; border-radius: 6px; background: #d8af13; opacity: 1; }
+.electrical-swiper .swiper-pagination-bullet-active {
+  width: 22px;
+  border-radius: 6px;
+  background: #d8af13;
+  opacity: 1;
+}
 
 @media (max-width: 991px) {
-  .home-page .hero { padding: 78px 0 18px; }
-  .electrical-showcase { width: 100%; }
-  .electrical-home-row { display: block; height: auto; }
-  .electrical-category-menu { display: none !important; }
-  .electrical-swiper { height: clamp(390px, 118vw, 500px) !important; min-height: 390px !important; border-radius: 0; box-shadow: none; }
-  .electrical-swiper .swiper-wrapper,
-  .electrical-swiper .swiper-slide { height: 100% !important; min-height: 0 !important; }
-  .electrical-swiper .swiper-slide { align-items: flex-start; padding: 32px 24px 66px; }
-  .electrical-slide::after {
-    background: linear-gradient(180deg, rgba(255,255,255,.94) 0%, rgba(255,255,255,.78) 48%, rgba(255,255,255,.08) 78%);
+  .home-page .hero {
+    padding: 78px 0 18px;
   }
-  .electrical-banner-image { object-position: 34% center; }
-  .electrical-copy { position: relative; z-index: 2; width: 100%; max-width: 310px; }
+  .electrical-showcase {
+    width: 100%;
+  }
+  .electrical-home-row {
+    display: block;
+    height: auto;
+  }
+  .electrical-category-menu {
+    display: none !important;
+  }
+  .electrical-swiper {
+    height: clamp(390px, 118vw, 500px) !important;
+    min-height: 390px !important;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  .electrical-swiper .swiper-wrapper,
+  .electrical-swiper .swiper-slide {
+    height: 100% !important;
+    min-height: 0 !important;
+  }
+  .electrical-swiper .swiper-slide {
+    align-items: flex-start;
+    padding: 32px 24px 66px;
+  }
+  .electrical-slide::after {
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.94) 0%,
+      rgba(255, 255, 255, 0.78) 48%,
+      rgba(255, 255, 255, 0.08) 78%
+    );
+  }
+  .electrical-banner-image {
+    object-position: 34% center;
+  }
+  .electrical-copy {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 310px;
+  }
   .electrical-copy h1,
-  .electrical-copy h2 { margin: 10px 0 8px; font-size: clamp(28px, 8.5vw, 38px); line-height: 1.35; }
-  .electrical-copy p { max-width: 96%; margin-bottom: 18px; font-size: 12px; line-height: 1.9; }
-  .electrical-kicker { font-size: 11px; }
-  .electrical-cta { min-height: 40px; padding: 0 15px; gap: 12px; font-size: 12px; }
-  .electrical-art { position: absolute; right: auto; bottom: 7px; left: 20px; width: 165px; height: 158px; opacity: .88; }
-  .electrical-art::before { width: 135px; height: 135px; }
-  .electrical-art-icon { font-size: 78px; }
-  .electrical-art-badge { top: 9px; right: 1px; width: 39px; height: 39px; font-size: 17px; }
-  .electrical-art-label { bottom: 1px; font-size: 9px; }
-  .electrical-arrow { top: auto; bottom: 18px; width: 38px; height: 38px; font-size: 14px; transform: none; }
-  .electrical-arrow:hover { transform: none; }
-  .electrical-prev { right: 18px; }
-  .electrical-next { right: 62px; left: auto; }
-  .electrical-swiper .swiper-pagination { right: auto; bottom: 31px; left: 20px; transform: none; }
-  .electrical-slide-index { display: none; }
+  .electrical-copy h2 {
+    margin: 10px 0 8px;
+    font-size: clamp(28px, 8.5vw, 38px);
+    line-height: 1.35;
+  }
+  .electrical-copy p {
+    max-width: 96%;
+    margin-bottom: 18px;
+    font-size: 12px;
+    line-height: 1.9;
+  }
+  .electrical-kicker {
+    font-size: 11px;
+  }
+  .electrical-cta {
+    min-height: 40px;
+    padding: 0 15px;
+    gap: 12px;
+    font-size: 12px;
+  }
+  .electrical-art {
+    position: absolute;
+    right: auto;
+    bottom: 7px;
+    left: 20px;
+    width: 165px;
+    height: 158px;
+    opacity: 0.88;
+  }
+  .electrical-art::before {
+    width: 135px;
+    height: 135px;
+  }
+  .electrical-art-icon {
+    font-size: 78px;
+  }
+  .electrical-art-badge {
+    top: 9px;
+    right: 1px;
+    width: 39px;
+    height: 39px;
+    font-size: 17px;
+  }
+  .electrical-art-label {
+    bottom: 1px;
+    font-size: 9px;
+  }
+  .electrical-arrow {
+    top: auto;
+    bottom: 18px;
+    width: 38px;
+    height: 38px;
+    font-size: 14px;
+    transform: none;
+  }
+  .electrical-arrow:hover {
+    transform: none;
+  }
+  .electrical-prev {
+    right: 18px;
+  }
+  .electrical-next {
+    right: 62px;
+    left: auto;
+  }
+  .electrical-swiper .swiper-pagination {
+    right: auto;
+    bottom: 31px;
+    left: 20px;
+    transform: none;
+  }
+  .electrical-slide-index {
+    display: none;
+  }
 }
 
 ::selection {
@@ -842,7 +993,13 @@ body {
 }
 
 #mainNav .mega-content-grid > .mega-links > a + a::before {
-  background: linear-gradient(90deg, transparent, #e9d77b 27%, #e9d77b 78%, transparent) !important;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    #e9d77b 27%,
+    #e9d77b 78%,
+    transparent
+  ) !important;
 }
 
 #mainNav .mega-content-grid > .mega-links > a:hover {

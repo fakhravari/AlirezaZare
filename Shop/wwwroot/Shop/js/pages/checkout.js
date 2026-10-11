@@ -10,7 +10,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const preview = document.querySelector("#addressPreview");
   const checkoutPreview = document.querySelector("#checkoutAddressPreview");
   const payment = document.querySelector("#finalPayment");
-  const cartCheckoutLink = document.querySelector("#cartView .cart-checkout-link");
+  const cartCheckoutLink = document.querySelector(
+    "#cartView .cart-checkout-link",
+  );
   let addresses = [];
   let selectedPaymentMethod = ui.storage.get(paymentMethodKey, "zarinpal");
   if (!Object.hasOwn(paymentMethods, selectedPaymentMethod)) {
@@ -24,7 +26,15 @@ document.addEventListener("DOMContentLoaded", () => {
       addresses = value.filter(
         (address) =>
           address &&
-          ["id", "title", "recipient", "phone", "city", "street", "postal"].every(
+          [
+            "id",
+            "title",
+            "recipient",
+            "phone",
+            "city",
+            "street",
+            "postal",
+          ].every(
             (key) => typeof address[key] === "string" && address[key].trim(),
           ),
       );
@@ -34,7 +44,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   let selected = ui.storage.get(selectedKey, "");
-  const selectedAddress = () => addresses.find((address) => address.id === selected);
+  const selectedAddress = () =>
+    addresses.find((address) => address.id === selected);
 
   function addressMarkup(address) {
     if (!address) return "";
@@ -51,15 +62,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function syncPayment() {
     if (cartCheckoutLink) {
-      const ready = Boolean(selectedAddress()) && Boolean(selectedPaymentMethod) && ui.cart.read().length > 0;
+      const ready =
+        Boolean(selectedAddress()) &&
+        Boolean(selectedPaymentMethod) &&
+        ui.cart.read().length > 0;
       cartCheckoutLink.classList.toggle("is-disabled", !ready);
       cartCheckoutLink.setAttribute("aria-disabled", String(!ready));
-      cartCheckoutLink.title = ready ? "" : !selectedAddress()
-        ? "ابتدا آدرس تحویل را انتخاب کنید"
-        : "ابتدا نحوه پرداخت را انتخاب کنید";
+      cartCheckoutLink.title = ready
+        ? ""
+        : !selectedAddress()
+          ? "ابتدا آدرس تحویل را انتخاب کنید"
+          : "ابتدا نحوه پرداخت را انتخاب کنید";
     }
     if (!payment) return;
-    payment.disabled = !ui.cart.read().length || !selectedAddress() || !selectedPaymentMethod;
+    payment.disabled =
+      !ui.cart.read().length || !selectedAddress() || !selectedPaymentMethod;
     document.querySelector("#paymentStatus").textContent = "";
   }
 
@@ -79,8 +96,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const address = selectedAddress();
     const addressSection = document.querySelector(".cart-address-section");
     addressSection?.classList.toggle("is-selected", Boolean(address));
-    const selectedBadge = addressSection?.querySelector(".address-selected-badge");
-    if (selectedBadge) selectedBadge.setAttribute("aria-hidden", String(!address));
+    const selectedBadge = addressSection?.querySelector(
+      ".address-selected-badge",
+    );
+    if (selectedBadge)
+      selectedBadge.setAttribute("aria-hidden", String(!address));
     if (preview) {
       preview.replaceChildren();
       if (address) preview.append(addressMarkup(address));
@@ -107,10 +127,18 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
     select.replaceChildren(
-      new Option(addresses.length ? "انتخاب آدرس تحویل" : "هنوز آدرسی ثبت نشده", ""),
+      new Option(
+        addresses.length ? "انتخاب آدرس تحویل" : "هنوز آدرسی ثبت نشده",
+        "",
+      ),
     );
     addresses.forEach((address) =>
-      select.add(new Option(`${address.title} — ${address.city}، ${address.street}`, address.id)),
+      select.add(
+        new Option(
+          `${address.title} — ${address.city}، ${address.street}`,
+          address.id,
+        ),
+      ),
     );
     select.value = selectedAddress() ? selected : "";
     renderPreview();
@@ -119,7 +147,9 @@ document.addEventListener("DOMContentLoaded", () => {
   if (select) {
     const dialog = document.querySelector("#addressDialog");
     const form = document.querySelector("#addressForm");
-    form.querySelector(".address-form-grid").append(form.querySelector('[name="postal"]').closest("label"));
+    form
+      .querySelector(".address-form-grid")
+      .append(form.querySelector('[name="postal"]').closest("label"));
     select.addEventListener("change", () => {
       selected = select.value;
       ui.storage.set(selectedKey, selected);
@@ -132,7 +162,9 @@ document.addEventListener("DOMContentLoaded", () => {
       dialog.showModal();
       document.documentElement.classList.add("address-modal-open");
     });
-    document.querySelector("#closeAddress").addEventListener("click", () => dialog.close());
+    document
+      .querySelector("#closeAddress")
+      .addEventListener("click", () => dialog.close());
     dialog.addEventListener("close", () => {
       document.documentElement.classList.remove("address-modal-open");
       document.querySelector("#newAddress").focus();
@@ -208,4 +240,3 @@ document.addEventListener("DOMContentLoaded", () => {
   renderAddresses();
   renderPaymentMethod();
 });
-

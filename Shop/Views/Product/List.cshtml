@@ -4,8 +4,14 @@
     <div class="container">
         <nav class="cart-breadcrumb taxonomy-breadcrumb" id="searchBreadcrumb" aria-label="مسیر صفحه">
             <ol>
-                <li><a href="/"><i class="bi bi-house-door" aria-hidden="true"></i><span>خانه</span></a></li>
-                <li class="cart-breadcrumb-current"><i class="bi bi-chevron-left" aria-hidden="true"></i><span aria-current="page">ابزار و تجهیزات</span></li>
+                <li>
+                    <a href="/">
+                        <i class="bi bi-house-door" aria-hidden="true"></i><span>خانه</span>
+                    </a>
+                </li>
+                <li class="cart-breadcrumb-current">
+                    <i class="bi bi-chevron-left" aria-hidden="true"></i><span aria-current="page">ابزار و تجهیزات</span>
+                </li>
             </ol>
         </nav>
         <div>
@@ -50,36 +56,56 @@
         </button>
         <div class="filter-group open" data-filter-fa="برند" data-filter-en="Brand" data-filter-slug="brand">
             <button type="button" aria-expanded="true">
-                <span class="filter-group-title" data-filter-fa="برند" data-filter-en="Brand" data-filter-slug="brand"><i class="bi bi-patch-check" aria-hidden="true"></i><span>برند</span></span>
-                <span class="filter-group-arrow"><i class="bi bi-chevron-down" aria-hidden="true"></i></span>
+                <span class="filter-group-title" data-filter-fa="برند" data-filter-en="Brand" data-filter-slug="brand">
+                    <i class="bi bi-patch-check" aria-hidden="true"></i><span>برند</span>
+                </span>
+                <span class="filter-group-arrow">
+                    <i class="bi bi-chevron-down" aria-hidden="true"></i>
+                </span>
             </button>
             <div class="filter-options" id="brandFilters"></div>
         </div>
         <div class="filter-group" data-filter-fa="گروه محصول" data-filter-en="Product group" data-filter-slug="product-group">
             <button type="button" aria-expanded="false">
-                <span class="filter-group-title" data-filter-fa="گروه محصول" data-filter-en="Product group" data-filter-slug="product-group"><i class="bi bi-tools" aria-hidden="true"></i><span>گروه محصول</span></span>
-                <span class="filter-group-arrow"><i class="bi bi-chevron-down" aria-hidden="true"></i></span>
+                <span class="filter-group-title" data-filter-fa="گروه محصول" data-filter-en="Product group" data-filter-slug="product-group">
+                    <i class="bi bi-tools" aria-hidden="true"></i><span>گروه محصول</span>
+                </span>
+                <span class="filter-group-arrow">
+                    <i class="bi bi-chevron-down" aria-hidden="true"></i>
+                </span>
             </button>
             <div class="filter-options" id="typeFilters"></div>
         </div>
         <div class="filter-group" data-filter-fa="نوع تغذیه" data-filter-en="Power type" data-filter-slug="power-type">
             <button type="button" aria-expanded="false">
-                <span class="filter-group-title" data-filter-fa="نوع تغذیه" data-filter-en="Power type" data-filter-slug="power-type"><i class="bi bi-lightning-charge" aria-hidden="true"></i><span>نوع تغذیه</span></span>
-                <span class="filter-group-arrow"><i class="bi bi-chevron-down" aria-hidden="true"></i></span>
+                <span class="filter-group-title" data-filter-fa="نوع تغذیه" data-filter-en="Power type" data-filter-slug="power-type">
+                    <i class="bi bi-lightning-charge" aria-hidden="true"></i><span>نوع تغذیه</span>
+                </span>
+                <span class="filter-group-arrow">
+                    <i class="bi bi-chevron-down" aria-hidden="true"></i>
+                </span>
             </button>
             <div class="filter-options" id="movementFilters"></div>
         </div>
         <div class="filter-group" data-filter-fa="محیط کاربرد" data-filter-en="Application environment" data-filter-slug="application-environment">
             <button type="button" aria-expanded="false">
-                <span class="filter-group-title" data-filter-fa="محیط کاربرد" data-filter-en="Application environment" data-filter-slug="application-environment"><i class="bi bi-building-gear" aria-hidden="true"></i><span>محیط کاربرد</span></span>
-                <span class="filter-group-arrow"><i class="bi bi-chevron-down" aria-hidden="true"></i></span>
+                <span class="filter-group-title" data-filter-fa="محیط کاربرد" data-filter-en="Application environment" data-filter-slug="application-environment">
+                    <i class="bi bi-building-gear" aria-hidden="true"></i><span>محیط کاربرد</span>
+                </span>
+                <span class="filter-group-arrow">
+                    <i class="bi bi-chevron-down" aria-hidden="true"></i>
+                </span>
             </button>
             <div class="filter-options" id="strapFilters"></div>
         </div>
         <div class="filter-group" data-filter-fa="بازه قیمت" data-filter-en="Price range" data-filter-slug="price-range">
             <button type="button" aria-expanded="false">
-                <span class="filter-group-title" data-filter-fa="بازه قیمت" data-filter-en="Price range" data-filter-slug="price-range"><i class="bi bi-cash-stack" aria-hidden="true"></i><span>بازه قیمت</span></span>
-                <span class="filter-group-arrow"><i class="bi bi-chevron-down" aria-hidden="true"></i></span>
+                <span class="filter-group-title" data-filter-fa="بازه قیمت" data-filter-en="Price range" data-filter-slug="price-range">
+                    <i class="bi bi-cash-stack" aria-hidden="true"></i><span>بازه قیمت</span>
+                </span>
+                <span class="filter-group-arrow">
+                    <i class="bi bi-chevron-down" aria-hidden="true"></i>
+                </span>
             </button>
             <div class="price-filter">
                 <div>
@@ -163,7 +189,7 @@
     </section>
 </main>
 
-<partial name="_PurchaseBenefits" />
+<partial name="_PurchaseBenefits"/>
 
 <div class="search-toast" id="searchToast" role="status"></div>
 <style>

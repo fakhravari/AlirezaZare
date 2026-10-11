@@ -1,5 +1,9 @@
-.inner-page #mainNav { background: #102a56; }
-.inner-page { padding-top: 88px; }
+.inner-page #mainNav {
+  background: #102a56;
+}
+.inner-page {
+  padding-top: 88px;
+}
 
 /* Benefits and catalogue action in the shared category menu. */
 #mainNav .mega-menu .mega-bottom {
@@ -53,7 +57,9 @@
   font-size: 12px;
   font-weight: 700;
   text-decoration: none;
-  transition: background .2s ease, box-shadow .2s ease;
+  transition:
+    background 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 #mainNav .mega-menu .mega-bottom > a > i {
@@ -129,7 +135,11 @@
   max-width: 100%;
   box-sizing: border-box;
   flex-wrap: wrap;
-  background-image: linear-gradient(115deg, rgba(255, 255, 255, .94), rgba(250, 247, 241, .98));
+  background-image: linear-gradient(
+    115deg,
+    rgba(255, 255, 255, 0.94),
+    rgba(250, 247, 241, 0.98)
+  );
 }
 
 .inner-page :is(.article-breadcrumb, .cart-breadcrumb) a:focus-visible {
@@ -137,19 +147,24 @@
   outline-offset: 3px;
 }
 
-.inner-page .article-breadcrumb a:not(.breadcrumb-home):is(:hover, :focus-visible) {
+.inner-page
+  .article-breadcrumb
+  a:not(.breadcrumb-home):is(:hover, :focus-visible) {
   background: linear-gradient(135deg, #fff8df, #f2e3b8);
   color: var(--industrial-navy);
-  box-shadow: 0 4px 12px rgba(16, 42, 67, .12);
+  box-shadow: 0 4px 12px rgba(16, 42, 67, 0.12);
 }
 
-.inner-page .article-breadcrumb a:not(.breadcrumb-home):is(:hover, :focus-visible) i {
+.inner-page
+  .article-breadcrumb
+  a:not(.breadcrumb-home):is(:hover, :focus-visible)
+  i {
   color: #806000;
 }
 
 .inner-page .article-breadcrumb .breadcrumb-current {
-  border-color: rgba(255, 255, 255, .4);
-  background: rgba(255, 255, 255, .14);
+  border-color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.14);
   color: #fff;
 }
 
@@ -161,7 +176,7 @@
   border: 1px solid #d6bd69;
   background: linear-gradient(135deg, #fff8df, #f4e7c2);
   color: var(--industrial-navy);
-  box-shadow: inset 0 1px rgba(255, 255, 255, .85);
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.85);
 }
 
 .inner-page .cart-breadcrumb [aria-current] i {
@@ -243,8 +258,16 @@ body .cart-panel .cart-item .cart-remove > i,
 body .page-cart-panel .page-cart-item .cart-remove > i,
 body .search-cart-drawer .search-cart-item .cart-remove > i,
 body .cart-panel .cart-item .cart-remove:is(:hover, :focus, :active) > i,
-body .page-cart-panel .page-cart-item .cart-remove:is(:hover, :focus, :active) > i,
-body .search-cart-drawer .search-cart-item .cart-remove:is(:hover, :focus, :active) > i {
+body
+  .page-cart-panel
+  .page-cart-item
+  .cart-remove:is(:hover, :focus, :active)
+  > i,
+body
+  .search-cart-drawer
+  .search-cart-item
+  .cart-remove:is(:hover, :focus, :active)
+  > i {
   width: auto !important;
   height: auto !important;
   border: 0 !important;
@@ -296,7 +319,11 @@ footer .trust-badges .trust-badge {
   opacity: 0;
   visibility: hidden;
   transform: translateY(14px);
-  transition: opacity .22s ease, visibility .22s ease, transform .22s ease, background-color .2s ease;
+  transition:
+    opacity 0.22s ease,
+    visibility 0.22s ease,
+    transform 0.22s ease,
+    background-color 0.2s ease;
 }
 .back-to-top.is-visible {
   opacity: 1;
@@ -322,26 +349,34 @@ footer .trust-badges .trust-badge {
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .back-to-top { transition: none; }
+  .back-to-top {
+    transition: none;
+  }
 }
 
 /* Shared form behavior: consistent focus and layout-stable validation. */
-form :where(
-  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]),
-  select,
-  textarea
-) {
+form
+  :where(
+    input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not(
+        [type="range"]
+      ),
+    select,
+    textarea
+  ) {
   transition:
     border-color 180ms ease,
     background-color 180ms ease,
     box-shadow 180ms ease;
 }
 
-form :where(
-  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]),
-  select,
-  textarea
-):is(:focus, :focus-visible) {
+form
+  :where(
+    input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not(
+        [type="range"]
+      ),
+    select,
+    textarea
+  ):is(:focus, :focus-visible) {
   border-color: rgba(173, 137, 80, 0.82) !important;
   outline: none !important;
   background-color: #fffdfa;
@@ -406,10 +441,7 @@ body .price-filter input[type="range"]::-moz-range-thumb {
 }
 
 /* Shared editorial badge for section-level kickers on inner pages. */
-.inner-page main :where(
-  .page-kicker,
-  .article-eyebrow
-) {
+.inner-page main :where(.page-kicker, .article-eyebrow) {
   display: inline-flex;
   width: fit-content;
   align-items: center;
@@ -418,7 +450,11 @@ body .price-filter input[type="range"]::-moz-range-thumb {
   padding: 6px 11px;
   border: 1px solid rgba(165, 124, 64, 0.2);
   border-radius: 999px;
-  background: linear-gradient(135deg, rgba(249, 244, 235, 0.92), rgba(255, 253, 249, 0.96));
+  background: linear-gradient(
+    135deg,
+    rgba(249, 244, 235, 0.92),
+    rgba(255, 253, 249, 0.96)
+  );
   box-shadow: inset 0 1px rgba(255, 255, 255, 0.9);
   color: #a57c40 !important;
   font-family: var(--font-body, "Vazirmatn", Tahoma, sans-serif) !important;
@@ -428,10 +464,7 @@ body .price-filter input[type="range"]::-moz-range-thumb {
   letter-spacing: 0 !important;
 }
 
-.inner-page main :where(
-  .page-kicker,
-  .article-eyebrow
-)::before {
+.inner-page main :where(.page-kicker, .article-eyebrow)::before {
   flex: 0 0 17px;
   width: 17px;
   height: 2px;
