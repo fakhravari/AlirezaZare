@@ -148,17 +148,47 @@ window.HNProducts = productCatalog.map((entry, i) => {
     newest: 30 - i,
     variants: ({
       1: {
-        color: { label: "رنگ", options: [{ value: "yellow-black", label: "زرد و مشکی", swatch: "#f4bd19", priceDelta: 0 }, { value: "blue-black", label: "آبی و مشکی", swatch: "#264d79", priceDelta: 0.35 }] },
-        size: { label: "اندازه", options: [{ value: "compact", label: "جمع‌وجور", priceDelta: 0 }, { value: "professional", label: "حرفه‌ای", priceDelta: 1.2 }] },
+        battery: { label: "ظرفیت باتری", options: [{ value: "2ah", label: "۲ آمپرساعت", priceDelta: 0 }, { value: "4ah", label: "۴ آمپرساعت", priceDelta: 1.2 }] },
+        chuck: { label: "قطر سه‌نظام", options: [{ value: "10mm", label: "۱۰ میلی‌متر", priceDelta: 0 }, { value: "13mm", label: "۱۳ میلی‌متر", priceDelta: 0.6 }] },
       },
       4: {
-        color: { label: "رنگ", options: [{ value: "yellow-black", label: "زرد و مشکی", swatch: "#f4bd19", priceDelta: 0 }, { value: "black", label: "مشکی", swatch: "#202b38", priceDelta: 0.25 }] },
-        size: { label: "اندازه", options: [{ value: "standard", label: "استاندارد", priceDelta: 0 }, { value: "large", label: "بزرگ", priceDelta: 0.8 }] },
+        battery: { label: "ظرفیت باتری", options: [{ value: "2ah", label: "۲ آمپرساعت", priceDelta: 0 }, { value: "4ah", label: "۴ آمپرساعت", priceDelta: 1.1 }] },
+        chuck: { label: "ظرفیت سه‌نظام", options: [{ value: "10mm", label: "۱۰ میلی‌متر", priceDelta: 0 }, { value: "13mm", label: "۱۳ میلی‌متر", priceDelta: 0.55 }] },
       },
       16: {
-        color: { label: "رنگ نور", options: [{ value: "warm", label: "آفتابی", swatch: "#f5bd28", priceDelta: 0 }, { value: "neutral", label: "طبیعی", swatch: "#fff4d0", priceDelta: 0.15 }] },
-        size: { label: "اندازه", options: [{ value: "small", label: "کوچک", priceDelta: 0 }, { value: "large", label: "بزرگ", priceDelta: 0.45 }] },
+        temperature: { label: "دمای رنگ نور", options: [{ value: "4000k", label: "۴۰۰۰ کلوین · طبیعی", priceDelta: 0 }, { value: "6500k", label: "۶۵۰۰ کلوین · سفید", priceDelta: 0.15 }] },
+        brightness: { label: "شار نوری", options: [{ value: "1000lm", label: "۱۰۰۰ لومن", priceDelta: 0 }, { value: "2000lm", label: "۲۰۰۰ لومن", priceDelta: 0.45 }] },
       },
+    })[i + 1] || null,
+    accessories: ({
+      1: [
+        { id: "shipping-insurance", name: "بیمهٔ حمل و تحویل کالا", price: 0.35, required: true, description: "پوشش بیمه‌ای سفارش؛ در این پیشنهاد به‌صورت الزامی محاسبه می‌شود." },
+        { id: "sds-bit-set", name: "ست متهٔ چهارشیار بتن", price: 1.25, required: false, description: "مته‌های بتن با اتصال SDS-Plus؛ سازگاری سه‌نظام را بررسی کنید." },
+      ],
+      2: [
+        { id: "battery-pack", name: "باتری یدک سازگار", price: 1.8, required: false, description: "باتری اضافه برای افزایش زمان کار؛ ولتاژ و نوع اتصال را بررسی کنید." },
+        { id: "driver-bit-set", name: "ست سری پیچ‌گوشتی", price: 0.55, required: false, description: "سری‌های پرکاربرد برای باز و بسته‌کردن پیچ‌ها." },
+      ],
+      3: [
+        { id: "sds-bit-set", name: "ست متهٔ چهارشیار بتن", price: 1.45, required: false, description: "مته‌های بتن با اتصال SDS-Plus؛ نوع سه‌نظام را بررسی کنید." },
+        { id: "drill-case", name: "کیف حمل دریل", price: 0.9, required: false, description: "کیف محافظ برای حمل و نگهداری ابزار و متعلقات." },
+      ],
+      4: [
+        { id: "battery-charger-kit", name: "باتری و شارژر سازگار", price: 2.4, required: false, description: "پیش از سفارش، سازگاری باتری و شارژر با پلتفرم دستگاه را بررسی کنید." },
+        { id: "driver-bit-set", name: "ست سری پیچ‌گوشتی", price: 0.55, required: false, description: "سری‌های پرکاربرد برای نصب و مونتاژ." },
+      ],
+      6: [
+        { id: "meter-case", name: "کیف محافظ مولتی‌متر", price: 0.65, required: false, description: "برای نگهداری دستگاه و پراب‌ها در محیط کار." },
+        { id: "probe-set", name: "ست پراب اندازه‌گیری", price: 0.45, required: false, description: "پراب یدک؛ ردهٔ ایمنی و سازگاری اتصال را بررسی کنید." },
+      ],
+      11: [
+        { id: "solder-tips", name: "مجموعه نوک هویه", price: 0.85, required: false, description: "نوک‌های جایگزین؛ قطر و سازگاری با دستهٔ هویه را بررسی کنید." },
+        { id: "solder-wire", name: "سیم لحیم الکترونیکی", price: 0.38, required: false, description: "سیم لحیم مناسب مونتاژ و تعمیر بردهای الکترونیکی." },
+      ],
+      16: [
+        { id: "worklight-tripod", name: "پایهٔ سه‌پایه چراغ کار", price: 1.15, required: false, description: "برای قرارگیری چراغ در ارتفاع؛ نوع اتصال پایه را بررسی کنید." },
+        { id: "worklight-battery", name: "باتری یدک چراغ کار", price: 1.35, required: false, description: "باتری جایگزین؛ ولتاژ و سازگاری با مدل چراغ را بررسی کنید." },
+      ],
     })[i + 1] || null,
     badge: i % 7 === 0 ? "پرفروش" : i % 5 === 0 ? "جدید" : "",
   };

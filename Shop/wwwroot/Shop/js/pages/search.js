@@ -273,6 +273,14 @@ function render(reset = false, returnToStart = false) {
   $("#resultsEnd").hidden = !finished;
   $("#clearFilters").hidden = !hasActiveFilters();
   renderChips();
+  const breadcrumb = $("#searchBreadcrumb ol");
+  if (breadcrumb) {
+    const selectedTypes = [...state.type];
+    const categoryPath = selectedTypes.length === 1
+      ? products.find((product) => product.type === selectedTypes[0])?.categoryPath || ["ابزار و تجهیزات", selectedTypes[0]]
+      : ["ابزار و تجهیزات", ...(selectedTypes.length ? ["گروه‌های منتخب"] : [])];
+    breadcrumb.innerHTML = `<li><a href="/"><i class="bi bi-house-door" aria-hidden="true"></i><span>خانه</span></a></li>${categoryPath.map((part) => `<li><i class="bi bi-chevron-left" aria-hidden="true"></i><span>${part}</span></li>`).join("")}<li class="cart-breadcrumb-current"><i class="bi bi-chevron-left" aria-hidden="true"></i><span aria-current="page">${selectedTypes.length ? "نتایج جستجو" : "جستجو و انتخاب ابزار"}</span></li>`;
+  }
   syncUrl();
   if (returnToStart) requestAnimationFrame(scrollToResultsStart);
 }
