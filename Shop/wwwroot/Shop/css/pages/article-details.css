@@ -40,7 +40,7 @@
 .article-next-step { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; padding: 26px; border-radius: 18px; background: var(--industrial-navy); color: #fff; }
 .article-next-step > div { width: 100%; }
 .article-next-step h3 { color: #fff; font-size: 21px; line-height: 1.7; }
-.article-body .article-next-step p { color: var(--industrial-line); font-size: 13px; }
+.article-body .article-next-step p { color: rgba(255, 255, 255, .76); font-size: 13px; }
 .article-next-step > a { padding: 11px 16px; border-radius: 9px; background: var(--industrial-yellow); color: var(--industrial-navy); font-size: 13px; }
 .article-next-step > a.article-consult { background: transparent; border: 1px solid var(--industrial-steel); color: #fff; }
 .article-related { padding-bottom: 64px; }

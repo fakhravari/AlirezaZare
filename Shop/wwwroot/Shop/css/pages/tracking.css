@@ -96,7 +96,7 @@
   transition: border-color .2s ease, background-color .2s ease, box-shadow .2s ease;
 }
 
-.tracking-input input::placeholder { color: var(--industrial-line); }
+.tracking-input input::placeholder { color: var(--industrial-muted); }
 .tracking-input input:focus { border-color: var(--industrial-yellow-dark); background: #fff; box-shadow: 0 0 0 4px rgba(183, 144, 82, .12); }
 .tracking-input > i { position: absolute; top: 50%; right: 16px; color: var(--industrial-yellow-dark); font-size: 19px; pointer-events: none; transform: translateY(-50%); }
 

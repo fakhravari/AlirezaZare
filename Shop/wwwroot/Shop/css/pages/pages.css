@@ -1752,7 +1752,7 @@ textarea,
   font-size: 11px;
 }
 .article-author small {
-  color: var(--industrial-line);
+  color: var(--industrial-muted);
   font-size: 9px;
 }
 .article-link-primary {
@@ -2327,7 +2327,7 @@ textarea,
 }
 .article-body figcaption {
   margin-top: 9px;
-  color: var(--industrial-line);
+  color: var(--industrial-muted);
   font-size: 10px;
   text-align: center;
 }
@@ -3401,7 +3401,7 @@ body {
   font-size: 12px;
 }
 .page-brand-menu small {
-  color: var(--industrial-line);
+  color: var(--industrial-muted);
   font-size: 8px;
   letter-spacing: 0.5px;
 }

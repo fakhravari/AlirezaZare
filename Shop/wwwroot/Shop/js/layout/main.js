@@ -590,6 +590,9 @@ $(function () {
       const keepOpen = () => {
         window.clearTimeout(closeTimer);
         dropdown.classList.add("is-mega-open");
+        if (!buttons.some((button) => button.classList.contains("active"))) {
+          activate(buttons[0]);
+        }
       };
       const closeSoon = () => {
         window.clearTimeout(closeTimer);

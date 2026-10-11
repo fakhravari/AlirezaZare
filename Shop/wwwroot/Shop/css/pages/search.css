@@ -584,7 +584,7 @@ select {
 
     .filter-option small {
         margin-right: auto;
-        color: var(--industrial-line);
+        color: var(--industrial-muted);
     }
 
 .price-filter > div {

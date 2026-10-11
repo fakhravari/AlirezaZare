@@ -841,7 +841,7 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop { background: rgba(3, 13
 .account-welcome-brand { display: inline-flex; align-items: center; gap: 10px; color: var(--industrial-yellow); font-size: 12px; }
 .account-welcome-brand::before { content: ''; width: 24px; height: 1px; background: var(--industrial-yellow); }
 .account-welcome h1 { margin: 14px 0 10px; color: #fff; font-size: clamp(28px, 3vw, 42px); font-weight: 800; line-height: 1.5; }
-.account-welcome p { margin: 0; color: var(--industrial-line); font-size: 14px; line-height: 2; }
+.account-welcome p { margin: 0; color: rgba(255, 255, 255, .76); font-size: 14px; line-height: 2; }
 .account-welcome-links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 23px; }
 .account-welcome-links a { display: inline-flex; align-items: center; gap: 9px; padding: 11px 16px; border: 1px solid var(--industrial-steel); border-radius: 11px; color: var(--industrial-bg); font-size: 12px; transition: background .2s ease, border-color .2s ease; }
 .account-welcome-links a:first-child { border-color: var(--industrial-yellow); background: var(--industrial-yellow); color: var(--industrial-navy); font-weight: 700; }
