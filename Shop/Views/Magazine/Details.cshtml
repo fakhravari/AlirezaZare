@@ -115,22 +115,9 @@
                         <a asp-controller="Magazine" asp-action="Index">@Model.Data.Category</a>
 
                     </div>
-                    @if (Model.Data.Slug == "solar-watch-guide")
-                    {
-                        <section class="article-checklist" aria-labelledby="solarChecklistTitle">
-                            <span class="article-eyebrow">از مطالعه تا انتخاب</span>
-                            <h2 id="solarChecklistTitle">چک‌لیست انتخاب ساعت خورشیدی</h2>
-                            <p>پیش از خرید، این موارد را برای مدل موردنظرتان بررسی کنید.</p>
-                            <label><input type="checkbox" /> شرایط و زمان شارژ را در دفترچه مدل بررسی کردم.</label>
-                            <label><input type="checkbox" /> ذخیره انرژی را با شیوه استفاده‌ام مقایسه کردم.</label>
-                            <label><input type="checkbox" /> ابعاد قاب و راحتی بند را بررسی کردم.</label>
-                            <label><input type="checkbox" /> درباره ضمانت و خدمات پس از فروش اطلاعات گرفتم.</label>
-                            <p id="articleChecklistStatus" role="status">۰ از ۴ مورد بررسی شده</p>
-                        </section>
-                    }
                     <div class="article-next-step">
-                        <div><span class="article-eyebrow">انتخاب بعدی شما</span><h3>راهنما را خواندید؛ حالا ساعت‌ها را ببینید.</h3><p>مدل‌ها را مقایسه کنید و گزینه مناسب خود را پیدا کنید.</p></div>
-                        <a href="@Url.Content(Model.Data.Slug == "solar-watch-guide" ? "~/Search?movement=solar" : "~/Search")">مشاهده ساعت‌ها <i class="bi bi-arrow-left" aria-hidden="true"></i></a>
+                        <div><span class="article-eyebrow">انتخاب بعدی شما</span><h3>راهنما را خواندید؛ حالا ابزارها را بررسی کنید.</h3><p>مشخصات محصولات را مقایسه کنید و گزینه مناسب کارتان را پیدا کنید.</p></div>
+                        <a href="@Url.Content("~/Search")">مشاهده محصولات <i class="bi bi-arrow-left" aria-hidden="true"></i></a>
                     </div>
                 </article>
             </div>
@@ -139,8 +126,8 @@
     <section class="container article-related" aria-labelledby="relatedTitle">
         <span class="article-eyebrow">ادامه مسیر مطالعه</span><h2 id="relatedTitle">این راهنماها را هم بخوانید</h2>
         <div>
-            <a asp-controller="Magazine" asp-action="Details" asp-route-slug="watch-movements"><img src="~/Shop/images/products/tool-multimeter-kit.png" alt="ساعت با صفحه کلاسیک" loading="lazy" /><span><small>شناخت موتور</small><strong>تفاوت کوارتز، اتوماتیک و مکانیکی</strong><i class="bi bi-arrow-left" aria-hidden="true"></i></span></a>
-            <a asp-controller="Magazine" asp-action="Details" asp-route-slug="watch-care"><img src="~/Shop/images/products/tool-led-worklight.png" alt="جزئیات ساعت و بند" loading="lazy" /><span><small>مراقبت از ساعت</small><strong>نکات کاربردی نگهداری ساعت</strong><i class="bi bi-arrow-left" aria-hidden="true"></i></span></a>
+            <a asp-controller="Magazine" asp-action="Details" asp-route-slug="multimeter-buying-guide"><img src="~/Shop/images/products/tool-multimeter-kit.png" alt="مولتی‌متر دیجیتال و پراب‌های اندازه‌گیری" loading="lazy" /><span><small>راهنمای خرید</small><strong>چطور مولتی‌متر مناسب انتخاب کنیم؟</strong><i class="bi bi-arrow-left" aria-hidden="true"></i></span></a>
+            <a asp-controller="Magazine" asp-action="Details" asp-route-slug="electrical-tool-safety"><img src="~/Shop/images/products/tool-led-worklight.png" alt="ابزار و تجهیزات ایمنی کارگاهی" loading="lazy" /><span><small>ایمنی و نگهداری</small><strong>چک‌لیست ایمنی کار با ابزار برقی</strong><i class="bi bi-arrow-left" aria-hidden="true"></i></span></a>
         </div>
     </section>
 

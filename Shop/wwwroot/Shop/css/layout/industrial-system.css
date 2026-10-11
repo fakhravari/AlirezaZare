@@ -8078,7 +8078,7 @@ html body :is(
 }
 
 #productView .product-detail-price > #productFinalPrice {
-  font-size: clamp(29px, 2.5vw, 36px);
+  font-size: clamp(31px, 2.7vw, 38px);
   font-weight: 950;
 }
 
@@ -8092,12 +8092,12 @@ html body :is(
   }
   #productView .product-detail-price > .product-price-heading { grid-row: 1; }
   #productView .product-detail-price > .product-detail-sale-meta { grid-row: 2; }
-  #productView .product-detail-price > #productFinalPrice { grid-row: 3; font-size: 25px; }
+  #productView .product-detail-price > #productFinalPrice { grid-row: 3; font-size: 27px; }
   #productView .product-detail-price > .product-price-context { grid-row: 4; }
 }
 
 #productView .product-detail-price {
-  grid-template-columns: minmax(0, .76fr) minmax(0, 1.24fr);
+  grid-template-columns: minmax(0, .84fr) minmax(0, 1.16fr);
 }
 
 #productView .product-detail-price > .product-price-context {
@@ -8160,4 +8160,32 @@ html body :is(
 
 .inner-page .search-intro .taxonomy-breadcrumb li > .bi-chevron-left {
   color: #ffd44f;
+}
+
+#productView .product-price-trust-list {
+  display: grid;
+  gap: 5px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+#productView .product-price-trust-list > li {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #66583e;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.6;
+  white-space: nowrap;
+}
+
+#productView .product-price-trust-list > li > i {
+  color: #947321;
+  font-size: 13px;
+}
+
+@media (max-width: 575px) {
+  #productView .product-price-trust-list > li { font-size: 12px; }
 }

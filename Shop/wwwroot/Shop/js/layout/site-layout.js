@@ -89,6 +89,17 @@
     document.querySelectorAll("[data-site-footer-slot]").forEach((slot) => slot.outerHTML = footerTemplate());
     if (document.querySelector("[data-site-header]") && !document.querySelector("[data-site-panels]")) {
       document.body.insertAdjacentHTML("beforeend", panelsTemplate());
+      const cartTotal = document.querySelector(".page-cart-total");
+      const cartAssurance = document.querySelector(".page-cart-footer > small");
+      if (cartTotal && cartAssurance) {
+        const totalMain = document.createElement("div");
+        totalMain.className = "page-cart-total-main";
+        while (cartTotal.firstChild) totalMain.append(cartTotal.firstChild);
+        cartTotal.append(totalMain);
+        cartAssurance.className = "page-cart-assurance";
+        cartAssurance.innerHTML = '<i class="bi bi-shield-check"></i><span><b>خرید امن</b><em>ضمانت اصالت کالا</em></span>';
+        cartTotal.append(cartAssurance);
+      }
     }
     connectProfileRoutes();
   }

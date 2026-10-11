@@ -1,161 +1,57 @@
 @model PageModel
 @{
     var posts = new[] {
-        new { Slug = "solar-watch-guide", Branch = "buying", Topic = "daily-watch", Category = "راهنمای خرید", Title = "ساعت خورشیدی برای چه کسانی مناسب است؟", Summary = "پیش از انتخاب، شرایط شارژ، ذخیره انرژی و شیوه استفاده خود را بررسی کنید.", Image = "tool-hammer-drill.png" },
-        new { Slug = "small-wrist-watch", Branch = "buying", Topic = "choose-watch", Category = "انتخاب ساعت", Title = "راهنمای انتخاب ساعت برای مچ‌های ظریف", Summary = "توجه به طول قاب، ضخامت و فرم بند برای نشستن راحت‌تر روی مچ.", Image = "tool-multimeter-kit.png" },
-        new { Slug = "watch-gift-checklist", Branch = "buying", Topic = "gift-watch", Category = "ساعت هدیه", Title = "چک‌لیست خرید ساعت برای سالگرد", Summary = "از شناخت سلیقه تا قابلیت تنظیم بند و بسته‌بندی هدیه.", Image = "tool-led-worklight.png" },
-        new { Slug = "watch-office-style", Branch = "style", Topic = "formal-watch", Category = "استایل رسمی", Title = "ساعت مناسب محیط کار و جلسه", Summary = "بررسی خوانایی، سادگی صفحه و هماهنگی ساعت با لباس کاری.", Image = "tool-soldering-station.png" },
-        new { Slug = "weekend-watch-style", Branch = "style", Topic = "sport-watch", Category = "استایل اسپرت", Title = "انتخاب ساعت برای آخر هفته", Summary = "راحتی بند و تناسب رنگ برای پوشش آزاد و استفاده طولانی.", Image = "tool-hammer-drill.png" },
-        new { Slug = "watch-jewelry-match", Branch = "style", Topic = "age-occasion", Category = "سبک و استایل", Title = "چطور ساعت را با انگشتر و دستبند هماهنگ کنیم؟", Summary = "توجه به رنگ فلز، فاصله دستبند و تعادل جزئیات روی مچ.", Image = "tool-led-worklight.png" },
-        new { Slug = "watch-clasp-types", Branch = "comparison", Topic = "model-comparison", Category = "مقایسه مدل‌ها", Title = "قفل پروانه‌ای یا سگکی؛ تفاوت در استفاده روزانه", Summary = "مقایسه سهولت بستن، تنظیم اندازه و راحتی قفل روی مچ.", Image = "tool-soldering-station.png" },
-        new { Slug = "watch-date-display", Branch = "comparison", Topic = "model-comparison", Category = "مقایسه مدل‌ها", Title = "ساعت تاریخ‌دار یا صفحه ساده؟", Summary = "انتخاب میان نمایش اطلاعات بیشتر و طراحی خلوت‌تر صفحه.", Image = "tool-multimeter-kit.png" },
-        new { Slug = "quartz-service-guide", Branch = "education", Topic = "watch-care", Category = "نگهداری ساعت", Title = "پیش از تعویض باتری ساعت چه بدانیم؟", Summary = "بررسی خدمات موردنیاز و شرایط آب‌بندی پس از بازشدن قاب.", Image = "tool-hammer-drill.png" },
-        new { Slug = "watch-strap-sizing", Branch = "education", Topic = "case-size", Category = "اندازه ساعت", Title = "عرض بند ساعت را چگونه انتخاب کنیم؟", Summary = "تفاوت عرض محل اتصال بند با قطر قاب و اهمیت سازگاری قطعات.", Image = "tool-hammer-drill.png" },
-        new { Slug = "brand-catalog-guide", Branch = "brands", Topic = "brand-introduction", Category = "برندشناسی", Title = "کاتالوگ برند ساعت را چگونه بخوانیم؟", Summary = "آشنایی با شماره مرجع، نام مجموعه و مشخصات هر مدل.", Image = "tool-multimeter-kit.png" },
-        new { Slug = "brand-collections", Branch = "brands", Topic = "best-brand-models", Category = "مجموعه‌های برند", Title = "تفاوت مجموعه‌های مختلف یک برند ساعت", Summary = "مقایسه کاربرد و زبان طراحی مجموعه‌های رسمی و روزمره.", Image = "tool-led-worklight.png" },
-        new { Slug = "watch-warranty-guide", Branch = "authenticity", Topic = "buying-tips", Category = "نکات خرید ساعت", Title = "پیش از خرید، ضمانت ساعت را چگونه بررسی کنیم؟", Summary = "توجه به ارائه‌دهنده خدمات، مدت پوشش و مدارک موردنیاز.", Image = "tool-soldering-station.png" },
-        new { Slug = "watch-reference-check", Branch = "authenticity", Topic = "original-watch", Category = "تشخیص اصالت", Title = "تطبیق شماره مرجع ساعت با مشخصات محصول", Summary = "بررسی یکسان‌بودن مدل، رنگ، بند و اطلاعات کاتالوگ سازنده.", Image = "tool-hammer-drill.png" },
-        new { Slug = "choosing-watch-for-wrist", Branch = "buying", Topic = "choose-watch", Category = "چگونه ساعت مناسب انتخاب کنیم؟", Title = "چطور ساعت مچی مناسب استایل و اندازه مچ خود انتخاب کنیم؟", Summary = "از اندازه قاب تا جنس بند؛ جزئیاتی که انتخاب شما را شخصی‌تر می‌کنند.", Image = "tool-hammer-drill.png" },
-        new { Slug = "watch-movements", Branch = "education", Topic = "quartz-automatic", Category = "تفاوت کوارتز و اتوماتیک", Title = "تفاوت ساعت اتوماتیک، کوارتز و مکانیکی به زبان ساده", Summary = "شناخت سازوکار موتور ساعت و تفاوت‌های آن در استفاده روزمره.", Image = "tool-multimeter-kit.png" },
-        new { Slug = "watch-care", Branch = "education", Topic = "watch-care", Category = "نحوه نگهداری ساعت", Title = "هفت نکته کاربردی برای افزایش عمر ساعت و بند چرمی", Summary = "عادت‌های ساده برای مراقبت از قاب، موتور و بند ساعت محبوب شما.", Image = "tool-led-worklight.png" },
-        new { Slug = "authentic-watch", Branch = "authenticity", Topic = "original-watch", Category = "تشخیص ساعت اصل", Title = "هنگام خرید ساعت اصل به چه جزئیاتی توجه کنیم؟", Summary = "بررسی مشخصات، مدارک و اعتبار فروشنده پیش از انتخاب نهایی.", Image = "tool-soldering-station.png" },
-        new { Slug = "watch-strap-guide", Branch = "comparison", Topic = "model-comparison", Category = "مقایسه مدل‌ها", Title = "بند چرمی، استیل یا سیلیکونی؛ کدام برای شما مناسب‌تر است؟", Summary = "مقایسه راحتی و ظاهر بندها برای محل کار، مهمانی و استفاده روزمره.", Image = "tool-multimeter-kit.png" },
-        new { Slug = "watch-gift-guide", Branch = "buying", Topic = "gift-watch", Category = "بهترین ساعت برای هدیه", Title = "راهنمای انتخاب ساعت برای هدیه؛ از سلیقه تا اندازه", Summary = "چند قدم ساده برای انتخاب هدیه‌ای کاربردی و متناسب با سبک زندگی.", Image = "tool-soldering-station.png" },
-        new { Slug = "watch-storage", Branch = "education", Topic = "watch-care", Category = "نحوه نگهداری ساعت", Title = "وقتی از ساعت استفاده نمی‌کنیم، چطور از آن نگهداری کنیم؟", Summary = "انتخاب جای مناسب و مراقبت از ساعت در فاصله بین استفاده‌ها.", Image = "tool-led-worklight.png" },
-        new { Slug = "watch-dial-guide", Branch = "education", Topic = "watch-movements", Category = "انواع موتور ساعت", Title = "آشنایی با اجزای صفحه ساعت؛ عقربه‌ها و نمایشگرها", Summary = "راهنمای ساده خواندن صفحه و شناخت کاربرد اجزای مختلف ساعت.", Image = "tool-hammer-drill.png" },
-        new { Slug = "dress-watch", Branch = "style", Topic = "formal-watch", Category = "ساعت مناسب لباس رسمی", Title = "ساعت رسمی را چگونه با لباس هماهنگ کنیم؟", Summary = "انتخاب رنگ، ضخامت و بند برای یک استایل رسمی و ساده.", Image = "tool-multimeter-kit.png" },
-        new { Slug = "daily-watch", Branch = "buying", Topic = "daily-watch", Category = "انتخاب ساعت برای استفاده روزمره", Title = "برای استفاده روزمره چه ساعتی انتخاب کنیم؟", Summary = "راحتی، خوانایی و کاربرد؛ سه معیار برای ساعت هر روز شما.", Image = "tool-hammer-drill.png" },
-        new { Slug = "watch-documents", Branch = "authenticity", Topic = "buying-tips", Category = "نکات خرید ساعت", Title = "هنگام تحویل ساعت چه مدارکی دریافت کنیم؟", Summary = "مرور فاکتور، مشخصات مدل و اطلاعات ضمانت پیش از خروج از فروشگاه.", Image = "tool-soldering-station.png" },
-        new { Slug = "watch-online-buying", Branch = "authenticity", Topic = "buying-mistakes", Category = "اشتباهات رایج هنگام خرید", Title = "پیش از خرید اینترنتی ساعت چه سؤال‌هایی بپرسیم؟", Summary = "یک چک‌لیست کاربردی برای مقایسه محصول و اطلاعات فروشنده.", Image = "tool-hammer-drill.png" },
-        new { Slug = "watch-crown", Branch = "education", Topic = "watch-movements", Category = "انواع موتور ساعت", Title = "تاج ساعت چیست و چه کاربردی دارد؟", Summary = "آشنایی با دکمه کنار قاب و نکات استفاده از آن.", Image = "tool-multimeter-kit.png" },
-        new { Slug = "watch-service-signs", Branch = "education", Topic = "watch-care", Category = "نحوه نگهداری ساعت", Title = "چه نشانه‌هایی می‌گویند ساعت نیاز به بررسی دارد؟", Summary = "تغییرات عملکرد و ظاهر را پیش از جدی‌ترشدن پیگیری کنید.", Image = "tool-led-worklight.png" },
-        new { Slug = "watch-travel", Branch = "education", Topic = "watch-care", Category = "نحوه نگهداری ساعت", Title = "چطور ساعت را برای سفر بسته‌بندی کنیم؟", Summary = "مراقبت از قاب و بند هنگام جابه‌جایی و اقامت.", Image = "tool-soldering-station.png" },
-        new { Slug = "watch-size-measure", Branch = "education", Topic = "case-size", Category = "راهنمای اندازه قاب", Title = "اندازه ساعت را فراتر از قطر قاب بررسی کنید", Summary = "چرا دو ساعت با قطر یکسان، روی مچ متفاوت دیده می‌شوند؟", Image = "tool-hammer-drill.png" },
-        new { Slug = "watch-by-budget", Branch = "buying", Topic = "budget-watch", Category = "انتخاب براساس بودجه", Title = "چطور بر اساس بودجه ساعت مناسب انتخاب کنیم؟", Summary = "راهی ساده برای تعیین بودجه و مقایسه امکانات ساعت‌ها.", Image = "tool-hammer-drill.png" },
-        new { Slug = "formal-watch-choice", Branch = "buying", Topic = "formal-choice", Category = "انتخاب برای استایل رسمی", Title = "انتخاب ساعت برای استایل رسمی", Summary = "تناسب قاب، صفحه و بند با پوشش رسمی و محیط کار.", Image = "tool-multimeter-kit.png" },
-        new { Slug = "water-resistance", Branch = "education", Topic = "water-resistance", Category = "مقاومت در برابر آب", Title = "مقاومت در برابر آب در ساعت دقیقاً یعنی چه؟", Summary = "معنای درجه‌های مقاومت آب و محدودیت‌های استفاده روزمره.", Image = "tool-hammer-drill.png" },
-        new { Slug = "watch-glass-types", Branch = "education", Topic = "watch-glass", Category = "انواع شیشه ساعت", Title = "مینرال، سافایر و اکریلیک؛ تفاوت شیشه‌های ساعت", Summary = "مقایسه شفافیت، مقاومت و ویژگی‌های انواع شیشه ساعت.", Image = "tool-soldering-station.png" },
-        new { Slug = "brand-history", Branch = "brands", Topic = "brand-history", Category = "تاریخچه برندها", Title = "تاریخچه برندهای ساعت چگونه شکل گرفته است؟", Summary = "نگاهی کوتاه به مسیر رشد نام‌های شناخته‌شده ساعت‌سازی.", Image = "tool-led-worklight.png" },
-        new { Slug = "brand-introduction", Branch = "brands", Topic = "brand-introduction", Category = "معرفی برندها", Title = "چطور یک برند ساعت را بهتر بشناسیم؟", Summary = "معیارهای شناخت هویت، تخصص و جایگاه برندهای ساعت.", Image = "tool-hammer-drill.png" },
-        new { Slug = "brand-comparison", Branch = "brands", Topic = "brand-comparison", Category = "مقایسه برندها", Title = "مقایسه برندهای ساعت؛ از کجا شروع کنیم؟", Summary = "روشی منصفانه برای مقایسه برندها در یک بازه قیمتی.", Image = "tool-hammer-drill.png" },
-        new { Slug = "best-brand-models", Branch = "brands", Topic = "best-brand-models", Category = "بهترین مدل‌های هر برند", Title = "بهترین مدل‌های هر برند را چگونه پیدا کنیم؟", Summary = "انتخاب مدل شاخص بر اساس نیاز، بودجه و کاربرد واقعی.", Image = "tool-soldering-station.png" },
-        new { Slug = "compare-dress-models", Branch = "comparison", Topic = "model-comparison", Category = "مقایسه مدل‌ها", Title = "مقایسه ساعت‌های رسمی محبوب", Summary = "بررسی خوانایی، ضخامت، بند و تناسب مدل‌های رسمی.", Image = "tool-multimeter-kit.png" },
-        new { Slug = "compare-watch-brands", Branch = "comparison", Topic = "compare-brands", Category = "مقایسه برندها", Title = "مقایسه دو برند ساعت در یک بازه قیمت", Summary = "چه معیارهایی مقایسه برندها را کاربردی‌تر می‌کنند؟", Image = "tool-led-worklight.png" },
-        new { Slug = "movement-comparison", Branch = "comparison", Topic = "movement-comparison", Category = "مقایسه موتورهای ساعت", Title = "مقایسه موتورهای ساعت برای استفاده روزانه", Summary = "دقت، نگهداری و تجربه استفاده از موتورهای رایج.", Image = "tool-multimeter-kit.png" },
-        new { Slug = "price-range-comparison", Branch = "comparison", Topic = "price-comparison", Category = "مقایسه بازه‌های قیمتی", Title = "در هر بازه قیمتی چه انتظاری از ساعت داشته باشیم؟", Summary = "مقایسه امکانات و کیفیت ساخت بدون تمرکز صرف بر قیمت.", Image = "tool-hammer-drill.png" },
-        new { Slug = "serial-number-guide", Branch = "authenticity", Topic = "original-watch", Category = "تشخیص ساعت اصل", Title = "شماره سریال ساعت چه اطلاعاتی به ما می‌دهد؟", Summary = "کاربرد شماره مرجع و سریال و محدودیت آن‌ها در تشخیص اصالت.", Image = "tool-soldering-station.png" },
-        new { Slug = "common-buying-mistakes", Branch = "authenticity", Topic = "buying-mistakes", Category = "اشتباهات رایج خرید", Title = "پنج اشتباه رایج هنگام خرید ساعت", Summary = "خطاهایی که مقایسه و انتخاب ساعت را دشوار می‌کنند.", Image = "tool-hammer-drill.png" },
-        new { Slug = "sport-style-watch", Branch = "style", Topic = "sport-watch", Category = "ساعت مناسب استایل اسپرت", Title = "چه ساعتی برای استایل اسپرت مناسب است؟", Summary = "انتخاب بند، رنگ و ابعاد برای پوشش اسپرت.", Image = "tool-hammer-drill.png" },
-        new { Slug = "gift-style-watch", Branch = "style", Topic = "gift-style", Category = "ساعت مناسب هدیه", Title = "ساعت مناسب هدیه؛ کلاسیک یا مدرن؟", Summary = "هماهنگ‌کردن انتخاب هدیه با سلیقه دریافت‌کننده.", Image = "tool-led-worklight.png" },
-        new { Slug = "watch-by-age", Branch = "style", Topic = "age-occasion", Category = "سن و موقعیت", Title = "انتخاب ساعت براساس سن و موقعیت", Summary = "چطور کاربرد و موقعیت را مهم‌تر از قواعد کلی بدانیم.", Image = "tool-multimeter-kit.png" },
-        new { Slug = "minimal-watch-style", Branch = "style", Topic = "formal-watch", Category = "استایل رسمی و مینیمال", Title = "راهنمای ست‌کردن ساعت مینیمال", Summary = "ایده‌هایی ساده برای استفاده روزمره و رسمی.", Image = "tool-soldering-station.png" },
-        new { Slug = "automatic-power-reserve", Branch = "education", Topic = "watch-movements", Category = "انواع موتور ساعت", Title = "ذخیره انرژی در ساعت اتوماتیک چیست؟", Summary = "آشنایی با مدت کارکرد ساعت مکانیکی پس از کنارگذاشتن.", Image = "tool-multimeter-kit.png" },
-        new { Slug = "watch-lume-guide", Branch = "education", Topic = "watch-movements", Category = "آموزش ساعت", Title = "شب‌تاب ساعت چگونه کار می‌کند؟", Summary = "نکات مهم درباره خوانایی صفحه در نور کم.", Image = "tool-hammer-drill.png" },
-        new { Slug = "watch-case-materials", Branch = "education", Topic = "case-size", Category = "قاب ساعت", Title = "تفاوت جنس‌های رایج قاب ساعت", Summary = "مقایسه استیل و دیگر مواد رایج از نظر کاربرد و نگهداری.", Image = "tool-soldering-station.png" },
-        new { Slug = "first-watch-guide", Branch = "buying", Topic = "choose-watch", Category = "راهنمای خرید", Title = "راهنمای خرید اولین ساعت مچی", Summary = "مهم‌ترین معیارها برای یک انتخاب ساده و ماندگار.", Image = "tool-hammer-drill.png" },
-        new { Slug = "couple-watch-guide", Branch = "buying", Topic = "gift-watch", Category = "ساعت هدیه و ست", Title = "چطور ساعت ست انتخاب کنیم؟", Summary = "هماهنگی دو ساعت بدون یکسان‌بودن کامل طراحی.", Image = "tool-led-worklight.png" },
-        new { Slug = "watch-color-guide", Branch = "style", Topic = "age-occasion", Category = "سبک و استایل", Title = "انتخاب رنگ صفحه و بند ساعت", Summary = "هماهنگی رنگ ساعت با پوشش و زیورآلات روزمره.", Image = "tool-led-worklight.png" }
+        new { Slug = "choosing-work-drill", Branch = "buying", Topic = "tools", Category = "راهنمای خرید", Title = "راهنمای انتخاب دریل برای خانه و کارگاه", Summary = "از نوع کار و منبع تغذیه تا سه‌نظام و متعلقات؛ معیارهای انتخاب یک دریل متناسب با نیازتان.", Image = "tool-hammer-drill.png" },
+        new { Slug = "multimeter-buying-guide", Branch = "buying", Topic = "measurement", Category = "راهنمای خرید", Title = "چطور مولتی‌متر مناسب انتخاب کنیم؟", Summary = "نوع اندازه‌گیری، رده ایمنی و کیفیت پراب‌ها را پیش از خرید مولتی‌متر بررسی کنید.", Image = "tool-multimeter-kit.png" },
+        new { Slug = "soldering-station-basics", Branch = "education", Topic = "soldering", Category = "آموزش تخصصی", Title = "راهنمای انتخاب ایستگاه لحیم‌کاری", Summary = "توان، کنترل دما و نوع نوک هویه را با کارتان هماهنگ کنید.", Image = "tool-soldering-station.png" },
+        new { Slug = "worklight-selection", Branch = "buying", Topic = "lighting", Category = "راهنمای خرید", Title = "چراغ کار مناسب تعمیرگاه و محیط نصب", Summary = "شدت نور، زاویه تابش، پایه و منبع تغذیه را متناسب با محل کار انتخاب کنید.", Image = "tool-led-worklight.png" },
+        new { Slug = "drill-bit-matching", Branch = "education", Topic = "tools", Category = "آموزش تخصصی", Title = "انتخاب مته بر اساس جنس سطح", Summary = "مته چوب، فلز و مصالح کاربردهای متفاوتی دارند؛ شکل نوک و نوع اتصال را بشناسید.", Image = "tool-hammer-drill.png" },
+        new { Slug = "electrical-tool-safety", Branch = "safety", Topic = "safety", Category = "ایمنی و نگهداری", Title = "چک‌لیست ایمنی هنگام کار با ابزار برقی", Summary = "چند بررسی ساده پیش از شروع کار به کاهش خطر آسیب و خرابی ابزار کمک می‌کند.", Image = "tool-multimeter-kit.png" },
+        new { Slug = "battery-tool-care", Branch = "safety", Topic = "battery", Category = "ایمنی و نگهداری", Title = "نگهداری باتری ابزار شارژی", Summary = "روش شارژ، دما و محل نگهداری در عمر و عملکرد باتری ابزار اثر دارند.", Image = "tool-hammer-drill.png" },
+        new { Slug = "soldering-tip-care", Branch = "safety", Topic = "soldering", Category = "ایمنی و نگهداری", Title = "چطور از نوک هویه مراقبت کنیم؟", Summary = "تمیزکاری مناسب و انتخاب دمای درست به حفظ نوک هویه و کیفیت لحیم کمک می‌کند.", Image = "tool-soldering-station.png" },
+        new { Slug = "power-tool-buying-checklist", Branch = "buying", Topic = "tools", Category = "راهنمای خرید", Title = "پیش از خرید ابزار برقی چه چیزهایی را بررسی کنیم؟", Summary = "مشخصات فنی، اقلام همراه، ضمانت و سازگاری را قبل از نهایی‌کردن سفارش تطبیق دهید.", Image = "tool-led-worklight.png" },
+        new { Slug = "multimeter-measurement-safety", Branch = "safety", Topic = "measurement", Category = "ایمنی و نگهداری", Title = "نکات ایمنی اندازه‌گیری با مولتی‌متر", Summary = "انتخاب حالت و ورودی درست، محدوده مناسب و پراب سالم را پیش از اندازه‌گیری بررسی کنید.", Image = "tool-multimeter-kit.png" },
+        new { Slug = "workshop-lighting-guide", Branch = "education", Topic = "lighting", Category = "آموزش تخصصی", Title = "روشنایی کارگاه را چطور بهتر برنامه‌ریزی کنیم؟", Summary = "ترکیب نور عمومی و موضعی، خیرگی و سایه را کاهش می‌دهد و دید محل کار را بهتر می‌کند.", Image = "tool-led-worklight.png" },
+        new { Slug = "soldering-station-setup", Branch = "education", Topic = "soldering", Category = "آموزش تخصصی", Title = "آماده‌سازی میز تعمیر برد", Summary = "چیدمان ابزار، نور و تهویه مناسب، فرایند تعمیرات الکترونیک را ایمن‌تر و دقیق‌تر می‌کند.", Image = "tool-soldering-station.png" }
     };
     var postCount = posts.Length.ToString("N0", System.Globalization.CultureInfo.InvariantCulture)
         .Replace("0", "۰").Replace("1", "۱").Replace("2", "۲").Replace("3", "۳").Replace("4", "۴")
         .Replace("5", "۵").Replace("6", "۶").Replace("7", "۷").Replace("8", "۸").Replace("9", "۹");
 }
 <header class="page-hero editorial-hero">
-    <img class="hero-image" src="~/Shop/images/heroes/hero-electrical-editorial.png" alt="مجله تخصصی ساعت علی‌رضا زارع" />
+    <img class="hero-image" src="~/Shop/images/heroes/hero-electrical-editorial.png" alt="مجله تخصصی برق و ابزار علی‌رضا زارع" />
     <div class="container">
         <nav class="article-breadcrumb" aria-label="مسیر صفحه">
-            <a class="breadcrumb-home" asp-controller="Home" asp-action="Index">
-                <i class="bi bi-house-door"></i>
-                <span>خانه</span>
-            </a>
-            <span class="breadcrumb-step">
-                <i class="breadcrumb-separator bi bi-chevron-left" aria-hidden="true"></i>
-                <span class="breadcrumb-current" aria-current="page">
-                    <i class="bi bi-journal-richtext"></i>
-                    <span>مجله</span>
-                </span>
-            </span>
+            <a class="breadcrumb-home" asp-controller="Home" asp-action="Index"><i class="bi bi-house-door"></i><span>خانه</span></a>
+            <span class="breadcrumb-step"><i class="breadcrumb-separator bi bi-chevron-left" aria-hidden="true"></i><span class="breadcrumb-current" aria-current="page"><i class="bi bi-journal-richtext"></i><span>مجله</span></span></span>
         </nav>
-        <span class="page-kicker">مجله علی‌رضا زارع</span>
-        <h1>راهنمای خرید و <em>نگهداری ساعت</em></h1>
-        <p>برای انتخابی آگاهانه‌تر و همراهی طولانی‌تر با ساعت شما.</p>
+        <span class="page-kicker">دانش فنی و راهنمای خرید</span>
+        <h1>مجله برق و <em>ابزار</em></h1>
+        <p>راهنماهای کاربردی برای انتخاب، استفاده و نگهداری ابزار و تجهیزات فنی.</p>
     </div>
 </header>
 <main class="journal-page">
     <section class="container journal-archive" aria-labelledby="archive-title">
         <aside class="journal-categories" aria-label="دسته‌بندی مطالب">
             <div class="journal-categories-scroll ui-scrollbar ui-scrollbar--navy">
-            <h2>دسته‌بندی مجله</h2>
-            <button type="button" class="is-active journal-all" data-journal-filter="all" aria-pressed="true">همه مطالب <span>@postCount</span></button>
-            <div class="journal-branch">
-                <button type="button" data-journal-filter="buying" aria-pressed="false"><i class="bi bi-compass" aria-hidden="true"></i> راهنمای خرید</button>
-                <div class="journal-children">
-                    <button type="button" data-journal-filter="choose-watch" aria-pressed="false">چگونه ساعت مناسب انتخاب کنیم؟</button>
-                    <button type="button" data-journal-filter="gift-watch" aria-pressed="false">بهترین ساعت برای هدیه</button>
-                    <button type="button" data-journal-filter="budget-watch" aria-pressed="false">انتخاب ساعت بر اساس بودجه</button>
-                    <button type="button" data-journal-filter="formal-choice" aria-pressed="false">انتخاب ساعت برای استایل رسمی</button>
-                    <button type="button" data-journal-filter="daily-watch" aria-pressed="false">انتخاب ساعت برای استفاده روزمره</button>
-                </div>
-            </div>
-            <div class="journal-branch">
-                <button type="button" data-journal-filter="education" aria-pressed="false"><i class="bi bi-mortarboard" aria-hidden="true"></i> آموزش</button>
-                <div class="journal-children">
-                    <button type="button" data-journal-filter="watch-movements" aria-pressed="false">انواع موتور ساعت</button>
-                    <button type="button" data-journal-filter="quartz-automatic" aria-pressed="false">تفاوت کوارتز و اتوماتیک</button>
-                    <button type="button" data-journal-filter="watch-care" aria-pressed="false">نحوه نگهداری ساعت</button>
-                    <button type="button" data-journal-filter="water-resistance" aria-pressed="false">مفهوم مقاومت در برابر آب</button>
-                    <button type="button" data-journal-filter="watch-glass" aria-pressed="false">تفاوت انواع شیشه ساعت</button>
-                    <button type="button" data-journal-filter="case-size" aria-pressed="false">راهنمای اندازه قاب</button>
-                </div>
-            </div>
-            <div class="journal-branch">
-                <button type="button" data-journal-filter="brands" aria-pressed="false"><i class="bi bi-award" aria-hidden="true"></i> برندشناسی</button>
-                <div class="journal-children">
-                    <button type="button" data-journal-filter="brand-history" aria-pressed="false">تاریخچه برندها</button>
-                    <button type="button" data-journal-filter="brand-introduction" aria-pressed="false">معرفی برندها</button>
-                    <button type="button" data-journal-filter="brand-comparison" aria-pressed="false">مقایسه برندها</button>
-                    <button type="button" data-journal-filter="best-brand-models" aria-pressed="false">بهترین مدل‌های هر برند</button>
-                </div>
-            </div>
-            <div class="journal-branch">
-                <button type="button" data-journal-filter="comparison" aria-pressed="false"><i class="bi bi-arrow-left-right" aria-hidden="true"></i> مقایسه</button>
-                <div class="journal-children">
-                    <button type="button" data-journal-filter="model-comparison" aria-pressed="false">مقایسه مدل‌ها</button>
-                    <button type="button" data-journal-filter="compare-brands" aria-pressed="false">مقایسه برندها</button>
-                    <button type="button" data-journal-filter="movement-comparison" aria-pressed="false">مقایسه موتورهای ساعت</button>
-                    <button type="button" data-journal-filter="price-comparison" aria-pressed="false">مقایسه بازه‌های قیمتی</button>
-                </div>
-            </div>
-            <div class="journal-branch">
-                <button type="button" data-journal-filter="authenticity" aria-pressed="false"><i class="bi bi-patch-check" aria-hidden="true"></i> تشخیص و اصالت</button>
-                <div class="journal-children">
-                    <button type="button" data-journal-filter="original-watch" aria-pressed="false">تشخیص ساعت اصل</button>
-                    <button type="button" data-journal-filter="buying-tips" aria-pressed="false">نکات خرید ساعت</button>
-                    <button type="button" data-journal-filter="buying-mistakes" aria-pressed="false">اشتباهات رایج هنگام خرید</button>
-                </div>
-            </div>
-            <div class="journal-branch">
-                <button type="button" data-journal-filter="style" aria-pressed="false"><i class="bi bi-stars" aria-hidden="true"></i> سبک و استایل</button>
-                <div class="journal-children">
-                    <button type="button" data-journal-filter="formal-watch" aria-pressed="false">ساعت مناسب لباس رسمی</button>
-                    <button type="button" data-journal-filter="sport-watch" aria-pressed="false">ساعت مناسب استایل اسپرت</button>
-                    <button type="button" data-journal-filter="gift-style" aria-pressed="false">ساعت مناسب هدیه</button>
-                    <button type="button" data-journal-filter="age-occasion" aria-pressed="false">انتخاب ساعت براساس سن و موقعیت</button>
-                </div>
-            </div>
+                <h2>دسته‌بندی مجله</h2>
+                <button type="button" class="is-active journal-all" data-journal-filter="all" aria-pressed="true">همه مطالب <span>@postCount</span></button>
+                <div class="journal-branch"><button type="button" data-journal-filter="buying" aria-pressed="false"><i class="bi bi-cart-check" aria-hidden="true"></i> راهنمای خرید</button></div>
+                <div class="journal-branch"><button type="button" data-journal-filter="education" aria-pressed="false"><i class="bi bi-mortarboard" aria-hidden="true"></i> آموزش تخصصی</button></div>
+                <div class="journal-branch"><button type="button" data-journal-filter="safety" aria-pressed="false"><i class="bi bi-shield-check" aria-hidden="true"></i> ایمنی و نگهداری</button></div>
             </div>
         </aside>
         <div class="journal-results">
-            <div class="journal-results-heading"><h2 id="archive-title" tabindex="-1">همه نوشته‌های مجله</h2><span id="journal-count" class="journal-count-badge" role="status" aria-live="polite">@posts.Length مطلب</span></div>
+            <div class="journal-results-heading"><h2 id="archive-title" tabindex="-1">راهنماهای ابزار و تجهیزات</h2><span id="journal-count" class="journal-count-badge" role="status" aria-live="polite">@posts.Length مطلب</span></div>
             <div class="journal-grid">
                 @{ var postIndex = 0; }
                 @foreach (var post in posts)
                 {
                     var publishedAt = DateTime.Today.AddDays(-(postIndex * 3 + 1));
-                    var readingMinutes = 4 + postIndex % 5;
+                    var readingMinutes = 4 + postIndex % 4;
                     <article class="journal-post" data-branch="@post.Branch" data-topic="@post.Topic">
                         <a asp-controller="Magazine" asp-action="Details" asp-route-slug="@post.Slug">
-                            <div class="journal-post-image"><img src="@Url.Content("~/Shop/images/" + (post.Image.StartsWith("slider-") ? "sliders/" : "products/") + post.Image)" alt="@post.Title" loading="lazy" /></div>
+                            <div class="journal-post-image"><img src="@Url.Content("~/Shop/images/products/" + post.Image)" alt="@post.Title" loading="lazy" /></div>
                             <div class="journal-post-copy"><span class="journal-kicker">@post.Category</span><h3>@post.Title</h3><p>@post.Summary</p><div class="journal-post-meta"><span><i class="bi bi-calendar3"></i>@publishedAt.ToString("yyyy/MM/dd", System.Globalization.CultureInfo.InvariantCulture)</span><span><i class="bi bi-clock"></i>@readingMinutes دقیقه مطالعه</span></div><span class="journal-read">خواندن مطلب <i class="bi bi-arrow-left" aria-hidden="true"></i></span></div>
                         </a>
                     </article>
@@ -163,20 +59,6 @@
                 }
             </div>
             <nav id="journal-pagination" class="journal-paging site-pagination" aria-label="صفحه‌بندی مطالب" hidden></nav>
-        </div>
-    </section>
-    <section class="container journal-connect" aria-label="همراه مجله باشید">
-        <div class="journal-subscribe">
-            <span class="journal-connect-icon"><i class="bi bi-envelope-paper" aria-hidden="true"></i></span>
-            <div>
-                <span class="journal-kicker">نامه مجله</span>
-                <h2>فرصتی برای بیشتر دانستن</h2>
-                <p>راهنماهای انتخاب و مراقبت از ساعت، در یک خبرنامه کوتاه.</p>
-            </div>
-            <div class="journal-subscribe-action">
-                <span class="journal-soon">به‌زودی</span>
-                <p>عضویت در خبرنامه هنوز فعال نشده است.</p>
-            </div>
         </div>
     </section>
 </main>

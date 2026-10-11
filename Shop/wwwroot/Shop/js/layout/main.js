@@ -452,7 +452,7 @@ $(function () {
         column.append(heading);
         items.forEach((label) => {
           const link = document.createElement("a");
-          link.href = "Search";
+          link.href = `Search?q=${encodeURIComponent(label)}`;
           link.textContent = label;
           column.append(link);
         });
@@ -781,28 +781,44 @@ $(function () {
   };
 
   const catalogProducts = window.HNProducts || [];
+  if (catalogProducts.length >= 6) {
+    const featuredBindings = [
+      { selector: ".featured-main", product: catalogProducts[0] },
+      { selector: ".featured-side", product: catalogProducts[5] },
+    ];
+    featuredBindings.forEach(({ selector, product }) => {
+      const $card = $(selector);
+      if (!$card.length) return;
+      $card.find("img").attr({ src: product.image, alt: product.name });
+      $card.find("h3").text(product.name);
+      $card.find(".featured-content > p, .featured-side-content > p").text(product.detail?.intro || product.type);
+      $card.find(".featured-content > small").text(`${product.brand} · ${product.type}`);
+      $card.find(".featured-price, .featured-buy strong").text(`${faNumber(product.price * 1000000)} تومان`);
+      $card.find(".add-cart").attr({
+        "data-id": String(product.id),
+        "data-name": product.name,
+        "data-price": String(product.price * 1000000),
+        "data-image": product.image,
+      });
+    });
+  }
   const $amazingItems = $("#amazing .row > div");
   if ($amazingItems.length === 3 && catalogProducts.length > 15) {
-    const offerProducts = [catalogProducts[10], catalogProducts[15]];
-    $amazingItems.each(function () {
-      $(this).removeClass("col-md-4").addClass("col-12 col-md-6 col-xl");
-    });
-    offerProducts.forEach((product, index) => {
-      const $item = $amazingItems.eq(index === 0 ? 1 : 2).clone();
-      $item.find(".showcase-card").attr("data-offer-index", String(index + 4));
+    [catalogProducts[0], catalogProducts[5], catalogProducts[10]].forEach((product, index) => {
+      const $item = $amazingItems.eq(index);
+      $item.removeClass("col-md-4").addClass("col-12 col-md-6 col-xl");
       $item.find(".product-image").removeClass("cream warm light");
       $item.find("img").attr({ src: product.image, alt: product.name });
-      $item.find(".badge-offer").text(product.badge || "\u067e\u06cc\u0634\u0646\u0647\u0627\u062f \u0648\u06cc\u0698\u0647");
+      $item.find(".badge-offer").text(product.discountPercent ? `${faNumber(product.discountPercent)}٪ تخفیف` : "پیشنهاد ویژه");
       $item.find(".showcase-card-body small").text(product.brand);
       $item.find(".showcase-card-body h3").text(product.name);
-      $item.find(".showcase-card-body strong").text(`${faNumber(product.price * 1000000)} \u062a\u0648\u0645\u0627\u0646`);
+      $item.find(".showcase-card-body strong").text(`${faNumber(product.price * 1000000)} تومان`);
       $item.find(".add-cart").attr({
         "data-id": String(product.id),
         "data-name": product.name,
         "data-price": String(product.price * 1000000),
         "data-image": product.image,
       });
-      $("#amazing .row").append($item);
     });
     window.HNUI?.enhance(document.querySelector("#amazing"));
   }
@@ -811,7 +827,7 @@ $(function () {
       <article class="showcase-card">
         <div class="product-image">
           <a href="Product?id=${product.id}" aria-label="مشاهده ${escapeHtml(product.name)}">
-            <img loading="lazy" decoding="async" src="${escapeHtml(product.image)}" alt="ساعت ${escapeHtml(product.name)}">
+            <img loading="lazy" decoding="async" src="${escapeHtml(product.image)}" alt="${escapeHtml(product.name)}">
           </a>
           ${product.badge ? `<span class="badge-best">${escapeHtml(product.badge)}</span>` : ""}
         </div>
@@ -828,7 +844,7 @@ $(function () {
     <article class="rail-card">
       <div class="rail-image">
         <a href="Product?id=${product.id}" aria-label="مشاهده ${escapeHtml(product.name)}">
-          <img loading="lazy" decoding="async" src="${escapeHtml(product.image)}" alt="ساعت ${escapeHtml(product.name)}">
+          <img loading="lazy" decoding="async" src="${escapeHtml(product.image)}" alt="${escapeHtml(product.name)}">
         </a>
         ${product.badge ? `<span>${escapeHtml(product.badge)}</span>` : ""}
       </div>
@@ -840,15 +856,9 @@ $(function () {
     </article>`;
 
   if (catalogProducts.length >= 24) {
-    $("#bestsellersSlider").append(
-      catalogProducts.slice(8, 20).map(productCardMarkup).join(""),
-    );
-    $("#newestSlider").append(
-      catalogProducts.slice(14, 20).map(productCardMarkup).join(""),
-    );
-    $("#productRail").append(
-      catalogProducts.slice(20, 25).map(railCardMarkup).join(""),
-    );
+    $("#bestsellersSlider").html(catalogProducts.slice(0, 12).map(productCardMarkup).join(""));
+    $("#newestSlider").html(catalogProducts.slice(14, 20).map(productCardMarkup).join(""));
+    $("#productRail").html(catalogProducts.slice(20, 25).map(railCardMarkup).join(""));
   }
 
   initOwlCarousel($("#productRail"), {
@@ -1513,10 +1523,14 @@ $(function () {
     const name = String(
       $cartButton.data("name") ||
         $root.find("h3").first().text() ||
-        "ساعت منتخب",
+        "محصول منتخب",
+    );
+    const productId = String($cartButton.data("id") || "");
+    const catalogProduct = (window.HNProducts || []).find(
+      (product) => String(product.id) === productId,
     );
     return {
-      id: String($cartButton.data("id") || name),
+      id: productId || name,
       name,
       price: Number($cartButton.data("price")) || 0,
       image: String(
@@ -1524,15 +1538,20 @@ $(function () {
           $root.find("img").first().attr("src") ||
           "Shop/images/products/tool-hammer-drill.png",
       ),
-      code: $root.find("small").first().text() || "ORIGINAL COLLECTION",
+      code: catalogProduct
+        ? `HN-${String(catalogProduct.id).padStart(3, "0")}`
+        : $root.find("small").first().text() || "کد محصول",
+      brand: catalogProduct?.brand || "",
+      type: catalogProduct?.type || "",
+      movement: catalogProduct?.movement || "",
+      strap: catalogProduct?.strap || "",
+      detail: catalogProduct?.detail || null,
     };
   };
   let activeProduct = null;
   const quickViewModal = bootstrap.Modal.getOrCreateInstance(
     $("#quickViewModal")[0],
   );
-  const wristModal = bootstrap.Modal.getOrCreateInstance($("#wristModal")[0]);
-
   $('.quick[href="#"]').each(function () {
     $(this).replaceWith(
       `<button type="button" class="quick">${$(this).html()}</button>`,
@@ -1644,13 +1663,26 @@ $(function () {
 
   const openQuickView = (product) => {
     activeProduct = product;
-    $("#quickViewImage, #wristWatch").attr({
+    $("#quickViewImage").attr({
       src: product.image,
       alt: product.name,
     });
     $("#quickViewTitle").text(product.name);
-    $("#quickViewCode").text(product.code);
+    $("#quickViewCode").text(`${product.brand ? `${product.brand} · ` : ""}${product.code}`);
     $("#quickViewPrice").text(`${faNumber(product.price)} تومان`);
+    $(".quick-description").text(
+      product.detail?.intro || "مشخصات این مدل را پیش از انتخاب بررسی کنید.",
+    );
+    const quickSpecs = [
+      ["گروه محصول", product.type],
+      ["نوع تغذیه", product.movement],
+      ["محیط کاربرد", product.strap],
+    ].filter(([, value]) => value);
+    $("#quickViewSpecs").html(
+      quickSpecs
+        .map(([label, value]) => `<div><i class="bi bi-info-circle" aria-hidden="true"></i><span>${escapeHtml(label)}</span><b>${escapeHtml(value)}</b></div>`)
+        .join(""),
+    );
     $("#interactiveViewer")
       .removeClass("auto-spin zoomed")
       .css({
@@ -1698,9 +1730,6 @@ $(function () {
     window.HNUI?.cart.add(activeProduct, 1, this);
   });
 
-  $(
-    "#mobileCategories .mobile-submenu a, #mobileBrands .mobile-brand-list a",
-  ).attr("href", "Search");
   $("#mobileMenu").on("click", "a[href]", function (event) {
     const href = this.getAttribute("href");
     if (!href || href === "#") return;
@@ -1713,16 +1742,6 @@ $(function () {
       120,
     );
   });
-  $("#wristTrigger").on("click", () => {
-    quickViewModal.hide();
-    window.setTimeout(() => wristModal.show(), 250);
-  });
-  $("#wristSize").on("input", function () {
-    const size = Number(this.value);
-    $("#wristSizeLabel").text(`${faNumber(size)} سانتی‌متر`);
-    $("#wristWatch").css("transform", `scale(${1.25 - (size - 14) * 0.045})`);
-  });
-
   document.addEventListener("hn:cart-added", (event) => {
     const { product, trigger } = event.detail || {};
     const target = $("#cartToggle")[0];

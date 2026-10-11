@@ -7,7 +7,7 @@ public sealed class BrandsController : PageController
 {
     public async Task<IActionResult> Index()
     {
-        PageModel model = new(new SeoModel("برندهای ساعت | کمپانی علی‌رضا زارع", "برندهای ساعت؛ امضای متفاوت زمان"));
+        PageModel model = new(new SeoModel("برندهای ابزار و تجهیزات برق | کمپانی علی‌رضا زارع", "برندهای معتبر ابزار برقی، ابزار اندازه‌گیری و تجهیزات فنی"));
         return await PageAsync(model);
     }
 }
