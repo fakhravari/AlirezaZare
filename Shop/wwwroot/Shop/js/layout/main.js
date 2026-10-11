@@ -493,6 +493,125 @@ $(function () {
     });
   }
 
+  const innerCategoryGroups = {
+    tools: [
+      ["دریل و پیچ‌گوشتی", "دریل چکشی", "دریل شارژی", "پیچ‌گوشتی برقی"],
+      ["فرز و برش", "فرز آهنگری", "مینی‌فرز", "اره عمودبر"],
+      ["تجهیزات کارگاهی", "دستگاه جوش", "کارواش", "کمپرسور باد"],
+    ],
+    "hand-tools": [
+      ["آچار و بکس", "آچار فرانسه", "ست بکس", "آچار آلن"],
+      ["پیچ‌گوشتی و انبر", "پیچ‌گوشتی دستی", "انبردست", "سیم‌چین"],
+      ["لوازم ابزار", "جعبه ابزار", "مته و سری", "گیره و پیچ‌دستی"],
+    ],
+    components: [
+      ["مقاومت و خازن", "مقاومت", "خازن", "دیود"],
+      ["آی‌سی و نیمه‌رسانا", "آی‌سی", "ترانزیستور", "رگولاتور"],
+      ["برد و ماژول", "بردبورد", "ماژول آماده", "سنسور"],
+    ],
+    cables: [
+      ["سیم و کابل", "سیم افشان", "کابل برق", "کابل شبکه"],
+      ["سوکت و کانکتور", "فیش برق", "سوکت شبکه", "کانکتور"],
+      ["اتصالات نصب", "ترمینال", "سرسیم", "داکت و بست"],
+    ],
+    lighting: [
+      ["لامپ و LED", "لامپ LED", "پنل سقفی", "ریسه نواری"],
+      ["چراغ کارگاهی", "چراغ بازرسی", "چراغ اضطراری", "پروژکتور"],
+      ["لوازم روشنایی", "سرپیچ", "درایور LED", "سنسور حرکتی"],
+    ],
+    switchgear: [
+      ["کلید و پریز", "کلید برق", "پریز توکار", "پریز صنعتی"],
+      ["فیوز و محافظ", "فیوز مینیاتوری", "محافظ جان", "محافظ ولتاژ"],
+      ["تجهیزات کنترل", "کنتاکتور", "تایمر", "شستی و سیگنال"],
+    ],
+    safety: [
+      ["ایمنی فردی", "دستکش عایق", "عینک ایمنی", "کفش کار"],
+      ["حفاظت برق", "محافظ ولتاژ", "تجهیزات ارت", "صاعقه‌گیر"],
+      ["ایمنی کارگاه", "کلاه ایمنی", "لباس کار", "جعبه کمک‌های اولیه"],
+    ],
+    measurement: [
+      ["ابزار اندازه‌گیری", "مولتی‌متر", "آمپرمتر", "ولت‌متر"],
+      ["تست و عیب‌یابی", "فازمتر", "تستر کابل", "تستر باتری"],
+      ["ابزار دقیق", "کلمپ‌متر", "اسیلوسکوپ", "منبع تغذیه"],
+    ],
+  };
+
+  document.querySelectorAll(".category-nav-mega").forEach((menu) => {
+    const sidebar = menu.querySelector(".category-mega-sidebar");
+    const content = menu.querySelector(".category-mega-panels");
+    if (!sidebar || !content) return;
+    const buttons = [...sidebar.querySelectorAll("[data-mega-category]")];
+    const reset = () => {
+      buttons.forEach((button) => {
+        button.classList.remove("active");
+        button.setAttribute("aria-expanded", "false");
+      });
+      content.replaceChildren();
+      const hint = document.createElement("p");
+      hint.className = "category-mega-hint";
+      hint.textContent = "برای دیدن زیرشاخه‌ها، یک گروه را انتخاب کنید.";
+      content.append(hint);
+    };
+    const activate = (button) => {
+      const groups = innerCategoryGroups[button.dataset.megaCategory];
+      if (!groups) return;
+      buttons.forEach((item) => {
+        const active = item === button;
+        item.classList.toggle("active", active);
+        item.setAttribute("aria-expanded", String(active));
+      });
+      content.replaceChildren();
+      groups.forEach(([title, ...items]) => {
+        const group = document.createElement("section");
+        group.className = "category-mega-group";
+        const heading = document.createElement("a");
+        heading.className = "category-mega-title";
+        heading.href = `Search?q=${encodeURIComponent(title)}`;
+        heading.textContent = title;
+        group.append(heading);
+        items.forEach((label) => {
+          const link = document.createElement("a");
+          link.href = `Search?q=${encodeURIComponent(label)}`;
+          link.textContent = label;
+          group.append(link);
+        });
+        content.append(group);
+      });
+    };
+    buttons.forEach((button) => {
+      button.setAttribute("aria-expanded", "false");
+      button.addEventListener("pointerenter", () => activate(button));
+      button.addEventListener("focus", () => activate(button));
+      button.addEventListener("click", () => activate(button));
+    });
+    const dropdown = menu.closest(".category-nav-dropdown");
+    if (dropdown) {
+      let closeTimer;
+      const keepOpen = () => {
+        window.clearTimeout(closeTimer);
+        dropdown.classList.add("is-mega-open");
+      };
+      const closeSoon = () => {
+        window.clearTimeout(closeTimer);
+        closeTimer = window.setTimeout(() => {
+          dropdown.classList.remove("is-mega-open");
+          reset();
+        }, 350);
+      };
+      dropdown.addEventListener("pointerenter", keepOpen);
+      dropdown.addEventListener("pointerleave", closeSoon);
+      dropdown.addEventListener("focusin", keepOpen);
+      dropdown.addEventListener("focusout", (event) => {
+        if (!dropdown.contains(event.relatedTarget)) closeSoon();
+      });
+      dropdown.addEventListener("hidden.bs.dropdown", () => {
+        window.clearTimeout(closeTimer);
+        dropdown.classList.remove("is-mega-open");
+        reset();
+      });
+    }
+  });
+
   /* Route mega-menu selections once, independently from slider lifecycle events. */
   document.addEventListener("click", (event) => {
     const link = event.target.closest(
