@@ -8036,3 +8036,128 @@ html body :is(
     grid-template-columns: minmax(0, 1fr) !important;
   }
 }
+
+#productView .product-detail-price {
+  grid-template-columns: minmax(0, .58fr) minmax(0, 1.42fr);
+  column-gap: 14px;
+}
+
+#productView .product-detail-price > .product-price-context {
+  gap: 9px;
+  padding: 10px 11px;
+}
+
+#productView .product-detail-price > .product-price-context > i {
+  width: 36px;
+  height: 36px;
+  flex-basis: 36px;
+  border-radius: 10px;
+  font-size: 18px;
+}
+
+#productView .product-detail-price > .product-price-context strong { font-size: 13px; }
+#productView .product-detail-price > .product-price-context small { font-size: 11px; }
+
+#productView .product-detail-price > .product-detail-sale-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px 8px;
+}
+
+#productView .product-detail-price > .product-detail-sale-meta .product-price-discount {
+  padding: 4px 9px;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+#productView .product-detail-price > .product-detail-sale-meta .product-price-savings {
+  color: #a33e37;
+  font-size: 12px;
+  font-weight: 850;
+}
+
+#productView .product-detail-price > #productFinalPrice {
+  font-size: clamp(29px, 2.5vw, 36px);
+  font-weight: 950;
+}
+
+@media (max-width: 575px) {
+  #productView .product-detail-price { grid-template-columns: minmax(0, 1fr); row-gap: 7px; }
+  #productView .product-detail-price > .product-price-heading,
+  #productView .product-detail-price > .product-detail-sale-meta,
+  #productView .product-detail-price > #productFinalPrice,
+  #productView .product-detail-price > .product-price-context {
+    grid-column: 1;
+  }
+  #productView .product-detail-price > .product-price-heading { grid-row: 1; }
+  #productView .product-detail-price > .product-detail-sale-meta { grid-row: 2; }
+  #productView .product-detail-price > #productFinalPrice { grid-row: 3; font-size: 25px; }
+  #productView .product-detail-price > .product-price-context { grid-row: 4; }
+}
+
+#productView .product-detail-price {
+  grid-template-columns: minmax(0, .76fr) minmax(0, 1.24fr);
+}
+
+#productView .product-detail-price > .product-price-context {
+  gap: 11px;
+  padding: 12px 14px;
+}
+
+#productView .product-detail-price > .product-price-context > i {
+  width: 40px;
+  height: 40px;
+  flex-basis: 40px;
+}
+
+#productView .product-detail-price > .product-price-context strong { font-size: 15px; }
+#productView .product-detail-price > .product-price-context small { font-size: 13px; }
+#productView .product-detail-price > .product-price-heading span { font-size: 16px; }
+#productView .product-detail-price > .product-detail-sale-meta .price-old { font-size: 13px; }
+#productView .product-detail-price > .product-detail-sale-meta .product-price-discount { font-size: 15px; }
+
+#productView .product-accessory-price {
+  min-width: 132px;
+  padding: 8px 11px;
+}
+
+#productView .product-accessory-price > small { font-size: 12px; }
+#productView .product-accessory-price > .product-price-current { font-size: 15px; }
+
+@media (max-width: 575px) {
+  #productView .product-detail-price { grid-template-columns: minmax(0, 1fr); }
+  #productView .product-detail-price > .product-price-heading span { font-size: 15px; }
+  #productView .product-detail-price > .product-detail-sale-meta .product-price-discount { font-size: 14px; }
+  #productView .product-detail-price > .product-price-context strong { font-size: 14px; }
+  #productView .product-detail-price > .product-price-context small { font-size: 12px; }
+  #productView .product-accessory-price { min-width: 0; padding: 7px 9px; }
+  #productView .product-accessory-price > small { font-size: 11px; }
+  #productView .product-accessory-price > .product-price-current { font-size: 14px; }
+}
+
+.inner-page .search-intro .taxonomy-breadcrumb ol {
+  border-color: rgba(255, 255, 255, .22);
+  background: rgba(7, 25, 45, .78);
+  background-image: none;
+  box-shadow: 0 5px 16px rgba(3, 14, 34, .2), inset 0 1px rgba(255, 255, 255, .08);
+}
+
+.inner-page .search-intro .taxonomy-breadcrumb a {
+  color: #fff;
+}
+
+.inner-page .search-intro .taxonomy-breadcrumb a:is(:hover, :focus-visible) {
+  background: rgba(255, 255, 255, .13);
+  color: #fff;
+}
+
+.inner-page .search-intro .taxonomy-breadcrumb [aria-current] {
+  border-color: rgba(255, 218, 102, .75);
+  background: linear-gradient(135deg, #fff4c7, #f3df9a);
+  color: #17324b;
+}
+
+.inner-page .search-intro .taxonomy-breadcrumb li > .bi-chevron-left {
+  color: #ffd44f;
+}
