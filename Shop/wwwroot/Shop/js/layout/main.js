@@ -23,6 +23,25 @@ $(function () {
         .replace(/ك/g, "ک")
         .replace(/\s+/g, " ")
         .trim();
+    const recentSearchKey = "hn-header-recent-searches";
+    const popularSearches = ["دریل شارژی", "مولتی‌متر دیجیتال", "ست مته و سری", "ایستگاه هویه", "چراغ کارگاهی"];
+    const readRecentSearches = () => {
+      const searches = window.HNUI.storage.json(recentSearchKey, []);
+      return Array.isArray(searches) ? searches.filter((item) => typeof item === "string").slice(0, 6) : [];
+    };
+    const rememberSearch = (value) => {
+      const query = String(value || "").trim().slice(0, 80);
+      if (Array.from(query).length < 2) return;
+      const recent = readRecentSearches().filter((item) => normalizeSearchText(item) !== normalizeSearchText(query));
+      window.HNUI.storage.set(recentSearchKey, JSON.stringify([query, ...recent].slice(0, 6)));
+    };
+    const quickSearchLink = (query, icon) =>
+      `<a class="header-search-quick-chip" data-search-query="${escapeHtml(query)}" href="${searchUrl(query)}"><i class="bi ${icon}" aria-hidden="true"></i><span>${escapeHtml(query)}</span></a>`;
+    const renderQuickSearchPanel = () => {
+      const recent = readRecentSearches();
+      suggestions.innerHTML = `<section class="header-search-quick-section" aria-labelledby="recentSearchesTitle"><div class="header-search-quick-heading"><strong id="recentSearchesTitle"><i class="bi bi-clock-history" aria-hidden="true"></i> جستجوهای اخیر</strong>${recent.length ? '<button type="button" data-clear-search-history>پاک‌کردن</button>' : ''}</div>${recent.length ? `<div class="header-search-quick-chips">${recent.map((query) => quickSearchLink(query, "bi-clock-history")).join("")}</div>` : '<p class="header-search-quick-empty">جستجوهای اخیر اینجا نمایش داده می‌شوند.</p>'}</section><section class="header-search-quick-section" aria-labelledby="popularSearchesTitle"><div class="header-search-quick-heading"><strong id="popularSearchesTitle"><i class="bi bi-graph-up-arrow" aria-hidden="true"></i> جستجوهای پرتکرار</strong></div><div class="header-search-quick-chips">${popularSearches.map((query) => quickSearchLink(query, "bi-arrow-up-right")).join("")}</div></section>`;
+      openSuggestions();
+    };
     const closeSuggestions = () => {
       suggestions.hidden = true;
       searchInput.setAttribute("aria-expanded", "false");
@@ -35,7 +54,7 @@ $(function () {
     const renderSuggestions = () => {
       const query = normalizeSearchText(searchInput.value);
       if (Array.from(query).length < 3) {
-        closeSuggestions();
+        renderQuickSearchPanel();
         return;
       }
 
@@ -89,13 +108,26 @@ $(function () {
         : `<div class="header-search-empty"><i class="bi bi-search" aria-hidden="true"></i><span>محصولی با این عبارت پیدا نشد.</span><a href="${searchUrl(searchInput.value.trim())}">جستجو در همه محصولات <i class="bi bi-arrow-left" aria-hidden="true"></i></a></div>`;
 
       suggestions.innerHTML = resultMarkup;
+      suggestions.querySelectorAll('[role="option"]').forEach((option) => option.removeAttribute("role"));
       openSuggestions();
     };
 
     searchInput.addEventListener("input", renderSuggestions);
+    headerSearchForm.addEventListener("submit", () => rememberSearch(searchInput.value));
+    suggestions.addEventListener("click", (event) => {
+      const clearHistory = event.target.closest("[data-clear-search-history]");
+      if (clearHistory) {
+        window.HNUI.storage.set(recentSearchKey, "[]");
+        renderQuickSearchPanel();
+        return;
+      }
+      const link = event.target.closest("a");
+      if (link) rememberSearch(link.dataset.searchQuery || searchInput.value);
+    });
     searchInput.addEventListener("focus", () => {
       if (Array.from(normalizeSearchText(searchInput.value)).length >= 3)
         renderSuggestions();
+      else renderQuickSearchPanel();
     });
     searchInput.addEventListener("keydown", (event) => {
       if (event.key === "Escape" && !suggestions.hidden) {
@@ -103,7 +135,7 @@ $(function () {
         closeSuggestions();
       } else if (event.key === "ArrowDown" && !suggestions.hidden) {
         const firstSuggestion = suggestions.querySelector(
-          ".header-search-suggestion",
+          ".header-search-suggestion, .header-search-quick-chip",
         );
         if (firstSuggestion) {
           event.preventDefault();
