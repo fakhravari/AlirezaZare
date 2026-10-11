@@ -6971,18 +6971,53 @@ html body #mainNav .home-header-search > input[type="search"]:is(:focus, :focus-
 
 #cartPanel .cart-footer .cart-safety-badge {
   display: flex;
-  width: 100%;
-  min-height: 52px;
-  margin: 2px 0 14px;
-  padding: 8px 12px;
+  width: auto;
+  min-height: 40px;
+  margin: 0;
+  padding: 0 0 0 12px;
   align-items: center;
-  gap: 10px;
+  gap: 7px;
   box-sizing: border-box;
-  border: 1px solid #d8bd79;
-  border-radius: 13px;
-  background: linear-gradient(110deg, #fff9e5, #fffdf7 62%, #f8f1dc);
+  border: 0;
+  border-inline-start: 1px solid rgba(197, 157, 75, .32);
+  border-radius: 0;
+  background: transparent;
   color: #17344b;
-  box-shadow: 0 4px 12px rgba(115, 82, 18, .08), inset 0 1px rgba(255,255,255,.9);
+  box-shadow: none;
+}
+
+#cartPanel .cart-footer .cart-total-summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  min-height: 76px;
+  margin: 0 0 12px;
+  padding: 10px 13px;
+  align-items: center;
+  border: 1px solid rgba(197, 157, 75, .32);
+  border-radius: 15px;
+  background: linear-gradient(110deg, #fffdf7, #fff8e8 75%, #fffdf7);
+}
+
+#cartPanel .cart-footer .cart-total-amount {
+  display: flex;
+  min-width: 0;
+  margin: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  line-height: 1.4;
+}
+
+#cartPanel .cart-footer .cart-total-amount > span {
+  color: #536477;
+  font-size: 12px;
+}
+
+#cartPanel .cart-footer .cart-total-amount > strong {
+  color: #173867 !important;
+  font-size: 17px;
+  white-space: nowrap;
 }
 
 #cartPanel .cart-safety-icon {
@@ -7795,6 +7830,19 @@ html body :is(
   #productView .product-detail-favorite { min-height: 52px; padding-inline: 9px; font-size: 13px; }
   #productView .product-detail-tabs { gap: 7px; padding: 7px; }
   #productView .product-detail-tabs > a { min-height: 44px; padding: 8px 12px; font-size: 13px; }
+}
+
+#cartPanel .cart-footer .cart-safety-check {
+  display: none;
+}
+
+@media (max-width: 380px) {
+  #cartPanel .cart-footer .cart-total-summary { gap: 6px; padding-inline: 9px; }
+  #cartPanel .cart-footer .cart-total-amount > strong { font-size: 15px; }
+  #cartPanel .cart-footer .cart-safety-badge { gap: 5px; padding-inline-start: 8px; }
+  #cartPanel .cart-safety-icon { width: 30px; min-width: 30px; height: 30px; }
+  #cartPanel .cart-safety-copy strong { font-size: 11px; }
+  #cartPanel .cart-safety-copy small { font-size: 9px !important; }
 }
 
 @media (max-width: 991px) {
