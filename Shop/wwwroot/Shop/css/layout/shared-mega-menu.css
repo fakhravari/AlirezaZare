@@ -112,13 +112,10 @@
   #mainNav .mega-content-grid > .mega-links > a:hover,
   .page-mega-columns > div > a:hover {
     padding: 0 8px !important;
-    border-color: rgba(185, 145, 87, 0.72);
-    color: #6f4b1d !important;
-    box-shadow:
-      inset -2px 0 0 #bd8432,
-      inset 0 0 0 1px rgba(255, 255, 255, 0.55),
-      0 3px 8px rgba(117, 79, 28, 0.08);
-    transform: translateX(-1px) scale(1.005) !important;
+    border-color: rgba(185, 145, 87, 0.42);
+    color: var(--color-navy) !important;
+    box-shadow: 0 3px 10px rgba(16, 42, 67, 0.07);
+    transform: translateX(-1px) !important;
   }
   #mainNav .mega-content-grid > .mega-links > a:hover:before,
   .page-mega-columns > div > a:hover:before {
@@ -134,6 +131,7 @@
 @media (prefers-reduced-motion: reduce) {
   #mainNav .mega-content-grid > .mega-links > a,
   .page-mega-columns > div > a,
+  .inner-page #mainNav .category-mega-group > a:not(.category-mega-title),
   #mainNav .mega-content-grid > .mega-links > a:after,
   .page-mega-columns > div > a:after {
     transition: none !important;
@@ -746,9 +744,10 @@
   #mainNav .mega-content-grid > .mega-links > a:hover {
     z-index: 2 !important;
     transform: translateX(-1px) !important;
-    border: 1px solid #d9bd90 !important;
+    border: 1px solid rgba(185, 145, 87, 0.42) !important;
     background: #fffaf1 !important;
-    box-shadow: inset -2px 0 #c99b4f !important;
+    color: var(--color-navy) !important;
+    box-shadow: 0 3px 10px rgba(16, 42, 67, 0.07) !important;
   }
 
   #mainNav .mega-content-grid > .mega-links > a:hover::before {
