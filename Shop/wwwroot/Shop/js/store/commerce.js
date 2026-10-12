@@ -306,11 +306,11 @@ document.addEventListener("DOMContentLoaded", () => {
       if (productBreadcrumb)
         productBreadcrumb.innerHTML = `<li><a href="/"><i class="bi bi-house-door" aria-hidden="true"></i><span>خانه</span></a></li>${categoryPath.map((part) => `<li><i class="bi bi-chevron-left" aria-hidden="true"></i><span>${esc(part)}</span></li>`).join("")}<li class="cart-breadcrumb-current"><i class="bi bi-chevron-left" aria-hidden="true"></i><span aria-current="page"><i class="bi bi-tools" aria-hidden="true"></i>${esc(p.name)}</span></li>`;
       productMeta.innerHTML =
-        '<span class="product-meta-pill product-meta-brand"><i class="bi bi-patch-check" aria-hidden="true"></i><span><small>برند</small><strong>' +
+        '<div class="product-meta-identity" role="group" aria-label="اطلاعات برند و کد محصول"><span class="product-meta-pill product-meta-brand"><i class="bi bi-patch-check" aria-hidden="true"></i><span><small>برند</small><strong>' +
         esc(p.brand) +
         '</strong></span></span><span class="product-meta-pill product-meta-code"><i class="bi bi-upc-scan" aria-hidden="true"></i><span><small>کد محصول</small><strong dir="ltr">HN-' +
         String(p.id).padStart(3, "0") +
-        '</strong></span></span><span class="product-meta-pill product-meta-category"><i class="bi bi-grid" aria-hidden="true"></i><span class="product-meta-category-content"><small>مسیر دسته‌بندی</small><ol class="product-meta-path" aria-label="' +
+        '</strong></span></span></div><span class="product-meta-pill product-meta-category"><i class="bi bi-grid" aria-hidden="true"></i><span class="product-meta-category-content"><small>مسیر دسته‌بندی</small><ol class="product-meta-path" aria-label="' +
         esc(categoryPath.join("، ")) +
         '">' +
         categoryPath.map((part) => "<li>" + esc(part) + "</li>").join("") +
@@ -579,6 +579,22 @@ document.addEventListener("DOMContentLoaded", () => {
           .feedbackPagination;
         feedbackPages[type] = Number(button.dataset.feedbackPage) || 1;
         renderProductFeedback(type);
+        const feedbackList = productView.querySelector(
+          type === "reviews" ? "#productReviewList" : "#productQuestionList",
+        );
+        const feedbackSection = feedbackList?.closest(
+          ".product-detail-content-panel",
+        );
+        if (feedbackSection)
+          window.requestAnimationFrame(() =>
+            feedbackSection.scrollIntoView({
+              behavior: window.matchMedia("(prefers-reduced-motion: reduce)")
+                .matches
+                ? "auto"
+                : "smooth",
+              block: "start",
+            }),
+          );
       });
       productView.querySelectorAll(".product-feedback-form").forEach((form) =>
         form.addEventListener("submit", (event) => {
