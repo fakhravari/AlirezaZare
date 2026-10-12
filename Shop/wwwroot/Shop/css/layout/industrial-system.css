@@ -9439,9 +9439,329 @@ html
   font-size: 13px;
 }
 
+#productView .product-detail-gallery,
+#productView .product-detail-summary {
+  border-color: #dce4e9;
+  border-radius: 20px;
+  box-shadow: 0 14px 36px rgba(16, 42, 67, 0.08);
+}
+
+#productView .product-detail-gallery {
+  padding: 18px;
+}
+
+#productView .product-detail-summary {
+  padding: clamp(20px, 2.3vw, 30px);
+}
+
+#productView .product-detail-image-code {
+  font-size: 12px;
+}
+
+#productView .product-detail-gallery-caption {
+  font-size: 14px;
+}
+
+#productView .product-detail-gallery-caption small {
+  font-size: 12px;
+}
+
+#productView .product-detail-meta {
+  font-size: 13px;
+}
+
+#productView .product-detail-summary > h2 {
+  margin-block: 18px 12px;
+  font-size: clamp(25px, 2.4vw, 34px);
+  line-height: 1.5;
+}
+
+#productView .product-detail-description,
+#productView .product-detail-content-panel > p,
+#productView .product-expert-grid p {
+  font-size: 15px;
+  line-height: 2.1;
+}
+
+#productView .product-main-feature-chips > span {
+  font-size: 14px;
+}
+
+#productView .product-variant-field legend {
+  font-size: 15px;
+}
+
+#productView .product-variant-current,
+#productView .product-variant-required,
+#productView .product-variant-optional {
+  font-size: 13px;
+}
+
+#productView .product-variant-choice {
+  font-size: 14px;
+}
+
+#productView .product-variant-choice small {
+  font-size: 12px;
+}
+
+#productView .product-accessories > header strong {
+  font-size: 16px;
+}
+
+#productView .product-accessories > header small,
+#productView .product-accessory-copy small {
+  font-size: 13px;
+}
+
+#productView .product-accessory-copy strong {
+  font-size: 15px;
+}
+
+#productView .product-accessory-copy .product-accessory-status {
+  font-size: 12px;
+}
+
+#productView .product-accessory-price > small {
+  font-size: 12px;
+}
+
+#productView .product-accessory-price > .product-price-current {
+  font-size: 15px;
+}
+
+#productView .product-detail-price > .product-price-heading span {
+  font-size: 18px;
+}
+
+#productView .product-detail-price > .product-price-heading small,
+#productView .product-detail-price > .product-detail-sale-meta .price-old {
+  font-size: 14px;
+}
+
+#productView .product-detail-price > .product-price-context strong {
+  font-size: 16px;
+}
+
+#productView .product-detail-price > .product-price-context small {
+  font-size: 14px;
+}
+
+#productView .product-detail-price > #productFinalPrice {
+  font-size: clamp(32px, 2.8vw, 40px);
+}
+
+#productView .product-detail-add,
+#productView .product-detail-secondary-actions > a,
+#productView .product-detail-favorite {
+  font-size: 15px;
+}
+
+#productView .product-spec-group dt,
+#productView .product-spec-group dd,
+#productView .product-feedback-form label,
+#productView .product-feedback-user-text,
+#productView .product-question-user-text {
+  font-size: 14px;
+}
+
+#productView .product-feedback-note {
+  font-size: 13px;
+}
+
+#productView .product-detail-add {
+  min-height: 62px;
+  gap: 12px;
+  padding: 10px 20px;
+  border-radius: 15px;
+  background: linear-gradient(135deg, #ffda4b, #f3bd0b) !important;
+  box-shadow:
+    0 9px 22px rgba(191, 145, 0, 0.2),
+    inset 0 1px rgba(255, 255, 255, 0.6);
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+#productView .product-detail-add > i {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  place-items: center;
+  border: 1px solid rgba(16, 42, 67, 0.12);
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.52);
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+#productView .product-detail-add:is(:hover, :focus-visible) {
+  border-color: var(--industrial-navy) !important;
+  background: linear-gradient(135deg, #173a5b, #102a43) !important;
+  box-shadow: 0 12px 25px rgba(16, 42, 67, 0.24);
+  color: #fff !important;
+  transform: translateY(-2px);
+}
+
+#productView .product-detail-add:is(:hover, :focus-visible) > i {
+  background: var(--industrial-yellow);
+  color: var(--industrial-navy) !important;
+  transform: scale(1.04);
+}
+
+#productView .product-detail-add:active {
+  transform: translateY(0) scale(0.99);
+}
+
+#productView .product-detail-add:focus-visible,
+#productView .product-detail-secondary-actions > a:focus-visible,
+#productView .product-detail-favorite:focus-visible,
+#productView .product-variant-choice:focus-visible,
+#productView .product-feedback-submit:focus-visible {
+  outline: 3px solid rgba(23, 59, 93, 0.28);
+  outline-offset: 3px;
+}
+
+#productView .product-detail-secondary-actions > a,
+#productView .product-detail-favorite {
+  border-color: #dce4e9;
+  border-radius: 13px;
+  background: linear-gradient(180deg, #fff, #f7f9fa);
+  box-shadow: 0 4px 12px rgba(16, 42, 67, 0.05);
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    background 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+#productView .product-detail-secondary-actions > a > i,
+#productView .product-detail-favorite > i {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border-radius: 10px;
+  background: #edf2f5;
+  color: var(--industrial-navy);
+  transition:
+    background 0.18s ease,
+    color 0.18s ease;
+}
+
+#productView .product-detail-secondary-actions > a:is(:hover, :focus-visible),
+#productView .product-detail-favorite:is(:hover, :focus-visible, [aria-pressed="true"]) {
+  border-color: #e4c65e;
+  background: #fffaf0;
+  box-shadow: 0 8px 18px rgba(16, 42, 67, 0.09);
+  color: var(--industrial-navy);
+  transform: translateY(-1px);
+}
+
+#productView .product-detail-secondary-actions > a:is(:hover, :focus-visible) > i,
+#productView .product-detail-favorite:is(:hover, :focus-visible) > i {
+  background: #fff0b8;
+  color: #765d08;
+}
+
+#productView .product-variant-choice {
+  min-height: 46px;
+  border-radius: 12px;
+  box-shadow: 0 2px 7px rgba(16, 42, 67, 0.045);
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    background 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+#productView .product-variant-choice:is(:hover, :focus-visible) {
+  border-color: #d7b63d;
+  background: #fffaf0;
+  box-shadow: 0 7px 15px rgba(16, 42, 67, 0.08);
+  transform: translateY(-1px);
+}
+
+#productView .product-variant-choice.is-selected {
+  border-color: var(--industrial-navy);
+  background: linear-gradient(135deg, #173b5d, #102a43);
+  box-shadow: 0 6px 14px rgba(16, 42, 67, 0.16);
+  color: #fff;
+}
+
+#productView .product-variant-choice.is-selected small {
+  color: #ffdc55;
+}
+
+#productView .product-detail-gallery-open {
+  min-height: 44px;
+  border-color: rgba(255, 255, 255, 0.7);
+  border-radius: 13px;
+  background: rgba(16, 42, 67, 0.92);
+  color: #fff;
+  box-shadow: 0 7px 18px rgba(16, 42, 67, 0.2);
+  font-size: 14px;
+  transition:
+    transform 0.18s ease,
+    background 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+#productView .product-detail-gallery-open:is(:hover, :focus-visible) {
+  background: var(--industrial-yellow);
+  box-shadow: 0 10px 22px rgba(16, 42, 67, 0.28);
+  color: var(--industrial-navy);
+  transform: translateY(-2px);
+}
+
+#productView .product-feedback-form > .product-feedback-submit {
+  min-height: 48px;
+  padding-inline: 20px;
+  border: 1px solid var(--industrial-navy);
+  border-radius: 12px;
+  background: linear-gradient(135deg, #173b5d, #102a43);
+  box-shadow: 0 6px 15px rgba(16, 42, 67, 0.14);
+  color: #fff;
+  font-size: 14px;
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    background 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+#productView .product-feedback-form > .product-feedback-submit:is(:hover, :focus-visible) {
+  border-color: #d5ad15;
+  background: linear-gradient(135deg, #ffda4b, #f3bd0b);
+  box-shadow: 0 8px 18px rgba(191, 145, 0, 0.2);
+  color: var(--industrial-navy);
+  transform: translateY(-1px);
+}
+
 @media (max-width: 575px) {
   #productView .product-price-trust-list > li {
     font-size: 12px;
+  }
+
+  #productView .product-detail-gallery {
+    padding: 12px;
+  }
+
+  #productView .product-detail-summary {
+    padding: 18px;
+  }
+
+  #productView .product-detail-summary > h2 {
+    font-size: 25px;
+  }
+
+  #productView .product-detail-price > #productFinalPrice {
+    font-size: 30px;
   }
 }
 
