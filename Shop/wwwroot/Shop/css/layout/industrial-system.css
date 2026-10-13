@@ -11111,3 +11111,43 @@ html
     font-size: max(14px, 0.875em) !important;
   }
 }
+
+/* Keep high-value labels and price units comfortably readable on every route. */
+.inner-page main :is(.cart-continue-link, .cart-clear-action, .checkout-address-action, .account-profile-edit) span,
+.inner-page main .cart-continue-link,
+.inner-page main .cart-clear-action,
+.inner-page main .checkout-address-action,
+.inner-page main .account-profile-edit {
+  font-size: 14px !important;
+}
+
+.inner-page main .section-title > span,
+.inner-page main .address-dialog-kicker {
+  font-size: 14px !important;
+}
+
+.inner-page main :is(.cart-line-item small, .cart-product-row small, .product-detail-gallery-caption, .product-accessory-price small, .product-question-form-heading small, .product-feedback-admin-meta, .journal-post time, .journal-post .journal-meta) {
+  font-size: 13px !important;
+}
+
+.inner-page main :is(.search-product .product-price-current small, .search-product .price-old, .search-product .product-price-discount, .search-product .badge-best, .search-product .product-discount-badge) {
+  font-size: 13px !important;
+}
+
+.inner-page main :is(.account-nav a, .account-profile-edit, .account-stats small, .order-total small) {
+  font-size: 13px !important;
+}
+
+.inner-page main .product-detail-gallery-open b,
+.inner-page main .compare-card-top > span,
+.inner-page main .compare-product-meta > span {
+  font-size: 13px !important;
+}
+
+.inner-page main :is(.search-add-cart, .overview-heading > span, .product-price-trust-list, .product-price-context, .product-meta-pill, .product-meta-category-content, .product-detail-gallery-caption) {
+  font-size: 13px !important;
+}
+
+.inner-page main :is(.search-results-count, .product-result-count, .compare-overview-copy small) {
+  font-size: 13px !important;
+}
