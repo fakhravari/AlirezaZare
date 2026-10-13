@@ -10986,11 +10986,11 @@ html
 
 /* Slightly widen only the header cart quantity-control outline. */
 #cartPanel .cart-item-controls {
-  padding-inline: 10px;
+  padding-inline: 14px;
 }
 
 @media (max-width: 420px) {
   #cartPanel .cart-item-controls {
-    padding-inline: 6px;
+    padding-inline: 10px;
   }
 }
