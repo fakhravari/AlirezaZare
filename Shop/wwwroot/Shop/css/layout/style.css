@@ -94,7 +94,8 @@
   gap: 9px;
   direction: rtl;
 }
-.mobile-support-socials > a {
+.mobile-support-socials > a,
+.mobile-support-socials > .mobile-support-social-placeholder {
   display: grid;
   place-items: center;
   width: 36px;
@@ -111,7 +112,8 @@
     border-color 0.18s,
     transform 0.18s;
 }
-.mobile-support-socials > a:hover {
+.mobile-support-socials > a:hover,
+.mobile-support-socials > .mobile-support-social-placeholder:hover {
   border-color: rgba(224, 195, 129, 0.6);
   background: rgba(216, 188, 126, 0.12);
   transform: translateY(-1px);

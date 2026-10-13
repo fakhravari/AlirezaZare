@@ -13,14 +13,14 @@
             data-bs-dismiss="offcanvas"
             aria-label="بستن">
         </button>
-    </div>
-    <div class="offcanvas-body">
         <form class="mobile-menu-search" id="mobileMenuSearchForm" action="/Search" method="get" role="search">
             <i class="bi bi-search" aria-hidden="true"></i>
-            <input class="header-search-input" id="mobileMenuSearch" name="q" type="search" placeholder="جستجوی کالا یا برند…" aria-label="جستجوی کالا یا برند" aria-controls="mobileMenuSearchSuggestions" aria-autocomplete="list" autocomplete="off" />
+            <input class="header-search-input" id="mobileMenuSearch" name="q" type="search" placeholder="جستجوی کالا یا برند…" aria-label="جستجوی کالا یا برند" aria-controls="mobileMenuSearchSuggestions" aria-autocomplete="list" aria-expanded="false" autocomplete="off" />
             <button type="submit" aria-label="جستجو"><i class="bi bi-arrow-left" aria-hidden="true"></i></button>
-            <div class="header-search-suggestions" id="mobileMenuSearchSuggestions" role="region" aria-label="پیشنهادهای جستجو" hidden></div>
+            <div class="mobile-menu-search-results" id="mobileMenuSearchSuggestions" role="region" aria-label="پیشنهادهای جستجو" hidden></div>
         </form>
+    </div>
+    <div class="offcanvas-body">
         <div class="mobile-accordion">
             <button
                 class="mobile-category-toggle"
@@ -150,6 +150,12 @@
                 <span>۲۴ ساعته</span>
             </div>
             <div class="mobile-support-socials" aria-label="راه‌های ارتباطی">
+                <span class="mobile-support-social-placeholder" role="img" aria-label="Instagram" title="Instagram">
+                    <i class="bi bi-instagram" aria-hidden="true"></i>
+                </span>
+                <span class="mobile-support-social-placeholder" role="img" aria-label="Telegram" title="Telegram">
+                    <i class="bi bi-telegram" aria-hidden="true"></i>
+                </span>
                 <a href="https://wa.me/989177764324" target="_blank" rel="noopener" aria-label="واتساپ">
                     <i class="bi bi-whatsapp"></i>
                 </a>

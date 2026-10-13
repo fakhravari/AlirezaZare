@@ -17,9 +17,35 @@ $(function () {
         ".header-search-input",
       );
       const suggestions = headerSearchForm.querySelector(
-        ".header-search-suggestions",
+        ".header-search-suggestions, .mobile-menu-search-results",
       );
       if (!searchInput || !suggestions) return;
+      const isDrawerSearch = headerSearchForm.classList.contains(
+        "mobile-menu-search",
+      );
+      const isolateDrawerSearchMarkup = (markup) => {
+        if (!isDrawerSearch) return markup;
+        return [
+          ["header-search-quick-section", "mobile-menu-search-quick-section"],
+          ["header-search-quick-heading", "mobile-menu-search-quick-heading"],
+          ["header-search-quick-chips", "mobile-menu-search-quick-chips"],
+          ["header-search-quick-chip", "mobile-menu-search-quick-chip"],
+          ["header-search-quick-empty", "mobile-menu-search-quick-empty"],
+          ["header-search-suggestions-head", "mobile-menu-search-results-head"],
+          ["header-search-suggestion-image", "mobile-menu-search-suggestion-image"],
+          ["header-search-suggestion-copy", "mobile-menu-search-suggestion-copy"],
+          ["header-search-suggestion", "mobile-menu-search-suggestion"],
+          ["header-search-all", "mobile-menu-search-all"],
+          ["header-search-empty", "mobile-menu-search-empty"],
+        ]
+          .sort((a, b) => b[0].length - a[0].length)
+          .reduce(
+            (html, [source, target]) => html.replaceAll(source, target),
+            markup
+              .replaceAll("recentSearchesTitle", "mobileMenuRecentSearchesTitle")
+              .replaceAll("popularSearchesTitle", "mobileMenuPopularSearchesTitle"),
+          );
+      };
     const normalizeSearchText = (value) =>
       String(value || "")
         .toLocaleLowerCase("fa-IR")
@@ -59,6 +85,9 @@ $(function () {
     const renderQuickSearchPanel = () => {
       const recent = readRecentSearches();
       suggestions.innerHTML = `<section class="header-search-quick-section" aria-labelledby="recentSearchesTitle"><div class="header-search-quick-heading"><strong id="recentSearchesTitle"><i class="bi bi-clock-history" aria-hidden="true"></i> جستجوهای اخیر</strong>${recent.length ? '<button type="button" data-clear-search-history>پاک‌کردن</button>' : ""}</div>${recent.length ? `<div class="header-search-quick-chips">${recent.map((query) => quickSearchLink(query, "bi-clock-history")).join("")}</div>` : '<p class="header-search-quick-empty">جستجوهای اخیر اینجا نمایش داده می‌شوند.</p>'}</section><section class="header-search-quick-section" aria-labelledby="popularSearchesTitle"><div class="header-search-quick-heading"><strong id="popularSearchesTitle"><i class="bi bi-graph-up-arrow" aria-hidden="true"></i> جستجوهای پرتکرار</strong></div><div class="header-search-quick-chips">${popularSearches.map((query) => quickSearchLink(query, "bi-arrow-up-right")).join("")}</div></section>`;
+      suggestions.innerHTML = isolateDrawerSearchMarkup(
+        suggestions.innerHTML,
+      );
       openSuggestions();
     };
     const closeSuggestions = () => {
@@ -129,6 +158,9 @@ $(function () {
         : `<div class="header-search-empty"><i class="bi bi-search" aria-hidden="true"></i><span>محصولی با این عبارت پیدا نشد.</span><a href="${searchUrl(searchInput.value.trim())}">جستجو در همه محصولات <i class="bi bi-arrow-left" aria-hidden="true"></i></a></div>`;
 
       suggestions.innerHTML = resultMarkup;
+      suggestions.innerHTML = isolateDrawerSearchMarkup(
+        suggestions.innerHTML,
+      );
       suggestions
         .querySelectorAll('[role="option"]')
         .forEach((option) => option.removeAttribute("role"));
@@ -160,7 +192,7 @@ $(function () {
         closeSuggestions();
       } else if (event.key === "ArrowDown" && !suggestions.hidden) {
         const firstSuggestion = suggestions.querySelector(
-          ".header-search-suggestion, .header-search-quick-chip",
+          ".header-search-suggestion, .header-search-quick-chip, .mobile-menu-search-suggestion, .mobile-menu-search-quick-chip",
         );
         if (firstSuggestion) {
           event.preventDefault();
