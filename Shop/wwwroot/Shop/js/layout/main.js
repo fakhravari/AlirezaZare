@@ -1151,15 +1151,15 @@ $(function () {
       </button>
     </article>`;
 
-  if (catalogProducts.length >= 24) {
+  if (catalogProducts.length >= 30) {
     $("#bestsellersSlider").html(
-      catalogProducts.slice(0, 12).map(productCardMarkup).join(""),
+      catalogProducts.slice(0, 20).map(productCardMarkup).join(""),
     );
     $("#newestSlider").html(
-      catalogProducts.slice(14, 20).map(productCardMarkup).join(""),
+      catalogProducts.slice(20, 26).map(productCardMarkup).join(""),
     );
     $("#productRail").html(
-      catalogProducts.slice(20, 25).map(railCardMarkup).join(""),
+      catalogProducts.slice(26, 30).map(railCardMarkup).join(""),
     );
   }
 

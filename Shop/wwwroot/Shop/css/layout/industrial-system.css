@@ -11151,3 +11151,13 @@ html
 .inner-page main :is(.search-results-count, .product-result-count, .compare-overview-copy small) {
   font-size: 13px !important;
 }
+
+/* Match drawer price and product-name sizes across all header panels. */
+#cartPanel .cart-item-actions > span {
+  font-size: 14px !important;
+}
+
+#cartPanel .cart-item-info > strong,
+:is(#favoritesPanel, #comparePanel) .compare-panel-item > span > strong {
+  font-size: 14px !important;
+}
