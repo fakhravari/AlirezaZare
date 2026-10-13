@@ -8258,10 +8258,15 @@ html
   #mainNav
     .nav-actions
     :is(.favorites-toggle, .compare-toggle, .cart-btn.cart-icon-theme) {
-    width: 42px !important;
-    min-width: 42px !important;
-    height: 42px !important;
+    width: 40px !important;
+    min-width: 40px !important;
+    height: 40px !important;
   }
+
+  #mainNav .nav-actions :is(.favorites-toggle, .compare-toggle, .cart-btn.cart-icon-theme) > i {
+    font-size: 19px !important;
+  }
+
   #mainNav .nav-actions :is(.nav-count, .cart-btn.cart-icon-theme > b) {
     top: -9px !important;
     right: -7px !important;
