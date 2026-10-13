@@ -10222,50 +10222,190 @@ html
   }
 }
 
-/* Keep the mobile favorites and compare drawers aligned with the cart drawer. */
-@media (max-width: 991px) {
-  html body > #favoritesPanel.compare-panel,
-  html body > #favoritesPanel.compare-panel.open,
-  html body > #comparePanel.compare-panel,
-  html body > #comparePanel.compare-panel.open {
-    position: fixed !important;
-    top: 74px !important;
-    right: 8px !important;
-    bottom: auto !important;
-    left: 8px !important;
-    z-index: 7000 !important;
-    width: auto !important;
-    max-width: none !important;
-    max-height: calc(100dvh - 84px) !important;
-    margin: 0 auto !important;
-    overflow: hidden !important;
-    transform: translateY(-10px) scale(0.985) !important;
-    transform-origin: top center !important;
+/* Final shared layout for inner-page banners and their breadcrumb trails. */
+.inner-page .page-hero {
+  min-height: 360px !important;
+  padding: 28px 0 36px !important;
+  align-items: flex-start;
+  text-align: right;
+}
+
+.inner-page .page-hero > .container {
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 8px;
+  direction: rtl;
+  text-align: right;
+}
+
+.inner-page .page-hero > .container > .article-breadcrumb {
+  min-height: 46px;
+  margin: 0 0 10px !important;
+  align-self: flex-start;
+}
+
+.inner-page .page-hero > .container > .page-kicker {
+  margin: 0 !important;
+  align-self: flex-start;
+  clear: none;
+}
+
+.inner-page .page-hero > .container > :is(h1, p, .hero-trail) {
+  text-align: right;
+}
+
+.inner-page .page-hero > .container > h1 {
+  max-width: 100%;
+  margin: 0;
+}
+
+.inner-page .page-hero > .container > p {
+  max-width: 760px;
+  margin: 0;
+}
+
+.inner-page .page-hero > .container > .hero-trail {
+  justify-content: flex-start;
+  margin-top: 12px;
+}
+
+.inner-page :is(.article-breadcrumb, .cart-breadcrumb) {
+  display: flex;
+  width: max-content;
+  max-width: 100%;
+  min-height: 46px;
+  box-sizing: border-box;
+  align-items: center;
+  gap: 5px 9px;
+  padding: 4px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 12px;
+  background: rgba(7, 25, 45, 0.78);
+  color: rgba(255, 255, 255, 0.86);
+  font-size: 13px;
+  box-shadow: 0 5px 16px rgba(3, 14, 34, 0.2);
+  direction: rtl;
+  text-align: right;
+  backdrop-filter: blur(10px);
+}
+
+.inner-page .article-breadcrumb::after {
+  content: none;
+}
+
+.inner-page :is(.article-breadcrumb, .cart-breadcrumb) ol {
+  display: flex;
+  max-width: 100%;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px 9px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  direction: rtl;
+}
+
+.inner-page :is(.article-breadcrumb, .cart-breadcrumb) :is(li, a, .breadcrumb-current, [aria-current]) {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+
+.inner-page :is(.article-breadcrumb, .cart-breadcrumb) :is(a, .breadcrumb-current, [aria-current]) {
+  min-height: 36px;
+  padding: 4px 9px;
+  align-items: center;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.86);
+  box-shadow: none;
+  font-size: inherit;
+  text-decoration: none;
+}
+
+.inner-page :is(.article-breadcrumb, .cart-breadcrumb) :is(a, .breadcrumb-current, [aria-current]) > i {
+  color: var(--industrial-yellow);
+}
+
+.inner-page :is(.article-breadcrumb, .cart-breadcrumb) :is(.breadcrumb-separator, li > .bi-chevron-left) {
+  display: inline-grid;
+  width: 18px;
+  height: 18px;
+  margin: 0 2px;
+  flex: 0 0 18px;
+  place-items: center;
+  border: 1px solid rgba(255, 212, 79, 0.34);
+  border-radius: 50%;
+  background: rgba(255, 212, 79, 0.12);
+  color: #ffe07a;
+  font-size: 9px;
+  opacity: 1;
+}
+
+.inner-page :is(.article-breadcrumb, .cart-breadcrumb) :is(.breadcrumb-current, [aria-current]) {
+  border-color: rgba(255, 218, 102, 0.75);
+  background: linear-gradient(135deg, #fff4c7, #f3df9a);
+  color: #17324b;
+  font-weight: 700;
+}
+
+.inner-page :is(.article-breadcrumb, .cart-breadcrumb) :is(.breadcrumb-current, [aria-current]) > i {
+  color: #17324b;
+}
+
+.inner-page :is(.article-breadcrumb, .cart-breadcrumb) a:is(:hover, :focus-visible) {
+  background: rgba(255, 255, 255, 0.13);
+  color: #fff;
+  box-shadow: none;
+  transform: none;
+}
+
+.inner-page :is(.article-breadcrumb, .cart-breadcrumb) a:focus-visible {
+  outline: 2px solid #ffd44f;
+  outline-offset: 2px;
+}
+
+.inner-page .cart-breadcrumb ol {
+  background-image: none;
+}
+
+.inner-page .cart-breadcrumb.profile-breadcrumb {
+  width: max-content;
+}
+
+@media (max-width: 767px) {
+  .inner-page .page-hero {
+    min-height: 0 !important;
+    padding: 22px 0 30px !important;
   }
 
-  html body > #favoritesPanel.compare-panel.open,
-  html body > #comparePanel.compare-panel.open {
-    transform: translateY(0) scale(1) !important;
+  .inner-page .page-hero > .container > h1 {
+    font-size: clamp(30px, 8vw, 40px);
+  }
+}
+
+@media (max-width: 575px) {
+  .inner-page :is(.article-breadcrumb, .cart-breadcrumb) {
+    min-height: 44px;
+    padding: 4px 6px;
+    font-size: 12px;
   }
 
-  /* The account drawer shares the same mobile anchor as the header panels. */
-  html body > #accountPanel.account-panel,
-  html body > #accountPanel.account-panel.open {
-    position: fixed !important;
-    top: 74px !important;
-    right: 8px !important;
-    bottom: auto !important;
-    left: 8px !important;
-    z-index: 7000 !important;
-    width: auto !important;
-    max-width: none !important;
-    max-height: calc(100dvh - 84px) !important;
-    margin: 0 auto !important;
-    transform: translateY(-10px) scale(0.985) !important;
-    transform-origin: top center !important;
+  .inner-page :is(.article-breadcrumb, .cart-breadcrumb) :is(a, .breadcrumb-current, [aria-current]) {
+    min-height: 34px;
+    padding: 3px 8px;
   }
 
-  html body > #accountPanel.account-panel.open {
-    transform: translateY(0) scale(1) !important;
+  .inner-page .cart-breadcrumb.profile-breadcrumb,
+  .inner-page .cart-breadcrumb.profile-breadcrumb ol {
+    width: max-content;
+    max-width: 100%;
   }
 }
