@@ -10898,3 +10898,99 @@ html
     min-height: 36px;
   }
 }
+
+#cartPanel .cart-item-controls > .cart-quantity {
+  gap: 2px !important;
+}
+
+#cartPanel .cart-item-controls > .cart-quantity > button {
+  width: 28px !important;
+  min-width: 28px;
+  height: 28px !important;
+  min-height: 28px;
+}
+
+#cartPanel .cart-item-controls > .cart-quantity > b {
+  min-width: 20px;
+}
+
+#cartPanel .cart-item > img {
+  width: 72px !important;
+  height: 72px !important;
+  aspect-ratio: 1 / 1;
+  align-self: center;
+  object-fit: cover !important;
+}
+
+@media (max-width: 420px) {
+  #cartPanel .cart-item-controls > .cart-quantity > button {
+    width: 26px !important;
+    min-width: 26px;
+    height: 26px !important;
+    min-height: 26px;
+  }
+
+  #cartPanel .cart-item-controls > .cart-quantity > b {
+    min-width: 18px;
+  }
+
+  #cartPanel .cart-item > img {
+    width: 60px !important;
+    height: 60px !important;
+  }
+}
+
+/* Use square, edge-to-edge product imagery in favorites and compare surfaces. */
+:is(#favoritesPanel, #comparePanel) .compare-panel-item {
+  grid-template-columns: 72px minmax(0, 1fr) 34px;
+}
+
+:is(#favoritesPanel, #comparePanel) .compare-panel-item > img {
+  width: 72px !important;
+  height: 72px !important;
+  aspect-ratio: 1 / 1;
+  object-fit: cover !important;
+}
+
+#favoritesView .favorite-item-card .flow-photo {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+}
+
+#compareView .compare-product-image {
+  height: auto;
+  aspect-ratio: 1 / 1;
+}
+
+#compareView .compare-product-image > img,
+.compare-product-card img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1 / 1;
+  padding: 0 !important;
+  object-fit: cover;
+}
+
+@media (max-width: 420px) {
+  :is(#favoritesPanel, #comparePanel) .compare-panel-item {
+    grid-template-columns: 60px minmax(0, 1fr) 32px;
+  }
+
+  :is(#favoritesPanel, #comparePanel) .compare-panel-item > img {
+    width: 60px !important;
+    height: 60px !important;
+  }
+}
+
+/* Slightly widen only the header cart quantity-control outline. */
+#cartPanel .cart-item-controls {
+  padding-inline: 10px;
+}
+
+@media (max-width: 420px) {
+  #cartPanel .cart-item-controls {
+    padding-inline: 6px;
+  }
+}
