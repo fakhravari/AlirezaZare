@@ -25,10 +25,12 @@ a {
 }
 h1,
 h2,
-h3,
+h3 {
+  font-family: var(--font-heading);
+}
 .brand,
 .nav-link {
-  font-family: "Noto Kufi Arabic", "Vazirmatn", sans-serif;
+  font-family: var(--font-body);
 }
 .inner-nav {
   height: 82px;
@@ -766,14 +768,8 @@ h3,
   }
 }
 
-/* Final home-page typography: Estedad is the active family there. */
+/* Keep body and controls on Vazirmatn, with Estedad reserved for headings. */
 body,
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
 .brand,
 .btn,
 .nav-link,
@@ -788,8 +784,17 @@ textarea,
   font-family: var(--font-body) !important;
   font-synthesis: none;
 }
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading) !important;
+  font-synthesis: none;
+}
 .page-hero h1 em {
-  font-family: var(--font-body) !important;
+  font-family: var(--font-heading) !important;
   font-style: normal;
   font-weight: 700;
   letter-spacing: -1px;
@@ -1664,7 +1669,7 @@ textarea,
   align-items: center;
   border-bottom: 1px solid rgba(223, 200, 141, 0.15);
   color: rgba(255, 255, 255, 0.9);
-  font-family: "Estedad", "Vazirmatn", sans-serif;
+  font-family: var(--font-body);
   font-size: 14px;
   font-weight: 600;
 }

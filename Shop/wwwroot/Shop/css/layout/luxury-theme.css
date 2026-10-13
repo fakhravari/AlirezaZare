@@ -284,7 +284,7 @@ h3,
   min-height: 18px;
   margin: 0 0 5px;
   color: #98703a;
-  font-family: "Noto Kufi Arabic", Arial, sans-serif;
+  font-family: var(--font-body);
   font-size: 11.5px;
   font-weight: 700;
   line-height: 1.6;
@@ -306,7 +306,7 @@ h3,
   min-height: 31px;
   margin: 0;
   color: #101c2d;
-  font-family: "Vazirmatn", "Estedad", sans-serif;
+  font-family: var(--font-heading);
   font-size: 17.5px;
   font-weight: 700;
   line-height: 1.75;
@@ -318,7 +318,7 @@ h3,
 .rail-card > strong,
 .search-product-info > strong {
   color: #172e50;
-  font-family: "Vazirmatn", "Estedad", sans-serif;
+  font-family: var(--font-body);
   font-variant-numeric: tabular-nums;
   font-weight: 700;
   letter-spacing: -0.02em;
@@ -362,7 +362,7 @@ h3,
   min-height: 48px;
   gap: 9px;
   border-radius: 10px;
-  font-family: "Vazirmatn", "Estedad", sans-serif;
+  font-family: var(--font-body);
   font-size: 14px;
   font-weight: 600;
   letter-spacing: 0;
@@ -871,7 +871,7 @@ h3,
 #loginModal .login-brand small {
   margin-top: 5px;
   color: #6f7883;
-  font-family: "Vazirmatn", "Estedad", sans-serif;
+  font-family: var(--font-body);
   font-size: 13px;
   font-weight: 500;
   line-height: 1.6;
@@ -1223,7 +1223,7 @@ h3,
   border-radius: 10px !important;
   background: linear-gradient(135deg, #10233d, #061223);
   color: #fff;
-  font-family: "Vazirmatn", "Estedad", sans-serif;
+  font-family: var(--font-body);
   font-size: 15px;
   font-weight: 600;
   line-height: 1.4;
@@ -1332,7 +1332,7 @@ h3,
 .featured-content h3 {
   margin: 10px 0 8px;
   color: #fff;
-  font-family: "Vazirmatn", "Estedad", sans-serif;
+  font-family: var(--font-heading);
   font-size: 31px;
   font-weight: 700;
   line-height: 1.6;
@@ -1348,7 +1348,7 @@ h3,
 
 .featured-buy strong {
   color: #fff;
-  font-family: "Vazirmatn", "Estedad", sans-serif;
+  font-family: var(--font-body);
   font-size: 20px;
   font-weight: 700;
 }
@@ -1356,7 +1356,7 @@ h3,
 .featured-buy del {
   margin-bottom: 4px;
   color: rgba(255, 255, 255, 0.74);
-  font-family: "Vazirmatn", "Estedad", sans-serif;
+  font-family: var(--font-body);
   font-size: 16px;
   font-weight: 600;
   line-height: 1.6;
@@ -1390,7 +1390,7 @@ h3,
 .featured-side-content h3 {
   margin: 8px 0 5px;
   color: #10233d;
-  font-family: "Vazirmatn", "Estedad", sans-serif;
+  font-family: var(--font-heading);
   font-size: 24px;
   font-weight: 700;
   line-height: 1.65;
@@ -1408,7 +1408,7 @@ h3,
 
 .featured-price {
   color: #10233d;
-  font-family: "Vazirmatn", "Estedad", sans-serif;
+  font-family: var(--font-body);
   font-size: 18px;
   font-weight: 700;
 }
@@ -1521,7 +1521,7 @@ h3,
   justify-content: center;
   border: 1px solid rgba(255, 255, 255, 0.26);
   border-radius: 999px !important;
-  font-family: "Vazirmatn", "Estedad", sans-serif;
+  font-family: var(--font-body);
   font-size: 12.5px;
   font-weight: 700;
   line-height: 1;

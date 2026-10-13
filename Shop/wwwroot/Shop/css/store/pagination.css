@@ -5,7 +5,7 @@ body .site-pagination button > span,
 body .orders-pagination p,
 body .blog-page-status,
 body #journal-count {
-  font-family: var(--font-body, "Estedad", "Vazirmatn", Tahoma, sans-serif);
+  font-family: var(--font-body, "Vazirmatn", "Estedad", Tahoma, sans-serif);
   font-size: 13px;
   font-weight: 600;
   line-height: 1.7;

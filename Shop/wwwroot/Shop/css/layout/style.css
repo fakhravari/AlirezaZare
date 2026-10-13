@@ -277,7 +277,13 @@ h4,
 .brand,
 .btn,
 .nav-link {
-  font-family: "Noto Kufi Arabic", "Vazirmatn", sans-serif;
+  font-family: var(--font-body);
+}
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-heading);
 }
 
 a {
@@ -3763,7 +3769,7 @@ footer .copyright {
 .story em,
 .journal em,
 .recommend-head h2 em {
-  font-family: "Noto Kufi Arabic", "Vazirmatn", sans-serif;
+  font-family: var(--font-heading);
   font-style: normal;
   font-weight: 600;
   letter-spacing: -1.5px;
@@ -4696,7 +4702,7 @@ footer .copyright {
 
 .testimonial-intro h2 em {
   color: #a28a68;
-  font-family: "Noto Kufi Arabic", "Vazirmatn", sans-serif;
+  font-family: var(--font-heading);
   font-style: normal;
   font-weight: 600;
 }

@@ -5,11 +5,18 @@
   --industrial-steel: #243b53;
   --industrial-yellow: #f6c515;
   --industrial-yellow-dark: #866600;
+  --industrial-accent-border: #d4b14d;
+  --industrial-accent-border-soft: color-mix(
+    in srgb,
+    var(--industrial-accent-border) 28%,
+    white
+  );
   --industrial-bg: #f5f7f8;
   --industrial-surface: #fff;
   --industrial-ink: #202a33;
   --industrial-muted: #4c5b65;
-  --industrial-line: #dee4e7;
+  --industrial-line: #dfe5e9;
+  --industrial-line-strong: #cbd5db;
   --industrial-icon-border: #d6e0e5;
   --industrial-icon-surface: #edf2f4;
   --industrial-icon-ink: var(--industrial-steel);
@@ -31,7 +38,7 @@
   --color-ink: var(--industrial-ink);
   --color-muted: var(--industrial-muted);
   --color-line: var(--industrial-line);
-  --color-line-strong: #aeb9bf;
+  --color-line-strong: var(--industrial-line-strong);
   --color-card-border: var(--industrial-line);
   --color-card-border-hover: var(--industrial-yellow);
   --color-card-icon-border: var(--industrial-icon-border);
@@ -10408,4 +10415,122 @@ html
     width: max-content;
     max-width: 100%;
   }
+}
+
+/* Keep Cart content aligned with the shared inner-page direction. */
+.inner-page .cart-page-main {
+  direction: rtl;
+  text-align: right;
+}
+
+.inner-page .cart-page-hero .cart-breadcrumb {
+  align-self: flex-start;
+}
+
+/* Keep the desktop brand menu anchored while its trigger enters the open state. */
+@media (min-width: 992px) {
+  #mainNav .brand-dropdown > .nav-link,
+  #mainNav .brand-dropdown > .nav-link:is(:hover, :focus-visible, .show) {
+    transform: none !important;
+  }
+
+  #mainNav .brand-dropdown > .brand-menu {
+    top: 100% !important;
+    margin-top: 0 !important;
+    border-top: 3px solid var(--industrial-yellow) !important;
+    animation: none !important;
+    transition: none !important;
+    transform: translate(-50%, 0) !important;
+  }
+}
+
+/* Match the header cart stepper to the quantity controls on the Cart page. */
+#cartPanel .cart-item-info .cart-quantity {
+  min-width: 0 !important;
+  min-height: 38px;
+  gap: 2px !important;
+  padding: 2px !important;
+  border-color: #dfceb3 !important;
+  background: linear-gradient(180deg, #fffdf8, #f4eee3) !important;
+  box-shadow: inset 0 1px 0 #fff, 0 4px 10px -6px #80633740 !important;
+}
+
+#cartPanel .cart-item-info .cart-quantity > button,
+#cartPanel .cart-item-info .cart-quantity > button[data-action="plus"] {
+  width: 32px !important;
+  min-width: 32px;
+  height: 32px !important;
+  min-height: 32px;
+  border: 1px solid #e5dac8 !important;
+  border-radius: 50% !important;
+  background: #fffdf9 !important;
+  color: #8b6b3a !important;
+  box-shadow: 0 2px 4px #142e5105 !important;
+}
+
+#cartPanel .cart-item-info .cart-quantity > button:hover,
+#cartPanel .cart-item-info .cart-quantity > button:focus-visible {
+  transform: none !important;
+  border-color: #e8bd34 !important;
+  background: linear-gradient(145deg, #ffdf68, #f6c515) !important;
+  color: #142e51 !important;
+  box-shadow: 0 3px 8px rgba(166, 123, 0, 0.2) !important;
+}
+
+#cartPanel .cart-item-info .cart-quantity > button:active {
+  transform: translateY(0);
+}
+
+#cartPanel .cart-item-info .cart-quantity > b {
+  min-width: 34px;
+  height: auto;
+  background: transparent;
+  color: #142e51;
+  font-size: 13px !important;
+  font-weight: 700;
+}
+
+/* Shared border rhythm for separators and accent frames across pages. */
+:where(
+  hr,
+  .flow-row,
+  .flow-related,
+  .flow-card details,
+  .cart-summary-heading,
+  .orders-pagination,
+  .profile-order-card header,
+  .profile-order-card footer,
+  .product-variant-options,
+  .product-variant-field,
+  .product-variant-field legend,
+  .article-enhanced .article-section,
+  .article-checklist label,
+  .product-gallery-dialog-rail,
+  .product-gallery-rail-title
+) {
+  border-color: var(--industrial-line) !important;
+}
+
+:where(
+  .profile-order-card,
+  .article-checklist,
+  .article-enhanced .article-share,
+  .flow-notice,
+  .cart-summary,
+  .cart-address-section,
+  .cart-payment-section
+) {
+  border-color: var(--industrial-accent-border-soft);
+}
+
+:where(.cart-address-section, .cart-payment-section, .cart-summary) {
+  border-width: 1px;
+}
+
+:where(.flow-notice, .article-enhanced .article-lead, .article-checklist) {
+  border-inline-start-color: var(--industrial-accent-border) !important;
+}
+
+.product-gallery-dialog-tools button:hover {
+  border-color: var(--industrial-accent-border) !important;
 }

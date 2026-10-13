@@ -1,4 +1,4 @@
-﻿:root {
+:root {
   --journal-ink: var(--industrial-navy);
   --journal-muted: var(--industrial-steel);
   --journal-gold: var(--industrial-yellow-dark);
@@ -317,7 +317,7 @@
   border-radius: 50%;
   background: var(--industrial-bg);
   color: var(--journal-ink);
-  font-family: var(--font-body, "Estedad", "Vazirmatn", Tahoma, sans-serif);
+  font-family: var(--font-body, "Vazirmatn", "Estedad", Tahoma, sans-serif);
   font-weight: 600;
   font-variant-numeric: normal;
 }
@@ -378,7 +378,7 @@
   );
   box-shadow: 0 7px 18px rgba(31, 48, 66, 0.07);
   color: var(--industrial-steel);
-  font-family: var(--font-body, "Estedad", "Vazirmatn", Tahoma, sans-serif);
+  font-family: var(--font-body, "Vazirmatn", "Estedad", Tahoma, sans-serif);
   font-size: 11px;
   font-weight: 600;
   word-spacing: 3px;
@@ -832,7 +832,7 @@
 .journal-page,
 .journal-page button,
 .journal-page input {
-  font-family: var(--font-body, "Estedad", "Vazirmatn", Tahoma, sans-serif);
+  font-family: var(--font-body, "Vazirmatn", "Estedad", Tahoma, sans-serif);
 }
 
 .blog-hero .hero-image {
@@ -952,7 +952,7 @@
   border-right: 2px solid transparent;
   border-radius: 8px;
   color: var(--industrial-steel);
-  font-family: var(--font-body, "Estedad", "Vazirmatn", Tahoma, sans-serif);
+  font-family: var(--font-body, "Vazirmatn", "Estedad", Tahoma, sans-serif);
   font-size: 12px;
   font-weight: 500;
   line-height: 1.85;

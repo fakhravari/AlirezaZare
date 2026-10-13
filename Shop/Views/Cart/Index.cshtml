@@ -1,8 +1,10 @@
 @model PageModel
 
 
-<main class="flow-main container">
-    <nav class="cart-breadcrumb" aria-label="مسیر صفحه">
+<header class="page-hero cart-page-hero">
+    <img class="hero-image" src="~/Shop/images/heroes/hero-electrical-editorial.png" alt="ابزارهای برقی و تجهیزات فنی" width="1536" height="1024" fetchpriority="high" />
+    <div class="container">
+        <nav class="cart-breadcrumb" aria-label="مسیر صفحه">
         <ol>
             <li>
                 <a asp-controller="Home" asp-action="Index">
@@ -14,13 +16,12 @@
             </li>
         </ol>
     </nav>
-    <header class="flow-heading cart-hero">
-        <div class="cart-hero-dial" aria-hidden="true">
-            <span></span>
-        </div>
+        <span class="page-kicker">خرید امن و آسان</span>
         <h1>سبد خرید</h1>
         <p>یک قدم نزدیک‌تر به انتخاب شما</p>
-    </header>
+    </div>
+</header>
+<main class="flow-main container cart-page-main">
     <section class="cart-address-section">
         <div class="invoice-section-title">
             <i class="bi bi-geo-alt"></i>
