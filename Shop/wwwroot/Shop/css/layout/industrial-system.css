@@ -2110,7 +2110,7 @@ footer .trust-badges .trust-badge-image {
     min-height: 82px;
     margin-bottom: 4px;
     padding: 10px 12px;
-    grid-template-columns: 46px 1fr 30px;
+    grid-template-columns: 46px minmax(0, 1fr);
     gap: 9px;
   }
 
@@ -2152,7 +2152,7 @@ footer .trust-badges .trust-badge-image {
   .shared-account-card .account-user {
     min-height: 76px;
     padding: 8px 10px;
-    grid-template-columns: 42px 1fr 28px;
+    grid-template-columns: 42px minmax(0, 1fr);
     gap: 8px;
   }
 
@@ -2393,7 +2393,7 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
   position: absolute;
   z-index: 3;
   top: 18px;
-  left: calc(42.5% + 18px);
+  left: 18px;
   box-shadow: 0 4px 14px rgba(16, 42, 67, 0.1);
 }
 
@@ -2441,7 +2441,7 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
   #loginModal .login-modal-form-panel {
     min-height: 0;
     flex: 1 1 auto;
-    padding: 58px 18px 18px;
+    padding: 26px 18px 18px;
     overflow-x: hidden;
     overflow-y: auto;
     overscroll-behavior: contain;
@@ -4393,6 +4393,8 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
     width: 40px !important;
     min-width: 40px !important;
     height: 40px !important;
+    min-height: 40px !important;
+    flex: 0 0 40px !important;
     padding: 0 !important;
     justify-content: center !important;
   }
@@ -9048,9 +9050,6 @@ html
     grid-template-columns: 54px minmax(0, 1fr) !important;
   }
 
-  .shared-account-card .account-user > i {
-    display: none !important;
-  }
 }
 
 @media (max-width: 575px) {
@@ -9245,7 +9244,7 @@ html
   .modal button[data-bs-dismiss="modal"],
   .site-modal-close,
   .login-close,
-  .product-gallery-dialog-tools button
+  [data-gallery-close]
 ),
 #loginModal .login-close {
   display: grid;
@@ -9275,7 +9274,7 @@ html
   .modal button[data-bs-dismiss="modal"],
   .site-modal-close,
   .login-close,
-  .product-gallery-dialog-tools button
+  [data-gallery-close]
 ):is(:hover, :focus-visible),
 #loginModal .login-close:is(:hover, :focus-visible) {
   border-color: #d2b761;
@@ -9292,7 +9291,7 @@ html
     .modal button[data-bs-dismiss="modal"],
     .site-modal-close,
     .login-close,
-    .product-gallery-dialog-tools button
+    [data-gallery-close]
   )
   > i,
 #loginModal .login-close > i {
@@ -9303,7 +9302,7 @@ html
     .modal button[data-bs-dismiss="modal"],
     .site-modal-close,
     .login-close,
-    .product-gallery-dialog-tools button
+    [data-gallery-close]
   ):hover
   > i,
 #loginModal .login-close:hover > i {
@@ -9315,14 +9314,14 @@ html
     .modal button[data-bs-dismiss="modal"],
     .site-modal-close,
     .login-close,
-    .product-gallery-dialog-tools button
+    [data-gallery-close]
   ),
   #loginModal .login-close,
   :is(
       .modal button[data-bs-dismiss="modal"],
       .site-modal-close,
       .login-close,
-      .product-gallery-dialog-tools button
+      [data-gallery-close]
     )
     > i,
   #loginModal .login-close > i {
@@ -10208,5 +10207,53 @@ html
 
   .purchase-benefits--showcase .benefits-intro p {
     white-space: normal;
+  }
+}
+
+/* Keep the mobile favorites and compare drawers aligned with the cart drawer. */
+@media (max-width: 991px) {
+  html body > #favoritesPanel.compare-panel,
+  html body > #favoritesPanel.compare-panel.open,
+  html body > #comparePanel.compare-panel,
+  html body > #comparePanel.compare-panel.open {
+    position: fixed !important;
+    top: 74px !important;
+    right: 8px !important;
+    bottom: auto !important;
+    left: 8px !important;
+    z-index: 7000 !important;
+    width: auto !important;
+    max-width: none !important;
+    max-height: calc(100dvh - 84px) !important;
+    margin: 0 auto !important;
+    overflow: hidden !important;
+    transform: translateY(-10px) scale(0.985) !important;
+    transform-origin: top center !important;
+  }
+
+  html body > #favoritesPanel.compare-panel.open,
+  html body > #comparePanel.compare-panel.open {
+    transform: translateY(0) scale(1) !important;
+  }
+
+  /* The account drawer shares the same mobile anchor as the header panels. */
+  html body > #accountPanel.account-panel,
+  html body > #accountPanel.account-panel.open {
+    position: fixed !important;
+    top: 74px !important;
+    right: 8px !important;
+    bottom: auto !important;
+    left: 8px !important;
+    z-index: 7000 !important;
+    width: auto !important;
+    max-width: none !important;
+    max-height: calc(100dvh - 84px) !important;
+    margin: 0 auto !important;
+    transform: translateY(-10px) scale(0.985) !important;
+    transform-origin: top center !important;
+  }
+
+  html body > #accountPanel.account-panel.open {
+    transform: translateY(0) scale(1) !important;
   }
 }

@@ -647,38 +647,37 @@ body {
   z-index: 5;
   top: 50%;
   display: grid;
-  width: 46px;
-  height: 46px;
+  width: 42px;
+  height: 42px;
   place-items: center;
-  border: 1px solid rgba(16, 42, 67, 0.14);
+  border: 1px solid rgba(255, 255, 255, .34);
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.92);
-  color: #102a43;
+  background: linear-gradient(145deg, #183d63, var(--color-navy));
+  color: var(--color-gold);
   box-shadow:
-    0 7px 18px rgba(16, 42, 67, 0.16),
-    inset 0 1px rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(8px);
-  font-size: 16px;
+    0 5px 14px rgba(16, 42, 67, .2),
+    inset 0 1px rgba(255, 255, 255, .12);
+  font-size: 15px;
   transform: translateY(-50%);
   transition:
     border-color 0.2s ease,
-    background 0.2s ease,
+    background-color 0.2s ease,
     color 0.2s ease,
     box-shadow 0.2s ease,
     transform 0.2s ease;
 }
 
 .electrical-arrow:is(:hover, :focus-visible) {
-  border-color: #102a43;
+  border-color: var(--color-gold);
   outline: none;
-  background: #102a43;
-  color: #ffda4b;
-  box-shadow: 0 10px 22px rgba(16, 42, 67, 0.24);
-  transform: translateY(-50%) scale(1.04);
+  background: var(--color-gold);
+  color: var(--color-navy);
+  box-shadow: 0 7px 16px rgba(16, 42, 67, .2);
+  transform: translateY(-50%) scale(1.05);
 }
 
 .electrical-arrow:focus-visible {
-  outline: 3px solid rgba(255, 218, 75, 0.75);
+  outline: 3px solid rgba(246, 197, 21, .62);
   outline-offset: 3px;
 }
 
@@ -824,15 +823,17 @@ body {
     bottom: 10px;
     width: 34px;
     height: 34px;
-    border-color: rgba(16, 42, 67, 0.12);
-    background: rgba(255, 255, 255, 0.88);
-    box-shadow: 0 4px 11px rgba(16, 42, 67, 0.14);
-    backdrop-filter: blur(6px);
-    font-size: 13px;
+    border-color: rgba(255, 255, 255, .34);
+    background: linear-gradient(145deg, #183d63, var(--color-navy));
+    box-shadow: 0 4px 10px rgba(16, 42, 67, .2), inset 0 1px rgba(255, 255, 255, .12);
+    font-size: 12px;
     transform: none;
   }
   .electrical-arrow:is(:hover, :focus-visible) {
-    transform: none;
+    border-color: var(--color-gold);
+    background: var(--color-gold);
+    color: var(--color-navy);
+    transform: scale(1.05);
   }
   .electrical-arrow:active {
     transform: scale(0.95);

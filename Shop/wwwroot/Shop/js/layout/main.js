@@ -1225,26 +1225,47 @@ $(function () {
   const $favoritesWrap = $("#favoritesWrap");
   const $favoritesToggle = $("#favoritesToggle");
   const $favoritesPanel = $("#favoritesPanel");
+  const $compareWrap = $("#compareWrap");
+  const $compareToggle = $("#compareToggle");
+  const $comparePanel = $("#comparePanel");
+  const $accountWrap = $("#accountWrap");
+  const $accountToggle = $("#accountToggle");
+  const $accountPanel = $("#accountPanel");
+  const syncMobileHeaderPanelLock = () => {
+    const lockPage =
+      $window.width() <= mobileBreakpoint &&
+      ($cartPanel.hasClass("open") ||
+        $favoritesPanel.hasClass("open") ||
+        $comparePanel.hasClass("open") ||
+        $accountPanel.hasClass("open"));
+    $body.toggleClass("cart-mobile-open", lockPage);
+    $html.toggleClass("cart-mobile-open", lockPage);
+  };
   const setFavoriteOpen = (open) => {
     $favoritesWrap.toggleClass("open", open);
     $favoritesPanel
       .toggleClass("open", open)
       .attr("aria-hidden", String(!open));
     $favoritesToggle.attr("aria-expanded", String(open));
+    syncMobileHeaderPanelLock();
   };
-  const $compareWrap = $("#compareWrap");
-  const $compareToggle = $("#compareToggle");
-  const $comparePanel = $("#comparePanel");
+  const placeFavoritePanel = () => {
+    if ($window.width() <= mobileBreakpoint) $favoritesPanel.appendTo($body);
+    else $favoritesPanel.appendTo($favoritesWrap);
+    setFavoriteOpen(false);
+  };
   const setCompareOpen = (open) => {
     $compareWrap.toggleClass("open", open);
     $comparePanel.toggleClass("open", open).attr("aria-hidden", String(!open));
     $compareToggle.attr("aria-expanded", String(open));
+    syncMobileHeaderPanelLock();
   };
   const placeComparePanel = () => {
     if ($window.width() <= mobileBreakpoint) $comparePanel.appendTo($body);
     else $comparePanel.appendTo($compareWrap);
     setCompareOpen(false);
   };
+  placeFavoritePanel();
   placeComparePanel();
   const readStoredArray = (key) => {
     try {
@@ -1284,15 +1305,8 @@ $(function () {
   const setCartOpen = (open) => {
     $cartWrap.toggleClass("open", open);
     $cartPanel.toggleClass("open", open);
-    $body.toggleClass(
-      "cart-mobile-open",
-      open && $window.width() <= mobileBreakpoint,
-    );
-    $html.toggleClass(
-      "cart-mobile-open",
-      open && $window.width() <= mobileBreakpoint,
-    );
     $cartToggle.attr("aria-expanded", String(open));
+    syncMobileHeaderPanelLock();
   };
   const placeCartPanel = () => {
     if ($window.width() <= mobileBreakpoint) $cartPanel.appendTo($body);
@@ -1301,9 +1315,6 @@ $(function () {
   };
   placeCartPanel();
 
-  const $accountWrap = $("#accountWrap");
-  const $accountToggle = $("#accountToggle");
-  const $accountPanel = $("#accountPanel");
   const $loginModalElement = $("#loginModal");
   const loginModal =
     window.bootstrap?.Modal && $loginModalElement.length
@@ -1315,10 +1326,15 @@ $(function () {
   let userLoggedIn = window.HNUI.auth.isLoggedIn();
 
   const setAccountOpen = (open) => {
+    if (open) {
+      setCartOpen(false);
+      setFavoriteOpen(false);
+      setCompareOpen(false);
+    }
     $accountWrap.toggleClass("open", open);
     $accountPanel.toggleClass("open", open);
     $accountToggle.attr("aria-expanded", String(open));
-    if (open) setCartOpen(false);
+    syncMobileHeaderPanelLock();
   };
   const placeAccountPanel = () => {
     if ($window.width() <= mobileBreakpoint) $accountPanel.appendTo($body);
@@ -1347,6 +1363,8 @@ $(function () {
       wasMobile = isMobile;
       placeCartPanel();
       placeAccountPanel();
+      placeFavoritePanel();
+      placeComparePanel();
     });
   });
   updateAccountUI();
@@ -1604,6 +1622,25 @@ $(function () {
     );
     setFavoriteOpen(true);
   });
+  $favoritesToggle.on("click", (event) => {
+    if (
+      $window.width() > mobileBreakpoint ||
+      event.button !== 0 ||
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.altKey ||
+      $favoritesPanel.hasClass("open")
+    )
+      return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    setCartOpen(false);
+    setAccountOpen(false);
+    setCompareOpen(false);
+    setFavoriteOpen(true);
+  });
   let favoriteHoverTimer = null;
   $favoritesWrap.on("mouseenter", () => {
     if ($window.width() <= mobileBreakpoint) return;
@@ -1650,6 +1687,25 @@ $(function () {
         setCompareOpen(false);
     }, 220);
   });
+  $compareToggle.on("click", (event) => {
+    if (
+      $window.width() > mobileBreakpoint ||
+      event.button !== 0 ||
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.altKey ||
+      $comparePanel.hasClass("open")
+    )
+      return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    setCartOpen(false);
+    setAccountOpen(false);
+    setFavoriteOpen(false);
+    setCompareOpen(true);
+  });
   $comparePanel.on("mouseenter", () => window.clearTimeout(compareHoverTimer));
   $comparePanel.on("mouseleave", () => {
     if ($window.width() > mobileBreakpoint) setCompareOpen(false);
@@ -1694,7 +1750,6 @@ $(function () {
     if (!$target.closest("#accountWrap, #accountPanel").length)
       setAccountOpen(false);
   });
-  $window.on("resize", placeComparePanel);
   renderCart();
 
   $document.on("click", ".favorite", function () {

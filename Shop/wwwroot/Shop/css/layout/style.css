@@ -3835,7 +3835,7 @@ footer .copyright {
 .account-user {
   padding: 18px;
   display: grid;
-  grid-template-columns: 43px 1fr 20px;
+  grid-template-columns: 43px minmax(0, 1fr);
   gap: 12px;
   align-items: center;
   border-bottom: 1px solid #eee;
@@ -3865,11 +3865,6 @@ footer .copyright {
   font-size: 10px;
   color: #8a939c;
   margin-top: 3px;
-}
-
-.account-user > i {
-  font-size: 12px;
-  color: #8d959c;
 }
 
 .account-plan {
@@ -5157,19 +5152,26 @@ footer .copyright {
 }
 
 .testimonial-slider .owl-nav button {
-  width: 42px;
-  height: 42px;
-  border: 1px solid #d7d0c5 !important;
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, .34) !important;
   border-radius: 50% !important;
-  background: #fff !important;
-  color: var(--navy) !important;
-  box-shadow: 0 6px 18px rgba(7, 26, 46, 0.1);
+  background: linear-gradient(145deg, #183d63, var(--color-navy)) !important;
+  color: var(--color-gold) !important;
+  box-shadow: 0 5px 14px rgba(16, 42, 67, .2), inset 0 1px rgba(255, 255, 255, .12);
+  font-size: 15px;
+  transition: transform .2s ease, background-color .2s ease, color .2s ease, border-color .2s ease, box-shadow .2s ease;
   pointer-events: auto;
 }
 
 .testimonial-slider .owl-nav button:hover {
-  background: var(--navy) !important;
-  color: #fff !important;
+  transform: translateY(-1px) scale(1.05);
+  border-color: var(--color-gold) !important;
+  background: var(--color-gold) !important;
+  color: var(--color-navy) !important;
+  box-shadow: 0 7px 16px rgba(16, 42, 67, .2);
 }
 
 .testimonial-slider .owl-dots {
@@ -5289,19 +5291,26 @@ footer .copyright {
 }
 
 .product-rail .owl-nav button {
-  width: 42px;
-  height: 42px;
-  border: 1px solid #d7d0c5 !important;
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, .34) !important;
   border-radius: 50% !important;
-  background: #fff !important;
-  color: var(--navy) !important;
-  box-shadow: 0 6px 18px rgba(7, 26, 46, 0.1);
+  background: linear-gradient(145deg, #183d63, var(--color-navy)) !important;
+  color: var(--color-gold) !important;
+  box-shadow: 0 5px 14px rgba(16, 42, 67, .2), inset 0 1px rgba(255, 255, 255, .12);
+  font-size: 15px;
+  transition: transform .2s ease, background-color .2s ease, color .2s ease, border-color .2s ease, box-shadow .2s ease;
   pointer-events: auto;
 }
 
 .product-rail .owl-nav button:hover {
-  background: var(--navy) !important;
-  color: #fff !important;
+  transform: translateY(-1px) scale(1.05);
+  border-color: var(--color-gold) !important;
+  background: var(--color-gold) !important;
+  color: var(--color-navy) !important;
+  box-shadow: 0 7px 16px rgba(16, 42, 67, .2);
 }
 
 .product-rail .owl-dots {
@@ -7378,19 +7387,26 @@ h6,
 }
 
 .category-slider .owl-nav button {
-  width: 42px;
-  height: 42px;
-  border: 1px solid #d7d0c5 !important;
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, .34) !important;
   border-radius: 50% !important;
-  background: #fff !important;
-  color: var(--navy) !important;
-  box-shadow: 0 6px 18px rgba(7, 26, 46, 0.12);
+  background: linear-gradient(145deg, #183d63, var(--color-navy)) !important;
+  color: var(--color-gold) !important;
+  box-shadow: 0 5px 14px rgba(16, 42, 67, .2), inset 0 1px rgba(255, 255, 255, .12);
+  font-size: 15px;
+  transition: transform .2s ease, background-color .2s ease, color .2s ease, border-color .2s ease, box-shadow .2s ease;
   pointer-events: auto;
 }
 
 .category-slider .owl-nav button:hover {
-  background: var(--navy) !important;
-  color: #fff !important;
+  transform: translateY(-1px) scale(1.05);
+  border-color: var(--color-gold) !important;
+  background: var(--color-gold) !important;
+  color: var(--color-navy) !important;
+  box-shadow: 0 7px 16px rgba(16, 42, 67, .2);
 }
 
 .category-slider .owl-dots {
@@ -8168,9 +8184,27 @@ body {
 .category-slider .owl-nav button,
 .product-rail .owl-nav button,
 .testimonial-slider .owl-nav button {
-  border: 1px solid var(--md-outline-variant) !important;
-  background: var(--md-surface) !important;
-  box-shadow: var(--md-elevation-2);
+  border-color: rgba(255, 255, 255, .34) !important;
+  background: linear-gradient(145deg, #183d63, var(--color-navy)) !important;
+  color: var(--color-gold) !important;
+  box-shadow: 0 5px 14px rgba(16, 42, 67, .2), inset 0 1px rgba(255, 255, 255, .12);
+}
+
+.category-slider .owl-nav button:hover,
+.product-rail .owl-nav button:hover,
+.testimonial-slider .owl-nav button:hover {
+  border-color: var(--color-gold) !important;
+  background: var(--color-gold) !important;
+  color: var(--color-navy) !important;
+  box-shadow: 0 7px 16px rgba(16, 42, 67, .2);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .category-slider .owl-nav button,
+  .product-rail .owl-nav button,
+  .testimonial-slider .owl-nav button {
+    transition: none;
+  }
 }
 
 .category-slider .owl-dot.active span,
@@ -10817,7 +10851,6 @@ textarea:focus-visible {
 
 .favorite:hover,
 .cart-btn:hover,
-.owl-nav button:hover,
 .login-close:hover,
 .experience-close:hover {
   transform: translateY(-2px);

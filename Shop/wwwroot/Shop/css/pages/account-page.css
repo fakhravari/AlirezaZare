@@ -1561,8 +1561,43 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
 
   .cart-breadcrumb ol {
     max-width: 100%;
-    flex-wrap: wrap;
-    gap: 4px 8px;
+  }
+
+  .inner-page .cart-breadcrumb.profile-breadcrumb {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .inner-page .cart-breadcrumb.profile-breadcrumb ol {
+    width: 100%;
+    min-width: 0;
+    flex-wrap: nowrap;
+    gap: 2px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+  }
+
+  .inner-page .cart-breadcrumb.profile-breadcrumb ol::-webkit-scrollbar {
+    display: none;
+  }
+
+  .inner-page .cart-breadcrumb.profile-breadcrumb ol > li {
+    flex: 0 0 auto;
+    gap: 4px;
+    white-space: nowrap;
+  }
+
+  .inner-page .cart-breadcrumb.profile-breadcrumb ol a {
+    gap: 4px;
+    padding-inline: 5px;
+    white-space: nowrap;
+  }
+
+  .inner-page .cart-breadcrumb.profile-breadcrumb ol [aria-current] {
+    gap: 4px;
+    padding-inline: 7px;
+    white-space: nowrap;
   }
 }
 
