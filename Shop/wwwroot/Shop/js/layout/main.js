@@ -1612,7 +1612,7 @@ $(function () {
           const safeId = escapeHtml(item.id);
           const safeName = escapeHtml(item.name);
           const safeImage = escapeHtml(item.image);
-          return `<div class="cart-item" data-cart-id="${safeId}"><img src="${safeImage}" alt="${safeName}" loading="lazy" decoding="async"><div class="cart-item-info"><strong>${safeName}</strong><span>${faNumber(item.price)} تومان</span><div class="cart-quantity"><button type="button" data-action="plus" aria-label="افزایش تعداد">+</button><b>${faNumber(item.quantity)}</b><button type="button" data-action="minus" aria-label="کاهش تعداد">−</button></div></div><button class="cart-remove" type="button" data-action="remove" aria-label="حذف محصول"><i class="bi bi-trash3"></i></button></div>`;
+          return `<div class="cart-item" data-cart-id="${safeId}"><img src="${safeImage}" alt="${safeName}" loading="lazy" decoding="async"><div class="cart-item-info"><strong>${safeName}</strong><div class="cart-item-actions"><span>${faNumber(item.price)} تومان</span><div class="cart-item-controls"><div class="cart-quantity"><button type="button" data-action="plus" aria-label="افزایش تعداد">+</button><b>${faNumber(item.quantity)}</b><button type="button" data-action="minus" aria-label="کاهش تعداد">−</button></div><button class="cart-remove" type="button" data-action="remove" aria-label="حذف محصول"><i class="bi bi-trash3"></i></button></div></div></div></div>`;
         })
         .join(""),
     );

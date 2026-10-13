@@ -1,6 +1,6 @@
 const productCatalog = [
   [
-    "دریل چکشی شارژی",
+    "دریل چکشی شارژی حرفه‌ای سه‌نظام اتوماتیک",
     "Cordless Hammer Drill",
     "Bosch",
     "دریل چکشی",
@@ -90,7 +90,7 @@ const productCatalog = [
     1,
   ],
   [
-    "ایستگاه هویه دیجیتال",
+    "ایستگاه هویه دیجیتال هوشمند با نمایشگر دمای دقیق و پایه قابل تنظیم",
     "Digital Soldering Station",
     "YIHUA",
     "ایستگاه هویه",
@@ -135,7 +135,7 @@ const productCatalog = [
     2,
   ],
   [
-    "چراغ کار LED قابل‌حمل",
+    "چراغ کار LED قابل‌حمل شارژی با پایه مغناطیسی و روشنایی گسترده",
     "Portable LED Work Light",
     "Philips",
     "چراغ کارگاهی",
