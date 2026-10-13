@@ -15,6 +15,12 @@
         </button>
     </div>
     <div class="offcanvas-body">
+        <form class="mobile-menu-search" id="mobileMenuSearchForm" action="/Search" method="get" role="search">
+            <i class="bi bi-search" aria-hidden="true"></i>
+            <input class="header-search-input" id="mobileMenuSearch" name="q" type="search" placeholder="جستجوی کالا یا برند…" aria-label="جستجوی کالا یا برند" aria-controls="mobileMenuSearchSuggestions" aria-autocomplete="list" autocomplete="off" />
+            <button type="submit" aria-label="جستجو"><i class="bi bi-arrow-left" aria-hidden="true"></i></button>
+            <div class="header-search-suggestions" id="mobileMenuSearchSuggestions" role="region" aria-label="پیشنهادهای جستجو" hidden></div>
+        </form>
         <div class="mobile-accordion">
             <button
                 class="mobile-category-toggle"

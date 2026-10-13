@@ -10,12 +10,16 @@ $(function () {
   ).matches;
   const faNumber = (number) => window.HNUI.formatNumber(number);
   const escapeHtml = (value) => window.HNUI.escapeHtml(value);
-  const headerSearchForm = document.querySelector(".home-header-search");
-  if (headerSearchForm) {
-    const searchInput = headerSearchForm.querySelector("#headerSearchInput");
-    const suggestions = headerSearchForm.querySelector(
-      "#headerSearchSuggestions",
-    );
+  document
+    .querySelectorAll(".home-header-search, .mobile-menu-search")
+    .forEach((headerSearchForm) => {
+      const searchInput = headerSearchForm.querySelector(
+        ".header-search-input",
+      );
+      const suggestions = headerSearchForm.querySelector(
+        ".header-search-suggestions",
+      );
+      if (!searchInput || !suggestions) return;
     const normalizeSearchText = (value) =>
       String(value || "")
         .toLocaleLowerCase("fa-IR")
@@ -164,10 +168,10 @@ $(function () {
         }
       }
     });
-    document.addEventListener("click", (event) => {
-      if (!headerSearchForm.contains(event.target)) closeSuggestions();
+      document.addEventListener("click", (event) => {
+        if (!headerSearchForm.contains(event.target)) closeSuggestions();
+      });
     });
-  }
   const storedListCount = (key) => {
     const list = window.HNUI.storage.json(key, []);
     return Array.isArray(list) ? new Set(list.map(String)).size : 0;

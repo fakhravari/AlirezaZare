@@ -9295,6 +9295,13 @@ html
   )
   > i,
 #loginModal .login-close > i {
+  display: grid;
+  width: 1em;
+  height: 1em;
+  place-items: center;
+  line-height: 1;
+  transform-origin: center;
+  transform: translateX(-1px);
   transition: transform 0.18s ease;
 }
 
@@ -9306,7 +9313,7 @@ html
   ):hover
   > i,
 #loginModal .login-close:hover > i {
-  transform: rotate(90deg);
+  transform: translateX(-1px) rotate(90deg);
 }
 
 @media (prefers-reduced-motion: reduce) {
