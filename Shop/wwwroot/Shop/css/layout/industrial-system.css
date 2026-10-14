@@ -11358,6 +11358,17 @@ body.home-page .rail-card > strong {
   grid-auto-rows: 1fr;
 }
 
+.inner-page .search-product.product-card {
+  height: 100% !important;
+  min-height: 0 !important;
+  align-self: stretch !important;
+}
+
+.home-page :is(.product-card, .showcase-card, .rail-card) {
+  height: 100% !important;
+  align-self: stretch !important;
+}
+
 .product-card,
 .search-product.product-card,
 .showcase-card,

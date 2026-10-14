@@ -9,3 +9,9 @@ db bsshopir_fakhravari
 u= bsshopir_fakhravari 
 p= n*3Mg83LS^iijmyh
 host=.\sqlserver2022:0
+
+
+
+ftp
+fakhravari
+1qw70a9_N
