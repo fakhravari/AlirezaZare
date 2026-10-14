@@ -5410,6 +5410,9 @@ footer .copyright {
 
 .product-rail .owl-item .rail-image {
   height: 270px;
+  width: calc(100% + 28px);
+  margin: -14px -14px 0;
+  border-radius: 15px 15px 0 0;
 }
 
 .product-rail .owl-item .rail-card > small {
@@ -5440,6 +5443,8 @@ footer .copyright {
 @media (max-width: 991px) {
   .product-rail .owl-item .rail-image {
     height: 300px;
+    width: calc(100% + 24px);
+    margin: -12px -12px 0;
   }
 }
 
@@ -7491,7 +7496,7 @@ h6,
   }
 
   .category-slider .owl-dots {
-    margin-top: 18px;
+    display: none !important;
   }
 }
 
@@ -7690,6 +7695,18 @@ body {
   transition:
     background-color 0.2s ease,
     color 0.2s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .product-tabs button:not(.active):hover {
+    background: rgba(246, 194, 20, 0.16);
+    color: var(--md-on-surface);
+    box-shadow: inset 0 0 0 1px rgba(194, 145, 35, 0.2);
+  }
+
+  .product-tabs button:not(.active):hover i {
+    color: #b78322;
+  }
 }
 
 .product-tabs button.active {
@@ -10233,6 +10250,184 @@ footer .copyright::before {
   #mainNav .mega-bottom {
     border-top-color: rgba(158, 137, 108, 0.38) !important;
     background: #f8f3eb !important;
+  }
+}
+
+/* Keep the homepage journal readable and show more articles in the same space. */
+#journal .journal-main::after {
+  background: linear-gradient(
+    180deg,
+    rgba(7, 26, 46, 0.02) 25%,
+    rgba(7, 26, 46, 0.62) 68%,
+    rgba(7, 26, 46, 0.9) 100%
+  );
+}
+
+#journal .journal-main > div {
+  right: 20px;
+  bottom: 20px;
+  left: 20px;
+  padding: 16px 20px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 14px;
+  background: rgba(7, 26, 46, 0.76);
+  box-shadow: 0 12px 28px rgba(4, 16, 35, 0.2);
+  backdrop-filter: blur(8px);
+}
+
+#journal .journal-main small {
+  color: #f0cf91 !important;
+}
+
+#journal .journal-main h3,
+#journal .journal-main h3 a {
+  color: #fff !important;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+#journal .journal-list {
+  display: flex;
+  height: 460px;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+#journal .journal-list article {
+  min-height: 0;
+  height: auto;
+  flex: 1 1 0;
+  gap: 12px;
+  padding: 8px 12px;
+}
+
+#journal .journal-list article > span {
+  flex: 0 0 30px;
+  min-width: 30px;
+  font-size: 21px;
+}
+
+#journal .journal-list article > div {
+  min-width: 0;
+}
+
+#journal .journal-list small {
+  display: block;
+  font-size: 12px !important;
+  line-height: 1.3;
+}
+
+#journal .journal-list h4 {
+  display: -webkit-box;
+  overflow: hidden;
+  margin: 4px 0 0;
+  font-size: 15px;
+  line-height: 1.45;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+#journal .journal-list article:last-child {
+  border-bottom: 0;
+}
+
+@media (max-width: 767px) {
+  #journal .journal-main > div {
+    right: 12px;
+    bottom: 12px;
+    left: 12px;
+    padding: 12px 14px;
+  }
+
+  #journal .journal-main h3 {
+    font-size: 19px;
+  }
+
+  #journal .journal-list {
+    height: 390px;
+  }
+
+  #journal .journal-list article {
+    gap: 9px;
+    padding: 6px 10px;
+  }
+
+  #journal .journal-list small {
+    font-size: 11px !important;
+  }
+
+  #journal .journal-list h4 {
+    font-size: 14px;
+    line-height: 1.35;
+  }
+}
+
+/* Round the email field's inner corners at the RTL edge. */
+.newsletter .subscribe input {
+  border-radius: 0 13px 13px 0;
+}
+
+@media (max-width: 767px) {
+  #productTabs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    align-items: stretch;
+    width: 100%;
+    margin: 0 0 24px;
+    padding: 9px;
+    overflow: visible;
+    white-space: normal;
+    border-radius: 16px;
+    background: #f8f5ef;
+  }
+
+  #productTabs > li {
+    display: flex;
+    min-width: 0;
+  }
+
+  #productTabs > li:last-child {
+    grid-column: 1 / -1;
+    justify-content: center;
+  }
+
+  #productTabs button,
+  #productTabs button.active {
+    display: inline-flex;
+    width: 100%;
+    min-width: 0;
+    min-height: 42px;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 7px;
+    border: 1px solid #e3d8c5;
+    border-radius: 11px;
+    background: #fff;
+    color: #526174;
+    font-size: 13px;
+    white-space: nowrap;
+    box-shadow: none;
+    transform: none !important;
+  }
+
+  #productTabs > li:last-child button {
+    width: calc(50% - 4px);
+  }
+
+  #productTabs button i {
+    flex: 0 0 auto;
+    font-size: 14px;
+  }
+
+  #productTabs button.active {
+    border-color: #102a56;
+    background: #102a56;
+    color: #fff;
+  }
+
+  #productTabs button.active i {
+    color: #dfc88d;
   }
 }
 

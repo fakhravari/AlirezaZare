@@ -1128,7 +1128,7 @@ $(function () {
           ${product.badge ? `<span class="badge-best">${escapeHtml(product.badge)}</span>` : ""}
         </div>
         <div class="showcase-card-body">
-          <h3>${escapeHtml(product.name)}</h3>
+          <h3><a class="showcase-product-detail" href="Product?id=${product.id}">${escapeHtml(product.name)}</a></h3>
           <strong>${faNumber(product.price * 1000000)} تومان</strong>
           <button type="button" class="add-cart" data-id="${product.id}" data-name="${escapeHtml(product.name)}" data-price="${product.price * 1000000}" data-image="${escapeHtml(product.image)}">
             <i class="bi bi-bag-plus"></i> افزودن به سبد
@@ -1153,13 +1153,13 @@ $(function () {
 
   if (catalogProducts.length >= 30) {
     $("#bestsellersSlider").html(
-      catalogProducts.slice(0, 20).map(productCardMarkup).join(""),
+      catalogProducts.slice(0, 24).map(productCardMarkup).join(""),
     );
     $("#newestSlider").html(
       catalogProducts.slice(20, 26).map(productCardMarkup).join(""),
     );
     $("#productRail").html(
-      catalogProducts.slice(26, 30).map(railCardMarkup).join(""),
+      catalogProducts.slice(25, 30).map(railCardMarkup).join(""),
     );
   }
 
@@ -1185,7 +1185,7 @@ $(function () {
     responsive: {
       0: { items: 1 },
       768: { items: 3 },
-      1200: { items: 4 },
+      1200: { items: 5 },
     },
   });
 

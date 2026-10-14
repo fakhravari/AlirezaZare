@@ -6722,11 +6722,16 @@ body,
 }
 
 @media (max-width: 767px) {
+  html,
+  body {
+    scrollbar-width: none !important;
+  }
+
   html::-webkit-scrollbar,
   body::-webkit-scrollbar {
-    display: block;
-    width: var(--site-scrollbar-size);
-    height: var(--site-scrollbar-size);
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
   }
 }
 
@@ -11152,6 +11157,18 @@ html
   font-size: 13px !important;
 }
 
+.showcase-card-body h3 > .showcase-product-detail {
+  color: inherit !important;
+  text-decoration: none;
+}
+
+.showcase-card-body h3 > .showcase-product-detail:is(:hover, :focus-visible) {
+  color: var(--industrial-yellow-dark) !important;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
 /* Match drawer price and product-name sizes across all header panels. */
 #cartPanel .cart-item-actions > span {
   font-size: 14px !important;
@@ -11160,4 +11177,93 @@ html
 #cartPanel .cart-item-info > strong,
 :is(#favoritesPanel, #comparePanel) .compare-panel-item > span > strong {
   font-size: 14px !important;
+}
+
+/* Product cards: keep the cart symbol legible and align card content across rows. */
+.product-card > .add-cart > i,
+.search-product.product-card > .search-add-cart > i,
+.showcase-card-body > .add-cart > i,
+.rail-card > .add-cart > i,
+.product-detail-related-card > .add-cart > i {
+  display: inline-block !important;
+  color: var(--industrial-yellow) !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.product-card > .add-cart:is(:hover, :focus-visible) > i,
+.search-product.product-card > .search-add-cart:is(:hover, :focus-visible) > i,
+.showcase-card-body > .add-cart:is(:hover, :focus-visible) > i,
+.rail-card > .add-cart:is(:hover, :focus-visible) > i,
+.product-detail-related-card > .add-cart:is(:hover, :focus-visible) > i {
+  color: var(--industrial-navy) !important;
+}
+
+.product-card,
+.search-product.product-card,
+.showcase-card,
+.rail-card,
+#productView .product-detail-related-card {
+  height: 100%;
+}
+
+.product-card .product-info,
+.search-product.product-card .product-info {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+}
+
+.product-card .product-info h3,
+.search-product.product-card .product-info h3,
+.showcase-card-body h3,
+.rail-card h3,
+#productView .product-detail-related-card .product-info h3 {
+  display: -webkit-box;
+  min-height: 4.95em;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+}
+
+.product-card .product-info > p,
+.search-product.product-card .search-product-price,
+.showcase-card-body > strong,
+.rail-card > strong {
+  margin-top: auto !important;
+}
+
+.showcase-card-body,
+.rail-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.showcase-card-body > .add-cart,
+.rail-card > .add-cart {
+  margin-top: auto !important;
+}
+
+body.home-page .product-card .product-info,
+body.home-page .showcase-card-body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+}
+
+body.home-page .product-card .product-info h3,
+body.home-page .showcase-card-body h3,
+body.home-page .rail-card h3 {
+  min-height: 4.95em !important;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+}
+
+body.home-page .product-card .product-info > p,
+body.home-page .showcase-card-body > strong,
+body.home-page .rail-card > strong {
+  margin-top: auto !important;
 }
