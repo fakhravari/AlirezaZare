@@ -12288,3 +12288,268 @@ body .electrical-swiper .swiper-pagination-bullet-active {
   color: var(--industrial-yellow) !important;
   transform: translateX(-2px);
 }
+/* Set testimonial portraits to 60px and rebalance spacing around reviewer details. */
+.home-page .testimonials .testimonial-card .reviewer {
+  min-height: 78px;
+  grid-template-columns: 60px minmax(0, 1fr);
+  column-gap: 13px;
+  padding-top: 16px;
+}
+
+.home-page .testimonials .testimonial-card .reviewer-avatar {
+  width: 60px;
+  height: 60px;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 8px rgba(16, 42, 67, 0.14);
+}
+
+.home-page .testimonials .testimonial-card .reviewer > div {
+  row-gap: 6px;
+  column-gap: 10px;
+  align-self: center;
+}
+
+.home-page .testimonials .testimonial-card .reviewer > div > small {
+  line-height: 1.4;
+}
+
+@media (max-width: 575px) {
+  .home-page .testimonials .testimonial-card .reviewer {
+    min-height: 76px;
+    grid-template-columns: 60px minmax(0, 1fr);
+    column-gap: 10px;
+  }
+
+  .home-page .testimonials .testimonial-card .reviewer-avatar {
+    width: 60px;
+    height: 60px;
+  }
+
+  .home-page .testimonials .testimonial-card .reviewer > div {
+    column-gap: 6px;
+    row-gap: 5px;
+  }
+}
+
+/* Make homepage journal metadata clearer without increasing the article list height. */
+.home-page #journal .journal-main-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 14px;
+  margin-bottom: 8px;
+  color: #f4f6f8;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.home-page #journal .journal-main-meta-copy {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+}
+
+.home-page #journal .journal-main-meta :is(.journal-main-category, .journal-main-read, time) {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+.home-page #journal .journal-main-category {
+  color: #ffdc78;
+}
+
+.home-page #journal .journal-main-read,
+.home-page #journal .journal-main-meta time {
+  color: #eef3f6;
+}
+
+.home-page #journal .journal-main-meta i {
+  color: #f6c515;
+  font-size: 14px;
+}
+
+.home-page #journal .journal-main h3 {
+  font-size: 28px;
+  line-height: 1.65;
+}
+
+.home-page #journal .journal-list small {
+  font-size: 13px !important;
+  font-weight: 700;
+}
+
+.home-page #journal .journal-list h4 {
+  margin-top: 6px;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+@media (max-width: 767px) {
+  .home-page #journal .journal-main-meta {
+    gap: 6px 9px;
+    font-size: 11px;
+  }
+
+  .home-page #journal .journal-main-meta-copy {
+    gap: 6px 9px;
+  }
+
+  .home-page #journal .journal-main h3 {
+    font-size: 20px;
+    line-height: 1.5;
+  }
+
+  .home-page #journal .journal-list small {
+    font-size: 12px !important;
+  }
+
+  .home-page #journal .journal-list h4 {
+    font-size: 15px;
+    line-height: 1.4;
+  }
+}
+/* Contemporary hover and keyboard-focus treatment for homepage journal cards. */
+.home-page #journal .journal-main {
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 18px;
+  box-shadow: 0 16px 36px rgba(16, 42, 67, 0.16);
+  transition:
+    transform 220ms ease,
+    box-shadow 220ms ease,
+    border-color 220ms ease;
+}
+
+.home-page #journal .journal-main > img {
+  transition: transform 500ms cubic-bezier(0.2, 0.7, 0.2, 1), filter 300ms ease;
+}
+
+.home-page #journal .journal-main > div {
+  transition:
+    background-color 220ms ease,
+    border-color 220ms ease,
+    transform 220ms ease,
+    box-shadow 220ms ease;
+}
+
+.home-page #journal .journal-main:is(:hover, :focus-within) {
+  transform: translateY(-4px);
+  border-color: rgba(246, 197, 21, 0.72);
+  box-shadow: 0 22px 44px rgba(16, 42, 67, 0.22);
+}
+
+.home-page #journal .journal-main:is(:hover, :focus-within) > img {
+  transform: scale(1.045);
+  filter: saturate(1.08);
+}
+
+.home-page #journal .journal-main:is(:hover, :focus-within) > div {
+  border-color: rgba(255, 220, 77, 0.48);
+  background-color: rgba(7, 26, 46, 0.88);
+  transform: translateY(-2px);
+  box-shadow: 0 16px 34px rgba(4, 16, 35, 0.3);
+}
+
+.home-page #journal .journal-list article {
+  position: relative;
+  border: 1px solid transparent;
+  border-bottom-color: rgba(16, 42, 67, 0.1);
+  border-radius: 12px;
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    background-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.home-page #journal .journal-list article::before {
+  position: absolute;
+  top: 18%;
+  right: 0;
+  width: 3px;
+  height: 64%;
+  border-radius: 999px;
+  background: var(--industrial-yellow);
+  content: "";
+  opacity: 0;
+  transform: scaleY(0.5);
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease;
+}
+
+.home-page #journal .journal-list article:is(:hover, :focus-within) {
+  z-index: 1;
+  border-color: rgba(212, 177, 77, 0.34);
+  background: linear-gradient(100deg, #fff 0%, #fffdf7 100%);
+  box-shadow: 0 8px 20px rgba(16, 42, 67, 0.09);
+  transform: translateX(-3px);
+}
+
+.home-page #journal .journal-list article:is(:hover, :focus-within)::before {
+  opacity: 1;
+  transform: scaleY(1);
+}
+
+.home-page #journal .journal-list article > span {
+  transition: color 180ms ease, transform 180ms ease;
+}
+
+.home-page #journal .journal-list article:is(:hover, :focus-within) > span {
+  color: #9b7300;
+  transform: scale(1.08);
+}
+
+.home-page #journal .journal-list h4 a {
+  text-decoration: none;
+  transition: color 180ms ease;
+}
+
+.home-page #journal .journal-list article:is(:hover, :focus-within) h4 a {
+  color: var(--industrial-navy) !important;
+}
+
+.home-page #journal .section-head > a {
+  display: inline-flex;
+  min-height: 42px;
+  padding: 8px 14px;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(16, 42, 67, 0.14);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--industrial-navy) !important;
+  text-decoration: none;
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    background-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.home-page #journal .section-head > a:is(:hover, :focus-visible) {
+  border-color: var(--industrial-yellow);
+  background: #fff9df;
+  box-shadow: 0 7px 18px rgba(16, 42, 67, 0.1);
+  transform: translateY(-2px);
+}
+
+.home-page #journal :is(a, button):focus-visible {
+  outline: 3px solid rgba(246, 197, 21, 0.7);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-page #journal :is(.journal-main, .journal-main > img, .journal-main > div, .journal-list article, .journal-list article::before, .journal-list article > span, .section-head > a, .journal-list h4 a) {
+    transition: none !important;
+    transform: none !important;
+  }
+}
+/* Round the newsletter email input on its right-hand corners. */
+.newsletter .subscribe input {
+  border-top-right-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
