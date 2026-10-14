@@ -11351,3 +11351,64 @@ body.home-page .rail-card > strong {
   ) > i {
   color: var(--industrial-navy) !important;
 }
+
+/* Equalize product cards across search, collection, and home-page grids. */
+.product-results {
+  align-items: stretch;
+  grid-auto-rows: 1fr;
+}
+
+.product-card,
+.search-product.product-card,
+.showcase-card,
+.rail-card,
+#productView .product-detail-related-card {
+  height: 100% !important;
+  align-self: stretch !important;
+}
+
+.product-card .product-info,
+.search-product.product-card .product-info,
+.showcase-card-body,
+.rail-card,
+#productView .product-detail-related-card .product-info {
+  display: flex;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+}
+
+.inner-page .search-product.product-card .product-info h3 {
+  display: -webkit-box;
+  min-height: 4.95em;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+}
+
+.inner-page .search-product.product-card .search-product-body {
+  flex: 1 1 auto;
+}
+
+.inner-page .search-product.product-card .search-product-price {
+  display: flex;
+  min-height: 58px;
+  margin: auto 0 0 !important;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.inner-page .search-product.product-card .search-product-price.has-discount {
+  display: grid;
+  min-height: 58px;
+  align-content: center;
+}
+
+.product-card > .add-cart,
+.search-product.product-card > .search-add-cart,
+.showcase-card-body > .add-cart,
+.rail-card > .add-cart,
+#productView .product-detail-related-card > .add-cart {
+  margin-top: auto;
+}
