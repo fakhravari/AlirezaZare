@@ -1493,6 +1493,27 @@ select {
   box-shadow: 0 0 0 3px rgba(152, 119, 71, 0.2);
 }
 
+.filter-stock-option {
+  display: flex;
+  min-height: 46px;
+  margin: 8px 12px 12px;
+  padding: 9px 12px;
+  align-items: center;
+  border-color: color-mix(in srgb, #16845b 24%, white);
+  background: color-mix(in srgb, #16845b 5%, white);
+  color: var(--industrial-navy);
+  font-weight: 600;
+}
+
+.filter-stock-option > span {
+  flex: 1;
+}
+
+.filter-stock-option > i {
+  color: #16845b;
+  font-size: 17px;
+}
+
 .search-product .product-specs {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

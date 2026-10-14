@@ -7,6 +7,7 @@
     type: new Set(),
     movement: new Set(),
     strap: new Set(),
+    onlyAvailable: false,
     maxPrice: 60,
     query: "",
     sort: "recommended",
@@ -25,6 +26,7 @@
   };
   const hasActiveFilters = () =>
     ["brand", "type", "movement", "strap"].some((key) => state[key].size) ||
+    state.onlyAvailable ||
     state.maxPrice < 60 ||
     Boolean(state.query);
   const brandPersianLabels = {
@@ -228,6 +230,7 @@
     );
     if (state.maxPrice < 60)
       params.set(filterFields.price.slug, String(state.maxPrice));
+    if (state.onlyAvailable) params.set("available", "1");
     if (state.query) params.set("q", state.query);
     if (state.sort !== "recommended") params.set("sort", state.sort);
     const query = params.toString();
@@ -273,14 +276,18 @@
     state.maxPrice =
       Number.isFinite(price) && price >= 10 && price <= 60 ? price : 60;
     state.query = params.get("q")?.trim() || "";
+    state.onlyAvailable = ["1", "true"].includes(
+      (params.get("available") ?? params.get("onlyAvailable") ?? "").toLowerCase(),
+    );
     state.sort = ["recommended", "newest", "low", "high"].includes(
       params.get("sort"),
     )
       ? params.get("sort")
       : "recommended";
-    $$(".filter-option input").forEach(
+    $$(".filter-option input[data-filter]").forEach(
       (input) => (input.checked = state[input.dataset.filter].has(input.value)),
     );
+    $("#onlyAvailable").checked = state.onlyAvailable;
     $("#maxPrice").value = state.maxPrice;
     $("#productSearch").value = state.query;
     $("#sortProducts").value = state.sort;
@@ -311,6 +318,7 @@
         (!state.type.size || state.type.has(p.type)) &&
         (!state.movement.size || state.movement.has(p.movement)) &&
         (!state.strap.size || state.strap.has(p.strap)) &&
+        (!state.onlyAvailable || p.inStock !== false) &&
         p.price <= state.maxPrice &&
         (!state.query ||
           `${p.name} ${p.brand} ${p.type} ${p.movement}`.includes(state.query)),
@@ -426,6 +434,10 @@
       chips.push(
         `<button class="filter-chip" data-key="price">تا ${fa(state.maxPrice)} میلیون ×</button>`,
       );
+    if (state.onlyAvailable)
+      chips.push(
+        `<button class="filter-chip" data-key="available">فقط کالاهای موجود ×</button>`,
+      );
     $("#activeChips").innerHTML = chips.join("");
     const count = chips.length;
     $("#activeFilterCount").textContent = fa(count);
@@ -435,6 +447,9 @@
           if (chip.dataset.key === "price") {
             state.maxPrice = 60;
             $("#maxPrice").value = 60;
+          } else if (chip.dataset.key === "available") {
+            state.onlyAvailable = false;
+            $("#onlyAvailable").checked = false;
           } else {
             state[chip.dataset.key].delete(chip.dataset.value);
             const box = document.querySelector(
@@ -449,6 +464,7 @@
   }
   function clearAll() {
     ["brand", "type", "movement", "strap"].forEach((key) => state[key].clear());
+    state.onlyAvailable = false;
     state.maxPrice = 60;
     state.query = "";
     $$(".filter-option input").forEach((input) => (input.checked = false));
@@ -490,7 +506,7 @@
         button.setAttribute("aria-expanded", String(open));
       }),
   );
-  $$(".filter-option input").forEach(
+  $$(".filter-option input[data-filter]").forEach(
     (input) =>
       (input.onchange = () => {
         const set = state[input.dataset.filter];
@@ -498,6 +514,10 @@
         render(true, true);
       }),
   );
+  $("#onlyAvailable").onchange = (event) => {
+    state.onlyAvailable = event.target.checked;
+    render(true, true);
+  };
   $("#maxPrice").oninput = () => {
     updatePrice();
     render(true);

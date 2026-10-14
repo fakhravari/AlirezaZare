@@ -11724,3 +11724,43 @@ body.home-page .rail-card > strong {
 body.home-page .product-card .product-info > p {
   margin-bottom: 8px !important;
 }
+
+/* Keep related-product titles, sale prices, and cart actions on shared rows. */
+#productView .product-detail-related-card {
+  display: flex;
+  flex-direction: column;
+}
+
+#productView .product-detail-related-card .product-info {
+  flex: 1 1 auto;
+}
+
+#productView .product-detail-related-card .product-info h3 {
+  display: -webkit-box;
+  min-height: 43px;
+  max-height: 43px;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
+#productView .product-detail-related-card .product-info > p {
+  display: grid;
+  min-height: 58px;
+  margin: auto 0 8px !important;
+  align-content: start;
+  justify-items: start;
+  line-height: 1.65;
+}
+
+#productView .product-detail-related-card .product-info > p.has-discount {
+  grid-template-rows: 29px 23px;
+  align-content: start;
+  row-gap: 0;
+}
+
+#productView .product-detail-related-card > .add-cart {
+  margin: 0 10px 10px !important;
+  flex: 0 0 auto;
+}
