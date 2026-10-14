@@ -12200,9 +12200,9 @@ body .electrical-swiper .swiper-pagination-bullet-active {
 }
 /* Smooth desktop category and brand menus, including their closing state. */
 @media (min-width: 992px) {
+  .home-page #mainNav .mega-dropdown > .mega-menu,
   .inner-page #mainNav .category-nav-mega,
   #mainNav .brand-dropdown > .brand-menu {
-    display: grid !important;
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
@@ -12214,10 +12214,21 @@ body .electrical-swiper .swiper-pagination-bullet-active {
     will-change: opacity, transform;
   }
 
+  .home-page #mainNav .mega-dropdown > .mega-menu {
+    display: block !important;
+    transform: translate(50%, 9px) !important;
+  }
+
+  .inner-page #mainNav .category-nav-mega,
+  #mainNav .brand-dropdown > .brand-menu {
+    display: grid !important;
+  }
+
   #mainNav .brand-dropdown > .brand-menu {
     transform: translate(-50%, 9px) !important;
   }
 
+  .home-page #mainNav .mega-dropdown:is(:hover, :focus-within, .show) > .mega-menu,
   .inner-page #mainNav .category-nav-dropdown:is(:hover, :focus-within, .show, .is-mega-open) > .category-nav-mega,
   #mainNav .brand-dropdown:is(:hover, :focus-within, .show) > .brand-menu {
     opacity: 1;
@@ -12225,6 +12236,10 @@ body .electrical-swiper .swiper-pagination-bullet-active {
     pointer-events: auto;
     transform: translateY(0);
     transition-delay: 0s;
+  }
+
+  .home-page #mainNav .mega-dropdown:is(:hover, :focus-within, .show) > .mega-menu {
+    transform: translate(50%, 0) !important;
   }
 
   #mainNav .brand-dropdown:is(:hover, :focus-within, .show) > .brand-menu {
@@ -12269,6 +12284,7 @@ body .electrical-swiper .swiper-pagination-bullet-active {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .home-page #mainNav .mega-dropdown > .mega-menu,
   .inner-page #mainNav .category-nav-mega,
   #mainNav .brand-dropdown > .brand-menu,
   #mainNav .navbar-brand,
