@@ -20,5 +20,6 @@ host=31.25.91.7\sqlserver2022
 
 
 ftp
+31.25.91.7
 fakhravari
 1qw70a9_N
