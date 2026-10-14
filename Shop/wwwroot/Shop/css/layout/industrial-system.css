@@ -12176,3 +12176,115 @@ body .electrical-swiper .swiper-pagination-bullet-active {
   font-weight: 800;
   line-height: 1.45;
 }
+/* Align the home header with the shared header layout used on inner pages. */
+@media (min-width: 992px) {
+  .home-page #mainNav .navbar-brand {
+    top: -64px;
+  }
+
+  .home-page #mainNav .home-header-support small,
+  .inner-page #mainNav .home-header-support small {
+    color: #657486;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.5;
+    white-space: nowrap;
+  }
+
+  .home-page #mainNav .home-header-support strong,
+  .inner-page #mainNav .home-header-support strong {
+    font-size: 15px;
+    font-weight: 800;
+    line-height: 1.45;
+  }
+}
+/* Smooth desktop category and brand menus, including their closing state. */
+@media (min-width: 992px) {
+  .inner-page #mainNav .category-nav-mega,
+  #mainNav .brand-dropdown > .brand-menu {
+    display: grid !important;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(9px);
+    transition:
+      opacity 180ms ease,
+      transform 180ms ease,
+      visibility 0s linear 180ms;
+    will-change: opacity, transform;
+  }
+
+  #mainNav .brand-dropdown > .brand-menu {
+    transform: translate(-50%, 9px) !important;
+  }
+
+  .inner-page #mainNav .category-nav-dropdown:is(:hover, :focus-within, .show, .is-mega-open) > .category-nav-mega,
+  #mainNav .brand-dropdown:is(:hover, :focus-within, .show) > .brand-menu {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateY(0);
+    transition-delay: 0s;
+  }
+
+  #mainNav .brand-dropdown:is(:hover, :focus-within, .show) > .brand-menu {
+    transform: translate(-50%, 0) !important;
+  }
+
+  #mainNav .navbar-brand {
+    transition: color 180ms ease;
+  }
+
+  #mainNav .navbar-brand:hover,
+  #mainNav .navbar-brand:focus-visible {
+    color: var(--industrial-navy) !important;
+  }
+
+  #mainNav .navbar-brand > span {
+    transition:
+      background-color 180ms ease,
+      color 180ms ease,
+      transform 180ms ease,
+      box-shadow 180ms ease;
+  }
+
+  #mainNav .navbar-brand:hover > span,
+  #mainNav .navbar-brand:focus-visible > span {
+    background: #ffdc4d !important;
+    color: var(--industrial-navy) !important;
+    transform: translateY(-1px) scale(1.05);
+    box-shadow: 0 4px 12px rgba(246, 197, 21, 0.28) !important;
+  }
+
+  #mainNav .nav-link:is(:hover, :focus-visible, .active) .nav-menu-icon,
+  #mainNav .dropdown:is(:hover, :focus-within, .show) > .nav-link .nav-menu-icon {
+    color: #ffd447 !important;
+    filter: drop-shadow(0 0 4px rgba(246, 197, 21, 0.28));
+  }
+
+  .home-page #mainNav .navbar-nav > .nav-item:first-child > .nav-link:is(:hover, :focus-visible, .active) .nav-menu-icon {
+    color: var(--industrial-navy) !important;
+    filter: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .inner-page #mainNav .category-nav-mega,
+  #mainNav .brand-dropdown > .brand-menu,
+  #mainNav .navbar-brand,
+  #mainNav .navbar-brand > span,
+  #mainNav .nav-menu-icon {
+    transition-duration: 0.01ms !important;
+  }
+}
+/* Keep the contact submit icon clear against its yellow button. */
+.inner-page .contact-submit > i {
+  color: var(--industrial-navy) !important;
+  transition: color 180ms ease, transform 180ms ease;
+}
+
+.inner-page .contact-submit:hover > i,
+.inner-page .contact-submit:focus-visible > i {
+  color: var(--industrial-yellow) !important;
+  transform: translateX(-2px);
+}
