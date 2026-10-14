@@ -11465,15 +11465,13 @@ body.home-page .rail-card > strong {
 
 /* Keep the header support promise on one line beside the phone number. */
 @media (min-width: 992px) {
-  .home-page #mainNav .home-header-top,
-  .inner-page #mainNav .home-header-top {
+  .home-page #mainNav .home-header-top {
     padding-right: 220px;
-    padding-left: 120px;
-    grid-template-columns: minmax(260px, 1fr) 255px;
+    padding-left: 190px;
+    grid-template-columns: minmax(260px, 480px) 230px;
   }
 
-  .home-page #mainNav .home-header-support small,
-  .inner-page #mainNav .home-header-support small {
+  .home-page #mainNav .home-header-support small {
     white-space: nowrap;
   }
 }
@@ -11482,6 +11480,16 @@ body.home-page .rail-card > strong {
 .product-results {
   align-items: stretch;
   grid-auto-rows: 1fr;
+}
+
+/* Outside the product detail page, product cards lead with the Persian name. */
+.home-page .product-card .product-info > div > small,
+.home-page .showcase-card-body > small,
+.home-page :is(.featured-content, .featured-side-content) > small,
+.search-main .search-product-heading > small,
+#compareView .compare-product-meta,
+#compareView .compare-product-card > dl > div:first-child {
+  display: none !important;
 }
 
 .inner-page .search-product.product-card {
