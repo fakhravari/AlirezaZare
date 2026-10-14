@@ -10386,9 +10386,13 @@ footer .copyright::before {
     min-width: 0;
   }
 
-  #productTabs > li:last-child {
+  #productTabs > li:first-child {
     grid-column: 1 / -1;
-    justify-content: center;
+    justify-content: flex-start;
+  }
+
+  #productTabs > li:first-child button {
+    width: calc(50% - 4px);
   }
 
   #productTabs button,
@@ -10409,10 +10413,6 @@ footer .copyright::before {
     white-space: nowrap;
     box-shadow: none;
     transform: none !important;
-  }
-
-  #productTabs > li:last-child button {
-    width: calc(50% - 4px);
   }
 
   #productTabs button i {

@@ -11267,3 +11267,27 @@ body.home-page .showcase-card-body > strong,
 body.home-page .rail-card > strong {
   margin-top: auto !important;
 }
+
+@media (max-width: 767px) {
+  #recommendations #productRail > .owl-nav {
+    display: none !important;
+  }
+
+  #recommendations #productRail > .owl-dots {
+    display: flex !important;
+    min-height: 28px;
+    align-items: center;
+    justify-content: center;
+    margin: 14px auto 0 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  #recommendations #productRail > .owl-dots > .owl-dot {
+    display: inline-flex !important;
+    width: 28px !important;
+    height: 28px !important;
+    align-items: center;
+    justify-content: center;
+  }
+}

@@ -1183,7 +1183,7 @@ $(function () {
       '<i class="bi bi-arrow-left"></i>',
     ],
     responsive: {
-      0: { items: 1 },
+      0: { items: 1, nav: false, dots: true },
       768: { items: 3 },
       1200: { items: 5 },
     },
