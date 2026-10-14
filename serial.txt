@@ -1,0 +1,11 @@
+
+
+email
+info@bs-shop.ir
+1245Df34$#-a
+
+
+db bsshopir_fakhravari 
+u= bsshopir_fakhravari 
+p= n*3Mg83LS^iijmyh
+host=.\sqlserver2022:0
