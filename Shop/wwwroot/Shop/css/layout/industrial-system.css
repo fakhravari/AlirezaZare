@@ -1174,7 +1174,7 @@ input[type="radio"] {
 
 /* Keep the cart glyph legible on the yellow special-offer buttons. */
 .category-showcase .showcase-card-body .add-cart > i {
-  color: var(--industrial-navy) !important;
+  color: var(--industrial-yellow) !important;
   opacity: 1;
 }
 
@@ -1182,7 +1182,7 @@ input[type="radio"] {
   .showcase-card-body
   .add-cart:is(:hover, :focus-visible, .added)
   > i {
-  color: var(--industrial-yellow) !important;
+  color: var(--industrial-navy) !important;
 }
 
 /* One image height across every product-card layout and viewport. */
@@ -5886,10 +5886,25 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
 }
 
 #bestsellersSlider .showcase-card-body > .add-cart > i {
-  color: #fff !important;
+  color: var(--industrial-yellow) !important;
+  opacity: 1 !important;
+  visibility: visible !important;
 }
 
 #bestsellersSlider
+  .showcase-card-body
+  > .add-cart:is(:hover, :focus-visible, .added)
+  > i {
+  color: var(--industrial-navy) !important;
+}
+
+#newestSlider .showcase-card-body > .add-cart > i {
+  color: var(--industrial-yellow) !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+#newestSlider
   .showcase-card-body
   > .add-cart:is(:hover, :focus-visible, .added)
   > i {
@@ -11269,6 +11284,12 @@ body.home-page .rail-card > strong {
 }
 
 @media (max-width: 767px) {
+  body.home-page .product-card .product-info h3,
+  body.home-page .showcase-card-body h3,
+  body.home-page .rail-card h3 {
+    min-height: 3.4em !important;
+  }
+
   #recommendations #productRail > .owl-nav {
     display: none !important;
   }
@@ -11290,4 +11311,29 @@ body.home-page .rail-card > strong {
     align-items: center;
     justify-content: center;
   }
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  .home-page #mainNav .navbar-brand {
+    top: 50%;
+    right: 68px;
+    left: auto;
+    transform: translateY(-50%);
+    font-size: 17px;
+  }
+}
+
+/* Keep the offer-card cart icon visible on its navy action button. */
+.home-page #amazing .showcase-card-body > .add-cart > i {
+  color: var(--industrial-yellow) !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.home-page #amazing .showcase-card-body > .add-cart:is(
+    :hover,
+    :focus-visible,
+    .added
+  ) > i {
+  color: var(--industrial-navy) !important;
 }
