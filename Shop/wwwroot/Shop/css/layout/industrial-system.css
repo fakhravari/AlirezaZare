@@ -11423,3 +11423,10 @@ body.home-page .rail-card > strong {
 #productView .product-detail-related-card > .add-cart {
   margin-top: auto;
 }
+
+@media (max-width: 767px) {
+  footer .footer-main > div:not(:first-child) a {
+    font-size: 14px !important;
+    line-height: 1.8;
+  }
+}
