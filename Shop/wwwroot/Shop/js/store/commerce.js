@@ -324,18 +324,22 @@ document.addEventListener("DOMContentLoaded", () => {
         "</ol></span></span>";
       const decorateSalePrice = (node, item) => {
         const discount = Number(item?.discountPercent) || 0;
-        if (!node || discount <= 0 || discount >= 100) return;
-        node.classList.add("has-discount");
-        const current = Math.round(item.price * 1000000),
-          previous = Math.round(current / (1 - discount / 100));
+        const current = Math.round(Number(item?.price) * 1000000);
+        if (!node || !current) return;
         node.innerHTML =
-          '<strong class="product-price-current">' +
-          money(current) +
-          '</strong><span class="product-price-deal"><del class="price-old">' +
-          fa(previous) +
-          '</del><b class="product-price-discount">٪' +
-          fa(discount) +
-          "</b></span>";
+          '<strong class="product-price-current">' + money(current) + "</strong>";
+        node.classList.remove("has-discount");
+        if (discount <= 0 || discount >= 100) return;
+        node.classList.add("has-discount");
+        const previous = Math.round(current / (1 - discount / 100));
+        node.insertAdjacentHTML(
+          "beforeend",
+          '<span class="product-price-deal"><del class="price-old">' +
+            money(previous) +
+            '</del><b class="product-price-discount">٪' +
+            fa(discount) +
+            "</b></span>",
+        );
       };
       const salePercent = Number(p.discountPercent) || 0;
       const priceHeading = productView.querySelector(

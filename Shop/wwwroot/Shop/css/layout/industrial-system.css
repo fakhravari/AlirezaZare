@@ -11764,3 +11764,285 @@ body.home-page .product-card .product-info > p {
   margin: 0 10px 10px !important;
   flex: 0 0 auto;
 }
+
+#productView .product-detail-related-card .product-info > p > .product-price-current {
+  font-size: 18px !important;
+  font-weight: 800 !important;
+  line-height: 1.55;
+}
+
+#productView .product-detail-related-card .product-info > p > .product-price-current small {
+  font-size: 11px !important;
+}
+
+#productView .product-detail-related-card .product-info > p .price-old {
+  font-size: 14px !important;
+  line-height: 1.5;
+}
+
+#productView .product-detail-related-card .product-info > p .product-price-discount {
+  min-height: 25px;
+  font-size: 12px !important;
+}
+
+/* Give customer reviews a compact, consistent card layout with clear hierarchy. */
+.home-page .testimonials.py-section {
+  background:
+    radial-gradient(ellipse at 92% 6%, rgba(190, 151, 91, 0.1), transparent 34%),
+    linear-gradient(180deg, #f8f6f1, #f1eee7);
+}
+
+.home-page .testimonials .testimonial-card,
+.home-page .testimonials .testimonial-card.featured-review {
+  min-height: 292px;
+  padding: 25px 26px 21px;
+  overflow: hidden;
+  border: 1px solid rgba(178, 146, 96, 0.3) !important;
+  border-radius: 18px;
+  background: linear-gradient(155deg, #fff 0%, #fff 68%, #fbf8f1 100%) !important;
+  box-shadow: 0 12px 30px rgba(20, 39, 60, 0.07) !important;
+  transition:
+    transform 0.24s ease,
+    border-color 0.24s ease,
+    box-shadow 0.24s ease;
+}
+
+.home-page .testimonials .testimonial-card::before {
+  right: 28%;
+  left: 28%;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #c29a5c, transparent);
+}
+
+.home-page .testimonials .testimonial-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(178, 146, 96, 0.52) !important;
+  box-shadow: 0 18px 36px rgba(20, 39, 60, 0.11) !important;
+}
+
+.home-page .testimonials .testimonial-card .quote-mark {
+  top: 18px;
+  left: 20px;
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 1px solid rgba(178, 146, 96, 0.18);
+  border-radius: 11px;
+  background: #f8f3e9;
+  color: #aa8248;
+  font-family: Georgia, serif;
+  font-size: 29px;
+  line-height: 1;
+  opacity: 0.9;
+}
+
+.home-page .testimonials .testimonial-card .quote-mark::before {
+  content: "“";
+}
+
+.home-page .testimonials .testimonial-card .rating-stars {
+  color: #b58b50;
+  font-size: 12px;
+}
+
+.home-page .testimonials .testimonial-card > p {
+  display: -webkit-box;
+  min-height: 5.2em;
+  margin: 20px 0 18px;
+  overflow: hidden;
+  color: #4b5a70 !important;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 2;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+}
+
+.home-page .testimonials .testimonial-card .reviewer {
+  min-height: 58px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(27, 48, 72, 0.09);
+}
+
+.home-page .testimonials .testimonial-card .reviewer-avatar {
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(27, 48, 72, 0.06);
+}
+
+.home-page .testimonials .testimonial-card .reviewer strong {
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.home-page .testimonials .testimonial-card .reviewer small {
+  margin-top: 4px;
+  font-size: 11px;
+}
+
+.home-page .testimonials .testimonial-card .reviewer > i {
+  color: #16845b !important;
+  font-size: 16px;
+}
+
+@media (max-width: 767px) {
+  .home-page .testimonials .testimonial-card,
+  .home-page .testimonials .testimonial-card.featured-review {
+    min-height: 260px;
+    padding: 23px 19px 18px;
+  }
+
+  .home-page .testimonials .testimonial-card > p {
+    min-height: 4.8em;
+    font-size: 14px;
+    line-height: 1.9;
+  }
+}
+
+/* Use the same arrow and pill-dot language for every carousel on the site. */
+body .owl-carousel > .owl-nav button,
+body .electrical-swiper .electrical-arrow {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.42) !important;
+  border-radius: 50% !important;
+  background: linear-gradient(145deg, #183d63, var(--industrial-navy)) !important;
+  color: var(--industrial-yellow) !important;
+  box-shadow:
+    0 5px 14px rgba(16, 42, 67, 0.2),
+    inset 0 1px rgba(255, 255, 255, 0.12) !important;
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    background-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+body .owl-carousel > .owl-nav button:is(:hover, :focus-visible),
+body .electrical-swiper .electrical-arrow:is(:hover, :focus-visible) {
+  border-color: var(--industrial-yellow) !important;
+  background: var(--industrial-yellow) !important;
+  color: var(--industrial-navy) !important;
+  box-shadow: 0 7px 17px rgba(16, 42, 67, 0.22) !important;
+  transform: translateY(-1px) scale(1.05);
+}
+
+body .owl-carousel > .owl-nav button:focus-visible,
+body .electrical-swiper .electrical-arrow:focus-visible {
+  outline: 3px solid rgba(246, 197, 21, 0.42) !important;
+  outline-offset: 3px;
+}
+
+body .owl-carousel > .owl-nav button:disabled {
+  opacity: 0.42;
+  cursor: default;
+  transform: none;
+}
+
+body .owl-carousel > .owl-dots {
+  display: flex !important;
+  min-height: 30px;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  margin: 18px auto 0 !important;
+  direction: ltr;
+}
+
+body .owl-carousel > .owl-dots > .owl-dot {
+  display: inline-flex !important;
+  width: 28px !important;
+  height: 28px !important;
+  align-items: center;
+  justify-content: center;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 50%;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+body .owl-carousel > .owl-dots > .owl-dot span,
+body .electrical-swiper .swiper-pagination-bullet {
+  display: block;
+  width: 8px;
+  height: 8px;
+  margin: 0 !important;
+  border: 1px solid rgba(16, 42, 67, 0.24);
+  border-radius: 999px;
+  background: #d7d0c5;
+  opacity: 1;
+  transition:
+    width 0.24s ease,
+    height 0.24s ease,
+    background-color 0.24s ease,
+    border-color 0.24s ease,
+    transform 0.24s ease;
+}
+
+body .owl-carousel > .owl-dots > .owl-dot:is(:hover, :focus-visible) span {
+  border-color: var(--industrial-yellow-dark);
+  background: #c3a16c;
+  transform: scale(1.12);
+}
+
+body .owl-carousel > .owl-dots > .owl-dot.active span,
+body .electrical-swiper .swiper-pagination-bullet-active {
+  width: 28px !important;
+  height: 8px;
+  border-color: var(--industrial-navy) !important;
+  border-radius: 999px !important;
+  background: var(--industrial-navy) !important;
+}
+
+body .electrical-swiper .swiper-pagination-bullet-active {
+  border-color: var(--industrial-yellow) !important;
+  background: var(--industrial-yellow) !important;
+}
+
+@media (max-width: 767px) {
+  body .electrical-swiper .electrical-arrow {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body .owl-carousel > .owl-nav button,
+  body .electrical-swiper .electrical-arrow,
+  body .owl-carousel > .owl-dots > .owl-dot span,
+  body .electrical-swiper .swiper-pagination-bullet {
+    transition: none;
+  }
+}
+
+/* Blend the cream and white surfaces between the home service and journal areas. */
+.home-page #services.purchase-benefits--showcase {
+  border-color: rgba(178, 146, 96, 0.12);
+  background:
+    radial-gradient(
+      circle at 92% 8%,
+      rgba(246, 197, 21, 0.1),
+      transparent 30%
+    ),
+    linear-gradient(118deg, #fffdf8 0%, #faf8f1 46%, #f5f7f8 100%);
+  box-shadow: 0 14px 34px rgba(27, 39, 67, 0.045);
+}
+
+.home-page #journal.py-section {
+  background: linear-gradient(
+    180deg,
+    #f5f7f8 0%,
+    #f8f6f0 22%,
+    #f5f7f8 100%
+  );
+}
+
+.home-page #journal > .container {
+  background: linear-gradient(145deg, #fff 0%, #fffdf8 54%, #f8f5ed 100%);
+}
