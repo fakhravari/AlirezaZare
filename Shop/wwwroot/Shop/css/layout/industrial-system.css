@@ -591,7 +591,7 @@ h6,
 .inner-page #mainNav .category-mega-panels {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 22px;
+  gap: 0;
   align-content: start;
 }
 
@@ -658,12 +658,17 @@ h6,
 }
 
 .inner-page #mainNav .category-mega-group {
+  position: relative;
   display: grid;
   align-content: start;
   gap: 11px;
   min-width: 0;
-  padding: 0 12px;
+  padding: 0 20px;
   border-bottom: 0;
+  border-right: 0;
+}
+
+.inner-page #mainNav .category-mega-group:not(:first-child) {
   border-right: 1px solid #edf0f2;
 }
 
@@ -5909,6 +5914,15 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
   > .add-cart:is(:hover, :focus-visible, .added)
   > i {
   color: var(--industrial-navy) !important;
+}
+
+@media (max-width: 991px) {
+  html body > #favoritesPanel,
+  html body > #favoritesPanel.open,
+  html body > #comparePanel,
+  html body > #comparePanel.open {
+    z-index: 7000 !important;
+  }
 }
 
 @media (min-width: 992px) {

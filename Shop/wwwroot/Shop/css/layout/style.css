@@ -2721,10 +2721,6 @@ footer {
     margin-bottom: 30px !important;
   }
 
-  .product-col + .product-col {
-    margin-top: 8px;
-  }
-
   .product-image {
     height: min(420px, 108vw);
   }
