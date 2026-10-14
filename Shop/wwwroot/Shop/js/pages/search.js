@@ -346,15 +346,6 @@
           fa(discount) +
           "</b></span>";
       }
-      const image = productCard.querySelector(".search-product-image");
-      if (image && !image.querySelector(".product-discount-badge")) {
-        image.insertAdjacentHTML(
-          "beforeend",
-          '<span class="product-discount-badge">٪' +
-            fa(discount) +
-            " تخفیف</span>",
-        );
-      }
     });
   }
   function scrollToResultsStart() {

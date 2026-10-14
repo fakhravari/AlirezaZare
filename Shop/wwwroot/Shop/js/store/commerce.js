@@ -379,15 +379,6 @@ document.addEventListener("DOMContentLoaded", () => {
         .forEach((card, index) => {
           const item = suggestions[index];
           decorateSalePrice(card.querySelector(".product-info > p"), item);
-          if (item && Number(item.discountPercent) > 0)
-            card
-              .querySelector(".product-image")
-              ?.insertAdjacentHTML(
-                "beforeend",
-                '<span class="product-discount-badge">٪' +
-                  fa(item.discountPercent) +
-                  " تخفیف</span>",
-              );
         });
       productView
         .querySelectorAll(".product-feedback-note")

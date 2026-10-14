@@ -4146,6 +4146,60 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
   background: rgba(255, 255, 255, 0.13);
 }
 
+.home-page #brandsSlider {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 16px;
+  direction: rtl;
+}
+
+.home-page #brandsSlider > .brand-card {
+  min-height: 150px;
+  height: 100%;
+}
+
+.home-page #brandsSlider .brand-logo-frame {
+  display: grid;
+  width: 100%;
+  min-height: 74px;
+  padding: 10px 14px;
+  place-items: center;
+  border: 1px solid rgba(16, 42, 67, 0.08);
+  border-radius: 10px;
+  background: #fff;
+}
+
+.home-page #brandsSlider .brand-logo-image {
+  display: block;
+  width: min(100%, 170px);
+  height: 50px;
+  object-fit: contain;
+  object-position: center;
+}
+
+.home-page #brandsSlider .brand-logo-image[src$="/uni-t.png"],
+.home-page #brandsSlider .brand-logo-image[src$="/yihua.png"] {
+  filter: brightness(0);
+}
+
+@media (max-width: 991px) {
+  .home-page #brandsSlider {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 575px) {
+  .home-page #brandsSlider {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .home-page #brandsSlider > .brand-card {
+    min-height: 118px;
+    padding: 12px 8px;
+  }
+}
+
 .home-page .testimonials.py-section {
   padding-block: clamp(38px, 5vw, 70px);
   background: #edf2f4;
@@ -4913,28 +4967,6 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
   display: grid;
   gap: 2px;
   align-content: start;
-}
-
-.search-product-image > .product-discount-badge,
-.product-image > .product-discount-badge,
-.rail-image > .product-discount-badge,
-.product-detail-related-card .product-image > .product-discount-badge {
-  position: absolute;
-  z-index: 6;
-  top: 52px;
-  right: 12px;
-  display: inline-flex;
-  min-height: 26px;
-  align-items: center;
-  padding: 3px 10px;
-  border: 1px solid rgba(255, 255, 255, 0.65);
-  border-radius: 999px;
-  background: #b83242;
-  color: #fff;
-  box-shadow: 0 4px 12px rgba(56, 11, 18, 0.2);
-  font-size: 10px;
-  font-weight: 800;
-  line-height: 1;
 }
 
 .product-detail-sale-meta {
@@ -10537,6 +10569,20 @@ html
     transition: none !important;
     transform: translate(-50%, 0) !important;
   }
+
+  #mainNav .brand-dropdown:is(:hover, :focus-within) > .brand-menu {
+    display: grid !important;
+  }
+
+  #mainNav .brand-dropdown > .brand-menu::after {
+    position: absolute;
+    top: -36px;
+    right: 0;
+    left: 0;
+    height: 36px;
+    content: "";
+    pointer-events: auto;
+  }
 }
 
 /* Match the header cart stepper to the quantity controls on the Cart page. */
@@ -11225,7 +11271,7 @@ html
   font-size: 13px !important;
 }
 
-.inner-page main :is(.search-product .product-price-current small, .search-product .product-price-discount, .search-product .badge-best, .search-product .product-discount-badge) {
+.inner-page main :is(.search-product .product-price-current small, .search-product .product-price-discount, .search-product .badge-best) {
   font-size: 13px !important;
 }
 
@@ -11417,6 +11463,21 @@ body.home-page .rail-card > strong {
   color: var(--industrial-navy) !important;
 }
 
+/* Keep the header support promise on one line beside the phone number. */
+@media (min-width: 992px) {
+  .home-page #mainNav .home-header-top,
+  .inner-page #mainNav .home-header-top {
+    padding-right: 220px;
+    padding-left: 120px;
+    grid-template-columns: minmax(260px, 1fr) 255px;
+  }
+
+  .home-page #mainNav .home-header-support small,
+  .inner-page #mainNav .home-header-support small {
+    white-space: nowrap;
+  }
+}
+
 /* Equalize product cards across search, collection, and home-page grids. */
 .product-results {
   align-items: stretch;
@@ -11488,6 +11549,34 @@ body.home-page .rail-card > strong {
 #productView .product-detail-related-card > .add-cart {
   margin-top: auto !important;
   flex-shrink: 0;
+}
+
+/* Reserve the same price row for discounted and regular product cards. */
+.product-card .product-info > p,
+.search-product.product-card .search-product-price,
+.showcase-card-body > strong,
+.showcase-card-body > .product-card-sale-price,
+.rail-card > strong,
+.rail-card > .product-card-sale-price {
+  min-height: 58px !important;
+  margin-top: auto !important;
+  margin-bottom: 8px !important;
+  align-content: start;
+  justify-content: flex-start;
+}
+
+.showcase-card-body > strong,
+.rail-card > strong {
+  display: flex;
+  align-items: flex-start;
+}
+
+.product-card > .add-cart,
+.search-product.product-card > .search-add-cart,
+.showcase-card-body > .add-cart,
+.rail-card > .add-cart,
+#productView .product-detail-related-card > .add-cart {
+  margin-top: 0 !important;
 }
 
 @media (max-width: 767px) {

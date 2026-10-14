@@ -1,4 +1,12 @@
+https://setareh.r1host.com:8443
+http://setareh.r1host.com:8880
+bsshopir
+Xu7p~9C~R0j9Ps
 
+irwin7.sabahost.net
+irwin8.sabahost.org
+31.25.91.7
+---------------------------------------------------
 
 email
 info@bs-shop.ir
@@ -9,7 +17,6 @@ db bsshopir_fakhravari
 u= bsshopir_fakhravari 
 p= n*3Mg83LS^iijmyh
 host=.\sqlserver2022:0
-
 
 
 ftp

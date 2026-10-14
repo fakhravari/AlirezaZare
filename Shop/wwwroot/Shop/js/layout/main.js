@@ -1087,12 +1087,6 @@ $(function () {
             else
             price.outerHTML = `<div class="product-card-sale-price has-discount">${saleMarkup}</div>`;
         }
-        const image = card.querySelector(".product-image, .rail-image");
-        if (image && !image.querySelector(".product-discount-badge"))
-          image.insertAdjacentHTML(
-            "beforeend",
-            `<span class="product-discount-badge">٪${faNumber(product.discountPercent)} تخفیف</span>`,
-          );
       });
   };
   if (catalogProducts.length >= 6) {
@@ -1132,11 +1126,7 @@ $(function () {
         $item.find("img").attr({ src: product.image, alt: product.name });
         $item
           .find(".badge-offer")
-          .text(
-            product.discountPercent
-              ? `${faNumber(product.discountPercent)}٪ تخفیف`
-              : "پیشنهاد ویژه",
-          );
+          .text("پیشنهاد ویژه");
         $item.find(".showcase-card-body small").text(product.brand);
         $item.find(".showcase-card-body h3").text(product.name);
         $item
@@ -1221,28 +1211,6 @@ $(function () {
       0: { items: 1, nav: false, dots: true },
       768: { items: 3 },
       1200: { items: 5 },
-    },
-  });
-
-  initOwlCarousel($("#brandsSlider"), {
-    ...carouselMotion,
-    rtl: true,
-    loop: false,
-    rewind: false,
-    startPosition: 0,
-    margin: 16,
-    nav: false,
-    dots: false,
-    autoplay: false,
-    navText: [
-      '<i class="bi bi-arrow-right"></i>',
-      '<i class="bi bi-arrow-left"></i>',
-    ],
-    responsive: {
-      0: { items: 2 },
-      576: { items: 3 },
-      768: { items: 4 },
-      1200: { items: 6 },
     },
   });
 
