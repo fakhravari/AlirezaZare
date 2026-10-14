@@ -12057,3 +12057,47 @@ body .electrical-swiper .swiper-pagination-bullet-active {
 .home-page #journal > .container {
   background: linear-gradient(145deg, #fff 0%, #fffdf8 54%, #f8f5ed 100%);
 }
+
+/* Varied review ratings and a quiet date label at the lower-left of each testimonial. */
+.home-page .testimonials .testimonial-card .rating-stars {
+  gap: 3px;
+}
+
+.home-page .testimonials .testimonial-card .reviewer {
+  grid-template-columns: 40px minmax(0, 1fr) auto;
+  column-gap: 10px;
+}
+
+.home-page .testimonials .testimonial-card .review-date {
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  gap: 5px;
+  padding: 6px 9px;
+  border: 1px solid rgba(178, 146, 96, 0.2);
+  border-radius: 999px;
+  background: #f8f5ee;
+  color: #758194;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.home-page .testimonials .testimonial-card .review-date i {
+  color: #b28a4f;
+  font-size: 11px;
+}
+
+@media (max-width: 575px) {
+  .home-page .testimonials .testimonial-card .reviewer {
+    grid-template-columns: 36px minmax(0, 1fr) auto;
+    column-gap: 7px;
+  }
+
+  .home-page .testimonials .testimonial-card .review-date {
+    gap: 4px;
+    padding: 5px 7px;
+    font-size: 9px;
+  }
+}
