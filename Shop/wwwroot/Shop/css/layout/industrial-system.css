@@ -4868,31 +4868,28 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
 }
 
 .product-price-deal {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
+  display: contents;
 }
 
 .product-price-deal .price-old,
 .product-detail-sale-meta .price-old {
-  color: #87929a !important;
-  font-size: 11px;
-  font-weight: 600;
+  color: #91a5be !important;
+  font-size: 14px;
+  font-weight: 650;
   text-decoration: line-through;
-  text-decoration-color: #bd6670;
+  text-decoration-color: #a9b9cd;
   text-decoration-thickness: 1.5px;
 }
 
 .product-price-discount {
   display: inline-flex;
-  min-height: 23px;
+  min-height: 27px;
   align-items: center;
-  padding: 2px 8px;
+  padding: 3px 10px;
   border-radius: 999px;
   background: #fff0f0;
   color: #b83242;
-  font-size: 10px;
+  font-size: 13px;
   font-weight: 850;
   white-space: nowrap;
 }
@@ -4900,8 +4897,8 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
 .product-price-current {
   display: block;
   color: var(--industrial-navy) !important;
-  font-size: 15px;
-  font-weight: 900;
+  font-size: 18px;
+  font-weight: bold;
   line-height: 1.65;
   white-space: nowrap;
 }
@@ -4919,6 +4916,8 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
 }
 
 .search-product-image > .product-discount-badge,
+.product-image > .product-discount-badge,
+.rail-image > .product-discount-badge,
 .product-detail-related-card .product-image > .product-discount-badge {
   position: absolute;
   z-index: 6;
@@ -5894,6 +5893,68 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
   color: var(--industrial-yellow) !important;
   opacity: 1 !important;
   visibility: visible !important;
+}
+
+:is(
+    .search-product-price,
+    .product-card-sale-price,
+    .favorite-item-price,
+    .compare-price-values,
+    .product-info > p
+  ).has-discount {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "current discount"
+    "old discount";
+  align-items: center;
+  column-gap: 10px;
+  row-gap: 0;
+}
+
+:is(
+    .search-product-price,
+    .product-card-sale-price,
+    .favorite-item-price,
+    .compare-price-values,
+    .product-info > p
+  ).has-discount > .product-price-current {
+  grid-area: current;
+  justify-self: start;
+  margin: 0;
+  text-align: right;
+}
+
+:is(
+    .search-product-price,
+    .product-card-sale-price,
+    .favorite-item-price,
+    .compare-price-values,
+    .product-info > p
+  ).has-discount .price-old {
+  grid-area: old;
+  justify-self: start;
+  margin: 0;
+  text-align: right;
+}
+
+:is(
+    .search-product-price,
+    .product-card-sale-price,
+    .favorite-item-price,
+    .compare-price-values,
+    .product-info > p
+  ).has-discount .product-price-discount {
+  grid-area: discount;
+  align-self: start;
+  justify-self: end;
+}
+
+#productView .product-detail-related-card .product-info > p.has-discount {
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "current discount"
+    "old discount";
 }
 
 #bestsellersSlider
@@ -11164,8 +11225,12 @@ html
   font-size: 13px !important;
 }
 
-.inner-page main :is(.search-product .product-price-current small, .search-product .price-old, .search-product .product-price-discount, .search-product .badge-best, .search-product .product-discount-badge) {
+.inner-page main :is(.search-product .product-price-current small, .search-product .product-price-discount, .search-product .badge-best, .search-product .product-discount-badge) {
   font-size: 13px !important;
+}
+
+.inner-page main .search-product .price-old {
+  font-size: 14px !important;
 }
 
 .inner-page main :is(.account-nav a, .account-profile-edit, .account-stats small, .order-total small) {
@@ -11421,7 +11486,8 @@ body.home-page .rail-card > strong {
 .showcase-card-body > .add-cart,
 .rail-card > .add-cart,
 #productView .product-detail-related-card > .add-cart {
-  margin-top: auto;
+  margin-top: auto !important;
+  flex-shrink: 0;
 }
 
 @media (max-width: 767px) {
@@ -11429,4 +11495,135 @@ body.home-page .rail-card > strong {
     font-size: 14px !important;
     line-height: 1.8;
   }
+}
+
+/* Refined back-to-top control with a light upward cue on hover. */
+.back-to-top {
+  width: 42px !important;
+  height: 42px !important;
+  border: 1px solid rgba(246, 197, 21, 0.58) !important;
+  border-radius: 50% !important;
+  background: rgba(16, 42, 67, 0.94) !important;
+  box-shadow: 0 5px 16px rgba(16, 42, 67, 0.2) !important;
+  color: var(--industrial-yellow) !important;
+  font-size: 17px !important;
+  transform: translateY(12px) scale(0.92);
+  transition:
+    opacity 0.24s ease,
+    visibility 0.24s ease,
+    transform 0.34s cubic-bezier(0.2, 0.85, 0.25, 1.2),
+    background-color 0.22s ease,
+    border-color 0.22s ease,
+    box-shadow 0.22s ease;
+}
+
+.back-to-top.is-visible {
+  transform: translateY(0) scale(1);
+}
+
+.back-to-top > i {
+  display: block;
+  transition: transform 0.24s ease;
+}
+
+.back-to-top:is(:hover, :focus-visible) {
+  border-color: var(--industrial-yellow) !important;
+  background: var(--industrial-yellow) !important;
+  box-shadow: 0 8px 20px rgba(16, 42, 67, 0.24) !important;
+  color: var(--industrial-navy) !important;
+  transform: translateY(-2px) scale(1.03);
+}
+
+.back-to-top:is(:hover, :focus-visible) > i {
+  animation: back-to-top-arrow 0.7s ease-in-out infinite;
+}
+
+@keyframes back-to-top-arrow {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+@media (max-width: 575px) {
+  .back-to-top {
+    bottom: 16px;
+    left: 14px;
+    width: 40px !important;
+    height: 40px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .back-to-top,
+  .back-to-top > i {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* One sale-price treatment across home, search, favorites, and comparison cards. */
+.product-card-sale-price {
+  display: grid;
+  min-height: 58px;
+  margin-top: auto;
+  align-content: center;
+  gap: 2px;
+}
+
+.product-card-sale-price .product-price-deal,
+.compare-price-values .product-price-deal {
+  justify-content: flex-start;
+}
+
+.product-card-sale-price .product-price-current {
+  font-size: 18px;
+}
+
+.product-card .product-info > p.has-discount {
+  display: grid;
+  min-height: 58px;
+  align-content: center;
+  gap: 2px;
+}
+
+#favoritesView .favorite-item-card > p.has-discount {
+  display: grid;
+  gap: 3px;
+}
+
+.compare-price-values {
+  display: grid;
+  justify-items: start;
+  gap: 3px;
+}
+
+.compare-price-values.has-discount .product-price-current {
+  font-size: 18px;
+}
+
+.product-price-discount {
+  font-size: 12px;
+}
+
+.product-card-sale-price,
+.product-card .product-info > p,
+.search-product .search-product-price,
+.showcase-card-body > strong,
+.showcase-card-body > .product-card-sale-price,
+.rail-card > strong,
+.rail-card > .product-card-sale-price,
+#productView .product-detail-related-card .product-info > p {
+  margin-bottom: 8px !important;
+}
+
+.inner-page .search-product.product-card .search-product-price {
+  margin-bottom: 8px !important;
+}
+
+body.home-page .product-card .product-info > p {
+  margin-bottom: 8px !important;
 }

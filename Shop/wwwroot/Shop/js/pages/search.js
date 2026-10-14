@@ -338,13 +338,13 @@
       if (price) {
         price.classList.add("has-discount");
         price.innerHTML =
-          '<span class="product-price-deal"><del class="price-old">' +
+          '<strong class="product-price-current">' +
+          fa(currentPrice) +
+          " <small>تومان</small></strong><span class=\"product-price-deal\"><del class=\"price-old\">" +
           fa(previousPrice) +
           '</del><b class="product-price-discount">٪' +
           fa(discount) +
-          '</b></span><strong class="product-price-current">' +
-          fa(currentPrice) +
-          " <small>تومان</small></strong>";
+          "</b></span>";
       }
       const image = productCard.querySelector(".search-product-image");
       if (image && !image.querySelector(".product-discount-badge")) {

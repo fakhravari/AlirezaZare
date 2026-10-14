@@ -1061,6 +1061,40 @@ $(function () {
   };
 
   const catalogProducts = window.HNProducts || [];
+  const catalogSaleMarkup = (product) => {
+    const discount = Number(product?.discountPercent) || 0;
+    const current = Math.round(Number(product?.price) * 1000000);
+    if (!discount || discount >= 100 || !current) return "";
+    const previous = Math.round(current / (1 - discount / 100));
+    return `<strong class="product-price-current">${faNumber(current)} <small>تومان</small></strong><span class="product-price-deal"><del class="price-old">${faNumber(previous)} تومان</del><b class="product-price-discount">٪${faNumber(discount)}</b></span>`;
+  };
+  const decorateCatalogSaleCards = (root = document) => {
+    root
+      .querySelectorAll(".product-card, .showcase-card, .rail-card")
+      .forEach((card) => {
+        const id = card.querySelector(".add-cart[data-id]")?.dataset.id;
+        const product = catalogProducts.find((item) => String(item.id) === id);
+        const saleMarkup = catalogSaleMarkup(product);
+        if (!saleMarkup) return;
+        const price = card.querySelector(
+          ".product-info > p, .showcase-card-body > strong, .rail-card > strong",
+        );
+        if (price) {
+          if (price.tagName === "P") {
+            price.classList.add("has-discount");
+            price.innerHTML = saleMarkup;
+          }
+            else
+            price.outerHTML = `<div class="product-card-sale-price has-discount">${saleMarkup}</div>`;
+        }
+        const image = card.querySelector(".product-image, .rail-image");
+        if (image && !image.querySelector(".product-discount-badge"))
+          image.insertAdjacentHTML(
+            "beforeend",
+            `<span class="product-discount-badge">٪${faNumber(product.discountPercent)} تخفیف</span>`,
+          );
+      });
+  };
   if (catalogProducts.length >= 6) {
     const featuredBindings = [
       { selector: ".featured-main", product: catalogProducts[0] },
@@ -1162,6 +1196,7 @@ $(function () {
       catalogProducts.slice(25, 30).map(railCardMarkup).join(""),
     );
   }
+  decorateCatalogSaleCards();
 
   initOwlCarousel($("#productRail"), {
     ...carouselMotion,

@@ -4,6 +4,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const fa = (n) => ui.formatNumber(n);
   const esc = (s) => ui.escapeHtml(s);
   const money = (n) => `${fa(n)} تومان`;
+  const salePriceMarkup = (product) => {
+    const discount = Number(product?.discountPercent) || 0;
+    const current = Math.round(Number(product?.price) * 1000000);
+    if (!discount || discount >= 100 || !current) return `<strong>${money(current)}</strong>`;
+    const previous = Math.round(current / (1 - discount / 100));
+    return `<strong class="product-price-current">${money(current)}</strong><span class="product-price-deal"><del class="price-old">${money(previous)}</del><b class="product-price-discount">٪${fa(discount)}</b></span>`;
+  };
   const empty = (text) =>
     `<div class="flow-card flow-empty"><i class="bi bi-bag"></i><h2>${text}</h2><a class="flow-button" href="Search">مشاهده محصولات</a></div>`;
   const emptyCart = () =>
@@ -318,16 +325,17 @@ document.addEventListener("DOMContentLoaded", () => {
       const decorateSalePrice = (node, item) => {
         const discount = Number(item?.discountPercent) || 0;
         if (!node || discount <= 0 || discount >= 100) return;
+        node.classList.add("has-discount");
         const current = Math.round(item.price * 1000000),
           previous = Math.round(current / (1 - discount / 100));
         node.innerHTML =
-          '<span class="product-price-deal"><del class="price-old">' +
+          '<strong class="product-price-current">' +
+          money(current) +
+          '</strong><span class="product-price-deal"><del class="price-old">' +
           fa(previous) +
           '</del><b class="product-price-discount">٪' +
           fa(discount) +
-          '</b></span><strong class="product-price-current">' +
-          money(current) +
-          "</strong>";
+          "</b></span>";
       };
       const salePercent = Number(p.discountPercent) || 0;
       const priceHeading = productView.querySelector(
@@ -341,7 +349,7 @@ document.addEventListener("DOMContentLoaded", () => {
       );
       if (featureChips)
         featureChips.insertAdjacentHTML(
-          "beforebegin",
+          "afterend",
           '<div class="product-main-feature-heading"><i class="bi bi-stars" aria-hidden="true"></i><span>ویژگی‌های کلیدی محصول</span></div>',
         );
       productView.querySelector(".product-detail-price > p")?.remove();
@@ -358,7 +366,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const current = Math.round(p.price * 1000000),
           previous = Math.round(current / (1 - salePercent / 100));
         detailPrice.insertAdjacentHTML(
-          "beforebegin",
+          "afterend",
           '<div class="product-detail-sale-meta"><del class="price-old">' +
             money(previous) +
             '</del><span class="product-price-discount">٪' +
@@ -927,7 +935,7 @@ document.addEventListener("DOMContentLoaded", () => {
       .map((id) => catalog.find((p) => String(p.id) === id) || cache[id])
       .filter(Boolean);
     view.innerHTML = list.length
-      ? `<div class="flow-cards">${list.map((p) => `<article class="flow-card favorite-item-card"><a href="Product?id=${encodeURIComponent(p.id)}"><img class="flow-photo" src="${esc(p.image)}" alt="${esc(p.name)}"><h2>${esc(p.name)}</h2></a><p>${money(Number(p.price) * 1000000)}</p><button class="list-remove-button" type="button" data-unlike="${esc(p.id)}" aria-label="حذف ${esc(p.name)} از علاقه‌مندی‌ها"><i class="bi bi-trash3" aria-hidden="true"></i><span>حذف از علاقه‌مندی‌ها</span></button></article>`).join("")}</div>`
+      ? `<div class="flow-cards">${list.map((p) => `<article class="flow-card favorite-item-card"><a href="Product?id=${encodeURIComponent(p.id)}"><img class="flow-photo" src="${esc(p.image)}" alt="${esc(p.name)}"><h2>${esc(p.name)}</h2></a><p class="favorite-item-price${Number(p.discountPercent) > 0 ? " has-discount" : ""}">${salePriceMarkup(p)}</p><button class="list-remove-button" type="button" data-unlike="${esc(p.id)}" aria-label="حذف ${esc(p.name)} از علاقه‌مندی‌ها"><i class="bi bi-trash3" aria-hidden="true"></i><span>حذف از علاقه‌مندی‌ها</span></button></article>`).join("")}</div>`
       : empty("هنوز محصولی به علاقه‌مندی‌ها اضافه نکرده‌اید");
     view.querySelectorAll("[data-unlike]").forEach(
       (b) =>
@@ -1010,7 +1018,7 @@ document.addEventListener("DOMContentLoaded", () => {
         ["کاربری", product.strap || "کارگاهی"],
         ...(product.detail?.specs || []).slice(0, 3),
       ];
-      return `<article class="compare-product-card"><div class="compare-card-top"><span>گزینهٔ ${fa(index + 1)}</span><button class="compare-remove-icon" type="button" data-compare-remove-page="${esc(product.id)}" aria-label="حذف ${esc(product.name)} از مقایسه"><i class="bi bi-trash3" aria-hidden="true"></i></button></div><a class="compare-product-link" href="Product?id=${encodeURIComponent(product.id)}"><div class="compare-product-image"><img src="${esc(product.image)}" alt="${esc(product.name)}" loading="lazy"></div><div class="compare-product-meta"><span>${esc(product.brand || "برند منتخب")}</span><small><i class="bi bi-grid-3x3-gap" aria-hidden="true"></i>${esc(product.type || "ابزار و تجهیزات")}</small></div><h2>${esc(product.name)}</h2></a><div class="compare-price"><small>قیمت محصول</small><strong>${money(Number(product.price) * 1000000)}</strong></div><h3 class="compare-spec-title"><i class="bi bi-list-check" aria-hidden="true"></i>مشخصات قابل بررسی</h3><dl>${specs.map(([label, value]) => `<div><dt>${esc(label)}</dt><dd>${esc(value)}</dd></div>`).join("")}</dl><a class="compare-detail-link" href="Product?id=${encodeURIComponent(product.id)}">جزئیات محصول<i class="bi bi-arrow-left" aria-hidden="true"></i></a></article>`;
+      return `<article class="compare-product-card"><div class="compare-card-top"><span>گزینهٔ ${fa(index + 1)}</span><button class="compare-remove-icon" type="button" data-compare-remove-page="${esc(product.id)}" aria-label="حذف ${esc(product.name)} از مقایسه"><i class="bi bi-trash3" aria-hidden="true"></i></button></div><a class="compare-product-link" href="Product?id=${encodeURIComponent(product.id)}"><div class="compare-product-image"><img src="${esc(product.image)}" alt="${esc(product.name)}" loading="lazy"></div><div class="compare-product-meta"><span>${esc(product.brand || "برند منتخب")}</span><small><i class="bi bi-grid-3x3-gap" aria-hidden="true"></i>${esc(product.type || "ابزار و تجهیزات")}</small></div><h2>${esc(product.name)}</h2></a><div class="compare-price"><small>قیمت محصول</small><div class="compare-price-values${Number(product.discountPercent) > 0 ? " has-discount" : ""}">${salePriceMarkup(product)}</div></div><h3 class="compare-spec-title"><i class="bi bi-list-check" aria-hidden="true"></i>مشخصات قابل بررسی</h3><dl>${specs.map(([label, value]) => `<div><dt>${esc(label)}</dt><dd>${esc(value)}</dd></div>`).join("")}</dl><a class="compare-detail-link" href="Product?id=${encodeURIComponent(product.id)}">جزئیات محصول<i class="bi bi-arrow-left" aria-hidden="true"></i></a></article>`;
     };
     view.innerHTML = list.length
       ? `<header class="compare-overview"><span class="compare-overview-icon"><i class="bi bi-columns-gap" aria-hidden="true"></i></span><span class="compare-overview-copy"><strong>مقایسهٔ دسته‌بندی‌شدهٔ محصولات</strong><small>هر گروه را جداگانه بررسی کنید تا انتخاب دقیق‌تری داشته باشید.</small></span><b>${fa(list.length)} محصول · ${fa(groups.size)} گروه</b><a href="Search"><i class="bi bi-plus-lg" aria-hidden="true"></i>افزودن محصول</a></header><div class="compare-category-groups">${[...groups.entries()].map(([category, products]) => `<section class="compare-category-group" aria-label="مقایسهٔ ${esc(category)}"><header class="compare-category-heading"><span class="compare-category-icon"><i class="bi ${groupIcons[category] || "bi-grid"}" aria-hidden="true"></i></span><span><strong>${esc(category)}</strong><small>مقایسهٔ محصولات هم‌دسته</small></span><b>${fa(products.length)} محصول</b></header><div class="compare-product-grid">${products.map(renderCard).join("")}</div></section>`).join("")}</div>`
