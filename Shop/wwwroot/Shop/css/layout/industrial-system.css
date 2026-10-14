@@ -12163,3 +12163,16 @@ body .electrical-swiper .swiper-pagination-bullet-active {
     column-gap: 5px;
   }
 }
+/* Improve the visibility of the support line and mobile number in the header. */
+.home-page #mainNav .home-header-support small {
+  color: #657486;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.home-page #mainNav .home-header-support strong {
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1.45;
+}
