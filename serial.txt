@@ -16,7 +16,7 @@ info@bs-shop.ir
 db bsshopir_fakhravari 
 u= bsshopir_fakhravari 
 p= n*3Mg83LS^iijmyh
-host=.\sqlserver2022:0
+host=31.25.91.7\sqlserver2022
 
 
 ftp

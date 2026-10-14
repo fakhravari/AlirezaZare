@@ -12073,12 +12073,12 @@ body .electrical-swiper .swiper-pagination-bullet-active {
   align-items: center;
   justify-self: start;
   gap: 5px;
-  padding: 6px 9px;
+  padding: 7px 10px;
   border: 1px solid rgba(178, 146, 96, 0.2);
   border-radius: 999px;
   background: #f8f5ee;
   color: #758194;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   line-height: 1;
   white-space: nowrap;
@@ -12097,7 +12097,69 @@ body .electrical-swiper .swiper-pagination-bullet-active {
 
   .home-page .testimonials .testimonial-card .review-date {
     gap: 4px;
-    padding: 5px 7px;
-    font-size: 9px;
+    padding: 6px 8px;
+    font-size: 10px;
+  }
+}
+/* Give customer portraits more presence in the testimonial cards. */
+.home-page .testimonials .testimonial-card .reviewer {
+  grid-template-columns: 52px minmax(0, 1fr) auto;
+}
+
+.home-page .testimonials .testimonial-card .reviewer-avatar {
+  width: 52px;
+  height: 52px;
+}
+
+@media (max-width: 575px) {
+  .home-page .testimonials .testimonial-card .reviewer {
+    grid-template-columns: 46px minmax(0, 1fr) auto;
+  }
+
+  .home-page .testimonials .testimonial-card .reviewer-avatar {
+    width: 46px;
+    height: 46px;
+  }
+}
+/* Keep the purchased category and review date on one shared baseline. */
+.home-page .testimonials .testimonial-card .reviewer {
+  grid-template-columns: 52px minmax(0, 1fr);
+}
+
+.home-page .testimonials .testimonial-card .reviewer > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "name name"
+    "category date";
+  align-items: center;
+  column-gap: 8px;
+  row-gap: 4px;
+  min-width: 0;
+}
+
+.home-page .testimonials .testimonial-card .reviewer > div > strong {
+  grid-area: name;
+}
+
+.home-page .testimonials .testimonial-card .reviewer > div > small {
+  grid-area: category;
+  min-width: 0;
+  margin-top: 0;
+  white-space: nowrap;
+}
+
+.home-page .testimonials .testimonial-card .reviewer > div > .review-date {
+  grid-area: date;
+  justify-self: start;
+}
+
+@media (max-width: 575px) {
+  .home-page .testimonials .testimonial-card .reviewer {
+    grid-template-columns: 46px minmax(0, 1fr);
+  }
+
+  .home-page .testimonials .testimonial-card .reviewer > div {
+    column-gap: 5px;
   }
 }
