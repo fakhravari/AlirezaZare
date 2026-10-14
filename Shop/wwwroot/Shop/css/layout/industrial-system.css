@@ -11870,6 +11870,17 @@ body.home-page .product-card .product-info > p {
   width: 40px;
   height: 40px;
   border: 1px solid rgba(27, 48, 72, 0.06);
+  overflow: hidden;
+  padding: 0;
+}
+
+.home-page .testimonials .testimonial-card .reviewer-avatar img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  object-fit: cover;
+  object-position: center 38%;
 }
 
 .home-page .testimonials .testimonial-card .reviewer strong {
