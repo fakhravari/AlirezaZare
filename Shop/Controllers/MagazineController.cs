@@ -13,7 +13,7 @@ public sealed class MagazineController : PageController
         return await PageAsync(model);
     }
 
-    [HttpGet("Details/{slug}")]
+    [HttpGet("{slug}")]
     public async Task<IActionResult> Details(string slug)
     {
         if (JournalArticles.Find(slug) is { } relatedArticle)
@@ -23,4 +23,8 @@ public sealed class MagazineController : PageController
 
         return NotFound();
     }
+
+    [HttpGet("Details/{slug}")]
+    public IActionResult LegacyDetails(string slug) =>
+        RedirectToActionPermanent(nameof(Details), new { slug });
 }

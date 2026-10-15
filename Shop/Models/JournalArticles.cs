@@ -20,19 +20,9 @@ public static class JournalArticles
         new("soldering-station-setup", "آموزش تخصصی", "آماده‌سازی میز تعمیر برد", "چیدمان ابزار، نور و تهویه مناسب، فرایند تعمیرات الکترونیک را ایمن‌تر و دقیق‌تر می‌کند.", "tool-soldering-station.png", ["سطح کار و نظم ابزار", "نور کافی", "تهویه مناسب", "ایمنی قطعات حساس"], ["سطح نسوز و مرتب برای کار انتخاب کنید و ابزارهای داغ را روی پایه مخصوص قرار دهید. کابل‌ها را از محل حرکت دست دور کنید.", "چراغ موضعی با زاویه قابل تنظیم، دید اتصالات کوچک را بهتر می‌کند. نور را طوری قرار دهید که بازتاب آزاردهنده روی برد ایجاد نشود.", "دود لحیم را با تهویه مناسب از محدوده تنفس دور کنید. تهویه عمومی را متناسب با حجم و نوع کار در نظر بگیرید.", "برای قطعات حساس، روش حفاظت در برابر تخلیه الکترواستاتیک را رعایت کنید. پیش از دست‌کاری برد، منبع تغذیه آن را قطع کنید."]),
     ];
 
-    private static readonly Dictionary<string, string> LegacySlugs = new(StringComparer.OrdinalIgnoreCase)
-    {
-        ["choosing-watch-for-wrist"] = "choosing-work-drill",
-        ["watch-movements"] = "multimeter-buying-guide",
-        ["watch-care"] = "electrical-tool-safety",
-        ["authentic-watch"] = "power-tool-buying-checklist",
-        ["solar-watch-guide"] = "battery-tool-care",
-    };
-
     public static MagazineDetailsModel? Find(string slug)
     {
-        var normalizedSlug = LegacySlugs.GetValueOrDefault(slug, slug);
-        var article = Articles.FirstOrDefault(item => string.Equals(item.Slug, normalizedSlug, StringComparison.OrdinalIgnoreCase));
+        var article = Articles.FirstOrDefault(item => string.Equals(item.Slug, slug, StringComparison.OrdinalIgnoreCase));
         if (article is null) return null;
 
         var sections = article.Headings.Select((heading, index) => new MagazineSectionModel($"section-{index + 1}", heading, article.Content[index])).ToArray();

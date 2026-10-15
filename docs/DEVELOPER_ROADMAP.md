@@ -41,8 +41,8 @@
 | جزئیات محصول | `/Product?id=…` | `ProductController.Details` → `Views/Product/Details.cshtml`؛ رندر جزئیات و تعامل محصول عمدتاً در `js/store/commerce.js` |
 | سبد و تسویه | `/Cart`, `/Checkout` | `CartController`, `CheckoutController` و Viewهای هم‌نام |
 | مقایسه و علاقه‌مندی | `/Compare`, `/Favorites` | Controller و Viewهای هم‌نام؛ state محلی با کدهای store |
-| پروفایل | `/Account` (هدایت به پروفایل), `/Profile`, `/Profile/Orders`, `/Profile/Addresses`, `/Profile/Favorites` | `AccountController`, `ProfileController`؛ صفحه‌ها از `Views/Account/Index.cshtml` استفاده می‌کنند و نوع بخش با مسیر/فرانت‌اند تعیین می‌شود |
-| مجله | `/Magazine`, `/Magazine/Details/{slug}` | `MagazineController`، `Views/Magazine/`، دادهٔ مقاله در `Models/JournalArticles.cs` |
+| پروفایل | `/Account` (هدایت سازگاری به پروفایل), `/Profile`, `/Profile/Orders`, `/Profile/Addresses`, `/Profile/Favorites` | `AccountController` فقط alias سازگاری است؛ صفحه‌ها در `ProfileController` و `Views/Profile/Index.cshtml` رندر می‌شوند |
+| مجله | `/Magazine`, `/Magazine/{slug}` (مسیر قبلی `/Magazine/Details/{slug}` حفظ و هدایت می‌شود) | `MagazineController`، `Views/Magazine/`، دادهٔ مقاله در `Models/JournalArticles.cs` |
 | محتوا/خدمات | `/About`, `/Brands`, `/Contact`, `/Faq`, `/Shipping`, `/Tracking`, `/Warranty` | Controller و View هم‌نام |
 | قوانین | `/Legal/Privacy`, `/Legal/Terms`, `/Legal/Returns` | `LegalController` و Viewهای `Views/Legal/` |
 | خطا | `/Error` | `ErrorController` → `Views/Error/Index.cshtml` |
@@ -64,9 +64,9 @@ Routeهای attribute-based مانند `Profile` و `Magazine` را کنار rou
 | Partial | وظیفه و مصرف | مالکیت استایل/رفتار برای ردیابی |
 |---|---|---|
 | `_Header.cshtml` با `_HomeHeader` و `_InnerHeader` | هدر و ناوبری؛ markup مگامنو در خانه و صفحات داخلی متفاوت است | `layout/shared-header.css`, `shared-mega-menu.css`, `electrical-theme.css`, `industrial-system.css`; تعامل‌ها عمدتاً `js/layout/main.js` |
-| `_Panels.cshtml` | منوی موبایل، ورود، سبد، حساب، علاقه‌مندی/مقایسه و quick view | CSSهای `layout/shared-*.css`, `style.css`, `mobile-drawer-compact.css`; رفتار عمدتاً `js/layout/main.js` و `js/store/commerce.js`؛ فعال‌بودن فایل را در Network تأیید کنید |
+| `_Panels.cshtml` | منوی موبایل، ورود، سبد، حساب، علاقه‌مندی/مقایسه و quick view | CSSهای `layout/shared-*.css`, `luxury-theme.css`, `style.css`, `mobile-drawer-compact.css`, `industrial-system.css`; رفتار عمدتاً `js/layout/main.js` و `js/store/commerce.js`؛ فعال‌بودن فایل را در Network تأیید کنید |
 | `_Footer.cshtml` | فوتر مشترک | `layout/shared-footer.css` و قواعد پوسته؛ معمولاً رفتار اختصاصی صفحه ندارد |
-| `_AddressForm.cshtml` | فرم مشترک آدرس در پروفایل/سبد/تسویه | `pages/checkout.css`, `pages/account-page.css`; `js/pages/address-fields.js`, `iran-places.js` به‌علاوهٔ کد صفحه |
+| `_AddressForm.cshtml` | فرم مشترک آدرس در پروفایل و سبد خرید؛ تسویه فقط آدرس انتخاب‌شده را پیش‌نمایش می‌کند و این فرم را رندر نمی‌کند | `pages/checkout.css`, `pages/account-page.css`; `js/pages/address-fields.js`, `iran-places.js` به‌علاوهٔ کد صفحه |
 | `_PurchaseBenefits.cshtml` | بلوک مزیت/خرید مطمئن در خانه و مسیرهای فروشگاهی | قوانین `.purchase-benefits` در `layout/style.css` و overrideهای `industrial-system.css`; مالک JS ندارد |
 | `_RelatedLinks.cshtml` | نوار لینک‌های مرتبط در چند صفحه | پایه در `store/commerce.css` و اصلاح‌های صفحه در `pages/pages.css`; مالک JS ندارد |
 
@@ -84,6 +84,7 @@ Routeهای attribute-based مانند `Profile` و `Magazine` را کنار rou
 - سطح روشن: `--color-cream` / `--industrial-bg`
 - سفید، متن، متن کمکی و خط: `--color-surface`, `--color-ink`, `--color-muted`, `--color-line`
 - شعاع و سایه: `--radius-*`, `--shadow-card`, `--shadow-card-hover`
+- نقش‌های معنایی: `--color-page`, `--color-content-surface`, `--color-text`, `--color-text-muted`, `--color-divider`, `--color-success`, `--color-danger`؛ فاصله‌ها از `--space-*` و متن ریز مشترک از `--font-size-caption`.
 
 مقادیر کلیدی فعلی و معنای توکن canonical:
 
@@ -116,7 +117,9 @@ Routeهای attribute-based مانند `Profile` و `Magazine` را کنار rou
 
 ### ترتیب CSS فعلی
 
-ترتیب واقعی لینک‌ها در `Views/Shared/_Shop.cshtml` چنین است: فونت/Bootstrap/آیکن و vendorها → `design-tokens.css` → `components.css` → `ui-core.css` → CSSهای shared → `luxury-theme.css` → `site.css` → `style.css` → `shared-mega-menu.css` → CSSهای store → `@section Styles` صفحه → `mvc-layout.css` → `mobile-drawer-compact.css` → `pagination.css` → `electrical-theme.css` → `industrial-system.css`.
+ترتیب واقعی لینک‌ها در `Views/Shared/_Shop.cshtml` چنین است: فونت/Bootstrap/آیکن و vendorها → `design-tokens.css` → `components.css` → `ui-core.css` → CSSهای shared → `luxury-theme.css` → `site.css` → `style.css` → `shared-mega-menu.css` → `commerce.css` → `@section Styles` صفحه → `mvc-layout.css` → `mobile-drawer-compact.css` → `pagination.css` → `electrical-theme.css` → `industrial-system.css` → `shared-product-card.css`.
+
+`shared-product-card.css` آخر بارگذاری می‌شود تا ظاهر پایهٔ کارت محصول در خانه، جستجو و فهرست‌ها از یک فایل تغذیه شود؛ overrideهای `!important` پوسته هنوز می‌توانند روی آن تقدم داشته باشند و باید پیش از افزودن قاعدهٔ تازه بررسی شوند.
 
 `industrial-system.css` آخر بارگذاری می‌شود و overrideهای زیادی دارد؛ بنابراین حتی CSS صفحه که در `@section Styles` آمده ممکن است بعداً بی‌اثر شود. ترتیب cascade را با چهار عامل بررسی کنید: origin/importance، specificity، ترتیب بارگذاری، و در صورت وجود media query/شرط فعال. صرفاً بالا بردن specificity یا افزودن `!important` تعارض را پنهان می‌کند. راه‌حل ترجیحی اصلاح قانون در فایل مالک و حذف/محدودکردن overrideٔ متناقض است؛ از ساختن یک لایهٔ override تازه در انتهای فایل خودداری کنید.
 
@@ -133,10 +136,10 @@ Routeهای attribute-based مانند `Profile` و `Magazine` را کنار rou
 | `/Checkout` تسویه | `Views/Checkout/Index.cshtml` | `pages/checkout.css`, `pages/pages.css` |
 | `/Compare` مقایسه | `Views/Compare/Index.cshtml` | `pages/pages.css` |
 | `/Favorites` علاقه‌مندی | `Views/Favorites/Index.cshtml` | `pages/pages.css` |
-| `/Profile`, `/Profile/Orders`, `/Profile/Addresses`, `/Profile/Favorites` | `Views/Account/Index.cshtml` | `pages/account-page.css`, `pages/checkout.css`, `pages/pages.css` |
+| `/Profile`, `/Profile/Orders`, `/Profile/Addresses`, `/Profile/Favorites` | `Views/Profile/Index.cshtml` | `pages/account-page.css`, `pages/checkout.css`, `pages/pages.css` |
 | `/Profile/Edit` | — | Controller فعلی به `/Profile` redirect می‌کند؛ `Views/Profile/Edit.cshtml` و `pages/profile-edit.css` در مسیر فعال بارگذاری نمی‌شوند |
 | `/Magazine` | `Views/Magazine/Index.cshtml` | `pages/magazine-luxury.css`, `pages/pages.css` |
-| `/Magazine/Details/{slug}` | `Views/Magazine/Details.cshtml` | `pages/article-details.css`, `pages/pages.css` |
+| `/Magazine/{slug}` | `Views/Magazine/Details.cshtml`؛ مسیر قدیمی `/Magazine/Details/{slug}` هدایت می‌شود | `pages/article-details.css`, `pages/pages.css` |
 | `/About` | `Views/About/Index.cshtml` | `pages/pages.css` |
 | `/Brands` | `Views/Brands/Index.cshtml` | `pages/brands.css`, `pages/pages.css` |
 | `/Contact` | `Views/Contact/Index.cshtml` | `pages/contact.css`, `pages/form-confirm-dialog.css`, `pages/pages.css` |
@@ -226,7 +229,7 @@ Routeهای attribute-based مانند `Profile` و `Magazine` را کنار rou
 | `/Compare`, `/Favorites` | `page-content.js` | رندر و state مقایسه/علاقه‌مندی در `commerce.js` |
 | `/Profile` و زیربخش‌ها | `account-page.js`, `address-fields.js`, `iran-places.js`, `orders-pagination.js`, `page-content.js` | پوسته و stateهای مشترک در `main.js`/`commerce.js` |
 | `/Magazine` | `magazine.js` | — |
-| `/Magazine/Details/{slug}` | `article-details.js`, `page-content.js` | — |
+| `/Magazine/{slug}` | `article-details.js`, `page-content.js` | — |
 | `/Contact` | `contact.js`, `form-confirm-dialog.js`, `page-content.js` | اعتبارسنجی عمومی در `form-validation.js` |
 | `/About`, `/Brands`, `/Faq`, `/Shipping`, `/Tracking`, `/Warranty` | `page-content.js` | محتوای مشترک در `electrical-content.js` |
 | قوانین | script اختصاصی ندارد | فقط رفتارهای عمومی layout |

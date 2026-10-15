@@ -1,6 +1,6 @@
 # مرجع کامل لایه‌های رابط کاربری
 
-این سند مکمل [`DEVELOPER_ROADMAP.md`](DEVELOPER_ROADMAP.md) است و برای پیدا کردن مالک واقعی UI، ردیابی تداخل CSS/JavaScript و بازآزمایی صفحه‌ها نوشته شده است. این مرجع از کد موجود در مخزن در **۱۲ اکتبر ۲۰۲۶** استخراج شده؛ نقشهٔ مسیرها و فایل‌ها snapshot است و پس از تغییر View یا asset باید به‌روز شود.
+این سند مکمل [`DEVELOPER_ROADMAP.md`](DEVELOPER_ROADMAP.md) است و برای پیدا کردن مالک واقعی UI، ردیابی تداخل CSS/JavaScript و بازآزمایی صفحه‌ها نوشته شده است. این مرجع در **۱۵ اکتبر ۲۰۲۶** با ساختار و assetهای موجود در مخزن تطبیق داده شده است؛ نقشهٔ مسیرها، breakpointها و فایل‌ها snapshot هستند و پس از تغییر View یا asset باید دوباره بررسی شوند.
 
 > این سند فهرست مفصل مالکیت و نقاط شروع جست‌وجو است، نه جایگزین خواندن markup و cascade واقعی. DOM نهایی، کلاس‌های state و stylesheet برنده را برای هر باگ در مرورگر تأیید کنید.
 
@@ -49,11 +49,11 @@ Shop/Program.cs
 2. `css/core/design-tokens.css` → `components.css` → `ui-core.css`.
 3. `css/layout/shared-header.css` → `shared-account.css` → `shared-cart.css` → `shared-login.css` → `shared-footer.css`.
 4. `css/layout/luxury-theme.css` → `css/core/site.css` → `css/layout/style.css` → `shared-mega-menu.css`.
-5. `css/store/shared-product-card.css` → `commerce.css`.
+5. `commerce.css`.
 6. `@section Styles` از View جاری.
-7. `css/layout/mvc-layout.css` → `mobile-drawer-compact.css` → `css/store/pagination.css` → `electrical-theme.css` → `industrial-system.css`.
+7. `css/layout/mvc-layout.css` → `mobile-drawer-compact.css` → `css/store/pagination.css` → `electrical-theme.css` → `industrial-system.css` → `css/store/shared-product-card.css`.
 
-قاعدهٔ مهم: CSS اختصاصی View در میانهٔ ترتیب است؛ `mvc-layout.css`، `electrical-theme.css` یا به‌خصوص `industrial-system.css` ممکن است بعداً روی آن بنویسند. وجود فایل در repo به معنی load شدنش نیست. ترتیب نهایی را در تب Network و DOM `<link>`ها تأیید کنید.
+قاعدهٔ مهم: CSS اختصاصی View در میانهٔ ترتیب است؛ `mvc-layout.css`، `electrical-theme.css` یا به‌خصوص `industrial-system.css` ممکن است بعداً روی آن بنویسند. `shared-product-card.css` آخر بارگذاری می‌شود و ظاهر پایه را تأمین می‌کند؛ overrideهای `!important` پوسته همچنان برنده‌اند. وجود فایل در repo به معنی load شدنش نیست. ترتیب نهایی را در تب Network و DOM `<link>`ها تأیید کنید.
 
 ### JavaScript
 
@@ -102,7 +102,7 @@ core/ui-core.js
 | `css/layout/shared-mega-menu.css` | `.page-mega-*` و مگامنوی دسکتاپ صفحات داخلی | منوی خانه variant دیگری دارد؛ hover و فاصلهٔ اشاره‌گر را تست کنید |
 | `css/layout/shared-account.css` | `.shared-account-*`, لینک‌ها و account popover/drawer | وضعیت `.open` و breakpoint موبایل مهم است |
 | `css/layout/shared-cart.css` | پنل‌های cart/favorites/compare، ردیف‌ها، footer و total | چند پنل مشابه دارد؛ selectorها را با ID/root واقعی محدود کنید |
-| `css/layout/shared-login.css` | `.shared-login-overlay`, `.shared-login-modal`, فرم و stepهای login | ارتفاع viewport کوچک، اسکرول داخلی و focus را بررسی کنید |
+| `css/layout/shared-login.css` | استایل پایهٔ `.shared-login-modal` برای dialog ویرایش پروفایل و بخشی از قواعد داخلی فرم `#loginModal` | با layout modal سراسری یکی نیست؛ `#loginModal` در `_Panels.cshtml` است و استایل layout آن بین `style.css`, `luxury-theme.css` و `industrial-system.css` تقسیم شده؛ `.shared-login-overlay` فعلاً در Viewها markup متناظر ندارد |
 | `css/layout/shared-footer.css` | footer مشترک | در همهٔ routeها اثر دارد |
 | `css/layout/luxury-theme.css` | تزئینات و پوستهٔ عمومی/legacy | قواعد گسترده و media متعدد؛ اولین مالک ظاهری فرض نشود |
 | `css/layout/style.css` | stylesheet قدیمی و حجیم، قواعد عمومی و responsive | فایل legacy بزرگ؛ قواعد هم‌نام را قبل از ادیت بشمارید |
@@ -131,7 +131,8 @@ core/ui-core.js
 |---|---|
 | `core/design-tokens.css` | max 575 |
 | `layout/shared-header.css` | max 767, 991 |
-| `layout/shared-account.css`, `shared-footer.css` | max 575, 991 |
+| `layout/shared-account.css` | max 991؛ reduced-motion |
+| `layout/shared-footer.css` | max 575, 991 |
 | `layout/shared-cart.css` | max 380, 991؛ min 992 |
 | `layout/shared-login.css` | max 575 |
 | `layout/shared-mega-menu.css` | min 992 |
@@ -139,16 +140,19 @@ core/ui-core.js
 | `layout/mvc-layout.css` | max 575, 767 |
 | `layout/mobile-drawer-compact.css` | max 991 |
 | `layout/electrical-theme.css` | max 991؛ min 992 |
-| `layout/industrial-system.css` | max 380, 389, 575, 640, 700, 767, 991, 991.98, 1199؛ min 390, 992, 1200, 1480؛ همچنین max-height 640 و hover/none |
+| `layout/industrial-system.css` | max 380, 389, 420, 575, 640, 700, 767, 991, 991.98, 1199؛ min 992, 1200, 1480؛ بازه‌های 390–767 و 992–1199؛ همچنین max-height 640، hover/none و reduced-motion |
 | `layout/style.css` | max 380, 575, 767, 991, 1199؛ min 768, 992 |
 | `pages/account-page.css` | max 380, 430, 560, 575, 640, 767, 991 |
 | `pages/search.css` | max 359, 575, 767, 1100 |
 | `pages/magazine-luxury.css` | max 480, 575, 767, 991, 1199؛ min 768, 992, 1200 |
 | `pages/checkout.css` | max 480, 520, 575, 991 |
 | `pages/pages.css` | max 575, 640, 767, 991؛ min 768, 992, 1200 |
-| `pages/brands.css`, `contact.css`, `article-details.css`, `tracking.css` | مرزهای اصلی 575, 767, 991؛ بعضی min-width و print/reduced-motion هم دارند |
-| `store/commerce.css` | max 380, 390, 575, 700, 767؛ min 768, 1200 |
-| `store/shared-product-card.css` | max 575, 991, 1199 |
+| `pages/brands.css` | max 575, 767, 991؛ reduced-motion |
+| `pages/contact.css` | max 767, 991؛ min 768؛ reduced-motion |
+| `pages/article-details.css` | max 767؛ print، screen و reduced-motion |
+| `pages/tracking.css` | max 575, 991؛ reduced-motion |
+| `store/commerce.css` | max 380, 390, 575, 700, 767؛ بازهٔ 768–1199؛ min 1200؛ reduced-motion |
+| `store/shared-product-card.css` | max 389, 575, 991؛ بازهٔ 992–1199 |
 | `store/pagination.css` | max 575 |
 
 برای فهرست به‌روزتر: `rg -n "@media" Shop/wwwroot/Shop/css`. تعارض را با viewport browser و Styles/Computed تأیید کنید؛ جدول ممکن است با تغییر CSS قدیمی شود.
@@ -179,10 +183,10 @@ CSS/JS عمومی layout و store که بالاتر آمده‌اند به هم�
 | `/Checkout` | `CheckoutController` → `Views/Checkout/Index.cshtml` | `checkout.css`, `pages.css` | `checkout.js`, `page-content.js` | `main.flow-main.invoice-page`, invoice/address/payment; سبد خالی/پر، روش پرداخت demo، modal آدرس |
 | `/Compare` | `CompareController` → `Views/Compare/Index.cshtml` | `pages.css` + `commerce.css` | `page-content.js` | `main.flow-main.compare-page`; zero/one/multiple product و حذف آیتم |
 | `/Favorites` | `FavoritesController` → `Views/Favorites/Index.cshtml` | `pages.css` + `commerce.css` | `page-content.js` | `main.flow-main`, `#favoritesView`; صفر/چند کارت و حذف favorite |
-| `/Profile`, `/Profile/Orders`, `/Profile/Addresses`, `/Profile/Favorites` | `ProfileController` → `Views/Account/Index.cshtml` | `account-page.css`, `checkout.css`, `pages.css` | `account-page.js`, `address-fields.js`, `iran-places.js`, `orders-pagination.js`, `page-content.js` | `main.flow-main`, `section.account-section`; route/hash بخش فعال، addresses، order pagination و وضعیت خالی |
+| `/Profile`, `/Profile/Orders`, `/Profile/Addresses`, `/Profile/Favorites` | `ProfileController` → `Views/Profile/Index.cshtml` | `account-page.css`, `checkout.css`, `pages.css` | `account-page.js`, `address-fields.js`, `iran-places.js`, `orders-pagination.js`, `page-content.js` | `main.flow-main`, `section.account-section`; route/hash بخش فعال، addresses، order pagination و وضعیت خالی |
 | `/Profile/Edit` | Controller فعلی redirect می‌کند | — | — | `Views/Profile/Edit.cshtml` و `profile-edit.css` در مسیر فعال استفاده نمی‌شوند؛ پیش از تغییر route را تأیید کنید |
 | `/Magazine` | `MagazineController` → `Views/Magazine/Index.cshtml` | `magazine-luxury.css`, `pages.css` | `magazine.js` | `main.journal-page`, `article.journal-post`; category/filter/sort، query string، popstate و responsive floating nav |
-| `/Magazine/Details/{slug}` | `MagazineController` → `Views/Magazine/Details.cshtml` | `article-details.css`, `pages.css` | `article-details.js`, `page-content.js` | `main.article-page`, `article.article-body`, `section.article-section`; TOC، progress، checklist، print/share |
+| `/Magazine/{slug}` | `MagazineController` → `Views/Magazine/Details.cshtml`؛ مسیر قدیمی `/Magazine/Details/{slug}` به مسیر جدید هدایت می‌شود | `article-details.css`, `pages.css` | `article-details.js`, `page-content.js` | `main.article-page`, `article.article-body`, `section.article-section`; TOC، progress، checklist، print/share |
 | `/About` | `AboutController` → `Views/About/Index.cshtml` | `pages.css` | `page-content.js` | hero/breadcrumb و `page-section`; لینک/CTA و sectionهای داینامیک را بررسی کنید |
 | `/Brands` | `BrandsController` → `Views/Brands/Index.cshtml` | `brands.css`, `pages.css` | `page-content.js` | hero، فهرست برند و کارت‌ها؛ responsive grid |
 | `/Contact` | `ContactController` → `Views/Contact/Index.cshtml` | `contact.css`, `form-confirm-dialog.css`, `pages.css` | `contact.js`, `form-confirm-dialog.js`, `page-content.js` | فرم contact، شعبه‌ها و CTA؛ validation، submit demo و feedback |
@@ -202,8 +206,9 @@ CSS/JS عمومی layout و store که بالاتر آمده‌اند به هم�
 | مگامنو | خانه و inner markup/variant متفاوت؛ inner selectorهایی مثل `.page-mega-sidebar` | `shared-mega-menu.css`, `electrical-theme.css`, `industrial-system.css`; باز/بسته و category در `main.js` | hover trigger → pointer حرکت به panel، keyboard focus، شاخهٔ پیش‌فرض، breakpoint 992 |
 | account popover/drawer هدر | `.shared-account-card`, `.shared-account-popover`, `.account-links` | `shared-account.css`; تعامل در `main.js` | کاربر خارج/وارد، desktop/mobile، Escape، focus و scroll |
 | cart/favorites/compare panels | `.page-cart-panel`, `.search-cart-drawer`, `.favorites-panel`, `.compare-panel` و item/footerها | `shared-cart.css`, `commerce.css`; `main.js` + `commerce.js` | سبد خالی/پر، تعداد زیاد آیتم، پنل باز و scroll داخلی، responsive |
-| login/register modal | `.shared-login-overlay`, `.shared-login-modal`, `.login-step`, `.login-close`, `.login-input` | `shared-login.css`; login interaction در `main.js` | ورود/ثبت‌نام/OTP، viewport کوتاه موبایل، scroll داخل، close و focus restore |
-| آدرس | `_AddressForm`, `#addressDialog` و address form classes | `checkout.css`, `account-page.css`; `address-fields.js`, `iran-places.js`, `account-page.js`/`checkout.js` | شهر بدون استان، استان/شهر معتبر، validation و submit/save |
+| modal ورود/ثبت‌نام سراسری | `#loginModal`, `.login-modal-form-panel`, `.login-close` در `_Panels.cshtml` | layout در `style.css`, `luxury-theme.css`, `industrial-system.css`; قواعد فرم در `shared-login.css`; تعامل در `main.js` | ورود/ثبت‌نام/OTP، viewport کوتاه موبایل، اسکرول داخلی، بستن و بازگشت focus |
+| dialog ویرایش پروفایل | `.shared-login-modal.profile-edit-dialog` در `Views/Profile/Index.cshtml` | `shared-login.css` به‌علاوهٔ `account-page.css`; رفتار در View پروفایل | باز/بسته‌شدن native dialog، اعتبارسنجی و focus |
+| فرم آدرس | `_AddressForm`, `#addressDialog` در Cart و dialog آدرس پروفایل | `checkout.css`, `account-page.css`; `address-fields.js`, `iran-places.js`, `account-page.js` | شهر بدون استان، استان/شهر معتبر، validation و ذخیره؛ Checkout این فرم را ندارد و فقط آدرس انتخابی را پیش‌نمایش می‌کند |
 | مزیت خرید مطمئن | `_PurchaseBenefits`, `.purchase-benefits` | `style.css` و overrideهای `industrial-system.css`; JS اختصاصی ندارد | صفحهٔ محصول و هر مسیر دیگری که partial را رندر می‌کند |
 | لینک‌های مرتبط | `_RelatedLinks` | `commerce.css`, overrideهای `pages.css`; JS اختصاصی ندارد | صفحات service/editorial که partial را مصرف می‌کنند |
 | کارت محصول | shared card markup و rendererهای store | `shared-product-card.css`, `commerce.css` | Home/Search/Related/Compare/Favorites؛ crop تصویر و عنوان طولانی |
@@ -268,8 +273,8 @@ CSS/JS عمومی layout و store که بالاتر آمده‌اند به هم�
 | `hn-delivery-addresses` | فهرست آدرس‌های نمایشی |
 | `hn-selected-address` | شناسهٔ آدرس انتخابی |
 | `hn-payment-method-v2` | روش پرداخت انتخابی نمایشی |
-| `hn-profile` | دادهٔ profile نمایشی در `Views/Account/Index.cshtml` |
-| `hn-product-reviews-{productId}`, `hn-product-questions-{productId}` | feedback پویا برای هر محصول؛ seedها جداگانه همراه دادهٔ ذخیره‌شده رندر می‌شوند |
+| `hn-profile` | دادهٔ profile نمایشی در `Views/Profile/Index.cshtml` |
+| `hn-product-${type}-${productId}` | کلید واقعی feedback در `commerce.js`؛ `type` برابر `reviews` یا `questions` است. seedهای نمایشی جداگانه با دادهٔ ذخیره‌شده ترکیب می‌شوند. |
 
 ممکن است scriptهای دیگر کلید تازه اضافه کنند؛ این جدول هنگام تغییر باید با `rg -n "localStorage|storage\.(get|set|json)|hn-" Shop/wwwroot/Shop/js Shop/Views` تطبیق داده شود.
 

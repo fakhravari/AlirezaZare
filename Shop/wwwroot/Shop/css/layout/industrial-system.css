@@ -28,6 +28,21 @@
   --industrial-danger: #c73e3e;
   --industrial-shadow: 0 12px 30px rgba(16, 42, 67, 0.08);
   --industrial-shadow-hover: 0 18px 42px rgba(16, 42, 67, 0.14);
+  --color-page: var(--industrial-bg);
+  --color-content-surface: var(--industrial-surface);
+  --color-text: var(--industrial-ink);
+  --color-text-muted: var(--industrial-muted);
+  --color-divider: var(--industrial-line);
+  --color-accent: var(--industrial-yellow);
+  --color-accent-border-soft: var(--industrial-accent-border-soft);
+  --color-accent-border: var(--industrial-accent-border);
+  --color-accent-ink: var(--industrial-yellow-dark);
+  --color-accent-ink-soft: #94713d;
+  --color-accent-ink-strong: #5f411c;
+  --color-success: var(--industrial-success);
+  --color-danger: var(--industrial-danger);
+  --color-danger-soft: #fff2f0;
+  --color-danger-border: #ddb0aa;
 
   /* Keep legacy page components on the same navy, yellow and neutral palette. */
   --color-navy: var(--industrial-navy);
@@ -12568,4 +12583,19 @@ body .electrical-swiper .swiper-pagination-bullet-active {
 .newsletter .subscribe input {
   border-top-right-radius: 10px;
   border-bottom-right-radius: 10px;
+}
+
+@media (min-width: 992px) and (max-width: 1199px) {
+  .inner-page #mainNav .navbar-nav {
+    gap: 4px;
+  }
+
+  .inner-page #mainNav .nav-link {
+    padding-inline: 8px !important;
+    font-size: 13px;
+  }
+
+  .inner-page #mainNav .home-nav-groups {
+    gap: 8px;
+  }
 }
