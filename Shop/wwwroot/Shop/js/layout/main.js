@@ -2013,10 +2013,20 @@ $(function () {
   };
   const detailCardSelector =
     ".product-card, .showcase-card, .rail-card, .featured-main, .featured-side, .favorite-item-card, .compare-product-card";
+  const normalizeProductLinks = (root) => {
+    const links = [];
+    if (root.matches?.("a[href]")) links.push(root);
+    links.push(...(root.querySelectorAll?.("a[href]") || []));
+    links.forEach((link) => {
+      const productId = link.getAttribute("href")?.match(/^\/?Product\?id=(\d+)(?:&|$)/i)?.[1];
+      if (productId) link.setAttribute("href", `/products/${productId}`);
+    });
+  };
+  normalizeProductLinks(document);
   const detailHrefForCard = (card) => {
     const productLink = [...card.querySelectorAll("a[href]")].find((link) => {
       const url = new URL(link.href, window.location.href);
-      return /\/Product\/?$/i.test(url.pathname) && url.searchParams.has("id");
+      return /\/products\/\d+\/?$/i.test(url.pathname) || (/\/Product\/?$/i.test(url.pathname) && url.searchParams.has("id"));
     });
     if (productLink) return productLink.href;
     const cartButton = card.querySelector(".add-cart[data-id]");
@@ -2027,7 +2037,7 @@ $(function () {
         String(item.id) === productId ||
         (productName && item.name === productName),
     );
-    return product ? `Product?id=${encodeURIComponent(product.id)}` : "";
+    return product ? `/products/${encodeURIComponent(product.id)}` : "";
   };
   const markDetailCards = (root = document) => {
     const cards = [];
@@ -2046,6 +2056,7 @@ $(function () {
     records.forEach((record) =>
       record.addedNodes.forEach((node) => {
         if (node instanceof Element) {
+          normalizeProductLinks(node);
           decorateProductCards(node);
           markDetailCards(node);
           const parentCard = node.closest(detailCardSelector);

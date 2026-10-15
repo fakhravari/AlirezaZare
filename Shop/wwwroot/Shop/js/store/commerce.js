@@ -73,9 +73,8 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   const productView = document.querySelector("#productView");
   if (productView) {
-    const p = catalog.find(
-      (p) => p.id === Number(new URLSearchParams(location.search).get("id")),
-    );
+    const productId = Number(location.pathname.match(/^\/products\/(\d+)\/?$/i)?.[1]);
+    const p = catalog.find((p) => p.id === productId);
     if (!p) productView.innerHTML = empty("محصول پیدا نشد");
     else {
       document.title = `${p.name} | علی‌رضا زارع`;

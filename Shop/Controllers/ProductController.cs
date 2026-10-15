@@ -14,12 +14,16 @@ public sealed class ProductController : PageController
         return await PageAsync(model);
     }
 
-    [HttpGet("/Product")]
-    public async Task<IActionResult> Details([FromQuery] int? id)
+    [HttpGet("/products/{id:int}")]
+    public async Task<IActionResult> Details(int id)
     {
         PageModel<ProductDetailsModel> model = new(
             new ProductDetailsModel(id),
             new SeoModel("جزئیات محصول | فروشگاه برق و ابزار علی‌رضا زارع", "مشخصات، قیمت و شرایط خرید ابزار و تجهیزات برق از برندهای معتبر"));
         return await PageAsync(model);
     }
+
+    [HttpGet("/Product")]
+    public IActionResult LegacyDetails([FromQuery] int? id) =>
+        id is > 0 ? RedirectPermanent($"/products/{id.Value}") : NotFound();
 }
