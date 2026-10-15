@@ -102,6 +102,8 @@
       return safeItems;
     },
     add(product, quantity = 1, trigger = null) {
+      if (!auth.requireLogin(() => cart.add(product, quantity, trigger)))
+        return null;
       const items = this.read();
       const safeProduct = normalizeCart([{ ...product, quantity }])[0];
       if (!safeProduct) return items;
@@ -154,6 +156,15 @@
   const auth = {
     isLoggedIn: () =>
       ["1", "true"].includes(storage.get(STORAGE_KEYS.auth, "")),
+    requireLogin(resume) {
+      if (auth.isLoggedIn()) return true;
+      document.dispatchEvent(
+        new CustomEvent("hn:auth-required", {
+          detail: { resume: typeof resume === "function" ? resume : null },
+        }),
+      );
+      return false;
+    },
     login() {
       storage.set(STORAGE_KEYS.auth, "1");
       document.dispatchEvent(
@@ -353,7 +364,7 @@
       1,
       button,
     );
-    if (!items.some((item) => item.id === String(button.dataset.id))) return;
+    if (!items?.some((item) => item.id === String(button.dataset.id))) return;
     const originalMarkup = button.innerHTML;
     button.classList.add("added");
     button.innerHTML = '<i class="bi bi-check2"></i> به سبد اضافه شد';

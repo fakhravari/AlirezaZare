@@ -750,6 +750,8 @@ document.addEventListener("DOMContentLoaded", () => {
       mobileBuyBar.querySelector("button").onclick = (event) =>
         addProductToCart(event.currentTarget);
       document.querySelector("#saveProduct").onclick = (e) => {
+        const button = e.currentTarget;
+        if (!ui.auth.requireLogin(() => button.click())) return;
         let ids = favorites();
         ids = ids.includes(String(p.id))
           ? ids.filter((i) => i !== String(p.id))

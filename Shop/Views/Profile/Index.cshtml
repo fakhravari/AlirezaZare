@@ -56,29 +56,29 @@
         </span>
         <span>ابزار و تجهیزات برقی</span>
     </div>
-</header>
-<nav class="cart-breadcrumb profile-breadcrumb" aria-label="مسیر صفحه">
-    <ol>
-        <li>
-            <a asp-controller="Home" asp-action="Index">
-                <i class="bi bi-house-door" aria-hidden="true"></i><span>خانه</span>
-            </a>
-        </li>
-        @if (profileSection is "orders" or "addresses" or "favorites")
-        {
-            <li class="profile-breadcrumb-parent">
-                <i class="bi bi-chevron-left" aria-hidden="true"></i>
-                <a asp-controller="Profile" asp-action="Index">حساب کاربری</a>
+    <nav class="cart-breadcrumb profile-breadcrumb" aria-label="مسیر صفحه">
+        <ol>
+            <li>
+                <a asp-controller="Home" asp-action="Index">
+                    <i class="bi bi-house-door" aria-hidden="true"></i><span>خانه</span>
+                </a>
             </li>
-        }
-        <li class="cart-breadcrumb-current">
-            <i class="bi bi-chevron-left" aria-hidden="true"></i>
-            <span aria-current="page">
-                <i class="bi @profileIcon" aria-hidden="true"></i>@profileTitle
-            </span>
-        </li>
-    </ol>
-</nav>
+            @if (profileSection is "orders" or "addresses" or "favorites")
+            {
+                <li class="profile-breadcrumb-parent">
+                    <i class="bi bi-chevron-left" aria-hidden="true"></i>
+                    <a asp-controller="Profile" asp-action="Index">حساب کاربری</a>
+                </li>
+            }
+            <li class="cart-breadcrumb-current">
+                <i class="bi bi-chevron-left" aria-hidden="true"></i>
+                <span aria-current="page">
+                    <i class="bi @profileIcon" aria-hidden="true"></i>@profileTitle
+                </span>
+            </li>
+        </ol>
+    </nav>
+</header>
 <div class="account-dashboard">
 <aside class="account-sidebar">
     <div class="account-profile">

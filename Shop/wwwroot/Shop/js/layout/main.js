@@ -1283,6 +1283,7 @@ $(function () {
     $html.toggleClass("cart-mobile-open", lockPage);
   };
   const setFavoriteOpen = (open) => {
+    if (open && !userLoggedIn) return;
     $favoritesWrap.toggleClass("open", open);
     $favoritesPanel
       .toggleClass("open", open)
@@ -1296,6 +1297,7 @@ $(function () {
     setFavoriteOpen(false);
   };
   const setCompareOpen = (open) => {
+    if (open && !userLoggedIn) return;
     $compareWrap.toggleClass("open", open);
     $comparePanel.toggleClass("open", open).attr("aria-hidden", String(!open));
     $compareToggle.attr("aria-expanded", String(open));
@@ -1344,6 +1346,7 @@ $(function () {
   let cart = window.HNUI.cart.read();
 
   const setCartOpen = (open) => {
+    if (open && !userLoggedIn) return;
     $cartWrap.toggleClass("open", open);
     $cartPanel.toggleClass("open", open);
     $cartToggle.attr("aria-expanded", String(open));
@@ -1365,6 +1368,18 @@ $(function () {
         })
       : null;
   let userLoggedIn = window.HNUI.auth.isLoggedIn();
+  const protectedRoots = new Set([
+    "profile",
+    "cart",
+    "checkout",
+    "compare",
+    "favorites",
+  ]);
+  const protectedPath = protectedRoots.has(
+    window.location.pathname.split("/").filter(Boolean)[0]?.toLowerCase(),
+  );
+  let pendingAuthenticatedAction = null;
+  let resumeAuthenticatedAction = false;
 
   const setAccountOpen = (open) => {
     if (open) {
@@ -1377,6 +1392,18 @@ $(function () {
     $accountToggle.attr("aria-expanded", String(open));
     syncMobileHeaderPanelLock();
   };
+  const showLoginModal = (resume) => {
+    pendingAuthenticatedAction =
+      typeof resume === "function" ? resume : null;
+    setCartOpen(false);
+    setFavoriteOpen(false);
+    setCompareOpen(false);
+    setAccountOpen(false);
+    if (loginModal) loginModal.show();
+  };
+  document.addEventListener("hn:auth-required", (event) => {
+    showLoginModal(event.detail?.resume);
+  });
   const placeAccountPanel = () => {
     if ($window.width() <= mobileBreakpoint) $accountPanel.appendTo($body);
     else $accountPanel.appendTo($accountWrap);
@@ -1413,8 +1440,7 @@ $(function () {
   $accountToggle.on("click", (event) => {
     event.stopPropagation();
     if (!userLoggedIn) {
-      setCartOpen(false);
-      if (loginModal) loginModal.show();
+      showLoginModal();
       return;
     }
     setAccountOpen(!$accountPanel.hasClass("open"));
@@ -1517,6 +1543,19 @@ $(function () {
     $emailOtpStep.removeClass("d-none").prop("hidden", false);
     $emailOtpInput.val("123456").trigger("focus");
   };
+  const completeDemoLogin = () => {
+    userLoggedIn = true;
+    resumeAuthenticatedAction = true;
+    window.HNUI.auth.login();
+    updateAccountUI();
+    if (loginModal) loginModal.hide();
+    else {
+      const resume = pendingAuthenticatedAction;
+      pendingAuthenticatedAction = null;
+      resumeAuthenticatedAction = false;
+      resume?.();
+    }
+  };
 
   $("#loginEmailForm").on("submit", (event) => {
     event.preventDefault();
@@ -1527,10 +1566,7 @@ $(function () {
       return;
     }
     $loginEmailError.empty();
-    userLoggedIn = true;
-    window.HNUI.auth.login();
-    updateAccountUI();
-    if (loginModal) loginModal.hide();
+    completeDemoLogin();
   });
 
   $("#registerEmailForm").on("submit", (event) => {
@@ -1561,10 +1597,7 @@ $(function () {
       return;
     }
     $emailOtpError.empty();
-    userLoggedIn = true;
-    window.HNUI.auth.login();
-    updateAccountUI();
-    if (loginModal) loginModal.hide();
+    completeDemoLogin();
   });
 
   $("#loginEmailBack").on("click", () => {
@@ -1582,6 +1615,25 @@ $(function () {
     $("#sentEmail").empty();
     $emailOtpInput.val("");
     selectLoginMode("login");
+    const resume = resumeAuthenticatedAction
+      ? pendingAuthenticatedAction
+      : null;
+    pendingAuthenticatedAction = null;
+    resumeAuthenticatedAction = false;
+    if (resume) window.setTimeout(resume, 0);
+    else if (protectedPath && !window.HNUI.auth.isLoggedIn())
+      window.location.replace("/");
+  });
+  document.addEventListener("hn:auth-change", (event) => {
+    userLoggedIn = Boolean(event.detail);
+    updateAccountUI();
+    if (!userLoggedIn) {
+      setCartOpen(false);
+      setFavoriteOpen(false);
+      setCompareOpen(false);
+      setAccountOpen(false);
+      if (protectedPath) window.location.replace("/");
+    }
   });
   $(".account-links>a:last-child").on("click", (event) => {
     event.preventDefault();
@@ -1590,6 +1642,8 @@ $(function () {
     setAccountOpen(false);
     updateAccountUI();
   });
+  if (protectedPath && !userLoggedIn)
+    showLoginModal(() => window.location.reload());
 
   const saveCart = () => {
     cart = window.HNUI?.cart.write(cart) || cart;
@@ -1649,6 +1703,10 @@ $(function () {
 
   $cartToggle.on("click", (event) => {
     event.stopPropagation();
+    if (!window.HNUI.auth.requireLogin(() => $cartToggle.trigger("click"))) {
+      event.preventDefault();
+      return;
+    }
     setAccountOpen(false);
     setFavoriteOpen(false);
     setCompareOpen(false);
@@ -1677,6 +1735,11 @@ $(function () {
 
     event.preventDefault();
     event.stopPropagation();
+    const favoritesToggle = $favoritesToggle[0];
+    if (
+      !window.HNUI.auth.requireLogin(() => favoritesToggle.click())
+    )
+      return;
     setCartOpen(false);
     setAccountOpen(false);
     setCompareOpen(false);
@@ -1742,6 +1805,9 @@ $(function () {
 
     event.preventDefault();
     event.stopPropagation();
+    const compareToggle = $compareToggle[0];
+    if (!window.HNUI.auth.requireLogin(() => compareToggle.click()))
+      return;
     setCartOpen(false);
     setAccountOpen(false);
     setFavoriteOpen(false);
@@ -1795,6 +1861,8 @@ $(function () {
 
   $document.on("click", ".favorite", function () {
     const $button = $(this);
+    const button = this;
+    if (!window.HNUI.auth.requireLogin(() => button.click())) return;
     const productId = String(
       $button.attr("data-product-id") ||
         $button
@@ -2139,6 +2207,8 @@ $(function () {
   $document.on("click", ".compare-trigger[data-product-id]", function (event) {
     event.preventDefault();
     event.stopPropagation();
+    const button = this;
+    if (!window.HNUI.auth.requireLogin(() => button.click())) return;
     const productId = String(this.dataset.productId || "");
     if (!productId) return;
     cacheProductFromCard(

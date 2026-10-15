@@ -227,7 +227,7 @@ CSS/JS عمومی layout و store که بالاتر آمده‌اند به هم�
 | `HNUI.storage.get/set/remove/json` | خواندن/نوشتن مقاوم در برابر خطای browser storage؛ `set` برای favorite/compare رویداد list را dispatch می‌کند |
 | `HNUI.ready(callback)` | اجرای callback پس از آماده‌شدن DOM |
 | `HNUI.cart.read/write/add/update/remove/totals` | normalize، validation ساده و مدیریت سبد؛ `write` رویداد cart را dispatch می‌کند |
-| `HNUI.auth.isLoggedIn/login/logout` | وضعیت ورود نمایشی و `hn:auth-change` |
+| `HNUI.auth.isLoggedIn/login/logout/requireLogin` | وضعیت ورود نمایشی؛ `requireLogin(resume)` برای ورود نداشتن رویداد `hn:auth-required` می‌فرستد و callback را پس از ورود آزمایشی ادامه می‌دهد |
 | `HNUI.scrollLock.lock/unlock` | شمارندهٔ قفل scroll با کلاس `ui-scroll-locked` |
 | `HNUI.dialog` | helperهای dialog/focus/keyboard؛ جزئیات دقیق را در همان فایل بخوانید |
 | `HNUI.enhance(root)` | بهبودهای عمومی DOM داخل root |
@@ -285,6 +285,7 @@ CSS/JS عمومی layout و store که بالاتر آمده‌اند به هم�
 | `hn:cart-change` | `detail`: آرایهٔ cart نرمال‌شده | header/panel، commerce و checkout را sync می‌کند |
 | `hn:cart-added` | `detail: { product, items, trigger }` | پنل cart ممکن است باز شود؛ focus trigger را حفظ کنید |
 | `hn:auth-change` | `detail`: boolean | هدر و بخش account را تازه می‌کند |
+| `hn:auth-required` | `detail: { resume: Function|null }` | بازکردن مدال ورود؛ callback پس از ورود آزمایشی اجرا می‌شود |
 | `hn:lists-change` | بدون `detail` | شمارنده‌ها، favorite/compare button و صفحه‌ها را sync می‌کند |
 | native `storage` | `key`, `newValue`, `oldValue` | همگام‌سازی tabهای دیگر؛ same-tab تغییرات باید از helper/event عبور کند |
 
