@@ -1,30 +1,30 @@
 .account-dashboard {
   display: grid;
-  grid-template-columns: minmax(270px, 320px) minmax(0, 1fr);
-  gap: 28px;
-  margin: 28px 0 36px;
+  grid-template-columns: minmax(260px, 300px) minmax(0, 1fr);
+  gap: 24px;
+  margin: 22px 0 40px;
   align-items: start;
 }
 
 .account-sidebar {
   position: sticky;
-  top: 112px;
+  top: 124px;
   overflow: hidden;
-  padding: 12px;
-  border: 1px solid rgba(113, 135, 166, 0.32);
-  border-radius: 24px;
-  background: linear-gradient(155deg, #fff, var(--industrial-bg));
-  box-shadow: 0 18px 45px rgba(12, 35, 70, 0.1);
+  padding: 14px;
+  border: 1px solid var(--color-line);
+  border-radius: 22px;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
 }
 
 .account-profile {
   display: grid;
-  min-height: 112px;
-  padding: 18px 15px;
+  min-height: 118px;
+  padding: 18px 16px;
   grid-template-columns: 54px minmax(0, 1fr);
   gap: 13px;
   align-items: center;
-  border-radius: 17px;
+  border-radius: 18px;
   background:
     radial-gradient(
       circle at 8% 12%,
@@ -69,20 +69,20 @@
 
 .account-tabs {
   display: grid;
-  gap: 2px;
-  margin: 12px 0;
+  gap: 5px;
+  margin: 14px 0;
 }
 
 .account-tabs a {
   display: grid;
-  min-height: 54px;
-  padding: 6px 8px;
+  min-height: 58px;
+  padding: 7px 9px;
   grid-template-columns: 36px minmax(0, 1fr) 16px;
   gap: 9px;
   align-items: center;
   border: 1px solid transparent;
-  border-bottom-color: #edf1f4;
-  border-radius: 10px;
+  border-bottom-color: #e9eef2;
+  border-radius: 12px;
   color: var(--industrial-steel);
   transition: 0.22s ease;
 }
@@ -127,15 +127,15 @@
 }
 
 .account-tabs a:hover {
-  border-color: transparent;
-  background: #f5f7f9;
+  border-color: #e1e8ee;
+  background: #f7f9fb;
   transform: none;
 }
 
 .account-tabs a[aria-current] {
-  border-color: #e8edf2;
-  background: #f7f9fb;
-  box-shadow: inset -2px 0 var(--industrial-navy);
+  border-color: #eadcad;
+  background: linear-gradient(100deg, #fffdf7, #fff8e5);
+  box-shadow: inset -3px 0 var(--industrial-yellow-dark);
 }
 
 .account-tabs a[aria-current] > i:first-child {
@@ -184,12 +184,12 @@
 
 .account-content {
   min-width: 0;
-  min-height: 620px;
-  padding: 24px;
-  border: 1px solid rgba(113, 135, 166, 0.32);
-  border-radius: 24px;
-  background: linear-gradient(155deg, #fff, var(--industrial-bg));
-  box-shadow: 0 18px 45px rgba(12, 35, 70, 0.1);
+  min-height: 520px;
+  padding: 28px;
+  border: 1px solid var(--color-line);
+  border-radius: 22px;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
   font-size: 14px;
 }
 
@@ -250,20 +250,21 @@
 
 .account-stats {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
-  margin-bottom: 24px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 26px;
 }
 
 .account-stats article {
   display: flex;
   min-width: 0;
-  padding: 16px 13px;
+  padding: 17px 15px;
   align-items: center;
   gap: 10px;
-  border: 1px solid rgba(113, 135, 166, 0.22);
+  border: 1px solid var(--color-line);
   border-radius: 16px;
-  background: linear-gradient(145deg, #fff, var(--industrial-bg));
+  background: linear-gradient(145deg, #fff, #f7f9fa);
+  box-shadow: 0 6px 18px rgba(16, 42, 67, 0.035);
 }
 
 .stat-icon {
@@ -315,16 +316,16 @@
 .overview-panels {
   display: grid;
   grid-template-columns: minmax(0, 1.2fr) minmax(230px, 0.8fr);
-  gap: 16px;
+  gap: 18px;
 }
 
 .overview-panels > article {
   min-width: 0;
-  padding: 16px;
-  border: 1px solid rgba(113, 135, 166, 0.2);
-  border-radius: 16px;
-  background: linear-gradient(145deg, #fff, #f9fafb);
-  box-shadow: 0 8px 22px rgba(12, 35, 70, 0.035);
+  padding: 19px;
+  border: 1px solid var(--color-line);
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 8px 22px rgba(16, 42, 67, 0.045);
 }
 
 .overview-panel-title {
@@ -351,9 +352,9 @@
   justify-content: center;
   flex-direction: column;
   text-align: center;
-  border: 1px solid rgba(113, 135, 166, 0.12);
-  border-radius: 12px;
-  background: linear-gradient(145deg, #f5f7f8, #eef2f4);
+  border: 1px solid #e5ebef;
+  border-radius: 14px;
+  background: linear-gradient(145deg, #f8fafb, #f1f5f7);
 }
 
 .overview-empty > i {
@@ -1276,9 +1277,9 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
   justify-content: space-between;
   gap: 32px;
   overflow: hidden;
-  min-height: 270px;
-  margin: 24px 0 28px;
-  padding: 34px 46px;
+  min-height: 250px;
+  margin: 24px 0 18px;
+  padding: 34px 44px;
   border: 1px solid var(--industrial-navy);
   border-radius: 26px;
   background:
@@ -1311,7 +1312,7 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
 .account-welcome h1 {
   margin: 14px 0 10px;
   color: #fff;
-  font-size: clamp(28px, 3vw, 42px);
+  font-size: clamp(30px, 3.2vw, 44px);
   font-weight: 800;
   line-height: 1.5;
 }
@@ -1340,6 +1341,27 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
     background 0.2s ease,
     border-color 0.2s ease;
 }
+.account-welcome-links button {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 11px 16px;
+  border: 1px solid var(--industrial-yellow);
+  border-radius: 11px;
+  background: var(--industrial-yellow);
+  color: var(--industrial-navy);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+.account-welcome-links button:hover,
+.account-welcome-links button:focus-visible {
+  transform: translateY(-1px);
+  border-color: #ffda52;
+  background: #ffda52;
+}
 .account-welcome-links a:first-child {
   border-color: var(--industrial-yellow);
   background: var(--industrial-yellow);
@@ -1347,8 +1369,9 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
   font-weight: 700;
 }
 .account-welcome-links a:hover {
-  border-color: color-mix(in srgb, var(--industrial-yellow) 14%, white);
-  background: var(--industrial-navy);
+  border-color: color-mix(in srgb, var(--industrial-yellow) 52%, white);
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
 }
 .account-welcome-links a:first-child:hover {
   background: color-mix(in srgb, var(--industrial-yellow) 14%, white);
@@ -1525,7 +1548,7 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
     gap: 8px;
     margin-top: 10px;
   }
-  .account-welcome-links a {
+  .account-welcome-links :is(a, button) {
     min-height: 38px;
     padding: 8px 11px;
     font-size: 11px;
@@ -1612,6 +1635,11 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
     margin-top: 8px;
   }
 
+  .account-welcome-links :is(a, button) {
+    min-height: 36px;
+    padding: 7px 10px;
+  }
+
   .account-content {
     padding: 14px 12px;
   }
@@ -1640,7 +1668,7 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
 }
 
 #orders .profile-order-card footer {
-  border-top: 2px solid var(--industrial-yellow) !important;
+  border-top: 1px solid #e8edf1 !important;
   background: #f8fafb !important;
   color: var(--industrial-muted) !important;
 }
@@ -1865,7 +1893,7 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
 #favoritesView .favorite-item-card .flow-photo {
   display: block;
   width: 100%;
-  height: clamp(210px, 22vw, 270px);
+  height: var(--product-card-image-height, 220px);
   flex: 0 0 auto;
   max-height: none;
   border: 0;
@@ -1873,18 +1901,35 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
   background: #edf1f4;
   object-fit: cover;
   object-position: center;
+  transition: transform 0.7s ease;
+}
+.account-welcome-links button:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+
+#favoritesView .favorite-item-card:hover .flow-photo {
+  transform: scale(1.05);
 }
 
 #favoritesView .favorite-item-card h2 {
-  min-height: 58px;
-  margin: 12px 16px 4px;
+  display: -webkit-box;
+  min-height: 4.95em;
+  margin: 12px 16px 0;
+  overflow: hidden;
   text-align: right;
   font-size: 16px;
   line-height: 1.8;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
 }
 
 #favoritesView .favorite-item-card > p {
-  margin: 5px 16px 14px;
+  display: flex;
+  min-height: 58px;
+  margin: auto 16px 8px;
+  align-items: center;
   text-align: right;
   font-size: 15px;
 }
@@ -1909,6 +1954,6 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
   }
 
   #favoritesView .favorite-item-card .flow-photo {
-    height: 200px;
+    height: var(--product-card-image-height, 220px);
   }
 }

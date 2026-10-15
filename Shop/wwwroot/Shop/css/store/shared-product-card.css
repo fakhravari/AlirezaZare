@@ -173,6 +173,100 @@
   transform: translateY(-1px);
 }
 
+#favoritesView .favorite-item-card {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0;
+  border: 1px solid var(--product-card-border);
+  border-radius: var(--product-card-radius);
+  background: var(--product-card-surface);
+  box-shadow: var(--shadow-card);
+  transition:
+    transform 0.3s ease,
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+#favoritesView .favorite-item-card:hover {
+  transform: translateY(-6px);
+  border-color: var(--product-card-border-hover);
+  box-shadow: var(--shadow-card-hover);
+}
+
+#favoritesView .favorite-item-card > a {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  color: inherit;
+  text-decoration: none;
+}
+
+#favoritesView .favorite-item-card .flow-photo {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1 / 1;
+  flex: none;
+  border: 0;
+  border-radius: 0;
+  background: var(--product-card-image-surface);
+  object-fit: cover;
+  transition: transform 0.7s ease;
+}
+
+#favoritesView .favorite-item-card:hover .flow-photo {
+  transform: scale(1.05);
+}
+
+#favoritesView .favorite-item-card h2 {
+  display: -webkit-box;
+  min-height: 4.95em;
+  margin: 12px 20px 6px;
+  overflow: hidden;
+  color: var(--product-card-text);
+  font-size: var(--product-card-title-size);
+  font-weight: 700;
+  line-height: 1.75;
+  text-align: right;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+}
+
+#favoritesView .favorite-item-card > p {
+  padding-right: 20px;
+  padding-left: 20px;
+}
+
+#favoritesView .favorite-item-card > p {
+  display: flex;
+  min-height: 58px;
+  margin: auto 0 8px;
+  align-items: center;
+  color: var(--product-card-price);
+  font-size: var(--product-card-price-size);
+  font-weight: 700;
+  line-height: 1.7;
+  text-align: right;
+}
+
+#favoritesView .favorite-item-card .list-remove-button {
+  width: calc(100% - 32px);
+  min-height: 48px;
+  margin: 0 16px 16px;
+  border-radius: 10px;
+  font-size: var(--product-card-button-size);
+}
+
+#favoritesView .price-old,
+.product-price-deal .price-old,
+.product-detail-sale-meta .price-old,
+.inner-page main .search-product .price-old,
+#productView .product-detail-related-card .product-info > p .price-old {
+  text-decoration-thickness: 1px;
+}
+
 /* Shared overlay controls. Their visual centers sit on the same baseline. */
 .product-card .product-image > :is(.badge-best, .badge-new, .badge-offer),
 .search-product.product-card .search-product-image > span {

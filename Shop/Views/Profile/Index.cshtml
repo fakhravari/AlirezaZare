@@ -1,24 +1,62 @@
 @model PageModel
 
 @{
-    var profileSection = Context.Request.Path.Value?.TrimEnd('/').Split('/').LastOrDefault();
+    var profileSection = Context.Request.Path.Value?.TrimEnd('/').Split('/').LastOrDefault()?.ToLowerInvariant();
     var profileTitle = profileSection switch
     {
-        "Orders" => "سفارش‌های من",
-        "Addresses" => "آدرس‌های من",
-        "Favorites" => "علاقه‌مندی‌ها",
+        "orders" => "سفارش‌های من",
+        "addresses" => "آدرس‌های من",
+        "favorites" => "علاقه‌مندی‌ها",
         _ => "پروفایل من"
+    };
+    var profileDescription = profileSection switch
+    {
+        "orders" => "وضعیت سفارش‌ها و سوابق خریدتان را یک‌جا دنبال کنید.",
+        "addresses" => "نشانی‌های تحویل را مدیریت کنید تا خرید بعدی ساده‌تر باشد.",
+        "favorites" => "محصول‌های ذخیره‌شده را مرور کنید و برای خرید مقایسه‌شان کنید.",
+        _ => "اطلاعات حساب و فعالیت‌های خریدتان را از اینجا مدیریت کنید."
     };
     var profileIcon = profileSection switch
     {
-        "Orders" => "bi-bag-check",
-        "Addresses" => "bi-geo-alt",
-        "Favorites" => "bi-heart",
+        "orders" => "bi-bag-check",
+        "addresses" => "bi-geo-alt",
+        "favorites" => "bi-heart",
         _ => "bi-person"
     };
 }
 
 <main class="flow-main container">
+<header class="account-welcome">
+    <div class="account-welcome-copy">
+        <span class="account-welcome-brand">حساب کاربری شما</span>
+        <h1>@profileTitle</h1>
+        <p>@profileDescription</p>
+        <div class="account-welcome-links">
+            @if (profileSection == "orders")
+            {
+                <a asp-controller="Tracking" asp-action="Index"><i class="bi bi-geo-alt" aria-hidden="true"></i> پیگیری سفارش <i class="bi bi-arrow-left" aria-hidden="true"></i></a>
+            }
+            else if (profileSection == "addresses")
+            {
+                <button type="button" data-open-address><i class="bi bi-plus-lg" aria-hidden="true"></i> افزودن آدرس جدید</button>
+            }
+            else if (profileSection == "favorites")
+            {
+                <a href="/search"><i class="bi bi-search" aria-hidden="true"></i> جست‌وجوی محصولات <i class="bi bi-arrow-left" aria-hidden="true"></i></a>
+            }
+            else
+            {
+                <a asp-controller="Profile" asp-action="Orders"><i class="bi bi-bag-check" aria-hidden="true"></i> مشاهده سفارش‌ها <i class="bi bi-arrow-left" aria-hidden="true"></i></a>
+            }
+        </div>
+    </div>
+    <div class="account-welcome-art" aria-hidden="true">
+        <span class="account-welcome-tool-icon">
+            <i class="bi bi-tools"></i>
+        </span>
+        <span>ابزار و تجهیزات برقی</span>
+    </div>
+</header>
 <nav class="cart-breadcrumb profile-breadcrumb" aria-label="مسیر صفحه">
     <ol>
         <li>
@@ -26,7 +64,7 @@
                 <i class="bi bi-house-door" aria-hidden="true"></i><span>خانه</span>
             </a>
         </li>
-        @if (profileSection is "Orders" or "Addresses" or "Favorites")
+        @if (profileSection is "orders" or "addresses" or "favorites")
         {
             <li class="profile-breadcrumb-parent">
                 <i class="bi bi-chevron-left" aria-hidden="true"></i>
@@ -41,23 +79,6 @@
         </li>
     </ol>
 </nav>
-<header class="account-welcome">
-    <div class="account-welcome-copy">
-        <span class="account-welcome-brand">کمپانی علی‌رضا زارع</span>
-        <h1>حساب کاربری</h1>
-        <p>فضای شخصی شما؛ برای پیگیری هر انتخاب ماندگار.</p>
-        <div class="account-welcome-links">
-            <a asp-controller="Profile" asp-action="Orders"><i class="bi bi-bag-check" aria-hidden="true"></i> سفارش‌های من <i class="bi bi-arrow-left" aria-hidden="true"></i></a>
-            <a asp-controller="Profile" asp-action="Favorites"><i class="bi bi-heart" aria-hidden="true"></i> علاقه‌مندی‌ها</a>
-        </div>
-    </div>
-    <div class="account-welcome-art" aria-hidden="true">
-        <span class="account-welcome-tool-icon">
-            <i class="bi bi-tools"></i>
-        </span>
-        <span>ابزار و تجهیزات برقی</span>
-    </div>
-</header>
 <div class="account-dashboard">
 <aside class="account-sidebar">
     <div class="account-profile">
@@ -72,25 +93,25 @@
         </a>
     </div>
     <nav class="account-tabs" aria-label="بخش‌های حساب">
-        <a asp-controller="Profile" asp-action="Index">
+        <a asp-controller="Profile" asp-action="Index" aria-current="@(profileSection == "profile" ? "page" : null)">
             <i class="bi bi-person"></i>
             <span>
                 <strong>پروفایل من</strong>
             </span><i class="bi bi-chevron-left"></i>
         </a>
-        <a asp-controller="Profile" asp-action="Orders">
+        <a asp-controller="Profile" asp-action="Orders" aria-current="@(profileSection == "orders" ? "page" : null)">
             <i class="bi bi-bag-check"></i>
             <span>
                 <strong>سفارش‌های من</strong>
             </span><i class="bi bi-chevron-left"></i>
         </a>
-        <a asp-controller="Profile" asp-action="Addresses">
+        <a asp-controller="Profile" asp-action="Addresses" aria-current="@(profileSection == "addresses" ? "page" : null)">
             <i class="bi bi-geo-alt"></i>
             <span>
                 <strong>آدرس‌های من</strong>
             </span><i class="bi bi-chevron-left"></i>
         </a>
-        <a asp-controller="Profile" asp-action="Favorites">
+        <a asp-controller="Profile" asp-action="Favorites" aria-current="@(profileSection == "favorites" ? "page" : null)">
             <i class="bi bi-heart"></i>
             <span>
                 <strong>علاقه‌مندی‌ها</strong>
@@ -105,7 +126,7 @@
     </div>
 </aside>
 <div class="account-content">
-<section id="overview" class="account-section account-overview">
+<section id="overview" class="account-section account-overview" hidden="@(profileSection == "profile" ? null : "hidden")">
     <div class="overview-heading">
         <i class="bi bi-grid-1x2" aria-hidden="true"></i>
         <div>
@@ -171,7 +192,7 @@
         </article>
     </div>
 </section>
-<section id="orders" class="account-section">
+<section id="orders" class="account-section" hidden="@(profileSection == "orders" ? null : "hidden")">
 <div class="orders-heading">
     <div>
         <span>تاریخچه خرید</span>
@@ -249,7 +270,7 @@
         </div>
     </div>
     <footer>
-        <span><i class="bi bi-calendar-check"></i> تحویل در ۲ شهریور</span><a href="/products/5">خرید مجدد <i class="bi bi-arrow-left"></i></a>
+        <span><i class="bi bi-calendar-check"></i> تحویل در ۲ شهریور</span><a href="/products/electric-hammer-drill-with-keyless-chuck-5">خرید مجدد <i class="bi bi-arrow-left"></i></a>
     </footer>
 </article>
 <article class="profile-order-card">
@@ -272,7 +293,7 @@
         </div>
     </div>
     <footer>
-        <span><i class="bi bi-check2-circle"></i> سفارش با موفقیت تحویل شد</span><a href="/products/3">خرید مجدد <i class="bi bi-arrow-left"></i></a>
+        <span><i class="bi bi-check2-circle"></i> سفارش با موفقیت تحویل شد</span><a href="/products/electric-hammer-drill-3">خرید مجدد <i class="bi bi-arrow-left"></i></a>
     </footer>
 </article>
 <article class="profile-order-card">
@@ -295,7 +316,7 @@
         </div>
     </div>
     <footer>
-        <span><i class="bi bi-check2-circle"></i> سفارش با موفقیت تحویل شد</span><a href="/products/1">خرید مجدد <i class="bi bi-arrow-left"></i></a>
+        <span><i class="bi bi-check2-circle"></i> سفارش با موفقیت تحویل شد</span><a href="/products/cordless-hammer-drill-1">خرید مجدد <i class="bi bi-arrow-left"></i></a>
     </footer>
 </article>
 <article class="profile-order-card">
@@ -318,7 +339,7 @@
         </div>
     </div>
     <footer>
-        <span><i class="bi bi-check2-circle"></i> سفارش با موفقیت تحویل شد</span><a href="/products/5">خرید مجدد <i class="bi bi-arrow-left"></i></a>
+        <span><i class="bi bi-check2-circle"></i> سفارش با موفقیت تحویل شد</span><a href="/products/electric-hammer-drill-with-keyless-chuck-5">خرید مجدد <i class="bi bi-arrow-left"></i></a>
     </footer>
 </article>
 <article class="profile-order-card">
@@ -341,7 +362,7 @@
         </div>
     </div>
     <footer>
-        <span><i class="bi bi-check2-circle"></i> سفارش با موفقیت تحویل شد</span><a href="/products/2">خرید مجدد <i class="bi bi-arrow-left"></i></a>
+        <span><i class="bi bi-check2-circle"></i> سفارش با موفقیت تحویل شد</span><a href="/products/cordless-drill-driver-2">خرید مجدد <i class="bi bi-arrow-left"></i></a>
     </footer>
 </article>
 <article class="profile-order-card">
@@ -364,7 +385,7 @@
         </div>
     </div>
     <footer>
-        <span><i class="bi bi-check2-circle"></i> سفارش با موفقیت تحویل شد</span><a href="/products/3">خرید مجدد <i class="bi bi-arrow-left"></i></a>
+        <span><i class="bi bi-check2-circle"></i> سفارش با موفقیت تحویل شد</span><a href="/products/electric-hammer-drill-3">خرید مجدد <i class="bi bi-arrow-left"></i></a>
     </footer>
 </article>
 <article class="profile-order-card">
@@ -387,7 +408,7 @@
         </div>
     </div>
     <footer>
-        <span><i class="bi bi-check2-circle"></i> سفارش با موفقیت تحویل شد</span><a href="/products/1">خرید مجدد <i class="bi bi-arrow-left"></i></a>
+        <span><i class="bi bi-check2-circle"></i> سفارش با موفقیت تحویل شد</span><a href="/products/cordless-hammer-drill-1">خرید مجدد <i class="bi bi-arrow-left"></i></a>
     </footer>
 </article>
 <article class="profile-order-card">
@@ -410,18 +431,18 @@
         </div>
     </div>
     <footer>
-        <span><i class="bi bi-check2-circle"></i> سفارش با موفقیت تحویل شد</span><a href="/products/5">خرید مجدد <i class="bi bi-arrow-left"></i></a>
+        <span><i class="bi bi-check2-circle"></i> سفارش با موفقیت تحویل شد</span><a href="/products/electric-hammer-drill-with-keyless-chuck-5">خرید مجدد <i class="bi bi-arrow-left"></i></a>
     </footer>
 </article>
 </div>
 </section>
-<section id="addresses" class="account-section">
+<section id="addresses" class="account-section" hidden="@(profileSection == "addresses" ? null : "hidden")">
     <div class="account-section-heading">
         <h2>آدرس‌های من</h2><button id="newAddress" class="flow-button" type="button"><i class="bi bi-plus-lg"></i> آدرس جدید</button>
     </div>
     <div id="addressList"></div>
 </section>
-<section id="favorites" class="account-section">
+<section id="favorites" class="account-section" hidden="@(profileSection == "favorites" ? null : "hidden")">
     <h2>لیست علاقه‌مندی‌ها</h2>
     <div id="favoritesView"></div>
 </section>

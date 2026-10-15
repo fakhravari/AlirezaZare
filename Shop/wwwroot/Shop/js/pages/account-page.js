@@ -85,6 +85,9 @@ document.addEventListener("DOMContentLoaded", () => {
     document.documentElement.classList.add("address-modal-open");
   }
   document.querySelector("#newAddress").onclick = () => openAddress();
+  document
+    .querySelectorAll("[data-open-address]")
+    .forEach((button) => button.addEventListener("click", () => openAddress()));
   document.querySelector("#closeAddress").onclick = () => dialog.close();
   dialog.addEventListener("close", () => {
     document.documentElement.classList.remove("address-modal-open");

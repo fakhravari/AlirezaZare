@@ -2019,9 +2019,34 @@ $(function () {
     ".product-card, .showcase-card, .rail-card, .featured-main, .featured-side, .favorite-item-card";
   const normalizeProductLinks = (root) => {
     const links = [];
-    if (root.matches?.("a[href]")) links.push(root);
-    links.push(...(root.querySelectorAll?.("a[href]") || []));
-    links.forEach((link) => {
+    const pageTargets = [];
+    if (root.matches?.("a[href], form[action]")) pageTargets.push(root);
+    pageTargets.push(...(root.querySelectorAll?.("a[href], form[action]") || []));
+    pageTargets.forEach((target) => {
+      const attribute = target.matches("form") ? "action" : "href";
+      const value = target.getAttribute(attribute) || "";
+      if (!value || value.startsWith("#") || value.startsWith("?")) return;
+      const legacyProductId = value.match(/^\/?Product\?id=(\d+)(?:&|$)/i)?.[1];
+      if (legacyProductId) {
+        const productUrl = window.HNProductUrl?.(legacyProductId);
+        if (productUrl) target.setAttribute(attribute, productUrl);
+        return;
+      }
+      const isRootRelative = value.startsWith("/");
+      const firstSegment = value.split(/[/?#]/, 1)[0];
+      if (!isRootRelative && !/^[A-Z]/.test(firstSegment)) return;
+      const url = new URL(value, window.location.origin);
+      if (url.origin !== window.location.origin) return;
+      if (/\.[a-z\d]{1,8}$/i.test(url.pathname)) return;
+      target.setAttribute(
+        attribute,
+        `${url.pathname.toLowerCase()}${url.search}${url.hash}`,
+      );
+    });
+    const productLinks = [];
+    if (root.matches?.("a[href]")) productLinks.push(root);
+    productLinks.push(...(root.querySelectorAll?.("a[href]") || []));
+    productLinks.forEach((link) => {
       const href = link.getAttribute("href") || "";
       const productId =
         href.match(/^\/?Product\?id=(\d+)(?:&|$)/i)?.[1] ||
@@ -2031,6 +2056,18 @@ $(function () {
     });
   };
   normalizeProductLinks(document);
+  document.addEventListener(
+    "click",
+    (event) => {
+      const link = event.target.closest?.("a[href]");
+      if (link) normalizeProductLinks(link);
+    },
+    true,
+  );
+  document.addEventListener("submit", (event) => {
+    if (event.target instanceof HTMLFormElement)
+      normalizeProductLinks(event.target);
+  }, true);
   const detailHrefForCard = (card) => {
     const productLink = [...card.querySelectorAll("a[href]")].find((link) => {
       const url = new URL(link.href, window.location.href);
