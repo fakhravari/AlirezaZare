@@ -58,7 +58,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const p = catalog.find((p) => name.textContent.trim().includes(p.name));
       if (p) {
         const a = document.createElement("a");
-        a.href = `Product?id=${p.id}`;
+        a.href = window.HNProductUrl(p);
         a.textContent = name.textContent;
         name.replaceChildren(a);
       }
@@ -73,7 +73,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   const productView = document.querySelector("#productView");
   if (productView) {
-    const productId = Number(location.pathname.match(/^\/products\/(\d+)\/?$/i)?.[1]);
+    const productId = Number(location.pathname.match(/(?:^|\/)(?:[a-z0-9-]+-)?(\d+)\/?$/i)?.[1]);
     const p = catalog.find((p) => p.id === productId);
     if (!p) productView.innerHTML = empty("محصول پیدا نشد");
     else {
@@ -1039,6 +1039,13 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!confirmed) return;
         ui.storage.set("hn-compare", "[]");
         document.dispatchEvent(new CustomEvent("hn:lists-change"));
+        window.setTimeout(() => {
+          const toast = document.querySelector("#liveToast");
+          const toastBody = toast?.querySelector(".toast-body");
+          if (!toast || !toastBody || !window.bootstrap?.Toast) return;
+          toastBody.textContent = "فهرست مقایسه با موفقیت پاک شد.";
+          window.bootstrap.Toast.getOrCreateInstance(toast).show();
+        }, 240);
       },
     );
   };

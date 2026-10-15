@@ -150,7 +150,7 @@ $(function () {
         ? `<div class="header-search-suggestions-head"><span><i class="bi bi-stars" aria-hidden="true"></i> پیشنهاد برای جستجوی شما</span><small>${faNumber(matches.length)} محصول</small></div><ul>${matches
             .map(
               (product) =>
-                `<li><a class="header-search-suggestion" role="option" href="Product?id=${encodeURIComponent(product.id)}"><span class="header-search-suggestion-image"><img src="${escapeHtml(product.image)}" alt="" loading="lazy" decoding="async"></span><span class="header-search-suggestion-copy"><strong>${escapeHtml(product.name)}</strong><small>${escapeHtml(product.brand)} <bdi>· ${escapeHtml(product.type)}</bdi></small><b>${faNumber(product.price * 1000000)} <small>تومان</small></b></span><i class="bi bi-arrow-left" aria-hidden="true"></i></a></li>`,
+                `<li><a class="header-search-suggestion" role="option" href="${window.HNProductUrl(product)}"><span class="header-search-suggestion-image"><img src="${escapeHtml(product.image)}" alt="" loading="lazy" decoding="async"></span><span class="header-search-suggestion-copy"><strong>${escapeHtml(product.name)}</strong><small>${escapeHtml(product.brand)} <bdi>· ${escapeHtml(product.type)}</bdi></small><b>${faNumber(product.price * 1000000)} <small>تومان</small></b></span><i class="bi bi-arrow-left" aria-hidden="true"></i></a></li>`,
             )
             .join(
               "",
@@ -1148,13 +1148,13 @@ $(function () {
     <div class="showcase-slide">
       <article class="showcase-card">
         <div class="product-image">
-          <a href="Product?id=${product.id}" aria-label="مشاهده ${escapeHtml(product.name)}">
+          <a href="${window.HNProductUrl(product)}" aria-label="مشاهده ${escapeHtml(product.name)}">
             <img loading="lazy" decoding="async" src="${escapeHtml(product.image)}" alt="${escapeHtml(product.name)}">
           </a>
           ${product.badge ? `<span class="badge-best">${escapeHtml(product.badge)}</span>` : ""}
         </div>
         <div class="showcase-card-body">
-          <h3><a class="showcase-product-detail" href="Product?id=${product.id}">${escapeHtml(product.name)}</a></h3>
+          <h3><a class="showcase-product-detail" href="${window.HNProductUrl(product)}">${escapeHtml(product.name)}</a></h3>
           <strong>${faNumber(product.price * 1000000)} تومان</strong>
           <button type="button" class="add-cart" data-id="${product.id}" data-name="${escapeHtml(product.name)}" data-price="${product.price * 1000000}" data-image="${escapeHtml(product.image)}">
             <i class="bi bi-bag-plus"></i> افزودن به سبد
@@ -1165,7 +1165,7 @@ $(function () {
   const railCardMarkup = (product) => `
     <article class="rail-card">
       <div class="rail-image">
-        <a href="Product?id=${product.id}" aria-label="مشاهده ${escapeHtml(product.name)}">
+        <a href="${window.HNProductUrl(product)}" aria-label="مشاهده ${escapeHtml(product.name)}">
           <img loading="lazy" decoding="async" src="${escapeHtml(product.image)}" alt="${escapeHtml(product.name)}">
         </a>
         ${product.badge ? `<span>${escapeHtml(product.badge)}</span>` : ""}
@@ -2022,15 +2022,19 @@ $(function () {
     if (root.matches?.("a[href]")) links.push(root);
     links.push(...(root.querySelectorAll?.("a[href]") || []));
     links.forEach((link) => {
-      const productId = link.getAttribute("href")?.match(/^\/?Product\?id=(\d+)(?:&|$)/i)?.[1];
-      if (productId) link.setAttribute("href", `/products/${productId}`);
+      const href = link.getAttribute("href") || "";
+      const productId =
+        href.match(/^\/?Product\?id=(\d+)(?:&|$)/i)?.[1] ||
+        href.match(/^\/?products\/(\d+)\/?$/i)?.[1];
+      const productUrl = productId && window.HNProductUrl?.(productId);
+      if (productUrl) link.setAttribute("href", productUrl);
     });
   };
   normalizeProductLinks(document);
   const detailHrefForCard = (card) => {
     const productLink = [...card.querySelectorAll("a[href]")].find((link) => {
       const url = new URL(link.href, window.location.href);
-      return /\/products\/\d+\/?$/i.test(url.pathname) || (/\/Product\/?$/i.test(url.pathname) && url.searchParams.has("id"));
+      return /\/products\/[a-z0-9-]+-\d+\/?$/i.test(url.pathname) || /\/products\/\d+\/?$/i.test(url.pathname) || (/\/Product\/?$/i.test(url.pathname) && url.searchParams.has("id"));
     });
     if (productLink) return productLink.href;
     const cartButton = card.querySelector(".add-cart[data-id]");
@@ -2041,7 +2045,7 @@ $(function () {
         String(item.id) === productId ||
         (productName && item.name === productName),
     );
-    return product ? `/products/${encodeURIComponent(product.id)}` : "";
+    return product ? window.HNProductUrl?.(product) || "" : "";
   };
   const markDetailCards = (root = document) => {
     const cards = [];

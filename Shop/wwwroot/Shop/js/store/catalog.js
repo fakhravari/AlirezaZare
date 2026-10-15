@@ -934,3 +934,19 @@ window.HNProducts = productCatalog.map((entry, i) => {
     badge: i % 7 === 0 ? "پرفروش" : i % 5 === 0 ? "جدید" : "",
   };
 });
+
+window.HNProductUrl = (productOrId) => {
+  const products = window.HNProducts || [];
+  const product =
+    typeof productOrId === "object"
+      ? productOrId
+      : products.find((item) => String(item.id) === String(productOrId));
+  const id = Number(product?.id ?? productOrId);
+  if (!Number.isInteger(id) || id < 1) return "/Search";
+  const slug = String(product?.englishName || product?.name || "product")
+    .normalize("NFKD")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  return `/products/${slug || "product"}-${id}`;
+};

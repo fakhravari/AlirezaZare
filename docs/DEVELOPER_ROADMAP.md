@@ -38,7 +38,7 @@
 |---|---|---|
 | خانه | `/` | `HomeController` → `Views/Home/Index.cshtml` |
 | جستجو و فهرست محصول | `/Search` | `ProductController.Index` → `Views/Product/List.cshtml` |
-| جزئیات محصول | `/products/{id}` (آدرس قبلی `/Product?id=…` با ۳۰۱ هدایت می‌شود) | `ProductController.Details` → `Views/Product/Details.cshtml`؛ رندر جزئیات و تعامل محصول عمدتاً در `js/store/commerce.js` |
+| جزئیات محصول | `/products/{slug}-{id}` (مسیرهای قبلی `/products/{id}` و `/Product?id=…` با ۳۰۱ هدایت می‌شوند) | `ProductController.Details` → `Views/Product/Details.cshtml`؛ ساخت slug در `store/catalog.js` و لینک‌دهی عمومی در `layout/main.js`؛ رندر جزئیات در `store/commerce.js` |
 | سبد و تسویه | `/Cart`, `/Checkout` | `CartController`, `CheckoutController` و Viewهای هم‌نام |
 | مقایسه و علاقه‌مندی | `/Compare`, `/Favorites` | Controller و Viewهای هم‌نام؛ state محلی با کدهای store |
 | پروفایل | `/Account` (هدایت سازگاری به پروفایل), `/Profile`, `/Profile/Orders`, `/Profile/Addresses`, `/Profile/Favorites` | `AccountController` فقط alias سازگاری است؛ صفحه‌ها در `ProfileController` و `Views/Profile/Index.cshtml` رندر می‌شوند |
@@ -131,7 +131,7 @@ Routeهای attribute-based مانند `Profile` و `Magazine` را کنار rou
 |---|---|---|
 | `/` خانه | `Views/Home/Index.cshtml` | CSS اختصاصیِ لینک‌شده در خود View ندارد؛ از لایه‌های عمومی و پوسته استفاده می‌کند |
 | `/Search` جستجو | `Views/Product/List.cshtml` | `pages/search.css` |
-| `/products/{id}` جزئیات محصول | `Views/Product/Details.cshtml` | `pages/pages.css`؛ بخش عمدهٔ UI فروشگاهی از `store/commerce.css` است |
+| `/products/{slug}-{id}` جزئیات محصول | `Views/Product/Details.cshtml` | `pages/pages.css`؛ بخش عمدهٔ UI فروشگاهی از `store/commerce.css` است |
 | `/Cart` سبد | `Views/Cart/Index.cshtml` | `pages/checkout.css`, `pages/form-confirm-dialog.css`, `pages/pages.css` |
 | `/Checkout` تسویه | `Views/Checkout/Index.cshtml` | `pages/checkout.css`, `pages/pages.css` |
 | `/Compare` مقایسه | `Views/Compare/Index.cshtml` | `pages/pages.css` |
@@ -223,7 +223,7 @@ Routeهای attribute-based مانند `Profile` و `Magazine` را کنار rou
 |---|---|---|
 | `/` خانه | موردی در `@section Scripts` ندارد | `layout/main.js`, `store/commerce.js`, `core/electrical-content.js` |
 | `/Search` | `pages/search.js` | `HNProducts` از `store/catalog.js`، تعامل‌های cart/list از `commerce.js` |
-| `/products/{id}` | `pages/page-content.js` | رندر/variant/accessory/gallery/feedback محصول در `store/commerce.js` |
+| `/products/{slug}-{id}` | `pages/page-content.js` | خواندن شناسه از انتهای slug و رندر/variant/accessory/gallery/feedback در `store/commerce.js` |
 | `/Cart` | `form-confirm-dialog.js`, `address-fields.js`, `checkout.js`, `iran-places.js`, `page-content.js` | cart state/render در `commerce.js` |
 | `/Checkout` | `checkout.js`, `page-content.js` | cart state در `commerce.js` |
 | `/Compare`, `/Favorites` | `page-content.js` | رندر و state مقایسه/علاقه‌مندی در `commerce.js` |
@@ -263,7 +263,7 @@ dotnet build Shop.sln
 dotnet run --project Shop/Shop.csproj --no-launch-profile --urls http://localhost:5100
 ```
 
-درخواست‌های صفحه‌ای نمونه برای بررسی دستی: `/`, `/Search`, `/products/1`, `/Cart`, `/Checkout`, `/Compare`, `/Profile`, `/Profile/Orders`, `/Profile/Favorites`, `/Magazine`.
+درخواست‌های صفحه‌ای نمونه برای بررسی دستی: `/`, `/Search`, `/products/cordless-hammer-drill-1`, `/Cart`, `/Checkout`, `/Compare`, `/Profile`, `/Profile/Orders`, `/Profile/Favorites`, `/Magazine`.
 
 - در تغییر CSS/JS دست‌کم صفحهٔ هدف، یک صفحهٔ دیگر با همان component مشترک و اندازهٔ موبایل را بررسی کنید.
 - در تغییر route/controller مدل، `dotnet build Shop.sln` را اجرا کنید.
