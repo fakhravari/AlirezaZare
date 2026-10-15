@@ -1012,10 +1012,10 @@ document.addEventListener("DOMContentLoaded", () => {
         ["مورد استفاده", product.useCase || product.strap || "کارگاهی"],
         ...(product.detail?.specs || []).slice(0, 3),
       ];
-      return `<article class="compare-product-card"><div class="compare-card-top"><span>گزینهٔ ${fa(index + 1)}</span><button class="compare-remove-icon" type="button" data-compare-remove-page="${esc(product.id)}" aria-label="حذف ${esc(product.name)} از مقایسه"><i class="bi bi-trash3" aria-hidden="true"></i></button></div><a class="compare-product-link" href="Product?id=${encodeURIComponent(product.id)}"><div class="compare-product-image"><img src="${esc(product.image)}" alt="${esc(product.name)}" loading="lazy"></div><div class="compare-product-meta"><span>${esc(product.brand || "برند منتخب")}</span><small><i class="bi bi-grid-3x3-gap" aria-hidden="true"></i>${esc(product.type || "ابزار و تجهیزات")}</small></div><h2>${esc(product.name)}</h2></a><div class="compare-price"><small>قیمت محصول</small><div class="compare-price-values${Number(product.discountPercent) > 0 ? " has-discount" : ""}">${salePriceMarkup(product)}</div></div><h3 class="compare-spec-title"><i class="bi bi-list-check" aria-hidden="true"></i>مشخصات قابل بررسی</h3><dl>${specs.map(([label, value]) => `<div><dt>${esc(label)}</dt><dd>${esc(value)}</dd></div>`).join("")}</dl><a class="compare-detail-link" href="Product?id=${encodeURIComponent(product.id)}">جزئیات محصول<i class="bi bi-arrow-left" aria-hidden="true"></i></a></article>`;
+      return `<article class="compare-product-card"><div class="compare-card-top"><span>گزینهٔ ${fa(index + 1)}</span><button class="compare-remove-icon" type="button" data-compare-remove-page="${esc(product.id)}" aria-label="حذف ${esc(product.name)} از مقایسه"><i class="bi bi-trash3" aria-hidden="true"></i></button></div><div class="compare-product-image"><img src="${esc(product.image)}" alt="${esc(product.name)}" loading="lazy"></div><div class="compare-product-meta"><span>${esc(product.brand || "برند منتخب")}</span><small><i class="bi bi-grid-3x3-gap" aria-hidden="true"></i>${esc(product.type || "ابزار و تجهیزات")}</small></div><h2><a class="compare-product-link" href="Product?id=${encodeURIComponent(product.id)}">${esc(product.name)}</a></h2><div class="compare-price"><small>قیمت محصول</small><div class="compare-price-values${Number(product.discountPercent) > 0 ? " has-discount" : ""}">${salePriceMarkup(product)}</div></div><h3 class="compare-spec-title"><i class="bi bi-list-check" aria-hidden="true"></i>مشخصات قابل بررسی</h3><dl>${specs.map(([label, value]) => `<div><dt>${esc(label)}</dt><dd>${esc(value)}</dd></div>`).join("")}</dl><a class="compare-detail-link" href="Product?id=${encodeURIComponent(product.id)}">جزئیات محصول<i class="bi bi-arrow-left" aria-hidden="true"></i></a></article>`;
     };
     view.innerHTML = list.length
-      ? `<header class="compare-overview"><span class="compare-overview-icon"><i class="bi bi-columns-gap" aria-hidden="true"></i></span><span class="compare-overview-copy"><strong>مقایسهٔ دسته‌بندی‌شدهٔ محصولات</strong><small>هر گروه را جداگانه بررسی کنید تا انتخاب دقیق‌تری داشته باشید.</small></span><b>${fa(list.length)} محصول · ${fa(groups.size)} گروه</b><a href="Search"><i class="bi bi-plus-lg" aria-hidden="true"></i>افزودن محصول</a></header><div class="compare-category-groups">${[...groups.entries()].map(([category, products]) => `<section class="compare-category-group" aria-label="مقایسهٔ ${esc(category)}"><header class="compare-category-heading"><span class="compare-category-icon"><i class="bi ${groupIcons[category] || "bi-grid"}" aria-hidden="true"></i></span><span><strong>${esc(category)}</strong><small>مقایسهٔ محصولات هم‌دسته</small></span><b>${fa(products.length)} محصول</b></header><div class="compare-product-grid">${products.map(renderCard).join("")}</div></section>`).join("")}</div>`
+      ? `<header class="compare-overview"><span class="compare-overview-icon"><i class="bi bi-columns-gap" aria-hidden="true"></i></span><span class="compare-overview-copy"><strong>مقایسهٔ دسته‌بندی‌شدهٔ محصولات</strong><small>هر گروه را جداگانه بررسی کنید تا انتخاب دقیق‌تری داشته باشید.</small></span><b>${fa(list.length)} محصول · ${fa(groups.size)} گروه</b><button class="compare-clear-all" type="button" data-compare-clear-all><i class="bi bi-trash3" aria-hidden="true"></i>حذف همه</button></header><div class="compare-category-groups">${[...groups.entries()].map(([category, products]) => `<section class="compare-category-group" aria-label="مقایسهٔ ${esc(category)}"><header class="compare-category-heading"><span class="compare-category-icon"><i class="bi ${groupIcons[category] || "bi-grid"}" aria-hidden="true"></i></span><span><strong>${esc(category)}</strong><small>مقایسهٔ محصولات هم‌دسته</small></span><b>${fa(products.length)} محصول</b></header><div class="compare-product-grid">${products.map(renderCard).join("")}</div></section>`).join("")}</div>`
       : `<div class="compare-empty"><i class="bi bi-columns-gap" aria-hidden="true"></i><h2>هنوز محصولی برای مقایسه انتخاب نکرده‌اید</h2><p>از آیکن مقایسه روی کارت محصولات استفاده کنید تا مشخصاتشان اینجا کنار هم نمایش داده شود.</p><a class="flow-button" href="Search">انتخاب محصولات <i class="bi bi-arrow-left" aria-hidden="true"></i></a></div>`;
     view.querySelectorAll("[data-compare-remove-page]").forEach(
       (button) =>
@@ -1027,6 +1027,19 @@ document.addEventListener("DOMContentLoaded", () => {
           ui.storage.set("hn-compare", JSON.stringify(next));
           renderCompare();
         }),
+    );
+    view.querySelector("[data-compare-clear-all]")?.addEventListener(
+      "click",
+      async () => {
+        const confirmed = await window.confirmFormSubmission?.({
+          title: "حذف همهٔ محصولات مقایسه؟",
+          message: "فهرست مقایسه پاک می‌شود و این محصولات دیگر در این صفحه نمایش داده نمی‌شوند.",
+          confirmText: "بله، حذف همه",
+        });
+        if (!confirmed) return;
+        ui.storage.set("hn-compare", "[]");
+        document.dispatchEvent(new CustomEvent("hn:lists-change"));
+      },
     );
   };
   renderCompare();
