@@ -2016,7 +2016,7 @@ $(function () {
       .forEach(decorateProductCard);
   };
   const detailCardSelector =
-    ".product-card, .showcase-card, .rail-card, .featured-main, .featured-side, .favorite-item-card, .compare-product-card";
+    ".product-card, .showcase-card, .rail-card, .featured-main, .featured-side, .favorite-item-card";
   const normalizeProductLinks = (root) => {
     const links = [];
     if (root.matches?.("a[href]")) links.push(root);
