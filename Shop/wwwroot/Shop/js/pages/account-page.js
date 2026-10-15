@@ -92,6 +92,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   form.onsubmit = (e) => {
     e.preventDefault();
+    if (!form.reportValidity()) return;
     const address = Object.fromEntries(
       [...new FormData(form)].map(([k, v]) => [k, v.trim()]),
     );
@@ -100,7 +101,11 @@ document.addEventListener("DOMContentLoaded", () => {
         "همه فیلدها را کامل کنید.";
       return;
     }
-    address.id = editing || crypto.randomUUID();
+    address.phone = ui.toEnglishDigits(address.phone).replace(/\D/g, "");
+    address.postal = ui.toEnglishDigits(address.postal).replace(/\D/g, "");
+    address.id = editing ||
+      (window.crypto?.randomUUID?.() ??
+        `address-${Date.now()}-${Math.random().toString(36).slice(2)}`);
     const addresses = read(addressKey);
     const next = editing
       ? addresses.map((a) => (a.id === editing ? address : a))

@@ -1695,7 +1695,8 @@ summary:focus-visible {
   color: #142e51;
 }
 .compare-product-grid {
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 270px), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 270px), min(100%, 340px)));
+  justify-content: start;
   align-items: stretch;
   gap: 16px;
 }
@@ -1906,7 +1907,7 @@ summary:focus-visible {
   white-space: nowrap;
 }
 .compare-category-group .compare-product-grid {
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 270px), min(100%, 340px)));
 }
 
 @media (max-width: 575px) {

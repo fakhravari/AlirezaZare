@@ -320,8 +320,10 @@ $(function () {
           ?.getAttribute("src") ||
         "Shop/images/products/tool-hammer-drill.png",
       type: "مشخصات محصول",
+      powerSource: "مطابق مشخصات کالا",
+      useCase: "مطابق اطلاعات کالا",
       movement: "مطابق مشخصات کالا",
-      strap: "مطابق اطلاعات سازنده",
+      strap: "مطابق اطلاعات کالا",
     };
     window.HNUI.storage.set("hn-product-cache", JSON.stringify(cache));
   };
@@ -1953,8 +1955,10 @@ $(function () {
         : $root.find("small").first().text() || "کد محصول",
       brand: catalogProduct?.brand || "",
       type: catalogProduct?.type || "",
-      movement: catalogProduct?.movement || "",
-      strap: catalogProduct?.strap || "",
+      powerSource: catalogProduct?.powerSource || catalogProduct?.movement || "",
+      useCase: catalogProduct?.useCase || catalogProduct?.strap || "",
+      movement: catalogProduct?.powerSource || catalogProduct?.movement || "",
+      strap: catalogProduct?.useCase || catalogProduct?.strap || "",
       detail: catalogProduct?.detail || null,
     };
   };
@@ -2129,8 +2133,8 @@ $(function () {
     );
     const quickSpecs = [
       ["گروه محصول", product.type],
-      ["نوع تغذیه", product.movement],
-      ["محیط کاربرد", product.strap],
+      ["منبع تغذیه", product.powerSource || product.movement],
+      ["مورد استفاده", product.useCase || product.strap],
     ].filter(([, value]) => value);
     $("#quickViewSpecs").html(
       quickSpecs

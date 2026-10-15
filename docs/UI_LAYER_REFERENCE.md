@@ -121,7 +121,7 @@ core/ui-core.js
 | `css/pages/checkout.css` | Cart/Checkout و address dialog/form | با `commerce.css` برای قیمت/سبد تداخل دارد |
 | `css/pages/brands.css`, `contact.css`, `tracking.css` | صفحهٔ متناظر | page-root را حفظ کنید |
 | `css/pages/form-confirm-dialog.css` | تأیید فرم | فایل کوچک/minified؛ قواعد باز/بسته و overlay را جدا بررسی کنید |
-| `css/pages/profile-edit.css` | View ویرایش پروفایل | فعلاً route فعال به آن نمی‌رسد؛ Controller redirect می‌کند |
+| `/Profile/Edit` | route سازگاری؛ به `/Profile` هدایت می‌شود | View و CSS مستقل ندارد؛ ویرایش از dialog پروفایل انجام می‌شود |
 
 ### breakpointهای مشاهده‌شده
 
@@ -184,7 +184,7 @@ CSS/JS عمومی layout و store که بالاتر آمده‌اند به هم�
 | `/Compare` | `CompareController` → `Views/Compare/Index.cshtml` | `pages.css` + `commerce.css` | `page-content.js` | `main.flow-main.compare-page`; zero/one/multiple product و حذف آیتم |
 | `/Favorites` | `FavoritesController` → `Views/Favorites/Index.cshtml` | `pages.css` + `commerce.css` | `page-content.js` | `main.flow-main`, `#favoritesView`; صفر/چند کارت و حذف favorite |
 | `/Profile`, `/Profile/Orders`, `/Profile/Addresses`, `/Profile/Favorites` | `ProfileController` → `Views/Profile/Index.cshtml` | `account-page.css`, `checkout.css`, `pages.css` | `account-page.js`, `address-fields.js`, `iran-places.js`, `orders-pagination.js`, `page-content.js` | `main.flow-main`, `section.account-section`; route/hash بخش فعال، addresses، order pagination و وضعیت خالی |
-| `/Profile/Edit` | Controller فعلی redirect می‌کند | — | — | `Views/Profile/Edit.cshtml` و `profile-edit.css` در مسیر فعال استفاده نمی‌شوند؛ پیش از تغییر route را تأیید کنید |
+| `/Profile/Edit` | Controller به `/Profile` هدایت می‌کند | — | — | مسیر سازگاری؛ صفحهٔ جداگانه ندارد |
 | `/Magazine` | `MagazineController` → `Views/Magazine/Index.cshtml` | `magazine-luxury.css`, `pages.css` | `magazine.js` | `main.journal-page`, `article.journal-post`; category/filter/sort، query string، popstate و responsive floating nav |
 | `/Magazine/{slug}` | `MagazineController` → `Views/Magazine/Details.cshtml`؛ مسیر قدیمی `/Magazine/Details/{slug}` به مسیر جدید هدایت می‌شود | `article-details.css`, `pages.css` | `article-details.js`, `page-content.js` | `main.article-page`, `article.article-body`, `section.article-section`; TOC، progress، checklist، print/share |
 | `/About` | `AboutController` → `Views/About/Index.cshtml` | `pages.css` | `page-content.js` | hero/breadcrumb و `page-section`; لینک/CTA و sectionهای داینامیک را بررسی کنید |
@@ -345,7 +345,7 @@ CSS/JS عمومی layout و store که بالاتر آمده‌اند به هم�
 - توکن‌های legacy و canonical هم‌زمان حضور دارند؛ نام alias همیشه معنای ظاهری مورد انتظار را نمی‌رساند.
 - مرزهای responsive هم‌پوشان‌اند و در چند فایل مقدارهای 380/389/390، 991/991.98/992 و مرزهای صفحه‌ای وجود دارد.
 - بعضی CSS/JSها در مخزن هستند ولی از layout جاری load نمی‌شوند؛ قبل از فعال‌سازی یا حذف، ارجاع و runtime را بررسی کنید.
-- `profile-edit.css` و View مربوطه فعلاً در مسیر فعال نیستند؛ route redirect دارد.
+- `/Profile/Edit` فقط مسیر سازگاری است و به `/Profile` هدایت می‌شود؛ View و CSS مستقل ندارد.
 - catalog، profile/auth، favorite/compare، address، coupon و payment عمدتاً demo/localStorage هستند؛ به‌عنوان backend واقعی معرفی نشوند.
 - solution پروژهٔ تست مستقل ندارد؛ مستندسازی/بازبینی runtime جای ادعای تست خودکار را نمی‌گیرد.
 - سند باید با هر تغییر route، partial، ترتیب asset، event یا storage key به‌روز شود؛ اطلاعات منسوخ از راهنمای «کامل» بدتر است.

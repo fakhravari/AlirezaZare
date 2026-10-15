@@ -16,9 +16,9 @@
   const filterFields = {
     brand: { fa: "برند", en: "Brand", slug: "brand" },
     type: { fa: "گروه محصول", en: "Product group", slug: "product-group" },
-    movement: { fa: "نوع تغذیه", en: "Power type", slug: "power-type" },
+    movement: { fa: "منبع تغذیه", en: "Power source", slug: "power-source" },
     strap: {
-      fa: "محیط کاربرد",
+      fa: "مورد استفاده",
       en: "Application environment",
       slug: "application-environment",
     },
@@ -76,6 +76,7 @@
       "چراغ کارگاهی": { en: "Workshop light", slug: "workshop-light" },
       "دریل چکشی": { en: "Hammer drill", slug: "hammer-drill" },
       "دریل و پیچ‌گوشتی": { en: "Drill driver", slug: "drill-driver" },
+      "کلمپ‌متر": { en: "Clamp meter", slug: "clamp-meter" },
       فازمتر: { en: "Voltage detector", slug: "voltage-detector" },
       "مجموعه ابزار برق‌کاری": {
         en: "Electrician tool kit",
@@ -316,12 +317,12 @@
       (p) =>
         (!state.brand.size || state.brand.has(p.brand)) &&
         (!state.type.size || state.type.has(p.type)) &&
-        (!state.movement.size || state.movement.has(p.movement)) &&
-        (!state.strap.size || state.strap.has(p.strap)) &&
+        (!state.movement.size || state.movement.has(p.powerSource || p.movement)) &&
+        (!state.strap.size || state.strap.has(p.useCase || p.strap)) &&
         (!state.onlyAvailable || p.inStock !== false) &&
         p.price <= state.maxPrice &&
         (!state.query ||
-          `${p.name} ${p.brand} ${p.type} ${p.movement}`.includes(state.query)),
+          `${p.name} ${p.brand} ${p.type} ${p.powerSource || p.movement}`.includes(state.query)),
     );
     if (state.sort === "low") list.sort((a, b) => a.price - b.price);
     if (state.sort === "high") list.sort((a, b) => b.price - a.price);

@@ -9,7 +9,7 @@
 - راه‌حل: `Shop.sln`؛ پروژهٔ اجرایی: `Shop/Shop.csproj` با `Microsoft.NET.Sdk.Web` و هدف `net10.0`.
 - الگو: ASP.NET Core MVC با Controller و Razor View؛ رابط کاربری فارسی و راست‌به‌چپ است.
 - `Shop/Program.cs` فقط MVC، فایل‌های استاتیک و route پیش‌فرض را راه‌اندازی می‌کند. در ترکیب فعلی، دیتابیس، Entity Framework، سرویس دامنه، API یا احراز هویت سمت سرور ثبت نشده است.
-- بسیاری از مسیرهای Controller صرفاً View و دادهٔ نمایشی برمی‌گردانند. کاتالوگ نمونه در `Shop/wwwroot/Shop/js/store/catalog.js` است؛ محتوا و تعامل‌های سبد، علاقه‌مندی، مقایسه و بخشی از حساب در مرورگر و `localStorage` مدیریت می‌شوند.
+- بسیاری از مسیرهای Controller صرفاً View و دادهٔ نمایشی برمی‌گردانند. کاتالوگ نمونهٔ ۳۰ قلمی ابزار در `Shop/wwwroot/Shop/js/store/catalog.js` نگهداری می‌شود؛ قیمت‌ها (به میلیون تومان)، تخفیف‌ها، دیدگاه‌ها و موجودی دادهٔ واقعی فروش نیستند. توضیحات فنی در شش گروه کالایی مشترک‌اند و مشخصات مدل‌محور تا اتصال منبع دادهٔ معتبر نباید حدس زده شوند. فیلدهای روشن‌تر `powerSource` (منبع تغذیه) و `useCase` (مورد استفاده) هستند؛ `movement` و `strap` برای سازگاری با کد و داده‌های قدیمی فعلاً نگه داشته شده‌اند. محتوا و تعامل‌های سبد، علاقه‌مندی، مقایسه و بخشی از حساب در مرورگر و `localStorage` مدیریت می‌شوند.
 - نتیجه: رفتار فعلی فروشگاه را دمو/نمونه فرض کنید؛ دادهٔ `localStorage` را دادهٔ سرور، سفارش واقعی یا احراز هویت واقعی تلقی نکنید.
 
 ## ۲. نقشهٔ پوشه‌ها و مالکیت کد
@@ -137,7 +137,7 @@ Routeهای attribute-based مانند `Profile` و `Magazine` را کنار rou
 | `/Compare` مقایسه | `Views/Compare/Index.cshtml` | `pages/pages.css` |
 | `/Favorites` علاقه‌مندی | `Views/Favorites/Index.cshtml` | `pages/pages.css` |
 | `/Profile`, `/Profile/Orders`, `/Profile/Addresses`, `/Profile/Favorites` | `Views/Profile/Index.cshtml` | `pages/account-page.css`, `pages/checkout.css`, `pages/pages.css` |
-| `/Profile/Edit` | — | Controller فعلی به `/Profile` redirect می‌کند؛ `Views/Profile/Edit.cshtml` و `pages/profile-edit.css` در مسیر فعال بارگذاری نمی‌شوند |
+| `/Profile/Edit` | — | مسیر سازگاری است و به `/Profile` redirect می‌کند؛ ویرایش حساب از dialog در `Views/Profile/Index.cshtml` انجام می‌شود |
 | `/Magazine` | `Views/Magazine/Index.cshtml` | `pages/magazine-luxury.css`, `pages/pages.css` |
 | `/Magazine/{slug}` | `Views/Magazine/Details.cshtml`؛ مسیر قدیمی `/Magazine/Details/{slug}` هدایت می‌شود | `pages/article-details.css`, `pages/pages.css` |
 | `/About` | `Views/About/Index.cshtml` | `pages/pages.css` |
@@ -166,7 +166,7 @@ Routeهای attribute-based مانند `Profile` و `Magazine` را کنار rou
 | ارسال/رهگیری/ضمانت | `main.flow-main`; محتوای خدمات در کارت/فرم و `_RelatedLinks` مشترک |
 | قوانین | `main.flow-main` → `article.flow-card` → `section.legal-section` |
 | خطا | `main.container.py-5` با عنوان، توضیح و لینک بازگشت |
-| ویرایش پروفایل | `main.profile-edit-page`; View موجود است اما route فعلی redirect می‌کند و معمولاً رندر نمی‌شود |
+| ویرایش پروفایل | dialog در `Views/Profile/Index.cshtml`; `/Profile/Edit` فقط به `/Profile` redirect می‌کند |
 
 ### روند عیب‌یابی تداخل CSS
 

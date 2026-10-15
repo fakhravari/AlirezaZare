@@ -1,6 +1,6 @@
 const productCatalog = [
   [
-    "دریل چکشی شارژی حرفه‌ای سه‌نظام اتوماتیک",
+    "دریل چکشی شارژی با سه‌نظام اتوماتیک",
     "Cordless Hammer Drill",
     "Bosch",
     "دریل چکشی",
@@ -27,7 +27,7 @@ const productCatalog = [
     0,
   ],
   [
-    "دریل پیچ‌گوشتی شارژی دو‌سرعته",
+    "دریل پیچ‌گوشتی شارژی دوسرعته",
     "Two-Speed Cordless Drill Driver",
     "Ronix",
     "دریل و پیچ‌گوشتی",
@@ -45,7 +45,7 @@ const productCatalog = [
     0,
   ],
   [
-    "مولتی‌متر دیجیتال",
+    "مولتی‌متر دیجیتال دستی",
     "Digital Multimeter",
     "UNI-T",
     "مولتی‌متر دیجیتال",
@@ -72,10 +72,10 @@ const productCatalog = [
     1,
   ],
   [
-    "مولتی‌متر دیجیتال با انبر اندازه‌گیری",
-    "Digital Multimeter with Clamp Meter",
+    "کلمپ‌متر دیجیتال",
+    "Digital Clamp Meter",
     "Victor",
-    "مولتی‌متر دیجیتال",
+    "کلمپ‌متر",
     "باتری‌خور",
     "برق صنعتی",
     1,
@@ -90,7 +90,7 @@ const productCatalog = [
     1,
   ],
   [
-    "ایستگاه هویه دیجیتال هوشمند با نمایشگر دمای دقیق و پایه قابل تنظیم",
+    "ایستگاه هویه دیجیتال با کنترل دما",
     "Digital Soldering Station",
     "YIHUA",
     "ایستگاه هویه",
@@ -99,7 +99,7 @@ const productCatalog = [
     2,
   ],
   [
-    "هویه قلمی قابل تنظیم",
+    "هویه قلمی با قابلیت تنظیم دما",
     "Adjustable Soldering Iron",
     "Hakko",
     "هویه قلمی",
@@ -108,7 +108,7 @@ const productCatalog = [
     2,
   ],
   [
-    "هیتر هوای گرم تعمیرات برد",
+    "ایستگاه هیتر هوای گرم تعمیر برد",
     "Hot Air Rework Station",
     "Quick",
     "هیتر و هویه",
@@ -126,7 +126,7 @@ const productCatalog = [
     2,
   ],
   [
-    "هویه قلمی سبک کارگاهی",
+    "هویه قلمی سبک",
     "Lightweight Workshop Soldering Iron",
     "GOOT",
     "هویه قلمی",
@@ -135,7 +135,7 @@ const productCatalog = [
     2,
   ],
   [
-    "چراغ کار LED قابل‌حمل شارژی با پایه مغناطیسی و روشنایی گسترده",
+    "چراغ کار LED شارژی قابل‌حمل",
     "Portable LED Work Light",
     "Philips",
     "چراغ کارگاهی",
@@ -707,7 +707,7 @@ window.HNProducts = productCatalog.map((entry, i) => {
       ],
     },
   ];
-  const [name, englishName, brand, type, movement, strap, imageIndex] = entry;
+  const [name, englishName, brand, type, powerSource, useCase, imageIndex] = entry;
   const categoryRoots = {
     "دریل چکشی": "ابزار برقی",
     "دریل و پیچ‌گوشتی": "ابزار برقی",
@@ -734,8 +734,10 @@ window.HNProducts = productCatalog.map((entry, i) => {
     name,
     brand,
     type,
-    movement,
-    strap,
+    powerSource,
+    useCase,
+    movement: powerSource,
+    strap: useCase,
     categoryPath: [
       "ابزار و تجهیزات",
       categoryRoots[type] || "ابزار و تجهیزات",

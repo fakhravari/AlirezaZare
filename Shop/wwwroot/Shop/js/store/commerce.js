@@ -143,8 +143,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const specs = [
         ["برند", p.brand],
         ["دسته‌بندی", p.type],
-        ["نوع تغذیه", p.movement],
-        ["کاربری/ساختار", p.strap],
+        ["منبع تغذیه", p.powerSource || p.movement],
+        ["مورد استفاده", p.useCase || p.strap],
         ["شناسه محصول", `HN-${String(p.id).padStart(3, "0")}`],
         ...(p.detail?.specs || []),
       ];
@@ -1008,8 +1008,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const renderCard = (product, index) => {
       const specs = [
         ["دسته‌بندی", product.type || "ابزار و تجهیزات"],
-        ["نوع تغذیه", product.movement || "مطابق مشخصات کالا"],
-        ["کاربری", product.strap || "کارگاهی"],
+        ["منبع تغذیه", product.powerSource || product.movement || "مطابق مشخصات کالا"],
+        ["مورد استفاده", product.useCase || product.strap || "کارگاهی"],
         ...(product.detail?.specs || []).slice(0, 3),
       ];
       return `<article class="compare-product-card"><div class="compare-card-top"><span>گزینهٔ ${fa(index + 1)}</span><button class="compare-remove-icon" type="button" data-compare-remove-page="${esc(product.id)}" aria-label="حذف ${esc(product.name)} از مقایسه"><i class="bi bi-trash3" aria-hidden="true"></i></button></div><a class="compare-product-link" href="Product?id=${encodeURIComponent(product.id)}"><div class="compare-product-image"><img src="${esc(product.image)}" alt="${esc(product.name)}" loading="lazy"></div><div class="compare-product-meta"><span>${esc(product.brand || "برند منتخب")}</span><small><i class="bi bi-grid-3x3-gap" aria-hidden="true"></i>${esc(product.type || "ابزار و تجهیزات")}</small></div><h2>${esc(product.name)}</h2></a><div class="compare-price"><small>قیمت محصول</small><div class="compare-price-values${Number(product.discountPercent) > 0 ? " has-discount" : ""}">${salePriceMarkup(product)}</div></div><h3 class="compare-spec-title"><i class="bi bi-list-check" aria-hidden="true"></i>مشخصات قابل بررسی</h3><dl>${specs.map(([label, value]) => `<div><dt>${esc(label)}</dt><dd>${esc(value)}</dd></div>`).join("")}</dl><a class="compare-detail-link" href="Product?id=${encodeURIComponent(product.id)}">جزئیات محصول<i class="bi bi-arrow-left" aria-hidden="true"></i></a></article>`;

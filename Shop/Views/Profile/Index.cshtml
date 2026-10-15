@@ -72,25 +72,25 @@
         </a>
     </div>
     <nav class="account-tabs" aria-label="بخش‌های حساب">
-        <a href="Profile">
+        <a asp-controller="Profile" asp-action="Index">
             <i class="bi bi-person"></i>
             <span>
                 <strong>پروفایل من</strong>
             </span><i class="bi bi-chevron-left"></i>
         </a>
-        <a href="Profile/Orders">
+        <a asp-controller="Profile" asp-action="Orders">
             <i class="bi bi-bag-check"></i>
             <span>
                 <strong>سفارش‌های من</strong>
             </span><i class="bi bi-chevron-left"></i>
         </a>
-        <a href="Profile/Addresses">
+        <a asp-controller="Profile" asp-action="Addresses">
             <i class="bi bi-geo-alt"></i>
             <span>
                 <strong>آدرس‌های من</strong>
             </span><i class="bi bi-chevron-left"></i>
         </a>
-        <a href="Profile/Favorites">
+        <a asp-controller="Profile" asp-action="Favorites">
             <i class="bi bi-heart"></i>
             <span>
                 <strong>علاقه‌مندی‌ها</strong>
@@ -100,7 +100,7 @@
     <div class="account-sidebar-help">
         <i class="bi bi-headset"></i>
         <div>
-            <strong>نیاز به راهنمایی دارید؟</strong><a href="Contact">ارتباط با پشتیبانی</a>
+            <strong>نیاز به راهنمایی دارید؟</strong><a asp-controller="Contact" asp-action="Index">ارتباط با پشتیبانی</a>
         </div>
     </div>
 </aside>
@@ -156,13 +156,13 @@
                 <i class="bi bi-compass"></i>
                 <h3>شروع سریع</h3>
             </div>
-            <a href="Search">
+            <a href="/Search">
                 <i class="bi bi-tools"></i>
                 <span>
                     <strong>مشاهده محصولات</strong><small>ابزار و تجهیزات برق را بررسی کنید</small>
                 </span><i class="bi bi-arrow-left"></i>
             </a>
-            <a href="Profile/Addresses">
+            <a asp-controller="Profile" asp-action="Addresses">
                 <i class="bi bi-plus-circle"></i>
                 <span>
                     <strong>ثبت آدرس تحویل</strong><small>برای خرید سریع‌تر آماده شوید</small>
@@ -177,7 +177,7 @@
         <span>تاریخچه خرید</span>
         <h2 id="ordersTitle" tabindex="-1">سفارش‌های من <small id="ordersTotal">۱۰ سفارش</small></h2>
     </div>
-    <a href="Tracking"><i class="bi bi-geo-alt"></i> پیگیری سفارش</a>
+    <a asp-controller="Tracking" asp-action="Index"><i class="bi bi-geo-alt"></i> پیگیری سفارش</a>
 </div>
 <div class="profile-order-list">
 <article class="profile-order-card">
@@ -193,7 +193,7 @@
                 <i class="bi bi-tools"></i>
             </span>
             <div>
-                <strong>نوا کرونو</strong><small>۱ کالا · پرداخت آنلاین</small>
+                <strong>دریل چکشی شارژی با سه‌نظام اتوماتیک</strong><small>۱ کالا · پرداخت آنلاین</small>
             </div>
         </div>
         <div class="order-total">
@@ -201,7 +201,7 @@
         </div>
     </div>
     <footer>
-        <span><i class="bi bi-box-seam"></i> تحویل به شرکت پست</span><a href="Tracking">مشاهده جزئیات <i class="bi bi-arrow-left"></i></a>
+        <span><i class="bi bi-box-seam"></i> تحویل به شرکت پست</span><a asp-controller="Tracking" asp-action="Index">مشاهده جزئیات <i class="bi bi-arrow-left"></i></a>
     </footer>
 </article>
 <article class="profile-order-card">
@@ -217,7 +217,7 @@
                 <i class="bi bi-box-seam"></i>
             </span>
             <div>
-                <strong>آرمان کلاسیک و آبان استیل</strong><small>۲ کالا · پرداخت آنلاین</small>
+                <strong>دریل پیچ‌گوشتی شارژی و مولتی‌متر دیجیتال دستی</strong><small>۲ کالا · پرداخت آنلاین</small>
             </div>
         </div>
         <div class="order-total">
@@ -225,7 +225,7 @@
         </div>
     </div>
     <footer>
-        <span><i class="bi bi-shield-check"></i> اصالت کالا تأیید شد</span><a href="Tracking">مشاهده جزئیات <i class="bi bi-arrow-left"></i></a>
+        <span><i class="bi bi-shield-check"></i> اصالت کالا تأیید شد</span><a asp-controller="Tracking" asp-action="Index">مشاهده جزئیات <i class="bi bi-arrow-left"></i></a>
     </footer>
 </article>
 <article class="profile-order-card">
@@ -241,7 +241,7 @@
                 <i class="bi bi-lightning-charge"></i>
             </span>
             <div>
-                <strong>میراث اتوماتیک</strong><small>۱ کالا · پرداخت آنلاین</small>
+                <strong>دریل چکشی برقی سه‌نظام اتوماتیک</strong><small>۱ کالا · پرداخت آنلاین</small>
             </div>
         </div>
         <div class="order-total">
@@ -264,7 +264,7 @@
                 <i class="bi bi-tools"></i>
             </span>
             <div>
-                <strong>آبان استیل</strong><small>۱ کالا · پرداخت آنلاین</small>
+                <strong>دریل چکشی برقی</strong><small>۱ کالا · پرداخت آنلاین</small>
             </div>
         </div>
         <div class="order-total">
@@ -287,7 +287,7 @@
                 <i class="bi bi-box-seam"></i>
             </span>
             <div>
-                <strong>نوا کرونو و آرمان کلاسیک</strong><small>۲ کالا · پرداخت آنلاین</small>
+                <strong>دریل چکشی شارژی و دریل پیچ‌گوشتی شارژی</strong><small>۲ کالا · پرداخت آنلاین</small>
             </div>
         </div>
         <div class="order-total">
@@ -310,7 +310,7 @@
                 <i class="bi bi-lightning-charge"></i>
             </span>
             <div>
-                <strong>میراث اتوماتیک</strong><small>۱ کالا · پرداخت آنلاین</small>
+                <strong>دریل چکشی برقی سه‌نظام اتوماتیک</strong><small>۱ کالا · پرداخت آنلاین</small>
             </div>
         </div>
         <div class="order-total">
@@ -333,7 +333,7 @@
                 <i class="bi bi-speedometer2"></i>
             </span>
             <div>
-                <strong>آرمان کلاسیک</strong><small>۱ کالا · پرداخت آنلاین</small>
+                <strong>دریل پیچ‌گوشتی شارژی</strong><small>۱ کالا · پرداخت آنلاین</small>
             </div>
         </div>
         <div class="order-total">
@@ -356,7 +356,7 @@
                 <i class="bi bi-box-seam"></i>
             </span>
             <div>
-                <strong>آبان استیل و میراث اتوماتیک</strong><small>۲ کالا · پرداخت آنلاین</small>
+                <strong>دریل چکشی برقی و دریل چکشی برقی سه‌نظام اتوماتیک</strong><small>۲ کالا · پرداخت آنلاین</small>
             </div>
         </div>
         <div class="order-total">
@@ -379,7 +379,7 @@
                 <i class="bi bi-tools"></i>
             </span>
             <div>
-                <strong>نوا کرونو</strong><small>۱ کالا · پرداخت آنلاین</small>
+                <strong>دریل چکشی شارژی با سه‌نظام اتوماتیک</strong><small>۱ کالا · پرداخت آنلاین</small>
             </div>
         </div>
         <div class="order-total">
@@ -402,7 +402,7 @@
                 <i class="bi bi-lightning-charge"></i>
             </span>
             <div>
-                <strong>میراث اتوماتیک</strong><small>۱ کالا · پرداخت آنلاین</small>
+                <strong>دریل چکشی برقی سه‌نظام اتوماتیک</strong><small>۱ کالا · پرداخت آنلاین</small>
             </div>
         </div>
         <div class="order-total">
@@ -534,6 +534,10 @@
         if (savedProfile.gender === 'male' || savedProfile.gender === 'female') {
           const gender = form.querySelector(`[name="gender"][value="${savedProfile.gender}"]`);
           if (gender) gender.checked = true;
+        }
+        const profileName = document.querySelector('.account-profile > div strong');
+        if (profileName) {
+          profileName.textContent = `${form.elements.firstName.value.trim()} ${form.elements.lastName.value.trim()}`.trim();
         }
         const setError = (name, message) => {
           const host = form.querySelector(`[data-profile-edit-error="${name}"]`);

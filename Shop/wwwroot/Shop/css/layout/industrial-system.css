@@ -952,7 +952,6 @@ h6,
 .flow-main,
 .journal-page,
 .article-page,
-.profile-edit-page,
 .search-main {
   background-color: var(--industrial-bg);
 }
@@ -11116,17 +11115,31 @@ html
 }
 
 #compareView .compare-product-image {
-  height: auto;
-  aspect-ratio: 1 / 1;
+  height: 180px;
+  aspect-ratio: auto;
+  background: linear-gradient(145deg, #f5f7f8, #eef2f4);
 }
 
-#compareView .compare-product-image > img,
-.compare-product-card img {
+.home-page #brandsSlider .brand-wordmark {
+  color: var(--industrial-navy);
+  font-family: var(--font-heading);
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+#compareView .compare-product-image > img {
   width: 100%;
-  height: auto;
-  aspect-ratio: 1 / 1;
-  padding: 0 !important;
-  object-fit: cover;
+  height: 100%;
+  aspect-ratio: auto;
+  padding: 12px !important;
+  object-fit: contain;
+}
+
+@media (max-width: 575px) {
+  #compareView .compare-product-image {
+    height: 150px;
+  }
 }
 
 @media (max-width: 420px) {

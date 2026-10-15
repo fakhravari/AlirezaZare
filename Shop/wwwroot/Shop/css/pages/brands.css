@@ -192,6 +192,14 @@
   object-position: center;
 }
 
+.brands-grid .brand-wordmark {
+  color: var(--industrial-navy);
+  font-family: var(--font-heading);
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
 .brands-grid .brand-logo-image[src$="/uni-t.png"],
 .brands-grid .brand-logo-image[src$="/yihua.png"] {
   filter: brightness(0);
