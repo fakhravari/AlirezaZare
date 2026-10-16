@@ -362,6 +362,11 @@
   color: var(--about-muted);
 }
 
+.about-page .about-intro-section .story-copy p,
+.about-page .about-journey-section .timeline-item p {
+  color: #586d7b !important;
+}
+
 .about-page .story-copy .article-link {
   border-color: #e6d3a9;
   background: #fff9e9;
@@ -405,7 +410,7 @@
 }
 
 .about-page .value-card p {
-  color: #cfdae2;
+  color: #d7e1e8 !important;
 }
 
 .about-page .about-journey-section {

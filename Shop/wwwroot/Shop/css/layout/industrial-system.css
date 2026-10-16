@@ -1915,7 +1915,7 @@ thead,
 
 /* Footer */
 footer {
-  border-top: 5px solid var(--industrial-yellow) !important;
+  border-top: 3px solid var(--industrial-yellow) !important;
   background: var(--industrial-navy) !important;
   color: rgba(255, 255, 255, 0.76) !important;
 }

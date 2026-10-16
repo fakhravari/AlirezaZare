@@ -1543,3 +1543,33 @@ select {
     grid-template-columns: 1fr;
   }
 }
+
+.search-main :is(
+  .filter-head-title > i,
+  .filter-group-title > i,
+  .filter-stock-option > i,
+  .mobile-filter-toggle > i
+) {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  place-items: center;
+  border: 1px solid #efdfad;
+  border-radius: 10px;
+  background: #fff8e2;
+  color: #866600;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.search-main .filter-head-title > i {
+  border-color: rgba(255, 223, 84, 0.38);
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffdf54;
+}
+
+.search-main .clear-filters > i {
+  color: #866600;
+  font-size: 16px;
+}
