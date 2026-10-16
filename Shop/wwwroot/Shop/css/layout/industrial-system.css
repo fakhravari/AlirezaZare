@@ -10605,10 +10605,10 @@ html
 
   #mainNav .brand-dropdown > .brand-menu::after {
     position: absolute;
-    top: -36px;
+    top: -48px;
     right: 0;
     left: 0;
-    height: 36px;
+    height: 48px;
     content: "";
     pointer-events: auto;
   }
@@ -12263,7 +12263,6 @@ body .electrical-swiper .swiper-pagination-bullet-active {
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
-    transform: translateY(9px);
     transition:
       opacity 180ms ease,
       transform 180ms ease,
@@ -12276,13 +12275,17 @@ body .electrical-swiper .swiper-pagination-bullet-active {
     transform: translate(50%, 9px) !important;
   }
 
+  .inner-page #mainNav .category-nav-mega {
+    transform: none !important;
+  }
+
   .inner-page #mainNav .category-nav-mega,
   #mainNav .brand-dropdown > .brand-menu {
     display: grid !important;
   }
 
   #mainNav .brand-dropdown > .brand-menu {
-    transform: translate(-50%, 9px) !important;
+    transform: translate(-50%, 0) !important;
   }
 
   .home-page #mainNav .mega-dropdown:is(:hover, :focus-within, .show) > .mega-menu,
@@ -12301,6 +12304,32 @@ body .electrical-swiper .swiper-pagination-bullet-active {
 
   #mainNav .brand-dropdown:is(:hover, :focus-within, .show) > .brand-menu {
     transform: translate(-50%, 0) !important;
+  }
+
+  .inner-page #mainNav .navbar-nav > .category-nav-dropdown > .nav-link,
+  .inner-page #mainNav .navbar-nav > .brand-dropdown > .nav-link {
+    transition:
+      color 180ms ease,
+      background-color 180ms ease,
+      border-color 180ms ease,
+      box-shadow 180ms ease,
+      transform 180ms ease;
+  }
+
+  .inner-page #mainNav .navbar-nav > .category-nav-dropdown:is(:hover, :focus-within, .show, .is-mega-open) > .nav-link,
+  .inner-page #mainNav .navbar-nav > .brand-dropdown:is(:hover, :focus-within, .show) > .nav-link {
+    border-color: rgba(246, 197, 21, 0.28) !important;
+    background: rgba(246, 197, 21, 0.1) !important;
+    color: #ffd447 !important;
+    box-shadow: 0 4px 14px rgba(246, 197, 21, 0.12) !important;
+    transform: translateY(-1px);
+  }
+
+  .inner-page #mainNav .navbar-nav > .category-nav-dropdown:is(:hover, :focus-within, .show, .is-mega-open) > .nav-link .nav-menu-icon,
+  .inner-page #mainNav .navbar-nav > .brand-dropdown:is(:hover, :focus-within, .show) > .nav-link .nav-menu-icon {
+    color: #ffd447 !important;
+    filter: drop-shadow(0 0 4px rgba(246, 197, 21, 0.28));
+    transform: scale(1.06);
   }
 
   #mainNav .navbar-brand {

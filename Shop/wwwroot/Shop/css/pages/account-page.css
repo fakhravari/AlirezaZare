@@ -1456,6 +1456,17 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
   filter: drop-shadow(0 8px 20px rgba(4, 14, 28, 0.24));
 }
 
+.account-welcome > .profile-breadcrumb {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 2;
+  margin: 0;
+  border-color: rgba(255, 255, 255, 0.16);
+  background: rgba(7, 25, 45, 0.58);
+  box-shadow: 0 7px 18px rgba(3, 14, 34, 0.16);
+}
+
 .profile-breadcrumb-parent {
   display: flex;
   align-items: center;
@@ -1512,7 +1523,7 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
   .account-welcome {
     min-height: 0;
     margin: 12px 0 16px;
-    padding: 16px 18px;
+    padding: 16px 18px 60px;
     border-radius: 16px;
     background-image:
       linear-gradient(
@@ -1591,6 +1602,15 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
     min-width: 0;
   }
 
+  .account-welcome > .profile-breadcrumb {
+    top: auto;
+    bottom: 12px;
+    left: 12px;
+    max-width: calc(100% - 24px);
+    min-height: 36px;
+    font-size: 11px;
+  }
+
   .inner-page .cart-breadcrumb.profile-breadcrumb ol {
     width: 100%;
     min-width: 0;
@@ -1627,7 +1647,7 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
 @media (max-width: 380px) {
   .account-welcome {
     margin: 10px 0 14px;
-    padding: 14px 15px;
+    padding: 14px 15px 56px;
     border-radius: 16px;
   }
 

@@ -1859,6 +1859,17 @@ $(function () {
   });
   renderCart();
 
+  const showListActionToast = (message) => {
+    const toast = $("#searchToast").length ? $("#searchToast") : $("#liveToast");
+    if (toast.is("#searchToast")) {
+      toast.text(message).addClass("show");
+      window.setTimeout(() => toast.removeClass("show"), 1800);
+      return;
+    }
+    toast.find(".toast-body").text(message);
+    bootstrap.Toast.getOrCreateInstance(toast[0]).show();
+  };
+
   $document.on("click", ".favorite", function () {
     const $button = $(this);
     const button = this;
@@ -1902,23 +1913,11 @@ $(function () {
     $button
       .find("i")
       .attr("class", isFavorite ? "bi bi-heart-fill" : "bi bi-heart");
-    $("#liveToast .toast-body").text(
+    showListActionToast(
       isFavorite
         ? "محصول به علاقه‌مندی‌ها اضافه شد."
         : "محصول از علاقه‌مندی‌ها حذف شد.",
     );
-    const toast = $("#searchToast").length
-      ? $("#searchToast")
-      : $("#liveToast");
-    if (toast.is("#searchToast")) {
-      toast.text(
-        isFavorite
-          ? "محصول به علاقه‌مندی‌ها اضافه شد."
-          : "محصول از علاقه‌مندی‌ها حذف شد.",
-      );
-      toast.addClass("show");
-      window.setTimeout(() => toast.removeClass("show"), 1800);
-    } else bootstrap.Toast.getOrCreateInstance(toast[0]).show();
   });
 
   const $productColumns = $(".product-col");
@@ -2221,10 +2220,16 @@ $(function () {
       : [...selected, productId];
     window.HNUI.storage.set("hn-compare", JSON.stringify(next));
     syncCompareButtons();
-    if (next.includes(productId)) {
+    const isCompared = next.includes(productId);
+    if (isCompared) {
       pulseListControl(document.querySelector("#compareToggle"));
       flyProductToControl(this, null, document.querySelector("#compareToggle"));
     }
+    showListActionToast(
+      isCompared
+        ? "محصول به فهرست مقایسه اضافه شد."
+        : "محصول از فهرست مقایسه حذف شد.",
+    );
     setCartOpen(false);
   });
 
