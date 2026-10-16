@@ -10589,6 +10589,18 @@ html
     position: static !important;
   }
 
+  .home-page #mainNav .brand-dropdown::after {
+    position: absolute;
+    top: calc(100% - 16px);
+    left: 50%;
+    z-index: 3;
+    width: min(1120px, calc(100vw - 48px));
+    height: 16px;
+    content: "";
+    pointer-events: auto;
+    transform: translateX(-50%);
+  }
+
   #mainNav .brand-dropdown > .nav-link,
   #mainNav .brand-dropdown > .nav-link:is(:hover, :focus-visible, .show) {
     transform: none !important;
@@ -10610,15 +10622,6 @@ html
     display: grid !important;
   }
 
-  #mainNav .brand-dropdown > .brand-menu::after {
-    position: absolute;
-    top: -48px;
-    right: 0;
-    left: 0;
-    height: 48px;
-    content: "";
-    pointer-events: auto;
-  }
 }
 
 /* Match the header cart stepper to the quantity controls on the Cart page. */
