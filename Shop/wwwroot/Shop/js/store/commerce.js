@@ -213,6 +213,39 @@ document.addEventListener("DOMContentLoaded", () => {
         if (productId) link.href = window.HNProductUrl(productId);
       });
       const detail = p.detail || {};
+      const brandSlugs = {
+        bosch: "bosch", makita: "makita", dewalt: "dewalt", ronix: "ronix",
+        tosan: "tosan", "uni-t": "uni-t", fluke: "fluke", mastech: "mastech",
+        kyoritsu: "kyoritsu", yihua: "yihua", hakko: "hakko", weller: "weller",
+        philips: "philips", wiha: "wiha", arva: "arva", victor: "victor",
+        quick: "quick", goot: "goot", knipex: "knipex", stanley: "stanley",
+        benning: "benning",
+      };
+      const productBrandSlug = brandSlugs[String(p.brand || "").trim().toLowerCase()];
+      if (productBrandSlug) {
+        fetch(`/brands/${productBrandSlug}/editorial`)
+          .then((response) => response.ok ? response.json() : null)
+          .then((brand) => {
+            if (!brand || !productView.isConnected) return;
+            const escapeHtml = (value) => esc(String(value ?? ""));
+            const brandPanel = document.createElement("section");
+            brandPanel.className = "product-detail-content-panel product-brand-editorial";
+            brandPanel.id = "product-brand-editorial";
+            const families = (brand.productFamilies || []).map((item) => `<li>${escapeHtml(item)}</li>`).join("");
+            const strengths = (brand.strengths || []).map((item) => `<li><i class="bi bi-check2-circle" aria-hidden="true"></i>${escapeHtml(item)}</li>`).join("");
+            brandPanel.innerHTML = `<header><span>دربارهٔ برند</span><h2>${escapeHtml(brand.persianName)}؛ تخصص و محصولات</h2></header><p class="product-brand-introduction">${escapeHtml(brand.introduction)}</p><div class="product-brand-editorial-grid"><section><h3><i class="bi bi-grid-3x3-gap" aria-hidden="true"></i>گروه‌های محصول</h3><ul class="product-brand-families">${families}</ul></section><section><h3><i class="bi bi-stars" aria-hidden="true"></i>نکات شاخص</h3><ul class="product-brand-strengths">${strengths}</ul></section><aside><span><i class="bi bi-person-workspace" aria-hidden="true"></i>مناسب برای</span><p>${escapeHtml(brand.audience)}</p></aside></div><a class="product-brand-page-link" href="/brands/${escapeHtml(brand.slug)}">آشنایی بیشتر با ${escapeHtml(brand.persianName)}<i class="bi bi-arrow-left" aria-hidden="true"></i></a>`;
+            const introPanel = productView.querySelector("#product-intro");
+            introPanel?.insertAdjacentElement("afterend", brandPanel);
+            const tabs = productView.querySelector(".product-detail-tabs");
+            if (tabs && !tabs.querySelector('[href="#product-brand-editorial"]')) {
+              const brandTab = document.createElement("a");
+              brandTab.href = "#product-brand-editorial";
+              brandTab.innerHTML = '<i class="bi bi-award" aria-hidden="true"></i>دربارهٔ برند';
+              tabs.insertBefore(brandTab, tabs.querySelector('[href="#product-expert"]'));
+            }
+          })
+          .catch(() => {});
+      }
       const mobileBuyBar = document.createElement("div");
       mobileBuyBar.className = "product-mobile-buybar";
       mobileBuyBar.innerHTML = `<span class="product-mobile-buy-price"><small>قیمت نهایی</small><strong id="productMobileFinalPrice">${money(p.price * 1000000)}</strong></span><button type="button" class="product-mobile-buy-button"><i class="bi bi-bag-plus" aria-hidden="true"></i> افزودن به سبد</button>`;

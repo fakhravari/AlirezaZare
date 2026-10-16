@@ -33,4 +33,28 @@ public sealed class BrandsController : PageController
                 ImageUrl: "/Shop/images/heroes/hero-electrical-editorial.png"));
         return await PageAsync(model);
     }
+
+    [HttpGet("{slug}/editorial")]
+    public IActionResult Editorial(string slug)
+    {
+        BrandProfileModel? brand = BrandCatalog.Find(slug);
+        if (brand is null)
+        {
+            return NotFound();
+        }
+
+        return Json(new
+        {
+            brand.Slug,
+            brand.Name,
+            brand.PersianName,
+            Introduction = brand.Editorial ?? brand.Summary,
+            brand.Focus,
+            brand.FoundedYear,
+            brand.OfficialUrl,
+            brand.EditorialContent.ProductFamilies,
+            brand.EditorialContent.Strengths,
+            brand.EditorialContent.Audience
+        });
+    }
 }
