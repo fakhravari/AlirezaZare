@@ -1747,13 +1747,35 @@ summary:focus-visible {
   color: #687987;
   font-size: 13px;
 }
-.compare-overview > b {
-  padding: 7px 11px;
-  border-radius: 999px;
-  background: #eaf0f3;
+.compare-overview-metrics {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 8px;
+}
+.compare-overview-metric {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  gap: 7px;
+  padding: 0 11px;
+  border: 1px solid #dce5e9;
+  border-radius: 12px;
+  background: #fff;
   color: #193b55;
-  font-size: 13px;
   white-space: nowrap;
+}
+.compare-overview-metric > i {
+  color: #a87427;
+  font-size: 14px;
+}
+.compare-overview-metric > b {
+  font-size: 15px;
+  font-weight: 800;
+}
+.compare-overview-metric > small {
+  color: #687987;
+  font-size: 12px;
 }
 .compare-overview > .compare-clear-all {
   display: inline-flex;
@@ -2032,8 +2054,9 @@ summary:focus-visible {
 }
 
 .compare-category-group.has-single-product {
-  width: min(100%, 430px);
-  justify-self: start;
+  width: 100%;
+  max-width: none;
+  justify-self: stretch;
 }
 
 .compare-category-group.has-single-product .compare-product-grid {
@@ -2055,8 +2078,16 @@ summary:focus-visible {
   .compare-overview-copy small {
     font-size: 13px;
   }
-  .compare-overview > b {
+  .compare-overview-metrics {
     margin-inline-start: auto;
+  }
+  .compare-overview-metric {
+    min-height: 36px;
+    gap: 5px;
+    padding-inline: 8px;
+  }
+  .compare-overview-metric > small {
+    font-size: 11px;
   }
   .compare-overview > .compare-clear-all {
     flex: 1 1 145px;

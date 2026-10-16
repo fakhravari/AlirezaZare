@@ -13074,3 +13074,26 @@ body .electrical-swiper .swiper-pagination-bullet-active {
     font-size: 14px;
   }
 }
+
+#cartView .cart-quantity > button {
+  display: grid !important;
+  place-items: center !important;
+  padding: 0 !important;
+  line-height: 1 !important;
+}
+
+#cartView .cart-quantity > button > .bi {
+  display: grid !important;
+  width: 1em;
+  height: 1em;
+  place-items: center;
+  line-height: 1 !important;
+  vertical-align: middle !important;
+  transform: none !important;
+}
+
+#cartView .cart-quantity > button > .bi::before {
+  display: block;
+  line-height: 1;
+  vertical-align: 0;
+}
