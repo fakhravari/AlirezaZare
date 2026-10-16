@@ -1,11 +1,19 @@
 using Shop.Models;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 
 namespace Shop.Controllers;
 
 [Route("brands")]
 public sealed class BrandsController : PageController
 {
+    private readonly IWebHostEnvironment _environment;
+
+    public BrandsController(IWebHostEnvironment environment)
+    {
+        _environment = environment;
+    }
+
     [HttpGet("")]
     public async Task<IActionResult> Index()
     {
@@ -43,22 +51,35 @@ public sealed class BrandsController : PageController
             return NotFound();
         }
 
+        string contentPath = Path.Combine(
+            _environment.WebRootPath,
+            "Shop",
+            "js",
+            "store",
+            "brand-editorial.json");
+        using JsonDocument document = JsonDocument.Parse(System.IO.File.ReadAllText(contentPath));
+        JsonElement source = document.RootElement.EnumerateArray().FirstOrDefault(item =>
+            string.Equals(item.GetProperty("slug").GetString(), brand.Slug, StringComparison.OrdinalIgnoreCase));
+        if (source.ValueKind != JsonValueKind.Object)
+        {
+            return NotFound();
+        }
+
         return Json(new
         {
-            brand.Slug,
+            Slug = source.GetProperty("slug").GetString(),
             brand.Name,
-            brand.PersianName,
-            Introduction = brand.EditorialContent.Introduction is { Length: > 0 } introduction
-                ? introduction
-                : brand.Editorial ?? brand.Summary,
-            brand.EditorialContent.Specialization,
-            brand.EditorialContent.ShoppingAdvice,
-            brand.Focus,
-            brand.FoundedYear,
-            brand.OfficialUrl,
-            brand.EditorialContent.ProductFamilies,
-            brand.EditorialContent.Strengths,
-            brand.EditorialContent.Audience
+            PersianName = source.GetProperty("persianName").GetString(),
+            CompanyIntroductions = source.GetProperty("companyIntroductions"),
+            Established = source.GetProperty("established").GetString(),
+            Country = source.GetProperty("country").GetString(),
+            OfficialUrl = source.GetProperty("officialUrl").GetString(),
+            Specialization = source.GetProperty("specialization").GetString(),
+            FeaturedProducts = source.GetProperty("featuredProducts").GetString(),
+            ProductFamilies = source.GetProperty("productFamilies"),
+            Strengths = source.GetProperty("strengths"),
+            Audience = source.GetProperty("audience").GetString(),
+            ShoppingAdvice = source.GetProperty("shoppingAdvice").GetString()
         });
     }
 }
