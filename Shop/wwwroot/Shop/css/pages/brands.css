@@ -417,16 +417,38 @@
 
 .brand-detail-eyebrow {
   display: inline-flex;
+  min-height: 36px;
+  padding: 6px 12px;
   align-items: center;
-  gap: 7px;
-  color: #99713b;
+  gap: 8px;
+  border: 1px solid #ead8b7;
+  border-radius: 999px;
+  background: #fff8e7;
+  color: #795a25;
   font-size: 13px;
   font-weight: 800;
 }
 
 .brand-detail-eyebrow i {
-  color: #bd934d;
-  font-size: 16px;
+  display: grid;
+  width: 23px;
+  height: 23px;
+  place-items: center;
+  border-radius: 50%;
+  background: #f3e4c3;
+  color: #8c672f;
+  font-size: 13px;
+}
+
+.brand-detail-eyebrow--guide {
+  border-color: #d7e2e9;
+  background: #f1f6f8;
+  color: var(--industrial-navy);
+}
+
+.brand-detail-eyebrow--guide i {
+  background: #e1ebf0;
+  color: var(--industrial-navy);
 }
 
 .brand-detail-overview-copy h2,
@@ -503,6 +525,11 @@
   display: block;
 }
 
+.brand-profile-fact-content {
+  min-width: 0;
+  flex: 1;
+}
+
 .brand-profile-facts small {
   margin-bottom: 4px;
   color: #718091;
@@ -513,6 +540,37 @@
   color: var(--industrial-navy);
   font-size: 14px;
   line-height: 1.8;
+}
+
+.brand-profile-facts [data-brand-product-count] {
+  display: inline-flex;
+  width: fit-content;
+  padding: 3px 10px;
+  border: 1px solid #ead8b7;
+  border-radius: 999px;
+  background: #fff8e7;
+  color: #795a25;
+}
+
+.brand-focus-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 7px;
+}
+
+.brand-focus-tag {
+  display: inline-flex;
+  min-height: 30px;
+  padding: 5px 10px;
+  align-items: center;
+  border: 1px solid #e1e7eb;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--industrial-navy);
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1.5;
 }
 
 .brand-detail-overview-copy p.brand-profile-note {
@@ -636,9 +694,11 @@
 
 .brand-detail-cta > div p {
   margin: 4px 0 0;
-  color: rgba(255, 255, 255, 0.72);
-  font-size: 13px;
+  color: #e4edf6 !important;
+  font-size: 14px !important;
+  font-weight: 600;
   line-height: 1.8;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.18);
 }
 
 .brand-detail-cta > a {

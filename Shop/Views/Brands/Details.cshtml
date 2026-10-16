@@ -2,6 +2,10 @@
 @{
     BrandProfileModel brand = Model.Data;
     string shopUrl = Url.Content($"~/search?brand={brand.Slug}");
+    string[] focusItems = brand.Focus
+        .Split('،', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
+        .SelectMany(item => item.Split(" و ", StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries))
+        .ToArray();
 }
 
 <main class="brand-detail-page">
@@ -35,7 +39,19 @@
                     <div class="brand-profile-facts">
                         <div>
                             <span class="brand-profile-fact-icon"><i class="bi bi-tools" aria-hidden="true"></i></span>
-                            <span><small>حوزهٔ فعالیت در این فروشگاه</small><strong>@brand.Focus</strong></span>
+                            <span class="brand-profile-fact-content">
+                                <small>حوزهٔ فعالیت در این فروشگاه</small>
+                                <span class="brand-focus-tags" aria-label="حوزه‌های فعالیت">
+                                    @foreach (string focusItem in focusItems)
+                                    {
+                                        <span class="brand-focus-tag">@focusItem</span>
+                                    }
+                                </span>
+                            </span>
+                        </div>
+                        <div>
+                            <span class="brand-profile-fact-icon"><i class="bi bi-box-seam" aria-hidden="true"></i></span>
+                            <span><small>محصولات مرتبط در کاتالوگ</small><strong data-brand-product-count data-brand-slug="@brand.Slug">در حال شمارش…</strong></span>
                         </div>
                         @if (brand.FoundedYear.HasValue)
                         {
@@ -57,7 +73,7 @@
 
             <section class="brand-selection-guide" aria-labelledby="brandGuideTitle">
                 <header>
-                    <span class="brand-detail-eyebrow"><i class="bi bi-check2-circle" aria-hidden="true"></i>راهنمای انتخاب</span>
+                    <span class="brand-detail-eyebrow brand-detail-eyebrow--guide"><i class="bi bi-check2-circle" aria-hidden="true"></i>راهنمای انتخاب</span>
                     <h2 id="brandGuideTitle">پیش از انتخاب محصول <em>چه چیزهایی را بررسی کنیم؟</em></h2>
                     <p>برای انتخابی متناسب با کارتان، این نکته‌ها را در مشخصات هر مدل در نظر بگیرید.</p>
                 </header>
@@ -88,4 +104,8 @@
 @section Styles {
     <link href="~/Shop/css/pages/pages.css" rel="stylesheet" asp-append-version="true"/>
     <link href="~/Shop/css/pages/brands.css" rel="stylesheet" asp-append-version="true"/>
+}
+
+@section Scripts {
+    <script src="~/Shop/js/pages/brand-product-count.js" asp-append-version="true"></script>
 }
