@@ -48,7 +48,11 @@ public sealed class BrandsController : PageController
             brand.Slug,
             brand.Name,
             brand.PersianName,
-            Introduction = brand.Editorial ?? brand.Summary,
+            Introduction = brand.EditorialContent.Introduction is { Length: > 0 } introduction
+                ? introduction
+                : brand.Editorial ?? brand.Summary,
+            brand.EditorialContent.Specialization,
+            brand.EditorialContent.ShoppingAdvice,
             brand.Focus,
             brand.FoundedYear,
             brand.OfficialUrl,

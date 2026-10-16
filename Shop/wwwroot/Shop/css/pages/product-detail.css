@@ -24,6 +24,34 @@
   line-height: 2.1;
 }
 
+#productView .product-brand-specialty,
+#productView .product-brand-shopping-advice {
+  margin-top: 16px;
+  padding: 15px 17px;
+  border: 1px solid #e6dcc7;
+  border-radius: 14px;
+  background: #fffaf0;
+}
+
+#productView :is(.product-brand-specialty, .product-brand-shopping-advice) strong {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #153454;
+  font-size: 14px;
+}
+
+#productView :is(.product-brand-specialty, .product-brand-shopping-advice) strong i {
+  color: #a98248;
+}
+
+#productView :is(.product-brand-specialty, .product-brand-shopping-advice) p {
+  margin: 6px 0 0;
+  color: #566779;
+  font-size: 14px;
+  line-height: 1.9;
+}
+
 #productView .product-brand-editorial-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

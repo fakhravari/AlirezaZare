@@ -602,6 +602,48 @@
   text-underline-offset: 4px;
 }
 
+.brand-specialization-panel,
+.brand-source-shopping-advice {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 0;
+  padding: 18px 20px;
+  border: 1px solid #e6dcc7;
+  border-radius: 15px;
+  background: #fffaf0;
+  color: #566779;
+  font-size: 14px;
+  line-height: 1.95;
+}
+
+.brand-specialization-panel > span,
+.brand-source-shopping-advice > i {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  color: #8c672f;
+  font-weight: 850;
+}
+
+.brand-specialization-panel p {
+  margin: 0;
+}
+
+.brand-source-shopping-advice {
+  margin-top: 18px;
+}
+
+.brand-source-shopping-advice > span {
+  display: grid;
+  gap: 4px;
+}
+
+.brand-source-shopping-advice strong {
+  color: var(--industrial-navy);
+}
+
 .brand-selection-guide {
   padding: clamp(22px, 4vw, 36px);
 }

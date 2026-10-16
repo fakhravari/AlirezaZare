@@ -35,7 +35,7 @@
                 <div class="brand-detail-overview-copy">
                     <span class="brand-detail-eyebrow"><i class="bi bi-bookmark-star" aria-hidden="true"></i>شناخت برند</span>
                     <h2 id="brandOverviewTitle">@brand.Name <em>و حوزهٔ تخصصی آن</em></h2>
-                    <p>@(brand.Editorial ?? $"در این معرفی، {brand.PersianName} را از زاویهٔ {brand.Focus} بررسی می‌کنیم؛ مشخصات هر مدل را با نیاز کاری، سازگاری و اقلام همراه آن بسنجید.")</p>
+                    <p>@(brand.EditorialContent.Introduction is { Length: > 0 } introduction ? introduction : brand.Editorial ?? $"در این معرفی، {brand.PersianName} را از زاویهٔ {brand.Focus} بررسی می‌کنیم؛ مشخصات هر مدل را با نیاز کاری، سازگاری و اقلام همراه آن بسنجید.")</p>
                     <div class="brand-profile-facts">
                         <div>
                             <span class="brand-profile-fact-icon"><i class="bi bi-tools" aria-hidden="true"></i></span>
@@ -71,6 +71,14 @@
                 </div>
             </div>
 
+            @if (brand.EditorialContent.Specialization is { Length: > 0 } specialization)
+            {
+                <section class="brand-specialization-panel" aria-label="حوزه تخصصی برند">
+                    <span><i class="bi bi-tools" aria-hidden="true"></i>حوزهٔ تخصصی</span>
+                    <p>@specialization</p>
+                </section>
+            }
+
             <section class="brand-selection-guide" aria-labelledby="brandGuideTitle">
                 <header>
                     <span class="brand-detail-eyebrow brand-detail-eyebrow--guide"><i class="bi bi-check2-circle" aria-hidden="true"></i>راهنمای انتخاب</span>
@@ -87,6 +95,10 @@
                         </article>
                     }
                 </div>
+                @if (brand.EditorialContent.ShoppingAdvice is { Length: > 0 } shoppingAdvice)
+                {
+                    <p class="brand-source-shopping-advice"><i class="bi bi-lightbulb" aria-hidden="true"></i><span><strong>نکته‌های خرید بر اساس محتوای ارسالی</strong>@shoppingAdvice</span></p>
+                }
             </section>
 
             <aside class="brand-detail-cta">
