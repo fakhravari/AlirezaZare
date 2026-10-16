@@ -30,7 +30,7 @@ public sealed class BrandsController : PageController
                 $"برند {brand.PersianName}؛ محصولات و راهنمای انتخاب | علی‌رضا زارع",
                 brand.Summary,
                 CanonicalUrl: $"/brands/{brand.Slug}",
-                ImageUrl: brand.LogoFile is null ? null : $"/Shop/images/brands/{brand.LogoFile}"));
+                ImageUrl: "/Shop/images/heroes/hero-electrical-editorial.png"));
         return await PageAsync(model);
     }
 }

@@ -15,24 +15,12 @@
                 <i class="breadcrumb-separator bi bi-chevron-left" aria-hidden="true"></i>
                 <span class="breadcrumb-current" aria-current="page">@brand.PersianName</span>
             </nav>
-            <div class="brand-detail-hero-content">
-                <div class="brand-detail-logo" aria-label="@brand.Name">
-                    @if (!string.IsNullOrWhiteSpace(brand.LogoFile))
-                    {
-                        <img src="@Url.Content($"~/Shop/images/brands/{brand.LogoFile}")" alt="لوگوی @brand.PersianName"/>
-                    }
-                    else
-                    {
-                        <span>@brand.Name.ToUpperInvariant()</span>
-                    }
-                </div>
-                <span class="page-kicker"><i class="bi bi-patch-check" aria-hidden="true"></i>راهنمای برند و انتخاب محصول</span>
-                <h1>برند <em>@brand.PersianName</em></h1>
-                <p>@brand.Summary</p>
-                <div class="brand-detail-actions">
-                    <a class="brand-detail-primary" href="@shopUrl"><i class="bi bi-shop" aria-hidden="true"></i>مشاهده محصولات @brand.PersianName</a>
-                    <a class="brand-detail-secondary" href="@Url.Content("~/brands")"><i class="bi bi-grid" aria-hidden="true"></i>بازگشت به همهٔ برندها</a>
-                </div>
+            <span class="page-kicker"><i class="bi bi-patch-check" aria-hidden="true"></i>معرفی برند و راهنمای انتخاب</span>
+            <h1>برند <em>@brand.PersianName</em></h1>
+            <p>@brand.Summary</p>
+            <div class="brand-detail-actions">
+                <a class="brand-detail-primary" href="@shopUrl"><i class="bi bi-shop" aria-hidden="true"></i>مشاهده محصولات @brand.PersianName</a>
+                <a class="brand-detail-secondary" href="@Url.Content("~/brands")"><i class="bi bi-grid" aria-hidden="true"></i>بازگشت به همهٔ برندها</a>
             </div>
         </div>
     </header>
@@ -41,17 +29,30 @@
         <div class="container">
             <div class="brand-detail-overview">
                 <div class="brand-detail-overview-copy">
-                    <span class="brand-detail-eyebrow"><i class="bi bi-bookmark-star" aria-hidden="true"></i>آشنایی با برند</span>
-                    <h2 id="brandOverviewTitle">@brand.Name <em>در فروشگاه ما</em></h2>
-                    <p>@brand.Summary</p>
-                    <p>در این صفحه، محصولات موجود با نام برند @brand.PersianName یک‌جا گردآوری شده‌اند تا بتوانید مدل‌ها را بر اساس کاربرد، مشخصات و شرایط استفاده بررسی و مقایسه کنید.</p>
+                    <span class="brand-detail-eyebrow"><i class="bi bi-bookmark-star" aria-hidden="true"></i>شناخت برند</span>
+                    <h2 id="brandOverviewTitle">@brand.Name <em>و حوزهٔ تخصصی آن</em></h2>
+                    <p>@(brand.Editorial ?? $"در این معرفی، {brand.PersianName} را از زاویهٔ {brand.Focus} بررسی می‌کنیم؛ مشخصات هر مدل را با نیاز کاری، سازگاری و اقلام همراه آن بسنجید.")</p>
+                    <div class="brand-profile-facts">
+                        <div>
+                            <span class="brand-profile-fact-icon"><i class="bi bi-tools" aria-hidden="true"></i></span>
+                            <span><small>حوزهٔ فعالیت در این فروشگاه</small><strong>@brand.Focus</strong></span>
+                        </div>
+                        @if (brand.FoundedYear.HasValue)
+                        {
+                            <div>
+                                <span class="brand-profile-fact-icon"><i class="bi bi-calendar3" aria-hidden="true"></i></span>
+                                <span><small>آغاز فعالیت برند</small><strong>از @brand.FoundedYear</strong></span>
+                            </div>
+                        }
+                    </div>
+                    <p class="brand-profile-note">تنوع، مشخصات و اقلام همراه میان مدل‌های یک برند متفاوت است؛ پیش از خرید، صفحهٔ هر محصول را جداگانه بررسی کنید.</p>
+                    @if (!string.IsNullOrWhiteSpace(brand.OfficialUrl))
+                    {
+                        <a class="brand-official-source" href="@brand.OfficialUrl" target="_blank" rel="noopener noreferrer">
+                            <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i>مشاهدهٔ معرفی در وب‌سایت رسمی @brand.Name
+                        </a>
+                    }
                 </div>
-                <aside class="brand-focus-card" aria-label="گروه‌های شاخص محصولات">
-                    <span class="brand-focus-icon"><i class="bi bi-tools" aria-hidden="true"></i></span>
-                    <small>گروه‌های شاخص</small>
-                    <strong>@brand.Focus</strong>
-                    <a href="@shopUrl">رفتن به فهرست محصولات <i class="bi bi-arrow-left" aria-hidden="true"></i></a>
-                </aside>
             </div>
 
             <section class="brand-selection-guide" aria-labelledby="brandGuideTitle">
