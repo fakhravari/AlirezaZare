@@ -1,29 +1,4 @@
 /* Brand catalogue follows the homepage's compact navy, white and gold system. */
-.inner-page .page-hero.brands-hero {
-  height: auto !important;
-  min-height: 410px !important;
-  padding: 112px 0 52px !important;
-  align-items: center;
-  background: #102a43;
-}
-
-.brands-hero .hero-image {
-  opacity: 0.32;
-}
-
-.brands-hero::before {
-  background: linear-gradient(90deg, rgba(16, 42, 67, 0.62), rgba(10, 31, 55, 0.96) 76%);
-}
-
-.brands-hero::after {
-  border-color: rgba(246, 197, 21, 0.18);
-  box-shadow: 0 0 0 55px rgba(246, 197, 21, 0.025), 0 0 0 110px rgba(246, 197, 21, 0.018);
-}
-
-.brands-hero > .container {
-  gap: 10px !important;
-}
-
 .brands-hero .page-kicker {
   color: #f6c515 !important;
   border-color: rgba(246, 197, 21, 0.38);
@@ -51,8 +26,8 @@
   max-width: 720px !important;
   color: rgba(255, 255, 255, 0.82) !important;
   font-family: var(--font-body);
-  font-size: 15px !important;
-  line-height: 1.95 !important;
+  font-size: 16px !important;
+  line-height: 2.1 !important;
   letter-spacing: 0 !important;
 }
 
@@ -62,8 +37,8 @@
 }
 
 .brands-hero .hero-trail span {
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(217, 177, 110, 0.18);
+  background: rgba(9, 35, 78, 0.48);
   color: rgba(255, 255, 255, 0.88);
 }
 
@@ -682,11 +657,6 @@
 }
 
 @media (max-width: 767px) {
-  .inner-page .page-hero.brands-hero {
-    min-height: 340px !important;
-    padding: 92px 0 38px !important;
-  }
-
   .brands-heading {
     align-items: flex-start;
     flex-direction: column;
@@ -706,11 +676,6 @@
 }
 
 @media (max-width: 575px) {
-  .inner-page .page-hero.brands-hero {
-    min-height: 320px !important;
-    padding: 82px 0 30px !important;
-  }
-
   .brands-hero h1 {
     font-size: 30px !important;
     line-height: 1.5 !important;

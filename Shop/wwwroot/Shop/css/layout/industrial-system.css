@@ -10583,13 +10583,13 @@ html
   align-self: flex-start;
 }
 
-/* Keep the desktop brand menu anchored while its trigger enters the open state. */
+/* Share one desktop hover bridge and panel anchor across home and inner pages. */
 @media (min-width: 992px) {
-  .home-page #mainNav .brand-dropdown {
+  #mainNav .brand-dropdown {
     position: static !important;
   }
 
-  .home-page #mainNav .brand-dropdown::after {
+  #mainNav .brand-dropdown::after {
     position: absolute;
     top: calc(100% - 16px);
     left: 50%;
@@ -12711,5 +12711,95 @@ body .electrical-swiper .swiper-pagination-bullet-active {
 
   .inner-page #mainNav .home-nav-groups {
     gap: 8px;
+  }
+}
+
+/* Keep hero breadcrumbs visually consistent across page templates. */
+.page-hero :is(.article-breadcrumb, .cart-breadcrumb) {
+  width: fit-content;
+  min-height: 46px;
+  max-width: 100%;
+  padding: 4px 8px;
+  overflow: visible;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 12px;
+  background: rgba(7, 25, 45, 0.78);
+  color: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 5px 16px rgba(3, 14, 34, 0.2);
+  backdrop-filter: blur(10px);
+}
+
+.page-hero :is(.article-breadcrumb, .cart-breadcrumb) ol {
+  gap: 5px 9px;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.page-hero :is(.article-breadcrumb, .cart-breadcrumb) :is(a, .breadcrumb-current, [aria-current]) {
+  min-height: 36px;
+  padding: 4px 9px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.88);
+  box-shadow: none;
+  font-size: inherit;
+  text-decoration: none;
+}
+
+.page-hero :is(.article-breadcrumb, .cart-breadcrumb) :is(a, .breadcrumb-current, [aria-current]) i {
+  color: #ffd447;
+}
+
+.page-hero :is(.article-breadcrumb, .cart-breadcrumb) :is(.breadcrumb-separator, li > .bi-chevron-left) {
+  display: inline-grid;
+  width: 14px;
+  height: 18px;
+  margin-inline: 1px;
+  flex: 0 0 14px;
+  place-items: center;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: rgba(255, 212, 71, 0.72);
+  font-size: 9px;
+}
+
+.page-hero :is(.article-breadcrumb, .cart-breadcrumb) :is(.breadcrumb-current, [aria-current]) {
+  border-color: var(--industrial-yellow);
+  background: var(--industrial-yellow);
+  color: #17324b;
+  font-weight: 700;
+}
+
+.page-hero :is(.article-breadcrumb, .cart-breadcrumb) :is(.breadcrumb-current, [aria-current]) i {
+  color: var(--industrial-navy) !important;
+  filter: none;
+}
+
+.page-hero :is(.article-breadcrumb, .cart-breadcrumb) a:is(:hover, :focus-visible) {
+  border-color: rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  transform: none;
+}
+
+.page-hero :is(.article-breadcrumb, .cart-breadcrumb) a:focus-visible {
+  outline: 2px solid #ffd447;
+  outline-offset: 2px;
+}
+
+@media (max-width: 575px) {
+  .page-hero :is(.article-breadcrumb, .cart-breadcrumb) {
+    min-height: 44px;
+    padding: 4px 6px;
+  }
+
+  .page-hero :is(.article-breadcrumb, .cart-breadcrumb) :is(a, .breadcrumb-current, [aria-current]) {
+    min-height: 34px;
+    padding: 3px 8px;
   }
 }
