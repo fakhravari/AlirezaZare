@@ -1,0 +1,430 @@
+@media (max-width: 767px) {
+  .product-card .product-info h3,
+  .search-product.product-card .product-info h3,
+  .showcase-card-body h3,
+  .rail-card h3,
+  #productView .product-detail-related-card .product-info h3 {
+    font-size: 12px !important;
+    line-height: 1.5;
+  }
+
+  .product-card-actions {
+    top: 8px;
+    left: 8px;
+    gap: 6px;
+  }
+
+  .product-card-actions > :is(.favorite, .compare-trigger) {
+    width: 34px !important;
+    min-width: 34px !important;
+    height: 34px !important;
+    min-height: 34px !important;
+    font-size: 14px !important;
+  }
+
+  .product-card > .add-cart,
+  .search-product.product-card > .search-add-cart,
+  .showcase-card-body > .add-cart,
+  .rail-card > .add-cart,
+  .product-detail-related-card > .add-cart {
+    position: relative !important;
+    height: 36px;
+    min-height: 36px !important;
+    flex: 0 0 36px;
+    padding: 5px 8px;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  .product-card > .add-cart,
+  .search-product.product-card > .search-add-cart,
+  .showcase-card-body > .add-cart,
+  .rail-card > .add-cart,
+  .product-detail-related-card > .add-cart {
+    gap: 5px;
+    font-size: 0 !important;
+    flex-direction: row;
+    flex-wrap: nowrap;
+  }
+
+  .product-card > .add-cart::after,
+  .search-product.product-card > .search-add-cart::after,
+  .showcase-card-body > .add-cart::after,
+  .rail-card > .add-cart::after,
+  .product-detail-related-card > .add-cart::after {
+    content: "افزودن به سبد";
+    font-size: 10px;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .product-card > .add-cart > i,
+  .search-product.product-card > .search-add-cart > i,
+  .showcase-card-body > .add-cart > i,
+  .rail-card > .add-cart > i,
+  .product-detail-related-card > .add-cart > i {
+    flex: 0 0 auto;
+    font-size: 14px !important;
+  }
+
+  .add-cart-confirmation {
+    font-size: 10px;
+  }
+
+  .mobile-page--home-index #collection > .container {
+    width: 100%;
+    max-width: 100%;
+    padding-right: 8px;
+    padding-left: 8px;
+  }
+
+  .mobile-page--home-index #productGrid {
+    --bs-gutter-x: 8px;
+    --bs-gutter-y: 10px;
+  }
+
+  .mobile-page--home-index #productGrid > .product-col {
+    flex: 0 0 50%;
+    max-width: 50%;
+    min-width: 0;
+  }
+
+  .mobile-page--brands-index .brands-catalogue .brands-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .mobile-page--brands-details .brand-detail-page .brand-detail-content {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .mobile-page--about-index .about-page,
+  .mobile-page--contact-index .contact-section,
+  .mobile-page--cart-index .cart-page-main,
+  .mobile-page--checkout-index .invoice-page,
+  .mobile-page--compare-index .compare-page,
+  .mobile-page--product-details main.flow-main,
+  .mobile-page--profile-index main.flow-main,
+  .mobile-page--profile-orders main.flow-main,
+  .mobile-page--profile-addresses main.flow-main,
+  .mobile-page--profile-favorites main.flow-main,
+  .mobile-page--favorites-index main.flow-main,
+  .mobile-page--magazine-index .journal-page,
+  .mobile-page--magazine-details .article-page,
+  .mobile-page--faq-index .customer-service-main,
+  .mobile-page--shipping-index .customer-service-main,
+  .mobile-page--tracking-index .customer-service-main,
+  .mobile-page--warranty-index .customer-service-main,
+  .mobile-page--legal-terms .legal-main,
+  .mobile-page--legal-returns .legal-main,
+  .mobile-page--legal-privacy .legal-main,
+  .mobile-page--error-index main {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .mobile-page--about-index .about-page .container,
+  .mobile-page--contact-index .contact-section .container,
+  .mobile-page--contact-index .contact-shortcuts .container,
+  .mobile-page--brands-index .brands-catalogue .container,
+  .mobile-page--brands-details .brand-detail-page .container,
+  .mobile-page--magazine-index .journal-archive,
+  .mobile-page--magazine-details .article-content-section > .container {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .mobile-page--contact-index .contact-layout,
+  .mobile-page--contact-index .contact-shortcuts-grid,
+  .mobile-page--checkout-index .invoice-page > .flow-grid,
+  .mobile-page--magazine-details .article-content-section .article-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .mobile-page--about-index .story-copy p,
+  .mobile-page--about-index .about-journey-section .timeline-item p {
+    word-spacing: normal;
+  }
+
+  .mobile-page--profile-index .account-section .flow-cards,
+  .mobile-page--profile-orders .account-section .flow-cards,
+  .mobile-page--profile-addresses .account-section .flow-cards,
+  .mobile-page--profile-favorites .account-section .flow-cards,
+  .mobile-page--favorites-index #favoritesView .flow-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .mobile-page--product-index .search-page .search-page-results {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .mobile-page--favorites-index main.flow-main.container {
+    width: 100%;
+    max-width: 100%;
+    padding-right: 8px;
+    padding-left: 8px;
+  }
+
+  .mobile-page--profile-favorites .account-content {
+    padding-right: 8px;
+    padding-left: 8px;
+  }
+
+  .mobile-page--favorites-index #favoritesView .flow-cards,
+  .mobile-page--profile-favorites #favoritesView .flow-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px;
+  }
+
+  .mobile-page--favorites-index #favoritesView .favorite-item-card,
+  .mobile-page--profile-favorites #favoritesView .favorite-item-card {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 0;
+    padding: 0;
+  }
+
+  .mobile-page--favorites-index #favoritesView .favorite-item-card > a,
+  .mobile-page--profile-favorites #favoritesView .favorite-item-card > a {
+    min-width: 0;
+  }
+
+  .mobile-page--favorites-index #favoritesView .favorite-item-card .flow-photo,
+  .mobile-page--profile-favorites #favoritesView .favorite-item-card .flow-photo {
+    height: 126px;
+    aspect-ratio: auto;
+    object-fit: cover;
+  }
+
+  .mobile-page--favorites-index #favoritesView .favorite-item-card h2,
+  .mobile-page--profile-favorites #favoritesView .favorite-item-card h2 {
+    min-height: 3.2em;
+    margin: 8px 8px 0;
+    font-size: 12px;
+    line-height: 1.6;
+  }
+
+  .mobile-page--favorites-index #favoritesView .favorite-item-card > p,
+  .mobile-page--profile-favorites #favoritesView .favorite-item-card > p {
+    min-height: 42px;
+    margin: auto 8px 6px;
+    font-size: 12px;
+  }
+
+  .mobile-page--favorites-index #favoritesView .favorite-item-card .list-remove-button,
+  .mobile-page--profile-favorites #favoritesView .favorite-item-card .list-remove-button {
+    width: calc(100% - 16px);
+    min-height: 34px;
+    margin: 0 8px 8px;
+    padding: 5px;
+    font-size: 11px;
+  }
+
+  .mobile-page--product-details #productView .product-detail-related-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .mobile-page--product-details #productView .product-detail-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 520px) {
+  .mobile-page--brands-index .brands-catalogue .brands-grid,
+  .mobile-page--profile-index .account-section .flow-cards,
+  .mobile-page--profile-orders .account-section .flow-cards,
+  .mobile-page--profile-addresses .account-section .flow-cards {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .mobile-page--favorites-index #favoritesView .flow-cards,
+  .mobile-page--profile-favorites #favoritesView .flow-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px;
+  }
+
+  .mobile-page--about-index .about-page .container,
+  .mobile-page--contact-index .contact-section .container,
+  .mobile-page--contact-index .contact-shortcuts .container,
+  .mobile-page--brands-index .brands-catalogue .container,
+  .mobile-page--brands-details .brand-detail-page .container,
+  .mobile-page--magazine-index .journal-archive,
+  .mobile-page--magazine-details .article-content-section > .container,
+  .mobile-page--legal-terms .legal-main,
+  .mobile-page--legal-returns .legal-main,
+  .mobile-page--legal-privacy .legal-main,
+  .mobile-page--error-index main {
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+}
+
+@media (max-width: 389px) {
+  .mobile-page--home-index #productGrid > .product-col .product-image {
+    height: 136px !important;
+    min-height: 136px !important;
+    max-height: 136px !important;
+  }
+
+  .mobile-page--home-index #productGrid > .product-col .product-info {
+    min-height: 112px;
+    padding: 9px 8px 7px !important;
+  }
+
+  .mobile-page--home-index #productGrid > .product-col .product-info h3 {
+    min-height: 42px;
+    font-size: 11.5px !important;
+    line-height: 1.55;
+  }
+
+  .mobile-page--home-index #productGrid > .product-col .product-info > p {
+    font-size: 12px;
+  }
+
+  .mobile-page--home-index #productGrid > .product-col .product-info > p.has-discount {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    white-space: normal;
+  }
+
+  .mobile-page--home-index #productGrid > .product-col .product-price-current {
+    max-width: 100%;
+    font-size: 11px !important;
+    line-height: 1.5;
+  }
+
+  .mobile-page--home-index #productGrid > .product-col .product-price-current small {
+    font-size: 9px !important;
+  }
+
+  .mobile-page--home-index #productGrid > .product-col .product-price-deal {
+    display: flex !important;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .mobile-page--home-index #productGrid > .product-col .price-old {
+    font-size: 9px !important;
+  }
+
+  .mobile-page--home-index #productGrid > .product-col .product-price-discount {
+    min-height: 20px;
+    padding: 2px 6px;
+    font-size: 10px;
+  }
+
+  .mobile-page--home-index #productGrid > .product-col > .add-cart {
+    display: flex !important;
+    width: calc(100% - 16px) !important;
+    min-width: 0;
+    height: 36px;
+    min-height: 36px !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin: 0 8px 8px !important;
+    padding: 7px 4px;
+    font-size: 0 !important;
+    line-height: 1.25;
+    white-space: nowrap;
+    word-break: keep-all;
+    overflow-wrap: normal;
+  }
+}
+
+@media (max-width: 575px) {
+  footer .footer-main > .col-6 {
+    min-width: 0;
+    padding: 12px 10px 10px;
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: 14px;
+    background: linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.055),
+      rgba(255, 255, 255, 0.018)
+    );
+  }
+
+  footer .footer-main > .col-6 h4 {
+    margin: 0 0 8px;
+    padding-bottom: 10px;
+    color: #f2cc70;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  footer .footer-main > div:not(:first-child).col-6 a {
+    position: relative;
+    display: block;
+    width: 100%;
+    min-width: 0;
+    margin: 0;
+    padding: 5px 11px 5px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    color: rgba(244, 247, 249, 0.82) !important;
+    font-size: 12.5px;
+    line-height: 1.7;
+    overflow-wrap: anywhere;
+  }
+
+  footer .footer-main > div:not(:first-child).col-6 a::before {
+    position: absolute;
+    top: 13px;
+    right: 0;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: #e8c36b;
+    content: "";
+  }
+
+  footer .footer-main > div:not(:first-child).col-6 a:last-child {
+    border-bottom: 0;
+  }
+
+  footer .footer-main > div:not(:first-child).col-6 a:hover {
+    color: #ffd45a !important;
+    transform: none;
+  }
+
+  footer .trust-badges {
+    flex-wrap: nowrap;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  footer .trust-badges .trust-badge-image {
+    flex: 0 0 calc((100% - 12px) / 3);
+    width: calc((100% - 12px) / 3);
+    min-width: 0;
+    height: auto;
+    aspect-ratio: 1;
+    object-fit: contain;
+  }
+}
+
+@media (max-width: 359px) {
+  footer .footer-main > .col-6 {
+    padding: 10px 8px 8px;
+  }
+
+  footer .footer-main > .col-6 h4 {
+    font-size: 13px;
+  }
+
+  footer .footer-main > div:not(:first-child).col-6 a {
+    padding-right: 9px;
+    font-size: 11.5px;
+  }
+}

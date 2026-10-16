@@ -1,4 +1,9 @@
 @model PageModel
+@{
+    string pageController = ViewContext.RouteData.Values["controller"]?.ToString()?.ToLowerInvariant() ?? "home";
+    string pageAction = ViewContext.RouteData.Values["action"]?.ToString()?.ToLowerInvariant() ?? "index";
+    string mobilePageClass = $"mobile-page--{pageController}-{pageAction}";
+}
 <!doctype html>
 <html lang="fa" dir="rtl">
 <head>
@@ -56,8 +61,12 @@
     <link href="~/Shop/css/layout/electrical-theme.css" rel="stylesheet" asp-append-version="true"/>
     <link href="~/Shop/css/layout/industrial-system.css" rel="stylesheet" asp-append-version="true"/>
     <link href="~/Shop/css/store/shared-product-card.css" rel="stylesheet" asp-append-version="true"/>
+    @await RenderSectionAsync("PageStyles", false)
+    <link href="~/Shop/css/layout/content-typography.css" rel="stylesheet" asp-append-version="true"/>
+    <link href="~/Shop/css/pages/search-mobile.css" rel="stylesheet" asp-append-version="true"/>
+    <link href="~/Shop/css/layout/mobile-pages.css" rel="stylesheet" asp-append-version="true"/>
 </head>
-<body class="@(Model.IsHome ? "home-page" : "inner-page")">
+<body class="@(Model.IsHome ? "home-page" : "inner-page") @mobilePageClass">
 @if (Model.IsHome)
 {
     <header class="hero" id="home">

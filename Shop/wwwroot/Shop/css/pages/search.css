@@ -10,7 +10,7 @@
 }
 
 /* Slim product badges with larger labels, matching the home page. */
-.search-product .search-product-image > span {
+.search-product .search-page-card-media > span {
   top: 16px;
   right: 15px;
   min-width: 62px;
@@ -25,7 +25,8 @@
   box-shadow: 0 5px 13px rgba(4, 13, 26, 0.13);
 }
 
-.search-product .search-product-image > .favorite {
+.search-product .search-page-card-media > .favorite {
+  position: absolute;
   top: 13px;
   left: 15px;
   width: 38px;
@@ -39,7 +40,7 @@
   box-shadow: 0 5px 13px rgba(4, 13, 26, 0.13);
 }
 
-.search-product .search-product-image > .favorite i {
+.search-product .search-page-card-media > .favorite i {
   display: grid;
   width: 100%;
   height: 100%;
@@ -49,7 +50,7 @@
 }
 
 @media (max-width: 575px) {
-  .search-product .search-product-image > span {
+  .search-product .search-page-card-media > span {
     top: 13px;
     right: 12px;
     min-width: 56px;
@@ -59,7 +60,7 @@
     font-size: 12px;
   }
 
-  .search-product .search-product-image > .favorite {
+  .search-product .search-page-card-media > .favorite {
     top: 10px;
     left: 12px;
     width: 36px;
@@ -89,7 +90,7 @@
   transform: translateY(-6px);
 }
 
-.search-product .search-product-image {
+.search-product .search-page-card-media {
   height: 335px;
   border-bottom: 1px solid
     color-mix(in srgb, var(--industrial-yellow) 14%, white);
@@ -97,35 +98,35 @@
   background: var(--industrial-bg);
 }
 
-.search-product .search-product-image > a {
+.search-product .search-page-card-media > a {
   display: block;
   width: 100%;
   height: 100%;
 }
 
-.search-product .search-product-image img {
+.search-product .search-page-card-media img {
   display: block;
   object-fit: cover;
   object-position: 50% 50%;
   transition: transform 0.7s ease;
 }
 
-.search-product:hover .search-product-image img {
+.search-product:hover .search-page-card-media img {
   transform: scale(1.05);
 }
 
-.search-product.product-card .search-product-body.product-info {
+.search-product.product-card .search-page-card-content {
   display: flex;
   min-height: 122px;
   padding: 21px 20px 15px;
   flex-direction: column;
 }
 
-.search-product-heading {
+.search-page-card-heading {
   min-height: 55px;
 }
 
-.search-product-heading small {
+.search-page-card-heading small {
   display: block;
   margin-bottom: 5px;
   color: var(--industrial-yellow-dark);
@@ -134,7 +135,7 @@
   letter-spacing: 0.06em;
 }
 
-.search-product-heading h3 {
+.search-page-card-heading h3 {
   margin: 0;
   color: var(--industrial-navy);
   font-size: 18px;
@@ -142,7 +143,7 @@
   line-height: 1.75;
 }
 
-.search-product .search-product-price {
+.search-product .search-page-card-price {
   min-height: auto;
   margin: 5px 0 13px;
   color: var(--industrial-navy);
@@ -151,7 +152,7 @@
   line-height: 1.7;
 }
 
-.search-product .search-product-price small {
+.search-product .search-page-card-price small {
   margin-right: 3px;
   color: var(--industrial-muted);
   font-size: 10px;
@@ -204,12 +205,12 @@
 }
 
 @media (max-width: 575px) {
-  .search-product .search-product-image {
+  .search-product .search-page-card-media {
     height: 335px;
     padding: 0;
   }
 
-  .search-product .search-product-body.product-info {
+  .search-product .search-page-card-content {
     min-height: 148px;
     padding: 18px 17px 14px;
   }
@@ -789,14 +790,14 @@ select {
   transform: translateY(-5px);
 }
 
-.search-product-image {
+.search-page-card-media {
   position: relative;
   height: 230px;
   overflow: hidden;
   background: var(--industrial-bg);
 }
 
-.search-product-image img {
+.search-page-card-media img {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -807,7 +808,7 @@ select {
   transform: scale(1.04);
 }
 
-.search-product-image span {
+.search-page-card-media span {
   position: absolute;
   top: 12px;
   right: 12px;
@@ -818,7 +819,7 @@ select {
   font-size: 8px;
 }
 
-.search-product-body {
+.search-page-card-content {
   padding: 17px;
 }
 
@@ -1276,7 +1277,7 @@ select {
     grid-template-columns: 1fr;
   }
 
-  .search-product-image {
+  .search-page-card-media {
     height: 280px;
   }
 }
@@ -1542,6 +1543,21 @@ select {
   .filter-group.open .filter-options {
     grid-template-columns: 1fr;
   }
+}
+
+.search-product .search-page-card-media > .compare-trigger {
+  position: absolute;
+  top: 13px;
+  right: auto;
+  bottom: auto;
+  left: 60px;
+  z-index: 5;
+  width: 38px;
+  min-width: 38px;
+  height: 38px;
+  min-height: 38px;
+  padding: 0;
+  font-size: 15px;
 }
 
 .search-main :is(

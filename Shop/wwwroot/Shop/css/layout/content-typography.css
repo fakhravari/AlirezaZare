@@ -1,0 +1,52 @@
+body[dir="rtl"].home-page main p,
+body[dir="rtl"].inner-page main p,
+body[dir="rtl"].inner-page .page-hero p,
+body[dir="rtl"] footer p {
+  text-align: justify;
+  text-align-last: start;
+  line-height: 1.85;
+}
+
+body[dir="rtl"] :is(.home-page, .inner-page) main
+  :is(
+    .product-card,
+    .product-info,
+    .search-product,
+    .search-page-card,
+    .showcase-card,
+    .showcase-card-body,
+    .rail-card,
+    .product-detail-price,
+    .product-detail-related-card
+  )
+  p {
+  text-align: right;
+  text-align-last: right;
+  line-height: 1.55;
+}
+
+body[dir="rtl"] :is(.home-page, .inner-page) main
+  :is(.flow-empty, .cart-empty, .compare-empty, .empty-results, .overview-empty)
+  p {
+  text-align: center;
+  text-align-last: center;
+  line-height: 1.8;
+}
+
+body[dir="rtl"] :is(.home-page, .inner-page) main p:is(
+    .text-center,
+    .blog-page-status
+  ) {
+  text-align: center;
+  text-align-last: center;
+}
+
+body[dir="rtl"] :is(.home-page, .inner-page) main p:is(.text-start, [role="status"], .article-share-status) {
+  text-align: start;
+  text-align-last: start;
+}
+
+body[dir="rtl"] :is(.home-page, .inner-page) main p.text-end {
+  text-align: end;
+  text-align-last: end;
+}

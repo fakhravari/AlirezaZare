@@ -231,7 +231,7 @@ document.addEventListener("DOMContentLoaded", () => {
       syncPayment();
       if (payment.disabled) return;
       document.querySelector("#paymentStatus").textContent =
-        "درگاه پرداخت در نسخه نمایشی فعال نیست؛ سفارشی ثبت یا پرداخت نشده است. برای نهایی کردن خرید با ۰۹۱۷۷۷۶۴۳۲۴ تماس بگیرید.";
+        "درگاه پرداخت در نسخه نمایشی فعال نیست؛ سفارشی ثبت یا پرداخت نشده است. برای نهایی کردن خرید با 03969455457 تماس بگیرید.";
     });
     document.addEventListener("hn:cart-change", syncPayment);
   }

@@ -1,0 +1,338 @@
+@media (max-width: 767px) {
+  .search-page {
+    width: calc(100% - 16px) !important;
+    max-width: none !important;
+    padding: 16px 0 28px !important;
+  }
+
+  .search-page .search-page-results {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .search-page .search-page-card {
+    display: grid !important;
+    box-sizing: border-box;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    height: auto !important;
+    grid-template-rows: 154px 1fr 48px;
+    overflow: hidden;
+    border: 1px solid #dce4ea !important;
+    border-radius: 16px;
+    background: #fff !important;
+    box-shadow: 0 7px 20px rgba(16, 42, 67, 0.08) !important;
+    animation: none !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .search-page .search-page-card:hover {
+    border-color: #d4b04c !important;
+    box-shadow: 0 9px 22px rgba(16, 42, 67, 0.11) !important;
+    transform: none !important;
+  }
+
+  .search-page .search-page-card-media {
+    position: relative;
+    width: 100%;
+    height: 154px !important;
+    min-height: 154px !important;
+    max-height: 154px !important;
+    overflow: hidden;
+    border: 0;
+    border-bottom: 1px solid #e8edf0;
+    border-radius: 0;
+    background: #f2f5f6;
+  }
+
+  .search-page .search-page-card-media > a,
+  .search-page .search-page-card-media img {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .search-page .search-page-card-media img {
+    padding: 0;
+    object-fit: cover;
+    object-position: center;
+  }
+
+  .search-page .search-page-card-media > .favorite,
+  .search-page .search-page-card-media > .compare-trigger {
+    position: absolute;
+    z-index: 2;
+    display: grid;
+    width: 36px;
+    min-width: 36px;
+    height: 36px;
+    min-height: 36px;
+    padding: 0;
+    place-items: center;
+    border: 1px solid rgba(16, 42, 67, 0.08);
+    border-radius: 50%;
+    background: #fff;
+    color: #173852;
+    box-shadow: 0 4px 12px rgba(16, 42, 67, 0.18);
+    font-size: 15px;
+    line-height: 1;
+  }
+
+  .search-page .search-page-card-media > .favorite {
+    top: 10px;
+    left: 10px;
+  }
+
+  .search-page .search-page-card-media > .compare-trigger {
+    top: 52px;
+    left: 10px;
+  }
+
+  .search-page .search-page-card-media > .favorite > i,
+  .search-page .search-page-card-media > .compare-trigger > i {
+    display: grid;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    place-items: center;
+    line-height: 1;
+  }
+
+  .search-page .search-page-card-media > .badge-best {
+    position: absolute;
+    z-index: 2;
+    top: 12px;
+    right: 10px;
+    min-width: 0;
+    height: auto;
+    min-height: 27px;
+    padding: 4px 9px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 999px;
+    background: #102a43;
+    color: #fff;
+    font-size: 10px;
+    line-height: 1.2;
+  }
+
+  .search-page .search-page-card-content {
+    display: grid !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    padding: 10px 11px 6px !important;
+    grid-template-rows: minmax(48px, auto) minmax(58px, 1fr) !important;
+    gap: 5px !important;
+  }
+
+  .search-page .search-page-card-heading {
+    display: block;
+    min-width: 0;
+  }
+
+  .search-page .search-page-card-heading > small {
+    display: none !important;
+  }
+
+  .search-page .search-page-card-title {
+    display: -webkit-box !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    color: #173852 !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    line-height: 1.7;
+    text-align: right;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+  }
+
+  .search-page .search-page-card-title a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .search-page .search-page-card-price {
+    display: flex !important;
+    width: 100%;
+    min-width: 0;
+    min-height: 0 !important;
+    margin: 0 !important;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    color: #102a43 !important;
+    font-size: 13px !important;
+    font-weight: 800 !important;
+    line-height: 1.45;
+    white-space: nowrap;
+  }
+
+  .search-page .search-page-card-price.has-discount {
+    min-height: 58px !important;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .search-page .search-page-card-price .product-price-current {
+    display: block;
+    max-width: 100%;
+    color: #102a43;
+    font-size: 13px;
+    line-height: 1.4;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .search-page .search-page-card-price .product-price-current small {
+    margin-inline-start: 3px;
+    font-size: 10px;
+  }
+
+  .search-page .search-page-card-price .product-price-deal {
+    display: flex;
+    width: 100%;
+    min-width: 0;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .search-page .search-page-card-price .price-old {
+    color: #98a9b8;
+    font-size: 10px;
+    white-space: nowrap;
+  }
+
+  .search-page .search-page-card-price .product-price-discount {
+    display: inline-flex;
+    min-height: 21px;
+    padding: 2px 7px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: #fff0f0;
+    color: #cf4651;
+    font-size: 10px;
+    line-height: 1;
+  }
+
+  .search-page .search-page-card-action {
+    display: flex;
+    width: calc(100% - 20px) !important;
+    min-width: 0;
+    min-height: 38px !important;
+    margin: 0 10px 10px;
+    padding: 6px 8px;
+    align-items: center;
+    justify-content: center;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 7px;
+    border: 0 !important;
+    border-radius: 10px;
+    background: #102a43 !important;
+    color: #fff !important;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.3;
+    white-space: nowrap;
+  }
+
+  .search-page .search-page-card-action > i {
+    display: grid;
+    width: 16px;
+    height: 16px;
+    flex: 0 0 16px;
+    margin: 0;
+    place-items: center;
+    color: #f6c515;
+    font-size: 14px;
+    line-height: 1;
+  }
+
+  .search-page .search-page-card-action-label {
+    min-width: 0;
+    flex: 0 1 auto;
+    white-space: nowrap;
+  }
+
+  .search-page .search-page-card-action-compact {
+    display: none;
+  }
+}
+
+@media (max-width: 359px) {
+  .search-page .search-page-results {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .search-page .search-page-card {
+    grid-template-rows: 132px 1fr 42px;
+  }
+
+  .search-page .search-page-card-media {
+    height: 132px !important;
+    min-height: 132px !important;
+    max-height: 132px !important;
+  }
+
+  .search-page .search-page-card-content {
+    padding: 8px 7px 4px !important;
+    grid-template-rows: minmax(42px, auto) minmax(54px, 1fr) !important;
+    gap: 4px !important;
+  }
+
+  .search-page .search-page-card-title {
+    font-size: 11px !important;
+    line-height: 1.6;
+  }
+
+  .search-page .search-page-card-price,
+  .search-page .search-page-card-price .product-price-current {
+    font-size: 11px !important;
+  }
+
+  .search-page .search-page-card-price .price-old {
+    font-size: 9px;
+  }
+
+  .search-page .search-page-card-action {
+    width: calc(100% - 14px) !important;
+    min-height: 34px !important;
+    margin: 0 7px 8px;
+    padding: 5px 4px;
+    gap: 5px;
+    font-size: 10px;
+  }
+
+  .search-page .search-page-card-action-label {
+    display: none;
+  }
+
+  .search-page .search-page-card-action-compact {
+    display: inline;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 319px) {
+  .search-page .search-page-results {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .search-page .search-page-card {
+    grid-template-rows: 142px 1fr 42px;
+  }
+
+  .search-page .search-page-card-media {
+    height: 142px !important;
+    min-height: 142px !important;
+    max-height: 142px !important;
+  }
+}

@@ -7,7 +7,7 @@ public sealed class FavoritesController : PageController
 {
     public async Task<IActionResult> Index()
     {
-        PageModel model = new(new SeoModel("علاقه‌مندی‌ها | کمپانی علی‌رضا زارع", "علاقه‌مندی‌ها؛ انتخاب‌هایی برای بعد"));
+        PageModel model = new(new SeoModel("علاقه‌مندی‌ها | ندا اولیائی", "علاقه‌مندی‌ها؛ انتخاب‌هایی برای بعد"));
         return await PageAsync(model);
     }
 }

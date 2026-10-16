@@ -365,13 +365,24 @@
       button,
     );
     if (!items?.some((item) => item.id === String(button.dataset.id))) return;
-    const originalMarkup = button.innerHTML;
+    window.clearTimeout(button._cartFeedbackTimer);
+    button.querySelector(".add-cart-confirmation")?.remove();
     button.classList.add("added");
-    button.innerHTML = '<i class="bi bi-check2"></i> به سبد اضافه شد';
-    window.setTimeout(() => {
+    const confirmation = document.createElement("span");
+    confirmation.className = "add-cart-confirmation";
+    confirmation.setAttribute("role", "status");
+    confirmation.setAttribute("aria-live", "polite");
+    const confirmationIcon = document.createElement("i");
+    confirmationIcon.className = "bi bi-check2";
+    confirmationIcon.setAttribute("aria-hidden", "true");
+    const confirmationText = document.createElement("span");
+    confirmationText.textContent = "به سبد خرید اضافه شد";
+    confirmation.append(confirmationIcon, confirmationText);
+    button.append(confirmation);
+    button._cartFeedbackTimer = window.setTimeout(() => {
       if (!button.isConnected) return;
+      confirmation.remove();
       button.classList.remove("added");
-      button.innerHTML = originalMarkup;
     }, 1400);
   });
   window.addEventListener("storage", (event) => {

@@ -23,7 +23,7 @@ public sealed class ProfileController : PageController
 
     private Task<ViewResult> ProfilePage(string title, string description)
     {
-        PageModel model = new(new SeoModel($"{title} | کمپانی علی‌رضا زارع", description), "~/Views/Profile/Index.cshtml");
+        PageModel model = new(new SeoModel($"{title} | ندا اولیائی", description), "~/Views/Profile/Index.cshtml");
         return PageAsync(model);
     }
 }

@@ -23,7 +23,7 @@
     </div>
 </header>
 
-<main class="search-main container">
+<main class="search-main search-page container">
     <button
         class="mobile-filter-toggle"
         id="mobileFilterToggle"
@@ -166,7 +166,7 @@
             <p><b id="resultCount">۰</b> محصول پیدا شد</p>
             <div class="active-chips" id="activeChips"></div>
         </div>
-        <div class="product-results" id="productResults"></div>
+        <div class="product-results search-page-results" id="productResults"></div>
         <div class="empty-results" id="emptyResults" hidden>
             <i class="bi bi-search"></i>
             <h2>محصولی پیدا نشد</h2>
@@ -413,6 +413,10 @@
 
 @section Styles {
     <link href="~/Shop/css/pages/search.css" rel="stylesheet" asp-append-version="true"/>
+}
+
+@section PageStyles {
+    <link href="~/Shop/css/pages/search-mobile.css" rel="stylesheet" asp-append-version="true"/>
 }
 
 @section Scripts {

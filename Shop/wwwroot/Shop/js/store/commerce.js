@@ -77,7 +77,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const p = catalog.find((p) => p.id === productId);
     if (!p) productView.innerHTML = empty("محصول پیدا نشد");
     else {
-      document.title = `${p.name} | علی‌رضا زارع`;
+      document.title = `${p.name} | ندا اولیائی`;
       const isFavorite = favorites().includes(String(p.id));
       const selectedVariants = p.variants
         ? Object.fromEntries(
@@ -168,7 +168,7 @@ document.addEventListener("DOMContentLoaded", () => {
             rating: rating || 0,
             reply:
               type === "questions"
-                ? p.id === 1 && [0, 3, 8].includes(index)
+                ? [0, 3, 8].includes(index)
                   ? reply || ""
                   : ""
                 : reply || "",
@@ -934,7 +934,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.querySelector("#trackingForm")?.addEventListener("submit", (e) => {
     e.preventDefault();
     document.querySelector("#trackingStatus").textContent =
-      "استعلام آنلاین فعال نیست. برای دریافت وضعیت واقعی سفارش با پشتیبانی ۰۹۱۷۷۷۶۴۳۲۴ تماس بگیرید.";
+      "استعلام آنلاین فعال نیست. برای دریافت وضعیت واقعی سفارش با پشتیبانی 03969455457 تماس بگیرید.";
   });
   function renderFavorites() {
     const view = document.querySelector("#favoritesView");

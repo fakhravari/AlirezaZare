@@ -9,7 +9,7 @@ public sealed class ProductController : PageController
     public async Task<IActionResult> Index()
     {
         PageModel model = new(
-            new SeoModel("جستجوی پیشرفته برق و ابزار | علی‌رضا زارع", "جستجو و فیلتر ابزار برقی، قطعات الکترونیکی و تجهیزات فنی علی‌رضا زارع"),
+            new SeoModel("جستجوی پیشرفته برق و ابزار | ندا اولیائی", "جستجو و فیلتر ابزار برقی، قطعات الکترونیکی و تجهیزات فنی ندا اولیائی"),
             ViewName: "List");
         return await PageAsync(model);
     }
@@ -23,7 +23,7 @@ public sealed class ProductController : PageController
 
         PageModel<ProductDetailsModel> model = new(
             new ProductDetailsModel(id),
-            new SeoModel("جزئیات محصول | فروشگاه برق و ابزار علی‌رضا زارع", "مشخصات، قیمت و شرایط خرید ابزار و تجهیزات برق از برندهای معتبر"));
+            new SeoModel("جزئیات محصول | فروشگاه برق و ابزار ندا اولیائی", "مشخصات، قیمت و شرایط خرید ابزار و تجهیزات برق از برندهای معتبر"));
         return await PageAsync(model);
     }
 

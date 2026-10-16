@@ -8070,6 +8070,49 @@ html
   transform: none !important;
 }
 
+:is(
+    .product-card > .add-cart,
+    .search-product.product-card > .search-add-cart,
+    .showcase-card-body > .add-cart,
+    .rail-card > .add-cart,
+    .product-detail-related-card > .add-cart,
+    .product-card-actions > .add-cart
+  ).added {
+  position: relative !important;
+  overflow: hidden;
+  color: transparent !important;
+}
+
+:is(
+    .product-card > .add-cart,
+    .search-product.product-card > .search-add-cart,
+    .showcase-card-body > .add-cart,
+    .rail-card > .add-cart,
+    .product-detail-related-card > .add-cart,
+    .product-card-actions > .add-cart
+  ).added > :not(.add-cart-confirmation) {
+  visibility: hidden !important;
+}
+
+.add-cart-confirmation {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  color: var(--industrial-navy);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.product-card-actions > .add-cart .add-cart-confirmation > span {
+  display: none;
+}
+
 .product-card > .add-cart.added > i,
 .search-product.product-card > .search-add-cart.added > i,
 .showcase-card-body > .add-cart.added > i,

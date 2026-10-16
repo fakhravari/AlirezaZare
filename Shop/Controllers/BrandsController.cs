@@ -18,7 +18,7 @@ public sealed class BrandsController : PageController
     public async Task<IActionResult> Index()
     {
         PageModel<IReadOnlyList<BrandProfileModel>> model = new(BrandCatalog.All,
-            new SeoModel("برندهای ابزار و تجهیزات برق | کمپانی علی‌رضا زارع", "برندهای معتبر ابزار برقی، ابزار اندازه‌گیری و تجهیزات فنی"));
+            new SeoModel("برندهای ابزار و تجهیزات برق | ندا اولیائی", "برندهای معتبر ابزار برقی، ابزار اندازه‌گیری و تجهیزات فنی"));
         return await PageAsync(model);
     }
 
@@ -36,7 +36,7 @@ public sealed class BrandsController : PageController
         PageModel<BrandProfileModel> model = new(
             brand,
             new SeoModel(
-                $"برند {brand.PersianName}؛ محصولات و راهنمای انتخاب | علی‌رضا زارع",
+                $"برند {brand.PersianName}؛ محصولات و راهنمای انتخاب | ندا اولیائی",
                 brand.Summary,
                 CanonicalUrl: $"/brands/{brand.Slug}",
                 ImageUrl: "/Shop/images/heroes/hero-electrical-editorial.png"));

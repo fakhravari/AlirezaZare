@@ -7,7 +7,7 @@ public sealed class WarrantyController : PageController
 {
     public async Task<IActionResult> Index()
     {
-        PageModel model = new(new SeoModel("ضمانت اصالت | کمپانی علی‌رضا زارع", "ضمانت اصالت؛ اطمینان، با جزئیات روشن"));
+        PageModel model = new(new SeoModel("ضمانت اصالت | ندا اولیائی", "ضمانت اصالت؛ اطمینان، با جزئیات روشن"));
         return await PageAsync(model);
     }
 }
