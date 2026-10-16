@@ -70,16 +70,18 @@ public sealed class BrandsController : PageController
             Slug = source.GetProperty("slug").GetString(),
             brand.Name,
             PersianName = source.GetProperty("persianName").GetString(),
-            CompanyIntroductions = source.GetProperty("companyIntroductions"),
+            CompanyIntroductions = source.GetProperty("companyIntroductions").Clone(),
             Established = source.GetProperty("established").GetString(),
             Country = source.GetProperty("country").GetString(),
             OfficialUrl = source.GetProperty("officialUrl").GetString(),
             Specialization = source.GetProperty("specialization").GetString(),
             FeaturedProducts = source.GetProperty("featuredProducts").GetString(),
-            ProductFamilies = source.GetProperty("productFamilies"),
-            Strengths = source.GetProperty("strengths"),
+            ProductFamilies = source.GetProperty("productFamilies").Clone(),
+            Strengths = source.GetProperty("strengths").Clone(),
             Audience = source.GetProperty("audience").GetString(),
-            ShoppingAdvice = source.GetProperty("shoppingAdvice").GetString()
+            ShoppingAdvice = source.GetProperty("shoppingAdvice").GetString(),
+            FullPastedText = source.GetProperty("fullPastedText").GetString(),
+            FullDocumentText = source.GetProperty("fullDocumentText").GetString()
         });
     }
 }

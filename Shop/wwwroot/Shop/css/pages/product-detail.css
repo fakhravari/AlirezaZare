@@ -159,6 +159,66 @@
   transition: transform 160ms ease;
 }
 
+#productView .product-brand-full-source {
+  margin-top: 20px;
+  overflow: hidden;
+  border: 1px solid #dfe6eb;
+  border-radius: 14px;
+  background: #fff;
+}
+
+#productView .product-brand-full-source > summary {
+  display: flex;
+  min-height: 52px;
+  padding: 12px 16px;
+  align-items: center;
+  gap: 9px;
+  color: #153454;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 800;
+  list-style: none;
+}
+
+#productView .product-brand-full-source > summary::-webkit-details-marker {
+  display: none;
+}
+
+#productView .product-brand-full-source > summary::after {
+  margin-inline-start: auto;
+  color: #a98248;
+  content: "+";
+  font-size: 20px;
+}
+
+#productView .product-brand-full-source[open] > summary::after {
+  content: "−";
+}
+
+#productView .product-brand-full-source > summary i {
+  color: #a98248;
+}
+
+#productView .product-brand-full-source > section {
+  padding: 18px;
+  border-top: 1px solid #e6ebef;
+  background: #fbfcfd;
+}
+
+#productView .product-brand-full-source > section h3 {
+  margin: 0 0 12px;
+  color: #153454;
+  font-size: 15px;
+}
+
+#productView .product-brand-full-source > section > div {
+  color: #526477;
+  font-size: 13px;
+  line-height: 2;
+  overflow-wrap: anywhere;
+  white-space: pre-line;
+}
+
 #productView .product-brand-page-link:hover i,
 #productView .product-brand-page-link:focus-visible i {
   transform: translateX(-4px);
