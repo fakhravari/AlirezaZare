@@ -21,7 +21,7 @@
             </nav>
             <span class="page-kicker"><i class="bi bi-patch-check" aria-hidden="true"></i>معرفی برند و راهنمای انتخاب</span>
             <h1>برند <em>@brand.PersianName</em></h1>
-            <p>@brand.Summary</p>
+            <p>محصولات @brand.PersianName در حوزهٔ @brand.Focus را بشناسید و مشخصات هر مدل را با نیاز کاری خود تطبیق دهید.</p>
             <div class="brand-detail-actions">
                 <a class="brand-detail-primary" href="@shopUrl"><i class="bi bi-shop" aria-hidden="true"></i>مشاهده محصولات @brand.PersianName</a>
                 <a class="brand-detail-secondary" href="@Url.Content("~/brands")"><i class="bi bi-grid" aria-hidden="true"></i>بازگشت به همهٔ برندها</a>
@@ -35,7 +35,17 @@
                 <div class="brand-detail-overview-copy">
                     <span class="brand-detail-eyebrow"><i class="bi bi-bookmark-star" aria-hidden="true"></i>شناخت برند</span>
                     <h2 id="brandOverviewTitle">@brand.Name <em>و حوزهٔ تخصصی آن</em></h2>
-                    <p>@(brand.EditorialContent.Introduction is { Length: > 0 } introduction ? introduction : brand.Editorial ?? $"در این معرفی، {brand.PersianName} را از زاویهٔ {brand.Focus} بررسی می‌کنیم؛ مشخصات هر مدل را با نیاز کاری، سازگاری و اقلام همراه آن بسنجید.")</p>
+                    @if (brand.SourceEditorial?.CompanyIntroductions is { Count: > 0 } introductions)
+                    {
+                        @foreach (string introduction in introductions)
+                        {
+                            <p>@introduction</p>
+                        }
+                    }
+                    else
+                    {
+                        <p>@(brand.EditorialContent.Introduction is { Length: > 0 } introduction ? introduction : brand.Editorial ?? $"در این معرفی، {brand.PersianName} را از زاویهٔ {brand.Focus} بررسی می‌کنیم؛ مشخصات هر مدل را با نیاز کاری، سازگاری و اقلام همراه آن بسنجید.")</p>
+                    }
                     <div class="brand-profile-facts">
                         <div>
                             <span class="brand-profile-fact-icon"><i class="bi bi-tools" aria-hidden="true"></i></span>
@@ -60,7 +70,21 @@
                                 <span><small>آغاز فعالیت برند</small><strong>از @brand.FoundedYear</strong></span>
                             </div>
                         }
+                        @if (!string.IsNullOrWhiteSpace(brand.SourceEditorial?.Country))
+                        {
+                            <div>
+                                <span class="brand-profile-fact-icon"><i class="bi bi-globe2" aria-hidden="true"></i></span>
+                                <span><small>کشور مبدأ</small><strong>@brand.SourceEditorial.Country</strong></span>
+                            </div>
+                        }
                     </div>
+                    @if (brand.SourceEditorial?.Audience is { Length: > 0 } audience)
+                    {
+                        <div class="brand-editorial-audience">
+                            <strong><i class="bi bi-people" aria-hidden="true"></i>مخاطبان اصلی</strong>
+                            <p>@audience</p>
+                        </div>
+                    }
                     <p class="brand-profile-note">تنوع، مشخصات و اقلام همراه میان مدل‌های یک برند متفاوت است؛ پیش از خرید، صفحهٔ هر محصول را جداگانه بررسی کنید.</p>
                     @if (!string.IsNullOrWhiteSpace(brand.OfficialUrl))
                     {
@@ -71,11 +95,72 @@
                 </div>
             </div>
 
-            @if (brand.EditorialContent.Specialization is { Length: > 0 } specialization)
+            @if (brand.SourceEditorial is { } sourceEditorial)
             {
-                <section class="brand-specialization-panel" aria-label="حوزه تخصصی برند">
-                    <span><i class="bi bi-tools" aria-hidden="true"></i>حوزهٔ تخصصی</span>
-                    <p>@specialization</p>
+                <section class="brand-source-content" aria-label="جزئیات معرفی برند">
+                    @if (!string.IsNullOrWhiteSpace(sourceEditorial.Specialization))
+                    {
+                        <div class="brand-specialization-panel">
+                            <span><i class="bi bi-tools" aria-hidden="true"></i>حوزهٔ تخصصی</span>
+                            <p>@sourceEditorial.Specialization</p>
+                        </div>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(sourceEditorial.FeaturedProducts))
+                    {
+                        <div class="brand-source-featured">
+                            <span class="brand-detail-eyebrow"><i class="bi bi-stars" aria-hidden="true"></i>محصولات شاخص</span>
+                            <p>@sourceEditorial.FeaturedProducts</p>
+                        </div>
+                    }
+                    @if (sourceEditorial.ProductFamilies.Count > 0 || sourceEditorial.Strengths.Count > 0)
+                    {
+                        <div class="brand-source-lists">
+                            @if (sourceEditorial.ProductFamilies.Count > 0)
+                            {
+                                <section class="brand-source-list" aria-labelledby="brandFamiliesTitle">
+                                    <h2 id="brandFamiliesTitle"><i class="bi bi-grid" aria-hidden="true"></i>گروه‌های محصول</h2>
+                                    <ul>
+                                        @foreach (string family in sourceEditorial.ProductFamilies)
+                                        {
+                                            <li>@family</li>
+                                        }
+                                    </ul>
+                                </section>
+                            }
+                            @if (sourceEditorial.Strengths.Count > 0)
+                            {
+                                <section class="brand-source-list" aria-labelledby="brandStrengthsTitle">
+                                    <h2 id="brandStrengthsTitle"><i class="bi bi-patch-check" aria-hidden="true"></i>نکات برجسته</h2>
+                                    <ul>
+                                        @foreach (string strength in sourceEditorial.Strengths)
+                                        {
+                                            <li>@strength</li>
+                                        }
+                                    </ul>
+                                </section>
+                            }
+                        </div>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(sourceEditorial.FullPastedText) || !string.IsNullOrWhiteSpace(sourceEditorial.FullDocumentText))
+                    {
+                        <details class="brand-source-originals" open>
+                            <summary><i class="bi bi-file-text" aria-hidden="true"></i>مشاهدهٔ متن کامل منابع و توضیحات</summary>
+                            @if (!string.IsNullOrWhiteSpace(sourceEditorial.FullPastedText))
+                            {
+                                <section>
+                                    <h3>متن ارسالی</h3>
+                                    <p>@sourceEditorial.FullPastedText</p>
+                                </section>
+                            }
+                            @if (!string.IsNullOrWhiteSpace(sourceEditorial.FullDocumentText))
+                            {
+                                <section>
+                                    <h3>محتوای کامل سند</h3>
+                                    <p>@sourceEditorial.FullDocumentText</p>
+                                </section>
+                            }
+                        </details>
+                    }
                 </section>
             }
 
@@ -95,7 +180,7 @@
                         </article>
                     }
                 </div>
-                @if (brand.EditorialContent.ShoppingAdvice is { Length: > 0 } shoppingAdvice)
+                @if (brand.SourceEditorial?.ShoppingAdvice is { Length: > 0 } shoppingAdvice)
                 {
                     <p class="brand-source-shopping-advice"><i class="bi bi-lightbulb" aria-hidden="true"></i><span><strong>نکته‌های خرید بر اساس محتوای ارسالی</strong>@shoppingAdvice</span></p>
                 }

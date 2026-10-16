@@ -17,8 +17,7 @@ public sealed class BrandsController : PageController
     [HttpGet("")]
     public async Task<IActionResult> Index()
     {
-        PageModel<IReadOnlyList<BrandProfileModel>> model = new(
-            BrandCatalog.All,
+        PageModel<IReadOnlyList<BrandProfileModel>> model = new(BrandCatalog.All,
             new SeoModel("برندهای ابزار و تجهیزات برق | کمپانی علی‌رضا زارع", "برندهای معتبر ابزار برقی، ابزار اندازه‌گیری و تجهیزات فنی"));
         return await PageAsync(model);
     }
@@ -32,6 +31,8 @@ public sealed class BrandsController : PageController
             return NotFound();
         }
 
+        brand = brand with { SourceEditorial = FindEditorial(brand.Slug) };
+
         PageModel<BrandProfileModel> model = new(
             brand,
             new SeoModel(
@@ -42,46 +43,12 @@ public sealed class BrandsController : PageController
         return await PageAsync(model);
     }
 
-    [HttpGet("{slug}/editorial")]
-    public IActionResult Editorial(string slug)
+    private BrandEditorialDocument? FindEditorial(string slug)
     {
-        BrandProfileModel? brand = BrandCatalog.Find(slug);
-        if (brand is null)
-        {
-            return NotFound();
-        }
+        string contentPath = Path.Combine(_environment.WebRootPath, "Shop", "js", "store", "brand-editorial.json");
+        BrandEditorialDocument[] documents = JsonSerializer.Deserialize<BrandEditorialDocument[]>(System.IO.File.ReadAllText(contentPath),
+            new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? [];
 
-        string contentPath = Path.Combine(
-            _environment.WebRootPath,
-            "Shop",
-            "js",
-            "store",
-            "brand-editorial.json");
-        using JsonDocument document = JsonDocument.Parse(System.IO.File.ReadAllText(contentPath));
-        JsonElement source = document.RootElement.EnumerateArray().FirstOrDefault(item =>
-            string.Equals(item.GetProperty("slug").GetString(), brand.Slug, StringComparison.OrdinalIgnoreCase));
-        if (source.ValueKind != JsonValueKind.Object)
-        {
-            return NotFound();
-        }
-
-        return Json(new
-        {
-            Slug = source.GetProperty("slug").GetString(),
-            brand.Name,
-            PersianName = source.GetProperty("persianName").GetString(),
-            CompanyIntroductions = source.GetProperty("companyIntroductions").Clone(),
-            Established = source.GetProperty("established").GetString(),
-            Country = source.GetProperty("country").GetString(),
-            OfficialUrl = source.GetProperty("officialUrl").GetString(),
-            Specialization = source.GetProperty("specialization").GetString(),
-            FeaturedProducts = source.GetProperty("featuredProducts").GetString(),
-            ProductFamilies = source.GetProperty("productFamilies").Clone(),
-            Strengths = source.GetProperty("strengths").Clone(),
-            Audience = source.GetProperty("audience").GetString(),
-            ShoppingAdvice = source.GetProperty("shoppingAdvice").GetString(),
-            FullPastedText = source.GetProperty("fullPastedText").GetString(),
-            FullDocumentText = source.GetProperty("fullDocumentText").GetString()
-        });
+        return documents.FirstOrDefault(document => string.Equals(document.Slug, slug, StringComparison.OrdinalIgnoreCase));
     }
 }

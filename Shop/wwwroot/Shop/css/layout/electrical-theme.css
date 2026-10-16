@@ -229,7 +229,7 @@ body {
 }
 
 .electrical-home-row {
-  --electrical-showcase-height: clamp(360px, 32vw, 500px);
+  --electrical-showcase-height: clamp(320px, 29vw, 440px);
   position: relative;
   display: grid;
   height: var(--electrical-showcase-height);

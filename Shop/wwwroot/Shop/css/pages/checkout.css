@@ -1246,3 +1246,102 @@
     gap: 10px;
   }
 }
+
+.address-dialog-heading .site-modal-close {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 3;
+}
+
+.address-dialog-title {
+  padding-left: 48px;
+}
+
+.address-dialog-heading::after {
+  inset: auto auto -102px -48px;
+  opacity: 0.65;
+}
+
+.address-dialog #addressForm {
+  gap: 13px;
+  padding: 16px;
+  border: 1px solid #e2e8ed;
+  border-radius: 16px;
+  background: #fff;
+}
+
+.address-dialog #addressForm label {
+  display: grid;
+  gap: 7px;
+  color: var(--industrial-steel);
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.address-dialog .address-form-grid {
+  gap: 13px 16px;
+}
+
+.address-dialog #addressForm input,
+.address-dialog #addressForm select {
+  min-height: 48px;
+}
+
+.address-dialog #addressForm textarea {
+  min-height: 100px;
+}
+
+.address-dialog #addressForm .invoice-demo-note,
+.address-dialog #addressForm [role="status"] {
+  margin: 0;
+}
+
+.address-dialog #addressForm .flow-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+}
+
+.address-dialog .site-modal-close > i {
+  transform: none;
+}
+
+.address-dialog .site-modal-close:hover > i {
+  transform: rotate(90deg);
+}
+
+@media (max-width: 575px) {
+  .address-dialog {
+    width: calc(100vw - 24px);
+    max-height: calc(100dvh - 24px);
+    padding: 14px;
+  }
+
+  .address-dialog-heading {
+    margin: -4px -4px 14px;
+    padding: 16px 14px 16px 52px;
+  }
+
+  .address-dialog-heading .site-modal-close {
+    top: 12px;
+    left: 12px;
+    width: 36px;
+    height: 36px;
+  }
+
+  .address-dialog-title {
+    gap: 10px;
+    padding-left: 0;
+  }
+
+  .address-dialog #addressForm {
+    gap: 11px;
+    padding: 12px;
+  }
+
+  .address-dialog .address-form-grid {
+    gap: 10px;
+  }
+}

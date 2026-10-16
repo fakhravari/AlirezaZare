@@ -213,41 +213,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (productId) link.href = window.HNProductUrl(productId);
       });
       const detail = p.detail || {};
-      const brandSlugs = {
-        bosch: "bosch", makita: "makita", dewalt: "dewalt", ronix: "ronix",
-        tosan: "tosan", "uni-t": "uni-t", fluke: "fluke", mastech: "mastech",
-        kyoritsu: "kyoritsu", yihua: "yihua", hakko: "hakko", weller: "weller",
-        philips: "philips", wiha: "wiha", arva: "arva", victor: "victor",
-        quick: "quick", goot: "goot", knipex: "knipex", stanley: "stanley",
-        benning: "benning",
-      };
-      const productBrandSlug = brandSlugs[String(p.brand || "").trim().toLowerCase()];
-      if (productBrandSlug) {
-        fetch(`/brands/${productBrandSlug}/editorial`)
-          .then((response) => response.ok ? response.json() : null)
-          .then((brand) => {
-            if (!brand || !productView.isConnected) return;
-            const escapeHtml = (value) => esc(String(value ?? ""));
-            const brandPanel = document.createElement("section");
-            brandPanel.className = "product-detail-content-panel product-brand-editorial";
-            brandPanel.id = "product-brand-editorial";
-            const introductions = (brand.companyIntroductions || [brand.introduction || ""]).filter(Boolean).map((text) => `<p class="product-brand-introduction">${escapeHtml(text)}</p>`).join("");
-            const families = (brand.productFamilies || []).map((item) => `<li>${escapeHtml(item)}</li>`).join("");
-            const strengths = (brand.strengths || []).map((item) => `<li><i class="bi bi-check2-circle" aria-hidden="true"></i>${escapeHtml(item)}</li>`).join("");
-            const facts = [brand.established ? ["سال تأسیس", brand.established] : null, brand.country ? ["کشور مبدأ", brand.country] : null].filter(Boolean).map(([label, value]) => `<div><small>${escapeHtml(label)}</small><strong>${escapeHtml(value)}</strong></div>`).join("");
-            brandPanel.innerHTML = `<header><span>دربارهٔ برند</span><h2>${escapeHtml(brand.persianName)}؛ معرفی و حوزهٔ تخصصی</h2></header><div class="product-brand-facts">${facts}</div>${introductions}<div class="product-brand-specialty"><strong><i class="bi bi-tools" aria-hidden="true"></i>حوزهٔ تخصصی</strong><p>${escapeHtml(brand.specialization || "")}</p></div><div class="product-brand-featured"><strong><i class="bi bi-award" aria-hidden="true"></i>محصولات شاخص</strong><p>${escapeHtml(brand.featuredProducts || "")}</p></div><div class="product-brand-editorial-grid"><section><h3><i class="bi bi-grid-3x3-gap" aria-hidden="true"></i>گروه‌های محصول و فعالیت</h3><ul class="product-brand-families">${families}</ul></section><section><h3><i class="bi bi-stars" aria-hidden="true"></i>نقاط قوت</h3><ul class="product-brand-strengths">${strengths}</ul></section><aside><span><i class="bi bi-person-workspace" aria-hidden="true"></i>مخاطبان اصلی</span><p>${escapeHtml(brand.audience)}</p></aside></div><div class="product-brand-shopping-advice"><strong><i class="bi bi-lightbulb" aria-hidden="true"></i>نکات خرید</strong><p>${escapeHtml(brand.shoppingAdvice || "مشخصات فنی، اقلام همراه و شرایط ضمانت هر مدل را پیش از خرید بررسی کنید.")}</p></div><details class="product-brand-full-source"><summary><i class="bi bi-file-text" aria-hidden="true"></i>نمایش کامل متن هر دو فایل ارسالی</summary><section><h3>۲۱ برند ابزار و تجهیزات — معرفی کامل</h3><div>${escapeHtml(brand.fullPastedText || "")}</div></section><section><h3>معرفی جامع برندها — فایل Word</h3><div>${escapeHtml(brand.fullDocumentText || "")}</div></section></details>${brand.officialUrl ? `<a class="product-brand-official-link" href="${escapeHtml(brand.officialUrl)}" target="_blank" rel="noopener noreferrer">وب‌سایت رسمی ${escapeHtml(brand.name)}<i class="bi bi-box-arrow-up-right" aria-hidden="true"></i></a>` : ""}<a class="product-brand-page-link" href="/brands/${escapeHtml(brand.slug)}">آشنایی بیشتر با ${escapeHtml(brand.persianName)}<i class="bi bi-arrow-left" aria-hidden="true"></i></a>`;
-            const introPanel = productView.querySelector("#product-intro");
-            introPanel?.insertAdjacentElement("afterend", brandPanel);
-            const tabs = productView.querySelector(".product-detail-tabs");
-            if (tabs && !tabs.querySelector('[href="#product-brand-editorial"]')) {
-              const brandTab = document.createElement("a");
-              brandTab.href = "#product-brand-editorial";
-              brandTab.innerHTML = '<i class="bi bi-award" aria-hidden="true"></i>دربارهٔ برند';
-              tabs.insertBefore(brandTab, tabs.querySelector('[href="#product-expert"]'));
-            }
-          })
-          .catch(() => {});
-      }
       const mobileBuyBar = document.createElement("div");
       mobileBuyBar.className = "product-mobile-buybar";
       mobileBuyBar.innerHTML = `<span class="product-mobile-buy-price"><small>قیمت نهایی</small><strong id="productMobileFinalPrice">${money(p.price * 1000000)}</strong></span><button type="button" class="product-mobile-buy-button"><i class="bi bi-bag-plus" aria-hidden="true"></i> افزودن به سبد</button>`;
@@ -447,6 +412,15 @@ document.addEventListener("DOMContentLoaded", () => {
             `<div><i class="bi ${["bi-tools", "bi-lightbulb", "bi-shield-check"][index % 3]}" aria-hidden="true"></i><strong>${["کاربرد پیشنهادی", "نکتهٔ مهم پیش از خرید", "راهنمای استفاده و ایمنی"][index % 3]}</strong><p>${esc(text)}</p></div>`,
         )
         .join("");
+      const expertPanel = productView.querySelector("#product-expert");
+      const expertIntro = document.createElement("p");
+      expertIntro.className = "product-expert-intro";
+      expertIntro.textContent = `در این بخش، مشخصات ثبت‌شدهٔ ${p.name} را به زبان کاربردی مرور می‌کنیم تا روشن شود این کالا برای چه نوع کاری مناسب است و پیش از خرید چه نکاتی را باید بسنجید. این راهنما بر پایهٔ اطلاعات محصول تهیه شده و به‌معنای آزمون آزمایشگاهی یا بررسی حضوری کالا نیست.`;
+      expertPanel?.querySelector(".product-expert-grid")?.before(expertIntro);
+      const expertNote = document.createElement("aside");
+      expertNote.className = "product-expert-note";
+      expertNote.innerHTML = '<strong><i class="bi bi-clipboard-check" aria-hidden="true"></i>چطور از این بررسی استفاده کنید؟</strong><p>کاربری و حجم استفادهٔ خود را با پیشنهادها تطبیق دهید، سازگاری و مشخصات فنی را در بخش جزئیات فنی بررسی کنید و پیش از سفارش، اقلام همراه، شرایط ضمانت و موجودی همین مدل را از فروشگاه بپرسید.</p>';
+      expertPanel?.querySelector(".product-expert-grid")?.after(expertNote);
       productView
         .querySelectorAll(
           '.product-detail-tabs a[href="#product-reviews"],.product-detail-tabs a[href="#product-questions"]',
@@ -1056,7 +1030,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return `<article class="compare-product-card"><div class="compare-card-top"><span>گزینهٔ ${fa(index + 1)}</span><button class="compare-remove-icon" type="button" data-compare-remove-page="${esc(product.id)}" aria-label="حذف ${esc(product.name)} از مقایسه"><i class="bi bi-trash3" aria-hidden="true"></i></button></div><div class="compare-product-image"><img src="${esc(product.image)}" alt="${esc(product.name)}" loading="lazy"></div><div class="compare-product-meta"><span>${esc(product.brand || "برند منتخب")}</span><small><i class="bi bi-grid-3x3-gap" aria-hidden="true"></i>${esc(product.type || "ابزار و تجهیزات")}</small></div><h2><a class="compare-product-link" href="${window.HNProductUrl(product)}">${esc(product.name)}</a></h2><div class="compare-price"><small>قیمت محصول</small><div class="compare-price-values${Number(product.discountPercent) > 0 ? " has-discount" : ""}">${salePriceMarkup(product)}</div></div><h3 class="compare-spec-title"><i class="bi bi-list-check" aria-hidden="true"></i>مشخصات قابل بررسی</h3><dl>${specs.map(([label, value]) => `<div><dt>${esc(label)}</dt><dd>${esc(value)}</dd></div>`).join("")}</dl><a class="compare-detail-link" href="${window.HNProductUrl(product)}">جزئیات محصول<i class="bi bi-arrow-left" aria-hidden="true"></i></a></article>`;
     };
     view.innerHTML = list.length
-      ? `<header class="compare-overview"><span class="compare-overview-icon"><i class="bi bi-columns-gap" aria-hidden="true"></i></span><span class="compare-overview-copy"><strong>مقایسهٔ دسته‌بندی‌شدهٔ محصولات</strong><small>هر گروه را جداگانه بررسی کنید تا انتخاب دقیق‌تری داشته باشید.</small></span><b>${fa(list.length)} محصول · ${fa(groups.size)} گروه</b><button class="compare-clear-all" type="button" data-compare-clear-all><i class="bi bi-trash3" aria-hidden="true"></i>حذف همه</button></header><div class="compare-category-groups">${[...groups.entries()].map(([category, products]) => `<section class="compare-category-group" aria-label="مقایسهٔ ${esc(category)}"><header class="compare-category-heading"><span class="compare-category-icon"><i class="bi ${groupIcons[category] || "bi-grid"}" aria-hidden="true"></i></span><span><strong>${esc(category)}</strong><small>مقایسهٔ محصولات هم‌دسته</small></span><b>${fa(products.length)} محصول</b></header><div class="compare-product-grid">${products.map(renderCard).join("")}</div></section>`).join("")}</div>`
+      ? `<header class="compare-overview"><span class="compare-overview-icon"><i class="bi bi-columns-gap" aria-hidden="true"></i></span><span class="compare-overview-copy"><strong>مقایسهٔ دسته‌بندی‌شدهٔ محصولات</strong><small>هر گروه را جداگانه بررسی کنید تا انتخاب دقیق‌تری داشته باشید.</small></span><b>${fa(list.length)} محصول · ${fa(groups.size)} گروه</b><button class="compare-clear-all" type="button" data-compare-clear-all><i class="bi bi-trash3" aria-hidden="true"></i>حذف همه</button></header><div class="compare-category-groups">${[...groups.entries()].map(([category, products]) => `<section class="compare-category-group${products.length === 1 ? " has-single-product" : ""}" aria-label="مقایسهٔ ${esc(category)}"><header class="compare-category-heading"><span class="compare-category-icon"><i class="bi ${groupIcons[category] || "bi-grid"}" aria-hidden="true"></i></span><span><strong>${esc(category)}</strong><small>مقایسهٔ محصولات هم‌دسته</small></span><b>${fa(products.length)} محصول</b></header><div class="compare-product-grid">${products.map(renderCard).join("")}</div></section>`).join("")}</div>`
       : `<div class="compare-empty"><div class="compare-empty-art" aria-hidden="true"><span><i class="bi bi-columns-gap"></i></span><i class="bi bi-plus-lg"></i></div><span class="compare-empty-kicker">مقایسهٔ هوشمند محصولات</span><h2>هنوز محصولی برای مقایسه ندارید</h2><p>محصول‌های موردنظرتان را از صفحهٔ فروشگاه انتخاب کنید؛ مشخصاتشان را اینجا کنار هم و یک‌جا بررسی می‌کنید.</p><a class="flow-button" href="Search"><i class="bi bi-search" aria-hidden="true"></i> جست‌وجوی محصولات <i class="bi bi-arrow-left" aria-hidden="true"></i></a><small class="compare-empty-hint"><i class="bi bi-lightbulb" aria-hidden="true"></i> برای افزودن، آیکن مقایسه را روی کارت هر محصول بزنید.</small></div>`;
     view.querySelectorAll("[data-compare-remove-page]").forEach(
       (button) =>

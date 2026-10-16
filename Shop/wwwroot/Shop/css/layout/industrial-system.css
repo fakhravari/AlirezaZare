@@ -10387,8 +10387,8 @@ html
 
 /* Final shared layout for inner-page banners and their breadcrumb trails. */
 .inner-page .page-hero {
-  min-height: 360px !important;
-  padding: 28px 0 36px !important;
+  min-height: 320px !important;
+  padding: 24px 0 30px !important;
   align-items: flex-start;
   text-align: right;
 }
@@ -12824,5 +12824,253 @@ body .electrical-swiper .swiper-pagination-bullet-active {
   .page-hero :is(.article-breadcrumb, .cart-breadcrumb) :is(a, .breadcrumb-current, [aria-current]) {
     min-height: 34px;
     padding: 3px 8px;
+  }
+}
+
+:is(
+  .account-welcome-tool-icon,
+  .address-dialog-icon,
+  .back-to-top,
+  .branch-icon,
+  .brand-detail-cta-icon,
+  .brand-guide-icon,
+  .brand-menu-icon,
+  .brand-profile-fact-icon,
+  .cart-head-icon,
+  .cart-safety-icon,
+  .cart-summary-icon,
+  .compare-category-icon,
+  .compare-overview-icon,
+  .compare-remove-icon,
+  .contact-icon,
+  .contact-shortcut-icon,
+  .empty-cart-icon,
+  .end-icon,
+  .form-confirm-icon,
+  .header-panel-empty-icon,
+  .home-header-support-icon,
+  .home-header-welcome-icon,
+  .journal-connect-icon,
+  .mobile-support-contact-icon,
+  .mobile-support-icon,
+  .order-product-icon,
+  .payment-method-icon,
+  .product-accessories-icon,
+  .service-icon,
+  .stat-icon,
+  .store-contact-icon,
+  .tracking-card-icon,
+  .ui-icon-tile,
+  .value-icon
+) {
+  display: grid !important;
+  place-items: center !important;
+  line-height: 1 !important;
+}
+
+:is(
+  .account-welcome-tool-icon,
+  .address-dialog-icon,
+  .back-to-top,
+  .branch-icon,
+  .brand-detail-cta-icon,
+  .brand-guide-icon,
+  .brand-menu-icon,
+  .brand-profile-fact-icon,
+  .cart-head-icon,
+  .cart-safety-icon,
+  .cart-summary-icon,
+  .compare-category-icon,
+  .compare-overview-icon,
+  .compare-remove-icon,
+  .contact-icon,
+  .contact-shortcut-icon,
+  .empty-cart-icon,
+  .end-icon,
+  .form-confirm-icon,
+  .header-panel-empty-icon,
+  .home-header-support-icon,
+  .home-header-welcome-icon,
+  .journal-connect-icon,
+  .mobile-support-contact-icon,
+  .mobile-support-icon,
+  .order-product-icon,
+  .payment-method-icon,
+  .product-accessories-icon,
+  .service-icon,
+  .stat-icon,
+  .store-contact-icon,
+  .tracking-card-icon,
+  .ui-icon-tile,
+  .value-icon
+) > :is(i, svg) {
+  display: block !important;
+  margin: 0 !important;
+  line-height: 1 !important;
+}
+
+#mainNav .nav-shortcut > i,
+#mainNav .cart-btn.cart-icon-theme > i {
+  transform: none !important;
+}
+
+.cart-page-main,
+.invoice-page {
+  color: var(--industrial-navy);
+  font-family: inherit;
+}
+
+.cart-page-hero .container h1 {
+  color: #fff;
+  font-size: clamp(26px, 3vw, 32px);
+  font-weight: 850;
+  line-height: 1.5;
+}
+
+.invoice-page .flow-heading h1 {
+  color: var(--industrial-navy);
+  font-size: clamp(26px, 3vw, 32px);
+  font-weight: 850;
+  line-height: 1.5;
+}
+
+.cart-page-hero .container > p {
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 14px;
+  line-height: 1.9;
+}
+
+.invoice-page .flow-heading > p {
+  color: var(--industrial-steel);
+  font-size: 14px;
+  line-height: 1.9;
+}
+
+.cart-page-main .invoice-section-title h2,
+.invoice-page .invoice-section-title h2,
+#cartView .cart-summary-heading h2,
+.invoice-page .cart-summary-heading h2 {
+  color: var(--industrial-navy);
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1.6;
+}
+
+.cart-page-main .invoice-section-title p,
+.invoice-page .invoice-section-title p,
+.cart-page-main .cart-shipping-note,
+.invoice-page .cart-shipping-note,
+.invoice-page .invoice-demo-note,
+#cartView .cart-shipping-note,
+.invoice-page [role="status"] {
+  color: var(--industrial-steel);
+  font-size: 13px;
+  line-height: 1.9;
+}
+
+.cart-page-main .cart-address-section > label,
+.cart-page-main .cart-address-section .address-select-wrap select,
+.invoice-page .payment-method strong {
+  color: var(--industrial-navy);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.invoice-page .payment-method small,
+.invoice-page .payment-method-soon,
+.invoice-page .invoice-item small,
+.invoice-page .invoice-demo-note {
+  color: var(--industrial-steel);
+  font-size: 12px;
+}
+
+#cartView .cart-product-copy strong,
+.invoice-page .invoice-item strong {
+  color: var(--industrial-navy);
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1.8;
+}
+
+#cartView .cart-product-copy p,
+.invoice-page .invoice-item small {
+  color: var(--industrial-steel);
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+#cartView .cart-summary-lines .flow-total,
+.invoice-page .cart-summary-lines .flow-total {
+  color: var(--industrial-steel);
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+#cartView .cart-summary-lines .flow-total > strong,
+.invoice-page .cart-summary-lines .flow-total > strong,
+.invoice-page .invoice-item > b {
+  color: var(--industrial-navy);
+  font-size: 15px;
+  font-weight: 800;
+}
+
+#cartView .cart-summary-lines .flow-payable strong,
+.invoice-page .cart-summary-lines .flow-payable strong {
+  color: var(--industrial-navy);
+  font-size: 20px;
+  font-weight: 900;
+}
+
+#cartView .cart-summary-lines .flow-discount > :last-child,
+.invoice-page .cart-summary-lines .flow-discount > :last-child {
+  color: #a34d4d;
+}
+
+#cartView .cart-checkout-link,
+.invoice-page .cart-checkout-link,
+.cart-page-main .cart-address-section .flow-button {
+  font-size: 15px;
+  font-weight: 800;
+}
+
+@media (max-width: 575px) {
+  .cart-page-hero .container h1,
+  .invoice-page .flow-heading h1 {
+    font-size: 25px;
+  }
+
+  .cart-page-hero .container > p,
+  .invoice-page .flow-heading > p {
+    font-size: 13px;
+  }
+
+  .cart-page-main .invoice-section-title h2,
+  .invoice-page .invoice-section-title h2,
+  #cartView .cart-summary-heading h2,
+  .invoice-page .cart-summary-heading h2 {
+    font-size: 16px;
+  }
+
+  #cartView .cart-product-copy strong,
+  .invoice-page .invoice-item strong {
+    font-size: 14px;
+  }
+
+  #cartView .cart-product-copy p,
+  .invoice-page .invoice-item small,
+  #cartView .cart-summary-lines .flow-total,
+  .invoice-page .cart-summary-lines .flow-total {
+    font-size: 13px;
+  }
+
+  #cartView .cart-summary-lines .flow-payable strong,
+  .invoice-page .cart-summary-lines .flow-payable strong {
+    font-size: 18px;
+  }
+
+  #cartView .cart-checkout-link,
+  .invoice-page .cart-checkout-link,
+  .cart-page-main .cart-address-section .flow-button {
+    font-size: 14px;
   }
 }
