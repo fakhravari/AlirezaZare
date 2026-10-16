@@ -10585,12 +10585,19 @@ html
 
 /* Keep the desktop brand menu anchored while its trigger enters the open state. */
 @media (min-width: 992px) {
+  .home-page #mainNav .brand-dropdown {
+    position: static !important;
+  }
+
   #mainNav .brand-dropdown > .nav-link,
   #mainNav .brand-dropdown > .nav-link:is(:hover, :focus-visible, .show) {
     transform: none !important;
   }
 
   #mainNav .brand-dropdown > .brand-menu {
+    z-index: 2 !important;
+    left: 50% !important;
+    right: auto !important;
     top: 100% !important;
     margin-top: 0 !important;
     border-top: 3px solid var(--industrial-yellow) !important;
