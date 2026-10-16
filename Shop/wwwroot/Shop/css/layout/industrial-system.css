@@ -12379,6 +12379,39 @@ body .electrical-swiper .swiper-pagination-bullet-active {
     transition-duration: 0.01ms !important;
   }
 }
+
+#cartPanel .cart-items {
+  box-sizing: border-box;
+  padding: 4px 12px 10px !important;
+  scrollbar-color: rgba(23, 50, 75, 0.34) transparent;
+  scrollbar-width: thin;
+}
+
+#cartPanel .cart-items::-webkit-scrollbar {
+  width: 6px;
+}
+
+#cartPanel .cart-items::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#cartPanel .cart-items::-webkit-scrollbar-thumb {
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: rgba(23, 50, 75, 0.34);
+  background-clip: padding-box;
+}
+
+#cartPanel .cart-items::-webkit-scrollbar-thumb:hover {
+  background: rgba(23, 50, 75, 0.58);
+  background-clip: padding-box;
+}
+
+#cartPanel .cart-items::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
 /* Keep the contact submit icon clear against its yellow button. */
 .inner-page .contact-submit > i {
   color: var(--industrial-navy) !important;

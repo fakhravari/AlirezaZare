@@ -1162,21 +1162,6 @@ $(function () {
         </div>
       </article>
     </div>`;
-  const railCardMarkup = (product) => `
-    <article class="rail-card">
-      <div class="rail-image">
-        <a href="${window.HNProductUrl(product)}" aria-label="مشاهده ${escapeHtml(product.name)}">
-          <img loading="lazy" decoding="async" src="${escapeHtml(product.image)}" alt="${escapeHtml(product.name)}">
-        </a>
-        ${product.badge ? `<span>${escapeHtml(product.badge)}</span>` : ""}
-      </div>
-      <h3>${escapeHtml(product.name)}</h3>
-      <strong>${faNumber(product.price * 1000000)} <small>تومان</small></strong>
-      <button type="button" class="add-cart" data-id="${product.id}" data-name="${escapeHtml(product.name)}" data-price="${product.price * 1000000}" data-image="${escapeHtml(product.image)}">
-        <i class="bi bi-bag-plus"></i> افزودن به سبد
-      </button>
-    </article>`;
-
   if (catalogProducts.length >= 30) {
     $("#bestsellersSlider").html(
       catalogProducts.slice(0, 24).map(productCardMarkup).join(""),
@@ -1184,37 +1169,8 @@ $(function () {
     $("#newestSlider").html(
       catalogProducts.slice(20, 26).map(productCardMarkup).join(""),
     );
-    $("#productRail").html(
-      catalogProducts.slice(25, 30).map(railCardMarkup).join(""),
-    );
   }
   decorateCatalogSaleCards();
-
-  initOwlCarousel($("#productRail"), {
-    ...carouselMotion,
-    rtl: true,
-    loop: true,
-    rewind: false,
-    center: false,
-    autoWidth: false,
-    stagePadding: 0,
-    margin: 18,
-    nav: true,
-    dots: true,
-    autoplay: !prefersReducedMotion,
-    autoplayTimeout: 5500,
-    autoplayHoverPause: true,
-    lazyLoad: true,
-    navText: [
-      '<i class="bi bi-arrow-right"></i>',
-      '<i class="bi bi-arrow-left"></i>',
-    ],
-    responsive: {
-      0: { items: 1, nav: false, dots: true },
-      768: { items: 3 },
-      1200: { items: 5 },
-    },
-  });
 
   const showcaseSliderOptions = {
     ...carouselMotion,
