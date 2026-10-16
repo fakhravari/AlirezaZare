@@ -1,0 +1,90 @@
+@model PageModel<BrandProfileModel>
+@{
+    BrandProfileModel brand = Model.Data;
+    string shopUrl = Url.Content($"~/search?brand={brand.Slug}");
+}
+
+<main class="brand-detail-page">
+    <header class="page-hero brand-detail-hero">
+        <img class="hero-image" src="~/Shop/images/heroes/hero-electrical-editorial.png" alt="ابزار و تجهیزات فنی" width="1536" height="1024" fetchpriority="high"/>
+        <div class="container">
+            <nav class="article-breadcrumb" aria-label="مسیر صفحه">
+                <a asp-controller="Home" asp-action="Index"><i class="bi bi-house-door" aria-hidden="true"></i><span>خانه</span></a>
+                <i class="breadcrumb-separator bi bi-chevron-left" aria-hidden="true"></i>
+                <a href="@Url.Content("~/brands")"><i class="bi bi-award" aria-hidden="true"></i><span>برندها</span></a>
+                <i class="breadcrumb-separator bi bi-chevron-left" aria-hidden="true"></i>
+                <span class="breadcrumb-current" aria-current="page">@brand.PersianName</span>
+            </nav>
+            <div class="brand-detail-hero-content">
+                <div class="brand-detail-logo" aria-label="@brand.Name">
+                    @if (!string.IsNullOrWhiteSpace(brand.LogoFile))
+                    {
+                        <img src="@Url.Content($"~/Shop/images/brands/{brand.LogoFile}")" alt="لوگوی @brand.PersianName"/>
+                    }
+                    else
+                    {
+                        <span>@brand.Name.ToUpperInvariant()</span>
+                    }
+                </div>
+                <span class="page-kicker"><i class="bi bi-patch-check" aria-hidden="true"></i>راهنمای برند و انتخاب محصول</span>
+                <h1>برند <em>@brand.PersianName</em></h1>
+                <p>@brand.Summary</p>
+                <div class="brand-detail-actions">
+                    <a class="brand-detail-primary" href="@shopUrl"><i class="bi bi-shop" aria-hidden="true"></i>مشاهده محصولات @brand.PersianName</a>
+                    <a class="brand-detail-secondary" href="@Url.Content("~/brands")"><i class="bi bi-grid" aria-hidden="true"></i>بازگشت به همهٔ برندها</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <section class="brand-detail-content page-section" aria-labelledby="brandOverviewTitle">
+        <div class="container">
+            <div class="brand-detail-overview">
+                <div class="brand-detail-overview-copy">
+                    <span class="brand-detail-eyebrow"><i class="bi bi-bookmark-star" aria-hidden="true"></i>آشنایی با برند</span>
+                    <h2 id="brandOverviewTitle">@brand.Name <em>در فروشگاه ما</em></h2>
+                    <p>@brand.Summary</p>
+                    <p>در این صفحه، محصولات موجود با نام برند @brand.PersianName یک‌جا گردآوری شده‌اند تا بتوانید مدل‌ها را بر اساس کاربرد، مشخصات و شرایط استفاده بررسی و مقایسه کنید.</p>
+                </div>
+                <aside class="brand-focus-card" aria-label="گروه‌های شاخص محصولات">
+                    <span class="brand-focus-icon"><i class="bi bi-tools" aria-hidden="true"></i></span>
+                    <small>گروه‌های شاخص</small>
+                    <strong>@brand.Focus</strong>
+                    <a href="@shopUrl">رفتن به فهرست محصولات <i class="bi bi-arrow-left" aria-hidden="true"></i></a>
+                </aside>
+            </div>
+
+            <section class="brand-selection-guide" aria-labelledby="brandGuideTitle">
+                <header>
+                    <span class="brand-detail-eyebrow"><i class="bi bi-check2-circle" aria-hidden="true"></i>راهنمای انتخاب</span>
+                    <h2 id="brandGuideTitle">پیش از انتخاب محصول <em>چه چیزهایی را بررسی کنیم؟</em></h2>
+                    <p>برای انتخابی متناسب با کارتان، این نکته‌ها را در مشخصات هر مدل در نظر بگیرید.</p>
+                </header>
+                <div class="brand-guide-grid">
+                    @for (int index = 0; index < brand.Highlights.Count; index++)
+                    {
+                        <article>
+                            <span class="brand-guide-number">۰@(index + 1)</span>
+                            <span class="brand-guide-icon"><i class="bi @(index == 0 ? "bi-bullseye" : index == 1 ? "bi-list-check" : "bi-shield-check")" aria-hidden="true"></i></span>
+                            <p>@brand.Highlights[index]</p>
+                        </article>
+                    }
+                </div>
+            </section>
+
+            <aside class="brand-detail-cta">
+                <span class="brand-detail-cta-icon"><i class="bi bi-search" aria-hidden="true"></i></span>
+                <div>
+                    <strong>محصول مناسب کارتان را پیدا کنید</strong>
+                    <p>مدل‌های @brand.PersianName را ببینید و مشخصاتشان را با نیاز خود بسنجید.</p>
+                </div>
+                <a href="@shopUrl">مشاهده محصولات <i class="bi bi-arrow-left" aria-hidden="true"></i></a>
+            </aside>
+        </div>
+    </section>
+</main>
+
+@section Styles {
+    <link href="~/Shop/css/pages/pages.css" rel="stylesheet" asp-append-version="true"/>
+    <link href="~/Shop/css/pages/brands.css" rel="stylesheet" asp-append-version="true"/>
+}
