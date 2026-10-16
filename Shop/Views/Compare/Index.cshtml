@@ -1,23 +1,26 @@
 @model PageModel
 
-<main class="flow-main container compare-page">
-    <nav class="cart-breadcrumb" aria-label="مسیر صفحه">
-        <ol>
-            <li>
-                <a asp-controller="Home" asp-action="Index">
-                    <i class="bi bi-house-door" aria-hidden="true"></i><span>خانه</span>
-                </a>
-            </li>
-            <li class="cart-breadcrumb-current">
-                <i class="bi bi-chevron-left" aria-hidden="true"></i><span aria-current="page"><i class="bi bi-arrow-left-right" aria-hidden="true"></i> مقایسه محصولات</span>
-            </li>
-        </ol>
-    </nav>
-    <header class="compare-page-heading">
-        <span><i class="bi bi-columns-gap" aria-hidden="true"></i> انتخاب آگاهانه‌تر</span>
+<header class="page-hero compare-page-hero">
+    <img class="hero-image" src="~/Shop/images/heroes/hero-electrical-editorial.png" alt="ابزارهای فنی برای مقایسه و انتخاب آگاهانه" width="1536" height="1024" fetchpriority="high" />
+    <div class="container">
+        <nav class="cart-breadcrumb" aria-label="مسیر صفحه">
+            <ol>
+                <li>
+                    <a asp-controller="Home" asp-action="Index">
+                        <i class="bi bi-house-door" aria-hidden="true"></i><span>خانه</span>
+                    </a>
+                </li>
+                <li class="cart-breadcrumb-current">
+                    <i class="bi bi-chevron-left" aria-hidden="true"></i><span aria-current="page"><i class="bi bi-arrow-left-right" aria-hidden="true"></i> مقایسه محصولات</span>
+                </li>
+            </ol>
+        </nav>
+        <span class="page-kicker"><i class="bi bi-columns-gap" aria-hidden="true"></i> انتخاب آگاهانه‌تر</span>
         <h1>مقایسه محصولات</h1>
-        <p>محصولات منتخب را کنار هم ببینید و ویژگی‌هایشان را بررسی کنید.</p>
-    </header>
+        <p>محصولات منتخب را کنار هم ببینید، مشخصات و قیمت‌هایشان را در یک نگاه مقایسه کنید و با توجه به نیازتان آگاهانه‌تر تصمیم بگیرید.</p>
+</div>
+</header>
+<main class="flow-main container compare-page">
     <section id="compareView" aria-live="polite"></section>
 </main>
 

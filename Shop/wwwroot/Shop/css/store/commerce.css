@@ -1398,38 +1398,6 @@ summary:focus-visible {
 .compare-page {
   padding-bottom: 70px;
 }
-.compare-page-heading {
-  position: relative;
-  overflow: hidden;
-  margin: 26px 0 28px;
-  padding: 34px 38px;
-  border: 1px solid #e6dccb;
-  border-radius: 22px;
-  background:
-    radial-gradient(circle at 5% 5%, #f5ead6 0, transparent 35%),
-    linear-gradient(120deg, #fffdf9, #f6f2e9);
-}
-.compare-page-heading > span {
-  display: inline-flex;
-  align-items: center;
-  gap: 9px;
-  color: #987747;
-  font-size: 13px;
-  font-weight: 700;
-}
-.compare-page-heading > span i {
-  font-size: 17px;
-}
-.compare-page-heading h1 {
-  margin: 12px 0 7px;
-  color: #142e51;
-  font-size: clamp(26px, 4vw, 38px);
-  font-weight: 800;
-}
-.compare-page-heading p {
-  margin: 0;
-  color: #687382;
-}
 .compare-product-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
@@ -1612,10 +1580,6 @@ summary:focus-visible {
   .compare-empty-hint {
     font-size: 12px;
     line-height: 1.8;
-  }
-  .compare-page-heading {
-    padding: 26px 20px;
-    border-radius: 17px;
   }
   .compare-product-card img {
     height: 190px;
