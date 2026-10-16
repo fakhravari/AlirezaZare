@@ -12,6 +12,16 @@
 - بسیاری از مسیرهای Controller صرفاً View و دادهٔ نمایشی برمی‌گردانند. کاتالوگ نمونهٔ ۳۰ قلمی ابزار در `Shop/wwwroot/Shop/js/store/catalog.js` نگهداری می‌شود؛ قیمت‌ها (به میلیون تومان)، تخفیف‌ها، دیدگاه‌ها و موجودی دادهٔ واقعی فروش نیستند. توضیحات فنی در شش گروه کالایی مشترک‌اند و مشخصات مدل‌محور تا اتصال منبع دادهٔ معتبر نباید حدس زده شوند. فیلدهای روشن‌تر `powerSource` (منبع تغذیه) و `useCase` (مورد استفاده) هستند؛ `movement` و `strap` برای سازگاری با کد و داده‌های قدیمی فعلاً نگه داشته شده‌اند. محتوا و تعامل‌های سبد، علاقه‌مندی، مقایسه و بخشی از حساب در مرورگر و `localStorage` مدیریت می‌شوند.
 - نتیجه: رفتار فعلی فروشگاه را دمو/نمونه فرض کنید؛ دادهٔ `localStorage` را دادهٔ سرور، سفارش واقعی یا احراز هویت واقعی تلقی نکنید.
 
+### هویت و اطلاعات تماس فعلی
+
+| مورد | مقدار جاری | محل‌های اصلی مصرف |
+|---|---|---|
+| نام نمایشی فروشگاه | ندا اولیائی | partialهای Header/Footer/Panels، محتوای صفحه‌ها، عنوان‌های SEO و متن‌های JavaScript |
+| تلفن تماس | `03969455457` | هدر، فوتر، Contact، Tracking و پیام‌های پشتیبانی |
+| ایمیل تماس | `neda.oliyai67@gmail.com` | `Views/Contact/Index.cshtml` |
+
+این مقادیر در حال حاضر در چند محل به‌صورت literal تکرار شده‌اند و از تنظیمات مرکزی خوانده نمی‌شوند. هنگام تغییر هویت، با `rg` کل `Shop/` را برای نام، شماره، ایمیل و `tel:`/`mailto:` جست‌وجو کنید؛ لینک مستقیم `wa.me` را جداگانه با قالب بین‌المللی معتبر بررسی کنید.
+
 ## ۲. نقشهٔ پوشه‌ها و مالکیت کد
 
 | مسیر | مسئولیت |
@@ -37,17 +47,18 @@
 | صفحه/قابلیت | مسیر متداول | Controller و View اصلی |
 |---|---|---|
 | خانه | `/` | `HomeController` → `Views/Home/Index.cshtml` |
-| جستجو و فهرست محصول | `/Search` | `ProductController.Index` → `Views/Product/List.cshtml` |
-| جزئیات محصول | `/products/{slug}-{id}` (مسیرهای قبلی `/products/{id}` و `/Product?id=…` با ۳۰۱ هدایت می‌شوند) | `ProductController.Details` → `Views/Product/Details.cshtml`؛ ساخت slug در `store/catalog.js` و لینک‌دهی عمومی در `layout/main.js`؛ رندر جزئیات در `store/commerce.js` |
-| سبد و تسویه | `/Cart`, `/Checkout` | `CartController`, `CheckoutController` و Viewهای هم‌نام |
-| مقایسه و علاقه‌مندی | `/Compare`, `/Favorites` | Controller و Viewهای هم‌نام؛ state محلی با کدهای store |
-| پروفایل | `/Account` (هدایت سازگاری به پروفایل), `/Profile`, `/Profile/Orders`, `/Profile/Addresses`, `/Profile/Favorites` | `AccountController` فقط alias سازگاری است؛ صفحه‌ها در `ProfileController` و `Views/Profile/Index.cshtml` رندر می‌شوند |
-| مجله | `/Magazine`, `/Magazine/{slug}` (مسیر قبلی `/Magazine/Details/{slug}` حفظ و هدایت می‌شود) | `MagazineController`، `Views/Magazine/`، دادهٔ مقاله در `Models/JournalArticles.cs` |
-| محتوا/خدمات | `/About`, `/Brands`, `/Contact`, `/Faq`, `/Shipping`, `/Tracking`, `/Warranty` | Controller و View هم‌نام |
-| قوانین | `/Legal/Privacy`, `/Legal/Terms`, `/Legal/Returns` | `LegalController` و Viewهای `Views/Legal/` |
-| خطا | `/Error` | `ErrorController` → `Views/Error/Index.cshtml` |
+| جستجو و فهرست محصول | `/search` | `ProductController.Index` → `Views/Product/List.cshtml` |
+| جزئیات محصول | `/products/{slug}` که انتهای slug شامل `-{id}` است (مسیرهای قبلی `/products/{id}` و `/product?id=…` با ۳۰۱ هدایت می‌شوند) | `ProductController.Details` → `Views/Product/Details.cshtml`؛ ساخت slug در `store/catalog.js` و لینک‌دهی عمومی در `layout/main.js`؛ رندر جزئیات در `store/commerce.js` |
+| سبد و تسویه | `/cart`, `/checkout` | `CartController`, `CheckoutController` و Viewهای هم‌نام |
+| مقایسه و علاقه‌مندی | `/compare`, `/favorites` | Controller و Viewهای هم‌نام؛ state محلی با کدهای store |
+| پروفایل | `/account` (هدایت سازگاری به پروفایل), `/profile`, `/profile/orders`, `/profile/addresses`, `/profile/favorites` | `AccountController` فقط alias سازگاری است؛ صفحه‌ها در `ProfileController` و `Views/Profile/Index.cshtml` رندر می‌شوند |
+| مجله | `/magazine`, `/magazine/{slug}` (مسیر قبلی `/magazine/details/{slug}` حفظ و هدایت می‌شود) | `MagazineController`، `Views/Magazine/`، دادهٔ مقاله در `Models/JournalArticles.cs` |
+| برندها | `/brands`, `/brands/{slug}` | `BrandsController` و Viewهای فهرست/جزئیات؛ اطلاعات پایه در `BrandCatalog` و متن تحریریه در `wwwroot/Shop/js/store/brand-editorial.json` |
+| محتوا/خدمات | `/about`, `/contact`, `/faq`, `/shipping`, `/tracking`, `/warranty` | Controller و View هم‌نام |
+| قوانین | `/legal/privacy`, `/legal/terms`, `/legal/returns` | `LegalController` و Viewهای `Views/Legal/` |
+| خطا | `/error` | `ErrorController` → `Views/Error/Index.cshtml` |
 
-Routeهای attribute-based مانند `Profile` و `Magazine` را کنار route پیش‌فرض در `Program.cs` بررسی کنید. مسیر و محتوای لینک‌ها ممکن است در JavaScript نیز normalize شود؛ قبل از تغییر URLها، Controller، Razor و `js/store/commerce.js` را با هم دنبال کنید.
+`Program.cs` گزینهٔ `RouteOptions.LowercaseUrls = true` را فعال می‌کند؛ بنابراین URLهای تولیدشده باید lowercase باشند، حتی اگر بعضی attribute routeها در کد با حروف بزرگ نوشته شده باشند. مسیرهای attribute-based را کنار route پیش‌فرض بررسی کنید. مسیر و محتوای لینک‌ها ممکن است در JavaScript نیز normalize شود؛ قبل از تغییر URLها، Controller، Razor و `js/store/commerce.js` را با هم دنبال کنید.
 
 ## ۴. ترکیب Razor و layout
 
@@ -117,11 +128,11 @@ Routeهای attribute-based مانند `Profile` و `Magazine` را کنار rou
 
 ### ترتیب CSS فعلی
 
-ترتیب واقعی لینک‌ها در `Views/Shared/_Shop.cshtml` چنین است: فونت/Bootstrap/آیکن و vendorها → `design-tokens.css` → `components.css` → `ui-core.css` → CSSهای shared → `luxury-theme.css` → `site.css` → `style.css` → `shared-mega-menu.css` → `commerce.css` → `@section Styles` صفحه → `mvc-layout.css` → `mobile-drawer-compact.css` → `pagination.css` → `electrical-theme.css` → `industrial-system.css` → `shared-product-card.css`.
+ترتیب واقعی لینک‌ها در `Views/Shared/_Shop.cshtml` چنین است: فونت/Bootstrap/آیکن و vendorها → `design-tokens.css` → `components.css` → `ui-core.css` → CSSهای shared → `luxury-theme.css` → `site.css` → `style.css` → `shared-mega-menu.css` → `commerce.css` → `@section Styles` صفحه → `mvc-layout.css` → `mobile-drawer-compact.css` → `pagination.css` → `electrical-theme.css` → `industrial-system.css` → `shared-product-card.css` → `@section PageStyles` → `content-typography.css` → `search-mobile.css` → `mobile-pages.css`.
 
-`shared-product-card.css` آخر بارگذاری می‌شود تا ظاهر پایهٔ کارت محصول در خانه، جستجو و فهرست‌ها از یک فایل تغذیه شود؛ overrideهای `!important` پوسته هنوز می‌توانند روی آن تقدم داشته باشند و باید پیش از افزودن قاعدهٔ تازه بررسی شوند.
+`mobile-pages.css` آخرین stylesheet سراسری در layout فعلی است؛ `search-mobile.css` از layout بارگذاری می‌شود و selectorهای آن برای Search scope شده‌اند. لینک `PageStyles` تکراری آن از View Search حذف شده است. `shared-product-card.css` دیگر آخرین فایل نیست. فایل‌های `content-typography.css`, `search-mobile.css` و `mobile-pages.css` در انتهای cascade قرار گرفته‌اند و می‌توانند روی قواعد زودتر بنویسند؛ scope selectorها و routeهای مصرف‌کننده را پیش از تغییر بررسی کنید.
 
-`industrial-system.css` آخر بارگذاری می‌شود و overrideهای زیادی دارد؛ بنابراین حتی CSS صفحه که در `@section Styles` آمده ممکن است بعداً بی‌اثر شود. ترتیب cascade را با چهار عامل بررسی کنید: origin/importance، specificity، ترتیب بارگذاری، و در صورت وجود media query/شرط فعال. صرفاً بالا بردن specificity یا افزودن `!important` تعارض را پنهان می‌کند. راه‌حل ترجیحی اصلاح قانون در فایل مالک و حذف/محدودکردن overrideٔ متناقض است؛ از ساختن یک لایهٔ override تازه در انتهای فایل خودداری کنید.
+`industrial-system.css` همچنان overrideهای زیادی دارد، اما آخرین فایل CSS نیست. ترتیب cascade را با چهار عامل بررسی کنید: origin/importance، specificity، ترتیب بارگذاری، و در صورت وجود media query/شرط فعال. صرفاً بالا بردن specificity یا افزودن `!important` تعارض را پنهان می‌کند. راه‌حل ترجیحی اصلاح قانون در فایل مالک و حذف/محدودکردن overrideٔ متناقض است؛ از ساختن یک لایهٔ override تازه در انتهای فایل خودداری کنید.
 
 ### نقشهٔ صفحه به CSS
 
@@ -130,23 +141,24 @@ Routeهای attribute-based مانند `Profile` و `Magazine` را کنار rou
 | Route / صفحه | Razor | CSS اختصاصی صفحه |
 |---|---|---|
 | `/` خانه | `Views/Home/Index.cshtml` | CSS اختصاصیِ لینک‌شده در خود View ندارد؛ از لایه‌های عمومی و پوسته استفاده می‌کند |
-| `/Search` جستجو | `Views/Product/List.cshtml` | `pages/search.css` |
-| `/products/{slug}-{id}` جزئیات محصول | `Views/Product/Details.cshtml` | `pages/pages.css`؛ بخش عمدهٔ UI فروشگاهی از `store/commerce.css` است |
-| `/Cart` سبد | `Views/Cart/Index.cshtml` | `pages/checkout.css`, `pages/form-confirm-dialog.css`, `pages/pages.css` |
-| `/Checkout` تسویه | `Views/Checkout/Index.cshtml` | `pages/checkout.css`, `pages/pages.css` |
-| `/Compare` مقایسه | `Views/Compare/Index.cshtml` | `pages/pages.css` |
-| `/Favorites` علاقه‌مندی | `Views/Favorites/Index.cshtml` | `pages/pages.css` |
-| `/Profile`, `/Profile/Orders`, `/Profile/Addresses`, `/Profile/Favorites` | `Views/Profile/Index.cshtml` | `pages/account-page.css`, `pages/checkout.css`, `pages/pages.css` |
-| `/Profile/Edit` | — | مسیر سازگاری است و به `/Profile` redirect می‌کند؛ ویرایش حساب از dialog در `Views/Profile/Index.cshtml` انجام می‌شود |
-| `/Magazine` | `Views/Magazine/Index.cshtml` | `pages/magazine-luxury.css`, `pages/pages.css` |
-| `/Magazine/{slug}` | `Views/Magazine/Details.cshtml`؛ مسیر قدیمی `/Magazine/Details/{slug}` هدایت می‌شود | `pages/article-details.css`, `pages/pages.css` |
-| `/About` | `Views/About/Index.cshtml` | `pages/pages.css` |
-| `/Brands` | `Views/Brands/Index.cshtml` | `pages/brands.css`, `pages/pages.css` |
-| `/Contact` | `Views/Contact/Index.cshtml` | `pages/contact.css`, `pages/form-confirm-dialog.css`, `pages/pages.css` |
-| `/Faq`, `/Shipping`, `/Warranty` | View هم‌نام | `pages/pages.css` |
-| `/Tracking` | `Views/Tracking/Index.cshtml` | `pages/pages.css`, `pages/tracking.css` |
-| `/Legal/Privacy`, `/Legal/Terms`, `/Legal/Returns` | View هم‌نام در `Views/Legal/` | `pages/pages.css` |
-| `/Error` | `Views/Error/Index.cshtml` | CSS اختصاصی ندارد؛ از پوسته و قواعد عمومی استفاده می‌کند |
+| `/search` جستجو | `Views/Product/List.cshtml` | `pages/search.css`, `pages/search-mobile.css` |
+| `/products/{slug}` جزئیات محصول؛ `{slug}` با `-{id}` تمام می‌شود | `Views/Product/Details.cshtml` | `pages/pages.css`؛ بخش عمدهٔ UI فروشگاهی از `store/commerce.css` است |
+| `/cart` سبد | `Views/Cart/Index.cshtml` | `pages/checkout.css`, `pages/form-confirm-dialog.css`, `pages/pages.css` |
+| `/checkout` تسویه | `Views/Checkout/Index.cshtml` | `pages/checkout.css`, `pages/pages.css` |
+| `/compare` مقایسه | `Views/Compare/Index.cshtml` | `pages/pages.css` |
+| `/favorites` علاقه‌مندی | `Views/Favorites/Index.cshtml` | `pages/pages.css` |
+| `/profile`, `/profile/orders`, `/profile/addresses`, `/profile/favorites` | `Views/Profile/Index.cshtml` | `pages/account-page.css`, `pages/checkout.css`, `pages/pages.css` |
+| `/profile/edit` | — | مسیر سازگاری است و به `/profile` redirect می‌کند؛ ویرایش حساب از dialog در `Views/Profile/Index.cshtml` انجام می‌شود |
+| `/magazine` | `Views/Magazine/Index.cshtml` | `pages/magazine-luxury.css`, `pages/pages.css` |
+| `/magazine/{slug}` | `Views/Magazine/Details.cshtml`؛ مسیر قدیمی `/magazine/details/{slug}` هدایت می‌شود | `pages/article-details.css`, `pages/pages.css` |
+| `/about` | `Views/About/Index.cshtml` | `pages/pages.css` |
+| `/brands` | `Views/Brands/Index.cshtml` | `pages/brands.css`, `pages/pages.css` |
+| `/brands/{slug}` | `Views/Brands/Details.cshtml` | `pages/pages.css`, `pages/brands.css`؛ محتوای تحریریه از `wwwroot/Shop/js/store/brand-editorial.json` |
+| `/contact` | `Views/Contact/Index.cshtml` | `pages/contact.css`, `pages/form-confirm-dialog.css`, `pages/pages.css` |
+| `/faq`, `/shipping`, `/warranty` | View هم‌نام | `pages/pages.css` |
+| `/tracking` | `Views/Tracking/Index.cshtml` | `pages/pages.css`, `pages/tracking.css` |
+| `/legal/privacy`, `/legal/terms`, `/legal/returns` | View هم‌نام در `Views/Legal/` | `pages/pages.css` |
+| `/error` | `Views/Error/Index.cshtml` | CSS اختصاصی ندارد؛ از پوسته و قواعد عمومی استفاده می‌کند |
 
 ### landmarkهای ساختاری Viewها
 
@@ -166,7 +178,7 @@ Routeهای attribute-based مانند `Profile` و `Magazine` را کنار rou
 | ارسال/رهگیری/ضمانت | `main.flow-main`; محتوای خدمات در کارت/فرم و `_RelatedLinks` مشترک |
 | قوانین | `main.flow-main` → `article.flow-card` → `section.legal-section` |
 | خطا | `main.container.py-5` با عنوان، توضیح و لینک بازگشت |
-| ویرایش پروفایل | dialog در `Views/Profile/Index.cshtml`; `/Profile/Edit` فقط به `/Profile` redirect می‌کند |
+| ویرایش پروفایل | dialog در `Views/Profile/Index.cshtml`; `/profile/edit` فقط به `/profile` redirect می‌کند |
 
 ### روند عیب‌یابی تداخل CSS
 
@@ -222,18 +234,19 @@ Routeهای attribute-based مانند `Profile` و `Magazine` را کنار rou
 | Route / صفحه | Script اختصاصیِ واردشده از View | منطق عمومی مکمل |
 |---|---|---|
 | `/` خانه | موردی در `@section Scripts` ندارد | `layout/main.js`, `store/commerce.js`, `core/electrical-content.js` |
-| `/Search` | `pages/search.js` | `HNProducts` از `store/catalog.js`، تعامل‌های cart/list از `commerce.js` |
-| `/products/{slug}-{id}` | `pages/page-content.js` | خواندن شناسه از انتهای slug و رندر/variant/accessory/gallery/feedback در `store/commerce.js` |
-| `/Cart` | `form-confirm-dialog.js`, `address-fields.js`, `checkout.js`, `iran-places.js`, `page-content.js` | cart state/render در `commerce.js` |
-| `/Checkout` | `checkout.js`, `page-content.js` | cart state در `commerce.js` |
-| `/Compare`, `/Favorites` | `page-content.js` | رندر و state مقایسه/علاقه‌مندی در `commerce.js` |
-| `/Profile` و زیربخش‌ها | `account-page.js`, `address-fields.js`, `iran-places.js`, `orders-pagination.js`, `page-content.js` | پوسته و stateهای مشترک در `main.js`/`commerce.js` |
-| `/Magazine` | `magazine.js` | — |
-| `/Magazine/{slug}` | `article-details.js`, `page-content.js` | — |
-| `/Contact` | `contact.js`, `form-confirm-dialog.js`, `page-content.js` | اعتبارسنجی عمومی در `form-validation.js` |
-| `/About`, `/Brands`, `/Faq`, `/Shipping`, `/Tracking`, `/Warranty` | `page-content.js` | محتوای مشترک در `electrical-content.js` |
+| `/search` | `pages/search.js` | `HNProducts` از `store/catalog.js`، تعامل‌های cart/list از `commerce.js` |
+| `/products/{slug}`؛ slug با `-{id}` تمام می‌شود | `pages/page-content.js` | خواندن شناسه از انتهای slug و رندر/variant/accessory/gallery/feedback در `store/commerce.js` |
+| `/cart` | `form-confirm-dialog.js`, `address-fields.js`, `checkout.js`, `iran-places.js`, `page-content.js` | cart state/render در `commerce.js` |
+| `/checkout` | `checkout.js`, `page-content.js` | cart state در `commerce.js` |
+| `/compare`, `/favorites` | `page-content.js` | رندر و state مقایسه/علاقه‌مندی در `commerce.js` |
+| `/profile` و زیربخش‌ها | `account-page.js`, `address-fields.js`, `iran-places.js`, `orders-pagination.js`, `page-content.js` | پوسته و stateهای مشترک در `main.js`/`commerce.js` |
+| `/magazine` | `magazine.js` | — |
+| `/magazine/{slug}` | `article-details.js`, `page-content.js` | — |
+| `/brands/{slug}` | `brand-product-count.js` | شمارش محصولات از کاتالوگ؛ محتوای تحریریه در View از فایل JSON خوانده می‌شود |
+| `/contact` | `contact.js`, `form-confirm-dialog.js`, `page-content.js` | اعتبارسنجی عمومی در `form-validation.js` |
+| `/about`, `/brands`, `/faq`, `/shipping`, `/tracking`, `/warranty` | `page-content.js` | محتوای مشترک در `electrical-content.js` |
 | قوانین | script اختصاصی ندارد | فقط رفتارهای عمومی layout |
-| `/Error` | script اختصاصی ندارد | فقط رفتارهای عمومی layout |
+| `/error` | script اختصاصی ندارد | فقط رفتارهای عمومی layout |
 
 نسخه‌های قدیمی `layout/page-mega-menu.js`, `page-panels.js`, `shared-login.js` و `site-layout.js` پس از تأیید نبود ارجاع در layout/View/scriptهای پروژه حذف شدند. پیاده‌سازی فعال header، mega-menu و پنل‌های حساب/سبد در `layout/main.js` و markup فعلی در partialهای Shared است؛ برای قابلیت تازه، همان مسیر فعال را توسعه دهید و نسخهٔ موازی نسازید.
 
@@ -263,7 +276,7 @@ dotnet build Shop.sln
 dotnet run --project Shop/Shop.csproj --no-launch-profile --urls http://localhost:5100
 ```
 
-درخواست‌های صفحه‌ای نمونه برای بررسی دستی: `/`, `/Search`, `/products/cordless-hammer-drill-1`, `/Cart`, `/Checkout`, `/Compare`, `/Profile`, `/Profile/Orders`, `/Profile/Favorites`, `/Magazine`.
+درخواست‌های صفحه‌ای نمونه برای بررسی دستی: `/`, `/search`, `/products/cordless-hammer-drill-1`, `/cart`, `/checkout`, `/compare`, `/profile`, `/profile/orders`, `/profile/favorites`, `/magazine`, `/brands/ronix`.
 
 - در تغییر CSS/JS دست‌کم صفحهٔ هدف، یک صفحهٔ دیگر با همان component مشترک و اندازهٔ موبایل را بررسی کنید.
 - در تغییر route/controller مدل، `dotnet build Shop.sln` را اجرا کنید.

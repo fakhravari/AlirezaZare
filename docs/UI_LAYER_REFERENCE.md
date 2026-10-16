@@ -1,6 +1,6 @@
 # مرجع کامل لایه‌های رابط کاربری
 
-این سند مکمل [`DEVELOPER_ROADMAP.md`](DEVELOPER_ROADMAP.md) است و برای پیدا کردن مالک واقعی UI، ردیابی تداخل CSS/JavaScript و بازآزمایی صفحه‌ها نوشته شده است. این مرجع در **۱۵ اکتبر ۲۰۲۶** با ساختار و assetهای موجود در مخزن تطبیق داده شده است؛ نقشهٔ مسیرها، breakpointها و فایل‌ها snapshot هستند و پس از تغییر View یا asset باید دوباره بررسی شوند.
+این سند مکمل [`DEVELOPER_ROADMAP.md`](DEVELOPER_ROADMAP.md) است و برای پیدا کردن مالک واقعی UI، ردیابی تداخل CSS/JavaScript و بازآزمایی صفحه‌ها نوشته شده است. این مرجع در **۱۷ اکتبر ۲۰۲۶** با ساختار و assetهای موجود در مخزن تطبیق داده شده است؛ نقشهٔ مسیرها، breakpointها و فایل‌ها snapshot هستند و پس از تغییر View یا asset باید دوباره بررسی شوند.
 
 > این سند فهرست مفصل مالکیت و نقاط شروع جست‌وجو است، نه جایگزین خواندن markup و cascade واقعی. DOM نهایی، کلاس‌های state و stylesheet برنده را برای هر باگ در مرورگر تأیید کنید.
 
@@ -39,6 +39,8 @@ Shop/Program.cs
 | JavaScript عمومی | `Shop/wwwroot/Shop/js/core/`, `layout/`, `store/` |
 | JavaScript صفحه‌ها | `Shop/wwwroot/Shop/js/pages/` |
 
+`RouteOptions.LowercaseUrls` در `Shop/Program.cs` فعال است؛ URLهای تولیدشده را lowercase نگه دارید. نام کلاس/فایل‌های Controller و View به‌دلیل قرارداد ASP.NET ممکن است PascalCase باقی بماند. مقدارهای فعلی نام فروشگاه و اطلاعات تماس در بخش «هویت و اطلاعات تماس فعلی» از [`DEVELOPER_ROADMAP.md`](DEVELOPER_ROADMAP.md) ثبت شده‌اند؛ هنگام تغییر، viewهای مشترک، SEO و متن‌های JS را نیز جست‌وجو کنید.
+
 ## ۲. ترتیب واقعی بارگذاری و اثر آن
 
 ### CSS
@@ -52,8 +54,10 @@ Shop/Program.cs
 5. `commerce.css`.
 6. `@section Styles` از View جاری.
 7. `css/layout/mvc-layout.css` → `mobile-drawer-compact.css` → `css/store/pagination.css` → `electrical-theme.css` → `industrial-system.css` → `css/store/shared-product-card.css`.
+8. `@section PageStyles` از View جاری.
+9. `css/layout/content-typography.css` → `css/pages/search-mobile.css` → `css/layout/mobile-pages.css`.
 
-قاعدهٔ مهم: CSS اختصاصی View در میانهٔ ترتیب است؛ `mvc-layout.css`، `electrical-theme.css` یا به‌خصوص `industrial-system.css` ممکن است بعداً روی آن بنویسند. `shared-product-card.css` آخر بارگذاری می‌شود و ظاهر پایه را تأمین می‌کند؛ overrideهای `!important` پوسته همچنان برنده‌اند. وجود فایل در repo به معنی load شدنش نیست. ترتیب نهایی را در تب Network و DOM `<link>`ها تأیید کنید.
+قاعدهٔ مهم: CSS اختصاصی View در میانهٔ ترتیب است و `PageStyles` پس از `shared-product-card.css` می‌آید. `mobile-pages.css` آخرین stylesheet سراسری در layout فعلی است. `search-mobile.css` از layout بارگذاری می‌شود و selectorهای آن برای Search scope شده‌اند؛ لینک تکراری آن از View Search حذف شده است. `industrial-system.css` overrideهای زیادی دارد ولی آخرین فایل نیست؛ overrideهای `!important` نیز می‌توانند مستقل از ترتیب برنده شوند. وجود فایل در repo به معنی load شدنش نیست. ترتیب نهایی را در تب Network و DOM `<link>`ها تأیید کنید.
 
 ### JavaScript
 
@@ -109,8 +113,11 @@ core/ui-core.js
 | `css/layout/mvc-layout.css` | قاب و layout صفحه‌های MVC | پس از `@section Styles` بارگذاری می‌شود |
 | `css/layout/mobile-drawer-compact.css` | فشرده‌سازی drawer موبایل | فقط تا 991px؛ ممکن است بر shared drawer غلبه کند |
 | `css/layout/electrical-theme.css` | هویت/چیدمان تم برق و ابزار | در انتهای cascade عمومی است |
-| `css/layout/industrial-system.css` | overrideهای صنعتی/سراسری و responsive | آخرین فایل CSS؛ فایل مالک مؤلفه نیست و منبع تعارض‌های زیادی است |
+| `css/layout/industrial-system.css` | overrideهای صنعتی/سراسری و responsive | overrideهای زیادی دارد ولی آخرین فایل نیست؛ فایل مالک مؤلفه فرض نشود |
 | `css/store/shared-product-card.css` | کارت‌های مشترک محصول | grid و ابعاد تصویر را در Search/خانه/Related بررسی کنید |
+| `css/layout/content-typography.css` | یکدست‌سازی تایپوگرافی و خوانایی محتوای فارسی | layout-wide؛ بعد از CSSهای قبلی می‌آید، در صفحه‌های محتوایی و RTL بررسی شود |
+| `css/pages/search-mobile.css` | ریزچیدمان و کنترل‌های Search در موبایل | در layout بارگذاری می‌شود؛ selectorهای فایل باید به Search محدود بمانند |
+| `css/layout/mobile-pages.css` | اصلاحات responsive مشترک صفحه‌ها | آخرین stylesheet layout؛ scope هر selector را بررسی کنید |
 | `css/store/commerce.css` | سبد، جزئیات محصول، variant/accessory، مقایسه و favorite | هم بخش‌های صفحه و هم تعامل‌های commerce را پوشش می‌دهد |
 | `css/store/pagination.css` | `.site-pagination` | بعد از View CSS می‌آید |
 | `css/pages/pages.css` | قواعد عمومی/قدیمی چند صفحه | به علت گستردگی، وجود selector عمومی را کنترل کنید |
@@ -121,7 +128,7 @@ core/ui-core.js
 | `css/pages/checkout.css` | Cart/Checkout و address dialog/form | با `commerce.css` برای قیمت/سبد تداخل دارد |
 | `css/pages/brands.css`, `contact.css`, `tracking.css` | صفحهٔ متناظر | page-root را حفظ کنید |
 | `css/pages/form-confirm-dialog.css` | تأیید فرم | فایل کوچک/minified؛ قواعد باز/بسته و overlay را جدا بررسی کنید |
-| `/Profile/Edit` | route سازگاری؛ به `/Profile` هدایت می‌شود | View و CSS مستقل ندارد؛ ویرایش از dialog پروفایل انجام می‌شود |
+| `/profile/edit` | route سازگاری؛ به `/profile` هدایت می‌شود | View و CSS مستقل ندارد؛ ویرایش از dialog پروفایل انجام می‌شود |
 
 ### breakpointهای مشاهده‌شده
 
@@ -154,6 +161,9 @@ core/ui-core.js
 | `store/commerce.css` | max 380, 390, 575, 700, 767؛ بازهٔ 768–1199؛ min 1200؛ reduced-motion |
 | `store/shared-product-card.css` | max 389, 575, 991؛ بازهٔ 992–1199 |
 | `store/pagination.css` | max 575 |
+| `layout/content-typography.css` | media query ندارد؛ قواعد تایپوگرافی عمومی |
+| `pages/search-mobile.css` | max 767, 359, 319؛ فایل در layout لود می‌شود و فقط selectorهای Search دارد |
+| `layout/mobile-pages.css` | max 767, 520, 389, 575, 359 |
 
 برای فهرست به‌روزتر: `rg -n "@media" Shop/wwwroot/Shop/css`. تعارض را با viewport browser و Styles/Computed تأیید کنید؛ جدول ممکن است با تغییر CSS قدیمی شود.
 
@@ -177,24 +187,25 @@ CSS/JS عمومی layout و store که بالاتر آمده‌اند به هم�
 | Route | Controller/View | CSS اختصاصی | JS صفحه | landmark/نقطهٔ تعامل مهم |
 |---|---|---|---|---|
 | `/` | `HomeController` → `Views/Home/Index.cshtml` | section اختصاصی ندارد | section اختصاصی ندارد | `body.home-page`, `header.hero#home`, `section.electrical-showcase`, `section.py-section`, اسلایدرها؛ header home را با inner مقایسه کنید |
-| `/Search` | `ProductController.Index` → `Views/Product/List.cshtml` | `pages/search.css` | `pages/search.js` | `section.search-intro` → `main.search-main` → `section.results-area`; فیلتر/مرتب‌سازی، URL، صفحه‌بندی، حالت خالی و filter drawer |
-| `/products/{slug}-{id}` (مسیرهای قبلی `/products/{id}` و `/Product?id=…` با ۳۰۱ هدایت می‌شوند) | `ProductController.Details` → `Views/Product/Details.cshtml` | `pages/pages.css`; بخش فروشگاه در `store/commerce.css` | `pages/page-content.js` | slug از `store/catalog.js` و لینک‌های مشترک در `layout/main.js`; `main.flow-main`, product view و gallery; variant، accessory، قیمت، cart، favorite/compare، feedback |
-| `/Cart` | `CartController` → `Views/Cart/Index.cshtml` | `pages/checkout.css`, `form-confirm-dialog.css`, `pages.css` | `form-confirm-dialog.js`, `address-fields.js`, `checkout.js`, `iran-places.js`, `page-content.js` | `main.flow-main`, `#cartView`, address/payment sections; empty/populated, quantity, coupon, address dialog |
-| `/Checkout` | `CheckoutController` → `Views/Checkout/Index.cshtml` | `checkout.css`, `pages.css` | `checkout.js`, `page-content.js` | `main.flow-main.invoice-page`, invoice/address/payment; سبد خالی/پر، روش پرداخت demo، modal آدرس |
-| `/Compare` | `CompareController` → `Views/Compare/Index.cshtml` | `pages.css` + `commerce.css` | `page-content.js` | `main.flow-main.compare-page`; zero/one/multiple product و حذف آیتم |
-| `/Favorites` | `FavoritesController` → `Views/Favorites/Index.cshtml` | `pages.css` + `commerce.css` | `page-content.js` | `main.flow-main`, `#favoritesView`; صفر/چند کارت و حذف favorite |
-| `/Profile`, `/Profile/Orders`, `/Profile/Addresses`, `/Profile/Favorites` | `ProfileController` → `Views/Profile/Index.cshtml` | `account-page.css`, `checkout.css`, `pages.css` | `account-page.js`, `address-fields.js`, `iran-places.js`, `orders-pagination.js`, `page-content.js` | `main.flow-main`, `section.account-section`; route/hash بخش فعال، addresses، order pagination و وضعیت خالی |
-| `/Profile/Edit` | Controller به `/Profile` هدایت می‌کند | — | — | مسیر سازگاری؛ صفحهٔ جداگانه ندارد |
-| `/Magazine` | `MagazineController` → `Views/Magazine/Index.cshtml` | `magazine-luxury.css`, `pages.css` | `magazine.js` | `main.journal-page`, `article.journal-post`; category/filter/sort، query string، popstate و responsive floating nav |
-| `/Magazine/{slug}` | `MagazineController` → `Views/Magazine/Details.cshtml`؛ مسیر قدیمی `/Magazine/Details/{slug}` به مسیر جدید هدایت می‌شود | `article-details.css`, `pages.css` | `article-details.js`, `page-content.js` | `main.article-page`, `article.article-body`, `section.article-section`; TOC، progress، checklist، print/share |
-| `/About` | `AboutController` → `Views/About/Index.cshtml` | `pages.css` | `page-content.js` | hero/breadcrumb و `page-section`; لینک/CTA و sectionهای داینامیک را بررسی کنید |
-| `/Brands` | `BrandsController` → `Views/Brands/Index.cshtml` | `brands.css`, `pages.css` | `page-content.js` | hero، فهرست برند و کارت‌ها؛ responsive grid |
-| `/Contact` | `ContactController` → `Views/Contact/Index.cshtml` | `contact.css`, `form-confirm-dialog.css`, `pages.css` | `contact.js`, `form-confirm-dialog.js`, `page-content.js` | فرم contact، شعبه‌ها و CTA؛ validation، submit demo و feedback |
-| `/Faq` | `FaqController` و View هم‌نام | `pages.css` | `page-content.js` | page sections/FAQ items؛ باز و بسته‌شدن و keyboard state را در DOM ببینید |
-| `/Shipping`, `/Warranty` | Controller و View هم‌نام | `pages.css` | `page-content.js` | `main.flow-main`, کارت‌های service و `_RelatedLinks` |
-| `/Tracking` | `TrackingController` → `Views/Tracking/Index.cshtml` | `pages.css`, `tracking.css` | `page-content.js` | `main.flow-main`, tracking form/status؛ نتیجه واقعی سفارش فعال نیست |
-| `/Legal/Privacy`, `/Legal/Terms`, `/Legal/Returns` | `LegalController` → `Views/Legal/` | `pages.css` | اختصاصی ندارد | `main.flow-main > article.flow-card > section.legal-section` |
-| `/Error` | `ErrorController` → `Views/Error/Index.cshtml` | اختصاصی ندارد | اختصاصی ندارد | `main.container.py-5`; پوستهٔ مشترک همچنان load می‌شود |
+| `/search` | `ProductController.Index` → `Views/Product/List.cshtml` | `pages/search.css`, `pages/search-mobile.css` | `pages/search.js` | `section.search-intro` → `main.search-main` → `section.results-area`; فیلتر/مرتب‌سازی، URL، صفحه‌بندی، حالت خالی و filter drawer |
+| `/products/{slug}` که slug با `-{id}` تمام می‌شود (مسیرهای قبلی `/products/{id}` و `/product?id=…` با ۳۰۱ هدایت می‌شوند) | `ProductController.Details` → `Views/Product/Details.cshtml` | `pages/pages.css`; بخش فروشگاه در `store/commerce.css` | `page-content.js` به‌عنوان script عمومی صفحه | slug از `store/catalog.js` و لینک‌های مشترک در `layout/main.js`; `main.flow-main`, product view و gallery; variant، accessory، قیمت، cart، favorite/compare، feedback |
+| `/cart` | `CartController` → `Views/Cart/Index.cshtml` | `pages/checkout.css`, `form-confirm-dialog.css`, `pages.css` | `form-confirm-dialog.js`, `address-fields.js`, `checkout.js`, `iran-places.js`, `page-content.js` | `main.flow-main`, `#cartView`, address/payment sections; empty/populated, quantity, coupon, address dialog |
+| `/checkout` | `CheckoutController` → `Views/Checkout/Index.cshtml` | `checkout.css`, `pages.css` | `checkout.js`, `page-content.js` | `main.flow-main.invoice-page`, invoice/address/payment; سبد خالی/پر، روش پرداخت demo، modal آدرس |
+| `/compare` | `CompareController` → `Views/Compare/Index.cshtml` | `pages.css` + `commerce.css` | `page-content.js` | `main.flow-main.compare-page`; zero/one/multiple product و حذف آیتم |
+| `/favorites` | `FavoritesController` → `Views/Favorites/Index.cshtml` | `pages.css` + `commerce.css` | `page-content.js` | `main.flow-main`, `#favoritesView`; صفر/چند کارت و حذف favorite |
+| `/profile`, `/profile/orders`, `/profile/addresses`, `/profile/favorites` | `ProfileController` → `Views/Profile/Index.cshtml` | `account-page.css`, `checkout.css`, `pages.css` | `account-page.js`, `address-fields.js`, `iran-places.js`, `orders-pagination.js`, `page-content.js` | `main.flow-main`, `section.account-section`; route/hash بخش فعال، addresses، order pagination و وضعیت خالی |
+| `/profile/edit` | Controller به `/profile` هدایت می‌کند | — | — | مسیر سازگاری؛ صفحهٔ جداگانه ندارد |
+| `/magazine` | `MagazineController` → `Views/Magazine/Index.cshtml` | `magazine-luxury.css`, `pages.css` | `magazine.js` | `main.journal-page`, `article.journal-post`; category/filter/sort، query string، popstate و responsive floating nav |
+| `/magazine/{slug}` | `MagazineController` → `Views/Magazine/Details.cshtml`؛ مسیر قدیمی `/magazine/details/{slug}` به مسیر جدید هدایت می‌شود | `article-details.css`, `pages.css` | `article-details.js`, `page-content.js` | `main.article-page`, `article.article-body`, `section.article-section`; TOC، progress، checklist، print/share |
+| `/about` | `AboutController` → `Views/About/Index.cshtml` | `pages.css` | `page-content.js` | hero/breadcrumb و `page-section`; لینک/CTA و sectionهای داینامیک را بررسی کنید |
+| `/brands` | `BrandsController` → `Views/Brands/Index.cshtml` | `brands.css`, `pages.css` | `page-content.js` | hero، فهرست برند و کارت‌ها؛ responsive grid |
+| `/brands/{slug}` | `BrandsController.Details` → `Views/Brands/Details.cshtml`؛ اطلاعات پایه از `BrandCatalog` و editorial از `brand-editorial.json` | `pages.css`, `brands.css` | `brand-product-count.js` | hero برند، CTA فروشگاه، حوزهٔ فعالیت، راهنمای انتخاب و شمارش محصولات |
+| `/contact` | `ContactController` → `Views/Contact/Index.cshtml` | `contact.css`, `form-confirm-dialog.css`, `pages.css` | `contact.js`, `form-confirm-dialog.js`, `page-content.js` | فرم contact و CTA؛ validation، submit demo و feedback |
+| `/faq` | `FaqController` و View هم‌نام | `pages.css` | `page-content.js` | page sections/FAQ items؛ باز و بسته‌شدن و keyboard state را در DOM ببینید |
+| `/shipping`, `/warranty` | Controller و View هم‌نام | `pages.css` | `page-content.js` | `main.flow-main`, کارت‌های service و `_RelatedLinks` |
+| `/tracking` | `TrackingController` → `Views/Tracking/Index.cshtml` | `pages.css`, `tracking.css` | `page-content.js` | `main.flow-main`, tracking form/status؛ نتیجه واقعی سفارش فعال نیست |
+| `/legal/privacy`, `/legal/terms`, `/legal/returns` | `LegalController` → `Views/Legal/` | `pages.css` | اختصاصی ندارد | `main.flow-main > article.flow-card > section.legal-section` |
+| `/error` | `ErrorController` → `Views/Error/Index.cshtml` | اختصاصی ندارد | اختصاصی ندارد | `main.container.py-5`; پوستهٔ مشترک همچنان load می‌شود |
 
 صفحه‌های ساخته‌شده با JavaScript ممکن است `innerHTML` جایگزین کنند؛ در این حالت selectorهای markup نهایی را هم در `commerce.js`/script صفحه پیدا کنید. Razor landmark به‌تنهایی همهٔ DOM را شرح نمی‌دهد.
 
@@ -346,7 +357,7 @@ CSS/JS عمومی layout و store که بالاتر آمده‌اند به هم�
 - توکن‌های legacy و canonical هم‌زمان حضور دارند؛ نام alias همیشه معنای ظاهری مورد انتظار را نمی‌رساند.
 - مرزهای responsive هم‌پوشان‌اند و در چند فایل مقدارهای 380/389/390، 991/991.98/992 و مرزهای صفحه‌ای وجود دارد.
 - بعضی CSS/JSها در مخزن هستند ولی از layout جاری load نمی‌شوند؛ قبل از فعال‌سازی یا حذف، ارجاع و runtime را بررسی کنید.
-- `/Profile/Edit` فقط مسیر سازگاری است و به `/Profile` هدایت می‌شود؛ View و CSS مستقل ندارد.
+- `/profile/edit` فقط مسیر سازگاری است و به `/profile` هدایت می‌شود؛ View و CSS مستقل ندارد.
 - catalog، profile/auth، favorite/compare، address، coupon و payment عمدتاً demo/localStorage هستند؛ به‌عنوان backend واقعی معرفی نشوند.
 - solution پروژهٔ تست مستقل ندارد؛ مستندسازی/بازبینی runtime جای ادعای تست خودکار را نمی‌گیرد.
 - سند باید با هر تغییر route، partial، ترتیب asset، event یا storage key به‌روز شود؛ اطلاعات منسوخ از راهنمای «کامل» بدتر است.
