@@ -911,59 +911,63 @@ summary:focus-visible {
 }
 #cartView .cart-product-copy .cart-item-options {
   display: grid;
-  gap: 7px;
-  margin-top: 8px;
+  gap: 5px;
+  margin-top: 5px;
 }
 #cartView .cart-product-copy .cart-item-option-group {
-  display: grid;
-  gap: 4px;
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 3px 6px;
 }
 #cartView .cart-product-copy .cart-item-option-label {
-  color: #758276;
-  font-size: 10px;
-  font-weight: 800;
+  color: #84909b;
+  font-size: 9px;
+  font-weight: 650;
+  line-height: 1.4;
 }
 #cartView .cart-product-copy .cart-item-option-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 5px;
+  gap: 3px;
 }
 #cartView .cart-product-copy .cart-item-option-chip {
   display: inline-flex;
   min-width: 0;
   align-items: center;
   flex-wrap: wrap;
-  gap: 4px 7px;
-  padding: 5px 8px;
-  border: 1px solid #dce8de;
-  border-radius: 9px;
-  background: #f5f9f5;
-  color: #294d38;
-  font-size: 11px;
-  line-height: 1.5;
+  gap: 2px 5px;
+  padding: 3px 6px;
+  border: 1px solid rgba(167, 181, 192, 0.34);
+  border-radius: 7px;
+  background: rgba(247, 249, 250, 0.78);
+  color: #465568;
+  font-size: 10px;
+  line-height: 1.4;
 }
 #cartView .cart-product-copy .cart-item-option-chip > small {
-  color: #718174;
-  font-size: 10px;
+  color: #87919c;
+  font-size: 9px;
 }
 #cartView .cart-product-copy .cart-item-option-chip > strong {
   display: inline;
-  color: #244831;
-  font-size: 11px;
-  font-weight: 800;
-  line-height: 1.5;
+  color: #35465b;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.4;
 }
 #cartView .cart-product-copy .cart-item-option-chip--accessory {
-  border-color: #e8dfc8;
-  background: #fbf8ef;
-  color: #65532d;
+  border-color: rgba(207, 177, 118, 0.35);
+  background: rgba(251, 248, 241, 0.8);
+  color: #756244;
 }
 #cartView .cart-product-copy .cart-item-option-chip--accessory > i {
-  color: #9d7d35;
-  font-size: 12px;
+  color: #ad925e;
+  font-size: 10px;
 }
 #cartView .cart-product-copy .cart-item-option-chip--accessory > strong {
-  color: #66552f;
+  color: #746342;
 }
 #cartView .cart-product-row > .cart-item-actions {
   margin-top: 0;

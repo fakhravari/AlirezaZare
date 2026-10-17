@@ -1223,31 +1223,41 @@ $(function () {
       });
     });
   }
-  const $amazingItems = $("#amazing .row > div");
-  if ($amazingItems.length === 3 && catalogProducts.length > 15) {
-    [catalogProducts[0], catalogProducts[5], catalogProducts[10]].forEach(
-      (product, index) => {
-        const $item = $amazingItems.eq(index);
-        $item.removeClass("col-md-4").addClass("col-12 col-md-6 col-xl");
-        $item.find(".product-image").removeClass("cream warm light");
-        $item.find("img").attr({ src: product.image, alt: product.name });
-        $item
-          .find(".badge-offer")
-          .text("پیشنهاد ویژه");
-        $item.find(".showcase-card-body small").text(product.brand);
-        $item.find(".showcase-card-body h3").text(product.name);
-        $item
-          .find(".showcase-card-body strong")
-          .text(`${faNumber(product.price * 1000000)} تومان`);
-        $item.find(".add-cart").attr({
-          "data-id": String(product.id),
-          "data-name": product.name,
-          "data-price": String(product.price * 1000000),
-          "data-image": product.image,
-        });
-      },
-    );
-    window.HNUI?.enhance(document.querySelector("#amazing"));
+  const amazingProducts = [
+    ...catalogProducts.filter(
+      (product) => product.discountPercent > 0 && product.stockQuantity > 0,
+    ),
+    ...catalogProducts.filter(
+      (product) => product.stockQuantity > 0 && !product.discountPercent,
+    ),
+  ].slice(0, 5);
+  const amazingSection = document.querySelector("#amazing");
+  const amazingSlider = amazingSection?.querySelector("#amazingSlider");
+  if (amazingSlider && amazingProducts.length) {
+    amazingSlider.innerHTML = amazingProducts
+      .map(
+        (product) => `<div class="showcase-slide">
+          <article class="showcase-card">
+            <div class="product-image">
+              <a href="${window.HNProductUrl(product)}" aria-label="مشاهده ${escapeHtml(product.name)}">
+                <img loading="lazy" decoding="async" src="${escapeHtml(product.image)}" alt="${escapeHtml(product.name)}">
+              </a>
+              <span class="badge-offer">${product.discountPercent ? `${faNumber(product.discountPercent)}٪ تخفیف` : "پیشنهاد ویژه"}</span>
+            </div>
+            <div class="showcase-card-body">
+              <small>${escapeHtml(product.brand || "پیشنهاد فروشگاه")}</small>
+              <h3><a class="showcase-product-detail" href="${window.HNProductUrl(product)}">${escapeHtml(product.name)}</a></h3>
+              <strong>${faNumber(product.price * 1000000)} تومان</strong>
+              <button type="button" class="add-cart" data-id="${product.id}" data-name="${escapeHtml(product.name)}" data-price="${product.price * 1000000}" data-image="${escapeHtml(product.image)}">
+                <i class="bi bi-bag-plus" aria-hidden="true"></i> افزودن به سبد
+              </button>
+            </div>
+          </article>
+        </div>`,
+      )
+      .join("");
+    decorateCatalogPriceCards(amazingSection);
+    window.HNUI?.enhance(amazingSection);
   }
   const productCardMarkup = (product) => `
     <div class="showcase-slide">
@@ -1302,6 +1312,17 @@ $(function () {
       1100: { items: 5 },
     },
   };
+
+  const amazingSliderOptions = {
+    ...showcaseSliderOptions,
+    responsive: {
+      0: { items: 2 },
+      768: { items: 3 },
+      1100: { items: 4 },
+    },
+  };
+
+  initOwlCarousel($("#amazingSlider"), amazingSliderOptions);
 
   initOwlCarousel(
     $("#bestsellersSlider, #newestSlider"),
@@ -2141,6 +2162,10 @@ $(function () {
         '<div class="product-card-actions" role="group" aria-label="عملیات محصول"></div>',
       ).appendTo($image);
     $image.children(".favorite, .compare-trigger").appendTo($actions);
+    const cartIconClass = $cartButton.find("> i").attr("class") || "bi bi-bag-plus";
+    $cartButton.html(
+      `<i class="${escapeHtml(cartIconClass)}" aria-hidden="true"></i><span class="add-cart-label">افزودن به سبد</span>`,
+    );
     $cartButton.attr({
       "aria-label": "افزودن به سبد خرید",
       title: "افزودن به سبد خرید",
@@ -2411,5 +2436,8 @@ $(function () {
     }, 2100);
 
     flyProductToControl(trigger, product, target);
+  });
+  document.addEventListener("hn:cart-stock-limit", () => {
+    showListActionToast("تعداد درخواستی از موجودی این کالا بیشتر بود؛ سبد تا سقف موجودی به‌روز شد.");
   });
 });

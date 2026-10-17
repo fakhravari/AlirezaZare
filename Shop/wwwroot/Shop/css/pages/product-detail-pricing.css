@@ -350,6 +350,12 @@
   line-height: 1.65;
 }
 
+#productView > .product-purchase-trust {
+  width: 100%;
+  grid-column: auto;
+  margin: -28px 0 36px;
+}
+
 @media (max-width: 575px) {
   #productView .product-purchase-trust {
     margin-top: 11px;
@@ -382,5 +388,9 @@
 
   #productView .product-purchase-trust-list small {
     font-size: 9px;
+  }
+
+  #productView > .product-purchase-trust {
+    margin-top: -28px;
   }
 }

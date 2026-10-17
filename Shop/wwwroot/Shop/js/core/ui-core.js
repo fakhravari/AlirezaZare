@@ -51,6 +51,58 @@
 
   const normalizeCart = (value) => {
     if (!Array.isArray(value)) return [];
+    const migrateLegacyItem = (item) => {
+      const product = (window.HNProducts || []).find(
+        (candidate) =>
+          String(candidate.id) ===
+          String(item.id || "").replace(/^(\d+):.*$/, "$1"),
+      );
+      const originalName = String(item.name || "").trim();
+      if (!product || !originalName.startsWith(`${product.name} (`))
+        return item;
+
+      const options = item.options || {};
+      if ((options.variants || []).length || (options.accessories || []).length)
+        return item;
+
+      const legacyOptions = originalName.slice(product.name.length + 2);
+      const remaining = (legacyOptions.endsWith(")")
+        ? legacyOptions.slice(0, -1)
+        : legacyOptions)
+        .split("،")
+        .map((part) => part.trim())
+        .filter(Boolean);
+      const variants = [];
+      Object.entries(product.variants || {}).forEach(([key, feature]) => {
+        const prefix = `${feature.label}:`;
+        const index = remaining.findIndex((part) => part.startsWith(prefix));
+        if (index < 0) return;
+        const value = remaining[index].slice(prefix.length).trim();
+        const option = (feature.options || []).find((entry) => entry.label === value);
+        variants.push({
+          key,
+          label: feature.label,
+          value,
+          productValue: option?.value || "",
+        });
+        remaining.splice(index, 1);
+      });
+      const accessories = [];
+      (product.accessories || []).forEach((accessory) => {
+        const index = remaining.indexOf(accessory.name);
+        if (index < 0) return;
+        accessories.push({ name: accessory.name, price: accessory.price });
+        remaining.splice(index, 1);
+      });
+      // Keep any older custom selection visible as an accessory chip instead of
+      // leaving it appended to the product title or silently dropping it.
+      remaining.forEach((name) => accessories.push({ name, price: 0 }));
+      return {
+        ...item,
+        name: product.name,
+        options: { variants, accessories },
+      };
+    };
     const normalizeOptions = (options) => {
       const cleanText = (text, limit) => String(text || "").trim().slice(0, limit);
       return {
@@ -58,8 +110,10 @@
           ? options.variants
               .filter((option) => option && typeof option === "object")
               .map((option) => ({
+                key: cleanText(option.key, 50),
                 label: cleanText(option.label, 50),
                 value: cleanText(option.value, 80),
+                productValue: cleanText(option.productValue, 80),
               }))
               .filter((option) => option.label && option.value)
               .slice(0, 12)
@@ -85,20 +139,46 @@
         );
     const normalizedItems = value
       .filter((item) => item && typeof item === "object")
-      .map((item) => ({
-        // Older product-detail rows included variant/accessory keys after the product ID.
-        id: String(item.id || "")
-          .slice(0, 80)
-          .replace(/^(\d+):.*$/, "$1"),
-        name: String(item.name || "").slice(0, 120),
-        price: Number(item.price),
-        image: normalizeImage(item.image),
-        options: normalizeOptions(item.options),
-        quantity: Math.min(
-          99,
-          Math.max(1, Number.parseInt(item.quantity, 10) || 1),
-        ),
-      }))
+      .map((rawItem) => {
+        const item = migrateLegacyItem(rawItem);
+        const product = (window.HNProducts || []).find(
+          (candidate) => String(candidate.id) === String(item.id || "").replace(/^(\d+):.*$/, "$1"),
+        );
+        const options = normalizeOptions(item.options);
+        const requiredAccessories = (product?.accessories || []).filter(
+          (accessory) => accessory.required,
+        );
+        const missingRequiredAccessories = requiredAccessories.filter(
+          (accessory) =>
+            !options.accessories.some((selected) => selected.name === accessory.name),
+        );
+        options.accessories.push(
+          ...missingRequiredAccessories.map((accessory) => ({
+            name: accessory.name,
+            price: accessory.price,
+          })),
+        );
+        return {
+          // Older product-detail rows included variant/accessory keys after the product ID.
+          id: String(item.id || "")
+            .slice(0, 80)
+            .replace(/^(\d+):.*$/, "$1"),
+          name: String(item.name || "").slice(0, 120),
+          price:
+            Number(item.price) +
+            missingRequiredAccessories.reduce(
+              (sum, accessory) =>
+                sum + (Number(accessory.price) || 0) * 1000000,
+              0,
+            ),
+          image: normalizeImage(item.image),
+          options,
+          quantity: Math.min(
+            99,
+            Math.max(1, Number.parseInt(item.quantity, 10) || 1),
+          ),
+        };
+      })
       .filter(
         (item) =>
           item.id &&
@@ -129,11 +209,54 @@
     return [...uniqueItems.values()];
   };
 
+  const availableStock = (item) => {
+    const product = (window.HNProducts || []).find(
+      (candidate) => String(candidate.id) === String(item?.id || ""),
+    );
+    if (!product) return null;
+    const rawStock =
+      product.stockQuantity ??
+      product.inventoryCount ??
+      product.quantityInStock ??
+      product.availableQuantity ??
+      product.stock;
+    let stock =
+      typeof rawStock === "number" ||
+      (typeof rawStock === "string" && rawStock.trim())
+        ? Number(rawStock)
+        : Number.NaN;
+    if (!Number.isFinite(stock) || stock < 0) return null;
+
+    const variantKeys = Object.keys(product.variants || {});
+    if (variantKeys.length && product.variantStock) {
+      const selected = new Map(
+        (item.options?.variants || []).map((option) => [option.key, option.productValue]),
+      );
+      const hasCombination = variantKeys.every((key) => selected.get(key));
+      if (hasCombination) {
+        const combinationKey = variantKeys
+          .map((key) => `${key}=${selected.get(key)}`)
+          .join("|");
+        if (Object.prototype.hasOwnProperty.call(product.variantStock, combinationKey))
+          stock = Number(product.variantStock[combinationKey]);
+      }
+    }
+    return Number.isFinite(stock) && stock >= 0 ? Math.floor(stock) : null;
+  };
+
+  const enforceStockLimits = (items) =>
+    items.flatMap((item) => {
+      const stock = availableStock(item);
+      if (stock === null) return [item];
+      if (!stock) return [];
+      return [{ ...item, quantity: Math.min(item.quantity, stock) }];
+    });
+
   const cart = {
     read() {
       try {
         const raw = JSON.parse(storage.get(STORAGE_KEYS.cart, "[]"));
-        const normalized = normalizeCart(raw);
+        const normalized = enforceStockLimits(normalizeCart(raw));
         if (JSON.stringify(raw) !== JSON.stringify(normalized)) {
           storage.set(STORAGE_KEYS.cart, JSON.stringify(normalized));
         }
@@ -143,7 +266,7 @@
       }
     },
     write(items) {
-      const safeItems = normalizeCart(items);
+      const safeItems = enforceStockLimits(normalizeCart(items));
       storage.set(STORAGE_KEYS.cart, JSON.stringify(safeItems));
       document.dispatchEvent(
         new CustomEvent("hn:cart-change", { detail: safeItems }),
@@ -157,13 +280,28 @@
       const safeProduct = normalizeCart([{ ...product, quantity }])[0];
       if (!safeProduct) return items;
       const existing = items.find((item) => item.id === safeProduct.id);
+      const sameConfiguration =
+        existing &&
+        existing.name === safeProduct.name &&
+        existing.price === safeProduct.price &&
+        existing.image === safeProduct.image &&
+        JSON.stringify(existing.options) === JSON.stringify(safeProduct.options);
+      const stock = availableStock(safeProduct);
+      if (stock !== null) {
+        const remaining = Math.max(0, stock - (sameConfiguration ? existing.quantity : 0));
+        const requested = safeProduct.quantity;
+        safeProduct.quantity = Math.min(requested, remaining);
+        if (safeProduct.quantity < requested) {
+          document.dispatchEvent(
+            new CustomEvent("hn:cart-stock-limit", {
+              detail: { product: safeProduct, stock, requested, remaining },
+            }),
+          );
+        }
+        if (!safeProduct.quantity) return items;
+      }
       if (existing) {
-        if (
-          existing.name === safeProduct.name &&
-          existing.price === safeProduct.price &&
-          existing.image === safeProduct.image &&
-          JSON.stringify(existing.options) === JSON.stringify(safeProduct.options)
-        ) {
+        if (sameConfiguration) {
           existing.quantity = Math.min(
             99,
             existing.quantity + safeProduct.quantity,
@@ -194,7 +332,17 @@
       if (!Number.isFinite(nextQuantity) || nextQuantity < 1) {
         return this.remove(id);
       }
-      item.quantity = Math.min(99, nextQuantity);
+      const stock = availableStock(item);
+      const limitedQuantity = stock === null ? nextQuantity : Math.min(nextQuantity, stock);
+      if (limitedQuantity < nextQuantity) {
+        document.dispatchEvent(
+          new CustomEvent("hn:cart-stock-limit", {
+            detail: { product: item, stock, requested: nextQuantity, remaining: stock },
+          }),
+        );
+      }
+      if (!limitedQuantity) return this.remove(id);
+      item.quantity = Math.min(99, limitedQuantity);
       return this.write(items);
     },
     remove(id) {
