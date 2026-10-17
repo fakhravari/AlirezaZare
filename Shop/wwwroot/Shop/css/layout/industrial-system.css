@@ -605,9 +605,11 @@ h6,
 
 .inner-page #mainNav .category-mega-panels {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(var(--category-mega-columns, 1), minmax(0, 1fr));
   gap: 0;
   align-content: start;
+  grid-auto-flow: row;
+  grid-auto-rows: min-content;
 }
 
 .inner-page #mainNav .category-mega-hint {
@@ -12087,6 +12089,18 @@ body .electrical-swiper .swiper-pagination-bullet-active {
 }
 
 @media (max-width: 767px) {
+  body .home-page #heroSwiper.electrical-swiper .electrical-arrow {
+    display: none !important;
+  }
+
+  body .home-page #heroSwiper.electrical-swiper .swiper-pagination {
+    right: 50%;
+    bottom: 10px;
+    left: auto;
+    display: flex !important;
+    transform: translateX(50%);
+  }
+
   body .electrical-swiper .electrical-arrow {
     width: 36px;
     height: 36px;
@@ -13393,9 +13407,12 @@ body .electrical-swiper .swiper-pagination-bullet-active {
   }
 
   .inner-page #mainNav .category-mega-panels {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(var(--category-mega-columns, 1), minmax(0, 1fr));
     align-content: start;
     gap: 12px;
+    align-items: stretch;
+    grid-auto-flow: row;
+    grid-auto-rows: min-content;
   }
 
   .inner-page #mainNav .category-mega-group {
@@ -13404,7 +13421,7 @@ body .electrical-swiper .swiper-pagination-bullet-active {
     min-height: 0;
     padding: 13px 12px 12px;
     gap: 5px;
-    overflow: hidden;
+    overflow: visible;
     border: 1px solid #e4e9ec;
     border-radius: 13px;
     background: linear-gradient(150deg, #fff, var(--mega-tint));
@@ -13434,9 +13451,12 @@ body .electrical-swiper .swiper-pagination-bullet-active {
     min-height: 40px;
     margin: 0 0 3px;
     padding: 0 0 8px;
+    min-width: 0;
     border-bottom: 1px solid color-mix(in srgb, var(--mega-accent) 24%, white);
     color: var(--industrial-navy);
     font-size: 14px;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
   }
 
   .inner-page #mainNav .category-mega-title i {
@@ -13449,9 +13469,14 @@ body .electrical-swiper .swiper-pagination-bullet-active {
   .inner-page #mainNav .category-mega-group > a:not(.category-mega-title) {
     min-height: 34px;
     padding: 5px 8px;
+    min-width: 0;
+    border: 1px solid #e7edf1;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.78);
     color: #526579;
     font-size: 12px;
     line-height: 1.55;
+    overflow-wrap: anywhere;
   }
 
   .inner-page
@@ -13650,4 +13675,22 @@ body .electrical-swiper .swiper-pagination-bullet-active {
     box-shadow: 0 3px 9px rgba(16, 42, 67, 0.055);
     transform: translateX(-2px);
   }
+}
+
+#cartPanel .cart-items,
+#favoritesPanel .compare-panel-items,
+#comparePanel .compare-panel-items {
+  background-image:
+    radial-gradient(
+      circle at calc(100% + 20px) -18px,
+      transparent 0 34px,
+      rgba(190, 153, 91, 0.09) 35px 42px,
+      transparent 43px 54px,
+      rgba(190, 153, 91, 0.07) 55px 63px,
+      transparent 64px 75px,
+      rgba(190, 153, 91, 0.05) 76px 84px,
+      transparent 85px
+    ),
+    linear-gradient(180deg, #fffdf9, #faf7f1) !important;
+  background-repeat: no-repeat;
 }

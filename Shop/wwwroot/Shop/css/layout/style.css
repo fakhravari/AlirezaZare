@@ -112,6 +112,16 @@
     border-color 0.18s,
     transform 0.18s;
 }
+.mobile-support-socials > a > i,
+.mobile-support-socials > .mobile-support-social-placeholder > i,
+.mobile-support-number .mobile-support-contact-icon > i,
+.mobile-support-icon > i {
+  display: block;
+  place-self: center;
+  margin: 0;
+  line-height: 1;
+  transform: none;
+}
 .mobile-support-socials > a:hover,
 .mobile-support-socials > .mobile-support-social-placeholder:hover {
   border-color: rgba(224, 195, 129, 0.6);

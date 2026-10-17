@@ -141,7 +141,7 @@
     min-width: 0;
     min-height: 32px;
     align-items: center;
-    justify-content: space-between;
+    justify-content: start;
     gap: 6px;
     padding: 0 9px;
     border: 1px solid #e0e7ec;
@@ -321,6 +321,23 @@
   .mobile-menu .offcanvas-header > .mobile-menu-search {
     grid-column: 1 / -1;
     grid-row: 2;
+    width: calc(100% + 16px);
+    margin-inline: -8px;
+  }
+  #mobileMenu .mobile-menu-search-quick-section {
+    direction: rtl;
+    text-align: right;
+  }
+  #mobileMenu .mobile-menu-search-quick-heading,
+  #mobileMenu .mobile-menu-search-quick-empty {
+    text-align: right;
+  }
+  #mobileMenu .mobile-menu-search-quick-chips {
+    direction: rtl;
+  }
+  #mobileMenu .mobile-menu-search-quick-chip {
+    direction: rtl;
+    text-align: right;
   }
   .mobile-menu .offcanvas-body {
     padding-top: 0;
