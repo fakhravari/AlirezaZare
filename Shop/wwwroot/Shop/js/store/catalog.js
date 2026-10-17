@@ -271,6 +271,9 @@ const productCatalog = [
   ],
 ];
 window.HNProducts = productCatalog.map((entry, i) => {
+  // Sample stock levels keep both in-stock and sold-out detail states visible.
+  const stockLevels = [12, 0, 7, 3, 0, 18, 5, 0, 2, 9];
+  const stockQuantity = stockLevels[i % stockLevels.length];
   const images = [
     "Shop/images/products/tool-hammer-drill.png",
     "Shop/images/products/tool-multimeter-kit.png",
@@ -746,6 +749,8 @@ window.HNProducts = productCatalog.map((entry, i) => {
     type,
     powerSource,
     useCase,
+    stockQuantity,
+    inStock: stockQuantity > 0,
     movement: powerSource,
     strap: useCase,
     categoryPath: [

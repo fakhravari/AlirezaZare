@@ -32,3 +32,27 @@
   font-size: 14px;
   line-height: 2;
 }
+
+/* Keep the product hero breadcrumb readable on narrow screens. The product
+   name is already the hero heading, so mobile only needs its useful path. */
+@media (max-width: 575px) {
+  .product-detail-hero .cart-breadcrumb {
+    overflow: hidden;
+    touch-action: auto;
+  }
+
+  .product-detail-hero .cart-breadcrumb ol {
+    width: 100%;
+    max-width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .product-detail-hero .cart-breadcrumb ol > li {
+    white-space: normal;
+  }
+
+  .product-detail-hero .cart-breadcrumb ol > li:nth-child(2),
+  .product-detail-hero .cart-breadcrumb ol > li:last-child {
+    display: none;
+  }
+}

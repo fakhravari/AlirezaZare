@@ -13403,3 +13403,17 @@ body .electrical-swiper .swiper-pagination-bullet-active {
   outline: 2px solid var(--industrial-yellow-dark);
   outline-offset: 4px;
 }
+
+@media (max-width: 991px) {
+  #mainNav .navbar-toggler {
+    display: grid;
+    place-items: center;
+    line-height: 1;
+  }
+
+  #mainNav .navbar-toggler > i {
+    display: block;
+    margin: 0;
+    line-height: 1;
+  }
+}

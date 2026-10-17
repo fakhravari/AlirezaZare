@@ -966,13 +966,15 @@ summary:focus-visible {
 }
 #cartView .cart-product-identity img {
   width: 88px;
-  height: 106px;
+  height: 88px;
+  aspect-ratio: 1;
+  object-fit: cover;
   border-radius: 12px;
 }
 @media (max-width: 575px) {
   #cartView .cart-product-identity img {
     width: 56px;
-    height: 70px;
+    height: 56px;
   }
 }
 @media (min-width: 1200px) {

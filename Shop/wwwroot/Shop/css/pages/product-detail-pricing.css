@@ -1,11 +1,11 @@
 #productView .product-detail-price {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(190px, 0.58fr);
+  grid-template-columns: minmax(0, 1fr);
   grid-template-areas:
-    "heading trust"
-    "base trust"
-    "extras trust"
-    "total trust";
+    "heading"
+    "base"
+    "extras"
+    "total";
   align-items: center;
   gap: 10px 18px;
   min-height: 0;
@@ -17,11 +17,6 @@
   justify-content: flex-start;
   direction: rtl;
   text-align: right;
-}
-
-#productView .product-detail-price > .product-price-context {
-  grid-area: trust;
-  align-self: stretch;
 }
 
 #productView .product-detail-price > .product-detail-base-price {
@@ -197,18 +192,12 @@
       "heading"
       "base"
       "extras"
-      "total"
-      "trust";
+      "total";
     gap: 10px;
     padding: 14px;
   }
 
   #productView .product-detail-price > .product-price-heading {
-    grid-column: 1;
-    grid-row: auto;
-  }
-
-  #productView .product-detail-price > .product-price-context {
     grid-column: 1;
     grid-row: auto;
   }
@@ -229,5 +218,61 @@
 
   #productView .product-stock-status-copy > small {
     font-size: 13px;
+  }
+}
+
+#productView .product-purchase-trust {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 13px;
+  margin-top: 11px;
+  padding: 12px 15px;
+  border: 1px solid #eee2c4;
+  border-radius: 14px;
+  background: linear-gradient(110deg, #fffdf8, #fff4d4);
+  color: var(--industrial-navy, #102a56);
+}
+
+#productView .product-purchase-trust > i {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  place-items: center;
+  border-radius: 12px;
+  background: #f8c51a;
+  color: #17375d;
+  font-size: 20px;
+}
+
+#productView .product-purchase-trust > span {
+  display: grid;
+  gap: 3px;
+}
+
+#productView .product-purchase-trust strong {
+  font-size: 14px;
+  font-weight: 900;
+}
+
+#productView .product-purchase-trust small {
+  color: #76664a;
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+@media (max-width: 575px) {
+  #productView .product-purchase-trust {
+    gap: 9px;
+    margin-top: 9px;
+    padding: 10px 12px;
+  }
+
+  #productView .product-purchase-trust > i {
+    width: 35px;
+    height: 35px;
+    flex-basis: 35px;
+    font-size: 18px;
   }
 }

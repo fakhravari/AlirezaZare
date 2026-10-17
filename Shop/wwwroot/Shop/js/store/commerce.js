@@ -253,7 +253,6 @@ document.addEventListener("DOMContentLoaded", () => {
       inventoryStatus.className = `product-stock-status ${inventoryState}`;
       inventoryStatus.setAttribute("role", "status");
       inventoryStatus.innerHTML = `<span class="product-stock-status-icon"><i class="bi bi-box-seam" aria-hidden="true"></i></span><span class="product-stock-status-copy"><strong>موجودی انبار</strong><small>${inventoryMessage}</small></span><i class="bi ${inventoryIcon} product-stock-status-mark" aria-hidden="true"></i>`;
-      productView.querySelector(".product-detail-actions")?.before(inventoryStatus);
       productView.querySelectorAll('a[href^="Product?id="]').forEach((link) => {
         const productId = link.getAttribute("href")?.match(/^Product\?id=(\d+)/i)?.[1];
         if (productId) link.href = window.HNProductUrl(productId);
@@ -342,6 +341,15 @@ document.addEventListener("DOMContentLoaded", () => {
           productView.querySelector(".product-variant-options") ||
           productView.querySelector(".product-main-feature-chips");
         accessoryAnchor?.insertAdjacentHTML("afterend", accessoryMarkup);
+      }
+      const accessoriesSection = productView.querySelector(".product-accessories");
+      if (accessoriesSection) accessoriesSection.before(inventoryStatus);
+      else productView.querySelector(".product-detail-price")?.before(inventoryStatus);
+      const purchaseTrustPanel = productView.querySelector(".product-price-context"),
+        purchaseActions = productView.querySelector(".product-detail-actions");
+      if (purchaseTrustPanel && purchaseActions) {
+        purchaseTrustPanel.classList.add("product-purchase-trust");
+        purchaseActions.after(purchaseTrustPanel);
       }
       const productTitle = productView.querySelector("#productDetailTitle");
       if (p.englishName)
