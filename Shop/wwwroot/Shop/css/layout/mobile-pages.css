@@ -488,6 +488,105 @@
   }
 }
 
+/* Keep mobile product-card grids on the same symmetric horizontal gutter. */
+@media (max-width: 767px) {
+  .mobile-page--home-index > main > section > .container,
+  .mobile-page--home-index #collection > .container,
+  .mobile-page--home-index .category-showcase > .container,
+  .mobile-page--home-index #recommendations > .container {
+    box-sizing: border-box;
+    width: calc(100% - 12px) !important;
+    max-width: none !important;
+    padding-right: 4px !important;
+    padding-left: 4px !important;
+  }
+
+  .mobile-page--home-index #productGrid {
+    width: 100% !important;
+    margin-right: 0 !important;
+    margin-left: 0 !important;
+    --bs-gutter-x: 6px;
+  }
+
+  .mobile-page--product-index .search-page {
+    box-sizing: border-box;
+    width: calc(100% - 12px) !important;
+    margin-right: auto !important;
+    margin-left: auto !important;
+    padding-right: 0 !important;
+    padding-left: 0 !important;
+  }
+
+  .mobile-page--product-index .search-page-results,
+  .inner-page .product-results {
+    box-sizing: border-box;
+    width: 100%;
+    margin-right: 0 !important;
+    margin-left: 0 !important;
+    gap: 6px !important;
+  }
+
+  .mobile-page--favorites-index #favoritesView .flow-cards,
+  .mobile-page--profile-favorites #favoritesView .flow-cards {
+    box-sizing: border-box;
+    width: 100%;
+    margin-right: 0 !important;
+    margin-left: 0 !important;
+    gap: 6px !important;
+  }
+
+  .mobile-page--home-index .product-card,
+  .mobile-page--home-index .showcase-card,
+  .mobile-page--product-index .search-page-card,
+  .inner-page .product-card,
+  .inner-page .search-product.product-card,
+  .inner-page .favorite-item-card {
+    box-sizing: border-box;
+    min-width: 0;
+    margin-right: 0 !important;
+    margin-left: 0 !important;
+  }
+
+  .mobile-page--home-index .category-showcase .showcase-card {
+    min-height: 0 !important;
+  }
+
+  .mobile-page--home-index .category-showcase .showcase-card .product-image {
+    height: 175px !important;
+    min-height: 175px !important;
+    max-height: 175px !important;
+  }
+
+  .mobile-page--home-index .category-showcase .showcase-card-body {
+    min-height: 148px !important;
+    padding: 9px 8px 10px !important;
+  }
+
+  .mobile-page--home-index .category-showcase .showcase-card-body h3 {
+    min-height: 3em;
+    margin: 5px 0 7px !important;
+    font-size: 12px !important;
+    line-height: 1.5 !important;
+  }
+
+  .mobile-page--home-index .category-showcase .showcase-card-body > strong {
+    min-height: 38px !important;
+    font-size: 13px !important;
+    line-height: 1.4 !important;
+  }
+
+  .mobile-page--home-index #amazing > .container > .row {
+    --bs-gutter-x: 6px;
+    --bs-gutter-y: 8px;
+  }
+
+  .mobile-page--home-index #amazing > .container > .row > [class*="col-"] {
+    flex: 0 0 50% !important;
+    max-width: 50% !important;
+    min-width: 0;
+  }
+}
+
 /* Product card breakpoints and touch controls live in the mobile stylesheet. */
 @media (min-width: 992px) and (max-width: 1199px) {
   :root {
@@ -533,6 +632,7 @@
 /* Keep the mobile cart sheet heading readable and provide a visible close action. */
 @media (max-width: 991px) {
   html body > #cartPanel.cart-panel .cart-head {
+    position: relative !important;
     display: flex !important;
     height: 88px !important;
     min-height: 88px !important;
@@ -583,6 +683,10 @@
   }
 
   html body > #cartPanel .cart-head > .cart-panel-close {
+    position: absolute !important;
+    top: 16px !important;
+    left: 16px !important;
+    z-index: 2;
     display: grid !important;
     width: 36px !important;
     min-width: 36px !important;
@@ -607,6 +711,7 @@
   }
 
   html body > :is(#favoritesPanel, #comparePanel) .compare-panel-head {
+    position: relative !important;
     display: flex !important;
     height: 88px !important;
     min-height: 88px !important;
@@ -654,6 +759,10 @@
   }
 
   html body > :is(#favoritesPanel, #comparePanel) .compare-panel-head > .compare-panel-close {
+    position: absolute !important;
+    top: 16px !important;
+    left: 16px !important;
+    z-index: 2;
     display: grid !important;
     width: 36px !important;
     min-width: 36px !important;

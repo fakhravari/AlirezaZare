@@ -1200,7 +1200,7 @@ $(function () {
       '<i class="bi bi-arrow-left"></i>',
     ],
     responsive: {
-      0: { items: 1 },
+      0: { items: 2 },
       768: { items: 2 },
       1100: { items: 5 },
     },
