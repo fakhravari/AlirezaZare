@@ -253,6 +253,50 @@ document.addEventListener("DOMContentLoaded", () => {
       inventoryStatus.className = `product-stock-status ${inventoryState}`;
       inventoryStatus.setAttribute("role", "status");
       inventoryStatus.innerHTML = `<span class="product-stock-status-icon"><i class="bi bi-box-seam" aria-hidden="true"></i></span><span class="product-stock-status-copy"><strong>موجودی انبار</strong><small>${inventoryMessage}</small></span><i class="bi ${inventoryIcon} product-stock-status-mark" aria-hidden="true"></i>`;
+      const updateInventoryStatus = () => {
+        let quantity = inventoryQuantity;
+        const variantKeys = Object.keys(p.variants || {});
+        const allVariantsSelected =
+          variantKeys.length > 0 &&
+          variantKeys.every((key) => selectedVariants[key] !== undefined);
+        if (allVariantsSelected && p.variantStock) {
+          const combinationKey = variantKeys
+            .map((key) => `${key}=${selectedVariants[key]}`)
+            .join("|");
+          if (Object.prototype.hasOwnProperty.call(p.variantStock, combinationKey))
+            quantity = Number(p.variantStock[combinationKey]);
+        }
+        const quantityKnown = Number.isFinite(quantity) && quantity >= 0;
+        const available = quantityKnown ? quantity > 0 : p.inStock === true;
+        const unavailable = quantityKnown ? quantity === 0 : p.inStock === false;
+        const message = quantityKnown
+          ? unavailable
+            ? "۰ عدد · ناموجود"
+            : `${fa(quantity)} عدد در انبار`
+          : unavailable
+            ? "در حال حاضر ناموجود"
+            : available
+              ? "موجود در انبار"
+              : "برای اطلاع از موجودی تماس بگیرید";
+        const state = available
+          ? "is-available"
+          : unavailable
+            ? "is-unavailable"
+            : "is-pending";
+        const icon = available
+          ? "bi-check2-circle"
+          : unavailable
+            ? "bi-x-circle"
+            : "bi-clock-history";
+        inventoryStatus.className = `product-stock-status ${state}`;
+        inventoryStatus.innerHTML = `<span class="product-stock-status-icon"><i class="bi bi-box-seam" aria-hidden="true"></i></span><span class="product-stock-status-copy"><strong>موجودی انبار</strong><small>${message}</small></span><i class="bi ${icon} product-stock-status-mark" aria-hidden="true"></i>`;
+        productView
+          .querySelectorAll("#addProduct, .product-mobile-buy-button")
+          .forEach((button) => {
+            button.disabled = unavailable;
+            button.setAttribute("aria-disabled", String(unavailable));
+          });
+      };
       productView.querySelectorAll('a[href^="Product?id="]').forEach((link) => {
         const productId = link.getAttribute("href")?.match(/^Product\?id=(\d+)/i)?.[1];
         if (productId) link.href = window.HNProductUrl(productId);
@@ -750,6 +794,7 @@ document.addEventListener("DOMContentLoaded", () => {
               : adjustment < 0
                 ? "کسر قیمت گزینه‌ها: " + money(Math.abs(adjustment))
                 : "بدون هزینهٔ افزوده";
+        updateInventoryStatus();
       };
       updateVariantPrice();
       productView.querySelectorAll(".product-variant-field").forEach((field) =>

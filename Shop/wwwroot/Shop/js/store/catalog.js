@@ -823,6 +823,17 @@ window.HNProducts = productCatalog.map((entry, i) => {
           },
         },
       }[i + 1] || null,
+    // Combination-level stock for the drill detail page; the base stock remains
+    // the fallback for products without explicit variant inventory data.
+    variantStock:
+      i === 3
+        ? {
+            "battery=2ah|chuck=10mm": 3,
+            "battery=2ah|chuck=13mm": 0,
+            "battery=4ah|chuck=10mm": 2,
+            "battery=4ah|chuck=13mm": 1,
+          }
+        : null,
     accessories:
       {
         1: [
