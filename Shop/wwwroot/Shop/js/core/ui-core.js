@@ -315,7 +315,7 @@
         ? item.options.variants
         : [];
       const accessories = Array.isArray(item.options?.accessories)
-        ? item.options.accessories
+        ? item.options.accessories.filter((accessory) => accessory.selected !== false)
         : [];
       if (!variants.length && !accessories.length) return "";
       const money = (amount) => `${formatNumber(amount)} تومان`;
@@ -326,7 +326,7 @@
         : "";
       const accessoriesMarkup = accessories.length
         ? `<div class="cart-item-option-group"><small class="cart-item-option-label">متعلقات و خدمات</small><div class="cart-item-option-list cart-item-option-list--accessories">${accessories
-            .map((accessory) => `<span class="cart-item-option-chip cart-item-option-chip--accessory${accessory.selected === false ? " is-unselected" : ""}"><i class="bi bi-plus-circle" aria-hidden="true"></i><strong>${escapeHtml(accessory.name)}</strong><small class="cart-item-option-status ${accessory.required ? "is-required" : "is-optional"}">${accessory.required ? "الزامی" : accessory.selected === false ? "اختیاری · انتخاب نشده" : "اختیاری · انتخاب‌شده"}</small>${Number(accessory.price) > 0 ? `<small>${accessory.selected === false ? "در صورت انتخاب + " : "+ "}${money(Number(accessory.price) * 1000000)}</small>` : "<small>رایگان</small>"}</span>`)
+            .map((accessory) => `<span class="cart-item-option-chip cart-item-option-chip--accessory"><i class="bi bi-plus-circle" aria-hidden="true"></i><strong>${escapeHtml(accessory.name)}</strong><small class="cart-item-option-status ${accessory.required ? "is-required" : "is-optional"}">${accessory.required ? "الزامی" : "اختیاری"}</small>${Number(accessory.price) > 0 ? `<small>+ ${money(Number(accessory.price) * 1000000)}</small>` : "<small>رایگان</small>"}</span>`)
             .join("")}</div></div>`
         : "";
       return `<div class="cart-item-options" aria-label="ویژگی‌ها و متعلقات انتخاب‌شده">${variantsMarkup}${accessoriesMarkup}</div>`;

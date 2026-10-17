@@ -1063,7 +1063,7 @@ document.addEventListener("DOMContentLoaded", () => {
           ? items
               .map(
                 (item) =>
-                  `<article class="invoice-item"><img src="${esc(item.image)}" alt="${esc(item.name)}"><div><strong>${esc(item.name)}</strong>${cartOptionsMarkup(item)}<small>${fa(item.quantity)} عدد × ${money(item.price)}</small></div><b>${money(item.price * item.quantity)}</b></article>`,
+                  `<article class="invoice-item"><img src="${esc(item.image)}" alt="${esc(item.name)}"><div class="invoice-item-details"><strong><a class="invoice-product-title" href="${window.HNProductUrl(item.id)}" target="_blank" rel="noopener noreferrer">${esc(item.name)}</a></strong>${cartOptionsMarkup(item)}<div class="invoice-item-pricing"><small class="invoice-item-quantity-price">${fa(item.quantity)} عدد × ${money(item.price)}</small><strong class="invoice-item-line-total"><span>جمع این کالا</span><b>${money(item.price * item.quantity)}</b></strong></div></div></article>`,
               )
               .join("")
           : "<p>سبد خرید شما خالی است.</p>";

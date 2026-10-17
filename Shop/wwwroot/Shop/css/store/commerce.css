@@ -972,14 +972,13 @@ summary:focus-visible {
   gap: 6px;
 }
 #cartView .cart-product-copy .cart-item-option-list--variants {
-  flex-wrap: nowrap;
-  overflow-x: auto;
-  padding-bottom: 3px;
-  scrollbar-color: #c7d1dc transparent;
-  scrollbar-width: thin;
+  flex-direction: column;
+  align-items: flex-start;
+  overflow: visible;
+  padding-bottom: 0;
 }
 #cartView .cart-product-copy .cart-item-option-list--variants .cart-item-option-chip {
-  flex: 0 0 auto;
+  flex: 0 1 auto;
   max-width: 100%;
 }
 #cartView .cart-product-copy .cart-item-option-list--variants .cart-item-option-chip > strong {
