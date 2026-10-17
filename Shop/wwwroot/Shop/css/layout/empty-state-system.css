@@ -1,0 +1,144 @@
+/* Shared visual language for full-page and in-content empty states. */
+.empty-state-card {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border: 1px solid #dfc9a5 !important;
+  border-radius: 22px !important;
+  background:
+    radial-gradient(circle at 100% 0, rgba(224, 196, 145, .20), transparent 36%),
+    linear-gradient(145deg, #fffefa, #f7f1e7) !important;
+  box-shadow:
+    0 16px 34px -26px rgba(16, 42, 67, .34),
+    inset 0 1px rgba(255, 255, 255, .92) !important;
+  color: #17314d;
+}
+
+.empty-state-card::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0 0 auto;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #d5ad62 24%, #f2d88f 50%, #d5ad62 76%, transparent);
+  content: "";
+  pointer-events: none;
+}
+
+.empty-state-card::after {
+  position: absolute;
+  z-index: -1;
+  top: -100px;
+  left: -78px;
+  width: 220px;
+  height: 220px;
+  border: 1px solid rgba(181, 149, 98, .18);
+  border-radius: 50%;
+  box-shadow: 0 0 0 18px rgba(181, 149, 98, .045), 0 0 0 40px rgba(181, 149, 98, .025);
+  content: "";
+  pointer-events: none;
+}
+
+.empty-state-card > i,
+.empty-state-card .compare-empty-art > span {
+  display: grid;
+  width: 66px;
+  min-width: 66px;
+  height: 66px;
+  place-items: center;
+  border: 1px solid rgba(217, 181, 112, .62) !important;
+  border-radius: 21px !important;
+  background: linear-gradient(145deg, #183a5d, #102a48) !important;
+  box-shadow: 0 10px 22px -12px rgba(16, 42, 67, .5), 0 0 0 8px rgba(255, 250, 240, .82) !important;
+  color: #f0d28b !important;
+  font-size: 27px;
+}
+
+#productView .product-feedback-empty.empty-state-card > i {
+  width: 58px;
+  min-width: 58px;
+  height: 58px;
+  place-items: center;
+  border: 1px solid rgba(217, 181, 112, .62);
+  border-radius: 18px;
+  background: linear-gradient(145deg, #183a5d, #102a48);
+  box-shadow: 0 10px 22px -12px rgba(16, 42, 67, .5), 0 0 0 7px rgba(255, 250, 240, .82);
+  color: #f0d28b;
+}
+
+.empty-state-card > :is(h2, h3, strong) {
+  color: #17314d !important;
+  font-weight: 800;
+  line-height: 1.65;
+}
+
+.empty-state-card > p,
+.empty-state-card > span:not(.compare-empty-kicker),
+.empty-state-card > small {
+  color: #687585 !important;
+  line-height: 1.9;
+}
+
+.empty-state-card :is(.compare-empty-kicker, .empty-state-kicker) {
+  color: #9a7540 !important;
+  font-weight: 750;
+}
+
+.empty-state-card :is(a.flow-button, button) {
+  border: 1px solid #17314d !important;
+  border-radius: 13px !important;
+  background: linear-gradient(120deg, #173a5d, #102a48) !important;
+  box-shadow: 0 8px 18px rgba(16, 42, 67, .16) !important;
+  color: #fff !important;
+  transition: transform .2s ease, box-shadow .2s ease, background-color .2s ease !important;
+}
+
+.empty-state-card :is(a.flow-button, button):is(:hover, :focus-visible) {
+  border-color: #35597c !important;
+  background: linear-gradient(120deg, #244a70, #173757) !important;
+  box-shadow: 0 11px 22px rgba(16, 42, 67, .22) !important;
+  color: #fff !important;
+  transform: translateY(-2px);
+}
+
+.empty-state-card :is(a.flow-button, button) > i {
+  color: #f0d28b !important;
+}
+
+/* Compact empty notices in header drawers keep the same colors without growing. */
+:is(#cartPanel, #favoritesPanelItems, #comparePanelItems) .header-panel-empty-icon {
+  border: 1px solid rgba(217, 181, 112, .6) !important;
+  background: linear-gradient(145deg, #183a5d, #102a48) !important;
+  color: #f0d28b !important;
+  box-shadow: 0 0 0 6px rgba(247, 241, 231, .8) !important;
+}
+
+.header-search-empty > i {
+  border-color: rgba(217, 181, 112, .6) !important;
+  background: linear-gradient(145deg, #183a5d, #102a48) !important;
+  color: #f0d28b !important;
+}
+
+@media (max-width: 767px) {
+  .empty-state-card {
+    border-radius: 18px !important;
+  }
+
+  .empty-state-card > i,
+  .empty-state-card .compare-empty-art > span {
+    width: 58px;
+    min-width: 58px;
+    height: 58px;
+    border-radius: 18px !important;
+    font-size: 24px;
+  }
+
+  .empty-state-card :is(a.flow-button, button) {
+    min-height: 46px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .empty-state-card :is(a.flow-button, button) {
+    transition: none !important;
+  }
+}

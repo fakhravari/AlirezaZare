@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
     return `<strong class="product-price-current">${money(current)}</strong><span class="product-price-deal"><del class="price-old">${money(previous)}</del><b class="product-price-discount">٪${fa(discount)}</b></span>`;
   };
   const empty = (text) =>
-    `<div class="flow-card flow-empty"><i class="bi bi-bag"></i><h2>${text}</h2><a class="flow-button" href="Search">مشاهده محصولات</a></div>`;
+    `<div class="flow-card flow-empty empty-state-card"><i class="bi bi-bag"></i><h2>${text}</h2><a class="flow-button" href="Search">مشاهده محصولات</a></div>`;
   const emptyCart = () =>
     `<section class="cart-empty-state" aria-labelledby="emptyCartTitle"><div class="cart-empty-ornament" aria-hidden="true"><span><i class="bi bi-bag"></i></span></div><div class="cart-empty-copy"><span class="cart-empty-kicker">سبد خرید</span><h2 id="emptyCartTitle">سبد خرید شما خالی است</h2><p>هنوز محصولی برای بررسی و خرید انتخاب نکرده‌اید. از میان ابزارها و تجهیزات، انتخابتان را شروع کنید.</p><div class="cart-empty-actions"><a class="flow-button" href="Search"><i class="bi bi-tools" aria-hidden="true"></i><span>مشاهده محصولات</span><i class="bi bi-arrow-left" aria-hidden="true"></i></a><a class="ui-inline-action" href="Magazine"><i class="bi bi-journal-text" aria-hidden="true"></i><span>راهنمای انتخاب</span></a></div><div class="cart-empty-benefits"><span><i class="bi bi-patch-check" aria-hidden="true"></i>ضمانت اصالت</span><span><i class="bi bi-truck" aria-hidden="true"></i>ارسال به سراسر ایران</span></div></div></section>`;
   const favorites = () => {
@@ -197,16 +197,63 @@ document.addEventListener("DOMContentLoaded", () => {
           return seeded;
         }
       };
+      const ratingStars = (rating) => {
+        const value = Math.max(1, Math.min(5, Number(rating) || 5));
+        return `<span class="product-feedback-stars" aria-label="امتیاز ${fa(value)} از ۵"><span aria-hidden="true">${"★".repeat(value)}</span><span class="product-feedback-stars-empty" aria-hidden="true">${"☆".repeat(5 - value)}</span></span>`;
+      };
       const feedbackMarkup = (type, items) =>
         items.length
           ? items
               .map(
                 (item) =>
-                  `<article class="product-feedback-card"><div class="product-feedback-meta"><img class="product-feedback-avatar" src="Shop/images/guest-avatar.svg" alt="" loading="lazy"><strong>${esc(item.name?.trim() || "کاربر مهمان")}</strong>${type === "reviews" ? `<span class="product-feedback-stars" aria-label="امتیاز ${fa(item.rating)} از ۵">${"★".repeat(Math.max(1, Math.min(5, Number(item.rating) || 5)))}</span>` : ""}</div><p class="${type === "questions" ? "product-question-user-text" : "product-feedback-user-text"}">${esc(item.text)}</p>${item.reply ? `<aside class="product-feedback-admin-reply"><div class="product-feedback-admin-meta"><span><i class="bi bi-patch-check-fill" aria-hidden="true"></i>پاسخ مدیر فروشگاه</span><small>پاسخ رسمی</small></div><p>${esc(item.reply)}</p></aside>` : ""}</article>`,
+                  `<article class="product-feedback-card"><div class="product-feedback-meta"><img class="product-feedback-avatar" src="Shop/images/guest-avatar.svg" alt="" loading="lazy"><strong>${esc(item.name?.trim() || "کاربر مهمان")}</strong>${type === "reviews" ? `${ratingStars(item.rating)}` : ""}</div><p class="${type === "questions" ? "product-question-user-text" : "product-feedback-user-text"}">${esc(item.text)}</p>${item.reply ? `<aside class="product-feedback-admin-reply"><div class="product-feedback-admin-meta"><span><i class="bi bi-patch-check-fill" aria-hidden="true"></i>پاسخ مدیر فروشگاه</span><small>پاسخ رسمی</small></div><p>${esc(item.reply)}</p></aside>` : ""}</article>`,
               )
               .join("")
-          : `<div class="product-feedback-empty"><i class="bi ${type === "reviews" ? "bi-chat-square-heart" : "bi-question-circle"}" aria-hidden="true"></i><strong>${type === "reviews" ? "هنوز دیدگاهی برای این محصول ثبت نشده است." : "هنوز پرسشی دربارهٔ این محصول ثبت نشده است."}</strong><span>${type === "reviews" ? "تجربهٔ استفاده‌تان را با خریداران دیگر به اشتراک بگذارید." : "سؤال خود را ثبت کنید تا اطلاعات این کالا کامل‌تر شود."}</span></div>`;
+          : `<div class="product-feedback-empty empty-state-card"><i class="bi ${type === "reviews" ? "bi-chat-square-heart" : "bi-question-circle"}" aria-hidden="true"></i><strong>${type === "reviews" ? "هنوز دیدگاهی برای این محصول ثبت نشده است." : "هنوز پرسشی دربارهٔ این محصول ثبت نشده است."}</strong><span>${type === "reviews" ? "تجربهٔ استفاده‌تان را با خریداران دیگر به اشتراک بگذارید." : "سؤال خود را ثبت کنید تا اطلاعات این کالا کامل‌تر شود."}</span></div>`;
       productView.innerHTML = `<div class="product-detail-layout"><section class="product-detail-gallery" aria-label="تصاویر و ویدئوهای محصول"><div class="product-detail-image-frame"><span class="product-detail-image-code"><i class="bi bi-upc-scan" aria-hidden="true"></i> HN-${String(p.id).padStart(3, "0")}</span><div class="product-detail-media-frame" id="productDetailMedia">${renderMedia(mainMedia)}</div><button class="product-detail-gallery-open" id="openProductGallery" type="button"><i class="bi bi-grid-3x3-gap" aria-hidden="true"></i><span>مشاهدهٔ همه</span><b>${fa(media.length)}</b></button></div>${thumbMarkup}<div class="product-detail-gallery-caption"><i class="bi bi-images" aria-hidden="true"></i><span>تصاویر و ویدئوهای محصول</span><small>${media.length > 1 ? `${fa(media.length)} فایل رسانه‌ای` : "نمای کامل محصول"}</small></div></section><section class="product-detail-summary" aria-labelledby="productDetailTitle"><div class="product-detail-meta"><span><i class="bi bi-patch-check" aria-hidden="true"></i>${esc(p.brand)}</span><span>کد کالا: HN-${String(p.id).padStart(3, "0")}</span></div><h2 id="productDetailTitle">${esc(p.name)}</h2><p class="product-detail-description">${esc(p.name)} از گروه ${esc(p.type)}، با ویژگی ${esc(p.movement)} و ساختار ${esc(p.strap)}.</p><div class="product-main-feature-chips" aria-label="ویژگی‌های اصلی"><span><i class="bi bi-grid" aria-hidden="true"></i>${esc(p.type)}</span><span><i class="bi bi-lightning-charge" aria-hidden="true"></i>${esc(p.movement)}</span><span><i class="bi bi-building" aria-hidden="true"></i>${esc(p.brand)}</span></div>${variantMarkup}<div class="product-detail-price"><div class="product-price-heading"><span>تفکیک قیمت</span><small>قیمت کالا و هزینه‌های انتخابی</small></div><div class="product-price-context"><i class="bi bi-shield-check" aria-hidden="true"></i><span><strong>خرید مطمئن</strong><small>قیمت نهایی همراه با ضمانت اصالت کالا</small></span></div><div class="product-detail-base-price"><div class="product-detail-base-row"><span>قیمت کالا</span><strong id="productBasePrice">${money(p.price * 1000000)}</strong></div><div class="product-detail-sale-meta"></div></div><div class="product-detail-extras-price"><span>هزینهٔ گزینه‌ها و متعلقات</span><strong id="productAddonsPrice"></strong></div><div class="product-detail-total-price"><span>مبلغ قابل پرداخت</span><strong id="productFinalPrice">${money(p.price * 1000000)}</strong></div></div><div class="product-detail-actions"><button class="product-detail-add flow-button" id="addProduct" type="button"><i class="bi bi-bag-plus" aria-hidden="true"></i> افزودن به سبد خرید</button><div class="product-detail-secondary-actions"><a href="Cart"><i class="bi bi-basket3" aria-hidden="true"></i> مشاهده سبد خرید</a><button class="product-detail-favorite" id="saveProduct" type="button" aria-pressed="${isFavorite}" aria-label="${isFavorite ? "حذف از علاقه‌مندی‌ها" : "ذخیره در علاقه‌مندی‌ها"}"><i class="bi ${isFavorite ? "bi-heart-fill" : "bi-heart"}" aria-hidden="true"></i><span>${isFavorite ? "ذخیره‌شده" : "علاقه‌مندی"}</span></button></div></div><p class="product-detail-status" id="productStatus" role="status" aria-live="polite"></p></section></div><nav class="product-detail-tabs" aria-label="بخش‌های اطلاعات محصول"><a href="#product-intro"><i class="bi bi-info-circle" aria-hidden="true"></i>معرفی</a><a href="#product-expert"><i class="bi bi-journal-richtext" aria-hidden="true"></i>بررسی تخصصی</a><a href="#product-specifications"><i class="bi bi-list-check" aria-hidden="true"></i>مشخصات</a><a href="#product-reviews"><i class="bi bi-chat-heart" aria-hidden="true"></i>دیدگاه‌ها <b>${fa(readFeedback("reviews").length)}</b></a><a href="#product-questions"><i class="bi bi-question-circle" aria-hidden="true"></i>پرسش‌ها <b>${fa(readFeedback("questions").length)}</b></a></nav><section class="product-detail-content-panel" id="product-intro"><header><span>معرفی محصول</span><h2>${esc(p.name)}؛ انتخابی متناسب با نیاز شما</h2></header><p>این محصول از دستهٔ ${esc(p.type)} است. هنگام انتخاب، نوع ${esc(p.movement)} و ساختار ${esc(p.strap)} را با نیاز و شرایط کاری خود تطبیق دهید. اطلاعات این صفحه بر پایهٔ مشخصات ثبت‌شدهٔ کالا تهیه شده است.</p></section><section class="product-detail-content-panel product-detail-expert" id="product-expert"><header><span>راهنمای انتخاب</span><h2>بررسی تخصصی</h2></header><div class="product-expert-grid"><div><i class="bi bi-tools" aria-hidden="true"></i><strong>دسته و کاربرد</strong><p>${esc(p.type)}؛ برای انتخاب دقیق، نوع کار و میزان استفادهٔ روزانه را در نظر بگیرید.</p></div><div><i class="bi bi-lightning-charge" aria-hidden="true"></i><strong>نوع عملکرد</strong><p>${esc(p.movement)}؛ سازگاری منبع تغذیه یا شیوهٔ عملکرد را پیش از خرید بررسی کنید.</p></div><div><i class="bi bi-rulers" aria-hidden="true"></i><strong>ساختار محصول</strong><p>${esc(p.strap)}؛ ابعاد، لوازم همراه و شرایط نصب را با فضای کارتان تطبیق دهید.</p></div></div></section><section class="product-detail-content-panel" id="product-specifications"><header><span>جزئیات فنی</span><h2>ویژگی‌های اصلی و دیگر ویژگی‌ها</h2></header><div class="product-spec-groups"><section class="product-spec-group"><h3><i class="bi bi-stars" aria-hidden="true"></i>ویژگی‌های اصلی</h3><dl><div><dt>دسته‌بندی</dt><dd>${esc(p.type)}</dd></div><div><dt>نوع عملکرد</dt><dd>${esc(p.movement)}</dd></div><div><dt>برند</dt><dd>${esc(p.brand)}</dd></div></dl></section><section class="product-spec-group"><h3><i class="bi bi-list-check" aria-hidden="true"></i>دیگر ویژگی‌ها</h3><dl>${specs.map(([label, value]) => `<div><dt>${esc(label)}</dt><dd>${esc(value)}</dd></div>`).join("")}</dl></section></div></section><section class="product-detail-content-panel" id="product-reviews"><header><span>تجربهٔ خریداران</span><h2>دیدگاه‌ها</h2></header><div class="product-feedback-list" id="productReviewList">${feedbackMarkup("reviews", readFeedback("reviews"))}</div><form class="product-feedback-form" data-feedback-type="reviews"><label>نام نمایشی<input name="name" maxlength="60" required placeholder="نام شما"></label><label>امتیاز<select name="rating" required><option value="5">۵ — عالی</option><option value="4">۴ — خوب</option><option value="3">۳ — متوسط</option><option value="2">۲ — ضعیف</option><option value="1">۱ — خیلی ضعیف</option></select></label><label class="product-feedback-wide">دیدگاه شما<textarea name="text" rows="3" maxlength="800" required placeholder="تجربه یا نکتهٔ خود را بنویسید"></textarea></label><button class="product-feedback-submit" type="submit"><i class="bi bi-send" aria-hidden="true"></i>ثبت دیدگاه</button><small class="product-feedback-note">دیدگاه در این نسخه به‌صورت محلی در همین مرورگر ذخیره می‌شود.</small></form></section><section class="product-detail-content-panel" id="product-questions"><header><span>پاسخ به ابهام‌ها</span><h2>پرسش‌ها</h2></header><div class="product-feedback-list" id="productQuestionList">${feedbackMarkup("questions", readFeedback("questions"))}</div><form class="product-feedback-form product-question-form" data-feedback-type="questions"><label>نام نمایشی<input name="name" maxlength="60" required placeholder="نام شما"></label><label class="product-feedback-wide">پرسش شما<textarea name="text" rows="3" maxlength="600" required placeholder="سؤال خود دربارهٔ محصول را بنویسید"></textarea></label><button class="product-feedback-submit" type="submit"><i class="bi bi-question-lg" aria-hidden="true"></i>ثبت پرسش</button><small class="product-feedback-note">پرسش در این نسخه به‌صورت محلی در همین مرورگر ذخیره می‌شود.</small></form></section><section class="product-detail-related" aria-labelledby="relatedProductsTitle"><header><span>برای انتخاب بهتر</span><h2 id="relatedProductsTitle">کالاهای مشابه</h2></header><div class="product-detail-related-grid">${suggestions.map((item) => `<article class="product-card product-detail-related-card"><a class="product-image" href="Product?id=${item.id}"><img src="${esc(item.image)}" alt="${esc(item.name)}" loading="lazy"></a><div class="product-info"><div class="product-related-meta"><span class="product-related-brand">${esc(item.brand)}</span><span class="product-related-category"><i class="bi bi-grid-3x3-gap" aria-hidden="true"></i>${esc(item.type)}</span></div><h3><a href="Product?id=${item.id}">${esc(item.name)}</a></h3><p>${money(item.price * 1000000)}</p></div><button class="add-cart" type="button" data-id="${item.id}" data-name="${esc(item.name)}" data-price="${item.price * 1000000}" data-image="${esc(item.image)}"><i class="bi bi-bag-plus" aria-hidden="true"></i>افزودن به سبد خرید</button></article>`).join("")}</div></section>`;
+      const inventoryValue =
+        p.stockQuantity ??
+        p.inventoryCount ??
+        p.quantityInStock ??
+        p.availableQuantity ??
+        p.stock;
+      const inventoryQuantity =
+        typeof inventoryValue !== "number" &&
+        !(typeof inventoryValue === "string" && inventoryValue.trim())
+          ? Number.NaN
+          : Number(inventoryValue);
+      const hasInventoryQuantity =
+        Number.isFinite(inventoryQuantity) && inventoryQuantity >= 0;
+      const inventoryAvailable = hasInventoryQuantity
+        ? inventoryQuantity > 0
+        : p.inStock === true;
+      const inventoryUnavailable = hasInventoryQuantity
+        ? inventoryQuantity === 0
+        : p.inStock === false;
+      const inventoryMessage = hasInventoryQuantity
+        ? inventoryUnavailable
+          ? "۰ عدد · ناموجود"
+          : `${fa(inventoryQuantity)} عدد در انبار`
+        : inventoryUnavailable
+          ? "در حال حاضر ناموجود"
+          : inventoryAvailable
+            ? "موجود در انبار"
+            : "برای اطلاع از موجودی تماس بگیرید";
+      const inventoryState = inventoryAvailable
+        ? "is-available"
+        : inventoryUnavailable
+          ? "is-unavailable"
+          : "is-pending";
+      const inventoryIcon = inventoryAvailable
+        ? "bi-check2-circle"
+        : inventoryUnavailable
+          ? "bi-x-circle"
+          : "bi-clock-history";
+      const inventoryStatus = document.createElement("div");
+      inventoryStatus.className = `product-stock-status ${inventoryState}`;
+      inventoryStatus.setAttribute("role", "status");
+      inventoryStatus.innerHTML = `<span class="product-stock-status-icon"><i class="bi bi-box-seam" aria-hidden="true"></i></span><span class="product-stock-status-copy"><strong>موجودی انبار</strong><small>${inventoryMessage}</small></span><i class="bi ${inventoryIcon} product-stock-status-mark" aria-hidden="true"></i>`;
+      productView.querySelector(".product-detail-actions")?.before(inventoryStatus);
       productView.querySelectorAll('a[href^="Product?id="]').forEach((link) => {
         const productId = link.getAttribute("href")?.match(/^Product\?id=(\d+)/i)?.[1];
         if (productId) link.href = window.HNProductUrl(productId);
@@ -618,13 +665,22 @@ document.addEventListener("DOMContentLoaded", () => {
           );
       });
       productView.querySelectorAll(".product-feedback-form").forEach((form) =>
-        form.addEventListener("submit", (event) => {
+        form.addEventListener("submit", async (event) => {
           event.preventDefault();
           const type = form.dataset.feedbackType,
             data = new FormData(form),
             name = String(data.get("name") || "").trim() || "کاربر مهمان",
             text = String(data.get("text") || "").trim();
           if (!text) return;
+          const isReview = type === "reviews",
+            confirmed = await window.confirmFormSubmission({
+              title: isReview ? "ثبت دیدگاه برای این محصول؟" : "ثبت پرسش دربارهٔ این محصول؟",
+              message: isReview
+                ? "پس از تأیید، دیدگاه شما در همین مرورگر ثبت و نمایش داده می‌شود. از آماده بودن متن مطمئن شوید."
+                : "پس از تأیید، پرسش شما در همین مرورگر ثبت و نمایش داده می‌شود. از آماده بودن متن مطمئن شوید.",
+              confirmText: isReview ? "بله، دیدگاه ثبت شود" : "بله، پرسش ثبت شود",
+            });
+          if (!confirmed) return;
           const key = `hn-product-${type}-${p.id}`,
             items = readFeedback(type);
           items.unshift({
@@ -1028,7 +1084,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
     view.innerHTML = list.length
       ? `<header class="compare-overview"><span class="compare-overview-icon"><i class="bi bi-columns-gap" aria-hidden="true"></i></span><span class="compare-overview-copy"><strong>مقایسهٔ دسته‌بندی‌شدهٔ محصولات</strong><small>هر گروه را جداگانه بررسی کنید تا انتخاب دقیق‌تری داشته باشید.</small></span><span class="compare-overview-metrics" aria-label="${fa(list.length)} محصول در ${fa(groups.size)} گروه"><span class="compare-overview-metric"><i class="bi bi-box-seam" aria-hidden="true"></i><b>${fa(list.length)}</b><small>محصول</small></span><span class="compare-overview-metric"><i class="bi bi-grid-3x3-gap" aria-hidden="true"></i><b>${fa(groups.size)}</b><small>گروه</small></span></span><button class="compare-clear-all" type="button" data-compare-clear-all><i class="bi bi-trash3" aria-hidden="true"></i>حذف همه</button></header><div class="compare-category-groups">${[...groups.entries()].map(([category, products]) => `<section class="compare-category-group${products.length === 1 ? " has-single-product" : ""}" aria-label="مقایسهٔ ${esc(category)}"><header class="compare-category-heading"><span class="compare-category-icon"><i class="bi ${groupIcons[category] || "bi-grid"}" aria-hidden="true"></i></span><span><strong>${esc(category)}</strong><small>مقایسهٔ محصولات هم‌دسته</small></span><b>${fa(products.length)} محصول</b></header><div class="compare-product-grid">${products.map(renderCard).join("")}</div></section>`).join("")}</div>`
-      : `<div class="compare-empty"><div class="compare-empty-art" aria-hidden="true"><span><i class="bi bi-columns-gap"></i></span><i class="bi bi-plus-lg"></i></div><span class="compare-empty-kicker">مقایسهٔ هوشمند محصولات</span><h2>هنوز محصولی برای مقایسه ندارید</h2><p>محصول‌های موردنظرتان را از صفحهٔ فروشگاه انتخاب کنید؛ مشخصاتشان را اینجا کنار هم و یک‌جا بررسی می‌کنید.</p><a class="flow-button" href="Search"><i class="bi bi-search" aria-hidden="true"></i> جست‌وجوی محصولات <i class="bi bi-arrow-left" aria-hidden="true"></i></a><small class="compare-empty-hint"><i class="bi bi-lightbulb" aria-hidden="true"></i> برای افزودن، آیکن مقایسه را روی کارت هر محصول بزنید.</small></div>`;
+      : `<div class="compare-empty empty-state-card"><div class="compare-empty-art" aria-hidden="true"><span><i class="bi bi-columns-gap"></i></span><i class="bi bi-plus-lg"></i></div><span class="compare-empty-kicker">مقایسهٔ هوشمند محصولات</span><h2>هنوز محصولی برای مقایسه ندارید</h2><p>محصول‌های موردنظرتان را از صفحهٔ فروشگاه انتخاب کنید؛ مشخصاتشان را اینجا کنار هم و یک‌جا بررسی می‌کنید.</p><a class="flow-button" href="Search"><i class="bi bi-search" aria-hidden="true"></i> جست‌وجوی محصولات <i class="bi bi-arrow-left" aria-hidden="true"></i></a><small class="compare-empty-hint"><i class="bi bi-lightbulb" aria-hidden="true"></i> برای افزودن، آیکن مقایسه را روی کارت هر محصول بزنید.</small></div>`;
     view.querySelectorAll("[data-compare-remove-page]").forEach(
       (button) =>
         (button.onclick = () => {

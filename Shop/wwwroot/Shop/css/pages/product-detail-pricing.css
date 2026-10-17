@@ -117,6 +117,79 @@
   white-space: nowrap;
 }
 
+#productView .product-stock-status {
+  display: flex;
+  min-width: 0;
+  min-height: 62px;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 10px 13px;
+  border: 1px solid rgba(181, 149, 98, .26);
+  border-radius: 15px;
+  background: linear-gradient(110deg, #fffefa, #f8f3e9);
+  box-shadow: 0 7px 18px -15px rgba(16, 42, 67, .4), inset 0 1px #fff;
+}
+
+#productView .product-stock-status-icon {
+  display: grid;
+  width: 38px;
+  min-width: 38px;
+  height: 38px;
+  place-items: center;
+  border: 1px solid rgba(181, 149, 98, .26);
+  border-radius: 12px;
+  background: #fff;
+  color: #92713b;
+  font-size: 17px;
+}
+
+#productView .product-stock-status-copy {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+#productView .product-stock-status-copy > strong {
+  color: #536477;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+#productView .product-stock-status-copy > small {
+  color: #17314d;
+  font-size: 14px;
+  font-weight: 850;
+  line-height: 1.6;
+}
+
+#productView .product-stock-status-mark {
+  margin-inline-start: auto;
+  font-size: 19px;
+}
+
+#productView .product-stock-status.is-available {
+  border-color: rgba(34, 126, 86, .24);
+  background: linear-gradient(110deg, #fffefa, #eff8f2);
+}
+
+#productView .product-stock-status.is-available .product-stock-status-mark {
+  color: #23805b;
+}
+
+#productView .product-stock-status.is-unavailable {
+  border-color: rgba(180, 70, 70, .22);
+  background: linear-gradient(110deg, #fffefa, #fcf1ef);
+}
+
+#productView .product-stock-status.is-unavailable .product-stock-status-mark {
+  color: #b04c4c;
+}
+
+#productView .product-stock-status.is-pending .product-stock-status-mark {
+  color: #9a7540;
+}
+
 @media (max-width: 575px) {
   #productView .product-detail-price {
     grid-template-columns: minmax(0, 1fr);
@@ -146,5 +219,15 @@
 
   #productView .product-detail-total-price > strong {
     font-size: 24px;
+  }
+
+  #productView .product-stock-status {
+    min-height: 56px;
+    margin-top: 10px;
+    padding: 8px 10px;
+  }
+
+  #productView .product-stock-status-copy > small {
+    font-size: 13px;
   }
 }

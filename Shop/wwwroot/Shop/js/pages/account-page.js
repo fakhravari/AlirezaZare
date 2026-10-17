@@ -31,7 +31,7 @@ document.addEventListener("DOMContentLoaded", () => {
               `<article class="flow-card address-account-card"><h3>${esc(a.title)} ${a.id === selected ? "<small>آدرس انتخابی</small>" : ""}</h3><strong>${esc(a.recipient)} · ${esc(a.phone)}</strong><p>${a.province ? esc(a.province) + "، " : ""}${esc(a.city)}، ${esc(a.street)}</p><p>کد پستی: ${esc(a.postal)}</p><div class="account-actions"><button data-select="${esc(a.id)}" ${a.id === selected ? "disabled" : ""}>انتخاب برای تحویل</button><button data-edit="${esc(a.id)}">ویرایش</button><button data-delete="${esc(a.id)}">حذف آدرس</button></div></article>`,
           )
           .join("")
-      : '<div class="flow-card flow-empty"><i class="bi bi-geo-alt"></i><h3>هنوز آدرسی ندارید</h3><p>آدرس جدید را اضافه کنید تا در پیش‌فاکتور هم قابل انتخاب باشد.</p></div>';
+      : '<div class="flow-card flow-empty empty-state-card"><i class="bi bi-geo-alt"></i><h3>هنوز آدرسی ندارید</h3><p>آدرس جدید را اضافه کنید تا در پیش‌فاکتور هم قابل انتخاب باشد.</p></div>';
     host.querySelectorAll("[data-select]").forEach(
       (b) =>
         (b.onclick = () => {

@@ -1994,6 +1994,23 @@ footer .trust-badges .trust-badge-image {
   color: var(--industrial-navy) !important;
 }
 
+/* Keep the product hero kicker in the same dark-glass palette as its banner. */
+.inner-page main .product-detail-hero > .container > .page-kicker {
+  border: 1px solid rgba(246, 197, 21, .34) !important;
+  background: rgba(10, 34, 55, .78) !important;
+  box-shadow: 0 6px 18px rgba(4, 16, 35, .2), inset 0 1px rgba(255, 255, 255, .1) !important;
+  color: #ffdc54 !important;
+  backdrop-filter: blur(8px);
+}
+
+.inner-page main .product-detail-hero > .container > .page-kicker::before {
+  content: none !important;
+}
+
+.inner-page main .product-detail-hero > .container > .page-kicker > i {
+  color: #ffdc54 !important;
+}
+
 /* Product labels share one shape and use clear, coordinated status colors. */
 :is(.badge-best, .badge-new, .badge-offer) {
   display: inline-flex !important;
@@ -10373,6 +10390,8 @@ html
   .purchase-benefits--showcase .benefits-intro p {
     width: 100%;
     max-width: none;
+    flex: 0 1 auto;
+    white-space: normal;
   }
 }
 
@@ -12040,6 +12059,11 @@ body .electrical-swiper .electrical-arrow:is(:hover, :focus-visible) {
   transform: translateY(-1px) scale(1.05);
 }
 
+/* Preserve the hero arrows' vertical centering while hovering. */
+body .electrical-swiper .electrical-arrow:is(:hover, :focus-visible) {
+  transform: translateY(-50%) scale(1.05);
+}
+
 body .owl-carousel > .owl-nav button:focus-visible,
 body .electrical-swiper .electrical-arrow:focus-visible {
   outline: 3px solid rgba(246, 197, 21, 0.42) !important;
@@ -13292,4 +13316,90 @@ body .electrical-swiper .swiper-pagination-bullet-active {
   #mainNav .brand-dropdown > .nav-link.dropdown-toggle::after {
     transition-duration: 0.01ms !important;
   }
+}
+
+/* Make the review and question totals easier to read in the product tabs. */
+#productView .product-detail-tabs > a > b {
+  min-width: 27px;
+  height: 27px;
+  padding-inline: 6px;
+  font-size: 12px;
+  line-height: 1;
+}
+
+#productView .product-feedback-stars {
+  display: inline-flex;
+  direction: ltr;
+  align-items: center;
+  white-space: nowrap;
+  letter-spacing: 1px;
+  color: #b88712;
+}
+
+#productView .product-feedback-stars-empty {
+  color: #c8d0d8;
+}
+
+#productView .product-feedback-admin-reply {
+  position: relative;
+  margin: 14px 0 0;
+  padding: 14px 16px;
+  overflow: hidden;
+  border: 1px solid #ead9a8;
+  border-inline-start: 4px solid #d5a91e;
+  border-radius: 14px;
+  background:
+    radial-gradient(circle at 100% 0, rgba(246, 197, 21, 0.12), transparent 42%),
+    linear-gradient(135deg, #fffaf0, #fff 72%);
+  box-shadow: 0 5px 14px rgba(16, 42, 67, 0.06);
+}
+
+#productView .product-feedback-admin-meta > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #173653;
+  font-size: 13px;
+  font-weight: 850;
+}
+
+#productView .product-feedback-admin-meta > span i {
+  display: grid;
+  width: 27px;
+  height: 27px;
+  place-items: center;
+  border: 1px solid rgba(213, 169, 30, 0.32);
+  border-radius: 9px;
+  background: #fff3c4;
+  color: #9a7100;
+}
+
+#productView .product-feedback-admin-meta > small {
+  padding: 5px 9px;
+  border: 1px solid rgba(213, 169, 30, 0.24);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.78);
+  color: #87630c;
+  font-size: 11px;
+  font-weight: 750;
+}
+
+#productView .product-feedback-admin-reply > p {
+  margin: 9px 0 0;
+  color: #405568;
+  font-size: 13px;
+  line-height: 1.95;
+}
+
+#mainNav .header-home-link {
+  z-index: 5;
+  cursor: pointer;
+  pointer-events: auto;
+  text-decoration: none;
+}
+
+#mainNav .header-home-link:focus-visible {
+  border-radius: 999px;
+  outline: 2px solid var(--industrial-yellow-dark);
+  outline-offset: 4px;
 }
