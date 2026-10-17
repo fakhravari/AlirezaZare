@@ -807,7 +807,7 @@ $(function () {
         closeTimer = window.setTimeout(() => {
           dropdown.classList.remove("is-mega-open");
           reset();
-        }, 350);
+        }, 220);
       };
       dropdown.addEventListener("pointerenter", keepOpen);
       dropdown.addEventListener("pointerleave", closeSoon);

@@ -13141,14 +13141,155 @@ body .electrical-swiper .swiper-pagination-bullet-active {
   display: inline-grid !important;
   visibility: visible !important;
   opacity: 1 !important;
-  border-color: var(--industrial-yellow) !important;
-  background: var(--industrial-yellow) !important;
-  color: var(--industrial-navy) !important;
-  -webkit-text-fill-color: var(--industrial-navy) !important;
+  border-color: rgba(255, 255, 255, 0.22) !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
 }
 
 #productView #addProduct:is(:hover, :focus-visible) > i.bi-bag-plus::before {
   display: block !important;
   color: inherit !important;
   -webkit-text-fill-color: inherit !important;
+}
+
+/* Keep related products visually consistent with the main product-card pattern. */
+#productView .product-detail-related-card {
+  overflow: hidden;
+  border: 1px solid var(--product-card-border, #dce4e8);
+  border-radius: var(--product-card-radius, 18px);
+  background: var(--product-card-surface, #fff);
+  box-shadow: var(--shadow-card, 0 8px 24px rgba(16, 42, 67, 0.08));
+  transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+#productView .product-detail-related-card:is(:hover, :focus-within) {
+  border-color: var(--product-card-border-hover, #b8c7d0);
+  box-shadow: var(--shadow-card-hover, 0 14px 30px rgba(16, 42, 67, 0.13));
+  transform: translateY(-3px);
+}
+
+#productView .product-detail-related-card .product-image {
+  display: block;
+  width: 100%;
+  height: 220px;
+  min-height: 220px;
+  flex: 0 0 220px;
+  padding: 0;
+  background: #edf1f3;
+}
+
+#productView .product-detail-related-card .product-image img {
+  display: block;
+  box-sizing: border-box;
+  width: 100% !important;
+  max-width: none !important;
+  height: 100% !important;
+  padding: 0 !important;
+  object-fit: cover !important;
+  object-position: center;
+}
+
+#productView .product-detail-related-card .product-info {
+  padding: 14px 16px 8px !important;
+}
+
+#productView .product-detail-related-card .product-related-meta {
+  flex-wrap: nowrap;
+  margin-bottom: 8px;
+}
+
+#productView .product-detail-related-card .product-related-category {
+  border-color: #e4e9ed;
+  background: #f5f7f8;
+  color: #40576a;
+}
+
+#productView .product-detail-related-card .product-info h3 {
+  min-height: 46px;
+  max-height: 46px;
+  margin: 2px 0 6px;
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+#productView .product-detail-related-card > .add-cart {
+  width: calc(100% - 24px);
+  min-height: 44px;
+  margin: 0 12px 12px !important;
+  border-radius: 12px;
+}
+
+#productView .product-detail-related-card > .add-cart:is(:hover, :focus-visible, .added) {
+  border-color: var(--industrial-yellow) !important;
+  background: var(--industrial-navy) !important;
+  color: #fff !important;
+  box-shadow: 0 0 0 2px rgba(246, 197, 21, 0.16), 0 8px 18px rgba(16, 42, 67, 0.16) !important;
+  transform: translateY(-1px);
+}
+
+#productView .product-detail-related-card > .add-cart:is(:hover, :focus-visible, .added) > i {
+  background: transparent !important;
+  color: var(--industrial-yellow) !important;
+  -webkit-text-fill-color: var(--industrial-yellow) !important;
+}
+
+/* Match desktop category and brand dropdown motion and caret feedback. */
+@media (min-width: 992px) {
+  .inner-page #mainNav .category-nav-mega,
+  #mainNav .brand-dropdown > .brand-menu {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transition:
+      opacity 180ms ease,
+      transform 180ms ease,
+      visibility 0s linear 180ms !important;
+    will-change: opacity, transform;
+  }
+
+  .inner-page #mainNav .category-nav-mega {
+    transform: translateY(8px) !important;
+  }
+
+  #mainNav .brand-dropdown > .brand-menu {
+    transform: translate(-50%, 8px) !important;
+  }
+
+  .inner-page #mainNav .category-nav-dropdown:is(:hover, :focus-within, .show, .is-mega-open) > .category-nav-mega,
+  #mainNav .brand-dropdown:is(:hover, :focus-within, .show, .is-brand-open) > .brand-menu {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transition-delay: 0s !important;
+  }
+
+  .inner-page #mainNav .category-nav-dropdown:is(:hover, :focus-within, .show, .is-mega-open) > .category-nav-mega {
+    transform: translateY(0) !important;
+  }
+
+  #mainNav .brand-dropdown:is(:hover, :focus-within, .show, .is-brand-open) > .brand-menu {
+    transform: translate(-50%, 0) !important;
+  }
+
+  .inner-page #mainNav .category-nav-dropdown > .nav-link.dropdown-toggle::after,
+  #mainNav .brand-dropdown > .nav-link.dropdown-toggle::after {
+    transform: rotate(0deg) !important;
+    transform-origin: center;
+    transition: transform 180ms ease;
+  }
+
+  .inner-page #mainNav .category-nav-dropdown:is(:hover, :focus-within, .show, .is-mega-open) > .nav-link.dropdown-toggle::after,
+  #mainNav .brand-dropdown:is(:hover, :focus-within, .show, .is-brand-open) > .nav-link.dropdown-toggle::after {
+    transform: rotate(180deg) !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .inner-page #mainNav .category-nav-mega,
+  #mainNav .brand-dropdown > .brand-menu,
+  .inner-page #mainNav .category-nav-dropdown > .nav-link.dropdown-toggle::after,
+  #mainNav .brand-dropdown > .nav-link.dropdown-toggle::after {
+    transition-duration: 0.01ms !important;
+  }
 }

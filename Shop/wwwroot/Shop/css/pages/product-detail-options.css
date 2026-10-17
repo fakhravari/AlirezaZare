@@ -1,9 +1,54 @@
 /* Product-only styling for key specs and selectable accessories. */
+#productView .product-main-features {
+  position: relative;
+  overflow: hidden;
+  margin: 17px 0 19px;
+  padding: 16px;
+  border: 1px solid #e2e8ef;
+  border-radius: 18px;
+  background: linear-gradient(155deg, #fff 0%, #f8fafc 100%);
+  box-shadow: 0 10px 26px rgba(16, 42, 67, 0.065);
+}
+
+#productView .product-main-features::before {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3px;
+  background: linear-gradient(90deg, #f6c515, #e7d7af 48%, #173b5d);
+  content: "";
+}
+
+#productView .product-main-feature-heading {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin: 0 0 13px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e8edf2;
+  color: #173653;
+  font-size: 16px;
+  font-weight: 900;
+}
+
+#productView .product-main-feature-heading > i {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  place-items: center;
+  border: 1px solid #ecdcae;
+  border-radius: 14px;
+  background: linear-gradient(145deg, #fff9e7, #fff1c4);
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.9);
+  color: #8c6918;
+  font-size: 18px;
+}
+
 #productView .product-main-feature-chips {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 9px;
-  margin: 0 0 20px;
+  margin: 0;
 }
 
 #productView .product-main-feature-chips > span {
@@ -228,6 +273,25 @@
     gap: 7px;
   }
 
+  #productView .product-main-features {
+    padding: 13px;
+    border-radius: 15px;
+  }
+
+  #productView .product-main-feature-heading {
+    gap: 9px;
+    margin-bottom: 11px;
+    padding-bottom: 10px;
+    font-size: 15px;
+  }
+
+  #productView .product-main-feature-heading > i {
+    width: 38px;
+    height: 38px;
+    flex-basis: 38px;
+    border-radius: 12px;
+  }
+
   #productView .product-main-feature-chips > span {
     min-height: 48px;
     padding: 7px 8px;
@@ -295,6 +359,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   #productView .product-main-feature-chips > span,
+  #productView .product-main-feature-heading > i,
   #productView .product-accessory,
   #productView .product-accessory-check,
   #productView .product-accessory-price {

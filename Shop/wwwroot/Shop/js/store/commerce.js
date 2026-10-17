@@ -356,11 +356,21 @@ document.addEventListener("DOMContentLoaded", () => {
       const featureChips = productView.querySelector(
         ".product-main-feature-chips",
       );
-      if (featureChips)
+      if (featureChips) {
         featureChips.insertAdjacentHTML(
-          "afterend",
+          "beforebegin",
           '<div class="product-main-feature-heading"><i class="bi bi-stars" aria-hidden="true"></i><span>ویژگی‌های کلیدی محصول</span></div>',
         );
+        const featureHeading = featureChips.previousElementSibling;
+        const featurePanel = document.createElement("section");
+        featurePanel.className = "product-main-features";
+        featurePanel.setAttribute("aria-labelledby", "productMainFeaturesTitle");
+        const featureTitle = featureHeading?.querySelector("span");
+        if (featureTitle) featureTitle.id = "productMainFeaturesTitle";
+        featureHeading?.before(featurePanel);
+        if (featureHeading) featurePanel.append(featureHeading);
+        featurePanel.append(featureChips);
+      }
       productView.querySelector(".product-detail-price > p")?.remove();
       const priceTrustCopy = productView.querySelector(
         ".product-price-context > span",
