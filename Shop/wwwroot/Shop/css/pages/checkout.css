@@ -331,6 +331,60 @@
 .invoice-item > b {
   font-size: 14px;
 }
+.invoice-item .cart-item-options {
+  display: grid;
+  min-width: 0;
+  gap: 5px;
+  margin-top: 7px;
+}
+.invoice-item .cart-item-option-group {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 3px 6px;
+}
+.invoice-item .cart-item-option-label {
+  color: var(--industrial-steel);
+  font-size: 11px;
+  font-weight: 700;
+}
+.invoice-item .cart-item-option-list {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+.invoice-item .cart-item-option-chip {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2px 5px;
+  padding: 3px 6px;
+  border: 1px solid color-mix(in srgb, var(--industrial-steel) 18%, white);
+  border-radius: 7px;
+  background: rgba(247, 249, 250, 0.78);
+  color: var(--industrial-steel);
+  font-size: 10px;
+  line-height: 1.4;
+}
+.invoice-item .cart-item-option-chip > small {
+  color: var(--industrial-steel);
+  font-size: 9px;
+}
+.invoice-item .cart-item-option-chip > strong {
+  color: var(--industrial-navy);
+  font-size: 10px;
+}
+.invoice-item .cart-item-option-chip--accessory {
+  border-color: color-mix(in srgb, var(--industrial-yellow) 32%, white);
+  background: color-mix(in srgb, var(--industrial-yellow) 7%, white);
+}
+.invoice-item .cart-item-option-chip--accessory > i {
+  color: var(--industrial-yellow);
+  font-size: 10px;
+}
 .invoice-page .cart-continue-link {
   margin-top: 20px;
 }

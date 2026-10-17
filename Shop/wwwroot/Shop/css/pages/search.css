@@ -1057,13 +1057,16 @@ select {
   overflow: hidden;
   border: 1px solid #dce4e8;
   border-radius: 20px;
-  background: linear-gradient(145deg, #fff 0%, #f7f9fa 100%);
+  background:
+    radial-gradient(circle at 9% 100%, rgba(246, 197, 21, 0.11) 0 34px, transparent 35px),
+    radial-gradient(circle at 9% 100%, transparent 0 49px, rgba(16, 42, 67, 0.055) 50px 51px, transparent 52px),
+    linear-gradient(145deg, #fff 0%, #f7f9fa 100%);
   box-shadow: 0 12px 30px rgba(16, 42, 67, 0.07);
   text-align: start;
 }
 
 .search-main .results-area > #resultsEnd {
-  margin-top: 64px !important;
+  margin-top: 88px !important;
 }
 
 .results-end::before {

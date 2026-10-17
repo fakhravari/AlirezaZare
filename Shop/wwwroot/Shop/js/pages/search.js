@@ -560,6 +560,33 @@
   function readCart() {
     return window.HNUI?.cart.read() || [];
   }
+  function cartOptionsMarkup(item) {
+    const escape = window.HNUI?.escapeHtml || ((value) => String(value || ""));
+    const variants = Array.isArray(item.options?.variants)
+      ? item.options.variants
+      : [];
+    const accessories = Array.isArray(item.options?.accessories)
+      ? item.options.accessories
+      : [];
+    if (!variants.length && !accessories.length) return "";
+    const variantMarkup = variants.length
+      ? `<div class="cart-item-option-group"><small class="cart-item-option-label">ویژگی‌ها</small><div class="cart-item-option-list">${variants
+          .map(
+            (option) =>
+              `<span class="cart-item-option-chip"><small>${escape(option.label)}</small><strong>${escape(option.value)}</strong></span>`,
+          )
+          .join("")}</div></div>`
+      : "";
+    const accessoryMarkup = accessories.length
+      ? `<div class="cart-item-option-group"><small class="cart-item-option-label">متعلقات و خدمات</small><div class="cart-item-option-list">${accessories
+          .map(
+            (accessory) =>
+              `<span class="cart-item-option-chip cart-item-option-chip--accessory"><i class="bi bi-plus-circle" aria-hidden="true"></i><strong>${escape(accessory.name)}</strong>${Number(accessory.price) > 0 ? `<small>+ ${fa(Number(accessory.price) * 1000000)} تومان</small>` : "<small>رایگان</small>"}</span>`,
+          )
+          .join("")}</div></div>`
+      : "";
+    return `<div class="cart-item-options" aria-label="ویژگی‌ها و متعلقات انتخاب‌شده">${variantMarkup}${accessoryMarkup}</div>`;
+  }
   function updateCartCount() {
     const cart = readCart(),
       count = cart.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0),
@@ -581,7 +608,7 @@
         ? cart
             .map(
               (item) =>
-                `<article class="search-cart-item"><img src="${item.image || "Shop/images/products/tool-hammer-drill.png"}" alt=""><span><strong>${item.name || "محصول"}</strong><small>${fa(item.price)} تومان</small></span><b>${fa(item.quantity)} عدد</b></article>`,
+                `<article class="search-cart-item"><img src="${window.HNUI.escapeHtml(item.image || "Shop/images/products/tool-hammer-drill.png")}" alt=""><span><strong>${window.HNUI.escapeHtml(item.name || "محصول")}</strong>${cartOptionsMarkup(item)}<small>${fa(item.price)} تومان</small></span><b>${fa(item.quantity)} عدد</b></article>`,
             )
             .join("")
         : '<div class="search-cart-empty"><i class="bi bi-bag"></i><strong>سبد خرید شما خالی است</strong></div>';
