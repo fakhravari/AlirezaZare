@@ -8,6 +8,18 @@ document.addEventListener("DOMContentLoaded", () => {
   const addressKey = "hn-delivery-addresses";
   const dialog = document.querySelector("#addressDialog"),
     form = document.querySelector("#addressForm");
+  const formStatus = document.querySelector("#addressFormStatus");
+  const setFormStatus = (message, isError = false) => {
+    formStatus.querySelector(".address-form-status-message").textContent = message;
+    formStatus.querySelector("i").className = isError
+      ? "bi bi-exclamation-circle-fill"
+      : "bi bi-check-circle-fill";
+    formStatus.hidden = !message;
+    formStatus.classList.toggle("is-error", isError);
+  };
+  form.addEventListener("hn:form-invalid", () =>
+    setFormStatus("لطفاً موارد مشخص‌شده را کامل و اصلاح کنید.", true),
+  );
   form
     .querySelector(".address-form-grid")
     .append(form.querySelector('[name="postal"]').closest("label"));
@@ -69,7 +81,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelector("#addressDialogTitle").textContent = editing
       ? "ویرایش آدرس"
       : "تعریف آدرس جدید";
-    document.querySelector("#addressFormStatus").textContent = "";
+    setFormStatus("");
     if (address)
       for (const field of [
         "title",
@@ -100,8 +112,7 @@ document.addEventListener("DOMContentLoaded", () => {
       [...new FormData(form)].map(([k, v]) => [k, v.trim()]),
     );
     if (Object.values(address).some((v) => !v)) {
-      document.querySelector("#addressFormStatus").textContent =
-        "همه فیلدها را کامل کنید.";
+      setFormStatus("همه فیلدها را کامل کنید.", true);
       return;
     }
     address.phone = ui.toEnglishDigits(address.phone).replace(/\D/g, "");
@@ -114,8 +125,7 @@ document.addEventListener("DOMContentLoaded", () => {
       ? addresses.map((a) => (a.id === editing ? address : a))
       : [...addresses, address];
     if (!save(addressKey, next)) {
-      document.querySelector("#addressFormStatus").textContent =
-        "ذخیره آدرس ممکن نشد.";
+      setFormStatus("ذخیره آدرس ممکن نشد. دوباره تلاش کنید.", true);
       return;
     }
     ui.storage.set("hn-selected-address", address.id);

@@ -160,6 +160,12 @@
       if (!invalid.length) return;
       event.preventDefault();
       event.stopImmediatePropagation();
+      form.dispatchEvent(
+        new CustomEvent("hn:form-invalid", {
+          bubbles: true,
+          detail: { invalid },
+        }),
+      );
       invalid[0].focus({ preventScroll: true });
       invalid[0].scrollIntoView({ behavior: "smooth", block: "center" });
     },

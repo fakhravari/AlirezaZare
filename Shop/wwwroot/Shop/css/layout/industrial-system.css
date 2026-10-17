@@ -9117,10 +9117,13 @@ html
 #productView .product-detail-tabs {
   gap: 9px;
   padding: 10px;
-  border: 1px solid #d8e1ea;
+  border: 1px solid #e8ddc7;
   border-radius: 16px;
-  background: linear-gradient(135deg, #fff, #f7f9fb);
-  box-shadow: 0 8px 22px rgba(16, 42, 67, 0.09);
+  background: linear-gradient(135deg, #fffefa, #f8f8f6 72%);
+  box-shadow:
+    0 8px 22px rgba(16, 42, 67, 0.075),
+    0 0 0 3px rgba(214, 165, 13, 0.045),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 #productView .product-detail-tabs > a {
   min-height: 48px;

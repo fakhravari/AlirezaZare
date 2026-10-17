@@ -230,57 +230,157 @@
 }
 
 #productView .product-purchase-trust {
-  display: flex;
   min-width: 0;
-  align-items: center;
-  gap: 13px;
-  margin-top: 11px;
-  padding: 12px 15px;
-  border: 1px solid #eee2c4;
-  border-radius: 14px;
-  background: linear-gradient(110deg, #fffdf8, #fff4d4);
+  grid-column: 1 / -1;
+  direction: rtl;
+  margin-top: 14px;
+  padding: 16px;
+  overflow: hidden;
+  border: 1px solid #d9e6df;
+  border-radius: 17px;
+  background:
+    radial-gradient(circle at 100% 0, rgba(225, 239, 228, 0.9), transparent 42%),
+    linear-gradient(135deg, #fbfdfb 0%, #f4f8f4 54%, #fffaf0 100%);
+  box-shadow: 0 10px 24px -20px rgba(23, 54, 83, 0.5), inset 0 1px #fff;
   color: var(--industrial-navy, #102a56);
+  position: relative;
 }
 
-#productView .product-purchase-trust > i {
+#productView .product-purchase-trust::before {
+  position: absolute;
+  inset: 0 20px auto;
+  height: 2px;
+  border-radius: 0 0 99px 99px;
+  background: linear-gradient(90deg, transparent, #8eb69a 30%, #d7b849 70%, transparent);
+  content: "";
+}
+
+#productView .product-purchase-trust-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 13px;
+  border-bottom: 1px solid #e2ebe4;
+}
+
+#productView .product-purchase-trust-mark {
   display: grid;
-  width: 40px;
-  height: 40px;
-  flex: 0 0 40px;
+  width: 46px;
+  height: 46px;
+  flex: 0 0 46px;
   place-items: center;
-  border-radius: 12px;
-  background: #f8c51a;
-  color: #17375d;
-  font-size: 20px;
+  border: 1px solid #c9dccd;
+  border-radius: 14px;
+  background: linear-gradient(145deg, #e6f1e8, #d7e8db);
+  color: #347653;
+  font-size: 23px;
+  box-shadow: inset 0 1px #fff;
 }
 
-#productView .product-purchase-trust > span {
+#productView .product-purchase-trust-heading > span:last-child {
   display: grid;
-  gap: 3px;
+  gap: 2px;
 }
 
-#productView .product-purchase-trust strong {
-  font-size: 14px;
+#productView .product-purchase-trust-heading small {
+  color: #66816e;
+  font-size: 10px;
+  font-weight: 750;
+}
+
+#productView .product-purchase-trust-heading strong {
+  font-size: 15px;
   font-weight: 900;
 }
 
-#productView .product-purchase-trust small {
-  color: #76664a;
-  font-size: 12px;
+#productView .product-purchase-trust-heading p {
+  margin: 1px 0 0;
+  color: #65766b;
+  font-size: 11px;
   line-height: 1.7;
+}
+
+#productView .product-purchase-trust-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+#productView .product-purchase-trust-list > li {
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 9px;
+  border: 1px solid rgba(206, 222, 210, 0.8);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.78);
+}
+
+#productView .product-purchase-trust-list > li > i {
+  display: grid;
+  width: 25px;
+  height: 25px;
+  flex: 0 0 25px;
+  place-items: center;
+  border-radius: 8px;
+  background: #edf5ee;
+  color: #46805a;
+  font-size: 14px;
+}
+
+#productView .product-purchase-trust-list > li > span {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+#productView .product-purchase-trust-list strong {
+  color: #254b37;
+  font-size: 11px;
+  font-weight: 850;
+}
+
+#productView .product-purchase-trust-list small {
+  color: #68796d;
+  font-size: 10px;
+  line-height: 1.65;
 }
 
 @media (max-width: 575px) {
   #productView .product-purchase-trust {
-    gap: 9px;
-    margin-top: 9px;
-    padding: 10px 12px;
+    margin-top: 11px;
+    padding: 13px;
   }
 
-  #productView .product-purchase-trust > i {
-    width: 35px;
-    height: 35px;
-    flex-basis: 35px;
-    font-size: 18px;
+  #productView .product-purchase-trust-mark {
+    width: 40px;
+    height: 40px;
+    flex-basis: 40px;
+    font-size: 20px;
+  }
+
+  #productView .product-purchase-trust-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  #productView .product-purchase-trust-list > li:last-child {
+    grid-column: 1 / -1;
+  }
+
+  #productView .product-purchase-trust-list > li {
+    gap: 6px;
+    padding: 9px 8px;
+  }
+
+  #productView .product-purchase-trust-list strong {
+    font-size: 10px;
+  }
+
+  #productView .product-purchase-trust-list small {
+    font-size: 9px;
   }
 }

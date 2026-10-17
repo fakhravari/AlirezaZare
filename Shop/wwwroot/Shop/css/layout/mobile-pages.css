@@ -722,6 +722,39 @@
   }
 }
 
+/* Keep profile navigation and favorite-product grids aligned to the RTL start. */
+.inner-page[class*="mobile-page--profile-"] .account-welcome > .profile-breadcrumb {
+  right: 20px;
+  left: auto;
+}
+
+.inner-page[class*="mobile-page--profile-"] #favoritesView,
+.inner-page[class*="mobile-page--profile-"] #favoritesView .flow-cards {
+  width: 100%;
+  max-width: 100%;
+  margin-inline: 0;
+  direction: rtl;
+}
+
+.inner-page[class*="mobile-page--profile-"] #favoritesView .flow-cards {
+  justify-items: stretch;
+}
+
+.inner-page[class*="mobile-page--profile-"] #favoritesView .favorite-item-card {
+  width: 100%;
+  min-width: 0;
+  margin-inline: 0;
+  justify-self: stretch;
+  direction: rtl;
+}
+
+@media (max-width: 767px) {
+  .inner-page[class*="mobile-page--profile-"] .account-welcome > .profile-breadcrumb {
+    right: 12px;
+    left: auto;
+  }
+}
+
 
 
 /* Keep the discount chip beside the current price on every mobile card. */
@@ -1293,7 +1326,7 @@
 
 /* Keep the desktop cart popover heading on one clean row. */
 @media (min-width: 992px) {
-  html body > #cartPanel.cart-panel .cart-head {
+  html body #cartPanel.cart-panel .cart-head {
     display: flex !important;
     min-height: 82px !important;
     height: 82px !important;
@@ -1303,7 +1336,7 @@
     box-sizing: border-box;
   }
 
-  html body > #cartPanel .cart-head .cart-head-title {
+  html body #cartPanel.cart-panel .cart-head .cart-head-title {
     display: flex !important;
     min-width: 0;
     flex: 0 0 auto;
@@ -1311,14 +1344,14 @@
     gap: 12px !important;
   }
 
-  html body > #cartPanel .cart-head .cart-head-icon {
+  html body #cartPanel.cart-panel .cart-head .cart-head-icon {
     width: 42px !important;
     min-width: 42px !important;
     height: 42px !important;
     flex: 0 0 42px;
   }
 
-  html body > #cartPanel .cart-head .cart-head-title > span:last-child {
+  html body #cartPanel.cart-panel .cart-head .cart-head-title > span:last-child {
     display: flex !important;
     min-width: max-content;
     flex: 0 0 auto;
@@ -1326,7 +1359,7 @@
     gap: 3px;
   }
 
-  html body > #cartPanel .cart-head .cart-head-title :is(strong, small) {
+  html body #cartPanel.cart-panel .cart-head .cart-head-title :is(strong, small) {
     display: block;
     margin: 0 !important;
     white-space: nowrap;

@@ -10,6 +10,32 @@ $(function () {
   ).matches;
   const faNumber = (number) => window.HNUI.formatNumber(number);
   const escapeHtml = (value) => window.HNUI.escapeHtml(value);
+  const cartOptionsMarkup = (item) => {
+    const variants = Array.isArray(item.options?.variants)
+      ? item.options.variants
+      : [];
+    const accessories = Array.isArray(item.options?.accessories)
+      ? item.options.accessories
+      : [];
+    if (!variants.length && !accessories.length) return "";
+    const variantMarkup = variants.length
+      ? `<div class="cart-item-option-group"><small class="cart-item-option-label">ویژگی‌ها</small><div class="cart-item-option-list">${variants
+          .map(
+            (option) =>
+              `<span class="cart-item-option-chip"><small>${escapeHtml(option.label)}</small><strong>${escapeHtml(option.value)}</strong></span>`,
+          )
+          .join("")}</div></div>`
+      : "";
+    const accessoryMarkup = accessories.length
+      ? `<div class="cart-item-option-group"><small class="cart-item-option-label">متعلقات و خدمات</small><div class="cart-item-option-list">${accessories
+          .map(
+            (accessory) =>
+              `<span class="cart-item-option-chip cart-item-option-chip--accessory"><i class="bi bi-plus-circle" aria-hidden="true"></i><strong>${escapeHtml(accessory.name)}</strong>${Number(accessory.price) > 0 ? `<small>+ ${faNumber(Number(accessory.price) * 1000000)} تومان</small>` : '<small>رایگان</small>'}</span>`,
+          )
+          .join("")}</div></div>`
+      : "";
+    return `<div class="cart-item-options" aria-label="ویژگی‌ها و متعلقات انتخاب‌شده">${variantMarkup}${accessoryMarkup}</div>`;
+  };
   document
     .querySelectorAll(".home-header-search, .mobile-menu-search")
     .forEach((headerSearchForm) => {
@@ -1706,7 +1732,7 @@ $(function () {
           const safeId = escapeHtml(item.id);
           const safeName = escapeHtml(item.name);
           const safeImage = escapeHtml(item.image);
-          return `<div class="cart-item" data-cart-id="${safeId}"><img src="${safeImage}" alt="${safeName}" loading="lazy" decoding="async"><div class="cart-item-info"><strong>${safeName}</strong><div class="cart-item-actions"><span>${faNumber(item.price)} تومان</span><div class="cart-item-controls"><div class="cart-quantity"><button type="button" data-action="minus" aria-label="کاهش تعداد">−</button><b>${faNumber(item.quantity)}</b><button type="button" data-action="plus" aria-label="افزایش تعداد">+</button></div><button class="cart-remove" type="button" data-action="remove" aria-label="حذف محصول"><i class="bi bi-trash3"></i></button></div></div></div></div>`;
+          return `<div class="cart-item" data-cart-id="${safeId}"><img src="${safeImage}" alt="${safeName}" loading="lazy" decoding="async"><div class="cart-item-info"><strong>${safeName}</strong>${cartOptionsMarkup(item)}<div class="cart-item-actions"><span>${faNumber(item.price)} تومان</span><div class="cart-item-controls"><div class="cart-quantity"><button type="button" data-action="minus" aria-label="کاهش تعداد">−</button><b>${faNumber(item.quantity)}</b><button type="button" data-action="plus" aria-label="افزایش تعداد">+</button></div><button class="cart-remove" type="button" data-action="remove" aria-label="حذف محصول"><i class="bi bi-trash3"></i></button></div></div></div></div>`;
         })
         .join(""),
     );

@@ -19,6 +19,12 @@
     <label>نشانی کامل<textarea name="street" autocomplete="street-address" rows="3" maxlength="400" required></textarea></label>
     <label>کد پستی<input name="postal" inputmode="numeric" autocomplete="postal-code" pattern="[0-9۰-۹٠-٩]{10}" maxlength="10" required></label>
     <p class="invoice-demo-note">آدرس فقط در همین مرورگر ذخیره می‌شود.</p>
-    <p id="addressFormStatus" role="status"></p>
-    <button type="submit" class="flow-button">ذخیره و انتخاب آدرس <i class="bi bi-check2"></i></button>
+    <div id="addressFormStatus" class="address-form-status" role="status" aria-live="polite" hidden>
+        <i class="bi bi-exclamation-circle-fill" aria-hidden="true"></i>
+        <span class="address-form-status-message"></span>
+    </div>
+    <button type="submit" class="flow-button address-save-button">
+        <span class="address-save-icon" aria-hidden="true"><i class="bi bi-floppy2"></i></span>
+        <span>ذخیره و انتخاب آدرس</span>
+    </button>
 </form>

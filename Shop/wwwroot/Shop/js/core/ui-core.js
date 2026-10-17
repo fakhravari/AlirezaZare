@@ -51,6 +51,31 @@
 
   const normalizeCart = (value) => {
     if (!Array.isArray(value)) return [];
+    const normalizeOptions = (options) => {
+      const cleanText = (text, limit) => String(text || "").trim().slice(0, limit);
+      return {
+        variants: Array.isArray(options?.variants)
+          ? options.variants
+              .filter((option) => option && typeof option === "object")
+              .map((option) => ({
+                label: cleanText(option.label, 50),
+                value: cleanText(option.value, 80),
+              }))
+              .filter((option) => option.label && option.value)
+              .slice(0, 12)
+          : [],
+        accessories: Array.isArray(options?.accessories)
+          ? options.accessories
+              .filter((accessory) => accessory && typeof accessory === "object")
+              .map((accessory) => ({
+                name: cleanText(accessory.name, 100),
+                price: Math.max(0, Number(accessory.price) || 0),
+              }))
+              .filter((accessory) => accessory.name)
+              .slice(0, 12)
+          : [],
+      };
+    };
     const normalizeImage = (image) =>
       String(image || "")
         .slice(0, 250)
@@ -68,6 +93,7 @@
         name: String(item.name || "").slice(0, 120),
         price: Number(item.price),
         image: normalizeImage(item.image),
+        options: normalizeOptions(item.options),
         quantity: Math.min(
           99,
           Math.max(1, Number.parseInt(item.quantity, 10) || 1),
@@ -91,7 +117,8 @@
       if (
         existing.name === item.name &&
         existing.price === item.price &&
-        existing.image === item.image
+        existing.image === item.image &&
+        JSON.stringify(existing.options) === JSON.stringify(item.options)
       ) {
         existing.quantity = Math.min(99, existing.quantity + item.quantity);
         return;
@@ -134,7 +161,8 @@
         if (
           existing.name === safeProduct.name &&
           existing.price === safeProduct.price &&
-          existing.image === safeProduct.image
+          existing.image === safeProduct.image &&
+          JSON.stringify(existing.options) === JSON.stringify(safeProduct.options)
         ) {
           existing.quantity = Math.min(
             99,

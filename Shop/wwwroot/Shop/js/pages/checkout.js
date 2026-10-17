@@ -50,13 +50,23 @@ document.addEventListener("DOMContentLoaded", () => {
   function addressMarkup(address) {
     if (!address) return "";
     const wrapper = document.createElement("div");
+    wrapper.className = "selected-address-card";
+    const heading = document.createElement("div");
+    heading.className = "selected-address-card-heading";
     const title = document.createElement("strong");
+    const badge = document.createElement("span");
+    const badgeIcon = document.createElement("i");
     const street = document.createElement("p");
     const postal = document.createElement("small");
+    badge.className = "selected-address-card-badge";
+    badgeIcon.className = "bi bi-check2-circle";
+    badgeIcon.setAttribute("aria-hidden", "true");
+    badge.append(badgeIcon, document.createTextNode("آدرس انتخابی"));
     title.textContent = `${address.recipient} · ${address.phone}`;
     street.textContent = `${address.province ? `${address.province}، ` : ""}${address.city}، ${address.street}`;
     postal.textContent = `کد پستی: ${address.postal}`;
-    wrapper.append(title, street, postal);
+    heading.append(title, badge);
+    wrapper.append(heading, street, postal);
     return wrapper;
   }
 
@@ -147,6 +157,18 @@ document.addEventListener("DOMContentLoaded", () => {
   if (select) {
     const dialog = document.querySelector("#addressDialog");
     const form = document.querySelector("#addressForm");
+    const formStatus = document.querySelector("#addressFormStatus");
+    const setFormStatus = (message, isError = false) => {
+      formStatus.querySelector(".address-form-status-message").textContent = message;
+      formStatus.querySelector("i").className = isError
+        ? "bi bi-exclamation-circle-fill"
+        : "bi bi-check-circle-fill";
+      formStatus.hidden = !message;
+      formStatus.classList.toggle("is-error", isError);
+    };
+    form.addEventListener("hn:form-invalid", () =>
+      setFormStatus("لطفاً موارد مشخص‌شده را کامل و اصلاح کنید.", true),
+    );
     form
       .querySelector(".address-form-grid")
       .append(form.querySelector('[name="postal"]').closest("label"));
@@ -158,7 +180,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelector("#newAddress").addEventListener("click", () => {
       form.reset();
       window.HNAddressFields.set();
-      document.querySelector("#addressFormStatus").textContent = "";
+      setFormStatus("");
       dialog.showModal();
       document.documentElement.classList.add("address-modal-open");
     });
@@ -175,24 +197,23 @@ document.addEventListener("DOMContentLoaded", () => {
         [...new FormData(form)].map(([key, value]) => [key, value.trim()]),
       );
       if (Object.values(address).some((value) => !value)) {
-        document.querySelector("#addressFormStatus").textContent =
-          "لطفاً همه مشخصات آدرس را کامل کنید.";
+        setFormStatus("لطفاً همه مشخصات آدرس را کامل کنید.", true);
         return;
       }
       address.id = crypto.randomUUID();
       addresses.push(address);
       if (!ui.storage.set(addressKey, JSON.stringify(addresses))) {
         addresses.pop();
-        document.querySelector("#addressFormStatus").textContent =
-          "ذخیره آدرس ممکن نشد. دسترسی مرورگر به فضای ذخیره‌سازی را بررسی کنید.";
+        setFormStatus(
+          "ذخیره آدرس ممکن نشد. دسترسی مرورگر به فضای ذخیره‌سازی را بررسی کنید.",
+          true,
+        );
         return;
       }
       selected = address.id;
       ui.storage.set(selectedKey, selected);
       renderAddresses();
       dialog.close();
-      document.querySelector("#addressStatus").textContent =
-        "آدرس جدید ذخیره و انتخاب شد.";
     });
     cartCheckoutLink?.addEventListener("click", (event) => {
       if (cartCheckoutLink.getAttribute("aria-disabled") !== "true") return;
