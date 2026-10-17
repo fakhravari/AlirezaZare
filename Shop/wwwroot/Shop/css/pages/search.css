@@ -91,7 +91,7 @@
 }
 
 .search-product .search-page-card-media {
-  height: 335px;
+  height: 220px;
   border-bottom: 1px solid
     color-mix(in srgb, var(--industrial-yellow) 14%, white);
   padding: 0;
@@ -138,9 +138,9 @@
 .search-page-card-heading h3 {
   margin: 0;
   color: var(--industrial-navy);
-  font-size: 18px;
+  font-size: 15px;
   font-weight: 700;
-  line-height: 1.75;
+  line-height: 1.65;
 }
 
 .search-product .search-page-card-price {
@@ -178,9 +178,14 @@
 }
 
 .search-product > .search-add-cart.add-cart {
+  display: inline-flex;
   width: calc(100% - 32px);
   min-height: 48px;
   margin: 0 16px 16px;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: nowrap;
+  gap: 9px;
   border: 1px solid var(--industrial-navy);
   border-radius: 10px;
   background: linear-gradient(
@@ -191,6 +196,16 @@
   color: #fff;
   font-size: 14px;
   font-weight: 600;
+  line-height: 1.6;
+  white-space: nowrap;
+}
+
+.search-page-card-action-label {
+  white-space: nowrap;
+}
+
+.search-page-card-action-compact {
+  display: none;
 }
 
 .search-product > .search-add-cart.add-cart:hover,
@@ -206,7 +221,7 @@
 
 @media (max-width: 575px) {
   .search-product .search-page-card-media {
-    height: 335px;
+    height: 175px;
     padding: 0;
   }
 
