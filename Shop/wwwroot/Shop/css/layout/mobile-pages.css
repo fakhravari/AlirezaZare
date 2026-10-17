@@ -464,6 +464,159 @@
   }
 }
 
+/* Mobile footer: give the shared footer a clear, compact reading order. */
+@media (max-width: 767px) {
+  footer > .container {
+    width: 100%;
+    max-width: 100%;
+    padding: 0 14px;
+  }
+
+  footer .footer-main {
+    --bs-gutter-x: 10px;
+    --bs-gutter-y: 10px;
+    margin-bottom: 16px;
+  }
+
+  footer .footer-main > div:first-child {
+    padding: 17px 15px 15px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 18px;
+    background: linear-gradient(145deg, rgba(255,255,255,.075), rgba(255,255,255,.025));
+    text-align: right;
+  }
+
+  footer .footer-main > div:first-child .footer-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    margin-bottom: 8px;
+    font-size: 18px;
+    font-weight: 800;
+  }
+
+  footer .footer-main > div:first-child > p {
+    max-width: 56ch;
+    margin: 0;
+    color: rgba(244, 247, 249, .76);
+    font-size: 13px;
+    line-height: 1.9;
+  }
+
+  footer .footer-main > div:first-child .socials {
+    justify-content: flex-start;
+    gap: 8px;
+    margin: 13px 0 12px;
+  }
+
+  footer .footer-main > div:first-child .socials > a,
+  footer .footer-main > div:first-child .socials > .social-placeholder {
+    display: grid;
+    width: 38px;
+    min-width: 38px;
+    height: 38px;
+    place-items: center;
+    border: 1px solid rgba(255,255,255,.15);
+    border-radius: 12px;
+    background: rgba(255,255,255,.07);
+  }
+
+  footer .footer-main > div:first-child .trust-badges {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  footer .footer-main > div:first-child .trust-badges .trust-badge-image {
+    flex: 0 0 68px;
+    width: 68px;
+    height: 72px;
+    aspect-ratio: auto;
+    padding: 4px;
+    border: 1px solid rgba(255,255,255,.2);
+    border-radius: 10px;
+    background: #fff;
+    object-fit: contain;
+  }
+
+  footer .footer-main > .col-6 {
+    min-width: 0;
+    padding: 13px 12px 10px;
+    border: 1px solid rgba(255, 255, 255, .11);
+    border-radius: 15px;
+    background: rgba(255, 255, 255, .035);
+  }
+
+  footer .footer-main > .col-6 h4 {
+    display: flex;
+    min-height: 34px;
+    align-items: center;
+    margin: 0 0 6px;
+    padding: 0 0 8px;
+    border-bottom: 1px solid rgba(246, 197, 21, .27);
+    color: #f5d46d !important;
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1.55;
+  }
+
+  footer .footer-main > div:not(:first-child).col-6 a {
+    min-height: 34px;
+    padding: 6px 12px 6px 0;
+    border-bottom-color: rgba(255,255,255,.07);
+    color: rgba(244,247,249,.8) !important;
+    font-size: 12px !important;
+    line-height: 1.65;
+  }
+
+  footer .footer-main > div:not(:first-child).col-6 a::before {
+    top: 15px;
+    width: 5px;
+    height: 5px;
+    background: #d8b456;
+  }
+
+  footer .footer-main > div:not(:first-child).col-6 a:last-child {
+    border-bottom: 0;
+  }
+
+  footer .footer-main > .col-6:last-child {
+    flex: 0 0 100%;
+    width: 100%;
+  }
+
+  footer .footer-main > .col-6:last-child a {
+    display: inline-flex !important;
+    width: auto !important;
+    min-height: 34px;
+    margin: 2px 0 0 8px !important;
+    padding: 7px 12px !important;
+    border: 1px solid rgba(255,255,255,.13) !important;
+    border-radius: 10px;
+    background: rgba(255,255,255,.055);
+    direction: rtl;
+    white-space: nowrap;
+  }
+
+  footer .footer-main > .col-6:last-child a::before {
+    display: none;
+  }
+
+  footer .copyright {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin: 0;
+    padding: 13px 4px 4px;
+    border-top: 1px solid rgba(255,255,255,.12);
+    color: rgba(244,247,249,.62);
+    font-size: 11px;
+    line-height: 1.8;
+    text-align: center;
+  }
+}
+
 /* Search keeps two cards beside its filter panel until the result area is wide enough. */
 @media (min-width: 960px) and (max-width: 1199px) {
   .mobile-page--product-index .search-page .search-page-results {
@@ -1130,7 +1283,11 @@
     place-items: center !important;
     font-size: 19px !important;
     line-height: 1 !important;
-    transform: translate(-2px, 2px) !important;
+    transform: none !important;
+  }
+
+  #mainNav .nav-actions :is(.favorites-toggle, .compare-toggle, .cart-btn.cart-icon-theme) > i {
+    transform: translate(-5px, 6px) !important;
   }
 }
 
