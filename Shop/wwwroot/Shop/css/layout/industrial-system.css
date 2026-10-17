@@ -10631,23 +10631,10 @@ html
   align-self: flex-start;
 }
 
-/* Share one desktop hover bridge and panel anchor across home and inner pages. */
+/* Keep the desktop brand panel anchored to the navbar without a page-wide hover target. */
 @media (min-width: 992px) {
   #mainNav .brand-dropdown {
     position: static !important;
-  }
-
-  #mainNav .brand-dropdown::after {
-    position: absolute;
-    top: calc(100% - 16px);
-    left: 50%;
-    /* Keep the hover bridge underneath the panel so it cannot intercept menu links. */
-    z-index: 1;
-    width: min(1120px, calc(100vw - 48px));
-    height: 16px;
-    content: "";
-    pointer-events: auto;
-    transform: translateX(-50%);
   }
 
   #mainNav .brand-dropdown > .nav-link,
