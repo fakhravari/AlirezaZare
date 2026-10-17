@@ -1,6 +1,6 @@
 # مرجع کامل لایه‌های رابط کاربری
 
-این سند مکمل [`DEVELOPER_ROADMAP.md`](DEVELOPER_ROADMAP.md) است و برای پیدا کردن مالک واقعی UI، ردیابی تداخل CSS/JavaScript و بازآزمایی صفحه‌ها نوشته شده است. این مرجع در **۱۷ اکتبر ۲۰۲۶** با ساختار و assetهای موجود در مخزن تطبیق داده شده است؛ نقشهٔ مسیرها، breakpointها و فایل‌ها snapshot هستند و پس از تغییر View یا asset باید دوباره بررسی شوند.
+این سند مکمل [`DEVELOPER_ROADMAP.md`](DEVELOPER_ROADMAP.md) است و برای پیدا کردن مالک واقعی UI، ردیابی تداخل CSS/JavaScript و بازآزمایی صفحه‌ها نوشته شده است. این مرجع در **۱۸ اکتبر ۲۰۲۶** با ساختار و assetهای موجود در مخزن تطبیق داده شده است؛ نقشهٔ مسیرها، breakpointها و فایل‌ها snapshot هستند و پس از تغییر View یا asset باید دوباره بررسی شوند.
 
 > این سند فهرست مفصل مالکیت و نقاط شروع جست‌وجو است، نه جایگزین خواندن markup و cascade واقعی. DOM نهایی، کلاس‌های state و stylesheet برنده را برای هر باگ در مرورگر تأیید کنید.
 
@@ -190,7 +190,7 @@ CSS/JS عمومی layout و store که بالاتر آمده‌اند به هم�
 | `/search` | `ProductController.Index` → `Views/Product/List.cshtml` | `pages/search.css`, `pages/search-mobile.css` | `pages/search.js` | `section.search-intro` → `main.search-main` → `section.results-area`; فیلتر/مرتب‌سازی، URL، صفحه‌بندی، حالت خالی و filter drawer |
 | `/products/{slug}` که slug با `-{id}` تمام می‌شود (مسیرهای قبلی `/products/{id}` و `/product?id=…` با ۳۰۱ هدایت می‌شوند) | `ProductController.Details` → `Views/Product/Details.cshtml` | `pages/pages.css`; بخش فروشگاه در `store/commerce.css` | `page-content.js` به‌عنوان script عمومی صفحه | slug از `store/catalog.js` و لینک‌های مشترک در `layout/main.js`; `main.flow-main`, product view و gallery; variant، accessory، قیمت، cart، favorite/compare، feedback |
 | `/cart` | `CartController` → `Views/Cart/Index.cshtml` | `pages/checkout.css`, `form-confirm-dialog.css`, `pages.css` | `form-confirm-dialog.js`, `address-fields.js`, `checkout.js`, `iran-places.js`, `page-content.js` | `main.flow-main`, `#cartView`, address/payment sections; empty/populated, quantity, coupon, address dialog |
-| `/checkout` | `CheckoutController` → `Views/Checkout/Index.cshtml` | `checkout.css`, `pages.css` | `checkout.js`, `page-content.js` | `main.flow-main.invoice-page`, invoice/address/payment; سبد خالی/پر، روش پرداخت demo، modal آدرس |
+| `/checkout` | `CheckoutController` → `Views/Checkout/Index.cshtml` | `checkout.css`, `pages.css` | `checkout.js`, `page-content.js` | `main.flow-main.invoice-page`, invoice/address/payment؛ نمایش هر ویژگی/متعلقه در ردیف مستقل، قیمت واحد و جمع ردیف، سبد خالی/پر، روش پرداخت demo، modal آدرس |
 | `/compare` | `CompareController` → `Views/Compare/Index.cshtml` | `pages.css` + `commerce.css` | `page-content.js` | `main.flow-main.compare-page`; zero/one/multiple product و حذف آیتم |
 | `/favorites` | `FavoritesController` → `Views/Favorites/Index.cshtml` | `pages.css` + `commerce.css` | `page-content.js` | `main.flow-main`, `#favoritesView`; صفر/چند کارت و حذف favorite |
 | `/profile`, `/profile/orders`, `/profile/addresses`, `/profile/favorites` | `ProfileController` → `Views/Profile/Index.cshtml` | `account-page.css`, `checkout.css`, `pages.css` | `account-page.js`, `address-fields.js`, `iran-places.js`, `orders-pagination.js`, `page-content.js` | `main.flow-main`, `section.account-section`; route/hash بخش فعال، addresses، order pagination و وضعیت خالی |
@@ -237,7 +237,7 @@ CSS/JS عمومی layout و store که بالاتر آمده‌اند به هم�
 | `HNUI.STORAGE_KEYS` | کلیدهای پایهٔ auth/cart |
 | `HNUI.storage.get/set/remove/json` | خواندن/نوشتن مقاوم در برابر خطای browser storage؛ `set` برای favorite/compare رویداد list را dispatch می‌کند |
 | `HNUI.ready(callback)` | اجرای callback پس از آماده‌شدن DOM |
-| `HNUI.cart.read/write/add/update/remove/totals` | normalize، validation ساده و مدیریت سبد؛ `write` رویداد cart را dispatch می‌کند |
+| `HNUI.cart.read/write/add/update/remove/totals/renderOptions` | normalize مشترک، renderer مشترک ویژگی/متعلقات، validation ساده و مدیریت سبد؛ `write` رویداد cart را dispatch می‌کند |
 | `HNUI.auth.isLoggedIn/login/logout/requireLogin` | وضعیت ورود نمایشی؛ `requireLogin(resume)` برای ورود نداشتن رویداد `hn:auth-required` می‌فرستد و callback را پس از ورود آزمایشی ادامه می‌دهد |
 | `HNUI.scrollLock.lock/unlock` | شمارندهٔ قفل scroll با کلاس `ui-scroll-locked` |
 | `HNUI.dialog` | helperهای dialog/focus/keyboard؛ جزئیات دقیق را در همان فایل بخوانید |
@@ -245,6 +245,13 @@ CSS/JS عمومی layout و store که بالاتر آمده‌اند به هم�
 | `toPersianDigits`, `toEnglishDigits`, `formatNumber`, `escapeHtml`, `localizeVisibleDigits` | ارقام، قالب عدد، escape متن و بومی‌سازی نمایش |
 
 برای تبدیل رقم‌های فارسی/عربی در validation، OTP، شمارهٔ تماس و کد تخفیف، فقط از `HNUI.toEnglishDigits` استفاده کنید؛ mapper محلی تازه نسازید.
+
+### قرارداد رندر سبد
+
+- همهٔ مسیرهای افزودن کالا باید از `HNUI.cart.add` عبور کنند تا آیتم با دادهٔ `window.HNProducts` نرمال و ویژگی‌های پیش‌فرض و خدمات الزامی یکسان اعمال شوند؛ برای پنل هدر state جداگانه نسازید.
+- پنل سبد هدر، صفحهٔ سبد و فاکتور checkout برای نمایش ویژگی‌ها و متعلقات از `HNUI.cart.renderOptions(item)` استفاده می‌کنند. اگر markup یا برچسب‌ها تغییر کرد، renderer مشترک را اصلاح کنید، نه هر مصرف‌کننده را جداگانه.
+- متعلقات اختیاریِ انتخاب‌نشده در نمایش و مبلغ نهایی وارد نمی‌شوند؛ موارد انتخاب‌شده با برچسب «الزامی» یا «اختیاری» نمایش داده می‌شوند. قیمت واحد را از جمع همان ردیف (قیمت واحد × تعداد) جدا نگه دارید.
+- بعد از تغییر شکل داده یا renderer، هر سه سطح پنل هدر، صفحهٔ سبد و checkout را با کالای دارای ویژگی و متعلقه بررسی کنید؛ دادهٔ سبد محلی/دمویی است و جای سفارش سمت سرور را نمی‌گیرد.
 
 ### مالکیت JS و رفتارهای کلیدی
 
