@@ -109,40 +109,80 @@
     };
     const normalizeOptions = (options, product) => {
       const cleanText = (text, limit) => String(text || "").trim().slice(0, limit);
-      return {
-        variants: Array.isArray(options?.variants)
-          ? options.variants
-              .filter((option) => option && typeof option === "object")
-              .map((option) => ({
-                key: cleanText(option.key, 50),
+      const variants = Array.isArray(options?.variants)
+        ? options.variants
+            .filter((option) => option && typeof option === "object")
+            .map((option) => {
+              const key = cleanText(option.key, 50);
+              const value = cleanText(option.value, 80);
+              const productValue = cleanText(option.productValue, 80);
+              const productOption = product?.variants?.[key]?.options?.find(
+                (candidate) =>
+                  candidate.value === productValue || candidate.label === value,
+              );
+              const savedDelta = Number(option.priceDelta);
+              return {
+                key,
                 label: cleanText(option.label, 50),
-                value: cleanText(option.value, 80),
-                productValue: cleanText(option.productValue, 80),
-              }))
-              .filter((option) => option.label && option.value)
-              .slice(0, 12)
-          : [],
-        accessories: Array.isArray(options?.accessories)
-          ? options.accessories
-              .filter((accessory) => accessory && typeof accessory === "object")
-              .map((accessory) => {
-                const name = cleanText(accessory.name, 100);
-                const productAccessory = (product?.accessories || []).find(
-                  (candidate) => candidate.name === name,
-                );
-                return {
-                  name,
-                  price: Math.max(0, Number(accessory.price) || 0),
-                  required:
-                    typeof accessory.required === "boolean"
-                      ? accessory.required
-                      : Boolean(productAccessory?.required),
-                };
-              })
-              .filter((accessory) => accessory.name)
-              .slice(0, 12)
-          : [],
-      };
+                value,
+                productValue,
+                priceDelta: Number.isFinite(savedDelta)
+                  ? savedDelta
+                  : Number(productOption?.priceDelta) || 0,
+              };
+            })
+            .filter((option) => option.label && option.value)
+            .slice(0, 12)
+        : [];
+      const selectedVariantKeys = new Set(variants.map((option) => option.key));
+      Object.entries(product?.variants || {}).forEach(([key, feature]) => {
+        if (selectedVariantKeys.has(key)) return;
+        const option = feature.options?.[0];
+        if (!option) return;
+        variants.push({
+          key,
+          label: cleanText(feature.label, 50),
+          value: cleanText(option.label, 80),
+          productValue: cleanText(option.value, 80),
+          priceDelta: Number(option.priceDelta) || 0,
+        });
+      });
+      const accessories = Array.isArray(options?.accessories)
+        ? options.accessories
+            .filter((accessory) => accessory && typeof accessory === "object")
+            .map((accessory) => {
+              const name = cleanText(accessory.name, 100);
+              const productAccessory = (product?.accessories || []).find(
+                (candidate) => candidate.name === name,
+              );
+              const required = Boolean(accessory.required || productAccessory?.required);
+              return {
+                name,
+                price: Math.max(0, Number(productAccessory?.price ?? accessory.price) || 0),
+                required,
+                selected: required || accessory.selected !== false,
+              };
+            })
+            .filter((accessory) => accessory.name)
+            .slice(0, 12)
+        : [];
+      (product?.accessories || []).forEach((accessory) => {
+        const existing = accessories.find((item) => item.name === accessory.name);
+        if (existing) {
+          existing.required = Boolean(accessory.required);
+          if (existing.required) existing.selected = true;
+          existing.price = Math.max(0, Number(accessory.price) || 0);
+          return;
+        }
+        if (accessories.length >= 12) return;
+        accessories.push({
+          name: cleanText(accessory.name, 100),
+          price: Math.max(0, Number(accessory.price) || 0),
+          required: Boolean(accessory.required),
+          selected: Boolean(accessory.required),
+        });
+      });
+      return { variants: variants.slice(0, 12), accessories };
     };
     const normalizeImage = (image) =>
       String(image || "")
@@ -162,17 +202,18 @@
         const requiredAccessories = (product?.accessories || []).filter(
           (accessory) => accessory.required,
         );
+        const selectedAccessoryNames = new Set(
+          (Array.isArray(item.options?.accessories) ? item.options.accessories : [])
+            .filter((accessory) => accessory && accessory.selected !== false)
+            .map((accessory) => accessory.name),
+        );
         const missingRequiredAccessories = requiredAccessories.filter(
-          (accessory) =>
-            !options.accessories.some((selected) => selected.name === accessory.name),
+          (accessory) => !selectedAccessoryNames.has(accessory.name),
         );
-        options.accessories.push(
-          ...missingRequiredAccessories.map((accessory) => ({
-            name: accessory.name,
-            price: accessory.price,
-            required: true,
-          })),
-        );
+        const missingVariantPriceDelta = options.variants
+          .filter((option) => !Array.isArray(item.options?.variants) ||
+            !item.options.variants.some((selected) => selected?.key === option.key))
+          .reduce((sum, option) => sum + (Number(option.priceDelta) || 0), 0);
         return {
           // Older product-detail rows included variant/accessory keys after the product ID.
           id: String(item.id || "")
@@ -181,6 +222,7 @@
           name: String(item.name || "").slice(0, 120),
           price:
             Number(item.price) +
+            missingVariantPriceDelta * 1000000 +
             missingRequiredAccessories.reduce(
               (sum, accessory) =>
                 sum + (Number(accessory.price) || 0) * 1000000,
@@ -268,6 +310,27 @@
     });
 
   const cart = {
+    renderOptions(item) {
+      const variants = Array.isArray(item.options?.variants)
+        ? item.options.variants
+        : [];
+      const accessories = Array.isArray(item.options?.accessories)
+        ? item.options.accessories
+        : [];
+      if (!variants.length && !accessories.length) return "";
+      const money = (amount) => `${formatNumber(amount)} تومان`;
+      const variantsMarkup = variants.length
+        ? `<div class="cart-item-option-group"><small class="cart-item-option-label">ویژگی‌ها</small><div class="cart-item-option-list cart-item-option-list--variants">${variants
+            .map((option) => `<span class="cart-item-option-chip"><small>${escapeHtml(option.label)}</small><strong>${escapeHtml(option.value)}</strong>${Number(option.priceDelta) ? `<small class="cart-item-option-price">${Number(option.priceDelta) > 0 ? "+" : "−"} ${money(Math.abs(Number(option.priceDelta)) * 1000000)}</small>` : ""}</span>`)
+            .join("")}</div></div>`
+        : "";
+      const accessoriesMarkup = accessories.length
+        ? `<div class="cart-item-option-group"><small class="cart-item-option-label">متعلقات و خدمات</small><div class="cart-item-option-list cart-item-option-list--accessories">${accessories
+            .map((accessory) => `<span class="cart-item-option-chip cart-item-option-chip--accessory${accessory.selected === false ? " is-unselected" : ""}"><i class="bi bi-plus-circle" aria-hidden="true"></i><strong>${escapeHtml(accessory.name)}</strong><small class="cart-item-option-status ${accessory.required ? "is-required" : "is-optional"}">${accessory.required ? "الزامی" : accessory.selected === false ? "اختیاری · انتخاب نشده" : "اختیاری · انتخاب‌شده"}</small>${Number(accessory.price) > 0 ? `<small>${accessory.selected === false ? "در صورت انتخاب + " : "+ "}${money(Number(accessory.price) * 1000000)}</small>` : "<small>رایگان</small>"}</span>`)
+            .join("")}</div></div>`
+        : "";
+      return `<div class="cart-item-options" aria-label="ویژگی‌ها و متعلقات انتخاب‌شده">${variantsMarkup}${accessoriesMarkup}</div>`;
+    },
     read() {
       try {
         const raw = JSON.parse(storage.get(STORAGE_KEYS.cart, "[]"));

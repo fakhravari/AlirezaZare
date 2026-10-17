@@ -4,32 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const fa = (n) => ui.formatNumber(n);
   const esc = (s) => ui.escapeHtml(s);
   const money = (n) => `${fa(n)} تومان`;
-  const cartOptionsMarkup = (item) => {
-    const variants = Array.isArray(item.options?.variants)
-      ? item.options.variants
-      : [];
-    const accessories = Array.isArray(item.options?.accessories)
-      ? item.options.accessories
-      : [];
-    if (!variants.length && !accessories.length) return "";
-    const variantMarkup = variants.length
-      ? `<div class="cart-item-option-group"><small class="cart-item-option-label">ویژگی‌ها</small><div class="cart-item-option-list">${variants
-          .map(
-            (option) =>
-              `<span class="cart-item-option-chip"><small>${esc(option.label)}</small><strong>${esc(option.value)}</strong></span>`,
-          )
-          .join("")}</div></div>`
-      : "";
-    const accessoryMarkup = accessories.length
-      ? `<div class="cart-item-option-group"><small class="cart-item-option-label">متعلقات و خدمات</small><div class="cart-item-option-list">${accessories
-          .map(
-            (accessory) =>
-              `<span class="cart-item-option-chip cart-item-option-chip--accessory"><i class="bi bi-plus-circle" aria-hidden="true"></i><strong>${esc(accessory.name)}</strong><small class="cart-item-option-status ${accessory.required ? "is-required" : "is-optional"}">${accessory.required ? "الزامی" : "اختیاری"}</small>${Number(accessory.price) > 0 ? `<small>+ ${money(Number(accessory.price) * 1000000)}</small>` : "<small>رایگان</small>"}</span>`,
-          )
-          .join("")}</div></div>`
-      : "";
-    return `<div class="cart-item-options" aria-label="ویژگی‌ها و متعلقات انتخاب‌شده">${variantMarkup}${accessoryMarkup}</div>`;
-  };
+  const cartOptionsMarkup = (item) => ui.cart.renderOptions(item);
   const salePriceMarkup = (product) => {
     const discount = Number(product?.discountPercent) || 0;
     const current = Math.round(Number(product?.price) * 1000000);
@@ -882,6 +857,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 label: feature.label,
                 value: option.label,
                 productValue: option.value,
+                priceDelta: Number(option.priceDelta) || 0,
               }
             : null;
         });
@@ -953,8 +929,25 @@ document.addEventListener("DOMContentLoaded", () => {
       if (addressSection) addressSection.remove();
       if (paymentSection) paymentSection.remove();
       view.innerHTML = items.length
-        ? `<div class="flow-grid"><div class="cart-primary-column"><div class="cart-address-slot"></div><section class="flow-card cart-products-panel"><div class="cart-items-list">${items.map((i, n) => `<article class="flow-row cart-product-row"><div class="cart-product-identity"><img src="${esc(i.image)}" alt="${esc(i.name)}"><div class="cart-product-copy"><strong>${esc(i.name)}</strong>${cartOptionsMarkup(i)}<p>${money(i.price)}</p></div></div><div class="cart-item-actions"><div class="cart-quantity" role="group" aria-label="تعداد ${esc(i.name)}"><button type="button" data-minus="${n}" aria-label="کاهش تعداد ${esc(i.name)}" ${i.quantity === 1 ? "disabled" : ""}><i class="bi bi-dash" aria-hidden="true"></i></button><span class="cart-quantity-value">${fa(i.quantity)}</span><button type="button" data-plus="${n}" aria-label="افزایش تعداد ${esc(i.name)}" ${i.quantity >= 99 ? "disabled" : ""}><i class="bi bi-plus" aria-hidden="true"></i></button></div><button type="button" class="cart-item-remove" data-remove="${n}" aria-label="حذف ${esc(i.name)} از سبد"><i class="bi bi-trash3" aria-hidden="true"></i></button></div></article>`).join("")}</div></section></div><div class="cart-summary-column"><div class="cart-payment-slot"></div><aside class="flow-card cart-summary"><div class="cart-summary-heading"><span class="cart-summary-icon"><i class="bi bi-receipt" aria-hidden="true"></i></span><h2>خلاصه سبد خرید</h2></div><div class="cart-summary-lines"><div class="flow-total"><span class="cart-line-label"><i class="bi bi-box-seam" aria-hidden="true"></i><span>تعداد آیتم‌ها</span></span><strong>${fa(items.reduce((sum, item) => sum + item.quantity, 0))} عدد <small>(${fa(items.length)} مدل)</small></strong></div><div class="flow-total"><span class="cart-line-label"><i class="bi bi-receipt" aria-hidden="true"></i><span>جمع قیمت محصولات</span></span><strong>${money(total)}</strong></div>${totalsMarkup}</div>${couponMarkup}<p class="cart-shipping-note"><i class="bi bi-truck" aria-hidden="true"></i> هزینه ارسال هنگام تأیید سفارش مشخص می‌شود.</p><a class="flow-button cart-checkout-link" href="Checkout">مشاهده پیش‌فاکتور و پرداخت <i class="bi bi-arrow-left" aria-hidden="true"></i></a><a class="ui-inline-action cart-continue-link" href="Search"><i class="bi bi-tools" aria-hidden="true"></i><span>بازگشت به فروشگاه</span><i class="bi bi-arrow-left" aria-hidden="true"></i></a></aside></div></div>`
+        ? `<div class="flow-grid"><div class="cart-primary-column"><div class="cart-address-slot"></div><section class="flow-card cart-products-panel"><div class="cart-items-list">${items.map((i, n) => `<article class="flow-row cart-product-row"><div class="cart-product-identity"><img src="${esc(i.image)}" alt="${esc(i.name)}"><div class="cart-product-copy"><strong>${esc(i.name)}</strong>${cartOptionsMarkup(i)}<p class="cart-product-unit-price"><span>قیمت هر عدد</span><strong>${money(i.price)}</strong></p></div></div><div class="cart-item-actions"><div class="cart-quantity" role="group" aria-label="تعداد ${esc(i.name)}"><button type="button" data-minus="${n}" aria-label="کاهش تعداد ${esc(i.name)}" ${i.quantity === 1 ? "disabled" : ""}><i class="bi bi-dash" aria-hidden="true"></i></button><span class="cart-quantity-value">${fa(i.quantity)}</span><button type="button" data-plus="${n}" aria-label="افزایش تعداد ${esc(i.name)}" ${i.quantity >= 99 ? "disabled" : ""}><i class="bi bi-plus" aria-hidden="true"></i></button></div><button type="button" class="cart-item-remove" data-remove="${n}" aria-label="حذف ${esc(i.name)} از سبد"><i class="bi bi-trash3" aria-hidden="true"></i></button></div></article>`).join("")}</div></section></div><div class="cart-summary-column"><div class="cart-payment-slot"></div><aside class="flow-card cart-summary"><div class="cart-summary-heading"><span class="cart-summary-icon"><i class="bi bi-receipt" aria-hidden="true"></i></span><h2>خلاصه سبد خرید</h2></div><div class="cart-summary-lines"><div class="flow-total"><span class="cart-line-label"><i class="bi bi-box-seam" aria-hidden="true"></i><span>تعداد آیتم‌ها</span></span><strong>${fa(items.reduce((sum, item) => sum + item.quantity, 0))} عدد <small>(${fa(items.length)} مدل)</small></strong></div><div class="flow-total"><span class="cart-line-label"><i class="bi bi-receipt" aria-hidden="true"></i><span>جمع قیمت محصولات</span></span><strong>${money(total)}</strong></div>${totalsMarkup}</div>${couponMarkup}<p class="cart-shipping-note"><i class="bi bi-truck" aria-hidden="true"></i> هزینه ارسال هنگام تأیید سفارش مشخص می‌شود.</p><a class="flow-button cart-checkout-link" href="Checkout">مشاهده پیش‌فاکتور و پرداخت <i class="bi bi-arrow-left" aria-hidden="true"></i></a><a class="ui-inline-action cart-continue-link" href="Search"><i class="bi bi-tools" aria-hidden="true"></i><span>بازگشت به فروشگاه</span><i class="bi bi-arrow-left" aria-hidden="true"></i></a></aside></div></div>`
         : emptyCart();
+      view
+        .querySelectorAll(".cart-product-unit-price > span")
+        .forEach((label) => {
+          label.textContent = "قیمت واحد";
+        });
+      view.querySelectorAll(".cart-product-row").forEach((row, index) => {
+        const title = row.querySelector(".cart-product-copy > strong");
+        const item = items[index];
+        if (!title || !item) return;
+        const link = document.createElement("a");
+        link.className = "cart-product-title-link";
+        link.href = `Product?id=${encodeURIComponent(item.id)}`;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        link.textContent = title.textContent;
+        title.replaceWith(link);
+      });
       if (items.length && addressSection) {
         const addressSlot = view.querySelector(".cart-address-slot");
         if (addressSlot) addressSlot.append(addressSection);
@@ -1001,10 +994,13 @@ document.addEventListener("DOMContentLoaded", () => {
             button.classList.toggle("is-clicked", quantityFeedback.has(key));
           }
           button.onclick = () => {
-            if (button.dataset.remove !== undefined)
+            if (button.dataset.remove !== undefined) {
               items.splice(Number(button.dataset.remove), 1);
-            else {
-              items[index].quantity += action === "plus" ? 1 : -1;
+              ui.cart.write(items);
+            } else {
+              const item = items[index];
+              const nextQuantity =
+                item.quantity + (action === "plus" ? 1 : -1);
               clearTimeout(quantityFeedback.get(key));
               quantityFeedback.set(
                 key,
@@ -1015,11 +1011,11 @@ document.addEventListener("DOMContentLoaded", () => {
                     .forEach((current) => {
                       if (current.dataset.quantityFeedback === key)
                         current.classList.remove("is-clicked");
-                    });
+                  });
                 }, 1000),
               );
+              ui.cart.update(item.id, nextQuantity);
             }
-            ui.cart.write(items);
           };
         });
     }

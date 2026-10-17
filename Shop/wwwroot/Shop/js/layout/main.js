@@ -10,32 +10,7 @@ $(function () {
   ).matches;
   const faNumber = (number) => window.HNUI.formatNumber(number);
   const escapeHtml = (value) => window.HNUI.escapeHtml(value);
-  const cartOptionsMarkup = (item) => {
-    const variants = Array.isArray(item.options?.variants)
-      ? item.options.variants
-      : [];
-    const accessories = Array.isArray(item.options?.accessories)
-      ? item.options.accessories
-      : [];
-    if (!variants.length && !accessories.length) return "";
-    const variantMarkup = variants.length
-      ? `<div class="cart-item-option-group"><small class="cart-item-option-label">ویژگی‌ها</small><div class="cart-item-option-list">${variants
-          .map(
-            (option) =>
-              `<span class="cart-item-option-chip"><small>${escapeHtml(option.label)}</small><strong>${escapeHtml(option.value)}</strong></span>`,
-          )
-          .join("")}</div></div>`
-      : "";
-    const accessoryMarkup = accessories.length
-      ? `<div class="cart-item-option-group"><small class="cart-item-option-label">متعلقات و خدمات</small><div class="cart-item-option-list">${accessories
-          .map(
-            (accessory) =>
-              `<span class="cart-item-option-chip cart-item-option-chip--accessory"><i class="bi bi-plus-circle" aria-hidden="true"></i><strong>${escapeHtml(accessory.name)}</strong><small class="cart-item-option-status ${accessory.required ? "is-required" : "is-optional"}">${accessory.required ? "الزامی" : "اختیاری"}</small>${Number(accessory.price) > 0 ? `<small>+ ${faNumber(Number(accessory.price) * 1000000)} تومان</small>` : '<small>رایگان</small>'}</span>`,
-          )
-          .join("")}</div></div>`
-      : "";
-    return `<div class="cart-item-options" aria-label="ویژگی‌ها و متعلقات انتخاب‌شده">${variantMarkup}${accessoryMarkup}</div>`;
-  };
+  const cartOptionsMarkup = (item) => window.HNUI.cart.renderOptions(item);
   document
     .querySelectorAll(".home-header-search, .mobile-menu-search")
     .forEach((headerSearchForm) => {
@@ -2519,7 +2494,11 @@ $(function () {
 
     flyProductToControl(trigger, product, target);
   });
-  document.addEventListener("hn:cart-stock-limit", () => {
-    showListActionToast("تعداد درخواستی از موجودی این کالا بیشتر بود؛ سبد تا سقف موجودی به‌روز شد.");
+  document.addEventListener("hn:cart-stock-limit", (event) => {
+    const { product, stock } = event.detail || {};
+    const message = product?.name && Number.isFinite(Number(stock))
+      ? `موجودی «${product.name}» فقط ${faNumber(Number(stock))} عدد است؛ تعداد سبد به سقف موجودی رسید.`
+      : "تعداد درخواستی از موجودی کالا بیشتر بود؛ سبد تا سقف موجودی به‌روز شد.";
+    showListActionToast(message);
   });
 });

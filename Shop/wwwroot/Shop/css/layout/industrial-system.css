@@ -10449,6 +10449,35 @@ html
   margin-top: 12px;
 }
 
+.inner-page .page-hero > .container > .hero-trail > span,
+.inner-page .page-hero > .container > .article-hero-meta > span {
+  display: inline-flex;
+  min-height: 38px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.035);
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  text-align: center;
+  backdrop-filter: blur(8px);
+}
+
+.inner-page .page-hero > .container > .article-hero-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.inner-page .page-hero > .container > .article-hero-meta i {
+  color: rgba(255, 255, 255, 0.58);
+}
+
 .inner-page :is(.article-breadcrumb, .cart-breadcrumb) {
   display: flex;
   width: max-content;
