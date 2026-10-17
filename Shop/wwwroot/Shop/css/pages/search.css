@@ -304,7 +304,8 @@ select {
 
 .search-intro > .container,
 .search-main.container {
-  width: min(1480px, calc(100% - 48px));
+  width: min(1540px, calc(100% - 48px));
+  max-width: 1540px;
   margin: auto;
 }
 
@@ -1566,9 +1567,23 @@ select {
   flex: 1;
 }
 
-.filter-stock-option > i {
-  color: #16845b;
-  font-size: 17px;
+.filter-stock-option > select {
+  min-width: 0;
+  max-width: 150px;
+  min-height: 34px;
+  padding: 5px 9px;
+  border: 1px solid var(--industrial-muted);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--industrial-navy);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.filter-stock-option > select:focus-visible {
+  outline: 2px solid color-mix(in srgb, #16845b 35%, white);
+  outline-offset: 2px;
 }
 
 .search-product .product-specs {
@@ -1619,7 +1634,6 @@ select {
 .search-main :is(
   .filter-head-title > i,
   .filter-group-title > i,
-  .filter-stock-option > i,
   .mobile-filter-toggle > i
 ) {
   display: grid;

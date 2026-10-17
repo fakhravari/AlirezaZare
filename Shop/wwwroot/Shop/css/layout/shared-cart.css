@@ -128,10 +128,10 @@
   gap: 3px 6px;
 }
 :where(.cart-item, .page-cart-item, .search-cart-item) .cart-item-option-label {
-  color: #84909b;
-  font-size: 9px;
-  font-weight: 650;
-  line-height: 1.4;
+  color: #718091;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.5;
 }
 :where(.cart-item, .page-cart-item, .search-cart-item) .cart-item-option-list {
   display: flex;

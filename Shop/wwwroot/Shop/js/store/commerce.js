@@ -419,7 +419,7 @@ document.addEventListener("DOMContentLoaded", () => {
         purchaseTrustPanel.setAttribute("aria-label", "مزیت‌های خرید مطمئن");
         purchaseTrustPanel.innerHTML =
           '<div class="product-purchase-trust-heading"><span class="product-purchase-trust-mark"><i class="bi bi-shield-check" aria-hidden="true"></i></span><span><small>همراه شما از انتخاب تا تحویل</small><strong>با اطمینان خرید کنید</strong><p>پشتیبانی و اطلاعات روشن برای انتخابی مطمئن‌تر.</p></span></div><ul class="product-purchase-trust-list"><li><i class="bi bi-patch-check" aria-hidden="true"></i><span><strong>ضمانت اصالت کالا</strong><small>مشخصات و اصالت محصول را با خیال آسوده بررسی کنید.</small></span></li><li><i class="bi bi-chat-dots" aria-hidden="true"></i><span><strong>مشاوره پیش از خرید</strong><small>برای انتخاب متناسب با نیازتان راهنمایی بگیرید.</small></span></li><li><i class="bi bi-box-seam" aria-hidden="true"></i><span><strong>پیگیری سفارش</strong><small>از وضعیت سفارش تا زمان تحویل مطلع بمانید.</small></span></li></ul>';
-        productLayout.after(purchaseTrustPanel);
+        productLayout.append(purchaseTrustPanel);
       }
       const productTitle = productView.querySelector("#productDetailTitle");
       if (p.englishName)
