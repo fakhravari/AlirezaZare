@@ -488,6 +488,8 @@
   }
 }
 
+
+
 /* Keep the discount chip beside the current price on every mobile card. */
 @media (max-width: 767px) {
   .product-card-sale-price.has-discount,
@@ -1015,5 +1017,38 @@
 @media (max-width: 389px) {
   :root {
     --product-card-image-height: 175px;
+  }
+}
+/* Normalize mobile header control and glyph heights across all pages. */
+@media (max-width: 767px) {
+  #mainNav .navbar-toggler,
+  #mainNav .nav-tools .account-btn,
+  #mainNav .nav-actions .nav-shortcut,
+  #mainNav .nav-actions .cart-btn.cart-icon-theme {
+    box-sizing: border-box !important;
+    height: 40px !important;
+    min-height: 40px !important;
+  }
+
+  #mainNav .navbar-toggler,
+  #mainNav .nav-actions .nav-shortcut,
+  #mainNav .nav-actions .cart-btn.cart-icon-theme {
+    width: 40px !important;
+    min-width: 40px !important;
+    flex: 0 0 40px !important;
+    padding: 0 !important;
+  }
+
+  #mainNav .navbar-toggler > i,
+  #mainNav .nav-tools .account-btn > .bi-person,
+  #mainNav .nav-actions .nav-shortcut > i,
+  #mainNav .nav-actions .cart-btn.cart-icon-theme > i {
+    display: grid !important;
+    width: 22px !important;
+    height: 22px !important;
+    place-items: center !important;
+    font-size: 19px !important;
+    line-height: 1 !important;
+    transform: none !important;
   }
 }
