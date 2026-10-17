@@ -207,18 +207,6 @@ $(function () {
           };
           brandDropdown.addEventListener("pointerenter", dismissSearch);
           brandDropdown.addEventListener("focusin", dismissSearch);
-          document.addEventListener("pointermove", (event) => {
-            if (suggestions.hidden) return;
-            const bounds = brandDropdown.getBoundingClientRect();
-            if (
-              event.clientX >= bounds.left &&
-              event.clientX <= bounds.right &&
-              event.clientY >= bounds.top &&
-              event.clientY <= bounds.bottom
-            ) {
-              dismissSearch();
-            }
-          });
         });
     }
     searchInput.addEventListener("keydown", (event) => {
