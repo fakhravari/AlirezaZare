@@ -200,13 +200,38 @@ $(function () {
       document
         .querySelectorAll("#mainNav .brand-dropdown")
         .forEach((brandDropdown) => {
+          let brandCloseTimer = 0;
+          const keepBrandOpen = () => {
+            window.clearTimeout(brandCloseTimer);
+            brandDropdown.classList.add("is-brand-open");
+          };
+          const closeBrandSoon = () => {
+            window.clearTimeout(brandCloseTimer);
+            brandCloseTimer = window.setTimeout(() => {
+              brandDropdown.classList.remove("is-brand-open");
+            }, 220);
+          };
           const dismissSearch = () => {
             if (suggestions.hidden) return;
             searchInput.blur();
             closeSuggestions();
           };
-          brandDropdown.addEventListener("pointerenter", dismissSearch);
-          brandDropdown.addEventListener("focusin", dismissSearch);
+          brandDropdown.addEventListener("pointerenter", () => {
+            keepBrandOpen();
+            dismissSearch();
+          });
+          brandDropdown.addEventListener("pointerleave", closeBrandSoon);
+          brandDropdown.addEventListener("focusin", () => {
+            keepBrandOpen();
+            dismissSearch();
+          });
+          brandDropdown.addEventListener("focusout", (event) => {
+            if (!brandDropdown.contains(event.relatedTarget)) closeBrandSoon();
+          });
+          brandDropdown.addEventListener("hidden.bs.dropdown", () => {
+            window.clearTimeout(brandCloseTimer);
+            brandDropdown.classList.remove("is-brand-open");
+          });
         });
     }
     searchInput.addEventListener("keydown", (event) => {
