@@ -488,6 +488,71 @@
   }
 }
 
+/* Keep the discount chip beside the current price on every mobile card. */
+@media (max-width: 767px) {
+  .product-card-sale-price.has-discount,
+  .product-card .product-info > p.has-discount,
+  .search-product .search-page-card-price.has-discount,
+  #favoritesView .favorite-item-price.has-discount,
+  #compareView .compare-price-values.has-discount,
+  #productView .product-detail-related-card .product-info > p.has-discount {
+    display: grid !important;
+    min-height: 46px !important;
+    grid-template-columns: minmax(0, 1fr) max-content !important;
+    grid-template-rows: minmax(22px, auto) minmax(18px, auto) !important;
+    grid-template-areas:
+      "current discount"
+      "old ." !important;
+    align-content: center !important;
+    align-items: center !important;
+    column-gap: 5px !important;
+    row-gap: 0 !important;
+    white-space: nowrap;
+  }
+
+  .product-card-sale-price.has-discount .product-price-current,
+  .product-card .product-info > p.has-discount > .product-price-current,
+  .search-product .search-page-card-price.has-discount > .product-price-current,
+  #favoritesView .favorite-item-price.has-discount > .product-price-current,
+  #compareView .compare-price-values.has-discount > .product-price-current,
+  #productView .product-detail-related-card .product-info > p.has-discount > .product-price-current {
+    grid-area: current;
+    justify-self: start;
+    margin: 0 !important;
+  }
+
+  .product-card-sale-price.has-discount .product-price-deal,
+  .product-card .product-info > p.has-discount .product-price-deal,
+  .search-product .search-page-card-price.has-discount .product-price-deal,
+  #favoritesView .favorite-item-price.has-discount .product-price-deal,
+  #compareView .compare-price-values.has-discount .product-price-deal,
+  #productView .product-detail-related-card .product-info > p.has-discount .product-price-deal {
+    display: contents !important;
+  }
+
+  .product-card-sale-price.has-discount .price-old,
+  .product-card .product-info > p.has-discount .price-old,
+  .search-product .search-page-card-price.has-discount .price-old,
+  #favoritesView .favorite-item-price.has-discount .price-old,
+  #compareView .compare-price-values.has-discount .price-old,
+  #productView .product-detail-related-card .product-info > p.has-discount .price-old {
+    grid-area: old;
+    justify-self: start;
+    margin: 0 !important;
+  }
+
+  .product-card-sale-price.has-discount .product-price-discount,
+  .product-card .product-info > p.has-discount .product-price-discount,
+  .search-product .search-page-card-price.has-discount .product-price-discount,
+  #favoritesView .favorite-item-price.has-discount .product-price-discount,
+  #compareView .compare-price-values.has-discount .product-price-discount,
+  #productView .product-detail-related-card .product-info > p.has-discount .product-price-discount {
+    grid-area: discount;
+    align-self: center !important;
+    justify-self: end;
+  }
+}
+
 /* Keep mobile product-card grids on the same symmetric horizontal gutter. */
 @media (max-width: 767px) {
   .mobile-page--home-index > main > section > .container,

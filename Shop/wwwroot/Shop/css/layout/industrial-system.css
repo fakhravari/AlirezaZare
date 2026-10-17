@@ -13134,3 +13134,11 @@ body .electrical-swiper .swiper-pagination-bullet-active {
   line-height: 1;
   vertical-align: 0;
 }
+
+@media (min-width: 992px) {
+  body.has-search-suggestions #mainNav .brand-dropdown > .brand-menu {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+}

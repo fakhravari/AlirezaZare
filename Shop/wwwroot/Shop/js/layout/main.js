@@ -93,10 +93,14 @@ $(function () {
     const closeSuggestions = () => {
       suggestions.hidden = true;
       searchInput.setAttribute("aria-expanded", "false");
+      if (!isDrawerSearch)
+        document.body.classList.remove("has-search-suggestions");
     };
     const openSuggestions = () => {
       suggestions.hidden = false;
       searchInput.setAttribute("aria-expanded", "true");
+      if (!isDrawerSearch)
+        document.body.classList.add("has-search-suggestions");
     };
     const searchUrl = (query) => `Search?q=${encodeURIComponent(query)}`;
     const renderSuggestions = () => {
@@ -186,6 +190,37 @@ $(function () {
         renderSuggestions();
       else renderQuickSearchPanel();
     });
+    if (!isDrawerSearch) {
+      headerSearchForm.addEventListener("pointerleave", () => {
+        if (window.matchMedia("(min-width: 992px)").matches)
+          closeSuggestions();
+      });
+    }
+    if (!isDrawerSearch && window.matchMedia("(min-width: 992px)").matches) {
+      document
+        .querySelectorAll("#mainNav .brand-dropdown")
+        .forEach((brandDropdown) => {
+          const dismissSearch = () => {
+            if (suggestions.hidden) return;
+            searchInput.blur();
+            closeSuggestions();
+          };
+          brandDropdown.addEventListener("pointerenter", dismissSearch);
+          brandDropdown.addEventListener("focusin", dismissSearch);
+          document.addEventListener("pointermove", (event) => {
+            if (suggestions.hidden) return;
+            const bounds = brandDropdown.getBoundingClientRect();
+            if (
+              event.clientX >= bounds.left &&
+              event.clientX <= bounds.right &&
+              event.clientY >= bounds.top &&
+              event.clientY <= bounds.bottom
+            ) {
+              dismissSearch();
+            }
+          });
+        });
+    }
     searchInput.addEventListener("keydown", (event) => {
       if (event.key === "Escape" && !suggestions.hidden) {
         event.preventDefault();
