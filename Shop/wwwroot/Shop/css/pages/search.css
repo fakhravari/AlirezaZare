@@ -91,14 +91,19 @@
 }
 
 .search-product .search-page-card-media {
+  position: relative;
   height: 220px;
+  min-width: 0;
+  overflow: hidden;
   border-bottom: 1px solid
     color-mix(in srgb, var(--industrial-yellow) 14%, white);
-  padding: 0;
+  padding: 0 !important;
   background: var(--industrial-bg);
 }
 
 .search-product .search-page-card-media > a {
+  position: absolute;
+  inset: 0;
   display: block;
   width: 100%;
   height: 100%;
@@ -106,13 +111,21 @@
 
 .search-product .search-page-card-media img {
   display: block;
-  object-fit: cover;
-  object-position: 50% 50%;
-  transition: transform 0.7s ease;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  box-sizing: border-box;
+  object-fit: contain !important;
+  object-position: center;
+  background: #fff;
+  transition: none;
 }
 
 .search-product:hover .search-page-card-media img {
-  transform: scale(1.05);
+  transform: none;
 }
 
 .search-product.product-card .search-page-card-content {

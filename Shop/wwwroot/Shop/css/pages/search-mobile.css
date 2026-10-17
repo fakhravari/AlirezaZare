@@ -56,8 +56,10 @@
 
   .search-page .search-page-card-media img {
     padding: 0;
-    object-fit: cover;
+    object-fit: contain !important;
     object-position: center;
+    background: #fff;
+    transform: none !important;
   }
 
   .search-page .search-page-card-media > .favorite,
