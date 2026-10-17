@@ -18,7 +18,7 @@
     min-width: 0 !important;
     min-height: 0 !important;
     height: auto !important;
-    grid-template-rows: 154px 1fr 48px;
+    grid-template-rows: 175px 1fr 48px;
     overflow: hidden;
     border: 1px solid #dce4ea !important;
     border-radius: 16px;
@@ -37,9 +37,9 @@
   .search-page .search-page-card-media {
     position: relative;
     width: 100%;
-    height: 154px !important;
-    min-height: 154px !important;
-    max-height: 154px !important;
+    height: 175px !important;
+    min-height: 175px !important;
+    max-height: 175px !important;
     overflow: hidden;
     border: 0;
     border-bottom: 1px solid #e8edf0;
@@ -272,13 +272,13 @@
   }
 
   .search-page .search-page-card {
-    grid-template-rows: 132px 1fr 42px;
+    grid-template-rows: 175px 1fr 42px;
   }
 
   .search-page .search-page-card-media {
-    height: 132px !important;
-    min-height: 132px !important;
-    max-height: 132px !important;
+    height: 175px !important;
+    min-height: 175px !important;
+    max-height: 175px !important;
   }
 
   .search-page .search-page-card-content {
@@ -327,12 +327,12 @@
   }
 
   .search-page .search-page-card {
-    grid-template-rows: 142px 1fr 42px;
+    grid-template-rows: 175px 1fr 42px;
   }
 
   .search-page .search-page-card-media {
-    height: 142px !important;
-    min-height: 142px !important;
-    max-height: 142px !important;
+    height: 175px !important;
+    min-height: 175px !important;
+    max-height: 175px !important;
   }
 }

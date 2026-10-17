@@ -219,6 +219,28 @@
   box-shadow: 0 10px 24px rgba(7, 20, 38, 0.18);
 }
 
+/* Search owns its card rhythm after shared desktop styles have loaded. */
+@media (min-width: 768px) {
+  .inner-page .search-product.product-card.search-page-card .search-page-card-content {
+    min-height: 0;
+    padding: 13px 14px !important;
+    flex: 0 0 auto;
+  }
+
+  .inner-page .search-product.product-card.search-page-card .search-page-card-title {
+    margin: 0 0 7px !important;
+  }
+
+  .inner-page .search-product.product-card.search-page-card .search-page-card-price {
+    min-height: 58px !important;
+    margin: auto 0 8px !important;
+    color: var(--industrial-navy) !important;
+    font-size: 18px !important;
+    font-weight: 700;
+    line-height: 1.7;
+  }
+}
+
 @media (max-width: 575px) {
   .search-product .search-page-card-media {
     height: 175px;
