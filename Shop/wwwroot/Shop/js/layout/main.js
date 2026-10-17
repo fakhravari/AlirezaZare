@@ -1070,24 +1070,32 @@ $(function () {
     const previous = Math.round(current / (1 - discount / 100));
     return `<strong class="product-price-current">${faNumber(current)} <small>تومان</small></strong><span class="product-price-deal"><del class="price-old">${faNumber(previous)} تومان</del><b class="product-price-discount">٪${faNumber(discount)}</b></span>`;
   };
-  const decorateCatalogSaleCards = (root = document) => {
+  const decorateCatalogPriceCards = (root = document) => {
     root
       .querySelectorAll(".product-card, .showcase-card, .rail-card")
       .forEach((card) => {
         const id = card.querySelector(".add-cart[data-id]")?.dataset.id;
         const product = catalogProducts.find((item) => String(item.id) === id);
+        if (!product) return;
         const saleMarkup = catalogSaleMarkup(product);
-        if (!saleMarkup) return;
+        const homeGridCard = card.closest("#productGrid");
+        if (!saleMarkup && !homeGridCard) return;
+        const current = Math.round(Number(product.price) * 1000000);
+        if (!current) return;
+        const regularMarkup =
+          `<strong class="product-price-current">${faNumber(current)} ` +
+          "<small>تومان</small></strong>";
         const price = card.querySelector(
           ".product-info > p, .showcase-card-body > strong, .rail-card > strong",
         );
         if (price) {
           if (price.tagName === "P") {
-            price.classList.add("has-discount");
-            price.innerHTML = saleMarkup;
-          }
-            else
+            price.classList.toggle("has-discount", Boolean(saleMarkup));
+            price.classList.toggle("is-regular", !saleMarkup);
+            price.innerHTML = saleMarkup || regularMarkup;
+          } else if (saleMarkup) {
             price.outerHTML = `<div class="product-card-sale-price has-discount">${saleMarkup}</div>`;
+          }
         }
       });
   };
@@ -1170,7 +1178,7 @@ $(function () {
       catalogProducts.slice(20, 26).map(productCardMarkup).join(""),
     );
   }
-  decorateCatalogSaleCards();
+  decorateCatalogPriceCards();
 
   const showcaseSliderOptions = {
     ...carouselMotion,
@@ -1677,6 +1685,12 @@ $(function () {
     );
     setFavoriteOpen(true);
   });
+  $favoritesPanel.on("click", ".compare-panel-close", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setFavoriteOpen(false);
+    $favoritesToggle.trigger("focus");
+  });
   $favoritesToggle.on("click", (event) => {
     if (
       $window.width() > mobileBreakpoint ||
@@ -1731,6 +1745,12 @@ $(function () {
     );
     syncCompareButtons();
     setCompareOpen(true);
+  });
+  $comparePanel.on("click", ".compare-panel-close", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setCompareOpen(false);
+    $compareToggle.trigger("focus");
   });
   let compareHoverTimer = null;
   $compareWrap.on("mouseenter", () => {
@@ -1802,6 +1822,11 @@ $(function () {
     }, 220);
   });
   $cartPanel.on("click", (event) => event.stopPropagation());
+  $cartPanel.on("click", ".cart-panel-close", (event) => {
+    event.preventDefault();
+    setCartOpen(false);
+    $cartToggle.trigger("focus");
+  });
   $document.on("click", (event) => {
     const $target = $(event.target);
     if (!$target.closest("#cartWrap, #cartPanel, .add-cart").length)

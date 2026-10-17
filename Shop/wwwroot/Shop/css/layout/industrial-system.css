@@ -11506,12 +11506,6 @@ body.home-page .rail-card > strong {
 }
 
 @media (max-width: 767px) {
-  body.home-page .product-card .product-info h3,
-  body.home-page .showcase-card-body h3,
-  body.home-page .rail-card h3 {
-    min-height: 3.4em !important;
-  }
-
   #recommendations #productRail > .owl-nav {
     display: none !important;
   }

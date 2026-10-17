@@ -259,6 +259,54 @@
   font-size: var(--product-card-button-size);
 }
 
+/* Keep every desktop home-grid price on the same two-row format. */
+@media (min-width: 768px) {
+  .home-page #productGrid .product-info > p {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: 28px 24px;
+    grid-template-areas:
+      "current discount"
+      "old discount";
+    align-items: center;
+    align-content: center;
+    column-gap: 10px;
+    row-gap: 0;
+    white-space: nowrap;
+  }
+
+  .home-page #productGrid .product-info > p .product-price-current {
+    grid-area: current;
+    justify-self: start;
+    margin: 0;
+    color: var(--product-card-price);
+    font-size: 18px;
+    font-weight: 800;
+    line-height: 1.45;
+  }
+
+  .home-page #productGrid .product-info > p .product-price-current small {
+    color: var(--product-card-muted);
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .home-page #productGrid .product-info > p .price-old {
+    grid-area: old;
+    justify-self: start;
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  .home-page #productGrid .product-info > p .product-price-discount {
+    grid-area: discount;
+    align-self: center;
+    justify-self: end;
+    font-size: 13px;
+  }
+}
+
 #favoritesView .price-old,
 .product-price-deal .price-old,
 .product-detail-sale-meta .price-old,
@@ -311,50 +359,4 @@
   margin: 0;
   place-items: center;
   line-height: 1;
-}
-
-@media (max-width: 1199px) and (min-width: 992px) {
-  :root {
-    --product-card-image-height: 290px;
-  }
-}
-
-@media (max-width: 991px) {
-  :root {
-    --product-card-image-height: 190px;
-  }
-}
-
-@media (max-width: 575px) {
-  :root {
-    --product-card-image-height: 154px;
-  }
-
-  .product-card .product-image > :is(.badge-best, .badge-new, .badge-offer),
-  .search-product.product-card .search-product-image > span {
-    top: 13px;
-    right: 12px;
-    min-width: 56px;
-    height: 30px;
-    min-height: 30px;
-    padding: 3px 12px;
-    font-size: 12px;
-  }
-
-  .product-card .product-image > .favorite,
-  .search-product.product-card .search-product-image > .favorite {
-    top: 10px;
-    left: 12px;
-    width: 36px;
-    min-width: 36px;
-    height: 36px;
-    min-height: 36px;
-    font-size: 15px;
-  }
-}
-
-@media (max-width: 389px) {
-  :root {
-    --product-card-image-height: 180px;
-  }
 }
