@@ -114,18 +114,15 @@ document.addEventListener("DOMContentLoaded", () => {
           ? `<div class="product-detail-thumbnails" role="group" aria-label="انتخاب تصویر یا ویدئو">${media.map((item, index) => `<button class="product-detail-thumb${index === 0 ? " is-active" : ""}" type="button" data-detail-media-index="${index}" aria-label="${item.type === "video" ? esc(item.title) : `تصویر ${fa(index + 1)}`}" aria-pressed="${index === 0}">${item.type === "video" ? `<span><img src="${esc(item.poster || p.image)}" alt="" loading="lazy"><i class="bi bi-play-fill" aria-hidden="true"></i></span>` : `<img src="${esc(item.src)}" alt="" loading="lazy">`}</button>`).join("")}</div>`
           : "";
       const variantMarkup = p.variants
-        ? `<section class="product-variant-options" aria-label="انتخاب ویژگی‌های محصول">${Object.entries(
+        ? `<section class="product-variant-options" aria-labelledby="productVariantTitle"><header class="product-variant-heading"><span class="product-variant-heading-icon"><i class="bi bi-sliders" aria-hidden="true"></i></span><span><strong id="productVariantTitle">انتخاب ویژگی‌های محصول</strong><small>گزینه‌های موردنظر را انتخاب کنید.</small></span></header>${Object.entries(
             p.variants,
           )
             .map(([key, feature]) => {
               const isPriceRequired = feature.options.some(
                   (option) => Number(option.priceDelta) !== 0,
                 ),
-                selectedValue = selectedVariants[key],
-                selectedOption = feature.options.find(
-                  (option) => option.value === selectedValue,
-                );
-              return `<fieldset class="product-variant-field product-variant-field--${esc(key)}" data-variant-key="${esc(key)}" data-required="${isPriceRequired}"><legend><span>${esc(feature.label)}</span><span class="product-variant-current" data-variant-current>${esc(selectedOption?.label || "انتخاب کنید")}</span>${isPriceRequired ? '<span class="product-variant-required">انتخاب</span>' : '<span class="product-variant-optional">اختیاری</span>'}</legend><div class="product-variant-choices">${feature.options
+                selectedValue = selectedVariants[key];
+              return `<fieldset class="product-variant-field product-variant-field--${esc(key)}" data-variant-key="${esc(key)}" data-required="${isPriceRequired}"><legend><span>${esc(feature.label)}</span></legend><div class="product-variant-choices">${feature.options
                 .map((option) => {
                   const selected = option.value === selectedValue;
                   return `<button class="product-variant-choice${option.swatch ? " product-variant-choice--swatch" : ""}${selected ? " is-selected" : ""}" type="button" data-value="${esc(option.value)}" data-delta="${Number(option.priceDelta) || 0}" aria-label="${esc(option.label)}" title="${esc(option.label)}" aria-pressed="${selected}">${option.swatch ? `<span class="product-variant-swatch" style="--variant-swatch:${esc(option.swatch)}"></span>` : ""}<span class="product-variant-choice-label">${esc(option.label)}</span>${Number(option.priceDelta) ? `<small>+ ${money(Number(option.priceDelta) * 1000000)}</small>` : ""}</button>`;
@@ -703,12 +700,6 @@ document.addEventListener("DOMContentLoaded", () => {
               button.setAttribute("aria-pressed", String(button === choice));
               button.classList.toggle("is-selected", button === choice);
             });
-          const currentLabel = field.querySelector("[data-variant-current]");
-          if (currentLabel)
-            currentLabel.textContent =
-              p.variants[key].options.find(
-                (option) => option.value === choice.dataset.value,
-              )?.label || "";
           field.classList.remove("has-error");
           updateVariantPrice();
         }),
