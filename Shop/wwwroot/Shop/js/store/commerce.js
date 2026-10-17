@@ -291,7 +291,7 @@ document.addEventListener("DOMContentLoaded", () => {
         inventoryStatus.className = `product-stock-status ${state}`;
         inventoryStatus.innerHTML = `<span class="product-stock-status-icon"><i class="bi bi-box-seam" aria-hidden="true"></i></span><span class="product-stock-status-copy"><strong>موجودی انبار</strong><small>${message}</small></span><i class="bi ${icon} product-stock-status-mark" aria-hidden="true"></i>`;
         productView
-          .querySelectorAll("#addProduct, .product-mobile-buy-button")
+          .querySelectorAll("#addProduct")
           .forEach((button) => {
             button.disabled = unavailable;
             button.setAttribute("aria-disabled", String(unavailable));
@@ -302,10 +302,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (productId) link.href = window.HNProductUrl(productId);
       });
       const detail = p.detail || {};
-      const mobileBuyBar = document.createElement("div");
-      mobileBuyBar.className = "product-mobile-buybar";
-      mobileBuyBar.innerHTML = `<span class="product-mobile-buy-price"><small>قیمت نهایی</small><strong id="productMobileFinalPrice">${money(p.price * 1000000)}</strong></span><button type="button" class="product-mobile-buy-button"><i class="bi bi-bag-plus" aria-hidden="true"></i> افزودن به سبد</button>`;
-      productView.append(mobileBuyBar);
       if (media.length === 1)
         productView.querySelector(
           ".product-detail-gallery-caption > span",
@@ -577,13 +573,28 @@ document.addEventListener("DOMContentLoaded", () => {
           section: productView.querySelector(link.getAttribute("href")),
         }))
         .filter((item) => item.section);
-      const setActiveDetailTab = (activeLink) =>
+      let currentActiveDetailTab = null;
+      const setActiveDetailTab = (activeLink) => {
+        if (!activeLink) return;
+        const changed = currentActiveDetailTab !== activeLink;
+        currentActiveDetailTab = activeLink;
         detailTabLinks.forEach((link) => {
           const active = link === activeLink;
           link.classList.toggle("is-active", active);
           if (active) link.setAttribute("aria-current", "location");
           else link.removeAttribute("aria-current");
         });
+        if (changed && window.matchMedia("(max-width: 575px)").matches) {
+          activeLink.scrollIntoView({
+            behavior: window.matchMedia("(prefers-reduced-motion: reduce)")
+              .matches
+              ? "auto"
+              : "smooth",
+            block: "nearest",
+            inline: "center",
+          });
+        }
+      };
       detailTabLinks.forEach((link) =>
         link.addEventListener("click", (event) => {
           const target = productView.querySelector(link.getAttribute("href"));
@@ -779,11 +790,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const value = calculateVariantPrice();
         const formatted = money(value);
         const desktopPrice = productView.querySelector("#productFinalPrice");
-        const mobilePrice = mobileBuyBar.querySelector(
-          "#productMobileFinalPrice",
-        );
         if (desktopPrice) desktopPrice.textContent = formatted;
-        if (mobilePrice) mobilePrice.textContent = formatted;
         const addonsPrice = productView.querySelector("#productAddonsPrice");
         const basePrice = Math.round(Number(p.price) * 1000000);
         const adjustment = value - basePrice;
@@ -861,8 +868,6 @@ document.addEventListener("DOMContentLoaded", () => {
         );
       };
       document.querySelector("#addProduct").onclick = (event) =>
-        addProductToCart(event.currentTarget);
-      mobileBuyBar.querySelector("button").onclick = (event) =>
         addProductToCart(event.currentTarget);
       document.querySelector("#saveProduct").onclick = (e) => {
         const button = e.currentTarget;

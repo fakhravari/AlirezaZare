@@ -185,6 +185,14 @@
   color: #9a7540;
 }
 
+#productView .product-detail-add:disabled {
+  cursor: not-allowed !important;
+  opacity: 0.58;
+  filter: saturate(0.55);
+  box-shadow: none !important;
+  transform: none !important;
+}
+
 @media (max-width: 575px) {
   #productView .product-detail-price {
     grid-template-columns: minmax(0, 1fr);
