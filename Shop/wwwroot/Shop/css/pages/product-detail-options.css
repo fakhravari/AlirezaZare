@@ -389,3 +389,50 @@
   outline: 2px solid rgba(180, 145, 93, 0.32);
   outline-offset: 2px;
 }
+
+/* One icon palette across the product detail: navy by default, with contrast
+   retained for controls and active states. */
+#productView {
+  --product-detail-icon-color: #173b5d;
+  --product-detail-icon-accent: #d6a50d;
+}
+
+#productView :is(
+  .product-detail-layout,
+  .product-variant-options,
+  .product-accessories,
+  .product-detail-tabs,
+  .product-detail-content-panel,
+  .product-detail-related
+) i {
+  color: var(--product-detail-icon-color) !important;
+}
+
+#productView :is(
+  .product-detail-add,
+  .product-detail-gallery-open,
+  .product-detail-tabs > a,
+  .product-feedback-submit,
+  .product-accessory-check,
+  .product-accessory-status,
+  .product-detail-related-card > .add-cart
+) > i,
+#productView .product-detail-add:is(:hover, :focus-visible) > i,
+#productView .product-detail-related-card > .add-cart:is(:hover, :focus-visible, .added) > i,
+#productView .product-accessory-check > i,
+#productView .product-accessory-status > i {
+  color: inherit !important;
+}
+
+#productView .product-detail-add:is(:hover, :focus-visible) > i,
+#productView .product-feedback-submit:is(:hover, :focus-visible) > i {
+  color: var(--product-detail-icon-accent) !important;
+}
+
+#productView .product-detail-favorite[aria-pressed="true"] > i {
+  color: #c84350 !important;
+}
+
+#productView .product-detail-thumb .bi-play-fill {
+  color: inherit !important;
+}

@@ -1,26 +1,32 @@
 @model PageModel<ProductDetailsModel>
 
 
-<main class="flow-main container">
-    <nav class="cart-breadcrumb taxonomy-breadcrumb" aria-label="مسیر صفحه">
-        <ol>
-            <li>
-                <a asp-controller="Home" asp-action="Index">
-                    <i class="bi bi-house-door" aria-hidden="true"></i><span>خانه</span>
-                </a>
-            </li>
-            <li class="cart-breadcrumb-current">
-                <i class="bi bi-chevron-left" aria-hidden="true"></i><span aria-current="page"><i class="bi bi-tools" aria-hidden="true"></i>جزئیات محصول</span>
-            </li>
-        </ol>
-    </nav>
-    <header class="flow-heading">
-        <span>فروشگاه تخصصی برق و ابزار ندا اولیائی</span>
-        <h1 id="productPageTitle">جزئیات محصول</h1>
-        <p>مشخصات فنی، قیمت، موجودی و ضمانت اصالت</p>
+<main class="product-detail-page">
+    <header class="page-hero product-detail-hero">
+        <img class="hero-image" src="~/Shop/images/heroes/hero-electrical-editorial.png" alt="ابزار و تجهیزات فنی" width="1536" height="1024" fetchpriority="high"/>
+        <div class="container">
+            <nav class="cart-breadcrumb taxonomy-breadcrumb" aria-label="مسیر صفحه">
+                <ol>
+                    <li>
+                        <a asp-controller="Home" asp-action="Index">
+                            <i class="bi bi-house-door" aria-hidden="true"></i><span>خانه</span>
+                        </a>
+                    </li>
+                    <li class="cart-breadcrumb-current">
+                        <i class="bi bi-chevron-left" aria-hidden="true"></i><span aria-current="page"><i class="bi bi-tools" aria-hidden="true"></i>جزئیات محصول</span>
+                    </li>
+                </ol>
+            </nav>
+            <span class="page-kicker"><i class="bi bi-tools" aria-hidden="true"></i>فروشگاه تخصصی برق و ابزار ندا اولیائی</span>
+            <h1 id="productPageTitle">جزئیات محصول</h1>
+            <p>مشخصات فنی، قیمت، موجودی و ضمانت اصالت</p>
+        </div>
     </header>
-    <div id="productView"></div>
-    <partial name="_RelatedLinks"/>
+
+    <section class="flow-main container">
+        <div id="productView"></div>
+        <partial name="_RelatedLinks"/>
+    </section>
 </main>
 
 <partial name="_PurchaseBenefits"/>

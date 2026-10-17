@@ -90,17 +90,31 @@ $(function () {
       );
       openSuggestions();
     };
+    let suggestionsCloseTimer = 0;
     const closeSuggestions = () => {
+      window.clearTimeout(suggestionsCloseTimer);
       suggestions.hidden = true;
       searchInput.setAttribute("aria-expanded", "false");
       if (!isDrawerSearch)
         document.body.classList.remove("has-search-suggestions");
     };
     const openSuggestions = () => {
+      window.clearTimeout(suggestionsCloseTimer);
       suggestions.hidden = false;
       searchInput.setAttribute("aria-expanded", "true");
       if (!isDrawerSearch)
         document.body.classList.add("has-search-suggestions");
+    };
+    const closeSuggestionsAfterPointerLeave = () => {
+      window.clearTimeout(suggestionsCloseTimer);
+      suggestionsCloseTimer = window.setTimeout(() => {
+        const pointerStillInSearch = headerSearchForm.matches(":hover");
+        const keyboardFocusInSuggestions = suggestions.contains(
+          document.activeElement,
+        );
+        if (!pointerStillInSearch && !keyboardFocusInSuggestions)
+          closeSuggestions();
+      }, 500);
     };
     const searchUrl = (query) => `Search?q=${encodeURIComponent(query)}`;
     const renderSuggestions = () => {
@@ -193,8 +207,18 @@ $(function () {
     if (!isDrawerSearch) {
       headerSearchForm.addEventListener("pointerleave", () => {
         if (window.matchMedia("(min-width: 992px)").matches)
-          closeSuggestions();
+          closeSuggestionsAfterPointerLeave();
       });
+      headerSearchForm.addEventListener("pointerenter", () =>
+        window.clearTimeout(suggestionsCloseTimer),
+      );
+      suggestions.addEventListener("pointerenter", () =>
+        window.clearTimeout(suggestionsCloseTimer),
+      );
+      suggestions.addEventListener(
+        "pointerleave",
+        closeSuggestionsAfterPointerLeave,
+      );
     }
     if (!isDrawerSearch && window.matchMedia("(min-width: 992px)").matches) {
       document
@@ -218,7 +242,6 @@ $(function () {
           };
           brandDropdown.addEventListener("pointerenter", () => {
             keepBrandOpen();
-            dismissSearch();
           });
           brandDropdown.addEventListener("pointerleave", closeBrandSoon);
           brandDropdown.addEventListener("focusin", () => {
