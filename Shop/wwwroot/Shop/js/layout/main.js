@@ -711,18 +711,40 @@ $(function () {
       const groups = categoryContent[category];
       if (!groups) return;
       categoryPanel.replaceChildren();
-      groups.forEach(([title, ...items]) => {
+      categoryPanel.dataset.groupCount = String(groups.length);
+      const submenuHeading = document.createElement("div");
+      submenuHeading.className = "electrical-submenu-heading";
+      const headingCopy = document.createElement("span");
+      headingCopy.className = "electrical-submenu-heading-copy";
+      const headingTitle = document.createElement("strong");
+      const activeCategory = triggers.find(
+        (trigger) => trigger.dataset.category === category,
+      );
+      headingTitle.textContent = `زیرشاخه‌های ${activeCategory?.querySelector("span")?.textContent.trim() || "محصولات"}`;
+      const headingCaption = document.createElement("small");
+      headingCaption.textContent = "دستهٔ موردنظر را برای دیدن کالاها انتخاب کنید";
+      headingCopy.append(headingTitle, headingCaption);
+      const groupCount = document.createElement("span");
+      groupCount.className = "electrical-submenu-heading-count";
+      groupCount.textContent = `${groups.length.toLocaleString("fa-IR")} گروه`;
+      submenuHeading.append(headingCopy, groupCount);
+      categoryPanel.append(submenuHeading);
+      groups.forEach(([title, ...items], index) => {
         const column = document.createElement("div");
         column.className = "electrical-submenu-column";
+        column.dataset.index = String(index);
         const heading = document.createElement("strong");
         heading.textContent = title;
         column.append(heading);
+        const links = document.createElement("div");
+        links.className = "electrical-submenu-items";
         items.forEach((label) => {
           const link = document.createElement("a");
           link.href = `Search?q=${encodeURIComponent(label)}`;
           link.textContent = label;
-          column.append(link);
+          links.append(link);
         });
+        column.append(links);
         categoryPanel.append(column);
       });
       categoryPanel.hidden = false;
@@ -837,6 +859,7 @@ $(function () {
         item.setAttribute("aria-expanded", String(active));
       });
       content.replaceChildren();
+      content.dataset.groupCount = String(groups.length);
       groups.forEach(([title, ...items]) => {
         const group = document.createElement("section");
         group.className = "category-mega-group";

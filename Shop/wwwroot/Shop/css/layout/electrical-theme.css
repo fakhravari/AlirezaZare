@@ -363,7 +363,14 @@ body {
   font-size: 13px;
 }
 
-.electrical-submenu-column > a {
+.electrical-submenu-items {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 3px;
+}
+
+.electrical-submenu-column > .electrical-submenu-items > a {
   padding: 6px 7px;
   border-radius: 5px;
   color: #5b6a70;
@@ -372,8 +379,8 @@ body {
   text-decoration: none;
 }
 
-.electrical-submenu-column > a:hover,
-.electrical-submenu-column > a:focus-visible {
+.electrical-submenu-column > .electrical-submenu-items > a:hover,
+.electrical-submenu-column > .electrical-submenu-items > a:focus-visible {
   background: #fff8dc;
   color: #6c5800;
   box-shadow: inset -2px 0 #edc52b;
