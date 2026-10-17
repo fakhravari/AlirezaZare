@@ -118,7 +118,7 @@
   margin: 0 !important;
   padding: 0 !important;
   box-sizing: border-box;
-  object-fit: contain !important;
+  object-fit: cover !important;
   object-position: center;
   background: #fff;
   transition: none;

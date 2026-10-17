@@ -56,7 +56,7 @@
 
   .search-page .search-page-card-media img {
     padding: 0;
-    object-fit: contain !important;
+    object-fit: cover !important;
     object-position: center;
     background: #fff;
     transform: none !important;
