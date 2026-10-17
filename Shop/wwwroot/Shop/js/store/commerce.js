@@ -24,7 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
       ? `<div class="cart-item-option-group"><small class="cart-item-option-label">متعلقات و خدمات</small><div class="cart-item-option-list">${accessories
           .map(
             (accessory) =>
-              `<span class="cart-item-option-chip cart-item-option-chip--accessory"><i class="bi bi-plus-circle" aria-hidden="true"></i><strong>${esc(accessory.name)}</strong>${Number(accessory.price) > 0 ? `<small>+ ${money(Number(accessory.price) * 1000000)}</small>` : "<small>رایگان</small>"}</span>`,
+              `<span class="cart-item-option-chip cart-item-option-chip--accessory"><i class="bi bi-plus-circle" aria-hidden="true"></i><strong>${esc(accessory.name)}</strong><small class="cart-item-option-status ${accessory.required ? "is-required" : "is-optional"}">${accessory.required ? "الزامی" : "اختیاری"}</small>${Number(accessory.price) > 0 ? `<small>+ ${money(Number(accessory.price) * 1000000)}</small>` : "<small>رایگان</small>"}</span>`,
           )
           .join("")}</div></div>`
       : "";
@@ -899,6 +899,7 @@ document.addEventListener("DOMContentLoaded", () => {
               accessories: selectedAccessoryItems.map((item) => ({
                 name: item.name,
                 price: item.price,
+                required: Boolean(item.required),
               })),
             },
           },

@@ -91,7 +91,11 @@
       (product.accessories || []).forEach((accessory) => {
         const index = remaining.indexOf(accessory.name);
         if (index < 0) return;
-        accessories.push({ name: accessory.name, price: accessory.price });
+        accessories.push({
+          name: accessory.name,
+          price: accessory.price,
+          required: Boolean(accessory.required),
+        });
         remaining.splice(index, 1);
       });
       // Keep any older custom selection visible as an accessory chip instead of
@@ -103,7 +107,7 @@
         options: { variants, accessories },
       };
     };
-    const normalizeOptions = (options) => {
+    const normalizeOptions = (options, product) => {
       const cleanText = (text, limit) => String(text || "").trim().slice(0, limit);
       return {
         variants: Array.isArray(options?.variants)
@@ -121,10 +125,20 @@
         accessories: Array.isArray(options?.accessories)
           ? options.accessories
               .filter((accessory) => accessory && typeof accessory === "object")
-              .map((accessory) => ({
-                name: cleanText(accessory.name, 100),
-                price: Math.max(0, Number(accessory.price) || 0),
-              }))
+              .map((accessory) => {
+                const name = cleanText(accessory.name, 100);
+                const productAccessory = (product?.accessories || []).find(
+                  (candidate) => candidate.name === name,
+                );
+                return {
+                  name,
+                  price: Math.max(0, Number(accessory.price) || 0),
+                  required:
+                    typeof accessory.required === "boolean"
+                      ? accessory.required
+                      : Boolean(productAccessory?.required),
+                };
+              })
               .filter((accessory) => accessory.name)
               .slice(0, 12)
           : [],
@@ -144,7 +158,7 @@
         const product = (window.HNProducts || []).find(
           (candidate) => String(candidate.id) === String(item.id || "").replace(/^(\d+):.*$/, "$1"),
         );
-        const options = normalizeOptions(item.options);
+        const options = normalizeOptions(item.options, product);
         const requiredAccessories = (product?.accessories || []).filter(
           (accessory) => accessory.required,
         );
@@ -156,6 +170,7 @@
           ...missingRequiredAccessories.map((accessory) => ({
             name: accessory.name,
             price: accessory.price,
+            required: true,
           })),
         );
         return {

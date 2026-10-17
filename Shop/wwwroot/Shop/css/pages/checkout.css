@@ -373,6 +373,21 @@
   color: var(--industrial-steel);
   font-size: 9px;
 }
+.invoice-item .cart-item-option-status {
+  padding: 1px 5px;
+  border-radius: 99px;
+  font-size: 9px;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+.invoice-item .cart-item-option-status.is-required {
+  background: color-mix(in srgb, var(--industrial-yellow) 18%, white);
+  color: #856000;
+}
+.invoice-item .cart-item-option-status.is-optional {
+  background: color-mix(in srgb, var(--industrial-steel) 10%, white);
+  color: var(--industrial-steel);
+}
 .invoice-item .cart-item-option-chip > strong {
   color: var(--industrial-navy);
   font-size: 10px;

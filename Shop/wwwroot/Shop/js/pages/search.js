@@ -581,7 +581,7 @@
       ? `<div class="cart-item-option-group"><small class="cart-item-option-label">متعلقات و خدمات</small><div class="cart-item-option-list">${accessories
           .map(
             (accessory) =>
-              `<span class="cart-item-option-chip cart-item-option-chip--accessory"><i class="bi bi-plus-circle" aria-hidden="true"></i><strong>${escape(accessory.name)}</strong>${Number(accessory.price) > 0 ? `<small>+ ${fa(Number(accessory.price) * 1000000)} تومان</small>` : "<small>رایگان</small>"}</span>`,
+              `<span class="cart-item-option-chip cart-item-option-chip--accessory"><i class="bi bi-plus-circle" aria-hidden="true"></i><strong>${escape(accessory.name)}</strong><small class="cart-item-option-status ${accessory.required ? "is-required" : "is-optional"}">${accessory.required ? "الزامی" : "اختیاری"}</small>${Number(accessory.price) > 0 ? `<small>+ ${fa(Number(accessory.price) * 1000000)} تومان</small>` : "<small>رایگان</small>"}</span>`,
           )
           .join("")}</div></div>`
       : "";
