@@ -13148,3 +13148,20 @@ body .electrical-swiper .swiper-pagination-bullet-active {
     pointer-events: none !important;
   }
 }
+
+/* Keep the product detail cart glyph visible with stable contrast on hover. */
+#productView #addProduct:is(:hover, :focus-visible) > i.bi-bag-plus {
+  display: inline-grid !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  border-color: var(--industrial-yellow) !important;
+  background: var(--industrial-yellow) !important;
+  color: var(--industrial-navy) !important;
+  -webkit-text-fill-color: var(--industrial-navy) !important;
+}
+
+#productView #addProduct:is(:hover, :focus-visible) > i.bi-bag-plus::before {
+  display: block !important;
+  color: inherit !important;
+  -webkit-text-fill-color: inherit !important;
+}

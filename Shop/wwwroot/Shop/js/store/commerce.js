@@ -701,10 +701,6 @@ document.addEventListener("DOMContentLoaded", () => {
               )?.label || "";
           field.classList.remove("has-error");
           updateVariantPrice();
-          const status = productView.querySelector("#productStatus");
-          if (status)
-            status.textContent =
-              "قیمت با توجه به ویژگی‌های انتخاب‌شده به‌روز شد.";
         }),
       );
       productView
@@ -742,20 +738,11 @@ document.addEventListener("DOMContentLoaded", () => {
           selectedAccessories.has(item.id),
         );
         const accessoryNames = selectedAccessoryItems.map((item) => item.name);
-        const variantKey = Object.entries(selectedVariants)
-          .sort(([a], [b]) => a.localeCompare(b))
-          .map(([key, value]) => `${key}-${value}`)
-          .join("|");
-        const accessoryKey = selectedAccessoryItems
-          .map((item) => item.id)
-          .sort()
-          .join("|");
-        const lineKey = [variantKey, accessoryKey].filter(Boolean).join("|");
         const lineDescription = [...chosen, ...accessoryNames].join("، ");
         ui.cart.add(
           {
             ...p,
-            id: lineKey ? `${p.id}:${lineKey}` : String(p.id),
+            id: String(p.id),
             name: lineDescription ? `${p.name} (${lineDescription})` : p.name,
             price: calculateVariantPrice(),
           },

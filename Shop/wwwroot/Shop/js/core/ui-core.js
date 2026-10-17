@@ -58,10 +58,13 @@
           /^((?:Shop\/)?images\/watch-(?:blue|cream|silver|story|hero))\.(?:jpe?g|png)$/i,
           "$1.webp",
         );
-    return value
+    const normalizedItems = value
       .filter((item) => item && typeof item === "object")
       .map((item) => ({
-        id: String(item.id || "").slice(0, 80),
+        // Older product-detail rows included variant/accessory keys after the product ID.
+        id: String(item.id || "")
+          .slice(0, 80)
+          .replace(/^(\d+):.*$/, "$1"),
         name: String(item.name || "").slice(0, 120),
         price: Number(item.price),
         image: normalizeImage(item.image),
@@ -78,6 +81,25 @@
           item.price >= 0 &&
           /^(?:Shop\/)?images\/(?:[\w.-]+\/)*[\w.-]+$/i.test(item.image),
       );
+    const uniqueItems = new Map();
+    normalizedItems.forEach((item) => {
+      const existing = uniqueItems.get(item.id);
+      if (!existing) {
+        uniqueItems.set(item.id, item);
+        return;
+      }
+      if (
+        existing.name === item.name &&
+        existing.price === item.price &&
+        existing.image === item.image
+      ) {
+        existing.quantity = Math.min(99, existing.quantity + item.quantity);
+        return;
+      }
+      // Different options for one product code replace its previous configuration.
+      uniqueItems.set(item.id, item);
+    });
+    return [...uniqueItems.values()];
   };
 
   const cart = {
@@ -109,10 +131,18 @@
       if (!safeProduct) return items;
       const existing = items.find((item) => item.id === safeProduct.id);
       if (existing) {
-        existing.quantity = Math.min(
-          99,
-          existing.quantity + safeProduct.quantity,
-        );
+        if (
+          existing.name === safeProduct.name &&
+          existing.price === safeProduct.price &&
+          existing.image === safeProduct.image
+        ) {
+          existing.quantity = Math.min(
+            99,
+            existing.quantity + safeProduct.quantity,
+          );
+        } else {
+          Object.assign(existing, safeProduct);
+        }
       } else {
         items.push(safeProduct);
       }
