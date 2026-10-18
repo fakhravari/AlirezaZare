@@ -96,6 +96,7 @@
 
     host.textContent = message;
     host.hidden = !message;
+    window.HNUI?.setMessageType(host, message ? "error" : "");
     control.classList.toggle("is-invalid", Boolean(message));
     control.setAttribute("aria-invalid", String(Boolean(message)));
     const describedBy = new Set(

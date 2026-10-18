@@ -5,6 +5,21 @@
   padding-bottom: 42px;
 }
 
+.faq-related-section {
+  box-sizing: border-box;
+  width: min(calc(100% - 48px), 1360px);
+  margin: 0 auto clamp(40px, 4vw, 56px);
+  padding: clamp(16px, 2vw, 24px);
+  border: 1px solid rgba(178, 145, 75, 0.17);
+  border-radius: 20px;
+  background: linear-gradient(145deg, #fffefa, #f8f9f8);
+  box-shadow: 0 12px 32px rgba(16, 42, 67, 0.045);
+}
+
+.faq-related-section .flow-related {
+  margin: 0;
+}
+
 .faq-shell {
   position: relative;
   overflow: hidden;
@@ -348,6 +363,13 @@
   .faq-main {
     padding-top: 28px;
     padding-bottom: 28px;
+  }
+
+  .faq-related-section {
+    width: calc(100% - 24px);
+    margin-bottom: 32px;
+    padding: 12px;
+    border-radius: 16px;
   }
 
   .faq-shell {

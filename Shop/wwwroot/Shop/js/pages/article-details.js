@@ -9,8 +9,11 @@
   const checks = [...page.querySelectorAll(".article-checklist input")];
   checks.forEach((input) =>
     input.addEventListener("change", () => {
-      document.getElementById("articleChecklistStatus").textContent =
-        `${formatNumber(checks.filter((item) => item.checked).length)} از ${formatNumber(checks.length)} مورد بررسی شده`;
+      window.HNUI.setMessage(
+        document.getElementById("articleChecklistStatus"),
+        `${formatNumber(checks.filter((item) => item.checked).length)} از ${formatNumber(checks.length)} مورد بررسی شده`,
+        "info",
+      );
     }),
   );
   const headings = [...body.querySelectorAll(".article-section h2[id]")];

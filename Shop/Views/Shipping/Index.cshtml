@@ -32,30 +32,55 @@
         </div>
     </div>
 </header>
-<main class="flow-main container customer-service-main">
-    <div class="flow-cards">
-        <article class="flow-card">
-            <i class="bi bi-box-seam"></i>
-            <h2>آماده‌سازی سفارش</h2>
-            <p>پیش از نهایی کردن خرید، موجودی محصول و زمان آماده‌سازی را با پشتیبانی بررسی کنید.</p>
-        </article>
-        <article class="flow-card">
-            <i class="bi bi-truck"></i>
-            <h2>روش و هزینه ارسال</h2>
-            <p>روش ارسال، هزینه و زمان تحویل متناسب با مقصد، هنگام تأیید سفارش توسط فروشگاه اعلام می‌شود.</p>
-        </article>
-        <article class="flow-card">
-            <i class="bi bi-clipboard-check"></i>
-            <h2>هنگام دریافت</h2>
-            <p>سلامت بسته‌بندی و تطابق محصول با سفارش را بررسی کنید و در صورت وجود مشکل با پشتیبانی تماس بگیرید.</p>
-        </article>
-    </div><a class="flow-button" href="Tracking">پیگیری سفارش <i class="bi bi-arrow-left"></i></a>
-    <partial name="_RelatedLinks"/>
+<main class="flow-main container customer-service-main shipping-page">
+    <section class="shipping-shell" aria-labelledby="shippingProcessTitle">
+        <header class="shipping-heading">
+            <div>
+                <span class="shipping-kicker"><i class="bi bi-truck" aria-hidden="true"></i> راهنمای ارسال</span>
+                <h2 id="shippingProcessTitle">مسیر سفارش تا دریافت کالا</h2>
+            </div>
+            <p>جزئیات ارسال با توجه به موجودی کالا، مقصد و هماهنگی نهایی با فروشگاه مشخص می‌شود.</p>
+        </header>
+
+        <ol class="shipping-steps">
+            <li class="shipping-step">
+                <span class="shipping-step-top"><span class="shipping-step-number">۰۱</span><i class="bi bi-clipboard2-check" aria-hidden="true"></i></span>
+                <h3>هماهنگی سفارش</h3>
+                <p>موجودی، نشانی مقصد و زمان آماده‌سازی را پیش از تأیید نهایی با فروشگاه بررسی کنید.</p>
+            </li>
+            <li class="shipping-step">
+                <span class="shipping-step-top"><span class="shipping-step-number">۰۲</span><i class="bi bi-box-seam" aria-hidden="true"></i></span>
+                <h3>تعیین روش ارسال</h3>
+                <p>روش ارسال، هزینه و زمان تقریبی تحویل متناسب با مقصد و شرایط سفارش اعلام می‌شود.</p>
+            </li>
+            <li class="shipping-step">
+                <span class="shipping-step-top"><span class="shipping-step-number">۰۳</span><i class="bi bi-box2-heart" aria-hidden="true"></i></span>
+                <h3>بررسی هنگام دریافت</h3>
+                <p>سلامت بسته و تطابق اقلام را بررسی کنید و هرگونه مغایرت یا آسیب را به پشتیبانی اطلاع دهید.</p>
+            </li>
+        </ol>
+
+        <div class="shipping-note">
+            <span class="shipping-note-icon"><i class="bi bi-info-circle" aria-hidden="true"></i></span>
+            <p><strong>هزینه و زمان ارسال</strong><span>مبلغ و زمان ثابت نیست و پس از بررسی موجودی و مقصد، پیش از تأیید سفارش به شما اعلام می‌شود.</span></p>
+        </div>
+
+        <div class="shipping-actions">
+            <a class="shipping-action-primary" asp-controller="Contact" asp-action="Index">هماهنگی ارسال با پشتیبانی <i class="bi bi-arrow-left" aria-hidden="true"></i></a>
+            <a class="shipping-action-secondary" asp-controller="Tracking" asp-action="Index"><i class="bi bi-box-seam" aria-hidden="true"></i> پیگیری سفارش</a>
+        </div>
+    </section>
 </main>
+<section class="shipping-related-section" aria-label="صفحات مرتبط با ارسال">
+    <div class="container">
+        <partial name="_RelatedLinks"/>
+    </div>
+</section>
 
 
 @section Styles {
     <link href="Shop/css/pages/pages.css" asp-append-version="true" rel="stylesheet"/>
+    <link href="~/Shop/css/pages/shipping.css" asp-append-version="true" rel="stylesheet"/>
 }
 
 @section Scripts {

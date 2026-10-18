@@ -175,8 +175,16 @@
   margin-bottom: 20px;
 }
 .contact-shortcuts-heading .page-kicker {
+  display: inline-flex;
+  padding: 6px 12px;
+  align-items: center;
+  border: 1px solid rgba(191, 151, 57, 0.16);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.62);
   color: var(--industrial-yellow-dark);
+  font-size: 12px;
   font-weight: 700;
+  line-height: 1.45;
 }
 .contact-shortcuts-heading h2 {
   margin: 5px 0 0;
@@ -185,25 +193,58 @@
   line-height: 1.55;
 }
 .contact-shortcuts-heading > p {
-  max-width: 420px;
+  max-width: none;
   margin: 0 0 4px;
   color: var(--industrial-steel);
   font-size: 14px;
   line-height: 1.9;
 }
+.contact-shortcuts-heading > p.contact-shortcuts-note {
+  display: flex;
+  width: min(100%, 440px);
+  flex: 0 1 440px;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 2px;
+  padding: 10px 13px;
+  border: 1px solid rgba(191, 151, 57, 0.14);
+  border-inline-start: 3px solid rgba(191, 151, 57, 0.58);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.54);
+  color: #687783;
+  font-size: 13px;
+  line-height: 1.8;
+}
+.contact-shortcuts-note > i {
+  display: grid;
+  width: 27px;
+  height: 27px;
+  flex: 0 0 27px;
+  place-items: center;
+  border: 1px solid rgba(191, 151, 57, 0.17);
+  border-radius: 9px;
+  background: #fffaf0;
+  color: #9b7626;
+  font-size: 14px;
+}
+@media (min-width: 1200px) {
+  .contact-shortcuts-heading > p.contact-shortcuts-note {
+    white-space: normal;
+  }
+}
 .contact-shortcuts-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
+  gap: 16px;
 }
 .contact-shortcut-card {
   display: grid;
   min-width: 0;
-  min-height: 104px;
-  padding: 16px;
-  grid-template-columns: 44px minmax(0, 1fr) 26px;
+  min-height: 116px;
+  padding: 18px;
+  grid-template-columns: 48px minmax(0, 1fr) 28px;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   border: 1px solid rgba(191, 151, 57, 0.2);
   border-radius: var(--radius-panel-compact, 14px);
   background: rgba(255, 255, 255, 0.92);
@@ -225,14 +266,14 @@
 }
 .contact-shortcut-icon {
   display: grid;
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 48px;
   place-items: center;
   border: 1px solid rgba(205, 158, 28, 0.27);
   border-radius: 13px;
   background: linear-gradient(145deg, #fff9e8, #f7edce);
   color: #906700;
-  font-size: 19px;
+  font-size: 20px;
 }
 .contact-shortcut-card > span:nth-child(2) {
   display: grid;
@@ -240,17 +281,17 @@
   gap: 4px;
 }
 .contact-shortcut-card strong {
-  font-size: 15px;
+  font-size: 16px;
   line-height: 1.5;
 }
 .contact-shortcut-card small {
   color: var(--industrial-steel);
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.7;
 }
 .contact-shortcut-arrow {
   color: #9a7837;
-  font-size: 15px;
+  font-size: 16px;
   transition: transform 180ms ease;
 }
 .contact-shortcut-card:hover .contact-shortcut-arrow,
@@ -534,8 +575,18 @@
     gap: 10px;
   }
   .contact-shortcut-card {
-    min-height: 88px;
-    padding: 13px;
+    min-height: 96px;
+    padding: 15px;
+  }
+  .contact-shortcut-icon {
+    width: 46px;
+    height: 46px;
+  }
+  .contact-shortcut-card strong {
+    font-size: 15px;
+  }
+  .contact-shortcut-card small {
+    font-size: 12px;
   }
   .branches-grid {
     grid-template-columns: 1fr;

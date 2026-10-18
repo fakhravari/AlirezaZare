@@ -1750,11 +1750,17 @@ $(function () {
     event.preventDefault();
     const emailInput = $("#forgotPasswordEmail")[0];
     if (!emailInput.value.trim() || !emailInput.validity.valid) {
-      $("#forgotPasswordError").text("ایمیل را با قالب صحیح وارد کنید.");
+      window.HNUI.setMessage(
+        document.querySelector("#forgotPasswordError"),
+        "ایمیل را با قالب صحیح وارد کنید.",
+        "error",
+      );
       return;
     }
-    $("#forgotPasswordError").text(
+    window.HNUI.setMessage(
+      document.querySelector("#forgotPasswordError"),
       "ارسال ایمیل بازنشانی هنوز به سرویس ایمیل سایت متصل نشده است.",
+      "warning",
     );
   });
 
@@ -1791,10 +1797,14 @@ $(function () {
     const email = $("#loginEmail").val().trim();
     const password = $("#loginPassword").val();
     if (!email || !$("#loginEmail")[0].validity.valid || !password) {
-      $loginEmailError.text("ایمیل معتبر و رمز عبور را وارد کنید.");
+      window.HNUI.setMessage(
+        $loginEmailError[0],
+        "ایمیل معتبر و رمز عبور را وارد کنید.",
+        "error",
+      );
       return;
     }
-    $loginEmailError.empty();
+    window.HNUI.setMessage($loginEmailError[0], "");
     completeDemoLogin();
   });
 
@@ -1805,10 +1815,14 @@ $(function () {
     const firstName = $("#registerFirstName").val().trim();
     const lastName = $("#registerLastName").val().trim();
     if (!firstName || !lastName || !emailInput.validity.valid) {
-      $registerEmailError.text("نام، نام خانوادگی و ایمیل معتبر را وارد کنید.");
+      window.HNUI.setMessage(
+        $registerEmailError[0],
+        "نام، نام خانوادگی و ایمیل معتبر را وارد کنید.",
+        "error",
+      );
       return;
     }
-    $registerEmailError.empty();
+    window.HNUI.setMessage($registerEmailError[0], "");
     requestEmailCode("register", email);
   });
 
@@ -1822,10 +1836,14 @@ $(function () {
     event.preventDefault();
     const code = window.HNUI.toEnglishDigits($emailOtpInput.val().trim());
     if (!/^\d{6}$/.test(code)) {
-      $emailOtpError.text("کد شش‌رقمی را کامل وارد کنید.");
+      window.HNUI.setMessage(
+        $emailOtpError[0],
+        "کد شش‌رقمی را کامل وارد کنید.",
+        "error",
+      );
       return;
     }
-    $emailOtpError.empty();
+    window.HNUI.setMessage($emailOtpError[0], "");
     completeDemoLogin();
   });
 
@@ -2105,16 +2123,8 @@ $(function () {
   });
   renderCart();
 
-  const showListActionToast = (message) => {
-    const toast = $("#searchToast").length ? $("#searchToast") : $("#liveToast");
-    if (toast.is("#searchToast")) {
-      toast.text(message).addClass("show");
-      window.setTimeout(() => toast.removeClass("show"), 1800);
-      return;
-    }
-    toast.find(".toast-body").text(message);
-    bootstrap.Toast.getOrCreateInstance(toast[0]).show();
-  };
+  const showListActionToast = (message, type = "success") =>
+    window.HNUI.showToast(message, type);
 
   $document.on("click", ".favorite", function () {
     const $button = $(this);
@@ -2235,7 +2245,11 @@ $(function () {
 
   $("#newsletterForm").on("submit", (event) => {
     event.preventDefault();
-    $("#formMessage").text("عضویت شما با موفقیت ثبت شد.");
+    window.HNUI.setMessage(
+      document.querySelector("#formMessage"),
+      "عضویت شما با موفقیت ثبت شد.",
+      "success",
+    );
     $(event.currentTarget).trigger("reset");
   });
 
@@ -2585,10 +2599,12 @@ $(function () {
     flyProductToControl(trigger, product, target);
   });
   document.addEventListener("hn:cart-stock-limit", (event) => {
-    const { product, stock } = event.detail || {};
-    const message = product?.name && Number.isFinite(Number(stock))
-      ? `موجودی «${product.name}» فقط ${faNumber(Number(stock))} عدد است؛ تعداد سبد به سقف موجودی رسید.`
-      : "تعداد درخواستی از موجودی کالا بیشتر بود؛ سبد تا سقف موجودی به‌روز شد.";
-    showListActionToast(message);
+    const { product, stock, limit, reason } = event.detail || {};
+    const message = reason === "cart" && Number.isFinite(Number(limit))
+      ? `حداکثر تعداد مجاز برای «${product?.name || "این کالا"}» ${faNumber(Number(limit))} عدد است.`
+      : product?.name && Number.isFinite(Number(stock))
+        ? `موجودی «${product.name}» فقط ${faNumber(Number(stock))} عدد است؛ تعداد سبد به سقف موجودی رسید.`
+        : "تعداد درخواستی از سقف مجاز کالا بیشتر بود؛ تعداد سبد به‌روزرسانی شد.";
+    showListActionToast(message, "warning");
   });
 });

@@ -32,24 +32,58 @@
         </div>
     </div>
 </header>
-<main class="flow-main container customer-service-main">
-    <div class="flow-grid">
-        <img class="flow-photo" src="Shop/images/products/tool-led-worklight.png" alt="چراغ کار LED قابل‌حمل">
-        <article class="flow-card">
-            <h2>مدارک محصول را بررسی کنید</h2>
-            <p>فاکتور، مدل و شماره مرجع کالا و کارت ضمانت را هنگام تحویل بررسی و نگهداری کنید.</p>
-            <h2>شرایط خدمات هر مدل</h2>
-            <p>مدت ضمانت، موارد تحت پوشش و شرایط سرویس باید بر اساس کارت ضمانت همان محصول و تأیید فروشگاه مشخص شود.</p>
-            <h2>درخواست خدمات</h2>
-            <p>برای بررسی محصول، شرح مشکل و مشخصات خرید را با پشتیبانی در میان بگذارید.</p><a class="flow-button" href="Contact">ارتباط با خدمات مشتریان <i class="bi bi-arrow-left"></i></a>
-        </article>
-    </div>
-    <partial name="_RelatedLinks"/>
+<main class="flow-main container customer-service-main warranty-page">
+    <section class="warranty-shell" aria-labelledby="warrantyTitle">
+        <div class="warranty-overview">
+            <div class="warranty-copy">
+                <span class="warranty-kicker"><i class="bi bi-shield-check" aria-hidden="true"></i> ضمانت و خدمات پس از فروش</span>
+                <h2 id="warrantyTitle">برای استفاده از ضمانت، مدارک محصول را نگه دارید</h2>
+                <p>فاکتور، مدل و شماره مرجع کالا و کارت ضمانت را هنگام تحویل بررسی کنید. مدت پوشش و شرایط سرویس برای هر محصول متفاوت است و باید با مدارک همان کالا تطبیق داده شود.</p>
+                <a class="warranty-contact" asp-controller="Contact" asp-action="Index">ارتباط با خدمات مشتریان <i class="bi bi-arrow-left" aria-hidden="true"></i></a>
+            </div>
+            <div class="warranty-visual">
+                <img src="~/Shop/images/products/tool-led-worklight.png" alt="چراغ کار LED و تجهیزات فنی" width="900" height="900" loading="lazy"/>
+                <span><i class="bi bi-patch-check" aria-hidden="true"></i> بررسی شرایط هر محصول</span>
+            </div>
+        </div>
+
+        <section class="warranty-guidance" aria-labelledby="warrantyGuidanceTitle">
+            <header>
+                <span>راهنمای درخواست</span>
+                <h2 id="warrantyGuidanceTitle">اگر به خدمات نیاز داشتید</h2>
+            </header>
+            <ol class="warranty-steps">
+                <li>
+                    <span class="warranty-step-icon"><i class="bi bi-receipt" aria-hidden="true"></i></span>
+                    <div><strong>مدارک را آماده کنید</strong><p>فاکتور خرید، مدل و کارت ضمانت محصول را در دسترس داشته باشید.</p></div>
+                </li>
+                <li>
+                    <span class="warranty-step-icon"><i class="bi bi-chat-left-text" aria-hidden="true"></i></span>
+                    <div><strong>شرح مشکل را بگویید</strong><p>علائم و زمان بروز مشکل را برای بررسی اولیه با پشتیبانی در میان بگذارید.</p></div>
+                </li>
+                <li>
+                    <span class="warranty-step-icon"><i class="bi bi-headset" aria-hidden="true"></i></span>
+                    <div><strong>شرایط را هماهنگ کنید</strong><p>پوشش و مراحل بعدی بر اساس مدارک محصول و بررسی فروشگاه اعلام می‌شود.</p></div>
+                </li>
+            </ol>
+        </section>
+
+        <aside class="warranty-note">
+            <i class="bi bi-info-circle" aria-hidden="true"></i>
+            <p><strong>نکته:</strong> کارت ضمانت و اطلاعات همان محصول، مرجع تعیین مدت پوشش و شرایط خدمات هستند.</p>
+        </aside>
+    </section>
 </main>
+<section class="warranty-related-section" aria-label="صفحات مرتبط با ضمانت و خدمات">
+    <div class="container">
+        <partial name="_RelatedLinks"/>
+    </div>
+</section>
 
 
 @section Styles {
     <link href="Shop/css/pages/pages.css" asp-append-version="true" rel="stylesheet"/>
+    <link href="~/Shop/css/pages/warranty.css" asp-append-version="true" rel="stylesheet"/>
 }
 
 @section Scripts {

@@ -29,8 +29,11 @@ document.addEventListener("DOMContentLoaded", () => {
           });
         } catch (error) {
           if (error.name !== "AbortError")
-            share.querySelector(".article-share-status").textContent =
-              "اشتراک‌گذاری انجام نشد؛ از کپی لینک استفاده کنید.";
+            window.HNUI.setMessage(
+              share.querySelector(".article-share-status"),
+              "اشتراک‌گذاری انجام نشد؛ از کپی لینک استفاده کنید.",
+              "error",
+            );
         }
       });
     }
@@ -42,14 +45,17 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
           await navigator.clipboard.writeText(window.location.href);
         } catch {
-          status.textContent =
-            "کپی خودکار ممکن نشد؛ لینک را از نوار آدرس کپی کنید.";
+          window.HNUI.setMessage(
+            status,
+            "کپی خودکار ممکن نشد؛ لینک را از نوار آدرس کپی کنید.",
+            "warning",
+          );
           return;
         }
-        status.textContent = "لینک مطلب کپی شد.";
+        window.HNUI.setMessage(status, "لینک مطلب کپی شد.", "success");
         button.classList.add("copied");
         setTimeout(() => {
-          status.textContent = "";
+          window.HNUI.setMessage(status, "");
           button.classList.remove("copied");
         }, 2200);
       });

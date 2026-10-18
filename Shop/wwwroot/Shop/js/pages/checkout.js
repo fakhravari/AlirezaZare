@@ -87,7 +87,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!payment) return;
     payment.disabled =
       !ui.cart.read().length || !selectedAddress() || !selectedPaymentMethod;
-    document.querySelector("#paymentStatus").textContent = "";
+    ui.setMessage(document.querySelector("#paymentStatus"), "");
   }
 
   function renderPaymentMethod() {
@@ -165,6 +165,7 @@ document.addEventListener("DOMContentLoaded", () => {
         : "bi bi-check-circle-fill";
       formStatus.hidden = !message;
       formStatus.classList.toggle("is-error", isError);
+      ui.setMessageType(formStatus, message ? (isError ? "error" : "success") : "");
     };
     form.addEventListener("hn:form-invalid", () =>
       setFormStatus("لطفاً موارد مشخص‌شده را کامل و اصلاح کنید.", true),
@@ -225,9 +226,13 @@ document.addEventListener("DOMContentLoaded", () => {
       const status = needsAddress
         ? document.querySelector("#addressStatus")
         : document.querySelector("#paymentMethodStatus");
-      status.textContent = needsAddress
-        ? "برای ادامه، ابتدا یک آدرس تحویل ثبت یا انتخاب کنید."
-        : "برای ادامه، انتخاب نحوه پرداخت الزامی است.";
+      ui.setMessage(
+        status,
+        needsAddress
+          ? "برای ادامه، ابتدا یک آدرس تحویل ثبت یا انتخاب کنید."
+          : "برای ادامه، انتخاب نحوه پرداخت الزامی است.",
+        "warning",
+      );
       target.scrollIntoView({
         behavior: "smooth",
         block: "center",
@@ -240,8 +245,11 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!radio.checked || !Object.hasOwn(paymentMethods, radio.value)) return;
       selectedPaymentMethod = radio.value;
       ui.storage.set(paymentMethodKey, selectedPaymentMethod);
-      document.querySelector("#paymentMethodStatus").textContent =
-        `${paymentMethods[selectedPaymentMethod]} به‌عنوان روش پرداخت انتخاب شد.`;
+      ui.setMessage(
+        document.querySelector("#paymentMethodStatus"),
+        `${paymentMethods[selectedPaymentMethod]} به‌عنوان روش پرداخت انتخاب شد.`,
+        "success",
+      );
       renderPaymentMethod();
       syncPayment();
     });
@@ -251,8 +259,11 @@ document.addEventListener("DOMContentLoaded", () => {
     payment.addEventListener("click", () => {
       syncPayment();
       if (payment.disabled) return;
-      document.querySelector("#paymentStatus").textContent =
-        "درگاه پرداخت در نسخه نمایشی فعال نیست؛ سفارشی ثبت یا پرداخت نشده است. برای نهایی کردن خرید با 03969455457 تماس بگیرید.";
+      ui.setMessage(
+        document.querySelector("#paymentStatus"),
+        "درگاه پرداخت در نسخه نمایشی فعال نیست؛ سفارشی ثبت یا پرداخت نشده است. برای نهایی کردن خرید با 03969455457 تماس بگیرید.",
+        "warning",
+      );
     });
     document.addEventListener("hn:cart-change", syncPayment);
   }

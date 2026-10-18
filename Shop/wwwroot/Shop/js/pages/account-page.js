@@ -16,6 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
       : "bi bi-check-circle-fill";
     formStatus.hidden = !message;
     formStatus.classList.toggle("is-error", isError);
+    ui.setMessageType(formStatus, message ? (isError ? "error" : "success") : "");
   };
   form.addEventListener("hn:form-invalid", () =>
     setFormStatus("لطفاً موارد مشخص‌شده را کامل و اصلاح کنید.", true),
@@ -28,8 +29,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const save = (key, value) => {
     const ok = ui.storage.set(key, JSON.stringify(value));
     if (!ok)
-      status.textContent =
-        "ذخیره اطلاعات ممکن نشد؛ تنظیمات مرورگر را بررسی کنید.";
+      ui.setMessage(
+        status,
+        "ذخیره اطلاعات ممکن نشد؛ تنظیمات مرورگر را بررسی کنید.",
+        "error",
+      );
     return ok;
   };
   function renderAddresses() {
@@ -70,7 +74,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (selected === b.dataset.delete)
               ui.storage.remove("hn-selected-address");
             renderAddresses();
-            status.textContent = "آدرس حذف شد.";
+            ui.setMessage(status, "آدرس حذف شد.", "success");
           }
         }),
     );
@@ -131,7 +135,7 @@ document.addEventListener("DOMContentLoaded", () => {
     ui.storage.set("hn-selected-address", address.id);
     renderAddresses();
     dialog.close();
-    status.textContent = "آدرس ذخیره و برای تحویل انتخاب شد.";
+    ui.setMessage(status, "آدرس ذخیره و برای تحویل انتخاب شد.", "success");
   };
   function renderOverview() {
     const values = {

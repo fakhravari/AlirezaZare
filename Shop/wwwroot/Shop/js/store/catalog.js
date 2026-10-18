@@ -720,7 +720,17 @@ window.HNProducts = productCatalog.map((entry, i) => {
       ],
     },
   ];
-  const [name, englishName, brand, type, powerSource, useCase, imageIndex] = entry;
+  const [
+    name,
+    englishName,
+    brand,
+    type,
+    powerSource,
+    useCase,
+    imageIndex,
+    configuredCartLimit,
+  ] = entry;
+  const cartLimit = Number(configuredCartLimit);
   const categoryRoots = {
     "دریل چکشی": "ابزار برقی",
     "دریل و پیچ‌گوشتی": "ابزار برقی",
@@ -750,6 +760,10 @@ window.HNProducts = productCatalog.map((entry, i) => {
     powerSource,
     useCase,
     stockQuantity,
+    maxCartQuantity:
+      Number.isFinite(cartLimit) && cartLimit > 0
+        ? Math.min(99, Math.floor(cartLimit))
+        : 99,
     inStock: stockQuantity > 0,
     movement: powerSource,
     strap: useCase,

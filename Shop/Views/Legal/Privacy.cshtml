@@ -24,10 +24,14 @@
 </header>
 
 <main class="flow-main container legal-main">
-    <article class="flow-card legal-document">
-        <div class="legal-note">
-            <i class="bi bi-info-circle" aria-hidden="true"></i>
-            <p>در نسخه فعلی، این وب‌سایت فروشگاه نمایشی است و پرداخت یا ثبت سفارش واقعی انجام نمی‌دهد. متن این سیاست متناسب با همین وضعیت نوشته شده است.</p>
+    <article class="flow-card legal-document privacy-document">
+        <div class="privacy-intro">
+            <span class="privacy-intro-icon"><i class="bi bi-shield-lock" aria-hidden="true"></i></span>
+            <div>
+                <span class="privacy-intro-label">راهنمای حریم خصوصی</span>
+                <h2>اطلاعات شما، روشن و قابل‌فهم</h2>
+                <p>با یک نگاه، محل نگهداری اطلاعات مرورگر، وضعیت فرم‌ها و راه مدیریت داده‌های ذخیره‌شده را مرور کنید.</p>
+            </div>
         </div>
         <section class="legal-section">
             <h2><i class="bi bi-database-lock" aria-hidden="true"></i> چه اطلاعاتی در مرورگر ذخیره می‌شود؟</h2>
@@ -45,9 +49,10 @@
             <h2><i class="bi bi-sliders" aria-hidden="true"></i> مدیریت اطلاعات</h2>
             <p>برای پاک‌کردن فهرست‌های ذخیره‌شده، داده‌های این وب‌سایت را از تنظیمات مرورگر حذف کنید. برای پرسش درباره حریم خصوصی یا درخواست‌های مربوط به اطلاعات، از صفحه تماس با ما استفاده کنید.</p>
         </section>
-        <p class="legal-updated">آخرین بازبینی: ۱۵ مهر ۱۴۰۵</p>
+        <p class="legal-updated"><i class="bi bi-calendar-check" aria-hidden="true"></i><span>آخرین بازبینی: ۱۵ مهر ۱۴۰۵</span></p>
         <div class="legal-actions">
-            <a class="flow-button" asp-controller="Contact" asp-action="Index">تماس درباره حریم خصوصی <i class="bi bi-arrow-left" aria-hidden="true"></i></a><a class="ui-inline-action" asp-controller="Legal" asp-action="Terms">شرایط استفاده</a>
+            <a class="flow-button" asp-controller="Contact" asp-action="Index">تماس درباره حریم خصوصی <i class="bi bi-arrow-left" aria-hidden="true"></i></a>
+            <a class="ui-inline-action" asp-controller="Legal" asp-action="Terms"><i class="bi bi-file-earmark-text" aria-hidden="true"></i> شرایط استفاده</a>
         </div>
     </article>
 </main>

@@ -48,6 +48,7 @@
       host.className = invalid
         ? "field-validation-error"
         : "field-validation-valid";
+      window.HNUI.setMessageType(host, invalid ? "error" : "");
     }
     return !invalid;
   };
@@ -91,6 +92,7 @@
       if (status) {
         status.hidden = false;
         status.className = "contact-form-status is-error";
+        window.HNUI.setMessageType(status, "error");
         status.innerHTML =
           '<i class="bi bi-exclamation-circle-fill" aria-hidden="true"></i><span><span>ارسال انجام نشد.</span><span>لطفاً موارد مشخص‌شده را کامل و اصلاح کنید.</span></span>';
       }
@@ -113,6 +115,7 @@
     if (status) {
       status.hidden = false;
       status.className = "contact-form-status";
+      window.HNUI.setMessageType(status, "success");
       status.innerHTML =
         '<i class="bi bi-check-circle-fill" aria-hidden="true"></i><span><span>درخواست شما با موفقیت ثبت شد.</span><span>کارشناسان ما به‌زودی با شما تماس می‌گیرند.</span></span>';
     }

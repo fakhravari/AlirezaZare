@@ -231,7 +231,7 @@
           image: normalizeImage(item.image),
           options,
           quantity: Math.min(
-            99,
+            productCartLimit(product),
             Math.max(1, Number.parseInt(item.quantity, 10) || 1),
           ),
         };
@@ -257,7 +257,12 @@
         existing.image === item.image &&
         JSON.stringify(existing.options) === JSON.stringify(item.options)
       ) {
-        existing.quantity = Math.min(99, existing.quantity + item.quantity);
+        existing.quantity = Math.min(
+          productCartLimit((window.HNProducts || []).find(
+            (product) => String(product.id) === existing.id,
+          )),
+          existing.quantity + item.quantity,
+        );
         return;
       }
       // Different options for one product code replace its previous configuration.
@@ -266,10 +271,18 @@
     return [...uniqueItems.values()];
   };
 
-  const availableStock = (item) => {
-    const product = (window.HNProducts || []).find(
+  const productForCartItem = (item) =>
+    (window.HNProducts || []).find(
       (candidate) => String(candidate.id) === String(item?.id || ""),
     );
+  const productCartLimit = (product) => {
+    const rawLimit = Number(product?.maxCartQuantity);
+    return Number.isFinite(rawLimit) && rawLimit > 0
+      ? Math.min(99, Math.floor(rawLimit))
+      : 99;
+  };
+  const availableStock = (item) => {
+    const product = productForCartItem(item);
     if (!product) return null;
     const rawStock =
       product.stockQuantity ??
@@ -301,12 +314,17 @@
     return Number.isFinite(stock) && stock >= 0 ? Math.floor(stock) : null;
   };
 
-  const enforceStockLimits = (items) =>
+  const enforceCartLimits = (items) =>
     items.flatMap((item) => {
+      const cartLimit = productCartLimit(productForCartItem(item));
       const stock = availableStock(item);
-      if (stock === null) return [item];
+      if (stock === null)
+        return [{ ...item, quantity: Math.min(item.quantity, cartLimit) }];
       if (!stock) return [];
-      return [{ ...item, quantity: Math.min(item.quantity, stock) }];
+      return [{
+        ...item,
+        quantity: Math.min(item.quantity, stock, cartLimit),
+      }];
     });
 
   const cart = {
@@ -334,7 +352,7 @@
     read() {
       try {
         const raw = JSON.parse(storage.get(STORAGE_KEYS.cart, "[]"));
-        const normalized = enforceStockLimits(normalizeCart(raw));
+        const normalized = enforceCartLimits(normalizeCart(raw));
         if (JSON.stringify(raw) !== JSON.stringify(normalized)) {
           storage.set(STORAGE_KEYS.cart, JSON.stringify(normalized));
         }
@@ -344,7 +362,7 @@
       }
     },
     write(items) {
-      const safeItems = enforceStockLimits(normalizeCart(items));
+      const safeItems = enforceCartLimits(normalizeCart(items));
       storage.set(STORAGE_KEYS.cart, JSON.stringify(safeItems));
       document.dispatchEvent(
         new CustomEvent("hn:cart-change", { detail: safeItems }),
@@ -355,6 +373,7 @@
       if (!auth.requireLogin(() => cart.add(product, quantity, trigger)))
         return null;
       const items = this.read();
+      const requestedQuantity = Math.max(1, Number.parseInt(quantity, 10) || 1);
       const safeProduct = normalizeCart([{ ...product, quantity }])[0];
       if (!safeProduct) return items;
       const existing = items.find((item) => item.id === safeProduct.id);
@@ -365,23 +384,32 @@
         existing.image === safeProduct.image &&
         JSON.stringify(existing.options) === JSON.stringify(safeProduct.options);
       const stock = availableStock(safeProduct);
-      if (stock !== null) {
-        const remaining = Math.max(0, stock - (sameConfiguration ? existing.quantity : 0));
-        const requested = safeProduct.quantity;
-        safeProduct.quantity = Math.min(requested, remaining);
-        if (safeProduct.quantity < requested) {
-          document.dispatchEvent(
-            new CustomEvent("hn:cart-stock-limit", {
-              detail: { product: safeProduct, stock, requested, remaining },
-            }),
-          );
-        }
-        if (!safeProduct.quantity) return items;
+      const cartLimit = productCartLimit(productForCartItem(safeProduct));
+      const quantityLimit = stock === null ? cartLimit : Math.min(stock, cartLimit);
+      const currentQuantity = sameConfiguration ? existing.quantity : 0;
+      const remaining = Math.max(0, quantityLimit - currentQuantity);
+      const requested = requestedQuantity;
+      safeProduct.quantity = Math.min(requested, remaining);
+      if (safeProduct.quantity < requested) {
+        document.dispatchEvent(
+          new CustomEvent("hn:cart-stock-limit", {
+            detail: {
+              product: safeProduct,
+              stock,
+              maxCartQuantity: cartLimit,
+              limit: quantityLimit,
+              requested,
+              remaining,
+              reason: stock !== null && stock <= cartLimit ? "stock" : "cart",
+            },
+          }),
+        );
       }
+      if (!safeProduct.quantity) return items;
       if (existing) {
         if (sameConfiguration) {
           existing.quantity = Math.min(
-            99,
+            quantityLimit,
             existing.quantity + safeProduct.quantity,
           );
         } else {
@@ -411,17 +439,32 @@
         return this.remove(id);
       }
       const stock = availableStock(item);
-      const limitedQuantity = stock === null ? nextQuantity : Math.min(nextQuantity, stock);
+      const cartLimit = productCartLimit(productForCartItem(item));
+      const quantityLimit = stock === null ? cartLimit : Math.min(stock, cartLimit);
+      const limitedQuantity = Math.min(nextQuantity, quantityLimit);
       if (limitedQuantity < nextQuantity) {
         document.dispatchEvent(
           new CustomEvent("hn:cart-stock-limit", {
-            detail: { product: item, stock, requested: nextQuantity, remaining: stock },
+            detail: {
+              product: item,
+              stock,
+              maxCartQuantity: cartLimit,
+              limit: quantityLimit,
+              requested: nextQuantity,
+              remaining: quantityLimit,
+              reason: stock !== null && stock <= cartLimit ? "stock" : "cart",
+            },
           }),
         );
       }
       if (!limitedQuantity) return this.remove(id);
-      item.quantity = Math.min(99, limitedQuantity);
+      item.quantity = limitedQuantity;
       return this.write(items);
+    },
+    quantityLimit(item) {
+      const stock = availableStock(item);
+      const cartLimit = productCartLimit(productForCartItem(item));
+      return stock === null ? cartLimit : Math.min(stock, cartLimit);
     },
     remove(id) {
       return this.write(this.read().filter((item) => item.id !== String(id)));
@@ -577,6 +620,67 @@
           "'": "&#39;",
         })[character],
     );
+  const setMessageType = (element, type = "") => {
+    if (!element) return;
+    const validTypes = ["success", "warning", "error", "info"];
+    const normalizedType = validTypes.includes(type) ? type : "";
+    validTypes.forEach((item) =>
+      element.classList.toggle(`hn-message--${item}`, item === normalizedType),
+    );
+    if (normalizedType) {
+      element.dataset.messageType = normalizedType;
+      element.setAttribute(
+        "role",
+        normalizedType === "error" ? "alert" : "status",
+      );
+    } else {
+      delete element.dataset.messageType;
+    }
+  };
+  const setMessage = (element, message, type = "info") => {
+    if (!element) return;
+    element.textContent = message;
+    setMessageType(element, message ? type : "");
+  };
+  const showToast = (message, type = "info") => {
+    const searchToast = document.querySelector("#searchToast");
+    const toast = searchToast || document.querySelector("#liveToast");
+    if (!toast) return false;
+    const body = searchToast ? toast : toast.querySelector(".toast-body");
+    if (!body) return false;
+    setMessageType(toast, type);
+    const messageIcons = {
+      success: "bi-check-circle-fill",
+      warning: "bi-exclamation-triangle-fill",
+      error: "bi-x-circle-fill",
+      info: "bi-info-circle-fill",
+    };
+    const icon = document.createElement("i");
+    icon.className = `bi ${messageIcons[type] || messageIcons.info} hn-toast-icon`;
+    icon.setAttribute("aria-hidden", "true");
+    const text = document.createElement("span");
+    text.className = "hn-toast-text";
+    text.textContent = message;
+    body.replaceChildren(icon, text);
+    if (searchToast) {
+      window.clearTimeout(toast._hnMessageTimer);
+      toast.classList.add("show");
+      toast._hnMessageTimer = window.setTimeout(
+        () => toast.classList.remove("show"),
+        2200,
+      );
+    } else if (window.bootstrap?.Toast) {
+      window.bootstrap.Toast.getOrCreateInstance(toast).show();
+    } else {
+      toast.classList.add("show");
+      window.clearTimeout(toast._hnMessageTimer);
+      toast._hnMessageTimer = window.setTimeout(
+        () => toast.classList.remove("show"),
+        4000,
+      );
+    }
+    return true;
+  };
 
   const localizeVisibleDigits = (root = document.body) => {
     if (!root) return;
@@ -638,9 +742,14 @@
   document.addEventListener("click", (event) => {
     const button = event.target.closest(".add-cart[data-id]");
     if (!button) return;
+    const productId = String(button.dataset.id);
+    const quantityBefore = cart
+      .read()
+      .filter((item) => item.id === productId)
+      .reduce((total, item) => total + item.quantity, 0);
     const items = cart.add(
       {
-        id: button.dataset.id,
+        id: productId,
         name: button.dataset.name,
         price: button.dataset.price,
         image: button.dataset.image,
@@ -648,7 +757,14 @@
       1,
       button,
     );
-    if (!items?.some((item) => item.id === String(button.dataset.id))) return;
+    const quantityAfter = items
+      ?.filter((item) => item.id === productId)
+      .reduce((total, item) => total + item.quantity, 0);
+    if (
+      !Number.isFinite(quantityAfter) ||
+      quantityAfter <= quantityBefore
+    )
+      return;
     window.clearTimeout(button._cartFeedbackTimer);
     button.querySelector(".add-cart-confirmation")?.remove();
     button.classList.add("added");
@@ -693,6 +809,9 @@
     toEnglishDigits,
     formatNumber,
     escapeHtml,
+    setMessage,
+    setMessageType,
+    showToast,
     localizeVisibleDigits,
   });
 })(window, document);

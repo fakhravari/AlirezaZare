@@ -760,8 +760,11 @@ document.addEventListener("DOMContentLoaded", () => {
           form.reset();
           const status = document.querySelector("#productStatus");
           if (status)
-            status.textContent =
-              type === "reviews" ? "دیدگاه شما ثبت شد." : "پرسش شما ثبت شد.";
+            ui.setMessage(
+              status,
+              type === "reviews" ? "دیدگاه شما ثبت شد." : "پرسش شما ثبت شد.",
+              "success",
+            );
         }),
       );
       renderProductFeedback("reviews");
@@ -840,7 +843,11 @@ document.addEventListener("DOMContentLoaded", () => {
               .querySelector("legend")
               ?.childNodes[0]?.textContent?.trim() || "ویژگی محصول";
           const status = productView.querySelector("#productStatus");
-          status.textContent = `لطفاً ${featureLabel} را انتخاب کنید؛ این ویژگی روی قیمت تأثیر دارد.`;
+          ui.setMessage(
+            status,
+            `لطفاً ${featureLabel} را انتخاب کنید؛ این ویژگی روی قیمت تأثیر دارد.`,
+            "warning",
+          );
           missing.scrollIntoView({ behavior: "smooth", block: "center" });
           missing.querySelector(".product-variant-choice")?.focus();
           return;
@@ -928,6 +935,10 @@ document.addEventListener("DOMContentLoaded", () => {
       view.innerHTML = items.length
         ? `<div class="flow-grid"><div class="cart-primary-column"><div class="cart-address-slot"></div><section class="flow-card cart-products-panel"><div class="cart-items-list">${items.map((i, n) => `<article class="flow-row cart-product-row"><div class="cart-product-identity"><img src="${esc(i.image)}" alt="${esc(i.name)}"><div class="cart-product-copy"><strong>${esc(i.name)}</strong>${cartOptionsMarkup(i)}<p class="cart-product-unit-price"><span>قیمت هر عدد</span><strong>${money(i.price)}</strong></p></div></div><div class="cart-item-actions"><div class="cart-quantity" role="group" aria-label="تعداد ${esc(i.name)}"><button type="button" data-minus="${n}" aria-label="کاهش تعداد ${esc(i.name)}" ${i.quantity === 1 ? "disabled" : ""}><i class="bi bi-dash" aria-hidden="true"></i></button><span class="cart-quantity-value">${fa(i.quantity)}</span><button type="button" data-plus="${n}" aria-label="افزایش تعداد ${esc(i.name)}" ${i.quantity >= 99 ? "disabled" : ""}><i class="bi bi-plus" aria-hidden="true"></i></button></div><button type="button" class="cart-item-remove" data-remove="${n}" aria-label="حذف ${esc(i.name)} از سبد"><i class="bi bi-trash3" aria-hidden="true"></i></button></div></article>`).join("")}</div></section></div><div class="cart-summary-column"><div class="cart-payment-slot"></div><aside class="flow-card cart-summary"><div class="cart-summary-heading"><span class="cart-summary-icon"><i class="bi bi-receipt" aria-hidden="true"></i></span><h2>خلاصه سبد خرید</h2></div><div class="cart-summary-lines"><div class="flow-total"><span class="cart-line-label"><i class="bi bi-box-seam" aria-hidden="true"></i><span>تعداد آیتم‌ها</span></span><strong>${fa(items.reduce((sum, item) => sum + item.quantity, 0))} عدد <small>(${fa(items.length)} مدل)</small></strong></div><div class="flow-total"><span class="cart-line-label"><i class="bi bi-receipt" aria-hidden="true"></i><span>جمع قیمت محصولات</span></span><strong>${money(total)}</strong></div>${totalsMarkup}</div>${couponMarkup}<p class="cart-shipping-note"><i class="bi bi-truck" aria-hidden="true"></i> هزینه ارسال هنگام تأیید سفارش مشخص می‌شود.</p><a class="flow-button cart-checkout-link" href="Checkout">مشاهده پیش‌فاکتور و پرداخت <i class="bi bi-arrow-left" aria-hidden="true"></i></a><a class="ui-inline-action cart-continue-link" href="Search"><i class="bi bi-tools" aria-hidden="true"></i><span>بازگشت به فروشگاه</span><i class="bi bi-arrow-left" aria-hidden="true"></i></a></aside></div></div>`
         : emptyCart();
+      ui.setMessageType(
+        view.querySelector("#couponStatus"),
+        couponError ? "error" : couponCode ? "success" : "",
+      );
       view
         .querySelectorAll(".cart-product-unit-price > span")
         .forEach((label) => {
@@ -977,6 +988,11 @@ document.addEventListener("DOMContentLoaded", () => {
         };
         actions.append(clearCart);
       }
+      view
+        .querySelectorAll("[data-plus]")
+        .forEach((button) => {
+          button.disabled = false;
+        });
       view
         .querySelectorAll("[data-remove],[data-plus],[data-minus]")
         .forEach((button) => {
@@ -1031,6 +1047,7 @@ document.addEventListener("DOMContentLoaded", () => {
           const status = document.querySelector("#couponStatus");
           status.textContent = couponMessage;
           status.classList.add("is-error");
+          ui.setMessageType(status, "error");
           input.focus();
           return;
         }
@@ -1041,6 +1058,10 @@ document.addEventListener("DOMContentLoaded", () => {
         couponError = false;
         ui.storage.set(couponKey, couponCode);
         renderCart();
+        ui.setMessageType(
+          document.querySelector("#couponStatus"),
+          couponMessage.startsWith("این کد قبلاً") ? "info" : "success",
+        );
         document.querySelector("#couponCode")?.focus();
       });
     document.querySelector("#removeCoupon")?.addEventListener("click", () => {
@@ -1049,6 +1070,7 @@ document.addEventListener("DOMContentLoaded", () => {
       couponMessage = "کد تخفیف حذف شد.";
       ui.storage.remove(couponKey);
       renderCart();
+      ui.setMessageType(document.querySelector("#couponStatus"), "success");
       document.querySelector("#couponCode")?.focus();
     });
     const summary = document.querySelector("#orderSummary");
@@ -1077,8 +1099,11 @@ document.addEventListener("DOMContentLoaded", () => {
   window.addEventListener("storage", renderCart);
   document.querySelector("#trackingForm")?.addEventListener("submit", (e) => {
     e.preventDefault();
-    document.querySelector("#trackingStatus").textContent =
-      "استعلام آنلاین فعال نیست. برای دریافت وضعیت واقعی سفارش با پشتیبانی 03969455457 تماس بگیرید.";
+    ui.setMessage(
+      document.querySelector("#trackingStatus"),
+      "استعلام آنلاین فعال نیست. برای دریافت وضعیت واقعی سفارش با پشتیبانی 03969455457 تماس بگیرید.",
+      "warning",
+    );
   });
   function renderFavorites() {
     const view = document.querySelector("#favoritesView");
@@ -1200,10 +1225,8 @@ document.addEventListener("DOMContentLoaded", () => {
         document.dispatchEvent(new CustomEvent("hn:lists-change"));
         window.setTimeout(() => {
           const toast = document.querySelector("#liveToast");
-          const toastBody = toast?.querySelector(".toast-body");
-          if (!toast || !toastBody || !window.bootstrap?.Toast) return;
-          toastBody.textContent = "فهرست مقایسه با موفقیت پاک شد.";
-          window.bootstrap.Toast.getOrCreateInstance(toast).show();
+          if (!toast) return;
+          ui.showToast("فهرست مقایسه با موفقیت پاک شد.", "success");
         }, 240);
       },
     );
