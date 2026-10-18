@@ -649,8 +649,10 @@
     position: absolute;
     top: 100%;
     right: 0;
-    left: 0;
+    left: auto;
+    width: min(1160px, calc(100vw - 32px));
     height: 16px;
     content: "";
+    pointer-events: auto;
   }
 }
