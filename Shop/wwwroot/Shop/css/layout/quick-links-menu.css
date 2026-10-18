@@ -625,6 +625,40 @@ html body #mainNav .home-header-search:focus-within {
 
 /* Keep the desktop brand panel anchored below the navbar with fade-only motion. */
 @media (min-width: 992px) {
+  .inner-page #mainNav .category-nav-mega {
+    border-top: 3px solid #f6c515 !important;
+    border-top-left-radius: 0 !important;
+    border-top-right-radius: 0 !important;
+    border-radius: 0 0 20px 20px !important;
+    transform: none !important;
+    transition:
+      opacity 160ms ease,
+      visibility 0s linear 160ms !important;
+  }
+
+  .inner-page #mainNav .category-nav-dropdown:is(:hover, :focus-within, .show, .is-mega-open) > .category-nav-mega {
+    transform: none !important;
+    transition-delay: 0s !important;
+  }
+
+  #mainNav .quick-links-dropdown > .quick-links-menu {
+    position: absolute !important;
+    top: calc(100% + 16px) !important;
+    border-top: 3px solid #f6c515 !important;
+    border-top-left-radius: 0 !important;
+    border-top-right-radius: 0 !important;
+    border-radius: 0 0 20px 20px !important;
+    transform: none !important;
+    transition:
+      opacity 160ms ease,
+      visibility 0s linear 160ms !important;
+  }
+
+  #mainNav .quick-links-dropdown:is(:hover, :focus-within, .show, .is-quick-links-open) > .quick-links-menu {
+    transform: none !important;
+    transition-delay: 0s !important;
+  }
+
   #mainNav .brand-dropdown {
     position: relative !important;
   }

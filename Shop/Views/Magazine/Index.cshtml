@@ -16,9 +16,8 @@
         new { Slug = "workshop-lighting-guide", Branch = "education", Topic = "lighting", Category = "آموزش تخصصی", Title = "روشنایی کارگاه را چطور بهتر برنامه‌ریزی کنیم؟", Summary = "ترکیب نور عمومی و موضعی، خیرگی و سایه را کاهش می‌دهد و دید محل کار را بهتر می‌کند.", Image = "tool-led-worklight.png" },
         new { Slug = "soldering-station-setup", Branch = "education", Topic = "soldering", Category = "آموزش تخصصی", Title = "آماده‌سازی میز تعمیر برد", Summary = "چیدمان ابزار، نور و تهویه مناسب، فرایند تعمیرات الکترونیک را ایمن‌تر و دقیق‌تر می‌کند.", Image = "tool-soldering-station.png" }
     };
-    var postCount = posts.Length.ToString("N0", CultureInfo.InvariantCulture)
-        .Replace("0", "۰").Replace("1", "۱").Replace("2", "۲").Replace("3", "۳").Replace("4", "۴")
-        .Replace("5", "۵").Replace("6", "۶").Replace("7", "۷").Replace("8", "۸").Replace("9", "۹");
+    string PersianDigits(int value) => string.Concat(value.ToString(CultureInfo.InvariantCulture).Select(digit => digit is >= '0' and <= '9' ? (char)('\u06F0' + digit - '0') : digit));
+    var postCount = PersianDigits(posts.Length);
 }
 <header class="page-hero editorial-hero">
     <img class="hero-image" src="~/Shop/images/heroes/hero-electrical-editorial.png" alt="مجله تخصصی برق و ابزار ندا اولیائی"/>
@@ -49,15 +48,24 @@
         <aside class="journal-categories" aria-label="دسته‌بندی مطالب">
             <div class="journal-categories-scroll ui-scrollbar ui-scrollbar--navy">
                 <h2>دسته‌بندی مجله</h2>
-                <button type="button" class="is-active journal-all" data-journal-filter="all" aria-pressed="true">همه مطالب <span>@postCount</span></button>
+                <p class="journal-categories-intro">مطالب را بر اساس نیاز و حوزهٔ کاری‌تان پیدا کنید.</p>
+                <button type="button" class="is-active journal-all" data-journal-filter="all" aria-pressed="true">همه مطالب <span class="journal-category-count">@postCount</span></button>
                 <div class="journal-branch">
-                    <button type="button" data-journal-filter="buying" aria-pressed="false"><i class="bi bi-cart-check" aria-hidden="true"></i> راهنمای خرید</button>
+                    <button type="button" data-journal-filter="buying" aria-pressed="false"><i class="bi bi-cart-check" aria-hidden="true"></i><span>راهنمای خرید</span><span class="journal-category-count">@PersianDigits(posts.Count(post => post.Branch == "buying"))</span></button>
                 </div>
                 <div class="journal-branch">
-                    <button type="button" data-journal-filter="education" aria-pressed="false"><i class="bi bi-mortarboard" aria-hidden="true"></i> آموزش تخصصی</button>
+                    <button type="button" data-journal-filter="education" aria-pressed="false"><i class="bi bi-mortarboard" aria-hidden="true"></i><span>آموزش تخصصی</span><span class="journal-category-count">@PersianDigits(posts.Count(post => post.Branch == "education"))</span></button>
                 </div>
                 <div class="journal-branch">
-                    <button type="button" data-journal-filter="safety" aria-pressed="false"><i class="bi bi-shield-check" aria-hidden="true"></i> ایمنی و نگهداری</button>
+                    <button type="button" data-journal-filter="safety" aria-pressed="false"><i class="bi bi-shield-check" aria-hidden="true"></i><span>ایمنی و نگهداری</span><span class="journal-category-count">@PersianDigits(posts.Count(post => post.Branch == "safety"))</span></button>
+                </div>
+                <div class="journal-topic-heading"><span>موضوعات تخصصی</span><span>۵ حوزه</span></div>
+                <div class="journal-topic-grid" aria-label="فیلتر بر اساس موضوع تخصصی">
+                    <button type="button" data-journal-filter="tools" aria-pressed="false"><i class="bi bi-tools" aria-hidden="true"></i><span>ابزار برقی</span><b>@PersianDigits(posts.Count(post => post.Topic == "tools"))</b></button>
+                    <button type="button" data-journal-filter="measurement" aria-pressed="false"><i class="bi bi-speedometer2" aria-hidden="true"></i><span>اندازه‌گیری</span><b>@PersianDigits(posts.Count(post => post.Topic == "measurement"))</b></button>
+                    <button type="button" data-journal-filter="soldering" aria-pressed="false"><i class="bi bi-wrench-adjustable" aria-hidden="true"></i><span>لحیم‌کاری</span><b>@PersianDigits(posts.Count(post => post.Topic == "soldering"))</b></button>
+                    <button type="button" data-journal-filter="lighting" aria-pressed="false"><i class="bi bi-lightbulb" aria-hidden="true"></i><span>روشنایی</span><b>@PersianDigits(posts.Count(post => post.Topic == "lighting"))</b></button>
+                    <button type="button" data-journal-filter="battery" aria-pressed="false"><i class="bi bi-battery-half" aria-hidden="true"></i><span>باتری و شارژی</span><b>@PersianDigits(posts.Count(post => post.Topic == "battery"))</b></button>
                 </div>
             </div>
         </aside>
