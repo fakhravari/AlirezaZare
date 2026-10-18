@@ -232,6 +232,7 @@ $(function () {
         .forEach((brandDropdown) => {
           let brandCloseTimer = 0;
           const brandTrigger = brandDropdown.querySelector(":scope > .nav-link");
+          const brandMenu = brandDropdown.querySelector(":scope > .brand-menu");
           const keepBrandOpen = () => {
             window.clearTimeout(brandCloseTimer);
             brandDropdown.classList.add("is-brand-open");
@@ -245,7 +246,7 @@ $(function () {
               if (!brandDropdown.classList.contains("show")) {
                 brandTrigger?.setAttribute("aria-expanded", "false");
               }
-            }, 220);
+            }, 500);
           };
           const dismissSearch = () => {
             if (suggestions.hidden) return;
@@ -256,6 +257,8 @@ $(function () {
             keepBrandOpen();
           });
           brandDropdown.addEventListener("pointerleave", closeBrandSoon);
+          brandMenu?.addEventListener("pointerenter", keepBrandOpen);
+          brandMenu?.addEventListener("pointerleave", closeBrandSoon);
           brandDropdown.addEventListener("focusin", () => {
             keepBrandOpen();
             dismissSearch();
@@ -1007,7 +1010,7 @@ $(function () {
   /* Route mega-menu selections once, independently from slider lifecycle events. */
   document.addEventListener("click", (event) => {
     const link = event.target.closest(
-      ".mega-sidebar a, .mega-links a, .brand-menu .dropdown-item",
+      ".mega-sidebar a, .mega-links a",
     );
     if (!link) return;
     event.preventDefault();

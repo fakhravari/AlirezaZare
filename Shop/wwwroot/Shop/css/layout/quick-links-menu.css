@@ -303,6 +303,55 @@
   }
 }
 
+/* Use the real brand marks in the desktop brand menu, with a wordmark fallback. */
+#mainNav .brand-menu .dropdown-item {
+  grid-template-columns: 50px minmax(0, 1fr) 14px !important;
+  gap: 9px !important;
+}
+
+#mainNav .brand-menu-logo-frame {
+  display: grid;
+  width: 48px;
+  height: 38px;
+  min-width: 0;
+  padding: 4px;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid #e5e8eb;
+  border-radius: 9px;
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(16, 42, 67, 0.045);
+  transition:
+    border-color 180ms ease,
+    background-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+#mainNav .brand-menu-logo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+#mainNav .brand-menu-logo-fallback {
+  color: #173653;
+  font-family: var(--font-latin);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.15px;
+}
+
+#mainNav .brand-menu .dropdown-item:is(:hover, :focus-visible) .brand-menu-logo-frame {
+  border-color: #e0c56e;
+  background: #fffdf7;
+  box-shadow: 0 3px 9px rgba(16, 42, 67, 0.08);
+}
+
+#mainNav .brand-menu .dropdown-item small {
+  text-transform: uppercase;
+}
+
 /* Give the all-brands action the available footer space and clear hierarchy. */
 #mainNav .brand-menu-footer > .brand-menu-all-link {
   width: auto !important;
@@ -377,5 +426,212 @@
   #mainNav .brand-menu-footer > .brand-menu-all-link,
   #mainNav .brand-menu-footer > .brand-menu-all-link > i {
     transition: none !important;
+  }
+}
+
+/* Desktop brand menu: a clean logo wall instead of a row of small icon cards. */
+#mainNav .brand-dropdown > .brand-menu {
+  padding: 16px !important;
+  grid-template-columns: repeat(8, minmax(0, 1fr)) !important;
+  gap: 11px !important;
+  border: 1px solid #f6c515 !important;
+  border-top-width: 3px !important;
+  border-radius: 0 0 20px 20px !important;
+  background: #f2f5f7 !important;
+  box-shadow: 0 22px 50px rgba(16, 42, 67, 0.2) !important;
+}
+
+#mainNav .brand-menu > .brand-menu-heading {
+  display: flex !important;
+  min-height: 70px;
+  grid-column: 1 / -1;
+  margin: 0 !important;
+  padding: 10px 15px !important;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  border: 1px solid #193f5c;
+  border-radius: 12px;
+  background: linear-gradient(110deg, #173b57, #102a43 78%);
+  color: #fff;
+}
+
+#mainNav .brand-menu-heading > span {
+  display: grid;
+  gap: 2px;
+}
+
+#mainNav .brand-menu-heading strong {
+  color: #fff;
+  font-size: 17px;
+  font-weight: 800;
+}
+
+#mainNav .brand-menu-heading small {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 12px;
+}
+
+#mainNav .brand-menu-heading > b {
+  padding: 7px 12px;
+  border: 1px solid rgba(246, 197, 21, 0.45);
+  border-radius: 999px;
+  background: rgba(246, 197, 21, 0.1);
+  color: #ffda4e;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+#mainNav .brand-menu > li:not(.brand-menu-heading):not(.brand-menu-footer) {
+  min-width: 0;
+  margin: 0 !important;
+}
+
+#mainNav .brand-menu .dropdown-item {
+  display: grid !important;
+  min-height: 98px !important;
+  height: 100%;
+  padding: 10px 8px !important;
+  grid-template-columns: minmax(0, 1fr) 16px !important;
+  grid-template-rows: 40px auto;
+  gap: 5px 2px !important;
+  justify-items: center;
+  align-content: center;
+  border: 1px solid #dbe3e8 !important;
+  border-radius: 13px !important;
+  background: #fff !important;
+  box-shadow: 0 3px 10px rgba(16, 42, 67, 0.035) !important;
+  color: #243b53 !important;
+  text-align: center;
+  transform: none !important;
+}
+
+#mainNav .brand-menu-logo-frame {
+  width: 94px;
+  max-width: 100%;
+  height: 40px;
+  padding: 2px 5px;
+  grid-column: 1 / -1;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+#mainNav .brand-menu-logo {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+#mainNav .brand-menu-logo-fallback {
+  color: #173653;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+}
+
+#mainNav .brand-menu .dropdown-item > span:nth-child(2) {
+  min-width: 0;
+  grid-column: 1;
+  grid-row: 2;
+  align-items: center;
+  gap: 1px !important;
+}
+
+#mainNav .brand-menu .dropdown-item strong {
+  max-width: 100%;
+  color: #173653 !important;
+  font-size: 14px !important;
+  font-weight: 800 !important;
+}
+
+#mainNav .brand-menu .dropdown-item small {
+  color: #82909b !important;
+  font-size: 10px !important;
+}
+
+#mainNav .brand-menu .dropdown-item > i {
+  grid-column: 2;
+  grid-row: 2;
+  align-self: center;
+  color: #a0acb5 !important;
+  font-size: 10px !important;
+}
+
+#mainNav .brand-menu .dropdown-item:is(:hover, :focus-visible) {
+  border-color: #dfbd58 !important;
+  background: #fffdf7 !important;
+  box-shadow: 0 8px 18px rgba(16, 42, 67, 0.09) !important;
+  transform: translateY(-2px) !important;
+}
+
+#mainNav .brand-menu .dropdown-item:is(:hover, :focus-visible) > i {
+  color: #a77a1e !important;
+  transform: translateX(-2px);
+}
+
+#mainNav .brand-menu-footer {
+  min-width: 0;
+  grid-column: 1 / -1;
+  margin: 0 !important;
+  padding: 8px 10px !important;
+  justify-content: space-between !important;
+  border-color: #dce3e8 !important;
+  border-radius: 13px !important;
+  background: #e9eef2 !important;
+}
+
+#mainNav .brand-menu-footer > .brand-menu-all-link {
+  width: 100% !important;
+  min-height: 48px !important;
+  flex: 1 1 auto !important;
+  justify-content: space-between !important;
+  padding: 6px 12px !important;
+}
+
+@media (max-width: 1199.98px) and (min-width: 992px) {
+  #mainNav .brand-dropdown > .brand-menu {
+    grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+  }
+}
+
+/* Keep the desktop brand panel anchored below the navbar with fade-only motion. */
+@media (min-width: 992px) {
+  #mainNav .brand-dropdown {
+    position: relative !important;
+  }
+
+  #mainNav .brand-dropdown > .brand-menu {
+    position: absolute !important;
+    top: calc(100% + 16px) !important;
+    right: 0 !important;
+    left: auto !important;
+    z-index: 1055 !important;
+    margin: 0 !important;
+    transform: none !important;
+    transform-origin: top center !important;
+    animation: none !important;
+    transition:
+      opacity 160ms ease,
+      visibility 0s linear 160ms !important;
+    will-change: opacity;
+  }
+
+  #mainNav .brand-dropdown:is(:hover, :focus-within, .show, .is-brand-open) > .brand-menu {
+    display: grid !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: none !important;
+    transition-delay: 0s !important;
+  }
+
+  #mainNav .brand-dropdown::after {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    left: 0;
+    height: 16px;
+    content: "";
   }
 }
