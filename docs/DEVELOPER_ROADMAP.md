@@ -1,8 +1,8 @@
 # رودمپ توسعه و نقشهٔ پروژه
 
-این سند نقطهٔ شروع هر توسعه‌دهنده یا ایجنتی است که باید ساختار پروژه، محل کد هر قابلیت و مسیر امن اعمال تغییر را بفهمد. این نقشه وضعیت فعلی مخزن را توصیف می‌کند؛ موارد بخش «رودمپ پیشنهادی» هدف‌های آینده‌اند، نه قابلیت‌های تکمیل‌شده.
+این نقشه راهنمای معماری و نقطهٔ شروع ردیابی هر قابلیت است. برای مسیر یادگیری، دسته‌بندی اسناد و خلاصهٔ سریع، [`README.md`](README.md) را ببینید. این سند وضعیت فعلی مخزن را توصیف می‌کند؛ موارد «رودمپ پیشنهادی» هدف آینده‌اند، نه قابلیت تکمیل‌شده. بازبینی معماری: **۱۸ اکتبر ۲۰۲۶**.
 
-برای راهنمای عمیق selectorها، breakpointها، landmarkهای route، state/eventهای JavaScript و روند مرحله‌به‌مرحلهٔ عیب‌یابی UI، مرجع مکمل [`UI_LAYER_REFERENCE.md`](UI_LAYER_REFERENCE.md) را نیز بخوانید. اطلاعات آن snapshot از کد فعلی است و باید همراه تغییر معماری/asset به‌روز بماند.
+برای selectorها، breakpointها، landmarkهای route، state/eventهای JavaScript و عیب‌یابی UI، مرجع مکمل [`UI_LAYER_REFERENCE.md`](UI_LAYER_REFERENCE.md) را بخوانید. برای metadata و structured data به [`SEO_METADATA.md`](SEO_METADATA.md) مراجعه کنید. این جزئیات snapshot هستند و باید همراه تغییر معماری/asset به‌روز بمانند.
 
 ## ۱. خلاصهٔ معماری فعلی
 
@@ -135,9 +135,9 @@
 
 ### ترتیب CSS فعلی
 
-ترتیب واقعی لینک‌ها در `Views/Shared/_Shop.cshtml` چنین است: فونت/Bootstrap/آیکن و vendorها → `design-tokens.css` → `components.css` → `ui-core.css` → CSSهای shared → `luxury-theme.css` → `site.css` → `style.css` → `shared-mega-menu.css` → `commerce.css` → `@section Styles` صفحه → `mvc-layout.css` → `mobile-drawer-compact.css` → `pagination.css` → `electrical-theme.css` → `industrial-system.css` → `shared-product-card.css` → `@section PageStyles` → `content-typography.css` → `search-mobile.css` → `mobile-pages.css`.
+ترتیب واقعی لینک‌ها در `Views/Shared/_Shop.cshtml` چنین است: فونت/Bootstrap/آیکن و vendorها → `design-tokens.css` → `components.css` → `ui-core.css` → CSSهای shared → `luxury-theme.css` → `site.css` → `style.css` → `shared-mega-menu.css` → `commerce.css` → `@section Styles` صفحه → `mvc-layout.css` → `mobile-drawer-compact.css` → `pagination.css` → `electrical-theme.css` → `industrial-system.css` → `quick-links-menu.css` → `shared-product-card.css` → `@section PageStyles` → `content-typography.css` → `mobile-pages.css` → `@section SearchStyles` → `search-mobile.css` → `empty-state-system.css` → `shared-surface-theme.css`.
 
-`mobile-pages.css` آخرین stylesheet سراسری در layout فعلی است؛ `search-mobile.css` از layout بارگذاری می‌شود و selectorهای آن برای Search scope شده‌اند. لینک `PageStyles` تکراری آن از View Search حذف شده است. `shared-product-card.css` دیگر آخرین فایل نیست. فایل‌های `content-typography.css`, `search-mobile.css` و `mobile-pages.css` در انتهای cascade قرار گرفته‌اند و می‌توانند روی قواعد زودتر بنویسند؛ scope selectorها و routeهای مصرف‌کننده را پیش از تغییر بررسی کنید.
+`shared-surface-theme.css` آخرین stylesheet سراسری در layout فعلی است. `search-mobile.css` پس از `@section SearchStyles` بارگذاری می‌شود و selectorهای آن باید برای Search محدود بمانند؛ `empty-state-system.css` و `shared-surface-theme.css` نیز انتهای cascade مشترک را شکل می‌دهند. `shared-product-card.css` زودتر از `@section PageStyles` می‌آید. scope selectorها و routeهای مصرف‌کننده را پیش از تغییر بررسی کنید.
 
 `industrial-system.css` همچنان overrideهای زیادی دارد، اما آخرین فایل CSS نیست. ترتیب cascade را با چهار عامل بررسی کنید: origin/importance، specificity، ترتیب بارگذاری، و در صورت وجود media query/شرط فعال. صرفاً بالا بردن specificity یا افزودن `!important` تعارض را پنهان می‌کند. راه‌حل ترجیحی اصلاح قانون در فایل مالک و حذف/محدودکردن overrideٔ متناقض است؛ از ساختن یک لایهٔ override تازه در انتهای فایل خودداری کنید.
 

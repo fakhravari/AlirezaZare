@@ -1,6 +1,6 @@
 # مرجع کامل لایه‌های رابط کاربری
 
-این سند مکمل [`DEVELOPER_ROADMAP.md`](DEVELOPER_ROADMAP.md) است و برای پیدا کردن مالک واقعی UI، ردیابی تداخل CSS/JavaScript و بازآزمایی صفحه‌ها نوشته شده است. این مرجع در **۱۸ اکتبر ۲۰۲۶** با ساختار و assetهای موجود در مخزن تطبیق داده شده است؛ نقشهٔ مسیرها، breakpointها و فایل‌ها snapshot هستند و پس از تغییر View یا asset باید دوباره بررسی شوند.
+این سند مکمل [`DEVELOPER_ROADMAP.md`](DEVELOPER_ROADMAP.md) است و برای پیدا کردن مالک واقعی UI، ردیابی تداخل CSS/JavaScript و بازآزمایی صفحه‌ها نوشته شده است. برای ترتیب مطالعه و انتخاب سند مناسب، از [`README.md`](README.md) شروع کنید. این مرجع در **۱۸ اکتبر ۲۰۲۶** با ساختار و assetهای موجود در مخزن تطبیق داده شده است؛ نقشهٔ مسیرها، breakpointها و فایل‌ها snapshot هستند و پس از تغییر View یا asset باید دوباره بررسی شوند.
 
 > این سند فهرست مفصل مالکیت و نقاط شروع جست‌وجو است، نه جایگزین خواندن markup و cascade واقعی. DOM نهایی، کلاس‌های state و stylesheet برنده را برای هر باگ در مرورگر تأیید کنید.
 
@@ -53,11 +53,12 @@ Shop/Program.cs
 4. `css/layout/luxury-theme.css` → `css/core/site.css` → `css/layout/style.css` → `shared-mega-menu.css`.
 5. `commerce.css`.
 6. `@section Styles` از View جاری.
-7. `css/layout/mvc-layout.css` → `mobile-drawer-compact.css` → `css/store/pagination.css` → `electrical-theme.css` → `industrial-system.css` → `css/store/shared-product-card.css`.
+7. `css/layout/mvc-layout.css` → `mobile-drawer-compact.css` → `css/store/pagination.css` → `electrical-theme.css` → `industrial-system.css` → `quick-links-menu.css` → `css/store/shared-product-card.css`.
 8. `@section PageStyles` از View جاری.
-9. `css/layout/content-typography.css` → `css/pages/search-mobile.css` → `css/layout/mobile-pages.css`.
+9. `css/layout/content-typography.css` → `css/layout/mobile-pages.css`.
+10. `@section SearchStyles` از View جاری → `css/pages/search-mobile.css` → `css/layout/empty-state-system.css` → `css/layout/shared-surface-theme.css`.
 
-قاعدهٔ مهم: CSS اختصاصی View در میانهٔ ترتیب است و `PageStyles` پس از `shared-product-card.css` می‌آید. `mobile-pages.css` آخرین stylesheet سراسری در layout فعلی است. `search-mobile.css` از layout بارگذاری می‌شود و selectorهای آن برای Search scope شده‌اند؛ لینک تکراری آن از View Search حذف شده است. `industrial-system.css` overrideهای زیادی دارد ولی آخرین فایل نیست؛ overrideهای `!important` نیز می‌توانند مستقل از ترتیب برنده شوند. وجود فایل در repo به معنی load شدنش نیست. ترتیب نهایی را در تب Network و DOM `<link>`ها تأیید کنید.
+قاعدهٔ مهم: CSS اختصاصی View در میانهٔ ترتیب است و `PageStyles` پس از `shared-product-card.css` می‌آید. `shared-surface-theme.css` آخرین stylesheet سراسری در layout فعلی است. `search-mobile.css` پس از `SearchStyles` بارگذاری می‌شود؛ selectorهای آن باید Search-scoped باشند. `empty-state-system.css` و `shared-surface-theme.css` نیز قواعد مشترک انتهایی‌اند. `industrial-system.css` overrideهای زیادی دارد ولی آخرین فایل نیست؛ overrideهای `!important` نیز می‌توانند مستقل از ترتیب برنده شوند. وجود فایل در repo به معنی load شدنش نیست. ترتیب نهایی را در تب Network و DOM `<link>`ها تأیید کنید.
 
 ### JavaScript
 
@@ -114,10 +115,13 @@ core/ui-core.js
 | `css/layout/mobile-drawer-compact.css` | فشرده‌سازی drawer موبایل | فقط تا 991px؛ ممکن است بر shared drawer غلبه کند |
 | `css/layout/electrical-theme.css` | هویت/چیدمان تم برق و ابزار | در انتهای cascade عمومی است |
 | `css/layout/industrial-system.css` | overrideهای صنعتی/سراسری و responsive | overrideهای زیادی دارد ولی آخرین فایل نیست؛ فایل مالک مؤلفه فرض نشود |
+| `css/layout/quick-links-menu.css` | منوی دسترسی سریع مشترک | پس از پوستهٔ صنعتی و پیش از کارت محصول بارگذاری می‌شود |
 | `css/store/shared-product-card.css` | کارت‌های مشترک محصول | grid و ابعاد تصویر را در Search/خانه/Related بررسی کنید |
 | `css/layout/content-typography.css` | یکدست‌سازی تایپوگرافی و خوانایی محتوای فارسی | layout-wide؛ بعد از CSSهای قبلی می‌آید، در صفحه‌های محتوایی و RTL بررسی شود |
 | `css/pages/search-mobile.css` | ریزچیدمان و کنترل‌های Search در موبایل | در layout بارگذاری می‌شود؛ selectorهای فایل باید به Search محدود بمانند |
-| `css/layout/mobile-pages.css` | اصلاحات responsive مشترک صفحه‌ها | آخرین stylesheet layout؛ scope هر selector را بررسی کنید |
+| `css/layout/mobile-pages.css` | اصلاحات responsive مشترک صفحه‌ها | پیش از `SearchStyles` و stylesheetهای نهایی مشترک می‌آید؛ scope هر selector را بررسی کنید |
+| `css/layout/empty-state-system.css` | الگوی مشترک حالت‌های بدون نتیجه/بدون داده | در انتهای stylesheetهای مشترک می‌آید؛ به صفحهٔ مصرف‌کننده محدودش کنید |
+| `css/layout/shared-surface-theme.css` | پرداخت نهایی سطح‌ها و پنل‌های مشترک | آخرین stylesheet سراسری؛ پیش از افزودن override بررسی شود |
 | `css/store/commerce.css` | سبد، جزئیات محصول، variant/accessory، مقایسه و favorite | هم بخش‌های صفحه و هم تعامل‌های commerce را پوشش می‌دهد |
 | `css/store/pagination.css` | `.site-pagination` | بعد از View CSS می‌آید |
 | `css/pages/pages.css` | قواعد عمومی/قدیمی چند صفحه | به علت گستردگی، وجود selector عمومی را کنترل کنید |

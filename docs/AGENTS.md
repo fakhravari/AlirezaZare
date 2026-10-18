@@ -1,20 +1,27 @@
-# Repository Guide for Coding Agents
+# راهنمای عامل کدنویسی مخزن
 
-Read `DEVELOPER_ROADMAP.md` before making non-trivial changes. For UI/CSS/JS work, also read `UI_LAYER_REFERENCE.md`; it contains the detailed page landmarks, stylesheet/component ownership, responsive breakpoints, runtime state/events, and conflict-debugging checklist.
+برای آشنایی سریع، ابتدا [`README.md`](README.md) و سپس [`DEVELOPER_ROADMAP.md`](DEVELOPER_ROADMAP.md) را بخوانید. برای تغییر UI/CSS/JS، [`UI_LAYER_REFERENCE.md`](UI_LAYER_REFERENCE.md) و برای metadata/structured data، [`SEO_METADATA.md`](SEO_METADATA.md) نیز مرجع لازم هستند.
 
-## Required workflow
+## روند کاری الزامی
 
-1. Run `git status --short` first. Preserve unrelated user changes; do not reset, clean, or overwrite them.
-2. Trace the complete feature path before editing: controller/route → model or data source → Razor view → page CSS/JS → shared layout and components. Use the roadmap's page-to-asset tables to identify actual owners.
-3. Inspect the actual loaded asset order in `Shop/Views/Shared/_Shop.cshtml`. Files present in the repository are not necessarily loaded by the layout.
-4. Make the smallest coherent change in the owning layer. Avoid duplicate markup, duplicate event handlers, broad global selectors, and new `!important` overrides unless the existing cascade makes them necessary.
-5. Keep pages Persian-first and RTL. Preserve responsive behavior, keyboard access, accessible names, and reduced-motion support when relevant.
-6. For visual changes, check shared tokens before using new colors, borders, spacing, radius, or shadows. Inspect the winning cascade rule and actual load order; prefer fixing the component's source stylesheet over appending another override to `industrial-system.css`.
-7. Validate with the narrowest relevant check, then build with `dotnet build Shop.sln` when appropriate. There is currently no test project in the solution; do not claim tests ran unless they did.
-8. Never assume demo browser data is server-persisted. Current catalog and commerce behavior is mostly static/demo data; see the roadmap before changing data flows.
+1. ابتدا `git status --short` اجرا کنید؛ تغییرهای موجود کاربر را حفظ کنید و reset/clean نکنید.
+2. مسیر کامل قابلیت را ردیابی کنید: route/controller → model یا منبع داده → Razor/partial → layout → CSS/JS. از جدول route و asset در Roadmap و UI Reference کمک بگیرید.
+3. ترتیب assetهای واقعاً بارگذاری‌شده را در `Shop/Views/Shared/_Shop.cshtml` بررسی کنید؛ وجود فایل در repo به معنی استفاده‌شدن آن نیست.
+4. کوچک‌ترین تغییر منسجم را در owner واقعی اعمال کنید. markup، listener یا selector عمومی موازی نسازید و `!important` تازه را راه‌حل پیش‌فرض نکنید.
+5. فارسی و RTL را حفظ کنید؛ responsive، keyboard/focus، نام دسترس‌پذیر و reduced-motion را متناسب با تغییر بررسی کنید.
+6. برای ظاهر، ابتدا token و component مشترک را بررسی کنید؛ قانون برنده و load order را از DevTools تأیید کنید و از append کردن override عمومی به `industrial-system.css` پرهیز کنید.
+7. منبع حقیقت داده را مشخص کنید. دادهٔ ثابت C#، کاتالوگ JavaScript و `localStorage` را سرور، سفارش واقعی یا دیتابیس فرض نکنید.
+8. اعتبارسنجی محدود و مرتبط انجام دهید؛ در صورت اقتضا `dotnet build Shop.sln` را اجرا کنید. solution فعلاً test project ندارد؛ تستی را که اجرا نشده ادعا نکنید.
+9. اگر route، asset، source of truth یا رفتار تغییر کرد، README و سند تخصصی مرتبط را همگام کنید و لینک‌های داخلی را بررسی کنید.
 
-## Repository scope
+## محدودهٔ مخزن
 
-- `Shop/` is the ASP.NET Core MVC application and the only project currently included in `Shop.sln`.
-- `ClockTemplate/` currently contains generated/build artifacts rather than a source project in the solution; do not treat it as an application entry point without verifying new source files and solution membership.
-- Do not delete generated, vendor, or apparently unused files as cleanup unless references and build/runtime usage have been checked.
+- `Shop/` برنامهٔ ASP.NET Core MVC و تنها پروژهٔ فعلی `Shop.sln` است.
+- `ClockTemplate/` فعلاً artifactهای تولید/ساخت دارد، نه پروژهٔ source عضو solution؛ پیش از هر نتیجه‌گیری عضویت و source را بررسی کنید.
+- فایل generated، vendor یا ظاهراً بدون مصرف را صرفاً برای cleanup حذف نکنید؛ ارجاع، build و runtime را اول بررسی کنید.
+
+## منابع و اولویت
+
+- `README.md` فهرست و مسیر یادگیری اسناد است؛ `DEVELOPER_ROADMAP.md` مرجع معماری و `UI_LAYER_REFERENCE.md` مرجع جزئیات UI است.
+- برای metadata، structured data، sitemap و robots از `SEO_METADATA.md` استفاده کنید.
+- اگر سند با کد یا رفتار runtime اختلاف داشت، کد منبع نهایی است؛ پس از بررسی، سند مرتبط و فهرست README را اصلاح کنید.
