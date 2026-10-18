@@ -22,6 +22,19 @@ public static class JournalArticles
 
     public static IReadOnlyList<string> Slugs { get; } = Articles.Select(article => article.Slug).ToArray();
 
+    private static readonly IReadOnlyDictionary<string, JournalArticleMetrics> Metrics =
+        new Dictionary<string, JournalArticleMetrics>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["multimeter-buying-guide"] = new(12800, 342, 4.8),
+            ["electrical-tool-safety"] = new(9600, 218, 4.9),
+            ["soldering-station-basics"] = new(8200, 196, 4.7),
+            ["worklight-selection"] = new(7400, 152, 4.8),
+            ["battery-tool-care"] = new(6100, 124, 4.6)
+        };
+
+    public static JournalArticleMetrics GetMetrics(string slug) =>
+        Metrics.GetValueOrDefault(slug) ?? new JournalArticleMetrics(0, 0, 0);
+
     public static MagazineDetailsModel? Find(string slug)
     {
         var article = Articles.FirstOrDefault(item => string.Equals(item.Slug, slug, StringComparison.OrdinalIgnoreCase));
@@ -31,3 +44,5 @@ public static class JournalArticles
         return new MagazineDetailsModel(article.Slug, article.Category, "مجله تخصصی برق و ابزار", article.Title, article.Summary, "تحریریه ندا اولیائی", "", "۶ دقیقه مطالعه", "Shop/images/heroes/hero-electrical-editorial.png", "Shop/images/products/" + article.Image, article.Summary, sections, "مشخصات و دستورالعمل سازندهٔ همان مدل را بررسی کنید و ابزار را متناسب با کاربرد و شرایط ایمنی انتخاب کنید.");
     }
 }
+
+public sealed record JournalArticleMetrics(int Views, int Likes, double AverageRating);

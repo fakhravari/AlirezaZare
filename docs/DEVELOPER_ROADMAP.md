@@ -59,7 +59,7 @@
 | سبد و تسویه | `/cart`, `/checkout` | `CartController`, `CheckoutController` و Viewهای هم‌نام |
 | مقایسه و علاقه‌مندی | `/compare`, `/favorites` | Controller و Viewهای هم‌نام؛ state محلی با کدهای store |
 | پروفایل | `/account` (هدایت سازگاری به پروفایل), `/profile`, `/profile/orders`, `/profile/addresses`, `/profile/favorites` | `AccountController` فقط alias سازگاری است؛ صفحه‌ها در `ProfileController` و `Views/Profile/Index.cshtml` رندر می‌شوند |
-| مجله | `/magazine`, `/magazine/{slug}` (مسیر قبلی `/magazine/details/{slug}` حفظ و هدایت می‌شود) | `MagazineController`، `Views/Magazine/`، دادهٔ مقاله در `Models/JournalArticles.cs` |
+| مجله | `/magazine`, `/magazine/{slug}` (مسیر قبلی `/magazine/details/{slug}` حفظ و هدایت می‌شود) | `MagazineController`، `Views/Magazine/`، دادهٔ مقاله و اعداد نمایشی ثابت در `Models/JournalArticles.cs` |
 | برندها | `/brands`, `/brands/{slug}` | `BrandsController` و Viewهای فهرست/جزئیات؛ اطلاعات پایه در `BrandCatalog` و متن تحریریه در `wwwroot/Shop/js/store/brand-editorial.json` |
 | محتوا/خدمات | `/about`, `/contact`, `/faq`, `/shipping`, `/tracking`, `/warranty` | Controller و View هم‌نام |
 | قوانین | `/legal/privacy`, `/legal/terms`, `/legal/returns` | `LegalController` و Viewهای `Views/Legal/` |
