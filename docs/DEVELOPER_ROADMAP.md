@@ -12,6 +12,13 @@
 - بسیاری از مسیرهای Controller صرفاً View و دادهٔ نمایشی برمی‌گردانند. کاتالوگ نمونهٔ ۳۰ قلمی ابزار در `Shop/wwwroot/Shop/js/store/catalog.js` نگهداری می‌شود؛ قیمت‌ها (به میلیون تومان)، تخفیف‌ها، دیدگاه‌ها و موجودی دادهٔ واقعی فروش نیستند. توضیحات فنی در شش گروه کالایی مشترک‌اند و مشخصات مدل‌محور تا اتصال منبع دادهٔ معتبر نباید حدس زده شوند. فیلدهای روشن‌تر `powerSource` (منبع تغذیه) و `useCase` (مورد استفاده) هستند؛ `movement` و `strap` برای سازگاری با کد و داده‌های قدیمی فعلاً نگه داشته شده‌اند. محتوا و تعامل‌های سبد، علاقه‌مندی، مقایسه و بخشی از حساب در مرورگر و `localStorage` مدیریت می‌شوند.
 - نتیجه: رفتار فعلی فروشگاه را دمو/نمونه فرض کنید؛ دادهٔ `localStorage` را دادهٔ سرور، سفارش واقعی یا احراز هویت واقعی تلقی نکنید.
 
+### قرارداد مشترک سبد خرید
+
+- `HNUI.cart` در `js/core/ui-core.js` منبع واحد نرمال‌سازی و ثبت آیتم سبد است؛ کارت خانه، جستجو، پیشنهادها، quick view و صفحهٔ دیتیل باید از `HNUI.cart.add` عبور کنند، نه اینکه دادهٔ موازی برای پنل هدر بسازند.
+- هنگام نرمال‌سازی، محصول با شناسه‌اش در `window.HNProducts` پیدا می‌شود؛ ویژگی‌های پیش‌فرض و خدمات الزامی به پیکربندی افزوده می‌شوند. متعلقات اختیاریِ انتخاب‌نشده در state می‌مانند، اما در نمای سبد/مدال/فاکتور نشان داده نمی‌شوند و هزینه‌ای ندارند.
+- `HNUI.cart.renderOptions(item)` تنها renderer مشترک ویژگی‌ها و متعلقات است و در پنل هدر، صفحهٔ سبد و فاکتور استفاده می‌شود. برچسب خدمات انتخاب‌شده فقط «الزامی» یا «اختیاری» است.
+- قیمت و موجودی هنوز محلی/دمویی‌اند. هنگام تغییر منطق قیمت، بررسی کنید مبلغ گزینه و خدمت اجباری فقط یک‌بار به قیمت پایه اضافه شود و تغییر تعداد، جمع ردیف و جمع فاکتور را هماهنگ نگه دارد.
+
 ### هویت و اطلاعات تماس فعلی
 
 | مورد | مقدار جاری | محل‌های اصلی مصرف |
@@ -119,7 +126,7 @@
 |---|---|---|
 | وابستگی | `wwwroot/Shop/vendor/` | Bootstrap RTL، آیکن‌ها، فونت‌ها و carouselها؛ فقط تغییر vendor با دلیل و بررسی نسخه/وابستگی‌ها |
 | پایه و توکن | `css/core/design-tokens.css`, `components.css`, `ui-core.css`, `site.css` | رنگ، تایپوگرافی، resetهای محدود، الگوهای UI عمومی و پایهٔ سایت |
-| اجزای مشترک | `css/layout/shared-header.css`, `shared-mega-menu.css`, `shared-account.css`, `shared-cart.css`, `shared-login.css`, `shared-footer.css` | اجزایی که در چند route تکرار می‌شوند؛ header خانه/داخلی را جداگانه بررسی کنید |
+| اجزای مشترک | `css/layout/shared-header.css`, `shared-mega-menu.css`, `shared-account.css`, `shared-cart.css`, `shared-login.css`, `shared-footer.css` | اجزایی که در چند route تکرار می‌شوند؛ `shared-cart.css` پنل سبد هدر را هم پوشش می‌دهد؛ header خانه/داخلی را جداگانه بررسی کنید |
 | پوسته و legacy | `css/layout/luxury-theme.css`, `style.css`, `mvc-layout.css`, `electrical-theme.css`, `mobile-drawer-compact.css`, `industrial-system.css` | پوستهٔ عمومی، responsive و سازگاری‌های قدیمی؛ در این گروه هم‌پوشانی و override زیاد است |
 | مؤلفهٔ فروشگاه | `css/store/shared-product-card.css`, `commerce.css`, `pagination.css` | کارت محصول، جزئیات/سبد/مقایسه و صفحه‌بندی فروشگاهی |
 | صفحه | `css/pages/*.css` | فرم‌ها و layout اختصاصی یک صفحه یا یک جریان؛ selector را به ریشهٔ همان صفحه محدود کنید |
@@ -144,7 +151,7 @@
 | `/search` جستجو | `Views/Product/List.cshtml` | `pages/search.css`, `pages/search-mobile.css` |
 | `/products/{slug}` جزئیات محصول؛ `{slug}` با `-{id}` تمام می‌شود | `Views/Product/Details.cshtml` | `pages/pages.css`؛ بخش عمدهٔ UI فروشگاهی از `store/commerce.css` است |
 | `/cart` سبد | `Views/Cart/Index.cshtml` | `pages/checkout.css`, `pages/form-confirm-dialog.css`, `pages/pages.css` |
-| `/checkout` تسویه | `Views/Checkout/Index.cshtml` | `pages/checkout.css`, `pages/pages.css` |
+| `/checkout` تسویه | `Views/Checkout/Index.cshtml` | `pages/checkout.css`, `pages/pages.css`; ویژگی‌ها/متعلقات در فاکتور با renderer مشترک سبد نمایش داده می‌شوند و قیمت واحد از جمع همان ردیف جداست |
 | `/compare` مقایسه | `Views/Compare/Index.cshtml` | `pages/pages.css` |
 | `/favorites` علاقه‌مندی | `Views/Favorites/Index.cshtml` | `pages/pages.css` |
 | `/profile`, `/profile/orders`, `/profile/addresses`, `/profile/favorites` | `Views/Profile/Index.cshtml` | `pages/account-page.css`, `pages/checkout.css`, `pages/pages.css` |
@@ -223,7 +230,7 @@
 
 در `_Shop.cshtml` ترتیب scriptها این است: `core/ui-core.js` → jQuery و pluginها → Bootstrap → `layout/main.js` → `core/form-validation.js` → `store/catalog.js` → `store/commerce.js` → `@section Scripts` صفحه → `core/electrical-content.js`. کدهای بعدی ممکن است به globalهای قبلی وابسته باشند؛ جابه‌جایی ترتیب را تغییر معماری حساب کنید و بعد از آن همهٔ جریان‌های متأثر را بررسی کنید.
 
-جریان معمول دادهٔ فعلی: `catalog.js` کاتالوگ نمونه را روی `window.HNProducts` می‌گذارد؛ `commerce.js` و صفحه‌هایی مثل Search آن را مصرف می‌کنند؛ تغییر سبد/لیست‌ها از helperهای `HNUI` و storage مرورگر عبور می‌کند؛ رویدادهای سفارشی `hn:*` برای تازه‌سازی شمارنده‌ها و viewهای باز استفاده می‌شوند. هنگام تغییر، نام کلید و payload واقعی event را در `ui-core.js`/مصرف‌کننده‌ها بخوانید؛ به حدس یا ایجاد مستقیم state موازی متکی نشوید. `storage` event نیز تغییر تب/پنجرهٔ دیگر را همگام می‌کند.
+جریان معمول دادهٔ فعلی: `catalog.js` کاتالوگ نمونه را روی `window.HNProducts` می‌گذارد؛ `commerce.js` و صفحه‌هایی مثل Search آن را مصرف می‌کنند؛ تغییر سبد/لیست‌ها از helperهای `HNUI` و storage مرورگر عبور می‌کند؛ رویدادهای سفارشی `hn:*` برای تازه‌سازی شمارنده‌ها و viewهای باز استفاده می‌شوند. هنگام تغییر، نام کلید و payload واقعی event را در `ui-core.js`/مصرف‌کننده‌ها بخوانید؛ به حدس یا ایجاد مستقیم state موازی متکی نشوید. `storage` event نیز تغییر تب/پنجرهٔ دیگر را همگام می‌کند. همهٔ ورودی‌های افزودن محصول باید از `HNUI.cart.add` و normalize مشترک عبور کنند؛ نمایش گزینه‌ها در پنل هدر، سبد و فاکتور نیز فقط از `HNUI.cart.renderOptions` انجام می‌شود.
 
 برای جلوگیری از باگ تعاملی، از event listener تکراری در `main.js`, `commerce.js` و View پرهیز کنید؛ ابتدا بررسی کنید listener مشترکی قبلاً ثبت نشده باشد. handler صفحه را تا حد ممکن به ریشهٔ همان صفحه محدود و در نبود markup با guard امن کنید. برای HTML پویا از escape helper موجود استفاده کنید و دادهٔ query string/localStorage را ورودی قابل‌اعتماد فرض نکنید.
 
@@ -237,7 +244,7 @@
 | `/search` | `pages/search.js` | `HNProducts` از `store/catalog.js`، تعامل‌های cart/list از `commerce.js` |
 | `/products/{slug}`؛ slug با `-{id}` تمام می‌شود | `pages/page-content.js` | خواندن شناسه از انتهای slug و رندر/variant/accessory/gallery/feedback در `store/commerce.js` |
 | `/cart` | `form-confirm-dialog.js`, `address-fields.js`, `checkout.js`, `iran-places.js`, `page-content.js` | cart state/render در `commerce.js` |
-| `/checkout` | `checkout.js`, `page-content.js` | cart state در `commerce.js` |
+| `/checkout` | `checkout.js`, `page-content.js` | cart state و `HNUI.cart.renderOptions` در `commerce.js`; لینک عنوان محصول و تفکیک قیمت واحد/جمع ردیف در `pages/checkout.css` |
 | `/compare`, `/favorites` | `page-content.js` | رندر و state مقایسه/علاقه‌مندی در `commerce.js` |
 | `/profile` و زیربخش‌ها | `account-page.js`, `address-fields.js`, `iran-places.js`, `orders-pagination.js`, `page-content.js` | پوسته و stateهای مشترک در `main.js`/`commerce.js` |
 | `/magazine` | `magazine.js` | — |

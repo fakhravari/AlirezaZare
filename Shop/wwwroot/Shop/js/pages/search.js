@@ -7,7 +7,7 @@
     type: new Set(),
     movement: new Set(),
     strap: new Set(),
-    onlyAvailable: false,
+    availability: "all",
     maxPrice: 60,
     query: "",
     sort: "recommended",
@@ -26,7 +26,7 @@
   };
   const hasActiveFilters = () =>
     ["brand", "type", "movement", "strap"].some((key) => state[key].size) ||
-    state.onlyAvailable ||
+    state.availability !== "all" ||
     state.maxPrice < 60 ||
     Boolean(state.query);
   const brandPersianLabels = {
@@ -231,7 +231,8 @@
     );
     if (state.maxPrice < 60)
       params.set(filterFields.price.slug, String(state.maxPrice));
-    if (state.onlyAvailable) params.set("available", "1");
+    if (state.availability === "in-stock") params.set("available", "1");
+    if (state.availability === "out-of-stock") params.set("available", "0");
     if (state.query) params.set("q", state.query);
     if (state.sort !== "recommended") params.set("sort", state.sort);
     const query = params.toString();
@@ -277,9 +278,16 @@
     state.maxPrice =
       Number.isFinite(price) && price >= 10 && price <= 60 ? price : 60;
     state.query = params.get("q")?.trim() || "";
-    state.onlyAvailable = ["1", "true"].includes(
-      (params.get("available") ?? params.get("onlyAvailable") ?? "").toLowerCase(),
-    );
+    const availability = (
+      params.get("available") ?? params.get("onlyAvailable") ?? ""
+    ).toLowerCase();
+    state.availability = ["0", "false", "out-of-stock", "unavailable"].includes(
+      availability,
+    )
+      ? "out-of-stock"
+      : ["1", "true", "in-stock", "available"].includes(availability)
+        ? "in-stock"
+        : "all";
     state.sort = ["recommended", "newest", "low", "high"].includes(
       params.get("sort"),
     )
@@ -288,13 +296,24 @@
     $$(".filter-option input[data-filter]").forEach(
       (input) => (input.checked = state[input.dataset.filter].has(input.value)),
     );
-    $("#onlyAvailable").checked = state.onlyAvailable;
+    $("#availabilityFilter").value = state.availability;
     $("#maxPrice").value = state.maxPrice;
     $("#productSearch").value = state.query;
     $("#sortProducts").value = state.sort;
     restoringUrl = false;
   }
   const fa = (n) => window.HNUI.formatNumber(n);
+  const isProductAvailable = (product) => {
+    if (typeof product.inStock === "boolean") return product.inStock;
+    const inventory =
+      product.stockQuantity ??
+      product.inventoryCount ??
+      product.quantityInStock ??
+      product.availableQuantity ??
+      product.stock;
+    const quantity = Number(inventory);
+    return Number.isFinite(quantity) && quantity >= 0 ? quantity > 0 : true;
+  };
   function buildFilters() {
     Object.entries(filterConfig).forEach(([key, values]) => {
       const searchBox = ["brand", "type"].includes(key)
@@ -319,7 +338,10 @@
         (!state.type.size || state.type.has(p.type)) &&
         (!state.movement.size || state.movement.has(p.powerSource || p.movement)) &&
         (!state.strap.size || state.strap.has(p.useCase || p.strap)) &&
-        (!state.onlyAvailable || p.inStock !== false) &&
+        (state.availability === "all" ||
+          (state.availability === "in-stock"
+            ? isProductAvailable(p)
+            : !isProductAvailable(p))) &&
         p.price <= state.maxPrice &&
         (!state.query ||
           `${p.name} ${p.brand} ${p.type} ${p.powerSource || p.movement}`.includes(state.query)),
@@ -435,9 +457,9 @@
       chips.push(
         `<button class="filter-chip" data-key="price">تا ${fa(state.maxPrice)} میلیون ×</button>`,
       );
-    if (state.onlyAvailable)
+    if (state.availability !== "all")
       chips.push(
-        `<button class="filter-chip" data-key="available">فقط کالاهای موجود ×</button>`,
+        `<button class="filter-chip" data-key="available">${state.availability === "in-stock" ? "کالاهای موجود" : "کالاهای ناموجود"} ×</button>`,
       );
     $("#activeChips").innerHTML = chips.join("");
     const count = chips.length;
@@ -449,8 +471,8 @@
             state.maxPrice = 60;
             $("#maxPrice").value = 60;
           } else if (chip.dataset.key === "available") {
-            state.onlyAvailable = false;
-            $("#onlyAvailable").checked = false;
+            state.availability = "all";
+            $("#availabilityFilter").value = "all";
           } else {
             state[chip.dataset.key].delete(chip.dataset.value);
             const box = document.querySelector(
@@ -465,10 +487,11 @@
   }
   function clearAll() {
     ["brand", "type", "movement", "strap"].forEach((key) => state[key].clear());
-    state.onlyAvailable = false;
+    state.availability = "all";
     state.maxPrice = 60;
     state.query = "";
     $$(".filter-option input").forEach((input) => (input.checked = false));
+    $("#availabilityFilter").value = "all";
     $("#maxPrice").value = 60;
     $("#productSearch").value = "";
     $$("[data-filter-search]").forEach((input) => {
@@ -515,8 +538,8 @@
         render(true, true);
       }),
   );
-  $("#onlyAvailable").onchange = (event) => {
-    state.onlyAvailable = event.target.checked;
+  $("#availabilityFilter").onchange = (event) => {
+    state.availability = event.target.value;
     render(true, true);
   };
   $("#maxPrice").oninput = () => {
@@ -536,6 +559,33 @@
   $("#emptyResults button").onclick = clearAll;
   function readCart() {
     return window.HNUI?.cart.read() || [];
+  }
+  function cartOptionsMarkup(item) {
+    const escape = window.HNUI?.escapeHtml || ((value) => String(value || ""));
+    const variants = Array.isArray(item.options?.variants)
+      ? item.options.variants
+      : [];
+    const accessories = Array.isArray(item.options?.accessories)
+      ? item.options.accessories
+      : [];
+    if (!variants.length && !accessories.length) return "";
+    const variantMarkup = variants.length
+      ? `<div class="cart-item-option-group"><small class="cart-item-option-label">ویژگی‌ها</small><div class="cart-item-option-list cart-item-option-list--variants">${variants
+          .map(
+            (option) =>
+              `<span class="cart-item-option-chip"><small>${escape(option.label)}</small><strong>${escape(option.value)}</strong>${Number(option.priceDelta) ? `<small class="cart-item-option-price">${Number(option.priceDelta) > 0 ? "+" : "−"} ${fa(Math.abs(Number(option.priceDelta)) * 1000000)} تومان</small>` : ""}</span>`,
+          )
+          .join("")}</div></div>`
+      : "";
+    const accessoryMarkup = accessories.length
+      ? `<div class="cart-item-option-group"><small class="cart-item-option-label">متعلقات و خدمات</small><div class="cart-item-option-list cart-item-option-list--accessories">${accessories
+          .map(
+            (accessory) =>
+              `<span class="cart-item-option-chip cart-item-option-chip--accessory"><i class="bi bi-plus-circle" aria-hidden="true"></i><strong>${escape(accessory.name)}</strong><small class="cart-item-option-status ${accessory.required ? "is-required" : "is-optional"}">${accessory.required ? "الزامی" : "اختیاری"}</small>${Number(accessory.price) > 0 ? `<small>+ ${fa(Number(accessory.price) * 1000000)} تومان</small>` : "<small>رایگان</small>"}</span>`,
+          )
+          .join("")}</div></div>`
+      : "";
+    return `<div class="cart-item-options" aria-label="ویژگی‌ها و متعلقات انتخاب‌شده">${variantMarkup}${accessoryMarkup}</div>`;
   }
   function updateCartCount() {
     const cart = readCart(),
@@ -558,7 +608,7 @@
         ? cart
             .map(
               (item) =>
-                `<article class="search-cart-item"><img src="${item.image || "Shop/images/products/tool-hammer-drill.png"}" alt=""><span><strong>${item.name || "محصول"}</strong><small>${fa(item.price)} تومان</small></span><b>${fa(item.quantity)} عدد</b></article>`,
+                `<article class="search-cart-item"><img src="${window.HNUI.escapeHtml(item.image || "Shop/images/products/tool-hammer-drill.png")}" alt=""><span><strong>${window.HNUI.escapeHtml(item.name || "محصول")}</strong>${cartOptionsMarkup(item)}<small>${fa(item.price)} تومان</small></span><b>${fa(item.quantity)} عدد</b></article>`,
             )
             .join("")
         : '<div class="search-cart-empty"><i class="bi bi-bag"></i><strong>سبد خرید شما خالی است</strong></div>';

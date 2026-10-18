@@ -4149,6 +4149,10 @@ body {
     box-shadow 0.22s ease;
 }
 
+.flow-related.shared-related.cart-related a {
+  border-color: #e0e5e9;
+}
+
 .flow-related.shared-related a > i:first-child {
   display: grid;
   width: 38px;

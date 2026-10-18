@@ -20,6 +20,11 @@
             با ترکیب چند فیلتر، سریع‌تر به ابزار متناسب با بودجه، توان موردنیاز و
             محیط استفاده خود برسید.
         </p>
+        <div class="hero-trail" aria-label="امکانات جستجوی محصولات">
+            <span>فیلترهای دقیق</span>
+            <span>انتخاب متناسب با نیاز</span>
+            <span>بررسی مشخصات و قیمت</span>
+        </div>
     </div>
 </header>
 
@@ -52,10 +57,13 @@
         <button class="clear-filters" id="clearFilters" type="button" hidden>
             <i class="bi bi-arrow-counterclockwise"></i> پاک‌کردن همه فیلترها
         </button>
-        <label class="filter-option filter-stock-option">
-            <input type="checkbox" id="onlyAvailable" name="available" value="1">
-            <span>فقط کالاهای موجود</span>
-            <i class="bi bi-box-seam" aria-hidden="true"></i>
+        <label class="filter-option filter-stock-option" for="availabilityFilter">
+            <span>وضعیت موجودی</span>
+            <select id="availabilityFilter" name="available">
+                <option value="all">همهٔ کالاها</option>
+                <option value="in-stock">کالاهای موجود</option>
+                <option value="out-of-stock">کالاهای ناموجود</option>
+            </select>
         </label>
         <div class="filter-group open" data-filter-fa="برند" data-filter-en="Brand" data-filter-slug="brand">
             <button type="button" aria-expanded="true">

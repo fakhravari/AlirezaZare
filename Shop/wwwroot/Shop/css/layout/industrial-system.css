@@ -605,9 +605,11 @@ h6,
 
 .inner-page #mainNav .category-mega-panels {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(var(--category-mega-columns, 1), minmax(0, 1fr));
   gap: 0;
   align-content: start;
+  grid-auto-flow: row;
+  grid-auto-rows: min-content;
 }
 
 .inner-page #mainNav .category-mega-hint {
@@ -1993,7 +1995,6 @@ footer .trust-badges .trust-badge-image {
   background: var(--industrial-yellow) !important;
   color: var(--industrial-navy) !important;
 }
-
 
 /* Keep the product hero kicker in the same dark-glass palette as its banner. */
 .inner-page main .product-detail-hero > .container > .page-kicker {
@@ -10448,6 +10449,35 @@ html
   margin-top: 12px;
 }
 
+.inner-page .page-hero > .container > .hero-trail > span,
+.inner-page .page-hero > .container > .article-hero-meta > span {
+  display: inline-flex;
+  min-height: 38px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.035);
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  text-align: center;
+  backdrop-filter: blur(8px);
+}
+
+.inner-page .page-hero > .container > .article-hero-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.inner-page .page-hero > .container > .article-hero-meta i {
+  color: rgba(255, 255, 255, 0.58);
+}
+
 .inner-page :is(.article-breadcrumb, .cart-breadcrumb) {
   display: flex;
   width: max-content;
@@ -12088,6 +12118,18 @@ body .electrical-swiper .swiper-pagination-bullet-active {
 }
 
 @media (max-width: 767px) {
+  body .home-page #heroSwiper.electrical-swiper .electrical-arrow {
+    display: none !important;
+  }
+
+  body .home-page #heroSwiper.electrical-swiper .swiper-pagination {
+    right: 50%;
+    bottom: 10px;
+    left: auto;
+    display: flex !important;
+    transform: translateX(50%);
+  }
+
   body .electrical-swiper .electrical-arrow {
     width: 36px;
     height: 36px;
@@ -13370,36 +13412,6 @@ body .electrical-swiper .swiper-pagination-bullet-active {
 
 /* Refined typography and item rhythm for the desktop category mega menu. */
 @media (min-width: 992px) {
-  .home-page .electrical-category-menu {
-    padding: 10px;
-    border: 1px solid #274b62;
-    border-radius: 14px;
-    background: linear-gradient(155deg, #173b54, #102a43 72%);
-    box-shadow:
-      0 18px 38px rgba(8, 29, 45, 0.24),
-      inset 0 1px rgba(255, 255, 255, 0.08);
-    overflow: visible;
-  }
-
-  .home-page .electrical-category-heading {
-    min-height: 48px;
-    margin: 0 2px 5px;
-    padding-inline: 8px;
-    border-bottom-color: rgba(255, 255, 255, 0.16);
-    color: #fff;
-    font-size: 16px;
-    font-weight: 850;
-  }
-
-  .home-page .electrical-category-heading > span {
-    width: 32px;
-    height: 32px;
-    border-color: #f6c515;
-    border-radius: 10px;
-    background: linear-gradient(145deg, #ffe779, #f6c515);
-    box-shadow: 0 4px 10px rgba(246, 197, 21, 0.2);
-  }
-
   .inner-page #mainNav .category-nav-mega {
     right: max(18px, calc((100% - 1540px) / 2));
     left: max(18px, calc((100% - 1540px) / 2));
@@ -13424,9 +13436,12 @@ body .electrical-swiper .swiper-pagination-bullet-active {
   }
 
   .inner-page #mainNav .category-mega-panels {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(var(--category-mega-columns, 1), minmax(0, 1fr));
     align-content: start;
     gap: 12px;
+    align-items: stretch;
+    grid-auto-flow: row;
+    grid-auto-rows: min-content;
   }
 
   .inner-page #mainNav .category-mega-group {
@@ -13435,7 +13450,7 @@ body .electrical-swiper .swiper-pagination-bullet-active {
     min-height: 0;
     padding: 13px 12px 12px;
     gap: 5px;
-    overflow: hidden;
+    overflow: visible;
     border: 1px solid #e4e9ec;
     border-radius: 13px;
     background: linear-gradient(150deg, #fff, var(--mega-tint));
@@ -13457,11 +13472,6 @@ body .electrical-swiper .swiper-pagination-bullet-active {
     --mega-tint: #f2f8f2;
   }
 
-  .inner-page #mainNav .category-mega-group:is(:nth-child(3n + 2), :nth-child(3n)) {
-    border-color: #e8edef;
-    box-shadow: 0 3px 9px rgba(16, 42, 67, 0.035);
-  }
-
   .inner-page #mainNav .category-mega-group:not(:first-child) {
     border-right: 1px solid #e4e9ec;
   }
@@ -13470,9 +13480,12 @@ body .electrical-swiper .swiper-pagination-bullet-active {
     min-height: 40px;
     margin: 0 0 3px;
     padding: 0 0 8px;
+    min-width: 0;
     border-bottom: 1px solid color-mix(in srgb, var(--mega-accent) 24%, white);
     color: var(--industrial-navy);
     font-size: 14px;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
   }
 
   .inner-page #mainNav .category-mega-title i {
@@ -13485,9 +13498,14 @@ body .electrical-swiper .swiper-pagination-bullet-active {
   .inner-page #mainNav .category-mega-group > a:not(.category-mega-title) {
     min-height: 34px;
     padding: 5px 8px;
+    min-width: 0;
+    border: 1px solid #e7edf1;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.78);
     color: #526579;
     font-size: 12px;
     line-height: 1.55;
+    overflow-wrap: anywhere;
   }
 
   .inner-page
@@ -13501,17 +13519,13 @@ body .electrical-swiper .swiper-pagination-bullet-active {
   }
 
   .home-page .electrical-category-menu > button {
-    min-height: 40px;
-    flex: 0 0 auto;
-    margin: 1px 0;
+    min-height: 46px;
     padding-inline: 12px;
-    grid-template-columns: 30px minmax(0, 1fr) 14px;
+    grid-template-columns: 28px minmax(0, 1fr) 14px;
     gap: 9px;
-    border-color: rgba(255, 255, 255, 0.1);
-    border-top-color: rgba(255, 255, 255, 0.1);
-    border-radius: 9px;
-    background: rgba(255, 255, 255, 0.045);
-    color: rgba(255, 255, 255, 0.9);
+    border-color: #e9edf0;
+    border-radius: 8px;
+    color: #34475a;
     font-size: 14px;
     font-weight: 700;
     transition:
@@ -13527,38 +13541,29 @@ body .electrical-swiper .swiper-pagination-bullet-active {
     width: 27px;
     height: 27px;
     place-items: center;
-    border-radius: 9px;
-    background: rgba(246, 197, 21, 0.16);
-    color: #f6cf37;
+    border-radius: 8px;
+    background: #fff7d8;
+    color: #a17b0d;
     font-size: 16px;
   }
 
   .home-page .electrical-category-menu > button:is(:hover, .active, [aria-expanded="true"]) {
-    border-color: rgba(255, 221, 91, 0.7);
-    background: linear-gradient(100deg, #ffe780, #f6c515);
-    color: #102a43;
+    border-color: #f0d777;
+    background: linear-gradient(100deg, #fffdf6, #fff6d3);
+    color: var(--industrial-navy);
     box-shadow:
       inset -3px 0 var(--industrial-yellow),
       0 3px 9px rgba(16, 42, 67, 0.055);
     transform: translateX(-2px);
   }
 
-  .home-page .electrical-category-menu > button:is(:hover, .active, [aria-expanded="true"]) > i:first-child {
-    background: rgba(255, 255, 255, 0.78);
-    color: #9b7300;
-  }
-
-  .home-page .electrical-category-menu > button > i:last-child {
-    color: rgba(255, 255, 255, 0.56);
-  }
-
   .home-page .electrical-submenu {
-    width: min(1140px, calc(100vw - 340px));
-    height: auto;
-    min-height: min(300px, calc(100vh - 220px));
-    max-height: min(640px, calc(100vh - 220px));
+    width: min(980px, calc(100vw - 340px));
+    height: min(580px, calc(100vh - 220px));
+    min-height: min(460px, calc(100vh - 220px));
     padding: 18px;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-auto-flow: row;
     grid-auto-rows: min-content;
     align-content: start;
     gap: 12px;
@@ -13570,137 +13575,45 @@ body .electrical-swiper .swiper-pagination-bullet-active {
     scrollbar-width: thin;
   }
 
-  .home-page .electrical-submenu-heading {
-    display: flex;
-    min-height: 58px;
-    padding: 10px 15px;
-    grid-column: 1 / -1;
-    align-items: center;
-    justify-content: space-between;
-    gap: 14px;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 11px;
-    background:
-      radial-gradient(circle at 100% 0, rgba(246, 197, 21, 0.18), transparent 38%),
-      linear-gradient(110deg, #102a43, #204e69);
-    box-shadow: 0 7px 16px rgba(16, 42, 67, 0.13);
-    color: #fff;
-  }
-
-  .home-page .electrical-submenu-heading-copy {
-    display: flex;
-    min-width: 0;
-    flex-direction: column;
-    gap: 3px;
-  }
-
-  .home-page .electrical-submenu-heading-copy > strong {
-    color: #fff;
-    font-size: 15px;
-    font-weight: 850;
-  }
-
-  .home-page .electrical-submenu-heading-copy > small {
-    color: rgba(255, 255, 255, 0.7);
-    font-size: 11px;
-  }
-
-  .home-page .electrical-submenu-heading-count {
-    flex: none;
-    padding: 6px 10px;
-    border: 1px solid rgba(255, 220, 91, 0.34);
-    border-radius: 999px;
-    background: rgba(255, 220, 91, 0.12);
-    color: #ffe06b;
-    font-size: 11px;
-    font-weight: 800;
-  }
-
   .home-page .electrical-submenu-column {
     --submenu-accent: #a77a1e;
     --submenu-tint: #fff9e9;
-    position: relative;
     min-height: 0;
-    gap: 4px;
+    gap: 5px;
     padding: 12px 11px;
-    border: 1px solid #e0e7ec;
-    border-top: 3px solid var(--submenu-accent);
+    border: 1px solid #e4e9ec;
     border-radius: 12px;
     background: linear-gradient(150deg, #fff, var(--submenu-tint));
-    box-shadow: 0 7px 18px rgba(16, 42, 67, 0.07);
+    box-shadow: 0 4px 12px rgba(16, 42, 67, 0.045);
   }
 
-  .home-page .electrical-submenu-column[data-index="1"] {
+  .home-page .electrical-submenu-column:nth-child(3n + 2) {
     --submenu-accent: #527b91;
     --submenu-tint: #f1f8fb;
   }
 
-  .home-page .electrical-submenu-column[data-index="2"] {
+  .home-page .electrical-submenu-column:nth-child(3n) {
     --submenu-accent: #63826d;
     --submenu-tint: #f2f8f2;
   }
 
-  .home-page .electrical-submenu-column:is([data-index="1"], [data-index="2"]) {
-    border-color: #e7ecef;
-    border-top-color: color-mix(in srgb, var(--submenu-accent) 62%, white);
-    border-top-width: 2px;
-    box-shadow: 0 4px 12px rgba(16, 42, 67, 0.045);
-  }
-
-  .home-page .electrical-submenu-column[data-index="3"] {
-    --submenu-accent: #896ca5;
-    --submenu-tint: #f7f3fa;
-  }
-
-  .home-page .electrical-submenu-column[data-index="4"] {
-    --submenu-accent: #b37454;
-    --submenu-tint: #fbf4ef;
-  }
-
-  .home-page .electrical-submenu-column[data-index="5"] {
-    --submenu-accent: #527f78;
-    --submenu-tint: #f0f7f5;
-  }
-
   .home-page .electrical-submenu-column > strong {
-    display: flex;
     margin-bottom: 4px;
     padding: 0 7px 9px;
-    align-items: center;
-    gap: 8px;
-    border-color: rgba(16, 42, 67, 0.11);
+    border-color: color-mix(in srgb, var(--submenu-accent) 24%, white);
     color: var(--industrial-navy);
     font-size: 15px;
     font-weight: 800;
   }
 
-  .home-page .electrical-submenu-column > strong::before {
-    width: 8px;
-    height: 8px;
-    flex: 0 0 8px;
-    border-radius: 50%;
-    background: var(--submenu-accent);
-    box-shadow: 0 0 0 4px var(--submenu-tint);
-    content: "";
-  }
-
-  .home-page .electrical-submenu-items {
-    display: grid;
-    min-width: 0;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 132px), 1fr));
-    gap: 4px;
-  }
-
-  .home-page .electrical-submenu-column > .electrical-submenu-items > a {
+  .home-page .electrical-submenu-column > a {
     min-height: 34px;
-    position: relative;
-    padding: 6px 22px 6px 8px;
-    border: 1px solid transparent;
-    border-top-color: rgba(16, 42, 67, 0.055);
+    padding: 6px 8px;
+    border: 1px solid rgba(220, 228, 233, 0.66);
     border-radius: 8px;
     color: #526579;
-    background: transparent;
-    font-size: 13px;
+    background: rgba(255, 255, 255, 0.68);
+    font-size: 12px;
     font-weight: 600;
     line-height: 1.65;
     transition:
@@ -13711,20 +13624,8 @@ body .electrical-swiper .swiper-pagination-bullet-active {
       transform 0.18s ease;
   }
 
-  .home-page .electrical-submenu-column > .electrical-submenu-items > a::before {
-    position: absolute;
-    top: 50%;
-    right: 8px;
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    background: var(--submenu-accent);
-    content: "";
-    transform: translateY(-50%);
-  }
-
-  .home-page .electrical-submenu-column > .electrical-submenu-items > a:is(:hover, :focus-visible) {
-    border-color: rgba(16, 42, 67, 0.1);
+  .home-page .electrical-submenu-column > a:is(:hover, :focus-visible) {
+    border-color: color-mix(in srgb, var(--submenu-accent) 34%, white);
     background: var(--submenu-tint);
     color: var(--industrial-navy);
     box-shadow: 0 3px 9px rgba(16, 42, 67, 0.055);
@@ -13806,16 +13707,20 @@ body .electrical-swiper .swiper-pagination-bullet-active {
   }
 }
 
-@media (min-width: 1300px) {
-  .home-page .electrical-submenu[data-group-count="6"],
-  .inner-page #mainNav .category-mega-panels[data-group-count="6"] {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 1600px) {
-  .home-page .electrical-submenu[data-group-count="6"],
-  .inner-page #mainNav .category-mega-panels[data-group-count="6"] {
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-  }
+#cartPanel .cart-items,
+#favoritesPanel .compare-panel-items,
+#comparePanel .compare-panel-items {
+  background-image:
+    radial-gradient(
+      circle at calc(100% + 20px) -18px,
+      transparent 0 34px,
+      rgba(190, 153, 91, 0.09) 35px 42px,
+      transparent 43px 54px,
+      rgba(190, 153, 91, 0.07) 55px 63px,
+      transparent 64px 75px,
+      rgba(190, 153, 91, 0.05) 76px 84px,
+      transparent 85px
+    ),
+    linear-gradient(180deg, #fffdf9, #faf7f1) !important;
+  background-repeat: no-repeat;
 }

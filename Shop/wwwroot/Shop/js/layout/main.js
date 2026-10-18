@@ -10,32 +10,7 @@ $(function () {
   ).matches;
   const faNumber = (number) => window.HNUI.formatNumber(number);
   const escapeHtml = (value) => window.HNUI.escapeHtml(value);
-  const cartOptionsMarkup = (item) => {
-    const variants = Array.isArray(item.options?.variants)
-      ? item.options.variants
-      : [];
-    const accessories = Array.isArray(item.options?.accessories)
-      ? item.options.accessories
-      : [];
-    if (!variants.length && !accessories.length) return "";
-    const variantMarkup = variants.length
-      ? `<div class="cart-item-option-group"><small class="cart-item-option-label">ویژگی‌ها</small><div class="cart-item-option-list">${variants
-          .map(
-            (option) =>
-              `<span class="cart-item-option-chip"><small>${escapeHtml(option.label)}</small><strong>${escapeHtml(option.value)}</strong></span>`,
-          )
-          .join("")}</div></div>`
-      : "";
-    const accessoryMarkup = accessories.length
-      ? `<div class="cart-item-option-group"><small class="cart-item-option-label">متعلقات و خدمات</small><div class="cart-item-option-list">${accessories
-          .map(
-            (accessory) =>
-              `<span class="cart-item-option-chip cart-item-option-chip--accessory"><i class="bi bi-plus-circle" aria-hidden="true"></i><strong>${escapeHtml(accessory.name)}</strong>${Number(accessory.price) > 0 ? `<small>+ ${faNumber(Number(accessory.price) * 1000000)} تومان</small>` : '<small>رایگان</small>'}</span>`,
-          )
-          .join("")}</div></div>`
-      : "";
-    return `<div class="cart-item-options" aria-label="ویژگی‌ها و متعلقات انتخاب‌شده">${variantMarkup}${accessoryMarkup}</div>`;
-  };
+  const cartOptionsMarkup = (item) => window.HNUI.cart.renderOptions(item);
   document
     .querySelectorAll(".home-header-search, .mobile-menu-search")
     .forEach((headerSearchForm) => {
@@ -212,9 +187,14 @@ $(function () {
     };
 
     searchInput.addEventListener("input", renderSuggestions);
-    headerSearchForm.addEventListener("submit", () =>
-      rememberSearch(searchInput.value),
-    );
+    headerSearchForm.addEventListener("submit", (event) => {
+      if (isDrawerSearch && !searchInput.value.trim()) {
+        event.preventDefault();
+        searchInput.focus();
+        return;
+      }
+      rememberSearch(searchInput.value);
+    });
     suggestions.addEventListener("click", (event) => {
       const clearHistory = event.target.closest("[data-clear-search-history]");
       if (clearHistory) {
@@ -834,16 +814,68 @@ $(function () {
     ],
   };
 
+  const innerCategoryIcons = {
+    "دریل و پیچ‌گوشتی": "bi-tools",
+    "فرز و برش": "bi-disc",
+    "تجهیزات کارگاهی": "bi-wrench",
+    "مته و سوراخ‌کاری": "bi-crosshair",
+    "صفحه و تیغه": "bi-circle",
+    "متعلقات ابزار برقی": "bi-box-seam",
+    "آچار و بکس": "bi-tools",
+    "پیچ‌گوشتی و انبر": "bi-wrench",
+    "لوازم ابزار": "bi-briefcase",
+    "مقاومت و خازن": "bi-cpu",
+    "آی‌سی و نیمه‌رسانا": "bi-cpu",
+    "برد و ماژول": "bi-motherboard",
+    "سنسور و ماژول": "bi-broadcast",
+    "تجهیزات لحیم‌کاری": "bi-lightning-charge",
+    "بردهای توسعه": "bi-grid-3x3-gap",
+    "سیم و کابل": "bi-bezier2",
+    "سوکت و کانکتور": "bi-plug",
+    "اتصالات نصب": "bi-link-45deg",
+    "لامپ و LED": "bi-lightbulb",
+    "چراغ کارگاهی": "bi-lamp",
+    "لوازم روشنایی": "bi-brightness-high",
+    "کلید و پریز": "bi-toggle-on",
+    "فیوز و محافظ": "bi-shield-check",
+    "تجهیزات کنترل": "bi-sliders",
+    "ایمنی فردی": "bi-person-badge",
+    "حفاظت برق": "bi-shield-lock",
+    "ایمنی کارگاه": "bi-cone-striped",
+    "ابزار اندازه‌گیری": "bi-speedometer2",
+    "تست و عیب‌یابی": "bi-clipboard2-pulse",
+    "ابزار دقیق": "bi-rulers",
+    "دما و رطوبت": "bi-thermometer-half",
+    "اندازه‌گیری محیط": "bi-globe",
+    "منابع تست و کالیبراسیون": "bi-sliders",
+  };
+
   document.querySelectorAll(".category-nav-mega").forEach((menu) => {
     const sidebar = menu.querySelector(".category-mega-sidebar");
     const content = menu.querySelector(".category-mega-panels");
     if (!sidebar || !content) return;
     const buttons = [...sidebar.querySelectorAll("[data-mega-category]")];
+    let activeGroups = [];
+    const updateColumnCount = () => {
+      if (!activeGroups.length) return;
+      const gap = 12;
+      const minimumCardWidth = 135;
+      const availableColumns = Math.max(
+        1,
+        Math.floor((content.clientWidth + gap) / (minimumCardWidth + gap)),
+      );
+      content.style.setProperty(
+        "--category-mega-columns",
+        String(Math.min(6, activeGroups.length, availableColumns)),
+      );
+    };
     const reset = () => {
       buttons.forEach((button) => {
         button.classList.remove("active");
         button.setAttribute("aria-expanded", "false");
       });
+      activeGroups = [];
+      content.style.removeProperty("--category-mega-columns");
       content.replaceChildren();
       const hint = document.createElement("p");
       hint.className = "category-mega-hint";
@@ -853,6 +885,7 @@ $(function () {
     const activate = (button) => {
       const groups = innerCategoryGroups[button.dataset.megaCategory];
       if (!groups) return;
+      activeGroups = groups;
       buttons.forEach((item) => {
         const active = item === button;
         item.classList.toggle("active", active);
@@ -866,7 +899,10 @@ $(function () {
         const heading = document.createElement("a");
         heading.className = "category-mega-title";
         heading.href = `Search?q=${encodeURIComponent(title)}`;
-        heading.textContent = title;
+        const icon = document.createElement("i");
+        icon.className = `bi ${innerCategoryIcons[title] || "bi-grid"}`;
+        icon.setAttribute("aria-hidden", "true");
+        heading.append(icon, document.createTextNode(title));
         group.append(heading);
         items.forEach((label) => {
           const link = document.createElement("a");
@@ -876,6 +912,7 @@ $(function () {
         });
         content.append(group);
       });
+      window.requestAnimationFrame(updateColumnCount);
     };
     buttons.forEach((button) => {
       button.setAttribute("aria-expanded", "false");
@@ -906,6 +943,7 @@ $(function () {
       dropdown.addEventListener("focusout", (event) => {
         if (!dropdown.contains(event.relatedTarget)) closeSoon();
       });
+      window.addEventListener("resize", updateColumnCount, { passive: true });
       dropdown.addEventListener("hidden.bs.dropdown", () => {
         window.clearTimeout(closeTimer);
         dropdown.classList.remove("is-mega-open");
@@ -1358,9 +1396,9 @@ $(function () {
   const amazingSliderOptions = {
     ...showcaseSliderOptions,
     responsive: {
-      0: { items: 2 },
-      768: { items: 3 },
-      1100: { items: 4 },
+      0: { items: 2, margin: 8 },
+      768: { items: 3, margin: 18 },
+      1100: { items: 5, margin: 18 },
     },
   };
 
@@ -2479,7 +2517,11 @@ $(function () {
 
     flyProductToControl(trigger, product, target);
   });
-  document.addEventListener("hn:cart-stock-limit", () => {
-    showListActionToast("تعداد درخواستی از موجودی این کالا بیشتر بود؛ سبد تا سقف موجودی به‌روز شد.");
+  document.addEventListener("hn:cart-stock-limit", (event) => {
+    const { product, stock } = event.detail || {};
+    const message = product?.name && Number.isFinite(Number(stock))
+      ? `موجودی «${product.name}» فقط ${faNumber(Number(stock))} عدد است؛ تعداد سبد به سقف موجودی رسید.`
+      : "تعداد درخواستی از موجودی کالا بیشتر بود؛ سبد تا سقف موجودی به‌روز شد.";
+    showListActionToast(message);
   });
 });
