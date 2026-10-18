@@ -13338,9 +13338,8 @@ body .electrical-swiper .swiper-pagination-bullet-active {
     pointer-events: none !important;
     transition:
       opacity 180ms ease,
-      transform 180ms ease,
       visibility 0s linear 180ms !important;
-    will-change: opacity, transform;
+    will-change: opacity;
   }
 
   .inner-page #mainNav .category-nav-mega {
@@ -13348,7 +13347,8 @@ body .electrical-swiper .swiper-pagination-bullet-active {
   }
 
   #mainNav .brand-dropdown > .brand-menu {
-    transform: translate(-50%, 8px) !important;
+    /* Keep the panel's geometry fixed; fade-only avoids a zoom-like close. */
+    transform: translate(-50%, 0) !important;
   }
 
   .inner-page #mainNav .category-nav-dropdown:is(:hover, :focus-within, .show, .is-mega-open) > .category-nav-mega,
@@ -13654,26 +13654,64 @@ body .electrical-swiper .swiper-pagination-bullet-active {
     scrollbar-width: thin;
   }
 
+  .home-page .electrical-submenu-heading {
+    grid-column: 1 / -1;
+    display: flex;
+    min-width: 0;
+    min-height: 54px;
+    padding: 10px 14px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    border: 1px solid #e6d6b7;
+    border-radius: 12px;
+    background: #f8f5ed;
+    color: var(--industrial-navy);
+  }
+
+  .home-page .electrical-submenu-heading-copy {
+    display: flex;
+    min-width: 0;
+    align-items: baseline;
+    gap: 14px;
+  }
+
+  .home-page .electrical-submenu-heading-copy > strong {
+    flex: 0 0 auto;
+    font-size: 15px;
+    font-weight: 800;
+  }
+
+  .home-page .electrical-submenu-heading-copy > small {
+    overflow: hidden;
+    color: #637286;
+    font-size: 13px;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .home-page .electrical-submenu-heading-count {
+    flex: 0 0 auto;
+    padding: 5px 10px;
+    border: 1px solid #e5d4ae;
+    border-radius: 999px;
+    background: #fffdf8;
+    color: #8b681b;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
   .home-page .electrical-submenu-column {
     --submenu-accent: #a77a1e;
-    --submenu-tint: #fff9e9;
     min-height: 0;
     gap: 5px;
     padding: 12px 11px;
     border: 1px solid #e4e9ec;
     border-radius: 12px;
-    background: linear-gradient(150deg, #fff, var(--submenu-tint));
+    background: #f7f9fb;
     box-shadow: 0 4px 12px rgba(16, 42, 67, 0.045);
-  }
-
-  .home-page .electrical-submenu-column:nth-child(3n + 2) {
-    --submenu-accent: #527b91;
-    --submenu-tint: #f1f8fb;
-  }
-
-  .home-page .electrical-submenu-column:nth-child(3n) {
-    --submenu-accent: #63826d;
-    --submenu-tint: #f2f8f2;
   }
 
   .home-page .electrical-submenu-column > strong {
@@ -13704,8 +13742,8 @@ body .electrical-swiper .swiper-pagination-bullet-active {
   }
 
   .home-page .electrical-submenu-column > a:is(:hover, :focus-visible) {
-    border-color: color-mix(in srgb, var(--submenu-accent) 34%, white);
-    background: var(--submenu-tint);
+    border-color: #d8bf8a;
+    background: #fffdf8;
     color: var(--industrial-navy);
     box-shadow: 0 3px 9px rgba(16, 42, 67, 0.055);
     transform: translateX(-2px);
