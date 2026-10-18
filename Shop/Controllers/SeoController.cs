@@ -1,0 +1,66 @@
+using System.Text;
+using System.Xml.Linq;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Hosting;
+using Shop.Models;
+
+namespace Shop.Controllers;
+
+public sealed class SeoController : Controller
+{
+    private readonly IWebHostEnvironment _environment;
+
+    public SeoController(IWebHostEnvironment environment)
+    {
+        _environment = environment;
+    }
+
+    [HttpGet("/robots.txt")]
+    [ResponseCache(Duration = 3600, Location = ResponseCacheLocation.Any)]
+    public IActionResult Robots()
+    {
+        string body = $"User-agent: *\nAllow: /\nSitemap: {SiteRoot()}sitemap.xml\n";
+        return Content(body, "text/plain; charset=utf-8", Encoding.UTF8);
+    }
+
+    [HttpGet("/sitemap.xml")]
+    [ResponseCache(Duration = 3600, Location = ResponseCacheLocation.Any)]
+    public IActionResult Sitemap()
+    {
+        string[] staticPaths =
+        [
+            "/",
+            "/search",
+            "/about",
+            "/contact",
+            "/faq",
+            "/shipping",
+            "/tracking",
+            "/warranty",
+            "/legal/privacy",
+            "/legal/terms",
+            "/legal/returns",
+            "/magazine",
+            "/brands"
+        ];
+
+        IEnumerable<string> paths = staticPaths
+            .Concat(BrandCatalog.All.Select(brand => $"/brands/{brand.Slug}"))
+            .Concat(JournalArticles.Slugs.Select(slug => $"/magazine/{slug}"))
+            .Concat(ProductSeoCatalog.Load(_environment.WebRootPath).Select(product => $"/products/{product.Slug}-{product.Id}"));
+
+        XNamespace sitemapNamespace = "http://www.sitemaps.org/schemas/sitemap/0.9";
+        XDocument document = new(
+            new XElement(sitemapNamespace + "urlset",
+                paths.Distinct(StringComparer.OrdinalIgnoreCase).Select(path =>
+                    new XElement(sitemapNamespace + "url",
+                        new XElement(sitemapNamespace + "loc", AbsoluteUrl(path))))));
+
+        return Content(document.ToString(SaveOptions.DisableFormatting), "application/xml; charset=utf-8", Encoding.UTF8);
+    }
+
+    private string SiteRoot() => $"{Request.Scheme}://{Request.Host}{Request.PathBase}/";
+
+    private string AbsoluteUrl(string path) => new Uri(new Uri(SiteRoot()), path.TrimStart('/')).AbsoluteUri;
+
+}

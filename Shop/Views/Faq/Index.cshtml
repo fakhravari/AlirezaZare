@@ -1,4 +1,4 @@
-@model PageModel
+@model PageModel<IReadOnlyList<FaqEntry>>
 
 
 <header class="page-hero about-hero">
@@ -32,35 +32,48 @@
         </div>
     </div>
 </header>
-<main class="flow-main container customer-service-main">
-    <div class="flow-card">
-        <details>
-            <summary>چطور ابزار مناسب انتخاب کنم؟</summary>
-            <p>از فیلترهای صفحهٔ محصولات برای انتخاب گروه ابزار، برند، نوع تغذیه و بازهٔ قیمت استفاده کنید.</p>
-        </details>
-        <details>
-            <summary>آیا امکان خرید آنلاین وجود دارد؟</summary>
-            <p>در این نسخه می‌توانید محصول را بررسی و سبد خرید را آماده کنید؛ پرداخت واقعی فعال نیست. برای خرید با فروشگاه تماس بگیرید.</p>
-        </details>
-        <details>
-            <summary>چگونه سفارش را پیگیری کنم؟</summary>
-            <p>به صفحه پیگیری سفارش مراجعه کنید. تا اتصال سامانه آنلاین، پشتیبانی تلفنی پاسخ‌گوی شماست.</p>
-        </details>
-        <details>
-            <summary>هزینه و زمان ارسال چقدر است؟</summary>
-            <p>این موارد با توجه به مقصد و موجودی، توسط فروشگاه تأیید می‌شود.</p>
-        </details>
-        <details>
-            <summary>شرایط ضمانت و مرجوعی چیست؟</summary>
-            <p>شرایط ضمانت هر محصول روی کارت ضمانت و فاکتور درج می‌شود. راهنمای انصراف از خرید و بازگرداندن کالا را در <a asp-controller="Legal" asp-action="Returns">رویه بازگرداندن کالا</a> بخوانید.</p>
-        </details>
-    </div><a class="flow-button" href="Contact">پرسش دیگری دارید؟ <i class="bi bi-arrow-left"></i></a>
+<main class="flow-main container customer-service-main faq-main">
+    <section class="faq-shell" aria-labelledby="faqListTitle">
+        <span class="faq-shell-shape" aria-hidden="true"></span>
+        <header class="faq-list-heading">
+            <div>
+                <span class="faq-list-kicker"><i class="bi bi-chat-square-text" aria-hidden="true"></i>پاسخ‌های راهگشا</span>
+                <h2 id="faqListTitle">پرسش‌های پرتکرار</h2>
+            </div>
+            <span class="faq-count"><i class="bi bi-patch-question" aria-hidden="true"></i>@Model.Data.Count پرسش و پاسخ</span>
+        </header>
+        <div class="faq-list">
+        @foreach (FaqEntry item in Model.Data)
+        {
+            <details class="faq-item">
+                <summary>
+                    <span class="faq-question-icon"><i class="bi bi-question-lg" aria-hidden="true"></i></span>
+                    <span class="faq-question-text">@item.Question</span>
+                    <span class="faq-toggle" aria-hidden="true"><i class="bi bi-plus-lg"></i></span>
+                </summary>
+                <div class="faq-answer">
+                    <span class="faq-answer-label"><i class="bi bi-check2" aria-hidden="true"></i>پاسخ</span>
+                    <p>@item.Answer @if (!string.IsNullOrWhiteSpace(item.LinkText) && !string.IsNullOrWhiteSpace(item.LinkUrl))
+                    {
+                        <a href="@Url.Content("~" + item.LinkUrl)">@item.LinkText</a>
+                    }</p>
+                </div>
+            </details>
+        }
+        </div>
+    </section>
+    <a class="faq-contact-cta" href="Contact">
+        <span class="faq-contact-icon"><i class="bi bi-headset" aria-hidden="true"></i></span>
+        <span class="faq-contact-copy"><strong>پاسختان را پیدا نکردید؟</strong><small>برای راهنمایی بیشتر با تیم پشتیبانی در تماس باشید.</small></span>
+        <span class="faq-contact-action">ارتباط با ما <i class="bi bi-arrow-left" aria-hidden="true"></i></span>
+    </a>
     <partial name="_RelatedLinks"/>
 </main>
 
 
 @section Styles {
     <link href="Shop/css/pages/pages.css" asp-append-version="true" rel="stylesheet"/>
+    <link href="Shop/css/pages/faq.css" asp-append-version="true" rel="stylesheet"/>
 }
 
 @section Scripts {

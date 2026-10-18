@@ -114,13 +114,16 @@
                 ><i class="bi bi-plus-lg"></i>
             </button>
             <div class="collapse" id="mobileBrands">
-                <div class="mobile-brand-list">
-                    <a href="/Search?brand=bosch" data-bs-dismiss="offcanvas">بوش</a>
-                    <a href="/Search?brand=makita" data-bs-dismiss="offcanvas">ماکیتا</a>
-                    <a href="/Search?brand=dewalt" data-bs-dismiss="offcanvas">دیوالت</a>
-                    <a href="/Search?brand=ronix" data-bs-dismiss="offcanvas">رونیکس</a>
-                    <a href="/Search?brand=tosan" data-bs-dismiss="offcanvas">توسن</a>
-                    <a href="/Search?brand=uni-t" data-bs-dismiss="offcanvas">یونی‌تی</a>
+                <div class="mobile-brand-list" aria-label="فهرست برندها">
+                    <a class="mobile-brand-list-all" href="@Url.Content("~/brands")" data-bs-dismiss="offcanvas">
+                        <i class="bi bi-grid-3x3-gap" aria-hidden="true"></i>
+                        <span>معرفی همهٔ برندها</span>
+                        <i class="bi bi-arrow-left" aria-hidden="true"></i>
+                    </a>
+                    @foreach (BrandProfileModel brand in BrandCatalog.All)
+                    {
+                        <a href="@Url.Content($"~/brands/{brand.Slug}")" data-bs-dismiss="offcanvas">@brand.PersianName</a>
+                    }
                 </div>
             </div>
         </div>
@@ -132,6 +135,42 @@
             <span><i class="bi bi-building"></i> درباره ما</span>
         </a
         >
+        <div class="mobile-accordion mobile-quick-links-accordion">
+            <button
+                class="mobile-category-toggle"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#mobileQuickLinks"
+                aria-expanded="false"
+                aria-controls="mobileQuickLinks">
+                <span><i class="bi bi-link-45deg"></i> لینک‌های سریع</span>
+                <i class="bi bi-plus-lg" aria-hidden="true"></i>
+            </button>
+            <div class="collapse" id="mobileQuickLinks">
+                <div class="quick-links-mobile-content">
+                    <section class="quick-links-mobile-group" aria-labelledby="mobileCustomerLinksTitle">
+                        <h3 id="mobileCustomerLinksTitle"><i class="bi bi-headset" aria-hidden="true"></i> خدمات مشتریان</h3>
+                        <div class="mobile-submenu">
+                            <a href="/Tracking" data-bs-dismiss="offcanvas">پیگیری سفارش</a>
+                            <a href="/Shipping" data-bs-dismiss="offcanvas">شرایط ارسال</a>
+                            <a href="/Warranty" data-bs-dismiss="offcanvas">ضمانت اصالت</a>
+                            <a href="/Faq" data-bs-dismiss="offcanvas">پرسش‌های متداول</a>
+                            <a href="/Legal/Returns" data-bs-dismiss="offcanvas">رویه بازگرداندن کالا</a>
+                        </div>
+                    </section>
+                    <section class="quick-links-mobile-group" aria-labelledby="mobileCompanyLinksTitle">
+                        <h3 id="mobileCompanyLinksTitle"><i class="bi bi-building" aria-hidden="true"></i> کمپانی و قوانین</h3>
+                        <div class="mobile-submenu">
+                            <a href="/Home/Index#story" data-bs-dismiss="offcanvas">درباره مجموعه</a>
+                            <a href="/Magazine" data-bs-dismiss="offcanvas">مجله برق و ابزار</a>
+                            <a href="/Contact" data-bs-dismiss="offcanvas">تماس با ما</a>
+                            <a href="/Legal/Privacy" data-bs-dismiss="offcanvas">حریم خصوصی</a>
+                            <a href="/Legal/Terms" data-bs-dismiss="offcanvas">شرایط استفاده</a>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
         <a href="Contact" data-bs-dismiss="offcanvas">
             <span><i class="bi bi-telephone"></i> تماس با ما</span>
         </a>

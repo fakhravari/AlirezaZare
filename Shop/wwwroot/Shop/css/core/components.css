@@ -2,9 +2,17 @@
 .ui-surface-card {
   /* The legacy layout outline is !important; keep the shared component authoritative. */
   border: 1px solid var(--widget-border, var(--color-card-border)) !important;
-  border-radius: var(--radius-card);
+  border-radius: var(--radius-panel-standard, var(--radius-card));
   background: var(--surface-raised);
   box-shadow: var(--shadow-card);
+}
+
+.ui-surface-card--compact {
+  border-radius: var(--radius-panel-compact, var(--radius-card));
+}
+
+.ui-surface-card--featured {
+  border-radius: var(--radius-panel-featured, var(--radius-lg));
 }
 
 .ui-surface-card--interactive {

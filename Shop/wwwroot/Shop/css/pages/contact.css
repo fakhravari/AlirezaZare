@@ -16,6 +16,7 @@
 .contact-hero ~ main .contact-panel {
   position: relative;
   overflow: hidden;
+  border-radius: var(--radius-panel-featured, 24px 24px 14px 24px);
   background:
     radial-gradient(circle at 8% 8%, rgba(246, 197, 21, 0.13), transparent 28%),
     linear-gradient(145deg, #173653, #102a43 72%);
@@ -150,7 +151,21 @@
   font-weight: 700;
 }
 .contact-shortcuts {
-  padding-top: 26px;
+  padding: 34px 0 38px;
+  border: 1px solid rgba(191, 151, 57, 0.16);
+  border-radius: 24px;
+  background:
+    radial-gradient(
+      ellipse at 8% 26%,
+      rgba(246, 197, 21, 0.13),
+      transparent 30%
+    ),
+    radial-gradient(
+      ellipse at 94% 84%,
+      rgba(216, 177, 88, 0.1),
+      transparent 32%
+    ),
+    linear-gradient(115deg, #f8f5e9 0%, #f6f7f6 52%, #fbf8ef 100%);
 }
 .contact-shortcuts-heading {
   display: flex;
@@ -189,10 +204,10 @@
   grid-template-columns: 44px minmax(0, 1fr) 26px;
   align-items: center;
   gap: 12px;
-  border: 1px solid var(--industrial-line);
-  border-radius: 16px;
-  background: #fff;
-  box-shadow: 0 8px 20px rgba(16, 42, 67, 0.05);
+  border: 1px solid rgba(191, 151, 57, 0.2);
+  border-radius: var(--radius-panel-compact, 14px);
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 8px 22px rgba(90, 69, 25, 0.055);
   color: var(--industrial-navy);
   text-decoration: none;
   transition:
@@ -202,8 +217,9 @@
 }
 .contact-shortcut-card:hover,
 .contact-shortcut-card:focus-visible {
-  border-color: rgba(198, 151, 58, 0.58);
-  box-shadow: 0 12px 26px rgba(16, 42, 67, 0.1);
+  border-color: rgba(183, 136, 20, 0.52);
+  background: #fffdf6;
+  box-shadow: 0 12px 26px rgba(90, 69, 25, 0.11);
   color: var(--industrial-navy);
   transform: translateY(-2px);
 }
@@ -212,10 +228,10 @@
   width: 44px;
   height: 44px;
   place-items: center;
-  border: 1px solid rgba(246, 197, 21, 0.3);
+  border: 1px solid rgba(205, 158, 28, 0.27);
   border-radius: 13px;
-  background: #fff8df;
-  color: #896900;
+  background: linear-gradient(145deg, #fff9e8, #f7edce);
+  color: #906700;
   font-size: 19px;
 }
 .contact-shortcut-card > span:nth-child(2) {
@@ -505,7 +521,8 @@
     padding-bottom: 8px;
   }
   .contact-shortcuts {
-    padding-top: 16px;
+    padding: 24px 0;
+    border-radius: 18px;
   }
   .contact-shortcuts-heading {
     align-items: start;

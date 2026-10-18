@@ -10,23 +10,7 @@
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <meta name="theme-color" content="#102a56"/>
-    <meta name="description" content="@Model.Seo.Description"/>
-    <meta name="robots" content="@Model.Seo.Robots"/>
-    @if (!string.IsNullOrWhiteSpace(Model.Seo.Keywords))
-    {
-        <meta name="keywords" content="@Model.Seo.Keywords"/>
-    }
-    @if (!string.IsNullOrWhiteSpace(Model.Seo.CanonicalUrl))
-    {
-        <link rel="canonical" href="@Model.Seo.CanonicalUrl"/>
-    }
-    <meta property="og:title" content="@Model.Seo.Title"/>
-    <meta property="og:description" content="@Model.Seo.Description"/>
-    <meta property="og:type" content="website"/>
-    @if (!string.IsNullOrWhiteSpace(Model.Seo.ImageUrl))
-    {
-        <meta property="og:image" content="@Model.Seo.ImageUrl"/>
-    }
+    <partial name="_SeoMetadata" model="Model"/>
     <base href="@Url.Content("~/")"/>
     <title>@Model.Seo.Title</title>
     <link href="~/Shop/vendor/fonts/fonts.css" rel="stylesheet" asp-append-version="true"/>
@@ -60,6 +44,7 @@
     <link href="~/Shop/css/store/pagination.css" rel="stylesheet" asp-append-version="true"/>
     <link href="~/Shop/css/layout/electrical-theme.css" rel="stylesheet" asp-append-version="true"/>
     <link href="~/Shop/css/layout/industrial-system.css" rel="stylesheet" asp-append-version="true"/>
+    <link href="~/Shop/css/layout/quick-links-menu.css" rel="stylesheet" asp-append-version="true"/>
     <link href="~/Shop/css/store/shared-product-card.css" rel="stylesheet" asp-append-version="true"/>
     @await RenderSectionAsync("PageStyles", false)
     <link href="~/Shop/css/layout/content-typography.css" rel="stylesheet" asp-append-version="true"/>

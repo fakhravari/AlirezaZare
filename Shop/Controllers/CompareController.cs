@@ -7,7 +7,7 @@ public sealed class CompareController : PageController
 {
     public async Task<IActionResult> Index()
     {
-        PageModel model = new(new SeoModel("مقایسه محصولات | ندا اولیائی", "محصولات انتخاب‌شده را کنار هم بررسی کنید."));
+        PageModel model = new(new SeoModel("مقایسه محصولات | ندا اولیائی", "مشخصات و ویژگی‌های محصولات انتخاب‌شده را کنار هم مقایسه کنید.", Robots: "noindex, nofollow"));
         return await PageAsync(model);
     }
 }

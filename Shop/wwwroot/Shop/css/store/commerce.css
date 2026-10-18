@@ -38,7 +38,7 @@
 .flow-card {
   background: #fffdf9;
   border: 1px solid #e4dccf;
-  border-radius: 20px;
+  border-radius: var(--radius-panel-standard, 20px);
   padding: 28px;
   color: inherit;
 }

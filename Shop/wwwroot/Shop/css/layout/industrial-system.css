@@ -1042,8 +1042,26 @@ h6,
   .product-details-card
 ) {
   border-color: var(--industrial-line) !important;
+  border-radius: var(--radius-panel-standard, 20px);
   background: var(--industrial-surface) !important;
   box-shadow: var(--industrial-shadow) !important;
+}
+
+:is(
+  .faq-item,
+  .address-card,
+  .journal-card,
+  .article-card,
+  .brand-card,
+  .gallery-card,
+  .filter-card,
+  .summary-card
+) {
+  border-radius: var(--radius-panel-compact, 14px);
+}
+
+:is(.cart-summary, .contact-info-card, .product-details-card) {
+  border-radius: var(--radius-panel-featured, 24px 24px 14px 24px);
 }
 
 :is(
@@ -1066,6 +1084,10 @@ h6,
   border-color: var(--industrial-line) !important;
   background: #fff !important;
   box-shadow: var(--industrial-shadow) !important;
+}
+
+:is(.ui-surface-card, .service-card, .benefit, .store-card, .testimonial-card) {
+  border-radius: var(--radius-panel-standard, 20px);
 }
 
 .ui-surface-card--interactive:hover,
@@ -11549,7 +11571,62 @@ body.home-page .rail-card > strong {
   .home-page #mainNav .home-header-top {
     padding-right: 220px;
     padding-left: 190px;
-    grid-template-columns: minmax(260px, 480px) 230px;
+    grid-template-columns: minmax(320px, 560px) 230px;
+  }
+
+  .home-page #mainNav .home-header-search {
+    width: 100%;
+    max-width: 560px;
+    height: 58px;
+  }
+
+  .home-page #mainNav .home-header-search > button {
+    width: 46px;
+    font-size: 18px;
+  }
+
+  .home-page #mainNav .home-header-search > input[type="search"] {
+    font-size: 15px !important;
+  }
+
+  .home-page #mainNav .header-search-suggestions {
+    padding: 12px;
+  }
+
+  .home-page #mainNav .header-search-quick-heading strong,
+  .home-page #mainNav .header-search-suggestions-head {
+    font-size: 14px;
+  }
+
+  .home-page #mainNav .header-search-quick-chip {
+    min-height: 38px;
+    font-size: 13px;
+  }
+
+  .home-page #mainNav .header-search-quick-empty,
+  .home-page #mainNav .header-search-suggestions-head small,
+  .home-page #mainNav .header-search-suggestion-copy > small {
+    font-size: 12px;
+  }
+
+  .home-page #mainNav .header-search-suggestion {
+    min-height: 76px;
+    grid-template-columns: 56px minmax(0, 1fr) 18px;
+  }
+
+  .home-page #mainNav .header-search-suggestion-image {
+    width: 56px;
+    height: 56px;
+  }
+
+  .home-page #mainNav .header-search-suggestion-copy > strong {
+    font-size: 14px;
+  }
+
+  .home-page #mainNav .header-search-suggestion-copy > b,
+  .home-page #mainNav .header-search-all,
+  .home-page #mainNav .header-search-empty {
+    font-size: 13px;
   }
 
   .home-page #mainNav .home-header-support small {

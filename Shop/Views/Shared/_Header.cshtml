@@ -78,11 +78,6 @@
         <i class="bi bi-shop nav-menu-icon" aria-hidden="true"></i><span>فروشگاه</span>
     </a>
 </li>
-<li class="nav-item">
-    <a class="nav-link" href="Home/Index#bestsellers">
-        <i class="bi bi-stars nav-menu-icon" aria-hidden="true"></i><span>پرفروش‌ها</span>
-    </a>
-</li>
 <li class="nav-item dropdown brand-dropdown">
 <a class="nav-link dropdown-toggle"
    href="Home/Index#brands"
@@ -315,6 +310,29 @@
     <a class="nav-link" href="About">
         <i class="bi bi-info-circle nav-menu-icon" aria-hidden="true"></i><span>درباره ما</span>
     </a>
+</li>
+<li class="nav-item dropdown quick-links-dropdown">
+    <button class="nav-link dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="bi bi-link-45deg nav-menu-icon" aria-hidden="true"></i><span>لینک‌های سریع</span>
+    </button>
+    <div class="dropdown-menu quick-links-menu" aria-label="لینک‌های سریع">
+        <section class="quick-links-group" aria-labelledby="quickCustomerLinks">
+            <h3 id="quickCustomerLinks"><i class="bi bi-headset" aria-hidden="true"></i> خدمات مشتریان</h3>
+            <a href="@Url.Content("~/Tracking")">پیگیری سفارش</a>
+            <a href="@Url.Content("~/Shipping")">شرایط ارسال</a>
+            <a href="@Url.Content("~/Warranty")">ضمانت اصالت</a>
+            <a href="@Url.Content("~/Faq")">پرسش‌های متداول</a>
+            <a href="@Url.Content("~/Legal/Returns")">رویه بازگرداندن کالا</a>
+        </section>
+        <section class="quick-links-group" aria-labelledby="quickCompanyLinks">
+            <h3 id="quickCompanyLinks"><i class="bi bi-building" aria-hidden="true"></i> کمپانی و قوانین</h3>
+            <a href="@Url.Content("~/Home/Index#story")">درباره مجموعه</a>
+            <a href="@Url.Content("~/Magazine")">مجله برق و ابزار</a>
+            <a href="@Url.Content("~/Contact")">تماس با ما</a>
+            <a href="@Url.Content("~/Legal/Privacy")">حریم خصوصی</a>
+            <a href="@Url.Content("~/Legal/Terms")">شرایط استفاده</a>
+        </section>
+    </div>
 </li>
 <li class="nav-item">
     <a class="nav-link" href="Contact">

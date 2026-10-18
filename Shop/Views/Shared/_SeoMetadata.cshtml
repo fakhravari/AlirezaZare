@@ -1,0 +1,145 @@
+@using System.Text.Json
+@using System.Text.Encodings.Web
+@using System.Text.Unicode
+@using Microsoft.Extensions.Options
+@using Shop.Models
+@model PageModel
+@inject IOptions<SeoMetadataOptions> SeoOptions
+@{
+    SeoMetadataOptions options = SeoOptions.Value;
+    string siteRoot = $"{Context.Request.Scheme}://{Context.Request.Host}{Url.Content("~/")}";
+    string requestedCanonical = Model.Seo.CanonicalUrl ?? (Context.Request.Path.Value ?? "/").ToLowerInvariant();
+    if (requestedCanonical.Length > 1 && !Uri.TryCreate(requestedCanonical, UriKind.Absolute, out _))
+        requestedCanonical = requestedCanonical.TrimEnd('/');
+    string canonicalUrl = Uri.TryCreate(requestedCanonical, UriKind.Absolute, out Uri? absoluteCanonical)
+        ? absoluteCanonical.AbsoluteUri
+        : new Uri(new Uri(siteRoot), requestedCanonical.TrimStart('/')).AbsoluteUri;
+    string imagePath = Url.Content(Model.Seo.ImageUrl ?? options.DefaultImagePath);
+    string socialImage = Uri.TryCreate(Model.Seo.ImageUrl, UriKind.Absolute, out Uri? absoluteImage)
+        ? absoluteImage.AbsoluteUri
+        : $"{Context.Request.Scheme}://{Context.Request.Host}{imagePath}";
+    string imageExtension = System.IO.Path.GetExtension(imagePath).ToLowerInvariant();
+    string imageType = imageExtension == ".png" ? "image/png"
+        : imageExtension == ".webp" ? "image/webp"
+        : imageExtension == ".jpg" || imageExtension == ".jpeg" ? "image/jpeg"
+        : imageExtension == ".gif" ? "image/gif"
+        : string.Empty;
+    string imageAlt = Model.Seo.SocialImageAlt ?? options.DefaultImageAlt;
+    string googleBotRules = $"{Model.Seo.Robots}, max-image-preview:large, max-snippet:-1, max-video-preview:-1";
+    var structuredGraph = new List<object>
+    {
+        new Dictionary<string, object?>
+        {
+            ["@type"] = "OnlineStore",
+            ["@id"] = $"{siteRoot.TrimEnd('/')}#organization",
+            ["name"] = options.SiteName,
+            ["url"] = siteRoot
+        },
+        new Dictionary<string, object?>
+        {
+            ["@type"] = "WebSite",
+            ["@id"] = $"{siteRoot.TrimEnd('/')}#website",
+            ["url"] = siteRoot,
+            ["name"] = options.SiteName,
+            ["inLanguage"] = "fa-IR",
+            ["publisher"] = new Dictionary<string, string> { ["@id"] = $"{siteRoot.TrimEnd('/')}#organization" }
+        },
+        new Dictionary<string, object?>
+        {
+            ["@type"] = "WebPage",
+            ["@id"] = $"{canonicalUrl}#webpage",
+            ["url"] = canonicalUrl,
+            ["name"] = Model.Seo.Title,
+            ["description"] = Model.Seo.Description,
+            ["inLanguage"] = "fa-IR",
+            ["isPartOf"] = new Dictionary<string, string> { ["@id"] = $"{siteRoot.TrimEnd('/')}#website" }
+        }
+    };
+    if (Model.Seo.StructuredData is not null) structuredGraph.Add(Model.Seo.StructuredData);
+    if (Model.Seo.Breadcrumbs is { Count: > 1 } breadcrumbs)
+    {
+        structuredGraph.Add(new Dictionary<string, object?>
+        {
+            ["@type"] = "BreadcrumbList",
+            ["itemListElement"] = breadcrumbs.Select((breadcrumb, index) => new Dictionary<string, object?>
+            {
+                ["@type"] = "ListItem",
+                ["position"] = index + 1,
+                ["name"] = breadcrumb.Name,
+                ["item"] = Uri.TryCreate(breadcrumb.Url, UriKind.Absolute, out _)
+                    ? breadcrumb.Url
+                    : new Uri(new Uri(siteRoot), breadcrumb.Url.TrimStart('/')).AbsoluteUri
+            }).ToArray()
+        });
+    }
+    var persianJsonEncoderSettings = new TextEncoderSettings(UnicodeRanges.BasicLatin, UnicodeRanges.Arabic);
+    persianJsonEncoderSettings.AllowCharacter('\u200C');
+    var jsonOptions = new JsonSerializerOptions
+    {
+        Encoder = JavaScriptEncoder.Create(persianJsonEncoderSettings)
+    };
+    string structuredDataJson = JsonSerializer.Serialize(new Dictionary<string, object?>
+    {
+        ["@context"] = "https://schema.org",
+        ["@graph"] = structuredGraph
+    }, jsonOptions);
+}
+<meta name="description" content="@Model.Seo.Description"/>
+<meta name="robots" content="@Model.Seo.Robots"/>
+<meta name="googlebot" content="@googleBotRules"/>
+@if (!string.IsNullOrWhiteSpace(Model.Seo.Keywords))
+{
+    <meta name="keywords" content="@Model.Seo.Keywords"/>
+}
+@if (!string.IsNullOrWhiteSpace(options.GoogleSiteVerification))
+{
+    <meta name="google-site-verification" content="@options.GoogleSiteVerification"/>
+}
+@if (!string.IsNullOrWhiteSpace(options.BingSiteVerification))
+{
+    <meta name="msvalidate.01" content="@options.BingSiteVerification"/>
+}
+<link rel="canonical" href="@canonicalUrl"/>
+<link rel="alternate" hreflang="fa-IR" href="@canonicalUrl"/>
+<meta property="og:title" content="@Model.Seo.Title"/>
+<meta property="og:description" content="@Model.Seo.Description"/>
+<meta property="og:type" content="@Model.Seo.OpenGraphType"/>
+<meta property="og:site_name" content="@options.SiteName"/>
+<meta property="og:locale" content="@options.Locale"/>
+<meta property="og:url" content="@canonicalUrl"/>
+<meta property="og:image" content="@socialImage"/>
+<meta property="og:image:alt" content="@imageAlt"/>
+@if (!string.IsNullOrEmpty(imageType))
+{
+    <meta property="og:image:type" content="@imageType"/>
+}
+@if (socialImage.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+{
+    <meta property="og:image:secure_url" content="@socialImage"/>
+}
+@if (string.Equals(Model.Seo.OpenGraphType, "article", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(Model.Seo.ArticleSection))
+{
+    <meta property="article:section" content="@Model.Seo.ArticleSection"/>
+}
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="@Model.Seo.Title"/>
+<meta name="twitter:description" content="@Model.Seo.Description"/>
+<meta name="twitter:image" content="@socialImage"/>
+<meta name="twitter:image:alt" content="@imageAlt"/>
+@if (!string.IsNullOrWhiteSpace(options.XSite))
+{
+    <meta name="twitter:site" content="@options.XSite"/>
+}
+@if (!string.IsNullOrWhiteSpace(options.XCreator))
+{
+    <meta name="twitter:creator" content="@options.XCreator"/>
+}
+@if (!string.IsNullOrWhiteSpace(options.FacebookAppId))
+{
+    <meta property="fb:app_id" content="@options.FacebookAppId"/>
+}
+@if (!string.IsNullOrWhiteSpace(options.FacebookDomainVerification))
+{
+    <meta name="facebook-domain-verification" content="@options.FacebookDomainVerification"/>
+}
+<script type="application/ld+json">@Html.Raw(structuredDataJson)</script>

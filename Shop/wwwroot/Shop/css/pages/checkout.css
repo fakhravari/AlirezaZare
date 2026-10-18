@@ -3,7 +3,7 @@
 }
 .invoice-page > .flow-grid > .flow-card {
   border: 1px solid color-mix(in srgb, var(--industrial-yellow) 19%, white);
-  border-radius: 22px;
+  border-radius: var(--radius-panel-featured, 24px 24px 14px 24px);
   background: linear-gradient(var(--industrial-bg), var(--industrial-bg));
   box-shadow: 0 14px 32px -18px
     color-mix(in srgb, var(--industrial-navy) 25%, transparent);
@@ -1258,7 +1258,7 @@
   position: relative;
   overflow: hidden;
   border: 1px solid var(--industrial-yellow);
-  border-radius: 20px;
+  border-radius: var(--radius-panel-featured, 24px 24px 14px 24px);
   background:
     linear-gradient(135deg, rgba(181, 149, 98, 0.07), transparent 32%),
     linear-gradient(180deg, var(--industrial-bg), var(--industrial-bg));
@@ -1348,7 +1348,7 @@
 }
 @media (max-width: 575px) {
   .invoice-page > .flow-grid > .flow-card {
-    border-radius: 17px;
+    border-radius: var(--radius-panel-compact, 14px);
   }
   .invoice-page .invoice-item {
     padding: 11px;

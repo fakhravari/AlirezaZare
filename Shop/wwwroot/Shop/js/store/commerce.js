@@ -78,9 +78,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const p = catalog.find((p) => p.id === productId);
     if (!p) productView.innerHTML = empty("محصول پیدا نشد");
     else {
-      document.title = `${p.name} | ندا اولیائی`;
-      const productPageTitle = document.querySelector("#productPageTitle");
-      if (productPageTitle) productPageTitle.textContent = p.name;
       const isFavorite = favorites().includes(String(p.id));
       const selectedVariants = p.variants
         ? Object.fromEntries(

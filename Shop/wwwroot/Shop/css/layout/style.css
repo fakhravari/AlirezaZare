@@ -1122,6 +1122,7 @@ textarea {
 }
 
 .section-head h2,
+.section-head .home-primary-heading,
 .story h2,
 .newsletter h2 {
   font-weight: 500;
@@ -4224,6 +4225,7 @@ footer .copyright {
 }
 
 .section-head h2,
+.section-head .home-primary-heading,
 .story h2,
 .newsletter h2 {
   font-size: clamp(34px, 3.7vw, 48px);
@@ -4252,6 +4254,7 @@ footer .copyright {
   }
 
   .section-head h2,
+  .section-head .home-primary-heading,
   .story h2,
   .newsletter h2 {
     font-size: 29px;
@@ -7563,7 +7566,8 @@ body {
   color: #fff;
 }
 
-.featured-products .section-head h2 em {
+.featured-products .section-head h2 em,
+.featured-products .section-head .home-primary-heading em {
   color: #dfc88d;
 }
 
@@ -7644,6 +7648,7 @@ body {
 }
 
 .section-head h2,
+.section-head .home-primary-heading,
 .category-showcase-head h2,
 .recommend-head h2 {
   letter-spacing: -0.7px;
@@ -10916,6 +10921,7 @@ footer .copyright::before {
 }
 
 .section-head h2,
+.section-head .home-primary-heading,
 .category-showcase-head h2,
 .recommend-head h2,
 .testimonial-intro h2,
@@ -10929,6 +10935,7 @@ footer .copyright::before {
 }
 
 .section-head h2 em,
+.section-head .home-primary-heading em,
 .category-showcase-head h2 em,
 .recommend-head h2 em,
 .testimonial-intro h2 em,

@@ -63,6 +63,10 @@
   --radius-md: 14px;
   --radius-lg: 20px;
   --radius-pill: 999px;
+  --radius-panel-compact: var(--radius-md);
+  --radius-panel-standard: var(--radius-lg);
+  --radius-panel-featured: 24px 24px 14px 24px;
+  --radius-panel-floating: 22px;
   --container-max: 1320px;
   --container-gutter: 40px;
   --header-height: 96px;
