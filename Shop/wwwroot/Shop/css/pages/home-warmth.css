@@ -1,0 +1,124 @@
+/* Home-only warmth layer: soft ivory surfaces balance the existing navy and gold identity. */
+.home-page {
+  --home-ivory: #fbf8f0;
+  --home-sand: #f3ecdc;
+  --home-brass: #b28a4f;
+  --home-warm-line: rgba(178, 138, 79, 0.2);
+}
+
+.home-page .electrical-showcase {
+  background:
+    radial-gradient(ellipse at 4% 0%, rgba(246, 197, 21, 0.12), transparent 32%),
+    linear-gradient(180deg, #fbf8f0 0%, #f5f7f8 100%);
+}
+
+.home-page .electrical-category-menu {
+  border-color: var(--home-warm-line);
+  background: linear-gradient(155deg, #fffefa 0%, #f8f4e9 100%);
+  box-shadow: 0 16px 38px rgba(70, 54, 28, 0.11);
+}
+
+.home-page #collection,
+.home-page #amazing,
+.home-page #bestsellers,
+.home-page #newest,
+.home-page #recommendations,
+.home-page #journal {
+  background:
+    radial-gradient(ellipse at 96% 2%, rgba(246, 197, 21, 0.075), transparent 27%),
+    linear-gradient(180deg, #faf8f2 0%, #f5f7f8 68%, #f8f6f0 100%);
+}
+
+.home-page #collection > .container,
+.home-page .category-showcase > .container,
+.home-page #recommendations .recommend-box,
+.home-page #journal > .container {
+  border-color: var(--home-warm-line);
+  background: linear-gradient(145deg, #fffefa 0%, #fff 54%, #fbf8f0 100%);
+  box-shadow: 0 16px 42px rgba(65, 52, 31, 0.075);
+}
+
+.home-page .category-showcase-head {
+  border-color: rgba(178, 138, 79, 0.28);
+}
+
+.home-page .category-showcase-head .eyebrow,
+.home-page .section-head .eyebrow,
+.home-page .recommend-head .eyebrow,
+.home-page .brands-heading .eyebrow,
+.home-page .journal .eyebrow {
+  color: #9a722f;
+}
+
+.home-page .showcase-card {
+  border-color: rgba(178, 138, 79, 0.2);
+  background: linear-gradient(160deg, #fff 0%, #fffefa 100%);
+  box-shadow: 0 8px 24px rgba(74, 58, 31, 0.065);
+}
+
+.home-page .showcase-card:hover {
+  border-color: rgba(178, 138, 79, 0.55);
+  box-shadow: 0 17px 36px rgba(74, 58, 31, 0.13);
+}
+
+.home-page #brands > .container {
+  border-color: rgba(246, 197, 21, 0.25);
+  background:
+    radial-gradient(circle at 8% 100%, rgba(246, 197, 21, 0.14), transparent 30%),
+    linear-gradient(135deg, #102a43 0%, #183b57 72%, #25475c 100%);
+  box-shadow: 0 20px 48px rgba(16, 42, 67, 0.18);
+}
+
+.home-page #brandsSlider .brand-logo-frame {
+  border-color: rgba(178, 138, 79, 0.18);
+  background: linear-gradient(145deg, #fff 0%, #fbf8f0 100%);
+}
+
+.home-page #services.purchase-benefits--showcase {
+  border-color: var(--home-warm-line);
+  background:
+    radial-gradient(ellipse at 0% 100%, rgba(178, 138, 79, 0.11), transparent 34%),
+    linear-gradient(120deg, #fffefa 0%, #fbf7ed 56%, #f5f7f8 100%);
+}
+
+.home-page .newsletter {
+  border-top: 1px solid rgba(178, 138, 79, 0.2);
+  background:
+    radial-gradient(ellipse at 92% 12%, rgba(246, 197, 21, 0.16), transparent 30%),
+    linear-gradient(125deg, #f4eddd 0%, #fbf9f3 54%, #f1f4f4 100%);
+}
+
+.home-page .newsletter .subscribe {
+  border-color: rgba(178, 138, 79, 0.28);
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 12px 28px rgba(65, 52, 31, 0.09);
+}
+
+.home-page .newsletter .subscribe:focus-within {
+  border-color: rgba(178, 138, 79, 0.62);
+  box-shadow: 0 0 0 4px rgba(246, 197, 21, 0.14), 0 12px 28px rgba(65, 52, 31, 0.09);
+}
+
+@media (max-width: 767px) {
+  .home-page #collection,
+  .home-page #amazing,
+  .home-page #bestsellers,
+  .home-page #newest,
+  .home-page #recommendations,
+  .home-page #journal {
+    background: linear-gradient(180deg, #faf8f2 0%, #f5f7f8 100%);
+  }
+
+  .home-page #collection > .container,
+  .home-page .category-showcase > .container,
+  .home-page #recommendations .recommend-box,
+  .home-page #journal > .container {
+    box-shadow: 0 10px 28px rgba(65, 52, 31, 0.065);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-page .showcase-card {
+    transition: none;
+  }
+}

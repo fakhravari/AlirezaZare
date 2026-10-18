@@ -73,12 +73,73 @@
     visibility 0s linear 180ms;
 }
 
+/* Quiet geometric ornaments add warmth while staying behind menu content. */
+#mainNav .quick-links-menu,
+#mainNav .brand-dropdown > .brand-menu {
+  isolation: isolate;
+}
+
+#mainNav .quick-links-menu::before,
+#mainNav .brand-dropdown > .brand-menu::before {
+  position: absolute;
+  top: -38px;
+  left: -26px;
+  z-index: 0;
+  width: 132px;
+  height: 132px;
+  border: 1px solid rgba(190, 145, 65, 0.2);
+  border-radius: 43% 57% 62% 38% / 55% 39% 61% 45%;
+  background: radial-gradient(circle at 55% 48%, rgba(246, 197, 21, 0.13), transparent 67%);
+  content: "";
+  pointer-events: none;
+  transform: rotate(-18deg);
+}
+
+#mainNav .quick-links-menu::after,
+#mainNav .brand-dropdown > .brand-menu::after {
+  position: absolute;
+  right: 15px;
+  bottom: 12px;
+  z-index: 0;
+  width: 54px;
+  height: 54px;
+  border: 1px solid rgba(190, 145, 65, 0.14);
+  border-radius: 42% 58% 50% 50%;
+  background: radial-gradient(circle at 42% 38%, rgba(246, 197, 21, 0.08), transparent 70%);
+  content: "";
+  pointer-events: none;
+  transform: rotate(24deg);
+}
+
+#mainNav .quick-links-menu > *,
+#mainNav .brand-dropdown > .brand-menu > li {
+  position: relative;
+  z-index: 1;
+}
+
 #mainNav .quick-links-dropdown:is(:hover, :focus-within, .show, .is-quick-links-open) > .quick-links-menu {
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
   transform: translateY(0);
   transition-delay: 0s;
+}
+
+/* The quick-links trigger sits inside the nav row; align its panel with the
+   brand menu, which is anchored to the bottom edge of the full navbar. */
+@media (min-width: 992px) {
+  #mainNav .quick-links-dropdown::after {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    left: 0;
+    height: 16px;
+    content: "";
+  }
+
+  #mainNav .quick-links-menu {
+    top: calc(100% + 16px);
+  }
 }
 
 /* Keep the brand menu's hover treatment and animated caret consistent. */
