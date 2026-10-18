@@ -1452,8 +1452,9 @@
             <a asp-controller="Magazine" asp-action="Index">مشاهده همه مطالب <i class="bi bi-arrow-left"></i></a>
         </div>
         <div class="row g-4">
-            <div class="col-md-7">
+            <div class="col-md-6 journal-feature-column">
                 <article class="journal-main">
+                    <span class="journal-main-featured"><i class="bi bi-stars" aria-hidden="true"></i> انتخاب تحریریه</span>
                     <img
                         loading="lazy"
                         decoding="async"
@@ -1470,55 +1471,81 @@
                         <h3>
                             <a asp-controller="Magazine" asp-action="Details" asp-route-slug="choosing-work-drill" style="color: inherit; text-decoration: none;">راهنمای انتخاب دریل برای خانه و کارگاه</a>
                         </h3>
+                        <a class="journal-main-cta" asp-controller="Magazine" asp-action="Details" asp-route-slug="choosing-work-drill">خواندن مقاله <i class="bi bi-arrow-left-circle-fill" aria-hidden="true"></i></a>
                     </div>
                 </article>
             </div>
-            <div class="col-md-5">
+            <div class="col-md-6 journal-list-column">
                 <div class="journal-list">
+                    <div class="journal-list-heading">
+                        <span class="journal-list-heading-icon"><i class="bi bi-journal-bookmark-fill" aria-hidden="true"></i></span>
+                        <div><small>مجلهٔ تخصصی برق و ابزار</small><strong>منتخب راهنماها</strong></div>
+                        <span class="journal-list-count"><b>۵</b> مطلب کاربردی</span>
+                    </div>
                     <article>
-                        <span>۱</span>
-                        <div>
-                            <small>آموزش تخصصی</small>
-                            <h4>
-                                <a asp-controller="Magazine" asp-action="Details" asp-route-slug="multimeter-buying-guide" style="color: inherit; text-decoration: none;">چطور مولتی‌متر مناسب انتخاب کنیم؟</a>
-                            </h4>
-                        </div>
-                    </article>
-                    <article>
-                        <span>۲</span>
-                        <div>
-                            <small>نگهداری</small>
-                            <h4>
-                                <a asp-controller="Magazine" asp-action="Details" asp-route-slug="electrical-tool-safety" style="color: inherit; text-decoration: none;">چک‌لیست ایمنی هنگام کار با ابزار برقی</a>
-                            </h4>
-                        </div>
-                    </article>
-                    <article>
-                        <span>۳</span>
-                        <div>
-                            <small>راهنمای اصالت</small>
-                            <h4>
-                                <a asp-controller="Magazine" asp-action="Details" asp-route-slug="soldering-station-basics" style="color: inherit; text-decoration: none;">راهنمای انتخاب ایستگاه لحیم‌کاری</a>
-                            </h4>
-                        </div>
-                    </article>
-                    <article>
-                        <span>۴</span>
-                        <div>
+                        <span class="journal-list-number">۱</span>
+                        <div class="journal-list-card-meta">
                             <small>راهنمای خرید</small>
-                            <h4>
-                                <a asp-controller="Magazine" asp-action="Details" asp-route-slug="worklight-selection" style="color: inherit; text-decoration: none;">انتخاب چراغ کار برای تعمیرگاه و محیط نصب</a>
-                            </h4>
                         </div>
+                        <h4><a asp-controller="Magazine" asp-action="Details" asp-route-slug="multimeter-buying-guide" style="color: inherit; text-decoration: none;">چطور مولتی‌متر مناسب انتخاب کنیم؟</a></h4>
+                        <div class="journal-list-stats" aria-label="آمار نمونهٔ مقاله">
+                            <span aria-label="۱۲ هزار و ۸۰۰ بازدید"><i class="bi bi-eye" aria-hidden="true"></i> ۱۲٬۸۰۰ <small>بازدید</small></span>
+                            <span aria-label="۳۴۲ پسند"><i class="bi bi-heart" aria-hidden="true"></i> ۳۴۲ <small>پسند</small></span>
+                            <span aria-label="میانگین امتیاز ۴٫۸ از ۵"><i class="bi bi-star-fill" aria-hidden="true"></i> ۴٫۸ <small>امتیاز</small></span>
+                        </div>
+                        <i class="bi bi-arrow-left journal-list-arrow" aria-hidden="true"></i>
                     </article>
                     <article>
-                        <span>۵</span>
-                        <div>
-                            <small>نگهداری ابزار</small>
-                            <h4>
-                                <a asp-controller="Magazine" asp-action="Details" asp-route-slug="battery-tool-care" style="color: inherit; text-decoration: none;">نگهداری باتری ابزار شارژی</a>
-                            </h4>
+                        <span class="journal-list-number">۲</span>
+                        <div class="journal-list-card-meta">
+                            <small>ایمنی و نگهداری</small>
                         </div>
+                        <h4><a asp-controller="Magazine" asp-action="Details" asp-route-slug="electrical-tool-safety" style="color: inherit; text-decoration: none;">چک‌لیست ایمنی هنگام کار با ابزار برقی</a></h4>
+                        <div class="journal-list-stats" aria-label="آمار نمونهٔ مقاله">
+                            <span aria-label="۹ هزار و ۶۰۰ بازدید"><i class="bi bi-eye" aria-hidden="true"></i> ۹٬۶۰۰ <small>بازدید</small></span>
+                            <span aria-label="۲۱۸ پسند"><i class="bi bi-heart" aria-hidden="true"></i> ۲۱۸ <small>پسند</small></span>
+                            <span aria-label="میانگین امتیاز ۴٫۹ از ۵"><i class="bi bi-star-fill" aria-hidden="true"></i> ۴٫۹ <small>امتیاز</small></span>
+                        </div>
+                        <i class="bi bi-arrow-left journal-list-arrow" aria-hidden="true"></i>
+                    </article>
+                    <article>
+                        <span class="journal-list-number">۳</span>
+                        <div class="journal-list-card-meta">
+                            <small>آموزش تخصصی</small>
+                        </div>
+                        <h4><a asp-controller="Magazine" asp-action="Details" asp-route-slug="soldering-station-basics" style="color: inherit; text-decoration: none;">راهنمای انتخاب ایستگاه لحیم‌کاری</a></h4>
+                        <div class="journal-list-stats" aria-label="آمار نمونهٔ مقاله">
+                            <span aria-label="۸ هزار و ۲۰۰ بازدید"><i class="bi bi-eye" aria-hidden="true"></i> ۸٬۲۰۰ <small>بازدید</small></span>
+                            <span aria-label="۱۹۶ پسند"><i class="bi bi-heart" aria-hidden="true"></i> ۱۹۶ <small>پسند</small></span>
+                            <span aria-label="میانگین امتیاز ۴٫۷ از ۵"><i class="bi bi-star-fill" aria-hidden="true"></i> ۴٫۷ <small>امتیاز</small></span>
+                        </div>
+                        <i class="bi bi-arrow-left journal-list-arrow" aria-hidden="true"></i>
+                    </article>
+                    <article>
+                        <span class="journal-list-number">۴</span>
+                        <div class="journal-list-card-meta">
+                            <small>راهنمای خرید</small>
+                        </div>
+                        <h4><a asp-controller="Magazine" asp-action="Details" asp-route-slug="worklight-selection" style="color: inherit; text-decoration: none;">انتخاب چراغ کار برای تعمیرگاه و محیط نصب</a></h4>
+                        <div class="journal-list-stats" aria-label="آمار نمونهٔ مقاله">
+                            <span aria-label="۷ هزار و ۴۰۰ بازدید"><i class="bi bi-eye" aria-hidden="true"></i> ۷٬۴۰۰ <small>بازدید</small></span>
+                            <span aria-label="۱۵۲ پسند"><i class="bi bi-heart" aria-hidden="true"></i> ۱۵۲ <small>پسند</small></span>
+                            <span aria-label="میانگین امتیاز ۴٫۸ از ۵"><i class="bi bi-star-fill" aria-hidden="true"></i> ۴٫۸ <small>امتیاز</small></span>
+                        </div>
+                        <i class="bi bi-arrow-left journal-list-arrow" aria-hidden="true"></i>
+                    </article>
+                    <article>
+                        <span class="journal-list-number">۵</span>
+                        <div class="journal-list-card-meta">
+                            <small>ایمنی و نگهداری</small>
+                        </div>
+                        <h4><a asp-controller="Magazine" asp-action="Details" asp-route-slug="battery-tool-care" style="color: inherit; text-decoration: none;">نگهداری باتری ابزار شارژی</a></h4>
+                        <div class="journal-list-stats" aria-label="آمار نمونهٔ مقاله">
+                            <span aria-label="۶ هزار و ۱۰۰ بازدید"><i class="bi bi-eye" aria-hidden="true"></i> ۶٬۱۰۰ <small>بازدید</small></span>
+                            <span aria-label="۱۲۴ پسند"><i class="bi bi-heart" aria-hidden="true"></i> ۱۲۴ <small>پسند</small></span>
+                            <span aria-label="میانگین امتیاز ۴٫۶ از ۵"><i class="bi bi-star-fill" aria-hidden="true"></i> ۴٫۶ <small>امتیاز</small></span>
+                        </div>
+                        <i class="bi bi-arrow-left journal-list-arrow" aria-hidden="true"></i>
                     </article>
                 </div>
             </div>
@@ -1534,7 +1561,7 @@
                 <h2>عضویت در باشگاه مشتریان ندا اولیائی</h2>
                 <p>
                     اطلاعیه‌های رسمی موجودی محصولات، شرایط فروش، پیشنهادهای دوره‌ای و
-                    راهنماهای تخصصی کمپانی را مستقیماً دریافت کنید.
+                    راهنماهای تخصصی کمپانی را دریافت کنید.
                 </p>
             </div>
             <div class="col-lg-5">
