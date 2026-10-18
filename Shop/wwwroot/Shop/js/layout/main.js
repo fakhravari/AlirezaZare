@@ -231,14 +231,20 @@ $(function () {
         .querySelectorAll("#mainNav .brand-dropdown")
         .forEach((brandDropdown) => {
           let brandCloseTimer = 0;
+          const brandTrigger = brandDropdown.querySelector(":scope > .nav-link");
           const keepBrandOpen = () => {
             window.clearTimeout(brandCloseTimer);
             brandDropdown.classList.add("is-brand-open");
+            brandTrigger?.setAttribute("aria-expanded", "true");
           };
           const closeBrandSoon = () => {
             window.clearTimeout(brandCloseTimer);
             brandCloseTimer = window.setTimeout(() => {
+              if (brandDropdown.matches(":hover, :focus-within")) return;
               brandDropdown.classList.remove("is-brand-open");
+              if (!brandDropdown.classList.contains("show")) {
+                brandTrigger?.setAttribute("aria-expanded", "false");
+              }
             }, 220);
           };
           const dismissSearch = () => {
@@ -260,6 +266,52 @@ $(function () {
           brandDropdown.addEventListener("hidden.bs.dropdown", () => {
             window.clearTimeout(brandCloseTimer);
             brandDropdown.classList.remove("is-brand-open");
+            brandTrigger?.setAttribute("aria-expanded", "false");
+          });
+        });
+      document
+        .querySelectorAll("#mainNav .quick-links-dropdown")
+        .forEach((quickLinksDropdown) => {
+          let quickLinksCloseTimer = 0;
+          const quickLinksTrigger = quickLinksDropdown.querySelector(":scope > .nav-link");
+          const quickLinksMenu = quickLinksDropdown.querySelector(":scope > .quick-links-menu");
+          const keepQuickLinksOpen = () => {
+            window.clearTimeout(quickLinksCloseTimer);
+            quickLinksDropdown.classList.add("is-quick-links-open");
+            quickLinksTrigger?.setAttribute("aria-expanded", "true");
+          };
+          const closeQuickLinksSoon = () => {
+            window.clearTimeout(quickLinksCloseTimer);
+            quickLinksCloseTimer = window.setTimeout(() => {
+              if (quickLinksDropdown.matches(":hover, :focus-within")) return;
+              quickLinksDropdown.classList.remove("is-quick-links-open");
+              if (!quickLinksDropdown.classList.contains("show")) {
+                quickLinksTrigger?.setAttribute("aria-expanded", "false");
+              }
+            }, 220);
+          };
+          const dismissSearch = () => {
+            if (suggestions.hidden) return;
+            searchInput.blur();
+            closeSuggestions();
+          };
+
+          quickLinksDropdown.addEventListener("pointerenter", () => {
+            keepQuickLinksOpen();
+          });
+          quickLinksDropdown.addEventListener("pointerleave", closeQuickLinksSoon);
+          quickLinksMenu?.addEventListener("pointerenter", keepQuickLinksOpen);
+          quickLinksDropdown.addEventListener("focusin", () => {
+            keepQuickLinksOpen();
+            dismissSearch();
+          });
+          quickLinksDropdown.addEventListener("focusout", (event) => {
+            if (!quickLinksDropdown.contains(event.relatedTarget)) closeQuickLinksSoon();
+          });
+          quickLinksDropdown.addEventListener("hidden.bs.dropdown", () => {
+            window.clearTimeout(quickLinksCloseTimer);
+            quickLinksDropdown.classList.remove("is-quick-links-open");
+            quickLinksTrigger?.setAttribute("aria-expanded", "false");
           });
         });
     }
