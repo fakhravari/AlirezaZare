@@ -12120,16 +12120,16 @@ body .electrical-swiper .swiper-pagination-bullet-active {
 }
 
 @media (max-width: 767px) {
-  body .home-page #heroSwiper.electrical-swiper .electrical-arrow {
+  body .electrical-swiper .electrical-arrow {
     display: none !important;
   }
 
-  body .home-page #heroSwiper.electrical-swiper .swiper-pagination {
-    right: 50%;
-    bottom: 10px;
-    left: auto;
+  body .electrical-swiper .swiper-pagination {
+    right: auto;
+    bottom: 15px;
+    left: 12px;
     display: flex !important;
-    transform: translateX(50%);
+    transform: none;
   }
 
   body .electrical-swiper .electrical-arrow {
