@@ -526,9 +526,27 @@
 }
 
 #mainNav .brand-menu-logo-fallback {
+  display: grid;
+  place-items: center;
   color: #173653;
-  font-size: 13px;
-  letter-spacing: 0.5px;
+  font-family: Arial, sans-serif;
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: 0.4px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+#mainNav .brand-menu-logo-fallback--uni-t {
+  color: #e21f2f;
+  font-size: 19px;
+  letter-spacing: 0.1px;
+}
+
+#mainNav .brand-menu-logo-fallback--yihua {
+  color: #173653;
+  font-size: 17px;
+  letter-spacing: 1.2px;
 }
 
 #mainNav .brand-menu .dropdown-item > span:nth-child(2) {

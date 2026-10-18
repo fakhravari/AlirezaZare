@@ -111,7 +111,7 @@
     }
     <li>
         <a class="dropdown-item" href="@Url.Content($"~/Search?brand={brand.Slug}")">
-            @if (!string.IsNullOrWhiteSpace(brand.LogoFile))
+            @if (!string.IsNullOrWhiteSpace(brand.LogoFile) && slug is not ("uni-t" or "yihua"))
             {
                 <span class="brand-menu-logo-frame">
                     <img class="brand-menu-logo" src="@Url.Content($"~/Shop/images/brands/{brand.LogoFile}")" alt="" width="52" height="38" decoding="async" />
@@ -119,7 +119,7 @@
             }
             else
             {
-                <span class="brand-menu-logo-frame brand-menu-logo-fallback" aria-hidden="true">@brand.Name</span>
+                <span class="brand-menu-logo-frame brand-menu-logo-fallback brand-menu-logo-fallback--@slug" aria-hidden="true">@(slug == "uni-t" ? "UNI-T" : slug == "yihua" ? "YIHUA" : brand.Name)</span>
             }
             <span>
                 <strong>@brand.PersianName</strong>
