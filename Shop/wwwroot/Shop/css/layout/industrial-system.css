@@ -13846,3 +13846,31 @@ body .electrical-swiper .swiper-pagination-bullet-active {
     linear-gradient(180deg, #fffdf9, #faf7f1) !important;
   background-repeat: no-repeat;
 }
+
+/* Match the inner-page category trigger hover to the highlighted home navigation item. */
+@media (min-width: 992px) {
+  body.inner-page
+    #mainNav
+    .navbar-nav
+    > li.category-nav-dropdown:is(:hover, :focus-within, .show, .is-mega-open)
+    > button.nav-link.dropdown-toggle {
+    border-color: rgba(255, 223, 84, 0.72) !important;
+    background: var(--industrial-yellow) !important;
+    color: var(--industrial-navy) !important;
+    box-shadow: 0 4px 14px rgba(246, 197, 21, 0.28) !important;
+    transform: none !important;
+  }
+
+  body.inner-page
+    #mainNav
+    .navbar-nav
+    > li.category-nav-dropdown:is(:hover, :focus-within, .show, .is-mega-open)
+    > button.nav-link.dropdown-toggle
+    > .nav-menu-icon {
+    background: transparent !important;
+    color: var(--industrial-navy) !important;
+    -webkit-text-fill-color: var(--industrial-navy) !important;
+    filter: none !important;
+    transform: scale(1.12) !important;
+  }
+}
