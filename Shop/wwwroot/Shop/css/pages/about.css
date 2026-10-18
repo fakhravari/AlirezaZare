@@ -812,7 +812,7 @@ body.inner-page .about-page .page-cta {
   box-shadow: 0 10px 24px rgba(4, 20, 34, 0.28);
 }
 
-.about-page .about-journey-section .section-title > .about-section-kicker {
+.about-page :is(.about-values-section, .about-journey-section) .section-title > .about-section-kicker {
   display: inline-flex;
   min-height: 34px;
   align-items: center;
@@ -828,7 +828,7 @@ body.inner-page .about-page .page-cta {
   line-height: 1.5;
 }
 
-.about-page .about-journey-section .section-title > .about-section-kicker::before {
+.about-page :is(.about-values-section, .about-journey-section) .section-title > .about-section-kicker::before {
   width: 14px;
   height: 1px;
   background: currentColor;

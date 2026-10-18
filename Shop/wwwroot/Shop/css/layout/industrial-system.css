@@ -14264,16 +14264,16 @@ body .electrical-swiper .swiper-pagination-bullet-active {
   }
 
   .inner-page #mainNav .category-mega-group {
-    gap: 8px;
-    padding-inline: 18px;
+    gap: 5px;
+    padding-inline: 12px;
   }
 
   .inner-page #mainNav .category-mega-group > .category-mega-title {
-    min-height: 39px;
-    margin-bottom: 4px;
-    padding-bottom: 7px;
+    min-height: 36px;
+    margin-bottom: 3px;
+    padding-bottom: 8px;
     border-bottom: 1px solid #e8edef;
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 800;
   }
 
@@ -14285,14 +14285,14 @@ body .electrical-swiper .swiper-pagination-bullet-active {
   }
 
   .inner-page #mainNav .category-mega-group > a:not(.category-mega-title) {
-    min-height: 36px;
-    padding: 6px 10px;
+    min-height: 30px;
+    padding: 5px 8px;
     border-color: transparent;
     border-radius: 8px;
     color: #526579;
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 550;
-    line-height: 1.6;
+    line-height: 1.55;
   }
 
   .inner-page

@@ -5,6 +5,10 @@
   padding-bottom: 42px;
 }
 
+.flow-main.customer-service-main.faq-main {
+  padding-top: clamp(18px, 2vw, 26px);
+}
+
 .faq-related-section {
   box-sizing: border-box;
   width: min(calc(100% - 48px), 1360px);
@@ -212,12 +216,23 @@
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  justify-self: end;
+  align-self: center;
+  justify-self: center;
+  padding: 0;
   border: 1px solid rgba(16, 42, 67, 0.1);
   background: #f5f7f8;
   color: #52677a;
   font-size: 14px;
   transition: transform 180ms ease, color 180ms ease, background-color 180ms ease;
+}
+
+.faq-toggle > i {
+  display: block;
+  width: 1em;
+  height: 1em;
+  margin: 0;
+  line-height: 1;
+  text-align: center;
 }
 
 .faq-item[open] .faq-toggle {
@@ -360,8 +375,11 @@
 }
 
 @media (max-width: 767px) {
+  .flow-main.customer-service-main.faq-main {
+    padding-top: 18px;
+  }
+
   .faq-main {
-    padding-top: 28px;
     padding-bottom: 28px;
   }
 

@@ -50,6 +50,11 @@
   margin-bottom: 27px;
 }
 
+.tracking-card-heading > div {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
 .tracking-card-icon {
   display: grid;
   width: 48px;
@@ -71,17 +76,17 @@
 .tracking-eyebrow {
   display: inline-flex;
   width: fit-content;
-  min-height: 32px;
+  min-height: 34px;
   align-items: center;
-  gap: 7px;
-  margin: 0 0 11px;
-  padding: 5px 11px;
+  gap: 8px;
+  margin: 0 0 10px;
+  padding: 6px 12px;
   border: 1px solid #ead9ae;
   border-radius: 999px;
-  background: linear-gradient(135deg, #fff9e9, #fffdf8);
+  background: #fff8e7;
   color: #805d1d;
   font-size: 13px;
-  font-weight: 800;
+  font-weight: 750;
   line-height: 1.5;
 }
 

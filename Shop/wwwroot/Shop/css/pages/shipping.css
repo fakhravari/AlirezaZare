@@ -58,6 +58,33 @@
   line-height: 2;
 }
 
+.shipping-heading > .shipping-heading-note {
+  display: inline-flex;
+  max-width: none;
+  min-height: 38px;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 12px;
+  border: 1px solid #eee1bc;
+  border-radius: 999px;
+  background: linear-gradient(110deg, #fff8e5, #fffdf7);
+  font-size: 12px;
+  line-height: 1.6;
+  white-space: nowrap;
+}
+
+.shipping-heading-note > i {
+  display: grid;
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+  place-items: center;
+  border-radius: 50%;
+  background: #f5e8c4;
+  color: #8b681b;
+  font-size: 12px;
+}
+
 .shipping-steps {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -246,6 +273,12 @@
     align-items: flex-start;
     flex-direction: column;
     gap: 10px;
+  }
+
+  .shipping-heading > .shipping-heading-note {
+    max-width: 100%;
+    border-radius: 12px;
+    white-space: normal;
   }
 
   .shipping-steps {

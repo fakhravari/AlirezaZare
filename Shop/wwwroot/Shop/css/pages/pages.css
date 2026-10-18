@@ -1983,20 +1983,23 @@ h6 {
   width: min(100%, 1160px);
   margin-inline: auto;
 }
+.flow-main.legal-main > .privacy-document {
+  width: 100%;
+}
 .legal-document.terms-document {
   counter-reset: terms-section;
-  padding: clamp(24px, 4vw, 48px);
-  border-color: rgba(186, 143, 49, 0.24) !important;
-  background:
-    radial-gradient(circle at 100% 0, rgba(247, 197, 24, 0.09), transparent 24rem),
-    #fff !important;
+  padding: 0;
+  border: 0 !important;
+  border-radius: 0;
+  background: transparent !important;
+  box-shadow: none !important;
 }
 .legal-document.privacy-document {
-  padding: clamp(22px, 3.6vw, 42px);
-  border-color: #eadfca !important;
-  background:
-    radial-gradient(ellipse at 100% 0, rgba(246, 197, 21, 0.13), transparent 28rem),
-    linear-gradient(145deg, #fffefa 0%, #fff 58%, #fbf7ee 100%) !important;
+  padding: 0;
+  border: 0 !important;
+  border-radius: 0;
+  background: transparent !important;
+  box-shadow: none !important;
 }
 .legal-document.returns-document {
   padding: clamp(22px, 3.6vw, 42px);
@@ -2091,13 +2094,9 @@ h6 {
   grid-template-columns: 54px minmax(0, 1fr);
   align-items: center;
   gap: 16px;
-  margin-bottom: 28px;
-  padding: clamp(18px, 2.6vw, 28px);
-  border: 1px solid #ecdfc1;
-  border-inline-start: 4px solid #d8ad3a;
-  border-radius: 18px;
-  background: linear-gradient(115deg, #fff6dc, #fffdf7 72%);
-  box-shadow: 0 10px 26px rgba(100, 77, 30, 0.06);
+  margin-bottom: 22px;
+  padding: 0 0 22px;
+  border-bottom: 1px solid #eee5d4;
 }
 .privacy-intro-icon {
   display: grid;
@@ -2106,10 +2105,10 @@ h6 {
   place-items: center;
   border: 1px solid #ead49a;
   border-radius: 16px;
-  background: #fff;
+  background: #fff8e7;
   color: #98700d;
   font-size: 23px;
-  box-shadow: 0 6px 16px rgba(100, 77, 30, 0.08);
+  box-shadow: none;
 }
 .privacy-intro-label {
   display: block;
