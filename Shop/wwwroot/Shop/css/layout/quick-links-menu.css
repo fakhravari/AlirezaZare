@@ -401,14 +401,23 @@
 
 #mainNav .brand-menu-footer > .brand-menu-all-link:hover,
 #mainNav .brand-menu-footer > .brand-menu-all-link:focus-visible {
-  transform: translateY(-2px) !important;
+  transform: none !important;
   background: linear-gradient(115deg, #204d70, #143652 72%) !important;
   box-shadow: 0 9px 20px rgba(16, 42, 67, 0.2) !important;
 }
 
 #mainNav .brand-menu-footer > .brand-menu-all-link:hover > i,
 #mainNav .brand-menu-footer > .brand-menu-all-link:focus-visible > i {
-  transform: translateX(-3px);
+  transform: none !important;
+}
+
+/* Keep the header search's focused frame consistent across all page types. */
+html body #mainNav .home-header-search:focus-within {
+  border-color: var(--industrial-yellow-dark) !important;
+  background: #fff !important;
+  box-shadow:
+    0 0 0 2px rgba(246, 197, 21, 0.12),
+    0 7px 20px rgba(16, 42, 67, 0.09) !important;
 }
 
 @media (max-width: 991.98px) {
@@ -581,12 +590,12 @@
   border-color: #dfbd58 !important;
   background: #fffdf7 !important;
   box-shadow: 0 8px 18px rgba(16, 42, 67, 0.09) !important;
-  transform: translateY(-2px) !important;
+  transform: none !important;
 }
 
 #mainNav .brand-menu .dropdown-item:is(:hover, :focus-visible) > i {
   color: #a77a1e !important;
-  transform: translateX(-2px);
+  transform: none !important;
 }
 
 #mainNav .brand-menu-footer {
@@ -627,6 +636,10 @@
     left: auto !important;
     z-index: 1055 !important;
     margin: 0 !important;
+    border-top: 3px solid #f6c515 !important;
+    border-top-left-radius: 0 !important;
+    border-top-right-radius: 0 !important;
+    border-radius: 0 0 20px 20px !important;
     transform: none !important;
     transform-origin: top center !important;
     animation: none !important;
@@ -643,6 +656,13 @@
     pointer-events: auto !important;
     transform: none !important;
     transition-delay: 0s !important;
+  }
+
+  #mainNav .brand-dropdown.is-brand-switching > .brand-menu {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transition: none !important;
   }
 
   #mainNav .brand-dropdown::after {

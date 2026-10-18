@@ -235,6 +235,7 @@ $(function () {
           const brandMenu = brandDropdown.querySelector(":scope > .brand-menu");
           const keepBrandOpen = () => {
             window.clearTimeout(brandCloseTimer);
+            brandDropdown.classList.remove("is-brand-switching");
             brandDropdown.classList.add("is-brand-open");
             brandTrigger?.setAttribute("aria-expanded", "true");
           };
@@ -266,9 +267,20 @@ $(function () {
           brandDropdown.addEventListener("focusout", (event) => {
             if (!brandDropdown.contains(event.relatedTarget)) closeBrandSoon();
           });
+          brandDropdown.parentElement
+            ?.querySelectorAll(":scope > .nav-item:not(.brand-dropdown)")
+            .forEach((siblingItem) => {
+              siblingItem.addEventListener("pointerenter", () => {
+                window.clearTimeout(brandCloseTimer);
+                brandDropdown.classList.remove("is-brand-open", "show");
+                brandMenu?.classList.remove("show");
+                brandDropdown.classList.add("is-brand-switching");
+                brandTrigger?.setAttribute("aria-expanded", "false");
+              });
+            });
           brandDropdown.addEventListener("hidden.bs.dropdown", () => {
             window.clearTimeout(brandCloseTimer);
-            brandDropdown.classList.remove("is-brand-open");
+            brandDropdown.classList.remove("is-brand-open", "is-brand-switching");
             brandTrigger?.setAttribute("aria-expanded", "false");
           });
         });
