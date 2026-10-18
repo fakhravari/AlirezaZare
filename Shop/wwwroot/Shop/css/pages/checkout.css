@@ -1590,18 +1590,19 @@
   height: 34px;
   flex: 0 0 34px;
   place-items: center;
-  border: 1px solid rgba(246, 197, 21, 0.55);
-  border-radius: 10px;
-  background: #fff7d6;
-  color: #173653;
-  font-size: 17px;
-  transition: background-color 180ms ease, color 180ms ease, transform 180ms ease;
+  border: 1px solid rgba(246, 197, 21, 0.34);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.09);
+  color: #f6c515;
+  font-size: 15px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease;
 }
 
 .address-dialog #addressForm .address-save-button:hover .address-save-icon {
-  transform: translateY(-1px);
-  background: #f6c515;
-  color: #173653;
+  border-color: rgba(246, 197, 21, 0.64);
+  background: rgba(246, 197, 21, 0.16);
+  color: #ffe18a;
 }
 
 .address-dialog .site-modal-close > i {
@@ -1615,33 +1616,69 @@
 @media (max-width: 575px) {
   .address-dialog {
     width: calc(100vw - 24px);
-    max-height: calc(100dvh - 24px);
-    padding: 14px;
+    max-height: calc(100dvh - 16px);
+    padding: 10px;
   }
 
   .address-dialog-heading {
-    margin: -4px -4px 14px;
-    padding: 16px 14px 16px 52px;
+    margin: -2px -2px 9px;
+    padding: 11px 12px 11px 48px;
   }
 
   .address-dialog-heading .site-modal-close {
-    top: 12px;
-    left: 12px;
-    width: 36px;
-    height: 36px;
+    top: 10px;
+    left: 10px;
+    width: 34px;
+    height: 34px;
   }
 
   .address-dialog-title {
-    gap: 10px;
+    gap: 8px;
     padding-left: 0;
   }
 
+  .address-dialog-heading .address-dialog-icon {
+    width: 42px;
+    height: 42px;
+    flex-basis: 42px;
+    border-radius: 13px;
+    font-size: 19px;
+  }
+
+  .address-dialog-heading h2 {
+    font-size: 19px;
+    line-height: 1.4;
+  }
+
+  .address-dialog-heading p {
+    display: none;
+  }
+
   .address-dialog #addressForm {
-    gap: 11px;
-    padding: 12px;
+    gap: 8px;
+    padding: 9px;
+  }
+
+  .address-dialog #addressForm label {
+    gap: 4px;
+  }
+
+  .address-dialog #addressForm input,
+  .address-dialog #addressForm select {
+    min-height: 44px;
+    padding-block: 7px;
+  }
+
+  .address-dialog #addressForm textarea {
+    min-height: 78px;
+    padding-block: 8px;
+  }
+
+  .address-dialog #addressForm .flow-button {
+    min-height: 48px;
   }
 
   .address-dialog .address-form-grid {
-    gap: 10px;
+    gap: 7px;
   }
 }

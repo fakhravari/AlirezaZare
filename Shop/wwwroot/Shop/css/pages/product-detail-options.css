@@ -286,10 +286,123 @@
 
   #productView .product-accessory-price > small {
     white-space: normal;
+    font-size: 11px;
   }
 
   #productView .product-accessory-price > .product-price-current {
     font-size: 13px;
+  }
+
+  #productView .product-variant-heading small {
+    font-size: 12px;
+  }
+
+  #productView .product-detail-secondary-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  #productView .product-detail-secondary-actions > a,
+  #productView .product-detail-favorite {
+    min-width: 0;
+    min-height: 44px;
+    gap: 5px;
+    padding-inline: 6px;
+    flex-wrap: nowrap;
+    font-size: 11px !important;
+    white-space: nowrap;
+  }
+
+  #productView .product-detail-secondary-actions > a > i,
+  #productView .product-detail-favorite > i {
+    width: 24px;
+    height: 24px;
+    flex: 0 0 24px;
+    font-size: 14px;
+  }
+
+  #productView .product-detail-favorite > span {
+    min-width: 0;
+    white-space: nowrap;
+  }
+
+  #productView .product-detail-related-card {
+    height: auto !important;
+    min-height: 0 !important;
+  }
+
+  #productView .product-detail-related-card .product-image {
+    height: auto !important;
+    min-height: 0 !important;
+    flex: 0 0 auto;
+    aspect-ratio: 1;
+  }
+
+  #productView .product-detail-related-card .product-info {
+    min-height: 0 !important;
+    gap: 6px;
+    padding: 10px 9px 5px !important;
+  }
+
+  #productView .product-detail-related-card .product-related-meta {
+    min-height: 26px;
+    margin-bottom: 2px;
+    align-items: center;
+    gap: 5px;
+    overflow: hidden;
+  }
+
+  #productView .product-detail-related-card .product-related-brand {
+    min-width: 0;
+    flex: 0 0 auto;
+    font-size: 11px;
+  }
+
+  #productView .product-detail-related-card .product-related-category {
+    min-width: 0;
+    max-width: 62%;
+    flex: 0 1 auto;
+    overflow: hidden;
+    padding-inline: 6px;
+    font-size: 10px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  #productView .product-detail-related-card .product-related-category > i {
+    flex: 0 0 auto;
+    font-size: 10px;
+  }
+
+  #productView .product-detail-related-card .product-info h3 {
+    min-height: 42px;
+    max-height: 42px;
+    margin: 2px 0;
+    font-size: 12px !important;
+    line-height: 1.6;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+  }
+
+  #productView .product-detail-related-card .product-info > p {
+    min-height: 42px !important;
+    margin: auto 0 0 !important;
+    font-size: 13px !important;
+    line-height: 1.5;
+  }
+
+  #productView .product-detail-related-card > .add-cart {
+    width: calc(100% - 16px) !important;
+    height: 42px !important;
+    min-height: 42px !important;
+    flex: 0 0 42px;
+    margin: 0 8px 8px !important;
+  }
+
+  #productView .product-detail-related-card:only-child {
+    grid-column: 1 / -1;
+    width: min(100%, 280px);
+    justify-self: center;
   }
 }
 

@@ -1237,8 +1237,8 @@ select {
     height: 37px;
   }
 
-  .search-intro {
-    padding: 40px 0;
+  .inner-page .search-intro {
+    padding: 18px 0 16px !important;
     background-position:
       58% center,
       58% center;
@@ -1249,13 +1249,38 @@ select {
     flex-direction: column;
   }
 
-  .search-intro h1 {
-    font-size: 30px;
+  .inner-page .search-intro h1 {
+    margin: 5px 0 7px !important;
+    font-size: 24px !important;
+    line-height: 1.55 !important;
+  }
+
+  .inner-page .search-intro p {
+    margin: 0 !important;
+    font-size: 13px !important;
+    line-height: 1.8 !important;
+  }
+
+  .inner-page .search-intro .hero-trail {
+    display: none;
+  }
+
+  .inner-page .search-intro .taxonomy-breadcrumb {
+    margin-bottom: 8px;
+  }
+
+  .inner-page .search-intro .taxonomy-breadcrumb ol {
+    flex-wrap: nowrap;
+    white-space: nowrap;
+  }
+
+  .inner-page .search-intro .taxonomy-breadcrumb li:first-child span {
+    display: none;
   }
 
   .search-main {
     display: block;
-    padding-top: 22px;
+    padding-top: 12px;
   }
 
   .mobile-filter-toggle {
@@ -1292,6 +1317,11 @@ select {
     right: 0;
     bottom: 0;
     width: min(88vw, 360px);
+    max-height: 100dvh;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
     border-radius: 0;
     opacity: 0;
     visibility: hidden;
@@ -1305,8 +1335,42 @@ select {
     transform: none;
   }
 
+  .filter-panel .filter-head {
+    position: sticky;
+    z-index: 2;
+    top: 0;
+  }
+
+  .filter-panel .filter-options {
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
   .filter-head button {
     display: grid;
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    min-height: 44px;
+    flex: 0 0 44px;
+    place-items: center;
+  }
+
+  .filter-option {
+    min-height: 44px;
+  }
+
+  .filter-panel .filter-option {
+    min-height: 44px;
+  }
+
+  .filter-search {
+    min-height: 44px;
+  }
+
+  .filter-search input {
+    height: 42px;
+    font-size: 16px;
   }
 
   .filter-backdrop {

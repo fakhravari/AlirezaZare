@@ -647,6 +647,14 @@
 }
 
 @media screen and (max-width: 767px) {
+  .article-breadcrumb .breadcrumb-title-step,
+  .article-breadcrumb .breadcrumb-title-step > span {
+    min-width: 0;
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
   .article-enhanced .article-body h2 {
     font-size: 20px;
     line-height: 1.8;

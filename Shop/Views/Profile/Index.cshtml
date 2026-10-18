@@ -31,24 +31,19 @@
         <span class="account-welcome-brand">حساب کاربری شما</span>
         <h1>@profileTitle</h1>
         <p>@profileDescription</p>
-        <div class="account-welcome-links">
-            @if (profileSection == "orders")
-            {
-                <a asp-controller="Tracking" asp-action="Index"><i class="bi bi-geo-alt" aria-hidden="true"></i> پیگیری سفارش <i class="bi bi-arrow-left" aria-hidden="true"></i></a>
-            }
-            else if (profileSection == "addresses")
-            {
-                <button type="button" data-open-address><i class="bi bi-plus-lg" aria-hidden="true"></i> افزودن آدرس جدید</button>
-            }
-            else if (profileSection == "favorites")
-            {
-                <a href="/search"><i class="bi bi-search" aria-hidden="true"></i> جست‌وجوی محصولات <i class="bi bi-arrow-left" aria-hidden="true"></i></a>
-            }
-            else
-            {
-                <a asp-controller="Profile" asp-action="Orders"><i class="bi bi-bag-check" aria-hidden="true"></i> مشاهده سفارش‌ها <i class="bi bi-arrow-left" aria-hidden="true"></i></a>
-            }
-        </div>
+        @if (profileSection is "orders" or "favorites")
+        {
+            <div class="account-welcome-links">
+                @if (profileSection == "orders")
+                {
+                    <a asp-controller="Tracking" asp-action="Index"><i class="bi bi-geo-alt" aria-hidden="true"></i> پیگیری سفارش <i class="bi bi-arrow-left" aria-hidden="true"></i></a>
+                }
+                else
+                {
+                    <a href="/search"><i class="bi bi-search" aria-hidden="true"></i> جست‌وجوی محصولات <i class="bi bi-arrow-left" aria-hidden="true"></i></a>
+                }
+            </div>
+        }
     </div>
     <div class="account-welcome-art" aria-hidden="true">
         <span class="account-welcome-tool-icon">
@@ -529,7 +524,7 @@
 
 @section Styles {
     <link href="Shop/css/pages/pages.css?v=12" rel="stylesheet"/>
-    <link href="Shop/css/pages/checkout.css?v=2" rel="stylesheet">
+    <link href="~/Shop/css/pages/checkout.css" rel="stylesheet" asp-append-version="true" />
     <link href="Shop/css/pages/account-page.css" rel="stylesheet" asp-append-version="true">
 }
 

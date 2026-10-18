@@ -1830,6 +1830,47 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
   color: var(--color-navy);
 }
 
+@media (max-width: 767px) {
+  .account-stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .account-stats article {
+    min-height: 126px;
+    flex-direction: column;
+    justify-content: center;
+    gap: 7px;
+    padding: 11px 6px;
+    text-align: center;
+  }
+
+  .account-stats .stat-icon {
+    width: 36px;
+    height: 36px;
+    flex-basis: 36px;
+    border-radius: 11px;
+    font-size: 15px;
+  }
+
+  .account-stats article > div {
+    align-items: center;
+  }
+
+  .account-stats strong {
+    font-size: 20px;
+    line-height: 1.25;
+  }
+
+  .account-stats article > div small {
+    overflow: visible;
+    font-size: 11px;
+    line-height: 1.45;
+    text-overflow: clip;
+    white-space: normal;
+  }
+}
+
 .account-tabs a[aria-current] > i:last-child {
   color: #9aa8b6;
 }
