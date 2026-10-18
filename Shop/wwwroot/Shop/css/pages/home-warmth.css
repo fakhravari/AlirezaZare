@@ -24,9 +24,7 @@
 .home-page #newest,
 .home-page #recommendations,
 .home-page #journal {
-  background:
-    radial-gradient(ellipse at 96% 2%, rgba(246, 197, 21, 0.075), transparent 27%),
-    linear-gradient(180deg, #faf8f2 0%, #f5f7f8 68%, #f8f6f0 100%);
+  background: #f5f7f8;
 }
 
 .home-page #collection > .container,
@@ -106,7 +104,7 @@
   .home-page #newest,
   .home-page #recommendations,
   .home-page #journal {
-    background: linear-gradient(180deg, #faf8f2 0%, #f5f7f8 100%);
+    background: #f5f7f8;
   }
 
   .home-page #collection > .container,

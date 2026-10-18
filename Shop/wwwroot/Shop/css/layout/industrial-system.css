@@ -13648,7 +13648,9 @@ body .electrical-swiper .swiper-pagination-bullet-active {
     gap: 12px;
     border-color: #dce4e9;
     border-radius: 12px;
-    background: rgba(255, 255, 255, 0.985);
+    background:
+      radial-gradient(circle at 100% 0, rgba(246, 197, 21, 0.045), transparent 30%),
+      linear-gradient(145deg, #fffefa, #f8f9fb);
     box-shadow: 0 20px 46px rgba(16, 42, 67, 0.18);
     overflow: auto;
     scrollbar-width: thin;
@@ -13663,9 +13665,9 @@ body .electrical-swiper .swiper-pagination-bullet-active {
     align-items: center;
     justify-content: space-between;
     gap: 18px;
-    border: 1px solid #e6d6b7;
+    border: 1px solid #e9e2d2;
     border-radius: 12px;
-    background: #f8f5ed;
+    background: #fbfaf6;
     color: var(--industrial-navy);
   }
 
