@@ -5,7 +5,7 @@
   const heading = document.getElementById("archive-title");
   const count = document.getElementById("journal-count");
   if (!nav || !heading || !count) return;
-  const perPage = 12;
+  const perPage = 6;
   let filter = "all";
   let page = 1;
   const number = (value) => window.HNUI.formatNumber(value);
@@ -30,12 +30,12 @@
       window.history[replace ? "replaceState" : "pushState"](null, "", url);
   }
   function render() {
-    const matches = posts.filter(
-      (post) =>
-        filter === "all" ||
-        post.dataset.branch === filter ||
-        post.dataset.topic === filter,
-    );
+    const matches = posts.filter((post) => {
+      if (filter === "all") return true;
+      if (filter.startsWith("area-"))
+        return post.dataset.area === filter.slice("area-".length);
+      return post.dataset.branch === filter || post.dataset.topic === filter;
+    });
     const pages = Math.max(1, Math.ceil(matches.length / perPage));
     page = Math.max(1, Math.min(page, pages));
     buttons.forEach((button) => {
