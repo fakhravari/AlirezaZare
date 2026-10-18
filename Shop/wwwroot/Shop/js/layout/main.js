@@ -831,12 +831,12 @@ $(function () {
 
   const innerCategoryGroups = {
     tools: [
-      ["دریل و پیچ‌گوشتی", "دریل چکشی", "دریل شارژی", "پیچ‌گوشتی برقی", "دریل ستونی", "پیچ‌گوشتی شارژی"],
-      ["فرز و برش", "فرز آهنگری", "مینی‌فرز", "اره عمودبر", "اره فارسی‌بر", "سنگ رومیزی"],
-      ["تجهیزات کارگاهی", "دستگاه جوش", "کارواش", "کمپرسور باد", "موتور برق", "هویه و ابزار لحیم‌کاری"],
-      ["مته و سوراخ‌کاری", "مته بتن", "مته فلز", "مته چوب", "مته الماسه", "گردبر"],
-      ["صفحه و تیغه", "صفحه برش آهن", "صفحه ساب", "صفحه الماسه", "تیغ اره عمودبر", "تیغ اره گردبر"],
-      ["متعلقات ابزار برقی", "سه‌نظام", "ذغال دستگاه", "دسته کمکی", "باتری یدکی", "شارژر ابزار"],
+      ["دریل و پیچ‌گوشتی", "دریل چکشی", "دریل شارژی", "پیچ‌گوشتی برقی", "دریل بتن‌کن"],
+      ["برش و سایش", "فرز و مینی‌فرز", "اره عمودبر", "اره گردبر", "صفحه برش"],
+      ["تجهیزات کارگاهی", "دستگاه جوش", "کارواش", "کمپرسور باد", "لوازم جانبی ابزار"],
+      ["مته و سوراخ‌کاری", "مته بتن", "مته فلز", "مته چوب", "مته الماسه"],
+      ["صفحه و تیغه", "صفحه برش", "صفحه ساب", "تیغ اره عمودبر", "تیغ اره گردبر"],
+      ["باتری و متعلقات", "باتری یدکی", "شارژر ابزار", "سه‌نظام", "ذغال دستگاه"],
     ],
     "hand-tools": [
       ["آچار و بکس", "آچار فرانسه", "ست بکس", "آچار آلن", "آچار تخت و رینگی", "آچار ترکمتر", "آچار لوله‌گیر"],
@@ -881,42 +881,6 @@ $(function () {
     ],
   };
 
-  const innerCategoryIcons = {
-    "دریل و پیچ‌گوشتی": "bi-tools",
-    "فرز و برش": "bi-disc",
-    "تجهیزات کارگاهی": "bi-wrench",
-    "مته و سوراخ‌کاری": "bi-crosshair",
-    "صفحه و تیغه": "bi-circle",
-    "متعلقات ابزار برقی": "bi-box-seam",
-    "آچار و بکس": "bi-tools",
-    "پیچ‌گوشتی و انبر": "bi-wrench",
-    "لوازم ابزار": "bi-briefcase",
-    "مقاومت و خازن": "bi-cpu",
-    "آی‌سی و نیمه‌رسانا": "bi-cpu",
-    "برد و ماژول": "bi-motherboard",
-    "سنسور و ماژول": "bi-broadcast",
-    "تجهیزات لحیم‌کاری": "bi-lightning-charge",
-    "بردهای توسعه": "bi-grid-3x3-gap",
-    "سیم و کابل": "bi-bezier2",
-    "سوکت و کانکتور": "bi-plug",
-    "اتصالات نصب": "bi-link-45deg",
-    "لامپ و LED": "bi-lightbulb",
-    "چراغ کارگاهی": "bi-lamp",
-    "لوازم روشنایی": "bi-brightness-high",
-    "کلید و پریز": "bi-toggle-on",
-    "فیوز و محافظ": "bi-shield-check",
-    "تجهیزات کنترل": "bi-sliders",
-    "ایمنی فردی": "bi-person-badge",
-    "حفاظت برق": "bi-shield-lock",
-    "ایمنی کارگاه": "bi-cone-striped",
-    "ابزار اندازه‌گیری": "bi-speedometer2",
-    "تست و عیب‌یابی": "bi-clipboard2-pulse",
-    "ابزار دقیق": "bi-rulers",
-    "دما و رطوبت": "bi-thermometer-half",
-    "اندازه‌گیری محیط": "bi-globe",
-    "منابع تست و کالیبراسیون": "bi-sliders",
-  };
-
   document.querySelectorAll(".category-nav-mega").forEach((menu) => {
     const sidebar = menu.querySelector(".category-mega-sidebar");
     const content = menu.querySelector(".category-mega-panels");
@@ -933,7 +897,7 @@ $(function () {
       );
       content.style.setProperty(
         "--category-mega-columns",
-        String(Math.min(6, activeGroups.length, availableColumns)),
+        String(Math.min(5, activeGroups.length, availableColumns)),
       );
     };
     const reset = () => {
@@ -960,16 +924,28 @@ $(function () {
       });
       content.replaceChildren();
       content.dataset.groupCount = String(groups.length);
+      const submenuHeading = document.createElement("div");
+      submenuHeading.className = "electrical-submenu-heading";
+      const headingCopy = document.createElement("span");
+      headingCopy.className = "electrical-submenu-heading-copy";
+      const headingTitle = document.createElement("strong");
+      const activeCategory = button.querySelector("span")?.textContent.trim();
+      headingTitle.textContent = `زیرشاخه‌های ${activeCategory || "محصولات"}`;
+      const headingCaption = document.createElement("small");
+      headingCaption.textContent = "دستهٔ موردنظر را برای دیدن کالاها انتخاب کنید";
+      headingCopy.append(headingTitle, headingCaption);
+      const groupCount = document.createElement("span");
+      groupCount.className = "electrical-submenu-heading-count";
+      groupCount.textContent = `${groups.length.toLocaleString("fa-IR")} گروه`;
+      submenuHeading.append(headingCopy, groupCount);
+      content.append(submenuHeading);
       groups.forEach(([title, ...items]) => {
         const group = document.createElement("section");
         group.className = "category-mega-group";
         const heading = document.createElement("a");
         heading.className = "category-mega-title";
         heading.href = `Search?q=${encodeURIComponent(title)}`;
-        const icon = document.createElement("i");
-        icon.className = `bi ${innerCategoryIcons[title] || "bi-grid"}`;
-        icon.setAttribute("aria-hidden", "true");
-        heading.append(icon, document.createTextNode(title));
+        heading.textContent = title;
         group.append(heading);
         items.forEach((label) => {
           const link = document.createElement("a");

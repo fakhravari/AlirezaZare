@@ -201,8 +201,8 @@
 }
 .contact-shortcuts-heading > p.contact-shortcuts-note {
   display: flex;
-  width: min(100%, 440px);
-  flex: 0 1 440px;
+  width: min(100%, 560px);
+  flex: 0 1 560px;
   align-items: center;
   gap: 10px;
   margin: 0 0 2px;
@@ -229,7 +229,7 @@
 }
 @media (min-width: 1200px) {
   .contact-shortcuts-heading > p.contact-shortcuts-note {
-    white-space: normal;
+    white-space: nowrap;
   }
 }
 .contact-shortcuts-grid {
