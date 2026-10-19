@@ -9,6 +9,7 @@
     strap: new Set(),
     availability: "all",
     discountOnly: false,
+    minPrice: 0,
     maxPrice: 60,
     query: "",
     sort: "recommended",
@@ -29,6 +30,7 @@
     ["brand", "type", "movement", "strap"].some((key) => state[key].size) ||
     state.availability !== "all" ||
     state.discountOnly ||
+    state.minPrice > 0 ||
     state.maxPrice < 60 ||
     Boolean(state.query);
   const brandPersianLabels = {
@@ -231,7 +233,8 @@
         if (state[key].has(label)) params.append(filterFields[key].slug, id);
       }),
     );
-    if (state.maxPrice < 60)
+    if (state.minPrice > 0) params.set("price-min", String(state.minPrice));
+    if (state.minPrice > 0 || state.maxPrice < 60)
       params.set(filterFields.price.slug, String(state.maxPrice));
     if (state.availability === "in-stock") params.set("available", "1");
     if (state.availability === "out-of-stock") params.set("available", "0");
@@ -279,7 +282,11 @@
       params.get(filterFields.price.slug) ?? params.get("maxPrice"),
     );
     state.maxPrice =
-      Number.isFinite(price) && price >= 10 && price <= 60 ? price : 60;
+      Number.isFinite(price) && price >= 1 && price <= 60 ? price : 60;
+    const minPrice = Number(params.get("price-min") ?? params.get("minPrice"));
+    state.minPrice = Number.isFinite(minPrice) && minPrice >= 0 && minPrice < state.maxPrice
+      ? minPrice
+      : 0;
     state.query = params.get("q")?.trim() || "";
     const availability = (
       params.get("available") ?? params.get("onlyAvailable") ?? ""
@@ -304,6 +311,7 @@
     );
     $("#availabilityFilter").value = state.availability;
     $("#discountFilter").checked = state.discountOnly;
+    $("#minPrice").value = state.minPrice;
     $("#maxPrice").value = state.maxPrice;
     $("#productSearch").value = state.query;
     $("#sortProducts").value = state.sort;
@@ -364,6 +372,7 @@
             ? isProductAvailable(p)
             : !isProductAvailable(p))) &&
         (!state.discountOnly || isProductDiscounted(p)) &&
+        p.price >= state.minPrice &&
         p.price <= state.maxPrice &&
         (!state.query ||
           `${p.name} ${p.brand} ${p.type} ${p.powerSource || p.movement}`.includes(state.query)),
@@ -475,9 +484,9 @@
         ),
       ),
     );
-    if (state.maxPrice < 60)
+    if (state.minPrice > 0 || state.maxPrice < 60)
       chips.push(
-        `<button class="filter-chip" data-key="price">تا ${fa(state.maxPrice)} میلیون ×</button>`,
+        `<button class="filter-chip" data-key="price">${fa(state.minPrice)} تا ${fa(state.maxPrice)} میلیون تومان ×</button>`,
       );
     if (state.availability !== "all")
       chips.push(
@@ -494,7 +503,9 @@
       (chip) =>
         (chip.onclick = () => {
           if (chip.dataset.key === "price") {
+            state.minPrice = 0;
             state.maxPrice = 60;
+            $("#minPrice").value = 0;
             $("#maxPrice").value = 60;
           } else if (chip.dataset.key === "available") {
             state.availability = "all";
@@ -518,10 +529,12 @@
     ["brand", "type", "movement", "strap"].forEach((key) => state[key].clear());
     state.availability = "all";
     state.discountOnly = false;
+    state.minPrice = 0;
     state.maxPrice = 60;
     state.query = "";
     $$(".filter-option input").forEach((input) => (input.checked = false));
     $("#availabilityFilter").value = "all";
+    $("#minPrice").value = 0;
     $("#maxPrice").value = 60;
     $("#productSearch").value = "";
     $$("[data-filter-search]").forEach((input) => {
@@ -535,8 +548,13 @@
     render(true, true);
   }
   function updatePrice() {
+    state.minPrice = Number($("#minPrice").value);
     state.maxPrice = Number($("#maxPrice").value);
-    $("#maxPriceLabel").textContent = `${fa(state.maxPrice)} میلیون`;
+    const range = $(".price-range");
+    range.style.setProperty("--range-start", `${(state.minPrice / 60) * 100}%`);
+    range.style.setProperty("--range-end", `${(state.maxPrice / 60) * 100}%`);
+    $("#minPriceLabel").textContent = fa(state.minPrice);
+    $("#maxPriceLabel").textContent = fa(state.maxPrice);
   }
   buildFilters();
   $$("[data-filter-search]").forEach((input) => {
@@ -585,10 +603,19 @@
     state.discountOnly = event.target.checked;
     render(true, true);
   };
-  $("#maxPrice").oninput = () => {
+  $("#minPrice").oninput = () => {
+    if (Number($("#minPrice").value) >= state.maxPrice)
+      $("#minPrice").value = Math.max(0, state.maxPrice - 1);
     updatePrice();
     render(true);
   };
+  $("#maxPrice").oninput = () => {
+    if (Number($("#maxPrice").value) <= state.minPrice)
+      $("#maxPrice").value = Math.min(60, state.minPrice + 1);
+    updatePrice();
+    render(true);
+  };
+  $("#minPrice").onchange = () => scrollToResultsStart();
   $("#maxPrice").onchange = () => scrollToResultsStart();
   $("#productSearch").oninput = (e) => {
     state.query = e.target.value.trim();

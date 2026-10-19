@@ -211,8 +211,8 @@ h6,
     width: 100% !important;
     max-width: none !important;
     height: 78px;
-    padding-right: max(28px, calc((100% - 1480px) / 2)) !important;
-    padding-left: max(28px, calc((100% - 1480px) / 2)) !important;
+    padding-right: max(28px, calc((100% - var(--container-wide-max)) / 2)) !important;
+    padding-left: max(28px, calc((100% - var(--container-wide-max)) / 2)) !important;
     border-top: 0 !important;
     border-bottom: 0 !important;
     background: transparent !important;
@@ -220,7 +220,7 @@ h6,
 
   .home-page #mainNav .home-nav-groups {
     position: absolute;
-    inset: 0 max(28px, calc((100% - 1480px) / 2));
+    inset: 0 max(28px, calc((100% - var(--container-wide-max)) / 2));
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -265,7 +265,7 @@ h6,
   }
 
   .home-page #mainNav .navbar-brand {
-    right: max(28px, calc((100% - 1480px) / 2));
+    right: max(28px, calc((100% - var(--container-wide-max)) / 2));
     color: var(--industrial-navy) !important;
   }
 
@@ -512,8 +512,8 @@ h6,
   position: absolute;
   top: calc(100% - 2px);
   z-index: 1050;
-  right: max(24px, calc((100% - 1480px) / 2));
-  left: max(24px, calc((100% - 1480px) / 2));
+  right: max(24px, calc((100% - var(--container-wide-max)) / 2));
+  left: max(24px, calc((100% - var(--container-wide-max)) / 2));
   display: none;
   grid-template-columns: 250px minmax(0, 1fr);
   gap: 0;
@@ -4073,7 +4073,7 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
 /* Homepage section panels: consistent surfaces with clear visual hierarchy. */
 .home-page > section > .container,
 .home-page #home-main-content > section > .container {
-  width: min(1480px, calc(100% - 56px));
+  width: min(var(--container-wide-max), calc(100% - 56px));
   max-width: none;
 }
 
@@ -4331,8 +4331,8 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
     width: 100% !important;
     max-width: none !important;
     height: 78px;
-    padding-right: max(28px, calc((100% - 1480px) / 2)) !important;
-    padding-left: max(28px, calc((100% - 1480px) / 2)) !important;
+    padding-right: max(28px, calc((100% - var(--container-wide-max)) / 2)) !important;
+    padding-left: max(28px, calc((100% - var(--container-wide-max)) / 2)) !important;
     border: 0 !important;
     background: transparent !important;
   }
@@ -4343,7 +4343,7 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
     right: 50%;
     z-index: 2;
     display: grid;
-    width: min(1480px, calc(100% - 56px));
+    width: min(var(--container-wide-max), calc(100% - 56px));
     height: 85px;
     padding: 13px 220px 13px 190px;
     grid-template-columns: minmax(260px, 480px) 180px;
@@ -4355,7 +4355,7 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
 
   .inner-page #mainNav .home-nav-groups {
     position: absolute;
-    inset: 0 max(28px, calc((100% - 1480px) / 2));
+    inset: 0 max(28px, calc((100% - var(--container-wide-max)) / 2));
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -4397,7 +4397,7 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
   .inner-page #mainNav .navbar-brand {
     position: absolute;
     top: -64px;
-    right: max(28px, calc((100% - 1480px) / 2));
+    right: max(28px, calc((100% - var(--container-wide-max)) / 2));
     margin: 0;
     color: var(--industrial-navy) !important;
     text-shadow: none !important;
@@ -13953,8 +13953,8 @@ body .electrical-swiper .swiper-pagination-bullet-active {
 /* Refined typography and item rhythm for the desktop category mega menu. */
 @media (min-width: 992px) {
   .inner-page #mainNav .category-nav-mega {
-    right: max(18px, calc((100% - 1540px) / 2));
-    left: max(18px, calc((100% - 1540px) / 2));
+    right: max(18px, calc((100% - var(--container-wide-max)) / 2));
+    left: max(18px, calc((100% - var(--container-wide-max)) / 2));
     height: min(580px, calc(100vh - 220px));
     min-height: min(460px, calc(100vh - 220px));
     grid-template-columns: 276px minmax(0, 1fr);

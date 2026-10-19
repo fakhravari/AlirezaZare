@@ -2610,8 +2610,8 @@ h6 {
 }
 @media (min-width: 1200px) {
   .article-content-section > .container {
-    width: min(1540px, calc(100% - 48px));
-    max-width: 1540px;
+    width: min(var(--container-wide-max), calc(100% - 48px));
+    max-width: var(--container-wide-max);
     padding-inline: 0;
   }
   .article-content-section .article-layout {

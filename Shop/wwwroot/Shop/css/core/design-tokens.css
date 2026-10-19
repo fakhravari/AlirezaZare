@@ -68,6 +68,7 @@
   --radius-panel-featured: 24px 24px 14px 24px;
   --radius-panel-floating: 22px;
   --container-max: 1320px;
+  --container-wide-max: 1480px;
   --container-gutter: 40px;
   --header-height: 96px;
   --panel-shell-bg:

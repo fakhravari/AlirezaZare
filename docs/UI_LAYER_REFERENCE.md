@@ -96,6 +96,8 @@ core/ui-core.js
 
 توکن‌های فاصله، container، radius و shadow نیز در همان فایل هستند؛ نام و مقدار را پیش از تعریف مقدار جدید بخوانید. aliasهای قدیمی را با نامشان تفسیر نکنید: در وضعیت فعلی `--cream` به طلایی وصل است، اما `--cream2` زمینهٔ روشن است. aliasهای `--industrial-*` را نیز trace کنید.
 
+برای محتوای پهن دسکتاپ، `--container-wide-max` سقف مشترک ۱۴۸۰px است. خانه، جستجو، آرشیو مجله، مقاله و مگامنوی صفحات داخلی باید از همین سقف و فاصلهٔ مرکزی استفاده کنند؛ بخش‌های معمولی‌تر می‌توانند از سقف Bootstrap یا قاب ۱۳۶۰px صفحه استفاده کنند. هدرها و heroهای تمام‌عرض پس‌زمینهٔ خود را حفظ می‌کنند و محتوای داخلی‌شان در قاب پهن هم‌تراز می‌شود.
+
 ### مالکیت فایل‌های CSS
 
 | فایل/خانواده | مالکیت معمول | نکتهٔ عیب‌یابی |
@@ -195,7 +197,7 @@ CSS/JS عمومی layout و store که بالاتر آمده‌اند به هم�
 | Route | Controller/View | CSS اختصاصی | JS صفحه | landmark/نقطهٔ تعامل مهم |
 |---|---|---|---|---|
 | `/` | `HomeController` → `Views/Home/Index.cshtml` | section اختصاصی ندارد | section اختصاصی ندارد | `body.home-page`, `header.hero#home`, `section.electrical-showcase`, `section.py-section`, اسلایدرها؛ header home را با inner مقایسه کنید |
-| `/search` | `ProductController.Index` → `Views/Product/List.cshtml` | `pages/search.css`, `pages/search-mobile.css` | `pages/search.js` | `section.search-intro` → `main.search-main` → `section.results-area`; فیلتر/مرتب‌سازی، URL، صفحه‌بندی، حالت خالی و filter drawer |
+| `/search` | `ProductController.Index` → `Views/Product/List.cshtml` | `pages/search.css`, `pages/search-mobile.css` | `pages/search.js` | `section.search-intro` و `main.search-main` از سقف پهن ۱۴۸۰px استفاده می‌کنند؛ فیلتر/مرتب‌سازی، URL، صفحه‌بندی، حالت خالی و filter drawer |
 | `/products/{slug}` که slug با `-{id}` تمام می‌شود (مسیرهای قبلی `/products/{id}` و `/product?id=…` با ۳۰۱ هدایت می‌شوند) | `ProductController.Details` → `Views/Product/Details.cshtml` | `pages/pages.css`; بخش فروشگاه در `store/commerce.css` | `page-content.js` به‌عنوان script عمومی صفحه | slug از `store/catalog.js` و لینک‌های مشترک در `layout/main.js`; `main.flow-main`, product view و gallery; variant، accessory، قیمت، cart، favorite/compare، feedback |
 | `/cart` | `CartController` → `Views/Cart/Index.cshtml` | `pages/checkout.css`, `form-confirm-dialog.css`, `pages.css` | `form-confirm-dialog.js`, `address-fields.js`, `checkout.js`, `iran-places.js`, `page-content.js` | `main.flow-main`, `#cartView`, address/payment sections; empty/populated, quantity, coupon, address dialog |
 | `/checkout` | `CheckoutController` → `Views/Checkout/Index.cshtml` | `checkout.css`, `pages.css` | `checkout.js`, `page-content.js` | `main.flow-main.invoice-page`, invoice/address/payment؛ نمایش هر ویژگی/متعلقه در ردیف مستقل، قیمت واحد و جمع ردیف، سبد خالی/پر، روش پرداخت demo، modal آدرس |

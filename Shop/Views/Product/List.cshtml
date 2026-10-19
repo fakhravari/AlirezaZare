@@ -113,33 +113,27 @@
             </button>
             <div class="filter-options" id="strapFilters"></div>
         </div>
-        <div class="filter-group" data-filter-fa="بازه قیمت" data-filter-en="Price range" data-filter-slug="price-range">
+        <div class="filter-group" data-filter-fa="بازه قیمت تومان" data-filter-en="Price range Toman" data-filter-slug="price-range">
             <button type="button" aria-expanded="false">
-                <span class="filter-group-title" data-filter-fa="بازه قیمت" data-filter-en="Price range" data-filter-slug="price-range">
-                    <i class="bi bi-cash-stack" aria-hidden="true"></i><span>بازه قیمت</span>
+                <span class="filter-group-title" data-filter-fa="بازه قیمت تومان" data-filter-en="Price range Toman" data-filter-slug="price-range">
+                    <i class="bi bi-cash-stack" aria-hidden="true"></i><span>بازه قیمت (تومان)</span>
                 </span>
                 <span class="filter-group-arrow">
                     <i class="bi bi-chevron-down" aria-hidden="true"></i>
                 </span>
             </button>
             <div class="price-filter">
-                <div>
-                    <span id="minPriceLabel">
-                        ۰
-                    </span
-                    ><span id="maxPriceLabel">۶۰ میلیون</span>
+                <div class="price-filter-values" aria-live="polite">
+                    <span>از <b id="minPriceLabel">۰</b></span>
+                    <span>تا <b id="maxPriceLabel">۶۰</b> میلیون تومان</span>
                 </div>
-                <label class="ui-sr-only" for="maxPrice">
-                    حداکثر قیمت
-                </label
-                >
-                <input
-                    id="maxPrice"
-                    type="range"
-                    min="10"
-                    max="60"
-                    value="60"
-                    step="5"/><small>حداکثر قیمت انتخابی</small>
+                <div class="price-range" dir="ltr" style="--range-start: 0%; --range-end: 100%">
+                    <div class="price-range-track" aria-hidden="true"></div>
+                    <label class="ui-sr-only" for="minPrice">حداقل قیمت به میلیون تومان</label>
+                    <input id="minPrice" class="price-range-input price-range-min" type="range" min="0" max="60" value="0" step="1" aria-label="حداقل قیمت به میلیون تومان" />
+                    <label class="ui-sr-only" for="maxPrice">حداکثر قیمت به میلیون تومان</label>
+                    <input id="maxPrice" class="price-range-input price-range-max" type="range" min="0" max="60" value="60" step="1" aria-label="حداکثر قیمت به میلیون تومان" />
+                </div>
             </div>
         </div>
     </aside>

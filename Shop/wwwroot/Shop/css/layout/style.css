@@ -11453,7 +11453,7 @@ textarea:focus-visible {
 
 .newsletter .container {
   width: calc(100% - 64px);
-  max-width: 1480px;
+  max-width: var(--container-wide-max);
   padding: 38px 42px;
   border: 1px solid #ded5c7;
   border-radius: 22px;

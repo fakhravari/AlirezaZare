@@ -869,7 +869,7 @@
 @media (min-width: 1200px) {
   .journal-page > .container {
     width: calc(100% - 48px);
-    max-width: 1480px;
+    max-width: var(--container-wide-max);
   }
 }
 
