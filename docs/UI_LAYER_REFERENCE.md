@@ -196,7 +196,7 @@ CSS/JS عمومی layout و store که بالاتر آمده‌اند به هم�
 
 | Route | Controller/View | CSS اختصاصی | JS صفحه | landmark/نقطهٔ تعامل مهم |
 |---|---|---|---|---|
-| `/` | `HomeController` → `Views/Home/Index.cshtml` | section اختصاصی ندارد | section اختصاصی ندارد | `body.home-page`, `header.hero#home`, `section.electrical-showcase`, `section.py-section`, اسلایدرها؛ header home را با inner مقایسه کنید |
+| `/` | `HomeController` → `Views/Home/Index.cshtml` | section اختصاصی ندارد | `layout/main.js` | `body.home-page`, `header.hero#home`, `section.electrical-showcase`, `section.py-section`; شبکه و اسلایدرهای محصولات از عرض ۱۴۰۰px شش کارت دارند، در ۹۹۲–۱۳۹۹ چهار/پنج و در تبلت/موبایل دو کارت |
 | `/search` | `ProductController.Index` → `Views/Product/List.cshtml` | `pages/search.css`, `pages/search-mobile.css` | `pages/search.js` | `section.search-intro` و `main.search-main` از سقف پهن ۱۴۸۰px استفاده می‌کنند؛ فیلتر/مرتب‌سازی، URL، صفحه‌بندی، حالت خالی و filter drawer |
 | `/products/{slug}` که slug با `-{id}` تمام می‌شود (مسیرهای قبلی `/products/{id}` و `/product?id=…` با ۳۰۱ هدایت می‌شوند) | `ProductController.Details` → `Views/Product/Details.cshtml` | `pages/pages.css`; بخش فروشگاه در `store/commerce.css` | `page-content.js` به‌عنوان script عمومی صفحه | slug از `store/catalog.js` و لینک‌های مشترک در `layout/main.js`; `main.flow-main`, product view و gallery; variant، accessory، قیمت، cart، favorite/compare، feedback |
 | `/cart` | `CartController` → `Views/Cart/Index.cshtml` | `pages/checkout.css`, `form-confirm-dialog.css`, `pages.css` | `form-confirm-dialog.js`, `address-fields.js`, `checkout.js`, `iran-places.js`, `page-content.js` | `main.flow-main`, `#cartView`, address/payment sections; empty/populated, quantity, coupon, address dialog |

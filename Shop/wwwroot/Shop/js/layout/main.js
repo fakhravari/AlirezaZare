@@ -1098,6 +1098,7 @@ $(function () {
       0: { items: 2 },
       768: { items: 2 },
       1100: { items: 5 },
+      1400: { items: 6 },
     },
   };
 

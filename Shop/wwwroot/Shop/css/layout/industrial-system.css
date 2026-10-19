@@ -2075,6 +2075,13 @@ footer .trust-badges .trust-badge-image {
   }
 }
 
+@media (min-width: 1400px) {
+  #productGrid > .product-col {
+    flex: 0 0 16.666667%;
+    max-width: 16.666667%;
+  }
+}
+
 /* Responsive consistency */
 #mainNav .mobile-header-search {
   display: none;
