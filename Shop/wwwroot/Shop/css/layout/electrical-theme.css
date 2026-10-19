@@ -769,7 +769,7 @@ body {
     padding: 0;
   }
   .electrical-banner-image {
-    object-position: 24% center;
+    object-position: center center;
   }
   .electrical-copy {
     position: relative;
