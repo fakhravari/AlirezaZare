@@ -14501,3 +14501,43 @@ body .electrical-swiper .swiper-pagination-bullet-active {
     transform: translateX(-2px);
   }
 }
+
+/* Keep the mobile header-cart total and its safety note in separate rows. */
+@media (max-width: 575px) {
+  #cartPanel .cart-footer .cart-total-summary {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+    min-height: 0;
+    padding: 10px;
+  }
+
+  #cartPanel .cart-footer .cart-total-amount {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  #cartPanel .cart-footer .cart-total-amount > span {
+    flex: 0 0 auto;
+  }
+
+  #cartPanel .cart-footer .cart-total-amount > strong {
+    max-width: 100%;
+    text-align: left;
+  }
+
+  #cartPanel .cart-footer .cart-safety-badge {
+    width: 100%;
+    min-height: 0;
+    padding: 8px 0 0;
+    border-top: 1px solid rgba(197, 157, 75, 0.24);
+    border-inline-start: 0;
+    align-items: center;
+  }
+
+  #cartPanel .cart-safety-copy {
+    flex: 1 1 auto;
+    overflow-wrap: anywhere;
+  }
+}

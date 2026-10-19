@@ -121,8 +121,8 @@
   }
 
   .home-page #productGrid .product-info > p {
-    min-height: 76px;
-    margin-top: auto;
+    min-height: 58px;
+    margin-top: 6px;
   }
 }
 
