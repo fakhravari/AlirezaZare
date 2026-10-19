@@ -194,7 +194,7 @@
 3. در DevTools روی عنصر، `Computed` و `Styles` را ببینید: قانون برنده، فایل و خط، specificity، مقدار خط‌خورده، media query فعال و کلاس‌های حالت (`active`, `open`, `is-*`) را ثبت کنید.
 4. همان مؤلفه را در خانه و صفحهٔ داخلی، و در عرض دسکتاپ و موبایل مقایسه کنید. `home-page`/`inner-page` و variant هدر می‌توانند markup یا selector متفاوت بسازند.
 5. قانون را در فایل مالک اصلاح کنید؛ selector را به ریشهٔ صفحه/کامپوننت محدود کنید. از selectorهای سراسری مثل `section`, `button`, `.card` و `!important` جدید پرهیز کنید.
-6. با hard refresh/cache-busting بررسی کنید که مرورگر asset جدید را گرفته؛ query-version دستی در بعضی Viewها با `asp-append-version` در layout فرق دارد.
+6. با hard refresh/cache-busting بررسی کنید که مرورگر asset جدید را گرفته؛ stylesheet و scriptهای View از `asp-append-version` استفاده می‌کنند و مسیرهای ثابت با `~/Shop/` نوشته می‌شوند.
 
 الگوی تشخیص سریع:
 
@@ -289,7 +289,7 @@ dotnet run --project Shop/Shop.csproj --no-launch-profile --urls http://localhos
 - در تغییر route/controller مدل، `dotnet build Shop.sln` را اجرا کنید.
 - در تغییر JS، syntax و حالت‌های no-data / malformed storage را بررسی کنید.
 - پروژه فعلاً test project ثبت‌شده در solution ندارد؛ این را به‌عنوان نبود تست خودکار اعلام کنید، نه «تست موفق».
-- `asp-append-version="true"` برای بسیاری از assetها فعال است؛ برخی Viewها هنوز query version دستی دارند. اگر مرورگر CSS/JS قدیمی نشان داد، ابتدا URL و cache-busting واقعی asset را بررسی کنید.
+- stylesheet و scriptهای اختصاصی View از `asp-append-version="true"` استفاده می‌کنند؛ مسیرهای asset ثابت در Razor با `~/Shop/` آغاز می‌شوند تا به مسیر جاری وابسته نباشند. اگر مرورگر CSS/JS قدیمی نشان داد، ابتدا URL نهایی و cache-busting واقعی asset را بررسی کنید.
 
 ## ۹. رودمپ پیشنهادی توسعه
 

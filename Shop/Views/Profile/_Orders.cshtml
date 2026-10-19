@@ -1,0 +1,246 @@
+@model bool
+
+<section id="orders" class="account-section" hidden="@(Model ? null : "hidden")">
+<div class="orders-heading">
+    <div>
+        <span>تاریخچه خرید</span>
+        <h2 id="ordersTitle" tabindex="-1">سفارش‌های من <small id="ordersTotal">۱۰ سفارش</small></h2>
+    </div>
+    <a asp-controller="Tracking" asp-action="Index"><i class="bi bi-geo-alt"></i> پیگیری سفارش</a>
+</div>
+<div class="profile-order-list">
+<article class="profile-order-card">
+    <header>
+        <div>
+            <span class="order-status is-shipping"><i class="bi bi-truck"></i> در حال ارسال</span><strong>سفارش HN-۱۴۰۵۰۶۲۱</strong>
+        </div>
+        <time datetime="2026-09-08">۱۷ شهریور ۱۴۰۵</time>
+    </header>
+    <div class="order-body">
+        <div class="order-products">
+            <span class="order-product-icon" aria-hidden="true">
+                <i class="bi bi-tools"></i>
+            </span>
+            <div>
+                <strong>دریل چکشی شارژی با سه‌نظام اتوماتیک</strong><small>۱ کالا · پرداخت آنلاین</small>
+            </div>
+        </div>
+        <div class="order-total">
+            <small>مبلغ سفارش</small><strong>۲۴٬۵۰۰٬۰۰۰ تومان</strong>
+        </div>
+    </div>
+    <footer>
+        <span><i class="bi bi-box-seam"></i> تحویل به شرکت پست</span><a asp-controller="Tracking" asp-action="Index">مشاهده جزئیات <i class="bi bi-arrow-left"></i></a>
+    </footer>
+</article>
+<article class="profile-order-card">
+    <header>
+        <div>
+            <span class="order-status is-processing"><i class="bi bi-hourglass-split"></i> در حال آماده‌سازی</span><strong>سفارش HN-۱۴۰۵۰۶۱۸</strong>
+        </div>
+        <time datetime="2026-09-05">۱۴ شهریور ۱۴۰۵</time>
+    </header>
+    <div class="order-body">
+        <div class="order-products order-products-multiple">
+            <span class="order-product-icon" aria-hidden="true">
+                <i class="bi bi-box-seam"></i>
+            </span>
+            <div>
+                <strong>دریل پیچ‌گوشتی شارژی و مولتی‌متر دیجیتال دستی</strong><small>۲ کالا · پرداخت آنلاین</small>
+            </div>
+        </div>
+        <div class="order-total">
+            <small>مبلغ سفارش</small><strong>۴۶٬۰۰۰٬۰۰۰ تومان</strong>
+        </div>
+    </div>
+    <footer>
+        <span><i class="bi bi-shield-check"></i> اصالت کالا تأیید شد</span><a asp-controller="Tracking" asp-action="Index">مشاهده جزئیات <i class="bi bi-arrow-left"></i></a>
+    </footer>
+</article>
+<article class="profile-order-card">
+    <header>
+        <div>
+            <span class="order-status is-delivered"><i class="bi bi-check2-circle"></i> تحویل‌شده</span><strong>سفارش HN-۱۴۰۵۰۵۹۲</strong>
+        </div>
+        <time datetime="2026-08-22">۳۱ مرداد ۱۴۰۵</time>
+    </header>
+    <div class="order-body">
+        <div class="order-products">
+            <span class="order-product-icon" aria-hidden="true">
+                <i class="bi bi-lightning-charge"></i>
+            </span>
+            <div>
+                <strong>دریل چکشی برقی سه‌نظام اتوماتیک</strong><small>۱ کالا · پرداخت آنلاین</small>
+            </div>
+        </div>
+        <div class="order-total">
+            <small>مبلغ سفارش</small><strong>۲۶٬۰۰۰٬۰۰۰ تومان</strong>
+        </div>
+    </div>
+    <footer>
+        <span><i class="bi bi-calendar-check"></i> تحویل در ۲ شهریور</span><a href="/products/electric-hammer-drill-with-keyless-chuck-5">خرید مجدد <i class="bi bi-arrow-left"></i></a>
+    </footer>
+</article>
+<article class="profile-order-card">
+    <header>
+        <div>
+            <span class="order-status is-delivered"><i class="bi bi-check2-circle"></i> تحویل‌شده</span><strong>سفارش HN-۱۴۰۵۰۵۸۵</strong>
+        </div><time datetime="2026-08-17">۲۶ مرداد ۱۴۰۵</time>
+    </header>
+    <div class="order-body">
+        <div class="order-products">
+            <span class="order-product-icon" aria-hidden="true">
+                <i class="bi bi-tools"></i>
+            </span>
+            <div>
+                <strong>دریل چکشی برقی</strong><small>۱ کالا · پرداخت آنلاین</small>
+            </div>
+        </div>
+        <div class="order-total">
+            <small>مبلغ سفارش</small><strong>۱۸٬۷۰۰٬۰۰۰ تومان</strong>
+        </div>
+    </div>
+    <footer>
+        <span><i class="bi bi-check2-circle"></i> سفارش با موفقیت تحویل شد</span><a href="/products/electric-hammer-drill-3">خرید مجدد <i class="bi bi-arrow-left"></i></a>
+    </footer>
+</article>
+<article class="profile-order-card">
+    <header>
+        <div>
+            <span class="order-status is-delivered"><i class="bi bi-check2-circle"></i> تحویل‌شده</span><strong>سفارش HN-۱۴۰۵۰۵۷۲</strong>
+        </div><time datetime="2026-08-08">۱۷ مرداد ۱۴۰۵</time>
+    </header>
+    <div class="order-body">
+        <div class="order-products order-products-multiple">
+            <span class="order-product-icon" aria-hidden="true">
+                <i class="bi bi-box-seam"></i>
+            </span>
+            <div>
+                <strong>دریل چکشی شارژی و دریل پیچ‌گوشتی شارژی</strong><small>۲ کالا · پرداخت آنلاین</small>
+            </div>
+        </div>
+        <div class="order-total">
+            <small>مبلغ سفارش</small><strong>۵۱٬۲۰۰٬۰۰۰ تومان</strong>
+        </div>
+    </div>
+    <footer>
+        <span><i class="bi bi-check2-circle"></i> سفارش با موفقیت تحویل شد</span><a href="/products/cordless-hammer-drill-1">خرید مجدد <i class="bi bi-arrow-left"></i></a>
+    </footer>
+</article>
+<article class="profile-order-card">
+    <header>
+        <div>
+            <span class="order-status is-delivered"><i class="bi bi-check2-circle"></i> تحویل‌شده</span><strong>سفارش HN-۱۴۰۵۰۵۴۰</strong>
+        </div><time datetime="2026-07-30">۸ مرداد ۱۴۰۵</time>
+    </header>
+    <div class="order-body">
+        <div class="order-products">
+            <span class="order-product-icon" aria-hidden="true">
+                <i class="bi bi-lightning-charge"></i>
+            </span>
+            <div>
+                <strong>دریل چکشی برقی سه‌نظام اتوماتیک</strong><small>۱ کالا · پرداخت آنلاین</small>
+            </div>
+        </div>
+        <div class="order-total">
+            <small>مبلغ سفارش</small><strong>۲۹٬۸۰۰٬۰۰۰ تومان</strong>
+        </div>
+    </div>
+    <footer>
+        <span><i class="bi bi-check2-circle"></i> سفارش با موفقیت تحویل شد</span><a href="/products/electric-hammer-drill-with-keyless-chuck-5">خرید مجدد <i class="bi bi-arrow-left"></i></a>
+    </footer>
+</article>
+<article class="profile-order-card">
+    <header>
+        <div>
+            <span class="order-status is-delivered"><i class="bi bi-check2-circle"></i> تحویل‌شده</span><strong>سفارش HN-۱۴۰۵۰۴۹۸</strong>
+        </div><time datetime="2026-07-21">۳۰ تیر ۱۴۰۵</time>
+    </header>
+    <div class="order-body">
+        <div class="order-products">
+            <span class="order-product-icon" aria-hidden="true">
+                <i class="bi bi-speedometer2"></i>
+            </span>
+            <div>
+                <strong>دریل پیچ‌گوشتی شارژی</strong><small>۱ کالا · پرداخت آنلاین</small>
+            </div>
+        </div>
+        <div class="order-total">
+            <small>مبلغ سفارش</small><strong>۲۲٬۴۰۰٬۰۰۰ تومان</strong>
+        </div>
+    </div>
+    <footer>
+        <span><i class="bi bi-check2-circle"></i> سفارش با موفقیت تحویل شد</span><a href="/products/cordless-drill-driver-2">خرید مجدد <i class="bi bi-arrow-left"></i></a>
+    </footer>
+</article>
+<article class="profile-order-card">
+    <header>
+        <div>
+            <span class="order-status is-delivered"><i class="bi bi-check2-circle"></i> تحویل‌شده</span><strong>سفارش HN-۱۴۰۵۰۴۶۱</strong>
+        </div><time datetime="2026-07-08">۱۷ تیر ۱۴۰۵</time>
+    </header>
+    <div class="order-body">
+        <div class="order-products order-products-multiple">
+            <span class="order-product-icon" aria-hidden="true">
+                <i class="bi bi-box-seam"></i>
+            </span>
+            <div>
+                <strong>دریل چکشی برقی و دریل چکشی برقی سه‌نظام اتوماتیک</strong><small>۲ کالا · پرداخت آنلاین</small>
+            </div>
+        </div>
+        <div class="order-total">
+            <small>مبلغ سفارش</small><strong>۴۳٬۶۰۰٬۰۰۰ تومان</strong>
+        </div>
+    </div>
+    <footer>
+        <span><i class="bi bi-check2-circle"></i> سفارش با موفقیت تحویل شد</span><a href="/products/electric-hammer-drill-3">خرید مجدد <i class="bi bi-arrow-left"></i></a>
+    </footer>
+</article>
+<article class="profile-order-card">
+    <header>
+        <div>
+            <span class="order-status is-delivered"><i class="bi bi-check2-circle"></i> تحویل‌شده</span><strong>سفارش HN-۱۴۰۵۰۴۲۲</strong>
+        </div><time datetime="2026-06-22">۱ تیر ۱۴۰۵</time>
+    </header>
+    <div class="order-body">
+        <div class="order-products">
+            <span class="order-product-icon" aria-hidden="true">
+                <i class="bi bi-tools"></i>
+            </span>
+            <div>
+                <strong>دریل چکشی شارژی با سه‌نظام اتوماتیک</strong><small>۱ کالا · پرداخت آنلاین</small>
+            </div>
+        </div>
+        <div class="order-total">
+            <small>مبلغ سفارش</small><strong>۲۵٬۹۰۰٬۰۰۰ تومان</strong>
+        </div>
+    </div>
+    <footer>
+        <span><i class="bi bi-check2-circle"></i> سفارش با موفقیت تحویل شد</span><a href="/products/cordless-hammer-drill-1">خرید مجدد <i class="bi bi-arrow-left"></i></a>
+    </footer>
+</article>
+<article class="profile-order-card">
+    <header>
+        <div>
+            <span class="order-status is-delivered"><i class="bi bi-check2-circle"></i> تحویل‌شده</span><strong>سفارش HN-۱۴۰۵۰۳۸۹</strong>
+        </div><time datetime="2026-06-09">۱۹ خرداد ۱۴۰۵</time>
+    </header>
+    <div class="order-body">
+        <div class="order-products">
+            <span class="order-product-icon" aria-hidden="true">
+                <i class="bi bi-lightning-charge"></i>
+            </span>
+            <div>
+                <strong>دریل چکشی برقی سه‌نظام اتوماتیک</strong><small>۱ کالا · پرداخت آنلاین</small>
+            </div>
+        </div>
+        <div class="order-total">
+            <small>مبلغ سفارش</small><strong>۳۱٬۵۰۰٬۰۰۰ تومان</strong>
+        </div>
+    </div>
+    <footer>
+        <span><i class="bi bi-check2-circle"></i> سفارش با موفقیت تحویل شد</span><a href="/products/electric-hammer-drill-with-keyless-chuck-5">خرید مجدد <i class="bi bi-arrow-left"></i></a>
+    </footer>
+</article>
+</div>
+</section>

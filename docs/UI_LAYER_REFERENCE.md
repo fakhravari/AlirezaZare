@@ -138,6 +138,8 @@ core/ui-core.js
 
 این‌ها breakpointهای موجودند، نه یک سیستم breakpoint رسمی. مرزهای متداخل را فعلاً حذف یا جابه‌جا نکنید؛ قانون فعال را در viewport واقعی پیدا کنید. مقدارهای رایج: 380، 575، 640، 767/768 و 991/992 پیکسل؛ برخی فایل‌ها مرزهای دیگری دارند.
 
+کلاس صفحه در `_Shop.cshtml` از نام controller/action ساخته می‌شود (`mobile-page--{controller}-{action}`). برای نمونه، فهرست محصول و جست‌وجو `mobile-page--product-list` و جزئیات مقاله `mobile-page--magazine-details` است؛ selector صفحه را با همین route واقعی هماهنگ کنید.
+
 | فایل/گروه | مرزهای ثبت‌شده (px) |
 |---|---|
 | `core/design-tokens.css` | max 575 |
@@ -167,7 +169,7 @@ core/ui-core.js
 | `store/pagination.css` | max 575 |
 | `layout/content-typography.css` | media query ندارد؛ قواعد تایپوگرافی عمومی |
 | `pages/search-mobile.css` | max 767, 359, 319؛ فایل در layout لود می‌شود و فقط selectorهای Search دارد |
-| `layout/mobile-pages.css` | max 767, 520, 389, 575, 359 |
+| `layout/mobile-pages.css` | max 767, 520, 389, 575, 359؛ baseline تعامل موبایل تا 767 و چیدمان تک‌ستونهٔ مقایسه |
 
 برای فهرست به‌روزتر: `rg -n "@media" Shop/wwwroot/Shop/css`. تعارض را با viewport browser و Styles/Computed تأیید کنید؛ جدول ممکن است با تغییر CSS قدیمی شود.
 

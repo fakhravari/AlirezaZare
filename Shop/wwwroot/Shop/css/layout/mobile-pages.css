@@ -157,7 +157,7 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .mobile-page--product-index .search-page .search-page-results {
+  .mobile-page--product-list .search-page .search-page-results {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 6px;
   }
@@ -471,7 +471,7 @@
     max-width: 33.333333% !important;
   }
 
-  .mobile-page--product-index .search-page .search-page-results {
+  .mobile-page--product-list .search-page .search-page-results {
     grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
   }
 
@@ -738,20 +738,20 @@
 
 /* Search keeps two cards beside its filter panel until the result area is wide enough. */
 @media (min-width: 960px) and (max-width: 1199px) {
-  .mobile-page--product-index .search-page .search-page-results {
+  .mobile-page--product-list .search-page .search-page-results {
     grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
   }
 }
 
 /* Keep mobile home cards and their two-line sale prices on shared baselines. */
 @media (max-width: 767px) {
-  .mobile-page--product-index .search-page {
+  .mobile-page--product-list .search-page {
     width: calc(100% - 10px) !important;
     padding-top: 12px !important;
     padding-bottom: 20px !important;
   }
 
-  .mobile-page--product-index .search-page .search-page-results {
+  .mobile-page--product-list .search-page .search-page-results {
     gap: 6px;
   }
 
@@ -961,7 +961,7 @@
     --bs-gutter-x: 6px;
   }
 
-  .mobile-page--product-index .search-page {
+  .mobile-page--product-list .search-page {
     box-sizing: border-box;
     width: calc(100% - 12px) !important;
     margin-right: auto !important;
@@ -970,7 +970,7 @@
     padding-left: 0 !important;
   }
 
-  .mobile-page--product-index .search-page-results,
+  .mobile-page--product-list .search-page-results,
   .inner-page .product-results {
     box-sizing: border-box;
     width: 100%;
@@ -990,7 +990,7 @@
 
   .mobile-page--home-index .product-card,
   .mobile-page--home-index .showcase-card,
-  .mobile-page--product-index .search-page-card,
+  .mobile-page--product-list .search-page-card,
   .inner-page .product-card,
   .inner-page .search-product.product-card,
   .inner-page .favorite-item-card {
@@ -1482,5 +1482,69 @@
     display: block;
     margin: 0 !important;
     white-space: nowrap;
+  }
+}
+
+/* Mobile interaction baseline for page-specific controls. Keep these scoped
+   to the existing MVC page classes so desktop layouts and embedded widgets
+   retain their own sizing. */
+@media (max-width: 767px) {
+  .mobile-page--product-list :is(input, select, textarea),
+  .mobile-page--contact-index :is(input, select, textarea),
+  .mobile-page--tracking-index :is(input, select, textarea),
+  .mobile-page--cart-index :is(input, select, textarea),
+  .mobile-page--checkout-index :is(input, select, textarea),
+  .mobile-page--profile-index :is(input, select, textarea),
+  .mobile-page--profile-addresses :is(input, select, textarea) {
+    min-width: 0;
+    font-size: 16px;
+  }
+
+  .mobile-page--compare-index .compare-product-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .mobile-page--compare-index .compare-category-group,
+  .mobile-page--compare-index .compare-product-card,
+  .mobile-page--tracking-index .tracking-card,
+  .mobile-page--contact-index .contact-form,
+  .mobile-page--checkout-index .flow-card,
+  .mobile-page--cart-index .flow-card {
+    min-width: 0;
+  }
+
+  .mobile-page--compare-index .compare-product-card :is(h2, dd, a),
+  .mobile-page--tracking-index .tracking-card :is(h2, p, label),
+  .mobile-page--magazine-details .article-content-section,
+  .mobile-page--legal-terms .legal-main,
+  .mobile-page--legal-returns .legal-main,
+  .mobile-page--legal-privacy .legal-main {
+    overflow-wrap: anywhere;
+  }
+
+  .mobile-page--compare-index .compare-remove-icon,
+  .mobile-page--tracking-index .tracking-submit,
+  .mobile-page--tracking-index .tracking-support-action,
+  .mobile-page--contact-index :is(button, a),
+  .mobile-page--cart-index :is(.cart-quantity button, .cart-item-remove),
+  .mobile-page--profile-index .account-tabs a,
+  .mobile-page--profile-orders .account-tabs a,
+  .mobile-page--profile-addresses .account-tabs a,
+  .mobile-page--profile-favorites .account-tabs a {
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 389px) {
+  .mobile-page--compare-index .compare-category-heading {
+    flex-wrap: wrap;
+  }
+
+  .mobile-page--compare-index .compare-category-heading > b {
+    margin-inline-start: 45px;
+  }
+
+  .mobile-page--tracking-index .tracking-card {
+    padding: 18px 14px;
   }
 }
