@@ -1,16 +1,13 @@
 <section class="category-showcase category-showcase-new" id="newest" aria-labelledby="newestTitle">
     <div class="container">
-        <div class="category-showcase-head">
+        <header class="category-showcase-head">
             <div>
-                <span class="eyebrow dark">راهنمای بررسی کالا</span>
-                <h2 id="newestTitle">پیش از سفارش <em>چه چیزهایی را ببینیم؟</em></h2>
+                <span class="eyebrow dark">تازه‌واردهای فروشگاه</span>
+                <h2 id="newestTitle">جدیدترین <em>کالاها</em></h2>
+                <p>تازه‌ترین کالاهای فروشگاه را ببینید.</p>
             </div>
-            <a asp-controller="Faq" asp-action="Index">پاسخ پرسش‌های رایج <i class="bi bi-arrow-left" aria-hidden="true"></i></a>
-        </div>
-        <div class="row g-3">
-            <div class="col-md-4"><article class="showcase-card h-100"><div class="showcase-card-body"><span class="badge-new">۱</span><h3>مشخصات و اقلام همراه</h3><p>نام مدل، ویژگی‌های فنی و محتویات بسته را در توضیحات همان محصول بخوانید. در صورت درج‌نشدن جزئیات، پیش از خرید سؤال کنید.</p></div></article></div>
-            <div class="col-md-4"><article class="showcase-card h-100"><div class="showcase-card-body"><span class="badge-new">۲</span><h3>قیمت و موجودی</h3><p>قیمت و وضعیت ارائه‌شده را در صفحهٔ محصول بررسی کنید؛ اطلاعات نمایشی نمونه مبنای ثبت سفارش یا پرداخت نیست.</p></div></article></div>
-            <div class="col-md-4"><article class="showcase-card h-100"><div class="showcase-card-body"><span class="badge-new">۳</span><h3>شرایط تحویل و ضمانت</h3><p>هزینه و زمان ارسال به مقصد و شرایط سفارش وابسته است. مدت و ضوابط ضمانت نیز به مدل کالا بستگی دارد.</p></div></article></div>
-        </div>
+            <a href="/Search">مشاهدهٔ همهٔ محصولات <i class="bi bi-arrow-left" aria-hidden="true"></i></a>
+        </header>
+        <div class="category-slider owl-carousel" id="newestSlider" aria-label="جدیدترین محصولات فروشگاه"></div>
     </div>
 </section>

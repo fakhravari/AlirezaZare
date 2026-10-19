@@ -1653,6 +1653,43 @@ select {
   outline-offset: 2px;
 }
 
+.filter-discount-option {
+  display: flex;
+  min-height: 46px;
+  margin: 0 12px 12px;
+  padding: 9px 12px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-color: color-mix(in srgb, var(--industrial-yellow) 34%, white);
+  background: linear-gradient(110deg, #fff, #fffaf0);
+  color: var(--industrial-navy);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.filter-discount-option > span {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
+  white-space: normal;
+}
+
+.filter-discount-option > span > i {
+  color: var(--industrial-yellow-dark);
+  font-size: 16px;
+}
+
+.filter-discount-option input {
+  flex: 0 0 17px;
+}
+
+.filter-discount-option:has(input:checked) {
+  border-color: var(--industrial-yellow-dark);
+  background: color-mix(in srgb, var(--industrial-yellow) 17%, white);
+}
+
 .search-product .product-specs {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

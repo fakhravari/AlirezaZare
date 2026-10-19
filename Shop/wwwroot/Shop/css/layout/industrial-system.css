@@ -4071,7 +4071,8 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
 }
 
 /* Homepage section panels: consistent surfaces with clear visual hierarchy. */
-.home-page > section > .container {
+.home-page > section > .container,
+.home-page #home-main-content > section > .container {
   width: min(1480px, calc(100% - 56px));
   max-width: none;
 }
@@ -4277,7 +4278,8 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
 }
 
 @media (max-width: 767px) {
-  .home-page > section > .container {
+  .home-page > section > .container,
+  .home-page #home-main-content > section > .container {
     width: calc(100% - 24px);
   }
 
@@ -13136,6 +13138,42 @@ body .electrical-swiper .swiper-pagination-bullet-active {
     display: none;
   }
 }
+
+/* Keep the homepage guide list focused on article titles instead of crowded metrics. */
+.home-page #journal .journal-list article {
+  grid-template-columns: 30px minmax(0, 1fr);
+  grid-template-rows: 24px minmax(0, 1fr);
+  grid-template-areas: "number meta" "number title";
+  column-gap: 10px;
+  row-gap: 2px;
+}
+
+.home-page #journal .journal-list-stats,
+.home-page #journal .journal-list-pick {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .home-page #journal .journal-list article,
+  .home-page #journal .journal-list article:last-child {
+    min-height: 82px;
+    grid-template-columns: 28px minmax(0, 1fr);
+    grid-template-rows: 22px minmax(0, 1fr);
+    grid-template-areas: "number meta" "number title";
+    gap: 3px 8px;
+    padding: 9px 10px;
+  }
+
+}
+
+@media (min-width: 768px) and (max-width: 991.98px) {
+  .home-page #journal .journal-list article {
+    grid-template-columns: 28px minmax(0, 1fr);
+    grid-template-rows: 22px minmax(0, 1fr);
+    grid-template-areas: "number meta" "number title";
+  }
+}
+
 /* Contemporary hover and keyboard-focus treatment for homepage journal cards. */
 .home-page #journal .journal-main {
   border: 1px solid rgba(255, 255, 255, 0.28);

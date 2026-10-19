@@ -8,6 +8,7 @@
     movement: new Set(),
     strap: new Set(),
     availability: "all",
+    discountOnly: false,
     maxPrice: 60,
     query: "",
     sort: "recommended",
@@ -27,6 +28,7 @@
   const hasActiveFilters = () =>
     ["brand", "type", "movement", "strap"].some((key) => state[key].size) ||
     state.availability !== "all" ||
+    state.discountOnly ||
     state.maxPrice < 60 ||
     Boolean(state.query);
   const brandPersianLabels = {
@@ -233,6 +235,7 @@
       params.set(filterFields.price.slug, String(state.maxPrice));
     if (state.availability === "in-stock") params.set("available", "1");
     if (state.availability === "out-of-stock") params.set("available", "0");
+    if (state.discountOnly) params.set("discounted", "1");
     if (state.query) params.set("q", state.query);
     if (state.sort !== "recommended") params.set("sort", state.sort);
     const query = params.toString();
@@ -288,6 +291,9 @@
       : ["1", "true", "in-stock", "available"].includes(availability)
         ? "in-stock"
         : "all";
+    state.discountOnly = ["1", "true", "yes"].includes(
+      (params.get("discounted") ?? params.get("discount") ?? "").toLowerCase(),
+    );
     state.sort = ["recommended", "newest", "low", "high"].includes(
       params.get("sort"),
     )
@@ -297,6 +303,7 @@
       (input) => (input.checked = state[input.dataset.filter].has(input.value)),
     );
     $("#availabilityFilter").value = state.availability;
+    $("#discountFilter").checked = state.discountOnly;
     $("#maxPrice").value = state.maxPrice;
     $("#productSearch").value = state.query;
     $("#sortProducts").value = state.sort;
@@ -314,10 +321,24 @@
     const quantity = Number(inventory);
     return Number.isFinite(quantity) && quantity >= 0 ? quantity > 0 : true;
   };
+  const isProductDiscounted = (product) => {
+    const discount = Number(product.discountPercent) || 0;
+    return discount > 0 && discount < 100;
+  };
+  const normalizeFilterSearch = (value) =>
+    String(value ?? "")
+      .normalize("NFKC")
+      .toLocaleLowerCase("fa")
+      .replace(/[يى]/g, "ی")
+      .replace(/ك/g, "ک")
+      .replace(/[\u200c\u200f\u202a-\u202e]/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
   function buildFilters() {
     Object.entries(filterConfig).forEach(([key, values]) => {
+      const filterName = key === "brand" ? "برند" : "گروه محصول";
       const searchBox = ["brand", "type"].includes(key)
-        ? `<label class="filter-search"><i class="bi bi-search" aria-hidden="true"></i><input type="search" data-filter-search="${key}" placeholder="جستجوی ${key === "brand" ? "برند" : "گروه محصول"}" aria-label="جستجو در ${key === "brand" ? "برندها" : "گروه‌های محصول"}"></label>`
+        ? `<label class="filter-search"><i class="bi bi-search" aria-hidden="true"></i><input type="search" data-filter-search="${key}" placeholder="جستجوی فارسی یا انگلیسی ${filterName}" aria-label="جستجوی فارسی یا انگلیسی در ${key === "brand" ? "برندها" : "گروه‌های محصول"}"></label>`
         : "";
       $(`#${key}Filters`).innerHTML =
         searchBox +
@@ -342,6 +363,7 @@
           (state.availability === "in-stock"
             ? isProductAvailable(p)
             : !isProductAvailable(p))) &&
+        (!state.discountOnly || isProductDiscounted(p)) &&
         p.price <= state.maxPrice &&
         (!state.query ||
           `${p.name} ${p.brand} ${p.type} ${p.powerSource || p.movement}`.includes(state.query)),
@@ -461,6 +483,10 @@
       chips.push(
         `<button class="filter-chip" data-key="available">${state.availability === "in-stock" ? "کالاهای موجود" : "کالاهای ناموجود"} ×</button>`,
       );
+    if (state.discountOnly)
+      chips.push(
+        '<button class="filter-chip" data-key="discounted">کالاهای تخفیف‌دار ×</button>',
+      );
     $("#activeChips").innerHTML = chips.join("");
     const count = chips.length;
     $("#activeFilterCount").textContent = fa(count);
@@ -473,6 +499,9 @@
           } else if (chip.dataset.key === "available") {
             state.availability = "all";
             $("#availabilityFilter").value = "all";
+          } else if (chip.dataset.key === "discounted") {
+            state.discountOnly = false;
+            $("#discountFilter").checked = false;
           } else {
             state[chip.dataset.key].delete(chip.dataset.value);
             const box = document.querySelector(
@@ -488,6 +517,7 @@
   function clearAll() {
     ["brand", "type", "movement", "strap"].forEach((key) => state[key].clear());
     state.availability = "all";
+    state.discountOnly = false;
     state.maxPrice = 60;
     state.query = "";
     $$(".filter-option input").forEach((input) => (input.checked = false));
@@ -511,14 +541,23 @@
   buildFilters();
   $$("[data-filter-search]").forEach((input) => {
     input.addEventListener("input", () => {
-      const query = input.value.trim().toLocaleLowerCase();
+      const query = normalizeFilterSearch(input.value);
       input
         .closest(".filter-options")
         .querySelectorAll(".filter-option")
         .forEach((option) => {
+          const optionInput = option.querySelector("input[data-filter]");
+          const searchableText = normalizeFilterSearch(
+            [
+              option.textContent,
+              optionInput?.dataset.valueFa,
+              optionInput?.dataset.valueEn,
+              optionInput?.dataset.valueSlug,
+            ].join(" "),
+          );
           option.classList.toggle(
             "filter-option-hidden",
-            !option.textContent.toLocaleLowerCase().includes(query),
+            !searchableText.includes(query),
           );
         });
     });
@@ -540,6 +579,10 @@
   );
   $("#availabilityFilter").onchange = (event) => {
     state.availability = event.target.value;
+    render(true, true);
+  };
+  $("#discountFilter").onchange = (event) => {
+    state.discountOnly = event.target.checked;
     render(true, true);
   };
   $("#maxPrice").oninput = () => {

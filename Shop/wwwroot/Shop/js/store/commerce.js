@@ -209,6 +209,96 @@ document.addEventListener("DOMContentLoaded", () => {
               .join("")
           : `<div class="product-feedback-empty empty-state-card"><i class="bi ${type === "reviews" ? "bi-chat-square-heart" : "bi-question-circle"}" aria-hidden="true"></i><strong>${type === "reviews" ? "هنوز دیدگاهی برای این محصول ثبت نشده است." : "هنوز پرسشی دربارهٔ این محصول ثبت نشده است."}</strong><span>${type === "reviews" ? "تجربهٔ استفاده‌تان را با خریداران دیگر به اشتراک بگذارید." : "سؤال خود را ثبت کنید تا اطلاعات این کالا کامل‌تر شود."}</span></div>`;
       productView.innerHTML = `<div class="product-detail-layout"><section class="product-detail-gallery" aria-label="تصاویر و ویدئوهای محصول"><div class="product-detail-image-frame"><span class="product-detail-image-code"><i class="bi bi-upc-scan" aria-hidden="true"></i> HN-${String(p.id).padStart(3, "0")}</span><div class="product-detail-media-frame" id="productDetailMedia">${renderMedia(mainMedia)}</div><button class="product-detail-gallery-open" id="openProductGallery" type="button"><i class="bi bi-grid-3x3-gap" aria-hidden="true"></i><span>مشاهدهٔ همه</span><b>${fa(media.length)}</b></button></div>${thumbMarkup}<div class="product-detail-gallery-caption"><i class="bi bi-images" aria-hidden="true"></i><span>تصاویر و ویدئوهای محصول</span><small>${media.length > 1 ? `${fa(media.length)} فایل رسانه‌ای` : "نمای کامل محصول"}</small></div></section><section class="product-detail-summary" aria-labelledby="productDetailTitle"><div class="product-detail-meta"><span><i class="bi bi-patch-check" aria-hidden="true"></i>${esc(p.brand)}</span><span>کد کالا: HN-${String(p.id).padStart(3, "0")}</span></div><h2 id="productDetailTitle">${esc(p.name)}</h2><p class="product-detail-description">${esc(p.name)} از گروه ${esc(p.type)}، با ویژگی ${esc(p.movement)} و ساختار ${esc(p.strap)}.</p><div class="product-main-feature-chips" aria-label="ویژگی‌های اصلی"><span><i class="bi bi-grid" aria-hidden="true"></i>${esc(p.type)}</span><span><i class="bi bi-lightning-charge" aria-hidden="true"></i>${esc(p.movement)}</span><span><i class="bi bi-building" aria-hidden="true"></i>${esc(p.brand)}</span></div>${variantMarkup}<div class="product-detail-price"><div class="product-price-heading"><span>تفکیک قیمت</span><small>قیمت کالا و هزینه‌های انتخابی</small></div><div class="product-price-context"><i class="bi bi-shield-check" aria-hidden="true"></i><span><strong>خرید مطمئن</strong><small>قیمت نهایی همراه با ضمانت اصالت کالا</small></span></div><div class="product-detail-base-price"><div class="product-detail-base-row"><span>قیمت کالا</span><strong id="productBasePrice">${money(p.price * 1000000)}</strong></div><div class="product-detail-sale-meta"></div></div><div class="product-detail-extras-price"><span>هزینهٔ گزینه‌ها و متعلقات</span><strong id="productAddonsPrice"></strong></div><div class="product-detail-total-price"><span>مبلغ قابل پرداخت</span><strong id="productFinalPrice">${money(p.price * 1000000)}</strong></div></div><div class="product-detail-actions"><button class="product-detail-add flow-button" id="addProduct" type="button"><i class="bi bi-bag-plus" aria-hidden="true"></i> افزودن به سبد خرید</button><div class="product-detail-secondary-actions"><a href="Cart"><i class="bi bi-basket3" aria-hidden="true"></i> مشاهده سبد خرید</a><button class="product-detail-favorite" id="saveProduct" type="button" aria-pressed="${isFavorite}" aria-label="${isFavorite ? "حذف از علاقه‌مندی‌ها" : "ذخیره در علاقه‌مندی‌ها"}"><i class="bi ${isFavorite ? "bi-heart-fill" : "bi-heart"}" aria-hidden="true"></i><span>${isFavorite ? "ذخیره‌شده" : "علاقه‌مندی"}</span></button></div></div><p class="product-detail-status" id="productStatus" role="status" aria-live="polite"></p></section></div><nav class="product-detail-tabs" aria-label="بخش‌های اطلاعات محصول"><a href="#product-intro"><i class="bi bi-info-circle" aria-hidden="true"></i>معرفی</a><a href="#product-expert"><i class="bi bi-journal-richtext" aria-hidden="true"></i>بررسی تخصصی</a><a href="#product-specifications"><i class="bi bi-list-check" aria-hidden="true"></i>مشخصات</a><a href="#product-reviews"><i class="bi bi-chat-heart" aria-hidden="true"></i>دیدگاه‌ها <b>${fa(readFeedback("reviews").length)}</b></a><a href="#product-questions"><i class="bi bi-question-circle" aria-hidden="true"></i>پرسش‌ها <b>${fa(readFeedback("questions").length)}</b></a></nav><section class="product-detail-content-panel" id="product-intro"><header><span>معرفی محصول</span><h2>${esc(p.name)}؛ انتخابی متناسب با نیاز شما</h2></header><p>این محصول از دستهٔ ${esc(p.type)} است. هنگام انتخاب، نوع ${esc(p.movement)} و ساختار ${esc(p.strap)} را با نیاز و شرایط کاری خود تطبیق دهید. اطلاعات این صفحه بر پایهٔ مشخصات ثبت‌شدهٔ کالا تهیه شده است.</p></section><section class="product-detail-content-panel product-detail-expert" id="product-expert"><header><span>راهنمای انتخاب</span><h2>بررسی تخصصی</h2></header><div class="product-expert-grid"><div><i class="bi bi-tools" aria-hidden="true"></i><strong>دسته و کاربرد</strong><p>${esc(p.type)}؛ برای انتخاب دقیق، نوع کار و میزان استفادهٔ روزانه را در نظر بگیرید.</p></div><div><i class="bi bi-lightning-charge" aria-hidden="true"></i><strong>نوع عملکرد</strong><p>${esc(p.movement)}؛ سازگاری منبع تغذیه یا شیوهٔ عملکرد را پیش از خرید بررسی کنید.</p></div><div><i class="bi bi-rulers" aria-hidden="true"></i><strong>ساختار محصول</strong><p>${esc(p.strap)}؛ ابعاد، لوازم همراه و شرایط نصب را با فضای کارتان تطبیق دهید.</p></div></div></section><section class="product-detail-content-panel" id="product-specifications"><header><span>جزئیات فنی</span><h2>ویژگی‌های اصلی و دیگر ویژگی‌ها</h2></header><div class="product-spec-groups"><section class="product-spec-group"><h3><i class="bi bi-stars" aria-hidden="true"></i>ویژگی‌های اصلی</h3><dl><div><dt>دسته‌بندی</dt><dd>${esc(p.type)}</dd></div><div><dt>نوع عملکرد</dt><dd>${esc(p.movement)}</dd></div><div><dt>برند</dt><dd>${esc(p.brand)}</dd></div></dl></section><section class="product-spec-group"><h3><i class="bi bi-list-check" aria-hidden="true"></i>دیگر ویژگی‌ها</h3><dl>${specs.map(([label, value]) => `<div><dt>${esc(label)}</dt><dd>${esc(value)}</dd></div>`).join("")}</dl></section></div></section><section class="product-detail-content-panel" id="product-reviews"><header><span>تجربهٔ خریداران</span><h2>دیدگاه‌ها</h2></header><div class="product-feedback-list" id="productReviewList">${feedbackMarkup("reviews", readFeedback("reviews"))}</div><form class="product-feedback-form" data-feedback-type="reviews"><label>نام نمایشی<input name="name" maxlength="60" required placeholder="نام شما"></label><label>امتیاز<select name="rating" required><option value="5">۵ — عالی</option><option value="4">۴ — خوب</option><option value="3">۳ — متوسط</option><option value="2">۲ — ضعیف</option><option value="1">۱ — خیلی ضعیف</option></select></label><label class="product-feedback-wide">دیدگاه شما<textarea name="text" rows="3" maxlength="800" required placeholder="تجربه یا نکتهٔ خود را بنویسید"></textarea></label><button class="product-feedback-submit" type="submit"><i class="bi bi-send" aria-hidden="true"></i>ثبت دیدگاه</button><small class="product-feedback-note">دیدگاه در این نسخه به‌صورت محلی در همین مرورگر ذخیره می‌شود.</small></form></section><section class="product-detail-content-panel" id="product-questions"><header><span>پاسخ به ابهام‌ها</span><h2>پرسش‌ها</h2></header><div class="product-feedback-list" id="productQuestionList">${feedbackMarkup("questions", readFeedback("questions"))}</div><form class="product-feedback-form product-question-form" data-feedback-type="questions"><label>نام نمایشی<input name="name" maxlength="60" required placeholder="نام شما"></label><label class="product-feedback-wide">پرسش شما<textarea name="text" rows="3" maxlength="600" required placeholder="سؤال خود دربارهٔ محصول را بنویسید"></textarea></label><button class="product-feedback-submit" type="submit"><i class="bi bi-question-lg" aria-hidden="true"></i>ثبت پرسش</button><small class="product-feedback-note">پرسش در این نسخه به‌صورت محلی در همین مرورگر ذخیره می‌شود.</small></form></section><section class="product-detail-related" aria-labelledby="relatedProductsTitle"><header><span>برای انتخاب بهتر</span><h2 id="relatedProductsTitle">کالاهای مشابه</h2></header><div class="product-detail-related-grid">${suggestions.map((item) => `<article class="product-card product-detail-related-card"><a class="product-image" href="Product?id=${item.id}"><img src="${esc(item.image)}" alt="${esc(item.name)}" loading="lazy"></a><div class="product-info"><div class="product-related-meta"><span class="product-related-brand">${esc(item.brand)}</span><span class="product-related-category"><i class="bi bi-grid-3x3-gap" aria-hidden="true"></i>${esc(item.type)}</span></div><h3><a href="Product?id=${item.id}">${esc(item.name)}</a></h3><p>${money(item.price * 1000000)}</p></div><button class="add-cart" type="button" data-id="${item.id}" data-name="${esc(item.name)}" data-price="${item.price * 1000000}" data-image="${esc(item.image)}"><i class="bi bi-bag-plus" aria-hidden="true"></i>افزودن به سبد خرید</button></article>`).join("")}</div></section>`;
+      const shareActions = document.createElement("div");
+      shareActions.className = "product-share-control";
+      shareActions.innerHTML = `<button class="product-detail-share" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="productShareMenu"><i class="bi bi-share" aria-hidden="true"></i><span>اشتراک‌گذاری</span></button><div class="product-share-menu" id="productShareMenu" role="group" aria-label="اشتراک‌گذاری این محصول" hidden><strong>اشتراک‌گذاری محصول</strong><button class="product-share-native" type="button" data-product-share-native><i class="bi bi-phone" aria-hidden="true"></i>اشتراک‌گذاری دستگاه</button><a data-share-network="whatsapp" target="_blank" rel="noopener noreferrer"><i class="bi bi-whatsapp" aria-hidden="true"></i>واتساپ</a><a data-share-network="telegram" target="_blank" rel="noopener noreferrer"><i class="bi bi-telegram" aria-hidden="true"></i>تلگرام</a><a data-share-network="facebook" target="_blank" rel="noopener noreferrer"><i class="bi bi-facebook" aria-hidden="true"></i>فیس‌بوک</a><a data-share-network="x" target="_blank" rel="noopener noreferrer"><i class="bi bi-twitter-x" aria-hidden="true"></i>ایکس</a><a data-share-network="linkedin" target="_blank" rel="noopener noreferrer"><i class="bi bi-linkedin" aria-hidden="true"></i>لینکدین</a><a data-share-network="email"><i class="bi bi-envelope" aria-hidden="true"></i>ایمیل</a><button type="button" data-copy-product-link><i class="bi bi-link-45deg" aria-hidden="true"></i>کپی پیوند</button></div>`;
+      productView
+        .querySelector(".product-detail-secondary-actions")
+        ?.append(shareActions);
+
+      const shareTitle = p.name || document.title;
+      const shareUrl = window.location.href;
+      const shareText = `${shareTitle} | ${shareUrl}`;
+      const shareUrlEncoded = encodeURIComponent(shareUrl);
+      const shareTextEncoded = encodeURIComponent(shareTitle);
+      const socialShareUrls = {
+        whatsapp: `https://wa.me/?text=${encodeURIComponent(shareText)}`,
+        telegram: `https://t.me/share/url?url=${shareUrlEncoded}&text=${shareTextEncoded}`,
+        facebook: `https://www.facebook.com/sharer/sharer.php?u=${shareUrlEncoded}`,
+        x: `https://twitter.com/intent/tweet?url=${shareUrlEncoded}&text=${shareTextEncoded}`,
+        linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${shareUrlEncoded}`,
+        email: `mailto:?subject=${shareTextEncoded}&body=${encodeURIComponent(shareUrl)}`,
+      };
+      const shareMenu = shareActions.querySelector(".product-share-menu");
+      const shareTrigger = shareActions.querySelector(".product-detail-share");
+      const nativeShareButton = shareActions.querySelector(
+        "[data-product-share-native]",
+      );
+      nativeShareButton.hidden = typeof navigator.share !== "function";
+      shareActions.querySelectorAll("[data-share-network]").forEach((link) => {
+        link.href = socialShareUrls[link.dataset.shareNetwork];
+      });
+      shareTrigger.addEventListener("click", () => {
+        const isOpen = shareTrigger.getAttribute("aria-expanded") === "true";
+        shareTrigger.setAttribute("aria-expanded", String(!isOpen));
+        shareMenu.hidden = isOpen;
+      });
+      nativeShareButton.addEventListener("click", async () => {
+        try {
+          await navigator.share({ title: shareTitle, text: shareTitle, url: shareUrl });
+        } catch (error) {
+          if (error?.name !== "AbortError") {
+            const status = productView.querySelector("#productStatus");
+            if (status) status.textContent = "اشتراک‌گذاری انجام نشد؛ یک روش دیگر را انتخاب کنید.";
+          }
+        }
+      });
+      shareActions
+        .querySelector("[data-copy-product-link]")
+        .addEventListener("click", async (event) => {
+          let copied = false;
+          try {
+            if (navigator.clipboard?.writeText) {
+              await navigator.clipboard.writeText(shareUrl);
+              copied = true;
+            }
+          } catch {
+            copied = false;
+          }
+          if (!copied) {
+            const input = document.createElement("textarea");
+            input.value = shareUrl;
+            input.setAttribute("readonly", "");
+            input.style.position = "fixed";
+            input.style.opacity = "0";
+            document.body.append(input);
+            input.select();
+            copied = document.execCommand("copy");
+            input.remove();
+          }
+          const status = productView.querySelector("#productStatus");
+          if (status)
+            status.textContent = copied
+              ? "پیوند محصول کپی شد."
+              : "کپی خودکار در این مرورگر در دسترس نیست.";
+          event.currentTarget.innerHTML = copied
+            ? '<i class="bi bi-check2" aria-hidden="true"></i>پیوند کپی شد'
+            : '<i class="bi bi-link-45deg" aria-hidden="true"></i>کپی پیوند';
+        });
+      document.addEventListener("click", (event) => {
+        if (!shareActions.contains(event.target)) {
+          shareMenu.hidden = true;
+          shareTrigger.setAttribute("aria-expanded", "false");
+        }
+      });
+      shareActions.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          shareMenu.hidden = true;
+          shareTrigger.setAttribute("aria-expanded", "false");
+          shareTrigger.focus();
+        }
+      });
+
       const inventoryValue =
         p.stockQuantity ??
         p.inventoryCount ??
@@ -501,6 +591,66 @@ document.addEventListener("DOMContentLoaded", () => {
           "afterend",
           `<ul class="product-detail-intro-points">${(detail.highlights || []).map((item) => `<li><i class="bi bi-check2-circle" aria-hidden="true"></i>${esc(item)}</li>`).join("")}</ul>`,
         );
+      const introParagraph = productView.querySelector("#product-intro > p");
+      const introHighlights = productView.querySelector(
+        "#product-intro > .product-detail-intro-points",
+      );
+      if (introParagraph) {
+        const introCopy = document.createElement("div");
+        introCopy.className = "product-intro-copy";
+        introCopy.id = "productIntroCopy";
+        introParagraph.before(introCopy);
+        introCopy.append(introParagraph);
+        if (introHighlights) introCopy.append(introHighlights);
+
+        const introToggle = document.createElement("button");
+        introToggle.className = "product-intro-toggle";
+        introToggle.type = "button";
+        introToggle.setAttribute("aria-controls", introCopy.id);
+        introToggle.setAttribute("aria-expanded", "false");
+        introToggle.innerHTML = '<span>مشاهدهٔ همه</span><i class="bi bi-chevron-down" aria-hidden="true"></i>';
+        introCopy.after(introToggle);
+
+        const syncIntroToggle = () => {
+          const wasExpanded = introCopy.classList.contains("is-expanded");
+          introCopy.classList.remove("is-expanded");
+          const isOverflowing =
+            introCopy.scrollHeight > introCopy.clientHeight + 2;
+          if (wasExpanded && isOverflowing)
+            introCopy.classList.add("is-expanded");
+          else if (wasExpanded) {
+            introToggle.setAttribute("aria-expanded", "false");
+            introToggle.innerHTML = '<span>مشاهدهٔ همه</span><i class="bi bi-chevron-down" aria-hidden="true"></i>';
+          }
+          introCopy.classList.toggle(
+            "is-truncated",
+            isOverflowing && !introCopy.classList.contains("is-expanded"),
+          );
+          introToggle.hidden = !isOverflowing && !wasExpanded;
+        };
+
+        introToggle.addEventListener("click", () => {
+          const isExpanded = introToggle.getAttribute("aria-expanded") === "true";
+          introCopy.classList.toggle("is-expanded", !isExpanded);
+          introCopy.classList.toggle("is-truncated", isExpanded);
+          introToggle.setAttribute("aria-expanded", String(!isExpanded));
+          introToggle.innerHTML = isExpanded
+            ? '<span>مشاهدهٔ همه</span><i class="bi bi-chevron-down" aria-hidden="true"></i>'
+            : '<span>نمایش کمتر</span><i class="bi bi-chevron-up" aria-hidden="true"></i>';
+        });
+
+        let introResizeFrame = 0;
+        window.addEventListener(
+          "resize",
+          () => {
+            window.cancelAnimationFrame(introResizeFrame);
+            introResizeFrame = window.requestAnimationFrame(syncIntroToggle);
+          },
+          { passive: true },
+        );
+        window.requestAnimationFrame(syncIntroToggle);
+        if (document.fonts?.ready) document.fonts.ready.then(syncIntroToggle);
+      }
       const expertPoints = (detail.highlights || []).filter(Boolean);
       const expertFallback = (detail.specs || [])
         .slice(0, 3)

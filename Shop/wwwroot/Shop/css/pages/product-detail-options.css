@@ -549,3 +549,196 @@
 #productView .product-detail-thumb .bi-play-fill {
   color: inherit !important;
 }
+
+#productView #product-intro .product-intro-copy {
+  position: relative;
+  max-height: 11rem;
+  overflow: hidden;
+  transition: max-height 220ms ease;
+}
+
+#productView #product-intro .product-intro-copy.is-truncated::after {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 2.5rem;
+  background: linear-gradient(transparent, #fff 88%);
+  content: "";
+  pointer-events: none;
+}
+
+#productView #product-intro .product-intro-copy.is-expanded {
+  max-height: none;
+  overflow: visible;
+}
+
+#productView #product-intro .product-intro-copy:not(.is-truncated)::after {
+  display: none;
+}
+
+#productView #product-intro .product-intro-copy > p {
+  max-width: 900px;
+  margin: 0;
+  color: var(--industrial-muted, #65788a);
+  font-size: 13px;
+  line-height: 2.2;
+}
+
+#productView #product-intro .product-intro-toggle {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  gap: 7px;
+  margin-top: 8px;
+  padding: 6px 12px;
+  border: 1px solid #ead8ad;
+  border-radius: 999px;
+  background: #fffaf0;
+  color: #795f2b;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+#productView #product-intro .product-intro-toggle[hidden] {
+  display: none !important;
+}
+
+#productView #product-intro .product-intro-toggle:is(:hover, :focus-visible) {
+  border-color: #d6c79f;
+  background: #173b5d;
+  color: #fff;
+  outline: 2px solid rgba(180, 145, 93, 0.24);
+  outline-offset: 2px;
+}
+
+#productView #product-intro .product-intro-toggle > i {
+  color: #b58b32;
+}
+
+#productView #product-intro .product-intro-toggle:is(:hover, :focus-visible) > i {
+  color: #f6c515 !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #productView #product-intro .product-intro-copy {
+    transition: none;
+  }
+}
+
+#productView .product-detail-secondary-actions > .product-share-control {
+  position: relative;
+  min-width: 0;
+}
+
+#productView .product-detail-secondary-actions {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+#productView .product-detail-secondary-actions > .product-share-control > .product-detail-share {
+  display: inline-flex;
+  width: 100%;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 8px 10px;
+  border: 1px solid var(--industrial-line, #dce3e8);
+  border-radius: 9px;
+  background: #fff;
+  color: var(--industrial-navy, #173b5d);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+#productView .product-detail-share > i {
+  color: #b58b32;
+  font-size: 16px;
+}
+
+#productView .product-detail-share:is(:hover, :focus-visible, [aria-expanded="true"]) {
+  border-color: #d6c79f;
+  background: #fffaf0;
+  color: var(--industrial-navy, #173b5d);
+}
+
+#productView .product-share-menu[hidden],
+#productView .product-share-native[hidden] {
+  display: none !important;
+}
+
+#productView .product-share-menu {
+  position: absolute;
+  z-index: 30;
+  inset-inline-end: 0;
+  bottom: calc(100% + 9px);
+  display: grid;
+  width: min(290px, calc(100vw - 36px));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  padding: 12px;
+  border: 1px solid #e6dcc6;
+  border-radius: 15px;
+  background: linear-gradient(145deg, #fff 0%, #fffaf0 100%);
+  box-shadow: 0 14px 32px rgba(16, 42, 67, 0.18);
+}
+
+#productView .product-share-menu > strong {
+  grid-column: 1 / -1;
+  padding: 2px 4px 8px;
+  border-bottom: 1px solid #eee4d2;
+  color: var(--industrial-navy, #173b5d);
+  font-size: 12px;
+}
+
+#productView .product-share-menu > :is(a, button) {
+  display: inline-flex;
+  min-width: 0;
+  min-height: 38px;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 9px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.78);
+  color: #28445e;
+  font: inherit;
+  font-size: 11px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+#productView .product-share-menu > :is(a, button):is(:hover, :focus-visible) {
+  border-color: #e6d5ad;
+  background: #fff;
+  color: #173b5d;
+  outline: 2px solid rgba(180, 145, 93, 0.2);
+  outline-offset: 1px;
+}
+
+#productView .product-share-menu > :is(a, button) > i {
+  color: #a77a24 !important;
+  font-size: 15px;
+}
+
+#productView .product-share-native,
+#productView .product-share-menu > [data-copy-product-link] {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 575px) {
+  #productView .product-detail-secondary-actions > .product-share-control > .product-detail-share {
+    min-height: 44px;
+    padding-inline: 5px;
+    gap: 4px;
+    font-size: 10px;
+  }
+
+  #productView .product-share-menu {
+    width: min(290px, calc(100vw - 32px));
+  }
+}

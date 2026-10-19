@@ -1,10 +1,4 @@
-@using System.Globalization
 @model PageModel
-
-@{
-    string PersianNumber(int value) => value.ToString("N0", CultureInfo.GetCultureInfo("fa-IR"));
-    string PersianRating(double value) => value.ToString("0.0", CultureInfo.GetCultureInfo("fa-IR"));
-}
 
 @section Hero {
     <partial name="_Hero"/>
@@ -69,76 +63,40 @@
                         <div><small>مجلهٔ تخصصی برق و ابزار</small><strong>منتخب راهنماها</strong></div>
                         <span class="journal-list-count"><b>۵</b> مطلب کاربردی</span>
                     </div>
-                    @{ var metric1 = JournalArticles.GetMetrics("multimeter-buying-guide"); }
                     <article>
                         <span class="journal-list-number">۱</span>
                         <div class="journal-list-card-meta">
                             <small>راهنمای خرید</small>
-                            <span class="journal-list-pick"><i class="bi bi-stars" aria-hidden="true"></i> پیشنهاد تحریریه</span>
                         </div>
                         <h4><a asp-controller="Magazine" asp-action="Details" asp-route-slug="multimeter-buying-guide" style="color: inherit; text-decoration: none;">چطور مولتی‌متر مناسب انتخاب کنیم؟</a></h4>
-                        <div class="journal-list-reading journal-list-stats" aria-label="آمار مقاله">
-                            <span class="journal-metric" title="بازدید"><i class="bi bi-eye" aria-hidden="true"></i><span>@PersianNumber(metric1.Views)</span><small>بازدید</small></span>
-                            <span class="journal-metric journal-like-metric" title="پسند"><i class="bi bi-heart-fill" aria-hidden="true"></i><span>@PersianNumber(metric1.Likes)</span><small>پسند</small></span>
-                            <span class="journal-metric" title="میانگین امتیاز"><i class="bi bi-star-fill" aria-hidden="true"></i><span>@PersianRating(metric1.AverageRating)</span><small>امتیاز</small></span>
-                        </div>
-                        <a class="journal-list-cta" asp-controller="Magazine" asp-action="Details" asp-route-slug="multimeter-buying-guide" aria-label="خواندن راهنمای انتخاب مولتی‌متر"><span>خواندن راهنما</span><i class="bi bi-arrow-left" aria-hidden="true"></i></a>
                     </article>
-                    @{ var metric2 = JournalArticles.GetMetrics("electrical-tool-safety"); }
                     <article>
                         <span class="journal-list-number">۲</span>
                         <div class="journal-list-card-meta">
                             <small>ایمنی و نگهداری</small>
                         </div>
                         <h4><a asp-controller="Magazine" asp-action="Details" asp-route-slug="electrical-tool-safety" style="color: inherit; text-decoration: none;">چک‌لیست ایمنی هنگام کار با ابزار برقی</a></h4>
-                        <div class="journal-list-reading journal-list-stats" aria-label="آمار مقاله">
-                            <span class="journal-metric" title="بازدید"><i class="bi bi-eye" aria-hidden="true"></i><span>@PersianNumber(metric2.Views)</span><small>بازدید</small></span>
-                            <span class="journal-metric journal-like-metric" title="پسند"><i class="bi bi-heart-fill" aria-hidden="true"></i><span>@PersianNumber(metric2.Likes)</span><small>پسند</small></span>
-                            <span class="journal-metric" title="میانگین امتیاز"><i class="bi bi-star-fill" aria-hidden="true"></i><span>@PersianRating(metric2.AverageRating)</span><small>امتیاز</small></span>
-                        </div>
-                        <a class="journal-list-cta" asp-controller="Magazine" asp-action="Details" asp-route-slug="electrical-tool-safety" aria-label="خواندن چک‌لیست ایمنی ابزار برقی"><span>خواندن راهنما</span><i class="bi bi-arrow-left" aria-hidden="true"></i></a>
                     </article>
-                    @{ var metric3 = JournalArticles.GetMetrics("soldering-station-basics"); }
                     <article>
                         <span class="journal-list-number">۳</span>
                         <div class="journal-list-card-meta">
                             <small>آموزش تخصصی</small>
                         </div>
                         <h4><a asp-controller="Magazine" asp-action="Details" asp-route-slug="soldering-station-basics" style="color: inherit; text-decoration: none;">راهنمای انتخاب ایستگاه لحیم‌کاری</a></h4>
-                        <div class="journal-list-reading journal-list-stats" aria-label="آمار مقاله">
-                            <span class="journal-metric" title="بازدید"><i class="bi bi-eye" aria-hidden="true"></i><span>@PersianNumber(metric3.Views)</span><small>بازدید</small></span>
-                            <span class="journal-metric journal-like-metric" title="پسند"><i class="bi bi-heart-fill" aria-hidden="true"></i><span>@PersianNumber(metric3.Likes)</span><small>پسند</small></span>
-                            <span class="journal-metric" title="میانگین امتیاز"><i class="bi bi-star-fill" aria-hidden="true"></i><span>@PersianRating(metric3.AverageRating)</span><small>امتیاز</small></span>
-                        </div>
-                        <a class="journal-list-cta" asp-controller="Magazine" asp-action="Details" asp-route-slug="soldering-station-basics" aria-label="خواندن راهنمای ایستگاه لحیم‌کاری"><span>خواندن راهنما</span><i class="bi bi-arrow-left" aria-hidden="true"></i></a>
                     </article>
-                    @{ var metric4 = JournalArticles.GetMetrics("worklight-selection"); }
                     <article>
                         <span class="journal-list-number">۴</span>
                         <div class="journal-list-card-meta">
                             <small>راهنمای خرید</small>
                         </div>
                         <h4><a asp-controller="Magazine" asp-action="Details" asp-route-slug="worklight-selection" style="color: inherit; text-decoration: none;">انتخاب چراغ کار برای تعمیرگاه و محیط نصب</a></h4>
-                        <div class="journal-list-reading journal-list-stats" aria-label="آمار مقاله">
-                            <span class="journal-metric" title="بازدید"><i class="bi bi-eye" aria-hidden="true"></i><span>@PersianNumber(metric4.Views)</span><small>بازدید</small></span>
-                            <span class="journal-metric journal-like-metric" title="پسند"><i class="bi bi-heart-fill" aria-hidden="true"></i><span>@PersianNumber(metric4.Likes)</span><small>پسند</small></span>
-                            <span class="journal-metric" title="میانگین امتیاز"><i class="bi bi-star-fill" aria-hidden="true"></i><span>@PersianRating(metric4.AverageRating)</span><small>امتیاز</small></span>
-                        </div>
-                        <a class="journal-list-cta" asp-controller="Magazine" asp-action="Details" asp-route-slug="worklight-selection" aria-label="خواندن راهنمای انتخاب چراغ کار"><span>خواندن راهنما</span><i class="bi bi-arrow-left" aria-hidden="true"></i></a>
                     </article>
-                    @{ var metric5 = JournalArticles.GetMetrics("battery-tool-care"); }
                     <article>
                         <span class="journal-list-number">۵</span>
                         <div class="journal-list-card-meta">
                             <small>ایمنی و نگهداری</small>
                         </div>
                         <h4><a asp-controller="Magazine" asp-action="Details" asp-route-slug="battery-tool-care" style="color: inherit; text-decoration: none;">نگهداری باتری ابزار شارژی</a></h4>
-                        <div class="journal-list-reading journal-list-stats" aria-label="آمار مقاله">
-                            <span class="journal-metric" title="بازدید"><i class="bi bi-eye" aria-hidden="true"></i><span>@PersianNumber(metric5.Views)</span><small>بازدید</small></span>
-                            <span class="journal-metric journal-like-metric" title="پسند"><i class="bi bi-heart-fill" aria-hidden="true"></i><span>@PersianNumber(metric5.Likes)</span><small>پسند</small></span>
-                            <span class="journal-metric" title="میانگین امتیاز"><i class="bi bi-star-fill" aria-hidden="true"></i><span>@PersianRating(metric5.AverageRating)</span><small>امتیاز</small></span>
-                        </div>
-                        <a class="journal-list-cta" asp-controller="Magazine" asp-action="Details" asp-route-slug="battery-tool-care" aria-label="خواندن راهنمای نگهداری باتری ابزار شارژی"><span>خواندن راهنما</span><i class="bi bi-arrow-left" aria-hidden="true"></i></a>
                     </article>
                 </div>
             </div>

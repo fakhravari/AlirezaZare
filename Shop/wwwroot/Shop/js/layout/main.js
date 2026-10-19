@@ -1054,7 +1054,7 @@ $(function () {
           <a href="${window.HNProductUrl(product)}" aria-label="مشاهده ${escapeHtml(product.name)}">
             <img loading="lazy" decoding="async" src="${escapeHtml(product.image)}" alt="${escapeHtml(product.name)}">
           </a>
-          ${product.badge ? `<span class="badge-best">${escapeHtml(product.badge)}</span>` : ""}
+          ${product.badge ? `<span class="${product.badge === "جدید" ? "badge-new" : "badge-best"}">${escapeHtml(product.badge)}</span>` : ""}
         </div>
         <div class="showcase-card-body">
           <h3><a class="showcase-product-detail" href="${window.HNProductUrl(product)}">${escapeHtml(product.name)}</a></h3>
@@ -2150,7 +2150,7 @@ $(function () {
     );
     $("#quickViewPrice").text(`${faNumber(product.price)} تومان`);
     $(".quick-description").text(
-      product.detail?.intro || "مشخصات این مدل را پیش از انتخاب بررسی کنید.",
+      product.detail?.highlights?.[0] || product.detail?.intro || "مشخصات این مدل را بررسی کنید.",
     );
     const quickSpecs = [
       ["گروه محصول", product.type],
