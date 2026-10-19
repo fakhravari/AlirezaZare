@@ -2,7 +2,6 @@
 
 
 <header class="page-hero cart-page-hero">
-    <img class="hero-image" src="~/Shop/images/heroes/hero-electrical-editorial.png" alt="ابزارهای برقی و تجهیزات فنی" width="1536" height="1024" fetchpriority="high" />
     <div class="container">
         <nav class="cart-breadcrumb" aria-label="مسیر صفحه">
         <ol>
@@ -16,13 +15,13 @@
             </li>
         </ol>
     </nav>
-        <span class="page-kicker">خرید امن و آسان</span>
+        <span class="page-kicker">مرور انتخاب‌ها</span>
         <h1>سبد خرید</h1>
         <p>یک قدم نزدیک‌تر به انتخاب شما</p>
         <div class="hero-trail" aria-label="مزایای خرید">
-            <span>خرید امن</span>
-            <span>ضمانت اصالت</span>
-            <span>ارسال به سراسر ایران</span>
+            <span>بررسی اقلام</span>
+            <span>تطبیق نشانی</span>
+            <span>اطلاع از شرایط تحویل</span>
         </div>
     </div>
 </header>
@@ -66,7 +65,7 @@
                     <img src="~/Shop/images/payments/zarinpal.svg" asp-append-version="true" alt="" width="42" height="42" loading="lazy">
                 </span>
                 <span>
-                    <strong>زرین‌پال</strong><small>پرداخت امن و آنلاین</small>
+                    <strong>زرین‌پال</strong><small>درگاه نمایشی؛ پرداخت فعال نیست</small>
                 </span>
                 <i class="bi bi-check-circle-fill payment-method-check" aria-hidden="true"></i>
             </label>
@@ -83,7 +82,7 @@
         </div>
         <p id="paymentMethodStatus" class="payment-method-status" role="status"></p>
     </section>
-    <div id="cartView"></div>
+    <div id="cartView"><section class="cart-empty-state"><div class="cart-empty-copy"><span class="cart-empty-kicker">سبد خرید</span><h2>سبد خرید شما خالی است</h2><p>کالایی به سبد اضافه نشده است. برای مرور محصولات یا راهنمای انتخاب از پیوندهای زیر استفاده کنید.</p><div class="cart-empty-actions"><a class="flow-button" asp-controller="Product" asp-action="List">مرور محصولات</a><a class="ui-inline-action" asp-controller="Magazine" asp-action="Index">مطالعهٔ راهنماها</a></div></div></section></div>
     <dialog id="addressDialog" class="address-dialog" aria-labelledby="addressDialogTitle">
         <div class="address-dialog-heading">
             <div class="address-dialog-title">

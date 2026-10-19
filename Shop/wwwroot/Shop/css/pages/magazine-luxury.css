@@ -1697,6 +1697,34 @@
   }
 }
 
+.journal-categories-intro {
+  margin-bottom: 9px;
+  font-size: 11px;
+  line-height: 1.7;
+}
+
+.journal-categories button {
+  font-weight: 600;
+}
+
+.journal-all-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.journal-all-label i {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border: 1px solid #e7edf1;
+  border-radius: 9px;
+  background: #f5f7f9;
+  color: #8b6800;
+  font-size: 14px;
+}
+
 .journal-branch--areas > .journal-children {
   margin-top: 8px;
   margin-right: 18px;

@@ -737,7 +737,7 @@
 }
 
 /* Search keeps two cards beside its filter panel until the result area is wide enough. */
-@media (min-width: 960px) and (max-width: 1199px) {
+@media (min-width: 992px) and (max-width: 1199px) {
   .mobile-page--product-list .search-page .search-page-results {
     grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
   }

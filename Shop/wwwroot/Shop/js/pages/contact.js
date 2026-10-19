@@ -103,21 +103,21 @@
       return;
     }
     const confirmed = await window.confirmFormSubmission({
-      title: "آیا اطلاعات برای ارسال آماده است؟",
-      message: "لطفاً از درست بودن نام، شماره تماس و متن پیام مطمئن شوید.",
-      confirmText: "بله، ارسال شود",
+      title: "بررسی اطلاعات واردشده",
+      message: "این نسخه نمایشی پیام را برای پشتیبانی ارسال نمی‌کند. اطلاعات واردشده را بررسی کنید.",
+      confirmText: "متوجه شدم",
     });
     if (!confirmed) return;
     const button = form.querySelector('button[type="submit"]');
     const original = button.innerHTML;
     button.disabled = true;
-    button.innerHTML = '<i class="bi bi-check2"></i> پیام شما ثبت شد';
+    button.innerHTML = '<i class="bi bi-check2"></i> بررسی نمایشی انجام شد';
     if (status) {
       status.hidden = false;
       status.className = "contact-form-status";
       window.HNUI.setMessageType(status, "success");
       status.innerHTML =
-        '<i class="bi bi-check-circle-fill" aria-hidden="true"></i><span><span>درخواست شما با موفقیت ثبت شد.</span><span>کارشناسان ما به‌زودی با شما تماس می‌گیرند.</span></span>';
+        '<i class="bi bi-info-circle-fill" aria-hidden="true"></i><span><span>فرم در این نسخه نمایشی ارسال نمی‌شود.</span><span>برای ارتباط واقعی، از شماره تلفن یا ایمیل درج‌شده استفاده کنید.</span></span>';
     }
     window.setTimeout(() => {
       button.innerHTML = original;

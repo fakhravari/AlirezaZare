@@ -576,6 +576,32 @@
   justify-self: start;
 }
 
+.account-welcome::after {
+  position: absolute;
+  z-index: 0;
+  inset-inline-end: -72px;
+  bottom: -150px;
+  width: 320px;
+  height: 320px;
+  border: 1px solid rgba(246, 197, 21, 0.3);
+  border-radius: 43% 57% 58% 42%;
+  box-shadow: 0 0 0 18px rgba(246, 197, 21, 0.07), 0 0 0 44px rgba(255, 255, 255, 0.035);
+  content: "";
+  pointer-events: none;
+}
+
+.account-sidebar {
+  border-color: rgba(178, 145, 75, 0.22);
+  background: linear-gradient(155deg, #fffefa 0%, #fbf7ed 100%);
+  box-shadow: 0 14px 34px rgba(67, 53, 28, 0.08);
+}
+
+.account-tabs a[aria-current] {
+  border-color: rgba(183, 136, 23, 0.34);
+  background: linear-gradient(110deg, #fff8e3, #fffefa);
+  box-shadow: inset -3px 0 #d6a315;
+}
+
 .draft-text {
   overflow-wrap: anywhere;
   white-space: pre-wrap;
@@ -1442,14 +1468,9 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
 
 .account-welcome {
   background:
-    linear-gradient(
-      270deg,
-      rgba(16, 42, 86, 0.97) 0%,
-      rgba(16, 42, 86, 0.88) 43%,
-      rgba(16, 42, 86, 0.28) 100%
-    ),
-    url("../../images/heroes/hero-electrical-service.png") center 42% / cover
-      no-repeat;
+    radial-gradient(ellipse at 88% 0%, rgba(246, 197, 21, 0.2), transparent 32%),
+    radial-gradient(ellipse at 10% 100%, rgba(177, 138, 79, 0.15), transparent 34%),
+    linear-gradient(120deg, #102a43 0%, #153754 68%, #244760 100%);
 }
 
 .account-welcome-art {
@@ -1914,6 +1935,37 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
   }
 }
 
+/* Final profile layout rules, after all legacy account-page declarations. */
+.account-welcome {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 180px;
+  align-items: center;
+}
+
+.account-welcome > .profile-breadcrumb {
+  position: relative;
+  inset: auto;
+  grid-column: 1 / -1;
+  grid-row: 1;
+  justify-self: start;
+  width: max-content;
+  max-width: 100%;
+  margin: 0 0 4px;
+}
+
+.account-welcome-copy { grid-column: 1; grid-row: 2; }
+.account-welcome-art { grid-column: 2; grid-row: 2; }
+
+@media (max-width: 767px) {
+  .account-welcome { display: block; }
+  .account-welcome > .profile-breadcrumb {
+    position: relative;
+    inset: auto;
+    width: fit-content;
+    margin: 0 0 18px;
+  }
+}
+
 #favoritesView .flow-cards {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
@@ -2018,3 +2070,8 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
     height: var(--product-card-image-height, 220px);
   }
 }
+
+/* Keep the profile header ornament behind copy across all account sections. */
+.account-welcome::after { z-index: 0; pointer-events: none; }
+.account-welcome-art { position: relative; z-index: 1; }
+.account-content { border-color: rgba(178, 145, 75, 0.2); background: linear-gradient(145deg, #fffefa 0%, #fff 58%, #fbf8f0 100%); box-shadow: 0 14px 34px rgba(67, 53, 28, 0.06); }

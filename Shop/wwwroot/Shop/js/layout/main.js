@@ -1,4 +1,56 @@
 $(function () {
+  const innerCategoryGroups = {
+    tools: [
+      ["دریل و پیچ‌گوشتی", "دریل چکشی", "دریل شارژی", "پیچ‌گوشتی برقی", "دریل بتن‌کن"],
+      ["برش و سایش", "فرز و مینی‌فرز", "اره عمودبر", "اره گردبر", "صفحه برش"],
+      ["تجهیزات کارگاهی", "دستگاه جوش", "کارواش", "کمپرسور باد", "لوازم جانبی ابزار"],
+      ["مته و سوراخ‌کاری", "مته بتن", "مته فلز", "مته چوب", "مته الماسه"],
+      ["صفحه و تیغه", "صفحه برش", "صفحه ساب", "تیغ اره عمودبر", "تیغ اره گردبر"],
+      ["باتری و متعلقات", "باتری یدکی", "شارژر ابزار", "سه‌نظام", "ذغال دستگاه"],
+    ],
+    "hand-tools": [
+      ["آچار و بکس", "آچار فرانسه", "ست بکس", "آچار آلن", "آچار تخت و رینگی", "آچار ترکمتر", "آچار لوله‌گیر"],
+      ["پیچ‌گوشتی و انبر", "پیچ‌گوشتی دستی", "انبردست", "سیم‌چین", "دم‌باریک", "ست پیچ‌گوشتی", "انبرقفلی"],
+      ["لوازم ابزار", "جعبه ابزار", "مته و سری", "گیره و پیچ‌دستی", "کاتر و تیغ", "چکش و ابزار ضربه‌ای", "متر و خط‌کش"],
+    ],
+    components: [
+      ["مقاومت و خازن", "مقاومت", "خازن", "دیود", "سلف", "پل دیود"],
+      ["آی‌سی و نیمه‌رسانا", "آی‌سی", "ترانزیستور", "رگولاتور", "ماسفت", "اپتوکوپلر"],
+      ["برد و ماژول", "بردبورد", "ماژول آماده", "سنسور", "برد آردوینو", "ماژول تغذیه"],
+      ["سنسور و ماژول", "سنسور دما", "سنسور رطوبت", "سنسور فاصله", "ماژول رله", "ماژول ارتباطی"],
+      ["تجهیزات لحیم‌کاری", "هویه", "نوک هویه", "سیم لحیم", "قلع‌کش", "هیتر و هویه"],
+      ["بردهای توسعه", "برد آردوینو", "برد ESP32", "برد رزبری پای", "برد سوراخ‌دار", "جامپر و سیم رابط"],
+    ],
+    cables: [
+      ["سیم و کابل", "سیم افشان", "کابل برق", "کابل شبکه", "کابل شیلددار", "سیم مفتولی", "کابل ابزار دقیق"],
+      ["سوکت و کانکتور", "فیش برق", "سوکت شبکه", "کانکتور", "فیش BNC", "کانکتور مخابراتی", "فیش موزی"],
+      ["اتصالات نصب", "ترمینال", "سرسیم", "داکت و بست", "وارنیش حرارتی", "گلند کابل", "بست کمربندی"],
+    ],
+    lighting: [
+      ["لامپ و LED", "لامپ LED", "پنل سقفی", "ریسه نواری", "لامپ فیلامنتی", "چراغ خطی"],
+      ["چراغ کارگاهی", "چراغ بازرسی", "چراغ اضطراری", "پروژکتور", "چراغ سیار", "چراغ ضدانفجار"],
+      ["لوازم روشنایی", "سرپیچ", "درایور LED", "سنسور حرکتی", "فتوسل", "قاب و متعلقات چراغ"],
+    ],
+    switchgear: [
+      ["کلید و پریز", "کلید برق", "پریز توکار", "پریز صنعتی", "کلید تبدیل", "پریز ارت‌دار"],
+      ["فیوز و محافظ", "فیوز مینیاتوری", "محافظ جان", "محافظ ولتاژ", "فیوز کاردی", "کلید اتوماتیک"],
+      ["تجهیزات کنترل", "کنتاکتور", "تایمر", "شستی و سیگنال", "رله حرارتی", "کنترل فاز"],
+    ],
+    safety: [
+      ["ایمنی فردی", "دستکش عایق", "عینک ایمنی", "کفش کار", "کلاه ایمنی", "لباس کار"],
+      ["حفاظت برق", "محافظ ولتاژ", "تجهیزات ارت", "صاعقه‌گیر", "دستگاه تست عایق", "تجهیزات قفل و برچسب"],
+      ["ایمنی کارگاه", "کلاه ایمنی", "لباس کار", "جعبه کمک‌های اولیه", "گوشی ایمنی", "ماسک تنفسی"],
+    ],
+    measurement: [
+      ["ابزار اندازه‌گیری", "مولتی‌متر", "آمپرمتر", "ولت‌متر", "فرکانس‌متر", "LCR متر"],
+      ["تست و عیب‌یابی", "فازمتر", "تستر کابل", "تستر باتری", "تستر عایق", "ردیاب سیم"],
+      ["ابزار دقیق", "کلمپ‌متر", "اسیلوسکوپ", "منبع تغذیه", "دماسنج لیزری", "لوکس‌متر"],
+      ["دما و رطوبت", "دماسنج دیجیتال", "دماسنج لیزری", "رطوبت‌سنج", "دماسنج محیطی", "ترموکوپل"],
+      ["اندازه‌گیری محیط", "لوکس‌متر", "صوت‌سنج", "فشارسنج", "سرعت‌سنج", "کیفیت‌سنج هوا"],
+      ["منابع تست و کالیبراسیون", "منبع تغذیه آزمایشگاهی", "مولد سیگنال", "کالیبراتور", "بار الکترونیکی", "پراب و کابل تست"],
+    ],
+  };
+
   const $window = $(window);
   const $document = $(document);
   const $html = $("html");
@@ -11,6 +63,40 @@ $(function () {
   const faNumber = (number) => window.HNUI.formatNumber(number);
   const escapeHtml = (value) => window.HNUI.escapeHtml(value);
   const cartOptionsMarkup = (item) => window.HNUI.cart.renderOptions(item);
+  const renderCategoryGroups = (host, groups, categoryName) => {
+    const heading = document.createElement("div");
+    heading.className = "electrical-submenu-heading";
+    const copy = document.createElement("span");
+    copy.className = "electrical-submenu-heading-copy";
+    const title = document.createElement("strong");
+    title.textContent = `زیرشاخه‌های ${categoryName || "محصولات"}`;
+    const caption = document.createElement("small");
+    caption.textContent = "برای دیدن کالاها، یک زیرشاخه را انتخاب کنید";
+    copy.append(title, caption);
+    const count = document.createElement("span");
+    count.className = "electrical-submenu-heading-count";
+    count.textContent = `${groups.length.toLocaleString("fa-IR")} گروه`;
+    heading.append(copy, count);
+
+    const cards = groups.map(([groupName, ...items], index) => {
+      const card = document.createElement("section");
+      card.className = "electrical-submenu-column category-mega-group";
+      card.dataset.index = String(index);
+      const groupLink = document.createElement("a");
+      groupLink.className = "category-mega-title";
+      groupLink.href = `Search?q=${encodeURIComponent(groupName)}`;
+      groupLink.textContent = groupName;
+      card.append(groupLink);
+      items.forEach((label) => {
+        const link = document.createElement("a");
+        link.href = `Search?q=${encodeURIComponent(label)}`;
+        link.textContent = label;
+        card.append(link);
+      });
+      return card;
+    });
+    host.replaceChildren(heading, ...cards);
+  };
   document
     .querySelectorAll(".home-header-search, .mobile-menu-search")
     .forEach((headerSearchForm) => {
@@ -639,106 +725,7 @@ $(function () {
   const categoryMenu = categoryRow?.querySelector(".electrical-category-menu");
   const categoryPanel = categoryMenu?.querySelector("#electricalSubmenu");
   if (categoryRow && categoryMenu && categoryPanel) {
-    const categoryContent = {
-      tools: [
-        [
-          "دریل و پیچ‌گوشتی",
-          "دریل چکشی",
-          "دریل شارژی",
-          "پیچ‌گوشتی برقی",
-          "دریل بتن‌کن",
-        ],
-        ["برش و سایش", "فرز و مینی‌فرز", "اره عمودبر", "اره گردبر", "صفحه برش"],
-        [
-          "تجهیزات کارگاهی",
-          "دستگاه جوش",
-          "کارواش",
-          "کمپرسور باد",
-          "لوازم جانبی ابزار",
-        ],
-        ["مته و سوراخ‌کاری", "مته بتن", "مته فلز", "مته چوب", "مته الماسه"],
-        ["صفحه و تیغه", "صفحه برش", "صفحه ساب", "تیغ اره عمودبر", "تیغ اره گردبر"],
-        ["باتری و متعلقات", "باتری یدکی", "شارژر ابزار", "سه‌نظام", "ذغال دستگاه"],
-      ],
-      "hand-tools": [
-        [
-          "ابزارهای دستی",
-          "انواع آچار",
-          "پیچ‌گوشتی دستی",
-          "انبردست و سیم‌چین",
-          "چکش و تبر",
-          "آچار لوله‌گیر",
-        ],
-        ["اندازه‌گیری دستی", "متر و خط‌کش", "تراز دستی", "گونیا", "کولیس", "متر لیزری"],
-        [
-          "لوازم کارگاهی",
-          "جعبه ابزار",
-          "گیره و پیچ‌دستی",
-          "تیغه و مته",
-          "متعلقات",
-        ],
-      ],
-      components: [
-        ["قطعات پایه", "مقاومت", "خازن", "دیود و LED", "سلف و ترانس"],
-        [
-          "قطعات نیمه‌رسانا",
-          "آی‌سی",
-          "ترانزیستور",
-          "رگولاتور",
-          "ماژول‌های آماده",
-        ],
-        ["برد و اتصال", "بردبورد", "برد مدار چاپی", "رله", "سنسور"],
-        ["سنسور و ماژول", "سنسور دما", "سنسور رطوبت", "سنسور فاصله", "ماژول رله"],
-        ["تجهیزات لحیم‌کاری", "هویه", "نوک هویه", "سیم لحیم", "قلع‌کش"],
-        ["بردهای توسعه", "برد آردوینو", "برد ESP32", "برد رزبری پای", "سیم جامپر"],
-      ],
-      cables: [
-        ["سیم و کابل", "سیم افشان", "کابل برق", "کابل شبکه", "کابل تلفن", "کابل شیلددار"],
-        ["اتصالات", "فیش و سوکت", "ترمینال", "سرسیم", "کانکتور", "فیش BNC"],
-        ["لوازم نصب", "داکت و بست", "لوله خرطومی", "چسب برق", "قرقره کابل", "گلند کابل"],
-      ],
-      lighting: [
-        ["لامپ و LED", "لامپ LED", "لامپ هالوژن", "ریسه نواری", "پنل سقفی"],
-        ["چراغ‌ها", "چراغ کارگاهی", "پروژکتور", "چراغ اضطراری", "چراغ خیابانی"],
-        ["لوازم روشنایی", "سرپیچ", "درایور LED", "قاب و فریم", "سنسور حرکتی"],
-      ],
-      switchgear: [
-        ["کلید و پریز", "کلید برق", "پریز توکار", "پریز صنعتی", "دیمر"],
-        [
-          "حفاظت مدار",
-          "فیوز مینیاتوری",
-          "محافظ جان",
-          "کلید اتوماتیک",
-          "تابلو برق",
-        ],
-        ["کنترل صنعتی", "کنتاکتور", "تایمر", "شستی و سیگنال", "ترموستات"],
-      ],
-      safety: [
-        ["تجهیزات حفاظت", "دستکش عایق", "عینک ایمنی", "کفش کار", "ماسک"],
-        [
-          "محافظت برق",
-          "محافظ ولتاژ",
-          "ارت و اتصال زمین",
-          "صاعقه‌گیر",
-          "سرج ارستر",
-        ],
-        [
-          "ایمنی کارگاه",
-          "کلاه ایمنی",
-          "لباس کار",
-          "جعبه کمک‌های اولیه",
-          "نوار هشدار",
-        ],
-      ],
-      measurement: [
-        ["ابزار اندازه‌گیری", "مولتی‌متر", "آمپرمتر", "ولت‌متر", "کلمپ‌متر"],
-        ["تست و عیب‌یابی", "فازمتر", "تستر کابل", "تستر باتری", "دماسنج"],
-        ["ابزار دقیق", "منبع تغذیه", "اسیلوسکوپ", "فرکانس‌متر", "لوازم جانبی"],
-        ["دما و رطوبت", "دماسنج دیجیتال", "دماسنج لیزری", "رطوبت‌سنج", "ترموکوپل"],
-        ["اندازه‌گیری محیط", "لوکس‌متر", "صوت‌سنج", "فشارسنج", "کیفیت‌سنج هوا"],
-        ["تجهیزات آزمایشگاهی", "مولد سیگنال", "کالیبراتور", "بار الکترونیکی", "پراب تست"],
-      ],
-    };
+    const categoryContent = innerCategoryGroups;
 
     const triggers = [
       ...categoryMenu.querySelectorAll("button[data-category]"),
@@ -757,43 +744,15 @@ $(function () {
     const openCategoryPanel = (category) => {
       const groups = categoryContent[category];
       if (!groups) return;
-      categoryPanel.replaceChildren();
-      categoryPanel.dataset.groupCount = String(groups.length);
-      const submenuHeading = document.createElement("div");
-      submenuHeading.className = "electrical-submenu-heading";
-      const headingCopy = document.createElement("span");
-      headingCopy.className = "electrical-submenu-heading-copy";
-      const headingTitle = document.createElement("strong");
       const activeCategory = triggers.find(
         (trigger) => trigger.dataset.category === category,
       );
-      headingTitle.textContent = `زیرشاخه‌های ${activeCategory?.querySelector("span")?.textContent.trim() || "محصولات"}`;
-      const headingCaption = document.createElement("small");
-      headingCaption.textContent = "دستهٔ موردنظر را برای دیدن کالاها انتخاب کنید";
-      headingCopy.append(headingTitle, headingCaption);
-      const groupCount = document.createElement("span");
-      groupCount.className = "electrical-submenu-heading-count";
-      groupCount.textContent = `${groups.length.toLocaleString("fa-IR")} گروه`;
-      submenuHeading.append(headingCopy, groupCount);
-      categoryPanel.append(submenuHeading);
-      groups.forEach(([title, ...items], index) => {
-        const column = document.createElement("div");
-        column.className = "electrical-submenu-column";
-        column.dataset.index = String(index);
-        const heading = document.createElement("strong");
-        heading.textContent = title;
-        column.append(heading);
-        const links = document.createElement("div");
-        links.className = "electrical-submenu-items";
-        items.forEach((label) => {
-          const link = document.createElement("a");
-          link.href = `Search?q=${encodeURIComponent(label)}`;
-          link.textContent = label;
-          links.append(link);
-        });
-        column.append(links);
-        categoryPanel.append(column);
-      });
+      categoryPanel.dataset.groupCount = String(groups.length);
+      renderCategoryGroups(
+        categoryPanel,
+        groups,
+        activeCategory?.querySelector("span")?.textContent.trim(),
+      );
       categoryPanel.hidden = false;
       categoryRow.dataset.openCategory = category;
       triggers.forEach((trigger) => {
@@ -829,75 +788,26 @@ $(function () {
     });
   }
 
-  const innerCategoryGroups = {
-    tools: [
-      ["دریل و پیچ‌گوشتی", "دریل چکشی", "دریل شارژی", "پیچ‌گوشتی برقی", "دریل بتن‌کن"],
-      ["برش و سایش", "فرز و مینی‌فرز", "اره عمودبر", "اره گردبر", "صفحه برش"],
-      ["تجهیزات کارگاهی", "دستگاه جوش", "کارواش", "کمپرسور باد", "لوازم جانبی ابزار"],
-      ["مته و سوراخ‌کاری", "مته بتن", "مته فلز", "مته چوب", "مته الماسه"],
-      ["صفحه و تیغه", "صفحه برش", "صفحه ساب", "تیغ اره عمودبر", "تیغ اره گردبر"],
-      ["باتری و متعلقات", "باتری یدکی", "شارژر ابزار", "سه‌نظام", "ذغال دستگاه"],
-    ],
-    "hand-tools": [
-      ["آچار و بکس", "آچار فرانسه", "ست بکس", "آچار آلن", "آچار تخت و رینگی", "آچار ترکمتر", "آچار لوله‌گیر"],
-      ["پیچ‌گوشتی و انبر", "پیچ‌گوشتی دستی", "انبردست", "سیم‌چین", "دم‌باریک", "ست پیچ‌گوشتی", "انبرقفلی"],
-      ["لوازم ابزار", "جعبه ابزار", "مته و سری", "گیره و پیچ‌دستی", "کاتر و تیغ", "چکش و ابزار ضربه‌ای", "متر و خط‌کش"],
-    ],
-    components: [
-      ["مقاومت و خازن", "مقاومت", "خازن", "دیود", "سلف", "پل دیود"],
-      ["آی‌سی و نیمه‌رسانا", "آی‌سی", "ترانزیستور", "رگولاتور", "ماسفت", "اپتوکوپلر"],
-      ["برد و ماژول", "بردبورد", "ماژول آماده", "سنسور", "برد آردوینو", "ماژول تغذیه"],
-      ["سنسور و ماژول", "سنسور دما", "سنسور رطوبت", "سنسور فاصله", "ماژول رله", "ماژول ارتباطی"],
-      ["تجهیزات لحیم‌کاری", "هویه", "نوک هویه", "سیم لحیم", "قلع‌کش", "هیتر و هویه"],
-      ["بردهای توسعه", "برد آردوینو", "برد ESP32", "برد رزبری پای", "برد سوراخ‌دار", "جامپر و سیم رابط"],
-    ],
-    cables: [
-      ["سیم و کابل", "سیم افشان", "کابل برق", "کابل شبکه", "کابل شیلددار", "سیم مفتولی", "کابل ابزار دقیق"],
-      ["سوکت و کانکتور", "فیش برق", "سوکت شبکه", "کانکتور", "فیش BNC", "کانکتور مخابراتی", "فیش موزی"],
-      ["اتصالات نصب", "ترمینال", "سرسیم", "داکت و بست", "وارنیش حرارتی", "گلند کابل", "بست کمربندی"],
-    ],
-    lighting: [
-      ["لامپ و LED", "لامپ LED", "پنل سقفی", "ریسه نواری", "لامپ فیلامنتی", "چراغ خطی"],
-      ["چراغ کارگاهی", "چراغ بازرسی", "چراغ اضطراری", "پروژکتور", "چراغ سیار", "چراغ ضدانفجار"],
-      ["لوازم روشنایی", "سرپیچ", "درایور LED", "سنسور حرکتی", "فتوسل", "قاب و متعلقات چراغ"],
-    ],
-    switchgear: [
-      ["کلید و پریز", "کلید برق", "پریز توکار", "پریز صنعتی", "کلید تبدیل", "پریز ارت‌دار"],
-      ["فیوز و محافظ", "فیوز مینیاتوری", "محافظ جان", "محافظ ولتاژ", "فیوز کاردی", "کلید اتوماتیک"],
-      ["تجهیزات کنترل", "کنتاکتور", "تایمر", "شستی و سیگنال", "رله حرارتی", "کنترل فاز"],
-    ],
-    safety: [
-      ["ایمنی فردی", "دستکش عایق", "عینک ایمنی", "کفش کار", "کلاه ایمنی", "لباس کار"],
-      ["حفاظت برق", "محافظ ولتاژ", "تجهیزات ارت", "صاعقه‌گیر", "دستگاه تست عایق", "تجهیزات قفل و برچسب"],
-      ["ایمنی کارگاه", "کلاه ایمنی", "لباس کار", "جعبه کمک‌های اولیه", "گوشی ایمنی", "ماسک تنفسی"],
-    ],
-    measurement: [
-      ["ابزار اندازه‌گیری", "مولتی‌متر", "آمپرمتر", "ولت‌متر", "فرکانس‌متر", "LCR متر"],
-      ["تست و عیب‌یابی", "فازمتر", "تستر کابل", "تستر باتری", "تستر عایق", "ردیاب سیم"],
-      ["ابزار دقیق", "کلمپ‌متر", "اسیلوسکوپ", "منبع تغذیه", "دماسنج لیزری", "لوکس‌متر"],
-      ["دما و رطوبت", "دماسنج دیجیتال", "دماسنج لیزری", "رطوبت‌سنج", "دماسنج محیطی", "ترموکوپل"],
-      ["اندازه‌گیری محیط", "لوکس‌متر", "صوت‌سنج", "فشارسنج", "سرعت‌سنج", "کیفیت‌سنج هوا"],
-      ["منابع تست و کالیبراسیون", "منبع تغذیه آزمایشگاهی", "مولد سیگنال", "کالیبراتور", "بار الکترونیکی", "پراب و کابل تست"],
-    ],
-  };
-
   document.querySelectorAll(".category-nav-mega").forEach((menu) => {
     const sidebar = menu.querySelector(".category-mega-sidebar");
     const content = menu.querySelector(".category-mega-panels");
     if (!sidebar || !content) return;
     const buttons = [...sidebar.querySelectorAll("[data-mega-category]")];
+    buttons.forEach((button) => button.setAttribute("aria-controls", "categoryMegaPanels"));
     let activeGroups = [];
     const updateColumnCount = () => {
       if (!activeGroups.length) return;
       const gap = 12;
-      const minimumCardWidth = 135;
+      const minimumCardWidth = 205;
       const availableColumns = Math.max(
         1,
         Math.floor((content.clientWidth + gap) / (minimumCardWidth + gap)),
       );
+      const preferredColumns =
+        activeGroups.length <= 3 ? activeGroups.length : Math.ceil(activeGroups.length / 2);
       content.style.setProperty(
         "--category-mega-columns",
-        String(Math.min(5, activeGroups.length, availableColumns)),
+        String(Math.max(1, Math.min(4, preferredColumns, availableColumns))),
       );
     };
     const reset = () => {
@@ -922,39 +832,9 @@ $(function () {
         item.classList.toggle("active", active);
         item.setAttribute("aria-expanded", String(active));
       });
-      content.replaceChildren();
       content.dataset.groupCount = String(groups.length);
-      const submenuHeading = document.createElement("div");
-      submenuHeading.className = "electrical-submenu-heading";
-      const headingCopy = document.createElement("span");
-      headingCopy.className = "electrical-submenu-heading-copy";
-      const headingTitle = document.createElement("strong");
       const activeCategory = button.querySelector("span")?.textContent.trim();
-      headingTitle.textContent = `زیرشاخه‌های ${activeCategory || "محصولات"}`;
-      const headingCaption = document.createElement("small");
-      headingCaption.textContent = "دستهٔ موردنظر را برای دیدن کالاها انتخاب کنید";
-      headingCopy.append(headingTitle, headingCaption);
-      const groupCount = document.createElement("span");
-      groupCount.className = "electrical-submenu-heading-count";
-      groupCount.textContent = `${groups.length.toLocaleString("fa-IR")} گروه`;
-      submenuHeading.append(headingCopy, groupCount);
-      content.append(submenuHeading);
-      groups.forEach(([title, ...items]) => {
-        const group = document.createElement("section");
-        group.className = "category-mega-group";
-        const heading = document.createElement("a");
-        heading.className = "category-mega-title";
-        heading.href = `Search?q=${encodeURIComponent(title)}`;
-        heading.textContent = title;
-        group.append(heading);
-        items.forEach((label) => {
-          const link = document.createElement("a");
-          link.href = `Search?q=${encodeURIComponent(label)}`;
-          link.textContent = label;
-          group.append(link);
-        });
-        content.append(group);
-      });
+      renderCategoryGroups(content, groups, activeCategory);
       window.requestAnimationFrame(updateColumnCount);
     };
     buttons.forEach((button) => {
@@ -995,182 +875,7 @@ $(function () {
     }
   });
 
-  /* Route mega-menu selections once, independently from slider lifecycle events. */
-  document.addEventListener("click", (event) => {
-    const link = event.target.closest(
-      ".mega-sidebar a, .mega-links a",
-    );
-    if (!link) return;
-    event.preventDefault();
-    const label =
-      link.querySelector("strong")?.textContent.trim() ||
-      link.textContent.trim();
-    const params = new URLSearchParams();
-    const type = ["مردانه", "زنانه", "اسپرت", "کلاسیک"].find((item) =>
-      label.includes(item),
-    );
-    if (link.closest(".brand-menu")) params.set("brand", label);
-    else if (type) params.set("type", type);
-    location.href = `Search${params.toString() ? `?${params}` : ""}`;
-  });
-
   const storage = window.HNUI.storage;
-
-  const megaData = {
-    men: [
-      ["سبک مردانه", "کلاسیک", "مینیمال", "کرنوگراف", "اسپرت", "روزمره"],
-      ["نوع بند", "چرم طبیعی", "استیل ضدزنگ", "بند مش", "سیلیکونی", "برزنتی"],
-      ["رنگ محبوب", "سرمه‌ای", "مشکی", "نقره‌ای", "سبز زیتونی", "سفید"],
-      [
-        "انتخاب سریع",
-        "پرفروش مردانه",
-        "تازه‌رسیده‌ها",
-        "نسخه محدود",
-        "زیر ۲۰ میلیون",
-        "مناسب هدیه",
-      ],
-    ],
-    women: [
-      ["سبک زنانه", "مینیمال", "مجلسی", "کلاسیک", "فشن", "روزمره"],
-      ["رنگ و متریال", "رزگلد", "طلایی", "نقره‌ای", "صدفی", "سرامیکی"],
-      [
-        "اندازه صفحه",
-        "صفحه ظریف",
-        "صفحه متوسط",
-        "صفحه بزرگ",
-        "بند باریک",
-        "بند جواهری",
-      ],
-      [
-        "انتخاب سریع",
-        "پرفروش زنانه",
-        "کالکشن مهتاب",
-        "هدیه تولد",
-        "زیر ۱۸ میلیون",
-        "مدل‌های جدید",
-      ],
-    ],
-    sport: [
-      [
-        "کاربرد",
-        "دویدن و تمرین",
-        "کوهنوردی",
-        "شنا",
-        "دوچرخه‌سواری",
-        "استفاده روزانه",
-      ],
-      ["امکانات", "کرنوگراف", "ضدآب", "تاریخ‌شمار", "شب‌تاب", "زمان‌سنج"],
-      [
-        "نوع طراحی",
-        "دیجیتال",
-        "آنالوگ اسپرت",
-        "هیبریدی",
-        "صفحه بزرگ",
-        "فوق سبک",
-      ],
-      [
-        "انتخاب سریع",
-        "مقاوم‌ترین‌ها",
-        "بند سیلیکونی",
-        "مدل‌های مشکی",
-        "زیر ۱۵ میلیون",
-        "تازه‌رسیده‌ها",
-      ],
-    ],
-    classic: [
-      ["طراحی", "سه عقربه", "صفحه ساده", "رومن", "وینتیج", "دست‌ساز"],
-      [
-        "نوع بند",
-        "چرم قهوه‌ای",
-        "چرم مشکی",
-        "استیل نقره‌ای",
-        "استیل طلایی",
-        "بند مش",
-      ],
-      [
-        "مناسب برای",
-        "جلسه رسمی",
-        "مراسم",
-        "استایل اداری",
-        "هدیه سازمانی",
-        "استفاده روزانه",
-      ],
-      [
-        "مجموعه‌ها",
-        "آرمان کلاسیک",
-        "میراث",
-        "نسخه بوشهر",
-        "کالکشن ۱۴۰۵",
-        "مدل‌های محدود",
-      ],
-    ],
-    couple: [
-      ["ست بر اساس سبک", "کلاسیک", "مینیمال", "اسپرت", "رزگلد", "دو رنگ"],
-      ["مناسبت", "سالگرد", "عروسی", "تولد", "نامزدی", "هدیه مشترک"],
-      [
-        "شخصی‌سازی",
-        "حک اسم",
-        "حک تاریخ",
-        "جعبه ویژه",
-        "کارت هدیه",
-        "بسته‌بندی لوکس",
-      ],
-      [
-        "انتخاب سریع",
-        "محبوب‌ترین ست‌ها",
-        "ست زیر ۳۵ میلیون",
-        "نسخه محدود",
-        "جدیدترین‌ها",
-        "راهنمای انتخاب",
-      ],
-    ],
-    gift: [
-      ["هدیه برای", "آقایان", "بانوان", "مدیران", "همسر", "دوست"],
-      ["مناسبت", "تولد", "سالگرد", "روز پدر", "روز مادر", "موفقیت کاری"],
-      [
-        "بازه قیمت",
-        "زیر ۱۵ میلیون",
-        "۱۵ تا ۲۵ میلیون",
-        "۲۵ تا ۴۰ میلیون",
-        "بالاتر از ۴۰ میلیون",
-        "کارت هدیه",
-      ],
-      [
-        "خدمات هدیه",
-        "بسته‌بندی ویژه",
-        "حک اختصاصی",
-        "ارسال سورپرایزی",
-        "پیام دست‌نویس",
-      ],
-    ],
-    sale: [
-      [
-        "تخفیف‌ها",
-        "پیشنهاد امروز",
-        "تخفیف هفتگی",
-        "فروش پایان فصل",
-        "تخفیف ست‌ها",
-        "آخرین موجودی",
-      ],
-      [
-        "درصد تخفیف",
-        "تا ۱۰٪",
-        "تا ۲۰٪",
-        "تا ۳۰٪",
-        "بیش از ۳۰٪",
-        "ارسال رایگان",
-      ],
-      ["دسته‌ها", "مردانه", "زنانه", "اسپرت", "کلاسیک", "لوازم جانبی"],
-      [
-        "فرصت محدود",
-        "نوا نسخه شب",
-        "آرمان رزگلد",
-        "مهتاب مینیمال",
-        "ست‌های منتخب",
-        "مشاهده همه",
-      ],
-    ],
-  };
 
   let navFrame = null;
   const updateNav = () => {
@@ -1228,46 +933,6 @@ $(function () {
       revealObserver.observe(this);
     });
   }
-
-  const $megaGrid = $("#megaContentGrid");
-  const $megaCategoryLinks = $("[data-mega-category]");
-  const megaGroupIcon = (title) => {
-    const icons = {
-      "سبک مردانه": "bi-stars",
-      "سبک زنانه": "bi-stars",
-      "سبک اسپرت": "bi-activity",
-      "سبک کلاسیک": "bi-gem",
-      "نوع بند": "bi-link-45deg",
-      "رنگ محبوب": "bi-palette2",
-      "رنگ و متریال": "bi-palette2",
-      "اندازه صفحه": "bi-aspect-ratio",
-      "انتخاب سریع": "bi-lightning-charge",
-    };
-    return icons[title] || "bi-compass";
-  };
-  const renderMegaCategory = (category) => {
-    if (!megaData[category]) return;
-    $megaGrid.html(
-      megaData[category]
-        .map(
-          (group) =>
-            `<div class="col-3 mega-links"><h4><i class="bi ${megaGroupIcon(group[0])}" aria-hidden="true"></i>${group[0]}</h4>${group
-              .slice(1)
-              .map((item) => `<a href="#collection">${item}</a>`)
-              .join("")}</div>`,
-        )
-        .join(""),
-    );
-    $megaCategoryLinks
-      .toggleClass("active", false)
-      .filter(`[data-mega-category="${category}"]`)
-      .addClass("active");
-  };
-
-  $megaCategoryLinks.on("mouseenter focus", function () {
-    renderMegaCategory($(this).data("mega-category"));
-  });
-  renderMegaCategory("men");
 
   const initOwlCarousel = ($element, options) => {
     if ($.fn.owlCarousel) $element.owlCarousel(options);
@@ -2223,8 +1888,8 @@ $(function () {
     event.preventDefault();
     window.HNUI.setMessage(
       document.querySelector("#formMessage"),
-      "عضویت شما با موفقیت ثبت شد.",
-      "success",
+      "ثبت‌نام خبرنامه در نسخهٔ نمایشی فعال نیست؛ اطلاعاتی ارسال یا ذخیره نشد.",
+      "warning",
     );
     $(event.currentTarget).trigger("reset");
   });

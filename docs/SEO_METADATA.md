@@ -67,6 +67,12 @@ Controller / ساخت PageModel
 
 هنگام افزودن route یا تغییر slug، هم منبع تولید sitemap را بررسی کنید و هم URL canonical و لینک‌های قابل‌مشاهده را. خروجی sitemap تضمین نمی‌کند صفحه از نظر محتوایی آمادهٔ index است.
 
+## پوسته و دسترس‌پذیری مشترک
+
+`Views/Shared/_Shop.cshtml` نگه‌دارندهٔ `lang="fa"`, `dir="rtl"`, charset، viewport، favicon، partial متادیتا و پیوند «رفتن به محتوای اصلی» است. پیوند دسترس‌پذیری به قاب `#main-content` می‌رود؛ صفحهٔ خانه درون آن یک `<main id="home-main-content">` مستقل دارد و صفحه‌های داخلی main خود را در View تعریف می‌کنند. هنگام تغییر layout، از ایجاد main تو در تو یا حذف مقصد skip link جلوگیری کنید.
+
+favicon فعلی SVG برداری برند در `wwwroot/Shop/images/shared/store-mark.svg` است. تصویر OG پیش‌فرض هنوز fallback عمومی است؛ برای صفحه‌ای با تصویر شاخص اختصاصی، `SeoModel.ImageUrl` و متن جایگزین آن را از همان تصویر واقعی صفحه تنظیم کنید.
+
 ## محدودیت‌های اندازه‌گیری
 
 این لایه Google Analytics یا Google Tag Manager بارگذاری نمی‌کند. افزودن ابزار اندازه‌گیری نیازمند شناسهٔ واقعی و بررسی رضایت/حریم خصوصی است. داده‌های نمایشی مجله، محصول و فروشگاه را آمار واقعی یا دادهٔ structured offer جا نزنید.

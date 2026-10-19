@@ -140,6 +140,8 @@ core/ui-core.js
 
 کلاس صفحه در `_Shop.cshtml` از نام controller/action ساخته می‌شود (`mobile-page--{controller}-{action}`). برای نمونه، فهرست محصول و جست‌وجو `mobile-page--product-list` و جزئیات مقاله `mobile-page--magazine-details` است؛ selector صفحه را با همین route واقعی هماهنگ کنید.
 
+در کاتالوگ، grid سه‌ستونه کنار فیلتر فقط از عرض ۹۹۲px فعال می‌شود؛ بازهٔ ۷۶۸ تا ۹۹۱px با container حداکثر ۷۲۰px دو ستون نگه می‌دارد تا کارت‌ها فشرده نشوند.
+
 | فایل/گروه | مرزهای ثبت‌شده (px) |
 |---|---|
 | `core/design-tokens.css` | max 575 |
@@ -390,3 +392,10 @@ dotnet build Shop.sln
 ```
 
 برای تغییر CSS/JS، ابتدا diff و `git status` را بررسی کنید، فقط فایل مالک را تغییر دهید، `git diff --check` اجرا کنید و سپس صفحهٔ مرتبط را با matrix این سند بررسی کنید. build برای تغییر Razor/C# مناسب است؛ build موفق به‌تنهایی رفتار بصری یا JS را ثابت نمی‌کند.
+
+### یادداشت layout و دسترس‌پذیری
+
+- پوستهٔ `_Shop.cshtml` پیوند keyboard-only با کلاس `.skip-link` را پیش از header قرار می‌دهد و `#main-content` ظرف focus مقصد آن است.
+- صفحهٔ خانه در `Views/Home/Index.cshtml` همهٔ محتوای صفحه را در یک main قرار می‌دهد؛ هر View داخلی main معنایی خودش را حفظ می‌کند.
+- صفحهٔ پروفایل چهار route اصلی را در `Profile/Index.cshtml` با یک View مشترک رندر می‌کند. عنوان و breadcrumb از route ساخته می‌شوند؛ چیدمان breadcrumb در `.account-welcome` و سطح‌های گرم در `account-page.css` مشترک‌اند.
+- کارت محصول خانه در `shared-product-card.css` صاحب تراز قیمت است؛ `home-warmth.css` فقط اندازهٔ عنوان، ارتفاع یکسان فضای قیمت و ظاهر بخش منتخب را تنظیم می‌کند.

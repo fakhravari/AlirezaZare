@@ -1,7 +1,6 @@
 @model PageModel
 
 <header class="page-hero compare-page-hero">
-    <img class="hero-image" src="~/Shop/images/heroes/hero-electrical-editorial.png" alt="ابزارهای فنی برای مقایسه و انتخاب آگاهانه" width="1536" height="1024" fetchpriority="high" />
     <div class="container">
         <nav class="cart-breadcrumb" aria-label="مسیر صفحه">
             <ol>
@@ -26,7 +25,7 @@
 </div>
 </header>
 <main class="flow-main container compare-page">
-    <section id="compareView" aria-live="polite"></section>
+    <section id="compareView" aria-live="polite"><div class="flow-card flow-empty empty-state-card"><i class="bi bi-columns-gap" aria-hidden="true"></i><h2>هنوز محصولی برای مقایسه انتخاب نشده است</h2><p>از صفحهٔ کالاها، مدل‌هایی را که بررسی می‌کنید به فهرست مقایسه اضافه کنید. مقایسه به شما کمک می‌کند مشخصات ثبت‌شده را کنار هم ببینید.</p><a class="flow-button" asp-controller="Product" asp-action="List">مرور محصولات</a></div></section>
 </main>
 
 @section Styles {

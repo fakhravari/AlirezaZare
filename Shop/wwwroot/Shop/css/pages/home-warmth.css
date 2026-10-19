@@ -97,6 +97,42 @@
   box-shadow: 0 0 0 4px rgba(246, 197, 21, 0.14), 0 12px 28px rgba(65, 52, 31, 0.09);
 }
 
+@media (min-width: 1200px) {
+  .home-page #collection .section-head {
+    align-items: center;
+  }
+
+  .home-page #collection .home-primary-heading {
+    width: max-content;
+    max-width: none;
+    margin-top: 14px;
+    font-size: clamp(27px, 2vw, 32px);
+    white-space: nowrap;
+  }
+
+  .home-page #collection .section-head > div:last-child {
+    padding-top: 38px;
+  }
+}
+
+@media (min-width: 768px) {
+  .home-page #productGrid .product-info h3 {
+    min-height: 3.5em;
+  }
+
+  .home-page #productGrid .product-info > p {
+    min-height: 76px;
+    margin-top: auto;
+  }
+}
+
+@media (max-width: 1199px) {
+  .home-page #collection .home-primary-heading {
+    max-width: 100%;
+    text-wrap: balance;
+  }
+}
+
 @media (max-width: 767px) {
   .home-page #collection,
   .home-page #amazing,

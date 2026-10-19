@@ -1,7 +1,6 @@
 @model PageModel
 
 <header class="page-hero about-hero legal-hero">
-    <img class="hero-image" src="@Url.Content("~/Shop/images/heroes/hero-electrical-editorial.png")" alt="شرایط استفاده از فروشگاه" width="1536" height="1024" fetchpriority="high"/>
     <div class="container">
         <nav class="article-breadcrumb" aria-label="مسیر صفحه">
             <a class="breadcrumb-home" asp-controller="Home" asp-action="Index">
@@ -45,7 +44,7 @@
             <h2><i class="bi bi-arrow-repeat" aria-hidden="true"></i> به‌روزرسانی شرایط</h2>
             <p>با اضافه‌شدن امکان ثبت سفارش و پرداخت واقعی، شرایط خرید و خدمات به‌روزرسانی و پیش از نهایی‌کردن سفارش در دسترس شما قرار می‌گیرد. خریدهای تأییدشده تابع اطلاعات و شرایط اعلام‌شده هنگام همان خرید و قوانین لازم‌الاجرا هستند.</p>
         </section>
-        <p class="legal-updated"><i class="bi bi-calendar-check" aria-hidden="true"></i><span>آخرین بازبینی: ۱۵ مهر ۱۴۰۵</span></p>
+        <p class="legal-updated"><i class="bi bi-calendar-check" aria-hidden="true"></i><time datetime="2026-10-19">آخرین بازبینی: ۲۷ مهر ۱۴۰۵</time></p>
         <div class="legal-actions">
             <a class="flow-button" asp-controller="Contact" asp-action="Index">پرسش درباره شرایط <i class="bi bi-arrow-left" aria-hidden="true"></i></a>
             <a class="ui-inline-action" asp-controller="Legal" asp-action="Privacy"><i class="bi bi-shield-lock" aria-hidden="true"></i> حریم خصوصی</a>

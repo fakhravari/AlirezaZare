@@ -497,3 +497,10 @@
     animation: none;
   }
 }
+
+/* Final compact but readable FAQ rhythm at desktop and mobile sizes. */
+.faq-main .faq-list { gap: 9px; }
+.faq-main .faq-item summary { min-height: 68px; }
+.faq-main .faq-question-text { font-size: 16px; }
+.faq-main .faq-answer p { font-size: 15px; line-height: 1.95; }
+.faq-main .faq-contact-action { min-width: 190px; justify-content: center; padding-inline: 22px; }

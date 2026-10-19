@@ -31,3 +31,28 @@
     transition-duration: 0.01ms !important;
   }
 }
+/* Keyboard users can jump past the shared navigation on every route. */
+.skip-link {
+  position: fixed;
+  z-index: 20000;
+  top: 10px;
+  inset-inline-start: 10px;
+  padding: 12px 18px;
+  transform: translateY(-160%);
+  border: 2px solid #f6c515;
+  border-radius: 10px;
+  background: #102a43;
+  color: #fff;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.skip-link:focus-visible {
+  transform: translateY(0);
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+}
+
+#main-content:focus {
+  outline: none;
+}
