@@ -1,6 +1,6 @@
 # مرجع کامل لایه‌های رابط کاربری
 
-این سند مکمل [`DEVELOPER_ROADMAP.md`](DEVELOPER_ROADMAP.md) است و برای پیدا کردن مالک واقعی UI، ردیابی تداخل CSS/JavaScript و بازآزمایی صفحه‌ها نوشته شده است. برای ترتیب مطالعه و انتخاب سند مناسب، از [`README.md`](README.md) شروع کنید. این مرجع در **۱۸ اکتبر ۲۰۲۶** با ساختار و assetهای موجود در مخزن تطبیق داده شده است؛ نقشهٔ مسیرها، breakpointها و فایل‌ها snapshot هستند و پس از تغییر View یا asset باید دوباره بررسی شوند.
+این سند مکمل [`DEVELOPER_ROADMAP.md`](DEVELOPER_ROADMAP.md) است و برای پیدا کردن مالک واقعی UI، ردیابی تداخل CSS/JavaScript و بازآزمایی صفحه‌ها نوشته شده است. برای ترتیب مطالعه و انتخاب سند مناسب، از [`README.md`](README.md) شروع کنید. این مرجع در **۱۹ اکتبر ۲۰۲۶** با ساختار و assetهای موجود در مخزن تطبیق داده شده است؛ نقشهٔ مسیرها، breakpointها و فایل‌ها snapshot هستند و پس از تغییر View یا asset باید دوباره بررسی شوند.
 
 > این سند فهرست مفصل مالکیت و نقاط شروع جست‌وجو است، نه جایگزین خواندن markup و cascade واقعی. DOM نهایی، کلاس‌های state و stylesheet برنده را برای هر باگ در مرورگر تأیید کنید.
 
@@ -199,17 +199,19 @@ CSS/JS عمومی layout و store که بالاتر آمده‌اند به هم�
 | `/favorites` | `FavoritesController` → `Views/Favorites/Index.cshtml` | `pages.css` + `commerce.css` | `page-content.js` | `main.flow-main`, `#favoritesView`; صفر/چند کارت و حذف favorite |
 | `/profile`, `/profile/orders`, `/profile/addresses`, `/profile/favorites` | `ProfileController` → `Views/Profile/Index.cshtml` | `account-page.css`, `checkout.css`, `pages.css` | `account-page.js`, `address-fields.js`, `iran-places.js`, `orders-pagination.js`, `page-content.js` | `main.flow-main`, `section.account-section`; route/hash بخش فعال، addresses، order pagination و وضعیت خالی |
 | `/profile/edit` | Controller به `/profile` هدایت می‌کند | — | — | مسیر سازگاری؛ صفحهٔ جداگانه ندارد |
-| `/magazine` | `MagazineController` → `Views/Magazine/Index.cshtml` | `magazine-luxury.css`, `pages.css` | `magazine.js` | `main.journal-page`, `article.journal-post`; category/filter/sort، query string، popstate و responsive floating nav |
+| `/magazine` | `MagazineController` → `Views/Magazine/Index.cshtml` | `magazine-luxury.css`, `pages.css`, `store/pagination.css` | `magazine.js` | `main.journal-page`, `.journal-grid`, `#journal-pagination.site-pagination`; فیلتر دسته، شش مطلب در هر صفحه، queryهای `category`/`page`، popstate و صفحه‌بندی responsive؛ ظاهر صفحه‌بندی در `magazine-luxury.css` و رفتار در `magazine.js` مالکیت دارد |
 | `/magazine/{slug}` | `MagazineController` → `Views/Magazine/Details.cshtml`؛ مسیر قدیمی `/magazine/details/{slug}` به مسیر جدید هدایت می‌شود | `article-details.css`, `pages.css` | `article-details.js`, `page-content.js` | `main.article-page`, `article.article-body`, `section.article-section`; TOC، progress، checklist، print/share |
 | `/` مجلهٔ خانه | `HomeController` → `Views/Home/Index.cshtml`؛ اعداد ثابت در `Models/JournalArticles.cs` | `industrial-system.css` | script اختصاصی ندارد | نمایش آماریِ غیرتعاملی؛ مقادیر نمایشی‌اند و در جایی ثبت یا به‌روزرسانی نمی‌شوند |
 | `/about` | `AboutController` → `Views/About/Index.cshtml` | `pages.css` | `page-content.js` | hero/breadcrumb و `page-section`; لینک/CTA و sectionهای داینامیک را بررسی کنید |
 | `/brands` | `BrandsController` → `Views/Brands/Index.cshtml` | `brands.css`, `pages.css` | `page-content.js` | hero، فهرست برند و کارت‌ها؛ responsive grid |
 | `/brands/{slug}` | `BrandsController.Details` → `Views/Brands/Details.cshtml`؛ اطلاعات پایه از `BrandCatalog` و editorial از `brand-editorial.json` | `pages.css`, `brands.css` | `brand-product-count.js` | hero برند، CTA فروشگاه، حوزهٔ فعالیت، راهنمای انتخاب و شمارش محصولات |
 | `/contact` | `ContactController` → `Views/Contact/Index.cshtml` | `contact.css`, `form-confirm-dialog.css`, `pages.css` | `contact.js`, `form-confirm-dialog.js`, `page-content.js` | فرم contact و CTA؛ validation، submit demo و feedback |
-| `/faq` | `FaqController` و View هم‌نام | `pages.css` | `page-content.js` | page sections/FAQ items؛ باز و بسته‌شدن و keyboard state را در DOM ببینید |
-| `/shipping`, `/warranty` | Controller و View هم‌نام | `pages.css` | `page-content.js` | `main.flow-main`, کارت‌های service و `_RelatedLinks` |
+| `/faq` | `FaqController` → `Views/Faq/Index.cshtml` | `pages.css`, `faq.css` | `page-content.js` | `main.flow-main.customer-service-main.faq-main > .faq-shell`; فاصلهٔ بالای محتوا در `faq.css` (۱۸–۲۶px دسکتاپ و ۱۸px موبایل)، جزئیات باز/بسته، keyboard و reduced-motion |
+| `/shipping` | `ShippingController` → `Views/Shipping/Index.cshtml` | `pages.css`, `shipping.css` | `page-content.js` | `main.flow-main.shipping-page > .shipping-shell`; مراحل ارسال، یادداشت هماهنگی و `_RelatedLinks` |
+| `/warranty` | `WarrantyController` → `Views/Warranty/Index.cshtml` | `pages.css`, `warranty.css` | `page-content.js` | `main.flow-main.warranty-page`; معرفی ضمانت از بالای تصویر شروع می‌شود، توضیحات و بج گرم راهنمای درخواست در `warranty.css` چیده شده‌اند |
 | `/tracking` | `TrackingController` → `Views/Tracking/Index.cshtml` | `pages.css`, `tracking.css` | `page-content.js` | `main.flow-main`, tracking form/status؛ نتیجه واقعی سفارش فعال نیست |
-| `/legal/privacy`, `/legal/terms`, `/legal/returns` | `LegalController` → `Views/Legal/` | `pages.css` | اختصاصی ندارد | `main.flow-main > article.flow-card > section.legal-section` |
+| `/legal/privacy` | `LegalController` → `Views/Legal/Privacy.cshtml` | `pages.css` | اختصاصی ندارد | `main.flow-main.legal-main > article.privacy-document`; قاب اصلی صفحه تنها سطح بیرونی است، سند شفاف و تمام‌عرض می‌ماند و `.privacy-intro` کارت تو‌در‌تو ندارد |
+| `/legal/terms`, `/legal/returns` | `LegalController` → View هم‌نام در `Views/Legal/` | `pages.css` | اختصاصی ندارد | `main.flow-main.legal-main > article.legal-document`; ساختار بندها و قاب معرفی هر صفحه را در selectorهای scoped همان صفحه بررسی کنید |
 | `/error` | `ErrorController` → `Views/Error/Index.cshtml` | اختصاصی ندارد | اختصاصی ندارد | `main.container.py-5`; پوستهٔ مشترک همچنان load می‌شود |
 
 صفحه‌های ساخته‌شده با JavaScript ممکن است `innerHTML` جایگزین کنند؛ در این حالت selectorهای markup نهایی را هم در `commerce.js`/script صفحه پیدا کنید. Razor landmark به‌تنهایی همهٔ DOM را شرح نمی‌دهد.
