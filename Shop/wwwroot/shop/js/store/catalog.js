@@ -340,9 +340,9 @@ const productColorsById = Object.freeze({
 window.HNProductColors = productColorCatalog;
 
 const productVideosById = Object.freeze({
-    1: ["content/products/cordless-hammer-drill-hn-001-row-001/videos/cordless-hammer-drill-hn-001-row-001-video-01.mp4"],
-    2: ["content/products/cordless-drill-driver-hn-002-row-002/videos/cordless-drill-driver-hn-002-row-002-video-01.mp4"],
-    3: ["content/products/electric-hammer-drill-hn-003-row-003/videos/electric-hammer-drill-hn-003-row-003-video-01.mp4"],
+    1: ["content/products/videos/cordless-hammer-drill-hn-001-row-001-video-01.mp4"],
+    2: ["content/products/videos/cordless-drill-driver-hn-002-row-002-video-01.mp4"],
+    3: ["content/products/videos/electric-hammer-drill-hn-003-row-003-video-01.mp4"],
 });
 
 const productFileName = (englishName, row) => {
@@ -353,14 +353,12 @@ const productFileName = (englishName, row) => {
     const rowCode = String(row).padStart(3, "0");
     return `${slug}-hn-${rowCode}-row-${rowCode}`;
 };
-const productDirectory = (englishName, row) =>
-    `content/products/${productFileName(englishName, row)}`;
 const productMainImagePath = (englishName, row) =>
-    `${productDirectory(englishName, row)}/images/main/${productFileName(englishName, row)}.png`;
+    `content/products/images/main/${productFileName(englishName, row)}-main.png`;
 const productCardImagePath = (englishName, row) =>
-    `${productDirectory(englishName, row)}/images/card/${productFileName(englishName, row)}-800.jpg`;
+    `content/products/images/card/${productFileName(englishName, row)}-card-800.jpg`;
 const productThumbnailImagePath = (englishName, row) =>
-    `${productDirectory(englishName, row)}/images/thumbnail/${productFileName(englishName, row)}-256.jpg`;
+    `content/products/images/thumbnail/${productFileName(englishName, row)}-thumbnail-256.jpg`;
 
 window.HNProducts = productCatalog.map((entry, i) => {
     // Sample stock levels keep both in-stock and sold-out detail states visible.

@@ -11,26 +11,19 @@ public static class ProductMediaCatalog
     public static string ForProduct(string englishName, int row)
     {
         string fileName = ProductFileName(englishName, row);
-        return $"{ProductDirectory(englishName, row)}/images/main/{fileName}.png";
+        return $"content/products/images/main/{fileName}-main.png";
     }
 
     public static string ForCard(string englishName, int row)
     {
         string fileName = ProductFileName(englishName, row);
-        return $"{ProductDirectory(englishName, row)}/images/card/{fileName}-800.jpg";
+        return $"content/products/images/card/{fileName}-card-800.jpg";
     }
 
     public static string ForThumbnail(string englishName, int row)
     {
         string fileName = ProductFileName(englishName, row);
-        return $"{ProductDirectory(englishName, row)}/images/thumbnail/{fileName}-256.jpg";
-    }
-
-    private static string ProductDirectory(string englishName, int row)
-    {
-        string slug = Regex.Replace(englishName.ToLowerInvariant(), "[^a-z0-9]+", "-").Trim('-');
-        string rowCode = row.ToString("D3", CultureInfo.InvariantCulture);
-        return $"content/products/{slug}-hn-{rowCode}-row-{rowCode}";
+        return $"content/products/images/thumbnail/{fileName}-thumbnail-256.jpg";
     }
 
     private static string ProductFileName(string englishName, int row)

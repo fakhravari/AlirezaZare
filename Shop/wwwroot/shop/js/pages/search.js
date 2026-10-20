@@ -711,7 +711,7 @@
         ? cart
             .map(
               (item) =>
-                `<article class="search-cart-item"><img src="${window.HNUI.escapeHtml(item.image || "content/products/cordless-hammer-drill-hn-001-row-001/images/card/cordless-hammer-drill-hn-001-row-001-800.jpg")}" alt=""><span><strong>${window.HNUI.escapeHtml(item.name || "محصول")}</strong>${cartOptionsMarkup(item)}<small>${fa(item.price)} تومان</small></span><b>${fa(item.quantity)} عدد</b></article>`,
+                `<article class="search-cart-item"><img src="${window.HNUI.escapeHtml(item.image || "content/products/images/card/cordless-hammer-drill-hn-001-row-001-card-800.jpg")}" alt=""><span><strong>${window.HNUI.escapeHtml(item.name || "محصول")}</strong>${cartOptionsMarkup(item)}<small>${fa(item.price)} تومان</small></span><b>${fa(item.quantity)} عدد</b></article>`,
             )
             .join("")
         : '<div class="search-cart-empty"><i class="bi bi-bag"></i><strong>سبد خرید شما خالی است</strong></div>';
