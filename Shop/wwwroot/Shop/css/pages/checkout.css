@@ -964,30 +964,49 @@
     padding: 16px;
   }
   .payment-method {
-    min-height: 66px;
-    gap: 7px;
-    padding: 8px;
+    min-height: 72px;
+    gap: 6px;
+    padding: 8px 7px;
     border-radius: 12px;
   }
   .payment-method-icon {
-    width: 32px;
-    height: 32px;
-    flex-basis: 32px;
+    width: 28px;
+    height: 28px;
+    flex-basis: 28px;
     border-radius: 10px;
+  }
+  .payment-method > span:nth-of-type(2) {
+    flex: 1 1 0;
+    width: 0;
+    overflow: hidden;
   }
   .payment-method strong {
     font-size: 11px;
+    line-height: 1.4;
+    white-space: nowrap;
   }
   .payment-method small {
-    font-size: 9px;
+    display: -webkit-box;
+    overflow: hidden;
+    font-size: 8px;
     line-height: 1.5;
+    overflow-wrap: normal;
+    word-break: normal;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
   }
   .payment-method-check {
-    font-size: 13px;
+    position: absolute;
+    inset-inline-start: 6px;
+    bottom: 6px;
+    font-size: 11px;
   }
   .payment-method-soon {
-    padding: 3px 5px;
-    font-size: 8px;
+    position: absolute;
+    inset-inline-start: 5px;
+    bottom: 5px;
+    padding: 2px 4px;
+    font-size: 7px;
   }
 }
 .address-dialog .invoice-demo-note {
