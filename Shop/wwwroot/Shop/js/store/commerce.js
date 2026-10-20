@@ -78,6 +78,21 @@ document.addEventListener("DOMContentLoaded", () => {
     const p = catalog.find((p) => p.id === productId);
     if (!p) productView.innerHTML = empty("محصول پیدا نشد");
     else {
+      const productSectionHash =
+        /^#product-(?:intro|expert|specifications|reviews|questions)$/.test(
+          location.hash,
+        );
+      if (
+        productSectionHash &&
+        window.matchMedia("(max-width: 767px)").matches
+      ) {
+        history.replaceState(
+          history.state,
+          "",
+          `${location.pathname}${location.search}`,
+        );
+        window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+      }
       const isFavorite = favorites().includes(String(p.id));
       const selectedVariants = p.variants
         ? Object.fromEntries(
@@ -500,7 +515,7 @@ document.addEventListener("DOMContentLoaded", () => {
         purchaseTrustPanel.classList.remove("product-price-context");
         purchaseTrustPanel.setAttribute("aria-label", "مزیت‌های خرید مطمئن");
         purchaseTrustPanel.innerHTML =
-          '<div class="product-purchase-trust-heading"><span class="product-purchase-trust-mark"><i class="bi bi-shield-check" aria-hidden="true"></i></span><span><small>پیش از تصمیم‌گیری</small><strong>اطلاعات محصول را بررسی کنید</strong><p>مشخصات و شرایط ارائه‌شده برای همین کالا را مبنا قرار دهید.</p></span></div><ul class="product-purchase-trust-list"><li><i class="bi bi-list-check" aria-hidden="true"></i><span><strong>مشخصات فنی</strong><small>ویژگی‌ها و اقلام همراه را با نیاز کاری خود تطبیق دهید.</small></span></li><li><i class="bi bi-chat-dots" aria-hidden="true"></i><span><strong>پرسش پیش از خرید</strong><small>برای جزئیات نامشخص با مجموعه تماس بگیرید.</small></span></li><li><i class="bi bi-box-seam" aria-hidden="true"></i><span><strong>شرایط سفارش</strong><small>اطلاعات تحویل و ضمانت را در صفحات مربوط بررسی کنید.</small></span></li></ul>';
+          '<div class="product-purchase-trust-heading"><span class="product-purchase-trust-mark"><i class="bi bi-shield-check" aria-hidden="true"></i></span><span><small>پیش از تصمیم‌گیری</small><strong>اطلاعات محصول را بررسی کنید</strong><p>مشخصات و شرایط ارائه‌شده برای همین کالا را مبنا قرار دهید.</p></span></div><ul class="product-purchase-trust-list"><li><i class="bi bi-list-check" aria-hidden="true"></i><span><strong>مشخصات فنی</strong><small>سازگاری فنی و اقلام همراه را بسنجید.</small></span></li><li><i class="bi bi-chat-dots" aria-hidden="true"></i><span><strong>پرسش پیش از خرید</strong><small>ابهام‌ها را پیش از خرید بپرسید.</small></span></li><li><i class="bi bi-box-seam" aria-hidden="true"></i><span><strong>شرایط سفارش</strong><small>تحویل و ضمانت سفارش را بررسی کنید.</small></span></li></ul>';
         const galleryColumn = document.createElement("div");
         galleryColumn.className = "product-detail-gallery-column";
         productGallery.replaceWith(galleryColumn);
