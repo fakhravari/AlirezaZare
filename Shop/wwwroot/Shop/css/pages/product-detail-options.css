@@ -731,14 +731,107 @@
 }
 
 @media (max-width: 575px) {
+  #productView .product-detail-secondary-actions {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
+  }
+
+  #productView .product-detail-secondary-actions > a,
+  #productView .product-detail-favorite,
   #productView .product-detail-secondary-actions > .product-share-control > .product-detail-share {
-    min-height: 44px;
-    padding-inline: 5px;
-    gap: 4px;
-    font-size: 10px;
+    width: 100%;
+    min-height: 38px;
+    justify-content: flex-start;
+    gap: 8px;
+    padding: 7px 11px;
+    border-radius: 9px;
+    font-size: 11px;
+    text-align: right;
+  }
+
+  #productView .product-detail-secondary-actions > .product-share-control {
+    width: 100%;
+  }
+
+  #productView .product-detail-secondary-actions > a > i,
+  #productView .product-detail-favorite > i,
+  #productView .product-detail-share > i {
+    flex: 0 0 auto;
+    font-size: 15px;
+  }
+
+  #productView .product-detail-secondary-actions > .product-share-control > .product-detail-share {
+    padding-inline: 11px;
   }
 
   #productView .product-share-menu {
     width: min(290px, calc(100vw - 32px));
+  }
+}
+
+#productView :is(
+  .product-detail-description,
+  .product-detail-intro,
+  .product-detail-content-panel > p,
+  #product-intro > p,
+  .product-expert-grid p,
+  .product-question-faq > p,
+  .product-feedback-card > p,
+  .product-feedback-admin-reply > p,
+  .product-feedback-user-text
+) {
+  width: min(100%, 78ch);
+  max-width: 100%;
+  min-width: 0;
+  margin-inline-start: 0;
+  margin-inline-end: auto;
+  direction: rtl;
+  text-align: justify;
+  text-align-last: right;
+  text-justify: inter-word;
+  line-height: 1.9;
+  overflow-wrap: break-word;
+  word-break: normal;
+}
+
+#productView .product-feedback-admin-meta {
+  min-width: 0;
+  flex-wrap: nowrap;
+  gap: 6px;
+}
+
+#productView .product-feedback-admin-meta > span {
+  min-width: 0;
+  flex: 1 1 auto;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+#productView .product-feedback-admin-meta > span > i {
+  flex: 0 0 24px;
+  width: 24px;
+  height: 24px;
+}
+
+#productView .product-feedback-admin-meta > small {
+  flex: 0 0 auto;
+  padding: 4px 7px;
+  white-space: nowrap;
+}
+
+@media (max-width: 575px) {
+  #productView :is(
+    .product-detail-description,
+    .product-detail-intro,
+    .product-detail-content-panel > p,
+    #product-intro > p,
+    .product-expert-grid p,
+    .product-question-faq > p,
+    .product-feedback-card > p,
+    .product-feedback-admin-reply > p,
+    .product-feedback-user-text
+  ) {
+    width: 100%;
+    line-height: 1.8;
   }
 }

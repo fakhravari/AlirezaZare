@@ -157,21 +157,41 @@ document.addEventListener("DOMContentLoaded", () => {
         : catalog.filter((item) => item.id !== p.id).slice(0, 4);
       const feedbackPages = { reviews: 1, questions: 1 },
         feedbackPageSize = 4;
+      const questionGuideItems = [
+        [
+          "اقلام همراه کالا را از کجا ببینم؟",
+          "فهرست محتویات و متعلقات در مشخصات همین کالا درج شده است؛ بسته‌بندی مدل‌های مختلف ممکن است تفاوت داشته باشد.",
+        ],
+        [
+          "چطور سازگاری لوازم جانبی را بررسی کنم؟",
+          "مدل، ابعاد، نوع اتصال و مشخصات فنی را با کالای اصلی تطبیق دهید؛ هم‌برند بودن به‌تنهایی سازگاری را تضمین نمی‌کند.",
+        ],
+        [
+          "شرایط ضمانت و خدمات کالا چیست؟",
+          "مدت و موارد پوشش بسته به کالا متفاوت است؛ شرایط ضمانت ثبت‌شده برای همین محصول را پیش از خرید بررسی کنید.",
+        ],
+        [
+          "برای استفادهٔ طولانی چه نکته‌ای رعایت کنم؟",
+          "محدودهٔ کاری و شیوهٔ نگهداری هر مدل متفاوت است؛ مشخصات و دستورالعمل همان کالا را مبنا قرار دهید.",
+        ],
+      ].map(([text, reply]) => ({
+        name: "راهنمای خرید",
+        text,
+        rating: 0,
+        reply,
+        sample: true,
+      }));
       const readFeedback = (type) => {
         const seeded = (p.detail?.[type] || []).map(
-          ([name, text, rating, reply], index) => ({
+          ([name, text, rating, reply]) => ({
             name: name?.trim() || "کاربر مهمان",
             text,
             rating: rating || 0,
-            reply:
-              type === "questions"
-                ? [0, 3, 8].includes(index)
-                  ? reply || ""
-                  : ""
-                : reply || "",
+            reply: reply || "",
             sample: true,
           }),
         );
+        if (type === "questions") seeded.push(...questionGuideItems);
         try {
           const raw = ui.storage.get(
             `hn-product-${type}-${p.id}`,

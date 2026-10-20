@@ -215,7 +215,35 @@
   }
 
   #productView .product-detail-total-price > strong {
-    font-size: 24px;
+    font-size: clamp(18px, 5vw, 20px);
+    line-height: 1.25;
+  }
+
+  #productView .product-detail-extras-price {
+    align-items: center;
+    gap: 7px;
+    padding-top: 7px;
+  }
+
+  #productView .product-detail-extras-price > span {
+    font-size: 11px;
+    line-height: 1.45;
+  }
+
+  #productView .product-detail-extras-price > strong {
+    max-width: 48%;
+    font-size: 11px;
+    line-height: 1.45;
+  }
+
+  #productView .product-detail-total-price {
+    gap: 6px;
+    padding-top: 8px;
+  }
+
+  #productView .product-detail-total-price > span {
+    font-size: 11px;
+    white-space: nowrap;
   }
 
   #productView .product-stock-status {
@@ -363,6 +391,68 @@
 }
 
 @media (max-width: 575px) {
+  #productView .product-detail-meta > .product-meta-category {
+    position: relative;
+    display: block;
+    padding: 10px !important;
+  }
+
+  #productView .product-detail-meta > .product-meta-category > i {
+    position: absolute;
+    top: 10px;
+    inset-inline-start: 10px;
+    width: 28px;
+    height: 28px;
+    margin: 0;
+    flex: 0 0 28px;
+    border-radius: 9px;
+    font-size: 14px;
+  }
+
+  #productView .product-detail-meta .product-meta-category-content {
+    display: block;
+    width: 100%;
+    padding-top: 34px;
+  }
+
+  #productView .product-detail-meta .product-meta-category-content > small {
+    position: absolute;
+    top: 17px;
+    inset-inline-start: 46px;
+    font-size: 10px;
+  }
+
+  #productView .product-detail-meta .product-meta-path {
+    display: flex;
+    width: 100%;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 3px 16px;
+    font-size: 11px;
+    line-height: 1.6;
+  }
+
+  #productView .product-detail-meta .product-meta-path > li {
+    max-width: none;
+    padding: 2px 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    overflow-wrap: normal;
+    white-space: nowrap;
+  }
+
+  #productView
+    .product-detail-meta
+    .product-meta-path
+    > li:not(:last-child)::after {
+    left: -11px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 575px) {
   #productView .product-purchase-trust {
     margin-top: 11px;
     padding: 13px;
@@ -384,16 +474,17 @@
   }
 
   #productView .product-purchase-trust-list {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1fr);
   }
 
   #productView .product-purchase-trust-list > li:last-child {
-    grid-column: 1 / -1;
+    grid-column: auto;
   }
 
   #productView .product-purchase-trust-list > li {
+    align-items: center;
     gap: 6px;
-    padding: 9px 8px;
+    padding: 7px 9px;
   }
 
   #productView .product-purchase-trust-list strong {

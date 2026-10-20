@@ -735,10 +735,10 @@ h3,
     background:
       radial-gradient(
         circle at 8% 4%,
-        rgba(189, 163, 111, 0.13),
+        rgba(212, 192, 146, 0.16),
         transparent 25%
       ),
-      linear-gradient(165deg, #0d233d 0%, #07182b 56%, #05111f 100%) !important;
+      linear-gradient(165deg, #183554 0%, #122d4b 56%, #0d233d 100%) !important;
     color: #f8f3e9 !important;
     box-shadow: -22px 0 60px rgba(1, 8, 18, 0.42) !important;
   }
