@@ -560,7 +560,7 @@ $(function () {
         card
           .querySelector(".product-image img, .rail-image img")
           ?.getAttribute("src") ||
-        "shop/images/products/tool-hammer-drill.png",
+        "content/products/cordless-hammer-drill-hn-001-row-001.png",
       type: "مشخصات محصول",
       powerSource: "مطابق مشخصات کالا",
       useCase: "مطابق اطلاعات کالا",
@@ -624,9 +624,9 @@ $(function () {
           const product = products.get(id) || {
             name: "محصول منتخب",
             price: 0,
-            image: "shop/images/products/tool-hammer-drill.png",
+            image: "content/products/cordless-hammer-drill-hn-001-row-001.png",
           };
-          return `<article class="compare-panel-item" data-favorite-id="${escapeHtml(id)}"><img src="${escapeHtml(product.image || "shop/images/products/tool-hammer-drill.png")}" alt="" loading="lazy"><span><strong>${escapeHtml(product.name || "محصول منتخب")}</strong><small>${faNumber(Number(product.price) * (Number(product.price) < 1000000 ? 1000000 : 1))} تومان</small></span><button class="cart-remove" type="button" data-favorite-remove="${escapeHtml(id)}" aria-label="حذف ${escapeHtml(product.name || "محصول")} از علاقه‌مندی‌ها"><i class="bi bi-trash3" aria-hidden="true"></i></button></article>`;
+          return `<article class="compare-panel-item" data-favorite-id="${escapeHtml(id)}"><img src="${escapeHtml(product.image || "content/products/cordless-hammer-drill-hn-001-row-001.png")}" alt="" loading="lazy"><span><strong>${escapeHtml(product.name || "محصول منتخب")}</strong><small>${faNumber(Number(product.price) * (Number(product.price) < 1000000 ? 1000000 : 1))} تومان</small></span><button class="cart-remove" type="button" data-favorite-remove="${escapeHtml(id)}" aria-label="حذف ${escapeHtml(product.name || "محصول")} از علاقه‌مندی‌ها"><i class="bi bi-trash3" aria-hidden="true"></i></button></article>`;
         })
         .join(""),
     );
@@ -653,7 +653,7 @@ $(function () {
         image:
           button.dataset.image ||
           image?.getAttribute("src") ||
-          "shop/images/products/tool-hammer-drill.png",
+          "content/products/cordless-hammer-drill-hn-001-row-001.png",
       });
     });
     $("#comparePanelCount").text(`${faNumber(ids.length)} محصول`);
@@ -669,7 +669,7 @@ $(function () {
           const product = products.get(id) || {
             name: "محصول منتخب",
             price: 0,
-            image: "shop/images/products/tool-hammer-drill.png",
+            image: "content/products/cordless-hammer-drill-hn-001-row-001.png",
           };
           return `<article class="compare-panel-item" data-compare-id="${escapeHtml(id)}"><img src="${escapeHtml(product.image)}" alt="" loading="lazy"><span><strong>${escapeHtml(product.name)}</strong><small>${faNumber(product.price)} تومان</small></span><button class="cart-remove" type="button" data-compare-remove="${escapeHtml(id)}" aria-label="حذف ${escapeHtml(product.name)} از مقایسه"><i class="bi bi-trash3" aria-hidden="true"></i></button></article>`;
         })
@@ -1044,6 +1044,14 @@ $(function () {
       (product) => product.stockQuantity > 0 && !product.discountPercent,
     ),
   ].slice(0, 5);
+  const sliderImagePaths = [
+    "shop/images/sliders/slide-power-tools.png",
+    "shop/images/sliders/slide-measurement-tools.png",
+    "shop/images/sliders/slide-soldering-tools.png",
+    "shop/images/sliders/slide-workshop-lighting.png",
+  ];
+  const sliderImagePath = (product) =>
+    sliderImagePaths[Number(product.imageSet)] || product.image;
   const amazingSection = document.querySelector("#amazing");
   const amazingSlider = amazingSection?.querySelector("#amazingSlider");
   if (amazingSlider && amazingProducts.length) {
@@ -1053,7 +1061,7 @@ $(function () {
           <article class="showcase-card">
             <div class="product-image">
               <a href="${window.HNProductUrl(product)}" aria-label="مشاهده ${escapeHtml(product.name)}">
-                <img loading="lazy" decoding="async" src="${escapeHtml(product.image)}" alt="${escapeHtml(product.name)}">
+                <img loading="lazy" decoding="async" src="${escapeHtml(sliderImagePath(product))}" alt="${escapeHtml(product.name)}">
               </a>
               <span class="badge-offer">${product.discountPercent ? `${faNumber(product.discountPercent)}٪ تخفیف` : "پیشنهاد ویژه"}</span>
             </div>
@@ -1077,7 +1085,7 @@ $(function () {
       <article class="showcase-card">
         <div class="product-image">
           <a href="${window.HNProductUrl(product)}" aria-label="مشاهده ${escapeHtml(product.name)}">
-            <img loading="lazy" decoding="async" src="${escapeHtml(product.image)}" alt="${escapeHtml(product.name)}">
+            <img loading="lazy" decoding="async" src="${escapeHtml(sliderImagePath(product))}" alt="${escapeHtml(product.name)}">
           </a>
           ${product.badge ? `<span class="${product.badge === "جدید" ? "badge-new" : "badge-best"}">${escapeHtml(product.badge)}</span>` : ""}
         </div>
@@ -1942,7 +1950,7 @@ $(function () {
       image: String(
         $cartButton.data("image") ||
           $root.find("img").first().attr("src") ||
-          "shop/images/products/tool-hammer-drill.png",
+          "content/products/cordless-hammer-drill-hn-001-row-001.png",
       ),
       code: catalogProduct
         ? `HN-${String(catalogProduct.id).padStart(3, "0")}`

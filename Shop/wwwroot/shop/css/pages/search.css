@@ -382,7 +382,7 @@ select {
       rgba(6, 24, 63, 0.38) 62%,
       rgba(4, 16, 40, 0.78) 100%
     ),
-    url("../../images/sliders/tool-multimeter-kit.png");
+    url("/shop/images/heroes/hero-measurement-tools.png");
   background-position: center, center;
   background-size: cover;
   color: #fff;

@@ -1,7 +1,29 @@
+using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
 
 namespace Shop.Models;
+
+public static class ProductMediaCatalog
+{
+    public const int ImageGroupCount = 4;
+
+    public static string ForProduct(string englishName, int row)
+    {
+        string slug = Regex.Replace(englishName.ToLowerInvariant(), "[^a-z0-9]+", "-").Trim('-');
+        string rowCode = row.ToString("D3", CultureInfo.InvariantCulture);
+        return $"content/products/{slug}-hn-{rowCode}-row-{rowCode}.png";
+    }
+
+    public static string GetContentPath(string fileName) => fileName switch
+    {
+        "tool-hammer-drill.png" => ForProduct("Cordless Hammer Drill", 1),
+        "tool-multimeter-kit.png" => ForProduct("Digital Multimeter", 6),
+        "tool-soldering-station.png" => ForProduct("Digital Soldering Station", 11),
+        "tool-led-worklight.png" => ForProduct("Portable LED Work Light", 16),
+        _ => throw new ArgumentOutOfRangeException(nameof(fileName), fileName, "Unknown product media file.")
+    };
+}
 
 public sealed record ProductSeoEntry(
     int Id,
@@ -22,17 +44,9 @@ public sealed record ProductSeoEntry(
 
 public static class ProductSeoCatalog
 {
-    private static readonly string[] Images =
-    [
-        "shop/images/products/tool-hammer-drill.png",
-        "shop/images/products/tool-multimeter-kit.png",
-        "shop/images/products/tool-soldering-station.png",
-        "shop/images/products/tool-led-worklight.png"
-    ];
-
     public static IReadOnlyList<ProductSeoEntry> Load(string webRootPath)
     {
-        string catalogPath = Path.Combine(webRootPath, "Shop", "js", "store", "catalog.js");
+        string catalogPath = Path.Combine(webRootPath, "shop", "js", "store", "catalog.js");
         if (!File.Exists(catalogPath)) return [];
 
         string source = File.ReadAllText(catalogPath);
@@ -53,7 +67,7 @@ public static class ProductSeoCatalog
             if (fields.Count < 4 || imageIndexMatch is null) continue;
 
             int imageIndex = int.Parse(imageIndexMatch.Groups[1].Value);
-            if (imageIndex < 0 || imageIndex >= Images.Length) continue;
+            if (imageIndex < 0 || imageIndex >= ProductMediaCatalog.ImageGroupCount) continue;
 
             products.Add(new ProductSeoEntry(
                 id,
@@ -61,7 +75,7 @@ public static class ProductSeoCatalog
                 fields[1].Groups[1].Value,
                 fields[2].Groups[1].Value,
                 fields[3].Groups[1].Value,
-                Images[imageIndex]));
+                ProductMediaCatalog.ForProduct(fields[1].Groups[1].Value, id)));
         }
 
         return products;

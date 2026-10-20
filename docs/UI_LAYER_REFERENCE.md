@@ -1,6 +1,6 @@
 # مرجع کامل لایه‌های رابط کاربری
 
-این سند مکمل [`DEVELOPER_ROADMAP.md`](DEVELOPER_ROADMAP.md) است و برای پیدا کردن مالک واقعی UI، ردیابی تداخل CSS/JavaScript و بازآزمایی صفحه‌ها نوشته شده است. برای ترتیب مطالعه و انتخاب سند مناسب، از [`README.md`](README.md) شروع کنید. این مرجع در **۱۹ اکتبر ۲۰۲۶** با ساختار و assetهای موجود در مخزن تطبیق داده شده است؛ نقشهٔ مسیرها، breakpointها و فایل‌ها snapshot هستند و پس از تغییر View یا asset باید دوباره بررسی شوند.
+این سند مکمل [`DEVELOPER_ROADMAP.md`](DEVELOPER_ROADMAP.md) است و برای پیدا کردن مالک واقعی UI، ردیابی تداخل CSS/JavaScript و بازآزمایی صفحه‌ها نوشته شده است. برای ترتیب مطالعه و انتخاب سند مناسب، از [`README.md`](README.md) شروع کنید. این مرجع در **۲۰ اکتبر ۲۰۲۶** با ساختار و assetهای موجود در مخزن تطبیق داده شده است؛ نقشهٔ مسیرها، breakpointها و فایل‌ها snapshot هستند و پس از تغییر View یا asset باید دوباره بررسی شوند.
 
 > این سند فهرست مفصل مالکیت و نقاط شروع جست‌وجو است، نه جایگزین خواندن markup و cascade واقعی. DOM نهایی، کلاس‌های state و stylesheet برنده را برای هر باگ در مرورگر تأیید کنید.
 
@@ -38,6 +38,8 @@ Shop/Program.cs
 | CSS تجارت/کارت/صفحه‌بندی | `Shop/wwwroot/shop/css/store/` |
 | JavaScript عمومی | `Shop/wwwroot/shop/js/core/`, `layout/`, `store/` |
 | JavaScript صفحه‌ها | `Shop/wwwroot/shop/js/pages/` |
+
+برای محل نگهداری عکس‌ها، ابعاد پیشنهادی اسلایدر دسکتاپ/موبایل، کارت محصول، گالری جزئیات، بنرهای داخلی و فرمت/وزن فایل‌ها، [`IMAGE_ASSET_GUIDE.md`](IMAGE_ASSET_GUIDE.md) را ببینید.
 
 `RouteOptions.LowercaseUrls` در `Shop/Program.cs` فعال است؛ URLهای تولیدشده را lowercase نگه دارید. نام کلاس/فایل‌های Controller و View به‌دلیل قرارداد ASP.NET ممکن است PascalCase باقی بماند. مقدارهای فعلی نام فروشگاه و اطلاعات تماس در بخش «هویت و اطلاعات تماس فعلی» از [`DEVELOPER_ROADMAP.md`](DEVELOPER_ROADMAP.md) ثبت شده‌اند؛ هنگام تغییر، viewهای مشترک، SEO و متن‌های JS را نیز جست‌وجو کنید.
 

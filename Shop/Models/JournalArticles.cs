@@ -41,7 +41,7 @@ public static partial class JournalArticles
         if (article is null) return null;
 
         var sections = article.Headings.Select((heading, index) => new MagazineSectionModel($"section-{index + 1}", heading, article.Content[index])).ToArray();
-        return new MagazineDetailsModel(article.Slug, article.Category, "مجله تخصصی برق و ابزار", article.Title, article.Summary, "تحریریه ندا اولیائی", "", "۶ دقیقه مطالعه", "shop/images/heroes/hero-electrical-editorial.png", "shop/images/products/" + article.Image, article.Summary, sections, "مشخصات و دستورالعمل سازندهٔ همان مدل را بررسی کنید و ابزار را متناسب با کاربرد و شرایط ایمنی انتخاب کنید.", article.Sources);
+        return new MagazineDetailsModel(article.Slug, article.Category, "مجله تخصصی برق و ابزار", article.Title, article.Summary, "تحریریه ندا اولیائی", "", "۶ دقیقه مطالعه", "shop/images/heroes/hero-electrical-editorial.png", ProductMediaCatalog.GetContentPath(article.Image), article.Summary, sections, "مشخصات و دستورالعمل سازندهٔ همان مدل را بررسی کنید و ابزار را متناسب با کاربرد و شرایط ایمنی انتخاب کنید.", article.Sources);
     }
 }
 

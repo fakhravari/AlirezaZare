@@ -113,7 +113,7 @@
             @if (!string.IsNullOrWhiteSpace(brand.LogoFile) && slug is not ("uni-t" or "yihua"))
             {
                 <span class="brand-menu-logo-frame">
-                    <img class="brand-menu-logo" src="@Url.Content($"~/shop/images/brands/{brand.LogoFile}")" alt="" width="52" height="38" decoding="async" />
+                    <img class="brand-menu-logo" src="@Url.Content($"~/content/brands/{brand.LogoFile}")" alt="" width="52" height="38" decoding="async" />
                 </span>
             }
             else

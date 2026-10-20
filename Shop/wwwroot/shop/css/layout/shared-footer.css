@@ -170,7 +170,7 @@
   border: 3px solid rgba(255, 255, 255, 0.88);
   border-radius: 12px;
   background-color: #fff;
-  background-image: url(../../images/shared/trust-badges.png);
+  background-image: url(/content/trust/trust-badges.png);
   background-repeat: no-repeat;
   background-size: 298px 104px;
   color: transparent;

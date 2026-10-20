@@ -45,7 +45,7 @@
                         <span class="brand-logo-frame">
                             @if (!string.IsNullOrWhiteSpace(brand.LogoFile))
                             {
-                                <img class="brand-logo-image" src="@Url.Content($"~/shop/images/brands/{brand.LogoFile}")" alt="لوگوی @brand.PersianName" loading="lazy" decoding="async"/>
+                                <img class="brand-logo-image" src="@Url.Content($"~/content/brands/{brand.LogoFile}")" alt="لوگوی @brand.PersianName" loading="lazy" decoding="async"/>
                             }
                             else
                             {

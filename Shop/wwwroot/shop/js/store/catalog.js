@@ -298,11 +298,19 @@ window.HNProducts = productCatalog.map((entry, i) => {
   // Sample stock levels keep both in-stock and sold-out detail states visible.
   const stockLevels = [12, 0, 7, 3, 0, 18, 5, 0, 2, 9];
   const stockQuantity = stockLevels[i % stockLevels.length];
-  const images = [
-    "shop/images/products/tool-hammer-drill.png",
-    "shop/images/products/tool-multimeter-kit.png",
-    "shop/images/products/tool-soldering-station.png",
-    "shop/images/products/tool-led-worklight.png",
+  const productImagePath = (englishName, row) => {
+    const slug = String(englishName || "product")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+    const rowCode = String(row).padStart(3, "0");
+    return `content/products/${slug}-hn-${rowCode}-row-${rowCode}.png`;
+  };
+  const representativeImages = [
+    productImagePath(productCatalog[0][1], 1),
+    productImagePath(productCatalog[5][1], 6),
+    productImagePath(productCatalog[10][1], 11),
+    productImagePath(productCatalog[15][1], 16),
   ];
   const productDetails = [
     {
@@ -754,6 +762,7 @@ window.HNProducts = productCatalog.map((entry, i) => {
     imageIndex,
     configuredCartLimit,
   ] = entry;
+  const productImage = productImagePath(englishName, i + 1);
   const cartLimit = Number(configuredCartLimit);
   const categoryRoots = {
     "دریل چکشی": "ابزار برقی",
@@ -799,11 +808,12 @@ window.HNProducts = productCatalog.map((entry, i) => {
     ],
     price: i === 0 ? 24.5 : 14 + ((i * 3) % 45),
     discountPercent: i % 5 === 0 ? 15 : i % 7 === 0 ? 10 : 0,
-    image: images[imageIndex],
+    image: productImage,
+    imageSet: imageIndex,
     detail: productDetails[Math.floor(i / 5)],
     images: [
-      images[imageIndex],
-      ...images.filter((_, index) => index !== imageIndex),
+      productImage,
+      ...representativeImages.filter((_, index) => index !== imageIndex),
     ],
     videos: [
       "shop/videos/1_compressed.mp4",

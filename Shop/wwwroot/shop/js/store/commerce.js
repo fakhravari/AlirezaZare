@@ -548,7 +548,7 @@ document.addEventListener("DOMContentLoaded", () => {
       };
       const brandLogoFile = productBrandLogos[p.brand];
       const brandMark = brandLogoFile
-        ? `<img class="product-meta-brand-logo" src="/shop/images/brands/${brandLogoFile}" alt="" aria-hidden="true" decoding="async">`
+        ? `<img class="product-meta-brand-logo" src="/content/brands/${brandLogoFile}" alt="" aria-hidden="true" decoding="async">`
         : '<i class="bi bi-patch-check" aria-hidden="true"></i>';
       const categoryPath =
         Array.isArray(p.categoryPath) && p.categoryPath.length
@@ -558,7 +558,7 @@ document.addEventListener("DOMContentLoaded", () => {
         String(p.brandCountryCode || "").toUpperCase()
       ];
       const brandCountryMark = brandCountry
-        ? `<img class="product-meta-country-flag" src="/shop/images/countries/flags/${brandCountry.code.toLowerCase()}.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">`
+        ? `<img class="product-meta-country-flag" src="/content/countries/flags/${brandCountry.code.toLowerCase()}.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">`
         : '<i class="bi bi-globe2" aria-hidden="true"></i>';
       const brandCountryContent = brandCountry
         ? `<span><small>کشور برند</small><strong>${esc(brandCountry.fa)}</strong><small class="product-meta-country-en" lang="en" dir="ltr">${esc(brandCountry.en)}</small></span>`

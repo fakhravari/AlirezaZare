@@ -47,6 +47,7 @@
 |---|---|---|
 | [`DEVELOPER_ROADMAP.md`](DEVELOPER_ROADMAP.md) | شناخت معماری و پیدا کردن owner کد | راه‌اندازی، پوشه‌ها، routeها، جریان داده، روش تغییر و بدهی‌ها |
 | [`UI_LAYER_REFERENCE.md`](UI_LAYER_REFERENCE.md) | پیدا کردن markup و asset برندهٔ صفحه | ترتیب CSS/JS، selectorها، breakpointها، eventها، storage و regression |
+| [`IMAGE_ASSET_GUIDE.md`](IMAGE_ASSET_GUIDE.md) | افزودن یا جایگزینی عکس‌های سایت | ساختار پوشه‌ها، ابعاد هدف موبایل/دسکتاپ، فرمت و نام‌گذاری |
 | [`SEO_METADATA.md`](SEO_METADATA.md) | تغییر metadata و structured data | مدل صفحه، partial مشترک، sitemap/robots و تنظیمات اختیاری |
 | [`AGENTS.md`](AGENTS.md) | workflow لازم برای تغییر مخزن | ترتیب مطالعه، ایمنی، سبک و اعتبارسنجی |
 
@@ -75,4 +76,4 @@ Shop/Program.cs
 
 ## اعتبار مستندات
 
-این نقشه و راهنماهای فنی در **۱۹ اکتبر ۲۰۲۶** با ساختار فعلی مخزن تطبیق داده شده‌اند. breakpointها، ترتیب assetها و مسیرها snapshot هستند؛ پیش از تغییر، آن‌ها را با فایل جاری و runtime دوباره بررسی کنید.
+این صفحه، مرجع UI و راهنمای تصویرها در **۲۰ اکتبر ۲۰۲۶** با ساختار فعلی مخزن تطبیق داده شده‌اند. breakpointها، ترتیب assetها و مسیرها snapshot هستند؛ پیش از تغییر، آن‌ها را با فایل جاری و runtime دوباره بررسی کنید.
