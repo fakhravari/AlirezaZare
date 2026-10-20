@@ -169,6 +169,15 @@ h6,
 ::placeholder {
   color: #5d6a73 !important;
   opacity: 1;
+  font-size: 0.95em;
+  font-weight: 400;
+}
+
+@media (max-width: 575px) {
+  input::placeholder,
+  textarea::placeholder {
+    font-size: 0.93em;
+  }
 }
 
 :focus-visible {

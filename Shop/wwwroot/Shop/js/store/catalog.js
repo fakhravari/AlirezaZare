@@ -270,6 +270,30 @@ const productCatalog = [
     1,
   ],
 ];
+const productBrandCountryCodes = Object.freeze({
+  Bosch: "DE",
+  Makita: "JP",
+  DeWalt: "US",
+  Ronix: "IR",
+  Tosan: "IR",
+  "UNI-T": "CN",
+  Fluke: "US",
+  Mastech: "CN",
+  Victor: "CN",
+  Kyoritsu: "JP",
+  YIHUA: "CN",
+  Hakko: "JP",
+  Quick: "CN",
+  Weller: "DE",
+  GOOT: "JP",
+  Philips: "NL",
+  Arva: "IR",
+  Wiha: "DE",
+  Knipex: "DE",
+  Stanley: "US",
+  Benning: "DE",
+});
+
 window.HNProducts = productCatalog.map((entry, i) => {
   // Sample stock levels keep both in-stock and sold-out detail states visible.
   const stockLevels = [12, 0, 7, 3, 0, 18, 5, 0, 2, 9];
@@ -756,6 +780,7 @@ window.HNProducts = productCatalog.map((entry, i) => {
     englishName,
     name,
     brand,
+    brandCountryCode: productBrandCountryCodes[brand] || null,
     type,
     powerSource,
     useCase,

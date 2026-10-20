@@ -2093,6 +2093,18 @@
   object-position: center;
 }
 
+@media (min-width: 992px) {
+  #productView .product-meta-brand-logo {
+    width: 58px;
+    height: 48px;
+    flex: 0 0 58px;
+    padding: 4px;
+    border-color: rgba(22, 50, 79, 0.12);
+    border-radius: 9px;
+    box-shadow: 0 2px 6px rgba(22, 50, 79, 0.06);
+  }
+}
+
 @media (max-width: 575px) {
   .product-detail-page > .flow-main.container {
     padding-inline: 8px !important;
