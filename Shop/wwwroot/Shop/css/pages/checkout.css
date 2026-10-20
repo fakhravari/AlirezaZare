@@ -1350,14 +1350,47 @@
   .invoice-page > .flow-grid > .flow-card {
     border-radius: var(--radius-panel-compact, 14px);
   }
-  .invoice-page .invoice-item {
+  body:is(.mobile-page--cart-index, .mobile-page--checkout-index) .invoice-item {
+    display: grid;
+    grid-template-columns: 58px minmax(0, 1fr);
+    align-items: start;
+    gap: 10px;
     padding: 11px;
     border-radius: 12px;
   }
-  .invoice-page .invoice-item img {
-    width: 66px;
-    height: 66px;
-    flex-basis: 66px;
+  body:is(.mobile-page--cart-index, .mobile-page--checkout-index) .invoice-item img {
+    width: 58px;
+    height: 58px;
+  }
+  body:is(.mobile-page--cart-index, .mobile-page--checkout-index) .invoice-item-details {
+    min-width: 0;
+  }
+  body:is(.mobile-page--cart-index, .mobile-page--checkout-index) .invoice-product-title {
+    display: inline-block;
+    line-height: 1.8;
+    overflow-wrap: anywhere;
+  }
+  body:is(.mobile-page--cart-index, .mobile-page--checkout-index) .invoice-item .cart-item-option-chip {
+    width: 100%;
+    box-sizing: border-box;
+    overflow-wrap: anywhere;
+  }
+  body:is(.mobile-page--cart-index, .mobile-page--checkout-index) .invoice-item .cart-item-option-chip > strong {
+    overflow-wrap: anywhere;
+  }
+  body:is(.mobile-page--cart-index, .mobile-page--checkout-index) .invoice-item .invoice-item-pricing {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 6px;
+  }
+  body:is(.mobile-page--cart-index, .mobile-page--checkout-index) .invoice-item .invoice-item-line-total {
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 4px 8px;
+  }
+  body:is(.mobile-page--cart-index, .mobile-page--checkout-index) .invoice-item .invoice-item-line-total > b {
+    white-space: normal;
+    overflow-wrap: anywhere;
   }
 }
 .cart-related {

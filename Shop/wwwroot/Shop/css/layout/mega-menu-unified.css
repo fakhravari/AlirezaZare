@@ -274,3 +274,56 @@
     filter: drop-shadow(0 0 4px rgba(246, 197, 21, 0.3));
   }
 }
+
+/* Use one shipping-page-matched guide panel on every inner page. */
+@media (min-width: 992px) {
+  .inner-page #mainNav .quick-links-menu {
+    position: absolute !important;
+    top: calc(100% + 16px) !important;
+    right: 0 !important;
+    left: auto !important;
+    display: grid !important;
+    width: min(560px, calc(100vw - 32px)) !important;
+    padding: 18px !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 16px !important;
+    border: 1px solid var(--mega-card-border) !important;
+    border-top: 3px solid var(--mega-gold-bright) !important;
+    border-radius: 0 0 20px 20px !important;
+    background: linear-gradient(145deg, #fffdf8, #fff 58%, #fbf7ec) !important;
+    box-shadow: var(--mega-shadow) !important;
+  }
+
+  .inner-page #mainNav .quick-links-group {
+    display: grid;
+    min-width: 0;
+    padding: 12px;
+    align-content: start;
+    gap: 4px;
+    border: 1px solid rgba(16, 42, 67, 0.09);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.82);
+  }
+
+  .inner-page #mainNav .quick-links-group h3 {
+    margin: 0 0 5px;
+    padding: 0 0 10px;
+    border-bottom: 1px solid var(--mega-line);
+    color: var(--mega-ink);
+  }
+
+  .inner-page #mainNav .quick-links-group a {
+    min-height: 36px;
+    padding: 7px 8px;
+    border: 1px solid transparent;
+    border-radius: 8px 13px 8px 13px;
+    color: #526579;
+    transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease;
+  }
+
+  .inner-page #mainNav .quick-links-group a:is(:hover, :focus-visible) {
+    border-color: rgba(190, 145, 65, 0.2);
+    background: #fff6d9;
+    color: var(--mega-ink);
+  }
+}
