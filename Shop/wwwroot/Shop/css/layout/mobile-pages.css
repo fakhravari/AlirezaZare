@@ -2079,3 +2079,16 @@
       0 0 0 4px rgba(246, 197, 21, 0.28) !important;
   }
 }
+
+#productView .product-meta-brand-logo {
+  display: block;
+  width: 36px;
+  height: 26px;
+  flex: 0 0 36px;
+  padding: 3px;
+  border: 1px solid rgba(22, 50, 79, 0.08);
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.9);
+  object-fit: contain;
+  object-position: center;
+}

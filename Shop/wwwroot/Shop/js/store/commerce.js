@@ -530,6 +530,26 @@ document.addEventListener("DOMContentLoaded", () => {
             "</p>",
         );
       const productMeta = productView.querySelector(".product-detail-meta");
+      const productBrandLogos = {
+        Bosch: "bosch.svg",
+        Makita: "makita.svg",
+        DeWalt: "dewalt.svg",
+        Ronix: "ronix.png",
+        Tosan: "tosan.webp",
+        "UNI-T": "uni-t.png",
+        Fluke: "fluke.svg",
+        Mastech: "mastech.png",
+        Kyoritsu: "kyoritsu.png",
+        Yihua: "yihua.png",
+        Hakko: "hakko.png",
+        Weller: "weller.svg",
+        Philips: "philips.svg",
+        Wiha: "wiha.svg",
+      };
+      const brandLogoFile = productBrandLogos[p.brand];
+      const brandMark = brandLogoFile
+        ? `<img class="product-meta-brand-logo" src="/Shop/images/brands/${brandLogoFile}" alt="" aria-hidden="true" decoding="async">`
+        : '<i class="bi bi-patch-check" aria-hidden="true"></i>';
       const categoryPath =
         Array.isArray(p.categoryPath) && p.categoryPath.length
           ? p.categoryPath
@@ -540,7 +560,9 @@ document.addEventListener("DOMContentLoaded", () => {
       if (productBreadcrumb)
         productBreadcrumb.innerHTML = `<li><a href="/"><i class="bi bi-house-door" aria-hidden="true"></i><span>خانه</span></a></li>${categoryPath.map((part) => `<li><i class="bi bi-chevron-left" aria-hidden="true"></i><span>${esc(part)}</span></li>`).join("")}<li class="cart-breadcrumb-current"><i class="bi bi-chevron-left" aria-hidden="true"></i><span aria-current="page"><i class="bi bi-tools" aria-hidden="true"></i>${esc(p.name)}</span></li>`;
       productMeta.innerHTML =
-        '<div class="product-meta-identity" role="group" aria-label="اطلاعات برند و کد محصول"><span class="product-meta-pill product-meta-brand"><i class="bi bi-patch-check" aria-hidden="true"></i><span><small>برند</small><strong>' +
+        '<div class="product-meta-identity" role="group" aria-label="اطلاعات برند و کد محصول"><span class="product-meta-pill product-meta-brand">' +
+        brandMark +
+        '<span><small>برند</small><strong>' +
         esc(p.brand) +
         '</strong></span></span><span class="product-meta-pill product-meta-code"><i class="bi bi-upc-scan" aria-hidden="true"></i><span><small>کد محصول</small><strong dir="ltr">HN-' +
         String(p.id).padStart(3, "0") +
