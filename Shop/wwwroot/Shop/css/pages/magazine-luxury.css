@@ -309,7 +309,7 @@
   justify-content: space-between;
 }
 
-.journal-all span {
+.journal-all > .journal-category-count {
   display: grid;
   place-items: center;
   min-width: 25px;
@@ -1597,7 +1597,7 @@
   color: var(--industrial-navy);
 }
 
-.journal-all span {
+.journal-all > .journal-category-count {
   min-width: 27px;
   height: 27px;
   padding: 0 6px;
@@ -1608,7 +1608,7 @@
   font-size: 12px;
 }
 
-.journal-all.is-active span {
+.journal-all.is-active > .journal-category-count {
   border-color: #f0dfaa;
   background: #fff;
   color: var(--industrial-navy);
@@ -1713,9 +1713,12 @@
 }
 
 .journal-all-label {
+  flex: 1 1 auto;
+  min-width: 0;
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  white-space: nowrap;
 }
 
 .journal-all-label i {
@@ -1732,8 +1735,9 @@
 }
 
 .journal-branch--areas > .journal-children {
-  margin-top: 4px;
-  margin-right: 18px;
+  margin: 4px 0 0;
+  padding: 0;
+  border: 0;
 }
 
 .journal-categories .journal-branch > button > i,
@@ -1762,6 +1766,17 @@
   min-height: 44px;
   gap: 10px;
   padding: 7px 9px;
+  justify-content: space-between;
+}
+
+.journal-branch--areas .journal-children button > span:first-of-type {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.journal-branch--areas .journal-children button > .journal-category-count {
+  flex: 0 0 29px;
+  margin: 0;
 }
 
 .journal-branch--areas .journal-children button > i {
@@ -1845,7 +1860,7 @@
 
 @media (max-width: 767px) {
   .journal-branch--areas > .journal-children {
-    margin-right: 10px;
+    margin-right: 0;
   }
 
   .journal-page nav.journal-paging.site-pagination {

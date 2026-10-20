@@ -62,6 +62,16 @@
     url("../../images/heroes/hero-brand-tools.jpg") !important;
 }
 
+/* Use the page's foreground photo once; a second CSS photo underneath made
+   image-based heroes look soft and doubled. */
+.inner-page .page-hero:has(> .hero-image) {
+  background-image: none !important;
+}
+
+.inner-page .page-hero:has(> .hero-image) > .hero-image {
+  opacity: 0.9;
+}
+
 @media (max-width: 767px) {
   .inner-page :is(
       .about-hero,
