@@ -2,7 +2,7 @@
    Their positioning remains context-specific; their presentation is shared. */
 :root {
   --mega-surface: #fffdf8;
-  --mega-card: #fffdf8;
+  --mega-card: #f7f9fb;
   --mega-card-border: rgba(190, 145, 65, 0.28);
   --mega-line: rgba(190, 145, 65, 0.24);
   --mega-ink: #102a43;

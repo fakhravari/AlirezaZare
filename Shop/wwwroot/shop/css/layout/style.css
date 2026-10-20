@@ -3736,10 +3736,6 @@ footer .copyright {
 }
 
 @media (max-width: 767px) {
-  html {
-    scrollbar-width: none;
-  }
-
   .hero-stats {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -3775,13 +3771,6 @@ footer .copyright {
 
   .hero-stats div:first-child {
     border-right: 0;
-  }
-
-  html::-webkit-scrollbar,
-  body::-webkit-scrollbar {
-    display: none;
-    width: 0;
-    height: 0;
   }
 }
 

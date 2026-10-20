@@ -294,6 +294,51 @@ const productBrandCountryCodes = Object.freeze({
     Benning: "DE",
 });
 
+const productColorCatalog = Object.freeze({
+    black: Object.freeze({ slug: "black", en: "Black", fa: "مشکی", hex: "#252525" }),
+    white: Object.freeze({ slug: "white", en: "White", fa: "سفید", hex: "#ffffff" }),
+    red: Object.freeze({ slug: "red", en: "Red", fa: "قرمز", hex: "#d62828" }),
+    blue: Object.freeze({ slug: "blue", en: "Blue", fa: "آبی", hex: "#2563eb" }),
+    green: Object.freeze({ slug: "green", en: "Green", fa: "سبز", hex: "#16834a" }),
+    yellow: Object.freeze({ slug: "yellow", en: "Yellow", fa: "زرد", hex: "#f6c515" }),
+    orange: Object.freeze({ slug: "orange", en: "Orange", fa: "نارنجی", hex: "#f97316" }),
+    gray: Object.freeze({ slug: "gray", en: "Gray", fa: "خاکستری", hex: "#8b929a" }),
+});
+
+const productColorsById = Object.freeze({
+    1: ["yellow", "black"],
+    2: ["blue", "black"],
+    3: ["yellow", "black"],
+    4: ["red", "black"],
+    5: ["yellow", "black"],
+    6: ["yellow", "black"],
+    7: ["yellow", "black"],
+    8: ["yellow", "black"],
+    9: ["gray", "black"],
+    10: ["red", "black"],
+    11: ["blue", "black"],
+    12: ["blue", "black"],
+    13: ["gray", "black"],
+    14: ["white", "black"],
+    15: ["red", "black"],
+    16: ["yellow", "black"],
+    17: ["yellow", "black"],
+    18: ["orange", "black"],
+    19: ["yellow", "black"],
+    20: ["yellow", "black"],
+    21: ["red", "black"],
+    22: ["red", "black"],
+    23: ["yellow", "black"],
+    24: ["orange", "black"],
+    25: ["black", "gray"],
+    26: ["yellow", "black"],
+    27: ["yellow", "red"],
+    28: ["yellow", "black"],
+    29: ["green", "black"],
+    30: ["white", "black"],
+});
+window.HNProductColors = productColorCatalog;
+
 const productVideosById = Object.freeze({
     1: ["content/products/cordless-hammer-drill-hn-001-row-001-video-01.mp4"],
     2: ["content/products/cordless-drill-driver-hn-002-row-002-video-01.mp4"],
@@ -796,6 +841,7 @@ window.HNProducts = productCatalog.map((entry, i) => {
         name,
         brand,
         brandCountryCode: productBrandCountryCodes[brand] || null,
+        colors: (productColorsById[i + 1] || []).map((slug) => productColorCatalog[slug]),
         type,
         powerSource,
         useCase,

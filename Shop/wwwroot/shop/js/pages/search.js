@@ -7,6 +7,7 @@
     type: new Set(),
     movement: new Set(),
     strap: new Set(),
+    color: new Set(),
     availability: "all",
     discountOnly: false,
     minPrice: 0,
@@ -24,10 +25,11 @@
       en: "Application environment",
       slug: "application-environment",
     },
+    color: { fa: "رنگ", en: "Color", slug: "color" },
     price: { fa: "بازه قیمت", en: "Price range", slug: "price-range" },
   };
   const hasActiveFilters = () =>
-    ["brand", "type", "movement", "strap"].some((key) => state[key].size) ||
+    ["brand", "type", "movement", "strap", "color"].some((key) => state[key].size) ||
     state.availability !== "all" ||
     state.discountOnly ||
     state.minPrice > 0 ||
@@ -192,6 +194,13 @@
   const filterValueMeta = (key, value) =>
     key === "brand"
       ? { fa: brandDisplayName(value), en: value, slug: brandSlug(value) }
+      : key === "color"
+        ? window.HNProductColors?.[value] || {
+            fa: value,
+            en: value,
+            slug: value,
+            hex: "#64748b",
+          }
       : {
           fa: value,
           ...(filterValueMetadata[key]?.[value] || {
@@ -217,6 +226,15 @@
     type: createFilterOptions("type"),
     movement: createFilterOptions("movement"),
     strap: createFilterOptions("strap"),
+    color: Object.fromEntries(
+      [
+        ...new Set(
+          products.flatMap((product) =>
+            (product.colors || []).map((color) => color.slug),
+          ),
+        ),
+      ].map((slug) => [slug, slug]),
+    ),
   };
   const filterConfig = Object.fromEntries(
     Object.entries(filterOptions).map(([key, options]) => [
@@ -354,7 +372,11 @@
           .map((value) =>
             (() => {
               const metadata = filterValueMeta(key, value);
-              return `<label class="filter-option"><input type="checkbox" value="${value}" data-filter="${key}" data-value-fa="${metadata.fa}" data-value-en="${metadata.en}" data-value-slug="${metadata.slug}"><span>${metadata.fa}</span></label>`;
+              const colorOption =
+                key === "color"
+                  ? `<i class="filter-color-swatch" style="--filter-color: ${metadata.hex}" aria-hidden="true"></i>`
+                  : "";
+              return `<label class="filter-option${key === "color" ? " filter-color-option" : ""}"><input type="checkbox" value="${value}" data-filter="${key}" data-value-fa="${metadata.fa}" data-value-en="${metadata.en}" data-value-slug="${metadata.slug}"><span class="filter-option-label">${colorOption}${key === "color" ? `<span class="filter-color-name" title="${metadata.fa} ${metadata.hex}">${metadata.fa}</span>` : metadata.fa}</span></label>`;
             })(),
           )
           .join("");
@@ -367,6 +389,8 @@
         (!state.type.size || state.type.has(p.type)) &&
         (!state.movement.size || state.movement.has(p.powerSource || p.movement)) &&
         (!state.strap.size || state.strap.has(p.useCase || p.strap)) &&
+        (!state.color.size ||
+          (p.colors || []).some((color) => state.color.has(color.slug))) &&
         (state.availability === "all" ||
           (state.availability === "in-stock"
             ? isProductAvailable(p)
@@ -477,10 +501,19 @@
   }
   function renderChips() {
     const chips = [];
-    ["brand", "type", "movement", "strap"].forEach((key) =>
+    ["brand", "type", "movement", "strap", "color"].forEach((key) =>
       state[key].forEach((value) =>
         chips.push(
-          `<button class="filter-chip" data-key="${key}" data-value="${value}">${key === "brand" ? brandDisplayName(value) : value} ×</button>`,
+          (() => {
+            const metadata = filterValueMeta(key, value);
+            const swatch =
+              key === "color"
+                ? `<i class="filter-color-swatch" style="--filter-color: ${metadata.hex}" aria-hidden="true"></i>`
+                : "";
+            const label =
+              key === "brand" ? brandDisplayName(value) : key === "color" ? metadata.fa : value;
+            return `<button class="filter-chip${key === "color" ? " filter-chip-color" : ""}" data-key="${key}" data-value="${value}">${swatch}${label} ×</button>`;
+          })(),
         ),
       ),
     );
@@ -526,7 +559,7 @@
     );
   }
   function clearAll() {
-    ["brand", "type", "movement", "strap"].forEach((key) => state[key].clear());
+    ["brand", "type", "movement", "strap", "color"].forEach((key) => state[key].clear());
     state.availability = "all";
     state.discountOnly = false;
     state.minPrice = 0;

@@ -745,9 +745,54 @@ $(function () {
     triggers.forEach((trigger) =>
       trigger.setAttribute("aria-controls", "electricalSubmenu"),
     );
+    let activeCategoryGroups = [];
+    const updateHomeCategoryPanelSize = () => {
+      if (!activeCategoryGroups.length) return;
+      const gap = 12;
+      const horizontalPadding = 36;
+      const minimumColumnWidth = 184;
+      const configuredMaxWidth =
+        Number.parseFloat(
+          window
+            .getComputedStyle(document.documentElement)
+            .getPropertyValue("--container-wide-max"),
+        ) || 1480;
+      const maxMenuWidth = Math.max(
+        320,
+        Math.min(window.innerWidth - 340, 1004, configuredMaxWidth),
+      );
+      const availableColumns = Math.max(
+        1,
+        Math.floor(
+          (maxMenuWidth - horizontalPadding + gap) /
+            (minimumColumnWidth + gap),
+        ),
+      );
+      const columns = Math.min(
+        5,
+        activeCategoryGroups.length,
+        availableColumns,
+      );
+      const idealWidth =
+        horizontalPadding +
+        columns * minimumColumnWidth +
+        (columns - 1) * gap;
+      const menuWidth = Math.min(
+        maxMenuWidth,
+        Math.max(Math.min(720, maxMenuWidth), idealWidth),
+      );
+      categoryPanel.style.setProperty(
+        "--home-category-mega-columns",
+        String(columns),
+      );
+      categoryPanel.style.width = `${menuWidth}px`;
+    };
     const closeCategoryPanel = () => {
       categoryPanel.hidden = true;
       categoryRow.removeAttribute("data-open-category");
+      activeCategoryGroups = [];
+      categoryPanel.style.removeProperty("--home-category-mega-columns");
+      categoryPanel.style.removeProperty("width");
       triggers.forEach((trigger) => {
         trigger.classList.remove("active");
         trigger.setAttribute("aria-expanded", "false");
@@ -756,6 +801,7 @@ $(function () {
     const openCategoryPanel = (category) => {
       const groups = categoryContent[category];
       if (!groups) return;
+      activeCategoryGroups = groups;
       const activeCategory = triggers.find(
         (trigger) => trigger.dataset.category === category,
       );
@@ -767,6 +813,7 @@ $(function () {
       );
       categoryPanel.hidden = false;
       categoryRow.dataset.openCategory = category;
+      updateHomeCategoryPanelSize();
       triggers.forEach((trigger) => {
         const isOpen = trigger.dataset.category === category;
         trigger.classList.toggle("active", isOpen);
@@ -794,6 +841,9 @@ $(function () {
         else openCategoryPanel(trigger.dataset.category);
       }),
     );
+    window.addEventListener("resize", () => {
+      if (!categoryPanel.hidden) updateHomeCategoryPanelSize();
+    });
     categoryRow.addEventListener("pointerleave", closeCategoryPanel);
     categoryRow.addEventListener("focusout", (event) => {
       if (!categoryRow.contains(event.relatedTarget)) closeCategoryPanel();
