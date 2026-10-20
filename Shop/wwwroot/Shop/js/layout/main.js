@@ -1889,7 +1889,7 @@ $(function () {
     event.preventDefault();
     window.HNUI.setMessage(
       document.querySelector("#formMessage"),
-      "ثبت‌نام خبرنامه در نسخهٔ نمایشی فعال نیست؛ اطلاعاتی ارسال یا ذخیره نشد.",
+      "ثبت‌نام خبرنامه هنوز فعال نیست؛ اطلاعاتی ارسال یا ذخیره نشد.",
       "warning",
     );
     $(event.currentTarget).trigger("reset");

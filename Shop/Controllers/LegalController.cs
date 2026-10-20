@@ -10,7 +10,7 @@ public sealed class LegalController : PageController
         "Privacy"));
 
     public Task<ViewResult> Terms() => PageAsync(new PageModel(
-        new SeoModel("شرایط استفاده | ندا اولیائی", "شرایط استفاده از وب‌سایت نمایشی، اطلاعات محصولات و قیمت‌ها، حساب کاربری و سبد خرید را بخوانید؛ پرداخت آنلاین و ثبت سفارش واقعی در این نسخه فعال نیست.", Breadcrumbs: [new SeoBreadcrumb("خانه", "/"), new SeoBreadcrumb("شرایط استفاده", "/legal/terms")]),
+        new SeoModel("شرایط استفاده | ندا اولیائی", "شرایط استفاده از وب‌سایت، اطلاعات محصولات و قیمت‌ها، حساب کاربری و سبد خرید را بخوانید؛ پرداخت آنلاین و ثبت سفارش در حال حاضر فعال نیست.", Breadcrumbs: [new SeoBreadcrumb("خانه", "/"), new SeoBreadcrumb("شرایط استفاده", "/legal/terms")]),
         "Terms"));
 
     public Task<ViewResult> Returns() => PageAsync(new PageModel(

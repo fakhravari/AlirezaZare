@@ -11,7 +11,7 @@
 ```text
 Shop/Program.cs
   → Controller و route
-  → Model یا دادهٔ نمایشی
+  → Model یا دادهٔ فروشگاه
   → Razor View
   → Views/_ViewStart.cshtml
   → Views/Shared/_Shop.cshtml
@@ -207,7 +207,7 @@ CSS/JS عمومی layout و store که بالاتر آمده‌اند به هم�
 | `/profile/edit` | Controller به `/profile` هدایت می‌کند | — | — | مسیر سازگاری؛ صفحهٔ جداگانه ندارد |
 | `/magazine` | `MagazineController` → `Views/Magazine/Index.cshtml` | `magazine-luxury.css`, `pages.css`, `store/pagination.css` | `magazine.js` | `main.journal-page`, `.journal-grid`, `#journal-pagination.site-pagination`; فیلتر دسته، شش مطلب در هر صفحه، queryهای `category`/`page`، popstate و صفحه‌بندی responsive؛ ظاهر صفحه‌بندی در `magazine-luxury.css` و رفتار در `magazine.js` مالکیت دارد |
 | `/magazine/{slug}` | `MagazineController` → `Views/Magazine/Details.cshtml`؛ مسیر قدیمی `/magazine/details/{slug}` به مسیر جدید هدایت می‌شود | `article-details.css`, `pages.css` | `article-details.js`, `page-content.js` | `main.article-page`, `article.article-body`, `section.article-section`; TOC، progress، checklist، print/share |
-| `/` مجلهٔ خانه | `HomeController` → `Views/Home/Index.cshtml`؛ اعداد ثابت در `Models/JournalArticles.cs` | `industrial-system.css` | script اختصاصی ندارد | نمایش آماریِ غیرتعاملی؛ مقادیر نمایشی‌اند و در جایی ثبت یا به‌روزرسانی نمی‌شوند |
+| `/` مجلهٔ خانه | `HomeController` → `Views/Home/Index.cshtml`؛ اعداد ثابت در `Models/JournalArticles.cs` | `industrial-system.css` | script اختصاصی ندارد | نمایش آماریِ غیرتعاملی؛ مقادیر ثابت‌اند و در جایی ثبت یا به‌روزرسانی نمی‌شوند |
 | `/about` | `AboutController` → `Views/About/Index.cshtml` | `pages.css` | `page-content.js` | hero/breadcrumb و `page-section`; لینک/CTA و sectionهای داینامیک را بررسی کنید |
 | `/brands` | `BrandsController` → `Views/Brands/Index.cshtml` | `brands.css`, `pages.css` | `page-content.js` | hero، فهرست برند و کارت‌ها؛ responsive grid |
 | `/brands/{slug}` | `BrandsController.Details` → `Views/Brands/Details.cshtml`؛ اطلاعات پایه از `BrandCatalog` و editorial از `brand-editorial.json` | `pages.css`, `brands.css` | `brand-product-count.js` | hero برند، CTA فروشگاه، حوزهٔ فعالیت، راهنمای انتخاب و شمارش محصولات |
@@ -227,7 +227,7 @@ CSS/JS عمومی layout و store که بالاتر آمده‌اند به هم�
 | Partial/component | markup یا نشانه | مالک CSS/JS اصلی | جاهایی که باید رگرسیون شوند |
 |---|---|---|---|
 | هدر | `_HomeHeader`, `_InnerHeader`, `_Header`؛ body کلاس home/inner | `shared-header.css`, `shared-mega-menu.css`, themeها؛ `layout/main.js` | خانه + یک inner page، دسکتاپ + موبایل، login/logout و search open |
-| مگامنو | خانه و inner markup/variant متفاوت؛ inner selectorهایی مثل `.page-mega-sidebar` | `shared-mega-menu.css`, `electrical-theme.css`, `industrial-system.css`; باز/بسته و category در `main.js` | hover trigger → pointer حرکت به panel، keyboard focus، شاخهٔ پیش‌فرض، breakpoint 992 |
+| مگامنو | خانه و inner markup/variant متفاوت؛ inner selectorهایی مثل `.page-mega-sidebar` | `shared-mega-menu.css`, `electrical-theme.css`, `industrial-system.css`; باز/بسته و category در `main.js` | hover trigger → pointer حرکت به panel، keyboard focus، شاخهٔ پیش‌فرض، breakpoint 992؛ پنل inner زیر هدر و در قاب مرکزیِ عریض قرار می‌گیرد؛ حالت فعال/hover دسکتاپ دسته‌بندی زمینهٔ زرد و آیکن سرمه‌ای دارد |
 | account popover/drawer هدر | `.shared-account-card`, `.shared-account-popover`, `.account-links` | `shared-account.css`; تعامل در `main.js` | کاربر خارج/وارد، desktop/mobile، Escape، focus و scroll |
 | cart/favorites/compare panels | `.page-cart-panel`, `.search-cart-drawer`, `.favorites-panel`, `.compare-panel` و item/footerها | `shared-cart.css`, `commerce.css`; `main.js` + `commerce.js` | سبد خالی/پر، تعداد زیاد آیتم، پنل باز و scroll داخلی، responsive |
 | modal ورود/ثبت‌نام سراسری | `#loginModal`, `.login-modal-form-panel`, `.login-close` در `_Panels.cshtml` | layout در `style.css`, `luxury-theme.css`, `industrial-system.css`; قواعد فرم در `shared-login.css`; تعامل در `main.js` | ورود/ثبت‌نام/OTP، viewport کوتاه موبایل، اسکرول داخلی، بستن و بازگشت focus |
@@ -251,7 +251,7 @@ CSS/JS عمومی layout و store که بالاتر آمده‌اند به هم�
 | `HNUI.storage.get/set/remove/json` | خواندن/نوشتن مقاوم در برابر خطای browser storage؛ `set` برای favorite/compare رویداد list را dispatch می‌کند |
 | `HNUI.ready(callback)` | اجرای callback پس از آماده‌شدن DOM |
 | `HNUI.cart.read/write/add/update/remove/totals/renderOptions` | normalize مشترک، renderer مشترک ویژگی/متعلقات، validation ساده و مدیریت سبد؛ `write` رویداد cart را dispatch می‌کند |
-| `HNUI.auth.isLoggedIn/login/logout/requireLogin` | وضعیت ورود نمایشی؛ `requireLogin(resume)` برای ورود نداشتن رویداد `hn:auth-required` می‌فرستد و callback را پس از ورود آزمایشی ادامه می‌دهد |
+| `HNUI.auth.isLoggedIn/login/logout/requireLogin` | وضعیت ورود در مرورگر؛ `requireLogin(resume)` برای ورود نداشتن رویداد `hn:auth-required` می‌فرستد و callback را پس از ورود ادامه می‌دهد |
 | `HNUI.scrollLock.lock/unlock` | شمارندهٔ قفل scroll با کلاس `ui-scroll-locked` |
 | `HNUI.dialog` | helperهای dialog/focus/keyboard؛ جزئیات دقیق را در همان فایل بخوانید |
 | `HNUI.enhance(root)` | بهبودهای عمومی DOM داخل root |
@@ -279,10 +279,10 @@ CSS/JS عمومی layout و store که بالاتر آمده‌اند به هم�
 | `js/pages/account-page.js` | profile route/hash navigation، overview و CRUD آدرس | storage keys، modal، hashchange و `storage` event |
 | `js/pages/checkout.js` | انتخاب آدرس، روش پرداخت و هماهنگی state سبد | روش پرداخت فعلاً demo است؛ Cart/Checkout هر دو consumer هستند |
 | `js/pages/address-fields.js`, `iran-places.js` | dependent province/city selects و dataset استان‌ها | load order و markup field IDs/data |
-| `js/pages/orders-pagination.js` | pagination نمایشی سفارش‌ها | URL state/popstate و empty/list state |
+| `js/pages/orders-pagination.js` | صفحه‌بندی سفارش‌ها | URL state/popstate و empty/list state |
 | `js/pages/magazine.js` | فیلتر/مرتب‌سازی و تاریخچهٔ URL مقاله‌ها | `history`, query string و back/forward |
 | `js/pages/article-details.js` | print، فهرست مطالب، پیشرفت مطالعه و scroll/resize | sticky offset، passive listener و کاهش حرکت |
-| `js/pages/contact.js` | اعتبارسنجی و submit نمایشی فرم contact | پیام status؛ ارسال backend واقعی را فرض نکنید |
+| `js/pages/contact.js` | اعتبارسنجی فرم تماس و نمایش وضعیت ارسال | پیام status؛ endpoint ارسال در سرور تعریف نشده است |
 | `js/pages/page-content.js` | share/copy، forms، CTA و pagination عمومی بعضی صفحه‌ها | script در چند route مشترک است؛ handler دوباره ثبت نشود |
 | `js/pages/form-confirm-dialog.js` | dialog تأیید فرم | backdrop/ESC و focus; در Cart/Contact load می‌شود |
 | `js/core/electrical-content.js` | ریزتعامل/محتوای عمومی برخی صفحه‌ها | پس از section Scripts اجرا می‌شود |
@@ -294,18 +294,18 @@ CSS/JS عمومی layout و store که بالاتر آمده‌اند به هم�
 | کلید | مصرف/نکته |
 |---|---|
 | `hadi-norouzi-cart` | cart نرمال‌شده توسط `HNUI.cart` |
-| `hn-demo-auth` | وضعیت ورود نمایشی (`1`/`true`) |
+| `hn-demo-auth` | وضعیت ورود در مرورگر (`1`/`true`) |
 | `hn-favorites` | شناسه‌های favorite |
 | `hn-compare` | شناسه‌های مقایسه |
-| `hn-compare-demo-seeded` | علامت seed نمایشی اولیهٔ Compare |
+| `hn-compare-demo-seeded` | علامت مقداردهی اولیهٔ Compare |
 | `hn-product-cache` | cache اطلاعات محصول برای رندر list/panel |
 | `hn-header-recent-searches` | تاریخچهٔ پیشنهاد search در هدر |
 | `hn-demo-coupon` | کد تخفیف demo |
-| `hn-delivery-addresses` | فهرست آدرس‌های نمایشی |
+| `hn-delivery-addresses` | فهرست آدرس‌های ذخیره‌شده در مرورگر |
 | `hn-selected-address` | شناسهٔ آدرس انتخابی |
-| `hn-payment-method-v2` | روش پرداخت انتخابی نمایشی |
-| `hn-profile` | دادهٔ profile نمایشی در `Views/Profile/Index.cshtml` |
-| `hn-product-${type}-${productId}` | کلید واقعی feedback در `commerce.js`؛ `type` برابر `reviews` یا `questions` است. seedهای نمایشی جداگانه با دادهٔ ذخیره‌شده ترکیب می‌شوند. |
+| `hn-payment-method-v2` | روش پرداخت انتخابی در مرورگر |
+| `hn-profile` | دادهٔ profile در `Views/Profile/Index.cshtml` |
+| `hn-product-${type}-${productId}` | کلید feedback در `commerce.js`؛ `type` برابر `reviews` یا `questions` است. داده‌های اولیه با دادهٔ ذخیره‌شده ترکیب می‌شوند. |
 
 ممکن است scriptهای دیگر کلید تازه اضافه کنند؛ این جدول هنگام تغییر باید با `rg -n "localStorage|storage\.(get|set|json)|hn-" Shop/wwwroot/Shop/js Shop/Views` تطبیق داده شود.
 

@@ -9,7 +9,7 @@
 - راه‌حل: `Shop.sln`؛ پروژهٔ اجرایی: `Shop/Shop.csproj` با `Microsoft.NET.Sdk.Web` و هدف `net10.0`.
 - الگو: ASP.NET Core MVC با Controller و Razor View؛ رابط کاربری فارسی و راست‌به‌چپ است.
 - `Shop/Program.cs` فقط MVC، فایل‌های استاتیک و route پیش‌فرض را راه‌اندازی می‌کند. در ترکیب فعلی، دیتابیس، Entity Framework، سرویس دامنه، API یا احراز هویت سمت سرور ثبت نشده است.
-- بسیاری از مسیرهای Controller صرفاً View و دادهٔ نمایشی برمی‌گردانند. کاتالوگ نمونهٔ ۳۰ قلمی ابزار در `Shop/wwwroot/Shop/js/store/catalog.js` نگهداری می‌شود؛ قیمت‌ها (به میلیون تومان)، تخفیف‌ها، دیدگاه‌ها و موجودی دادهٔ واقعی فروش نیستند. توضیحات فنی در شش گروه کالایی مشترک‌اند و مشخصات مدل‌محور تا اتصال منبع دادهٔ معتبر نباید حدس زده شوند. فیلدهای روشن‌تر `powerSource` (منبع تغذیه) و `useCase` (مورد استفاده) هستند؛ `movement` و `strap` برای سازگاری با کد و داده‌های قدیمی فعلاً نگه داشته شده‌اند. محتوا و تعامل‌های سبد، علاقه‌مندی، مقایسه و بخشی از حساب در مرورگر و `localStorage` مدیریت می‌شوند.
+- بسیاری از مسیرهای Controller، View و محتوای فعلی را برمی‌گردانند. کاتالوگ ۳۰ قلمی ابزار در `Shop/wwwroot/Shop/js/store/catalog.js` نگهداری می‌شود؛ قیمت‌ها (به میلیون تومان)، تخفیف‌ها، دیدگاه‌ها و موجودی از پایگاه دادهٔ فروش دریافت نمی‌شوند. توضیحات فنی در شش گروه کالایی مشترک‌اند و مشخصات مدل‌محور تا اتصال منبع دادهٔ معتبر نباید حدس زده شوند. فیلدهای روشن‌تر `powerSource` (منبع تغذیه) و `useCase` (مورد استفاده) هستند؛ `movement` و `strap` برای سازگاری با کد و داده‌های قدیمی فعلاً نگه داشته شده‌اند. محتوا و تعامل‌های سبد، علاقه‌مندی، مقایسه و بخشی از حساب در مرورگر و `localStorage` مدیریت می‌شوند.
 - نتیجه: رفتار فعلی فروشگاه را دمو/نمونه فرض کنید؛ دادهٔ `localStorage` را دادهٔ سرور، سفارش واقعی یا احراز هویت واقعی تلقی نکنید.
 
 ### قرارداد مشترک سبد خرید
@@ -23,7 +23,7 @@
 
 | مورد | مقدار جاری | محل‌های اصلی مصرف |
 |---|---|---|
-| نام نمایشی فروشگاه | ندا اولیائی | partialهای Header/Footer/Panels، محتوای صفحه‌ها، عنوان‌های SEO و متن‌های JavaScript |
+| نام فروشگاه | ندا اولیائی | partialهای Header/Footer/Panels، محتوای صفحه‌ها، عنوان‌های SEO و متن‌های JavaScript |
 | تلفن تماس | `03969455457` | هدر، فوتر، Contact، Tracking و پیام‌های پشتیبانی |
 | ایمیل تماس | `neda.oliyai67@gmail.com` | `Views/Contact/Index.cshtml` |
 
@@ -59,7 +59,7 @@
 | سبد و تسویه | `/cart`, `/checkout` | `CartController`, `CheckoutController` و Viewهای هم‌نام |
 | مقایسه و علاقه‌مندی | `/compare`, `/favorites` | Controller و Viewهای هم‌نام؛ state محلی با کدهای store |
 | پروفایل | `/account` (هدایت سازگاری به پروفایل), `/profile`, `/profile/orders`, `/profile/addresses`, `/profile/favorites` | `AccountController` فقط alias سازگاری است؛ صفحه‌ها در `ProfileController` و `Views/Profile/Index.cshtml` رندر می‌شوند |
-| مجله | `/magazine`, `/magazine/{slug}` (مسیر قبلی `/magazine/details/{slug}` حفظ و هدایت می‌شود) | `MagazineController`، `Views/Magazine/`، دادهٔ مقاله و اعداد نمایشی ثابت در `Models/JournalArticles.cs` |
+| مجله | `/magazine`, `/magazine/{slug}` (مسیر قبلی `/magazine/details/{slug}` حفظ و هدایت می‌شود) | `MagazineController`، `Views/Magazine/`، دادهٔ مقاله و اعداد ثابت در `Models/JournalArticles.cs` |
 | برندها | `/brands`, `/brands/{slug}` | `BrandsController` و Viewهای فهرست/جزئیات؛ اطلاعات پایه در `BrandCatalog` و متن تحریریه در `wwwroot/Shop/js/store/brand-editorial.json` |
 | محتوا/خدمات | `/about`, `/contact`, `/faq`, `/shipping`, `/tracking`, `/warranty` | Controller و View هم‌نام |
 | قوانین | `/legal/privacy`, `/legal/terms`, `/legal/returns` | `LegalController` و Viewهای `Views/Legal/` |
@@ -219,7 +219,7 @@
 
 - `js/core/ui-core.js`: namespace عمومی `window.HNUI`، دسترسی امن به storage، ابزارهای کمکی و رفتار عمومی.
 - `js/core/form-validation.js`: اعتبارسنجی مشترک فرم‌ها؛ قواعد تازه را بدون بررسی فرم‌های مشابه دوباره تعریف نکنید.
-- `js/store/catalog.js`: منبع کاتالوگ نمونه و اطلاعات نمایشی محصولات.
+- `js/store/catalog.js`: منبع کاتالوگ محصولات و اطلاعات فعلی کالاها.
 - `js/store/commerce.js`: رندر و تعامل کاتالوگ/محصول، سبد، علاقه‌مندی، مقایسه و برخی feedbackهای محلی؛ کلیدهای state و eventهای `hn:*` را پیش از تغییر بررسی کنید.
 - `js/layout/main.js`: رفتارهای مشترک اصلی مانند هدر، جستجو، شمارنده‌ها و منوهای مشترک.
 - `js/pages/`: منطق مختص صفحه؛ فایل و View متناظر را با هم پیدا کنید.

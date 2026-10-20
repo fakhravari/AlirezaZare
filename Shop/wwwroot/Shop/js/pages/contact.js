@@ -104,20 +104,20 @@
     }
     const confirmed = await window.confirmFormSubmission({
       title: "بررسی اطلاعات واردشده",
-      message: "این نسخه نمایشی پیام را برای پشتیبانی ارسال نمی‌کند. اطلاعات واردشده را بررسی کنید.",
+      message: "پیام از این فرم ارسال نمی‌شود. اطلاعات واردشده را بررسی کنید یا از راه‌های ارتباطی درج‌شده استفاده کنید.",
       confirmText: "متوجه شدم",
     });
     if (!confirmed) return;
     const button = form.querySelector('button[type="submit"]');
     const original = button.innerHTML;
     button.disabled = true;
-    button.innerHTML = '<i class="bi bi-check2"></i> بررسی نمایشی انجام شد';
+    button.innerHTML = '<i class="bi bi-check2"></i> اطلاعات بررسی شد';
     if (status) {
       status.hidden = false;
       status.className = "contact-form-status";
       window.HNUI.setMessageType(status, "success");
       status.innerHTML =
-        '<i class="bi bi-info-circle-fill" aria-hidden="true"></i><span><span>فرم در این نسخه نمایشی ارسال نمی‌شود.</span><span>برای ارتباط واقعی، از شماره تلفن یا ایمیل درج‌شده استفاده کنید.</span></span>';
+        '<i class="bi bi-info-circle-fill" aria-hidden="true"></i><span><span>پیام از این فرم ارسال نشد.</span><span>برای ارتباط با ما، از شماره تلفن یا ایمیل درج‌شده استفاده کنید.</span></span>';
     }
     window.setTimeout(() => {
       button.innerHTML = original;

@@ -1,0 +1,78 @@
+/* Shared photographic heroes for the inner pages that need visual context. */
+.inner-page :is(
+    .about-hero,
+    .contact-hero,
+    .brands-hero,
+    .brand-detail-hero,
+    .compare-page-hero,
+    .cart-page-hero,
+    .product-detail-hero
+  ) {
+  background-repeat: no-repeat !important;
+  background-size: cover !important;
+  background-position: center !important;
+}
+
+.inner-page .about-hero,
+.inner-page .contact-hero {
+  background-image:
+    linear-gradient(
+      90deg,
+      rgba(16, 42, 67, 0.04) 0%,
+      rgba(16, 42, 67, 0.28) 48%,
+      rgba(16, 42, 67, 0.7) 100%
+    ),
+    url("../../images/heroes/hero-service-support.jpg") !important;
+}
+
+.inner-page .about-hero::before,
+.inner-page .contact-hero::before,
+.inner-page .brands-hero::before,
+.inner-page .brand-detail-hero::before,
+.inner-page .compare-page-hero::before,
+.inner-page .cart-page-hero::before,
+.inner-page .product-detail-hero::before {
+  background: linear-gradient(
+    90deg,
+    rgba(16, 42, 67, 0.08),
+    rgba(16, 42, 67, 0.24) 55%,
+    rgba(16, 42, 67, 0.52)
+  ) !important;
+}
+
+.inner-page.mobile-page--about-index .about-hero {
+  background-image:
+    linear-gradient(
+      90deg,
+      rgba(16, 42, 67, 0.04) 0%,
+      rgba(16, 42, 67, 0.28) 48%,
+      rgba(16, 42, 67, 0.7) 100%
+    ),
+    url("../../images/heroes/hero-about-showroom.jpg") !important;
+}
+
+.inner-page :is(.brands-hero, .brand-detail-hero, .compare-page-hero, .cart-page-hero, .product-detail-hero) {
+  background-image:
+    linear-gradient(
+      90deg,
+      rgba(16, 42, 67, 0.04) 0%,
+      rgba(16, 42, 67, 0.28) 48%,
+      rgba(16, 42, 67, 0.7) 100%
+    ),
+    url("../../images/heroes/hero-brand-tools.jpg") !important;
+}
+
+@media (max-width: 767px) {
+  .inner-page :is(
+      .about-hero,
+      .contact-hero,
+      .brands-hero,
+      .brand-detail-hero,
+      .compare-page-hero,
+      .cart-page-hero,
+      .product-detail-hero
+    ) {
+    min-height: 280px !important;
+    background-position: 36% center !important;
+  }
+}

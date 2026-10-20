@@ -261,7 +261,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (payment.disabled) return;
       ui.setMessage(
         document.querySelector("#paymentStatus"),
-        "درگاه پرداخت در نسخه نمایشی فعال نیست؛ سفارشی ثبت یا پرداخت نشده است. برای نهایی کردن خرید با 03969455457 تماس بگیرید.",
+        "درگاه پرداخت هنوز فعال نیست؛ سفارشی ثبت یا پرداخت نشده است. برای نهایی کردن خرید با 03969455457 تماس بگیرید.",
         "warning",
       );
     });
