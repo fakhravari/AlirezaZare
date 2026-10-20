@@ -16,12 +16,8 @@
 <div class="container">
 <a class="navbar-brand brand header-home-link header-brand-lockup" asp-controller="Home" asp-action="Index" aria-label="ندا اولیائی؛ فروشگاه تخصصی برق و ابزار" title="رفتن به صفحهٔ اصلی">
     <span class="header-brand-mark" aria-hidden="true">
-        <img src="~/content/identity/store-electrical-mark.svg" alt="" width="96" height="64" decoding="async" asp-append-version="true" />
+        <img src="~/content/identity/store-electrical-lockup.svg" alt="" width="256" height="72" decoding="async" asp-append-version="true" />
     </span>
-    <div class="header-brand-copy">
-        <strong>ندا اولیائی</strong>
-        <small>فروشگاه تخصصی برق و ابزار</small>
-    </div>
 </a>
 <button class="navbar-toggler shadow-none border-0"
         type="button"
@@ -99,21 +95,14 @@
         <strong>برندهای معتبر ابزار</strong>
         <small>لوگوی برند را انتخاب کنید و محصولاتش را ببینید</small>
     </span>
-    <b>۱۵ برند منتخب</b>
+    <b>@BrandCatalog.All.Count برند</b>
 </li>
-@{
-    string[] featuredBrandSlugs = ["bosch", "makita", "dewalt", "ronix", "tosan", "uni-t", "fluke", "mastech", "kyoritsu", "yihua", "hakko", "weller", "philips", "wiha", "knipex"];
-}
-@foreach (string slug in featuredBrandSlugs)
+@foreach (BrandProfileModel brand in BrandCatalog.All)
 {
-    BrandProfileModel? brand = BrandCatalog.Find(slug);
-    if (brand is null)
-    {
-        continue;
-    }
+    string slug = brand.Slug;
     <li>
         <a class="dropdown-item" href="@Url.Content($"~/Search?brand={brand.Slug}")">
-            @if (!string.IsNullOrWhiteSpace(brand.LogoFile) && slug is not ("uni-t" or "yihua"))
+            @if (!string.IsNullOrWhiteSpace(brand.LogoFile))
             {
                 <span class="brand-menu-logo-frame">
                     <img class="brand-menu-logo" src="@Url.Content($"~/content/brands/{brand.LogoFile}")" alt="" width="52" height="38" decoding="async" />
