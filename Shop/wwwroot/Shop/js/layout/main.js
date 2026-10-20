@@ -798,17 +798,27 @@ $(function () {
     const updateColumnCount = () => {
       if (!activeGroups.length) return;
       const gap = 12;
-      const minimumCardWidth = 205;
+      const minimumCardWidth = 184;
+      const rootStyles = window.getComputedStyle(document.documentElement);
+      const configuredMaxWidth =
+        Number.parseFloat(rootStyles.getPropertyValue("--container-wide-max")) || 1480;
+      const maxMenuWidth = Math.max(320, Math.min(window.innerWidth - 36, configuredMaxWidth));
+      const availableContentWidth = maxMenuWidth - 276 - 44;
       const availableColumns = Math.max(
         1,
-        Math.floor((content.clientWidth + gap) / (minimumCardWidth + gap)),
+        Math.floor((availableContentWidth + gap) / (minimumCardWidth + gap)),
       );
-      const preferredColumns =
-        activeGroups.length <= 3 ? activeGroups.length : Math.ceil(activeGroups.length / 2);
+      const columns = Math.min(5, activeGroups.length, availableColumns);
+      const idealMenuWidth = 276 + 44 + columns * minimumCardWidth + (columns - 1) * gap;
+      const menuWidth = Math.min(maxMenuWidth, Math.max(Math.min(720, maxMenuWidth), idealMenuWidth));
+      const rightInset = Math.max(18, (window.innerWidth - configuredMaxWidth) / 2);
       content.style.setProperty(
         "--category-mega-columns",
-        String(Math.max(1, Math.min(4, preferredColumns, availableColumns))),
+        String(columns),
       );
+      menu.style.width = `${menuWidth}px`;
+      menu.style.right = `${rightInset}px`;
+      menu.style.left = "auto";
     };
     const reset = () => {
       buttons.forEach((button) => {
@@ -817,6 +827,9 @@ $(function () {
       });
       activeGroups = [];
       content.style.removeProperty("--category-mega-columns");
+      menu.style.removeProperty("width");
+      menu.style.removeProperty("right");
+      menu.style.removeProperty("left");
       content.replaceChildren();
       const hint = document.createElement("p");
       hint.className = "category-mega-hint";

@@ -1657,21 +1657,23 @@
   margin: -3px 4px 12px;
   color: #718092;
   font-size: 12px;
-  line-height: 1.8;
-  overflow-wrap: anywhere;
+  line-height: 1.6;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .journal-category-count {
   display: inline-grid;
-  min-width: 26px;
-  height: 25px;
-  padding: 0 6px;
+  min-width: 29px;
+  height: 29px;
+  padding: 0 7px;
   place-items: center;
   border: 1px solid #e4eaf0;
   border-radius: 999px;
   background: #f7f9fb;
   color: #617284;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   font-variant-numeric: normal;
 }
@@ -1701,6 +1703,9 @@
   margin-bottom: 9px;
   font-size: 11px;
   line-height: 1.7;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .journal-categories button {
@@ -1715,8 +1720,9 @@
 
 .journal-all-label i {
   display: grid;
-  width: 30px;
-  height: 30px;
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
   place-items: center;
   border: 1px solid #e7edf1;
   border-radius: 9px;
@@ -1726,17 +1732,30 @@
 }
 
 .journal-branch--areas > .journal-children {
-  margin-top: 8px;
+  margin-top: 4px;
   margin-right: 18px;
 }
 
-.journal-children-label {
-  display: block;
-  margin: 0 10px 4px 0;
-  color: #8995a0;
-  font-size: 11px;
-  font-weight: 700;
-  line-height: 1.7;
+.journal-categories .journal-branch > button > i,
+.journal-categories .journal-children button > i,
+.journal-categories .journal-all-label > i {
+  box-sizing: border-box;
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  border: 1px solid #e7edf1;
+  border-radius: 9px;
+  background: #f5f7f9;
+  color: #8b6800;
+  font-size: 15px;
+}
+
+.journal-categories .journal-branch > button:is(:hover, .is-active) > i,
+.journal-categories .journal-children button:is(:hover, .is-active) > i,
+.journal-categories .journal-all.is-active .journal-all-label > i {
+  border-color: #f0dfaa;
+  background: #fff2c2;
+  color: #8b6800;
 }
 
 .journal-branch--areas .journal-children button {

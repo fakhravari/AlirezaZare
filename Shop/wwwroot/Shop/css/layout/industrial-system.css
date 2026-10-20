@@ -14384,9 +14384,10 @@ body .electrical-swiper .swiper-pagination-bullet-active {
 /* Keep the home and inner-page category mega menus on one layout and palette. */
 @media (min-width: 992px) {
   .inner-page #mainNav .category-nav-mega {
-    top: calc(100% - 2px);
-    right: max(18px, calc((100% - var(--container-wide-max)) / 2));
-    left: max(18px, calc((100% - var(--container-wide-max)) / 2));
+    position: fixed;
+    top: 149px;
+    right: max(18px, calc((100vw - var(--container-wide-max)) / 2));
+    left: max(18px, calc((100vw - var(--container-wide-max)) / 2));
     width: auto;
     height: min(580px, calc(100vh - 112px));
     min-height: min(380px, calc(100vh - 112px));
@@ -14519,5 +14520,124 @@ body .electrical-swiper .swiper-pagination-bullet-active {
   #cartPanel .cart-safety-copy {
     flex: 1 1 auto;
     overflow-wrap: anywhere;
+  }
+}
+
+/* Warm, softly shaped treatment for the second and third category-menu levels. */
+@media (min-width: 992px) {
+  .inner-page #mainNav .category-mega-group {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    border: 1px solid rgba(190, 145, 65, 0.28) !important;
+    border-radius: 18px 10px 18px 10px;
+    background: linear-gradient(145deg, #fffdf8 0%, #fff 58%, #fbf7ec) !important;
+    box-shadow: 0 8px 22px rgba(67, 52, 25, 0.07);
+  }
+
+  .inner-page #mainNav .category-mega-group::before,
+  .inner-page #mainNav .category-mega-group::after {
+    position: absolute;
+    z-index: -1;
+    border: 1px solid rgba(190, 145, 65, 0.12);
+    background: radial-gradient(circle at 45% 45%, rgba(246, 197, 21, 0.1), transparent 70%);
+    content: "";
+    pointer-events: none;
+  }
+
+  .inner-page #mainNav .category-mega-group::before {
+    top: -37px;
+    left: -34px;
+    width: 112px;
+    height: 112px;
+    border-radius: 42% 58% 60% 40% / 55% 42% 58% 45%;
+    transform: rotate(-18deg);
+  }
+
+  .inner-page #mainNav .category-mega-group::after {
+    right: -25px;
+    bottom: -29px;
+    width: 76px;
+    height: 76px;
+    border-radius: 50% 42% 58% 42%;
+  }
+
+  .inner-page #mainNav .category-mega-group > .category-mega-title,
+  .inner-page #mainNav .category-mega-group > a:not(.category-mega-title) {
+    position: relative;
+    z-index: 1;
+  }
+
+  .inner-page #mainNav .category-mega-group > .category-mega-title {
+    border-bottom-color: rgba(190, 145, 65, 0.24);
+  }
+
+  .inner-page #mainNav .category-mega-group > a:not(.category-mega-title) {
+    border: 1px solid rgba(190, 145, 65, 0.12);
+    border-radius: 8px 13px 8px 13px;
+    background: rgba(255, 252, 245, 0.88);
+    transition:
+      border-color 180ms ease,
+      background-color 180ms ease,
+      box-shadow 180ms ease,
+      color 180ms ease;
+  }
+
+.inner-page #mainNav .category-mega-group > a:not(.category-mega-title):is(:hover, :focus-visible) {
+    border-color: rgba(190, 145, 65, 0.38);
+    background: #fff6d9;
+    box-shadow: 0 4px 12px rgba(67, 52, 25, 0.08);
+    color: var(--industrial-navy);
+    transform: none;
+  }
+}
+
+/* Subtle warmth on the category trigger and a content-sized, five-column mega menu. */
+@media (min-width: 992px) {
+  .inner-page #mainNav .navbar-nav > .category-nav-dropdown:is(:hover, :focus-within, .show, .is-mega-open) > .nav-link {
+    border-color: rgba(246, 197, 21, 0.42) !important;
+    background: rgba(246, 197, 21, 0.15) !important;
+    color: #fff4c4 !important;
+    box-shadow: inset 0 -2px #f6c515 !important;
+  }
+
+  .inner-page #mainNav .category-nav-mega {
+    isolation: isolate;
+    height: auto;
+    min-height: min(380px, calc(100vh - 164px));
+    max-height: calc(100vh - 164px);
+    border-color: rgba(190, 145, 65, 0.25) !important;
+    background: linear-gradient(155deg, #fffefa 0%, #fff 62%, #faf6ec) !important;
+    box-shadow: 0 20px 46px rgba(16, 42, 67, 0.17) !important;
+  }
+
+  .inner-page #mainNav .category-nav-mega::before,
+  .inner-page #mainNav .category-nav-mega::after {
+    position: absolute;
+    z-index: -1;
+    border: 1px solid rgba(190, 145, 65, 0.12);
+    border-radius: 43% 57% 60% 40% / 55% 42% 58% 45%;
+    background: radial-gradient(circle at 45% 45%, rgba(246, 197, 21, 0.08), transparent 70%);
+    content: "";
+    pointer-events: none;
+  }
+
+  .inner-page #mainNav .category-nav-mega::before {
+    top: 14px;
+    left: 14px;
+    width: 120px;
+    height: 120px;
+  }
+
+  .inner-page #mainNav .category-nav-mega::after {
+    right: 14px;
+    bottom: 14px;
+    width: 64px;
+    height: 64px;
+  }
+
+  .inner-page #mainNav .category-nav-mega > * {
+    position: relative;
+    z-index: 1;
   }
 }

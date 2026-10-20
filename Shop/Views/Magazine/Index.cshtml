@@ -48,7 +48,7 @@
         <aside class="journal-categories" aria-label="دسته‌بندی مطالب">
             <div class="journal-categories-scroll ui-scrollbar ui-scrollbar--navy">
                 <h2>دسته‌بندی مجله</h2>
-                <p class="journal-categories-intro">مطالب را بر اساس نیاز و حوزهٔ کاری‌تان پیدا کنید.</p>
+                <p class="journal-categories-intro">مقاله‌ها را بر اساس موضوع دلخواه بیابید.</p>
                 <button type="button" class="is-active journal-all" data-journal-filter="all" aria-pressed="true"><span class="journal-all-label"><i class="bi bi-grid" aria-hidden="true"></i> همه مطالب</span><span class="journal-category-count">@postCount</span></button>
                 <div class="journal-branch">
                     <button type="button" data-journal-filter="buying" aria-pressed="false"><i class="bi bi-cart-check" aria-hidden="true"></i><span>راهنمای خرید</span><span class="journal-category-count">@PersianDigits(posts.Count(post => post.Branch == "buying"))</span></button>
@@ -59,7 +59,6 @@
                 <div class="journal-branch journal-branch--areas">
                     <button type="button" data-journal-filter="safety" aria-pressed="false"><i class="bi bi-shield-check" aria-hidden="true"></i><span>ایمنی و نگهداری</span><span class="journal-category-count">@PersianDigits(posts.Count(post => post.Branch == "safety"))</span></button>
                     <div class="journal-children" aria-label="حوزه‌های مجله">
-                        <span class="journal-children-label">حوزه‌های کاری</span>
                         <button type="button" data-journal-filter="area-tools" aria-pressed="false"><i class="bi bi-tools" aria-hidden="true"></i><span>ابزار و تجهیزات</span><span class="journal-category-count">@PersianDigits(posts.Count(post => post.Area == "tools"))</span></button>
                         <button type="button" data-journal-filter="area-electrical" aria-pressed="false"><i class="bi bi-lightning-charge" aria-hidden="true"></i><span>برق و اندازه‌گیری</span><span class="journal-category-count">@PersianDigits(posts.Count(post => post.Area == "electrical"))</span></button>
                         <button type="button" data-journal-filter="area-workshop" aria-pressed="false"><i class="bi bi-lightbulb" aria-hidden="true"></i><span>روشنایی و کارگاه</span><span class="journal-category-count">@PersianDigits(posts.Count(post => post.Area == "workshop"))</span></button>
