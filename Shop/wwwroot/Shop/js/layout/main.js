@@ -319,6 +319,12 @@ $(function () {
           let brandCloseTimer = 0;
           const brandTrigger = brandDropdown.querySelector(":scope > .nav-link");
           const brandMenu = brandDropdown.querySelector(":scope > .brand-menu");
+          const isBrandControlActive = () =>
+            Boolean(
+              brandTrigger?.matches(":hover") ||
+                brandMenu?.querySelector("a:hover") ||
+                brandDropdown.contains(document.activeElement),
+            );
           const keepBrandOpen = () => {
             window.clearTimeout(brandCloseTimer);
             brandDropdown.classList.remove("is-brand-switching");
@@ -328,7 +334,7 @@ $(function () {
           const closeBrandSoon = () => {
             window.clearTimeout(brandCloseTimer);
             brandCloseTimer = window.setTimeout(() => {
-              if (brandDropdown.matches(":hover")) return;
+              if (isBrandControlActive()) return;
               brandDropdown.classList.remove("is-brand-open");
               if (!brandDropdown.classList.contains("show")) {
                 brandTrigger?.setAttribute("aria-expanded", "false");
@@ -340,12 +346,18 @@ $(function () {
             searchInput.blur();
             closeSuggestions();
           };
-          brandDropdown.addEventListener("pointerenter", () => {
+          brandTrigger?.addEventListener("pointerenter", () => {
             keepBrandOpen();
           });
           brandDropdown.addEventListener("pointerleave", closeBrandSoon);
-          brandMenu?.addEventListener("pointerenter", keepBrandOpen);
           brandMenu?.addEventListener("pointerleave", closeBrandSoon);
+          brandMenu?.addEventListener("pointerover", (event) => {
+            if (event.target instanceof Element && event.target.closest("a")) {
+              keepBrandOpen();
+            } else {
+              closeBrandSoon();
+            }
+          });
           brandDropdown.addEventListener("focusin", () => {
             keepBrandOpen();
             dismissSearch();

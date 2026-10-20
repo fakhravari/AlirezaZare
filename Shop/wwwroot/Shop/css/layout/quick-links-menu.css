@@ -161,7 +161,7 @@
   transition: transform 180ms ease;
 }
 
-#mainNav .brand-dropdown:is(:hover, :focus-within, .show, .is-brand-open) > .nav-link::before {
+#mainNav .brand-dropdown:is(:focus-within, .show, .is-brand-open) > .nav-link::before {
   transform: translateX(50%) scaleX(1);
 }
 
@@ -171,7 +171,7 @@
   transition: transform 180ms ease;
 }
 
-#mainNav .brand-dropdown:is(:hover, :focus-within, .show, .is-brand-open) > .nav-link .brand-menu-caret {
+#mainNav .brand-dropdown:is(:focus-within, .show, .is-brand-open) > .nav-link .brand-menu-caret {
   transform: rotate(180deg);
 }
 
@@ -683,7 +683,7 @@ html body #mainNav .home-header-search:focus-within {
     will-change: opacity;
   }
 
-  #mainNav .brand-dropdown:is(:hover, :focus-within, .show, .is-brand-open) > .brand-menu {
+  #mainNav .brand-dropdown:is(:focus-within, .show, .is-brand-open) > .brand-menu {
     display: grid !important;
     opacity: 1 !important;
     visibility: visible !important;
@@ -699,12 +699,12 @@ html body #mainNav .home-header-search:focus-within {
     transition: none !important;
   }
 
+  /* Bridge only the button-width gap; this area cannot open the menu by itself. */
   #mainNav .brand-dropdown::after {
     position: absolute;
     top: 100%;
     right: 0;
-    left: auto;
-    width: min(1160px, calc(100vw - 32px));
+    width: 100%;
     height: 16px;
     content: "";
     pointer-events: auto;

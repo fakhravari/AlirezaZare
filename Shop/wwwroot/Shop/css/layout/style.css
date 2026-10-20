@@ -45,6 +45,24 @@
   color: #e8cd91 !important;
   font-size: 22px !important;
 }
+.mobile-support-icon--urgent {
+  text-decoration: none;
+  transition:
+    border-color 0.18s ease,
+    background 0.18s ease,
+    transform 0.18s ease;
+}
+.mobile-support-icon--urgent:hover,
+.mobile-support-icon--urgent:focus-visible {
+  border-color: rgba(255, 220, 93, 0.78);
+  background: rgba(232, 189, 36, 0.2);
+  transform: translateY(-1px);
+}
+.mobile-support-icon--urgent img {
+  display: block;
+  width: 30px;
+  height: 30px;
+}
 .mobile-support-head > div {
   min-width: 0;
   flex: 1;
@@ -3024,11 +3042,7 @@ body {
     display: block;
   }
 
-  .brand-dropdown:hover > .brand-menu {
-    display: block;
-  }
-
-  .brand-dropdown:hover > .nav-link {
+  .brand-dropdown > .nav-link:hover {
     color: var(--cream) !important;
   }
 
@@ -7983,7 +7997,7 @@ body {
     transform: translate(-50%, 12px);
   }
 
-  .brand-dropdown:hover > .brand-menu,
+  .brand-dropdown.is-brand-open > .brand-menu,
   .brand-dropdown .brand-menu.show {
     display: grid !important;
     transform: translate(-50%, 0);
@@ -10479,7 +10493,7 @@ footer .copyright::before {
       color 0.22s ease !important;
   }
   #mainNav .mega-dropdown:hover > .dropdown-toggle::after,
-  #mainNav .brand-dropdown:hover > .dropdown-toggle::after,
+  #mainNav .brand-dropdown > .dropdown-toggle:hover::after,
   #mainNav .dropdown-toggle.show::after {
     color: #e2c27f !important;
     transform: rotate(180deg);
@@ -11599,7 +11613,7 @@ textarea:focus-visible {
 @media (min-width: 992px) {
   #mainNav .brand-menu,
   #mainNav .brand-menu.show,
-  #mainNav .brand-dropdown:hover > .brand-menu {
+  #mainNav .brand-dropdown.is-brand-open > .brand-menu {
     width: min(1120px, calc(100vw - 48px)) !important;
     min-height: 390px !important;
     padding: 18px !important;
@@ -11607,7 +11621,7 @@ textarea:focus-visible {
     gap: 10px 14px !important;
   }
 
-  #mainNav .brand-dropdown:hover > .brand-menu,
+  #mainNav .brand-dropdown.is-brand-open > .brand-menu,
   #mainNav .brand-menu.show {
     display: grid !important;
   }

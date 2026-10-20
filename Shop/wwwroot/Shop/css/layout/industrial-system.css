@@ -10638,35 +10638,6 @@ html
   align-self: flex-start;
 }
 
-/* Keep the desktop brand panel anchored to the navbar without a page-wide hover target. */
-@media (min-width: 992px) {
-  #mainNav .brand-dropdown {
-    position: static !important;
-  }
-
-  #mainNav .brand-dropdown > .nav-link,
-  #mainNav .brand-dropdown > .nav-link:is(:hover, :focus-visible, .show) {
-    transform: none !important;
-  }
-
-  #mainNav .brand-dropdown > .brand-menu {
-    z-index: 2 !important;
-    left: 50% !important;
-    right: auto !important;
-    top: 100% !important;
-    margin-top: 0 !important;
-    border-top: 3px solid var(--industrial-yellow) !important;
-    animation: none !important;
-    transition: none !important;
-    transform: translate(-50%, 0) !important;
-  }
-
-  #mainNav .brand-dropdown:is(:hover, .is-brand-open) > .brand-menu {
-    display: grid !important;
-  }
-
-}
-
 /* Match the header cart stepper to the quantity controls on the Cart page. */
 #cartPanel .cart-item-info .cart-quantity {
   min-width: 0 !important;
@@ -12413,7 +12384,7 @@ body .electrical-swiper .swiper-pagination-bullet-active {
 
   .home-page #mainNav .mega-dropdown:is(:hover, :focus-within, .show) > .mega-menu,
   .inner-page #mainNav .category-nav-dropdown:is(:hover, :focus-within, .show, .is-mega-open) > .category-nav-mega,
-  #mainNav .brand-dropdown:is(:hover, .show, .is-brand-open) > .brand-menu {
+  #mainNav .brand-dropdown:is(:focus-within, .show, .is-brand-open) > .brand-menu {
     opacity: 1;
     visibility: visible;
     pointer-events: auto;
@@ -12425,7 +12396,7 @@ body .electrical-swiper .swiper-pagination-bullet-active {
     transform: translate(50%, 0) !important;
   }
 
-  #mainNav .brand-dropdown:is(:hover, .show, .is-brand-open) > .brand-menu {
+  #mainNav .brand-dropdown:is(:focus-within, .show, .is-brand-open) > .brand-menu {
     transform: translate(-50%, 0) !important;
   }
 
@@ -12447,7 +12418,7 @@ body .electrical-swiper .swiper-pagination-bullet-active {
     transform: none;
   }
 
-  .inner-page #mainNav .navbar-nav > .brand-dropdown:is(:hover, .show, .is-brand-open) > .nav-link {
+  .inner-page #mainNav .navbar-nav > .brand-dropdown:is(:focus-within, .show, .is-brand-open) > .nav-link {
     border-color: rgba(246, 197, 21, 0.28) !important;
     background: rgba(246, 197, 21, 0.1) !important;
     color: #ffd447 !important;
@@ -12461,7 +12432,7 @@ body .electrical-swiper .swiper-pagination-bullet-active {
     transform: scale(1.12);
   }
 
-  .inner-page #mainNav .navbar-nav > .brand-dropdown:is(:hover, .show, .is-brand-open) > .nav-link .nav-menu-icon {
+  .inner-page #mainNav .navbar-nav > .brand-dropdown:is(:focus-within, .show, .is-brand-open) > .nav-link .nav-menu-icon {
     color: #ffd447 !important;
     filter: drop-shadow(0 0 4px rgba(246, 197, 21, 0.28));
     transform: scale(1.06);
@@ -13811,7 +13782,7 @@ body .electrical-swiper .swiper-pagination-bullet-active {
   }
 
   .inner-page #mainNav .category-nav-dropdown:is(:hover, :focus-within, .show, .is-mega-open) > .category-nav-mega,
-  #mainNav .brand-dropdown:is(:hover, .show, .is-brand-open) > .brand-menu {
+  #mainNav .brand-dropdown:is(:focus-within, .show, .is-brand-open) > .brand-menu {
     opacity: 1 !important;
     visibility: visible !important;
     pointer-events: auto !important;
@@ -13822,7 +13793,7 @@ body .electrical-swiper .swiper-pagination-bullet-active {
     transform: translateY(0) !important;
   }
 
-  #mainNav .brand-dropdown:is(:hover, .show, .is-brand-open) > .brand-menu {
+  #mainNav .brand-dropdown:is(:focus-within, .show, .is-brand-open) > .brand-menu {
     transform: translate(-50%, 0) !important;
   }
 
@@ -13834,7 +13805,7 @@ body .electrical-swiper .swiper-pagination-bullet-active {
   }
 
   .inner-page #mainNav .category-nav-dropdown:is(:hover, :focus-within, .show, .is-mega-open) > .nav-link.dropdown-toggle::after,
-  #mainNav .brand-dropdown:is(:hover, .show, .is-brand-open) > .nav-link.dropdown-toggle::after {
+  #mainNav .brand-dropdown:is(:focus-within, .show, .is-brand-open) > .nav-link.dropdown-toggle::after {
     transform: rotate(180deg) !important;
   }
 }
