@@ -134,19 +134,58 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     ui.storage.set("hn-selected-address", address.id);
     renderAddresses();
+    renderOverview();
     dialog.close();
     ui.setMessage(status, "آدرس ذخیره و برای تحویل انتخاب شد.", "success");
   };
   function renderOverview() {
+    const activeCoupons = [{ code: "HADI10", discountPercent: 10 }];
+    const compareList = ui.storage.json("hn-compare", []);
+    const compareCount = Array.isArray(compareList)
+      ? new Set(
+          compareList
+            .filter((id) => id !== null && id !== undefined && String(id).trim())
+            .map(String),
+        ).size
+      : 0;
     const values = {
       statOrders: document.querySelectorAll(".profile-order-card").length,
       statAddresses: read(addressKey).length,
       statFavorites: read("hn-favorites").length,
+      statCoupons: activeCoupons.length,
+      statCompare: compareCount,
     };
     Object.entries(values).forEach(([id, value]) => {
       const element = document.querySelector(`#${id}`);
       if (element) element.textContent = ui.formatNumber(value);
     });
+    const couponHost = document.querySelector("#activeCouponsList");
+    if (couponHost) {
+      const appliedCode = ui.storage.get("hn-demo-coupon", "");
+      couponHost.innerHTML = activeCoupons
+        .map(
+          ({ code, discountPercent }) =>
+            `<article class="overview-coupon-card"><div class="overview-coupon-copy"><bdi class="overview-coupon-code" dir="ltr">${esc(code)}</bdi><strong>${ui.formatNumber(discountPercent)}٪ تخفیف خرید</strong><small>${appliedCode === code ? "در سبد خرید اعمال شده" : "قابل استفاده در سبد خرید"}</small></div><a href="/Cart" aria-label="استفاده از کد ${esc(code)}"><span>استفاده</span><i class="bi bi-arrow-left" aria-hidden="true"></i></a></article>`,
+        )
+        .join("");
+    }
+    const activityHost = document.querySelector("#recentActivityList");
+    if (activityHost) {
+      const activity = ui.storage.json("hn-profile-activity", []);
+      const recentActivity = Array.isArray(activity)
+        ? activity
+            .filter((item) => item && item.title && !Number.isNaN(Date.parse(item.at)))
+            .slice(0, 8)
+        : [];
+      activityHost.innerHTML = recentActivity.length
+        ? recentActivity
+            .map(
+              (item) =>
+                `<article class="activity-log-entry"><span class="activity-log-icon" aria-hidden="true"><i class="bi ${esc(item.icon || "bi-clock-history")}"></i></span><span class="activity-log-copy"><strong>${esc(item.title)}</strong><small>${esc(item.detail || "")}</small></span><time datetime="${esc(item.at)}">${new Intl.DateTimeFormat("fa-IR", { dateStyle: "medium", timeStyle: "short" }).format(new Date(item.at))}</time></article>`,
+            )
+            .join("")
+        : '<div class="overview-activity-empty"><i class="bi bi-clock-history" aria-hidden="true"></i><span>هنوز فعالیتی ثبت نشده؛ تغییرات علاقه‌مندی، مقایسه، آدرس و کد تخفیف اینجا ثبت می‌شوند.</span></div>';
+    }
   }
   function navigate() {
     renderOverview();
@@ -184,6 +223,8 @@ document.addEventListener("DOMContentLoaded", () => {
     renderAddresses();
     renderOverview();
   });
+  document.addEventListener("hn:lists-change", renderOverview);
+  document.addEventListener("hn:profile-activity-change", renderOverview);
   renderAddresses();
   renderOverview();
   navigate();

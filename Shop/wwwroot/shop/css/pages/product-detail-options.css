@@ -732,21 +732,28 @@
   align-items: center;
   gap: 7px;
   padding: 7px 9px;
-  border: 1px solid transparent;
+  border: 1px solid #e1e8ee;
   border-radius: 9px;
-  background: rgba(255, 255, 255, 0.78);
+  background: linear-gradient(145deg, #fff, #f9fbfd);
   color: #28445e;
   font: inherit;
   font-size: 11px;
   text-decoration: none;
   cursor: pointer;
+  box-shadow: 0 1px 3px rgba(16, 42, 67, 0.04);
+  transition:
+    border-color 0.18s ease,
+    background 0.18s ease,
+    box-shadow 0.18s ease,
+    color 0.18s ease;
 }
 
 #productView .product-share-menu > :is(a, button):is(:hover, :focus-visible) {
-  border-color: #e6d5ad;
-  background: #fff;
+  border-color: #dfc77f;
+  background: linear-gradient(145deg, #fffdf7, #fff8e8);
   color: #173b5d;
-  outline: 2px solid rgba(180, 145, 93, 0.2);
+  box-shadow: 0 3px 9px rgba(177, 139, 34, 0.12);
+  outline: 2px solid rgba(180, 145, 93, 0.16);
   outline-offset: 1px;
 }
 
@@ -1092,11 +1099,44 @@
 }
 
 #productView .product-meta-identity {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto auto;
 }
 
-#productView .product-meta-identity > .product-meta-country {
+#productView .product-meta-identity-top {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border-bottom: 1px solid #dce4e9;
+}
+
+#productView .product-meta-identity-top > .product-meta-pill {
+  min-width: 0;
+  justify-content: center;
+  padding: 10px 12px;
+  text-align: center;
+}
+
+#productView .product-meta-identity-top > .product-meta-country {
   border-inline-start: 1px solid #dce4e9;
+}
+
+#productView .product-meta-identity-top .product-meta-pill > span {
+  min-width: 0;
+  align-items: center;
+  text-align: center;
+}
+
+#productView .product-meta-identity-top .product-meta-pill strong,
+#productView .product-meta-identity-top .product-meta-pill small {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+#productView .product-meta-identity-top .product-meta-brand-en,
+#productView .product-meta-identity-top .product-meta-country-en {
+  direction: ltr;
+  text-align: center;
 }
 
 #productView .product-meta-country-flag {
@@ -1120,35 +1160,39 @@
   overflow-wrap: anywhere;
 }
 
+#productView .product-meta-identity > .product-meta-code {
+  min-height: 58px;
+  justify-content: center;
+  gap: 10px;
+  border: 0;
+  direction: rtl;
+  text-align: center;
+}
+
+#productView .product-meta-identity > .product-meta-code > i {
+  width: auto;
+  height: auto;
+  flex: 0 0 auto;
+  border-radius: 0;
+  background: transparent;
+  font-size: 16px;
+}
+
 @media (max-width: 640px) {
-  #productView .product-meta-identity {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  #productView .product-meta-identity > .product-meta-country {
-    grid-column: 2;
-    grid-row: 1;
-    border-inline-start: 1px solid #dce4e9;
-  }
-
-  #productView .product-meta-identity > .product-meta-brand {
-    grid-column: 1;
-    grid-row: 1;
-  }
-
-  #productView .product-meta-identity > .product-meta-code {
-    grid-column: 1 / -1;
-    grid-row: 2;
+  #productView .product-meta-identity-top > .product-meta-pill {
     min-height: 52px;
-    justify-content: center;
-    border-inline-start: 0;
-    border-top: 1px solid #dce4e9;
+    gap: 7px;
+    padding: 9px 7px;
   }
 
   #productView .product-meta-country-flag {
-    width: 34px;
-    height: 26px;
-    flex-basis: 34px;
+    width: 38px;
+    height: 29px;
+    flex-basis: 38px;
+  }
+
+  #productView .product-meta-identity > .product-meta-code {
+    min-height: 52px;
   }
 }
 
@@ -1174,10 +1218,10 @@
 }
 
 #productView .product-detail-tabs > a:is(:hover, :focus-visible) > i {
-  border-color: #e7d18a;
-  background: #fff8e4;
-  color: #8b6b0b;
-  box-shadow: 0 2px 6px rgba(180, 145, 47, 0.12);
+  border-color: #dce4ea;
+  background: #f1f5f8;
+  color: #173b5d;
+  box-shadow: 0 2px 6px rgba(16, 42, 67, 0.08);
 }
 
 #productView .product-detail-tabs > a.is-active > i,
@@ -1218,5 +1262,77 @@
 @media (prefers-reduced-motion: reduce) {
   #productView .product-detail-tabs > a > i {
     transition: none;
+  }
+}
+
+/* Keep review name and rating together, giving the optional name field most of the row. */
+#productView .product-review-form-column .product-feedback-form {
+  grid-template-columns: minmax(0, 1fr) minmax(106px, 0.42fr);
+}
+
+#productView
+  .product-review-form-column
+  .product-feedback-form
+  > label:first-child {
+  grid-column: auto;
+}
+
+#productView
+  .product-review-form-column
+  .product-feedback-form
+  > .product-feedback-wide {
+  grid-column: 1 / -1;
+}
+
+/* Match the share icon tile to the cart and favorite actions. */
+#productView
+  .product-detail-secondary-actions
+  > .product-share-control
+  > .product-detail-share
+  > i {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  flex: 0 0 30px;
+  place-items: center;
+  border-radius: 9px;
+  background: #edf2f5;
+  color: var(--industrial-navy, #173b5d) !important;
+  transition:
+    background 0.18s ease,
+    color 0.18s ease;
+}
+
+#productView
+  .product-detail-secondary-actions
+  > .product-share-control
+  > .product-detail-share:is(:hover, :focus-visible, [aria-expanded="true"])
+  > i {
+  background: #fff0b8;
+  color: #765d08 !important;
+}
+
+@media (max-width: 575px) {
+  #productView
+    .product-detail-secondary-actions
+    > .product-share-control
+    > .product-detail-share
+    > i {
+    width: 24px;
+    height: 24px;
+    flex-basis: 24px;
+    border-radius: 10px;
+  }
+}
+
+/* Keep the mobile category label and breadcrumb comfortably readable. */
+@media (max-width: 575px) {
+  #productView .product-detail-meta .product-meta-category-content > small {
+    font-size: 12px;
+    line-height: 1.45;
+  }
+
+  #productView .product-detail-meta .product-meta-path {
+    font-size: 12px;
   }
 }

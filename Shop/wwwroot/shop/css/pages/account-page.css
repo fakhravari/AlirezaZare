@@ -250,7 +250,7 @@
 
 .account-stats {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 14px;
   margin-bottom: 26px;
 }
@@ -1901,6 +1901,198 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
   color: #b98d00;
 }
 
+.overview-coupon-list {
+  display: grid;
+  gap: 10px;
+}
+
+.overview-coupon-card {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 13px 14px;
+  border: 1px solid color-mix(in srgb, var(--color-gold) 30%, white);
+  border-radius: 14px;
+  background: linear-gradient(110deg, #fffdf7, #fff8e8);
+}
+
+.overview-coupon-copy {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 4px 10px;
+}
+
+.overview-coupon-code {
+  grid-row: span 2;
+  padding: 7px 10px;
+  border: 1px dashed color-mix(in srgb, var(--color-gold) 55%, white);
+  border-radius: 9px;
+  background: #fff;
+  color: var(--color-navy);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.overview-coupon-copy strong {
+  color: var(--color-navy);
+  font-size: 13px;
+}
+
+.overview-coupon-copy small {
+  color: var(--industrial-steel);
+  font-size: 11px;
+}
+
+.overview-coupon-card > a {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 11px;
+  border: 1px solid var(--color-line);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--color-navy);
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: border-color 160ms ease, background-color 160ms ease;
+}
+
+.overview-coupon-card > a:hover {
+  border-color: color-mix(in srgb, var(--color-gold) 55%, white);
+  background: #fff9e8;
+}
+
+.overview-activity {
+  grid-column: 1 / -1;
+}
+
+.overview-activity-list {
+  display: grid;
+}
+
+.activity-log-entry {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+}
+
+.activity-log-entry:not(:last-child)::after {
+  position: absolute;
+  top: 43px;
+  right: 17px;
+  bottom: -10px;
+  border-right: 1px solid #e3e9ed;
+  content: "";
+}
+
+.activity-log-icon {
+  z-index: 1;
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border: 1px solid #dce6ec;
+  border-radius: 11px;
+  background: #f4f7f9;
+  color: var(--color-navy);
+  font-size: 15px;
+}
+
+.activity-log-copy {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.activity-log-copy strong {
+  overflow: hidden;
+  color: var(--color-navy);
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.activity-log-copy small,
+.activity-log-entry time {
+  color: var(--industrial-steel);
+  font-size: 11px;
+}
+
+.activity-log-entry time {
+  white-space: nowrap;
+}
+
+.overview-activity-empty {
+  display: flex;
+  min-height: 58px;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px dashed #dce4e9;
+  border-radius: 12px;
+  background: #fafcfd;
+  color: var(--industrial-steel);
+  font-size: 12px;
+  line-height: 1.8;
+}
+
+.overview-activity-empty > i {
+  flex: 0 0 auto;
+  color: #8b9aa6;
+  font-size: 17px;
+}
+
+@media (max-width: 767px) {
+  .overview-panels > article {
+    padding: 14px;
+  }
+
+  .overview-coupon-card {
+    gap: 8px;
+    padding: 10px;
+  }
+
+  .overview-coupon-copy {
+    gap: 3px 7px;
+  }
+
+  .overview-coupon-card > a {
+    padding: 8px;
+  }
+
+  .activity-log-entry {
+    grid-template-columns: 32px minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .activity-log-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    font-size: 14px;
+  }
+
+  .activity-log-entry:not(:last-child)::after {
+    top: 40px;
+    right: 15px;
+  }
+
+  .activity-log-entry time {
+    grid-column: 2;
+    margin-top: -6px;
+  }
+}
+
 #addresses .account-section-heading {
   margin-bottom: 30px;
   align-items: center;
@@ -2075,3 +2267,261 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
 .account-welcome::after { z-index: 0; pointer-events: none; }
 .account-welcome-art { position: relative; z-index: 1; }
 .account-content { border-color: rgba(178, 145, 75, 0.2); background: linear-gradient(145deg, #fffefa 0%, #fff 58%, #fbf8f0 100%); box-shadow: 0 14px 34px rgba(67, 53, 28, 0.06); }
+
+/* Keep the profile dialog controls anchored in its header while the form scrolls. */
+#profileEditDialog.profile-edit-dialog .profile-edit-dialog-header {
+  position: sticky;
+  z-index: 5;
+  top: 0;
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 13px;
+  border-bottom: 1px solid #e8e2d9;
+  background: var(--color-cream, #fffdfa);
+}
+
+#profileEditDialog.profile-edit-dialog .profile-edit-dialog-header .login-brand {
+  min-width: 0;
+  flex: 1 1 auto;
+  padding: 0;
+  border: 0;
+}
+
+#profileEditDialog.profile-edit-dialog .profile-edit-dialog-header .login-close {
+  position: relative;
+  inset: auto;
+  flex: 0 0 38px;
+  box-shadow: 0 2px 7px rgba(16, 42, 67, 0.1);
+}
+
+#profileEditDialog.profile-edit-dialog .profile-edit-form button[type="submit"] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+}
+
+#profileEditDialog.profile-edit-dialog .profile-edit-form button[type="submit"] > i {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.13);
+  font-size: 15px;
+}
+
+@media (max-width: 560px) {
+  #profileEditDialog.profile-edit-dialog {
+    width: calc(100vw - 20px);
+    max-height: calc(100dvh - 20px);
+    padding: 18px 16px;
+  }
+
+  #profileEditDialog.profile-edit-dialog .profile-edit-dialog-header {
+    padding-bottom: 10px;
+  }
+
+  #profileEditDialog.profile-edit-dialog .login-step {
+    padding-top: 13px;
+  }
+
+  #profileEditDialog.profile-edit-dialog .login-step > p {
+    margin-bottom: 12px;
+  }
+
+  #profileEditDialog.profile-edit-dialog .profile-edit-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px 10px;
+  }
+
+  #profileEditDialog.profile-edit-dialog .profile-edit-form > label:nth-child(3),
+  #profileEditDialog.profile-edit-dialog .profile-edit-form > fieldset,
+  #profileEditDialog.profile-edit-dialog .profile-edit-form > label:nth-child(4),
+  #profileEditDialog.profile-edit-dialog .profile-edit-form > .profile-edit-full {
+    grid-column: 1 / -1;
+  }
+
+  #profileEditDialog.profile-edit-dialog .profile-edit-form .login-input {
+    margin-top: 4px;
+  }
+
+  #profileEditDialog.profile-edit-dialog .profile-edit-form .login-input input {
+    height: 44px;
+  }
+
+  #profileEditDialog.profile-edit-dialog .profile-edit-gender legend {
+    margin-bottom: 4px;
+  }
+
+  #profileEditDialog.profile-edit-dialog .profile-edit-gender label {
+    min-height: 44px;
+  }
+}
+
+/* Give order history details a calmer reading rhythm, especially on phones. */
+#orders .orders-heading {
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #e8edf1;
+}
+
+#orders .orders-heading h2 {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  line-height: 1.6;
+}
+
+#orders .orders-heading h2 small {
+  margin: 0;
+  padding: 3px 9px;
+  border: 1px solid #e5ebef;
+  border-radius: 999px;
+  background: #f7f9fa;
+  line-height: 1.6;
+}
+
+#orders .account-demo-note {
+  margin: 0 0 18px;
+  padding: 11px 14px;
+  border: 1px solid #e8edf1;
+  border-radius: 12px;
+  background: #f8fafb;
+  color: var(--industrial-muted);
+  font-size: 12px;
+  line-height: 1.9;
+}
+
+#orders .profile-order-list {
+  gap: 16px;
+}
+
+#orders .profile-order-card header {
+  gap: 12px 18px;
+  padding: 15px 18px;
+}
+
+#orders .profile-order-card header > div {
+  flex-wrap: wrap;
+  gap: 8px 12px;
+}
+
+#orders .profile-order-card header strong {
+  line-height: 1.8;
+}
+
+#orders .order-body {
+  gap: 20px;
+  padding: 18px;
+}
+
+#orders .order-products {
+  gap: 14px;
+}
+
+#orders .order-products > div {
+  display: grid;
+  gap: 4px;
+}
+
+#orders .order-products strong {
+  line-height: 1.9;
+}
+
+#orders .order-products small {
+  margin-top: 0;
+  line-height: 1.7;
+}
+
+#orders .order-total {
+  min-width: 184px;
+  padding: 11px 14px;
+}
+
+#orders .order-total strong {
+  margin-top: 5px;
+  line-height: 1.8;
+}
+
+#orders .profile-order-card footer {
+  gap: 10px 16px;
+  padding: 12px 18px;
+  line-height: 1.8;
+}
+
+@media (max-width: 640px) {
+  #orders .orders-heading {
+    gap: 12px;
+  }
+
+  #orders .orders-heading > a {
+    min-height: 40px;
+  }
+
+  #orders .profile-order-card header {
+    position: static;
+    align-items: flex-start;
+    gap: 6px;
+    padding: 14px 15px;
+  }
+
+  #orders .profile-order-card header > div {
+    width: 100%;
+    align-items: center;
+    flex-direction: row;
+  }
+
+  #orders .profile-order-card time {
+    position: static;
+    display: block;
+    align-self: flex-start;
+  }
+
+  #orders .order-body {
+    gap: 13px;
+    padding: 15px;
+  }
+
+  #orders .order-products {
+    align-items: flex-start;
+    gap: 11px;
+  }
+
+  #orders .order-product-icon {
+    flex-basis: 42px;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    font-size: 18px;
+  }
+
+  #orders .order-total {
+    display: flex;
+    width: 100%;
+    min-width: 0;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 2px;
+    padding: 10px 12px;
+    text-align: right;
+  }
+
+  #orders .order-total strong {
+    margin-top: 0;
+    text-align: left;
+  }
+
+  #orders .profile-order-card footer {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 7px;
+    padding: 11px 15px;
+  }
+}

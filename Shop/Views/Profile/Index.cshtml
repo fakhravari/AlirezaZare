@@ -156,17 +156,30 @@
                 <strong id="statFavorites">۰</strong><small>کالای موردعلاقه</small>
             </div>
         </article>
+        <article>
+            <span class="stat-icon stat-coupons">
+                <i class="bi bi-ticket-perforated"></i>
+            </span>
+            <div>
+                <strong id="statCoupons">۰</strong><small>کد تخفیف فعال</small>
+            </div>
+        </article>
+        <article>
+            <span class="stat-icon stat-compare">
+                <i class="bi bi-arrow-left-right"></i>
+            </span>
+            <div>
+                <strong id="statCompare">۰</strong><small>محصول در مقایسه</small>
+            </div>
+        </article>
     </div>
     <div class="overview-panels">
         <article>
             <div class="overview-panel-title">
-                <i class="bi bi-clock-history"></i>
-                <h3>فعالیت‌های اخیر</h3>
+                <i class="bi bi-ticket-perforated"></i>
+                <h3>کدهای تخفیف فعال</h3>
             </div>
-            <div class="overview-empty empty-state-card">
-                <i class="bi bi-stars"></i><strong>هنوز فعالیتی ثبت نشده است</strong>
-                <p>پس از ثبت آدرس، ذخیره محصول یا خرید، خلاصه فعالیت‌ها اینجا نمایش داده می‌شود.</p>
-            </div>
+            <div id="activeCouponsList" class="overview-coupon-list" aria-live="polite"></div>
         </article>
         <article class="overview-guide">
             <div class="overview-panel-title">
@@ -185,6 +198,13 @@
                     <strong>ثبت آدرس تحویل</strong><small>برای خرید سریع‌تر آماده شوید</small>
                 </span><i class="bi bi-arrow-left"></i>
             </a>
+        </article>
+        <article class="overview-activity">
+            <div class="overview-panel-title">
+                <i class="bi bi-clock-history" aria-hidden="true"></i>
+                <h3>فعالیت‌های اخیر</h3>
+            </div>
+            <div id="recentActivityList" class="overview-activity-list" aria-live="polite"></div>
         </article>
     </div>
 </section>
@@ -221,15 +241,17 @@
     <partial name="_AddressForm"/>
 </dialog>
 <dialog id="profileEditDialog" class="shared-login-modal profile-edit-dialog" aria-labelledby="profileEditDialogTitle">
-    <button class="login-close" type="button" data-profile-edit-close aria-label="بستن">
-        <i class="bi bi-x-lg"></i>
-    </button>
-    <div class="login-brand">
-        <span>
-            <i class="bi bi-person"></i>
-        </span>
-        <div>
-            <strong>ندا اولیائی</strong><small>مدیریت اطلاعات حساب کاربری</small>
+    <div class="profile-edit-dialog-header">
+        <button class="login-close" type="button" data-profile-edit-close aria-label="بستن">
+            <i class="bi bi-x-lg" aria-hidden="true"></i>
+        </button>
+        <div class="login-brand">
+            <span>
+                <i class="bi bi-person" aria-hidden="true"></i>
+            </span>
+            <div>
+                <strong>ندا اولیائی</strong><small>مدیریت اطلاعات حساب کاربری</small>
+            </div>
         </div>
     </div>
     <div class="login-step">
@@ -272,7 +294,7 @@
                     <input name="email" type="email" value="example@email.com" dir="ltr" readonly aria-readonly="true"/><i class="bi bi-envelope" aria-hidden="true"></i>
                 </span><small class="profile-edit-validation field-validation-valid" data-profile-edit-error="email"></small>
             </label>
-            <button class="profile-edit-full" type="submit">ذخیره تغییرات <i class="bi bi-check2"></i></button>
+            <button class="profile-edit-full" type="submit">ذخیره تغییرات <i class="bi bi-floppy2-fill" aria-hidden="true"></i></button>
         </form>
     </div>
 </dialog>

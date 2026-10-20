@@ -156,3 +156,24 @@
     transition: none;
   }
 }
+
+/* Keep the main home-page headings on one shared type scale. */
+.home-page #collection .home-primary-heading,
+.home-page #amazing .category-showcase-head h2,
+.home-page #bestsellers .category-showcase-head h2,
+.home-page #newest .category-showcase-head h2,
+.home-page #testimonials .testimonial-intro h2 {
+  font-size: 32px;
+  line-height: 1.5;
+}
+
+@media (max-width: 767px) {
+  .home-page #collection .home-primary-heading,
+  .home-page #amazing .category-showcase-head h2,
+  .home-page #bestsellers .category-showcase-head h2,
+  .home-page #newest .category-showcase-head h2,
+  .home-page #testimonials .testimonial-intro h2 {
+    font-size: clamp(23px, 6.5vw, 28px);
+    line-height: 1.5;
+  }
+}

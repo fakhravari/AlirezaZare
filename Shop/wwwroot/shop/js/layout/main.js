@@ -1043,7 +1043,7 @@ $(function () {
     ...catalogProducts.filter(
       (product) => product.stockQuantity > 0 && !product.discountPercent,
     ),
-  ].slice(0, 5);
+  ].slice(0, 12);
   const sliderImagePaths = [
     "shop/images/sliders/slide-power-tools.png",
     "shop/images/sliders/slide-measurement-tools.png",
@@ -1138,18 +1138,38 @@ $(function () {
   const amazingSliderOptions = {
     ...showcaseSliderOptions,
     responsive: {
-      0: { items: 2, margin: 8 },
-      768: { items: 3, margin: 18 },
-      1100: { items: 5, margin: 18 },
+      0: { items: 2, margin: 2 },
+      768: { items: 3, margin: 20 },
+      992: { items: 4, margin: 20 },
+      1200: { items: 5, margin: 20 },
+      1440: { items: 6, margin: 20 },
     },
   };
 
   initOwlCarousel($("#amazingSlider"), amazingSliderOptions);
 
-  initOwlCarousel(
-    $("#bestsellersSlider, #newestSlider"),
-    showcaseSliderOptions,
-  );
+  const bestsellersSliderOptions = {
+    ...showcaseSliderOptions,
+    responsive: {
+      0: { items: 2, margin: 2 },
+      768: { items: 3, margin: 20 },
+      992: { items: 4, margin: 20 },
+      1200: { items: 5, margin: 20 },
+      1440: { items: 6, margin: 20 },
+    },
+  };
+  initOwlCarousel($("#bestsellersSlider"), bestsellersSliderOptions);
+  const newestSliderOptions = {
+    ...showcaseSliderOptions,
+    responsive: {
+      0: { items: 2, margin: 2 },
+      768: { items: 3, margin: 20 },
+      992: { items: 4, margin: 20 },
+      1200: { items: 5, margin: 20 },
+      1440: { items: 6, margin: 20 },
+    },
+  };
+  initOwlCarousel($("#newestSlider"), newestSliderOptions);
 
   $(".showcase-card, .rail-card").each(function () {
     const $card = $(this);

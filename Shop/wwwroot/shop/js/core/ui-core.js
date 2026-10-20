@@ -5,6 +5,73 @@
     auth: "hn-demo-auth",
     cart: "hadi-norouzi-cart",
   });
+  const PROFILE_ACTIVITY_KEY = "hn-profile-activity";
+
+  const recordProfileActivity = (key, previous, next) => {
+    if (previous === next) return;
+
+    const eventMap = {
+      "hn-favorites": {
+        title: "فهرست علاقه‌مندی‌ها به‌روز شد",
+        icon: "bi-heart",
+        label: "محصول ذخیره‌شده",
+      },
+      "hn-compare": {
+        title: "فهرست مقایسه به‌روز شد",
+        icon: "bi-arrow-left-right",
+        label: "محصول در مقایسه",
+      },
+      "hn-delivery-addresses": {
+        title: "آدرس‌های حساب به‌روز شد",
+        icon: "bi-geo-alt",
+        label: "آدرس ذخیره‌شده",
+      },
+    };
+    let event = eventMap[key];
+    let detail = "";
+
+    if (event) {
+      const parseList = (value) => {
+        try {
+          const parsed = JSON.parse(value || "[]");
+          return Array.isArray(parsed) ? parsed : [];
+        } catch {
+          return [];
+        }
+      };
+      const currentItems = parseList(next);
+
+      // The comparison page seeds a sample list on first visit. Keep that setup
+      // out of the user's activity history.
+      if (key === "hn-compare" && previous === null && currentItems.length > 1)
+        return;
+
+      detail = `${currentItems.length} ${event.label}`;
+    } else if (key === "hn-demo-coupon" && next) {
+      event = { title: "کد تخفیف در سبد خرید اعمال شد", icon: "bi-ticket-perforated" };
+      detail = `کد ${String(next)}`;
+    } else if (key === "hn-demo-coupon" && previous) {
+      event = { title: "کد تخفیف از سبد خرید حذف شد", icon: "bi-ticket-perforated" };
+      detail = `کد ${String(previous)}`;
+    }
+
+    if (!event) return;
+
+    try {
+      const saved = JSON.parse(window.localStorage.getItem(PROFILE_ACTIVITY_KEY) || "[]");
+      const history = Array.isArray(saved) ? saved : [];
+      history.unshift({
+        title: event.title,
+        detail,
+        icon: event.icon,
+        at: new Date().toISOString(),
+      });
+      window.localStorage.setItem(PROFILE_ACTIVITY_KEY, JSON.stringify(history.slice(0, 20)));
+      document.dispatchEvent(new Event("hn:profile-activity-change"));
+    } catch {
+      // Activity history is optional; the underlying account action must still work.
+    }
+  };
 
   const storage = {
     get(key, fallback = null) {
@@ -17,7 +84,9 @@
     },
     set(key, value) {
       try {
+        const previous = window.localStorage.getItem(key);
         window.localStorage.setItem(key, value);
+        recordProfileActivity(key, previous, String(value));
         if (key === "hn-favorites" || key === "hn-compare") {
           document.dispatchEvent(new Event("hn:lists-change"));
         }
@@ -28,7 +97,9 @@
     },
     remove(key) {
       try {
+        const previous = window.localStorage.getItem(key);
         window.localStorage.removeItem(key);
+        recordProfileActivity(key, previous, null);
       } catch {
         // The static demo remains usable when browser storage is unavailable.
       }
@@ -242,7 +313,7 @@
           item.name &&
           Number.isFinite(item.price) &&
           item.price >= 0 &&
-          /^(?:Shop\/)?images\/(?:[\w.-]+\/)*[\w.-]+$/i.test(item.image),
+          /^(?:(?:Shop\/)?images\/|\/?content\/products\/)(?:[\w.-]+\/)*[\w.-]+$/i.test(item.image),
       );
     const uniqueItems = new Map();
     normalizedItems.forEach((item) => {
