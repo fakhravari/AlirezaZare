@@ -121,7 +121,9 @@
     min-height: 46px;
     margin: 0 1px 3px;
     padding-inline: 8px;
-    justify-content: space-between;
+    justify-content: flex-start;
+    direction: rtl;
+    text-align: right;
     border-bottom: 1px solid #eee5d5;
     color: #19344e;
     font-size: 14px;

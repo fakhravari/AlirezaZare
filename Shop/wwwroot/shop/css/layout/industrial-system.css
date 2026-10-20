@@ -399,7 +399,7 @@ h6,
     overflow: hidden;
     height: 54px;
     grid-template-columns: var(--header-search-action-width, 52px) minmax(0, 1fr) !important;
-    direction: rtl !important;
+    direction: ltr !important;
     border-color: var(--industrial-line) !important;
     border-radius: 8px;
     background: #f7f9fa !important;
@@ -2894,7 +2894,7 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
   margin: 0;
   padding: 0 24px 0 16px !important;
   border: 0 !important;
-  border-radius: 12px 0 0 12px;
+  border-radius: 0 12px 12px 0;
   outline: none !important;
   background: transparent !important;
   color: var(--industrial-ink) !important;
