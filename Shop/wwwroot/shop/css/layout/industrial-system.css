@@ -14600,3 +14600,110 @@ body .electrical-swiper .swiper-pagination-bullet-active {
     z-index: 1;
   }
 }
+
+/* Use a compact square monogram at the right edge of the shared site header. */
+#mainNav .navbar-brand > span {
+  border-radius: 10px !important;
+  box-shadow:
+    0 3px 9px rgba(16, 42, 67, 0.12),
+    inset 0 1px rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Rectangular electrical-store wordmark for the shared header. */
+#mainNav .header-brand-lockup {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 9px;
+  width: max-content;
+  max-width: min(248px, 40vw);
+  min-width: 0;
+  padding: 5px 9px 5px 13px;
+  border: 1px solid rgba(16, 42, 67, 0.14);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 3px 12px rgba(16, 42, 67, 0.07);
+  color: var(--industrial-navy) !important;
+  line-height: 1.15;
+  text-decoration: none;
+  transition:
+    border-color 180ms ease,
+    background-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+#mainNav .header-brand-lockup:is(:hover, :focus-visible) {
+  border-color: rgba(190, 145, 35, 0.48);
+  background: #fff;
+  box-shadow: 0 5px 15px rgba(16, 42, 67, 0.11);
+  color: var(--industrial-navy) !important;
+}
+
+#mainNav .header-brand-lockup > .header-brand-mark {
+  display: grid;
+  flex: 0 0 58px;
+  width: 58px;
+  height: 40px;
+  place-items: center;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+#mainNav .header-brand-mark > img {
+  display: block;
+  width: 58px;
+  height: 40px;
+  max-width: none;
+  object-fit: contain;
+}
+
+#mainNav .header-brand-lockup > .header-brand-copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 3px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+#mainNav .header-brand-copy > strong {
+  color: var(--industrial-navy);
+  font-size: 16px;
+  font-weight: 850;
+  letter-spacing: -0.25px;
+}
+
+#mainNav .header-brand-copy > small {
+  color: #748292;
+  font-size: 10px;
+  font-weight: 650;
+}
+
+@media (max-width: 575px) {
+  #mainNav .header-brand-lockup {
+    gap: 6px;
+    max-width: 48vw;
+    padding: 3px 5px 3px 8px;
+    border-radius: 11px;
+  }
+
+  #mainNav .header-brand-lockup > .header-brand-mark,
+  #mainNav .header-brand-mark > img {
+    width: 48px;
+    height: 34px;
+  }
+
+  #mainNav .header-brand-lockup > .header-brand-mark {
+    flex-basis: 48px;
+  }
+
+  #mainNav .header-brand-copy > strong {
+    font-size: 14px;
+  }
+
+  #mainNav .header-brand-copy > small {
+    display: none;
+  }
+}

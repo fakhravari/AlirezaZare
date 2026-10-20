@@ -294,6 +294,12 @@ const productBrandCountryCodes = Object.freeze({
     Benning: "DE",
 });
 
+const productVideosById = Object.freeze({
+    1: ["content/products/cordless-hammer-drill-hn-001-row-001-video-01.mp4"],
+    2: ["content/products/cordless-drill-driver-hn-002-row-002-video-01.mp4"],
+    3: ["content/products/electric-hammer-drill-hn-003-row-003-video-01.mp4"],
+});
+
 window.HNProducts = productCatalog.map((entry, i) => {
     // Sample stock levels keep both in-stock and sold-out detail states visible.
     const stockLevels = [12, 0, 7, 3, 0, 18, 5, 0, 2, 9];
@@ -815,11 +821,7 @@ window.HNProducts = productCatalog.map((entry, i) => {
             productImage,
             ...representativeImages.filter((_, index) => index !== imageIndex),
         ],
-        videos: [
-            "shop/videos/1_compressed.mp4",
-            "shop/videos/2_compressed.mp4",
-            "shop/videos/3_compressed.mp4",
-        ],
+        videos: productVideosById[i + 1] || [],
         newest: 30 - i,
         variants:
             {

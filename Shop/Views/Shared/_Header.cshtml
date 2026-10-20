@@ -1,9 +1,6 @@
 ﻿<nav class="navbar navbar-expand-lg navbar-dark fixed-top" id="mainNav">
 <div class="home-header-top" aria-label="جست‌وجو و پشتیبانی فروشگاه">
     <a class="home-header-support home-header-support-link" href="tel:03969455457" aria-label="تماس فوری با پشتیبانی به شماره 03969455457">
-        <span class="home-header-support-icon home-header-support-icon--urgent" aria-hidden="true">
-            <img src="@Url.Content("~/shop/images/icons/urgent-support.svg")" alt="" />
-        </span>
         <span>
             <small>پشتیبانی فوری و پیگیری سفارش</small><strong dir="ltr">03969455457</strong>
         </span>
@@ -17,8 +14,14 @@
     </form>
 </div>
 <div class="container">
-<a class="navbar-brand brand header-home-link" asp-controller="Home" asp-action="Index" aria-label="رفتن به صفحهٔ اصلی" title="رفتن به صفحهٔ اصلی">
-    <span>ن</span> ندا اولیائی
+<a class="navbar-brand brand header-home-link header-brand-lockup" asp-controller="Home" asp-action="Index" aria-label="ندا اولیائی؛ فروشگاه تخصصی برق و ابزار" title="رفتن به صفحهٔ اصلی">
+    <span class="header-brand-mark" aria-hidden="true">
+        <img src="~/content/identity/store-electrical-mark.svg" alt="" width="96" height="64" decoding="async" asp-append-version="true" />
+    </span>
+    <div class="header-brand-copy">
+        <strong>ندا اولیائی</strong>
+        <small>فروشگاه تخصصی برق و ابزار</small>
+    </div>
 </a>
 <button class="navbar-toggler shadow-none border-0"
         type="button"

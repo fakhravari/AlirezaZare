@@ -1116,7 +1116,7 @@ $(function () {
     center: false,
     autoWidth: false,
     stagePadding: 0,
-    margin: 18,
+    margin: 14,
     nav: true,
     dots: true,
     autoplay: !prefersReducedMotion,
@@ -1139,10 +1139,10 @@ $(function () {
     ...showcaseSliderOptions,
     responsive: {
       0: { items: 2, margin: 2 },
-      768: { items: 3, margin: 20 },
-      992: { items: 4, margin: 20 },
-      1200: { items: 5, margin: 20 },
-      1440: { items: 6, margin: 20 },
+      768: { items: 3, margin: 14 },
+      992: { items: 4, margin: 14 },
+      1200: { items: 5, margin: 14 },
+      1440: { items: 6, margin: 14 },
     },
   };
 
@@ -1152,10 +1152,10 @@ $(function () {
     ...showcaseSliderOptions,
     responsive: {
       0: { items: 2, margin: 2 },
-      768: { items: 3, margin: 20 },
-      992: { items: 4, margin: 20 },
-      1200: { items: 5, margin: 20 },
-      1440: { items: 6, margin: 20 },
+      768: { items: 3, margin: 14 },
+      992: { items: 4, margin: 14 },
+      1200: { items: 5, margin: 14 },
+      1440: { items: 6, margin: 14 },
     },
   };
   initOwlCarousel($("#bestsellersSlider"), bestsellersSliderOptions);
@@ -1163,10 +1163,10 @@ $(function () {
     ...showcaseSliderOptions,
     responsive: {
       0: { items: 2, margin: 2 },
-      768: { items: 3, margin: 20 },
-      992: { items: 4, margin: 20 },
-      1200: { items: 5, margin: 20 },
-      1440: { items: 6, margin: 20 },
+      768: { items: 3, margin: 14 },
+      992: { items: 4, margin: 14 },
+      1200: { items: 5, margin: 14 },
+      1440: { items: 6, margin: 14 },
     },
   };
   initOwlCarousel($("#newestSlider"), newestSliderOptions);
