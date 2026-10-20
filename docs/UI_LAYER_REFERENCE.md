@@ -32,12 +32,12 @@ Shop/Program.cs
 | Controllerها | `Shop/Controllers/` |
 | Viewها و partialها | `Shop/Views/` |
 | Layout و ترتیب asset واقعی | `Shop/Views/Shared/_Shop.cshtml` |
-| توکن‌ها و پایهٔ UI | `Shop/wwwroot/Shop/css/core/` |
-| CSS پوسته و اجزای مشترک | `Shop/wwwroot/Shop/css/layout/` |
-| CSS صفحه‌ها | `Shop/wwwroot/Shop/css/pages/` |
-| CSS تجارت/کارت/صفحه‌بندی | `Shop/wwwroot/Shop/css/store/` |
-| JavaScript عمومی | `Shop/wwwroot/Shop/js/core/`, `layout/`, `store/` |
-| JavaScript صفحه‌ها | `Shop/wwwroot/Shop/js/pages/` |
+| توکن‌ها و پایهٔ UI | `Shop/wwwroot/shop/css/core/` |
+| CSS پوسته و اجزای مشترک | `Shop/wwwroot/shop/css/layout/` |
+| CSS صفحه‌ها | `Shop/wwwroot/shop/css/pages/` |
+| CSS تجارت/کارت/صفحه‌بندی | `Shop/wwwroot/shop/css/store/` |
+| JavaScript عمومی | `Shop/wwwroot/shop/js/core/`, `layout/`, `store/` |
+| JavaScript صفحه‌ها | `Shop/wwwroot/shop/js/pages/` |
 
 `RouteOptions.LowercaseUrls` در `Shop/Program.cs` فعال است؛ URLهای تولیدشده را lowercase نگه دارید. نام کلاس/فایل‌های Controller و View به‌دلیل قرارداد ASP.NET ممکن است PascalCase باقی بماند. مقدارهای فعلی نام فروشگاه و اطلاعات تماس در بخش «هویت و اطلاعات تماس فعلی» از [`DEVELOPER_ROADMAP.md`](DEVELOPER_ROADMAP.md) ثبت شده‌اند؛ هنگام تغییر، viewهای مشترک، SEO و متن‌های JS را نیز جست‌وجو کنید.
 
@@ -81,7 +81,7 @@ core/ui-core.js
 
 ### توکن‌های پایه
 
-مرجع: `Shop/wwwroot/Shop/css/core/design-tokens.css`.
+مرجع: `Shop/wwwroot/shop/css/core/design-tokens.css`.
 
 | نقش | توکن مرجع | مقدار فعلی |
 |---|---|---|
@@ -175,14 +175,14 @@ core/ui-core.js
 | `pages/search-mobile.css` | max 767, 359, 319؛ فایل در layout لود می‌شود و فقط selectorهای Search دارد |
 | `layout/mobile-pages.css` | max 767, 520, 389, 575, 359؛ baseline تعامل موبایل تا 767 و چیدمان تک‌ستونهٔ مقایسه |
 
-برای فهرست به‌روزتر: `rg -n "@media" Shop/wwwroot/Shop/css`. تعارض را با viewport browser و Styles/Computed تأیید کنید؛ جدول ممکن است با تغییر CSS قدیمی شود.
+برای فهرست به‌روزتر: `rg -n "@media" Shop/wwwroot/shop/css`. تعارض را با viewport browser و Styles/Computed تأیید کنید؛ جدول ممکن است با تغییر CSS قدیمی شود.
 
 ### قرارداد انتخاب selector و پیدا کردن مالک
 
 - ابتدا class/ID/data-attribute را از Razor یا DOM زنده بردارید؛ سپس همهٔ مصرف‌ها و تعریف‌ها را پیدا کنید:
 
 ```powershell
-rg -n "نام-کلاس|#نامId|data-نام" Shop/Views Shop/wwwroot/Shop/css Shop/wwwroot/Shop/js
+rg -n "نام-کلاس|#نامId|data-نام" Shop/Views Shop/wwwroot/shop/css Shop/wwwroot/shop/js
 ```
 
 - selector صفحه را زیر ریشهٔ همان View نگه دارید (`.search-main …`, `.journal-page …`, `#cartView …`) و selector مشترک را در CSS مشترک مؤلفه اصلاح کنید.
@@ -307,7 +307,7 @@ CSS/JS عمومی layout و store که بالاتر آمده‌اند به هم�
 | `hn-profile` | دادهٔ profile در `Views/Profile/Index.cshtml` |
 | `hn-product-${type}-${productId}` | کلید feedback در `commerce.js`؛ `type` برابر `reviews` یا `questions` است. داده‌های اولیه با دادهٔ ذخیره‌شده ترکیب می‌شوند. |
 
-ممکن است scriptهای دیگر کلید تازه اضافه کنند؛ این جدول هنگام تغییر باید با `rg -n "localStorage|storage\.(get|set|json)|hn-" Shop/wwwroot/Shop/js Shop/Views` تطبیق داده شود.
+ممکن است scriptهای دیگر کلید تازه اضافه کنند؛ این جدول هنگام تغییر باید با `rg -n "localStorage|storage\.(get|set|json)|hn-" Shop/wwwroot/shop/js Shop/Views` تطبیق داده شود.
 
 ### رویدادهای سفارشی
 
@@ -386,9 +386,9 @@ CSS/JS عمومی layout و store که بالاتر آمده‌اند به هم�
 
 ```powershell
 git status --short
-rg -n "نام-کلاس|#نامId|data-نام" Shop/Views Shop/wwwroot/Shop/css Shop/wwwroot/Shop/js
-rg -n "@media" Shop/wwwroot/Shop/css
-rg -n "localStorage|storage\.(get|set|json)|hn:" Shop/wwwroot/Shop/js Shop/Views
+rg -n "نام-کلاس|#نامId|data-نام" Shop/Views Shop/wwwroot/shop/css Shop/wwwroot/shop/js
+rg -n "@media" Shop/wwwroot/shop/css
+rg -n "localStorage|storage\.(get|set|json)|hn:" Shop/wwwroot/shop/js Shop/Views
 rg -n "<link|<script|RenderSection|RenderBody" Shop/Views/Shared/_Shop.cshtml
 dotnet build Shop.sln
 ```

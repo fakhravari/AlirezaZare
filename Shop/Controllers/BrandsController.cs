@@ -39,7 +39,7 @@ public sealed class BrandsController : PageController
                 $"برند {brand.PersianName}؛ محصولات و راهنمای انتخاب | ندا اولیائی",
                 brand.Summary,
                 CanonicalUrl: $"/brands/{brand.Slug}",
-                ImageUrl: "/Shop/images/heroes/hero-electrical-editorial.png",
+                ImageUrl: "/shop/images/heroes/hero-electrical-editorial.png",
                 Breadcrumbs: [new SeoBreadcrumb("خانه", "/"), new SeoBreadcrumb("برندها", "/brands"), new SeoBreadcrumb(brand.PersianName, $"/brands/{brand.Slug}")]));
         return await PageAsync(model);
     }

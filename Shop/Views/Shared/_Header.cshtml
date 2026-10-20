@@ -2,7 +2,7 @@
 <div class="home-header-top" aria-label="جست‌وجو و پشتیبانی فروشگاه">
     <a class="home-header-support home-header-support-link" href="tel:03969455457" aria-label="تماس فوری با پشتیبانی به شماره 03969455457">
         <span class="home-header-support-icon home-header-support-icon--urgent" aria-hidden="true">
-            <img src="@Url.Content("~/Shop/images/icons/urgent-support.svg")" alt="" />
+            <img src="@Url.Content("~/shop/images/icons/urgent-support.svg")" alt="" />
         </span>
         <span>
             <small>پشتیبانی فوری و پیگیری سفارش</small><strong dir="ltr">03969455457</strong>
@@ -113,7 +113,7 @@
             @if (!string.IsNullOrWhiteSpace(brand.LogoFile) && slug is not ("uni-t" or "yihua"))
             {
                 <span class="brand-menu-logo-frame">
-                    <img class="brand-menu-logo" src="@Url.Content($"~/Shop/images/brands/{brand.LogoFile}")" alt="" width="52" height="38" decoding="async" />
+                    <img class="brand-menu-logo" src="@Url.Content($"~/shop/images/brands/{brand.LogoFile}")" alt="" width="52" height="38" decoding="async" />
                 </span>
             }
             else

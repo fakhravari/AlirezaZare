@@ -24,10 +24,10 @@ public static class ProductSeoCatalog
 {
     private static readonly string[] Images =
     [
-        "Shop/images/products/tool-hammer-drill.png",
-        "Shop/images/products/tool-multimeter-kit.png",
-        "Shop/images/products/tool-soldering-station.png",
-        "Shop/images/products/tool-led-worklight.png"
+        "shop/images/products/tool-hammer-drill.png",
+        "shop/images/products/tool-multimeter-kit.png",
+        "shop/images/products/tool-soldering-station.png",
+        "shop/images/products/tool-led-worklight.png"
     ];
 
     public static IReadOnlyList<ProductSeoEntry> Load(string webRootPath)

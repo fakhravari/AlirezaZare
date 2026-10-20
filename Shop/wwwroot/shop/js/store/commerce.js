@@ -239,7 +239,7 @@ document.addEventListener("DOMContentLoaded", () => {
           ? items
               .map(
                 (item) =>
-                  `<article class="product-feedback-card"><div class="product-feedback-meta"><img class="product-feedback-avatar" src="Shop/images/guest-avatar.svg" alt="" loading="lazy"><strong>${esc(item.name?.trim() || "کاربر مهمان")}</strong>${type === "reviews" ? `${ratingStars(item.rating)}` : ""}</div><p class="${type === "questions" ? "product-question-user-text" : "product-feedback-user-text"}">${esc(item.text)}</p>${item.reply ? `<aside class="product-feedback-admin-reply"><div class="product-feedback-admin-meta"><span><i class="bi bi-patch-check-fill" aria-hidden="true"></i>پاسخ مدیر فروشگاه</span><small>پاسخ رسمی</small></div><p>${esc(item.reply)}</p></aside>` : ""}</article>`,
+                  `<article class="product-feedback-card"><div class="product-feedback-meta"><img class="product-feedback-avatar" src="shop/images/guest-avatar.svg" alt="" loading="lazy"><strong>${esc(item.name?.trim() || "کاربر مهمان")}</strong>${type === "reviews" ? `${ratingStars(item.rating)}` : ""}</div><p class="${type === "questions" ? "product-question-user-text" : "product-feedback-user-text"}">${esc(item.text)}</p>${item.reply ? `<aside class="product-feedback-admin-reply"><div class="product-feedback-admin-meta"><span><i class="bi bi-patch-check-fill" aria-hidden="true"></i>پاسخ مدیر فروشگاه</span><small>پاسخ رسمی</small></div><p>${esc(item.reply)}</p></aside>` : ""}</article>`,
               )
               .join("")
           : `<div class="product-feedback-empty empty-state-card"><i class="bi ${type === "reviews" ? "bi-chat-square-heart" : "bi-question-circle"}" aria-hidden="true"></i><strong>${type === "reviews" ? "هنوز دیدگاهی برای این محصول ثبت نشده است." : "هنوز پرسشی دربارهٔ این محصول ثبت نشده است."}</strong><span>${type === "reviews" ? "تجربهٔ استفاده‌تان را با خریداران دیگر به اشتراک بگذارید." : "سؤال خود را ثبت کنید تا اطلاعات این کالا کامل‌تر شود."}</span></div>`;
@@ -548,7 +548,7 @@ document.addEventListener("DOMContentLoaded", () => {
       };
       const brandLogoFile = productBrandLogos[p.brand];
       const brandMark = brandLogoFile
-        ? `<img class="product-meta-brand-logo" src="/Shop/images/brands/${brandLogoFile}" alt="" aria-hidden="true" decoding="async">`
+        ? `<img class="product-meta-brand-logo" src="/shop/images/brands/${brandLogoFile}" alt="" aria-hidden="true" decoding="async">`
         : '<i class="bi bi-patch-check" aria-hidden="true"></i>';
       const categoryPath =
         Array.isArray(p.categoryPath) && p.categoryPath.length
@@ -558,7 +558,7 @@ document.addEventListener("DOMContentLoaded", () => {
         String(p.brandCountryCode || "").toUpperCase()
       ];
       const brandCountryMark = brandCountry
-        ? `<img class="product-meta-country-flag" src="/Shop/images/countries/flags/${brandCountry.code.toLowerCase()}.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">`
+        ? `<img class="product-meta-country-flag" src="/shop/images/countries/flags/${brandCountry.code.toLowerCase()}.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">`
         : '<i class="bi bi-globe2" aria-hidden="true"></i>';
       const brandCountryContent = brandCountry
         ? `<span><small>کشور برند</small><strong>${esc(brandCountry.fa)}</strong><small class="product-meta-country-en" lang="en" dir="ltr">${esc(brandCountry.en)}</small></span>`

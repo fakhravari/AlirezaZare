@@ -71,7 +71,7 @@ Controller / ساخت PageModel
 
 `Views/Shared/_Shop.cshtml` نگه‌دارندهٔ `lang="fa"`, `dir="rtl"`, charset، viewport، favicon، partial متادیتا و پیوند «رفتن به محتوای اصلی» است. پیوند دسترس‌پذیری به قاب `#main-content` می‌رود؛ صفحهٔ خانه درون آن یک `<main id="home-main-content">` مستقل دارد و صفحه‌های داخلی main خود را در View تعریف می‌کنند. هنگام تغییر layout، از ایجاد main تو در تو یا حذف مقصد skip link جلوگیری کنید.
 
-favicon فعلی SVG برداری برند در `wwwroot/Shop/images/shared/store-mark.svg` است. تصویر OG پیش‌فرض هنوز fallback عمومی است؛ برای صفحه‌ای با تصویر شاخص اختصاصی، `SeoModel.ImageUrl` و متن جایگزین آن را از همان تصویر واقعی صفحه تنظیم کنید.
+favicon فعلی SVG برداری برند در `wwwroot/shop/images/shared/store-mark.svg` است. تصویر OG پیش‌فرض هنوز fallback عمومی است؛ برای صفحه‌ای با تصویر شاخص اختصاصی، `SeoModel.ImageUrl` و متن جایگزین آن را از همان تصویر واقعی صفحه تنظیم کنید.
 
 ## محدودیت‌های اندازه‌گیری
 

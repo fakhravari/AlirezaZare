@@ -6,7 +6,7 @@
 }
 
 <header class="page-hero article-hero">
-    <img class="hero-image" src="@Url.Content($"~/Shop/images/{imageFolder}/{contentImage}")" alt="@Model.Data.Title"/>
+    <img class="hero-image" src="@Url.Content($"~/shop/images/{imageFolder}/{contentImage}")" alt="@Model.Data.Title"/>
     <div class="container">
         <nav class="article-breadcrumb" aria-label="مسیر صفحه">
             <a class="breadcrumb-home" asp-controller="Home" asp-action="Index">
@@ -130,7 +130,7 @@
                         </div>
                     </div>
                     <figure>
-                        <img src="@Url.Content($"~/Shop/images/{imageFolder}/{contentImage}")" alt="@Model.Data.Title" loading="lazy"/>
+                        <img src="@Url.Content($"~/shop/images/{imageFolder}/{contentImage}")" alt="@Model.Data.Title" loading="lazy"/>
                         <figcaption>@Model.Data.Title</figcaption>
                     </figure>
 
@@ -185,13 +185,13 @@
         <h2 id="relatedTitle">این راهنماها را هم بخوانید</h2>
         <div>
             <a asp-controller="Magazine" asp-action="Details" asp-route-slug="multimeter-buying-guide">
-                <img src="~/Shop/images/products/tool-multimeter-kit.png" alt="مولتی‌متر دیجیتال و پراب‌های اندازه‌گیری" loading="lazy"/>
+                <img src="~/shop/images/products/tool-multimeter-kit.png" alt="مولتی‌متر دیجیتال و پراب‌های اندازه‌گیری" loading="lazy"/>
                 <span>
                     <small>راهنمای خرید</small><strong>چطور مولتی‌متر مناسب انتخاب کنیم؟</strong><i class="bi bi-arrow-left" aria-hidden="true"></i>
                 </span>
             </a>
             <a asp-controller="Magazine" asp-action="Details" asp-route-slug="electrical-tool-safety">
-                <img src="~/Shop/images/products/tool-led-worklight.png" alt="ابزار و تجهیزات ایمنی کارگاهی" loading="lazy"/>
+                <img src="~/shop/images/products/tool-led-worklight.png" alt="ابزار و تجهیزات ایمنی کارگاهی" loading="lazy"/>
                 <span>
                     <small>ایمنی و نگهداری</small><strong>چک‌لیست ایمنی کار با ابزار برقی</strong><i class="bi bi-arrow-left" aria-hidden="true"></i>
                 </span>
@@ -202,11 +202,11 @@
 </main>
 
 @section Styles {
-    <link href="~/Shop/css/pages/pages.css" rel="stylesheet" asp-append-version="true"/>
-    <link href="~/Shop/css/pages/article-details.css" rel="stylesheet" asp-append-version="true"/>
+    <link href="~/shop/css/pages/pages.css" rel="stylesheet" asp-append-version="true"/>
+    <link href="~/shop/css/pages/article-details.css" rel="stylesheet" asp-append-version="true"/>
 }
 
 @section Scripts {
-    <script src="~/Shop/js/pages/page-content.js" asp-append-version="true"></script>
-    <script src="~/Shop/js/pages/article-details.js" asp-append-version="true"></script>
+    <script src="~/shop/js/pages/page-content.js" asp-append-version="true"></script>
+    <script src="~/shop/js/pages/article-details.js" asp-append-version="true"></script>
 }

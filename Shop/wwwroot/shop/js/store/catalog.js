@@ -299,10 +299,10 @@ window.HNProducts = productCatalog.map((entry, i) => {
   const stockLevels = [12, 0, 7, 3, 0, 18, 5, 0, 2, 9];
   const stockQuantity = stockLevels[i % stockLevels.length];
   const images = [
-    "Shop/images/products/tool-hammer-drill.png",
-    "Shop/images/products/tool-multimeter-kit.png",
-    "Shop/images/products/tool-soldering-station.png",
-    "Shop/images/products/tool-led-worklight.png",
+    "shop/images/products/tool-hammer-drill.png",
+    "shop/images/products/tool-multimeter-kit.png",
+    "shop/images/products/tool-soldering-station.png",
+    "shop/images/products/tool-led-worklight.png",
   ];
   const productDetails = [
     {
@@ -806,9 +806,9 @@ window.HNProducts = productCatalog.map((entry, i) => {
       ...images.filter((_, index) => index !== imageIndex),
     ],
     videos: [
-      "Shop/videos/1_compressed.mp4",
-      "Shop/videos/2_compressed.mp4",
-      "Shop/videos/3_compressed.mp4",
+      "shop/videos/1_compressed.mp4",
+      "shop/videos/2_compressed.mp4",
+      "shop/videos/3_compressed.mp4",
     ],
     newest: 30 - i,
     variants:

@@ -9,7 +9,7 @@
 - راه‌حل: `Shop.sln`؛ پروژهٔ اجرایی: `Shop/Shop.csproj` با `Microsoft.NET.Sdk.Web` و هدف `net10.0`.
 - الگو: ASP.NET Core MVC با Controller و Razor View؛ رابط کاربری فارسی و راست‌به‌چپ است.
 - `Shop/Program.cs` فقط MVC، فایل‌های استاتیک و route پیش‌فرض را راه‌اندازی می‌کند. در ترکیب فعلی، دیتابیس، Entity Framework، سرویس دامنه، API یا احراز هویت سمت سرور ثبت نشده است.
-- بسیاری از مسیرهای Controller، View و محتوای فعلی را برمی‌گردانند. کاتالوگ ۳۰ قلمی ابزار در `Shop/wwwroot/Shop/js/store/catalog.js` نگهداری می‌شود؛ قیمت‌ها (به میلیون تومان)، تخفیف‌ها، دیدگاه‌ها و موجودی از پایگاه دادهٔ فروش دریافت نمی‌شوند. توضیحات فنی در شش گروه کالایی مشترک‌اند و مشخصات مدل‌محور تا اتصال منبع دادهٔ معتبر نباید حدس زده شوند. فیلدهای روشن‌تر `powerSource` (منبع تغذیه) و `useCase` (مورد استفاده) هستند؛ `movement` و `strap` برای سازگاری با کد و داده‌های قدیمی فعلاً نگه داشته شده‌اند. محتوا و تعامل‌های سبد، علاقه‌مندی، مقایسه و بخشی از حساب در مرورگر و `localStorage` مدیریت می‌شوند.
+- بسیاری از مسیرهای Controller، View و محتوای فعلی را برمی‌گردانند. کاتالوگ ۳۰ قلمی ابزار در `Shop/wwwroot/shop/js/store/catalog.js` نگهداری می‌شود؛ قیمت‌ها (به میلیون تومان)، تخفیف‌ها، دیدگاه‌ها و موجودی از پایگاه دادهٔ فروش دریافت نمی‌شوند. توضیحات فنی در شش گروه کالایی مشترک‌اند و مشخصات مدل‌محور تا اتصال منبع دادهٔ معتبر نباید حدس زده شوند. فیلدهای روشن‌تر `powerSource` (منبع تغذیه) و `useCase` (مورد استفاده) هستند؛ `movement` و `strap` برای سازگاری با کد و داده‌های قدیمی فعلاً نگه داشته شده‌اند. محتوا و تعامل‌های سبد، علاقه‌مندی، مقایسه و بخشی از حساب در مرورگر و `localStorage` مدیریت می‌شوند.
 - نتیجه: رفتار فعلی فروشگاه را دمو/نمونه فرض کنید؛ دادهٔ `localStorage` را دادهٔ سرور، سفارش واقعی یا احراز هویت واقعی تلقی نکنید.
 
 ### قرارداد مشترک سبد خرید
@@ -39,15 +39,15 @@
 | `Shop/Views/` | Razor UI؛ صفحات محصول، پروفایل، خرید، محتوا و layoutهای مشترک |
 | `Shop/Views/Shared/_Shop.cshtml` | سند HTML اصلی، ترتیب بارگذاری CSS/JS، هدر/فوتر/پنل‌ها |
 | `Shop/Views/Shared/_Header.cshtml` | markup هدر مشترک؛ تفاوت صفحهٔ خانه و داخلی با `HeaderVariant` |
-| `Shop/wwwroot/Shop/css/core/` | توکن‌های طراحی، کامپوننت‌های مشترک و پایهٔ UI |
-| `Shop/wwwroot/Shop/css/layout/` | پوسته، هدر، پنل‌ها، موبایل و overrideهای layout |
-| `Shop/wwwroot/Shop/css/pages/` | استایل اختصاصی صفحه‌ها |
-| `Shop/wwwroot/Shop/css/store/` | کارت محصول، خرید، مقایسه و صفحه‌بندی فروشگاه |
-| `Shop/wwwroot/Shop/js/core/` | زیرساخت مرورگر، اعتبارسنجی و محتوای مشترک |
-| `Shop/wwwroot/Shop/js/layout/` | تعامل‌های هدر، منوها، پنل‌ها و layout |
-| `Shop/wwwroot/Shop/js/store/` | دادهٔ کاتالوگ و رفتار فروشگاهی |
-| `Shop/wwwroot/Shop/js/pages/` | رفتار مختص یک صفحه یا جریان کاری |
-| `Shop/wwwroot/Shop/images/`, `videos/`, `vendor/` | رسانه‌ها، فونت‌ها و وابستگی‌های محلی؛ پیش از جایگزینی/حذف، تمام ارجاعات را بررسی کنید |
+| `Shop/wwwroot/shop/css/core/` | توکن‌های طراحی، کامپوننت‌های مشترک و پایهٔ UI |
+| `Shop/wwwroot/shop/css/layout/` | پوسته، هدر، پنل‌ها، موبایل و overrideهای layout |
+| `Shop/wwwroot/shop/css/pages/` | استایل اختصاصی صفحه‌ها |
+| `Shop/wwwroot/shop/css/store/` | کارت محصول، خرید، مقایسه و صفحه‌بندی فروشگاه |
+| `Shop/wwwroot/shop/js/core/` | زیرساخت مرورگر، اعتبارسنجی و محتوای مشترک |
+| `Shop/wwwroot/shop/js/layout/` | تعامل‌های هدر، منوها، پنل‌ها و layout |
+| `Shop/wwwroot/shop/js/store/` | دادهٔ کاتالوگ و رفتار فروشگاهی |
+| `Shop/wwwroot/shop/js/pages/` | رفتار مختص یک صفحه یا جریان کاری |
+| `Shop/wwwroot/shop/images/`, `videos/`, `vendor/` | رسانه‌ها، فونت‌ها و وابستگی‌های محلی؛ پیش از جایگزینی/حذف، تمام ارجاعات را بررسی کنید |
 
 ## ۳. مسیرهای اصلی و نقطهٔ شروع تغییر
 
@@ -60,7 +60,7 @@
 | مقایسه و علاقه‌مندی | `/compare`, `/favorites` | Controller و Viewهای هم‌نام؛ state محلی با کدهای store |
 | پروفایل | `/account` (هدایت سازگاری به پروفایل), `/profile`, `/profile/orders`, `/profile/addresses`, `/profile/favorites` | `AccountController` فقط alias سازگاری است؛ صفحه‌ها در `ProfileController` و `Views/Profile/Index.cshtml` رندر می‌شوند |
 | مجله | `/magazine`, `/magazine/{slug}` (مسیر قبلی `/magazine/details/{slug}` حفظ و هدایت می‌شود) | `MagazineController`، `Views/Magazine/`، دادهٔ مقاله و اعداد ثابت در `Models/JournalArticles.cs` |
-| برندها | `/brands`, `/brands/{slug}` | `BrandsController` و Viewهای فهرست/جزئیات؛ اطلاعات پایه در `BrandCatalog` و متن تحریریه در `wwwroot/Shop/js/store/brand-editorial.json` |
+| برندها | `/brands`, `/brands/{slug}` | `BrandsController` و Viewهای فهرست/جزئیات؛ اطلاعات پایه در `BrandCatalog` و متن تحریریه در `wwwroot/shop/js/store/brand-editorial.json` |
 | محتوا/خدمات | `/about`, `/contact`, `/faq`, `/shipping`, `/tracking`, `/warranty` | Controller و View هم‌نام |
 | قوانین | `/legal/privacy`, `/legal/terms`, `/legal/returns` | `LegalController` و Viewهای `Views/Legal/` |
 | خطا | `/error` | `ErrorController` → `Views/Error/Index.cshtml` |
@@ -94,7 +94,7 @@
 
 ### توکن‌های مرجع
 
-`Shop/wwwroot/Shop/css/core/design-tokens.css` مرجع اولیهٔ palette و مقادیر عمومی است. خانوادهٔ اصلی پروژه:
+`Shop/wwwroot/shop/css/core/design-tokens.css` مرجع اولیهٔ palette و مقادیر عمومی است. خانوادهٔ اصلی پروژه:
 
 - سرمه‌ای: `--color-navy` / `--industrial-navy`
 - آبی-خاکستری: `--color-blue` / `--industrial-steel`
@@ -124,7 +124,7 @@
 
 | لایه | مسیر/فایل | محدودهٔ مسئولیت |
 |---|---|---|
-| وابستگی | `wwwroot/Shop/vendor/` | Bootstrap RTL، آیکن‌ها، فونت‌ها و carouselها؛ فقط تغییر vendor با دلیل و بررسی نسخه/وابستگی‌ها |
+| وابستگی | `wwwroot/shop/vendor/` | Bootstrap RTL، آیکن‌ها، فونت‌ها و carouselها؛ فقط تغییر vendor با دلیل و بررسی نسخه/وابستگی‌ها |
 | پایه و توکن | `css/core/design-tokens.css`, `components.css`, `ui-core.css`, `site.css` | رنگ، تایپوگرافی، resetهای محدود، الگوهای UI عمومی و پایهٔ سایت |
 | اجزای مشترک | `css/layout/shared-header.css`, `shared-mega-menu.css`, `shared-account.css`, `shared-cart.css`, `shared-login.css`, `shared-footer.css` | اجزایی که در چند route تکرار می‌شوند؛ `shared-cart.css` پنل سبد هدر را هم پوشش می‌دهد؛ header خانه/داخلی را جداگانه بررسی کنید |
 | پوسته و legacy | `css/layout/luxury-theme.css`, `style.css`, `mvc-layout.css`, `electrical-theme.css`, `mobile-drawer-compact.css`, `industrial-system.css` | پوستهٔ عمومی، responsive و سازگاری‌های قدیمی؛ در این گروه هم‌پوشانی و override زیاد است |
@@ -160,7 +160,7 @@
 | `/magazine/{slug}` | `Views/Magazine/Details.cshtml`؛ مسیر قدیمی `/magazine/details/{slug}` هدایت می‌شود | `pages/article-details.css`, `pages/pages.css` |
 | `/about` | `Views/About/Index.cshtml` | `pages/pages.css` |
 | `/brands` | `Views/Brands/Index.cshtml` | `pages/brands.css`, `pages/pages.css` |
-| `/brands/{slug}` | `Views/Brands/Details.cshtml` | `pages/pages.css`, `pages/brands.css`؛ محتوای تحریریه از `wwwroot/Shop/js/store/brand-editorial.json` |
+| `/brands/{slug}` | `Views/Brands/Details.cshtml` | `pages/pages.css`, `pages/brands.css`؛ محتوای تحریریه از `wwwroot/shop/js/store/brand-editorial.json` |
 | `/contact` | `Views/Contact/Index.cshtml` | `pages/contact.css`, `pages/form-confirm-dialog.css`, `pages/pages.css` |
 | `/faq`, `/shipping`, `/warranty` | View هم‌نام | `pages/pages.css` |
 | `/tracking` | `Views/Tracking/Index.cshtml` | `pages/pages.css`, `pages/tracking.css` |
@@ -190,11 +190,11 @@
 ### روند عیب‌یابی تداخل CSS
 
 1. با route و selector/متن قابل مشاهده شروع کنید؛ markup را در View/partial پیدا کنید و ببینید صفحه چه ریشه یا کلاسِ وضعیت فعالی دارد.
-2. تمام تعریف‌ها و مصرف‌ها را جستجو کنید؛ برای مثال `rg -n "\.mega-menu|mega-menu" Shop/Views Shop/wwwroot/Shop/css Shop/wwwroot/Shop/js` و سپس فایل‌های بالادستی و پایین‌دستی جدول ترتیب را باز کنید.
+2. تمام تعریف‌ها و مصرف‌ها را جستجو کنید؛ برای مثال `rg -n "\.mega-menu|mega-menu" Shop/Views Shop/wwwroot/shop/css Shop/wwwroot/shop/js` و سپس فایل‌های بالادستی و پایین‌دستی جدول ترتیب را باز کنید.
 3. در DevTools روی عنصر، `Computed` و `Styles` را ببینید: قانون برنده، فایل و خط، specificity، مقدار خط‌خورده، media query فعال و کلاس‌های حالت (`active`, `open`, `is-*`) را ثبت کنید.
 4. همان مؤلفه را در خانه و صفحهٔ داخلی، و در عرض دسکتاپ و موبایل مقایسه کنید. `home-page`/`inner-page` و variant هدر می‌توانند markup یا selector متفاوت بسازند.
 5. قانون را در فایل مالک اصلاح کنید؛ selector را به ریشهٔ صفحه/کامپوننت محدود کنید. از selectorهای سراسری مثل `section`, `button`, `.card` و `!important` جدید پرهیز کنید.
-6. با hard refresh/cache-busting بررسی کنید که مرورگر asset جدید را گرفته؛ stylesheet و scriptهای View از `asp-append-version` استفاده می‌کنند و مسیرهای ثابت با `~/Shop/` نوشته می‌شوند.
+6. با hard refresh/cache-busting بررسی کنید که مرورگر asset جدید را گرفته؛ stylesheet و scriptهای View از `asp-append-version` استفاده می‌کنند و مسیرهای ثابت با `~/shop/` نوشته می‌شوند.
 
 الگوی تشخیص سریع:
 
@@ -213,7 +213,7 @@
 - کارت‌ها/پنل‌ها را تودرتو و بی‌دلیل با پس‌زمینه و سایهٔ جدا نسازید؛ مرز بین سطح صفحه، پنل و کارت باید واضح و کم‌تعداد باشد.
 - هدر، مگامنو، پنل‌های سبد/حساب، modal و صفحه‌بندی اجزای مشترک‌اند؛ تغییر آن‌ها را روی خانه، صفحهٔ داخلی و موبایل ارزیابی کنید.
 - تصاویر باید نسبت/قاب مشخص و `object-fit` مناسب داشته باشند؛ در موبایل عرض، overflow و فضای امن محتوا را بررسی کنید.
-- فونت‌ها و آیکن‌ها از فایل‌های محلی زیر `wwwroot/Shop/vendor/` می‌آیند. برای آیکن جدید اول از Bootstrap Icons موجود استفاده کنید و وابستگی تازه وارد نکنید.
+- فونت‌ها و آیکن‌ها از فایل‌های محلی زیر `wwwroot/shop/vendor/` می‌آیند. برای آیکن جدید اول از Bootstrap Icons موجود استفاده کنید و وابستگی تازه وارد نکنید.
 
 ## ۶. قرارداد JavaScript و داده
 
@@ -289,7 +289,7 @@ dotnet run --project Shop/Shop.csproj --no-launch-profile --urls http://localhos
 - در تغییر route/controller مدل، `dotnet build Shop.sln` را اجرا کنید.
 - در تغییر JS، syntax و حالت‌های no-data / malformed storage را بررسی کنید.
 - پروژه فعلاً test project ثبت‌شده در solution ندارد؛ این را به‌عنوان نبود تست خودکار اعلام کنید، نه «تست موفق».
-- stylesheet و scriptهای اختصاصی View از `asp-append-version="true"` استفاده می‌کنند؛ مسیرهای asset ثابت در Razor با `~/Shop/` آغاز می‌شوند تا به مسیر جاری وابسته نباشند. اگر مرورگر CSS/JS قدیمی نشان داد، ابتدا URL نهایی و cache-busting واقعی asset را بررسی کنید.
+- stylesheet و scriptهای اختصاصی View از `asp-append-version="true"` استفاده می‌کنند؛ مسیرهای asset ثابت در Razor با `~/shop/` آغاز می‌شوند تا به مسیر جاری وابسته نباشند. اگر مرورگر CSS/JS قدیمی نشان داد، ابتدا URL نهایی و cache-busting واقعی asset را بررسی کنید.
 
 ## ۹. رودمپ پیشنهادی توسعه
 

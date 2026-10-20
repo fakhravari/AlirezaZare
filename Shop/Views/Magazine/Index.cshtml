@@ -32,7 +32,7 @@
     var postCount = PersianDigits(posts.Length);
 }
 <header class="page-hero editorial-hero">
-    <img class="hero-image" src="~/Shop/images/heroes/hero-electrical-editorial.png" alt="مجله تخصصی برق و ابزار ندا اولیائی"/>
+    <img class="hero-image" src="~/shop/images/heroes/hero-electrical-editorial.png" alt="مجله تخصصی برق و ابزار ندا اولیائی"/>
     <div class="container">
         <nav class="article-breadcrumb" aria-label="مسیر صفحه">
             <a class="breadcrumb-home" asp-controller="Home" asp-action="Index">
@@ -90,7 +90,7 @@
                     <article class="journal-post" data-branch="@post.Branch" data-topic="@post.Topic" data-area="@post.Area">
                         <a asp-controller="Magazine" asp-action="Details" asp-route-slug="@post.Slug">
                             <div class="journal-post-image">
-                                <img src="@Url.Content("~/Shop/images/products/" + post.Image)" alt="@post.Title" loading="lazy"/>
+                                <img src="@Url.Content("~/shop/images/products/" + post.Image)" alt="@post.Title" loading="lazy"/>
                             </div>
                             <div class="journal-post-copy">
                                 <span class="journal-kicker">@post.Category</span>
@@ -113,10 +113,10 @@
 </main>
 
 @section Styles {
-    <link href="~/Shop/css/pages/pages.css" rel="stylesheet" asp-append-version="true"/>
-    <link href="~/Shop/css/pages/magazine-luxury.css" rel="stylesheet" asp-append-version="true"/>
+    <link href="~/shop/css/pages/pages.css" rel="stylesheet" asp-append-version="true"/>
+    <link href="~/shop/css/pages/magazine-luxury.css" rel="stylesheet" asp-append-version="true"/>
 }
 
 @section Scripts {
-    <script src="~/Shop/js/pages/magazine.js" asp-append-version="true"></script>
+    <script src="~/shop/js/pages/magazine.js" asp-append-version="true"></script>
 }

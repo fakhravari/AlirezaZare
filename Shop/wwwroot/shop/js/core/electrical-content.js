@@ -94,9 +94,9 @@
   const replaceImages = (root) => {
     root.querySelectorAll?.("img").forEach((image) => {
       if (servicePaths.has(location.pathname) && image.closest(".page-hero"))
-        image.src = "Shop/images/heroes/hero-electrical-service.png";
+        image.src = "shop/images/heroes/hero-electrical-service.png";
       if (editorialPaths.has(location.pathname) && image.closest(".page-hero"))
-        image.src = "Shop/images/heroes/hero-electrical-editorial.png";
+        image.src = "shop/images/heroes/hero-electrical-editorial.png";
       if (image.closest(".page-hero"))
         image.alt = "Electrical tools and professional service";
     });

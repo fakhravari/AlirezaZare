@@ -19,7 +19,7 @@ public sealed class MagazineController : PageController
         if (JournalArticles.Find(slug) is { } relatedArticle)
         {
             string articleUrl = $"{Request.Scheme}://{Request.Host}{Url.Content($"~/magazine/{relatedArticle.Slug}")}";
-            string articleImage = $"{Request.Scheme}://{Request.Host}{Url.Content($"~/Shop/images/products/{Path.GetFileName(relatedArticle.ContentImage)}")}";
+            string articleImage = $"{Request.Scheme}://{Request.Host}{Url.Content($"~/shop/images/products/{Path.GetFileName(relatedArticle.ContentImage)}")}";
             var articleData = new Dictionary<string, object?>
             {
                 ["@type"] = "Article",
