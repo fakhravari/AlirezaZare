@@ -398,7 +398,7 @@ h6,
   .home-header-search {
     overflow: hidden;
     height: 54px;
-    grid-template-columns: 48px minmax(0, 1fr) !important;
+    grid-template-columns: var(--header-search-action-width, 52px) minmax(0, 1fr) !important;
     direction: rtl !important;
     border-color: var(--industrial-line) !important;
     border-radius: 8px;
@@ -2894,7 +2894,7 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
   margin: 0;
   padding: 0 24px 0 16px !important;
   border: 0 !important;
-  border-radius: 0 12px 12px 0;
+  border-radius: 12px 0 0 12px;
   outline: none !important;
   background: transparent !important;
   color: var(--industrial-ink) !important;
@@ -4343,7 +4343,7 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
     width: min(var(--container-wide-max), calc(100% - 56px));
     height: 85px;
     padding: 13px 220px 13px 190px;
-    grid-template-columns: minmax(260px, 480px) 180px;
+    grid-template-columns: minmax(260px, 480px) 230px;
     gap: 20px;
     align-items: center;
     color: var(--industrial-ink);
@@ -11524,10 +11524,11 @@ body.home-page .rail-card > strong {
   .home-page #mainNav .home-header-top {
     padding-right: 220px;
     padding-left: 190px;
-    grid-template-columns: minmax(320px, 560px) 230px;
+    grid-template-columns: minmax(260px, 560px) 230px;
   }
 
   .home-page #mainNav .home-header-search {
+    --header-search-action-width: 56px;
     width: 100%;
     max-width: 560px;
     height: 58px;
@@ -14585,8 +14586,8 @@ body .electrical-swiper .swiper-pagination-bullet-active {
   display: inline-flex !important;
   align-items: center;
   justify-content: center;
-  width: 220px;
-  max-width: min(220px, 40vw);
+  width: 178px;
+  max-width: min(178px, 40vw);
   min-width: 0;
   height: auto;
   aspect-ratio: 256 / 72;
@@ -14630,9 +14631,16 @@ body .electrical-swiper .swiper-pagination-bullet-active {
   object-fit: contain;
 }
 
+@media (min-width: 992px) {
+  .home-page #mainNav .header-brand-lockup,
+  .inner-page #mainNav .header-brand-lockup {
+    top: -66px;
+  }
+}
+
 @media (max-width: 575px) {
   #mainNav .header-brand-lockup {
-    width: min(150px, 36vw);
+    width: min(132px, 36vw);
     max-width: 48vw;
   }
 }

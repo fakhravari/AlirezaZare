@@ -144,6 +144,14 @@ body {
   .home-header-support {
     grid-column: 2;
     grid-row: 1;
+    min-width: 0;
+    direction: rtl;
+    text-align: right;
+  }
+
+  .home-header-support strong[dir="ltr"] {
+    align-self: flex-start;
+    unicode-bidi: isolate;
   }
 
   .home-header-support > span:last-child,
