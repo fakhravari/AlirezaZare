@@ -340,28 +340,37 @@ const productColorsById = Object.freeze({
 window.HNProductColors = productColorCatalog;
 
 const productVideosById = Object.freeze({
-    1: ["content/products/cordless-hammer-drill-hn-001-row-001-video-01.mp4"],
-    2: ["content/products/cordless-drill-driver-hn-002-row-002-video-01.mp4"],
-    3: ["content/products/electric-hammer-drill-hn-003-row-003-video-01.mp4"],
+    1: ["content/products/cordless-hammer-drill-hn-001-row-001/videos/cordless-hammer-drill-hn-001-row-001-video-01.mp4"],
+    2: ["content/products/cordless-drill-driver-hn-002-row-002/videos/cordless-drill-driver-hn-002-row-002-video-01.mp4"],
+    3: ["content/products/electric-hammer-drill-hn-003-row-003/videos/electric-hammer-drill-hn-003-row-003-video-01.mp4"],
 });
+
+const productFileName = (englishName, row) => {
+    const slug = String(englishName || "product")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+    const rowCode = String(row).padStart(3, "0");
+    return `${slug}-hn-${rowCode}-row-${rowCode}`;
+};
+const productDirectory = (englishName, row) =>
+    `content/products/${productFileName(englishName, row)}`;
+const productMainImagePath = (englishName, row) =>
+    `${productDirectory(englishName, row)}/images/main/${productFileName(englishName, row)}.png`;
+const productCardImagePath = (englishName, row) =>
+    `${productDirectory(englishName, row)}/images/card/${productFileName(englishName, row)}-800.jpg`;
+const productThumbnailImagePath = (englishName, row) =>
+    `${productDirectory(englishName, row)}/images/thumbnail/${productFileName(englishName, row)}-256.jpg`;
 
 window.HNProducts = productCatalog.map((entry, i) => {
     // Sample stock levels keep both in-stock and sold-out detail states visible.
     const stockLevels = [12, 0, 7, 3, 0, 18, 5, 0, 2, 9];
     const stockQuantity = stockLevels[i % stockLevels.length];
-    const productImagePath = (englishName, row) => {
-        const slug = String(englishName || "product")
-            .toLowerCase()
-            .replace(/[^a-z0-9]+/g, "-")
-            .replace(/^-+|-+$/g, "");
-        const rowCode = String(row).padStart(3, "0");
-        return `content/products/${slug}-hn-${rowCode}-row-${rowCode}.png`;
-    };
     const representativeImages = [
-        productImagePath(productCatalog[0][1], 1),
-        productImagePath(productCatalog[5][1], 6),
-        productImagePath(productCatalog[10][1], 11),
-        productImagePath(productCatalog[15][1], 16),
+        { src: productMainImagePath(productCatalog[0][1], 1), thumbnail: productThumbnailImagePath(productCatalog[0][1], 1) },
+        { src: productMainImagePath(productCatalog[5][1], 6), thumbnail: productThumbnailImagePath(productCatalog[5][1], 6) },
+        { src: productMainImagePath(productCatalog[10][1], 11), thumbnail: productThumbnailImagePath(productCatalog[10][1], 11) },
+        { src: productMainImagePath(productCatalog[15][1], 16), thumbnail: productThumbnailImagePath(productCatalog[15][1], 16) },
     ];
     const productDetails = [
         {
@@ -813,7 +822,9 @@ window.HNProducts = productCatalog.map((entry, i) => {
         imageIndex,
         configuredCartLimit,
     ] = entry;
-    const productImage = productImagePath(englishName, i + 1);
+    const productImage = productCardImagePath(englishName, i + 1);
+    const productMainImage = productMainImagePath(englishName, i + 1);
+    const productThumbnailImage = productThumbnailImagePath(englishName, i + 1);
     const cartLimit = Number(configuredCartLimit);
     const categoryRoots = {
         "دریل چکشی": "ابزار برقی",
@@ -861,10 +872,12 @@ window.HNProducts = productCatalog.map((entry, i) => {
         price: i === 0 ? 24.5 : 14 + ((i * 3) % 45),
         discountPercent: i % 5 === 0 ? 15 : i % 7 === 0 ? 10 : 0,
         image: productImage,
+        mainImage: productMainImage,
+        thumbnailImage: productThumbnailImage,
         imageSet: imageIndex,
         detail: productDetails[Math.floor(i / 5)],
         images: [
-            productImage,
+            { src: productMainImage, thumbnail: productThumbnailImage },
             ...representativeImages.filter((_, index) => index !== imageIndex),
         ],
         videos: productVideosById[i + 1] || [],

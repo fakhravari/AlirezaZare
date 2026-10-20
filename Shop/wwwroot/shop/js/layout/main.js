@@ -560,7 +560,7 @@ $(function () {
         card
           .querySelector(".product-image img, .rail-image img")
           ?.getAttribute("src") ||
-        "content/products/cordless-hammer-drill-hn-001-row-001.png",
+        "content/products/cordless-hammer-drill-hn-001-row-001/images/card/cordless-hammer-drill-hn-001-row-001-800.jpg",
       type: "مشخصات محصول",
       powerSource: "مطابق مشخصات کالا",
       useCase: "مطابق اطلاعات کالا",
@@ -624,9 +624,9 @@ $(function () {
           const product = products.get(id) || {
             name: "محصول منتخب",
             price: 0,
-            image: "content/products/cordless-hammer-drill-hn-001-row-001.png",
+            image: "content/products/cordless-hammer-drill-hn-001-row-001/images/card/cordless-hammer-drill-hn-001-row-001-800.jpg",
           };
-          return `<article class="compare-panel-item" data-favorite-id="${escapeHtml(id)}"><img src="${escapeHtml(product.image || "content/products/cordless-hammer-drill-hn-001-row-001.png")}" alt="" loading="lazy"><span><strong>${escapeHtml(product.name || "محصول منتخب")}</strong><small>${faNumber(Number(product.price) * (Number(product.price) < 1000000 ? 1000000 : 1))} تومان</small></span><button class="cart-remove" type="button" data-favorite-remove="${escapeHtml(id)}" aria-label="حذف ${escapeHtml(product.name || "محصول")} از علاقه‌مندی‌ها"><i class="bi bi-trash3" aria-hidden="true"></i></button></article>`;
+          return `<article class="compare-panel-item" data-favorite-id="${escapeHtml(id)}"><img src="${escapeHtml(product.image || "content/products/cordless-hammer-drill-hn-001-row-001/images/card/cordless-hammer-drill-hn-001-row-001-800.jpg")}" alt="" loading="lazy"><span><strong>${escapeHtml(product.name || "محصول منتخب")}</strong><small>${faNumber(Number(product.price) * (Number(product.price) < 1000000 ? 1000000 : 1))} تومان</small></span><button class="cart-remove" type="button" data-favorite-remove="${escapeHtml(id)}" aria-label="حذف ${escapeHtml(product.name || "محصول")} از علاقه‌مندی‌ها"><i class="bi bi-trash3" aria-hidden="true"></i></button></article>`;
         })
         .join(""),
     );
@@ -653,7 +653,7 @@ $(function () {
         image:
           button.dataset.image ||
           image?.getAttribute("src") ||
-          "content/products/cordless-hammer-drill-hn-001-row-001.png",
+          "content/products/cordless-hammer-drill-hn-001-row-001/images/card/cordless-hammer-drill-hn-001-row-001-800.jpg",
       });
     });
     $("#comparePanelCount").text(`${faNumber(ids.length)} محصول`);
@@ -669,7 +669,7 @@ $(function () {
           const product = products.get(id) || {
             name: "محصول منتخب",
             price: 0,
-            image: "content/products/cordless-hammer-drill-hn-001-row-001.png",
+            image: "content/products/cordless-hammer-drill-hn-001-row-001/images/card/cordless-hammer-drill-hn-001-row-001-800.jpg",
           };
           return `<article class="compare-panel-item" data-compare-id="${escapeHtml(id)}"><img src="${escapeHtml(product.image)}" alt="" loading="lazy"><span><strong>${escapeHtml(product.name)}</strong><small>${faNumber(product.price)} تومان</small></span><button class="cart-remove" type="button" data-compare-remove="${escapeHtml(id)}" aria-label="حذف ${escapeHtml(product.name)} از مقایسه"><i class="bi bi-trash3" aria-hidden="true"></i></button></article>`;
         })
@@ -2020,7 +2020,7 @@ $(function () {
       image: String(
         $cartButton.data("image") ||
           $root.find("img").first().attr("src") ||
-          "content/products/cordless-hammer-drill-hn-001-row-001.png",
+          "content/products/cordless-hammer-drill-hn-001-row-001/images/card/cordless-hammer-drill-hn-001-row-001-800.jpg",
       ),
       code: catalogProduct
         ? `HN-${String(catalogProduct.id).padStart(3, "0")}`

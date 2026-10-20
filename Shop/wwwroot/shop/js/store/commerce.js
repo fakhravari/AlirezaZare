@@ -103,28 +103,44 @@ document.addEventListener("DOMContentLoaded", () => {
                 : {};
             const images =
                 Array.isArray(p.images) && p.images.length
-                    ? p.images.filter(Boolean)
-                    : [p.image];
+                    ? p.images
+                        .map((image) =>
+                            typeof image === "string"
+                                ? { src: image, thumbnail: image }
+                                : image && typeof image.src === "string"
+                                    ? image
+                                    : null,
+                        )
+                        .filter(Boolean)
+                    : [{ src: p.mainImage || p.image, thumbnail: p.thumbnailImage || p.image }];
             const videos = (Array.isArray(p.videos) ? p.videos : [])
                 .map((video) => (typeof video === "string" ? { src: video } : video))
                 .filter((video) => video?.src);
             const media = [
-                ...images.map((src) => ({ type: "image", src })),
+                ...images.map((image) => ({
+                    type: "image",
+                    src: image.src,
+                    thumbnail: image.thumbnail || image.src,
+                })),
                 ...videos.map((video) => ({
                     type: "video",
                     src: video.src,
-                    poster: video.poster || p.image,
+                    poster: video.poster || p.mainImage || p.image,
                     title: video.title || `ویدئوی ${p.name}`,
                 })),
             ];
-            const mainMedia = media[0] || { type: "image", src: p.image };
+            const mainMedia = media[0] || {
+                type: "image",
+                src: p.mainImage || p.image,
+                thumbnail: p.thumbnailImage || p.image,
+            };
             const renderMedia = (item) =>
                 item.type === "video"
-                    ? `<video class="product-detail-image" controls preload="metadata" poster="${esc(item.poster || p.image)}"><source src="${esc(item.src)}"></video>`
+                    ? `<video class="product-detail-image" controls preload="metadata" poster="${esc(item.poster || p.mainImage || p.image)}"><source src="${esc(item.src)}"></video>`
                     : `<img class="product-detail-image" src="${esc(item.src)}" alt="${esc(p.name)}" fetchpriority="high">`;
             const thumbMarkup =
                 media.length > 1
-                    ? `<div class="product-detail-thumbnails" role="group" aria-label="انتخاب تصویر یا ویدئو">${media.map((item, index) => `<button class="product-detail-thumb${index === 0 ? " is-active" : ""}" type="button" data-detail-media-index="${index}" aria-label="${item.type === "video" ? esc(item.title) : `تصویر ${fa(index + 1)}`}" aria-pressed="${index === 0}">${item.type === "video" ? `<span><img src="${esc(item.poster || p.image)}" alt="" loading="lazy"><i class="bi bi-play-fill" aria-hidden="true"></i></span>` : `<img src="${esc(item.src)}" alt="" loading="lazy">`}</button>`).join("")}</div>`
+                    ? `<div class="product-detail-thumbnails" role="group" aria-label="انتخاب تصویر یا ویدئو">${media.map((item, index) => `<button class="product-detail-thumb${index === 0 ? " is-active" : ""}" type="button" data-detail-media-index="${index}" aria-label="${item.type === "video" ? esc(item.title) : `تصویر ${fa(index + 1)}`}" aria-pressed="${index === 0}">${item.type === "video" ? `<span><img src="${esc(item.poster || p.mainImage || p.image)}" alt="" loading="lazy"><i class="bi bi-play-fill" aria-hidden="true"></i></span>` : `<img src="${esc(item.thumbnail || item.src)}" alt="" loading="lazy">`}</button>`).join("")}</div>`
                     : "";
             const variantMarkup = p.variants
                 ? `<section class="product-variant-options" aria-labelledby="productVariantTitle"><header class="product-variant-heading"><span class="product-variant-heading-icon"><i class="bi bi-sliders" aria-hidden="true"></i></span><span><strong id="productVariantTitle">انتخاب ویژگی‌های محصول</strong><small>گزینه‌های موردنظر را انتخاب کنید.</small></span></header>${Object.entries(
@@ -786,7 +802,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const galleryDialog = document.createElement("dialog");
             galleryDialog.className = "product-gallery-dialog";
             galleryDialog.setAttribute("aria-labelledby", "productGalleryTitle");
-            galleryDialog.innerHTML = `<div class="product-gallery-dialog-shell"><header class="product-gallery-dialog-head"><div><span>گالری محصول</span><h2 id="productGalleryTitle">${esc(p.name)}</h2></div><div class="product-gallery-dialog-tools"><span class="product-gallery-dialog-count" data-gallery-count>${fa(1)} از ${fa(media.length)}</span><button type="button" data-gallery-close aria-label="بستن گالری"><i class="bi bi-x-lg" aria-hidden="true"></i></button></div></header><div class="product-gallery-dialog-body"><div class="product-gallery-full-stage" id="productGalleryFullStage">${renderMedia(mainMedia)}</div><aside class="product-gallery-dialog-rail"><div class="product-gallery-rail-title"><strong>همهٔ تصاویر و ویدئوها</strong><span>${fa(media.length)} فایل</span></div><div class="product-gallery-full-thumbs">${media.map((item, index) => `<button class="product-gallery-full-thumb${index === 0 ? " is-active" : ""}" type="button" data-gallery-media-index="${index}" aria-label="${item.type === "video" ? `پخش ویدئوی ${fa(index + 1)}` : `نمایش تصویر ${fa(index + 1)}`}" aria-pressed="${index === 0}">${item.type === "video" ? `<span><img src="${esc(item.poster || p.image)}" alt="" loading="lazy"><i class="bi bi-play-fill" aria-hidden="true"></i></span>` : `<img src="${esc(item.src)}" alt="" loading="lazy">`}<b>${fa(index + 1)}</b></button>`).join("")}</div></aside></div></div>`;
+            galleryDialog.innerHTML = `<div class="product-gallery-dialog-shell"><header class="product-gallery-dialog-head"><div><span>گالری محصول</span><h2 id="productGalleryTitle">${esc(p.name)}</h2></div><div class="product-gallery-dialog-tools"><span class="product-gallery-dialog-count" data-gallery-count>${fa(1)} از ${fa(media.length)}</span><button type="button" data-gallery-close aria-label="بستن گالری"><i class="bi bi-x-lg" aria-hidden="true"></i></button></div></header><div class="product-gallery-dialog-body"><div class="product-gallery-full-stage" id="productGalleryFullStage">${renderMedia(mainMedia)}</div><aside class="product-gallery-dialog-rail"><div class="product-gallery-rail-title"><strong>همهٔ تصاویر و ویدئوها</strong><span>${fa(media.length)} فایل</span></div><div class="product-gallery-full-thumbs">${media.map((item, index) => `<button class="product-gallery-full-thumb${index === 0 ? " is-active" : ""}" type="button" data-gallery-media-index="${index}" aria-label="${item.type === "video" ? `پخش ویدئوی ${fa(index + 1)}` : `نمایش تصویر ${fa(index + 1)}`}" aria-pressed="${index === 0}">${item.type === "video" ? `<span><img src="${esc(item.poster || p.mainImage || p.image)}" alt="" loading="lazy"><i class="bi bi-play-fill" aria-hidden="true"></i></span>` : `<img src="${esc(item.thumbnail || item.src)}" alt="" loading="lazy">`}<b>${fa(index + 1)}</b></button>`).join("")}</div></aside></div></div>`;
             document.body.append(galleryDialog);
             const setActiveMedia = (index) => {
                 const next = Number(index);
