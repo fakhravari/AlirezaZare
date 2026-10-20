@@ -2886,6 +2886,35 @@ h6 {
   font-size: 13px;
   font-weight: 600;
 }
+.article-sources {
+  margin-top: 28px;
+  padding: 20px 22px;
+  border: 1px solid var(--industrial-border, #dce3e9);
+  border-radius: 16px;
+  background: linear-gradient(135deg, #fffdf8, #fff);
+}
+.article-sources h2 {
+  margin: 0 0 12px;
+  color: var(--industrial-navy);
+  font-size: 17px;
+}
+.article-sources ul {
+  display: grid;
+  gap: 9px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.article-sources a {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--industrial-navy);
+  font-size: 14px;
+}
+.article-sources a:hover {
+  color: var(--industrial-yellow-dark);
+}
 .related-posts {
   position: relative;
   padding: 75px 0;

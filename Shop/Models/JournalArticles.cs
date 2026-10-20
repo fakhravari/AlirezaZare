@@ -1,8 +1,8 @@
 namespace Shop.Models;
 
-public static class JournalArticles
+public static partial class JournalArticles
 {
-    private sealed record Article(string Slug, string Category, string Title, string Summary, string Image, string[] Headings, string[] Content);
+    private sealed record Article(string Slug, string Category, string Title, string Summary, string Image, string[] Headings, string[] Content, MagazineSourceModel[]? Sources = null);
 
     private static readonly Article[] Articles =
     [
@@ -37,11 +37,11 @@ public static class JournalArticles
 
     public static MagazineDetailsModel? Find(string slug)
     {
-        var article = Articles.FirstOrDefault(item => string.Equals(item.Slug, slug, StringComparison.OrdinalIgnoreCase));
+        var article = Articles.Concat(ExpandedArticles).FirstOrDefault(item => string.Equals(item.Slug, slug, StringComparison.OrdinalIgnoreCase));
         if (article is null) return null;
 
         var sections = article.Headings.Select((heading, index) => new MagazineSectionModel($"section-{index + 1}", heading, article.Content[index])).ToArray();
-        return new MagazineDetailsModel(article.Slug, article.Category, "مجله تخصصی برق و ابزار", article.Title, article.Summary, "تحریریه ندا اولیائی", "", "۶ دقیقه مطالعه", "Shop/images/heroes/hero-electrical-editorial.png", "Shop/images/products/" + article.Image, article.Summary, sections, "مشخصات و دستورالعمل سازندهٔ همان مدل را بررسی کنید و ابزار را متناسب با کاربرد و شرایط ایمنی انتخاب کنید.");
+        return new MagazineDetailsModel(article.Slug, article.Category, "مجله تخصصی برق و ابزار", article.Title, article.Summary, "تحریریه ندا اولیائی", "", "۶ دقیقه مطالعه", "Shop/images/heroes/hero-electrical-editorial.png", "Shop/images/products/" + article.Image, article.Summary, sections, "مشخصات و دستورالعمل سازندهٔ همان مدل را بررسی کنید و ابزار را متناسب با کاربرد و شرایط ایمنی انتخاب کنید.", article.Sources);
     }
 }
 

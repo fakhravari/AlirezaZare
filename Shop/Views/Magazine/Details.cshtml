@@ -156,6 +156,18 @@
                         <a asp-controller="Magazine" asp-action="Index">@Model.Data.Category</a>
 
                     </div>
+                    @if (Model.Data.Sources is { Count: > 0 } sources)
+                    {
+                        <section class="article-sources" aria-labelledby="articleSourcesTitle">
+                            <h2 id="articleSourcesTitle">منابع و مطالعهٔ بیشتر</h2>
+                            <ul>
+                                @foreach (var source in sources)
+                                {
+                                    <li><a href="@source.Url" target="_blank" rel="noopener noreferrer">@source.Title <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i></a></li>
+                                }
+                            </ul>
+                        </section>
+                    }
                     <div class="article-next-step">
                         <div>
                             <span class="article-eyebrow">انتخاب بعدی شما</span>

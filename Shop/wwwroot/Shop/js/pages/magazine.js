@@ -5,7 +5,7 @@
   const heading = document.getElementById("archive-title");
   const count = document.getElementById("journal-count");
   if (!nav || !heading || !count) return;
-  const perPage = 6;
+  const perPage = 4;
   let filter = "all";
   let page = 1;
   const number = (value) => window.HNUI.formatNumber(value);
