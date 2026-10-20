@@ -33,26 +33,38 @@
   line-height: 2;
 }
 
-/* Keep the product hero breadcrumb readable on narrow screens. The product
-   name is already the hero heading, so mobile only needs its useful path. */
+/* Keep every product breadcrumb segment visible on narrow screens. */
 @media (max-width: 575px) {
-  .product-detail-hero .cart-breadcrumb {
-    overflow: hidden;
+  .inner-page .product-detail-hero .cart-breadcrumb {
+    width: 100%;
+    max-width: 100%;
+    overflow: visible;
     touch-action: auto;
   }
 
-  .product-detail-hero .cart-breadcrumb ol {
+  .inner-page .product-detail-hero .cart-breadcrumb ol {
+    display: flex;
     width: 100%;
     max-width: 100%;
     flex-wrap: wrap;
+    gap: 2px 4px;
   }
 
-  .product-detail-hero .cart-breadcrumb ol > li {
+  .inner-page .product-detail-hero .cart-breadcrumb ol > li {
+    flex: 0 1 auto;
     white-space: normal;
+    overflow-wrap: anywhere;
   }
 
-  .product-detail-hero .cart-breadcrumb ol > li:nth-child(2),
-  .product-detail-hero .cart-breadcrumb ol > li:last-child {
-    display: none;
+  .inner-page .product-detail-hero .cart-breadcrumb ol > li:last-child {
+    flex: 0 1 100%;
+  }
+
+  .inner-page .product-detail-hero .cart-breadcrumb ol > li:last-child > [aria-current] {
+    min-width: 0;
+    max-width: 100%;
+    flex-wrap: wrap;
+    white-space: normal;
+    overflow-wrap: anywhere;
   }
 }

@@ -2092,3 +2092,56 @@
   object-fit: contain;
   object-position: center;
 }
+
+@media (max-width: 575px) {
+  .product-detail-page > .flow-main.container {
+    padding-inline: 8px !important;
+  }
+
+  #productView .product-detail-layout {
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+
+  #productView .product-detail-gallery {
+    padding: 9px;
+  }
+
+  #productView .product-detail-summary {
+    padding: 14px;
+  }
+
+  #productView :is(.product-detail-content-panel, .product-detail-related) {
+    padding: 14px 11px;
+  }
+
+  #productView .product-detail-price,
+  #productView .product-accessories,
+  #productView .product-purchase-trust,
+  #productView .product-variant-options {
+    padding-inline: 11px;
+  }
+
+  #productView .product-detail-related-card .product-related-meta {
+    display: none !important;
+  }
+
+  #productView .product-detail-related-card .product-card-actions > :is(.favorite, .compare-trigger) {
+    width: 36px !important;
+    min-width: 36px !important;
+    height: 36px !important;
+    min-height: 36px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: #fff !important;
+    font-size: 13px !important;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.9));
+  }
+
+  #productView .product-detail-related-card .product-card-actions > :is(.favorite, .compare-trigger).active {
+    background: transparent !important;
+    color: #ffd21a !important;
+  }
+}
