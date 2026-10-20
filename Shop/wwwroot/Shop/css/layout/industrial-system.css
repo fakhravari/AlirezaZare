@@ -599,7 +599,7 @@ h6,
   min-width: 0;
   padding: 25px 28px 17px;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start;
   background: #fff;
 }
 
@@ -748,26 +748,6 @@ h6,
   .category-mega-group
   > .category-mega-title:is(:hover, :focus-visible) {
   color: #765900;
-}
-
-.inner-page #mainNav .category-mega-all {
-  display: inline-flex;
-  width: fit-content;
-  margin-top: 18px;
-  padding: 9px 13px;
-  align-items: center;
-  gap: 8px;
-  border: 1px solid #e7dcc2;
-  border-radius: 9px;
-  color: #173867;
-  font-size: 12px;
-  font-weight: 700;
-  text-decoration: none;
-}
-
-.inner-page #mainNav .category-mega-all:hover {
-  background: #fff8e6;
-  border-color: #d6b15b;
 }
 
 .inner-page #mainNav .category-mega-title i {
@@ -10196,8 +10176,7 @@ html
     color: var(--industrial-navy) !important;
   }
 
-  .home-page #mainNav .mega-bottom,
-  .inner-page #mainNav .category-mega-all {
+  .home-page #mainNav .mega-bottom {
     border-color: #dfe6eb !important;
     background: #f7f9fa !important;
   }
@@ -10682,7 +10661,7 @@ html
     transform: translate(-50%, 0) !important;
   }
 
-  #mainNav .brand-dropdown:is(:hover, :focus-within, .is-brand-open) > .brand-menu {
+  #mainNav .brand-dropdown:is(:hover, .is-brand-open) > .brand-menu {
     display: grid !important;
   }
 
@@ -12434,7 +12413,7 @@ body .electrical-swiper .swiper-pagination-bullet-active {
 
   .home-page #mainNav .mega-dropdown:is(:hover, :focus-within, .show) > .mega-menu,
   .inner-page #mainNav .category-nav-dropdown:is(:hover, :focus-within, .show, .is-mega-open) > .category-nav-mega,
-  #mainNav .brand-dropdown:is(:hover, :focus-within, .show, .is-brand-open) > .brand-menu {
+  #mainNav .brand-dropdown:is(:hover, .show, .is-brand-open) > .brand-menu {
     opacity: 1;
     visibility: visible;
     pointer-events: auto;
@@ -12446,7 +12425,7 @@ body .electrical-swiper .swiper-pagination-bullet-active {
     transform: translate(50%, 0) !important;
   }
 
-  #mainNav .brand-dropdown:is(:hover, :focus-within, .show, .is-brand-open) > .brand-menu {
+  #mainNav .brand-dropdown:is(:hover, .show, .is-brand-open) > .brand-menu {
     transform: translate(-50%, 0) !important;
   }
 
@@ -12468,7 +12447,7 @@ body .electrical-swiper .swiper-pagination-bullet-active {
     transform: none;
   }
 
-  .inner-page #mainNav .navbar-nav > .brand-dropdown:is(:hover, :focus-within, .show) > .nav-link {
+  .inner-page #mainNav .navbar-nav > .brand-dropdown:is(:hover, .show, .is-brand-open) > .nav-link {
     border-color: rgba(246, 197, 21, 0.28) !important;
     background: rgba(246, 197, 21, 0.1) !important;
     color: #ffd447 !important;
@@ -12482,7 +12461,7 @@ body .electrical-swiper .swiper-pagination-bullet-active {
     transform: scale(1.12);
   }
 
-  .inner-page #mainNav .navbar-nav > .brand-dropdown:is(:hover, :focus-within, .show) > .nav-link .nav-menu-icon {
+  .inner-page #mainNav .navbar-nav > .brand-dropdown:is(:hover, .show, .is-brand-open) > .nav-link .nav-menu-icon {
     color: #ffd447 !important;
     filter: drop-shadow(0 0 4px rgba(246, 197, 21, 0.28));
     transform: scale(1.06);
@@ -13832,7 +13811,7 @@ body .electrical-swiper .swiper-pagination-bullet-active {
   }
 
   .inner-page #mainNav .category-nav-dropdown:is(:hover, :focus-within, .show, .is-mega-open) > .category-nav-mega,
-  #mainNav .brand-dropdown:is(:hover, :focus-within, .show, .is-brand-open) > .brand-menu {
+  #mainNav .brand-dropdown:is(:hover, .show, .is-brand-open) > .brand-menu {
     opacity: 1 !important;
     visibility: visible !important;
     pointer-events: auto !important;
@@ -13843,7 +13822,7 @@ body .electrical-swiper .swiper-pagination-bullet-active {
     transform: translateY(0) !important;
   }
 
-  #mainNav .brand-dropdown:is(:hover, :focus-within, .show, .is-brand-open) > .brand-menu {
+  #mainNav .brand-dropdown:is(:hover, .show, .is-brand-open) > .brand-menu {
     transform: translate(-50%, 0) !important;
   }
 
@@ -13855,7 +13834,7 @@ body .electrical-swiper .swiper-pagination-bullet-active {
   }
 
   .inner-page #mainNav .category-nav-dropdown:is(:hover, :focus-within, .show, .is-mega-open) > .nav-link.dropdown-toggle::after,
-  #mainNav .brand-dropdown:is(:hover, :focus-within, .show, .is-brand-open) > .nav-link.dropdown-toggle::after {
+  #mainNav .brand-dropdown:is(:hover, .show, .is-brand-open) > .nav-link.dropdown-toggle::after {
     transform: rotate(180deg) !important;
   }
 }

@@ -1,0 +1,276 @@
+/* Shared visual system for home and inner-page product mega menus.
+   Their positioning remains context-specific; their presentation is shared. */
+:root {
+  --mega-surface: #fffdf8;
+  --mega-card: #fffdf8;
+  --mega-card-border: rgba(190, 145, 65, 0.28);
+  --mega-line: rgba(190, 145, 65, 0.24);
+  --mega-ink: #102a43;
+  --mega-muted: #637286;
+  --mega-gold: #b18a35;
+  --mega-gold-bright: #f6c515;
+  --mega-shadow: 0 14px 34px rgba(16, 42, 67, 0.14);
+}
+
+.home-page #electricalSubmenu,
+.inner-page #mainNav .category-nav-mega {
+  isolation: isolate;
+  border: 1px solid var(--mega-card-border) !important;
+  border-top: 3px solid var(--mega-gold-bright) !important;
+  border-radius: 18px 10px 18px 10px !important;
+  background: var(--mega-surface) !important;
+  box-shadow: var(--mega-shadow) !important;
+  color: var(--mega-ink) !important;
+  font-size: 13px !important;
+}
+
+.home-page #electricalSubmenu::before,
+.home-page #electricalSubmenu::after,
+.inner-page #mainNav .category-nav-mega::before,
+.inner-page #mainNav .category-nav-mega::after {
+  position: absolute;
+  z-index: -1;
+  border: 1px solid rgba(190, 145, 65, 0.1);
+  border-radius: 43% 57% 60% 40% / 55% 42% 58% 45%;
+  background: radial-gradient(circle at 45% 45%, rgba(246, 197, 21, 0.08), transparent 70%);
+  content: "";
+  pointer-events: none;
+}
+
+.home-page #electricalSubmenu::before,
+.inner-page #mainNav .category-nav-mega::before {
+  top: 14px;
+  left: 14px;
+  width: 120px;
+  height: 120px;
+}
+
+.home-page #electricalSubmenu::after,
+.inner-page #mainNav .category-nav-mega::after {
+  right: 14px;
+  bottom: 14px;
+  width: 64px;
+  height: 64px;
+}
+
+.home-page #electricalSubmenu,
+.inner-page #mainNav .category-nav-mega,
+.home-page .electrical-category-menu,
+.inner-page #mainNav .category-mega-sidebar,
+.home-page .electrical-submenu-column,
+.inner-page #mainNav .category-mega-group {
+  font-family: var(--font-body, "Vazirmatn", Tahoma, sans-serif) !important;
+  font-synthesis: none;
+}
+
+.home-page .electrical-category-menu,
+.inner-page #mainNav .category-mega-sidebar {
+  border-color: #e8dfce !important;
+  border-radius: 12px !important;
+  background: #fffdf8 !important;
+  box-shadow: 0 6px 16px rgba(67, 52, 25, 0.06) !important;
+  color: var(--mega-ink) !important;
+  font-size: 13px !important;
+}
+
+.home-page .electrical-category-menu > button,
+.inner-page #mainNav .category-mega-sidebar > button {
+  min-height: 43px !important;
+  padding-inline: 10px !important;
+  border-color: #ece7dd !important;
+  border-radius: 8px !important;
+  background: transparent !important;
+  color: var(--mega-ink) !important;
+  font-size: 13px !important;
+  font-weight: 650 !important;
+  box-shadow: none;
+}
+
+.home-page .electrical-category-menu > button > i:first-child,
+.inner-page #mainNav .category-mega-sidebar > button > i:first-child {
+  color: var(--mega-gold) !important;
+}
+
+.home-page .electrical-category-menu > button > i:last-child,
+.inner-page #mainNav .category-mega-sidebar > button > i:last-child {
+  color: #9aa4aa !important;
+}
+
+.home-page .electrical-category-menu > button:is(:hover, :focus-visible, .active, [aria-expanded="true"]),
+.inner-page #mainNav .category-mega-sidebar > button:is(:hover, :focus-visible, .active) {
+  border-color: rgba(190, 145, 65, 0.28) !important;
+  background: #fff6d9 !important;
+  color: var(--mega-ink) !important;
+  box-shadow: inset -3px 0 var(--mega-gold-bright) !important;
+}
+
+.home-page .electrical-submenu-column,
+.inner-page #mainNav .category-mega-group {
+  position: relative !important;
+  isolation: isolate;
+  display: flex !important;
+  min-width: 0;
+  min-height: 0;
+  padding: 12px 11px !important;
+  flex-direction: column;
+  gap: 5px !important;
+  overflow: hidden !important;
+  border: 1px solid var(--mega-card-border) !important;
+  border-radius: 18px 10px 18px 10px !important;
+  background: var(--mega-card) !important;
+  box-shadow: 0 6px 16px rgba(67, 52, 25, 0.06) !important;
+  color: var(--mega-ink) !important;
+  font-size: 13px !important;
+}
+
+.home-page .electrical-submenu-column::before,
+.inner-page #mainNav .category-mega-group::before {
+  position: absolute;
+  z-index: -1;
+  top: -36px;
+  left: -32px;
+  width: 108px;
+  height: 108px;
+  border: 1px solid rgba(190, 145, 65, 0.1);
+  border-radius: 42% 58% 60% 40% / 55% 42% 58% 45%;
+  background: radial-gradient(circle at 45% 45%, rgba(246, 197, 21, 0.08), transparent 70%);
+  content: "";
+  pointer-events: none;
+}
+
+.home-page .electrical-submenu-column > .category-mega-title,
+.inner-page #mainNav .category-mega-group > .category-mega-title {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  min-height: 36px;
+  min-width: 0;
+  margin: 0 0 3px !important;
+  padding: 0 5px 8px !important;
+  align-items: center;
+  border: 0 !important;
+  border-bottom: 1px solid var(--mega-line) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--mega-ink) !important;
+  font-size: 14px !important;
+  font-weight: 800 !important;
+  line-height: 1.5;
+}
+
+.home-page .electrical-submenu-column > a:not(.category-mega-title),
+.inner-page #mainNav .category-mega-group > a:not(.category-mega-title) {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  min-width: 0;
+  min-height: 34px !important;
+  padding: 5px 8px !important;
+  align-items: center;
+  border: 1px solid rgba(190, 145, 65, 0.12) !important;
+  border-radius: 8px 13px 8px 13px !important;
+  background: rgba(255, 252, 245, 0.88) !important;
+  color: #526579 !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+  text-decoration: none;
+  transition:
+    border-color 180ms ease,
+    background-color 180ms ease,
+    box-shadow 180ms ease,
+    color 180ms ease;
+}
+
+.home-page .electrical-submenu-column > a:not(.category-mega-title):is(:hover, :focus-visible),
+.inner-page #mainNav .category-mega-group > a:not(.category-mega-title):is(:hover, :focus-visible) {
+  border-color: rgba(190, 145, 65, 0.38) !important;
+  background: #fff6d9 !important;
+  box-shadow: 0 4px 12px rgba(67, 52, 25, 0.08) !important;
+  color: var(--mega-ink) !important;
+  transform: none !important;
+}
+
+.home-page .electrical-submenu-heading,
+.inner-page #mainNav .electrical-submenu-heading,
+.home-page .electrical-submenu .category-mega-hint,
+.inner-page #mainNav .category-mega-panels > .category-mega-hint {
+  grid-column: 1 / -1;
+  min-width: 0;
+  min-height: 44px;
+  margin: 0;
+  padding: 6px 12px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  border: 1px solid var(--mega-line);
+  border-inline-start: 3px solid var(--mega-gold-bright);
+  border-radius: 10px;
+  background: #f7f3e9;
+  color: var(--mega-ink);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.home-page .electrical-submenu-heading,
+.inner-page #mainNav .electrical-submenu-heading {
+  display: flex;
+}
+
+.home-page .electrical-submenu-heading-copy,
+.inner-page #mainNav .electrical-submenu-heading-copy {
+  display: flex;
+  min-width: 0;
+  align-items: baseline;
+  gap: 11px;
+}
+
+.home-page .electrical-submenu-heading-copy > strong,
+.inner-page #mainNav .electrical-submenu-heading-copy > strong {
+  flex: 0 0 auto;
+  color: var(--mega-ink);
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.home-page .electrical-submenu-heading-copy > small,
+.inner-page #mainNav .electrical-submenu-heading-copy > small {
+  overflow: hidden;
+  color: var(--mega-muted);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.6;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.home-page .electrical-submenu-heading-count,
+.inner-page #mainNav .electrical-submenu-heading-count {
+  flex: 0 0 auto;
+  padding: 3px 8px;
+  border: 1px solid var(--mega-line);
+  border-radius: 999px;
+  background: #fffdf8;
+  color: #80672f;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-page .electrical-submenu-column > a:not(.category-mega-title),
+  .inner-page #mainNav .category-mega-group > a:not(.category-mega-title) {
+    transition: none;
+  }
+}
+
+/* Keep the category icon legible against the navy header in its warm active state. */
+@media (min-width: 992px) {
+  .inner-page #mainNav .navbar-nav > .category-nav-dropdown:is(:hover, :focus-within, .show, .is-mega-open) > .nav-link .nav-menu-icon {
+    color: #ffd447 !important;
+    -webkit-text-fill-color: #ffd447 !important;
+    filter: drop-shadow(0 0 4px rgba(246, 197, 21, 0.3));
+  }
+}

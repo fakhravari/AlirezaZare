@@ -328,7 +328,7 @@ $(function () {
           const closeBrandSoon = () => {
             window.clearTimeout(brandCloseTimer);
             brandCloseTimer = window.setTimeout(() => {
-              if (brandDropdown.matches(":hover, :focus-within")) return;
+              if (brandDropdown.matches(":hover")) return;
               brandDropdown.classList.remove("is-brand-open");
               if (!brandDropdown.classList.contains("show")) {
                 brandTrigger?.setAttribute("aria-expanded", "false");
