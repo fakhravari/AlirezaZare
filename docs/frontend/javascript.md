@@ -1,0 +1,94 @@
+# قرارداد JavaScript و state مرورگر
+
+مسیرهای کوتاه `js/` در این صفحه نسبت به `Shop/wwwroot/shop/` هستند. برای ورود از صفحه به script، [نقشهٔ صفحه‌ها](../architecture/routing.md) و [ترتیب اجرا](layout.md) را ببینید.
+
+ورودی ذخیره‌شده در مرورگر باید پیش از رندر escape و validate شود. fallback خطای storage در ui-core.js وجود دارد؛ handler اختصاصی را به ریشهٔ صفحه محدود و از ثبت دوبارهٔ listener پرهیز کنید.
+
+## API مشترک `window.HNUI`
+
+در `js/core/ui-core.js` با `Object.freeze` منتشر می‌شود. اعضای قابل استفادهٔ فعلی:
+
+| API | نقش |
+|---|---|
+| `HNUI.STORAGE_KEYS` | کلیدهای پایهٔ auth/cart |
+| `HNUI.storage.get/set/remove/json` | خواندن/نوشتن مقاوم در برابر خطای browser storage؛ `set` برای favorite/compare رویداد list را dispatch می‌کند |
+| `HNUI.ready(callback)` | اجرای callback پس از آماده‌شدن DOM |
+| `HNUI.cart.read/write/add/update/remove/totals/renderOptions` | normalize مشترک، renderer مشترک ویژگی/متعلقات، validation ساده و مدیریت سبد؛ `write` رویداد cart را dispatch می‌کند |
+| `HNUI.auth.isLoggedIn/login/logout/requireLogin` | وضعیت ورود در مرورگر؛ `requireLogin(resume)` برای ورود نداشتن رویداد `hn:auth-required` می‌فرستد و callback را پس از ورود ادامه می‌دهد |
+| `HNUI.scrollLock.lock/unlock` | شمارندهٔ قفل scroll با کلاس `ui-scroll-locked` |
+| `HNUI.dialog` | helperهای dialog/focus/keyboard؛ جزئیات دقیق را در همان فایل بخوانید |
+| `HNUI.setMessage`, `setMessageType`, `showToast` | پیام وضعیت و بازخورد UI؛ امضا و پیش‌فرض را در ui-core.js بررسی کنید |
+| `HNUI.enhance(root)` | بهبودهای عمومی DOM داخل root |
+| `toPersianDigits`, `toEnglishDigits`, `formatNumber`, `escapeHtml`, `localizeVisibleDigits` | ارقام، قالب عدد، escape متن و بومی‌سازی نمایش |
+
+برای تبدیل رقم‌های فارسی/عربی در validation، OTP، شمارهٔ تماس و کد تخفیف، فقط از `HNUI.toEnglishDigits` استفاده کنید؛ mapper محلی تازه نسازید.
+
+## قرارداد سبد
+
+منبع واحد افزودن، نرمال‌سازی و رندر گزینه‌ها در [راهنمای سبد و تسویه](../store/cart.md) تعریف شده است. رفتار سبد را در آن راهنما تغییر دهید؛ این صفحه مالک API، event و کلیدهای مشترک است.
+
+## مالکیت JS و رفتارهای کلیدی
+
+| فایل | مسئولیت فعلی | قبل از تغییر چه چیزی را دنبال کنیم |
+|---|---|---|
+| `js/core/ui-core.js` | storage، cart/auth helpers، eventها، lock/dialog، format/escape | قرارداد کلید/payload؛ fallback storage؛ accessibility |
+| `js/layout/main.js` | header، پیشنهاد/جست‌وجوی اخیر، شمارنده‌ها، mega-menu، account/login/cart/list panels و تعامل عمومی | DOM واقعی partialها، listenerهای delegated، home/inner variant و panel state |
+| `js/core/form-validation.js` | validation عمومی/delegated فرم | `data-*`، selector فرم، خطاهای inline و submit handler اختصاصی |
+| `js/store/countries.js` | نام فارسی/انگلیسی و پرچم روی `window.HNCountries` | پیش از catalog.js؛ نام و مسیر SVG را هم‌زمان بررسی کنید |
+| `js/store/catalog.js` | کاتالوگ نمونه روی `window.HNProducts` | مدل محصول/قیمت/تصویر/variant؛ داده دمو است |
+| `js/store/commerce.js` | جزئیات محصول، variant/accessory، قیمت، gallery، feedback، cart، coupon، compare و favorites rendering | selectorهای `#productView`, `#cartView`, `#favoritesView`, `#compareView`؛ event/storage و rendererهای HTML |
+| `js/pages/search.js` | URL-backed filter/sort/page، نتایج و mobile filter drawer | query params، `popstate`, empty state و cart/list controls |
+| `js/pages/account-page.js` | profile route/hash navigation، overview و CRUD آدرس | storage keys، modal، hashchange و `storage` event |
+| `js/pages/checkout.js` | انتخاب آدرس، روش پرداخت و هماهنگی state سبد | روش پرداخت فعلاً demo است؛ Cart/Checkout هر دو consumer هستند |
+| `js/pages/address-fields.js`, `iran-places.js` | dependent province/city selects و dataset استان‌ها | load order و markup field IDs/data |
+| `js/pages/orders-pagination.js` | صفحه‌بندی سفارش‌ها | URL state/popstate و empty/list state |
+| `js/pages/magazine.js` | فیلتر/مرتب‌سازی و تاریخچهٔ URL مقاله‌ها | `history`, query string و back/forward |
+| `js/pages/article-details.js` | print، فهرست مطالب، پیشرفت مطالعه و scroll/resize | sticky offset، passive listener و کاهش حرکت |
+| `js/pages/brand-product-count.js` | شمارش محصولات برند | دادهٔ HNProducts و View جزئیات برند |
+| `js/pages/contact.js` | اعتبارسنجی فرم تماس و نمایش وضعیت ارسال | پیام status؛ endpoint ارسال در سرور تعریف نشده است |
+| `js/pages/page-content.js` | share/copy، forms، CTA و pagination عمومی بعضی صفحه‌ها | script در چند route مشترک است؛ handler دوباره ثبت نشود |
+| `js/pages/form-confirm-dialog.js` | dialog تأیید فرم | backdrop/ESC و focus; در Product/Cart/Compare/Contact load می‌شود |
+| `js/core/electrical-content.js` | ریزتعامل/محتوای عمومی برخی صفحه‌ها | پس از section Scripts اجرا می‌شود |
+
+## localStorage: کلیدهای شناخته‌شده
+
+کلیدهای زیر دمو و client-side هستند؛ persistence سرور یا دادهٔ قابل‌اعتماد محسوب نمی‌شوند. پیش از migration/پاک‌سازی، همهٔ مصرف‌کننده‌ها را با `rg -n "نام-کلید" Shop` پیدا کنید.
+
+| کلید | مصرف/نکته |
+|---|---|
+| `hadi-norouzi-cart` | cart نرمال‌شده توسط `HNUI.cart` |
+| `hn-demo-auth` | وضعیت ورود در مرورگر (`1`/`true`) |
+| `hn-favorites` | شناسه‌های favorite |
+| `hn-compare` | شناسه‌های مقایسه |
+| `hn-compare-demo-seeded` | علامت مقداردهی اولیهٔ Compare |
+| `hn-product-cache` | cache اطلاعات محصول برای رندر list/panel |
+| `hn-header-recent-searches` | تاریخچهٔ پیشنهاد search در هدر |
+| `hn-demo-coupon` | کد تخفیف demo |
+| `hn-delivery-addresses` | فهرست آدرس‌های ذخیره‌شده در مرورگر |
+| `hn-selected-address` | شناسهٔ آدرس انتخابی |
+| `hn-payment-method-v2` | روش پرداخت انتخابی در مرورگر |
+| `hn-profile-activity` | دادهٔ فعالیت محلی خوانده‌شده در account-page.js؛ گزارش عملیاتی سرور نیست |
+| `hn-profile` | دادهٔ profile در `Views/Profile/Index.cshtml` |
+| `hn-product-${type}-${productId}` | کلید feedback در `commerce.js`؛ `type` برابر `reviews` یا `questions` است. داده‌های اولیه با دادهٔ ذخیره‌شده ترکیب می‌شوند. |
+
+ممکن است scriptهای دیگر کلید تازه اضافه کنند؛ این جدول هنگام تغییر باید با `rg -n "localStorage|storage\.(get|set|json)|hn-" Shop/wwwroot/shop/js Shop/Views` تطبیق داده شود.
+
+## رویدادهای سفارشی
+
+| Event | payload فعلی | listenerهای مهم/اثر |
+|---|---|---|
+| `hn:cart-change` | `detail`: آرایهٔ cart نرمال‌شده | header/panel، commerce و checkout را sync می‌کند |
+| `hn:cart-added` | `detail: { product, items, trigger }` | پنل cart ممکن است باز شود؛ focus trigger را حفظ کنید |
+| `hn:auth-change` | `detail`: boolean | هدر و بخش account را تازه می‌کند |
+| `hn:auth-required` | `detail: { resume: Function|null }` | بازکردن مدال ورود؛ callback پس از ورود آزمایشی اجرا می‌شود |
+| `hn:lists-change` | بدون `detail` | شمارنده‌ها، favorite/compare button و صفحه‌ها را sync می‌کند |
+| `hn:profile-activity-change` | بدون `detail` | account-page.js نمای فعالیت محلی را تازه می‌کند |
+| native `storage` | `key`, `newValue`, `oldValue` | همگام‌سازی tabهای دیگر؛ same-tab تغییرات باید از helper/event عبور کند |
+
+هنگام افزودن event، یک source of truth حفظ کنید، payload را document کنید، handler را idempotent بنویسید و از dispatch مضاعف در View و shared JS جلوگیری کنید.
+
+---
+
+[فهرست این بخش](README.md) · [فهرست مستندات](../README.md)
+
+آخرین تطبیق با کد: ۲۱ اکتبر ۲۰۲۶.

@@ -1,4 +1,4 @@
-﻿# راهنمای تصویرها و رسانه‌های سایت
+# راهنمای تصویرها و رسانه‌های سایت
 
 این راهنما ساختار فایل‌های تصویری، کاربرد هر پوشه و اندازه‌های پیشنهادی برای خروجی‌های جدید را مشخص می‌کند. اندازه‌ها بر پایهٔ قاب‌های CSS و تصویرهای فعلی بررسی شده‌اند. مقدارهای «پیشنهادی» استاندارد تولید محتوا هستند و در سایت به‌صورت خودکار اعتبارسنجی نمی‌شوند.
 
@@ -87,3 +87,12 @@ content/products/
 - اسلایدرهای کالا و اتصال تصویر/ویدئوی محصول: `js/layout/main.js` و `js/store/catalog.js`
 - گالری جزئیات محصول و thumbnailهای رسانه: `js/store/commerce.js` و `css/layout/industrial-system.css`
 - ترتیب بارگذاری CSS و JS: `Shop/Views/Shared/_Shop.cshtml`
+
+
+مسیرهای محصول را در [کاتالوگ](../store/catalog.md) و مصرف گالری را در [جزئیات محصول](../store/product.md) بررسی کنید. [ProductSeoCatalog.cs](../../Shop/Models/ProductSeoCatalog.cs)، [catalog.js](../../Shop/wwwroot/shop/js/store/catalog.js) و [commerce.js](../../Shop/wwwroot/shop/js/store/commerce.js) باید پس از تغییر مسیرها هماهنگ بمانند.
+
+---
+
+[فهرست این بخش](README.md) · [فهرست مستندات](../README.md)
+
+آخرین تطبیق با کد: ۲۱ اکتبر ۲۰۲۶.

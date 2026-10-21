@@ -1,79 +1,53 @@
-# راهنمای مطالعه و نقشهٔ مستندات
+# راهنمای بررسی پروژه
 
-این صفحه نقطهٔ شروع شناخت پروژه است. ترتیب پیشنهادی را دنبال کنید تا از نمای کلی معماری به مسیر دقیق کد برسید و جزئیات تکراری بین راهنماها را دوباره نخوانید.
+این فهرست نقطهٔ شروع شناخت و تغییر پروژه است. مستندات بر اساس مسئولیت به هشت گروه تقسیم شده‌اند؛ راهنمای هر بخش در پوشهٔ خودش نگهداری می‌شود.
 
-## خلاصهٔ یک‌دقیقه‌ای
+## مسیر سریع بررسی
 
-- راه‌حل `Shop.sln` فعلاً فقط پروژهٔ وب `Shop/Shop.csproj` را دارد؛ برنامه با ASP.NET Core MVC و Razor اجرا می‌شود.
-- مسیر درخواست معمول: **Controller → Model/داده → Razor View → layout مشترک → CSS/JavaScript**.
-- `Shop/Program.cs` دیتابیس، EF Core، ورود سروری یا ثبت سفارش را راه‌اندازی نمی‌کند. کاتالوگ محصولات و بیشتر تعامل‌های فروشگاه در رابط کاربری مدیریت می‌شوند و بخشی از state در `localStorage` مرورگر نگهداری می‌شود.
-- آمار ثابت مجله در `Shop/Models/JournalArticles.cs` تعریف شده و در این پروژه به‌روزرسانی عملیاتی نمی‌شود.
-- هنگام تعارض مستندات با کد، **کد و رفتار runtime منبع نهایی‌اند**؛ راهنماها را پس از کشف اختلاف به‌روز کنید.
+1. [نمای کلی معماری](architecture/overview.md) را بخوانید؛ برنامهٔ اجرایی `Shop/` و الگوی فعلی MVC است.
+2. صفحه را در [نقشهٔ route، View و asset](architecture/routing.md) پیدا کنید.
+3. [منبع حقیقت داده](architecture/data-sources.md) را مشخص کنید؛ سپس راهنمای حوزهٔ مربوط را از جدول زیر باز کنید.
+4. در تغییر UI، [پوسته و ترتیب منابع](frontend/layout.md) و مالک CSS/JS را بررسی کنید.
+5. طبق [روند تغییر](development/workflow.md) اصلاح و [اعتبارسنجی مرتبط](development/setup.md) را انجام دهید.
 
-## مسیر یادگیری بر اساس نیاز
+## گروه‌های مستندات
 
-### شروع از صفر — حدود ۲۰ دقیقه
-
-1. همین صفحه را بخوانید.
-2. بخش‌های معماری، پوشه‌ها، routeها و چرخهٔ داده در [`DEVELOPER_ROADMAP.md`](DEVELOPER_ROADMAP.md) را مرور کنید.
-3. یک مسیر ساده مثل `/about` را از `AboutController` تا View دنبال کنید.
-4. ترتیب assetها را در `Shop/Views/Shared/_Shop.cshtml` ببینید.
-5. `dotnet build Shop.sln` را اجرا کنید.
-
-### تغییر ظاهر، responsive یا تعامل صفحه
-
-1. route را در جدول «صفحه به View/CSS/JS» در [`UI_LAYER_REFERENCE.md`](UI_LAYER_REFERENCE.md) پیدا کنید.
-2. markup واقعی را در View و partial مصرف‌شده بررسی کنید.
-3. فقط asset بارگذاری‌شده و قانون CSS برنده را تغییر دهید؛ ترتیب واقعی در `_Shop.cshtml` ثبت شده است.
-4. طبق چک‌لیست UI، حالت موبایل/دسکتاپ، keyboard و stateهای خالی/پر را بازبینی کنید.
-
-### تغییر کالا، سبد یا منبع داده
-
-1. بخش «وضعیت و منبع داده» و «قرارداد مشترک سبد» در [`DEVELOPER_ROADMAP.md`](DEVELOPER_ROADMAP.md) را بخوانید.
-2. `HNUI` و مصرف‌کننده‌هایش را در [`UI_LAYER_REFERENCE.md`](UI_LAYER_REFERENCE.md) دنبال کنید.
-3. مشخص کنید داده از C#، JavaScript، فایل JSON یا `localStorage` می‌آید؛ state محلی را دادهٔ سرور فرض نکنید.
-
-### تغییر SEO، عنوان یا structured data
-
-[`SEO_METADATA.md`](SEO_METADATA.md) را کنار `SeoModel`، `SeoController`، `SeoMetadataOptions` و `_SeoMetadata.cshtml` بخوانید.
-
-### عامل کدنویسی / تغییر چندلایه
-
-ابتدا [`AGENTS.md`](AGENTS.md) را برای workflow بخوانید؛ سپس این نقشه و Roadmap را مرور کنید. برای هر UI، راهنمای UI را هم بخوانید؛ برای metadata و structured data، راهنمای SEO را مبنا بگیرید.
-
-## دسته‌بندی اسناد
-
-| سند | برای چه کاری است؟ | جزئیات اصلی |
+| گروه | مسئولیت | راهنمای شروع |
 |---|---|---|
-| [`DEVELOPER_ROADMAP.md`](DEVELOPER_ROADMAP.md) | شناخت معماری و پیدا کردن owner کد | راه‌اندازی، پوشه‌ها، routeها، جریان داده، روش تغییر و بدهی‌ها |
-| [`UI_LAYER_REFERENCE.md`](UI_LAYER_REFERENCE.md) | پیدا کردن markup و asset برندهٔ صفحه | ترتیب CSS/JS، selectorها، breakpointها، eventها، storage و regression |
-| [`IMAGE_ASSET_GUIDE.md`](IMAGE_ASSET_GUIDE.md) | افزودن یا جایگزینی تصویرها و رسانه‌های محصول | ساختار پوشه‌ها، اندازه‌های پیشنهادی، فرمت و نام‌گذاری |
-| [`SEO_METADATA.md`](SEO_METADATA.md) | تغییر metadata و structured data | مدل صفحه، partial مشترک، sitemap/robots و تنظیمات اختیاری |
-| [`AGENTS.md`](AGENTS.md) | workflow لازم برای تغییر مخزن | ترتیب مطالعه، ایمنی، سبک و اعتبارسنجی |
+| [معماری](architecture/README.md) | ساختار برنامه، مسیر صفحه‌ها و مرز داده | [نمای کلی](architecture/overview.md) |
+| [رابط کاربری](frontend/README.md) | پوسته، طراحی، JS مشترک و بازبینی UI | [ترتیب منابع](frontend/layout.md) |
+| [فروشگاه](store/README.md) | کاتالوگ، فیلتر، محصول، سبد و تسویه | [کاتالوگ و فهرست‌ها](store/catalog.md) |
+| [حساب کاربری](account/README.md) | پروفایل، آدرس، سفارش و فعالیت محلی | [پروفایل](account/profile.md) |
+| [محتوا و خدمات](content/README.md) | مجله، برند، FAQ، قوانین و هویت | [صفحه‌های محتوایی](content/pages.md) |
+| [رسانه](media/README.md) | پوشه‌ها، نام‌گذاری، تصاویر، ویدئو و ابعاد | [راهنمای رسانه](media/images.md) |
+| [SEO](seo/README.md) | metadata، canonical، schema و crawl | [metadata](seo/metadata.md) |
+| [توسعه](development/README.md) | اجرا، workflow، مستندسازی و برنامهٔ آینده | [راه‌اندازی](development/setup.md) |
 
-## نقشهٔ کد در یک نگاه
+## برای یک تغییر مشخص
 
-```text
-Shop/Program.cs
-  └─ Controllers/            route، orchestration و ساخت PageModel
-      └─ Models/              مدل صفحه، SEO و دادهٔ محتوای ثابت
-          └─ Views/           Razor صفحه‌ها و partialهای مشترک
-              └─ Views/Shared/_Shop.cshtml
-                  ├─ css/core, css/layout, css/pages, css/store
-                  └─ js/core, js/layout, js/store, js/pages
+| نیاز | مرجع اصلی |
+|---|---|
+| رنگ، فاصله، responsive یا تداخل CSS | [مالکیت CSS](frontend/styling.md) و [عیب‌یابی](frontend/verification.md) |
+| هدر، مگامنو، modal و ترتیب load | [پوسته](frontend/layout.md) |
+| event، storage یا HNUI | [قرارداد JavaScript](frontend/javascript.md) |
+| فیلتر رنگ، کشور، کارت و لیست محصول | [کاتالوگ](store/catalog.md) |
+| گالری، ویژگی، پرسش و دیدگاه محصول | [جزئیات محصول](store/product.md) |
+| افزودن به سبد، گزینه و مبلغ | [سبد و تسویه](store/cart.md) |
+| تصویر اصلی/کارت/thumbnail، بنر و انتقال محتوا | [رسانه و ابعاد](media/images.md) |
+| نوشتن یا جابه‌جایی راهنما | [قانون مستندسازی](development/documentation.md) و [الگو](development/guide-template.md) |
+
+## قواعد اصلی
+
+- **راهنمای هر بخش در پوشهٔ همان بخش ساخته و در README آن فهرست می‌شود.** ریشهٔ docs فقط فهرست و قواعد مشترک دارد؛ جزئیات در چند سند تکرار نمی‌شوند.
+- [AGENTS.md ریشهٔ مخزن](../AGENTS.md) این قانون را برای تغییرات کل پروژه اعمال می‌کند؛ [روند عامل](AGENTS.md) مراحل کار را مشخص می‌کند.
+- کد و runtime مرجع نهایی‌اند. مسیرها و ترتیب منابع snapshot هستند؛ پس از کشف اختلاف، راهنمای مسئول به‌روز شود.
+- محصولات، auth، سبد، کوپن و پرداخت فعلی عمدتاً نمونه/محلی‌اند؛ [مرز داده](architecture/data-sources.md) را با backend عملیاتی اشتباه نگیرید.
+- `Shop.sln` فقط Shop را اجرا می‌کند و test project مستقل ندارد؛ build موفق جای تست رفتار و ظاهر نیست.
+
+برای بررسی ساختار و لینک‌های مستندات از ریشهٔ مخزن اجرا کنید:
+
+```powershell
+node docs/development/check-docs.mjs
 ```
 
-برای دنبال‌کردن قابلیت از ابتدا تا انتها، Controller و route را پیدا کنید، منبع داده را تعیین کنید، markup و renderer را دنبال کنید، سپس asset و script واقعی را از layout تأیید کنید.
-
-## قواعد مهم پروژه
-
-- فقط `Shop/` عضو فعلی solution است؛ `ClockTemplate/` را بدون تأیید source و عضویت در solution، برنامهٔ اجرایی فرض نکنید.
-- URLهای تولیدشده lowercase هستند (`RouteOptions.LowercaseUrls`).
-- محصولات، قیمت، موجودی، سفارش و پرداخت را واقعی فرض نکنید؛ وضعیت دموی هر جریان در Roadmap آمده است.
-- برای UI از tokenها و componentهای موجود شروع کنید؛ selector عمومی تازه یا override انتهای فایل راه‌حل پیش‌فرض نیست.
-- منوی دسته‌بندی خانه و صفحات داخلی markup جدا دارند؛ در دسکتاپ پنل داخلی زیر هدر و در قاب مرکزی باز می‌شود، و حالت hover/فعال با زمینهٔ زرد و آیکن سرمه‌ای هم‌خوان می‌ماند. جزئیات در [`UI_LAYER_REFERENCE.md`](UI_LAYER_REFERENCE.md) است.
-- پروژه test project مستقل ندارد. نتیجهٔ build را به‌جای تست رفتاری یا بصری معرفی نکنید.
-
-## اعتبار مستندات
-
-این صفحه، مرجع UI و راهنمای تصویرها در **۲۰ اکتبر ۲۰۲۶** با ساختار فعلی مخزن تطبیق داده شده‌اند. breakpointها، ترتیب assetها و مسیرها snapshot هستند؛ پیش از تغییر، آن‌ها را با فایل جاری و runtime دوباره بررسی کنید.
+آخرین تطبیق با کد: ۲۱ اکتبر ۲۰۲۶.

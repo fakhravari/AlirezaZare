@@ -1,6 +1,6 @@
-# راهنمای SEO و metadata مشترک
+# SEO و metadata مشترک
 
-این راهنما مسیر metadata صفحه‌ها و structured data را توضیح می‌دهد. برای ترتیب یادگیری و دیگر مستندات از [`README.md`](README.md) شروع کنید؛ نمای معماری و وضعیت داده‌ها در [`DEVELOPER_ROADMAP.md`](DEVELOPER_ROADMAP.md) آمده است.
+این راهنما مسیر metadata صفحه‌ها و structured data را توضیح می‌دهد. پیش از تغییر، [منابع داده](../architecture/data-sources.md) و برای URLها [مسیرها](../architecture/routing.md) را ببینید.
 
 ## مسیر داده
 
@@ -71,8 +71,17 @@ Controller / ساخت PageModel
 
 `Views/Shared/_Shop.cshtml` نگه‌دارندهٔ `lang="fa"`, `dir="rtl"`, charset، viewport، favicon، partial متادیتا و پیوند «رفتن به محتوای اصلی» است. پیوند دسترس‌پذیری به قاب `#main-content` می‌رود؛ صفحهٔ خانه درون آن یک `<main id="home-main-content">` مستقل دارد و صفحه‌های داخلی main خود را در View تعریف می‌کنند. هنگام تغییر layout، از ایجاد main تو در تو یا حذف مقصد skip link جلوگیری کنید.
 
-favicon فعلی SVG برداری برند در `wwwroot/shop/images/shared/store-mark.svg` است. تصویر OG پیش‌فرض هنوز fallback عمومی است؛ برای صفحه‌ای با تصویر شاخص اختصاصی، `SeoModel.ImageUrl` و متن جایگزین آن را از همان تصویر واقعی صفحه تنظیم کنید.
+favicon فعلی SVG برداری برند در `wwwroot/content/identity/store-mark.svg` است. تصویر OG پیش‌فرض هنوز fallback عمومی است؛ برای صفحه‌ای با تصویر شاخص اختصاصی، `SeoModel.ImageUrl` و متن جایگزین آن را از همان تصویر واقعی صفحه تنظیم کنید.
 
 ## محدودیت‌های اندازه‌گیری
 
 این لایه Google Analytics یا Google Tag Manager بارگذاری نمی‌کند. افزودن ابزار اندازه‌گیری نیازمند شناسهٔ واقعی و بررسی رضایت/حریم خصوصی است. داده‌های مجله، محصول و فروشگاه را بدون منبع معتبر به‌عنوان آمار عملیاتی یا structured offer منتشر نکنید.
+
+
+منابع اصلی: [PageModel.cs](../../Shop/Models/PageModel.cs)، [SeoMetadataOptions.cs](../../Shop/Models/SeoMetadataOptions.cs)، [_SeoMetadata.cshtml](../../Shop/Views/Shared/_SeoMetadata.cshtml) و [SeoController.cs](../../Shop/Controllers/SeoController.cs). تغییر asset تصویر اجتماعی باید با [قرارداد رسانه](../media/images.md) هماهنگ باشد.
+
+---
+
+[فهرست این بخش](README.md) · [فهرست مستندات](../README.md)
+
+آخرین تطبیق با کد: ۲۱ اکتبر ۲۰۲۶.
