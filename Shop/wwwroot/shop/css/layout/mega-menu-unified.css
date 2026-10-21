@@ -106,7 +106,18 @@
 
 /* Give the home-page category rail a clearer, warmer card rhythm. */
 @media (min-width: 992px) {
-  .home-page .electrical-category-menu {
+  .inner-page #mainNav .category-nav-mega {
+    grid-template-columns: 250px minmax(0, 1fr);
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .inner-page #mainNav .category-mega-content {
+    padding: 10px;
+  }
+
+  .home-page .electrical-category-menu,
+  .inner-page #mainNav .category-mega-sidebar {
     padding: 10px !important;
     gap: 5px;
     border: 1px solid #e7dcc8 !important;
@@ -117,7 +128,8 @@
     box-shadow: 0 12px 30px rgba(67, 52, 25, 0.09) !important;
   }
 
-  .home-page .electrical-category-heading {
+  .home-page .electrical-category-heading,
+  .inner-page #mainNav .electrical-category-heading {
     min-height: 46px;
     margin: 0 1px 3px;
     padding-inline: 8px;
@@ -130,7 +142,8 @@
     letter-spacing: -0.15px;
   }
 
-  .home-page .electrical-category-heading > span {
+  .home-page .electrical-category-heading > span,
+  .inner-page #mainNav .electrical-category-heading > span {
     width: 29px;
     height: 29px;
     border-color: #f0d78b;
@@ -140,7 +153,8 @@
     box-shadow: inset 0 1px rgba(255, 255, 255, 0.9);
   }
 
-  .home-page .electrical-category-menu > button {
+  .home-page .electrical-category-menu > button,
+  .inner-page #mainNav .category-mega-sidebar > button {
     min-height: 37px !important;
     padding: 0 8px !important;
     grid-template-columns: 28px minmax(0, 1fr) 12px !important;
@@ -157,7 +171,8 @@
       transform 160ms ease;
   }
 
-  .home-page .electrical-category-menu > button > i:first-child {
+  .home-page .electrical-category-menu > button > i:first-child,
+  .inner-page #mainNav .category-mega-sidebar > button > i:first-child {
     width: 27px;
     height: 27px;
     border: 1px solid #f2e2b6;
@@ -167,12 +182,14 @@
     font-size: 14px;
   }
 
-  .home-page .electrical-category-menu > button > i:last-child {
+  .home-page .electrical-category-menu > button > i:last-child,
+  .inner-page #mainNav .category-mega-sidebar > button > i:last-child {
     color: #a9b1b4 !important;
     font-size: 9px;
   }
 
-  .home-page .electrical-category-menu > button:is(:hover, :focus-visible, .active, [aria-expanded="true"]) {
+  .home-page .electrical-category-menu > button:is(:hover, :focus-visible, .active, [aria-expanded="true"]),
+  .inner-page #mainNav .category-mega-sidebar > button:is(:hover, :focus-visible, .active) {
     border-color: #eee0bd !important;
     background: linear-gradient(100deg, #fffdf8, #fff5d9) !important;
     color: #173651 !important;
@@ -180,7 +197,8 @@
     transform: translateX(-2px);
   }
 
-  .home-page .electrical-category-menu > button:is(:hover, :focus-visible, .active, [aria-expanded="true"]) > i:first-child {
+  .home-page .electrical-category-menu > button:is(:hover, :focus-visible, .active, [aria-expanded="true"]) > i:first-child,
+  .inner-page #mainNav .category-mega-sidebar > button:is(:hover, :focus-visible, .active) > i:first-child {
     border-color: #e8cf83;
     background: #ffefb7;
     color: #805b0d !important;
