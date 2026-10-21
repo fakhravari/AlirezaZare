@@ -88,7 +88,7 @@ body .orders-pagination {
 body .orders-pagination p,
 body .blog-page-status {
   margin: 0;
-  color: #73808c;
+  color: var(--color-text-muted);
   text-align: center;
 }
 @media (max-width: 575px) {

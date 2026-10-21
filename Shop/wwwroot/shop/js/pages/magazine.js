@@ -1,11 +1,11 @@
-(() => {
+window.HNUI.mount("pages-magazine", document, () => {
   const buttons = [...document.querySelectorAll("[data-journal-filter]")];
   const posts = [...document.querySelectorAll(".journal-post")];
   const nav = document.getElementById("journal-pagination");
   const heading = document.getElementById("archive-title");
   const count = document.getElementById("journal-count");
   if (!nav || !heading || !count) return;
-  const perPage = 4;
+  const perPage = 12;
   let filter = "all";
   let page = 1;
   const number = (value) => window.HNUI.formatNumber(value);
@@ -129,4 +129,4 @@
   readLocation();
   render();
   saveLocation(true);
-})();
+});

@@ -28,6 +28,11 @@ body.inner-page .page-section > .container {
   padding: clamp(20px, 2.2vw, 32px);
 }
 
+body.inner-page .flow-main.cart-page-main {
+  min-height: 0;
+  margin-bottom: 24px;
+}
+
 body.inner-page .contact-section > .container,
 body.inner-page .contact-shortcuts > .container {
   width: min(calc(100% - 48px), 1360px);

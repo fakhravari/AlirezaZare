@@ -3,16 +3,17 @@ using System.Xml.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Hosting;
 using Shop.Models;
+using Shop.Services;
 
 namespace Shop.Controllers;
 
 public sealed class SeoController : Controller
 {
-    private readonly IWebHostEnvironment _environment;
+    private readonly CatalogRepository _catalog;
 
-    public SeoController(IWebHostEnvironment environment)
+    public SeoController(CatalogRepository catalog)
     {
-        _environment = environment;
+        _catalog = catalog;
     }
 
     [HttpGet("/robots.txt")]
@@ -45,9 +46,9 @@ public sealed class SeoController : Controller
         ];
 
         IEnumerable<string> paths = staticPaths
-            .Concat(BrandCatalog.All.Select(brand => $"/brands/{brand.Slug}"))
+            .Concat(_catalog.Read().Brands.Select(brand => $"/brands/{brand.Slug}"))
             .Concat(JournalArticles.Slugs.Select(slug => $"/magazine/{slug}"))
-            .Concat(ProductSeoCatalog.Load(_environment.WebRootPath).Select(product => $"/products/{product.Slug}-{product.Id}"));
+            .Concat(_catalog.Read().Products.Select(product => $"/products/{product.Slug}-{product.Id}"));
 
         XNamespace sitemapNamespace = "http://www.sitemaps.org/schemas/sitemap/0.9";
         XDocument document = new(

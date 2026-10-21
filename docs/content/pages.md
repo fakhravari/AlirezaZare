@@ -6,7 +6,7 @@
 |---|---|---|
 | مجله | [MagazineController](../../Shop/Controllers/MagazineController.cs)، [Views/Magazine](../../Shop/Views/Magazine)، `JournalArticles.cs` و `JournalArticles.Expanded.cs` | مقاله و آمار ثابت؛ `magazine.js` فیلتر/صفحه‌بندی و URL را مدیریت می‌کند |
 | جزئیات مقاله | `Magazine/Details.cshtml`، `article-details.js` و `article-details.css` | TOC، progress، print، share و فاصلهٔ sticky header |
-| برند | [BrandsController](../../Shop/Controllers/BrandsController.cs)، [BrandProfileModel.cs](../../Shop/Models/BrandProfileModel.cs)، [Views/Brands](../../Shop/Views/Brands) | پایه در BrandCatalog؛ تحریریه در `brand-editorial.json`؛ شمارش محصول با `brand-product-count.js` |
+| برند | [BrandsController](../../Shop/Controllers/BrandsController.cs)، [BrandProfileModel.cs](../../Shop/Models/BrandProfileModel.cs)، [Views/Brands](../../Shop/Views/Brands) | هویت در catalog.json و snapshot؛ تحریریه در `brand-editorial.json`؛ شمارش محصول با `brand-product-count.js` |
 | FAQ | `FaqController`، [Faq/Index.cshtml](../../Shop/Views/Faq/Index.cshtml)، `FaqCatalog` | متن صفحه و schema باید از یک کاتالوگ بیایند |
 | تماس | [Contact/Index.cshtml](../../Shop/Views/Contact/Index.cshtml)، `contact.js` و dialog تأیید | feedback فرم نمونه است؛ endpoint ارسال واقعی ثبت نشده |
 | معرفی / ارسال / ضمانت / پیگیری | Controller و View هم‌نام | `pages.css` و فایل صفحه؛ پیگیری فعلی نتیجهٔ واقعی سفارش دریافت نمی‌کند |
@@ -17,7 +17,17 @@
 
 ## برند و محتوای دو منبعی
 
-BrandsController اطلاعات پایه را از `BrandCatalog` می‌گیرد و متن تحریریه را با slug از [brand-editorial.json](../../Shop/wwwroot/shop/js/store/brand-editorial.json) اضافه می‌کند. مسیر خواندن فعلی در Controller از رشتهٔ `Shop` با S بزرگ استفاده می‌کند، در حالی که پوشهٔ واقعی `shop` است؛ هنگام انتقال به فایل‌سیستم حساس به حروف، این اختلاف باید اصلاح و بررسی شود. لوگو در `content/brands/` است و قرارداد کشور/رنگ/محصول در [کاتالوگ](../store/catalog.md) قرار دارد.
+BrandsController هویت برند را از CatalogRepository می‌گیرد؛ نام/نام فارسی/لوگو از catalog.json و متن پایه از BrandCatalog ترکیب می‌شوند. متن تحریریه با slug از [brand-editorial.json](../../Shop/wwwroot/shop/js/store/brand-editorial.json) افزوده می‌شود؛ مسیر فایل با حروف واقعی `shop` اصلاح شده و در HTTP smoke بررسی می‌شود. لوگو در `content/brands/` است؛ رابطهٔ کشور/رنگ/محصول در [کاتالوگ](../store/catalog.md) تعریف شده است.
+
+فهرست `/brands` تا عرض ۷۶۷px دو ستون دارد؛ مالک چیدمان `pages/brands.css` است و قواعد عمومی `mobile-pages.css` نباید آن را تک‌ستونه کنند. تا عرض ۵۷۵px، کارت‌ها با فاصلهٔ ۱۰px و دکمه‌های هم‌ردیف «مشاهده» و «درباره» نمایش داده می‌شوند؛ عنوان کامل مقصد و نام برند در `aria-label` لینک حفظ می‌شود. تعداد ستون‌ها در تبلت سه و از عرض ۹۹۲px چهار است.
+
+در جزئیات برند، تا عرض ۷۶۷px دکمه‌های hero عنوان کوتاه دارند و با flex-wrap، در صورت وجود فضا کنار هم قرار می‌گیرند. عنوان «حوزهٔ تخصصی» در ردیف جدا بالای متن است و متن تمام عرض پنل را می‌گیرد. `brand-product-count.js` علاوه بر شمارش، خوانایی پاراگراف‌های سادهٔ همین صفحه را پس از آماده‌شدن فونت‌ها و تغییر عرض بررسی می‌کند: متن حداقل هشت‌کلمه‌ای با عرض حداقل ۲۲۰px ابتدا justify می‌شود؛ اگر فاصلهٔ بین دو واژه در هر خط از ۰٫۷ برابر اندازهٔ فونت بیشتر شود، کل آن پاراگراف با فاصلهٔ طبیعی و راست‌چین باقی می‌ماند. خط آخر همیشه طبیعی است؛ متن و ساختار محتوای پاراگراف‌ها بازنویسی نمی‌شوند. قواعد نمایش در `brands.css` هستند و در دسکتاپ فعال نیستند.
+
+## فهرست و جزئیات مجله
+
+فهرست مجله در `magazine.js` حداکثر ۱۲ مطلب در هر صفحه نمایش می‌دهد؛ همین تعداد برای دسته‌بندی‌های فیلترشده هم اعمال می‌شود. ارتفاع فهرست با تعداد کارت‌ها تنظیم می‌شود و صفحه‌بندی و URL فعلی حفظ می‌شوند.
+
+تصویر hero مستقیماً از `MagazineDetailsModel.HeroImage` و عکس بدنه از `ContentImage` با `Url.Content("~/" + path)` خوانده می‌شود. نام فایل را از مسیر جدا نکنید و پوشهٔ قدیمی `shop/images/products/` را دوباره نسازید؛ مسیر کامل نگاشت رسانه مرجع است. `article-details.css` پالت محلی سفید گرم، طلایی ظریف و متن سرمه‌ای، قاب‌های نامتقارن ملایم و شکل‌های دایره‌ای تزئینی را فقط برای `.article-hero` و `.article-enhanced` تعریف می‌کند؛ چاپ همچنان زمینهٔ سفید دارد. فهرست مطالعه پس‌زمینهٔ یکپارچه ندارد و لینک‌های روشن با مرز طلایی مانند منوها نمایش داده می‌شوند. کپی موفق لینک در `page-content.js` فقط toast سبز «کپی شد» نشان می‌دهد و پیام موفقیت در پنل اشتراک‌گذاری درج نمی‌شود.
 
 ## هویت و تماس فعلی
 

@@ -36,7 +36,7 @@
 }
 
 #productView .product-accessories > header small {
-  color: #687a8d;
+  color: var(--color-text-muted);
   font-size: 12px;
   line-height: 1.8;
 }
@@ -96,7 +96,7 @@
 }
 
 #productView .product-accessory-copy small {
-  color: #718196;
+  color: var(--color-text-muted);
   font-size: 12px;
   line-height: 1.75;
 }
@@ -141,7 +141,7 @@
 }
 
 #productView .product-accessory-price > small {
-  color: #78879a;
+  color: var(--color-text-muted);
   font-size: 10px;
 }
 
@@ -206,7 +206,7 @@
 }
 
 #productView .product-variant-heading small {
-  color: #748294;
+  color: var(--color-text-muted);
   font-size: 11px;
   line-height: 1.6;
 }
@@ -1045,7 +1045,7 @@
 #productView #product-specifications .product-spec-group dt {
   border: 1px solid #e5eaee;
   background: #f2f5f7;
-  color: #607487;
+  color: var(--color-text-muted);
   font-size: 12px;
   font-weight: 700;
 }
@@ -1152,7 +1152,7 @@
 }
 
 #productView .product-meta-country-en {
-  color: #8290a0 !important;
+  color: var(--color-text-muted) !important;
   font-size: 10px !important;
   font-weight: 650 !important;
   line-height: 1.25 !important;

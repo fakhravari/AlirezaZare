@@ -32,7 +32,7 @@
   transition: transform 180ms ease;
 }
 
-#mainNav .quick-links-dropdown:is(:hover, :focus-within, .show) > .nav-link::before {
+#mainNav .quick-links-dropdown:is(.show) > .nav-link::before {
   transform: translateX(50%) scaleX(1);
 }
 
@@ -46,7 +46,7 @@
   transition: transform 180ms ease;
 }
 
-#mainNav .quick-links-dropdown:is(:hover, :focus-within, .show, .is-quick-links-open) > .nav-link .quick-links-caret {
+#mainNav .quick-links-dropdown:is(.show, .is-quick-links-open) > .nav-link .quick-links-caret {
   transform: rotate(180deg);
 }
 
@@ -117,7 +117,7 @@
   z-index: 1;
 }
 
-#mainNav .quick-links-dropdown:is(:hover, :focus-within, .show, .is-quick-links-open) > .quick-links-menu {
+#mainNav .quick-links-dropdown:is(.show, .is-quick-links-open) > .quick-links-menu {
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
@@ -161,7 +161,7 @@
   transition: transform 180ms ease;
 }
 
-#mainNav .brand-dropdown:is(:focus-within, .show, .is-brand-open) > .nav-link::before {
+#mainNav .brand-dropdown:is(.show, .is-brand-open) > .nav-link::before {
   transform: translateX(50%) scaleX(1);
 }
 
@@ -171,7 +171,7 @@
   transition: transform 180ms ease;
 }
 
-#mainNav .brand-dropdown:is(:focus-within, .show, .is-brand-open) > .nav-link .brand-menu-caret {
+#mainNav .brand-dropdown:is(.show, .is-brand-open) > .nav-link .brand-menu-caret {
   transform: rotate(180deg);
 }
 
@@ -636,7 +636,7 @@ html body #mainNav .home-header-search:focus-within {
       visibility 0s linear 160ms !important;
   }
 
-  .inner-page #mainNav .category-nav-dropdown:is(:hover, :focus-within, .show, .is-mega-open) > .category-nav-mega {
+  .inner-page #mainNav .category-nav-dropdown:is(.show, .is-mega-open) > .category-nav-mega {
     transform: none !important;
     transition-delay: 0s !important;
   }
@@ -654,7 +654,7 @@ html body #mainNav .home-header-search:focus-within {
       visibility 0s linear 160ms !important;
   }
 
-  #mainNav .quick-links-dropdown:is(:hover, :focus-within, .show, .is-quick-links-open) > .quick-links-menu {
+  #mainNav .quick-links-dropdown:is(.show, .is-quick-links-open) > .quick-links-menu {
     transform: none !important;
     transition-delay: 0s !important;
   }
@@ -683,7 +683,7 @@ html body #mainNav .home-header-search:focus-within {
     will-change: opacity;
   }
 
-  #mainNav .brand-dropdown:is(:focus-within, .show, .is-brand-open) > .brand-menu {
+  #mainNav .brand-dropdown:is(.show, .is-brand-open) > .brand-menu {
     display: grid !important;
     opacity: 1 !important;
     visibility: visible !important;

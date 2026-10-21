@@ -27,8 +27,8 @@
                 <span>انتخاب</span>
             </div>
             <div class="brand-detail-actions">
-                <a class="brand-detail-primary" href="@shopUrl"><i class="bi bi-shop" aria-hidden="true"></i>مشاهده محصولات @brand.PersianName</a>
-                <a class="brand-detail-secondary" href="@Url.Content("~/brands")"><i class="bi bi-grid" aria-hidden="true"></i>بازگشت به همهٔ برندها</a>
+                <a class="brand-detail-primary" href="@shopUrl" aria-label="مشاهده محصولات @brand.PersianName"><i class="bi bi-shop" aria-hidden="true"></i><span>مشاهده محصولات<span class="brand-detail-action-context"> @brand.PersianName</span></span></a>
+                <a class="brand-detail-secondary" href="@Url.Content("~/brands")" aria-label="بازگشت به همهٔ برندها"><i class="bi bi-grid" aria-hidden="true"></i><span>بازگشت<span class="brand-detail-action-context"> به همهٔ برندها</span></span></a>
             </div>
         </div>
     </header>

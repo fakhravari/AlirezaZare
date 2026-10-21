@@ -1,4 +1,4 @@
-(() => {
+window.HNUI.mount("pages-orders-pagination", document, () => {
   const section = document.getElementById("orders");
   if (!section) return;
   const cards = [...section.querySelectorAll(".profile-order-card")];
@@ -80,4 +80,4 @@
   }
   window.addEventListener("popstate", () => render());
   render();
-})();
+});

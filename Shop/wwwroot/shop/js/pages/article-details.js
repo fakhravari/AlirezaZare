@@ -1,4 +1,4 @@
-(() => {
+window.HNUI.mount("pages-article-details", document, () => {
   const page = document.querySelector("[data-article-slug]");
   if (!page) return;
   const formatNumber = (value) => window.HNUI.formatNumber(value);
@@ -68,4 +68,4 @@
   window.addEventListener("resize", schedule);
   window.addEventListener("load", schedule);
   updateProgress();
-})();
+});

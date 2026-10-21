@@ -4,20 +4,20 @@
 
 | داده | منبع فعلی | مصرف و محدودیت |
 |---|---|---|
-| مسیر و مدل صفحه | [Controllers](../../Shop/Controllers) و [PageModel](../../Shop/Models/PageModel.cs) | آماده‌سازی Razor و SEO؛ سرویس دامنهٔ مستقل ندارد |
-| محصولات، قیمت، رنگ و ویژگی‌ها | [catalog.js](../../Shop/wwwroot/shop/js/store/catalog.js) → `window.HNProducts` | کاتالوگ ۳۰ قلمی نمونه؛ قیمت و موجودی از پایگاه فروش دریافت نمی‌شوند |
-| عنوان، slug و تصویر محصول در سرور | [ProductSeoCatalog.cs](../../Shop/Models/ProductSeoCatalog.cs) | متن همان catalog.js را می‌خواند؛ ارتباط به قالب آرایه‌های فایل وابسته است |
-| کشور و پرچم | [countries.js](../../Shop/wwwroot/shop/js/store/countries.js) → `window.HNCountries` | نام‌های فارسی/انگلیسی و مسیر SVG؛ اتصال برند به کشور در catalog.js |
-| اطلاعات پایهٔ برند | [BrandProfileModel.cs](../../Shop/Models/BrandProfileModel.cs)، `BrandCatalog` | Controller برند؛ متن تحریریه منبع جدا دارد |
+| مسیر و مدل صفحه | [Controllers](../../Shop/Controllers) و [PageModel](../../Shop/Models/PageModel.cs) | آماده‌سازی Razor و SEO |
+| محصول، برند، کشور، رنگ، دسته، رسانه و فهرست‌های خانه | [catalog.json](../../Shop/wwwroot/content/data/catalog.json) | منبع مشترک ساختاریافته با schemaVersion و شناسه‌های صریح؛ ۳۰ محصول نمونه |
+| کاتالوگ سمت سرور | [CatalogRepository.cs](../../Shop/Services/CatalogRepository.cs) | singleton با cache بر اساس زمان/اندازهٔ فایل؛ اعتبارسنجی رابطه‌ها و تولید snapshot برای محصول، برند و sitemap |
+| کاتالوگ مرورگر | [_CatalogData.cshtml](../../Shop/Views/Shared/_CatalogData.cshtml) → [catalog.js](../../Shop/wwwroot/shop/js/store/catalog.js) | JSON امن داخل script غیرقابل‌اجرا؛ resolver، دادهٔ immutable و API سازگار HNProducts/HNCountries |
+| اطلاعات تحریریهٔ پایهٔ برند | [BrandProfileModel.cs](../../Shop/Models/BrandProfileModel.cs) | متن/تاریخچه از BrandCatalog؛ نام، نام فارسی و لوگو هنگام ساخت snapshot از catalog.json گرفته می‌شوند |
 | متن تحریریهٔ برند | [brand-editorial.json](../../Shop/wwwroot/shop/js/store/brand-editorial.json) | خوانده‌شدن توسط BrandsController؛ نام مسیر واقعی را در محیط حساس به بزرگی حروف هم بررسی کنید |
 | مقاله‌ها و آمار مجله | [JournalArticles.cs](../../Shop/Models/JournalArticles.cs) و [JournalArticles.Expanded.cs](../../Shop/Models/JournalArticles.Expanded.cs) | دادهٔ ثابت؛ آمار نمایش‌داده‌شده عملیاتی یا خودکار نیست |
 | FAQ | `FaqCatalog` در [PageModel.cs](../../Shop/Models/PageModel.cs) | منبع مشترک متن صفحه و FAQPage JSON-LD |
 | سبد، ورود، مقایسه، علاقه‌مندی، آدرس و پروفایل | `HNUI`، script صفحه و `localStorage` | state مرورگر؛ سفارش، پرداخت یا هویت تأییدشدهٔ سرور نیست |
-| رسانه‌ها | [ساختار content](../media/images.md) | مسیرها از catalog.js، مدل C#، Razor و CSS مصرف می‌شوند |
+| رسانه‌ها | [ساختار content](../media/images.md) | مسیرهای محصول در catalog.json ثبت‌اند؛ نام فایل از ترتیب آرایه ساخته نمی‌شود |
 
 ## هنگام تغییر داده
 
-ابتدا مصرف‌کننده‌های سرور و مرورگر را پیدا کنید. افزودن فیلد به JS به‌تنهایی مدل C#، metadata یا sitemap را به‌روز نمی‌کند. تغییر ساختار آرایه‌های catalog.js ممکن است parser فعلی ProductSeoCatalog را بشکند؛ هر دو مسیر را بررسی کنید.
+دادهٔ محصول را فقط در catalog.json تغییر دهید. `id` و `code` پایدارند؛ relationها و مسیرها باید معتبر بمانند. parser متن JavaScript حذف شده است. تغییر schema باید هم‌زمان در CatalogSnapshot و resolver مرورگر اعمال شود؛ قرارداد دقیق در [کاتالوگ](../store/catalog.md) و بررسی‌های خودکار در [کیفیت](../development/quality.md) ثبت شده‌اند.
 
 دادهٔ ذخیره‌شده در مرورگر را ورودی قابل‌اعتماد فرض نکنید. افزودن persistence واقعی نیاز به مدل دامنه، validation، هویت، مجوز و endpoint سرور دارد؛ برنامهٔ این کار در [رودمپ](../development/roadmap.md) آمده است.
 

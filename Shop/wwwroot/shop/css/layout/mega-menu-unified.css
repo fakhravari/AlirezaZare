@@ -351,7 +351,7 @@
 
 /* Keep the category icon legible against the navy header in its warm active state. */
 @media (min-width: 992px) {
-  .inner-page #mainNav .navbar-nav > .category-nav-dropdown:is(:hover, :focus-within, .show, .is-mega-open) > .nav-link .nav-menu-icon {
+  .inner-page #mainNav .navbar-nav > .category-nav-dropdown:is(.show, .is-mega-open) > .nav-link .nav-menu-icon {
     color: #ffd447 !important;
     -webkit-text-fill-color: #ffd447 !important;
     filter: drop-shadow(0 0 4px rgba(246, 197, 21, 0.3));

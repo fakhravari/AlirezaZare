@@ -10,3 +10,6 @@ appsettings.Development.json
 __pycache__/
 *.pyc
 .artifacts/
+node_modules/
+playwright-report/
+test-results/

@@ -1,3 +1,4 @@
+window.HNUI.mount("pages-page-content", document, () => {
 document.addEventListener("DOMContentLoaded", () => {
   const share = document.querySelector(".article-share");
   if (share) {
@@ -52,7 +53,8 @@ document.addEventListener("DOMContentLoaded", () => {
           );
           return;
         }
-        window.HNUI.setMessage(status, "لینک مطلب کپی شد.", "success");
+        window.HNUI.setMessage(status, "");
+        window.HNUI.showToast("کپی شد", "success");
         button.classList.add("copied");
         setTimeout(() => {
           window.HNUI.setMessage(status, "");
@@ -153,4 +155,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }),
   );
   render();
+});
+
 });

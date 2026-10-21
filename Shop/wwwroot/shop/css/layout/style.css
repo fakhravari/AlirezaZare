@@ -10843,7 +10843,7 @@ footer .copyright::before {
 }
 
 .testimonials .rating-summary span {
-  color: #747e91 !important;
+  color: var(--color-text-muted) !important;
 }
 
 .testimonials .testimonial-card,

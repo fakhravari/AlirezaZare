@@ -2,7 +2,7 @@
 
 ## مسیر اجرا
 
-[ProductController.Details](../../Shop/Controllers/ProductController.cs) → [ProductSeoCatalog](../../Shop/Models/ProductSeoCatalog.cs) → `PageModel<ProductDetailsModel>` → [Details.cshtml](../../Shop/Views/Product/Details.cshtml) → `commerce.js` و `#productView`.
+[ProductController.Details](../../Shop/Controllers/ProductController.cs) → [CatalogRepository](../../Shop/Services/CatalogRepository.cs) → `PageModel<ProductDetailsModel>` → [Details.cshtml](../../Shop/Views/Product/Details.cshtml) → `commerce.js` و `#productView`.
 
 Controller شناسه را از انتهای slug می‌خواند و محصول را از کاتالوگ پیدا می‌کند. canonical از نام انگلیسی محصول و id ساخته می‌شود. مسیرهای قدیمی ابتدا به `/products/product-{id}` هدایت می‌شوند؛ Controller فعلی پیشوند slug ورودی را با canonical تطبیق اجباری نمی‌دهد. نامعتبر بودن id یا نبود محصول، 404 می‌دهد.
 
@@ -18,7 +18,7 @@ Controller شناسه را از انتهای slug می‌خواند و محصو�
 
 | نیاز | محل بررسی |
 |---|---|
-| عنوان سرور، canonical و JSON-LD | Controller، ProductSeoCatalog و [SEO](../seo/metadata.md) |
+| عنوان سرور، canonical و JSON-LD | Controller، CatalogRepository و [SEO](../seo/metadata.md) |
 | برند فارسی، کشور و breadcrumb دسته | کاتالوگ، HNCountries و markup renderer در commerce.js |
 | عکس و ویدئو | `image/mainImage/thumbnailImage`، آرایهٔ `images` و `videos`؛ [رسانه](../media/images.md) |
 | ویژگی‌ها، گزینه‌ها، متعلقات و قیمت | کاتالوگ، renderer و CSS اختصاصی قیمت/گزینه‌ها؛ مبلغ نهایی طبق [سبد](cart.md) |

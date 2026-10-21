@@ -1,12 +1,7 @@
 @using System.Globalization
 @model PageModel<MagazineDetailsModel>
-@{
-    var contentImage = System.IO.Path.GetFileName(Model.Data.ContentImage);
-    var imageFolder = contentImage.StartsWith("slider-") ? "sliders" : "products";
-}
-
 <header class="page-hero article-hero">
-    <img class="hero-image" src="@Url.Content($"~/shop/images/{imageFolder}/{contentImage}")" alt="@Model.Data.Title"/>
+    <img class="hero-image" src="@Url.Content("~/" + Model.Data.HeroImage)" alt="@Model.Data.Title" width="1916" height="821" fetchpriority="high"/>
     <div class="container">
         <nav class="article-breadcrumb" aria-label="مسیر صفحه">
             <a class="breadcrumb-home" asp-controller="Home" asp-action="Index">
@@ -130,7 +125,7 @@
                         </div>
                     </div>
                     <figure>
-                        <img src="@Url.Content($"~/shop/images/{imageFolder}/{contentImage}")" alt="@Model.Data.Title" loading="lazy"/>
+                        <img src="@Url.Content("~/" + Model.Data.ContentImage)" alt="@Model.Data.Title" width="1254" height="1254" loading="lazy"/>
                         <figcaption>@Model.Data.Title</figcaption>
                     </figure>
 

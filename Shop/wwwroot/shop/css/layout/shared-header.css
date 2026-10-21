@@ -4,6 +4,65 @@
   --header-action-divider-height: 28px;
   --header-action-divider-gap: 12px;
 }
+
+/* The horizontal logo stays in the desktop header; mobile uses the drawer. */
+#mainNav .header-brand-lockup {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 178px;
+  max-width: min(178px, 40vw);
+  min-width: 0;
+  height: auto;
+  aspect-ratio: 256 / 72;
+  padding: 0;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  box-shadow: none;
+  line-height: 1;
+  text-decoration: none;
+  transition: filter 180ms ease;
+}
+
+#mainNav .header-brand-lockup:is(:hover, :focus-visible) {
+  filter: drop-shadow(0 4px 8px rgba(16, 42, 67, 0.18));
+}
+
+#mainNav .header-brand-mark,
+#mainNav .header-brand-mark > img {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  height: auto;
+  aspect-ratio: 256 / 72;
+  object-fit: contain;
+}
+
+@media (min-width: 992px) {
+  #mainNav .header-brand-lockup {
+    display: inline-flex !important;
+  }
+
+  .home-page #mainNav .header-brand-lockup.header-home-link,
+  .inner-page #mainNav .header-brand-lockup.header-home-link {
+    top: -66px;
+  }
+}
+
+@media (max-width: 991px) {
+  #mainNav {
+    --header-actions-gap: 5px;
+  }
+}
+
+@media (max-width: 767px) {
+  #mainNav > .container {
+    flex-wrap: nowrap;
+    gap: 4px;
+  }
+}
+
 .account-wrap {
   padding-left: var(--header-action-divider-gap);
   margin-left: 4px;

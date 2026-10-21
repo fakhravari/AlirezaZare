@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", () => {
+window.HNUI.ready(() => window.HNUI.mount("checkout", document, () => {
   const ui = window.HNUI;
   const addressKey = "hn-delivery-addresses";
   const selectedKey = "hn-selected-address";
@@ -271,4 +271,4 @@ document.addEventListener("DOMContentLoaded", () => {
   window.addEventListener("storage", () => window.location.reload());
   renderAddresses();
   renderPaymentMethod();
-});
+}));

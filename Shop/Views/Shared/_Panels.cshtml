@@ -1,12 +1,12 @@
+@inject Shop.Services.CatalogRepository StoreCatalog
 <div
     class="offcanvas offcanvas-start mobile-menu"
     tabindex="-1"
     id="mobileMenu">
     <div class="offcanvas-header">
-        <a class="brand" href="Home/Index" data-bs-dismiss="offcanvas">
-            <span>ن</span> ندا اولیائی
-        </a
-        >
+        <a class="brand mobile-menu-logo" asp-controller="Home" asp-action="Index" aria-label="برق شیراز؛ رفتن به صفحهٔ اصلی">
+            <img src="~/content/identity/store-electrical-lockup.svg" alt="برق شیراز" width="256" height="72" decoding="async" asp-append-version="true" />
+        </a>
         <button
             type="button"
             class="btn-close btn-close-white"
@@ -120,7 +120,7 @@
                         <span>معرفی همهٔ برندها</span>
                         <i class="bi bi-arrow-left" aria-hidden="true"></i>
                     </a>
-                    @foreach (BrandProfileModel brand in BrandCatalog.All)
+                    @foreach (BrandProfileModel brand in StoreCatalog.Read().Brands)
                     {
                         <a href="@Url.Content($"~/brands/{brand.Slug}")" data-bs-dismiss="offcanvas">@brand.PersianName</a>
                     }

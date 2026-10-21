@@ -1,0 +1,138 @@
+{
+  "schemaVersion": 1,
+  "components": {
+    "catalog": {
+      "markup": [
+        "Shop/Views/Shared/_CatalogData.cshtml"
+      ],
+      "data": [
+        "Shop/wwwroot/content/data/catalog.json"
+      ],
+      "server": [
+        "Shop/Services/CatalogRepository.cs"
+      ],
+      "js": [
+        "Shop/wwwroot/shop/js/store/catalog.js"
+      ]
+    },
+    "product-card": {
+      "selector": "\\.(?:product-card|showcase-card|product-price)(?=[\\s.#:>+~\\[),-]|$)",
+      "js": [
+        "Shop/wwwroot/shop/js/store/product-card.js"
+      ],
+      "css": [
+        "Shop/wwwroot/shop/css/store/shared-product-card.css"
+      ],
+      "pageOverrides": [
+        "Shop/wwwroot/shop/css/pages/home-warmth.css",
+        "Shop/wwwroot/shop/css/pages/search.css",
+        "Shop/wwwroot/shop/css/pages/search-mobile.css"
+      ]
+    },
+    "header-navigation": {
+      "selector": "\\.(?:brand-dropdown|brand-menu|category-nav-dropdown|category-nav-mega|quick-links-dropdown|quick-links-menu)(?=[\\s.#:>+~\\[),-]|$)",
+      "markup": [
+        "Shop/Views/Shared/_Header.cshtml"
+      ],
+      "js": [
+        "Shop/wwwroot/shop/js/layout/header-navigation.js"
+      ],
+      "css": [
+        "Shop/wwwroot/shop/css/layout/shared-header.css",
+        "Shop/wwwroot/shop/css/layout/shared-mega-menu.css",
+        "Shop/wwwroot/shop/css/layout/mega-menu-unified.css",
+        "Shop/wwwroot/shop/css/layout/quick-links-menu.css"
+      ]
+    },
+    "cart": {
+      "markup": [
+        "Shop/Views/Shared/_Panels.cshtml",
+        "Shop/Views/Cart/Index.cshtml"
+      ],
+      "js": [
+        "Shop/wwwroot/shop/js/store/cart.js"
+      ],
+      "css": [
+        "Shop/wwwroot/shop/css/layout/shared-cart.css"
+      ],
+      "data": [
+        "Shop/wwwroot/shop/js/core/storage.js"
+      ]
+    },
+    "ui-core": {
+      "js": [
+        "Shop/wwwroot/shop/js/core/ui-core.js"
+      ],
+      "css": [
+        "Shop/wwwroot/shop/css/core/ui-core.css",
+        "Shop/wwwroot/shop/css/core/design-tokens.css"
+      ]
+    },
+    "header-search": {
+      "markup": [
+        "Shop/Views/Shared/_Header.cshtml"
+      ],
+      "js": [
+        "Shop/wwwroot/shop/js/layout/main.js"
+      ],
+      "css": [
+        "Shop/wwwroot/shop/css/layout/shared-header.css"
+      ]
+    },
+    "account-panel": {
+      "markup": [
+        "Shop/Views/Shared/_Header.cshtml"
+      ],
+      "js": [
+        "Shop/wwwroot/shop/js/layout/main.js"
+      ],
+      "css": [
+        "Shop/wwwroot/shop/css/layout/shared-account.css"
+      ]
+    },
+    "login-dialog": {
+      "markup": [
+        "Shop/Views/Shared/_Panels.cshtml"
+      ],
+      "js": [
+        "Shop/wwwroot/shop/js/layout/main.js"
+      ],
+      "css": [
+        "Shop/wwwroot/shop/css/layout/shared-login.css"
+      ]
+    },
+    "footer": {
+      "markup": [
+        "Shop/Views/Shared/_Footer.cshtml"
+      ],
+      "css": [
+        "Shop/wwwroot/shop/css/layout/shared-footer.css"
+      ]
+    },
+    "form-validation": {
+      "js": [
+        "Shop/wwwroot/shop/js/core/form-validation.js"
+      ],
+      "css": [
+        "Shop/wwwroot/shop/css/core/ui-core.css"
+      ]
+    },
+    "pagination": {
+      "css": [
+        "Shop/wwwroot/shop/css/store/pagination.css"
+      ],
+      "js": [
+        "Shop/wwwroot/shop/js/pages/orders-pagination.js",
+        "Shop/wwwroot/shop/js/pages/search.js"
+      ]
+    },
+    "confirmation-dialog": {
+      "js": [
+        "Shop/wwwroot/shop/js/pages/form-confirm-dialog.js"
+      ],
+      "css": [
+        "Shop/wwwroot/shop/css/pages/form-confirm-dialog.css"
+      ]
+    }
+  }
+}

@@ -35,7 +35,7 @@ Program.cs / middleware / route
 | `Shop/wwwroot/shop/js/layout/` | تعامل‌های هدر، منوها، پنل‌ها و layout |
 | `Shop/wwwroot/shop/js/store/` | دادهٔ کاتالوگ و رفتار فروشگاهی |
 | `Shop/wwwroot/shop/js/pages/` | رفتار مختص یک صفحه یا جریان کاری |
-| `Shop/wwwroot/content/products/` | رسانه‌ها در پوشه‌های مشترک بر اساس نوع؛ نام فایل شامل محصول، کد کالا و کاربرد نسخه است و مسیر ویدئو فقط در محصول متناظر `store/catalog.js` ثبت می‌شود |
+| `Shop/wwwroot/content/products/` | رسانه‌ها در پوشه‌های مشترک بر اساس نوع؛ نام فایل شامل محصول، کد کالا و کاربرد نسخه است و مسیر ویدئو فقط در محصول متناظر `content/data/catalog.json` ثبت می‌شود |
 | `Shop/wwwroot/shop/images/`, `vendor/` | رسانه‌های قالب، فونت‌ها و وابستگی‌های محلی؛ پیش از جایگزینی/حذف، تمام ارجاعات را بررسی کنید |
 
 `wwwroot/content/` مرز رسانهٔ وابسته به داده و `wwwroot/shop/` محل قالب و منابع UI است. جزئیات در [رسانه](../media/images.md) قرار دارد. artifactهای `ClockTemplate/` را برنامهٔ source عضو solution فرض نکنید؛ قبل از استفاده عضویت و منبع آن را بررسی کنید.

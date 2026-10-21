@@ -1,4 +1,4 @@
-(() => {
+window.HNUI.mount("pages-form-confirm-dialog", document, () => {
   let activeResolve = null;
   let lastFocused = null;
   const overlay = document.createElement("div");
@@ -57,4 +57,4 @@
         accept.focus();
       });
     });
-})();
+});

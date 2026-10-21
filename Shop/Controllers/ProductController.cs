@@ -1,15 +1,16 @@
 using Shop.Models;
+using Shop.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Shop.Controllers;
 
 public sealed class ProductController : PageController
 {
-    private readonly IWebHostEnvironment _environment;
+    private readonly CatalogRepository _catalog;
 
-    public ProductController(IWebHostEnvironment environment)
+    public ProductController(CatalogRepository catalog)
     {
-        _environment = environment;
+        _catalog = catalog;
     }
 
     [HttpGet("/Search")]
@@ -28,11 +29,13 @@ public sealed class ProductController : PageController
         if (separator < 0 || !int.TryParse(slug[(separator + 1)..], out var id) || id < 1)
             return NotFound();
 
-        ProductSeoEntry? product = ProductSeoCatalog.Load(_environment.WebRootPath)
+        ProductSeoEntry? product = _catalog.Read().Products
             .FirstOrDefault(item => item.Id == id);
         if (product is null) return NotFound();
 
         string canonicalPath = $"/products/{product.Slug}-{product.Id}";
+        if (!string.Equals(slug, $"{product.Slug}-{product.Id}", StringComparison.Ordinal))
+            return RedirectPermanent(canonicalPath);
         string productImage = $"{Request.Scheme}://{Request.Host}{Url.Content($"~/{product.ImagePath}")}";
         var structuredData = new Dictionary<string, object?>
         {
@@ -64,9 +67,15 @@ public sealed class ProductController : PageController
 
     [HttpGet("/products/{id:int}")]
     public IActionResult LegacyPath(int id) =>
-        id > 0 ? RedirectPermanent($"/products/product-{id}") : NotFound();
+        id > 0 ? CanonicalRedirect(id) : NotFound();
 
     [HttpGet("/Product")]
     public IActionResult LegacyDetails([FromQuery] int? id) =>
-        id is > 0 ? RedirectPermanent($"/products/product-{id.Value}") : NotFound();
+        id is > 0 ? CanonicalRedirect(id.Value) : NotFound();
+
+    private IActionResult CanonicalRedirect(int id)
+    {
+        ProductSeoEntry? product = _catalog.Read().Products.FirstOrDefault(item => item.Id == id);
+        return product is null ? NotFound() : RedirectPermanent($"/products/{product.Slug}-{product.Id}");
+    }
 }

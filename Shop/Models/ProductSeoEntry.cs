@@ -1,0 +1,14 @@
+namespace Shop.Models;
+
+public sealed record ProductSeoEntry(
+    int Id,
+    string Name,
+    string EnglishName,
+    string Brand,
+    string Type,
+    string ImagePath,
+    string Slug)
+{
+    public string Description =>
+        $"{Name} از برند {Brand}، در گروه {Type}. مشخصات فنی، تصاویر، ویژگی‌های قابل انتخاب و اقلام همراه این کالا را بررسی کنید.";
+}

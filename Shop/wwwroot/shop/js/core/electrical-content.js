@@ -1,4 +1,4 @@
-(() => {
+window.HNUI.mount("core-electrical-content", document, () => {
   const phraseMap = new Map([
     ["مجله ساعت", "مجله فنی"],
     ["مجله تخصصی ساعت", "مجله تخصصی برق و ابزار"],
@@ -117,4 +117,4 @@
       ),
     ).observe(document.body, { childList: true, subtree: true });
   });
-})();
+});

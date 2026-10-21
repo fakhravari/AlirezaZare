@@ -1,4 +1,4 @@
-(() => {
+window.HNUI.mount("pages-contact", document, () => {
   const form = document.getElementById("contactForm");
   if (!form) return;
 
@@ -126,4 +126,4 @@
       rules.forEach(([input]) => setError(input, ""));
     }, 2200);
   });
-})();
+});

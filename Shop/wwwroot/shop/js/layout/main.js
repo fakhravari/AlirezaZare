@@ -1,56 +1,5 @@
 $(function () {
-  const innerCategoryGroups = {
-    tools: [
-      ["دریل و پیچ‌گوشتی", "دریل چکشی", "دریل شارژی", "پیچ‌گوشتی برقی", "دریل بتن‌کن"],
-      ["برش و سایش", "فرز و مینی‌فرز", "اره عمودبر", "اره گردبر", "صفحه برش"],
-      ["تجهیزات کارگاهی", "دستگاه جوش", "کارواش", "کمپرسور باد", "لوازم جانبی ابزار"],
-      ["مته و سوراخ‌کاری", "مته بتن", "مته فلز", "مته چوب", "مته الماسه"],
-      ["صفحه و تیغه", "صفحه برش", "صفحه ساب", "تیغ اره عمودبر", "تیغ اره گردبر"],
-      ["باتری و متعلقات", "باتری یدکی", "شارژر ابزار", "سه‌نظام", "ذغال دستگاه"],
-    ],
-    "hand-tools": [
-      ["آچار و بکس", "آچار فرانسه", "ست بکس", "آچار آلن", "آچار تخت و رینگی", "آچار ترکمتر", "آچار لوله‌گیر"],
-      ["پیچ‌گوشتی و انبر", "پیچ‌گوشتی دستی", "انبردست", "سیم‌چین", "دم‌باریک", "ست پیچ‌گوشتی", "انبرقفلی"],
-      ["لوازم ابزار", "جعبه ابزار", "مته و سری", "گیره و پیچ‌دستی", "کاتر و تیغ", "چکش و ابزار ضربه‌ای", "متر و خط‌کش"],
-    ],
-    components: [
-      ["مقاومت و خازن", "مقاومت", "خازن", "دیود", "سلف", "پل دیود"],
-      ["آی‌سی و نیمه‌رسانا", "آی‌سی", "ترانزیستور", "رگولاتور", "ماسفت", "اپتوکوپلر"],
-      ["برد و ماژول", "بردبورد", "ماژول آماده", "سنسور", "برد آردوینو", "ماژول تغذیه"],
-      ["سنسور و ماژول", "سنسور دما", "سنسور رطوبت", "سنسور فاصله", "ماژول رله", "ماژول ارتباطی"],
-      ["تجهیزات لحیم‌کاری", "هویه", "نوک هویه", "سیم لحیم", "قلع‌کش", "هیتر و هویه"],
-      ["بردهای توسعه", "برد آردوینو", "برد ESP32", "برد رزبری پای", "برد سوراخ‌دار", "جامپر و سیم رابط"],
-    ],
-    cables: [
-      ["سیم و کابل", "سیم افشان", "کابل برق", "کابل شبکه", "کابل شیلددار", "سیم مفتولی", "کابل ابزار دقیق"],
-      ["سوکت و کانکتور", "فیش برق", "سوکت شبکه", "کانکتور", "فیش BNC", "کانکتور مخابراتی", "فیش موزی"],
-      ["اتصالات نصب", "ترمینال", "سرسیم", "داکت و بست", "وارنیش حرارتی", "گلند کابل", "بست کمربندی"],
-    ],
-    lighting: [
-      ["لامپ و LED", "لامپ LED", "پنل سقفی", "ریسه نواری", "لامپ فیلامنتی", "چراغ خطی"],
-      ["چراغ کارگاهی", "چراغ بازرسی", "چراغ اضطراری", "پروژکتور", "چراغ سیار", "چراغ ضدانفجار"],
-      ["لوازم روشنایی", "سرپیچ", "درایور LED", "سنسور حرکتی", "فتوسل", "قاب و متعلقات چراغ"],
-    ],
-    switchgear: [
-      ["کلید و پریز", "کلید برق", "پریز توکار", "پریز صنعتی", "کلید تبدیل", "پریز ارت‌دار"],
-      ["فیوز و محافظ", "فیوز مینیاتوری", "محافظ جان", "محافظ ولتاژ", "فیوز کاردی", "کلید اتوماتیک"],
-      ["تجهیزات کنترل", "کنتاکتور", "تایمر", "شستی و سیگنال", "رله حرارتی", "کنترل فاز"],
-    ],
-    safety: [
-      ["ایمنی فردی", "دستکش عایق", "عینک ایمنی", "کفش کار", "کلاه ایمنی", "لباس کار"],
-      ["حفاظت برق", "محافظ ولتاژ", "تجهیزات ارت", "صاعقه‌گیر", "دستگاه تست عایق", "تجهیزات قفل و برچسب"],
-      ["ایمنی کارگاه", "کلاه ایمنی", "لباس کار", "جعبه کمک‌های اولیه", "گوشی ایمنی", "ماسک تنفسی"],
-    ],
-    measurement: [
-      ["ابزار اندازه‌گیری", "مولتی‌متر", "آمپرمتر", "ولت‌متر", "فرکانس‌متر", "LCR متر"],
-      ["تست و عیب‌یابی", "فازمتر", "تستر کابل", "تستر باتری", "تستر عایق", "ردیاب سیم"],
-      ["ابزار دقیق", "کلمپ‌متر", "اسیلوسکوپ", "منبع تغذیه", "دماسنج لیزری", "لوکس‌متر"],
-      ["دما و رطوبت", "دماسنج دیجیتال", "دماسنج لیزری", "رطوبت‌سنج", "دماسنج محیطی", "ترموکوپل"],
-      ["اندازه‌گیری محیط", "لوکس‌متر", "صوت‌سنج", "فشارسنج", "سرعت‌سنج", "کیفیت‌سنج هوا"],
-      ["منابع تست و کالیبراسیون", "منبع تغذیه آزمایشگاهی", "مولد سیگنال", "کالیبراتور", "بار الکترونیکی", "پراب و کابل تست"],
-    ],
-  };
-
+  window.HNUI.mount("site-layout", document, () => {
   const $window = $(window);
   const $document = $(document);
   const $html = $("html");
@@ -63,40 +12,6 @@ $(function () {
   const faNumber = (number) => window.HNUI.formatNumber(number);
   const escapeHtml = (value) => window.HNUI.escapeHtml(value);
   const cartOptionsMarkup = (item) => window.HNUI.cart.renderOptions(item);
-  const renderCategoryGroups = (host, groups, categoryName) => {
-    const heading = document.createElement("div");
-    heading.className = "electrical-submenu-heading";
-    const copy = document.createElement("span");
-    copy.className = "electrical-submenu-heading-copy";
-    const title = document.createElement("strong");
-    title.textContent = `زیرشاخه‌های ${categoryName || "محصولات"}`;
-    const caption = document.createElement("small");
-    caption.textContent = "برای دیدن کالاها، یک زیرشاخه را انتخاب کنید";
-    copy.append(title, caption);
-    const count = document.createElement("span");
-    count.className = "electrical-submenu-heading-count";
-    count.textContent = `${groups.length.toLocaleString("fa-IR")} گروه`;
-    heading.append(copy, count);
-
-    const cards = groups.map(([groupName, ...items], index) => {
-      const card = document.createElement("section");
-      card.className = "electrical-submenu-column category-mega-group";
-      card.dataset.index = String(index);
-      const groupLink = document.createElement("a");
-      groupLink.className = "category-mega-title";
-      groupLink.href = `Search?q=${encodeURIComponent(groupName)}`;
-      groupLink.textContent = groupName;
-      card.append(groupLink);
-      items.forEach((label) => {
-        const link = document.createElement("a");
-        link.href = `Search?q=${encodeURIComponent(label)}`;
-        link.textContent = label;
-        card.append(link);
-      });
-      return card;
-    });
-    host.replaceChildren(heading, ...cards);
-  };
   document
     .querySelectorAll(".home-header-search, .mobile-menu-search")
     .forEach((headerSearchForm) => {
@@ -311,122 +226,6 @@ $(function () {
         "pointerleave",
         closeSuggestionsAfterPointerLeave,
       );
-    }
-    if (!isDrawerSearch && window.matchMedia("(min-width: 992px)").matches) {
-      document
-        .querySelectorAll("#mainNav .brand-dropdown")
-        .forEach((brandDropdown) => {
-          let brandCloseTimer = 0;
-          const brandTrigger = brandDropdown.querySelector(":scope > .nav-link");
-          const brandMenu = brandDropdown.querySelector(":scope > .brand-menu");
-          const isBrandControlActive = () =>
-            Boolean(
-              brandTrigger?.matches(":hover") ||
-                brandMenu?.querySelector("a:hover") ||
-                brandDropdown.contains(document.activeElement),
-            );
-          const keepBrandOpen = () => {
-            window.clearTimeout(brandCloseTimer);
-            brandDropdown.classList.remove("is-brand-switching");
-            brandDropdown.classList.add("is-brand-open");
-            brandTrigger?.setAttribute("aria-expanded", "true");
-          };
-          const closeBrandSoon = () => {
-            window.clearTimeout(brandCloseTimer);
-            brandCloseTimer = window.setTimeout(() => {
-              if (isBrandControlActive()) return;
-              brandDropdown.classList.remove("is-brand-open");
-              if (!brandDropdown.classList.contains("show")) {
-                brandTrigger?.setAttribute("aria-expanded", "false");
-              }
-            }, 500);
-          };
-          const dismissSearch = () => {
-            if (suggestions.hidden) return;
-            searchInput.blur();
-            closeSuggestions();
-          };
-          brandTrigger?.addEventListener("pointerenter", () => {
-            keepBrandOpen();
-          });
-          brandDropdown.addEventListener("pointerleave", closeBrandSoon);
-          brandMenu?.addEventListener("pointerleave", closeBrandSoon);
-          brandMenu?.addEventListener("pointerover", (event) => {
-            if (event.target instanceof Element && event.target.closest("a")) {
-              keepBrandOpen();
-            } else {
-              closeBrandSoon();
-            }
-          });
-          brandDropdown.addEventListener("focusin", () => {
-            keepBrandOpen();
-            dismissSearch();
-          });
-          brandDropdown.addEventListener("focusout", (event) => {
-            if (!brandDropdown.contains(event.relatedTarget)) closeBrandSoon();
-          });
-          brandDropdown.parentElement
-            ?.querySelectorAll(":scope > .nav-item:not(.brand-dropdown)")
-            .forEach((siblingItem) => {
-              siblingItem.addEventListener("pointerenter", () => {
-                window.clearTimeout(brandCloseTimer);
-                brandDropdown.classList.remove("is-brand-open", "show");
-                brandMenu?.classList.remove("show");
-                brandDropdown.classList.add("is-brand-switching");
-                brandTrigger?.setAttribute("aria-expanded", "false");
-              });
-            });
-          brandDropdown.addEventListener("hidden.bs.dropdown", () => {
-            window.clearTimeout(brandCloseTimer);
-            brandDropdown.classList.remove("is-brand-open", "is-brand-switching");
-            brandTrigger?.setAttribute("aria-expanded", "false");
-          });
-        });
-      document
-        .querySelectorAll("#mainNav .quick-links-dropdown")
-        .forEach((quickLinksDropdown) => {
-          let quickLinksCloseTimer = 0;
-          const quickLinksTrigger = quickLinksDropdown.querySelector(":scope > .nav-link");
-          const quickLinksMenu = quickLinksDropdown.querySelector(":scope > .quick-links-menu");
-          const keepQuickLinksOpen = () => {
-            window.clearTimeout(quickLinksCloseTimer);
-            quickLinksDropdown.classList.add("is-quick-links-open");
-            quickLinksTrigger?.setAttribute("aria-expanded", "true");
-          };
-          const closeQuickLinksSoon = () => {
-            window.clearTimeout(quickLinksCloseTimer);
-            quickLinksCloseTimer = window.setTimeout(() => {
-              if (quickLinksDropdown.matches(":hover, :focus-within")) return;
-              quickLinksDropdown.classList.remove("is-quick-links-open");
-              if (!quickLinksDropdown.classList.contains("show")) {
-                quickLinksTrigger?.setAttribute("aria-expanded", "false");
-              }
-            }, 220);
-          };
-          const dismissSearch = () => {
-            if (suggestions.hidden) return;
-            searchInput.blur();
-            closeSuggestions();
-          };
-
-          quickLinksDropdown.addEventListener("pointerenter", () => {
-            keepQuickLinksOpen();
-          });
-          quickLinksDropdown.addEventListener("pointerleave", closeQuickLinksSoon);
-          quickLinksMenu?.addEventListener("pointerenter", keepQuickLinksOpen);
-          quickLinksDropdown.addEventListener("focusin", () => {
-            keepQuickLinksOpen();
-            dismissSearch();
-          });
-          quickLinksDropdown.addEventListener("focusout", (event) => {
-            if (!quickLinksDropdown.contains(event.relatedTarget)) closeQuickLinksSoon();
-          });
-          quickLinksDropdown.addEventListener("hidden.bs.dropdown", () => {
-            window.clearTimeout(quickLinksCloseTimer);
-            quickLinksDropdown.classList.remove("is-quick-links-open");
-            quickLinksTrigger?.setAttribute("aria-expanded", "false");
-          });
-        });
     }
     searchInput.addEventListener("keydown", (event) => {
       if (event.key === "Escape" && !suggestions.hidden) {
@@ -733,223 +532,6 @@ $(function () {
     }
   }
 
-  const categoryRow = document.querySelector(".electrical-home-row");
-  const categoryMenu = categoryRow?.querySelector(".electrical-category-menu");
-  const categoryPanel = categoryMenu?.querySelector("#electricalSubmenu");
-  if (categoryRow && categoryMenu && categoryPanel) {
-    const categoryContent = innerCategoryGroups;
-
-    const triggers = [
-      ...categoryMenu.querySelectorAll("button[data-category]"),
-    ];
-    triggers.forEach((trigger) =>
-      trigger.setAttribute("aria-controls", "electricalSubmenu"),
-    );
-    let activeCategoryGroups = [];
-    const updateHomeCategoryPanelSize = () => {
-      if (!activeCategoryGroups.length) return;
-      const gap = 12;
-      const horizontalPadding = 36;
-      const minimumColumnWidth = 184;
-      const configuredMaxWidth =
-        Number.parseFloat(
-          window
-            .getComputedStyle(document.documentElement)
-            .getPropertyValue("--container-wide-max"),
-        ) || 1480;
-      const maxMenuWidth = Math.max(
-        320,
-        Math.min(window.innerWidth - 340, 1004, configuredMaxWidth),
-      );
-      const availableColumns = Math.max(
-        1,
-        Math.floor(
-          (maxMenuWidth - horizontalPadding + gap) /
-            (minimumColumnWidth + gap),
-        ),
-      );
-      const columns = Math.min(
-        5,
-        activeCategoryGroups.length,
-        availableColumns,
-      );
-      const idealWidth =
-        horizontalPadding +
-        columns * minimumColumnWidth +
-        (columns - 1) * gap;
-      const menuWidth = Math.min(
-        maxMenuWidth,
-        Math.max(Math.min(720, maxMenuWidth), idealWidth),
-      );
-      categoryPanel.style.setProperty(
-        "--home-category-mega-columns",
-        String(columns),
-      );
-      categoryPanel.style.width = `${menuWidth}px`;
-    };
-    const closeCategoryPanel = () => {
-      categoryPanel.hidden = true;
-      categoryRow.removeAttribute("data-open-category");
-      activeCategoryGroups = [];
-      categoryPanel.style.removeProperty("--home-category-mega-columns");
-      categoryPanel.style.removeProperty("width");
-      triggers.forEach((trigger) => {
-        trigger.classList.remove("active");
-        trigger.setAttribute("aria-expanded", "false");
-      });
-    };
-    const openCategoryPanel = (category) => {
-      const groups = categoryContent[category];
-      if (!groups) return;
-      activeCategoryGroups = groups;
-      const activeCategory = triggers.find(
-        (trigger) => trigger.dataset.category === category,
-      );
-      categoryPanel.dataset.groupCount = String(groups.length);
-      renderCategoryGroups(
-        categoryPanel,
-        groups,
-        activeCategory?.querySelector("span")?.textContent.trim(),
-      );
-      categoryPanel.hidden = false;
-      categoryRow.dataset.openCategory = category;
-      updateHomeCategoryPanelSize();
-      triggers.forEach((trigger) => {
-        const isOpen = trigger.dataset.category === category;
-        trigger.classList.toggle("active", isOpen);
-        trigger.setAttribute("aria-expanded", String(isOpen));
-      });
-    };
-
-    if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
-      triggers.forEach((trigger) =>
-        trigger.addEventListener("pointerenter", () =>
-          openCategoryPanel(trigger.dataset.category),
-        ),
-      );
-    }
-    categoryMenu.addEventListener("focusin", (event) => {
-      const trigger = event.target.closest("button[data-category]");
-      if (trigger) openCategoryPanel(trigger.dataset.category);
-    });
-    triggers.forEach((trigger) =>
-      trigger.addEventListener("click", () => {
-        const alreadyOpen =
-          categoryRow.dataset.openCategory === trigger.dataset.category &&
-          !categoryPanel.hidden;
-        if (alreadyOpen) closeCategoryPanel();
-        else openCategoryPanel(trigger.dataset.category);
-      }),
-    );
-    window.addEventListener("resize", () => {
-      if (!categoryPanel.hidden) updateHomeCategoryPanelSize();
-    });
-    categoryRow.addEventListener("pointerleave", closeCategoryPanel);
-    categoryRow.addEventListener("focusout", (event) => {
-      if (!categoryRow.contains(event.relatedTarget)) closeCategoryPanel();
-    });
-  }
-
-  document.querySelectorAll(".category-nav-mega").forEach((menu) => {
-    const sidebar = menu.querySelector(".category-mega-sidebar");
-    const content = menu.querySelector(".category-mega-panels");
-    if (!sidebar || !content) return;
-    const buttons = [...sidebar.querySelectorAll("[data-mega-category]")];
-    buttons.forEach((button) => button.setAttribute("aria-controls", "categoryMegaPanels"));
-    let activeGroups = [];
-    const updateColumnCount = () => {
-      if (!activeGroups.length) return;
-      const gap = 12;
-      const minimumCardWidth = 184;
-      const rootStyles = window.getComputedStyle(document.documentElement);
-      const configuredMaxWidth =
-        Number.parseFloat(rootStyles.getPropertyValue("--container-wide-max")) || 1480;
-      const maxMenuWidth = Math.max(320, Math.min(window.innerWidth - 36, configuredMaxWidth));
-      const availableContentWidth = maxMenuWidth - 276 - 44;
-      const availableColumns = Math.max(
-        1,
-        Math.floor((availableContentWidth + gap) / (minimumCardWidth + gap)),
-      );
-      const columns = Math.min(5, activeGroups.length, availableColumns);
-      const idealMenuWidth = 276 + 44 + columns * minimumCardWidth + (columns - 1) * gap;
-      const menuWidth = Math.min(maxMenuWidth, Math.max(Math.min(720, maxMenuWidth), idealMenuWidth));
-      const rightInset = Math.max(18, (window.innerWidth - configuredMaxWidth) / 2);
-      content.style.setProperty(
-        "--category-mega-columns",
-        String(columns),
-      );
-      menu.style.width = `${menuWidth}px`;
-      menu.style.right = `${rightInset}px`;
-      menu.style.left = "auto";
-    };
-    const reset = () => {
-      buttons.forEach((button) => {
-        button.classList.remove("active");
-        button.setAttribute("aria-expanded", "false");
-      });
-      activeGroups = [];
-      content.style.removeProperty("--category-mega-columns");
-      menu.style.removeProperty("width");
-      menu.style.removeProperty("right");
-      menu.style.removeProperty("left");
-      content.replaceChildren();
-      const hint = document.createElement("p");
-      hint.className = "category-mega-hint";
-      hint.textContent = "برای دیدن زیرشاخه‌ها، یک گروه را انتخاب کنید.";
-      content.append(hint);
-    };
-    const activate = (button) => {
-      const groups = innerCategoryGroups[button.dataset.megaCategory];
-      if (!groups) return;
-      activeGroups = groups;
-      buttons.forEach((item) => {
-        const active = item === button;
-        item.classList.toggle("active", active);
-        item.setAttribute("aria-expanded", String(active));
-      });
-      content.dataset.groupCount = String(groups.length);
-      const activeCategory = button.querySelector("span")?.textContent.trim();
-      renderCategoryGroups(content, groups, activeCategory);
-      window.requestAnimationFrame(updateColumnCount);
-    };
-    buttons.forEach((button) => {
-      button.setAttribute("aria-expanded", "false");
-      button.addEventListener("pointerenter", () => activate(button));
-      button.addEventListener("focus", () => activate(button));
-      button.addEventListener("click", () => activate(button));
-    });
-    const dropdown = menu.closest(".category-nav-dropdown");
-    if (dropdown) {
-      let closeTimer;
-      const keepOpen = () => {
-        window.clearTimeout(closeTimer);
-        dropdown.classList.add("is-mega-open");
-        if (!buttons.some((button) => button.classList.contains("active"))) {
-          activate(buttons[0]);
-        }
-      };
-      const closeSoon = () => {
-        window.clearTimeout(closeTimer);
-        closeTimer = window.setTimeout(() => {
-          dropdown.classList.remove("is-mega-open");
-          reset();
-        }, 220);
-      };
-      dropdown.addEventListener("pointerenter", keepOpen);
-      dropdown.addEventListener("pointerleave", closeSoon);
-      dropdown.addEventListener("focusin", keepOpen);
-      dropdown.addEventListener("focusout", (event) => {
-        if (!dropdown.contains(event.relatedTarget)) closeSoon();
-      });
-      window.addEventListener("resize", updateColumnCount, { passive: true });
-      dropdown.addEventListener("hidden.bs.dropdown", () => {
-        window.clearTimeout(closeTimer);
-        dropdown.classList.remove("is-mega-open");
-        reset();
-      });
-    }
-  });
-
   const storage = window.HNUI.storage;
 
   let navFrame = null;
@@ -1023,46 +605,10 @@ $(function () {
   };
 
   const catalogProducts = window.HNProducts || [];
-  const catalogSaleMarkup = (product) => {
-    const discount = Number(product?.discountPercent) || 0;
-    const current = Math.round(Number(product?.price) * 1000000);
-    if (!discount || discount >= 100 || !current) return "";
-    const previous = Math.round(current / (1 - discount / 100));
-    return `<strong class="product-price-current">${faNumber(current)} <small>تومان</small></strong><span class="product-price-deal"><del class="price-old">${faNumber(previous)} تومان</del><b class="product-price-discount">٪${faNumber(discount)}</b></span>`;
-  };
-  const decorateCatalogPriceCards = (root = document) => {
-    root
-      .querySelectorAll(".product-card, .showcase-card, .rail-card")
-      .forEach((card) => {
-        const id = card.querySelector(".add-cart[data-id]")?.dataset.id;
-        const product = catalogProducts.find((item) => String(item.id) === id);
-        if (!product) return;
-        const saleMarkup = catalogSaleMarkup(product);
-        const homeGridCard = card.closest("#productGrid");
-        if (!saleMarkup && !homeGridCard) return;
-        const current = Math.round(Number(product.price) * 1000000);
-        if (!current) return;
-        const regularMarkup =
-          `<strong class="product-price-current">${faNumber(current)} ` +
-          "<small>تومان</small></strong>";
-        const price = card.querySelector(
-          ".product-info > p, .showcase-card-body > strong, .rail-card > strong",
-        );
-        if (price) {
-          if (price.tagName === "P") {
-            price.classList.toggle("has-discount", Boolean(saleMarkup));
-            price.classList.toggle("is-regular", !saleMarkup);
-            price.innerHTML = saleMarkup || regularMarkup;
-          } else if (saleMarkup) {
-            price.outerHTML = `<div class="product-card-sale-price has-discount">${saleMarkup}</div>`;
-          }
-        }
-      });
-  };
-  if (catalogProducts.length >= 6) {
+  if (catalogProducts.length) {
     const featuredBindings = [
-      { selector: ".featured-main", product: catalogProducts[0] },
-      { selector: ".featured-side", product: catalogProducts[5] },
+      { selector: ".featured-main", product: window.HNCatalog.find(1) },
+      { selector: ".featured-side", product: window.HNCatalog.find(6) },
     ];
     featuredBindings.forEach(({ selector, product }) => {
       const $card = $(selector);
@@ -1086,6 +632,12 @@ $(function () {
       });
     });
   }
+  const categoryFilters = {"ابزار برقی": "power-tools", "ابزار اندازه‌گیری": "measurement", "لحیم‌کاری و تعمیر برد": "electronics", "روشنایی و لامپ": "lighting"};
+  const grid = document.querySelector("#productGrid");
+  if (grid) grid.innerHTML = (window.HNCatalog.collections.selected || []).map((id) => {
+    const product = window.HNCatalog.find(id);
+    return product ? '<div class="col-md-6 col-lg-3 col-xxl-2 product-col" data-category="' + (categoryFilters[product.categoryPath[1]] || "all") + '">' + window.HNProductCard.render(product) + '</div>' : "";
+  }).join("");
   const amazingProducts = [
     ...catalogProducts.filter(
       (product) => product.discountPercent > 0 && product.stockQuantity > 0,
@@ -1105,58 +657,17 @@ $(function () {
   const amazingSection = document.querySelector("#amazing");
   const amazingSlider = amazingSection?.querySelector("#amazingSlider");
   if (amazingSlider && amazingProducts.length) {
-    amazingSlider.innerHTML = amazingProducts
-      .map(
-        (product) => `<div class="showcase-slide">
-          <article class="showcase-card">
-            <div class="product-image">
-              <a href="${window.HNProductUrl(product)}" aria-label="مشاهده ${escapeHtml(product.name)}">
-                <img loading="lazy" decoding="async" src="${escapeHtml(sliderImagePath(product))}" alt="${escapeHtml(product.name)}">
-              </a>
-              <span class="badge-offer">${product.discountPercent ? `${faNumber(product.discountPercent)}٪ تخفیف` : "پیشنهاد ویژه"}</span>
-            </div>
-            <div class="showcase-card-body">
-              <small>${escapeHtml(product.brand || "پیشنهاد فروشگاه")}</small>
-              <h3><a class="showcase-product-detail" href="${window.HNProductUrl(product)}">${escapeHtml(product.name)}</a></h3>
-              <strong>${faNumber(product.price * 1000000)} تومان</strong>
-              <button type="button" class="add-cart" data-id="${product.id}" data-name="${escapeHtml(product.name)}" data-price="${product.price * 1000000}" data-image="${escapeHtml(product.image)}">
-                <i class="bi bi-bag-plus" aria-hidden="true"></i> افزودن به سبد
-              </button>
-            </div>
-          </article>
-        </div>`,
-      )
-      .join("");
-    decorateCatalogPriceCards(amazingSection);
+    amazingSlider.innerHTML = amazingProducts.map((product) => window.HNProductCard.render(product, {
+      variant: "slider", image: sliderImagePath(product), offer: true,
+      badge: product.discountPercent ? faNumber(product.discountPercent) + "٪ تخفیف" : "پیشنهاد ویژه",
+    })).join("");
     window.HNUI?.enhance(amazingSection);
   }
-  const productCardMarkup = (product) => `
-    <div class="showcase-slide">
-      <article class="showcase-card">
-        <div class="product-image">
-          <a href="${window.HNProductUrl(product)}" aria-label="مشاهده ${escapeHtml(product.name)}">
-            <img loading="lazy" decoding="async" src="${escapeHtml(sliderImagePath(product))}" alt="${escapeHtml(product.name)}">
-          </a>
-          ${product.badge ? `<span class="${product.badge === "جدید" ? "badge-new" : "badge-best"}">${escapeHtml(product.badge)}</span>` : ""}
-        </div>
-        <div class="showcase-card-body">
-          <h3><a class="showcase-product-detail" href="${window.HNProductUrl(product)}">${escapeHtml(product.name)}</a></h3>
-          <strong>${faNumber(product.price * 1000000)} تومان</strong>
-          <button type="button" class="add-cart" data-id="${product.id}" data-name="${escapeHtml(product.name)}" data-price="${product.price * 1000000}" data-image="${escapeHtml(product.image)}">
-            <i class="bi bi-bag-plus"></i> افزودن به سبد
-          </button>
-        </div>
-      </article>
-    </div>`;
-  if (catalogProducts.length >= 30) {
-    $("#bestsellersSlider").html(
-      catalogProducts.slice(0, 24).map(productCardMarkup).join(""),
-    );
-    $("#newestSlider").html(
-      catalogProducts.slice(20, 26).map(productCardMarkup).join(""),
-    );
-  }
-  decorateCatalogPriceCards();
+  const productCardMarkup = (product) => window.HNProductCard.render(product, {variant: "slider", image: sliderImagePath(product)});
+  const collections = window.HNCatalog.collections;
+  const collectionProducts = (name) => (collections[name] || []).map((id) => window.HNCatalog.find(id)).filter(Boolean);
+  $("#bestsellersSlider").html(collectionProducts("bestsellers").map(productCardMarkup).join(""));
+  $("#newestSlider").html(collectionProducts("newest").map(productCardMarkup).join(""));
 
   const showcaseSliderOptions = {
     ...carouselMotion,
@@ -2023,7 +1534,7 @@ $(function () {
           "content/products/images/card/cordless-hammer-drill-hn-001-row-001-card-800.jpg",
       ),
       code: catalogProduct
-        ? `HN-${String(catalogProduct.id).padStart(3, "0")}`
+        ? catalogProduct.code
         : $root.find("small").first().text() || "کد محصول",
       brand: catalogProduct?.brand || "",
       type: catalogProduct?.type || "",
@@ -2051,12 +1562,12 @@ $(function () {
     const $cartButton = $card.find(".add-cart").first();
     if (!$image.length || !$cartButton.length) return;
     const productId = String($cartButton.data("id") || "");
-    if (!$image.children(".favorite").length) {
+    if (!$image.find(".favorite").length) {
       $image.prepend(
         `<button class="favorite" type="button" data-product-id="${escapeHtml(productId)}" aria-label="افزودن به علاقه‌مندی‌ها" aria-pressed="false" title="علاقه‌مندی‌ها"><i class="bi bi-heart" aria-hidden="true"></i></button>`,
       );
     }
-    $image.children(".favorite").attr("data-product-id", productId);
+    $image.find(".favorite").attr("data-product-id", productId);
     if (productId && !$image.find(".compare-trigger[data-product-id]").length) {
       $image.append(
         `<button type="button" class="compare-trigger" data-product-id="${escapeHtml(productId)}" aria-label="افزودن به مقایسه" aria-pressed="false" title="افزودن به مقایسه"><i class="bi bi-arrow-left-right" aria-hidden="true"></i></button>`,
@@ -2351,5 +1862,6 @@ $(function () {
         ? `موجودی «${product.name}» فقط ${faNumber(Number(stock))} عدد است؛ تعداد سبد به سقف موجودی رسید.`
         : "تعداد درخواستی از سقف مجاز کالا بیشتر بود؛ تعداد سبد به‌روزرسانی شد.";
     showListActionToast(message, "warning");
+  });
   });
 });

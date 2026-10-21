@@ -78,16 +78,20 @@ else
 <button class="back-to-top" id="backToTop" type="button" aria-label="بازگشت به ابتدای صفحه" title="بازگشت به بالا" aria-hidden="true" tabindex="-1">
     <i class="bi bi-arrow-up" aria-hidden="true"></i>
 </button>
+<partial name="_CatalogData"/>
+<script src="~/shop/js/core/storage.js" asp-append-version="true"></script>
+<script src="~/shop/js/store/cart.js" asp-append-version="true"></script>
 <script src="~/shop/js/core/ui-core.js" asp-append-version="true"></script>
 <script src="~/shop/vendor/jquery/jquery.min.js" asp-append-version="true"></script>
 <script src="~/shop/vendor/jquery/jquery-migrate.min.js" asp-append-version="true"></script>
 <script src="~/shop/vendor/owl.carousel/owl.carousel.min.js" asp-append-version="true"></script>
 <script src="~/shop/vendor/swiper/swiper-bundle.min.js" asp-append-version="true"></script>
 <script src="~/shop/vendor/bootstrap/bootstrap.bundle.min.js" asp-append-version="true"></script>
+<script src="~/shop/js/store/catalog.js" asp-append-version="true"></script>
+<script src="~/shop/js/store/product-card.js" asp-append-version="true"></script>
+<script src="~/shop/js/layout/header-navigation.js" asp-append-version="true"></script>
 <script src="~/shop/js/layout/main.js" asp-append-version="true"></script>
 <script src="~/shop/js/core/form-validation.js" asp-append-version="true"></script>
-<script src="~/shop/js/store/countries.js" asp-append-version="true"></script>
-<script src="~/shop/js/store/catalog.js" asp-append-version="true"></script>
 <script src="~/shop/js/store/commerce.js" asp-append-version="true"></script>
 @await RenderSectionAsync("Scripts", false)
 <script src="~/shop/js/core/electrical-content.js" asp-append-version="true"></script>

@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", () => {
+window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
   const ui = window.HNUI;
   const read = (key) => {
     const v = ui.storage.json(key, []);
@@ -228,4 +228,4 @@ document.addEventListener("DOMContentLoaded", () => {
   renderAddresses();
   renderOverview();
   navigate();
-});
+}));

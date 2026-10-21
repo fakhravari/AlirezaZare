@@ -870,7 +870,7 @@ h3,
 .shared-login-modal .login-brand small,
 #loginModal .login-brand small {
   margin-top: 5px;
-  color: #6f7883;
+  color: var(--color-text-muted);
   font-family: var(--font-body);
   font-size: 13px;
   font-weight: 500;

@@ -2,7 +2,7 @@
 
 مسیرهای کوتاه `js/` در این صفحه نسبت به `Shop/wwwroot/shop/` هستند. برای ورود از صفحه به script، [نقشهٔ صفحه‌ها](../architecture/routing.md) و [ترتیب اجرا](layout.md) را ببینید.
 
-ورودی ذخیره‌شده در مرورگر باید پیش از رندر escape و validate شود. fallback خطای storage در ui-core.js وجود دارد؛ handler اختصاصی را به ریشهٔ صفحه محدود و از ثبت دوبارهٔ listener پرهیز کنید.
+ورودی ذخیره‌شده در مرورگر باید پیش از رندر escape و validate شود. fallback و migration در storage.js است؛ handler اختصاصی را به ریشهٔ صفحه محدود کنید و با `HNUI.mount` یک‌بار ثبت کنید.
 
 ## API مشترک `window.HNUI`
 
@@ -13,6 +13,8 @@
 | `HNUI.STORAGE_KEYS` | کلیدهای پایهٔ auth/cart |
 | `HNUI.storage.get/set/remove/json` | خواندن/نوشتن مقاوم در برابر خطای browser storage؛ `set` برای favorite/compare رویداد list را dispatch می‌کند |
 | `HNUI.ready(callback)` | اجرای callback پس از آماده‌شدن DOM |
+| `HNUI.mount(name, root, initialize)` | اجرای یک‌باره برای نام مؤلفه و root؛ root غایب یا نصب دوباره false برمی‌گرداند؛ خطای initialize دوباره قابل تلاش است |
+| `HNUI.EVENTS`, `HNUI.emit(type, detail)` | نام ثابت رویداد و کنترل payloadهای cart/auth؛ برای رویداد مشترک CustomEvent موازی نسازید |
 | `HNUI.cart.read/write/add/update/remove/totals/renderOptions` | normalize مشترک، renderer مشترک ویژگی/متعلقات، validation ساده و مدیریت سبد؛ `write` رویداد cart را dispatch می‌کند |
 | `HNUI.auth.isLoggedIn/login/logout/requireLogin` | وضعیت ورود در مرورگر؛ `requireLogin(resume)` برای ورود نداشتن رویداد `hn:auth-required` می‌فرستد و callback را پس از ورود ادامه می‌دهد |
 | `HNUI.scrollLock.lock/unlock` | شمارندهٔ قفل scroll با کلاس `ui-scroll-locked` |
@@ -31,11 +33,14 @@
 
 | فایل | مسئولیت فعلی | قبل از تغییر چه چیزی را دنبال کنیم |
 |---|---|---|
-| `js/core/ui-core.js` | storage، cart/auth helpers، eventها، lock/dialog، format/escape | قرارداد کلید/payload؛ fallback storage؛ accessibility |
-| `js/layout/main.js` | header، پیشنهاد/جست‌وجوی اخیر، شمارنده‌ها، mega-menu، account/login/cart/list panels و تعامل عمومی | DOM واقعی partialها، listenerهای delegated، home/inner variant و panel state |
+| `js/core/ui-core.js` | اتصال APIهای مشترک، auth، event/mount، lock/dialog، format/escape | قرارداد payload و accessibility |
+| `js/core/storage.js` | storage، نسخهٔ رکورد، backup و migration | legacy/future/malformed/quota؛ نوشتن و حذف موفق/ناموفق |
+| `js/store/cart.js` | normalize، قیمت، موجودی، سبد و renderer گزینه‌ها | شناسهٔ محصول و قرارداد سبد |
+| `js/layout/header-navigation.js` | باز/بسته، کیبورد، hover و گروه‌های دسته در هدر | trigger واقعی، state صریح و خانه/داخلی |
+| `js/layout/main.js` | پیشنهاد/جست‌وجوی اخیر، شمارنده‌ها، account/login/cart/list panels و هماهنگی خانه | listenerهای delegated و panel state |
 | `js/core/form-validation.js` | validation عمومی/delegated فرم | `data-*`، selector فرم، خطاهای inline و submit handler اختصاصی |
-| `js/store/countries.js` | نام فارسی/انگلیسی و پرچم روی `window.HNCountries` | پیش از catalog.js؛ نام و مسیر SVG را هم‌زمان بررسی کنید |
-| `js/store/catalog.js` | کاتالوگ نمونه روی `window.HNProducts` | مدل محصول/قیمت/تصویر/variant؛ داده دمو است |
+| `js/store/catalog.js` | resolverِ catalog.json؛ HNCatalog و APIهای سازگار HNProducts/HNCountries/HNProductColors | شناسه‌های صریح، relation و immutable بودن؛ داده دمو است |
+| `js/store/product-card.js` | renderer مشترک کارت و قیمت | variantهای grid/slider/search/related/favorite؛ escape و data-* مشترک |
 | `js/store/commerce.js` | جزئیات محصول، variant/accessory، قیمت، gallery، feedback، cart، coupon، compare و favorites rendering | selectorهای `#productView`, `#cartView`, `#favoritesView`, `#compareView`؛ event/storage و rendererهای HTML |
 | `js/pages/search.js` | URL-backed filter/sort/page، نتایج و mobile filter drawer | query params، `popstate`, empty state و cart/list controls |
 | `js/pages/account-page.js` | profile route/hash navigation، overview و CRUD آدرس | storage keys، modal، hashchange و `storage` event |
@@ -51,6 +56,10 @@
 | `js/core/electrical-content.js` | ریزتعامل/محتوای عمومی برخی صفحه‌ها | پس از section Scripts اجرا می‌شود |
 
 ## localStorage: کلیدهای شناخته‌شده
+
+رکوردهای ساختاریافته با شکل `{schemaVersion: 1, value: ...}` نوشته می‌شوند. آرایه/شیء قدیمی همچنان خوانده می‌شود و در اولین نوشتن نسخه‌دار، نسخهٔ خام یک‌بار در `hn-migration-backup:{key}` حفظ می‌شود. wrapper همیشه مقدار بازشده را به consumer می‌دهد؛ کد مصرف‌کننده نباید envelope را خودش باز کند.
+
+نسخهٔ جدیدتر خوانده/بازنویسی/حذف نمی‌شود و `storage.writable(key)` false برمی‌گرداند. JSON خراب یا shape اشتباه fallback می‌گیرد؛ نوشتن معتبر می‌تواند آن را با backup اصلاح کند. cart، favorite/compare، آدرس‌ها، پروفایل/فعالیت، cache محصول، جستجوهای اخیر و کلیدهای `hn-product-reviews-{id}`/`hn-product-questions-{id}` قرارداد نسخه‌دار دارند. scalarهایی مثل auth، coupon و شناسهٔ آدرس همچنان رشته‌اند. تغییر schema باید migration صریح و تست داشته باشد؛ storage کاربر را برای رفع خطا پاک نکنید.
 
 کلیدهای زیر دمو و client-side هستند؛ persistence سرور یا دادهٔ قابل‌اعتماد محسوب نمی‌شوند. پیش از migration/پاک‌سازی، همهٔ مصرف‌کننده‌ها را با `rg -n "نام-کلید" Shop` پیدا کنید.
 

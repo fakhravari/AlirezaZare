@@ -4,21 +4,25 @@
 
 | بخش | نقطهٔ شروع | مالک رفتار / ظاهر |
 |---|---|---|
-| دادهٔ محصول | [catalog.js](../../Shop/wwwroot/shop/js/store/catalog.js) | `productCatalog` → `window.HNProducts` |
+| دادهٔ محصول | [catalog.json](../../Shop/wwwroot/content/data/catalog.json) | [CatalogRepository](../../Shop/Services/CatalogRepository.cs) و resolver [catalog.js](../../Shop/wwwroot/shop/js/store/catalog.js) |
 | خانه | [Home/Index.cshtml](../../Shop/Views/Home/Index.cshtml) | `layout/main.js`؛ `home-warmth.css` و کارت مشترک |
 | Search | [Product/List.cshtml](../../Shop/Views/Product/List.cshtml) | [search.js](../../Shop/wwwroot/shop/js/pages/search.js)، `search.css` و `search-mobile.css` |
 | مقایسه / علاقه‌مندی | [Compare](../../Shop/Views/Compare/Index.cshtml) و [Favorites](../../Shop/Views/Favorites/Index.cshtml) | `store/commerce.js`؛ `commerce.css` و قواعد responsive مشترک |
-| کارت مشترک | [shared-product-card.css](../../Shop/wwwroot/shop/css/store/shared-product-card.css) | rendererهای main.js، search.js و commerce.js را نیز پیدا کنید |
+| کارت مشترک | [product-card.js](../../Shop/wwwroot/shop/js/store/product-card.js) و [shared-product-card.css](../../Shop/wwwroot/shop/css/store/shared-product-card.css) | یک renderer با variantهای grid/slider/search/related/favorite؛ مصرف در main/search/commerce |
 
 جدول route و asset کامل در [نقشهٔ صفحه‌ها](../architecture/routing.md) است؛ ترتیب cascade را از [پوسته](../frontend/layout.md) بخوانید.
 
 ## قرارداد محصول
 
-کاتالوگ فعلی ۳۰ ردیف نمونه دارد. `id` از شمارهٔ ردیف به‌علاوهٔ یک ساخته می‌شود؛ تغییر ترتیب آرایه می‌تواند شناسه، URL، state ذخیره‌شده و نام رسانه را تغییر دهد. ردیف را صرفاً برای مرتب‌سازی نمایش جابه‌جا نکنید.
+کاتالوگ فعلی ۳۰ محصول نمونه با `schemaVersion: 1` دارد. `id`، `code` و `slug` در هر رکورد صریح‌اند؛ تغییر ترتیب آرایه، هویت، URL و رسانه را عوض نمی‌کند. شناسهٔ حذف‌شده را به کالای دیگری اختصاص ندهید. URL با `/products/{slug}-{id}` ساخته می‌شود و مسیرهای قدیمی یک‌مرحله‌ای به canonical هدایت می‌شوند.
+
+جدول‌های `brands`, `countries`, `categories`, `colors`, `media` و `details` با کلید مشخص نگهداری می‌شوند. محصول با `brandId`, `categoryId`, `colorIds`, `mediaId`, `detailId` به آن‌ها متصل است؛ برند با `countryCode` به کشور وصل می‌شود. `collections.selected/bestsellers/newest` فقط شناسهٔ محصول دارند و ترتیب نمایش خانه را تعیین می‌کنند. نام، قیمت، مسیر فایل یا شمارهٔ ردیف کلید رابطه نیست.
+
+resolver، شکل مصرفی سازگار زیر را می‌سازد؛ `HNProducts` و اشیای درونی آن frozen هستند. برای پیدا کردن محصول از `HNCatalog.find(id)` و برای لینک از `HNCatalog.url(id)` استفاده کنید. برای نمایش فهرست‌ها داده را کپی و مرتب کنید، نه اینکه شیء مشترک را تغییر دهید.
 
 | فیلد | نقش |
 |---|---|
-| `id`، `name`، `englishName` | هویت نمونه، عنوان فارسی و مبنای slug/نام فایل |
+| `id`، `code`، `slug`، `name`، `englishName` | هویت پایدار، کد کالا، slug صریح و عنوان فارسی/انگلیسی |
 | `brand`، `brandCountryCode` | برند و اتصال به `HNCountries` |
 | `type`، `categoryPath` | نوع و مسیر دسته‌بندی |
 | `powerSource`، `useCase` | منبع تغذیه و مورد استفاده؛ aliasهای قدیمی `movement` و `strap` برای سازگاری باقی‌اند |
@@ -29,23 +33,23 @@
 | `images`، `videos` | رسانه‌های گالری؛ تصاویر شامل `src` و `thumbnail` هستند |
 | `detail`، `variants` | توضیحات و گزینه‌ها؛ شرح فنی در شش گروه مشترک است و مشخصات تأییدشدهٔ مدل نیست |
 
-نسخهٔ سمت سرور در [ProductSeoCatalog.cs](../../Shop/Models/ProductSeoCatalog.cs) متن catalog.js را با regex می‌خواند؛ فقط اضافه‌شدن فیلد به شیء JS، دادهٔ SEO را تغییر نمی‌دهد. بعد از تغییر قالب آرایه، صفحهٔ محصول و sitemap را بررسی کنید.
+CatalogRepository همان JSON را با System.Text.Json می‌خواند و شناسه/کد تکراری، رابطهٔ شکسته، slug نامعتبر، مسیر نامعتبر، قیمت/موجودی منفی و collection نامعتبر را رد می‌کند. JSON مرورگر با encoder پیش‌فرض امن در `_CatalogData` منتشر می‌شود. دادهٔ قالب، قیمت و موجودی همچنان نمونه است.
 
 ## رنگ و کشور
 
-`productColorCatalog` در catalog.js هشت رنگ مشکی، سفید، قرمز، آبی، سبز، زرد، نارنجی و خاکستری را تعریف می‌کند و به `window.HNProductColors` می‌دهد. شکل رکورد `{slug, en, fa, hex}` است؛ `productColorsById` رنگ را به محصول متصل می‌کند. slug انگلیسی برای URL و اسم فارسی به‌همراه swatch کد رنگ برای نمایش استفاده می‌شود.
+`colors` در catalog.json هشت رنگ اصلی را با شکل `{slug, en, fa, hex}` تعریف می‌کند و `colorIds` محصول به آن‌ها وصل است. slug انگلیسی برای URL و نام فارسی به‌همراه swatch کد رنگ برای نمایش استفاده می‌شود؛ API سازگار `HNProductColors` باقی است.
 
-[countries.js](../../Shop/wwwroot/shop/js/store/countries.js) نام فارسی/انگلیسی و مسیر پرچم را منتشر می‌کند؛ `productBrandCountryCodes` اتصال برند به کد کشور را نگه می‌دارد. لوگوی برند و پرچم، تصویر داده هستند و به `content/` تعلق دارند. کشور معرفی‌شده را بدون منبع معتبر «کشور ساخت همان کالا» فرض نکنید.
+`countries` در همان JSON نام فارسی/انگلیسی و مسیر پرچم را نگه می‌دارد؛ `brands[id].countryCode` اتصال برند را تعیین می‌کند. API سازگار `HNCountries` باقی است و countries.js جداگانه حذف شده است. لوگوی برند و پرچم در `content/` قرار دارند. کشور برند به‌خودی‌خود کشور ساخت همان کالا نیست.
 
 ## فهرست‌ها و URL state
 
 Search فیلترها، sort و pagination را با query string و `popstate` هماهنگ می‌کند؛ رنگ در `state.color` یک Set از slugها است. نام فارسی یا hex را جای slug در URL قرار ندهید. پس از تغییر فیلتر، reload، back/forward، بدون نتیجه و ترکیب رنگ با قیمت را بررسی کنید. بازهٔ قیمت در RTL باید سمت راست «از» و چپ «تا» خوانده شود.
 
-خانه چند renderer برای منتخب، پرفروش و تازه‌وارد دارد. عرض کارت، فاصلهٔ دو کارت و تراز فضای قیمت را با بخش اول خانه مقایسه کنید. ظاهر مشترک کارت در shared-product-card.css است؛ home-warmth.css فقط اصلاح‌های خانه را نگه می‌دارد. افزودن به سبد باید طبق [قرارداد سبد](cart.md) انجام شود.
+خانه، جستجو، مشابه و علاقه‌مندی، markup و قیمت کارت را از `HNProductCard.render(product, {variant})` می‌گیرند. `HNProductCard.price` قیمت مشترک مقایسه را نیز می‌سازد؛ جدول مقایسه چیدمان جدا دارد. عرض، فاصله و قیمت در shared-product-card.css مدیریت می‌شود؛ home-warmth.css فقط چیدمان اختصاصی خانه را نگه می‌دارد. افزودن به سبد طبق [قرارداد سبد](cart.md) است.
 
 ## بازبینی مرتبط
 
-دو کارت با عنوان کوتاه/بلند، قیمت با/بدون تخفیف، موجودی صفر و چند محصول را در موبایل و دسکتاپ بررسی کنید. گروه‌های مقایسه در موبایل باید بدون ایجاد overflow کل صفحه قابل پیمایش باشند. تغییر کارت مشترک را روی Home، Search، Related، Favorites و Compare بررسی کنید؛ rendererهای متفاوت را یکسان فرض نکنید.
+دو کارت با عنوان کوتاه/بلند، قیمت با/بدون تخفیف و موجودی صفر را در موبایل و دسکتاپ بررسی کنید. گروه‌های مقایسه در موبایل باید بدون overflow کل صفحه قابل پیمایش باشند. `npm test` حفظ خروجی کاتالوگ پیش از انتقال، استقلال از ترتیب، مسیر فایل‌ها و قرارداد renderer را بررسی می‌کند؛ [کیفیت](../development/quality.md) مرجع فرمان‌هاست.
 
 ---
 

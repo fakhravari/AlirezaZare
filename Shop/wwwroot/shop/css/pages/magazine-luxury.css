@@ -1863,6 +1863,27 @@
     margin-right: 0;
   }
 
+  .journal-categories .journal-branch > button {
+    gap: 5px;
+    padding-inline: 6px;
+  }
+
+  .journal-categories .journal-branch > button > i {
+    flex-basis: 28px;
+    width: 28px;
+    height: 28px;
+  }
+
+  .journal-categories .journal-branch > button > .journal-category-count {
+    min-width: 24px;
+    padding-inline: 4px;
+    flex-shrink: 0;
+  }
+
+  .journal-branch > button > span:first-of-type {
+    overflow-wrap: anywhere;
+  }
+
   .journal-page nav.journal-paging.site-pagination {
     gap: 6px;
     margin-top: 26px;

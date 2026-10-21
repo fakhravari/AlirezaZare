@@ -1,4 +1,5 @@
-﻿<nav class="navbar navbar-expand-lg navbar-dark fixed-top" id="mainNav">
+@inject Shop.Services.CatalogRepository StoreCatalog
+<nav class="navbar navbar-expand-lg navbar-dark fixed-top" id="mainNav">
 <div class="home-header-top" aria-label="جست‌وجو و پشتیبانی فروشگاه">
     <a class="home-header-support home-header-support-link" href="tel:03969455457" aria-label="تماس فوری با پشتیبانی به شماره 03969455457">
         <span class="home-header-support-icon" aria-hidden="true"><i class="bi bi-headset"></i></span>
@@ -15,11 +16,6 @@
     </form>
 </div>
 <div class="container">
-<a class="navbar-brand brand header-home-link header-brand-lockup" asp-controller="Home" asp-action="Index" aria-label="برق شیراز؛ فروشگاه تخصصی برق و ابزار ندا اولیائی" title="رفتن به صفحهٔ اصلی">
-    <span class="header-brand-mark" aria-hidden="true">
-        <img src="~/content/identity/store-electrical-lockup.svg" alt="" width="256" height="72" decoding="async" asp-append-version="true" />
-    </span>
-</a>
 <button class="navbar-toggler shadow-none border-0"
         type="button"
         data-bs-toggle="offcanvas"
@@ -27,6 +23,11 @@
         aria-label="باز کردن منو">
     <i class="bi bi-list"></i>
 </button>
+<a class="navbar-brand brand header-home-link header-brand-lockup" asp-controller="Home" asp-action="Index" aria-label="برق شیراز؛ فروشگاه تخصصی برق و ابزار ندا اولیائی" title="رفتن به صفحهٔ اصلی">
+    <picture class="header-brand-mark" aria-hidden="true">
+        <img src="~/content/identity/store-electrical-lockup.svg" alt="" width="256" height="72" decoding="async" asp-append-version="true" />
+    </picture>
+</a>
 <div class="home-nav-groups">
 <div class="home-nav-menu-group">
 <div class="collapse navbar-collapse">
@@ -96,9 +97,9 @@
         <strong>برندهای معتبر ابزار</strong>
         <small>لوگوی برند را انتخاب کنید و محصولاتش را ببینید</small>
     </span>
-    <b>@BrandCatalog.All.Count برند</b>
+    <b>@StoreCatalog.Read().Brands.Count برند</b>
 </li>
-@foreach (BrandProfileModel brand in BrandCatalog.All)
+@foreach (BrandProfileModel brand in StoreCatalog.Read().Brands)
 {
     string slug = brand.Slug;
     <li>

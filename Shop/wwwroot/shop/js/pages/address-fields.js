@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", () => {
+window.HNUI.ready(() => window.HNUI.mount("pages-address-fields", document, () => {
   const form = document.querySelector("#addressForm");
   if (!form) return;
   const data = window.HNIranPlaces,
@@ -49,4 +49,4 @@ document.addEventListener("DOMContentLoaded", () => {
   };
   province.addEventListener("change", () => cities());
   window.HNAddressFields.set();
-});
+}));

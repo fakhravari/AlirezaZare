@@ -17,6 +17,8 @@ _Shop
 
 در خانه section `Hero` داخل `header.hero#home` رندر می‌شود؛ این section جایگاه محتوای hero است و جزو ترتیب CSS/JS نیست.
 
+لوگوی `content/identity/store-electrical-lockup.svg` در هدر فقط از عرض ۹۹۲px به بالا نمایش داده می‌شود؛ تا عرض ۹۹۱px، هدر فقط دکمهٔ منو، حساب و ابزارهای خرید/مقایسه/علاقه‌مندی را دارد. همان لوگوی کامل در `.mobile-menu-logo` بالای drawer موبایل، با عرض حداکثر ۱۹۲px و نسبت ۲۵۶:۷۲ جایگزین نوشتهٔ قدیمی «ن / ندا اولیائی» است و به خانه لینک می‌شود. دکمهٔ بستن در ستون جدا و جستجو در ردیف بعد قرار دارند. قواعد هدر در `shared-header.css` و قاب لوگوی drawer در `mobile-drawer-compact.css` هستند؛ فاصلهٔ سه دکمهٔ خرید/مقایسه/علاقه‌مندی در موبایل ۵px است.
+
 پنل‌ها بیرون `#main-content` هستند. خطای z-index، قفل scroll یا اندازهٔ پنل را فقط به View صفحه نسبت ندهید. skip link به `div#main-content[tabindex="-1"]` می‌رود؛ هر View، main معنایی خودش را درون آن حفظ می‌کند. عنصر main تو در تو نسازید.
 
 ## اجزای مشترک
@@ -24,7 +26,7 @@ _Shop
 | Partial/component | markup یا نشانه | مالک CSS/JS اصلی | جاهایی که باید رگرسیون شوند |
 |---|---|---|---|
 | هدر | `_HomeHeader`, `_InnerHeader`, `_Header`؛ body کلاس home/inner | `shared-header.css`, `shared-mega-menu.css`, themeها؛ `layout/main.js` | خانه + یک inner page، دسکتاپ + موبایل، login/logout و search open |
-| مگامنو | خانه و inner markup/variant متفاوت؛ inner selectorهایی مثل `.page-mega-sidebar` | `shared-mega-menu.css`, `electrical-theme.css`, `industrial-system.css`, `mega-menu-unified.css`; باز/بسته و category در `main.js` | hover trigger → pointer حرکت به panel، keyboard focus، شاخهٔ پیش‌فرض، breakpoint 992؛ پنل inner زیر هدر و در قاب مرکزیِ عریض قرار می‌گیرد؛ حالت فعال/hover دسکتاپ دسته‌بندی زمینهٔ زرد و آیکن سرمه‌ای دارد |
+| مگامنو | خانه و inner markup/variant متفاوت؛ inner selectorهایی مثل `.page-mega-sidebar` | `shared-mega-menu.css`, `mega-menu-unified.css`, `quick-links-menu.css`; باز/بسته و category در `header-navigation.js` | trigger → panel، keyboard/ArrowDown/Escape، فضای خالی هدر، شاخهٔ پیش‌فرض و breakpoint 992 |
 | account popover/drawer هدر | `.shared-account-card`, `.shared-account-popover`, `.account-links` | `shared-account.css`; تعامل در `main.js` | کاربر خارج/وارد، desktop/mobile، Escape، focus و scroll |
 | cart/favorites/compare panels | `.page-cart-panel`, `.search-cart-drawer`, `.favorites-panel`, `.compare-panel` و item/footerها | `shared-cart.css`, `commerce.css`; `main.js` + `commerce.js` | سبد خالی/پر، تعداد زیاد آیتم، پنل باز و scroll داخلی، responsive |
 | modal ورود/ثبت‌نام سراسری | `#loginModal`, `.login-modal-form-panel`, `.login-close` در `_Panels.cshtml` | layout در `style.css`, `luxury-theme.css`, `industrial-system.css`; قواعد فرم در `shared-login.css`; تعامل در `main.js` | ورود/ثبت‌نام/OTP، viewport کوتاه موبایل، اسکرول داخلی، بستن و بازگشت focus |
@@ -32,7 +34,8 @@ _Shop
 | فرم آدرس | `_AddressForm`, `#addressDialog` در Cart و dialog آدرس پروفایل | `checkout.css`, `account-page.css`; `address-fields.js`, `iran-places.js`, `account-page.js` | شهر بدون استان، استان/شهر معتبر، validation و ذخیره؛ Checkout این فرم را ندارد و فقط آدرس انتخابی را پیش‌نمایش می‌کند |
 | مزیت خرید مطمئن | `_PurchaseBenefits`, `.purchase-benefits` | `style.css` و overrideهای `industrial-system.css`; JS اختصاصی ندارد | صفحهٔ محصول و هر مسیر دیگری که partial را رندر می‌کند |
 | لینک‌های مرتبط | `_RelatedLinks` | `commerce.css`, overrideهای `pages.css`; JS اختصاصی ندارد | صفحات service/editorial که partial را مصرف می‌کنند |
-| کارت محصول | shared card markup و rendererهای store | `shared-product-card.css`, `commerce.css` | Home/Search/Related/Compare/Favorites؛ crop تصویر و عنوان طولانی |
+| کارت محصول | `HNProductCard.render` در `store/product-card.js` | `shared-product-card.css`؛ [نقشهٔ مالکیت](../../tools/ui-owners.json) | Home/Search/Related/Favorites و قیمت Compare؛ crop تصویر و عنوان طولانی |
+| فوتر موبایل | `_Footer` و `.footer-main > .col-6` | `mobile-pages.css`؛ فاصلهٔ بالای همهٔ ستون‌های لینک از gutter مشترک Bootstrap می‌آید | هم‌ترازی عنوان‌های هر ردیف، به‌ویژه «کمپانی و قوانین» و «راه‌های ارتباطی»؛ margin-top اختصاصی ستون آخر نگذارید |
 
 این‌ها نقطهٔ شروع‌اند؛ selectorهای دقیق و حالت واقعی را با `rg` و Elements panel پیدا کنید. از فرض «یک partial = یک CSS» پرهیز کنید.
 
@@ -79,21 +82,28 @@ _Shop
 
 ## ترتیب واقعی JavaScript
 
+ابتدا `_CatalogData`، JSON امن `script[type="application/json"]#storeCatalog` را رندر می‌کند.
+
+- `shop/js/core/storage.js`
+- `shop/js/store/cart.js`
 - `shop/js/core/ui-core.js`
 - `shop/vendor/jquery/jquery.min.js`
 - `shop/vendor/jquery/jquery-migrate.min.js`
 - `shop/vendor/owl.carousel/owl.carousel.min.js`
 - `shop/vendor/swiper/swiper-bundle.min.js`
 - `shop/vendor/bootstrap/bootstrap.bundle.min.js`
+- `shop/js/store/catalog.js`
+- `shop/js/store/product-card.js`
+- `shop/js/layout/header-navigation.js`
 - `shop/js/layout/main.js`
 - `shop/js/core/form-validation.js`
-- `shop/js/store/countries.js`
-- `shop/js/store/catalog.js`
 - `shop/js/store/commerce.js`
 - **section `Scripts` از View**
 - `shop/js/core/electrical-content.js`
 
-`HNUI` پیش از مصرف‌کننده‌ها منتشر می‌شود؛ `countries.js` پیش از کاتالوگ و `commerce.js` بعد از کاتالوگ است. ترتیب اجرا، ready callback و guard عنصر را هم در script بررسی کنید؛ وجود فایل در مخزن، مصرف‌شدنش را ثابت نمی‌کند.
+storage/cart factory پیش از HNUI، resolver پیش از renderer و renderer پیش از مصرف‌کننده‌ها منتشر می‌شوند. این ترتیب با `npm run check` کنترل می‌شود. کاتالوگ کشور در همان JSON مشترک است. `HNUI.mount(name, root, initialize)` اجرای تکراری مؤلفه روی همان root را متوقف می‌کند؛ وجود فایل در مخزن به معنی مصرف‌شدنش نیست.
+
+منوهای برند، دسته و دسترسی سریع فقط با state صریح `is-brand-open`, `is-mega-open`, `is-quick-links-open` باز می‌شوند. hover/focus روی wrapper گسترده نباید منو را باز کند؛ pointer فقط روی trigger باز می‌کند و panel باز را نگه می‌دارد. controller مشترک منوی قبلی را می‌بندد، Escape را همراه بازگشت فوکوس مدیریت می‌کند و در تغییر breakpoint وضعیت را پاک می‌کند.
 
 ## هنگام تغییر پوسته
 

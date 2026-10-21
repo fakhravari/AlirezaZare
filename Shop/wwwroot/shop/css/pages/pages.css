@@ -2044,7 +2044,7 @@ h6 {
 .returns-intro-label {
   display: block;
   margin-bottom: 4px;
-  color: #927022;
+  color: var(--color-accent-ink);
   font-size: 13px;
   font-weight: 750;
 }
@@ -2057,7 +2057,7 @@ h6 {
 }
 .returns-intro p {
   margin: 0;
-  color: #647586;
+  color: var(--color-text-muted);
   font-size: 14px;
   line-height: 1.9;
 }
@@ -4541,6 +4541,23 @@ body {
 }
 
 /* Shared related-link cards used across the flow pages. */
+.cart-page-links {
+  width: min(calc(100% - 48px), 1360px);
+  max-width: 1360px;
+  margin: 0 auto clamp(40px, 4vw, 56px);
+  padding: 0;
+}
+
+.cart-page-links > .flow-related.shared-related {
+  margin: 0;
+}
+
+@media (max-width: 767px) {
+  .cart-page-links {
+    width: calc(100% - 24px);
+  }
+}
+
 .flow-related.shared-related {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -4599,7 +4616,8 @@ body {
   font-size: 12px;
   font-weight: 700;
   line-height: 1.7;
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .flow-related.shared-related a > i:last-child {
@@ -4777,7 +4795,7 @@ body {
     0 3px 10px rgba(16, 42, 67, 0.08);
 }
 #productView .product-variant-choice small {
-  color: #927346;
+  color: var(--color-accent-ink);
   font-size: 10px;
   white-space: nowrap;
 }

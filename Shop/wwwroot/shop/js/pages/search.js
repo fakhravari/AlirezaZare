@@ -1,4 +1,4 @@
-(() => {
+window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".search-main"), () => {
   const products = window.HNProducts;
   const $ = (selector) => document.querySelector(selector);
   const $$ = (selector) => [...document.querySelectorAll(selector)];
@@ -406,34 +406,7 @@
     if (state.sort === "newest") list.sort((a, b) => a.newest - b.newest);
     return list;
   }
-  function card(p) {
-    return `<article class="search-product product-card search-page-card"><div class="product-image search-page-card-media"><a href="${window.HNProductUrl(p)}"><img src="${p.image}" alt="${p.name}" loading="lazy" decoding="async"></a><button class="favorite" type="button" data-product-id="${p.id}" aria-label="افزودن به علاقه‌مندی‌ها" aria-pressed="false"><i class="bi bi-heart"></i></button><button class="compare-trigger" type="button" data-product-id="${p.id}" aria-label="افزودن به مقایسه" aria-pressed="false" title="افزودن به مقایسه"><i class="bi bi-arrow-left-right" aria-hidden="true"></i></button>${p.badge ? `<span class="badge-best">${p.badge}</span>` : ""}</div><div class="product-info search-page-card-content"><div class="search-page-card-heading"><h3 class="search-page-card-title"><a href="${window.HNProductUrl(p)}">${p.name}</a></h3></div><p class="search-product-price search-page-card-price">${fa(p.price * 1000000)} <small>تومان</small></p></div><button class="search-add-cart add-cart search-page-card-action" type="button" data-id="${p.id}" data-name="${p.name}" data-price="${p.price * 1000000}" data-image="${p.image}"><i class="bi bi-bag-plus"></i><span class="search-page-card-action-label">افزودن</span><span class="search-page-card-action-compact">افزودن</span></button></article>`;
-  }
-  function applyDiscountDisplay(root) {
-    root.querySelectorAll(".search-page-card").forEach((productCard) => {
-      const productId = Number(
-        productCard.querySelector(".search-page-card-action")?.dataset.id,
-      );
-      const product = products.find((item) => item.id === productId);
-      const discount = Number(product?.discountPercent) || 0;
-      if (!product || discount <= 0 || discount >= 100) return;
-
-      const currentPrice = Math.round(product.price * 1000000);
-      const previousPrice = Math.round(currentPrice / (1 - discount / 100));
-      const price = productCard.querySelector(".search-page-card-price");
-      if (price) {
-        price.classList.add("has-discount");
-        price.innerHTML =
-          '<strong class="product-price-current">' +
-          fa(currentPrice) +
-          " <small>تومان</small></strong><span class=\"product-price-deal\"><del class=\"price-old\">" +
-          fa(previousPrice) +
-          '</del><b class="product-price-discount">٪' +
-          fa(discount) +
-          "</b></span>";
-      }
-    });
-  }
+  const card = (product) => window.HNProductCard.render(product, {variant: "search"});
   function scrollToResultsStart() {
     const results = document.querySelector(".results-area");
     if (!results) return;
@@ -454,7 +427,6 @@
     const shown = list.slice(0, state.visible);
     const finished = list.length > 0 && state.visible >= list.length;
     $("#productResults").innerHTML = shown.map(card).join("");
-    applyDiscountDisplay($("#productResults"));
     const comparedProducts = new Set(
       window.HNUI?.storage.json("hn-compare", []).map(String) || [],
     );
@@ -770,4 +742,4 @@
     { rootMargin: "300px" },
   );
   observer.observe($("#loadMoreSentinel"));
-})();
+}));

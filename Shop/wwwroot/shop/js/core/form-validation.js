@@ -1,4 +1,4 @@
-(() => {
+window.HNUI.mount("core-form-validation", document, () => {
   "use strict";
 
   const customForms = new Set([
@@ -226,4 +226,4 @@
         });
     });
   });
-})();
+});

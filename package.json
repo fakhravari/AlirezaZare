@@ -1,0 +1,16 @@
+{
+  "name": "shop-quality",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/unit/*.test.mjs",
+    "check": "node tools/check-ui.mjs && node docs/development/check-docs.mjs",
+    "test:http": "node --test tests/smoke/*.test.mjs",
+    "test:browser": "playwright test",
+    "test:browser:list": "playwright test --list"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.1",
+    "postcss": "8.5.31"
+  }
+}

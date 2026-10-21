@@ -1,6 +1,6 @@
 # راه‌اندازی و اعتبارسنجی پروژه
 
-پیش‌نیاز: .NET SDK سازگار با `net10.0`.
+پیش‌نیاز: .NET SDK سازگار با `net10.0`؛ برای کنترل‌های UI و تست‌ها Node.js 24 و وابستگی‌های ثبت‌شده در package-lock.json.
 
 ```powershell
 dotnet restore Shop.sln
@@ -13,7 +13,7 @@ dotnet run --project Shop/Shop.csproj --no-launch-profile --urls http://localhos
 - در تغییر CSS/JS دست‌کم صفحهٔ هدف، یک صفحهٔ دیگر با همان component مشترک و اندازهٔ موبایل را بررسی کنید.
 - در تغییر route/controller مدل، `dotnet build Shop.sln` را اجرا کنید.
 - در تغییر JS، syntax و حالت‌های no-data / malformed storage را بررسی کنید.
-- پروژه فعلاً test project ثبت‌شده در solution ندارد؛ این را به‌عنوان نبود تست خودکار اعلام کنید، نه «تست موفق».
+- پروژهٔ `tests/Shop.Contracts` در solution قرارداد C# را بررسی می‌کند؛ تست‌های JS/HTTP/مرورگر نیز اضافه شده‌اند. نصب و اجرای بررسی‌ها در [کیفیت](quality.md) است؛ موفقیت build را معادل تست مرورگر اعلام نکنید.
 - stylesheet و scriptهای اختصاصی View از `asp-append-version="true"` استفاده می‌کنند؛ مسیرهای CSS/JS قالب در Razor با `~/shop/` و رسانه‌های داده با `~/content/` آغاز می‌شوند تا به مسیر جاری وابسته نباشند. اگر مرورگر CSS/JS قدیمی نشان داد، ابتدا URL نهایی و cache-busting واقعی asset را بررسی کنید.
 
 ## بررسی مستندات

@@ -55,11 +55,11 @@
                         <h2>@brand.Name <small>@brand.PersianName</small></h2>
                         <p>@brand.Focus</p>
                         <div class="brand-card-actions">
-                            <a class="brand-action brand-action-store" href="@Url.Content($"~/search?brand={brand.Slug}")">
-                                <i class="bi bi-shop" aria-hidden="true"></i><span>مشاهده فروشگاه</span>
+                            <a class="brand-action brand-action-store" href="@Url.Content($"~/search?brand={brand.Slug}")" aria-label="مشاهده محصولات @brand.PersianName">
+                                <i class="bi bi-shop" aria-hidden="true"></i><span>مشاهده<span class="brand-action-label-detail"> فروشگاه</span></span>
                             </a>
-                            <a class="brand-action brand-action-details" href="@Url.Content($"~/brands/{brand.Slug}")">
-                                <i class="bi bi-info-circle" aria-hidden="true"></i><span>دربارهٔ برند</span>
+                            <a class="brand-action brand-action-details" href="@Url.Content($"~/brands/{brand.Slug}")" aria-label="درباره برند @brand.PersianName">
+                                <i class="bi bi-info-circle" aria-hidden="true"></i><span>درباره<span class="brand-action-label-detail"> برند</span></span>
                             </a>
                         </div>
                     </article>

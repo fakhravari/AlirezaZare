@@ -13,7 +13,7 @@
   padding: 35px 0;
 }
 .flow-heading > span {
-  color: #987747;
+  color: var(--color-accent-ink);
   font-size: 12px;
 }
 .flow-heading h1 {
@@ -503,7 +503,7 @@ summary:focus-visible {
   font-size: 11px;
   font-weight: 400;
   margin-top: 5px;
-  color: #687382;
+  color: var(--color-text-muted);
 }
 .cart-summary-lines .flow-payable strong {
   font-size: 18px;
@@ -1410,15 +1410,39 @@ summary:focus-visible {
   gap: 10px;
   margin-top: 20px;
 }
-.cart-empty-actions .flow-button {
-  min-height: 42px;
+.cart-empty-actions :is(.flow-button, .ui-inline-action) {
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) 18px;
+  flex: 0 1 176px;
+  width: 176px;
+  max-width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  align-items: center;
+  justify-items: center;
+  gap: 8px;
   margin: 0;
-  padding: 9px 15px;
+  padding: 10px 12px;
+  border-width: 1px;
+  border-style: solid;
+  border-radius: 11px;
   font-size: 12px;
+  font-weight: 700;
+  line-height: 1.5;
+  text-align: center;
+  white-space: nowrap;
+}
+.cart-empty-actions :is(.flow-button, .ui-inline-action) > i {
+  display: grid;
+  width: 18px;
+  height: 18px;
+  place-items: center;
+  font-size: 16px;
+  line-height: 1;
 }
 .cart-empty-actions .flow-button i:first-child {
   color: #e1c17d;
-  font-size: 16px;
 }
 .cart-empty-benefits {
   display: flex;
@@ -1862,7 +1886,7 @@ summary:focus-visible {
   font-size: 16px;
 }
 .compare-overview-copy small {
-  color: #687987;
+  color: var(--color-text-muted);
   font-size: 13px;
 }
 .compare-overview-metrics {
@@ -1892,7 +1916,7 @@ summary:focus-visible {
   font-weight: 800;
 }
 .compare-overview-metric > small {
-  color: #687987;
+  color: var(--color-text-muted);
   font-size: 12px;
 }
 .compare-overview > .compare-clear-all {
@@ -2082,7 +2106,7 @@ summary:focus-visible {
 }
 .compare-product-card dt {
   flex: 0 0 38%;
-  color: #687987;
+  color: var(--color-text-muted);
   font-weight: 600;
 }
 .compare-product-card dd {

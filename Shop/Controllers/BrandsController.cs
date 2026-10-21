@@ -8,16 +8,18 @@ namespace Shop.Controllers;
 public sealed class BrandsController : PageController
 {
     private readonly IWebHostEnvironment _environment;
+    private readonly Shop.Services.CatalogRepository _catalog;
 
-    public BrandsController(IWebHostEnvironment environment)
+    public BrandsController(IWebHostEnvironment environment, Shop.Services.CatalogRepository catalog)
     {
         _environment = environment;
+        _catalog = catalog;
     }
 
     [HttpGet("")]
     public async Task<IActionResult> Index()
     {
-        PageModel<IReadOnlyList<BrandProfileModel>> model = new(BrandCatalog.All,
+        PageModel<IReadOnlyList<BrandProfileModel>> model = new(_catalog.Read().Brands,
             new SeoModel("برندهای ابزار برقی و تجهیزات اندازه‌گیری | ندا اولیائی", "معرفی برندهای ابزار برقی، دریل و پیچ‌گوشتی، ابزار اندازه‌گیری و تجهیزات لحیم‌کاری؛ بررسی محصولات و راهنمای انتخاب هر برند.", Breadcrumbs: [new SeoBreadcrumb("خانه", "/"), new SeoBreadcrumb("برندها", "/brands")]));
         return await PageAsync(model);
     }
@@ -25,7 +27,7 @@ public sealed class BrandsController : PageController
     [HttpGet("{slug}")]
     public async Task<IActionResult> Details(string slug)
     {
-        BrandProfileModel? brand = BrandCatalog.Find(slug);
+        BrandProfileModel? brand = _catalog.Read().Brands.FirstOrDefault(brand => string.Equals(brand.Slug, slug, StringComparison.OrdinalIgnoreCase));
         if (brand is null)
         {
             return NotFound();
@@ -46,7 +48,7 @@ public sealed class BrandsController : PageController
 
     private BrandEditorialDocument? FindEditorial(string slug)
     {
-        string contentPath = Path.Combine(_environment.WebRootPath, "Shop", "js", "store", "brand-editorial.json");
+        string contentPath = Path.Combine(_environment.WebRootPath, "shop", "js", "store", "brand-editorial.json");
         BrandEditorialDocument[] documents = JsonSerializer.Deserialize<BrandEditorialDocument[]>(System.IO.File.ReadAllText(contentPath),
             new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? [];
 

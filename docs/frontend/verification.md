@@ -24,7 +24,7 @@
 |---|---|
 | همهٔ صفحات رنگ/فونت/بردر ناسازگار دارند | `design-tokens.css`, `style.css`, `electrical-theme.css`, `industrial-system.css` و rule برنده |
 | فقط خانه یا inner header خراب است | `_HomeHeader`/`_InnerHeader`, `HeaderVariant`, `body.home-page`/`inner-page` |
-| مگامنو با حرکت pointer بسته می‌شود | gap بین trigger/panel، `pointerleave`, stacking/overlay، eventها در `main.js` و CSS min-width 992 |
+| مگامنو با حرکت pointer بسته یا بی‌دلیل باز می‌شود | trigger واقعی، gap، `pointerleave` و state controller در `header-navigation.js`؛ CSS نباید از hover/focus wrapper منو را باز کند |
 | تغییر CSS صفحه اعمال نمی‌شود | load order بعد از `@section Styles`, selector specificity و cache |
 | ظاهر با hover اولیه متفاوت است | کلاس active پیش‌فرض، hover/focus CSS، JS category initialization |
 | drawer/modal اسکرول نمی‌خورد | ارتفاع viewport، `overflow-y`, flex child min-height، scroll lock، backdrop و breakpoint |
@@ -38,7 +38,7 @@
 
 | محور | حالت‌هایی که باید تست شوند |
 |---|---|
-| Viewport | 360–390px موبایل، 575–640px، 768px، 992px، 1200px+؛ در breakpoint مشکوک یک px دو طرف مرز |
+| Viewport | 320، 360–390px موبایل، 575–640px، 768px، 992px، 1200px+؛ در breakpoint مشکوک یک px دو طرف مرز |
 | State داده | خالی، یک آیتم، چند آیتم/عنوان بلند، خطا/ورودی نامعتبر، دادهٔ ذخیره‌شدهٔ قدیمی |
 | تعامل | pointer hover، click، keyboard Tab/Enter/Escape، focus-visible، close و بازگشت focus |
 | نمایش | overflow افقی، scroll داخلی modal/drawer، clipping، z-index، image fit، contrast و متن طولانی فارسی/RTL |
@@ -58,7 +58,7 @@ rg -n "<link|<script|RenderSection|RenderBody" Shop/Views/Shared/_Shop.cshtml
 dotnet build Shop.sln
 ```
 
-برای تغییر CSS/JS، ابتدا diff و `git status` را بررسی کنید، فقط فایل مالک را تغییر دهید، `git diff --check` اجرا کنید و سپس صفحهٔ مرتبط را با matrix این سند بررسی کنید. build برای تغییر Razor/C# مناسب است؛ build موفق به‌تنهایی رفتار بصری یا JS را ثابت نمی‌کند.
+برای تغییر CSS/JS، ابتدا diff و `git status` را بررسی کنید، فقط فایل مالک را تغییر دهید، `npm run check` و `git diff --check` اجرا کنید و سپس صفحهٔ مرتبط را با matrix این سند بررسی کنید. [کنترل‌های خودکار و CI](../development/quality.md) unit، قرارداد C#، HTTP و مرورگر را پوشش می‌دهند؛ build موفق به‌تنهایی رفتار بصری یا JS را ثابت نمی‌کند.
 
 
 
