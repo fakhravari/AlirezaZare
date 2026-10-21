@@ -14098,3 +14098,41 @@ body .electrical-swiper .swiper-pagination-bullet-active {
     0 3px 9px rgba(16, 42, 67, 0.12),
     inset 0 1px rgba(255, 255, 255, 0.3) !important;
 }
+
+/* Keep the cart amount and its pre-order reminder in distinct, readable rows. */
+#cartPanel .cart-footer .cart-total-summary {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 9px;
+  min-height: 0;
+  padding: 12px 14px;
+}
+
+#cartPanel .cart-footer .cart-total-amount {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+#cartPanel .cart-footer .cart-total-amount > span {
+  flex: 0 0 auto;
+}
+
+#cartPanel .cart-footer .cart-total-amount > strong {
+  max-width: 100%;
+  text-align: left;
+}
+
+#cartPanel .cart-footer .cart-safety-badge {
+  width: 100%;
+  min-height: 0;
+  padding: 9px 0 0;
+  border-top: 1px solid rgba(197, 157, 75, 0.24);
+  border-inline-start: 0;
+  align-items: center;
+}
+
+#cartPanel .cart-safety-copy {
+  flex: 1 1 auto;
+  overflow-wrap: anywhere;
+}
