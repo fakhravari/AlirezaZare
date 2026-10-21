@@ -1,4 +1,5 @@
 @model PageModel
+@using System.Globalization
 
 @section Hero {
     <partial name="_Hero"/>
@@ -34,6 +35,7 @@
         <div class="row g-4">
             <div class="col-md-6 journal-feature-column">
                 <article class="journal-main">
+                    @{ var leadMetrics = JournalArticles.GetMetrics("choosing-work-drill"); }
                     <span class="journal-main-featured"><i class="bi bi-stars" aria-hidden="true"></i> انتخاب تحریریه</span>
                     <img
                         loading="lazy"
@@ -46,6 +48,9 @@
                                 <span class="journal-main-category"><i class="bi bi-bookmark-star" aria-hidden="true"></i> راهنمای خرید</span>
                                 <span class="journal-main-read"><i class="bi bi-clock" aria-hidden="true"></i> ۸ دقیقه مطالعه</span>
                                 <span class="journal-main-author"><i class="bi bi-person-circle" aria-hidden="true"></i> تحریریه ندا اولیائی</span>
+                                <span class="journal-main-stat" aria-label="@leadMetrics.Comments نظر"><i class="bi bi-chat-left-text" aria-hidden="true"></i> @leadMetrics.Comments.ToString("N0", CultureInfo.GetCultureInfo("fa-IR"))</span>
+                                <span class="journal-main-stat" aria-label="امتیاز @leadMetrics.AverageRating از ۵"><i class="bi bi-star-fill" aria-hidden="true"></i> @leadMetrics.AverageRating.ToString("0.0", CultureInfo.GetCultureInfo("fa-IR"))</span>
+                                <span class="journal-main-stat journal-like-metric" aria-label="@leadMetrics.Likes پسند"><i class="bi bi-heart-fill" aria-hidden="true"></i> @leadMetrics.Likes.ToString("N0", CultureInfo.GetCultureInfo("fa-IR"))</span>
                             </span>
                             <time datetime="2026-10-14"><i class="bi bi-calendar3" aria-hidden="true"></i> ۱۴۰۵/۰۷/۲۲</time>
                         </div>
@@ -64,39 +69,69 @@
                         <span class="journal-list-count"><b>۵</b> مطلب کاربردی</span>
                     </div>
                     <article>
+                        @{ var multimeterMetrics = JournalArticles.GetMetrics("multimeter-buying-guide"); }
                         <span class="journal-list-number">۱</span>
                         <div class="journal-list-card-meta">
                             <small>راهنمای خرید</small>
                         </div>
                         <h4><a asp-controller="Magazine" asp-action="Details" asp-route-slug="multimeter-buying-guide" style="color: inherit; text-decoration: none;">چطور مولتی‌متر مناسب انتخاب کنیم؟</a></h4>
+                        <div class="journal-list-stats" aria-label="بازخورد خوانندگان">
+                            <span class="journal-metric" aria-label="@multimeterMetrics.Comments نظر"><i class="bi bi-chat-left-text" aria-hidden="true"></i><small>@multimeterMetrics.Comments.ToString("N0", CultureInfo.GetCultureInfo("fa-IR"))</small></span>
+                            <span class="journal-metric" aria-label="امتیاز @multimeterMetrics.AverageRating از ۵"><i class="bi bi-star-fill" aria-hidden="true"></i><small>@multimeterMetrics.AverageRating.ToString("0.0", CultureInfo.GetCultureInfo("fa-IR"))</small></span>
+                            <span class="journal-metric journal-like-metric" aria-label="@multimeterMetrics.Likes پسند"><i class="bi bi-heart-fill" aria-hidden="true"></i><small>@multimeterMetrics.Likes.ToString("N0", CultureInfo.GetCultureInfo("fa-IR"))</small></span>
+                        </div>
                     </article>
                     <article>
+                        @{ var safetyMetrics = JournalArticles.GetMetrics("electrical-tool-safety"); }
                         <span class="journal-list-number">۲</span>
                         <div class="journal-list-card-meta">
                             <small>ایمنی و نگهداری</small>
                         </div>
                         <h4><a asp-controller="Magazine" asp-action="Details" asp-route-slug="electrical-tool-safety" style="color: inherit; text-decoration: none;">چک‌لیست ایمنی هنگام کار با ابزار برقی</a></h4>
+                        <div class="journal-list-stats" aria-label="بازخورد خوانندگان">
+                            <span class="journal-metric" aria-label="@safetyMetrics.Comments نظر"><i class="bi bi-chat-left-text" aria-hidden="true"></i><small>@safetyMetrics.Comments.ToString("N0", CultureInfo.GetCultureInfo("fa-IR"))</small></span>
+                            <span class="journal-metric" aria-label="امتیاز @safetyMetrics.AverageRating از ۵"><i class="bi bi-star-fill" aria-hidden="true"></i><small>@safetyMetrics.AverageRating.ToString("0.0", CultureInfo.GetCultureInfo("fa-IR"))</small></span>
+                            <span class="journal-metric journal-like-metric" aria-label="@safetyMetrics.Likes پسند"><i class="bi bi-heart-fill" aria-hidden="true"></i><small>@safetyMetrics.Likes.ToString("N0", CultureInfo.GetCultureInfo("fa-IR"))</small></span>
+                        </div>
                     </article>
                     <article>
+                        @{ var solderingMetrics = JournalArticles.GetMetrics("soldering-station-basics"); }
                         <span class="journal-list-number">۳</span>
                         <div class="journal-list-card-meta">
                             <small>آموزش تخصصی</small>
                         </div>
                         <h4><a asp-controller="Magazine" asp-action="Details" asp-route-slug="soldering-station-basics" style="color: inherit; text-decoration: none;">راهنمای انتخاب ایستگاه لحیم‌کاری</a></h4>
+                        <div class="journal-list-stats" aria-label="بازخورد خوانندگان">
+                            <span class="journal-metric" aria-label="@solderingMetrics.Comments نظر"><i class="bi bi-chat-left-text" aria-hidden="true"></i><small>@solderingMetrics.Comments.ToString("N0", CultureInfo.GetCultureInfo("fa-IR"))</small></span>
+                            <span class="journal-metric" aria-label="امتیاز @solderingMetrics.AverageRating از ۵"><i class="bi bi-star-fill" aria-hidden="true"></i><small>@solderingMetrics.AverageRating.ToString("0.0", CultureInfo.GetCultureInfo("fa-IR"))</small></span>
+                            <span class="journal-metric journal-like-metric" aria-label="@solderingMetrics.Likes پسند"><i class="bi bi-heart-fill" aria-hidden="true"></i><small>@solderingMetrics.Likes.ToString("N0", CultureInfo.GetCultureInfo("fa-IR"))</small></span>
+                        </div>
                     </article>
                     <article>
+                        @{ var worklightMetrics = JournalArticles.GetMetrics("worklight-selection"); }
                         <span class="journal-list-number">۴</span>
                         <div class="journal-list-card-meta">
                             <small>راهنمای خرید</small>
                         </div>
                         <h4><a asp-controller="Magazine" asp-action="Details" asp-route-slug="worklight-selection" style="color: inherit; text-decoration: none;">انتخاب چراغ کار برای تعمیرگاه و محیط نصب</a></h4>
+                        <div class="journal-list-stats" aria-label="بازخورد خوانندگان">
+                            <span class="journal-metric" aria-label="@worklightMetrics.Comments نظر"><i class="bi bi-chat-left-text" aria-hidden="true"></i><small>@worklightMetrics.Comments.ToString("N0", CultureInfo.GetCultureInfo("fa-IR"))</small></span>
+                            <span class="journal-metric" aria-label="امتیاز @worklightMetrics.AverageRating از ۵"><i class="bi bi-star-fill" aria-hidden="true"></i><small>@worklightMetrics.AverageRating.ToString("0.0", CultureInfo.GetCultureInfo("fa-IR"))</small></span>
+                            <span class="journal-metric journal-like-metric" aria-label="@worklightMetrics.Likes پسند"><i class="bi bi-heart-fill" aria-hidden="true"></i><small>@worklightMetrics.Likes.ToString("N0", CultureInfo.GetCultureInfo("fa-IR"))</small></span>
+                        </div>
                     </article>
                     <article>
+                        @{ var batteryMetrics = JournalArticles.GetMetrics("battery-tool-care"); }
                         <span class="journal-list-number">۵</span>
                         <div class="journal-list-card-meta">
                             <small>ایمنی و نگهداری</small>
                         </div>
                         <h4><a asp-controller="Magazine" asp-action="Details" asp-route-slug="battery-tool-care" style="color: inherit; text-decoration: none;">نگهداری باتری ابزار شارژی</a></h4>
+                        <div class="journal-list-stats" aria-label="بازخورد خوانندگان">
+                            <span class="journal-metric" aria-label="@batteryMetrics.Comments نظر"><i class="bi bi-chat-left-text" aria-hidden="true"></i><small>@batteryMetrics.Comments.ToString("N0", CultureInfo.GetCultureInfo("fa-IR"))</small></span>
+                            <span class="journal-metric" aria-label="امتیاز @batteryMetrics.AverageRating از ۵"><i class="bi bi-star-fill" aria-hidden="true"></i><small>@batteryMetrics.AverageRating.ToString("0.0", CultureInfo.GetCultureInfo("fa-IR"))</small></span>
+                            <span class="journal-metric journal-like-metric" aria-label="@batteryMetrics.Likes پسند"><i class="bi bi-heart-fill" aria-hidden="true"></i><small>@batteryMetrics.Likes.ToString("N0", CultureInfo.GetCultureInfo("fa-IR"))</small></span>
+                        </div>
                     </article>
                 </div>
             </div>

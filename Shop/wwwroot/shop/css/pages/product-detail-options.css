@@ -1107,24 +1107,38 @@
   display: grid;
   min-width: 0;
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  padding: 10px;
   border-bottom: 1px solid #dce4e9;
+  background: linear-gradient(180deg, #fff, #fbfcfd);
 }
 
 #productView .product-meta-identity-top > .product-meta-pill {
+  display: flex;
   min-width: 0;
-  justify-content: center;
-  padding: 10px 12px;
-  text-align: center;
+  min-height: 94px;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 13px;
+  padding: 14px 16px;
+  border: 1px solid #e2e8ed;
+  border-radius: 14px;
+  background: linear-gradient(145deg, #fff, #f8fafb);
+  box-shadow: 0 3px 10px rgba(16, 42, 67, 0.04), inset 0 1px #fff;
+  text-align: right;
 }
 
 #productView .product-meta-identity-top > .product-meta-country {
-  border-inline-start: 1px solid #dce4e9;
+  border-inline-start: 1px solid #e2e8ed;
 }
 
 #productView .product-meta-identity-top .product-meta-pill > span {
+  display: flex;
   min-width: 0;
-  align-items: center;
-  text-align: center;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  text-align: right;
 }
 
 #productView .product-meta-identity-top .product-meta-pill strong,
@@ -1141,14 +1155,27 @@
 
 #productView .product-meta-country-flag {
   display: block;
-  width: 40px;
-  height: 30px;
-  flex: 0 0 40px;
+  width: 48px;
+  height: 36px;
+  flex: 0 0 48px;
   border: 1px solid rgba(22, 50, 79, 0.12);
-  border-radius: 6px;
+  border-radius: 8px;
   background: #fff;
   object-fit: cover;
-  box-shadow: 0 2px 5px rgba(16, 42, 67, 0.08);
+  box-shadow: 0 3px 8px rgba(16, 42, 67, 0.1);
+}
+
+#productView .product-meta-brand-logo {
+  display: block;
+  width: 68px;
+  height: 52px;
+  flex: 0 0 68px;
+  padding: 5px;
+  border: 1px solid rgba(22, 50, 79, 0.12);
+  border-radius: 10px;
+  background: #fff;
+  object-fit: contain;
+  box-shadow: 0 3px 8px rgba(16, 42, 67, 0.09);
 }
 
 #productView .product-meta-country-en {
@@ -1156,7 +1183,7 @@
   font-size: 10px !important;
   font-weight: 650 !important;
   line-height: 1.25 !important;
-  text-align: right;
+  text-align: left;
   overflow-wrap: anywhere;
 }
 
@@ -1180,20 +1207,33 @@
 
 @media (max-width: 640px) {
   #productView .product-meta-identity-top > .product-meta-pill {
-    min-height: 52px;
-    gap: 7px;
-    padding: 9px 7px;
+    min-height: 82px;
+    gap: 9px;
+    padding: 10px 9px;
   }
 
   #productView .product-meta-country-flag {
-    width: 38px;
-    height: 29px;
-    flex-basis: 38px;
+    width: 44px;
+    height: 33px;
+    flex-basis: 44px;
+  }
+
+  #productView .product-meta-brand-logo {
+    width: 48px;
+    height: 38px;
+    flex-basis: 48px;
   }
 
   #productView .product-meta-identity > .product-meta-code {
     min-height: 52px;
   }
+}
+
+@media (max-width: 380px) {
+  #productView .product-meta-identity-top { gap: 6px; padding: 7px; }
+  #productView .product-meta-identity-top > .product-meta-pill { gap: 6px; padding-inline: 7px; }
+  #productView .product-meta-country-flag { width: 38px; height: 29px; flex-basis: 38px; }
+  #productView .product-meta-brand-logo { width: 42px; height: 34px; flex-basis: 42px; }
 }
 
 /* Give each product-detail tab a consistent, quiet icon tile. */
@@ -1282,6 +1322,49 @@
   .product-feedback-form
   > .product-feedback-wide {
   grid-column: 1 / -1;
+}
+
+#productView #product-reviews > header .product-review-intro {
+  max-width: 760px;
+  margin: 9px 0 0;
+  color: var(--industrial-muted, #687887);
+  font-size: 13px;
+  line-height: 1.9;
+}
+
+@media (max-width: 575px) {
+  #productView .product-review-form-column .product-feedback-form {
+    grid-template-columns: minmax(0, 1fr) minmax(100px, 0.42fr);
+  }
+
+  #productView
+    .product-review-form-column
+    .product-feedback-form
+    > label:first-child {
+    grid-column: auto;
+  }
+
+  #productView #product-reviews > header .product-review-intro {
+    font-size: 12px;
+    line-height: 1.85;
+  }
+}
+
+#productView .product-feedback-datetime {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 7px;
+  color: #7a8791;
+  direction: rtl;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+#productView .product-feedback-datetime > i {
+  color: #a47b35;
+  font-size: 12px;
 }
 
 /* Match the share icon tile to the cart and favorite actions. */

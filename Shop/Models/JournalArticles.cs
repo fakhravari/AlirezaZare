@@ -25,15 +25,16 @@ public static partial class JournalArticles
     private static readonly IReadOnlyDictionary<string, JournalArticleMetrics> Metrics =
         new Dictionary<string, JournalArticleMetrics>(StringComparer.OrdinalIgnoreCase)
         {
-            ["multimeter-buying-guide"] = new(12800, 342, 4.8),
-            ["electrical-tool-safety"] = new(9600, 218, 4.9),
-            ["soldering-station-basics"] = new(8200, 196, 4.7),
-            ["worklight-selection"] = new(7400, 152, 4.8),
-            ["battery-tool-care"] = new(6100, 124, 4.6)
+            ["choosing-work-drill"] = new(15400, 386, 4.9, 48),
+            ["multimeter-buying-guide"] = new(12800, 342, 4.8, 42),
+            ["electrical-tool-safety"] = new(9600, 218, 4.9, 27),
+            ["soldering-station-basics"] = new(8200, 196, 4.7, 31),
+            ["worklight-selection"] = new(7400, 152, 4.8, 19),
+            ["battery-tool-care"] = new(6100, 124, 4.6, 15)
         };
 
     public static JournalArticleMetrics GetMetrics(string slug) =>
-        Metrics.GetValueOrDefault(slug) ?? new JournalArticleMetrics(0, 0, 0);
+        Metrics.GetValueOrDefault(slug) ?? new JournalArticleMetrics(0, 0, 0, 0);
 
     public static MagazineDetailsModel? Find(string slug)
     {
@@ -45,4 +46,4 @@ public static partial class JournalArticles
     }
 }
 
-public sealed record JournalArticleMetrics(int Views, int Likes, double AverageRating);
+public sealed record JournalArticleMetrics(int Views, int Likes, double AverageRating, int Comments);

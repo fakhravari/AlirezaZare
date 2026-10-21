@@ -181,7 +181,7 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                 ? related
                 : catalog.filter((item) => item.id !== p.id).slice(0, 4);
             const feedbackPages = { reviews: 1, questions: 1 },
-                feedbackPageSize = 4;
+                feedbackPageSize = 3;
             const questionGuideItems = [
                 [
                     "اقلام همراه کالا را از کجا ببینم؟",
@@ -208,11 +208,12 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
             }));
             const readFeedback = (type) => {
                 const seeded = (p.detail?.[type] || []).map(
-                    ([name, text, rating, reply]) => ({
+                    ([name, text, rating, reply, createdAt]) => ({
                         name: name?.trim() || "کاربر مهمان",
                         text,
                         rating: rating || 0,
                         reply: reply || "",
+                        createdAt: createdAt || "",
                         sample: true,
                     }),
                 );
@@ -244,12 +245,22 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                 const value = Math.max(1, Math.min(5, Number(rating) || 5));
                 return `<span class="product-feedback-stars" aria-label="امتیاز ${fa(value)} از ۵"><span aria-hidden="true">${"★".repeat(value)}</span><span class="product-feedback-stars-empty" aria-hidden="true">${"☆".repeat(5 - value)}</span></span>`;
             };
+            const feedbackDateMarkup = (value) => {
+                if (!value) return "";
+                const date = new Date(value);
+                if (Number.isNaN(date.getTime())) return "";
+                const formatted = new Intl.DateTimeFormat("fa-IR-u-ca-persian", {
+                    dateStyle: "medium",
+                    timeStyle: "short",
+                }).format(date);
+                return `<time class="product-feedback-datetime" datetime="${esc(date.toISOString())}"><i class="bi bi-clock" aria-hidden="true"></i><span>${esc(formatted)}</span></time>`;
+            };
             const feedbackMarkup = (type, items) =>
                 items.length
                     ? items
                         .map(
                             (item) =>
-                                `<article class="product-feedback-card"><div class="product-feedback-meta"><img class="product-feedback-avatar" src="shop/images/guest-avatar.svg" alt="" loading="lazy"><strong>${esc(item.name?.trim() || "کاربر مهمان")}</strong>${type === "reviews" ? `${ratingStars(item.rating)}` : ""}</div><p class="${type === "questions" ? "product-question-user-text" : "product-feedback-user-text"}">${esc(item.text)}</p>${item.reply ? `<aside class="product-feedback-admin-reply"><div class="product-feedback-admin-meta"><span><i class="bi bi-patch-check-fill" aria-hidden="true"></i>پاسخ مدیر فروشگاه</span><small>پاسخ رسمی</small></div><p>${esc(item.reply)}</p></aside>` : ""}</article>`,
+                                `<article class="product-feedback-card"><div class="product-feedback-meta"><img class="product-feedback-avatar" src="shop/images/guest-avatar.svg" alt="" loading="lazy"><strong>${esc(item.name?.trim() || "کاربر مهمان")}</strong>${type === "reviews" ? `${ratingStars(item.rating)}` : ""}</div>${feedbackDateMarkup(item.createdAt)}<p class="${type === "questions" ? "product-question-user-text" : "product-feedback-user-text"}">${esc(item.text)}</p>${item.reply ? `<aside class="product-feedback-admin-reply"><div class="product-feedback-admin-meta"><span><i class="bi bi-patch-check-fill" aria-hidden="true"></i>پاسخ مدیر فروشگاه</span><small>پاسخ رسمی</small></div><p>${esc(item.reply)}</p></aside>` : ""}</article>`,
                         )
                         .join("")
                     : `<div class="product-feedback-empty empty-state-card"><i class="bi ${type === "reviews" ? "bi-chat-square-heart" : "bi-question-circle"}" aria-hidden="true"></i><strong>${type === "reviews" ? "هنوز دیدگاهی برای این محصول ثبت نشده است." : "هنوز پرسشی دربارهٔ این محصول ثبت نشده است."}</strong><span>${type === "reviews" ? "تجربهٔ استفاده‌تان را با خریداران دیگر به اشتراک بگذارید." : "سؤال خود را ثبت کنید تا اطلاعات این کالا کامل‌تر شود."}</span></div>`;
@@ -507,6 +518,10 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
             reviewPagination.setAttribute("aria-label", "صفحه‌بندی دیدگاه‌ها");
             reviewListColumn.append(reviewPagination);
             reviewLayout.append(reviewFormColumn, reviewListColumn);
+            reviewsPanel.querySelector("header").insertAdjacentHTML(
+                "beforeend",
+                '<p class="product-review-intro">اگر این کالا را استفاده کرده‌اید، تجربه‌تان دربارهٔ کیفیت، کاربری و نکته‌های پیش از خرید را با دیگران به‌اشتراک بگذارید. نام اختیاری است و دیدگاه‌ها در صفحه‌های جداگانه نمایش داده می‌شوند.</p>',
+            );
             reviewsPanel.querySelector("header").after(reviewLayout);
             productView
                 .querySelectorAll('.product-feedback-form input[name="name"]')
@@ -973,6 +988,7 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                         name,
                         text,
                         rating: Number(data.get("rating")) || 5,
+                        createdAt: new Date().toISOString(),
                         sample: false,
                     });
                     ui.storage.set(

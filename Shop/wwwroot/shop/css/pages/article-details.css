@@ -79,6 +79,21 @@
 .article-enhanced .article-body {
   color: var(--color-ink, var(--industrial-navy));
 }
+.article-hero .article-hero-meta .article-hero-stat {
+  gap: 6px;
+  padding: 5px 9px;
+  border: 1px solid rgba(225, 196, 140, 0.3);
+  border-radius: 999px;
+  background: rgba(16, 42, 67, 0.34);
+  color: #fff8e8;
+  white-space: nowrap;
+}
+.article-hero .article-hero-stat i {
+  color: #f1c65a;
+}
+.article-hero .article-hero-stat.article-like-stat i {
+  color: #f2a09b;
+}
 .article-enhanced .article-body h2,
 .article-enhanced .article-body h3 {
   font-weight: 750;

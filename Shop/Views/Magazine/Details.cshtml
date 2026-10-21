@@ -1,5 +1,9 @@
 @using System.Globalization
 @model PageModel<MagazineDetailsModel>
+@{
+    var articleMetrics = JournalArticles.GetMetrics(Model.Data.Slug);
+    var persianCulture = CultureInfo.GetCultureInfo("fa-IR");
+}
 <header class="page-hero article-hero">
     <img class="hero-image" src="@Url.Content("~/" + Model.Data.HeroImage)" alt="@Model.Data.Title" width="1916" height="821" fetchpriority="high"/>
     <div class="container">
@@ -41,6 +45,15 @@
             }
             <span>
                 <i class="bi bi-clock"></i> @Model.Data.ReadTime
+            </span>
+            <span class="article-hero-stat" aria-label="@articleMetrics.Comments نظر">
+                <i class="bi bi-chat-left-text" aria-hidden="true"></i> @articleMetrics.Comments.ToString("N0", persianCulture) نظر
+            </span>
+            <span class="article-hero-stat" aria-label="امتیاز @articleMetrics.AverageRating از ۵">
+                <i class="bi bi-star-fill" aria-hidden="true"></i> @(articleMetrics.AverageRating > 0 ? articleMetrics.AverageRating.ToString("0.0", persianCulture) : "بدون امتیاز")
+            </span>
+            <span class="article-hero-stat article-like-stat" aria-label="@articleMetrics.Likes پسند">
+                <i class="bi bi-heart-fill" aria-hidden="true"></i> @articleMetrics.Likes.ToString("N0", persianCulture) پسند
             </span>
         </div>
     </div>
