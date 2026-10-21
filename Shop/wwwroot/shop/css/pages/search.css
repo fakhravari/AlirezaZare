@@ -124,6 +124,16 @@
   transition: none;
 }
 
+/* Override the shared product-card image inset on search results. */
+.search-page .search-product.product-card .search-page-card-media > a > img {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  padding: 0 !important;
+  object-fit: cover !important;
+}
+
 .search-product:hover .search-page-card-media img {
   transform: none;
 }

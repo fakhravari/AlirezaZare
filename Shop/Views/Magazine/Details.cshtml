@@ -62,6 +62,7 @@
                                 </span>
                                 <div>
                                     <small>راهنمای مطالعه</small><strong>در این مقاله می‌خوانید</strong>
+                                    <span class="toc-tagline">هر بخش، یک قدم به انتخاب بهتر</span>
                                 </div>
                             </div>
                             @for (var index = 0; index < Model.Data.Sections.Count; index++)
@@ -72,7 +73,6 @@
                                     <span class="article-toc-index">@sectionNumber</span><span>@item.Title</span>
                                 </a>
                             }
-                            <div class="toc-footnote"><i class="bi bi-book" aria-hidden="true"></i> هر بخش، یک قدم به انتخاب بهتر</div>
                         </div>
                     </nav>
                     <div class="article-share">
