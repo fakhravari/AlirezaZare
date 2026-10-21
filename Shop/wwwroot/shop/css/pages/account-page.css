@@ -2131,30 +2131,40 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 180px;
   align-items: center;
+  min-height: 0;
+  gap: 24px;
+  padding: 24px 36px;
 }
 
-.account-welcome > .profile-breadcrumb {
+.account-welcome .profile-breadcrumb {
   position: relative;
   inset: auto;
-  grid-column: 1 / -1;
-  grid-row: 1;
-  justify-self: start;
-  width: max-content;
+  z-index: 2;
+  width: fit-content;
   max-width: 100%;
-  margin: 0 0 4px;
+  margin: 14px 0 0;
 }
 
-.account-welcome-copy { grid-column: 1; grid-row: 2; }
-.account-welcome-art { grid-column: 2; grid-row: 2; }
+.account-welcome h1 { margin: 8px 0 4px; line-height: 1.4; }
+.account-welcome-copy { grid-column: 1; grid-row: 1; }
+.account-welcome-art { grid-column: 2; grid-row: 1; }
 
 @media (max-width: 767px) {
-  .account-welcome { display: block; }
-  .account-welcome > .profile-breadcrumb {
+  .account-welcome {
+    display: block;
+    padding: 14px 16px;
+  }
+  .account-welcome .profile-breadcrumb {
     position: relative;
     inset: auto;
     width: fit-content;
-    margin: 0 0 18px;
+    margin: 12px 0 0;
   }
+}
+
+@media (max-width: 380px) {
+  .account-welcome { padding: 12px 14px; }
+  .account-welcome .profile-breadcrumb { margin-top: 10px; }
 }
 
 #favoritesView .flow-cards {

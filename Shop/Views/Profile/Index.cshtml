@@ -32,19 +32,28 @@
         <span class="account-welcome-brand">حساب کاربری شما</span>
         <h1>@profileTitle</h1>
         <p>@profileDescription</p>
-        @if (profileSection is "orders" or "favorites")
-        {
-            <div class="account-welcome-links">
-                @if (profileSection == "orders")
+        <nav class="cart-breadcrumb profile-breadcrumb" aria-label="مسیر صفحه">
+            <ol>
+                <li>
+                    <a asp-controller="Home" asp-action="Index">
+                        <i class="bi bi-house-door" aria-hidden="true"></i><span>خانه</span>
+                    </a>
+                </li>
+                @if (profileSection is "orders" or "addresses" or "favorites")
                 {
-                    <a asp-controller="Tracking" asp-action="Index"><i class="bi bi-geo-alt" aria-hidden="true"></i> پیگیری سفارش <i class="bi bi-arrow-left" aria-hidden="true"></i></a>
+                    <li class="profile-breadcrumb-parent">
+                        <i class="bi bi-chevron-left" aria-hidden="true"></i>
+                        <a asp-controller="Profile" asp-action="Index">حساب کاربری</a>
+                    </li>
                 }
-                else
-                {
-                    <a href="/search"><i class="bi bi-search" aria-hidden="true"></i> جست‌وجوی محصولات <i class="bi bi-arrow-left" aria-hidden="true"></i></a>
-                }
-            </div>
-        }
+                <li class="cart-breadcrumb-current">
+                    <i class="bi bi-chevron-left" aria-hidden="true"></i>
+                    <span aria-current="page">
+                        <i class="bi @profileIcon" aria-hidden="true"></i>@profileTitle
+                    </span>
+                </li>
+            </ol>
+        </nav>
     </div>
     <div class="account-welcome-art" aria-hidden="true">
         <span class="account-welcome-tool-icon">
@@ -52,28 +61,6 @@
         </span>
         <span>ابزار و تجهیزات برقی</span>
     </div>
-    <nav class="cart-breadcrumb profile-breadcrumb" aria-label="مسیر صفحه">
-        <ol>
-            <li>
-                <a asp-controller="Home" asp-action="Index">
-                    <i class="bi bi-house-door" aria-hidden="true"></i><span>خانه</span>
-                </a>
-            </li>
-            @if (profileSection is "orders" or "addresses" or "favorites")
-            {
-                <li class="profile-breadcrumb-parent">
-                    <i class="bi bi-chevron-left" aria-hidden="true"></i>
-                    <a asp-controller="Profile" asp-action="Index">حساب کاربری</a>
-                </li>
-            }
-            <li class="cart-breadcrumb-current">
-                <i class="bi bi-chevron-left" aria-hidden="true"></i>
-                <span aria-current="page">
-                    <i class="bi @profileIcon" aria-hidden="true"></i>@profileTitle
-                </span>
-            </li>
-        </ol>
-    </nav>
 </header>
 <div class="account-dashboard">
 <aside class="account-sidebar">

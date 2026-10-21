@@ -4552,6 +4552,16 @@ body {
   margin: 0;
 }
 
+/* Keep the cart's purchase note sized to its copy instead of stretching across the page. */
+.cart-page-main ~ #services.purchase-benefits--showcase .benefits-intro p {
+  width: fit-content;
+  max-width: min(100%, 460px);
+  min-height: 0;
+  flex: 0 1 auto;
+  box-sizing: border-box;
+  white-space: normal;
+}
+
 @media (max-width: 767px) {
   .cart-page-links {
     width: calc(100% - 24px);
