@@ -2404,9 +2404,7 @@
           "thumbnail": "content/products/images/thumbnail/portable-led-work-light-hn-016-row-016-thumbnail-256.jpg"
         }
       ],
-      "videos": [
-        "content/products/videos/cordless-hammer-drill-hn-001-row-001-video-01.mp4"
-      ]
+      "videos": []
     },
     "product-2": {
       "id": "product-2",
@@ -2431,9 +2429,7 @@
           "thumbnail": "content/products/images/thumbnail/portable-led-work-light-hn-016-row-016-thumbnail-256.jpg"
         }
       ],
-      "videos": [
-        "content/products/videos/cordless-drill-driver-hn-002-row-002-video-01.mp4"
-      ]
+      "videos": []
     },
     "product-3": {
       "id": "product-3",
@@ -2458,9 +2454,7 @@
           "thumbnail": "content/products/images/thumbnail/portable-led-work-light-hn-016-row-016-thumbnail-256.jpg"
         }
       ],
-      "videos": [
-        "content/products/videos/electric-hammer-drill-hn-003-row-003-video-01.mp4"
-      ]
+      "videos": []
     },
     "product-4": {
       "id": "product-4",
