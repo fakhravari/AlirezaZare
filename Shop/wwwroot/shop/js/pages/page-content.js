@@ -54,7 +54,7 @@ document.addEventListener("DOMContentLoaded", () => {
           return;
         }
         window.HNUI.setMessage(status, "");
-        window.HNUI.showToast("کپی شد", "success");
+        window.HNUI.showToast("پیوند مقاله کپی شد.", "success");
         button.classList.add("copied");
         setTimeout(() => {
           window.HNUI.setMessage(status, "");

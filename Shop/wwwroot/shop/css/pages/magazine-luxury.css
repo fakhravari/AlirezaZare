@@ -1050,22 +1050,6 @@
     gap: 24px;
   }
 
-  .journal-post:nth-child(5n + 1) {
-    grid-column: 1 / -1;
-  }
-
-  .journal-post:nth-child(5n + 1) > a {
-    grid-template-columns: minmax(260px, 48%) minmax(0, 1fr);
-    min-height: 286px;
-  }
-
-  .journal-post:nth-child(5n + 1) .journal-post-image {
-    min-height: 286px;
-  }
-
-  .journal-post:nth-child(5n + 1) h3 {
-    font-size: 21px;
-  }
 }
 
 @media (max-width: 767px) {
@@ -1164,23 +1148,6 @@
     gap: 20px;
   }
 
-  .journal-post:nth-child(5n + 1) {
-    grid-column: span 2;
-  }
-
-  .journal-post:nth-child(5n + 1) > a {
-    display: grid;
-    grid-template-columns: minmax(190px, 44%) minmax(0, 1fr);
-    flex-direction: initial;
-  }
-
-  .journal-post:nth-child(5n + 1) .journal-post-image {
-    aspect-ratio: auto;
-  }
-
-  .journal-post:nth-child(5n + 1) h3 {
-    font-size: 18px;
-  }
 }
 
 @media (max-width: 767px) {
@@ -1500,6 +1467,34 @@
   border-color: #dfe6eb;
   background: #fff;
   box-shadow: 0 10px 28px rgba(16, 42, 67, 0.06);
+}
+
+/* Keep every story in the archive on one consistent card template. */
+.journal-grid {
+  grid-auto-rows: 1fr;
+}
+
+.journal-post > a,
+.journal-post:nth-child(5n + 1) > a {
+  display: flex;
+  height: 100%;
+  min-height: 0;
+  flex-direction: column;
+}
+
+.journal-post-image,
+.journal-post:nth-child(5n + 1) .journal-post-image {
+  width: 100%;
+  min-height: 0;
+  aspect-ratio: 16 / 9;
+}
+
+.journal-post h3,
+.journal-post:nth-child(5n + 1) h3 {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .journal-post .journal-kicker {
