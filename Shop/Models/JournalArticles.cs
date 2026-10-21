@@ -20,7 +20,7 @@ public static partial class JournalArticles
         new("soldering-station-setup", "آموزش تخصصی", "آماده‌سازی میز تعمیر برد", "چیدمان ابزار، نور و تهویه مناسب، فرایند تعمیرات الکترونیک را ایمن‌تر و دقیق‌تر می‌کند.", "tool-soldering-station.png", ["سطح کار و نظم ابزار", "نور کافی", "تهویه مناسب", "ایمنی قطعات حساس"], ["سطح نسوز و مرتب برای کار انتخاب کنید و ابزارهای داغ را روی پایه مخصوص قرار دهید. کابل‌ها را از محل حرکت دست دور کنید.", "چراغ موضعی با زاویه قابل تنظیم، دید اتصالات کوچک را بهتر می‌کند. نور را طوری قرار دهید که بازتاب آزاردهنده روی برد ایجاد نشود.", "دود لحیم را با تهویه مناسب از محدوده تنفس دور کنید. تهویه عمومی را متناسب با حجم و نوع کار در نظر بگیرید.", "برای قطعات حساس، روش حفاظت در برابر تخلیه الکترواستاتیک را رعایت کنید. پیش از دست‌کاری برد، منبع تغذیه آن را قطع کنید."]),
     ];
 
-    public static IReadOnlyList<string> Slugs { get; } = Articles.Select(article => article.Slug).ToArray();
+    public static IReadOnlyList<string> Slugs => Articles.Concat(ExpandedArticles).Select(article => article.Slug).ToArray();
 
     private static readonly IReadOnlyDictionary<string, JournalArticleMetrics> Metrics =
         new Dictionary<string, JournalArticleMetrics>(StringComparer.OrdinalIgnoreCase)

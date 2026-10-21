@@ -305,23 +305,6 @@
   color: #fff;
 }
 
-.journal-all {
-  justify-content: space-between;
-}
-
-.journal-all > .journal-category-count {
-  display: grid;
-  place-items: center;
-  min-width: 25px;
-  min-height: 25px;
-  border-radius: 50%;
-  background: var(--industrial-bg);
-  color: var(--journal-ink);
-  font-family: var(--font-body, "Vazirmatn", "Estedad", Tahoma, sans-serif);
-  font-weight: 600;
-  font-variant-numeric: normal;
-}
-
 .journal-branch {
   margin-top: 12px;
   padding-top: 12px;
@@ -1592,23 +1575,6 @@
   color: var(--industrial-navy);
 }
 
-.journal-all > .journal-category-count {
-  min-width: 27px;
-  height: 27px;
-  padding: 0 6px;
-  border: 1px solid #e5ebef;
-  border-radius: 50%;
-  background: #fff;
-  color: #617284;
-  font-size: 12px;
-}
-
-.journal-all.is-active > .journal-category-count {
-  border-color: #f0dfaa;
-  background: #fff;
-  color: var(--industrial-navy);
-}
-
 .journal-branch {
   margin: 3px 0 0;
   padding-top: 5px;
@@ -1642,7 +1608,7 @@
   color: #8b6800;
 }
 
-/* A clearer magazine filter rail with useful counts and topic shortcuts. */
+/* A clear magazine filter rail with topic shortcuts. */
 .journal-categories {
   border-top: 3px solid var(--industrial-yellow);
   background: linear-gradient(155deg, #fff 0%, #fbfcfd 68%, #f7f8f8 100%);
@@ -1658,33 +1624,12 @@
   text-overflow: ellipsis;
 }
 
-.journal-category-count {
-  display: inline-grid;
-  min-width: 29px;
-  height: 29px;
-  padding: 0 7px;
-  place-items: center;
-  border: 1px solid #e4eaf0;
-  border-radius: 999px;
-  background: #f7f9fb;
-  color: #617284;
-  font-size: 13px;
-  font-weight: 700;
-  font-variant-numeric: normal;
-}
-
 .journal-branch > button > span:first-of-type {
   min-width: 0;
   flex: 1 1 auto;
 }
 
-.journal-branch > button.is-active .journal-category-count {
-  border-color: #f1dfa0;
-  background: #fff;
-  color: var(--industrial-navy);
-}
-
-@media (max-width: 991.98px) {
+.journal-branch > button.is-active @media (max-width: 991.98px) {
   .journal-categories-scroll .journal-categories-intro {
     grid-column: 1 / -1;
   }
@@ -1769,12 +1714,7 @@
   flex: 1 1 auto;
 }
 
-.journal-branch--areas .journal-children button > .journal-category-count {
-  flex: 0 0 29px;
-  margin: 0;
-}
-
-.journal-branch--areas .journal-children button > i {
+.journal-branch--areas .journal-children button > .journal-branch--areas .journal-children button > i {
   color: var(--journal-gold);
 }
 
@@ -1869,13 +1809,7 @@
     height: 28px;
   }
 
-  .journal-categories .journal-branch > button > .journal-category-count {
-    min-width: 24px;
-    padding-inline: 4px;
-    flex-shrink: 0;
-  }
-
-  .journal-branch > button > span:first-of-type {
+  .journal-categories .journal-branch > button > .journal-branch > button > span:first-of-type {
     overflow-wrap: anywhere;
   }
 
