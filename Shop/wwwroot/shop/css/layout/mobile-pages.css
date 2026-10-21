@@ -1,4 +1,50 @@
 @media (max-width: 767px) {
+  .mobile-page--magazine-index .journal-page {
+    padding-top: 24px;
+  }
+
+  .mobile-page--magazine-index .journal-archive {
+    margin-top: 18px;
+  }
+
+  .mobile-page--magazine-index .journal-categories-scroll {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 10px;
+  }
+
+  .mobile-page--magazine-index .journal-categories-scroll > .journal-branch--areas,
+  .mobile-page--magazine-index .journal-branch--areas > .journal-children {
+    display: contents;
+  }
+
+  .mobile-page--magazine-index .journal-categories-scroll > .journal-branch--areas {
+    grid-column: auto;
+  }
+
+  .mobile-page--magazine-index .journal-categories .journal-branch,
+  .mobile-page--magazine-index .journal-categories .journal-branch--areas > .journal-children {
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .mobile-page--magazine-index .journal-categories button {
+    min-width: 0;
+    min-height: 48px;
+    padding: 7px 6px;
+    border: 0;
+    border-bottom: 1px solid #e8edf0;
+    border-radius: 0;
+    background-color: transparent;
+    font-size: 11px;
+  }
+
+  .mobile-page--magazine-index .journal-categories button.is-active {
+    border-bottom-color: #e6cf82;
+    border-radius: 10px;
+    background-color: #fff8df;
+  }
+
   .product-card .product-info h3,
   .search-product.product-card .product-info h3,
   .showcase-card-body h3,

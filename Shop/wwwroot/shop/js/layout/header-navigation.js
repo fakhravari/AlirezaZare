@@ -53,20 +53,43 @@
     ],
   };
 
-  const renderCategoryGroups = (host, groups, categoryName) => {
+  const catalogCategoryPaths = {
+    tools: ["ابزار برقی"],
+    "hand-tools": ["ابزار برق‌کار"],
+    components: ["لحیم‌کاری و تعمیر برد"],
+    cables: ["سیم و کابل", "سیم، کابل و اتصالات"],
+    lighting: ["روشنایی و لامپ"],
+    switchgear: ["کلید و پریز", "کلید و تجهیزات برقی"],
+    safety: ["تستر و ایمنی برق"],
+    measurement: ["ابزار اندازه‌گیری"],
+  };
+
+  const renderCategoryGroups = (host, groups, categoryName, categoryKey) => {
     const heading = document.createElement("div");
     heading.className = "electrical-submenu-heading";
     const copy = document.createElement("span");
     copy.className = "electrical-submenu-heading-copy";
     const title = document.createElement("strong");
     title.textContent = `زیرشاخه‌های ${categoryName || "محصولات"}`;
-    const caption = document.createElement("small");
-    caption.textContent = "برای دیدن کالاها، یک زیرشاخه را انتخاب کنید";
-    copy.append(title, caption);
-    const count = document.createElement("span");
-    count.className = "electrical-submenu-heading-count";
-    count.textContent = `${groups.length.toLocaleString("fa-IR")} گروه`;
-    heading.append(copy, count);
+    copy.append(title);
+    const badges = document.createElement("div");
+    badges.className = "electrical-submenu-heading-badges";
+    const addBadge = (iconName, label) => {
+      const badge = document.createElement("span");
+      badge.className = "electrical-submenu-heading-count";
+      const icon = document.createElement("i");
+      icon.className = `bi ${iconName}`;
+      icon.setAttribute("aria-hidden", "true");
+      badge.append(icon, document.createTextNode(label));
+      badges.append(badge);
+    };
+    const categoryPaths = new Set(catalogCategoryPaths[categoryKey] || [categoryName]);
+    const productCount = (window.HNProducts || []).filter((product) =>
+      product.categoryPath?.some((label) => categoryPaths.has(label)),
+    ).length;
+    addBadge("bi-grid-3x3-gap", `${groups.length.toLocaleString("fa-IR")} گروه`);
+    addBadge("bi-box-seam", `${productCount.toLocaleString("fa-IR")} محصول`);
+    heading.append(copy, badges);
 
     const cards = groups.map(([groupName, ...items], index) => {
       const card = document.createElement("section");
@@ -234,6 +257,7 @@
         categoryPanel,
         groups,
         activeCategory?.querySelector("span")?.textContent.trim(),
+        category,
       );
       categoryPanel.hidden = false;
       categoryRow.dataset.openCategory = category;
@@ -344,7 +368,7 @@
       });
       content.dataset.groupCount = String(groups.length);
       const activeCategory = button.querySelector("span")?.textContent.trim();
-      renderCategoryGroups(content, groups, activeCategory);
+      renderCategoryGroups(content, groups, activeCategory, button.dataset.megaCategory);
       window.requestAnimationFrame(updateColumnCount);
     };
     buttons.forEach((button) => {

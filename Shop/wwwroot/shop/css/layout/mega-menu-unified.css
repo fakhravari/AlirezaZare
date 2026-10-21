@@ -349,6 +349,9 @@
 
 .home-page .electrical-submenu-heading-count,
 .inner-page #mainNav .electrical-submenu-heading-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   flex: 0 0 auto;
   padding: 3px 8px;
   border: 1px solid var(--mega-line);
@@ -358,6 +361,21 @@
   font-size: 11px;
   font-weight: 700;
   white-space: nowrap;
+}
+
+.home-page .electrical-submenu-heading-badges,
+.inner-page #mainNav .electrical-submenu-heading-badges {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+}
+
+.home-page .electrical-submenu-heading-count > i,
+.inner-page #mainNav .electrical-submenu-heading-count > i {
+  color: var(--mega-gold);
+  font-size: 10px;
 }
 
 @media (prefers-reduced-motion: reduce) {

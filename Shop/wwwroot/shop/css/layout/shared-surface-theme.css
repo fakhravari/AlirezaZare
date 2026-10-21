@@ -102,7 +102,7 @@ body.inner-page .contact-shortcuts > .container {
   body.inner-page .flow-main {
     width: calc(100% - 24px);
     max-width: 100%;
-    margin-block: 20px 32px;
+    margin-block: 16px 24px;
     padding-inline: 16px;
   }
 
