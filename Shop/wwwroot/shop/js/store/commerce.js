@@ -148,7 +148,14 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                         return `<fieldset class="product-variant-field product-variant-field--${esc(key)}" data-variant-key="${esc(key)}" data-required="${isPriceRequired}"><legend><span>${esc(feature.label)}</span></legend><div class="product-variant-choices">${feature.options
                             .map((option) => {
                                 const selected = option.value === selectedValue;
-                                return `<button class="product-variant-choice${option.swatch ? " product-variant-choice--swatch" : ""}${selected ? " is-selected" : ""}" type="button" data-value="${esc(option.value)}" data-delta="${Number(option.priceDelta) || 0}" aria-label="${esc(option.label)}" title="${esc(option.label)}" aria-pressed="${selected}">${option.swatch ? `<span class="product-variant-swatch" style="--variant-swatch:${esc(option.swatch)}"></span>` : ""}<span class="product-variant-choice-label">${esc(option.label)}</span>${Number(option.priceDelta) ? `<small>+ ${money(Number(option.priceDelta) * 1000000)}</small>` : ""}</button>`;
+                                const priceDelta = Number(option.priceDelta) || 0;
+                                const priceHint = priceDelta > 0
+                                    ? `، افزایش قیمت ${money(priceDelta * 1000000)}`
+                                    : "";
+                                const choice = `<button class="product-variant-choice${option.swatch ? " product-variant-choice--swatch" : ""}${selected ? " is-selected" : ""}" type="button" data-value="${esc(option.value)}" data-delta="${priceDelta}" aria-label="${esc(option.label + priceHint)}" title="${esc(option.label + priceHint)}" aria-pressed="${selected}">${option.swatch ? `<span class="product-variant-swatch" style="--variant-swatch:${esc(option.swatch)}"></span>` : ""}<span class="product-variant-choice-label">${esc(option.label)}</span>${!option.swatch && priceDelta > 0 ? `<small>+ ${money(priceDelta * 1000000)}</small>` : ""}</button>`;
+                                return option.swatch
+                                    ? `<span class="product-variant-choice-wrap">${choice}${priceDelta > 0 ? `<small class="product-variant-price-delta">+ ${money(priceDelta * 1000000)}</small>` : ""}</span>`
+                                    : choice;
                             })
                             .join("")}</div></fieldset>`;
                     })
@@ -838,16 +845,46 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                     const target = productView.querySelector(link.getAttribute("href"));
                     if (!target) return;
                     event.preventDefault();
+                    detailTabScrollTarget = link;
+                    window.clearTimeout(detailTabScrollReleaseTimer);
+                    detailTabScrollReleaseTimer = window.setTimeout(
+                        releaseDetailTabScroll,
+                        1800,
+                    );
                     setActiveDetailTab(link);
                     history.replaceState(null, "", link.getAttribute("href"));
                     target.scrollIntoView({ behavior: "smooth", block: "start" });
                 }),
             );
             let detailTabScrollFrame = 0;
+            let detailTabScrollTarget = null;
+            let detailTabScrollReleaseTimer = 0;
+            const releaseDetailTabScroll = () => {
+                detailTabScrollTarget = null;
+                window.clearTimeout(detailTabScrollReleaseTimer);
+                detailTabScrollReleaseTimer = 0;
+                syncActiveDetailTab();
+            };
             const syncActiveDetailTab = () => {
                 detailTabScrollFrame = 0;
                 if (!detailTabSections.length) return;
                 const marker = Math.min(window.innerHeight * 0.34, 220);
+                if (detailTabScrollTarget) {
+                    const target = detailTabSections.find(
+                        (item) => item.link === detailTabScrollTarget,
+                    );
+                    if (target) {
+                        const rect = target.section.getBoundingClientRect();
+                        if (rect.top <= marker && rect.bottom > marker) {
+                            detailTabScrollTarget = null;
+                            window.clearTimeout(detailTabScrollReleaseTimer);
+                            detailTabScrollReleaseTimer = 0;
+                        } else {
+                            setActiveDetailTab(detailTabScrollTarget);
+                            return;
+                        }
+                    }
+                }
                 let current = null,
                     nearest = null,
                     nearestDistance = Infinity;
@@ -872,6 +909,9 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                 },
                 { passive: true },
             );
+            window.addEventListener("scrollend", releaseDetailTabScroll, {
+                passive: true,
+            });
             window.addEventListener("resize", syncActiveDetailTab, { passive: true });
             syncActiveDetailTab();
             productView

@@ -21,8 +21,8 @@ Controller شناسه را از انتهای slug می‌خواند و محصو�
 | عنوان سرور، canonical و JSON-LD | Controller، CatalogRepository و [SEO](../seo/metadata.md) |
 | برند فارسی، کشور و breadcrumb دسته | کاتالوگ، HNCountries و markup renderer در commerce.js |
 | عکس و ویدئو | `image/mainImage/thumbnailImage`، آرایهٔ `images` و `videos`؛ [رسانه](../media/images.md) |
-| ویژگی‌ها، گزینه‌ها، متعلقات و قیمت | کاتالوگ، renderer و CSS اختصاصی قیمت/گزینه‌ها؛ مبلغ نهایی طبق [سبد](cart.md) |
-| تب معرفی، بررسی، مشخصات، دیدگاه و پرسش | commerce.js؛ متن اولیه از `detail` و دادهٔ محلی feedback |
+| ویژگی‌ها، گزینه‌ها، متعلقات و قیمت | کاتالوگ و renderer؛ افزایش قیمت گزینه‌های swatch زیر رنگ به‌شکل برچسب ظریف دیده می‌شود و مبلغ نهایی طبق [سبد](cart.md) محاسبه می‌شود |
+| تب معرفی، بررسی، مشخصات، دیدگاه و پرسش | commerce.js؛ متن اولیه از `detail` و دادهٔ محلی feedback؛ هنگام پیمایش نرم، تب مقصد تا رسیدن اسکرول فعال می‌ماند |
 | اشتراک و کپی | handlerهای صفحه و commerce/page-content؛ ثبت دوبارهٔ listener را کنترل کنید |
 | افزودن به سبد | رویداد و گزینهٔ انتخابی → `HNUI.cart.add`؛ state موازی نسازید |
 

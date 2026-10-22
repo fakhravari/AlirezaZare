@@ -1292,12 +1292,22 @@
 
 #productView .product-detail-tabs > a.is-active > i,
 #productView .product-detail-tabs > a.is-active:is(:hover, :focus-visible) > i {
-  border-color: rgba(246, 197, 21, 0.5);
-  background: linear-gradient(145deg, #fff0ae, #f6c515);
+  border-color: #c9d9e3;
+  background: linear-gradient(145deg, #f1f6f9, #dce8ef);
   color: #173b5d;
   box-shadow:
-    0 2px 6px rgba(10, 31, 51, 0.15),
-    inset 0 1px rgba(255, 255, 255, 0.6);
+    0 2px 6px rgba(16, 42, 67, 0.12),
+    inset 0 1px rgba(255, 255, 255, 0.85);
+}
+
+.product-gallery-dialog [data-gallery-close] > i {
+  transform: none;
+  transition: transform 0.3s cubic-bezier(0.2, 0.75, 0.25, 1);
+}
+
+.product-gallery-dialog [data-gallery-close]:hover > i,
+.product-gallery-dialog [data-gallery-close]:focus-visible > i {
+  transform: rotate(90deg);
 }
 
 #productView .product-detail-tabs > a > b {
@@ -1329,6 +1339,40 @@
   #productView .product-detail-tabs > a > i {
     transition: none;
   }
+  .product-gallery-dialog [data-gallery-close] > i {
+    transition: none;
+  }
+}
+
+/* Keep color choices compact and show only real price increases below the swatch. */
+#productView .product-variant-choice-wrap {
+  display: inline-grid;
+  justify-items: center;
+  gap: 3px;
+}
+
+#productView .product-variant-choice--swatch {
+  width: 38px;
+  min-width: 38px;
+  height: 38px;
+  min-height: 38px;
+  padding: 4px;
+}
+
+#productView .product-variant-choice--swatch.is-selected::after {
+  font-size: 15px;
+}
+
+#productView .product-variant-price-delta {
+  padding: 1px 5px;
+  border: 1px solid #eee7d9;
+  border-radius: 999px;
+  background: #f8f5ef;
+  color: #806239;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1.5;
+  white-space: nowrap;
 }
 
 /* Keep review name and rating together, giving the optional name field most of the row. */
