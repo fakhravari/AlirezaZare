@@ -847,10 +847,11 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                     event.preventDefault();
                     detailTabScrollTarget = link;
                     window.clearTimeout(detailTabScrollReleaseTimer);
-                    detailTabScrollReleaseTimer = window.setTimeout(
-                        releaseDetailTabScroll,
-                        1800,
-                    );
+                    detailTabScrollReleaseTimer = window.setTimeout(() => {
+                        detailTabScrollTarget = null;
+                        detailTabScrollReleaseTimer = 0;
+                        syncActiveDetailTab();
+                    }, 5000);
                     setActiveDetailTab(link);
                     history.replaceState(null, "", link.getAttribute("href"));
                     target.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -859,12 +860,6 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
             let detailTabScrollFrame = 0;
             let detailTabScrollTarget = null;
             let detailTabScrollReleaseTimer = 0;
-            const releaseDetailTabScroll = () => {
-                detailTabScrollTarget = null;
-                window.clearTimeout(detailTabScrollReleaseTimer);
-                detailTabScrollReleaseTimer = 0;
-                syncActiveDetailTab();
-            };
             const syncActiveDetailTab = () => {
                 detailTabScrollFrame = 0;
                 if (!detailTabSections.length) return;
@@ -909,7 +904,7 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                 },
                 { passive: true },
             );
-            window.addEventListener("scrollend", releaseDetailTabScroll, {
+            window.addEventListener("scrollend", syncActiveDetailTab, {
                 passive: true,
             });
             window.addEventListener("resize", syncActiveDetailTab, { passive: true });
