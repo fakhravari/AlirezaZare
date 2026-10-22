@@ -3263,8 +3263,29 @@
       "discountPercent": 0,
       "imageSet": 0,
       "newest": 28,
-      "variants": null,
-      "variantStock": null,
+      "variants": {
+        "color": {
+          "label": "رنگ",
+          "options": [
+            {
+              "value": "yellow",
+              "label": "زرد",
+              "swatch": "#f6c515",
+              "priceDelta": 0
+            },
+            {
+              "value": "black",
+              "label": "مشکی",
+              "swatch": "#252525",
+              "priceDelta": 0.35
+            }
+          ]
+        }
+      },
+      "variantStock": {
+        "color=yellow": 7,
+        "color=black": 3
+      },
       "accessories": [
         {
           "id": "sds-bit-set",
@@ -3413,8 +3434,29 @@
       "discountPercent": 15,
       "imageSet": 1,
       "newest": 25,
-      "variants": null,
-      "variantStock": null,
+      "variants": {
+        "color": {
+          "label": "رنگ",
+          "options": [
+            {
+              "value": "yellow",
+              "label": "زرد",
+              "swatch": "#f6c515",
+              "priceDelta": 0
+            },
+            {
+              "value": "black",
+              "label": "مشکی",
+              "swatch": "#252525",
+              "priceDelta": 0.2
+            }
+          ]
+        }
+      },
+      "variantStock": {
+        "color=yellow": 12,
+        "color=black": 6
+      },
       "accessories": [
         {
           "id": "meter-case",
@@ -3512,8 +3554,29 @@
       "discountPercent": 0,
       "imageSet": 1,
       "newest": 22,
-      "variants": null,
-      "variantStock": null,
+      "variants": {
+        "color": {
+          "label": "رنگ",
+          "options": [
+            {
+              "value": "gray",
+              "label": "خاکستری",
+              "swatch": "#8b929a",
+              "priceDelta": 0
+            },
+            {
+              "value": "black",
+              "label": "مشکی",
+              "swatch": "#252525",
+              "priceDelta": 0.15
+            }
+          ]
+        }
+      },
+      "variantStock": {
+        "color=gray": 2,
+        "color=black": 4
+      },
       "accessories": null,
       "badge": "",
       "slug": "digital-clamp-meter",
@@ -3540,8 +3603,29 @@
       "discountPercent": 0,
       "imageSet": 1,
       "newest": 21,
-      "variants": null,
-      "variantStock": null,
+      "variants": {
+        "color": {
+          "label": "رنگ",
+          "options": [
+            {
+              "value": "red",
+              "label": "قرمز",
+              "swatch": "#d62828",
+              "priceDelta": 0
+            },
+            {
+              "value": "black",
+              "label": "مشکی",
+              "swatch": "#252525",
+              "priceDelta": 0.25
+            }
+          ]
+        }
+      },
+      "variantStock": {
+        "color=red": 9,
+        "color=black": 5
+      },
       "accessories": null,
       "badge": "",
       "slug": "electrical-installation-digital-multimeter",

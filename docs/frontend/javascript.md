@@ -79,6 +79,7 @@
 | `hn-profile-activity` | دادهٔ فعالیت محلی خوانده‌شده در account-page.js؛ گزارش عملیاتی سرور نیست |
 | `hn-profile` | دادهٔ profile در `Views/Profile/Index.cshtml` |
 | `hn-product-${type}-${productId}` | کلید feedback در `commerce.js`؛ `type` برابر `reviews` یا `questions` است. داده‌های اولیه با دادهٔ ذخیره‌شده ترکیب می‌شوند. |
+| `hn-article-feedback-v1-${slug}` | دیدگاه و پسند محلی مقاله؛ نمونه‌های اولیه با برچسب نمایشی هستند و هیچ ارسال سروری انجام نمی‌شود. |
 
 ممکن است scriptهای دیگر کلید تازه اضافه کنند؛ این جدول هنگام تغییر باید با `rg -n "localStorage|storage\.(get|set|json)|hn-" Shop/wwwroot/shop/js Shop/Views` تطبیق داده شود.
 
@@ -100,4 +101,4 @@
 
 [فهرست این بخش](README.md) · [فهرست مستندات](../README.md)
 
-آخرین تطبیق با کد: ۲۱ اکتبر ۲۰۲۶.
+آخرین تطبیق با کد: ۲۲ اکتبر ۲۰۲۶.

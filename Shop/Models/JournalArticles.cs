@@ -38,11 +38,95 @@ public static partial class JournalArticles
 
     public static MagazineDetailsModel? Find(string slug)
     {
-        var article = Articles.Concat(ExpandedArticles).FirstOrDefault(item => string.Equals(item.Slug, slug, StringComparison.OrdinalIgnoreCase));
+        var allArticles = Articles.Concat(ExpandedArticles).ToArray();
+        var article = allArticles.FirstOrDefault(item => string.Equals(item.Slug, slug, StringComparison.OrdinalIgnoreCase));
         if (article is null) return null;
 
         var sections = article.Headings.Select((heading, index) => new MagazineSectionModel($"section-{index + 1}", heading, article.Content[index])).ToArray();
-        return new MagazineDetailsModel(article.Slug, article.Category, "مجله تخصصی برق و ابزار", article.Title, article.Summary, "تحریریه ندا اولیائی", "", "۶ دقیقه مطالعه", "shop/images/heroes/hero-electrical-editorial.png", ProductMediaCatalog.GetContentPath(article.Image), article.Summary, sections, "مشخصات و دستورالعمل سازندهٔ همان مدل را بررسی کنید و ابزار را متناسب با کاربرد و شرایط ایمنی انتخاب کنید.", article.Sources);
+        var related = allArticles
+            .Where(candidate => !string.Equals(candidate.Slug, article.Slug, StringComparison.OrdinalIgnoreCase))
+            .Select(candidate => new { Article = candidate, Score = RelatedScore(article, candidate) })
+            .OrderByDescending(candidate => candidate.Score)
+            .ThenBy(candidate => candidate.Article.Title, StringComparer.Ordinal)
+            .Take(8)
+            .Select(candidate => new MagazineRelatedArticleModel(candidate.Article.Slug, candidate.Article.Category, candidate.Article.Title, ProductMediaCatalog.GetContentPath(candidate.Article.Image)))
+            .ToArray();
+        return new MagazineDetailsModel(article.Slug, article.Category, "مجله تخصصی برق و ابزار", article.Title, article.Summary, "تحریریه ندا اولیائی", "", "۶ دقیقه مطالعه", "shop/images/heroes/hero-electrical-editorial.png", ProductMediaCatalog.GetContentPath(article.Image), article.Summary, sections, "مشخصات و دستورالعمل سازندهٔ همان مدل را بررسی کنید و ابزار را متناسب با کاربرد و شرایط ایمنی انتخاب کنید.", ResolveSources(article), BuildTags(article), related);
+    }
+
+    private static int RelatedScore(Article current, Article candidate)
+    {
+        var score = string.Equals(current.Category, candidate.Category, StringComparison.Ordinal) ? 2 : 0;
+        var currentTopic = TopicFor(current.Slug);
+        var candidateTopic = TopicFor(candidate.Slug);
+        if (currentTopic == candidateTopic) score += 5;
+        if (current.Slug.Contains("safety", StringComparison.Ordinal) == candidate.Slug.Contains("safety", StringComparison.Ordinal)) score++;
+        return score;
+    }
+
+    private static string TopicFor(string slug) => slug switch
+    {
+        var value when value.Contains("solder", StringComparison.Ordinal) => "soldering",
+        var value when value.Contains("multimeter", StringComparison.Ordinal) || value.Contains("measurement", StringComparison.Ordinal) => "measurement",
+        var value when value.Contains("light", StringComparison.Ordinal) || value.Contains("lumen", StringComparison.Ordinal) => "lighting",
+        var value when value.Contains("battery", StringComparison.Ordinal) || value.Contains("cordless", StringComparison.Ordinal) => "battery",
+        var value when value.Contains("cord", StringComparison.Ordinal) || value.Contains("electrical", StringComparison.Ordinal) => "electrical",
+        _ => "tools"
+    };
+
+    private static IReadOnlyList<MagazineTagModel> BuildTags(Article article)
+    {
+        var topic = TopicFor(article.Slug);
+        var topicLabel = topic switch
+        {
+            "soldering" => "لحیم‌کاری و تعمیر برد",
+            "measurement" => "مولتی‌متر و اندازه‌گیری",
+            "lighting" => "روشنایی و چراغ کارگاهی",
+            "battery" => "باتری و ابزار شارژی",
+            "electrical" => "برق، کابل و سیم رابط",
+            _ => "ابزار و تجهیزات کارگاهی"
+        };
+        var filter = topic switch
+        {
+            "soldering" => "soldering",
+            "measurement" => "measurement",
+            "lighting" => "lighting",
+            "battery" => "battery",
+            "electrical" => "electrical",
+            _ => "tools"
+        };
+        var branch = article.Category switch
+        {
+            "راهنمای خرید" => "buying",
+            "آموزش تخصصی" => "education",
+            _ => "safety"
+        };
+        var additional = topic switch
+        {
+            "soldering" => new MagazineTagModel("ایمنی میز کار", "area-tools"),
+            "measurement" => new MagazineTagModel("ایمنی اندازه‌گیری", "area-electrical"),
+            "lighting" => new MagazineTagModel("نور محیط کار", "area-workshop"),
+            "battery" => new MagazineTagModel("نگهداری ابزار", "area-tools"),
+            "electrical" => new MagazineTagModel("ایمنی برق", "area-electrical"),
+            _ => new MagazineTagModel("انتخاب ابزار", "area-tools")
+        };
+        return [new(article.Category, branch), new(topicLabel, filter), additional];
+    }
+
+    private static IReadOnlyList<MagazineSourceModel> ResolveSources(Article article)
+    {
+        var sources = (article.Sources ?? []).ToList();
+        var topicalSources = TopicFor(article.Slug) switch
+        {
+            "soldering" => new[] { new MagazineSourceModel("راهنمای HAKKO برای نگهداری نوک هویه", "https://www.hakko.com/english/support/maintenance/detail.php?seq=183"), new MagazineSourceModel("راهنمای OSHA دربارهٔ تهویهٔ موضعی در محیط کار", "https://www.osha.gov/otm/section-5-construction-operations/chapter-3") },
+            "measurement" => new[] { new MagazineSourceModel("راهنمای Fluke برای آزمون پیوستگی مولتی‌متر", "https://www.fluke.com/en-gb/learn/blog/digital-multimeters/how-to-test-for-continuity"), new MagazineSourceModel("OSHA 1910.334: ایمنی تجهیزات و ابزار آزمون", "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.334") },
+            "lighting" => new[] { new MagazineSourceModel("راهنمای ENERGY STAR دربارهٔ روشنایی و لومن", "https://www.energystar.gov/products/learn-about-brightness"), new MagazineSourceModel("راهنمای ENERGY STAR دربارهٔ دمای رنگ نور", "https://www.energystar.gov/products/light_fixtures/downlights-key-product-criteria") },
+            "battery" => new[] { new MagazineSourceModel("راهنمای ایمنی باتری در دفترچهٔ سازندهٔ Makita؛ برای مدل‌های سازگار", "https://cdn.makitatools.com/apps/cms/doc/prod/XWT/41303269-e06f-4eb8-8eef-14ae86c69d2e_XWT05Z_IM.pdf") },
+            "electrical" => new[] { new MagazineSourceModel("راهنمای OSHA برای ایمنی سیم‌های رابط", "https://www.osha.gov/electrical/hazards/flexible-cords"), new MagazineSourceModel("OSHA 1910.334: ایمنی تجهیزات و ابزار آزمون", "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.334") },
+            _ => new[] { new MagazineSourceModel("راهنمای OSHA دربارهٔ ابزارهای برقی", "https://www.osha.gov/etools/construction/electrical-incidents/power-tools"), new MagazineSourceModel("OSHA 1910.243: الزامات ابزارهای دستی و برقی", "https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.243") }
+        };
+        sources.AddRange(topicalSources);
+        return sources.DistinctBy(source => source.Url, StringComparer.OrdinalIgnoreCase).Take(4).ToArray();
     }
 }
 

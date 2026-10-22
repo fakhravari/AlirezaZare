@@ -102,13 +102,19 @@
 }
 
 .brands-heading > p {
-  max-width: 380px;
-  margin: 0 0 4px;
+  max-width: 410px;
+  margin: 0;
+  padding: 13px 16px;
+  border: 1px solid #eadfc9;
+  border-inline-start: 3px solid #d9b76e;
+  border-radius: 14px 8px 14px 14px;
+  background: linear-gradient(130deg, #fffdf8, #fff8e9);
   color: var(--industrial-steel);
   font-family: var(--font-body);
   font-size: 14px;
-  line-height: 1.9;
+  line-height: 1.85;
   letter-spacing: 0;
+  box-shadow: inset 0 1px rgba(255,255,255,.9), 0 5px 16px rgba(16,42,67,.04);
 }
 
 .brands-grid {

@@ -5,7 +5,7 @@ window.HNUI.mount("pages-magazine", document, () => {
   const heading = document.getElementById("archive-title");
   const count = document.getElementById("journal-count");
   if (!nav || !heading || !count) return;
-  const perPage = 12;
+  const perPage = 16;
   let filter = "all";
   let page = 1;
   const number = (value) => window.HNUI.formatNumber(value);
@@ -113,18 +113,26 @@ window.HNUI.mount("pages-magazine", document, () => {
     });
     add("بعدی", page + 1, page === pages);
   }
+  function focusFirstResult() {
+    const firstResult = posts.find((post) => !post.hidden)?.querySelector("a");
+    const target = firstResult || heading;
+    target.focus({ preventScroll: true });
+    target.scrollIntoView({ block: "start", behavior: "auto" });
+  }
   buttons.forEach((button) =>
     button.addEventListener("click", () => {
       filter = button.dataset.journalFilter;
       page = 1;
       render();
       saveLocation();
+      focusFirstResult();
     }),
   );
   window.addEventListener("popstate", () => {
     readLocation();
     render();
     saveLocation(true);
+    focusFirstResult();
   });
   readLocation();
   render();

@@ -46,20 +46,20 @@
             <span>
                 <i class="bi bi-clock"></i> @Model.Data.ReadTime
             </span>
-            <span class="article-hero-stat" aria-label="@articleMetrics.Comments نظر">
-                <i class="bi bi-chat-left-text" aria-hidden="true"></i> @articleMetrics.Comments.ToString("N0", persianCulture) نظر
+            <span class="article-hero-stat" data-article-comment-count aria-label="۳ نظر نمونه">
+                <i class="bi bi-chat-left-text" aria-hidden="true"></i> <span data-article-comment-value>۳</span> نظر
             </span>
-            <span class="article-hero-stat" aria-label="امتیاز @articleMetrics.AverageRating از ۵">
-                <i class="bi bi-star-fill" aria-hidden="true"></i> @(articleMetrics.AverageRating > 0 ? articleMetrics.AverageRating.ToString("0.0", persianCulture) : "بدون امتیاز")
+            <span class="article-hero-stat" data-article-rating aria-label="امتیاز ۴٫۷ از ۵؛ نمونه">
+                <i class="bi bi-star-fill" aria-hidden="true"></i> <span data-article-rating-value>۴٫۷</span>
             </span>
-            <span class="article-hero-stat article-like-stat" aria-label="@articleMetrics.Likes پسند">
-                <i class="bi bi-heart-fill" aria-hidden="true"></i> @articleMetrics.Likes.ToString("N0", persianCulture) پسند
+            <span class="article-hero-stat article-like-stat" data-article-like-count aria-label="@articleMetrics.Likes پسند">
+                <i class="bi bi-heart-fill" aria-hidden="true"></i> <span data-article-like-value>@articleMetrics.Likes.ToString("N0", persianCulture)</span> پسند
             </span>
         </div>
     </div>
 </header>
 
-<main class="article-page article-enhanced" data-article-slug="@Model.Data.Slug">
+<main class="article-page article-enhanced" data-article-slug="@Model.Data.Slug" data-article-likes="@articleMetrics.Likes">
     <div class="reading-progress" aria-hidden="true">
         <span id="readingProgress"></span>
     </div>
@@ -161,8 +161,10 @@
                     </div>
                     <div class="article-tags">
                         <span>برچسب‌ها:</span>
-                        <a asp-controller="Magazine" asp-action="Index">@Model.Data.Category</a>
-
+                        @foreach (var tag in Model.Data.Tags ?? [])
+                        {
+                            <a href="@Url.Action("Index", "Magazine", new { category = tag.Filter })">@tag.Label</a>
+                        }
                     </div>
                     @if (Model.Data.Sources is { Count: > 0 } sources)
                     {
@@ -184,26 +186,56 @@
                         </div>
                         <a href="@Url.Content("~/Search")">مشاهده محصولات <i class="bi bi-arrow-left" aria-hidden="true"></i></a>
                     </div>
+                    <section class="article-feedback" data-article-feedback aria-labelledby="articleFeedbackTitle">
+                        <div class="article-feedback-heading">
+                            <div><span class="article-eyebrow">بازخورد خوانندگان</span><h2 id="articleFeedbackTitle">نظر، امتیاز و پسند</h2></div>
+                            <button class="article-like-button" type="button" data-article-like aria-pressed="false"><i class="bi bi-heart" aria-hidden="true"></i><span>پسندیدن</span><b data-article-like-count-inline>۰</b></button>
+                        </div>
+                        <p class="article-feedback-note">نظرها و آمار اولیه نمونه‌اند؛ بازخورد شما فقط در همین مرورگر ذخیره می‌شود.</p>
+                        <div class="article-feedback-summary"><strong><i class="bi bi-star-fill" aria-hidden="true"></i> <span data-feedback-average>—</span> از ۵</strong><span data-feedback-count>۰ نظر</span></div>
+                        <div class="article-feedback-list" data-feedback-list aria-live="polite"></div>
+                        <form class="article-feedback-form" data-feedback-form>
+                            <h3>دیدگاه خود را بنویسید</h3>
+                            <label>نام شما<input name="name" maxlength="50" autocomplete="name" required></label>
+                            <label>امتیاز<select name="rating" required><option value="5">۵ از ۵</option><option value="4">۴ از ۵</option><option value="3">۳ از ۵</option><option value="2">۲ از ۵</option><option value="1">۱ از ۵</option></select></label>
+                            <label class="article-feedback-message">متن دیدگاه<textarea name="text" rows="3" maxlength="1000" required></textarea></label>
+                            <button type="submit">ثبت دیدگاه</button><p role="status" aria-live="polite" data-feedback-status></p>
+                        </form>
+                    </section>
                 </article>
             </div>
         </div>
     </section>
     <section class="container article-related" aria-labelledby="relatedTitle">
-        <span class="article-eyebrow">ادامه مسیر مطالعه</span>
-        <h2 id="relatedTitle">این راهنماها را هم بخوانید</h2>
-        <div>
-            <a asp-controller="Magazine" asp-action="Details" asp-route-slug="multimeter-buying-guide">
-                <img src="~/content/products/images/card/digital-multimeter-hn-006-row-006-card-800.jpg" alt="مولتی‌متر دیجیتال و پراب‌های اندازه‌گیری" loading="lazy"/>
-                <span>
-                    <small>راهنمای خرید</small><strong>چطور مولتی‌متر مناسب انتخاب کنیم؟</strong><i class="bi bi-arrow-left" aria-hidden="true"></i>
-                </span>
-            </a>
-            <a asp-controller="Magazine" asp-action="Details" asp-route-slug="electrical-tool-safety">
-                <img src="~/content/products/images/card/portable-led-work-light-hn-016-row-016-card-800.jpg" alt="ابزار و تجهیزات ایمنی کارگاهی" loading="lazy"/>
-                <span>
-                    <small>ایمنی و نگهداری</small><strong>چک‌لیست ایمنی کار با ابزار برقی</strong><i class="bi bi-arrow-left" aria-hidden="true"></i>
-                </span>
-            </a>
+        <div class="article-related-heading">
+            <div>
+                <span class="article-eyebrow">ادامه مسیر مطالعه</span>
+                <h2 id="relatedTitle">مقالات مرتبط</h2>
+            </div>
+            @if (Model.Data.RelatedArticles is { Count: > 1 })
+            {
+                <div class="article-related-controls" role="group" aria-label="کنترل مقالات مرتبط">
+                    <button type="button" data-related-scroll="next" aria-label="مقالات بعدی"><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
+                    <button type="button" data-related-scroll="previous" aria-label="مقالات قبلی"><i class="bi bi-chevron-left" aria-hidden="true"></i></button>
+                </div>
+            }
+        </div>
+        <div class="article-related-viewport" id="articleRelatedViewport" role="region" aria-label="مقالات مرتبط" tabindex="0">
+            <div class="article-related-track">
+                @foreach (var related in Model.Data.RelatedArticles ?? [])
+                {
+                    <article class="article-related-card">
+                        <a asp-controller="Magazine" asp-action="Details" asp-route-slug="@related.Slug">
+                            <img src="@Url.Content("~/" + related.Image)" alt="@related.Title" loading="lazy" width="640" height="420"/>
+                            <span class="article-related-copy">
+                                <small>@related.Category</small>
+                                <strong>@related.Title</strong>
+                                <span class="article-related-link">خواندن مطلب <i class="bi bi-arrow-left" aria-hidden="true"></i></span>
+                            </span>
+                        </a>
+                    </article>
+                }
+            </div>
         </div>
     </section>
 

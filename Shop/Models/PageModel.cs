@@ -57,7 +57,11 @@ public sealed record MagazineDetailsModel(
     string Lead,
     IReadOnlyList<MagazineSectionModel> Sections,
     string Conclusion,
-    IReadOnlyList<MagazineSourceModel>? Sources = null);
+    IReadOnlyList<MagazineSourceModel>? Sources = null,
+    IReadOnlyList<MagazineTagModel>? Tags = null,
+    IReadOnlyList<MagazineRelatedArticleModel>? RelatedArticles = null);
 
 public sealed record MagazineSectionModel(string Id, string Title, string Content);
 public sealed record MagazineSourceModel(string Title, string Url);
+public sealed record MagazineTagModel(string Label, string Filter);
+public sealed record MagazineRelatedArticleModel(string Slug, string Category, string Title, string Image);
