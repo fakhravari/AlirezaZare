@@ -12674,13 +12674,13 @@ body .electrical-swiper .swiper-pagination-bullet-active {
   border: 1px solid rgba(193, 154, 93, 0.5);
   border-radius: 999px;
   background: linear-gradient(135deg, #fff6d7, #f5e1ad);
-  color: #6e5116 !important;
+  color: #6e5116;
 }
 
 .home-page #journal .journal-main-cta:hover {
   gap: 10px;
   background: linear-gradient(135deg, #f7e6bb, #ecd28d);
-  color: var(--industrial-navy) !important;
+  color: var(--industrial-navy);
 }
 
 @media (max-width: 767px) {
