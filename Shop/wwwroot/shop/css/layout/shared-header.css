@@ -8,68 +8,29 @@
 /* The horizontal logo stays in the desktop header; mobile uses the drawer. */
 #mainNav .header-brand-lockup {
   display: none;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
   width: 184px;
   max-width: min(184px, 40vw);
   min-width: 0;
-  min-height: 50px;
-  padding: 5px 9px;
-  border: 1px solid #d9b43a;
-  border-radius: 14px;
-  background: linear-gradient(135deg, #102a43 0%, #173b57 65%, #0b2236 100%);
-  box-shadow: 0 5px 14px rgba(16, 42, 67, 0.12), inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  height: 60px;
+  min-height: 60px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
   line-height: 1;
   text-decoration: none;
-  transition: transform 180ms ease, box-shadow 180ms ease;
+  transition: transform 180ms ease;
 }
 
 #mainNav .header-brand-lockup:is(:hover, :focus-visible) {
   transform: translateY(-1px);
-  box-shadow: 0 8px 18px rgba(16, 42, 67, 0.18), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
 }
 
-#mainNav .header-brand-symbol {
+#mainNav .header-brand-image {
   display: block;
-  width: 38px;
-  height: 38px;
-  flex: 0 0 38px;
-}
-
-#mainNav .header-brand-copy,
-.mobile-menu-logo-copy {
-  display: grid;
-  min-width: 0;
-  justify-items: start;
-  gap: 4px;
-  direction: rtl;
-  text-align: right;
-  font-family: "Estedad", "Vazirmatn", Tahoma, sans-serif;
-}
-
-#mainNav .header-brand-lockup > .header-brand-copy,
-.mobile-menu .mobile-menu-logo > .mobile-menu-logo-copy {
-  width: auto;
-  height: auto;
-  flex: 1 1 auto;
-}
-
-#mainNav .header-brand-copy strong,
-.mobile-menu-logo-copy strong {
-  color: #fff;
-  font-size: 16px;
-  font-weight: 800;
-  letter-spacing: -0.35px;
-  white-space: nowrap;
-}
-
-#mainNav .header-brand-copy small,
-.mobile-menu-logo-copy small {
-  color: #f6d66b;
-  font-size: 9px;
-  font-weight: 600;
-  white-space: nowrap;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 @media (min-width: 992px) {
@@ -84,10 +45,7 @@
 }
 
 @media (max-width: 1100px) and (min-width: 992px) {
-  #mainNav .header-brand-lockup { width: 166px; gap: 6px; padding-inline: 7px; }
-  #mainNav .header-brand-symbol { width: 34px; height: 34px; flex-basis: 34px; }
-  #mainNav .header-brand-copy strong { font-size: 14px; }
-  #mainNav .header-brand-copy small { font-size: 8px; }
+  #mainNav .header-brand-lockup { width: 166px; }
 }
 
 @media (max-width: 991px) {

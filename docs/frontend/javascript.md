@@ -38,7 +38,7 @@
 | `js/store/cart.js` | normalize، قیمت، موجودی، سبد و renderer گزینه‌ها | شناسهٔ محصول و قرارداد سبد |
 | `js/layout/header-navigation.js` | باز/بسته، کیبورد، hover و گروه‌های دسته در هدر | trigger واقعی، state صریح و خانه/داخلی |
 | `js/layout/main.js` | پیشنهاد/جست‌وجوی اخیر، شمارنده‌ها، account/login/cart/list panels و هماهنگی خانه | listenerهای delegated و panel state |
-| `js/core/form-validation.js` | validation عمومی/delegated فرم | `data-*`، selector فرم، خطاهای inline و submit handler اختصاصی |
+| `js/core/form-validation.js` | validation عمومی/delegated فرم | `data-*`، selector فرم، خطاهای inline و submit handler اختصاصی؛ `data-validation="full-name"` دست‌کم دو بخش نام را می‌سنجد |
 | `js/store/catalog.js` | resolverِ catalog.json؛ HNCatalog و APIهای سازگار HNProducts/HNCountries/HNProductColors | شناسه‌های صریح، relation و immutable بودن؛ داده دمو است |
 | `js/store/product-card.js` | renderer مشترک کارت و قیمت | variantهای grid/slider/search/related/favorite؛ escape و data-* مشترک |
 | `js/store/commerce.js` | جزئیات محصول، variant/accessory، قیمت، gallery، feedback، cart، coupon، compare و favorites rendering | selectorهای `#productView`, `#cartView`, `#favoritesView`, `#compareView`؛ event/storage و rendererهای HTML |

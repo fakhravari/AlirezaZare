@@ -23,7 +23,7 @@ _Shop
 
 در خانه section `Hero` داخل `header.hero#home` رندر می‌شود؛ این section جایگاه محتوای hero است و جزو ترتیب CSS/JS نیست.
 
-نشان «برق شیراز» در `content/identity/store-electrical-mark.svg` است. متن لوگو در هدر و `.mobile-menu-logo` به‌صورت HTML و با فونت Estedad رندر می‌شود تا شکل حروف فارسی با فونت اصلی سایت یکسان بماند؛ قاب سرمه‌ای و طلایی هر دو نسخه یکپارچه است. در هدر دسکتاپ نشان ۳۸px و در منوی موبایل ۴۰px است. در عرض‌های حداکثر ۹۹۱px لوگوی هدر پنهان می‌ماند و نشانِ همان هویت در drawer دیده می‌شود. قواعد برند دسکتاپ در `shared-header.css` و drawer در `mobile-drawer-compact.css` هستند؛ فاصلهٔ سه دکمهٔ خرید/مقایسه/علاقه‌مندی در موبایل ۵px است.
+لوگوی کامل «برق شیراز» یک SVG افقی در `content/identity/store-electrical-lockup.svg` است؛ عنوان و زیرعنوان داخل خود تصویر با فونت Estedad، تراز وسط و بدون نوشتهٔ HTML جداگانه قرار دارند. هدر دسکتاپ و `.mobile-menu-logo` در drawer همین تصویر را با اندازهٔ متناسب نمایش می‌دهند؛ لینک‌ها نام دسترس‌پذیر جداگانه دارند. نشان مربعی `store-electrical-mark.svg` برای مواردی که فقط نماد لازم است باقی می‌ماند و `store-mark.svg` favicon است. قواعد برند دسکتاپ در `shared-header.css` و drawer در `mobile-drawer-compact.css` هستند؛ فاصلهٔ سه دکمهٔ خرید/مقایسه/علاقه‌مندی در موبایل ۵px است.
 
 پنل‌ها بیرون `#main-content` هستند. خطای z-index، قفل scroll یا اندازهٔ پنل را فقط به View صفحه نسبت ندهید. skip link به `div#main-content[tabindex="-1"]` می‌رود؛ هر View، main معنایی خودش را درون آن حفظ می‌کند. عنصر main تو در تو نسازید.
 

@@ -33,6 +33,12 @@ window.HNUI.mount("core-form-validation", document, () => {
     }
     if (!value) return "";
 
+    if (
+      control.dataset.validation === "full-name" &&
+      value.split(/\s+/).filter(Boolean).length < 2
+    )
+      return "نام و نام خانوادگی را کامل وارد کنید.";
+
     if (control.type === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))
       return "ایمیل را با قالب صحیح وارد کنید.";
     if (control.type === "url") {

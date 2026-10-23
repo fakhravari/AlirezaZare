@@ -1635,3 +1635,77 @@
     font-size: 12px;
   }
 }
+
+/* Keep feedback identity, rating and registration time together in a compact row. */
+#productView .product-feedback-meta {
+  min-width: 0;
+  flex-wrap: nowrap;
+  gap: 9px;
+}
+
+#productView .product-feedback-card .product-feedback-meta > strong {
+  min-width: 0;
+  overflow: hidden;
+  font-size: 16px;
+  font-weight: 750;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#productView .product-feedback-meta-details {
+  display: inline-flex;
+  min-width: 0;
+  flex: 0 1 auto;
+  align-items: center;
+  gap: 7px;
+  direction: rtl;
+  white-space: nowrap;
+}
+
+#productView .product-feedback-meta-details .product-feedback-stars {
+  gap: 4px;
+  letter-spacing: 0;
+  font-size: 11px;
+}
+
+#productView .product-feedback-stars-glyphs {
+  font-size: 12px;
+  letter-spacing: 0.5px;
+}
+
+#productView .product-feedback-stars > small {
+  color: #8b6e2e;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+#productView .product-feedback-separator {
+  color: #d7dee3;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+#productView .product-feedback-meta-details .product-feedback-datetime {
+  gap: 5px;
+  margin: 0;
+  font-size: 10px;
+}
+
+@media (max-width: 420px) {
+  #productView .product-feedback-meta {
+    gap: 6px;
+  }
+
+  #productView .product-feedback-card .product-feedback-meta > strong {
+    font-size: 14px;
+  }
+
+  #productView .product-feedback-meta-details {
+    gap: 5px;
+  }
+
+  #productView .product-feedback-meta-details .product-feedback-datetime {
+    font-size: 9px;
+  }
+}

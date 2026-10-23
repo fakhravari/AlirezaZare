@@ -65,65 +65,67 @@
     <section class="page-section article-content-section">
         <div class="container">
             <div class="article-layout">
-                <aside class="article-sidebar ui-scrollbar ui-scrollbar--gold-on-dark">
-                    <nav class="article-toc" aria-label="فهرست مطالب">
-                        <div class="article-toc-scroll ui-scrollbar ui-scrollbar--gold-on-dark">
-                            <div class="toc-heading">
-                                <span class="toc-emblem">
-                                    <i class="bi bi-journal-text" aria-hidden="true"></i>
+                <aside class="article-sidebar">
+                    <div class="article-sidebar-scroll ui-scrollbar ui-scrollbar--gold-on-dark">
+                        <nav class="article-toc" aria-label="فهرست مطالب">
+                            <div class="article-toc-scroll ui-scrollbar ui-scrollbar--gold-on-dark">
+                                <div class="toc-heading">
+                                    <span class="toc-emblem">
+                                        <i class="bi bi-journal-text" aria-hidden="true"></i>
+                                    </span>
+                                    <div>
+                                        <small>راهنمای مطالعه</small><strong>در این مقاله می‌خوانید</strong>
+                                        <span class="toc-tagline">هر بخش، یک قدم به انتخاب بهتر</span>
+                                    </div>
+                                </div>
+                                @for (var index = 0; index < Model.Data.Sections.Count; index++)
+                                {
+                                    var item = Model.Data.Sections[index];
+                                    var sectionNumber = (index + 1).ToString("00", CultureInfo.GetCultureInfo("fa-IR"));
+                                    <a href="#@item.Id">
+                                        <span class="article-toc-index">@sectionNumber</span><span>@item.Title</span>
+                                    </a>
+                                }
+                            </div>
+                        </nav>
+                        <div class="article-share">
+                            <div class="article-share-heading">
+                                <span>
+                                    <i class="bi bi-send"></i>
                                 </span>
                                 <div>
-                                    <small>راهنمای مطالعه</small><strong>در این مقاله می‌خوانید</strong>
-                                    <span class="toc-tagline">هر بخش، یک قدم به انتخاب بهتر</span>
+                                    <strong>اشتراک‌گذاری مطلب</strong>
+                                    <small>برای دوستانتان بفرستید</small>
                                 </div>
                             </div>
-                            @for (var index = 0; index < Model.Data.Sections.Count; index++)
-                            {
-                                var item = Model.Data.Sections[index];
-                                var sectionNumber = (index + 1).ToString("00", CultureInfo.GetCultureInfo("fa-IR"));
-                                <a href="#@item.Id">
-                                    <span class="article-toc-index">@sectionNumber</span><span>@item.Title</span>
+                            <div class="article-share-actions">
+                                <a data-share="telegram" href="#" target="_blank" rel="noopener" aria-label="اشتراک در تلگرام">
+                                    <i class="bi bi-telegram"></i><span>تلگرام</span>
                                 </a>
-                            }
-                        </div>
-                    </nav>
-                    <div class="article-share">
-                        <div class="article-share-heading">
-                            <span>
-                                <i class="bi bi-send"></i>
-                            </span>
-                            <div>
-                                <strong>اشتراک‌گذاری مطلب</strong>
-                                <small>برای دوستانتان بفرستید</small>
+                                <a data-share="whatsapp" href="#" target="_blank" rel="noopener" aria-label="اشتراک در واتساپ">
+                                    <i class="bi bi-whatsapp"></i><span>واتساپ</span>
+                                </a>
+                                <a data-share="linkedin" href="#" target="_blank" rel="noopener" aria-label="اشتراک در لینکدین">
+                                    <i class="bi bi-linkedin" aria-hidden="true"></i><span>لینکدین</span>
+                                </a>
+                                <a data-share="x" href="#" target="_blank" rel="noopener" aria-label="اشتراک در ایکس">
+                                    <b aria-hidden="true">𝕏</b><span>ایکس</span>
+                                </a>
+                                <a data-share="facebook" href="#" target="_blank" rel="noopener" aria-label="اشتراک در فیسبوک">
+                                    <i class="bi bi-facebook" aria-hidden="true"></i><span>فیسبوک</span>
+                                </a>
+                                <a data-share="email" href="#" aria-label="اشتراک با ایمیل">
+                                    <i class="bi bi-envelope" aria-hidden="true"></i><span>ایمیل</span>
+                                </a>
+                                <button data-share="native" type="button" hidden>
+                                    <i class="bi bi-share" aria-hidden="true"></i><span>سایر برنامه‌ها</span>
+                                </button>
+                                <button data-share="copy" type="button" aria-label="کپی لینک">
+                                    <i class="bi bi-link-45deg"></i><span>کپی لینک</span>
+                                </button>
                             </div>
+                            <p class="article-share-status" role="status" aria-live="polite"></p>
                         </div>
-                        <div class="article-share-actions">
-                            <a data-share="telegram" href="#" target="_blank" rel="noopener" aria-label="اشتراک در تلگرام">
-                                <i class="bi bi-telegram"></i><span>تلگرام</span>
-                            </a>
-                            <a data-share="whatsapp" href="#" target="_blank" rel="noopener" aria-label="اشتراک در واتساپ">
-                                <i class="bi bi-whatsapp"></i><span>واتساپ</span>
-                            </a>
-                            <a data-share="linkedin" href="#" target="_blank" rel="noopener" aria-label="اشتراک در لینکدین">
-                                <i class="bi bi-linkedin" aria-hidden="true"></i><span>لینکدین</span>
-                            </a>
-                            <a data-share="x" href="#" target="_blank" rel="noopener" aria-label="اشتراک در ایکس">
-                                <b aria-hidden="true">𝕏</b><span>ایکس</span>
-                            </a>
-                            <a data-share="facebook" href="#" target="_blank" rel="noopener" aria-label="اشتراک در فیسبوک">
-                                <i class="bi bi-facebook" aria-hidden="true"></i><span>فیسبوک</span>
-                            </a>
-                            <a data-share="email" href="#" aria-label="اشتراک با ایمیل">
-                                <i class="bi bi-envelope" aria-hidden="true"></i><span>ایمیل</span>
-                            </a>
-                            <button data-share="native" type="button" hidden>
-                                <i class="bi bi-share" aria-hidden="true"></i><span>سایر برنامه‌ها</span>
-                            </button>
-                            <button data-share="copy" type="button" aria-label="کپی لینک">
-                                <i class="bi bi-link-45deg"></i><span>کپی لینک</span>
-                            </button>
-                        </div>
-                        <p class="article-share-status" role="status" aria-live="polite"></p>
                     </div>
                 </aside>
 
