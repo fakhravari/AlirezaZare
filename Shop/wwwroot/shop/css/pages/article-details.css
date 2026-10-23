@@ -1108,11 +1108,14 @@
   .article-enhanced .article-sidebar-scroll {
     box-sizing: border-box;
     max-height: calc(100dvh - 149px);
-    margin-inline: 6px 12px;
+    margin-inline: 12px -4px;
     overflow-x: hidden;
     overflow-y: auto;
     scrollbar-gutter: stable;
     scroll-behavior: smooth;
+  }
+  .article-enhanced .article-toc-scroll {
+    margin-left: 8px;
   }
   .article-enhanced .article-toc-scroll > a {
     position: relative;
@@ -1183,6 +1186,7 @@
   }
   .article-enhanced .article-toc-scroll {
     max-height: none;
+    margin-left: 0;
     overflow-y: visible;
   }
   .article-enhanced .article-share {

@@ -8,8 +8,8 @@
 /* The horizontal logo stays in the desktop header; mobile uses the drawer. */
 #mainNav .header-brand-lockup {
   display: none;
-  width: 184px;
-  max-width: min(184px, 40vw);
+  width: 220px;
+  max-width: min(220px, 40vw);
   min-width: 0;
   height: 60px;
   min-height: 60px;
@@ -45,7 +45,7 @@
 }
 
 @media (max-width: 1100px) and (min-width: 992px) {
-  #mainNav .header-brand-lockup { width: 166px; }
+  #mainNav .header-brand-lockup { width: 180px; }
 }
 
 @media (max-width: 991px) {

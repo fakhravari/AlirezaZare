@@ -4205,8 +4205,8 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
     display: grid;
     width: min(var(--container-wide-max), calc(100% - 56px));
     height: 85px;
-    padding: 13px 220px 13px 190px;
-    grid-template-columns: minmax(260px, 480px) 230px;
+    padding: 13px 262px 13px 40px;
+    grid-template-columns: minmax(260px, 640px) 230px;
     gap: 20px;
     align-items: center;
     color: var(--industrial-ink);
@@ -4337,7 +4337,9 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
   }
 
   .inner-page #mainNav .home-header-search {
-    height: 54px;
+    width: 100%;
+    max-width: 640px;
+    height: 58px;
     border-color: #dce3e7 !important;
     border-radius: 9px;
     background: #fff !important;
@@ -11005,15 +11007,15 @@ body.home-page .rail-card > strong {
 /* Keep the header support promise on one line beside the phone number. */
 @media (min-width: 992px) {
   .home-page #mainNav .home-header-top {
-    padding-right: 220px;
-    padding-left: 190px;
-    grid-template-columns: minmax(260px, 560px) 230px;
+    padding-right: 262px;
+    padding-left: 40px;
+    grid-template-columns: minmax(260px, 640px) 230px;
   }
 
   .home-page #mainNav .home-header-search {
     --header-search-action-width: 56px;
     width: 100%;
-    max-width: 560px;
+    max-width: 640px;
     height: 58px;
   }
 
