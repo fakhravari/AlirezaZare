@@ -1300,6 +1300,10 @@
     inset 0 1px rgba(255, 255, 255, 0.85);
 }
 
+#productView .product-detail-tabs > a.is-active > i.bi-file-earmark-text {
+  color: #173b5d;
+}
+
 .product-gallery-dialog [data-gallery-close] > i {
   transform: none;
   transition: transform 0.3s cubic-bezier(0.2, 0.75, 0.25, 1);
@@ -1449,8 +1453,8 @@
   flex: 0 0 30px;
   place-items: center;
   border-radius: 9px;
-  background: #edf2f5;
-  color: var(--industrial-navy, #173b5d) !important;
+  background: #f5f1e5;
+  color: #a47d12 !important;
   transition:
     background 0.18s ease,
     color 0.18s ease;
