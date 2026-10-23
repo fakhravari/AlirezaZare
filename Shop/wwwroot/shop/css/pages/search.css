@@ -118,9 +118,8 @@
   margin: 0 !important;
   padding: 0 !important;
   box-sizing: border-box;
-  object-fit: cover !important;
   object-position: center;
-  background: #fff;
+  background: var(--product-card-image-surface, #f2f5f6);
   transition: none;
 }
 
@@ -131,7 +130,8 @@
   max-width: none;
   max-height: none;
   padding: 0;
-  object-fit: cover;
+  object-fit: cover !important;
+  object-position: center;
 }
 
 .search-product:hover .search-page-card-media img {
@@ -173,6 +173,17 @@
   font-size: 18px;
   font-weight: 700;
   line-height: 1.7;
+}
+
+.search-product.product-card .search-page-card-price.has-discount {
+  align-content: center;
+  column-gap: 10px;
+  row-gap: 0;
+}
+
+.search-product.product-card .search-page-card-price .product-price-current {
+  font-size: 16px;
+  line-height: 1.45;
 }
 
 .search-product .search-page-card-price small {

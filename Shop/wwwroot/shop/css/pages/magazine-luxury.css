@@ -73,7 +73,6 @@
 }
 
 .blog-hero p {
-  max-width: 610px;
   margin: 0;
   color: var(--industrial-bg);
   font-size: 15px;
@@ -331,6 +330,37 @@
 .journal-children button {
   padding-block: 7px;
   font-size: 11px;
+}
+
+.journal-categories button > span:not(.journal-category-count) {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.journal-categories button > .journal-category-count {
+  display: inline-flex;
+  min-width: 27px;
+  min-height: 24px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  margin-inline-start: auto;
+  padding: 1px 7px;
+  border: 1px solid #e8dfc8;
+  border-radius: 999px;
+  background: #f5f2e9;
+  color: #75612a;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.journal-categories button.is-active > .journal-category-count {
+  border-color: #edcf61;
+  background: #f6c515;
+  color: #102a43;
+  box-shadow: 0 2px 6px rgba(16, 42, 67, 0.12);
 }
 
 .journal-results-heading {
@@ -1481,7 +1511,7 @@
 .journal-post:nth-child(5n + 1) .journal-post-image {
   width: 100%;
   min-height: 0;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 3 / 2;
 }
 
 .journal-post h3,
@@ -1493,9 +1523,18 @@
 }
 
 .journal-post .journal-kicker {
+  position: absolute;
+  z-index: 2;
+  inset-block-end: 13px;
+  inset-inline-end: 13px;
+  max-width: calc(100% - 26px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   border-color: #efe1ab;
   background: #fff8dc;
   color: #765900;
+  box-shadow: 0 4px 12px rgba(16, 42, 67, 0.2);
   font-size: 12px;
 }
 
@@ -1853,6 +1892,13 @@
     margin-top: 7px;
   }
 
+  .journal-categories button > .journal-category-count {
+    min-width: 24px;
+    min-height: 22px;
+    padding-inline: 5px;
+    font-size: 10px;
+  }
+
   .journal-branch--areas > .journal-children {
     margin-right: 0;
   }
@@ -1893,5 +1939,54 @@
   .journal-page .journal-paging button:first-child,
   .journal-page .journal-paging button:last-child {
     min-width: 58px;
+  }
+}
+
+/* Archive cards: larger three-column desktop layout with aligned metadata. */
+.journal-page .journal-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.journal-page .journal-post-copy {
+  padding: 20px 21px 17px;
+}
+
+.journal-page .journal-post .journal-kicker {
+  inset-block-start: 13px;
+  inset-block-end: auto;
+  inset-inline-start: 13px;
+  inset-inline-end: auto;
+}
+
+.journal-page .journal-post-meta {
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 12px;
+}
+
+.journal-page .journal-post-meta span {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+@media (min-width: 768px) and (max-width: 1199px) {
+  .journal-page .journal-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+  }
+}
+
+@media (max-width: 767px) {
+  .journal-page .journal-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .journal-page .journal-post-copy {
+    padding: 14px 16px 12px;
   }
 }

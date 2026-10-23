@@ -30,7 +30,6 @@
                 </span>
             </span>
         </nav>
-        <span class="page-kicker">@Model.Data.Kicker</span>
         <h1>@Model.Data.Title</h1>
         <p>@Model.Data.Summary</p>
         <div class="article-hero-meta">
@@ -46,10 +45,10 @@
             <span>
                 <i class="bi bi-clock"></i> @Model.Data.ReadTime
             </span>
-            <span class="article-hero-stat" data-article-comment-count aria-label="۳ نظر نمونه">
+            <span class="article-hero-stat" data-article-comment-count aria-label="۳ نظر">
                 <i class="bi bi-chat-left-text" aria-hidden="true"></i> <span data-article-comment-value>۳</span> نظر
             </span>
-            <span class="article-hero-stat" data-article-rating aria-label="امتیاز ۴٫۷ از ۵؛ نمونه">
+            <span class="article-hero-stat" data-article-rating aria-label="امتیاز ۴٫۷ از ۵">
                 <i class="bi bi-star-fill" aria-hidden="true"></i> <span data-article-rating-value>۴٫۷</span>
             </span>
             <span class="article-hero-stat article-like-stat" data-article-like-count aria-label="@articleMetrics.Likes پسند">
@@ -191,16 +190,21 @@
                             <div><span class="article-eyebrow">بازخورد خوانندگان</span><h2 id="articleFeedbackTitle">نظر، امتیاز و پسند</h2></div>
                             <button class="article-like-button" type="button" data-article-like aria-pressed="false"><i class="bi bi-heart" aria-hidden="true"></i><span>پسندیدن</span><b data-article-like-count-inline>۰</b></button>
                         </div>
-                        <p class="article-feedback-note">نظرها و آمار اولیه نمونه‌اند؛ بازخورد شما فقط در همین مرورگر ذخیره می‌شود.</p>
                         <div class="article-feedback-summary"><strong><i class="bi bi-star-fill" aria-hidden="true"></i> <span data-feedback-average>—</span> از ۵</strong><span data-feedback-count>۰ نظر</span></div>
-                        <div class="article-feedback-list" data-feedback-list aria-live="polite"></div>
-                        <form class="article-feedback-form" data-feedback-form>
-                            <h3>دیدگاه خود را بنویسید</h3>
-                            <label>نام شما<input name="name" maxlength="50" autocomplete="name" required></label>
-                            <label>امتیاز<select name="rating" required><option value="5">۵ از ۵</option><option value="4">۴ از ۵</option><option value="3">۳ از ۵</option><option value="2">۲ از ۵</option><option value="1">۱ از ۵</option></select></label>
-                            <label class="article-feedback-message">متن دیدگاه<textarea name="text" rows="3" maxlength="1000" required></textarea></label>
-                            <button type="submit">ثبت دیدگاه</button><p role="status" aria-live="polite" data-feedback-status></p>
-                        </form>
+                        <div class="article-feedback-columns">
+                            <form class="article-feedback-form" data-feedback-form>
+                                <h3>دیدگاه خود را بنویسید</h3>
+                                <label>نام شما<input name="name" maxlength="50" autocomplete="name" required></label>
+                                <label>امتیاز<select name="rating" required><option value="5">۵ از ۵</option><option value="4">۴ از ۵</option><option value="3">۳ از ۵</option><option value="2">۲ از ۵</option><option value="1">۱ از ۵</option></select></label>
+                                <label class="article-feedback-message">متن دیدگاه<textarea name="text" rows="3" maxlength="1000" required></textarea></label>
+                                <button type="submit"><i class="bi bi-chat-square-check" aria-hidden="true"></i> ثبت دیدگاه</button><p role="status" aria-live="polite" data-feedback-status></p>
+                            </form>
+                            <section class="article-feedback-reviews" aria-labelledby="articleFeedbackListTitle">
+                                <h3 id="articleFeedbackListTitle">نظرهای ثبت‌شده</h3>
+                                <div class="article-feedback-list" data-feedback-list aria-live="polite"></div>
+                                <nav class="article-feedback-pagination" data-feedback-pagination aria-label="صفحه‌بندی دیدگاه‌ها" hidden></nav>
+                            </section>
+                        </div>
                     </section>
                 </article>
             </div>
@@ -226,11 +230,10 @@
                 {
                     <article class="article-related-card">
                         <a asp-controller="Magazine" asp-action="Details" asp-route-slug="@related.Slug">
-                            <img src="@Url.Content("~/" + related.Image)" alt="@related.Title" loading="lazy" width="640" height="420"/>
+                            <img src="@Url.Content("~/" + related.Image)" alt="" loading="lazy" width="240" height="180"/>
                             <span class="article-related-copy">
-                                <small>@related.Category</small>
+                                <small class="article-related-category">@related.Category</small>
                                 <strong>@related.Title</strong>
-                                <span class="article-related-link">خواندن مطلب <i class="bi bi-arrow-left" aria-hidden="true"></i></span>
                             </span>
                         </a>
                     </article>
@@ -244,9 +247,11 @@
 @section Styles {
     <link href="~/shop/css/pages/pages.css" rel="stylesheet" asp-append-version="true"/>
     <link href="~/shop/css/pages/article-details.css" rel="stylesheet" asp-append-version="true"/>
+    <link href="~/shop/css/pages/form-confirm-dialog.css" rel="stylesheet" asp-append-version="true"/>
 }
 
 @section Scripts {
     <script src="~/shop/js/pages/page-content.js" asp-append-version="true"></script>
+    <script src="~/shop/js/pages/form-confirm-dialog.js" asp-append-version="true"></script>
     <script src="~/shop/js/pages/article-details.js" asp-append-version="true"></script>
 }

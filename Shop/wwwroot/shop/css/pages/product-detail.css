@@ -1,3 +1,23 @@
+.product-detail-page > .flow-main.container {
+  width: min(1500px, calc(100% - clamp(32px, 8vw, 128px)));
+  max-width: none;
+  padding-inline: 0;
+}
+
+.product-detail-page #productView {
+  padding-inline: 16px;
+}
+
+@media (max-width: 575px) {
+  .product-detail-page > .flow-main.container {
+    width: calc(100% - 24px);
+  }
+
+  .product-detail-page #productView {
+    padding-inline: 8px;
+  }
+}
+
 #productView .product-expert-intro {
   margin: 0 0 18px;
   color: #526579;

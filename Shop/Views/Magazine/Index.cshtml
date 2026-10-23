@@ -55,6 +55,12 @@
     };
     string PersianDigits(int value) => string.Concat(value.ToString(CultureInfo.InvariantCulture).Select(digit => digit is >= '0' and <= '9' ? (char)('\u06F0' + digit - '0') : digit));
     var postCount = PersianDigits(posts.Length);
+    var buyingPostCount = PersianDigits(posts.Count(post => post.Branch == "buying"));
+    var educationPostCount = PersianDigits(posts.Count(post => post.Branch == "education"));
+    var safetyPostCount = PersianDigits(posts.Count(post => post.Branch == "safety"));
+    var toolsPostCount = PersianDigits(posts.Count(post => post.Area == "tools"));
+    var electricalPostCount = PersianDigits(posts.Count(post => post.Area == "electrical"));
+    var workshopPostCount = PersianDigits(posts.Count(post => post.Area == "workshop"));
 }
 <header class="page-hero editorial-hero">
     <img class="hero-image" src="~/shop/images/heroes/hero-electrical-editorial.png" alt="مجله تخصصی برق و ابزار ندا اولیائی"/>
@@ -70,7 +76,6 @@
                 </span>
             </span>
         </nav>
-        <span class="page-kicker">دانش فنی و راهنمای خرید</span>
         <h1>مجله برق و <em>ابزار</em></h1>
         <p>راهنماهای کاربردی برای انتخاب، استفاده و نگهداری ابزار و تجهیزات فنی.</p>
         <div class="hero-trail" aria-label="موضوعات مجله">
@@ -85,19 +90,19 @@
         <aside class="journal-categories" aria-label="دسته‌بندی مطالب">
             <div class="journal-categories-scroll ui-scrollbar ui-scrollbar--navy">
                 <h2>دسته‌بندی مجله</h2>
-                <button type="button" class="is-active journal-all" data-journal-filter="all" aria-pressed="true"><span class="journal-all-label"><i class="bi bi-grid" aria-hidden="true"></i> همه مطالب</span></button>
+                <button type="button" class="is-active journal-all" data-journal-filter="all" aria-pressed="true"><span class="journal-all-label"><i class="bi bi-grid" aria-hidden="true"></i> همه مطالب</span><span class="journal-category-count">@postCount</span></button>
                 <div class="journal-branch">
-                    <button type="button" data-journal-filter="buying" aria-pressed="false"><i class="bi bi-cart-check" aria-hidden="true"></i><span>راهنمای خرید</span></button>
+                    <button type="button" data-journal-filter="buying" aria-pressed="false"><i class="bi bi-cart-check" aria-hidden="true"></i><span>راهنمای خرید</span><span class="journal-category-count">@buyingPostCount</span></button>
                 </div>
                 <div class="journal-branch">
-                    <button type="button" data-journal-filter="education" aria-pressed="false"><i class="bi bi-mortarboard" aria-hidden="true"></i><span>آموزش تخصصی</span></button>
+                    <button type="button" data-journal-filter="education" aria-pressed="false"><i class="bi bi-mortarboard" aria-hidden="true"></i><span>آموزش تخصصی</span><span class="journal-category-count">@educationPostCount</span></button>
                 </div>
                 <div class="journal-branch journal-branch--areas">
-                    <button type="button" data-journal-filter="safety" aria-pressed="false"><i class="bi bi-shield-check" aria-hidden="true"></i><span>ایمنی و نگهداری</span></button>
+                    <button type="button" data-journal-filter="safety" aria-pressed="false"><i class="bi bi-shield-check" aria-hidden="true"></i><span>ایمنی و نگهداری</span><span class="journal-category-count">@safetyPostCount</span></button>
                     <div class="journal-children" aria-label="حوزه‌های مجله">
-                        <button type="button" data-journal-filter="area-tools" aria-pressed="false"><i class="bi bi-tools" aria-hidden="true"></i><span>ابزار و تجهیزات</span></button>
-                        <button type="button" data-journal-filter="area-electrical" aria-pressed="false"><i class="bi bi-lightning-charge" aria-hidden="true"></i><span>برق و اندازه‌گیری</span></button>
-                        <button type="button" data-journal-filter="area-workshop" aria-pressed="false"><i class="bi bi-lightbulb" aria-hidden="true"></i><span>روشنایی و کارگاه</span></button>
+                        <button type="button" data-journal-filter="area-tools" aria-pressed="false"><i class="bi bi-tools" aria-hidden="true"></i><span>ابزار و تجهیزات</span><span class="journal-category-count">@toolsPostCount</span></button>
+                        <button type="button" data-journal-filter="area-electrical" aria-pressed="false"><i class="bi bi-lightning-charge" aria-hidden="true"></i><span>برق و اندازه‌گیری</span><span class="journal-category-count">@electricalPostCount</span></button>
+                        <button type="button" data-journal-filter="area-workshop" aria-pressed="false"><i class="bi bi-lightbulb" aria-hidden="true"></i><span>روشنایی و کارگاه</span><span class="journal-category-count">@workshopPostCount</span></button>
                     </div>
                 </div>
             </div>
@@ -116,15 +121,15 @@
                         <a asp-controller="Magazine" asp-action="Details" asp-route-slug="@post.Slug">
                             <div class="journal-post-image">
                                 <img src="@Url.Content("~/" + ProductMediaCatalog.GetContentPath(post.Image))" alt="@post.Title" loading="lazy"/>
+                                <span class="journal-kicker">@post.Category</span>
                             </div>
                             <div class="journal-post-copy">
-                                <span class="journal-kicker">@post.Category</span>
                                 <h3>@post.Title</h3>
                                 <div class="journal-post-meta">
                                     <span>
                                         <i class="bi bi-calendar3"></i>@publishedAt.ToString("yyyy/MM/dd", CultureInfo.InvariantCulture)
-                                    </span><span><i class="bi bi-clock"></i>@readingMinutes دقیقه مطالعه</span>
-                                </div><span class="journal-read">خواندن مطلب <i class="bi bi-arrow-left" aria-hidden="true"></i></span>
+                                    </span><span><i class="bi bi-clock"></i>@readingMinutes دقیقه</span>
+                                </div>
                             </div>
                         </a>
                     </article>

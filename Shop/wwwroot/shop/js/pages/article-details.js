@@ -12,10 +12,22 @@ window.HNUI.mount("pages-article-details", document, () => {
     const key = `hn-article-feedback-v1-${slug}`;
     const metrics = { likes: Number(page.dataset.articleLikes) || 0 };
     const seed = [
-      { name: "کاربر نمونه", text: "راهنمای خلاصه و کاربردی بود؛ نکته‌های انتخاب ابزار کمک‌کننده است.", rating: 5, sample: true },
-      { name: "خوانندهٔ مجله", text: "مقایسهٔ نیاز و مشخصات دستگاه، انتخاب را ساده‌تر کرد.", rating: 4, sample: true },
-      { name: "بازدیدکننده", text: "بخش نکات ایمنی و بررسی مدل را مفید دیدم.", rating: 5, sample: true },
-    ];
+      { name: "خوانندهٔ مجله", text: "راهنما خلاصه و کاربردی بود؛ نکته‌های انتخاب ابزار کمک‌کننده است.", rating: 5 },
+      { name: "کاربر کارگاهی", text: "مقایسهٔ نیاز و مشخصات دستگاه، انتخاب را ساده‌تر کرد.", rating: 4 },
+      { name: "بازدیدکننده", text: "بخش نکات ایمنی مفید بود، اما توضیح بعضی مراحل می‌توانست کامل‌تر باشد.", rating: 3 },
+      { name: "خواننده", text: "ترتیب مراحل روشن است و برای شروع کار راهنمای خوبی به حساب می‌آید.", rating: 5 },
+      { name: "مخاطب مجله", text: "پیشنهاد بررسی مشخصات دستگاه پیش از خرید برایم مفید بود.", rating: 4 },
+      { name: "کاربر ابزار", text: "موضوع خوب توضیح داده شده، ولی چند نکتهٔ فنی برایم مبهم ماند.", rating: 2 },
+      { name: "خوانندهٔ راهنما", text: "مطالب کوتاه و قابل استفاده بودند؛ مخصوصاً بخش نگهداری ابزار.", rating: 5 },
+      { name: "بازدیدکنندهٔ سایت", text: "راهنمای مناسبی است و مثال‌های بیشتری می‌تواند آن را بهتر کند.", rating: 3 },
+      { name: "کاربر مجله", text: "نکته‌های انتخاب با نیاز کارگاهی من هم‌خوانی داشت.", rating: 4 },
+      { name: "خوانندهٔ سایت", text: "موضوع اصلی را پوشش می‌دهد و توضیحاتش روان است.", rating: 5 },
+    ].map((item, index) => ({
+      ...item,
+      createdAt: new Date(Date.now() - (index + 1) * 86400000).toISOString(),
+    }));
+    const pageSize = 5;
+    let reviewPage = 1;
     const readSaved = () => {
       try {
         const parsed = JSON.parse(window.HNUI.storage.get(key, "[]"));
@@ -24,20 +36,78 @@ window.HNUI.mount("pages-article-details", document, () => {
     };
     let saved = readSaved();
     const list = feedback.querySelector("[data-feedback-list]");
+    const pagination = feedback.querySelector("[data-feedback-pagination]");
+    const formatReviewTime = (value) => {
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return "زمان ثبت نامشخص";
+      return new Intl.DateTimeFormat("fa-IR", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      }).format(date);
+    };
     const renderFeedback = () => {
-      const entries = [...saved.map((item) => ({ ...item, sample: false })).reverse(), ...seed];
+      const entries = [...saved, ...seed].sort(
+        (first, second) =>
+          new Date(second.createdAt || 0).getTime() -
+          new Date(first.createdAt || 0).getTime(),
+      );
+      const pageCount = Math.max(1, Math.ceil(entries.length / pageSize));
+      reviewPage = Math.min(reviewPage, pageCount);
+      const visibleEntries = entries.slice(
+        (reviewPage - 1) * pageSize,
+        reviewPage * pageSize,
+      );
       list.replaceChildren();
-      entries.forEach((item) => {
+      visibleEntries.forEach((item) => {
         const card = document.createElement("article");
         card.className = "article-feedback-card";
         const heading = document.createElement("div");
-        const name = document.createElement("strong"); name.textContent = item.name;
-        const badge = document.createElement("small"); badge.textContent = item.sample ? "نمونهٔ نمایشی" : "دیدگاه شما";
-        heading.append(name, badge);
-        const stars = document.createElement("span"); stars.className = "article-feedback-stars"; stars.textContent = `★ ${item.rating} از ۵`;
-        const copy = document.createElement("p"); copy.textContent = item.text;
-        card.append(heading, stars, copy); list.append(card);
+        const name = document.createElement("strong");
+        name.textContent = item.name;
+        const stars = document.createElement("span");
+        stars.className = "article-feedback-stars";
+        stars.setAttribute("aria-label", `امتیاز ${formatNumber(Number(item.rating))} از ۵`);
+        stars.textContent = `★ ${formatNumber(Number(item.rating))} از ۵`;
+        heading.append(name, stars);
+        const registered = document.createElement("time");
+        registered.className = "article-feedback-time";
+        if (item.createdAt) registered.dateTime = item.createdAt;
+        registered.textContent = `ثبت‌شده در ${formatReviewTime(item.createdAt)}`;
+        const copy = document.createElement("p");
+        copy.textContent = item.text;
+        card.append(heading, registered, copy);
+        list.append(card);
       });
+      pagination.replaceChildren();
+      pagination.hidden = pageCount <= 1;
+      if (pageCount > 1) {
+        const addPageButton = (label, target, disabled, current = false) => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.textContent = label;
+          button.disabled = disabled;
+          button.dataset.reviewPage = String(target);
+          button.setAttribute(
+            "aria-label",
+            current ? `صفحه ${formatNumber(target)}، صفحهٔ فعلی` : `رفتن به صفحه ${formatNumber(target)}`,
+          );
+          if (current) button.setAttribute("aria-current", "page");
+          button.addEventListener("click", () => {
+            reviewPage = target;
+            renderFeedback();
+            pagination.querySelector(`[data-review-page="${target}"]`)?.focus({ preventScroll: true });
+          });
+          pagination.append(button);
+        };
+        addPageButton("قبلی", reviewPage - 1, reviewPage === 1);
+        for (let target = 1; target <= pageCount; target++) {
+          addPageButton(formatNumber(target), target, false, target === reviewPage);
+        }
+        addPageButton("بعدی", reviewPage + 1, reviewPage === pageCount);
+      }
       const all = [...saved, ...seed];
       const average = all.reduce((sum, item) => sum + Number(item.rating), 0) / all.length;
       feedback.querySelector("[data-feedback-average]").textContent = average.toLocaleString("fa-IR", { maximumFractionDigits: 1 });
@@ -62,13 +132,26 @@ window.HNUI.mount("pages-article-details", document, () => {
       likeStat?.setAttribute("aria-label", `${count.toLocaleString("fa-IR")} پسند`);
     };
     likeButton.addEventListener("click", () => { liked = !liked; window.HNUI.storage.set(`${key}-liked`, String(liked)); paintLikes(); });
-    feedback.querySelector("[data-feedback-form]").addEventListener("submit", (event) => {
+    feedback.querySelector("[data-feedback-form]").addEventListener("submit", async (event) => {
       event.preventDefault();
       const form = event.currentTarget;
+      if (form.dataset.confirming === "true") return;
       const data = new FormData(form);
+      form.dataset.confirming = "true";
+      const submitButton = form.querySelector('button[type="submit"]');
+      if (submitButton) submitButton.disabled = true;
+      const confirmed = await window.confirmFormSubmission?.({
+        title: "دیدگاه شما ثبت شود؟",
+        message: "پس از تأیید، دیدگاه در همین مرورگر ذخیره و به فهرست اضافه می‌شود.",
+        confirmText: "بله، ثبت دیدگاه",
+      });
+      form.dataset.confirming = "false";
+      if (submitButton) submitButton.disabled = false;
+      if (!confirmed) return;
       saved.push({ name: String(data.get("name")).trim().slice(0, 50), text: String(data.get("text")).trim().slice(0, 1000), rating: Math.max(1, Math.min(5, Number(data.get("rating")) || 5)), createdAt: new Date().toISOString() });
       saved = saved.slice(-50);
       const stored = window.HNUI.storage.set(key, JSON.stringify(saved));
+      reviewPage = 1;
       form.reset(); renderFeedback();
       feedback.querySelector("[data-feedback-status]").textContent = stored ? "دیدگاه در همین مرورگر ذخیره شد." : "دیدگاه نمایش داده شد، اما ذخیرهٔ مرورگر در دسترس نیست.";
     });

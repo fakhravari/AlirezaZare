@@ -975,3 +975,64 @@
   color: var(--product-card-price);
   font-size: var(--product-card-price-size);
 }
+
+/* Related cards use the same image, content, title, and action rhythm as home cards. */
+#productView .product-detail-related-card {
+  min-width: 0;
+  min-height: 470px;
+  margin: 0;
+}
+
+#productView .product-detail-related-card .product-info {
+  min-height: 118px;
+  padding: 14px 15px 12px;
+}
+
+#productView .product-detail-related-card .product-image > a > img {
+  padding: 12px;
+  object-fit: contain;
+}
+
+#productView .product-detail-related-card .product-info h3 {
+  display: -webkit-box;
+  min-height: 4.95em;
+  max-height: none;
+  margin: 0 0 7px;
+  overflow: hidden;
+  font-size: 15px;
+  line-height: 1.65;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+}
+
+#productView .product-detail-related-card > .add-cart {
+  width: calc(100% - 28px);
+  min-height: 42px;
+  margin: 0 14px 14px;
+  padding: 8px 10px;
+  border-radius: 9px;
+  font-size: 12.5px;
+}
+
+@media (min-width: 390px) and (max-width: 767px) {
+  #productView .product-detail-related-card .product-info {
+    min-height: 104px;
+  }
+
+  #productView .product-detail-related-card .product-info h3 {
+    min-height: 42px;
+    font-size: 13px;
+  }
+
+  #productView .product-detail-related-card .product-info > p {
+    font-size: 14px;
+  }
+
+  #productView .product-detail-related-card > .add-cart {
+    width: calc(100% - 20px);
+    min-height: 38px;
+    margin: 0 10px 10px;
+    font-size: 11px;
+  }
+}
