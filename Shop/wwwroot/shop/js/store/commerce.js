@@ -853,7 +853,11 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                         syncActiveDetailTab();
                     }, 5000);
                     setActiveDetailTab(link);
-                    history.replaceState(null, "", link.getAttribute("href"));
+                    history.replaceState(
+                        history.state,
+                        "",
+                        `${location.pathname}${location.search}${link.getAttribute("href")}`,
+                    );
                     target.scrollIntoView({ behavior: "smooth", block: "start" });
                 }),
             );

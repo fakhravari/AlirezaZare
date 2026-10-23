@@ -46,8 +46,9 @@
 
 #productView .product-detail-base-row > strong {
   color: var(--industrial-ink, #18324b);
-  font-size: 19px;
+  font-size: 21px;
   font-weight: 900;
+  text-align: left;
   white-space: nowrap;
 }
 
@@ -86,9 +87,10 @@
 
 #productView .product-detail-extras-price > strong {
   color: #526579;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 800;
   text-align: left;
+  white-space: nowrap;
 }
 
 #productView .product-detail-total-price {
@@ -105,7 +107,7 @@
 
 #productView .product-detail-total-price > strong {
   color: var(--industrial-navy, #102a56);
-  font-size: clamp(24px, 2.1vw, 31px);
+  font-size: clamp(27px, 2.3vw, 34px);
   font-weight: 950;
   line-height: 1.4;
   text-align: left;
@@ -211,11 +213,11 @@
   }
 
   #productView .product-detail-base-row > strong {
-    font-size: 18px;
+    font-size: 20px;
   }
 
   #productView .product-detail-total-price > strong {
-    font-size: clamp(18px, 5vw, 20px);
+    font-size: clamp(20px, 5.3vw, 23px);
     line-height: 1.25;
   }
 
@@ -232,7 +234,7 @@
 
   #productView .product-detail-extras-price > strong {
     max-width: 48%;
-    font-size: 11px;
+    font-size: 13px;
     line-height: 1.45;
   }
 

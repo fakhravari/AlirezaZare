@@ -524,7 +524,6 @@
 #productView :is(
   .product-detail-add,
   .product-detail-gallery-open,
-  .product-detail-tabs > a,
   .product-feedback-submit,
   .product-accessory-check,
   .product-accessory-status,
@@ -969,12 +968,14 @@
 }
 
 #productView #product-specifications .product-spec-groups {
+  direction: rtl;
   align-items: start;
   gap: 16px;
 }
 
 #productView #product-specifications .product-spec-group {
   align-self: start;
+  direction: rtl;
   min-width: 0;
   padding: 14px;
   border: 1px solid #e2e8ec;
@@ -1300,10 +1301,6 @@
     inset 0 1px rgba(255, 255, 255, 0.85);
 }
 
-#productView .product-detail-tabs > a.is-active > i.bi-file-earmark-text {
-  color: #173b5d;
-}
-
 .product-gallery-dialog [data-gallery-close] > i {
   transform: none;
   transition: transform 0.3s cubic-bezier(0.2, 0.75, 0.25, 1);
@@ -1351,8 +1348,18 @@
 /* Keep color choices compact and show only real price increases below the swatch. */
 #productView .product-variant-choice-wrap {
   display: inline-grid;
+  width: 92px;
+  min-width: 92px;
+  min-height: 67px;
+  grid-template-rows: 42px 22px;
   justify-items: center;
+  align-items: start;
+  vertical-align: top;
   gap: 3px;
+}
+
+#productView .product-variant-choices {
+  align-items: flex-start;
 }
 
 #productView .product-variant-choice--swatch {
@@ -1368,15 +1375,22 @@
 }
 
 #productView .product-variant-price-delta {
-  padding: 1px 5px;
+  max-width: 100%;
+  padding: 2px 6px;
   border: 1px solid #eee7d9;
   border-radius: 999px;
   background: #f8f5ef;
   color: #806239;
-  font-size: 9px;
-  font-weight: 700;
-  line-height: 1.5;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.45;
   white-space: nowrap;
+}
+
+#productView .product-variant-choice-wrap .product-variant-choice-label {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Keep review name and rating together, giving the optional name field most of the row. */
