@@ -4182,6 +4182,18 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
     padding-top: 164px !important;
   }
 
+  .inner-page #mainNav,
+  .inner-page #mainNav.scrolled {
+    height: 164px !important;
+    background: linear-gradient(
+      to bottom,
+      #e1e4e7 0 85px,
+      var(--industrial-navy) 85px 100%
+    ) !important;
+    border-bottom: 3px solid var(--industrial-yellow) !important;
+    box-shadow: 0 10px 28px rgba(16, 42, 67, 0.14) !important;
+  }
+
   .inner-page #mainNav > .container {
     position: absolute;
     right: 0;
