@@ -47,7 +47,7 @@ BrandsController هویت برند را از CatalogRepository می‌گیرد؛
 
 | مورد | وضعیت در کد |
 |---|---|
-| نشان تصویری هدر | «برق شیراز» در `content/identity/store-electrical-lockup.svg` |
+| هویت بصری هدر | نشان سرمه‌ای/طلایی `content/identity/store-electrical-mark.svg` به‌همراه نوشتهٔ HTML با فونت Estedad؛ favicon از `content/identity/store-mark.svg` |
 | نام فروشگاه در متن/SEO | «ندا اولیائی» هنوز در Controllerها، footer و متن‌های دیگر مصرف می‌شود |
 | تلفن | `03969455457`، تکرارشده در Header، Footer، Contact و مسیرهای خدماتی |
 | ایمیل | `neda.oliyai67@gmail.com` در Contact |
