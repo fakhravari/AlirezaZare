@@ -59,7 +59,7 @@
 
 رکوردهای ساختاریافته با شکل `{schemaVersion: 1, value: ...}` نوشته می‌شوند. آرایه/شیء قدیمی همچنان خوانده می‌شود و در اولین نوشتن نسخه‌دار، نسخهٔ خام یک‌بار در `hn-migration-backup:{key}` حفظ می‌شود. wrapper همیشه مقدار بازشده را به consumer می‌دهد؛ کد مصرف‌کننده نباید envelope را خودش باز کند.
 
-نسخهٔ جدیدتر خوانده/بازنویسی/حذف نمی‌شود و `storage.writable(key)` false برمی‌گرداند. JSON خراب یا shape اشتباه fallback می‌گیرد؛ نوشتن معتبر می‌تواند آن را با backup اصلاح کند. cart، favorite/compare، آدرس‌ها، پروفایل/فعالیت، cache محصول، جستجوهای اخیر و کلیدهای `hn-product-reviews-{id}`/`hn-product-questions-{id}` قرارداد نسخه‌دار دارند. scalarهایی مثل auth، coupon و شناسهٔ آدرس همچنان رشته‌اند. تغییر schema باید migration صریح و تست داشته باشد؛ storage کاربر را برای رفع خطا پاک نکنید.
+نسخهٔ جدیدتر خوانده/بازنویسی/حذف نمی‌شود و `storage.writable(key)` false برمی‌گرداند. JSON خراب یا shape اشتباه fallback می‌گیرد؛ نوشتن معتبر می‌تواند آن را با backup اصلاح کند. cart، favorite/compare، آدرس‌ها، پروفایل، cache محصول، جستجوهای اخیر و کلیدهای `hn-product-reviews-{id}`/`hn-product-questions-{id}` قرارداد نسخه‌دار دارند. scalarهایی مثل auth، coupon و شناسهٔ آدرس همچنان رشته‌اند. تغییر schema باید migration صریح و تست داشته باشد؛ storage کاربر را برای رفع خطا پاک نکنید. دادهٔ قدیمی `hn-profile-activity` دیگر مصرف یا پاک نمی‌شود و در مرورگر باقی می‌ماند.
 
 کلیدهای زیر دمو و client-side هستند؛ persistence سرور یا دادهٔ قابل‌اعتماد محسوب نمی‌شوند. پیش از migration/پاک‌سازی، همهٔ مصرف‌کننده‌ها را با `rg -n "نام-کلید" Shop` پیدا کنید.
 
@@ -76,7 +76,6 @@
 | `hn-delivery-addresses` | فهرست آدرس‌های ذخیره‌شده در مرورگر |
 | `hn-selected-address` | شناسهٔ آدرس انتخابی |
 | `hn-payment-method-v2` | روش پرداخت انتخابی در مرورگر |
-| `hn-profile-activity` | دادهٔ فعالیت محلی خوانده‌شده در account-page.js؛ گزارش عملیاتی سرور نیست |
 | `hn-profile` | دادهٔ profile در `Views/Profile/Index.cshtml` |
 | `hn-product-${type}-${productId}` | کلید feedback در `commerce.js`؛ `type` برابر `reviews` یا `questions` است. داده‌های اولیه با دادهٔ ذخیره‌شده ترکیب می‌شوند. |
 | `hn-article-feedback-v1-${slug}` | دیدگاه و پسند محلی مقاله؛ نمونه‌های اولیه با برچسب نمایشی هستند و هیچ ارسال سروری انجام نمی‌شود. |
@@ -92,7 +91,6 @@
 | `hn:auth-change` | `detail`: boolean | هدر و بخش account را تازه می‌کند |
 | `hn:auth-required` | `detail: { resume: Function|null }` | بازکردن مدال ورود؛ callback پس از ورود آزمایشی اجرا می‌شود |
 | `hn:lists-change` | بدون `detail` | شمارنده‌ها، favorite/compare button و صفحه‌ها را sync می‌کند |
-| `hn:profile-activity-change` | بدون `detail` | account-page.js نمای فعالیت محلی را تازه می‌کند |
 | native `storage` | `key`, `newValue`, `oldValue` | همگام‌سازی tabهای دیگر؛ same-tab تغییرات باید از helper/event عبور کند |
 
 هنگام افزودن event، یک source of truth حفظ کنید، payload را document کنید، handler را idempotent بنویسید و از dispatch مضاعف در View و shared JS جلوگیری کنید.
@@ -101,4 +99,4 @@
 
 [فهرست این بخش](README.md) · [فهرست مستندات](../README.md)
 
-آخرین تطبیق با کد: ۲۲ اکتبر ۲۰۲۶.
+آخرین تطبیق با کد: ۲۴ اکتبر ۲۰۲۶.

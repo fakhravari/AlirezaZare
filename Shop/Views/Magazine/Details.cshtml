@@ -116,11 +116,11 @@
                             <a data-share="email" href="#" aria-label="اشتراک با ایمیل">
                                 <i class="bi bi-envelope" aria-hidden="true"></i><span>ایمیل</span>
                             </a>
-                            <button data-share="copy" type="button" aria-label="کپی لینک">
-                                <i class="bi bi-link-45deg"></i><span>کپی لینک</span>
-                            </button>
                             <button data-share="native" type="button" hidden>
                                 <i class="bi bi-share" aria-hidden="true"></i><span>سایر برنامه‌ها</span>
+                            </button>
+                            <button data-share="copy" type="button" aria-label="کپی لینک">
+                                <i class="bi bi-link-45deg"></i><span>کپی لینک</span>
                             </button>
                         </div>
                         <p class="article-share-status" role="status" aria-live="polite"></p>
@@ -159,10 +159,10 @@
                         </div>
                     </div>
                     <div class="article-tags">
-                        <span>برچسب‌ها:</span>
+                        <strong>برچسب‌ها:</strong>
                         @foreach (var tag in Model.Data.Tags ?? [])
                         {
-                            <a href="@Url.Action("Index", "Magazine", new { category = tag.Filter })">@tag.Label</a>
+                            <span class="article-tag">@tag.Label</span>
                         }
                     </div>
                     @if (Model.Data.Sources is { Count: > 0 } sources)
@@ -194,7 +194,7 @@
                         <div class="article-feedback-columns">
                             <form class="article-feedback-form" data-feedback-form>
                                 <h3>دیدگاه خود را بنویسید</h3>
-                                <label>نام شما<input name="name" maxlength="50" autocomplete="name" required></label>
+                                <label>نام و نام خانوادگی<input name="name" maxlength="80" minlength="5" autocomplete="name" placeholder="نام و نام خانوادگی" required></label>
                                 <label>امتیاز<select name="rating" required><option value="5">۵ از ۵</option><option value="4">۴ از ۵</option><option value="3">۳ از ۵</option><option value="2">۲ از ۵</option><option value="1">۱ از ۵</option></select></label>
                                 <label class="article-feedback-message">متن دیدگاه<textarea name="text" rows="3" maxlength="1000" required></textarea></label>
                                 <button type="submit"><i class="bi bi-chat-square-check" aria-hidden="true"></i> ثبت دیدگاه</button><p role="status" aria-live="polite" data-feedback-status></p>
@@ -216,29 +216,20 @@
                 <span class="article-eyebrow">ادامه مسیر مطالعه</span>
                 <h2 id="relatedTitle">مقالات مرتبط</h2>
             </div>
-            @if (Model.Data.RelatedArticles is { Count: > 1 })
-            {
-                <div class="article-related-controls" role="group" aria-label="کنترل مقالات مرتبط">
-                    <button type="button" data-related-scroll="next" aria-label="مقالات بعدی"><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
-                    <button type="button" data-related-scroll="previous" aria-label="مقالات قبلی"><i class="bi bi-chevron-left" aria-hidden="true"></i></button>
-                </div>
-            }
         </div>
-        <div class="article-related-viewport" id="articleRelatedViewport" role="region" aria-label="مقالات مرتبط" tabindex="0">
-            <div class="article-related-track">
-                @foreach (var related in Model.Data.RelatedArticles ?? [])
-                {
-                    <article class="article-related-card">
-                        <a asp-controller="Magazine" asp-action="Details" asp-route-slug="@related.Slug">
-                            <img src="@Url.Content("~/" + related.Image)" alt="" loading="lazy" width="240" height="180"/>
-                            <span class="article-related-copy">
-                                <small class="article-related-category">@related.Category</small>
-                                <strong>@related.Title</strong>
-                            </span>
-                        </a>
-                    </article>
-                }
-            </div>
+        <div class="article-related-track" role="list" aria-label="مقالات مرتبط">
+            @foreach (var related in Model.Data.RelatedArticles ?? [])
+            {
+                <article class="article-related-card" role="listitem">
+                    <a asp-controller="Magazine" asp-action="Details" asp-route-slug="@related.Slug">
+                        <img src="@Url.Content("~/" + related.Image)" alt="" loading="lazy" width="240" height="180"/>
+                        <span class="article-related-copy">
+                            <small class="article-related-category">@related.Category</small>
+                            <strong>@related.Title</strong>
+                        </span>
+                    </a>
+                </article>
+            }
         </div>
     </section>
 

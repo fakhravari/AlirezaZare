@@ -914,6 +914,159 @@
 .profile-order-card footer > a:hover {
   color: var(--industrial-navy);
 }
+.order-invoice-summary .order-product-icon {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  margin-inline-end: 11px;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--industrial-yellow) 24%, white);
+  border-radius: 12px;
+  background: var(--industrial-bg);
+  color: var(--industrial-yellow-dark);
+  font-size: 18px;
+}
+.profile-order-card .order-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.profile-order-card .order-card-actions > a,
+.profile-order-card .order-card-actions > button {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 7px 11px;
+  border: 1px solid color-mix(in srgb, var(--industrial-yellow) 35%, white);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--industrial-navy);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+.profile-order-card .order-card-actions > :hover,
+.profile-order-card .order-card-actions > :focus-visible {
+  border-color: var(--industrial-yellow-dark);
+  background: var(--industrial-bg);
+}
+.order-invoice-dialog {
+  box-sizing: border-box;
+  width: min(920px, calc(100vw - 32px));
+  max-width: 920px;
+  max-height: min(760px, calc(100dvh - 32px));
+  padding: 28px;
+  border: 1px solid color-mix(in srgb, var(--industrial-yellow) 34%, white);
+  border-radius: 22px;
+  background: var(--color-cream, #fffdfa);
+  color: var(--industrial-navy);
+  box-shadow: 0 26px 80px rgba(16, 42, 67, 0.26);
+  overflow: auto;
+}
+.order-invoice-dialog::backdrop {
+  background: rgba(3, 13, 35, 0.58);
+  backdrop-filter: blur(4px);
+}
+.order-invoice-dialog[open] {
+  animation: orderInvoiceIn 180ms ease-out both;
+}
+@keyframes orderInvoiceIn {
+  from { opacity: 0; transform: translateY(8px) scale(.99); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.order-invoice-dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--industrial-line);
+}
+.order-invoice-dialog-header span {
+  color: var(--industrial-yellow-dark);
+  font-size: 12px;
+  font-weight: 700;
+}
+.order-invoice-dialog-header h2 {
+  margin: 4px 0 0;
+  font-size: 24px;
+}
+.order-invoice-dialog-header .site-modal-close { flex: 0 0 40px; }
+.order-invoice-layout {
+  display: grid;
+  grid-template-columns: minmax(250px, .8fr) minmax(0, 1.2fr);
+  gap: 18px;
+  padding-top: 20px;
+}
+.order-invoice-master,
+.order-invoice-detail {
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid var(--industrial-line);
+  border-radius: 15px;
+  background: #fff;
+}
+.order-invoice-layout h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 14px;
+  font-size: 15px;
+}
+.order-invoice-layout h3 i { color: var(--industrial-yellow-dark); }
+.order-invoice-master dl { display: grid; gap: 0; margin: 0; }
+.order-invoice-master dl > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 0;
+  border-bottom: 1px solid #edf0f2;
+  font-size: 12px;
+}
+.order-invoice-master dl > div:last-child { border-bottom: 0; }
+.order-invoice-master dt { color: var(--industrial-steel); }
+.order-invoice-master dd { margin: 0; font-weight: 700; text-align: left; }
+.order-invoice-table { border: 1px solid #e7ebee; border-radius: 12px; overflow: hidden; }
+.order-invoice-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 70px minmax(110px, auto);
+  gap: 10px;
+  align-items: center;
+  padding: 14px;
+  font-size: 12px;
+}
+.order-invoice-row + .order-invoice-row { border-top: 1px solid #e7ebee; }
+.order-invoice-table-heading { background: #f5f7f8; color: var(--industrial-steel); font-weight: 700; }
+.order-invoice-row > :last-child { text-align: left; }
+.order-invoice-payable {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 14px;
+  padding: 15px;
+  border-radius: 12px;
+  background: #fff7df;
+  font-size: 13px;
+  font-weight: 700;
+}
+.order-invoice-payable strong { color: var(--industrial-navy); font-size: 17px; }
+.order-invoice-demo-note { margin: 14px 0 0; color: var(--industrial-steel); font-size: 11px; line-height: 1.9; }
+@media (max-width: 640px) {
+  .profile-order-card .order-card-actions { width: 100%; }
+  .profile-order-card .order-card-actions > a,
+  .profile-order-card .order-card-actions > button { flex: 1 1 100%; }
+  .order-invoice-dialog { padding: 18px 14px; }
+  .order-invoice-layout { grid-template-columns: minmax(0, 1fr); }
+  .order-invoice-row { grid-template-columns: minmax(0, 1fr) 48px minmax(90px, auto); padding: 11px 9px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .order-invoice-dialog[open] { animation: none; }
+}
 @media (max-width: 640px) {
   .orders-heading {
     align-items: flex-start;
@@ -1057,6 +1210,10 @@ dialog.shared-login-modal.profile-edit-dialog {
   max-height: calc(100dvh - 28px);
   min-height: 550px;
   margin: 0;
+}
+
+dialog.shared-login-modal.profile-edit-dialog::before {
+  display: none;
 }
 
 dialog.shared-login-modal.profile-edit-dialog[open] {
@@ -1321,21 +1478,8 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
   position: relative;
   z-index: 1;
 }
-.account-welcome-brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  color: var(--industrial-yellow);
-  font-size: 12px;
-}
-.account-welcome-brand::before {
-  content: "";
-  width: 24px;
-  height: 1px;
-  background: var(--industrial-yellow);
-}
 .account-welcome h1 {
-  margin: 14px 0 10px;
+  margin: 0 0 16px;
   color: #fff;
   font-size: clamp(30px, 3.2vw, 44px);
   font-weight: 800;
@@ -1511,7 +1655,6 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
 .address-account-card h3 small,
 #orders .orders-heading > div > span,
 .orders-pagination :is(p, button),
-.account-welcome-brand,
 .account-welcome-links a,
 .profile-edit-dialog .profile-edit-cancel {
   font-size: 13px;
@@ -1564,14 +1707,13 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
     max-width: 100%;
   }
 
-  .account-welcome-brand,
   .account-welcome p,
   .account-welcome-art {
     display: none;
   }
 
   .account-welcome h1 {
-    margin: 0;
+    margin: 0 0 12px;
     font-size: 23px;
     line-height: 1.45;
   }
@@ -1967,90 +2109,6 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
   background: #fff9e8;
 }
 
-.overview-activity {
-  grid-column: 1 / -1;
-}
-
-.overview-activity-list {
-  display: grid;
-}
-
-.activity-log-entry {
-  position: relative;
-  display: grid;
-  min-width: 0;
-  grid-template-columns: 36px minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 0;
-}
-
-.activity-log-entry:not(:last-child)::after {
-  position: absolute;
-  top: 43px;
-  right: 17px;
-  bottom: -10px;
-  border-right: 1px solid #e3e9ed;
-  content: "";
-}
-
-.activity-log-icon {
-  z-index: 1;
-  display: grid;
-  width: 36px;
-  height: 36px;
-  place-items: center;
-  border: 1px solid #dce6ec;
-  border-radius: 11px;
-  background: #f4f7f9;
-  color: var(--color-navy);
-  font-size: 15px;
-}
-
-.activity-log-copy {
-  display: grid;
-  min-width: 0;
-  gap: 3px;
-}
-
-.activity-log-copy strong {
-  overflow: hidden;
-  color: var(--color-navy);
-  font-size: 13px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.activity-log-copy small,
-.activity-log-entry time {
-  color: var(--industrial-steel);
-  font-size: 11px;
-}
-
-.activity-log-entry time {
-  white-space: nowrap;
-}
-
-.overview-activity-empty {
-  display: flex;
-  min-height: 58px;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  border: 1px dashed #dce4e9;
-  border-radius: 12px;
-  background: #fafcfd;
-  color: var(--industrial-steel);
-  font-size: 12px;
-  line-height: 1.8;
-}
-
-.overview-activity-empty > i {
-  flex: 0 0 auto;
-  color: #8b9aa6;
-  font-size: 17px;
-}
-
 @media (max-width: 767px) {
   .overview-panels > article {
     padding: 14px;
@@ -2069,27 +2127,6 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
     padding: 8px;
   }
 
-  .activity-log-entry {
-    grid-template-columns: 32px minmax(0, 1fr);
-    gap: 8px;
-  }
-
-  .activity-log-icon {
-    width: 32px;
-    height: 32px;
-    border-radius: 10px;
-    font-size: 14px;
-  }
-
-  .activity-log-entry:not(:last-child)::after {
-    top: 40px;
-    right: 15px;
-  }
-
-  .activity-log-entry time {
-    grid-column: 2;
-    margin-top: -6px;
-  }
 }
 
 #addresses .account-section-heading {
@@ -2145,7 +2182,7 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
   margin: 14px 0 0;
 }
 
-.account-welcome h1 { margin: 8px 0 4px; line-height: 1.4; }
+.account-welcome h1 { margin: 0 0 16px; line-height: 1.4; }
 .account-welcome-copy { grid-column: 1; grid-row: 1; }
 .account-welcome-art { grid-column: 2; grid-row: 1; }
 
@@ -2302,7 +2339,14 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
   position: relative;
   inset: auto;
   flex: 0 0 38px;
+  background: linear-gradient(145deg, #173653, #102a43);
+  color: #f2d27c;
   box-shadow: 0 2px 7px rgba(16, 42, 67, 0.1);
+}
+
+#profileEditDialog.profile-edit-dialog .profile-edit-dialog-header .login-close > i,
+#profileEditDialog.profile-edit-dialog .profile-edit-dialog-header .login-close:hover > i {
+  transform: none;
 }
 
 #profileEditDialog.profile-edit-dialog .profile-edit-form button[type="submit"] {

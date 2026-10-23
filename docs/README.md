@@ -17,7 +17,7 @@
 | [معماری](architecture/README.md) | ساختار برنامه، مسیر صفحه‌ها و مرز داده | [نمای کلی](architecture/overview.md) |
 | [رابط کاربری](frontend/README.md) | پوسته، طراحی، JS مشترک و بازبینی UI | [ترتیب منابع](frontend/layout.md) |
 | [فروشگاه](store/README.md) | کاتالوگ، فیلتر، محصول، سبد و تسویه | [کاتالوگ و فهرست‌ها](store/catalog.md) |
-| [حساب کاربری](account/README.md) | پروفایل، آدرس، سفارش و فعالیت محلی | [پروفایل](account/profile.md) |
+| [حساب کاربری](account/README.md) | پروفایل، آدرس و سفارش | [پروفایل](account/profile.md) |
 | [محتوا و خدمات](content/README.md) | مجله، برند، FAQ، قوانین و هویت | [صفحه‌های محتوایی](content/pages.md) |
 | [رسانه](media/README.md) | پوشه‌ها، نام‌گذاری، تصاویر، ویدئو و ابعاد | [راهنمای رسانه](media/images.md) |
 | [SEO](seo/README.md) | metadata، canonical، schema و crawl | [metadata](seo/metadata.md) |

@@ -15,7 +15,7 @@
         "orders" => "وضعیت سفارش‌ها و سوابق خریدتان را یک‌جا دنبال کنید.",
         "addresses" => "نشانی‌های تحویل را مدیریت کنید تا خرید بعدی ساده‌تر باشد.",
         "favorites" => "محصول‌های ذخیره‌شده را مرور کنید و برای خرید مقایسه‌شان کنید.",
-        _ => "اطلاعات حساب و فعالیت‌های خریدتان را از اینجا مدیریت کنید."
+        _ => "جزئیات پروفایل، نشانی‌ها و کالاهای ذخیره‌شده را مدیریت کنید."
     };
     var profileIcon = profileSection switch
     {
@@ -29,7 +29,6 @@
 <main class="flow-main container">
 <header class="account-welcome">
     <div class="account-welcome-copy">
-        <span class="account-welcome-brand">حساب کاربری شما</span>
         <h1>@profileTitle</h1>
         <p>@profileDescription</p>
         <nav class="cart-breadcrumb profile-breadcrumb" aria-label="مسیر صفحه">
@@ -69,7 +68,7 @@
             <i class="bi bi-person"></i>
         </span>
         <div>
-            <small>حساب کاربری</small><strong>کاربر</strong><span>مدیریت اطلاعات و فعالیت‌های حساب</span>
+            <small>حساب کاربری</small><strong>کاربر</strong><span>پروفایل و اطلاعات حساب</span>
         </div>
         <a class="account-profile-edit" href="#profileEditDialog" data-profile-edit-trigger aria-label="ویرایش پروفایل">
             <i class="bi bi-pencil-square" aria-hidden="true"></i><span>ویرایش پروفایل</span>
@@ -114,7 +113,7 @@
         <i class="bi bi-grid-1x2" aria-hidden="true"></i>
         <div>
             <span>نمای کلی حساب</span>
-            <h2>گزارش فعالیت‌های شما</h2>
+            <h2>خلاصهٔ حساب شما</h2>
             <p>خلاصه‌ای از خریدها و اطلاعات ذخیره‌شده در حساب کاربری</p>
         </div>
     </div>
@@ -185,13 +184,6 @@
                     <strong>ثبت آدرس تحویل</strong><small>برای خرید سریع‌تر آماده شوید</small>
                 </span><i class="bi bi-arrow-left"></i>
             </a>
-        </article>
-        <article class="overview-activity">
-            <div class="overview-panel-title">
-                <i class="bi bi-clock-history" aria-hidden="true"></i>
-                <h3>فعالیت‌های اخیر</h3>
-            </div>
-            <div id="recentActivityList" class="overview-activity-list" aria-live="polite"></div>
         </article>
     </div>
 </section>

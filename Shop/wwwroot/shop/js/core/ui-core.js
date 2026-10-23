@@ -16,7 +16,7 @@
   const EVENTS = Object.freeze({
     cartChange: "hn:cart-change", cartAdded: "hn:cart-added", cartStockLimit: "hn:cart-stock-limit",
     authChange: "hn:auth-change", authRequired: "hn:auth-required",
-    listsChange: "hn:lists-change", profileActivityChange: "hn:profile-activity-change",
+    listsChange: "hn:lists-change",
   });
   const emit = (type, detail) => {
     if (!Object.values(EVENTS).includes(type)) throw new Error("Unknown UI event: " + type);

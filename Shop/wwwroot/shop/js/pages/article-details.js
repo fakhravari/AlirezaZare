@@ -12,11 +12,11 @@ window.HNUI.mount("pages-article-details", document, () => {
     const key = `hn-article-feedback-v1-${slug}`;
     const metrics = { likes: Number(page.dataset.articleLikes) || 0 };
     const seed = [
-      { name: "خوانندهٔ مجله", text: "راهنما خلاصه و کاربردی بود؛ نکته‌های انتخاب ابزار کمک‌کننده است.", rating: 5 },
-      { name: "کاربر کارگاهی", text: "مقایسهٔ نیاز و مشخصات دستگاه، انتخاب را ساده‌تر کرد.", rating: 4 },
+      { name: "خوانندهٔ مجله", text: "راهنما خلاصه و کاربردی بود؛ نکته‌های انتخاب ابزار کمک‌کننده است.", rating: 5, reply: "خوشحالیم که راهنما برای انتخاب ابزار به شما کمک کرده است." },
+      { name: "کاربر کارگاهی", text: "مقایسهٔ نیاز و مشخصات دستگاه، انتخاب را ساده‌تر کرد.", rating: 4, reply: "ممنون از بازخوردتان؛ بررسی نیاز کارگاه پیش از انتخاب، نکتهٔ مهمی است." },
       { name: "بازدیدکننده", text: "بخش نکات ایمنی مفید بود، اما توضیح بعضی مراحل می‌توانست کامل‌تر باشد.", rating: 3 },
       { name: "خواننده", text: "ترتیب مراحل روشن است و برای شروع کار راهنمای خوبی به حساب می‌آید.", rating: 5 },
-      { name: "مخاطب مجله", text: "پیشنهاد بررسی مشخصات دستگاه پیش از خرید برایم مفید بود.", rating: 4 },
+      { name: "مخاطب مجله", text: "پیشنهاد بررسی مشخصات دستگاه پیش از خرید برایم مفید بود.", rating: 4, reply: "از همراهی شما سپاسگزاریم. مشخصات هر مدل را در صفحهٔ محصول می‌توانید بررسی کنید." },
       { name: "کاربر ابزار", text: "موضوع خوب توضیح داده شده، ولی چند نکتهٔ فنی برایم مبهم ماند.", rating: 2 },
       { name: "خوانندهٔ راهنما", text: "مطالب کوتاه و قابل استفاده بودند؛ مخصوصاً بخش نگهداری ابزار.", rating: 5 },
       { name: "بازدیدکنندهٔ سایت", text: "راهنمای مناسبی است و مثال‌های بیشتری می‌تواند آن را بهتر کند.", rating: 3 },
@@ -25,6 +25,7 @@ window.HNUI.mount("pages-article-details", document, () => {
     ].map((item, index) => ({
       ...item,
       createdAt: new Date(Date.now() - (index + 1) * 86400000).toISOString(),
+      ...(item.reply ? { replyAt: new Date(Date.now() - (index + 1) * 86400000 + 3600000).toISOString() } : {}),
     }));
     const pageSize = 5;
     let reviewPage = 1;
@@ -64,6 +65,7 @@ window.HNUI.mount("pages-article-details", document, () => {
       visibleEntries.forEach((item) => {
         const card = document.createElement("article");
         card.className = "article-feedback-card";
+        card.tabIndex = -1;
         const heading = document.createElement("div");
         const name = document.createElement("strong");
         name.textContent = item.name;
@@ -71,14 +73,43 @@ window.HNUI.mount("pages-article-details", document, () => {
         stars.className = "article-feedback-stars";
         stars.setAttribute("aria-label", `امتیاز ${formatNumber(Number(item.rating))} از ۵`);
         stars.textContent = `★ ${formatNumber(Number(item.rating))} از ۵`;
-        heading.append(name, stars);
+        const meta = document.createElement("span");
+        meta.className = "article-feedback-meta";
+        const separator = document.createElement("span");
+        separator.className = "article-feedback-separator";
+        separator.setAttribute("aria-hidden", "true");
+        separator.textContent = "|";
         const registered = document.createElement("time");
         registered.className = "article-feedback-time";
         if (item.createdAt) registered.dateTime = item.createdAt;
-        registered.textContent = `ثبت‌شده در ${formatReviewTime(item.createdAt)}`;
+        const registeredIcon = document.createElement("i");
+        registeredIcon.className = "bi bi-calendar3";
+        registeredIcon.setAttribute("aria-hidden", "true");
+        registered.append(registeredIcon, document.createTextNode(formatReviewTime(item.createdAt)));
+        meta.append(stars, separator, registered);
+        heading.append(name, meta);
         const copy = document.createElement("p");
         copy.textContent = item.text;
         card.append(heading, registered, copy);
+        if (item.reply) {
+          const reply = document.createElement("aside");
+          reply.className = "article-feedback-admin-reply";
+          const replyHeading = document.createElement("strong");
+          replyHeading.className = "article-feedback-admin-badge";
+          replyHeading.innerHTML = '<i class="bi bi-patch-check-fill" aria-hidden="true"></i> پاسخ مدیر مجله';
+          const replyTime = document.createElement("time");
+          replyTime.className = "article-feedback-admin-time";
+          const replyTimestamp = item.replyAt || item.createdAt;
+          if (replyTimestamp) replyTime.dateTime = replyTimestamp;
+          const replyIcon = document.createElement("i");
+          replyIcon.className = "bi bi-clock";
+          replyIcon.setAttribute("aria-hidden", "true");
+          replyTime.append(replyIcon, document.createTextNode(formatReviewTime(replyTimestamp)));
+          const replyText = document.createElement("p");
+          replyText.textContent = item.reply;
+          reply.append(replyHeading, replyTime, replyText);
+          card.append(reply);
+        }
         list.append(card);
       });
       pagination.replaceChildren();
@@ -98,7 +129,12 @@ window.HNUI.mount("pages-article-details", document, () => {
           button.addEventListener("click", () => {
             reviewPage = target;
             renderFeedback();
-            pagination.querySelector(`[data-review-page="${target}"]`)?.focus({ preventScroll: true });
+            const firstReview = list.querySelector(".article-feedback-card");
+            firstReview?.focus({ preventScroll: true });
+            firstReview?.scrollIntoView({
+              behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+              block: "start",
+            });
           });
           pagination.append(button);
         };
@@ -137,6 +173,16 @@ window.HNUI.mount("pages-article-details", document, () => {
       const form = event.currentTarget;
       if (form.dataset.confirming === "true") return;
       const data = new FormData(form);
+      const nameField = form.elements.namedItem("name");
+      const fullName = String(data.get("name") || "").trim().replace(/\s+/g, " ");
+      if (fullName.split(" ").filter(Boolean).length < 2) {
+        nameField.setCustomValidity("نام و نام خانوادگی را وارد کنید.");
+        nameField.reportValidity();
+        nameField.addEventListener("input", () => nameField.setCustomValidity(""), { once: true });
+        return;
+      }
+      nameField.setCustomValidity("");
+      if (!form.reportValidity()) return;
       form.dataset.confirming = "true";
       const submitButton = form.querySelector('button[type="submit"]');
       if (submitButton) submitButton.disabled = true;
@@ -148,7 +194,7 @@ window.HNUI.mount("pages-article-details", document, () => {
       form.dataset.confirming = "false";
       if (submitButton) submitButton.disabled = false;
       if (!confirmed) return;
-      saved.push({ name: String(data.get("name")).trim().slice(0, 50), text: String(data.get("text")).trim().slice(0, 1000), rating: Math.max(1, Math.min(5, Number(data.get("rating")) || 5)), createdAt: new Date().toISOString() });
+      saved.push({ name: fullName.slice(0, 80), text: String(data.get("text")).trim().slice(0, 1000), rating: Math.max(1, Math.min(5, Number(data.get("rating")) || 5)), createdAt: new Date().toISOString() });
       saved = saved.slice(-50);
       const stored = window.HNUI.storage.set(key, JSON.stringify(saved));
       reviewPage = 1;
@@ -170,44 +216,6 @@ window.HNUI.mount("pages-article-details", document, () => {
   const headings = [...body.querySelectorAll(".article-section h2[id]")];
   const links = [...page.querySelectorAll(".article-toc a")];
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-  const relatedViewport = page.querySelector("#articleRelatedViewport");
-  if (relatedViewport) {
-    const relatedCards = [...relatedViewport.querySelectorAll(".article-related-card")];
-    const relatedButtons = [...page.querySelectorAll("[data-related-scroll]")];
-    const updateRelatedButtons = () => {
-      const bounds = relatedViewport.getBoundingClientRect();
-      const visible = relatedCards
-        .map((card, index) => ({ index, rect: card.getBoundingClientRect() }))
-        .filter(({ rect }) => rect.right > bounds.left + 2 && rect.left < bounds.right - 2)
-        .map(({ index }) => index);
-      const first = visible.length ? Math.min(...visible) : 0;
-      const last = visible.length ? Math.max(...visible) : relatedCards.length - 1;
-      relatedButtons.forEach((button) => {
-        button.disabled = button.dataset.relatedScroll === "previous"
-          ? first <= 0
-          : last >= relatedCards.length - 1;
-      });
-    };
-    relatedButtons.forEach((button) => {
-      button.addEventListener("click", () => {
-        const visible = relatedCards
-          .map((card, index) => ({ card, index, rect: card.getBoundingClientRect() }))
-          .filter(({ rect }) => rect.right > relatedViewport.getBoundingClientRect().left + 2
-            && rect.left < relatedViewport.getBoundingClientRect().right - 2);
-        const targetIndex = button.dataset.relatedScroll === "previous"
-          ? Math.max(0, Math.min(...visible.map(({ index }) => index)) - 1)
-          : Math.min(relatedCards.length - 1, Math.max(...visible.map(({ index }) => index)) + 1);
-        relatedCards[targetIndex]?.scrollIntoView({
-          behavior: reducedMotion.matches ? "auto" : "smooth",
-          block: "nearest",
-          inline: "start",
-        });
-      });
-    });
-    relatedViewport.addEventListener("scroll", updateRelatedButtons, { passive: true });
-    window.addEventListener("resize", updateRelatedButtons);
-    updateRelatedButtons();
-  }
   links.forEach((link) =>
     link.addEventListener("click", (event) => {
       if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey)

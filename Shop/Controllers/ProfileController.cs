@@ -7,7 +7,7 @@ namespace Shop.Controllers;
 public sealed class ProfileController : PageController
 {
     [HttpGet("")]
-    public Task<ViewResult> Index() => ProfilePage("پروفایل من", "مدیریت اطلاعات و فعالیت‌های حساب کاربری");
+    public Task<ViewResult> Index() => ProfilePage("پروفایل من", "مشاهده و ویرایش اطلاعات پروفایل کاربری");
 
     [HttpGet("Edit")]
     public IActionResult Edit() => RedirectToAction(nameof(Index));

@@ -169,23 +169,6 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
         )
         .join("");
     }
-    const activityHost = document.querySelector("#recentActivityList");
-    if (activityHost) {
-      const activity = ui.storage.json("hn-profile-activity", []);
-      const recentActivity = Array.isArray(activity)
-        ? activity
-            .filter((item) => item && item.title && !Number.isNaN(Date.parse(item.at)))
-            .slice(0, 8)
-        : [];
-      activityHost.innerHTML = recentActivity.length
-        ? recentActivity
-            .map(
-              (item) =>
-                `<article class="activity-log-entry"><span class="activity-log-icon" aria-hidden="true"><i class="bi ${esc(item.icon || "bi-clock-history")}"></i></span><span class="activity-log-copy"><strong>${esc(item.title)}</strong><small>${esc(item.detail || "")}</small></span><time datetime="${esc(item.at)}">${new Intl.DateTimeFormat("fa-IR", { dateStyle: "medium", timeStyle: "short" }).format(new Date(item.at))}</time></article>`,
-            )
-            .join("")
-        : '<div class="overview-activity-empty"><i class="bi bi-clock-history" aria-hidden="true"></i><span>هنوز فعالیتی ثبت نشده؛ تغییرات علاقه‌مندی، مقایسه، آدرس و کد تخفیف اینجا ثبت می‌شوند.</span></div>';
-    }
   }
   function navigate() {
     renderOverview();
@@ -219,12 +202,31 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
     });
   }
   window.addEventListener("hashchange", navigate);
+  const invoiceDialog = document.getElementById("orderInvoiceDialog");
+  const formatToman = (amount) => `${ui.formatNumber(Number(amount) || 0)} تومان`;
+  document.querySelectorAll("[data-open-order-invoice]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const order = button.closest(".profile-order-card");
+      if (!order || !invoiceDialog) return;
+      invoiceDialog.querySelector("[data-invoice-number]").textContent = order.dataset.orderNumber;
+      invoiceDialog.querySelector("[data-invoice-date]").textContent = order.dataset.orderDate;
+      invoiceDialog.querySelector("[data-invoice-status]").textContent = order.dataset.orderStatus;
+      invoiceDialog.querySelector("[data-invoice-delivery]").textContent = order.dataset.orderDelivery;
+      invoiceDialog.querySelector("[data-invoice-count]").textContent = ui.formatNumber(order.dataset.orderCount);
+      invoiceDialog.querySelector("[data-invoice-amount]").textContent = formatToman(order.dataset.orderAmount);
+      invoiceDialog.querySelector("[data-invoice-total]").textContent = formatToman(order.dataset.orderAmount);
+      if (!invoiceDialog.open) invoiceDialog.showModal();
+    });
+  });
+  invoiceDialog?.querySelector("[data-close-order-invoice]")?.addEventListener("click", () => invoiceDialog.close());
+  invoiceDialog?.addEventListener("click", (event) => {
+    if (event.target === invoiceDialog) invoiceDialog.close();
+  });
   window.addEventListener("storage", () => {
     renderAddresses();
     renderOverview();
   });
   document.addEventListener("hn:lists-change", renderOverview);
-  document.addEventListener("hn:profile-activity-change", renderOverview);
   renderAddresses();
   renderOverview();
   navigate();

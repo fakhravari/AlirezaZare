@@ -12,6 +12,19 @@
   --mega-shadow: 0 14px 34px rgba(16, 42, 67, 0.14);
 }
 
+.home-page .electrical-category-heading > span,
+.inner-page #mainNav .electrical-category-heading > span {
+  display: grid;
+  place-items: center;
+}
+
+.home-page .electrical-category-heading > span > i::before,
+.inner-page #mainNav .electrical-category-heading > span > i::before {
+  display: block;
+  line-height: 1;
+  vertical-align: 0;
+}
+
 .home-page #electricalSubmenu,
 .inner-page #mainNav .category-nav-mega {
   isolation: isolate;
@@ -144,8 +157,12 @@
 
   .home-page .electrical-category-heading > span,
   .inner-page #mainNav .electrical-category-heading > span {
+    display: grid;
     width: 29px;
     height: 29px;
+    flex: 0 0 29px;
+    padding: 0;
+    place-items: center;
     border-color: #f0d78b;
     border-radius: 9px;
     background: linear-gradient(145deg, #fff8df, #f9e9ae);

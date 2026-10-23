@@ -48,6 +48,13 @@
   font-family: "Estedad", "Vazirmatn", Tahoma, sans-serif;
 }
 
+#mainNav .header-brand-lockup > .header-brand-copy,
+.mobile-menu .mobile-menu-logo > .mobile-menu-logo-copy {
+  width: auto;
+  height: auto;
+  flex: 1 1 auto;
+}
+
 #mainNav .header-brand-copy strong,
 .mobile-menu-logo-copy strong {
   color: #fff;
