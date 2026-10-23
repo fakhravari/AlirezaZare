@@ -9,8 +9,8 @@
 | دادهٔ مبنای محصول | [catalog.json](../../Shop/wwwroot/content/data/catalog.json) از طریق `HNCatalog`/`HNProducts` |
 | رندر سبد / قیمت / تخفیف | [commerce.js](../../Shop/wwwroot/shop/js/store/commerce.js)، `#cartView` |
 | پنل هدر | [_Panels.cshtml](../../Shop/Views/Shared/_Panels.cshtml)، `layout/main.js` و `shared-cart.css` |
-| صفحهٔ سبد | [Cart/Index.cshtml](../../Shop/Views/Cart/Index.cshtml)، `checkout.css` |
-| فاکتور و انتخاب پرداخت | [Checkout/Index.cshtml](../../Shop/Views/Checkout/Index.cshtml)، [checkout.js](../../Shop/wwwroot/shop/js/pages/checkout.js) |
+| صفحهٔ سبد | [Cart/Index.cshtml](../../Shop/Views/Cart/Index.cshtml)، `checkout.css`؛ عنوان محصول در پنل‌های سبد، علاقه‌مندی و مقایسهٔ هدر به مسیر canonical جزئیات محصول لینک می‌شود |
+| فاکتور و انتخاب پرداخت | [Checkout/Index.cshtml](../../Shop/Views/Checkout/Index.cshtml)، [checkout.js](../../Shop/wwwroot/shop/js/pages/checkout.js)؛ hero و breadcrumb با الگوی مشترک صفحهٔ سبد نمایش داده می‌شوند |
 | فرم آدرس مشترک | [_AddressForm.cshtml](../../Shop/Views/Shared/_AddressForm.cshtml)، `iran-places.js` و `address-fields.js` |
 
 ## قرارداد واحد

@@ -75,6 +75,19 @@
   color: #0b2868;
   font-size: 13px;
 }
+
+:where(.cart-item, .page-cart-item, .search-cart-item, .compare-panel-item)
+  .header-panel-product-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+:where(.cart-item, .page-cart-item, .search-cart-item, .compare-panel-item)
+  .header-panel-product-link:is(:hover, :focus-visible) {
+  color: #a77a1e;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
 :where(.cart-item, .page-cart-item, .search-cart-item) .cart-item-info > span {
   color: #9a6d31;
   font-size: 11px;

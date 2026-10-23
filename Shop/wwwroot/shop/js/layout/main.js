@@ -425,7 +425,9 @@ $(function () {
             price: 0,
             image: "content/products/images/card/cordless-hammer-drill-hn-001-row-001-card-800.jpg",
           };
-          return `<article class="compare-panel-item" data-favorite-id="${escapeHtml(id)}"><img src="${escapeHtml(product.image || "content/products/images/card/cordless-hammer-drill-hn-001-row-001-card-800.jpg")}" alt="" loading="lazy"><span><strong>${escapeHtml(product.name || "محصول منتخب")}</strong><small>${faNumber(Number(product.price) * (Number(product.price) < 1000000 ? 1000000 : 1))} تومان</small></span><button class="cart-remove" type="button" data-favorite-remove="${escapeHtml(id)}" aria-label="حذف ${escapeHtml(product.name || "محصول")} از علاقه‌مندی‌ها"><i class="bi bi-trash3" aria-hidden="true"></i></button></article>`;
+          const name = product.name || "محصول منتخب";
+          const href = window.HNProductUrl?.(id) || "/search";
+          return `<article class="compare-panel-item" data-favorite-id="${escapeHtml(id)}"><img src="${escapeHtml(product.image || "content/products/images/card/cordless-hammer-drill-hn-001-row-001-card-800.jpg")}" alt="" loading="lazy"><span><strong><a class="header-panel-product-link" href="${escapeHtml(href)}">${escapeHtml(name)}</a></strong><small>${faNumber(Number(product.price) * (Number(product.price) < 1000000 ? 1000000 : 1))} تومان</small></span><button class="cart-remove" type="button" data-favorite-remove="${escapeHtml(id)}" aria-label="حذف ${escapeHtml(name)} از علاقه‌مندی‌ها"><i class="bi bi-trash3" aria-hidden="true"></i></button></article>`;
         })
         .join(""),
     );
@@ -470,7 +472,8 @@ $(function () {
             price: 0,
             image: "content/products/images/card/cordless-hammer-drill-hn-001-row-001-card-800.jpg",
           };
-          return `<article class="compare-panel-item" data-compare-id="${escapeHtml(id)}"><img src="${escapeHtml(product.image)}" alt="" loading="lazy"><span><strong>${escapeHtml(product.name)}</strong><small>${faNumber(product.price)} تومان</small></span><button class="cart-remove" type="button" data-compare-remove="${escapeHtml(id)}" aria-label="حذف ${escapeHtml(product.name)} از مقایسه"><i class="bi bi-trash3" aria-hidden="true"></i></button></article>`;
+          const href = window.HNProductUrl?.(id) || "/search";
+          return `<article class="compare-panel-item" data-compare-id="${escapeHtml(id)}"><img src="${escapeHtml(product.image)}" alt="" loading="lazy"><span><strong><a class="header-panel-product-link" href="${escapeHtml(href)}">${escapeHtml(product.name)}</a></strong><small>${faNumber(product.price)} تومان</small></span><button class="cart-remove" type="button" data-compare-remove="${escapeHtml(id)}" aria-label="حذف ${escapeHtml(product.name)} از مقایسه"><i class="bi bi-trash3" aria-hidden="true"></i></button></article>`;
         })
         .join(""),
     );
@@ -1174,7 +1177,8 @@ $(function () {
           const safeId = escapeHtml(item.id);
           const safeName = escapeHtml(item.name);
           const safeImage = escapeHtml(item.image);
-          return `<div class="cart-item" data-cart-id="${safeId}"><img src="${safeImage}" alt="${safeName}" loading="lazy" decoding="async"><div class="cart-item-info"><strong>${safeName}</strong>${cartOptionsMarkup(item)}<div class="cart-item-actions"><span>${faNumber(item.price)} تومان</span><div class="cart-item-controls"><div class="cart-quantity"><button type="button" data-action="minus" aria-label="کاهش تعداد">−</button><b>${faNumber(item.quantity)}</b><button type="button" data-action="plus" aria-label="افزایش تعداد">+</button></div><button class="cart-remove" type="button" data-action="remove" aria-label="حذف محصول"><i class="bi bi-trash3"></i></button></div></div></div></div>`;
+          const href = window.HNProductUrl?.(item.id) || "/search";
+          return `<div class="cart-item" data-cart-id="${safeId}"><img src="${safeImage}" alt="${safeName}" loading="lazy" decoding="async"><div class="cart-item-info"><strong><a class="header-panel-product-link" href="${escapeHtml(href)}">${safeName}</a></strong>${cartOptionsMarkup(item)}<div class="cart-item-actions"><span>${faNumber(item.price)} تومان</span><div class="cart-item-controls"><div class="cart-quantity"><button type="button" data-action="minus" aria-label="کاهش تعداد">−</button><b>${faNumber(item.quantity)}</b><button type="button" data-action="plus" aria-label="افزایش تعداد">+</button></div><button class="cart-remove" type="button" data-action="remove" aria-label="حذف محصول"><i class="bi bi-trash3"></i></button></div></div></div></div>`;
         })
         .join(""),
     );

@@ -339,11 +339,6 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                         copied = document.execCommand("copy");
                         input.remove();
                     }
-                    const status = productView.querySelector("#productStatus");
-                    if (status)
-                        status.textContent = copied
-                            ? "پیوند محصول کپی شد."
-                            : "کپی خودکار در این مرورگر در دسترس نیست.";
                     ui.showToast(
                         copied
                             ? "پیوند محصول کپی شد."
