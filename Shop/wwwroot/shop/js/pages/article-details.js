@@ -67,6 +67,7 @@ window.HNUI.mount("pages-article-details", document, () => {
         card.className = "article-feedback-card";
         card.tabIndex = -1;
         const heading = document.createElement("div");
+        heading.className = "article-feedback-card-heading";
         const name = document.createElement("strong");
         name.textContent = item.name;
         const stars = document.createElement("span");
@@ -90,10 +91,12 @@ window.HNUI.mount("pages-article-details", document, () => {
         heading.append(name, meta);
         const copy = document.createElement("p");
         copy.textContent = item.text;
-        card.append(heading, registered, copy);
+        card.append(heading, copy);
         if (item.reply) {
           const reply = document.createElement("aside");
           reply.className = "article-feedback-admin-reply";
+          const replyMeta = document.createElement("div");
+          replyMeta.className = "article-feedback-admin-meta";
           const replyHeading = document.createElement("strong");
           replyHeading.className = "article-feedback-admin-badge";
           replyHeading.innerHTML = '<i class="bi bi-patch-check-fill" aria-hidden="true"></i> پاسخ مدیر مجله';
@@ -107,7 +110,8 @@ window.HNUI.mount("pages-article-details", document, () => {
           replyTime.append(replyIcon, document.createTextNode(formatReviewTime(replyTimestamp)));
           const replyText = document.createElement("p");
           replyText.textContent = item.reply;
-          reply.append(replyHeading, replyTime, replyText);
+          replyMeta.append(replyHeading, replyTime);
+          reply.append(replyMeta, replyText);
           card.append(reply);
         }
         list.append(card);

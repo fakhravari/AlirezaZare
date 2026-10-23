@@ -1674,10 +1674,13 @@ input[type="radio"] {
 
 .status-danger,
 .out-of-stock,
-.validation-summary-errors,
+.validation-summary-errors {
+  color: var(--industrial-danger) !important;
+}
+
 .field-validation-error,
 .contact-form-status.is-error {
-  color: var(--industrial-danger) !important;
+  color: var(--industrial-danger);
 }
 
 /* Shared manual validation and focus treatment across storefront forms. */
@@ -1704,9 +1707,9 @@ form textarea:focus-visible {
 form input.is-invalid:not([type="radio"]):not([type="checkbox"]),
 form select.is-invalid,
 form textarea.is-invalid {
-  border-color: var(--industrial-danger) !important;
-  background-color: #fffafa !important;
-  box-shadow: 0 0 0 3px rgba(185, 73, 73, 0.1) !important;
+  border-color: var(--industrial-danger);
+  background-color: #fffdfc;
+  box-shadow: 0 0 0 2px rgba(185, 73, 73, 0.055);
 }
 
 form input[type="radio"].is-invalid,
@@ -1729,10 +1732,10 @@ form .form-field-error[hidden] {
 }
 
 .contact-form-status:not(.is-error) > i {
-  background: var(--industrial-success) !important;
+  background: var(--industrial-success);
 }
 .contact-form-status.is-error > i {
-  background: var(--industrial-danger) !important;
+  background: var(--industrial-danger);
 }
 
 /* Account, cart and modal panels */

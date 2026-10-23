@@ -615,12 +615,23 @@
 
 .article-feedback-admin-reply {
   display: grid;
+  width: min(100%, 480px);
   gap: 8px;
   margin-top: 12px;
+  margin-inline-start: auto;
   padding: 11px 12px;
   border: 1px solid #d8e9dc;
   border-radius: 11px;
   background: #f3faf4;
+  direction: rtl;
+  text-align: left;
+}
+.article-feedback-admin-meta {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 9px;
+  direction: ltr;
 }
 .article-feedback-admin-badge {
   display: inline-flex;
@@ -633,12 +644,15 @@
   background: #e6f4e9;
   color: #28633b;
   font-size: 11px;
+  direction: rtl;
 }
+.article-feedback-admin-time { direction: rtl; }
 .article-enhanced .article-body .article-feedback-card .article-feedback-admin-reply > p {
   margin: 0;
   color: #435b4a;
   font-size: 12px;
   line-height: 1.8;
+  text-align: left;
 }
 @media (prefers-reduced-motion: reduce) {
   .article-related-card > a,

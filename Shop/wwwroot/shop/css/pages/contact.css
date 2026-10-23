@@ -314,13 +314,6 @@
     box-shadow 0.2s,
     background-color 0.2s;
 }
-.contact-form .field.is-invalid > input,
-.contact-form .field.is-invalid > select,
-.contact-form .field.is-invalid > textarea {
-  border-color: #b75959 !important;
-  background: var(--industrial-bg);
-  box-shadow: 0 0 0 3px rgba(183, 89, 89, 0.1);
-}
 .contact-form .field.is-valid > input,
 .contact-form .field.is-valid > select,
 .contact-form .field.is-valid > textarea {
@@ -333,12 +326,33 @@
   line-height: 1.6;
 }
 .contact-form .field-validation-error {
-  display: block;
-  color: #a34343;
+  --hn-message-color: #8f4c4a;
+  --hn-message-bg: #fff6f5;
+  --hn-message-border: rgba(169, 76, 76, 0.14);
+  display: inline-flex;
+  justify-self: start;
+  width: fit-content;
+  max-width: 100%;
+  min-height: 0;
+  align-items: center;
+  gap: 5px;
+  margin-top: 2px;
+  padding: 3px 9px;
+  border: 1px solid var(--hn-message-border);
+  border-radius: 999px;
+  background: #fff6f5;
+  color: #8f4c4a;
+  font-size: 11px;
+  line-height: 1.6;
 }
 .contact-form .field-validation-valid {
   display: block;
   visibility: hidden;
+}
+#contactForm .field.is-invalid > :is(input, select, textarea)[aria-invalid="true"] {
+  border-color: #c98c88;
+  background-color: #fffaf9;
+  box-shadow: 0 0 0 2px rgba(169, 76, 76, 0.055);
 }
 @media (min-width: 768px) {
   .contact-form .form-grid {
@@ -387,13 +401,17 @@
   gap: 1px;
 }
 .contact-form-status.is-error {
-  border-color: #e0b2b2;
-  background: var(--industrial-bg);
-  color: #a34343;
+  border-color: #ead0ce;
+  background: linear-gradient(135deg, #fff8f6, #fffdfb);
+  color: #8f4c4a;
 }
 .contact-form-status.is-error > i {
-  background: #f6dcdc;
-  color: #a34343;
+  width: 28px;
+  height: 28px;
+  flex-basis: 28px;
+  background: #f7e6e4;
+  color: #9b5551;
+  font-size: 16px;
 }
 .branches-kicker {
   color: var(--industrial-yellow-dark);
