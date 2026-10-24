@@ -1753,31 +1753,6 @@
   box-shadow: 0 0 0 2px rgba(169, 76, 76, 0.055);
 }
 
-#productView
-  .product-feedback-form--validated
-  .form-field-error:not([hidden]) {
-  --hn-message-color: #8f4c4a;
-  display: inline-flex;
-  width: fit-content;
-  max-width: 100%;
-  align-items: center;
-  gap: 5px;
-  margin-top: 2px;
-  padding: 3px 9px;
-  border: 1px solid rgba(169, 76, 76, 0.14);
-  border-radius: 999px;
-  background: #fff6f5;
-  color: var(--hn-message-color);
-  font-size: 11px;
-  line-height: 1.6;
-}
-
-#productView
-  .product-feedback-form--validated
-  .form-field-error.hn-message--error:not([hidden])::before {
-  margin-inline-start: 0;
-}
-
 #productView .product-feedback-admin-datetime {
   display: inline-flex;
   align-items: center;

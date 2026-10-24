@@ -9,7 +9,7 @@
 | برند | [BrandsController](../../Shop/Controllers/BrandsController.cs)، [BrandProfileModel.cs](../../Shop/Models/BrandProfileModel.cs)، [Views/Brands](../../Shop/Views/Brands) | هویت در catalog.json و snapshot؛ تحریریه در `brand-editorial.json`؛ شمارش محصول با `brand-product-count.js` |
 | FAQ | `FaqController`، [Faq/Index.cshtml](../../Shop/Views/Faq/Index.cshtml)، `FaqCatalog` | متن صفحه و schema باید از یک کاتالوگ بیایند |
 | تماس | [Contact/Index.cshtml](../../Shop/Views/Contact/Index.cshtml)، `contact.js` و dialog تأیید | feedback فرم نمونه است؛ endpoint ارسال واقعی ثبت نشده |
-| معرفی / ارسال / ضمانت / پیگیری | Controller و View هم‌نام | `pages.css` و فایل صفحه؛ پیگیری فعلی نتیجهٔ واقعی سفارش دریافت نمی‌کند |
+| معرفی / ارسال / ضمانت / پیگیری | Controller و View هم‌نام | `pages.css` و فایل صفحه؛ قاب تصویر صفحهٔ ضمانت در `warranty.css` با فریم گرم، لایهٔ نور و حرکت hover کنترل می‌شود؛ پیگیری فعلی نتیجهٔ واقعی سفارش دریافت نمی‌کند |
 | قوانین | [LegalController](../../Shop/Controllers/LegalController.cs) و [Views/Legal](../../Shop/Views/Legal) | سند حریم خصوصی و terms/returns ریشه‌ها و selectorهای اختصاصی دارند |
 | خطا | [ErrorController](../../Shop/Controllers/ErrorController.cs) و [Error/Index.cshtml](../../Shop/Views/Error/Index.cshtml) | پوستهٔ عمومی همچنان اجرا می‌شود |
 

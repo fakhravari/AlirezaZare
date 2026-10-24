@@ -141,6 +141,27 @@
   --hn-message-border: #c8d7e8;
 }
 
+.form-field-error:not([hidden]) {
+  display: inline-flex;
+  box-sizing: border-box;
+  width: fit-content;
+  max-width: 100%;
+  min-height: 0;
+  align-items: center;
+  justify-self: start;
+  gap: 5px;
+  margin: 3px 0 0;
+  padding: 3px;
+  border: 1px solid var(--hn-message-border, #efb9bd);
+  border-radius: 999px;
+  background: var(--hn-message-bg, #fff0f0);
+  color: var(--hn-message-color, #a52834);
+  font-size: 11px;
+  font-weight: 650;
+  line-height: 1.6;
+  text-align: right;
+}
+
 :is(#liveToast, .search-toast).hn-message--success,
 :is(#liveToast, .search-toast).hn-message--warning,
 :is(#liveToast, .search-toast).hn-message--error,

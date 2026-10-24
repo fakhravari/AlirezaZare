@@ -11687,8 +11687,8 @@ body .electrical-swiper .swiper-pagination-bullet-active {
 }
 /* Align the home header with the shared header layout used on inner pages. */
 @media (min-width: 992px) {
-  .home-page #mainNav .navbar-brand {
-    top: -64px;
+  :is(.home-page, .inner-page) #mainNav .header-brand-lockup.header-home-link {
+    top: -74px;
   }
 
   .home-page #mainNav .home-header-support small,

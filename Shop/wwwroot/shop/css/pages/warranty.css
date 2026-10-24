@@ -96,33 +96,61 @@
 
 .warranty-visual {
   position: relative;
-  min-height: 310px;
+  isolation: isolate;
+  width: 100%;
+  min-height: 340px;
+  aspect-ratio: 1.08 / 1;
   overflow: hidden;
-  border: 1px solid #e4dbc9;
-  border-radius: 19px;
-  background: #e9eceb;
-  box-shadow: 0 16px 34px rgba(20, 47, 73, 0.12);
+  border: 1px solid rgba(205, 170, 88, 0.62);
+  border-radius: 26px 12px 26px 12px;
+  background: #102a43;
+  box-shadow:
+    0 0 0 6px rgba(255, 255, 255, 0.92),
+    0 0 0 7px rgba(205, 170, 88, 0.32),
+    0 22px 44px rgba(20, 47, 73, 0.2);
+}
+
+.warranty-visual::before {
+  position: absolute;
+  z-index: 2;
+  inset: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  border-radius: 19px 8px 19px 8px;
+  content: "";
+  pointer-events: none;
 }
 
 .warranty-visual::after {
   position: absolute;
-  inset: 40% 0 0;
-  background: linear-gradient(180deg, transparent, rgba(13, 37, 58, 0.76));
+  z-index: 1;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 78% 12%, rgba(255, 213, 97, 0.22), transparent 31%),
+    linear-gradient(180deg, rgba(10, 31, 50, 0.02) 34%, rgba(10, 31, 50, 0.68) 100%);
   content: "";
   pointer-events: none;
 }
 
 .warranty-visual img {
   display: block;
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
-  min-height: 310px;
   object-fit: cover;
+  object-position: 46% center;
+  transform: scale(1.015);
+  transition: transform 520ms cubic-bezier(0.2, 0.7, 0.25, 1), filter 520ms ease;
+}
+
+.warranty-visual:hover img {
+  filter: saturate(1.08) contrast(1.025);
+  transform: scale(1.07);
 }
 
 .warranty-visual > span {
   position: absolute;
-  z-index: 1;
+  z-index: 3;
   right: 18px;
   bottom: 16px;
   display: inline-flex;
@@ -131,11 +159,12 @@
   padding: 8px 12px;
   border: 1px solid rgba(255, 255, 255, 0.28);
   border-radius: 999px;
-  background: rgba(15, 42, 64, 0.78);
+  background: rgba(15, 42, 64, 0.84);
   color: #fff;
   font-size: 13px;
   font-weight: 700;
-  backdrop-filter: blur(8px);
+  box-shadow: 0 8px 20px rgba(4, 17, 29, 0.16);
+  backdrop-filter: blur(10px);
 }
 
 .warranty-visual > span i {
@@ -279,12 +308,8 @@
   }
 
   .warranty-visual {
+    aspect-ratio: 1.45 / 1;
     min-height: 280px;
-  }
-
-  .warranty-visual img {
-    min-height: 280px;
-    max-height: 380px;
   }
 
   .warranty-steps {
@@ -327,8 +352,8 @@
     width: 100%;
   }
 
-  .warranty-visual,
-  .warranty-visual img {
+  .warranty-visual {
+    aspect-ratio: 1.2 / 1;
     min-height: 220px;
   }
 
@@ -362,7 +387,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .warranty-contact {
+  .warranty-contact,
+  .warranty-visual img {
     transition: none;
   }
 }

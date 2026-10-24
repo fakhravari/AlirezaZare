@@ -44,6 +44,31 @@
         "Shop/wwwroot/shop/css/layout/quick-links-menu.css"
       ]
     },
+    "header-brand": {
+      "markup": [
+        "Shop/Views/Shared/_Header.cshtml",
+        "Shop/Views/Shared/_Panels.cshtml"
+      ],
+      "css": [
+        "Shop/wwwroot/shop/css/layout/shared-header.css",
+        "Shop/wwwroot/shop/css/layout/mobile-drawer-compact.css"
+      ],
+      "assets": [
+        "Shop/wwwroot/content/identity/store-electrical-header.svg",
+        "Shop/wwwroot/content/identity/store-electrical-lockup.svg"
+      ]
+    },
+    "warranty-page": {
+      "markup": [
+        "Shop/Views/Warranty/Index.cshtml"
+      ],
+      "css": [
+        "Shop/wwwroot/shop/css/pages/warranty.css"
+      ],
+      "assets": [
+        "Shop/wwwroot/shop/images/heroes/hero-warranty-work-light.png"
+      ]
+    },
     "cart": {
       "markup": [
         "Shop/Views/Shared/_Panels.cshtml",

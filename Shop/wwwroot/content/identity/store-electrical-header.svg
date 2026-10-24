@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 108" fill="none" role="img" aria-labelledby="title desc">
+  <title id="title">برق شیراز</title>
+  <desc id="desc">نشان برق طلایی کنار نام برق شیراز روی زمینهٔ سرمه‌ای</desc>
+  <defs>
+    <style>
+      @font-face {
+        font-family: Estedad;
+        font-style: normal;
+        font-weight: 800;
+        src: url('/shop/vendor/fonts/qdvjstk1ogitjvytdpnstdh9kgsljx96izgj.ttf') format('truetype');
+      }
+    </style>
+    <linearGradient id="header-navy" x1="8" y1="5" x2="352" y2="103" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1b4665"/>
+      <stop offset="1" stop-color="#0b2236"/>
+    </linearGradient>
+    <linearGradient id="header-gold" x1="20" y1="10" x2="45" y2="54" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ffe27a"/>
+      <stop offset="1" stop-color="#e7b511"/>
+    </linearGradient>
+  </defs>
+  <rect x="1.5" y="1.5" width="357" height="105" rx="20" fill="url(#header-navy)" stroke="#d9b43a" stroke-width="3"/>
+  <rect x="5" y="5" width="350" height="98" rx="17" stroke="#fff" stroke-opacity=".12"/>
+  <text x="150" y="68" fill="#fff" font-family="Estedad, Vazirmatn, Tahoma, sans-serif" font-size="40" font-weight="800" text-anchor="middle" direction="rtl" unicode-bidi="plaintext">برق شیراز</text>
+  <g transform="translate(286 22)">
+    <rect x="1.5" y="1.5" width="61" height="61" rx="17" fill="url(#header-navy)" stroke="#d9b43a" stroke-width="2"/>
+    <rect x="5" y="5" width="54" height="54" rx="14" stroke="#fff" stroke-opacity=".12"/>
+    <path d="M32 9.5 51 20.25v23.5L32 54.5 13 43.75v-23.5L32 9.5Z" fill="#f7f2e5" stroke="#f6d66b" stroke-width="1.5" stroke-linejoin="round"/>
+    <path d="m35.4 15.5-14 20.1h9.1l-2.2 13.2 15.1-21.1h-9.3l4.1-12.2h-2.8Z" fill="url(#header-gold)" stroke="#173b57" stroke-width="1.25" stroke-linejoin="round"/>
+  </g>
+</svg>
