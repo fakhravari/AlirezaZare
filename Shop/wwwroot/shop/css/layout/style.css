@@ -601,11 +601,11 @@ textarea {
   .subscribe,
   .search-form,
   .product-tabs button
-) {
+):not(.is-invalid) {
   border-color: var(--widget-border) !important;
 }
 
-:where(input, select, textarea):focus {
+:where(input, select, textarea):not(.is-invalid):focus {
   border-color: #6f829b !important;
 }
 
@@ -2026,7 +2026,7 @@ footer {
 
   .section-head p,
   .story-copy p {
-    font-size: 15px;
+    font-size: 14px;
   }
 
   .product-tabs {
@@ -5752,7 +5752,7 @@ h6,
   .featured-content p,
   .featured-side-content p,
   .newsletter p {
-    font-size: 15px;
+    font-size: 14px;
   }
 
   .journal-main h3 {

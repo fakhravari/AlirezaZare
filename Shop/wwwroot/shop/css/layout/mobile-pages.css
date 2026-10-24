@@ -1897,7 +1897,7 @@
 @media (max-width: 575px) {
   #productView .product-feedback-admin-meta {
     display: flex;
-    flex-wrap: nowrap !important;
+    flex-wrap: wrap;
     align-items: center;
     gap: 5px;
   }
@@ -1905,11 +1905,11 @@
   #productView .product-feedback-admin-meta > span {
     display: inline-flex;
     min-width: 0;
-    flex: 1 1 auto;
+    flex: 1 1 100%;
     align-items: center;
     gap: 5px;
     font-size: 11px;
-    white-space: nowrap !important;
+    white-space: nowrap;
   }
 
   #productView .product-feedback-admin-meta > span > i {
@@ -1922,7 +1922,12 @@
     flex: 0 0 auto;
     padding: 3px 6px;
     font-size: 9px;
-    white-space: nowrap !important;
+    white-space: nowrap;
+  }
+
+  #productView .product-feedback-admin-datetime {
+    margin-inline-start: 27px;
+    font-size: 10px;
   }
 }
 

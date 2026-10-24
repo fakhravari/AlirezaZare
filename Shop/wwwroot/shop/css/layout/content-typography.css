@@ -50,3 +50,15 @@ body[dir="rtl"] :is(.home-page, .inner-page) main p.text-end {
   text-align: end;
   text-align-last: end;
 }
+
+@media (max-width: 767px) {
+  body:is(.home-page, .inner-page) {
+    font-size: 14px;
+  }
+
+  html[dir="rtl"] body:is(.home-page, .inner-page)
+    :is(input, textarea, select)::placeholder {
+    font-size: 12px;
+    font-weight: 400;
+  }
+}

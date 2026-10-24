@@ -29,7 +29,7 @@ window.HNUI.mount("core-form-validation", document, () => {
       if (control.type === "checkbox" || control.type === "radio")
         return "این گزینه را انتخاب کنید.";
       if (control.tagName === "SELECT") return "یک مورد را انتخاب کنید.";
-      return "تکمیل این فیلد الزامی است.";
+      return control.dataset.requiredMessage || "تکمیل این فیلد الزامی است.";
     }
     if (!value) return "";
 
@@ -130,7 +130,10 @@ window.HNUI.mount("core-form-validation", document, () => {
         control.type === "hidden"
       )
         return;
-      if (control.matches(":radio, :checkbox") && control.name) {
+      if (
+        control.matches('input[type="radio"], input[type="checkbox"]') &&
+        control.name
+      ) {
         if (handledGroups.has(control.name)) return;
         handledGroups.add(control.name);
         const group = [
@@ -202,7 +205,10 @@ window.HNUI.mount("core-form-validation", document, () => {
     )
       return;
     if (control.getAttribute("aria-invalid") !== "true") return;
-    if (control.matches(":radio, :checkbox") && control.name) {
+    if (
+      control.matches('input[type="radio"], input[type="checkbox"]') &&
+      control.name
+    ) {
       const group = [
         ...control.form.querySelectorAll(
           `[name="${CSS.escape(control.name)}"]`,

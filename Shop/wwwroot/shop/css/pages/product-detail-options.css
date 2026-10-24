@@ -1414,20 +1414,43 @@
 }
 
 /* Keep required review name and rating fields together in one row. */
-#productView .product-review-form-column .product-feedback-form {
+#productView
+  .product-review-form-column
+  .product-feedback-form.product-review-form {
   grid-template-columns: minmax(0, 1fr) minmax(106px, 0.42fr);
 }
 
 #productView
   .product-review-form-column
-  .product-feedback-form
-  > label:first-child {
+  .product-feedback-form.product-review-form
+  > .product-feedback-name-field,
+#productView
+  .product-review-form-column
+  .product-feedback-form.product-review-form
+  > .product-feedback-rating-field {
   grid-column: auto;
 }
 
 #productView
   .product-review-form-column
-  .product-feedback-form
+  .product-feedback-form.product-review-form
+  > :is(.product-feedback-name-field, .product-feedback-rating-field) {
+  align-self: start;
+  align-content: start;
+}
+
+#productView
+  .product-review-form-column
+  .product-feedback-form.product-review-form
+  > :is(.product-feedback-name-field, .product-feedback-rating-field)
+  :is(input, select) {
+  height: 50px;
+  min-height: 50px;
+}
+
+#productView
+  .product-review-form-column
+  .product-feedback-form.product-review-form
   > .product-feedback-wide {
   grid-column: 1 / -1;
 }
@@ -1441,14 +1464,20 @@
 }
 
 @media (max-width: 575px) {
-  #productView .product-review-form-column .product-feedback-form {
+  #productView
+    .product-review-form-column
+    .product-feedback-form.product-review-form {
     grid-template-columns: minmax(0, 1fr) minmax(100px, 0.42fr);
   }
 
   #productView
     .product-review-form-column
-    .product-feedback-form
-    > label:first-child {
+    .product-feedback-form.product-review-form
+    > .product-feedback-name-field,
+  #productView
+    .product-review-form-column
+    .product-feedback-form.product-review-form
+    > .product-feedback-rating-field {
     grid-column: auto;
   }
 
@@ -1665,17 +1694,19 @@
 #productView .product-feedback-meta-details .product-feedback-stars {
   gap: 4px;
   letter-spacing: 0;
-  font-size: 11px;
+  direction: ltr;
+  font-size: 14px;
+  unicode-bidi: isolate;
 }
 
 #productView .product-feedback-stars-glyphs {
-  font-size: 12px;
+  font-size: 16px;
   letter-spacing: 0.5px;
 }
 
 #productView .product-feedback-stars > small {
   color: #8b6e2e;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0;
 }
@@ -1689,11 +1720,12 @@
 #productView .product-feedback-meta-details .product-feedback-datetime {
   gap: 5px;
   margin: 0;
-  font-size: 10px;
+  font-size: 12px;
 }
 
 @media (max-width: 420px) {
-  #productView .product-feedback-meta {
+  #productView .product-review-list-column .product-feedback-meta {
+    flex-wrap: wrap;
     gap: 6px;
   }
 
@@ -1701,11 +1733,122 @@
     font-size: 14px;
   }
 
-  #productView .product-feedback-meta-details {
+  #productView .product-review-list-column .product-feedback-meta-details {
+    flex: 0 0 calc(100% - 44px);
     gap: 5px;
+    margin-inline-start: 44px;
+    white-space: normal;
   }
 
   #productView .product-feedback-meta-details .product-feedback-datetime {
-    font-size: 9px;
+    font-size: 11px;
+  }
+}
+
+#productView
+  .product-feedback-form--validated
+  :is(input, textarea).is-invalid {
+  border-color: #c98c88;
+  background-color: #fffaf9;
+  box-shadow: 0 0 0 2px rgba(169, 76, 76, 0.055);
+}
+
+#productView
+  .product-feedback-form--validated
+  .form-field-error:not([hidden]) {
+  --hn-message-color: #8f4c4a;
+  display: inline-flex;
+  width: fit-content;
+  max-width: 100%;
+  align-items: center;
+  gap: 5px;
+  margin-top: 2px;
+  padding: 3px 9px;
+  border: 1px solid rgba(169, 76, 76, 0.14);
+  border-radius: 999px;
+  background: #fff6f5;
+  color: var(--hn-message-color);
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+#productView
+  .product-feedback-form--validated
+  .form-field-error.hn-message--error:not([hidden])::before {
+  margin-inline-start: 0;
+}
+
+#productView .product-feedback-admin-datetime {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #687887;
+  direction: rtl;
+  font-size: 11px;
+  font-weight: 650;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+#productView .product-feedback-admin-datetime > i {
+  color: #9a7500;
+  font-size: 12px;
+}
+
+#productView
+  .product-feedback-form--validated
+  .product-feedback-validation-summary:not([hidden]) {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 10px 13px;
+  border: 1px solid rgba(169, 76, 76, 0.14);
+  border-radius: 12px;
+  background: #fff6f5;
+  color: #8f4c4a;
+  font-size: 12px;
+  line-height: 1.8;
+}
+
+@media (max-width: 767px) {
+  #productView
+    .product-review-form-column
+    .product-feedback-form.product-review-form
+    > .product-feedback-name-field,
+  #productView
+    .product-review-form-column
+    .product-feedback-form.product-review-form
+    > .product-feedback-rating-field {
+    min-width: 0;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+
+  #productView
+    .product-review-form-column
+    .product-feedback-form.product-review-form
+    > .product-feedback-name-field
+    .form-field-error {
+    white-space: normal;
+  }
+
+  #productView
+    .product-review-form-column
+    .product-feedback-form.product-review-form
+    :is(input, select) {
+    padding-inline: 8px;
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 575px) {
+  #productView
+    .product-review-form-column
+    .product-feedback-form.product-review-form
+    > .product-feedback-name-field,
+  #productView
+    .product-review-form-column
+    .product-feedback-form.product-review-form
+    > .product-feedback-rating-field {
+    font-size: 10px;
   }
 }

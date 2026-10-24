@@ -211,26 +211,38 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                     "برای استفادهٔ طولانی چه نکته‌ای رعایت کنم؟",
                     "محدودهٔ کاری و شیوهٔ نگهداری هر مدل متفاوت است؛ مشخصات و دستورالعمل همان کالا را مبنا قرار دهید.",
                 ],
-            ].map(([text, reply], index) => ({
-                name: "راهنمای خرید",
-                text,
-                rating: 0,
-                reply,
-                createdAt: new Date(Date.now() - (index + 1) * 86400000).toISOString(),
-                sample: true,
-            }));
+            ].map(([text, reply], index) => {
+                const createdAt = new Date(
+                    Date.now() - (index + 1) * 86400000,
+                ).toISOString();
+                return {
+                    name: "راهنمای خرید",
+                    text,
+                    rating: 0,
+                    reply,
+                    createdAt,
+                    replyAt: createdAt,
+                    sample: true,
+                };
+            });
             const readFeedback = (type) => {
                 const seeded = (p.detail?.[type] || []).map(
-                    ([name, text, rating, reply, createdAt], index) => ({
-                        name: name?.trim() || "کاربر مهمان",
-                        text,
-                        rating: rating || 0,
-                        reply: reply || "",
-                        createdAt:
+                    ([name, text, rating, reply, createdAt, replyAt], index) => {
+                        const submittedAt =
                             createdAt ||
-                            new Date(Date.now() - (index + 1) * 86400000).toISOString(),
-                        sample: true,
-                    }),
+                            new Date(
+                                Date.now() - (index + 1) * 86400000,
+                            ).toISOString();
+                        return {
+                            name: name?.trim() || "کاربر مهمان",
+                            text,
+                            rating: rating || 0,
+                            reply: reply || "",
+                            createdAt: submittedAt,
+                            replyAt: reply ? replyAt || submittedAt : "",
+                            sample: true,
+                        };
+                    },
                 );
                 if (type === "questions") seeded.push(...questionGuideItems);
                 try {
@@ -244,13 +256,19 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                         ...(Array.isArray(value)
                             ? value
                                 .filter((item) => item && typeof item.text === "string")
-                                .map((item) => ({
-                                    ...item,
-                                    name: item.name?.trim() || "کاربر مهمان",
-                                    createdAt:
-                                        item.createdAt || new Date().toISOString(),
-                                    sample: false,
-                                }))
+                                .map((item) => {
+                                    const createdAt =
+                                        item.createdAt || new Date().toISOString();
+                                    return {
+                                        ...item,
+                                        name: item.name?.trim() || "کاربر مهمان",
+                                        createdAt,
+                                        replyAt: item.reply
+                                            ? item.replyAt || createdAt
+                                            : "",
+                                        sample: false,
+                                    };
+                                })
                             : []),
                         ...seeded,
                     ];
@@ -262,7 +280,10 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                 const value = Math.max(1, Math.min(5, Number(rating) || 5));
                 return `<span class="product-feedback-stars" aria-label="امتیاز ${fa(value)} از ۵"><span class="product-feedback-stars-glyphs" aria-hidden="true">${"★".repeat(value)}<span class="product-feedback-stars-empty">${"☆".repeat(5 - value)}</span></span><small>${fa(value)} از ۵</small></span>`;
             };
-            const feedbackDateMarkup = (value) => {
+            const feedbackDateMarkup = (
+                value,
+                className = "product-feedback-datetime",
+            ) => {
                 if (!value) return "";
                 const date = new Date(value);
                 if (Number.isNaN(date.getTime())) return "";
@@ -270,7 +291,7 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                     dateStyle: "medium",
                     timeStyle: "short",
                 }).format(date);
-                return `<time class="product-feedback-datetime" datetime="${esc(date.toISOString())}"><i class="bi bi-clock" aria-hidden="true"></i><span>${esc(formatted)}</span></time>`;
+                return `<time class="${className}" datetime="${esc(date.toISOString())}"><i class="bi bi-clock" aria-hidden="true"></i><span>${esc(formatted)}</span></time>`;
             };
             const feedbackMarkup = (type, items) =>
                 items.length
@@ -279,6 +300,10 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                             const name = esc(item.name?.trim() || "کاربر مهمان");
                             const isReview = type === "reviews";
                             const registeredAt = feedbackDateMarkup(item.createdAt);
+                            const replyAt = feedbackDateMarkup(
+                                item.replyAt,
+                                "product-feedback-admin-datetime",
+                            );
                             const details = [
                                 isReview ? ratingStars(item.rating) : "",
                                 registeredAt
@@ -286,7 +311,7 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                                     : "",
                                 registeredAt,
                             ].join("");
-                            return `<article class="product-feedback-card"><div class="product-feedback-meta"><img class="product-feedback-avatar" src="shop/images/guest-avatar.svg" alt="" loading="lazy"><strong title="${name}">${name}</strong><span class="product-feedback-meta-details">${details}</span></div><p class="${type === "questions" ? "product-question-user-text" : "product-feedback-user-text"}">${esc(item.text)}</p>${item.reply ? `<aside class="product-feedback-admin-reply"><div class="product-feedback-admin-meta"><span><i class="bi bi-patch-check-fill" aria-hidden="true"></i>پاسخ مدیر فروشگاه</span><small>پاسخ رسمی</small></div><p>${esc(item.reply)}</p></aside>` : ""}</article>`;
+                            return `<article class="product-feedback-card"><div class="product-feedback-meta"><img class="product-feedback-avatar" src="shop/images/guest-avatar.svg" alt="" loading="lazy"><strong title="${name}">${name}</strong><span class="product-feedback-meta-details">${details}</span></div><p class="${type === "questions" ? "product-question-user-text" : "product-feedback-user-text"}">${esc(item.text)}</p>${item.reply ? `<aside class="product-feedback-admin-reply"><div class="product-feedback-admin-meta"><span><i class="bi bi-patch-check-fill" aria-hidden="true"></i>پاسخ مدیر فروشگاه</span>${replyAt}<small>پاسخ رسمی</small></div><p>${esc(item.reply)}</p></aside>` : ""}</article>`;
                         })
                         .join("")
                     : `<div class="product-feedback-empty empty-state-card"><i class="bi ${type === "reviews" ? "bi-chat-square-heart" : "bi-question-circle"}" aria-hidden="true"></i><strong>${type === "reviews" ? "هنوز دیدگاهی برای این محصول ثبت نشده است." : "هنوز پرسشی دربارهٔ این محصول ثبت نشده است."}</strong><span>${type === "reviews" ? "تجربهٔ استفاده‌تان را با خریداران دیگر به اشتراک بگذارید." : "سؤال خود را ثبت کنید تا اطلاعات این کالا کامل‌تر شود."}</span></div>`;
@@ -484,6 +509,25 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
             const questionForm = questionsPanel.querySelector(
                 ".product-question-form",
             );
+            const questionNameInput = questionForm.querySelector(
+                'input[name="name"]',
+            );
+            const questionTextInput = questionForm.querySelector(
+                'textarea[name="text"]',
+            );
+            questionNameInput.id = "productQuestionName";
+            questionNameInput.dataset.requiredMessage =
+                "نام و نام خانوادگی را وارد کنید.";
+            questionTextInput.id = "productQuestionText";
+            questionTextInput.dataset.requiredMessage = "متن پرسش را وارد کنید.";
+            questionForm.classList.add("product-feedback-form--validated");
+            const questionValidationSummary = document.createElement("small");
+            questionValidationSummary.className =
+                "product-feedback-validation-summary product-feedback-wide";
+            questionValidationSummary.setAttribute("role", "alert");
+            questionValidationSummary.setAttribute("aria-live", "assertive");
+            questionValidationSummary.hidden = true;
+            questionForm.append(questionValidationSummary);
             const questionLayout = document.createElement("div");
             questionLayout.className = "product-question-layout";
             const questionFormColumn = document.createElement("div");
@@ -521,13 +565,41 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
             const reviewsPanel = productView.querySelector("#product-reviews");
             const reviewForm = reviewsPanel.querySelector(".product-feedback-form");
             const reviewList = reviewsPanel.querySelector("#productReviewList");
+            reviewForm.classList.add("product-review-form");
+            reviewForm.classList.add("product-feedback-form--validated");
+            const reviewNameInput = reviewForm.querySelector('input[name="name"]');
+            const reviewRatingSelect = reviewForm.querySelector(
+                'select[name="rating"]',
+            );
+            const reviewTextInput = reviewForm.querySelector(
+                'textarea[name="text"]',
+            );
+            reviewNameInput.id = "productReviewName";
+            reviewNameInput.dataset.requiredMessage =
+                "نام و نام خانوادگی را وارد کنید.";
+            reviewNameInput.closest("label").classList.add(
+                "product-feedback-name-field",
+            );
+            reviewRatingSelect.id = "productReviewRating";
+            reviewRatingSelect.closest("label").classList.add(
+                "product-feedback-rating-field",
+            );
+            reviewTextInput.id = "productReviewText";
+            reviewTextInput.dataset.requiredMessage = "متن دیدگاه را وارد کنید.";
+            const reviewValidationSummary = document.createElement("small");
+            reviewValidationSummary.className =
+                "product-feedback-validation-summary product-feedback-wide";
+            reviewValidationSummary.setAttribute("role", "alert");
+            reviewValidationSummary.setAttribute("aria-live", "assertive");
+            reviewValidationSummary.hidden = true;
+            reviewForm.append(reviewValidationSummary);
             const reviewLayout = document.createElement("div");
             reviewLayout.className = "product-review-layout";
             const reviewFormColumn = document.createElement("div");
             reviewFormColumn.className =
                 "product-review-form-column product-question-form-column";
             reviewFormColumn.innerHTML =
-                '<div class="product-question-form-heading"><span><i class="bi bi-chat-heart" aria-hidden="true"></i></span><strong>تجربه‌تان را بنویسید</strong><small>نام و نام خانوادگی خود را وارد کنید؛ امتیازدهی اختیاری است.</small></div>';
+                '<div class="product-question-form-heading"><span><i class="bi bi-chat-heart" aria-hidden="true"></i></span><strong>تجربه‌تان را بنویسید</strong><small>نام کامل و متن دیدگاه الزامی‌اند؛ امتیازدهی اختیاری است.</small></div>';
             reviewFormColumn.append(reviewForm);
             const reviewListColumn = document.createElement("div");
             reviewListColumn.className =
@@ -1017,16 +1089,25 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                         }),
                     );
             });
-            productView.querySelectorAll(".product-feedback-form").forEach((form) =>
+            productView.querySelectorAll(".product-feedback-form").forEach((form) => {
+                const validationSummary = form.querySelector(
+                    ".product-feedback-validation-summary",
+                );
+                form.addEventListener("hn:form-invalid", () => {
+                    if (!validationSummary) return;
+                    validationSummary.textContent =
+                        "لطفاً موارد مشخص‌شده را کامل و اصلاح کنید.";
+                    validationSummary.hidden = false;
+                });
                 form.addEventListener("submit", async (event) => {
                     event.preventDefault();
+                    if (validationSummary) validationSummary.hidden = true;
                     const type = form.dataset.feedbackType,
                         data = new FormData(form),
                         name = String(data.get("name") || "")
                             .trim()
                             .replace(/\s+/g, " "),
                         text = String(data.get("text") || "").trim();
-                    if (!name || name.split(" ").length < 2 || !text) return;
                     const isReview = type === "reviews",
                         confirmed = await window.confirmFormSubmission({
                             title: isReview ? "ثبت دیدگاه برای این محصول؟" : "ثبت پرسش دربارهٔ این محصول؟",
@@ -1045,22 +1126,31 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                         createdAt: new Date().toISOString(),
                         sample: false,
                     });
-                    ui.storage.set(
+                    const status = document.querySelector("#productStatus");
+                    const saved = ui.storage.set(
                         key,
                         JSON.stringify(items.filter((item) => !item.sample).slice(0, 50)),
                     );
+                    if (!saved) {
+                        if (status)
+                            ui.setMessage(
+                                status,
+                                "ثبت انجام نشد؛ فضای ذخیره‌سازی مرورگر در دسترس نیست.",
+                                "error",
+                            );
+                        return;
+                    }
                     feedbackPages[type] = 1;
                     renderProductFeedback(type);
                     form.reset();
-                    const status = document.querySelector("#productStatus");
                     if (status)
                         ui.setMessage(
                             status,
                             type === "reviews" ? "دیدگاه شما ثبت شد." : "پرسش شما ثبت شد.",
                             "success",
                         );
-                }),
-            );
+                });
+            });
             renderProductFeedback("reviews");
             renderProductFeedback("questions");
             const requiredVariantFields = [

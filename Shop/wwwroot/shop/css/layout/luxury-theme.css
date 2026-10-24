@@ -1738,16 +1738,16 @@ h3,
 
 :where(input, textarea, select):not([type="checkbox"]):not(
     [type="radio"]
-  ):hover {
+  ):not(.is-invalid):hover {
   border-color: var(--luxury-border) !important;
 }
 
 :where(input, textarea, select):not([type="checkbox"]):not(
     [type="radio"]
-  ):focus,
+  ):not(.is-invalid):focus,
 :where(input, textarea, select):not([type="checkbox"]):not(
     [type="radio"]
-  ):focus-visible {
+  ):not(.is-invalid):focus-visible {
   border-color: var(--luxury-border-strong) !important;
   outline: 0 !important;
   box-shadow: 0 0 0 3px var(--luxury-focus-ring) !important;

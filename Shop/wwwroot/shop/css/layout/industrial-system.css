@@ -1051,7 +1051,7 @@ textarea:focus-visible {
 /* Forms */
 :is(input, select, textarea):not([type="checkbox"]):not([type="radio"]):not(
     [type="range"]
-  ) {
+  ):not(.is-invalid) {
   border-color: var(--industrial-line) !important;
   background-color: #fff !important;
   color: var(--industrial-ink) !important;
@@ -1059,7 +1059,7 @@ textarea:focus-visible {
 
 :is(input, select, textarea):not([type="checkbox"]):not([type="radio"]):not(
     [type="range"]
-  ):focus {
+  ):not(.is-invalid):focus {
   border-color: var(--industrial-steel) !important;
   box-shadow: 0 0 0 4px rgba(36, 59, 83, 0.1) !important;
 }
@@ -1589,9 +1589,9 @@ form textarea {
 form
   input:not([type="radio"]):not([type="checkbox"]):not(
     [type="hidden"]
-  ):focus-visible,
-form select:focus-visible,
-form textarea:focus-visible {
+  ):not(.is-invalid):focus-visible,
+form select:not(.is-invalid):focus-visible,
+form textarea:not(.is-invalid):focus-visible {
   border-color: var(--industrial-yellow-dark) !important;
   outline: 0;
   box-shadow: 0 0 0 3px rgba(246, 197, 21, 0.2) !important;
@@ -4759,14 +4759,19 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
   line-height: 1.7;
 }
 
-#productView .product-question-form-column .product-feedback-form {
+#productView
+  .product-question-form-column
+  .product-feedback-form.product-question-form {
   grid-template-columns: minmax(0, 1fr);
   padding: 0;
   border: 0;
   background: transparent;
 }
 
-#productView .product-question-form-column .product-feedback-form label {
+#productView
+  .product-question-form-column
+  .product-feedback-form.product-question-form
+  label {
   grid-column: 1;
 }
 
@@ -5378,10 +5383,10 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
   width: 100%;
   min-height: 42px;
   padding: 9px 11px;
-  border: 1px solid #dce4e8 !important;
+  border: 1px solid #dce4e8;
   border-radius: 9px;
-  background: #fff !important;
-  color: var(--industrial-ink) !important;
+  background: #fff;
+  color: var(--industrial-ink);
   font: inherit;
   font-size: 12px;
 }
@@ -10644,7 +10649,10 @@ html
   font-size: max(14px, 1em) !important;
 }
 
-.inner-page main label,
+.inner-page main
+  label:not(.product-feedback-name-field):not(
+    .product-feedback-rating-field
+  ),
 .inner-page main input,
 .inner-page main select,
 .inner-page main textarea {
@@ -10692,7 +10700,10 @@ html
     font-size: max(14px, 1em) !important;
   }
 
-  .inner-page main label,
+  .inner-page main
+    label:not(.product-feedback-name-field):not(
+      .product-feedback-rating-field
+    ),
   .inner-page main input,
   .inner-page main select,
   .inner-page main textarea {
