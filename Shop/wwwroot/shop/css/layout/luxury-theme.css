@@ -1,24 +1,4 @@
-/* Shared quiet-luxury skin. Loaded last by ui-core.js. */
-:root {
-  --luxury-ink: #10151d;
-  --luxury-navy: #071426;
-  --luxury-navy-soft: #0d2039;
-  --luxury-gold: #bda36f;
-  --luxury-gold-light: #d4c092;
-  --luxury-ivory: #f6f2e9;
-  --luxury-paper: #fcfaf5;
-  --luxury-line: rgba(109, 84, 45, 0.22);
-  --luxury-shadow: 0 24px 70px rgba(7, 20, 38, 0.1);
-  --color-navy: var(--luxury-navy);
-  --color-blue: var(--luxury-navy-soft);
-  --color-gold: var(--luxury-gold);
-  --color-cream: var(--luxury-ivory);
-  --color-surface: var(--luxury-paper);
-  --color-ink: var(--luxury-ink);
-  --color-muted: #68707a;
-  --color-line: #d6ccbb;
-}
-
+/* Shared legacy skin rules; active palette tokens live in design-tokens.css. */
 body {
   color: var(--luxury-ink);
   background:
@@ -532,12 +512,6 @@ h3,
 }
 
 @media (max-width: 575px) {
-  :root {
-    --luxury-gold: #bda36f;
-    --luxury-gold-light: #d4c092;
-    --color-gold: #bda36f;
-  }
-
   .hero em,
   .page-hero em,
   .search-intro em {
@@ -1676,14 +1650,6 @@ h3,
 }
 
 /* Unified borders and interaction states across the storefront. */
-:root {
-  --luxury-border-soft: rgba(117, 91, 50, 0.18);
-  --luxury-border: rgba(189, 163, 111, 0.34);
-  --luxury-border-strong: rgba(189, 163, 111, 0.58);
-  --luxury-hover-surface: rgba(244, 238, 226, 0.72);
-  --luxury-focus-ring: rgba(189, 163, 111, 0.16);
-}
-
 :where(
   .product-card,
   .showcase-card,

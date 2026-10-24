@@ -1,39 +1,4 @@
-﻿/* Electrical supply storefront palette: graphite, deep blue and warm yellow. */
-:root {
-  --luxury-ink: #202a33;
-  --luxury-navy: #152b3a;
-  --luxury-navy-soft: #23495d;
-  --luxury-gold: #e8bd24;
-  --luxury-gold-light: #ffdf54;
-  --luxury-ivory: #f1f4f5;
-  --luxury-paper: #f7f9fa;
-  --luxury-line: rgba(65, 83, 94, 0.2);
-  --luxury-shadow: 0 24px 70px rgba(21, 43, 58, 0.1);
-  --color-navy: #152b3a;
-  --color-blue: #23495d;
-  --color-gold: #e8bd24;
-  --color-cream: #f1f4f5;
-  --color-surface: #fff;
-  --color-ink: #202a33;
-  --color-muted: #62717b;
-  --color-line: #d8e0e4;
-  --color-card-border: #dce4e8;
-  --color-card-border-hover: #e8bd24;
-  --color-card-icon-border: #dce4e8;
-  --color-card-icon-bg: #eef3f5;
-  --color-card-icon: #23495d;
-  --gold: #e8bd24;
-  --cream: #e8bd24;
-  --cream2: #f1f4f5;
-  --p-gold: #e8bd24;
-  --p-cream: #f1f4f5;
-  --action-submit-bg: linear-gradient(120deg, #23495d, #152b3a);
-  --action-submit-bg-hover: linear-gradient(120deg, #2e5c72, #1b394b);
-  --action-submit-border: #23495d;
-  --action-submit-shadow: 0 8px 20px rgba(21, 43, 58, 0.2);
-  --action-submit-ring: rgba(232, 189, 36, 0.3);
-}
-
+﻿/* Electrical storefront layout; shared palette tokens live in design-tokens.css. */
 body {
   background: var(--luxury-paper);
 }

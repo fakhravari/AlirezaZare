@@ -86,6 +86,8 @@ _Shop
 - `shop/css/layout/page-hero-imagery.css`
 - `shop/css/layout/mega-menu-unified.css`
 
+پالت فعال و aliasهای Bootstrap/legacy فقط در `core/design-tokens.css` تعریف می‌شوند. `electrical-theme.css` و `luxury-theme.css` قواعد ظاهری دارند و توکن‌های root را بازنویسی نمی‌کنند؛ `industrial-system.css` هنوز overrideهای layout قدیمی دارد اما منبع رنگ نیست. cascade همچنان براساس ترتیب stylesheetهاست؛ مهاجرت تکه‌ای به `@layer` ممنوع است تا منابع بدون layer، از جمله View و vendor، اولویت ناخواسته نگیرند.
+
 ## ترتیب واقعی JavaScript
 
 ابتدا `_CatalogData`، JSON امن `script[type="application/json"]#storeCatalog` را رندر می‌کند.
@@ -119,4 +121,4 @@ storage/cart factory پیش از HNUI، resolver پیش از renderer و rendere
 
 [فهرست این بخش](README.md) · [فهرست مستندات](../README.md)
 
-آخرین تطبیق با کد: ۲۱ اکتبر ۲۰۲۶.
+آخرین تطبیق با کد: ۲۴ اکتبر ۲۰۲۶.

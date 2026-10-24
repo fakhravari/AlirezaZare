@@ -1396,7 +1396,7 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
         e.preventDefault();
         ui.setMessage(
             document.querySelector("#trackingStatus"),
-            "استعلام آنلاین فعال نیست. برای دریافت وضعیت واقعی سفارش با پشتیبانی 03969455457 تماس بگیرید.",
+            "استعلام آنلاین فعال نیست. برای دریافت وضعیت واقعی سفارش با پشتیبانی 09369455457 تماس بگیرید.",
             "warning",
         );
     });

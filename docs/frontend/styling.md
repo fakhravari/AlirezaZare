@@ -28,10 +28,12 @@
 | زمینهٔ روشن | `--color-cream` | `#f5f7f8` |
 | سطح | `--color-surface` | `#fff` |
 | متن اصلی | `--color-ink` | `#202a33` |
-| متن کمکی | `--color-muted` | `#65737d` |
-| خط/بردر | `--color-line` | `#dee4e7` |
+| متن کمکی | `--color-muted` | `#4c5b65` |
+| خط/بردر | `--color-line` | `#dfe5e9` |
 
-توکن‌های فاصله، container، radius و shadow نیز در همان فایل هستند؛ نام و مقدار را پیش از تعریف مقدار جدید بخوانید. aliasهای قدیمی را با نامشان تفسیر نکنید: در وضعیت فعلی `--cream` به طلایی وصل است، اما `--cream2` زمینهٔ روشن است. aliasهای `--industrial-*` را نیز trace کنید.
+توکن‌های فاصله، container، radius و shadow نیز در همان فایل هستند؛ نام و مقدار را پیش از تعریف مقدار جدید بخوانید. `design-tokens.css` مرجع واحد پالت فعال و aliasهای سازگاری است. `electrical-theme.css` و `luxury-theme.css` قواعد ظاهر/چیدمان دارند و نباید رنگ‌های root را دوباره تعریف کنند؛ `industrial-system.css` مصرف‌کنندهٔ توکن‌ها و مالک overrideهای legacy است، نه منبع پالت. aliasهای قدیمی را با نامشان تفسیر نکنید: `--cream` به طلایی وصل است، اما `--cream2` زمینهٔ روشن است. برای متغیرهای `--industrial-*` مقدار مرجع را در همان فایل توکن‌ها تغییر دهید.
+
+CSS فعلی با ترتیب stylesheetها cascade می‌شود و از `@layer` استفاده نمی‌کند. فایل‌ها را جداگانه داخل cascade layer نپیچید: قانون‌های عادی بدون layer بر قانون‌های عادی داخل layer اولویت دارند و ترتیب فعلی می‌تواند بی‌اثر شود. مهاجرت به `@layer` فقط باید یک‌جا و با پوشش منابع vendor، layout، View و page انجام شود.
 
 برای محتوای پهن دسکتاپ، `--container-wide-max` سقف مشترک ۱۴۸۰px است. خانه، جستجو، آرشیو مجله، مقاله و مگامنوی صفحات داخلی باید از همین سقف و فاصلهٔ مرکزی استفاده کنند؛ بخش‌های معمولی‌تر می‌توانند از سقف Bootstrap یا قاب ۱۳۶۰px صفحه استفاده کنند. هدرها و heroهای تمام‌عرض پس‌زمینهٔ خود را حفظ می‌کنند و محتوای داخلی‌شان در قاب پهن هم‌تراز می‌شود.
 
@@ -50,12 +52,12 @@
 | `css/layout/shared-cart.css` | پنل‌های cart/favorites/compare، ردیف‌ها، footer و total | چند پنل مشابه دارد؛ selectorها را با ID/root واقعی محدود کنید |
 | `css/layout/shared-login.css` | استایل پایهٔ `.shared-login-modal` برای dialog ویرایش پروفایل و بخشی از قواعد داخلی فرم `#loginModal` | با layout modal سراسری یکی نیست؛ `#loginModal` در `_Panels.cshtml` است و استایل layout آن بین `style.css`, `luxury-theme.css` و `industrial-system.css` تقسیم شده؛ `.shared-login-overlay` فعلاً در Viewها markup متناظر ندارد |
 | `css/layout/shared-footer.css` | footer مشترک | در همهٔ routeها اثر دارد |
-| `css/layout/luxury-theme.css` | تزئینات و پوستهٔ عمومی/legacy | قواعد گسترده و media متعدد؛ اولین مالک ظاهری فرض نشود |
+| `css/layout/luxury-theme.css` | تزئینات و پوستهٔ عمومی/legacy | توکن root تعریف نمی‌کند؛ قواعد گسترده و media متعدد دارد و اولین مالک ظاهری فرض نشود |
 | `css/layout/style.css` | stylesheet قدیمی و حجیم، قواعد عمومی و responsive | فایل legacy بزرگ؛ قواعد هم‌نام را قبل از ادیت بشمارید |
 | `css/layout/mvc-layout.css` | قاب و layout صفحه‌های MVC | پس از `@section Styles` بارگذاری می‌شود |
 | `css/layout/mobile-drawer-compact.css` | فشرده‌سازی drawer موبایل | فقط تا 991px؛ ممکن است بر shared drawer غلبه کند |
-| `css/layout/electrical-theme.css` | هویت/چیدمان تم برق و ابزار | در انتهای cascade عمومی است |
-| `css/layout/industrial-system.css` | overrideهای صنعتی/سراسری و responsive | overrideهای زیادی دارد ولی آخرین فایل نیست؛ فایل مالک مؤلفه فرض نشود |
+| `css/layout/electrical-theme.css` | هویت/چیدمان تم برق و ابزار | قواعد صفحهٔ اول؛ مرجع رنگ در design-tokens.css است |
+| `css/layout/industrial-system.css` | overrideهای صنعتی/سراسری و responsive | مصرف‌کنندهٔ توکن‌های مرکزی و دارای overrideهای legacy؛ آخرین فایل نیست و مالک مؤلفه فرض نشود |
 | `css/layout/quick-links-menu.css` | منوی دسترسی سریع مشترک | پس از پوستهٔ صنعتی و پیش از کارت محصول بارگذاری می‌شود |
 | `css/store/shared-product-card.css` | کارت‌های مشترک محصول و قیمت؛ شامل ۶۸ قاعدهٔ منتقل‌شده از industrial-system | renderer واحد product-card.js؛ media queryهای منتقل‌شده حفظ شده‌اند؛ Search/خانه/Related/Favorites بررسی شوند |
 | `css/layout/content-typography.css` | یکدست‌سازی تایپوگرافی و خوانایی محتوای فارسی | layout-wide؛ بعد از CSSهای قبلی می‌آید، در صفحه‌های محتوایی و RTL بررسی شود |
