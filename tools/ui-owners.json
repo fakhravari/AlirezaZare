@@ -68,6 +68,11 @@
         "Shop/wwwroot/shop/css/core/design-tokens.css"
       ]
     },
+    "scrollbar": {
+      "css": [
+        "Shop/wwwroot/shop/css/layout/shared-scrollbars.css"
+      ]
+    },
     "header-search": {
       "markup": [
         "Shop/Views/Shared/_Header.cshtml"
@@ -76,7 +81,8 @@
         "Shop/wwwroot/shop/js/layout/main.js"
       ],
       "css": [
-        "Shop/wwwroot/shop/css/layout/shared-header.css"
+        "Shop/wwwroot/shop/css/layout/shared-header.css",
+        "Shop/wwwroot/shop/css/layout/industrial-system.css"
       ]
     },
     "account-panel": {

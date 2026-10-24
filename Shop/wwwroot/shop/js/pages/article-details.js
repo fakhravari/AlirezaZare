@@ -73,7 +73,13 @@ window.HNUI.mount("pages-article-details", document, () => {
         const stars = document.createElement("span");
         stars.className = "article-feedback-stars";
         stars.setAttribute("aria-label", `امتیاز ${formatNumber(Number(item.rating))} از ۵`);
-        stars.textContent = `★ ${formatNumber(Number(item.rating))} از ۵`;
+        const ratingIcon = document.createElement("i");
+        ratingIcon.className = "bi bi-star-fill";
+        ratingIcon.setAttribute("aria-hidden", "true");
+        const ratingValue = document.createElement("bdi");
+        ratingValue.dir = "rtl";
+        ratingValue.textContent = `${formatNumber(Number(item.rating))} از ۵`;
+        stars.append(ratingIcon, ratingValue);
         const meta = document.createElement("span");
         meta.className = "article-feedback-meta";
         const separator = document.createElement("span");

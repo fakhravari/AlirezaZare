@@ -86,7 +86,7 @@
 }
 
 .inner-page .page-hero h1 {
-  font-size: clamp(38px, 4.2vw, 56px);
+  font-size: var(--font-size-page-title);
 }
 
 .inner-page .page-hero h1 em {
@@ -194,7 +194,7 @@
   }
 
   .inner-page .page-hero h1 {
-    font-size: clamp(30px, 8vw, 36px);
+    font-size: clamp(28px, 7.2vw, 34px);
   }
 
   .inner-page .article-hero h1 {

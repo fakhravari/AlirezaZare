@@ -1481,7 +1481,7 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
 .account-welcome h1 {
   margin: 0 0 16px;
   color: #fff;
-  font-size: clamp(30px, 3.2vw, 44px);
+  font-size: var(--font-size-page-title);
   font-weight: 800;
   line-height: 1.5;
 }
@@ -1714,7 +1714,7 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
 
   .account-welcome h1 {
     margin: 0 0 12px;
-    font-size: 23px;
+    font-size: clamp(28px, 7.2vw, 34px);
     line-height: 1.45;
   }
   .account-welcome-links {

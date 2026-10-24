@@ -36,22 +36,13 @@
     border-bottom: 1px solid #e8edf0;
     border-radius: 0;
     background-color: transparent;
-    font-size: 11px;
+    font-size: 13px;
   }
 
   .mobile-page--magazine-index .journal-categories button.is-active {
     border-bottom-color: #e6cf82;
     border-radius: 10px;
     background-color: #fff8df;
-  }
-
-  .product-card .product-info h3,
-  .search-product.product-card .product-info h3,
-  .showcase-card-body h3,
-  .rail-card h3,
-  #productView .product-detail-related-card .product-info h3 {
-    font-size: 12px !important;
-    line-height: 1.5;
   }
 
   .product-card-actions {
@@ -314,12 +305,6 @@
   .mobile-page--home-index #productGrid > .product-col .product-info {
     min-height: 112px;
     padding: 9px 8px 7px !important;
-  }
-
-  .mobile-page--home-index #productGrid > .product-col .product-info h3 {
-    min-height: 42px;
-    font-size: 11.5px !important;
-    line-height: 1.55;
   }
 
   .mobile-page--home-index #productGrid > .product-col > .add-cart {
@@ -1372,18 +1357,11 @@
     padding: 9px 9px 6px !important;
   }
 
-  .product-card .product-info h3,
   .search-page .search-page-card-title,
   #favoritesView .favorite-item-card h2 {
     min-height: 3em !important;
     margin: 0 !important;
-    font-size: 12px !important;
-    line-height: 1.5 !important;
-  }
-
-  .mobile-page--home-index #productGrid > .product-col .product-info h3 {
-    min-height: 3em !important;
-    font-size: 12px !important;
+    font-size: 14px !important;
     line-height: 1.5 !important;
   }
 

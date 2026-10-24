@@ -7,7 +7,7 @@ body {
   background: var(--industrial-bg);
   color: var(--industrial-ink);
   font-family: var(--font-body) !important;
-  font-size: 15px;
+  font-size: var(--font-size-body);
   line-height: 1.85;
 }
 
@@ -4219,6 +4219,13 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
     box-shadow: 0 5px 16px rgba(16, 42, 67, 0.08) !important;
   }
 
+  .inner-page #mainNav .account-btn:hover,
+  .inner-page #mainNav .account-wrap.open .account-btn {
+    border-color: var(--industrial-yellow) !important;
+    background: #fffbea !important;
+    box-shadow: 0 5px 16px rgba(4, 17, 30, 0.12) !important;
+  }
+
   .inner-page #mainNav .nav-actions {
     display: flex;
     height: auto;
@@ -4230,6 +4237,7 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
   }
 
   .inner-page #mainNav .home-header-search {
+    --header-search-action-width: 56px;
     width: 100%;
     max-width: 640px;
     height: 58px;
@@ -4240,8 +4248,25 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
   }
 
   .inner-page #mainNav .home-header-search > button {
+    width: 46px;
+    font-size: 18px;
     background: var(--industrial-yellow) !important;
     color: var(--industrial-navy) !important;
+  }
+
+  .inner-page #mainNav .home-header-search > input[type="search"] {
+    font-size: 15px !important;
+  }
+
+  .inner-page #mainNav .home-header-search > button:hover {
+    transform: scale(1.04);
+    background: var(--industrial-navy) !important;
+    color: var(--industrial-yellow) !important;
+  }
+
+  .inner-page #mainNav .home-header-search > button:focus-visible {
+    outline: 2px solid var(--industrial-navy) !important;
+    outline-offset: 2px;
   }
 }
 

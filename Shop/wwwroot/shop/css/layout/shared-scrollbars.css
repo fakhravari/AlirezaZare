@@ -1,0 +1,56 @@
+/* Shared finish for every native scroll surface across the storefront. */
+:is(html, #main-content, #cartPanel, #cartPanel .cart-items, #favoritesPanel, #favoritesPanel .compare-panel-items, #comparePanel, #comparePanel .compare-panel-items, #loginModal, #addressDialog) * {
+  scrollbar-width: thin;
+  scrollbar-color: var(--site-scrollbar-thumb, #c5a43b) transparent;
+}
+
+html {
+  scrollbar-width: thin;
+  scrollbar-color: var(--site-scrollbar-thumb, #c5a43b) transparent;
+}
+
+:is(html, #main-content, #cartPanel, #cartPanel .cart-items, #favoritesPanel, #favoritesPanel .compare-panel-items, #comparePanel, #comparePanel .compare-panel-items, #loginModal, #addressDialog) *::-webkit-scrollbar,
+html::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+:is(html, #main-content, #cartPanel, #cartPanel .cart-items, #favoritesPanel, #favoritesPanel .compare-panel-items, #comparePanel, #comparePanel .compare-panel-items, #loginModal, #addressDialog) *::-webkit-scrollbar-button,
+html::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+:is(html, #main-content, #cartPanel, #cartPanel .cart-items, #favoritesPanel, #favoritesPanel .compare-panel-items, #comparePanel, #comparePanel .compare-panel-items, #loginModal, #addressDialog) *::-webkit-scrollbar-track,
+html::-webkit-scrollbar-track {
+  margin-block: 6px;
+  border-radius: 999px;
+  background: transparent;
+  box-shadow: none;
+}
+
+:is(html, #main-content, #cartPanel, #cartPanel .cart-items, #favoritesPanel, #favoritesPanel .compare-panel-items, #comparePanel, #comparePanel .compare-panel-items, #loginModal, #addressDialog) *::-webkit-scrollbar-thumb,
+html::-webkit-scrollbar-thumb {
+  min-height: 38px;
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background: var(--site-scrollbar-thumb, #c5a43b);
+  background-clip: padding-box;
+  box-shadow: none;
+}
+
+:is(html, #main-content, #cartPanel, #cartPanel .cart-items, #favoritesPanel, #favoritesPanel .compare-panel-items, #comparePanel, #comparePanel .compare-panel-items, #loginModal, #addressDialog) *::-webkit-scrollbar-thumb:hover,
+html::-webkit-scrollbar-thumb:hover {
+  background: var(--site-scrollbar-thumb-hover, #94751e);
+  background-clip: padding-box;
+}
+
+/* Horizontal swipe rails intentionally hide their native scrollbar. */
+:is(html, #main-content) :is(.product-tabs, .article-breadcrumb, .cart-breadcrumb, .product-rail, .testimonial-slider, .profile-breadcrumb ol) {
+  scrollbar-width: none;
+}
+
+:is(html, #main-content) :is(.product-tabs, .article-breadcrumb, .cart-breadcrumb, .product-rail, .testimonial-slider, .profile-breadcrumb ol)::-webkit-scrollbar {
+  display: none;
+}

@@ -329,7 +329,7 @@
 
 .journal-children button {
   padding-block: 7px;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .journal-categories button > span:not(.journal-category-count) {
@@ -373,7 +373,7 @@
 
 .journal-results-heading h2 {
   margin: 0;
-  font-size: 27px;
+  font-size: var(--font-size-section-title);
 }
 
 .journal-results-heading > .journal-count-badge {
@@ -822,11 +822,11 @@
 
   .journal-categories button {
     padding-inline: 7px;
-    font-size: 11px;
+    font-size: 13px;
   }
 
   .journal-results-heading h2 {
-    font-size: 21px;
+    font-size: var(--font-size-section-title);
   }
 
   .journal-results-heading > .journal-count-badge {
@@ -1400,7 +1400,7 @@
   margin: 0;
   padding-right: 15px;
   color: var(--industrial-navy);
-  font-size: clamp(19px, 1.9vw, 24px);
+  font-size: var(--font-size-section-title);
   font-weight: 800;
   letter-spacing: -0.3px;
   line-height: 1.7;
@@ -1442,7 +1442,7 @@
   }
 
   .journal-results-heading h2 {
-    font-size: 20px;
+    font-size: var(--font-size-section-title);
   }
 
   .journal-results-heading > .journal-count-badge {

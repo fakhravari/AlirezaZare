@@ -603,10 +603,10 @@
   --product-card-radius: 18px;
   --product-card-image-height: 220px;
   --product-card-code-size: var(--font-size-caption);
-  --product-card-title-size: 16px;
+  --product-card-title-size: var(--font-size-card-title);
   --product-card-price-size: 18px;
   --product-card-price-unit-size: var(--font-size-caption);
-  --product-card-button-size: var(--font-size-body-sm);
+  --product-card-button-size: var(--font-size-control);
   --product-card-border: var(--color-card-border);
   --product-card-border-hover: var(--color-line-strong);
   --product-card-surface: var(--color-content-surface);
@@ -1034,5 +1034,22 @@
     min-height: 38px;
     margin: 0 10px 10px;
     font-size: 11px;
+  }
+}
+
+@media (max-width: 767px) {
+  .product-card .product-info h3,
+  .search-product.product-card .product-info h3,
+  .showcase-card-body h3,
+  .rail-card h3,
+  #productView .product-detail-related-card .product-info h3 {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .mobile-page--home-index #productGrid > .product-col .product-info h3 {
+    min-height: 3em;
+    font-size: 14px;
+    line-height: 1.5;
   }
 }

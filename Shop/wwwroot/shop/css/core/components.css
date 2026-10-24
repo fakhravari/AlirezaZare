@@ -346,6 +346,7 @@
 .ui-scrollbar::-webkit-scrollbar-thumb:hover {
   background: var(--ui-scroll-thumb-hover, #967440);
 }
+
 /* Compact navigation actions used for contextual edit and manage links. */
 .ui-inline-action {
   display: inline-flex;

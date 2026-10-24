@@ -196,10 +196,10 @@
                         <div class="article-feedback-columns">
                             <form class="article-feedback-form" data-feedback-form>
                                 <h3>دیدگاه خود را بنویسید</h3>
-                                <label>نام و نام خانوادگی<input name="name" maxlength="80" minlength="5" autocomplete="name" placeholder="نام و نام خانوادگی" required></label>
+                                <label>نام و نام خانوادگی<input name="name" data-validation="full-name" data-required-message="نام و نام خانوادگی را وارد کنید." maxlength="80" minlength="5" autocomplete="name" placeholder="نام و نام خانوادگی" required></label>
                                 <label>امتیاز<select name="rating" required><option value="5">۵ از ۵</option><option value="4">۴ از ۵</option><option value="3">۳ از ۵</option><option value="2">۲ از ۵</option><option value="1">۱ از ۵</option></select></label>
-                                <label class="article-feedback-message">متن دیدگاه<textarea name="text" rows="3" maxlength="1000" required></textarea></label>
-                                <button type="submit"><i class="bi bi-chat-square-check" aria-hidden="true"></i> ثبت دیدگاه</button><p role="status" aria-live="polite" data-feedback-status></p>
+                                <label class="article-feedback-message">متن دیدگاه<textarea name="text" data-required-message="متن دیدگاه را وارد کنید." rows="3" maxlength="1000" required></textarea></label>
+                                <button type="submit"><i class="bi bi-send-fill" aria-hidden="true"></i><span>ثبت دیدگاه</span></button><p role="status" aria-live="polite" data-feedback-status></p>
                             </form>
                             <section class="article-feedback-reviews" aria-labelledby="articleFeedbackListTitle">
                                 <h3 id="articleFeedbackListTitle">نظرهای ثبت‌شده</h3>

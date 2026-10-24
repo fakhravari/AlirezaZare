@@ -53,7 +53,7 @@ body[dir="rtl"] :is(.home-page, .inner-page) main p.text-end {
 
 @media (max-width: 767px) {
   body:is(.home-page, .inner-page) {
-    font-size: 14px;
+    font-size: 15px;
   }
 
   html[dir="rtl"] body:is(.home-page, .inner-page)
