@@ -5,7 +5,7 @@
 | راهنما | موضوع |
 |---|---|
 | [پوسته و ترتیب منابع](layout.md) | ترکیب Razor، partialها و ترتیب واقعی CSS/JS |
-| [قرارداد CSS](styling.md) | توکن‌ها، مالک فایل، breakpoint و انتخاب selector |
+| [قرارداد CSS](styling.md) | توکن‌ها، مالک فایل، breakpoint، انتخاب selector و قانون سراسری خوانایی موبایل و دسکتاپ |
 | [قرارداد JavaScript](javascript.md) | HNUI، رویدادها، کلیدهای storage و مالکیت script |
 | [عیب‌یابی و بازبینی UI](verification.md) | ردیابی تداخل، دسترس‌پذیری و ماتریس responsive |
 

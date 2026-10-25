@@ -634,19 +634,21 @@ body #cartView .cart-summary-actions .ui-inline-action {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 46px;
-  padding: 10px 12px;
-  gap: 8px;
-  font-size: 14px;
-  line-height: 1.8;
+  min-height: 44px;
+  padding: 7px 10px;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.7;
   white-space: normal;
   text-align: center;
 }
 body #cartView .cart-summary-actions .ui-inline-action > span { font-size: inherit; }
-body #cartView .cart-summary-actions .ui-inline-action > i { font-size: 17px; flex: 0 0 auto; }
+body #cartView .cart-summary-actions .ui-inline-action > i { font-size: 15px; flex: 0 0 auto; }
 @media (min-width: 992px) {
-  body #cartView .cart-summary-actions .ui-inline-action { min-height: 48px; font-size: 15px; }
-  body #cartView .cart-summary-actions .ui-inline-action > i { font-size: 18px; }
+  body #cartView .cart-summary-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  body #cartView .cart-summary-actions .ui-inline-action { min-height: 42px; font-size: 14px; }
+  body #cartView .cart-summary-actions .ui-inline-action > i { font-size: 16px; }
 }
 
 /* Coupon removal follows the cart's quiet secondary actions. */
@@ -679,6 +681,21 @@ body #cartView .cart-coupon-feedback .flow-coupon-status {
   line-height: 1.7;
 }
 body #cartView .cart-coupon-feedback.is-applied .flow-coupon-status { color: #426957; }
+body #cartView .cart-coupon-feedback #couponStatus.is-error {
+  box-sizing: border-box;
+  align-items: baseline;
+  padding: 7px 9px;
+  border: 1px solid var(--hn-message-border, #efb9bd);
+  border-radius: 9px;
+  background: var(--hn-message-bg, #fff0f0);
+  font-size: 13px;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+}
+body #cartView .cart-coupon-feedback #couponStatus.is-error::before { flex: 0 0 auto; }
+@media (min-width: 992px) {
+  body #cartView .cart-coupon-feedback #couponStatus.is-error { font-size: 14px; }
+}
 body #cartView .cart-coupon-feedback.is-applied #couponStatus::before {
   content: none;
 }
