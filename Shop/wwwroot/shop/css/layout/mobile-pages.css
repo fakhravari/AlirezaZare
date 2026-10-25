@@ -414,7 +414,7 @@
   }
 }
 
-/* Mobile form controls stay readable and avoid iOS input zoom. */
+/* Mobile controls use a readable default; compact forms supply their own size. */
 @media (max-width: 767px) {
   .home-page .price-old,
   .inner-page main .price-old {
@@ -427,7 +427,7 @@
     select,
     textarea
   ) {
-    font-size: 16px !important;
+    font-size: var(--mobile-control-font-size, 16px) !important;
   }
 
   .mobile-page--about-index .about-hero,
@@ -1552,7 +1552,6 @@
   .mobile-page--tracking-index .tracking-submit,
   .mobile-page--tracking-index .tracking-support-action,
   .mobile-page--contact-index :is(button, a),
-  .mobile-page--cart-index :is(.cart-quantity button, .cart-item-remove),
   .mobile-page--profile-index .account-tabs a,
   .mobile-page--profile-orders .account-tabs a,
   .mobile-page--profile-addresses .account-tabs a,
@@ -1604,9 +1603,10 @@
     white-space: nowrap;
   }
 
-  html body #cartView .cart-summary-lines > .flow-total:nth-child(2) {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
+  html body #cartView .cart-summary-lines > .flow-total {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
     align-items: center;
     gap: 8px;
   }
@@ -1614,7 +1614,7 @@
   html body #cartView .cart-summary-lines > .flow-total:nth-child(2) .cart-line-label {
     min-width: 0;
     gap: 6px;
-    font-size: 12px;
+    font-size: inherit;
     white-space: nowrap;
   }
 
@@ -1625,13 +1625,13 @@
   }
 
   html body #cartView .cart-summary-lines > .flow-total:nth-child(2) > strong {
-    font-size: 12px;
+    font-size: 15px;
     white-space: nowrap;
   }
 
   html body #cartView .cart-summary-lines > .flow-payable {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
+    display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: 6px;
     padding: 12px 10px;
@@ -1653,75 +1653,18 @@
 
   html body #cartView .flow-payable .cart-line-label > span {
     min-width: 0;
-    font-size: 11px;
+    font-size: 13px;
   }
 
   html body #cartView .flow-payable .cart-line-label small {
     margin-top: 2px;
-    font-size: 9px;
+    font-size: 11px;
     white-space: nowrap;
   }
 
   html body #cartView .cart-summary-lines .flow-payable > strong {
-    font-size: 14px;
+    font-size: 17px;
     white-space: nowrap;
-  }
-
-  /* The cart page uses a different item structure from the header drawer.
-     Give the product copy the full row so option labels cannot collapse into
-     a narrow second grid column beside the quantity toolbar. */
-  html body #cartView .cart-product-row {
-    grid-template-columns: minmax(0, 1fr);
-    align-items: stretch;
-    gap: 12px;
-  }
-
-  html body #cartView .cart-product-identity {
-    width: 100%;
-    min-width: 0;
-    align-items: flex-start;
-    gap: 12px;
-  }
-
-  html body #cartView .cart-product-identity > img {
-    flex: 0 0 64px;
-    width: 64px;
-    height: 64px;
-    border-radius: 10px;
-    object-fit: cover;
-  }
-
-  html body #cartView .cart-product-copy {
-    flex: 1 1 0;
-    width: auto;
-    min-width: 0;
-    overflow-wrap: break-word;
-  }
-
-  html body #cartView .cart-product-copy > strong {
-    font-size: 14px;
-    line-height: 1.8;
-    overflow-wrap: break-word;
-    word-break: normal;
-  }
-
-  html body #cartView .cart-product-copy .cart-item-options,
-  html body #cartView .cart-product-copy .cart-item-option-group,
-  html body #cartView .cart-product-copy .cart-item-option-list {
-    min-width: 0;
-    max-width: 100%;
-  }
-
-  html body #cartView .cart-product-copy .cart-item-option-chip {
-    max-width: 100%;
-    overflow-wrap: break-word;
-    word-break: normal;
-  }
-
-  html body #cartView .cart-product-row > .cart-item-actions {
-    justify-self: start;
-    max-width: 100%;
-    margin-inline-start: 76px;
   }
 
   html body > #cartPanel .cart-item {

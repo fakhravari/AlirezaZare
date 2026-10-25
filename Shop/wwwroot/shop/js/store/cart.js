@@ -268,6 +268,12 @@
     });
 
   const cart = {
+    renderControls(item, index = null) {
+      const attribute = (action) => index === null
+        ? `data-action="${action}"`
+        : `data-${action}="${index}"`;
+      return `<div class="hn-cart-controls" role="group" aria-label="تعداد ${escapeHtml(item.name)}"><div class="hn-cart-quantity"><button type="button" ${attribute("plus")} aria-label="افزایش تعداد" ${item.quantity >= this.quantityLimit(item) ? "disabled" : ""}><i class="bi bi-plus" aria-hidden="true"></i></button><span class="cart-quantity-value">${formatNumber(item.quantity)}</span><button type="button" ${attribute("minus")} aria-label="کاهش تعداد" ${item.quantity <= 1 ? "disabled" : ""}><i class="bi bi-dash" aria-hidden="true"></i></button></div><button type="button" class="hn-cart-remove" ${attribute("remove")} aria-label="حذف ${escapeHtml(item.name)} از سبد"><i class="bi bi-trash3" aria-hidden="true"></i></button></div>`;
+    },
     renderOptions(item) {
       const variants = Array.isArray(item.options?.variants)
         ? item.options.variants
@@ -279,12 +285,12 @@
       const money = (amount) => `${formatNumber(amount)} تومان`;
       const variantsMarkup = variants.length
         ? `<div class="cart-item-option-group"><small class="cart-item-option-label">ویژگی‌ها</small><div class="cart-item-option-list cart-item-option-list--variants">${variants
-            .map((option) => `<span class="cart-item-option-chip"><small>${escapeHtml(option.label)}</small><strong>${escapeHtml(option.value)}</strong>${Number(option.priceDelta) ? `<small class="cart-item-option-price">${Number(option.priceDelta) > 0 ? "+" : "−"} ${money(Math.abs(Number(option.priceDelta)) * 1000000)}</small>` : ""}</span>`)
+            .map((option) => `<span class="cart-item-option-chip"><small class="cart-item-option-name">${escapeHtml(option.label)}</small><strong>${escapeHtml(option.value)}</strong>${Number(option.priceDelta) ? `<small class="cart-item-option-price">${Number(option.priceDelta) > 0 ? "+" : "−"} ${money(Math.abs(Number(option.priceDelta)) * 1000000)}</small>` : ""}</span>`)
             .join("")}</div></div>`
         : "";
       const accessoriesMarkup = accessories.length
         ? `<div class="cart-item-option-group"><small class="cart-item-option-label">متعلقات و خدمات</small><div class="cart-item-option-list cart-item-option-list--accessories">${accessories
-            .map((accessory) => `<span class="cart-item-option-chip cart-item-option-chip--accessory"><i class="bi bi-plus-circle" aria-hidden="true"></i><strong>${escapeHtml(accessory.name)}</strong><small class="cart-item-option-status ${accessory.required ? "is-required" : "is-optional"}">${accessory.required ? "الزامی" : "اختیاری"}</small>${Number(accessory.price) > 0 ? `<small>+ ${money(Number(accessory.price) * 1000000)}</small>` : "<small>رایگان</small>"}</span>`)
+            .map((accessory) => `<span class="cart-item-option-chip cart-item-option-chip--accessory"><small class="cart-item-option-name">${escapeHtml(accessory.name)}</small><small class="cart-item-option-status ${accessory.required ? "is-required" : "is-optional"}">${accessory.required ? "الزامی" : "اختیاری"}</small><small class="cart-item-option-price">${Number(accessory.price) > 0 ? `+ ${money(Number(accessory.price) * 1000000)}` : "رایگان"}</small></span>`)
             .join("")}</div></div>`
         : "";
       return `<div class="cart-item-options" aria-label="ویژگی‌ها و متعلقات انتخاب‌شده">${variantsMarkup}${accessoriesMarkup}</div>`;

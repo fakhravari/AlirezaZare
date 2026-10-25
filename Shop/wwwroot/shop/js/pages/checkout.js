@@ -54,18 +54,12 @@ window.HNUI.ready(() => window.HNUI.mount("checkout", document, () => {
     const heading = document.createElement("div");
     heading.className = "selected-address-card-heading";
     const title = document.createElement("strong");
-    const badge = document.createElement("span");
-    const badgeIcon = document.createElement("i");
     const street = document.createElement("p");
     const postal = document.createElement("small");
-    badge.className = "selected-address-card-badge";
-    badgeIcon.className = "bi bi-check2-circle";
-    badgeIcon.setAttribute("aria-hidden", "true");
-    badge.append(badgeIcon, document.createTextNode("آدرس انتخابی"));
     title.textContent = `${address.recipient} · ${address.phone}`;
     street.textContent = `${address.province ? `${address.province}، ` : ""}${address.city}، ${address.street}`;
     postal.textContent = `کد پستی: ${address.postal}`;
-    heading.append(title, badge);
+    heading.append(title);
     wrapper.append(heading, street, postal);
     return wrapper;
   }
@@ -106,11 +100,6 @@ window.HNUI.ready(() => window.HNUI.mount("checkout", document, () => {
     const address = selectedAddress();
     const addressSection = document.querySelector(".cart-address-section");
     addressSection?.classList.toggle("is-selected", Boolean(address));
-    const selectedBadge = addressSection?.querySelector(
-      ".address-selected-badge",
-    );
-    if (selectedBadge)
-      selectedBadge.setAttribute("aria-hidden", String(!address));
     if (preview) {
       preview.replaceChildren();
       if (address) preview.append(addressMarkup(address));
@@ -171,8 +160,9 @@ window.HNUI.ready(() => window.HNUI.mount("checkout", document, () => {
       setFormStatus("لطفاً موارد مشخص‌شده را کامل و اصلاح کنید.", true),
     );
     form
-      .querySelector(".address-form-grid")
-      .append(form.querySelector('[name="postal"]').closest("label"));
+      .querySelector('[name="phone"]')
+      .closest("label")
+      .after(form.querySelector('[name="postal"]').closest("label"));
     select.addEventListener("change", () => {
       selected = select.value;
       ui.storage.set(selectedKey, selected);

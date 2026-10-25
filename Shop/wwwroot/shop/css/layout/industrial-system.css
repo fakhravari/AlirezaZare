@@ -2521,15 +2521,15 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
 
 .purchase-benefits--showcase .benefit strong {
   color: var(--industrial-navy);
-  font-size: 13px;
+  font-size: 15px;
   line-height: 1.65;
 }
 
 .purchase-benefits--showcase .benefit span {
   margin-top: 5px;
   color: var(--industrial-muted);
-  font-size: 11px;
-  line-height: 1.8;
+  font-size: 14px;
+  line-height: 1.9;
 }
 
 /* Clear, readable layout for the store's policy and help pages. */
@@ -2699,12 +2699,12 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
   }
 
   .purchase-benefits--showcase .benefit strong {
-    font-size: 13px;
+    font-size: 14px;
     line-height: 1.7;
   }
 
   .purchase-benefits--showcase .benefit span {
-    font-size: 12px;
+    font-size: 13px;
     line-height: 1.8;
   }
 }
@@ -10689,13 +10689,8 @@ html
 }
 
 /* Bring the smallest functional copy up while keeping metadata compact. */
-.inner-page main :is(.payment-method strong, .contact-form .field-validation-error) {
+.inner-page main :is(.contact-form .field-validation-error) {
   font-size: 13px !important;
-}
-
-.inner-page main .payment-method small,
-.inner-page main .payment-method-soon {
-  font-size: 12px !important;
 }
 
 .inner-page main :is(.cart-shipping-note, .cart-address-section > p, .cart-address-section .invoice-section-title p, .cart-address-section .address-preview p) {
@@ -10729,9 +10724,7 @@ html
 }
 
 /* Keep high-value labels and price units comfortably readable on every route. */
-.inner-page main :is(.cart-continue-link, .cart-clear-action, .checkout-address-action, .account-profile-edit) span,
-.inner-page main .cart-continue-link,
-.inner-page main .cart-clear-action,
+.inner-page main :is(.checkout-address-action, .account-profile-edit) span,
 .inner-page main .checkout-address-action,
 .inner-page main .account-profile-edit {
   font-size: 14px !important;

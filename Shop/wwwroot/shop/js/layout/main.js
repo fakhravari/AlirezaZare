@@ -1155,6 +1155,7 @@ $(function () {
     cart = window.HNUI?.cart.write(cart) || cart;
     renderCart();
   };
+  let renderedHeaderCartShape = "";
   const renderCart = () => {
     const totalCount = cart.reduce((sum, item) => sum + item.quantity, 0);
     const totalPrice = cart.reduce(
@@ -1165,6 +1166,18 @@ $(function () {
     $("#cartTitleCount").text(`${faNumber(totalCount)} محصول`);
     $("#cartTotal").text(`${faNumber(totalPrice)} تومان`);
     $cartFooter.toggle(cart.length > 0);
+    const shape = JSON.stringify(cart.map(({ quantity, ...item }) => item));
+    if (cart.length && shape === renderedHeaderCartShape) {
+      $cartItems.find("[data-cart-id]").each(function () {
+        const item = cart.find((entry) => String(entry.id) === String(this.dataset.cartId));
+        if (!item) return;
+        this.querySelector(".cart-quantity-value").textContent = faNumber(item.quantity);
+        this.querySelector('[data-action="minus"]').disabled = item.quantity <= 1;
+        this.querySelector('[data-action="plus"]').disabled = item.quantity >= window.HNUI.cart.quantityLimit(item);
+      });
+      return;
+    }
+    renderedHeaderCartShape = shape;
     if (!cart.length) {
       $cartItems.html(
         '<div class="empty-cart header-panel-empty"><span class="empty-cart-icon header-panel-empty-icon"><i class="bi bi-cart3" aria-hidden="true"></i></span><strong>سبد خرید شما خالی است</strong><p>برای شروع، یک محصول به سبد خرید اضافه کنید.</p></div>',
@@ -1178,7 +1191,7 @@ $(function () {
           const safeName = escapeHtml(item.name);
           const safeImage = escapeHtml(item.image);
           const href = window.HNProductUrl?.(item.id) || "/search";
-          return `<div class="cart-item" data-cart-id="${safeId}"><img src="${safeImage}" alt="${safeName}" loading="lazy" decoding="async"><div class="cart-item-info"><strong><a class="header-panel-product-link" href="${escapeHtml(href)}">${safeName}</a></strong>${cartOptionsMarkup(item)}<div class="cart-item-actions"><span>${faNumber(item.price)} تومان</span><div class="cart-item-controls"><div class="cart-quantity"><button type="button" data-action="minus" aria-label="کاهش تعداد">−</button><b>${faNumber(item.quantity)}</b><button type="button" data-action="plus" aria-label="افزایش تعداد">+</button></div><button class="cart-remove" type="button" data-action="remove" aria-label="حذف محصول"><i class="bi bi-trash3"></i></button></div></div></div></div>`;
+          return `<div class="cart-item" data-cart-id="${safeId}"><img src="${safeImage}" alt="${safeName}" loading="lazy" decoding="async"><div class="cart-item-info"><strong><a class="header-panel-product-link" href="${escapeHtml(href)}">${safeName}</a></strong>${cartOptionsMarkup(item)}<div class="cart-item-actions"><span>${faNumber(item.price)} تومان</span>${window.HNUI.cart.renderControls(item)}</div></div></div>`;
         })
         .join(""),
     );

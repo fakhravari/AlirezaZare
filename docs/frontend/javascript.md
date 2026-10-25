@@ -15,7 +15,7 @@
 | `HNUI.ready(callback)` | اجرای callback پس از آماده‌شدن DOM |
 | `HNUI.mount(name, root, initialize)` | اجرای یک‌باره برای نام مؤلفه و root؛ root غایب یا نصب دوباره false برمی‌گرداند؛ خطای initialize دوباره قابل تلاش است |
 | `HNUI.EVENTS`, `HNUI.emit(type, detail)` | نام ثابت رویداد و کنترل payloadهای cart/auth؛ برای رویداد مشترک CustomEvent موازی نسازید |
-| `HNUI.cart.read/write/add/update/remove/totals/renderOptions` | normalize مشترک، renderer مشترک ویژگی/متعلقات، validation ساده و مدیریت سبد؛ `write` رویداد cart را dispatch می‌کند |
+| `HNUI.cart.read/write/add/update/remove/totals/renderOptions/renderControls` | normalize مشترک، renderer مشترک گزینه‌ها و کنترل تعداد/حذف، validation ساده و مدیریت سبد؛ `write` رویداد cart را dispatch می‌کند |
 | `HNUI.auth.isLoggedIn/login/logout/requireLogin` | وضعیت ورود در مرورگر؛ `requireLogin(resume)` برای ورود نداشتن رویداد `hn:auth-required` می‌فرستد و callback را پس از ورود ادامه می‌دهد |
 | `HNUI.scrollLock.lock/unlock` | شمارندهٔ قفل scroll با کلاس `ui-scroll-locked` |
 | `HNUI.dialog` | helperهای dialog/focus/keyboard؛ جزئیات دقیق را در همان فایل بخوانید |
@@ -28,6 +28,8 @@
 ## قرارداد سبد
 
 منبع واحد افزودن، نرمال‌سازی و رندر گزینه‌ها در [راهنمای سبد و تسویه](../store/cart.md) تعریف شده است. رفتار سبد را در آن راهنما تغییر دهید؛ این صفحه مالک API، event و کلیدهای مشترک است.
+
+`HNUI.cart.renderControls(item, index = null)` کنترل مشترک هدر و صفحهٔ سبد را می‌سازد. بدون index از `data-action` و با index از `data-plus/minus/remove` استفاده می‌کند. نام محصول escape می‌شود و وضعیت دکمه‌ها با حداقل یک و `quantityLimit(item)` هماهنگ است. مالک ظاهر `.hn-cart-controls` در `shared-cart.css` است.
 
 ## مالکیت JS و رفتارهای کلیدی
 

@@ -22,8 +22,9 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
     setFormStatus("لطفاً موارد مشخص‌شده را کامل و اصلاح کنید.", true),
   );
   form
-    .querySelector(".address-form-grid")
-    .append(form.querySelector('[name="postal"]').closest("label"));
+    .querySelector('[name="phone"]')
+    .closest("label")
+    .after(form.querySelector('[name="postal"]').closest("label"));
   let editing = null;
   const status = document.querySelector("#accountStatus");
   const save = (key, value) => {
