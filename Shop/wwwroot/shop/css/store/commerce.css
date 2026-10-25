@@ -2049,7 +2049,9 @@ summary:focus-visible {
 }
 .compare-price {
   display: flex;
-  min-height: 82px;
+  height: 108px;
+  min-height: 108px;
+  flex: 0 0 108px;
   box-sizing: border-box;
   align-items: center;
   justify-content: space-between;
@@ -2262,7 +2264,7 @@ summary:focus-visible {
     height: 150px;
   }
   .compare-product-card h2 {
-    min-height: auto;
+    min-height: 4em;
   }
   .compare-category-group {
     padding: 12px;
