@@ -341,7 +341,7 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
             const usefulHighlights = highlights.length
                 ? highlights
                 : (p.attributeValues || []).filter((attribute) => attribute.is_filterable && ["brand", "category", "powerSource", "useCase", "color"].includes(attribute.key));
-            if (featurePanel) featurePanel.innerHTML = `${usefulHighlights.slice(0, 9).map((attribute) =>
+            if (featurePanel) featurePanel.innerHTML = `${usefulHighlights.slice(0, 12).map((attribute) =>
                 `<span class="product-main-feature-item"><small>${esc(attribute.label)}</small><strong>${esc(attribute.value)}</strong></span>`).join("")}<a class="product-main-feature-more" href="#product-specifications">مشاهدهٔ همهٔ ویژگی‌ها<i class="bi bi-arrow-left" aria-hidden="true"></i></a>`;
 
             const baseLabels = new Set(["برند", "دسته‌بندی", "منبع تغذیه", "مورد استفاده", "شناسه محصول"]);

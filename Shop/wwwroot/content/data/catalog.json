@@ -14,6 +14,8 @@
     "lightingType": { "label": "نوع روشنایی", "icon": "bi-lightbulb", "source": "spec:نوع روشنایی", "is_filterable": false, "is_highlight": true },
     "productType": { "label": "نوع محصول", "icon": "bi-box-seam", "source": "spec:نوع محصول", "is_filterable": false, "is_highlight": true },
     "temperatureControl": { "label": "کنترل دما", "icon": "bi-thermometer-half", "source": "spec:کنترل دما", "is_filterable": false, "is_highlight": true },
+    "technicalSpecs": { "label": "مشخصات فنی", "icon": "bi-list-check", "source": "specs", "is_filterable": false, "is_highlight": true },
+    "variantOptions": { "label": "گزینه‌های قابل انتخاب", "icon": "bi-sliders", "source": "variants", "is_filterable": false, "is_highlight": true },
     "price": { "label": "بازهٔ قیمت", "icon": "bi-cash-stack", "source": "price", "filterKey": "price", "is_filterable": true, "is_highlight": false },
     "availability": { "label": "موجودی", "icon": "bi-box-seam", "source": "stockQuantity", "filterKey": "availability", "is_filterable": true, "is_highlight": false },
     "discount": { "label": "تخفیف", "icon": "bi-tags", "source": "discountPercent", "filterKey": "discount", "is_filterable": true, "is_highlight": false }
@@ -1906,19 +1908,7 @@
       "specs": [
         [
           "کاربری",
-          "نصب و تعمیرات عمومی"
-        ],
-        [
-          "منبع تغذیه",
-          "باتری شارژی"
-        ],
-        [
-          "نوع ابزار",
-          "دریل چکشی"
-        ],
-        [
-          "موارد پیشنهادی همراه",
-          "باتری، شارژر و دفترچه راهنما"
+          "سوراخ‌کاری و نصب"
         ]
       ],
       "reviews": [
@@ -2089,10 +2079,6 @@
           "دیجیتال"
         ],
         [
-          "اندازه‌گیری",
-          "وابسته به قابلیت‌های مدل"
-        ],
-        [
           "نکتهٔ ایمنی",
           "بررسی ردهٔ حفاظتی پیش از استفاده"
         ]
@@ -2148,14 +2134,6 @@
         [
           "کاربری",
           "لحیم‌کاری و تعمیرات الکترونیک"
-        ],
-        [
-          "نوع ابزار",
-          "ایستگاه هویه"
-        ],
-        [
-          "کنترل دما",
-          "بر اساس مدل دستگاه"
         ],
         [
           "لوازم پیشنهادی",
@@ -2219,10 +2197,6 @@
           "LED"
         ],
         [
-          "نحوهٔ نصب",
-          "وابسته به مدل؛ پایه یا آویز"
-        ],
-        [
           "نکتهٔ انتخاب",
           "بررسی شار نوری و درجهٔ حفاظت"
         ]
@@ -2280,14 +2254,6 @@
           "نصب و سرویس برق"
         ],
         [
-          "نوع محصول",
-          "مجموعه ابزار"
-        ],
-        [
-          "محتویات بسته",
-          "وابسته به مدل و فهرست اقلام"
-        ],
-        [
           "نکتهٔ ایمنی",
           "ابزار عایق جایگزین قطع برق و دستورالعمل ایمنی نیست"
         ]
@@ -2343,10 +2309,6 @@
         [
           "کاربری",
           "بررسی اولیهٔ مدار"
-        ],
-        [
-          "نوع نمایش",
-          "دیجیتال یا نشانگر؛ وابسته به مدل"
         ],
         [
           "نوع ابزار",

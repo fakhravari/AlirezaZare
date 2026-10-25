@@ -63,7 +63,7 @@
     const specValueByLabel = new Map(resolvedSpecs.map(([label, value]) => [normalizeLabel(label), value]));
     const attributeValues = Object.entries(attributeDefinitions).flatMap(([key, definition]) => {
       let value = "";
-      if (definition.source === "spec") value = "";
+      if (definition.source === "specs" || definition.source === "variants") return [];
       else if (definition.source?.startsWith("spec:")) value = specValueByLabel.get(normalizeLabel(definition.source.slice(5))) || "";
       else if (definition.source === "country") value = relation(data.countries, brand.countryCode).fa;
       else if (definition.source === "color") value = colors.map((color) => color.fa).filter(Boolean).join("، ");
@@ -73,6 +73,30 @@
         filterKey: definition.filterKey || "", is_filterable: definition.is_filterable === true,
         is_highlight: definition.is_highlight === true}];
     });
+    const technicalDefinition = Object.values(attributeDefinitions).find((definition) => definition.source === "specs");
+    const variantDefinition = Object.values(attributeDefinitions).find((definition) => definition.source === "variants");
+    const seenLabels = new Set(attributeValues.map((attribute) => normalizeLabel(attribute.label)));
+    const seenValues = new Set(attributeValues.map((attribute) => normalizeLabel(attribute.value)));
+    const addDynamicAttribute = (key, label, value, definition) => {
+      const normalizedLabel = normalizeLabel(label);
+      const normalizedValue = normalizeLabel(value);
+      if (!definition?.is_highlight || !normalizedLabel || !normalizedValue ||
+          unusableAttributeValue(value) || seenLabels.has(normalizedLabel) || seenValues.has(normalizedValue)) return;
+      seenLabels.add(normalizedLabel);
+      seenValues.add(normalizedValue);
+      attributeValues.push({key, label, icon: definition.icon, value, filterKey: "",
+        is_filterable: definition.is_filterable === true, is_highlight: true});
+    };
+    if (variantDefinition?.is_highlight) {
+      for (const [variantKey, variant] of Object.entries(product.variants || {})) {
+        const options = (variant.options || []).map((option) => String(option.label || "").trim()).filter(Boolean);
+        addDynamicAttribute(`variant-${variantKey}`, String(variant.label || "").trim(), options.join(" / "), variantDefinition);
+      }
+    }
+    if (technicalDefinition?.is_highlight) {
+      for (const [label, value] of resolvedSpecs)
+        addDynamicAttribute(`spec-${normalizeLabel(label).replace(/[^\p{L}\p{N}]+/gu, "-")}`, label, value, technicalDefinition);
+    }
     return freeze({
       ...product, brand: brand.name, brandFa: brand.fa, brandLogo: brand.logo,
       brandCountryCode: brand.countryCode, type: category.fa, categoryPath: [...category.path],
