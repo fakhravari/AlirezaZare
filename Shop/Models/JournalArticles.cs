@@ -51,7 +51,7 @@ public static partial class JournalArticles
             .Take(8)
             .Select(candidate => new MagazineRelatedArticleModel(candidate.Article.Slug, candidate.Article.Category, candidate.Article.Title, ProductMediaCatalog.GetContentPath(candidate.Article.Image)))
             .ToArray();
-        return new MagazineDetailsModel(article.Slug, article.Category, "مجله تخصصی برق و ابزار", article.Title, article.Summary, "تحریریه ندا اولیائی", "", "۶ دقیقه مطالعه", "shop/images/heroes/hero-electrical-editorial.png", ProductMediaCatalog.GetContentPath(article.Image), article.Summary, sections, "مشخصات و دستورالعمل سازندهٔ همان مدل را بررسی کنید و ابزار را متناسب با کاربرد و شرایط ایمنی انتخاب کنید.", ResolveSources(article), BuildTags(article), related);
+        return new MagazineDetailsModel(article.Slug, article.Category, "مجله تخصصی برق و ابزار", article.Title, article.Summary, "تحریریه ندا اولیائی", "", "۶ دقیقه مطالعه", ProductMediaCatalog.GetContentPath(article.Image), ProductMediaCatalog.GetContentPath(article.Image), article.Summary, sections, "مشخصات و دستورالعمل سازندهٔ همان مدل را بررسی کنید و ابزار را متناسب با کاربرد و شرایط ایمنی انتخاب کنید.", ResolveSources(article), BuildTags(article), related);
     }
 
     private static int RelatedScore(Article current, Article candidate)

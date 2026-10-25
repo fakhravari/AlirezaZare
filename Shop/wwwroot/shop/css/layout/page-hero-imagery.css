@@ -1,88 +1,71 @@
-/* Shared photographic heroes for the inner pages that need visual context. */
-.inner-page :is(
-    .about-hero,
-    .contact-hero,
-    .brands-hero,
-    .brand-detail-hero,
-    .compare-page-hero,
-    .cart-page-hero,
-    .product-detail-hero
-  ) {
+/* Page-specific photography; keep the subject tied to the page title. */
+.inner-page .page-hero {
+  --page-hero-photo: url("../../images/heroes/hero-brand-tools.jpg");
   background-repeat: no-repeat !important;
   background-size: cover !important;
   background-position: center !important;
-}
-
-.inner-page .about-hero,
-.inner-page .contact-hero {
   background-image:
-    linear-gradient(
-      90deg,
-      rgba(16, 42, 67, 0.04) 0%,
-      rgba(16, 42, 67, 0.28) 48%,
-      rgba(16, 42, 67, 0.7) 100%
-    ),
-    url("../../images/heroes/hero-service-support.jpg") !important;
+    linear-gradient(90deg, rgba(16, 42, 67, .04), rgba(16, 42, 67, .28) 48%, rgba(16, 42, 67, .7)),
+    var(--page-hero-photo) !important;
 }
 
-.inner-page .about-hero::before,
-.inner-page .contact-hero::before,
-.inner-page .brands-hero::before,
-.inner-page .brand-detail-hero::before,
-.inner-page .compare-page-hero::before,
-.inner-page .cart-page-hero::before,
-.inner-page .product-detail-hero::before {
-  background: linear-gradient(
-    90deg,
-    rgba(16, 42, 67, 0.08),
-    rgba(16, 42, 67, 0.24) 55%,
-    rgba(16, 42, 67, 0.52)
-  ) !important;
+.inner-page.mobile-page--about-index .about-hero,
+.inner-page.mobile-page--brands-index .brands-hero {
+  --page-hero-photo: url("../../images/heroes/hero-about-showroom.jpg");
 }
 
-.inner-page.mobile-page--about-index .about-hero {
-  background-image:
-    linear-gradient(
-      90deg,
-      rgba(16, 42, 67, 0.04) 0%,
-      rgba(16, 42, 67, 0.28) 48%,
-      rgba(16, 42, 67, 0.7) 100%
-    ),
-    url("../../images/heroes/hero-about-showroom.jpg") !important;
+.inner-page.mobile-page--contact-index .contact-hero,
+.inner-page.mobile-page--faq-index .about-hero {
+  --page-hero-photo: url("../../images/heroes/hero-service-support.jpg");
 }
 
-.inner-page :is(.brands-hero, .brand-detail-hero, .compare-page-hero, .cart-page-hero, .product-detail-hero) {
-  background-image:
-    linear-gradient(
-      90deg,
-      rgba(16, 42, 67, 0.04) 0%,
-      rgba(16, 42, 67, 0.28) 48%,
-      rgba(16, 42, 67, 0.7) 100%
-    ),
-    url("../../images/heroes/hero-brand-tools.jpg") !important;
+.inner-page.mobile-page--shipping-index .about-hero,
+.inner-page.mobile-page--tracking-index .about-hero,
+.inner-page.mobile-page--legal-returns .legal-hero,
+.inner-page .cart-page-hero {
+  --page-hero-photo: url("../../images/heroes/order-dispatch.jpg");
 }
 
-/* Use the page's foreground photo once; a second CSS photo underneath made
-   image-based heroes look soft and doubled. */
+.inner-page.mobile-page--legal-terms .legal-hero,
+.inner-page.mobile-page--legal-privacy .legal-hero {
+  --page-hero-photo: url("../../images/heroes/store-policies-privacy.jpg");
+}
+
+.inner-page .compare-page-hero {
+  --page-hero-photo: url("../../images/heroes/hero-measurement-tools.png");
+}
+
+.inner-page .page-hero::before {
+  background: linear-gradient(90deg, rgba(16, 42, 67, .08), rgba(16, 42, 67, .24) 55%, rgba(16, 42, 67, .52)) !important;
+}
+
+/* Foreground photos (about, warranty, articles and individual products)
+   replace the CSS photo rather than being layered over a second image. */
 .inner-page .page-hero:has(> .hero-image) {
   background-image: none !important;
 }
 
 .inner-page .page-hero:has(> .hero-image) > .hero-image {
-  opacity: 0.9;
+  opacity: .9;
+}
+
+/* Square product photos stay complete instead of being cropped into a strip. */
+.inner-page :is(.product-detail-hero, .article-hero) > .hero-image {
+  inset: 0 auto 0 0;
+  width: 52%;
+  object-fit: contain;
+  object-position: left center;
 }
 
 @media (max-width: 767px) {
-  .inner-page :is(
-      .about-hero,
-      .contact-hero,
-      .brands-hero,
-      .brand-detail-hero,
-      .compare-page-hero,
-      .cart-page-hero,
-      .product-detail-hero
-    ) {
+  .inner-page .page-hero {
     min-height: 280px !important;
     background-position: 36% center !important;
+  }
+
+  .inner-page .page-hero:is(.product-detail-hero, .article-hero) > .hero-image {
+    width: 100%;
+    object-position: center;
+    opacity: .4;
   }
 }

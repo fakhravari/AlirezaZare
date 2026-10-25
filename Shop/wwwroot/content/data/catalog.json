@@ -3136,7 +3136,7 @@
     {
       "id": 1,
       "englishName": "Cordless Hammer Drill",
-      "name": "دریل چکشی شارژی با سه‌نظام اتوماتیک",
+      "name": "دریل چکشی شارژی بوش با سه‌نظام اتوماتیک مناسب نصب و کارگاه",
       "powerSource": "باتری شارژی",
       "useCase": "نصب و کارگاه",
       "stockQuantity": 12,
@@ -3424,7 +3424,7 @@
     {
       "id": 6,
       "englishName": "Digital Multimeter",
-      "name": "مولتی‌متر دیجیتال دستی",
+      "name": "مولتی‌متر دیجیتال دستی یونی‌تی برای تست و عیب‌یابی مدار",
       "powerSource": "باتری‌خور",
       "useCase": "تست و عیب‌یابی",
       "stockQuantity": 18,
@@ -3642,7 +3642,7 @@
     {
       "id": 11,
       "englishName": "Digital Soldering Station",
-      "name": "ایستگاه هویه دیجیتال با کنترل دما",
+      "name": "ایستگاه هویه دیجیتال یوهوا با کنترل دما برای تعمیر برد",
       "powerSource": "برق شهری",
       "useCase": "تعمیر برد",
       "stockQuantity": 12,
@@ -3797,7 +3797,7 @@
     {
       "id": 16,
       "englishName": "Portable LED Work Light",
-      "name": "چراغ کار LED شارژی قابل‌حمل",
+      "name": "چراغ کار LED شارژی قابل‌حمل فیلیپس برای بازرسی و تعمیر",
       "powerSource": "باتری شارژی",
       "useCase": "بازرسی و تعمیر",
       "stockQuantity": 18,
@@ -3983,7 +3983,7 @@
     {
       "id": 21,
       "englishName": "Insulated Electrician Screwdriver Set",
-      "name": "ست پیچ‌گوشتی عایق برق‌کاری",
+      "name": "ست پیچ‌گوشتی عایق ویها برای نصب و برق‌کاری",
       "powerSource": "دستی",
       "useCase": "نصب و برق‌کاری",
       "stockQuantity": 12,
@@ -4039,7 +4039,7 @@
     {
       "id": 23,
       "englishName": "Insulated Electrician Tool Kit",
-      "name": "مجموعه ابزار عایق برق‌کار",
+      "name": "مجموعه ابزار عایق برق‌کار استنلی برای تعمیر و نگهداری",
       "powerSource": "دستی",
       "useCase": "تعمیر و نگهداری",
       "stockQuantity": 7,

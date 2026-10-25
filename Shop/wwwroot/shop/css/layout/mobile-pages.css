@@ -1273,7 +1273,7 @@
   .mobile-page--home-index #productGrid > .product-col .product-info > p {
     display: flex;
     min-height: 46px;
-    margin: auto 0 6px !important;
+    margin: 4px 0 6px !important;
     align-items: center;
     justify-content: flex-start;
     font-size: 14px;
@@ -1365,12 +1365,6 @@
     line-height: 1.5 !important;
   }
 
-  .product-card .product-info > p {
-    min-height: 46px !important;
-    margin: auto 0 6px !important;
-    font-size: 14px !important;
-    line-height: 1.4 !important;
-  }
 
   .product-card > .add-cart,
   .search-page .search-page-card-action,
@@ -2000,46 +1994,57 @@
   }
 }
 
-/* Present secondary product actions as a compact mobile action strip. */
+/* Keep all four secondary product actions aligned in a mobile two-column grid. */
 @media (max-width: 575px) {
   #productView .product-detail-secondary-actions {
-    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     align-items: stretch;
-    gap: 6px;
+    gap: 8px;
     margin-top: 10px;
   }
 
   #productView .product-detail-secondary-actions > a,
   #productView .product-detail-favorite,
+  #productView .product-detail-secondary-actions > .product-detail-compare,
   #productView .product-detail-secondary-actions > .product-share-control > .product-detail-share {
     box-sizing: border-box;
+    display: flex;
     width: 100%;
     min-width: 0;
-    min-height: 58px;
-    flex-direction: column;
+    height: 60px;
+    min-height: 60px;
+    align-items: center;
+    flex-direction: row;
     justify-content: center;
-    gap: 4px;
-    padding: 6px 3px;
+    gap: 6px;
+    padding: 8px 6px;
     border-radius: 11px;
-    font-size: 10px;
+    font-size: 11px;
     line-height: 1.25;
     text-align: center;
   }
 
   #productView .product-detail-secondary-actions > a > i,
   #productView .product-detail-favorite > i,
+  #productView .product-detail-compare > i,
   #productView .product-detail-share > i {
-    flex: 0 0 auto;
+    display: grid;
+    width: 24px;
+    height: 24px;
+    flex: 0 0 24px;
+    place-items: center;
     font-size: 16px;
   }
 
   #productView .product-detail-favorite > span,
+  #productView .product-detail-compare > span,
   #productView .product-detail-share > span {
     max-width: 100%;
     white-space: normal;
   }
 
   #productView .product-detail-secondary-actions > .product-share-control {
+    display: flex;
     width: 100%;
     min-width: 0;
   }
@@ -2173,22 +2178,4 @@
     display: none !important;
   }
 
-  #productView .product-detail-related-card .product-card-actions > :is(.favorite, .compare-trigger) {
-    width: 36px !important;
-    min-width: 36px !important;
-    height: 36px !important;
-    min-height: 36px !important;
-    border: 0 !important;
-    border-radius: 0 !important;
-    background: transparent !important;
-    box-shadow: none !important;
-    color: #fff !important;
-    font-size: 13px !important;
-    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.9));
-  }
-
-  #productView .product-detail-related-card .product-card-actions > :is(.favorite, .compare-trigger).active {
-    background: transparent !important;
-    color: #ffd21a !important;
-  }
 }
