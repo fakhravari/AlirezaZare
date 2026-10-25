@@ -1,6 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 108" fill="none" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 120" fill="none" role="img" aria-labelledby="title desc">
   <title id="title">برق شیراز</title>
-  <desc id="desc">لوگوی سرمه‌ای و طلایی برق شیراز؛ ابزارآلات مکانیکی و برق‌کاری</desc>
+  <desc id="desc">لوگوی سرمه‌ای و طلایی برق شیراز؛ مرجع تخصصی برق و الکترونیک</desc>
   <defs>
     <style>
       @font-face {
@@ -25,12 +25,12 @@
       <stop offset="1" stop-color="#e7b511"/>
     </linearGradient>
   </defs>
-  <rect x="1.5" y="1.5" width="357" height="105" rx="20" fill="url(#lockup-navy)" stroke="#d9b43a" stroke-width="3"/>
-  <rect x="5" y="5" width="350" height="98" rx="17" stroke="#fff" stroke-opacity=".12"/>
+  <rect x="1.5" y="1.5" width="357" height="117" rx="20" fill="url(#lockup-navy)" stroke="#d9b43a" stroke-width="3"/>
+  <rect x="5" y="5" width="350" height="110" rx="17" stroke="#fff" stroke-opacity=".12"/>
   <path d="M330 65h-8m8 0v5" stroke="#f6c515" stroke-width="2" stroke-linecap="round"/>
   <circle cx="345" cy="78" r="2.5" fill="#f6c515"/>
   <text x="148" y="47" fill="#fff" font-family="Estedad, Vazirmatn, Tahoma, sans-serif" font-size="31" font-weight="800" text-anchor="middle" direction="rtl" unicode-bidi="plaintext">برق شیراز</text>
-  <text x="148" y="80" fill="#f6d66b" font-family="Estedad, Vazirmatn, Tahoma, sans-serif" font-size="15" font-weight="600" text-anchor="middle" direction="rtl" unicode-bidi="plaintext">ابزارآلات مکانیکی و برق‌کاری</text>
+  <text x="148" y="101" fill="#f6d66b" font-family="Estedad, Vazirmatn, Tahoma, sans-serif" font-size="17" font-weight="600" text-anchor="middle" direction="rtl" unicode-bidi="plaintext">مرجع تخصصی برق و الکترونیک</text>
   <g transform="translate(286 22)">
     <rect x="1.5" y="1.5" width="61" height="61" rx="17" fill="url(#lockup-navy)" stroke="#d9b43a" stroke-width="2"/>
     <rect x="5" y="5" width="54" height="54" rx="14" stroke="#fff" stroke-opacity=".12"/>

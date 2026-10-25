@@ -1,6 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 108" fill="none" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 120" fill="none" role="img" aria-labelledby="title desc">
   <title id="title">برق شیراز</title>
-  <desc id="desc">نشان برق طلایی کنار نام برق شیراز روی زمینهٔ سرمه‌ای</desc>
+  <desc id="desc">نشان برق طلایی کنار نام برق شیراز و عبارت مرجع تخصصی برق و الکترونیک روی زمینهٔ سرمه‌ای</desc>
   <defs>
     <style>
       @font-face {
@@ -19,9 +19,10 @@
       <stop offset="1" stop-color="#e7b511"/>
     </linearGradient>
   </defs>
-  <rect x="1.5" y="1.5" width="357" height="105" rx="20" fill="url(#header-navy)" stroke="#d9b43a" stroke-width="3"/>
-  <rect x="5" y="5" width="350" height="98" rx="17" stroke="#fff" stroke-opacity=".12"/>
-  <text x="150" y="68" fill="#fff" font-family="Estedad, Vazirmatn, Tahoma, sans-serif" font-size="40" font-weight="800" text-anchor="middle" direction="rtl" unicode-bidi="plaintext">برق شیراز</text>
+  <rect x="1.5" y="1.5" width="357" height="117" rx="20" fill="url(#header-navy)" stroke="#d9b43a" stroke-width="3"/>
+  <rect x="5" y="5" width="350" height="110" rx="17" stroke="#fff" stroke-opacity=".12"/>
+  <text x="150" y="57" fill="#fff" font-family="Estedad, Vazirmatn, Tahoma, sans-serif" font-size="40" font-weight="800" text-anchor="middle" direction="rtl" unicode-bidi="plaintext">برق شیراز</text>
+  <text x="150" y="101" fill="#f6d66b" font-family="Estedad, Vazirmatn, Tahoma, sans-serif" font-size="17" font-weight="600" text-anchor="middle" direction="rtl" unicode-bidi="plaintext">مرجع تخصصی برق و الکترونیک</text>
   <g transform="translate(286 22)">
     <rect x="1.5" y="1.5" width="61" height="61" rx="17" fill="url(#header-navy)" stroke="#d9b43a" stroke-width="2"/>
     <rect x="5" y="5" width="54" height="54" rx="14" stroke="#fff" stroke-opacity=".12"/>
