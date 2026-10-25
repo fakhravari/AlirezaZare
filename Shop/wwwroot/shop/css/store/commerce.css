@@ -2205,6 +2205,27 @@ summary:focus-visible {
   justify-content: start;
 }
 
+.compare-scroll-hint {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .compare-category-group .compare-scroll-hint {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0 0 12px;
+    color: var(--color-text-muted);
+    font-size: 12px;
+    line-height: 1.8;
+  }
+  .compare-scroll-hint > i { flex: 0 0 auto; }
+  .compare-product-grid:focus-visible {
+    outline: 2px solid var(--industrial-yellow-dark);
+    outline-offset: 3px;
+  }
+}
+
 @media (max-width: 575px) {
   .compare-overview {
     flex-wrap: wrap;

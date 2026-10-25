@@ -588,6 +588,16 @@
     flex-direction: column;
     gap: 6px;
   }
+  .contact-shortcuts-heading > p.contact-shortcuts-note {
+    width: 100%;
+    flex: none;
+    margin-top: 8px;
+    font-size: 13px;
+  }
+  .contact-shortcuts-heading h2 {
+    font-size: 20px;
+    line-height: 1.65;
+  }
   .contact-shortcuts-grid {
     grid-template-columns: 1fr;
     gap: 10px;

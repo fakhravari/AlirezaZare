@@ -10670,10 +10670,6 @@ html
 }
 
 /* Shared readable type scale for page content, following the header-cart treatment. */
-.inner-page main p {
-  font-size: max(14px, 1em) !important;
-}
-
 .inner-page main
   label:not(.product-feedback-name-field):not(
     .product-feedback-rating-field
@@ -10721,10 +10717,6 @@ html
 }
 
 @media (max-width: 575px) {
-  .inner-page main p {
-    font-size: max(14px, 1em) !important;
-  }
-
   .inner-page main
     label:not(.product-feedback-name-field):not(
       .product-feedback-rating-field
@@ -11688,7 +11680,7 @@ body .electrical-swiper .swiper-pagination-bullet-active {
 /* Align the home header with the shared header layout used on inner pages. */
 @media (min-width: 992px) {
   :is(.home-page, .inner-page) #mainNav .header-brand-lockup.header-home-link {
-    top: -81px;
+    top: -76px;
   }
 
   .home-page #mainNav .home-header-support small,

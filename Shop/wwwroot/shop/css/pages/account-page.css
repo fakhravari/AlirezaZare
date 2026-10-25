@@ -1060,9 +1060,18 @@
   .profile-order-card .order-card-actions { width: 100%; }
   .profile-order-card .order-card-actions > a,
   .profile-order-card .order-card-actions > button { flex: 1 1 100%; }
-  .order-invoice-dialog { padding: 18px 14px; }
-  .order-invoice-layout { grid-template-columns: minmax(0, 1fr); }
-  .order-invoice-row { grid-template-columns: minmax(0, 1fr) 48px minmax(90px, auto); padding: 11px 9px; }
+  .order-invoice-dialog { width: calc(100vw - 20px); max-height: calc(100dvh - 20px); padding: 14px 12px; }
+  .order-invoice-dialog-header { gap: 10px; padding-bottom: 12px; }
+  .order-invoice-dialog-header h2 { font-size: 21px; }
+  .order-invoice-layout { grid-template-columns: minmax(0, 1fr); gap: 12px; padding-top: 12px; }
+  .order-invoice-master,
+  .order-invoice-detail { padding: 12px; }
+  .order-invoice-master dl > div { flex-wrap: wrap; gap: 5px 12px; }
+  .order-invoice-master dd { margin-inline-start: auto; overflow-wrap: anywhere; }
+  .order-invoice-row { grid-template-columns: minmax(0, 1fr) 32px minmax(95px, auto); gap: 6px; padding: 10px 8px; font-size: 11px; }
+  .order-invoice-row > * { min-width: 0; overflow-wrap: anywhere; }
+  .order-invoice-payable { flex-wrap: wrap; align-items: center; gap: 6px 12px; padding: 12px; }
+  .order-invoice-payable strong { font-size: 16px; margin-inline-start: auto; }
 }
 @media (prefers-reduced-motion: reduce) {
   .order-invoice-dialog[open] { animation: none; }

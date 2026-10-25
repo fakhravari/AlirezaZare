@@ -8,11 +8,11 @@
 /* The horizontal logo stays in the desktop header; mobile uses the drawer. */
 #mainNav .header-brand-lockup {
   display: none;
-  width: 240px;
-  max-width: min(240px, 40vw);
+  width: 220px;
+  max-width: min(220px, 40vw);
   min-width: 0;
-  height: 80px;
-  min-height: 80px;
+  height: 73.333px;
+  min-height: 73.333px;
   padding: 0;
   border: 0;
   background: transparent;
@@ -40,12 +40,14 @@
 
   .home-page #mainNav .header-brand-lockup.header-home-link,
   .inner-page #mainNav .header-brand-lockup.header-home-link {
-    top: -81px;
+    top: -76px;
   }
 }
 
 @media (max-width: 1100px) and (min-width: 992px) {
-  #mainNav .header-brand-lockup { width: 240px; }
+  #mainNav .header-brand-lockup { width: 190px; height: 63.333px; min-height: 63.333px; }
+  .home-page #mainNav .header-brand-lockup.header-home-link,
+  .inner-page #mainNav .header-brand-lockup.header-home-link { top: -71px; }
 }
 
 @media (max-width: 991px) {

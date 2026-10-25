@@ -1518,7 +1518,7 @@
 
   .mobile-page--compare-index .compare-category-group .compare-product-grid {
     grid-auto-flow: column;
-    grid-auto-columns: min(86%, 320px);
+    grid-auto-columns: 100%;
     grid-template-columns: none;
     justify-content: start;
     overflow-x: auto;

@@ -560,7 +560,12 @@
 }
 @media (max-width: 767px) {
   .article-feedback-columns { grid-template-columns: minmax(0, 1fr); gap: 12px; }
-  .article-feedback-form { grid-template-columns: minmax(0, 1fr) 120px; }
+  .article-feedback-form { grid-template-columns: minmax(0, 1fr) 100px; }
+  .article-enhanced .article-feedback { padding: 12px; }
+  .article-feedback-form,
+  .article-feedback-reviews { padding: 12px; }
+  .article-feedback-card .article-feedback-meta { flex-wrap: wrap; gap: 5px; white-space: normal; }
+  .article-feedback-form textarea { min-height: 110px; }
   .article-feedback-heading { align-items: flex-start; flex-direction: column; }
 }
 @media (max-width: 420px) {
@@ -675,6 +680,7 @@
 }
 .article-feedback-admin-meta {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   width: 100%;
@@ -683,6 +689,9 @@
 }
 .article-feedback-admin-badge {
   display: inline-flex;
+  flex: 0 0 auto;
+  max-width: 100%;
+  white-space: nowrap;
   width: fit-content;
   align-items: center;
   gap: 6px;

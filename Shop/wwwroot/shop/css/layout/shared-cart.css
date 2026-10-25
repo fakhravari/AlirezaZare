@@ -597,6 +597,61 @@ body > .cart-panel .empty-cart > a:hover > i,
   display: none !important;
 }
 
+/* Cart page items keep a stable image/title row and square touch controls. */
+@media (max-width: 767px) {
+  #cartView .cart-product-row.flow-row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+    padding-block: 16px;
+  }
+  #cartView .cart-product-row .cart-product-identity {
+    align-items: flex-start;
+    gap: 10px;
+  }
+  #cartView .cart-product-row .cart-product-identity img {
+    width: 64px;
+    height: 64px;
+    flex: 0 0 64px;
+  }
+  #cartView .cart-product-row > .cart-item-actions {
+    justify-self: end;
+    align-items: center;
+    padding: 4px;
+  }
+  #cartView .cart-product-row > .cart-item-actions .cart-quantity > button {
+    display: grid;
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    min-height: 44px;
+    flex: 0 0 44px;
+    padding: 0;
+    place-items: center;
+  }
+  #cartView .cart-product-row .cart-item-remove {
+    display: grid;
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    min-height: 44px;
+    padding: 0;
+    place-items: center;
+  }
+  #cartView .cart-product-copy .cart-item-option-chip {
+    flex-wrap: wrap;
+    max-width: 100%;
+    gap: 4px 6px;
+  }
+  #cartView .cart-product-copy .cart-item-option-status {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+  #cartView .cart-product-copy .cart-product-unit-price {
+    flex-wrap: wrap;
+    gap: 4px 8px;
+  }
+}
+
 /* Mobile cart follows the same below-header popover pattern as the account panel. */
 @media (max-width: 991px) {
   body > .cart-panel,

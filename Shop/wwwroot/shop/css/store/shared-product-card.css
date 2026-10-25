@@ -776,6 +776,7 @@
 #favoritesView .favorite-item-card {
   display: flex;
   height: 100%;
+  min-height: 0;
   flex-direction: column;
   overflow: hidden;
   padding: 0;
@@ -1038,6 +1039,42 @@
 }
 
 @media (max-width: 767px) {
+  #favoritesView .favorite-item-card .product-info {
+    flex: 0 1 auto;
+    gap: 10px;
+  }
+  #favoritesView .favorite-item-card .product-info h3 {
+    min-height: 4.5em;
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  #favoritesView .favorite-item-card .product-price-current {
+    font-size: 14px;
+    line-height: 1.6;
+    white-space: normal;
+  }
+  #favoritesView .favorite-item-card .product-price-current small {
+    display: inline-block;
+    font-size: 10px;
+  }
+  #favoritesView .favorite-item-card .list-remove-button {
+    font-size: 10px;
+    gap: 4px;
+    margin-top: auto;
+  }
+  .product-card .product-image > :is(.badge-best, .badge-new, .badge-offer) {
+    top: 8px;
+    right: 7px;
+    min-width: 0;
+    max-width: calc(100% - 60px);
+    height: auto;
+    min-height: 28px;
+    padding: 5px 8px;
+    font-size: 11px;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+  }
   .product-card .product-info h3,
   .search-product.product-card .product-info h3,
   .showcase-card-body h3,

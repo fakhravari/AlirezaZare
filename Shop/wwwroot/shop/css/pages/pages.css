@@ -2342,6 +2342,26 @@ h6 {
     margin-top: 28px;
   }
 
+  .flow-main.legal-main > .legal-document {
+    padding: 16px 12px;
+    border-radius: 14px;
+  }
+  .legal-document .legal-section h2 {
+    align-items: flex-start;
+    font-size: 16px;
+    line-height: 1.7;
+    gap: 8px;
+  }
+  .terms-document .legal-section h2::after {
+    padding: 3px 6px;
+    font-size: 10px;
+  }
+  .legal-document :is(.legal-section p, .legal-section li, .legal-note p) {
+    font-size: 14px;
+    line-height: 1.9;
+    text-align: start;
+  }
+
   .contact-hero ~ main .contact-shortcuts {
     width: calc(100% - 24px);
     margin: var(--quick-access-section-space) auto;

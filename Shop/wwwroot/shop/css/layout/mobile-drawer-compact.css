@@ -314,8 +314,8 @@
   }
   .mobile-menu .offcanvas-header > .mobile-menu-logo {
     display: block;
-    height: 80px;
-    width: min(240px, 100%);
+    height: 73.333px;
+    width: min(220px, 100%);
     padding: 0;
     border: 0;
     background: transparent;
