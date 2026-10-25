@@ -3,21 +3,21 @@
 @using System.Text.Unicode
 @using Microsoft.Extensions.Options
 @using Shop.Models
+@using Shop.Services
 @model PageModel
 @inject IOptions<SeoMetadataOptions> SeoOptions
 @{
     SeoMetadataOptions options = SeoOptions.Value;
-    string siteRoot = $"{Context.Request.Scheme}://{Context.Request.Host}{Url.Content("~/")}";
+    string siteOrigin = SeoUrlBuilder.SiteOrigin(options.SiteUrl, Context.Request);
+    string siteRoot = SeoUrlBuilder.SiteRoot(options.SiteUrl, Context.Request);
     string requestedCanonical = Model.Seo.CanonicalUrl ?? (Context.Request.Path.Value ?? "/").ToLowerInvariant();
     if (requestedCanonical.Length > 1 && !Uri.TryCreate(requestedCanonical, UriKind.Absolute, out _))
         requestedCanonical = requestedCanonical.TrimEnd('/');
-    string canonicalUrl = Uri.TryCreate(requestedCanonical, UriKind.Absolute, out Uri? absoluteCanonical)
-        ? absoluteCanonical.AbsoluteUri
-        : new Uri(new Uri(siteRoot), requestedCanonical.TrimStart('/')).AbsoluteUri;
+    string canonicalUrl = SeoUrlBuilder.AbsolutePageUrl(siteRoot, requestedCanonical);
     string imagePath = Url.Content(Model.Seo.ImageUrl ?? options.DefaultImagePath);
     string socialImage = Uri.TryCreate(Model.Seo.ImageUrl, UriKind.Absolute, out Uri? absoluteImage)
         ? absoluteImage.AbsoluteUri
-        : $"{Context.Request.Scheme}://{Context.Request.Host}{imagePath}";
+        : SeoUrlBuilder.AbsoluteAssetUrl(siteOrigin, imagePath);
     string imageExtension = System.IO.Path.GetExtension(imagePath).ToLowerInvariant();
     string imageType = imageExtension == ".png" ? "image/png"
         : imageExtension == ".webp" ? "image/webp"
@@ -66,9 +66,7 @@
                 ["@type"] = "ListItem",
                 ["position"] = index + 1,
                 ["name"] = breadcrumb.Name,
-                ["item"] = Uri.TryCreate(breadcrumb.Url, UriKind.Absolute, out _)
-                    ? breadcrumb.Url
-                    : new Uri(new Uri(siteRoot), breadcrumb.Url.TrimStart('/')).AbsoluteUri
+                ["item"] = SeoUrlBuilder.AbsolutePageUrl(siteRoot, breadcrumb.Url)
             }).ToArray()
         });
     }

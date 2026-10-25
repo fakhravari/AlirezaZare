@@ -1,4 +1,6 @@
 using Shop.Models;
+using Shop.Services;
+using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Shop.Controllers;
@@ -6,6 +8,13 @@ namespace Shop.Controllers;
 [Route("Magazine")]
 public sealed class MagazineController : PageController
 {
+    private readonly SeoMetadataOptions _seoOptions;
+
+    public MagazineController(IOptions<SeoMetadataOptions> seoOptions)
+    {
+        _seoOptions = seoOptions.Value;
+    }
+
     [HttpGet("")]
     public async Task<IActionResult> Index()
     {
@@ -18,8 +27,10 @@ public sealed class MagazineController : PageController
     {
         if (JournalArticles.Find(slug) is { } relatedArticle)
         {
-            string articleUrl = $"{Request.Scheme}://{Request.Host}{Url.Content($"~/magazine/{relatedArticle.Slug}")}";
-            string articleImage = $"{Request.Scheme}://{Request.Host}{Url.Content($"~/{relatedArticle.ContentImage}")}";
+            string siteOrigin = SeoUrlBuilder.SiteOrigin(_seoOptions.SiteUrl, Request);
+            string siteRoot = SeoUrlBuilder.SiteRoot(_seoOptions.SiteUrl, Request);
+            string articleUrl = SeoUrlBuilder.AbsolutePageUrl(siteRoot, $"/magazine/{relatedArticle.Slug}");
+            string articleImage = SeoUrlBuilder.AbsoluteAssetUrl(siteOrigin, Url.Content($"~/{relatedArticle.ContentImage}"));
             var articleData = new Dictionary<string, object?>
             {
                 ["@type"] = "Article",
@@ -31,7 +42,7 @@ public sealed class MagazineController : PageController
                 ["mainEntityOfPage"] = articleUrl,
                 ["inLanguage"] = "fa-IR"
             };
-            return await PageAsync(new PageModel<MagazineDetailsModel>(relatedArticle, new SeoModel(relatedArticle.Title + " | مجله برق و ابزار ندا اولیائی", relatedArticle.Summary, CanonicalUrl: articleUrl, ImageUrl: articleImage, StructuredData: articleData, OpenGraphType: "article", SocialImageAlt: relatedArticle.Title, ArticleSection: relatedArticle.Category, Breadcrumbs: [new SeoBreadcrumb("خانه", "/"), new SeoBreadcrumb("مجله برق و ابزار", "/magazine"), new SeoBreadcrumb(relatedArticle.Title, $"/magazine/{relatedArticle.Slug}")])));
+            return await PageAsync(new PageModel<MagazineDetailsModel>(relatedArticle, new SeoModel(relatedArticle.Title + " | مجله برق و ابزار ندا اولیائی", relatedArticle.Summary, CanonicalUrl: $"/magazine/{relatedArticle.Slug}", ImageUrl: articleImage, StructuredData: articleData, OpenGraphType: "article", SocialImageAlt: relatedArticle.Title, ArticleSection: relatedArticle.Category, Breadcrumbs: [new SeoBreadcrumb("خانه", "/"), new SeoBreadcrumb("مجله برق و ابزار", "/magazine"), new SeoBreadcrumb(relatedArticle.Title, $"/magazine/{relatedArticle.Slug}")])));
         }
 
         return NotFound();

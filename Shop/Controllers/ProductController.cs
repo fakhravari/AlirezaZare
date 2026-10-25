@@ -1,16 +1,19 @@
 using Shop.Models;
 using Shop.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace Shop.Controllers;
 
 public sealed class ProductController : PageController
 {
     private readonly CatalogRepository _catalog;
+    private readonly SeoMetadataOptions _seoOptions;
 
-    public ProductController(CatalogRepository catalog)
+    public ProductController(CatalogRepository catalog, IOptions<SeoMetadataOptions> seoOptions)
     {
         _catalog = catalog;
+        _seoOptions = seoOptions.Value;
     }
 
     [HttpGet("/Search")]
@@ -36,7 +39,9 @@ public sealed class ProductController : PageController
         string canonicalPath = $"/products/{product.Slug}-{product.Id}";
         if (!string.Equals(slug, $"{product.Slug}-{product.Id}", StringComparison.Ordinal))
             return RedirectPermanent(canonicalPath);
-        string productImage = $"{Request.Scheme}://{Request.Host}{Url.Content($"~/{product.ImagePath}")}";
+        string siteOrigin = SeoUrlBuilder.SiteOrigin(_seoOptions.SiteUrl, Request);
+        string siteRoot = SeoUrlBuilder.SiteRoot(_seoOptions.SiteUrl, Request);
+        string productImage = SeoUrlBuilder.AbsoluteAssetUrl(siteOrigin, Url.Content($"~/{product.ImagePath}"));
         var structuredData = new Dictionary<string, object?>
         {
             ["@type"] = "Product",
@@ -45,7 +50,7 @@ public sealed class ProductController : PageController
             ["image"] = new[] { productImage },
             ["category"] = product.Type,
             ["brand"] = new Dictionary<string, object?> { ["@type"] = "Brand", ["name"] = product.Brand },
-            ["url"] = $"{Request.Scheme}://{Request.Host}{Url.Content($"~{canonicalPath}")}"
+            ["url"] = SeoUrlBuilder.AbsolutePageUrl(siteRoot, canonicalPath)
         };
 
         PageModel<ProductDetailsModel> model = new(

@@ -43,6 +43,7 @@ Controller / ساخت PageModel
 
 | کلید | کاربرد |
 |---|---|
+| `Seo:SiteUrl` | origin اصلی و عمومی سایت، مانند `https://example.com`؛ برای canonical، URL تصویرهای اجتماعی، robots و sitemap. در `Shop/appsettings.json` روی `https://bs-shop.ir/` تنظیم شده و در محیط انتشار با `Seo__SiteUrl` قابل بازنویسی است. اگر خالی باشد، origin درخواست جاری به‌عنوان fallback استفاده می‌شود. |
 | `Seo:SiteName` | نام مشترک Open Graph و JSON-LD |
 | `Seo:Locale` | locale شبکه‌های اجتماعی؛ پیش‌فرض `fa_IR` |
 | `Seo:DefaultImagePath` | تصویر اجتماعی جایگزین؛ پیش‌فرض تصویر hero فروشگاه |
@@ -56,9 +57,11 @@ Controller / ساخت PageModel
 
 توکن‌های تأیید و شناسه‌های شبکهٔ اجتماعی تا زمان دریافت مقدار واقعی از مالک سایت خالی می‌مانند؛ مقدار نمونه را واقعی تلقی یا در کد hardcode نکنید.
 
+برای جلوگیری از انتشار دامنهٔ alias یا Host ارسالی درخواست در URLهای ایندکس، `Seo:SiteUrl` در `Shop/appsettings.json` روی origin اصلی `https://bs-shop.ir/` تنظیم شده است. محیط انتشار می‌تواند آن را با متغیر `Seo__SiteUrl` بازنویسی کند. اگر تنظیم خالی باشد، کد برای سازگاری از scheme و Host درخواست استفاده می‌کند.
+
 ## robots و sitemap
 
-`SeoController` این مسیرها را فراهم می‌کند:
+`SeoController` این مسیرها را فراهم می‌کند. URLها از `Seo:SiteUrl` و مسیر پایهٔ برنامه ساخته می‌شوند؛ canonical و Open Graph نیز در partial مشترک همین origin را به‌کار می‌برند:
 
 | مسیر | رفتار |
 |---|---|

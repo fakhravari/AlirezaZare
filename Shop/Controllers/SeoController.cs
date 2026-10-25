@@ -1,7 +1,7 @@
 using System.Text;
 using System.Xml.Linq;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Options;
 using Shop.Models;
 using Shop.Services;
 
@@ -10,17 +10,19 @@ namespace Shop.Controllers;
 public sealed class SeoController : Controller
 {
     private readonly CatalogRepository _catalog;
+    private readonly SeoMetadataOptions _options;
 
-    public SeoController(CatalogRepository catalog)
+    public SeoController(CatalogRepository catalog, IOptions<SeoMetadataOptions> options)
     {
         _catalog = catalog;
+        _options = options.Value;
     }
 
     [HttpGet("/robots.txt")]
     [ResponseCache(Duration = 3600, Location = ResponseCacheLocation.Any)]
     public IActionResult Robots()
     {
-        string body = $"User-agent: *\nAllow: /\nSitemap: {SiteRoot()}sitemap.xml\n";
+        string body = $"User-agent: *\nAllow: /\nSitemap: {SeoUrlBuilder.AbsolutePageUrl(SiteRoot(), "sitemap.xml")}\n";
         return Content(body, "text/plain; charset=utf-8", Encoding.UTF8);
     }
 
@@ -55,13 +57,11 @@ public sealed class SeoController : Controller
             new XElement(sitemapNamespace + "urlset",
                 paths.Distinct(StringComparer.OrdinalIgnoreCase).Select(path =>
                     new XElement(sitemapNamespace + "url",
-                        new XElement(sitemapNamespace + "loc", AbsoluteUrl(path))))));
+                        new XElement(sitemapNamespace + "loc", SeoUrlBuilder.AbsolutePageUrl(SiteRoot(), path))))));
 
         return Content(document.ToString(SaveOptions.DisableFormatting), "application/xml; charset=utf-8", Encoding.UTF8);
     }
 
-    private string SiteRoot() => $"{Request.Scheme}://{Request.Host}{Request.PathBase}/";
-
-    private string AbsoluteUrl(string path) => new Uri(new Uri(SiteRoot()), path.TrimStart('/')).AbsoluteUri;
+    private string SiteRoot() => SeoUrlBuilder.SiteRoot(_options.SiteUrl, Request);
 
 }

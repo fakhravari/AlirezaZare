@@ -2,6 +2,7 @@ namespace Shop.Models;
 
 public sealed class SeoMetadataOptions
 {
+    public string? SiteUrl { get; set; }
     public string SiteName { get; set; } = "فروشگاه برق و ابزار ندا اولیائی";
     public string Locale { get; set; } = "fa_IR";
     public string DefaultImagePath { get; set; } = "~/shop/images/heroes/hero-electrical-editorial.png";
