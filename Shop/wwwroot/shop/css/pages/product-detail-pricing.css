@@ -344,7 +344,7 @@
 
 #productView .product-purchase-trust-list {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: 8px;
   margin: 12px 0 0;
   padding: 0;
@@ -390,6 +390,126 @@
   color: #68796d;
   font-size: 10px;
   line-height: 1.65;
+}
+
+@media (min-width: 1200px) {
+  #productView .product-purchase-trust-list > li {
+    align-items: center;
+    padding-block: 8px;
+  }
+
+  #productView .product-purchase-trust-list > li > span {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  #productView .product-purchase-trust-list strong {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
+  #productView .product-purchase-trust-list small {
+    min-width: 0;
+    font-size: 10px;
+    line-height: 1.5;
+    text-align: start;
+    white-space: nowrap;
+  }
+}
+
+/* Category and product attributes marked as highlights use a compact spec-card grid. */
+#productView .product-main-features {
+  margin: 16px 0 18px;
+  padding: 14px;
+  border: 1px solid #e3e8ed;
+  border-radius: 15px;
+  background: linear-gradient(145deg, #fff, #f8fafc);
+}
+
+#productView .product-main-feature-heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 11px;
+  color: #183752;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+#productView .product-main-feature-heading > i {
+  color: #ad8423;
+}
+
+#productView .product-main-feature-chips {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+}
+
+#productView .product-main-feature-chips > .product-main-feature-item {
+  display: flex;
+  min-width: 0;
+  min-height: 64px;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
+  padding: 8px 10px;
+  border: 1px solid #e7ebef;
+  border-radius: 11px;
+  background: #f1f4f7;
+  color: #183752;
+}
+
+#productView .product-main-feature-item > small {
+  color: #758395;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+#productView .product-main-feature-item > strong {
+  color: #203e59;
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+
+#productView .product-main-feature-more {
+  display: flex;
+  min-height: 34px;
+  grid-column: 1 / -1;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 1px solid #e5e9ed;
+  border-radius: 10px;
+  background: #fff;
+  color: #475e73;
+  font-size: 11px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: border-color .18s ease, color .18s ease, background-color .18s ease;
+}
+
+#productView .product-main-feature-more:hover {
+  border-color: #d8bd70;
+  background: #fffaf0;
+  color: #8d6b14;
+}
+
+@media (max-width: 767px) {
+  #productView .product-main-feature-chips {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 389px) {
+  #productView .product-main-feature-chips {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 @media (max-width: 575px) {

@@ -17,6 +17,25 @@
     }
     return value;
   };
+  const mergeSpecs = (shared = [], specific = []) => {
+    const merged = new Map();
+    for (const pair of [...shared, ...specific]) {
+      if (!Array.isArray(pair) || pair.length < 2) continue;
+      const label = String(pair[0] ?? "").trim();
+      const value = String(pair[1] ?? "").trim();
+      if (label && value) merged.set(label.toLocaleLowerCase("fa"), [label, value]);
+    }
+    return [...merged.values()];
+  };
+  const normalizeSpecGroups = (groups = []) => groups
+    .filter((group) => group && typeof group.title === "string" && Array.isArray(group.specs))
+    .map((group) => ({title: group.title.trim(), specs: group.specs.filter((pair) =>
+      Array.isArray(pair) && String(pair[0] ?? "").trim() && String(pair[1] ?? "").trim())
+      .map(([label, value]) => [String(label).trim(), String(value).trim()])}))
+    .filter((group) => group.title && group.specs.length);
+  const attributeDefinitions = data.attributeDefinitions || {};
+  const normalizeLabel = (value) => String(value ?? "").trim().toLocaleLowerCase("fa").replace(/[يى]/g, "ی").replace(/ك/g, "ک").replace(/[\u200c\u200f\s]+/g, " ");
+  const unusableAttributeValue = (value) => /وابسته به|بر اساس مدل|بررسی .* پیش از|اقلام.*متفاوت/i.test(value);
   const ids = new Set();
   const products = data.products.map((product) => {
     if (!Number.isSafeInteger(product.id) || product.id < 1 || ids.has(product.id))
@@ -26,11 +45,38 @@
     const category = relation(data.categories, product.categoryId);
     const media = relation(data.media, product.mediaId);
     if (brand.countryCode) relation(data.countries, brand.countryCode);
+    const colors = product.colorIds.map((id) => relation(data.colors, id));
+    const detail = (() => {
+      const sharedDetail = relation(data.details, product.detailId);
+      const sharedSpecGroups = [
+        ...(sharedDetail.specs?.length ? [{title: "ویژگی‌های عمومی", specs: sharedDetail.specs}] : []),
+        ...normalizeSpecGroups(sharedDetail.specGroups),
+      ];
+      const productSpecGroups = normalizeSpecGroups(product.specGroups);
+      return {...sharedDetail, specs: mergeSpecs(sharedDetail.specs), sharedSpecGroups, productSpecGroups};
+    })();
+    const resolvedSpecs = mergeSpecs(
+      detail.specs,
+      [...(product.specs || []), ...detail.sharedSpecGroups.flatMap((group) => group.specs),
+        ...detail.productSpecGroups.flatMap((group) => group.specs)],
+    );
+    const specValueByLabel = new Map(resolvedSpecs.map(([label, value]) => [normalizeLabel(label), value]));
+    const attributeValues = Object.entries(attributeDefinitions).flatMap(([key, definition]) => {
+      let value = "";
+      if (definition.source === "spec") value = "";
+      else if (definition.source?.startsWith("spec:")) value = specValueByLabel.get(normalizeLabel(definition.source.slice(5))) || "";
+      else if (definition.source === "country") value = relation(data.countries, brand.countryCode).fa;
+      else if (definition.source === "color") value = colors.map((color) => color.fa).filter(Boolean).join("، ");
+      else value = String(({brand: brand.fa, type: category.fa})[definition.source] ?? product[definition.source] ?? "").trim();
+      if (!value || unusableAttributeValue(value)) return [];
+      return [{key, label: definition.label, icon: definition.icon, value,
+        filterKey: definition.filterKey || "", is_filterable: definition.is_filterable === true,
+        is_highlight: definition.is_highlight === true}];
+    });
     return freeze({
       ...product, brand: brand.name, brandFa: brand.fa, brandLogo: brand.logo,
       brandCountryCode: brand.countryCode, type: category.fa, categoryPath: [...category.path],
-      colors: product.colorIds.map((id) => relation(data.colors, id)),
-      detail: relation(data.details, product.detailId), image: media.card,
+      colors, attributeValues, detail, image: media.card,
       mainImage: media.main, thumbnailImage: media.thumbnail, images: media.images, videos: media.videos,
       // Compatibility aliases for persisted filters; new code uses explicit names.
       movement: product.powerSource, strap: product.useCase,
@@ -46,6 +92,6 @@
   window.HNProducts = freeze(products);
   window.HNProductUrl = productUrl;
   window.HNCatalog = Object.freeze({schemaVersion: data.schemaVersion, products: window.HNProducts,
-    brands: freeze(data.brands), categories: freeze(data.categories), collections: freeze(data.collections),
+    brands: freeze(data.brands), categories: freeze(data.categories), attributeDefinitions: freeze(attributeDefinitions), collections: freeze(data.collections),
     find: (id) => byId.get(String(id)) || null, url: productUrl});
 })(window, document);

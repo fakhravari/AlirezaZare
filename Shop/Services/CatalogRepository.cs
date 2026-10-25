@@ -41,7 +41,9 @@ public sealed record CatalogSnapshot(string BrowserJson, IReadOnlyList<ProductSe
 
         JsonElement brands = root.GetProperty("brands"), categories = root.GetProperty("categories"),
             media = root.GetProperty("media"), colors = root.GetProperty("colors"),
-            countries = root.GetProperty("countries"), details = root.GetProperty("details");
+            countries = root.GetProperty("countries"), details = root.GetProperty("details"),
+            attributeDefinitions = root.GetProperty("attributeDefinitions");
+        ValidateAttributeDefinitions(attributeDefinitions);
         HashSet<int> ids = [];
         HashSet<string> codes = new(StringComparer.Ordinal);
         List<ProductSeoEntry> products = [];
@@ -61,6 +63,11 @@ public sealed record CatalogSnapshot(string BrowserJson, IReadOnlyList<ProductSe
         }
         foreach (JsonElement country in countries.EnumerateObject().Select(item => item.Value))
             ValidatePath(Text(country, "flag"), "content/countries/flags/");
+        foreach (JsonElement detail in details.EnumerateObject().Select(item => item.Value))
+        {
+            if (detail.TryGetProperty("specs", out JsonElement sharedSpecs)) ValidateSpecPairs(sharedSpecs, "Shared detail specs");
+            ValidateSpecGroups(detail, "specGroups", "Shared detail");
+        }
         foreach (JsonElement images in media.EnumerateObject().Select(item => item.Value))
         {
             ValidatePath(Text(images, "main"), "content/products/images/main/");
@@ -98,6 +105,8 @@ public sealed record CatalogSnapshot(string BrowserJson, IReadOnlyList<ProductSe
             if (cartLimit is < 1 or > 99 || discount is < 0 or >= 100)
                 throw new InvalidDataException($"Invalid cart limit/discount: {id}");
             ValidateOptions(product);
+            ValidateProductSpecs(product);
+            ValidateSpecGroups(product, "specGroups", "Product");
             products.Add(new(id, name, englishName, Text(brand, "name"), Text(category, "fa"), imagePath, slug));
         }
         if (products.Count == 0) throw new InvalidDataException("The catalog has no products.");
@@ -145,6 +154,70 @@ public sealed record CatalogSnapshot(string BrowserJson, IReadOnlyList<ProductSe
             _ = Text(accessory, "name");
             _ = accessory.GetProperty("required").GetBoolean();
             if (accessory.GetProperty("price").GetDecimal() < 0) throw new InvalidDataException("Invalid accessory price.");
+        }
+    }
+
+    private static void ValidateProductSpecs(JsonElement product)
+    {
+        if (!product.TryGetProperty("specs", out JsonElement specs)) return;
+        ValidateSpecPairs(specs, "Product specs");
+    }
+
+    private static void ValidateAttributeDefinitions(JsonElement definitions)
+    {
+        if (definitions.ValueKind != JsonValueKind.Object || definitions.EnumerateObject().Count() == 0)
+            throw new InvalidDataException("Catalog attributeDefinitions must be a non-empty object.");
+        foreach (JsonProperty attribute in definitions.EnumerateObject())
+        {
+            JsonElement value = attribute.Value;
+            if (attribute.Name.Length == 0 || attribute.Name[0] is < 'a' or > 'z' || attribute.Name.Any(character =>
+                !(character is >= 'a' and <= 'z' or >= 'A' and <= 'Z' or >= '0' and <= '9' or '-')))
+                throw new InvalidDataException("Catalog attribute ids must be lower-camel identifiers or lowercase slugs.");
+            _ = Text(value, "label");
+            _ = Text(value, "icon");
+            _ = Text(value, "source");
+            _ = value.GetProperty("is_filterable").GetBoolean();
+            _ = value.GetProperty("is_highlight").GetBoolean();
+            if (value.TryGetProperty("filterKey", out JsonElement filterKey) &&
+                filterKey.ValueKind != JsonValueKind.String)
+                throw new InvalidDataException("Catalog attribute filterKey must be a string.");
+        }
+    }
+
+    private static void ValidateSpecGroups(JsonElement item, string propertyName, string context)
+    {
+        if (!item.TryGetProperty(propertyName, out JsonElement groups)) return;
+        if (groups.ValueKind != JsonValueKind.Array)
+            throw new InvalidDataException($"{context} specGroups must be an array.");
+        HashSet<string> titles = new(StringComparer.OrdinalIgnoreCase);
+        HashSet<string> labels = new(StringComparer.OrdinalIgnoreCase);
+        foreach (JsonElement group in groups.EnumerateArray())
+        {
+            string title = Text(group, "title").Trim();
+            if (title.Length == 0) throw new InvalidDataException($"{context} spec group titles cannot be empty.");
+            if (!titles.Add(title)) throw new InvalidDataException("Product spec group titles must be unique.");
+            if (!group.TryGetProperty("specs", out JsonElement specs) || specs.ValueKind != JsonValueKind.Array || specs.GetArrayLength() == 0)
+                throw new InvalidDataException("Each product spec group needs at least one spec.");
+            ValidateSpecPairs(specs, $"{context} spec group");
+            foreach (JsonElement pair in specs.EnumerateArray())
+                if (!labels.Add(pair[0].GetString()!.Trim()))
+                    throw new InvalidDataException("A product spec label cannot be repeated across groups.");
+        }
+    }
+
+    private static void ValidateSpecPairs(JsonElement specs, string context)
+    {
+        if (specs.ValueKind != JsonValueKind.Array)
+            throw new InvalidDataException($"{context} must be an array of label/value pairs.");
+        HashSet<string> labels = new(StringComparer.OrdinalIgnoreCase);
+        foreach (JsonElement pair in specs.EnumerateArray())
+        {
+            if (pair.ValueKind != JsonValueKind.Array || pair.GetArrayLength() != 2)
+                throw new InvalidDataException($"{context} entries must contain a label and value.");
+            string label = pair[0].GetString()?.Trim() ?? "";
+            string value = pair[1].GetString()?.Trim() ?? "";
+            if (label.Length == 0 || value.Length == 0 || !labels.Add(label))
+                throw new InvalidDataException($"{context} labels and values must be non-empty and labels unique.");
         }
     }
 

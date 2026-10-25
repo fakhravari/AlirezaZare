@@ -1,5 +1,23 @@
 {
   "schemaVersion": 1,
+  "attributeDefinitions": {
+    "brand": { "label": "برند", "icon": "bi-patch-check", "source": "brand", "filterKey": "brand", "is_filterable": true, "is_highlight": true },
+    "category": { "label": "دسته‌بندی", "icon": "bi-grid", "source": "type", "filterKey": "type", "is_filterable": true, "is_highlight": true },
+    "country": { "label": "کشور سازنده", "icon": "bi-globe2", "source": "country", "is_filterable": false, "is_highlight": true },
+    "code": { "label": "کد محصول", "icon": "bi-upc-scan", "source": "code", "is_filterable": false, "is_highlight": true },
+    "powerSource": { "label": "منبع تغذیه", "icon": "bi-lightning-charge", "source": "powerSource", "filterKey": "movement", "is_filterable": true, "is_highlight": true },
+    "useCase": { "label": "مورد استفاده", "icon": "bi-building-gear", "source": "useCase", "filterKey": "strap", "is_filterable": true, "is_highlight": true },
+    "color": { "label": "رنگ", "icon": "bi-palette2", "source": "color", "filterKey": "color", "is_filterable": true, "is_highlight": true },
+    "toolType": { "label": "نوع ابزار", "icon": "bi-tools", "source": "spec:نوع ابزار", "is_filterable": false, "is_highlight": true },
+    "displayType": { "label": "نوع نمایش", "icon": "bi-display", "source": "spec:نوع نمایش", "is_filterable": false, "is_highlight": true },
+    "measurement": { "label": "اندازه‌گیری", "icon": "bi-speedometer2", "source": "spec:اندازه‌گیری", "is_filterable": false, "is_highlight": true },
+    "lightingType": { "label": "نوع روشنایی", "icon": "bi-lightbulb", "source": "spec:نوع روشنایی", "is_filterable": false, "is_highlight": true },
+    "productType": { "label": "نوع محصول", "icon": "bi-box-seam", "source": "spec:نوع محصول", "is_filterable": false, "is_highlight": true },
+    "temperatureControl": { "label": "کنترل دما", "icon": "bi-thermometer-half", "source": "spec:کنترل دما", "is_filterable": false, "is_highlight": true },
+    "price": { "label": "بازهٔ قیمت", "icon": "bi-cash-stack", "source": "price", "filterKey": "price", "is_filterable": true, "is_highlight": false },
+    "availability": { "label": "موجودی", "icon": "bi-box-seam", "source": "stockQuantity", "filterKey": "availability", "is_filterable": true, "is_highlight": false },
+    "discount": { "label": "تخفیف", "icon": "bi-tags", "source": "discountPercent", "filterKey": "discount", "is_filterable": true, "is_highlight": false }
+  },
   "brands": {
     "bosch": {
       "id": "bosch",

@@ -16,18 +16,21 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
     sort: "recommended",
     visible: 9,
   };
+  const attributeDefinitions = window.HNCatalog?.attributeDefinitions || {};
   const filterFields = {
-    brand: { fa: "برند", en: "Brand", slug: "brand" },
-    type: { fa: "گروه محصول", en: "Product group", slug: "product-group" },
-    movement: { fa: "منبع تغذیه", en: "Power source", slug: "power-source" },
+    brand: { fa: "برند", en: "Brand", slug: "brand", attributeId: "brand" },
+    type: { fa: "گروه محصول", en: "Product group", slug: "product-group", attributeId: "category" },
+    movement: { fa: "منبع تغذیه", en: "Power source", slug: "power-source", attributeId: "powerSource" },
     strap: {
       fa: "مورد استفاده",
       en: "Application environment",
       slug: "application-environment",
+      attributeId: "useCase",
     },
-    color: { fa: "رنگ", en: "Color", slug: "color" },
-    price: { fa: "بازه قیمت", en: "Price range", slug: "price-range" },
+    color: { fa: "رنگ", en: "Color", slug: "color", attributeId: "color" },
+    price: { fa: "بازه قیمت", en: "Price range", slug: "price-range", attributeId: "price" },
   };
+  const isFilterable = (key) => attributeDefinitions[filterFields[key]?.attributeId]?.is_filterable === true;
   const hasActiveFilters = () =>
     ["brand", "type", "movement", "strap", "color"].some((key) => state[key].size) ||
     state.availability !== "all" ||
@@ -221,7 +224,7 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
         (label, index) => [`option${index + 1}`, label],
       ),
     );
-  const filterOptions = {
+  const filterOptions = Object.fromEntries(Object.entries({
     brand: createFilterOptions("brand"),
     type: createFilterOptions("type"),
     movement: createFilterOptions("movement"),
@@ -235,7 +238,7 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
         ),
       ].map((slug) => [slug, slug]),
     ),
-  };
+  }).filter(([key]) => isFilterable(key)));
   const filterConfig = Object.fromEntries(
     Object.entries(filterOptions).map(([key, options]) => [
       key,
@@ -426,6 +429,7 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
     const list = getFiltered();
     const shown = list.slice(0, state.visible);
     const finished = list.length > 0 && state.visible >= list.length;
+    renderFilterSuggestions(list);
     $("#productResults").innerHTML = shown.map(card).join("");
     const comparedProducts = new Set(
       window.HNUI?.storage.json("hn-compare", []).map(String) || [],
@@ -470,6 +474,31 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
     }
     syncUrl();
     if (returnToStart) requestAnimationFrame(scrollToResultsStart);
+  }
+  function renderFilterSuggestions(list) {
+    const host = $("#searchFilterSuggestions");
+    if (!host) return;
+    const candidates = ["brand", "type", "movement", "strap", "color"]
+      .filter((key) => isFilterable(key) && !state[key].size)
+      .map((key) => ({key, values: new Set(list.flatMap((product) => {
+        if (key === "color") return (product.colors || []).map((color) => color.slug);
+        return [product[key] || (key === "movement" ? product.powerSource : key === "strap" ? product.useCase : "")];
+      }).filter(Boolean))}))
+      .filter(({values}) => values.size > 1)
+      .sort((left, right) => right.values.size - left.values.size)
+      .slice(0, 3);
+    host.hidden = !candidates.length;
+    host.innerHTML = candidates.length
+      ? `<span class="search-filter-suggestions-title"><i class="bi bi-stars" aria-hidden="true"></i>فیلترهای پیشنهادی</span>${candidates.map(({key}) => `<button type="button" data-filter-suggestion="${key}">${attributeDefinitions[filterFields[key].attributeId]?.label || filterFields[key].fa}<i class="bi bi-chevron-down" aria-hidden="true"></i></button>`).join("")}`
+      : "";
+    host.querySelectorAll("[data-filter-suggestion]").forEach((button) => button.addEventListener("click", () => {
+      const group = $(`#${button.dataset.filterSuggestion}Filters`)?.closest(".filter-group");
+      if (!group) return;
+      if (window.matchMedia("(max-width: 991px)").matches && !$("#filterPanel").classList.contains("open")) $("#mobileFilterToggle").click();
+      group.classList.add("open");
+      group.querySelector(":scope > button")?.setAttribute("aria-expanded", "true");
+      setTimeout(() => group.scrollIntoView({behavior: "smooth", block: "center"}), 120);
+    }));
   }
   function renderChips() {
     const chips = [];

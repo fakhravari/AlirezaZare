@@ -15,6 +15,20 @@
         "Shop/wwwroot/shop/js/store/catalog.js"
       ]
     },
+    "product-search": {
+      "markup": [
+        "Shop/Views/Product/List.cshtml"
+      ],
+      "data": [
+        "Shop/wwwroot/content/data/catalog.json"
+      ],
+      "js": [
+        "Shop/wwwroot/shop/js/pages/search.js"
+      ],
+      "css": [
+        "Shop/wwwroot/shop/css/pages/search.css"
+      ]
+    },
     "product-card": {
       "selector": "\\.(?:product-card|showcase-card|product-price)(?=[\\s.#:>+~\\[),-]|$)",
       "js": [
@@ -26,7 +40,8 @@
       "pageOverrides": [
         "Shop/wwwroot/shop/css/pages/home-warmth.css",
         "Shop/wwwroot/shop/css/pages/search.css",
-        "Shop/wwwroot/shop/css/pages/search-mobile.css"
+        "Shop/wwwroot/shop/css/pages/search-mobile.css",
+        "Shop/wwwroot/shop/css/pages/product-detail-options.css"
       ]
     },
     "header-navigation": {
@@ -42,6 +57,27 @@
         "Shop/wwwroot/shop/css/layout/shared-mega-menu.css",
         "Shop/wwwroot/shop/css/layout/mega-menu-unified.css",
         "Shop/wwwroot/shop/css/layout/quick-links-menu.css"
+      ]
+    },
+    "product-detail": {
+      "markup": [
+        "Shop/Views/Product/Details.cshtml"
+      ],
+      "data": [
+        "Shop/wwwroot/content/data/catalog.json"
+      ],
+      "server": [
+        "Shop/Controllers/ProductController.cs",
+        "Shop/Services/CatalogRepository.cs"
+      ],
+      "js": [
+        "Shop/wwwroot/shop/js/store/catalog.js",
+        "Shop/wwwroot/shop/js/store/commerce.js"
+      ],
+      "css": [
+        "Shop/wwwroot/shop/css/pages/product-detail.css",
+        "Shop/wwwroot/shop/css/pages/product-detail-pricing.css",
+        "Shop/wwwroot/shop/css/pages/product-detail-options.css"
       ]
     },
     "header-brand": {
@@ -153,8 +189,7 @@
         "Shop/wwwroot/shop/css/store/pagination.css"
       ],
       "js": [
-        "Shop/wwwroot/shop/js/pages/orders-pagination.js",
-        "Shop/wwwroot/shop/js/pages/search.js"
+        "Shop/wwwroot/shop/js/pages/orders-pagination.js"
       ]
     },
     "confirmation-dialog": {

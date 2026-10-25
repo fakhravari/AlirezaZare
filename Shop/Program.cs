@@ -8,8 +8,7 @@ var persianHtmlEncoderSettings = new TextEncoderSettings(UnicodeRanges.BasicLati
 persianHtmlEncoderSettings.AllowCharacter('\u200C');
 builder.Services.AddWebEncoders(options => options.TextEncoderSettings = persianHtmlEncoderSettings);
 builder.Services.Configure<Shop.Models.SeoMetadataOptions>(builder.Configuration.GetSection("Seo"));
-builder.Services.Configure<Microsoft.AspNetCore.Routing.RouteOptions>(options =>
-    options.LowercaseUrls = true);
+builder.Services.Configure<Microsoft.AspNetCore.Routing.RouteOptions>(options => options.LowercaseUrls = true);
 var app = builder.Build();
 if (!app.Environment.IsDevelopment())
 {

@@ -852,7 +852,7 @@ body #cartView .cart-product-toolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 8px 12px;
   margin: 0 18px 16px;
   padding: 10px 12px;
@@ -860,15 +860,20 @@ body #cartView .cart-product-toolbar {
   border-radius: 8px;
   background: #f3f6f9;
 }
-body #cartView .cart-product-toolbar .hn-cart-controls { order: 1; }
+body #cartView .cart-product-toolbar .hn-cart-controls {
+  order: 1;
+  flex: 0 0 auto;
+}
 body #cartView .cart-product-line-total {
   display: grid;
+  min-width: 0;
+  flex: 1 1 auto;
   gap: 2px;
   margin: 0;
   text-align: start;
 }
-body #cartView .cart-product-line-total > span { color: #7b8793; font-size: 11px; }
-body #cartView .cart-product-line-total > strong { color: var(--industrial-navy); font-size: 16px; font-weight: 650; }
+body #cartView .cart-product-line-total > span { color: #7b8793; font-size: 11px; white-space: nowrap; }
+body #cartView .cart-product-line-total > strong { color: var(--industrial-navy); font-size: 16px; font-weight: 650; white-space: nowrap; }
 body #cartView .cart-product-header .cart-product-unit-price > strong,
 body #cartView .cart-product-line-total > strong,
 body #cartView .cart-product-details .cart-item-option-price,
@@ -1015,12 +1020,12 @@ body #cartView .cart-product-details .cart-item-option-chip > .cart-item-option-
     display: flex;
     align-items: center;
     justify-content: space-between;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     margin: 0 8px 12px;
     padding: 8px 6px;
     gap: 8px;
   }
-  body #cartView .cart-product-toolbar .hn-cart-controls { flex: 0 0 auto; margin: 0; margin-inline-start: auto; }
+  body #cartView .cart-product-toolbar .hn-cart-controls { flex: 0 0 auto; margin: 0; }
   body #cartView .cart-product-details { --cart-option-name-size: 12px; padding: 0 8px 12px; }
   body #cartView .cart-product-details .cart-item-option-group { padding: 9px 6px; }
   body #cartView .cart-product-details .cart-item-option-label { padding-inline: 6px; font-size: 13px; }
