@@ -990,8 +990,9 @@
 }
 
 #productView .product-detail-related-card .product-image > a > img {
-  padding: 12px;
-  object-fit: contain;
+  padding: 0;
+  object-fit: cover;
+  object-position: center;
 }
 
 #productView .product-detail-related-card .product-info h3 {
