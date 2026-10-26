@@ -95,14 +95,16 @@
 
 #productView .product-detail-total-price {
   grid-area: total;
+  gap: 6px;
   padding-top: 10px;
   border-top: 1px solid #e7eaf0;
 }
 
 #productView .product-detail-total-price > span {
   color: var(--industrial-navy, #102a56);
-  font-size: 14px;
+  font-size: 11px;
   font-weight: 900;
+  white-space: nowrap;
 }
 
 #productView .product-detail-total-price > strong {
@@ -228,7 +230,7 @@
   }
 
   #productView .product-detail-extras-price > span {
-    font-size: 11px;
+    font-size: 12px;
     line-height: 1.45;
   }
 
@@ -244,7 +246,7 @@
   }
 
   #productView .product-detail-total-price > span {
-    font-size: 11px;
+    font-size: 12px;
     white-space: nowrap;
   }
 
@@ -326,7 +328,7 @@
 
 #productView .product-purchase-trust-heading small {
   color: #4f6858;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 750;
 }
 
@@ -338,7 +340,7 @@
 #productView .product-purchase-trust-heading p {
   margin: 1px 0 0;
   color: #4f6858;
-  font-size: 11px;
+  font-size: 13px;
   line-height: 1.7;
 }
 
@@ -382,13 +384,13 @@
 
 #productView .product-purchase-trust-list strong {
   color: #254b37;
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 850;
 }
 
 #productView .product-purchase-trust-list small {
   color: #68796d;
-  font-size: 10px;
+  font-size: 13px;
   line-height: 1.65;
 }
 
@@ -412,10 +414,10 @@
 
   #productView .product-purchase-trust-list small {
     min-width: 0;
-    font-size: 10px;
+    font-size: 12px;
     line-height: 1.5;
     text-align: start;
-    white-space: nowrap;
+    white-space: normal;
   }
 }
 
@@ -434,7 +436,7 @@
   gap: 8px;
   margin: 0 0 11px;
   color: #183752;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 800;
 }
 
@@ -452,7 +454,6 @@
 #productView .product-main-feature-chips > .product-main-feature-item {
   display: flex;
   min-width: 0;
-  min-height: 64px;
   flex-direction: column;
   justify-content: center;
   gap: 3px;
@@ -465,13 +466,13 @@
 
 #productView .product-main-feature-item > small {
   color: #758395;
-  font-size: 10px;
+  font-size: 12px;
   line-height: 1.5;
 }
 
 #productView .product-main-feature-item > strong {
   color: #203e59;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 750;
   line-height: 1.65;
   overflow-wrap: anywhere;
@@ -488,7 +489,7 @@
   border-radius: 10px;
   background: #fff;
   color: #475e73;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   text-decoration: none;
   transition: border-color .18s ease, color .18s ease, background-color .18s ease;
@@ -514,44 +515,50 @@
 
 @media (max-width: 575px) {
   #productView .product-detail-meta > .product-meta-category {
-    position: relative;
-    display: block;
-    padding: 10px !important;
+    position: static;
+    display: flex;
+    min-height: 0;
+    align-items: center;
+    padding: 8px 9px !important;
   }
 
   #productView .product-detail-meta > .product-meta-category > i {
-    position: absolute;
-    top: 10px;
-    inset-inline-start: 10px;
-    width: 28px;
-    height: 28px;
+    position: static;
+    width: 26px;
+    height: 26px;
     margin: 0;
-    flex: 0 0 28px;
-    border-radius: 9px;
-    font-size: 14px;
+    flex: 0 0 26px;
+    border-radius: 8px;
+    font-size: 13px;
   }
 
   #productView .product-detail-meta .product-meta-category-content {
-    display: block;
-    width: 100%;
-    padding-top: 34px;
+    display: flex;
+    min-width: 0;
+    width: auto;
+    flex: 1 1 auto;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 3px 8px;
+    padding: 0;
   }
 
   #productView .product-detail-meta .product-meta-category-content > small {
-    position: absolute;
-    top: 17px;
-    inset-inline-start: 46px;
-    font-size: 10px;
+    position: static;
+    flex: 0 0 auto;
+    font-size: 11px;
   }
 
   #productView .product-detail-meta .product-meta-path {
     display: flex;
-    width: 100%;
+    min-width: 0;
+    width: auto;
+    flex: 1 1 auto;
     flex-wrap: wrap;
     align-items: center;
-    gap: 3px 16px;
-    font-size: 11px;
-    line-height: 1.6;
+    gap: 2px 12px;
+    font-size: 12px;
+    line-height: 1.45;
   }
 
   #productView .product-detail-meta .product-meta-path > li {
@@ -610,11 +617,11 @@
   }
 
   #productView .product-purchase-trust-list strong {
-    font-size: 10px;
+    font-size: 13px;
   }
 
   #productView .product-purchase-trust-list small {
-    font-size: 9px;
+    font-size: 12px;
   }
 
 }

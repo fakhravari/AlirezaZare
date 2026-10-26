@@ -345,12 +345,21 @@
   gap: 11px;
 }
 
-.home-page .electrical-submenu-heading-copy > strong,
-.inner-page #mainNav .electrical-submenu-heading-copy > strong {
+.home-page .electrical-submenu-heading-copy > .electrical-submenu-heading-link,
+.inner-page #mainNav .electrical-submenu-heading-copy > .electrical-submenu-heading-link {
+  display: inline-flex;
   flex: 0 0 auto;
   color: var(--mega-ink);
   font-size: 14px;
   font-weight: 800;
+  text-decoration: none;
+}
+
+.home-page .electrical-submenu-heading-link:is(:hover, :focus-visible),
+.inner-page #mainNav .electrical-submenu-heading-link:is(:hover, :focus-visible) {
+  color: var(--mega-gold-bright);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .home-page .electrical-submenu-heading-copy > small,

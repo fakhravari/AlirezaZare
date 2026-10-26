@@ -34,6 +34,40 @@
       .map(([label, value]) => [String(label).trim(), String(value).trim()])}))
     .filter((group) => group.title && group.specs.length);
   const attributeDefinitions = data.attributeDefinitions || {};
+  const categoryEntries = Object.entries(data.categories).map(([id, category]) => ({
+    id, label: String(category.fa || "").trim(), path: [...(category.path || [])],
+  }));
+  const normalizeCategoryLabel = (value) => String(value ?? "").trim()
+    .toLocaleLowerCase("fa").replace(/[يى]/g, "ی").replace(/ك/g, "ک")
+    .replace(/[\u200c\u200f\s]+/g, " ");
+  const categoryEntriesForPath = (path) => {
+    const segments = (Array.isArray(path) ? path : [path]).map(normalizeCategoryLabel).filter(Boolean);
+    if (!segments.length) return [];
+    return categoryEntries.filter((category) => {
+      const categoryPath = category.path.map(normalizeCategoryLabel);
+      if (segments.length === 1) return categoryPath.includes(segments[0]);
+      return segments.every((segment, index) => categoryPath[index] === segment);
+    });
+  };
+  const categorySearchUrl = (entries, fallback) => {
+    const types = [...new Set(entries.map((category) => category.label).filter(Boolean))];
+    const params = new URLSearchParams();
+    if (types.length) types.forEach((type) => params.append("product-group", type));
+    else params.set("q", String(fallback || "ابزار و تجهیزات").trim());
+    return "/Search?" + params.toString();
+  };
+  const categoryUrl = (path) => {
+    const segments = Array.isArray(path) ? path : [path];
+    const entries = categoryEntriesForPath(segments);
+    return categorySearchUrl(entries, segments.at(-1));
+  };
+  const categoryUrlForLabels = (labels) => {
+    const wanted = new Set((Array.isArray(labels) ? labels : [labels]).map(normalizeCategoryLabel));
+    const entries = categoryEntries.filter((category) =>
+      category.path.some((segment) => wanted.has(normalizeCategoryLabel(segment))),
+    );
+    return categorySearchUrl(entries, [...wanted].at(-1));
+  };
   const normalizeLabel = (value) => String(value ?? "").trim().toLocaleLowerCase("fa").replace(/[يى]/g, "ی").replace(/ك/g, "ک").replace(/[\u200c\u200f\s]+/g, " ");
   const unusableAttributeValue = (value) => /وابسته به|بر اساس مدل|بررسی .* پیش از|اقلام.*متفاوت/i.test(value);
   const ids = new Set();
@@ -117,5 +151,6 @@
   window.HNProductUrl = productUrl;
   window.HNCatalog = Object.freeze({schemaVersion: data.schemaVersion, products: window.HNProducts,
     brands: freeze(data.brands), categories: freeze(data.categories), attributeDefinitions: freeze(attributeDefinitions), collections: freeze(data.collections),
-    find: (id) => byId.get(String(id)) || null, url: productUrl});
+    find: (id) => byId.get(String(id)) || null, url: productUrl,
+    categoryUrl, categoryUrlForLabels});
 })(window, document);

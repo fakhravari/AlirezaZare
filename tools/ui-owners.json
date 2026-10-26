@@ -108,13 +108,17 @@
     "cart": {
       "markup": [
         "Shop/Views/Shared/_Panels.cshtml",
-        "Shop/Views/Cart/Index.cshtml"
+        "Shop/Views/Cart/Index.cshtml",
+        "Shop/Views/Checkout/Index.cshtml"
       ],
       "js": [
-        "Shop/wwwroot/shop/js/store/cart.js"
+        "Shop/wwwroot/shop/js/store/cart.js",
+        "Shop/wwwroot/shop/js/pages/checkout.js",
+        "Shop/wwwroot/shop/js/store/commerce.js"
       ],
       "css": [
-        "Shop/wwwroot/shop/css/layout/shared-cart.css"
+        "Shop/wwwroot/shop/css/layout/shared-cart.css",
+        "Shop/wwwroot/shop/css/pages/checkout.css"
       ],
       "data": [
         "Shop/wwwroot/shop/js/core/storage.js"

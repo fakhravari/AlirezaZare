@@ -429,7 +429,6 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
     const list = getFiltered();
     const shown = list.slice(0, state.visible);
     const finished = list.length > 0 && state.visible >= list.length;
-    renderFilterSuggestions(list);
     $("#productResults").innerHTML = shown.map(card).join("");
     const comparedProducts = new Set(
       window.HNUI?.storage.json("hn-compare", []).map(String) || [],
@@ -462,43 +461,55 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
     const breadcrumb = $("#searchBreadcrumb ol");
     if (breadcrumb) {
       const selectedTypes = [...state.type];
-      const categoryPath =
-        selectedTypes.length === 1
-          ? products.find((product) => product.type === selectedTypes[0])
-              ?.categoryPath || ["ابزار و تجهیزات", selectedTypes[0]]
-          : [
-              "ابزار و تجهیزات",
-              ...(selectedTypes.length ? ["گروه‌های منتخب"] : []),
-            ];
-      breadcrumb.innerHTML = `<li><a href="/"><i class="bi bi-house-door" aria-hidden="true"></i><span>خانه</span></a></li>${categoryPath.map((part) => `<li><i class="bi bi-chevron-left" aria-hidden="true"></i><span>${part}</span></li>`).join("")}<li class="cart-breadcrumb-current"><i class="bi bi-chevron-left" aria-hidden="true"></i><span aria-current="page">${selectedTypes.length ? "نتایج جستجو" : "جستجو و انتخاب ابزار"}</span></li>`;
+      const selectedPaths = selectedTypes.map((type) =>
+        products.find((product) => product.type === type)?.categoryPath || ["ابزار و تجهیزات", type],
+      );
+      const sharedPathLength = selectedPaths.length
+        ? selectedPaths[0].findIndex((part, index) => selectedPaths.some((path) => path[index] !== part))
+        : 1;
+      const categoryPath = selectedTypes.length === 1
+        ? selectedPaths[0]
+        : selectedTypes.length > 1
+          ? [...selectedPaths[0].slice(0, sharedPathLength < 0 ? selectedPaths[0].length : sharedPathLength), "گروه‌های منتخب"]
+          : ["ابزار و تجهیزات"];
+      breadcrumb.replaceChildren();
+      const appendItem = (className) => {
+        const item = document.createElement("li");
+        if (className) item.className = className;
+        breadcrumb.append(item);
+        return item;
+      };
+      const home = appendItem();
+      const homeLink = document.createElement("a");
+      homeLink.href = "/";
+      homeLink.innerHTML = '<i class="bi bi-house-door" aria-hidden="true"></i><span>خانه</span>';
+      home.append(homeLink);
+      categoryPath.forEach((part, index) => {
+        const item = appendItem();
+        const separator = document.createElement("i");
+        separator.className = "bi bi-chevron-left";
+        separator.setAttribute("aria-hidden", "true");
+        item.append(separator);
+        if (part === "گروه‌های منتخب") {
+          item.append(document.createTextNode(part));
+          return;
+        }
+        const link = document.createElement("a");
+        link.href = window.HNCatalog?.categoryUrl(categoryPath.slice(0, index + 1)) || `/Search?q=${encodeURIComponent(part)}`;
+        link.textContent = part;
+        item.append(link);
+      });
+      const current = appendItem("cart-breadcrumb-current");
+      const currentSeparator = document.createElement("i");
+      currentSeparator.className = "bi bi-chevron-left";
+      currentSeparator.setAttribute("aria-hidden", "true");
+      const currentLabel = document.createElement("span");
+      currentLabel.setAttribute("aria-current", "page");
+      currentLabel.textContent = selectedTypes.length ? "نتایج جستجو" : "جستجو و انتخاب ابزار";
+      current.append(currentSeparator, currentLabel);
     }
     syncUrl();
     if (returnToStart) requestAnimationFrame(scrollToResultsStart);
-  }
-  function renderFilterSuggestions(list) {
-    const host = $("#searchFilterSuggestions");
-    if (!host) return;
-    const candidates = ["brand", "type", "movement", "strap", "color"]
-      .filter((key) => isFilterable(key) && !state[key].size)
-      .map((key) => ({key, values: new Set(list.flatMap((product) => {
-        if (key === "color") return (product.colors || []).map((color) => color.slug);
-        return [product[key] || (key === "movement" ? product.powerSource : key === "strap" ? product.useCase : "")];
-      }).filter(Boolean))}))
-      .filter(({values}) => values.size > 1)
-      .sort((left, right) => right.values.size - left.values.size)
-      .slice(0, 3);
-    host.hidden = !candidates.length;
-    host.innerHTML = candidates.length
-      ? `<span class="search-filter-suggestions-title"><i class="bi bi-stars" aria-hidden="true"></i>فیلترهای پیشنهادی</span>${candidates.map(({key}) => `<button type="button" data-filter-suggestion="${key}">${attributeDefinitions[filterFields[key].attributeId]?.label || filterFields[key].fa}<i class="bi bi-chevron-down" aria-hidden="true"></i></button>`).join("")}`
-      : "";
-    host.querySelectorAll("[data-filter-suggestion]").forEach((button) => button.addEventListener("click", () => {
-      const group = $(`#${button.dataset.filterSuggestion}Filters`)?.closest(".filter-group");
-      if (!group) return;
-      if (window.matchMedia("(max-width: 991px)").matches && !$("#filterPanel").classList.contains("open")) $("#mobileFilterToggle").click();
-      group.classList.add("open");
-      group.querySelector(":scope > button")?.setAttribute("aria-expanded", "true");
-      setTimeout(() => group.scrollIntoView({behavior: "smooth", block: "center"}), 120);
-    }));
   }
   function renderChips() {
     const chips = [];

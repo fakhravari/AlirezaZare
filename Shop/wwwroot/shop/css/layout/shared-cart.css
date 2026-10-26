@@ -811,8 +811,8 @@ body :is(#cartPanel, #cartView) .hn-cart-controls button:focus-visible { outline
 body :is(#cartPanel, #cartView) .hn-cart-controls button:disabled { opacity: .4; cursor: not-allowed; }
 
 /* Cart cards: product identity, purchase strip and structured details. */
-body #cartView .cart-items-list { display: grid; gap: 18px; }
-body #cartView .cart-product-row.flow-row {
+body :is(#cartView, #invoiceItems) .cart-items-list { display: grid; gap: 18px; }
+body :is(#cartView, #invoiceItems) .cart-product-row.flow-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   box-sizing: border-box;
@@ -825,9 +825,9 @@ body #cartView .cart-product-row.flow-row {
   background: #fff;
   box-shadow: 0 8px 24px -18px #17364f55;
 }
-body #cartView .cart-product-header { min-width: 0; padding: 18px; border-top: 3px solid #d2b467; border-radius: 12px 12px 0 0; }
-body #cartView .cart-product-header .cart-product-identity { align-items: center; gap: 14px; }
-body #cartView .cart-product-header .cart-product-identity > img {
+body :is(#cartView, #invoiceItems) .cart-product-header { min-width: 0; padding: 18px; border-top: 3px solid #d2b467; border-radius: 12px 12px 0 0; }
+body :is(#cartView, #invoiceItems) .cart-product-header .cart-product-identity { align-items: center; gap: 14px; }
+body :is(#cartView, #invoiceItems) .cart-product-header .cart-product-identity > img {
   width: 88px;
   height: 88px;
   flex: 0 0 88px;
@@ -835,20 +835,20 @@ body #cartView .cart-product-header .cart-product-identity > img {
   border-radius: 8px;
   object-fit: cover;
 }
-body #cartView .cart-product-header .cart-product-copy { flex: 1; min-width: 0; }
-body #cartView .cart-product-header .cart-product-title-link {
+body :is(#cartView, #invoiceItems) .cart-product-header .cart-product-copy { flex: 1; min-width: 0; }
+body :is(#cartView, #invoiceItems) .cart-product-header .cart-product-title-link {
   color: var(--industrial-navy);
   font-size: 15px;
   line-height: 1.9;
   overflow-wrap: anywhere;
 }
-body #cartView .cart-product-header .cart-product-unit-price {
+body :is(#cartView, #invoiceItems) .cart-product-header .cart-product-unit-price {
   margin: 6px 0 0;
   gap: 3px 7px;
 }
-body #cartView .cart-product-header .cart-product-unit-price > span { font-size: 11px; color: #7b8793; }
-body #cartView .cart-product-header .cart-product-unit-price > strong { font-size: 16px; color: var(--industrial-navy); font-weight: 650; }
-body #cartView .cart-product-toolbar {
+body :is(#cartView, #invoiceItems) .cart-product-header .cart-product-unit-price > span { font-size: 11px; color: #7b8793; }
+body :is(#cartView, #invoiceItems) .cart-product-header .cart-product-unit-price > strong { font-size: 16px; color: var(--industrial-navy); font-weight: 650; }
+body :is(#cartView, #invoiceItems) .cart-product-toolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -860,11 +860,11 @@ body #cartView .cart-product-toolbar {
   border-radius: 8px;
   background: #f3f6f9;
 }
-body #cartView .cart-product-toolbar .hn-cart-controls {
+body :is(#cartView, #invoiceItems) .cart-product-toolbar .hn-cart-controls {
   order: 1;
   flex: 0 0 auto;
 }
-body #cartView .cart-product-line-total {
+body :is(#cartView, #invoiceItems) .cart-product-line-total {
   display: grid;
   min-width: 0;
   flex: 1 1 auto;
@@ -872,27 +872,31 @@ body #cartView .cart-product-line-total {
   margin: 0;
   text-align: start;
 }
-body #cartView .cart-product-line-total > span { color: #7b8793; font-size: 11px; white-space: nowrap; }
-body #cartView .cart-product-line-total > strong { color: var(--industrial-navy); font-size: 16px; font-weight: 650; white-space: nowrap; }
-body #cartView .cart-product-header .cart-product-unit-price > strong,
-body #cartView .cart-product-line-total > strong,
-body #cartView .cart-product-details .cart-item-option-price,
-body #cartView .cart-summary-lines > .flow-total:not(:first-child) > :last-child {
+body :is(#cartView, #invoiceItems) .cart-product-line-total > span { color: #7b8793; font-size: 11px; white-space: nowrap; }
+body :is(#cartView, #invoiceItems) .cart-product-line-total > strong { color: var(--industrial-navy); font-size: 16px; font-weight: 650; white-space: nowrap; }
+body :is(#cartView, #invoiceItems) .cart-product-header .cart-product-unit-price > strong,
+body :is(#cartView, #invoiceItems) .cart-product-line-total > strong,
+body :is(#cartView, #invoiceItems) .cart-product-details .cart-item-option-price,
+body :is(#cartView, #invoiceItems) .cart-summary-lines > .flow-total:not(:first-child) > :last-child {
   font-family: var(--font-heading);
   letter-spacing: 0;
   font-variant-numeric: proportional-nums;
   font-feature-settings: normal;
 }
-body #cartView .cart-summary-lines > .flow-total:not(:first-child) > :last-child { font-weight: 650; }
-body #cartView .cart-product-details {
+body :is(#cartView, #invoiceItems) .cart-summary-lines > .flow-total:not(:first-child) > :last-child { font-weight: 650; }
+body :is(#cartView, #invoiceItems) .cart-product-details {
   --cart-option-name-size: 11px;
   box-sizing: border-box;
   min-width: 0;
   padding: 0 18px 18px;
 }
-body #cartView .cart-product-details:not(:has(.cart-item-options)) { display: none; }
-body #cartView .cart-product-details .cart-item-options { margin: 0; gap: 12px; }
-body #cartView .cart-product-details .cart-item-option-group {
+body :is(#cartView, #invoiceItems) .cart-product-details:not(:has(.cart-item-options)) { display: none; }
+body :is(#cartView, #invoiceItems) .cart-product-details .cart-item-options {
+  display: grid;
+  margin: 0;
+  gap: 12px;
+}
+body :is(#cartView, #invoiceItems) .cart-product-details .cart-item-option-group {
   box-sizing: border-box;
   width: 100%;
   min-width: 0;
@@ -902,7 +906,7 @@ body #cartView .cart-product-details .cart-item-option-group {
   border-radius: 10px;
   background: #fff;
 }
-body #cartView .cart-product-details .cart-item-option-label {
+body :is(#cartView, #invoiceItems) .cart-product-details .cart-item-option-label {
   display: flex;
   box-sizing: border-box;
   width: 100%;
@@ -916,7 +920,7 @@ body #cartView .cart-product-details .cart-item-option-label {
   border-radius: 7px;
   background: #f3f6f9;
 }
-body #cartView .cart-product-details .cart-item-option-label::before {
+body :is(#cartView, #invoiceItems) .cart-product-details .cart-item-option-label::before {
   content: '';
   flex: 0 0 6px;
   width: 6px;
@@ -924,13 +928,13 @@ body #cartView .cart-product-details .cart-item-option-label::before {
   border-radius: 50%;
   background: #d2b467;
 }
-body #cartView .cart-product-details .cart-item-option-list {
+body :is(#cartView, #invoiceItems) .cart-product-details .cart-item-option-list {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: 6px;
   width: 100%;
 }
-body #cartView .cart-product-details .cart-item-option-chip {
+body :is(#cartView, #invoiceItems) .cart-product-details .cart-item-option-chip {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
@@ -944,23 +948,23 @@ body #cartView .cart-product-details .cart-item-option-chip {
   background: #fafbfd;
   overflow-wrap: anywhere;
 }
-body #cartView .cart-product-details .cart-item-option-chip > small { font-size: 11px; color: #62758a; }
-body #cartView .cart-product-details .cart-item-option-chip > strong { font-size: 12px; font-weight: 800; color: #17364f; }
-body #cartView .cart-product-details .cart-item-option-chip > .cart-item-option-name {
+body :is(#cartView, #invoiceItems) .cart-product-details .cart-item-option-chip > small { font-size: 11px; color: #62758a; }
+body :is(#cartView, #invoiceItems) .cart-product-details .cart-item-option-chip > strong { font-size: 12px; font-weight: 800; color: #17364f; }
+body :is(#cartView, #invoiceItems) .cart-product-details .cart-item-option-chip > .cart-item-option-name {
   font-family: inherit;
   font-size: var(--cart-option-name-size);
   font-weight: 500;
   line-height: 1.6;
   color: #718094;
 }
-body #cartView .cart-product-details .cart-item-option-price {
+body :is(#cartView, #invoiceItems) .cart-product-details .cart-item-option-price {
   grid-column: 2;
   justify-self: end;
   white-space: normal;
   color: #17364f;
   font-weight: 700;
 }
-body #cartView .cart-product-details .cart-item-option-chip > .cart-item-option-status {
+body :is(#cartView, #invoiceItems) .cart-product-details .cart-item-option-chip > .cart-item-option-status {
   box-sizing: border-box;
   width: 48px;
   min-width: 48px;
@@ -972,30 +976,30 @@ body #cartView .cart-product-details .cart-item-option-chip > .cart-item-option-
   padding: 1px 5px;
 }
 @media (min-width: 768px) {
-  body #cartView .cart-product-details .cart-item-options { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; align-items: start; }
+  body :is(#cartView, #invoiceItems) .cart-product-details .cart-item-options { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; align-items: start; }
 }
 @media (min-width: 992px) {
-  body #cartView .cart-product-header .cart-product-title-link { font-size: 16px; }
-  body #cartView .cart-product-header .cart-product-unit-price > span,
-  body #cartView .cart-product-line-total > span { font-size: 13px; }
-  body #cartView .cart-product-header .cart-product-unit-price > strong,
-  body #cartView .cart-product-line-total > strong { font-size: 18px; }
-  body #cartView .cart-product-details { --cart-option-name-size: 13px; }
-  body #cartView .cart-product-details .cart-item-option-label,
-  body #cartView .cart-product-details .cart-item-option-chip > strong { font-size: 14px; }
-  body #cartView .cart-product-details .cart-item-option-chip > .cart-item-option-price { font-size: 13px; }
-  body #cartView .cart-product-details .cart-item-option-chip > .cart-item-option-status {
+  body :is(#cartView, #invoiceItems) .cart-product-header .cart-product-title-link { font-size: 16px; }
+  body :is(#cartView, #invoiceItems) .cart-product-header .cart-product-unit-price > span,
+  body :is(#cartView, #invoiceItems) .cart-product-line-total > span { font-size: 13px; }
+  body :is(#cartView, #invoiceItems) .cart-product-header .cart-product-unit-price > strong,
+  body :is(#cartView, #invoiceItems) .cart-product-line-total > strong { font-size: 18px; }
+  body :is(#cartView, #invoiceItems) .cart-product-details { --cart-option-name-size: 13px; }
+  body :is(#cartView, #invoiceItems) .cart-product-details .cart-item-option-label,
+  body :is(#cartView, #invoiceItems) .cart-product-details .cart-item-option-chip > strong { font-size: 14px; }
+  body :is(#cartView, #invoiceItems) .cart-product-details .cart-item-option-chip > .cart-item-option-price { font-size: 13px; }
+  body :is(#cartView, #invoiceItems) .cart-product-details .cart-item-option-chip > .cart-item-option-status {
     width: 54px;
     min-width: 54px;
     height: 22px;
     min-height: 22px;
     font-size: 11px;
   }
-  body #cartView .cart-summary-lines > .flow-total > :last-child { font-size: 17px; }
-  body #cartView .cart-summary-lines > .flow-total.flow-payable > strong { font-size: 20px; }
-  body #cartView .cart-coupon-feedback .flow-coupon-status,
-  body #cartView .flow-coupon-remove { font-size: 13px; }
-  body #cartView .cart-coupon-feedback code { font-size: 12px; }
+  body :is(#cartView, #invoiceItems) .cart-summary-lines > .flow-total > :last-child { font-size: 17px; }
+  body :is(#cartView, #invoiceItems) .cart-summary-lines > .flow-total.flow-payable > strong { font-size: 20px; }
+  body :is(#cartView, #invoiceItems) .cart-coupon-feedback .flow-coupon-status,
+  body :is(#cartView, #invoiceItems) .flow-coupon-remove { font-size: 13px; }
+  body :is(#cartView, #invoiceItems) .cart-coupon-feedback code { font-size: 12px; }
 }
 @media (max-width: 767px) {
   body main.flow-main.container.cart-page-main {
@@ -1004,19 +1008,19 @@ body #cartView .cart-product-details .cart-item-option-chip > .cart-item-option-
     box-sizing: border-box;
     padding-inline: 8px;
   }
-  body #cartView .cart-summary-label-extra { display: none; }
-  body #cartView .cart-summary { padding-inline: 12px; }
-  body #cartView .cart-summary-lines > .flow-total > :last-child {
+  body :is(#cartView, #invoiceItems) .cart-summary-label-extra { display: none; }
+  body :is(#cartView, #invoiceItems) .cart-summary { padding-inline: 12px; }
+  body :is(#cartView, #invoiceItems) .cart-summary-lines > .flow-total > :last-child {
     font-size: 15px;
     font-weight: 650;
     white-space: nowrap;
   }
-  body #cartView .cart-products-panel { padding-inline: 6px; }
-  body #cartView .cart-product-row.flow-row { padding: 0; gap: 0; border-radius: 10px; }
-  body #cartView .cart-product-header { padding: 12px 8px; border-radius: 10px 10px 0 0; }
-  body #cartView .cart-product-header .cart-product-identity { align-items: start; gap: 8px; }
-  body #cartView .cart-product-header .cart-product-identity > img { width: 64px; height: 64px; flex-basis: 64px; border-radius: 6px; }
-  body #cartView .cart-product-toolbar {
+  body :is(#cartView, #invoiceItems) .cart-products-panel { padding-inline: 6px; }
+  body :is(#cartView, #invoiceItems) .cart-product-row.flow-row { padding: 0; gap: 0; border-radius: 10px; }
+  body :is(#cartView, #invoiceItems) .cart-product-header { padding: 12px 8px; border-radius: 10px 10px 0 0; }
+  body :is(#cartView, #invoiceItems) .cart-product-header .cart-product-identity { align-items: start; gap: 8px; }
+  body :is(#cartView, #invoiceItems) .cart-product-header .cart-product-identity > img { width: 64px; height: 64px; flex-basis: 64px; border-radius: 6px; }
+  body :is(#cartView, #invoiceItems) .cart-product-toolbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -1025,19 +1029,19 @@ body #cartView .cart-product-details .cart-item-option-chip > .cart-item-option-
     padding: 8px 6px;
     gap: 8px;
   }
-  body #cartView .cart-product-toolbar .hn-cart-controls { flex: 0 0 auto; margin: 0; }
-  body #cartView .cart-product-details { --cart-option-name-size: 12px; padding: 0 8px 12px; }
-  body #cartView .cart-product-details .cart-item-option-group { padding: 9px 6px; }
-  body #cartView .cart-product-details .cart-item-option-label { padding-inline: 6px; font-size: 13px; }
-  body #cartView .cart-product-details .cart-item-option-chip { padding-inline: 6px; gap: 5px 6px; }
-  body #cartView .cart-product-header .cart-product-title-link { font-size: 14px; line-height: 1.85; }
-  body #cartView .cart-product-header .cart-product-unit-price > strong { font-size: 15px; }
-  body #cartView .cart-product-line-total > strong { font-size: 15px; }
-  body #cartView .cart-product-header .cart-product-unit-price > span,
-  body #cartView .cart-product-line-total > span { font-size: 12px; }
-  body #cartView .cart-product-details .cart-item-option-chip > small { font-size: 12px; }
-  body #cartView .cart-product-details .cart-item-option-chip > strong { font-size: 13px; }
-  body #cartView .cart-product-details .cart-item-option-chip > .cart-item-option-status {
+  body :is(#cartView, #invoiceItems) .cart-product-toolbar .hn-cart-controls { flex: 0 0 auto; margin: 0; }
+  body :is(#cartView, #invoiceItems) .cart-product-details { --cart-option-name-size: 12px; padding: 0 8px 12px; }
+  body :is(#cartView, #invoiceItems) .cart-product-details .cart-item-option-group { padding: 9px 6px; }
+  body :is(#cartView, #invoiceItems) .cart-product-details .cart-item-option-label { padding-inline: 6px; font-size: 13px; }
+  body :is(#cartView, #invoiceItems) .cart-product-details .cart-item-option-chip { padding-inline: 6px; gap: 5px 6px; }
+  body :is(#cartView, #invoiceItems) .cart-product-header .cart-product-title-link { font-size: 14px; line-height: 1.85; }
+  body :is(#cartView, #invoiceItems) .cart-product-header .cart-product-unit-price > strong { font-size: 15px; }
+  body :is(#cartView, #invoiceItems) .cart-product-line-total > strong { font-size: 15px; }
+  body :is(#cartView, #invoiceItems) .cart-product-header .cart-product-unit-price > span,
+  body :is(#cartView, #invoiceItems) .cart-product-line-total > span { font-size: 12px; }
+  body :is(#cartView, #invoiceItems) .cart-product-details .cart-item-option-chip > small { font-size: 12px; }
+  body :is(#cartView, #invoiceItems) .cart-product-details .cart-item-option-chip > strong { font-size: 13px; }
+  body :is(#cartView, #invoiceItems) .cart-product-details .cart-item-option-chip > .cart-item-option-status {
     width: 52px;
     min-width: 52px;
     height: 22px;

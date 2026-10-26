@@ -69,8 +69,11 @@
     heading.className = "electrical-submenu-heading";
     const copy = document.createElement("span");
     copy.className = "electrical-submenu-heading-copy";
-    const title = document.createElement("strong");
-    title.textContent = `زیرشاخه‌های ${categoryName || "محصولات"}`;
+    const title = document.createElement("a");
+    title.className = "electrical-submenu-heading-link";
+    title.href = window.HNCatalog?.categoryUrlForLabels(catalogCategoryPaths[categoryKey] || [categoryName])
+      || `/Search?q=${encodeURIComponent(categoryName || "محصولات")}`;
+    title.textContent = `همهٔ محصولات ${categoryName || "محصولات"}`;
     copy.append(title);
     const badges = document.createElement("div");
     badges.className = "electrical-submenu-heading-badges";
@@ -97,12 +100,14 @@
       card.dataset.index = String(index);
       const groupLink = document.createElement("a");
       groupLink.className = "category-mega-title";
-      groupLink.href = `Search?q=${encodeURIComponent(groupName)}`;
+      groupLink.href = window.HNCatalog?.categoryUrl(groupName)
+        || `/Search?q=${encodeURIComponent(groupName)}`;
       groupLink.textContent = groupName;
       card.append(groupLink);
       items.forEach((label) => {
         const link = document.createElement("a");
-        link.href = `Search?q=${encodeURIComponent(label)}`;
+        link.href = window.HNCatalog?.categoryUrl(label)
+          || `/Search?q=${encodeURIComponent(label)}`;
         link.textContent = label;
         card.append(link);
       });

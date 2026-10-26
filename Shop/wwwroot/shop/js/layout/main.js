@@ -1503,11 +1503,15 @@ $(function () {
     const $target = $(href);
     if (!$target.length) return;
     event.preventDefault();
+    const targetElement = $target[0];
+    const scrollMarginTop =
+      Number.parseFloat(window.getComputedStyle(targetElement).scrollMarginTop) || 0;
+    const scrollTop = Math.max(0, $target.offset().top - scrollMarginTop);
     if (prefersReducedMotion) {
-      window.scrollTo(0, $target.offset().top);
+      window.scrollTo(0, scrollTop);
       return;
     }
-    $("html, body").stop().animate({ scrollTop: $target.offset().top }, 500);
+    $("html, body").stop().animate({ scrollTop }, 500);
   });
 
   $document.on("click", '.mega-menu a[href="#collection"]', () => {
