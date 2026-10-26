@@ -289,7 +289,7 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
         if (key === "type") {
           const legacyOption = /^option\d+$/.test(value)
             ? createLegacyFilterOptions(key)[value]
-            : value;
+            : Object.entries(filterValueMetadata.type).find(([, metadata]) => metadata.slug === value)?.[0] || value;
           const productCategory = products.find((product) => product.type === legacyOption);
           const catalogCategory = window.HNCatalog?.categoryForSlug?.(value) ||
             window.HNCatalog?.categories?.[value] ||

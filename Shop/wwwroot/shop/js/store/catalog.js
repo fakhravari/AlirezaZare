@@ -77,15 +77,14 @@
       throw new Error("Category parent/path mismatch: " + category.id);
     category.path = derivedPath;
     delete category.storedPath;
+    freeze(category);
   }
+  const categoryEntriesByPath = new Map(categoryEntries.map((category) =>
+    [JSON.stringify(category.path.map(normalizeCategoryLabel)), category]));
   const categoryForPath = (path) => {
     const segments = (Array.isArray(path) ? path : [path]).map(normalizeCategoryLabel).filter(Boolean);
     if (!segments.length) return null;
-    const exactPath = categoryEntries.find((category) => {
-      const categoryPath = category.path.map(normalizeCategoryLabel);
-      return segments.length === categoryPath.length &&
-        segments.every((segment, index) => categoryPath[index] === segment);
-    });
+    const exactPath = categoryEntriesByPath.get(JSON.stringify(segments));
     return exactPath || (segments.length === 1 ? categoryEntriesByLabel.get(segments[0]) || null : null);
   };
   const categorySearchUrl = (category, fallback) => {
@@ -145,8 +144,8 @@
       return {...sharedDetail, specs: mergeSpecs(sharedDetail.specs), sharedSpecGroups, productSpecGroups};
     })();
     const resolvedSpecs = mergeSpecs(
-      detail.specs,
-      [...(product.specs || []), ...detail.sharedSpecGroups.flatMap((group) => group.specs),
+      detail.sharedSpecGroups.flatMap((group) => group.specs),
+      [...(product.specs || []),
         ...detail.productSpecGroups.flatMap((group) => group.specs)],
     );
     const specValueByLabel = new Map(resolvedSpecs.map(([label, value]) => [normalizeLabel(label), value]));

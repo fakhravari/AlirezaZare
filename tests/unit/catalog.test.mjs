@@ -91,10 +91,31 @@ test('broken relations, duplicate IDs and unknown schema versions fail explicitl
 
 test('resolved catalog is immutable and unknown IDs do not create product URLs', () => {
   const {window} = runtime();
+  const category = window.HNCatalog.categoryForSlug('hammer-drills');
+  assert.throws(() => { category.parentId = category.id; });
+  assert.throws(() => category.path.push('changed'));
+  assert.equal(window.HNCatalog.categoryContains('power-tools', category.id), true);
   assert.throws(() => window.HNCatalog.find(1).variants.battery.options.push({}));
   assert.throws(() => window.HNProducts.push({}));
   assert.equal(window.HNProductUrl({id: 999}), '/search');
   assert.equal(window.HNCatalog.find(999), null);
+});
+
+test('product specifications override shared values in highlighted attributes', () => {
+  const data = source();
+  const product = data.products[0];
+  data.details[product.detailId].specs = [['توان آزمایشی', 'shared']];
+  data.details[product.detailId].specGroups = [{title: 'Shared', specs: [['توان آزمایشی', 'shared group']]}];
+  product.specs = [['توان آزمایشی', 'product']];
+  product.specGroups = [];
+  data.attributeDefinitions.testPower = {
+    label: 'توان آزمایشی', source: 'spec:توان آزمایشی', is_highlight: true,
+  };
+  const value = catalog => runtime(catalog).window.HNCatalog.find(product.id)
+    .attributeValues.find(attribute => attribute.key === 'testPower').value;
+  assert.equal(value(data), 'product');
+  product.specGroups = [{title: 'Product', specs: [['توان آزمایشی', 'product group']]}];
+  assert.equal(value(data), 'product group');
 });
 
 test('every referenced media file exists with exact lowercase casing', () => {
