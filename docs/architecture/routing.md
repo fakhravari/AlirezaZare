@@ -7,7 +7,7 @@
 | مسیر | Controller → View | CSS مستقیم View | JS مستقیم View | نقطهٔ بررسی |
 |---|---|---|---|---|
 | `/` | [HomeController](../../Shop/Controllers/HomeController.cs) → [Index](../../Shop/Views/Home/Index.cshtml) | `pages/home-warmth.css` | — | خانه، grid و اسلایدرهای کالا |
-| `/search` | [ProductController](../../Shop/Controllers/ProductController.cs) → [List](../../Shop/Views/Product/List.cshtml) | `pages/search.css` | `pages/search.js` | فیلتر، مرتب‌سازی، URL و صفحه‌بندی |
+| `/search` | [ProductController](../../Shop/Controllers/ProductController.cs) → [List](../../Shop/Views/Product/List.cshtml) | `pages/search.css` (در `SearchStyles` section) | `pages/search.js` | فیلتر، مرتب‌سازی، URL و صفحه‌بندی |
 | `/products/{slug}` | [ProductController](../../Shop/Controllers/ProductController.cs) → [Details](../../Shop/Views/Product/Details.cshtml) | `pages/pages.css`، `pages/product-detail.css`، `pages/form-confirm-dialog.css`، `pages/product-detail-pricing.css`، `pages/product-detail-options.css` | `pages/form-confirm-dialog.js`، `pages/page-content.js` | main.product-detail-page، #productView و گالری |
 | `/cart` | [CartController](../../Shop/Controllers/CartController.cs) → [Index](../../Shop/Views/Cart/Index.cshtml) | `pages/pages.css`، `pages/checkout.css`، `pages/form-confirm-dialog.css` | `pages/page-content.js`، `pages/iran-places.js`، `pages/address-fields.js`، `pages/checkout.js`، `pages/form-confirm-dialog.js` | #cartView، آدرس و گزینه‌های سبد |
 | `/checkout` | [CheckoutController](../../Shop/Controllers/CheckoutController.cs) → [Index](../../Shop/Views/Checkout/Index.cshtml) | `pages/pages.css`، `pages/checkout.css` | `pages/page-content.js`، `pages/checkout.js` | فاکتور و روش پرداخت نمونه |
@@ -15,7 +15,7 @@
 | `/favorites` | [FavoritesController](../../Shop/Controllers/FavoritesController.cs) → [Index](../../Shop/Views/Favorites/Index.cshtml) | `pages/pages.css` | `pages/page-content.js` | #favoritesView؛ حالت خالی و حذف |
 | `/profile` و زیرمسیرها | [ProfileController](../../Shop/Controllers/ProfileController.cs) → [Index](../../Shop/Views/Profile/Index.cshtml) | `pages/pages.css`، `pages/checkout.css`، `pages/account-page.css` | `pages/page-content.js`، `pages/iran-places.js`، `pages/address-fields.js`، `pages/account-page.js`، `pages/orders-pagination.js` | نمای مشترک حساب و dialog ویرایش |
 | `/magazine` | [MagazineController](../../Shop/Controllers/MagazineController.cs) → [Index](../../Shop/Views/Magazine/Index.cshtml) | `pages/pages.css`، `pages/magazine-luxury.css` | `pages/magazine.js` | فیلتر مقاله و صفحه‌بندی |
-| `/magazine/{slug}` | [MagazineController](../../Shop/Controllers/MagazineController.cs) → [Details](../../Shop/Views/Magazine/Details.cshtml) | `pages/pages.css`، `pages/article-details.css`، `pages/form-confirm-dialog.css` | `pages/page-content.js`، `pages/article-details.js`، `pages/form-confirm-dialog.js` | TOC، progress، print و share |
+| `/magazine/{slug}` | [MagazineController](../../Shop/Controllers/MagazineController.cs) → [Details](../../Shop/Views/Magazine/Details.cshtml) | `pages/pages.css`، `pages/article-details.css`، `pages/form-confirm-dialog.css` | `pages/page-content.js`، `pages/form-confirm-dialog.js`، `pages/article-details.js` | TOC، progress، print و share |
 | `/brands` | [BrandsController](../../Shop/Controllers/BrandsController.cs) → [Index](../../Shop/Views/Brands/Index.cshtml) | `pages/pages.css`، `pages/brands.css` | `pages/page-content.js` | فهرست و شبکهٔ برندها |
 | `/brands/{slug}` | [BrandsController](../../Shop/Controllers/BrandsController.cs) → [Details](../../Shop/Views/Brands/Details.cshtml) | `pages/pages.css`، `pages/brands.css` | `pages/brand-product-count.js` | معرفی برند و شمارش محصول |
 | `/about` | [AboutController](../../Shop/Controllers/AboutController.cs) → [Index](../../Shop/Views/About/Index.cshtml) | `pages/pages.css`، `pages/about.css` | `pages/page-content.js` | معرفی فروشگاه |
@@ -46,4 +46,4 @@ Controller، لینک‌های Razor، تولید لینک در JS، canonical،
 
 [فهرست این بخش](README.md) · [فهرست مستندات](../README.md)
 
-آخرین تطبیق با کد: ۲۶ اکتبر ۲۰۲۶.
+آخرین تطبیق با کد: ۲۷ اکتبر ۲۰۲۶.

@@ -41,6 +41,7 @@ _Shop
 | مگامنو | خانه و inner markup/variant متفاوت؛ inner selectorهایی مثل `.page-mega-sidebar` | `shared-mega-menu.css`, `mega-menu-unified.css`, `quick-links-menu.css`; باز/بسته و category در `header-navigation.js` | trigger → panel، keyboard/ArrowDown/Escape، فضای خالی هدر، شاخهٔ پیش‌فرض و breakpoint 992 |
 | account popover/drawer هدر | `.shared-account-card`, `.shared-account-popover`, `.account-links` | `shared-account.css`; تعامل در `main.js` | کاربر خارج/وارد، desktop/mobile، Escape، focus و scroll |
 | cart/favorites/compare panels | `.page-cart-panel`, `.search-cart-drawer`, `.favorites-panel`, `.compare-panel` و item/footerها | `shared-cart.css`, `commerce.css`; `main.js` + `commerce.js` | سبد خالی/پر، تعداد زیاد آیتم، پنل باز و scroll داخلی، responsive |
+| پیوندهای مرتبط چهارگانه | `_RelatedLinks.cshtml` با چهار مقصد محصول، ارسال، ضمانت و FAQ | `layout/shared-related-links.css`؛ کارت‌های کامل بدون قاب بیرونی مشترک؛ ثبت مالک در `tools/ui-owners.json` | صفحهٔ محصول، برند، علاقه‌مندی، سبد و صفحه‌های خدمات؛ چهارستونه دسکتاپ، دوستونه تبلت و تک‌ستونه موبایل |
 | modal ورود/ثبت‌نام سراسری | `#loginModal`, `.login-modal-form-panel`, `.login-close` در `_Panels.cshtml` | layout در `style.css`, `luxury-theme.css`, `industrial-system.css`; قواعد فرم در `shared-login.css`; تعامل در `main.js` | ورود/ثبت‌نام/OTP، viewport کوتاه موبایل، اسکرول داخلی، بستن و بازگشت focus |
 | dialog ویرایش پروفایل | `.shared-login-modal.profile-edit-dialog` در `Views/Profile/Index.cshtml` | `shared-login.css` به‌علاوهٔ `account-page.css`; رفتار در View پروفایل | باز/بسته‌شدن native dialog، اعتبارسنجی و focus |
 | فرم آدرس | `_AddressForm`, `#addressDialog` در Cart و dialog آدرس پروفایل | `checkout.css`, `account-page.css`; `address-fields.js`, `iran-places.js`, `account-page.js` | شهر بدون استان، استان/شهر معتبر، validation و ذخیره؛ Checkout این فرم را ندارد و فقط آدرس انتخابی را پیش‌نمایش می‌کند |
@@ -90,6 +91,7 @@ _Shop
 - `shop/css/layout/empty-state-system.css`
 - `shop/css/layout/shared-surface-theme.css`
 - `shop/css/layout/page-hero-imagery.css`
+- `shop/css/layout/shared-page-hero.css`
 - `shop/css/layout/mega-menu-unified.css`
 - `shop/css/layout/shared-scrollbars.css`
 
@@ -130,4 +132,4 @@ storage/cart factory پیش از HNUI، resolver پیش از renderer و rendere
 
 [فهرست این بخش](README.md) · [فهرست مستندات](../README.md)
 
-آخرین تطبیق با کد: ۲۶ اکتبر ۲۰۲۶.
+آخرین تطبیق با کد: ۲۷ اکتبر ۲۰۲۶.

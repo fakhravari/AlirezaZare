@@ -117,6 +117,14 @@
         "Shop/wwwroot/shop/css/pages/contact.css"
       ]
     },
+    "related-page-links": {
+      "markup": [
+        "Shop/Views/Shared/_RelatedLinks.cshtml"
+      ],
+      "css": [
+        "Shop/wwwroot/shop/css/layout/shared-related-links.css"
+      ]
+    },
     "cart": {
       "markup": [
         "Shop/Views/Shared/_Panels.cshtml",

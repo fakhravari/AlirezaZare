@@ -1,0 +1,144 @@
+.flow-related.shared-related {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  overflow: visible;
+  margin-block: var(--quick-access-section-space, 32px) 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.flow-related.shared-related::before,
+.flow-related.shared-related::after {
+  display: none;
+}
+
+.flow-related.shared-related a {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  min-width: 0;
+  min-height: 94px;
+  padding: 14px 15px;
+  grid-template-columns: 46px minmax(0, 1fr) 20px;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid color-mix(in srgb, var(--industrial-yellow) 20%, white);
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 7px 20px -15px rgba(16, 42, 67, 0.38);
+  color: var(--industrial-navy);
+  text-decoration: none;
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease,
+    background-color 180ms ease;
+}
+
+.flow-related.shared-related a > i:first-child {
+  display: grid;
+  width: 46px;
+  height: 46px;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--industrial-yellow) 32%, white);
+  border-radius: 13px;
+  background: linear-gradient(145deg, #fff9e8, #f7edce);
+  color: #906700;
+  font-size: 20px;
+}
+
+.flow-related.shared-related a > span {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.flow-related.shared-related a > span strong {
+  color: var(--industrial-navy);
+  font-size: 14px;
+  font-weight: 750;
+  line-height: 1.6;
+}
+
+.flow-related.shared-related a > span small {
+  color: var(--industrial-steel);
+  font-size: 12px;
+  font-weight: 450;
+  line-height: 1.65;
+}
+
+.flow-related.shared-related a > i:last-child {
+  display: grid;
+  place-items: center;
+  color: #9a7837;
+  font-size: 18px;
+  transition: transform 180ms ease;
+}
+
+.flow-related.shared-related a:hover,
+.flow-related.shared-related a:focus-visible {
+  border-color: color-mix(in srgb, var(--industrial-yellow) 58%, white);
+  background: #fffdf6;
+  box-shadow: 0 12px 24px -15px rgba(90, 69, 25, 0.28);
+  color: var(--industrial-navy);
+  transform: translateY(-2px);
+}
+
+.flow-related.shared-related a:hover > i:last-child,
+.flow-related.shared-related a:focus-visible > i:last-child {
+  transform: translateX(-3px);
+}
+
+.flow-related.shared-related a:focus-visible {
+  outline: 3px solid rgba(246, 197, 21, 0.62);
+  outline-offset: 3px;
+}
+
+@media (max-width: 991px) {
+  .flow-related.shared-related {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 575px) {
+  .flow-related.shared-related {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+    padding: 11px;
+    border-radius: 18px;
+  }
+
+  .flow-related.shared-related a {
+    min-height: 82px;
+    padding: 12px;
+    grid-template-columns: 42px minmax(0, 1fr) 18px;
+    gap: 10px;
+  }
+
+  .flow-related.shared-related a > i:first-child {
+    width: 42px;
+    height: 42px;
+    font-size: 18px;
+  }
+
+  .flow-related.shared-related a > span strong {
+    font-size: 13px;
+  }
+
+  .flow-related.shared-related a > span small {
+    font-size: 11px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flow-related.shared-related a,
+  .flow-related.shared-related a > i:last-child {
+    transition: none;
+  }
+}
