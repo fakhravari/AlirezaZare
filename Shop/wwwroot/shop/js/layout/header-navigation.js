@@ -64,6 +64,19 @@
     measurement: ["ابزار اندازه‌گیری"],
   };
 
+  const categoryMenuUrl = (label, parentLabel, rootLabels) => {
+    const isTextSearch = (url) =>
+      Boolean(url && new URL(url, window.location.href).searchParams.has("q"));
+    const direct = window.HNCatalog?.categoryUrl(label);
+    if (direct && !isTextSearch(direct)) return direct;
+    const parent = parentLabel && window.HNCatalog?.categoryUrlForLabels([parentLabel]);
+    if (parent && !isTextSearch(parent)) return parent;
+    const root = window.HNCatalog?.categoryUrlForLabels(rootLabels || []);
+    return root && !isTextSearch(root)
+      ? root
+      : direct || `/Search?q=${encodeURIComponent(label || "محصولات")}`;
+  };
+
   const renderCategoryGroups = (host, groups, categoryName, categoryKey) => {
     const heading = document.createElement("div");
     heading.className = "electrical-submenu-heading";
@@ -86,7 +99,8 @@
       badge.append(icon, document.createTextNode(label));
       badges.append(badge);
     };
-    const categoryPaths = new Set(catalogCategoryPaths[categoryKey] || [categoryName]);
+    const categoryLabels = catalogCategoryPaths[categoryKey] || [categoryName];
+    const categoryPaths = new Set(categoryLabels);
     const productCount = (window.HNProducts || []).filter((product) =>
       product.categoryPath?.some((label) => categoryPaths.has(label)),
     ).length;
@@ -100,14 +114,12 @@
       card.dataset.index = String(index);
       const groupLink = document.createElement("a");
       groupLink.className = "category-mega-title";
-      groupLink.href = window.HNCatalog?.categoryUrl(groupName)
-        || `/Search?q=${encodeURIComponent(groupName)}`;
+      groupLink.href = categoryMenuUrl(groupName, null, categoryLabels);
       groupLink.textContent = groupName;
       card.append(groupLink);
       items.forEach((label) => {
         const link = document.createElement("a");
-        link.href = window.HNCatalog?.categoryUrl(label)
-          || `/Search?q=${encodeURIComponent(label)}`;
+        link.href = categoryMenuUrl(label, groupName, categoryLabels);
         link.textContent = label;
         card.append(link);
       });

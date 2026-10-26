@@ -281,13 +281,14 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
         ]),
       ];
       values.forEach((value) => {
-        // Accept slug, legacy English brand values, and Persian labels in shared links.
+        // Accept filter slugs, catalog category IDs, legacy option IDs, and Persian labels.
+        const catalogCategory = key === "type" ? window.HNCatalog?.categories?.[value] : null;
         const legacyOption = /^option\d+$/.test(value)
           ? createLegacyFilterOptions(key)[value]
           : undefined;
         const slugValue = Object.hasOwn(filterOptions[key], value)
           ? filterOptions[key][value]
-          : legacyOption || value;
+          : catalogCategory?.fa || legacyOption || value;
         const label =
           key === "brand"
             ? brandPersianLabels[slugValue]

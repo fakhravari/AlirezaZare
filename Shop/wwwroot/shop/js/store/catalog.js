@@ -50,9 +50,9 @@
     });
   };
   const categorySearchUrl = (entries, fallback) => {
-    const types = [...new Set(entries.map((category) => category.label).filter(Boolean))];
+    const categoryIds = [...new Set(entries.map((category) => category.id).filter(Boolean))];
     const params = new URLSearchParams();
-    if (types.length) types.forEach((type) => params.append("product-group", type));
+    if (categoryIds.length) categoryIds.forEach((id) => params.append("product-group", id));
     else params.set("q", String(fallback || "ابزار و تجهیزات").trim());
     return "/Search?" + params.toString();
   };

@@ -357,8 +357,9 @@
 
 .home-page .electrical-submenu-heading-link:is(:hover, :focus-visible),
 .inner-page #mainNav .electrical-submenu-heading-link:is(:hover, :focus-visible) {
-  color: var(--mega-gold-bright);
+  color: var(--mega-ink);
   text-decoration: underline;
+  text-decoration-color: rgba(16, 42, 67, 0.42);
   text-underline-offset: 3px;
 }
 
