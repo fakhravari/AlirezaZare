@@ -90,9 +90,21 @@ window.HNUI.ready(() => window.HNUI.mount("checkout", document, () => {
     });
     const checkoutMethod = document.querySelector("#checkoutPaymentMethod");
     if (checkoutMethod) {
-      checkoutMethod.textContent = selectedPaymentMethod
-        ? `پرداخت از طریق ${paymentMethods[selectedPaymentMethod]}`
-        : "روش پرداختی انتخاب نشده است؛ به سبد خرید بازگردید.";
+      checkoutMethod.replaceChildren();
+      if (selectedPaymentMethod) {
+        const logo = document.createElement("img");
+        logo.className = "checkout-payment-logo";
+        logo.src = "/content/payments/zarinpal.svg";
+        logo.alt = "نشان زرین‌پال";
+        logo.width = 48;
+        logo.height = 48;
+        logo.decoding = "async";
+        const label = document.createElement("span");
+        label.textContent = `پرداخت از طریق ${paymentMethods[selectedPaymentMethod]}`;
+        checkoutMethod.append(logo, label);
+      } else {
+        checkoutMethod.textContent = "روش پرداختی انتخاب نشده است؛ به سبد خرید بازگردید.";
+      }
     }
   }
 

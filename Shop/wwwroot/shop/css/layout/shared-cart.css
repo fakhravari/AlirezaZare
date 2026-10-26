@@ -597,7 +597,7 @@ body > .cart-panel .empty-cart > a:hover > i,
   display: none !important;
 }
 
-body #cartView .cart-product-copy .cart-item-option-chip > .cart-item-option-status {
+body :is(#cartView, #invoiceItems) .cart-product-copy .cart-item-option-chip > .cart-item-option-status {
   display: inline-flex;
   align-items: center;
   flex: 0 0 auto;
@@ -610,13 +610,13 @@ body #cartView .cart-product-copy .cart-item-option-chip > .cart-item-option-sta
   line-height: 1.5;
   white-space: nowrap;
 }
-body #cartView .cart-product-copy .cart-item-option-status.is-required {
+body :is(#cartView, #invoiceItems) .cart-product-copy .cart-item-option-status.is-required {
   border-color: #ecdbb2;
   background: #fff7e4;
   color: #80652d;
   font-weight: 650;
 }
-body #cartView .cart-product-copy .cart-item-option-status.is-optional {
+body :is(#cartView, #invoiceItems) .cart-product-copy .cart-item-option-status.is-optional {
   border-color: #dbe4ed;
   background: #eff4f8;
   color: #52677d;

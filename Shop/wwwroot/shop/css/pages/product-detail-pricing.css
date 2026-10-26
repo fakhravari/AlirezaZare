@@ -93,6 +93,11 @@
   white-space: nowrap;
 }
 
+#productView .product-detail-extras-price > strong.is-no-extra {
+  font-size: 13px;
+  font-weight: 700;
+}
+
 #productView .product-detail-total-price {
   grid-area: total;
   gap: 6px;
@@ -113,6 +118,13 @@
   font-weight: 950;
   line-height: 1.4;
   text-align: left;
+  white-space: nowrap;
+}
+
+#productView .product-detail-total-price .detail-price-unit {
+  margin-inline-start: 5px;
+  font-size: 0.58em;
+  font-weight: 800;
   white-space: nowrap;
 }
 

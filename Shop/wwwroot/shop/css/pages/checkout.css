@@ -1211,6 +1211,23 @@ body .selected-address-card-heading > strong {
   color: var(--industrial-yellow);
   box-shadow: 0 7px 15px -10px var(--industrial-navy);
 }
+.invoice-page .invoice-payment-title #checkoutPaymentMethod {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+}
+.invoice-page .checkout-payment-logo {
+  display: block;
+  width: 48px;
+  height: 48px;
+  flex: 0 0 48px;
+  padding: 4px;
+  border: 1px solid color-mix(in srgb, var(--industrial-yellow) 28%, white);
+  border-radius: 13px;
+  background: #fff;
+  object-fit: contain;
+  box-shadow: 0 5px 12px -9px var(--industrial-navy);
+}
 .invoice-page .invoice-products-title {
   margin-top: 20px;
   padding: 18px 0 12px;
