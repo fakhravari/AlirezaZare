@@ -15,7 +15,7 @@
 | `/favorites` | [FavoritesController](../../Shop/Controllers/FavoritesController.cs) → [Index](../../Shop/Views/Favorites/Index.cshtml) | `pages/pages.css` | `pages/page-content.js` | #favoritesView؛ حالت خالی و حذف |
 | `/profile` و زیرمسیرها | [ProfileController](../../Shop/Controllers/ProfileController.cs) → [Index](../../Shop/Views/Profile/Index.cshtml) | `pages/pages.css`، `pages/checkout.css`، `pages/account-page.css` | `pages/page-content.js`، `pages/iran-places.js`، `pages/address-fields.js`، `pages/account-page.js`، `pages/orders-pagination.js` | نمای مشترک حساب و dialog ویرایش |
 | `/magazine` | [MagazineController](../../Shop/Controllers/MagazineController.cs) → [Index](../../Shop/Views/Magazine/Index.cshtml) | `pages/pages.css`، `pages/magazine-luxury.css` | `pages/magazine.js` | فیلتر مقاله و صفحه‌بندی |
-| `/magazine/{slug}` | [MagazineController](../../Shop/Controllers/MagazineController.cs) → [Details](../../Shop/Views/Magazine/Details.cshtml) | `pages/pages.css`، `pages/article-details.css` | `pages/page-content.js`، `pages/article-details.js` | TOC، progress، print و share |
+| `/magazine/{slug}` | [MagazineController](../../Shop/Controllers/MagazineController.cs) → [Details](../../Shop/Views/Magazine/Details.cshtml) | `pages/pages.css`، `pages/article-details.css`، `pages/form-confirm-dialog.css` | `pages/page-content.js`، `pages/article-details.js`، `pages/form-confirm-dialog.js` | TOC، progress، print و share |
 | `/brands` | [BrandsController](../../Shop/Controllers/BrandsController.cs) → [Index](../../Shop/Views/Brands/Index.cshtml) | `pages/pages.css`، `pages/brands.css` | `pages/page-content.js` | فهرست و شبکهٔ برندها |
 | `/brands/{slug}` | [BrandsController](../../Shop/Controllers/BrandsController.cs) → [Details](../../Shop/Views/Brands/Details.cshtml) | `pages/pages.css`، `pages/brands.css` | `pages/brand-product-count.js` | معرفی برند و شمارش محصول |
 | `/about` | [AboutController](../../Shop/Controllers/AboutController.cs) → [Index](../../Shop/Views/About/Index.cshtml) | `pages/pages.css`، `pages/about.css` | `pages/page-content.js` | معرفی فروشگاه |
@@ -33,7 +33,7 @@
 
 - `Program.cs` گزینهٔ `LowercaseUrls = true` و مسیر پیش‌فرض `{controller=Home}/{action=Index}/{id?}` را دارد. attribute route را کنار این مسیر بخوانید؛ routeهای تولیدشده lowercase هستند.
 - `/search` به `ProductController.Index` و View `List` می‌رسد. کلاس body از controller/action ساخته می‌شود: `mobile-page--product-index`؛ نام View در این کلاس نقشی ندارد.
-- جزئیات محصول شناسه را از بخش عددی بعد از آخرین خط تیره می‌خواند. canonical واقعی از نام انگلیسی کاتالوگ ساخته می‌شود. `/products/{id:int}` و `/Product?id=…` با ۳۰۱ به `/products/product-{id}` می‌روند؛ این مقصد را با slug canonical یکسان فرض نکنید. رفتار دقیق در [راهنمای محصول](../store/product.md) است.
+- قرارداد slug صریح محصول، تطبیق canonical و هدایت مستقیم مسیرهای قدیمی در [راهنمای محصول](../store/product.md) مستند است؛ مسیر واسط `/products/product-{id}` تولید نمی‌شود.
 - `/account` مسیر سازگاری پروفایل است. `/profile`، `/profile/orders`، `/profile/addresses` و `/profile/favorites` یک View دارند. `/profile/edit` به `/profile` برمی‌گردد و صفحهٔ مستقلی ندارد.
 - مسیر قدیمی `/magazine/details/{slug}` به مسیر جدید مقاله هدایت می‌شود.
 - `/robots.txt` و `/sitemap.xml` از `SeoController` می‌آیند و View صفحه ندارند؛ [راهنمای SEO](../seo/metadata.md) را ببینید.
@@ -46,4 +46,4 @@ Controller، لینک‌های Razor، تولید لینک در JS، canonical،
 
 [فهرست این بخش](README.md) · [فهرست مستندات](../README.md)
 
-آخرین تطبیق با کد: ۲۱ اکتبر ۲۰۲۶.
+آخرین تطبیق با کد: ۲۶ اکتبر ۲۰۲۶.

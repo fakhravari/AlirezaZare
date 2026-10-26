@@ -11,11 +11,11 @@
 | API | نقش |
 |---|---|
 | `HNUI.STORAGE_KEYS` | کلیدهای پایهٔ auth/cart |
-| `HNUI.storage.get/set/remove/json` | خواندن/نوشتن مقاوم در برابر خطای browser storage؛ `set` برای favorite/compare رویداد list را dispatch می‌کند |
+| `HNUI.storage.get/set/remove/json/writable` | خواندن/نوشتن مقاوم در برابر خطای browser storage؛ `set` برای favorite/compare رویداد list را dispatch می‌کند |
 | `HNUI.ready(callback)` | اجرای callback پس از آماده‌شدن DOM |
 | `HNUI.mount(name, root, initialize)` | اجرای یک‌باره برای نام مؤلفه و root؛ root غایب یا نصب دوباره false برمی‌گرداند؛ خطای initialize دوباره قابل تلاش است |
 | `HNUI.EVENTS`, `HNUI.emit(type, detail)` | نام ثابت رویداد و کنترل payloadهای cart/auth؛ برای رویداد مشترک CustomEvent موازی نسازید |
-| `HNUI.cart.read/write/add/update/remove/totals/renderOptions/renderControls` | normalize مشترک، renderer مشترک گزینه‌ها و کنترل تعداد/حذف، validation ساده و مدیریت سبد؛ `write` رویداد cart را dispatch می‌کند |
+| `HNUI.cart.read/write/add/update/remove/totals/quantityLimit/renderOptions/renderControls` | normalize مشترک، renderer مشترک گزینه‌ها و کنترل تعداد/حذف، validation ساده و مدیریت سبد؛ `write` رویداد cart را dispatch می‌کند |
 | `HNUI.auth.isLoggedIn/login/logout/requireLogin` | وضعیت ورود در مرورگر؛ `requireLogin(resume)` برای ورود نداشتن رویداد `hn:auth-required` می‌فرستد و callback را پس از ورود ادامه می‌دهد |
 | `HNUI.scrollLock.lock/unlock` | شمارندهٔ قفل scroll با کلاس `ui-scroll-locked` |
 | `HNUI.dialog` | helperهای dialog/focus/keyboard؛ جزئیات دقیق را در همان فایل بخوانید |
@@ -49,12 +49,12 @@
 | `js/pages/checkout.js` | انتخاب آدرس، روش پرداخت و هماهنگی state سبد | روش پرداخت فعلاً demo است؛ Cart/Checkout هر دو consumer هستند |
 | `js/pages/address-fields.js`, `iran-places.js` | dependent province/city selects و dataset استان‌ها | load order و markup field IDs/data |
 | `js/pages/orders-pagination.js` | صفحه‌بندی سفارش‌ها | URL state/popstate و empty/list state |
-| `js/pages/magazine.js` | فیلتر/مرتب‌سازی و تاریخچهٔ URL مقاله‌ها | `history`, query string و back/forward |
+| `js/pages/magazine.js` | فیلتر/صفحه‌بندی و تاریخچهٔ URL مقاله‌ها | `history`, query string و back/forward |
 | `js/pages/article-details.js` | print، فهرست مطالب، پیشرفت مطالعه و scroll/resize | sticky offset، passive listener و کاهش حرکت |
 | `js/pages/brand-product-count.js` | شمارش محصولات برند | دادهٔ HNProducts و View جزئیات برند |
 | `js/pages/contact.js` | اعتبارسنجی فرم تماس و نمایش وضعیت ارسال | پیام status؛ endpoint ارسال در سرور تعریف نشده است |
 | `js/pages/page-content.js` | share/copy، forms، CTA و pagination عمومی بعضی صفحه‌ها | script در چند route مشترک است؛ handler دوباره ثبت نشود |
-| `js/pages/form-confirm-dialog.js` | dialog تأیید فرم | backdrop/ESC و focus; در Product/Cart/Compare/Contact load می‌شود |
+| `js/pages/form-confirm-dialog.js` | dialog تأیید فرم | backdrop/ESC و focus; در Product/Cart/Compare/Contact و جزئیات Magazine load می‌شود |
 | `js/core/electrical-content.js` | ریزتعامل/محتوای عمومی برخی صفحه‌ها | پس از section Scripts اجرا می‌شود |
 
 ## localStorage: کلیدهای شناخته‌شده
@@ -80,7 +80,8 @@
 | `hn-payment-method-v2` | روش پرداخت انتخابی در مرورگر |
 | `hn-profile` | دادهٔ profile در `Views/Profile/Index.cshtml` |
 | `hn-product-${type}-${productId}` | کلید feedback در `commerce.js`؛ `type` برابر `reviews` یا `questions` است. داده‌های اولیه با دادهٔ ذخیره‌شده ترکیب می‌شوند. |
-| `hn-article-feedback-v1-${slug}` | دیدگاه و پسند محلی مقاله؛ نمونه‌های اولیه با برچسب نمایشی هستند و هیچ ارسال سروری انجام نمی‌شود. |
+| `hn-article-feedback-v1-${slug}` | آرایهٔ خام دیدگاه‌های محلی مقاله، حداکثر ۵۰ مورد؛ این کلید در قرارداد envelope نسخه‌دار storage.js ثبت نشده و `v1` فقط بخشی از نام کلید است. |
+| `hn-article-feedback-v1-${slug}-liked` | وضعیت پسند مقاله به‌صورت رشتهٔ `true`/`false`؛ شمار پایه نمونه است و درخواست عمومی سرور ندارد. |
 
 ممکن است scriptهای دیگر کلید تازه اضافه کنند؛ این جدول هنگام تغییر باید با `rg -n "localStorage|storage\.(get|set|json)|hn-" Shop/wwwroot/shop/js Shop/Views` تطبیق داده شود.
 
@@ -90,6 +91,7 @@
 |---|---|---|
 | `hn:cart-change` | `detail`: آرایهٔ cart نرمال‌شده | header/panel، commerce و checkout را sync می‌کند |
 | `hn:cart-added` | `detail: { product, items, trigger }` | پنل cart ممکن است باز شود؛ focus trigger را حفظ کنید |
+| `hn:cart-stock-limit` | `detail: { product, stock, maxCartQuantity, limit, requested, remaining, reason }`؛ reason برابر `stock` یا `cart` | اعلام محدودیت موجودی یا سقف تعداد هنگام add/update؛ بازخورد آن در `main.js` نمایش داده می‌شود |
 | `hn:auth-change` | `detail`: boolean | هدر و بخش account را تازه می‌کند |
 | `hn:auth-required` | `detail: { resume: Function|null }` | بازکردن مدال ورود؛ callback پس از ورود آزمایشی اجرا می‌شود |
 | `hn:lists-change` | بدون `detail` | شمارنده‌ها، favorite/compare button و صفحه‌ها را sync می‌کند |

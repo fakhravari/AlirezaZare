@@ -17,6 +17,7 @@ Controller / ساخت PageModel
 |---|---|
 | مدل metadata صفحه | `Shop/Models/PageModel.cs` (`SeoModel`) |
 | پیش‌فرض و تنظیمات سراسری | `Shop/Models/SeoMetadataOptions.cs` |
+| ساخت origin و URL مطلق | `Shop/Services/SeoUrlBuilder.cs` |
 | ساخت meta و JSON-LD | `Shop/Views/Shared/_SeoMetadata.cshtml` |
 | endpointهای crawl | `Shop/Controllers/SeoController.cs` |
 | تعریف FAQ مشترک | `Shop/Models/PageModel.cs` (`FaqCatalog`) |
@@ -43,7 +44,7 @@ Controller / ساخت PageModel
 
 | کلید | کاربرد |
 |---|---|
-| `Seo:SiteUrl` | origin اصلی و عمومی سایت، مانند `https://example.com`؛ برای canonical، URL تصویرهای اجتماعی، robots و sitemap. در `Shop/appsettings.json` روی `https://bs-shop.ir/` تنظیم شده و در محیط انتشار با `Seo__SiteUrl` قابل بازنویسی است. اگر خالی باشد، origin درخواست جاری به‌عنوان fallback استفاده می‌شود. |
+| `Seo:SiteUrl` | origin اصلی و عمومی سایت، مانند `https://example.com`؛ برای canonical، URL تصویرهای اجتماعی، robots و sitemap. در `Shop/appsettings.json` روی `https://bs-shop.ir/` تنظیم شده و در محیط انتشار با `Seo__SiteUrl` قابل بازنویسی است. فقط origin مطلق HTTP/HTTPS بدون نام کاربری، مسیر اضافی، query یا fragment پذیرفته می‌شود؛ مقدار خالی یا نامعتبر به origin درخواست جاری برمی‌گردد. |
 | `Seo:SiteName` | نام مشترک Open Graph و JSON-LD |
 | `Seo:Locale` | locale شبکه‌های اجتماعی؛ پیش‌فرض `fa_IR` |
 | `Seo:DefaultImagePath` | تصویر اجتماعی جایگزین؛ پیش‌فرض تصویر hero فروشگاه |
@@ -57,7 +58,7 @@ Controller / ساخت PageModel
 
 توکن‌های تأیید و شناسه‌های شبکهٔ اجتماعی تا زمان دریافت مقدار واقعی از مالک سایت خالی می‌مانند؛ مقدار نمونه را واقعی تلقی یا در کد hardcode نکنید.
 
-برای جلوگیری از انتشار دامنهٔ alias یا Host ارسالی درخواست در URLهای ایندکس، `Seo:SiteUrl` در `Shop/appsettings.json` روی origin اصلی `https://bs-shop.ir/` تنظیم شده است. محیط انتشار می‌تواند آن را با متغیر `Seo__SiteUrl` بازنویسی کند. اگر تنظیم خالی باشد، کد برای سازگاری از scheme و Host درخواست استفاده می‌کند.
+برای جلوگیری از انتشار دامنهٔ alias یا Host ارسالی درخواست در URLهای ایندکس، `Seo:SiteUrl` در `Shop/appsettings.json` روی origin اصلی `https://bs-shop.ir/` تنظیم شده است. محیط انتشار می‌تواند آن را با متغیر `Seo__SiteUrl` بازنویسی کند. اگر تنظیم خالی یا نامعتبر باشد، کد برای سازگاری از scheme و Host درخواست استفاده می‌کند. `SiteRoot` مسیر `Request.PathBase` را نیز لحاظ می‌کند. تصویر hero محصول در View از همان `Seo.ImageUrl` مطلق مصرف می‌شود؛ در اجرای localhost با تنظیم فعلی، URL آن نیز روی دامنهٔ تنظیم‌شده است.
 
 ## robots و sitemap
 
@@ -65,10 +66,12 @@ Controller / ساخت PageModel
 
 | مسیر | رفتار |
 |---|---|
-| `/robots.txt` | قواعد crawl و نشانی sitemap را برمی‌گرداند |
+| `/robots.txt` | `User-agent: *`، `Allow: /` و URL sitemap؛ قاعدهٔ `Disallow` ندارد |
 | `/sitemap.xml` | صفحه‌های ثابت و فهرست‌های ساخته‌شده از کاتالوگ برند، مقاله و محصول را برمی‌گرداند |
 
 هنگام افزودن route یا تغییر slug، هم منبع تولید sitemap را بررسی کنید و هم URL canonical و لینک‌های قابل‌مشاهده را. خروجی sitemap تضمین نمی‌کند صفحه از نظر محتوایی آمادهٔ index است.
+
+سبد، تسویه، مقایسه، علاقه‌مندی و پروفایل در sitemap نیستند. هر دو پاسخ robots و sitemap هدر cache یک‌ساعته دارند. Breadcrumb محصول در JSON-LD فعلاً فقط «خانه → محصول» است؛ renderer مرورگر دسته‌های میانی را به مسیر نمایشی اضافه می‌کند و JSON-LD را بازنویسی نمی‌کند. بنابراین هماهنگی کامل این دو مسیر هنوز پیاده نشده است.
 
 ## پوسته و دسترس‌پذیری مشترک
 
@@ -87,4 +90,4 @@ favicon فعلی SVG برداری برند در `wwwroot/content/identity/store-
 
 [فهرست این بخش](README.md) · [فهرست مستندات](../README.md)
 
-آخرین تطبیق با کد: ۲۱ اکتبر ۲۰۲۶.
+آخرین تطبیق با کد: ۲۶ اکتبر ۲۰۲۶.
