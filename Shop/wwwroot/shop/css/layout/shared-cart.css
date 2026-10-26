@@ -897,9 +897,12 @@ body :is(#cartView, #invoiceItems) .cart-product-details .cart-item-options {
   gap: 12px;
 }
 body :is(#cartView, #invoiceItems) .cart-product-details .cart-item-option-group {
+  display: grid;
   box-sizing: border-box;
   width: 100%;
   min-width: 0;
+  justify-items: stretch;
+  align-items: start;
   gap: 8px;
   padding: 10px;
   border: 1px solid #dce4eb;
