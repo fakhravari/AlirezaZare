@@ -1043,7 +1043,10 @@
 
   #productView .product-detail-summary {
     margin-bottom: 150px;
-    padding: 0;
+    padding: 12px;
+    border: 1px solid #e3e9ef;
+    border-radius: 16px;
+    background: #fff;
   }
 
   #productView .product-purchase-panel {
