@@ -47,6 +47,11 @@
   text-align: justify;
   text-align-last: right;
 }
+
+footer .footer-main > .col-lg-4:first-child > p {
+  text-align: justify !important;
+}
+
 .site-footer .footer-socials {
   display: flex;
   gap: 9px;

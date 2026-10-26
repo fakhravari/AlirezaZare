@@ -40,8 +40,8 @@
   background: #f6f8f9 !important;
 }
 
-.product-card .product-image > a > img,
-.product-card .product-image > img,
+.product-card:not(.product-detail-related-card) .product-image > a > img,
+.product-card:not(.product-detail-related-card) .product-image > img,
 .search-product.product-card .search-product-image img {
   padding: 12px;
   object-fit: contain !important;

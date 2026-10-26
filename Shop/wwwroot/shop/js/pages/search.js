@@ -346,6 +346,17 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
     $$(".filter-option input[data-filter]").forEach((input) => {
       input.checked = state[input.dataset.filter].has(input.value);
     });
+    const openFilterSlugs = new Set();
+    if (state.brand.size) openFilterSlugs.add("brand");
+    if (state.type.size) openFilterSlugs.add("product-group");
+    $$(".filter-group").forEach((group) => {
+      const open = openFilterSlugs.has(group.dataset.filterSlug);
+      group.classList.toggle("open", open);
+      group.querySelector(":scope > button")?.setAttribute(
+        "aria-expanded",
+        String(open),
+      );
+    });
     $("#availabilityFilter").value = state.availability;
     $("#discountFilter").checked = state.discountOnly;
     $("#minPrice").value = state.minPrice;
