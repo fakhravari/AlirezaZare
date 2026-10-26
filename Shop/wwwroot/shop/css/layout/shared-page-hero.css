@@ -1,0 +1,54 @@
+/* Keep title, description and supporting tags consistent across inner-page heroes. */
+.inner-page .page-hero > .container > h1 {
+  max-width: 100%;
+  margin: 14px 0 10px;
+  font-size: clamp(32px, 3.2vw, 52px);
+  line-height: 1.45;
+  letter-spacing: -0.8px;
+}
+
+.inner-page .page-hero > .container > p {
+  max-width: none;
+  margin: 0;
+  font-size: clamp(14px, 1vw, 16px);
+  line-height: 1.9;
+}
+
+.inner-page .page-hero > .container > .hero-trail {
+  align-items: stretch;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.inner-page .page-hero > .container > .hero-trail > span {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  line-height: 1.6;
+  text-align: center;
+}
+
+@media (max-width: 767px) {
+  .inner-page .page-hero > .container > h1 {
+    margin: 10px 0 8px;
+    font-size: clamp(25px, 5vw, 34px);
+    line-height: 1.5;
+    letter-spacing: -0.4px;
+  }
+
+  .inner-page .page-hero > .container > p {
+    font-size: 15px;
+    line-height: 1.85;
+  }
+
+  .inner-page .page-hero > .container > .hero-trail {
+    margin-top: 12px;
+  }
+
+  .inner-page .page-hero > .container > .hero-trail > span {
+    min-height: 38px;
+    padding: 7px 9px;
+  }
+}

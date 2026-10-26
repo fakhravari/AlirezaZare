@@ -180,6 +180,12 @@
         "Shop/wwwroot/shop/css/layout/shared-footer.css"
       ]
     },
+    "page-hero": {
+      "selector": "\\.page-hero",
+      "css": [
+        "Shop/wwwroot/shop/css/layout/shared-page-hero.css"
+      ]
+    },
     "form-validation": {
       "js": [
         "Shop/wwwroot/shop/js/core/form-validation.js"
