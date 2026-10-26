@@ -401,6 +401,26 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
           .join("");
     });
   }
+  function syncCategoryFilters() {
+    const facets = window.HNCatalog.categoryFacets(state.type);
+    for (const key of ['brand', 'type', 'movement', 'strap', 'color']) {
+      const container = $(`#${key}Filters`);
+      const allowed = new Set(facets[key]);
+      if (key !== 'type') {
+        for (const value of state[key]) if (!allowed.has(value)) state[key].delete(value);
+      }
+      const enabled = isFilterable(key);
+      container.closest('.filter-group').hidden = !enabled || !allowed.size;
+      container.closest('.filter-group').style.display = enabled && allowed.size ? '' : 'none';
+      container.querySelectorAll('input[data-filter]').forEach(input => {
+        const visible = allowed.has(input.value);
+        input.closest('.filter-option').hidden = !visible;
+        input.closest('.filter-option').style.display = visible ? '' : 'none';
+        input.disabled = !visible;
+        input.checked = state[key].has(input.value);
+      });
+    }
+  }
   function getFiltered() {
     const selectedTypes = [...state.type];
     let list = products.filter(
@@ -444,6 +464,7 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
   }
   function render(reset = false, returnToStart = false) {
     if (reset) state.visible = 9;
+    syncCategoryFilters();
     const list = getFiltered();
     const shown = list.slice(0, state.visible);
     const finished = list.length > 0 && state.visible >= list.length;

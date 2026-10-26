@@ -196,6 +196,21 @@
     });
   });
   const byId = new Map(products.map((product) => [String(product.id), product]));
+  // Facet choices depend on the selected branch, independently of other filters.
+  const categoryFacets = (selectedCategories = []) => {
+    const selected = [...selectedCategories];
+    const scoped = products.filter(product => !selected.length ||
+      selected.some(category => categoryContains(category, product.categoryId)));
+    const values = key => [...new Set(scoped.map(product => product[key]).filter(Boolean))];
+    return {
+      brand: values('brand'), movement: values('powerSource'), strap: values('useCase'),
+      color: [...new Set(scoped.flatMap(product => product.colors.map(color => color.slug)))],
+      type: categoryEntries.filter(category =>
+        (!selected.length || selected.some(parent => categoryContains(parent, category.id))) &&
+        scoped.some(product => categoryContains(category.id, product.categoryId)))
+        .map(category => category.slug),
+    };
+  };
   const productUrl = (productOrId) => {
     const product = byId.get(String(productOrId?.id ?? productOrId));
     return product ? "/products/" + product.slug + "-" + product.id : "/search";
@@ -207,5 +222,6 @@
   window.HNCatalog = Object.freeze({schemaVersion: data.schemaVersion, products: window.HNProducts,
     brands: freeze(data.brands), categories: freeze(data.categories), attributeDefinitions: freeze(attributeDefinitions), collections: freeze(data.collections),
     find: (id) => byId.get(String(id)) || null, url: productUrl,
-    categoryUrl, categoryUrlForLabels, categoryForSlug, categoryForLabel, categoryContains, categoryMatchesPath});
+    categoryUrl, categoryUrlForLabels, categoryForSlug, categoryForLabel, categoryContains, categoryMatchesPath,
+    categoryFacets});
 })(window, document);

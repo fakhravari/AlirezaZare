@@ -77,6 +77,26 @@ test('all products use leaf categories and category paths follow parent links', 
   }
 });
 
+test('category facets exclude unrelated branches and handle empty and multiple selections', () => {
+  const {window} = runtime();
+  const catalog = window.HNCatalog;
+  const drills = catalog.categoryFacets(['drill-drivers']);
+  const expected = catalog.products.filter(product => catalog.categoryContains('drill-drivers', product.categoryId));
+  assert.deepEqual(plain(drills.brand).sort(), [...new Set(expected.map(product => product.brand))].sort());
+  assert.ok(drills.type.includes('hammer-drills'));
+  assert.ok(!drills.type.includes('digital-multimeters'));
+  assert.ok(!drills.type.includes('tools-and-equipment'));
+  const leaf = catalog.categoryFacets(['hammer-drills']);
+  assert.deepEqual(plain(leaf.type), ['hammer-drills']);
+  const empty = Object.values(catalog.categories).find(category =>
+    !catalog.products.some(product => catalog.categoryContains(category.id, product.categoryId)));
+  assert.ok(Object.values(catalog.categoryFacets([empty.slug])).every(values => values.length === 0));
+  const combined = catalog.categoryFacets(['drill-drivers', 'digital-multimeters']);
+  assert.ok(combined.type.includes('digital-multimeters'));
+  assert.ok(combined.type.includes('hammer-drills'));
+  assert.ok(catalog.categoryFacets().type.includes('work-lights'));
+});
+
 test('broken relations, duplicate IDs and unknown schema versions fail explicitly', () => {
   for (const mutate of [
     d => d.products[0].id = d.products[1].id,
