@@ -1754,6 +1754,8 @@
   "categories": {
     "hammer-drills": {
       "id": "hammer-drills",
+      "en": "Hammer Drills",
+      "slug": "hammer-drills",
       "fa": "دریل چکشی",
       "path": [
         "ابزار و تجهیزات",
@@ -1763,6 +1765,8 @@
     },
     "drill-drivers": {
       "id": "drill-drivers",
+      "en": "Drill Drivers",
+      "slug": "drill-drivers",
       "fa": "دریل و پیچ‌گوشتی",
       "path": [
         "ابزار و تجهیزات",
@@ -1772,6 +1776,8 @@
     },
     "digital-multimeters": {
       "id": "digital-multimeters",
+      "en": "Digital Multimeters",
+      "slug": "digital-multimeters",
       "fa": "مولتی‌متر دیجیتال",
       "path": [
         "ابزار و تجهیزات",
@@ -1781,6 +1787,8 @@
     },
     "clamp-meters": {
       "id": "clamp-meters",
+      "en": "Clamp Meters",
+      "slug": "clamp-meters",
       "fa": "کلمپ‌متر",
       "path": [
         "ابزار و تجهیزات",
@@ -1790,6 +1798,8 @@
     },
     "soldering-stations": {
       "id": "soldering-stations",
+      "en": "Soldering Stations",
+      "slug": "soldering-stations",
       "fa": "ایستگاه هویه",
       "path": [
         "ابزار و تجهیزات",
@@ -1799,6 +1809,8 @@
     },
     "soldering-irons": {
       "id": "soldering-irons",
+      "en": "Soldering Irons",
+      "slug": "soldering-irons",
       "fa": "هویه قلمی",
       "path": [
         "ابزار و تجهیزات",
@@ -1808,6 +1820,8 @@
     },
     "hot-air-stations": {
       "id": "hot-air-stations",
+      "en": "Hot Air Stations",
+      "slug": "hot-air-stations",
       "fa": "هیتر و هویه",
       "path": [
         "ابزار و تجهیزات",
@@ -1817,6 +1831,8 @@
     },
     "work-lights": {
       "id": "work-lights",
+      "en": "Work Lights",
+      "slug": "work-lights",
       "fa": "چراغ کارگاهی",
       "path": [
         "ابزار و تجهیزات",
@@ -1826,6 +1842,8 @@
     },
     "work-floodlights": {
       "id": "work-floodlights",
+      "en": "Work Floodlights",
+      "slug": "work-floodlights",
       "fa": "پروژکتور کارگاهی",
       "path": [
         "ابزار و تجهیزات",
@@ -1835,6 +1853,8 @@
     },
     "inspection-lights": {
       "id": "inspection-lights",
+      "en": "Inspection Lights",
+      "slug": "inspection-lights",
       "fa": "چراغ بازرسی",
       "path": [
         "ابزار و تجهیزات",
@@ -1844,6 +1864,8 @@
     },
     "electrician-hand-tools": {
       "id": "electrician-hand-tools",
+      "en": "Electrician Hand Tools",
+      "slug": "electrician-hand-tools",
       "fa": "ابزار دستی برق‌کاری",
       "path": [
         "ابزار و تجهیزات",
@@ -1853,6 +1875,8 @@
     },
     "electrician-tool-kits": {
       "id": "electrician-tool-kits",
+      "en": "Electrician Tool Kits",
+      "slug": "electrician-tool-kits",
       "fa": "مجموعه ابزار برق‌کاری",
       "path": [
         "ابزار و تجهیزات",
@@ -1862,6 +1886,8 @@
     },
     "electrical-testers": {
       "id": "electrical-testers",
+      "en": "Electrical Testers",
+      "slug": "electrical-testers",
       "fa": "تستر و فازمتر",
       "path": [
         "ابزار و تجهیزات",
@@ -1871,6 +1897,8 @@
     },
     "voltage-testers": {
       "id": "voltage-testers",
+      "en": "Voltage Testers",
+      "slug": "voltage-testers",
       "fa": "تستر ولتاژ",
       "path": [
         "ابزار و تجهیزات",
@@ -1880,6 +1908,8 @@
     },
     "phase-testers": {
       "id": "phase-testers",
+      "en": "Phase Testers",
+      "slug": "phase-testers",
       "fa": "فازمتر",
       "path": [
         "ابزار و تجهیزات",
@@ -1889,6 +1919,8 @@
     },
     "circuit-testers": {
       "id": "circuit-testers",
+      "en": "Circuit Testers",
+      "slug": "circuit-testers",
       "fa": "تستر مدار",
       "path": [
         "ابزار و تجهیزات",

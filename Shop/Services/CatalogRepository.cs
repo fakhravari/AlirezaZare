@@ -44,6 +44,7 @@ public sealed record CatalogSnapshot(string BrowserJson, IReadOnlyList<ProductSe
             countries = root.GetProperty("countries"), details = root.GetProperty("details"),
             attributeDefinitions = root.GetProperty("attributeDefinitions");
         ValidateAttributeDefinitions(attributeDefinitions);
+        ValidateCategories(categories);
         HashSet<int> ids = [];
         HashSet<string> codes = new(StringComparer.Ordinal);
         List<ProductSeoEntry> products = [];
@@ -124,6 +125,35 @@ public sealed record CatalogSnapshot(string BrowserJson, IReadOnlyList<ProductSe
             path.Any(character => !(character is >= 'a' and <= 'z' or >= '0' and <= '9' or '/' or '-' or '_' or '.')))
             throw new InvalidDataException($"Invalid catalog media path: {path}");
     }
+
+    private static void ValidateCategories(JsonElement categories)
+    {
+        if (categories.ValueKind != JsonValueKind.Object || !categories.EnumerateObject().Any())
+            throw new InvalidDataException("Catalog categories must be a non-empty object.");
+
+        HashSet<string> slugs = new(StringComparer.OrdinalIgnoreCase);
+        foreach (JsonProperty property in categories.EnumerateObject())
+        {
+            JsonElement category = property.Value;
+            string id = Text(category, "id").Trim();
+            string englishName = Text(category, "en").Trim();
+            string slug = Text(category, "slug").Trim();
+            _ = Text(category, "fa");
+
+            if (!StringComparer.Ordinal.Equals(id, property.Name))
+                throw new InvalidDataException($"Category key/id mismatch: {property.Name}");
+            if (!englishName.Any(character => character is >= 'A' and <= 'Z' or >= 'a' and <= 'z'))
+                throw new InvalidDataException($"Category English name is invalid: {id}");
+            if (!IsLowercaseSlug(slug))
+                throw new InvalidDataException($"Invalid category slug: {id}");
+            if (!slugs.Add(slug))
+                throw new InvalidDataException($"Duplicate category slug: {slug}");
+        }
+    }
+
+    private static bool IsLowercaseSlug(string value) =>
+        value.Length > 0 && value[0] != '-' && value[^1] != '-' && !value.Contains("--", StringComparison.Ordinal) &&
+        value.All(character => character is >= 'a' and <= 'z' or >= '0' and <= '9' or '-');
 
     private static void ValidateOptions(JsonElement product)
     {

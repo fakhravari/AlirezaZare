@@ -35,8 +35,11 @@
     .filter((group) => group.title && group.specs.length);
   const attributeDefinitions = data.attributeDefinitions || {};
   const categoryEntries = Object.entries(data.categories).map(([id, category]) => ({
-    id, label: String(category.fa || "").trim(), path: [...(category.path || [])],
+    id, slug: String(category.slug || "").trim(), en: String(category.en || "").trim(),
+    fa: String(category.fa || "").trim(), label: String(category.fa || "").trim(),
+    path: [...(category.path || [])],
   }));
+  const categoryEntriesBySlug = new Map(categoryEntries.map((category) => [category.slug, category]));
   const normalizeCategoryLabel = (value) => String(value ?? "").trim()
     .toLocaleLowerCase("fa").replace(/[يى]/g, "ی").replace(/ك/g, "ک")
     .replace(/[\u200c\u200f\s]+/g, " ");
@@ -50,9 +53,9 @@
     });
   };
   const categorySearchUrl = (entries, fallback) => {
-    const categoryIds = [...new Set(entries.map((category) => category.id).filter(Boolean))];
+    const categorySlugs = [...new Set(entries.map((category) => category.slug).filter(Boolean))];
     const params = new URLSearchParams();
-    if (categoryIds.length) categoryIds.forEach((id) => params.append("product-group", id));
+    if (categorySlugs.length) categorySlugs.forEach((slug) => params.append("product-group", slug));
     else params.set("q", String(fallback || "ابزار و تجهیزات").trim());
     return "/Search?" + params.toString();
   };
@@ -68,6 +71,7 @@
     );
     return categorySearchUrl(entries, [...wanted].at(-1));
   };
+  const categoryForSlug = (slug) => categoryEntriesBySlug.get(String(slug || "")) || null;
   const normalizeLabel = (value) => String(value ?? "").trim().toLocaleLowerCase("fa").replace(/[يى]/g, "ی").replace(/ك/g, "ک").replace(/[\u200c\u200f\s]+/g, " ");
   const unusableAttributeValue = (value) => /وابسته به|بر اساس مدل|بررسی .* پیش از|اقلام.*متفاوت/i.test(value);
   const ids = new Set();
@@ -152,5 +156,5 @@
   window.HNCatalog = Object.freeze({schemaVersion: data.schemaVersion, products: window.HNProducts,
     brands: freeze(data.brands), categories: freeze(data.categories), attributeDefinitions: freeze(attributeDefinitions), collections: freeze(data.collections),
     find: (id) => byId.get(String(id)) || null, url: productUrl,
-    categoryUrl, categoryUrlForLabels});
+    categoryUrl, categoryUrlForLabels, categoryForSlug});
 })(window, document);
