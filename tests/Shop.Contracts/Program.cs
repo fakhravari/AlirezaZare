@@ -19,11 +19,17 @@ void Reject(Action<JsonNode> mutate)
     catch (InvalidDataException) { rejected++; return; }
     throw new Exception("Invalid catalog was accepted.");
 }
-Reject(n => n["schemaVersion"] = 2);
+Reject(n => n["schemaVersion"] = 99);
 Reject(n => n["products"]![0]!["id"] = 2);
 Reject(n => n["products"]![0]!["code"] = "HN-002");
 Reject(n => n["products"]![0]!["brandId"] = "missing");
 Reject(n => n["products"]![0]!["categoryId"] = "missing");
+Reject(n => n["products"]![0]!["categoryId"] = "drill-drivers");
+Reject(n => n["categories"]!["cordless-drill"]!["parentId"] = "tools-and-equipment");
+Reject(n => n["categories"]!["hammer-drills"]!["en"] = "");
+Reject(n => n["categories"]!["hammer-drills"]!["slug"] = "Invalid Slug");
+Reject(n => n["categories"]!["drill-drivers"]!["slug"] = "hammer-drills");
+Reject(n => n["categories"]!.AsObject().Remove("power-tools"));
 Reject(n => n["products"]![0]!["detailId"] = "missing");
 Reject(n => n["products"]![0]!["mediaId"] = "missing");
 Reject(n => n["products"]![0]!["colorIds"]![0] = "missing");

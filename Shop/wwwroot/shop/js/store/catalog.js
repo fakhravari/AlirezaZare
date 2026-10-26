@@ -4,7 +4,7 @@
   const element = document.querySelector("#storeCatalog");
   if (!element) throw new Error("The shared #storeCatalog data block is missing.");
   const data = JSON.parse(element.textContent);
-  if (data.schemaVersion !== 1) throw new Error("Unsupported catalog schemaVersion.");
+  if (data.schemaVersion !== 2) throw new Error("Unsupported catalog schemaVersion.");
   const relation = (collection, id) => {
     if (!Object.prototype.hasOwnProperty.call(collection, id))
       throw new Error("Unknown catalog relation: " + id);
@@ -35,38 +35,91 @@
     .filter((group) => group.title && group.specs.length);
   const attributeDefinitions = data.attributeDefinitions || {};
   const categoryEntries = Object.entries(data.categories).map(([id, category]) => ({
-    id, label: String(category.fa || "").trim(), path: [...(category.path || [])],
+    id, slug: String(category.slug || "").trim(), en: String(category.en || "").trim(),
+    fa: String(category.fa || "").trim(), label: String(category.fa || "").trim(),
+    parentId: category.parentId === null ? null : String(category.parentId || ""),
+    path: [], storedPath: [...(category.path || [])],
   }));
+  const categoryEntriesBySlug = new Map(categoryEntries.map((category) => [category.slug, category]));
+  const categoryEntriesById = new Map(categoryEntries.map((category) => [category.id, category]));
   const normalizeCategoryLabel = (value) => String(value ?? "").trim()
     .toLocaleLowerCase("fa").replace(/[يى]/g, "ی").replace(/ك/g, "ک")
     .replace(/[\u200c\u200f\s]+/g, " ");
-  const categoryEntriesForPath = (path) => {
-    const segments = (Array.isArray(path) ? path : [path]).map(normalizeCategoryLabel).filter(Boolean);
-    if (!segments.length) return [];
-    return categoryEntries.filter((category) => {
-      const categoryPath = category.path.map(normalizeCategoryLabel);
-      if (segments.length === 1) return categoryPath.includes(segments[0]);
-      return segments.every((segment, index) => categoryPath[index] === segment);
-    });
+  const categoryEntriesByLabel = new Map(categoryEntries.map((category) =>
+    [normalizeCategoryLabel(category.fa), category]));
+  const categoryPathFromParents = (category) => {
+    const path = [];
+    const visited = new Set();
+    let current = category;
+    while (current) {
+      if (visited.has(current.id)) throw new Error("Category parent cycle: " + current.id);
+      visited.add(current.id);
+      path.push(current.fa);
+      if (current.parentId === null) {
+        current = null;
+      } else {
+        const parent = categoryEntriesById.get(current.parentId);
+        if (!parent) throw new Error("Unknown category parent: " + current.parentId);
+        current = parent;
+      }
+      if (path.length > categoryEntries.length) throw new Error("Invalid category parent chain.");
+    }
+    return path.reverse();
   };
-  const categorySearchUrl = (entries, fallback) => {
-    const categoryIds = [...new Set(entries.map((category) => category.id).filter(Boolean))];
+  for (const category of categoryEntries) {
+    if (!category.id || !category.slug || !category.en || !category.fa ||
+        (category.parentId !== null && !category.parentId))
+      throw new Error("Invalid category node: " + category.id);
+    const derivedPath = categoryPathFromParents(category);
+    if (derivedPath.length !== category.storedPath.length ||
+        !derivedPath.every((segment, index) =>
+          normalizeCategoryLabel(segment) === normalizeCategoryLabel(category.storedPath[index])))
+      throw new Error("Category parent/path mismatch: " + category.id);
+    category.path = derivedPath;
+    delete category.storedPath;
+  }
+  const categoryForPath = (path) => {
+    const segments = (Array.isArray(path) ? path : [path]).map(normalizeCategoryLabel).filter(Boolean);
+    if (!segments.length) return null;
+    const exactPath = categoryEntries.find((category) => {
+      const categoryPath = category.path.map(normalizeCategoryLabel);
+      return segments.length === categoryPath.length &&
+        segments.every((segment, index) => categoryPath[index] === segment);
+    });
+    return exactPath || (segments.length === 1 ? categoryEntriesByLabel.get(segments[0]) || null : null);
+  };
+  const categorySearchUrl = (category, fallback) => {
     const params = new URLSearchParams();
-    if (categoryIds.length) categoryIds.forEach((id) => params.append("product-group", id));
+    if (category?.slug) params.set("product-group", category.slug);
     else params.set("q", String(fallback || "ابزار و تجهیزات").trim());
     return "/Search?" + params.toString();
   };
   const categoryUrl = (path) => {
     const segments = Array.isArray(path) ? path : [path];
-    const entries = categoryEntriesForPath(segments);
-    return categorySearchUrl(entries, segments.at(-1));
+    return categorySearchUrl(categoryForPath(segments), segments.at(-1));
   };
   const categoryUrlForLabels = (labels) => {
-    const wanted = new Set((Array.isArray(labels) ? labels : [labels]).map(normalizeCategoryLabel));
-    const entries = categoryEntries.filter((category) =>
-      category.path.some((segment) => wanted.has(normalizeCategoryLabel(segment))),
-    );
-    return categorySearchUrl(entries, [...wanted].at(-1));
+    const rawValues = Array.isArray(labels) ? labels : [labels];
+    const values = rawValues.map(normalizeCategoryLabel).filter(Boolean);
+    const category = categoryForPath(rawValues) || [...values].reverse()
+      .map((label) => categoryEntriesByLabel.get(label)).find(Boolean);
+    return categorySearchUrl(category, values.at(-1));
+  };
+  const categoryForSlug = (slug) => categoryEntriesBySlug.get(String(slug || "")) ||
+    categoryEntriesById.get(String(slug || "")) || null;
+  const categoryForLabel = (label) => categoryEntriesByLabel.get(normalizeCategoryLabel(label)) || null;
+  const categoryContains = (selectedSlug, productCategory) => {
+    const selected = categoryForSlug(selectedSlug) || categoryForLabel(selectedSlug);
+    let current = categoryForSlug(productCategory) || categoryForLabel(productCategory);
+    while (current) {
+      if (current.id === selected?.id) return true;
+      current = current.parentId === null ? null : categoryEntriesById.get(current.parentId);
+    }
+    return false;
+  };
+  const categoryMatchesPath = (slug, path) => {
+    const candidate = categoryForPath(path);
+    return !!candidate && categoryContains(slug, candidate.id);
   };
   const normalizeLabel = (value) => String(value ?? "").trim().toLocaleLowerCase("fa").replace(/[يى]/g, "ی").replace(/ك/g, "ک").replace(/[\u200c\u200f\s]+/g, " ");
   const unusableAttributeValue = (value) => /وابسته به|بر اساس مدل|بررسی .* پیش از|اقلام.*متفاوت/i.test(value);
@@ -77,6 +130,8 @@
     ids.add(product.id);
     const brand = relation(data.brands, product.brandId);
     const category = relation(data.categories, product.categoryId);
+    const resolvedCategory = categoryEntriesById.get(product.categoryId);
+    if (!resolvedCategory) throw new Error("Unknown catalog category node: " + product.categoryId);
     const media = relation(data.media, product.mediaId);
     if (brand.countryCode) relation(data.countries, brand.countryCode);
     const colors = product.colorIds.map((id) => relation(data.colors, id));
@@ -133,7 +188,8 @@
     }
     return freeze({
       ...product, brand: brand.name, brandFa: brand.fa, brandLogo: brand.logo,
-      brandCountryCode: brand.countryCode, type: category.fa, categoryPath: [...category.path],
+      brandCountryCode: brand.countryCode, type: category.fa, categorySlug: category.slug,
+      categoryPath: [...resolvedCategory.path],
       colors, attributeValues, detail, image: media.card,
       mainImage: media.main, thumbnailImage: media.thumbnail, images: media.images, videos: media.videos,
       // Compatibility aliases for persisted filters; new code uses explicit names.
@@ -152,5 +208,5 @@
   window.HNCatalog = Object.freeze({schemaVersion: data.schemaVersion, products: window.HNProducts,
     brands: freeze(data.brands), categories: freeze(data.categories), attributeDefinitions: freeze(attributeDefinitions), collections: freeze(data.collections),
     find: (id) => byId.get(String(id)) || null, url: productUrl,
-    categoryUrl, categoryUrlForLabels});
+    categoryUrl, categoryUrlForLabels, categoryForSlug, categoryForLabel, categoryContains, categoryMatchesPath});
 })(window, document);

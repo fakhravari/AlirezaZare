@@ -1,24 +1,140 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "attributeDefinitions": {
-    "brand": { "label": "برند", "icon": "bi-patch-check", "source": "brand", "filterKey": "brand", "is_filterable": true, "is_highlight": true },
-    "category": { "label": "دسته‌بندی", "icon": "bi-grid", "source": "type", "filterKey": "type", "is_filterable": true, "is_highlight": true },
-    "country": { "label": "کشور سازنده", "icon": "bi-globe2", "source": "country", "is_filterable": false, "is_highlight": true },
-    "code": { "label": "کد محصول", "icon": "bi-upc-scan", "source": "code", "is_filterable": false, "is_highlight": true },
-    "powerSource": { "label": "منبع تغذیه", "icon": "bi-lightning-charge", "source": "powerSource", "filterKey": "movement", "is_filterable": true, "is_highlight": true },
-    "useCase": { "label": "مورد استفاده", "icon": "bi-building-gear", "source": "useCase", "filterKey": "strap", "is_filterable": true, "is_highlight": true },
-    "color": { "label": "رنگ", "icon": "bi-palette2", "source": "color", "filterKey": "color", "is_filterable": true, "is_highlight": true },
-    "toolType": { "label": "نوع ابزار", "icon": "bi-tools", "source": "spec:نوع ابزار", "is_filterable": false, "is_highlight": true },
-    "displayType": { "label": "نوع نمایش", "icon": "bi-display", "source": "spec:نوع نمایش", "is_filterable": false, "is_highlight": true },
-    "measurement": { "label": "اندازه‌گیری", "icon": "bi-speedometer2", "source": "spec:اندازه‌گیری", "is_filterable": false, "is_highlight": true },
-    "lightingType": { "label": "نوع روشنایی", "icon": "bi-lightbulb", "source": "spec:نوع روشنایی", "is_filterable": false, "is_highlight": true },
-    "productType": { "label": "نوع محصول", "icon": "bi-box-seam", "source": "spec:نوع محصول", "is_filterable": false, "is_highlight": true },
-    "temperatureControl": { "label": "کنترل دما", "icon": "bi-thermometer-half", "source": "spec:کنترل دما", "is_filterable": false, "is_highlight": true },
-    "technicalSpecs": { "label": "مشخصات فنی", "icon": "bi-list-check", "source": "specs", "is_filterable": false, "is_highlight": true },
-    "variantOptions": { "label": "گزینه‌های قابل انتخاب", "icon": "bi-sliders", "source": "variants", "is_filterable": false, "is_highlight": true },
-    "price": { "label": "بازهٔ قیمت", "icon": "bi-cash-stack", "source": "price", "filterKey": "price", "is_filterable": true, "is_highlight": false },
-    "availability": { "label": "موجودی", "icon": "bi-box-seam", "source": "stockQuantity", "filterKey": "availability", "is_filterable": true, "is_highlight": false },
-    "discount": { "label": "تخفیف", "icon": "bi-tags", "source": "discountPercent", "filterKey": "discount", "is_filterable": true, "is_highlight": false }
+    "brand": {
+      "label": "برند",
+      "icon": "bi-patch-check",
+      "source": "brand",
+      "filterKey": "brand",
+      "is_filterable": true,
+      "is_highlight": true
+    },
+    "category": {
+      "label": "دسته‌بندی",
+      "icon": "bi-grid",
+      "source": "type",
+      "filterKey": "type",
+      "is_filterable": true,
+      "is_highlight": true
+    },
+    "country": {
+      "label": "کشور سازنده",
+      "icon": "bi-globe2",
+      "source": "country",
+      "is_filterable": false,
+      "is_highlight": true
+    },
+    "code": {
+      "label": "کد محصول",
+      "icon": "bi-upc-scan",
+      "source": "code",
+      "is_filterable": false,
+      "is_highlight": true
+    },
+    "powerSource": {
+      "label": "منبع تغذیه",
+      "icon": "bi-lightning-charge",
+      "source": "powerSource",
+      "filterKey": "movement",
+      "is_filterable": true,
+      "is_highlight": true
+    },
+    "useCase": {
+      "label": "مورد استفاده",
+      "icon": "bi-building-gear",
+      "source": "useCase",
+      "filterKey": "strap",
+      "is_filterable": true,
+      "is_highlight": true
+    },
+    "color": {
+      "label": "رنگ",
+      "icon": "bi-palette2",
+      "source": "color",
+      "filterKey": "color",
+      "is_filterable": true,
+      "is_highlight": true
+    },
+    "toolType": {
+      "label": "نوع ابزار",
+      "icon": "bi-tools",
+      "source": "spec:نوع ابزار",
+      "is_filterable": false,
+      "is_highlight": true
+    },
+    "displayType": {
+      "label": "نوع نمایش",
+      "icon": "bi-display",
+      "source": "spec:نوع نمایش",
+      "is_filterable": false,
+      "is_highlight": true
+    },
+    "measurement": {
+      "label": "اندازه‌گیری",
+      "icon": "bi-speedometer2",
+      "source": "spec:اندازه‌گیری",
+      "is_filterable": false,
+      "is_highlight": true
+    },
+    "lightingType": {
+      "label": "نوع روشنایی",
+      "icon": "bi-lightbulb",
+      "source": "spec:نوع روشنایی",
+      "is_filterable": false,
+      "is_highlight": true
+    },
+    "productType": {
+      "label": "نوع محصول",
+      "icon": "bi-box-seam",
+      "source": "spec:نوع محصول",
+      "is_filterable": false,
+      "is_highlight": true
+    },
+    "temperatureControl": {
+      "label": "کنترل دما",
+      "icon": "bi-thermometer-half",
+      "source": "spec:کنترل دما",
+      "is_filterable": false,
+      "is_highlight": true
+    },
+    "technicalSpecs": {
+      "label": "مشخصات فنی",
+      "icon": "bi-list-check",
+      "source": "specs",
+      "is_filterable": false,
+      "is_highlight": true
+    },
+    "variantOptions": {
+      "label": "گزینه‌های قابل انتخاب",
+      "icon": "bi-sliders",
+      "source": "variants",
+      "is_filterable": false,
+      "is_highlight": true
+    },
+    "price": {
+      "label": "بازهٔ قیمت",
+      "icon": "bi-cash-stack",
+      "source": "price",
+      "filterKey": "price",
+      "is_filterable": true,
+      "is_highlight": false
+    },
+    "availability": {
+      "label": "موجودی",
+      "icon": "bi-box-seam",
+      "source": "stockQuantity",
+      "filterKey": "availability",
+      "is_filterable": true,
+      "is_highlight": false
+    },
+    "discount": {
+      "label": "تخفیف",
+      "icon": "bi-tags",
+      "source": "discountPercent",
+      "filterKey": "discount",
+      "is_filterable": true,
+      "is_highlight": false
+    }
   },
   "brands": {
     "bosch": {
@@ -1754,147 +1870,2786 @@
   "categories": {
     "hammer-drills": {
       "id": "hammer-drills",
+      "en": "Hammer Drills",
+      "slug": "hammer-drills",
       "fa": "دریل چکشی",
       "path": [
         "ابزار و تجهیزات",
         "ابزار برقی",
+        "دریل و پیچ‌گوشتی",
         "دریل چکشی"
-      ]
+      ],
+      "parentId": "drill-drivers"
     },
     "drill-drivers": {
       "id": "drill-drivers",
+      "en": "Drill Drivers",
+      "slug": "drill-drivers",
       "fa": "دریل و پیچ‌گوشتی",
       "path": [
         "ابزار و تجهیزات",
         "ابزار برقی",
         "دریل و پیچ‌گوشتی"
-      ]
+      ],
+      "parentId": "power-tools"
     },
     "digital-multimeters": {
       "id": "digital-multimeters",
+      "en": "Digital Multimeters",
+      "slug": "digital-multimeters",
       "fa": "مولتی‌متر دیجیتال",
       "path": [
         "ابزار و تجهیزات",
         "ابزار اندازه‌گیری",
+        "مولتی‌متر",
         "مولتی‌متر دیجیتال"
-      ]
+      ],
+      "parentId": "multimeters"
     },
     "clamp-meters": {
       "id": "clamp-meters",
+      "en": "Clamp Meters",
+      "slug": "clamp-meters",
       "fa": "کلمپ‌متر",
       "path": [
         "ابزار و تجهیزات",
         "ابزار اندازه‌گیری",
+        "ابزار دقیق",
         "کلمپ‌متر"
-      ]
+      ],
+      "parentId": "precision-instruments"
     },
     "soldering-stations": {
       "id": "soldering-stations",
+      "en": "Soldering Stations",
+      "slug": "soldering-stations",
       "fa": "ایستگاه هویه",
       "path": [
         "ابزار و تجهیزات",
-        "لحیم‌کاری و تعمیر برد",
+        "قطعات الکترونیکی",
+        "تجهیزات لحیم‌کاری",
+        "هیتر و هویه",
         "ایستگاه هویه"
-      ]
+      ],
+      "parentId": "hot-air-stations"
     },
     "soldering-irons": {
       "id": "soldering-irons",
+      "en": "Soldering Irons",
+      "slug": "soldering-irons",
       "fa": "هویه قلمی",
       "path": [
         "ابزار و تجهیزات",
-        "لحیم‌کاری و تعمیر برد",
+        "قطعات الکترونیکی",
+        "تجهیزات لحیم‌کاری",
+        "هویه",
         "هویه قلمی"
-      ]
+      ],
+      "parentId": "soldering-equipment-soldering-irons"
     },
     "hot-air-stations": {
       "id": "hot-air-stations",
+      "en": "Hot Air Stations",
+      "slug": "hot-air-stations",
       "fa": "هیتر و هویه",
       "path": [
         "ابزار و تجهیزات",
-        "لحیم‌کاری و تعمیر برد",
+        "قطعات الکترونیکی",
+        "تجهیزات لحیم‌کاری",
         "هیتر و هویه"
-      ]
+      ],
+      "parentId": "soldering-and-board-repair"
     },
     "work-lights": {
       "id": "work-lights",
+      "en": "Work Lights",
+      "slug": "work-lights",
       "fa": "چراغ کارگاهی",
       "path": [
         "ابزار و تجهیزات",
         "روشنایی و لامپ",
         "چراغ کارگاهی"
-      ]
+      ],
+      "parentId": "lighting-and-lamps"
     },
     "work-floodlights": {
       "id": "work-floodlights",
+      "en": "Work Floodlights",
+      "slug": "work-floodlights",
       "fa": "پروژکتور کارگاهی",
       "path": [
         "ابزار و تجهیزات",
         "روشنایی و لامپ",
+        "چراغ کارگاهی",
+        "پروژکتور",
         "پروژکتور کارگاهی"
-      ]
+      ],
+      "parentId": "floodlights"
     },
     "inspection-lights": {
       "id": "inspection-lights",
+      "en": "Inspection Lights",
+      "slug": "inspection-lights",
       "fa": "چراغ بازرسی",
       "path": [
         "ابزار و تجهیزات",
         "روشنایی و لامپ",
+        "چراغ کارگاهی",
         "چراغ بازرسی"
-      ]
+      ],
+      "parentId": "work-lights"
     },
     "electrician-hand-tools": {
       "id": "electrician-hand-tools",
+      "en": "Electrician Hand Tools",
+      "slug": "electrician-hand-tools",
       "fa": "ابزار دستی برق‌کاری",
       "path": [
         "ابزار و تجهیزات",
-        "ابزار برق‌کار",
+        "ابزار دستی",
+        "پیچ‌گوشتی و انبر",
         "ابزار دستی برق‌کاری"
-      ]
+      ],
+      "parentId": "screwdrivers-and-pliers"
     },
     "electrician-tool-kits": {
       "id": "electrician-tool-kits",
+      "en": "Electrician Tool Kits",
+      "slug": "electrician-tool-kits",
       "fa": "مجموعه ابزار برق‌کاری",
       "path": [
         "ابزار و تجهیزات",
-        "ابزار برق‌کار",
+        "ابزار دستی",
+        "لوازم ابزار",
+        "جعبه ابزار",
         "مجموعه ابزار برق‌کاری"
-      ]
+      ],
+      "parentId": "toolboxes"
     },
     "electrical-testers": {
       "id": "electrical-testers",
+      "en": "Electrical Testers",
+      "slug": "electrical-testers",
       "fa": "تستر و فازمتر",
       "path": [
         "ابزار و تجهیزات",
-        "تستر و ایمنی برق",
+        "ابزار اندازه‌گیری",
+        "تست و عیب‌یابی",
         "تستر و فازمتر"
-      ]
+      ],
+      "parentId": "testing-and-troubleshooting"
     },
     "voltage-testers": {
       "id": "voltage-testers",
+      "en": "Voltage Testers",
+      "slug": "voltage-testers",
       "fa": "تستر ولتاژ",
       "path": [
         "ابزار و تجهیزات",
-        "تستر و ایمنی برق",
+        "ابزار اندازه‌گیری",
+        "تست و عیب‌یابی",
         "تستر ولتاژ"
-      ]
+      ],
+      "parentId": "testing-and-troubleshooting"
     },
     "phase-testers": {
       "id": "phase-testers",
+      "en": "Phase Testers",
+      "slug": "phase-testers",
       "fa": "فازمتر",
       "path": [
         "ابزار و تجهیزات",
-        "تستر و ایمنی برق",
+        "ابزار اندازه‌گیری",
+        "تست و عیب‌یابی",
         "فازمتر"
-      ]
+      ],
+      "parentId": "testing-and-troubleshooting"
     },
     "circuit-testers": {
       "id": "circuit-testers",
+      "en": "Circuit Testers",
+      "slug": "circuit-testers",
       "fa": "تستر مدار",
       "path": [
         "ابزار و تجهیزات",
-        "تستر و ایمنی برق",
+        "ابزار اندازه‌گیری",
+        "تست و عیب‌یابی",
         "تستر مدار"
-      ]
+      ],
+      "parentId": "testing-and-troubleshooting"
+    },
+    "tools-and-equipment": {
+      "id": "tools-and-equipment",
+      "en": "Tools and Equipment",
+      "slug": "tools-and-equipment",
+      "fa": "ابزار و تجهیزات",
+      "path": [
+        "ابزار و تجهیزات"
+      ],
+      "parentId": null
+    },
+    "power-tools": {
+      "id": "power-tools",
+      "en": "Power Tools",
+      "slug": "power-tools",
+      "fa": "ابزار برقی",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار برقی"
+      ],
+      "parentId": "tools-and-equipment"
+    },
+    "measurement-tools": {
+      "id": "measurement-tools",
+      "en": "Measurement Tools",
+      "slug": "measurement-tools",
+      "fa": "ابزار اندازه‌گیری",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار اندازه‌گیری"
+      ],
+      "parentId": "tools-and-equipment"
+    },
+    "soldering-and-board-repair": {
+      "id": "soldering-and-board-repair",
+      "en": "Soldering Equipment",
+      "slug": "soldering-and-board-repair",
+      "fa": "تجهیزات لحیم‌کاری",
+      "path": [
+        "ابزار و تجهیزات",
+        "قطعات الکترونیکی",
+        "تجهیزات لحیم‌کاری"
+      ],
+      "parentId": "electronic-components"
+    },
+    "lighting-and-lamps": {
+      "id": "lighting-and-lamps",
+      "en": "Lighting and Lamps",
+      "slug": "lighting-and-lamps",
+      "fa": "روشنایی و لامپ",
+      "path": [
+        "ابزار و تجهیزات",
+        "روشنایی و لامپ"
+      ],
+      "parentId": "tools-and-equipment"
+    },
+    "electrician-tools": {
+      "id": "electrician-tools",
+      "en": "Electrician Tools",
+      "slug": "electrician-tools",
+      "fa": "ابزار برق‌کار",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار دستی",
+        "پیچ‌گوشتی و انبر",
+        "ابزار برق‌کار"
+      ],
+      "parentId": "screwdrivers-and-pliers"
+    },
+    "electrical-test-and-safety": {
+      "id": "electrical-test-and-safety",
+      "en": "Electrical Test and Safety",
+      "slug": "electrical-test-and-safety",
+      "fa": "تستر و ایمنی برق",
+      "path": [
+        "ابزار و تجهیزات",
+        "ایمنی و حفاظت",
+        "حفاظت برق",
+        "تستر و ایمنی برق"
+      ],
+      "parentId": "electrical-protection"
+    },
+    "wires-and-cables": {
+      "id": "wires-and-cables",
+      "en": "Wires and Cables",
+      "slug": "wires-and-cables",
+      "fa": "سیم و کابل",
+      "path": [
+        "ابزار و تجهیزات",
+        "سیم، کابل و اتصالات",
+        "سیم و کابل"
+      ],
+      "parentId": "wires-cables-and-connectors"
+    },
+    "switches-and-sockets": {
+      "id": "switches-and-sockets",
+      "en": "Switches and Sockets",
+      "slug": "switches-and-sockets",
+      "fa": "کلید و پریز",
+      "path": [
+        "ابزار و تجهیزات",
+        "کلید و تجهیزات برقی",
+        "کلید و پریز"
+      ],
+      "parentId": "switches-and-electrical-equipment"
+    },
+    "cordless-drill": {
+      "id": "cordless-drill",
+      "en": "Cordless Drill",
+      "slug": "cordless-drill",
+      "fa": "دریل شارژی",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار برقی",
+        "دریل و پیچ‌گوشتی",
+        "دریل شارژی"
+      ],
+      "parentId": "drill-drivers"
+    },
+    "electric-screwdriver": {
+      "id": "electric-screwdriver",
+      "en": "Electric Screwdriver",
+      "slug": "electric-screwdriver",
+      "fa": "پیچ‌گوشتی برقی",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار برقی",
+        "دریل و پیچ‌گوشتی",
+        "پیچ‌گوشتی برقی"
+      ],
+      "parentId": "drill-drivers"
+    },
+    "rotary-hammer": {
+      "id": "rotary-hammer",
+      "en": "Rotary Hammer",
+      "slug": "rotary-hammer",
+      "fa": "دریل بتن‌کن",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار برقی",
+        "دریل و پیچ‌گوشتی",
+        "دریل بتن‌کن"
+      ],
+      "parentId": "drill-drivers"
+    },
+    "cutting-and-grinding": {
+      "id": "cutting-and-grinding",
+      "en": "Cutting and Grinding",
+      "slug": "cutting-and-grinding",
+      "fa": "برش و سایش",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار برقی",
+        "برش و سایش"
+      ],
+      "parentId": "power-tools"
+    },
+    "angle-grinders": {
+      "id": "angle-grinders",
+      "en": "Angle Grinders",
+      "slug": "angle-grinders",
+      "fa": "فرز و مینی‌فرز",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار برقی",
+        "برش و سایش",
+        "فرز و مینی‌فرز"
+      ],
+      "parentId": "cutting-and-grinding"
+    },
+    "jigsaws": {
+      "id": "jigsaws",
+      "en": "Jigsaws",
+      "slug": "jigsaws",
+      "fa": "اره عمودبر",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار برقی",
+        "برش و سایش",
+        "اره عمودبر"
+      ],
+      "parentId": "cutting-and-grinding"
+    },
+    "circular-saws": {
+      "id": "circular-saws",
+      "en": "Circular Saws",
+      "slug": "circular-saws",
+      "fa": "اره گردبر",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار برقی",
+        "برش و سایش",
+        "اره گردبر"
+      ],
+      "parentId": "cutting-and-grinding"
+    },
+    "cutting-disc": {
+      "id": "cutting-disc",
+      "en": "Cutting Disc",
+      "slug": "cutting-disc",
+      "fa": "صفحه برش",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار برقی",
+        "برش و سایش",
+        "صفحه برش"
+      ],
+      "parentId": "cutting-and-grinding"
+    },
+    "workshop-equipment": {
+      "id": "workshop-equipment",
+      "en": "Workshop Equipment",
+      "slug": "workshop-equipment",
+      "fa": "تجهیزات کارگاهی",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار برقی",
+        "تجهیزات کارگاهی"
+      ],
+      "parentId": "power-tools"
+    },
+    "welding-machines": {
+      "id": "welding-machines",
+      "en": "Welding Machines",
+      "slug": "welding-machines",
+      "fa": "دستگاه جوش",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار برقی",
+        "تجهیزات کارگاهی",
+        "دستگاه جوش"
+      ],
+      "parentId": "workshop-equipment"
+    },
+    "pressure-washers": {
+      "id": "pressure-washers",
+      "en": "Pressure Washers",
+      "slug": "pressure-washers",
+      "fa": "کارواش",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار برقی",
+        "تجهیزات کارگاهی",
+        "کارواش"
+      ],
+      "parentId": "workshop-equipment"
+    },
+    "air-compressors": {
+      "id": "air-compressors",
+      "en": "Air Compressors",
+      "slug": "air-compressors",
+      "fa": "کمپرسور باد",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار برقی",
+        "تجهیزات کارگاهی",
+        "کمپرسور باد"
+      ],
+      "parentId": "workshop-equipment"
+    },
+    "tool-accessories": {
+      "id": "tool-accessories",
+      "en": "Tool Accessories",
+      "slug": "tool-accessories",
+      "fa": "لوازم جانبی ابزار",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار برقی",
+        "تجهیزات کارگاهی",
+        "لوازم جانبی ابزار"
+      ],
+      "parentId": "workshop-equipment"
+    },
+    "drill-bits-and-drilling": {
+      "id": "drill-bits-and-drilling",
+      "en": "Drill Bits and Drilling",
+      "slug": "drill-bits-and-drilling",
+      "fa": "مته و سوراخ‌کاری",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار برقی",
+        "مته و سوراخ‌کاری"
+      ],
+      "parentId": "power-tools"
+    },
+    "concrete-drill-bits": {
+      "id": "concrete-drill-bits",
+      "en": "Concrete Drill Bits",
+      "slug": "concrete-drill-bits",
+      "fa": "مته بتن",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار برقی",
+        "مته و سوراخ‌کاری",
+        "مته بتن"
+      ],
+      "parentId": "drill-bits-and-drilling"
+    },
+    "metal-drill-bits": {
+      "id": "metal-drill-bits",
+      "en": "Metal Drill Bits",
+      "slug": "metal-drill-bits",
+      "fa": "مته فلز",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار برقی",
+        "مته و سوراخ‌کاری",
+        "مته فلز"
+      ],
+      "parentId": "drill-bits-and-drilling"
+    },
+    "wood-drill-bits": {
+      "id": "wood-drill-bits",
+      "en": "Wood Drill Bits",
+      "slug": "wood-drill-bits",
+      "fa": "مته چوب",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار برقی",
+        "مته و سوراخ‌کاری",
+        "مته چوب"
+      ],
+      "parentId": "drill-bits-and-drilling"
+    },
+    "diamond-drill-bits": {
+      "id": "diamond-drill-bits",
+      "en": "Diamond Drill Bits",
+      "slug": "diamond-drill-bits",
+      "fa": "مته الماسه",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار برقی",
+        "مته و سوراخ‌کاری",
+        "مته الماسه"
+      ],
+      "parentId": "drill-bits-and-drilling"
+    },
+    "discs-and-blades": {
+      "id": "discs-and-blades",
+      "en": "Discs and Blades",
+      "slug": "discs-and-blades",
+      "fa": "صفحه و تیغه",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار برقی",
+        "صفحه و تیغه"
+      ],
+      "parentId": "power-tools"
+    },
+    "discs-and-blades-cutting-disc": {
+      "id": "discs-and-blades-cutting-disc",
+      "en": "Cutting Disc",
+      "slug": "discs-and-blades-cutting-disc",
+      "fa": "صفحه برش",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار برقی",
+        "صفحه و تیغه",
+        "صفحه برش"
+      ],
+      "parentId": "discs-and-blades"
+    },
+    "grinding-discs": {
+      "id": "grinding-discs",
+      "en": "Grinding Discs",
+      "slug": "grinding-discs",
+      "fa": "صفحه ساب",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار برقی",
+        "صفحه و تیغه",
+        "صفحه ساب"
+      ],
+      "parentId": "discs-and-blades"
+    },
+    "jigsaw-blades": {
+      "id": "jigsaw-blades",
+      "en": "Jigsaw Blades",
+      "slug": "jigsaw-blades",
+      "fa": "تیغ اره عمودبر",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار برقی",
+        "صفحه و تیغه",
+        "تیغ اره عمودبر"
+      ],
+      "parentId": "discs-and-blades"
+    },
+    "circular-saw-blades": {
+      "id": "circular-saw-blades",
+      "en": "Circular Saw Blades",
+      "slug": "circular-saw-blades",
+      "fa": "تیغ اره گردبر",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار برقی",
+        "صفحه و تیغه",
+        "تیغ اره گردبر"
+      ],
+      "parentId": "discs-and-blades"
+    },
+    "batteries-and-accessories": {
+      "id": "batteries-and-accessories",
+      "en": "Batteries and Accessories",
+      "slug": "batteries-and-accessories",
+      "fa": "باتری و متعلقات",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار برقی",
+        "باتری و متعلقات"
+      ],
+      "parentId": "power-tools"
+    },
+    "replacement-batteries": {
+      "id": "replacement-batteries",
+      "en": "Replacement Batteries",
+      "slug": "replacement-batteries",
+      "fa": "باتری یدکی",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار برقی",
+        "باتری و متعلقات",
+        "باتری یدکی"
+      ],
+      "parentId": "batteries-and-accessories"
+    },
+    "tool-chargers": {
+      "id": "tool-chargers",
+      "en": "Tool Chargers",
+      "slug": "tool-chargers",
+      "fa": "شارژر ابزار",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار برقی",
+        "باتری و متعلقات",
+        "شارژر ابزار"
+      ],
+      "parentId": "batteries-and-accessories"
+    },
+    "drill-chucks": {
+      "id": "drill-chucks",
+      "en": "Drill Chucks",
+      "slug": "drill-chucks",
+      "fa": "سه‌نظام",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار برقی",
+        "باتری و متعلقات",
+        "سه‌نظام"
+      ],
+      "parentId": "batteries-and-accessories"
+    },
+    "carbon-brushes": {
+      "id": "carbon-brushes",
+      "en": "Carbon Brushes",
+      "slug": "carbon-brushes",
+      "fa": "ذغال دستگاه",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار برقی",
+        "باتری و متعلقات",
+        "ذغال دستگاه"
+      ],
+      "parentId": "batteries-and-accessories"
+    },
+    "hand-tools": {
+      "id": "hand-tools",
+      "en": "Hand Tools",
+      "slug": "hand-tools",
+      "fa": "ابزار دستی",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار دستی"
+      ],
+      "parentId": "tools-and-equipment"
+    },
+    "wrenches-and-sockets": {
+      "id": "wrenches-and-sockets",
+      "en": "Wrenches and Sockets",
+      "slug": "wrenches-and-sockets",
+      "fa": "آچار و بکس",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار دستی",
+        "آچار و بکس"
+      ],
+      "parentId": "hand-tools"
+    },
+    "adjustable-wrenches": {
+      "id": "adjustable-wrenches",
+      "en": "Adjustable Wrenches",
+      "slug": "adjustable-wrenches",
+      "fa": "آچار فرانسه",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار دستی",
+        "آچار و بکس",
+        "آچار فرانسه"
+      ],
+      "parentId": "wrenches-and-sockets"
+    },
+    "socket-sets": {
+      "id": "socket-sets",
+      "en": "Socket Sets",
+      "slug": "socket-sets",
+      "fa": "ست بکس",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار دستی",
+        "آچار و بکس",
+        "ست بکس"
+      ],
+      "parentId": "wrenches-and-sockets"
+    },
+    "hex-keys": {
+      "id": "hex-keys",
+      "en": "Hex Keys",
+      "slug": "hex-keys",
+      "fa": "آچار آلن",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار دستی",
+        "آچار و بکس",
+        "آچار آلن"
+      ],
+      "parentId": "wrenches-and-sockets"
+    },
+    "combination-wrenches": {
+      "id": "combination-wrenches",
+      "en": "Combination Wrenches",
+      "slug": "combination-wrenches",
+      "fa": "آچار تخت و رینگی",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار دستی",
+        "آچار و بکس",
+        "آچار تخت و رینگی"
+      ],
+      "parentId": "wrenches-and-sockets"
+    },
+    "torque-wrenches": {
+      "id": "torque-wrenches",
+      "en": "Torque Wrenches",
+      "slug": "torque-wrenches",
+      "fa": "آچار ترکمتر",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار دستی",
+        "آچار و بکس",
+        "آچار ترکمتر"
+      ],
+      "parentId": "wrenches-and-sockets"
+    },
+    "pipe-wrenches": {
+      "id": "pipe-wrenches",
+      "en": "Pipe Wrenches",
+      "slug": "pipe-wrenches",
+      "fa": "آچار لوله‌گیر",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار دستی",
+        "آچار و بکس",
+        "آچار لوله‌گیر"
+      ],
+      "parentId": "wrenches-and-sockets"
+    },
+    "screwdrivers-and-pliers": {
+      "id": "screwdrivers-and-pliers",
+      "en": "Screwdrivers and Pliers",
+      "slug": "screwdrivers-and-pliers",
+      "fa": "پیچ‌گوشتی و انبر",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار دستی",
+        "پیچ‌گوشتی و انبر"
+      ],
+      "parentId": "hand-tools"
+    },
+    "hand-screwdrivers": {
+      "id": "hand-screwdrivers",
+      "en": "Hand Screwdrivers",
+      "slug": "hand-screwdrivers",
+      "fa": "پیچ‌گوشتی دستی",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار دستی",
+        "پیچ‌گوشتی و انبر",
+        "پیچ‌گوشتی دستی"
+      ],
+      "parentId": "screwdrivers-and-pliers"
+    },
+    "combination-pliers": {
+      "id": "combination-pliers",
+      "en": "Combination Pliers",
+      "slug": "combination-pliers",
+      "fa": "انبردست",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار دستی",
+        "پیچ‌گوشتی و انبر",
+        "انبردست"
+      ],
+      "parentId": "screwdrivers-and-pliers"
+    },
+    "diagonal-cutters": {
+      "id": "diagonal-cutters",
+      "en": "Diagonal Cutters",
+      "slug": "diagonal-cutters",
+      "fa": "سیم‌چین",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار دستی",
+        "پیچ‌گوشتی و انبر",
+        "سیم‌چین"
+      ],
+      "parentId": "screwdrivers-and-pliers"
+    },
+    "needle-nose-pliers": {
+      "id": "needle-nose-pliers",
+      "en": "Needle-Nose Pliers",
+      "slug": "needle-nose-pliers",
+      "fa": "دم‌باریک",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار دستی",
+        "پیچ‌گوشتی و انبر",
+        "دم‌باریک"
+      ],
+      "parentId": "screwdrivers-and-pliers"
+    },
+    "screwdriver-sets": {
+      "id": "screwdriver-sets",
+      "en": "Screwdriver Sets",
+      "slug": "screwdriver-sets",
+      "fa": "ست پیچ‌گوشتی",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار دستی",
+        "پیچ‌گوشتی و انبر",
+        "ست پیچ‌گوشتی"
+      ],
+      "parentId": "screwdrivers-and-pliers"
+    },
+    "locking-pliers": {
+      "id": "locking-pliers",
+      "en": "Locking Pliers",
+      "slug": "locking-pliers",
+      "fa": "انبرقفلی",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار دستی",
+        "پیچ‌گوشتی و انبر",
+        "انبرقفلی"
+      ],
+      "parentId": "screwdrivers-and-pliers"
+    },
+    "tool-supplies": {
+      "id": "tool-supplies",
+      "en": "Tool Supplies",
+      "slug": "tool-supplies",
+      "fa": "لوازم ابزار",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار دستی",
+        "لوازم ابزار"
+      ],
+      "parentId": "hand-tools"
+    },
+    "toolboxes": {
+      "id": "toolboxes",
+      "en": "Toolboxes",
+      "slug": "toolboxes",
+      "fa": "جعبه ابزار",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار دستی",
+        "لوازم ابزار",
+        "جعبه ابزار"
+      ],
+      "parentId": "tool-supplies"
+    },
+    "bits-and-drivers": {
+      "id": "bits-and-drivers",
+      "en": "Bits and Drivers",
+      "slug": "bits-and-drivers",
+      "fa": "مته و سری",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار دستی",
+        "لوازم ابزار",
+        "مته و سری"
+      ],
+      "parentId": "tool-supplies"
+    },
+    "clamps-and-hand-vises": {
+      "id": "clamps-and-hand-vises",
+      "en": "Clamps and Hand Vises",
+      "slug": "clamps-and-hand-vises",
+      "fa": "گیره و پیچ‌دستی",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار دستی",
+        "لوازم ابزار",
+        "گیره و پیچ‌دستی"
+      ],
+      "parentId": "tool-supplies"
+    },
+    "utility-knives-and-blades": {
+      "id": "utility-knives-and-blades",
+      "en": "Utility Knives and Blades",
+      "slug": "utility-knives-and-blades",
+      "fa": "کاتر و تیغ",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار دستی",
+        "لوازم ابزار",
+        "کاتر و تیغ"
+      ],
+      "parentId": "tool-supplies"
+    },
+    "hammers-and-striking-tools": {
+      "id": "hammers-and-striking-tools",
+      "en": "Hammers and Striking Tools",
+      "slug": "hammers-and-striking-tools",
+      "fa": "چکش و ابزار ضربه‌ای",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار دستی",
+        "لوازم ابزار",
+        "چکش و ابزار ضربه‌ای"
+      ],
+      "parentId": "tool-supplies"
+    },
+    "tape-measures-and-rulers": {
+      "id": "tape-measures-and-rulers",
+      "en": "Tape Measures and Rulers",
+      "slug": "tape-measures-and-rulers",
+      "fa": "متر و خط‌کش",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار دستی",
+        "لوازم ابزار",
+        "متر و خط‌کش"
+      ],
+      "parentId": "tool-supplies"
+    },
+    "electronic-components": {
+      "id": "electronic-components",
+      "en": "Electronic Components",
+      "slug": "electronic-components",
+      "fa": "قطعات الکترونیکی",
+      "path": [
+        "ابزار و تجهیزات",
+        "قطعات الکترونیکی"
+      ],
+      "parentId": "tools-and-equipment"
+    },
+    "resistors-and-capacitors": {
+      "id": "resistors-and-capacitors",
+      "en": "Resistors and Capacitors",
+      "slug": "resistors-and-capacitors",
+      "fa": "مقاومت و خازن",
+      "path": [
+        "ابزار و تجهیزات",
+        "قطعات الکترونیکی",
+        "مقاومت و خازن"
+      ],
+      "parentId": "electronic-components"
+    },
+    "resistors": {
+      "id": "resistors",
+      "en": "Resistors",
+      "slug": "resistors",
+      "fa": "مقاومت",
+      "path": [
+        "ابزار و تجهیزات",
+        "قطعات الکترونیکی",
+        "مقاومت و خازن",
+        "مقاومت"
+      ],
+      "parentId": "resistors-and-capacitors"
+    },
+    "capacitors": {
+      "id": "capacitors",
+      "en": "Capacitors",
+      "slug": "capacitors",
+      "fa": "خازن",
+      "path": [
+        "ابزار و تجهیزات",
+        "قطعات الکترونیکی",
+        "مقاومت و خازن",
+        "خازن"
+      ],
+      "parentId": "resistors-and-capacitors"
+    },
+    "diodes": {
+      "id": "diodes",
+      "en": "Diodes",
+      "slug": "diodes",
+      "fa": "دیود",
+      "path": [
+        "ابزار و تجهیزات",
+        "قطعات الکترونیکی",
+        "مقاومت و خازن",
+        "دیود"
+      ],
+      "parentId": "resistors-and-capacitors"
+    },
+    "inductors": {
+      "id": "inductors",
+      "en": "Inductors",
+      "slug": "inductors",
+      "fa": "سلف",
+      "path": [
+        "ابزار و تجهیزات",
+        "قطعات الکترونیکی",
+        "مقاومت و خازن",
+        "سلف"
+      ],
+      "parentId": "resistors-and-capacitors"
+    },
+    "bridge-rectifiers": {
+      "id": "bridge-rectifiers",
+      "en": "Bridge Rectifiers",
+      "slug": "bridge-rectifiers",
+      "fa": "پل دیود",
+      "path": [
+        "ابزار و تجهیزات",
+        "قطعات الکترونیکی",
+        "مقاومت و خازن",
+        "پل دیود"
+      ],
+      "parentId": "resistors-and-capacitors"
+    },
+    "ics-and-semiconductors": {
+      "id": "ics-and-semiconductors",
+      "en": "ICs and Semiconductors",
+      "slug": "ics-and-semiconductors",
+      "fa": "آی‌سی و نیمه‌رسانا",
+      "path": [
+        "ابزار و تجهیزات",
+        "قطعات الکترونیکی",
+        "آی‌سی و نیمه‌رسانا"
+      ],
+      "parentId": "electronic-components"
+    },
+    "integrated-circuits": {
+      "id": "integrated-circuits",
+      "en": "Integrated Circuits",
+      "slug": "integrated-circuits",
+      "fa": "آی‌سی",
+      "path": [
+        "ابزار و تجهیزات",
+        "قطعات الکترونیکی",
+        "آی‌سی و نیمه‌رسانا",
+        "آی‌سی"
+      ],
+      "parentId": "ics-and-semiconductors"
+    },
+    "transistors": {
+      "id": "transistors",
+      "en": "Transistors",
+      "slug": "transistors",
+      "fa": "ترانزیستور",
+      "path": [
+        "ابزار و تجهیزات",
+        "قطعات الکترونیکی",
+        "آی‌سی و نیمه‌رسانا",
+        "ترانزیستور"
+      ],
+      "parentId": "ics-and-semiconductors"
+    },
+    "voltage-regulators": {
+      "id": "voltage-regulators",
+      "en": "Voltage Regulators",
+      "slug": "voltage-regulators",
+      "fa": "رگولاتور",
+      "path": [
+        "ابزار و تجهیزات",
+        "قطعات الکترونیکی",
+        "آی‌سی و نیمه‌رسانا",
+        "رگولاتور"
+      ],
+      "parentId": "ics-and-semiconductors"
+    },
+    "mosfets": {
+      "id": "mosfets",
+      "en": "MOSFETs",
+      "slug": "mosfets",
+      "fa": "ماسفت",
+      "path": [
+        "ابزار و تجهیزات",
+        "قطعات الکترونیکی",
+        "آی‌سی و نیمه‌رسانا",
+        "ماسفت"
+      ],
+      "parentId": "ics-and-semiconductors"
+    },
+    "optocouplers": {
+      "id": "optocouplers",
+      "en": "Optocouplers",
+      "slug": "optocouplers",
+      "fa": "اپتوکوپلر",
+      "path": [
+        "ابزار و تجهیزات",
+        "قطعات الکترونیکی",
+        "آی‌سی و نیمه‌رسانا",
+        "اپتوکوپلر"
+      ],
+      "parentId": "ics-and-semiconductors"
+    },
+    "boards-and-modules": {
+      "id": "boards-and-modules",
+      "en": "Boards and Modules",
+      "slug": "boards-and-modules",
+      "fa": "برد و ماژول",
+      "path": [
+        "ابزار و تجهیزات",
+        "قطعات الکترونیکی",
+        "برد و ماژول"
+      ],
+      "parentId": "electronic-components"
+    },
+    "breadboards": {
+      "id": "breadboards",
+      "en": "Breadboards",
+      "slug": "breadboards",
+      "fa": "بردبورد",
+      "path": [
+        "ابزار و تجهیزات",
+        "قطعات الکترونیکی",
+        "برد و ماژول",
+        "بردبورد"
+      ],
+      "parentId": "boards-and-modules"
+    },
+    "ready-made-modules": {
+      "id": "ready-made-modules",
+      "en": "Ready-Made Modules",
+      "slug": "ready-made-modules",
+      "fa": "ماژول آماده",
+      "path": [
+        "ابزار و تجهیزات",
+        "قطعات الکترونیکی",
+        "برد و ماژول",
+        "ماژول آماده"
+      ],
+      "parentId": "boards-and-modules"
+    },
+    "sensors": {
+      "id": "sensors",
+      "en": "Sensors",
+      "slug": "sensors",
+      "fa": "سنسور",
+      "path": [
+        "ابزار و تجهیزات",
+        "قطعات الکترونیکی",
+        "برد و ماژول",
+        "سنسور"
+      ],
+      "parentId": "boards-and-modules"
+    },
+    "arduino-boards": {
+      "id": "arduino-boards",
+      "en": "Arduino Boards",
+      "slug": "arduino-boards",
+      "fa": "برد آردوینو",
+      "path": [
+        "ابزار و تجهیزات",
+        "قطعات الکترونیکی",
+        "برد و ماژول",
+        "برد آردوینو"
+      ],
+      "parentId": "boards-and-modules"
+    },
+    "power-modules": {
+      "id": "power-modules",
+      "en": "Power Modules",
+      "slug": "power-modules",
+      "fa": "ماژول تغذیه",
+      "path": [
+        "ابزار و تجهیزات",
+        "قطعات الکترونیکی",
+        "برد و ماژول",
+        "ماژول تغذیه"
+      ],
+      "parentId": "boards-and-modules"
+    },
+    "sensors-and-modules": {
+      "id": "sensors-and-modules",
+      "en": "Sensors and Modules",
+      "slug": "sensors-and-modules",
+      "fa": "سنسور و ماژول",
+      "path": [
+        "ابزار و تجهیزات",
+        "قطعات الکترونیکی",
+        "سنسور و ماژول"
+      ],
+      "parentId": "electronic-components"
+    },
+    "temperature-sensors": {
+      "id": "temperature-sensors",
+      "en": "Temperature Sensors",
+      "slug": "temperature-sensors",
+      "fa": "سنسور دما",
+      "path": [
+        "ابزار و تجهیزات",
+        "قطعات الکترونیکی",
+        "سنسور و ماژول",
+        "سنسور دما"
+      ],
+      "parentId": "sensors-and-modules"
+    },
+    "humidity-sensors": {
+      "id": "humidity-sensors",
+      "en": "Humidity Sensors",
+      "slug": "humidity-sensors",
+      "fa": "سنسور رطوبت",
+      "path": [
+        "ابزار و تجهیزات",
+        "قطعات الکترونیکی",
+        "سنسور و ماژول",
+        "سنسور رطوبت"
+      ],
+      "parentId": "sensors-and-modules"
+    },
+    "distance-sensors": {
+      "id": "distance-sensors",
+      "en": "Distance Sensors",
+      "slug": "distance-sensors",
+      "fa": "سنسور فاصله",
+      "path": [
+        "ابزار و تجهیزات",
+        "قطعات الکترونیکی",
+        "سنسور و ماژول",
+        "سنسور فاصله"
+      ],
+      "parentId": "sensors-and-modules"
+    },
+    "relay-modules": {
+      "id": "relay-modules",
+      "en": "Relay Modules",
+      "slug": "relay-modules",
+      "fa": "ماژول رله",
+      "path": [
+        "ابزار و تجهیزات",
+        "قطعات الکترونیکی",
+        "سنسور و ماژول",
+        "ماژول رله"
+      ],
+      "parentId": "sensors-and-modules"
+    },
+    "communication-modules": {
+      "id": "communication-modules",
+      "en": "Communication Modules",
+      "slug": "communication-modules",
+      "fa": "ماژول ارتباطی",
+      "path": [
+        "ابزار و تجهیزات",
+        "قطعات الکترونیکی",
+        "سنسور و ماژول",
+        "ماژول ارتباطی"
+      ],
+      "parentId": "sensors-and-modules"
+    },
+    "soldering-equipment-soldering-irons": {
+      "id": "soldering-equipment-soldering-irons",
+      "en": "Soldering Irons",
+      "slug": "soldering-equipment-soldering-irons",
+      "fa": "هویه",
+      "path": [
+        "ابزار و تجهیزات",
+        "قطعات الکترونیکی",
+        "تجهیزات لحیم‌کاری",
+        "هویه"
+      ],
+      "parentId": "soldering-and-board-repair"
+    },
+    "soldering-tips": {
+      "id": "soldering-tips",
+      "en": "Soldering Tips",
+      "slug": "soldering-tips",
+      "fa": "نوک هویه",
+      "path": [
+        "ابزار و تجهیزات",
+        "قطعات الکترونیکی",
+        "تجهیزات لحیم‌کاری",
+        "نوک هویه"
+      ],
+      "parentId": "soldering-and-board-repair"
+    },
+    "solder-wire": {
+      "id": "solder-wire",
+      "en": "Solder Wire",
+      "slug": "solder-wire",
+      "fa": "سیم لحیم",
+      "path": [
+        "ابزار و تجهیزات",
+        "قطعات الکترونیکی",
+        "تجهیزات لحیم‌کاری",
+        "سیم لحیم"
+      ],
+      "parentId": "soldering-and-board-repair"
+    },
+    "desoldering-pumps": {
+      "id": "desoldering-pumps",
+      "en": "Desoldering Pumps",
+      "slug": "desoldering-pumps",
+      "fa": "قلع‌کش",
+      "path": [
+        "ابزار و تجهیزات",
+        "قطعات الکترونیکی",
+        "تجهیزات لحیم‌کاری",
+        "قلع‌کش"
+      ],
+      "parentId": "soldering-and-board-repair"
+    },
+    "development-boards": {
+      "id": "development-boards",
+      "en": "Development Boards",
+      "slug": "development-boards",
+      "fa": "بردهای توسعه",
+      "path": [
+        "ابزار و تجهیزات",
+        "قطعات الکترونیکی",
+        "بردهای توسعه"
+      ],
+      "parentId": "electronic-components"
+    },
+    "development-boards-arduino-boards": {
+      "id": "development-boards-arduino-boards",
+      "en": "Arduino Boards",
+      "slug": "development-boards-arduino-boards",
+      "fa": "برد آردوینو",
+      "path": [
+        "ابزار و تجهیزات",
+        "قطعات الکترونیکی",
+        "بردهای توسعه",
+        "برد آردوینو"
+      ],
+      "parentId": "development-boards"
+    },
+    "esp32-boards": {
+      "id": "esp32-boards",
+      "en": "ESP32 Boards",
+      "slug": "esp32-boards",
+      "fa": "برد ESP32",
+      "path": [
+        "ابزار و تجهیزات",
+        "قطعات الکترونیکی",
+        "بردهای توسعه",
+        "برد ESP32"
+      ],
+      "parentId": "development-boards"
+    },
+    "raspberry-pi-boards": {
+      "id": "raspberry-pi-boards",
+      "en": "Raspberry Pi Boards",
+      "slug": "raspberry-pi-boards",
+      "fa": "برد رزبری پای",
+      "path": [
+        "ابزار و تجهیزات",
+        "قطعات الکترونیکی",
+        "بردهای توسعه",
+        "برد رزبری پای"
+      ],
+      "parentId": "development-boards"
+    },
+    "perfboards": {
+      "id": "perfboards",
+      "en": "Perfboards",
+      "slug": "perfboards",
+      "fa": "برد سوراخ‌دار",
+      "path": [
+        "ابزار و تجهیزات",
+        "قطعات الکترونیکی",
+        "بردهای توسعه",
+        "برد سوراخ‌دار"
+      ],
+      "parentId": "development-boards"
+    },
+    "jumper-wires": {
+      "id": "jumper-wires",
+      "en": "Jumper Wires",
+      "slug": "jumper-wires",
+      "fa": "جامپر و سیم رابط",
+      "path": [
+        "ابزار و تجهیزات",
+        "قطعات الکترونیکی",
+        "بردهای توسعه",
+        "جامپر و سیم رابط"
+      ],
+      "parentId": "development-boards"
+    },
+    "wires-cables-and-connectors": {
+      "id": "wires-cables-and-connectors",
+      "en": "Wires, Cables and Connectors",
+      "slug": "wires-cables-and-connectors",
+      "fa": "سیم، کابل و اتصالات",
+      "path": [
+        "ابزار و تجهیزات",
+        "سیم، کابل و اتصالات"
+      ],
+      "parentId": "tools-and-equipment"
+    },
+    "stranded-wire": {
+      "id": "stranded-wire",
+      "en": "Stranded Wire",
+      "slug": "stranded-wire",
+      "fa": "سیم افشان",
+      "path": [
+        "ابزار و تجهیزات",
+        "سیم، کابل و اتصالات",
+        "سیم و کابل",
+        "سیم افشان"
+      ],
+      "parentId": "wires-and-cables"
+    },
+    "power-cables": {
+      "id": "power-cables",
+      "en": "Power Cables",
+      "slug": "power-cables",
+      "fa": "کابل برق",
+      "path": [
+        "ابزار و تجهیزات",
+        "سیم، کابل و اتصالات",
+        "سیم و کابل",
+        "کابل برق"
+      ],
+      "parentId": "wires-and-cables"
+    },
+    "ethernet-cables": {
+      "id": "ethernet-cables",
+      "en": "Ethernet Cables",
+      "slug": "ethernet-cables",
+      "fa": "کابل شبکه",
+      "path": [
+        "ابزار و تجهیزات",
+        "سیم، کابل و اتصالات",
+        "سیم و کابل",
+        "کابل شبکه"
+      ],
+      "parentId": "wires-and-cables"
+    },
+    "shielded-cables": {
+      "id": "shielded-cables",
+      "en": "Shielded Cables",
+      "slug": "shielded-cables",
+      "fa": "کابل شیلددار",
+      "path": [
+        "ابزار و تجهیزات",
+        "سیم، کابل و اتصالات",
+        "سیم و کابل",
+        "کابل شیلددار"
+      ],
+      "parentId": "wires-and-cables"
+    },
+    "solid-wires": {
+      "id": "solid-wires",
+      "en": "Solid Wires",
+      "slug": "solid-wires",
+      "fa": "سیم مفتولی",
+      "path": [
+        "ابزار و تجهیزات",
+        "سیم، کابل و اتصالات",
+        "سیم و کابل",
+        "سیم مفتولی"
+      ],
+      "parentId": "wires-and-cables"
+    },
+    "instrumentation-cables": {
+      "id": "instrumentation-cables",
+      "en": "Instrumentation Cables",
+      "slug": "instrumentation-cables",
+      "fa": "کابل ابزار دقیق",
+      "path": [
+        "ابزار و تجهیزات",
+        "سیم، کابل و اتصالات",
+        "سیم و کابل",
+        "کابل ابزار دقیق"
+      ],
+      "parentId": "wires-and-cables"
+    },
+    "sockets-and-connectors": {
+      "id": "sockets-and-connectors",
+      "en": "Sockets and Connectors",
+      "slug": "sockets-and-connectors",
+      "fa": "سوکت و کانکتور",
+      "path": [
+        "ابزار و تجهیزات",
+        "سیم، کابل و اتصالات",
+        "سوکت و کانکتور"
+      ],
+      "parentId": "wires-cables-and-connectors"
+    },
+    "power-plugs": {
+      "id": "power-plugs",
+      "en": "Power Plugs",
+      "slug": "power-plugs",
+      "fa": "فیش برق",
+      "path": [
+        "ابزار و تجهیزات",
+        "سیم، کابل و اتصالات",
+        "سوکت و کانکتور",
+        "فیش برق"
+      ],
+      "parentId": "sockets-and-connectors"
+    },
+    "network-jacks": {
+      "id": "network-jacks",
+      "en": "Network Jacks",
+      "slug": "network-jacks",
+      "fa": "سوکت شبکه",
+      "path": [
+        "ابزار و تجهیزات",
+        "سیم، کابل و اتصالات",
+        "سوکت و کانکتور",
+        "سوکت شبکه"
+      ],
+      "parentId": "sockets-and-connectors"
+    },
+    "connectors": {
+      "id": "connectors",
+      "en": "Connectors",
+      "slug": "connectors",
+      "fa": "کانکتور",
+      "path": [
+        "ابزار و تجهیزات",
+        "سیم، کابل و اتصالات",
+        "سوکت و کانکتور",
+        "کانکتور"
+      ],
+      "parentId": "sockets-and-connectors"
+    },
+    "bnc-connectors": {
+      "id": "bnc-connectors",
+      "en": "BNC Connectors",
+      "slug": "bnc-connectors",
+      "fa": "فیش BNC",
+      "path": [
+        "ابزار و تجهیزات",
+        "سیم، کابل و اتصالات",
+        "سوکت و کانکتور",
+        "فیش BNC"
+      ],
+      "parentId": "sockets-and-connectors"
+    },
+    "telecom-connectors": {
+      "id": "telecom-connectors",
+      "en": "Telecom Connectors",
+      "slug": "telecom-connectors",
+      "fa": "کانکتور مخابراتی",
+      "path": [
+        "ابزار و تجهیزات",
+        "سیم، کابل و اتصالات",
+        "سوکت و کانکتور",
+        "کانکتور مخابراتی"
+      ],
+      "parentId": "sockets-and-connectors"
+    },
+    "banana-plugs": {
+      "id": "banana-plugs",
+      "en": "Banana Plugs",
+      "slug": "banana-plugs",
+      "fa": "فیش موزی",
+      "path": [
+        "ابزار و تجهیزات",
+        "سیم، کابل و اتصالات",
+        "سوکت و کانکتور",
+        "فیش موزی"
+      ],
+      "parentId": "sockets-and-connectors"
+    },
+    "installation-connectors": {
+      "id": "installation-connectors",
+      "en": "Installation Connectors",
+      "slug": "installation-connectors",
+      "fa": "اتصالات نصب",
+      "path": [
+        "ابزار و تجهیزات",
+        "سیم، کابل و اتصالات",
+        "اتصالات نصب"
+      ],
+      "parentId": "wires-cables-and-connectors"
+    },
+    "terminal-blocks": {
+      "id": "terminal-blocks",
+      "en": "Terminal Blocks",
+      "slug": "terminal-blocks",
+      "fa": "ترمینال",
+      "path": [
+        "ابزار و تجهیزات",
+        "سیم، کابل و اتصالات",
+        "اتصالات نصب",
+        "ترمینال"
+      ],
+      "parentId": "installation-connectors"
+    },
+    "wire-ferrules": {
+      "id": "wire-ferrules",
+      "en": "Wire Ferrules",
+      "slug": "wire-ferrules",
+      "fa": "سرسیم",
+      "path": [
+        "ابزار و تجهیزات",
+        "سیم، کابل و اتصالات",
+        "اتصالات نصب",
+        "سرسیم"
+      ],
+      "parentId": "installation-connectors"
+    },
+    "cable-ducts-and-clips": {
+      "id": "cable-ducts-and-clips",
+      "en": "Cable Ducts and Clips",
+      "slug": "cable-ducts-and-clips",
+      "fa": "داکت و بست",
+      "path": [
+        "ابزار و تجهیزات",
+        "سیم، کابل و اتصالات",
+        "اتصالات نصب",
+        "داکت و بست"
+      ],
+      "parentId": "installation-connectors"
+    },
+    "heat-shrink-tubing": {
+      "id": "heat-shrink-tubing",
+      "en": "Heat-Shrink Tubing",
+      "slug": "heat-shrink-tubing",
+      "fa": "وارنیش حرارتی",
+      "path": [
+        "ابزار و تجهیزات",
+        "سیم، کابل و اتصالات",
+        "اتصالات نصب",
+        "وارنیش حرارتی"
+      ],
+      "parentId": "installation-connectors"
+    },
+    "cable-glands": {
+      "id": "cable-glands",
+      "en": "Cable Glands",
+      "slug": "cable-glands",
+      "fa": "گلند کابل",
+      "path": [
+        "ابزار و تجهیزات",
+        "سیم، کابل و اتصالات",
+        "اتصالات نصب",
+        "گلند کابل"
+      ],
+      "parentId": "installation-connectors"
+    },
+    "cable-ties": {
+      "id": "cable-ties",
+      "en": "Cable Ties",
+      "slug": "cable-ties",
+      "fa": "بست کمربندی",
+      "path": [
+        "ابزار و تجهیزات",
+        "سیم، کابل و اتصالات",
+        "اتصالات نصب",
+        "بست کمربندی"
+      ],
+      "parentId": "installation-connectors"
+    },
+    "lamps-and-leds": {
+      "id": "lamps-and-leds",
+      "en": "Lamps and LEDs",
+      "slug": "lamps-and-leds",
+      "fa": "لامپ و LED",
+      "path": [
+        "ابزار و تجهیزات",
+        "روشنایی و لامپ",
+        "لامپ و LED"
+      ],
+      "parentId": "lighting-and-lamps"
+    },
+    "led-bulbs": {
+      "id": "led-bulbs",
+      "en": "LED Bulbs",
+      "slug": "led-bulbs",
+      "fa": "لامپ LED",
+      "path": [
+        "ابزار و تجهیزات",
+        "روشنایی و لامپ",
+        "لامپ و LED",
+        "لامپ LED"
+      ],
+      "parentId": "lamps-and-leds"
+    },
+    "ceiling-panels": {
+      "id": "ceiling-panels",
+      "en": "Ceiling Panels",
+      "slug": "ceiling-panels",
+      "fa": "پنل سقفی",
+      "path": [
+        "ابزار و تجهیزات",
+        "روشنایی و لامپ",
+        "لامپ و LED",
+        "پنل سقفی"
+      ],
+      "parentId": "lamps-and-leds"
+    },
+    "led-strip-lights": {
+      "id": "led-strip-lights",
+      "en": "LED Strip Lights",
+      "slug": "led-strip-lights",
+      "fa": "ریسه نواری",
+      "path": [
+        "ابزار و تجهیزات",
+        "روشنایی و لامپ",
+        "لامپ و LED",
+        "ریسه نواری"
+      ],
+      "parentId": "lamps-and-leds"
+    },
+    "filament-bulbs": {
+      "id": "filament-bulbs",
+      "en": "Filament Bulbs",
+      "slug": "filament-bulbs",
+      "fa": "لامپ فیلامنتی",
+      "path": [
+        "ابزار و تجهیزات",
+        "روشنایی و لامپ",
+        "لامپ و LED",
+        "لامپ فیلامنتی"
+      ],
+      "parentId": "lamps-and-leds"
+    },
+    "linear-lights": {
+      "id": "linear-lights",
+      "en": "Linear Lights",
+      "slug": "linear-lights",
+      "fa": "چراغ خطی",
+      "path": [
+        "ابزار و تجهیزات",
+        "روشنایی و لامپ",
+        "لامپ و LED",
+        "چراغ خطی"
+      ],
+      "parentId": "lamps-and-leds"
+    },
+    "emergency-lights": {
+      "id": "emergency-lights",
+      "en": "Emergency Lights",
+      "slug": "emergency-lights",
+      "fa": "چراغ اضطراری",
+      "path": [
+        "ابزار و تجهیزات",
+        "روشنایی و لامپ",
+        "چراغ کارگاهی",
+        "چراغ اضطراری"
+      ],
+      "parentId": "work-lights"
+    },
+    "floodlights": {
+      "id": "floodlights",
+      "en": "Floodlights",
+      "slug": "floodlights",
+      "fa": "پروژکتور",
+      "path": [
+        "ابزار و تجهیزات",
+        "روشنایی و لامپ",
+        "چراغ کارگاهی",
+        "پروژکتور"
+      ],
+      "parentId": "work-lights"
+    },
+    "portable-lights": {
+      "id": "portable-lights",
+      "en": "Portable Lights",
+      "slug": "portable-lights",
+      "fa": "چراغ سیار",
+      "path": [
+        "ابزار و تجهیزات",
+        "روشنایی و لامپ",
+        "چراغ کارگاهی",
+        "چراغ سیار"
+      ],
+      "parentId": "work-lights"
+    },
+    "explosion-proof-lights": {
+      "id": "explosion-proof-lights",
+      "en": "Explosion-Proof Lights",
+      "slug": "explosion-proof-lights",
+      "fa": "چراغ ضدانفجار",
+      "path": [
+        "ابزار و تجهیزات",
+        "روشنایی و لامپ",
+        "چراغ کارگاهی",
+        "چراغ ضدانفجار"
+      ],
+      "parentId": "work-lights"
+    },
+    "lighting-accessories": {
+      "id": "lighting-accessories",
+      "en": "Lighting Accessories",
+      "slug": "lighting-accessories",
+      "fa": "لوازم روشنایی",
+      "path": [
+        "ابزار و تجهیزات",
+        "روشنایی و لامپ",
+        "لوازم روشنایی"
+      ],
+      "parentId": "lighting-and-lamps"
+    },
+    "lamp-holders": {
+      "id": "lamp-holders",
+      "en": "Lamp Holders",
+      "slug": "lamp-holders",
+      "fa": "سرپیچ",
+      "path": [
+        "ابزار و تجهیزات",
+        "روشنایی و لامپ",
+        "لوازم روشنایی",
+        "سرپیچ"
+      ],
+      "parentId": "lighting-accessories"
+    },
+    "led-drivers": {
+      "id": "led-drivers",
+      "en": "LED Drivers",
+      "slug": "led-drivers",
+      "fa": "درایور LED",
+      "path": [
+        "ابزار و تجهیزات",
+        "روشنایی و لامپ",
+        "لوازم روشنایی",
+        "درایور LED"
+      ],
+      "parentId": "lighting-accessories"
+    },
+    "motion-sensors": {
+      "id": "motion-sensors",
+      "en": "Motion Sensors",
+      "slug": "motion-sensors",
+      "fa": "سنسور حرکتی",
+      "path": [
+        "ابزار و تجهیزات",
+        "روشنایی و لامپ",
+        "لوازم روشنایی",
+        "سنسور حرکتی"
+      ],
+      "parentId": "lighting-accessories"
+    },
+    "photocells": {
+      "id": "photocells",
+      "en": "Photocells",
+      "slug": "photocells",
+      "fa": "فتوسل",
+      "path": [
+        "ابزار و تجهیزات",
+        "روشنایی و لامپ",
+        "لوازم روشنایی",
+        "فتوسل"
+      ],
+      "parentId": "lighting-accessories"
+    },
+    "light-fixtures-and-accessories": {
+      "id": "light-fixtures-and-accessories",
+      "en": "Light Fixtures and Accessories",
+      "slug": "light-fixtures-and-accessories",
+      "fa": "قاب و متعلقات چراغ",
+      "path": [
+        "ابزار و تجهیزات",
+        "روشنایی و لامپ",
+        "لوازم روشنایی",
+        "قاب و متعلقات چراغ"
+      ],
+      "parentId": "lighting-accessories"
+    },
+    "switches-and-electrical-equipment": {
+      "id": "switches-and-electrical-equipment",
+      "en": "Switches and Electrical Equipment",
+      "slug": "switches-and-electrical-equipment",
+      "fa": "کلید و تجهیزات برقی",
+      "path": [
+        "ابزار و تجهیزات",
+        "کلید و تجهیزات برقی"
+      ],
+      "parentId": "tools-and-equipment"
+    },
+    "electrical-switches": {
+      "id": "electrical-switches",
+      "en": "Electrical Switches",
+      "slug": "electrical-switches",
+      "fa": "کلید برق",
+      "path": [
+        "ابزار و تجهیزات",
+        "کلید و تجهیزات برقی",
+        "کلید و پریز",
+        "کلید برق"
+      ],
+      "parentId": "switches-and-sockets"
+    },
+    "flush-mount-outlets": {
+      "id": "flush-mount-outlets",
+      "en": "Flush-Mount Outlets",
+      "slug": "flush-mount-outlets",
+      "fa": "پریز توکار",
+      "path": [
+        "ابزار و تجهیزات",
+        "کلید و تجهیزات برقی",
+        "کلید و پریز",
+        "پریز توکار"
+      ],
+      "parentId": "switches-and-sockets"
+    },
+    "industrial-outlets": {
+      "id": "industrial-outlets",
+      "en": "Industrial Outlets",
+      "slug": "industrial-outlets",
+      "fa": "پریز صنعتی",
+      "path": [
+        "ابزار و تجهیزات",
+        "کلید و تجهیزات برقی",
+        "کلید و پریز",
+        "پریز صنعتی"
+      ],
+      "parentId": "switches-and-sockets"
+    },
+    "two-way-switches": {
+      "id": "two-way-switches",
+      "en": "Two-Way Switches",
+      "slug": "two-way-switches",
+      "fa": "کلید تبدیل",
+      "path": [
+        "ابزار و تجهیزات",
+        "کلید و تجهیزات برقی",
+        "کلید و پریز",
+        "کلید تبدیل"
+      ],
+      "parentId": "switches-and-sockets"
+    },
+    "grounded-outlets": {
+      "id": "grounded-outlets",
+      "en": "Grounded Outlets",
+      "slug": "grounded-outlets",
+      "fa": "پریز ارت‌دار",
+      "path": [
+        "ابزار و تجهیزات",
+        "کلید و تجهیزات برقی",
+        "کلید و پریز",
+        "پریز ارت‌دار"
+      ],
+      "parentId": "switches-and-sockets"
+    },
+    "fuses-and-surge-protection": {
+      "id": "fuses-and-surge-protection",
+      "en": "Fuses and Surge Protection",
+      "slug": "fuses-and-surge-protection",
+      "fa": "فیوز و محافظ",
+      "path": [
+        "ابزار و تجهیزات",
+        "کلید و تجهیزات برقی",
+        "فیوز و محافظ"
+      ],
+      "parentId": "switches-and-electrical-equipment"
+    },
+    "miniature-circuit-breakers": {
+      "id": "miniature-circuit-breakers",
+      "en": "Miniature Circuit Breakers",
+      "slug": "miniature-circuit-breakers",
+      "fa": "فیوز مینیاتوری",
+      "path": [
+        "ابزار و تجهیزات",
+        "کلید و تجهیزات برقی",
+        "فیوز و محافظ",
+        "فیوز مینیاتوری"
+      ],
+      "parentId": "fuses-and-surge-protection"
+    },
+    "residual-current-devices": {
+      "id": "residual-current-devices",
+      "en": "Residual-Current Devices",
+      "slug": "residual-current-devices",
+      "fa": "محافظ جان",
+      "path": [
+        "ابزار و تجهیزات",
+        "کلید و تجهیزات برقی",
+        "فیوز و محافظ",
+        "محافظ جان"
+      ],
+      "parentId": "fuses-and-surge-protection"
+    },
+    "voltage-protectors": {
+      "id": "voltage-protectors",
+      "en": "Voltage Protectors",
+      "slug": "voltage-protectors",
+      "fa": "محافظ ولتاژ",
+      "path": [
+        "ابزار و تجهیزات",
+        "کلید و تجهیزات برقی",
+        "فیوز و محافظ",
+        "محافظ ولتاژ"
+      ],
+      "parentId": "fuses-and-surge-protection"
+    },
+    "cartridge-fuses": {
+      "id": "cartridge-fuses",
+      "en": "Cartridge Fuses",
+      "slug": "cartridge-fuses",
+      "fa": "فیوز کاردی",
+      "path": [
+        "ابزار و تجهیزات",
+        "کلید و تجهیزات برقی",
+        "فیوز و محافظ",
+        "فیوز کاردی"
+      ],
+      "parentId": "fuses-and-surge-protection"
+    },
+    "circuit-breakers": {
+      "id": "circuit-breakers",
+      "en": "Circuit Breakers",
+      "slug": "circuit-breakers",
+      "fa": "کلید اتوماتیک",
+      "path": [
+        "ابزار و تجهیزات",
+        "کلید و تجهیزات برقی",
+        "فیوز و محافظ",
+        "کلید اتوماتیک"
+      ],
+      "parentId": "fuses-and-surge-protection"
+    },
+    "control-equipment": {
+      "id": "control-equipment",
+      "en": "Control Equipment",
+      "slug": "control-equipment",
+      "fa": "تجهیزات کنترل",
+      "path": [
+        "ابزار و تجهیزات",
+        "کلید و تجهیزات برقی",
+        "تجهیزات کنترل"
+      ],
+      "parentId": "switches-and-electrical-equipment"
+    },
+    "contactors": {
+      "id": "contactors",
+      "en": "Contactors",
+      "slug": "contactors",
+      "fa": "کنتاکتور",
+      "path": [
+        "ابزار و تجهیزات",
+        "کلید و تجهیزات برقی",
+        "تجهیزات کنترل",
+        "کنتاکتور"
+      ],
+      "parentId": "control-equipment"
+    },
+    "timers": {
+      "id": "timers",
+      "en": "Timers",
+      "slug": "timers",
+      "fa": "تایمر",
+      "path": [
+        "ابزار و تجهیزات",
+        "کلید و تجهیزات برقی",
+        "تجهیزات کنترل",
+        "تایمر"
+      ],
+      "parentId": "control-equipment"
+    },
+    "pushbuttons-and-indicators": {
+      "id": "pushbuttons-and-indicators",
+      "en": "Pushbuttons and Indicators",
+      "slug": "pushbuttons-and-indicators",
+      "fa": "شستی و سیگنال",
+      "path": [
+        "ابزار و تجهیزات",
+        "کلید و تجهیزات برقی",
+        "تجهیزات کنترل",
+        "شستی و سیگنال"
+      ],
+      "parentId": "control-equipment"
+    },
+    "thermal-relays": {
+      "id": "thermal-relays",
+      "en": "Thermal Relays",
+      "slug": "thermal-relays",
+      "fa": "رله حرارتی",
+      "path": [
+        "ابزار و تجهیزات",
+        "کلید و تجهیزات برقی",
+        "تجهیزات کنترل",
+        "رله حرارتی"
+      ],
+      "parentId": "control-equipment"
+    },
+    "phase-monitors": {
+      "id": "phase-monitors",
+      "en": "Phase Monitors",
+      "slug": "phase-monitors",
+      "fa": "کنترل فاز",
+      "path": [
+        "ابزار و تجهیزات",
+        "کلید و تجهیزات برقی",
+        "تجهیزات کنترل",
+        "کنترل فاز"
+      ],
+      "parentId": "control-equipment"
+    },
+    "safety-and-protection": {
+      "id": "safety-and-protection",
+      "en": "Safety and Protection",
+      "slug": "safety-and-protection",
+      "fa": "ایمنی و حفاظت",
+      "path": [
+        "ابزار و تجهیزات",
+        "ایمنی و حفاظت"
+      ],
+      "parentId": "tools-and-equipment"
+    },
+    "personal-protective-equipment": {
+      "id": "personal-protective-equipment",
+      "en": "Personal Protective Equipment",
+      "slug": "personal-protective-equipment",
+      "fa": "ایمنی فردی",
+      "path": [
+        "ابزار و تجهیزات",
+        "ایمنی و حفاظت",
+        "ایمنی فردی"
+      ],
+      "parentId": "safety-and-protection"
+    },
+    "insulated-gloves": {
+      "id": "insulated-gloves",
+      "en": "Insulated Gloves",
+      "slug": "insulated-gloves",
+      "fa": "دستکش عایق",
+      "path": [
+        "ابزار و تجهیزات",
+        "ایمنی و حفاظت",
+        "ایمنی فردی",
+        "دستکش عایق"
+      ],
+      "parentId": "personal-protective-equipment"
+    },
+    "safety-glasses": {
+      "id": "safety-glasses",
+      "en": "Safety Glasses",
+      "slug": "safety-glasses",
+      "fa": "عینک ایمنی",
+      "path": [
+        "ابزار و تجهیزات",
+        "ایمنی و حفاظت",
+        "ایمنی فردی",
+        "عینک ایمنی"
+      ],
+      "parentId": "personal-protective-equipment"
+    },
+    "safety-boots": {
+      "id": "safety-boots",
+      "en": "Safety Boots",
+      "slug": "safety-boots",
+      "fa": "کفش کار",
+      "path": [
+        "ابزار و تجهیزات",
+        "ایمنی و حفاظت",
+        "ایمنی فردی",
+        "کفش کار"
+      ],
+      "parentId": "personal-protective-equipment"
+    },
+    "hard-hats": {
+      "id": "hard-hats",
+      "en": "Hard Hats",
+      "slug": "hard-hats",
+      "fa": "کلاه ایمنی",
+      "path": [
+        "ابزار و تجهیزات",
+        "ایمنی و حفاظت",
+        "ایمنی فردی",
+        "کلاه ایمنی"
+      ],
+      "parentId": "personal-protective-equipment"
+    },
+    "workwear": {
+      "id": "workwear",
+      "en": "Workwear",
+      "slug": "workwear",
+      "fa": "لباس کار",
+      "path": [
+        "ابزار و تجهیزات",
+        "ایمنی و حفاظت",
+        "ایمنی فردی",
+        "لباس کار"
+      ],
+      "parentId": "personal-protective-equipment"
+    },
+    "electrical-protection": {
+      "id": "electrical-protection",
+      "en": "Electrical Protection",
+      "slug": "electrical-protection",
+      "fa": "حفاظت برق",
+      "path": [
+        "ابزار و تجهیزات",
+        "ایمنی و حفاظت",
+        "حفاظت برق"
+      ],
+      "parentId": "safety-and-protection"
+    },
+    "electrical-protection-voltage-protectors": {
+      "id": "electrical-protection-voltage-protectors",
+      "en": "Voltage Protectors",
+      "slug": "electrical-protection-voltage-protectors",
+      "fa": "محافظ ولتاژ",
+      "path": [
+        "ابزار و تجهیزات",
+        "ایمنی و حفاظت",
+        "حفاظت برق",
+        "محافظ ولتاژ"
+      ],
+      "parentId": "electrical-protection"
+    },
+    "grounding-equipment": {
+      "id": "grounding-equipment",
+      "en": "Grounding Equipment",
+      "slug": "grounding-equipment",
+      "fa": "تجهیزات ارت",
+      "path": [
+        "ابزار و تجهیزات",
+        "ایمنی و حفاظت",
+        "حفاظت برق",
+        "تجهیزات ارت"
+      ],
+      "parentId": "electrical-protection"
+    },
+    "lightning-arresters": {
+      "id": "lightning-arresters",
+      "en": "Lightning Arresters",
+      "slug": "lightning-arresters",
+      "fa": "صاعقه‌گیر",
+      "path": [
+        "ابزار و تجهیزات",
+        "ایمنی و حفاظت",
+        "حفاظت برق",
+        "صاعقه‌گیر"
+      ],
+      "parentId": "electrical-protection"
+    },
+    "insulation-testers": {
+      "id": "insulation-testers",
+      "en": "Insulation Testers",
+      "slug": "insulation-testers",
+      "fa": "دستگاه تست عایق",
+      "path": [
+        "ابزار و تجهیزات",
+        "ایمنی و حفاظت",
+        "حفاظت برق",
+        "دستگاه تست عایق"
+      ],
+      "parentId": "electrical-protection"
+    },
+    "lockout-and-tagout-equipment": {
+      "id": "lockout-and-tagout-equipment",
+      "en": "Lockout and Tagout Equipment",
+      "slug": "lockout-and-tagout-equipment",
+      "fa": "تجهیزات قفل و برچسب",
+      "path": [
+        "ابزار و تجهیزات",
+        "ایمنی و حفاظت",
+        "حفاظت برق",
+        "تجهیزات قفل و برچسب"
+      ],
+      "parentId": "electrical-protection"
+    },
+    "workshop-safety": {
+      "id": "workshop-safety",
+      "en": "Workshop Safety",
+      "slug": "workshop-safety",
+      "fa": "ایمنی کارگاه",
+      "path": [
+        "ابزار و تجهیزات",
+        "ایمنی و حفاظت",
+        "ایمنی کارگاه"
+      ],
+      "parentId": "safety-and-protection"
+    },
+    "workshop-safety-hard-hats": {
+      "id": "workshop-safety-hard-hats",
+      "en": "Hard Hats",
+      "slug": "workshop-safety-hard-hats",
+      "fa": "کلاه ایمنی",
+      "path": [
+        "ابزار و تجهیزات",
+        "ایمنی و حفاظت",
+        "ایمنی کارگاه",
+        "کلاه ایمنی"
+      ],
+      "parentId": "workshop-safety"
+    },
+    "workshop-safety-workwear": {
+      "id": "workshop-safety-workwear",
+      "en": "Workwear",
+      "slug": "workshop-safety-workwear",
+      "fa": "لباس کار",
+      "path": [
+        "ابزار و تجهیزات",
+        "ایمنی و حفاظت",
+        "ایمنی کارگاه",
+        "لباس کار"
+      ],
+      "parentId": "workshop-safety"
+    },
+    "first-aid-kits": {
+      "id": "first-aid-kits",
+      "en": "First Aid Kits",
+      "slug": "first-aid-kits",
+      "fa": "جعبه کمک‌های اولیه",
+      "path": [
+        "ابزار و تجهیزات",
+        "ایمنی و حفاظت",
+        "ایمنی کارگاه",
+        "جعبه کمک‌های اولیه"
+      ],
+      "parentId": "workshop-safety"
+    },
+    "hearing-protection": {
+      "id": "hearing-protection",
+      "en": "Hearing Protection",
+      "slug": "hearing-protection",
+      "fa": "گوشی ایمنی",
+      "path": [
+        "ابزار و تجهیزات",
+        "ایمنی و حفاظت",
+        "ایمنی کارگاه",
+        "گوشی ایمنی"
+      ],
+      "parentId": "workshop-safety"
+    },
+    "respirator-masks": {
+      "id": "respirator-masks",
+      "en": "Respirator Masks",
+      "slug": "respirator-masks",
+      "fa": "ماسک تنفسی",
+      "path": [
+        "ابزار و تجهیزات",
+        "ایمنی و حفاظت",
+        "ایمنی کارگاه",
+        "ماسک تنفسی"
+      ],
+      "parentId": "workshop-safety"
+    },
+    "multimeters": {
+      "id": "multimeters",
+      "en": "Multimeters",
+      "slug": "multimeters",
+      "fa": "مولتی‌متر",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار اندازه‌گیری",
+        "مولتی‌متر"
+      ],
+      "parentId": "measurement-tools"
+    },
+    "ammeters": {
+      "id": "ammeters",
+      "en": "Ammeters",
+      "slug": "ammeters",
+      "fa": "آمپرمتر",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار اندازه‌گیری",
+        "آمپرمتر"
+      ],
+      "parentId": "measurement-tools"
+    },
+    "voltmeters": {
+      "id": "voltmeters",
+      "en": "Voltmeters",
+      "slug": "voltmeters",
+      "fa": "ولت‌متر",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار اندازه‌گیری",
+        "ولت‌متر"
+      ],
+      "parentId": "measurement-tools"
+    },
+    "frequency-meters": {
+      "id": "frequency-meters",
+      "en": "Frequency Meters",
+      "slug": "frequency-meters",
+      "fa": "فرکانس‌متر",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار اندازه‌گیری",
+        "فرکانس‌متر"
+      ],
+      "parentId": "measurement-tools"
+    },
+    "lcr-meters": {
+      "id": "lcr-meters",
+      "en": "LCR Meters",
+      "slug": "lcr-meters",
+      "fa": "LCR متر",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار اندازه‌گیری",
+        "LCR متر"
+      ],
+      "parentId": "measurement-tools"
+    },
+    "testing-and-troubleshooting": {
+      "id": "testing-and-troubleshooting",
+      "en": "Testing and Troubleshooting",
+      "slug": "testing-and-troubleshooting",
+      "fa": "تست و عیب‌یابی",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار اندازه‌گیری",
+        "تست و عیب‌یابی"
+      ],
+      "parentId": "measurement-tools"
+    },
+    "cable-testers": {
+      "id": "cable-testers",
+      "en": "Cable Testers",
+      "slug": "cable-testers",
+      "fa": "تستر کابل",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار اندازه‌گیری",
+        "تست و عیب‌یابی",
+        "تستر کابل"
+      ],
+      "parentId": "testing-and-troubleshooting"
+    },
+    "battery-testers": {
+      "id": "battery-testers",
+      "en": "Battery Testers",
+      "slug": "battery-testers",
+      "fa": "تستر باتری",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار اندازه‌گیری",
+        "تست و عیب‌یابی",
+        "تستر باتری"
+      ],
+      "parentId": "testing-and-troubleshooting"
+    },
+    "testing-and-troubleshooting-insulation-testers": {
+      "id": "testing-and-troubleshooting-insulation-testers",
+      "en": "Insulation Testers",
+      "slug": "testing-and-troubleshooting-insulation-testers",
+      "fa": "تستر عایق",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار اندازه‌گیری",
+        "تست و عیب‌یابی",
+        "تستر عایق"
+      ],
+      "parentId": "testing-and-troubleshooting"
+    },
+    "wire-tracers": {
+      "id": "wire-tracers",
+      "en": "Wire Tracers",
+      "slug": "wire-tracers",
+      "fa": "ردیاب سیم",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار اندازه‌گیری",
+        "تست و عیب‌یابی",
+        "ردیاب سیم"
+      ],
+      "parentId": "testing-and-troubleshooting"
+    },
+    "precision-instruments": {
+      "id": "precision-instruments",
+      "en": "Precision Instruments",
+      "slug": "precision-instruments",
+      "fa": "ابزار دقیق",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار اندازه‌گیری",
+        "ابزار دقیق"
+      ],
+      "parentId": "measurement-tools"
+    },
+    "oscilloscopes": {
+      "id": "oscilloscopes",
+      "en": "Oscilloscopes",
+      "slug": "oscilloscopes",
+      "fa": "اسیلوسکوپ",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار اندازه‌گیری",
+        "ابزار دقیق",
+        "اسیلوسکوپ"
+      ],
+      "parentId": "precision-instruments"
+    },
+    "power-supplies": {
+      "id": "power-supplies",
+      "en": "Power Supplies",
+      "slug": "power-supplies",
+      "fa": "منبع تغذیه",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار اندازه‌گیری",
+        "ابزار دقیق",
+        "منبع تغذیه"
+      ],
+      "parentId": "precision-instruments"
+    },
+    "infrared-thermometers": {
+      "id": "infrared-thermometers",
+      "en": "Infrared Thermometers",
+      "slug": "infrared-thermometers",
+      "fa": "دماسنج لیزری",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار اندازه‌گیری",
+        "ابزار دقیق",
+        "دماسنج لیزری"
+      ],
+      "parentId": "precision-instruments"
+    },
+    "lux-meters": {
+      "id": "lux-meters",
+      "en": "Lux Meters",
+      "slug": "lux-meters",
+      "fa": "لوکس‌متر",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار اندازه‌گیری",
+        "ابزار دقیق",
+        "لوکس‌متر"
+      ],
+      "parentId": "precision-instruments"
+    },
+    "temperature-and-humidity": {
+      "id": "temperature-and-humidity",
+      "en": "Temperature and Humidity",
+      "slug": "temperature-and-humidity",
+      "fa": "دما و رطوبت",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار اندازه‌گیری",
+        "دما و رطوبت"
+      ],
+      "parentId": "measurement-tools"
+    },
+    "digital-thermometers": {
+      "id": "digital-thermometers",
+      "en": "Digital Thermometers",
+      "slug": "digital-thermometers",
+      "fa": "دماسنج دیجیتال",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار اندازه‌گیری",
+        "دما و رطوبت",
+        "دماسنج دیجیتال"
+      ],
+      "parentId": "temperature-and-humidity"
+    },
+    "temperature-and-humidity-infrared-thermometers": {
+      "id": "temperature-and-humidity-infrared-thermometers",
+      "en": "Infrared Thermometers",
+      "slug": "temperature-and-humidity-infrared-thermometers",
+      "fa": "دماسنج لیزری",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار اندازه‌گیری",
+        "دما و رطوبت",
+        "دماسنج لیزری"
+      ],
+      "parentId": "temperature-and-humidity"
+    },
+    "hygrometers": {
+      "id": "hygrometers",
+      "en": "Hygrometers",
+      "slug": "hygrometers",
+      "fa": "رطوبت‌سنج",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار اندازه‌گیری",
+        "دما و رطوبت",
+        "رطوبت‌سنج"
+      ],
+      "parentId": "temperature-and-humidity"
+    },
+    "ambient-thermometers": {
+      "id": "ambient-thermometers",
+      "en": "Ambient Thermometers",
+      "slug": "ambient-thermometers",
+      "fa": "دماسنج محیطی",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار اندازه‌گیری",
+        "دما و رطوبت",
+        "دماسنج محیطی"
+      ],
+      "parentId": "temperature-and-humidity"
+    },
+    "thermocouples": {
+      "id": "thermocouples",
+      "en": "Thermocouples",
+      "slug": "thermocouples",
+      "fa": "ترموکوپل",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار اندازه‌گیری",
+        "دما و رطوبت",
+        "ترموکوپل"
+      ],
+      "parentId": "temperature-and-humidity"
+    },
+    "environmental-measurement": {
+      "id": "environmental-measurement",
+      "en": "Environmental Measurement",
+      "slug": "environmental-measurement",
+      "fa": "اندازه‌گیری محیط",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار اندازه‌گیری",
+        "اندازه‌گیری محیط"
+      ],
+      "parentId": "measurement-tools"
+    },
+    "environmental-measurement-lux-meters": {
+      "id": "environmental-measurement-lux-meters",
+      "en": "Lux Meters",
+      "slug": "environmental-measurement-lux-meters",
+      "fa": "لوکس‌متر",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار اندازه‌گیری",
+        "اندازه‌گیری محیط",
+        "لوکس‌متر"
+      ],
+      "parentId": "environmental-measurement"
+    },
+    "sound-level-meters": {
+      "id": "sound-level-meters",
+      "en": "Sound Level Meters",
+      "slug": "sound-level-meters",
+      "fa": "صوت‌سنج",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار اندازه‌گیری",
+        "اندازه‌گیری محیط",
+        "صوت‌سنج"
+      ],
+      "parentId": "environmental-measurement"
+    },
+    "pressure-gauges": {
+      "id": "pressure-gauges",
+      "en": "Pressure Gauges",
+      "slug": "pressure-gauges",
+      "fa": "فشارسنج",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار اندازه‌گیری",
+        "اندازه‌گیری محیط",
+        "فشارسنج"
+      ],
+      "parentId": "environmental-measurement"
+    },
+    "speed-meters": {
+      "id": "speed-meters",
+      "en": "Speed Meters",
+      "slug": "speed-meters",
+      "fa": "سرعت‌سنج",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار اندازه‌گیری",
+        "اندازه‌گیری محیط",
+        "سرعت‌سنج"
+      ],
+      "parentId": "environmental-measurement"
+    },
+    "air-quality-meters": {
+      "id": "air-quality-meters",
+      "en": "Air Quality Meters",
+      "slug": "air-quality-meters",
+      "fa": "کیفیت‌سنج هوا",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار اندازه‌گیری",
+        "اندازه‌گیری محیط",
+        "کیفیت‌سنج هوا"
+      ],
+      "parentId": "environmental-measurement"
+    },
+    "test-and-calibration-equipment": {
+      "id": "test-and-calibration-equipment",
+      "en": "Test and Calibration Equipment",
+      "slug": "test-and-calibration-equipment",
+      "fa": "منابع تست و کالیبراسیون",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار اندازه‌گیری",
+        "منابع تست و کالیبراسیون"
+      ],
+      "parentId": "measurement-tools"
+    },
+    "laboratory-power-supplies": {
+      "id": "laboratory-power-supplies",
+      "en": "Laboratory Power Supplies",
+      "slug": "laboratory-power-supplies",
+      "fa": "منبع تغذیه آزمایشگاهی",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار اندازه‌گیری",
+        "منابع تست و کالیبراسیون",
+        "منبع تغذیه آزمایشگاهی"
+      ],
+      "parentId": "test-and-calibration-equipment"
+    },
+    "signal-generators": {
+      "id": "signal-generators",
+      "en": "Signal Generators",
+      "slug": "signal-generators",
+      "fa": "مولد سیگنال",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار اندازه‌گیری",
+        "منابع تست و کالیبراسیون",
+        "مولد سیگنال"
+      ],
+      "parentId": "test-and-calibration-equipment"
+    },
+    "calibrators": {
+      "id": "calibrators",
+      "en": "Calibrators",
+      "slug": "calibrators",
+      "fa": "کالیبراتور",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار اندازه‌گیری",
+        "منابع تست و کالیبراسیون",
+        "کالیبراتور"
+      ],
+      "parentId": "test-and-calibration-equipment"
+    },
+    "electronic-loads": {
+      "id": "electronic-loads",
+      "en": "Electronic Loads",
+      "slug": "electronic-loads",
+      "fa": "بار الکترونیکی",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار اندازه‌گیری",
+        "منابع تست و کالیبراسیون",
+        "بار الکترونیکی"
+      ],
+      "parentId": "test-and-calibration-equipment"
+    },
+    "test-leads-and-cables": {
+      "id": "test-leads-and-cables",
+      "en": "Test Leads and Cables",
+      "slug": "test-leads-and-cables",
+      "fa": "پراب و کابل تست",
+      "path": [
+        "ابزار و تجهیزات",
+        "ابزار اندازه‌گیری",
+        "منابع تست و کالیبراسیون",
+        "پراب و کابل تست"
+      ],
+      "parentId": "test-and-calibration-equipment"
+    },
+    "hot-air-rework-stations": {
+      "id": "hot-air-rework-stations",
+      "en": "Hot Air Rework Stations",
+      "slug": "hot-air-rework-stations",
+      "fa": "ایستگاه هیتر هوای گرم",
+      "path": [
+        "ابزار و تجهیزات",
+        "قطعات الکترونیکی",
+        "تجهیزات لحیم‌کاری",
+        "هیتر و هویه",
+        "ایستگاه هیتر هوای گرم"
+      ],
+      "parentId": "hot-air-stations"
     }
   },
   "details": {
@@ -3222,7 +5977,7 @@
       "slug": "cordless-drill-driver",
       "code": "HN-002",
       "brandId": "makita",
-      "categoryId": "drill-drivers",
+      "categoryId": "cordless-drill",
       "colorIds": [
         "blue",
         "black"
@@ -3365,7 +6120,7 @@
       "slug": "two-speed-cordless-drill-driver",
       "code": "HN-004",
       "brandId": "ronix",
-      "categoryId": "drill-drivers",
+      "categoryId": "cordless-drill",
       "colorIds": [
         "red",
         "black"
@@ -3710,7 +6465,7 @@
       "slug": "hot-air-rework-station",
       "code": "HN-013",
       "brandId": "quick",
-      "categoryId": "hot-air-stations",
+      "categoryId": "hot-air-rework-stations",
       "colorIds": [
         "gray",
         "black"
@@ -3840,7 +6595,7 @@
       "slug": "portable-led-work-light",
       "code": "HN-016",
       "brandId": "philips",
-      "categoryId": "work-lights",
+      "categoryId": "inspection-lights",
       "colorIds": [
         "yellow",
         "black"
@@ -3924,7 +6679,7 @@
       "slug": "led-work-light-with-stand",
       "code": "HN-019",
       "brandId": "makita",
-      "categoryId": "work-lights",
+      "categoryId": "work-floodlights",
       "colorIds": [
         "yellow",
         "black"

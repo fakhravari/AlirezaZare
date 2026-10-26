@@ -36,7 +36,7 @@ public sealed record CatalogSnapshot(string BrowserJson, IReadOnlyList<ProductSe
     {
         using JsonDocument document = JsonDocument.Parse(source);
         JsonElement root = document.RootElement;
-        if (root.GetProperty("schemaVersion").GetInt32() != 1)
+        if (root.GetProperty("schemaVersion").GetInt32() != 2)
             throw new InvalidDataException("Unsupported catalog schemaVersion.");
 
         JsonElement brands = root.GetProperty("brands"), categories = root.GetProperty("categories"),
@@ -44,6 +44,7 @@ public sealed record CatalogSnapshot(string BrowserJson, IReadOnlyList<ProductSe
             countries = root.GetProperty("countries"), details = root.GetProperty("details"),
             attributeDefinitions = root.GetProperty("attributeDefinitions");
         ValidateAttributeDefinitions(attributeDefinitions);
+        HashSet<string> nonLeafCategories = ValidateCategories(categories);
         HashSet<int> ids = [];
         HashSet<string> codes = new(StringComparer.Ordinal);
         List<ProductSeoEntry> products = [];
@@ -93,6 +94,8 @@ public sealed record CatalogSnapshot(string BrowserJson, IReadOnlyList<ProductSe
             JsonElement brand = Reference(brands, product, "brandId"),
                 category = Reference(categories, product, "categoryId"),
                 images = Reference(media, product, "mediaId");
+            if (nonLeafCategories.Contains(Text(category, "id")))
+                throw new InvalidDataException($"Product category must be a leaf category: {id}");
             _ = Reference(details, product, "detailId");
             foreach (JsonElement color in product.GetProperty("colorIds").EnumerateArray())
                 if (!colors.TryGetProperty(color.GetString()!, out _))
@@ -124,6 +127,79 @@ public sealed record CatalogSnapshot(string BrowserJson, IReadOnlyList<ProductSe
             path.Any(character => !(character is >= 'a' and <= 'z' or >= '0' and <= '9' or '/' or '-' or '_' or '.')))
             throw new InvalidDataException($"Invalid catalog media path: {path}");
     }
+
+    private static HashSet<string> ValidateCategories(JsonElement categories)
+    {
+        if (categories.ValueKind != JsonValueKind.Object || !categories.EnumerateObject().Any())
+            throw new InvalidDataException("Catalog categories must be a non-empty object.");
+
+        HashSet<string> slugs = new(StringComparer.OrdinalIgnoreCase);
+        HashSet<string> paths = new(StringComparer.Ordinal);
+        List<(string Id, string? ParentId, string[] Path)> categoryNodes = [];
+        foreach (JsonProperty property in categories.EnumerateObject())
+        {
+            JsonElement category = property.Value;
+            string id = Text(category, "id").Trim();
+            string englishName = Text(category, "en").Trim();
+            string slug = Text(category, "slug").Trim();
+            string persianName = Text(category, "fa").Trim();
+            if (!category.TryGetProperty("parentId", out JsonElement parentElement) ||
+                parentElement.ValueKind is not (JsonValueKind.Null or JsonValueKind.String))
+                throw new InvalidDataException($"Category parentId is missing or invalid: {id}");
+            string? parentId = parentElement.ValueKind == JsonValueKind.String
+                ? parentElement.GetString()?.Trim() : null;
+            if (!category.TryGetProperty("path", out JsonElement pathElement) ||
+                pathElement.ValueKind != JsonValueKind.Array || pathElement.GetArrayLength() == 0)
+                throw new InvalidDataException($"Category path is missing: {id}");
+            string[] path = pathElement.EnumerateArray()
+                .Select(segment => segment.ValueKind == JsonValueKind.String ? segment.GetString()?.Trim() ?? "" : "")
+                .ToArray();
+
+            if (!StringComparer.Ordinal.Equals(id, property.Name))
+                throw new InvalidDataException($"Category key/id mismatch: {property.Name}");
+            if (!englishName.Any(character => character is >= 'A' and <= 'Z' or >= 'a' and <= 'z'))
+                throw new InvalidDataException($"Category English name is invalid: {id}");
+            if (!IsLowercaseSlug(slug))
+                throw new InvalidDataException($"Invalid category slug: {id}");
+            if (!slugs.Add(slug))
+                throw new InvalidDataException($"Duplicate category slug: {slug}");
+            if (path.Any(string.IsNullOrWhiteSpace) || !StringComparer.Ordinal.Equals(path[^1], persianName))
+                throw new InvalidDataException($"Invalid category path: {id}");
+            if (!paths.Add(string.Join("\u001f", path)))
+                throw new InvalidDataException($"Duplicate category path: {id}");
+            categoryNodes.Add((id, parentId, path));
+        }
+
+        Dictionary<string, string> categoryIdByPath = categoryNodes.ToDictionary(
+            node => string.Join("\u001f", node.Path), node => node.Id, StringComparer.Ordinal);
+        HashSet<string> nonLeafCategories = [];
+        foreach ((string id, string? parentId, string[] path) in categoryNodes)
+        {
+            for (int length = 1; length < path.Length; length++)
+                if (!paths.Contains(string.Join("\u001f", path.Take(length))))
+                    throw new InvalidDataException($"Missing category ancestor for: {id}");
+
+            if (path.Length == 1)
+            {
+                if (parentId is not null)
+                    throw new InvalidDataException($"Root category cannot have a parent: {id}");
+                continue;
+            }
+
+            string expectedParentPath = string.Join("\u001f", path.Take(path.Length - 1));
+            if (string.IsNullOrWhiteSpace(parentId) ||
+                !categoryIdByPath.TryGetValue(expectedParentPath, out string? expectedParentId) ||
+                !StringComparer.Ordinal.Equals(parentId, expectedParentId))
+                throw new InvalidDataException($"Invalid category parent: {id}");
+            nonLeafCategories.Add(parentId);
+        }
+
+        return nonLeafCategories;
+    }
+
+    private static bool IsLowercaseSlug(string value) =>
+        value.Length > 0 && value[0] != '-' && value[^1] != '-' && !value.Contains("--", StringComparison.Ordinal) &&
+        value.All(character => character is >= 'a' and <= 'z' or >= '0' and <= '9' or '-');
 
     private static void ValidateOptions(JsonElement product)
     {

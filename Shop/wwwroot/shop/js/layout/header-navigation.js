@@ -54,27 +54,29 @@
   };
 
   const catalogCategoryPaths = {
-    tools: ["ابزار برقی"],
-    "hand-tools": ["ابزار برق‌کار"],
-    components: ["لحیم‌کاری و تعمیر برد"],
-    cables: ["سیم و کابل", "سیم، کابل و اتصالات"],
-    lighting: ["روشنایی و لامپ"],
-    switchgear: ["کلید و پریز", "کلید و تجهیزات برقی"],
-    safety: ["تستر و ایمنی برق"],
-    measurement: ["ابزار اندازه‌گیری"],
+    tools: ["ابزار و تجهیزات", "ابزار برقی"],
+    "hand-tools": ["ابزار و تجهیزات", "ابزار دستی"],
+    components: ["ابزار و تجهیزات", "قطعات الکترونیکی"],
+    cables: ["ابزار و تجهیزات", "سیم، کابل و اتصالات"],
+    lighting: ["ابزار و تجهیزات", "روشنایی و لامپ"],
+    switchgear: ["ابزار و تجهیزات", "کلید و تجهیزات برقی"],
+    safety: ["ابزار و تجهیزات", "ایمنی و حفاظت"],
+    measurement: ["ابزار و تجهیزات", "ابزار اندازه‌گیری"],
   };
 
-  const categoryMenuUrl = (label, parentLabel, rootLabels) => {
-    const isTextSearch = (url) =>
-      Boolean(url && new URL(url, window.location.href).searchParams.has("q"));
-    const direct = window.HNCatalog?.categoryUrl(label);
-    if (direct && !isTextSearch(direct)) return direct;
-    const parent = parentLabel && window.HNCatalog?.categoryUrlForLabels([parentLabel]);
-    if (parent && !isTextSearch(parent)) return parent;
-    const root = window.HNCatalog?.categoryUrlForLabels(rootLabels || []);
-    return root && !isTextSearch(root)
-      ? root
-      : direct || `/Search?q=${encodeURIComponent(label || "محصولات")}`;
+  const categoryMenuPath = (categoryKey, groupName, itemName) => {
+    const path = [...(catalogCategoryPaths[categoryKey] || [])];
+    if (groupName && groupName !== path.at(-1)) path.push(groupName);
+    if (itemName) path.push(itemName);
+    return path;
+  };
+
+  const categoryMenuUrl = (categoryKey, groupName, itemName) => {
+    const path = categoryMenuPath(categoryKey, groupName, itemName);
+    const url = window.HNCatalog?.categoryUrl(path);
+    if (url && !new URL(url, window.location.href).searchParams.has("q")) return url;
+    const rootUrl = window.HNCatalog?.categoryUrl(catalogCategoryPaths[categoryKey] || []);
+    return rootUrl || "/Search?product-group=tools-and-equipment";
   };
 
   const renderCategoryGroups = (host, groups, categoryName, categoryKey) => {
@@ -84,8 +86,7 @@
     copy.className = "electrical-submenu-heading-copy";
     const title = document.createElement("a");
     title.className = "electrical-submenu-heading-link";
-    title.href = window.HNCatalog?.categoryUrlForLabels(catalogCategoryPaths[categoryKey] || [categoryName])
-      || `/Search?q=${encodeURIComponent(categoryName || "محصولات")}`;
+    title.href = categoryMenuUrl(categoryKey);
     title.textContent = `همهٔ محصولات ${categoryName || "محصولات"}`;
     copy.append(title);
     const badges = document.createElement("div");
@@ -100,9 +101,8 @@
       badges.append(badge);
     };
     const categoryLabels = catalogCategoryPaths[categoryKey] || [categoryName];
-    const categoryPaths = new Set(categoryLabels);
     const productCount = (window.HNProducts || []).filter((product) =>
-      product.categoryPath?.some((label) => categoryPaths.has(label)),
+      categoryLabels.every((label, index) => product.categoryPath?.[index] === label),
     ).length;
     addBadge("bi-grid-3x3-gap", `${groups.length.toLocaleString("fa-IR")} گروه`);
     addBadge("bi-box-seam", `${productCount.toLocaleString("fa-IR")} محصول`);
@@ -114,12 +114,12 @@
       card.dataset.index = String(index);
       const groupLink = document.createElement("a");
       groupLink.className = "category-mega-title";
-      groupLink.href = categoryMenuUrl(groupName, null, categoryLabels);
+      groupLink.href = categoryMenuUrl(categoryKey, groupName);
       groupLink.textContent = groupName;
       card.append(groupLink);
       items.forEach((label) => {
         const link = document.createElement("a");
-        link.href = categoryMenuUrl(label, groupName, categoryLabels);
+        link.href = categoryMenuUrl(categoryKey, groupName, label);
         link.textContent = label;
         card.append(link);
       });

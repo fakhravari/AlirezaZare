@@ -25,7 +25,7 @@ export function runtime(data = source(), seed = {}) {
     },
   };
   class CustomEvent { constructor(type, options = {}) { this.type = type; this.detail = options.detail; } }
-  const context = vm.createContext({window, document, CustomEvent, console, setTimeout, clearTimeout});
+  const context = vm.createContext({window, document, CustomEvent, URLSearchParams, console, setTimeout, clearTimeout});
   const load = name => vm.runInContext(fs.readFileSync(path.join(root, 'Shop/wwwroot/shop/js', name), 'utf8'), context, {filename: name});
   load('store/catalog.js');
   load('core/storage.js');

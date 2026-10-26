@@ -25,6 +25,58 @@ test('reordering products cannot change IDs, URLs or relationships', () => {
   assert.deepEqual(plain(first.HNCatalog.collections), plain(reordered.HNCatalog.collections));
 });
 
+test('category URLs carry one category slug and category filters include descendants', () => {
+  const {window} = runtime();
+  const powerToolsUrl = new URL(window.HNCatalog.categoryUrl(['ابزار و تجهیزات', 'ابزار برقی']), 'http://localhost');
+  const powerTools = window.HNCatalog.categoryForSlug('power-tools');
+  const hammerDrill = window.HNCatalog.find(1);
+  const cordlessDrill = window.HNCatalog.find(2);
+  const multimeter = window.HNCatalog.find(6);
+
+  assert.deepEqual(powerToolsUrl.searchParams.getAll('product-group'), ['power-tools']);
+  assert.equal(powerToolsUrl.searchParams.has('q'), false);
+  assert.equal(powerTools.fa, 'ابزار برقی');
+  assert.equal(window.HNCatalog.categoryMatchesPath('power-tools', hammerDrill.categoryPath), true);
+  assert.equal(window.HNCatalog.categoryMatchesPath('power-tools', multimeter.categoryPath), false);
+  assert.equal(window.HNCatalog.categoryMatchesPath('drill-drivers', hammerDrill.categoryPath), true);
+  assert.equal(window.HNCatalog.categoryMatchesPath('drill-drivers', multimeter.categoryPath), false);
+  assert.equal(window.HNCatalog.categoryContains('drill-drivers', cordlessDrill.categoryId), true);
+  assert.equal(window.HNCatalog.categoryContains('cordless-drill', cordlessDrill.categoryId), true);
+  assert.equal(window.HNCatalog.categoryContains('cordless-drill', hammerDrill.categoryId), false);
+  assert.equal(window.HNCatalog.categoryMatchesPath('tools-and-equipment', hammerDrill.categoryPath), true);
+  assert.deepEqual(
+    new URL(window.HNCatalog.categoryUrl(hammerDrill.categoryPath), 'http://localhost')
+      .searchParams.getAll('product-group'),
+    ['hammer-drills'],
+  );
+  const voltageProtectorCategories = Object.values(window.HNCatalog.categories)
+    .filter(category => category.fa === 'محافظ ولتاژ');
+  assert.equal(voltageProtectorCategories.length, 2);
+  assert.notEqual(
+    window.HNCatalog.categoryUrl(voltageProtectorCategories[0].path),
+    window.HNCatalog.categoryUrl(voltageProtectorCategories[1].path),
+  );
+});
+
+test('all products use leaf categories and category paths follow parent links', () => {
+  const {window} = runtime();
+  const categories = Object.values(window.HNCatalog.categories);
+  const parentsWithChildren = new Set(categories.map(category => category.parentId).filter(Boolean));
+  const slugs = categories.map(category => category.slug);
+
+  assert.equal(window.HNCatalog.schemaVersion, 2);
+  assert.equal(new Set(slugs).size, categories.length);
+  for (const category of categories) {
+    assert.ok(category.en && category.slug, category.id);
+    const resolved = window.HNCatalog.categoryForSlug(category.slug);
+    assert.deepEqual(resolved.path, category.path, category.id);
+  }
+  for (const product of window.HNProducts) {
+    assert.ok(!parentsWithChildren.has(product.categoryId), `Product ${product.id} must reference a leaf category`);
+    assert.deepEqual(product.categoryPath, window.HNCatalog.categoryForSlug(product.categorySlug).path);
+  }
+});
+
 test('broken relations, duplicate IDs and unknown schema versions fail explicitly', () => {
   for (const mutate of [
     d => d.products[0].id = d.products[1].id,

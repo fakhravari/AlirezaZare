@@ -194,23 +194,15 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
       },
     },
   };
-  const filterValueMeta = (key, value) =>
-    key === "brand"
-      ? { fa: brandDisplayName(value), en: value, slug: brandSlug(value) }
-      : key === "color"
-        ? window.HNProductColors?.[value] || {
-            fa: value,
-            en: value,
-            slug: value,
-            hex: "#64748b",
-          }
-      : {
-          fa: value,
-          ...(filterValueMetadata[key]?.[value] || {
-            en: value,
-            slug: `option-${value}`,
-          }),
-        };
+  const filterValueMeta = (key, value) => {
+    if (key === "brand") return {fa: brandDisplayName(value), en: value, slug: brandSlug(value)};
+    if (key === "color") return window.HNProductColors?.[value] || {fa: value, en: value, slug: value, hex: "#64748b"};
+    if (key === "type") {
+      const category = window.HNCatalog?.categoryForSlug?.(value) || window.HNCatalog?.categoryForLabel?.(value);
+      if (category) return {fa: category.fa, en: category.en, slug: category.slug};
+    }
+    return {fa: value, ...(filterValueMetadata[key]?.[value] || {en: value, slug: `option-${value}`})};
+  };
   const createFilterOptions = (key) =>
     Object.fromEntries(
       [...new Set(products.map((product) => product[key]))].map((label) => [
@@ -218,6 +210,12 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
         label,
       ]),
     );
+  const createCategoryFilterOptions = () => Object.fromEntries(
+    Object.entries(window.HNCatalog?.categories || {})
+      .filter(([id, category]) => products.some((product) =>
+        window.HNCatalog?.categoryContains?.(category.slug || id, product.categoryId)))
+      .map(([id, category]) => [category.slug || id, category.slug || id]),
+  );
   const createLegacyFilterOptions = (key) =>
     Object.fromEntries(
       [...new Set(products.map((product) => product[key]))].map(
@@ -226,7 +224,7 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
     );
   const filterOptions = Object.fromEntries(Object.entries({
     brand: createFilterOptions("brand"),
-    type: createFilterOptions("type"),
+    type: createCategoryFilterOptions(),
     movement: createFilterOptions("movement"),
     strap: createFilterOptions("strap"),
     color: Object.fromEntries(
@@ -249,11 +247,16 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
   function syncUrl() {
     if (restoringUrl) return;
     const params = new URLSearchParams();
-    Object.entries(filterOptions).forEach(([key, options]) =>
+    Object.entries(filterOptions).forEach(([key, options]) => {
+      if (key === "type") return;
       Object.entries(options).forEach(([id, label]) => {
         if (state[key].has(label)) params.append(filterFields[key].slug, id);
-      }),
-    );
+      });
+    });
+    state.type.forEach((value) => {
+      const category = window.HNCatalog?.categoryForSlug?.(value) || window.HNCatalog?.categoryForLabel?.(value);
+      params.append(filterFields.type.slug, category?.slug || filterValueMeta("type", value).slug);
+    });
     if (state.minPrice > 0) params.set("price-min", String(state.minPrice));
     if (state.minPrice > 0 || state.maxPrice < 60)
       params.set(filterFields.price.slug, String(state.maxPrice));
@@ -271,9 +274,10 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
   }
   function applyUrlState() {
     restoringUrl = true;
+    state.type.clear();
     const params = new URLSearchParams(location.search);
     Object.keys(filterConfig).forEach((key) => {
-      state[key].clear();
+      if (key !== "type") state[key].clear();
       const values = [
         ...new Set([
           ...params.getAll(filterFields[key].slug),
@@ -281,14 +285,25 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
         ]),
       ];
       values.forEach((value) => {
-        // Accept filter slugs, catalog category IDs, legacy option IDs, and Persian labels.
-        const catalogCategory = key === "type" ? window.HNCatalog?.categories?.[value] : null;
+        // Accept category slugs and legacy IDs, plus filter slugs, old options, and Persian labels.
+        if (key === "type") {
+          const legacyOption = /^option\d+$/.test(value)
+            ? createLegacyFilterOptions(key)[value]
+            : value;
+          const productCategory = products.find((product) => product.type === legacyOption);
+          const catalogCategory = window.HNCatalog?.categoryForSlug?.(value) ||
+            window.HNCatalog?.categories?.[value] ||
+            window.HNCatalog?.categoryForLabel?.(legacyOption) ||
+            (productCategory && window.HNCatalog?.categoryForSlug?.(productCategory.categorySlug));
+          if (catalogCategory) state.type.add(catalogCategory.slug || catalogCategory.id);
+          return;
+        }
         const legacyOption = /^option\d+$/.test(value)
           ? createLegacyFilterOptions(key)[value]
           : undefined;
         const slugValue = Object.hasOwn(filterOptions[key], value)
           ? filterOptions[key][value]
-          : catalogCategory?.fa || legacyOption || value;
+          : legacyOption || value;
         const label =
           key === "brand"
             ? brandPersianLabels[slugValue]
@@ -328,9 +343,9 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
     )
       ? params.get("sort")
       : "recommended";
-    $$(".filter-option input[data-filter]").forEach(
-      (input) => (input.checked = state[input.dataset.filter].has(input.value)),
-    );
+    $$(".filter-option input[data-filter]").forEach((input) => {
+      input.checked = state[input.dataset.filter].has(input.value);
+    });
     $("#availabilityFilter").value = state.availability;
     $("#discountFilter").checked = state.discountOnly;
     $("#minPrice").value = state.minPrice;
@@ -387,10 +402,12 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
     });
   }
   function getFiltered() {
+    const selectedTypes = [...state.type];
     let list = products.filter(
       (p) =>
         (!state.brand.size || state.brand.has(p.brand)) &&
-        (!state.type.size || state.type.has(p.type)) &&
+        (!selectedTypes.length || selectedTypes.some((type) =>
+          window.HNCatalog?.categoryContains?.(type, p.categoryId))) &&
         (!state.movement.size || state.movement.has(p.powerSource || p.movement)) &&
         (!state.strap.size || state.strap.has(p.useCase || p.strap)) &&
         (!state.color.size ||
@@ -462,9 +479,10 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
     const breadcrumb = $("#searchBreadcrumb ol");
     if (breadcrumb) {
       const selectedTypes = [...state.type];
-      const selectedPaths = selectedTypes.map((type) =>
-        products.find((product) => product.type === type)?.categoryPath || ["ابزار و تجهیزات", type],
-      );
+      const selectedPaths = selectedTypes.map((type) => {
+        const category = window.HNCatalog?.categoryForSlug?.(type);
+        return category?.path || products.find((product) => product.categorySlug === type)?.categoryPath || ["ابزار و تجهیزات", type];
+      });
       const sharedPathLength = selectedPaths.length
         ? selectedPaths[0].findIndex((part, index) => selectedPaths.some((path) => path[index] !== part))
         : 1;
@@ -524,7 +542,7 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
                 ? `<i class="filter-color-swatch" style="--filter-color: ${metadata.hex}" aria-hidden="true"></i>`
                 : "";
             const label =
-              key === "brand" ? brandDisplayName(value) : key === "color" ? metadata.fa : value;
+              key === "brand" ? brandDisplayName(value) : ["color", "type"].includes(key) ? metadata.fa : value;
             return `<button class="filter-chip${key === "color" ? " filter-chip-color" : ""}" data-key="${key}" data-value="${value}">${swatch}${label} ×</button>`;
           })(),
         ),
@@ -561,10 +579,16 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
             $("#discountFilter").checked = false;
           } else {
             state[chip.dataset.key].delete(chip.dataset.value);
-            const box = document.querySelector(
-              `input[data-filter="${chip.dataset.key}"][value="${chip.dataset.value}"]`,
-            );
-            if (box) box.checked = false;
+            if (chip.dataset.key === "type") {
+              $$("input[data-filter=\"type\"]").forEach((input) => {
+                if (input.value === chip.dataset.value) input.checked = false;
+              });
+            } else {
+              const box = document.querySelector(
+                `input[data-filter="${chip.dataset.key}"][value="${chip.dataset.value}"]`,
+              );
+              if (box) box.checked = false;
+            }
           }
           updatePrice();
           render(true, true);
@@ -637,7 +661,8 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
     (input) =>
       (input.onchange = () => {
         const set = state[input.dataset.filter];
-        input.checked ? set.add(input.value) : set.delete(input.value);
+        const value = input.value;
+        input.checked ? set.add(value) : set.delete(value);
         render(true, true);
       }),
   );
