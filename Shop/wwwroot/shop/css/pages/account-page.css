@@ -1469,7 +1469,7 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
   gap: 32px;
   overflow: hidden;
   min-height: 250px;
-  margin: 24px 0 18px;
+  margin: 8px 0 18px;
   padding: 34px 44px;
   border: 1px solid var(--industrial-navy);
   border-radius: 26px;
@@ -2173,6 +2173,11 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
 }
 
 /* Final profile layout rules, after all legacy account-page declarations. */
+body.inner-page main.profile-page-main {
+  width: min(calc(100% - 48px), 1560px);
+  max-width: 1560px;
+}
+
 .account-welcome {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 180px;
@@ -2214,7 +2219,7 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
 }
 
 #favoritesView .flow-cards {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 16px;
 }
 
@@ -2295,13 +2300,225 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
 }
 
 #favoritesView .favorite-item-card .list-remove-button {
-  width: calc(100% - 28px);
-  min-height: 40px;
+  width: fit-content;
+  min-height: 36px;
   margin: auto 14px 14px;
+  padding: 5px 10px;
+  border-radius: 8px;
+  background: #fbf8f3;
+  color: #8b7264;
+  font-size: 12px;
+}
+
+#favoritesView .favorite-item-card .product-image > a > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  object-fit: cover;
+  object-position: center;
+}
+
+#favoritesView .favorite-item-card .list-remove-button i {
+  font-size: 13px;
+}
+
+/* Give the account overview a clearer dashboard rhythm. */
+#overview.account-overview .overview-heading {
+  position: relative;
+  margin-bottom: 20px;
+  padding: 0 0 17px;
+  border-bottom: 1px solid #e9e4da;
+}
+
+#overview.account-overview .overview-heading > i {
+  width: 50px;
+  height: 50px;
+  flex-basis: 50px;
+  border-radius: 15px;
+  background: linear-gradient(145deg, #fff7df, #f6e8bd);
+  color: #806000;
+  box-shadow: inset 0 1px #fff, 0 5px 14px rgba(167, 124, 32, 0.09);
+}
+
+#overview.account-overview .overview-heading span {
+  min-height: 26px;
+  padding-inline: 11px;
+  background: #fffaf0;
+  font-size: 11px;
+}
+
+#overview.account-overview .overview-heading h2 {
+  margin: 5px 0 3px;
+  font-size: 24px;
+  letter-spacing: -0.02em;
+}
+
+#overview.account-overview .overview-heading p {
+  color: #718094;
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+#overview.account-overview .account-stats {
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+#overview.account-overview .account-stats article {
+  min-height: 92px;
+  padding: 14px 13px;
+  border-color: #e2e8ed;
+  border-radius: 15px;
+  background: linear-gradient(150deg, #fff 20%, #f8fafb 100%);
+  box-shadow: 0 5px 16px rgba(16, 42, 67, 0.035);
+  transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+#overview.account-overview .account-stats article:hover {
+  transform: translateY(-2px);
+  border-color: #dfc778;
+  box-shadow: 0 9px 20px rgba(16, 42, 67, 0.07);
+}
+
+#overview.account-overview .account-stats .stat-icon {
+  width: 42px;
+  height: 42px;
+  flex-basis: 42px;
+  border: 1px solid #efdfaa;
+  border-radius: 13px;
+  background: #fff7df;
+  color: #806000;
+}
+
+#overview.account-overview .account-stats strong {
+  font-size: 24px;
+  line-height: 1.2;
+}
+
+#overview.account-overview .account-stats small {
+  margin-top: 4px;
+  color: #718094;
+  font-size: 11px;
+}
+
+#overview.account-overview .overview-panels {
+  gap: 14px;
+  align-items: stretch;
+}
+
+#overview.account-overview .overview-panels > article {
+  padding: 17px;
+  border-color: #e1e7ec;
+  border-radius: 16px;
+  background: linear-gradient(150deg, #fff, #fdfdfc);
+  box-shadow: 0 7px 20px rgba(16, 42, 67, 0.04);
+}
+
+#overview.account-overview .overview-panel-title {
+  min-height: 34px;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #edf0f2;
+}
+
+#overview.account-overview .overview-panel-title > i {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  place-items: center;
+  border: 1px solid #efdfaa;
+  border-radius: 10px;
+  background: #fff8e4;
+  color: #806000;
+}
+
+#overview.account-overview .overview-panel-title h3 {
+  font-size: 15px;
+}
+
+#overview.account-overview .overview-coupon-card {
+  padding: 12px;
+  border-color: #efdfaa;
+  border-radius: 13px;
+  background: linear-gradient(110deg, #fffdf7, #fff8e8);
+}
+
+#overview.account-overview .overview-coupon-card > a {
+  min-height: 36px;
+  padding: 7px 10px;
+  border-color: #e0e7ed;
+  border-radius: 9px;
+  transition: border-color 160ms ease, background-color 160ms ease, transform 160ms ease;
+}
+
+#overview.account-overview .overview-coupon-card > a:hover {
+  transform: translateY(-1px);
+}
+
+#overview.account-overview .overview-guide > a {
+  min-height: 62px;
+  margin-top: 7px;
+  padding: 8px 10px;
+  border: 1px solid #e8edf1;
+  border-radius: 12px;
+  background: #fff;
+  transition: border-color 160ms ease, background-color 160ms ease, transform 160ms ease;
+}
+
+#overview.account-overview .overview-guide > a:hover {
+  transform: translateY(-1px);
+  border-color: #e6d28f;
+  background: #fffaf0;
+}
+
+#overview.account-overview .overview-guide > a > i:first-child {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border: 1px solid #efdfaa;
   border-radius: 11px;
+  background: #fff8e4;
+}
+
+@media (max-width: 767px) {
+  #overview.account-overview .overview-heading {
+    gap: 10px;
+    padding-bottom: 14px;
+  }
+
+  #overview.account-overview .overview-heading > i {
+    width: 42px;
+    height: 42px;
+    flex-basis: 42px;
+  }
+
+  #overview.account-overview .overview-heading h2 {
+    font-size: 20px;
+  }
+
+  #overview.account-overview .account-stats article {
+    min-height: 112px;
+  }
+
+  #overview.account-overview .overview-panels > article {
+    padding: 14px;
+  }
 }
 
 @media (max-width: 991px) {
+  #favoritesView .flow-cards {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  #favoritesView .flow-cards {
+    gap: 12px;
+  }
+}
+
+@media (max-width: 767px) {
   #favoritesView .flow-cards {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }

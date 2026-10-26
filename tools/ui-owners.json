@@ -41,7 +41,8 @@
         "Shop/wwwroot/shop/css/pages/home-warmth.css",
         "Shop/wwwroot/shop/css/pages/search.css",
         "Shop/wwwroot/shop/css/pages/search-mobile.css",
-        "Shop/wwwroot/shop/css/pages/product-detail-options.css"
+        "Shop/wwwroot/shop/css/pages/product-detail-options.css",
+        "Shop/wwwroot/shop/css/pages/account-page.css"
       ]
     },
     "header-navigation": {
@@ -103,6 +104,17 @@
       ],
       "assets": [
         "Shop/wwwroot/shop/images/heroes/hero-warranty-work-light.png"
+      ]
+    },
+    "contact-page": {
+      "markup": [
+        "Shop/Views/Contact/Index.cshtml"
+      ],
+      "js": [
+        "Shop/wwwroot/shop/js/pages/contact.js"
+      ],
+      "css": [
+        "Shop/wwwroot/shop/css/pages/contact.css"
       ]
     },
     "cart": {

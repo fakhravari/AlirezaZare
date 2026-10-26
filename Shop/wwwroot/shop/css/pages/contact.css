@@ -234,7 +234,7 @@
 }
 .contact-shortcuts-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 16px;
 }
 .contact-shortcut-card {
@@ -565,6 +565,9 @@
   box-shadow: none;
 }
 @media (max-width: 991px) {
+  .contact-shortcuts-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
   .branches-grid {
     gap: 16px;
   }

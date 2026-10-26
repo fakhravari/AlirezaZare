@@ -40,7 +40,7 @@
   background: #f6f8f9 !important;
 }
 
-.product-card:not(.product-detail-related-card) .product-image > a > img,
+.product-card:not(.product-detail-related-card):not(.favorite-item-card) .product-image > a > img,
 .product-card:not(.product-detail-related-card) .product-image > img,
 .search-product.product-card .search-product-image img {
   padding: 12px;
