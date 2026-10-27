@@ -1944,20 +1944,20 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
 }
 
 #orders .profile-order-card .order-card-actions > a {
-  border-color: #c7dce8;
-  background: #edf5fa;
-  color: #194d6b;
+  border-color: #1f4f70;
+  background: #1f4f70;
+  color: #fff;
 }
 
 #orders .profile-order-card .order-card-actions > a i {
-  color: #287ca3;
+  color: #ffe17a;
 }
 
 #orders .profile-order-card .order-card-actions > a:hover,
 #orders .profile-order-card .order-card-actions > a:focus-visible {
-  border-color: #8cb8d0;
-  background: #e0eff7;
-  color: #123e5e;
+  border-color: #143b58;
+  background: #143b58;
+  color: #fff;
 }
 
 #orders .profile-order-card .order-card-actions > button {
@@ -2155,6 +2155,7 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
 
 .profile-coupon-list {
   gap: 14px;
+  scroll-margin-top: 24px;
 }
 
 .profile-coupon-card {

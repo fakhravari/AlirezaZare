@@ -256,8 +256,10 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
             if (normalizedUrl.href !== window.location.href)
                 history.replaceState(null, "", normalizedUrl);
         }
-        if (moveFocus)
-            pageNav.querySelector('[aria-current="page"]')?.focus({ preventScroll: true });
+        if (moveFocus) {
+            profileHost.focus({ preventScroll: true });
+            profileHost.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+        }
     }
     window.addEventListener("popstate", () => renderCoupons());
     function renderPriceAlerts() {
@@ -316,7 +318,7 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
                 const productName = window.HNCatalog?.find(current[index].productId)?.name || "این محصول";
                 if (typeof window.confirmFormSubmission !== "function") return;
                 const confirmed = await window.confirmFormSubmission({
-                    title: "حذف پیگیری قیمت؟",
+                    title: "حذف پیگیری قیمت و موجودی؟",
                     message: `پیگیری «${productName}» از فهرست حذف می‌شود. ادامه می‌دهید؟`,
                     confirmText: "بله، حذف شود",
                 });
@@ -326,16 +328,16 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
                 const latestIndex = latest.findIndex((watch) => JSON.stringify(watch) === selectedWatch);
                 if (latestIndex < 0) {
                     renderPriceAlerts();
-                    ui.setMessage(status, "این پیگیری قبلاً حذف شده است.", "info");
+                    ui.showToast("این پیگیری قبلاً حذف شده است.", "info");
                     return;
                 }
                 latest.splice(latestIndex, 1);
                 if (!save(priceWatchKey, latest)) {
-                    ui.setMessage(status, "حذف پیگیری ذخیره نشد. دوباره تلاش کنید.", "error");
+                    ui.showToast("حذف پیگیری ذخیره نشد. دوباره تلاش کنید.", "error");
                     return;
                 }
                 renderPriceAlerts();
-                ui.setMessage(status, "پیگیری قیمت حذف شد.", "success");
+                ui.showToast("پیگیری قیمت و موجودی حذف شد.", "success");
                 requestAnimationFrame(() => {
                     const nextDelete = host.querySelector(`[data-delete-price-alert="${Math.min(index, latest.length - 1)}"]`);
                     (nextDelete || host.querySelector("a"))?.focus({ preventScroll: true });

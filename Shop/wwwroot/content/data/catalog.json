@@ -5940,7 +5940,19 @@
         "black"
       ],
       "detailId": "group-1",
-      "mediaId": "product-1"
+      "mediaId": "product-1",
+      "includedBenefits": [
+        {
+          "title": "۱۸ ماه ضمانت خدمات فنی",
+          "detail": "از زمان خرید، همراه کالا",
+          "icon": "bi-shield-check"
+        },
+        {
+          "title": "بازرسی سه‌نظام پیش از ارسال",
+          "detail": "کنترل عملکرد بدون هزینهٔ جداگانه",
+          "icon": "bi-wrench-adjustable"
+        }
+      ]
     },
     {
       "id": 2,
@@ -5983,7 +5995,14 @@
         "black"
       ],
       "detailId": "group-1",
-      "mediaId": "product-2"
+      "mediaId": "product-2",
+      "includedBenefits": [
+        {
+          "title": "۱۲ ماه ضمانت تعمیر",
+          "detail": "پوشش خدمات فنی محصول",
+          "icon": "bi-shield-check"
+        }
+      ]
     },
     {
       "id": 3,
@@ -6047,7 +6066,14 @@
         "black"
       ],
       "detailId": "group-1",
-      "mediaId": "product-3"
+      "mediaId": "product-3",
+      "includedBenefits": [
+        {
+          "title": "تست ایمنی پیش از ارسال",
+          "detail": "بررسی عملکرد دستگاه در فروشگاه",
+          "icon": "bi-clipboard2-check"
+        }
+      ]
     },
     {
       "id": 4,
@@ -6218,7 +6244,14 @@
         "black"
       ],
       "detailId": "group-2",
-      "mediaId": "product-6"
+      "mediaId": "product-6",
+      "includedBenefits": [
+        {
+          "title": "کالیبراسیون اولیه",
+          "detail": "آمادهٔ استفاده، بدون هزینهٔ اضافه",
+          "icon": "bi-speedometer2"
+        }
+      ]
     },
     {
       "id": 7,
@@ -6246,7 +6279,14 @@
         "black"
       ],
       "detailId": "group-2",
-      "mediaId": "product-7"
+      "mediaId": "product-7",
+      "includedBenefits": [
+        {
+          "title": "بررسی دقت اندازه‌گیری",
+          "detail": "کنترل اولیه پیش از تحویل",
+          "icon": "bi-crosshair2"
+        }
+      ]
     },
     {
       "id": 8,
@@ -6415,7 +6455,14 @@
         "black"
       ],
       "detailId": "group-3",
-      "mediaId": "product-11"
+      "mediaId": "product-11",
+      "includedBenefits": [
+        {
+          "title": "۶ ماه خدمات فنی",
+          "detail": "راهنمایی و بررسی اولیهٔ دستگاه",
+          "icon": "bi-tools"
+        }
+      ]
     },
     {
       "id": 12,
@@ -6601,7 +6648,14 @@
         "black"
       ],
       "detailId": "group-4",
-      "mediaId": "product-16"
+      "mediaId": "product-16",
+      "includedBenefits": [
+        {
+          "title": "آزمون روشنایی پیش از ارسال",
+          "detail": "کنترل روشن‌شدن و حالت‌های نور",
+          "icon": "bi-lightbulb"
+        }
+      ]
     },
     {
       "id": 17,
@@ -6741,7 +6795,14 @@
         "black"
       ],
       "detailId": "group-5",
-      "mediaId": "product-21"
+      "mediaId": "product-21",
+      "includedBenefits": [
+        {
+          "title": "بررسی عایق‌بودن ابزار",
+          "detail": "بازبینی اولیه پیش از تحویل",
+          "icon": "bi-shield-check"
+        }
+      ]
     },
     {
       "id": 22,
@@ -6769,7 +6830,14 @@
         "black"
       ],
       "detailId": "group-5",
-      "mediaId": "product-22"
+      "mediaId": "product-22",
+      "includedBenefits": [
+        {
+          "title": "بازبینی مفصل‌ها و فک انبر",
+          "detail": "کنترل اولیهٔ سلامت ابزار",
+          "icon": "bi-wrench"
+        }
+      ]
     },
     {
       "id": 23,

@@ -233,6 +233,23 @@
   color: #f6c515;
 }
 
+#productView .product-detail-gallery-open > b {
+  background: transparent;
+  color: inherit;
+}
+
+#productView .product-detail-image-frame > .detail-price-tools {
+  top: 12px;
+  right: 12px;
+}
+
+@media (max-width: 575px) {
+  #productView .product-detail-image-frame > .detail-price-tools {
+    top: 8px;
+    right: 8px;
+  }
+}
+
 #productView .product-detail-add:is(:hover, :focus-visible) {
   border-color: #d6c79f !important;
   background: linear-gradient(135deg, #173b5d, #102a43) !important;
@@ -839,6 +856,7 @@
   flex: 1 1 auto;
   gap: 6px;
   white-space: nowrap;
+  font-size: 14px;
 }
 
 #productView .product-feedback-admin-meta > span > i {
@@ -851,6 +869,11 @@
   flex: 0 0 auto;
   padding: 4px 7px;
   white-space: nowrap;
+  font-size: 12px;
+}
+
+#productView .product-feedback-admin-datetime {
+  font-size: 12px;
 }
 
 @media (max-width: 575px) {
@@ -1106,6 +1129,73 @@
 
 #productView .product-purchase-panel .product-detail-secondary-actions {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+#productView .product-included-benefits {
+  margin-top: 10px;
+  padding: 8px 10px;
+  border: 1px solid #e9dfc9;
+  border-radius: 13px;
+  background: linear-gradient(115deg, #fffdf7, #fff);
+}
+
+#productView .product-included-benefits ul {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+#productView .product-included-benefits li {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: 22px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  color: #24445d;
+  font-size: 12px;
+}
+
+#productView .product-included-benefits li > i {
+  display: grid;
+  width: 22px;
+  height: 22px;
+  place-items: center;
+  border-radius: 7px;
+  background: #fff1bd;
+  color: #946c00;
+}
+
+#productView .product-included-benefits li > span {
+  display: grid;
+  min-width: 0;
+  gap: 1px;
+}
+
+#productView .product-included-benefits li strong {
+  overflow: hidden;
+  font-size: 12px;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#productView .product-included-benefits li small {
+  overflow: hidden;
+  color: #738498;
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#productView .product-included-benefits li > b {
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: #e8f5ed;
+  color: #287348;
+  font-size: 10px;
+  font-weight: 800;
 }
 
 @media (min-width: 992px) and (max-width: 1199px) {
@@ -1877,12 +1967,14 @@
 #productView .product-feedback-meta-details .product-feedback-stars {
   gap: 4px;
   letter-spacing: 0;
-  direction: ltr;
+  direction: rtl;
   font-size: 14px;
   unicode-bidi: isolate;
 }
 
 #productView .product-feedback-stars-glyphs {
+  direction: ltr;
+  unicode-bidi: isolate;
   font-size: 16px;
   letter-spacing: 0.5px;
 }

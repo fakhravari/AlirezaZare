@@ -2,7 +2,6 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   grid-template-areas:
-    "heading"
     "base"
     "extras"
     "total";
@@ -13,10 +12,7 @@
 }
 
 #productView .product-detail-price > .detail-price-heading {
-  grid-area: heading;
-  justify-content: flex-start;
-  direction: rtl;
-  text-align: right;
+  display: none;
 }
 
 #productView .product-detail-price > .product-detail-base-price {
@@ -214,17 +210,11 @@
   #productView .product-detail-price {
     grid-template-columns: minmax(0, 1fr);
     grid-template-areas:
-      "heading"
       "base"
       "extras"
       "total";
     gap: 10px;
     padding: 14px;
-  }
-
-  #productView .product-detail-price > .detail-price-heading {
-    grid-column: 1;
-    grid-row: auto;
   }
 
   #productView .product-detail-base-row > strong {
@@ -647,32 +637,7 @@
 
 
 #productView .detail-price-heading {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  grid-template-areas:
-    "title"
-    "subtitle";
-  align-items: center;
-  gap: 2px 12px;
-  padding: 9px 11px;
-  border: 1px solid #e5eaf0;
-  border-radius: 13px;
-  background: linear-gradient(135deg, #fffdf8, #f5f8fa);
-}
-
-#productView .detail-price-heading > span {
-  grid-area: title;
-  color: #18324b;
-  font-size: 14px;
-  font-weight: 900;
-  line-height: 1.4;
-}
-
-#productView .detail-price-heading > small {
-  grid-area: subtitle;
-  color: #718096;
-  font-size: 11px;
-  line-height: 1.5;
+  display: none;
 }
 
 #productView .detail-price-tools {
@@ -680,14 +645,15 @@
   z-index: 4;
   top: 12px;
   right: 12px;
-  display: inline-flex;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 5px;
-  padding: 4px;
-  border: 1px solid #e8edf1;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.84);
-  box-shadow: inset 0 1px rgba(255, 255, 255, 0.9);
+  gap: 3px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 #productView .detail-price-tool {
@@ -695,26 +661,21 @@
   width: 34px;
   height: 34px;
   place-items: center;
-  border: 1px solid transparent;
-  border-radius: 9px;
-  background: #f0f5f8;
-  color: #1f587b;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #173b5d;
   font-size: 15px;
   cursor: pointer;
-  transition: border-color .18s ease, background-color .18s ease, color .18s ease, transform .18s ease, box-shadow .18s ease;
+  transition: color .18s ease, transform .18s ease;
 }
 
 #productView .detail-price-tool:hover {
-  transform: translateY(-1px);
-  border-color: #e1c35b;
-  background: #fff9e8;
-  box-shadow: 0 3px 8px rgba(16, 42, 67, 0.1);
+  transform: scale(1.08);
   color: #805f00;
 }
 
 #productView .detail-price-tool.is-active {
-  border-color: #d3ad38;
-  background: #fff4c8;
   color: #896500;
 }
 
@@ -724,22 +685,8 @@
 }
 
 @media (max-width: 380px) {
-  #productView .detail-price-heading {
-    gap: 2px 7px;
-    padding: 8px;
-  }
-
-  #productView .detail-price-heading > span {
-    font-size: 13px;
-  }
-
-  #productView .detail-price-heading > small {
-    font-size: 10px;
-  }
-
   #productView .detail-price-tools {
-    gap: 3px;
-    padding: 3px;
+    gap: 2px;
   }
 
   #productView .detail-price-tool {
