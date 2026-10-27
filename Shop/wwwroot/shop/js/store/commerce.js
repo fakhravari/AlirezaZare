@@ -364,11 +364,14 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                 const node = productSummary?.querySelector(selector);
                 if (node) purchasePanel.append(node);
             }
+            const secondaryActions = purchasePanel.querySelector(".product-detail-secondary-actions");
+            secondaryActions?.remove();
             const includedBenefits = Array.isArray(p.includedBenefits)
                 ? p.includedBenefits.filter((benefit) => benefit && typeof benefit.title === "string" && benefit.title.trim())
                 : [];
+            let benefitsPanel = null;
             if (includedBenefits.length) {
-                const benefitsPanel = document.createElement("section");
+                benefitsPanel = document.createElement("section");
                 benefitsPanel.className = "product-included-benefits";
                 benefitsPanel.setAttribute("aria-label", "مزیت‌های همراه کالا بدون هزینهٔ اضافه");
                 benefitsPanel.innerHTML = `<ul>${includedBenefits.map((benefit) => {
@@ -380,6 +383,8 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                 if (deliveryStatus) deliveryStatus.before(benefitsPanel);
                 else purchasePanel.append(benefitsPanel);
             }
+            const actionsAnchor = benefitsPanel || purchasePanel.querySelector(".product-detail-actions");
+            if (secondaryActions && actionsAnchor) actionsAnchor.after(secondaryActions);
             productView.querySelector(".product-detail-layout")?.append(purchasePanel);
 
             const description = productSummary?.querySelector(".product-detail-description");
