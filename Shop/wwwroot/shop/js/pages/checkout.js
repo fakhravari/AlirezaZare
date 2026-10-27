@@ -53,7 +53,7 @@ window.HNUI.ready(() => window.HNUI.mount("checkout", document, () => {
         const street = document.createElement("p");
         const postal = document.createElement("small");
         title.textContent = `${address.recipient} · ${address.phone}`;
-        const region = [address.province, address.country || "ایران"].filter(Boolean).join("، ");
+        const region = [address.province, address.city].filter(Boolean).join("، ");
         street.textContent = `${region}، ${address.street}`;
         postal.textContent = `کد پستی: ${address.postal}`;
         heading.append(title);
@@ -143,7 +143,7 @@ window.HNUI.ready(() => window.HNUI.mount("checkout", document, () => {
         addresses.forEach((address) =>
             select.add(
                 new Option(
-                    `${address.title} — ${[address.province, address.country || "ایران"].filter(Boolean).join("، ")}، ${address.street}`,
+                    `${address.title} — ${[address.province, address.city].filter(Boolean).join("، ")}، ${address.street}`,
                     address.id,
                 ),
             ),
@@ -196,7 +196,7 @@ window.HNUI.ready(() => window.HNUI.mount("checkout", document, () => {
             const address = Object.fromEntries(
                 [...new FormData(form)].map(([key, value]) => [key, value.trim()]),
             );
-            if (["title", "recipient", "phone", "country", "countryId", "province", "provinceId", "street", "postal"].some((key) => !address[key])) {
+            if (["title", "recipient", "phone", "country", "countryId", "province", "provinceId", "city", "cityId", "street", "postal"].some((key) => !address[key])) {
                 setFormStatus("لطفاً همه مشخصات آدرس را کامل کنید.", true);
                 return;
             }

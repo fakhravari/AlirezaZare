@@ -77,7 +77,7 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
             ? addresses
                 .map(
                     (a) => {
-                        const region = [a.province, a.country || "ایران"].filter(Boolean).join("، ");
+                        const region = [a.province, a.city].filter(Boolean).join("، ");
                         return `<article class="flow-card address-account-card"><h3>${esc(a.title)} ${a.id === selected ? "<small>آدرس انتخابی</small>" : ""}</h3><strong>${esc(a.recipient)} · ${esc(a.phone)}</strong><p>${esc(region)}، ${esc(a.street)}</p><p>کد پستی: ${esc(a.postal)}</p><div class="account-actions"><button data-select="${esc(a.id)}" ${a.id === selected ? "disabled" : ""}>انتخاب برای تحویل</button><button data-edit="${esc(a.id)}">ویرایش</button><button data-delete="${esc(a.id)}">حذف آدرس</button></div></article>`;
                     },
                 )
@@ -152,7 +152,7 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
         const address = Object.fromEntries(
             [...new FormData(form)].map(([k, v]) => [k, v.trim()]),
         );
-        if (["title", "recipient", "phone", "country", "province", "street", "postal"].some((key) => !address[key])) {
+        if (["title", "recipient", "phone", "country", "countryId", "province", "provinceId", "city", "cityId", "street", "postal"].some((key) => !address[key])) {
             setFormStatus("همه فیلدها را کامل کنید.", true);
             return;
         }

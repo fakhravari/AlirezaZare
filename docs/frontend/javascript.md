@@ -47,7 +47,7 @@
 | `js/pages/search.js` | URL-backed filter/sort/page، نتایج و mobile filter drawer | query params، `popstate`, empty state و cart/list controls |
 | `js/pages/account-page.js` | profile route/hash navigation، overview و CRUD آدرس | storage keys، modal، hashchange و `storage` event |
 | `js/pages/checkout.js` | انتخاب آدرس، روش پرداخت و هماهنگی state سبد | روش پرداخت فعلاً demo است؛ Cart/Checkout هر دو consumer هستند |
-| `js/pages/address-fields.js`, `iran-places.js` | مدل‌های Country/Province/City و انتخاب وابستهٔ کشور/استان | دادهٔ شهرها برای UI آینده حفظ شده؛ فرم فعلی شهر را نشان نمی‌دهد |
+| `js/pages/address-fields.js`, `iran-places.js` | مدل‌های Country/Province/City و انتخاب وابستهٔ استان/شهر | کشور ایران در رکورد آدرس ثابت است؛ انتخاب استان فهرست شهرهای همان استان را به‌روزرسانی می‌کند |
 | `js/pages/orders-pagination.js` | صفحه‌بندی سفارش‌ها | URL state/popstate و empty/list state |
 | `js/pages/magazine.js` | فیلتر/صفحه‌بندی و تاریخچهٔ URL مقاله‌ها | `history`, query string و back/forward |
 | `js/pages/article-details.js` | print، فهرست مطالب، پیشرفت مطالعه و scroll/resize | sticky offset، passive listener و کاهش حرکت |

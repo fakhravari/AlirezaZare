@@ -10,7 +10,7 @@
 | محتوای سفارش‌ها و فاکتور | [_Orders.cshtml](../../Shop/Views/Profile/_Orders.cshtml)، dialog فاکتور در `account-page.js` و `orders-pagination.js` |
 | route/hash، آدرس و overview | [account-page.js](../../Shop/wwwroot/shop/js/pages/account-page.js) |
 | کدهای تخفیف و پیگیری قیمت | `account-page.js`؛ markup در `Index.cshtml` و ظاهر فهرست پیگیری در `account-page.css` |
-| کشور، استان و شهر | کلاس‌های `Country`، `Province` و `City` در `iran-places.js`؛ انتخاب کشور/استان در `address-fields.js` و [_AddressForm](../../Shop/Views/Shared/_AddressForm.cshtml) |
+| استان و شهر نشانی | کلاس‌های `Country`، `Province` و `City` در `iran-places.js`؛ انتخاب وابستهٔ استان/شهر در `address-fields.js` و [_AddressForm](../../Shop/Views/Shared/_AddressForm.cshtml). کشور ایران در رکورد آدرس نگهداری می‌شود، اما فیلد انتخابی نیست |
 | ظاهر صفحه | `pages/account-page.css`؛ قواعد مشترک فرم/آدرس در `checkout.css` و `shared-login.css` |
 | حساب داخل هدر | `layout/shared-account.css` و `layout/main.js`؛ با صفحهٔ پروفایل یک مالک نیست |
 
@@ -38,7 +38,7 @@ overview تعداد مقایسه را از فهرست محلی می‌خواند
 
 ## ویرایش و آدرس
 
-فرم آدرس موبایل از چیدمان دو ستونه و اندازهٔ قلم اختصاصی مشترک استفاده می‌کند؛ [قرارداد نمایش فرم آدرس](../store/cart.md) مرجع اندازه‌ها و ترتیب فیلدهاست. دادهٔ محلی مکان‌ها سه مدل کشور، استان و شهر دارد؛ فعلاً فرم انتخاب کشور و استان را نشان می‌دهد و شهرها در مدل برای تکمیل بعدی نگهداری می‌شوند. خلاصهٔ آدرس نیز استان و کشور را نمایش می‌دهد. فیلد خام `CountryName` در فایل ورودی با نام شهر پر شده است؛ مقدارش در مدل شهر با نام `sourceCountryName` نگهداری می‌شود و نام کشور از `CountryNameEn` به نام فارسی کشور نگاشت می‌شود.
+فرم آدرس موبایل از چیدمان دو ستونه و اندازهٔ قلم اختصاصی مشترک استفاده می‌کند؛ [قرارداد نمایش فرم آدرس](../store/cart.md) مرجع اندازه‌ها و ترتیب فیلدهاست. دادهٔ محلی مکان‌ها سه مدل کشور، استان و شهر دارد؛ فرم استان و سپس شهرهای همان استان را انتخاب می‌کند. کشور ایران همچنان در رکورد ذخیره می‌شود، ولی انتخاب جداگانه ندارد. خلاصهٔ آدرس استان و شهر را نمایش می‌دهد. فیلد خام `CountryName` در فایل ورودی با نام شهر پر شده است؛ مقدارش در مدل شهر با نام `sourceCountryName` نگهداری می‌شود و نام کشور از `CountryNameEn` به نام فارسی کشور نگاشت می‌شود.
 
 ویرایش پروفایل native dialog با `.shared-login-modal.profile-edit-dialog` است؛ فرم ورود سراسری `#loginModal` در `_Panels` مسیر جدا دارد. هنگام تغییر بستن dialog، focus، validation و اسکرول داخلی را حفظ کنید. فرم آدرس در Cart و Profile مشترک است؛ Checkout فقط آدرس انتخاب‌شده را نشان می‌دهد.
 
