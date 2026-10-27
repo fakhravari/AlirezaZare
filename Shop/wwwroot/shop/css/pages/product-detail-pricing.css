@@ -585,8 +585,8 @@
     .product-detail-meta
     .product-meta-path
     > li:not(:last-child)::after {
-    left: -11px;
-    font-size: 13px;
+    margin-inline-start: 6px;
+    font-size: 14px;
   }
 }
 

@@ -70,6 +70,17 @@ window.HNUI.mount("pages-article-details", document, () => {
         heading.className = "article-feedback-card-heading";
         const name = document.createElement("strong");
         name.textContent = item.name;
+        if (item.status === "pending" && !item.sample) {
+          const pending = document.createElement("span");
+          pending.className = "article-feedback-pending";
+          const pendingIcon = document.createElement("i");
+          pendingIcon.className = "bi bi-hourglass-split";
+          pendingIcon.setAttribute("aria-hidden", "true");
+          pending.append(pendingIcon, document.createTextNode("در انتظار تأیید"));
+          heading.append(name, pending);
+        } else {
+          heading.append(name);
+        }
         const stars = document.createElement("span");
         stars.className = "article-feedback-stars";
         stars.setAttribute("aria-label", `امتیاز ${formatNumber(Number(item.rating))} از ۵`);
@@ -94,7 +105,7 @@ window.HNUI.mount("pages-article-details", document, () => {
         registeredIcon.setAttribute("aria-hidden", "true");
         registered.append(registeredIcon, document.createTextNode(formatReviewTime(item.createdAt)));
         meta.append(stars, separator, registered);
-        heading.append(name, meta);
+        heading.append(meta);
         const copy = document.createElement("p");
         copy.textContent = item.text;
         card.append(heading, copy);
@@ -198,18 +209,18 @@ window.HNUI.mount("pages-article-details", document, () => {
       if (submitButton) submitButton.disabled = true;
       const confirmed = await window.confirmFormSubmission?.({
         title: "دیدگاه شما ثبت شود؟",
-        message: "پس از تأیید، دیدگاه در همین مرورگر ذخیره و به فهرست اضافه می‌شود.",
+        message: "دیدگاه در همین مرورگر ذخیره می‌شود و تا زمان تأیید با نشان انتظار تأیید در فهرست می‌ماند.",
         confirmText: "بله، ثبت دیدگاه",
       });
       form.dataset.confirming = "false";
       if (submitButton) submitButton.disabled = false;
       if (!confirmed) return;
-      saved.push({ name: fullName.slice(0, 80), text: String(data.get("text")).trim().slice(0, 1000), rating: Math.max(1, Math.min(5, Number(data.get("rating")) || 5)), createdAt: new Date().toISOString() });
+      saved.push({ name: fullName.slice(0, 80), text: String(data.get("text")).trim().slice(0, 1000), rating: Math.max(1, Math.min(5, Number(data.get("rating")) || 5)), createdAt: new Date().toISOString(), status: "pending" });
       saved = saved.slice(-50);
       const stored = window.HNUI.storage.set(key, JSON.stringify(saved));
       reviewPage = 1;
       form.reset(); renderFeedback();
-      feedback.querySelector("[data-feedback-status]").textContent = stored ? "دیدگاه در همین مرورگر ذخیره شد." : "دیدگاه نمایش داده شد، اما ذخیرهٔ مرورگر در دسترس نیست.";
+      feedback.querySelector("[data-feedback-status]").textContent = stored ? "دیدگاه در همین مرورگر ذخیره شد و در انتظار تأیید است." : "دیدگاه نمایش داده شد و در انتظار تأیید است، اما ذخیرهٔ مرورگر در دسترس نیست.";
     });
     renderFeedback(); paintLikes();
   }

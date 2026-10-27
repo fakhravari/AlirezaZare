@@ -339,7 +339,10 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                                     : "",
                                 registeredAt,
                             ].join("");
-                            return `<article class="product-feedback-card"><div class="product-feedback-meta"><img class="product-feedback-avatar" src="shop/images/guest-avatar.svg" alt="" loading="lazy"><strong title="${name}">${name}</strong><span class="product-feedback-meta-details">${details}</span></div><p class="${type === "questions" ? "product-question-user-text" : "product-feedback-user-text"}">${esc(item.text)}</p>${item.reply ? `<aside class="product-feedback-admin-reply"><div class="product-feedback-admin-meta"><span><i class="bi bi-patch-check-fill" aria-hidden="true"></i>پاسخ مدیر فروشگاه</span>${replyAt}<small>پاسخ رسمی</small></div><p>${esc(item.reply)}</p></aside>` : ""}</article>`;
+                            const pendingBadge = item.status === "pending" && !item.sample
+                                ? '<span class="product-feedback-pending"><i class="bi bi-hourglass-split" aria-hidden="true"></i>در انتظار تأیید</span>'
+                                : "";
+                            return `<article class="product-feedback-card"><div class="product-feedback-meta"><img class="product-feedback-avatar" src="shop/images/guest-avatar.svg" alt="" loading="lazy"><strong title="${name}">${name}</strong>${pendingBadge}<span class="product-feedback-meta-details">${details}</span></div><p class="${type === "questions" ? "product-question-user-text" : "product-feedback-user-text"}">${esc(item.text)}</p>${item.reply ? `<aside class="product-feedback-admin-reply"><div class="product-feedback-admin-meta"><span><i class="bi bi-patch-check-fill" aria-hidden="true"></i>پاسخ مدیر فروشگاه</span>${replyAt}<small>پاسخ رسمی</small></div><p>${esc(item.reply)}</p></aside>` : ""}</article>`;
                         })
                         .join("")
                     : `<div class="product-feedback-empty empty-state-card"><i class="bi ${type === "reviews" ? "bi-chat-square-heart" : "bi-question-circle"}" aria-hidden="true"></i><strong>${type === "reviews" ? "هنوز دیدگاهی برای این محصول ثبت نشده است." : "هنوز پرسشی دربارهٔ این محصول ثبت نشده است."}</strong><span>${type === "reviews" ? "تجربهٔ استفاده‌تان را با خریداران دیگر به اشتراک بگذارید." : "سؤال خود را ثبت کنید تا اطلاعات این کالا کامل‌تر شود."}</span></div>`;
@@ -782,7 +785,7 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                 ".taxonomy-breadcrumb ol",
             );
             if (productBreadcrumb)
-                productBreadcrumb.innerHTML = `<li><a href="/"><i class="bi bi-house-door" aria-hidden="true"></i><span>خانه</span></a></li>${categoryPath.map((part, index) => `<li><i class="bi bi-chevron-left" aria-hidden="true"></i><a href="${esc(window.HNCatalog?.categoryUrl(categoryPath.slice(0, index + 1)) || `/Search?q=${encodeURIComponent(part)}`)}">${esc(part)}</a></li>`).join("")}<li class="cart-breadcrumb-current"><i class="bi bi-chevron-left" aria-hidden="true"></i><span aria-current="page"><i class="bi bi-tools" aria-hidden="true"></i>${esc(p.name)}</span></li>`;
+                productBreadcrumb.innerHTML = `<li><a href="/"><i class="bi bi-house-door" aria-hidden="true"></i><span>خانه</span></a></li>${categoryPath.map((part, index) => `<li><a href="${esc(window.HNCatalog?.categoryUrl(categoryPath.slice(0, index + 1)) || `/Search?q=${encodeURIComponent(part)}`)}">${esc(part)}</a></li>`).join("")}<li class="cart-breadcrumb-current"><span aria-current="page"><i class="bi bi-tools" aria-hidden="true"></i>${esc(p.name)}</span></li>`;
             productMeta.innerHTML = `<div class="product-meta-identity" role="group" aria-label="اطلاعات برند، کشور و کد محصول"><div class="product-meta-identity-top"><span class="product-meta-pill product-meta-brand">${brandMark}<span><small>برند</small><strong>${esc(brandPersianName)}</strong><small class="product-meta-brand-en" lang="en" dir="ltr">${esc(p.brand)}</small></span></span><span class="product-meta-pill product-meta-country">${brandCountryMark}${brandCountryContent}</span></div><span class="product-meta-pill product-meta-code"><i class="bi bi-upc-scan" aria-hidden="true"></i><span><small>کد محصول</small><strong dir="ltr">${esc(p.code)}</strong></span></span></div><span class="product-meta-pill product-meta-category"><i class="bi bi-grid" aria-hidden="true"></i><span class="product-meta-category-content"><small>مسیر دسته‌بندی</small><ol class="product-meta-path" aria-label="${esc(categoryPath.join("، "))}">${categoryPath.map((part, index) => `<li><a href="${esc(window.HNCatalog?.categoryUrl(categoryPath.slice(0, index + 1)) || `/Search?q=${encodeURIComponent(part)}`)}">${esc(part)}</a></li>`).join("")}</ol></span></span>`;
             const decorateSalePrice = (node, item) => {
                 const discount = Number(item?.discountPercent) || 0;
@@ -1404,6 +1407,7 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                         text,
                         rating: Number(data.get("rating")) || 5,
                         createdAt: new Date().toISOString(),
+                        status: "pending",
                         sample: false,
                     });
                     const status = document.querySelector("#productStatus");
@@ -1426,7 +1430,7 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                     if (status)
                         ui.setMessage(
                             status,
-                            type === "reviews" ? "دیدگاه شما ثبت شد." : "پرسش شما ثبت شد.",
+                            type === "reviews" ? "دیدگاه شما ثبت شد و در انتظار تأیید است." : "پرسش شما ثبت شد و در انتظار تأیید است.",
                             "success",
                         );
                 });
