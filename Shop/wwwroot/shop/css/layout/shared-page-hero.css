@@ -1,10 +1,14 @@
 /* Keep title, description and supporting tags consistent across inner-page heroes. */
 .inner-page .page-hero > .container > h1 {
-  max-width: 100%;
+  width: 100%;
+  max-width: none;
+  min-width: 0;
   margin: 14px 0 10px;
-  font-size: clamp(32px, 3.2vw, 52px);
+  font-size: clamp(28px, 2.3vw, 38px);
   line-height: 1.45;
   letter-spacing: -0.8px;
+  text-wrap: wrap;
+  overflow-wrap: anywhere;
 }
 
 .inner-page .page-hero > .container > p {
@@ -33,7 +37,7 @@
 @media (max-width: 767px) {
   .inner-page .page-hero > .container > h1 {
     margin: 10px 0 8px;
-    font-size: clamp(25px, 5vw, 34px);
+    font-size: clamp(23px, 4.2vw, 28px);
     line-height: 1.5;
     letter-spacing: -0.4px;
   }

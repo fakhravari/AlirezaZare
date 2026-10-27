@@ -1,4 +1,20 @@
 @model PageModel
+@using System.Text.Json
+@inject Shop.Services.IAccountDataSource AccountSource
+@{
+    var accountData = await AccountSource.ReadAsync(Context.RequestAborted);
+    var accountToday = DateOnly.FromDateTime(DateTime.UtcNow);
+    var accountOrders = accountData.Orders.ToDictionary(order => order.Id);
+    var couponData = accountData.Coupons.Select(coupon => new {
+        coupon.Id, coupon.Code, coupon.DiscountPercent,
+        Active = coupon.IsActive(accountToday),
+        ExpiresOn = Shop.Models.AccountDisplay.Date(coupon.ExpiresOn),
+        Uses = coupon.OrderIds.Select(id => accountOrders[id]).Select(order => new {
+            Invoice = order.Number, Date = order.DateLabel, DateTime = order.OrderedOn.ToString("yyyy-MM-dd")
+        })
+    });
+}
+<script type="application/json" id="accountData">@Html.Raw(JsonSerializer.Serialize(new { schemaVersion = 1, coupons = couponData }, Shop.Models.AccountData.JsonOptions))</script>
 
 @{
     var profileSection = Context.Request.Path.Value?.TrimEnd('/').Split('/').LastOrDefault()?.ToLowerInvariant();

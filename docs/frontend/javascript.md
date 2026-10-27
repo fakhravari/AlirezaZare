@@ -4,6 +4,9 @@
 
 ورودی ذخیره‌شده در مرورگر باید پیش از رندر escape و validate شود. fallback و migration در storage.js است؛ handler اختصاصی را به ریشهٔ صفحه محدود کنید و با `HNUI.mount` یک‌بار ثبت کنید.
 
+
+`store/account-data.js` پس از JSONهای `commerceData` و (فقط در پروفایل) `accountData` اجرا می‌شود و projection فقط‌خواندنی `HNAccountData` را پیش از مصرف سبد و حساب منتشر می‌کند. دادهٔ خراب، غایب یا نسخهٔ ناشناخته به آرایه/پیشنهاد خالی تبدیل می‌شود. bootstrap عمومی سابقهٔ سفارش ندارد.
+
 ## API مشترک `window.HNUI`
 
 در `js/core/ui-core.js` با `Object.freeze` منتشر می‌شود. اعضای قابل استفادهٔ فعلی:

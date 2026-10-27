@@ -6,6 +6,7 @@
     <DefaultItemExcludesInProjectFolder>$(DefaultItemExcludesInProjectFolder);**/bin/**;**/obj/**</DefaultItemExcludesInProjectFolder>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="App_Data/account-demo.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <Folder Include="wwwroot\content\" />
   </ItemGroup>
 </Project>

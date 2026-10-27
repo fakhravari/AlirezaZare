@@ -1,6 +1,11 @@
 # پوسته، اجزای مشترک و ترتیب منابع
 
+
+پس از `_CatalogData`، partial مشترک `_CommerceData` و `store/account-data.js` پیش از `commerce.js` و script صفحه بارگذاری می‌شوند. JSON خصوصی سابقهٔ کوپن در View پروفایل است؛ partial عمومی فقط کد و درصد کوپن فعال را منتشر می‌کند.
+
 ## ترکیب Razor
+
+نماد اینماد در `_Footer.cshtml` از تصویر رسمی `trustseal.enamad.ir` با شناسهٔ 8270056 استفاده می‌کند و به صفحهٔ تأیید همان نماد در پنجرهٔ جدید پیوند دارد. سیاست referrer لینک و تصویر `origin` و رابطهٔ لینک `noopener` است؛ قاب واکنش‌گرای نماد در استایل فوتر حفظ می‌شود.
 
 [Views/_ViewStart.cshtml](../../Shop/Views/_ViewStart.cshtml) پوسته را روی [_Shop.cshtml](../../Shop/Views/Shared/_Shop.cshtml) قرار می‌دهد:
 

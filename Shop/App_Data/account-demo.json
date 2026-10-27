@@ -1,0 +1,196 @@
+{
+  "schemaVersion": 1,
+  "currency": "IRT",
+  "orders": [
+    {
+      "id": "order-1",
+      "number": "HN-۱۴۰۵۰۶۲۱",
+      "status": "shipping",
+      "orderedOn": "2026-09-08",
+      "itemCount": 1,
+      "totalAmount": 24500000,
+      "deliveryDescription": "تحویل به شرکت پست"
+    },
+    {
+      "id": "order-2",
+      "number": "HN-۱۴۰۵۰۶۱۸",
+      "status": "processing",
+      "orderedOn": "2026-09-05",
+      "itemCount": 2,
+      "totalAmount": 46000000,
+      "deliveryDescription": "در حال آماده‌سازی برای ارسال"
+    },
+    {
+      "id": "order-3",
+      "number": "HN-۱۴۰۵۰۵۹۲",
+      "status": "delivered",
+      "orderedOn": "2026-08-22",
+      "itemCount": 1,
+      "totalAmount": 26000000,
+      "deliveryDescription": "تحویل در ۲ شهریور"
+    },
+    {
+      "id": "order-4",
+      "number": "HN-۱۴۰۵۰۵۸۵",
+      "status": "delivered",
+      "orderedOn": "2026-08-17",
+      "itemCount": 1,
+      "totalAmount": 18700000,
+      "deliveryDescription": "سفارش با موفقیت تحویل شد"
+    },
+    {
+      "id": "order-5",
+      "number": "HN-۱۴۰۵۰۵۷۲",
+      "status": "delivered",
+      "orderedOn": "2026-08-08",
+      "itemCount": 2,
+      "totalAmount": 51200000,
+      "deliveryDescription": "سفارش با موفقیت تحویل شد"
+    },
+    {
+      "id": "order-6",
+      "number": "HN-۱۴۰۵۰۵۴۰",
+      "status": "delivered",
+      "orderedOn": "2026-07-30",
+      "itemCount": 1,
+      "totalAmount": 29800000,
+      "deliveryDescription": "سفارش با موفقیت تحویل شد"
+    },
+    {
+      "id": "order-7",
+      "number": "HN-۱۴۰۵۰۴۹۸",
+      "status": "delivered",
+      "orderedOn": "2026-07-21",
+      "itemCount": 1,
+      "totalAmount": 22400000,
+      "deliveryDescription": "سفارش با موفقیت تحویل شد"
+    },
+    {
+      "id": "order-8",
+      "number": "HN-۱۴۰۵۰۴۶۱",
+      "status": "delivered",
+      "orderedOn": "2026-07-08",
+      "itemCount": 2,
+      "totalAmount": 43600000,
+      "deliveryDescription": "سفارش با موفقیت تحویل شد"
+    },
+    {
+      "id": "order-9",
+      "number": "HN-۱۴۰۵۰۴۲۲",
+      "status": "delivered",
+      "orderedOn": "2026-06-22",
+      "itemCount": 1,
+      "totalAmount": 25900000,
+      "deliveryDescription": "سفارش با موفقیت تحویل شد"
+    },
+    {
+      "id": "order-10",
+      "number": "HN-۱۴۰۵۰۳۸۹",
+      "status": "delivered",
+      "orderedOn": "2026-06-09",
+      "itemCount": 1,
+      "totalAmount": 31500000,
+      "deliveryDescription": "سفارش با موفقیت تحویل شد"
+    }
+  ],
+  "coupons": [
+    {
+      "id": "coupon-bazar10",
+      "code": "BAZAR10",
+      "discountPercent": 10,
+      "enabled": true,
+      "expiresOn": "2027-03-20",
+      "orderIds": [
+        "order-3",
+        "order-6"
+      ]
+    },
+    {
+      "id": "coupon-tools15",
+      "code": "TOOLS15",
+      "discountPercent": 15,
+      "enabled": true,
+      "expiresOn": "2026-11-21",
+      "orderIds": [
+        "order-1",
+        "order-7"
+      ]
+    },
+    {
+      "id": "coupon-welcome8",
+      "code": "WELCOME8",
+      "discountPercent": 8,
+      "enabled": true,
+      "expiresOn": "2026-12-21",
+      "orderIds": [
+        "order-2"
+      ]
+    },
+    {
+      "id": "coupon-nimrooz12",
+      "code": "NIMROOZ12",
+      "discountPercent": 12,
+      "enabled": false,
+      "expiresOn": "2026-08-22",
+      "orderIds": [
+        "order-4"
+      ]
+    },
+    {
+      "id": "coupon-summer8",
+      "code": "SUMMER8",
+      "discountPercent": 8,
+      "enabled": false,
+      "expiresOn": "2026-08-22",
+      "orderIds": [
+        "order-5"
+      ]
+    },
+    {
+      "id": "coupon-autumn5",
+      "code": "AUTUMN5",
+      "discountPercent": 5,
+      "enabled": false,
+      "expiresOn": "2026-07-22",
+      "orderIds": [
+        "order-8"
+      ]
+    },
+    {
+      "id": "coupon-order7",
+      "code": "ORDER7",
+      "discountPercent": 7,
+      "enabled": false,
+      "expiresOn": "2026-07-22",
+      "orderIds": [
+        "order-9"
+      ]
+    },
+    {
+      "id": "coupon-aman15",
+      "code": "AMAN15",
+      "discountPercent": 15,
+      "enabled": false,
+      "expiresOn": "2026-06-21",
+      "orderIds": [
+        "order-10"
+      ]
+    },
+    {
+      "id": "coupon-bahar15",
+      "code": "BAHAR15",
+      "discountPercent": 15,
+      "enabled": false,
+      "expiresOn": "2026-07-22",
+      "orderIds": []
+    },
+    {
+      "id": "coupon-old20",
+      "code": "OLD20",
+      "discountPercent": 20,
+      "enabled": false,
+      "expiresOn": "2026-05-21",
+      "orderIds": []
+    }
+  ]
+}

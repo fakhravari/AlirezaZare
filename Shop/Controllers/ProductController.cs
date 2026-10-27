@@ -7,10 +7,10 @@ namespace Shop.Controllers;
 
 public sealed class ProductController : PageController
 {
-    private readonly CatalogRepository _catalog;
+    private readonly ICatalogSource _catalog;
     private readonly SeoMetadataOptions _seoOptions;
 
-    public ProductController(CatalogRepository catalog, IOptions<SeoMetadataOptions> seoOptions)
+    public ProductController(ICatalogSource catalog, IOptions<SeoMetadataOptions> seoOptions)
     {
         _catalog = catalog;
         _seoOptions = seoOptions.Value;
@@ -32,7 +32,7 @@ public sealed class ProductController : PageController
         if (separator < 0 || !int.TryParse(slug[(separator + 1)..], out var id) || id < 1)
             return NotFound();
 
-        CatalogSnapshot catalog = _catalog.Read();
+        CatalogSnapshot catalog = (await _catalog.ReadAsync(HttpContext.RequestAborted));
         ProductSeoEntry? product = catalog.Products
             .FirstOrDefault(item => item.Id == id);
         if (product is null) return NotFound();
@@ -73,16 +73,16 @@ public sealed class ProductController : PageController
     }
 
     [HttpGet("/products/{id:int}")]
-    public IActionResult LegacyPath(int id) =>
-        id > 0 ? CanonicalRedirect(id) : NotFound();
+    public async Task<IActionResult> LegacyPath(int id) =>
+        id > 0 ? await CanonicalRedirect(id) : NotFound();
 
     [HttpGet("/Product")]
-    public IActionResult LegacyDetails([FromQuery] int? id) =>
-        id is > 0 ? CanonicalRedirect(id.Value) : NotFound();
+    public async Task<IActionResult> LegacyDetails([FromQuery] int? id) =>
+        id is > 0 ? await CanonicalRedirect(id.Value) : NotFound();
 
-    private IActionResult CanonicalRedirect(int id)
+    private async Task<IActionResult> CanonicalRedirect(int id)
     {
-        ProductSeoEntry? product = _catalog.Read().Products.FirstOrDefault(item => item.Id == id);
+        ProductSeoEntry? product = (await _catalog.ReadAsync(HttpContext.RequestAborted)).Products.FirstOrDefault(item => item.Id == id);
         return product is null ? NotFound() : RedirectPermanent($"/products/{product.Slug}-{product.Id}");
     }
 }

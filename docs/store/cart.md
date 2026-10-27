@@ -1,5 +1,8 @@
 # قرارداد سبد و تسویه
 
+
+فهرست مستقل کد/درصد کوپن از renderer حذف شده است؛ سبد `HNAccountData.couponOffers` را از bootstrap مشترک `commerceData` می‌خواند. منبع عمومی `ICommerceOfferSource` با دادهٔ پروفایل هماهنگ است. محاسبهٔ نهایی تخفیف هنوز نمونه و مرورگری است؛ [مرز اتصال backend](../architecture/backend-readiness.md) را ببینید.
+
 ## منابع مسئول
 
 | لایه | منبع |

@@ -2,6 +2,9 @@
 
 این پروژه یک برنامهٔ ASP.NET Core MVC با رابط فارسی و RTL است. تنها برنامهٔ وب `Shop.sln`، [پروژهٔ Shop](../../Shop/Shop.csproj) با هدف `net10.0` است؛ solution همچنین پروژهٔ اجرایی بررسی قرارداد [Shop.Contracts](../../tests/Shop.Contracts/Shop.Contracts.csproj) را دارد. گروه‌های مستندات، مرز مسئولیت را توضیح می‌دهند؛ این دسته‌بندی به معنی وجود سرویس‌ها یا پروژه‌های مستقل نیست.
 
+
+مرزهای قابل‌جایگزینی خواندن داده `ICatalogSource`، `IAccountDataSource` و `ICommerceOfferSource` هستند. وضعیت پیاده‌شده و شکاف‌های اتصال در [آمادگی backend](backend-readiness.md) ثبت شده است.
+
 ## جریان درخواست
 
 ```text

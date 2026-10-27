@@ -160,6 +160,21 @@ footer .footer-main > .col-lg-4:first-child > p {
   }
 }
 
+footer .trust-badges > .enamad-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  cursor: pointer;
+}
+
+footer .trust-badges > .enamad-link > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
 /* Same trust-license sprites used on the home page */
 .site-footer .footer-trust {
   gap: 8px;

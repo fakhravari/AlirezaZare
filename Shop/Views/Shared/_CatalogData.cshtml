@@ -1,2 +1,2 @@
-@inject Shop.Services.CatalogRepository Catalog
-<script type="application/json" id="storeCatalog">@Html.Raw(Catalog.Read().BrowserJson)</script>
+@inject Shop.Services.ICatalogSource Catalog
+<script type="application/json" id="storeCatalog">@Html.Raw((await Catalog.ReadAsync(Context.RequestAborted)).BrowserJson)</script>

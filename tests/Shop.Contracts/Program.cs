@@ -50,3 +50,34 @@ CatalogSnapshot safe = CatalogSnapshot.Parse(injection.ToJsonString());
 if (safe.BrowserJson.Contains("<script", StringComparison.OrdinalIgnoreCase) || safe.BrowserJson.Contains("</script", StringComparison.OrdinalIgnoreCase))
     throw new Exception("Catalog JSON can escape its script element.");
 Console.WriteLine($"C# catalog contracts OK: {rejected} invalid catalogs rejected; canonical identity and safe JSON verified.");
+
+string accountPath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(sourcePath)!, "../../../App_Data/account-demo.json"));
+string accountSource = File.ReadAllText(accountPath);
+var account = Shop.Models.AccountData.Parse(accountSource);
+if (account.Orders.Count != 10 || account.Coupons.Count != 10)
+    throw new Exception("Account fixtures lost records.");
+void RejectAccount(Action<JsonNode> mutate)
+{
+    var node = JsonNode.Parse(accountSource)!;
+    mutate(node);
+    try { Shop.Models.AccountData.Parse(node.ToJsonString()); }
+    catch (InvalidDataException) { return; }
+    throw new Exception("Invalid account relationship was accepted.");
+}
+RejectAccount(n => n["schemaVersion"] = 99);
+RejectAccount(n => n["currency"] = "IRR");
+RejectAccount(n => n["orders"]![1]!["id"] = "order-1");
+RejectAccount(n => n["orders"]![0]!["totalAmount"] = -1);
+RejectAccount(n => n["orders"]![0]!["totalAmount"] = 1.5);
+RejectAccount(n => n["orders"]![0]!["status"] = "unknown");
+RejectAccount(n => n["coupons"]![0]!["orderIds"]![0] = "missing");
+RejectAccount(n => n["coupons"]![0]!["discountPercent"] = 100);
+RejectAccount(n => n["coupons"]![1]!["code"] = "BAZAR10");
+var coupon = account.Coupons.First(c => c.Enabled);
+if (!coupon.IsActive(coupon.ExpiresOn) || coupon.IsActive(coupon.ExpiresOn.AddDays(1)) ||
+    (coupon with { Enabled = false }).IsActive(coupon.ExpiresOn))
+    throw new Exception("Coupon expiry boundary is inconsistent.");
+var encoded = System.Text.Json.JsonSerializer.Serialize(new { note = "</script><script>alert(1)</script>" }, Shop.Models.AccountData.JsonOptions);
+if (encoded.Contains("</script", StringComparison.OrdinalIgnoreCase))
+    throw new Exception("Account JSON escaped its script element.");
+Console.WriteLine("C# account contracts OK: relationships, amounts, expiry and safe JSON verified.");

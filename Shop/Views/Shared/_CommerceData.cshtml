@@ -1,0 +1,7 @@
+@using System.Text.Json
+@inject Shop.Services.ICommerceOfferSource OfferSource
+@{
+    var today = DateOnly.FromDateTime(DateTime.UtcNow);
+    var offers = await OfferSource.ReadOffersAsync(today, Context.RequestAborted);
+}
+<script type="application/json" id="commerceData">@Html.Raw(JsonSerializer.Serialize(new { schemaVersion = 1, currency = "IRT", couponOffers = offers }))</script>

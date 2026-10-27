@@ -8,9 +8,9 @@ namespace Shop.Controllers;
 public sealed class BrandsController : PageController
 {
     private readonly IWebHostEnvironment _environment;
-    private readonly Shop.Services.CatalogRepository _catalog;
+    private readonly Shop.Services.ICatalogSource _catalog;
 
-    public BrandsController(IWebHostEnvironment environment, Shop.Services.CatalogRepository catalog)
+    public BrandsController(IWebHostEnvironment environment, Shop.Services.ICatalogSource catalog)
     {
         _environment = environment;
         _catalog = catalog;
@@ -19,7 +19,7 @@ public sealed class BrandsController : PageController
     [HttpGet("")]
     public async Task<IActionResult> Index()
     {
-        PageModel<IReadOnlyList<BrandProfileModel>> model = new(_catalog.Read().Brands,
+        PageModel<IReadOnlyList<BrandProfileModel>> model = new((await _catalog.ReadAsync(HttpContext.RequestAborted)).Brands,
             new SeoModel("برندهای ابزار برقی و تجهیزات اندازه‌گیری | ندا اولیائی", "معرفی برندهای ابزار برقی، دریل و پیچ‌گوشتی، ابزار اندازه‌گیری و تجهیزات لحیم‌کاری؛ بررسی محصولات و راهنمای انتخاب هر برند.", Breadcrumbs: [new SeoBreadcrumb("خانه", "/"), new SeoBreadcrumb("برندها", "/brands")]));
         return await PageAsync(model);
     }
@@ -27,7 +27,7 @@ public sealed class BrandsController : PageController
     [HttpGet("{slug}")]
     public async Task<IActionResult> Details(string slug)
     {
-        BrandProfileModel? brand = _catalog.Read().Brands.FirstOrDefault(brand => string.Equals(brand.Slug, slug, StringComparison.OrdinalIgnoreCase));
+        BrandProfileModel? brand = (await _catalog.ReadAsync(HttpContext.RequestAborted)).Brands.FirstOrDefault(brand => string.Equals(brand.Slug, slug, StringComparison.OrdinalIgnoreCase));
         if (brand is null)
         {
             return NotFound();

@@ -16,6 +16,9 @@
 | سبد، ورود، مقایسه، علاقه‌مندی، آدرس و پروفایل | `HNUI`، script صفحه و `localStorage` | state مرورگر؛ سفارش، پرداخت یا هویت تأییدشدهٔ سرور نیست |
 | رسانه‌ها | [ساختار content](../media/images.md) | مسیرهای محصول در catalog.json ثبت‌اند؛ نام فایل از ترتیب آرایه ساخته نمی‌شود |
 
+
+کاتالوگ در مصرف‌کننده‌های سرور از `ICatalogSource.ReadAsync` خوانده می‌شود؛ `CatalogRepository` پیاده‌سازی فایل آن است. سفارش و کوپن در `Shop/App_Data/account-demo.json` با مدل `AccountData` نگهداری می‌شوند؛ `IAccountDataSource` برای حساب و `ICommerceOfferSource` برای پیشنهاد عمومی است. شناسهٔ سفارش مرجع سابقهٔ مصرف کوپن است، تاریخ انتقال ISO و مبلغ حساب عدد صحیح تومان (IRT) است. وضعیت کامل آمادگی و محدودیت‌ها در [اتصال backend](backend-readiness.md) ثبت شده است.
+
 ## هنگام تغییر داده
 
 دادهٔ محصول را فقط در catalog.json تغییر دهید. `id` و `code` پایدارند؛ relationها و مسیرها باید معتبر بمانند. parser متن JavaScript حذف شده است. تغییر schema باید هم‌زمان در CatalogSnapshot و resolver مرورگر اعمال شود؛ قرارداد دقیق در [کاتالوگ](../store/catalog.md) و بررسی‌های خودکار در [کیفیت](../development/quality.md) ثبت شده‌اند.

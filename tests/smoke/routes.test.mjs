@@ -33,6 +33,22 @@ after(async () => {
   server.kill(); await stopped;
 });
 
+test('account coupons and public offers share values without publishing order history', async () => {
+  const home = await (await fetch(base + '/')).text();
+  const profile = await (await fetch(base + '/profile/coupons')).text();
+  const parse = (html, id) => JSON.parse(html.match(new RegExp(`<script type="application/json" id="${id}">([\\s\\S]*?)</script>`))[1]);
+  const offers = parse(home, 'commerceData');
+  const account = parse(profile, 'accountData');
+  assert.equal(offers.schemaVersion, 1);
+  assert.equal(offers.currency, 'IRT');
+  assert.deepEqual(offers.couponOffers, Object.fromEntries(account.coupons.filter(c => c.active).map(c => [c.code, c.discountPercent])));
+  assert.equal(account.coupons.length, 10);
+  assert.ok(account.coupons.some(c => c.uses.length > 0));
+  assert.ok(!home.includes('id="accountData"'));
+  assert.deepEqual(Object.keys(offers).sort(), ['couponOffers', 'currency', 'schemaVersion']);
+  assert.equal((await fetch(base + '/App_Data/account-demo.json')).status, 404);
+});
+
 test('home, search, product, cart, account and content routes serve the same validated catalog', async () => {
   const routes = ['/', '/search', '/products/cordless-hammer-drill-1', '/products/digital-multimeter-6', '/cart', '/checkout', '/compare', '/favorites', '/profile', '/profile/orders', '/profile/addresses', '/brands', '/brands/bosch', '/contact', '/about'];
   for (const route of routes) {

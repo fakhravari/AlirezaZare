@@ -4,8 +4,13 @@ using Shop.Models;
 namespace Shop.Services;
 
 /// <summary>The JSON catalog is shared by Razor, SEO and the browser. No JavaScript parsing.</summary>
-public sealed class CatalogRepository(IWebHostEnvironment environment)
+public sealed class CatalogRepository(IWebHostEnvironment environment) : ICatalogSource
 {
+    public ValueTask<CatalogSnapshot> ReadAsync(CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        return ValueTask.FromResult(Read());
+    }
     private readonly object _gate = new();
     private readonly string _path = Path.Combine(environment.WebRootPath, "content", "data", "catalog.json");
     private CatalogSnapshot? _snapshot;

@@ -1,26 +1,15 @@
 @model bool
 
+@inject Shop.Services.IAccountDataSource AccountSource
 @{
-    var orders = new[]
-    {
-        new { Number = "HN-۱۴۰۵۰۶۲۱", Status = "در حال ارسال", StatusClass = "is-shipping", Date = "۱۷ شهریور ۱۴۰۵", DateTime = "2026-09-08", Count = 1, Amount = 24500000, Delivery = "تحویل به شرکت پست" },
-        new { Number = "HN-۱۴۰۵۰۶۱۸", Status = "در حال آماده‌سازی", StatusClass = "is-processing", Date = "۱۴ شهریور ۱۴۰۵", DateTime = "2026-09-05", Count = 2, Amount = 46000000, Delivery = "در حال آماده‌سازی برای ارسال" },
-        new { Number = "HN-۱۴۰۵۰۵۹۲", Status = "تحویل‌شده", StatusClass = "is-delivered", Date = "۳۱ مرداد ۱۴۰۵", DateTime = "2026-08-22", Count = 1, Amount = 26000000, Delivery = "تحویل در ۲ شهریور" },
-        new { Number = "HN-۱۴۰۵۰۵۸۵", Status = "تحویل‌شده", StatusClass = "is-delivered", Date = "۲۶ مرداد ۱۴۰۵", DateTime = "2026-08-17", Count = 1, Amount = 18700000, Delivery = "سفارش با موفقیت تحویل شد" },
-        new { Number = "HN-۱۴۰۵۰۵۷۲", Status = "تحویل‌شده", StatusClass = "is-delivered", Date = "۱۷ مرداد ۱۴۰۵", DateTime = "2026-08-08", Count = 2, Amount = 51200000, Delivery = "سفارش با موفقیت تحویل شد" },
-        new { Number = "HN-۱۴۰۵۰۵۴۰", Status = "تحویل‌شده", StatusClass = "is-delivered", Date = "۸ مرداد ۱۴۰۵", DateTime = "2026-07-30", Count = 1, Amount = 29800000, Delivery = "سفارش با موفقیت تحویل شد" },
-        new { Number = "HN-۱۴۰۵۰۴۹۸", Status = "تحویل‌شده", StatusClass = "is-delivered", Date = "۳۰ تیر ۱۴۰۵", DateTime = "2026-07-21", Count = 1, Amount = 22400000, Delivery = "سفارش با موفقیت تحویل شد" },
-        new { Number = "HN-۱۴۰۵۰۴۶۱", Status = "تحویل‌شده", StatusClass = "is-delivered", Date = "۱۷ تیر ۱۴۰۵", DateTime = "2026-07-08", Count = 2, Amount = 43600000, Delivery = "سفارش با موفقیت تحویل شد" },
-        new { Number = "HN-۱۴۰۵۰۴۲۲", Status = "تحویل‌شده", StatusClass = "is-delivered", Date = "۱ تیر ۱۴۰۵", DateTime = "2026-06-22", Count = 1, Amount = 25900000, Delivery = "سفارش با موفقیت تحویل شد" },
-        new { Number = "HN-۱۴۰۵۰۳۸۹", Status = "تحویل‌شده", StatusClass = "is-delivered", Date = "۱۹ خرداد ۱۴۰۵", DateTime = "2026-06-09", Count = 1, Amount = 31500000, Delivery = "سفارش با موفقیت تحویل شد" },
-    };
+    var orders = (await AccountSource.ReadAsync(Context.RequestAborted)).Orders;
 }
 
 <section id="orders" class="account-section" hidden="@(Model ? null : "hidden")">
     <div class="orders-heading">
         <div>
             <span>تاریخچه خرید</span>
-            <h2 id="ordersTitle" tabindex="-1">سفارش‌های من <small id="ordersTotal">۱۰ سفارش</small></h2>
+            <h2 id="ordersTitle" tabindex="-1">سفارش‌های من <small id="ordersTotal">@orders.Count سفارش</small></h2>
         </div>
     </div>
     <p class="account-demo-note" role="note">این فهرست برای نمایش رابط کاربری نمونه‌سازی شده است و سوابق واقعی خرید یا وضعیت زندهٔ سفارش‌ها را نشان نمی‌دهد.</p>
@@ -29,28 +18,28 @@
         {
             <article class="profile-order-card"
                      data-order-number="@order.Number"
-                     data-order-status="@order.Status"
-                     data-order-date="@order.Date"
-                     data-order-datetime="@order.DateTime"
-                     data-order-count="@order.Count"
-                     data-order-amount="@order.Amount"
-                     data-order-delivery="@order.Delivery">
+                     data-order-status="@order.StatusLabel"
+                     data-order-date="@order.DateLabel"
+                     data-order-datetime="@order.OrderedOn.ToString("yyyy-MM-dd")"
+                     data-order-count="@order.ItemCount"
+                     data-order-amount="@order.TotalAmount"
+                     data-order-delivery="@order.DeliveryDescription">
                 <header>
                     <div>
-                        <span class="order-status @order.StatusClass"><i class="bi @(order.StatusClass == "is-shipping" ? "bi-truck" : order.StatusClass == "is-processing" ? "bi-hourglass-split" : "bi-check2-circle")" aria-hidden="true"></i> @order.Status</span>
+                        <span class="order-status @order.StatusClass"><i class="bi @(order.StatusClass == "is-shipping" ? "bi-truck" : order.StatusClass == "is-processing" ? "bi-hourglass-split" : "bi-check2-circle")" aria-hidden="true"></i> @order.StatusLabel</span>
                         <strong>سفارش @order.Number</strong>
                     </div>
-                    <time datetime="@order.DateTime">@order.Date</time>
+                    <time datetime="@order.OrderedOn.ToString("yyyy-MM-dd")">@order.DateLabel</time>
                 </header>
                 <div class="order-body order-invoice-summary">
                     <div class="order-products">
                         <span class="order-product-icon" aria-hidden="true"><i class="bi bi-receipt-cutoff"></i></span>
-                        <div><strong>خلاصهٔ فاکتور</strong><small>@order.Count کالا · پرداخت آنلاین</small></div>
+                        <div><strong>خلاصهٔ فاکتور</strong><small>@order.ItemCount کالا · پرداخت آنلاین</small></div>
                     </div>
-                    <div class="order-total"><small>مبلغ سفارش</small><strong>@order.Amount.ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("fa-IR")) تومان</strong></div>
+                    <div class="order-total"><small>مبلغ سفارش</small><strong>@order.TotalAmount.ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("fa-IR")) تومان</strong></div>
                 </div>
                 <footer>
-                    <span><i class="bi bi-box-seam" aria-hidden="true"></i> @order.Delivery</span>
+                    <span><i class="bi bi-box-seam" aria-hidden="true"></i> @order.DeliveryDescription</span>
                     <div class="order-card-actions">
                         <a asp-controller="Tracking" asp-action="Index"><i class="bi bi-truck" aria-hidden="true"></i> مشاهده جزئیات تحویل پست</a>
                         <button type="button" data-open-order-invoice><i class="bi bi-receipt" aria-hidden="true"></i> مشاهدهٔ فاکتور</button>

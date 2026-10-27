@@ -9,10 +9,10 @@ namespace Shop.Controllers;
 
 public sealed class SeoController : Controller
 {
-    private readonly CatalogRepository _catalog;
+    private readonly ICatalogSource _catalog;
     private readonly SeoMetadataOptions _options;
 
-    public SeoController(CatalogRepository catalog, IOptions<SeoMetadataOptions> options)
+    public SeoController(ICatalogSource catalog, IOptions<SeoMetadataOptions> options)
     {
         _catalog = catalog;
         _options = options.Value;
@@ -28,8 +28,9 @@ public sealed class SeoController : Controller
 
     [HttpGet("/sitemap.xml")]
     [ResponseCache(Duration = 3600, Location = ResponseCacheLocation.Any)]
-    public IActionResult Sitemap()
+    public async Task<IActionResult> Sitemap()
     {
+        var catalog = await _catalog.ReadAsync(HttpContext.RequestAborted);
         string[] staticPaths =
         [
             "/",
@@ -48,9 +49,9 @@ public sealed class SeoController : Controller
         ];
 
         IEnumerable<string> paths = staticPaths
-            .Concat(_catalog.Read().Brands.Select(brand => $"/brands/{brand.Slug}"))
+            .Concat(catalog.Brands.Select(brand => $"/brands/{brand.Slug}"))
             .Concat(JournalArticles.Slugs.Select(slug => $"/magazine/{slug}"))
-            .Concat(_catalog.Read().Products.Select(product => $"/products/{product.Slug}-{product.Id}"));
+            .Concat(catalog.Products.Select(product => $"/products/{product.Slug}-{product.Id}"));
 
         XNamespace sitemapNamespace = "http://www.sitemaps.org/schemas/sitemap/0.9";
         XDocument document = new(

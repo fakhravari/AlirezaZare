@@ -9,7 +9,8 @@
         "Shop/wwwroot/content/data/catalog.json"
       ],
       "server": [
-        "Shop/Services/CatalogRepository.cs"
+        "Shop/Services/CatalogRepository.cs",
+        "Shop/Services/ICatalogSource.cs"
       ],
       "js": [
         "Shop/wwwroot/shop/js/store/catalog.js"
@@ -192,13 +193,23 @@
     },
     "account-page": {
       "markup": [
-        "Shop/Views/Profile/Index.cshtml"
+        "Shop/Views/Profile/Index.cshtml",
+        "Shop/Views/Profile/_Orders.cshtml",
+        "Shop/Views/Shared/_CommerceData.cshtml"
       ],
       "js": [
-        "Shop/wwwroot/shop/js/pages/account-page.js"
+        "Shop/wwwroot/shop/js/pages/account-page.js",
+        "Shop/wwwroot/shop/js/store/account-data.js"
       ],
       "css": [
         "Shop/wwwroot/shop/css/pages/account-page.css"
+      ],
+      "data": [
+        "Shop/App_Data/account-demo.json"
+      ],
+      "server": [
+        "Shop/Models/AccountData.cs",
+        "Shop/Services/IAccountDataSource.cs"
       ]
     },
     "login-dialog": {

@@ -1556,7 +1556,7 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
         }
     }
     const couponKey = "hn-demo-coupon";
-    const couponOffers = Object.freeze({ BAZAR10: 10, TOOLS15: 15, WELCOME8: 8 });
+    const couponOffers = (window.HNAccountData?.couponOffers || {});
     const storedCouponCode = String(ui.storage.get(couponKey, "")).trim().toUpperCase();
     let couponCode = Object.hasOwn(couponOffers, storedCouponCode) ? storedCouponCode : "";
     if (storedCouponCode && !couponCode) ui.storage.remove(couponKey);
