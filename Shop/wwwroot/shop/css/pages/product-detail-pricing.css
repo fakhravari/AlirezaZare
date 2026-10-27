@@ -701,7 +701,7 @@
   transition: border-color .18s ease, background-color .18s ease, color .18s ease, transform .18s ease, box-shadow .18s ease;
 }
 
-#productView .detail-price-tool[data-price-dialog="notify"] {
+#productView .detail-price-tool[data-price-watch-toggle] {
   background: #fff6dc;
   color: #9a7300;
 }
@@ -917,8 +917,7 @@
   background: #fbfcfd;
 }
 
-.detail-price-demo-chart[hidden],
-.detail-price-demo-actions[hidden] {
+.detail-price-demo-chart[hidden] {
   display: none;
 }
 
@@ -963,40 +962,6 @@
   margin-top: 8px;
   color: #7a8b9a;
   font-size: 11px;
-}
-
-.detail-price-demo-actions {
-  display: grid;
-  justify-items: start;
-  gap: 8px;
-}
-
-.detail-price-demo-actions > button {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  min-height: 42px;
-  padding: 8px 14px;
-  border: 1px solid #d3b04a;
-  border-radius: 11px;
-  background: #fff7dc;
-  color: #634d0d;
-  font: inherit;
-  font-size: 14px;
-  font-weight: 850;
-  cursor: pointer;
-}
-
-.detail-price-demo-actions > button.is-active {
-  border-color: #e3c6c0;
-  background: #fff7f5;
-  color: #963f35;
-}
-
-.detail-price-demo-actions > small {
-  color: #68798a;
-  font-size: 12px;
-  line-height: 1.6;
 }
 
 @media (max-width: 575px) {

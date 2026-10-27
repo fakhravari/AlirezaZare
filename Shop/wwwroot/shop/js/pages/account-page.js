@@ -28,6 +28,15 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
         },
     ];
     const activeCoupons = couponHistory.filter((coupon) => coupon.active);
+    const formatPersianDate = (value) => {
+        const date = new Date(value);
+        if (!Number.isFinite(date.getTime())) return "";
+        return new Intl.DateTimeFormat("fa-IR-u-ca-persian", {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+        }).format(date);
+    };
     const priceWatchKey = "hn-price-watches-demo";
     const dialog = document.querySelector("#addressDialog"),
         form = document.querySelector("#addressForm");
@@ -244,8 +253,21 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
                 : hasVariants
                     ? "همهٔ قیمت‌های محصول"
                     : "بدون ویژگی";
+            const registeredDate = formatPersianDate(watch.createdAt);
+            const registeredPrice = typeof watch.priceAtRegistration === "number"
+                ? watch.priceAtRegistration
+                : NaN;
+            const trackingDetails = [
+                registeredDate ? "ثبت: " + registeredDate : "",
+                Number.isFinite(registeredPrice) && registeredPrice >= 0
+                    ? "قیمت هنگام ثبت: " + ui.formatNumber(registeredPrice) + " تومان"
+                    : "",
+                typeof watch.stockAtRegistration === "string" && watch.stockAtRegistration.trim()
+                    ? "موجودی هنگام ثبت: " + watch.stockAtRegistration.trim()
+                    : "",
+            ].filter(Boolean);
             const href = product ? window.HNProductUrl?.(product) || "/search" : "/search";
-            return `<article class="profile-price-alert-card"><a class="profile-price-alert-product" href="${esc(href)}"><span class="profile-price-alert-icon"><i class="bi bi-bell" aria-hidden="true"></i></span><span><strong>${esc(productName)}</strong><small>${esc(scopeLabel)}</small></span></a><button class="profile-price-alert-delete" type="button" data-delete-price-alert="${index}" aria-label="حذف پیگیری ${esc(productName)}"><i class="bi bi-trash3" aria-hidden="true"></i><span>حذف</span></button></article>`;
+            return `<article class="profile-price-alert-card"><a class="profile-price-alert-product" href="${esc(href)}"><span class="profile-price-alert-icon"><i class="bi bi-bell" aria-hidden="true"></i></span><span><strong>${esc(productName)}</strong><small>${esc(scopeLabel)}</small>${trackingDetails.map((detail) => "<small>" + esc(detail) + "</small>").join("")}</span></a><button class="profile-price-alert-delete" type="button" data-delete-price-alert="${index}" aria-label="حذف پیگیری ${esc(productName)}"><i class="bi bi-trash3" aria-hidden="true"></i><span>حذف</span></button></article>`;
         }).join("");
         host.querySelectorAll("[data-delete-price-alert]").forEach((button) => {
             button.addEventListener("click", () => {
