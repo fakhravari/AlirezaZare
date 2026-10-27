@@ -1171,6 +1171,7 @@
   }
 }
 
+.orders-pagination[hidden],
 .profile-order-card[hidden],
 .orders-pagination nav[hidden] {
   display: none;
@@ -2145,16 +2146,14 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
 .profile-coupon-header,
 .profile-coupon-identity,
 .profile-coupon-usage-heading,
-.profile-coupon-invoice,
-.profile-coupon-footer {
+.profile-coupon-invoice {
   display: flex;
   align-items: center;
 }
 
 .profile-coupon-header,
 .profile-coupon-usage-heading,
-.profile-coupon-invoice,
-.profile-coupon-footer {
+.profile-coupon-invoice {
   justify-content: space-between;
   gap: 12px;
 }
@@ -2287,49 +2286,6 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
   font-size: 12px;
 }
 
-.profile-coupon-footer {
-  justify-content: flex-start;
-}
-
-.profile-coupon-use-link {
-  display: inline-flex;
-  min-height: 40px;
-  align-items: center;
-  gap: 8px;
-  padding: 7px 11px;
-  border: 1px solid var(--industrial-navy);
-  border-radius: 10px;
-  background: var(--industrial-navy);
-  color: #fff;
-  font-size: 12px;
-  font-weight: 800;
-  text-decoration: none;
-  transition: background-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
-}
-
-.profile-coupon-use-link > i:first-child {
-  color: var(--industrial-yellow);
-}
-
-.profile-coupon-use-link:hover {
-  transform: translateY(-1px);
-  background: #21466b;
-  box-shadow: 0 5px 14px rgba(16, 42, 67, 0.16);
-  color: #fff;
-}
-
-.profile-coupon-use-link:focus-visible {
-  outline: 3px solid color-mix(in srgb, var(--industrial-yellow) 72%, white);
-  outline-offset: 2px;
-}
-
-.profile-coupon-expired-note {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  color: #748192;
-  font-size: 12px;
-}
 
 @media (max-width: 600px) {
   .profile-coupon-card {
@@ -3150,7 +3106,7 @@ body.inner-page .account-welcome .profile-breadcrumb ol > li.cart-breadcrumb-cur
 
 .profile-price-alert-product > span:last-child {
   display: grid;
-  gap: 5px;
+  gap: 8px;
   min-width: 0;
 }
 
@@ -3160,9 +3116,61 @@ body.inner-page .account-welcome .profile-breadcrumb ol > li.cart-breadcrumb-cur
   font-size: 1rem;
 }
 
-.profile-price-alert-product small {
+.profile-price-alert-meta,
+.profile-price-alert-details {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+}
+
+.profile-price-alert-scope,
+.profile-price-alert-detail {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  min-width: 0;
+  padding: 6px 9px;
+  border: 1px solid #e8edf2;
+  border-radius: 10px;
+  background: #f8fafc;
+  line-height: 1.6;
+}
+
+.profile-price-alert-scope {
+  border-color: #f0dfb4;
+  background: #fff9e9;
+  color: var(--navy, #142f4f);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.profile-price-alert-scope i,
+.profile-price-alert-detail > i {
+  flex: 0 0 auto;
+  color: var(--gold-dark, #9b7400);
+}
+
+.profile-price-alert-details {
+  gap: 6px;
+}
+
+.profile-price-alert-detail {
+  overflow-wrap: anywhere;
   color: var(--text-muted, #718096);
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
+}
+
+.profile-price-alert-detail-label {
+  color: var(--text-muted, #718096);
+}
+
+.profile-price-alert-detail-value {
+  color: var(--navy, #142f4f);
+  font-weight: 700;
 }
 
 .profile-price-alert-icon {

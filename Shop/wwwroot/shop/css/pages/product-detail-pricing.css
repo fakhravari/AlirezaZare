@@ -755,11 +755,15 @@
   max-height: min(88vh, 760px);
   padding: 0;
   overflow: auto;
-  border: 1px solid color-mix(in srgb, var(--industrial-yellow) 19%, white);
-  border-radius: 22px;
-  background: var(--industrial-bg);
+  border: 1px solid #eadfc9;
+  border-radius: 25px;
+  background:
+    radial-gradient(ellipse at 96% 0%, rgba(222, 177, 62, 0.12), transparent 34%),
+    linear-gradient(145deg, #fffdf9 0%, #fff9ee 100%);
   color: var(--industrial-navy);
-  box-shadow: 0 25px 90px color-mix(in srgb, var(--industrial-navy) 33%, transparent);
+  box-shadow:
+    0 26px 84px color-mix(in srgb, var(--industrial-navy) 31%, transparent),
+    0 0 0 5px rgba(232, 202, 135, 0.12);
 }
 
 .detail-price-dialog::backdrop {
@@ -768,27 +772,78 @@
 }
 
 .detail-price-dialog-shell {
+  position: relative;
   padding: 22px;
 }
 
 .detail-price-dialog-head {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid #e7edf2;
+  margin: -22px -22px 0;
+  padding: 22px 22px 16px;
+  border-bottom: 1px solid #eee2ca;
+  border-radius: 24px 24px 0 0;
+  background: linear-gradient(112deg, #fff4d9 0%, #fffaf0 45%, #fffdf8 100%);
+}
+
+.detail-price-dialog-head::before,
+.detail-price-dialog-head::after {
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+  content: "";
+}
+
+.detail-price-dialog-head::before {
+  top: -92px;
+  left: -58px;
+  width: 168px;
+  height: 168px;
+  border: 1px solid rgba(181, 138, 19, 0.28);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 12px rgba(181, 138, 19, 0.055),
+    0 0 0 27px rgba(181, 138, 19, 0.04);
+}
+
+.detail-price-dialog-head::after {
+  right: 29%;
+  bottom: -57px;
+  width: 116px;
+  height: 116px;
+  border: 1px solid rgba(213, 168, 48, 0.19);
+  border-radius: 38% 62% 55% 45%;
+  background: radial-gradient(circle at 35% 35%, rgba(236, 199, 98, 0.16), rgba(236, 199, 98, 0.015) 70%);
+  transform: rotate(28deg);
+}
+
+.detail-price-dialog-head > div,
+.detail-price-dialog-head > button {
+  position: relative;
+  z-index: 1;
 }
 
 .detail-price-dialog-head > div > span {
-  color: #9b7511;
+  display: inline-flex;
+  align-items: center;
+  min-height: 25px;
+  padding: 3px 10px;
+  border: 1px solid #efdfb7;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+  color: #98700d;
   font-size: 13px;
   font-weight: 800;
 }
 
 .detail-price-dialog-head h2 {
   margin: 4px 0 0;
-  color: #18324b;
+  color: #17324b;
   font-size: 21px;
   font-weight: 900;
 }
@@ -829,9 +884,9 @@
   align-items: flex-start;
   gap: 9px;
   padding: 12px;
-  border: 1px solid #dce5ed;
-  border-radius: 13px;
-  background: #f8fafb;
+  border: 1px solid #e9dfcd;
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.78);
   cursor: pointer;
 }
 
@@ -840,9 +895,9 @@
 }
 
 .detail-price-scope label.is-selected {
-  border-color: #d3ad38;
-  background: #fff8df;
-  box-shadow: inset 0 0 0 1px rgba(211, 173, 56, .18);
+  border-color: #d4a72b;
+  background: #fff5d9;
+  box-shadow: inset 0 0 0 1px rgba(211, 160, 34, 0.2), 0 5px 14px rgba(169, 121, 17, 0.08);
 }
 
 .detail-price-scope input {
@@ -878,9 +933,9 @@
   align-items: start;
   gap: 4px 9px;
   padding: 13px 15px;
-  border: 1px solid #e7dfc9;
-  border-radius: 13px;
-  background: #fffaf0;
+  border: 1px solid #ecdfc2;
+  border-radius: 15px;
+  background: linear-gradient(110deg, #fff7e5, #fffdf8);
 }
 
 .detail-price-dialog-state > i {
@@ -903,9 +958,9 @@
 
 .detail-price-demo-chart {
   padding: 12px 12px 8px;
-  border: 1px solid #e1e8ee;
-  border-radius: 14px;
-  background: #fbfcfd;
+  border: 1px solid #e9dfcd;
+  border-radius: 16px;
+  background: linear-gradient(145deg, #fffdf9, #fffaf1);
 }
 
 .detail-price-demo-chart[hidden] {
@@ -958,6 +1013,17 @@
 @media (max-width: 575px) {
   .detail-price-dialog-shell {
     padding: 17px;
+  }
+
+  .detail-price-dialog-head {
+    margin: -17px -17px 0;
+    padding: 18px 17px 15px;
+  }
+
+  .detail-price-dialog-head::after {
+    right: 20%;
+    width: 88px;
+    height: 88px;
   }
 
   .detail-price-dialog-head h2 {

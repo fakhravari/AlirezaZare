@@ -1556,7 +1556,10 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
         }
     }
     const couponKey = "hn-demo-coupon";
-    let couponCode = ui.storage.get(couponKey, "") === "HADI10" ? "HADI10" : "";
+    const couponOffers = Object.freeze({ BAZAR10: 10, TOOLS15: 15, WELCOME8: 8 });
+    const storedCouponCode = String(ui.storage.get(couponKey, "")).trim().toUpperCase();
+    let couponCode = Object.hasOwn(couponOffers, storedCouponCode) ? storedCouponCode : "";
+    if (storedCouponCode && !couponCode) ui.storage.remove(couponKey);
     let couponMessage = "";
     let couponError = false;
     const normalizeCoupon = (value) =>
@@ -1578,7 +1581,7 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                 row.querySelector(".cart-product-line-total > strong").textContent = money(item.price * item.quantity);
             });
             const lines = currentView.querySelector(".cart-summary-lines");
-            const discount = couponCode ? Math.floor(total * 0.1) : 0;
+            const discount = couponCode ? Math.floor(total * couponOffers[couponCode] / 100) : 0;
             lines.querySelector(".flow-total:first-child > strong").innerHTML = `${fa(items.reduce((sum, item) => sum + item.quantity, 0))} عدد <small>(${fa(items.length)} مدل)</small>`;
             lines.querySelector(".flow-total:nth-child(2) > strong").textContent = money(total);
             lines.querySelector(".flow-discount > span:last-child").textContent = money(discount);
@@ -1591,13 +1594,13 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
             couponMessage = "";
             ui.storage.remove(couponKey);
         }
-        const discount = couponCode ? Math.floor(total * 0.1) : 0;
+        const discount = couponCode ? Math.floor(total * couponOffers[couponCode] / 100) : 0;
         const finalTotal = total - discount;
         const couponStatusMarkup = couponCode && !couponError
-            ? '<i class="bi bi-tags" aria-hidden="true"></i><span>کد تخفیف <code dir="ltr">HADI10</code> اعمال شد</span>'
+            ? `<i class="bi bi-tags" aria-hidden="true"></i><span>کد تخفیف <code dir="ltr">${esc(couponCode)}</code> اعمال شد</span>`
             : esc(couponMessage);
         const couponMarkup = `<form id="couponForm" class="flow-coupon"><label for="couponCode">کد تخفیف دارید؟</label><div class="flow-coupon-entry"><input id="couponCode" name="coupon" dir="ltr" placeholder="کد تخفیف" maxlength="32" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-describedby="couponStatus" aria-invalid="${couponError}" value="${couponCode}"><button class="flow-button" type="submit">اعمال کد</button></div><div class="cart-coupon-feedback${couponCode && !couponError ? " is-applied" : ""}"><p id="couponStatus" class="flow-coupon-status${couponError ? " is-error" : ""}" role="status">${couponStatusMarkup}</p>${couponCode ? '<button id="removeCoupon" class="flow-coupon-remove" type="button" aria-label="حذف کد تخفیف"><i class="bi bi-trash3" aria-hidden="true"></i><span>حذف</span></button>' : ""}</div></form>`;
-        const totalsMarkup = `<div class="flow-total flow-discount"><span class="cart-line-label"><i class="bi bi-tags" aria-hidden="true"></i><span><span class="cart-summary-label-extra">مجموع </span>تخفیف${couponCode ? " (۱۰٪)" : ""}</span></span><span>${money(discount)}</span></div><div class="flow-total flow-payable"><span class="cart-line-label"><i class="bi bi-wallet2" aria-hidden="true"></i><span>مبلغ نهایی<span class="cart-summary-label-extra"> محصولات</span><small>بدون هزینه ارسال</small></span></span><strong>${money(finalTotal)}</strong></div>`;
+        const totalsMarkup = `<div class="flow-total flow-discount"><span class="cart-line-label"><i class="bi bi-tags" aria-hidden="true"></i><span><span class="cart-summary-label-extra">مجموع </span>تخفیف${couponCode ? ` (${fa(couponOffers[couponCode])}٪)` : ""}</span></span><span>${money(discount)}</span></div><div class="flow-total flow-payable"><span class="cart-line-label"><i class="bi bi-wallet2" aria-hidden="true"></i><span>مبلغ نهایی<span class="cart-summary-label-extra"> محصولات</span><small>بدون هزینه ارسال</small></span></span><strong>${money(finalTotal)}</strong></div>`;
         const view = document.querySelector("#cartView");
         if (view) {
             const addressSection = document.querySelector(".cart-address-section");
@@ -1711,7 +1714,7 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                 event.preventDefault();
                 const input = document.querySelector("#couponCode");
                 const value = normalizeCoupon(input.value);
-                if (value !== "HADI10") {
+                if (!Object.hasOwn(couponOffers, value)) {
                     couponError = true;
                     couponMessage = value
                         ? "کد تخفیف معتبر نیست. کد واردشده را بررسی کنید."
@@ -1725,9 +1728,9 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                     input.focus();
                     return;
                 }
-                couponMessage = couponCode
+                couponMessage = couponCode === value
                     ? "این کد قبلاً اعمال شده است."
-                    : "کد تخفیف اعمال شد؛ ۱۰٪ از جمع محصولات کم شد.";
+                    : `کد تخفیف اعمال شد؛ ${fa(couponOffers[value])}٪ از جمع محصولات کم شد.`;
                 couponCode = value;
                 couponError = false;
                 ui.storage.set(couponKey, couponCode);

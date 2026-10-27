@@ -222,13 +222,16 @@
         </a>
     </div>
     <div id="profileCouponsList" class="overview-coupon-list profile-coupon-list" aria-live="polite"></div>
+    <div id="profileCouponsPagination" class="orders-pagination profile-coupons-pagination" hidden>
+        <p role="status"></p>
+        <nav class="site-pagination" aria-label="صفحه‌بندی کدهای تخفیف"></nav>
+    </div>
 </section>
 <section id="price-alerts" class="account-section" hidden="@(profileSection == "pricealerts" ? null : "hidden")">
     <div class="account-section-heading">
         <div><h2>پیگیری‌های قیمت و موجودی</h2><p>هر پیگیری برای یک کالای بدون ویژگی یا ترکیب ویژگی مشخص ثبت می‌شود.</p></div>
     </div>
     <div id="priceAlertsList" class="profile-price-alert-list" aria-live="polite"></div>
-    <p class="account-demo-note" role="note">پیگیری‌ها فقط در همین مرورگر ذخیره می‌شوند؛ اعلان خودکار پس از اتصال API فعال خواهد شد.</p>
 </section>
 <p id="accountStatus" role="status"></p>
 </div>
@@ -316,12 +319,14 @@
     <link href="~/shop/css/pages/pages.css" rel="stylesheet" asp-append-version="true"/>
     <link href="~/shop/css/pages/checkout.css" rel="stylesheet" asp-append-version="true" />
     <link href="~/shop/css/pages/account-page.css" rel="stylesheet" asp-append-version="true">
+    <link href="~/shop/css/pages/form-confirm-dialog.css" rel="stylesheet" asp-append-version="true" />
 }
 
 @section Scripts {
     <script src="~/shop/js/pages/page-content.js" asp-append-version="true"></script>
     <script src="~/shop/js/pages/iran-places.js" asp-append-version="true"></script>
     <script src="~/shop/js/pages/address-fields.js" asp-append-version="true"></script>
+    <script src="~/shop/js/pages/form-confirm-dialog.js" asp-append-version="true"></script>
     <script src="~/shop/js/pages/account-page.js" asp-append-version="true"></script>
     <script src="~/shop/js/pages/orders-pagination.js" asp-append-version="true"></script>
     <script>

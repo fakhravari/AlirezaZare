@@ -6,9 +6,10 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
     };
     const esc = (v) => ui.escapeHtml(v);
     const addressKey = "hn-delivery-addresses";
+    const couponPageSize = 5;
     const couponHistory = [
         {
-            code: "HADI10",
+            code: "BAZAR10",
             discountPercent: 10,
             active: true,
             expiresOn: "۲۹ اسفند ۱۴۰۵",
@@ -18,13 +19,82 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
             ],
         },
         {
+            code: "TOOLS15",
+            discountPercent: 15,
+            active: true,
+            expiresOn: "۳۰ آبان ۱۴۰۵",
+            uses: [
+                { invoice: "HN-۱۴۰۵۰۶۲۱", date: "۱۷ شهریور ۱۴۰۵", dateTime: "2026-09-08" },
+                { invoice: "HN-۱۴۰۵۰۴۹۸", date: "۳۰ تیر ۱۴۰۵", dateTime: "2026-07-21" },
+            ],
+        },
+        {
+            code: "WELCOME8",
+            discountPercent: 8,
+            active: true,
+            expiresOn: "۳۰ آذر ۱۴۰۵",
+            uses: [
+                { invoice: "HN-۱۴۰۵۰۶۱۸", date: "۱۴ شهریور ۱۴۰۵", dateTime: "2026-09-05" },
+            ],
+        },
+        {
+            code: "NIMROOZ12",
+            discountPercent: 12,
+            active: false,
+            expiresOn: "۳۱ مرداد ۱۴۰۵",
+            uses: [
+                { invoice: "HN-۱۴۰۵۰۵۸۵", date: "۲۶ مرداد ۱۴۰۵", dateTime: "2026-08-17" },
+            ],
+        },
+        {
+            code: "SUMMER8",
+            discountPercent: 8,
+            active: false,
+            expiresOn: "۳۱ مرداد ۱۴۰۵",
+            uses: [
+                { invoice: "HN-۱۴۰۵۰۵۷۲", date: "۱۷ مرداد ۱۴۰۵", dateTime: "2026-08-08" },
+            ],
+        },
+        {
+            code: "AUTUMN5",
+            discountPercent: 5,
+            active: false,
+            expiresOn: "۳۱ تیر ۱۴۰۵",
+            uses: [
+                { invoice: "HN-۱۴۰۵۰۴۶۱", date: "۱۷ تیر ۱۴۰۵", dateTime: "2026-07-08" },
+            ],
+        },
+        {
+            code: "ORDER7",
+            discountPercent: 7,
+            active: false,
+            expiresOn: "۳۱ تیر ۱۴۰۵",
+            uses: [
+                { invoice: "HN-۱۴۰۵۰۴۲۲", date: "۱ تیر ۱۴۰۵", dateTime: "2026-06-22" },
+            ],
+        },
+        {
+            code: "AMAN15",
+            discountPercent: 15,
+            active: false,
+            expiresOn: "۳۱ خرداد ۱۴۰۵",
+            uses: [
+                { invoice: "HN-۱۴۰۵۰۳۸۹", date: "۱۹ خرداد ۱۴۰۵", dateTime: "2026-06-09" },
+            ],
+        },
+        {
             code: "BAHAR15",
             discountPercent: 15,
             active: false,
             expiresOn: "۳۱ تیر ۱۴۰۵",
-            uses: [
-                { invoice: "HN-۱۴۰۵۰۴۹۸", date: "۳۰ تیر ۱۴۰۵", dateTime: "2026-07-21" },
-            ],
+            uses: [],
+        },
+        {
+            code: "OLD20",
+            discountPercent: 20,
+            active: false,
+            expiresOn: "۳۱ اردیبهشت ۱۴۰۵",
+            uses: [],
         },
     ];
     const activeCoupons = couponHistory.filter((coupon) => coupon.active);
@@ -197,7 +267,7 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
         });
         renderCoupons();
     }
-    function renderCoupons() {
+    function renderCoupons(moveFocus = false) {
         const appliedCode = ui.storage.get("hn-demo-coupon", "");
         const overviewHost = document.querySelector("#activeCouponsList");
         if (overviewHost) {
@@ -210,7 +280,19 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
 
         const profileHost = document.querySelector("#profileCouponsList");
         if (!profileHost) return;
-        profileHost.innerHTML = couponHistory.map((coupon) => {
+        const pagination = document.querySelector("#profileCouponsPagination");
+        const pageStatus = pagination?.querySelector("p");
+        const pageNav = pagination?.querySelector("nav");
+        const pageSize = couponPageSize;
+        const pageCount = Math.max(1, Math.ceil(couponHistory.length / pageSize));
+        const url = new URL(window.location.href);
+        const requestedPage = Number(url.searchParams.get("couponPage"));
+        const page = Number.isSafeInteger(requestedPage) && requestedPage > 0
+            ? Math.min(requestedPage, pageCount)
+            : 1;
+        const start = (page - 1) * pageSize;
+
+        profileHost.innerHTML = couponHistory.slice(start, start + pageSize).map((coupon) => {
             const uses = Array.isArray(coupon.uses) ? coupon.uses : [];
             const stateClass = coupon.active ? "is-active" : "is-inactive";
             const stateLabel = coupon.active ? "فعال" : "غیرفعال";
@@ -221,12 +303,52 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
                     `<div class="profile-coupon-invoice"><span class="profile-coupon-invoice-number"><i class="bi bi-receipt" aria-hidden="true"></i><bdi dir="ltr">${esc(use.invoice)}</bdi></span><time datetime="${esc(use.dateTime)}">${esc(use.date)}</time></div>`,
                 ).join("")}</div>`
                 : '<p class="profile-coupon-no-invoices">هنوز از این کد در سفارشی استفاده نشده است.</p>';
-            const action = coupon.active
-                ? `<a class="profile-coupon-use-link" href="/Cart"><i class="bi bi-bag" aria-hidden="true"></i><span>${appliedCode === coupon.code ? "بررسی کد در سبد خرید" : "استفاده از کد در سبد خرید"}</span><i class="bi bi-arrow-left" aria-hidden="true"></i></a>`
-                : '<span class="profile-coupon-expired-note"><i class="bi bi-lock" aria-hidden="true"></i>این کد دیگر قابل استفاده نیست.</span>';
-            return `<article class="profile-coupon-card ${stateClass}"><header class="profile-coupon-header"><div class="profile-coupon-identity"><bdi class="profile-coupon-code" dir="ltr">${esc(coupon.code)}</bdi><div><strong>${ui.formatNumber(coupon.discountPercent)}٪ تخفیف خرید</strong><small>${expiryLabel} ${esc(coupon.expiresOn)}</small></div></div><span class="profile-coupon-status ${stateClass}"><i class="bi ${stateIcon}" aria-hidden="true"></i>${stateLabel}</span></header><section class="profile-coupon-usage" aria-label="سوابق استفاده از کد ${esc(coupon.code)}"><div class="profile-coupon-usage-heading"><strong><i class="bi bi-receipt-cutoff" aria-hidden="true"></i>فاکتورهای استفاده‌شده</strong><span>تعداد استفاده: <b>${ui.formatNumber(uses.length)}</b></span></div>${invoices}</section><footer class="profile-coupon-footer">${action}</footer></article>`;
+            return `<article class="profile-coupon-card ${stateClass}"><header class="profile-coupon-header"><div class="profile-coupon-identity"><bdi class="profile-coupon-code" dir="ltr">${esc(coupon.code)}</bdi><div><strong>${ui.formatNumber(coupon.discountPercent)}٪ تخفیف خرید</strong><small>${expiryLabel} ${esc(coupon.expiresOn)}</small></div></div><span class="profile-coupon-status ${stateClass}"><i class="bi ${stateIcon}" aria-hidden="true"></i>${stateLabel}</span></header><section class="profile-coupon-usage" aria-label="سوابق استفاده از کد ${esc(coupon.code)}"><div class="profile-coupon-usage-heading"><strong><i class="bi bi-receipt-cutoff" aria-hidden="true"></i>فاکتورهای استفاده‌شده</strong><span>تعداد استفاده: <b>${ui.formatNumber(uses.length)}</b></span></div>${invoices}</section></article>`;
         }).join("");
+
+        if (!pagination || !pageStatus || !pageNav) return;
+        pagination.hidden = pageCount <= 1;
+        pageStatus.textContent = couponHistory.length
+            ? `${ui.formatNumber(start + 1)} تا ${ui.formatNumber(Math.min(start + pageSize, couponHistory.length))} از ${ui.formatNumber(couponHistory.length)} کد`
+            : "کدی ثبت نشده است";
+        pageNav.replaceChildren();
+        pageNav.hidden = pageCount <= 1;
+
+        const addPageButton = (label, target, disabled = false) => {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.textContent = label;
+            button.disabled = disabled;
+            button.setAttribute("aria-label", target < page ? "صفحهٔ قبل" : target > page ? "صفحهٔ بعد" : `صفحه ${label}`);
+            if (target === page && label === ui.formatNumber(page))
+                button.setAttribute("aria-current", "page");
+            button.addEventListener("click", () => {
+                const next = new URL(window.location.href);
+                if (target === 1) next.searchParams.delete("couponPage");
+                else next.searchParams.set("couponPage", String(target));
+                if (next.href !== window.location.href)
+                    history.pushState(null, "", next);
+                renderCoupons(true);
+            });
+            pageNav.append(button);
+        };
+
+        addPageButton("قبلی", page - 1, page === 1);
+        for (let target = 1; target <= pageCount; target++)
+            addPageButton(ui.formatNumber(target), target);
+        addPageButton("بعدی", page + 1, page === pageCount);
+
+        if (window.location.pathname.replace(/\/+$/, "") === "/profile/coupons") {
+            const normalizedUrl = new URL(window.location.href);
+            if (page === 1) normalizedUrl.searchParams.delete("couponPage");
+            else normalizedUrl.searchParams.set("couponPage", String(page));
+            if (normalizedUrl.href !== window.location.href)
+                history.replaceState(null, "", normalizedUrl);
+        }
+        if (moveFocus)
+            pageNav.querySelector('[aria-current="page"]')?.focus({ preventScroll: true });
     }
+    window.addEventListener("popstate", () => renderCoupons());
     function renderPriceAlerts() {
         const host = document.querySelector("#priceAlertsList");
         if (!host) return;
@@ -253,32 +375,60 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
                 : hasVariants
                     ? "همهٔ قیمت‌های محصول"
                     : "بدون ویژگی";
+            const scopeIcon = watch.scope === "variant"
+                ? "sliders"
+                : hasVariants
+                    ? "tags"
+                    : "box-seam";
             const registeredDate = formatPersianDate(watch.createdAt);
             const registeredPrice = typeof watch.priceAtRegistration === "number"
                 ? watch.priceAtRegistration
                 : NaN;
             const trackingDetails = [
-                registeredDate ? "ثبت: " + registeredDate : "",
+                registeredDate ? { icon: "calendar3", label: "ثبت", value: registeredDate } : null,
                 Number.isFinite(registeredPrice) && registeredPrice >= 0
-                    ? "قیمت هنگام ثبت: " + ui.formatNumber(registeredPrice) + " تومان"
-                    : "",
+                    ? { icon: "currency-exchange", label: "قیمت ثبت‌شده", value: ui.formatNumber(registeredPrice) + " تومان" }
+                    : null,
                 typeof watch.stockAtRegistration === "string" && watch.stockAtRegistration.trim()
-                    ? "موجودی هنگام ثبت: " + watch.stockAtRegistration.trim()
-                    : "",
+                    ? { icon: "boxes", label: "موجودی ثبت‌شده", value: watch.stockAtRegistration.trim() }
+                    : null,
             ].filter(Boolean);
             const href = product ? window.HNProductUrl?.(product) || "/search" : "/search";
-            return `<article class="profile-price-alert-card"><a class="profile-price-alert-product" href="${esc(href)}"><span class="profile-price-alert-icon"><i class="bi bi-bell" aria-hidden="true"></i></span><span><strong>${esc(productName)}</strong><small>${esc(scopeLabel)}</small>${trackingDetails.map((detail) => "<small>" + esc(detail) + "</small>").join("")}</span></a><button class="profile-price-alert-delete" type="button" data-delete-price-alert="${index}" aria-label="حذف پیگیری ${esc(productName)}"><i class="bi bi-trash3" aria-hidden="true"></i><span>حذف</span></button></article>`;
+            return `<article class="profile-price-alert-card"><a class="profile-price-alert-product" href="${esc(href)}"><span class="profile-price-alert-icon"><i class="bi bi-bell" aria-hidden="true"></i></span><span><strong>${esc(productName)}</strong><span class="profile-price-alert-meta"><span class="profile-price-alert-scope"><i class="bi bi-${scopeIcon}" aria-hidden="true"></i><span>${esc(scopeLabel)}</span></span><span class="profile-price-alert-details">${trackingDetails.map((detail) => `<small class="profile-price-alert-detail"><i class="bi bi-${detail.icon}" aria-hidden="true"></i><span class="profile-price-alert-detail-label">${esc(detail.label)}</span><span class="profile-price-alert-detail-value">${esc(detail.value)}</span></small>`).join("")}</span></span></span></a><button class="profile-price-alert-delete" type="button" data-delete-price-alert="${index}" aria-label="حذف پیگیری ${esc(productName)}"><i class="bi bi-trash3" aria-hidden="true"></i><span>حذف</span></button></article>`;
         }).join("");
         host.querySelectorAll("[data-delete-price-alert]").forEach((button) => {
-            button.addEventListener("click", () => {
+            button.addEventListener("click", async () => {
                 const current = read(priceWatchKey);
                 const index = Number(button.dataset.deletePriceAlert);
                 if (!Number.isInteger(index) || index < 0 || index >= current.length) return;
-                current.splice(index, 1);
-                if (save(priceWatchKey, current)) {
+                const selectedWatch = JSON.stringify(current[index]);
+                const productName = window.HNCatalog?.find(current[index].productId)?.name || "این محصول";
+                if (typeof window.confirmFormSubmission !== "function") return;
+                const confirmed = await window.confirmFormSubmission({
+                    title: "حذف پیگیری قیمت؟",
+                    message: `پیگیری «${productName}» از فهرست حذف می‌شود. ادامه می‌دهید؟`,
+                    confirmText: "بله، حذف شود",
+                });
+                if (!confirmed) return;
+
+                const latest = read(priceWatchKey);
+                const latestIndex = latest.findIndex((watch) => JSON.stringify(watch) === selectedWatch);
+                if (latestIndex < 0) {
                     renderPriceAlerts();
-                    ui.setMessage(status, "پیگیری قیمت حذف شد.", "success");
+                    ui.setMessage(status, "این پیگیری قبلاً حذف شده است.", "info");
+                    return;
                 }
+                latest.splice(latestIndex, 1);
+                if (!save(priceWatchKey, latest)) {
+                    ui.setMessage(status, "حذف پیگیری ذخیره نشد. دوباره تلاش کنید.", "error");
+                    return;
+                }
+                renderPriceAlerts();
+                ui.setMessage(status, "پیگیری قیمت حذف شد.", "success");
+                requestAnimationFrame(() => {
+                    const nextDelete = host.querySelector(`[data-delete-price-alert="${Math.min(index, latest.length - 1)}"]`);
+                    (nextDelete || host.querySelector("a"))?.focus({ preventScroll: true });
+                });
             });
         });
     }
