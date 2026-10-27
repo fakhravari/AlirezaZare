@@ -1943,6 +1943,40 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
   color: var(--industrial-yellow-dark) !important;
 }
 
+#orders .profile-order-card .order-card-actions > a {
+  border-color: #c7dce8;
+  background: #edf5fa;
+  color: #194d6b;
+}
+
+#orders .profile-order-card .order-card-actions > a i {
+  color: #287ca3;
+}
+
+#orders .profile-order-card .order-card-actions > a:hover,
+#orders .profile-order-card .order-card-actions > a:focus-visible {
+  border-color: #8cb8d0;
+  background: #e0eff7;
+  color: #123e5e;
+}
+
+#orders .profile-order-card .order-card-actions > button {
+  border-color: #ebcf70;
+  background: #fff7df;
+  color: #6e5200;
+}
+
+#orders .profile-order-card .order-card-actions > button i {
+  color: #9a7000;
+}
+
+#orders .profile-order-card .order-card-actions > button:hover,
+#orders .profile-order-card .order-card-actions > button:focus-visible {
+  border-color: #d4ac32;
+  background: #fff0bf;
+  color: #594200;
+}
+
 #orders .order-status.is-shipping {
   background: #eaf3fb;
   color: #315f84;
