@@ -15,4 +15,4 @@ public sealed record ProductSeoEntry(
         $"{Name} از برند {Brand}، در گروه {Type}. مشخصات فنی، تصاویر، ویژگی‌های قابل انتخاب و اقلام همراه این کالا را بررسی کنید.";
 }
 
-public sealed record ProductCategorySeoEntry(string Id, string Name, string Slug);
+public sealed record ProductCategorySeoEntry(string Name, string Slug);

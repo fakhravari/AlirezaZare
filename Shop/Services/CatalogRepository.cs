@@ -140,7 +140,7 @@ public sealed record CatalogSnapshot(string BrowserJson, IReadOnlyList<ProductSe
         {
             string id = Text(current, "id");
             if (!visited.Add(id)) throw new InvalidDataException($"Category parent cycle: {id}");
-            path.Add(new(id, Text(current, "fa"), Text(current, "slug")));
+            path.Add(new(Text(current, "fa"), Text(current, "slug")));
 
             JsonElement parent = current.GetProperty("parentId");
             if (parent.ValueKind == JsonValueKind.Null) break;
