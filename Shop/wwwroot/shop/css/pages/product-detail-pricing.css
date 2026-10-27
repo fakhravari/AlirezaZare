@@ -648,10 +648,10 @@
 
 #productView .detail-price-heading {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr);
   grid-template-areas:
-    "title tools"
-    "subtitle tools";
+    "title"
+    "subtitle";
   align-items: center;
   gap: 2px 12px;
   padding: 9px 11px;
@@ -676,8 +676,11 @@
 }
 
 #productView .detail-price-tools {
+  position: absolute;
+  z-index: 4;
+  top: 12px;
+  right: 12px;
   display: inline-flex;
-  grid-area: tools;
   align-items: center;
   gap: 5px;
   padding: 4px;
@@ -699,11 +702,6 @@
   font-size: 15px;
   cursor: pointer;
   transition: border-color .18s ease, background-color .18s ease, color .18s ease, transform .18s ease, box-shadow .18s ease;
-}
-
-#productView .detail-price-tool[data-price-watch-toggle] {
-  background: #fff6dc;
-  color: #9a7300;
 }
 
 #productView .detail-price-tool:hover {
@@ -751,21 +749,22 @@
 }
 
 .detail-price-dialog {
-  width: min(620px, calc(100vw - 28px));
+  box-sizing: border-box;
+  width: min(700px, calc(100vw - 28px));
   max-width: none;
   max-height: min(88vh, 760px);
   padding: 0;
   overflow: auto;
-  border: 1px solid #dce5ed;
-  border-radius: 20px;
-  background: #fff;
-  color: #18324b;
-  box-shadow: 0 24px 70px rgba(16, 42, 67, .24);
+  border: 1px solid color-mix(in srgb, var(--industrial-yellow) 19%, white);
+  border-radius: 22px;
+  background: var(--industrial-bg);
+  color: var(--industrial-navy);
+  box-shadow: 0 25px 90px color-mix(in srgb, var(--industrial-navy) 33%, transparent);
 }
 
 .detail-price-dialog::backdrop {
-  background: rgba(10, 27, 44, .58);
-  backdrop-filter: blur(3px);
+  background: rgba(3, 13, 35, 0.52);
+  backdrop-filter: blur(4px);
 }
 
 .detail-price-dialog-shell {
@@ -794,16 +793,8 @@
   font-weight: 900;
 }
 
-.detail-price-dialog-head > button {
-  display: grid;
-  width: 40px;
-  height: 40px;
-  place-items: center;
-  border: 1px solid #dce5ed;
-  border-radius: 12px;
-  background: #f5f8fa;
-  color: #18324b;
-  cursor: pointer;
+.detail-price-dialog-head > .site-modal-close {
+  flex: 0 0 40px;
 }
 
 .detail-price-dialog-body {

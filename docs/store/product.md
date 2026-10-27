@@ -24,7 +24,7 @@ Controller شناسه را از انتهای slug می‌خواند و محصو�
 - در section `Styles`: `pages.css`، `product-detail.css` و `form-confirm-dialog.css`.
 - در section `PageStyles`: `product-detail-pricing.css` و `product-detail-options.css`.
 - scriptهای مستقیم View: `form-confirm-dialog.js` و `page-content.js`. renderer اصلی `store/commerce.js` از layout می‌آید؛ catalog و countries نیز منابع سراسری‌اند.
-- `_RelatedLinks` و `_PurchaseBenefits` مصرف می‌شوند. ترتیب نهایی همهٔ منابع در [پوسته](../frontend/layout.md) است؛ stylesheet صفحه آخرین قانون نیست.
+- در صفحهٔ جزئیات، partial مشترک `_RelatedLinks` نمایش داده نمی‌شود؛ `_PurchaseBenefits` پس از محتوای اصلی به‌صورت جداگانه مصرف می‌شود. ترتیب نهایی همهٔ منابع در [پوسته](../frontend/layout.md) است؛ stylesheet صفحه آخرین قانون نیست.
 
 ## مسیرهای تغییر
 
