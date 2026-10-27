@@ -32,7 +32,8 @@ public sealed class ProductController : PageController
         if (separator < 0 || !int.TryParse(slug[(separator + 1)..], out var id) || id < 1)
             return NotFound();
 
-        ProductSeoEntry? product = _catalog.Read().Products
+        CatalogSnapshot catalog = _catalog.Read();
+        ProductSeoEntry? product = catalog.Products
             .FirstOrDefault(item => item.Id == id);
         if (product is null) return NotFound();
 
@@ -42,10 +43,15 @@ public sealed class ProductController : PageController
         string siteOrigin = SeoUrlBuilder.SiteOrigin(_seoOptions.SiteUrl, Request);
         string siteRoot = SeoUrlBuilder.SiteRoot(_seoOptions.SiteUrl, Request);
         string productImage = SeoUrlBuilder.AbsoluteAssetUrl(siteOrigin, Url.Content($"~/{product.ImagePath}"));
+        List<SeoBreadcrumb> breadcrumbs = [new("خانه", "/")];
+        breadcrumbs.AddRange(product.CategoryPath.Select(category =>
+            new SeoBreadcrumb(category.Name, $"/Search?product-group={Uri.EscapeDataString(category.Slug)}")));
+        breadcrumbs.Add(new(product.Name, canonicalPath));
         var structuredData = new Dictionary<string, object?>
         {
             ["@type"] = "Product",
             ["name"] = product.Name,
+            ["sku"] = product.Code,
             ["description"] = product.Description,
             ["image"] = new[] { productImage },
             ["category"] = product.Type,
@@ -62,11 +68,7 @@ public sealed class ProductController : PageController
                 ImageUrl: productImage,
                 StructuredData: structuredData,
                 SocialImageAlt: product.Name,
-                Breadcrumbs:
-                [
-                    new SeoBreadcrumb("خانه", "/"),
-                    new SeoBreadcrumb(product.Name, canonicalPath)
-                ]));
+                Breadcrumbs: breadcrumbs));
         return await PageAsync(model);
     }
 

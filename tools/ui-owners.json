@@ -144,6 +144,15 @@
         "Shop/wwwroot/shop/js/core/storage.js"
       ]
     },
+    "address-location": {
+      "markup": [
+        "Shop/Views/Shared/_AddressForm.cshtml"
+      ],
+      "js": [
+        "Shop/wwwroot/shop/js/pages/iran-places.js",
+        "Shop/wwwroot/shop/js/pages/address-fields.js"
+      ]
+    },
     "ui-core": {
       "js": [
         "Shop/wwwroot/shop/js/core/ui-core.js"
@@ -179,6 +188,17 @@
       ],
       "css": [
         "Shop/wwwroot/shop/css/layout/shared-account.css"
+      ]
+    },
+    "account-page": {
+      "markup": [
+        "Shop/Views/Profile/Index.cshtml"
+      ],
+      "js": [
+        "Shop/wwwroot/shop/js/pages/account-page.js"
+      ],
+      "css": [
+        "Shop/wwwroot/shop/css/pages/account-page.css"
       ]
     },
     "login-dialog": {

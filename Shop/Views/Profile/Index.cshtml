@@ -8,6 +8,8 @@
         "orders" => "سفارش‌های من",
         "addresses" => "آدرس‌های من",
         "favorites" => "علاقه‌مندی‌ها",
+        "coupons" => "کدهای تخفیف من",
+        "pricealerts" => "به من اطلاع بده",
         _ => "پروفایل من"
     };
     var profileDescription = profileSection switch
@@ -15,6 +17,8 @@
         "orders" => "وضعیت سفارش‌ها و سوابق خریدتان را یک‌جا دنبال کنید.",
         "addresses" => "نشانی‌های تحویل را مدیریت کنید تا خرید بعدی ساده‌تر باشد.",
         "favorites" => "محصول‌های ذخیره‌شده را مرور کنید و برای خرید مقایسه‌شان کنید.",
+        "coupons" => "وضعیت کدها، تعداد استفاده و فاکتورهای مرتبط را ببینید.",
+        "pricealerts" => "پیگیری‌های قیمت و موجودی کالاهای منتخب را مدیریت کنید.",
         _ => "جزئیات پروفایل، نشانی‌ها و کالاهای ذخیره‌شده را مدیریت کنید."
     };
     var profileIcon = profileSection switch
@@ -22,6 +26,8 @@
         "orders" => "bi-bag-check",
         "addresses" => "bi-geo-alt",
         "favorites" => "bi-heart",
+        "coupons" => "bi-ticket-perforated",
+        "pricealerts" => "bi-bell",
         _ => "bi-person"
     };
 }
@@ -38,7 +44,7 @@
                         <i class="bi bi-house-door" aria-hidden="true"></i><span>خانه</span>
                     </a>
                 </li>
-                @if (profileSection is "orders" or "addresses" or "favorites")
+                @if (profileSection is "orders" or "addresses" or "favorites" or "coupons" or "pricealerts")
                 {
                     <li class="profile-breadcrumb-parent">
                         <i class="bi bi-chevron-left" aria-hidden="true"></i>
@@ -98,6 +104,14 @@
             <span>
                 <strong>علاقه‌مندی‌ها</strong>
             </span><i class="bi bi-chevron-left"></i>
+        </a>
+        <a asp-controller="Profile" asp-action="Coupons" aria-current="@(profileSection == "coupons" ? "page" : null)">
+            <i class="bi bi-ticket-perforated"></i>
+            <span><strong>کدهای تخفیف</strong></span><i class="bi bi-chevron-left"></i>
+        </a>
+        <a asp-controller="Profile" asp-action="PriceAlerts" aria-current="@(profileSection == "pricealerts" ? "page" : null)">
+            <i class="bi bi-bell"></i>
+            <span><strong>به من اطلاع بده</strong></span><i class="bi bi-chevron-left"></i>
         </a>
     </nav>
     <div class="account-sidebar-help">
@@ -197,6 +211,24 @@
 <section id="favorites" class="account-section" hidden="@(profileSection == "favorites" ? null : "hidden")">
     <h2>لیست علاقه‌مندی‌ها</h2>
     <div id="favoritesView"></div>
+</section>
+<section id="coupons" class="account-section" hidden="@(profileSection == "coupons" ? null : "hidden")">
+    <div class="account-section-heading">
+        <div><h2>کدهای تخفیف من</h2><p>کدهای فعال را در سبد خرید وارد کنید.</p></div>
+        <a class="account-section-action profile-coupons-cart-link" href="/Cart">
+            <i class="bi bi-bag" aria-hidden="true"></i>
+            <span>رفتن به سبد خرید</span>
+            <i class="bi bi-arrow-left" aria-hidden="true"></i>
+        </a>
+    </div>
+    <div id="profileCouponsList" class="overview-coupon-list profile-coupon-list" aria-live="polite"></div>
+</section>
+<section id="price-alerts" class="account-section" hidden="@(profileSection == "pricealerts" ? null : "hidden")">
+    <div class="account-section-heading">
+        <div><h2>پیگیری‌های قیمت و موجودی</h2><p>هر پیگیری برای یک کالای بدون ویژگی یا ترکیب ویژگی مشخص ثبت می‌شود.</p></div>
+    </div>
+    <div id="priceAlertsList" class="profile-price-alert-list" aria-live="polite"></div>
+    <p class="account-demo-note" role="note">پیگیری‌ها فقط در همین مرورگر ذخیره می‌شوند؛ اعلان خودکار پس از اتصال API فعال خواهد شد.</p>
 </section>
 <p id="accountStatus" role="status"></p>
 </div>

@@ -34,7 +34,7 @@
 - `Program.cs` گزینهٔ `LowercaseUrls = true` و مسیر پیش‌فرض `{controller=Home}/{action=Index}/{id?}` را دارد. attribute route را کنار این مسیر بخوانید؛ routeهای تولیدشده lowercase هستند.
 - `/search` به `ProductController.Index` و View `List` می‌رسد. کلاس body از controller/action ساخته می‌شود: `mobile-page--product-index`؛ نام View در این کلاس نقشی ندارد.
 - قرارداد slug صریح محصول، تطبیق canonical و هدایت مستقیم مسیرهای قدیمی در [راهنمای محصول](../store/product.md) مستند است؛ مسیر واسط `/products/product-{id}` تولید نمی‌شود.
-- `/account` مسیر سازگاری پروفایل است. `/profile`، `/profile/orders`، `/profile/addresses` و `/profile/favorites` یک View دارند. `/profile/edit` به `/profile` برمی‌گردد و صفحهٔ مستقلی ندارد.
+- `/account` مسیر سازگاری پروفایل است. `/profile`، `/profile/orders`، `/profile/addresses`، `/profile/favorites`، `/profile/coupons` و `/profile/pricealerts` یک View دارند. `/profile/edit` به `/profile` برمی‌گردد و صفحهٔ مستقلی ندارد.
 - مسیر قدیمی `/magazine/details/{slug}` به مسیر جدید مقاله هدایت می‌شود.
 - `/robots.txt` و `/sitemap.xml` از `SeoController` می‌آیند و View صفحه ندارند؛ [راهنمای SEO](../seo/metadata.md) را ببینید.
 

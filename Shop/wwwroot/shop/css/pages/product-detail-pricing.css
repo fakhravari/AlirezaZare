@@ -12,7 +12,7 @@
   direction: rtl;
 }
 
-#productView .product-detail-price > .product-price-heading {
+#productView .product-detail-price > .detail-price-heading {
   grid-area: heading;
   justify-content: flex-start;
   direction: rtl;
@@ -222,7 +222,7 @@
     padding: 14px;
   }
 
-  #productView .product-detail-price > .product-price-heading {
+  #productView .product-detail-price > .detail-price-heading {
     grid-column: 1;
     grid-row: auto;
   }
@@ -459,7 +459,7 @@
 
 #productView .product-main-feature-chips {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
   margin: 0;
 }
@@ -512,6 +512,12 @@
   border-color: #d8bd70;
   background: #fffaf0;
   color: #8d6b14;
+}
+
+@media (max-width: 991px) {
+  #productView .product-main-feature-chips {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 767px) {
@@ -637,4 +643,390 @@
     font-size: 12px;
   }
 
+}
+
+
+#productView .detail-price-heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "title tools"
+    "subtitle tools";
+  align-items: center;
+  gap: 2px 12px;
+  padding: 9px 11px;
+  border: 1px solid #e5eaf0;
+  border-radius: 13px;
+  background: linear-gradient(135deg, #fffdf8, #f5f8fa);
+}
+
+#productView .detail-price-heading > span {
+  grid-area: title;
+  color: #18324b;
+  font-size: 14px;
+  font-weight: 900;
+  line-height: 1.4;
+}
+
+#productView .detail-price-heading > small {
+  grid-area: subtitle;
+  color: #718096;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+#productView .detail-price-tools {
+  display: inline-flex;
+  grid-area: tools;
+  align-items: center;
+  gap: 5px;
+  padding: 4px;
+  border: 1px solid #e8edf1;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.84);
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.9);
+}
+
+#productView .detail-price-tool {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: #f0f5f8;
+  color: #1f587b;
+  font-size: 15px;
+  cursor: pointer;
+  transition: border-color .18s ease, background-color .18s ease, color .18s ease, transform .18s ease, box-shadow .18s ease;
+}
+
+#productView .detail-price-tool[data-price-dialog="notify"] {
+  background: #fff6dc;
+  color: #9a7300;
+}
+
+#productView .detail-price-tool:hover {
+  transform: translateY(-1px);
+  border-color: #e1c35b;
+  background: #fff9e8;
+  box-shadow: 0 3px 8px rgba(16, 42, 67, 0.1);
+  color: #805f00;
+}
+
+#productView .detail-price-tool.is-active {
+  border-color: #d3ad38;
+  background: #fff4c8;
+  color: #896500;
+}
+
+#productView .detail-price-tool:focus-visible {
+  outline: 2px solid #d8b73f;
+  outline-offset: 2px;
+}
+
+@media (max-width: 380px) {
+  #productView .detail-price-heading {
+    gap: 2px 7px;
+    padding: 8px;
+  }
+
+  #productView .detail-price-heading > span {
+    font-size: 13px;
+  }
+
+  #productView .detail-price-heading > small {
+    font-size: 10px;
+  }
+
+  #productView .detail-price-tools {
+    gap: 3px;
+    padding: 3px;
+  }
+
+  #productView .detail-price-tool {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+.detail-price-dialog {
+  width: min(620px, calc(100vw - 28px));
+  max-width: none;
+  max-height: min(88vh, 760px);
+  padding: 0;
+  overflow: auto;
+  border: 1px solid #dce5ed;
+  border-radius: 20px;
+  background: #fff;
+  color: #18324b;
+  box-shadow: 0 24px 70px rgba(16, 42, 67, .24);
+}
+
+.detail-price-dialog::backdrop {
+  background: rgba(10, 27, 44, .58);
+  backdrop-filter: blur(3px);
+}
+
+.detail-price-dialog-shell {
+  padding: 22px;
+}
+
+.detail-price-dialog-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e7edf2;
+}
+
+.detail-price-dialog-head > div > span {
+  color: #9b7511;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.detail-price-dialog-head h2 {
+  margin: 4px 0 0;
+  color: #18324b;
+  font-size: 21px;
+  font-weight: 900;
+}
+
+.detail-price-dialog-head > button {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border: 1px solid #dce5ed;
+  border-radius: 12px;
+  background: #f5f8fa;
+  color: #18324b;
+  cursor: pointer;
+}
+
+.detail-price-dialog-body {
+  display: grid;
+  gap: 16px;
+  padding-top: 18px;
+}
+
+.detail-price-scope {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  max-height: 240px;
+  gap: 10px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  border: 0;
+}
+
+.detail-price-scope legend {
+  grid-column: 1 / -1;
+  margin-bottom: 8px;
+  color: #526579;
+  font-size: 14px;
+  font-weight: 850;
+}
+
+.detail-price-scope label {
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 12px;
+  border: 1px solid #dce5ed;
+  border-radius: 13px;
+  background: #f8fafb;
+  cursor: pointer;
+}
+
+.detail-price-scope label[hidden] {
+  display: none;
+}
+
+.detail-price-scope label.is-selected {
+  border-color: #d3ad38;
+  background: #fff8df;
+  box-shadow: inset 0 0 0 1px rgba(211, 173, 56, .18);
+}
+
+.detail-price-scope input {
+  width: 17px;
+  height: 17px;
+  flex: 0 0 auto;
+  margin: 2px 0 0;
+  accent-color: #b58a13;
+}
+
+.detail-price-scope label > span {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.detail-price-scope strong {
+  color: #18324b;
+  font-size: 14px;
+  font-weight: 850;
+  line-height: 1.5;
+}
+
+.detail-price-scope small {
+  color: #65788a;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.detail-price-dialog-state {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  align-items: start;
+  gap: 4px 9px;
+  padding: 13px 15px;
+  border: 1px solid #e7dfc9;
+  border-radius: 13px;
+  background: #fffaf0;
+}
+
+.detail-price-dialog-state > i {
+  grid-row: span 2;
+  margin-top: 2px;
+  color: #9b7511;
+  font-size: 19px;
+}
+
+.detail-price-dialog-state > strong {
+  font-size: 14px;
+  font-weight: 850;
+}
+
+.detail-price-dialog-state > span {
+  color: #647689;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.detail-price-demo-chart {
+  padding: 12px 12px 8px;
+  border: 1px solid #e1e8ee;
+  border-radius: 14px;
+  background: #fbfcfd;
+}
+
+.detail-price-demo-chart[hidden],
+.detail-price-demo-actions[hidden] {
+  display: none;
+}
+
+.detail-price-demo-chart svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.detail-price-chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin-top: 5px;
+}
+
+.detail-price-chart-legend > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #526579;
+  font-size: 12px;
+}
+
+.detail-price-chart-legend > span > i {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--price-series-color);
+}
+
+.detail-price-chart-legend b {
+  color: #18324b;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.detail-price-chart-axis {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  color: #7a8b9a;
+  font-size: 11px;
+}
+
+.detail-price-demo-actions {
+  display: grid;
+  justify-items: start;
+  gap: 8px;
+}
+
+.detail-price-demo-actions > button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 8px 14px;
+  border: 1px solid #d3b04a;
+  border-radius: 11px;
+  background: #fff7dc;
+  color: #634d0d;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.detail-price-demo-actions > button.is-active {
+  border-color: #e3c6c0;
+  background: #fff7f5;
+  color: #963f35;
+}
+
+.detail-price-demo-actions > small {
+  color: #68798a;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+@media (max-width: 575px) {
+  .detail-price-dialog-shell {
+    padding: 17px;
+  }
+
+  .detail-price-dialog-head h2 {
+    font-size: 19px;
+  }
+
+  .detail-price-scope {
+    grid-template-columns: minmax(0, 1fr);
+    max-height: 190px;
+  }
+
+  .detail-price-scope legend {
+    font-size: 14px;
+  }
+
+  .detail-price-scope strong {
+    font-size: 14px;
+  }
+
+  .detail-price-scope small,
+  .detail-price-dialog-state > span {
+    font-size: 13px;
+  }
+
+  .detail-price-chart-legend > span {
+    font-size: 12px;
+  }
 }

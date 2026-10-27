@@ -4360,17 +4360,6 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
   position: relative;
 }
 
-/* Show every product fully inside the shared card image frame. */
-.product-card .product-image img,
-.search-product .search-product-image img,
-.showcase-card .product-image img,
-.rail-card .rail-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain !important;
-  object-position: center;
-}
-
 /* Product detail information architecture and media-aware gallery. */
 #productView .product-detail-media-frame {
   display: grid;

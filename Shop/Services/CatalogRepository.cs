@@ -88,7 +88,8 @@ public sealed record CatalogSnapshot(string BrowserJson, IReadOnlyList<ProductSe
             if (id <= 0 || !ids.Add(id)) throw new InvalidDataException($"Invalid/duplicate product id: {id}");
             string name = Text(product, "name"), englishName = Text(product, "englishName"),
                 slug = Text(product, "slug");
-            if (!codes.Add(Text(product, "code"))) throw new InvalidDataException($"Duplicate product code: {id}");
+            string code = Text(product, "code");
+            if (!codes.Add(code)) throw new InvalidDataException($"Duplicate product code: {id}");
             if (slug.Any(character => !(character is >= 'a' and <= 'z' or >= '0' and <= '9' or '-')))
                 throw new InvalidDataException($"Invalid product slug: {id}");
             JsonElement brand = Reference(brands, product, "brandId"),
@@ -110,7 +111,8 @@ public sealed record CatalogSnapshot(string BrowserJson, IReadOnlyList<ProductSe
             ValidateOptions(product);
             ValidateProductSpecs(product);
             ValidateSpecGroups(product, "specGroups", "Product");
-            products.Add(new(id, name, englishName, Text(brand, "name"), Text(category, "fa"), imagePath, slug));
+            products.Add(new(id, name, englishName, Text(brand, "name"), Text(category, "fa"), imagePath, slug,
+                code, GetCategoryPath(category, categories)));
         }
         if (products.Count == 0) throw new InvalidDataException("The catalog has no products.");
         foreach (JsonElement collection in root.GetProperty("collections").EnumerateObject().Select(item => item.Value))
@@ -126,6 +128,27 @@ public sealed record CatalogSnapshot(string BrowserJson, IReadOnlyList<ProductSe
         if (!path.StartsWith(prefix, StringComparison.Ordinal) || path.Contains("..") || path.Contains('\\') ||
             path.Any(character => !(character is >= 'a' and <= 'z' or >= '0' and <= '9' or '/' or '-' or '_' or '.')))
             throw new InvalidDataException($"Invalid catalog media path: {path}");
+    }
+
+    private static IReadOnlyList<ProductCategorySeoEntry> GetCategoryPath(JsonElement category, JsonElement categories)
+    {
+        List<ProductCategorySeoEntry> path = [];
+        HashSet<string> visited = new(StringComparer.Ordinal);
+        JsonElement current = category;
+
+        while (true)
+        {
+            string id = Text(current, "id");
+            if (!visited.Add(id)) throw new InvalidDataException($"Category parent cycle: {id}");
+            path.Add(new(id, Text(current, "fa"), Text(current, "slug")));
+
+            JsonElement parent = current.GetProperty("parentId");
+            if (parent.ValueKind == JsonValueKind.Null) break;
+            current = categories.GetProperty(parent.GetString()!);
+        }
+
+        path.Reverse();
+        return path.AsReadOnly();
     }
 
     private static HashSet<string> ValidateCategories(JsonElement categories)

@@ -2,14 +2,15 @@
 
 ## مسیر و منابع
 
-[ProfileController](../../Shop/Controllers/ProfileController.cs) مسیرهای `/profile`، `/profile/orders`، `/profile/addresses` و `/profile/favorites` را در [یک View مشترک](../../Shop/Views/Profile/Index.cshtml) نمایش می‌دهد. عنوان و breadcrumb از route ساخته می‌شوند. `/profile/edit` به پروفایل هدایت می‌شود و `AccountController` alias سازگاری است؛ View مستقلی برای آن نسازید. metadata پروفایل در وضعیت فعلی `noindex, nofollow` است.
+[ProfileController](../../Shop/Controllers/ProfileController.cs) مسیرهای `/profile`، `/profile/orders`، `/profile/addresses`، `/profile/favorites`، `/profile/coupons` و `/profile/pricealerts` را در [یک View مشترک](../../Shop/Views/Profile/Index.cshtml) نمایش می‌دهد. عنوان و breadcrumb از route ساخته می‌شوند. `/profile/edit` به پروفایل هدایت می‌شود و `AccountController` alias سازگاری است؛ View مستقلی برای آن نسازید. metadata پروفایل در وضعیت فعلی `noindex, nofollow` است.
 
 | مسئولیت | مالک |
 |---|---|
 | ترکیب بخش‌ها و dialog ویرایش | `Views/Profile/Index.cshtml`؛ بخشی از ذخیرهٔ پروفایل inline است |
 | محتوای سفارش‌ها و فاکتور | [_Orders.cshtml](../../Shop/Views/Profile/_Orders.cshtml)، dialog فاکتور در `account-page.js` و `orders-pagination.js` |
 | route/hash، آدرس و overview | [account-page.js](../../Shop/wwwroot/shop/js/pages/account-page.js) |
-| استان و شهر | `iran-places.js` → `address-fields.js`؛ [_AddressForm](../../Shop/Views/Shared/_AddressForm.cshtml) |
+| کدهای تخفیف و پیگیری قیمت | `account-page.js`؛ markup در `Index.cshtml` و ظاهر فهرست پیگیری در `account-page.css` |
+| کشور، استان و شهر | کلاس‌های `Country`، `Province` و `City` در `iran-places.js`؛ انتخاب کشور/استان در `address-fields.js` و [_AddressForm](../../Shop/Views/Shared/_AddressForm.cshtml) |
 | ظاهر صفحه | `pages/account-page.css`؛ قواعد مشترک فرم/آدرس در `checkout.css` و `shared-login.css` |
 | حساب داخل هدر | `layout/shared-account.css` و `layout/main.js`؛ با صفحهٔ پروفایل یک مالک نیست |
 
@@ -31,11 +32,13 @@ overview تعداد مقایسه را از فهرست محلی می‌خواند
 
 فهرست سفارش‌ها دادهٔ نمایشی است؛ نام کالا در کارت‌ها نشان داده نمی‌شود. جزئیات فاکتور در dialog بزرگ master-detail خلاصهٔ شماره، تاریخ، وضعیت، تعداد کالا و مبلغ را نشان می‌دهد. جزئیات تحویل به راهنمای پیگیری عمومی می‌رود و دادهٔ زندهٔ مرسوله ندارد؛ فاکتور نیز نمونهٔ نمایشی است.
 
-کوپن‌های فعال فعلی در account-page.js تعریف شده‌اند؛ `HADI10` با تخفیف ۱۰٪ یک نمونه است. انتخاب کد در سبد با `hn-demo-coupon` هماهنگ می‌شود؛ برای واقعی‌شدن کوپن باید اعتبارسنجی و شرایط مصرف سرور اضافه شود.
+دادهٔ نمایشی کوپن‌ها در `account-page.js` تعریف شده است؛ فهرست `/profile/coupons` کوپن‌های فعال و غیرفعال، درصد تخفیف، تاریخ اعتبار، تعداد استفاده و شماره/تاریخ فاکتورهای نمونه را نشان می‌دهد. سابقه‌ها با شماره و تاریخ سفارش‌های نمونهٔ [_Orders.cshtml](../../Shop/Views/Profile/_Orders.cshtml) هماهنگ شده‌اند. فقط `HADI10` در سبد پذیرفته می‌شود و انتخاب آن با `hn-demo-coupon` هماهنگ است؛ کد غیرفعال نمایشی قابل استفاده نیست. برای اتصال واقعی باید وضعیت، تاریخ اعتبار و مصرف کوپن از سرویس سفارش/تخفیف دریافت و اعتبارسنجی شود.
+
+صفحهٔ `/profile/coupons` علاوه بر پیوند به سبد خرید، شمار استفاده و فاکتورهای نمونهٔ مرتبط را نمایش می‌دهد. صفحهٔ `/profile/pricealerts` با عنوان «پیگیری‌های قیمت و موجودی»، فهرست پیگیری‌های ثبت‌شده توسط مدال محصول را از کلید `hn-price-watches-demo` می‌خواند؛ برای کالای دارای ویژگی، هر ترکیب جداگانه ثبت می‌شود و برای کالای بدون ویژگی، یک پیگیری «بدون ویژگی» ذخیره می‌شود. هر ردیف جداگانه قابل حذف است و برچسب ذخیره‌شدن در مرورگر در کنار ردیف نمی‌آید. این فهرست و حذف آن فقط روی دادهٔ محلی همین مرورگر اثر می‌گذارند؛ اعلان یا همگام‌سازی سروری فعال نیست.
 
 ## ویرایش و آدرس
 
-فرم آدرس موبایل از چیدمان دو ستونه و اندازهٔ قلم اختصاصی مشترک استفاده می‌کند؛ [قرارداد نمایش فرم آدرس](../store/cart.md) مرجع اندازه‌ها و ترتیب فیلدهاست.
+فرم آدرس موبایل از چیدمان دو ستونه و اندازهٔ قلم اختصاصی مشترک استفاده می‌کند؛ [قرارداد نمایش فرم آدرس](../store/cart.md) مرجع اندازه‌ها و ترتیب فیلدهاست. دادهٔ محلی مکان‌ها سه مدل کشور، استان و شهر دارد؛ فعلاً فرم انتخاب کشور و استان را نشان می‌دهد و شهرها در مدل برای تکمیل بعدی نگهداری می‌شوند. خلاصهٔ آدرس نیز استان و کشور را نمایش می‌دهد. فیلد خام `CountryName` در فایل ورودی با نام شهر پر شده است؛ مقدارش در مدل شهر با نام `sourceCountryName` نگهداری می‌شود و نام کشور از `CountryNameEn` به نام فارسی کشور نگاشت می‌شود.
 
 ویرایش پروفایل native dialog با `.shared-login-modal.profile-edit-dialog` است؛ فرم ورود سراسری `#loginModal` در `_Panels` مسیر جدا دارد. هنگام تغییر بستن dialog، focus، validation و اسکرول داخلی را حفظ کنید. فرم آدرس در Cart و Profile مشترک است؛ Checkout فقط آدرس انتخاب‌شده را نشان می‌دهد.
 
