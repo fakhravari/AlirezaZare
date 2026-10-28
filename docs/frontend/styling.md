@@ -62,11 +62,11 @@ CSS فعلی با ترتیب stylesheetها cascade می‌شود و از `@laye
 | `css/layout/shared-login.css` | استایل پایهٔ `.shared-login-modal` برای dialog ویرایش پروفایل و بخشی از قواعد داخلی فرم `#loginModal` | با layout modal سراسری یکی نیست؛ `#loginModal` در `_Panels.cshtml` است و استایل layout آن بین `style.css`, `luxury-theme.css` و `industrial-system.css` تقسیم شده؛ `.shared-login-overlay` فعلاً در Viewها markup متناظر ندارد |
 | `css/layout/shared-footer.css` | footer مشترک | در همهٔ routeها اثر دارد |
 | `css/layout/luxury-theme.css` | تزئینات و پوستهٔ عمومی/legacy | توکن root تعریف نمی‌کند؛ قواعد گسترده و media متعدد دارد و اولین مالک ظاهری فرض نشود |
-| `css/layout/style.css` | stylesheet قدیمی و حجیم، قواعد عمومی و responsive | فایل legacy بزرگ؛ قواعد هم‌نام را قبل از ادیت بشمارید |
+| `css/layout/style.css` | قواعد مشترک قالب و responsive | فایل بزرگ قالب در محل فعلی زنجیرهٔ بارگذاری؛ جابه‌جا یا صرفاً rename نشود؛ پیش از ادیت قواعد هم‌نام را بشمارید |
 | `css/layout/mvc-layout.css` | قاب و layout صفحه‌های MVC | پس از `@section Styles` بارگذاری می‌شود |
 | `css/layout/mobile-drawer-compact.css` | فشرده‌سازی drawer موبایل | فقط تا 991px؛ ممکن است بر shared drawer غلبه کند |
 | `css/layout/electrical-theme.css` | هویت/چیدمان تم برق و ابزار | قواعد صفحهٔ اول؛ مرجع رنگ در design-tokens.css است |
-| `css/layout/industrial-system.css` | overrideهای صنعتی/سراسری و responsive | مصرف‌کنندهٔ توکن‌های مرکزی و دارای overrideهای legacy؛ آخرین فایل نیست و مالک مؤلفه فرض نشود |
+| `css/layout/industrial-system.css` | قواعد و overrideهای مشترک قالب صنعتی و responsive | فایل بزرگ قالب در محل فعلی زنجیرهٔ بارگذاری؛ جابه‌جا یا خرد نشود؛ مصرف‌کنندهٔ توکن‌های مرکزی است و مالک یک مؤلفه فرض نشود |
 | `css/layout/quick-links-menu.css` | منوی دسترسی سریع مشترک | پس از پوستهٔ صنعتی و پیش از کارت محصول بارگذاری می‌شود |
 | `css/store/shared-product-card.css` | کارت‌های مشترک محصول و قیمت؛ شامل ۶۸ قاعدهٔ منتقل‌شده از industrial-system | renderer واحد product-card.js؛ media queryهای منتقل‌شده حفظ شده‌اند؛ Search/خانه/Related/Favorites بررسی شوند |
 | `css/layout/content-typography.css` | یکدست‌سازی تایپوگرافی و خوانایی محتوای فارسی | layout-wide؛ بعد از CSSهای قبلی می‌آید، در صفحه‌های محتوایی و RTL بررسی شود |
@@ -76,7 +76,7 @@ CSS فعلی با ترتیب stylesheetها cascade می‌شود و از `@laye
 | `css/layout/shared-surface-theme.css` | پرداخت نهایی سطح‌ها و پنل‌های مشترک | پیش از page-hero-imagery.css و mega-menu-unified.css؛ ترتیب نهایی را در راهنمای پوسته بررسی کنید |
 | `css/store/commerce.css` | سبد، جزئیات محصول، variant/accessory، مقایسه و favorite | هم بخش‌های صفحه و هم تعامل‌های commerce را پوشش می‌دهد |
 | `css/store/pagination.css` | `.site-pagination` | بعد از View CSS می‌آید |
-| `css/pages/pages.css` | قواعد عمومی/قدیمی چند صفحه | به علت گستردگی، وجود selector عمومی را کنترل کنید |
+| `css/pages/pages.css` | قواعد مشترک قالب برای چند صفحه | فایل بزرگ قالب در محل فعلی زنجیرهٔ بارگذاری؛ جابه‌جا یا صرفاً rename نشود؛ پیش از ادیت selectorهای عمومی را بررسی کنید |
 | `css/pages/account-page.css` | Profile و زیربخش‌های آن | با `shared-account.css` که پنل header را مالک است اشتباه نشود |
 | `css/pages/search.css` | Search | فایل صفحه‌ای؛ `main.search-main` ریشهٔ منطقی را پیدا کنید |
 | `css/pages/magazine-luxury.css` | فهرست Magazine | با `article-details.css` برای مقاله یکی نیست |

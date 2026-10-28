@@ -48,7 +48,7 @@ public sealed class BrandsController : PageController
 
     private BrandEditorialDocument? FindEditorial(string slug)
     {
-        string contentPath = Path.Combine(_environment.WebRootPath, "shop", "js", "store", "brand-editorial.json");
+        string contentPath = Path.Combine(_environment.WebRootPath, "content", "data", "brand-editorial.json");
         BrandEditorialDocument[] documents = JsonSerializer.Deserialize<BrandEditorialDocument[]>(System.IO.File.ReadAllText(contentPath),
             new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? [];
 

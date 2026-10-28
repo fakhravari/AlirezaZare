@@ -6,7 +6,7 @@
 |---|---|---|
 | مجله | [MagazineController](../../Shop/Controllers/MagazineController.cs)، [Views/Magazine](../../Shop/Views/Magazine)، `JournalArticles.cs` و `JournalArticles.Expanded.cs` | مقاله و آمار ثابت؛ `magazine.js` فیلتر/صفحه‌بندی و URL را مدیریت می‌کند |
 | جزئیات مقاله | `Magazine/Details.cshtml`، `article-details.js` و `article-details.css` | TOC، progress، print، share و فاصلهٔ sticky header |
-| برند | [BrandsController](../../Shop/Controllers/BrandsController.cs)، [BrandProfileModel.cs](../../Shop/Models/BrandProfileModel.cs)، [Views/Brands](../../Shop/Views/Brands) | هویت در catalog.json و snapshot؛ تحریریه در `brand-editorial.json`؛ شمارش محصول با `brand-product-count.js` |
+| برند | [BrandsController](../../Shop/Controllers/BrandsController.cs)، [BrandProfileModel.cs](../../Shop/Models/BrandProfileModel.cs)، [Views/Brands](../../Shop/Views/Brands) | هویت در catalog.json و snapshot؛ متن تحریریه در `content/data/brand-editorial.json`؛ شمارش محصول با `brand-product-count.js` |
 | FAQ | `FaqController`، [Faq/Index.cshtml](../../Shop/Views/Faq/Index.cshtml)، `FaqCatalog` | متن صفحه و schema باید از یک کاتالوگ بیایند |
 | تماس | [Contact/Index.cshtml](../../Shop/Views/Contact/Index.cshtml)، `contact.js` و dialog تأیید | دسترسی سریع شامل پیگیری سفارش، ضمانت، FAQ و شرایط ارسال (`/shipping`) است؛ feedback فرم نمونه است و endpoint ارسال واقعی ثبت نشده |
 | معرفی / ارسال / ضمانت / پیگیری | Controller و View هم‌نام | `pages.css` و فایل صفحه؛ پیوندهای چهارگانهٔ محصولات، ارسال، ضمانت و FAQ در این صفحه‌ها از partial مشترک [`_RelatedLinks.cshtml`](../../Shop/Views/Shared/_RelatedLinks.cshtml) و سبک [پوسته](../frontend/layout.md#اجزای-مشترک) استفاده می‌کنند؛ کارت‌ها قاب مستقل دارند و قاب مشترک دور گروه ندارند؛ قاب اصلی راهنمای ضمانت در `warranty.css` با حاشیهٔ دوگانهٔ ظریف طلایی از زمینه جدا می‌شود؛ قاب تصویر همان صفحه فریم گرم، لایهٔ نور و حرکت hover دارد؛ پیگیری فعلی نتیجهٔ واقعی سفارش دریافت نمی‌کند |
@@ -17,7 +17,7 @@
 
 ## برند و محتوای دو منبعی
 
-BrandsController هویت برند را از CatalogRepository می‌گیرد؛ نام/نام فارسی/لوگو از catalog.json و متن پایه از BrandCatalog ترکیب می‌شوند. متن تحریریه با slug از [brand-editorial.json](../../Shop/wwwroot/shop/js/store/brand-editorial.json) افزوده می‌شود؛ مسیر فایل با حروف واقعی `shop` اصلاح شده و در HTTP smoke بررسی می‌شود. لوگو در `content/brands/` است؛ رابطهٔ کشور/رنگ/محصول در [کاتالوگ](../store/catalog.md) تعریف شده است.
+BrandsController هویت برند را از CatalogRepository می‌گیرد؛ نام/نام فارسی/لوگو از catalog.json و متن پایه از BrandCatalog ترکیب می‌شوند. متن تحریریه با slug از [brand-editorial.json](../../Shop/wwwroot/content/data/brand-editorial.json) افزوده می‌شود؛ فایل در پوشهٔ داده قرار دارد و از پوشهٔ JavaScript جداست. لوگو در `content/brands/` است؛ رابطهٔ کشور/رنگ/محصول در [کاتالوگ](../store/catalog.md) تعریف شده است.
 
 فهرست `/brands` تا عرض ۷۶۷px دو ستون دارد؛ مالک چیدمان `pages/brands.css` است و قواعد عمومی `mobile-pages.css` نباید آن را تک‌ستونه کنند. تا عرض ۵۷۵px، کارت‌ها با فاصلهٔ ۱۰px و دکمه‌های هم‌ردیف «مشاهده» و «درباره» نمایش داده می‌شوند؛ عنوان کامل مقصد و نام برند در `aria-label` لینک حفظ می‌شود. تعداد ستون‌ها در تبلت سه و از عرض ۹۹۲px چهار است.
 
@@ -68,4 +68,4 @@ BrandsController هویت برند را از CatalogRepository می‌گیرد؛
 
 [فهرست این بخش](README.md) · [فهرست مستندات](../README.md)
 
-آخرین تطبیق با کد: ۲۷ اکتبر ۲۰۲۶.
+آخرین تطبیق با کد: ۲۸ اکتبر ۲۰۲۶.

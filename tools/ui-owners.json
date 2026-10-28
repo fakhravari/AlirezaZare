@@ -30,6 +30,59 @@
         "Shop/wwwroot/shop/css/pages/search.css"
       ]
     },
+    "brand-profile": {
+      "markup": [
+        "Shop/Views/Brands/Index.cshtml",
+        "Shop/Views/Brands/Details.cshtml"
+      ],
+      "data": [
+        "Shop/wwwroot/content/data/catalog.json",
+        "Shop/wwwroot/content/data/brand-editorial.json"
+      ],
+      "server": [
+        "Shop/Controllers/BrandsController.cs",
+        "Shop/Models/BrandProfileModel.cs",
+        "Shop/Services/CatalogRepository.cs"
+      ],
+      "js": [
+        "Shop/wwwroot/shop/js/pages/brand-product-count.js"
+      ],
+      "css": [
+        "Shop/wwwroot/shop/css/pages/brands.css"
+      ]
+    },
+    "magazine-list": {
+      "markup": [
+        "Shop/Views/Magazine/Index.cshtml"
+      ],
+      "server": [
+        "Shop/Controllers/MagazineController.cs",
+        "Shop/Models/JournalArticles.cs",
+        "Shop/Models/JournalArticles.Expanded.cs"
+      ],
+      "js": [
+        "Shop/wwwroot/shop/js/pages/magazine.js"
+      ],
+      "css": [
+        "Shop/wwwroot/shop/css/pages/magazine-luxury.css"
+      ]
+    },
+    "article-detail": {
+      "markup": [
+        "Shop/Views/Magazine/Details.cshtml"
+      ],
+      "server": [
+        "Shop/Controllers/MagazineController.cs",
+        "Shop/Models/JournalArticles.cs",
+        "Shop/Models/JournalArticles.Expanded.cs"
+      ],
+      "js": [
+        "Shop/wwwroot/shop/js/pages/article-details.js"
+      ],
+      "css": [
+        "Shop/wwwroot/shop/css/pages/article-details.css"
+      ]
+    },
     "product-card": {
       "selector": "\\.(?:product-card|showcase-card|product-price)(?=[\\s.#:>+~\\[),-]|$)",
       "js": [
