@@ -674,7 +674,6 @@ summary:focus-visible {
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0;
-  line-height: 1.8;
   box-shadow:
     inset 0 1px 0 #fff,
     0 4px 10px #07162914;
@@ -692,7 +691,6 @@ summary:focus-visible {
 @media (max-width: 575px) {
   .cart-hero > span {
     padding: 8px 13px;
-    font-size: 11px;
     gap: 9px;
   }
 }
@@ -824,8 +822,6 @@ summary:focus-visible {
   background: transparent;
 }
 #cartView .cart-quantity button {
-  width: 32px;
-  height: 32px;
   border: 1px solid #e5dac8;
   border-radius: 50%;
   background: #fffdf9;
@@ -849,7 +845,6 @@ summary:focus-visible {
 }
 #cartView .cart-quantity-value {
   min-width: 34px;
-  font-size: 13px;
   font-weight: 700;
 }
 #cartView .cart-item-remove {
@@ -1763,20 +1758,6 @@ summary:focus-visible {
     height: 190px;
   }
 }
-#favoritesView .favorite-item-card h2 {
-  min-height: 56px;
-  margin: 14px 0 10px;
-  color: #142e51;
-  font-size: 19px;
-  font-weight: 750;
-  line-height: 1.8;
-}
-#favoritesView .favorite-item-card > p {
-  margin: 8px 0 14px;
-  color: #142e51;
-  font-size: 16px;
-  font-weight: 750;
-}
 .list-remove-button {
   display: inline-flex;
   align-items: center;
@@ -1834,13 +1815,6 @@ summary:focus-visible {
   width: 100%;
 }
 @media (max-width: 575px) {
-  #favoritesView .favorite-item-card h2 {
-    min-height: auto;
-    font-size: 18px;
-  }
-  #favoritesView .favorite-item-card > p {
-    font-size: 15px;
-  }
   .compare-product-card h2 {
     min-height: auto;
     font-size: 18px;
@@ -2043,8 +2017,6 @@ summary:focus-visible {
 .compare-product-card h2 {
   min-height: 56px;
   margin: 8px 0 4px;
-  color: #142e51;
-  font-size: 18px;
   line-height: 1.75;
 }
 .compare-price {
@@ -2095,15 +2067,11 @@ summary:focus-visible {
   margin: 0 0 12px;
 }
 .compare-product-card dl > div {
-  display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
   padding: 9px 11px;
   border: 1px solid #e8edf1;
   border-radius: 10px;
   background: #f7f9fb;
-  font-size: 13px;
   line-height: 1.7;
 }
 .compare-product-card dt {
@@ -2113,7 +2081,6 @@ summary:focus-visible {
 }
 .compare-product-card dd {
   min-width: 0;
-  margin: 0;
   color: #193b55;
   font-weight: 750;
   text-align: end;

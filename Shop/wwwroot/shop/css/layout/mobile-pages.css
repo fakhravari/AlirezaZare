@@ -208,7 +208,6 @@
   .mobile-page--favorites-index #favoritesView .flow-cards,
   .mobile-page--profile-favorites #favoritesView .flow-cards {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 6px;
   }
 
   .mobile-page--favorites-index #favoritesView .favorite-item-card,
@@ -218,33 +217,6 @@
     flex-direction: column;
     gap: 0;
     padding: 0;
-  }
-
-  .mobile-page--favorites-index #favoritesView .favorite-item-card > a,
-  .mobile-page--profile-favorites #favoritesView .favorite-item-card > a {
-    min-width: 0;
-  }
-
-  .mobile-page--favorites-index #favoritesView .favorite-item-card .flow-photo,
-  .mobile-page--profile-favorites #favoritesView .favorite-item-card .flow-photo {
-    height: 126px;
-    aspect-ratio: auto;
-    object-fit: cover;
-  }
-
-  .mobile-page--favorites-index #favoritesView .favorite-item-card h2,
-  .mobile-page--profile-favorites #favoritesView .favorite-item-card h2 {
-    min-height: 3.2em;
-    margin: 8px 8px 0;
-    font-size: 12px;
-    line-height: 1.6;
-  }
-
-  .mobile-page--favorites-index #favoritesView .favorite-item-card > p,
-  .mobile-page--profile-favorites #favoritesView .favorite-item-card > p {
-    min-height: 42px;
-    margin: auto 8px 6px;
-    font-size: 12px;
   }
 
   .mobile-page--favorites-index #favoritesView .favorite-item-card .list-remove-button,
@@ -275,7 +247,6 @@
 
   .mobile-page--favorites-index #favoritesView .flow-cards,
   .mobile-page--profile-favorites #favoritesView .flow-cards {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     gap: 8px;
   }
 
@@ -769,28 +740,8 @@
 /* Keep mobile home cards and their two-line sale prices on shared baselines. */
 @media (max-width: 767px) {
   .mobile-page--product-list .search-page {
-    width: calc(100% - 10px) !important;
     padding-top: 12px !important;
     padding-bottom: 20px !important;
-  }
-
-  .mobile-page--product-list .search-page .search-page-results {
-    gap: 6px;
-  }
-
-  .search-page .search-page-card {
-    grid-template-rows: var(--product-card-image-height, 144px) minmax(106px, 1fr) 42px !important;
-  }
-
-  .search-page .search-page-card-content {
-    padding: 8px 8px 4px !important;
-    grid-template-rows: minmax(3em, auto) minmax(46px, 1fr) !important;
-    gap: 4px !important;
-  }
-
-  .search-page .search-page-card-price,
-  .search-page .search-page-card-price .product-price-current {
-    font-size: 14px !important;
   }
 
   .search-page .search-page-card-price.has-discount {
@@ -813,10 +764,6 @@
     font-size: 14px;
   }
 
-  .mobile-page--home-index #productGrid > .product-col .product-price-current small {
-    font-size: 10px !important;
-  }
-
   .mobile-page--home-index #productGrid > .product-col .price-old {
     font-size: 10px;
   }
@@ -826,34 +773,8 @@
     font-size: 11px;
   }
 
-  .mobile-page--favorites-index #favoritesView .flow-cards,
-  .mobile-page--profile-favorites #favoritesView .flow-cards {
-    gap: 6px !important;
-  }
-
-  .mobile-page--favorites-index #favoritesView .favorite-item-card .flow-photo,
-  .mobile-page--profile-favorites #favoritesView .favorite-item-card .flow-photo {
-    height: var(--product-card-image-height, 144px);
-  }
-
-  .mobile-page--favorites-index #favoritesView .favorite-item-card h2,
-  .mobile-page--profile-favorites #favoritesView .favorite-item-card h2 {
-    min-height: 3em;
-    margin: 7px 8px 0;
-    font-size: 12px;
-    line-height: 1.5;
-  }
-
-  .mobile-page--favorites-index #favoritesView .favorite-item-card > p,
-  .mobile-page--profile-favorites #favoritesView .favorite-item-card > p {
-    min-height: 46px;
-    margin: auto 8px 6px;
-    font-size: 13px;
-  }
-
   .mobile-page--favorites-index #favoritesView .favorite-item-card .list-remove-button,
   .mobile-page--profile-favorites #favoritesView .favorite-item-card .list-remove-button {
-    min-height: 34px;
     margin: 0 7px 7px;
   }
 }
@@ -981,7 +902,6 @@
     width: 100% !important;
     margin-right: 0 !important;
     margin-left: 0 !important;
-    --bs-gutter-x: 6px;
   }
 
   .mobile-page--product-list .search-page {
@@ -1272,11 +1192,9 @@
 
   .mobile-page--home-index #productGrid > .product-col .product-info > p {
     display: flex;
-    min-height: 46px;
     margin: 4px 0 6px !important;
     align-items: center;
     justify-content: flex-start;
-    font-size: 14px;
     line-height: 1.45;
   }
 
@@ -1297,7 +1215,6 @@
     grid-area: current;
     justify-self: start;
     max-width: 100%;
-    font-size: 14px;
     line-height: 1.45;
     white-space: nowrap;
   }
@@ -1313,7 +1230,6 @@
   .mobile-page--home-index #productGrid > .product-col .price-old {
     grid-area: old;
     justify-self: start;
-    font-size: 10px;
     line-height: 1.4;
     white-space: nowrap;
   }
@@ -1322,9 +1238,7 @@
     grid-area: discount;
     align-self: center;
     justify-self: end;
-    min-height: 20px;
     padding: 2px 7px;
-    font-size: 11px;
   }
 }
 
@@ -1345,8 +1259,7 @@
   }
 
   .product-card .product-image,
-  .search-page .search-page-card-media,
-  #favoritesView .favorite-item-card .flow-photo {
+  .search-page .search-page-card-media {
     height: var(--product-card-image-height, 144px) !important;
     min-height: var(--product-card-image-height, 144px) !important;
     max-height: var(--product-card-image-height, 144px) !important;
@@ -1357,8 +1270,7 @@
     padding: 9px 9px 6px !important;
   }
 
-  .search-page .search-page-card-title,
-  #favoritesView .favorite-item-card h2 {
+  .search-page .search-page-card-title {
     min-height: 3em !important;
     margin: 0 !important;
     font-size: 14px !important;
@@ -1399,21 +1311,9 @@
     font-size: 14px !important;
   }
 
-  #favoritesView .favorite-item-card h2 {
-    margin: 7px 8px 0 !important;
-  }
-
-  #favoritesView .favorite-item-card > p {
-    min-height: 46px;
-    margin: auto 8px 6px;
-    font-size: 14px;
-  }
 }
 
 @media (max-width: 389px) {
-  :root {
-    --product-card-image-height: 175px;
-  }
 }
 /* Normalize mobile header control and glyph heights across all pages. */
 @media (max-width: 767px) {
@@ -1940,7 +1840,6 @@
 /* Keep all four secondary product actions aligned in a mobile two-column grid. */
 @media (max-width: 575px) {
   #productView .product-detail-secondary-actions {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     align-items: stretch;
     gap: 8px;
     margin-top: 10px;

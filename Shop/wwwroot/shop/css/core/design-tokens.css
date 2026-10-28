@@ -40,6 +40,8 @@
   --color-danger: #c73e3e;
   --color-danger-soft: #fff2f0;
   --color-danger-border: #ddb0aa;
+  --focus-outline-color: rgba(246, 197, 21, 0.48);
+  --focus-ring-soft: 0 0 0 3px rgba(246, 197, 21, 0.24);
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;

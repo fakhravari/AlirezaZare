@@ -25,6 +25,32 @@ test('all home collections render shared cards with one action of each kind', as
   await noHorizontalOverflow(page);
 });
 
+test('keyboard focus indicators and shared product actions keep their layout', async ({page}) => {
+  await page.goto('/');
+  await page.keyboard.press('Tab');
+  await page.keyboard.press('Tab');
+  const focusStyle = await page.evaluate(() => {
+    const element = document.activeElement;
+    const style = getComputedStyle(element);
+    return {
+      visible: element.matches(':focus-visible'),
+      outline: style.outlineStyle,
+      width: style.outlineWidth,
+    };
+  });
+  expect(focusStyle.visible).toBe(true);
+  expect(focusStyle.outline).not.toBe('none');
+  expect(focusStyle.width).toBe('3px');
+
+  const addToCart = page.locator('#productGrid [data-product-card="v1"] .add-cart').first();
+  await expect(addToCart).toBeVisible();
+  expect(await addToCart.evaluate(element => getComputedStyle(element).flexShrink)).toBe('0');
+  const cartIcon = addToCart.locator('i');
+  await expect(cartIcon).toHaveCSS('color', 'rgb(246, 197, 21)');
+  await addToCart.hover();
+  await expect(cartIcon).toHaveCSS('color', 'rgb(16, 42, 67)');
+});
+
 test('search URL filters survive reload and browser navigation', async ({page}) => {
   await page.goto('/search?color=yellow');
   await expect(page.locator('#productResults [data-product-card="v1"]').first()).toBeVisible();

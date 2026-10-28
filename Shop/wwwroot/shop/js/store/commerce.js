@@ -1181,7 +1181,17 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                     if (active) link.setAttribute("aria-current", "location");
                     else link.removeAttribute("aria-current");
                 });
-                if (changed && window.matchMedia("(max-width: 575px)").matches) {
+                const tabStrip = activeLink.closest(".product-detail-tabs");
+                const tabStripRect = tabStrip?.getBoundingClientRect();
+                const tabStripIsVisible =
+                    tabStripRect &&
+                    tabStripRect.bottom > 0 &&
+                    tabStripRect.top < window.innerHeight;
+                if (
+                    changed &&
+                    tabStripIsVisible &&
+                    window.matchMedia("(max-width: 575px)").matches
+                ) {
                     activeLink.scrollIntoView({
                         behavior: window.matchMedia("(prefers-reduced-motion: reduce)")
                             .matches

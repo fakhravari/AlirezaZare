@@ -7,8 +7,16 @@
   font-size: clamp(28px, 2.3vw, 38px);
   line-height: 1.45;
   letter-spacing: -0.8px;
+  text-shadow: 0 12px 40px rgba(0, 0, 0, 0.32);
   text-wrap: wrap;
   overflow-wrap: anywhere;
+}
+
+.page-hero h1 em {
+  color: var(--industrial-yellow);
+  font-style: normal;
+  font-weight: 700;
+  letter-spacing: -1px;
 }
 
 .inner-page .page-hero > .container > p {

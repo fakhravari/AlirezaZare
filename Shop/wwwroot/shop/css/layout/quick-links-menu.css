@@ -304,10 +304,6 @@
 }
 
 /* Use the real brand marks in the desktop brand menu, with a wordmark fallback. */
-#mainNav .brand-menu .dropdown-item {
-  grid-template-columns: 50px minmax(0, 1fr) 14px !important;
-  gap: 9px !important;
-}
 
 #mainNav .brand-menu-logo-frame {
   display: grid;
@@ -354,12 +350,7 @@
 
 /* Give the all-brands action the available footer space and clear hierarchy. */
 #mainNav .brand-menu-footer > .brand-menu-all-link {
-  width: auto !important;
   min-width: 0 !important;
-  min-height: 58px !important;
-  flex: 1 1 auto !important;
-  justify-content: space-between !important;
-  padding: 8px 18px !important;
   border: 1px solid rgba(246, 197, 21, 0.5) !important;
   border-radius: 9px 18px 9px 18px !important;
   background: linear-gradient(115deg, #173b5b, #102a43 72%) !important;
@@ -421,11 +412,6 @@ html body #mainNav .home-header-search:focus-within {
 }
 
 @media (max-width: 991.98px) {
-  #mainNav .brand-menu-footer > .brand-menu-all-link {
-    min-height: 48px !important;
-    padding: 7px 12px !important;
-  }
-
   #mainNav .brand-menu-cta-copy small {
     display: none;
   }
@@ -522,22 +508,16 @@ html body #mainNav .home-header-search:focus-within {
   padding: 4px 7px;
   grid-column: 1 / -1;
   border: 1px solid #e1e7eb;
-  border-radius: 9px;
-  background: #fff;
   box-shadow: 0 2px 6px rgba(16, 42, 67, 0.035);
 }
 
 #mainNav .brand-menu-logo {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
   object-position: center;
 }
 
 #mainNav .brand-menu-logo-fallback {
   display: grid;
   place-items: center;
-  color: #173653;
   font-family: Arial, sans-serif;
   font-size: 18px;
   font-weight: 900;
@@ -630,7 +610,7 @@ html body #mainNav .home-header-search:focus-within {
     border-top-left-radius: 0 !important;
     border-top-right-radius: 0 !important;
     border-radius: 0 0 20px 20px !important;
-    transform: none !important;
+    transform: none;
     transition:
       opacity 160ms ease,
       visibility 0s linear 160ms !important;
@@ -647,7 +627,6 @@ html body #mainNav .home-header-search:focus-within {
     border-top: 3px solid #f6c515 !important;
     border-top-left-radius: 0 !important;
     border-top-right-radius: 0 !important;
-    border-radius: 0 0 20px 20px !important;
     transform: none !important;
     transition:
       opacity 160ms ease,
@@ -666,6 +645,7 @@ html body #mainNav .home-header-search:focus-within {
   #mainNav .brand-dropdown > .brand-menu {
     position: absolute !important;
     width: min(680px, calc(100vw - 48px)) !important;
+    min-height: 302px;
     max-width: calc(100vw - 32px) !important;
     box-sizing: border-box !important;
     top: calc(100% + 16px) !important;
@@ -676,7 +656,6 @@ html body #mainNav .home-header-search:focus-within {
     border-top: 3px solid #f6c515 !important;
     border-top-left-radius: 0 !important;
     border-top-right-radius: 0 !important;
-    border-radius: 0 0 20px 20px !important;
     transform: none !important;
     transform-origin: top center !important;
     animation: none !important;

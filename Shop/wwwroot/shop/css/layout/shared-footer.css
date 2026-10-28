@@ -72,20 +72,7 @@ footer .footer-main > .col-lg-4:first-child > p {
 }
 .site-footer .footer-trust {
   display: flex;
-  margin-top: 18px;
   gap: 8px;
-}
-.site-footer .footer-trust span {
-  display: grid;
-  min-width: 64px;
-  height: 54px;
-  padding: 0 7px;
-  place-items: center;
-  border: 1px solid rgba(255, 255, 255, 0.23);
-  border-radius: 9px;
-  background: rgba(255, 255, 255, 0.07);
-  color: rgba(255, 255, 255, 0.75);
-  font-size: 10px;
 }
 .site-footer .footer-column h4 {
   position: relative;
@@ -124,8 +111,6 @@ footer .footer-main > .col-lg-4:first-child > p {
   justify-content: space-between;
   border-top: 1px solid rgba(215, 182, 108, 0.32);
   color: rgba(255, 255, 255, 0.52);
-  font-size: 13px;
-  line-height: 1.9;
 }
 @media (max-width: 991px) {
   .site-footer .footer-grid {
@@ -177,7 +162,6 @@ footer .trust-badges > .enamad-link > img {
 
 /* Same trust-license sprites used on the home page */
 .site-footer .footer-trust {
-  gap: 8px;
   margin-top: 24px;
 }
 .site-footer .footer-trust span {

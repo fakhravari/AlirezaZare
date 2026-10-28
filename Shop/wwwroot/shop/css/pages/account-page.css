@@ -13,8 +13,6 @@
   padding: 14px;
   border: 1px solid var(--color-line);
   border-radius: var(--radius-panel-standard, 20px);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-card);
 }
 
 .account-profile {
@@ -131,12 +129,6 @@
   transform: none;
 }
 
-.account-tabs a[aria-current] {
-  border-color: #eadcad;
-  background: linear-gradient(100deg, #fffdf7, #fff8e5);
-  box-shadow: inset -3px 0 var(--industrial-yellow-dark);
-}
-
 .account-tabs a[aria-current] > i:first-child {
   background: #eaf0f5;
   color: var(--industrial-navy);
@@ -187,8 +179,6 @@
   padding: 28px;
   border: 1px solid var(--color-line);
   border-radius: var(--radius-panel-standard, 20px);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-card);
   font-size: 14px;
 }
 
@@ -307,7 +297,6 @@
 .account-stats small {
   overflow: hidden;
   color: var(--industrial-steel);
-  font-size: 11.5px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -576,57 +565,8 @@
   box-shadow: none;
 }
 
-#favoritesView .flow-cards {
-  grid-template-columns: minmax(0, 1fr);
-  gap: 14px;
-}
-
 #favoritesView .favorite-item-card {
-  display: grid;
-  grid-template-columns: minmax(190px, 30%) minmax(0, 1fr);
-  grid-template-rows: auto auto auto;
-  gap: 8px 22px;
-  align-items: center;
-  padding: 14px;
-  border-color: rgba(113, 135, 166, 0.22);
   background: #fff;
-  box-shadow: 0 10px 26px rgba(12, 35, 70, 0.06);
-}
-
-#favoritesView .favorite-item-card > a {
-  display: contents;
-}
-
-#favoritesView .favorite-item-card .flow-photo {
-  grid-column: 1;
-  grid-row: 1 / 4;
-  display: block;
-  width: 100%;
-  height: 210px;
-  max-height: none;
-  border-radius: 14px;
-  background: #edf1f3;
-  object-fit: cover;
-}
-
-#favoritesView .favorite-item-card h2 {
-  grid-column: 2;
-  grid-row: 1;
-  align-self: end;
-  min-height: 0;
-  margin: 0;
-}
-
-#favoritesView .favorite-item-card > p {
-  grid-column: 2;
-  grid-row: 2;
-  align-self: center;
-}
-
-#favoritesView .favorite-item-card .list-remove-button {
-  grid-column: 2;
-  grid-row: 3;
-  justify-self: start;
 }
 
 .account-welcome::after {
@@ -756,14 +696,6 @@
   #favorites.account-section {
     padding: 0;
   }
-  #favoritesView .favorite-item-card {
-    grid-template-columns: minmax(105px, 34%) minmax(0, 1fr);
-    gap: 7px 13px;
-    padding: 10px;
-  }
-  #favoritesView .favorite-item-card .flow-photo {
-    height: 150px;
-  }
   .account-section-heading {
     align-items: center;
   }
@@ -787,14 +719,6 @@
   }
   #favorites.account-section {
     padding: 0;
-  }
-  #favoritesView .favorite-item-card {
-    grid-template-columns: minmax(88px, 32%) minmax(0, 1fr);
-    gap: 6px 10px;
-    padding: 8px;
-  }
-  #favoritesView .favorite-item-card .flow-photo {
-    height: 124px;
   }
 }
 
@@ -1472,13 +1396,11 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
   font-size: clamp(21px, 2.2vw, 26px);
   font-weight: 800;
   letter-spacing: -0.02em;
-  line-height: 1.35;
 }
 
 #orders .orders-heading h2 small {
   margin-inline-start: 10px;
   color: var(--industrial-muted);
-  font-size: 13px;
   font-weight: 600;
   letter-spacing: 0;
   vertical-align: middle;
@@ -1505,7 +1427,6 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
   color: var(--industrial-navy);
   font-size: 15px;
   font-weight: 800;
-  line-height: 1.5;
 }
 
 #orders .order-status {
@@ -1518,9 +1439,6 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
 @media (max-width: 640px) {
   #orders .orders-heading h2 {
     font-size: 20px;
-  }
-  #orders .orders-heading h2 small {
-    font-size: 12px;
   }
 }
 
@@ -2010,10 +1928,6 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
   background: linear-gradient(105deg, #fff 0%, #f8fafc 100%);
 }
 
-#orders .order-products {
-  gap: 12px;
-}
-
 #orders .order-product-icon {
   display: grid;
   flex: 0 0 48px;
@@ -2027,21 +1941,12 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
   font-size: 20px;
 }
 
-#orders .order-total {
-  min-width: 164px;
-  padding: 9px 12px;
-  border: 1px solid #e8edf1;
-  border-radius: 12px;
-  background: #fff;
-}
-
 #orders .order-total small {
   margin-top: 0;
 }
 
 #orders .profile-order-card footer {
   min-height: 42px;
-  border-top-width: 1px !important;
 }
 
 @media (max-width: 640px) {
@@ -2056,7 +1961,6 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
 }
 
 #orders .order-total {
-  padding: 10px 13px;
   border: 1px solid #edf0f3;
   border-radius: 12px;
   background: #f8fafb;
@@ -2094,7 +1998,6 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
 
 .account-tabs a[aria-current] > i:first-child {
   border-color: #e3eaf0;
-  background: #eaf0f5;
   color: var(--color-navy);
 }
 
@@ -2137,10 +2040,6 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
     text-overflow: clip;
     white-space: normal;
   }
-}
-
-.account-tabs a[aria-current] > i:last-child {
-  color: #9aa8b6;
 }
 
 .overview-panel-title i,
@@ -2471,7 +2370,6 @@ body.inner-page main.profile-page-main {
 .account-welcome {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 180px;
-  align-items: center;
   min-height: 0;
   gap: 24px;
   padding: 24px 36px;
@@ -2497,7 +2395,7 @@ body.inner-page .account-welcome .profile-breadcrumb ol > li.cart-breadcrumb-cur
   color: #17324b;
 }
 
-.account-welcome h1 { margin: 0 0 16px; line-height: 1.4; }
+.account-welcome h1 { line-height: 1.4; }
 .account-welcome-copy { grid-column: 1; grid-row: 1; }
 .account-welcome-art { grid-column: 2; grid-row: 1; }
 
@@ -2533,7 +2431,6 @@ body.inner-page .account-welcome .profile-breadcrumb ol > li.cart-breadcrumb-cur
   padding: 0;
   border-color: #e1e7ec;
   border-radius: 18px;
-  background: #fff;
   box-shadow: 0 8px 24px rgba(16, 42, 67, 0.06);
   transition:
     border-color 0.2s ease,
@@ -2547,57 +2444,9 @@ body.inner-page .account-welcome .profile-breadcrumb ol > li.cart-breadcrumb-cur
   transform: translateY(-3px);
 }
 
-#favoritesView .favorite-item-card > a {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  align-items: stretch;
-  color: inherit;
-  text-decoration: none;
-}
-
-#favoritesView .favorite-item-card .flow-photo {
-  display: block;
-  width: 100%;
-  height: var(--product-card-image-height, 220px);
-  flex: 0 0 auto;
-  max-height: none;
-  border: 0;
-  border-radius: 0;
-  background: #edf1f4;
-  object-fit: cover;
-  object-position: center;
-  transition: transform 0.7s ease;
-}
 .account-welcome-links button:focus-visible {
   outline: 2px solid #fff;
   outline-offset: 3px;
-}
-
-#favoritesView .favorite-item-card:hover .flow-photo {
-  transform: scale(1.05);
-}
-
-#favoritesView .favorite-item-card h2 {
-  display: -webkit-box;
-  min-height: 4.95em;
-  margin: 12px 16px 0;
-  overflow: hidden;
-  text-align: right;
-  font-size: 16px;
-  line-height: 1.8;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
-  line-clamp: 3;
-}
-
-#favoritesView .favorite-item-card > p {
-  display: flex;
-  min-height: 58px;
-  margin: auto 16px 8px;
-  align-items: center;
-  text-align: right;
-  font-size: 15px;
 }
 
 #favoritesView .favorite-item-card .list-remove-button {
@@ -2881,13 +2730,9 @@ body.inner-page.mobile-page--profile-favorites #favoritesView .favorite-item-car
     gap: 12px;
   }
 
-  #favoritesView .favorite-item-card .flow-photo {
-    height: var(--product-card-image-height, 220px);
-  }
 }
 
 /* Keep the profile header ornament behind copy across all account sections. */
-.account-welcome::after { z-index: 0; pointer-events: none; }
 .account-welcome-art { position: relative; z-index: 1; }
 .account-content { border-color: rgba(178, 145, 75, 0.2); background: linear-gradient(145deg, #fffefa 0%, #fff 58%, #fbf8f0 100%); box-shadow: 0 14px 34px rgba(67, 53, 28, 0.06); }
 
@@ -3133,7 +2978,6 @@ body.inner-page.mobile-page--profile-favorites #favoritesView .favorite-item-car
 
   #orders .order-total {
     display: flex;
-    width: 100%;
     min-width: 0;
     align-items: center;
     justify-content: space-between;

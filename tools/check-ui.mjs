@@ -35,9 +35,27 @@ for (const file of styles) {
   try {
     const css = postcss.parse(await read(file), {from: file});
     let important = 0;
+    const declarationsByCascadeKey = new Map();
     css.walkDecls(decl => { if (decl.important) important++; });
     if (important > (baseline.important[file] || 0)) errors.push(`${file}: !important budget increased (${important})`);
     css.walkRules(rule => {
+      const conditions = [];
+      const selectorPath = [];
+      for (let parent = rule.parent; parent.type !== 'root'; parent = parent.parent) {
+        if (parent.type === 'atrule') conditions.unshift(`${parent.name} ${parent.params}`);
+        if (parent.type === 'rule') selectorPath.unshift(parent.selector);
+      }
+      selectorPath.push(rule.selector);
+      for (const declaration of rule.nodes || []) {
+        if (declaration.type !== 'decl') continue;
+        const key = `${conditions.join('\n')}\0${selectorPath.join('\n')}\0${declaration.prop}`;
+        const earlier = declarationsByCascadeKey.get(key);
+        if (declaration.important && earlier) {
+          const kind = earlier.important ? 'shadowed !important' : 'shadowed declaration';
+          errors.push(`${file}:${declaration.source.start.line}: ${kind} ${declaration.prop}; same selector and conditions already declare it at line ${earlier.line}`);
+        }
+        declarationsByCascadeKey.set(key, {line: declaration.source.start.line, important: declaration.important});
+      }
       for (const [name, owner] of Object.entries(owners)) {
         if (!owner.selector || !new RegExp(owner.selector).test(rule.selector)) continue;
         if ([...(owner.css || []), ...(owner.pageOverrides || [])].includes(file)) continue;

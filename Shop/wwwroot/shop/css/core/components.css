@@ -74,16 +74,16 @@
 }
 
 .contact-form-status > i {
-  display: grid !important;
-  width: 42px !important;
-  height: 42px !important;
-  flex: 0 0 42px !important;
+  display: grid;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
   place-items: center;
   border-radius: 50%;
   background: var(--color-success);
   color: var(--color-white);
-  font-size: 22px !important;
-  line-height: 1 !important;
+  font-size: 22px;
+  line-height: 1;
 }
 
 .contact-form-status > i::before {

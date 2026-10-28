@@ -24,6 +24,7 @@ window.HNUI.mount("pages-article-details", document, () => {
       { name: "خوانندهٔ سایت", text: "موضوع اصلی را پوشش می‌دهد و توضیحاتش روان است.", rating: 5 },
     ].map((item, index) => ({
       ...item,
+      sample: true,
       createdAt: new Date(Date.now() - (index + 1) * 86400000).toISOString(),
       ...(item.reply ? { replyAt: new Date(Date.now() - (index + 1) * 86400000 + 3600000).toISOString() } : {}),
     }));
@@ -81,18 +82,22 @@ window.HNUI.mount("pages-article-details", document, () => {
         } else {
           heading.append(name);
         }
-        const stars = document.createElement("span");
-        stars.className = "article-feedback-stars";
-        stars.setAttribute("aria-label", `امتیاز ${formatNumber(Number(item.rating))} از ۵`);
-        const ratingIcon = document.createElement("i");
-        ratingIcon.className = "bi bi-star-fill";
-        ratingIcon.setAttribute("aria-hidden", "true");
-        const ratingValue = document.createElement("bdi");
-        ratingValue.dir = "rtl";
-        ratingValue.textContent = `${formatNumber(Number(item.rating))} از ۵`;
-        stars.append(ratingIcon, ratingValue);
         const meta = document.createElement("span");
         meta.className = "article-feedback-meta";
+        const rating = Number(item.rating);
+        if (Number.isFinite(rating) && rating >= 1 && rating <= 5) {
+          const stars = document.createElement("span");
+          stars.className = "article-feedback-stars";
+          stars.setAttribute("aria-label", `امتیاز ${formatNumber(rating)} از ۵`);
+          const ratingIcon = document.createElement("i");
+          ratingIcon.className = "bi bi-star-fill";
+          ratingIcon.setAttribute("aria-hidden", "true");
+          const ratingValue = document.createElement("bdi");
+          ratingValue.dir = "rtl";
+          ratingValue.textContent = `${formatNumber(rating)} از ۵`;
+          stars.append(ratingIcon, ratingValue);
+          meta.append(stars);
+        }
         const separator = document.createElement("span");
         separator.className = "article-feedback-separator";
         separator.setAttribute("aria-hidden", "true");
@@ -104,7 +109,8 @@ window.HNUI.mount("pages-article-details", document, () => {
         registeredIcon.className = "bi bi-calendar3";
         registeredIcon.setAttribute("aria-hidden", "true");
         registered.append(registeredIcon, document.createTextNode(formatReviewTime(item.createdAt)));
-        meta.append(stars, separator, registered);
+        if (meta.childElementCount) meta.append(separator);
+        meta.append(registered);
         heading.append(meta);
         const copy = document.createElement("p");
         copy.textContent = item.text;
@@ -165,16 +171,21 @@ window.HNUI.mount("pages-article-details", document, () => {
         }
         addPageButton("بعدی", reviewPage + 1, reviewPage === pageCount);
       }
+      const ratedEntries = [...saved, ...seed].filter((item) => Number(item.rating) >= 1 && Number(item.rating) <= 5);
       const all = [...saved, ...seed];
-      const average = all.reduce((sum, item) => sum + Number(item.rating), 0) / all.length;
+      const average = ratedEntries.length
+        ? ratedEntries.reduce((sum, item) => sum + Number(item.rating), 0) / ratedEntries.length
+        : 0;
       feedback.querySelector("[data-feedback-average]").textContent = average.toLocaleString("fa-IR", { maximumFractionDigits: 1 });
       feedback.querySelector("[data-feedback-count]").textContent = `${all.length.toLocaleString("fa-IR")} نظر`;
       const commentStat = document.querySelector("[data-article-comment-count]");
       const ratingStat = document.querySelector("[data-article-rating]");
       commentStat?.querySelector("[data-article-comment-value]")?.replaceChildren(document.createTextNode(all.length.toLocaleString("fa-IR")));
-      ratingStat?.querySelector("[data-article-rating-value]")?.replaceChildren(document.createTextNode(average.toLocaleString("fa-IR", { maximumFractionDigits: 1 })));
       commentStat?.setAttribute("aria-label", `${all.length.toLocaleString("fa-IR")} نظر`);
-      ratingStat?.setAttribute("aria-label", `امتیاز ${average.toLocaleString("fa-IR", { maximumFractionDigits: 1 })} از ۵`);
+      if (ratingStat && ratedEntries.length) {
+        ratingStat.querySelector("[data-article-rating-value]")?.replaceChildren(document.createTextNode(average.toLocaleString("fa-IR", { maximumFractionDigits: 1 })));
+        ratingStat.setAttribute("aria-label", `امتیاز ${average.toLocaleString("fa-IR", { maximumFractionDigits: 1 })} از ۵`);
+      }
     };
     let likes = Number(metrics.likes) || 0;
     let liked = window.HNUI.storage.get(`${key}-liked`, "false") === "true";
@@ -215,7 +226,9 @@ window.HNUI.mount("pages-article-details", document, () => {
       form.dataset.confirming = "false";
       if (submitButton) submitButton.disabled = false;
       if (!confirmed) return;
-      saved.push({ name: fullName.slice(0, 80), text: String(data.get("text")).trim().slice(0, 1000), rating: Math.max(1, Math.min(5, Number(data.get("rating")) || 5)), createdAt: new Date().toISOString(), status: "pending" });
+      const rawRating = String(data.get("rating") || "");
+      const rating = rawRating ? Number(rawRating) : null;
+      saved.push({ name: fullName.slice(0, 80), text: String(data.get("text")).trim().slice(0, 1000), ...(Number.isFinite(rating) && rating >= 1 && rating <= 5 ? { rating } : {}), createdAt: new Date().toISOString(), status: "pending" });
       saved = saved.slice(-50);
       const stored = window.HNUI.storage.set(key, JSON.stringify(saved));
       reviewPage = 1;

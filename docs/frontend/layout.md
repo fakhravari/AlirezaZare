@@ -127,7 +127,7 @@ _Shop
 
 storage/cart factory پیش از HNUI، resolver پیش از renderer و renderer پیش از مصرف‌کننده‌ها منتشر می‌شوند. این ترتیب با `npm run check` کنترل می‌شود. کاتالوگ کشور در همان JSON مشترک است. `HNUI.mount(name, root, initialize)` اجرای تکراری مؤلفه روی همان root را متوقف می‌کند؛ وجود فایل در مخزن به معنی مصرف‌شدنش نیست.
 
-منوهای برند، دسته و دسترسی سریع فقط با state صریح `is-brand-open`, `is-mega-open`, `is-quick-links-open` باز می‌شوند. hover/focus روی wrapper گسترده نباید منو را باز کند؛ pointer فقط روی trigger باز می‌کند و panel باز را نگه می‌دارد. controller مشترک منوی قبلی را می‌بندد، Escape را همراه بازگشت فوکوس مدیریت می‌کند و در تغییر breakpoint وضعیت را پاک می‌کند.
+منوهای برند، دسته و دسترسی سریع فقط با state صریح `is-brand-open`, `is-mega-open`, `is-quick-links-open` باز می‌شوند. hover/focus روی wrapper گسترده نباید منو را باز کند؛ pointer فقط روی trigger باز می‌کند و panel باز را نگه می‌دارد. controller مشترک منوی قبلی را می‌بندد، Escape را همراه بازگشت فوکوس مدیریت می‌کند و تا زمانی که pointer از trigger خارج نشده، منوی بسته‌شده را دوباره باز نمی‌کند. در تغییر breakpoint هم وضعیت را پاک می‌کند.
 
 عنوان کارت‌های مزیت خرید در دسکتاپ ۱۵px و توضیح ۱۴px است؛ در breakpoint موبایل قالب، عنوان ۱۴px و توضیح ۱۳px نمایش داده می‌شود. ارتفاع کارت به متن وابسته است تا توضیحات بلند بریده نشوند.
 

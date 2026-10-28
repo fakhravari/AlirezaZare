@@ -140,19 +140,10 @@
 
 /* Refined brand menu cards. */
 #mainNav .brand-dropdown > .brand-menu {
-  width: 370px !important;
-  padding: 12px !important;
-  border: 1px solid rgba(113, 135, 166, 0.48) !important;
   border-top: 3px solid #c99b4f !important;
-  border-radius: 0 0 20px 20px !important;
-  background: linear-gradient(145deg, #fbfaf7, #eef3f8) !important;
-  box-shadow:
-    0 24px 58px rgba(3, 15, 53, 0.24),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.9) !important;
 }
 #mainNav .brand-dropdown > .brand-menu {
   width: min(680px, calc(100vw - 48px)) !important;
-  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
   column-gap: 14px !important;
 }
 #mainNav .brand-menu > li {
@@ -160,18 +151,9 @@
 }
 #mainNav .brand-menu .dropdown-item {
   position: relative !important;
-  display: grid !important;
   min-width: 0 !important;
-  min-height: 62px !important;
   margin: 4px 0 !important;
-  padding: 7px 7px !important;
-  grid-template-columns: 34px minmax(0, 1fr) 14px !important;
-  gap: 6px !important;
   align-items: center !important;
-  border: 1px solid rgba(137, 155, 179, 0.28) !important;
-  border-radius: 14px !important;
-  background: rgba(255, 255, 255, 0.48) !important;
-  color: #34445d !important;
   transition:
     transform 0.2s,
     background 0.2s,
@@ -206,29 +188,22 @@
 #mainNav .brand-menu .dropdown-item > span:nth-child(2) {
   display: flex !important;
   flex-direction: column !important;
-  gap: 3px !important;
 }
 #mainNav .brand-menu .dropdown-item strong {
   overflow: hidden !important;
   font-family: var(--font-body) !important;
-  font-size: 12px !important;
-  font-weight: 700 !important;
   line-height: 1.6;
   text-overflow: ellipsis !important;
   white-space: nowrap !important;
 }
 #mainNav .brand-menu .dropdown-item small {
   overflow: hidden !important;
-  color: #7a8491 !important;
   font-family: var(--font-latin) !important;
-  font-size: 8px !important;
   letter-spacing: 0.55px !important;
   text-overflow: ellipsis !important;
   white-space: nowrap !important;
 }
 #mainNav .brand-menu .dropdown-item > i {
-  color: #8395ab !important;
-  font-size: 11px !important;
   transition:
     transform 0.2s,
     color 0.2s !important;
@@ -256,11 +231,8 @@
   display: flex !important;
   gap: 10px !important;
   margin-top: 10px !important;
-  padding: 9px !important;
   align-items: center !important;
   border: 1px solid #e6ddcf !important;
-  border-radius: 15px !important;
-  background: linear-gradient(110deg, #faf7f1, #f2ece2) !important;
   box-shadow: none !important;
 }
 #mainNav .brand-menu-footer > a {
@@ -273,7 +245,6 @@
   padding: 0 16px !important;
   align-items: center !important;
   justify-content: center !important;
-  border: 0 !important;
   border-radius: 10px !important;
   border: 0 !important;
   background: #132f4e !important;
@@ -357,33 +328,13 @@
     border: 1px solid rgba(113, 135, 166, 0.48) !important;
     border-top: 3px solid #c99b4f !important;
     border-radius: 0 0 20px 20px !important;
-    background: linear-gradient(145deg, #fbfaf7, #eef3f8) !important;
-    box-shadow:
-      0 24px 58px rgba(3, 15, 53, 0.24),
-      inset 0 0 0 1px rgba(255, 255, 255, 0.9) !important;
   }
   #mainNav .mega-sidebar {
-    padding: 14px 10px !important;
     border-left: 1px solid rgba(137, 155, 179, 0.38) !important;
-    background: rgba(232, 239, 246, 0.28) !important;
   }
   #mainNav .mega-sidebar > a {
     margin: 4px 0 !important;
     border: 1px solid rgba(137, 155, 179, 0.28) !important;
-    border-radius: 13px !important;
-    background: rgba(255, 255, 255, 0.48) !important;
-  }
-  #mainNav .mega-sidebar > a:hover,
-  #mainNav .mega-sidebar > a.active {
-    border-color: rgba(79, 108, 147, 0.48) !important;
-    background: #fff !important;
-    box-shadow:
-      0 7px 17px rgba(16, 42, 86, 0.1),
-      inset -3px 0 #c99b4f !important;
-  }
-  #mainNav .mega-content {
-    padding: 8px 24px 0 !important;
-    background: rgba(255, 255, 255, 0.2) !important;
   }
   #mainNav .mega-links + .mega-links {
     border-right: 1px solid rgba(137, 155, 179, 0.32) !important;
@@ -403,11 +354,6 @@
     box-shadow:
       0 26px 62px rgba(8, 30, 56, 0.27),
       inset 0 0 0 1px rgba(255, 255, 255, 0.92) !important;
-  }
-
-  #mainNav .mega-sidebar {
-    border-left-color: #c5d3e1 !important;
-    background: #e6eef7 !important;
   }
 
   #mainNav .mega-sidebar > a,
@@ -435,8 +381,6 @@
 
   #mainNav .brand-menu .brand-menu-icon {
     border: 0 !important;
-    background: transparent !important;
-    color: #a8732e !important;
     box-shadow: none !important;
   }
 
@@ -508,7 +452,6 @@
 
   #mainNav .mega-sidebar {
     border-left-color: #e2d3bd !important;
-    background: #f7efe3 !important;
   }
 
   #mainNav .mega-sidebar > a {
@@ -537,18 +480,11 @@
     min-width: 106px;
     width: auto;
     align-self: flex-start;
-    min-height: 38px;
     margin-block: 2px;
-    border-color: #e2d3bd !important;
-    background: #fffdfa !important;
   }
 
   #mainNav .mega-content-grid > .mega-links > a:hover {
     border-color: #bd975f !important;
-    background: #fbf1df !important;
-    box-shadow:
-      0 5px 12px rgba(117, 79, 28, 0.09),
-      inset -2px 0 #c99b4f !important;
   }
 
   #mainNav .mega-sidebar {

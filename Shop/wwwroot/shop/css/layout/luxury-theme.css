@@ -112,7 +112,6 @@ h3,
 }
 .hero h1,
 .hero h2,
-.page-hero h1,
 .search-intro h1 {
   text-wrap: balance;
   text-shadow: 0 12px 40px rgba(0, 0, 0, 0.32);
@@ -131,7 +130,6 @@ h3,
 .hero em,
 .page-hero em,
 .search-intro em {
-  color: var(--luxury-gold-light);
   text-shadow: none;
 }
 

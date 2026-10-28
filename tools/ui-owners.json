@@ -96,7 +96,9 @@
         "Shop/wwwroot/shop/css/pages/search.css",
         "Shop/wwwroot/shop/css/pages/search-mobile.css",
         "Shop/wwwroot/shop/css/pages/product-detail-options.css",
-        "Shop/wwwroot/shop/css/pages/account-page.css"
+        "Shop/wwwroot/shop/css/pages/account-page.css",
+        "Shop/wwwroot/shop/css/layout/mobile-pages.css",
+        "Shop/wwwroot/shop/css/store/commerce.css"
       ]
     },
     "header-navigation": {

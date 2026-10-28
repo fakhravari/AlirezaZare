@@ -430,8 +430,6 @@ body > .cart-panel .empty-cart > a:hover > i,
   font-size: 11px;
 }
 :where(.cart-footer > a, .page-cart-footer > a, .search-cart-footer > button) {
-  background: linear-gradient(120deg, #173867, #0b2550 65%, #123466) !important;
-  color: #fff !important;
   box-shadow: 0 8px 18px rgba(3, 15, 53, 0.16) !important;
 }
 :where(
@@ -1117,7 +1115,6 @@ body :is(#cartView, #invoiceItems) .cart-product-details .cart-item-option-chip 
     margin: 0 !important;
     padding: 16px 14px !important;
     border: 5px solid transparent !important;
-    border-radius: 20px !important;
     background:
       radial-gradient(
           circle at 7% 12%,
@@ -1166,7 +1163,6 @@ body :is(#cartView, #invoiceItems) .cart-product-details .cart-item-option-chip 
   :where(.cart-panel, .page-cart-panel, .search-cart-drawer) {
     border: 1px solid rgba(113, 135, 166, 0.48) !important;
     border-radius: 22px !important;
-    background: var(--panel-shell-bg) !important;
     box-shadow:
       0 28px 70px rgba(3, 15, 53, 0.3),
       inset 0 0 0 1px rgba(255, 255, 255, 0.82) !important;

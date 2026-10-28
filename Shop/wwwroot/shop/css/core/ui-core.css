@@ -2,13 +2,6 @@
   overflow: hidden !important;
 }
 
-:where(a, button, input, select, textarea, [tabindex]):focus,
-:where(a, button, input, select, textarea, [tabindex]):focus-visible {
-  outline: none !important;
-  outline-offset: 0 !important;
-  box-shadow: none !important;
-}
-
 .ui-sr-only {
   position: absolute !important;
   width: 1px !important;

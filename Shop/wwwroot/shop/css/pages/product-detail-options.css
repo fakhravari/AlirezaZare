@@ -330,11 +330,6 @@
     font-size: 12px;
   }
 
-  #productView .product-detail-secondary-actions {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
-  }
-
   #productView .product-detail-secondary-actions > a,
   #productView .product-detail-favorite {
     min-width: 0;
@@ -342,7 +337,7 @@
     gap: 5px;
     padding-inline: 6px;
     flex-wrap: nowrap;
-    font-size: 11px !important;
+    font-size: 11px;
     white-space: nowrap;
   }
 
@@ -683,10 +678,6 @@
   min-width: 0;
 }
 
-#productView .product-detail-secondary-actions {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
 #productView .product-detail-secondary-actions > .product-share-control > .product-detail-share {
   display: inline-flex;
   width: 100%;
@@ -788,11 +779,6 @@
 }
 
 @media (max-width: 575px) {
-  #productView .product-detail-secondary-actions {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 6px;
-  }
-
   #productView .product-detail-secondary-actions > a,
   #productView .product-detail-favorite,
   #productView .product-detail-secondary-actions > .product-share-control > .product-detail-share {
@@ -888,10 +874,6 @@
   font-size: 12px;
 }
 
-#productView .product-feedback-admin-datetime {
-  font-size: 12px;
-}
-
 @media (max-width: 575px) {
   #productView :is(
     .product-detail-description,
@@ -911,7 +893,6 @@
 
 @media (min-width: 576px) {
   #productView .product-detail-secondary-actions {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
     align-items: stretch;
     gap: 12px;
   }
@@ -1169,18 +1150,23 @@
 
 #productView .product-included-benefits li {
   display: grid;
+  min-height: 60px;
   min-width: 0;
-  grid-template-columns: 22px minmax(0, 1fr) auto;
+  grid-template-columns: 24px minmax(0, 1fr) auto;
   align-items: center;
   gap: 10px;
+  padding: 9px 11px;
+  border: 1px solid #e3e9e8;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #fff, #f8faf8);
   color: #24445d;
   font-size: 12px;
 }
 
 #productView .product-included-benefits li > i {
   display: grid;
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   place-items: center;
   border-radius: 7px;
   background: #fff1bd;
@@ -1195,7 +1181,7 @@
 
 #productView .product-included-benefits li strong {
   overflow: hidden;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 800;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1204,17 +1190,17 @@
 #productView .product-included-benefits li small {
   overflow: hidden;
   color: #738498;
-  font-size: 10px;
+  font-size: 11px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 #productView .product-included-benefits li > b {
-  padding: 3px 7px;
+  padding: 4px 8px;
   border-radius: 999px;
   background: #e8f5ed;
   color: #287348;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 800;
 }
 
@@ -1434,7 +1420,6 @@
   flex: 0 0 30px;
   place-items: center;
   align-self: center;
-  place-items: center;
   border: 1px solid rgba(202, 159, 43, 0.2);
   border-radius: 8px;
   background: #fff8e7;
@@ -1833,16 +1818,6 @@
   outline-offset: 2px;
 }
 
-#productView .product-detail-secondary-actions {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-}
-
-@media (min-width: 576px) and (max-width: 991px) {
-  #productView .product-detail-secondary-actions {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
 @media (max-width: 575px) {
   #productView .product-detail-compare {
     height: 38px;
@@ -1861,10 +1836,6 @@
     flex-basis: 24px;
     border-radius: 10px;
     font-size: 15px;
-  }
-
-  #productView .product-detail-secondary-actions {
-    grid-template-columns: minmax(0, 1fr);
   }
 }
 
@@ -2172,7 +2143,7 @@
 }
 
 #productView .product-detail-media-frame {
-  height: 100% !important;
+  height: 100%;
   min-height: 0 !important;
 }
 

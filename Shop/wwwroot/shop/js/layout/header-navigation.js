@@ -137,6 +137,7 @@
     if (!trigger || !menu) return;
     let closeTimer = null;
     let restoringFocus = false;
+    let suppressHoverOpenUntilTriggerLeave = false;
     const isOpen = () => dropdown.classList.contains(state);
     const close = () => {
       window.clearTimeout(closeTimer);
@@ -163,25 +164,41 @@
         if (!menu.matches(":hover") && !trigger.matches(":hover") && !dropdown.contains(document.activeElement)) close();
       }, 220);
     };
-    trigger.addEventListener("pointerenter", () => { if (hover.matches) open(); });
+    trigger.addEventListener("pointerenter", () => {
+      if (hover.matches && !suppressHoverOpenUntilTriggerLeave) open();
+    });
+    trigger.addEventListener("pointerleave", () => {
+      suppressHoverOpenUntilTriggerLeave = false;
+    });
     // Empty navigation space never opens a menu; the panel can only retain an already-open menu.
     menu.addEventListener("pointerenter", () => { if (isOpen()) window.clearTimeout(closeTimer); });
     dropdown.addEventListener("pointerleave", closeSoon);
     dropdown.addEventListener("focusin", (event) => {
-      if ((event.target === trigger && trigger.matches(":focus-visible")) || menu.contains(event.target)) open();
+      if (
+        (event.target === trigger &&
+          trigger.matches(":focus-visible") &&
+          !suppressHoverOpenUntilTriggerLeave) ||
+        menu.contains(event.target)
+      ) open();
     });
     dropdown.addEventListener("focusout", (event) => { if (!dropdown.contains(event.relatedTarget)) close(); });
+    document.addEventListener("keydown", (event) => {
+      if (event.key !== "Escape" || !desktop.matches || !dropdown.contains(event.target) || !isOpen()) return;
+      event.preventDefault();
+      event.stopPropagation();
+      suppressHoverOpenUntilTriggerLeave = true;
+      close();
+      restoringFocus = true;
+      trigger.focus();
+      restoringFocus = false;
+    }, true);
     trigger.addEventListener("click", (event) => {
       if (!desktop.matches) return;
       event.preventDefault(); event.stopPropagation();
       if (isOpen()) close(); else open();
     });
     dropdown.addEventListener("keydown", (event) => {
-      if (!desktop.matches) return;
-      if (event.key === "Escape") {
-        event.preventDefault(); event.stopPropagation(); close();
-        restoringFocus = true; trigger.focus(); restoringFocus = false;
-      } else if (event.key === "ArrowDown" && event.target === trigger) {
+      if (desktop.matches && event.key === "ArrowDown" && event.target === trigger) {
         event.preventDefault(); open(); menu.querySelector("a, button")?.focus();
       }
     });

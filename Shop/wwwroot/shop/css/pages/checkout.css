@@ -1157,7 +1157,6 @@ body .selected-address-card-heading > strong {
   position: relative;
   overflow: hidden;
   border: 1px solid var(--industrial-yellow);
-  border-radius: var(--radius-panel-featured, 24px 24px 14px 24px);
   background:
     linear-gradient(135deg, rgba(181, 149, 98, 0.07), transparent 32%),
     linear-gradient(180deg, var(--industrial-bg), var(--industrial-bg));
@@ -1361,7 +1360,6 @@ body .selected-address-card-heading > strong {
 @media (max-width: 575px) {
   .address-dialog {
     width: calc(100% - 32px);
-    padding: 20px;
   }
 
   .address-dialog .address-form-grid {

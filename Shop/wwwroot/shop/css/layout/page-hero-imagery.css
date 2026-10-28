@@ -39,10 +39,10 @@
 .inner-page .article-hero::before {
   background: linear-gradient(
     90deg,
-    rgba(16, 42, 67, .06) 0%,
-    rgba(16, 42, 67, .16) 34%,
-    rgba(16, 42, 67, .42) 58%,
-    rgba(16, 42, 67, .88) 78%
+    rgba(16, 42, 67, .08) 0%,
+    rgba(16, 42, 67, .18) 38%,
+    rgba(16, 42, 67, .56) 67%,
+    rgba(16, 42, 67, .78) 100%
   ) !important;
 }
 
@@ -52,7 +52,12 @@
   background-image: none !important;
 }
 
-.inner-page .page-hero:has(> .hero-image) > .hero-image {
+.inner-page .page-hero > .hero-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   opacity: .9;
 }
 
@@ -66,10 +71,7 @@
 
 /* Article photography fills its column; contain left empty space beside square images. */
 .inner-page .article-hero > .hero-image {
-  inset: 0 auto 0 0;
-  width: 52%;
-  object-fit: cover;
-  object-position: center;
+  object-position: center 45%;
 }
 
 @media (max-width: 767px) {
@@ -81,6 +83,6 @@
   .inner-page .page-hero:is(.product-detail-hero, .article-hero) > .hero-image {
     width: 100%;
     object-position: center;
-    opacity: .82;
+    opacity: .88;
   }
 }
