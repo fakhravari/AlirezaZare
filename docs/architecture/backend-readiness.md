@@ -1,12 +1,14 @@
 # آمادگی داده برای اتصال backend
 
-این بازبینی مسیر Controller → مدل/منبع → Razor → JavaScript → storage را بررسی می‌کند. وضعیت زیر متعلق به ۲۷ اکتبر ۲۰۲۶ است؛ وجود دادهٔ نمایشی به معنی وجود API عملیاتی نیست.
+این بازبینی مسیر Controller → مدل/منبع → Razor → JavaScript → storage را بررسی می‌کند. وضعیت زیر متعلق به ۲۸ اکتبر ۲۰۲۶ است؛ وجود دادهٔ نمایشی به معنی وجود API عملیاتی نیست.
 
 ## نتیجهٔ بررسی و تغییر اجرایی
 
 کاتالوگ مشترک ساختاریافته است، اما کل پروژه هنوز به backend متصل نیست. مرز قابل‌جایگزینی خواندن کاتالوگ [ICatalogSource](../../Shop/Services/ICatalogSource.cs) است. محصول، برند، sitemap و bootstrap مرورگر از قرارداد async همراه CancellationToken استفاده می‌کنند. پیاده‌سازی فایل همچنان cache همگام دارد؛ adapter شبکه باید داده را با همان CatalogSnapshot.Parse اعتبارسنجی کند و نباید با خطای API بی‌صدا به دادهٔ دمو برگردد.
 
 سفارش و کوپن از Razor و JavaScript خارج و در [account-demo.json](../../Shop/App_Data/account-demo.json) یکپارچه شده‌اند. [AccountData](../../Shop/Models/AccountData.cs) رابطه‌ها و مبالغ را اعتبارسنجی می‌کند. [IAccountDataSource و ICommerceOfferSource](../../Shop/Services/IAccountDataSource.cs) دو مرز مستقل حساب و پیشنهاد عمومی هستند؛ پیاده‌سازی demo یک snapshot به‌ازای درخواست دارد. فایل خارج از wwwroot است و در publish کپی می‌شود. bootstrap عمومی فقط کد و درصد تخفیف را می‌دهد؛ سابقهٔ سفارش فقط در پروفایل serialize می‌شود. احراز هویت واقعی هنوز پیاده نشده است.
+
+ثبت‌نام اکنون کد ایمیل را از [EmailVerificationController](../../Shop/Controllers/EmailVerificationController.cs) می‌گیرد؛ [SmtpEmailSender](../../Shop/Services/SmtpEmailSender.cs) با تنظیمات `Email:Smtp` در appsettings ایمیل می‌فرستد و [EmailVerificationCodeStore](../../Shop/Services/EmailVerificationCodeStore.cs) کد hash‌شدهٔ یک‌بارمصرف را با انقضای ۱۰ دقیقه، حداکثر پنج تلاش و فاصلهٔ ارسال مجدد ۶۰ ثانیه نگه می‌دارد. endpoint ارسال به سقف پنج درخواست در هر IP طی پنج دقیقه محدود است. رمز فعلی در appsettings تنظیم شده تا مطابق محیط این مخزن قابل اجرا باشد؛ در انتشار عمومی باید مقدار `Email__Smtp__Password` از تنظیم محیط استقرار خوانده شود و secret وارد Git نشود. این تغییر فقط تأیید ایمیل را سروری کرده است؛ ساخت حساب پایدار، ورود با گذرواژه و session هنوز دمو هستند. store کدها در حافظهٔ یک process است و برای چند replica باید به cache مشترک منتقل شود.
 
 ## پوشش داده و شکاف‌های اتصال
 
@@ -19,7 +21,7 @@
 | سفارش | AccountOrder با id، number، status، orderedOn، itemCount، totalAmount، deliveryDescription | ردیف کالاها، snapshot عنوان/SKU/گزینه و مبلغ، آدرس تحویل، پرداخت، ارسال، مرجوعی؛ خلاصهٔ موجود فاکتور کامل نیست |
 | کوپن | AccountCoupon؛ id، code، discountPercent، enabled، expiresOn، orderIds؛ مصرف به سفارش معتبر وصل است | محدودیت کاربر/کالا/تعداد مصرف/حداقل مبلغ و اعتبارسنجی تراکنشی در سرور |
 | سبد و checkout | cart.js مدل مشترک قیمت/گزینه دارد؛ checkout پرداخت واقعی ندارد | سبد کاربر و مهمان، نسخهٔ سبد، quote، کلید جلوگیری از ثبت تکراری و نتیجهٔ پرداخت تأییدشده |
-| حساب و ورود | ui-core و profile و localStorage | session واقعی و مجوز سرور؛ هویت کاربر از درخواست معتبر استخراج شود |
+| حساب و ورود | تأیید OTP ایمیل در `/api/auth/email-code` و `/verify`؛ وضعیت ورود هنوز ui-core و localStorage است | ساخت حساب پایدار، ورود با گذرواژه، session و مجوز سرور؛ OTP برای چند replica به store مشترک نیاز دارد |
 | نشانی | سه مدل Country/Province/City در iran-places.js؛ آدرس محلی | شناسهٔ پایدار مکان، مالکیت آدرس و اعتبارسنجی رابطهٔ شهر/استان در API |
 | علاقه‌مندی و مقایسه | شناسهٔ کالا در storage | همگام‌سازی مهمان/کاربر، حذف id نامعتبر و تصمیم صریح دربارهٔ merge |
 | اطلاع‌رسانی | snapshot قیمت/موجودی و انتخاب ویژگی در hn-price-watches-demo | شناسهٔ پیگیری، مالک کاربر، variantId، کانال و وضعیت فعال؛ ثبت/حذف async و وضعیت خطا |
@@ -44,10 +46,12 @@
 
 ۳. سفارش کامل را با ردیف و snapshot قیمت/آدرس بسازید. مبلغ ارسالی مرورگر، کوپن محلی یا وضعیت پرداخت UI مبنای قطعی سفارش نباشد. callback پرداخت و ثبت سفارش تکراری باید در backend کنترل شوند.
 
-۴. پس از جایگزینی هر حوزه، دمو همان حوزه را از مسیر runtime خارج کنید و تست قرارداد، خطا، دسترسی و دادهٔ خالی اجرا کنید. endpoint واقعی، auth و دیتابیس در این تغییر ساخته نشده‌اند.
+۴. پس از جایگزینی هر حوزه، دمو همان حوزه را از مسیر runtime خارج کنید و تست قرارداد، خطا، دسترسی و دادهٔ خالی اجرا کنید. endpoint تأیید ایمیل ساخته شده، اما ساخت/ورود حساب و دیتابیس هویت هنوز عملیاتی نیستند.
 
 ## بررسی تغییر فعلی
 
 تست C# رابطهٔ کوپن/سفارش، واحد مبلغ، مبلغ منفی/کسری، شناسهٔ تکراری، تاریخ انقضا و JSON امن را پوشش می‌دهد. تست JS bootstrap غایب/خراب/نسخهٔ آینده و immutable بودن projection را بررسی می‌کند. فرمان‌های build، قرارداد، HTTP و کنترل منابع در [کیفیت](../development/quality.md) هستند.
 
 [منبع حقیقت داده](data-sources.md) · [فهرست معماری](README.md) · [فهرست مستندات](../README.md)
+
+آخرین تطبیق با کد: ۲۸ اکتبر ۲۰۲۶.

@@ -8,7 +8,9 @@ irwin8.sabahost.org
 31.25.91.7
 ---------------------------------------------------
 
-email
+
+https://webmail.bs-shop.ir/Mondo/lang/sys/login.aspx
+31.25.91.7
 info@bs-shop.ir
 1245Df34$#-a
 
@@ -23,6 +25,20 @@ ftp
 31.25.91.7
 fakhravari
 1qw70a9_N
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

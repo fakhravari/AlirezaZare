@@ -20,6 +20,8 @@
 | `HNUI.EVENTS`, `HNUI.emit(type, detail)` | نام ثابت رویداد و کنترل payloadهای cart/auth؛ برای رویداد مشترک CustomEvent موازی نسازید |
 | `HNUI.cart.read/write/add/update/remove/totals/quantityLimit/renderOptions/renderControls` | normalize مشترک، renderer مشترک گزینه‌ها و کنترل تعداد/حذف، validation ساده و مدیریت سبد؛ `write` رویداد cart را dispatch می‌کند |
 | `HNUI.auth.isLoggedIn/login/logout/requireLogin` | وضعیت ورود در مرورگر؛ `requireLogin(resume)` برای ورود نداشتن رویداد `hn:auth-required` می‌فرستد و callback را پس از ورود ادامه می‌دهد |
+
+فرم ثبت‌نام در `layout/main.js` کد را با `POST /api/auth/email-code` درخواست و با `POST /api/auth/email-code/verify` اعتبارسنجی می‌کند؛ کد ثابت یا قابل‌قبول‌بودن هر شش رقم در مرورگر وجود ندارد. کد تأیید سروری است، اما `completeDemoLogin` پس از تأیید هنوز state محلی ورود را فعال می‌کند؛ تا ساخت حساب و session backend اضافه نشده، ورود را احراز هویت پایدار تلقی نکنید. تنظیمات و محدودیت OTP در [مرز داده و backend](../architecture/backend-readiness.md) مرجع‌اند.
 | `HNUI.scrollLock.lock/unlock` | شمارندهٔ قفل scroll با کلاس `ui-scroll-locked` |
 | `HNUI.dialog` | helperهای dialog/focus/keyboard؛ جزئیات دقیق را در همان فایل بخوانید |
 | `HNUI.setMessage`, `setMessageType`, `showToast` | پیام وضعیت و بازخورد UI؛ امضا و پیش‌فرض را در ui-core.js بررسی کنید |
@@ -106,4 +108,4 @@
 
 [فهرست این بخش](README.md) · [فهرست مستندات](../README.md)
 
-آخرین تطبیق با کد: ۲۷ اکتبر ۲۰۲۶.
+آخرین تطبیق با کد: ۲۸ اکتبر ۲۰۲۶.

@@ -1023,7 +1023,24 @@ $(function () {
     );
   });
 
-  const requestEmailCode = (mode, email) => {
+  const requestEmailCode = async (mode, email) => {
+    const $submit = $(mode === "register" ? "#registerEmailForm button[type='submit']" : "#loginEmailForm button[type='submit']");
+    $submit.prop("disabled", true);
+    try {
+      const response = await fetch("/api/auth/email-code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.message || "ارسال کد انجام نشد. دوباره تلاش کنید.");
+    } catch (error) {
+      const $message = mode === "register" ? $registerEmailError : $loginEmailError;
+      window.HNUI.setMessage($message[0], error.message || "ارتباط با سرویس ارسال ایمیل برقرار نشد.", "error");
+      return;
+    } finally {
+      $submit.prop("disabled", false);
+    }
     pendingAuthMode = mode;
     $("#sentEmail").text(email);
     $("#emailOtpTitle").text(
@@ -1035,7 +1052,7 @@ $(function () {
     $loginEmailStep.addClass("d-none").prop("hidden", true);
     $registerEmailStep.addClass("d-none").prop("hidden", true);
     $emailOtpStep.removeClass("d-none").prop("hidden", false);
-    $emailOtpInput.val("123456").trigger("focus");
+    $emailOtpInput.val("").trigger("focus");
   };
   const completeDemoLogin = () => {
     userLoggedIn = true;
@@ -1082,7 +1099,7 @@ $(function () {
       return;
     }
     window.HNUI.setMessage($registerEmailError[0], "");
-    requestEmailCode("register", email);
+    void requestEmailCode("register", email);
   });
 
   $("#loginEmailOtp").on("input", function () {
@@ -1091,7 +1108,7 @@ $(function () {
       .slice(0, 6);
   });
 
-  $("#emailOtpForm").on("submit", (event) => {
+  $("#emailOtpForm").on("submit", async (event) => {
     event.preventDefault();
     const code = window.HNUI.toEnglishDigits($emailOtpInput.val().trim());
     if (!/^\d{6}$/.test(code)) {
@@ -1103,7 +1120,21 @@ $(function () {
       return;
     }
     window.HNUI.setMessage($emailOtpError[0], "");
-    completeDemoLogin();
+    const $submit = $("#emailOtpForm button[type='submit']").prop("disabled", true);
+    try {
+      const response = await fetch("/api/auth/email-code/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: $("#sentEmail").text(), code }),
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.message || "کد تأیید معتبر نیست.");
+      completeDemoLogin();
+    } catch (error) {
+      window.HNUI.setMessage($emailOtpError[0], error.message || "ارتباط با سرویس تأیید برقرار نشد.", "error");
+    } finally {
+      $submit.prop("disabled", false);
+    }
   });
 
   $("#loginEmailBack").on("click", () => {

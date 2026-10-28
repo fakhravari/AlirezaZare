@@ -13,6 +13,7 @@
 | متن تحریریهٔ برند | [brand-editorial.json](../../Shop/wwwroot/content/data/brand-editorial.json) | دادهٔ عمومی ساختاریافته در `wwwroot/content/data/`؛ خوانده‌شدن سمت سرور توسط BrandsController |
 | مقاله‌ها و آمار مجله | [JournalArticles.cs](../../Shop/Models/JournalArticles.cs) و [JournalArticles.Expanded.cs](../../Shop/Models/JournalArticles.Expanded.cs) | دادهٔ ثابت؛ منابع ثبت‌شده یا fallback موضوعی، برچسب‌ها و مقالات مرتبط هنگام ساخت مدل دیتیل محاسبه می‌شوند؛ آمار نمایش‌داده‌شده عملیاتی یا خودکار نیست |
 | FAQ | `FaqCatalog` در [PageModel.cs](../../Shop/Models/PageModel.cs) | منبع مشترک متن صفحه و FAQPage JSON-LD |
+| ارسال و تأیید کد ایمیل | [EmailVerificationController](../../Shop/Controllers/EmailVerificationController.cs)، [EmailVerificationCodeStore](../../Shop/Services/EmailVerificationCodeStore.cs) و [SmtpEmailSender](../../Shop/Services/SmtpEmailSender.cs) | SMTP از `Email:Smtp` در appsettings خوانده می‌شود؛ OTP در حافظهٔ سرور به‌شکل hash و یک‌بارمصرف است. ساخت حساب و session همچنان دمو هستند؛ برای چند replica store مشترک لازم است |
 | سبد، ورود، مقایسه، علاقه‌مندی، آدرس و پروفایل | `HNUI`، script صفحه و `localStorage` | state مرورگر؛ سفارش، پرداخت یا هویت تأییدشدهٔ سرور نیست |
 | رسانه‌ها | [ساختار content](../media/images.md) | مسیرهای محصول در catalog.json ثبت‌اند؛ نام فایل از ترتیب آرایه ساخته نمی‌شود |
 
@@ -23,7 +24,7 @@
 
 فایل‌های دادهٔ عمومی را کنار کد JavaScript نگذارید؛ آن‌ها را در `wwwroot/content/data/` نگه دارید و کد را از `wwwroot/shop/js/` مصرف کنید. دادهٔ خصوصی سرور در `App_Data/` می‌ماند. دادهٔ محصول را فقط در catalog.json تغییر دهید. `id` و `code` پایدارند؛ relationها و مسیرها باید معتبر بمانند. parser متن JavaScript حذف شده است. تغییر schema باید هم‌زمان در CatalogSnapshot و resolver مرورگر اعمال شود؛ قرارداد دقیق در [کاتالوگ](../store/catalog.md) و بررسی‌های خودکار در [کیفیت](../development/quality.md) ثبت شده‌اند.
 
-دادهٔ ذخیره‌شده در مرورگر را ورودی قابل‌اعتماد فرض نکنید. افزودن persistence واقعی نیاز به مدل دامنه، validation، هویت، مجوز و endpoint سرور دارد؛ برنامهٔ این کار در [رودمپ](../development/roadmap.md) آمده است.
+دادهٔ ذخیره‌شده در مرورگر را ورودی قابل‌اعتماد فرض نکنید. OTP ایمیل با endpoint سرور تأیید می‌شود؛ سایر persistenceها همچنان به مدل دامنه، validation، هویت، مجوز و endpoint سرور نیاز دارند؛ برنامهٔ این کار در [رودمپ](../development/roadmap.md) آمده است.
 
 ---
 

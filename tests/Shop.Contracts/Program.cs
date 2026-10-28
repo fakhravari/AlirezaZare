@@ -81,3 +81,14 @@ var encoded = System.Text.Json.JsonSerializer.Serialize(new { note = "</script><
 if (encoded.Contains("</script", StringComparison.OrdinalIgnoreCase))
     throw new Exception("Account JSON escaped its script element.");
 Console.WriteLine("C# account contracts OK: relationships, amounts, expiry and safe JSON verified.");
+
+var emailCodeStore = new EmailVerificationCodeStore();
+const string testEmail = "otp-contract@example.test";
+if (!emailCodeStore.TryCreate(testEmail, out string issuedCode, out _) || issuedCode.Length != 6)
+    throw new Exception("Email OTP generation did not produce a six-digit code.");
+if (emailCodeStore.TryCreate(testEmail, out _, out var retryAfter) || retryAfter <= TimeSpan.Zero)
+    throw new Exception("Email OTP resend cooldown was not enforced.");
+string wrongCode = issuedCode == "000000" ? "000001" : "000000";
+if (emailCodeStore.Verify(testEmail, wrongCode) || !emailCodeStore.Verify(testEmail, issuedCode) || emailCodeStore.Verify(testEmail, issuedCode))
+    throw new Exception("Email OTP validation, consumption, or one-time use failed.");
+Console.WriteLine("C# email OTP contracts OK: six digits, resend cooldown and one-time verification verified.");
