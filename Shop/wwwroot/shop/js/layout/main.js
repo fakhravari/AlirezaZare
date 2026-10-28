@@ -648,7 +648,7 @@ $(function () {
     ...catalogProducts.filter(
       (product) => product.stockQuantity > 0 && !product.discountPercent,
     ),
-  ].slice(0, 12);
+  ].slice(0, 6);
   const sliderImagePaths = [
     "shop/images/sliders/slide-power-tools.png",
     "shop/images/sliders/slide-measurement-tools.png",
@@ -706,9 +706,10 @@ $(function () {
     responsive: {
       0: { items: 1, margin: 10 },
       576: { items: 2, margin: 12 },
-      768: { items: 2, margin: 14 },
-      992: { items: 3, margin: 12 },
-      1200: { items: 4, margin: 12 },
+      768: { items: 3, margin: 14 },
+      992: { items: 4, margin: 12 },
+      1200: { items: 5, margin: 12 },
+      1440: { items: 6, margin: 12 },
     },
   };
 

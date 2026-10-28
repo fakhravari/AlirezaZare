@@ -5,13 +5,14 @@
     id="mobileMenu">
     <div class="offcanvas-header">
         <a class="brand mobile-menu-logo" asp-controller="Home" asp-action="Index" aria-label="برق شیراز؛ مرجع تخصصی ابزار و تجهیزات برقی؛ رفتن به صفحهٔ اصلی">
-            <img class="mobile-menu-logo-image" src="~/content/identity/store-electrical-lockup.svg" alt="" width="220" height="73" decoding="async" asp-append-version="true" />
+            <img class="mobile-menu-logo-image" src="~/content/identity/store-electrical-lockup.svg" alt="" width="360" height="120" decoding="async" asp-append-version="true" />
         </a>
         <button
             type="button"
-            class="btn-close btn-close-white"
+            class="mobile-menu-close"
             data-bs-dismiss="offcanvas"
             aria-label="بستن">
+            <i class="bi bi-x-lg" aria-hidden="true"></i>
         </button>
         <form class="mobile-menu-search" id="mobileMenuSearchForm" action="/Search" method="get" role="search">
             <i class="bi bi-search" aria-hidden="true"></i>
@@ -185,7 +186,6 @@
             </div>
             <div class="mobile-support-meta">
                 <span><i class="bi bi-clock" aria-hidden="true"></i> راه‌های ارتباطی</span>
-                <span>تماس و پیام</span>
             </div>
             <div class="mobile-support-socials" aria-label="راه‌های ارتباطی">
                 <span class="mobile-support-social-placeholder" role="img" aria-label="Instagram" title="Instagram">
