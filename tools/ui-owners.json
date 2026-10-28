@@ -287,7 +287,8 @@
     "page-hero": {
       "selector": "\\.page-hero",
       "css": [
-        "Shop/wwwroot/shop/css/layout/shared-page-hero.css"
+        "Shop/wwwroot/shop/css/layout/shared-page-hero.css",
+        "Shop/wwwroot/shop/css/layout/page-hero-imagery.css"
       ]
     },
     "form-validation": {

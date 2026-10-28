@@ -11993,7 +11993,7 @@ body .electrical-swiper .swiper-pagination-bullet-active {
   gap: 8px;
   margin-top: 5px;
   padding: 4px 0;
-  color: #ffdc78 !important;
+  color: #ffdc78;
   font-size: 13px;
   font-weight: 800;
   text-decoration: none;
@@ -12007,7 +12007,7 @@ body .electrical-swiper .swiper-pagination-bullet-active {
 
 .home-page #journal .journal-main-cta:hover {
   gap: 11px;
-  color: #fff !important;
+  color: #fff;
 }
 
 .home-page #journal .journal-main-cta:hover i {
@@ -12525,45 +12525,46 @@ body .electrical-swiper .swiper-pagination-bullet-active {
 }
 
 .home-page #journal .journal-main:is(:hover, :focus-within) > div {
-  border-color: rgba(193, 154, 93, 0.62);
-  background-color: rgba(255, 253, 248, 0.98);
+  border-color: rgba(255, 220, 120, 0.4);
+  background: linear-gradient(135deg, rgba(16, 42, 67, 0.86), rgba(7, 26, 46, 0.76));
   transform: translateY(-2px);
-  box-shadow: 0 16px 34px rgba(16, 42, 67, 0.14);
+  box-shadow: 0 16px 34px rgba(4, 16, 35, 0.34);
 }
 
 .home-page #journal .journal-main::after {
   background: linear-gradient(
     180deg,
-    rgba(7, 26, 46, 0.02) 38%,
-    rgba(7, 26, 46, 0.28) 100%
+    rgba(7, 26, 46, 0.02) 28%,
+    rgba(7, 26, 46, 0.42) 68%,
+    rgba(7, 26, 46, 0.62) 100%
   );
 }
 
 .home-page #journal .journal-main > div {
   padding: 20px 22px 18px;
-  border: 1px solid rgba(193, 154, 93, 0.52);
+  border: 1px solid rgba(255, 220, 120, 0.28);
   border-radius: 18px 10px 18px 18px;
-  background: rgba(255, 253, 248, 0.96);
-  color: var(--industrial-navy);
-  box-shadow: 0 14px 32px rgba(16, 42, 67, 0.16);
-  backdrop-filter: blur(10px);
+  background: linear-gradient(135deg, rgba(16, 42, 67, 0.78), rgba(7, 26, 46, 0.68));
+  color: #fff;
+  box-shadow: 0 16px 36px rgba(4, 16, 35, 0.3);
+  backdrop-filter: blur(14px) saturate(1.15);
 }
 
 .home-page #journal .journal-main-meta {
-  color: #657586;
+  color: rgba(255, 255, 255, 0.78);
 }
 
 .home-page #journal .journal-main-meta :is(.journal-main-read, .journal-main-author, time),
 .home-page #journal .journal-main-stat {
-  color: #5d6e7f;
+  color: rgba(255, 255, 255, 0.82);
 }
 
 .home-page #journal .journal-main-category {
-  color: #8a6510;
+  color: #ffdc78;
 }
 
 .home-page #journal .journal-main-meta i {
-  color: #a77b28;
+  color: #f6c515;
 }
 
 .home-page #journal .journal-main-stat.journal-like-metric i {
@@ -12571,7 +12572,7 @@ body .electrical-swiper .swiper-pagination-bullet-active {
 }
 
 .home-page #journal .journal-main h3 {
-  color: var(--industrial-navy);
+  color: #fff;
 }
 
 .home-page #journal .journal-main-cta {

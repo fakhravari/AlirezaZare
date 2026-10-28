@@ -35,8 +35,15 @@
   --page-hero-photo: url("../../images/heroes/hero-measurement-tools.png");
 }
 
-.inner-page .page-hero::before {
-  background: linear-gradient(90deg, rgba(16, 42, 67, .08), rgba(16, 42, 67, .24) 55%, rgba(16, 42, 67, .52)) !important;
+.inner-page .page-hero:not(.article-hero)::before,
+.inner-page .article-hero::before {
+  background: linear-gradient(
+    90deg,
+    rgba(16, 42, 67, .06) 0%,
+    rgba(16, 42, 67, .16) 34%,
+    rgba(16, 42, 67, .42) 58%,
+    rgba(16, 42, 67, .88) 78%
+  ) !important;
 }
 
 /* Foreground photos (about, warranty, articles and individual products)
@@ -49,12 +56,20 @@
   opacity: .9;
 }
 
-/* Square product photos stay complete instead of being cropped into a strip. */
-.inner-page :is(.product-detail-hero, .article-hero) > .hero-image {
+/* Square product photos stay complete inside their reserved image column. */
+.inner-page .product-detail-hero > .hero-image {
   inset: 0 auto 0 0;
   width: 52%;
   object-fit: contain;
   object-position: left center;
+}
+
+/* Article photography fills its column; contain left empty space beside square images. */
+.inner-page .article-hero > .hero-image {
+  inset: 0 auto 0 0;
+  width: 52%;
+  object-fit: cover;
+  object-position: center;
 }
 
 @media (max-width: 767px) {
@@ -66,6 +81,6 @@
   .inner-page .page-hero:is(.product-detail-hero, .article-hero) > .hero-image {
     width: 100%;
     object-position: center;
-    opacity: .4;
+    opacity: .82;
   }
 }

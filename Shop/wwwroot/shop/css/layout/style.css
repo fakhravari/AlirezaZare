@@ -10294,8 +10294,7 @@ footer .copyright::before {
 
 #journal .journal-main h3,
 #journal .journal-main h3 a {
-  color: #fff !important;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  color: #fff;
 }
 
 #journal .journal-list {
