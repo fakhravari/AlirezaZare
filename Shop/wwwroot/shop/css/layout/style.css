@@ -5477,6 +5477,7 @@ h6,
 
 .testimonial-slider-wrap {
   position: relative;
+  overflow: hidden;
 }
 
 .testimonial-slider .owl-nav,
@@ -8477,6 +8478,12 @@ footer .footer-main > div:not(:first-child) {
 
 footer .footer-brand {
   font-size: 22px;
+}
+
+footer .footer-brand-symbol svg {
+  display: block;
+  width: 23px;
+  height: 23px;
 }
 
 footer .footer-main p {

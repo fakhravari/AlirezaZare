@@ -27,7 +27,7 @@
 | `/legal/privacy` | [LegalController](../../Shop/Controllers/LegalController.cs) → [Privacy](../../Shop/Views/Legal/Privacy.cshtml) | `pages/pages.css` | — | سند حریم خصوصی |
 | `/legal/terms` | [LegalController](../../Shop/Controllers/LegalController.cs) → [Terms](../../Shop/Views/Legal/Terms.cshtml) | `pages/pages.css` | — | شرایط استفاده |
 | `/legal/returns` | [LegalController](../../Shop/Controllers/LegalController.cs) → [Returns](../../Shop/Views/Legal/Returns.cshtml) | `pages/pages.css` | — | شرایط بازگشت |
-| `/error` | [ErrorController](../../Shop/Controllers/ErrorController.cs) → [Index](../../Shop/Views/Error/Index.cshtml) | — | — | صفحهٔ خطا |
+| `/error` و `/Error/{statusCode}` | [ErrorController](../../Shop/Controllers/ErrorController.cs) → [Index](../../Shop/Views/Error/Index.cshtml) | — | — | خطاهای 4xx/5xx صفحهٔ راهنمای بدون ایندکس می‌گیرند و status اصلی حفظ می‌شود |
 
 ## قرارداد route و سازگاری
 
@@ -36,6 +36,7 @@
 - قرارداد slug صریح محصول، تطبیق canonical و هدایت مستقیم مسیرهای قدیمی در [راهنمای محصول](../store/product.md) مستند است؛ مسیر واسط `/products/product-{id}` تولید نمی‌شود.
 - `/account` مسیر سازگاری پروفایل است. `/profile`، `/profile/orders`، `/profile/addresses`، `/profile/favorites`، `/profile/coupons` و `/profile/pricealerts` یک View دارند. `/profile/edit` به `/profile` برمی‌گردد و صفحهٔ مستقلی ندارد.
 - مسیر قدیمی `/magazine/details/{slug}` به مسیر جدید مقاله هدایت می‌شود.
+- در انتشار، Hostهای غیر canonical بر اساس `Seo:SiteUrl` با redirect دائمی به همان path و query روی دامنهٔ اصلی هدایت می‌شوند؛ loopback در Development آزاد است.
 - `/robots.txt` و `/sitemap.xml` از `SeoController` می‌آیند و View صفحه ندارند؛ [راهنمای SEO](../seo/metadata.md) را ببینید.
 
 ## پس از تغییر URL یا View
@@ -46,4 +47,4 @@ Controller، لینک‌های Razor، تولید لینک در JS، canonical،
 
 [فهرست این بخش](README.md) · [فهرست مستندات](../README.md)
 
-آخرین تطبیق با کد: ۲۷ اکتبر ۲۰۲۶.
+آخرین تطبیق با کد: ۲۹ اکتبر ۲۰۲۶.

@@ -890,6 +890,7 @@ select {
   padding: 0 13px;
   align-items: center;
   justify-content: center;
+  border: 1px solid transparent;
   border-radius: 999px;
   color: #5f6c78;
   font-size: 13px;
@@ -911,8 +912,10 @@ select {
 }
 
 .sort-option:has(input:checked) {
-  background: #ef4055;
-  color: #fff;
+  border-color: color-mix(in srgb, var(--industrial-yellow) 52%, white);
+  background: color-mix(in srgb, var(--industrial-yellow) 17%, white);
+  color: var(--industrial-navy);
+  font-weight: 750;
 }
 
 .sort-option:has(input:focus-visible) {

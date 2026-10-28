@@ -1,6 +1,7 @@
 import test, {before, after} from 'node:test';
 import assert from 'node:assert/strict';
 import {spawn} from 'node:child_process';
+import {request as httpRequest} from 'node:http';
 import net from 'node:net';
 import path from 'node:path';
 import {setTimeout as delay} from 'node:timers/promises';
@@ -70,6 +71,33 @@ test('canonical redirects resolve in one hop and missing products return 404', a
   }
   const response = await fetch(base + '/products/missing-999');
   assert.equal(response.status, 404);
+  const html = await response.text();
+  assert.match(html, /صفحه پیدا نشد/);
+  assert.match(html, /name="robots" content="noindex, nofollow"/);
+  assert.match(html, /بازگشت به صفحه اصلی/);
+});
+
+test('canonical host redirects aliases to the configured site origin', async () => {
+  const response = await new Promise((resolve, reject) => {
+    const request = httpRequest({
+      hostname: '127.0.0.1',
+      port: new URL(base).port,
+      path: '/products/cordless-hammer-drill-1?source=share',
+      headers: {host: 'www.bs-shop.ir'},
+    }, resolve);
+    request.on('error', reject);
+    request.end();
+  });
+  response.resume();
+  assert.equal(response.statusCode, 308);
+  assert.equal(response.headers.location, 'https://bs-shop.ir/products/cordless-hammer-drill-1?source=share');
+});
+
+test('internal search pages are noindex and are excluded from the sitemap', async () => {
+  const search = await (await fetch(base + '/search')).text();
+  assert.match(search, /name="robots" content="noindex, follow"/);
+  const sitemap = await (await fetch(base + '/sitemap.xml')).text();
+  assert.doesNotMatch(sitemap, /<loc>[^<]*\/search<\/loc>/);
 });
 
 test('sitemap contains every stable canonical product URL exactly once', async () => {
@@ -77,6 +105,25 @@ test('sitemap contains every stable canonical product URL exactly once', async (
   assert.equal(response.status, 200);
   const xml = await response.text();
   for (const p of source().products) assert.equal(xml.split(`/products/${p.slug}-${p.id}</loc>`).length - 1, 1);
+});
+
+test('every sitemap URL serves indexable HTML with a unique canonical and one H1', async () => {
+  const xml = await (await fetch(base + '/sitemap.xml')).text();
+  const urls = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map(match => match[1].replaceAll('&amp;', '&'));
+  assert.ok(urls.length > 0);
+  for (let offset = 0; offset < urls.length; offset += 12) {
+    await Promise.all(urls.slice(offset, offset + 12).map(async url => {
+      const response = await fetch(url);
+      assert.equal(response.status, 200, url);
+      const html = await response.text();
+      assert.match(html, /<title>[^<]+<\/title>/, url + ': title missing');
+      assert.match(html, /<meta name="description" content="[^"]+"\s*\/>/, url + ': description missing');
+      assert.match(html, /<meta name="robots" content="index, follow"\s*\/>/, url + ': page is not indexable');
+      assert.equal([...html.matchAll(/<link rel="canonical" href="([^"]+)"\s*\/>/g)].length, 1, url + ': canonical count');
+      assert.equal(html.match(/<link rel="canonical" href="([^"]+)"\s*\/>/)?.[1], url, url + ': canonical mismatch');
+      assert.equal([...html.matchAll(/<h1\b/g)].length, 1, url + ': expected one H1');
+    }));
+  }
 });
 
 test('referenced scripts, styles, product media, logo and flags are served locally', async () => {

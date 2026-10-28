@@ -67,6 +67,19 @@
         "Shop/wwwroot/shop/css/pages/magazine-luxury.css"
       ]
     },
+    "homepage-magazine": {
+      "markup": [
+        "Shop/Views/Home/Index.cshtml"
+      ],
+      "server": [
+        "Shop/Models/JournalArticles.cs",
+        "Shop/Models/JournalArticles.Expanded.cs"
+      ],
+      "css": [
+        "Shop/wwwroot/shop/css/layout/style.css",
+        "Shop/wwwroot/shop/css/layout/industrial-system.css"
+      ]
+    },
     "article-detail": {
       "markup": [
         "Shop/Views/Magazine/Details.cshtml"
@@ -283,7 +296,8 @@
         "Shop/Views/Shared/_Footer.cshtml"
       ],
       "css": [
-        "Shop/wwwroot/shop/css/layout/shared-footer.css"
+        "Shop/wwwroot/shop/css/layout/shared-footer.css",
+        "Shop/wwwroot/shop/css/layout/style.css"
       ]
     },
     "page-hero": {

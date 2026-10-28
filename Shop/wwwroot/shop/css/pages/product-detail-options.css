@@ -241,11 +241,16 @@
   justify-content: center;
   padding-inline: 3px;
   border-radius: 999px;
-  background: transparent;
-  color: inherit;
+  background: var(--industrial-yellow);
+  color: var(--industrial-navy);
   font-size: 12px;
   font-weight: 900;
   line-height: 1;
+}
+
+#productView .product-detail-gallery-open:is(:hover, :focus-visible) > b {
+  background: var(--industrial-navy);
+  color: #fff;
 }
 
 #productView .product-detail-image-frame > .detail-price-tools {

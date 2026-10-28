@@ -28,6 +28,33 @@ builder.Services.AddWebEncoders(options => options.TextEncoderSettings = persian
 builder.Services.Configure<Shop.Models.SeoMetadataOptions>(builder.Configuration.GetSection("Seo"));
 builder.Services.Configure<Microsoft.AspNetCore.Routing.RouteOptions>(options => options.LowercaseUrls = true);
 var app = builder.Build();
+if (Uri.TryCreate(builder.Configuration["Seo:SiteUrl"], UriKind.Absolute, out var canonicalSite)
+    && (canonicalSite.Scheme == Uri.UriSchemeHttp || canonicalSite.Scheme == Uri.UriSchemeHttps)
+    && string.IsNullOrEmpty(canonicalSite.UserInfo)
+    && canonicalSite.AbsolutePath == "/"
+    && string.IsNullOrEmpty(canonicalSite.Query)
+    && string.IsNullOrEmpty(canonicalSite.Fragment))
+{
+    app.Use(async (context, next) =>
+    {
+        string requestHost = context.Request.Host.Host;
+        bool localDevelopmentHost = app.Environment.IsDevelopment()
+            && (string.Equals(requestHost, "localhost", StringComparison.OrdinalIgnoreCase)
+                || System.Net.IPAddress.TryParse(requestHost, out var address) && System.Net.IPAddress.IsLoopback(address));
+        if (!localDevelopmentHost && !string.Equals(requestHost, canonicalSite.Host, StringComparison.OrdinalIgnoreCase))
+        {
+            var target = new UriBuilder(canonicalSite)
+            {
+                Path = context.Request.PathBase.Add(context.Request.Path).Value ?? "/",
+                Query = context.Request.QueryString.HasValue ? context.Request.QueryString.Value![1..] : string.Empty
+            };
+            context.Response.Redirect(target.Uri.ToString(), permanent: true, preserveMethod: true);
+            return;
+        }
+
+        await next();
+    });
+}
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
@@ -36,6 +63,7 @@ if (!app.Environment.IsDevelopment())
 
 app.UseStaticFiles();
 app.UseRouting();
+app.UseStatusCodePagesWithReExecute("/Error/{0}");
 app.UseRateLimiter();
 app.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
 app.Run();

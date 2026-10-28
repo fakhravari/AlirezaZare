@@ -8,7 +8,7 @@
   --mega-ink: #102a43;
   --mega-muted: #637286;
   --mega-gold: #b18a35;
-  --mega-gold-bright: #f6c515;
+  --mega-gold-bright: var(--industrial-yellow);
   --mega-shadow: 0 14px 34px rgba(16, 42, 67, 0.14);
 }
 
@@ -30,11 +30,18 @@
   isolation: isolate;
   border: 1px solid var(--mega-card-border) !important;
   border-top: 3px solid var(--mega-gold-bright) !important;
-  border-radius: 18px 10px 18px 10px !important;
+  border-radius: 0 0 18px 10px !important;
   background: var(--mega-surface) !important;
   box-shadow: var(--mega-shadow) !important;
   color: var(--mega-ink) !important;
   font-size: 13px !important;
+}
+
+/* Let the home category panel overlap the hero gutter and meet the navbar rule. */
+@media (min-width: 992px) {
+  .home-page #electricalSubmenu {
+    top: -11px;
+  }
 }
 
 .home-page #electricalSubmenu::before,

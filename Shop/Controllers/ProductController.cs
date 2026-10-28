@@ -20,7 +20,7 @@ public sealed class ProductController : PageController
     public async Task<IActionResult> Index()
     {
         PageModel model = new(
-            new SeoModel("خرید ابزار برقی و تجهیزات فنی | فروشگاه ندا اولیائی", "جستجو و بررسی ابزار برقی، تجهیزات اندازه‌گیری، ابزار لحیم‌کاری و روشنایی؛ کالاها را بر اساس برند، کاربرد و قیمت فیلتر کنید.", CanonicalUrl: "/search", Breadcrumbs: [new SeoBreadcrumb("خانه", "/"), new SeoBreadcrumb("جستجو و انتخاب ابزار", "/search")]),
+            new SeoModel("خرید ابزار برقی و تجهیزات فنی | فروشگاه ندا اولیائی", "جستجو و بررسی ابزار برقی، تجهیزات اندازه‌گیری، ابزار لحیم‌کاری و روشنایی؛ کالاها را بر اساس برند، کاربرد و قیمت فیلتر کنید.", CanonicalUrl: "/search", Robots: "noindex, follow", Breadcrumbs: [new SeoBreadcrumb("خانه", "/"), new SeoBreadcrumb("جستجو و انتخاب ابزار", "/search")]),
             ViewName: "List");
         return await PageAsync(model);
     }

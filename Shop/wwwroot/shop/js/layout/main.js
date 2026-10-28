@@ -660,9 +660,11 @@ $(function () {
   const amazingSection = document.querySelector("#amazing");
   const amazingSlider = amazingSection?.querySelector("#amazingSlider");
   if (amazingSlider && amazingProducts.length) {
+    const amazingCount = amazingSection.querySelector("#amazingCount");
+    if (amazingCount) amazingCount.textContent = faNumber(amazingProducts.length);
     amazingSlider.innerHTML = amazingProducts.map((product) => window.HNProductCard.render(product, {
       variant: "slider", image: sliderImagePath(product), offer: true,
-      badge: product.discountPercent ? faNumber(product.discountPercent) + "٪ تخفیف" : "پیشنهاد ویژه",
+      badge: product.discountPercent ? faNumber(product.discountPercent) + "٪ تخفیف" : "منتخب",
     })).join("");
     window.HNUI?.enhance(amazingSection);
   }
@@ -702,11 +704,11 @@ $(function () {
   const amazingSliderOptions = {
     ...showcaseSliderOptions,
     responsive: {
-      0: { items: 2, margin: 2 },
-      768: { items: 3, margin: 14 },
-      992: { items: 4, margin: 14 },
-      1200: { items: 5, margin: 14 },
-      1440: { items: 6, margin: 14 },
+      0: { items: 1, margin: 10 },
+      576: { items: 2, margin: 12 },
+      768: { items: 2, margin: 14 },
+      992: { items: 3, margin: 12 },
+      1200: { items: 4, margin: 12 },
     },
   };
 

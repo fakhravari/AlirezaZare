@@ -34,7 +34,6 @@ public sealed class SeoController : Controller
         string[] staticPaths =
         [
             "/",
-            "/search",
             "/about",
             "/contact",
             "/faq",
