@@ -2699,7 +2699,7 @@ body.inner-page.mobile-page--profile-favorites #favoritesView .favorite-item-car
   }
 }
 
-@media (max-width: 991px) {
+@media (max-width: 1279px) {
   #favoritesView .flow-cards {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
@@ -2709,13 +2709,13 @@ body.inner-page.mobile-page--profile-favorites #favoritesView .favorite-item-car
   }
 }
 
-@media (max-width: 767px) {
+@media (max-width: 1099px) {
   #favoritesView .flow-cards {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-@media (max-width: 575px) {
+@media (max-width: 479px) {
   #favoritesView .flow-cards {
     grid-template-columns: minmax(0, 1fr);
     gap: 12px;
