@@ -60,26 +60,25 @@
                                         <span class="brand-focus-tag">@focusItem</span>
                                     }
                                 </span>
+                                @if (brand.FoundedYear.HasValue || !string.IsNullOrWhiteSpace(brand.SourceEditorial?.Country))
+                                {
+                                    <span class="brand-focus-meta" aria-label="اطلاعات برند">
+                                        @if (brand.FoundedYear.HasValue)
+                                        {
+                                            <span><i class="bi bi-calendar3" aria-hidden="true"></i><small>از</small><strong>@brand.FoundedYear</strong></span>
+                                        }
+                                        @if (!string.IsNullOrWhiteSpace(brand.SourceEditorial?.Country))
+                                        {
+                                            <span><i class="bi bi-globe2" aria-hidden="true"></i><small>مبدأ</small><strong>@brand.SourceEditorial.Country</strong></span>
+                                        }
+                                    </span>
+                                }
                             </span>
                         </div>
                         <div>
                             <span class="brand-profile-fact-icon"><i class="bi bi-box-seam" aria-hidden="true"></i></span>
                             <span><small>محصولات مرتبط در کاتالوگ</small><strong data-brand-product-count data-brand-slug="@brand.Slug">در حال شمارش…</strong></span>
                         </div>
-                        @if (brand.FoundedYear.HasValue)
-                        {
-                            <div>
-                                <span class="brand-profile-fact-icon"><i class="bi bi-calendar3" aria-hidden="true"></i></span>
-                                <span><small>آغاز فعالیت برند</small><strong>از @brand.FoundedYear</strong></span>
-                            </div>
-                        }
-                        @if (!string.IsNullOrWhiteSpace(brand.SourceEditorial?.Country))
-                        {
-                            <div>
-                                <span class="brand-profile-fact-icon"><i class="bi bi-globe2" aria-hidden="true"></i></span>
-                                <span><small>کشور مبدأ</small><strong>@brand.SourceEditorial.Country</strong></span>
-                            </div>
-                        }
                     </div>
                     @if (brand.SourceEditorial?.Audience is { Length: > 0 } audience)
                     {

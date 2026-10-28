@@ -579,6 +579,43 @@
   line-height: 1.5;
 }
 
+.brand-focus-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 9px;
+}
+
+.brand-focus-meta > span {
+  display: inline-flex;
+  min-height: 27px;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  border: 1px solid #e9e5db;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.78);
+  color: #617080;
+  line-height: 1.4;
+}
+
+.brand-focus-meta > span > i {
+  color: #a98248;
+  font-size: 12px;
+}
+
+.brand-profile-facts .brand-focus-meta > span > :is(small, strong) {
+  display: inline;
+  margin: 0;
+  font-size: 11px;
+  line-height: inherit;
+}
+
+.brand-focus-meta > span > strong {
+  color: var(--industrial-navy);
+  font-weight: 750;
+}
+
 .brand-detail-overview-copy p.brand-profile-note {
   margin-top: 12px;
   color: #536779;

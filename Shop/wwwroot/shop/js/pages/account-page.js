@@ -59,7 +59,13 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
                 .map(
                     (a) => {
                         const region = [a.province, a.city].filter(Boolean).join("، ");
-                        return `<article class="flow-card address-account-card"><h3>${esc(a.title)} ${a.id === selected ? "<small>آدرس انتخابی</small>" : ""}</h3><strong>${esc(a.recipient)} · ${esc(a.phone)}</strong><p>${esc(region)}، ${esc(a.street)}</p><p>کد پستی: ${esc(a.postal)}</p><div class="account-actions"><button data-select="${esc(a.id)}" ${a.id === selected ? "disabled" : ""}>انتخاب برای تحویل</button><button data-edit="${esc(a.id)}">ویرایش</button><button data-delete="${esc(a.id)}">حذف آدرس</button></div></article>`;
+                        const isSelected = a.id === selected;
+                        return `<article class="flow-card address-account-card${isSelected ? " is-selected" : ""}">
+<header class="address-card-header"><h3><i class="bi bi-bookmark" aria-hidden="true"></i><span>${esc(a.title)}</span></h3>${isSelected ? '<span class="address-selected-badge"><i class="bi bi-check-circle-fill" aria-hidden="true"></i>آدرس انتخابی</span>' : ""}</header>
+<div class="address-card-recipient"><i class="bi bi-person-vcard" aria-hidden="true"></i><strong>${esc(a.recipient)}</strong><span class="address-card-phone"><i class="bi bi-telephone" aria-hidden="true"></i><bdi>${esc(a.phone)}</bdi></span></div>
+<p class="address-card-location"><i class="bi bi-geo-alt" aria-hidden="true"></i><span>${esc(region)}، ${esc(a.street)}</span></p>
+<p class="address-card-postal"><i class="bi bi-mailbox" aria-hidden="true"></i><span>کد پستی</span><bdi>${esc(a.postal)}</bdi></p>
+<div class="account-actions address-card-actions"><button class="address-action-select" data-select="${esc(a.id)}" ${isSelected ? "disabled" : ""}><i class="bi bi-check2-circle" aria-hidden="true"></i><span>${isSelected ? "انتخاب شده" : "انتخاب برای تحویل"}</span></button><button data-edit="${esc(a.id)}"><i class="bi bi-pencil-square" aria-hidden="true"></i><span>ویرایش</span></button><button class="address-action-delete" data-delete="${esc(a.id)}"><i class="bi bi-trash3" aria-hidden="true"></i><span>حذف آدرس</span></button></div></article>`;
                     },
                 )
                 .join("")
@@ -184,7 +190,7 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
         if (overviewHost) {
             overviewHost.innerHTML = activeCoupons
                 .map(({ code, discountPercent }) =>
-                    `<article class="overview-coupon-card"><div class="overview-coupon-copy"><bdi class="overview-coupon-code" dir="ltr">${esc(code)}</bdi><strong>${ui.formatNumber(discountPercent)}٪ تخفیف خرید</strong><small>${appliedCode === code ? "در سبد خرید اعمال شده" : "قابل استفاده در سبد خرید"}</small></div><a href="/Cart" aria-label="استفاده از کد ${esc(code)}"><span>استفاده</span><i class="bi bi-arrow-left" aria-hidden="true"></i></a></article>`,
+                    `<article class="overview-coupon-card"><bdi class="overview-coupon-code" dir="ltr">${esc(code)}</bdi><div class="overview-coupon-copy"><strong>${ui.formatNumber(discountPercent)}٪ تخفیف خرید</strong><small>${appliedCode === code ? "در سبد خرید اعمال شده" : "قابل استفاده در سبد خرید"}</small></div><a href="/Cart" aria-label="استفاده از کد ${esc(code)}"><span>استفاده</span><i class="bi bi-arrow-left" aria-hidden="true"></i></a></article>`,
                 )
                 .join("");
         }

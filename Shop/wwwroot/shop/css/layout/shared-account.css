@@ -245,6 +245,10 @@
   color: var(--color-navy);
 }
 @media (max-width: 991px) {
+  .shared-account-card .account-links a > b {
+    display: none;
+  }
+
   .shared-account-card.account-panel,
   .shared-account-card.page-account-panel,
   .shared-account-card.shared-account-popover {

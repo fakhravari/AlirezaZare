@@ -268,12 +268,20 @@
   gap: 9px;
   width: 100%;
   padding: 10px 11px;
+  border: 1px solid transparent;
+  border-radius: 12px;
   background: transparent;
   text-align: right;
   font: inherit;
   font-size: 12px;
   line-height: 1.7;
   cursor: pointer;
+  appearance: none;
+}
+
+.journal-categories button:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--industrial-yellow) 62%, white);
+  outline-offset: 2px;
 }
 
 .journal-categories button.is-active {

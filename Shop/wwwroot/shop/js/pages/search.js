@@ -362,7 +362,7 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
     $("#minPrice").value = state.minPrice;
     $("#maxPrice").value = state.maxPrice;
     $("#productSearch").value = state.query;
-    $("#sortProducts").value = state.sort;
+    $(".sort-options input[value=\"" + state.sort + "\"]").checked = true;
     restoringUrl = false;
   }
   const fa = (n) => window.HNUI.formatNumber(n);
@@ -724,7 +724,8 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
     state.query = e.target.value.trim();
     render(true);
   };
-  $("#sortProducts").onchange = (e) => {
+  $(".sort-options").onchange = (e) => {
+    if (!e.target.matches('input[name="productSort"]')) return;
     state.sort = e.target.value;
     render(true, true);
   };

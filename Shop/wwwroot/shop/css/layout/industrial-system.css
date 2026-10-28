@@ -9259,6 +9259,17 @@ html
   transform: translateY(-2px);
 }
 
+#productView .product-detail-gallery-open > b {
+  border-radius: 999px;
+  background: var(--industrial-yellow);
+  color: var(--industrial-navy);
+}
+
+#productView .product-detail-gallery-open:is(:hover, :focus-visible) > b {
+  background: var(--industrial-navy);
+  color: #fff;
+}
+
 #productView .product-feedback-form > .product-feedback-submit {
   min-height: 48px;
   padding-inline: 20px;

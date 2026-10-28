@@ -166,16 +166,25 @@
                     autocomplete="off"/>
             </div>
             <div class="sort-box">
-                <label for="sortProducts">
-                    مرتب‌سازی:
-                </label
-                >
-                <select id="sortProducts">
-                    <option value="recommended">پیشنهادی</option>
-                    <option value="newest">جدیدترین</option>
-                    <option value="low">ارزان‌ترین</option>
-                    <option value="high">گران‌ترین</option>
-                </select>
+                <span class="sort-label" id="sortProductsLabel"><i class="bi bi-arrow-down-up" aria-hidden="true"></i> مرتب‌سازی بر اساس:</span>
+                <div class="sort-options" role="radiogroup" aria-labelledby="sortProductsLabel">
+                    <label class="sort-option">
+                        <input type="radio" name="productSort" value="recommended" checked />
+                        <span>محبوب‌ترین</span>
+                    </label>
+                    <label class="sort-option">
+                        <input type="radio" name="productSort" value="newest" />
+                        <span>جدیدترین</span>
+                    </label>
+                    <label class="sort-option">
+                        <input type="radio" name="productSort" value="low" />
+                        <span>ارزان‌ترین</span>
+                    </label>
+                    <label class="sort-option">
+                        <input type="radio" name="productSort" value="high" />
+                        <span>گران‌ترین</span>
+                    </label>
+                </div>
             </div>
         </div>
         <div class="results-summary" hidden>

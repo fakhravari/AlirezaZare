@@ -850,39 +850,79 @@ select {
 
 .sort-box {
   display: flex;
-  min-width: 235px;
-  padding: 0 13px;
+  min-width: 0;
+  min-inline-size: 0;
+  margin: 0;
+  padding: 7px 12px;
   align-items: center;
-  gap: 8px;
-  border: 1px solid var(--industrial-muted);
-  border-radius: 14px;
+  gap: 14px;
+  border: 1px solid #d8e1e6;
+  border-radius: 16px;
   background: #fff;
-  font-size: 13px;
+  box-shadow: 0 3px 10px rgba(16, 42, 67, 0.035);
 }
 
-.sort-box label {
+.sort-label {
+  flex: 0 0 auto;
   color: var(--industrial-steel);
   font-size: 13px;
   font-weight: 600;
   white-space: nowrap;
 }
 
-.sort-box select {
-  flex: 1;
-  min-height: 34px;
-  padding: 0 9px;
-  border: 1px solid rgba(165, 123, 64, 0.05);
-  border-radius: 8px;
-  background: var(--industrial-bg);
-  color: var(--industrial-navy);
+.sort-label i {
+  margin-inline-start: 4px;
+  color: #93a0aa;
   font-size: 13px;
-  font-weight: 600;
-  outline: 0;
 }
 
-.sort-box select option:checked {
-  background: var(--industrial-bg);
-  color: var(--industrial-yellow-dark);
+.sort-options {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 5px;
+}
+
+.sort-option {
+  position: relative;
+  display: inline-flex;
+  min-height: 34px;
+  padding: 0 13px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  color: #5f6c78;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color 160ms ease, background-color 160ms ease, box-shadow 160ms ease;
+}
+
+.sort-option input {
+  position: absolute;
+  inset: 0 auto auto 0;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.sort-option:has(input:checked) {
+  background: #ef4055;
+  color: #fff;
+}
+
+.sort-option:has(input:focus-visible) {
+  outline: 2px solid #a87c19;
+  outline-offset: 2px;
+}
+
+.sort-option:hover:not(:has(input:checked)) {
+  background: #f5f7f8;
+  color: var(--industrial-navy);
 }
 
 .results-summary {
@@ -1479,6 +1519,16 @@ select {
 
   .sort-box {
     min-height: 50px;
+    padding: 7px 9px;
+    gap: 8px;
+    overflow-x: auto;
+  }
+  .sort-options {
+    flex: 0 0 auto;
+  }
+  .sort-option {
+    min-height: 34px;
+    padding-inline: 10px;
   }
 
   .product-results {

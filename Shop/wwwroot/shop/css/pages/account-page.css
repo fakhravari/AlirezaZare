@@ -500,24 +500,129 @@
 }
 
 .address-account-card {
+  display: grid;
+  gap: 14px;
   margin-bottom: 16px;
-  border-color: rgba(113, 135, 166, 0.24) !important;
-  box-shadow: 0 8px 25px rgba(12, 35, 70, 0.06) !important;
+  border: 1px solid rgba(113, 135, 166, 0.2);
+  border-radius: 20px;
+  background: linear-gradient(145deg, #fff 0%, #fffefa 100%);
+  box-shadow: 0 10px 26px rgba(12, 35, 70, 0.055);
 }
 
-.address-account-card h3 {
+.address-account-card.is-selected {
+  border-color: color-mix(in srgb, var(--industrial-yellow) 56%, #d8e0e8);
+  background: linear-gradient(145deg, #fffdf5 0%, #fff 72%);
+}
+
+.address-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(113, 135, 166, 0.14);
+}
+
+.address-account-card .address-card-header h3 {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  margin: 0;
   color: var(--industrial-navy);
   font-size: 18px;
 }
 
-.address-account-card h3 small {
-  margin-inline-start: 10px;
-  padding: 5px 9px;
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--industrial-yellow) 14%, white);
-  font-size: 12px;
+.address-card-header h3 > i {
+  display: grid;
+  flex: 0 0 34px;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 1px solid rgba(195, 150, 35, 0.24);
+  border-radius: 11px;
+  background: #fff8df;
+  color: #986d00;
+  font-size: 16px;
 }
 
+.address-selected-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 11px;
+  border: 1px solid rgba(31, 125, 91, 0.16);
+  border-radius: 999px;
+  background: #edf8f1;
+  color: #216b4d;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.address-card-recipient,
+.address-card-phone,
+.address-card-location,
+.address-card-postal {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin: 0;
+  color: var(--industrial-steel);
+  line-height: 1.9;
+}
+
+.address-card-recipient > i,
+.address-card-phone > i,
+.address-card-location > i,
+.address-card-postal > i {
+  flex: 0 0 18px;
+  margin-top: 4px;
+  color: #a77a0b;
+  text-align: center;
+}
+
+.address-card-recipient { align-items: center; flex-wrap: wrap; color: var(--industrial-navy); }
+.address-card-recipient > strong { font-size: 15px; }
+.address-card-phone { margin-inline-start: auto; font-size: 13px; }
+.address-card-location > span { overflow-wrap: anywhere; }
+.address-card-postal { align-items: center; font-size: 13px; }
+.address-card-postal bdi { color: var(--industrial-navy); font-weight: 700; }
+
+.address-card-actions {
+  justify-content: flex-start;
+  padding-top: 12px;
+  border-top: 1px solid rgba(113, 135, 166, 0.14);
+}
+
+.address-card-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 42px;
+  padding: 9px 13px;
+  transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+}
+
+.address-card-actions button:hover:not(:disabled) { transform: translateY(-1px); border-color: rgba(167, 122, 11, 0.35); }
+.address-card-actions button:focus-visible { outline: 3px solid rgba(246, 197, 21, 0.55); outline-offset: 2px; }
+.address-card-actions .address-action-select { background: #fff8df; }
+.address-card-actions .address-action-select:disabled { border-color: rgba(31, 125, 91, 0.15); background: #edf8f1; color: #216b4d; opacity: 1; }
+.address-card-actions .address-action-delete { color: #8b4343; }
+
+@media (max-width: 575.98px) {
+  .address-account-card { gap: 12px; padding: 16px !important; }
+  .address-card-header { align-items: flex-start; }
+  .address-account-card .address-card-header h3 { font-size: 16px; }
+  .address-selected-badge { padding: 6px 9px; font-size: 11px; }
+  .address-card-recipient { align-items: flex-start; }
+  .address-card-phone { flex-basis: 100%; margin-inline-start: 27px; }
+  .address-card-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .address-card-actions button { width: 100%; padding-inline: 8px; font-size: 12px; }
+  .address-card-actions .address-action-delete { grid-column: 1 / -1; }
+}
 .account-actions {
   display: flex;
   flex-wrap: wrap;
@@ -930,13 +1035,16 @@
 }
 .order-invoice-dialog {
   box-sizing: border-box;
-  width: min(920px, calc(100vw - 32px));
-  max-width: 920px;
+  width: min(960px, calc(100vw - 48px));
+  max-width: 960px;
   max-height: min(760px, calc(100dvh - 32px));
-  padding: 28px;
+  padding: 32px;
   border: 1px solid color-mix(in srgb, var(--industrial-yellow) 34%, white);
   border-radius: 22px;
-  background: var(--color-cream, #fffdfa);
+  background:
+    radial-gradient(circle at 4% 4%, rgba(232, 190, 69, 0.13), transparent 25%),
+    radial-gradient(circle at 96% 96%, rgba(221, 177, 79, 0.09), transparent 28%),
+    linear-gradient(145deg, #fffdf7 0%, #fffaf0 100%);
   color: var(--industrial-navy);
   box-shadow: 0 26px 80px rgba(16, 42, 67, 0.26);
   overflow: auto;
@@ -953,43 +1061,80 @@
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 .order-invoice-dialog-header {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 18px;
-  padding-bottom: 18px;
-  border-bottom: 1px solid var(--industrial-line);
+  padding: 18px 20px;
+  border: 1px solid rgba(195, 151, 42, 0.2);
+  border-radius: 16px;
+  background: linear-gradient(110deg, rgba(255, 247, 221, 0.9), rgba(255, 255, 255, 0.82));
+}
+.order-invoice-dialog-header::before {
+  position: absolute;
+  z-index: -1;
+  top: -42px;
+  left: -20px;
+  width: 132px;
+  height: 112px;
+  border: 1px solid rgba(194, 151, 46, 0.23);
+  border-radius: 43% 57% 48% 52%;
+  box-shadow: 0 0 0 12px rgba(224, 185, 85, 0.07), 0 0 0 28px rgba(224, 185, 85, 0.045);
+  content: "";
+  transform: rotate(-16deg);
+  pointer-events: none;
+}
+.order-invoice-dialog-header::after {
+  position: absolute;
+  z-index: -1;
+  top: 20px;
+  left: 90px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(190, 145, 30, 0.55);
+  box-shadow: 15px 12px 0 -2px rgba(190, 145, 30, 0.35), 27px -7px 0 -2px rgba(190, 145, 30, 0.25);
+  content: "";
+  pointer-events: none;
+}
+.order-invoice-dialog-header > div,
+.order-invoice-dialog-header > .site-modal-close {
+  position: relative;
+  z-index: 1;
 }
 .order-invoice-dialog-header span {
   color: var(--industrial-yellow-dark);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
 }
 .order-invoice-dialog-header h2 {
-  margin: 4px 0 0;
-  font-size: 24px;
+  margin: 5px 0 0;
+  font-size: 26px;
 }
 .order-invoice-dialog-header .site-modal-close { flex: 0 0 40px; }
 .order-invoice-layout {
   display: grid;
-  grid-template-columns: minmax(250px, .8fr) minmax(0, 1.2fr);
-  gap: 18px;
-  padding-top: 20px;
+  grid-template-columns: minmax(260px, .8fr) minmax(0, 1.2fr);
+  gap: 20px;
+  padding-top: 24px;
 }
 .order-invoice-master,
 .order-invoice-detail {
   min-width: 0;
-  padding: 18px;
-  border: 1px solid var(--industrial-line);
+  padding: 20px;
+  border: 1px solid rgba(194, 151, 46, 0.18);
   border-radius: 15px;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.88);
 }
 .order-invoice-layout h3 {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin: 0 0 14px;
-  font-size: 15px;
+  margin: 0 0 16px;
+  font-size: 16px;
 }
 .order-invoice-layout h3 i { color: var(--industrial-yellow-dark); }
 .order-invoice-master dl { display: grid; gap: 0; margin: 0; }
@@ -997,9 +1142,9 @@
   display: flex;
   justify-content: space-between;
   gap: 12px;
-  padding: 11px 0;
+  padding: 12px 0;
   border-bottom: 1px solid #edf0f2;
-  font-size: 12px;
+  font-size: 13px;
 }
 .order-invoice-master dl > div:last-child { border-bottom: 0; }
 .order-invoice-master dt { color: var(--industrial-steel); }
@@ -1007,28 +1152,28 @@
 .order-invoice-table { border: 1px solid #e7ebee; border-radius: 12px; overflow: hidden; }
 .order-invoice-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 70px minmax(110px, auto);
-  gap: 10px;
+  grid-template-columns: minmax(0, 1fr) 76px minmax(110px, auto);
+  gap: 12px;
   align-items: center;
-  padding: 14px;
-  font-size: 12px;
+  padding: 15px 16px;
+  font-size: 13px;
 }
 .order-invoice-row + .order-invoice-row { border-top: 1px solid #e7ebee; }
-.order-invoice-table-heading { background: #f5f7f8; color: var(--industrial-steel); font-weight: 700; }
+.order-invoice-table-heading { background: #fff8e6; color: var(--industrial-steel); font-weight: 700; }
 .order-invoice-row > :last-child { text-align: left; }
 .order-invoice-payable {
   display: flex;
   justify-content: space-between;
   gap: 12px;
-  margin-top: 14px;
-  padding: 15px;
+  margin-top: 16px;
+  padding: 16px 18px;
   border-radius: 12px;
-  background: #fff7df;
-  font-size: 13px;
+  background: linear-gradient(105deg, #fff3c9, #fff9e9);
+  font-size: 14px;
   font-weight: 700;
 }
-.order-invoice-payable strong { color: var(--industrial-navy); font-size: 17px; }
-.order-invoice-demo-note { margin: 14px 0 0; color: var(--industrial-steel); font-size: 11px; line-height: 1.9; }
+.order-invoice-payable strong { color: var(--industrial-navy); font-size: 19px; }
+.order-invoice-demo-note { margin: 16px 0 0; color: var(--industrial-steel); font-size: 12px; line-height: 1.9; }
 @media (max-width: 640px) {
   .profile-order-card .order-card-actions { width: 100%; }
   .profile-order-card .order-card-actions > a,
@@ -1629,7 +1774,7 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
 .account-tabs a small,
 .account-sidebar-help :is(strong, a),
 .overview-empty p,
-.address-account-card h3 small,
+.address-selected-badge,
 #orders .orders-heading > div > span,
 .orders-pagination :is(p, button),
 .account-welcome-links a,
@@ -1984,8 +2129,16 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
 
 @media (max-width: 767px) {
   .account-stats {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(6, minmax(0, 1fr));
     gap: 8px;
+  }
+
+  .account-stats article {
+    grid-column: span 2;
+  }
+
+  .account-stats article:nth-child(n + 4) {
+    grid-column: span 3;
   }
 
   .account-stats article {
@@ -2227,11 +2380,12 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
 }
 
 .overview-coupon-card {
-  display: flex;
+  display: grid;
   min-width: 0;
   align-items: center;
-  justify-content: space-between;
-  gap: 14px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-areas: "code details action";
+  gap: 10px;
   padding: 13px 14px;
   border: 1px solid color-mix(in srgb, var(--color-gold) 30%, white);
   border-radius: 14px;
@@ -2241,13 +2395,13 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
 .overview-coupon-copy {
   display: grid;
   min-width: 0;
-  grid-template-columns: auto 1fr;
-  align-items: center;
-  gap: 4px 10px;
+  grid-area: details;
+  gap: 3px;
 }
 
 .overview-coupon-code {
-  grid-row: span 2;
+  grid-area: code;
+  justify-self: start;
   padding: 7px 10px;
   border: 1px dashed color-mix(in srgb, var(--color-gold) 55%, white);
   border-radius: 9px;
@@ -2255,6 +2409,7 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
   color: var(--color-navy);
   font-weight: 800;
   letter-spacing: 0.04em;
+  white-space: nowrap;
 }
 
 .overview-coupon-copy strong {
@@ -2269,6 +2424,7 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
 
 .overview-coupon-card > a {
   display: inline-flex;
+  grid-area: action;
   flex: 0 0 auto;
   align-items: center;
   gap: 6px;
@@ -2294,12 +2450,16 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
   }
 
   .overview-coupon-card {
-    gap: 8px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "details details"
+      "code action";
+    gap: 10px 8px;
     padding: 10px;
   }
 
   .overview-coupon-copy {
-    gap: 3px 7px;
+    gap: 3px;
   }
 
   .overview-coupon-card > a {
@@ -2396,6 +2556,22 @@ body.inner-page .account-welcome .profile-breadcrumb ol > li.cart-breadcrumb-cur
 @media (max-width: 380px) {
   .account-welcome { padding: 12px 14px; }
   .account-welcome .profile-breadcrumb { margin-top: 10px; }
+}
+
+@media (max-width: 767px) {
+  body.inner-page[class*="mobile-page--profile-"] main.profile-page-main {
+    width: calc(100% - 16px);
+    max-width: 100%;
+    padding-inline: 8px;
+  }
+
+  body.inner-page[class*="mobile-page--profile-"] .account-dashboard {
+    margin-top: 12px;
+  }
+
+  body.inner-page[class*="mobile-page--profile-"] .account-sidebar {
+    margin-bottom: 14px;
+  }
 }
 
 #favoritesView .flow-cards {

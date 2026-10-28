@@ -46,7 +46,7 @@ _Shop
 |---|---|---|---|
 | هدر | `_HomeHeader`, `_InnerHeader`, `_Header`؛ body کلاس home/inner | `shared-header.css`, `shared-mega-menu.css`, themeها؛ `layout/main.js` | خانه + یک inner page، دسکتاپ + موبایل، login/logout و search open |
 | مگامنو | خانه و inner markup/variant متفاوت؛ inner selectorهایی مثل `.page-mega-sidebar` | `shared-mega-menu.css`, `mega-menu-unified.css`, `quick-links-menu.css`; باز/بسته و category در `header-navigation.js` | trigger → panel، keyboard/ArrowDown/Escape، فضای خالی هدر، شاخهٔ پیش‌فرض و breakpoint 992 |
-| account popover/drawer هدر | `.shared-account-card`, `.shared-account-popover`, `.account-links` | `shared-account.css`; تعامل در `main.js` | کاربر خارج/وارد، desktop/mobile، Escape، focus و scroll |
+| account popover/drawer هدر | `.shared-account-card`, `.shared-account-popover`, `.account-links` | `shared-account.css`; تعامل در `main.js` | کاربر خارج/وارد، desktop/mobile، Escape، focus و scroll؛ badge عددی گزینه‌های منو در موبایل پنهان است |
 | cart/favorites/compare panels | `.page-cart-panel`, `.search-cart-drawer`, `.favorites-panel`, `.compare-panel` و item/footerها | `shared-cart.css`, `commerce.css`; `main.js` + `commerce.js` | سبد خالی/پر، تعداد زیاد آیتم، پنل باز و scroll داخلی، responsive |
 | پیوندهای مرتبط چهارگانه | `_RelatedLinks.cshtml` با چهار مقصد محصول، ارسال، ضمانت و FAQ | `layout/shared-related-links.css`؛ کارت‌های کامل بدون قاب بیرونی مشترک؛ ثبت مالک در `tools/ui-owners.json` | صفحهٔ محصول، برند، علاقه‌مندی، سبد و صفحه‌های خدمات؛ چهارستونه دسکتاپ، دوستونه تبلت و تک‌ستونه موبایل |
 | modal ورود/ثبت‌نام سراسری | `#loginModal`, `.login-modal-form-panel`, `.login-close` در `_Panels.cshtml` | layout در `style.css`, `luxury-theme.css`, `industrial-system.css`; قواعد فرم در `shared-login.css`; تعامل در `main.js` | ورود/ثبت‌نام/OTP، viewport کوتاه موبایل، اسکرول داخلی، بستن و بازگشت focus |
@@ -54,7 +54,7 @@ _Shop
 | فرم آدرس | `_AddressForm`, `#addressDialog` در Cart و dialog آدرس پروفایل | `checkout.css`, `account-page.css`; `address-fields.js`, `iran-places.js`, `account-page.js` | Country/Province/City مدل‌های جدا دارند؛ فرم استان و شهر را انتخاب می‌کند و شهر به استان وابسته است. کشور ایران در رکورد ثابت است؛ خلاصهٔ آدرس استان/شهر را نمایش می‌دهد. Checkout این فرم را ندارد و فقط آدرس انتخابی را پیش‌نمایش می‌کند |
 | مزیت خرید مطمئن | `_PurchaseBenefits`, `.purchase-benefits` | `style.css` و overrideهای `industrial-system.css`; JS اختصاصی ندارد | صفحهٔ محصول و هر مسیر دیگری که partial را رندر می‌کند |
 | لینک‌های مرتبط | `_RelatedLinks` | `commerce.css`, overrideهای `pages.css`; JS اختصاصی ندارد | صفحات service/editorial که partial را مصرف می‌کنند |
-| کارت محصول | `HNProductCard.render` در `store/product-card.js` | `shared-product-card.css`؛ [نقشهٔ مالکیت](../../tools/ui-owners.json) | Home/Search/Related/Favorites و قیمت Compare؛ crop تصویر و عنوان طولانی |
+| کارت محصول | `HNProductCard.render` در `store/product-card.js` | `shared-product-card.css`؛ [نقشهٔ مالکیت](../../tools/ui-owners.json) | Home/Search/Related/Favorites و قیمت Compare؛ آیکن مقایسهٔ خطیِ ترازو، crop تصویر و عنوان طولانی |
 | فوتر موبایل | `_Footer` و `.footer-main > .col-6` | `mobile-pages.css`؛ فاصلهٔ بالای همهٔ ستون‌های لینک از gutter مشترک Bootstrap می‌آید | هم‌ترازی عنوان‌های هر ردیف، به‌ویژه «کمپانی و قوانین» و «راه‌های ارتباطی»؛ margin-top اختصاصی ستون آخر نگذارید |
 
 این‌ها نقطهٔ شروع‌اند؛ selectorهای دقیق و حالت واقعی را با `rg` و Elements panel پیدا کنید. از فرض «یک partial = یک CSS» پرهیز کنید.
