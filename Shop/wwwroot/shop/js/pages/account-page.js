@@ -257,8 +257,9 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
                 history.replaceState(null, "", normalizedUrl);
         }
         if (moveFocus) {
-            profileHost.focus({ preventScroll: true });
-            profileHost.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+            const heading = document.querySelector("#profileCouponsTitle");
+            heading?.focus({ preventScroll: true });
+            heading?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
         }
     }
     window.addEventListener("popstate", () => renderCoupons());

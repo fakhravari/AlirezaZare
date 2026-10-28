@@ -785,6 +785,41 @@
   }
 }
 
+@media (max-width: 389px) {
+  .mobile-page--profile-favorites #favoritesView .flow-cards {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 14px !important;
+  }
+
+  .mobile-page--profile-favorites #favoritesView .favorite-item-card .product-image {
+    height: 220px !important;
+    min-height: 220px !important;
+    max-height: 220px !important;
+  }
+
+  .mobile-page--profile-favorites #favoritesView .favorite-item-card .product-info {
+    padding: 12px 14px 8px !important;
+  }
+
+  .mobile-page--profile-favorites #favoritesView .favorite-item-card .product-info h3 {
+    min-height: 0;
+    font-size: 16px;
+    line-height: 1.65;
+  }
+
+  .mobile-page--profile-favorites #favoritesView .favorite-item-card .favorite-item-price {
+    font-size: 15px;
+  }
+
+  .mobile-page--profile-favorites #favoritesView .favorite-item-card .list-remove-button {
+    width: calc(100% - 28px) !important;
+    min-height: 42px !important;
+    margin: 4px 14px 14px !important;
+    padding: 8px 12px !important;
+    font-size: 12px !important;
+  }
+}
+
 /* Keep profile navigation and favorite-product grids aligned to the RTL start. */
 .inner-page[class*="mobile-page--profile-"] .account-welcome > .profile-breadcrumb {
   right: 20px;

@@ -1925,13 +1925,22 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
             : `<div class="compare-empty empty-state-card"><div class="compare-empty-art" aria-hidden="true"><span><i class="bi bi-columns-gap"></i></span><i class="bi bi-plus-lg"></i></div><span class="compare-empty-kicker">مقایسهٔ هوشمند محصولات</span><h2>هنوز محصولی برای مقایسه ندارید</h2><p>محصول‌های موردنظرتان را از صفحهٔ فروشگاه انتخاب کنید؛ مشخصاتشان را اینجا کنار هم و یک‌جا بررسی می‌کنید.</p><a class="flow-button" href="Search"><i class="bi bi-search" aria-hidden="true"></i> جست‌وجوی محصولات <i class="bi bi-arrow-left" aria-hidden="true"></i></a><small class="compare-empty-hint"><i class="bi bi-lightbulb" aria-hidden="true"></i> برای افزودن، آیکن مقایسه را روی کارت هر محصول بزنید.</small></div>`;
         view.querySelectorAll("[data-compare-remove-page]").forEach(
             (button) =>
-            (button.onclick = () => {
+            (button.onclick = async () => {
+                const productId = String(button.dataset.compareRemovePage);
+                const productName = catalog.find((product) => String(product.id) === productId)?.name || "این محصول";
+                const confirmed = await window.confirmFormSubmission?.({
+                    title: "حذف از مقایسه؟",
+                    message: `«${productName}» از فهرست مقایسه حذف می‌شود. ادامه می‌دهید؟`,
+                    confirmText: "بله، حذف شود",
+                });
+                if (!confirmed) return;
                 const next = ui.storage
                     .json("hn-compare", [])
                     .map(String)
-                    .filter((id) => id !== button.dataset.compareRemovePage);
+                    .filter((id) => id !== productId);
                 ui.storage.set("hn-compare", JSON.stringify(next));
                 renderCompare();
+                ui.showToast("محصول از فهرست مقایسه حذف شد.", "success");
             }),
         );
         view.querySelector("[data-compare-clear-all]")?.addEventListener(

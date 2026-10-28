@@ -1602,10 +1602,7 @@ summary:focus-visible {
   font-size: 12px;
 }
 .compare-product-card h2 {
-  min-height: 52px;
-  margin: 5px 0 12px;
   color: #142e51;
-  font-size: 18px;
 }
 .compare-product-card > strong {
   display: block;
@@ -1797,11 +1794,6 @@ summary:focus-visible {
 }
 .compare-product-card > a > span {
   font-size: 13px;
-}
-.compare-product-card h2 {
-  min-height: 58px;
-  font-size: 20px;
-  line-height: 1.8;
 }
 .compare-product-card > strong {
   font-size: 17px;
@@ -2015,9 +2007,19 @@ summary:focus-visible {
   font-weight: 750;
 }
 .compare-product-card h2 {
-  min-height: 56px;
+  display: grid;
+  min-height: 4em;
   margin: 8px 0 4px;
+  align-items: center;
+  text-align: center;
+  font-size: 20px;
   line-height: 1.75;
+}
+.compare-product-card h2 > a {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 .compare-price {
   display: flex;
