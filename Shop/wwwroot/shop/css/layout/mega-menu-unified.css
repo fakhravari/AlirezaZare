@@ -1,6 +1,7 @@
 /* Shared visual system for home and inner-page product mega menus.
    Their positioning remains context-specific; their presentation is shared. */
-:root {
+.home-page #electricalSubmenu,
+.inner-page #mainNav .category-nav-mega {
   --mega-surface: #fffdf8;
   --mega-card: #f7f9fb;
   --mega-card-border: rgba(190, 145, 65, 0.28);
@@ -10,6 +11,17 @@
   --mega-gold: #b18a35;
   --mega-gold-bright: var(--industrial-yellow);
   --mega-shadow: 0 14px 34px rgba(16, 42, 67, 0.14);
+}
+
+@media (min-width: 992px) {
+  .inner-page #mainNav .category-nav-mega {
+    position: fixed;
+    top: 163px;
+    right: max(18px, calc((100vw - var(--container-wide-max)) / 2));
+    left: max(18px, calc((100vw - var(--container-wide-max)) / 2));
+    width: auto;
+    transform: none;
+  }
 }
 
 .home-page .electrical-category-heading > span,

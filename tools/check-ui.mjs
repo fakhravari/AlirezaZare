@@ -10,7 +10,7 @@ const read = file => fs.readFile(path.join(root, file), 'utf8');
 const owners = JSON.parse(await read('tools/ui-owners.json')).components;
 const baseline = JSON.parse(await read('tools/ui-legacy-budget.json'));
 const themeTokensFile = 'Shop/wwwroot/shop/css/core/design-tokens.css';
-const publicThemeToken = /^--(?:color-|font-size-|text-(?:xs|sm|md|base|lg|xl)$|space-|radius-|shadow-(?:card|card-hover)|ui-(?:navy|gold|surface|text|muted|border|radius-|shadow-|ease))/;
+const publicThemeToken = /^--(?:color-|font-size-|text-(?:xs|sm|md|base|lg|xl)$|space-|radius-|shadow-(?:card|card-hover)|ui-(?:navy|gold|surface|text|muted|border|radius-|shadow-|ease)|md-|mega-)/;
 const errors = [];
 const exists = async file => { try { await fs.access(path.join(root, file)); return true; } catch { return false; } };
 async function files(directory, suffix) {

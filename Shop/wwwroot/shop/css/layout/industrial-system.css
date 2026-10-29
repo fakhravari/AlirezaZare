@@ -13419,17 +13419,6 @@ body .electrical-swiper .swiper-pagination-bullet-active {
 
 /* Keep the home and inner-page category mega menus on one layout and palette. */
 @media (min-width: 992px) {
-  .inner-page #mainNav .category-nav-mega {
-    position: fixed;
-    top: 149px;
-    right: max(18px, calc((100vw - var(--container-wide-max)) / 2));
-    left: max(18px, calc((100vw - var(--container-wide-max)) / 2));
-    width: auto;
-    height: min(580px, calc(100vh - 112px));
-    min-height: min(380px, calc(100vh - 112px));
-    transform: none;
-  }
-
   .inner-page #mainNav .category-mega-sidebar,
   .home-page .electrical-category-menu {
     background: #f7f9fa !important;
