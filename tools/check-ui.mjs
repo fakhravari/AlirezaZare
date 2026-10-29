@@ -9,6 +9,8 @@ const root = fileURLToPath(new URL('../', import.meta.url));
 const read = file => fs.readFile(path.join(root, file), 'utf8');
 const owners = JSON.parse(await read('tools/ui-owners.json')).components;
 const baseline = JSON.parse(await read('tools/ui-legacy-budget.json'));
+const themeTokensFile = 'Shop/wwwroot/shop/css/core/design-tokens.css';
+const publicThemeToken = /^--(?:color-|font-size-|text-(?:xs|sm|md|base|lg|xl)$|space-|radius-|shadow-(?:card|card-hover)|ui-(?:navy|gold|surface|text|muted|border|radius-|shadow-|ease))/;
 const errors = [];
 const exists = async file => { try { await fs.access(path.join(root, file)); return true; } catch { return false; } };
 async function files(directory, suffix) {
@@ -39,6 +41,12 @@ for (const file of styles) {
     css.walkDecls(decl => { if (decl.important) important++; });
     if (important > (baseline.important[file] || 0)) errors.push(`${file}: !important budget increased (${important})`);
     css.walkRules(rule => {
+      if (rule.selector.trim() === ':root' && file !== themeTokensFile) {
+        rule.walkDecls(declaration => {
+          if (publicThemeToken.test(declaration.prop))
+            errors.push(`${file}:${declaration.source.start.line}: public theme token ${declaration.prop} belongs in ${themeTokensFile}`);
+        });
+      }
       const conditions = [];
       const selectorPath = [];
       for (let parent = rule.parent; parent.type !== 'root'; parent = parent.parent) {

@@ -2135,7 +2135,6 @@ footer .trust-badges .trust-badge-image {
 html body .login-input:focus-within,
 html body .tracking-input:focus-within,
 html body .search-box:focus-within,
-html body .flow-coupon-entry:focus-within,
 html body .newsletter .subscribe:focus-within {
   border-color: var(--industrial-yellow);
   box-shadow: var(--focus-ring-soft);

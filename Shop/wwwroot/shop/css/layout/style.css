@@ -3005,10 +3005,6 @@ body {
     display: block;
   }
 
-  .brand-dropdown > .nav-link:hover {
-    color: var(--color-gold) !important;
-  }
-
   .mega-menu {
     width: min(1380px, calc(100vw - 64px));
     top: 88px !important;
@@ -3150,22 +3146,6 @@ body {
   }
 }
 
-.brand-menu {
-  min-width: 250px;
-  padding: 8px 14px 12px;
-  border: 0;
-  border-top: 3px solid var(--color-gold);
-  border-radius: 0 0 8px 8px;
-  box-shadow: 0 22px 55px rgba(2, 12, 23, 0.24);
-}
-
-.brand-menu .dropdown-header {
-  padding: 10px 8px 12px;
-  color: var(--color-navy);
-  font-size: 12px;
-  font-weight: 800;
-}
-
 .brand-menu .dropdown-item {
   padding: 11px 9px;
   color: #52606c;
@@ -3179,13 +3159,6 @@ body {
 
 .brand-menu li:nth-child(n + 3) .dropdown-item {
   border-top: 1px solid #e9e3da;
-}
-
-.brand-menu .dropdown-item:hover,
-.brand-menu .dropdown-item:focus {
-  padding-right: 14px;
-  color: var(--color-navy);
-  background: #f8f5ef;
 }
 
 .mobile-category-list {
@@ -7113,26 +7086,10 @@ h6,
   letter-spacing: 1px;
 }
 
-.showcase-card-body h3 {
-  margin: 7px 0 12px;
-  color: var(--color-navy);
-  font-size: 21px;
-}
-
-.showcase-card-body strong {
-  color: var(--color-navy);
-  font-size: 16px;
-}
-
 .showcase-card-body .add-cart {
   margin-top: auto;
   padding: 10px 14px;
   font-size: 13px;
-}
-
-.showcase-card-body .add-cart:hover,
-.showcase-card-body .add-cart.added {
-  background: var(--color-navy);
 }
 
 .category-slider {
@@ -10444,24 +10401,6 @@ footer .copyright::before {
 /* =========================================================
    FINAL COMPONENT SYSTEM — shared rhythm, shape and motion
    ========================================================= */
-:root {
-  --ui-navy: #0b2868;
-  --ui-navy-deep: #071b5c;
-  --ui-gold: #b4894d;
-  --ui-gold-soft: #dfbd82;
-  --ui-surface: #ffffff;
-  --ui-surface-soft: #f8f5ef;
-  --ui-text: var(--color-ink);
-  --ui-muted: #68738a;
-  --ui-border: #e1d8ca;
-  --ui-radius-sm: 12px;
-  --ui-radius-md: 18px;
-  --ui-radius-lg: 24px;
-  --ui-shadow-1: 0 10px 26px rgba(19, 36, 72, 0.07);
-  --ui-shadow-2: 0 18px 38px rgba(19, 36, 72, 0.12);
-  --ui-ease: 0.25s ease;
-}
-
 /* Section rhythm */
 .py-section {
   padding-top: 88px;

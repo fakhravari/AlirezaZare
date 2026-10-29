@@ -20,7 +20,7 @@ git diff --check
 
 | کنترل | پوشش | محدودیت |
 |---|---|---|
-| `npm run check` | syntax همهٔ JSهای برنامه، parse CSS، مالکیت component، سقف !important، ترتیب dependency و ساختار/لینک docs | جای بررسی بصری را نمی‌گیرد |
+| `npm run check` | syntax همهٔ JSهای برنامه، parse CSS، مالکیت component، سقف !important، جایگاه توکن‌های عمومی تم در design-tokens.css، ترتیب dependency و ساختار/لینک docs | جای بررسی بصری را نمی‌گیرد |
 | `npm test` | شناسه/URL/رسانهٔ قبل و بعد از انتقال، جابه‌جایی ترتیب کاتالوگ، immutable بودن، روابط، مسیر واقعی فایل‌ها، قیمت/موجودی سبد، migration و mount/event/renderer | منطق JS در محیط VM؛ فاقد layout مرورگر |
 | `tests/Shop.Contracts` | خواندن واقعی CatalogSnapshot، رد داده‌های ناسازگار و JSON امن برای script | برنامهٔ contract با exit code، بدون وابستگی تست خارجی |
 | `npm run test:http` | پاسخ مسیرهای اصلی، کاتالوگ مشترک صفحات، redirect canonical محصول و host، 404 کاربردی/noindex، noindex جستجو، metadata و H1 یکتای همهٔ URLهای sitemap، sitemap و تصویرهای صفحات و CSSهای مصرف‌شده | JS صفحه را اجرا نمی‌کند و redirect دامنهٔ اصلی را در DNS/میزبانی عمومی بررسی نمی‌کند؛ کنترل مسیر تصاویر در [رسانه](../media/images.md) توضیح داده شده است |
@@ -46,4 +46,4 @@ git diff --check
 
 [فهرست این بخش](README.md) · [فهرست مستندات](../README.md)
 
-آخرین تطبیق با کد: ۲۸ اکتبر ۲۰۲۶.
+آخرین تطبیق با کد: ۳۰ اکتبر ۲۰۲۶.

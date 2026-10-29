@@ -139,6 +139,22 @@
   --luxury-border-strong: rgba(16, 42, 67, 0.34);
   --luxury-hover-surface: #eef2f4;
   --luxury-focus-ring: rgba(246, 197, 21, 0.24);
+  /* Shared component aliases must derive from the canonical theme tokens. */
+  --ui-navy: var(--color-navy);
+  --ui-navy-deep: var(--color-navy);
+  --ui-gold: var(--color-gold);
+  --ui-gold-soft: var(--industrial-accent-border);
+  --ui-surface: var(--color-surface);
+  --ui-surface-soft: var(--color-page);
+  --ui-text: var(--color-text);
+  --ui-muted: var(--color-text-muted);
+  --ui-border: var(--color-line);
+  --ui-radius-sm: var(--radius-sm);
+  --ui-radius-md: var(--radius-md);
+  --ui-radius-lg: var(--radius-panel-standard);
+  --ui-shadow-1: var(--shadow-card);
+  --ui-shadow-2: var(--shadow-card-hover);
+  --ui-ease: var(--transition-fast);
   --bs-primary: var(--industrial-navy);
   --bs-secondary: var(--industrial-steel);
   --bs-warning: var(--industrial-yellow);

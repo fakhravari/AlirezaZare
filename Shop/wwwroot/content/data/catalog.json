@@ -5643,12 +5643,12 @@
     },
     "product-22": {
       "id": "product-22",
-      "main": "content/products/images/main/electrician-pliers-set-hn-022-row-022-v2-main.png",
+      "main": "content/products/images/main/electrician-pliers-set-hn-022-row-022-v2-main.jpg",
       "card": "content/products/images/card/electrician-pliers-set-hn-022-row-022-v2-card-800.jpg",
       "thumbnail": "content/products/images/thumbnail/electrician-pliers-set-hn-022-row-022-v2-thumbnail-256.jpg",
       "images": [
         {
-          "src": "content/products/images/main/electrician-pliers-set-hn-022-row-022-v2-main.png",
+          "src": "content/products/images/main/electrician-pliers-set-hn-022-row-022-v2-main.jpg",
           "thumbnail": "content/products/images/thumbnail/electrician-pliers-set-hn-022-row-022-v2-thumbnail-256.jpg"
         }
       ],

@@ -58,6 +58,10 @@
   }
 }
 
+#mainNav .brand-menu .dropdown-item:is(:hover, :focus-visible) {
+  padding-right: 14px;
+}
+
 /* Third level only: interactive links inside the four-column content area. */
 @media (min-width: 992px) {
   #mainNav .mega-content-grid > .mega-links > a,

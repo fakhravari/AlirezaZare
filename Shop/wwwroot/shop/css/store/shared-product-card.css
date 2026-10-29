@@ -279,7 +279,7 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   grid-template-areas:
-    "current discount"
+    "current current"
     "old discount";
   align-items: center;
   column-gap: 10px;
@@ -310,6 +310,7 @@
   justify-self: start;
   margin: 0;
   text-align: right;
+  white-space: nowrap;
 }
 
 :is(
@@ -320,7 +321,7 @@
     .product-info > p
   ).has-discount .product-price-discount {
   grid-area: discount;
-  align-self: start;
+  align-self: center;
   justify-self: end;
 }
 
@@ -521,7 +522,7 @@
 #productView .product-detail-related-card .product-info > p.has-discount {
   grid-template-columns: max-content max-content;
   grid-template-areas:
-    "current discount"
+    "current current"
     "old discount";
   justify-content: start;
   column-gap: 8px;
@@ -749,7 +750,7 @@
     grid-template-columns: minmax(0, 1fr) auto;
     grid-template-rows: 28px 24px;
     grid-template-areas:
-      "current discount"
+      "current current"
       "old discount";
     align-items: center;
     align-content: center;
