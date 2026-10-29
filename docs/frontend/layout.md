@@ -44,7 +44,7 @@ _Shop
 
 | Partial/component | markup یا نشانه | مالک CSS/JS اصلی | جاهایی که باید رگرسیون شوند |
 |---|---|---|---|
-| هدر | `_HomeHeader`, `_InnerHeader`, `_Header`؛ body کلاس home/inner | `shared-header.css`, `shared-mega-menu.css`, themeها؛ `layout/main.js` | خانه + یک inner page، دسکتاپ + موبایل، login/logout و search open |
+| هدر | `_HomeHeader`, `_InnerHeader`, `_Header`؛ body کلاس home/inner | `shared-header.css`, `shared-mega-menu.css`, themeها؛ `layout/main.js` | خانه + یک inner page، دسکتاپ + موبایل، login/logout و search open؛ پیشنهاد محصول پس از ۳ نویسه با debounce ۲۵۰ms |
 | مگامنو | خانه و inner markup/variant متفاوت؛ inner selectorهایی مثل `.page-mega-sidebar` | `shared-mega-menu.css`, `mega-menu-unified.css`, `quick-links-menu.css`; باز/بسته و category در `header-navigation.js` | trigger → panel، keyboard/ArrowDown/Escape، فضای خالی هدر، شاخهٔ پیش‌فرض و breakpoint 992 |
 | account popover/drawer هدر | `.shared-account-card`, `.shared-account-popover`, `.account-links` | `shared-account.css`; تعامل در `main.js` | کاربر خارج/وارد، desktop/mobile، Escape، focus و scroll؛ badge عددی گزینه‌های منو در موبایل پنهان است |
 | cart/favorites/compare panels | `.page-cart-panel`, `.search-cart-drawer`, `.favorites-panel`, `.compare-panel` و item/footerها | `shared-cart.css`, `commerce.css`; `main.js` + `commerce.js` | سبد خالی/پر، تعداد زیاد آیتم، پنل باز و scroll داخلی، responsive |
@@ -52,12 +52,13 @@ _Shop
 | modal ورود/ثبت‌نام سراسری | `#loginModal`, `.login-modal-form-panel`, `.login-close` در `_Panels.cshtml` | layout در `style.css`, `luxury-theme.css`, `industrial-system.css`; قواعد فرم در `shared-login.css`; تعامل در `main.js` | ورود/ثبت‌نام/OTP، viewport کوتاه موبایل، اسکرول داخلی، بستن و بازگشت focus |
 | dialog ویرایش پروفایل | `.shared-login-modal.profile-edit-dialog` در `Views/Profile/Index.cshtml` | `shared-login.css` به‌علاوهٔ `account-page.css`; رفتار در View پروفایل | باز/بسته‌شدن native dialog، اعتبارسنجی و focus |
 | فرم آدرس | `_AddressForm`, `#addressDialog` در Cart و dialog آدرس پروفایل | `checkout.css`, `account-page.css`; `address-fields.js`, `iran-places.js`, `account-page.js` | Country/Province/City مدل‌های جدا دارند؛ فرم استان و شهر را انتخاب می‌کند و شهر به استان وابسته است. کشور ایران در رکورد ثابت است؛ خلاصهٔ آدرس استان/شهر را نمایش می‌دهد. Checkout این فرم را ندارد و فقط آدرس انتخابی را پیش‌نمایش می‌کند |
-| مزیت خرید مطمئن | `_PurchaseBenefits`, `.purchase-benefits` | `style.css` و overrideهای `industrial-system.css`; JS اختصاصی ندارد | صفحهٔ محصول و هر مسیر دیگری که partial را رندر می‌کند |
+| مزیت خرید مطمئن | `_PurchaseBenefits`, `.purchase-benefits` | `style.css` و overrideهای `industrial-system.css`; JS اختصاصی ندارد | صفحهٔ محصول و مسیرهای مصرف‌کنندهٔ partial؛ در صفحهٔ اول، فاصلهٔ عمودی موبایل حداکثر ۶۴۰px برای بخش showcase برابر ۱۲px است |
 | دیدگاه مشتریان خانه | `_Testimonials`, `#testimonialSlider` | قاب و کنترل‌های Owl در `style.css`؛ راه‌اندازی در `layout/main.js` | دسکتاپ و موبایل؛ کارت‌های مجاور داخل عرض بخش بمانند و پیمایش و دکمه‌ها کار کنند |
 | مجلهٔ صفحهٔ اول | `Home/Index.cshtml`, `#journal` | `style.css`, `industrial-system.css`; مالک در `tools/ui-owners.json` با نام `homepage-magazine` | پنج راهنمای منتخب و مطلب انتخاب تحریریه با تاریخ/زمان؛ عنوان مطلب لینک اصلی است |
+| خبرنامهٔ صفحهٔ اول | `_Newsletter.cshtml`, `.newsletter` | `style.css`, `home-warmth.css`; مالک در `tools/ui-owners.json` با نام `homepage-newsletter` | در موبایل فاصلهٔ عمودی بخش و فرم کمتر است؛ فاصلهٔ ردیف در موبایل `g-3` و از ۹۹۲px `g-5` است |
 | لینک‌های مرتبط | `_RelatedLinks` | `commerce.css`, overrideهای `pages.css`; JS اختصاصی ندارد | صفحات service/editorial که partial را مصرف می‌کنند |
 | کارت محصول | `HNProductCard.render` در `store/product-card.js` | `shared-product-card.css`؛ [نقشهٔ مالکیت](../../tools/ui-owners.json) | Home/Search/Related/Favorites و قیمت Compare؛ آیکن مقایسهٔ خطیِ ترازو، crop تصویر و عنوان طولانی |
-| فوتر | `_Footer`, `.footer-brand` | `shared-footer.css`, `style.css`; مالک در `tools/ui-owners.json` | نشان صاعقهٔ SVG کنار نام مجموعه، لینک‌ها و trust badgeها؛ در موبایل ستون‌ها و اندازهٔ قلم هماهنگ بمانند |
+| فوتر | `_Footer`, `.footer-brand` | `shared-footer.css`, `style.css`, `mobile-pages.css`; مالک در `tools/ui-owners.json` | لوگوی کامل برق شیراز با زیرعنوان در پس‌زمینهٔ تیره، لینک‌ها و trust badgeها؛ در موبایل لوگو حداکثر ۲۱۰px و وسط‌چین است و ردیف شبکه‌های اجتماعی وسط‌چین با فاصلهٔ بالایی ۳۱px نمایش داده می‌شود |
 
 این‌ها نقطهٔ شروع‌اند؛ selectorهای دقیق و حالت واقعی را با `rg` و Elements panel پیدا کنید. از فرض «یک partial = یک CSS» پرهیز کنید.
 

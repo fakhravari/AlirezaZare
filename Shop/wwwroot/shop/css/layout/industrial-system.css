@@ -2613,6 +2613,11 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
 }
 
 @media (max-width: 640px) {
+  .home-page #services.purchase-benefits--showcase {
+    margin-block: 12px;
+    padding-block: 12px;
+  }
+
   .purchase-benefits--showcase {
     margin-block: 22px;
     padding-block: 17px;
@@ -11720,7 +11725,7 @@ body .electrical-swiper .swiper-pagination-bullet-active {
   border-radius: 999px;
   background: rgba(7, 26, 46, 0.8);
   color: #fff;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   white-space: nowrap;
   backdrop-filter: blur(8px);
@@ -11728,7 +11733,7 @@ body .electrical-swiper .swiper-pagination-bullet-active {
 
 .home-page #journal .journal-main-featured-meta i {
   color: #f6c515;
-  font-size: 14px;
+  font-size: 16px;
 }
 
 .home-page #journal .journal-list-card-meta {
@@ -11744,14 +11749,14 @@ body .electrical-swiper .swiper-pagination-bullet-active {
   align-items: center;
   gap: 4px;
   color: #77869a;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 650;
   white-space: nowrap;
 }
 
 .home-page #journal .journal-list-card-meta time i {
   color: #a78350;
-  font-size: 11px;
+  font-size: 13px;
 }
 
 .home-page #journal .journal-main-cta {
@@ -11897,10 +11902,7 @@ body .electrical-swiper .swiper-pagination-bullet-active {
 }
 
 .home-page #journal .journal-list-card-meta {
-  display: flex;
   grid-area: meta;
-  min-width: 0;
-  align-items: center;
   gap: 7px;
 }
 
@@ -12078,6 +12080,15 @@ body .electrical-swiper .swiper-pagination-bullet-active {
 }
 
 @media (max-width: 767px) {
+  .home-page #journal.py-section {
+    padding-block: 42px;
+  }
+
+  .home-page #journal .section-head {
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+
   .home-page #journal .journal-main-meta {
     gap: 6px 9px;
     font-size: 11px;
@@ -12109,7 +12120,11 @@ body .electrical-swiper .swiper-pagination-bullet-active {
   .home-page #journal .journal-main-featured-meta time {
     min-height: 30px;
     padding: 5px 8px;
-    font-size: 10px;
+    font-size: 12px;
+  }
+
+  .home-page #journal .journal-main-featured-meta time i {
+    font-size: 15px;
   }
 
   .home-page #journal .journal-main-cta {
@@ -12281,7 +12296,7 @@ body .electrical-swiper .swiper-pagination-bullet-active {
   transition: transform 500ms cubic-bezier(0.2, 0.7, 0.2, 1), filter 300ms ease;
 }
 
-.home-page #journal .journal-main > div {
+.home-page #journal .journal-main > div:not(.journal-main-featured-meta) {
   transition:
     background-color 220ms ease,
     border-color 220ms ease,
@@ -12300,7 +12315,7 @@ body .electrical-swiper .swiper-pagination-bullet-active {
   filter: saturate(1.08);
 }
 
-.home-page #journal .journal-main:is(:hover, :focus-within) > div {
+.home-page #journal .journal-main:is(:hover, :focus-within) > div:not(.journal-main-featured-meta) {
   border-color: rgba(255, 220, 120, 0.4);
   background: linear-gradient(135deg, rgba(16, 42, 67, 0.86), rgba(7, 26, 46, 0.76));
   transform: translateY(-2px);
@@ -12316,7 +12331,7 @@ body .electrical-swiper .swiper-pagination-bullet-active {
   );
 }
 
-.home-page #journal .journal-main > div {
+.home-page #journal .journal-main > div:not(.journal-main-featured-meta) {
   padding: 20px 22px 18px;
   border: 1px solid rgba(255, 220, 120, 0.28);
   border-radius: 18px 10px 18px 18px;
@@ -12358,7 +12373,7 @@ body .electrical-swiper .swiper-pagination-bullet-active {
 }
 
 @media (max-width: 767px) {
-  .home-page #journal .journal-main > div {
+  .home-page #journal .journal-main > div:not(.journal-main-featured-meta) {
     right: 12px;
     bottom: 12px;
     left: 12px;
@@ -12428,7 +12443,7 @@ body .electrical-swiper .swiper-pagination-bullet-active {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .home-page #journal :is(.journal-main, .journal-main > img, .journal-main > div, .journal-main-cta, .journal-list article, .journal-list article::before, .journal-list article > span, .section-head > a, .journal-list h4 a) {
+  .home-page #journal :is(.journal-main, .journal-main > img, .journal-main > div:not(.journal-main-featured-meta), .journal-main-cta, .journal-list article, .journal-list article::before, .journal-list article > span, .section-head > a, .journal-list h4 a) {
     transition: none !important;
     transform: none !important;
   }

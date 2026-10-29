@@ -6,7 +6,7 @@
     var accountToday = DateOnly.FromDateTime(DateTime.UtcNow);
     var accountOrders = accountData.Orders.ToDictionary(order => order.Id);
     var couponData = accountData.Coupons.Select(coupon => new {
-        coupon.Id, coupon.Code, coupon.DiscountPercent,
+        coupon.Id, coupon.Code, coupon.DiscountPercent, coupon.UsageLimit,
         Active = coupon.IsActive(accountToday),
         ExpiresOn = Shop.Models.AccountDisplay.Date(coupon.ExpiresOn),
         Uses = coupon.OrderIds.Select(id => accountOrders[id]).Select(order => new {
@@ -187,33 +187,6 @@
             <div>
                 <strong id="statCompare">۰</strong><small>محصول در مقایسه</small>
             </div>
-        </article>
-    </div>
-    <div class="overview-panels">
-        <article>
-            <div class="overview-panel-title">
-                <i class="bi bi-ticket-perforated"></i>
-                <h3>کدهای تخفیف فعال</h3>
-            </div>
-            <div id="activeCouponsList" class="overview-coupon-list" aria-live="polite"></div>
-        </article>
-        <article class="overview-guide">
-            <div class="overview-panel-title">
-                <i class="bi bi-compass"></i>
-                <h3>شروع سریع</h3>
-            </div>
-            <a href="/Search">
-                <i class="bi bi-tools"></i>
-                <span>
-                    <strong>مشاهده محصولات</strong><small>ابزار و تجهیزات برق را بررسی کنید</small>
-                </span><i class="bi bi-arrow-left"></i>
-            </a>
-            <a asp-controller="Profile" asp-action="Addresses">
-                <i class="bi bi-plus-circle"></i>
-                <span>
-                    <strong>ثبت آدرس تحویل</strong><small>برای خرید سریع‌تر آماده شوید</small>
-                </span><i class="bi bi-arrow-left"></i>
-            </a>
         </article>
     </div>
 </section>

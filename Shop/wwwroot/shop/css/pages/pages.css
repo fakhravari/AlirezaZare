@@ -1,11 +1,3 @@
-:root {
-  --p-navy: var(--color-navy);
-  --p-blue: var(--color-blue);
-  --p-gold: var(--color-gold);
-  --p-cream: var(--color-cream);
-  --p-ink: var(--color-ink);
-  --p-muted: var(--color-muted);
-}
 * {
   box-sizing: border-box;
 }
@@ -15,7 +7,7 @@ html {
 body {
   margin: 0;
   background: var(--industrial-bg);
-  color: var(--p-ink);
+  color: var(--color-ink);
   font-family: "Vazirmatn", Tahoma, sans-serif;
   overflow-x: clip;
 }
@@ -90,7 +82,7 @@ h3 {
 }
 .nav-home:hover {
   background: #fff;
-  color: var(--p-navy);
+  color: var(--color-navy);
 }
 .page-hero {
   position: relative;
@@ -193,7 +185,7 @@ h3 {
 .section-title p {
   max-width: 650px;
   margin: 13px 0 0;
-  color: var(--p-muted);
+  color: var(--color-muted);
   line-height: 1.9;
 }
 .glass-card {
@@ -230,7 +222,7 @@ h3 {
 }
 .article-copy p {
   margin: 0;
-  color: var(--p-muted);
+  color: var(--color-muted);
   font-size: 13px;
   line-height: 1.9;
 }
@@ -3240,7 +3232,7 @@ h6 {
 }
 .page-cart-footer > a,
 .page-login-box form > button {
-  background: var(--navy);
+  background: var(--color-navy);
   transition:
     background-color 0.2s ease,
     transform 0.2s ease,

@@ -16,6 +16,12 @@ window.HNUI.mount("pages-orders-pagination", document, () => {
   section.append(footer);
   document.getElementById("ordersTotal").textContent =
     `${number(cards.length)} سفارش`;
+  if (!cards.length) {
+    section.querySelector(".account-demo-note")?.setAttribute("hidden", "hidden");
+    section.querySelector(".profile-order-list").innerHTML =
+      '<div class="compare-empty empty-state-card"><div class="compare-empty-art" aria-hidden="true"><span><i class="bi bi-receipt"></i></span><i class="bi bi-plus-lg"></i></div><span class="compare-empty-kicker">تاریخچهٔ خرید شما</span><h2>هنوز سفارشی ثبت نکرده‌اید</h2><p>بعد از ثبت سفارش، خلاصهٔ فاکتور و وضعیت ارسال را در این بخش می‌بینید.</p><a class="flow-button" href="/search"><i class="bi bi-search" aria-hidden="true"></i> مشاهدهٔ محصولات <i class="bi bi-arrow-left" aria-hidden="true"></i></a><small class="compare-empty-hint"><i class="bi bi-truck" aria-hidden="true"></i> سفارش‌های ثبت‌شده و جزئیات پیگیری آن‌ها اینجا در دسترس خواهند بود.</small></div>';
+    footer.hidden = true;
+  }
 
   function render(moveFocus = false) {
     const url = new URL(window.location.href);

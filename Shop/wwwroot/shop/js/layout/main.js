@@ -73,7 +73,7 @@ $(function () {
       const query = String(value || "")
         .trim()
         .slice(0, 80);
-      if (Array.from(query).length < 2) return;
+      if (Array.from(query).length < 3) return;
       const recent = readRecentSearches().filter(
         (item) => normalizeSearchText(item) !== normalizeSearchText(query),
       );
@@ -93,6 +93,7 @@ $(function () {
       openSuggestions();
     };
     let suggestionsCloseTimer = 0;
+    let suggestionsRenderTimer = 0;
     const closeSuggestions = () => {
       window.clearTimeout(suggestionsCloseTimer);
       suggestions.hidden = true;
@@ -122,7 +123,7 @@ $(function () {
     const renderSuggestions = () => {
       const query = normalizeSearchText(searchInput.value);
       if (Array.from(query).length < 3) {
-        renderQuickSearchPanel();
+        closeSuggestions();
         return;
       }
 
@@ -187,11 +188,18 @@ $(function () {
       openSuggestions();
     };
 
-    searchInput.addEventListener("input", renderSuggestions);
+    searchInput.addEventListener("input", () => {
+      window.clearTimeout(suggestionsRenderTimer);
+      if (Array.from(normalizeSearchText(searchInput.value)).length < 3) {
+        closeSuggestions();
+        return;
+      }
+      suggestionsRenderTimer = window.setTimeout(renderSuggestions, 250);
+    });
     headerSearchForm.addEventListener("submit", (event) => {
-      if (isDrawerSearch && !searchInput.value.trim()) {
+      if (Array.from(normalizeSearchText(searchInput.value)).length < 3) {
         event.preventDefault();
-        searchInput.focus();
+        if (isDrawerSearch) searchInput.focus();
         return;
       }
       rememberSearch(searchInput.value);
@@ -207,6 +215,7 @@ $(function () {
       if (link) rememberSearch(link.dataset.searchQuery || searchInput.value);
     });
     searchInput.addEventListener("focus", () => {
+      window.clearTimeout(suggestionsRenderTimer);
       if (Array.from(normalizeSearchText(searchInput.value)).length >= 3)
         renderSuggestions();
       else renderQuickSearchPanel();

@@ -1,4 +1,10 @@
 /* Shared UI components. Page styles only customize the component variables. */
+.bi::before,
+[class*=" bi-"]::before,
+[class^="bi-"]::before {
+  vertical-align: -0.3em;
+}
+
 .ui-surface-card {
   /* The legacy layout outline is !important; keep the shared component authoritative. */
   border: 1px solid var(--widget-border, var(--color-card-border)) !important;

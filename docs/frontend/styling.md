@@ -4,6 +4,8 @@
 
 ## قواعد طراحی مشترک
 
+glyph آیکن‌های Bootstrap Icons با `vertical-align: -0.3em` در `core/components.css` هم‌تراز می‌شود؛ اگر آیکن داخل قاب grid/flex است، این اصلاح baseline همچنان برقرار است و نباید برای هر صفحه override تکراری ساخته شود.
+
 نقشهٔ قابل‌کنترل مالکیت در [ui-owners.json](../../tools/ui-owners.json) است؛ قواعد قدیمی خارج مالک در [بودجهٔ legacy](../../tools/ui-legacy-budget.json) ثبت شده‌اند. `npm run check` افزایش !important یا override تازهٔ کارت/هدر خارج مالک را رد می‌کند. جزئیات تغییر کنترل‌شده در [کیفیت](../development/quality.md) است.
 
 - رنگ، بردر، شعاع، سایه و حالت hover/focus را از توکن مشترک بگیرید؛ رنگ وضعیت موفقیت/خطا/هشدار را فقط وقتی معنای واقعی دارد نگه دارید.
@@ -59,7 +61,7 @@ reset عمومی focus از `core/ui-core.css` حذف شد تا نشانگر ص�
 | متن کمکی | `--color-muted` | `#4c5b65` |
 | خط/بردر | `--color-line` | `#dfe5e9` |
 
-توکن‌های فاصله، container، radius و shadow نیز در همان فایل هستند؛ نام و مقدار را پیش از تعریف مقدار جدید بخوانید. `design-tokens.css` مرجع واحد پالت فعال و aliasهای سازگاری است. `electrical-theme.css` و `luxury-theme.css` قواعد ظاهر/چیدمان دارند و نباید رنگ‌های root را دوباره تعریف کنند؛ `industrial-system.css` مصرف‌کنندهٔ توکن‌ها و مالک overrideهای legacy است، نه منبع پالت. aliasهای قدیمی را با نامشان تفسیر نکنید: `--cream` به طلایی وصل است، اما `--cream2` زمینهٔ روشن است. برای متغیرهای `--industrial-*` مقدار مرجع را در همان فایل توکن‌ها تغییر دهید.
+توکن‌های فاصله، container، radius و shadow نیز در همان فایل هستند؛ نام و مقدار را پیش از تعریف مقدار جدید بخوانید. `design-tokens.css` مرجع واحد پالت فعال است و رنگ‌ها در CSS با نام‌های صریح `--color-*` مصرف می‌شوند. aliasهای رنگ قدیمی از stylesheetها حذف شده‌اند. `electrical-theme.css` و `luxury-theme.css` قواعد ظاهر/چیدمان دارند و نباید رنگ‌های root را دوباره تعریف کنند؛ `industrial-system.css` مصرف‌کنندهٔ توکن‌ها و مالک overrideهای legacy است، نه منبع پالت. برای متغیرهای `--industrial-*` مقدار مرجع را در همان فایل توکن‌ها تغییر دهید.
 
 CSS فعلی با ترتیب stylesheetها cascade می‌شود و از `@layer` استفاده نمی‌کند. فایل‌ها را جداگانه داخل cascade layer نپیچید: قانون‌های عادی بدون layer بر قانون‌های عادی داخل layer اولویت دارند و ترتیب فعلی می‌تواند بی‌اثر شود. مهاجرت به `@layer` فقط باید یک‌جا و با پوشش منابع vendor، layout، View و page انجام شود.
 
@@ -71,7 +73,7 @@ CSS فعلی با ترتیب stylesheetها cascade می‌شود و از `@laye
 
 | فایل/خانواده | مالکیت معمول | نکتهٔ عیب‌یابی |
 |---|---|---|
-| `css/core/design-tokens.css` | رنگ، فاصله، radius، سایه، تایپوگرافی پایه | تنها محل افزودن توکن عمومی جدید؛ alias را نیز بررسی کنید |
+| `css/core/design-tokens.css` | رنگ، فاصله، radius، سایه، تایپوگرافی پایه | تنها محل افزودن توکن عمومی جدید؛ مصرف‌کننده‌ها را با نام صریح `--color-*` به آن متصل کنید |
 | `css/core/components.css` | Shared surface and icon component styles, including `.ui-surface-card` and `.ui-icon-tile` | Keep changes in the component owner; avoid parallel page overrides |
 | `css/core/ui-core.css` | utilityهای UI، قفل اسکرول و رفتارهای قابل‌دسترسی مشترک | با قواعد overflow/z-index صفحه تداخل احتمالی دارد |
 | `css/layout/shared-header.css` | toggle حساب، جست‌وجو/سبد هدر و وضعیت responsive | خانه/داخلی را جداگانه تست کنید |

@@ -824,7 +824,7 @@ body :is(#cartView, #invoiceItems) .cart-product-row.flow-row {
   box-shadow: 0 8px 24px -18px #17364f55;
 }
 body :is(#cartView, #invoiceItems) .cart-product-header { min-width: 0; padding: 18px; border-top: 3px solid #d2b467; border-radius: 12px 12px 0 0; }
-body :is(#cartView, #invoiceItems) .cart-product-header .cart-product-identity { align-items: center; gap: 14px; }
+body :is(#cartView, #invoiceItems) .cart-product-header .cart-product-identity { display: flex; min-width: 0; align-items: center; gap: 14px; }
 body :is(#cartView, #invoiceItems) .cart-product-header .cart-product-identity > img {
   width: 88px;
   height: 88px;

@@ -442,12 +442,6 @@
     display: none;
   }
 
-  .mobile-menu .offcanvas-body > a,
-  .mobile-menu .mobile-category-toggle,
-  .mobile-menu .mobile-category > button {
-    min-height: 45px;
-  }
-
   .mobile-menu .offcanvas-body > a > span > i,
   .mobile-menu .mobile-category-toggle > span > i,
   .mobile-menu .mobile-category > button > span > i {

@@ -518,6 +518,15 @@
   line-height: 1.55;
 }
 
+#productView .product-detail-related-card .product-info > p.has-discount {
+  grid-template-columns: max-content max-content;
+  grid-template-areas:
+    "current discount"
+    "old discount";
+  justify-content: start;
+  column-gap: 8px;
+}
+
 #productView .product-detail-related-card .product-info > p > .product-price-current small {
   font-size: 11px !important;
 }

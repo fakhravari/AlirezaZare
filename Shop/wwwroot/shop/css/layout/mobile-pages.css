@@ -549,6 +549,13 @@
     color: #fff !important;
   }
 
+  .home-page footer .footer-main > .col-lg-4:first-child .footer-brand {
+    display: flex;
+    width: min(210px, 100%);
+    justify-content: center;
+    margin-inline: auto;
+  }
+
   footer .footer-main > .col-lg-4:first-child > p {
     max-width: 52ch;
     margin: 0;

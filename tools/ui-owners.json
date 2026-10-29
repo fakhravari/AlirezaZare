@@ -24,7 +24,8 @@
         "Shop/wwwroot/content/data/catalog.json"
       ],
       "js": [
-        "Shop/wwwroot/shop/js/pages/search.js"
+        "Shop/wwwroot/shop/js/pages/search.js",
+        "Shop/wwwroot/shop/js/layout/main.js"
       ],
       "css": [
         "Shop/wwwroot/shop/css/pages/search.css"
@@ -80,6 +81,15 @@
         "Shop/wwwroot/shop/css/layout/industrial-system.css"
       ]
     },
+    "homepage-newsletter": {
+      "markup": [
+        "Shop/Views/Home/_Newsletter.cshtml"
+      ],
+      "css": [
+        "Shop/wwwroot/shop/css/layout/style.css",
+        "Shop/wwwroot/shop/css/pages/home-warmth.css"
+      ]
+    },
     "article-detail": {
       "markup": [
         "Shop/Views/Magazine/Details.cshtml"
@@ -98,6 +108,10 @@
     },
     "product-card": {
       "selector": "\\.(?:product-card|showcase-card|product-price)(?=[\\s.#:>+~\\[),-]|$)",
+      "markup": [
+        "Shop/Views/Home/_Offers.cshtml",
+        "Shop/Views/Home/_Newest.cshtml"
+      ],
       "js": [
         "Shop/wwwroot/shop/js/store/product-card.js"
       ],
@@ -238,7 +252,8 @@
     },
     "header-search": {
       "markup": [
-        "Shop/Views/Shared/_Header.cshtml"
+        "Shop/Views/Shared/_Header.cshtml",
+        "Shop/Views/Shared/_Panels.cshtml"
       ],
       "js": [
         "Shop/wwwroot/shop/js/layout/main.js"
@@ -297,7 +312,8 @@
       ],
       "css": [
         "Shop/wwwroot/shop/css/layout/shared-footer.css",
-        "Shop/wwwroot/shop/css/layout/style.css"
+        "Shop/wwwroot/shop/css/layout/style.css",
+        "Shop/wwwroot/shop/css/layout/mobile-pages.css"
       ]
     },
     "page-hero": {

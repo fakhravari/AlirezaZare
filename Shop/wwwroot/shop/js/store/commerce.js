@@ -9,7 +9,7 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
     const empty = (text) =>
         `<div class="flow-card flow-empty empty-state-card"><i class="bi bi-bag"></i><h2>${text}</h2><a class="flow-button" href="Search">مشاهده محصولات</a></div>`;
     const emptyCart = () =>
-        `<section class="cart-empty-state" aria-labelledby="emptyCartTitle"><div class="cart-empty-ornament" aria-hidden="true"><span><i class="bi bi-bag"></i></span></div><div class="cart-empty-copy"><span class="cart-empty-kicker">سبد خرید</span><h2 id="emptyCartTitle">سبد خرید شما خالی است</h2><p>هنوز محصولی انتخاب نکرده‌اید. کاتالوگ را مرور کنید یا برای آشنایی با معیارهای انتخاب، راهنماهای فنی را بخوانید.</p><div class="cart-empty-actions"><a class="flow-button" href="Search"><i class="bi bi-tools" aria-hidden="true"></i><span>مرور محصولات</span><i class="bi bi-arrow-left" aria-hidden="true"></i></a><a class="ui-inline-action" href="Magazine"><i class="bi bi-journal-text" aria-hidden="true"></i><span>راهنمای انتخاب</span></a></div></div></section>`;
+        `<section class="cart-empty-state" aria-labelledby="emptyCartTitle"><div class="cart-empty-ornament" aria-hidden="true"><span><i class="bi bi-bag"></i></span></div><div class="cart-empty-copy"><span class="cart-empty-kicker">سبد خرید</span><h2 id="emptyCartTitle">سبد خرید شما خالی است</h2><p>هنوز محصولی انتخاب نکرده‌اید. محصولات را مرور کنید یا برای آشنایی با معیارهای انتخاب، راهنماهای فنی را بخوانید.</p><div class="cart-empty-actions"><a class="flow-button" href="Search"><i class="bi bi-tools" aria-hidden="true"></i><span>مرور محصولات</span><i class="bi bi-arrow-left" aria-hidden="true"></i></a><a class="ui-inline-action" href="Magazine"><i class="bi bi-journal-text" aria-hidden="true"></i><span>راهنمای انتخاب</span></a></div></div></section>`;
     const favorites = () => {
         try {
             const v = JSON.parse(ui.storage.get("hn-favorites", "[]"));
@@ -1828,7 +1828,7 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
             .filter(Boolean);
         view.innerHTML = list.length
             ? `<div class="flow-cards">${list.map((p) => window.HNProductCard.render(p, {variant: "favorite"})).join("")}</div>`
-            : empty("هنوز محصولی به علاقه‌مندی‌ها اضافه نکرده‌اید");
+            : `<div class="compare-empty empty-state-card"><div class="compare-empty-art" aria-hidden="true"><span><i class="bi bi-heart"></i></span><i class="bi bi-plus-lg"></i></div><span class="compare-empty-kicker">علاقه‌مندی‌های شما</span><h2>هنوز محصولی به علاقه‌مندی‌ها اضافه نکرده‌اید</h2><p>محصول‌های موردنظرتان را از صفحهٔ فروشگاه به علاقه‌مندی‌ها اضافه کنید تا بعداً راحت‌تر پیدایشان کنید.</p><a class="flow-button" href="Search"><i class="bi bi-search" aria-hidden="true"></i> جست‌وجوی محصولات <i class="bi bi-arrow-left" aria-hidden="true"></i></a><small class="compare-empty-hint"><i class="bi bi-heart" aria-hidden="true"></i> برای افزودن، آیکن قلب را روی کارت هر محصول بزنید.</small></div>`;
         view.querySelectorAll("[data-unlike]").forEach(
             (b) =>
             (b.onclick = async () => {

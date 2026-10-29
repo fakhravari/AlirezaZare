@@ -98,6 +98,7 @@
       "id": "coupon-bazar10",
       "code": "BAZAR10",
       "discountPercent": 10,
+      "usageLimit": 10,
       "enabled": true,
       "expiresOn": "2027-03-20",
       "orderIds": [
@@ -109,6 +110,7 @@
       "id": "coupon-tools15",
       "code": "TOOLS15",
       "discountPercent": 15,
+      "usageLimit": 8,
       "enabled": true,
       "expiresOn": "2026-11-21",
       "orderIds": [
@@ -120,6 +122,7 @@
       "id": "coupon-welcome8",
       "code": "WELCOME8",
       "discountPercent": 8,
+      "usageLimit": 8,
       "enabled": true,
       "expiresOn": "2026-12-21",
       "orderIds": [
@@ -130,6 +133,7 @@
       "id": "coupon-nimrooz12",
       "code": "NIMROOZ12",
       "discountPercent": 12,
+      "usageLimit": 5,
       "enabled": false,
       "expiresOn": "2026-08-22",
       "orderIds": [
@@ -140,6 +144,7 @@
       "id": "coupon-summer8",
       "code": "SUMMER8",
       "discountPercent": 8,
+      "usageLimit": 5,
       "enabled": false,
       "expiresOn": "2026-08-22",
       "orderIds": [
@@ -150,6 +155,7 @@
       "id": "coupon-autumn5",
       "code": "AUTUMN5",
       "discountPercent": 5,
+      "usageLimit": 5,
       "enabled": false,
       "expiresOn": "2026-07-22",
       "orderIds": [
@@ -160,6 +166,7 @@
       "id": "coupon-order7",
       "code": "ORDER7",
       "discountPercent": 7,
+      "usageLimit": 6,
       "enabled": false,
       "expiresOn": "2026-07-22",
       "orderIds": [
@@ -170,6 +177,7 @@
       "id": "coupon-aman15",
       "code": "AMAN15",
       "discountPercent": 15,
+      "usageLimit": 6,
       "enabled": false,
       "expiresOn": "2026-06-21",
       "orderIds": [
@@ -180,6 +188,7 @@
       "id": "coupon-bahar15",
       "code": "BAHAR15",
       "discountPercent": 15,
+      "usageLimit": 10,
       "enabled": false,
       "expiresOn": "2026-07-22",
       "orderIds": []
@@ -188,6 +197,7 @@
       "id": "coupon-old20",
       "code": "OLD20",
       "discountPercent": 20,
+      "usageLimit": 10,
       "enabled": false,
       "expiresOn": "2026-05-21",
       "orderIds": []

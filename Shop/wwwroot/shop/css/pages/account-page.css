@@ -442,7 +442,7 @@
 }
 
 #profileCouponsTitle {
-  scroll-margin-top: 132px;
+  scroll-margin-top: 112px;
 }
 
 #coupons .profile-coupons-cart-link {
@@ -2226,20 +2226,43 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
   gap: 12px;
 }
 
+.profile-coupon-usage-heading {
+  flex-wrap: wrap;
+}
+
 .profile-coupon-identity {
   min-width: 0;
   gap: 12px;
 }
 
 .profile-coupon-code {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   padding: 9px 11px;
   border: 1px dashed color-mix(in srgb, var(--industrial-yellow-dark) 55%, white);
   border-radius: 10px;
   background: #fff;
   color: var(--industrial-navy);
+  font: inherit;
   font-size: 14px;
   font-weight: 900;
   letter-spacing: 0.035em;
+  cursor: pointer;
+}
+
+.profile-coupon-code:hover,
+.profile-coupon-code:focus-visible {
+  border-color: var(--industrial-yellow-dark);
+  background: color-mix(in srgb, var(--industrial-yellow) 12%, white);
+  outline: 2px solid color-mix(in srgb, var(--industrial-yellow-dark) 35%, transparent);
+  outline-offset: 2px;
+}
+
+.profile-coupon-code > i {
+  color: var(--industrial-yellow-dark);
+  font-size: 13px;
+  letter-spacing: 0;
 }
 
 .profile-coupon-identity > div {
@@ -3208,7 +3231,7 @@ body.inner-page.mobile-page--profile-favorites #favoritesView .favorite-item-car
 
 .profile-price-alert-product strong {
   overflow-wrap: anywhere;
-  color: var(--navy, #142f4f);
+  color: var(--color-navy, #142f4f);
   font-size: 1rem;
 }
 
@@ -3238,7 +3261,7 @@ body.inner-page.mobile-page--profile-favorites #favoritesView .favorite-item-car
 .profile-price-alert-scope {
   border-color: #f0dfb4;
   background: #fff9e9;
-  color: var(--navy, #142f4f);
+  color: var(--color-navy, #142f4f);
   font-size: 0.8125rem;
   font-weight: 700;
   overflow-wrap: anywhere;
@@ -3247,7 +3270,7 @@ body.inner-page.mobile-page--profile-favorites #favoritesView .favorite-item-car
 .profile-price-alert-scope i,
 .profile-price-alert-detail > i {
   flex: 0 0 auto;
-  color: var(--gold-dark, #9b7400);
+  color: #9b7400;
 }
 
 .profile-price-alert-details {
@@ -3265,7 +3288,7 @@ body.inner-page.mobile-page--profile-favorites #favoritesView .favorite-item-car
 }
 
 .profile-price-alert-detail-value {
-  color: var(--navy, #142f4f);
+  color: var(--color-navy, #142f4f);
   font-weight: 700;
 }
 
@@ -3277,7 +3300,7 @@ body.inner-page.mobile-page--profile-favorites #favoritesView .favorite-item-car
   place-items: center;
   border-radius: 13px;
   background: #f3f6f8;
-  color: var(--gold-dark, #9b7400);
+  color: #9b7400;
   font-size: 18px;
 }
 
@@ -3304,7 +3327,7 @@ body.inner-page.mobile-page--profile-favorites #favoritesView .favorite-item-car
 }
 
 .profile-price-alert-delete:focus-visible {
-  outline: 2px solid var(--navy, #142f4f);
+  outline: 2px solid var(--color-navy, #142f4f);
   outline-offset: 2px;
 }
 

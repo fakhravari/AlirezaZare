@@ -32,7 +32,8 @@ public sealed record AccountData(int SchemaVersion, string Currency,
                 string.IsNullOrWhiteSpace(coupon.Code) || !codes.Add(coupon.Code) ||
                 coupon.Code.Any(c => !(c is >= 'A' and <= 'Z' or >= '0' and <= '9')) ||
                 coupon.DiscountPercent is <= 0 or >= 100 || coupon.ExpiresOn == default ||
-                coupon.OrderIds is null || coupon.OrderIds.Distinct().Count() != coupon.OrderIds.Count ||
+                coupon.UsageLimit < 1 || coupon.OrderIds is null ||
+                coupon.OrderIds.Distinct().Count() != coupon.OrderIds.Count ||
                 coupon.OrderIds.Any(id => !orders.Contains(id)))
                 throw new InvalidDataException("Invalid coupon or order reference.");
         return data;
@@ -52,7 +53,7 @@ public sealed record AccountOrder(string Id, string Number, string Status, DateO
 }
 
 public sealed record AccountCoupon(string Id, string Code, int DiscountPercent, bool Enabled,
-    DateOnly ExpiresOn, IReadOnlyList<string> OrderIds)
+    DateOnly ExpiresOn, int UsageLimit, IReadOnlyList<string> OrderIds)
 {
     public bool IsActive(DateOnly today) => Enabled && ExpiresOn >= today;
 }

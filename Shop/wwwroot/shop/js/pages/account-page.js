@@ -69,7 +69,7 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
                     },
                 )
                 .join("")
-            : '<div class="flow-card flow-empty empty-state-card"><i class="bi bi-geo-alt"></i><h3>هنوز آدرسی ندارید</h3><p>آدرس جدید را اضافه کنید تا در پیش‌فاکتور هم قابل انتخاب باشد.</p></div>';
+            : '<div class="compare-empty empty-state-card"><div class="compare-empty-art" aria-hidden="true"><span><i class="bi bi-geo-alt"></i></span><i class="bi bi-plus-lg"></i></div><span class="compare-empty-kicker">نشانی‌های شما</span><h2>هنوز نشانی‌ای ثبت نکرده‌اید</h2><p>یک آدرس اضافه کنید تا هنگام ثبت سفارش، مقصد تحویل را انتخاب کنید.</p><button class="flow-button" type="button" data-open-address><i class="bi bi-plus-lg" aria-hidden="true"></i> افزودن آدرس <i class="bi bi-arrow-left" aria-hidden="true"></i></button><small class="compare-empty-hint"><i class="bi bi-truck" aria-hidden="true"></i> آدرس ذخیره‌شده در پیش‌فاکتور قابل انتخاب خواهد بود.</small></div>';
         host.querySelectorAll("[data-select]").forEach(
             (b) =>
             (b.onclick = () => {
@@ -86,14 +86,27 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
             );
         host.querySelectorAll("[data-delete]").forEach(
             (b) =>
-            (b.onclick = () => {
+            (b.onclick = async () => {
+                const addressId = b.dataset.delete;
+                const address = addresses.find((item) => item.id === addressId);
+                if (!address || typeof window.confirmFormSubmission !== "function") return;
+                const confirmed = await window.confirmFormSubmission({
+                    title: "حذف آدرس؟",
+                    message: `آدرس «${address.title}» از فهرست آدرس‌های شما حذف می‌شود. ادامه می‌دهید؟`,
+                    confirmText: "بله، حذف شود",
+                });
+                if (!confirmed) return;
+
+                const currentAddresses = read(addressKey);
+                if (!currentAddresses.some((item) => item.id === addressId)) return;
+                const currentSelected = ui.storage.get("hn-selected-address", "");
                 if (
                     save(
                         addressKey,
-                        addresses.filter((a) => a.id !== b.dataset.delete),
+                        currentAddresses.filter((item) => item.id !== addressId),
                     )
                 ) {
-                    if (selected === b.dataset.delete)
+                    if (currentSelected === addressId)
                         ui.storage.remove("hn-selected-address");
                     renderAddresses();
                     ui.setMessage(status, "آدرس حذف شد.", "success");
@@ -185,16 +198,6 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
         renderCoupons();
     }
     function renderCoupons(moveFocus = false) {
-        const appliedCode = ui.storage.get("hn-demo-coupon", "");
-        const overviewHost = document.querySelector("#activeCouponsList");
-        if (overviewHost) {
-            overviewHost.innerHTML = activeCoupons
-                .map(({ code, discountPercent }) =>
-                    `<article class="overview-coupon-card"><bdi class="overview-coupon-code" dir="ltr">${esc(code)}</bdi><div class="overview-coupon-copy"><strong>${ui.formatNumber(discountPercent)}٪ تخفیف خرید</strong><small>${appliedCode === code ? "در سبد خرید اعمال شده" : "قابل استفاده در سبد خرید"}</small></div><a href="/Cart" aria-label="استفاده از کد ${esc(code)}"><span>استفاده</span><i class="bi bi-arrow-left" aria-hidden="true"></i></a></article>`,
-                )
-                .join("");
-        }
-
         const profileHost = document.querySelector("#profileCouponsList");
         if (!profileHost) return;
         const pagination = document.querySelector("#profileCouponsPagination");
@@ -211,6 +214,8 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
 
         profileHost.innerHTML = couponHistory.slice(start, start + pageSize).map((coupon) => {
             const uses = Array.isArray(coupon.uses) ? coupon.uses : [];
+            const usageLimit = Number.isSafeInteger(coupon.usageLimit) ? coupon.usageLimit : 0;
+            const remainingUses = Math.max(0, usageLimit - uses.length);
             const stateClass = coupon.active ? "is-active" : "is-inactive";
             const stateLabel = coupon.active ? "فعال" : "غیرفعال";
             const stateIcon = coupon.active ? "bi-check-circle-fill" : "bi-clock-history";
@@ -220,8 +225,33 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
                     `<div class="profile-coupon-invoice"><span class="profile-coupon-invoice-number"><i class="bi bi-receipt" aria-hidden="true"></i><bdi dir="ltr">${esc(use.invoice)}</bdi></span><time datetime="${esc(use.dateTime)}">${esc(use.date)}</time></div>`,
                 ).join("")}</div>`
                 : '<p class="profile-coupon-no-invoices">هنوز از این کد در سفارشی استفاده نشده است.</p>';
-            return `<article class="profile-coupon-card ${stateClass}"><header class="profile-coupon-header"><div class="profile-coupon-identity"><bdi class="profile-coupon-code" dir="ltr">${esc(coupon.code)}</bdi><div><strong>${ui.formatNumber(coupon.discountPercent)}٪ تخفیف خرید</strong><small>${expiryLabel} ${esc(coupon.expiresOn)}</small></div></div><span class="profile-coupon-status ${stateClass}"><i class="bi ${stateIcon}" aria-hidden="true"></i>${stateLabel}</span></header><section class="profile-coupon-usage" aria-label="سوابق استفاده از کد ${esc(coupon.code)}"><div class="profile-coupon-usage-heading"><strong><i class="bi bi-receipt-cutoff" aria-hidden="true"></i>فاکتورهای استفاده‌شده</strong><span>تعداد استفاده: <b>${ui.formatNumber(uses.length)}</b></span></div>${invoices}</section></article>`;
+            return `<article class="profile-coupon-card ${stateClass}"><header class="profile-coupon-header"><div class="profile-coupon-identity"><button class="profile-coupon-code" type="button" data-copy-coupon="${esc(coupon.code)}" aria-label="کپی کد تخفیف ${esc(coupon.code)}" title="برای کپی کد کلیک کنید"><bdi dir="ltr">${esc(coupon.code)}</bdi><i class="bi bi-copy" aria-hidden="true"></i></button><div><strong>${ui.formatNumber(coupon.discountPercent)}٪ تخفیف خرید</strong><small>${expiryLabel} ${esc(coupon.expiresOn)}</small></div></div><span class="profile-coupon-status ${stateClass}"><i class="bi ${stateIcon}" aria-hidden="true"></i>${stateLabel}</span></header><section class="profile-coupon-usage" aria-label="سوابق استفاده از کد ${esc(coupon.code)}"><div class="profile-coupon-usage-heading"><strong><i class="bi bi-receipt-cutoff" aria-hidden="true"></i>فاکتورهای استفاده‌شده</strong><span>استفاده‌شده: <b>${ui.formatNumber(uses.length)}</b></span><span>سقف استفاده: <b>${ui.formatNumber(usageLimit)}</b></span><span>باقی‌مانده: <b>${ui.formatNumber(remainingUses)}</b></span></div>${invoices}</section></article>`;
         }).join("");
+
+        profileHost.querySelectorAll("[data-copy-coupon]").forEach((button) => {
+            button.addEventListener("click", async () => {
+                const code = button.dataset.copyCoupon || "";
+                try {
+                    if (navigator.clipboard?.writeText) {
+                        await navigator.clipboard.writeText(code);
+                    } else {
+                        const input = document.createElement("textarea");
+                        input.value = code;
+                        input.setAttribute("readonly", "");
+                        input.style.position = "fixed";
+                        input.style.opacity = "0";
+                        document.body.append(input);
+                        input.select();
+                        const copied = document.execCommand("copy");
+                        input.remove();
+                        if (!copied) throw new Error("Clipboard unavailable");
+                    }
+                    ui.showToast("کد تخفیف کپی شد.", "success");
+                } catch {
+                    ui.showToast("کپی کد تخفیف انجام نشد.", "error");
+                }
+            });
+        });
 
         if (!pagination || !pageStatus || !pageNav) return;
         pagination.hidden = pageCount <= 1;
@@ -274,7 +304,7 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
         if (!host) return;
         const watches = read(priceWatchKey);
         if (!watches.length) {
-            host.innerHTML = '<div class="flow-card flow-empty empty-state-card"><i class="bi bi-bell-slash" aria-hidden="true"></i><h3>پیگیری قیمتی ثبت نشده</h3><p>در صفحهٔ محصول، «به من اطلاع بده» را بزنید تا پیگیری اینجا نمایش داده شود.</p><a class="account-section-action" href="/search"><i class="bi bi-search" aria-hidden="true"></i>جست‌وجوی محصولات</a></div>';
+            host.innerHTML = '<div class="compare-empty empty-state-card"><div class="compare-empty-art" aria-hidden="true"><span><i class="bi bi-bell-slash"></i></span><i class="bi bi-plus-lg"></i></div><span class="compare-empty-kicker">پیگیری هوشمند قیمت</span><h2>هنوز پیگیری قیمتی ثبت نکرده‌اید</h2><p>در صفحهٔ محصول، «به من اطلاع بده» را فعال کنید تا تغییر قیمت یا موجودی را اینجا دنبال کنید.</p><a class="flow-button" href="/search"><i class="bi bi-search" aria-hidden="true"></i> جست‌وجوی محصولات <i class="bi bi-arrow-left" aria-hidden="true"></i></a><small class="compare-empty-hint"><i class="bi bi-bell" aria-hidden="true"></i> پیگیری را از صفحهٔ هر محصول برای کالا یا ویژگی دلخواهتان ثبت کنید.</small></div>';
             return;
         }
         host.innerHTML = watches.map((watch, index) => {

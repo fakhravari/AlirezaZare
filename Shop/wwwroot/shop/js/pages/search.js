@@ -16,6 +16,7 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
     sort: "recommended",
     visible: 9,
   };
+  let searchRenderTimer = 0;
   const attributeDefinitions = window.HNCatalog?.attributeDefinitions || {};
   const filterFields = {
     brand: { fa: "برند", en: "Brand", slug: "brand", attributeId: "brand" },
@@ -324,7 +325,8 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
     state.minPrice = Number.isFinite(minPrice) && minPrice >= 0 && minPrice < state.maxPrice
       ? minPrice
       : 0;
-    state.query = params.get("q")?.trim() || "";
+    const queryFromUrl = params.get("q")?.trim() || "";
+    state.query = Array.from(queryFromUrl).length >= 3 ? queryFromUrl : "";
     const availability = (
       params.get("available") ?? params.get("onlyAvailable") ?? ""
     ).toLowerCase();
@@ -628,6 +630,7 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
     );
   }
   function clearAll() {
+    window.clearTimeout(searchRenderTimer);
     ["brand", "type", "movement", "strap", "color"].forEach((key) => state[key].clear());
     state.availability = "all";
     state.discountOnly = false;
@@ -635,6 +638,10 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
     state.maxPrice = 60;
     state.query = "";
     $$(".filter-option input").forEach((input) => (input.checked = false));
+    $$(".filter-group").forEach((group) => {
+      group.classList.remove("open");
+      group.querySelector(":scope > button")?.setAttribute("aria-expanded", "false");
+    });
     $("#availabilityFilter").value = "all";
     $("#minPrice").value = 0;
     $("#maxPrice").value = 60;
@@ -721,8 +728,19 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
   $("#minPrice").onchange = () => scrollToResultsStart();
   $("#maxPrice").onchange = () => scrollToResultsStart();
   $("#productSearch").oninput = (e) => {
-    state.query = e.target.value.trim();
-    render(true);
+    const query = e.target.value.trim();
+    window.clearTimeout(searchRenderTimer);
+    if (Array.from(query).length < 3) {
+      if (state.query) {
+        state.query = "";
+        render(true);
+      }
+      return;
+    }
+    searchRenderTimer = window.setTimeout(() => {
+      state.query = query;
+      render(true);
+    }, 250);
   };
   $(".sort-options").onchange = (e) => {
     if (!e.target.matches('input[name="productSort"]')) return;

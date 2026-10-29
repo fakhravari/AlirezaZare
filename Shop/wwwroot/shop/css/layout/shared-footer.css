@@ -39,6 +39,21 @@
   border-radius: 50%;
   color: #e2c27f;
 }
+
+footer .footer-brand {
+  display: inline-flex;
+  width: min(260px, 100%);
+  align-items: center;
+  line-height: 0;
+}
+
+footer .footer-brand-logo {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 3 / 1;
+  object-fit: contain;
+}
 .site-footer .footer-about > p {
   margin: 18px 0;
   color: rgba(255, 255, 255, 0.7);
@@ -131,6 +146,16 @@ footer .footer-main > .col-lg-4:first-child > p {
 @media (max-width: 575px) {
   .site-footer {
     padding-top: 54px;
+  }
+  .home-page footer .footer-main > .col-lg-4:first-child .footer-brand {
+    display: flex;
+    width: min(210px, 100%);
+    justify-content: center;
+    margin-inline: auto;
+  }
+  footer .socials {
+    justify-content: center;
+    margin-top: 31px;
   }
   .site-footer .footer-grid {
     gap: 25px 18px;

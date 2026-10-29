@@ -40,6 +40,79 @@
   border-color: rgba(178, 138, 79, 0.28);
 }
 
+.home-page :is(#amazing, #newest) .category-showcase-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
+  align-items: center;
+  gap: 24px;
+}
+
+.home-page :is(#amazing, #newest) .offer-heading-main {
+  min-width: 0;
+}
+
+.home-page :is(#amazing, #newest) .offer-heading-main h2 {
+  max-width: 100%;
+  text-wrap: balance;
+}
+
+.home-page :is(#amazing, #newest) .offer-heading-aside {
+  display: grid;
+  justify-items: start;
+  gap: 10px;
+  min-width: 0;
+}
+
+.home-page :is(#amazing, #newest) .offer-heading-aside .collection-guidance {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0;
+  padding: 10px 13px;
+  border: 1px solid rgba(178, 138, 79, 0.16);
+  border-inline-start: 3px solid rgba(178, 138, 79, 0.68);
+  border-radius: 11px 4px 4px 11px;
+  background: linear-gradient(110deg, rgba(251, 248, 240, 0.9), rgba(255, 255, 255, 0.72));
+  color: var(--industrial-muted);
+  font-size: 14px;
+  line-height: 1.85;
+}
+
+.home-page :is(#amazing, #newest) .offer-heading-aside .collection-guidance > i {
+  display: grid;
+  width: 27px;
+  height: 27px;
+  flex: 0 0 27px;
+  place-items: center;
+  margin-top: 1px;
+  border: 1px solid rgba(178, 138, 79, 0.18);
+  border-radius: 8px;
+  background: rgba(246, 197, 21, 0.12);
+  color: #9a722f;
+  font-size: 13px;
+}
+
+.home-page :is(#amazing, #newest) .offer-heading-aside .collection-guidance > span {
+  min-width: 0;
+}
+
+.home-page :is(#amazing, #newest) .offer-heading-aside > a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid rgba(165, 141, 108, 0.72);
+  color: var(--industrial-navy);
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.home-page :is(#amazing, #newest) .offer-heading-aside > a:is(:hover, :focus-visible) {
+  border-bottom-color: #9a722f;
+  color: #815a24;
+}
+
 .home-page .category-showcase-head .eyebrow,
 .home-page .section-head .eyebrow,
 .home-page .recommend-head .eyebrow,
@@ -216,6 +289,29 @@
     padding: 8px 10px;
     font-size: 13px;
     line-height: 1.8;
+  }
+
+  .home-page :is(#amazing, #newest) .category-showcase-head {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .home-page :is(#amazing, #newest) .offer-heading-aside {
+    width: 100%;
+    gap: 8px;
+  }
+
+  .home-page :is(#amazing, #newest) .offer-heading-aside .collection-guidance {
+    gap: 8px;
+    padding: 8px 10px;
+    font-size: 13px;
+    line-height: 1.8;
+  }
+
+  .home-page :is(#amazing, #newest) .offer-heading-aside .collection-guidance > i {
+    width: 25px;
+    height: 25px;
+    flex-basis: 25px;
   }
 
   .home-page #collection .collection-guidance > i {
