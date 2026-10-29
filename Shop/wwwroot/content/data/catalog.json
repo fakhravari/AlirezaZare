@@ -5643,25 +5643,13 @@
     },
     "product-22": {
       "id": "product-22",
-      "main": "content/products/images/main/electrician-pliers-set-hn-022-row-022-main.png",
-      "card": "content/products/images/card/electrician-pliers-set-hn-022-row-022-card-800.jpg",
-      "thumbnail": "content/products/images/thumbnail/electrician-pliers-set-hn-022-row-022-thumbnail-256.jpg",
+      "main": "content/products/images/main/electrician-pliers-set-hn-022-row-022-v2-main.png",
+      "card": "content/products/images/card/electrician-pliers-set-hn-022-row-022-v2-card-800.jpg",
+      "thumbnail": "content/products/images/thumbnail/electrician-pliers-set-hn-022-row-022-v2-thumbnail-256.jpg",
       "images": [
         {
-          "src": "content/products/images/main/electrician-pliers-set-hn-022-row-022-main.png",
-          "thumbnail": "content/products/images/thumbnail/electrician-pliers-set-hn-022-row-022-thumbnail-256.jpg"
-        },
-        {
-          "src": "content/products/images/main/cordless-hammer-drill-hn-001-row-001-main.png",
-          "thumbnail": "content/products/images/thumbnail/cordless-hammer-drill-hn-001-row-001-thumbnail-256.jpg"
-        },
-        {
-          "src": "content/products/images/main/digital-soldering-station-hn-011-row-011-main.png",
-          "thumbnail": "content/products/images/thumbnail/digital-soldering-station-hn-011-row-011-thumbnail-256.jpg"
-        },
-        {
-          "src": "content/products/images/main/portable-led-work-light-hn-016-row-016-main.png",
-          "thumbnail": "content/products/images/thumbnail/portable-led-work-light-hn-016-row-016-thumbnail-256.jpg"
+          "src": "content/products/images/main/electrician-pliers-set-hn-022-row-022-v2-main.png",
+          "thumbnail": "content/products/images/thumbnail/electrician-pliers-set-hn-022-row-022-v2-thumbnail-256.jpg"
         }
       ],
       "videos": []

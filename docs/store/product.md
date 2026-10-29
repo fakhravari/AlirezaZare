@@ -6,6 +6,8 @@
 
 هیروی صفحه تصویر اصلی محصول را از `Model.Seo.ImageUrl` می‌گیرد؛ منبع آن تصویر کاتالوگ در Controller است. تصویر در هیرو و قاب اصلی گالری با `contain` نمایش داده می‌شود؛ stage بزرگ پنجرهٔ گالری در قواعد فعلی `cover` دارد و ممکن است تصویر را برش دهد؛ `Seo.ImageUrl` برای metadata و تصویر اشتراک‌گذاری نیز مصرف می‌شود.
 
+برای محصول نمونهٔ ۲۲ (`electrician-pliers-set`)، تصویر مولتی‌مترِ اشتباه با تصویر تولیدشدهٔ ست سه‌تایی انبر برق‌کاری جایگزین شد. `main`، `card`، `thumbnail` و تنها تصویر گالری از یک تصویر پایه ساخته می‌شوند؛ تصویر برای نمایش نمونه است و عکس رسمی مدل Knipex محسوب نمی‌شود.
+
 [ProductController.Details](../../Shop/Controllers/ProductController.cs) → [CatalogRepository](../../Shop/Services/CatalogRepository.cs) → `PageModel<ProductDetailsModel>` → [Details.cshtml](../../Shop/Views/Product/Details.cshtml) → `commerce.js` و `#productView`.
 
 Controller شناسه را از انتهای slug می‌خواند و محصول را از کاتالوگ پیدا می‌کند. canonical از فیلد صریح `slug` و `id` به شکل `/products/{slug}-{id}` ساخته می‌شود. مسیرهای قدیمی `/products/{id:int}` و `/Product?id=…` مستقیماً با ۳۰۱ به canonical می‌روند؛ پیشوند یا بزرگی حروف ناهماهنگ در مسیر جزئیات نیز به همان canonical هدایت می‌شود. نامعتبر بودن id یا نبود محصول، 404 می‌دهد.
