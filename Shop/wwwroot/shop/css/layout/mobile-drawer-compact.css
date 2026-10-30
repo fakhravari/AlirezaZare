@@ -393,6 +393,11 @@
   .mobile-menu .offcanvas-body > a,
   .mobile-menu .mobile-category-toggle,
   .mobile-menu .mobile-category > button {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 28px;
+    column-gap: 8px;
+    align-items: center;
+    direction: rtl;
     min-height: 45px;
     padding: 5px 0;
     border: 0;
@@ -406,6 +411,27 @@
       background-color 160ms ease,
       border-color 160ms ease,
       transform 160ms ease;
+  }
+
+  .mobile-menu .offcanvas-body > a > span,
+  .mobile-menu .mobile-category-toggle > span,
+  .mobile-menu .mobile-category > button > span {
+    display: grid;
+    width: 100%;
+    min-width: 0;
+    grid-template-columns: 28px minmax(0, 1fr);
+    column-gap: 8px;
+    align-items: center;
+    text-align: right;
+  }
+
+  .mobile-menu .mobile-category-toggle > i:last-child,
+  .mobile-menu .mobile-category > button > i:last-child {
+    display: grid;
+    width: 28px;
+    height: 28px;
+    place-items: center;
+    justify-self: center;
   }
 
   .mobile-menu .offcanvas-body > a:is(:hover, :focus-visible),

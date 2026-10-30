@@ -1317,10 +1317,6 @@
   text-align: right;
 }
 
-#productView .product-meta-identity-top > .product-meta-country {
-  border-inline-start: 0;
-}
-
 #productView .product-meta-identity-top .product-meta-pill > span {
   display: flex;
   flex: 1 1 auto;

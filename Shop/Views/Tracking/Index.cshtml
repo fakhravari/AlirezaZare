@@ -1,6 +1,5 @@
 @model PageModel
 
-
 <header class="page-hero about-hero">
     <div class="container">
         <nav class="article-breadcrumb tracking-breadcrumb" aria-label="مسیر صفحه">
@@ -68,7 +67,8 @@
                 <h2>برای پیگیری واقعی تماس بگیرید</h2>
                 <p>این نسخه به سامانه سفارش متصل نیست؛ برای پیگیری، کد سفارش را به پشتیبانی بدهید.</p>
                 <ul class="tracking-support-points">
-                    <li><i class="bi bi-shield-check" aria-hidden="true"></i> بررسی دقیق وضعیت سفارش</li><li><i class="bi bi-clock-history" aria-hidden="true"></i> پاسخ‌گویی در ساعات کاری</li>
+                    <li><i class="bi bi-shield-check" aria-hidden="true"></i> بررسی دقیق وضعیت سفارش</li>
+                    <li><i class="bi bi-clock-history" aria-hidden="true"></i> پاسخ‌گویی در ساعات کاری</li>
                 </ul>
                 <a class="flow-button tracking-support-action" href="tel:09369455457">
                     <span>تماس با پشتیبانی</span><i class="bi bi-arrow-left" aria-hidden="true"></i>
@@ -77,16 +77,10 @@
         </aside>
     </div>
 </main>
-<section class="tracking-related-section" aria-label="صفحات مرتبط با پیگیری سفارش">
-    <div class="container">
-        <partial name="_RelatedLinks"/>
-    </div>
-</section>
-
 
 @section Styles {
-    <link href="~/shop/css/pages/pages.css" asp-append-version="true" rel="stylesheet"/>
-    <link href="~/shop/css/pages/tracking.css" asp-append-version="true" rel="stylesheet"/>
+    <link href="~/shop/css/pages/pages.css" asp-append-version="true" rel="stylesheet" />
+    <link href="~/shop/css/pages/tracking.css" asp-append-version="true" rel="stylesheet" />
 }
 
 @section Scripts {

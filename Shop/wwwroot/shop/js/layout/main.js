@@ -1643,13 +1643,16 @@ $(function () {
         '<div class="product-card-actions" role="group" aria-label="عملیات محصول"></div>',
       ).appendTo($image);
     $image.children(".favorite, .compare-trigger").appendTo($actions);
-    const cartIconClass = $cartButton.find("> i").attr("class") || "bi bi-bag-plus";
+    const outOfStock = $cartButton.prop("disabled");
+    const cartIconClass = outOfStock
+      ? "bi bi-bag-x"
+      : $cartButton.find("> i").attr("class") || "bi bi-bag-plus";
     $cartButton.html(
-      `<i class="${escapeHtml(cartIconClass)}" aria-hidden="true"></i><span class="add-cart-label">افزودن به سبد</span>`,
+      `<i class="${escapeHtml(cartIconClass)}" aria-hidden="true"></i><span class="add-cart-label">${outOfStock ? "ناموجود" : "افزودن به سبد"}</span>`,
     );
     $cartButton.attr({
-      "aria-label": "افزودن به سبد خرید",
-      title: "افزودن به سبد خرید",
+      "aria-label": outOfStock ? "ناموجود" : "افزودن به سبد خرید",
+      title: outOfStock ? "موجودی این کالا تمام شده است" : "افزودن به سبد خرید",
     });
     $card.attr("data-action-dock-ready", "true");
     syncCompareButtons();
@@ -1819,6 +1822,23 @@ $(function () {
 
   const openQuickView = (product) => {
     activeProduct = product;
+    const rawStock = product.stockQuantity ?? product.inventoryCount ?? product.quantityInStock ?? product.availableQuantity ?? product.stock;
+    const stock = rawStock === "" || rawStock === null || rawStock === undefined ? Number.NaN : Number(rawStock);
+    const unavailable = Number.isFinite(stock) && stock >= 0 ? stock === 0 : product.inStock === false;
+    const $quickAdd = $(".quick-add-cart");
+    $quickAdd
+      .prop("disabled", unavailable)
+      .attr("aria-disabled", String(unavailable))
+      .attr("aria-label", unavailable ? "ناموجود" : "افزودن به سبد خرید")
+      .attr("title", unavailable ? "موجودی این کالا تمام شده است" : "افزودن به سبد خرید")
+      .toggleClass("is-out-of-stock", unavailable)
+      .html(`<i class="bi ${unavailable ? "bi-bag-x" : "bi-bag-plus"}" aria-hidden="true"></i> ${unavailable ? "ناموجود" : "افزودن به سبد خرید"}`);
+    $(".stock-note > span").html(
+      `<i aria-hidden="true"></i> ${unavailable ? "ناموجود" : "موجود در انبار"}`,
+    );
+    $(".stock-note > small").text(
+      unavailable ? "موجودی این کالا تمام شده است." : "زمان ارسال بر اساس مقصد و سفارش اعلام می‌شود.",
+    );
     $("#quickViewImage").attr({
       src: product.image,
       alt: product.name,
@@ -1885,7 +1905,7 @@ $(function () {
   });
 
   $(".quick-add-cart").on("click", function () {
-    if (!activeProduct) return;
+    if (!activeProduct || this.disabled) return;
     window.HNUI?.cart.add(activeProduct, 1, this);
   });
 

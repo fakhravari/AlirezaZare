@@ -52,10 +52,10 @@
   }
 
   .product-card-actions > :is(.favorite, .compare-trigger) {
-    width: 40px !important;
-    min-width: 40px !important;
-    height: 40px !important;
-    min-height: 40px !important;
+    width: 35px !important;
+    min-width: 35px !important;
+    height: 35px !important;
+    min-height: 35px !important;
     font-size: 14px !important;
   }
 
@@ -1013,10 +1013,10 @@
   .search-product.product-card .search-product-image > .favorite {
     top: 10px;
     left: 12px;
-    width: 34px;
-    min-width: 34px;
-    height: 34px;
-    min-height: 34px;
+    width: 35px;
+    min-width: 35px;
+    height: 35px;
+    min-height: 35px;
     font-size: 14px;
   }
 
@@ -1187,7 +1187,6 @@
 @media (max-width: 767px) {
   .mobile-page--home-index #productGrid > .product-col .product-info h3 {
     min-height: 3em;
-    -webkit-line-clamp: 2;
     line-clamp: 2;
   }
 

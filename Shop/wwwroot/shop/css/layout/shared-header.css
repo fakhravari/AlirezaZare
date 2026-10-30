@@ -216,6 +216,6 @@
   }
   .mobile-menu .mobile-category-toggle > span > i,
   .mobile-menu .mobile-category > button > span > i {
-    margin-left: 8px !important;
+    margin-left: 0 !important;
   }
 }

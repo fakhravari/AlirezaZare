@@ -89,13 +89,16 @@ window.HNUI.mount("pages-article-details", document, () => {
           const stars = document.createElement("span");
           stars.className = "article-feedback-stars";
           stars.setAttribute("aria-label", `امتیاز ${formatNumber(rating)} از ۵`);
-          const ratingIcon = document.createElement("i");
-          ratingIcon.className = "bi bi-star-fill";
-          ratingIcon.setAttribute("aria-hidden", "true");
+          for (let score = 1; score <= 5; score += 1) {
+            const ratingIcon = document.createElement("i");
+            ratingIcon.className = `bi ${score <= rating ? "bi-star-fill is-filled" : "bi-star is-empty"}`;
+            ratingIcon.setAttribute("aria-hidden", "true");
+            stars.append(ratingIcon);
+          }
           const ratingValue = document.createElement("bdi");
           ratingValue.dir = "rtl";
           ratingValue.textContent = `${formatNumber(rating)} از ۵`;
-          stars.append(ratingIcon, ratingValue);
+          stars.append(ratingValue);
           meta.append(stars);
         }
         const separator = document.createElement("span");

@@ -609,6 +609,15 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                     .forEach((button) => {
                         button.disabled = unavailable;
                         button.setAttribute("aria-disabled", String(unavailable));
+                        button.setAttribute(
+                            "aria-label",
+                            unavailable ? "ناموجود" : "افزودن به سبد خرید",
+                        );
+                        button.title = unavailable
+                            ? "موجودی این کالا تمام شده است"
+                            : "افزودن به سبد خرید";
+                        button.classList.toggle("is-out-of-stock", unavailable);
+                        button.innerHTML = `<i class="bi ${unavailable ? "bi-bag-x" : "bi-bag-plus"}" aria-hidden="true"></i> ${unavailable ? "ناموجود" : "افزودن به سبد خرید"}`;
                     });
             };
             productView.querySelectorAll('a[href^="Product?id="]').forEach((link) => {
@@ -1597,6 +1606,19 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
     let couponError = false;
     const normalizeCoupon = (value) =>
         ui.toEnglishDigits(value.trim()).toUpperCase();
+    const couponEligibleTotal = (items) => items.reduce((sum, item) => {
+        const product = (window.HNProducts || []).find(
+            (candidate) => String(candidate.id) === String(item.id),
+        );
+        if ((Number(product?.discountPercent) || 0) > 0) return sum;
+        return sum + item.price * item.quantity;
+    }, 0);
+    const couponDiscount = (items, code = couponCode) => {
+        const rate = Number(couponOffers[code]) || 0;
+        return code && rate > 0
+            ? Math.floor(couponEligibleTotal(items) * rate / 100)
+            : 0;
+    };
     const quantityFeedback = new Map();
     let renderedCartShape = "";
     function renderCart(event) {
@@ -1614,7 +1636,7 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                 row.querySelector(".cart-product-line-total > strong").textContent = money(item.price * item.quantity);
             });
             const lines = currentView.querySelector(".cart-summary-lines");
-            const discount = couponCode ? Math.floor(total * couponOffers[couponCode] / 100) : 0;
+            const discount = couponDiscount(items);
             lines.querySelector(".flow-total:first-child > strong").innerHTML = `${fa(items.reduce((sum, item) => sum + item.quantity, 0))} عدد <small>(${fa(items.length)} مدل)</small>`;
             lines.querySelector(".flow-total:nth-child(2) > strong").textContent = money(total);
             lines.querySelector(".flow-discount > span:last-child").textContent = money(discount);
@@ -1627,10 +1649,11 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
             couponMessage = "";
             ui.storage.remove(couponKey);
         }
-        const discount = couponCode ? Math.floor(total * couponOffers[couponCode] / 100) : 0;
+        const discount = couponDiscount(items);
         const finalTotal = total - discount;
+        const couponEligibleAmount = couponEligibleTotal(items);
         const couponStatusMarkup = couponCode && !couponError
-            ? `<i class="bi bi-tags" aria-hidden="true"></i><span>کد تخفیف <code dir="ltr">${esc(couponCode)}</code> اعمال شد</span>`
+            ? `<i class="bi bi-tags" aria-hidden="true"></i><span>کد تخفیف <code dir="ltr">${esc(couponCode)}</code> ${couponEligibleAmount > 0 ? "فقط روی کالاهای بدون تخفیف اعمال می‌شود" : "ثبت شد؛ در این سبد کالای بدون تخفیف برای اعمال کوپن وجود ندارد"}</span>`
             : esc(couponMessage);
         const couponMarkup = `<form id="couponForm" class="flow-coupon"><label for="couponCode">کد تخفیف دارید؟</label><div class="flow-coupon-entry"><input id="couponCode" name="coupon" dir="ltr" placeholder="کد تخفیف" maxlength="32" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-describedby="couponStatus" aria-invalid="${couponError}" value="${couponCode}"><button class="flow-button" type="submit">اعمال کد</button></div><div class="cart-coupon-feedback${couponCode && !couponError ? " is-applied" : ""}"><p id="couponStatus" class="flow-coupon-status${couponError ? " is-error" : ""}" role="status">${couponStatusMarkup}</p>${couponCode ? '<button id="removeCoupon" class="flow-coupon-remove" type="button" aria-label="حذف کد تخفیف"><i class="bi bi-trash3" aria-hidden="true"></i><span>حذف</span></button>' : ""}</div></form>`;
         const totalsMarkup = `<div class="flow-total flow-discount"><span class="cart-line-label"><i class="bi bi-tags" aria-hidden="true"></i><span><span class="cart-summary-label-extra">مجموع </span>تخفیف${couponCode ? ` (${fa(couponOffers[couponCode])}٪)` : ""}</span></span><span>${money(discount)}</span></div><div class="flow-total flow-payable"><span class="cart-line-label"><i class="bi bi-wallet2" aria-hidden="true"></i><span>مبلغ نهایی<span class="cart-summary-label-extra"> محصولات</span><small>بدون هزینه ارسال</small></span></span><strong>${money(finalTotal)}</strong></div>`;
@@ -1761,9 +1784,12 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                     input.focus();
                     return;
                 }
+                const eligibleTotal = couponEligibleTotal(ui.cart.read());
                 couponMessage = couponCode === value
                     ? "این کد قبلاً اعمال شده است."
-                    : `کد تخفیف اعمال شد؛ ${fa(couponOffers[value])}٪ از جمع محصولات کم شد.`;
+                    : eligibleTotal > 0
+                        ? `کد تخفیف اعمال شد؛ ${fa(couponOffers[value])}٪ فقط از جمع کالاهای بدون تخفیف کم می‌شود.`
+                        : "کد ثبت شد؛ چون کالای بدون تخفیف در سبد نیست، تخفیف کوپن اعمال نشد.";
                 couponCode = value;
                 couponError = false;
                 ui.storage.set(couponKey, couponCode);

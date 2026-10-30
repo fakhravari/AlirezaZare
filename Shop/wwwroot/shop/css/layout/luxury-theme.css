@@ -773,7 +773,7 @@ h3,
   .page-menu-drawer nav > a:focus-visible,
   .search-mobile-menu > a:hover,
   .search-mobile-menu > a:focus-visible {
-    padding-right: 15px !important;
+    padding-right: 10px !important;
     border-bottom-color: rgba(212, 192, 146, 0.26) !important;
     background: linear-gradient(
       90deg,

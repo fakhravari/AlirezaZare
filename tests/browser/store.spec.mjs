@@ -97,6 +97,36 @@ test('cart defaults, required service and reload use one canonical price', async
   await noHorizontalOverflow(page);
 });
 
+test('cart coupon applies only to products without an existing sale', async ({page}) => {
+  await page.addInitScript(() => localStorage.setItem('hn-demo-auth', '1'));
+  await page.goto('/cart');
+  await page.evaluate(() => {
+    window.HNUI.cart.add(window.HNCatalog.find(1)); // 15% product discount
+    window.HNUI.cart.add(window.HNCatalog.find(3)); // no product discount
+  });
+  await expect(page.locator('.cart-product-row')).toHaveCount(2);
+
+  const expectedDiscount = await page.evaluate(() => {
+    const items = window.HNUI.cart.read();
+    const products = window.HNProducts || [];
+    const eligibleTotal = items.reduce((sum, item) => {
+      const product = products.find(candidate => String(candidate.id) === String(item.id));
+      return Number(product?.discountPercent) > 0
+        ? sum
+        : sum + item.price * item.quantity;
+    }, 0);
+    return Math.floor(eligibleTotal * 10 / 100);
+  });
+
+  await page.locator('#couponCode').fill('BAZAR10');
+  await page.locator('#couponForm button[type="submit"]').click();
+  await expect(page.locator('#couponStatus')).toContainText('فقط روی کالاهای بدون تخفیف');
+  const actualDiscount = await page.locator('.flow-discount > span:last-child').evaluate(element =>
+    Number(window.HNUI.toEnglishDigits(element.textContent).replace(/\D/g, '')),
+  );
+  expect(actualDiscount).toBe(expectedDiscount);
+});
+
 test('desktop dropdown opens from its trigger and Escape closes it while focused', async ({page, isMobile}) => {
   test.skip(isMobile, 'Desktop navigation has a separate mobile drawer.');
   for (const route of ['/', '/products/cordless-hammer-drill-1']) {

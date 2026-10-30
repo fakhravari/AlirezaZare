@@ -54,6 +54,19 @@ footer .footer-brand-logo {
   aspect-ratio: 3 / 1;
   object-fit: contain;
 }
+@media (min-width: 992px) {
+  footer .footer-main > .col-lg-4:first-child .footer-brand {
+    display: flex;
+    width: min(260px, 100%);
+    justify-content: flex-start;
+    margin-inline: 0 auto;
+  }
+  footer .footer-main > .col-lg-4:first-child .footer-brand-logo {
+    height: 80px;
+    aspect-ratio: auto;
+    object-fit: fill;
+  }
+}
 .site-footer .footer-about > p {
   margin: 18px 0;
   color: rgba(255, 255, 255, 0.7);

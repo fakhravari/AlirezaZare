@@ -14,19 +14,31 @@
   --page-hero-photo: url("../../images/heroes/hero-about-showroom.jpg");
 }
 
-.inner-page.mobile-page--contact-index .contact-hero,
 .inner-page.mobile-page--faq-index .about-hero {
+  --page-hero-photo: url("../../images/heroes/hero-faq-support.jpg");
+}
+
+.inner-page.mobile-page--contact-index .contact-hero {
   --page-hero-photo: url("../../images/heroes/hero-service-support.jpg");
 }
 
 .inner-page.mobile-page--shipping-index .about-hero,
-.inner-page.mobile-page--tracking-index .about-hero,
-.inner-page.mobile-page--legal-returns .legal-hero,
 .inner-page .cart-page-hero {
   --page-hero-photo: url("../../images/heroes/order-dispatch.jpg");
 }
 
-.inner-page.mobile-page--legal-terms .legal-hero,
+.inner-page.mobile-page--tracking-index .about-hero {
+  --page-hero-photo: url("../../images/heroes/hero-order-tracking.jpg");
+}
+
+.inner-page.mobile-page--legal-returns .legal-hero {
+  --page-hero-photo: url("../../images/heroes/hero-returns-inspection.jpg");
+}
+
+.inner-page.mobile-page--legal-terms .legal-hero {
+  --page-hero-photo: url("../../images/heroes/hero-terms-use.jpg");
+}
+
 .inner-page.mobile-page--legal-privacy .legal-hero {
   --page-hero-photo: url("../../images/heroes/store-policies-privacy.jpg");
 }
@@ -44,6 +56,16 @@
     rgba(16, 42, 67, .56) 67%,
     rgba(16, 42, 67, .78) 100%
   ) !important;
+}
+
+.inner-page .page-hero.product-detail-hero::before {
+  background: linear-gradient(
+    90deg,
+    rgba(16, 42, 67, 0) 0%,
+    rgba(16, 42, 67, .06) 24%,
+    rgba(16, 42, 67, .55) 55%,
+    rgba(16, 42, 67, .8) 100%
+  );
 }
 
 /* Foreground photos (about, warranty, articles and individual products)
@@ -67,6 +89,10 @@
   width: 52%;
   object-fit: contain;
   object-position: left center;
+  opacity: 1;
+  filter: drop-shadow(0 16px 24px rgba(3, 14, 34, .32));
+  transform: scale(1.1);
+  transform-origin: left center;
 }
 
 /* Article photography fills its column; contain left empty space beside square images. */
@@ -84,5 +110,10 @@
     width: 100%;
     object-position: center;
     opacity: .88;
+  }
+
+  .inner-page .product-detail-hero > .hero-image {
+    opacity: .96;
+    transform: none;
   }
 }
