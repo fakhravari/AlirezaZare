@@ -1852,6 +1852,27 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
         const list = favorites()
             .map((id) => catalog.find((p) => String(p.id) === id) || cache[id])
             .filter(Boolean);
+        const clearAllButton = document.querySelector("#clearFavorites");
+        if (clearAllButton) {
+            clearAllButton.hidden = list.length === 0;
+            clearAllButton.onclick = async () => {
+                if (!favorites().length) {
+                    clearAllButton.hidden = true;
+                    return;
+                }
+                const confirmed = await window.confirmFormSubmission?.({
+                    title: "حذف همهٔ علاقه‌مندی‌ها؟",
+                    message: "همهٔ محصولات ذخیره‌شده از فهرست علاقه‌مندی‌های شما حذف می‌شوند. ادامه می‌دهید؟",
+                    confirmText: "بله، حذف همه",
+                });
+                if (!confirmed) return;
+                if (!ui.storage.set("hn-favorites", "[]")) {
+                    ui.showToast("پاک‌کردن فهرست علاقه‌مندی‌ها انجام نشد. دوباره تلاش کنید.", "error");
+                    return;
+                }
+                ui.showToast("فهرست علاقه‌مندی‌ها پاک شد.", "success");
+            };
+        }
         view.innerHTML = list.length
             ? `<div class="flow-cards">${list.map((p) => window.HNProductCard.render(p, {variant: "favorite"})).join("")}</div>`
             : `<div class="compare-empty empty-state-card"><div class="compare-empty-art" aria-hidden="true"><span><i class="bi bi-heart"></i></span><i class="bi bi-plus-lg"></i></div><span class="compare-empty-kicker">علاقه‌مندی‌های شما</span><h2>هنوز محصولی به علاقه‌مندی‌ها اضافه نکرده‌اید</h2><p>محصول‌های موردنظرتان را از صفحهٔ فروشگاه به علاقه‌مندی‌ها اضافه کنید تا بعداً راحت‌تر پیدایشان کنید.</p><a class="flow-button" href="Search"><i class="bi bi-search" aria-hidden="true"></i> جست‌وجوی محصولات <i class="bi bi-arrow-left" aria-hidden="true"></i></a><small class="compare-empty-hint"><i class="bi bi-heart" aria-hidden="true"></i> برای افزودن، آیکن قلب را روی کارت هر محصول بزنید.</small></div>`;

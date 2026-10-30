@@ -198,7 +198,12 @@
     <div id="addressList"></div>
 </section>
 <section id="favorites" class="account-section" hidden="@(profileSection == "favorites" ? null : "hidden")">
-    <h2>لیست علاقه‌مندی‌ها</h2>
+    <div class="account-section-heading">
+        <h2>لیست علاقه‌مندی‌ها</h2>
+        <button id="clearFavorites" class="profile-favorites-clear" type="button" hidden>
+            <i class="bi bi-trash3" aria-hidden="true"></i><span>حذف همه</span>
+        </button>
+    </div>
     <div id="favoritesView"></div>
 </section>
 <section id="coupons" class="account-section" hidden="@(profileSection == "coupons" ? null : "hidden")">

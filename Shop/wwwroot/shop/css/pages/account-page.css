@@ -441,6 +441,38 @@
   margin-bottom: 0;
 }
 
+#favorites .profile-favorites-clear {
+  display: inline-flex;
+  min-height: 42px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 7px 13px;
+  border: 1px solid color-mix(in srgb, #b8404b 24%, white);
+  border-radius: 12px;
+  background: linear-gradient(135deg, #fff, #fff5f4);
+  box-shadow: 0 5px 14px rgba(120, 35, 43, .06);
+  color: #a33b45;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 750;
+  cursor: pointer;
+  transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease, color 160ms ease, transform 160ms ease;
+}
+
+#favorites .profile-favorites-clear:hover {
+  transform: translateY(-1px);
+  border-color: #b8404b;
+  background: #fff0ef;
+  box-shadow: 0 8px 18px rgba(120, 35, 43, .12);
+}
+
+#favorites .profile-favorites-clear:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--industrial-yellow) 72%, white);
+  outline-offset: 3px;
+}
+
 #profileCouponsTitle {
   scroll-margin-top: 112px;
 }
