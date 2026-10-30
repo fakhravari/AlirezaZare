@@ -468,6 +468,10 @@
   box-shadow: 0 8px 18px rgba(120, 35, 43, .12);
 }
 
+#favorites .profile-favorites-clear[hidden] {
+  display: none;
+}
+
 #favorites .profile-favorites-clear:focus-visible {
   outline: 3px solid color-mix(in srgb, var(--industrial-yellow) 72%, white);
   outline-offset: 3px;
