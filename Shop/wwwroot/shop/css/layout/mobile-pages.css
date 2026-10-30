@@ -746,7 +746,6 @@
   }
 
   .search-page .search-page-card-price.has-discount {
-    min-height: 46px !important;
     gap: 2px;
   }
 
@@ -1009,17 +1008,6 @@
     font-size: 12px;
   }
 
-  .product-card .product-image > .favorite,
-  .search-product.product-card .search-product-image > .favorite {
-    top: 10px;
-    left: 12px;
-    width: 35px;
-    min-width: 35px;
-    height: 35px;
-    min-height: 35px;
-    font-size: 14px;
-  }
-
   .home-page .showcase-card-body h3,
   .home-page .rail-card h3 {
     min-height: 3.4em !important;
@@ -1271,9 +1259,6 @@
   }
 
   .search-page .search-page-card-title {
-    min-height: 3em !important;
-    margin: 0 !important;
-    font-size: 14px !important;
     line-height: 1.5 !important;
   }
 
@@ -1301,9 +1286,6 @@
   }
 
   .search-page .search-page-card-content {
-    padding: 8px 8px 4px !important;
-    grid-template-rows: minmax(3em, auto) minmax(46px, 1fr) !important;
-    gap: 4px !important;
   }
 
   .search-page .search-page-card-price,

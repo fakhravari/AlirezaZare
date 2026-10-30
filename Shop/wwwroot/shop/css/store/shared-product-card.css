@@ -164,7 +164,7 @@
   font-size: 16px !important;
 }
 
-.product-card-actions > .favorite:hover,
+.product-card-actions > .favorite:hover:not(.active),
 .product-card-actions > .favorite.active,
 .product-card-actions > .compare-trigger:hover,
 .product-card-actions > .compare-trigger.active {
@@ -828,34 +828,6 @@
   font-weight: 700;
   line-height: 1;
   box-shadow: 0 5px 13px rgba(4, 13, 26, 0.13);
-}
-
-.product-card .product-image > .favorite,
-.search-product.product-card .search-product-image > .favorite {
-  top: 13px;
-  left: 15px;
-  display: grid;
-  width: 38px;
-  min-width: 38px;
-  height: 38px;
-  min-height: 38px;
-  padding: 0;
-  place-items: center;
-  border-width: 1px;
-  border-radius: 50%;
-  font-size: 16px;
-  line-height: 1;
-  box-shadow: 0 5px 13px rgba(4, 13, 26, 0.13);
-}
-
-.product-card .product-image > .favorite i,
-.search-product.product-card .search-product-image > .favorite i {
-  display: grid;
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  place-items: center;
-  line-height: 1;
 }
 
 /* The same media and price markup is used in every card context. */

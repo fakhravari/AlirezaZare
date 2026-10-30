@@ -630,8 +630,6 @@ h6,
   margin-bottom: 3px;
   padding: 0;
   border-radius: 0;
-  background: transparent !important;
-  box-shadow: none !important;
   color: var(--industrial-navy);
   font-size: 14px;
   font-weight: 750;
@@ -1525,18 +1523,6 @@ input[type="radio"] {
   .inner-page .product-results {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
-}
-
-.favorite {
-  border-color: var(--industrial-line) !important;
-  background: #fff !important;
-  color: var(--industrial-steel) !important;
-}
-
-.favorite:hover,
-.favorite.active {
-  border-color: var(--industrial-danger) !important;
-  color: var(--industrial-danger) !important;
 }
 
 .category-filter button.active,
@@ -3310,34 +3296,6 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
   color: var(--industrial-navy);
 }
 
-.product-card .product-image > .compare-trigger,
-.search-product .search-product-image > .compare-trigger,
-.showcase-card .product-image > .compare-trigger,
-.rail-card .rail-image > .compare-trigger {
-  top: 13px !important;
-  right: auto !important;
-  bottom: auto !important;
-  left: 60px !important;
-  width: 38px !important;
-  height: 38px !important;
-  min-width: 38px;
-  min-height: 38px;
-  padding: 0;
-  z-index: 5;
-  font-size: 15px;
-}
-
-.product-card .product-image > .favorite,
-.search-product .search-product-image > .favorite,
-.showcase-card .product-image > .favorite,
-.rail-card .rail-image > .favorite {
-  top: 13px !important;
-  right: auto !important;
-  bottom: auto !important;
-  left: 14px !important;
-  z-index: 5;
-}
-
 @media (max-width: 991px) {
   .compare-panel,
   .compare-panel.open {
@@ -3375,7 +3333,6 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
   border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 7px;
   background: var(--industrial-navy);
-  color: var(--industrial-yellow) !important;
   font-size: 15px;
   line-height: 1;
   opacity: 1 !important;
@@ -3395,7 +3352,6 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
   > i {
   border-color: rgba(16, 42, 67, 0.16);
   background: var(--industrial-yellow);
-  color: var(--industrial-navy) !important;
   transform: scale(1.04);
 }
 
@@ -6341,20 +6297,13 @@ html::-webkit-scrollbar-thumb:hover {
 
 #cartPanel .cart-item-info .cart-quantity > button {
   display: grid;
-  width: 29px !important;
   min-width: 29px;
-  height: 29px !important;
   min-height: 29px;
   padding: 0 !important;
   place-items: center;
-  border: 1px solid #e8d595 !important;
-  border-radius: 50% !important;
-  background: #fff !important;
-  color: #18344c !important;
   font-size: 18px !important;
   font-weight: 700;
   line-height: 1;
-  box-shadow: 0 2px 5px rgba(16, 42, 67, 0.08) !important;
   transition:
     transform 0.18s ease,
     background-color 0.18s ease,
@@ -6364,7 +6313,6 @@ html::-webkit-scrollbar-thumb:hover {
 
 #cartPanel .cart-item-info .cart-quantity > button[data-action="plus"] {
   border-color: #e8bd34 !important;
-  background: linear-gradient(145deg, #ffdf68, #f6c515) !important;
 }
 
 #cartPanel .cart-item-info .cart-quantity > button:active {
@@ -6417,12 +6365,6 @@ html
 #favoritesPanel,
 #comparePanel {
   width: min(410px, calc(100vw - 24px)) !important;
-  border: 1px solid rgba(180, 137, 77, 0.32) !important;
-  border-radius: 22px !important;
-  background: rgba(255, 253, 249, 0.98) !important;
-  box-shadow:
-    0 28px 80px rgba(4, 20, 55, 0.24),
-    0 4px 18px rgba(4, 20, 55, 0.08) !important;
 }
 
 :is(#favoritesPanel, #comparePanel) .compare-panel-head {
@@ -6742,10 +6684,6 @@ html
 
 :is(#favoritesPanel, #comparePanel) .compare-panel-head .compare-panel-count {
   display: block;
-  margin: 0 !important;
-  padding: 0 !important;
-  color: rgba(255, 255, 255, 0.74) !important;
-  font-size: 12px !important;
   font-weight: 550;
   line-height: 1.5;
 }
@@ -7438,45 +7376,6 @@ html
 .rail-card > .add-cart.added > i,
 .product-detail-related-card > .add-cart.added > i {
   color: #39714e !important;
-}
-
-/* Keep favorite and compare buttons white while their symbols show selection in navy. */
-.product-card-actions > .favorite,
-.product-card-actions > .favorite:is(:hover, :focus, :focus-visible, :active),
-.product-card .product-image > .favorite,
-.product-card
-  .product-image
-  > .favorite:is(:hover, :focus, :focus-visible, :active),
-.showcase-card .product-image > .favorite,
-.showcase-card
-  .product-image
-  > .favorite:is(:hover, :focus, :focus-visible, :active),
-.rail-card .rail-image > .favorite,
-.rail-card .rail-image > .favorite:is(:hover, :focus, :focus-visible, :active),
-.search-product .search-product-image > .favorite,
-.search-product
-  .search-product-image
-  > .favorite:is(:hover, :focus, :focus-visible, :active) {
-  border-color: #dbe3e7 !important;
-  background: #fff !important;
-  color: var(--industrial-navy) !important;
-}
-
-.product-card-actions > .favorite.active,
-.product-card-actions > .favorite.active:is(:hover, :focus-visible),
-.product-card .product-image > .favorite.active,
-.product-card .product-image > .favorite.active:is(:hover, :focus-visible),
-.showcase-card .product-image > .favorite.active,
-.showcase-card .product-image > .favorite.active:is(:hover, :focus-visible),
-.rail-card .rail-image > .favorite.active,
-.rail-card .rail-image > .favorite.active:is(:hover, :focus-visible),
-.search-product .search-product-image > .favorite.active,
-.search-product
-  .search-product-image
-  > .favorite.active:is(:hover, :focus-visible) {
-  border-color: var(--industrial-navy) !important;
-  background: #fff !important;
-  color: var(--industrial-navy) !important;
 }
 
 .favorite.active > i {
@@ -10045,7 +9944,6 @@ html
 
 /* Restore the Cart-page toolbar frame inside the header cart drawer. */
 #cartPanel .cart-item {
-  grid-template-columns: 72px minmax(0, 1fr) !important;
   align-items: center;
 }
 
@@ -10142,7 +10040,6 @@ html
 
 @media (max-width: 420px) {
   #cartPanel .cart-item {
-    grid-template-columns: 64px minmax(0, 1fr) !important;
   }
 
   #cartPanel .cart-item-actions {
@@ -10313,8 +10210,6 @@ html
 }
 
 #cartPanel .cart-item > img {
-  width: 72px !important;
-  height: 72px !important;
   aspect-ratio: 1 / 1;
   align-self: center;
   object-fit: cover !important;
@@ -10333,8 +10228,6 @@ html
   }
 
   #cartPanel .cart-item > img {
-    width: 60px !important;
-    height: 60px !important;
   }
 }
 
@@ -10411,7 +10304,6 @@ html
 }
 
 #cartPanel .cart-item-info > strong {
-  font-size: 14px !important;
   line-height: 1.55 !important;
 }
 
@@ -13421,7 +13313,6 @@ body .electrical-swiper .swiper-pagination-bullet-active {
 @media (min-width: 992px) {
   .inner-page #mainNav .category-mega-sidebar,
   .home-page .electrical-category-menu {
-    background: #f7f9fa !important;
   }
 
   .inner-page #mainNav .category-mega-panels,

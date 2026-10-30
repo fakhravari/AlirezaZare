@@ -143,16 +143,26 @@ test('normalized specification assignments resolve feature, category and group r
   const product = window.HNCatalog.find(16);
   assert.deepEqual(plain(product.detail.productSpecGroups.map(group => group.title)), [
     'شناسه و کاربرد · کاربری',
-    'ویژگی‌های عملکردی · منبع تغذیه',
+    'ویژگی‌های عملکردی · تغذیه و شیوهٔ عملکرد',
     'ویژگی‌های عملکردی · روشنایی',
     'ایمنی و انتخاب · نکات ایمنی و انتخاب',
   ]);
   assert.deepEqual(plain(product.detail.productSpecGroups.flatMap(group => group.specs)), [
     ['کاربری', 'روشنایی کارگاهی و تعمیراتی'],
-    ['منبع تغذیه', 'باتری شارژی'],
+    ['منبع تغذیه یا شیوهٔ عملکرد', 'باتری شارژی'],
     ['نوع روشنایی', 'LED'],
     ['نکتهٔ انتخاب', 'بررسی شار نوری و درجهٔ حفاظت'],
   ]);
+});
+
+test('every catalog product has varied data-driven specification assignments', () => {
+  const {window} = runtime();
+  assert.equal(window.HNCatalog.products.length, 30);
+  for (const product of window.HNCatalog.products) {
+    assert.ok(product.specificationValues.length >= 4, `product ${product.id} needs at least four assigned features`);
+    assert.ok(product.detail.productSpecGroups.length >= 4, `product ${product.id} should resolve into multiple categories`);
+    assert.ok(product.specificationValues.every(item => item.featureId && item.value.trim()));
+  }
 });
 
 test('every referenced media file exists with exact lowercase casing', () => {

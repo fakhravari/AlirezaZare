@@ -1,32 +1,20 @@
 {
   "schemaVersion": 2,
-  "specificationGroups": {
-    "identity": { "name": "شناسه و کاربرد", "order": 10 },
-    "operation": { "name": "ویژگی‌های عملکردی", "order": 20 },
-    "safety": { "name": "ایمنی و انتخاب", "order": 30 },
-    "accessories": { "name": "لوازم و متعلقات", "order": 40 }
-  },
-  "specificationCategories": {
-    "tool-type": { "groupId": "identity", "name": "نوع ابزار", "order": 10 },
-    "application": { "groupId": "identity", "name": "کاربری", "order": 20 },
-    "display": { "groupId": "operation", "name": "نمایش و عملکرد", "order": 10 },
-    "power": { "groupId": "operation", "name": "منبع تغذیه", "order": 20 },
-    "lighting": { "groupId": "operation", "name": "روشنایی", "order": 30 },
-    "selection-safety": { "groupId": "safety", "name": "نکات ایمنی و انتخاب", "order": 10 },
-    "soldering": { "groupId": "operation", "name": "کنترل فرایند لحیم‌کاری", "order": 40 },
-    "accessories-list": { "groupId": "accessories", "name": "لوازم پیشنهادی", "order": 10 }
-  },
-  "specificationFeatures": {
-    "tool-kind": { "categoryId": "tool-type", "label": "نوع ابزار", "order": 10 },
-    "usage": { "categoryId": "application", "label": "کاربری", "order": 10 },
-    "display-type": { "categoryId": "display", "label": "نوع نمایش", "order": 10 },
-    "power-source": { "categoryId": "power", "label": "منبع تغذیه", "order": 10 },
-    "light-source": { "categoryId": "lighting", "label": "نوع روشنایی", "order": 10 },
-    "safety-note": { "categoryId": "selection-safety", "label": "نکتهٔ ایمنی", "order": 10 },
-    "selection-note": { "categoryId": "selection-safety", "label": "نکتهٔ انتخاب", "order": 20 },
-    "temperature-control": { "categoryId": "soldering", "label": "کنترل فرایند", "order": 10 },
-    "recommended-accessories": { "categoryId": "accessories-list", "label": "لوازم پیشنهادی", "order": 10 }
-  },
+  "specificationGroups": {"identity":{"name":"شناسه و کاربرد","order":10},"operation":{"name":"ویژگی‌های عملکردی","order":20},"safety":{"name":"ایمنی و انتخاب","order":30},"accessories":{"name":"لوازم و متعلقات","order":40}},
+  "specificationCategories": {"tool-type":{"groupId":"identity","name":"نوع ابزار","order":10},"application":{"groupId":"identity","name":"کاربری","order":20},"display":{"groupId":"operation","name":"نمایش و عملکرد","order":10},"power":{"groupId":"operation","name":"تغذیه و شیوهٔ عملکرد","order":20},"lighting":{"groupId":"operation","name":"روشنایی","order":30},"selection-safety":{"groupId":"safety","name":"نکات ایمنی و انتخاب","order":10},"soldering":{"groupId":"operation","name":"کنترل فرایند لحیم‌کاری","order":40},"accessories-list":{"groupId":"accessories","name":"لوازم پیشنهادی","order":10},"drilling-method":{"groupId":"operation","name":"روش سوراخ‌کاری","order":50},"chuck":{"groupId":"operation","name":"سه‌نظام و نگهداری مته","order":60},"drive-control":{"groupId":"operation","name":"کنترل و پیچ‌کاری","order":70},"meter-form":{"groupId":"identity","name":"فرم دستگاه اندازه‌گیری","order":30},"measurement-task":{"groupId":"operation","name":"کار اندازه‌گیری","order":80},"solder-tool":{"groupId":"identity","name":"نوع ابزار لحیم‌کاری","order":40},"heating-method":{"groupId":"operation","name":"روش گرمایش","order":90},"lighting-format":{"groupId":"identity","name":"ساختار چراغ","order":50},"lighting-task":{"groupId":"operation","name":"کاربری روشنایی","order":100},"hand-tool-form":{"groupId":"identity","name":"نوع ابزار دستی","order":60},"tool-set":{"groupId":"accessories","name":"ساختار مجموعه","order":20},"tester-method":{"groupId":"operation","name":"نوع آزمون","order":110},"tester-form":{"groupId":"identity","name":"نوع تستر","order":70}},
+  "specificationFeatures": {"tool-kind":{"categoryId":"tool-type","label":"نوع ابزار","order":10},"usage":{"categoryId":"application","label":"کاربری","order":10},"display-type":{"categoryId":"display","label":"نوع نمایش","order":10},"power-source":{"categoryId":"power","label":"منبع تغذیه یا شیوهٔ عملکرد","order":10},"light-source":{"categoryId":"lighting","label":"نوع روشنایی","order":10},"safety-note":{"categoryId":"selection-safety","label":"نکتهٔ ایمنی","order":10},"selection-note":{"categoryId":"selection-safety","label":"نکتهٔ انتخاب","order":20},"temperature-control":{"categoryId":"soldering","label":"کنترل فرایند","order":10},"recommended-accessories":{"categoryId":"accessories-list","label":"لوازم پیشنهادی","order":10},"drill-mode":{"categoryId":"drilling-method","label":"نوع سوراخ‌کاری","order":10},"chuck-type":{"categoryId":"chuck","label":"نوع سه‌نظام","order":10},"drive-speed":{"categoryId":"drive-control","label":"تعداد سرعت","order":10},"drive-use":{"categoryId":"drive-control","label":"کاربری پیچ‌کاری","order":20},"meter-format":{"categoryId":"meter-form","label":"فرم دستگاه","order":10},"measurement-task":{"categoryId":"measurement-task","label":"کار اندازه‌گیری","order":10},"solder-format":{"categoryId":"solder-tool","label":"فرم ابزار","order":10},"heating-method":{"categoryId":"heating-method","label":"روش گرمایش","order":10},"lighting-format":{"categoryId":"lighting-format","label":"ساختار چراغ","order":10},"lighting-task":{"categoryId":"lighting-task","label":"کاربری روشنایی","order":10},"hand-tool-form":{"categoryId":"hand-tool-form","label":"نوع ابزار دستی","order":10},"set-content":{"categoryId":"tool-set","label":"ساختار مجموعه","order":10},"tester-method":{"categoryId":"tester-method","label":"روش آزمون","order":10},"tester-form":{"categoryId":"tester-form","label":"فرم تستر","order":10}},
+
+
+
+
+
+
+
+
+
+
+
+
   "attributeDefinitions": {
     "brand": {
       "label": "برند",
@@ -5954,6 +5942,14 @@
         "yellow",
         "black"
       ],
+
+      "specificationValues": [
+        { "featureId": "usage", "value": "نصب و کارگاه" },
+        { "featureId": "power-source", "value": "باتری شارژی" },
+        { "featureId": "tool-kind", "value": "دریل چکشی شارژی" },
+        { "featureId": "drill-mode", "value": "چکشی" },
+        { "featureId": "chuck-type", "value": "اتوماتیک" }
+      ],
       "detailId": "group-1",
       "mediaId": "product-1",
       "includedBenefits": [
@@ -6008,6 +6004,13 @@
       "colorIds": [
         "blue",
         "black"
+      ],
+
+      "specificationValues": [
+        { "featureId": "usage", "value": "نصب و تعمیر" },
+        { "featureId": "power-source", "value": "باتری شارژی" },
+        { "featureId": "tool-kind", "value": "دریل پیچ‌گوشتی شارژی" },
+        { "featureId": "drive-speed", "value": "کنترل برای سوراخ‌کاری و پیچ‌کاری" }
       ],
       "detailId": "group-1",
       "mediaId": "product-2",
@@ -6079,6 +6082,13 @@
       "colorIds": [
         "yellow",
         "black"
+      ],
+
+      "specificationValues": [
+        { "featureId": "usage", "value": "کارگاه ساختمانی" },
+        { "featureId": "power-source", "value": "برق شهری" },
+        { "featureId": "tool-kind", "value": "دریل چکشی برقی" },
+        { "featureId": "drill-mode", "value": "چکشی" }
       ],
       "detailId": "group-1",
       "mediaId": "product-3",
@@ -6166,6 +6176,13 @@
         "red",
         "black"
       ],
+
+      "specificationValues": [
+        { "featureId": "usage", "value": "نصب و مونتاژ" },
+        { "featureId": "power-source", "value": "باتری شارژی" },
+        { "featureId": "tool-kind", "value": "دریل پیچ‌گوشتی شارژی" },
+        { "featureId": "drive-speed", "value": "دوسرعته" }
+      ],
       "detailId": "group-1",
       "mediaId": "product-4"
     },
@@ -6193,6 +6210,14 @@
       "colorIds": [
         "yellow",
         "black"
+      ],
+
+      "specificationValues": [
+        { "featureId": "usage", "value": "تعمیر و نگهداری" },
+        { "featureId": "power-source", "value": "برق شهری" },
+        { "featureId": "tool-kind", "value": "دریل چکشی برقی" },
+        { "featureId": "drill-mode", "value": "چکشی" },
+        { "featureId": "chuck-type", "value": "اتوماتیک" }
       ],
       "detailId": "group-1",
       "mediaId": "product-5"
@@ -6258,13 +6283,15 @@
         "yellow",
         "black"
       ],
-      "detailId": "group-2",
+
       "specificationValues": [
         { "featureId": "tool-kind", "value": "مولتی‌متر دیجیتال" },
         { "featureId": "usage", "value": "اندازه‌گیری و عیب‌یابی" },
         { "featureId": "display-type", "value": "دیجیتال" },
         { "featureId": "safety-note", "value": "بررسی ردهٔ حفاظتی پیش از استفاده" }
       ],
+      "detailId": "group-2",
+
       "mediaId": "product-6",
       "includedBenefits": [
         {
@@ -6298,6 +6325,14 @@
       "colorIds": [
         "yellow",
         "black"
+      ],
+
+      "specificationValues": [
+        { "featureId": "usage", "value": "تعمیرگاه و کارگاه" },
+        { "featureId": "power-source", "value": "باتری‌خور" },
+        { "featureId": "tool-kind", "value": "مولتی‌متر دیجیتال" },
+        { "featureId": "meter-format", "value": "کارگاهی" },
+        { "featureId": "display-type", "value": "دیجیتال" }
       ],
       "detailId": "group-2",
       "mediaId": "product-7",
@@ -6333,6 +6368,14 @@
       "colorIds": [
         "yellow",
         "black"
+      ],
+
+      "specificationValues": [
+        { "featureId": "usage", "value": "تست و عیب‌یابی" },
+        { "featureId": "power-source", "value": "باتری‌خور" },
+        { "featureId": "tool-kind", "value": "مولتی‌متر دیجیتال" },
+        { "featureId": "meter-format", "value": "دستی با نمایشگر بزرگ" },
+        { "featureId": "display-type", "value": "دیجیتال" }
       ],
       "detailId": "group-2",
       "mediaId": "product-8"
@@ -6383,6 +6426,14 @@
         "gray",
         "black"
       ],
+
+      "specificationValues": [
+        { "featureId": "usage", "value": "برق صنعتی" },
+        { "featureId": "power-source", "value": "باتری‌خور" },
+        { "featureId": "tool-kind", "value": "کلمپ‌متر دیجیتال" },
+        { "featureId": "meter-format", "value": "کلمپی" },
+        { "featureId": "display-type", "value": "دیجیتال" }
+      ],
       "detailId": "group-2",
       "mediaId": "product-9"
     },
@@ -6432,6 +6483,14 @@
         "red",
         "black"
       ],
+
+      "specificationValues": [
+        { "featureId": "usage", "value": "تأسیسات برقی" },
+        { "featureId": "power-source", "value": "باتری‌خور" },
+        { "featureId": "tool-kind", "value": "مولتی‌متر دیجیتال" },
+        { "featureId": "meter-format", "value": "تأسیساتی" },
+        { "featureId": "display-type", "value": "دیجیتال" }
+      ],
       "detailId": "group-2",
       "mediaId": "product-10"
     },
@@ -6475,12 +6534,15 @@
         "blue",
         "black"
       ],
-      "detailId": "group-3",
+
       "specificationValues": [
         { "featureId": "usage", "value": "لحیم‌کاری و تعمیرات الکترونیک" },
         { "featureId": "temperature-control", "value": "کنترل دما و انتخاب نوک متناسب با قطعه" },
-        { "featureId": "recommended-accessories", "value": "پایهٔ هویه، نوک یدکی و اسفنج تمیزکننده" }
+        { "featureId": "recommended-accessories", "value": "پایهٔ هویه، نوک یدکی و اسفنج تمیزکننده" },
+        { "featureId": "tool-kind", "value": "ایستگاه هویه دیجیتال" }
       ],
+      "detailId": "group-3",
+
       "mediaId": "product-11",
       "includedBenefits": [
         {
@@ -6515,6 +6577,14 @@
         "blue",
         "black"
       ],
+
+      "specificationValues": [
+        { "featureId": "usage", "value": "مونتاژ الکترونیک" },
+        { "featureId": "power-source", "value": "برق شهری" },
+        { "featureId": "tool-kind", "value": "هویه قلمی" },
+        { "featureId": "solder-format", "value": "قلمی با قابلیت تنظیم دما" },
+        { "featureId": "temperature-control", "value": "تنظیم دما متناسب با کار" }
+      ],
       "detailId": "group-3",
       "mediaId": "product-12"
     },
@@ -6542,6 +6612,13 @@
       "colorIds": [
         "gray",
         "black"
+      ],
+
+      "specificationValues": [
+        { "featureId": "usage", "value": "تعمیرات الکترونیک" },
+        { "featureId": "power-source", "value": "برق شهری" },
+        { "featureId": "tool-kind", "value": "ایستگاه هیتر هوای گرم" },
+        { "featureId": "heating-method", "value": "هوای گرم" }
       ],
       "detailId": "group-3",
       "mediaId": "product-13"
@@ -6571,6 +6648,14 @@
         "white",
         "black"
       ],
+
+      "specificationValues": [
+        { "featureId": "usage", "value": "مونتاژ و تعمیر" },
+        { "featureId": "power-source", "value": "برق شهری" },
+        { "featureId": "tool-kind", "value": "ایستگاه لحیم‌کاری" },
+        { "featureId": "solder-format", "value": "رومیزی" },
+        { "featureId": "recommended-accessories", "value": "پایهٔ هویه، نوک یدکی و اسفنج تمیزکننده" }
+      ],
       "detailId": "group-3",
       "mediaId": "product-14"
     },
@@ -6598,6 +6683,14 @@
       "colorIds": [
         "red",
         "black"
+      ],
+
+      "specificationValues": [
+        { "featureId": "usage", "value": "تعمیر برد" },
+        { "featureId": "power-source", "value": "برق شهری" },
+        { "featureId": "tool-kind", "value": "هویه قلمی" },
+        { "featureId": "solder-format", "value": "قلمی سبک" },
+        { "featureId": "temperature-control", "value": "انتخاب نوک متناسب با قطعه" }
       ],
       "detailId": "group-3",
       "mediaId": "product-15"
@@ -6673,13 +6766,15 @@
         "yellow",
         "black"
       ],
-      "detailId": "group-4",
+
       "specificationValues": [
         { "featureId": "light-source", "value": "LED" },
         { "featureId": "usage", "value": "روشنایی کارگاهی و تعمیراتی" },
         { "featureId": "power-source", "value": "باتری شارژی" },
         { "featureId": "selection-note", "value": "بررسی شار نوری و درجهٔ حفاظت" }
       ],
+      "detailId": "group-4",
+
       "mediaId": "product-16",
       "includedBenefits": [
         {
@@ -6714,13 +6809,15 @@
         "yellow",
         "black"
       ],
-      "detailId": "group-4",
+
       "specificationValues": [
         { "featureId": "light-source", "value": "LED" },
         { "featureId": "usage", "value": "کارگاه و نصب" },
         { "featureId": "power-source", "value": "برق شهری" },
         { "featureId": "selection-note", "value": "بررسی شار نوری و درجهٔ حفاظت" }
       ],
+      "detailId": "group-4",
+
       "mediaId": "product-17"
     },
     {
@@ -6747,6 +6844,15 @@
       "colorIds": [
         "orange",
         "black"
+      ],
+
+      "specificationValues": [
+        { "featureId": "usage", "value": "تعمیر خودرو" },
+        { "featureId": "power-source", "value": "باتری شارژی" },
+        { "featureId": "light-source", "value": "LED" },
+        { "featureId": "lighting-format", "value": "چراغ بازرسی شارژی" },
+        { "featureId": "lighting-task", "value": "تعمیر خودرو" },
+        { "featureId": "selection-note", "value": "بررسی زاویهٔ تابش و درجهٔ حفاظت" }
       ],
       "detailId": "group-4",
       "mediaId": "product-18"
@@ -6776,6 +6882,15 @@
         "yellow",
         "black"
       ],
+
+      "specificationValues": [
+        { "featureId": "usage", "value": "نصب و کارگاه" },
+        { "featureId": "power-source", "value": "باتری شارژی" },
+        { "featureId": "light-source", "value": "LED" },
+        { "featureId": "lighting-format", "value": "چراغ پایه‌دار" },
+        { "featureId": "lighting-task", "value": "نصب و کارگاه" },
+        { "featureId": "selection-note", "value": "بررسی شار نوری و پایداری پایه" }
+      ],
       "detailId": "group-4",
       "mediaId": "product-19"
     },
@@ -6804,6 +6919,15 @@
         "yellow",
         "black"
       ],
+
+      "specificationValues": [
+        { "featureId": "usage", "value": "محیط کارگاهی" },
+        { "featureId": "power-source", "value": "باتری شارژی" },
+        { "featureId": "light-source", "value": "LED" },
+        { "featureId": "lighting-format", "value": "نورافکن قابل‌حمل" },
+        { "featureId": "lighting-task", "value": "محیط کارگاهی" },
+        { "featureId": "selection-note", "value": "بررسی شار نوری و درجهٔ حفاظت" }
+      ],
       "detailId": "group-4",
       "mediaId": "product-20"
     },
@@ -6831,6 +6955,14 @@
       "colorIds": [
         "red",
         "black"
+      ],
+
+      "specificationValues": [
+        { "featureId": "usage", "value": "نصب و برق‌کاری" },
+        { "featureId": "power-source", "value": "دستی" },
+        { "featureId": "tool-kind", "value": "ابزار دستی برق‌کاری" },
+        { "featureId": "hand-tool-form", "value": "ست پیچ‌گوشتی عایق" },
+        { "featureId": "safety-note", "value": "ابزار عایق جایگزین قطع برق و دستورالعمل ایمنی نیست" }
       ],
       "detailId": "group-5",
       "mediaId": "product-21",
@@ -6867,6 +6999,13 @@
         "red",
         "black"
       ],
+
+      "specificationValues": [
+        { "featureId": "usage", "value": "نصب و تعمیر" },
+        { "featureId": "power-source", "value": "دستی" },
+        { "featureId": "tool-kind", "value": "ابزار دستی برق‌کاری" },
+        { "featureId": "hand-tool-form", "value": "ست انبر برق‌کاری" }
+      ],
       "detailId": "group-5",
       "mediaId": "product-22",
       "includedBenefits": [
@@ -6902,6 +7041,15 @@
         "yellow",
         "black"
       ],
+
+      "specificationValues": [
+        { "featureId": "usage", "value": "تعمیر و نگهداری" },
+        { "featureId": "power-source", "value": "دستی" },
+        { "featureId": "tool-kind", "value": "مجموعه ابزار برق‌کار" },
+        { "featureId": "hand-tool-form", "value": "مجموعه ابزار عایق" },
+        { "featureId": "set-content", "value": "ترکیب ابزار را از اقلام همین مدل بررسی کنید" },
+        { "featureId": "safety-note", "value": "ابزار عایق جایگزین قطع برق و دستورالعمل ایمنی نیست" }
+      ],
       "detailId": "group-5",
       "mediaId": "product-23"
     },
@@ -6929,6 +7077,14 @@
       "colorIds": [
         "orange",
         "black"
+      ],
+
+      "specificationValues": [
+        { "featureId": "usage", "value": "سیم‌کشی و نصب" },
+        { "featureId": "power-source", "value": "دستی" },
+        { "featureId": "tool-kind", "value": "ست ابزار برق‌کاری" },
+        { "featureId": "hand-tool-form", "value": "ابزار نصب و سیم‌کشی" },
+        { "featureId": "set-content", "value": "ترکیب اقلام را با نیاز نصب و سیم‌کشی تطبیق دهید" }
       ],
       "detailId": "group-5",
       "mediaId": "product-24"
@@ -6958,6 +7114,14 @@
         "black",
         "gray"
       ],
+
+      "specificationValues": [
+        { "featureId": "usage", "value": "کارگاه و سرویس" },
+        { "featureId": "power-source", "value": "دستی" },
+        { "featureId": "tool-kind", "value": "کیف ابزار برق‌کاری" },
+        { "featureId": "hand-tool-form", "value": "کیف نگهداری و حمل ابزار" },
+        { "featureId": "set-content", "value": "اقلام داخل کیف را از فهرست همین مدل بررسی کنید" }
+      ],
       "detailId": "group-5",
       "mediaId": "product-25"
     },
@@ -6985,6 +7149,14 @@
       "colorIds": [
         "yellow",
         "black"
+      ],
+
+      "specificationValues": [
+        { "featureId": "usage", "value": "تست اولیه برق" },
+        { "featureId": "power-source", "value": "باتری‌خور" },
+        { "featureId": "tool-kind", "value": "فازمتر دیجیتال" },
+        { "featureId": "tester-form", "value": "دیجیتال" },
+        { "featureId": "tester-method", "value": "بررسی اولیهٔ برق" }
       ],
       "detailId": "group-6",
       "mediaId": "product-26"
@@ -7014,6 +7186,14 @@
         "yellow",
         "red"
       ],
+
+      "specificationValues": [
+        { "featureId": "usage", "value": "ایمنی و بازرسی" },
+        { "featureId": "power-source", "value": "باتری‌خور" },
+        { "featureId": "tool-kind", "value": "تستر ولتاژ" },
+        { "featureId": "tester-form", "value": "غیرتماسی" },
+        { "featureId": "tester-method", "value": "تشخیص ولتاژ بدون تماس مستقیم" }
+      ],
       "detailId": "group-6",
       "mediaId": "product-27"
     },
@@ -7041,6 +7221,14 @@
       "colorIds": [
         "yellow",
         "black"
+      ],
+
+      "specificationValues": [
+        { "featureId": "usage", "value": "تأسیسات برقی" },
+        { "featureId": "power-source", "value": "باتری‌خور" },
+        { "featureId": "tool-kind", "value": "فازمتر" },
+        { "featureId": "tester-form", "value": "القایی" },
+        { "featureId": "tester-method", "value": "بررسی القایی مدار" }
       ],
       "detailId": "group-6",
       "mediaId": "product-28"
@@ -7070,6 +7258,14 @@
         "green",
         "black"
       ],
+
+      "specificationValues": [
+        { "featureId": "usage", "value": "عیب‌یابی برق" },
+        { "featureId": "power-source", "value": "باتری‌خور" },
+        { "featureId": "tool-kind", "value": "تستر مدار" },
+        { "featureId": "tester-form", "value": "تستر پیوستگی" },
+        { "featureId": "tester-method", "value": "بررسی پیوستگی مدار" }
+      ],
       "detailId": "group-6",
       "mediaId": "product-29"
     },
@@ -7097,6 +7293,14 @@
       "colorIds": [
         "white",
         "black"
+      ],
+
+      "specificationValues": [
+        { "featureId": "usage", "value": "تست و سرویس" },
+        { "featureId": "power-source", "value": "باتری‌خور" },
+        { "featureId": "tool-kind", "value": "قلم تست ولتاژ" },
+        { "featureId": "tester-form", "value": "قلمی" },
+        { "featureId": "tester-method", "value": "تست ولتاژ" }
       ],
       "detailId": "group-6",
       "mediaId": "product-30"
