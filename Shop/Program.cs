@@ -17,6 +17,7 @@ builder.Services.AddRateLimiter(options => options.AddPolicy("email-code", conte
 builder.Services.Configure<Shop.Models.EmailSmtpOptions>(builder.Configuration.GetSection("Email:Smtp"));
 builder.Services.AddSingleton<Shop.Services.EmailVerificationCodeStore>();
 builder.Services.AddSingleton<Shop.Services.IEmailSender, Shop.Services.SmtpEmailSender>();
+builder.Services.AddSingleton<Shop.Services.IMagazineContentSource, Shop.Services.DemoMagazineContentSource>();
 builder.Services.AddSingleton<Shop.Services.CatalogRepository>();
 builder.Services.AddSingleton<Shop.Services.ICatalogSource>(services => services.GetRequiredService<Shop.Services.CatalogRepository>());
 builder.Services.AddScoped<Shop.Services.DemoAccountDataSource>();

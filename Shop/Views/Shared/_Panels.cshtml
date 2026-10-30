@@ -1,4 +1,7 @@
-@inject Shop.Services.CatalogRepository StoreCatalog
+@inject Shop.Services.ICatalogSource StoreCatalog
+@{
+    var panelCatalog = await StoreCatalog.ReadAsync(Context.RequestAborted);
+}
 <div
     class="offcanvas offcanvas-start mobile-menu"
     tabindex="-1"
@@ -121,7 +124,7 @@
                         <span>معرفی همهٔ برندها</span>
                         <i class="bi bi-arrow-left" aria-hidden="true"></i>
                     </a>
-                    @foreach (BrandProfileModel brand in StoreCatalog.Read().Brands)
+                    @foreach (BrandProfileModel brand in panelCatalog.Brands)
                     {
                         <a href="@Url.Content($"~/brands/{brand.Slug}")" data-bs-dismiss="offcanvas">@brand.PersianName</a>
                     }

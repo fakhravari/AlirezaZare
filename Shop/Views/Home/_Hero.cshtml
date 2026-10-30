@@ -1,83 +1,83 @@
 <section class="electrical-showcase" aria-label="دسته‌بندی و پیشنهادهای فروشگاه">
-        <div class="electrical-home-row">
-            <aside class="electrical-category-menu" id="productCategories" aria-label="مگامنوی دسته‌بندی قطعات">
-                <div class="electrical-category-heading">
-                    <span>
-                        <i class="bi bi-list"></i>
-                    </span> دسته‌بندی قطعات
-                </div>
-                <button type="button" data-category="tools" aria-expanded="false">
-                    <i class="bi bi-lightning-charge"></i><span>ابزار برقی</span><i class="bi bi-chevron-left"></i>
-                </button>
-                <button type="button" data-category="hand-tools" aria-expanded="false">
-                    <i class="bi bi-tools"></i><span>ابزار دستی</span><i class="bi bi-chevron-left"></i>
-                </button>
-                <button type="button" data-category="components" aria-expanded="false">
-                    <i class="bi bi-cpu"></i><span>قطعات الکترونیکی</span><i class="bi bi-chevron-left"></i>
-                </button>
-                <button type="button" data-category="cables" aria-expanded="false">
-                    <i class="bi bi-plug"></i><span>سیم، کابل و اتصالات</span><i class="bi bi-chevron-left"></i>
-                </button>
-                <button type="button" data-category="lighting" aria-expanded="false">
-                    <i class="bi bi-lightbulb"></i><span>روشنایی و لامپ</span><i class="bi bi-chevron-left"></i>
-                </button>
-                <button type="button" data-category="switchgear" aria-expanded="false">
-                    <i class="bi bi-toggle-on"></i><span>کلید و تجهیزات برقی</span><i class="bi bi-chevron-left"></i>
-                </button>
-                <button type="button" data-category="safety" aria-expanded="false">
-                    <i class="bi bi-shield-check"></i><span>ایمنی و حفاظت</span><i class="bi bi-chevron-left"></i>
-                </button>
-                <button type="button" data-category="measurement" aria-expanded="false">
-                    <i class="bi bi-speedometer2"></i><span>ابزار اندازه‌گیری</span><i class="bi bi-chevron-left"></i>
-                </button>
-                <div class="electrical-submenu" id="electricalSubmenu" hidden></div>
-            </aside>
-            <div id="heroSwiper" class="swiper hero-swiper electrical-swiper">
-                <div class="swiper-wrapper">
-                    <article class="swiper-slide electrical-slide electrical-slide-tools">
-                        <picture>
-                            <source media="(max-width: 767px)" srcset="@Url.Content("~/content/sliders/mobile/electrical-tools-mobile.jpg")"/>
-                            <img class="electrical-banner-image" src="~/content/sliders/electrical-tools-desktop-typography.png" alt="ابزار دقیق برای کار حرفه‌ای؛ برای هر کار، ابزار درست. از دریل و ابزار برقی تا تجهیزات اندازه‌گیری؛ انتخابی مطمئن برای کارگاه و خانه." fetchpriority="high"/>
-                        </picture>
-                    </article>
-                    <article class="swiper-slide electrical-slide electrical-slide-parts">
-                        <picture>
-                            <source media="(max-width: 767px)" srcset="@Url.Content("~/content/sliders/mobile/electrical-components-mobile.jpg")"/>
-                            <img class="electrical-banner-image" src="~/content/sliders/electrical-components-desktop-typography.png" alt="قطعات برای ساخت و تعمیر؛ ایده‌هایت را روشن کن. قطعات الکترونیکی و ابزار لحیم‌کاری برای پروژه‌های دقیق و خلاقانه." loading="lazy"/>
-                        </picture>
-                    </article>
-                    <article class="swiper-slide electrical-slide electrical-slide-lighting">
-                        <picture>
-                            <source media="(max-width: 767px)" srcset="@Url.Content("~/content/sliders/mobile/electrical-lighting-mobile.jpg")"/>
-                            <img class="electrical-banner-image" src="~/content/sliders/electrical-lighting-desktop-typography.png" alt="روشنایی و تجهیزات کارگاهی؛ نور بهتر، کار دقیق‌تر. چراغ کارگاهی و کابل‌های کاربردی برای خانه و محیط کار." loading="lazy"/>
-                        </picture>
-                    </article>
-                    <article class="swiper-slide electrical-slide electrical-slide-tools">
-                        <picture>
-                            <source media="(max-width: 767px)" srcset="@Url.Content("~/content/sliders/mobile/electrical-tools-pro-mobile.jpg")"/>
-                            <img class="electrical-banner-image" src="~/content/sliders/electrical-tools-pro-desktop.png" alt="ابزار برقی برای کار حرفه‌ای؛ قدرت در دستان تو. برای پروژه‌های خانگی و کارگاهی، ابزار مطمئن انتخاب کن." loading="lazy"/>
-                        </picture>
-                    </article>
-                    <article class="swiper-slide electrical-slide electrical-slide-parts">
-                        <picture>
-                            <source media="(max-width: 767px)" srcset="@Url.Content("~/content/sliders/mobile/electrical-components-pro-mobile.jpg")"/>
-                            <img class="electrical-banner-image" src="~/content/sliders/electrical-components-pro-desktop-v2.png" alt="قطعات برای ساخت و تعمیر؛ ایده‌هایت را روشن کن. قطعات الکترونیکی و ابزار لحیم‌کاری برای پروژه‌های دقیق و خلاقانه." loading="lazy"/>
-                        </picture>
-                    </article>
-                    <article class="swiper-slide electrical-slide electrical-slide-measurement">
-                        <picture>
-                            <source media="(max-width: 767px)" srcset="@Url.Content("~/content/sliders/mobile/electrical-measurement-mobile.jpg")"/>
-                            <img class="electrical-banner-image" src="~/content/sliders/electrical-measurement-desktop-v2.png" alt="ابزار اندازه‌گیری دقیق؛ با اطمینان اندازه بگیر. مولتی‌متر و ابزار تست برای بررسی ایمن و دقیق مدارها." loading="lazy"/>
-                        </picture>
-                    </article>
-                </div>
-                <button class="electrical-arrow electrical-prev" type="button" aria-label="اسلاید قبلی">
-                    <i class="bi bi-chevron-right"></i>
-                </button>
-                <button class="electrical-arrow electrical-next" type="button" aria-label="اسلاید بعدی">
-                    <i class="bi bi-chevron-left"></i>
-                </button>
-                <div class="swiper-pagination" aria-label="انتخاب اسلاید"></div>
+    <div class="electrical-home-row">
+        <aside class="electrical-category-menu" id="productCategories" aria-label="مگامنوی دسته‌بندی قطعات">
+            <div class="electrical-category-heading">
+                <span>
+                    <i class="bi bi-list"></i>
+                </span> دسته‌بندی قطعات
             </div>
+            <button type="button" data-category="tools" aria-expanded="false">
+                <i class="bi bi-lightning-charge"></i><span>ابزار برقی</span><i class="bi bi-chevron-left"></i>
+            </button>
+            <button type="button" data-category="hand-tools" aria-expanded="false">
+                <i class="bi bi-tools"></i><span>ابزار دستی</span><i class="bi bi-chevron-left"></i>
+            </button>
+            <button type="button" data-category="components" aria-expanded="false">
+                <i class="bi bi-cpu"></i><span>قطعات الکترونیکی</span><i class="bi bi-chevron-left"></i>
+            </button>
+            <button type="button" data-category="cables" aria-expanded="false">
+                <i class="bi bi-plug"></i><span>سیم، کابل و اتصالات</span><i class="bi bi-chevron-left"></i>
+            </button>
+            <button type="button" data-category="lighting" aria-expanded="false">
+                <i class="bi bi-lightbulb"></i><span>روشنایی و لامپ</span><i class="bi bi-chevron-left"></i>
+            </button>
+            <button type="button" data-category="switchgear" aria-expanded="false">
+                <i class="bi bi-toggle-on"></i><span>کلید و تجهیزات برقی</span><i class="bi bi-chevron-left"></i>
+            </button>
+            <button type="button" data-category="safety" aria-expanded="false">
+                <i class="bi bi-shield-check"></i><span>ایمنی و حفاظت</span><i class="bi bi-chevron-left"></i>
+            </button>
+            <button type="button" data-category="measurement" aria-expanded="false">
+                <i class="bi bi-speedometer2"></i><span>ابزار اندازه‌گیری</span><i class="bi bi-chevron-left"></i>
+            </button>
+            <div class="electrical-submenu" id="electricalSubmenu" hidden></div>
+        </aside>
+        <div id="heroSwiper" class="swiper hero-swiper electrical-swiper">
+            <div class="swiper-wrapper">
+                <article class="swiper-slide electrical-slide electrical-slide-tools">
+                    <picture>
+                        <source media="(max-width: 767px)" srcset="@Url.Content("~/content/sliders/mobile/electrical-tools-mobile.jpg")"/>
+                        <img class="electrical-banner-image" src="~/content/sliders/electrical-tools-desktop-typography.png" alt="ابزار دقیق برای کار حرفه‌ای؛ برای هر کار، ابزار درست. از دریل و ابزار برقی تا تجهیزات اندازه‌گیری؛ انتخابی مطمئن برای کارگاه و خانه." fetchpriority="high"/>
+                    </picture>
+                </article>
+                <article class="swiper-slide electrical-slide electrical-slide-parts">
+                    <picture>
+                        <source media="(max-width: 767px)" srcset="@Url.Content("~/content/sliders/mobile/electrical-components-mobile.jpg")"/>
+                        <img class="electrical-banner-image" src="~/content/sliders/electrical-components-desktop-typography.png" alt="قطعات برای ساخت و تعمیر؛ ایده‌هایت را روشن کن. قطعات الکترونیکی و ابزار لحیم‌کاری برای پروژه‌های دقیق و خلاقانه." loading="lazy"/>
+                    </picture>
+                </article>
+                <article class="swiper-slide electrical-slide electrical-slide-lighting">
+                    <picture>
+                        <source media="(max-width: 767px)" srcset="@Url.Content("~/content/sliders/mobile/electrical-lighting-mobile.jpg")"/>
+                        <img class="electrical-banner-image" src="~/content/sliders/electrical-lighting-desktop-typography.png" alt="روشنایی و تجهیزات کارگاهی؛ نور بهتر، کار دقیق‌تر. چراغ کارگاهی و کابل‌های کاربردی برای خانه و محیط کار." loading="lazy"/>
+                    </picture>
+                </article>
+                <article class="swiper-slide electrical-slide electrical-slide-tools">
+                    <picture>
+                        <source media="(max-width: 767px)" srcset="@Url.Content("~/content/sliders/mobile/electrical-tools-pro-mobile.jpg")"/>
+                        <img class="electrical-banner-image" src="~/content/sliders/electrical-tools-pro-desktop.png" alt="ابزار برقی برای کار حرفه‌ای؛ قدرت در دستان تو. برای پروژه‌های خانگی و کارگاهی، ابزار مطمئن انتخاب کن." loading="lazy"/>
+                    </picture>
+                </article>
+                <article class="swiper-slide electrical-slide electrical-slide-parts">
+                    <picture>
+                        <source media="(max-width: 767px)" srcset="@Url.Content("~/content/sliders/mobile/electrical-components-pro-mobile.jpg")"/>
+                        <img class="electrical-banner-image" src="~/content/sliders/electrical-components-pro-desktop-v2.png" alt="قطعات برای ساخت و تعمیر؛ ایده‌هایت را روشن کن. قطعات الکترونیکی و ابزار لحیم‌کاری برای پروژه‌های دقیق و خلاقانه." loading="lazy"/>
+                    </picture>
+                </article>
+                <article class="swiper-slide electrical-slide electrical-slide-measurement">
+                    <picture>
+                        <source media="(max-width: 767px)" srcset="@Url.Content("~/content/sliders/mobile/electrical-measurement-mobile.jpg")"/>
+                        <img class="electrical-banner-image" src="~/content/sliders/electrical-measurement-desktop-v2.png" alt="ابزار اندازه‌گیری دقیق؛ با اطمینان اندازه بگیر. مولتی‌متر و ابزار تست برای بررسی ایمن و دقیق مدارها." loading="lazy"/>
+                    </picture>
+                </article>
+            </div>
+            <button class="electrical-arrow electrical-prev" type="button" aria-label="اسلاید قبلی">
+                <i class="bi bi-chevron-right"></i>
+            </button>
+            <button class="electrical-arrow electrical-next" type="button" aria-label="اسلاید بعدی">
+                <i class="bi bi-chevron-left"></i>
+            </button>
+            <div class="swiper-pagination" aria-label="انتخاب اسلاید"></div>
         </div>
-    </section>
+    </div>
+</section>

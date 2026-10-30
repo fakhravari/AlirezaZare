@@ -5,12 +5,13 @@
 
 ## مسیر و منابع
 
-[ProfileController](../../Shop/Controllers/ProfileController.cs) مسیرهای `/profile`، `/profile/orders`، `/profile/addresses`، `/profile/favorites`، `/profile/coupons` و `/profile/pricealerts` را در [یک View مشترک](../../Shop/Views/Profile/Index.cshtml) نمایش می‌دهد. عنوان و breadcrumb از route ساخته می‌شوند. `/profile/edit` به پروفایل هدایت می‌شود و `AccountController` alias سازگاری است؛ View مستقلی برای آن نسازید. metadata پروفایل در وضعیت فعلی `noindex, nofollow` است.
+[ProfileController](../../Shop/Controllers/ProfileController.cs) مسیرهای `/profile`، `/profile/orders`، `/profile/addresses`، `/profile/favorites`، `/profile/coupons` و `/profile/pricealerts` را در [یک View مشترک](../../Shop/Views/Profile/Index.cshtml) نمایش می‌دهد. Controller از `IAccountDataSource` می‌خواند و عنوان، توضیح، بخش فعال، سفارش‌ها و projection کوپن را در `PageModel<ProfilePageViewModel>` می‌گذارد؛ Razor به Request برای تعیین route یا به منبع حساب برای خواندن داده وابسته نیست. `/profile/edit` به پروفایل هدایت می‌شود و `AccountController` alias سازگاری است؛ View مستقلی برای آن نسازید. metadata پروفایل در وضعیت فعلی `noindex, nofollow` است.
 
 | مسئولیت | مالک |
 |---|---|
-| ترکیب بخش‌ها و dialog ویرایش | `Views/Profile/Index.cshtml`؛ بخشی از ذخیرهٔ پروفایل inline است |
-| محتوای سفارش‌ها و فاکتور | [_Orders.cshtml](../../Shop/Views/Profile/_Orders.cshtml)، dialog فاکتور در `account-page.js` و `orders-pagination.js` |
+| انتخاب بخش، خواندن snapshot سفارش/کوپن و ساخت projection | `ProfileController` و `ProfilePageViewModel` |
+| نمایش بخش‌ها و dialog ویرایش | `Views/Profile/Index.cshtml`؛ ذخیرهٔ فرم پروفایل هنوز در مرورگر است |
+| محتوای سفارش‌ها و فاکتور | [_Orders.cshtml](../../Shop/Views/Profile/_Orders.cshtml)، `ProfileOrdersViewModel`، dialog فاکتور در `account-page.js` و `orders-pagination.js` |
 | route/hash، آدرس و overview | [account-page.js](../../Shop/wwwroot/shop/js/pages/account-page.js) |
 | کدهای تخفیف و پیگیری قیمت | `account-page.js`؛ markup در `Index.cshtml` و ظاهر فهرست پیگیری در `account-page.css` |
 | استان و شهر نشانی | کلاس‌های `Country`، `Province` و `City` در `iran-places.js`؛ انتخاب وابستهٔ استان/شهر در `address-fields.js` و [_AddressForm](../../Shop/Views/Shared/_AddressForm.cshtml). کشور ایران در رکورد آدرس نگهداری می‌شود، اما فیلد انتخابی نیست |

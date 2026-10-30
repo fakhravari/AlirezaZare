@@ -1,66 +1,9 @@
-@using System.Globalization
+﻿@using System.Globalization
 @using Shop.Models
-@model PageModel
+@model PageModel<MagazineIndexViewModel>
 @{
-    var posts = new[]
-    {
-        new { Slug = "choosing-work-drill", Branch = "buying", Topic = "tools", Area = "tools", Category = "راهنمای خرید", Title = "راهنمای انتخاب دریل برای خانه و کارگاه", Summary = "از نوع کار و منبع تغذیه تا سه‌نظام و متعلقات؛ معیارهای انتخاب یک دریل متناسب با نیازتان.", Image = "tool-hammer-drill.png" },
-        new { Slug = "multimeter-buying-guide", Branch = "buying", Topic = "measurement", Area = "electrical", Category = "راهنمای خرید", Title = "چطور مولتی‌متر مناسب انتخاب کنیم؟", Summary = "نوع اندازه‌گیری، رده ایمنی و کیفیت پراب‌ها را پیش از خرید مولتی‌متر بررسی کنید.", Image = "tool-multimeter-kit.png" },
-        new { Slug = "soldering-station-basics", Branch = "education", Topic = "soldering", Area = "tools", Category = "آموزش تخصصی", Title = "راهنمای انتخاب ایستگاه لحیم‌کاری", Summary = "توان، کنترل دما و نوع نوک هویه را با کارتان هماهنگ کنید.", Image = "tool-soldering-station.png" },
-        new { Slug = "worklight-selection", Branch = "buying", Topic = "lighting", Area = "workshop", Category = "راهنمای خرید", Title = "چراغ کار مناسب تعمیرگاه و محیط نصب", Summary = "شدت نور، زاویه تابش، پایه و منبع تغذیه را متناسب با محل کار انتخاب کنید.", Image = "tool-led-worklight.png" },
-        new { Slug = "drill-bit-matching", Branch = "education", Topic = "tools", Area = "tools", Category = "آموزش تخصصی", Title = "انتخاب مته بر اساس جنس سطح", Summary = "مته چوب، فلز و مصالح کاربردهای متفاوتی دارند؛ شکل نوک و نوع اتصال را بشناسید.", Image = "tool-hammer-drill.png" },
-        new { Slug = "electrical-tool-safety", Branch = "safety", Topic = "safety", Area = "electrical", Category = "ایمنی و نگهداری", Title = "چک‌لیست ایمنی هنگام کار با ابزار برقی", Summary = "چند بررسی ساده پیش از شروع کار به کاهش خطر آسیب و خرابی ابزار کمک می‌کند.", Image = "tool-multimeter-kit.png" },
-        new { Slug = "battery-tool-care", Branch = "safety", Topic = "battery", Area = "workshop", Category = "ایمنی و نگهداری", Title = "نگهداری باتری ابزار شارژی", Summary = "روش شارژ، دما و محل نگهداری در عمر و عملکرد باتری ابزار اثر دارند.", Image = "tool-hammer-drill.png" },
-        new { Slug = "soldering-tip-care", Branch = "safety", Topic = "soldering", Area = "tools", Category = "ایمنی و نگهداری", Title = "چطور از نوک هویه مراقبت کنیم؟", Summary = "تمیزکاری مناسب و انتخاب دمای درست به حفظ نوک هویه و کیفیت لحیم کمک می‌کند.", Image = "tool-soldering-station.png" },
-        new { Slug = "power-tool-buying-checklist", Branch = "buying", Topic = "tools", Area = "tools", Category = "راهنمای خرید", Title = "پیش از خرید ابزار برقی چه چیزهایی را بررسی کنیم؟", Summary = "مشخصات فنی، اقلام همراه، ضمانت و سازگاری را قبل از نهایی‌کردن سفارش تطبیق دهید.", Image = "tool-led-worklight.png" },
-        new { Slug = "multimeter-measurement-safety", Branch = "safety", Topic = "measurement", Area = "electrical", Category = "ایمنی و نگهداری", Title = "نکات ایمنی اندازه‌گیری با مولتی‌متر", Summary = "انتخاب حالت و ورودی درست، محدوده مناسب و پراب سالم را پیش از اندازه‌گیری بررسی کنید.", Image = "tool-multimeter-kit.png" },
-        new { Slug = "workshop-lighting-guide", Branch = "education", Topic = "lighting", Area = "workshop", Category = "آموزش تخصصی", Title = "روشنایی کارگاه را چطور بهتر برنامه‌ریزی کنیم؟", Summary = "ترکیب نور عمومی و موضعی، خیرگی و سایه را کاهش می‌دهد و دید محل کار را بهتر می‌کند.", Image = "tool-led-worklight.png" },
-        new { Slug = "soldering-station-setup", Branch = "education", Topic = "soldering", Area = "tools", Category = "آموزش تخصصی", Title = "آماده‌سازی میز تعمیر برد", Summary = "چیدمان ابزار، نور و تهویه مناسب، فرایند تعمیرات الکترونیک را ایمن‌تر و دقیق‌تر می‌کند.", Image = "tool-soldering-station.png" },
-
-
-
-
-
-
-
-
-
-
-
-
-        new { Slug = "choose-cordless-platform", Branch = "buying", Topic = "battery", Area = "tools", Category = "راهنمای خرید", Title = "چطور پلتفرم ابزار شارژی مناسب انتخاب کنیم؟", Summary = "باتری، شارژر و ابزارهای سازگار را کنار هم بسنجید تا خرید امروز با نیازهای بعدی کارگاه هم هماهنگ باشد.", Image = "tool-hammer-drill.png" },
-        new { Slug = "extension-cord-selection", Branch = "buying", Topic = "electrical", Area = "electrical", Category = "راهنمای خرید", Title = "برای ابزار برقی چه سیم رابطی انتخاب کنیم؟", Summary = "طول، جریان مجاز، ساختار کابل و شرایط محیط را متناسب با ابزار انتخاب کنید و از اتصال‌های آسیب‌دیده دوری کنید.", Image = "tool-multimeter-kit.png" },
-        new { Slug = "workshop-task-light", Branch = "buying", Topic = "lighting", Area = "workshop", Category = "راهنمای خرید", Title = "چراغ کارگاه را با توجه به کار انتخاب کنید", Summary = "روشنایی یکنواخت، نور موضعی قابل تنظیم و کاهش خیرگی، دیدن جزئیات کار را آسان‌تر می‌کند.", Image = "tool-led-worklight.png" },
-        new { Slug = "workshop-luminaire-layout", Branch = "buying", Topic = "lighting", Area = "workshop", Category = "راهنمای خرید", Title = "چیدمان نور کارگاه؛ از میز مونتاژ تا قفسه‌ها", Summary = "با نقشهٔ سادهٔ نقاط کار، سایه‌ها و مسیر رفت‌وآمد را پیش از خرید چراغ‌ها بررسی کنید.", Image = "tool-led-worklight.png" },
-        new { Slug = "bit-speed-material", Branch = "education", Topic = "tools", Area = "tools", Category = "آموزش تخصصی", Title = "مته، جنس سطح و سرعت دریل را با هم تطبیق دهید", Summary = "انتخاب مته فقط به قطر سوراخ وابسته نیست؛ جنس قطعه، نوع نوک و محدودهٔ سرعت هم مهم‌اند.", Image = "tool-hammer-drill.png" },
-        new { Slug = "multimeter-continuity", Branch = "education", Topic = "measurement", Area = "electrical", Category = "آموزش تخصصی", Title = "آزمون پیوستگی مولتی‌متر را درست بشناسید", Summary = "حالت پیوستگی برای بررسی مسیرهای بی‌برق کاربرد دارد؛ تنظیم دستگاه و آماده‌سازی مدار را طبق راهنما انجام دهید.", Image = "tool-multimeter-kit.png" },
-        new { Slug = "multimeter-display-resolution", Branch = "education", Topic = "measurement", Area = "electrical", Category = "آموزش تخصصی", Title = "دقت، رزولوشن و شمارش نمایشگر مولتی‌متر", Summary = "عددهای بیشتر روی نمایشگر همیشه به معنی اندازه‌گیری دقیق‌تر نیست؛ مشخصات دقت و شرایط آزمون را هم بخوانید.", Image = "tool-multimeter-kit.png" },
-        new { Slug = "soldering-tip-temperature", Branch = "education", Topic = "soldering", Area = "tools", Category = "آموزش تخصصی", Title = "دمای هویه را بر اساس اتصال تنظیم کنید", Summary = "تنظیم دما باید با نوک، آلیاژ لحیم، سطح اتصال و دستور سازنده هماهنگ باشد؛ دمای بیشتر همیشه کار را بهتر نمی‌کند.", Image = "tool-soldering-station.png" },
-        new { Slug = "verify-safe-measurement", Branch = "safety", Topic = "measurement", Area = "electrical", Category = "ایمنی و نگهداری", Title = "پیش از اندازه‌گیری برق، ایمنی مولتی‌متر را بسنجید", Summary = "رده‌بندی ابزار، سلامت پراب و روش آزمون باید با مدار و محیط اندازه‌گیری سازگار باشد.", Image = "tool-multimeter-kit.png" },
-        new { Slug = "extension-cord-inspection", Branch = "safety", Topic = "electrical", Area = "electrical", Category = "ایمنی و نگهداری", Title = "سیم رابط و قرقرهٔ کابل را ایمن نگه دارید", Summary = "نگهداری درست از کابل، فشار مکانیکی و گرمای ناخواسته را کمتر می‌کند و عیب‌های قابل مشاهده را زودتر آشکار می‌سازد.", Image = "tool-multimeter-kit.png" },
-        new { Slug = "battery-storage-care", Branch = "safety", Topic = "battery", Area = "workshop", Category = "ایمنی و نگهداری", Title = "باتری ابزار شارژی را درست نگهداری کنید", Summary = "شارژر سازگار، محیط نگهداری مناسب و بازرسی منظم، به حفظ عملکرد و کاهش خطر کمک می‌کند.", Image = "tool-hammer-drill.png" },
-        new { Slug = "esd-workbench", Branch = "safety", Topic = "components", Area = "workshop", Category = "ایمنی و نگهداری", Title = "میز کار الکترونیک و کنترل الکتریسیتهٔ ساکن", Summary = "سطح کار، بسته‌بندی و اتصال زمین بخشی از یک برنامهٔ کنترل ESD هستند؛ یک دستبند به‌تنهایی کافی نیست.", Image = "tool-soldering-station.png" },
-        new { Slug = "hammer-drill-vs-impact-driver", Branch = "buying", Topic = "tools", Area = "tools", Category = "راهنمای خرید", Title = "دریل چکشی یا پیچ‌بند؛ کدام برای کار شماست؟", Summary = "تفاوت کاربرد، کنترل و متعلقات این دو ابزار را با نوع کار و دفعات استفاده بسنجید.", Image = "tool-hammer-drill.png" },
-        new { Slug = "choose-drill-torque", Branch = "buying", Topic = "tools", Area = "tools", Category = "راهنمای خرید", Title = "برای انتخاب دریل به گشتاور چه‌طور نگاه کنیم؟", Summary = "گشتاور تنها معیار قدرت نیست؛ کنترل سرعت، نوع سه‌نظام و طراحی ابزار را هم کنار آن بررسی کنید.", Image = "tool-hammer-drill.png" },
-        new { Slug = "led-worklight-buying-guide", Branch = "buying", Topic = "lighting", Area = "workshop", Category = "راهنمای خرید", Title = "راهنمای انتخاب چراغ LED کارگاهی", Summary = "روشنایی، زاویهٔ تابش، پایه و شیوهٔ تغذیه را متناسب با محل استفاده مقایسه کنید.", Image = "tool-led-worklight.png" },
-        new { Slug = "soldering-station-buying-guide", Branch = "buying", Topic = "soldering", Area = "tools", Category = "راهنمای خرید", Title = "هنگام خرید هویه یا ایستگاه لحیم‌کاری چه چیزهایی مهم است؟", Summary = "نوع کار، کنترل دما، نوک‌های سازگار و خدمات قطعات را پیش از انتخاب در نظر بگیرید.", Image = "tool-soldering-station.png" },
-        new { Slug = "multimeter-symbols-guide", Branch = "education", Topic = "measurement", Area = "electrical", Category = "آموزش تخصصی", Title = "نمادهای رایج مولتی‌متر را چطور بخوانیم؟", Summary = "با شناخت نمادها و ورودی‌های دستگاه، دفترچهٔ همان مدل را دقیق‌تر دنبال کنید.", Image = "tool-multimeter-kit.png" },
-        new { Slug = "lumens-lux-basics", Branch = "education", Topic = "lighting", Area = "workshop", Category = "آموزش تخصصی", Title = "لومن و لوکس چه تفاوتی دارند؟", Summary = "لومن شار نوری منبع و لوکس روشنایی روی سطح را توصیف می‌کند؛ کاربرد این دو عدد را بشناسید.", Image = "tool-led-worklight.png" },
-        new { Slug = "solder-joint-basics", Branch = "education", Topic = "soldering", Area = "tools", Category = "آموزش تخصصی", Title = "ویژگی‌های یک اتصال لحیم‌کاری تمیز چیست؟", Summary = "آماده‌سازی سطح، نوک مناسب و رعایت راهنمای سازنده به کیفیت اتصال کمک می‌کند.", Image = "tool-soldering-station.png" },
-        new { Slug = "drill-speed-settings", Branch = "education", Topic = "tools", Area = "tools", Category = "آموزش تخصصی", Title = "تنظیم سرعت دریل را با کار هماهنگ کنید", Summary = "سرعت مناسب به مته، جنس قطعه و توصیهٔ سازنده وابسته است؛ نشانه‌های ابزار را بشناسید.", Image = "tool-hammer-drill.png" },
-        new { Slug = "inspect-power-tool-cord", Branch = "safety", Topic = "electrical", Area = "electrical", Category = "ایمنی و نگهداری", Title = "کابل و دوشاخهٔ ابزار برقی را پیش از کار بررسی کنید", Summary = "بازرسی چشمی می‌تواند آسیب‌های واضح را پیدا کند؛ کابل معیوب را کنار بگذارید و برای تعمیر به سرویس مجاز بسپارید.", Image = "tool-multimeter-kit.png" },
-        new { Slug = "protect-eyes-workshop", Branch = "safety", Topic = "tools", Area = "tools", Category = "ایمنی و نگهداری", Title = "محافظت از چشم هنگام کار با ابزار", Summary = "محافظ مناسب را بر اساس خطر و دستورالعمل ابزار انتخاب کنید و پیش از کار از سالم‌بودن آن مطمئن شوید.", Image = "tool-hammer-drill.png" },
-        new { Slug = "soldering-workspace-ventilation", Branch = "safety", Topic = "soldering", Area = "tools", Category = "ایمنی و نگهداری", Title = "تهویهٔ میز لحیم‌کاری را جدی بگیرید", Summary = "جریان هوای مناسب و رعایت دستور ایمنی مواد مصرفی، بخشی از چیدمان ایمن میز کار است.", Image = "tool-soldering-station.png" },
-        new { Slug = "clean-store-power-tools", Branch = "safety", Topic = "tools", Area = "tools", Category = "ایمنی و نگهداری", Title = "تمیزکاری و نگهداری روزمرهٔ ابزار برقی", Summary = "پس از قطع منبع تغذیه، گردوغبار را طبق دفترچه پاک کنید و ابزار را در محیط خشک نگه دارید.", Image = "tool-hammer-drill.png" }
-    };
+    var posts = Model.Data.Posts;
     string PersianDigits(int value) => string.Concat(value.ToString(CultureInfo.InvariantCulture).Select(digit => digit is >= '0' and <= '9' ? (char)('\u06F0' + digit - '0') : digit));
-    var postCount = PersianDigits(posts.Length);
-    var buyingPostCount = PersianDigits(posts.Count(post => post.Branch == "buying"));
-    var educationPostCount = PersianDigits(posts.Count(post => post.Branch == "education"));
-    var safetyPostCount = PersianDigits(posts.Count(post => post.Branch == "safety"));
-    var toolsPostCount = PersianDigits(posts.Count(post => post.Area == "tools"));
-    var electricalPostCount = PersianDigits(posts.Count(post => post.Area == "electrical"));
-    var workshopPostCount = PersianDigits(posts.Count(post => post.Area == "workshop"));
 }
 <header class="page-hero editorial-hero">
     <img class="hero-image" src="~/shop/images/heroes/hero-electrical-editorial.png" alt="مجله تخصصی برق و ابزار ندا اولیائی"/>
@@ -90,50 +33,50 @@
         <aside class="journal-categories" aria-label="دسته‌بندی مطالب">
             <div class="journal-categories-scroll ui-scrollbar ui-scrollbar--navy">
                 <h2>دسته‌بندی مجله</h2>
-                <button type="button" class="is-active journal-all" data-journal-filter="all" aria-pressed="true"><span class="journal-all-label"><i class="bi bi-grid" aria-hidden="true"></i> همه مطالب</span><span class="journal-category-count">@postCount</span></button>
+                <button type="button" class="is-active journal-all" data-journal-filter="all" aria-pressed="true"><span class="journal-all-label"><i class="bi bi-grid" aria-hidden="true"></i> همه مطالب</span><span class="journal-category-count">@PersianDigits(Model.Data.TotalCount)</span></button>
                 <div class="journal-branch">
-                    <button type="button" data-journal-filter="buying" aria-pressed="false"><i class="bi bi-cart-check" aria-hidden="true"></i><span>راهنمای خرید</span><span class="journal-category-count">@buyingPostCount</span></button>
+                    <button type="button" data-journal-filter="buying" aria-pressed="false"><i class="bi bi-cart-check" aria-hidden="true"></i><span>راهنمای خرید</span><span class="journal-category-count">@PersianDigits(Model.Data.BuyingCount)</span></button>
                 </div>
                 <div class="journal-branch">
-                    <button type="button" data-journal-filter="education" aria-pressed="false"><i class="bi bi-mortarboard" aria-hidden="true"></i><span>آموزش تخصصی</span><span class="journal-category-count">@educationPostCount</span></button>
+                    <button type="button" data-journal-filter="education" aria-pressed="false"><i class="bi bi-mortarboard" aria-hidden="true"></i><span>آموزش تخصصی</span><span class="journal-category-count">@PersianDigits(Model.Data.EducationCount)</span></button>
                 </div>
                 <div class="journal-branch journal-branch--areas">
-                    <button type="button" data-journal-filter="safety" aria-pressed="false"><i class="bi bi-shield-check" aria-hidden="true"></i><span>ایمنی و نگهداری</span><span class="journal-category-count">@safetyPostCount</span></button>
+                    <button type="button" data-journal-filter="safety" aria-pressed="false"><i class="bi bi-shield-check" aria-hidden="true"></i><span>ایمنی و نگهداری</span><span class="journal-category-count">@PersianDigits(Model.Data.SafetyCount)</span></button>
                     <div class="journal-children" aria-label="حوزه‌های مجله">
-                        <button type="button" data-journal-filter="area-tools" aria-pressed="false"><i class="bi bi-tools" aria-hidden="true"></i><span>ابزار و تجهیزات</span><span class="journal-category-count">@toolsPostCount</span></button>
-                        <button type="button" data-journal-filter="area-electrical" aria-pressed="false"><i class="bi bi-lightning-charge" aria-hidden="true"></i><span>برق و اندازه‌گیری</span><span class="journal-category-count">@electricalPostCount</span></button>
-                        <button type="button" data-journal-filter="area-workshop" aria-pressed="false"><i class="bi bi-lightbulb" aria-hidden="true"></i><span>روشنایی و کارگاه</span><span class="journal-category-count">@workshopPostCount</span></button>
+                        <button type="button" data-journal-filter="area-tools" aria-pressed="false"><i class="bi bi-tools" aria-hidden="true"></i><span>ابزار و تجهیزات</span><span class="journal-category-count">@PersianDigits(Model.Data.ToolsCount)</span></button>
+                        <button type="button" data-journal-filter="area-electrical" aria-pressed="false"><i class="bi bi-lightning-charge" aria-hidden="true"></i><span>برق و اندازه‌گیری</span><span class="journal-category-count">@PersianDigits(Model.Data.ElectricalCount)</span></button>
+                        <button type="button" data-journal-filter="area-workshop" aria-pressed="false"><i class="bi bi-lightbulb" aria-hidden="true"></i><span>روشنایی و کارگاه</span><span class="journal-category-count">@PersianDigits(Model.Data.WorkshopCount)</span></button>
                     </div>
                 </div>
             </div>
         </aside>
         <div class="journal-results">
             <div class="journal-results-heading">
-                <h2 id="archive-title" tabindex="-1">راهنماهای ابزار و تجهیزات</h2><span id="journal-count" class="journal-count-badge" role="status" aria-live="polite">@posts.Length مطلب</span>
+                <h2 id="archive-title" tabindex="-1">راهنماهای ابزار و تجهیزات</h2><span id="journal-count" class="journal-count-badge" role="status" aria-live="polite">@PersianDigits(Model.Data.TotalCount) مطلب</span>
             </div>
             <div class="journal-grid">
-                @{ var postIndex = 0; }
+
                 @foreach (var post in posts)
                 {
-                    var publishedAt = DateTime.Today.AddDays(-(postIndex * 3 + 1));
-                    var readingMinutes = 4 + postIndex % 4;
                     <article class="journal-post" data-branch="@post.Branch" data-topic="@post.Topic" data-area="@post.Area">
                         <a asp-controller="Magazine" asp-action="Details" asp-route-slug="@post.Slug">
                             <div class="journal-post-image">
-                                <img src="@Url.Content("~/" + ProductMediaCatalog.GetContentPath(post.Image))" alt="@post.Title" loading="lazy"/>
+                                <img src="@Url.Content("~/" + post.Image)" alt="@post.Title" loading="lazy"/>
                                 <span class="journal-kicker">@post.Category</span>
                             </div>
                             <div class="journal-post-copy">
                                 <h3>@post.Title</h3>
                                 <div class="journal-post-meta">
-                                    <span>
-                                        <i class="bi bi-calendar3"></i>@publishedAt.ToString("yyyy/MM/dd", CultureInfo.InvariantCulture)
-                                    </span><span><i class="bi bi-clock"></i>@readingMinutes دقیقه</span>
+                                    @if (!string.IsNullOrWhiteSpace(post.PublishedAt))
+                                    {
+                                        <span><i class="bi bi-calendar3" aria-hidden="true"></i>@post.PublishedAt</span>
+                                    }
+                                    <span><i class="bi bi-clock" aria-hidden="true"></i>@post.ReadMinutes دقیقه</span>
                                 </div>
                             </div>
                         </a>
                     </article>
-                    postIndex++;
+
                 }
             </div>
             <nav id="journal-pagination" class="journal-paging site-pagination" aria-label="صفحه‌بندی مطالب" hidden></nav>

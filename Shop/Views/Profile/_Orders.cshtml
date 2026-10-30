@@ -1,11 +1,9 @@
-@model bool
-
-@inject Shop.Services.IAccountDataSource AccountSource
+@model ProfileOrdersViewModel
 @{
-    var orders = (await AccountSource.ReadAsync(Context.RequestAborted)).Orders;
+    var orders = Model.Orders;
 }
 
-<section id="orders" class="account-section" hidden="@(Model ? null : "hidden")">
+<section id="orders" class="account-section" hidden="@(Model.IsActive ? null : "hidden")">
     <div class="orders-heading">
         <div>
             <span>تاریخچه خرید</span>

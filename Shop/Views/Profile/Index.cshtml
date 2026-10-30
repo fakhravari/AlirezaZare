@@ -1,58 +1,15 @@
-@model PageModel
+@model PageModel<ProfilePageViewModel>
 @using System.Text.Json
-@inject Shop.Services.IAccountDataSource AccountSource
 @{
-    var accountData = await AccountSource.ReadAsync(Context.RequestAborted);
-    var accountToday = DateOnly.FromDateTime(DateTime.UtcNow);
-    var accountOrders = accountData.Orders.ToDictionary(order => order.Id);
-    var couponData = accountData.Coupons.Select(coupon => new {
-        coupon.Id, coupon.Code, coupon.DiscountPercent, coupon.UsageLimit,
-        Active = coupon.IsActive(accountToday),
-        ExpiresOn = Shop.Models.AccountDisplay.Date(coupon.ExpiresOn),
-        Uses = coupon.OrderIds.Select(id => accountOrders[id]).Select(order => new {
-            Invoice = order.Number, Date = order.DateLabel, DateTime = order.OrderedOn.ToString("yyyy-MM-dd")
-        })
-    });
+    var profileSection = Model.Data.Section;
 }
-<script type="application/json" id="accountData">@Html.Raw(JsonSerializer.Serialize(new { schemaVersion = 1, coupons = couponData }, Shop.Models.AccountData.JsonOptions))</script>
-
-@{
-    var profileSection = Context.Request.Path.Value?.TrimEnd('/').Split('/').LastOrDefault()?.ToLowerInvariant();
-    var showOrders = profileSection == "orders";
-    var profileTitle = profileSection switch
-    {
-        "orders" => "سفارش‌های من",
-        "addresses" => "آدرس‌های من",
-        "favorites" => "علاقه‌مندی‌ها",
-        "coupons" => "کدهای تخفیف من",
-        "pricealerts" => "به من اطلاع بده",
-        _ => "پروفایل من"
-    };
-    var profileDescription = profileSection switch
-    {
-        "orders" => "وضعیت سفارش‌ها و سوابق خریدتان را یک‌جا دنبال کنید.",
-        "addresses" => "نشانی‌های تحویل را مدیریت کنید تا خرید بعدی ساده‌تر باشد.",
-        "favorites" => "محصول‌های ذخیره‌شده را مرور کنید و برای خرید مقایسه‌شان کنید.",
-        "coupons" => "وضعیت کدها، تعداد استفاده و فاکتورهای مرتبط را ببینید.",
-        "pricealerts" => "پیگیری‌های قیمت و موجودی کالاهای منتخب را مدیریت کنید.",
-        _ => "جزئیات پروفایل، نشانی‌ها و کالاهای ذخیره‌شده را مدیریت کنید."
-    };
-    var profileIcon = profileSection switch
-    {
-        "orders" => "bi-bag-check",
-        "addresses" => "bi-geo-alt",
-        "favorites" => "bi-heart",
-        "coupons" => "bi-ticket-perforated",
-        "pricealerts" => "bi-bell",
-        _ => "bi-person"
-    };
-}
+<script type="application/json" id="accountData">@Html.Raw(JsonSerializer.Serialize(new { schemaVersion = 1, coupons = Model.Data.Coupons }, AccountData.JsonOptions))</script>
 
 <main class="flow-main container profile-page-main">
 <header class="account-welcome">
     <div class="account-welcome-copy">
-        <h1>@profileTitle</h1>
-        <p>@profileDescription</p>
+        <h1>@Model.Data.Title</h1>
+        <p>@Model.Data.Description</p>
         <nav class="cart-breadcrumb profile-breadcrumb" aria-label="مسیر صفحه">
             <ol>
                 <li>
@@ -70,7 +27,7 @@
                 <li class="cart-breadcrumb-current">
                     <i class="bi bi-chevron-left" aria-hidden="true"></i>
                     <span aria-current="page">
-                        <i class="bi @profileIcon" aria-hidden="true"></i>@profileTitle
+                        <i class="bi @Model.Data.Icon" aria-hidden="true"></i>@Model.Data.Title
                     </span>
                 </li>
             </ol>
@@ -190,7 +147,7 @@
         </article>
     </div>
 </section>
-<partial name="_Orders" model="showOrders"/>
+<partial name="_Orders" model="@(new ProfileOrdersViewModel(profileSection == "orders", Model.Data.Orders))"/>
 <section id="addresses" class="account-section" hidden="@(profileSection == "addresses" ? null : "hidden")">
     <div class="account-section-heading">
         <h2>آدرس‌های من</h2><button id="newAddress" class="flow-button" type="button"><i class="bi bi-plus-lg"></i> آدرس جدید</button>

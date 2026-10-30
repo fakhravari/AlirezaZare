@@ -43,6 +43,27 @@ public static class FaqCatalog
 
 public sealed record ProductDetailsModel(int? Id, string? Name = null);
 
+public sealed record ProfilePageViewModel(
+    string Section,
+    string Title,
+    string Description,
+    string Icon,
+    IReadOnlyList<AccountOrder> Orders,
+    IReadOnlyList<ProfileCouponViewModel> Coupons);
+
+public sealed record ProfileOrdersViewModel(bool IsActive, IReadOnlyList<AccountOrder> Orders);
+
+public sealed record ProfileCouponViewModel(
+    string Id,
+    string Code,
+    int DiscountPercent,
+    int UsageLimit,
+    bool Active,
+    string ExpiresOn,
+    IReadOnlyList<ProfileCouponUseViewModel> Uses);
+
+public sealed record ProfileCouponUseViewModel(string Invoice, string Date, string DateTime);
+
 public sealed record MagazineDetailsModel(
     string Slug,
     string Category,
@@ -59,7 +80,8 @@ public sealed record MagazineDetailsModel(
     string Conclusion,
     IReadOnlyList<MagazineSourceModel>? Sources = null,
     IReadOnlyList<MagazineTagModel>? Tags = null,
-    IReadOnlyList<MagazineRelatedArticleModel>? RelatedArticles = null);
+    IReadOnlyList<MagazineRelatedArticleModel>? RelatedArticles = null,
+    JournalArticleMetrics? Metrics = null);
 
 public sealed record MagazineSectionModel(string Id, string Title, string Content);
 public sealed record MagazineSourceModel(string Title, string Url);

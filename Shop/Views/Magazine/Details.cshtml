@@ -1,7 +1,7 @@
 @using System.Globalization
 @model PageModel<MagazineDetailsModel>
 @{
-    var articleMetrics = JournalArticles.GetMetrics(Model.Data.Slug);
+    var articleMetrics = Model.Data.Metrics ?? new JournalArticleMetrics(0, 0, 0, 0);
     var persianCulture = CultureInfo.GetCultureInfo("fa-IR");
 }
 <header class="page-hero article-hero">

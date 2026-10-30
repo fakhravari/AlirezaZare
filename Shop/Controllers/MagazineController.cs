@@ -9,16 +9,18 @@ namespace Shop.Controllers;
 public sealed class MagazineController : PageController
 {
     private readonly SeoMetadataOptions _seoOptions;
+    private readonly IMagazineContentSource _magazineContent;
 
-    public MagazineController(IOptions<SeoMetadataOptions> seoOptions)
+    public MagazineController(IOptions<SeoMetadataOptions> seoOptions, IMagazineContentSource magazineContent)
     {
         _seoOptions = seoOptions.Value;
+        _magazineContent = magazineContent;
     }
 
     [HttpGet("")]
     public async Task<IActionResult> Index()
     {
-        PageModel model = new(new SeoModel("مجله برق و ابزار | ندا اولیائی", "راهنمای خرید، انتخاب ایمن، استفاده و نگهداری ابزار برقی و تجهیزات اندازه‌گیری؛ مقاله‌ها را بر اساس نیاز کارگاهی و موضوع موردنظر مرور کنید.", Breadcrumbs: [new SeoBreadcrumb("خانه", "/"), new SeoBreadcrumb("مجله برق و ابزار", "/magazine")]));
+        PageModel<MagazineIndexViewModel> model = new(await _magazineContent.ReadIndexAsync(HttpContext.RequestAborted), new SeoModel("مجله برق و ابزار | ندا اولیائی", "راهنمای خرید، انتخاب ایمن، استفاده و نگهداری ابزار برقی و تجهیزات اندازه‌گیری؛ مقاله‌ها را بر اساس نیاز کارگاهی و موضوع موردنظر مرور کنید.", Breadcrumbs: [new SeoBreadcrumb("خانه", "/"), new SeoBreadcrumb("مجله برق و ابزار", "/magazine")]));
         return await PageAsync(model);
     }
 

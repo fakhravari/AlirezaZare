@@ -1,4 +1,7 @@
-@inject Shop.Services.CatalogRepository StoreCatalog
+@inject Shop.Services.ICatalogSource StoreCatalog
+@{
+    var headerCatalog = await StoreCatalog.ReadAsync(Context.RequestAborted);
+}
 <nav class="navbar navbar-expand-lg navbar-dark fixed-top" id="mainNav">
 <div class="home-header-top" aria-label="جست‌وجو و پشتیبانی فروشگاه">
     <a class="home-header-support home-header-support-link" href="tel:09369455457" aria-label="تماس فوری با پشتیبانی به شماره 09369455457">
@@ -98,9 +101,9 @@
         <strong>برندهای معتبر ابزار</strong>
         <small>لوگوی برند را انتخاب کنید و محصولاتش را ببینید</small>
     </span>
-    <b>@StoreCatalog.Read().Brands.Count برند</b>
+    <b>@headerCatalog.Brands.Count برند</b>
 </li>
-@foreach (BrandProfileModel brand in StoreCatalog.Read().Brands)
+@foreach (BrandProfileModel brand in headerCatalog.Brands)
 {
     string slug = brand.Slug;
     <li>

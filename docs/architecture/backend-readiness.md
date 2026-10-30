@@ -1,6 +1,21 @@
 # آمادگی داده برای اتصال backend
 
-این بازبینی مسیر Controller → مدل/منبع → Razor → JavaScript → storage را بررسی می‌کند. وضعیت زیر متعلق به ۲۸ اکتبر ۲۰۲۶ است؛ وجود دادهٔ نمایشی به معنی وجود API عملیاتی نیست.
+این بازبینی مسیر Controller → مدل/منبع → Razor → JavaScript → storage را بررسی می‌کند. وضعیت زیر متعلق به ۳۰ اکتبر ۲۰۲۶ است؛ وجود دادهٔ نمایشی به معنی وجود API عملیاتی نیست.
+
+## بازبینی مدل دادهٔ صفحه‌ها — ۳۰ اکتبر ۲۰۲۶
+
+مسیرهای MVC از نظر محل آماده‌سازی داده مرور شدند. برای دادهٔ قابل‌تغییر، View باید یک مدل typed بگیرد و از Controller یا source بخواند؛ بخش‌هایی که به‌طور عمدی فقط browser state هستند نباید با ViewModel سروریِ ساختگی پوشانده شوند.
+
+| خانوادهٔ صفحه | جریان فعلی | آمادگی برای جایگزینی منبع |
+|---|---|---|
+| خانه، جستجو، صفحهٔ محصول، برندها | کاتالوگ نسخه‌دار از `ICatalogSource`؛ دادهٔ کامل سمت مرورگر از `_CatalogData` و صفحهٔ محصول علاوه بر آن مدل SEO/شناسهٔ سروری دارد | جایگزینی کاتالوگ با adapter API در مرز موجود؛ `Home`/جستجو هنوز client-render می‌شوند و SSR صفحه‌بندی/facet ندارند |
+| فهرست و دیتیل مجله | فهرست `PageModel<MagazineIndexViewModel>` از `IMagazineContentSource`؛ دیتیل از `PageModel<MagazineDetailsModel>` و `JournalArticles` | فهرست دارای adapter است؛ دیتیل و محتوای مقاله هنوز در مدل ثابت C# هستند و باید منبع CMS/API همان قرارداد را بسازد |
+| FAQ و معرفی برند | `PageModel<IReadOnlyList<FaqEntry>>` و `PageModel<BrandProfileModel>` | ورودی View مدل تایپ‌شده است؛ FAQ ثابت C# و بخشی از متن برند ثابت/JSON است |
+| پروفایل، سفارش و کوپن | `IAccountDataSource` در Controller و projectionهای `ProfilePageViewModel`/`ProfileOrdersViewModel` | View از source مستقل شده؛ adapter حساب دمو است و با endpoint سروری جایگزین می‌شود |
+| آدرس، علاقه‌مندی، مقایسه، سبد و checkout | بیشتر state از `localStorage` و renderer مرورگر می‌آید؛ Razor فقط پوستهٔ اولیه می‌دهد | تا ساخت endpoint، مالک داده مرورگر است. ابتدا قرارداد async سمت کاربر و endpoint لازم است؛ صرف افزودن ViewModel سروری اتصال API ایجاد نمی‌کند |
+| تماس و صفحه‌های خدمات/قوانین | متن تحریریه در View، ورودی فرم سمت مرورگر و metadata در `PageModel` | محتوای ثابت فعلی API ندارد؛ اگر CMS لازم شد، متن/بخش‌ها به مدل محتوای typed و source جدا منتقل شوند |
+
+در این بررسی، منبع حساب از Razor به `ProfileController` منتقل شد و آرشیو مجله از anonymous objectهای داخل View به `MagazineIndexViewModel` و `IMagazineContentSource` رفت. کارت‌های آرشیو از همان `JournalArticles` دیتیل عنوان/خلاصه/تصویر می‌گیرند. تاریخ انتشار برای دادهٔ نمونه خالی می‌ماند چون تاریخ واقعی وجود ندارد؛ زمان مطالعه هم هنوز نمونه است. متن ثابت صفحات محتوا عمداً به مدل‌های نمایشی ساختگی منتقل نشد، چون منبع CMS/API در runtime ندارند.
 
 ## نتیجهٔ بررسی و تغییر اجرایی
 
@@ -54,4 +69,4 @@
 
 [منبع حقیقت داده](data-sources.md) · [فهرست معماری](README.md) · [فهرست مستندات](../README.md)
 
-آخرین تطبیق با کد: ۲۸ اکتبر ۲۰۲۶.
+آخرین تطبیق با کد: ۳۰ اکتبر ۲۰۲۶.
