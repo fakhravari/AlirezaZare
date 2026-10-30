@@ -1599,7 +1599,6 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
 
 #orders .order-status {
   padding: 6px 10px;
-  font-size: 11px !important;
   font-weight: 700;
   line-height: 1.4;
 }

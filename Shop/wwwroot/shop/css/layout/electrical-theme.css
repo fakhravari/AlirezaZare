@@ -47,7 +47,6 @@ body {
     top: -70px;
     right: 18px;
     margin: 0;
-    color: #202a33 !important;
     text-shadow: none;
   }
 
@@ -66,13 +65,11 @@ body {
   .home-page #mainNav .nav-link {
     padding-top: 20px;
     padding-bottom: 20px;
-    color: #344047 !important;
     font-size: 13px;
     text-shadow: none;
   }
 
   .home-page #mainNav .nav-link:hover {
-    color: #9a7600 !important;
   }
 
   .home-page #mainNav .nav-link::after {
@@ -1039,8 +1036,6 @@ body {
 }
 
 .back-to-top {
-  background: #e8bd24 !important;
-  color: #152b3a !important;
 }
 
 @media (max-width: 991px) {

@@ -1102,7 +1102,6 @@ body :is(#cartView, #invoiceItems) .cart-product-details .cart-item-option-chip 
     max-height: calc(100dvh - 84px) !important;
     border-bottom: 1px solid rgba(113, 135, 166, 0.48) !important;
     border-radius: 24px !important;
-    transform: translateY(0) scale(1) !important;
   }
   html body > #cartPanel.cart-panel:not(.open) {
     opacity: 0 !important;
@@ -1114,27 +1113,6 @@ body :is(#cartView, #invoiceItems) .cart-product-details .cart-item-option-chip 
     flex: none !important;
     margin: 0 !important;
     padding: 16px 14px !important;
-    border: 5px solid transparent !important;
-    background:
-      radial-gradient(
-          circle at 7% 12%,
-          rgba(61, 101, 157, 0.48),
-          transparent 34%
-        )
-        padding-box,
-      linear-gradient(120deg, #244d7c 0%, #123766 34%, #08295b 100%) padding-box,
-      linear-gradient(
-          135deg,
-          #f8fbff 0%,
-          #cbd9e7 28%,
-          #829bb7 53%,
-          #eaf1f7 76%,
-          #fff 100%
-        )
-        border-box !important;
-    box-shadow:
-      0 8px 22px rgba(5, 27, 66, 0.18),
-      0 0 0 1px rgba(255, 255, 255, 0.58) !important;
     border-radius: 20px !important;
   }
   :where(.cart-items, .page-cart-items, .search-cart-items) {

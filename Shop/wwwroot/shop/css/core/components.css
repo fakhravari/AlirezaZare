@@ -29,10 +29,6 @@
 }
 
 .ui-surface-card--interactive:hover {
-  border-color: var(
-    --widget-border-strong,
-    var(--color-card-border-hover)
-  ) !important;
   box-shadow: var(--shadow-card-hover);
 }
 

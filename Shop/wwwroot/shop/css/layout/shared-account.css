@@ -298,28 +298,7 @@
     padding: 16px 14px;
     grid-template-columns: 54px minmax(0, 1fr);
     gap: 11px;
-    border: 5px solid transparent !important;
     border-radius: 20px !important;
-    background:
-      radial-gradient(
-          circle at 7% 12%,
-          rgba(61, 101, 157, 0.48),
-          transparent 34%
-        )
-        padding-box,
-      linear-gradient(120deg, #244d7c 0%, #123766 34%, #08295b 100%) padding-box,
-      linear-gradient(
-          135deg,
-          #f8fbff 0%,
-          #cbd9e7 28%,
-          #829bb7 53%,
-          #eaf1f7 76%,
-          #fff 100%
-        )
-        border-box !important;
-    box-shadow:
-      0 8px 22px rgba(5, 27, 66, 0.18),
-      0 0 0 1px rgba(255, 255, 255, 0.58) !important;
   }
   .shared-account-card .account-user:before {
     content: "";

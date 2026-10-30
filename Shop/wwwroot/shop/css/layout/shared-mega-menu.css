@@ -337,7 +337,6 @@
     border-left: 1px solid rgba(137, 155, 179, 0.38) !important;
   }
   #mainNav .mega-sidebar > a {
-    margin: 4px 0 !important;
     border: 1px solid rgba(137, 155, 179, 0.28) !important;
   }
   #mainNav .mega-links + .mega-links {
@@ -353,28 +352,16 @@
 @media (min-width: 992px) {
   #mainNav .mega-dropdown > .mega-menu,
   #mainNav .brand-dropdown > .brand-menu {
-    border-color: #8da5bd !important;
-    background: linear-gradient(145deg, #f7faff, #e7eff8) !important;
-    box-shadow:
-      0 26px 62px rgba(8, 30, 56, 0.27),
-      inset 0 0 0 1px rgba(255, 255, 255, 0.92) !important;
   }
 
   #mainNav .mega-sidebar > a,
   #mainNav .brand-menu .dropdown-item {
-    border-color: #c8d6e4 !important;
-    background: rgba(255, 255, 255, 0.78) !important;
   }
 
   #mainNav .mega-sidebar > a:hover,
   #mainNav .mega-sidebar > a.active,
   #mainNav .brand-menu .dropdown-item:hover,
   #mainNav .brand-menu .dropdown-item:focus-visible {
-    border-color: #7895b2 !important;
-    background: #e2edf8 !important;
-    box-shadow:
-      0 8px 18px rgba(16, 42, 86, 0.12),
-      inset -3px 0 #c99b4f !important;
   }
 
   #mainNav .mega-menu .mega-bottom,
@@ -384,14 +371,9 @@
   }
 
   #mainNav .brand-menu .brand-menu-icon {
-    border: 0 !important;
-    box-shadow: none !important;
   }
 
   #mainNav .brand-menu .dropdown-item:hover .brand-menu-icon {
-    background: rgba(213, 173, 104, 0.13) !important;
-    color: #91601f !important;
-    box-shadow: 0 0 0 5px rgba(207, 158, 82, 0.07) !important;
   }
 
   #mainNav .brand-menu-footer {
@@ -410,24 +392,15 @@
   }
 
   #mainNav .brand-menu .dropdown-item {
-    border-color: #dce4eb !important;
-    background: #fff !important;
     color: #243b53 !important;
   }
 
   #mainNav .brand-menu .dropdown-item:hover,
   #mainNav .brand-menu .dropdown-item:focus-visible {
-    border-color: #e5b900 !important;
-    background: #fff9df !important;
     color: #102a43 !important;
-    box-shadow:
-      0 8px 18px rgba(16, 42, 67, 0.1),
-      inset -3px 0 #f6c515 !important;
   }
 
   #mainNav .brand-menu .brand-menu-icon {
-    background: #fff4c2 !important;
-    color: #8a6800 !important;
   }
 
   #mainNav .brand-menu .dropdown-item:hover .brand-menu-icon,
@@ -459,17 +432,10 @@
   }
 
   #mainNav .mega-sidebar > a {
-    border-color: #e2d3bd !important;
-    background: #fffdfa !important;
   }
 
   #mainNav .mega-sidebar > a:hover,
   #mainNav .mega-sidebar > a.active {
-    border-color: #bd975f !important;
-    background: #fbf1df !important;
-    box-shadow:
-      0 8px 18px rgba(117, 79, 28, 0.11),
-      inset -3px 0 #c99b4f !important;
   }
 
   #mainNav .mega-content {
@@ -497,23 +463,10 @@
   }
 
   #mainNav .mega-sidebar > a {
-    height: 54px !important;
-    min-height: 54px !important;
-    max-height: 54px !important;
-    padding: 7px !important;
-    grid-template-columns: 38px minmax(0, 1fr) 14px !important;
-    gap: 6px !important;
     border-radius: 14px !important;
   }
 
   #mainNav .mega-sidebar > a > i:first-child {
-    width: 38px !important;
-    height: 38px !important;
-    border: 0 !important;
-    border-radius: 12px !important;
-    background: transparent !important;
-    color: #a8732e !important;
-    box-shadow: none !important;
     font-size: 17px !important;
   }
 
