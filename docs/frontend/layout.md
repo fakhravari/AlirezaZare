@@ -48,7 +48,7 @@ _Shop
 | مگامنو | خانه و inner markup/variant متفاوت؛ inner selectorهایی مثل `.page-mega-sidebar` | `shared-mega-menu.css`, `mega-menu-unified.css`, `quick-links-menu.css`; باز/بسته و category در `header-navigation.js` | trigger → panel، keyboard/ArrowDown/Escape، فضای خالی هدر، شاخهٔ پیش‌فرض و breakpoint 992 |
 | account popover/drawer هدر | `.shared-account-card`, `.shared-account-popover`, `.account-links` | `shared-account.css`; تعامل در `main.js` | کاربر خارج/وارد، desktop/mobile، Escape، focus و scroll؛ badge عددی گزینه‌های منو در موبایل پنهان است |
 | cart/favorites/compare panels | `.page-cart-panel`, `.search-cart-drawer`, `.favorites-panel`, `.compare-panel` و item/footerها | `shared-cart.css`, `commerce.css`; `main.js` + `commerce.js` | سبد خالی/پر، تعداد زیاد آیتم، پنل باز و scroll داخلی، responsive |
-| پیوندهای مرتبط چهارگانه | `_RelatedLinks.cshtml` با چهار مقصد محصول، ارسال، ضمانت و FAQ | `layout/shared-related-links.css`؛ کارت‌های کامل بدون قاب بیرونی مشترک؛ ثبت مالک در `tools/ui-owners.json` | صفحهٔ محصول، برند، علاقه‌مندی، سبد و صفحه‌های خدمات؛ چهارستونه دسکتاپ، دوستونه تبلت و تک‌ستونه موبایل |
+| پیوندهای مرتبط چهارگانه | `_RelatedLinks.cshtml` با چهار مقصد محصول، ارسال، ضمانت و FAQ | پایه در `layout/shared-related-links.css`؛ `pages.css` قاب بخش سبد و چیدمان مخصوص برند را تنظیم می‌کند؛ مالک در `tools/ui-owners.json` ثبت است | صفحهٔ محصول، برند، علاقه‌مندی، سبد و صفحه‌های خدمات؛ چهارستونه دسکتاپ، دوستونه تبلت و تک‌ستونه موبایل |
 | modal ورود/ثبت‌نام سراسری | `#loginModal`, `.login-modal-form-panel`, `.login-close` در `_Panels.cshtml` | layout در `style.css`, `luxury-theme.css`, `industrial-system.css`; قواعد فرم در `shared-login.css`; تعامل در `main.js` | ورود/ثبت‌نام/OTP، viewport کوتاه موبایل، اسکرول داخلی، بستن و بازگشت focus |
 | dialog ویرایش پروفایل | `.shared-login-modal.profile-edit-dialog` در `Views/Profile/Index.cshtml` | `shared-login.css` به‌علاوهٔ `account-page.css`; رفتار در View پروفایل | باز/بسته‌شدن native dialog، اعتبارسنجی و focus |
 | فرم آدرس | `_AddressForm`, `#addressDialog` در Cart و dialog آدرس پروفایل | `checkout.css`, `account-page.css`; `address-fields.js`, `iran-places.js`, `account-page.js` | Country/Province/City مدل‌های جدا دارند؛ فرم استان و شهر را انتخاب می‌کند و شهر به استان وابسته است. کشور ایران در رکورد ثابت است؛ خلاصهٔ آدرس استان/شهر را نمایش می‌دهد. Checkout این فرم را ندارد و فقط آدرس انتخابی را پیش‌نمایش می‌کند |
@@ -56,9 +56,8 @@ _Shop
 | دیدگاه مشتریان خانه | `_Testimonials`, `#testimonialSlider` | قاب و کنترل‌های Owl در `style.css`؛ راه‌اندازی در `layout/main.js` | دسکتاپ و موبایل؛ کارت‌های مجاور داخل عرض بخش بمانند و پیمایش و دکمه‌ها کار کنند |
 | مجلهٔ صفحهٔ اول | `Home/Index.cshtml`, `#journal` | `style.css`, `industrial-system.css`; مالک در `tools/ui-owners.json` با نام `homepage-magazine` | پنج راهنمای منتخب و مطلب انتخاب تحریریه با تاریخ/زمان؛ عنوان مطلب لینک اصلی است |
 | خبرنامهٔ صفحهٔ اول | `_Newsletter.cshtml`, `.newsletter` | `style.css`, `home-warmth.css`; مالک در `tools/ui-owners.json` با نام `homepage-newsletter` | در موبایل فاصلهٔ عمودی بخش و فرم کمتر است؛ فاصلهٔ ردیف در موبایل `g-3` و از ۹۹۲px `g-5` است |
-| لینک‌های مرتبط | `_RelatedLinks` | `commerce.css`, overrideهای `pages.css`; JS اختصاصی ندارد | صفحات service/editorial که partial را مصرف می‌کنند |
 | کارت محصول | `HNProductCard.render` در `store/product-card.js` | `shared-product-card.css`؛ [نقشهٔ مالکیت](../../tools/ui-owners.json) | Home/Search/Related/Favorites و قیمت Compare؛ آیکن مقایسهٔ خطیِ ترازو، crop تصویر و عنوان طولانی |
-| فوتر | `_Footer`, `.footer-brand` | `shared-footer.css`, `style.css`, `mobile-pages.css`; مالک در `tools/ui-owners.json` | لوگوی کامل برق شیراز با زیرعنوان در پس‌زمینهٔ تیره؛ در دسکتاپ عرض لوگو تا ۲۶۰px ثابت و به راست تراز است و ارتفاع آن ۸۰px می‌ماند؛ در موبایل لوگو حداکثر ۲۱۰px و وسط‌چین است و ردیف شبکه‌های اجتماعی وسط‌چین با فاصلهٔ بالایی ۳۱px نمایش داده می‌شود |
+| فوتر | `_Footer`, `.footer-brand` | `shared-footer.css`, `style.css`, `mobile-pages.css`; مالک در `tools/ui-owners.json` | لوگوی کامل برق شیراز با زیرعنوان در پس‌زمینهٔ تیره؛ در دسکتاپ عرض لوگو تا ۲۶۰px، تراز راست و ارتفاع ۸۰px است؛ در صفحهٔ خانهٔ موبایل لوگو حداکثر ۲۱۰px و وسط‌چین است. ردیف شبکه‌های اجتماعی وسط‌چین است؛ فاصلهٔ بالایی مؤثر آن در CSS نهایی ۱۵px است. |
 
 این‌ها نقطهٔ شروع‌اند؛ selectorهای دقیق و حالت واقعی را با `rg` و Elements panel پیدا کنید. از فرض «یک partial = یک CSS» پرهیز کنید.
 
@@ -104,6 +103,7 @@ _Shop
 - `shop/css/layout/shared-page-hero.css`
 - `shop/css/layout/mega-menu-unified.css`
 - `shop/css/layout/shared-scrollbars.css`
+- `shop/css/layout/shared-related-links.css`
 
 پالت فعال و aliasهای Bootstrap/legacy فقط در `core/design-tokens.css` تعریف می‌شوند. `electrical-theme.css` و `luxury-theme.css` قواعد ظاهری دارند و توکن‌های root را بازنویسی نمی‌کنند؛ `industrial-system.css` هنوز overrideهای layout قدیمی دارد اما منبع رنگ نیست. cascade همچنان براساس ترتیب stylesheetهاست؛ مهاجرت تکه‌ای به `@layer` ممنوع است تا منابع بدون layer، از جمله View و vendor، اولویت ناخواسته نگیرند.
 
@@ -112,6 +112,7 @@ _Shop
 ابتدا `_CatalogData`، JSON امن `script[type="application/json"]#storeCatalog` را رندر می‌کند.
 
 - `shop/js/core/storage.js`
+- `shop/js/store/account-data.js` (پس از JSONهای commerce/account و پیش از مصرف‌کننده‌ها)
 - `shop/js/store/cart.js`
 - `shop/js/core/ui-core.js`
 - `shop/vendor/jquery/jquery.min.js`

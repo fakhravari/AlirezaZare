@@ -1,5 +1,32 @@
 {
   "schemaVersion": 2,
+  "specificationGroups": {
+    "identity": { "name": "شناسه و کاربرد", "order": 10 },
+    "operation": { "name": "ویژگی‌های عملکردی", "order": 20 },
+    "safety": { "name": "ایمنی و انتخاب", "order": 30 },
+    "accessories": { "name": "لوازم و متعلقات", "order": 40 }
+  },
+  "specificationCategories": {
+    "tool-type": { "groupId": "identity", "name": "نوع ابزار", "order": 10 },
+    "application": { "groupId": "identity", "name": "کاربری", "order": 20 },
+    "display": { "groupId": "operation", "name": "نمایش و عملکرد", "order": 10 },
+    "power": { "groupId": "operation", "name": "منبع تغذیه", "order": 20 },
+    "lighting": { "groupId": "operation", "name": "روشنایی", "order": 30 },
+    "selection-safety": { "groupId": "safety", "name": "نکات ایمنی و انتخاب", "order": 10 },
+    "soldering": { "groupId": "operation", "name": "کنترل فرایند لحیم‌کاری", "order": 40 },
+    "accessories-list": { "groupId": "accessories", "name": "لوازم پیشنهادی", "order": 10 }
+  },
+  "specificationFeatures": {
+    "tool-kind": { "categoryId": "tool-type", "label": "نوع ابزار", "order": 10 },
+    "usage": { "categoryId": "application", "label": "کاربری", "order": 10 },
+    "display-type": { "categoryId": "display", "label": "نوع نمایش", "order": 10 },
+    "power-source": { "categoryId": "power", "label": "منبع تغذیه", "order": 10 },
+    "light-source": { "categoryId": "lighting", "label": "نوع روشنایی", "order": 10 },
+    "safety-note": { "categoryId": "selection-safety", "label": "نکتهٔ ایمنی", "order": 10 },
+    "selection-note": { "categoryId": "selection-safety", "label": "نکتهٔ انتخاب", "order": 20 },
+    "temperature-control": { "categoryId": "soldering", "label": "کنترل فرایند", "order": 10 },
+    "recommended-accessories": { "categoryId": "accessories-list", "label": "لوازم پیشنهادی", "order": 10 }
+  },
   "attributeDefinitions": {
     "brand": {
       "label": "برند",
@@ -6232,6 +6259,12 @@
         "black"
       ],
       "detailId": "group-2",
+      "specificationValues": [
+        { "featureId": "tool-kind", "value": "مولتی‌متر دیجیتال" },
+        { "featureId": "usage", "value": "اندازه‌گیری و عیب‌یابی" },
+        { "featureId": "display-type", "value": "دیجیتال" },
+        { "featureId": "safety-note", "value": "بررسی ردهٔ حفاظتی پیش از استفاده" }
+      ],
       "mediaId": "product-6",
       "includedBenefits": [
         {
@@ -6443,6 +6476,11 @@
         "black"
       ],
       "detailId": "group-3",
+      "specificationValues": [
+        { "featureId": "usage", "value": "لحیم‌کاری و تعمیرات الکترونیک" },
+        { "featureId": "temperature-control", "value": "کنترل دما و انتخاب نوک متناسب با قطعه" },
+        { "featureId": "recommended-accessories", "value": "پایهٔ هویه، نوک یدکی و اسفنج تمیزکننده" }
+      ],
       "mediaId": "product-11",
       "includedBenefits": [
         {
@@ -6636,6 +6674,12 @@
         "black"
       ],
       "detailId": "group-4",
+      "specificationValues": [
+        { "featureId": "light-source", "value": "LED" },
+        { "featureId": "usage", "value": "روشنایی کارگاهی و تعمیراتی" },
+        { "featureId": "power-source", "value": "باتری شارژی" },
+        { "featureId": "selection-note", "value": "بررسی شار نوری و درجهٔ حفاظت" }
+      ],
       "mediaId": "product-16",
       "includedBenefits": [
         {
@@ -6671,6 +6715,12 @@
         "black"
       ],
       "detailId": "group-4",
+      "specificationValues": [
+        { "featureId": "light-source", "value": "LED" },
+        { "featureId": "usage", "value": "کارگاه و نصب" },
+        { "featureId": "power-source", "value": "برق شهری" },
+        { "featureId": "selection-note", "value": "بررسی شار نوری و درجهٔ حفاظت" }
+      ],
       "mediaId": "product-17"
     },
     {

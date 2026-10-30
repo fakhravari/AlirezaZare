@@ -41,6 +41,9 @@ Reject(n => n["media"]!["product-1"]!["card"] = "Content/Bad.jpg");
 Reject(n => n["collections"]!["selected"]![0] = 999);
 Reject(n => n["products"]![0]!["maxCartQuantity"] = 0);
 Reject(n => n["products"]![0]!["discountPercent"] = 100);
+Reject(n => n["specificationCategories"]!["lighting"]!["groupId"] = "missing");
+Reject(n => n["specificationFeatures"]!["light-source"]!["categoryId"] = "missing");
+Reject(n => n["products"]![15]!["specificationValues"]![0]!["featureId"] = "missing");
 Reject(n => n["products"]![0]!["accessories"]![1]!["id"] = "shipping-insurance");
 Reject(n => n["products"]![0]!["accessories"]![0]!["price"] = -1);
 

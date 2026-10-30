@@ -138,6 +138,23 @@ test('product specifications override shared values in highlighted attributes', 
   assert.equal(value(data), 'product group');
 });
 
+test('normalized specification assignments resolve feature, category and group relationships', () => {
+  const {window} = runtime();
+  const product = window.HNCatalog.find(16);
+  assert.deepEqual(plain(product.detail.productSpecGroups.map(group => group.title)), [
+    'شناسه و کاربرد · کاربری',
+    'ویژگی‌های عملکردی · منبع تغذیه',
+    'ویژگی‌های عملکردی · روشنایی',
+    'ایمنی و انتخاب · نکات ایمنی و انتخاب',
+  ]);
+  assert.deepEqual(plain(product.detail.productSpecGroups.flatMap(group => group.specs)), [
+    ['کاربری', 'روشنایی کارگاهی و تعمیراتی'],
+    ['منبع تغذیه', 'باتری شارژی'],
+    ['نوع روشنایی', 'LED'],
+    ['نکتهٔ انتخاب', 'بررسی شار نوری و درجهٔ حفاظت'],
+  ]);
+});
+
 test('every referenced media file exists with exact lowercase casing', () => {
   const data = source();
   const files = new Set();

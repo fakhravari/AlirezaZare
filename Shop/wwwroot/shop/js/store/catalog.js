@@ -33,6 +33,38 @@
       Array.isArray(pair) && String(pair[0] ?? "").trim() && String(pair[1] ?? "").trim())
       .map(([label, value]) => [String(label).trim(), String(value).trim()])}))
     .filter((group) => group.title && group.specs.length);
+  const specificationGroups = data.specificationGroups || {};
+  const specificationCategories = data.specificationCategories || {};
+  const specificationFeatures = data.specificationFeatures || {};
+  const resolveSpecificationValues = (assignments = []) => {
+    const categories = new Map();
+    for (const assignment of assignments) {
+      const feature = relation(specificationFeatures, assignment.featureId);
+      const category = relation(specificationCategories, feature.categoryId);
+      const group = relation(specificationGroups, category.groupId);
+      const categoryKey = `${category.groupId}:${feature.categoryId}`;
+      if (!categories.has(categoryKey)) categories.set(categoryKey, {
+        groupOrder: Number(group.order) || 0,
+        categoryOrder: Number(category.order) || 0,
+        featureOrder: Number(feature.order) || 0,
+        groupName: String(group.name || "").trim(),
+        categoryName: String(category.name || "").trim(),
+        groupId: category.groupId,
+        categoryId: feature.categoryId,
+        specs: [],
+      });
+      categories.get(categoryKey).specs.push([String(feature.label || "").trim(), String(assignment.value || "").trim()]);
+    }
+    return [...categories.values()]
+      .sort((a, b) => a.groupOrder - b.groupOrder || a.categoryOrder - b.categoryOrder)
+      .map((category) => ({
+        title: `${category.groupName} · ${category.categoryName}`,
+        order: category.groupOrder * 10000 + category.categoryOrder,
+        specs: category.specs.filter(([label, value]) => label && value),
+      }))
+      .filter((category) => category.specs.length)
+      .map(({title, specs}) => ({title, specs}));
+  };
   const attributeDefinitions = data.attributeDefinitions || {};
   const categoryEntries = Object.entries(data.categories).map(([id, category]) => ({
     id, slug: String(category.slug || "").trim(), en: String(category.en || "").trim(),
@@ -140,7 +172,10 @@
         ...(sharedDetail.specs?.length ? [{title: "ویژگی‌های عمومی", specs: sharedDetail.specs}] : []),
         ...normalizeSpecGroups(sharedDetail.specGroups),
       ];
-      const productSpecGroups = normalizeSpecGroups(product.specGroups);
+      const productSpecGroups = [
+        ...normalizeSpecGroups(product.specGroups),
+        ...resolveSpecificationValues(product.specificationValues || []),
+      ];
       return {...sharedDetail, specs: mergeSpecs(sharedDetail.specs), sharedSpecGroups, productSpecGroups};
     })();
     const resolvedSpecs = mergeSpecs(
@@ -220,7 +255,9 @@
   window.HNProducts = freeze(products);
   window.HNProductUrl = productUrl;
   window.HNCatalog = Object.freeze({schemaVersion: data.schemaVersion, products: window.HNProducts,
-    brands: freeze(data.brands), categories: freeze(data.categories), attributeDefinitions: freeze(attributeDefinitions), collections: freeze(data.collections),
+    brands: freeze(data.brands), categories: freeze(data.categories), attributeDefinitions: freeze(attributeDefinitions),
+    specificationGroups: freeze(specificationGroups), specificationCategories: freeze(specificationCategories),
+    specificationFeatures: freeze(specificationFeatures), collections: freeze(data.collections),
     find: (id) => byId.get(String(id)) || null, url: productUrl,
     categoryUrl, categoryUrlForLabels, categoryForSlug, categoryForLabel, categoryContains, categoryMatchesPath,
     categoryFacets});

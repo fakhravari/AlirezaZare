@@ -49,6 +49,7 @@ public sealed record CatalogSnapshot(string BrowserJson, IReadOnlyList<ProductSe
             countries = root.GetProperty("countries"), details = root.GetProperty("details"),
             attributeDefinitions = root.GetProperty("attributeDefinitions");
         ValidateAttributeDefinitions(attributeDefinitions);
+        HashSet<string> specificationFeatures = ValidateSpecificationDefinitions(root);
         HashSet<string> nonLeafCategories = ValidateCategories(categories);
         HashSet<int> ids = [];
         HashSet<string> codes = new(StringComparer.Ordinal);
@@ -115,7 +116,7 @@ public sealed record CatalogSnapshot(string BrowserJson, IReadOnlyList<ProductSe
                 throw new InvalidDataException($"Invalid cart limit/discount: {id}");
             ValidateOptions(product);
             ValidateProductSpecs(product);
-            ValidateSpecGroups(product, "specGroups", "Product");
+            ValidateProductSpecificationValues(product, specificationFeatures);
             products.Add(new(id, name, englishName, Text(brand, "name"), Text(category, "fa"), imagePath, slug,
                 code, GetCategoryPath(category, categories)));
         }
@@ -285,6 +286,53 @@ public sealed record CatalogSnapshot(string BrowserJson, IReadOnlyList<ProductSe
             if (value.TryGetProperty("filterKey", out JsonElement filterKey) &&
                 filterKey.ValueKind != JsonValueKind.String)
                 throw new InvalidDataException("Catalog attribute filterKey must be a string.");
+        }
+    }
+
+    private static HashSet<string> ValidateSpecificationDefinitions(JsonElement root)
+    {
+        JsonElement groups = root.GetProperty("specificationGroups"),
+            categories = root.GetProperty("specificationCategories"),
+            features = root.GetProperty("specificationFeatures");
+        if (groups.ValueKind != JsonValueKind.Object || groups.EnumerateObject().Count() == 0 ||
+            categories.ValueKind != JsonValueKind.Object || categories.EnumerateObject().Count() == 0 ||
+            features.ValueKind != JsonValueKind.Object || features.EnumerateObject().Count() == 0)
+            throw new InvalidDataException("Specification groups, categories and features must be non-empty objects.");
+
+        foreach (JsonProperty group in groups.EnumerateObject()) _ = Text(group.Value, "name");
+        foreach (JsonProperty category in categories.EnumerateObject())
+        {
+            _ = Text(category.Value, "name");
+            string groupId = Text(category.Value, "groupId");
+            if (!groups.TryGetProperty(groupId, out _))
+                throw new InvalidDataException($"Unknown specification group: {groupId}");
+        }
+        HashSet<string> featureIds = new(StringComparer.Ordinal);
+        foreach (JsonProperty feature in features.EnumerateObject())
+        {
+            _ = Text(feature.Value, "label");
+            string categoryId = Text(feature.Value, "categoryId");
+            if (!categories.TryGetProperty(categoryId, out _))
+                throw new InvalidDataException($"Unknown specification category: {categoryId}");
+            featureIds.Add(feature.Name);
+        }
+        return featureIds;
+    }
+
+    private static void ValidateProductSpecificationValues(JsonElement product, HashSet<string> featureIds)
+    {
+        if (!product.TryGetProperty("specificationValues", out JsonElement values)) return;
+        if (values.ValueKind != JsonValueKind.Array)
+            throw new InvalidDataException("Product specificationValues must be an array.");
+        HashSet<string> assigned = new(StringComparer.Ordinal);
+        foreach (JsonElement item in values.EnumerateArray())
+        {
+            string featureId = Text(item, "featureId");
+            string value = Text(item, "value").Trim();
+            if (!featureIds.Contains(featureId))
+                throw new InvalidDataException($"Unknown product specification feature: {featureId}");
+            if (value.Length == 0 || !assigned.Add(featureId))
+                throw new InvalidDataException("Product specification values must be non-empty and unique per feature.");
         }
     }
 
