@@ -84,6 +84,7 @@
 | `hn-selected-address` | شناسهٔ آدرس انتخابی |
 | `hn-payment-method-v2` | روش پرداخت انتخابی در مرورگر |
 | `hn-profile` | دادهٔ profile در `Views/Profile/Index.cshtml` |
+| `hn-price-watches-demo` | پیگیری‌های قیمت و موجودی؛ ثبت در `commerce.js` و نمایش/حذف در `account-page.js`؛ دمو و فقط در همین مرورگر |
 | `hn-product-${type}-${productId}` | کلید feedback در `commerce.js`؛ `type` برابر `reviews` یا `questions` است. داده‌های اولیه با دادهٔ ذخیره‌شده ترکیب می‌شوند. |
 | `hn-article-feedback-v1-${slug}` | آرایهٔ خام دیدگاه‌های محلی مقاله، حداکثر ۵۰ مورد؛ این کلید در قرارداد envelope نسخه‌دار storage.js ثبت نشده و `v1` فقط بخشی از نام کلید است. |
 | `hn-article-feedback-v1-${slug}-liked` | وضعیت پسند مقاله به‌صورت رشتهٔ `true`/`false`؛ شمار پایه نمونه است و درخواست عمومی سرور ندارد. |

@@ -104,13 +104,15 @@ _Shop
 - `shop/css/layout/shared-page-hero.css`
 - `shop/css/layout/mega-menu-unified.css`
 - `shop/css/layout/shared-scrollbars.css`
+- `shop/css/layout/shared-related-links.css`
 
 پالت فعال و aliasهای Bootstrap/legacy فقط در `core/design-tokens.css` تعریف می‌شوند. `electrical-theme.css` و `luxury-theme.css` قواعد ظاهری دارند و توکن‌های root را بازنویسی نمی‌کنند؛ `industrial-system.css` هنوز overrideهای layout قدیمی دارد اما منبع رنگ نیست. cascade همچنان براساس ترتیب stylesheetهاست؛ مهاجرت تکه‌ای به `@layer` ممنوع است تا منابع بدون layer، از جمله View و vendor، اولویت ناخواسته نگیرند.
 
 ## ترتیب واقعی JavaScript
 
-ابتدا `_CatalogData`، JSON امن `script[type="application/json"]#storeCatalog` را رندر می‌کند.
+ابتدا `_CatalogData`، JSON امن `script[type="application/json"]#storeCatalog` را رندر می‌کند و پس از آن `_CommerceData` می‌آید.
 
+- `shop/js/store/account-data.js`
 - `shop/js/core/storage.js`
 - `shop/js/store/cart.js`
 - `shop/js/core/ui-core.js`
