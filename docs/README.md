@@ -17,7 +17,7 @@
 | [معماری](architecture/README.md) | ساختار برنامه، مسیر صفحه‌ها و مرز داده | [نمای کلی](architecture/overview.md) |
 | [رابط کاربری](frontend/README.md) | پوسته، طراحی، JS مشترک و بازبینی UI | [ترتیب منابع](frontend/layout.md) |
 | [فروشگاه](store/README.md) | کاتالوگ، فیلتر، محصول، سبد و تسویه | [کاتالوگ و فهرست‌ها](store/catalog.md) |
-| [حساب کاربری](account/README.md) | پروفایل، آدرس و سفارش | [پروفایل](account/profile.md) |
+| [حساب کاربری](account/README.md) | ثبت‌نام و تأیید ایمیل، پروفایل، آدرس و سفارش | [پروفایل](account/profile.md) |
 | [محتوا و خدمات](content/README.md) | مجله، برند، FAQ، قوانین و هویت | [صفحه‌های محتوایی](content/pages.md) |
 | [رسانه](media/README.md) | پوشه‌ها، نام‌گذاری، تصاویر، ویدئو و ابعاد | [راهنمای رسانه](media/images.md) |
 | [SEO](seo/README.md) | metadata، canonical، schema و crawl | [metadata](seo/metadata.md) |
@@ -29,7 +29,7 @@
 |---|---|
 | رنگ، فاصله، responsive یا تداخل CSS | [مالکیت CSS](frontend/styling.md) و [عیب‌یابی](frontend/verification.md) |
 | هدر، مگامنو، modal و ترتیب load | [پوسته](frontend/layout.md) |
-| event، storage یا HNUI | [قرارداد JavaScript](frontend/javascript.md) |
+| event، storage، HNUI یا مصرف endpoint تأیید ایمیل | [قرارداد JavaScript](frontend/javascript.md) |
 | فیلتر رنگ، کشور، کارت و لیست محصول | [کاتالوگ](store/catalog.md) |
 | گالری، ویژگی، پرسش و دیدگاه محصول | [جزئیات محصول](store/product.md) |
 | افزودن به سبد، گزینه و مبلغ | [سبد و تسویه](store/cart.md) |
@@ -42,7 +42,7 @@
 - **راهنمای هر بخش در پوشهٔ همان بخش ساخته و در README آن فهرست می‌شود.** ریشهٔ docs فقط فهرست و قواعد مشترک دارد؛ جزئیات در چند سند تکرار نمی‌شوند.
 - [AGENTS.md ریشهٔ مخزن](../AGENTS.md) این قانون را برای تغییرات کل پروژه اعمال می‌کند؛ [روند عامل](AGENTS.md) مراحل کار را مشخص می‌کند.
 - کد و runtime مرجع نهایی‌اند. مسیرها و ترتیب منابع snapshot هستند؛ پس از کشف اختلاف، راهنمای مسئول به‌روز شود.
-- محصولات، auth، سبد، کوپن و پرداخت فعلی عمدتاً نمونه/محلی‌اند؛ [مرز داده](architecture/data-sources.md) را با backend عملیاتی اشتباه نگیرید.
+- تأیید کد ایمیل ثبت‌نام از backend و SMTP انجام می‌شود؛ ایجاد حساب و session، محصولات، سبد، کوپن و پرداخت هنوز عمدتاً نمونه/محلی‌اند. وضعیت هر مرز در [منابع داده](architecture/data-sources.md) آمده است.
 - `Shop/` برنامهٔ وب است؛ `tests/Shop.Contracts` قرارداد C# را بررسی می‌کند. تست‌های JS، HTTP و مرورگر و workflow CI در [کیفیت](development/quality.md) توضیح داده شده‌اند؛ build موفق جای تست رفتار و ظاهر نیست.
 
 برای بررسی ساختار و لینک‌های مستندات از ریشهٔ مخزن اجرا کنید:
@@ -51,4 +51,4 @@
 node docs/development/check-docs.mjs
 ```
 
-آخرین تطبیق با کد: ۳۰ اکتبر ۲۰۲۶.
+آخرین تطبیق با کد: ۳۱ اکتبر ۲۰۲۶.

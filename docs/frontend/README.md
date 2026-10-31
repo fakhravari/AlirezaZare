@@ -6,7 +6,7 @@
 |---|---|
 | [پوسته و ترتیب منابع](layout.md) | ترکیب Razor، partialها و ترتیب واقعی CSS/JS |
 | [قرارداد CSS](styling.md) | توکن‌ها، مالک فایل، breakpoint، انتخاب selector و قانون سراسری خوانایی موبایل و دسکتاپ |
-| [قرارداد JavaScript](javascript.md) | HNUI، رویدادها، کلیدهای storage و مالکیت script |
+| [قرارداد JavaScript](javascript.md) | HNUI، رویدادها، کلیدهای storage، مالکیت script و مصرف endpoint تأیید ایمیل |
 | [عیب‌یابی و بازبینی UI](verification.md) | ردیابی تداخل، دسترس‌پذیری و ماتریس responsive |
 
 راهنمای تازهٔ این حوزه را در همین پوشه ایجاد و در این جدول ثبت کنید؛ جزئیات در [قانون مستندسازی](../development/documentation.md).

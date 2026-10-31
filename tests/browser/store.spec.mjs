@@ -97,7 +97,7 @@ test('cart defaults, required service and reload use one canonical price', async
   await noHorizontalOverflow(page);
 });
 
-test('cart coupon applies only to products without an existing sale', async ({page}) => {
+test('cart coupon applies only to products without an existing sale', async ({page, isMobile}) => {
   await page.addInitScript(() => localStorage.setItem('hn-demo-auth', '1'));
   await page.goto('/cart');
   await page.evaluate(() => {
@@ -105,6 +105,10 @@ test('cart coupon applies only to products without an existing sale', async ({pa
     window.HNUI.cart.add(window.HNCatalog.find(3)); // no product discount
   });
   await expect(page.locator('.cart-product-row')).toHaveCount(2);
+  if (isMobile) {
+    await page.locator('#cartPanel .cart-panel-close').click();
+    await expect(page.locator('#cartPanel')).not.toHaveClass(/open/);
+  }
 
   const expectedDiscount = await page.evaluate(() => {
     const items = window.HNUI.cart.read();

@@ -1031,6 +1031,16 @@ body :is(#cartView, #invoiceItems) .cart-product-details .cart-item-option-chip 
     gap: 8px;
   }
   body :is(#cartView, #invoiceItems) .cart-product-toolbar .hn-cart-controls { flex: 0 0 auto; margin: 0; }
+  body #cartView .cart-product-toolbar .hn-cart-controls .hn-cart-quantity > button,
+  body #cartView .cart-product-toolbar .hn-cart-controls > .hn-cart-remove {
+    box-sizing: border-box;
+    flex-basis: 44px;
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    min-height: 44px;
+  }
+  body #cartView .cart-product-toolbar .hn-cart-controls .cart-quantity-value { height: 44px; }
   body :is(#cartView, #invoiceItems) .cart-product-details { --cart-option-name-size: 12px; padding: 0 8px 12px; }
   body :is(#cartView, #invoiceItems) .cart-product-details .cart-item-option-group { padding: 9px 6px; }
   body :is(#cartView, #invoiceItems) .cart-product-details .cart-item-option-label { padding-inline: 6px; font-size: 13px; }

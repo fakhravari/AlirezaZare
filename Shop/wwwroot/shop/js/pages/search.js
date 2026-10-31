@@ -359,12 +359,13 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
         String(open),
       );
     });
-    $("#availabilityFilter").value = state.availability;
-    $("#discountFilter").checked = state.discountOnly;
-    $("#minPrice").value = state.minPrice;
-    $("#maxPrice").value = state.maxPrice;
-    $("#productSearch").value = state.query;
-    $(".sort-options input[value=\"" + state.sort + "\"]").checked = true;
+    if ($("#availabilityFilter")) $("#availabilityFilter").value = state.availability;
+    if ($("#discountFilter")) $("#discountFilter").checked = state.discountOnly;
+    if ($("#minPrice")) $("#minPrice").value = state.minPrice;
+    if ($("#maxPrice")) $("#maxPrice").value = state.maxPrice;
+    if ($("#productSearch")) $("#productSearch").value = state.query;
+    const selectedSort = $(".sort-options input[value=\"" + state.sort + "\"]");
+    if (selectedSort) selectedSort.checked = true;
     restoringUrl = false;
   }
   const fa = (n) => window.HNUI.formatNumber(n);
@@ -705,29 +706,29 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
         render(true, true);
       }),
   );
-  $("#availabilityFilter").onchange = (event) => {
+  $("#availabilityFilter")?.addEventListener("change", (event) => {
     state.availability = event.target.value;
     render(true, true);
-  };
-  $("#discountFilter").onchange = (event) => {
+  });
+  $("#discountFilter")?.addEventListener("change", (event) => {
     state.discountOnly = event.target.checked;
     render(true, true);
-  };
-  $("#minPrice").oninput = () => {
+  });
+  $("#minPrice")?.addEventListener("input", () => {
     if (Number($("#minPrice").value) >= state.maxPrice)
       $("#minPrice").value = Math.max(0, state.maxPrice - 1);
     updatePrice();
     render(true);
-  };
-  $("#maxPrice").oninput = () => {
+  });
+  $("#maxPrice")?.addEventListener("input", () => {
     if (Number($("#maxPrice").value) <= state.minPrice)
       $("#maxPrice").value = Math.min(60, state.minPrice + 1);
     updatePrice();
     render(true);
-  };
-  $("#minPrice").onchange = () => scrollToResultsStart();
-  $("#maxPrice").onchange = () => scrollToResultsStart();
-  $("#productSearch").oninput = (e) => {
+  });
+  $("#minPrice")?.addEventListener("change", () => scrollToResultsStart());
+  $("#maxPrice")?.addEventListener("change", () => scrollToResultsStart());
+  $("#productSearch")?.addEventListener("input", (e) => {
     const query = e.target.value.trim();
     window.clearTimeout(searchRenderTimer);
     if (Array.from(query).length < 3) {
@@ -741,14 +742,14 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
       state.query = query;
       render(true);
     }, 250);
-  };
-  $(".sort-options").onchange = (e) => {
+  });
+  $(".sort-options")?.addEventListener("change", (e) => {
     if (!e.target.matches('input[name="productSort"]')) return;
     state.sort = e.target.value;
     render(true, true);
-  };
-  $("#clearFilters").onclick = clearAll;
-  $("#emptyResults button").onclick = clearAll;
+  });
+  $("#clearFilters")?.addEventListener("click", clearAll);
+  $("#emptyResults button")?.addEventListener("click", clearAll);
   function readCart() {
     return window.HNUI?.cart.read() || [];
   }
