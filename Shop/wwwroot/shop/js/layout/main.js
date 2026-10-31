@@ -1234,7 +1234,7 @@ $(function () {
           const safeName = escapeHtml(item.name);
           const safeImage = escapeHtml(item.image);
           const href = window.HNProductUrl?.(item.id) || "/search";
-          return `<div class="cart-item" data-cart-id="${safeId}"><img src="${safeImage}" alt="${safeName}" loading="lazy" decoding="async"><div class="cart-item-info"><strong><a class="header-panel-product-link" href="${escapeHtml(href)}">${safeName}</a></strong>${cartOptionsMarkup(item)}<div class="cart-item-actions"><span>${faNumber(item.price)} تومان</span>${window.HNUI.cart.renderControls(item)}</div></div></div>`;
+          return `<div class="cart-item" data-cart-id="${safeId}" data-sales-plan-id="${escapeHtml(item.salesPlanId || "regular")}"><img src="${safeImage}" alt="${safeName}" loading="lazy" decoding="async"><div class="cart-item-info"><strong><a class="header-panel-product-link" href="${escapeHtml(href)}">${safeName}</a></strong>${cartOptionsMarkup(item)}<div class="cart-item-actions"><span>${faNumber(item.price)} تومان</span>${window.HNUI.cart.renderControls(item)}</div></div></div>`;
         })
         .join(""),
     );
@@ -1250,16 +1250,17 @@ $(function () {
     const $button = $(this);
     const $row = $button.closest("[data-cart-id]");
     const item = cart.find(
-      (product) => String(product.id) === String($row.attr("data-cart-id")),
+      (product) => String(product.id) === String($row.attr("data-cart-id")) &&
+        product.salesPlanId === String($row.attr("data-sales-plan-id") || "regular"),
     );
     if (!item) return;
     if ($button.data("action") === "plus")
-      window.HNUI.cart.update(item.id, item.quantity + 1);
+      window.HNUI.cart.update(item.id, item.quantity + 1, item.salesPlanId);
     if ($button.data("action") === "minus")
-      window.HNUI.cart.update(item.id, item.quantity - 1);
+      window.HNUI.cart.update(item.id, item.quantity - 1, item.salesPlanId);
     if ($button.data("action") === "remove") {
       event.stopPropagation();
-      window.HNUI.cart.remove(item.id);
+      window.HNUI.cart.remove(item.id, item.salesPlanId);
       setCartOpen(true);
     }
   });

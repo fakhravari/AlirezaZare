@@ -75,6 +75,30 @@ test('new configurations replace the existing configuration of the same product 
   assert.equal(items[0].options.variants[0].productValue, choice.value);
 });
 
+test('the same product in different sales plans stays in separate cart lines', () => {
+  const r = loggedIn(); const p = r.window.HNCatalog.find(1);
+  r.ui.cart.add({...p, salesPlanId: 'regular'}, 2);
+  r.ui.cart.add({...p, salesPlanId: 'demo-time'}, 1);
+  let items = r.ui.cart.read();
+  assert.equal(items.length, 2);
+  assert.equal(items.map(item => item.salesPlanId).sort().join(','), 'demo-time,regular');
+  assert.equal(r.events.filter(event => event.type === 'hn:cart-added').length, 2);
+  assert.deepEqual(r.events.filter(event => event.type === 'hn:cart-added').map(event => event.detail.product.salesPlanId), ['regular', 'demo-time']);
+  r.ui.cart.update('1', 2, 'demo-time');
+  items = r.ui.cart.read();
+  assert.equal(items.find(item => item.salesPlanId === 'regular').quantity, 2);
+  assert.equal(items.find(item => item.salesPlanId === 'demo-time').quantity, 2);
+  r.ui.cart.update('1', 0, 'demo-time');
+  items = r.ui.cart.read();
+  assert.equal(items.length, 1);
+  assert.equal(items[0].salesPlanId, 'regular');
+  r.ui.cart.add({...p, salesPlanId: 'demo-time'}, 1);
+  r.ui.cart.remove('1', 'regular');
+  items = r.ui.cart.read();
+  assert.equal(items.length, 1);
+  assert.equal(items[0].salesPlanId, 'demo-time');
+});
+
 test('future storage and failed writes cannot announce a successful cart addition', () => {
   for (const future of [true, false]) {
     const r = loggedIn(undefined, future ? {[key]: JSON.stringify({schemaVersion: 2, value: []})} : {});

@@ -157,7 +157,15 @@
           (candidate) => String(candidate.id) === String(item.id || "").replace(/^(\d+):.*$/, "$1"),
         );
         const options = normalizeOptions(item.options, product);
-        const configuredPrice = product ? Math.round((Number(product.price) +
+        if (item.salesPlanSnapshot?.accessoryPriceAmounts && typeof item.salesPlanSnapshot.accessoryPriceAmounts === "object") {
+          options.accessories = options.accessories.map((accessory) => {
+            const amount = Number(item.salesPlanSnapshot.accessoryPriceAmounts[accessory.id]);
+            return Number.isFinite(amount) && amount >= 0
+              ? { ...accessory, price: amount / 1000000 }
+              : accessory;
+          });
+        }
+        const configuredPrice = item.salesPlanSnapshot?.unitAmount != null ? Number(item.salesPlanSnapshot.unitAmount) : product ? Math.round((Number(product.price) +
           options.variants.reduce((sum, option) => sum + Number(option.priceDelta || 0), 0) +
           options.accessories.filter((accessory) => accessory.selected).reduce((sum, accessory) => sum + Number(accessory.price || 0), 0)
         ) * 1000000) : Number(item.price);
@@ -166,6 +174,8 @@
           id: String(item.id || "")
             .slice(0, 80)
             .replace(/^(\d+):.*$/, "$1"),
+          salesPlanId: String(item.salesPlanId || item.salesPlanSnapshot?.id || "regular").trim().slice(0, 64),
+          salesPlanSnapshot: item.salesPlanSnapshot && typeof item.salesPlanSnapshot === "object" ? item.salesPlanSnapshot : null,
           name: String(product?.name || item.name || "").slice(0, 120),
           price: configuredPrice,
           image: normalizeImage(product?.image || item.image),
@@ -179,6 +189,7 @@
       .filter(
         (item) =>
           item.id &&
+          /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(item.salesPlanId) &&
           item.name &&
           Number.isFinite(item.price) &&
           item.price >= 0 &&
@@ -186,9 +197,10 @@
       );
     const uniqueItems = new Map();
     normalizedItems.forEach((item) => {
-      const existing = uniqueItems.get(item.id);
+      const lineKey = `${item.id}:${item.salesPlanId}`;
+      const existing = uniqueItems.get(lineKey);
       if (!existing) {
-        uniqueItems.set(item.id, item);
+        uniqueItems.set(lineKey, item);
         return;
       }
       if (
@@ -205,8 +217,8 @@
         );
         return;
       }
-      // Different options for one product code replace its previous configuration.
-      uniqueItems.set(item.id, item);
+      // Within one plan, a product code keeps one configuration; other plans remain separate lines.
+      uniqueItems.set(lineKey, item);
     });
     return [...uniqueItems.values()];
   };
@@ -272,7 +284,7 @@
       const attribute = (action) => index === null
         ? `data-action="${action}"`
         : `data-${action}="${index}"`;
-      return `<div class="hn-cart-controls" role="group" aria-label="تعداد ${escapeHtml(item.name)}"><div class="hn-cart-quantity"><button type="button" ${attribute("plus")} aria-label="افزایش تعداد" ${item.quantity >= this.quantityLimit(item) ? "disabled" : ""}><i class="bi bi-plus" aria-hidden="true"></i></button><span class="cart-quantity-value">${formatNumber(item.quantity)}</span><button type="button" ${attribute("minus")} aria-label="کاهش تعداد" ${item.quantity <= 1 ? "disabled" : ""}><i class="bi bi-dash" aria-hidden="true"></i></button></div><button type="button" class="hn-cart-remove" ${attribute("remove")} aria-label="حذف ${escapeHtml(item.name)} از سبد"><i class="bi bi-trash3" aria-hidden="true"></i></button></div>`;
+      return `<div class="hn-cart-controls" data-sales-plan-id="${escapeHtml(item.salesPlanId || "regular")}" role="group" aria-label="تعداد ${escapeHtml(item.name)}"><div class="hn-cart-quantity"><button type="button" ${attribute("plus")} aria-label="افزایش تعداد" ${item.quantity >= this.quantityLimit(item) ? "disabled" : ""}><i class="bi bi-plus" aria-hidden="true"></i></button><span class="cart-quantity-value">${formatNumber(item.quantity)}</span><button type="button" ${attribute("minus")} aria-label="کاهش تعداد" ${item.quantity <= 1 ? "disabled" : ""}><i class="bi bi-dash" aria-hidden="true"></i></button></div><button type="button" class="hn-cart-remove" ${attribute("remove")} aria-label="حذف ${escapeHtml(item.name)} از سبد"><i class="bi bi-trash3" aria-hidden="true"></i></button></div>`;
     },
     renderOptions(item) {
       const variants = Array.isArray(item.options?.variants)
@@ -322,9 +334,10 @@
       const requestedQuantity = Math.max(1, Number.parseInt(quantity, 10) || 1);
       const safeProduct = normalizeCart([{ ...product, quantity }])[0];
       if (!safeProduct) return items;
-      const existing = items.find((item) => item.id === safeProduct.id);
+      const existing = items.find((item) => item.id === safeProduct.id && item.salesPlanId === safeProduct.salesPlanId);
       const sameConfiguration =
         existing &&
+        existing.salesPlanId === safeProduct.salesPlanId &&
         existing.name === safeProduct.name &&
         existing.price === safeProduct.price &&
         existing.image === safeProduct.image &&
@@ -361,7 +374,7 @@
         items.push(safeProduct);
       }
       const savedItems = this.write(items);
-      const saved = savedItems.find((item) => item.id === safeProduct.id);
+      const saved = savedItems.find((item) => item.id === safeProduct.id && item.salesPlanId === safeProduct.salesPlanId);
       if (!saved || saved.quantity !== (sameConfiguration ? existing.quantity : safeProduct.quantity) || JSON.stringify(saved.options) !== JSON.stringify(safeProduct.options)) return savedItems;
       emit("hn:cart-added", {
             product: safeProduct,
@@ -370,13 +383,13 @@
           });
       return savedItems;
     },
-    update(id, quantity) {
+    update(id, quantity, salesPlanId = "regular") {
       const items = this.read();
-      const item = items.find((entry) => entry.id === String(id));
+      const item = items.find((entry) => entry.id === String(id) && entry.salesPlanId === String(salesPlanId || "regular"));
       if (!item) return items;
       const nextQuantity = Number.parseInt(quantity, 10);
       if (!Number.isFinite(nextQuantity) || nextQuantity < 1) {
-        return this.remove(id);
+        return this.remove(id, salesPlanId);
       }
       const stock = availableStock(item);
       const cartLimit = productCartLimit(productForCartItem(item));
@@ -393,7 +406,7 @@
               reason: stock !== null && stock <= cartLimit ? "stock" : "cart",
             });
       }
-      if (!limitedQuantity) return this.remove(id);
+      if (!limitedQuantity) return this.remove(id, salesPlanId);
       item.quantity = limitedQuantity;
       return this.write(items);
     },
@@ -402,8 +415,8 @@
       const cartLimit = productCartLimit(productForCartItem(item));
       return stock === null ? cartLimit : Math.min(stock, cartLimit);
     },
-    remove(id) {
-      return this.write(this.read().filter((item) => item.id !== String(id)));
+    remove(id, salesPlanId = "regular") {
+      return this.write(this.read().filter((item) => item.id !== String(id) || item.salesPlanId !== String(salesPlanId || "regular")));
     },
     totals() {
       return this.read().reduce(

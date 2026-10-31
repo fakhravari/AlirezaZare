@@ -95,3 +95,108 @@ string wrongCode = issuedCode == "000000" ? "000001" : "000000";
 if (emailCodeStore.Verify(testEmail, wrongCode) || !emailCodeStore.Verify(testEmail, issuedCode) || emailCodeStore.Verify(testEmail, issuedCode))
     throw new Exception("Email OTP validation, consumption, or one-time use failed.");
 Console.WriteLine("C# email OTP contracts OK: six digits, resend cooldown and one-time verification verified.");
+
+const string salesPlanJson = """
+{
+  "schemaVersion": 1,
+  "currency": "IRT",
+  "plans": [
+    { "id": "regular", "code": "REGULAR", "name": "فروش عادی", "type": "regular", "isDefault": true, "isEnabled": true, "startsAtUtc": null, "endsAtUtc": null, "label": null, "showCountdown": false },
+    { "id": "demo-time", "code": "DEMO-TIME", "name": "دموی زمانی", "type": "demo-time", "isDefault": false, "isEnabled": true, "startsAtUtc": "2026-10-30T00:00:00+00:00", "endsAtUtc": "2026-11-01T00:00:00+00:00", "label": "فروش ویژه", "showCountdown": true }
+  ],
+  "offers": [
+    { "productId": 1, "salesPlanId": "regular", "priceAmount": 100000, "discountPercent": 0, "stockQuantity": 8, "maxPurchaseQuantity": 5, "isEnabled": true },
+    { "productId": 1, "salesPlanId": "demo-time", "priceAmount": 80000, "discountPercent": 12.5, "stockQuantity": 2, "maxPurchaseQuantity": 2, "isEnabled": true }
+  ]
+}
+""";
+var salesPlans = Shop.Models.SalesPlanCatalog.Parse(salesPlanJson, new HashSet<int> { 1 });
+var salesPlanConfig = JsonNode.Parse(salesPlanJson)!;
+var configuredOffers = (JsonArray)salesPlanConfig["offers"]!;
+configuredOffers.RemoveAt(0);
+configuredOffers[0]!["accessoryPriceAmounts"] = new JsonObject { ["belt"] = 245000 };
+const string accessoryCatalogJson = """
+{"products":[{"id":1,"price":1,"discountPercent":0,"stockQuantity":4,"maxCartQuantity":10,"accessories":[{"id":"belt","price":0.3,"required":true}]}]}
+""";
+var configuredSalesPlans = Shop.Models.SalesPlanCatalog.ParseConfiguration(salesPlanConfig.ToJsonString(), accessoryCatalogJson);
+if (configuredSalesPlans.Offers.Single(offer => offer.SalesPlanId == "regular").AccessoryPriceAmounts["belt"] != 300000 ||
+    configuredSalesPlans.Offers.Single(offer => offer.SalesPlanId == "demo-time").AccessoryPriceAmounts["belt"] != 245000)
+    throw new Exception("Per-plan accessory price override or default catalog conversion is inconsistent.");
+var unknownAccessoryConfig = JsonNode.Parse(salesPlanConfig.ToJsonString())!;
+unknownAccessoryConfig["offers"]![0]!["accessoryPriceAmounts"] = new JsonObject { ["unknown-part"] = 245000 };
+try
+{
+    Shop.Models.SalesPlanCatalog.ParseConfiguration(unknownAccessoryConfig.ToJsonString(), accessoryCatalogJson);
+    throw new Exception("A plan-specific price for an unknown accessory was accepted.");
+}
+catch (InvalidDataException) { }
+var fallbackPriceConfig = JsonNode.Parse(salesPlanConfig.ToJsonString())!;
+fallbackPriceConfig["offers"]![0]!.AsObject().Remove("accessoryPriceAmounts");
+var fallbackPricePlans = Shop.Models.SalesPlanCatalog.ParseConfiguration(fallbackPriceConfig.ToJsonString(), accessoryCatalogJson);
+if (fallbackPricePlans.Offers.Single(offer => offer.SalesPlanId == "demo-time").AccessoryPriceAmounts["belt"] != 300000)
+    throw new Exception("A plan without an accessory override must resolve the catalog accessory price before quoting.");
+var unknownProductConfig = JsonNode.Parse(salesPlanConfig.ToJsonString())!;
+unknownProductConfig["offers"]![0]!["productId"] = 404;
+try
+{
+    Shop.Models.SalesPlanCatalog.ParseConfiguration(unknownProductConfig.ToJsonString(), accessoryCatalogJson);
+    throw new Exception("A sales-plan offer for an unknown product was accepted.");
+}
+catch (InvalidDataException) { }
+var missingOffersConfig = JsonNode.Parse(salesPlanConfig.ToJsonString())!;
+missingOffersConfig["offers"] = null;
+try
+{
+    Shop.Models.SalesPlanCatalog.ParseConfiguration(missingOffersConfig.ToJsonString(), accessoryCatalogJson);
+    throw new Exception("A sales-plan configuration without offers was accepted.");
+}
+catch (InvalidDataException) { }
+var ordinaryQuote = salesPlans.Quote(1, null, 1, DateTimeOffset.Parse("2026-10-31T00:00:00+00:00"));
+var campaignQuote = salesPlans.Quote(1, "demo-time", 2, DateTimeOffset.Parse("2026-10-31T00:00:00+00:00"));
+var campaignCartLine = Shop.Models.SalesPlanCartLine.FromQuote(campaignQuote, "variant-black");
+var orderSnapshot = Shop.Models.SalesPlanOrderLineSnapshot.Capture(campaignQuote, "HN-001", "محصول نمونه", "variant-black");
+if (ordinaryQuote.SalesPlanId != "regular" || ordinaryQuote.UnitAmount != 100000 ||
+    campaignQuote.UnitAmount != 70000 || campaignQuote.TotalAmount != 140000 ||
+    ordinaryQuote.Currency != "IRT" || campaignCartLine.SalesPlanId != "demo-time" ||
+    campaignCartLine.LineKey != "1:variant-black:demo-time" || orderSnapshot.SalesPlanId != "demo-time" ||
+    orderSnapshot.UnitAmount != 70000 || orderSnapshot.TotalAmount != 140000)
+    throw new Exception("Default-plan or plan-specific quote is inconsistent.");
+if (Shop.Models.SalesPlanLineIdentity.Create(1, "regular") ==
+    Shop.Models.SalesPlanLineIdentity.Create(1, "demo-time"))
+    throw new Exception("Different sales plans must create different cart/order line identities.");
+void RejectSalesPlan(Action<JsonNode> mutate)
+{
+    var node = JsonNode.Parse(salesPlanJson)!;
+    mutate(node);
+    try { Shop.Models.SalesPlanCatalog.Parse(node.ToJsonString(), new HashSet<int> { 1 }); }
+    catch (InvalidDataException) { return; }
+    throw new Exception("Invalid sales-plan catalog was accepted.");
+}
+RejectSalesPlan(n => n["plans"]![1]!["id"] = "regular");
+RejectSalesPlan(n => n["offers"]![1]!["productId"] = 404);
+RejectSalesPlan(n => n["offers"]![1]!["salesPlanId"] = "missing");
+RejectSalesPlan(n => n["offers"]![1]!["stockQuantity"] = -1);
+RejectSalesPlan(n => n["plans"]![1]!["endsAtUtc"] = "2026-10-30T00:00:00+00:00");
+RejectSalesPlan(n => n["plans"]![1]!["isDefault"] = true);
+RejectSalesPlan(n => n["plans"]![0]!["showCountdown"] = true);
+RejectSalesPlan(n => n["offers"]![1]!["salesPlanId"] = "regular");
+RejectSalesPlan(n => n["plans"]![1]!["startsAtUtc"] = "2026-10-30T03:30:00+03:30");
+try
+{
+    salesPlans.Quote(1, "demo-time", 1, DateTimeOffset.Parse("2026-11-01T00:00:00+00:00"));
+    throw new Exception("Expired sales plan was accepted.");
+}
+catch (Shop.Models.SalesPlanUnavailableException error) when (error.ReasonCode == "inactive-plan") { }
+try
+{
+    salesPlans.Quote(1, "demo-time", 1, DateTimeOffset.Parse("2026-10-29T00:00:00+00:00"));
+    throw new Exception("A not-yet-started sales plan was accepted.");
+}
+catch (Shop.Models.SalesPlanUnavailableException error) when (error.ReasonCode == "inactive-plan") { }
+try
+{
+    salesPlans.Quote(1, "regular", 6, DateTimeOffset.Parse("2026-10-31T00:00:00+00:00"));
+    throw new Exception("A quantity above the per-plan limit was accepted.");
+}
+catch (Shop.Models.SalesPlanUnavailableException error) when (error.ReasonCode == "purchase-limit") { }
+Console.WriteLine("C# sales-plan contracts OK: default selection, campaign pricing/stock/window, distinct line identity and invalid relations verified.");

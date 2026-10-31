@@ -1,2 +1,4 @@
 @inject Shop.Services.ICatalogSource Catalog
 <script type="application/json" id="storeCatalog">@Html.Raw((await Catalog.ReadAsync(Context.RequestAborted)).BrowserJson)</script>
+@inject Shop.Services.ISalesPlanSource SalesPlans
+<script type="application/json" id="storeSalesPlans">@Html.Raw(System.Text.Json.JsonSerializer.Serialize(await SalesPlans.ReadAsync(Context.RequestAborted), Shop.Models.SalesPlanCatalog.JsonOptions))</script>

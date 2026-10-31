@@ -22,6 +22,8 @@ _Shop
 
 بدنهٔ صفحه `home-page` یا `inner-page` و کلاس `mobile-page--{controller}-{action}` دارد. برای Search مقدار صحیح `mobile-page--product-index` است. variant هدر با `ViewData["HeaderVariant"]` تعیین می‌شود؛ منوی خانه و داخلی DOM یکسانی ندارند.
 
+بخش تجربهٔ مشتریان خانه در `_Testimonials.cshtml` و استایل مستقل `pages/home-testimonials.css` با مالک `homepage-testimonials` در `tools/ui-owners.json` ثبت شده است. CSS مخصوص این بخش از `layout/style.css` جدا شده و با section اختصاصی پس از CSS مشترک بارگذاری می‌شود. ظرف آن از عرض مشترک `.container` استفاده می‌کند؛ عنوان در دسکتاپ کنار خلاصهٔ امتیاز و در موبایل زیر آن می‌آید، بدون شکست خط اجباری. فاصلهٔ عمودی این بخش از `.testimonials.py-section` کنترل می‌شود تا با ریتم سایر بخش‌های صفحه هماهنگ بماند.
+
 تایپوگرافی تیتر و توضیح و حداقل ارتفاع تگ‌های hero در همهٔ صفحات داخلی از `shared-page-hero.css` می‌آید؛ این فایل بعد از تصویر hero بارگذاری می‌شود تا قواعد مشترک در breakpointهای موبایل و دسکتاپ بر صفحه‌ها یکسان اعمال شوند.
 
 در دسکتاپ، مگامنوی دسته‌بندی خانه و صفحات داخلی یک قاب دیداری مشترک دارند: پنل کناری با عنوان «دسته‌بندی قطعات»، عرض ثابت ۲۵۰px، ردیف‌های هم‌اندازه و کارت‌های زیرشاخه با فاصلهٔ یکسان. جایگاه منو همچنان به زمینهٔ خودش وابسته است؛ خانه از پنل دسته‌بندی کنار hero باز می‌شود و صفحات داخلی از نوار ناوبری. زیرمنوی خانه ۱۱px به بالا می‌آید و مگامنوی صفحات داخلی از ابتدای هدر ۱۶۳px پایین می‌آید تا خط طلایی بالای هر دو پنل با خط زرد پایین هدر هم‌تراز شود؛ گوشه‌های بالایی منو صاف و گوشه‌های پایینی گرد می‌مانند. مگامنوی برند صفحات داخلی در viewport دسکتاپ حداکثر ۶۸۰px عرض دارد تا لبهٔ چپ آن از صفحه بیرون نزند.
@@ -52,10 +54,11 @@ _Shop
 | modal ورود/ثبت‌نام سراسری | `#loginModal`, `.login-modal-form-panel`, `.login-close` در `_Panels.cshtml` | layout در `style.css`, `luxury-theme.css`, `industrial-system.css`; قواعد فرم در `shared-login.css`; تعامل در `main.js` | ورود/ثبت‌نام/OTP، viewport کوتاه موبایل، اسکرول داخلی، بستن و بازگشت focus |
 | dialog ویرایش پروفایل | `.shared-login-modal.profile-edit-dialog` در `Views/Profile/Index.cshtml` | `shared-login.css` به‌علاوهٔ `account-page.css`; رفتار در View پروفایل | باز/بسته‌شدن native dialog، اعتبارسنجی و focus |
 | فرم آدرس | `_AddressForm`, `#addressDialog` در Cart و dialog آدرس پروفایل | `checkout.css`, `account-page.css`; `address-fields.js`, `iran-places.js`, `account-page.js` | Country/Province/City مدل‌های جدا دارند؛ فرم استان و شهر را انتخاب می‌کند و شهر به استان وابسته است. کشور ایران در رکورد ثابت است؛ خلاصهٔ آدرس استان/شهر را نمایش می‌دهد. Checkout این فرم را ندارد و فقط آدرس انتخابی را پیش‌نمایش می‌کند |
-| مزیت خرید مطمئن | `_PurchaseBenefits`, `.purchase-benefits` | `style.css` و overrideهای `industrial-system.css`; JS اختصاصی ندارد | صفحهٔ محصول و مسیرهای مصرف‌کنندهٔ partial؛ در صفحهٔ اول، فاصلهٔ عمودی موبایل حداکثر ۶۴۰px برای بخش showcase برابر ۱۲px است |
-| دیدگاه مشتریان خانه | `_Testimonials`, `#testimonialSlider` | قاب و کنترل‌های Owl در `style.css`؛ راه‌اندازی در `layout/main.js` | دسکتاپ و موبایل؛ کارت‌های مجاور داخل عرض بخش بمانند و پیمایش و دکمه‌ها کار کنند |
-| مجلهٔ صفحهٔ اول | `Home/Index.cshtml`, `#journal` | `style.css`, `industrial-system.css`; مالک در `tools/ui-owners.json` با نام `homepage-magazine` | پنج راهنمای منتخب و مطلب انتخاب تحریریه با تاریخ/زمان؛ عنوان مطلب لینک اصلی است |
-| خبرنامهٔ صفحهٔ اول | `_Newsletter.cshtml`, `.newsletter` | `style.css`, `home-warmth.css`; مالک در `tools/ui-owners.json` با نام `homepage-newsletter` | در موبایل فاصلهٔ عمودی بخش و فرم کمتر است؛ فاصلهٔ ردیف در موبایل `g-3` و از ۹۹۲px `g-5` است |
+| صفحهٔ اول | Hero، مجموعه، پرفروش‌ها، برند، تجربهٔ مشتریان، خبرنامه و مزیت‌های خرید | گروه `home` در `tools/ui-owners.json` | هر زیر‌بخش مسئول دارد؛ مالکیت‌ها در یک گروه حوزه‌ای نگهداری می‌شوند |
+| فروشگاه | کاتالوگ، جست‌وجو، محصول، کارت، مقایسه، علاقه‌مندی و سبد | گروه `store` در `tools/ui-owners.json` | قراردادهای مشترک کارت و commerce در همان گروه کنار مصرف‌کننده‌های صفحه‌ای دیده می‌شوند |
+| حساب کاربری | پروفایل، پنل حساب، ورود و فرم نشانی | گروه `account` در `tools/ui-owners.json` | Viewهای پروفایل زیر یک مالک حوزه‌ای هستند |
+| مجله و محتوا | فهرست و جزئیات مجله، تماس، قوانین و صفحه‌های اطلاعاتی | گروه `content` در `tools/ui-owners.json` | زیر‌بخش‌ها در یک گروه محتوایی‌اند و فایل مسئول هر بخش در نقشه مشخص است |
+| پوستهٔ مشترک | Header، footer، hero، مزیت‌های خرید، SEO و اجزای عمومی | گروه `shared` در `tools/ui-owners.json` | قواعد عمومی template در فایل‌های اصلی پوسته باقی می‌مانند؛ مزیت خرید چون در خانه، محصول، سبد و تسویه مصرف می‌شود عضو این گروه است |
 | کارت محصول | `HNProductCard.render` در `store/product-card.js` | `shared-product-card.css`؛ [نقشهٔ مالکیت](../../tools/ui-owners.json) | Home/Search/Related/Favorites و قیمت Compare؛ آیکن مقایسهٔ خطیِ ترازو، crop تصویر و عنوان طولانی |
 | فوتر | `_Footer`, `.footer-brand` | `shared-footer.css`, `style.css`, `mobile-pages.css`; مالک در `tools/ui-owners.json` | لوگوی کامل برق شیراز با زیرعنوان در پس‌زمینهٔ تیره؛ در دسکتاپ عرض لوگو تا ۲۶۰px، تراز راست و ارتفاع ۸۰px است؛ در صفحهٔ خانهٔ موبایل لوگو حداکثر ۲۱۰px و وسط‌چین است. ردیف شبکه‌های اجتماعی وسط‌چین است؛ فاصلهٔ بالایی مؤثر آن در CSS نهایی ۱۵px است. |
 
@@ -63,7 +66,7 @@ _Shop
 
 ## ترتیب واقعی CSS
 
-این فهرست از ترتیب فعلی [_Shop.cshtml](../../Shop/Views/Shared/_Shop.cshtml) استخراج شده است. sectionهای View دقیقاً در محل مشخص‌شده وارد می‌شوند؛ `Styles` یا `PageStyles` آخرین قانون cascade نیستند. مسیرها نسبت به `wwwroot/` هستند.
+این فهرست از ترتیب فعلی [_Shop.cshtml](../../Shop/Views/Shared/_Shop.cshtml) استخراج شده است. sectionهای View دقیقاً در محل مشخص‌شده وارد می‌شوند؛ `Styles` یا `PageStyles` آخرین قانون cascade نیستند. `HomeStyles` پس از stylesheetهای مشترک بارگذاری می‌شود تا مالکیت بخش‌های اختصاصی خانه حفظ شود. مسیرها نسبت به `wwwroot/` هستند.
 
 - `shop/vendor/fonts/fonts.css`
 - `shop/vendor/bootstrap/bootstrap.rtl.min.css`
@@ -93,6 +96,7 @@ _Shop
 - `shop/css/layout/quick-links-menu.css`
 - `shop/css/store/shared-product-card.css`
 - **section `PageStyles` از View**
+- **section `HomeStyles` از View** (پس از stylesheetهای مشترک)
 - `shop/css/layout/content-typography.css`
 - `shop/css/layout/mobile-pages.css`
 - **section `SearchStyles` از View**
@@ -143,4 +147,4 @@ storage/cart factory پیش از HNUI، resolver پیش از renderer و rendere
 
 [فهرست این بخش](README.md) · [فهرست مستندات](../README.md)
 
-آخرین تطبیق با کد: ۳۰ اکتبر ۲۰۲۶.
+آخرین تطبیق با کد: ۳۱ اکتبر ۲۰۲۶.

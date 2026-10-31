@@ -83,6 +83,27 @@ test('product opens at the top, gallery closes, and detail tabs remain reachable
   await noHorizontalOverflow(page);
 });
 
+test('product plan selection uses the matching quote and recovers cleanly from an expired plan URL', async ({page}) => {
+  await page.addInitScript(() => localStorage.setItem('hn-demo-auth', '1'));
+  await page.goto('/products/cordless-hammer-drill-1?salesPlanId=digi-time');
+  const selectedPrice = await page.evaluate(() => Number(
+    window.HNUI.toEnglishDigits(document.querySelector('#productFinalPrice').textContent).replace(/\D/g, ''),
+  ));
+  expect(selectedPrice).toBe(23303823);
+  await expect(page.locator('input[name="productSalesPlan"][value="digi-time"]')).toBeChecked();
+  await page.locator('#addProduct').click();
+  await expect.poll(() => page.evaluate(() => window.HNUI.cart.read()[0]?.price)).toBe(23303823);
+  expect(await page.evaluate(() => window.HNUI.cart.read()[0]?.salesPlanId)).toBe('digi-time');
+  expect(await page.evaluate(() => window.HNUI.cart.read()[0]?.salesPlanSnapshot?.accessoryPriceAmounts?.['shipping-insurance'])).toBe(245000);
+
+  await page.clock.install({time: new Date('2027-01-01T00:00:00Z')});
+  await page.goto('/products/cordless-hammer-drill-1?salesPlanId=digi-time');
+  await expect(page.locator('input[name="productSalesPlan"][value="regular"]')).toBeChecked();
+  await expect(page.locator('#productStatus')).toContainText('طرح انتخاب‌شده در دسترس نیست');
+  await expect(page).not.toHaveURL(/salesPlanId=/);
+  await noHorizontalOverflow(page);
+});
+
 test('cart defaults, required service and reload use one canonical price', async ({page}) => {
   // Disposable demo browser context; no account, network login or live payment.
   await page.addInitScript(() => localStorage.setItem('hn-demo-auth', '1'));

@@ -107,7 +107,12 @@ CSS فعلی با ترتیب stylesheetها cascade می‌شود و از `@laye
 | `css/pages/brands.css`, `contact.css`, `tracking.css` | صفحهٔ متناظر | page-root را حفظ کنید |
 | `css/pages/form-confirm-dialog.css` | تأیید فرم | فایل کوچک/minified؛ قواعد باز/بسته و overlay را جدا بررسی کنید |
 | `css/pages/product-detail.css`، `product-detail-pricing.css` و `product-detail-options.css` | چیدمان دیتیل، قیمت و گزینه‌های محصول | [راهنمای محصول](../store/product.md)؛ بین Styles و PageStyles تقسیم شده‌اند |
-| `css/pages/home-warmth.css` | ظاهر بخش‌های خانه و فضای عنوان/قیمت | مالک تراز مشترک کارت همچنان shared-product-card.css است |
+  | `css/pages/home-warmth.css` | ظاهر بخش‌های خانه و فضای عنوان/قیمت | مالک تراز مشترک کارت همچنان shared-product-card.css است |
+  | `css/pages/home-testimonials.css` | چیدمان و ظاهر مستقل تجربهٔ مشتریان صفحهٔ اول | فقط در `HomeStyles` بارگذاری می‌شود؛ مالک آن `_Testimonials.cshtml` است |
+  | `css/pages/home-brands.css` | چیدمان اسلایدر برندهای صفحهٔ اول | فقط در `HomeStyles` بارگذاری می‌شود؛ markup در `_Brands.cshtml` است |
+  | `css/pages/home-collection.css` | راهنمای اختصاصی و تراز تیتر مجموعهٔ صفحهٔ اول | از `HomeStyles` بارگذاری می‌شود؛ grid محصول و ویترین‌های مشترک در مالکان فعلی می‌مانند |
+  | فایل‌های پایهٔ shared | گروه `shared-foundation` در `tools/ui-owners.json` | typography، empty-state، layout shell و سطح‌ها؛ قواعد قالب در محل فعلی می‌مانند |
+  | `js/core/electrical-content.js` | گروه `content-adaptation` در `tools/ui-owners.json` | سازگارسازی اصطلاحات دادهٔ محتوایی نمونه در مرورگر؛ دادهٔ مرجع یا API نیست |
 | `css/layout/page-hero-imagery.css` | تصویر hero صفحه‌ها | پس از shared-surface-theme.css بارگذاری می‌شود |
 | `css/layout/shared-page-hero.css` | تایپوگرافی، فاصله و ارتفاع تگ‌های hero در صفحات داخلی | پس از تصاویر hero و برای همهٔ صفحه‌های داخلی بارگذاری می‌شود |
 | `css/layout/mega-menu-unified.css` | هماهنگی نهایی مگامنوی خانه/داخلی | آخرین CSS فعلی layout؛ trigger، سطح دوم/سوم و hover را با markup هدر بررسی کنید |

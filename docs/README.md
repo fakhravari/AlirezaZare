@@ -36,6 +36,7 @@
 | تصویر اصلی/کارت/thumbnail، بنر و انتقال محتوا | [رسانه و ابعاد](media/images.md) |
 | نوشتن یا جابه‌جایی راهنما | [قانون مستندسازی](development/documentation.md) و [الگو](development/guide-template.md) |
 | مالکیت مؤلفه، تست خودکار و CI | [کنترل کیفیت و قراردادها](development/quality.md) |
+| پیشرفت تفکیک مالکیت و فایل‌های UI | [برنامهٔ مالکیت UI](frontend/ui-ownership-roadmap.md) |
 
 ## قواعد اصلی
 

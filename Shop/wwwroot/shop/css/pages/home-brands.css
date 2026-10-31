@@ -1,0 +1,221 @@
+.brands-section {
+  padding: 46px 0 52px;
+  background: #fff;
+  border-top: 1px solid #eee8df;
+  border-bottom: 1px solid #eee8df;
+}
+
+.brands-heading {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 28px;
+}
+
+.brands-heading h2 {
+  flex: 0 0 auto;
+  margin: 0;
+  color: var(--color-navy);
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.brands-line {
+  height: 1px;
+  flex: 1;
+  background: #b6a58d;
+}
+
+.brands-slider {
+  direction: ltr;
+}
+
+.brands-slider .owl-stage {
+  display: flex;
+}
+
+.brands-slider .owl-item {
+  display: flex;
+}
+
+.brand-card {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  min-height: 126px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 22px 12px 14px;
+  border: 1px solid #eee8df;
+  border-radius: 14px;
+  background: #fff;
+  color: var(--color-navy);
+  box-shadow: 0 5px 18px rgba(7, 26, 46, 0.05);
+  text-align: center;
+  transition:
+    border-color 0.25s ease,
+    box-shadow 0.25s ease,
+    transform 0.25s ease;
+}
+
+.brand-card:hover {
+  border-color: #b79b73;
+  box-shadow: 0 10px 24px rgba(7, 26, 46, 0.1);
+  transform: translateY(-4px);
+}
+
+.brand-mark {
+  display: flex;
+  min-height: 45px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #1b1b1b;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  line-height: 1.1;
+}
+
+.brand-image-placeholder {
+  display: flex;
+  width: 100%;
+  min-height: 124px;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed #c8b99f;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #faf8f4, #f1eadf);
+  color: #a18b6c;
+  font-family: "Vazirmatn", Tahoma, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.brand-mark small {
+  margin-top: 5px;
+  font-family: inherit;
+  font-size: 8px;
+  font-weight: 400;
+  letter-spacing: 1.5px;
+}
+
+.brand-patek {
+  font-size: 13px;
+  letter-spacing: 0.5px;
+}
+
+.brand-police {
+  font-size: 25px;
+  letter-spacing: 3px;
+}
+
+.brand-polo {
+  font-size: 25px;
+  font-style: italic;
+  letter-spacing: 2px;
+}
+
+.brand-exchange {
+  font-size: 12px;
+  letter-spacing: 0.5px;
+}
+
+.brand-beverly,
+.brand-santa {
+  font-size: 11px;
+  letter-spacing: 0.5px;
+}
+
+.brand-card > strong {
+  overflow: hidden;
+  max-width: 100%;
+  color: #66717a;
+  font-family: "Vazirmatn", Tahoma, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 767px) {
+  .brands-section {
+    padding: 34px 0 40px;
+  }
+
+  .brands-heading {
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .brands-heading h2 {
+    font-size: 15px;
+  }
+
+  .brand-card {
+    min-height: 160px;
+    padding: 18px 8px 12px;
+  }
+
+  .brand-image-placeholder {
+    min-height: 112px;
+  }
+
+  .brand-mark {
+    font-size: 13px;
+  }
+
+  .brand-police,
+  .brand-polo {
+    font-size: 20px;
+  }
+
+  .brand-card > strong {
+    font-size: 12px;
+  }
+}
+
+/* Prevent brand cards and their shadows from being clipped by Owl Carousel. */
+.brands-slider .owl-stage-outer {
+  padding-top: 5px;
+  padding-bottom: 20px;
+}
+
+.brands-slider .owl-stage {
+  align-items: stretch;
+}
+
+.brands-slider .owl-item {
+  height: auto !important;
+  padding-bottom: 1px;
+}
+
+.brands-slider .brand-card {
+  box-sizing: border-box;
+  min-height: 194px;
+  height: 100%;
+  margin-bottom: 0;
+}
+
+.brands-slider .brand-image-placeholder {
+  flex: 0 0 124px;
+}
+
+.brands-section {
+  padding-bottom: 40px;
+}
+
+@media (max-width: 767px) {
+  .brands-slider .owl-stage-outer {
+    padding-bottom: 16px;
+  }
+  .brands-slider .brand-card {
+    min-height: 180px;
+  }
+  .brands-slider .brand-image-placeholder {
+    flex-basis: 112px;
+  }
+}

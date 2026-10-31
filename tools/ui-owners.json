@@ -1,351 +1,551 @@
 {
-  "schemaVersion": 1,
-  "components": {
-    "catalog": {
-      "markup": [
-        "Shop/Views/Shared/_CatalogData.cshtml"
-      ],
-      "data": [
-        "Shop/wwwroot/content/data/catalog.json"
-      ],
-      "server": [
-        "Shop/Services/CatalogRepository.cs",
-        "Shop/Services/ICatalogSource.cs"
-      ],
-      "js": [
-        "Shop/wwwroot/shop/js/store/catalog.js"
-      ]
+  "schemaVersion": 2,
+  "groups": {
+    "home": {
+      "label": "صفحهٔ اول",
+      "components": {
+        "homepage-magazine": {
+          "markup": [
+            "Shop/Views/Home/Index.cshtml"
+          ],
+          "server": [
+            "Shop/Models/JournalArticles.cs",
+            "Shop/Models/JournalArticles.Expanded.cs"
+          ],
+          "css": [
+            "Shop/wwwroot/shop/css/layout/style.css",
+            "Shop/wwwroot/shop/css/layout/industrial-system.css"
+          ]
+        },
+        "homepage-newsletter": {
+          "markup": [
+            "Shop/Views/Home/_Newsletter.cshtml"
+          ],
+          "css": [
+            "Shop/wwwroot/shop/css/layout/style.css",
+            "Shop/wwwroot/shop/css/pages/home-warmth.css"
+          ]
+        },
+        "homepage-testimonials": {
+          "markup": [
+            "Shop/Views/Home/_Testimonials.cshtml"
+          ],
+          "css": [
+            "Shop/wwwroot/shop/css/pages/home-testimonials.css"
+          ]
+        },
+        "homepage-sections": {
+          "markup": [
+            "Shop/Views/Home/_Hero.cshtml",
+            "Shop/Views/Home/_Collection.cshtml",
+            "Shop/Views/Home/_Bestsellers.cshtml"
+          ],
+          "css": [
+            "Shop/wwwroot/shop/css/layout/style.css",
+            "Shop/wwwroot/shop/css/layout/electrical-theme.css",
+            "Shop/wwwroot/shop/css/pages/home-warmth.css",
+            "Shop/wwwroot/shop/css/pages/home-collection.css"
+          ]
+        },
+        "homepage-brands": {
+          "markup": [
+            "Shop/Views/Home/_Brands.cshtml"
+          ],
+          "css": [
+            "Shop/wwwroot/shop/css/pages/home-brands.css"
+          ]
+        }
+      }
     },
-    "product-search": {
-      "markup": [
-        "Shop/Views/Product/List.cshtml"
-      ],
-      "data": [
-        "Shop/wwwroot/content/data/catalog.json"
-      ],
-      "js": [
-        "Shop/wwwroot/shop/js/pages/search.js",
-        "Shop/wwwroot/shop/js/layout/main.js"
-      ],
-      "css": [
-        "Shop/wwwroot/shop/css/pages/search.css"
-      ]
+    "store": {
+      "label": "فروشگاه",
+      "components": {
+        "catalog": {
+          "markup": [
+            "Shop/Views/Shared/_CatalogData.cshtml"
+          ],
+          "data": [
+            "Shop/wwwroot/content/data/catalog.json"
+          ],
+          "server": [
+            "Shop/Services/CatalogRepository.cs",
+            "Shop/Services/ICatalogSource.cs"
+          ],
+          "js": [
+            "Shop/wwwroot/shop/js/store/catalog.js"
+          ]
+        },
+        "product-search": {
+          "markup": [
+            "Shop/Views/Product/List.cshtml"
+          ],
+          "data": [
+            "Shop/wwwroot/content/data/catalog.json"
+          ],
+          "js": [
+            "Shop/wwwroot/shop/js/pages/search.js",
+            "Shop/wwwroot/shop/js/layout/main.js"
+          ],
+          "css": [
+            "Shop/wwwroot/shop/css/pages/search.css",
+            "Shop/wwwroot/shop/css/pages/search-mobile.css"
+          ]
+        },
+        "brand-profile": {
+          "markup": [
+            "Shop/Views/Brands/Index.cshtml",
+            "Shop/Views/Brands/Details.cshtml"
+          ],
+          "data": [
+            "Shop/wwwroot/content/data/catalog.json",
+            "Shop/wwwroot/content/data/brand-editorial.json"
+          ],
+          "server": [
+            "Shop/Controllers/BrandsController.cs",
+            "Shop/Models/BrandProfileModel.cs",
+            "Shop/Services/CatalogRepository.cs"
+          ],
+          "js": [
+            "Shop/wwwroot/shop/js/pages/brand-product-count.js"
+          ],
+          "css": [
+            "Shop/wwwroot/shop/css/pages/brands.css"
+          ]
+        },
+        "product-card": {
+          "selector": "\\.(?:product-card|showcase-card|product-price)(?=[\\s.#:>+~\\[),-]|$)",
+          "markup": [
+            "Shop/Views/Home/_Offers.cshtml",
+            "Shop/Views/Home/_Newest.cshtml"
+          ],
+          "js": [
+            "Shop/wwwroot/shop/js/store/product-card.js"
+          ],
+          "css": [
+            "Shop/wwwroot/shop/css/store/shared-product-card.css"
+          ],
+          "pageOverrides": [
+            "Shop/wwwroot/shop/css/pages/home-warmth.css",
+            "Shop/wwwroot/shop/css/pages/search.css",
+            "Shop/wwwroot/shop/css/pages/search-mobile.css",
+            "Shop/wwwroot/shop/css/pages/product-detail-options.css",
+            "Shop/wwwroot/shop/css/pages/account-page.css",
+            "Shop/wwwroot/shop/css/layout/mobile-pages.css",
+            "Shop/wwwroot/shop/css/store/commerce.css"
+          ]
+        },
+        "product-detail": {
+          "markup": [
+            "Shop/Views/Product/Details.cshtml"
+          ],
+          "data": [
+            "Shop/wwwroot/content/data/catalog.json",
+            "Shop/App_Data/sales-plans-demo.json"
+          ],
+          "server": [
+            "Shop/Controllers/ProductController.cs",
+            "Shop/Controllers/SalesPlansController.cs",
+            "Shop/Models/SalesPlanData.cs",
+            "Shop/Services/CatalogRepository.cs",
+            "Shop/Services/ISalesPlanSource.cs"
+          ],
+          "js": [
+            "Shop/wwwroot/shop/js/store/catalog.js",
+            "Shop/wwwroot/shop/js/store/commerce.js"
+          ],
+          "css": [
+            "Shop/wwwroot/shop/css/pages/product-detail.css",
+            "Shop/wwwroot/shop/css/pages/product-detail-pricing.css",
+            "Shop/wwwroot/shop/css/pages/product-detail-options.css"
+          ]
+        },
+        "compare-page": {
+          "markup": [
+            "Shop/Views/Compare/Index.cshtml"
+          ],
+          "js": [
+            "Shop/wwwroot/shop/js/pages/form-confirm-dialog.js",
+            "Shop/wwwroot/shop/js/store/commerce.js"
+          ],
+          "css": [
+            "Shop/wwwroot/shop/css/pages/form-confirm-dialog.css",
+            "Shop/wwwroot/shop/css/store/commerce.css"
+          ],
+          "data": [
+            "Shop/wwwroot/shop/js/core/storage.js"
+          ]
+        },
+        "favorites-page": {
+          "markup": [
+            "Shop/Views/Favorites/Index.cshtml"
+          ],
+          "js": [
+            "Shop/wwwroot/shop/js/pages/page-content.js",
+            "Shop/wwwroot/shop/js/store/commerce.js"
+          ],
+          "css": [
+            "Shop/wwwroot/shop/css/pages/pages.css",
+            "Shop/wwwroot/shop/css/store/commerce.css",
+            "Shop/wwwroot/shop/css/store/shared-product-card.css"
+          ],
+          "data": [
+            "Shop/wwwroot/shop/js/core/storage.js"
+          ]
+        },
+        "cart": {
+          "markup": [
+            "Shop/Views/Shared/_Panels.cshtml",
+            "Shop/Views/Cart/Index.cshtml",
+            "Shop/Views/Checkout/Index.cshtml"
+          ],
+          "js": [
+            "Shop/wwwroot/shop/js/core/storage.js",
+            "Shop/wwwroot/shop/js/store/cart.js",
+            "Shop/wwwroot/shop/js/pages/checkout.js",
+            "Shop/wwwroot/shop/js/store/commerce.js"
+          ],
+          "css": [
+            "Shop/wwwroot/shop/css/layout/shared-cart.css",
+            "Shop/wwwroot/shop/css/pages/checkout.css"
+          ]
+        },
+        "pagination": {
+          "css": [
+            "Shop/wwwroot/shop/css/store/pagination.css"
+          ],
+          "js": [
+            "Shop/wwwroot/shop/js/pages/orders-pagination.js"
+          ]
+        },
+        "related-page-links": {
+          "markup": [
+            "Shop/Views/Shared/_RelatedLinks.cshtml"
+          ],
+          "css": [
+            "Shop/wwwroot/shop/css/layout/shared-related-links.css"
+          ]
+        }
+      }
     },
-    "brand-profile": {
-      "markup": [
-        "Shop/Views/Brands/Index.cshtml",
-        "Shop/Views/Brands/Details.cshtml"
-      ],
-      "data": [
-        "Shop/wwwroot/content/data/catalog.json",
-        "Shop/wwwroot/content/data/brand-editorial.json"
-      ],
-      "server": [
-        "Shop/Controllers/BrandsController.cs",
-        "Shop/Models/BrandProfileModel.cs",
-        "Shop/Services/CatalogRepository.cs"
-      ],
-      "js": [
-        "Shop/wwwroot/shop/js/pages/brand-product-count.js"
-      ],
-      "css": [
-        "Shop/wwwroot/shop/css/pages/brands.css"
-      ]
+    "account": {
+      "label": "حساب کاربری",
+      "components": {
+        "account-page": {
+          "markup": [
+            "Shop/Views/Profile/Index.cshtml",
+            "Shop/Views/Profile/_Orders.cshtml",
+            "Shop/Views/Shared/_CommerceData.cshtml"
+          ],
+          "js": [
+            "Shop/wwwroot/shop/js/pages/account-page.js",
+            "Shop/wwwroot/shop/js/store/account-data.js"
+          ],
+          "css": [
+            "Shop/wwwroot/shop/css/pages/account-page.css"
+          ],
+          "data": [
+            "Shop/App_Data/account-demo.json"
+          ],
+          "server": [
+            "Shop/Models/AccountData.cs",
+            "Shop/Services/IAccountDataSource.cs"
+          ]
+        },
+        "account-panel": {
+          "markup": [
+            "Shop/Views/Shared/_Header.cshtml"
+          ],
+          "js": [
+            "Shop/wwwroot/shop/js/layout/main.js"
+          ],
+          "css": [
+            "Shop/wwwroot/shop/css/layout/shared-account.css"
+          ]
+        },
+        "login-dialog": {
+          "markup": [
+            "Shop/Views/Shared/_Panels.cshtml"
+          ],
+          "js": [
+            "Shop/wwwroot/shop/js/layout/main.js"
+          ],
+          "css": [
+            "Shop/wwwroot/shop/css/layout/shared-login.css"
+          ]
+        },
+        "address-location": {
+          "markup": [
+            "Shop/Views/Shared/_AddressForm.cshtml"
+          ],
+          "js": [
+            "Shop/wwwroot/shop/js/pages/iran-places.js",
+            "Shop/wwwroot/shop/js/pages/address-fields.js"
+          ]
+        }
+      }
     },
-    "magazine-list": {
-      "markup": [
-        "Shop/Views/Magazine/Index.cshtml"
-      ],
-      "server": [
-        "Shop/Controllers/MagazineController.cs",
-        "Shop/Models/JournalArticles.cs",
-        "Shop/Models/JournalArticles.Expanded.cs"
-      ],
-      "js": [
-        "Shop/wwwroot/shop/js/pages/magazine.js"
-      ],
-      "css": [
-        "Shop/wwwroot/shop/css/pages/magazine-luxury.css"
-      ]
+    "content": {
+      "label": "مجله و صفحات محتوا",
+      "components": {
+        "magazine-list": {
+          "markup": [
+            "Shop/Views/Magazine/Index.cshtml"
+          ],
+          "server": [
+            "Shop/Controllers/MagazineController.cs",
+            "Shop/Models/JournalArticles.cs",
+            "Shop/Models/JournalArticles.Expanded.cs"
+          ],
+          "js": [
+            "Shop/wwwroot/shop/js/pages/magazine.js"
+          ],
+          "css": [
+            "Shop/wwwroot/shop/css/pages/magazine-luxury.css"
+          ]
+        },
+        "article-detail": {
+          "markup": [
+            "Shop/Views/Magazine/Details.cshtml"
+          ],
+          "server": [
+            "Shop/Controllers/MagazineController.cs",
+            "Shop/Models/JournalArticles.cs",
+            "Shop/Models/JournalArticles.Expanded.cs"
+          ],
+          "js": [
+            "Shop/wwwroot/shop/js/pages/article-details.js"
+          ],
+          "css": [
+            "Shop/wwwroot/shop/css/pages/article-details.css"
+          ]
+        },
+        "about-page": {
+          "markup": [
+            "Shop/Views/About/Index.cshtml"
+          ],
+          "server": [
+            "Shop/Controllers/AboutController.cs"
+          ],
+          "css": [
+            "Shop/wwwroot/shop/css/pages/pages.css",
+            "Shop/wwwroot/shop/css/pages/about.css"
+          ]
+        },
+        "faq-page": {
+          "markup": [
+            "Shop/Views/Faq/Index.cshtml"
+          ],
+          "server": [
+            "Shop/Controllers/FaqController.cs"
+          ],
+          "js": [
+            "Shop/wwwroot/shop/js/pages/page-content.js"
+          ],
+          "css": [
+            "Shop/wwwroot/shop/css/pages/pages.css",
+            "Shop/wwwroot/shop/css/pages/faq.css"
+          ]
+        },
+        "legal-pages": {
+          "markup": [
+            "Shop/Views/Legal/Privacy.cshtml",
+            "Shop/Views/Legal/Returns.cshtml",
+            "Shop/Views/Legal/Terms.cshtml"
+          ],
+          "server": [
+            "Shop/Controllers/LegalController.cs"
+          ],
+          "css": [
+            "Shop/wwwroot/shop/css/pages/pages.css"
+          ]
+        },
+        "shipping-page": {
+          "markup": [
+            "Shop/Views/Shipping/Index.cshtml"
+          ],
+          "server": [
+            "Shop/Controllers/ShippingController.cs"
+          ],
+          "js": [
+            "Shop/wwwroot/shop/js/pages/page-content.js"
+          ],
+          "css": [
+            "Shop/wwwroot/shop/css/pages/pages.css",
+            "Shop/wwwroot/shop/css/pages/shipping.css"
+          ]
+        },
+        "tracking-page": {
+          "markup": [
+            "Shop/Views/Tracking/Index.cshtml"
+          ],
+          "server": [
+            "Shop/Controllers/TrackingController.cs"
+          ],
+          "js": [
+            "Shop/wwwroot/shop/js/pages/page-content.js"
+          ],
+          "css": [
+            "Shop/wwwroot/shop/css/pages/pages.css",
+            "Shop/wwwroot/shop/css/pages/tracking.css"
+          ]
+        },
+        "warranty-page": {
+          "markup": [
+            "Shop/Views/Warranty/Index.cshtml"
+          ],
+          "css": [
+            "Shop/wwwroot/shop/css/pages/warranty.css"
+          ],
+          "assets": [
+            "Shop/wwwroot/shop/images/heroes/hero-warranty-work-light.png"
+          ]
+        },
+        "contact-page": {
+          "markup": [
+            "Shop/Views/Contact/Index.cshtml"
+          ],
+          "js": [
+            "Shop/wwwroot/shop/js/pages/contact.js"
+          ],
+          "css": [
+            "Shop/wwwroot/shop/css/pages/contact.css"
+          ]
+        },
+        "content-adaptation": {
+          "js": [
+            "Shop/wwwroot/shop/js/core/electrical-content.js"
+          ]
+        }
+      }
     },
-    "homepage-magazine": {
-      "markup": [
-        "Shop/Views/Home/Index.cshtml"
-      ],
-      "server": [
-        "Shop/Models/JournalArticles.cs",
-        "Shop/Models/JournalArticles.Expanded.cs"
-      ],
-      "css": [
-        "Shop/wwwroot/shop/css/layout/style.css",
-        "Shop/wwwroot/shop/css/layout/industrial-system.css"
-      ]
-    },
-    "homepage-newsletter": {
-      "markup": [
-        "Shop/Views/Home/_Newsletter.cshtml"
-      ],
-      "css": [
-        "Shop/wwwroot/shop/css/layout/style.css",
-        "Shop/wwwroot/shop/css/pages/home-warmth.css"
-      ]
-    },
-    "article-detail": {
-      "markup": [
-        "Shop/Views/Magazine/Details.cshtml"
-      ],
-      "server": [
-        "Shop/Controllers/MagazineController.cs",
-        "Shop/Models/JournalArticles.cs",
-        "Shop/Models/JournalArticles.Expanded.cs"
-      ],
-      "js": [
-        "Shop/wwwroot/shop/js/pages/article-details.js"
-      ],
-      "css": [
-        "Shop/wwwroot/shop/css/pages/article-details.css"
-      ]
-    },
-    "product-card": {
-      "selector": "\\.(?:product-card|showcase-card|product-price)(?=[\\s.#:>+~\\[),-]|$)",
-      "markup": [
-        "Shop/Views/Home/_Offers.cshtml",
-        "Shop/Views/Home/_Newest.cshtml"
-      ],
-      "js": [
-        "Shop/wwwroot/shop/js/store/product-card.js"
-      ],
-      "css": [
-        "Shop/wwwroot/shop/css/store/shared-product-card.css"
-      ],
-      "pageOverrides": [
-        "Shop/wwwroot/shop/css/pages/home-warmth.css",
-        "Shop/wwwroot/shop/css/pages/search.css",
-        "Shop/wwwroot/shop/css/pages/search-mobile.css",
-        "Shop/wwwroot/shop/css/pages/product-detail-options.css",
-        "Shop/wwwroot/shop/css/pages/account-page.css",
-        "Shop/wwwroot/shop/css/layout/mobile-pages.css",
-        "Shop/wwwroot/shop/css/store/commerce.css"
-      ]
-    },
-    "header-navigation": {
-      "selector": "\\.(?:brand-dropdown|brand-menu|category-nav-dropdown|category-nav-mega|quick-links-dropdown|quick-links-menu)(?=[\\s.#:>+~\\[),-]|$)",
-      "markup": [
-        "Shop/Views/Shared/_Header.cshtml"
-      ],
-      "js": [
-        "Shop/wwwroot/shop/js/layout/header-navigation.js"
-      ],
-      "css": [
-        "Shop/wwwroot/shop/css/layout/shared-header.css",
-        "Shop/wwwroot/shop/css/layout/shared-mega-menu.css",
-        "Shop/wwwroot/shop/css/layout/mega-menu-unified.css",
-        "Shop/wwwroot/shop/css/layout/quick-links-menu.css"
-      ]
-    },
-    "product-detail": {
-      "markup": [
-        "Shop/Views/Product/Details.cshtml"
-      ],
-      "data": [
-        "Shop/wwwroot/content/data/catalog.json"
-      ],
-      "server": [
-        "Shop/Controllers/ProductController.cs",
-        "Shop/Services/CatalogRepository.cs"
-      ],
-      "js": [
-        "Shop/wwwroot/shop/js/store/catalog.js",
-        "Shop/wwwroot/shop/js/store/commerce.js"
-      ],
-      "css": [
-        "Shop/wwwroot/shop/css/pages/product-detail.css",
-        "Shop/wwwroot/shop/css/pages/product-detail-pricing.css",
-        "Shop/wwwroot/shop/css/pages/product-detail-options.css"
-      ]
-    },
-    "header-brand": {
-      "markup": [
-        "Shop/Views/Shared/_Header.cshtml",
-        "Shop/Views/Shared/_Panels.cshtml"
-      ],
-      "css": [
-        "Shop/wwwroot/shop/css/layout/shared-header.css",
-        "Shop/wwwroot/shop/css/layout/mobile-drawer-compact.css"
-      ],
-      "assets": [
-        "Shop/wwwroot/content/identity/store-electrical-header.svg",
-        "Shop/wwwroot/content/identity/store-electrical-lockup.svg"
-      ]
-    },
-    "warranty-page": {
-      "markup": [
-        "Shop/Views/Warranty/Index.cshtml"
-      ],
-      "css": [
-        "Shop/wwwroot/shop/css/pages/warranty.css"
-      ],
-      "assets": [
-        "Shop/wwwroot/shop/images/heroes/hero-warranty-work-light.png"
-      ]
-    },
-    "contact-page": {
-      "markup": [
-        "Shop/Views/Contact/Index.cshtml"
-      ],
-      "js": [
-        "Shop/wwwroot/shop/js/pages/contact.js"
-      ],
-      "css": [
-        "Shop/wwwroot/shop/css/pages/contact.css"
-      ]
-    },
-    "related-page-links": {
-      "markup": [
-        "Shop/Views/Shared/_RelatedLinks.cshtml"
-      ],
-      "css": [
-        "Shop/wwwroot/shop/css/layout/shared-related-links.css"
-      ]
-    },
-    "cart": {
-      "markup": [
-        "Shop/Views/Shared/_Panels.cshtml",
-        "Shop/Views/Cart/Index.cshtml",
-        "Shop/Views/Checkout/Index.cshtml"
-      ],
-      "js": [
-        "Shop/wwwroot/shop/js/store/cart.js",
-        "Shop/wwwroot/shop/js/pages/checkout.js",
-        "Shop/wwwroot/shop/js/store/commerce.js"
-      ],
-      "css": [
-        "Shop/wwwroot/shop/css/layout/shared-cart.css",
-        "Shop/wwwroot/shop/css/pages/checkout.css"
-      ],
-      "data": [
-        "Shop/wwwroot/shop/js/core/storage.js"
-      ]
-    },
-    "address-location": {
-      "markup": [
-        "Shop/Views/Shared/_AddressForm.cshtml"
-      ],
-      "js": [
-        "Shop/wwwroot/shop/js/pages/iran-places.js",
-        "Shop/wwwroot/shop/js/pages/address-fields.js"
-      ]
-    },
-    "ui-core": {
-      "js": [
-        "Shop/wwwroot/shop/js/core/ui-core.js"
-      ],
-      "css": [
-        "Shop/wwwroot/shop/css/core/ui-core.css",
-        "Shop/wwwroot/shop/css/core/design-tokens.css"
-      ]
-    },
-    "scrollbar": {
-      "css": [
-        "Shop/wwwroot/shop/css/layout/shared-scrollbars.css"
-      ]
-    },
-    "header-search": {
-      "markup": [
-        "Shop/Views/Shared/_Header.cshtml",
-        "Shop/Views/Shared/_Panels.cshtml"
-      ],
-      "js": [
-        "Shop/wwwroot/shop/js/layout/main.js"
-      ],
-      "css": [
-        "Shop/wwwroot/shop/css/layout/shared-header.css",
-        "Shop/wwwroot/shop/css/layout/industrial-system.css"
-      ]
-    },
-    "account-panel": {
-      "markup": [
-        "Shop/Views/Shared/_Header.cshtml"
-      ],
-      "js": [
-        "Shop/wwwroot/shop/js/layout/main.js"
-      ],
-      "css": [
-        "Shop/wwwroot/shop/css/layout/shared-account.css"
-      ]
-    },
-    "account-page": {
-      "markup": [
-        "Shop/Views/Profile/Index.cshtml",
-        "Shop/Views/Profile/_Orders.cshtml",
-        "Shop/Views/Shared/_CommerceData.cshtml"
-      ],
-      "js": [
-        "Shop/wwwroot/shop/js/pages/account-page.js",
-        "Shop/wwwroot/shop/js/store/account-data.js"
-      ],
-      "css": [
-        "Shop/wwwroot/shop/css/pages/account-page.css"
-      ],
-      "data": [
-        "Shop/App_Data/account-demo.json"
-      ],
-      "server": [
-        "Shop/Models/AccountData.cs",
-        "Shop/Services/IAccountDataSource.cs"
-      ]
-    },
-    "login-dialog": {
-      "markup": [
-        "Shop/Views/Shared/_Panels.cshtml"
-      ],
-      "js": [
-        "Shop/wwwroot/shop/js/layout/main.js"
-      ],
-      "css": [
-        "Shop/wwwroot/shop/css/layout/shared-login.css"
-      ]
-    },
-    "footer": {
-      "markup": [
-        "Shop/Views/Shared/_Footer.cshtml"
-      ],
-      "css": [
-        "Shop/wwwroot/shop/css/layout/shared-footer.css",
-        "Shop/wwwroot/shop/css/layout/style.css",
-        "Shop/wwwroot/shop/css/layout/mobile-pages.css"
-      ]
-    },
-    "page-hero": {
-      "selector": "\\.page-hero",
-      "css": [
-        "Shop/wwwroot/shop/css/layout/shared-page-hero.css",
-        "Shop/wwwroot/shop/css/layout/page-hero-imagery.css"
-      ]
-    },
-    "form-validation": {
-      "js": [
-        "Shop/wwwroot/shop/js/core/form-validation.js"
-      ],
-      "css": [
-        "Shop/wwwroot/shop/css/core/ui-core.css"
-      ]
-    },
-    "pagination": {
-      "css": [
-        "Shop/wwwroot/shop/css/store/pagination.css"
-      ],
-      "js": [
-        "Shop/wwwroot/shop/js/pages/orders-pagination.js"
-      ]
-    },
-    "confirmation-dialog": {
-      "js": [
-        "Shop/wwwroot/shop/js/pages/form-confirm-dialog.js"
-      ],
-      "css": [
-        "Shop/wwwroot/shop/css/pages/form-confirm-dialog.css"
-      ]
+    "shared": {
+      "label": "پوسته و اجزای مشترک",
+      "components": {
+        "header-navigation": {
+          "selector": "\\.(?:brand-dropdown|brand-menu|category-nav-dropdown|category-nav-mega|quick-links-dropdown|quick-links-menu)(?=[\\s.#:>+~\\[),-]|$)",
+          "markup": [
+            "Shop/Views/Shared/_Header.cshtml",
+            "Shop/Views/Shared/_HomeHeader.cshtml",
+            "Shop/Views/Shared/_InnerHeader.cshtml"
+          ],
+          "js": [
+            "Shop/wwwroot/shop/js/layout/header-navigation.js"
+          ],
+          "css": [
+            "Shop/wwwroot/shop/css/layout/shared-header.css",
+            "Shop/wwwroot/shop/css/layout/shared-mega-menu.css",
+            "Shop/wwwroot/shop/css/layout/mega-menu-unified.css",
+            "Shop/wwwroot/shop/css/layout/quick-links-menu.css"
+          ]
+        },
+        "header-brand": {
+          "markup": [
+            "Shop/Views/Shared/_Header.cshtml",
+            "Shop/Views/Shared/_Panels.cshtml"
+          ],
+          "css": [
+            "Shop/wwwroot/shop/css/layout/shared-header.css",
+            "Shop/wwwroot/shop/css/layout/mobile-drawer-compact.css"
+          ],
+          "assets": [
+            "Shop/wwwroot/content/identity/store-electrical-header.svg",
+            "Shop/wwwroot/content/identity/store-electrical-lockup.svg"
+          ]
+        },
+        "header-search": {
+          "markup": [
+            "Shop/Views/Shared/_Header.cshtml",
+            "Shop/Views/Shared/_Panels.cshtml"
+          ],
+          "js": [
+            "Shop/wwwroot/shop/js/layout/main.js"
+          ],
+          "css": [
+            "Shop/wwwroot/shop/css/layout/shared-header.css",
+            "Shop/wwwroot/shop/css/layout/industrial-system.css"
+          ]
+        },
+        "footer": {
+          "markup": [
+            "Shop/Views/Shared/_Footer.cshtml"
+          ],
+          "css": [
+            "Shop/wwwroot/shop/css/layout/shared-footer.css",
+            "Shop/wwwroot/shop/css/layout/style.css",
+            "Shop/wwwroot/shop/css/layout/mobile-pages.css"
+          ]
+        },
+        "page-hero": {
+          "selector": "\\.page-hero",
+          "css": [
+            "Shop/wwwroot/shop/css/layout/shared-page-hero.css",
+            "Shop/wwwroot/shop/css/layout/page-hero-imagery.css"
+          ]
+        },
+        "ui-core": {
+          "js": [
+            "Shop/wwwroot/shop/js/core/ui-core.js"
+          ],
+          "css": [
+            "Shop/wwwroot/shop/css/core/ui-core.css",
+            "Shop/wwwroot/shop/css/core/design-tokens.css"
+          ]
+        },
+        "scrollbar": {
+          "css": [
+            "Shop/wwwroot/shop/css/layout/shared-scrollbars.css"
+          ]
+        },
+        "form-validation": {
+          "js": [
+            "Shop/wwwroot/shop/js/core/form-validation.js"
+          ],
+          "css": [
+            "Shop/wwwroot/shop/css/core/ui-core.css"
+          ]
+        },
+        "confirmation-dialog": {
+          "js": [
+            "Shop/wwwroot/shop/js/pages/form-confirm-dialog.js"
+          ],
+          "css": [
+            "Shop/wwwroot/shop/css/pages/form-confirm-dialog.css"
+          ]
+        },
+        "seo-metadata": {
+          "markup": [
+            "Shop/Views/Shared/_SeoMetadata.cshtml"
+          ]
+        },
+        "error-page": {
+          "markup": [
+            "Shop/Views/Error/Index.cshtml"
+          ]
+        },
+        "purchase-benefits": {
+          "markup": [
+            "Shop/Views/Shared/_PurchaseBenefits.cshtml"
+          ],
+          "css": [
+            "Shop/wwwroot/shop/css/layout/style.css",
+            "Shop/wwwroot/shop/css/layout/industrial-system.css"
+          ]
+        },
+        "shared-foundation": {
+          "markup": [
+            "Shop/Views/Shared/_Shop.cshtml"
+          ],
+          "css": [
+            "Shop/wwwroot/shop/css/core/components.css",
+            "Shop/wwwroot/shop/css/core/site.css",
+            "Shop/wwwroot/shop/css/layout/content-typography.css",
+            "Shop/wwwroot/shop/css/layout/empty-state-system.css",
+            "Shop/wwwroot/shop/css/layout/luxury-theme.css",
+            "Shop/wwwroot/shop/css/layout/mvc-layout.css",
+            "Shop/wwwroot/shop/css/layout/shared-surface-theme.css"
+          ]
+        }
+      }
     }
   }
 }

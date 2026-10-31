@@ -7,11 +7,25 @@ import postcss from 'postcss';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const read = file => fs.readFile(path.join(root, file), 'utf8');
-const owners = JSON.parse(await read('tools/ui-owners.json')).components;
+const ownerMap = JSON.parse(await read('tools/ui-owners.json'));
+const errors = [];
+let owners = ownerMap.components;
+if (ownerMap.schemaVersion >= 2) {
+  owners = {};
+  for (const [groupName, group] of Object.entries(ownerMap.groups || {})) {
+    if (!group.label || !group.components || typeof group.components !== 'object') {
+      errors.push(`Invalid UI owner group: ${groupName}`);
+      continue;
+    }
+    for (const [component, owner] of Object.entries(group.components)) {
+      if (owners[component]) errors.push(`Duplicate UI owner id across groups: ${component}`);
+      else owners[component] = owner;
+    }
+  }
+}
 const baseline = JSON.parse(await read('tools/ui-legacy-budget.json'));
 const themeTokensFile = 'Shop/wwwroot/shop/css/core/design-tokens.css';
 const publicThemeToken = /^--(?:color-|font-size-|text-(?:xs|sm|md|base|lg|xl)$|space-|radius-|shadow-(?:card|card-hover)|ui-(?:navy|gold|surface|text|muted|border|radius-|shadow-|ease)|md-|mega-)/;
-const errors = [];
 const exists = async file => { try { await fs.access(path.join(root, file)); return true; } catch { return false; } };
 async function files(directory, suffix) {
   const list = [];
@@ -28,11 +42,15 @@ for (const [component, owner] of Object.entries(owners)) {
   }
 }
 const scripts = await files('Shop/wwwroot/shop/js', '.js');
+const styles = await files('Shop/wwwroot/shop/css', '.css');
+const ownedAssets = new Set(Object.values(owners).flatMap(owner => [...(owner.css || []), ...(owner.js || [])]));
+for (const file of [...scripts, ...styles]) {
+  if (!ownedAssets.has(file)) errors.push(`${file}: missing CSS/JS owner in tools/ui-owners.json`);
+}
 for (const file of scripts) {
   try { new vm.Script(await read(file), {filename: file}); }
   catch (error) { errors.push(file + ': ' + error.message); }
 }
-const styles = await files('Shop/wwwroot/shop/css', '.css');
 for (const file of styles) {
   try {
     const css = postcss.parse(await read(file), {from: file});

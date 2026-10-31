@@ -20,6 +20,7 @@ builder.Services.AddSingleton<Shop.Services.IEmailSender, Shop.Services.SmtpEmai
 builder.Services.AddSingleton<Shop.Services.IMagazineContentSource, Shop.Services.DemoMagazineContentSource>();
 builder.Services.AddSingleton<Shop.Services.CatalogRepository>();
 builder.Services.AddSingleton<Shop.Services.ICatalogSource>(services => services.GetRequiredService<Shop.Services.CatalogRepository>());
+builder.Services.AddSingleton<Shop.Services.ISalesPlanSource, Shop.Services.DemoSalesPlanSource>();
 builder.Services.AddScoped<Shop.Services.DemoAccountDataSource>();
 builder.Services.AddScoped<Shop.Services.IAccountDataSource>(services => services.GetRequiredService<Shop.Services.DemoAccountDataSource>());
 builder.Services.AddScoped<Shop.Services.ICommerceOfferSource>(services => services.GetRequiredService<Shop.Services.DemoAccountDataSource>());

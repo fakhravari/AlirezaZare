@@ -1,0 +1,121 @@
+{
+    "schemaVersion":  1,
+    "currency":  "IRT",
+    "plans":  [
+                  {
+                      "id":  "regular",
+                      "code":  "REGULAR",
+                      "name":  "فروش عادی",
+                      "type":  "regular",
+                      "isDefault":  true,
+                      "isEnabled":  true,
+                      "startsAtUtc":  null,
+                      "endsAtUtc":  null,
+                      "label":  null,
+                      "showCountdown":  false
+                  },
+                  {
+                      "id":  "digi-time",
+                      "code":  "DIGI-TIME-DEMO",
+                      "name":  "دیجی‌تایم",
+                      "type":  "digi-time",
+                      "isDefault":  false,
+                      "isEnabled":  true,
+                      "startsAtUtc":  "2026-10-01T00:00:00+00:00",
+                      "endsAtUtc":  "2026-12-01T00:00:00+00:00",
+                      "label":  "پیشنهاد زمان‌دار نمونه",
+                      "showCountdown":  true
+                  },
+                  {
+                      "id":  "digi-af",
+                      "code":  "DIGI-AF-DEMO",
+                      "name":  "دیجی‌اف",
+                      "type":  "digi-af",
+                      "isDefault":  false,
+                      "isEnabled":  true,
+                      "startsAtUtc":  "2026-10-01T00:00:00+00:00",
+                      "endsAtUtc":  "2026-12-01T00:00:00+00:00",
+                      "label":  "پیشنهاد ویژهٔ نمونه",
+                      "showCountdown":  false
+                  }
+              ],
+    "offers":  [
+                   {
+                       "productId":  1,
+                       "salesPlanId":  "digi-time",
+                       "priceAmount":  28823529,
+                       "discountPercent":  20,
+                       "stockQuantity":  4,
+                       "maxPurchaseQuantity":  2,
+                       "isEnabled":  true,
+                       "accessoryPriceAmounts":  {
+                                                     "shipping-insurance":  245000,
+                                                     "sds-bit-set":  875000
+                                                 }
+                   },
+                   {
+                       "productId":  6,
+                       "salesPlanId":  "digi-time",
+                       "priceAmount":  34117647,
+                       "discountPercent":  20,
+                       "stockQuantity":  5,
+                       "maxPurchaseQuantity":  2,
+                       "isEnabled":  true,
+                       "accessoryPriceAmounts":  {
+                                                     "meter-case":  455000,
+                                                     "probe-set":  315000
+                                                 }
+                   },
+                   {
+                       "productId":  11,
+                       "salesPlanId":  "digi-time",
+                       "priceAmount":  51764706,
+                       "discountPercent":  20,
+                       "stockQuantity":  3,
+                       "maxPurchaseQuantity":  2,
+                       "isEnabled":  true,
+                       "accessoryPriceAmounts":  {
+                                                     "solder-tips":  595000,
+                                                     "solder-wire":  266000
+                                                 }
+                   },
+                   {
+                       "productId":  3,
+                       "salesPlanId":  "digi-af",
+                       "priceAmount":  20000000,
+                       "discountPercent":  12,
+                       "stockQuantity":  2,
+                       "maxPurchaseQuantity":  1,
+                       "isEnabled":  true,
+                       "accessoryPriceAmounts":  {
+                                                     "sds-bit-set":  1232500,
+                                                     "drill-case":  765000
+                                                 }
+                   },
+                   {
+                       "productId":  4,
+                       "salesPlanId":  "digi-af",
+                       "priceAmount":  23000000,
+                       "discountPercent":  12,
+                       "stockQuantity":  2,
+                       "maxPurchaseQuantity":  1,
+                       "isEnabled":  true,
+                       "accessoryPriceAmounts":  {
+                                                     "battery-charger-kit":  2040000,
+                                                     "driver-bit-set":  467500
+                                                 }
+                   },
+                   {
+                       "productId":  7,
+                       "salesPlanId":  "digi-af",
+                       "priceAmount":  32000000,
+                       "discountPercent":  10,
+                       "stockQuantity":  2,
+                       "maxPurchaseQuantity":  1,
+                       "isEnabled":  true,
+                       "accessoryPriceAmounts":  {
+
+                                                 }
+                   }
+               ]
+}

@@ -50,6 +50,35 @@ test('account coupons and public offers share values without publishing order hi
   assert.equal((await fetch(base + '/App_Data/account-demo.json')).status, 404);
 });
 
+test('sales-plan quotes validate nullable options, plan-specific accessory prices and cart identity', async () => {
+  const quote = async body => fetch(base + '/api/store/sales-plans/quote', {
+    method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body),
+  });
+  const noOptions = await quote({productId: 7, salesPlanId: 'regular', quantity: 1, variants: {}, accessoryIds: []});
+  assert.equal(noOptions.status, 200, logs.slice(-2000));
+  const invalidOption = await quote({productId: 7, salesPlanId: 'regular', quantity: 1, variants: {unknown: 'x'}, accessoryIds: []});
+  assert.equal(invalidOption.status, 400);
+
+  const planQuote = await quote({productId: 1, salesPlanId: 'digi-time', quantity: 1,
+    variants: {battery: '2ah', chuck: '10mm'}, accessoryIds: ['shipping-insurance']});
+  assert.equal(planQuote.status, 200, logs.slice(-2000));
+  const priced = await planQuote.json();
+  assert.equal(priced.accessoryAmounts['shipping-insurance'], 245000);
+
+  const duplicateLine = await fetch(base + '/api/store/sales-plans/validate-cart', {
+    method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({lines: [
+      {productId: 7, salesPlanId: 'regular', quantity: 1, variants: {}, accessoryIds: []},
+      {productId: 7, salesPlanId: 'regular', quantity: 1, variants: {}, accessoryIds: []},
+    ]}),
+  });
+  assert.equal(duplicateLine.status, 400);
+  const nullLine = await fetch(base + '/api/store/sales-plans/validate-cart', {
+    method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({lines: [null]}),
+  });
+  assert.equal(nullLine.status, 400);
+});
+
 test('home, search, product, cart, account and content routes serve the same validated catalog', async () => {
   const routes = ['/', '/search', '/products/cordless-hammer-drill-1', '/products/digital-multimeter-6', '/cart', '/checkout', '/compare', '/favorites', '/profile', '/profile/orders', '/profile/addresses', '/brands', '/brands/bosch', '/contact', '/about'];
   for (const route of routes) {

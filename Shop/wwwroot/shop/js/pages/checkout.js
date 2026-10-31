@@ -11,6 +11,41 @@ window.HNUI.ready(() => window.HNUI.mount("checkout", document, () => {
     const cartCheckoutLink = document.querySelector("#cartView .cart-checkout-link",);
     let addresses = [];
     let selectedPaymentMethod = ui.storage.get(paymentMethodKey, "zarinpal");
+    let salesPlansValid = false;
+    let validationAttempt = 0;
+    const validateSalesPlanCart = async () => {
+        const attempt = ++validationAttempt;
+        const currentItems = ui.cart.read();
+        const lines = currentItems.map((item) => ({
+            productId: Number(item.id), salesPlanId: item.salesPlanId || "regular", quantity: item.quantity,
+            variants: Object.fromEntries((item.options?.variants || []).map((option) => [option.key, option.productValue || option.value])),
+            accessoryIds: (item.options?.accessories || []).filter((item) => item.selected !== false).map((item) => item.id),
+        }));
+        if (!lines.length) {
+            salesPlansValid = false;
+            ui.setMessage(document.querySelector("#paymentStatus"), "");
+            syncPayment();
+            return;
+        }
+        try {
+            const response = await fetch("api/store/sales-plans/validate-cart", {
+                method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ lines }),
+            });
+            if (attempt !== validationAttempt) return;
+            if (response.ok) {
+                const result = await response.json();
+                salesPlansValid = result.valid === true && Array.isArray(result.lines) &&
+                    result.lines.length === currentItems.length && result.lines.every((line, index) =>
+                        line.productId === Number(currentItems[index].id) &&
+                        line.salesPlanId === currentItems[index].salesPlanId &&
+                        Number(line.quote?.unitAmount) === Number(currentItems[index].price));
+            } else salesPlansValid = false;
+        } catch { salesPlansValid = false; }
+        if (attempt !== validationAttempt) return;
+        syncPayment();
+        const message = document.querySelector("#paymentStatus");
+        if (!salesPlansValid && message) ui.setMessage(message, "قیمت یا موجودی یکی از طرح‌های فروش تغییر کرده است؛ به سبد بازگردید و دوباره بررسی کنید.", "warning");
+    };
     if (!Object.hasOwn(paymentMethods, selectedPaymentMethod)) {
         selectedPaymentMethod = "zarinpal";
     }
@@ -66,7 +101,7 @@ window.HNUI.ready(() => window.HNUI.mount("checkout", document, () => {
             const ready =
                 Boolean(selectedAddress()) &&
                 Boolean(selectedPaymentMethod) &&
-                ui.cart.read().length > 0;
+                ui.cart.read().length > 0 && salesPlansValid;
             cartCheckoutLink.classList.toggle("is-disabled", !ready);
             cartCheckoutLink.setAttribute("aria-disabled", String(!ready));
             cartCheckoutLink.title = ready
@@ -77,8 +112,8 @@ window.HNUI.ready(() => window.HNUI.mount("checkout", document, () => {
         }
         if (!payment) return;
         payment.disabled =
-            !ui.cart.read().length || !selectedAddress() || !selectedPaymentMethod;
-        ui.setMessage(document.querySelector("#paymentStatus"), "");
+            !ui.cart.read().length || !selectedAddress() || !selectedPaymentMethod || !salesPlansValid;
+        if (salesPlansValid) ui.setMessage(document.querySelector("#paymentStatus"), "");
     }
 
     function renderPaymentMethod() {
@@ -264,10 +299,11 @@ window.HNUI.ready(() => window.HNUI.mount("checkout", document, () => {
                 "warning",
             );
         });
-        document.addEventListener("hn:cart-change", syncPayment);
+        document.addEventListener("hn:cart-change", validateSalesPlanCart);
     }
 
     window.addEventListener("storage", () => window.location.reload());
     renderAddresses();
+    validateSalesPlanCart();
     renderPaymentMethod();
 }));

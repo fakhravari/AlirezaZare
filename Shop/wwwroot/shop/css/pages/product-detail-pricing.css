@@ -11,6 +11,50 @@
   direction: rtl;
 }
 
+#productView .product-sales-plans {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr));
+  gap: 8px;
+  padding: 0;
+  margin: 0;
+  border: 0;
+}
+
+#productView .product-sales-plans legend {
+  float: none;
+  width: 100%;
+  margin: 0 0 2px;
+  color: var(--ink-muted, #60758a);
+  font-size: .8rem;
+  font-weight: 700;
+}
+
+#productView .product-sales-plan {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--line, #dbe4ec);
+  border-radius: 12px;
+  background: #f8fafc;
+  cursor: pointer;
+}
+
+#productView .product-sales-plan.is-selected {
+  border-color: var(--gold, #d39a00);
+  background: #fff8e2;
+}
+
+#productView .product-sales-plan input {
+  accent-color: var(--gold, #d39a00);
+}
+
+#productView .product-sales-plan span { display: grid; gap: 2px; }
+#productView .product-sales-plan small,
+#productView .product-sales-plan time { color: var(--ink-muted, #60758a); font-size: .72rem; }
+
 #productView .product-detail-price > .detail-price-heading {
   display: none;
 }
