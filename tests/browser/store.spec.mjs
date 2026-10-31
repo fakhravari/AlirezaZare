@@ -152,6 +152,28 @@ test('cart coupon applies only to products without an existing sale', async ({pa
   expect(actualDiscount).toBe(expectedDiscount);
 });
 
+test('favorites and coupon pagination stay usable without mobile or desktop overflow', async ({page}) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('hn-demo-auth', '1');
+    localStorage.setItem('hn-favorites', JSON.stringify(['1', '3', '6', '11']));
+  });
+  await page.goto('/profile/favorites');
+  await expect(page.locator('#favoritesView [data-product-card]').first()).toBeVisible();
+  await expect(page.locator('#favoritesView [data-product-card]')).toHaveCount(4);
+  await noHorizontalOverflow(page);
+
+  await page.goto('/profile/coupons');
+  const coupons = page.locator('#profileCouponsList .profile-coupon-card');
+  expect(await page.evaluate(() => window.HNAccountData?.coupons?.length)).toBeGreaterThan(5);
+  await expect(coupons.first()).toBeVisible();
+  await expect(coupons).toHaveCount(5);
+  await page.locator('#profileCouponsPagination [aria-label="صفحه ۲"]').click();
+  await expect(page).toHaveURL(/couponPage=2/);
+  await expect(page.locator('#profileCouponsTitle')).toBeFocused();
+  await expect(coupons).toHaveCount(5);
+  await noHorizontalOverflow(page);
+});
+
 test('desktop dropdown opens from its trigger and Escape closes it while focused', async ({page, isMobile}) => {
   test.skip(isMobile, 'Desktop navigation has a separate mobile drawer.');
   for (const route of ['/', '/products/cordless-hammer-drill-1']) {

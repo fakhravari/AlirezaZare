@@ -261,12 +261,12 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
         pageNav.replaceChildren();
         pageNav.hidden = pageCount <= 1;
 
-        const addPageButton = (label, target, disabled = false) => {
+        const addPageButton = (label, target, disabled = false, accessibleLabel) => {
             const button = document.createElement("button");
             button.type = "button";
             button.textContent = label;
             button.disabled = disabled;
-            button.setAttribute("aria-label", target < page ? "صفحهٔ قبل" : target > page ? "صفحهٔ بعد" : `صفحه ${label}`);
+            button.setAttribute("aria-label", accessibleLabel || `صفحه ${label}`);
             if (target === page && label === ui.formatNumber(page))
                 button.setAttribute("aria-current", "page");
             button.addEventListener("click", () => {
@@ -280,10 +280,10 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
             pageNav.append(button);
         };
 
-        addPageButton("قبلی", page - 1, page === 1);
+        addPageButton("قبلی", page - 1, page === 1, "صفحهٔ قبل");
         for (let target = 1; target <= pageCount; target++)
             addPageButton(ui.formatNumber(target), target);
-        addPageButton("بعدی", page + 1, page === pageCount);
+        addPageButton("بعدی", page + 1, page === pageCount, "صفحهٔ بعد");
 
         if (window.location.pathname.replace(/\/+$/, "") === "/profile/coupons") {
             const normalizedUrl = new URL(window.location.href);
