@@ -165,7 +165,8 @@
               : accessory;
           });
         }
-        const configuredPrice = item.salesPlanSnapshot?.unitAmount != null ? Number(item.salesPlanSnapshot.unitAmount) : product ? Math.round((Number(product.price) +
+        const configuredPrice = item.salesPlanSnapshot?.unitAmount != null ? Number(item.salesPlanSnapshot.unitAmount) :
+          item.salesPlanId && item.salesPlanId !== "regular" && Number.isFinite(Number(item.price)) ? Number(item.price) : product ? Math.round((Number(product.price) +
           options.variants.reduce((sum, option) => sum + Number(option.priceDelta || 0), 0) +
           options.accessories.filter((accessory) => accessory.selected).reduce((sum, accessory) => sum + Number(accessory.price || 0), 0)
         ) * 1000000) : Number(item.price);

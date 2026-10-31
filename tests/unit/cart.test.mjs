@@ -78,7 +78,8 @@ test('new configurations replace the existing configuration of the same product 
 test('the same product in different sales plans stays in separate cart lines', () => {
   const r = loggedIn(); const p = r.window.HNCatalog.find(1);
   r.ui.cart.add({...p, salesPlanId: 'regular'}, 2);
-  r.ui.cart.add({...p, salesPlanId: 'demo-time'}, 1);
+  r.ui.cart.add({...p, salesPlanId: 'demo-time', price: 23058823}, 1);
+  assert.equal(r.ui.cart.read().find(item => item.salesPlanId === 'demo-time').price, 23058823);
   let items = r.ui.cart.read();
   assert.equal(items.length, 2);
   assert.equal(items.map(item => item.salesPlanId).sort().join(','), 'demo-time,regular');

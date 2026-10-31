@@ -315,6 +315,7 @@
         name: button.dataset.name,
         price: button.dataset.price,
         image: button.dataset.image,
+        salesPlanId: button.dataset.salesPlanId || "regular",
       },
       1,
       button,

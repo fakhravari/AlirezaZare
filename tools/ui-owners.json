@@ -40,6 +40,9 @@
             "Shop/Views/Home/_Collection.cshtml",
             "Shop/Views/Home/_Bestsellers.cshtml"
           ],
+          "js": [
+            "Shop/wwwroot/shop/js/pages/home-sales-plans.js"
+          ],
           "css": [
             "Shop/wwwroot/shop/css/layout/style.css",
             "Shop/wwwroot/shop/css/layout/electrical-theme.css",

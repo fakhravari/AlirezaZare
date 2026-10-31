@@ -44,3 +44,16 @@ test('all card contexts share escaped identity, price, media and action contract
     if (variant !== 'favorite') assert.ok(html.includes('data-id="1"'));
   }
 });
+
+test('sales-plan cards show their own amount, stock, URL and cart plan identity', () => {
+  const {window} = runtime();
+  const product = window.HNCatalog.find(1);
+  const html = window.HNProductCard.render(product, {
+    variant: 'slider', salesPlanId: 'digi-time', priceAmount: 25000000,
+    discountPercent: 10, stockQuantity: 2,
+  });
+  assert.ok(html.includes('salesPlanId=digi-time'));
+  assert.ok(html.includes('data-sales-plan-id="digi-time"'));
+  assert.ok(html.includes('data-price="22500000"'));
+  assert.ok(html.includes(window.HNProductCard.price(product, {priceAmount: 25000000, discountPercent: 10})));
+});
