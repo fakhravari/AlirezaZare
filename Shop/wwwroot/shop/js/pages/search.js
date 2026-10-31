@@ -31,6 +31,7 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
     });
   })();
   const listings = [...products, ...activePlanListings];
+  const activePlanNames = new Map(activePlanListings.map((item) => [item._salesPlanListing.id, item._salesPlanListing.name]));
   const $ = (selector) => document.querySelector(selector);
   const $$ = (selector) => [...document.querySelectorAll(selector)];
   const state = {
@@ -39,6 +40,7 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
     movement: new Set(),
     strap: new Set(),
     color: new Set(),
+    salesPlan: new Set(),
     availability: "all",
     discountOnly: false,
     minPrice: 0,
@@ -60,11 +62,12 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
       attributeId: "useCase",
     },
     color: { fa: "رنگ", en: "Color", slug: "color", attributeId: "color" },
+    salesPlan: { fa: "طرح فروش", en: "Sales plan", slug: "sales-plan" },
     price: { fa: "بازه قیمت", en: "Price range", slug: "price-range", attributeId: "price" },
   };
   const isFilterable = (key) => attributeDefinitions[filterFields[key]?.attributeId]?.is_filterable === true;
   const hasActiveFilters = () =>
-    ["brand", "type", "movement", "strap", "color"].some((key) => state[key].size) ||
+    ["brand", "type", "movement", "strap", "color", "salesPlan"].some((key) => state[key].size) ||
     state.availability !== "all" ||
     state.discountOnly ||
     state.minPrice > 0 ||
@@ -227,6 +230,7 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
     },
   };
   const filterValueMeta = (key, value) => {
+    if (key === "salesPlan") return {fa: activePlanNames.get(value) || value, en: value, slug: value};
     if (key === "brand") return {fa: brandDisplayName(value), en: value, slug: brandSlug(value)};
     if (key === "color") return window.HNProductColors?.[value] || {fa: value, en: value, slug: value, hex: "#64748b"};
     if (key === "type") {
@@ -268,7 +272,8 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
         ),
       ].map((slug) => [slug, slug]),
     ),
-  }).filter(([key]) => isFilterable(key)));
+    salesPlan: Object.fromEntries([...activePlanNames].map(([id, name]) => [id, name])),
+  }).filter(([key, options]) => key === "salesPlan" ? Object.keys(options).length > 0 : isFilterable(key)));
   const filterConfig = Object.fromEntries(
     Object.entries(filterOptions).map(([key, options]) => [
       key,
@@ -440,7 +445,7 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
                 key === "color"
                   ? `<i class="filter-color-swatch" style="--filter-color: ${metadata.hex}" aria-hidden="true"></i>`
                   : "";
-              return `<label class="filter-option${key === "color" ? " filter-color-option" : ""}"><input type="checkbox" value="${value}" data-filter="${key}" data-value-fa="${metadata.fa}" data-value-en="${metadata.en}" data-value-slug="${metadata.slug}"><span class="filter-option-label">${colorOption}${key === "color" ? `<span class="filter-color-name" title="${metadata.fa} ${metadata.hex}">${metadata.fa}</span>` : metadata.fa}</span></label>`;
+              return `<label class="filter-option${key === "color" ? " filter-color-option" : key === "salesPlan" ? " filter-sales-plan-option" : ""}"><input type="checkbox" value="${value}" data-filter="${key}" data-value-fa="${metadata.fa}" data-value-en="${metadata.en}" data-value-slug="${metadata.slug}"><span class="filter-option-label">${colorOption}${key === "color" ? `<span class="filter-color-name" title="${metadata.fa} ${metadata.hex}">${metadata.fa}</span>` : metadata.fa}</span></label>`;
             })(),
           )
           .join("");
@@ -465,6 +470,14 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
         input.checked = state[key].has(input.value);
       });
     }
+    const planGroup = $("#salesPlanFilters")?.closest(".filter-group");
+    if (planGroup) {
+      planGroup.hidden = activePlanNames.size === 0;
+      planGroup.style.display = activePlanNames.size ? "" : "none";
+      $("#salesPlanFilters").querySelectorAll('input[data-filter="salesPlan"]').forEach((input) => {
+        input.checked = state.salesPlan.has(input.value);
+      });
+    }
   }
   function getFiltered() {
     const selectedTypes = [...state.type];
@@ -486,7 +499,8 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
         (!state.color.size ||
           (p.colors || []).some((color) => state.color.has(color.slug))) &&
         (!state.query ||
-          `${p.name} ${p.brand} ${p.type} ${p.powerSource || p.movement} ${p._salesPlanListing?.name || ""} ${p._salesPlanListing?.label || ""}`.includes(state.query)),
+          `${p.name} ${p.brand} ${p.type} ${p.powerSource || p.movement} ${p._salesPlanListing?.name || ""} ${p._salesPlanListing?.label || ""}`.includes(state.query)) &&
+        (!state.salesPlan.size || state.salesPlan.has(p._salesPlanListing?.id || "regular")),
     );
     const listingPrice = (item) => item._salesPlanListing ? item._salesPlanListing.priceAmount * (100 - item._salesPlanListing.discountPercent) / 1000000 : item.price * (1 - (Number(item.discountPercent) || 0) / 100);
     if (state.sort === "low") list.sort((a, b) => listingPrice(a) - listingPrice(b));
@@ -609,7 +623,7 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
   }
   function renderChips() {
     const chips = [];
-    ["brand", "type", "movement", "strap", "color"].forEach((key) =>
+    ["brand", "type", "movement", "strap", "color", "salesPlan"].forEach((key) =>
       state[key].forEach((value) =>
         chips.push(
           (() => {
@@ -619,7 +633,7 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
                 ? `<i class="filter-color-swatch" style="--filter-color: ${metadata.hex}" aria-hidden="true"></i>`
                 : "";
             const label =
-              key === "brand" ? brandDisplayName(value) : ["color", "type"].includes(key) ? metadata.fa : value;
+              key === "brand" ? brandDisplayName(value) : ["color", "type", "salesPlan"].includes(key) ? metadata.fa : value;
             return `<button class="filter-chip${key === "color" ? " filter-chip-color" : ""}" data-key="${key}" data-value="${value}">${swatch}${label} ×</button>`;
           })(),
         ),
@@ -674,7 +688,7 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
   }
   function clearAll() {
     window.clearTimeout(searchRenderTimer);
-    ["brand", "type", "movement", "strap", "color"].forEach((key) => state[key].clear());
+    ["brand", "type", "movement", "strap", "color", "salesPlan"].forEach((key) => state[key].clear());
     state.availability = "all";
     state.discountOnly = false;
     state.minPrice = 0;

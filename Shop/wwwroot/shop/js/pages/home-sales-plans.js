@@ -58,7 +58,6 @@
         salesPlanLabel: plan.label,
         maxPurchaseQuantity: Number(offer.maxPurchaseQuantity),
         offer: true,
-        badge: Number(offer.discountPercent) > 0 ? `${number(offer.discountPercent)}٪ تخفیف` : plan.label || plan.name,
       })}</div>`;
     }).join("")}</div></section>`);
   });
