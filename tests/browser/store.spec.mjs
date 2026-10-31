@@ -24,21 +24,21 @@ test('all home collections render shared cards with one action of each kind', as
     await expect(first.locator('a[href^="/products/"]').first()).toHaveAttribute('href', /-\d+$/);
   }
   const planSections = page.locator('#homeSalesPlans .home-sales-plan');
-  await expect(planSections).toHaveCount(3);
-  await expect(page.locator('#homeSalesPlans .home-sales-plan--regular')).toHaveCount(1);
+  await expect(planSections).toHaveCount(2);
   for (const section of await planSections.all()) {
     const planId = await section.getAttribute('data-sales-plan');
-    expect(['regular', 'digi-af', 'digi-time']).toContain(planId);
+    expect(['digi-af', 'digi-time']).toContain(planId);
     const product = section.locator('.home-sales-plan-grid > div .product-card').first();
     await expect(product).toBeVisible();
     const href = await product.locator('h3 a').getAttribute('href');
-    expect(new URL(href, 'http://localhost').searchParams.get('salesPlanId') || 'regular').toBe(planId);
-    expect(await product.locator('.add-cart').getAttribute('data-sales-plan-id') || 'regular').toBe(planId);
+    expect(new URL(href, 'http://localhost').searchParams.get('salesPlanId')).toBe(planId);
+    expect(await product.locator('.add-cart').getAttribute('data-sales-plan-id')).toBe(planId);
+    await expect(product.locator('.product-sales-plan-badge')).toContainText(await product.getAttribute('data-sales-plan-name'));
     expect(await product.evaluate(element => element.parentElement.classList.contains('col-xl-2'))).toBe(true);
     const columnRatio = await product.evaluate(element => element.parentElement.getBoundingClientRect().width / element.parentElement.parentElement.getBoundingClientRect().width);
     expect(columnRatio).toBeCloseTo(isMobile ? 0.5 : 1 / 6, 1);
   }
-  const planAdd = page.locator('#homeSalesPlans [data-sales-plan-id="digi-time"]').first();
+  const planAdd = page.locator('#homeSalesPlans .add-cart[data-sales-plan-id="digi-time"]').first();
   const planPrice = Number(await planAdd.getAttribute('data-price'));
   await planAdd.click();
   await expect.poll(() => page.evaluate(() => window.HNUI.cart.read().find(item => item.salesPlanId === 'digi-time')?.price)).toBe(planPrice);

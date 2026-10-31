@@ -316,8 +316,8 @@
         price: button.dataset.price,
         image: button.dataset.image,
         salesPlanId: button.dataset.salesPlanId || "regular",
-        salesPlanSnapshot: button.dataset.salesPlanId && button.dataset.salesPlanId !== "regular"
-          ? { id: button.dataset.salesPlanId, name: button.dataset.salesPlanName || "طرح فروش ویژه", code: button.dataset.salesPlanCode || "", label: button.dataset.salesPlanLabel || null, unitAmount: Number(button.dataset.price), currency: "IRT" }
+        salesPlanSnapshot: button.dataset.salesPlanId
+          ? { id: button.dataset.salesPlanId, name: button.dataset.salesPlanName || "طرح فروش ویژه", code: button.dataset.salesPlanCode || "", label: button.dataset.salesPlanLabel || null, unitAmount: Number(button.dataset.price), stockQuantity: Number(button.dataset.stockQuantity), maxPurchaseQuantity: Number(button.dataset.maxPurchaseQuantity), currency: "IRT" }
           : null,
       },
       1,

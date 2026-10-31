@@ -2,7 +2,7 @@
 
 مسیرهای کوتاه `js/` در این صفحه نسبت به `Shop/wwwroot/shop/` هستند. برای ورود از صفحه به script، [نقشهٔ صفحه‌ها](../architecture/routing.md) و [ترتیب اجرا](layout.md) را ببینید.
 
-ورودی ذخیره‌شده در مرورگر باید پیش از رندر escape و validate شود. fallback و migration در storage.js است؛ handler اختصاصی را به ریشهٔ صفحه محدود کنید و با `HNUI.mount` یک‌بار ثبت کنید.
+ورودی ذخیره‌شده در مرورگر باید پیش از رندر escape و validate شود. fallback و migration در storage.js است؛ handler اختصاصی را به ریشهٔ صفحه محدود کنید و با `HNUI.mount` یک‌بار ثبت کنید. کارت مشترک فروشگاه در [product-card.js](../../Shop/wwwroot/shop/js/store/product-card.js) optionهای طرح فروش را دریافت می‌کند؛ renderer صفحهٔ اول در [home-sales-plans.js](../../Shop/wwwroot/shop/js/pages/home-sales-plans.js) پلن عادی را حذف و برای offerهای ویژه کارت می‌سازد. افزودن از این کارت‌ها `salesPlanId` و snapshot نمایشی (نام، کد، مبلغ واحد، موجودی و سقف خرید) را به `HNUI.cart` می‌دهد؛ نام پلن ویژه در کارت و سبد هدر دیده می‌شود، اما پلن عادی برچسب ندارد. snapshot فقط برای نمایش است و Checkout باید آن را از API دوباره اعتبارسنجی کند. قرارداد دامنه در [فروش چندطرحی](../store/sales-plans.md) مرجع است.
 
 
 `store/account-data.js` پس از JSONهای `commerceData` و (فقط در پروفایل) `accountData` اجرا می‌شود و projection فقط‌خواندنی `HNAccountData` را پیش از مصرف سبد و حساب منتشر می‌کند. دادهٔ خراب، غایب یا نسخهٔ ناشناخته به آرایه/پیشنهاد خالی تبدیل می‌شود. bootstrap عمومی سابقهٔ سفارش ندارد.

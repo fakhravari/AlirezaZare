@@ -119,6 +119,8 @@ CSS فعلی با ترتیب stylesheetها cascade می‌شود و از `@laye
 
 ## breakpoint و responsive
 
+در صفحهٔ اول، `.home-sales-plan-grid` چیدمان ستون‌ها را با کلاس‌های Bootstrap تعیین می‌کند: دو ستون در موبایل، چهار ستون در تبلت و شش ستون از `xl` به بالا. فایل `pages/home-collection.css` فقط فاصله و سربرگ بخش‌ها را مالک است؛ اندازه و ظاهر کارت مشترک و نشان `.product-sales-plan-badge` در `store/shared-product-card.css` نگهداری می‌شود. برای نمایش پلن ویژه override جداگانه نسازید؛ renderer مشترک `product-card.js` کلاس نشان را تولید می‌کند. جزئیات رفتار و قرارداد داده در [فروش چندطرحی](../store/sales-plans.md) ثبت شده است.
+
 مقادیر رایج فعلی 380، 389/390، 575، 640، 767/768 و 991/992px هستند؛ برخی صفحه‌ها مرزهای دیگری دارند. این‌ها سیستم breakpoint واحد و رسمی نیستند. قواعد هم‌پوشان را با بررسی همان viewport اصلاح کنید.
 
 کلاس بدنه از controller/action ساخته می‌شود؛ Search با View نام List، کلاس `mobile-page--product-index` دارد. قاعده را از روی نام فایل View حدس نزنید. در جدول زیر یا snapshot قدیمی به‌دنبال آخرین media query نگردید؛ منبع جاری را بخوانید:
