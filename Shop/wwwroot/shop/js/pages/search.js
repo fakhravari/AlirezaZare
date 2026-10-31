@@ -1,5 +1,36 @@
 window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".search-main"), () => {
   const products = window.HNProducts;
+  const salesPlansData = (() => {
+    try {
+      return JSON.parse(document.querySelector("#storeSalesPlans")?.textContent || "{}");
+    } catch {
+      return {};
+    }
+  })();
+  const activePlanListings = (() => {
+    const plans = new Map((salesPlansData.plans || []).map((plan) => [plan.id, plan]));
+    const now = Date.now();
+    return (salesPlansData.offers || []).flatMap((offer) => {
+      const product = products.find((item) => Number(item.id) === Number(offer.productId));
+      const plan = plans.get(offer.salesPlanId);
+      if (!product || !plan || plan.isDefault || plan.isEnabled === false || offer.isEnabled === false || Number(offer.stockQuantity) <= 0) return [];
+      if ((plan.startsAtUtc && now < Date.parse(plan.startsAtUtc)) || (plan.endsAtUtc && now >= Date.parse(plan.endsAtUtc))) return [];
+      return [{
+        ...product,
+        _salesPlanListing: {
+          id: plan.id,
+          code: plan.code,
+          name: plan.name,
+          label: plan.label,
+          priceAmount: Number(offer.priceAmount),
+          discountPercent: Number(offer.discountPercent) || 0,
+          stockQuantity: Number(offer.stockQuantity),
+          maxPurchaseQuantity: Number(offer.maxPurchaseQuantity) || 99,
+        },
+      }];
+    });
+  })();
+  const listings = [...products, ...activePlanListings];
   const $ = (selector) => document.querySelector(selector);
   const $$ = (selector) => [...document.querySelectorAll(selector)];
   const state = {
@@ -437,8 +468,16 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
   }
   function getFiltered() {
     const selectedTypes = [...state.type];
-    let list = products.filter(
+    let list = listings.filter(
       (p) =>
+        (() => {
+          const offer = p._salesPlanListing;
+          const price = offer ? offer.priceAmount / 1000000 : p.price;
+          const discounted = offer ? offer.discountPercent > 0 : isProductDiscounted(p);
+          const available = offer ? offer.stockQuantity > 0 : isProductAvailable(p);
+          return (state.availability === "all" || (state.availability === "in-stock" ? available : !available)) &&
+            (!state.discountOnly || discounted) && price >= state.minPrice && price <= state.maxPrice;
+        })() &&
         (!state.brand.size || state.brand.has(p.brand)) &&
         (!selectedTypes.length || selectedTypes.some((type) =>
           window.HNCatalog?.categoryContains?.(type, p.categoryId))) &&
@@ -446,22 +485,25 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
         (!state.strap.size || state.strap.has(p.useCase || p.strap)) &&
         (!state.color.size ||
           (p.colors || []).some((color) => state.color.has(color.slug))) &&
-        (state.availability === "all" ||
-          (state.availability === "in-stock"
-            ? isProductAvailable(p)
-            : !isProductAvailable(p))) &&
-        (!state.discountOnly || isProductDiscounted(p)) &&
-        p.price >= state.minPrice &&
-        p.price <= state.maxPrice &&
         (!state.query ||
-          `${p.name} ${p.brand} ${p.type} ${p.powerSource || p.movement}`.includes(state.query)),
+          `${p.name} ${p.brand} ${p.type} ${p.powerSource || p.movement} ${p._salesPlanListing?.name || ""} ${p._salesPlanListing?.label || ""}`.includes(state.query)),
     );
-    if (state.sort === "low") list.sort((a, b) => a.price - b.price);
-    if (state.sort === "high") list.sort((a, b) => b.price - a.price);
+    const listingPrice = (item) => item._salesPlanListing ? item._salesPlanListing.priceAmount * (100 - item._salesPlanListing.discountPercent) / 1000000 : item.price * (1 - (Number(item.discountPercent) || 0) / 100);
+    if (state.sort === "low") list.sort((a, b) => listingPrice(a) - listingPrice(b));
+    if (state.sort === "high") list.sort((a, b) => listingPrice(b) - listingPrice(a));
     if (state.sort === "newest") list.sort((a, b) => a.newest - b.newest);
     return list;
   }
-  const card = (product) => window.HNProductCard.render(product, {variant: "search"});
+  const card = (product) => {
+    const offer = product._salesPlanListing;
+    return window.HNProductCard.render(product, {
+      variant: "search",
+      ...(offer ? {salesPlanId: offer.id, salesPlanCode: offer.code, salesPlanName: offer.name,
+        salesPlanLabel: offer.label, priceAmount: offer.priceAmount,
+        discountPercent: offer.discountPercent, stockQuantity: offer.stockQuantity,
+        maxPurchaseQuantity: offer.maxPurchaseQuantity} : {}),
+    });
+  };
   function scrollToResultsStart() {
     const results = document.querySelector(".results-area");
     if (!results) return;

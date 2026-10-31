@@ -1,9 +1,17 @@
 (function (window, document) {
   "use strict";
 
-  const root = document.querySelector("#homeSalesPlans");
-  const content = document.querySelector("#homeSalesPlansContent");
-  if (!root || !content || !window.HNCatalog || !window.HNProductCard) return;
+  const destinations = {
+    featured: {
+      root: document.querySelector("#homeSalesTime"),
+      content: document.querySelector("#homeSalesTimeContent"),
+    },
+    collection: {
+      root: document.querySelector("#homeSalesPlans"),
+      content: document.querySelector("#homeSalesPlansContent"),
+    },
+  };
+  if (Object.values(destinations).some(({ root, content }) => !root || !content) || !window.HNCatalog || !window.HNProductCard) return;
 
   let catalog = {};
   let sales = {};
@@ -28,11 +36,17 @@
   }).filter(([, product]) => Boolean(product)));
   const escape = window.HNUI.escapeHtml;
   const number = window.HNUI.formatNumber;
-  const sections = plans.map((plan) => {
+  const sections = {featured: [], collection: []};
+  plans.forEach((plan) => {
     const offers = (sales.offers || []).filter((offer) =>
       offer.salesPlanId === plan.id && offer.isEnabled && Number(offer.stockQuantity) > 0 && products.has(Number(offer.productId)));
-    if (!offers.length) return "";
-    return `<section class="home-sales-plan" data-sales-plan="${escape(plan.id)}" aria-labelledby="homeSalesPlan-${escape(plan.id)}-title"><header class="category-showcase-head"><div><span class="eyebrow dark">پیشنهادهای فروشگاه</span><h2 id="homeSalesPlan-${escape(plan.id)}-title">${escape(plan.name)}</h2>${plan.label ? `<p>${escape(plan.label)}</p>` : ""}</div><a href="/search">مشاهدهٔ همهٔ کالاها <i class="bi bi-arrow-left" aria-hidden="true"></i></a></header><div class="row g-3 home-sales-plan-grid" aria-label="کالاهای طرح ${escape(plan.name)}">${offers.map((offer) => {
+    if (!offers.length) return;
+    const placement = plan.type === "digi-time" ? "featured" : "collection";
+    const endTime = plan.endsAtUtc ? Date.parse(plan.endsAtUtc) : NaN;
+    const countdown = Number.isFinite(endTime)
+      ? `<div class="home-sales-plan-countdown"><span><i class="bi bi-hourglass-split" aria-hidden="true"></i> فرصت باقی‌مانده</span><time data-sales-plan-countdown="${escape(plan.endsAtUtc)}"></time></div>`
+      : "";
+    sections[placement].push(`<section class="home-sales-plan" data-sales-plan="${escape(plan.id)}" aria-labelledby="homeSalesPlan-${escape(plan.id)}-title"><header class="category-showcase-head"><div><span class="eyebrow dark">پیشنهادهای فروشگاه</span><h2 id="homeSalesPlan-${escape(plan.id)}-title">${escape(plan.name)}</h2>${countdown}${plan.label ? `<p>${escape(plan.label)}</p>` : ""}</div><a href="/search">مشاهدهٔ همهٔ کالاها <i class="bi bi-arrow-left" aria-hidden="true"></i></a></header><div class="row g-3 home-sales-plan-grid" aria-label="کالاهای طرح ${escape(plan.name)}">${offers.map((offer) => {
       const product = products.get(Number(offer.productId));
       return `<div class="col-6 col-sm-4 col-md-3 col-xl-2">${window.HNProductCard.render(product, {
         salesPlanId: plan.id,
@@ -46,11 +60,33 @@
         offer: true,
         badge: Number(offer.discountPercent) > 0 ? `${number(offer.discountPercent)}٪ تخفیف` : plan.label || plan.name,
       })}</div>`;
-    }).join("")}</div></section>`;
-  }).join("");
-  if (!sections) return;
+    }).join("")}</div></section>`);
+  });
 
-  content.innerHTML = sections;
-  root.hidden = false;
-  window.HNUI.enhance?.(root);
+  Object.entries(destinations).forEach(([placement, {root, content}]) => {
+    const markup = sections[placement].join("");
+    if (!markup) return;
+    content.innerHTML = markup;
+    root.hidden = false;
+    const updateCountdowns = () => content.querySelectorAll("[data-sales-plan-countdown]").forEach((timer) => {
+      const remaining = Math.max(0, Date.parse(timer.dataset.salesPlanCountdown) - Date.now());
+      if (!remaining) {
+        timer.textContent = "پایان‌یافته";
+        timer.closest(".home-sales-plan-countdown")?.classList.add("is-expired");
+        return;
+      }
+      const totalSeconds = Math.floor(remaining / 1000);
+      const days = Math.floor(totalSeconds / 86400);
+      const hours = Math.floor((totalSeconds % 86400) / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = totalSeconds % 60;
+      const pad = (value) => number(value).padStart(2, "۰");
+      const clock = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+      timer.innerHTML = `${days ? `<span class="sales-plan-countdown-days" dir="rtl">${number(days)} روز</span>` : ""}<bdi dir="ltr">${clock}</bdi>`;
+      timer.setAttribute("aria-label", `${days ? `${number(days)} روز و ` : ""}${number(hours)} ساعت و ${number(minutes)} دقیقه و ${number(seconds)} ثانیه`);
+    });
+    updateCountdowns();
+    if (content.querySelector("[data-sales-plan-countdown]")) window.setInterval(updateCountdowns, 1000);
+    window.HNUI.enhance?.(root);
+  });
 })(window, document);

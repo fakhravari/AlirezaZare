@@ -83,7 +83,8 @@
             "Shop/Views/Product/List.cshtml"
           ],
           "data": [
-            "Shop/wwwroot/content/data/catalog.json"
+            "Shop/wwwroot/content/data/catalog.json",
+            "Shop/App_Data/sales-plans-demo.json"
           ],
           "js": [
             "Shop/wwwroot/shop/js/pages/search.js",

@@ -6485,22 +6485,6 @@ html
   font-size: 13px;
 }
 
-/* Preserve the full product photo and leave a clear frame around it. */
-.home-page
-  :is(
-    .product-card .product-image img,
-    .showcase-card .product-image img,
-    .rail-card .rail-image img
-  ) {
-  box-sizing: border-box;
-  padding: 8px !important;
-  border: 1px solid #dce3e8;
-  border-radius: 12px;
-  background: #fff !important;
-  object-fit: contain !important;
-  object-position: center;
-}
-
 /* Search cards use the entire image frame, without the padding used by home cards. */
 .inner-page .search-product.product-card .search-product-image img {
   display: block;
@@ -6610,7 +6594,6 @@ html
 
 /* Match product copy and pricing across the cart, compare, and favorites drawers. */
 
-#cartPanel .cart-item-info > span,
 :is(#favoritesPanel, #comparePanel) .compare-panel-item > span > small {
   font-size: 14px !important;
   line-height: 1.5;
@@ -9805,87 +9788,8 @@ html
   box-shadow: 0 3px 8px rgba(166, 123, 0, 0.2) !important;
 }
 
-/* Header cart item: title above a balanced price / quantity / remove row. */
-#cartPanel .cart-item-info {
-  grid-template-columns: minmax(0, 1fr) auto;
-  grid-template-areas:
-    "title title"
-    "price quantity";
-  align-items: center;
-  column-gap: 8px;
-  row-gap: 4px;
-}
-
-#cartPanel .cart-item-info > strong {
-  grid-area: title;
-}
-
-#cartPanel .cart-item-info > span {
-  grid-area: price;
-  align-self: center;
-  margin: 0 !important;
-  white-space: nowrap;
-}
-
-#cartPanel .cart-item-info > .cart-quantity {
-  grid-area: quantity;
-  justify-self: end;
-  min-height: 30px;
-  gap: 3px !important;
-  padding: 0 !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
-  align-self: center;
-}
-
-#cartPanel .cart-item-info > .cart-quantity > button,
-#cartPanel .cart-item-info > .cart-quantity > button[data-action="plus"] {
-  width: 30px !important;
-  min-width: 30px;
-  height: 30px !important;
-  min-height: 30px;
-  border: 1px solid #e5dac8 !important;
-  border-radius: 50% !important;
-  background: #fffdf9 !important;
-  color: #8b6b3a !important;
-  box-shadow: 0 2px 4px #142e5105 !important;
-}
-
-#cartPanel .cart-item-info > .cart-quantity > button[data-action="plus"] {
-  border-color: #e8bd34 !important;
-  background: linear-gradient(145deg, #ffdf68, #f6c515) !important;
-  color: #142e51 !important;
-}
-
-#cartPanel .cart-item-info > .cart-quantity > b {
-  min-width: 25px;
-  height: auto;
-  background: #fff !important;
-  color: #142e51 !important;
-  font-size: 13px !important;
-}
-
 #cartPanel .cart-item > .cart-remove {
   margin-bottom: 0;
-}
-
-@media (max-width: 420px) {
-  #cartPanel .cart-item-info {
-    column-gap: 5px;
-  }
-
-  #cartPanel .cart-item-info > .cart-quantity > button {
-    width: 27px !important;
-    min-width: 27px;
-    height: 27px !important;
-    min-height: 27px;
-  }
-
-  #cartPanel .cart-item-info > .cart-quantity > b {
-    min-width: 21px;
-  }
 }
 
 #cartPanel .cart-item-info .cart-quantity > b {
@@ -9947,15 +9851,7 @@ html
   align-items: center;
 }
 
-#cartPanel .cart-item-info {
-  display: grid !important;
-  grid-template-columns: minmax(0, 1fr);
-  grid-template-areas: "title" "actions";
-  gap: 6px;
-}
-
 #cartPanel .cart-item-info > .cart-item-actions {
-  grid-area: actions;
   display: grid;
   min-width: 0;
   grid-template-columns: minmax(0, 1fr) auto 32px;
@@ -10209,12 +10105,6 @@ html
   min-width: 20px;
 }
 
-#cartPanel .cart-item > img {
-  aspect-ratio: 1 / 1;
-  align-self: center;
-  object-fit: cover !important;
-}
-
 @media (max-width: 420px) {
   #cartPanel .cart-item-controls > .cart-quantity > button {
     width: 26px !important;
@@ -10227,8 +10117,6 @@ html
     min-width: 18px;
   }
 
-  #cartPanel .cart-item > img {
-  }
 }
 
 /* Use square, edge-to-edge product imagery in favorites and compare surfaces. */

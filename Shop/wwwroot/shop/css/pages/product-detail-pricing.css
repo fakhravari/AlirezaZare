@@ -54,6 +54,17 @@
 #productView .product-sales-plan span { display: grid; gap: 2px; }
 #productView .product-sales-plan small,
 #productView .product-sales-plan time { color: var(--ink-muted, #60758a); font-size: .72rem; }
+#productView .product-sales-plan time {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  direction: rtl;
+  unicode-bidi: isolate;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+#productView .product-sales-plan time bdi { direction: ltr; unicode-bidi: isolate; }
+#productView .product-sales-plan time .sales-plan-countdown-days { direction: rtl; unicode-bidi: isolate; }
 
 #productView .product-detail-price > .detail-price-heading {
   display: none;

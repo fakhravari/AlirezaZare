@@ -17,11 +17,36 @@
   max-height: 220px !important;
 }
 
-.product-card:not(.product-detail-related-card):not(.favorite-item-card) .product-image > a > img,
-.product-card:not(.product-detail-related-card) .product-image > img,
+.product-card:not(.product-detail-related-card):not(.favorite-item-card):not([data-sales-plan-id]:not([data-sales-plan-id="regular"])) .product-image > a > img,
+.product-card:not(.product-detail-related-card):not([data-sales-plan-id]:not([data-sales-plan-id="regular"])) .product-image > img,
 .search-product.product-card .search-product-image img {
   padding: 12px;
   object-fit: contain !important;
+}
+
+/* Preserve framed photos on other home cards; special sales-plan cards stay edge-to-edge. */
+.home-page
+  :is(
+    .product-card:not([data-sales-plan-id]:not([data-sales-plan-id="regular"])) .product-image img,
+    .showcase-card .product-image img,
+    .rail-card .rail-image img
+  ) {
+  box-sizing: border-box;
+  padding: 8px;
+  border: 1px solid #dce3e8;
+  border-radius: 12px;
+  background: #fff;
+  object-fit: contain;
+  object-position: center;
+}
+
+/* Sales-plan cards use the full media frame and identify the plan on the image. */
+.home-page #homeSalesPlans .product-card[data-sales-plan-id]:not([data-sales-plan-id="regular"]) .product-image > a > img {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  object-fit: cover;
 }
 
 .product-card > .add-cart,
@@ -781,6 +806,20 @@
   font-size: 11px;
   font-weight: 700;
   line-height: 1.5;
+}
+
+.product-sales-plan-badge--overlay {
+  position: absolute;
+  z-index: 2;
+  top: 16px;
+  right: 15px;
+  margin: 0;
+  min-height: 32px;
+  padding: 3px 12px;
+  border-color: rgba(255, 255, 255, 0.7);
+  background: var(--industrial-yellow, #f6c515);
+  color: var(--industrial-navy, #102b43);
+  box-shadow: 0 5px 13px rgba(4, 13, 26, 0.18);
 }
 
 .product-sales-plan-badge i {

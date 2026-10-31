@@ -12,12 +12,218 @@
   margin-block-start: clamp(38px, 5vw, 64px);
 }
 
+.home-sales-plan {
+  position: relative;
+  padding: clamp(14px, 2.1vw, 26px);
+  overflow: hidden;
+  border: 1px solid rgba(178, 138, 79, 0.24);
+  border-radius: 26px;
+  background:
+    radial-gradient(ellipse at 2% 4%, rgba(246, 197, 21, 0.09), transparent 28%),
+    linear-gradient(145deg, #fffaf0 0%, #fff 48%, #f7f9fa 100%);
+  box-shadow: 0 18px 46px rgba(16, 42, 67, 0.08);
+  isolation: isolate;
+}
+
+.home-sales-plan[data-sales-plan="digi-time"] {
+  border-color: rgba(202, 158, 54, 0.38);
+  background:
+    radial-gradient(ellipse at 0% 0%, rgba(246, 197, 21, 0.16), transparent 32%),
+    linear-gradient(145deg, #fff9e9 0%, #fff 54%, #f6f9fb 100%);
+}
+
+.home-sales-plan[data-sales-plan="digi-af"] {
+  border-color: rgba(49, 119, 111, 0.26);
+  background:
+    radial-gradient(ellipse at 100% 0%, rgba(96, 171, 151, 0.13), transparent 34%),
+    linear-gradient(145deg, #f2f9f6 0%, #fff 52%, #fffaf0 100%);
+}
+
 .home-sales-plan .category-showcase-head {
-  margin-block-end: 20px;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 22px;
+  margin-block-end: 22px;
+  padding: clamp(17px, 2vw, 25px);
+  overflow: hidden;
+  border: 1px solid rgba(246, 197, 21, 0.32);
+  border-block-end: 1px solid rgba(246, 197, 21, 0.32);
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at 8% 120%, rgba(246, 197, 21, 0.23), transparent 34%),
+    linear-gradient(120deg, #102a43 0%, #173b56 55%, #244b62 100%);
+  box-shadow: 0 12px 26px rgba(16, 42, 67, 0.17);
+}
+
+.home-sales-plan .category-showcase-head::after {
+  position: absolute;
+  z-index: -1;
+  inset-block: -80%;
+  inset-inline-end: 12%;
+  width: 210px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 50%;
+  content: "";
+  pointer-events: none;
+}
+
+.home-sales-plan .category-showcase-head > div,
+.home-sales-plan .category-showcase-head > a {
+  position: relative;
+  z-index: 1;
+}
+
+.home-sales-plan .category-showcase-head .eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-block-end: 2px;
+  padding: 5px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffdf78;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.home-sales-plan .category-showcase-head .eyebrow::before {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #f6c515;
+  box-shadow: 0 0 0 4px rgba(246, 197, 21, 0.14);
+  content: "";
 }
 
 .home-sales-plan .category-showcase-head h2 {
-  margin-block: 5px 0;
+  margin-block: 6px 0;
+  color: #fff;
+  font-size: clamp(23px, 2.4vw, 34px);
+  font-weight: 900;
+  line-height: 1.45;
+  text-wrap: balance;
+}
+
+.home-sales-plan .category-showcase-head p {
+  margin-block: 8px 0;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.home-sales-plan .category-showcase-head > a {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-height: 44px;
+  padding: 10px 15px;
+  border: 1px solid rgba(255, 223, 120, 0.7);
+  border-radius: 12px;
+  background: linear-gradient(135deg, #ffe58a, #f6c515);
+  color: #182f43;
+  font-size: 13px;
+  font-weight: 800;
+  text-decoration: none;
+  box-shadow: 0 5px 15px rgba(5, 18, 30, 0.18);
+  transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
+}
+
+.home-sales-plan .category-showcase-head > a:is(:hover, :focus-visible) {
+  background: linear-gradient(135deg, #fff0b5, #ffda51);
+  box-shadow: 0 8px 20px rgba(5, 18, 30, 0.24);
+  transform: translateY(-2px);
+}
+
+.home-sales-plan .category-showcase-head > a:focus-visible {
+  outline: 3px solid rgba(255, 229, 138, 0.72);
+  outline-offset: 3px;
+}
+
+.home-sales-plan[data-sales-plan="digi-af"] .category-showcase-head {
+  border-color: rgba(165, 221, 195, 0.45);
+  border-block-end-color: rgba(165, 221, 195, 0.45);
+  background:
+    radial-gradient(circle at 8% 120%, rgba(116, 202, 165, 0.24), transparent 34%),
+    linear-gradient(120deg, #16474a 0%, #1b5b5c 55%, #2c6c68 100%);
+}
+
+.home-sales-plan[data-sales-plan="digi-af"] .category-showcase-head .eyebrow {
+  color: #bcebd3;
+}
+
+.home-sales-plan[data-sales-plan="digi-af"] .category-showcase-head .eyebrow::before {
+  background: #83d5a8;
+  box-shadow: 0 0 0 4px rgba(131, 213, 168, 0.15);
+}
+
+.home-sales-plan[data-sales-plan="digi-af"] .category-showcase-head > a {
+  border-color: rgba(176, 226, 196, 0.72);
+  background: linear-gradient(135deg, #d5f3df, #a9dfbd);
+}
+
+.home-sales-plan[data-sales-plan="digi-af"] .category-showcase-head > a:is(:hover, :focus-visible) {
+  background: linear-gradient(135deg, #e7faed, #c1ebcf);
+}
+
+.home-sales-plan-countdown {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin-block-start: 13px;
+  padding: 8px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  background: rgba(7, 22, 36, 0.32);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.home-sales-plan-countdown > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+.home-sales-plan-countdown time {
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: flex-start;
+  gap: 7px;
+  direction: rtl;
+  unicode-bidi: isolate;
+  color: #ffdf78;
+  font-size: 14px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.home-sales-plan-countdown time bdi {
+  direction: ltr;
+  unicode-bidi: isolate;
+  letter-spacing: 0.035em;
+  font-variant-numeric: tabular-nums;
+}
+
+.home-sales-plan-countdown time .sales-plan-countdown-days {
+  direction: rtl;
+  unicode-bidi: isolate;
+  letter-spacing: 0;
+}
+
+.home-sales-plan-countdown.is-expired {
+  border-color: rgba(80, 80, 80, 0.15);
+  background: #f3f4f5;
+  color: #626a72;
 }
 
 .home-sales-plan-grid {
@@ -36,7 +242,25 @@
   .home-sales-plan .category-showcase-head {
     align-items: flex-start;
     flex-direction: column;
-    gap: 8px;
+    gap: 13px;
+    padding: 16px;
+    border-radius: 16px;
+  }
+
+  .home-sales-plan .category-showcase-head > div {
+    width: 100%;
+  }
+
+  .home-sales-plan .category-showcase-head > a {
+    min-height: 42px;
+    padding-inline: 13px;
+  }
+
+  .home-sales-plan-countdown {
+    max-width: 100%;
+    gap: 9px;
+    padding: 7px 9px;
+    font-size: 11px;
   }
 
 }
