@@ -37,7 +37,7 @@
       .map((offer) => [Number(offer.productId), offer]));
     const defaultProducts = collection.map((id) => products.get(Number(id))).filter(Boolean);
     if (defaultProducts.length) {
-      const filters = `<nav class="home-sales-plan-filters" aria-label="دسته‌بندی کالاها"><button type="button" class="is-active" data-home-plan-filter="all" aria-pressed="true">همه</button><button type="button" data-home-plan-filter="power-tools" aria-pressed="false">ابزار برقی</button><button type="button" data-home-plan-filter="measurement" aria-pressed="false">اندازه‌گیری</button><button type="button" data-home-plan-filter="electronics" aria-pressed="false">لحیم‌کاری</button><button type="button" data-home-plan-filter="lighting" aria-pressed="false">روشنایی</button></nav>`;
+      const filters = `<nav class="home-sales-plan-filters" aria-label="دسته‌بندی کالاها"><button type="button" class="is-active" data-home-plan-filter="all" aria-pressed="true"><i class="bi bi-grid-3x3-gap-fill" aria-hidden="true"></i> همه</button><button type="button" data-home-plan-filter="power-tools" aria-pressed="false"><i class="bi bi-lightning-charge" aria-hidden="true"></i> ابزار برقی</button><button type="button" data-home-plan-filter="measurement" aria-pressed="false"><i class="bi bi-speedometer2" aria-hidden="true"></i> اندازه‌گیری</button><button type="button" data-home-plan-filter="electronics" aria-pressed="false"><i class="bi bi-cpu" aria-hidden="true"></i> لحیم‌کاری</button><button type="button" data-home-plan-filter="lighting" aria-pressed="false"><i class="bi bi-lightbulb" aria-hidden="true"></i> روشنایی</button></nav>`;
       const cards = defaultProducts.map((product) => {
         const offer = regularOffers.get(Number(product.id));
         if (!offer) return "";
@@ -74,9 +74,22 @@
       })}</div>`;
     }).join("")}</div></section>`;
   }).join("");
-  if (!sections) return;
+  if (!sections && !content.innerHTML) return;
 
-  content.innerHTML = sections;
+  content.insertAdjacentHTML("beforeend", sections);
   root.hidden = false;
+  root.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-home-plan-filter]");
+    if (!button) return;
+    const selected = button.dataset.homePlanFilter;
+    root.querySelectorAll("[data-home-plan-filter]").forEach((filter) => {
+      const active = filter === button;
+      filter.classList.toggle("is-active", active);
+      filter.setAttribute("aria-pressed", String(active));
+    });
+    root.querySelectorAll(".home-sales-plan--regular .home-sales-plan-column").forEach((column) => {
+      column.hidden = selected !== "all" && column.dataset.category !== selected;
+    });
+  });
   window.HNUI.enhance?.(root);
 })(window, document);
