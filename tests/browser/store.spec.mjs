@@ -13,6 +13,7 @@ async function noHorizontalOverflow(page) {
 
 test('all home collections render shared cards with one action of each kind', async ({page, isMobile}) => {
   await page.addInitScript(() => localStorage.setItem('hn-demo-auth', '1'));
+  await page.clock.install({time: new Date('2026-11-01T10:00:00Z')});
   await page.goto('/');
   for (const selector of ['#productGrid', '#bestsellersSlider', '#newestSlider']) {
     const cards = page.locator(`${selector} [data-product-card="v1"]`);
@@ -64,7 +65,11 @@ test('all home collections render shared cards with one action of each kind', as
     expect(new URL(href, 'http://localhost').searchParams.get('salesPlanId')).toBe(planId);
     expect(await product.locator('.add-cart').getAttribute('data-sales-plan-id')).toBe(planId);
     await expect(product.locator('.product-sales-plan-badge')).toContainText(await product.getAttribute('data-sales-plan-name'));
-    await expect(section.locator('[data-sales-plan-countdown]')).toBeVisible();
+    const countdown = section.locator('[data-sales-plan-countdown]');
+    await expect(countdown).toBeVisible();
+    if (planId === 'digi-time') await expect(countdown).not.toContainText('روز');
+    else await expect(countdown).toContainText('روز');
+    await expect(countdown.locator('bdi[dir="ltr"]')).toHaveText(/[۰-۹]{2}:[۰-۹]{2}:[۰-۹]{2}/);
     expect(await product.evaluate(element => element.parentElement.classList.contains('col-xl-2'))).toBe(true);
     const columnRatio = await product.evaluate(element => element.parentElement.getBoundingClientRect().width / element.parentElement.parentElement.getBoundingClientRect().width);
     expect(columnRatio).toBeCloseTo(isMobile ? 0.5 : 1 / 6, 1);
@@ -162,7 +167,7 @@ test('product plan selection uses the matching quote and recovers cleanly from a
   const underDayCountdown = page.locator('[data-plan-countdown]');
   await expect(underDayCountdown).toBeVisible();
   await expect(underDayCountdown).not.toContainText('روز');
-  await expect(underDayCountdown.locator('bdi[dir="ltr"]')).toHaveText(/\d{2}:\d{2}:\d{2}/);
+  await expect(underDayCountdown.locator('bdi[dir="ltr"]')).toHaveText(/[۰-۹]{2}:[۰-۹]{2}:[۰-۹]{2}/);
   const selectedPrice = await page.evaluate(() => Number(
     window.HNUI.toEnglishDigits(document.querySelector('#productFinalPrice').textContent).replace(/\D/g, ''),
   ));
@@ -173,10 +178,15 @@ test('product plan selection uses the matching quote and recovers cleanly from a
   expect(await page.evaluate(() => window.HNUI.cart.read()[0]?.salesPlanId)).toBe('digi-time');
   expect(await page.evaluate(() => window.HNUI.cart.read()[0]?.salesPlanSnapshot?.accessoryPriceAmounts?.['shipping-insurance'])).toBe(245000);
 
-  await page.goto('/products/cordless-hammer-drill-1?salesPlanId=digi-af');
+  const digiAfUrl = await page.evaluate(() => {
+    const plans = JSON.parse(document.querySelector('#storeSalesPlans').textContent);
+    const offer = plans.offers.find(item => item.salesPlanId === 'digi-af');
+    return `${window.HNCatalog.url(offer.productId)}?salesPlanId=digi-af`;
+  });
+  await page.goto(digiAfUrl);
   const overDayCountdown = page.locator('[data-plan-countdown]');
   await expect(overDayCountdown).toContainText('روز');
-  await expect(overDayCountdown.locator('bdi[dir="ltr"]')).toHaveText(/\d{2}:\d{2}:\d{2}/);
+  await expect(overDayCountdown.locator('bdi[dir="ltr"]')).toHaveText(/[۰-۹]{2}:[۰-۹]{2}:[۰-۹]{2}/);
 
   await page.clock.setFixedTime(new Date('2027-01-01T00:00:00Z'));
   await page.goto('/products/cordless-hammer-drill-1?salesPlanId=digi-time');
