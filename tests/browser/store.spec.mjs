@@ -24,15 +24,16 @@ test('all home collections render shared cards with one action of each kind', as
     await expect(first.locator('a[href^="/products/"]').first()).toHaveAttribute('href', /-\d+$/);
   }
   const planSections = page.locator('#homeSalesPlans .home-sales-plan');
-  await expect(planSections).toHaveCount(2);
+  await expect(planSections).toHaveCount(3);
+  await expect(page.locator('#homeSalesPlans .home-sales-plan--regular')).toHaveCount(1);
   for (const section of await planSections.all()) {
     const planId = await section.getAttribute('data-sales-plan');
-    expect(['digi-af', 'digi-time']).toContain(planId);
+    expect(['regular', 'digi-af', 'digi-time']).toContain(planId);
     const product = section.locator('.home-sales-plan-grid > div .product-card').first();
     await expect(product).toBeVisible();
     const href = await product.locator('h3 a').getAttribute('href');
-    expect(new URL(href, 'http://localhost').searchParams.get('salesPlanId')).toBe(planId);
-    expect(await product.locator('.add-cart').getAttribute('data-sales-plan-id')).toBe(planId);
+    expect(new URL(href, 'http://localhost').searchParams.get('salesPlanId') || 'regular').toBe(planId);
+    expect(await product.locator('.add-cart').getAttribute('data-sales-plan-id') || 'regular').toBe(planId);
     expect(await product.evaluate(element => element.parentElement.classList.contains('col-xl-2'))).toBe(true);
     const columnRatio = await product.evaluate(element => element.parentElement.getBoundingClientRect().width / element.parentElement.parentElement.getBoundingClientRect().width);
     expect(columnRatio).toBeCloseTo(isMobile ? 0.5 : 1 / 6, 1);
@@ -41,6 +42,7 @@ test('all home collections render shared cards with one action of each kind', as
   const planPrice = Number(await planAdd.getAttribute('data-price'));
   await planAdd.click();
   await expect.poll(() => page.evaluate(() => window.HNUI.cart.read().find(item => item.salesPlanId === 'digi-time')?.price)).toBe(planPrice);
+  await expect(page.locator('#cartPanel .cart-sales-plan-badge')).toContainText(/دیجی‌تایم/);
   await noHorizontalOverflow(page);
 });
 

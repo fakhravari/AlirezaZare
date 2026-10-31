@@ -1233,8 +1233,10 @@ $(function () {
           const safeId = escapeHtml(item.id);
           const safeName = escapeHtml(item.name);
           const safeImage = escapeHtml(item.image);
-          const href = window.HNProductUrl?.(item.id) || "/search";
-          return `<div class="cart-item" data-cart-id="${safeId}" data-sales-plan-id="${escapeHtml(item.salesPlanId || "regular")}"><img src="${safeImage}" alt="${safeName}" loading="lazy" decoding="async"><div class="cart-item-info"><strong><a class="header-panel-product-link" href="${escapeHtml(href)}">${safeName}</a></strong>${cartOptionsMarkup(item)}<div class="cart-item-actions"><span>${faNumber(item.price)} تومان</span>${window.HNUI.cart.renderControls(item)}</div></div></div>`;
+          const productUrl = window.HNProductUrl?.(item.id) || "/search";
+          const href = item.salesPlanId && item.salesPlanId !== "regular" ? `${productUrl}${productUrl.includes("?") ? "&" : "?"}salesPlanId=${encodeURIComponent(item.salesPlanId)}` : productUrl;
+          const planBadge = item.salesPlanSnapshot?.name && item.salesPlanId !== "regular" ? `<span class="cart-sales-plan-badge">${escapeHtml(item.salesPlanSnapshot.name)}</span>` : "";
+          return `<div class="cart-item" data-cart-id="${safeId}" data-sales-plan-id="${escapeHtml(item.salesPlanId || "regular")}"><img src="${safeImage}" alt="${safeName}" loading="lazy" decoding="async"><div class="cart-item-info"><strong><a class="header-panel-product-link" href="${escapeHtml(href)}">${safeName}</a></strong>${planBadge}${cartOptionsMarkup(item)}<div class="cart-item-actions"><span>${faNumber(item.price)} تومان</span>${window.HNUI.cart.renderControls(item)}</div></div></div>`;
         })
         .join(""),
     );
