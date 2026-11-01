@@ -7095,6 +7095,7 @@ html
 #favoritesPanel,
 #comparePanel {
   border: 1px solid rgba(180, 137, 77, 0.32) !important;
+  border-top: 3px solid var(--industrial-yellow, #f6c515) !important;
   border-radius: 0 0 22px 22px !important;
   background: rgba(255, 253, 249, 0.98) !important;
   box-shadow:
