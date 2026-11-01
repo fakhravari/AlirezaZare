@@ -2,6 +2,44 @@
   "use strict";
   if (window.HNCartModel) return;
   window.HNCartModel = Object.freeze({ create({ document, emit, storage, cartKey, requireLogin, formatNumber, escapeHtml }) {
+  const getSalesPlanData = () => {
+    try {
+      return JSON.parse(document.querySelector("#storeSalesPlans")?.textContent || "{}");
+    } catch {
+      return {};
+    }
+  };
+  const sortBySalesPlan = (items, getId = (item) => item?.salesPlanId || "regular") => {
+    const data = getSalesPlanData();
+    const plans = Array.isArray(data.plans) ? data.plans : [];
+    const campaignPlans = plans.filter((plan) => !plan.isDefault && plan.type !== "regular" && plan.id !== "regular");
+    const typeOrder = [...new Set(campaignPlans.map((plan) => String(plan.type || plan.id)))];
+    const ranks = new Map(campaignPlans.map((plan, index) => [String(plan.id), [0, typeOrder.indexOf(String(plan.type || plan.id)), index, String(plan.id)]]));
+    plans.filter((plan) => plan.isDefault || plan.type === "regular" || plan.id === "regular")
+      .forEach((plan, index) => ranks.set(String(plan.id), [1, index, index, String(plan.id)]));
+    if (!ranks.has("regular")) ranks.set("regular", [1, 0, 0, "regular"]);
+    const rankFor = (id) => ranks.get(String(id || "regular")) || [2, Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER, String(id)];
+    return (Array.isArray(items) ? items : [])
+      .map((item, index) => ({ item, index, rank: rankFor(getId(item)) }))
+      .sort((left, right) => left.rank[0] - right.rank[0] || left.rank[1] - right.rank[1] ||
+        left.rank[2] - right.rank[2] || left.rank[3].localeCompare(right.rank[3]) || left.index - right.index)
+      .map(({ item }) => item);
+  };
+  const salesPlanName = (id, fallback = "") => {
+    const data = getSalesPlanData();
+    const plan = (Array.isArray(data.plans) ? data.plans : [])
+      .find((candidate) => String(candidate.id) === String(id));
+    return String(plan?.name || fallback || (String(id) === "regular" ? "فروش عادی" : "طرح فروش"));
+  };
+  const groupBySalesPlan = (items, getId = (item) => item?.salesPlanId || "regular", getName = (item) => item?.salesPlanSnapshot?.name || "") => {
+    const groups = new Map();
+    sortBySalesPlan(items, getId).forEach((item) => {
+      const id = String(getId(item) || "regular");
+      if (!groups.has(id)) groups.set(id, { id, name: salesPlanName(id, getName(item)), items: [] });
+      groups.get(id).items.push(item);
+    });
+    return [...groups.values()];
+  };
   const normalizeCart = (value) => {
     if (!Array.isArray(value)) return [];
     const migrateLegacyItem = (item) => {
@@ -221,7 +259,7 @@
       // Within one plan, a product code keeps one configuration; other plans remain separate lines.
       uniqueItems.set(lineKey, item);
     });
-    return [...uniqueItems.values()];
+    return sortBySalesPlan([...uniqueItems.values()]);
   };
 
   const productForCartItem = (item) =>
@@ -281,6 +319,9 @@
     });
 
   const cart = {
+    sortBySalesPlan,
+    groupBySalesPlan,
+    salesPlanName,
     renderControls(item, index = null) {
       const attribute = (action) => index === null
         ? `data-action="${action}"`

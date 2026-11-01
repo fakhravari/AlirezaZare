@@ -958,6 +958,22 @@ select {
   gap: 18px;
 }
 
+.search-sales-plan-heading {
+  display: flex;
+  min-width: 0;
+  min-height: 42px;
+  padding: 8px 12px;
+  grid-column: 1 / -1;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid var(--industrial-muted);
+  color: var(--industrial-navy);
+}
+
+.search-sales-plan-heading strong { font-size: 14px; font-weight: 750; }
+.search-sales-plan-heading span { color: var(--industrial-muted); font-size: 11px; white-space: nowrap; }
+
 @media (min-width: 1480px) {
   .inner-page .search-main .search-page-results {
     grid-template-columns: repeat(5, minmax(0, 1fr));

@@ -206,7 +206,8 @@
             "Shop/wwwroot/shop/js/core/storage.js",
             "Shop/wwwroot/shop/js/store/cart.js",
             "Shop/wwwroot/shop/js/pages/checkout.js",
-            "Shop/wwwroot/shop/js/store/commerce.js"
+            "Shop/wwwroot/shop/js/store/commerce.js",
+            "Shop/wwwroot/shop/js/layout/main.js"
           ],
           "css": [
             "Shop/wwwroot/shop/css/layout/shared-cart.css",

@@ -23,10 +23,7 @@
       : favorite ? "product-card flow-card favorite-item-card" : "product-card";
     const headingClass = search ? "search-page-card-title" : "";
     const bodyClass = slider ? "showcase-card-body" : "product-info" + (search ? " search-page-card-content" : "");
-    const baseUrl = window.HNProductUrl(product);
-    const productUrl = options.salesPlanId
-      ? `${baseUrl}${baseUrl.includes("?") ? "&" : "?"}salesPlanId=${encodeURIComponent(options.salesPlanId)}`
-      : baseUrl;
+    const productUrl = window.HNProductUrl(product, {salesPlanId: options.salesPlanId});
     const title = `<h3 class="${headingClass}"><a class="${slider ? "showcase-product-detail" : ""}" href="${esc(productUrl)}">${esc(product.name)}</a></h3>`;
     const badge = options.badge ?? product.badge;
     const rawStock = options.stockQuantity ?? product.stockQuantity ?? product.inventoryCount ?? product.quantityInStock ?? product.availableQuantity ?? product.stock;

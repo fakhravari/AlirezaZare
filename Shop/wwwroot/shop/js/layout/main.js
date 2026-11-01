@@ -1233,10 +1233,9 @@ $(function () {
           const safeId = escapeHtml(item.id);
           const safeName = escapeHtml(item.name);
           const safeImage = escapeHtml(item.image);
-          const productUrl = window.HNProductUrl?.(item.id) || "/search";
-          const href = item.salesPlanId && item.salesPlanId !== "regular" ? `${productUrl}${productUrl.includes("?") ? "&" : "?"}salesPlanId=${encodeURIComponent(item.salesPlanId)}` : productUrl;
+          const href = window.HNProductUrl?.(item.id, {salesPlanId: item.salesPlanId}) || "/search";
           const planDetails = item.salesPlanSnapshot;
-          const planBadge = planDetails?.name && planDetails.id !== "regular" ? `<span class="cart-sales-plan-badge">${escapeHtml(planDetails.name)}</span>` : "";
+          const planBadge = `<span class="cart-sales-plan-badge">${escapeHtml(window.HNUI.cart.salesPlanName(item.salesPlanId, planDetails?.name))}</span>`;
           return `<div class="cart-item" data-cart-id="${safeId}" data-sales-plan-id="${escapeHtml(item.salesPlanId || "regular")}"><img src="${safeImage}" alt="${safeName}" loading="lazy" decoding="async"><div class="cart-item-info"><strong><a class="header-panel-product-link" href="${escapeHtml(href)}">${safeName}</a></strong>${planBadge}${cartOptionsMarkup(item)}<div class="cart-item-actions"><span>${faNumber(item.price)} تومان</span>${window.HNUI.cart.renderControls(item)}</div></div></div>`;
         })
         .join(""),

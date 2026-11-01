@@ -1,4 +1,4 @@
-﻿#mainNav .quick-links-dropdown {
+#mainNav .quick-links-dropdown {
   position: relative;
 }
 
@@ -48,6 +48,12 @@
 
 #mainNav .quick-links-dropdown:is(.show, .is-quick-links-open) > .nav-link .quick-links-caret {
   transform: rotate(180deg);
+}
+
+#mainNav .sales-plan-menu {
+  width: min(350px, calc(100vw - 32px));
+  grid-template-columns: minmax(0, 1fr);
+  padding: 14px;
 }
 
 #mainNav .quick-links-menu {
@@ -118,6 +124,7 @@
 }
 
 #mainNav .quick-links-dropdown:is(.show, .is-quick-links-open) > .quick-links-menu {
+  display: grid;
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
@@ -215,6 +222,25 @@
   transition: background-color 160ms ease, color 160ms ease;
 }
 
+#mainNav .quick-links-group a + a {
+  position: relative;
+}
+
+#mainNav .quick-links-group a + a::before {
+  position: absolute;
+  inset-block-start: -3px;
+  inset-inline: 14px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(173, 128, 15, 0.2), transparent);
+  content: "";
+  pointer-events: none;
+}
+
+#mainNav .quick-links-group a:focus-visible {
+  outline: 2px solid #f6c515;
+  outline-offset: 2px;
+}
+
 #mainNav .quick-links-group a:is(:hover, :focus-visible) {
   background: #fff5d8;
   color: #102a43;
@@ -233,6 +259,16 @@
   padding: 12px;
   border: 1px solid rgba(221, 187, 105, 0.17);
   border-radius: 9px 16px 9px 16px;
+  background: rgba(3, 20, 35, 0.2);
+}
+
+.mobile-sales-plan-list {
+  display: grid;
+  gap: 6px;
+  margin: 4px 0 10px;
+  padding: 8px;
+  border: 1px solid rgba(221, 187, 105, 0.2);
+  border-radius: 10px 15px 10px 15px;
   background: rgba(3, 20, 35, 0.2);
 }
 

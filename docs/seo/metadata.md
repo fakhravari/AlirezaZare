@@ -100,8 +100,13 @@ favicon فعلی SVG برداری برند در `wwwroot/content/identity/store-
 
 منابع اصلی: [PageModel.cs](../../Shop/Models/PageModel.cs)، [SeoMetadataOptions.cs](../../Shop/Models/SeoMetadataOptions.cs)، [_SeoMetadata.cshtml](../../Shop/Views/Shared/_SeoMetadata.cshtml) و [SeoController.cs](../../Shop/Controllers/SeoController.cs). تغییر asset تصویر اجتماعی باید با [قرارداد رسانه](../media/images.md) هماهنگ باشد.
 
+
+## نشانی محصول و پارامتر طرح فروش
+
+مسیر canonical محصول همیشه URL پایهٔ `/products/{slug}-{id}` است. پارامتر `salesPlanId` فقط زمینهٔ انتخاب یک پیشنهاد فعال را برای صفحهٔ جزئیات حمل می‌کند و canonical جداگانه ایجاد نمی‌کند. درخواست با شناسهٔ طرحی که پایانش گذشته، در `ProductController` با redirect دائمی به نشانی پایه هدایت می‌شود؛ در نتیجه URL طرح منقضی به‌عنوان صفحهٔ جدا باقی نمی‌ماند. راهنمای ساخت لینک و رفتار صفحه در [کاتالوگ](../store/catalog.md) نگهداری می‌شود.
+
 ---
 
 [فهرست این بخش](README.md) · [فهرست مستندات](../README.md)
 
-آخرین تطبیق با کد: ۲۹ اکتبر ۲۰۲۶.
+آخرین تطبیق با کد: ۱ نوامبر ۲۰۲۶.

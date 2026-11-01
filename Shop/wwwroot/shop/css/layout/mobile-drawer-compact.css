@@ -208,8 +208,12 @@
 
   #mobileMenu .mobile-menu-search-suggestion:is(:hover, :focus-visible) {
     border-color: #e6d38d;
-    outline: none;
     background: #fffbee !important;
+  }
+
+  #mobileMenu .mobile-menu-search-suggestion:focus-visible {
+    outline: 2px solid #ad800f;
+    outline-offset: 2px;
   }
 
   #mobileMenu .mobile-menu-search-suggestion-image {

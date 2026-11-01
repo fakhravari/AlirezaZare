@@ -132,9 +132,12 @@
   const hover = window.matchMedia("(hover: hover) and (pointer: fine)");
   const controllers = new Set();
   const bindDropdown = (dropdown, {state, menuSelector, onOpen = () => {}, onClose = () => {}}) => {
-    const trigger = dropdown.querySelector(":scope > .nav-link");
+    const trigger = dropdown.querySelector(":scope > .nav-link, :scope > button");
     const menu = dropdown.querySelector(":scope > " + menuSelector);
     if (!trigger || !menu) return;
+    if (dropdown.classList.contains("sales-plans-dropdown")) {
+      trigger.removeAttribute("data-bs-toggle");
+    }
     let closeTimer = null;
     let restoringFocus = false;
     let suppressHoverOpenUntilTriggerLeave = false;
@@ -195,7 +198,7 @@
     trigger.addEventListener("click", (event) => {
       if (!desktop.matches) return;
       event.preventDefault(); event.stopPropagation();
-      if (isOpen()) close(); else open();
+      open();
     });
     dropdown.addEventListener("keydown", (event) => {
       if (desktop.matches && event.key === "ArrowDown" && event.target === trigger) {

@@ -47,6 +47,10 @@
   background: #fff8e2;
 }
 
+#productView .product-sales-plan--fixed {
+  cursor: default;
+}
+
 #productView .product-sales-plan input {
   accent-color: var(--gold, #d39a00);
 }

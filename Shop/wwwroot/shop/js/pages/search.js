@@ -277,7 +277,7 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
   const filterConfig = Object.fromEntries(
     Object.entries(filterOptions).map(([key, options]) => [
       key,
-      Object.values(options),
+      key === "salesPlan" ? Object.keys(options) : Object.values(options),
     ]),
   );
   let restoringUrl = false;
@@ -287,7 +287,7 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
     Object.entries(filterOptions).forEach(([key, options]) => {
       if (key === "type") return;
       Object.entries(options).forEach(([id, label]) => {
-        if (state[key].has(label)) params.append(filterFields[key].slug, id);
+        if (state[key].has(key === "salesPlan" ? id : label)) params.append(filterFields[key].slug, id);
       });
     });
     state.type.forEach((value) => {
@@ -338,9 +338,14 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
         const legacyOption = /^option\d+$/.test(value)
           ? createLegacyFilterOptions(key)[value]
           : undefined;
-        const slugValue = Object.hasOwn(filterOptions[key], value)
-          ? filterOptions[key][value]
-          : legacyOption || value;
+        const slugValue = key === "salesPlan"
+          ? (Object.hasOwn(filterOptions[key], value)
+            ? value
+            : Object.keys(filterOptions[key]).find((id) => filterOptions[key][id] === value))
+          : Object.hasOwn(filterOptions[key], value)
+            ? filterOptions[key][value]
+            : legacyOption || value;
+        if (key === "salesPlan" && !slugValue) return;
         const label =
           key === "brand"
             ? brandPersianLabels[slugValue]
@@ -387,6 +392,7 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
     const openFilterSlugs = new Set();
     if (state.brand.size) openFilterSlugs.add("brand");
     if (state.type.size) openFilterSlugs.add("product-group");
+    if (state.salesPlan.size) openFilterSlugs.add("sales-plan");
     $$(".filter-group").forEach((group) => {
       const open = openFilterSlugs.has(group.dataset.filterSlug);
       group.classList.toggle("open", open);
@@ -506,7 +512,7 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
     if (state.sort === "low") list.sort((a, b) => listingPrice(a) - listingPrice(b));
     if (state.sort === "high") list.sort((a, b) => listingPrice(b) - listingPrice(a));
     if (state.sort === "newest") list.sort((a, b) => a.newest - b.newest);
-    return list;
+    return window.HNUI.cart.sortBySalesPlan(list, (item) => item._salesPlanListing?.id || "regular");
   }
   const card = (product) => {
     const offer = product._salesPlanListing;
@@ -517,6 +523,18 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
         discountPercent: offer.discountPercent, stockQuantity: offer.stockQuantity,
         maxPurchaseQuantity: offer.maxPurchaseQuantity} : {}),
     });
+  };
+  const groupedSearchCards = (items, allItems) => {
+    const totalByPlan = new Map(window.HNUI.cart.groupBySalesPlan(
+      allItems,
+      (item) => item._salesPlanListing?.id || "regular",
+      (item) => item._salesPlanListing?.name || "",
+    ).map((group) => [group.id, group.items.length]));
+    return window.HNUI.cart.groupBySalesPlan(
+      items,
+      (item) => item._salesPlanListing?.id || "regular",
+      (item) => item._salesPlanListing?.name || "",
+    ).map((group) => `<div class="search-sales-plan-heading" data-sales-plan-id="${window.HNUI.escapeHtml(group.id)}" role="heading" aria-level="2"><strong>${window.HNUI.escapeHtml(group.name)}</strong><span>${fa(totalByPlan.get(group.id) || group.items.length)} کالا</span></div>${group.items.map(card).join("")}`).join("");
   };
   function scrollToResultsStart() {
     const results = document.querySelector(".results-area");
@@ -538,7 +556,7 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
     const list = getFiltered();
     const shown = list.slice(0, state.visible);
     const finished = list.length > 0 && state.visible >= list.length;
-    $("#productResults").innerHTML = shown.map(card).join("");
+    $("#productResults").innerHTML = groupedSearchCards(shown, list);
     const comparedProducts = new Set(
       window.HNUI?.storage.json("hn-compare", []).map(String) || [],
     );

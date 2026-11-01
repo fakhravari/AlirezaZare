@@ -100,6 +100,30 @@ test('the same product in different sales plans stays in separate cart lines', (
   assert.equal(items[0].salesPlanId, 'demo-time');
 });
 
+test('cart lines follow configured sales-plan type order and expose grouped labels', () => {
+  const r = loggedIn();
+  const querySelector = r.document.querySelector;
+  const plans = {
+    plans: [
+      {id: 'regular', name: 'فروش عادی', type: 'regular', isDefault: true},
+      {id: 'digi-time', name: 'دیجی‌تایم', type: 'digi-time'},
+      {id: 'digi-af', name: 'دیجی‌اف', type: 'digi-af'},
+    ],
+  };
+  r.document.querySelector = selector => selector === '#storeSalesPlans'
+    ? {textContent: JSON.stringify(plans)}
+    : querySelector(selector);
+  const product = r.window.HNCatalog.find(1);
+  r.ui.cart.add({...product, salesPlanId: 'regular'});
+  r.ui.cart.add({...product, salesPlanId: 'digi-af', price: 20000000});
+  r.ui.cart.add({...product, salesPlanId: 'digi-time', price: 23000000});
+
+  const items = r.ui.cart.read();
+  assert.deepEqual(JSON.parse(JSON.stringify(items.map(item => item.salesPlanId))), ['digi-time', 'digi-af', 'regular']);
+  assert.deepEqual(JSON.parse(JSON.stringify(r.ui.cart.groupBySalesPlan(items).map(group => group.name))), ['دیجی‌تایم', 'دیجی‌اف', 'فروش عادی']);
+  assert.equal(r.ui.cart.groupBySalesPlan(items).reduce((sum, group) => sum + group.items.length, 0), 3);
+});
+
 test('future storage and failed writes cannot announce a successful cart addition', () => {
   for (const future of [true, false]) {
     const r = loggedIn(undefined, future ? {[key]: JSON.stringify({schemaVersion: 2, value: []})} : {});

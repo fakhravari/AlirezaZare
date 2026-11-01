@@ -8,11 +8,13 @@ namespace Shop.Controllers;
 public sealed class ProductController : PageController
 {
     private readonly ICatalogSource _catalog;
+    private readonly ISalesPlanSource _salesPlans;
     private readonly SeoMetadataOptions _seoOptions;
 
-    public ProductController(ICatalogSource catalog, IOptions<SeoMetadataOptions> seoOptions)
+    public ProductController(ICatalogSource catalog, ISalesPlanSource salesPlans, IOptions<SeoMetadataOptions> seoOptions)
     {
         _catalog = catalog;
+        _salesPlans = salesPlans;
         _seoOptions = seoOptions.Value;
     }
 
@@ -26,7 +28,7 @@ public sealed class ProductController : PageController
     }
 
     [HttpGet("/products/{slug}")]
-    public async Task<IActionResult> Details(string slug)
+    public async Task<IActionResult> Details(string slug, [FromQuery] string? salesPlanId)
     {
         var separator = slug.LastIndexOf('-');
         if (separator < 0 || !int.TryParse(slug[(separator + 1)..], out var id) || id < 1)
@@ -40,6 +42,15 @@ public sealed class ProductController : PageController
         string canonicalPath = $"/products/{product.Slug}-{product.Id}";
         if (!string.Equals(slug, $"{product.Slug}-{product.Id}", StringComparison.Ordinal))
             return RedirectPermanent(canonicalPath);
+        if (!string.IsNullOrWhiteSpace(salesPlanId) &&
+            !string.Equals(salesPlanId, "regular", StringComparison.Ordinal))
+        {
+            SalesPlanCatalog plans = await _salesPlans.ReadAsync(HttpContext.RequestAborted);
+            SalesPlan? requestedPlan = plans.Plans.FirstOrDefault(plan =>
+                string.Equals(plan.Id, salesPlanId, StringComparison.Ordinal));
+            if (requestedPlan?.EndsAtUtc is { } endsAtUtc && DateTimeOffset.UtcNow >= endsAtUtc)
+                return RedirectPermanent(canonicalPath);
+        }
         string siteOrigin = SeoUrlBuilder.SiteOrigin(_seoOptions.SiteUrl, Request);
         string siteRoot = SeoUrlBuilder.SiteRoot(_seoOptions.SiteUrl, Request);
         string productImage = SeoUrlBuilder.AbsoluteAssetUrl(siteOrigin, Url.Content($"~/{product.ImagePath}"));

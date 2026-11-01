@@ -84,6 +84,8 @@ test('all home collections render shared cards with one action of each kind', as
 
 test('keyboard focus indicators and shared product actions keep their layout', async ({page}) => {
   await page.goto('/');
+  const regularProductHref = await page.locator('#productGrid [data-product-card="v1"] h3 a').first().getAttribute('href');
+  expect(new URL(regularProductHref, 'http://localhost').searchParams.has('salesPlanId')).toBe(false);
   await page.keyboard.press('Tab');
   await page.keyboard.press('Tab');
   const focusStyle = await page.evaluate(() => {
@@ -146,6 +148,28 @@ test('search includes active plan offers and preserves the selected offer in car
   await expect.poll(() => page.evaluate(() => window.HNUI.cart.read().find(item => item.salesPlanId === 'digi-time')?.price)).toBe(expectedPrice);
 });
 
+test('sales plan navigation opens search with that plan selected', async ({page, isMobile}) => {
+  await page.clock.install({time: new Date('2026-11-01T10:00:00Z')});
+  await page.goto('/');
+
+  if (isMobile) {
+    await page.locator('#mainNav .navbar-toggler').click();
+    await page.locator('[data-bs-target="#mobileSalesPlans"]').click();
+    await page.locator('#mobileSalesPlans a[href*="sales-plan=digi-time"]').click();
+  } else {
+    await page.locator('.sales-plans-dropdown > button').click();
+    await page.locator('.sales-plan-menu a[href*="sales-plan=digi-time"]').click();
+  }
+
+  await expect(page).toHaveURL(/sales-plan=digi-time/);
+  await expect(page.locator('#salesPlanFilters input[value="digi-time"]')).toBeChecked();
+  await expect(page.locator('.filter-group[data-filter-slug="sales-plan"]')).toHaveClass(/open/);
+  const resultPlanIds = await page.locator('#productResults [data-product-card="v1"]').evaluateAll(cards =>
+    cards.map(card => card.getAttribute('data-sales-plan-id')));
+  expect(resultPlanIds.length).toBeGreaterThan(0);
+  expect(resultPlanIds.every(id => id === 'digi-time')).toBe(true);
+});
+
 test('product opens at the top, gallery closes, and detail tabs remain reachable', async ({page}) => {
   await page.goto('/products/cordless-hammer-drill-1');
   await expect(page.locator('#addProduct')).toBeAttached();
@@ -164,6 +188,7 @@ test('product plan selection uses the matching quote and recovers cleanly from a
   await page.addInitScript(() => localStorage.setItem('hn-demo-auth', '1'));
   await page.clock.install({time: new Date('2026-11-01T10:00:00Z')});
   await page.goto('/products/cordless-hammer-drill-1?salesPlanId=digi-time');
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', /\/products\/cordless-hammer-drill-1$/);
   const underDayCountdown = page.locator('[data-plan-countdown]');
   await expect(underDayCountdown).toBeVisible();
   await expect(underDayCountdown).not.toContainText('روز');
@@ -172,10 +197,12 @@ test('product plan selection uses the matching quote and recovers cleanly from a
     window.HNUI.toEnglishDigits(document.querySelector('#productFinalPrice').textContent).replace(/\D/g, ''),
   ));
   expect(selectedPrice).toBe(23303823);
-  await expect(page.locator('input[name="productSalesPlan"][value="digi-time"]')).toBeChecked();
+  await expect(page.locator('.product-sales-plan--fixed')).toContainText('دیجی‌تایم');
+  await expect(page.locator('input[name="productSalesPlan"]')).toHaveCount(0);
   await page.locator('#addProduct').click();
   await expect.poll(() => page.evaluate(() => window.HNUI.cart.read()[0]?.price)).toBe(23303823);
   expect(await page.evaluate(() => window.HNUI.cart.read()[0]?.salesPlanId)).toBe('digi-time');
+  await expect(page.locator('#cartPanel .cart-item .header-panel-product-link').first()).toHaveAttribute('href', /salesPlanId=digi-time/);
   expect(await page.evaluate(() => window.HNUI.cart.read()[0]?.salesPlanSnapshot?.accessoryPriceAmounts?.['shipping-insurance'])).toBe(245000);
 
   const digiAfUrl = await page.evaluate(() => {
@@ -207,6 +234,52 @@ test('cart defaults, required service and reload use one canonical price', async
   expect(await page.evaluate(() => window.HNUI.cart.read()[0].price)).toBe(24850000);
   await page.goto('/cart');
   await expect(page.locator('#cartView')).toContainText('بیمه');
+  await noHorizontalOverflow(page);
+});
+
+test('search, cart and checkout group listings by the configured sales-plan order', async ({page}) => {
+  await page.addInitScript(() => localStorage.setItem('hn-demo-auth', '1'));
+  await page.clock.install({time: new Date('2026-11-01T10:00:00Z')});
+  await page.goto('/search');
+  const searchGroups = page.locator('#productResults .search-sales-plan-heading');
+  await expect(searchGroups.first()).toHaveAttribute('data-sales-plan-id', 'digi-time');
+  await expect(searchGroups.nth(1)).toHaveAttribute('data-sales-plan-id', 'digi-af');
+  await expect(searchGroups.nth(1)).toContainText('۱۳ کالا');
+  await expect(page.locator('#productResults [data-product-card][data-sales-plan-id="digi-time"]')).toHaveCount(7);
+  await expect(page.locator('#productResults [data-product-card][data-sales-plan-id="digi-af"]')).toHaveCount(2);
+  await noHorizontalOverflow(page);
+
+  await page.evaluate(() => {
+    const addOffer = (productId, salesPlanId) => {
+      const plans = JSON.parse(document.querySelector('#storeSalesPlans').textContent);
+      const offer = plans.offers.find(item => item.productId === productId && item.salesPlanId === salesPlanId);
+      const plan = plans.plans.find(item => item.id === salesPlanId);
+      const product = window.HNCatalog.find(productId);
+      const price = Math.round(offer.priceAmount * (100 - offer.discountPercent) / 100);
+      window.HNUI.cart.add({...product, salesPlanId, price, salesPlanSnapshot: {
+        id: salesPlanId, name: plan.name, unitAmount: price,
+        accessoryPriceAmounts: offer.accessoryPriceAmounts,
+      }});
+    };
+    window.HNUI.cart.add(window.HNCatalog.find(1));
+    addOffer(3, 'digi-af');
+    addOffer(1, 'digi-time');
+  });
+
+  await page.goto('/cart');
+  const cartGroups = page.locator('#cartView .cart-plan-group');
+  await expect(cartGroups).toHaveCount(3);
+  await expect(cartGroups.nth(0)).toHaveAttribute('data-sales-plan-id', 'digi-time');
+  await expect(cartGroups.nth(1)).toHaveAttribute('data-sales-plan-id', 'digi-af');
+  await expect(cartGroups.nth(2)).toHaveAttribute('data-sales-plan-id', 'regular');
+  await noHorizontalOverflow(page);
+
+  await page.goto('/checkout');
+  const invoiceGroups = page.locator('#invoiceItems .cart-plan-group');
+  await expect(invoiceGroups).toHaveCount(3);
+  await expect(invoiceGroups.nth(0)).toHaveAttribute('data-sales-plan-id', 'digi-time');
+  await expect(invoiceGroups.nth(1)).toHaveAttribute('data-sales-plan-id', 'digi-af');
+  await expect(invoiceGroups.nth(2)).toHaveAttribute('data-sales-plan-id', 'regular');
   await noHorizontalOverflow(page);
 });
 

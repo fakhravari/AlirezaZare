@@ -79,9 +79,11 @@
 #cartPanel .cart-item-info {
   display: grid;
   min-width: 0;
-  grid-template-columns: minmax(0, 1fr);
-  grid-template-areas: "title" "plan" "options" "actions";
-  gap: 6px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: "title plan" "options options" "actions actions";
+  align-content: start;
+  align-items: center;
+  gap: 5px 8px;
 }
 
 #cartPanel .cart-item-info > strong {
@@ -90,7 +92,8 @@
 
 #cartPanel .cart-item-info > .cart-sales-plan-badge {
   grid-area: plan;
-  justify-self: start;
+  justify-self: end;
+  margin-block: 0;
 }
 
 #cartPanel .cart-item-info > .cart-item-options {
@@ -102,9 +105,18 @@
 }
 
 #cartPanel .cart-item > img {
+  width: 72px;
+  height: 72px;
   aspect-ratio: 1;
   object-fit: cover;
   object-position: center;
+}
+
+#cartPanel .cart-item {
+  grid-template-columns: 72px minmax(0, 1fr);
+  align-items: start;
+  gap: 10px;
+  padding: 10px;
 }
 
 :where(.cart-item, .page-cart-item, .search-cart-item, .compare-panel-item)
@@ -841,6 +853,23 @@ body :is(#cartPanel, #cartView) .hn-cart-controls button:disabled { opacity: .4;
 
 /* Cart cards: product identity, purchase strip and structured details. */
 body :is(#cartView, #invoiceItems) .cart-items-list { display: grid; gap: 18px; }
+body :is(#cartView, #invoiceItems) .cart-plan-groups { display: grid; min-width: 0; gap: 20px; }
+body :is(#cartView, #invoiceItems) .cart-plan-group { display: grid; min-width: 0; gap: 10px; }
+body :is(#cartView, #invoiceItems) .cart-plan-group-heading {
+  display: flex;
+  min-height: 42px;
+  padding: 8px 12px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid #e6d6ad;
+  border-radius: 9px;
+  background: #fffaf0;
+  color: #17364f;
+}
+body :is(#cartView, #invoiceItems) .cart-plan-group-heading h3 { margin: 0; color: inherit; font-size: 13px; font-weight: 750; }
+body :is(#cartView, #invoiceItems) .cart-plan-group-heading span { color: #788594; font-size: 11px; white-space: nowrap; }
+body :is(#cartView, #invoiceItems) .cart-plan-group-items { display: grid; min-width: 0; gap: 12px; }
 body :is(#cartView, #invoiceItems) .cart-product-row.flow-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr);

@@ -1,6 +1,16 @@
 @inject Shop.Services.ICatalogSource StoreCatalog
+@inject Shop.Services.ISalesPlanSource SalesPlans
 @{
     var headerCatalog = await StoreCatalog.ReadAsync(Context.RequestAborted);
+    var salesPlanCatalog = await SalesPlans.ReadAsync(Context.RequestAborted);
+    var nowUtc = DateTimeOffset.UtcNow;
+    var availableSalesPlans = salesPlanCatalog.Plans
+        .Where(plan => !plan.IsDefault && plan.IsEnabled &&
+            (plan.StartsAtUtc is null || plan.StartsAtUtc <= nowUtc) &&
+            (plan.EndsAtUtc is null || plan.EndsAtUtc > nowUtc) &&
+            salesPlanCatalog.Offers.Any(offer => offer.SalesPlanId == plan.Id && offer.IsEnabled && offer.StockQuantity > 0))
+        .OrderBy(plan => plan.Name)
+        .ToList();
 }
 <nav class="navbar navbar-expand-lg navbar-dark fixed-top" id="mainNav">
 <div class="home-header-top" aria-label="جست‌وجو و پشتیبانی فروشگاه">
@@ -146,6 +156,25 @@
 </li>
 </ul>
 </li>
+@if (availableSalesPlans.Count > 0)
+{
+    <li class="nav-item dropdown quick-links-dropdown sales-plans-dropdown">
+        <button class="nav-link dropdown-toggle" type="button" aria-expanded="false" aria-controls="salesPlansMenu">
+            <i class="bi bi-lightning-charge nav-menu-icon" aria-hidden="true"></i><span>طرح‌های فروش</span><i class="bi bi-chevron-down quick-links-caret" aria-hidden="true"></i>
+        </button>
+        <div class="dropdown-menu quick-links-menu sales-plan-menu" id="salesPlansMenu" aria-label="طرح‌های فروش فعال">
+            <section class="quick-links-group" aria-labelledby="salesPlansMenuHeading">
+                <h3 id="salesPlansMenuHeading"><i class="bi bi-stars" aria-hidden="true"></i> انتخاب طرح فروش</h3>
+                @foreach (var plan in availableSalesPlans)
+                {
+                    <a class="sales-plan-menu-link" href="@Url.Content($"~/Search?sales-plan={Uri.EscapeDataString(plan.Id)}")">
+                        <i class="bi bi-lightning-charge-fill" aria-hidden="true"></i><span>@plan.Name</span><i class="bi bi-arrow-left" aria-hidden="true"></i>
+                    </a>
+                }
+            </section>
+        </div>
+    </li>
+}
 <li class="nav-item">
     <a class="nav-link" href="Magazine">
         <i class="bi bi-journal-text nav-menu-icon" aria-hidden="true"></i><span>مجله فنی</span>

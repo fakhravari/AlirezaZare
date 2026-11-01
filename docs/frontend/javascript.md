@@ -62,6 +62,8 @@
 | `js/pages/form-confirm-dialog.js` | dialog تأیید فرم | backdrop/ESC و focus; در Product/Cart/Compare/Contact و جزئیات Magazine load می‌شود |
 | `js/core/electrical-content.js` | ریزتعامل/محتوای عمومی برخی صفحه‌ها | پس از section Scripts اجرا می‌شود |
 
+در منوهای دسکتاپ، حرکت نشانگر می‌تواند منو را باز کند و کلیک روی trigger آن را در حالت باز نگه می‌دارد؛ این کار مانع بسته‌شدن فوری منو هنگام ورود pointer به دکمه می‌شود. بستن با کلیک بیرون، خروج pointer از پنل و Escape انجام می‌شود. در تغییر رفتار trigger، خانه و صفحات داخلی را با pointer و صفحه‌کلید بررسی کنید.
+
 ## localStorage: کلیدهای شناخته‌شده
 
 رکوردهای ساختاریافته با شکل `{schemaVersion: 1, value: ...}` نوشته می‌شوند. آرایه/شیء قدیمی همچنان خوانده می‌شود و در اولین نوشتن نسخه‌دار، نسخهٔ خام یک‌بار در `hn-migration-backup:{key}` حفظ می‌شود. wrapper همیشه مقدار بازشده را به consumer می‌دهد؛ کد مصرف‌کننده نباید envelope را خودش باز کند.

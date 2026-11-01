@@ -1,4 +1,9 @@
 using System.Text.Json.Nodes;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+using Shop.Controllers;
+using Shop.Models;
 using Shop.Services;
 
 string sourcePath = args.Length > 0 ? Path.GetFullPath(args[0]) :
@@ -200,3 +205,32 @@ try
 }
 catch (Shop.Models.SalesPlanUnavailableException error) when (error.ReasonCode == "purchase-limit") { }
 Console.WriteLine("C# sales-plan contracts OK: default selection, campaign pricing/stock/window, distinct line identity and invalid relations verified.");
+
+SalesPlanCatalog expiredPlanCatalog = salesPlans with
+{
+    Plans = salesPlans.Plans.Select(plan => plan.Id == "demo-time"
+        ? plan with { EndsAtUtc = DateTimeOffset.UnixEpoch }
+        : plan).ToArray()
+};
+ProductController productController = new(new FixedCatalogSource(snapshot),
+    new FixedSalesPlanSource(expiredPlanCatalog), Options.Create(new SeoMetadataOptions()))
+{
+    ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() }
+};
+RedirectResult expiredRedirect = (RedirectResult)(await productController.Details(
+    "cordless-hammer-drill-1", "demo-time"));
+if (!expiredRedirect.Permanent || expiredRedirect.Url != "/products/cordless-hammer-drill-1")
+    throw new Exception("Expired plan URL did not permanently redirect to the canonical product URL.");
+Console.WriteLine("C# product route contract OK: expired sales-plan URLs permanently redirect to the base canonical URL.");
+
+sealed class FixedCatalogSource(CatalogSnapshot snapshot) : ICatalogSource
+{
+    public ValueTask<CatalogSnapshot> ReadAsync(CancellationToken cancellationToken = default) =>
+        ValueTask.FromResult(snapshot);
+}
+
+sealed class FixedSalesPlanSource(SalesPlanCatalog snapshot) : ISalesPlanSource
+{
+    public ValueTask<SalesPlanCatalog> ReadAsync(CancellationToken cancellationToken = default) =>
+        ValueTask.FromResult(snapshot);
+}

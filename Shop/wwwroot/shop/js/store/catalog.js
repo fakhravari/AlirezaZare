@@ -246,9 +246,14 @@
         .map(category => category.slug),
     };
   };
-  const productUrl = (productOrId) => {
+  const productUrl = (productOrId, options = {}) => {
     const product = byId.get(String(productOrId?.id ?? productOrId));
-    return product ? "/products/" + product.slug + "-" + product.id : "/search";
+    if (!product) return "/search";
+    const path = "/products/" + product.slug + "-" + product.id;
+    const salesPlanId = String(options?.salesPlanId || "").trim();
+    return salesPlanId && salesPlanId !== "regular"
+      ? `${path}?salesPlanId=${encodeURIComponent(salesPlanId)}`
+      : path;
   };
   window.HNCountries = freeze(data.countries);
   window.HNProductColors = freeze(data.colors);
