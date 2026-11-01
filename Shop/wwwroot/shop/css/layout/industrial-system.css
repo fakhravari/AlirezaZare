@@ -7072,6 +7072,8 @@ html
   margin: 0 !important;
   padding: 0 22px !important;
   border-bottom: 1px solid rgba(215, 182, 108, 0.24) !important;
+  border-start-start-radius: 0 !important;
+  border-start-end-radius: 0 !important;
   background:
     radial-gradient(
       circle at 8% 10%,
@@ -7084,7 +7086,8 @@ html
 
 #cartPanel .cart-head {
   border: 0 !important;
-  border-radius: 21px 21px 0 0 !important;
+  border-start-start-radius: 0 !important;
+  border-start-end-radius: 0 !important;
   box-shadow: none !important;
 }
 
@@ -7092,7 +7095,7 @@ html
 #favoritesPanel,
 #comparePanel {
   border: 1px solid rgba(180, 137, 77, 0.32) !important;
-  border-radius: 22px !important;
+  border-radius: 0 0 22px 22px !important;
   background: rgba(255, 253, 249, 0.98) !important;
   box-shadow:
     0 28px 80px rgba(4, 20, 55, 0.24),
