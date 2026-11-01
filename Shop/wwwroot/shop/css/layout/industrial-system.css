@@ -7059,10 +7059,39 @@ html
 }
 
 @media (min-width: 992px) {
+  #mainNav .cart-wrap > .cart-panel {
+    top: calc(100% + 15px) !important;
+  }
+
+  #mainNav .favorites-wrap > .favorites-panel,
+  #mainNav .compare-wrap > .compare-panel {
+    top: calc(100% + 18px) !important;
+  }
+
   #mainNav .cart-wrap > .cart-panel,
   #mainNav .favorites-wrap > .favorites-panel,
   #mainNav .compare-wrap > .compare-panel {
-    top: calc(100% + 15px) !important;
+    transform: none;
+    transition:
+      opacity 160ms ease,
+      visibility 0s linear 160ms;
+    will-change: opacity;
+  }
+
+  #mainNav .cart-wrap:is(.open, :hover, :focus-within) > .cart-panel,
+  #mainNav .favorites-wrap:is(.open, :hover, :focus-within) > .favorites-panel,
+  #mainNav .compare-wrap:is(.open, :hover, :focus-within) > .compare-panel,
+  #mainNav .cart-panel.open,
+  #mainNav .favorites-panel.open,
+  #mainNav .compare-panel.open {
+    transition-delay: 0s;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #mainNav :is(.cart-panel, .favorites-panel, .compare-panel) {
+    transition-duration: 0.01ms;
+    will-change: auto;
   }
 }
 

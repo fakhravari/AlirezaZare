@@ -37,10 +37,31 @@
 }
 
 .home-sales-plan[data-sales-plan="digi-af"] {
-  border-color: rgba(49, 119, 111, 0.26);
+  border-color: rgba(39, 122, 101, 0.3);
   background:
-    radial-gradient(ellipse at 100% 0%, rgba(96, 171, 151, 0.13), transparent 34%),
-    linear-gradient(145deg, #f2f9f6 0%, #fff 52%, #fffaf0 100%);
+    radial-gradient(ellipse at 100% 0%, rgba(88, 171, 140, 0.16), transparent 35%),
+    radial-gradient(ellipse at 0% 100%, rgba(246, 197, 21, 0.07), transparent 32%),
+    linear-gradient(145deg, #eef8f3 0%, #fff 48%, #fffaf1 100%);
+  box-shadow:
+    0 20px 48px rgba(20, 91, 74, 0.1),
+    inset 0 1px rgba(255, 255, 255, 0.88);
+}
+
+.home-sales-plan[data-sales-plan="digi-af"]::before {
+  position: absolute;
+  z-index: -1;
+  top: -112px;
+  left: -92px;
+  width: 250px;
+  aspect-ratio: 1;
+  border: 1px solid rgba(39, 122, 101, 0.14);
+  border-radius: 44% 56% 58% 42% / 48% 42% 58% 52%;
+  box-shadow:
+    0 0 0 14px rgba(39, 122, 101, 0.025),
+    0 0 0 30px rgba(39, 122, 101, 0.018);
+  content: "";
+  pointer-events: none;
+  transform: rotate(-18deg);
 }
 
 /* DigiTime is a fast offer: keep its intro compact so products remain the focus. */
@@ -194,11 +215,25 @@
 }
 
 .home-sales-plan[data-sales-plan="digi-af"] .category-showcase-head {
-  border-color: rgba(191, 207, 194, 0.3);
-  border-block-end-color: rgba(191, 207, 194, 0.3);
+  border-color: rgba(193, 227, 211, 0.34);
+  border-block-end-color: rgba(193, 227, 211, 0.34);
+  border-radius: 20px 20px 20px 10px;
   background:
-    radial-gradient(circle at 8% 120%, rgba(179, 199, 186, 0.12), transparent 34%),
-    linear-gradient(120deg, #142e47 0%, #1b3d57 55%, #29485a 100%);
+    radial-gradient(circle at 8% 120%, rgba(180, 226, 201, 0.16), transparent 34%),
+    linear-gradient(120deg, #123b39 0%, #15584d 52%, #1e5d59 100%);
+  box-shadow:
+    0 14px 30px rgba(14, 67, 58, 0.2),
+    inset 0 1px rgba(236, 255, 246, 0.12);
+}
+
+.home-sales-plan[data-sales-plan="digi-af"] .category-showcase-head::after {
+  inset-block: -68%;
+  inset-inline-end: 9%;
+  width: 174px;
+  border-color: rgba(198, 235, 215, 0.14);
+  border-radius: 44% 56% 48% 52% / 52% 42% 58% 48%;
+  box-shadow: 0 0 0 17px rgba(198, 235, 215, 0.025);
+  transform: rotate(18deg);
 }
 
 .home-sales-plan-countdown {
@@ -304,6 +339,16 @@
   .home-sales-plan .category-showcase-head > a {
     min-height: 42px;
     padding-inline: 13px;
+  }
+
+  .home-sales-plan[data-sales-plan="digi-af"]::before {
+    top: -86px;
+    left: -92px;
+    width: 180px;
+  }
+
+  .home-sales-plan[data-sales-plan="digi-af"] .category-showcase-head {
+    border-radius: 16px 16px 16px 8px;
   }
 
   .home-sales-plan-countdown {
