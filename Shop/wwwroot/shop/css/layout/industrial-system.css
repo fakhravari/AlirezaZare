@@ -6677,8 +6677,7 @@ html
   display: block;
   min-width: 0;
   overflow: visible;
-  text-align: justify;
-  text-align-last: right;
+  text-align: right;
   text-overflow: clip;
   white-space: normal;
   overflow-wrap: anywhere;
@@ -7115,8 +7114,7 @@ html
 
 #cartPanel .cart-head {
   border: 0 !important;
-  border-start-start-radius: 0 !important;
-  border-start-end-radius: 0 !important;
+  border-radius: 0 !important;
   box-shadow: none !important;
 }
 
@@ -10369,12 +10367,15 @@ html
 
 /* Match drawer price and product-name sizes across all header panels. */
 #cartPanel .cart-item-actions > span {
+  font-size: 15px !important;
+}
+
+:is(#favoritesPanel, #comparePanel) .compare-panel-item > span > strong {
   font-size: 14px !important;
 }
 
-#cartPanel .cart-item-info > strong,
-:is(#favoritesPanel, #comparePanel) .compare-panel-item > span > strong {
-  font-size: 14px !important;
+#cartPanel .cart-item-info > strong {
+  font-size: 15px !important;
 }
 
 .product-card .product-info h3,
