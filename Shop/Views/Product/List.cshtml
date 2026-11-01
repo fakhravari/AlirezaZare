@@ -56,16 +56,23 @@
         <button class="clear-filters" id="clearFilters" type="button" hidden>
             <i class="bi bi-arrow-counterclockwise"></i> پاک‌کردن همه فیلترها
         </button>
-        <fieldset class="filter-stock-option filter-choice-group">
-            <legend>وضعیت موجودی</legend>
-            <label class="filter-option filter-choice-option"><input type="radio" name="availability" value="all" checked /><span>همهٔ کالاها</span></label>
-            <label class="filter-option filter-choice-option"><input type="radio" name="availability" value="in-stock" /><span>کالاهای موجود</span></label>
-            <label class="filter-option filter-choice-option"><input type="radio" name="availability" value="out-of-stock" /><span>کالاهای ناموجود</span></label>
-        </fieldset>
         <label class="filter-option filter-discount-option" for="discountFilter">
             <span><i class="bi bi-tags" aria-hidden="true"></i> فقط کالاهای تخفیف‌دار</span>
             <input id="discountFilter" name="discounted" type="checkbox" value="1" />
         </label>
+        <div class="filter-group" data-filter-fa="وضعیت موجودی" data-filter-en="Availability" data-filter-slug="availability">
+            <button type="button" aria-expanded="false">
+                <span class="filter-group-title" data-filter-fa="وضعیت موجودی" data-filter-en="Availability" data-filter-slug="availability">
+                    <i class="bi bi-box-seam" aria-hidden="true"></i><span>وضعیت موجودی</span>
+                </span>
+                <span class="filter-group-arrow"><i class="bi bi-chevron-down" aria-hidden="true"></i></span>
+            </button>
+            <div class="filter-options" id="availabilityFilters">
+                <label class="filter-option filter-choice-option"><input type="radio" name="availability" value="all" checked /><span>همهٔ کالاها</span></label>
+                <label class="filter-option filter-choice-option"><input type="radio" name="availability" value="in-stock" /><span>کالاهای موجود</span></label>
+                <label class="filter-option filter-choice-option"><input type="radio" name="availability" value="out-of-stock" /><span>کالاهای ناموجود</span></label>
+            </div>
+        </div>
         <div class="filter-group" data-filter-fa="طرح فروش" data-filter-en="Sales plan" data-filter-slug="sales-plan">
             <button type="button" aria-expanded="false">
                 <span class="filter-group-title" data-filter-fa="طرح فروش" data-filter-en="Sales plan" data-filter-slug="sales-plan">

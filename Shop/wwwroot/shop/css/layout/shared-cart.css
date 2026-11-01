@@ -1267,6 +1267,9 @@ body :is(#cartView, #invoiceItems) .cart-product-details .cart-item-option-chip 
       0 28px 70px rgba(3, 15, 53, 0.3),
       inset 0 0 0 1px rgba(255, 255, 255, 0.82) !important;
   }
+  #mainNav .cart-wrap > #cartPanel.cart-panel {
+    top: calc(100% + 5px) !important;
+  }
   :where(.cart-head, .page-panel-head, .search-cart-head) {
     margin: 8px !important;
     padding: 14px 16px !important;

@@ -12,6 +12,17 @@
     gap: 12px;
   }
 
+  .search-page .filter-panel {
+    height: 100dvh;
+    max-height: 100dvh;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .search-page .filter-panel::-webkit-scrollbar {
+    display: none;
+  }
+
   .search-page .search-page-card {
     display: grid !important;
     box-sizing: border-box;

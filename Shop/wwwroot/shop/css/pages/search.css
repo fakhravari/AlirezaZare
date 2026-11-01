@@ -510,12 +510,32 @@ select {
 }
 
 .filter-panel {
+  box-sizing: border-box;
   position: sticky;
   top: 105px;
-  overflow: hidden;
+  height: calc(100dvh - 125px);
+  max-height: calc(100dvh - 125px);
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
   border: 1px solid var(--industrial-muted);
   border-radius: 20px;
   box-shadow: 0 14px 38px rgba(11, 40, 104, 0.1);
+}
+
+.filter-panel::-webkit-scrollbar {
+  display: none;
+}
+
+@media (min-width: 992px) {
+  .filter-panel {
+    top: 160px;
+    height: calc(100dvh - 176px);
+    max-height: calc(100dvh - 176px);
+  }
 }
 
 .filter-head {
@@ -1450,6 +1470,7 @@ select {
     right: 0;
     bottom: 0;
     width: min(88vw, 360px);
+    height: 100dvh;
     max-height: 100dvh;
     overflow-x: hidden;
     overflow-y: auto;
@@ -1761,29 +1782,6 @@ select {
   box-shadow: 0 0 0 3px rgba(152, 119, 71, 0.2);
 }
 
-.filter-choice-group.filter-stock-option {
-  display: grid;
-  min-width: 0;
-  gap: 7px;
-  margin: 8px 12px 12px;
-  padding: 10px 12px 12px;
-  align-items: center;
-  border: 1px solid color-mix(in srgb, #16845b 24%, white);
-  border-radius: 14px;
-  background: color-mix(in srgb, #16845b 5%, white);
-  color: var(--industrial-navy);
-}
-
-.filter-choice-group > legend {
-  float: none;
-  width: auto;
-  margin: 0;
-  padding: 0 4px;
-  color: var(--industrial-navy);
-  font-size: 12px;
-  font-weight: 700;
-}
-
 .filter-choice-option {
   justify-content: flex-start;
   gap: 9px;
@@ -1828,10 +1826,8 @@ select {
   grid-template-columns: minmax(0, 1fr);
 }
 
-.filter-stock-option {
-  min-height: 46px;
-  border-color: color-mix(in srgb, #16845b 24%, white);
-  background: color-mix(in srgb, #16845b 5%, white);
+.filter-group.open #availabilityFilters {
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .filter-discount-option {

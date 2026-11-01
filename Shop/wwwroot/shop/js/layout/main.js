@@ -678,7 +678,7 @@ $(function () {
     window.HNUI?.enhance(amazingSection);
   }
   const productCardMarkup = (product) => window.HNProductCard.render(product, {variant: "slider", image: sliderImagePath(product)});
-  const bestsellerCardMarkup = (product) => `<div class="showcase-slide">${window.HNProductCard.render(product, {variant: "grid", image: sliderImagePath(product)})}</div>`;
+  const bestsellerCardMarkup = (product) => window.HNProductCard.render(product, {variant: "slider", image: sliderImagePath(product)});
   const collections = window.HNCatalog.collections;
   const collectionProducts = (name) => (collections[name] || []).map((id) => window.HNCatalog.find(id)).filter(Boolean);
   $("#bestsellersSlider").html(collectionProducts("bestsellers").map(bestsellerCardMarkup).join(""));
