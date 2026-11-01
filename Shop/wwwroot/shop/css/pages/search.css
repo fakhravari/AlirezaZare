@@ -1761,39 +1761,77 @@ select {
   box-shadow: 0 0 0 3px rgba(152, 119, 71, 0.2);
 }
 
-.filter-stock-option {
-  display: flex;
-  min-height: 46px;
+.filter-choice-group.filter-stock-option {
+  display: grid;
+  min-width: 0;
+  gap: 7px;
   margin: 8px 12px 12px;
-  padding: 9px 12px;
+  padding: 10px 12px 12px;
   align-items: center;
-  border-color: color-mix(in srgb, #16845b 24%, white);
+  border: 1px solid color-mix(in srgb, #16845b 24%, white);
+  border-radius: 14px;
   background: color-mix(in srgb, #16845b 5%, white);
+  color: var(--industrial-navy);
+}
+
+.filter-choice-group > legend {
+  float: none;
+  width: auto;
+  margin: 0;
+  padding: 0 4px;
+  color: var(--industrial-navy);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.filter-choice-option {
+  justify-content: flex-start;
+  gap: 9px;
+  margin: 0;
   color: var(--industrial-navy);
   font-weight: 600;
 }
 
-.filter-stock-option > span {
+.filter-choice-option > span {
   flex: 1;
 }
 
-.filter-stock-option > select {
-  min-width: 0;
-  max-width: 150px;
-  min-height: 34px;
-  padding: 5px 9px;
-  border: 1px solid var(--industrial-muted);
-  border-radius: 8px;
-  background: #fff;
-  color: var(--industrial-navy);
-  font: inherit;
-  font-size: 12px;
-  cursor: pointer;
+.filter-choice-option input,
+.filter-sales-plan-option input {
+  border-radius: 50%;
 }
 
-.filter-stock-option > select:focus-visible {
-  outline: 2px solid color-mix(in srgb, #16845b 35%, white);
-  outline-offset: 2px;
+.filter-choice-option input:checked,
+.filter-sales-plan-option input:checked {
+  background: var(--industrial-yellow-dark)
+    radial-gradient(circle, #fff 0 2.5px, transparent 3px);
+}
+
+.filter-choice-option:has(input:checked),
+.filter-sales-plan-option:has(input:checked) {
+  border-color: var(--industrial-yellow);
+  background: color-mix(in srgb, var(--industrial-yellow) 12%, white);
+  color: var(--industrial-navy);
+}
+
+.filter-sales-plan-option {
+  width: 100%;
+  min-width: 0;
+  justify-content: flex-start;
+}
+
+.filter-sales-plan-option > span {
+  flex: 1;
+}
+
+.filter-group.open #salesPlanFilters {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.filter-stock-option {
+  min-height: 46px;
+  border-color: color-mix(in srgb, #16845b 24%, white);
+  background: color-mix(in srgb, #16845b 5%, white);
 }
 
 .filter-discount-option {

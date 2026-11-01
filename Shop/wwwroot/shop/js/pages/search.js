@@ -32,6 +32,11 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
   })();
   const listings = [...products, ...activePlanListings];
   const activePlanNames = new Map(activePlanListings.map((item) => [item._salesPlanListing.id, item._salesPlanListing.name]));
+  const salesPlanFilterNames = new Map([
+    ["all", "همهٔ طرح‌ها"],
+    ["regular", "فروش عادی"],
+    ...activePlanNames,
+  ]);
   const $ = (selector) => document.querySelector(selector);
   const $$ = (selector) => [...document.querySelectorAll(selector)];
   const state = {
@@ -230,7 +235,7 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
     },
   };
   const filterValueMeta = (key, value) => {
-    if (key === "salesPlan") return {fa: activePlanNames.get(value) || value, en: value, slug: value};
+    if (key === "salesPlan") return {fa: salesPlanFilterNames.get(value) || value, en: value, slug: value};
     if (key === "brand") return {fa: brandDisplayName(value), en: value, slug: brandSlug(value)};
     if (key === "color") return window.HNProductColors?.[value] || {fa: value, en: value, slug: value, hex: "#64748b"};
     if (key === "type") {
@@ -272,7 +277,7 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
         ),
       ].map((slug) => [slug, slug]),
     ),
-    salesPlan: Object.fromEntries([...activePlanNames].map(([id, name]) => [id, name])),
+    salesPlan: Object.fromEntries(salesPlanFilterNames),
   }).filter(([key, options]) => key === "salesPlan" ? Object.keys(options).length > 0 : isFilterable(key)));
   const filterConfig = Object.fromEntries(
     Object.entries(filterOptions).map(([key, options]) => [
@@ -321,7 +326,7 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
           ...(filterFields[key].slug === key ? [] : params.getAll(key)),
         ]),
       ];
-      values.forEach((value) => {
+      (key === "salesPlan" ? values.slice(-1) : values).forEach((value) => {
         // Accept category slugs and legacy IDs, plus filter slugs, old options, and Persian labels.
         if (key === "type") {
           const legacyOption = /^option\d+$/.test(value)
@@ -345,7 +350,7 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
           : Object.hasOwn(filterOptions[key], value)
             ? filterOptions[key][value]
             : legacyOption || value;
-        if (key === "salesPlan" && !slugValue) return;
+        if (key === "salesPlan" && (!slugValue || slugValue === "all")) return;
         const label =
           key === "brand"
             ? brandPersianLabels[slugValue]
@@ -354,7 +359,10 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
                   (brand) => brandPersianLabels[brand] === value,
                 ) || slugValue
             : slugValue;
-        if (filterConfig[key].includes(label)) state[key].add(label);
+        if (filterConfig[key].includes(label)) {
+          if (key === "salesPlan") state[key].clear();
+          state[key].add(label);
+        }
       });
     });
     const price = Number(
@@ -386,8 +394,10 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
     )
       ? params.get("sort")
       : "recommended";
+    syncExclusiveFilterInputs();
     $$(".filter-option input[data-filter]").forEach((input) => {
-      input.checked = state[input.dataset.filter].has(input.value);
+      if (input.dataset.filter !== "salesPlan")
+        input.checked = state[input.dataset.filter].has(input.value);
     });
     const openFilterSlugs = new Set();
     if (state.brand.size) openFilterSlugs.add("brand");
@@ -401,7 +411,6 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
         String(open),
       );
     });
-    if ($("#availabilityFilter")) $("#availabilityFilter").value = state.availability;
     if ($("#discountFilter")) $("#discountFilter").checked = state.discountOnly;
     if ($("#minPrice")) $("#minPrice").value = state.minPrice;
     if ($("#maxPrice")) $("#maxPrice").value = state.maxPrice;
@@ -451,10 +460,20 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
                 key === "color"
                   ? `<i class="filter-color-swatch" style="--filter-color: ${metadata.hex}" aria-hidden="true"></i>`
                   : "";
-              return `<label class="filter-option${key === "color" ? " filter-color-option" : key === "salesPlan" ? " filter-sales-plan-option" : ""}"><input type="checkbox" value="${value}" data-filter="${key}" data-value-fa="${metadata.fa}" data-value-en="${metadata.en}" data-value-slug="${metadata.slug}"><span class="filter-option-label">${colorOption}${key === "color" ? `<span class="filter-color-name" title="${metadata.fa} ${metadata.hex}">${metadata.fa}</span>` : metadata.fa}</span></label>`;
+              const inputType = key === "salesPlan" ? "radio" : "checkbox";
+              const inputName = key === "salesPlan" ? 'name="salesPlanFilter"' : "";
+              return `<label class="filter-option${key === "color" ? " filter-color-option" : key === "salesPlan" ? " filter-sales-plan-option" : ""}"><input type="${inputType}" ${inputName} value="${value}" data-filter="${key}" data-value-fa="${metadata.fa}" data-value-en="${metadata.en}" data-value-slug="${metadata.slug}"><span class="filter-option-label">${colorOption}${key === "color" ? `<span class="filter-color-name" title="${metadata.fa} ${metadata.hex}">${metadata.fa}</span>` : metadata.fa}</span></label>`;
             })(),
           )
           .join("");
+    });
+  }
+  function syncExclusiveFilterInputs() {
+    $$('input[name="availability"]').forEach((input) => {
+      input.checked = input.value === state.availability;
+    });
+    $$('#salesPlanFilters input[name="salesPlanFilter"]').forEach((input) => {
+      input.checked = state.salesPlan.has(input.value) || (!state.salesPlan.size && input.value === "all");
     });
   }
   function syncCategoryFilters() {
@@ -478,10 +497,10 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
     }
     const planGroup = $("#salesPlanFilters")?.closest(".filter-group");
     if (planGroup) {
-      planGroup.hidden = activePlanNames.size === 0;
-      planGroup.style.display = activePlanNames.size ? "" : "none";
+      planGroup.hidden = false;
+      planGroup.style.display = "";
       $("#salesPlanFilters").querySelectorAll('input[data-filter="salesPlan"]').forEach((input) => {
-        input.checked = state.salesPlan.has(input.value);
+        input.checked = state.salesPlan.has(input.value) || (!state.salesPlan.size && input.value === "all");
       });
     }
   }
@@ -670,7 +689,7 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
             $("#maxPrice").value = 60;
           } else if (chip.dataset.key === "available") {
             state.availability = "all";
-            $("#availabilityFilter").value = "all";
+            syncExclusiveFilterInputs();
           } else if (chip.dataset.key === "discounted") {
             state.discountOnly = false;
             $("#discountFilter").checked = false;
@@ -685,6 +704,7 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
                 `input[data-filter="${chip.dataset.key}"][value="${chip.dataset.value}"]`,
               );
               if (box) box.checked = false;
+              if (chip.dataset.key === "salesPlan") syncExclusiveFilterInputs();
             }
           }
           updatePrice();
@@ -705,7 +725,7 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
       group.classList.remove("open");
       group.querySelector(":scope > button")?.setAttribute("aria-expanded", "false");
     });
-    $("#availabilityFilter").value = "all";
+    syncExclusiveFilterInputs();
     $("#minPrice").value = 0;
     $("#maxPrice").value = 60;
     $("#productSearch").value = "";
@@ -764,14 +784,21 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
       (input.onchange = () => {
         const set = state[input.dataset.filter];
         const value = input.value;
-        input.checked ? set.add(value) : set.delete(value);
+        if (input.dataset.filter === "salesPlan") {
+          set.clear();
+          if (input.checked && value !== "all") set.add(value);
+          syncExclusiveFilterInputs();
+        } else {
+          input.checked ? set.add(value) : set.delete(value);
+        }
         render(true, true);
       }),
   );
-  $("#availabilityFilter")?.addEventListener("change", (event) => {
-    state.availability = event.target.value;
+  $$('input[name="availability"]').forEach((input) => input.addEventListener("change", () => {
+    if (!input.checked) return;
+    state.availability = input.value;
     render(true, true);
-  });
+  }));
   $("#discountFilter")?.addEventListener("change", (event) => {
     state.discountOnly = event.target.checked;
     render(true, true);

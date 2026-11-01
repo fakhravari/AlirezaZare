@@ -171,6 +171,52 @@ test('sales plan navigation opens search with that plan selected', async ({page,
   expect(resultPlanIds.every(id => id === 'digi-time')).toBe(true);
 });
 
+test('search plan and inventory filters allow one choice at a time', async ({page, isMobile}) => {
+  await page.clock.install({time: new Date('2026-11-01T10:00:00Z')});
+  await page.goto('/search?sales-plan=digi-time&sales-plan=digi-af');
+  await expect(page.locator('#salesPlanFilters input[value="digi-af"]')).toBeChecked();
+  await expect.poll(() => page.evaluate(() => new URL(location.href).searchParams.getAll('sales-plan'))).toEqual(['digi-af']);
+
+  await page.goto('/search');
+  if (isMobile) await page.locator('#mobileFilterToggle').click();
+
+  const planGroup = page.locator('.filter-group[data-filter-slug="sales-plan"]');
+  await planGroup.locator(':scope > button').click();
+  const planRadios = page.locator('#salesPlanFilters input[name="salesPlanFilter"]');
+  await expect(planRadios).toHaveCount(4);
+  await expect(page.locator('#salesPlanFilters input[value="all"]')).toBeChecked();
+  const planOptionRows = await planRadios.evaluateAll(inputs =>
+    inputs.map(input => Math.round(input.closest('label').getBoundingClientRect().top)));
+  expect(new Set(planOptionRows).size).toBe(planOptionRows.length);
+
+  await page.locator('#salesPlanFilters input[value="digi-time"]').check();
+  await expect(page).toHaveURL(/sales-plan=digi-time/);
+  await expect(page.locator('#salesPlanFilters input[name="salesPlanFilter"]:checked')).toHaveCount(1);
+  await page.locator('#salesPlanFilters input[value="regular"]').check();
+  await expect(page).toHaveURL(/sales-plan=regular/);
+  await expect(page.locator('#salesPlanFilters input[name="salesPlanFilter"]:checked')).toHaveCount(1);
+  const regularCards = await page.locator('#productResults [data-product-card="v1"]').evaluateAll(cards =>
+    cards.map(card => card.getAttribute('data-sales-plan-id')));
+  expect(regularCards.length).toBeGreaterThan(0);
+  expect(regularCards.every(planId => planId === null)).toBe(true);
+  await page.locator('#salesPlanFilters input[value="all"]').check();
+  await expect(page).not.toHaveURL(/sales-plan=/);
+
+  const availability = page.locator('input[name="availability"]');
+  await expect(availability).toHaveCount(3);
+  await expect(page.locator('input[name="availability"][value="all"]')).toBeChecked();
+  const availabilityRows = await availability.evaluateAll(inputs =>
+    inputs.map(input => Math.round(input.closest('label').getBoundingClientRect().top)));
+  expect(new Set(availabilityRows).size).toBe(availabilityRows.length);
+  await page.locator('input[name="availability"][value="in-stock"]').check();
+  await expect(page).toHaveURL(/available=1/);
+  await expect(page.locator('input[name="availability"]:checked')).toHaveCount(1);
+  await page.locator('input[name="availability"][value="out-of-stock"]').check();
+  await expect(page).toHaveURL(/available=0/);
+  await expect(page.locator('input[name="availability"]:checked')).toHaveCount(1);
+  await noHorizontalOverflow(page);
+});
+
 test('product opens at the top, gallery closes, and detail tabs remain reachable', async ({page}) => {
   await page.goto('/products/cordless-hammer-drill-1');
   await expect(page.locator('#addProduct')).toBeAttached();
@@ -185,9 +231,20 @@ test('product opens at the top, gallery closes, and detail tabs remain reachable
   await noHorizontalOverflow(page);
 });
 
-test('product plan selection uses the matching quote and recovers cleanly from an expired plan URL', async ({page}) => {
+test('product detail shows only its URL plan and recovers cleanly from an expired plan URL', async ({page}) => {
   await page.addInitScript(() => localStorage.setItem('hn-demo-auth', '1'));
   await page.clock.install({time: new Date('2026-11-01T10:00:00Z')});
+  await page.goto('/products/cordless-hammer-drill-1');
+  await expect(page.locator('.product-sales-plans, .product-sales-plan--fixed')).toHaveCount(0);
+  const regularPrice = await page.evaluate(() => Number(
+    window.HNUI.toEnglishDigits(document.querySelector('#productFinalPrice').textContent).replace(/\D/g, ''),
+  ));
+  expect(regularPrice).toBe(24850000);
+
+  await page.goto('/products/cordless-hammer-drill-1?salesPlanId=regular');
+  await expect(page).not.toHaveURL(/salesPlanId=/);
+  await expect(page.locator('.product-sales-plans, .product-sales-plan--fixed')).toHaveCount(0);
+
   await page.goto('/products/cordless-hammer-drill-1?salesPlanId=digi-time');
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', /\/products\/cordless-hammer-drill-1$/);
   const underDayCountdown = page.locator('[data-plan-countdown]');
@@ -218,7 +275,11 @@ test('product plan selection uses the matching quote and recovers cleanly from a
 
   await page.clock.setFixedTime(new Date('2027-01-01T00:00:00Z'));
   await page.goto('/products/cordless-hammer-drill-1?salesPlanId=digi-time');
-  await expect(page.locator('input[name="productSalesPlan"][value="regular"]')).toBeChecked();
+  await expect(page.locator('.product-sales-plans, .product-sales-plan--fixed')).toHaveCount(0);
+  const expiredPlanFallbackPrice = await page.evaluate(() => Number(
+    window.HNUI.toEnglishDigits(document.querySelector('#productFinalPrice').textContent).replace(/\D/g, ''),
+  ));
+  expect(expiredPlanFallbackPrice).toBe(regularPrice);
   await expect(page.locator('#productStatus')).toContainText('طرح انتخاب‌شده در دسترس نیست');
   await expect(page).not.toHaveURL(/salesPlanId=/);
   await noHorizontalOverflow(page);

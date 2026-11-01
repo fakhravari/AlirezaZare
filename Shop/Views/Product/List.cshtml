@@ -56,22 +56,20 @@
         <button class="clear-filters" id="clearFilters" type="button" hidden>
             <i class="bi bi-arrow-counterclockwise"></i> پاک‌کردن همه فیلترها
         </button>
-        <label class="filter-option filter-stock-option" for="availabilityFilter">
-            <span>وضعیت موجودی</span>
-            <select id="availabilityFilter" name="available">
-                <option value="all">همهٔ کالاها</option>
-                <option value="in-stock">کالاهای موجود</option>
-                <option value="out-of-stock">کالاهای ناموجود</option>
-            </select>
-        </label>
+        <fieldset class="filter-stock-option filter-choice-group">
+            <legend>وضعیت موجودی</legend>
+            <label class="filter-option filter-choice-option"><input type="radio" name="availability" value="all" checked /><span>همهٔ کالاها</span></label>
+            <label class="filter-option filter-choice-option"><input type="radio" name="availability" value="in-stock" /><span>کالاهای موجود</span></label>
+            <label class="filter-option filter-choice-option"><input type="radio" name="availability" value="out-of-stock" /><span>کالاهای ناموجود</span></label>
+        </fieldset>
         <label class="filter-option filter-discount-option" for="discountFilter">
             <span><i class="bi bi-tags" aria-hidden="true"></i> فقط کالاهای تخفیف‌دار</span>
             <input id="discountFilter" name="discounted" type="checkbox" value="1" />
         </label>
-        <div class="filter-group" data-filter-fa="طرح فروش" data-filter-en="Sales plan" data-filter-slug="sales-plan" hidden>
+        <div class="filter-group" data-filter-fa="طرح فروش" data-filter-en="Sales plan" data-filter-slug="sales-plan">
             <button type="button" aria-expanded="false">
                 <span class="filter-group-title" data-filter-fa="طرح فروش" data-filter-en="Sales plan" data-filter-slug="sales-plan">
-                    <i class="bi bi-lightning-charge" aria-hidden="true"></i><span>طرح فروش فعال</span>
+                    <i class="bi bi-lightning-charge" aria-hidden="true"></i><span>طرح فروش</span>
                 </span>
                 <span class="filter-group-arrow"><i class="bi bi-chevron-down" aria-hidden="true"></i></span>
             </button>
