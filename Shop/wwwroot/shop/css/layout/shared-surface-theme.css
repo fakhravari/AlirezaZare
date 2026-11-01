@@ -55,15 +55,6 @@ body.inner-page .contact-shortcuts > .container {
   line-height: 1.5;
 }
 
-#cartPanel .cart-item {
-  grid-template-columns: 78px minmax(0, 1fr) !important;
-}
-
-#cartPanel .cart-item > img {
-  width: 78px !important;
-  height: 78px !important;
-}
-
 #cartPanel .cart-item-info > strong {
   line-height: 1.65;
 }
@@ -110,16 +101,5 @@ body.inner-page .contact-shortcuts > .container {
     width: 100%;
     max-width: 100%;
     padding: 16px;
-  }
-}
-
-@media (max-width: 420px) {
-  #cartPanel .cart-item {
-    grid-template-columns: 68px minmax(0, 1fr) !important;
-  }
-
-  #cartPanel .cart-item > img {
-    width: 68px !important;
-    height: 68px !important;
   }
 }

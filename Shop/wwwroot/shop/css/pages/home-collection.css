@@ -404,6 +404,102 @@
 
 }
 
+/* Keep the DigiTime and DigiAF introductions aligned and visually quiet. */
+#homeSalesTime .home-sales-plan,
+#homeSalesPlans .home-sales-plan {
+  border-color: rgba(178, 138, 79, 0.24);
+  background: linear-gradient(145deg, #fffaf0 0%, #fff 52%, #f7f9fa 100%);
+  box-shadow: 0 18px 46px rgba(16, 42, 67, 0.08);
+}
+
+#homeSalesTime .home-sales-plan[data-sales-plan="digi-af"]::before,
+#homeSalesPlans .home-sales-plan[data-sales-plan="digi-af"]::before {
+  display: none;
+  content: none;
+}
+
+#homeSalesTime .home-sales-plan .category-showcase-head,
+#homeSalesPlans .home-sales-plan .category-showcase-head {
+  min-height: 196px;
+  box-sizing: border-box;
+  align-items: center;
+  flex-direction: row;
+  gap: 22px;
+  padding: 24px 28px;
+  border: 1px solid rgba(246, 197, 21, 0.32);
+  border-radius: 18px;
+  background:
+    radial-gradient(ellipse at 88% 0%, rgba(246, 197, 21, 0.11), transparent 34%),
+    linear-gradient(120deg, #102a43 0%, #173b56 58%, #20445d 100%);
+  box-shadow: 0 12px 26px rgba(16, 42, 67, 0.17);
+}
+
+#homeSalesTime .home-sales-plan .category-showcase-head::after,
+#homeSalesPlans .home-sales-plan .category-showcase-head::after {
+  z-index: 0;
+  inset-block: 22px;
+  inset-inline-end: 0;
+  width: 3px;
+  border: 0;
+  border-radius: 3px 0 0 3px;
+  background: rgba(246, 197, 21, 0.72);
+  box-shadow: none;
+  transform: none;
+}
+
+#homeSalesTime .home-sales-plan .category-showcase-head > div,
+#homeSalesPlans .home-sales-plan .category-showcase-head > div {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: center;
+  gap: 0;
+}
+
+#homeSalesTime .home-sales-plan .category-showcase-head h2,
+#homeSalesPlans .home-sales-plan .category-showcase-head h2 {
+  margin: 0;
+  font-size: clamp(24px, 2.4vw, 34px);
+}
+
+#homeSalesTime .home-sales-plan .home-sales-plan-countdown,
+#homeSalesPlans .home-sales-plan .home-sales-plan-countdown {
+  width: fit-content;
+  max-width: 100%;
+  margin-block-start: 14px;
+}
+
+#homeSalesTime .home-sales-plan[data-sales-plan="digi-af"] .category-showcase-head,
+#homeSalesPlans .home-sales-plan[data-sales-plan="digi-af"] .category-showcase-head {
+  border-color: rgba(191, 224, 211, 0.36);
+  background:
+    radial-gradient(ellipse at 88% 0%, rgba(99, 184, 152, 0.12), transparent 34%),
+    linear-gradient(120deg, #123b43 0%, #174b53 58%, #20545a 100%);
+}
+
+@media (max-width: 575.98px) {
+  #homeSalesTime .home-sales-plan .category-showcase-head,
+  #homeSalesPlans .home-sales-plan .category-showcase-head {
+    min-height: 250px;
+    align-items: stretch;
+    flex-direction: column;
+    gap: 13px;
+    padding: 18px;
+  }
+
+  #homeSalesTime .home-sales-plan .category-showcase-head > div,
+  #homeSalesPlans .home-sales-plan .category-showcase-head > div {
+    width: 100%;
+  }
+
+  #homeSalesTime .home-sales-plan .home-sales-plan-countdown,
+  #homeSalesPlans .home-sales-plan .home-sales-plan-countdown {
+    width: 100%;
+    justify-content: space-between;
+    margin: 12px 0 0;
+  }
+}
+
 .home-page #collection .collection-guidance {
   display: flex;
   align-items: flex-start;

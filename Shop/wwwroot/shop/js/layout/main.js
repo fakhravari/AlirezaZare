@@ -1237,7 +1237,7 @@ $(function () {
           const href = window.HNProductUrl?.(item.id, {salesPlanId: item.salesPlanId}) || "/search";
           const planDetails = item.salesPlanSnapshot;
           const planBadge = `<span class="cart-sales-plan-badge">${escapeHtml(window.HNUI.cart.salesPlanName(item.salesPlanId, planDetails?.name))}</span>`;
-          return `<div class="cart-item" data-cart-id="${safeId}" data-sales-plan-id="${escapeHtml(item.salesPlanId || "regular")}"><img src="${safeImage}" alt="${safeName}" loading="lazy" decoding="async"><div class="cart-item-info"><strong><a class="header-panel-product-link" href="${escapeHtml(href)}">${safeName}</a></strong>${planBadge}${cartOptionsMarkup(item)}<div class="cart-item-actions"><span>${faNumber(item.price)} تومان</span>${window.HNUI.cart.renderControls(item)}</div></div></div>`;
+          return `<div class="cart-item" data-cart-id="${safeId}" data-sales-plan-id="${escapeHtml(item.salesPlanId || "regular")}"><div class="cart-item-primary"><img src="${safeImage}" alt="${safeName}" loading="lazy" decoding="async"><div class="cart-item-info"><strong><a class="header-panel-product-link" href="${escapeHtml(href)}">${safeName}</a></strong>${planBadge}<div class="cart-item-actions"><span>${faNumber(item.price)} تومان</span>${window.HNUI.cart.renderControls(item)}</div></div></div>${cartOptionsMarkup(item)}</div>`;
         })
         .join(""),
     );
