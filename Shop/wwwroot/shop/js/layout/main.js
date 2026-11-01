@@ -12,6 +12,67 @@ $(function () {
   const faNumber = (number) => window.HNUI.formatNumber(number);
   const escapeHtml = (value) => window.HNUI.escapeHtml(value);
   const cartOptionsMarkup = (item) => window.HNUI.cart.renderOptions(item);
+  const searchProducts = Array.isArray(window.HNProducts)
+    ? window.HNProducts
+    : [];
+  const headerSearchListings = (() => {
+    let salesPlanCatalog = {};
+    try {
+      salesPlanCatalog = JSON.parse(
+        document.querySelector("#storeSalesPlans")?.textContent || "{}",
+      );
+    } catch {
+      salesPlanCatalog = {};
+    }
+
+    const productsById = new Map(
+      searchProducts.map((product) => [Number(product.id), product]),
+    );
+    const plansById = new Map(
+      (Array.isArray(salesPlanCatalog.plans) ? salesPlanCatalog.plans : []).map(
+        (plan) => [plan.id, plan],
+      ),
+    );
+    const now = Date.now();
+    const offers = (
+      Array.isArray(salesPlanCatalog.offers) ? salesPlanCatalog.offers : []
+    ).flatMap((offer) => {
+      const product = productsById.get(Number(offer.productId));
+      const plan = plansById.get(offer.salesPlanId);
+      const priceAmount = Number(offer.priceAmount);
+      const discountPercent = Number(offer.discountPercent) || 0;
+      if (
+        !product ||
+        !plan ||
+        plan.isDefault ||
+        plan.isEnabled === false ||
+        offer.isEnabled === false ||
+        Number(offer.stockQuantity) <= 0 ||
+        !Number.isFinite(priceAmount) ||
+        discountPercent < 0 ||
+        discountPercent >= 100
+      )
+        return [];
+
+      const startsAt = plan.startsAtUtc ? Date.parse(plan.startsAtUtc) : NaN;
+      const endsAt = plan.endsAtUtc ? Date.parse(plan.endsAtUtc) : NaN;
+      if (
+        (Number.isFinite(startsAt) && now < startsAt) ||
+        (Number.isFinite(endsAt) && now >= endsAt)
+      )
+        return [];
+
+      return [{ product, plan, offer, priceAmount, discountPercent }];
+    });
+    const productsWithActiveOffers = new Set(
+      offers.map(({ product }) => Number(product.id)),
+    );
+    const regularListings = searchProducts
+      .filter((product) => !productsWithActiveOffers.has(Number(product.id)))
+      .map((product) => ({ product, plan: null, offer: null }));
+
+    return [...regularListings, ...offers];
+  })();
   document
     .querySelectorAll(".home-header-search, .mobile-menu-search")
     .forEach((headerSearchForm) => {
@@ -36,6 +97,8 @@ $(function () {
           ["header-search-suggestions-head", "mobile-menu-search-results-head"],
           ["header-search-suggestion-image", "mobile-menu-search-suggestion-image"],
           ["header-search-suggestion-copy", "mobile-menu-search-suggestion-copy"],
+          ["header-search-suggestion-details", "mobile-menu-search-suggestion-details"],
+          ["header-search-plan-badge", "mobile-menu-search-plan-badge"],
           ["header-search-suggestion", "mobile-menu-search-suggestion"],
           ["header-search-all", "mobile-menu-search-all"],
           ["header-search-empty", "mobile-menu-search-empty"],
@@ -127,51 +190,69 @@ $(function () {
         return;
       }
 
-      const products = Array.isArray(window.HNProducts)
-        ? window.HNProducts
-        : [];
-      const matches = products
-        .map((product) => {
+      const matches = headerSearchListings
+        .map((listing) => {
+          const { product, plan } = listing;
           const productName = String(product.name || "").replace(/\s+\d+$/, "");
           const fields = [
             productName,
             product.brand,
             product.type,
             String(product.englishName || "").replace(/\s+\d+$/, ""),
+            plan?.name,
+            plan?.label,
+            plan?.code,
           ];
           const normalizedFields = fields.map(normalizeSearchText);
           const matchIndex = normalizedFields.findIndex((field) =>
             field.includes(query),
           );
-          return { product, matchIndex };
+          return { ...listing, matchIndex };
         })
         .filter(({ matchIndex }) => matchIndex >= 0)
         .sort(
           (a, b) =>
             a.matchIndex - b.matchIndex ||
+            Number(Boolean(b.plan)) - Number(Boolean(a.plan)) ||
             (b.product.newest || 0) - (a.product.newest || 0),
         )
         .filter(
           (() => {
-            const seenNames = new Set();
-            return ({ product }) => {
-              const productName = normalizeSearchText(
-                String(product.name || "").replace(/\s+\d+$/, ""),
-              );
-              if (seenNames.has(productName)) return false;
-              seenNames.add(productName);
+            const seenListings = new Set();
+            return ({ product, plan }) => {
+              const listingKey = `${Number(product.id)}:${plan?.id || "regular"}`;
+              if (seenListings.has(listingKey)) return false;
+              seenListings.add(listingKey);
               return true;
             };
           })(),
         )
         .slice(0, 5)
-        .map(({ product }) => product);
+        .map(({ product, plan, priceAmount, discountPercent }) => ({
+          product,
+          plan,
+          currentPrice: plan
+            ? Math.round(priceAmount * (100 - discountPercent) / 100)
+            : Math.round(Number(product.price) * 1000000),
+          listPrice: plan && discountPercent > 0 ? priceAmount : null,
+        }));
 
       const resultMarkup = matches.length
-        ? `<div class="header-search-suggestions-head"><span><i class="bi bi-stars" aria-hidden="true"></i> پیشنهاد برای جستجوی شما</span><small>${faNumber(matches.length)} محصول</small></div><ul>${matches
+        ? `<div class="header-search-suggestions-head"><span><i class="bi bi-stars" aria-hidden="true"></i> پیشنهاد برای جستجوی شما</span><small>${faNumber(matches.length)} پیشنهاد</small></div><ul>${matches
             .map(
-              (product) =>
-                `<li><a class="header-search-suggestion" role="option" href="${window.HNProductUrl(product)}"><span class="header-search-suggestion-image"><img src="${escapeHtml(product.image)}" alt="" loading="lazy" decoding="async"></span><span class="header-search-suggestion-copy"><strong>${escapeHtml(product.name)}</strong><small>${escapeHtml(product.brand)} <bdi>· ${escapeHtml(product.type)}</bdi></small><b>${faNumber(product.price * 1000000)} <small>تومان</small></b></span><i class="bi bi-arrow-left" aria-hidden="true"></i></a></li>`,
+              ({ product, plan, currentPrice, listPrice }) => {
+                const planBadge = plan
+                  ? `<span class="header-search-plan-badge" title="${escapeHtml(plan.label || plan.name)}"><i class="bi bi-lightning-charge-fill" aria-hidden="true"></i>طرح ${escapeHtml(plan.name || plan.code)}</span>`
+                  : "";
+                const priceMarkup = listPrice
+                  ? `<b><span>${faNumber(currentPrice)} <small>تومان</small></span><del>${faNumber(listPrice)}</del></b>`
+                  : `<b>${faNumber(currentPrice)} <small>تومان</small></b>`;
+                const productUrl = window.HNProductUrl(
+                  product,
+                  plan ? { salesPlanId: plan.id } : undefined,
+                );
+                return `<li><a class="header-search-suggestion" role="option" href="${escapeHtml(productUrl)}"><span class="header-search-suggestion-image"><img src="${escapeHtml(product.image)}" alt="" loading="lazy" decoding="async"></span><span class="header-search-suggestion-copy"><strong>${escapeHtml(product.name)}</strong><small><span class="header-search-suggestion-details">${escapeHtml(product.brand)} <bdi>· ${escapeHtml(product.type)}</bdi></span>${planBadge}</small>${priceMarkup}</span><i class="bi bi-arrow-left" aria-hidden="true"></i></a></li>`;
+              },
             )
             .join(
               "",

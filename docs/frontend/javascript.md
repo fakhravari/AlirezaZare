@@ -44,7 +44,7 @@
 | `js/core/storage.js` | storage، نسخهٔ رکورد، backup و migration | legacy/future/malformed/quota؛ نوشتن و حذف موفق/ناموفق |
 | `js/store/cart.js` | normalize، قیمت، موجودی، سبد و renderer گزینه‌ها | شناسهٔ محصول و قرارداد سبد |
 | `js/layout/header-navigation.js` | باز/بسته، کیبورد، hover و گروه‌های دسته در هدر | trigger واقعی، state صریح و خانه/داخلی |
-| `js/layout/main.js` | پیشنهاد/جست‌وجوی اخیر، شمارنده‌ها، account/login/cart/list panels و هماهنگی خانه؛ پیمایش لینک‌های hash با رعایت `scroll-margin-top` مقصد | جستجوی هدر و drawer پس از ۳ نویسه پیشنهاد محصول را با debounce ۲۵۰ms می‌سازند؛ submit کمتر از ۳ نویسه متوقف می‌شود. listenerهای delegated و panel state؛ حفظ offset هدر/نوار sticky و پشتیبانی از reduced motion |
+| `js/layout/main.js` | پیشنهاد/جست‌وجوی اخیر، شمارنده‌ها، account/login/cart/list panels و هماهنگی خانه؛ پیمایش لینک‌های hash با رعایت `scroll-margin-top` مقصد | جستجوی هدر و drawer پس از ۳ نویسه پیشنهاد محصول و offer طرح فروش فعال و موجود را با debounce ۲۵۰ms می‌سازند؛ offer نام طرح و قیمت ویژه را نشان می‌دهد و پیوندش `salesPlanId` را نگه می‌دارد. submit کمتر از ۳ نویسه متوقف می‌شود. listenerهای delegated و panel state؛ حفظ offset هدر/نوار sticky و پشتیبانی از reduced motion |
 | `js/core/form-validation.js` | validation عمومی/delegated فرم | `data-*`، selector فرم، خطاهای inline و submit handler اختصاصی؛ `data-validation="full-name"` دست‌کم دو بخش نام را می‌سنجد و `data-required-message` متن خطای فیلد اجباری را جایگزین می‌کند |
 | `js/store/catalog.js` | resolverِ catalog.json؛ HNCatalog و APIهای سازگار HNProducts/HNCountries/HNProductColors | شناسه‌های صریح، relation و immutable بودن؛ داده دمو است |
 | `js/store/product-card.js` | renderer مشترک کارت و قیمت | variantهای grid/slider/search/related/favorite؛ escape و data-* مشترک |
@@ -111,4 +111,4 @@
 
 [فهرست این بخش](README.md) · [فهرست مستندات](../README.md)
 
-آخرین تطبیق با کد: ۱ نوامبر ۲۰۲۶.
+آخرین تطبیق با کد: ۲ نوامبر ۲۰۲۶.

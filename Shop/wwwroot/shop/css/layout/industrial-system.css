@@ -2866,6 +2866,11 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
 }
 
 .header-search-suggestion-copy > small {
+  display: flex;
+  width: fit-content;
+  max-width: 100%;
+  align-items: center;
+  gap: 7px;
   overflow: hidden;
   color: var(--industrial-muted);
   font-size: 10px;
@@ -2873,7 +2878,44 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
   white-space: nowrap;
 }
 
+.header-search-suggestion-copy > small > .header-search-suggestion-details {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.header-search-suggestion-copy > small > .header-search-plan-badge {
+  display: inline-flex;
+  width: fit-content;
+  max-width: 48%;
+  flex: 0 1 auto;
+  align-items: center;
+  gap: 4px;
+  overflow: hidden;
+  padding: 2px 7px;
+  border: 1px solid #edda9e;
+  border-radius: 999px;
+  background: #fff9e5;
+  color: #77540e;
+  font-size: 9px;
+  font-weight: 750;
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.header-search-suggestion-copy > .header-search-plan-badge i {
+  flex: 0 0 auto;
+  color: #c28c12;
+}
+
 .header-search-suggestion-copy > b {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  white-space: nowrap;
   color: var(--industrial-yellow-dark);
   font-size: 11px;
   font-weight: 800;
@@ -2883,6 +2925,13 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
   color: var(--industrial-muted);
   font-size: 9px;
   font-weight: 500;
+}
+
+.header-search-suggestion-copy > b > del {
+  color: #9aa5af;
+  font-size: 9px;
+  font-weight: 500;
+  text-decoration-thickness: 1px;
 }
 
 .header-search-suggestion > i {
@@ -10537,12 +10586,21 @@ body.home-page .rail-card > strong {
 
   .home-page #mainNav .header-search-suggestion-copy > strong {
     font-size: 14px;
+    line-height: 1.35;
+  }
+
+  .home-page #mainNav .header-search-suggestion-copy > small {
+    line-height: 1.25;
   }
 
   .home-page #mainNav .header-search-suggestion-copy > b,
   .home-page #mainNav .header-search-all,
   .home-page #mainNav .header-search-empty {
     font-size: 13px;
+  }
+
+  .home-page #mainNav .header-search-suggestion-copy > b {
+    line-height: 1.25;
   }
 
   .home-page #mainNav .home-header-support small {

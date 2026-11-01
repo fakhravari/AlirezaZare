@@ -52,7 +52,7 @@ View خانه renderer `pages/home-sales-plans.js` را در section Scripts خ�
 
 | Partial/component | markup یا نشانه | مالک CSS/JS اصلی | جاهایی که باید رگرسیون شوند |
 |---|---|---|---|
-| هدر | `_HomeHeader`, `_InnerHeader`, `_Header`؛ body کلاس home/inner | `shared-header.css`, `shared-mega-menu.css`, themeها؛ `layout/main.js` | خانه + یک inner page، دسکتاپ + موبایل، login/logout و search open؛ پیشنهاد محصول پس از ۳ نویسه با debounce ۲۵۰ms |
+| هدر | `_HomeHeader`, `_InnerHeader`, `_Header`؛ body کلاس home/inner | `shared-header.css`, `shared-mega-menu.css`, themeها؛ `layout/main.js` | خانه + یک inner page، دسکتاپ + موبایل، login/logout و search open؛ پیشنهاد محصول و طرح فعال پس از ۳ نویسه با debounce ۲۵۰ms، نشان طرح/قیمت ویژه و حفظ `salesPlanId` در پیوند |
 | مگامنو | خانه و inner markup/variant متفاوت؛ inner selectorهایی مثل `.page-mega-sidebar` | `shared-mega-menu.css`, `mega-menu-unified.css`, `quick-links-menu.css`; باز/بسته و category در `header-navigation.js` | trigger → panel، keyboard/ArrowDown/Escape، فضای خالی هدر، شاخهٔ پیش‌فرض و breakpoint 992 |
 | account popover/drawer هدر | `.shared-account-card`, `.shared-account-popover`, `.account-links` | `shared-account.css`; تعامل در `main.js` | کاربر خارج/وارد، desktop/mobile، Escape، focus و scroll؛ badge عددی گزینه‌های منو در موبایل پنهان است |
 | cart/favorites/compare panels | `.page-cart-panel`, `.search-cart-drawer`, `.favorites-panel`, `.compare-panel` و item/footerها | `shared-cart.css`, `commerce.css`; `main.js` + `commerce.js` | سبد خالی/پر، تعداد زیاد آیتم، پنل باز و scroll داخلی، responsive |
@@ -155,4 +155,4 @@ storage/cart factory پیش از HNUI، resolver پیش از renderer و rendere
 
 [فهرست این بخش](README.md) · [فهرست مستندات](../README.md)
 
-آخرین تطبیق با کد: ۱ نوامبر ۲۰۲۶.
+آخرین تطبیق با کد: ۲ نوامبر ۲۰۲۶.

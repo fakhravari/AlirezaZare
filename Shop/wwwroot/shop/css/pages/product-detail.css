@@ -85,20 +85,23 @@
   }
 
   .inner-page .product-detail-hero .cart-breadcrumb ol > li:last-child > [aria-current] {
+    display: flex;
     min-width: 0;
     max-width: 100%;
     flex: 1 1 0;
-    flex-wrap: wrap;
-    white-space: normal;
-    overflow-wrap: anywhere;
+    flex-wrap: nowrap;
+    overflow: hidden;
+    white-space: nowrap;
     box-sizing: border-box;
   }
 
   .inner-page .product-detail-hero .cart-breadcrumb ol > li:last-child > [aria-current] > .product-breadcrumb-label {
+    display: block;
     min-width: 0;
     flex: 1 1 0;
-    overflow-wrap: anywhere;
-    white-space: normal;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .inner-page .product-detail-hero .cart-breadcrumb ol > li:last-child > [aria-current] > i,
