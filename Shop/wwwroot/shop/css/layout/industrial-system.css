@@ -9702,7 +9702,6 @@ html
 
 @media (max-width: 767px) {
   .inner-page .page-hero {
-    min-height: 0 !important;
     padding: 22px 0 30px !important;
   }
 
@@ -11261,7 +11260,6 @@ body .electrical-swiper .swiper-pagination-bullet-active {
   }
 
   .inner-page #mainNav .navbar-nav > .category-nav-dropdown:is(.show, .is-mega-open) > .nav-link .nav-menu-icon {
-    color: var(--industrial-navy) !important;
     filter: none;
     transform: scale(1.12);
   }
@@ -12674,25 +12672,12 @@ body .electrical-swiper .swiper-pagination-bullet-active {
     transform: translateY(8px) !important;
   }
 
-  #mainNav .brand-dropdown > .brand-menu {
-    /* Keep the panel's geometry fixed; fade-only avoids a zoom-like close. */
-    transform: translate(-50%, 0) !important;
-  }
-
   .inner-page #mainNav .category-nav-dropdown:is(.show, .is-mega-open) > .category-nav-mega,
   #mainNav .brand-dropdown:is(.show, .is-brand-open) > .brand-menu {
     opacity: 1 !important;
     visibility: visible !important;
     pointer-events: auto !important;
     transition-delay: 0s !important;
-  }
-
-  .inner-page #mainNav .category-nav-dropdown:is(.show, .is-mega-open) > .category-nav-mega {
-    transform: translateY(0) !important;
-  }
-
-  #mainNav .brand-dropdown:is(.show, .is-brand-open) > .brand-menu {
-    transform: translate(-50%, 0) !important;
   }
 
   .inner-page #mainNav .category-nav-dropdown > .nav-link.dropdown-toggle::after,

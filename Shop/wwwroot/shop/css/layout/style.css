@@ -9876,9 +9876,6 @@ footer .copyright::before {
   #mainNav .brand-menu-icon {
     border-color: #887965 !important;
   }
-  #mainNav .brand-menu-footer {
-    border-color: #958570 !important;
-  }
 }
 
 /* Keep the mobile cart as the final cascade authority. */
