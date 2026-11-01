@@ -61,10 +61,18 @@
 #productView .product-sales-plan time {
   display: inline-flex;
   align-items: baseline;
-  gap: 5px;
+  gap: 6px;
+  padding: 4px 7px;
+  border: 1px solid rgba(211, 154, 0, 0.2);
+  border-radius: 8px;
+  background: #102b43;
+  color: #ffdf78;
   direction: rtl;
   unicode-bidi: isolate;
   white-space: nowrap;
+  font-size: .78rem;
+  font-weight: 900;
+  text-shadow: 0 0 9px rgba(255, 210, 71, .3);
   font-variant-numeric: tabular-nums;
 }
 #productView .product-sales-plan time bdi { direction: ltr; unicode-bidi: isolate; }

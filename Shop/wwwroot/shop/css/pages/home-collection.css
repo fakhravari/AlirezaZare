@@ -1,4 +1,4 @@
-/* Collection-only introduction and heading layout. Shared showcase and product-card rules stay with their shared owners. */
+/* Homepage collection and sales-plan section layout, including the plan countdown presentation. Shared product-card rules stay with their owner. */
 .home-sales-plans[hidden] {
   display: none;
 }
@@ -59,6 +59,15 @@
 
 .home-sales-plan[data-sales-plan="digi-time"] .category-showcase-head .eyebrow {
   margin: 0;
+  border-color: rgba(255, 255, 255, 0.42);
+  background: linear-gradient(135deg, #ffe27a, #f6c515);
+  color: #102a43;
+  box-shadow: 0 5px 16px rgba(246, 197, 21, 0.22);
+}
+
+.home-sales-plan[data-sales-plan="digi-time"] .category-showcase-head .eyebrow::before {
+  background: #102a43;
+  box-shadow: 0 0 0 4px rgba(16, 42, 67, 0.12);
 }
 
 .home-sales-plan[data-sales-plan="digi-time"] .category-showcase-head h2 {
@@ -189,65 +198,67 @@
 }
 
 .home-sales-plan[data-sales-plan="digi-af"] .category-showcase-head {
-  border-color: rgba(165, 221, 195, 0.45);
-  border-block-end-color: rgba(165, 221, 195, 0.45);
+  border-color: rgba(191, 207, 194, 0.3);
+  border-block-end-color: rgba(191, 207, 194, 0.3);
   background:
-    radial-gradient(circle at 8% 120%, rgba(116, 202, 165, 0.24), transparent 34%),
-    linear-gradient(120deg, #16474a 0%, #1b5b5c 55%, #2c6c68 100%);
-}
-
-.home-sales-plan[data-sales-plan="digi-af"] .category-showcase-head .eyebrow {
-  color: #bcebd3;
-}
-
-.home-sales-plan[data-sales-plan="digi-af"] .category-showcase-head .eyebrow::before {
-  background: #83d5a8;
-  box-shadow: 0 0 0 4px rgba(131, 213, 168, 0.15);
-}
-
-.home-sales-plan[data-sales-plan="digi-af"] .category-showcase-head > a {
-  border-color: rgba(176, 226, 196, 0.72);
-  background: linear-gradient(135deg, #d5f3df, #a9dfbd);
-}
-
-.home-sales-plan[data-sales-plan="digi-af"] .category-showcase-head > a:is(:hover, :focus-visible) {
-  background: linear-gradient(135deg, #e7faed, #c1ebcf);
+    radial-gradient(circle at 8% 120%, rgba(179, 199, 186, 0.12), transparent 34%),
+    linear-gradient(120deg, #142e47 0%, #1b3d57 55%, #29485a 100%);
 }
 
 .home-sales-plan-countdown {
+  position: relative;
+  overflow: hidden;
   display: inline-flex;
   align-items: center;
   gap: 12px;
-  margin-block-start: 13px;
-  padding: 8px 12px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 12px;
-  background: rgba(7, 22, 36, 0.32);
-  color: #fff;
-  font-size: 12px;
-  font-weight: 700;
+  margin-block-start: 15px;
+  padding: 7px 9px 7px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.74);
+  border-radius: 15px;
+  background: linear-gradient(120deg, #fff5cf 0%, #ffdf68 58%, #f6c515 100%);
+  color: #102a43;
+  font-size: 13px;
+  font-weight: 800;
   font-variant-numeric: tabular-nums;
-  box-shadow: inset 0 1px rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 22px rgba(4, 13, 26, 0.2), 0 0 0 3px rgba(255, 223, 104, 0.13), inset 0 1px rgba(255, 255, 255, 0.72);
 }
 
 .home-sales-plan-countdown > span {
   display: inline-flex;
   align-items: center;
   gap: 5px;
+  padding-inline: 3px;
   white-space: nowrap;
+}
+
+.home-sales-plan-countdown > span i {
+  display: grid;
+  width: 25px;
+  height: 25px;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(16, 42, 67, 0.1);
+  color: #9a6810;
 }
 
 .home-sales-plan-countdown time {
   display: inline-flex;
   align-items: baseline;
   justify-content: flex-start;
-  gap: 7px;
+  gap: 9px;
+  min-height: 42px;
+  padding: 5px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 11px;
+  background: linear-gradient(145deg, #102a43, #183b57);
   direction: rtl;
   unicode-bidi: isolate;
-  color: #ffdf78;
-  font-size: 14px;
+  color: #ffe27a;
+  font-size: 17px;
   font-weight: 900;
+  text-shadow: 0 0 13px rgba(255, 210, 71, 0.48);
   white-space: nowrap;
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.13), 0 3px 8px rgba(16, 42, 67, 0.18);
 }
 
 .home-sales-plan-countdown time bdi {
@@ -323,17 +334,20 @@
   }
 
   .home-sales-plan[data-sales-plan="digi-time"] .home-sales-plan-countdown {
-    grid-column: 1;
-    justify-self: start;
-    max-width: 100%;
+    grid-column: 1 / -1;
+    justify-self: stretch;
+    width: 100%;
+    max-width: none;
+    justify-content: space-between;
     margin: 0;
-    padding: 5px 7px;
-    font-size: 10px;
+    padding: 9px 12px;
+    font-size: 12px;
   }
 
   .home-sales-plan[data-sales-plan="digi-time"] .home-sales-plan-countdown time {
-    gap: 4px;
-    font-size: 12px;
+    gap: 7px;
+    padding: 5px 8px;
+    font-size: 16px;
   }
 
   .home-sales-plan[data-sales-plan="digi-time"] .category-showcase-head p {

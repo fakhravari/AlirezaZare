@@ -671,16 +671,17 @@ $(function () {
   if (amazingSlider && amazingProducts.length) {
     const amazingCount = amazingSection.querySelector("#amazingCount");
     if (amazingCount) amazingCount.textContent = faNumber(amazingProducts.length);
-    amazingSlider.innerHTML = amazingProducts.map((product) => window.HNProductCard.render(product, {
-      variant: "slider", image: sliderImagePath(product), offer: true,
+    amazingSlider.innerHTML = amazingProducts.map((product) => `<div class="showcase-slide">${window.HNProductCard.render(product, {
+      variant: "grid", image: sliderImagePath(product), offer: true,
       badge: product.discountPercent ? faNumber(product.discountPercent) + "٪ تخفیف" : "منتخب",
-    })).join("");
+    })}</div>`).join("");
     window.HNUI?.enhance(amazingSection);
   }
   const productCardMarkup = (product) => window.HNProductCard.render(product, {variant: "slider", image: sliderImagePath(product)});
+  const bestsellerCardMarkup = (product) => `<div class="showcase-slide">${window.HNProductCard.render(product, {variant: "grid", image: sliderImagePath(product)})}</div>`;
   const collections = window.HNCatalog.collections;
   const collectionProducts = (name) => (collections[name] || []).map((id) => window.HNCatalog.find(id)).filter(Boolean);
-  $("#bestsellersSlider").html(collectionProducts("bestsellers").map(productCardMarkup).join(""));
+  $("#bestsellersSlider").html(collectionProducts("bestsellers").map(bestsellerCardMarkup).join(""));
   $("#newestSlider").html(collectionProducts("newest").map(productCardMarkup).join(""));
 
   const showcaseSliderOptions = {

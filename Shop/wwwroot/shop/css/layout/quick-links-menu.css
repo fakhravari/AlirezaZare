@@ -433,9 +433,16 @@
 #mainNav .quick-links-group a + a::before {
   position: absolute;
   inset-block-start: -3px;
-  inset-inline: 14px;
+  inset-inline: 6px;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(173, 128, 15, 0.2), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(173, 128, 15, 0.12) 8%,
+    rgba(173, 128, 15, 0.3) 50%,
+    rgba(173, 128, 15, 0.12) 92%,
+    transparent
+  );
   content: "";
   pointer-events: none;
 }

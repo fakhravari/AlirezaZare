@@ -174,13 +174,8 @@
 }
 
 @media (min-width: 768px) {
-  .home-page #productGrid .product-info h3 {
-    min-height: 3.5em;
-  }
-
-  .home-page #productGrid .product-info > p {
-    min-height: 58px;
-    margin-top: 2px;
+  .home-page :is(#productGrid, #homeSalesPlans, #homeSalesTime, #amazingSlider, #bestsellersSlider, #newestSlider) .product-image {
+    height: 220px;
   }
 }
 
@@ -223,6 +218,81 @@
 .home-page #testimonials .testimonial-intro h2 {
   font-size: 32px;
   line-height: 1.5;
+}
+
+/* Keep every homepage product-card variant on the same image, title, price, and action rhythm. */
+.home-page :is(#productGrid, #homeSalesPlans, #homeSalesTime, #amazingSlider, #bestsellersSlider, #newestSlider) :is(.product-card, .showcase-card) {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+}
+
+.home-page :is(#productGrid, #homeSalesPlans, #homeSalesTime, #amazingSlider, #bestsellersSlider, #newestSlider) :is(.product-card, .showcase-card) .product-image {
+  height: 220px;
+  flex: 0 0 220px;
+}
+
+.home-page :is(#productGrid, #homeSalesPlans, #homeSalesTime, #amazingSlider, #bestsellersSlider, #newestSlider) :is(.product-info, .showcase-card-body) {
+  display: flex;
+  min-height: 0;
+  padding: 14px;
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.home-page :is(#productGrid, #homeSalesPlans, #homeSalesTime, #amazingSlider, #bestsellersSlider, #newestSlider) :is(.product-info, .showcase-card-body) h3 {
+  display: -webkit-box;
+  min-height: 4.95em;
+  max-height: 4.95em;
+  overflow: hidden;
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+}
+
+.home-page :is(#productGrid, #homeSalesPlans, #homeSalesTime, #amazingSlider, #bestsellersSlider, #newestSlider) :is(.product-info, .showcase-card-body) > p {
+  min-height: 58px;
+  margin: 4px 0 8px;
+  flex: 0 0 58px;
+}
+
+.home-page :is(#productGrid, #homeSalesPlans, #homeSalesTime, #amazingSlider, #bestsellersSlider, #newestSlider) .product-info > .add-cart,
+.home-page :is(#productGrid, #homeSalesPlans, #homeSalesTime, #amazingSlider, #bestsellersSlider, #newestSlider) .showcase-card-body > .add-cart {
+  width: 100%;
+  min-height: 46px;
+  margin: auto 0 0;
+  flex: 0 0 46px;
+}
+
+.home-page :is(#productGrid, #homeSalesPlans, #homeSalesTime, #amazingSlider, #bestsellersSlider, #newestSlider) .product-card > .add-cart {
+  width: calc(100% - 28px);
+  margin: 0 14px 14px;
+}
+
+@media (max-width: 767px) {
+  .home-page :is(#productGrid, #homeSalesPlans, #homeSalesTime, #amazingSlider, #bestsellersSlider, #newestSlider) .product-image {
+    height: 180px;
+    flex-basis: 180px;
+  }
+
+  .home-page :is(#productGrid, #homeSalesPlans, #homeSalesTime, #amazingSlider, #bestsellersSlider, #newestSlider) :is(.product-info, .showcase-card-body) {
+    padding: 12px;
+  }
+
+  .home-page :is(#productGrid, #homeSalesPlans, #homeSalesTime, #amazingSlider, #bestsellersSlider, #newestSlider) :is(.product-info, .showcase-card-body) h3 {
+    min-height: 4.95em;
+    max-height: 4.95em;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .home-page :is(#productGrid, #homeSalesPlans, #homeSalesTime, #amazingSlider, #bestsellersSlider, #newestSlider) .product-card > .add-cart {
+    width: calc(100% - 24px);
+    margin: 0 12px 12px;
+  }
 }
 
 @media (max-width: 767px) {
