@@ -9702,6 +9702,7 @@ html
 
 @media (max-width: 767px) {
   .inner-page .page-hero {
+    min-height: 0 !important;
     padding: 22px 0 30px !important;
   }
 
@@ -11260,6 +11261,7 @@ body .electrical-swiper .swiper-pagination-bullet-active {
   }
 
   .inner-page #mainNav .navbar-nav > .category-nav-dropdown:is(.show, .is-mega-open) > .nav-link .nav-menu-icon {
+    color: var(--industrial-navy) !important;
     filter: none;
     transform: scale(1.12);
   }
