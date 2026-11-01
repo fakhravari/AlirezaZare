@@ -7065,7 +7065,7 @@ html
 
   #mainNav .favorites-wrap > .favorites-panel,
   #mainNav .compare-wrap > .compare-panel {
-    top: calc(100% + 18px) !important;
+    top: calc(100% + 16px) !important;
   }
 
   #mainNav .cart-wrap > .cart-panel,
@@ -7128,8 +7128,8 @@ html
   border-radius: 0 0 22px 22px !important;
   background: rgba(255, 253, 249, 0.98) !important;
   box-shadow:
-    0 28px 80px rgba(4, 20, 55, 0.24),
-    0 4px 18px rgba(4, 20, 55, 0.08) !important;
+    0 22px 50px rgba(16, 42, 67, 0.2),
+    inset 0 1px rgba(255, 255, 255, 0.82) !important;
 }
 
 #cartPanel .cart-head .cart-head-title,

@@ -5921,7 +5921,7 @@ h6,
   transition:
     opacity 0.28s ease,
     transform 0.34s cubic-bezier(0.2, 0.8, 0.2, 1),
-    visibility 0.28s !important;
+    visibility 0.28s;
 }
 
 .cart-wrap:hover .cart-panel,
