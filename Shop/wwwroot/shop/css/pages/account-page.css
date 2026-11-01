@@ -2924,6 +2924,16 @@ body.inner-page.mobile-page--profile-favorites #favoritesView .favorite-item-car
     font-size: 20px;
   }
 
+  #overview.account-overview .account-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  #overview.account-overview .account-stats article,
+  #overview.account-overview .account-stats article:nth-child(n + 4) {
+    grid-column: auto;
+  }
+
   #overview.account-overview .account-stats article {
     min-height: 112px;
   }
@@ -2985,7 +2995,11 @@ body.inner-page.mobile-page--profile-favorites #favoritesView .favorite-item-car
 #profileEditDialog.profile-edit-dialog .profile-edit-dialog-header .login-close {
   position: relative;
   inset: auto;
-  flex: 0 0 38px;
+  flex: 0 0 40px;
+  width: 40px;
+  height: 40px;
+  margin: 0;
+  float: none;
   background: linear-gradient(145deg, #173653, #102a43);
   color: #f2d27c;
   box-shadow: 0 2px 7px rgba(16, 42, 67, 0.1);
