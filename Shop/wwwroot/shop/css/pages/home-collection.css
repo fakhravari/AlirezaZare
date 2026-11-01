@@ -495,8 +495,30 @@
   #homeSalesTime .home-sales-plan .home-sales-plan-countdown,
   #homeSalesPlans .home-sales-plan .home-sales-plan-countdown {
     width: 100%;
+    max-width: none;
     justify-content: space-between;
     margin: 12px 0 0;
+  }
+
+  #homeSalesTime .home-sales-plan[data-sales-plan="digi-time"] .category-showcase-head > div {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  #homeSalesTime .home-sales-plan[data-sales-plan="digi-time"] .category-showcase-head h2,
+  #homeSalesTime .home-sales-plan[data-sales-plan="digi-time"] .home-sales-plan-countdown,
+  #homeSalesTime .home-sales-plan[data-sales-plan="digi-time"] .category-showcase-head p {
+    grid-column: 1;
+  }
+
+  #homeSalesTime .home-sales-plan[data-sales-plan="digi-time"] .home-sales-plan-countdown {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+  }
+
+  #homeSalesTime .home-sales-plan[data-sales-plan="digi-time"] .category-showcase-head p {
+    margin: 0;
   }
 }
 

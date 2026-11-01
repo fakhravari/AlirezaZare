@@ -1285,6 +1285,19 @@ body :is(#cartView, #invoiceItems) .cart-product-details .cart-item-option-chip 
     visibility: visible !important;
     transform: translateY(0) !important;
   }
+  #cartPanel .cart-item-info {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "title" "plan" "actions";
+    justify-items: stretch;
+  }
+  #cartPanel .cart-item-info > .cart-sales-plan-badge {
+    justify-self: start;
+  }
+  #cartPanel .cart-item-actions {
+    width: 100%;
+    grid-template-columns: minmax(0, 1fr) auto;
+    justify-content: space-between;
+  }
   /* Legacy index rules target #cartPanel with higher specificity; pin it to the header popover position. */
   html body > #cartPanel.cart-panel,
   html body > #cartPanel.cart-panel.open {
