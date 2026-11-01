@@ -1839,7 +1839,7 @@ select {
 .filter-discount-option {
   display: flex;
   min-height: 46px;
-  margin: 0 12px 12px;
+  margin: 12px 12px;
   padding: 9px 12px;
   align-items: center;
   justify-content: space-between;
