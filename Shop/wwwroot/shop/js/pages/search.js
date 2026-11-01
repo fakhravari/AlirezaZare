@@ -512,7 +512,7 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
     if (state.sort === "low") list.sort((a, b) => listingPrice(a) - listingPrice(b));
     if (state.sort === "high") list.sort((a, b) => listingPrice(b) - listingPrice(a));
     if (state.sort === "newest") list.sort((a, b) => a.newest - b.newest);
-    return window.HNUI.cart.sortBySalesPlan(list, (item) => item._salesPlanListing?.id || "regular");
+    return list;
   }
   const card = (product) => {
     const offer = product._salesPlanListing;
@@ -523,18 +523,6 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
         discountPercent: offer.discountPercent, stockQuantity: offer.stockQuantity,
         maxPurchaseQuantity: offer.maxPurchaseQuantity} : {}),
     });
-  };
-  const groupedSearchCards = (items, allItems) => {
-    const totalByPlan = new Map(window.HNUI.cart.groupBySalesPlan(
-      allItems,
-      (item) => item._salesPlanListing?.id || "regular",
-      (item) => item._salesPlanListing?.name || "",
-    ).map((group) => [group.id, group.items.length]));
-    return window.HNUI.cart.groupBySalesPlan(
-      items,
-      (item) => item._salesPlanListing?.id || "regular",
-      (item) => item._salesPlanListing?.name || "",
-    ).map((group) => `<div class="search-sales-plan-heading" data-sales-plan-id="${window.HNUI.escapeHtml(group.id)}" role="heading" aria-level="2"><strong>${window.HNUI.escapeHtml(group.name)}</strong><span>${fa(totalByPlan.get(group.id) || group.items.length)} کالا</span></div>${group.items.map(card).join("")}`).join("");
   };
   function scrollToResultsStart() {
     const results = document.querySelector(".results-area");
@@ -556,7 +544,7 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
     const list = getFiltered();
     const shown = list.slice(0, state.visible);
     const finished = list.length > 0 && state.visible >= list.length;
-    $("#productResults").innerHTML = groupedSearchCards(shown, list);
+    $("#productResults").innerHTML = shown.map(card).join("");
     const comparedProducts = new Set(
       window.HNUI?.storage.json("hn-compare", []).map(String) || [],
     );

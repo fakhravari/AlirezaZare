@@ -7,8 +7,8 @@
 | مسیر | Controller → View | CSS مستقیم View | JS مستقیم View | نقطهٔ بررسی |
 |---|---|---|---|---|
 | `/` | [HomeController](../../Shop/Controllers/HomeController.cs) → [Index](../../Shop/Views/Home/Index.cshtml) | `pages/home-warmth.css` | — | خانه، grid و اسلایدرهای کالا |
-| `/search` | [ProductController](../../Shop/Controllers/ProductController.cs) → [List](../../Shop/Views/Product/List.cshtml) | `pages/search.css` (در `SearchStyles` section) | `pages/search.js` | فیلتر، مرتب‌سازی، URL و صفحه‌بندی |
-| `/products/{slug}` | [ProductController](../../Shop/Controllers/ProductController.cs) → [Details](../../Shop/Views/Product/Details.cshtml) | `pages/pages.css`، `pages/product-detail.css`، `pages/form-confirm-dialog.css`، `pages/product-detail-pricing.css`، `pages/product-detail-options.css` | `pages/form-confirm-dialog.js`، `pages/page-content.js` | main.product-detail-page، #productView و گالری |
+| `/search` | [ProductController](../../Shop/Controllers/ProductController.cs) → [List](../../Shop/Views/Product/List.cshtml) | `pages/search.css` (در `SearchStyles` section) | `pages/search.js` | فیلتر `?sales-plan={planId}` با شناسهٔ پایدار، مرتب‌سازی، URL و صفحه‌بندی |
+| `/products/{slug}` | [ProductController](../../Shop/Controllers/ProductController.cs) → [Details](../../Shop/Views/Product/Details.cshtml) | `pages/pages.css`، `pages/product-detail.css`، `pages/form-confirm-dialog.css`، `pages/product-detail-pricing.css`، `pages/product-detail-options.css` | `pages/form-confirm-dialog.js`، `pages/page-content.js` | main.product-detail-page، #productView و گالری؛ `?salesPlanId={planId}` طرح را مشخص می‌کند و `regular` در URL لازم نیست |
 | `/cart` | [CartController](../../Shop/Controllers/CartController.cs) → [Index](../../Shop/Views/Cart/Index.cshtml) | `pages/pages.css`، `pages/checkout.css`، `pages/form-confirm-dialog.css` | `pages/page-content.js`، `pages/iran-places.js`، `pages/address-fields.js`، `pages/checkout.js`، `pages/form-confirm-dialog.js` | #cartView، آدرس و گزینه‌های سبد |
 | `/checkout` | [CheckoutController](../../Shop/Controllers/CheckoutController.cs) → [Index](../../Shop/Views/Checkout/Index.cshtml) | `pages/pages.css`، `pages/checkout.css` | `pages/page-content.js`، `pages/checkout.js` | فاکتور و روش پرداخت نمونه |
 | `/compare` | [CompareController](../../Shop/Controllers/CompareController.cs) → [Index](../../Shop/Views/Compare/Index.cshtml) | `pages/form-confirm-dialog.css` | `pages/form-confirm-dialog.js` | #compareView؛ صفر، یک یا چند محصول |
@@ -33,7 +33,7 @@
 
 - `Program.cs` گزینهٔ `LowercaseUrls = true` و مسیر پیش‌فرض `{controller=Home}/{action=Index}/{id?}` را دارد. attribute route را کنار این مسیر بخوانید؛ routeهای تولیدشده lowercase هستند.
 - `/search` به `ProductController.Index` و View `List` می‌رسد. کلاس body از controller/action ساخته می‌شود: `mobile-page--product-index`؛ نام View در این کلاس نقشی ندارد.
-- قرارداد slug صریح محصول، تطبیق canonical و هدایت مستقیم مسیرهای قدیمی در [راهنمای محصول](../store/product.md) مستند است؛ مسیر واسط `/products/product-{id}` تولید نمی‌شود.
+- قرارداد slug صریح محصول، تطبیق canonical و هدایت مستقیم مسیرهای قدیمی در [راهنمای محصول](../store/product.md) مستند است؛ مسیر واسط `/products/product-{id}` تولید نمی‌شود. لینک offer طرح، `salesPlanId` را برای نمایش همان طرح حمل می‌کند؛ طرح منقضیِ دارای زمان پایان با redirect دائمی به URL canonical عادی برمی‌گردد و canonical HTML همیشه پارامتر طرح را حذف می‌کند.
 - `/account` مسیر سازگاری پروفایل است. `/profile`، `/profile/orders`، `/profile/addresses`، `/profile/favorites`، `/profile/coupons` و `/profile/pricealerts` یک View دارند. `/profile/edit` به `/profile` برمی‌گردد و صفحهٔ مستقلی ندارد.
 - مسیر قدیمی `/magazine/details/{slug}` به مسیر جدید مقاله هدایت می‌شود.
 - در انتشار، Hostهای غیر canonical بر اساس `Seo:SiteUrl` با redirect دائمی به همان path و query روی دامنهٔ اصلی هدایت می‌شوند؛ loopback در Development آزاد است.
@@ -47,4 +47,4 @@ Controller، لینک‌های Razor، تولید لینک در JS، canonical،
 
 [فهرست این بخش](README.md) · [فهرست مستندات](../README.md)
 
-آخرین تطبیق با کد: ۳۰ اکتبر ۲۰۲۶.
+آخرین تطبیق با کد: ۱ نوامبر ۲۰۲۶.

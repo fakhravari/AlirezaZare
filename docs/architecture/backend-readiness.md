@@ -70,7 +70,7 @@
 
 [منبع حقیقت داده](data-sources.md) · [فهرست معماری](README.md) · [فهرست مستندات](../README.md)
 
-آخرین تطبیق با کد: ۳۱ اکتبر ۲۰۲۶.
+آخرین تطبیق با کد: ۱ نوامبر ۲۰۲۶.
 # Sales-plan API adapter
 
 برای قابلیت طرح‌های فروش، `ISalesPlanSource` مرز منبع داده و `DemoSalesPlanSource` adapter فقط‌خواندنی fixture است. APIهای quote و validate-cart در `SalesPlansController` قیمت، انتخاب ویژگی و متعلقات را از دادهٔ سرور بازسازی می‌کنند. پیاده‌سازی به دیتابیس/رزرو موجودی و ثبت سفارش وصل نیست؛ وضعیت جزئی و کارهای باقی‌مانده در [راهنمای طرح‌های فروش](../store/sales-plans.md) ثبت شده است.

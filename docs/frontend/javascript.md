@@ -48,8 +48,9 @@
 | `js/core/form-validation.js` | validation عمومی/delegated فرم | `data-*`، selector فرم، خطاهای inline و submit handler اختصاصی؛ `data-validation="full-name"` دست‌کم دو بخش نام را می‌سنجد و `data-required-message` متن خطای فیلد اجباری را جایگزین می‌کند |
 | `js/store/catalog.js` | resolverِ catalog.json؛ HNCatalog و APIهای سازگار HNProducts/HNCountries/HNProductColors | شناسه‌های صریح، relation و immutable بودن؛ داده دمو است |
 | `js/store/product-card.js` | renderer مشترک کارت و قیمت | variantهای grid/slider/search/related/favorite؛ escape و data-* مشترک |
+| `js/pages/home-sales-plans.js` | ساخت بخش‌های صفحهٔ اول برای طرح‌های فروش فعال، با کارت مشترک و offer همان طرح | میزبان‌های خانه، ترتیب طرح‌ها، زمان پایان و حذف offer ناموجود؛ فروش عادی در شبکهٔ عادی خانه باقی می‌ماند |
 | `js/store/commerce.js` | جزئیات محصول، variant/accessory، قیمت، gallery، feedback، cart، coupon، compare و favorites rendering | selectorهای `#productView`, `#cartView`, `#favoritesView`, `#compareView`؛ event/storage و rendererهای HTML؛ موقعیت نشانگر تب محصول با offset نوار چسبان هماهنگ است |
-| `js/pages/search.js` | URL-backed filter/sort/page، نتایج و mobile filter drawer | جستجوی محصول پس از ۳ نویسه و debounce ۲۵۰ms فهرست را به‌روزرسانی می‌کند؛ query کوتاه URL نادیده گرفته می‌شود و پاک‌کردن فیلترها گروه‌ها را می‌بندد. query params، `popstate`, empty state و cart/list controls |
+| `js/pages/search.js` | URL-backed filter/sort/page، نتایج و mobile filter drawer | query `sales-plan` شناسهٔ طرح را بازیابی می‌کند؛ فهرست همهٔ طرح‌ها یکپارچه است و badge کارت ویژه نوع آن را مشخص می‌کند. مرتب‌سازی روی کل نتایج اعمال می‌شود. جستجوی محصول پس از ۳ نویسه و debounce ۲۵۰ms است؛ query کوتاه نادیده گرفته می‌شود و پاک‌کردن فیلترها گروه‌های پنل فیلتر را می‌بندد. `popstate`, empty state و cart/list controls |
 | `js/pages/account-page.js` | profile route/hash navigation، overview و CRUD آدرس | storage keys، modal، hashchange و `storage` event |
 | `js/pages/checkout.js` | انتخاب آدرس، روش پرداخت و هماهنگی state سبد | روش پرداخت فعلاً demo است؛ Cart/Checkout هر دو consumer هستند |
 | `js/pages/address-fields.js`, `iran-places.js` | مدل‌های Country/Province/City و انتخاب وابستهٔ استان/شهر | کشور ایران در رکورد آدرس ثابت است؛ انتخاب استان فهرست شهرهای همان استان را به‌روزرسانی می‌کند |
@@ -110,4 +111,4 @@
 
 [فهرست این بخش](README.md) · [فهرست مستندات](../README.md)
 
-آخرین تطبیق با کد: ۲۸ اکتبر ۲۰۲۶.
+آخرین تطبیق با کد: ۱ نوامبر ۲۰۲۶.

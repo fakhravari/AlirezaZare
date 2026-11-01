@@ -7,6 +7,7 @@
 | مسیر و مدل صفحه | [Controllers](../../Shop/Controllers) و [PageModel](../../Shop/Models/PageModel.cs) | آماده‌سازی Razor و SEO |
 | محصول، برند، کشور، رنگ، دسته، رسانه و فهرست‌های خانه | [catalog.json](../../Shop/wwwroot/content/data/catalog.json) | منبع مشترک ساختاریافته با schemaVersion و شناسه‌های صریح؛ ۳۰ محصول نمونه |
 | کاتالوگ سمت سرور | [CatalogRepository.cs](../../Shop/Services/CatalogRepository.cs) | singleton با cache بر اساس زمان/اندازهٔ فایل؛ اعتبارسنجی رابطه‌ها و تولید snapshot برای محصول، برند و sitemap |
+| طرح‌های فروش و offer هر محصول | [sales-plans-demo.json](../../Shop/App_Data/sales-plans-demo.json) از [DemoSalesPlanSource](../../Shop/Services/ISalesPlanSource.cs) | fixture خصوصی و فقط‌خواندنی؛ با کاتالوگ اعتبارسنجی می‌شود و APIهای فهرست/quote/validate آن را مصرف می‌کنند. هر offer قیمت، موجودی، تخفیف، سقف خرید و قیمت متعلقات مختص همان طرح را دارد؛ منبع دمو دیتابیس یا رزرو موجودی نیست |
 | کاتالوگ مرورگر | [_CatalogData.cshtml](../../Shop/Views/Shared/_CatalogData.cshtml) → [catalog.js](../../Shop/wwwroot/shop/js/store/catalog.js) | JSON امن داخل script غیرقابل‌اجرا؛ resolver، دادهٔ immutable و API سازگار HNProducts/HNCountries |
 | کشور، استان و شهر نشانی | [iran-places.js](../../Shop/wwwroot/shop/js/pages/iran-places.js) | دادهٔ محلی پیوست با سه مدل Country/Province/City؛ ۱ کشور، ۳۱ استان و ۲۵۲۲ شهر. همهٔ ۱۴ ستون ورودی نگهداری می‌شوند؛ ستون CountryName که در ورودی نام شهر دارد در City با نام sourceCountryName حفظ شده است. فرم استان و شهر را انتخاب می‌کند؛ شهرها بر اساس استان فیلتر می‌شوند و کشور ایران در رکورد آدرس ثابت می‌ماند. |
 | اطلاعات تحریریهٔ پایهٔ برند | [BrandProfileModel.cs](../../Shop/Models/BrandProfileModel.cs) | متن/تاریخچه از BrandCatalog؛ نام، نام فارسی و لوگو هنگام ساخت snapshot از catalog.json گرفته می‌شوند |
@@ -36,4 +37,4 @@
 
 [فهرست این بخش](README.md) · [فهرست مستندات](../README.md)
 
-آخرین تطبیق با کد: ۳۰ اکتبر ۲۰۲۶.
+آخرین تطبیق با کد: ۱ نوامبر ۲۰۲۶.

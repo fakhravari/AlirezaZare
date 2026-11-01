@@ -126,8 +126,10 @@
                     <div class="mobile-sales-plan-list" aria-label="طرح‌های فروش فعال">
                         @foreach (var plan in availableSalesPlans)
                         {
-                            <a href="@Url.Content($"~/Search?sales-plan={Uri.EscapeDataString(plan.Id)}")" data-bs-dismiss="offcanvas">
-                                <i class="bi bi-lightning-charge-fill" aria-hidden="true"></i><span>@plan.Name</span><i class="bi bi-arrow-left" aria-hidden="true"></i>
+                            <a class="sales-plan-menu-link" href="@Url.Content($"~/Search?sales-plan={Uri.EscapeDataString(plan.Id)}")" data-bs-dismiss="offcanvas">
+                                <span class="sales-plan-menu-symbol" aria-hidden="true"><i class="bi bi-lightning-charge-fill"></i></span>
+                                <span class="sales-plan-menu-copy"><strong>@plan.Name</strong><small>@(string.IsNullOrWhiteSpace(plan.Label) ? "مشاهدهٔ کالاهای این طرح" : plan.Label)</small></span>
+                                <span class="sales-plan-menu-arrow" aria-hidden="true"><i class="bi bi-arrow-left"></i></span>
                             </a>
                         }
                     </div>

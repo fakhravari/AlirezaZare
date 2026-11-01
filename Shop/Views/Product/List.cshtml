@@ -64,6 +64,10 @@
                 <option value="out-of-stock">کالاهای ناموجود</option>
             </select>
         </label>
+        <label class="filter-option filter-discount-option" for="discountFilter">
+            <span><i class="bi bi-tags" aria-hidden="true"></i> فقط کالاهای تخفیف‌دار</span>
+            <input id="discountFilter" name="discounted" type="checkbox" value="1" />
+        </label>
         <div class="filter-group" data-filter-fa="طرح فروش" data-filter-en="Sales plan" data-filter-slug="sales-plan" hidden>
             <button type="button" aria-expanded="false">
                 <span class="filter-group-title" data-filter-fa="طرح فروش" data-filter-en="Sales plan" data-filter-slug="sales-plan">
@@ -73,10 +77,6 @@
             </button>
             <div class="filter-options" id="salesPlanFilters"></div>
         </div>
-        <label class="filter-option filter-discount-option" for="discountFilter">
-            <span><i class="bi bi-tags" aria-hidden="true"></i> فقط کالاهای تخفیف‌دار</span>
-            <input id="discountFilter" name="discounted" type="checkbox" value="1" />
-        </label>
         <div class="filter-group" data-filter-fa="برند" data-filter-en="Brand" data-filter-slug="brand">
             <button type="button" aria-expanded="false">
                 <span class="filter-group-title" data-filter-fa="برند" data-filter-en="Brand" data-filter-slug="brand">

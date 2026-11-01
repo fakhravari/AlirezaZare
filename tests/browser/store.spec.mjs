@@ -164,6 +164,7 @@ test('sales plan navigation opens search with that plan selected', async ({page,
   await expect(page).toHaveURL(/sales-plan=digi-time/);
   await expect(page.locator('#salesPlanFilters input[value="digi-time"]')).toBeChecked();
   await expect(page.locator('.filter-group[data-filter-slug="sales-plan"]')).toHaveClass(/open/);
+  await expect(page.locator('#productResults .search-sales-plan-heading')).toHaveCount(0);
   const resultPlanIds = await page.locator('#productResults [data-product-card="v1"]').evaluateAll(cards =>
     cards.map(card => card.getAttribute('data-sales-plan-id')));
   expect(resultPlanIds.length).toBeGreaterThan(0);
@@ -237,16 +238,12 @@ test('cart defaults, required service and reload use one canonical price', async
   await noHorizontalOverflow(page);
 });
 
-test('search, cart and checkout group listings by the configured sales-plan order', async ({page}) => {
+test('search keeps one result grid while cart and checkout group by sales plan', async ({page}) => {
   await page.addInitScript(() => localStorage.setItem('hn-demo-auth', '1'));
   await page.clock.install({time: new Date('2026-11-01T10:00:00Z')});
   await page.goto('/search');
-  const searchGroups = page.locator('#productResults .search-sales-plan-heading');
-  await expect(searchGroups.first()).toHaveAttribute('data-sales-plan-id', 'digi-time');
-  await expect(searchGroups.nth(1)).toHaveAttribute('data-sales-plan-id', 'digi-af');
-  await expect(searchGroups.nth(1)).toContainText('۱۳ کالا');
-  await expect(page.locator('#productResults [data-product-card][data-sales-plan-id="digi-time"]')).toHaveCount(7);
-  await expect(page.locator('#productResults [data-product-card][data-sales-plan-id="digi-af"]')).toHaveCount(2);
+  await expect(page.locator('#productResults .search-sales-plan-heading')).toHaveCount(0);
+  await expect(page.locator('#productResults [data-product-card]')).toHaveCount(9);
   await noHorizontalOverflow(page);
 
   await page.evaluate(() => {
