@@ -167,7 +167,7 @@
 
 @media (min-width: 992px) {
   #mainNav .cart-wrap > #cartPanel {
-    width: min(480px, calc(100vw - 32px));
+    width: min(410px, calc(100vw - 32px));
   }
 }
 
@@ -1268,7 +1268,9 @@ body :is(#cartView, #invoiceItems) .cart-product-details .cart-item-option-chip 
       inset 0 0 0 1px rgba(255, 255, 255, 0.82) !important;
   }
   #mainNav .cart-wrap > #cartPanel.cart-panel {
-    top: calc(100% + 5px) !important;
+    top: calc(100% + 16px) !important;
+    border-top: 3px solid var(--industrial-yellow, #f6c515) !important;
+    border-radius: 22px !important;
   }
   :where(.cart-head, .page-panel-head, .search-cart-head) {
     margin: 8px !important;

@@ -59,15 +59,6 @@
 
 .home-sales-plan[data-sales-plan="digi-time"] .category-showcase-head .eyebrow {
   margin: 0;
-  border-color: rgba(255, 255, 255, 0.42);
-  background: linear-gradient(135deg, #ffe27a, #f6c515);
-  color: #102a43;
-  box-shadow: 0 5px 16px rgba(246, 197, 21, 0.22);
-}
-
-.home-sales-plan[data-sales-plan="digi-time"] .category-showcase-head .eyebrow::before {
-  background: #102a43;
-  box-shadow: 0 0 0 4px rgba(16, 42, 67, 0.12);
 }
 
 .home-sales-plan[data-sales-plan="digi-time"] .category-showcase-head h2 {
@@ -134,12 +125,13 @@
   gap: 8px;
   margin-block-end: 2px;
   padding: 5px 10px;
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.72);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
-  color: #ffdf78;
+  background: linear-gradient(135deg, #fffdf7, #f5f1e7);
+  color: #102a43;
   font-size: 11px;
   font-weight: 700;
+  box-shadow: 0 4px 12px rgba(5, 18, 30, 0.14);
 }
 
 .home-sales-plan .category-showcase-head .eyebrow::before {
@@ -179,7 +171,7 @@
   border-radius: 12px;
   background: linear-gradient(135deg, #ffe58a, #f6c515);
   color: #182f43;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 800;
   text-decoration: none;
   box-shadow: 0 5px 15px rgba(5, 18, 30, 0.18);
@@ -190,6 +182,10 @@
   background: linear-gradient(135deg, #fff0b5, #ffda51);
   box-shadow: 0 8px 20px rgba(5, 18, 30, 0.24);
   transform: translateY(-2px);
+}
+
+.home-sales-plan .category-showcase-head > a > i {
+  font-size: 15px;
 }
 
 .home-sales-plan .category-showcase-head > a:focus-visible {
