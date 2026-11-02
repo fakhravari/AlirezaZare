@@ -419,21 +419,6 @@ h3 {
   font-weight: 700;
   box-shadow: 0 10px 24px rgba(11, 52, 126, 0.22);
 }
-.stores-mini .glass-card {
-  padding: 25px;
-}
-.stores-mini i {
-  color: var(--industrial-yellow-dark);
-  font-size: 24px;
-}
-.stores-mini h3 {
-  margin: 14px 0 8px;
-}
-.stores-mini p {
-  color: var(--color-muted);
-  font-size: 13px;
-  line-height: 1.9;
-}
 .page-cta {
   padding: 0 0 90px;
 }

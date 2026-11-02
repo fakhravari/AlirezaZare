@@ -1073,25 +1073,6 @@ h3,
 
 /* Softer featured cards: remove the hard outline and unify corner geometry. */
 
-.featured-badge {
-  width: 76px;
-  height: 76px;
-  border: 1px solid rgba(94, 71, 37, 0.22);
-  background: linear-gradient(145deg, #d8c59a, #bda36f);
-  color: #10233d;
-  box-shadow:
-    0 12px 28px rgba(2, 12, 27, 0.2),
-    inset 0 0 0 5px rgba(255, 255, 255, 0.12);
-}
-
-.featured-badge::after {
-  position: absolute;
-  inset: 6px;
-  border: 1px solid rgba(16, 35, 61, 0.12);
-  border-radius: 50%;
-  content: "";
-}
-
 @media (max-width: 575px) {
   .add-cart {
     min-height: 50px;
@@ -1099,11 +1080,6 @@ h3,
     font-size: 14.5px;
   }
 
-  .featured-badge {
-    width: 66px;
-    height: 66px;
-    font-size: 17px;
-  }
 }
 
 /* Unified product badges: same geometry, restrained semantic colors. */

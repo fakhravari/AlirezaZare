@@ -404,13 +404,6 @@
   font-size: 12px;
   font-weight: 700;
 }
-.branch-card-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 24px;
-}
 .branch-icon {
   --ui-icon-tile-border: color-mix(
     in srgb,
@@ -550,9 +543,6 @@
   }
   .contact-shortcut-card small {
     font-size: 12px;
-  }
-  .branch-card-top {
-    margin-bottom: 16px;
   }
   .contact-hero ~ main .contact-form .contact-submit {
     width: 100%;

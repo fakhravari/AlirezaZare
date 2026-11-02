@@ -843,30 +843,12 @@ textarea {
   display: none;
 }
 
-.ticker {
-  height: 68px;
-  display: flex;
-  align-items: center;
-  background: var(--color-gold);
-  overflow: hidden;
-}
-
 .ticker-track {
   display: flex;
   gap: 28px;
   white-space: nowrap;
   width: max-content;
   animation: ticker 25s linear infinite;
-}
-
-.ticker span {
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.ticker b {
-  font-size: 9px;
-  color: #9d8666;
 }
 
 @keyframes ticker {
@@ -1470,37 +1452,6 @@ footer {
   margin-top: 5px;
 }
 
-.search-form {
-  width: min(700px, 90%);
-}
-
-.search-form label {
-  font-size: 34px;
-  margin-bottom: 30px;
-}
-
-.search-form > div {
-  display: flex;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.4);
-}
-
-.search-form input {
-  flex: 1;
-  border: 0;
-  background: transparent;
-  color: #fff;
-  outline: 0;
-  padding: 18px 0;
-  font-size: 20px;
-}
-
-.search-form button {
-  background: none;
-  border: 0;
-  color: #fff;
-  font-size: 23px;
-}
-
 .toast {
   background: var(--color-gold);
   color: var(--color-navy);
@@ -1643,14 +1594,6 @@ footer {
 
   .hero-swiper .swiper-pagination-bullet {
     width: 48px;
-  }
-
-  .ticker {
-    height: 60px;
-  }
-
-  .ticker span {
-    font-size: 12px;
   }
 
   .py-section {
@@ -1801,14 +1744,6 @@ footer {
     line-height: 1.8;
   }
 
-  .search-form label {
-    font-size: 24px;
-  }
-
-  .search-form input {
-    min-width: 0;
-    font-size: 16px;
-  }
 }
 
 @media (max-width: 380px) {
@@ -2001,27 +1936,6 @@ footer {
   margin-left: 7px;
 }
 
-.featured-badge {
-  position: absolute;
-  z-index: 2;
-  left: 25px;
-  top: 25px;
-  width: 75px;
-  height: 75px;
-  border-radius: 50%;
-  display: grid;
-  place-content: center;
-  text-align: center;
-  background: var(--color-gold);
-  color: var(--color-navy);
-  font-size: 19px;
-  font-weight: 700;
-}
-
-.featured-badge small {
-  font-size: 9px;
-}
-
 @media (max-width: 991px) {
   .cart-panel {
     top: 78px;
@@ -2050,11 +1964,6 @@ footer {
     padding: 13px;
   }
 
-  .featured-badge {
-    width: 66px;
-    height: 66px;
-    font-size: 17px;
-  }
 }
 
 #collection {
@@ -2527,39 +2436,6 @@ body {
   gap: 9px;
 }
 
-.mobile-category-link {
-  display: grid;
-  grid-template-columns: 34px 1fr auto;
-  align-items: center;
-  gap: 10px;
-  min-height: 51px;
-  padding: 7px 10px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.88);
-}
-
-.mobile-category-link > i:first-child {
-  display: grid;
-  width: 32px;
-  height: 32px;
-  place-items: center;
-  border-radius: 9px;
-  background: rgba(255, 255, 255, 0.08);
-  color: #dfc88d;
-}
-
-.mobile-category-link > i:last-child {
-  color: rgba(255, 255, 255, 0.38);
-  font-size: 11px;
-}
-
-.mobile-category-link span {
-  font-size: 14px;
-}
-.mobile-category-link:hover {
-  color: #fff;
-  background: rgba(255, 255, 255, 0.055);
-}
 .mobile-category-sale > i:first-child {
   background: rgba(204, 93, 75, 0.18);
   color: #ffb2a5;
@@ -3140,10 +3016,6 @@ footer .copyright {
   .footer-main > div:not(:first-child) a {
     font-size: 16px;
   }
-}
-
-.stores {
-  background: #f7f4ef;
 }
 
 .store-card {
