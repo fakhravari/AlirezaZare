@@ -10546,7 +10546,6 @@ body.home-page .rail-card,
 .search-product.product-card,
 .showcase-card,
 .rail-card,
-.product-rail .owl-item .rail-card,
 #productView .product-detail-related-card {
   height: 100% !important;
   align-self: stretch !important;
@@ -10556,7 +10555,6 @@ body.home-page .rail-card,
 .search-product.product-card .product-info,
 .showcase-card-body,
 .rail-card,
-.product-rail .owl-item .rail-card,
 #productView .product-detail-related-card .product-info {
   display: flex;
   min-height: 0;
