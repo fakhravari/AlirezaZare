@@ -934,10 +934,13 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
       .map((item) => Date.parse(item._salesPlanListing.endsAtUtc))
       .filter((end) => Number.isFinite(end) && end > Date.now());
     if (!expiries.length) return;
+    const nextExpiry = Math.min(...expiries);
+    // Browser timers cannot exceed a signed 32-bit delay (about 24.8 days).
+    const delay = Math.min(2147483647, Math.max(0, nextExpiry - Date.now() + 25));
     planExpiryTimer = window.setTimeout(() => {
-      render(true);
+      if (Date.now() >= nextExpiry) render(true);
       schedulePlanExpiryRefresh();
-    }, Math.min(...expiries) - Date.now() + 25);
+    }, delay);
   };
   schedulePlanExpiryRefresh();
   updateCartCount();

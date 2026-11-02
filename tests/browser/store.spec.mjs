@@ -27,7 +27,7 @@ test('all home collections render shared cards with one action of each kind', as
   const planSections = page.locator('#homeSalesTime .home-sales-plan, #homeSalesPlans .home-sales-plan');
   await expect(planSections).toHaveCount(2);
   await expect(page.locator('#homeSalesTime .home-sales-plan-grid .product-card')).toHaveCount(7);
-  await expect(page.locator('#homeSalesPlans .home-sales-plan-grid .product-card')).toHaveCount(13);
+  await expect(page.locator('#homeSalesPlans .home-sales-plan-grid .product-card')).toHaveCount(16);
   await expect(page.locator('#homeSalesTime .home-sales-plan[data-sales-plan="digi-time"]')).toHaveCount(1);
   await expect(page.locator('#homeSalesPlans .home-sales-plan[data-sales-plan="digi-af"]')).toHaveCount(1);
   const timePlacement = await page.evaluate(() => {
@@ -43,10 +43,12 @@ test('all home collections render shared cards with one action of each kind', as
       background: getComputedStyle(header).backgroundImage,
       radius: getComputedStyle(header).borderRadius,
       titleColor: getComputedStyle(header.querySelector('h2')).color,
+      decoration: getComputedStyle(header, '::before').content,
     }));
-    expect(planHeader.background).toContain('radial-gradient');
+    expect(planHeader.background).toContain('linear-gradient');
     expect(planHeader.radius).toBe('18px');
-    expect(planHeader.titleColor).toBe('rgb(255, 255, 255)');
+    expect(planHeader.titleColor).toBe('rgb(16, 42, 67)');
+    expect(planHeader.decoration).toBe('\"\"');
     const product = section.locator('.home-sales-plan-grid > div .product-card').first();
     await expect(product).toBeVisible();
     const planImage = product.locator('.product-image img');
@@ -155,6 +157,17 @@ test('search includes active plan offers and preserves the selected offer in car
   await expect(offerCard.locator('.add-cart')).toHaveAttribute('data-price', String(expectedPrice));
   await offerCard.locator('.add-cart').click();
   await expect.poll(() => page.evaluate(() => window.HNUI.cart.read().find(item => item.salesPlanId === 'digi-time')?.price)).toBe(expectedPrice);
+});
+
+test('distant sales-plan expiry does not repeatedly rebuild search results', async ({page}) => {
+  // Keep the demo plan active with its expiry more than 24.8 days away.
+  await page.addInitScript(() => { Date.now = () => Date.parse('2026-11-01T10:00:00Z'); });
+  await page.goto('/search?sales-plan=digi-time');
+  const result = page.locator('#productResults [data-sales-plan-id="digi-time"]').first();
+  await expect(result).toBeVisible();
+  const originalCard = await result.elementHandle();
+  await page.waitForTimeout(800);
+  expect(await originalCard.evaluate(element => element.isConnected)).toBe(true);
 });
 
 test('search shares header query rules, filters on final plan price, and removes an offer at expiry', async ({page}, testInfo) => {
@@ -354,6 +367,51 @@ test('product detail shows only its URL plan without mixing browser and server c
   await expect(overDayCountdown.locator('bdi[dir="ltr"]')).toHaveText(/[۰-۹]{2}:[۰-۹]{2}:[۰-۹]{2}/);
 
   await noHorizontalOverflow(page);
+});
+
+test('products show their own plan-specific features, accessory choices and prices', async ({page}) => {
+  const samples = [
+    {path: '/products/cordless-hammer-drill-1', feature: 'نوع سه‌نظام', time: 'sds-bit-set', af: 'drill-case'},
+    {path: '/products/digital-multimeter-6', feature: 'نوع نمایش', time: 'probe-set', af: 'meter-test-lead'},
+    {path: '/products/digital-soldering-station-11', feature: 'کنترل فرایند', time: 'solder-tips', af: 'solder-stand-kit'},
+  ];
+  const readPlanDetails = async (sample, planId) => {
+    await page.goto(`${sample.path}?salesPlanId=${planId}`);
+    await expect(page.locator('.product-sales-plan--fixed')).toContainText(planId === 'digi-time' ? 'دیجی‌تایم' : 'دیجی‌اف');
+    return page.evaluate((feature) => ({
+      specification: [...document.querySelectorAll('#product-specifications dt')]
+        .find(item => item.textContent.trim() === feature)?.nextElementSibling?.textContent.trim(),
+      accessories: [...document.querySelectorAll('.product-accessory')]
+        .map(item => ({id: item.querySelector('[data-accessory-id]').dataset.accessoryId,
+          price: item.querySelector('.product-accessory-price strong').textContent.trim()})),
+    }), sample.feature);
+  };
+
+  for (const sample of samples) {
+    const digiTime = await readPlanDetails(sample, 'digi-time');
+    const digiAf = await readPlanDetails(sample, 'digi-af');
+    expect(digiTime.specification).toBeTruthy();
+    expect(digiAf.specification).toBeTruthy();
+    expect(digiAf.specification).not.toBe(digiTime.specification);
+    expect(digiTime.accessories.map(item => item.id)).toContain(sample.time);
+    expect(digiTime.accessories.map(item => item.id)).not.toContain(sample.af);
+    expect(digiAf.accessories.map(item => item.id)).toContain(sample.af);
+    expect(digiAf.accessories.map(item => item.id)).not.toContain(sample.time);
+    const timeAccessory = digiTime.accessories.find(item => item.id === sample.time);
+    const afAccessory = digiAf.accessories.find(item => item.id === sample.af);
+    expect(afAccessory.price).not.toBe(timeAccessory.price);
+  }
+
+  const invalidAccessory = await page.evaluate(async () => {
+    const response = await fetch('/api/store/sales-plans/quote', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({productId: 1, salesPlanId: 'digi-time', quantity: 1,
+        variants: {battery: '2ah', chuck: '10mm'}, accessoryIds: ['shipping-insurance', 'drill-case']}),
+    });
+    return {status: response.status, body: await response.json()};
+  });
+  expect(invalidAccessory.status).toBe(400);
+  expect(invalidAccessory.body.code).toBe('invalid-product-options');
 });
 
 test('cart defaults, required service and reload use one canonical price', async ({page}) => {

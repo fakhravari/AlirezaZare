@@ -120,19 +120,31 @@ var salesPlanConfig = JsonNode.Parse(salesPlanJson)!;
 var configuredOffers = (JsonArray)salesPlanConfig["offers"]!;
 configuredOffers.RemoveAt(0);
 configuredOffers[0]!["accessoryPriceAmounts"] = new JsonObject { ["belt"] = 245000 };
+configuredOffers[0]!["accessoryIds"] = new JsonArray("belt");
+configuredOffers[0]!["specificationOverrides"] = new JsonObject { ["نوع نمایش"] = "نمایش ویژهٔ همین طرح" };
 const string accessoryCatalogJson = """
 {"products":[{"id":1,"price":1,"discountPercent":0,"stockQuantity":4,"maxCartQuantity":10,"accessories":[{"id":"belt","price":0.3,"required":true}]}]}
 """;
 var configuredSalesPlans = Shop.Models.SalesPlanCatalog.ParseConfiguration(salesPlanConfig.ToJsonString(), accessoryCatalogJson);
 if (configuredSalesPlans.Offers.Single(offer => offer.SalesPlanId == "regular").AccessoryPriceAmounts["belt"] != 300000 ||
-    configuredSalesPlans.Offers.Single(offer => offer.SalesPlanId == "demo-time").AccessoryPriceAmounts["belt"] != 245000)
-    throw new Exception("Per-plan accessory price override or default catalog conversion is inconsistent.");
+    configuredSalesPlans.Offers.Single(offer => offer.SalesPlanId == "demo-time").AccessoryPriceAmounts["belt"] != 245000 ||
+    !configuredSalesPlans.Offers.Single(offer => offer.SalesPlanId == "demo-time").AccessoryIds!.Contains("belt") ||
+    configuredSalesPlans.Offers.Single(offer => offer.SalesPlanId == "demo-time").SpecificationOverrides["نوع نمایش"] != "نمایش ویژهٔ همین طرح")
+    throw new Exception("Per-plan accessory selection, specification override, or accessory price is inconsistent.");
 var unknownAccessoryConfig = JsonNode.Parse(salesPlanConfig.ToJsonString())!;
 unknownAccessoryConfig["offers"]![0]!["accessoryPriceAmounts"] = new JsonObject { ["unknown-part"] = 245000 };
 try
 {
     Shop.Models.SalesPlanCatalog.ParseConfiguration(unknownAccessoryConfig.ToJsonString(), accessoryCatalogJson);
     throw new Exception("A plan-specific price for an unknown accessory was accepted.");
+}
+catch (InvalidDataException) { }
+var unknownAccessorySelectionConfig = JsonNode.Parse(salesPlanConfig.ToJsonString())!;
+unknownAccessorySelectionConfig["offers"]![0]!["accessoryIds"] = new JsonArray("belt", "unknown-part");
+try
+{
+    Shop.Models.SalesPlanCatalog.ParseConfiguration(unknownAccessorySelectionConfig.ToJsonString(), accessoryCatalogJson);
+    throw new Exception("A plan-specific selection of an unknown accessory was accepted.");
 }
 catch (InvalidDataException) { }
 var fallbackPriceConfig = JsonNode.Parse(salesPlanConfig.ToJsonString())!;

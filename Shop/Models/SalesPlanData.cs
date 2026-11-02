@@ -36,6 +36,7 @@ public sealed record SalesPlanCatalog(
         List<ProductSalesOffer> defaultOffers = [];
         HashSet<int> productIds = [];
         Dictionary<int, HashSet<string>> accessoryIds = [];
+        Dictionary<int, HashSet<string>> requiredAccessoryIds = [];
         Dictionary<int, Dictionary<string, decimal>> accessoryPricesByProduct = [];
         foreach (JsonElement product in products.EnumerateArray())
         {
@@ -45,6 +46,7 @@ public sealed record SalesPlanCatalog(
             decimal listAmount = decimal.Round(currentAmount * 100m / (100m - discount), 0, MidpointRounding.AwayFromZero);
             productIds.Add(id);
             HashSet<string> ids = [];
+            HashSet<string> requiredIds = [];
             Dictionary<string, decimal> accessoryPrices = new(StringComparer.Ordinal);
             JsonElement accessoryArray = product.TryGetProperty("accessories", out JsonElement accessoryElement) &&
                 accessoryElement.ValueKind == JsonValueKind.Array ? accessoryElement : default;
@@ -53,16 +55,19 @@ public sealed record SalesPlanCatalog(
             {
                 string accessoryId = accessory.GetProperty("id").GetString()!;
                 ids.Add(accessoryId);
+                if (accessory.GetProperty("required").GetBoolean()) requiredIds.Add(accessoryId);
                 decimal accessoryAmount = accessory.GetProperty("price").GetDecimal() * 1_000_000m;
                 accessoryPrices[accessoryId] = accessoryAmount;
             }
             accessoryIds[id] = ids;
+            requiredAccessoryIds[id] = requiredIds;
             accessoryPricesByProduct[id] = accessoryPrices;
             defaultOffers.Add(new(id, "regular", listAmount, discount,
                 product.GetProperty("stockQuantity").GetInt32(),
                 product.GetProperty("maxCartQuantity").GetInt32(), true)
             {
-                AccessoryPriceAmounts = accessoryPrices
+                AccessoryPriceAmounts = accessoryPrices,
+                AccessoryIds = ids.ToArray()
             });
         }
 
@@ -79,7 +84,16 @@ public sealed record SalesPlanCatalog(
                 throw new InvalidDataException("An offer references an unknown accessory.");
             foreach ((string accessoryId, decimal amount) in overrides)
                 resolvedPrices[accessoryId] = amount;
-            configuredOffers.Add(offer with { AccessoryPriceAmounts = resolvedPrices });
+            string[] selectedAccessoryIds = offer.AccessoryIds?.ToArray() ?? productAccessoryIds.ToArray();
+            if (selectedAccessoryIds.Distinct(StringComparer.Ordinal).Count() != selectedAccessoryIds.Length ||
+                selectedAccessoryIds.Any(id => !productAccessoryIds.Contains(id)) ||
+                requiredAccessoryIds[offer.ProductId].Any(id => !selectedAccessoryIds.Contains(id, StringComparer.Ordinal)))
+                throw new InvalidDataException("An offer has an invalid or incomplete accessory selection.");
+            configuredOffers.Add(offer with
+            {
+                AccessoryPriceAmounts = resolvedPrices,
+                AccessoryIds = selectedAccessoryIds
+            });
         }
         SalesPlanCatalog complete = configured with
         {
@@ -127,6 +141,12 @@ public sealed record SalesPlanCatalog(
                 offer.PriceAmount < 0 || offer.PriceAmount != decimal.Truncate(offer.PriceAmount) ||
                 offer.AccessoryPriceAmounts is null || offer.AccessoryPriceAmounts.Any(price =>
                     string.IsNullOrWhiteSpace(price.Key) || price.Value < 0 || price.Value != decimal.Truncate(price.Value)) ||
+                offer.AccessoryIds is { } configuredAccessoryIds &&
+                    (configuredAccessoryIds.Any(string.IsNullOrWhiteSpace) ||
+                     configuredAccessoryIds.Distinct(StringComparer.Ordinal).Count() != configuredAccessoryIds.Count) ||
+                offer.SpecificationOverrides is null || offer.SpecificationOverrides.Any(specification =>
+                    string.IsNullOrWhiteSpace(specification.Key) || specification.Key.Length > 80 ||
+                    string.IsNullOrWhiteSpace(specification.Value) || specification.Value.Length > 240) ||
                 offer.DiscountPercent is < 0 or >= 100 ||
                 offer.StockQuantity < 0 || offer.MaxPurchaseQuantity is < 1 or > 99)
                 throw new InvalidDataException("Invalid, duplicate, or unreferenced product sales offer.");
@@ -199,6 +219,8 @@ public sealed record ProductSalesOffer(
     bool IsEnabled)
 {
     public IReadOnlyDictionary<string, decimal> AccessoryPriceAmounts { get; init; } = new Dictionary<string, decimal>();
+    public IReadOnlyList<string>? AccessoryIds { get; init; }
+    public IReadOnlyDictionary<string, string> SpecificationOverrides { get; init; } = new Dictionary<string, string>();
 }
 
 /// <summary>Immutable monetary facts captured for cart/order history.</summary>

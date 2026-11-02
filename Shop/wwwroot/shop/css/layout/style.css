@@ -2159,7 +2159,6 @@ footer {
   pointer-events: none;
 }
 
-.cart-wrap:hover .cart-panel,
 .cart-wrap:focus-within .cart-panel,
 .cart-wrap.open .cart-panel {
   opacity: 1;
@@ -5924,7 +5923,6 @@ h6,
     visibility 0.28s;
 }
 
-.cart-wrap:hover .cart-panel,
 .cart-wrap:focus-within .cart-panel,
 .cart-wrap.open .cart-panel,
 .cart-panel.open {

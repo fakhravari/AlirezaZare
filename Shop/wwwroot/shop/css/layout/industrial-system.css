@@ -4260,10 +4260,6 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
   }
 }
 
-.filter-group.open .filter-options {
-  max-height: 280px;
-  overflow-y: auto;
-}
 .filter-options > .filter-search {
   grid-column: 1 / -1;
 }

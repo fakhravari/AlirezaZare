@@ -129,6 +129,8 @@ public sealed class SalesPlansController(ISalesPlanSource plans, ICatalogSource 
         {
             string id = accessory.GetProperty("id").GetString()!;
             bool required = accessory.GetProperty("required").GetBoolean();
+            if (selected.Contains(id) && offer.AccessoryIds is { } allowedByOffer && !allowedByOffer.Contains(id, StringComparer.Ordinal))
+                throw new InvalidDataException();
             if (selected.Contains(id) || required)
             {
                 if (!required && !selected.Contains(id)) continue;

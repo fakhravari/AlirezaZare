@@ -880,7 +880,6 @@ $(function () {
     $html.toggleClass("cart-mobile-open", lockPage);
   };
   const setFavoriteOpen = (open) => {
-    if (open && !userLoggedIn) return;
     $favoritesWrap.toggleClass("open", open);
     $favoritesPanel
       .toggleClass("open", open)
@@ -894,7 +893,6 @@ $(function () {
     setFavoriteOpen(false);
   };
   const setCompareOpen = (open) => {
-    if (open && !userLoggedIn) return;
     $compareWrap.toggleClass("open", open);
     $comparePanel.toggleClass("open", open).attr("aria-hidden", String(!open));
     $compareToggle.attr("aria-expanded", String(open));
@@ -943,7 +941,6 @@ $(function () {
   let cart = window.HNUI.cart.read();
 
   const setCartOpen = (open) => {
-    if (open && !userLoggedIn) return;
     $cartWrap.toggleClass("open", open);
     $cartPanel.toggleClass("open", open);
     $cartToggle.attr("aria-expanded", String(open));
@@ -1418,6 +1415,7 @@ $(function () {
   $favoritesWrap.on("mouseenter", () => {
     if ($window.width() <= mobileBreakpoint) return;
     window.clearTimeout(favoriteHoverTimer);
+    if (!storedListCount("hn-favorites")) return;
     setCartOpen(false);
     setCompareOpen(false);
     setFavoriteOpen(true);
@@ -1455,6 +1453,7 @@ $(function () {
   $compareWrap.on("mouseenter", () => {
     if ($window.width() <= mobileBreakpoint) return;
     window.clearTimeout(compareHoverTimer);
+    if (!storedListCount("hn-compare")) return;
     setCartOpen(false);
     setFavoriteOpen(false);
     setCompareOpen(true);
@@ -1500,6 +1499,7 @@ $(function () {
   $cartWrap.on("mouseenter", () => {
     if ($window.width() <= mobileBreakpoint) return;
     clearCartHoverTimer();
+    if (!cart.length) return;
     setAccountOpen(false);
     setCartOpen(true);
   });

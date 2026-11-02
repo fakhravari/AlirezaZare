@@ -404,7 +404,7 @@
 
 }
 
-/* Keep the DigiTime and DigiAF introductions aligned and visually quiet. */
+/* Shared section surfaces and the DigiAF introduction. */
 #homeSalesTime .home-sales-plan,
 #homeSalesPlans .home-sales-plan {
   border-color: rgba(178, 138, 79, 0.24);
@@ -418,7 +418,6 @@
   content: none;
 }
 
-#homeSalesTime .home-sales-plan .category-showcase-head,
 #homeSalesPlans .home-sales-plan .category-showcase-head {
   min-height: 196px;
   box-sizing: border-box;
@@ -434,7 +433,6 @@
   box-shadow: 0 12px 26px rgba(16, 42, 67, 0.17);
 }
 
-#homeSalesTime .home-sales-plan .category-showcase-head::after,
 #homeSalesPlans .home-sales-plan .category-showcase-head::after {
   z-index: 0;
   inset-block: 22px;
@@ -447,7 +445,6 @@
   transform: none;
 }
 
-#homeSalesTime .home-sales-plan .category-showcase-head > div,
 #homeSalesPlans .home-sales-plan .category-showcase-head > div {
   display: grid;
   min-width: 0;
@@ -456,13 +453,11 @@
   gap: 0;
 }
 
-#homeSalesTime .home-sales-plan .category-showcase-head h2,
 #homeSalesPlans .home-sales-plan .category-showcase-head h2 {
   margin: 0;
   font-size: clamp(24px, 2.4vw, 34px);
 }
 
-#homeSalesTime .home-sales-plan .home-sales-plan-countdown,
 #homeSalesPlans .home-sales-plan .home-sales-plan-countdown {
   width: fit-content;
   max-width: 100%;
@@ -478,7 +473,6 @@
 }
 
 @media (max-width: 575.98px) {
-  #homeSalesTime .home-sales-plan .category-showcase-head,
   #homeSalesPlans .home-sales-plan .category-showcase-head {
     min-height: 250px;
     align-items: stretch;
@@ -487,12 +481,10 @@
     padding: 18px;
   }
 
-  #homeSalesTime .home-sales-plan .category-showcase-head > div,
   #homeSalesPlans .home-sales-plan .category-showcase-head > div {
     width: 100%;
   }
 
-  #homeSalesTime .home-sales-plan .home-sales-plan-countdown,
   #homeSalesPlans .home-sales-plan .home-sales-plan-countdown {
     width: 100%;
     max-width: none;
@@ -500,25 +492,131 @@
     margin: 12px 0 0;
   }
 
-  #homeSalesTime .home-sales-plan[data-sales-plan="digi-time"] .category-showcase-head > div {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 8px;
+}
+
+/* Coordinated, compact introductions for the featured sales plans. */
+:is(#homeSalesTime .home-sales-plan[data-sales-plan="digi-time"], #homeSalesPlans .home-sales-plan[data-sales-plan="digi-af"]) .category-showcase-head {
+  min-height: 0;
+  box-sizing: border-box;
+  align-items: center;
+  flex-direction: row;
+  gap: 18px;
+  padding: clamp(16px, 2vw, 22px) clamp(18px, 2.4vw, 30px);
+  border: 1px solid #e9d9ab;
+  border-radius: 18px;
+  background: linear-gradient(110deg, #fffaf0, #fff4d5 58%, #fffdf7);
+  box-shadow: 0 5px 16px rgba(114, 83, 21, 0.07);
+}
+
+:is(#homeSalesTime .home-sales-plan[data-sales-plan="digi-time"], #homeSalesPlans .home-sales-plan[data-sales-plan="digi-af"]) .category-showcase-head::before,
+:is(#homeSalesTime .home-sales-plan[data-sales-plan="digi-time"], #homeSalesPlans .home-sales-plan[data-sales-plan="digi-af"]) .category-showcase-head::after {
+  position: absolute;
+  z-index: 0;
+  content: "";
+  pointer-events: none;
+}
+
+:is(#homeSalesTime .home-sales-plan[data-sales-plan="digi-time"], #homeSalesPlans .home-sales-plan[data-sales-plan="digi-af"]) .category-showcase-head::before {
+  top: 50%;
+  left: 28%;
+  width: 90px;
+  height: 90px;
+  border: 1px solid rgba(196, 153, 58, 0.2);
+  border-radius: 50%;
+  box-shadow: 0 0 0 16px rgba(221, 181, 83, 0.055), 0 0 0 32px rgba(221, 181, 83, 0.035);
+  transform: translateY(-50%);
+}
+
+:is(#homeSalesTime .home-sales-plan[data-sales-plan="digi-time"], #homeSalesPlans .home-sales-plan[data-sales-plan="digi-af"]) .category-showcase-head::after {
+  inset: auto 31% 16px auto;
+  width: 72px;
+  height: 26px;
+  border: 0;
+  border-radius: 0;
+  background: radial-gradient(circle, rgba(186, 139, 44, 0.25) 1.5px, transparent 2px) 0 0 / 12px 12px;
+  box-shadow: none;
+  transform: none;
+}
+
+:is(#homeSalesTime .home-sales-plan[data-sales-plan="digi-time"], #homeSalesPlans .home-sales-plan[data-sales-plan="digi-af"]) .category-showcase-head > div {
+  display: grid;
+  min-width: 0;
+  flex: 1 1 auto;
+  grid-template-columns: max-content minmax(0, 1fr);
+  align-items: center;
+  gap: 4px clamp(20px, 3vw, 42px);
+}
+
+:is(#homeSalesTime .home-sales-plan[data-sales-plan="digi-time"], #homeSalesPlans .home-sales-plan[data-sales-plan="digi-af"]) .category-showcase-head h2 {
+  color: #102a43;
+  font-size: clamp(23px, 2vw, 29px);
+}
+
+:is(#homeSalesTime .home-sales-plan[data-sales-plan="digi-time"], #homeSalesPlans .home-sales-plan[data-sales-plan="digi-af"]) .home-sales-plan-countdown {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  justify-self: center;
+  margin: 0;
+  border-color: #ead393;
+  background: #fff;
+  box-shadow: 0 3px 10px rgba(102, 73, 17, 0.08);
+}
+
+:is(#homeSalesTime .home-sales-plan[data-sales-plan="digi-time"], #homeSalesPlans .home-sales-plan[data-sales-plan="digi-af"]) .category-showcase-head p {
+  grid-column: 1;
+  margin: 0;
+  color: #5b6670;
+  font-size: 13px;
+}
+
+:is(#homeSalesTime .home-sales-plan[data-sales-plan="digi-time"], #homeSalesPlans .home-sales-plan[data-sales-plan="digi-af"]) .category-showcase-head > a {
+  box-shadow: none;
+}
+
+@media (max-width: 767px) {
+  :is(#homeSalesTime .home-sales-plan[data-sales-plan="digi-time"], #homeSalesPlans .home-sales-plan[data-sales-plan="digi-af"]) .category-showcase-head {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
   }
 
-  #homeSalesTime .home-sales-plan[data-sales-plan="digi-time"] .category-showcase-head h2,
-  #homeSalesTime .home-sales-plan[data-sales-plan="digi-time"] .home-sales-plan-countdown,
-  #homeSalesTime .home-sales-plan[data-sales-plan="digi-time"] .category-showcase-head p {
-    grid-column: 1;
+  :is(#homeSalesTime .home-sales-plan[data-sales-plan="digi-time"], #homeSalesPlans .home-sales-plan[data-sales-plan="digi-af"]) .category-showcase-head::before {
+    top: 48px;
+    left: 14px;
+    width: 54px;
+    height: 54px;
   }
 
-  #homeSalesTime .home-sales-plan[data-sales-plan="digi-time"] .home-sales-plan-countdown {
+  :is(#homeSalesTime .home-sales-plan[data-sales-plan="digi-time"], #homeSalesPlans .home-sales-plan[data-sales-plan="digi-af"]) .category-showcase-head::after {
+    left: 20px;
+    right: auto;
+    bottom: 16px;
+  }
+
+  :is(#homeSalesTime .home-sales-plan[data-sales-plan="digi-time"], #homeSalesPlans .home-sales-plan[data-sales-plan="digi-af"]) .category-showcase-head > div {
     width: 100%;
-    max-width: none;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 9px;
+  }
+
+  :is(#homeSalesTime .home-sales-plan[data-sales-plan="digi-time"], #homeSalesPlans .home-sales-plan[data-sales-plan="digi-af"]) .category-showcase-head h2,
+  :is(#homeSalesTime .home-sales-plan[data-sales-plan="digi-time"], #homeSalesPlans .home-sales-plan[data-sales-plan="digi-af"]) .home-sales-plan-countdown,
+  :is(#homeSalesTime .home-sales-plan[data-sales-plan="digi-time"], #homeSalesPlans .home-sales-plan[data-sales-plan="digi-af"]) .category-showcase-head p {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  :is(#homeSalesTime .home-sales-plan[data-sales-plan="digi-time"], #homeSalesPlans .home-sales-plan[data-sales-plan="digi-af"]) .home-sales-plan-countdown {
+    width: 100%;
+    max-width: 100%;
+    flex-wrap: wrap;
+    justify-content: space-between;
     margin: 0;
   }
 
-  #homeSalesTime .home-sales-plan[data-sales-plan="digi-time"] .category-showcase-head p {
-    margin: 0;
+  :is(#homeSalesTime .home-sales-plan[data-sales-plan="digi-time"], #homeSalesPlans .home-sales-plan[data-sales-plan="digi-af"]) .category-showcase-head > a {
+    align-self: flex-start;
   }
 }
 

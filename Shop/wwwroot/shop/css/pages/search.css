@@ -511,14 +511,6 @@ select {
 
 .filter-panel {
   box-sizing: border-box;
-  position: sticky;
-  top: 105px;
-  height: calc(100dvh - 125px);
-  max-height: calc(100dvh - 125px);
-  min-height: 0;
-  overflow-x: hidden;
-  overflow-y: auto;
-  overscroll-behavior: contain;
   scrollbar-width: none;
   -ms-overflow-style: none;
   border: 1px solid var(--industrial-muted);
@@ -536,13 +528,6 @@ select {
   height: 0;
 }
 
-@media (min-width: 992px) {
-  .filter-panel {
-    top: 160px;
-    height: calc(100dvh - 176px);
-    max-height: calc(100dvh - 176px);
-  }
-}
 
 .filter-head {
   display: flex;

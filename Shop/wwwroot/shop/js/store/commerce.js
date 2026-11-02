@@ -74,6 +74,29 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
         try { salesPlans = JSON.parse(document.querySelector('#storeSalesPlans')?.textContent || '{}'); } catch { salesPlans = {}; }
         if (!p) productView.innerHTML = empty("محصول پیدا نشد");
         else {
+            const planOffers = (salesPlans.offers || []).filter((offer) => offer.productId === p.id);
+            const plansForProduct = (salesPlans.plans || []).filter((plan) => plan.isDefault || planOffers.some((offer) => offer.salesPlanId === plan.id));
+            const planIsActive = (plan) => plan.isEnabled !== false && (!plan.startsAtUtc || Date.now() >= new Date(plan.startsAtUtc).getTime()) && (!plan.endsAtUtc || Date.now() < new Date(plan.endsAtUtc).getTime());
+            const offerForPlan = (plan) => planOffers.find((offer) => offer.salesPlanId === plan.id);
+            const planIsSelectable = (plan) => {
+                if (plan.isDefault) return planIsActive(plan);
+                const offer = offerForPlan(plan);
+                return planIsActive(plan) && Boolean(offer?.isEnabled) && Number(offer?.stockQuantity) > 0;
+            };
+            const requestedPlanId = new URLSearchParams(location.search).get("salesPlanId");
+            const requestedPlan = plansForProduct.find((plan) => plan.id === requestedPlanId);
+            const defaultPlan = plansForProduct.find((plan) => plan.isDefault);
+            const fallbackPlan = plansForProduct.find(planIsSelectable) || defaultPlan;
+            const selectedSalesPlanId = requestedPlan && planIsSelectable(requestedPlan)
+                ? requestedPlan.id
+                : (defaultPlan && planIsSelectable(defaultPlan) ? defaultPlan.id : fallbackPlan?.id || "regular");
+            const focusedPlan = requestedPlan && planIsSelectable(requestedPlan) && requestedPlan.id !== "regular"
+                ? requestedPlan
+                : null;
+            const requestedPlanUnavailable = Boolean(requestedPlan && !planIsSelectable(requestedPlan));
+            const selectedOffer = () => planOffers.find((offer) => offer.salesPlanId === selectedSalesPlanId);
+            const availableAccessories = (p.accessories || []).filter((item) =>
+                !Array.isArray(selectedOffer()?.accessoryIds) || selectedOffer().accessoryIds.includes(item.id));
             const productSectionHash =
                 /^#product-(?:intro|expert|specifications|reviews|questions)$/.test(
                     location.hash,
@@ -194,12 +217,12 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                     .join("")}</section>`
                 : "";
             const selectedAccessories = new Set(
-                (p.accessories || [])
+                availableAccessories
                     .filter((item) => item.required)
                     .map((item) => item.id),
             );
-            const accessoryMarkup = p.accessories?.length
-                ? `<section class="product-accessories" aria-labelledby="productAccessoriesTitle"><header><span class="product-accessories-icon"><i class="bi bi-box-seam" aria-hidden="true"></i></span><span><strong id="productAccessoriesTitle">متعلقات و خدمات کالا</strong><small>موارد الزامی مشخص‌اند؛ بقیه را به‌دلخواه انتخاب کنید.</small></span></header><div class="product-accessory-list">${p.accessories.map((item) => `<label class="product-accessory${item.required ? " is-required" : ""}"><input type="checkbox" data-accessory-id="${esc(item.id)}" ${item.required ? "checked disabled" : ""}><span class="product-accessory-check" aria-hidden="true"><i class="bi bi-check2"></i></span><span class="product-accessory-copy"><strong>${esc(item.name)}<em class="product-accessory-status ${item.required ? "is-required" : "is-optional"}">${item.required ? '<i class="bi bi-lock-fill" aria-hidden="true"></i> الزامی' : "اختیاری"}</em></strong><small>${esc(item.description)}</small></span><span class="product-accessory-price"><small>افزوده به فاکتور</small><strong class="product-price-current">${item.price ? `+ ${money(Number(item.price) * 1000000)}` : "رایگان"}</strong></span></label>`).join("")}</div></section>`
+            const accessoryMarkup = availableAccessories.length
+                ? `<section class="product-accessories" aria-labelledby="productAccessoriesTitle"><header><span class="product-accessories-icon"><i class="bi bi-box-seam" aria-hidden="true"></i></span><span><strong id="productAccessoriesTitle">متعلقات و خدمات کالا</strong><small>موارد الزامی مشخص‌اند؛ بقیه را به‌دلخواه انتخاب کنید.</small></span></header><div class="product-accessory-list">${availableAccessories.map((item) => `<label class="product-accessory${item.required ? " is-required" : ""}"><input type="checkbox" data-accessory-id="${esc(item.id)}" ${item.required ? "checked disabled" : ""}><span class="product-accessory-check" aria-hidden="true"><i class="bi bi-check2"></i></span><span class="product-accessory-copy"><strong>${esc(item.name)}<em class="product-accessory-status ${item.required ? "is-required" : "is-optional"}">${item.required ? '<i class="bi bi-lock-fill" aria-hidden="true"></i> الزامی' : "اختیاری"}</em></strong><small>${esc(item.description)}</small></span><span class="product-accessory-price"><small>افزوده به فاکتور</small><strong class="product-price-current">${item.price ? `+ ${money(Number(item.price) * 1000000)}` : "رایگان"}</strong></span></label>`).join("")}</div></section>`
                 : "";
             const specs = [
                 ["برند", p.brand],
@@ -348,27 +371,7 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                         })
                         .join("")
                     : `<div class="product-feedback-empty empty-state-card"><i class="bi ${type === "reviews" ? "bi-chat-square-heart" : "bi-question-circle"}" aria-hidden="true"></i><strong>${type === "reviews" ? "هنوز دیدگاهی برای این محصول ثبت نشده است." : "هنوز پرسشی دربارهٔ این محصول ثبت نشده است."}</strong><span>${type === "reviews" ? "تجربهٔ استفاده‌تان را با خریداران دیگر به اشتراک بگذارید." : "سؤال خود را ثبت کنید تا اطلاعات این کالا کامل‌تر شود."}</span></div>`;
-            const planOffers = (salesPlans.offers || []).filter((offer) => offer.productId === p.id);
-            const plansForProduct = (salesPlans.plans || []).filter((plan) => plan.isDefault || planOffers.some((offer) => offer.salesPlanId === plan.id));
-            const planIsActive = (plan) => plan.isEnabled !== false && (!plan.startsAtUtc || Date.now() >= new Date(plan.startsAtUtc).getTime()) && (!plan.endsAtUtc || Date.now() < new Date(plan.endsAtUtc).getTime());
-            const offerForPlan = (plan) => planOffers.find((offer) => offer.salesPlanId === plan.id);
-            const planIsSelectable = (plan) => {
-                if (plan.isDefault) return planIsActive(plan);
-                const offer = offerForPlan(plan);
-                return planIsActive(plan) && Boolean(offer?.isEnabled) && Number(offer?.stockQuantity) > 0;
-            };
-            const requestedPlanId = new URLSearchParams(location.search).get("salesPlanId");
-            const requestedPlan = plansForProduct.find((plan) => plan.id === requestedPlanId);
-            const defaultPlan = plansForProduct.find((plan) => plan.isDefault);
-            const fallbackPlan = plansForProduct.find(planIsSelectable) || defaultPlan;
-            const selectedSalesPlanId = requestedPlan && planIsSelectable(requestedPlan)
-                ? requestedPlan.id
-                : (defaultPlan && planIsSelectable(defaultPlan) ? defaultPlan.id : fallbackPlan?.id || "regular");
-            const focusedPlan = requestedPlan && planIsSelectable(requestedPlan) && requestedPlan.id !== "regular"
-                ? requestedPlan
-                : null;
-            const requestedPlanUnavailable = Boolean(requestedPlan && !planIsSelectable(requestedPlan));
-            const selectedOffer = () => planOffers.find((offer) => offer.salesPlanId === selectedSalesPlanId);
+
                         productView.innerHTML = `<div class="product-detail-layout"><section class="product-detail-gallery" aria-label="تصاویر و ویدئوهای محصول"><div class="product-detail-image-frame"><span class="product-detail-image-code"><i class="bi bi-upc-scan" aria-hidden="true"></i> ${esc(p.code)}</span><div class="product-detail-media-frame" id="productDetailMedia">${renderMedia(mainMedia)}</div><button class="product-detail-gallery-open" id="openProductGallery" type="button"><i class="bi bi-grid-3x3-gap" aria-hidden="true"></i><span>مشاهدهٔ همه</span><b>${fa(media.length)}</b></button></div>${thumbMarkup}<div class="product-detail-gallery-caption"><i class="bi bi-images" aria-hidden="true"></i><span>تصاویر و ویدئوهای محصول</span><small>${media.length > 1 ? `${fa(media.length)} فایل رسانه‌ای` : "نمای کامل محصول"}</small></div></section><section class="product-detail-summary" aria-labelledby="productDetailTitle"><div class="product-detail-meta"></div><h2 id="productDetailTitle">${esc(p.name)}</h2><p class="product-detail-description">${esc(p.name)} از گروه ${esc(p.type)}، با ویژگی ${esc(p.powerSource)} و ساختار ${esc(p.useCase)}.</p><div class="product-main-feature-chips" aria-label="ویژگی‌های اصلی"><span><i class="bi bi-grid" aria-hidden="true"></i>${esc(p.type)}</span><span><i class="bi bi-lightning-charge" aria-hidden="true"></i>${esc(p.powerSource)}</span><span><i class="bi bi-building" aria-hidden="true"></i>${esc(p.brand)}</span></div>${variantMarkup}<div class="product-detail-price"><div class="detail-price-heading" aria-label="ابزارهای قیمت"><div class="detail-price-tools" aria-label="ابزارهای قیمت"><button class="detail-price-tool" type="button" data-price-dialog="history" aria-label="نمودار تغییر قیمت" title="نمودار تغییر قیمت"><i class="bi bi-graph-up-arrow" aria-hidden="true"></i></button><button class="detail-price-tool" type="button" data-price-watch-toggle aria-pressed="false" aria-label="به من اطلاع بده" title="به من اطلاع بده"><i class="bi bi-bell" aria-hidden="true"></i></button></div></div><div class="product-price-context"><i class="bi bi-shield-check" aria-hidden="true"></i><span><strong>خرید مطمئن</strong><small>قیمت نهایی همراه با ضمانت اصالت کالا</small></span></div><div class="product-detail-base-price"><div class="product-detail-base-row"><span>قیمت کالا</span><strong id="productBasePrice">${money(p.price * 1000000)}</strong></div><div class="product-detail-sale-meta"></div></div><div class="product-detail-extras-price"><span>هزینهٔ گزینه‌ها و متعلقات</span><strong id="productAddonsPrice"></strong></div><div class="product-detail-total-price"><span>مبلغ قابل پرداخت</span><strong id="productFinalPrice"><span>${fa(p.price * 1000000)}</span><small class="detail-price-unit">تومان</small></strong></div></div><div class="product-detail-actions"><button class="product-detail-add flow-button" id="addProduct" type="button"><i class="bi bi-bag-plus" aria-hidden="true"></i> افزودن به سبد خرید</button><div class="product-detail-secondary-actions"><button class="compare-trigger product-detail-compare${isCompared ? " active" : ""}" type="button" data-product-id="${esc(p.id)}" aria-pressed="${isCompared}" aria-label="${isCompared ? "حذف از مقایسه" : "افزودن به مقایسه"}" title="${isCompared ? "حذف از مقایسه" : "افزودن به مقایسه"}"><i class="bi bi-arrow-left-right" aria-hidden="true"></i><span>مقایسه</span></button><button class="product-detail-favorite" id="saveProduct" type="button" aria-pressed="${isFavorite}" aria-label="${isFavorite ? "حذف از علاقه‌مندی‌ها" : "افزودن به علاقه‌مندی‌ها"}"><i class="bi ${isFavorite ? "bi-heart-fill" : "bi-heart"}" aria-hidden="true"></i><span>${isFavorite ? "ذخیره‌شده" : "افزودن به علاقه‌مندی"}</span></button><a href="Cart"><i class="bi bi-basket3" aria-hidden="true"></i> مشاهده سبد</a></div></div><p class="product-detail-status" id="productStatus" role="status" aria-live="polite"></p></section></div><nav class="product-detail-tabs" aria-label="بخش‌های اطلاعات محصول"><a href="#product-intro"><i class="bi bi-file-earmark-text" aria-hidden="true"></i>معرفی</a><a href="#product-expert"><i class="bi bi-clipboard2-pulse" aria-hidden="true"></i>بررسی تخصصی</a><a href="#product-specifications"><i class="bi bi-sliders2" aria-hidden="true"></i>مشخصات</a><a href="#product-reviews"><i class="bi bi-chat-square-text" aria-hidden="true"></i>دیدگاه‌ها <b>${fa(readFeedback("reviews").length)}</b></a><a href="#product-questions"><i class="bi bi-patch-question" aria-hidden="true"></i>پرسش‌ها <b>${fa(readFeedback("questions").length)}</b></a><a href="#product-related"><i class="bi bi-boxes" aria-hidden="true"></i>کالاهای مشابه <b>${fa(suggestions.length)}</b></a></nav><section class="product-detail-content-panel" id="product-intro"><header><span>معرفی محصول</span><h2>${esc(p.name)}؛ انتخابی متناسب با نیاز شما</h2></header><p>این محصول از دستهٔ ${esc(p.type)} است. هنگام انتخاب، نوع ${esc(p.powerSource)} و ساختار ${esc(p.useCase)} را با نیاز و شرایط کاری خود تطبیق دهید. اطلاعات این صفحه بر پایهٔ مشخصات ثبت‌شدهٔ کالا تهیه شده است.</p></section><section class="product-detail-content-panel product-detail-expert" id="product-expert"><header><span>راهنمای انتخاب</span><h2>بررسی تخصصی</h2></header><div class="product-expert-grid"><div><i class="bi bi-tools" aria-hidden="true"></i><strong>دسته و کاربرد</strong><p>${esc(p.type)}؛ برای انتخاب دقیق، نوع کار و میزان استفادهٔ روزانه را در نظر بگیرید.</p></div><div><i class="bi bi-lightning-charge" aria-hidden="true"></i><strong>نوع عملکرد</strong><p>${esc(p.powerSource)}؛ سازگاری منبع تغذیه یا شیوهٔ عملکرد را پیش از خرید بررسی کنید.</p></div><div><i class="bi bi-rulers" aria-hidden="true"></i><strong>ساختار محصول</strong><p>${esc(p.useCase)}؛ ابعاد، لوازم همراه و شرایط نصب را با فضای کارتان تطبیق دهید.</p></div></div></section><section class="product-detail-content-panel" id="product-specifications"><header><span>جزئیات فنی</span><h2>ویژگی‌های اصلی و دیگر ویژگی‌ها</h2></header><div class="product-spec-groups"><section class="product-spec-group"><h3><i class="bi bi-stars" aria-hidden="true"></i>ویژگی‌های اصلی</h3><dl><div><dt>دسته‌بندی</dt><dd>${esc(p.type)}</dd></div><div><dt>نوع عملکرد</dt><dd>${esc(p.powerSource)}</dd></div><div><dt>برند</dt><dd>${esc(p.brand)}</dd></div></dl></section><section class="product-spec-group"><h3><i class="bi bi-list-check" aria-hidden="true"></i>دیگر ویژگی‌ها</h3><dl>${specs.map(([label, value]) => `<div><dt>${esc(label)}</dt><dd>${esc(value)}</dd></div>`).join("")}</dl></section></div></section><section class="product-detail-content-panel" id="product-reviews"><header><span>تجربهٔ خریداران</span><h2>دیدگاه‌ها</h2></header><div class="product-feedback-list" id="productReviewList">${feedbackMarkup("reviews", readFeedback("reviews"))}</div><form class="product-feedback-form" data-feedback-type="reviews"><label>نام و نام خانوادگی<input name="name" autocomplete="name" maxlength="80" minlength="5" data-validation="full-name" required placeholder="نام و نام خانوادگی"></label><label>امتیاز<select name="rating"><option value="5">۵ — عالی</option><option value="4">۴ — خوب</option><option value="3">۳ — متوسط</option><option value="2">۲ — ضعیف</option><option value="1">۱ — خیلی ضعیف</option></select></label><label class="product-feedback-wide">دیدگاه شما<textarea name="text" rows="3" maxlength="800" required placeholder="تجربه یا نکتهٔ خود را بنویسید"></textarea></label><button class="product-feedback-submit" type="submit"><i class="bi bi-send" aria-hidden="true"></i>ثبت دیدگاه</button><small class="product-feedback-note">دیدگاه در این نسخه به‌صورت محلی در همین مرورگر ذخیره می‌شود.</small></form></section><section class="product-detail-content-panel" id="product-questions"><header><span>پاسخ به ابهام‌ها</span><h2>پرسش‌ها</h2></header><div class="product-feedback-list" id="productQuestionList">${feedbackMarkup("questions", readFeedback("questions"))}</div><form class="product-feedback-form product-question-form" data-feedback-type="questions"><label>نام و نام خانوادگی<input name="name" autocomplete="name" maxlength="80" minlength="5" data-validation="full-name" required placeholder="نام و نام خانوادگی"></label><label class="product-feedback-wide">پرسش شما<textarea name="text" rows="3" maxlength="600" required placeholder="سؤال خود دربارهٔ محصول را بنویسید"></textarea></label><button class="product-feedback-submit" type="submit"><i class="bi bi-question-lg" aria-hidden="true"></i>ثبت پرسش</button><small class="product-feedback-note">پرسش در این نسخه به‌صورت محلی در همین مرورگر ذخیره می‌شود.</small></form></section><section class="product-detail-related" id="product-related" aria-labelledby="relatedProductsTitle"><header><span>برای انتخاب بهتر</span><h2 id="relatedProductsTitle">کالاهای مشابه</h2></header><div class="product-detail-related-grid">${suggestions.map((item) => window.HNProductCard.render(item, {variant: "related"})).join("")}</div></section>`;
             if (focusedPlan) {
                 const focusedOffer = offerForPlan(focusedPlan);
@@ -461,6 +464,11 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
             }
             for (const group of p.detail?.productSpecGroups || []) for (const [label, value] of group.specs || [])
                 finalSpecs.set(normalizedLabel(label), {label, value, group: group.title});
+            for (const [label, value] of Object.entries(selectedOffer()?.specificationOverrides || {})) {
+                const key = normalizedLabel(label);
+                const current = finalSpecs.get(key);
+                finalSpecs.set(key, {label: current?.label || label, value, group: current?.group || "ویژگی‌های طرح فروش"});
+            }
             const baseSpecs = [...finalSpecs.values()].filter(({label}) => baseLabels.has(label))
                 .map(({label, value}) => [label, value]);
             const groupedSpecs = new Map();
@@ -1520,7 +1528,7 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                             );
                             return sum + (Number(option?.priceDelta) || 0);
                         }, 0) +
-                        (p.accessories || [])
+                        availableAccessories
                             .filter((item) => selectedAccessories.has(item.id))
                             .reduce((sum, item) => sum + (Number(selectedOffer()?.accessoryPriceAmounts?.[item.id] ?? Number(item.price) * 1000000) / 1000000 || 0), 0)) *
                     1000000,
@@ -1530,10 +1538,10 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                 const basePriceLabel = productView.querySelector("#productBasePrice");
                 if (basePriceLabel) basePriceLabel.textContent = money(currentPlanBaseAmount());
                 productView.querySelectorAll("[data-accessory-id]").forEach((input) => {
-                    const item = (p.accessories || []).find((accessory) => accessory.id === input.dataset.accessoryId);
+                    const item = availableAccessories.find((accessory) => accessory.id === input.dataset.accessoryId);
                     const price = Number(selectedOffer()?.accessoryPriceAmounts?.[input.dataset.accessoryId] ?? Number(item?.price) * 1000000);
-                    const label = input.closest("label")?.querySelector(".product-accessory-price");
-                    if (label) label.textContent = price > 0 ? `افزوده به فاکتور · ${money(price)}` : "رایگان";
+                    const amountLabel = input.closest("label")?.querySelector(".product-accessory-price strong");
+                    if (amountLabel) amountLabel.textContent = price > 0 ? `+ ${money(price)}` : "رایگان";
                 });
                 const desktopPrice = productView.querySelector("#productFinalPrice");
                 if (desktopPrice) desktopPrice.innerHTML = `<span>${fa(value)}</span><small class="detail-price-unit">تومان</small>`;
