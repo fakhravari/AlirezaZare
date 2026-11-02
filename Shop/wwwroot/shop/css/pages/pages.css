@@ -2914,7 +2914,8 @@ body {
   --page-widget-border-strong: var(--color-line-strong);
   --page-widget-border-dark: rgba(236, 220, 188, 0.34);
 }
-:where(.glass-card,
+:where(
+  .glass-card,
   .featured-article,
   .article-card,
   .value-card,
@@ -2929,7 +2930,8 @@ body {
   .blog-newsletter form,
   .cta-box,
   .page-panel,
-  .article-share) {
+  .article-share
+) {
   border-color: var(--page-widget-border) !important;
 }
 :where(
@@ -2947,23 +2949,23 @@ body {
 :where(.field input, .field select, .field textarea) {
   border-color: var(--page-widget-border) !important;
 }
-:where(.field input,
+:where(
+  .field input,
   .field select,
-  .field textarea):focus {
+  .field textarea
+):focus {
   border-color: var(--industrial-steel) !important;
 }
-:where(.contact-panel,
+:where(
+  .contact-panel,
   .contact-method,
   .blog-topics a,
   .hero-trail span,
   .page-kicker,
-  .page-panel-head) {
+  .page-panel-head
+) {
   border-color: var(--page-widget-border-dark) !important;
 }
-
-/* Cart opening parity with the home page. */
-
-/* Cart counter exactly matched to the home-page header. */
 
 /* Category and brand dropdowns matched to the home-page header. */
 .page-header-dropdown {

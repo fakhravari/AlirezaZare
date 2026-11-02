@@ -7522,7 +7522,8 @@ html
 /* Keep every cart drawer balanced against the shared favorites panel in RTL. */
 html
   body
-  :is(#cartPanel.cart-panel .cart-items,
+  :is(
+    #cartPanel.cart-panel .cart-items,
     .search-cart-drawer .search-cart-items) {
   box-sizing: border-box;
   padding-inline: 0 !important;
@@ -7531,7 +7532,8 @@ html
 
 html
   body
-  :is(#cartPanel.cart-panel .cart-items > .cart-item,
+  :is(
+    #cartPanel.cart-panel .cart-items > .cart-item,
     .search-cart-drawer .search-cart-items > .search-cart-item) {
   box-sizing: border-box;
   width: 100%;
@@ -7541,10 +7543,12 @@ html
 /* Use one hover response for cart, favorites, and compare product rows. */
 html
   body
-  :is(#cartPanel .cart-item,
+  :is(
+    #cartPanel .cart-item,
     #favoritesPanel .compare-panel-item,
     #comparePanel .compare-panel-item,
-    .search-cart-drawer .search-cart-item) {
+    .search-cart-drawer .search-cart-item
+  ) {
   transition:
     transform 0.22s ease,
     background-color 0.22s ease,
@@ -7554,10 +7558,12 @@ html
 
 html
   body
-  :is(#cartPanel .cart-item,
+  :is(
+    #cartPanel .cart-item,
     #favoritesPanel .compare-panel-item,
     #comparePanel .compare-panel-item,
-    .search-cart-drawer .search-cart-item):hover {
+    .search-cart-drawer .search-cart-item
+  ):hover {
   transform: translateY(-2px) !important;
   border-color: rgba(180, 137, 77, 0.32) !important;
   background: #fff !important;
@@ -12264,7 +12270,8 @@ body .electrical-swiper .swiper-pagination-bullet-active {
   }
 }
 
-:is(.account-welcome-tool-icon,
+:is(
+  .account-welcome-tool-icon,
   .address-dialog-icon,
   .back-to-top,
   .branch-icon,
@@ -12296,13 +12303,15 @@ body .electrical-swiper .swiper-pagination-bullet-active {
   .store-contact-icon,
   .tracking-card-icon,
   .ui-icon-tile,
-  .value-icon) {
+  .value-icon
+) {
   display: grid !important;
   place-items: center !important;
   line-height: 1 !important;
 }
 
-:is(.account-welcome-tool-icon,
+:is(
+  .account-welcome-tool-icon,
   .address-dialog-icon,
   .back-to-top,
   .branch-icon,
@@ -12334,7 +12343,8 @@ body .electrical-swiper .swiper-pagination-bullet-active {
   .store-contact-icon,
   .tracking-card-icon,
   .ui-icon-tile,
-  .value-icon) > :is(i, svg) {
+  .value-icon
+) > :is(i, svg) {
   display: block !important;
   margin: 0 !important;
   line-height: 1 !important;
