@@ -10907,9 +10907,16 @@ body .electrical-swiper .swiper-pagination-bullet-active {
 
 .home-page #journal .journal-main-meta-copy {
   display: inline-flex;
+  min-width: 0;
+  flex: 1 1 auto;
   align-items: center;
   flex-wrap: wrap;
   gap: 8px 14px;
+}
+
+.home-page #journal .journal-main-meta > time {
+  flex: 0 0 auto;
+  margin-inline-start: auto;
 }
 
 .home-page #journal .journal-main-meta :is(.journal-main-category, .journal-main-read, .journal-main-author, time) {
