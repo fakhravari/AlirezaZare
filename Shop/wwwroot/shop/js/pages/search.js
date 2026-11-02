@@ -681,6 +681,8 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
     $("#activeChips").innerHTML = chips.join("");
     const count = chips.length;
     $("#activeFilterCount").textContent = fa(count);
+    $("#clearFilterCount").textContent = fa(count);
+    $("#clearFilterCount").setAttribute("aria-label", `${fa(count)} فیلتر فعال`);
     $$(".filter-chip").forEach(
       (chip) =>
         (chip.onclick = () => {

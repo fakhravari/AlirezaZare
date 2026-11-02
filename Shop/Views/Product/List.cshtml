@@ -54,7 +54,9 @@
             </button>
         </div>
         <button class="clear-filters" id="clearFilters" type="button" hidden>
-            <i class="bi bi-arrow-counterclockwise"></i> پاک‌کردن همه فیلترها
+            <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
+            <span>پاک‌کردن همه فیلترها</span>
+            <span class="clear-filter-count" id="clearFilterCount" aria-label="۰ فیلتر فعال">۰</span>
         </button>
         <label class="filter-option filter-discount-option" for="discountFilter">
             <span><i class="bi bi-tags" aria-hidden="true"></i> فقط کالاهای تخفیف‌دار</span>
