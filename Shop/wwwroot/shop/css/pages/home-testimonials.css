@@ -126,6 +126,12 @@
   overflow: hidden;
 }
 
+.testimonials .testimonial-slider .owl-nav {
+  inset-inline: 0;
+  width: auto;
+  z-index: 2;
+}
+
 .testimonials .testimonial-intro h2 {
   max-width: min(100%, 34rem);
   font-size: clamp(30px, 2.65vw, 38px);
