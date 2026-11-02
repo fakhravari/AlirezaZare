@@ -140,11 +140,6 @@
 @media (min-width: 992px) {
 
   #mainNav .brand-menu-footer {
-    border-color: #c4d2df !important;
-    background: #e8f0f8 !important;
-  }
-
-  #mainNav .brand-menu-footer {
     border-color: #e6ddcf !important;
     background: linear-gradient(110deg, #faf7f1, #f2ece2) !important;
   }

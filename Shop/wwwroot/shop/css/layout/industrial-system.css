@@ -1087,7 +1087,8 @@ input[type="radio"] {
 .product-card .product-image,
 .search-product .search-product-image,
 .showcase-card .product-image,
-.rail-card .rail-image {
+.rail-card,
+.product-rail .owl-item .rail-card .rail-image {
   height: var(--product-card-image-height) !important;
   min-height: var(--product-card-image-height) !important;
   max-height: var(--product-card-image-height) !important;
@@ -1096,7 +1097,8 @@ input[type="radio"] {
 .product-card .product-image > img,
 .search-product .search-product-image img,
 .showcase-card .product-image img,
-.rail-card .rail-image img {
+.rail-card,
+.product-rail .owl-item .rail-card .rail-image img {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -3007,7 +3009,8 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
 .product-card,
 .search-product.product-card,
 .showcase-card,
-.rail-card {
+.rail-card,
+.product-rail .owl-item .rail-card {
   display: flex;
   height: 100%;
   min-height: 470px;
@@ -3080,7 +3083,8 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
 
 .product-card > .add-cart i,
 .showcase-card-body .add-cart i,
-.rail-card .add-cart i,
+.rail-card,
+.product-rail .owl-item .rail-card .add-cart i,
 .search-product.product-card > .search-add-cart i {
   color: var(--industrial-navy) !important;
   opacity: 1;
@@ -3088,7 +3092,8 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
 
 .product-card > .add-cart:is(:hover, :focus-visible, .added) i,
 .showcase-card-body .add-cart:is(:hover, :focus-visible, .added) i,
-.rail-card .add-cart:is(:hover, :focus-visible, .added) i,
+.rail-card,
+.product-rail .owl-item .rail-card .add-cart:is(:hover, :focus-visible, .added) i,
 .search-product.product-card
   > .search-add-cart:is(:hover, :focus-visible, .added)
   i {
@@ -3657,7 +3662,8 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
   .product-card,
   .search-product.product-card,
   .showcase-card,
-  .rail-card {
+  .rail-card,
+.product-rail .owl-item .rail-card {
     min-height: 420px;
   }
 
@@ -4228,7 +4234,8 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
 .product-card .product-image,
 .search-product .search-product-image,
 .showcase-card .product-image,
-.rail-card .rail-image {
+.rail-card,
+.product-rail .owl-item .rail-card .rail-image {
   position: relative;
 }
 
@@ -4406,7 +4413,8 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
 }
 
 .inner-page .search-product.product-card,
-.home-page :is(.product-card, .showcase-card, .rail-card) {
+.home-page :is(.product-card, .showcase-card, .rail-card,
+.product-rail .owl-item .rail-card) {
   height: auto !important;
   min-height: 0 !important;
   align-self: start;
@@ -4417,7 +4425,8 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
   :is(
     .product-card .product-image,
     .showcase-card .product-image,
-    .rail-card .rail-image
+    .rail-card,
+.product-rail .owl-item .rail-card .rail-image
   ) {
   flex: 0 0 220px;
   padding: 0 !important;
@@ -4429,7 +4438,8 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
   :is(
     .product-card .product-image > a,
     .showcase-card .product-image > a,
-    .rail-card .rail-image > a
+    .rail-card,
+.product-rail .owl-item .rail-card .rail-image > a
   ) {
   display: block;
   width: 100%;
@@ -4441,7 +4451,8 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
   :is(
     .product-card .product-image img,
     .showcase-card .product-image img,
-    .rail-card .rail-image img
+    .rail-card,
+.product-rail .owl-item .rail-card .rail-image img
   ) {
   width: 100%;
   height: 100%;
@@ -4472,7 +4483,8 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
 }
 
 .home-page
-  :is(.product-card .product-info h3, .showcase-card-body h3, .rail-card h3) {
+  :is(.product-card .product-info h3, .showcase-card-body h3, .rail-card,
+.product-rail .owl-item .rail-card h3) {
   min-height: 0;
   margin-bottom: 7px !important;
 }
@@ -4481,7 +4493,8 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
   :is(
     .product-card .product-info > p,
     .showcase-card-body > strong,
-    .rail-card > strong
+    .rail-card,
+.product-rail .owl-item .rail-card > strong
   ) {
   min-height: 0;
   margin: 8px 0 0 !important;
@@ -4496,7 +4509,8 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
     :is(
       .product-card .product-image,
       .showcase-card .product-image,
-      .rail-card .rail-image
+      .rail-card,
+.product-rail .owl-item .rail-card .rail-image
     ) {
     flex-basis: 190px;
   }
@@ -4719,7 +4733,8 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
 .product-card > .add-cart,
 .search-product.product-card > .search-add-cart,
 .showcase-card-body > .add-cart,
-.rail-card > .add-cart,
+.rail-card,
+.product-rail .owl-item .rail-card > .add-cart,
 .product-detail-related-card > .add-cart {
   position: static !important;
   display: inline-flex !important;
@@ -4744,7 +4759,8 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
 .search-product.product-card
   > .search-add-cart:is(:hover, :focus-visible, .added),
 .showcase-card-body > .add-cart:is(:hover, :focus-visible, .added),
-.rail-card > .add-cart:is(:hover, :focus-visible, .added),
+.rail-card,
+.product-rail .owl-item .rail-card > .add-cart:is(:hover, :focus-visible, .added),
 .product-detail-related-card > .add-cart:is(:hover, :focus-visible, .added) {
   border-color: var(--industrial-yellow) !important;
   background: var(--industrial-yellow) !important;
@@ -4756,7 +4772,8 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
   > .search-add-cart:is(:hover, :focus-visible, .added)
   > i,
 .showcase-card-body > .add-cart:is(:hover, :focus-visible, .added) > i,
-.rail-card > .add-cart:is(:hover, :focus-visible, .added) > i,
+.rail-card,
+.product-rail .owl-item .rail-card > .add-cart:is(:hover, :focus-visible, .added) > i,
 .product-detail-related-card
   > .add-cart:is(:hover, :focus-visible, .added)
   > i {
@@ -7320,7 +7337,8 @@ html
 .product-card > .add-cart.added,
 .search-product.product-card > .search-add-cart.added,
 .showcase-card-body > .add-cart.added,
-.rail-card > .add-cart.added,
+.rail-card,
+.product-rail .owl-item .rail-card > .add-cart.added,
 .product-detail-related-card > .add-cart.added {
   border-color: #dbe3e7 !important;
   background: #f2f5f7 !important;
@@ -7347,7 +7365,8 @@ html
 .product-card > .add-cart.added > i,
 .search-product.product-card > .search-add-cart.added > i,
 .showcase-card-body > .add-cart.added > i,
-.rail-card > .add-cart.added > i,
+.rail-card,
+.product-rail .owl-item .rail-card > .add-cart.added > i,
 .product-detail-related-card > .add-cart.added > i {
   color: #39714e !important;
 }
@@ -10313,7 +10332,8 @@ html
 .product-card .product-info h3,
 .search-product.product-card .product-info h3,
 .showcase-card-body h3,
-.rail-card h3,
+.rail-card,
+.product-rail .owl-item .rail-card h3,
 #productView .product-detail-related-card .product-info h3 {
   display: -webkit-box;
   min-height: 4.95em;
@@ -10326,7 +10346,8 @@ html
 .product-card .product-info > p,
 .search-product.product-card .search-product-price,
 .showcase-card-body > strong,
-.rail-card > strong {
+.rail-card,
+.product-rail .owl-item .rail-card > strong {
   margin-top: auto !important;
 }
 
@@ -10350,7 +10371,8 @@ body.home-page .showcase-card-body {
 
 body.home-page .product-card .product-info h3,
 body.home-page .showcase-card-body h3,
-body.home-page .rail-card h3 {
+body.home-page .rail-card,
+.product-rail .owl-item .rail-card h3 {
   min-height: 4.95em !important;
   overflow: hidden;
   -webkit-box-orient: vertical;
@@ -10360,7 +10382,8 @@ body.home-page .rail-card h3 {
 
 body.home-page .product-card .product-info > p,
 body.home-page .showcase-card-body > strong,
-body.home-page .rail-card > strong {
+body.home-page .rail-card,
+.product-rail .owl-item .rail-card > strong {
   margin-top: auto !important;
 }
 
@@ -10513,7 +10536,8 @@ body.home-page .rail-card > strong {
   align-self: stretch !important;
 }
 
-.home-page :is(.product-card, .showcase-card, .rail-card) {
+.home-page :is(.product-card, .showcase-card, .rail-card,
+.product-rail .owl-item .rail-card) {
   height: 100% !important;
   align-self: stretch !important;
 }
@@ -10522,6 +10546,7 @@ body.home-page .rail-card > strong {
 .search-product.product-card,
 .showcase-card,
 .rail-card,
+.product-rail .owl-item .rail-card,
 #productView .product-detail-related-card {
   height: 100% !important;
   align-self: stretch !important;
@@ -10531,6 +10556,7 @@ body.home-page .rail-card > strong {
 .search-product.product-card .product-info,
 .showcase-card-body,
 .rail-card,
+.product-rail .owl-item .rail-card,
 #productView .product-detail-related-card .product-info {
   display: flex;
   min-height: 0;
@@ -10570,7 +10596,8 @@ body.home-page .rail-card > strong {
 .search-product.product-card .search-product-price,
 .showcase-card-body > strong,
 .showcase-card-body > .product-card-sale-price,
-.rail-card > strong,
+.rail-card,
+.product-rail .owl-item .rail-card > strong,
 .rail-card > .product-card-sale-price {
   min-height: 58px !important;
   margin-top: auto !important;
@@ -10681,7 +10708,8 @@ body.home-page .rail-card > strong {
 .search-product .search-product-price,
 .showcase-card-body > strong,
 .showcase-card-body > .product-card-sale-price,
-.rail-card > strong,
+.rail-card,
+.product-rail .owl-item .rail-card > strong,
 .rail-card > .product-card-sale-price,
 #productView .product-detail-related-card .product-info > p {
   margin-bottom: 8px !important;

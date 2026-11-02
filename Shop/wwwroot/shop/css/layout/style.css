@@ -4487,8 +4487,6 @@ footer .copyright {
   display: flex;
   justify-content: space-between;
   position: absolute;
-  right: -21px;
-  left: -21px;
   top: 50%;
   transform: translateY(-50%);
   pointer-events: none;
@@ -4513,7 +4511,6 @@ footer .copyright {
 }
 
 .testimonial-slider .owl-dots {
-  display: flex;
   justify-content: center;
   gap: 7px;
   margin-top: 25px;
@@ -4538,8 +4535,6 @@ footer .copyright {
 
 @media (max-width: 991px) {
   .testimonial-slider .owl-nav {
-    right: -14px;
-    left: -14px;
   }
 }
 
@@ -4660,8 +4655,6 @@ h6,
 }
 
 .testimonial-slider .owl-nav {
-  right: 8px !important;
-  left: 8px !important;
 }
 
 .testimonial-slider .owl-nav button {
@@ -7009,6 +7002,7 @@ body {
 
 /* Unified accessible color balance */
 .section-head p,
+.recommend-head p,
 .story-copy p,
 .service p,
 .newsletter p,

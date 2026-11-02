@@ -1064,8 +1064,6 @@ h6 {
   height: 42px;
   border-color: var(--industrial-bg);
   border-radius: 9px;
-  background: #fff;
-  color: var(--industrial-navy);
 }
 .page-cart-toggle > i {
   font-size: 20px;
