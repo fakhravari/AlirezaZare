@@ -773,12 +773,14 @@ $(function () {
     })}</div>`).join("");
     window.HNUI?.enhance(amazingSection);
   }
-  const productCardMarkup = (product) => window.HNProductCard.render(product, {variant: "slider", image: sliderImagePath(product)});
-  const bestsellerCardMarkup = (product) => window.HNProductCard.render(product, {variant: "slider", image: sliderImagePath(product)});
+  const homeCollectionCardMarkup = (product) => window.HNProductCard.render(product, {
+    variant: "grid",
+    image: sliderImagePath(product),
+  });
   const collections = window.HNCatalog.collections;
   const collectionProducts = (name) => (collections[name] || []).map((id) => window.HNCatalog.find(id)).filter(Boolean);
-  $("#bestsellersSlider").html(collectionProducts("bestsellers").map(bestsellerCardMarkup).join(""));
-  $("#newestSlider").html(collectionProducts("newest").map(productCardMarkup).join(""));
+  $("#bestsellersSlider").html(collectionProducts("bestsellers").map(homeCollectionCardMarkup).join(""));
+  $("#newestSlider").html(collectionProducts("newest").map(homeCollectionCardMarkup).join(""));
 
   const showcaseSliderOptions = {
     ...carouselMotion,
