@@ -8,7 +8,7 @@
     inset 0 0 0 1px rgba(255, 255, 255, 0.82) !important;
   backdrop-filter: blur(22px);
 }
-:where(.cart-head, .page-panel-head, .search-cart-head) {
+:where(.cart-head, .search-cart-head) {
   border-bottom: 1px solid rgba(215, 182, 108, 0.22) !important;
   background:
     radial-gradient(
@@ -19,32 +19,32 @@
     linear-gradient(135deg, #173867, #0b2550 70%, #123466) !important;
   color: #fff !important;
 }
-:where(.cart-head, .page-panel-head, .search-cart-head) small {
+:where(.cart-head, .search-cart-head) small {
   margin-top: 4px !important;
   color: rgba(255, 255, 255, 0.74) !important;
   font-size: 12px !important;
   font-weight: 550 !important;
   line-height: 1.5 !important;
 }
-:where(.cart-head, .page-panel-head, .search-cart-head) > button {
+:where(.cart-head, .search-cart-head) > button {
   border: 1px solid rgba(255, 255, 255, 0.14) !important;
   background: rgba(255, 255, 255, 0.07) !important;
   color: #e5c98f !important;
 }
-:where(.cart-head, .page-panel-head, .search-cart-head) .cart-head-title {
+:where(.cart-head, .search-cart-head) .cart-head-title {
   display: flex !important;
   flex-direction: row !important;
   align-items: center !important;
   gap: 12px !important;
 }
-:where(.cart-head, .page-panel-head, .search-cart-head)
+:where(.cart-head, .search-cart-head)
   .cart-head-title
   > span:last-child {
   display: flex;
   flex-direction: column;
   gap: 3px;
 }
-:where(.cart-head, .page-panel-head, .search-cart-head) .cart-head-icon {
+:where(.cart-head, .search-cart-head) .cart-head-icon {
   display: grid;
   width: 43px;
   height: 43px;
@@ -1239,7 +1239,7 @@ body :is(#cartView, #invoiceItems) .cart-product-details .cart-item-option-chip 
     visibility: hidden !important;
     transform: translateY(-10px) scale(0.985) !important;
   }
-  :where(.cart-head, .page-panel-head, .search-cart-head) {
+  :where(.cart-head, .search-cart-head) {
     min-height: 100px !important;
     flex: none !important;
     margin: 0 !important;
@@ -1284,7 +1284,7 @@ body :is(#cartView, #invoiceItems) .cart-product-details .cart-item-option-chip 
   #mainNav .cart-wrap > #cartPanel.cart-panel .cart-items {
     max-height: 317px;
   }
-  :where(.cart-head, .page-panel-head, .search-cart-head) {
+  :where(.cart-head, .search-cart-head) {
     margin: 8px !important;
     padding: 14px 16px !important;
     border: 4px solid transparent !important;

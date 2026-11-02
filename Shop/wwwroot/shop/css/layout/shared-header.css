@@ -74,43 +74,19 @@
   margin-left: 4px;
   border-left: 1px solid var(--header-action-divider);
 }
-.search-account {
-  position: relative;
-  margin-left: var(--header-action-divider-gap);
-}
-.search-account:after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: calc((var(--header-action-divider-gap) + 1px) * -1);
-  width: 1px;
-  height: var(--header-action-divider-height);
-  background: var(--header-action-divider);
-  transform: translateY(-50%);
-  pointer-events: none;
-}
 @media (max-width: 991px) {
   .account-wrap {
     padding-left: 0;
     margin-left: 0;
     border-left: 0;
   }
-  .search-account {
-    margin-left: 0;
-  }
-  .search-account:after {
-    display: none;
-  }
 }
 
 /* Keep the search header actions in the same blue-gray component palette. */
-.search-account,
 .header-cart {
   border-color: #d8dee5 !important;
   background: #fff !important;
 }
-.search-account:hover,
-.search-account:focus-visible,
 .header-cart:hover,
 .header-cart:focus-visible {
   border-color: #9ba9b6 !important;
@@ -120,28 +96,6 @@
 }
 
 /* Keep the signed-in label stable on one line across inner-page headers. */
-.search-account.logged-in {
-  width: 128px !important;
-  min-width: 128px !important;
-  padding: 0 12px !important;
-  flex-wrap: nowrap !important;
-  gap: 8px !important;
-  white-space: nowrap !important;
-}
-.search-account.logged-in > span {
-  display: inline-block;
-  white-space: nowrap;
-  line-height: 1;
-}
-.search-account.logged-in > .bi-person {
-  flex: none;
-  font-size: 18px;
-}
-.search-account.logged-in > .bi-chevron-down {
-  flex: none;
-  margin-right: auto;
-  font-size: 9px;
-}
 
 /* Keep search and account glyph boxes identical in both header variants. */
 #mainNav .home-header-search > button > .bi-search {
@@ -178,12 +132,6 @@
   place-items: center;
   font-size: 10px;
   line-height: 1;
-}
-
-@media (max-width: 767px) {
-  .search-account.logged-in {
-    padding: 0 9px !important;
-  }
 }
 
 @media (max-width: 991px) {

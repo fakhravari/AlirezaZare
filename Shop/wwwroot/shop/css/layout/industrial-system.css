@@ -305,7 +305,6 @@ h6,
 
 .inner-page #mainNav,
 .inner-page #mainNav.scrolled,
-.inner-nav,
 .search-header {
   border-bottom: 3px solid var(--industrial-yellow) !important;
   background: var(--industrial-navy) !important;
@@ -313,9 +312,7 @@ h6,
 }
 
 .inner-page #mainNav .brand,
-.inner-page #mainNav .nav-link,
-.inner-nav .brand,
-.inner-nav .nav-link {
+.inner-page #mainNav .nav-link {
   color: #fff !important;
   text-shadow: none !important;
 }
@@ -763,9 +760,7 @@ h6,
 }
 
 .inner-page #mainNav .nav-link:hover,
-.inner-page #mainNav .nav-link.active,
-.inner-nav .nav-link:hover,
-.inner-nav .nav-link.active {
+.inner-page #mainNav .nav-link.active {
   color: var(--industrial-yellow) !important;
 }
 

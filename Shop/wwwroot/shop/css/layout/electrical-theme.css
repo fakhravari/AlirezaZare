@@ -812,7 +812,6 @@ body {
 }
 
 .navbar,
-.inner-nav,
 .search-header,
 .navbar.scrolled {
   border-bottom-color: rgba(32, 42, 51, 0.12);
@@ -828,15 +827,11 @@ body {
 
 .navbar .brand,
 .navbar .nav-link,
-.inner-nav .brand,
-.inner-nav .nav-link,
 .search-header nav a {
   color: #202a33 !important;
 }
 
 .navbar .nav-link:hover,
-.inner-nav .nav-link:hover,
-.inner-nav .nav-link.active,
 .search-header nav a:hover {
   color: #fff !important;
 }
@@ -884,7 +879,6 @@ body {
   direction: rtl;
 }
 
-.search-account,
 .header-cart {
   color: #23495d !important;
 }

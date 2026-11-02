@@ -40,7 +40,6 @@ h3,
 
 /* Crisp dark glass navigation with restrained gold details. */
 .navbar,
-.inner-nav,
 .search-header {
   border-bottom: 1px solid rgba(222, 197, 143, 0.18);
   background: rgba(7, 20, 38, 0.92);
@@ -70,16 +69,12 @@ h3,
   pointer-events: none;
 }
 .navbar .brand,
-.inner-nav .brand,
 .search-brand,
 .navbar .nav-link,
-.inner-nav .nav-link,
 .search-header nav a {
   color: #f8f4eb;
 }
 .navbar .nav-link:hover,
-.inner-nav .nav-link:hover,
-.inner-nav .nav-link.active,
 .search-header nav a:hover {
   color: var(--luxury-gold-light);
 }
@@ -422,8 +417,7 @@ h3,
   color: #071426;
 }
 .favorite,
-.header-cart,
-.search-account {
+.header-cart {
   border-color: rgba(184, 148, 88, 0.34);
 }
 
@@ -468,7 +462,6 @@ h3,
 
 @media (max-width: 991px) {
   .navbar,
-  .inner-nav,
   .search-header {
     background: rgba(7, 20, 38, 0.97);
   }
@@ -539,27 +532,8 @@ h3,
     border-left: 1px solid rgba(212, 192, 146, 0.34) !important;
   }
 
-  .search-account {
-    margin-left: 10px !important;
-  }
-
-  .search-account::after {
-    display: block !important;
-    left: -6px !important;
-    width: 1px !important;
-    height: 28px !important;
-    background: linear-gradient(
-      180deg,
-      transparent,
-      rgba(212, 192, 146, 0.48),
-      transparent
-    ) !important;
-  }
-
   .account-btn,
-  .account-btn.logged-out,
-  .search-account,
-  .search-account.logged-in {
+  .account-btn.logged-out {
     width: 134px !important;
     min-width: 134px !important;
     height: 46px !important;
@@ -579,9 +553,7 @@ h3,
     flex: 0 0 46px !important;
   }
 
-  .account-btn .account-label,
-  .search-account > span,
-  .search-account.logged-in > span {
+  .account-btn .account-label {
     display: inline-block !important;
     font-size: 13.5px !important;
     font-weight: 700 !important;
@@ -590,9 +562,7 @@ h3,
   }
 
   .account-btn .bi-person,
-  .account-btn .bi-person-check,
-  .search-account > .bi-person,
-  .search-account > .bi-person-check {
+  .account-btn .bi-person-check {
     flex: none;
     font-size: 18px !important;
   }
@@ -600,16 +570,13 @@ h3,
 
 @media (max-width: 380px) {
   .account-btn,
-  .account-btn.logged-out,
-  .search-account,
-  .search-account.logged-in {
+  .account-btn.logged-out {
     width: 128px !important;
     min-width: 128px !important;
     padding-inline: 9px !important;
   }
 
-  .account-btn .account-label,
-  .search-account > span {
+  .account-btn .account-label {
     font-size: 13px !important;
   }
 }
@@ -1387,14 +1354,10 @@ h3,
   box-shadow: 0 0 0 3px var(--luxury-focus-ring);
 }
 
-:where(
-  .header-cart,
-  .search-account,
+:where(.header-cart,
   .favorite,
   .cart-head > button,
-  .page-panel-head > button,
-  .search-cart-head > button
-) {
+  .search-cart-head > button) {
   transition:
     color 0.2s ease,
     background-color 0.2s ease,
@@ -1403,14 +1366,8 @@ h3,
     transform 0.2s ease;
 }
 
-:where(
-  .header-cart,
-  .search-account
-):hover,
-:where(
-  .header-cart,
-  .search-account
-):focus-visible {
+:where(.header-cart):hover,
+:where(.header-cart):focus-visible {
   border-color: var(--luxury-border-strong) !important;
   background: rgba(212, 192, 146, 0.12) !important;
   color: var(--luxury-gold-light) !important;
@@ -1419,8 +1376,8 @@ h3,
     0 0 0 3px rgba(189, 163, 111, 0.08);
 }
 
-:where(.cart-head, .page-panel-head, .search-cart-head) > button:hover,
-:where(.cart-head, .page-panel-head, .search-cart-head) > button:focus-visible {
+:where(.cart-head, .search-cart-head) > button:hover,
+:where(.cart-head, .search-cart-head) > button:focus-visible {
   border-color: rgba(212, 192, 146, 0.48) !important;
   background: rgba(212, 192, 146, 0.14) !important;
   color: #f0d89f !important;
@@ -1478,7 +1435,7 @@ h3,
 }
 
 @media (max-width: 991px) {
-  :where(.cart-head, .page-panel-head, .search-cart-head),
+  :where(.cart-head, .search-cart-head),
   .shared-account-card .account-user {
     border: 1px solid rgba(212, 192, 146, 0.34) !important;
     background:
