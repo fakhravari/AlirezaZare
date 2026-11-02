@@ -632,6 +632,22 @@ select {
   font-size: 14px;
 }
 
+.clear-filter-count {
+  display: grid;
+  min-width: 24px;
+  height: 24px;
+  margin-inline-start: auto;
+  padding: 0 6px;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--industrial-yellow-dark) 24%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--industrial-yellow) 18%, white);
+  color: var(--industrial-navy);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+}
+
 .filter-group {
   border-top: 1px solid var(--color-line);
 }
