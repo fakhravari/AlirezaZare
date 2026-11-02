@@ -69,16 +69,29 @@
 }
 
 #productView .product-accessory-check {
+  display: grid;
   width: 20px;
   height: 20px;
+  flex: 0 0 20px;
+  place-items: center;
+  padding: 0;
   border: 1.5px solid #c2ccd6;
   border-radius: 6px;
   font-size: 14px;
+  line-height: 1;
   transition:
     border-color 160ms ease,
     background-color 160ms ease,
     color 160ms ease,
     box-shadow 160ms ease;
+}
+
+#productView .product-accessory-check > i {
+  display: block;
+  width: 1em;
+  height: 1em;
+  line-height: 1;
+  vertical-align: 0;
 }
 
 #productView .product-accessory input:checked + .product-accessory-check {
