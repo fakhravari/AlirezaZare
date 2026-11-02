@@ -88,7 +88,7 @@ content/products/
 | تماس با ما | `hero-service-support.jpg`؛ گفت‌وگوی مشتری و کارشناس ابزار |
 | پرسش‌های متداول | `hero-faq-support.jpg`؛ راهنمایی مشتری دربارهٔ ابزار |
 | جزئیات برند و جستجو | `hero-brand-tools.jpg`؛ مجموعهٔ ابزار و تجهیزات |
-| مقایسه | `hero-measurement-tools.png`؛ چند ابزار اندازه‌گیری کنار هم |
+| مقایسه | `hero-product-comparison.png`؛ چیدمان چند ابزار متفاوت روی میز کار، با فضای خالی سمت راست برای تیتر صفحه؛ تصویر 1942×809 و بدون نوشته یا لوگو |
 | سبد، تسویه و ارسال | `shop/images/heroes/order-dispatch.jpg`؛ بسته‌بندی و آماده‌سازی کالا |
 | پیگیری سفارش | `hero-order-tracking.jpg`؛ اسکن بسته در مسیر پیگیری |
 | بازگرداندن کالا | `hero-returns-inspection.jpg`؛ بررسی کالا و متعلقات بازگشتی |
