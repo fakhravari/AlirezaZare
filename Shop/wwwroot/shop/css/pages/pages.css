@@ -469,17 +469,6 @@ h3 {
   font-weight: 800;
   white-space: nowrap;
 }
-.inner-footer {
-  padding: 35px 0;
-  background: var(--industrial-navy);
-  color: rgba(255, 255, 255, 0.64);
-}
-.inner-footer .container {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-}
 .footer-links {
   display: flex;
   gap: 20px;
@@ -504,10 +493,6 @@ h3 {
     height: 440px;
   }
   .cta-box {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-  .inner-footer .container {
     align-items: flex-start;
     flex-direction: column;
   }
@@ -581,9 +566,6 @@ h3 {
   }
   .cta-box {
     padding: 28px 24px;
-  }
-  .inner-footer {
-    padding: 28px 0;
   }
   .footer-links {
     flex-wrap: wrap;

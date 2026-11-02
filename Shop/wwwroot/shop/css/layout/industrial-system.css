@@ -879,23 +879,7 @@ h6,
   background-color: #fff !important;
 }
 
-:is(.flow-card,
-  .contact-form,
-  .contact-info-card,
-  .branch-card,
-  .faq-item,
-  .tracking-card,
-  .shipping-card,
-  .warranty-card,
-  .invoice-card,
-  .checkout-card,
-  .address-card,
-  .brand-card,
-  .gallery-card,
-  .filter-card,
-  .summary-card,
-  .cart-summary,
-  .product-details-card) {
+:is(.flow-card, .contact-form, .contact-info-card, .faq-item, .tracking-card, .shipping-card, .warranty-card, .invoice-card, .checkout-card, .address-card, .brand-card, .gallery-card, .filter-card, .summary-card, .cart-summary, .product-details-card) {
   border-color: var(--industrial-line) !important;
   border-radius: var(--radius-panel-standard, 20px);
   background: var(--industrial-surface) !important;
@@ -915,10 +899,7 @@ h6,
   border-radius: var(--radius-panel-featured, 24px 24px 14px 24px);
 }
 
-:is(.branch-card,
-  .brand-card,
-  .gallery-card,
-  .address-card):hover {
+:is(.brand-card, .gallery-card, .address-card):hover {
   border-color: var(--industrial-yellow) !important;
   box-shadow: var(--industrial-shadow-hover) !important;
 }

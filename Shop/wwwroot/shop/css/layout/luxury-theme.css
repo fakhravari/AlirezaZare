@@ -440,23 +440,6 @@ h3,
   border-color: var(--luxury-line);
   background: rgba(255, 253, 248, 0.78);
 }
-.inner-footer {
-  border-top: 1px solid rgba(222, 197, 143, 0.23);
-  background:
-    radial-gradient(
-      circle at 12% 20%,
-      rgba(184, 148, 88, 0.1),
-      transparent 28rem
-    ),
-    #061120;
-  color: rgba(255, 255, 255, 0.76);
-}
-.inner-footer a {
-  color: #f5ead4;
-}
-.inner-footer a:hover {
-  color: var(--luxury-gold-light);
-}
 
 @media (max-width: 991px) {
   .navbar,

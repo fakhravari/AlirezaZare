@@ -434,44 +434,11 @@ textarea {
   --widget-border-dark: rgba(236, 220, 188, 0.34);
 }
 
-:where(
-  .product-card,
-  .showcase-card,
-  .story-card,
-  .service-card,
-  .trust-card,
-  .branch-card,
-  .brand-card,
-  .review-card,
-  .feature-card,
-  .glass-card,
-  .mega-menu,
-  .brand-menu,
-  .cart-panel,
-  .account-panel,
-  .login-modal-content,
-  .search-modal-content,
-  .cart-item,
-  .quick-view-content,
-  .calculator-card,
-  .wrist-card
-) {
+:where(.product-card, .showcase-card, .story-card, .service-card, .trust-card, .brand-card, .review-card, .feature-card, .glass-card, .mega-menu, .brand-menu, .cart-panel, .account-panel, .login-modal-content, .search-modal-content, .cart-item, .quick-view-content, .calculator-card, .wrist-card) {
   border: 1px solid var(--widget-border) !important;
 }
 
-:where(
-  .product-card,
-  .showcase-card,
-  .story-card,
-  .service-card,
-  .trust-card,
-  .branch-card,
-  .brand-card,
-  .review-card,
-  .feature-card,
-  .glass-card,
-  .cart-item
-):hover {
+:where(.product-card, .showcase-card, .story-card, .service-card, .trust-card, .brand-card, .review-card, .feature-card, .glass-card, .cart-item):hover {
   border-color: var(--widget-border-strong) !important;
 }
 
@@ -4080,27 +4047,6 @@ footer .copyright {
   gap: 12px;
 }
 
-.testimonial-controls {
-  display: flex;
-  gap: 7px;
-}
-
-.testimonial-controls button {
-  width: 42px;
-  height: 42px;
-  border: 1px solid #d7d0c5;
-  border-radius: 50%;
-  background: #fff;
-  color: var(--color-navy);
-  transition: 0.2s;
-}
-
-.testimonial-controls button:hover {
-  background: var(--color-navy);
-  border-color: var(--color-navy);
-  color: #fff;
-}
-
 .testimonial-slider-wrap {
   overflow: hidden;
   padding: 2px;
@@ -4148,11 +4094,6 @@ footer .copyright {
   .rating-summary {
     width: auto;
     flex: 1;
-  }
-
-  .testimonial-controls button {
-    width: 38px;
-    height: 38px;
   }
 
   .testimonial-slider {
@@ -5924,9 +5865,8 @@ body {
 }
 
 .product-image,
-.rail-image,
-.showcase-card .product-image,
-.featured-side-image {
+  .rail-image,
+  .showcase-card .product-image {
   overflow: hidden;
   border-radius: var(--md-radius-lg) var(--md-radius-lg) 0 0;
 }
@@ -6879,15 +6819,13 @@ footer .copyright::before {
 
 /* Product discovery experience */
 .product-experience-modal,
-.wrist-modal,
-.finder-modal,
-.compare-modal {
+  .finder-modal,
+  .compare-modal {
   z-index: 10080;
 }
 .product-experience-modal .modal-content,
-.wrist-modal .modal-content,
-.finder-modal .modal-content,
-.compare-modal .modal-content {
+  .finder-modal .modal-content,
+  .compare-modal .modal-content {
   border: 0;
   border-radius: 28px;
   overflow: hidden;
@@ -6985,9 +6923,8 @@ footer .copyright::before {
   margin-bottom: 10px;
 }
 .quick-details h2,
-.compare-modal h2,
-.finder-modal h2,
-.wrist-modal h2 {
+  .compare-modal h2,
+  .finder-modal h2 {
   color: #071b5c;
   font-size: 2.25rem;
 }
@@ -7241,9 +7178,8 @@ footer .copyright::before {
   height: 100px;
   object-fit: contain;
 }
-.finder-fab,
 .whatsapp-fab,
-.authenticity-seal {
+  .authenticity-seal {
   position: fixed;
   z-index: 10020;
   border: 0;
@@ -7253,13 +7189,6 @@ footer .copyright::before {
   align-items: center;
   gap: 8px;
   text-decoration: none;
-}
-.finder-fab {
-  right: 22px;
-  bottom: 24px;
-  padding: 13px 18px;
-  background: #0b2275;
-  color: #fff;
 }
 .whatsapp-fab {
   right: 22px;
@@ -7278,8 +7207,7 @@ footer .copyright::before {
 .authenticity-seal i {
   color: #b38a50;
 }
-.finder-modal .modal-content,
-.wrist-modal .modal-content {
+.finder-modal .modal-content {
   padding: 42px;
 }
 .finder-progress {
@@ -7353,14 +7281,6 @@ footer .copyright::before {
   object-fit: contain;
   filter: drop-shadow(0 10px 10px #00000040);
   transition: 0.25s;
-}
-.wrist-modal label {
-  display: block;
-  margin: 20px 0 8px;
-}
-.wrist-modal input {
-  width: 100%;
-  accent-color: #0b2275;
 }
 .fly-product {
   position: fixed;
@@ -7457,7 +7377,6 @@ footer .copyright::before {
     width: auto;
     bottom: 12px;
   }
-  .finder-fab,
   .whatsapp-fab,
   .authenticity-seal {
     right: 12px;
@@ -7466,13 +7385,9 @@ footer .copyright::before {
     padding: 0;
     justify-content: center;
   }
-  .finder-fab span,
   .whatsapp-fab span,
   .authenticity-seal span {
     display: none;
-  }
-  .finder-fab {
-    bottom: 15px;
   }
   .whatsapp-fab {
     bottom: 70px;
@@ -7780,17 +7695,6 @@ footer .copyright::before {
   min-height: auto;
 }
 
-.testimonial-bg-video {
-  position: absolute;
-  inset: 0;
-  z-index: -3;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center 48%;
-  filter: saturate(0.72) contrast(1.08) brightness(0.7);
-}
-
 .testimonials::before {
   content: "";
   position: absolute;
@@ -7850,15 +7754,9 @@ footer .copyright::before {
 }
 
 @media (max-width: 991px) {
-  .testimonial-bg-video {
-    object-position: 62% center;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .testimonial-bg-video {
-    display: none;
-  }
   .testimonials {
     background: linear-gradient(135deg, #061747, #0b2e77);
   }
@@ -8426,28 +8324,25 @@ footer .copyright::before {
 }
 
 .product-image,
-.showcase-card .product-image,
-.rail-image,
-.featured-side-image,
-.journal-main {
+  .showcase-card .product-image,
+  .rail-image,
+  .journal-main {
   overflow: hidden;
 }
 
 .product-image img,
-.showcase-card .product-image img,
-.rail-image img,
-.featured-side-image img,
-.journal-main img {
+  .showcase-card .product-image img,
+  .rail-image img,
+  .journal-main img {
   transition:
     transform 0.45s ease,
     filter 0.45s ease;
 }
 
 .product-card:hover .product-image img,
-.showcase-card:hover .product-image img,
-.rail-card:hover .rail-image img,
-.featured-side:hover .featured-side-image img,
-.journal-main:hover img {
+  .showcase-card:hover .product-image img,
+  .rail-card:hover .rail-image img,
+  .journal-main:hover img {
   transform: scale(1.035);
 }
 
@@ -8531,24 +8426,21 @@ textarea:focus-visible {
 }
 
 .cart-panel,
-.account-panel,
-.login-modal .modal-content,
-.product-experience-modal .modal-content,
-.wrist-modal .modal-content {
+  .account-panel,
+  .login-modal .modal-content,
+  .product-experience-modal .modal-content {
   border-radius: var(--ui-radius-lg);
   box-shadow: 0 26px 70px rgba(3, 15, 53, 0.24);
 }
 
 /* Removed features must never leave visual remnants. */
 .quick-compare,
-.compare-tray,
-.compare-modal,
-.finder-fab,
-.finder-modal,
-.whatsapp-fab,
-.authenticity-seal,
-.offer-timer,
-.testimonial-bg-video {
+  .compare-tray,
+  .compare-modal,
+  .finder-modal,
+  .whatsapp-fab,
+  .authenticity-seal,
+  .offer-timer {
   display: none !important;
 }
 
@@ -8598,7 +8490,6 @@ textarea:focus-visible {
   .services .service,
   .product-image img,
   .rail-image img,
-  .featured-side-image img,
   .journal-main img {
     transition: none !important;
     transform: none !important;

@@ -428,15 +428,6 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 22px;
 }
-.branch-card {
-  --shadow-card: 0 8px 24px
-    color-mix(in srgb, var(--industrial-navy) 2%, transparent);
-  --shadow-card-hover: 0 12px 30px
-    color-mix(in srgb, var(--industrial-navy) 5%, transparent);
-  display: flex;
-  flex-direction: column;
-  padding: 28px;
-}
 .branch-card-top {
   display: flex;
   align-items: center;
@@ -458,12 +449,6 @@
   color: var(--industrial-steel);
   font-size: 11px;
 }
-.contact-branches .branch-card h3 {
-  font-size: 20px;
-  line-height: 1.8;
-  color: var(--industrial-navy);
-  margin: 0 0 14px;
-}
 .branch-address {
   display: flex;
   align-items: baseline;
@@ -481,19 +466,6 @@
   font-size: 13px;
   line-height: 2;
   margin: 0;
-}
-.branch-card .branch-map {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  min-height: 46px;
-  padding-top: 18px;
-  margin-top: auto;
-  border-top: 1px solid var(--industrial-bg);
-  color: var(--industrial-navy);
-  text-decoration: none;
-  font-size: 12px;
-  font-weight: 700;
 }
 .branch-map:hover {
   color: var(--industrial-yellow-dark);
@@ -563,12 +535,6 @@
   }
   .branches-grid {
     gap: 16px;
-  }
-  .branch-card {
-    padding: 20px;
-  }
-  .contact-branches .branch-card h3 {
-    font-size: 18px;
   }
 }
 @media (max-width: 767px) {
@@ -663,7 +629,6 @@
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .branch-card,
   .contact-hero ~ main .contact-form .contact-submit {
     transition: none;
   }
