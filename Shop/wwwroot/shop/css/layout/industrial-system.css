@@ -9572,6 +9572,7 @@ html
 .inner-page .page-hero {
   min-height: 320px !important;
   padding: 24px 0 30px !important;
+  align-items: flex-start;
   text-align: right;
 }
 

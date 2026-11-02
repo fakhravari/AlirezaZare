@@ -6818,7 +6818,9 @@ h6,
 }
 
 .showcase-card-body {
+  display: flex;
   min-height: 185px;
+  flex-direction: column;
   align-items: flex-start;
   padding: 20px 22px 22px;
 }
