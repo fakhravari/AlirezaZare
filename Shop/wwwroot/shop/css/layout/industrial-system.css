@@ -1087,7 +1087,8 @@ input[type="radio"] {
 .product-card .product-image,
 .search-product .search-product-image,
 .showcase-card .product-image,
-.rail-card .rail-image {
+.rail-card,
+.product-rail .owl-item .rail-card .rail-image {
   height: var(--product-card-image-height) !important;
   min-height: var(--product-card-image-height) !important;
   max-height: var(--product-card-image-height) !important;
@@ -1096,7 +1097,8 @@ input[type="radio"] {
 .product-card .product-image > img,
 .search-product .search-product-image img,
 .showcase-card .product-image img,
-.rail-card .rail-image img {
+.rail-card,
+.product-rail .owl-item .rail-card .rail-image img {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -1606,8 +1608,7 @@ form .form-field-error[hidden] {
 .account-panel,
 .cart-panel,
 .login-modal-content,
-.search-modal-content,
-.page-menu-drawer {
+.search-modal-content {
   border-color: var(--industrial-line) !important;
   background: #fff !important;
   color: var(--industrial-ink) !important;
@@ -1615,8 +1616,7 @@ form .form-field-error[hidden] {
 }
 
 .account-links a:hover,
-.cart-item:hover,
-.page-menu-drawer nav a:hover {
+.cart-item:hover {
   background: #edf2f4 !important;
   color: var(--industrial-navy) !important;
 }
@@ -1706,13 +1706,6 @@ thead,
 .featured-products .featured-main::before,
 .featured-products .featured-side::before {
   display: none;
-}
-
-.recommendations .recommend-head > div > .eyebrow.dark {
-  border-color: rgba(16, 35, 61, 0.16) !important;
-  background: #fff4cf !important;
-  color: var(--industrial-navy) !important;
-  box-shadow: 0 5px 14px rgba(16, 35, 61, 0.06);
 }
 
 .testimonial-card .quote-mark {
@@ -1968,8 +1961,7 @@ footer .trust-badges .trust-badge-image {
   }
 
   .mobile-menu,
-  .offcanvas,
-  .page-menu-drawer {
+  .offcanvas {
     background: var(--industrial-navy) !important;
     color: #fff !important;
   }
@@ -3091,7 +3083,8 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
 
 .product-card > .add-cart i,
 .showcase-card-body .add-cart i,
-.rail-card .add-cart i,
+.rail-card,
+.product-rail .owl-item .rail-card .add-cart i,
 .search-product.product-card > .search-add-cart i {
   color: var(--industrial-navy) !important;
   opacity: 1;
@@ -3099,7 +3092,8 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
 
 .product-card > .add-cart:is(:hover, :focus-visible, .added) i,
 .showcase-card-body .add-cart:is(:hover, :focus-visible, .added) i,
-.rail-card .add-cart:is(:hover, :focus-visible, .added) i,
+.rail-card,
+.product-rail .owl-item .rail-card .add-cart:is(:hover, :focus-visible, .added) i,
 .search-product.product-card
   > .search-add-cart:is(:hover, :focus-visible, .added)
   i {
@@ -3525,61 +3519,6 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
   line-height: 2;
 }
 
-#productView .product-detail-specs {
-  padding: 16px;
-  border: 1px solid #e8edf0;
-  border-radius: 13px;
-  background: #fbfcfc;
-}
-
-#productView .product-detail-specs h3 {
-  margin: 0 0 9px;
-  color: var(--industrial-navy);
-  font-size: 14px;
-  font-weight: 800;
-}
-
-#productView .product-detail-specs dl {
-  display: grid;
-  gap: 7px;
-  margin: 0;
-}
-
-#productView .product-detail-specs dl > div {
-  display: flex;
-  min-height: 39px;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 7px 0;
-  border-bottom: 1px solid #edf0f2;
-}
-
-#productView .product-detail-specs dl > div:last-child {
-  border-bottom: 0;
-}
-
-#productView .product-detail-specs dt {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--industrial-muted);
-  font-size: 12px;
-}
-
-#productView .product-detail-specs dt i {
-  color: var(--industrial-yellow-dark);
-  font-size: 14px;
-}
-
-#productView .product-detail-specs dd {
-  margin: 0;
-  color: var(--industrial-ink);
-  font-size: 12px;
-  font-weight: 700;
-  text-align: left;
-}
-
 #productView .product-detail-price {
   margin-top: 15px;
   padding: 15px;
@@ -3724,7 +3663,7 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
   .search-product.product-card,
   .showcase-card,
   .rail-card,
-  .product-rail .owl-item .rail-card {
+.product-rail .owl-item .rail-card {
     min-height: 420px;
   }
 
@@ -3841,8 +3780,7 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
 }
 
 .home-page .category-showcase-head h2,
-.home-page .section-head h2,
-.home-page .recommend-head h2 {
+.home-page .section-head h2 {
   letter-spacing: -0.035em;
 }
 
@@ -4296,7 +4234,8 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
 .product-card .product-image,
 .search-product .search-product-image,
 .showcase-card .product-image,
-.rail-card .rail-image {
+.rail-card,
+.product-rail .owl-item .rail-card .rail-image {
   position: relative;
 }
 
@@ -4474,7 +4413,8 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
 }
 
 .inner-page .search-product.product-card,
-.home-page :is(.product-card, .showcase-card, .rail-card) {
+.home-page :is(.product-card, .showcase-card, .rail-card,
+.product-rail .owl-item .rail-card) {
   height: auto !important;
   min-height: 0 !important;
   align-self: start;
@@ -4485,7 +4425,8 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
   :is(
     .product-card .product-image,
     .showcase-card .product-image,
-    .rail-card .rail-image
+    .rail-card,
+.product-rail .owl-item .rail-card .rail-image
   ) {
   flex: 0 0 220px;
   padding: 0 !important;
@@ -4497,7 +4438,8 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
   :is(
     .product-card .product-image > a,
     .showcase-card .product-image > a,
-    .rail-card .rail-image > a
+    .rail-card,
+.product-rail .owl-item .rail-card .rail-image > a
   ) {
   display: block;
   width: 100%;
@@ -4509,7 +4451,8 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
   :is(
     .product-card .product-image img,
     .showcase-card .product-image img,
-    .rail-card .rail-image img
+    .rail-card,
+.product-rail .owl-item .rail-card .rail-image img
   ) {
   width: 100%;
   height: 100%;
@@ -4540,7 +4483,8 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
 }
 
 .home-page
-  :is(.product-card .product-info h3, .showcase-card-body h3, .rail-card h3) {
+  :is(.product-card .product-info h3, .showcase-card-body h3, .rail-card,
+.product-rail .owl-item .rail-card h3) {
   min-height: 0;
   margin-bottom: 7px !important;
 }
@@ -4549,7 +4493,8 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
   :is(
     .product-card .product-info > p,
     .showcase-card-body > strong,
-    .rail-card > strong
+    .rail-card,
+.product-rail .owl-item .rail-card > strong
   ) {
   min-height: 0;
   margin: 8px 0 0 !important;
@@ -4564,7 +4509,8 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
     :is(
       .product-card .product-image,
       .showcase-card .product-image,
-      .rail-card .rail-image
+      .rail-card,
+.product-rail .owl-item .rail-card .rail-image
     ) {
     flex-basis: 190px;
   }
@@ -4787,7 +4733,8 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
 .product-card > .add-cart,
 .search-product.product-card > .search-add-cart,
 .showcase-card-body > .add-cart,
-.rail-card > .add-cart,
+.rail-card,
+.product-rail .owl-item .rail-card > .add-cart,
 .product-detail-related-card > .add-cart {
   position: static !important;
   display: inline-flex !important;
@@ -4812,7 +4759,8 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
 .search-product.product-card
   > .search-add-cart:is(:hover, :focus-visible, .added),
 .showcase-card-body > .add-cart:is(:hover, :focus-visible, .added),
-.rail-card > .add-cart:is(:hover, :focus-visible, .added),
+.rail-card,
+.product-rail .owl-item .rail-card > .add-cart:is(:hover, :focus-visible, .added),
 .product-detail-related-card > .add-cart:is(:hover, :focus-visible, .added) {
   border-color: var(--industrial-yellow) !important;
   background: var(--industrial-yellow) !important;
@@ -4824,7 +4772,8 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
   > .search-add-cart:is(:hover, :focus-visible, .added)
   > i,
 .showcase-card-body > .add-cart:is(:hover, :focus-visible, .added) > i,
-.rail-card > .add-cart:is(:hover, :focus-visible, .added) > i,
+.rail-card,
+.product-rail .owl-item .rail-card > .add-cart:is(:hover, :focus-visible, .added) > i,
 .product-detail-related-card
   > .add-cart:is(:hover, :focus-visible, .added)
   > i {
@@ -6603,10 +6552,6 @@ html
   color: #684d14 !important;
 }
 
-.home-page .recommend-head > div > .eyebrow.dark {
-  color: var(--industrial-navy) !important;
-}
-
 .inner-page
   main
   :where(.page-kicker, .article-eyebrow):not(.page-hero .page-kicker) {
@@ -7392,7 +7337,8 @@ html
 .product-card > .add-cart.added,
 .search-product.product-card > .search-add-cart.added,
 .showcase-card-body > .add-cart.added,
-.rail-card > .add-cart.added,
+.rail-card,
+.product-rail .owl-item .rail-card > .add-cart.added,
 .product-detail-related-card > .add-cart.added {
   border-color: #dbe3e7 !important;
   background: #f2f5f7 !important;
@@ -7419,7 +7365,8 @@ html
 .product-card > .add-cart.added > i,
 .search-product.product-card > .search-add-cart.added > i,
 .showcase-card-body > .add-cart.added > i,
-.rail-card > .add-cart.added > i,
+.rail-card,
+.product-rail .owl-item .rail-card > .add-cart.added > i,
 .product-detail-related-card > .add-cart.added > i {
   color: #39714e !important;
 }
@@ -9257,13 +9204,11 @@ html
     backdrop-filter: none !important;
   }
 
-  .home-page #mainNav .mega-sidebar,
   .inner-page #mainNav .category-mega-sidebar {
     border-left: 1px solid #e3e9ed !important;
     background: #f7f9fa !important;
   }
 
-  .home-page #mainNav .mega-sidebar > a,
   .inner-page #mainNav .category-mega-sidebar > button {
     border-color: transparent !important;
     border-top: 1px solid #e8edef !important;
@@ -9273,12 +9218,10 @@ html
     box-shadow: none !important;
   }
 
-  .home-page #mainNav .mega-sidebar > a:first-child,
   .inner-page #mainNav .category-mega-sidebar > button:first-child {
     border-top-color: transparent !important;
   }
 
-  .home-page #mainNav .mega-sidebar > a > i:first-child,
   .inner-page #mainNav .category-mega-sidebar > button > i:first-child {
     color: var(--industrial-icon-gold) !important;
   }
@@ -9319,12 +9262,10 @@ html
     transform: scaleX(1) !important;
   }
 
-  .home-page #mainNav .mega-content-grid > .mega-links + .mega-links,
   .inner-page #mainNav .category-mega-group {
     border-right-color: #e8edef !important;
   }
 
-  .home-page #mainNav .mega-content-grid > .mega-links > a,
   .inner-page #mainNav .category-mega-group > a:not(.category-mega-title) {
     color: #5b6c7a !important;
   }
@@ -9339,11 +9280,6 @@ html
     .category-mega-group
     > a:not(.category-mega-title):is(:hover, :focus-visible) {
     color: var(--industrial-navy) !important;
-  }
-
-  .home-page #mainNav .mega-bottom {
-    border-color: #dfe6eb !important;
-    background: #f7f9fa !important;
   }
 }
 
@@ -9572,6 +9508,7 @@ html
 .inner-page .page-hero {
   min-height: 320px !important;
   padding: 24px 0 30px !important;
+  align-items: flex-start;
   text-align: right;
 }
 
@@ -10395,7 +10332,8 @@ html
 .product-card .product-info h3,
 .search-product.product-card .product-info h3,
 .showcase-card-body h3,
-.rail-card h3,
+.rail-card,
+.product-rail .owl-item .rail-card h3,
 #productView .product-detail-related-card .product-info h3 {
   display: -webkit-box;
   min-height: 4.95em;
@@ -10408,7 +10346,8 @@ html
 .product-card .product-info > p,
 .search-product.product-card .search-product-price,
 .showcase-card-body > strong,
-.rail-card > strong {
+.rail-card,
+.product-rail .owl-item .rail-card > strong {
   margin-top: auto !important;
 }
 
@@ -10432,7 +10371,8 @@ body.home-page .showcase-card-body {
 
 body.home-page .product-card .product-info h3,
 body.home-page .showcase-card-body h3,
-body.home-page .rail-card h3 {
+body.home-page .rail-card,
+.product-rail .owl-item .rail-card h3 {
   min-height: 4.95em !important;
   overflow: hidden;
   -webkit-box-orient: vertical;
@@ -10442,7 +10382,8 @@ body.home-page .rail-card h3 {
 
 body.home-page .product-card .product-info > p,
 body.home-page .showcase-card-body > strong,
-body.home-page .rail-card > strong {
+body.home-page .rail-card,
+.product-rail .owl-item .rail-card > strong {
   margin-top: auto !important;
 }
 
@@ -10595,7 +10536,8 @@ body.home-page .rail-card > strong {
   align-self: stretch !important;
 }
 
-.home-page :is(.product-card, .showcase-card, .rail-card) {
+.home-page :is(.product-card, .showcase-card, .rail-card,
+.product-rail .owl-item .rail-card) {
   height: 100% !important;
   align-self: stretch !important;
 }
@@ -10604,6 +10546,7 @@ body.home-page .rail-card > strong {
 .search-product.product-card,
 .showcase-card,
 .rail-card,
+.product-rail .owl-item .rail-card,
 #productView .product-detail-related-card {
   height: 100% !important;
   align-self: stretch !important;
@@ -10613,6 +10556,7 @@ body.home-page .rail-card > strong {
 .search-product.product-card .product-info,
 .showcase-card-body,
 .rail-card,
+.product-rail .owl-item .rail-card,
 #productView .product-detail-related-card .product-info {
   display: flex;
   min-height: 0;
@@ -10652,7 +10596,8 @@ body.home-page .rail-card > strong {
 .search-product.product-card .search-product-price,
 .showcase-card-body > strong,
 .showcase-card-body > .product-card-sale-price,
-.rail-card > strong,
+.rail-card,
+.product-rail .owl-item .rail-card > strong,
 .rail-card > .product-card-sale-price {
   min-height: 58px !important;
   margin-top: auto !important;
@@ -10763,7 +10708,8 @@ body.home-page .rail-card > strong {
 .search-product .search-product-price,
 .showcase-card-body > strong,
 .showcase-card-body > .product-card-sale-price,
-.rail-card > strong,
+.rail-card,
+.product-rail .owl-item .rail-card > strong,
 .rail-card > .product-card-sale-price,
 #productView .product-detail-related-card .product-info > p {
   margin-bottom: 8px !important;
@@ -11852,45 +11798,9 @@ body .electrical-swiper .swiper-pagination-bullet-active {
   white-space: nowrap;
 }
 
-.home-page #journal .journal-list-cta {
-  display: inline-flex;
-  grid-area: cta;
-  width: 112px;
-  min-height: 30px;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-  border: 1px solid rgba(178, 146, 96, 0.2);
-  border-radius: 999px;
-  color: #8d6e36;
-  font-size: 11px;
-  font-weight: 800;
-  text-decoration: none;
-  transition: background-color 180ms ease, color 180ms ease, border-color 180ms ease;
-}
-
-.home-page #journal .journal-list-cta span {
-  display: inline-block;
-  max-width: 0;
-  overflow: hidden;
-  opacity: 0;
-  transition: max-width 180ms ease, opacity 180ms ease;
-}
-
 .home-page #journal .journal-list article:is(:hover, :focus-within) .journal-list-cta span {
   max-width: 82px;
   opacity: 1;
-}
-
-.home-page #journal .journal-list-cta:hover,
-.home-page #journal .journal-list-cta:focus-visible {
-  border-color: rgba(178, 146, 96, 0.35);
-  background: #fbf5e8;
-  color: var(--industrial-navy);
-}
-
-.home-page #journal .journal-list-cta i {
-  font-size: 14px;
 }
 
 .home-page #journal .journal-list-card-meta small {
@@ -12026,17 +11936,6 @@ body .electrical-swiper .swiper-pagination-bullet-active {
     font-size: 10px;
   }
 
-  .home-page #journal .journal-list-cta {
-    width: 20px;
-    min-height: 28px;
-    border: 0;
-    background: transparent;
-  }
-
-  .home-page #journal .journal-list-cta span {
-    display: none;
-  }
-
   .home-page #journal .journal-list h4 {
     display: -webkit-box;
     font-size: 15px;
@@ -12065,16 +11964,6 @@ body .electrical-swiper .swiper-pagination-bullet-active {
 
   .home-page #journal .journal-list-stats {
     grid-area: reading;
-  }
-
-  .home-page #journal .journal-list-cta {
-    width: 20px;
-    border: 0;
-    background: transparent;
-  }
-
-  .home-page #journal .journal-list-cta span {
-    display: none;
   }
 }
 

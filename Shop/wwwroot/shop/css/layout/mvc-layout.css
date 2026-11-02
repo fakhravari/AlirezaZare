@@ -6,76 +6,6 @@
 }
 
 /* Benefits and catalogue action in the shared category menu. */
-#mainNav .mega-menu .mega-bottom {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 12px 20px;
-  min-height: 76px !important;
-  margin-top: auto !important;
-  margin-block-end: 14px;
-  padding: 14px 16px;
-  border: 1px solid #e6ddcf !important;
-  border-radius: 14px;
-  background: linear-gradient(110deg, #faf7f1, #f2ece2) !important;
-  color: #40516a;
-  font-size: 12px;
-}
-
-#mainNav .mega-menu .mega-bottom > span {
-  display: inline-flex;
-  align-items: center;
-  gap: 9px;
-  line-height: 1.8;
-}
-
-#mainNav .mega-menu .mega-bottom > span > i {
-  display: inline-grid;
-  place-items: center;
-  flex: 0 0 34px;
-  width: 34px;
-  height: 34px;
-  border: 1px solid #e3d5bd;
-  border-radius: 10px;
-  background: #fffaf2;
-  color: #a77c3d;
-  font-size: 18px;
-}
-
-#mainNav .mega-menu .mega-bottom > a {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 14px;
-  min-height: 42px;
-  margin-inline-start: auto;
-  padding: 10px 16px;
-  border: 1px solid #193b63;
-  border-radius: 10px;
-  background: #142e51;
-  color: #fffaf0;
-  font-size: 12px;
-  font-weight: 700;
-  text-decoration: none;
-  transition:
-    background 0.2s ease,
-    box-shadow 0.2s ease;
-}
-
-#mainNav .mega-menu .mega-bottom > a > i {
-  color: #dfbd80;
-}
-
-#mainNav .mega-menu .mega-bottom > a:hover,
-#mainNav .mega-menu .mega-bottom > a:focus-visible {
-  background: #21456f;
-  box-shadow: 0 4px 12px #142e5120;
-}
-
-#mainNav .mega-menu .mega-bottom > a:focus-visible {
-  outline: 2px solid #a77c3d;
-  outline-offset: 3px;
-}
 
 /* Compact page banners and breadcrumbs across all inner pages. */
 .inner-page .page-hero {
@@ -235,16 +165,12 @@
 
 /* Keep the cart remove control visually stable while hovering or clicking. */
 body .cart-panel .cart-item .cart-remove,
-body .page-cart-panel .page-cart-item .cart-remove,
 body .search-cart-drawer .search-cart-item .cart-remove,
 body .cart-panel .cart-item .cart-remove:hover,
-body .page-cart-panel .page-cart-item .cart-remove:hover,
 body .search-cart-drawer .search-cart-item .cart-remove:hover,
 body .cart-panel .cart-item .cart-remove:focus,
-body .page-cart-panel .page-cart-item .cart-remove:focus,
 body .search-cart-drawer .search-cart-item .cart-remove:focus,
 body .cart-panel .cart-item .cart-remove:active,
-body .page-cart-panel .page-cart-item .cart-remove:active,
 body .search-cart-drawer .search-cart-item .cart-remove:active {
   border: 0 !important;
   background: transparent !important;
@@ -255,7 +181,6 @@ body .search-cart-drawer .search-cart-item .cart-remove:active {
 }
 
 body .cart-panel .cart-item .cart-remove > i,
-body .page-cart-panel .page-cart-item .cart-remove > i,
 body .search-cart-drawer .search-cart-item .cart-remove > i,
 body .cart-panel .cart-item .cart-remove:is(:hover, :focus, :active) > i,
 body

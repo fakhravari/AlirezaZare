@@ -250,7 +250,6 @@
   }
 
   .shared-account-card.account-panel,
-  .shared-account-card.page-account-panel,
   .shared-account-card.shared-account-popover {
     position: fixed !important;
     z-index: 7000 !important;
@@ -280,14 +279,12 @@
     overscroll-behavior: contain;
   }
   .shared-account-card.account-panel.open,
-  .shared-account-card.page-account-panel.open,
   .shared-account-card.shared-account-popover.open {
     opacity: 1 !important;
     visibility: visible !important;
     transform: translateY(0) !important;
   }
   .shared-account-card.account-panel:before,
-  .shared-account-card.page-account-panel:before,
   .shared-account-card.shared-account-popover:before {
     display: none !important;
     content: none !important;

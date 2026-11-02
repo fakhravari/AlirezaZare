@@ -461,11 +461,6 @@ body {
   display: none;
 }
 
-.electrical-copy {
-  width: min(54%, 570px);
-  color: #203642;
-}
-
 .electrical-kicker {
   display: inline-flex;
   align-items: center;
@@ -477,32 +472,6 @@ body {
 
 .electrical-kicker i {
   font-size: 16px;
-}
-
-.electrical-copy h1,
-.electrical-copy h2 {
-  margin: 14px 0 8px;
-  color: #203642;
-  font-size: clamp(29px, 3.3vw, 45px);
-  font-weight: 800;
-  letter-spacing: -0.04em;
-  line-height: 1.45;
-  text-shadow: none;
-}
-
-.electrical-copy h1 em,
-.electrical-copy h2 em {
-  color: #947300;
-  font-style: normal;
-  text-shadow: none;
-}
-
-.electrical-copy p {
-  max-width: 480px;
-  margin: 0 0 18px;
-  color: #596b73;
-  font-size: 14px;
-  line-height: 1.9;
 }
 
 .electrical-cta {
@@ -754,24 +723,6 @@ body {
   .electrical-banner-image {
     object-position: center center;
   }
-  .electrical-copy {
-    position: relative;
-    z-index: 2;
-    width: 100%;
-    max-width: 310px;
-  }
-  .electrical-copy h1,
-  .electrical-copy h2 {
-    margin: 10px 0 8px;
-    font-size: clamp(28px, 8.5vw, 38px);
-    line-height: 1.35;
-  }
-  .electrical-copy p {
-    max-width: 96%;
-    margin-bottom: 18px;
-    font-size: 12px;
-    line-height: 1.9;
-  }
   .electrical-kicker {
     font-size: 11px;
   }
@@ -921,18 +872,6 @@ body {
   border-color: rgba(255, 223, 84, 0.48);
 }
 
-.hero .btn-cream {
-  border-color: #e8bd24;
-  background: linear-gradient(135deg, #ffdf54, #d5ae14);
-  color: #152b3a;
-}
-
-.hero .btn-cream:hover,
-.hero .btn-cream:focus-visible {
-  background: linear-gradient(135deg, #ffe984, #e8bd24);
-  color: #152b3a;
-}
-
 #mainNav .mega-dropdown > .mega-menu {
   direction: rtl;
   border-color: #d5dfe4 !important;
@@ -940,91 +879,9 @@ body {
   background: #fff !important;
 }
 
-#mainNav .mega-sidebar {
-  order: 0;
-  background: #263943 !important;
-}
-
-#mainNav .mega-sidebar > a {
-  color: #edf3f5 !important;
-  border-color: transparent !important;
-  background: transparent !important;
-  box-shadow: none !important;
-}
-
-#mainNav .mega-sidebar > a > span {
-  color: #edf3f5 !important;
-}
-
-#mainNav .mega-sidebar > a > i:first-child {
-  color: #ffdf54 !important;
-  background: rgba(255, 255, 255, 0.07) !important;
-}
-
-#mainNav .mega-sidebar > a:hover,
-#mainNav .mega-sidebar > a.active {
-  border-color: rgba(255, 255, 255, 0.08) !important;
-  background: #3b505b !important;
-  box-shadow: inset -3px 0 #e8bd24 !important;
-}
-
 /* Bootstrap RTL places the first grid column on the right; keep that contract explicit. */
 #mainNav .mega-menu > .row {
   direction: rtl;
-}
-
-#mainNav .mega-sidebar > a > i:last-child {
-  color: #bdcbd1 !important;
-}
-
-#mainNav .mega-content-grid > .mega-links {
-  border-color: #e0e7ea !important;
-  background: #fff !important;
-}
-
-#mainNav .mega-content-grid > .mega-links > h4 {
-  border-color: #e0e7ea !important;
-  color: #263943 !important;
-}
-
-#mainNav .mega-content-grid > .mega-links > h4 > i {
-  background: #fff6ce !important;
-  color: #856800 !important;
-}
-
-#mainNav .mega-content-grid > .mega-links > a {
-  color: #566872 !important;
-}
-
-#mainNav .mega-content-grid > .mega-links > a + a::before {
-  background: linear-gradient(
-    90deg,
-    transparent,
-    #e9d77b 27%,
-    #e9d77b 78%,
-    transparent
-  ) !important;
-}
-
-#mainNav .mega-content-grid > .mega-links > a:hover {
-  border-color: #e9d77b !important;
-  background: #fffbe8 !important;
-  box-shadow: inset -2px 0 #e8bd24 !important;
-}
-
-#mainNav .mega-menu .mega-bottom > span,
-#mainNav .mega-menu .mega-bottom > a {
-  color: #52646e !important;
-}
-
-#mainNav .mega-menu .mega-bottom > span > i,
-#mainNav .mega-menu .mega-bottom > a > i {
-  color: #a98400 !important;
-}
-
-#mainNav .mega-bottom {
-  border-color: #e0e7ea !important;
-  background: #f5f8f9 !important;
 }
 
 .search-account,
@@ -1034,8 +891,7 @@ body {
 
 @media (max-width: 991px) {
   .mobile-menu .mobile-category-toggle > span > i,
-  .mobile-menu .mobile-category > button > span > i,
-  .page-menu-drawer nav > a > i {
+  .mobile-menu .mobile-category > button > span > i {
     border-color: rgba(255, 223, 84, 0.25) !important;
     color: #ffdf54 !important;
   }

@@ -330,120 +330,6 @@ summary:focus-visible {
     padding: 6px 10px;
   }
 }
-.cart-breadcrumb + .cart-hero {
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
-  margin: 24px 0 32px;
-  padding: 44px 42px;
-  border: 1px solid #334868;
-  border-radius: 24px;
-  background:
-    radial-gradient(ellipse at 5% 70%, #38516b 0, transparent 55%),
-    linear-gradient(110deg, #13283f, #102544 65%, #1d3554);
-  box-shadow: 0 14px 35px #142e5112;
-}
-.cart-hero::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background: repeating-linear-gradient(
-    125deg,
-    transparent 0 65px,
-    #d8bf8b06 66px 67px,
-    transparent 68px 130px
-  );
-  pointer-events: none;
-}
-.cart-hero > span {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  color: #dfc693;
-  letter-spacing: 0.2px;
-}
-.cart-hero > span::before {
-  content: "";
-  width: 24px;
-  height: 1px;
-  background: #c6a86d;
-}
-.cart-hero h1 {
-  position: relative;
-  color: #fffaf0;
-  margin: 18px 0 12px;
-  font-size: clamp(32px, 4.5vw, 48px);
-}
-.cart-hero p {
-  position: relative;
-  margin: 0;
-  color: #d2dae5;
-  font-size: 15px;
-}
-.cart-hero-dial {
-  position: absolute;
-  z-index: -1;
-  left: 6%;
-  top: 50%;
-  width: 300px;
-  height: 300px;
-  transform: translateY(-50%) rotate(-15deg);
-  border: 1px solid #d8bd8050;
-  border-radius: 50%;
-  box-shadow:
-    0 0 0 20px #d8bd8009,
-    0 0 0 21px #d8bd8024,
-    0 0 0 50px #d8bd8005,
-    0 0 0 51px #d8bd8014;
-  background: repeating-conic-gradient(
-    from 0deg,
-    #d8bd8055 0deg 1deg,
-    transparent 1deg 30deg
-  );
-  opacity: 0.7;
-}
-.cart-hero-dial::before {
-  content: "";
-  position: absolute;
-  inset: 12px;
-  border-radius: 50%;
-  background: #21394f;
-  box-shadow: inset 0 0 65px #10254480;
-  border: 1px solid #d8bd8030;
-}
-.cart-hero-dial::after {
-  content: "";
-  position: absolute;
-  left: calc(50% - 4px);
-  top: calc(50% - 4px);
-  width: 8px;
-  height: 8px;
-  background: #d8bd80;
-  border-radius: 50%;
-  box-shadow: 0 0 0 5px #d8bd8015;
-}
-.cart-hero-dial span {
-  position: absolute;
-  left: 50%;
-  top: calc(50% - 92px);
-  width: 2px;
-  height: 92px;
-  background: linear-gradient(#d8bd80, #d8bd8040);
-  transform-origin: bottom;
-  transform: rotate(45deg);
-}
-.cart-hero-dial span::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 2px;
-  height: 66px;
-  background: #d8bd8090;
-  transform-origin: bottom;
-  transform: rotate(-110deg);
-}
 .cart-summary {
   border-top: 3px solid #b59562;
   box-shadow: 0 12px 32px #142e5107;
@@ -533,20 +419,6 @@ summary:focus-visible {
   color: #687382;
 }
 @media (max-width: 767px) {
-  .cart-breadcrumb + .cart-hero {
-    padding: 32px 24px;
-    margin: 20px 0 24px;
-    border-radius: 18px;
-  }
-  .cart-hero-dial {
-    width: 230px;
-    height: 230px;
-    left: -75px;
-    opacity: 0.25;
-  }
-  .cart-hero p {
-    font-size: 13px;
-  }
   .cart-summary-lines .flow-total {
     flex-wrap: wrap;
   }
@@ -593,39 +465,6 @@ summary:focus-visible {
   }
 }
 /* Gold brand frame and soft depth for the cart page. */
-.cart-hero > span {
-  position: relative;
-  max-width: 100%;
-  padding: 10px 18px;
-  border: 1px solid #c9a968;
-  border-radius: 12px;
-  background: linear-gradient(125deg, #e3c48718, #e3c48705);
-  box-shadow:
-    inset 0 0 0 3px #10254480,
-    inset 0 1px 0 #fff3,
-    0 5px 16px #07162930;
-  color: #f0d9a8;
-  line-height: 1.8;
-}
-.cart-hero > span::before {
-  width: 18px;
-  background: #d9b977;
-  flex-shrink: 0;
-}
-.cart-hero > span::after {
-  content: "";
-  width: 4px;
-  height: 4px;
-  flex-shrink: 0;
-  transform: rotate(45deg);
-  background: #d9b977;
-}
-.cart-breadcrumb + .cart-hero {
-  box-shadow:
-    0 18px 40px -16px #10254465,
-    0 5px 12px #10254412,
-    inset 0 1px 0 #ffffff12;
-}
 .cart-breadcrumb ol {
   box-shadow: 0 5px 16px -6px #142e511a;
 }
@@ -646,16 +485,6 @@ summary:focus-visible {
   box-shadow: 0 8px 18px -8px #142e5166;
 }
 @media (max-width: 575px) {
-  .cart-hero > span {
-    padding: 8px 12px;
-    gap: 8px;
-    font-size: 11px;
-  }
-  .cart-breadcrumb + .cart-hero {
-    box-shadow:
-      0 12px 26px -14px #10254460,
-      0 3px 8px #10254410;
-  }
   #cartView .flow-card {
     box-shadow:
       0 10px 24px -15px #142e5138,
@@ -663,37 +492,6 @@ summary:focus-visible {
   }
 }
 /* Reference-style cream capsule for the company name. */
-.cart-hero > span {
-  flex-direction: row;
-  gap: 9px;
-  padding: 8px 15px;
-  border: 1px solid #dfc9a7;
-  border-radius: 999px;
-  background: linear-gradient(110deg, #f1e8d9, #fffdf8);
-  color: #875a23;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0;
-  box-shadow:
-    inset 0 1px 0 #fff,
-    0 4px 10px #07162914;
-}
-.cart-hero > span::before {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #b58a49;
-  box-shadow: 0 0 0 4px #b58a4917;
-}
-.cart-hero > span::after {
-  content: none;
-}
-@media (max-width: 575px) {
-  .cart-hero > span {
-    padding: 8px 13px;
-    gap: 9px;
-  }
-}
 /* Matching frames for both columns of the shopping cart. */
 #cartView > .flow-grid > .flow-card {
   position: relative;

@@ -362,42 +362,6 @@
   line-height: 1.9;
 }
 
-.overview-guide > a {
-  display: grid;
-  min-height: 66px;
-  padding: 9px;
-  grid-template-columns: 38px minmax(0, 1fr) 16px;
-  gap: 9px;
-  align-items: center;
-  border-radius: 13px;
-  color: var(--industrial-steel);
-}
-
-.overview-guide > a:hover {
-  background: var(--industrial-bg);
-}
-.overview-guide > a > i:first-child {
-  color: var(--industrial-yellow-dark);
-  font-size: 19px;
-}
-.overview-guide > a > span {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-.overview-guide > a strong {
-  color: var(--industrial-navy);
-  font-size: 13px;
-}
-.overview-guide > a small {
-  color: var(--industrial-steel);
-  font-size: 11px;
-}
-.overview-guide > a > i:last-child {
-  color: var(--industrial-muted);
-  font-size: 13px;
-}
-
 .account-section > h2,
 .account-section-heading h2 {
   position: relative;
@@ -1821,7 +1785,6 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
   font-size: 12.5px;
 }
 
-.overview-guide > a small,
 #orders .profile-order-card time,
 #orders .order-products small,
 #orders .order-total small,
@@ -2151,7 +2114,6 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
 }
 
 .account-tabs a > i:first-child,
-.overview-guide > a > i:first-child,
 .overview-panel-title i,
 .account-sidebar-help > i {
   color: var(--color-navy);
@@ -2211,8 +2173,7 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
   }
 }
 
-.overview-panel-title i,
-.overview-guide > a > i:first-child {
+.overview-panel-title i {
   color: #b98d00;
 }
 
@@ -2437,19 +2398,6 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
   }
 }
 
-.overview-coupon-card {
-  display: grid;
-  min-width: 0;
-  align-items: center;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  grid-template-areas: "code details action";
-  gap: 10px;
-  padding: 13px 14px;
-  border: 1px solid color-mix(in srgb, var(--color-gold) 30%, white);
-  border-radius: 14px;
-  background: linear-gradient(110deg, #fffdf7, #fff8e8);
-}
-
 .overview-coupon-copy {
   display: grid;
   min-width: 0;
@@ -2480,48 +2428,13 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
   font-size: 11px;
 }
 
-.overview-coupon-card > a {
-  display: inline-flex;
-  grid-area: action;
-  flex: 0 0 auto;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 11px;
-  border: 1px solid var(--color-line);
-  border-radius: 10px;
-  background: #fff;
-  color: var(--color-navy);
-  font-size: 12px;
-  font-weight: 700;
-  text-decoration: none;
-  transition: border-color 160ms ease, background-color 160ms ease;
-}
-
-.overview-coupon-card > a:hover {
-  border-color: color-mix(in srgb, var(--color-gold) 55%, white);
-  background: #fff9e8;
-}
-
 @media (max-width: 767px) {
   .overview-panels > article {
     padding: 14px;
   }
 
-  .overview-coupon-card {
-    grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-areas:
-      "details details"
-      "code action";
-    gap: 10px 8px;
-    padding: 10px;
-  }
-
   .overview-coupon-copy {
     gap: 3px;
-  }
-
-  .overview-coupon-card > a {
-    padding: 8px;
   }
 
 }
@@ -2861,51 +2774,6 @@ body.inner-page.mobile-page--profile-favorites #favoritesView .favorite-item-car
 
 #overview.account-overview .overview-panel-title h3 {
   font-size: 15px;
-}
-
-#overview.account-overview .overview-coupon-card {
-  padding: 12px;
-  border-color: #efdfaa;
-  border-radius: 13px;
-  background: linear-gradient(110deg, #fffdf7, #fff8e8);
-}
-
-#overview.account-overview .overview-coupon-card > a {
-  min-height: 36px;
-  padding: 7px 10px;
-  border-color: #e0e7ed;
-  border-radius: 9px;
-  transition: border-color 160ms ease, background-color 160ms ease, transform 160ms ease;
-}
-
-#overview.account-overview .overview-coupon-card > a:hover {
-  transform: translateY(-1px);
-}
-
-#overview.account-overview .overview-guide > a {
-  min-height: 62px;
-  margin-top: 7px;
-  padding: 8px 10px;
-  border: 1px solid #e8edf1;
-  border-radius: 12px;
-  background: #fff;
-  transition: border-color 160ms ease, background-color 160ms ease, transform 160ms ease;
-}
-
-#overview.account-overview .overview-guide > a:hover {
-  transform: translateY(-1px);
-  border-color: #e6d28f;
-  background: #fffaf0;
-}
-
-#overview.account-overview .overview-guide > a > i:first-child {
-  display: grid;
-  width: 36px;
-  height: 36px;
-  place-items: center;
-  border: 1px solid #efdfaa;
-  border-radius: 11px;
-  background: #fff8e4;
 }
 
 @media (max-width: 767px) {

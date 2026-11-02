@@ -689,8 +689,7 @@
 
 .brand-editorial-audience,
 .brand-source-featured,
-.brand-source-list,
-.brand-source-originals {
+.brand-source-list {
   border: 1px solid #e2e8ec;
   border-radius: 16px;
   background: #f8fafb;
@@ -781,59 +780,6 @@
   border-radius: 50%;
   background: #c29a58;
   content: "";
-}
-
-.brand-source-originals {
-  overflow: hidden;
-  background: #fff;
-}
-
-.brand-source-originals summary {
-  display: flex;
-  min-height: 56px;
-  padding: 14px 18px;
-  align-items: center;
-  gap: 10px;
-  color: var(--industrial-navy);
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 800;
-  list-style: none;
-}
-
-.brand-source-originals summary::-webkit-details-marker {
-  display: none;
-}
-
-.brand-source-originals summary i {
-  color: #a98248;
-}
-
-.brand-source-originals[open] summary {
-  border-bottom: 1px solid #e2e8ec;
-}
-
-.brand-source-originals section {
-  padding: 18px 20px;
-}
-
-.brand-source-originals section + section {
-  border-top: 1px solid #e2e8ec;
-}
-
-.brand-source-originals h3 {
-  margin: 0 0 8px;
-  color: var(--industrial-navy);
-  font-size: 14px;
-  font-weight: 850;
-}
-
-.brand-source-originals section p {
-  margin: 0;
-  color: var(--industrial-steel);
-  font-size: 14px;
-  line-height: 2;
-  white-space: pre-line;
 }
 
 .brand-selection-guide {
