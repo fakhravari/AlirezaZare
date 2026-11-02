@@ -1,10 +1,3 @@
-.contact-branches .branches-heading {
-  display: flex;
-  align-items: end;
-  justify-content: space-between;
-  gap: 20px;
-  margin-bottom: 28px;
-}
 .page-section.contact-section {
   padding-bottom: 20px;
 }
@@ -411,23 +404,6 @@
   font-size: 12px;
   font-weight: 700;
 }
-.contact-branches h2 {
-  margin: 10px 0 0;
-  color: var(--industrial-navy);
-  font-size: clamp(26px, 3vw, 36px);
-  line-height: 1.6;
-}
-.branches-heading > p {
-  margin: 0 0 6px;
-  color: var(--industrial-steel);
-  font-size: 13px;
-  line-height: 1.9;
-}
-.branches-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 22px;
-}
 .branch-card-top {
   display: flex;
   align-items: center;
@@ -533,9 +509,6 @@
   .contact-shortcuts-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  .branches-grid {
-    gap: 16px;
-  }
 }
 @media (max-width: 767px) {
 .page-section.contact-section {
@@ -577,14 +550,6 @@
   }
   .contact-shortcut-card small {
     font-size: 12px;
-  }
-  .branches-grid {
-    grid-template-columns: 1fr;
-  }
-  .contact-branches .branches-heading {
-    align-items: start;
-    flex-direction: column;
-    gap: 10px;
   }
   .branch-card-top {
     margin-bottom: 16px;
