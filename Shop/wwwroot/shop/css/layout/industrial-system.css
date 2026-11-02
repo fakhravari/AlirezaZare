@@ -9588,9 +9588,6 @@ html
   box-shadow: none;
 }
 
-@media (max-width: 420px) {
-}
-
 /* Put every part of the price-and-actions row on one shared vertical axis. */
 #cartPanel .cart-item-actions {
   min-height: 40px;
@@ -9608,10 +9605,6 @@ html
   #cartPanel .cart-item-actions {
     min-height: 36px;
   }
-}
-
-@media (max-width: 420px) {
-
 }
 
 /* Use square, edge-to-edge product imagery in favorites and compare surfaces. */
@@ -9667,9 +9660,6 @@ html
 }
 
 /* Slightly widen only the header cart quantity-control outline. */
-
-@media (max-width: 420px) {
-}
 
 /* Improve header-cart readability without shrinking text on narrow phones. */
 #cartPanel .cart-head .cart-head-title strong {

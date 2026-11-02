@@ -559,8 +559,6 @@ summary:focus-visible {
   min-width: 34px;
   font-weight: 700;
 }
-@media (prefers-reduced-motion: reduce) {
-}
 #cartView .cart-product-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
