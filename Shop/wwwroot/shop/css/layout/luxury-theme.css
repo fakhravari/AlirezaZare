@@ -150,6 +150,8 @@ h3,
 .brand-card,
 .glass-card,
 .search-product,
+.featured-main,
+.featured-side,
 .store-card,
 .testimonial-card {
   border: 0;
@@ -1277,14 +1279,18 @@ h3,
 }
 
 /* Unified borders and interaction states across the storefront. */
-:where(.product-card,
+:where(
+  .product-card,
   .showcase-card,
   .rail-card,
   .brand-card,
   .glass-card,
   .search-product,
+  .featured-main,
+  .featured-side,
   .store-card,
-  .testimonial-card) {
+  .testimonial-card
+) {
   border-top-color: rgba(212, 192, 146, 0.28);
   border-right-color: rgba(212, 192, 146, 0.38);
   transition:
@@ -1293,14 +1299,18 @@ h3,
     border-color 0.24s ease;
 }
 
-:where(.product-card,
+:where(
+  .product-card,
   .showcase-card,
   .rail-card,
   .brand-card,
   .glass-card,
   .search-product,
+  .featured-main,
+  .featured-side,
   .store-card,
-  .testimonial-card):hover {
+  .testimonial-card
+):hover {
   border-top-color: rgba(212, 192, 146, 0.48);
   border-right-color: rgba(212, 192, 146, 0.58);
 }
@@ -1448,14 +1458,18 @@ h3,
 }
 
 @media (hover: none) {
-  :where(.product-card,
+  :where(
+    .product-card,
     .showcase-card,
     .rail-card,
     .brand-card,
     .glass-card,
     .search-product,
+    .featured-main,
+    .featured-side,
     .store-card,
-    .testimonial-card):hover {
+    .testimonial-card
+  ):hover {
     border-top-color: rgba(212, 192, 146, 0.28);
     border-right-color: rgba(212, 192, 146, 0.38);
     box-shadow: 0 10px 32px rgba(7, 20, 38, 0.075);

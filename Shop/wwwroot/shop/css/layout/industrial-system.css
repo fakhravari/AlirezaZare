@@ -7298,13 +7298,6 @@ html
   -webkit-text-stroke: 0 !important;
 }
 
-/* Fill the image frame edge to edge in the home page's special-offer cards. */
-
-/* The best-seller carousel also needs edge-to-edge photos, overriding the global contained-photo rule. */
-
-@media (max-width: 575px) {
-}
-
 /* Apply the same full-frame crop to the newest-products carousel. */
 #newestSlider .showcase-card .product-image {
   overflow: hidden;
@@ -10337,7 +10330,7 @@ body.home-page .rail-card > strong {
 /* Outside the product detail page, product cards lead with the Persian name. */
 .home-page .product-card .product-info > div > small,
 .home-page .showcase-card-body > small,
-.home-page  > small,
+.home-page :is(.featured-content, .featured-side-content) > small,
 .search-main .search-product-heading > small,
 #compareView .compare-product-meta,
 #compareView .compare-product-card > dl > div:first-child {
