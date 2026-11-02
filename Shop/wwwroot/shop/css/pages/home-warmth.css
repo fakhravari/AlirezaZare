@@ -170,9 +170,6 @@
   box-shadow: 0 0 0 4px rgba(246, 197, 21, 0.14), 0 12px 28px rgba(65, 52, 31, 0.09);
 }
 
-@media (min-width: 1200px) {
-}
-
 @media (min-width: 768px) {
   .home-page :is(#productGrid, #homeSalesPlans, #homeSalesTime, #amazingSlider, #bestsellersSlider, #newestSlider) .product-image {
     height: 220px;

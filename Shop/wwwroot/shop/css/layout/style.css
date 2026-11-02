@@ -3576,12 +3576,6 @@ body {
   pointer-events: none;
 }
 
-@media (max-width: 991px) {
-}
-
-@media (max-width: 767px) {
-}
-
 footer .footer-main h4 {
   font-size: 16px;
 }
@@ -5651,9 +5645,6 @@ h6,
 
 .services .service:hover h3 {
   color: #0b2f87 !important;
-}
-
-@media (max-width: 767px) {
 }
 
 /* Light luxury treatment for the three primary services only */
@@ -8267,9 +8258,6 @@ footer .copyright::before {
     padding-top: 54px;
   }
 
-  footer .footer-main > .col-lg-4:first-child {
-  }
-
   footer .footer-main h4 {
     font-size: 16px;
   }
@@ -8982,8 +8970,6 @@ footer .copyright::before {
   .product-image:after {
     display: none;
   }
-}
-.quick-compare {
 }
 
 /* Premium "view all" CTA */
@@ -9740,9 +9726,6 @@ footer .copyright::before {
       Tahoma,
       sans-serif !important;
   }
-  #mainNav .mega-sidebar > a:hover,
-  #mainNav .mega-sidebar > a.active {
-  }
   #mainNav .mega-links h4 {
     font:
       800 14.5px/1.5 "Estedad",
@@ -9794,16 +9777,10 @@ footer .copyright::before {
     max-width: none !important;
     flex: 1 1 auto !important;
   }
-  #mainNav .mega-sidebar > a {
-  }
-  #mainNav .mega-content {
-  }
   #mainNav .mega-content-grid {
     column-gap: 0 !important;
     row-gap: 0 !important;
     flex-wrap: nowrap !important;
-  }
-  #mainNav .mega-content-grid > .mega-links {
   }
   #mainNav .mega-bottom {
     min-height: 61px !important;
@@ -9848,17 +9825,6 @@ footer .copyright::before {
     box-shadow:
       0 24px 58px rgba(3, 13, 35, 0.28),
       inset 0 0 0 1px rgba(255, 255, 255, 0.72) !important;
-  }
-  #mainNav .mega-sidebar {
-  }
-  #mainNav .mega-sidebar > a {
-  }
-  #mainNav .mega-sidebar > a:hover,
-  #mainNav .mega-sidebar > a.active {
-  }
-  #mainNav .mega-links + .mega-links {
-  }
-  #mainNav .mega-bottom {
   }
   #mainNav .brand-menu .dropdown-item {
     border-color: #b2a38f !important;
@@ -10213,10 +10179,6 @@ textarea:focus-visible {
 .newsletter::after {
   display: none !important;
 }
-@media (max-width: 991px) {
-}
-@media (max-width: 575px) {
-}
 
 /* Compact champagne / deep-green newsletter palette */
 
@@ -10496,21 +10458,8 @@ textarea:focus-visible {
       inset 0 0 0 1px rgba(255, 255, 255, 0.9) !important;
   }
 
-  #mainNav .mega-sidebar {
-  }
-
   #mainNav .mega-sidebar > a {
     color: #46546a !important;
-  }
-
-  #mainNav .mega-sidebar > a:hover,
-  #mainNav .mega-sidebar > a.active {
-  }
-
-  #mainNav .mega-content {
-  }
-
-  #mainNav .mega-links + .mega-links {
   }
 
   #mainNav .mega-bottom {

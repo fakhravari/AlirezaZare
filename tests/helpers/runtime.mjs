@@ -32,5 +32,5 @@ export function runtime(data = source(), seed = {}) {
   load('store/cart.js');
   load('core/ui-core.js');
   load('store/product-card.js');
-  return {window, document, values, events, listeners, load, ui: window.HNUI};
+  return {window, document, values, events, listeners, load, context, ui: window.HNUI};
 }

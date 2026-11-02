@@ -119,8 +119,8 @@ test('cart lines follow configured sales-plan type order and expose grouped labe
   r.ui.cart.add({...product, salesPlanId: 'digi-time', price: 23000000});
 
   const items = r.ui.cart.read();
-  assert.deepEqual(JSON.parse(JSON.stringify(items.map(item => item.salesPlanId))), ['digi-time', 'digi-af', 'regular']);
-  assert.deepEqual(JSON.parse(JSON.stringify(r.ui.cart.groupBySalesPlan(items).map(group => group.name))), ['دیجی‌تایم', 'دیجی‌اف', 'فروش عادی']);
+  assert.deepEqual(JSON.parse(JSON.stringify(items.map(item => item.salesPlanId))), ['regular', 'digi-time', 'digi-af']);
+  assert.deepEqual(JSON.parse(JSON.stringify(r.ui.cart.groupBySalesPlan(items).map(group => group.name))), ['فروش عادی', 'دیجی‌تایم', 'دیجی‌اف']);
   assert.equal(r.ui.cart.groupBySalesPlan(items).reduce((sum, group) => sum + group.items.length, 0), 3);
 });
 

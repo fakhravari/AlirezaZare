@@ -1285,17 +1285,11 @@
     grid-template-rows: var(--product-card-image-height, 144px) minmax(106px, 1fr) 42px !important;
   }
 
-  .search-page .search-page-card-content {
-  }
-
   .search-page .search-page-card-price,
   .search-page .search-page-card-price .product-price-current {
     font-size: 14px !important;
   }
 
-}
-
-@media (max-width: 389px) {
 }
 /* Normalize mobile header control and glyph heights across all pages. */
 @media (max-width: 767px) {

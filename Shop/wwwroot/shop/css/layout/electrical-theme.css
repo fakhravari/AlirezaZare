@@ -69,9 +69,6 @@ body {
     text-shadow: none;
   }
 
-  .home-page #mainNav .nav-link:hover {
-  }
-
   .home-page #mainNav .nav-link::after {
     bottom: 10px;
     background: #e8bd24;
@@ -1033,9 +1030,6 @@ body {
 .search-account,
 .header-cart {
   color: #23495d !important;
-}
-
-.back-to-top {
 }
 
 @media (max-width: 991px) {

@@ -54,7 +54,7 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
     maxPrice: 60,
     query: "",
     sort: "recommended",
-    visible: 9,
+    visible: 15,
   };
   let searchRenderTimer = 0;
   const attributeDefinitions = window.HNCatalog?.attributeDefinitions || {};
@@ -560,7 +560,7 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
     });
   }
   function render(reset = false, returnToStart = false) {
-    if (reset) state.visible = 9;
+    if (reset) state.visible = 15;
     syncCategoryFilters();
     const list = getFiltered();
     const shown = list.slice(0, state.visible);

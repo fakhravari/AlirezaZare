@@ -1308,25 +1308,47 @@ select {
 
 .load-more-state {
   display: none;
-  padding: 28px;
+  width: fit-content;
+  max-width: 100%;
+  margin: 24px auto;
+  padding: 10px 18px;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  color: var(--industrial-steel);
-  font-size: 10px;
+  gap: 12px;
+  border: 1px solid #eadbb8;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #fffaf0, #fff4d6);
+  box-shadow: 0 8px 24px rgba(120, 84, 28, 0.08);
+  color: var(--industrial-navy);
 }
 
 .load-more-state.loading {
   display: flex;
 }
 
-.loader {
-  width: 22px;
-  height: 22px;
-  border: 3px solid var(--industrial-line);
-  border-top-color: var(--color-blue);
+.load-more-state p {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.7;
+}
+
+.load-more-state .loader {
+  position: relative;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  border: 3px solid #f0dfaf;
+  border-top-color: #bd8611;
+  border-right-color: #e4ae25;
   border-radius: 50%;
-  animation: spin 0.7s linear infinite;
+  animation: spin 0.9s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .load-more-state .loader {
+    animation: none;
+  }
 }
 
 .mobile-filter-toggle,

@@ -1382,9 +1382,6 @@ h6 {
   transform: translateX(-3px);
 }
 
-@media (max-width: 991px) {
-}
-
 @media (max-width: 575px) {
   .brands-related {
     gap: 9px;
@@ -4589,12 +4586,6 @@ body {
   border: 0 !important;
   background: transparent !important;
   box-shadow: none !important;
-}
-
-@media (max-width: 991px) {
-}
-
-@media (max-width: 575px) {
 }
 
 /* Product option selectors and price-linked variants */

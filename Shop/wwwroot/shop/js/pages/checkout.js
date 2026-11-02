@@ -8,7 +8,7 @@ window.HNUI.ready(() => window.HNUI.mount("checkout", document, () => {
     const preview = document.querySelector("#addressPreview");
     const checkoutPreview = document.querySelector("#checkoutAddressPreview");
     const payment = document.querySelector("#finalPayment");
-    const cartCheckoutLink = document.querySelector("#cartView .cart-checkout-link",);
+    const cartCheckoutLink = () => document.querySelector("#cartView .cart-checkout-link");
     let addresses = [];
     let selectedPaymentMethod = ui.storage.get(paymentMethodKey, "zarinpal");
     let salesPlansValid = false;
@@ -27,8 +27,10 @@ window.HNUI.ready(() => window.HNUI.mount("checkout", document, () => {
             syncPayment();
             return;
         }
+        salesPlansValid = false;
+        syncPayment();
         try {
-            const response = await fetch("api/store/sales-plans/validate-cart", {
+            const response = await fetch("/api/store/sales-plans/validate-cart", {
                 method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ lines }),
             });
             if (attempt !== validationAttempt) return;
@@ -44,7 +46,7 @@ window.HNUI.ready(() => window.HNUI.mount("checkout", document, () => {
         if (attempt !== validationAttempt) return;
         syncPayment();
         const message = document.querySelector("#paymentStatus");
-        if (!salesPlansValid && message) ui.setMessage(message, "قیمت یا موجودی یکی از طرح‌های فروش تغییر کرده است؛ به سبد بازگردید و دوباره بررسی کنید.", "warning");
+        if (!salesPlansValid && message) ui.setMessage(message, "قیمت یا موجودی یکی از کالاها با اطلاعات فعلی مطابقت ندارد؛ به سبد بازگردید، کالا را از سبد حذف و دوباره از صفحهٔ محصول اضافه کنید.", "warning");
     };
     if (!Object.hasOwn(paymentMethods, selectedPaymentMethod)) {
         selectedPaymentMethod = "zarinpal";
@@ -97,14 +99,15 @@ window.HNUI.ready(() => window.HNUI.mount("checkout", document, () => {
     }
 
     function syncPayment() {
-        if (cartCheckoutLink) {
+        const link = cartCheckoutLink();
+        if (link) {
             const ready =
                 Boolean(selectedAddress()) &&
                 Boolean(selectedPaymentMethod) &&
-                ui.cart.read().length > 0 && salesPlansValid;
-            cartCheckoutLink.classList.toggle("is-disabled", !ready);
-            cartCheckoutLink.setAttribute("aria-disabled", String(!ready));
-            cartCheckoutLink.title = ready
+                ui.cart.read().length > 0;
+            link.classList.toggle("is-disabled", !ready);
+            link.setAttribute("aria-disabled", String(!ready));
+            link.title = ready
                 ? ""
                 : !selectedAddress()
                     ? "ابتدا آدرس تحویل را انتخاب کنید"
@@ -250,8 +253,9 @@ window.HNUI.ready(() => window.HNUI.mount("checkout", document, () => {
             renderAddresses();
             dialog.close();
         });
-        cartCheckoutLink?.addEventListener("click", (event) => {
-            if (cartCheckoutLink.getAttribute("aria-disabled") !== "true") return;
+        document.addEventListener("click", (event) => {
+            const link = event.target.closest("#cartView .cart-checkout-link");
+            if (!link || link.getAttribute("aria-disabled") !== "true") return;
             event.preventDefault();
             const needsAddress = !selectedAddress();
             const target = needsAddress
@@ -299,11 +303,14 @@ window.HNUI.ready(() => window.HNUI.mount("checkout", document, () => {
                 "warning",
             );
         });
-        document.addEventListener("hn:cart-change", validateSalesPlanCart);
     }
+    document.addEventListener("hn:cart-change", () => {
+        syncPayment();
+        if (payment) validateSalesPlanCart();
+    });
 
     window.addEventListener("storage", () => window.location.reload());
     renderAddresses();
-    validateSalesPlanCart();
+    if (payment) validateSalesPlanCart();
     renderPaymentMethod();
 }));

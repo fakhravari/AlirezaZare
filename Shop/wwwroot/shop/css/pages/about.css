@@ -564,9 +564,6 @@ body.inner-page .about-page .about-values-section > .container {
   box-shadow: none;
 }
 
-.about-page .about-values-section .section-title > span {
-}
-
 .about-page .about-values-section .section-title h2 {
   color: #fff;
 }
@@ -587,14 +584,8 @@ body.inner-page .about-page .about-values-section > .container {
   color: #fff;
 }
 
-.about-page .value-card p {
-}
-
 .about-page .about-journey-section {
   background: linear-gradient(180deg, #f1f5f6, #f8f9f8);
-}
-
-.about-page .about-journey-section .section-title > span {
 }
 
 body.inner-page .about-page .page-cta {
@@ -707,7 +698,4 @@ body.inner-page .about-page .page-cta {
   height: 1px;
   background: currentColor;
   content: "";
-}
-
-@media (prefers-reduced-motion: reduce) {
 }

@@ -14,10 +14,10 @@
     const plans = Array.isArray(data.plans) ? data.plans : [];
     const campaignPlans = plans.filter((plan) => !plan.isDefault && plan.type !== "regular" && plan.id !== "regular");
     const typeOrder = [...new Set(campaignPlans.map((plan) => String(plan.type || plan.id)))];
-    const ranks = new Map(campaignPlans.map((plan, index) => [String(plan.id), [0, typeOrder.indexOf(String(plan.type || plan.id)), index, String(plan.id)]]));
+    const ranks = new Map(campaignPlans.map((plan, index) => [String(plan.id), [1, typeOrder.indexOf(String(plan.type || plan.id)), index, String(plan.id)]]));
     plans.filter((plan) => plan.isDefault || plan.type === "regular" || plan.id === "regular")
-      .forEach((plan, index) => ranks.set(String(plan.id), [1, index, index, String(plan.id)]));
-    if (!ranks.has("regular")) ranks.set("regular", [1, 0, 0, "regular"]);
+      .forEach((plan, index) => ranks.set(String(plan.id), [0, index, index, String(plan.id)]));
+    if (!ranks.has("regular")) ranks.set("regular", [0, 0, 0, "regular"]);
     const rankFor = (id) => ranks.get(String(id || "regular")) || [2, Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER, String(id)];
     return (Array.isArray(items) ? items : [])
       .map((item, index) => ({ item, index, rank: rankFor(getId(item)) }))

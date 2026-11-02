@@ -718,9 +718,6 @@
   justify-content: flex-start;
 }
 
-#productView .product-detail-favorite > span {
-  display: none;
-}
 
 #productView .product-share-menu[hidden],
 #productView .product-share-native[hidden] {

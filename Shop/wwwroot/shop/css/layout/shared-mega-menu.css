@@ -350,30 +350,11 @@
 
 /* Shared cool neutral palette for category and brand menus. */
 @media (min-width: 992px) {
-  #mainNav .mega-dropdown > .mega-menu,
-  #mainNav .brand-dropdown > .brand-menu {
-  }
-
-  #mainNav .mega-sidebar > a,
-  #mainNav .brand-menu .dropdown-item {
-  }
-
-  #mainNav .mega-sidebar > a:hover,
-  #mainNav .mega-sidebar > a.active,
-  #mainNav .brand-menu .dropdown-item:hover,
-  #mainNav .brand-menu .dropdown-item:focus-visible {
-  }
 
   #mainNav .mega-menu .mega-bottom,
   #mainNav .brand-menu-footer {
     border-color: #c4d2df !important;
     background: #e8f0f8 !important;
-  }
-
-  #mainNav .brand-menu .brand-menu-icon {
-  }
-
-  #mainNav .brand-menu .dropdown-item:hover .brand-menu-icon {
   }
 
   #mainNav .brand-menu-footer {
@@ -398,9 +379,6 @@
   #mainNav .brand-menu .dropdown-item:hover,
   #mainNav .brand-menu .dropdown-item:focus-visible {
     color: #102a43 !important;
-  }
-
-  #mainNav .brand-menu .brand-menu-icon {
   }
 
   #mainNav .brand-menu .dropdown-item:hover .brand-menu-icon,
@@ -429,13 +407,6 @@
 
   #mainNav .mega-sidebar {
     border-left-color: #e2d3bd !important;
-  }
-
-  #mainNav .mega-sidebar > a {
-  }
-
-  #mainNav .mega-sidebar > a:hover,
-  #mainNav .mega-sidebar > a.active {
   }
 
   #mainNav .mega-content {

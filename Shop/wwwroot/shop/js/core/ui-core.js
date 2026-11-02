@@ -309,10 +309,47 @@
       updateBackToTop();
     }
   });
-  document.addEventListener("click", (event) => {
+  document.addEventListener("click", async (event) => {
     const button = event.target.closest(".add-cart[data-id]");
-    if (!button) return;
+    if (!button || button._cartQuotePending) return;
     const productId = String(button.dataset.id);
+    const salesPlanId = button.dataset.salesPlanId || "regular";
+    let salesPlanSnapshot = null;
+    if (salesPlanId !== "regular") {
+      if (!auth.requireLogin(() => button.click())) return;
+      const product = (window.HNProducts || []).find((item) => String(item.id) === productId);
+      if (!product) return;
+      const variants = Object.fromEntries(Object.entries(product.variants || {})
+        .map(([key, feature]) => [key, feature.options?.[0]?.value])
+        .filter(([, value]) => value != null));
+      const accessoryIds = (product.accessories || []).filter((item) => item.required).map((item) => item.id);
+      button._cartQuotePending = true;
+      button.disabled = true;
+      try {
+        const response = await fetch("/api/store/sales-plans/quote", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ productId: Number(productId), salesPlanId, quantity: 1, variants, accessoryIds }),
+        });
+        if (!response.ok) throw new Error("quote unavailable");
+        const quote = await response.json();
+        if (quote.productId !== Number(productId) || quote.salesPlanId !== salesPlanId || !Number.isFinite(Number(quote.unitAmount)))
+          throw new Error("invalid quote");
+        salesPlanSnapshot = {
+          id: quote.salesPlanId, name: quote.planName, code: quote.salesPlanCode,
+          label: button.dataset.salesPlanLabel || null, unitAmount: Number(quote.unitAmount),
+          accessoryPriceAmounts: quote.accessoryAmounts, stockQuantity: Number(button.dataset.stockQuantity),
+          maxPurchaseQuantity: Number(button.dataset.maxPurchaseQuantity), currency: quote.currency,
+          quotedAtUtc: quote.quotedAtUtc,
+        };
+      } catch {
+        showToast("دریافت قیمت طرح ممکن نشد؛ دوباره تلاش کنید یا جزئیات محصول را ببینید.", "warning");
+        return;
+      } finally {
+        button._cartQuotePending = false;
+        button.disabled = false;
+      }
+    }
     const quantityBefore = cart
       .read()
       .filter((item) => item.id === productId)
@@ -323,10 +360,8 @@
         name: button.dataset.name,
         price: button.dataset.price,
         image: button.dataset.image,
-        salesPlanId: button.dataset.salesPlanId || "regular",
-        salesPlanSnapshot: button.dataset.salesPlanId
-          ? { id: button.dataset.salesPlanId, name: button.dataset.salesPlanName || "طرح فروش ویژه", code: button.dataset.salesPlanCode || "", label: button.dataset.salesPlanLabel || null, unitAmount: Number(button.dataset.price), stockQuantity: Number(button.dataset.stockQuantity), maxPurchaseQuantity: Number(button.dataset.maxPurchaseQuantity), currency: "IRT" }
-          : null,
+        salesPlanId,
+        salesPlanSnapshot,
       },
       1,
       button,

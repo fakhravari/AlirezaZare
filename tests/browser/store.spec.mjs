@@ -93,6 +93,11 @@ test('all home collections render shared cards with one action of each kind', as
   await noHorizontalOverflow(page);
 });
 
+test('search initially displays 15 products', async ({page}) => {
+  await page.goto('/Search');
+  await expect(page.locator('#productResults [data-product-card]')).toHaveCount(15);
+});
+
 test('keyboard focus indicators and shared product actions keep their layout', async ({page}) => {
   await page.goto('/');
   const regularProductHref = await page.locator('#productGrid [data-product-card="v1"] h3 a').first().getAttribute('href');
@@ -156,7 +161,7 @@ test('search includes active plan offers and preserves the selected offer in car
   const expectedPrice = Math.round(listing.offer.priceAmount * (100 - listing.offer.discountPercent) / 100);
   await expect(offerCard.locator('.add-cart')).toHaveAttribute('data-price', String(expectedPrice));
   await offerCard.locator('.add-cart').click();
-  await expect.poll(() => page.evaluate(() => window.HNUI.cart.read().find(item => item.salesPlanId === 'digi-time')?.price)).toBe(expectedPrice);
+  await expect.poll(() => page.evaluate(() => window.HNUI.cart.read().find(item => item.salesPlanId === 'digi-time')?.price)).toBe(expectedPrice + listing.offer.accessoryPriceAmounts['shipping-insurance']);
 });
 
 test('distant sales-plan expiry does not repeatedly rebuild search results', async ({page}) => {
@@ -414,6 +419,24 @@ test('products show their own plan-specific features, accessory choices and pric
   expect(invalidAccessory.body.code).toBe('invalid-product-options');
 });
 
+test('cart opens preview after address selection even if validation fails', async ({page}) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('hn-demo-auth', '1');
+    localStorage.setItem('hn-delivery-addresses', JSON.stringify([{id: 'test-address', title: 'Home', recipient: 'Test User', phone: '09123456789', province: 'Test', city: 'Test', street: 'Test street', postal: '1234567890'}]));
+    localStorage.setItem('hn-selected-address', 'test-address');
+  });
+  await page.route('**/api/store/sales-plans/validate-cart', route => route.fulfill({status: 409, contentType: 'application/json', body: JSON.stringify({code: 'unavailable'})}));
+  await page.goto('/search');
+  await page.evaluate(() => window.HNUI.cart.add(window.HNCatalog.find(1)));
+  await page.goto('/cart');
+  const link = page.locator('#cartView .cart-checkout-link');
+  await expect(link).toHaveAttribute('aria-disabled', 'false');
+  await link.click();
+  await expect(page).toHaveURL(/\/checkout/i);
+  await expect(page.locator('#finalPayment')).toBeDisabled();
+  await expect(page.locator('#paymentStatus')).toContainText('قیمت یا موجودی');
+});
+
 test('cart defaults, required service and reload use one canonical price', async ({page}) => {
   // Disposable demo browser context; no account, network login or live payment.
   await page.addInitScript(() => localStorage.setItem('hn-demo-auth', '1'));
@@ -433,7 +456,7 @@ test('search keeps one result grid while cart and checkout group by sales plan',
   await page.clock.install({time: new Date('2026-11-01T10:00:00Z')});
   await page.goto('/search');
   await expect(page.locator('#productResults .search-sales-plan-heading')).toHaveCount(0);
-  await expect(page.locator('#productResults [data-product-card]')).toHaveCount(9);
+  await expect(page.locator('#productResults [data-product-card]')).toHaveCount(15);
   await noHorizontalOverflow(page);
 
   await page.evaluate(() => {
@@ -456,17 +479,17 @@ test('search keeps one result grid while cart and checkout group by sales plan',
   await page.goto('/cart');
   const cartGroups = page.locator('#cartView .cart-plan-group');
   await expect(cartGroups).toHaveCount(3);
-  await expect(cartGroups.nth(0)).toHaveAttribute('data-sales-plan-id', 'digi-time');
-  await expect(cartGroups.nth(1)).toHaveAttribute('data-sales-plan-id', 'digi-af');
-  await expect(cartGroups.nth(2)).toHaveAttribute('data-sales-plan-id', 'regular');
+  await expect(cartGroups.nth(0)).toHaveAttribute('data-sales-plan-id', 'regular');
+  await expect(cartGroups.nth(1)).toHaveAttribute('data-sales-plan-id', 'digi-time');
+  await expect(cartGroups.nth(2)).toHaveAttribute('data-sales-plan-id', 'digi-af');
   await noHorizontalOverflow(page);
 
   await page.goto('/checkout');
   const invoiceGroups = page.locator('#invoiceItems .cart-plan-group');
   await expect(invoiceGroups).toHaveCount(3);
-  await expect(invoiceGroups.nth(0)).toHaveAttribute('data-sales-plan-id', 'digi-time');
-  await expect(invoiceGroups.nth(1)).toHaveAttribute('data-sales-plan-id', 'digi-af');
-  await expect(invoiceGroups.nth(2)).toHaveAttribute('data-sales-plan-id', 'regular');
+  await expect(invoiceGroups.nth(0)).toHaveAttribute('data-sales-plan-id', 'regular');
+  await expect(invoiceGroups.nth(1)).toHaveAttribute('data-sales-plan-id', 'digi-time');
+  await expect(invoiceGroups.nth(2)).toHaveAttribute('data-sales-plan-id', 'digi-af');
   await noHorizontalOverflow(page);
 });
 

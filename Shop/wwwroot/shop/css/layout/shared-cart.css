@@ -143,7 +143,6 @@
 }
 
 #cartPanel .cart-item-options .cart-item-option-group {
-  display: grid;
   grid-template-columns: minmax(0, 1fr);
   align-items: start;
   justify-items: stretch;
@@ -181,13 +180,6 @@
   flex-direction: row;
   align-items: center;
   flex-wrap: wrap;
-  gap: 5px;
-}
-
-#cartPanel .cart-item-options .cart-item-option-list--accessories {
-  display: grid;
-  width: 100%;
-  grid-template-columns: fit-content(100%);
 }
 
 #cartPanel .cart-item-options .cart-item-option-list--variants {
@@ -979,22 +971,60 @@ body :is(#cartPanel, #cartView) .hn-cart-controls button:disabled { opacity: .4;
 /* Cart cards: product identity, purchase strip and structured details. */
 body :is(#cartView, #invoiceItems) .cart-items-list { display: grid; gap: 18px; }
 body :is(#cartView, #invoiceItems) .cart-plan-groups { display: grid; min-width: 0; gap: 20px; }
-body :is(#cartView, #invoiceItems) .cart-plan-group { display: grid; min-width: 0; gap: 10px; }
+body :is(#cartView, #invoiceItems) .cart-plan-group {
+  display: grid;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid #e6d8b9;
+  border-radius: 15px;
+  background: #fbf8f1;
+  box-shadow: 0 6px 18px rgba(83, 65, 29, 0.06);
+}
 body :is(#cartView, #invoiceItems) .cart-plan-group-heading {
   display: flex;
-  min-height: 42px;
-  padding: 8px 12px;
+  min-width: 0;
+  min-height: 55px;
+  padding: 10px 14px;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  border: 1px solid #e6d6ad;
-  border-radius: 9px;
-  background: #fffaf0;
+  border-bottom: 1px solid #e9ddc5;
+  background: linear-gradient(110deg, #fffaf0, #f8edce);
   color: #17364f;
 }
-body :is(#cartView, #invoiceItems) .cart-plan-group-heading h3 { margin: 0; color: inherit; font-size: 13px; font-weight: 750; }
-body :is(#cartView, #invoiceItems) .cart-plan-group-heading span { color: #788594; font-size: 11px; white-space: nowrap; }
-body :is(#cartView, #invoiceItems) .cart-plan-group-items { display: grid; min-width: 0; gap: 12px; }
+body :is(#cartView, #invoiceItems) .cart-plan-group-heading h3 {
+  display: flex;
+  min-width: 0;
+  margin: 0;
+  align-items: center;
+  gap: 9px;
+  color: inherit;
+  font-size: 15px;
+  font-weight: 750;
+}
+body :is(#cartView, #invoiceItems) .cart-plan-group-heading h3 i {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  flex: 0 0 30px;
+  place-items: center;
+  border-radius: 9px;
+  background: #fff4ce;
+  color: #9b700b;
+  font-size: 16px;
+}
+body :is(#cartView, #invoiceItems) .cart-plan-group-heading .cart-plan-group-count {
+  flex: 0 0 auto;
+  padding: 4px 10px;
+  border: 1px solid #e7d6ab;
+  border-radius: 999px;
+  background: #fffdf7;
+  color: #66522b;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+body :is(#cartView, #invoiceItems) .cart-plan-group-items { display: grid; min-width: 0; gap: 12px; padding: 12px; }
 body :is(#cartView, #invoiceItems) .cart-product-row.flow-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
