@@ -754,12 +754,6 @@ h6 {
 /* Header controls matched to the home page */
 
 /* Rich magazine and single article */
-.blog-title-row {
-  display: flex;
-  align-items: end;
-  justify-content: space-between;
-  gap: 25px;
-}
 .article-author {
   display: flex;
   gap: 9px;
@@ -1995,10 +1989,6 @@ h6 {
   }
 }
 @media (max-width: 575px) {
-  .blog-title-row {
-    align-items: flex-start;
-    flex-direction: column;
-  }
   .article-hero {
     min-height: 610px;
     padding: 24px 0 40px;
@@ -2021,22 +2011,6 @@ h6 {
   .article-body blockquote {
     padding: 20px;
     font-size: 15px;
-  }
-}
-
-/* Panel placement parity with the home page */
-
-/* Exact home-header colors and interaction states */
-
-/* Refined blog ending: more posts and newsletter */
-#articles.page-section {
-  padding-bottom: 48px;
-}
-@media (max-width: 991px) {
-}
-@media (max-width: 575px) {
-  #articles.page-section {
-    padding-bottom: 35px;
   }
 }
 
@@ -2270,83 +2244,6 @@ body {
   to {
     opacity: 1;
     transform: none;
-  }
-}
-
-/* Blog pagination */
-.blog-pagination-wrap {
-  display: flex;
-  margin-top: 42px;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  gap: 13px;
-}
-.blog-pagination {
-  display: flex;
-  padding: 7px;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  border: 1px solid var(--industrial-muted);
-  border-radius: 16px;
-  background: var(--color-surface);
-  box-shadow: 0 10px 25px rgba(11, 40, 104, 0.08);
-}
-.blog-pagination button {
-  display: inline-flex;
-  min-width: 42px;
-  height: 42px;
-  padding: 0 12px;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  border: 1px solid var(--industrial-muted);
-  border-radius: 11px;
-  background: #fff;
-  color: var(--industrial-navy);
-  font:
-    600 12px "Estedad",
-    "Vazirmatn",
-    sans-serif;
-  transition: 0.2s;
-}
-.blog-pagination button:hover:not(:disabled) {
-  border-color: var(--industrial-muted);
-  background: var(--industrial-bg);
-  color: var(--color-blue);
-  transform: translateY(-2px);
-}
-.blog-pagination .page-number.active {
-  border-color: var(--industrial-navy);
-  background: var(--color-blue);
-  color: #fff;
-  box-shadow: 0 7px 16px rgba(11, 52, 126, 0.22);
-}
-.blog-pagination button:disabled {
-  cursor: not-allowed;
-  opacity: 0.38;
-}
-.blog-page-status {
-  margin: 0;
-  color: var(--industrial-steel);
-  font-size: 10px;
-}
-#articles .row.g-4 > [hidden] {
-  display: none !important;
-}
-@media (max-width: 575px) {
-  .blog-pagination {
-    width: 100%;
-    gap: 5px;
-  }
-  .blog-pagination button {
-    min-width: 38px;
-    height: 40px;
-    padding: 0 9px;
-  }
-  .blog-pagination .page-step span {
-    display: none;
   }
 }
 
