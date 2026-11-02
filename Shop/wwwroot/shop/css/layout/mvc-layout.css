@@ -184,11 +184,6 @@ body .cart-panel .cart-item .cart-remove > i,
 body .search-cart-drawer .search-cart-item .cart-remove > i,
 body .cart-panel .cart-item .cart-remove:is(:hover, :focus, :active) > i,
 body
-  .page-cart-panel
-  .page-cart-item
-  .cart-remove:is(:hover, :focus, :active)
-  > i,
-body
   .search-cart-drawer
   .search-cart-item
   .cart-remove:is(:hover, :focus, :active)

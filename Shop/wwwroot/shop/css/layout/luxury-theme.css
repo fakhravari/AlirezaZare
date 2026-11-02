@@ -423,8 +423,7 @@ h3,
 }
 .favorite,
 .header-cart,
-.search-account,
-.page-cart-toggle {
+.search-account {
   border-color: rgba(184, 148, 88, 0.34);
 }
 
@@ -572,7 +571,6 @@ h3,
   }
 
   .cart-btn.cart-icon-theme,
-  .page-cart-toggle,
   .header-cart {
     width: 46px !important;
     min-width: 46px !important;
@@ -1597,16 +1595,12 @@ h3,
   box-shadow: 0 0 0 3px var(--luxury-focus-ring);
 }
 
-:where(
-  .header-cart,
+:where(.header-cart,
   .search-account,
-  .page-cart-toggle,
-  .page-account-toggle,
   .favorite,
   .cart-head > button,
   .page-panel-head > button,
-  .search-cart-head > button
-) {
+  .search-cart-head > button) {
   transition:
     color 0.2s ease,
     background-color 0.2s ease,
@@ -1615,18 +1609,10 @@ h3,
     transform 0.2s ease;
 }
 
-:where(
-  .header-cart,
-  .search-account,
-  .page-cart-toggle,
-  .page-account-toggle
-):hover,
-:where(
-  .header-cart,
-  .search-account,
-  .page-cart-toggle,
-  .page-account-toggle
-):focus-visible {
+:where(.header-cart,
+  .search-account):hover,
+:where(.header-cart,
+  .search-account):focus-visible {
   border-color: var(--luxury-border-strong) !important;
   background: rgba(212, 192, 146, 0.12) !important;
   color: var(--luxury-gold-light) !important;
