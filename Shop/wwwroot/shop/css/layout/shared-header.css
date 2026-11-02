@@ -74,12 +74,10 @@
   margin-left: 4px;
   border-left: 1px solid var(--header-action-divider);
 }
-.page-account-toggle,
 .search-account {
   position: relative;
   margin-left: var(--header-action-divider-gap);
 }
-.page-account-toggle:after,
 .search-account:after {
   content: "";
   position: absolute;
@@ -97,11 +95,9 @@
     margin-left: 0;
     border-left: 0;
   }
-  .page-account-toggle,
   .search-account {
     margin-left: 0;
   }
-  .page-account-toggle:after,
   .search-account:after {
     display: none;
   }
@@ -124,7 +120,6 @@
 }
 
 /* Keep the signed-in label stable on one line across inner-page headers. */
-.page-account-toggle.logged-in,
 .search-account.logged-in {
   width: 128px !important;
   min-width: 128px !important;
@@ -133,18 +128,15 @@
   gap: 8px !important;
   white-space: nowrap !important;
 }
-.page-account-toggle.logged-in > span,
 .search-account.logged-in > span {
   display: inline-block;
   white-space: nowrap;
   line-height: 1;
 }
-.page-account-toggle.logged-in > .bi-person,
 .search-account.logged-in > .bi-person {
   flex: none;
   font-size: 18px;
 }
-.page-account-toggle.logged-in > .bi-chevron-down,
 .search-account.logged-in > .bi-chevron-down {
   flex: none;
   margin-right: auto;
@@ -189,7 +181,6 @@
 }
 
 @media (max-width: 767px) {
-  .page-account-toggle.logged-in,
   .search-account.logged-in {
     padding: 0 9px !important;
   }
@@ -197,8 +188,7 @@
 
 @media (max-width: 991px) {
   .mobile-menu .mobile-category-toggle > span > i,
-  .mobile-menu .mobile-category > button > span > i,
-  .page-menu-drawer nav > a > i {
+  .mobile-menu .mobile-category > button > span > i {
     display: grid !important;
     width: 31px !important;
     height: 31px !important;
