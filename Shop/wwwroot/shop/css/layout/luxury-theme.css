@@ -150,8 +150,6 @@ h3,
 .brand-card,
 .glass-card,
 .search-product,
-.featured-main,
-.featured-side,
 .store-card,
 .testimonial-card {
   border: 0;
@@ -1092,9 +1090,7 @@ h3,
 
 /* One visual language for every add-to-cart action, including featured cards. */
 
-.add-cart,
-.featured-buy .add-cart,
-.featured-side-content .add-cart {
+.add-cart {
   display: inline-flex;
   min-height: 48px;
   padding: 11px 18px;
@@ -1112,28 +1108,14 @@ h3,
   box-shadow: none;
 }
 
-.featured-buy .add-cart {
-  min-width: 190px;
-}
-
-.featured-side-content .add-cart {
-  width: 100%;
-}
-
-.add-cart i,
-.featured-buy .add-cart i,
-.featured-side-content .add-cart i {
+.add-cart i {
   margin: 0;
   color: var(--luxury-gold-light);
   font-size: 15px;
 }
 
 .add-cart:hover,
-.add-cart:focus-visible,
-.featured-buy .add-cart:hover,
-.featured-buy .add-cart:focus-visible,
-.featured-side-content .add-cart:hover,
-.featured-side-content .add-cart:focus-visible {
+.add-cart:focus-visible {
   border-color: rgba(189, 163, 111, 0.42);
   background: linear-gradient(135deg, #162e4b, #0b1c31);
   color: #fff;
@@ -1147,104 +1129,6 @@ h3,
 }
 
 /* Softer featured cards: remove the hard outline and unify corner geometry. */
-.featured-main,
-.featured-side {
-  position: relative;
-  overflow: hidden;
-  border: 1px solid rgba(212, 192, 146, 0.34);
-  border-top-color: rgba(225, 207, 168, 0.62);
-  border-right-color: rgba(225, 207, 168, 0.52);
-  border-radius: 20px;
-  box-shadow:
-    0 22px 56px rgba(2, 12, 27, 0.24),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.035);
-  box-sizing: border-box;
-}
-
-.featured-main::before,
-.featured-side::before {
-  position: absolute;
-  z-index: 5;
-  inset: 9px;
-  border-radius: 13px;
-  border: 1px solid rgba(240, 226, 197, 0.1);
-  border-top-color: rgba(240, 226, 197, 0.25);
-  border-right-color: rgba(240, 226, 197, 0.2);
-  background: transparent;
-  content: "";
-  pointer-events: none;
-}
-
-.featured-main::after {
-  background: linear-gradient(
-    180deg,
-    rgba(2, 10, 22, 0.03) 18%,
-    rgba(3, 13, 28, 0.3) 52%,
-    rgba(3, 13, 28, 0.94) 100%
-  );
-}
-
-.featured-content {
-  right: 42px;
-  bottom: 40px;
-  left: 42px;
-  text-shadow: 0 3px 18px rgba(0, 0, 0, 0.38);
-}
-
-.featured-content > small,
-.featured-side-content > small {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  color: #d4c092;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-}
-
-.featured-content > small::before,
-.featured-side-content > small::before {
-  width: 18px;
-  height: 1px;
-  background: currentColor;
-  content: "";
-  opacity: 0.72;
-}
-
-.featured-content h3 {
-  margin: 10px 0 8px;
-  color: #fff;
-  font-family: var(--font-heading);
-  font-size: 31px;
-  font-weight: 700;
-  line-height: 1.6;
-}
-
-.featured-content p {
-  margin: 0;
-  color: rgba(255, 255, 255, 0.82);
-  font-size: 15px;
-  font-weight: 400;
-  line-height: 2;
-}
-
-.featured-buy strong {
-  color: #fff;
-  font-family: var(--font-body);
-  font-size: 20px;
-  font-weight: 700;
-}
-
-.featured-buy del {
-  margin-bottom: 4px;
-  color: rgba(255, 255, 255, 0.74);
-  font-family: var(--font-body);
-  font-size: 16px;
-  font-weight: 600;
-  line-height: 1.6;
-  text-decoration-color: rgba(212, 192, 146, 0.9);
-  text-decoration-thickness: 1.5px;
-}
 
 .featured-badge {
   width: 76px;
@@ -1265,105 +1149,11 @@ h3,
   content: "";
 }
 
-.featured-side-content {
-  padding: 30px 34px 27px;
-}
-
-.featured-side-content h3 {
-  margin: 8px 0 5px;
-  color: #10233d;
-  font-family: var(--font-heading);
-  font-size: 24px;
-  font-weight: 700;
-  line-height: 1.65;
-}
-
-.featured-side-content > small {
-  color: #967541;
-}
-
-.featured-side-content p {
-  color: #66717e;
-  font-size: 14px;
-  line-height: 2;
-}
-
-.featured-price {
-  color: #10233d;
-  font-family: var(--font-body);
-  font-size: 18px;
-  font-weight: 700;
-}
-
-.featured-main > img,
-.featured-side-image,
-.featured-side-image > img {
-  border-radius: inherit;
-}
-
-.featured-side-image {
-  border-bottom-right-radius: 0;
-  border-bottom-left-radius: 0;
-}
-
-.featured-products.py-section {
-  background: linear-gradient(180deg, #0b2a73 0%, #07517a 82%, #0b4168 100%);
-}
-
 @media (max-width: 575px) {
-  .add-cart,
-  .featured-buy .add-cart,
-  .featured-side-content .add-cart {
+  .add-cart {
     min-height: 50px;
     border-radius: 10px !important;
     font-size: 14.5px;
-  }
-
-  .featured-main,
-  .featured-side {
-    border-radius: 17px;
-  }
-
-  .featured-buy .add-cart {
-    width: 100%;
-    min-width: 0;
-  }
-
-  .featured-main::before,
-  .featured-side::before {
-    inset: 7px;
-    border-radius: 11px;
-    border-color: rgba(240, 226, 197, 0.15);
-  }
-
-  .featured-content {
-    right: 25px;
-    bottom: 27px;
-    left: 25px;
-  }
-
-  .featured-content h3 {
-    font-size: 25px;
-  }
-
-  .featured-content p {
-    font-size: 13.5px;
-  }
-
-  .featured-buy strong {
-    font-size: 18px;
-  }
-
-  .featured-buy del {
-    font-size: 15px;
-  }
-
-  .featured-side-content {
-    padding: 26px 25px 23px;
-  }
-
-  .featured-side-content h3 {
-    font-size: 21px;
   }
 
   .featured-badge {
@@ -1487,18 +1277,14 @@ h3,
 }
 
 /* Unified borders and interaction states across the storefront. */
-:where(
-  .product-card,
+:where(.product-card,
   .showcase-card,
   .rail-card,
   .brand-card,
   .glass-card,
   .search-product,
-  .featured-main,
-  .featured-side,
   .store-card,
-  .testimonial-card
-) {
+  .testimonial-card) {
   border-top-color: rgba(212, 192, 146, 0.28);
   border-right-color: rgba(212, 192, 146, 0.38);
   transition:
@@ -1507,18 +1293,14 @@ h3,
     border-color 0.24s ease;
 }
 
-:where(
-  .product-card,
+:where(.product-card,
   .showcase-card,
   .rail-card,
   .brand-card,
   .glass-card,
   .search-product,
-  .featured-main,
-  .featured-side,
   .store-card,
-  .testimonial-card
-):hover {
+  .testimonial-card):hover {
   border-top-color: rgba(212, 192, 146, 0.48);
   border-right-color: rgba(212, 192, 146, 0.58);
 }
@@ -1666,18 +1448,14 @@ h3,
 }
 
 @media (hover: none) {
-  :where(
-    .product-card,
+  :where(.product-card,
     .showcase-card,
     .rail-card,
     .brand-card,
     .glass-card,
     .search-product,
-    .featured-main,
-    .featured-side,
     .store-card,
-    .testimonial-card
-  ):hover {
+    .testimonial-card):hover {
     border-top-color: rgba(212, 192, 146, 0.28);
     border-right-color: rgba(212, 192, 146, 0.38);
     box-shadow: 0 10px 32px rgba(7, 20, 38, 0.075);
