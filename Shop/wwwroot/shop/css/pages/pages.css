@@ -3033,8 +3033,7 @@ body {
   --page-widget-border-strong: var(--color-line-strong);
   --page-widget-border-dark: rgba(236, 220, 188, 0.34);
 }
-:where(
-  .glass-card,
+:where(.glass-card,
   .featured-article,
   .article-card,
   .value-card,
@@ -3049,45 +3048,33 @@ body {
   .blog-newsletter form,
   .cta-box,
   .page-panel,
-  .page-login-box,
-  .page-cart-item,
-  .article-share
-) {
+  .article-share) {
   border-color: var(--page-widget-border) !important;
 }
-:where(
-  .glass-card,
+:where(.glass-card,
   .featured-article,
   .article-card,
   .value-card,
   .timeline-item,
   .related-card,
   .blog-stats > span,
-  .blog-filter button
-):hover {
+  .blog-filter button):hover {
   border-color: var(--page-widget-border-strong) !important;
 }
-:where(.field input, .field select, .field textarea, .page-login-box input) {
+:where(.field input, .field select, .field textarea) {
   border-color: var(--page-widget-border) !important;
 }
-:where(
-  .field input,
+:where(.field input,
   .field select,
-  .field textarea,
-  .page-login-box input
-):focus {
+  .field textarea):focus {
   border-color: var(--industrial-steel) !important;
 }
-:where(
-  .contact-panel,
+:where(.contact-panel,
   .contact-method,
   .blog-topics a,
   .hero-trail span,
   .page-kicker,
-  .page-menu-drawer,
-  .page-menu-drawer nav > a,
-  .page-panel-head
-) {
+  .page-panel-head) {
   border-color: var(--page-widget-border-dark) !important;
 }
 

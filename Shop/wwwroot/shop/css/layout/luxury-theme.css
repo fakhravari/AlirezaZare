@@ -1489,8 +1489,7 @@ h3,
 }
 
 /* Unified borders and interaction states across the storefront. */
-:where(
-  .product-card,
+:where(.product-card,
   .showcase-card,
   .rail-card,
   .brand-card,
@@ -1499,8 +1498,7 @@ h3,
   .featured-main,
   .featured-side,
   .store-card,
-  .testimonial-card
-) {
+  .testimonial-card) {
   border-top-color: rgba(212, 192, 146, 0.28);
   border-right-color: rgba(212, 192, 146, 0.38);
   transition:
@@ -1509,8 +1507,7 @@ h3,
     border-color 0.24s ease;
 }
 
-:where(
-  .product-card,
+:where(.product-card,
   .showcase-card,
   .rail-card,
   .brand-card,
@@ -1519,14 +1516,12 @@ h3,
   .featured-main,
   .featured-side,
   .store-card,
-  .testimonial-card
-):hover {
+  .testimonial-card):hover {
   border-top-color: rgba(212, 192, 146, 0.48);
   border-right-color: rgba(212, 192, 146, 0.58);
 }
 
-:where(
-  .mega-menu,
+:where(.mega-menu,
   .dropdown-menu,
   .cart-panel,
   .account-panel,
@@ -1534,19 +1529,16 @@ h3,
   .shared-account-card,
   .filter-panel,
   .search-cart-drawer,
-  .shared-login-modal
-) {
+  .shared-login-modal) {
   border-color: var(--luxury-border) !important;
 }
 
-:where(
-  .dropdown-menu a,
+:where(.dropdown-menu a,
   .mega-menu a,
   .filter-option,
   .article-toc a,
   .results-toolbar button,
-  .active-chips button
-) {
+  .active-chips button) {
   border-color: transparent;
   transition:
     color 0.2s ease,
@@ -1557,12 +1549,10 @@ h3,
 }
 
 :where(.dropdown-menu a, .mega-menu a, .filter-option, .article-toc a):hover,
-:where(
-  .dropdown-menu a,
+:where(.dropdown-menu a,
   .mega-menu a,
   .filter-option,
-  .article-toc a
-):focus-visible {
+  .article-toc a):focus-visible {
   border-color: var(--luxury-border-soft);
   background: var(--luxury-hover-surface);
   color: #10233d;
@@ -1575,18 +1565,12 @@ h3,
     background-color 0.2s ease;
 }
 
-:where(input, textarea, select):not([type="checkbox"]):not(
-    [type="radio"]
-  ):not(.is-invalid):hover {
+:where(input, textarea, select):not([type="checkbox"]):not([type="radio"]):not(.is-invalid):hover {
   border-color: var(--luxury-border) !important;
 }
 
-:where(input, textarea, select):not([type="checkbox"]):not(
-    [type="radio"]
-  ):not(.is-invalid):focus,
-:where(input, textarea, select):not([type="checkbox"]):not(
-    [type="radio"]
-  ):not(.is-invalid):focus-visible {
+:where(input, textarea, select):not([type="checkbox"]):not([type="radio"]):not(.is-invalid):focus,
+:where(input, textarea, select):not([type="checkbox"]):not([type="radio"]):not(.is-invalid):focus-visible {
   border-color: var(--luxury-border-strong) !important;
   outline: 0 !important;
   box-shadow: 0 0 0 3px var(--luxury-focus-ring) !important;
@@ -1597,16 +1581,13 @@ h3,
   box-shadow: 0 0 0 3px var(--luxury-focus-ring);
 }
 
-:where(
-  .header-cart,
+:where(.header-cart,
   .search-account,
   .page-cart-toggle,
-  .page-account-toggle,
   .favorite,
   .cart-head > button,
   .page-panel-head > button,
-  .search-cart-head > button
-) {
+  .search-cart-head > button) {
   transition:
     color 0.2s ease,
     background-color 0.2s ease,
@@ -1615,18 +1596,12 @@ h3,
     transform 0.2s ease;
 }
 
-:where(
-  .header-cart,
+:where(.header-cart,
   .search-account,
-  .page-cart-toggle,
-  .page-account-toggle
-):hover,
-:where(
-  .header-cart,
+  .page-cart-toggle):hover,
+:where(.header-cart,
   .search-account,
-  .page-cart-toggle,
-  .page-account-toggle
-):focus-visible {
+  .page-cart-toggle):focus-visible {
   border-color: var(--luxury-border-strong) !important;
   background: rgba(212, 192, 146, 0.12) !important;
   color: var(--luxury-gold-light) !important;
@@ -1643,24 +1618,20 @@ h3,
   transform: rotate(5deg);
 }
 
-:where(
-  .add-cart,
+:where(.add-cart,
   .search-add-cart,
   .submit-btn,
   .subscribe button,
   .quick-add-cart,
   .page-cta a,
-  .view-all-link
-):hover,
-:where(
-  .add-cart,
+  .view-all-link):hover,
+:where(.add-cart,
   .search-add-cart,
   .submit-btn,
   .subscribe button,
   .quick-add-cart,
   .page-cta a,
-  .view-all-link
-):focus-visible {
+  .view-all-link):focus-visible {
   border-color: var(--luxury-border-strong) !important;
   background: linear-gradient(135deg, #183451, #0c2037) !important;
   color: #fff !important;
@@ -1674,8 +1645,7 @@ h3,
 }
 
 @media (hover: none) {
-  :where(
-    .product-card,
+  :where(.product-card,
     .showcase-card,
     .rail-card,
     .brand-card,
@@ -1684,8 +1654,7 @@ h3,
     .featured-main,
     .featured-side,
     .store-card,
-    .testimonial-card
-  ):hover {
+    .testimonial-card):hover {
     border-top-color: rgba(212, 192, 146, 0.28);
     border-right-color: rgba(212, 192, 146, 0.38);
     box-shadow: 0 10px 32px rgba(7, 20, 38, 0.075);
