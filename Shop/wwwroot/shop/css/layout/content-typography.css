@@ -26,7 +26,7 @@ body[dir="rtl"] :is(.home-page, .inner-page) main
 }
 
 body[dir="rtl"] :is(.home-page, .inner-page) main
-  :is(.flow-empty, .cart-empty, .compare-empty, .empty-results, .overview-empty)
+  :is(.flow-empty, .compare-empty, .empty-results, .overview-empty)
   p {
   text-align: center;
   text-align-last: center;

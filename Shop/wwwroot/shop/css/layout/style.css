@@ -1940,23 +1940,12 @@ footer {
   color: #777;
 }
 
-.cart-quantity {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.cart-quantity button,
 .cart-remove {
   border: 0;
   background: #f1ede7;
   color: var(--color-navy);
   width: 25px;
   height: 25px;
-}
-
-.cart-quantity b {
-  font-size: 12px;
 }
 
 .cart-remove {
@@ -4954,19 +4943,6 @@ h6,
   color: #9a6d31;
   font-weight: 700;
 }
-.cart-quantity {
-  padding: 3px;
-  border-radius: 9px;
-}
-.cart-quantity button {
-  border-radius: 7px;
-  background: #fff;
-  transition: 0.2s;
-}
-.cart-quantity button:hover {
-  background: #0b2868;
-  color: #fff;
-}
 .cart-remove {
   display: grid;
   place-items: center;
@@ -5311,16 +5287,6 @@ h6,
 .cart-item-info > span {
   font-size: 13px;
   line-height: 1.55;
-}
-
-.cart-quantity b {
-  min-width: 18px;
-  font-size: 14px;
-  text-align: center;
-}
-
-.cart-quantity button {
-  font-size: 15px;
 }
 
 /* Premium services and trust strip */
@@ -6275,16 +6241,6 @@ body {
 .account-links a,
 .cart-item {
   border-radius: var(--md-radius-sm);
-}
-
-.cart-quantity {
-  width: fit-content;
-  align-self: flex-start;
-  gap: 4px;
-  border: 0;
-  border-radius: 0;
-  background: transparent !important;
-  box-shadow: none;
 }
 
 .purchase-benefits {

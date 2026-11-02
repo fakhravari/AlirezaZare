@@ -1560,11 +1560,6 @@
     gap: 8px;
   }
 
-  html body > #cartPanel .cart-item-controls {
-    max-width: 100%;
-    margin-inline-start: auto;
-  }
-
   html body > #cartPanel .cart-item-option-chip {
     max-width: 100%;
     overflow-wrap: anywhere;
