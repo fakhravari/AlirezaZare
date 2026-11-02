@@ -426,7 +426,6 @@ h3,
 .dropdown-menu,
 .cart-panel,
 .account-panel,
-.page-panel,
 .shared-account-card,
 .filter-panel,
 .search-cart-drawer,
@@ -598,15 +597,13 @@ h3,
     box-shadow: -22px 0 60px rgba(1, 8, 18, 0.42) !important;
   }
 
-  .mobile-menu .offcanvas-header,
-  .page-menu-head {
+  .mobile-menu .offcanvas-header {
     min-height: 82px;
     border-bottom: 1px solid rgba(212, 192, 146, 0.2) !important;
     background: rgba(255, 255, 255, 0.018) !important;
   }
 
   .mobile-menu .btn-close,
-  .page-menu-head > button,
   .search-mobile-menu > button {
     border: 1px solid rgba(212, 192, 146, 0.34) !important;
     border-radius: 11px !important;
@@ -617,7 +614,6 @@ h3,
   }
 
   .mobile-menu .btn-close:hover,
-  .page-menu-head > button:hover,
   .search-mobile-menu > button:hover {
     border-color: rgba(212, 192, 146, 0.58) !important;
     background-color: rgba(212, 192, 146, 0.15) !important;
@@ -692,23 +688,19 @@ h3,
     color: #e2c47f !important;
   }
 
-  .mobile-menu-footer,
-  .page-menu-contact {
+  .mobile-menu-footer {
     border-top-color: rgba(212, 192, 146, 0.2) !important;
   }
 
-  .mobile-menu-footer span,
-  .page-menu-contact small {
+  .mobile-menu-footer span {
     color: rgba(226, 196, 127, 0.78) !important;
   }
 
-  .mobile-menu-footer a,
-  .page-menu-contact a {
+  .mobile-menu-footer a {
     color: #f7f1e4 !important;
   }
 
   .offcanvas-backdrop.show,
-  .page-menu-backdrop.open,
   .search-menu-backdrop.open {
     background: #020a13 !important;
     opacity: 0.68 !important;
@@ -1282,17 +1274,14 @@ h3,
   border-right-color: rgba(212, 192, 146, 0.58);
 }
 
-:where(
-  .mega-menu,
+:where(.mega-menu,
   .dropdown-menu,
   .cart-panel,
   .account-panel,
-  .page-panel,
   .shared-account-card,
   .filter-panel,
   .search-cart-drawer,
-  .shared-login-modal
-) {
+  .shared-login-modal) {
   border-color: var(--luxury-border) !important;
 }
 

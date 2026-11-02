@@ -774,8 +774,7 @@ h6,
   box-shadow: none !important;
 }
 
-.navbar-toggler,
-.page-menu-toggle {
+.navbar-toggler {
   border-color: var(--industrial-line) !important;
   background: #fff !important;
   color: var(--industrial-navy) !important;

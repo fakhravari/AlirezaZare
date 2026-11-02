@@ -699,85 +699,6 @@ h6 {
   font-synthesis: none;
 }
 /* Shared account and cart controls */
-.page-nav-actions {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-}
-.page-overlay {
-  position: fixed;
-  z-index: 1990;
-  inset: 0;
-  background: rgba(3, 13, 35, 0.52);
-  backdrop-filter: blur(3px);
-  opacity: 0;
-  visibility: hidden;
-  transition: 0.25s;
-}
-.page-overlay.open {
-  opacity: 1;
-  visibility: visible;
-}
-.page-panel {
-  position: fixed;
-  z-index: 2000;
-  border: 1px solid color-mix(in srgb, var(--industrial-yellow) 15%, white);
-  background: var(--color-surface);
-  color: var(--color-ink);
-  box-shadow: 0 25px 70px rgba(3, 13, 35, 0.28);
-  opacity: 0;
-  visibility: hidden;
-  transition:
-    opacity 0.24s ease,
-    visibility 0.24s ease,
-    transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.page-panel.open {
-  opacity: 1;
-  visibility: visible;
-}
-.page-user {
-  display: flex;
-  gap: 11px;
-  padding-bottom: 15px;
-  align-items: center;
-  border-bottom: 1px solid
-    color-mix(in srgb, var(--industrial-yellow) 14%, white);
-}
-.page-user > i {
-  display: grid;
-  width: 43px;
-  height: 43px;
-  place-items: center;
-  border-radius: 13px;
-  background: color-mix(in srgb, var(--industrial-yellow) 14%, white);
-  color: var(--color-blue);
-  font-size: 20px;
-}
-.page-user span {
-  display: flex;
-  flex-direction: column;
-}
-.page-user small {
-  color: var(--industrial-steel);
-  font-size: 10px;
-}
-.page-logout {
-  width: 100%;
-  margin-top: 14px;
-  padding: 11px;
-  border: 0;
-  border-radius: 10px;
-  background: var(--industrial-bg);
-  color: #a34f49;
-  font: inherit;
-  font-size: 11px;
-}
-@media (max-width: 991px) {
-  .page-nav-actions {
-    margin-right: auto;
-  }
-}
 
 /* Hero dimensions and type scale matched to the home page */
 .page-hero {
@@ -915,81 +836,6 @@ h6 {
 }
 
 /* Header controls matched to the home page */
-.page-menu-toggle {
-  display: none;
-  width: 40px;
-  height: 40px;
-  padding: 0;
-  place-items: center;
-  border: 0;
-  background: transparent;
-  color: #fff;
-  font-size: 23px;
-}
-.page-menu-head {
-  display: flex;
-  height: 82px;
-  align-items: center;
-  justify-content: space-between;
-  border-bottom: 1px solid rgba(223, 200, 141, 0.2);
-}
-.page-menu-head .brand {
-  font-size: 17px;
-}
-.page-menu-head .brand > span {
-  width: 34px;
-  height: 34px;
-}
-.page-menu-head > button {
-  display: grid;
-  width: 38px;
-  height: 38px;
-  place-items: center;
-  border: 1px solid rgba(255, 255, 255, 0.13);
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.07);
-  color: #fff;
-}
-.page-menu-contact {
-  position: absolute;
-  right: 22px;
-  bottom: 28px;
-  left: 22px;
-  padding-top: 18px;
-  border-top: 1px solid rgba(223, 200, 141, 0.2);
-}
-.page-menu-contact small {
-  display: block;
-  color: var(--industrial-yellow);
-  font-size: 10px;
-}
-.page-menu-contact a {
-  display: block;
-  margin-top: 4px;
-  font-size: 17px;
-  font-weight: 700;
-}
-
-@media (max-width: 767px) {
-  .page-menu-toggle {
-    display: grid;
-    order: -1;
-  }
-  .page-nav-actions {
-    margin: 0;
-    gap: 6px;
-  }
-}
-
-@media (min-width: 768px) and (max-width: 991px) {
-  .page-menu-toggle {
-    display: grid;
-    order: -1;
-  }
-  .page-nav-actions {
-    margin: 0;
-  }
-}
 
 /* Rich magazine and single article */
 .blog-title-row {
@@ -2449,21 +2295,6 @@ h6 {
 /* Panel placement parity with the home page */
 
 /* Exact home-header colors and interaction states */
-.page-panel {
-  border-color: var(--industrial-muted);
-  background: rgba(252, 249, 245, 0.98);
-  box-shadow: 0 24px 64px rgba(4, 17, 48, 0.24);
-  backdrop-filter: blur(18px);
-}
-.page-logout {
-  transition:
-    background-color 0.2s ease,
-    color 0.2s ease;
-}
-.page-logout:hover {
-  background: #a34f49;
-  color: #fff;
-}
 
 /* Refined blog ending: more posts and newsletter */
 #articles.page-section {
@@ -2714,8 +2545,7 @@ h6 {
 button,
 input,
 select,
-textarea,
-.page-panel {
+textarea {
   font-family: var(--font-body);
 }
 
@@ -2812,8 +2642,7 @@ body {
   --page-widget-border-strong: var(--color-line-strong);
   --page-widget-border-dark: rgba(236, 220, 188, 0.34);
 }
-:where(
-  .glass-card,
+:where(.glass-card,
   .featured-article,
   .article-card,
   .value-card,
@@ -2827,9 +2656,7 @@ body {
   .blog-filter button,
   .blog-newsletter form,
   .cta-box,
-  .page-panel,
-  .article-share
-) {
+  .article-share) {
   border-color: var(--page-widget-border) !important;
 }
 :where(
@@ -2863,63 +2690,8 @@ body {
 }
 
 /* Category and brand dropdowns matched to the home-page header. */
-.page-header-dropdown {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-.page-header-dropdown > button {
-  border: 0;
-  background: transparent;
-}
-.page-header-dropdown > button:after {
-  content: "\F282";
-  display: inline-block;
-  margin-right: 7px;
-  font-family: "bootstrap-icons";
-  font-size: 9px;
-  transition: transform 0.2s;
-}
-.page-header-dropdown.open > button:after,
-.page-header-dropdown:hover > button:after {
-  transform: rotate(180deg);
-}
-.page-header-menu {
-  position: absolute;
-  z-index: 2100;
-  top: calc(100% - 5px);
-  right: 0;
-  border: 1px solid var(--industrial-muted);
-  border-top: 3px solid var(--industrial-yellow);
-  border-radius: 0 0 14px 14px;
-  background: var(--color-surface);
-  color: var(--color-ink);
-  box-shadow:
-    0 22px 55px rgba(3, 13, 35, 0.27),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.75);
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(10px);
-  transition: 0.24s;
-}
-.page-header-dropdown:hover > .page-header-menu,
-.page-header-dropdown.open > .page-header-menu {
-  opacity: 1;
-  visibility: visible;
-  transform: none;
-}
-@media (max-width: 991px) {
-  .page-header-dropdown {
-    display: none;
-  }
-}
 
 /* Unified mobile-drawer icon color. */
-@media (max-width: 991px) {
-  .page-menu-contact i {
-    color: var(--industrial-yellow) !important;
-  }
-}
 
 /* Full desktop mega menus — same scale and composition as the home page. */
 @media (min-width: 992px) {
@@ -2964,22 +2736,6 @@ body {
 /* Exact mega-menu sizing shared with the home page. */
 
 /* Typography and hover behavior parity for inner-page mega menus. */
-.page-header-dropdown,
-.page-header-menu,
-.page-header-menu a,
-.page-header-menu button,
-.page-header-menu strong,
-.page-header-menu span {
-  font-family: var(--font-body) !important;
-  font-synthesis: none;
-}
-.page-header-dropdown > button {
-  font-size: 15px !important;
-  font-weight: 700 !important;
-}
-.page-header-menu {
-  font-size: 12px;
-}
 @keyframes pageMegaFade {
   from {
     opacity: 0.35;

@@ -13,11 +13,6 @@
   opacity: 0.62;
   visibility: visible;
 }
-.page-overlay.login-mode {
-  background: rgba(3, 13, 35, 0.36);
-  backdrop-filter: blur(4px);
-  opacity: 1;
-}
 .shared-login-modal {
   box-sizing: border-box;
   position: fixed;
