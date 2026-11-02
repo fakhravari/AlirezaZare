@@ -4533,11 +4533,6 @@ footer .copyright {
   background: var(--color-navy);
 }
 
-@media (max-width: 991px) {
-  .testimonial-slider .owl-nav {
-  }
-}
-
 @media (max-width: 767px) {
   .testimonial-slider .owl-item .testimonial-card {
     min-height: 280px;
@@ -4652,9 +4647,6 @@ h6,
 
 .testimonial-slider-wrap {
   position: relative;
-}
-
-.testimonial-slider .owl-nav {
 }
 
 .testimonial-slider .owl-nav button {

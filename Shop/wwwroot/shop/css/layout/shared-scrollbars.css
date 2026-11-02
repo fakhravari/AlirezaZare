@@ -47,10 +47,10 @@ html::-webkit-scrollbar-thumb:hover {
 }
 
 /* Horizontal swipe rails intentionally hide their native scrollbar. */
-:is(html, #main-content) :is(.product-tabs, .article-breadcrumb, .cart-breadcrumb, .testimonial-slider, .profile-breadcrumb ol) {
+:is(html, #main-content) :is(.product-tabs, .article-breadcrumb, .cart-breadcrumb, .product-rail, .testimonial-slider, .profile-breadcrumb ol) {
   scrollbar-width: none;
 }
 
-:is(html, #main-content) :is(.product-tabs, .article-breadcrumb, .cart-breadcrumb, .testimonial-slider, .profile-breadcrumb ol)::-webkit-scrollbar {
+:is(html, #main-content) :is(.product-tabs, .article-breadcrumb, .cart-breadcrumb, .product-rail, .testimonial-slider, .profile-breadcrumb ol)::-webkit-scrollbar {
   display: none;
 }

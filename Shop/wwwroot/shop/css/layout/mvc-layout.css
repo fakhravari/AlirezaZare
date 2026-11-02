@@ -276,9 +276,13 @@ footer .trust-badges .trust-badge {
 
 /* Shared form behavior: consistent focus and layout-stable validation. */
 form
-  :where(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]),
+  :where(
+    input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not(
+        [type="range"]
+      ),
     select,
-    textarea) {
+    textarea
+  ) {
   transition:
     border-color 180ms ease,
     background-color 180ms ease,
@@ -286,9 +290,13 @@ form
 }
 
 form
-  :where(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]),
+  :where(
+    input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not(
+        [type="range"]
+      ),
     select,
-    textarea):is(:focus, :focus-visible) {
+    textarea
+  ):is(:focus, :focus-visible) {
   border-color: rgba(173, 137, 80, 0.82) !important;
   outline: none !important;
   background-color: #fffdfa;

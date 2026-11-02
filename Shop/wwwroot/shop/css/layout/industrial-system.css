@@ -885,7 +885,8 @@ h6,
   background-color: #fff !important;
 }
 
-:is(.flow-card,
+:is(
+  .flow-card,
   .contact-form,
   .contact-info-card,
   .branch-card,
@@ -903,21 +904,24 @@ h6,
   .filter-card,
   .summary-card,
   .cart-summary,
-  .product-details-card) {
+  .product-details-card
+) {
   border-color: var(--industrial-line) !important;
   border-radius: var(--radius-panel-standard, 20px);
   background: var(--industrial-surface) !important;
   box-shadow: var(--industrial-shadow) !important;
 }
 
-:is(.faq-item,
+:is(
+  .faq-item,
   .address-card,
   .journal-card,
   .article-card,
   .brand-card,
   .gallery-card,
   .filter-card,
-  .summary-card) {
+  .summary-card
+) {
   border-radius: var(--radius-panel-compact, 14px);
 }
 
@@ -925,11 +929,13 @@ h6,
   border-radius: var(--radius-panel-featured, 24px 24px 14px 24px);
 }
 
-:is(.branch-card,
+:is(
+  .branch-card,
   .journal-card,
   .brand-card,
   .gallery-card,
-  .address-card):hover {
+  .address-card
+):hover {
   border-color: var(--industrial-yellow) !important;
   box-shadow: var(--industrial-shadow-hover) !important;
 }
@@ -958,7 +964,8 @@ h6,
 }
 
 /* Buttons and actions */
-:is(.btn-primary,
+:is(
+  .btn-primary,
   .contact-submit,
   .form-confirm-accept,
   .checkout-submit,
@@ -966,14 +973,16 @@ h6,
   .profile-save,
   .add-cart,
   .page-cta a,
-  .featured-buy button) {
+  .featured-buy button
+) {
   border-color: var(--industrial-yellow) !important;
   background: var(--industrial-yellow) !important;
   color: var(--industrial-navy) !important;
   box-shadow: 0 8px 18px rgba(201, 157, 0, 0.2) !important;
 }
 
-:is(.btn-primary,
+:is(
+  .btn-primary,
   .contact-submit,
   .form-confirm-accept,
   .checkout-submit,
@@ -981,17 +990,20 @@ h6,
   .profile-save,
   .add-cart,
   .page-cta a,
-  .featured-buy button):hover {
+  .featured-buy button
+):hover {
   border-color: var(--industrial-navy) !important;
   background: var(--industrial-navy) !important;
   color: #fff !important;
   transform: translateY(-1px);
 }
 
-:is(.btn-warning,
+:is(
+  .btn-warning,
   .badge-best,
   .featured-badge,
-  .discount-badge) {
+  .discount-badge
+) {
   border-color: var(--industrial-yellow) !important;
   background: var(--industrial-yellow) !important;
   color: var(--industrial-navy) !important;
@@ -1020,13 +1032,17 @@ textarea:focus-visible,
 }
 
 /* Forms */
-:is(input, select, textarea):not([type="checkbox"]):not([type="radio"]):not([type="range"]):not(.is-invalid) {
+:is(input, select, textarea):not([type="checkbox"]):not([type="radio"]):not(
+    [type="range"]
+  ):not(.is-invalid) {
   border-color: var(--industrial-line) !important;
   background-color: #fff !important;
   color: var(--industrial-ink) !important;
 }
 
-:is(input, select, textarea):not([type="checkbox"]):not([type="radio"]):not([type="range"]):not(.is-invalid):focus {
+:is(input, select, textarea):not([type="checkbox"]):not([type="radio"]):not(
+    [type="range"]
+  ):not(.is-invalid):focus {
   border-color: var(--industrial-steel) !important;
   box-shadow: 0 0 0 4px rgba(36, 59, 83, 0.1) !important;
 }
@@ -1542,7 +1558,9 @@ form textarea {
 }
 
 form
-  input:not([type="radio"]):not([type="checkbox"]):not([type="hidden"]):not(.is-invalid):focus-visible,
+  input:not([type="radio"]):not([type="checkbox"]):not(
+    [type="hidden"]
+  ):not(.is-invalid):focus-visible,
 form select:not(.is-invalid):focus-visible,
 form textarea:not(.is-invalid):focus-visible {
   border-color: var(--industrial-yellow-dark) !important;
@@ -3332,11 +3350,13 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
 }
 
 /* High-contrast cart glyph shared by every add-to-cart action. */
-:is(.add-cart,
+:is(
+    .add-cart,
     .quick-add-cart,
     .product-detail-add,
     .featured-buy button,
-    .featured-side-content button)
+    .featured-side-content button
+  )
   > i {
   display: inline-grid;
   width: 27px;
@@ -3355,11 +3375,13 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
     transform 0.18s ease;
 }
 
-:is(.add-cart,
+:is(
+    .add-cart,
     .quick-add-cart,
     .product-detail-add,
     .featured-buy button,
-    .featured-side-content button):is(:hover, :focus-visible, .added)
+    .featured-side-content button
+  ):is(:hover, :focus-visible, .added)
   > i {
   border-color: rgba(16, 42, 67, 0.16);
   background: var(--industrial-yellow);
@@ -4171,11 +4193,13 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
 }
 
 /* Final icon contrast wins over page-specific legacy button rules. */
-:is(.add-cart,
+:is(
+    .add-cart,
     .quick-add-cart,
     .product-detail-add,
     .featured-buy button,
-    .featured-side-content button)
+    .featured-side-content button
+  )
   > i,
 #productView .product-detail-add > i {
   border-color: transparent !important;
@@ -4184,11 +4208,13 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
   box-shadow: none !important;
 }
 
-:is(.add-cart,
+:is(
+    .add-cart,
     .quick-add-cart,
     .product-detail-add,
     .featured-buy button,
-    .featured-side-content button):is(:hover, :focus-visible, .added)
+    .featured-side-content button
+  ):is(:hover, :focus-visible, .added)
   > i,
 #productView .product-detail-add:is(:hover, :focus-visible) > i {
   border-color: transparent !important;
@@ -4390,9 +4416,11 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
 
 .inner-page .search-product.product-card .search-product-image,
 .home-page
-  :is(.product-card .product-image,
+  :is(
+    .product-card .product-image,
     .showcase-card .product-image,
-    .rail-card .rail-image) {
+    .rail-card .rail-image
+  ) {
   flex: 0 0 220px;
   padding: 0 !important;
   background: #edf1f3 !important;
@@ -4400,9 +4428,11 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
 
 .inner-page .search-product.product-card .search-product-image > a,
 .home-page
-  :is(.product-card .product-image > a,
+  :is(
+    .product-card .product-image > a,
     .showcase-card .product-image > a,
-    .rail-card .rail-image > a) {
+    .rail-card .rail-image > a
+  ) {
   display: block;
   width: 100%;
   height: 100%;
@@ -4410,9 +4440,11 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
 
 .inner-page .search-product.product-card .search-product-image img,
 .home-page
-  :is(.product-card .product-image img,
+  :is(
+    .product-card .product-image img,
     .showcase-card .product-image img,
-    .rail-card .rail-image img) {
+    .rail-card .rail-image img
+  ) {
   width: 100%;
   height: 100%;
   padding: 0 !important;
@@ -4448,9 +4480,11 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
 }
 
 .home-page
-  :is(.product-card .product-info > p,
+  :is(
+    .product-card .product-info > p,
     .showcase-card-body > strong,
-    .rail-card > strong) {
+    .rail-card > strong
+  ) {
   min-height: 0;
   margin: 8px 0 0 !important;
 }
@@ -4461,9 +4495,11 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
   }
 
   .home-page
-    :is(.product-card .product-image,
+    :is(
+      .product-card .product-image,
       .showcase-card .product-image,
-      .rail-card .rail-image) {
+      .rail-card .rail-image
+    ) {
     flex-basis: 190px;
   }
 }
@@ -5672,12 +5708,14 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
 }
 
 .search-main
-  :is(.filter-panel,
+  :is(
+    .filter-panel,
     .search-box,
     .sort-box,
     .search-product,
     .filter-chip,
-    .clear-filters) {
+    .clear-filters
+  ) {
   border-color: #d8e1e6 !important;
 }
 .search-main .filter-panel,
@@ -6126,38 +6164,46 @@ html::-webkit-scrollbar-thumb:hover {
   scrollbar-width: thin;
 }
 
-:is(.ui-scrollbar,
+:is(
+  .ui-scrollbar,
   .ui-scrollbar--navy,
   .ui-scrollbar--gold-on-dark,
   .electrical-stories,
-  .header-search-suggestions)::-webkit-scrollbar {
+  .header-search-suggestions
+)::-webkit-scrollbar {
   width: var(--site-scrollbar-size);
   height: var(--site-scrollbar-size);
 }
 
-:is(.ui-scrollbar,
+:is(
+  .ui-scrollbar,
   .ui-scrollbar--navy,
   .ui-scrollbar--gold-on-dark,
   .electrical-stories,
-  .header-search-suggestions)::-webkit-scrollbar-track {
+  .header-search-suggestions
+)::-webkit-scrollbar-track {
   margin: 0;
   background: var(--site-scrollbar-track);
 }
 
-:is(.ui-scrollbar,
+:is(
+  .ui-scrollbar,
   .ui-scrollbar--navy,
   .ui-scrollbar--gold-on-dark,
   .electrical-stories,
-  .header-search-suggestions)::-webkit-scrollbar-thumb {
+  .header-search-suggestions
+)::-webkit-scrollbar-thumb {
   border-color: var(--site-scrollbar-track);
   background: var(--site-scrollbar-thumb);
 }
 
-:is(.ui-scrollbar,
+:is(
+    .ui-scrollbar,
     .ui-scrollbar--navy,
     .ui-scrollbar--gold-on-dark,
     .electrical-stories,
-    .header-search-suggestions)::-webkit-scrollbar-thumb:hover {
+    .header-search-suggestions
+  )::-webkit-scrollbar-thumb:hover {
   background: var(--site-scrollbar-thumb-hover);
 }
 
@@ -6933,14 +6979,18 @@ html
 
 #mainNav
   .nav-actions
-  :is(.favorites-toggle:not(.list-received),
+  :is(
+    .favorites-toggle:not(.list-received),
     .compare-toggle:not(.list-received),
-    .cart-btn.cart-icon-theme:not(.cart-received)):is(:hover, :focus, :focus-visible, :active),
+    .cart-btn.cart-icon-theme:not(.cart-received)
+  ):is(:hover, :focus, :focus-visible, :active),
 #mainNav
   .nav-actions
-  :is(.favorites-wrap.open .favorites-toggle:not(.list-received),
+  :is(
+    .favorites-wrap.open .favorites-toggle:not(.list-received),
     .compare-wrap.open .compare-toggle:not(.list-received),
-    .cart-wrap.open .cart-btn.cart-icon-theme:not(.cart-received)) {
+    .cart-wrap.open .cart-btn.cart-icon-theme:not(.cart-received)
+  ) {
   transform: translateY(-1px) !important;
   border-color: #e4bd35 !important;
   background: #fff8d9 !important;
@@ -7203,10 +7253,12 @@ html
   body
   #mainNav
   .nav-actions
-  #compareToggle:not(.list-received):is(:hover,
+  #compareToggle:not(.list-received):is(
+    :hover,
     :focus,
     :focus-visible,
-    :active),
+    :active
+  ),
 html
   body
   #mainNav
@@ -7230,10 +7282,12 @@ html
   body
   #mainNav
   .nav-actions
-  #favoritesToggle:not(.list-received):is(:hover,
+  #favoritesToggle:not(.list-received):is(
+    :hover,
     :focus,
     :focus-visible,
-    :active),
+    :active
+  ),
 html
   body
   #mainNav
@@ -8473,10 +8527,12 @@ html
   }
 }
 
-:is(.modal button[data-bs-dismiss="modal"],
+:is(
+  .modal button[data-bs-dismiss="modal"],
   .site-modal-close,
   .login-close,
-  [data-gallery-close]),
+  [data-gallery-close]
+),
 #loginModal .login-close {
   display: grid;
   width: 40px;
@@ -8501,10 +8557,12 @@ html
     transform 0.18s ease;
 }
 
-:is(.modal button[data-bs-dismiss="modal"],
+:is(
+  .modal button[data-bs-dismiss="modal"],
   .site-modal-close,
   .login-close,
-  [data-gallery-close]):is(:hover, :focus-visible),
+  [data-gallery-close]
+):is(:hover, :focus-visible),
 #loginModal .login-close:is(:hover, :focus-visible) {
   border-color: #d2b761;
   background: linear-gradient(145deg, #21486d, #173653);
@@ -8516,10 +8574,12 @@ html
   transform: translateY(-1px);
 }
 
-:is(.modal button[data-bs-dismiss="modal"],
+:is(
+    .modal button[data-bs-dismiss="modal"],
     .site-modal-close,
     .login-close,
-    [data-gallery-close])
+    [data-gallery-close]
+  )
   > i,
 #loginModal .login-close > i {
   display: grid;
@@ -8532,25 +8592,31 @@ html
   transition: transform 0.18s ease;
 }
 
-:is(.modal button[data-bs-dismiss="modal"],
+:is(
+    .modal button[data-bs-dismiss="modal"],
     .site-modal-close,
     .login-close,
-    [data-gallery-close]):hover
+    [data-gallery-close]
+  ):hover
   > i,
 #loginModal .login-close:hover > i {
   transform: translateX(-1px) rotate(90deg);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  :is(.modal button[data-bs-dismiss="modal"],
+  :is(
+    .modal button[data-bs-dismiss="modal"],
     .site-modal-close,
     .login-close,
-    [data-gallery-close]),
+    [data-gallery-close]
+  ),
   #loginModal .login-close,
-  :is(.modal button[data-bs-dismiss="modal"],
+  :is(
+      .modal button[data-bs-dismiss="modal"],
       .site-modal-close,
       .login-close,
-      [data-gallery-close])
+      [data-gallery-close]
+    )
     > i,
   #loginModal .login-close > i {
     transition: none;
@@ -9131,6 +9197,7 @@ html
     color: var(--industrial-icon-gold) !important;
   }
 
+  .home-page #mainNav .mega-sidebar > a:is(:hover, .active),
   .inner-page
     #mainNav
     .category-mega-sidebar
@@ -9174,6 +9241,11 @@ html
     color: #5b6c7a !important;
   }
 
+  .home-page
+    #mainNav
+    .mega-content-grid
+    > .mega-links
+    > a:is(:hover, :focus-visible),
   .inner-page
     #mainNav
     .category-mega-group
@@ -9685,7 +9757,8 @@ html
 }
 
 /* Shared border rhythm for separators and accent frames across pages. */
-:where(hr,
+:where(
+  hr,
   .flow-row,
   .flow-related,
   .flow-card details,
@@ -9699,17 +9772,20 @@ html
   .article-enhanced .article-section,
   .article-checklist label,
   .product-gallery-dialog-rail,
-  .product-gallery-rail-title) {
+  .product-gallery-rail-title
+) {
   border-color: var(--industrial-line) !important;
 }
 
-:where(.profile-order-card,
+:where(
+  .profile-order-card,
   .article-checklist,
   .article-enhanced .article-share,
   .flow-notice,
   .cart-summary,
   .cart-address-section,
-  .cart-payment-section) {
+  .cart-payment-section
+) {
   border-color: var(--industrial-accent-border-soft);
 }
 
@@ -10105,7 +10181,9 @@ html
 
 /* Shared readable type scale for page content, following the header-cart treatment. */
 .inner-page main
-  label:not(.product-feedback-name-field):not(.product-feedback-rating-field),
+  label:not(.product-feedback-name-field):not(
+    .product-feedback-rating-field
+  ),
 .inner-page main input,
 .inner-page main select,
 .inner-page main textarea {
@@ -10145,7 +10223,9 @@ html
 
 @media (max-width: 575px) {
   .inner-page main
-    label:not(.product-feedback-name-field):not(.product-feedback-rating-field),
+    label:not(.product-feedback-name-field):not(
+      .product-feedback-rating-field
+    ),
   .inner-page main input,
   .inner-page main select,
   .inner-page main textarea {
@@ -10315,9 +10395,11 @@ body.home-page .rail-card > strong {
   visibility: visible !important;
 }
 
-.home-page #amazing .showcase-card-body > .add-cart:is(:hover,
+.home-page #amazing .showcase-card-body > .add-cart:is(
+    :hover,
     :focus-visible,
-    .added) > i {
+    .added
+  ) > i {
   color: var(--industrial-navy) !important;
 }
 
@@ -11676,6 +11758,11 @@ body .electrical-swiper .swiper-pagination-bullet-active {
   font-size: 11px;
   font-weight: 800;
   white-space: nowrap;
+}
+
+.home-page #journal .journal-list article:is(:hover, :focus-within) .journal-list-cta span {
+  max-width: 82px;
+  opacity: 1;
 }
 
 .home-page #journal .journal-list-card-meta small {
