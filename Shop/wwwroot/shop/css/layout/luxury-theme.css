@@ -23,10 +23,9 @@ h3,
   letter-spacing: -0.035em;
 }
 .section-head h2,
-.section-title h2,
-.page-section h2,
-.blog-newsletter h2,
-.page-cta h2 {
+  .section-title h2,
+  .page-section h2,
+  .page-cta h2 {
   font-weight: 700;
   line-height: 1.55;
 }
