@@ -433,20 +433,20 @@
   display: none;
 }
 
-#amazing .showcase-card .product-image {
+#amazing :is(.showcase-card, .product-card) .product-image {
   overflow: hidden;
   padding: 0 !important;
   background: #edf1f3 !important;
 }
 
-#amazing .showcase-card .product-image > a {
+#amazing :is(.showcase-card, .product-card) .product-image > a {
   display: block;
   width: 100%;
   height: 100%;
 }
 
-#amazing .showcase-card .product-image > img,
-#amazing .showcase-card .product-image > a > img {
+#amazing :is(.showcase-card, .product-card) .product-image > img,
+#amazing :is(.showcase-card, .product-card) .product-image > a > img {
   display: block;
   box-sizing: border-box;
   width: 100% !important;
