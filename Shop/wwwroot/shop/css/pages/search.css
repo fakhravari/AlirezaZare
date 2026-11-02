@@ -879,17 +879,24 @@ select {
 }
 
 .sort-label {
+  display: inline-flex;
   flex: 0 0 auto;
-  color: var(--industrial-steel);
-  font-size: 13px;
-  font-weight: 600;
+  min-height: 34px;
+  padding: 0 12px;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid color-mix(in srgb, var(--industrial-yellow) 48%, var(--industrial-navy));
+  border-radius: 10px;
+  background: var(--industrial-navy);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 750;
   white-space: nowrap;
 }
 
 .sort-label i {
-  margin-inline-start: 4px;
-  color: #93a0aa;
-  font-size: 13px;
+  color: var(--industrial-yellow);
+  font-size: 14px;
 }
 
 .sort-options {
