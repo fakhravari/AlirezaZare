@@ -3024,34 +3024,6 @@ footer .copyright {
   margin-top: 3px;
 }
 
-.account-plan {
-  height: 52px;
-  padding: 0 18px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-bottom: 1px solid #eee;
-}
-
-.account-plan span {
-  font-size: 12px;
-  color: #a18a68;
-}
-
-.account-plan span i {
-  margin-left: 7px;
-}
-
-.account-plan b {
-  font-size: 10px;
-  color: #b6449b;
-}
-
-.account-plan b i {
-  font-size: 8px;
-  margin-right: 5px;
-}
-
 .account-links {
   display: flex;
   flex-direction: column;
@@ -3229,132 +3201,12 @@ footer .copyright {
   margin-right: 9px;
 }
 
-.store-contact {
-  margin-top: 28px;
-  border: 1px solid rgba(189, 163, 111, 0.32);
-  border-radius: 22px;
-  background:
-    radial-gradient(
-      circle at 8% 0%,
-      rgba(189, 163, 111, 0.15),
-      transparent 38%
-    ),
-    linear-gradient(135deg, #0d2039, #071426);
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
-  padding: 16px;
-  box-shadow: 0 20px 50px rgba(7, 20, 38, 0.16);
-}
-
-.store-contact-card {
-  position: relative;
-  display: flex;
-  align-items: center;
-  min-width: 0;
-  min-height: 112px;
-  gap: 16px;
-  padding: 18px 20px;
-  border: 1px solid rgba(255, 255, 255, 0.13);
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.055);
-  color: #fff;
-  transition:
-    transform 0.22s ease,
-    border-color 0.22s ease,
-    background-color 0.22s ease,
-    box-shadow 0.22s ease;
-}
-
-.store-contact-card:hover {
-  border-color: rgba(212, 192, 146, 0.58);
-  background: rgba(255, 255, 255, 0.09);
-  color: #fff;
-  box-shadow: inset 0 0 0 1px rgba(212, 192, 146, 0.08);
-  transform: translateY(-2px);
-}
-
-.store-contact-icon {
-  display: grid;
-  width: 52px;
-  height: 52px;
-  flex: 0 0 52px;
-  place-items: center;
-  border: 1px solid rgba(212, 192, 146, 0.34);
-  border-radius: 15px;
-  background: rgba(189, 163, 111, 0.12);
-  color: #d4c092;
-  font-size: 22px;
-}
-
-.store-contact-copy {
-  display: flex;
-  min-width: 0;
-  flex: 1;
-  flex-direction: column;
-  align-items: flex-start;
-}
-
-.store-contact-copy small {
-  margin-bottom: 2px;
-  color: rgba(255, 255, 255, 0.55);
-  font-size: 11px;
-}
-
-.store-contact-copy strong {
-  color: #fff;
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.store-contact-copy b {
-  margin-top: 5px;
-  color: #d4c092;
-  font-size: 21px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  direction: ltr;
-}
-
-.store-contact-action {
-  flex: none;
-  color: rgba(212, 192, 146, 0.72);
-  font-size: 18px;
-  transition: transform 0.22s ease;
-}
-
-.store-contact-card:hover .store-contact-action {
-  transform: translate(-3px, -3px);
-}
-
 @media (max-width: 767px) {
   .store-card {
     min-height: 285px;
     padding: 25px;
   }
 
-  .store-contact {
-    grid-template-columns: 1fr;
-    gap: 10px;
-    padding: 12px;
-    border-radius: 18px;
-  }
-
-  .store-contact-card {
-    min-height: 104px;
-    padding: 15px;
-  }
-
-  .store-contact-icon {
-    width: 46px;
-    height: 46px;
-    flex-basis: 46px;
-    font-size: 20px;
-  }
-
-  .store-contact-copy b {
-    font-size: 19px;
-  }
 }
 
 .hero h1,
@@ -4676,26 +4528,6 @@ h6,
   );
 }
 
-.service-flow {
-  max-width: 1120px;
-  margin: 0 auto;
-}
-
-.service-flow::before {
-  top: 55px;
-  right: 20%;
-  left: 20%;
-  z-index: 0;
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(178, 139, 78, 0.48) 15%,
-    rgba(178, 139, 78, 0.48) 85%,
-    transparent
-  );
-}
-
 .services .service {
   min-height: 270px;
   padding: 38px 30px 30px;
@@ -4773,9 +4605,6 @@ h6,
 @media (max-width: 991px) {
   .services {
     padding: 60px 0;
-  }
-  .service-flow::before {
-    display: none;
   }
 }
 
@@ -5285,26 +5114,6 @@ h6,
 .services .container {
   position: relative;
   z-index: 1;
-}
-
-.service-flow {
-  position: relative;
-}
-
-.service-flow::before {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  top: 58px;
-  right: 16.66%;
-  left: 16.66%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(224, 188, 126, 0.68) 18%,
-    rgba(224, 188, 126, 0.68) 82%,
-    transparent
-  );
 }
 
 .services .service {
@@ -6204,12 +6013,6 @@ body {
 .account-panel,
 .cart-panel {
   overflow: hidden;
-}
-
-.account-plan {
-  border-radius: var(--md-radius-md);
-  background: var(--md-secondary-container) !important;
-  color: var(--md-on-secondary-container) !important;
 }
 
 .account-links a,
