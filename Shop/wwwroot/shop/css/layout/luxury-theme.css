@@ -354,7 +354,6 @@ h3,
 
 .showcase-card-body .add-cart,
 .rail-card .add-cart {
-  width: 100%;
   margin-top: 13px;
 }
 
@@ -1050,7 +1049,6 @@ h3,
 #loginModal .otp-input {
   height: 62px;
   border: 1px solid rgba(124, 108, 82, 0.28);
-  border-radius: 11px;
   background: #fffdf8;
   color: #10233d;
   font-size: 28px;
@@ -1569,11 +1567,9 @@ h3,
   width: 46px;
   height: 46px;
   flex: 0 0 46px;
-  place-items: center;
   color: #e2c47f;
   background: linear-gradient(145deg, #1d4778 0%, #153b68 100%);
   border: 1px solid rgba(214, 181, 106, 0.56);
-  border-radius: 13px;
   box-shadow:
     0 8px 20px rgba(2, 12, 25, 0.18),
     inset 0 1px 0 rgba(255, 255, 255, 0.07);

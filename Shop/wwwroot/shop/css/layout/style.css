@@ -219,7 +219,6 @@
 html {
   background: var(--color-navy);
   scrollbar-color: #9f8b6b var(--color-navy);
-  scrollbar-width: thin;
 }
 
 ::-webkit-scrollbar {
@@ -244,7 +243,6 @@ html {
 }
 
 body {
-  font-family: var(--font-body);
   font-size: var(--font-size-root);
   color: var(--color-ink);
   overflow-x: hidden;
@@ -3662,7 +3660,6 @@ footer .copyright {
 .account-wrap {
   position: relative;
   padding-left: 12px;
-  margin-left: 4px;
   border-left: 1px solid rgba(255, 255, 255, 0.18);
 }
 
@@ -6821,9 +6818,7 @@ h6,
 }
 
 .showcase-card-body {
-  display: flex;
   min-height: 185px;
-  flex-direction: column;
   align-items: flex-start;
   padding: 20px 22px 22px;
 }

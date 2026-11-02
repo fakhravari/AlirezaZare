@@ -565,7 +565,6 @@
 /* Shared product-card base styles; page-specific overrides load afterward. */
 :root {
   --product-card-radius: 18px;
-  --product-card-image-height: 220px;
   --product-card-code-size: var(--font-size-caption);
   --product-card-title-size: var(--font-size-card-title);
   --product-card-price-size: 18px;
@@ -1051,7 +1050,6 @@
   }
 
   .mobile-page--home-index #productGrid > .product-col .product-info h3 {
-    min-height: 3em;
     font-size: 14px;
     line-height: 1.5;
   }
