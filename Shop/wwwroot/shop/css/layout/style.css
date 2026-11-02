@@ -4537,6 +4537,8 @@ h6,
 .journal-main small,
 .journal-list small,
 .rail-card > small,
+.featured-content > small,
+.featured-side-content > small,
 .service > span,
 .store-card > span {
   font-family: "Vazirmatn", Tahoma, sans-serif;
@@ -4553,7 +4555,8 @@ h6,
 
 .product-info p,
 .rail-card > p,
-.rail-card > strong {
+.rail-card > strong,
+.featured-price {
   font-size: 16px;
 }
 
@@ -4838,11 +4841,6 @@ h6,
 .store-contact,
 .store-card > p {
   text-align: right;
-}
-
-/* Editorial pick treatment */
-
-@media (max-width: 575px) {
 }
 
 /* Premium cart drawer */
@@ -5935,7 +5933,9 @@ body {
 .journal-main,
 .journal-list,
 .testimonial-card,
-.recommend-box {
+.recommend-box,
+.featured-main,
+.featured-side {
   overflow: hidden;
   border: 1px solid #c5b8a8;
   border-radius: var(--md-radius-lg);
@@ -5959,7 +5959,8 @@ body {
 
 .product-image,
 .rail-image,
-.showcase-card .product-image {
+.showcase-card .product-image,
+.featured-side-image {
   overflow: hidden;
   border-radius: var(--md-radius-lg) var(--md-radius-lg) 0 0;
 }
@@ -5984,7 +5985,8 @@ body {
 .badge-best,
 .badge-new,
 .badge-offer,
-.rail-image > span {
+.rail-image > span,
+.featured-side-content > small {
   border-radius: 999px !important;
   box-shadow: var(--md-elevation-1);
 }
@@ -8470,6 +8472,7 @@ footer .copyright::before {
 .product-image,
 .showcase-card .product-image,
 .rail-image,
+.featured-side-image,
 .journal-main {
   overflow: hidden;
 }
@@ -8477,6 +8480,7 @@ footer .copyright::before {
 .product-image img,
 .showcase-card .product-image img,
 .rail-image img,
+.featured-side-image img,
 .journal-main img {
   transition:
     transform 0.45s ease,
@@ -8486,6 +8490,7 @@ footer .copyright::before {
 .product-card:hover .product-image img,
 .showcase-card:hover .product-image img,
 .rail-card:hover .rail-image img,
+.featured-side:hover .featured-side-image img,
 .journal-main:hover img {
   transform: scale(1.035);
 }
@@ -8637,6 +8642,7 @@ textarea:focus-visible {
   .services .service,
   .product-image img,
   .rail-image img,
+  .featured-side-image img,
   .journal-main img {
     transition: none !important;
     transform: none !important;
