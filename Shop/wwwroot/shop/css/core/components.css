@@ -286,10 +286,10 @@
   }
 }
 
-:is(.product-detail-status, #accountStatus, #addressStatus, #paymentMethodStatus, #paymentStatus, #trackingStatus, .article-share-status, #articleChecklistStatus, .blog-page-status, #formMessage, #couponStatus, .form-field-error, .field-validation-error, .login-error).hn-message--success,
-:is(.product-detail-status, #accountStatus, #addressStatus, #paymentMethodStatus, #paymentStatus, #trackingStatus, .article-share-status, #articleChecklistStatus, .blog-page-status, #formMessage, #couponStatus, .form-field-error, .field-validation-error, .login-error).hn-message--warning,
-:is(.product-detail-status, #accountStatus, #addressStatus, #paymentMethodStatus, #paymentStatus, #trackingStatus, .article-share-status, #articleChecklistStatus, .blog-page-status, #formMessage, #couponStatus, .form-field-error, .field-validation-error, .login-error).hn-message--error,
-:is(.product-detail-status, #accountStatus, #addressStatus, #paymentMethodStatus, #paymentStatus, #trackingStatus, .article-share-status, #articleChecklistStatus, .blog-page-status, #formMessage, #couponStatus, .form-field-error, .field-validation-error, .login-error).hn-message--info {
+:is(.product-detail-status, #accountStatus, #addressStatus, #paymentMethodStatus, #paymentStatus, #trackingStatus, .article-share-status, #articleChecklistStatus, #formMessage, #couponStatus, .form-field-error, .field-validation-error, .login-error).hn-message--success,
+  :is(.product-detail-status, #accountStatus, #addressStatus, #paymentMethodStatus, #paymentStatus, #trackingStatus, .article-share-status, #articleChecklistStatus, #formMessage, #couponStatus, .form-field-error, .field-validation-error, .login-error).hn-message--warning,
+  :is(.product-detail-status, #accountStatus, #addressStatus, #paymentMethodStatus, #paymentStatus, #trackingStatus, .article-share-status, #articleChecklistStatus, #formMessage, #couponStatus, .form-field-error, .field-validation-error, .login-error).hn-message--error,
+  :is(.product-detail-status, #accountStatus, #addressStatus, #paymentMethodStatus, #paymentStatus, #trackingStatus, .article-share-status, #articleChecklistStatus, #formMessage, #couponStatus, .form-field-error, .field-validation-error, .login-error).hn-message--info {
   color: var(--hn-message-color) !important;
 }
 

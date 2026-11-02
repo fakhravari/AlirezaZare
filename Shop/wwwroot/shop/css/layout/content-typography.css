@@ -33,10 +33,7 @@ body[dir="rtl"] :is(.home-page, .inner-page) main
   line-height: 1.8;
 }
 
-body[dir="rtl"] :is(.home-page, .inner-page) main p:is(
-    .text-center,
-    .blog-page-status
-  ) {
+body[dir="rtl"] :is(.home-page, .inner-page) main p:is(.text-center) {
   text-align: center;
   text-align-last: center;
 }

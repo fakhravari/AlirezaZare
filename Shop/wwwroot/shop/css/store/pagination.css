@@ -1,10 +1,9 @@
 /* Shared appearance for all numbered list pagination. */
 body .site-pagination,
-body .site-pagination button,
-body .site-pagination button > span,
-body .orders-pagination p,
-body .blog-page-status,
-body #journal-count {
+  body .site-pagination button,
+  body .site-pagination button > span,
+  body .orders-pagination p,
+  body #journal-count {
   font-family: var(--font-body, "Vazirmatn", "Estedad", Tahoma, sans-serif);
   font-size: 13px;
   font-weight: 600;
@@ -85,8 +84,7 @@ body .orders-pagination {
   justify-content: center;
   flex-direction: column;
 }
-body .orders-pagination p,
-body .blog-page-status {
+body .orders-pagination p {
   margin: 0;
   color: var(--color-text-muted);
   text-align: center;
