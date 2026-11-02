@@ -22,6 +22,8 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
           code: plan.code,
           name: plan.name,
           label: plan.label,
+          startsAtUtc: plan.startsAtUtc,
+          endsAtUtc: plan.endsAtUtc,
           priceAmount: Number(offer.priceAmount),
           discountPercent: Number(offer.discountPercent) || 0,
           stockQuantity: Number(offer.stockQuantity),
@@ -436,15 +438,10 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
     const discount = Number(product.discountPercent) || 0;
     return discount > 0 && discount < 100;
   };
-  const normalizeFilterSearch = (value) =>
-    String(value ?? "")
-      .normalize("NFKC")
-      .toLocaleLowerCase("fa")
-      .replace(/[يى]/g, "ی")
-      .replace(/ك/g, "ک")
-      .replace(/[\u200c\u200f\u202a-\u202e]/g, "")
-      .replace(/\s+/g, " ")
-      .trim();
+  const normalizeFilterSearch = window.HNUI.normalizeSearchText;
+  const isPlanListingActive = (offer, now = Date.now()) => !offer ||
+    ((!offer.startsAtUtc || now >= Date.parse(offer.startsAtUtc)) &&
+      (!offer.endsAtUtc || now < Date.parse(offer.endsAtUtc)));
   function buildFilters() {
     Object.entries(filterConfig).forEach(([key, values]) => {
       const filterName = key === "brand" ? "برند" : "گروه محصول";
@@ -511,10 +508,13 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
       (p) =>
         (() => {
           const offer = p._salesPlanListing;
-          const price = offer ? offer.priceAmount / 1000000 : p.price;
+          const price = (offer
+            ? window.HNProductCard.currentPrice(p, {priceAmount: offer.priceAmount, discountPercent: offer.discountPercent})
+            : window.HNProductCard.currentPrice(p)) / 1000000;
           const discounted = offer ? offer.discountPercent > 0 : isProductDiscounted(p);
           const available = offer ? offer.stockQuantity > 0 : isProductAvailable(p);
-          return (state.availability === "all" || (state.availability === "in-stock" ? available : !available)) &&
+          return isPlanListingActive(offer) &&
+            (state.availability === "all" || (state.availability === "in-stock" ? available : !available)) &&
             (!state.discountOnly || discounted) && price >= state.minPrice && price <= state.maxPrice;
         })() &&
         (!state.brand.size || state.brand.has(p.brand)) &&
@@ -525,10 +525,11 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
         (!state.color.size ||
           (p.colors || []).some((color) => state.color.has(color.slug))) &&
         (!state.query ||
-          `${p.name} ${p.brand} ${p.type} ${p.powerSource || p.movement} ${p._salesPlanListing?.name || ""} ${p._salesPlanListing?.label || ""}`.includes(state.query)) &&
+          normalizeFilterSearch(`${p.name} ${p.brand} ${p.type} ${p.englishName || ""} ${p.powerSource || p.movement} ${p._salesPlanListing?.name || ""} ${p._salesPlanListing?.label || ""} ${p._salesPlanListing?.code || ""}`)
+            .includes(normalizeFilterSearch(state.query))) &&
         (!state.salesPlan.size || state.salesPlan.has(p._salesPlanListing?.id || "regular")),
     );
-    const listingPrice = (item) => item._salesPlanListing ? item._salesPlanListing.priceAmount * (100 - item._salesPlanListing.discountPercent) / 1000000 : item.price * (1 - (Number(item.discountPercent) || 0) / 100);
+    const listingPrice = (item) => window.HNProductCard.currentPrice(item, item._salesPlanListing || {}) / 1000000;
     if (state.sort === "low") list.sort((a, b) => listingPrice(a) - listingPrice(b));
     if (state.sort === "high") list.sort((a, b) => listingPrice(b) - listingPrice(a));
     if (state.sort === "newest") list.sort((a, b) => a.newest - b.newest);
@@ -926,6 +927,19 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
   applyUrlState();
   updatePrice();
   render();
+  let planExpiryTimer = 0;
+  const schedulePlanExpiryRefresh = () => {
+    window.clearTimeout(planExpiryTimer);
+    const expiries = activePlanListings
+      .map((item) => Date.parse(item._salesPlanListing.endsAtUtc))
+      .filter((end) => Number.isFinite(end) && end > Date.now());
+    if (!expiries.length) return;
+    planExpiryTimer = window.setTimeout(() => {
+      render(true);
+      schedulePlanExpiryRefresh();
+    }, Math.min(...expiries) - Date.now() + 25);
+  };
+  schedulePlanExpiryRefresh();
   updateCartCount();
   document.addEventListener("hn:cart-change", updateCartCount);
   window.addEventListener("popstate", () => {

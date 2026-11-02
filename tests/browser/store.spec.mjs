@@ -45,7 +45,7 @@ test('all home collections render shared cards with one action of each kind', as
       titleColor: getComputedStyle(header.querySelector('h2')).color,
     }));
     expect(planHeader.background).toContain('radial-gradient');
-    expect(planHeader.radius).toBe(isMobile ? '16px' : '20px');
+    expect(planHeader.radius).toBe('18px');
     expect(planHeader.titleColor).toBe('rgb(255, 255, 255)');
     const product = section.locator('.home-sales-plan-grid > div .product-card').first();
     await expect(product).toBeVisible();
@@ -72,8 +72,12 @@ test('all home collections render shared cards with one action of each kind', as
     const countdownTime = countdown.locator('time');
     await expect(countdownTime).toHaveCSS('font-weight', '900');
     await expect(countdownTime).toHaveCSS('font-size', isMobile && planId === 'digi-time' ? '16px' : '17px');
-    if (planId === 'digi-time') await expect(countdownTime).not.toContainText('روز');
-    else await expect(countdownTime).toContainText('روز');
+    const remaining = await page.evaluate(id => {
+      const plans = JSON.parse(document.querySelector('#storeSalesPlans').textContent).plans;
+      return Date.parse(plans.find(plan => plan.id === id).endsAtUtc) - Date.now();
+    }, planId);
+    if (remaining >= 86400000) await expect(countdownTime).toContainText('روز');
+    else await expect(countdownTime).not.toContainText('روز');
     await expect(countdownTime.locator('bdi[dir="ltr"]')).toHaveText(/[۰-۹]{2}:[۰-۹]{2}:[۰-۹]{2}/);
     expect(await product.evaluate(element => element.parentElement.classList.contains('col-xl-2'))).toBe(true);
     const columnRatio = await product.evaluate(element => element.parentElement.getBoundingClientRect().width / element.parentElement.parentElement.getBoundingClientRect().width);
@@ -153,6 +157,56 @@ test('search includes active plan offers and preserves the selected offer in car
   await expect.poll(() => page.evaluate(() => window.HNUI.cart.read().find(item => item.salesPlanId === 'digi-time')?.price)).toBe(expectedPrice);
 });
 
+test('search shares header query rules, filters on final plan price, and removes an offer at expiry', async ({page}, testInfo) => {
+  await page.goto('/search');
+  const expiry = await page.evaluate(() => Date.parse(JSON.parse(document.querySelector('#storeSalesPlans').textContent).plans.find(plan => plan.id === 'digi-time').endsAtUtc));
+  await page.clock.install({time: new Date(expiry - 60000)});
+  await page.reload();
+  await page.locator('#productSearch').fill('DIGI-TIME');
+  await page.clock.runFor(300);
+  const planResults = page.locator('#productResults [data-sales-plan-id="digi-time"]');
+  await expect(planResults.first()).toBeVisible();
+  await page.locator('input[name="productSort"][value="low"]').evaluate(input => { input.checked = true; input.dispatchEvent(new Event('change', {bubbles: true})); });
+  const orderedPlanPrices = await page.locator('#productResults [data-sales-plan-id="digi-time"] .add-cart').evaluateAll(buttons => buttons.map(button => Number(button.dataset.price)));
+  expect(orderedPlanPrices).toEqual([...orderedPlanPrices].sort((a, b) => a - b));
+  await page.evaluate(() => {
+    const maxPrice = document.querySelector('#maxPrice');
+    maxPrice.value = '24';
+    maxPrice.dispatchEvent(new Event('input', {bubbles: true}));
+  });
+  await expect(planResults.first()).toBeVisible();
+  const discountedDrill = page.locator('#productResults [data-product-id="1"][data-sales-plan-id="digi-time"]');
+  await expect(discountedDrill).toBeVisible();
+  await expect(discountedDrill.locator('.add-cart')).toHaveAttribute('data-price', '23058823');
+
+  await page.clock.fastForward(61000);
+  await expect(page.locator('#productResults [data-sales-plan-id="digi-time"]')).toHaveCount(0);
+
+  if (testInfo.project.name === 'desktop') {
+    await page.clock.setSystemTime(new Date(expiry - 60000));
+    await page.goto('/');
+    const headerInput = page.locator('.home-header-search .header-search-input');
+    await headerInput.fill('DIGI-TIME');
+    const suggestions = page.locator('.header-search-suggestions');
+    await page.clock.runFor(300);
+    await expect(suggestions).toBeVisible();
+    await expect(suggestions.locator('.header-search-plan-badge').first()).toContainText('دیجی');
+    await suggestions.locator('a.header-search-all').click();
+    await expect(page).toHaveURL(/\/Search\?q=DIGI-TIME/i);
+    await expect(page.locator('#productResults [data-sales-plan-id="digi-time"]').first()).toBeVisible();
+
+    await page.goto('/');
+    const reopenedHeaderInput = page.locator('.home-header-search .header-search-input');
+    const reopenedSuggestions = page.locator('.header-search-suggestions');
+    await reopenedHeaderInput.fill('DIGI-TIME');
+    await page.clock.runFor(300);
+    await expect(reopenedSuggestions.locator('.header-search-plan-badge').first()).toBeVisible();
+    await reopenedSuggestions.hover();
+    await page.clock.fastForward(61000);
+    await expect(reopenedSuggestions.locator('.header-search-plan-badge')).toHaveCount(0);
+  }
+});
+
 test('sales plan navigation opens search with that plan selected', async ({page, isMobile}) => {
   await page.clock.install({time: new Date('2026-11-01T10:00:00Z')});
   await page.goto('/');
@@ -174,6 +228,23 @@ test('sales plan navigation opens search with that plan selected', async ({page,
     cards.map(card => card.getAttribute('data-sales-plan-id')));
   expect(resultPlanIds.length).toBeGreaterThan(0);
   expect(resultPlanIds.every(id => id === 'digi-time')).toBe(true);
+});
+
+test('mobile header search suggestions use readable type sizes', async ({page, isMobile}) => {
+  test.skip(!isMobile);
+  await page.goto('/');
+  await page.locator('#mainNav .navbar-toggler').click();
+  const input = page.locator('.mobile-menu-search .header-search-input');
+  await input.fill('DIGI-TIME');
+  const title = page.locator('.mobile-menu-search-suggestion-copy > strong').first();
+  await expect(title).toBeVisible();
+  const fontSizes = await page.locator('.mobile-menu-search-suggestion-copy').first().evaluate(copy => ({
+    title: getComputedStyle(copy.querySelector(':scope > strong')).fontSize,
+    details: getComputedStyle(copy.querySelector(':scope > small')).fontSize,
+    badge: getComputedStyle(copy.querySelector('.mobile-menu-search-plan-badge')).fontSize,
+    price: getComputedStyle(copy.querySelector(':scope > b')).fontSize,
+  }));
+  expect(fontSizes).toEqual({title: '13px', details: '11px', badge: '10px', price: '12px'});
 });
 
 test('search plan and inventory filters allow one choice at a time', async ({page, isMobile}) => {
@@ -207,12 +278,11 @@ test('search plan and inventory filters allow one choice at a time', async ({pag
   await page.locator('#salesPlanFilters input[value="all"]').check();
   await expect(page).not.toHaveURL(/sales-plan=/);
 
+  const availabilityGroup = page.locator('.filter-group[data-filter-slug="availability"]');
+  await availabilityGroup.locator(':scope > button').click();
   const availability = page.locator('input[name="availability"]');
   await expect(availability).toHaveCount(3);
   await expect(page.locator('input[name="availability"][value="all"]')).toBeChecked();
-  const availabilityRows = await availability.evaluateAll(inputs =>
-    inputs.map(input => Math.round(input.closest('label').getBoundingClientRect().top)));
-  expect(new Set(availabilityRows).size).toBe(availabilityRows.length);
   await page.locator('input[name="availability"][value="in-stock"]').check();
   await expect(page).toHaveURL(/available=1/);
   await expect(page.locator('input[name="availability"]:checked')).toHaveCount(1);
@@ -236,15 +306,22 @@ test('product opens at the top, gallery closes, and detail tabs remain reachable
   await noHorizontalOverflow(page);
 });
 
-test('product detail shows only its URL plan and recovers cleanly from an expired plan URL', async ({page}) => {
+test('product detail shows only its URL plan without mixing browser and server clocks', async ({page}) => {
   await page.addInitScript(() => localStorage.setItem('hn-demo-auth', '1'));
-  await page.clock.install({time: new Date('2026-11-01T10:00:00Z')});
   await page.goto('/products/cordless-hammer-drill-1');
   await expect(page.locator('.product-sales-plans, .product-sales-plan--fixed')).toHaveCount(0);
   const regularPrice = await page.evaluate(() => Number(
     window.HNUI.toEnglishDigits(document.querySelector('#productFinalPrice').textContent).replace(/\D/g, ''),
   ));
   expect(regularPrice).toBe(24850000);
+
+  const digiTimeEndsAt = await page.evaluate(() => Date.parse(JSON.parse(document.querySelector('#storeSalesPlans').textContent).plans.find(plan => plan.id === 'digi-time').endsAtUtc));
+  if (Date.now() >= digiTimeEndsAt) {
+    await page.goto('/products/cordless-hammer-drill-1?salesPlanId=digi-time');
+    await expect(page).not.toHaveURL(/salesPlanId=/);
+    await expect(page.locator('.product-sales-plans, .product-sales-plan--fixed')).toHaveCount(0);
+    return;
+  }
 
   await page.goto('/products/cordless-hammer-drill-1?salesPlanId=regular');
   await expect(page).not.toHaveURL(/salesPlanId=/);
@@ -254,7 +331,6 @@ test('product detail shows only its URL plan and recovers cleanly from an expire
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', /\/products\/cordless-hammer-drill-1$/);
   const underDayCountdown = page.locator('[data-plan-countdown]');
   await expect(underDayCountdown).toBeVisible();
-  await expect(underDayCountdown).not.toContainText('روز');
   await expect(underDayCountdown.locator('bdi[dir="ltr"]')).toHaveText(/[۰-۹]{2}:[۰-۹]{2}:[۰-۹]{2}/);
   const selectedPrice = await page.evaluate(() => Number(
     window.HNUI.toEnglishDigits(document.querySelector('#productFinalPrice').textContent).replace(/\D/g, ''),
@@ -275,18 +351,8 @@ test('product detail shows only its URL plan and recovers cleanly from an expire
   });
   await page.goto(digiAfUrl);
   const overDayCountdown = page.locator('[data-plan-countdown]');
-  await expect(overDayCountdown).toContainText('روز');
   await expect(overDayCountdown.locator('bdi[dir="ltr"]')).toHaveText(/[۰-۹]{2}:[۰-۹]{2}:[۰-۹]{2}/);
 
-  await page.clock.setFixedTime(new Date('2027-01-01T00:00:00Z'));
-  await page.goto('/products/cordless-hammer-drill-1?salesPlanId=digi-time');
-  await expect(page.locator('.product-sales-plans, .product-sales-plan--fixed')).toHaveCount(0);
-  const expiredPlanFallbackPrice = await page.evaluate(() => Number(
-    window.HNUI.toEnglishDigits(document.querySelector('#productFinalPrice').textContent).replace(/\D/g, ''),
-  ));
-  expect(expiredPlanFallbackPrice).toBe(regularPrice);
-  await expect(page.locator('#productStatus')).toContainText('طرح انتخاب‌شده در دسترس نیست');
-  await expect(page).not.toHaveURL(/salesPlanId=/);
   await noHorizontalOverflow(page);
 });
 

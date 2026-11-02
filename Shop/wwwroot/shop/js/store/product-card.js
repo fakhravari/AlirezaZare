@@ -3,10 +3,11 @@
   if (window.HNProductCard) return;
   const esc = (value) => window.HNUI.escapeHtml(value);
   const fa = (value) => window.HNUI.formatNumber(value);
+  const currentPrice = (product, options = {}) => Number.isFinite(Number(options.priceAmount))
+    ? Math.round(Number(options.priceAmount) * (100 - (Number(options.discountPercent) || 0)) / 100)
+    : Math.round(Number(product.price) * 1000000);
   const price = (product, options = {}) => {
-    const current = Number.isFinite(Number(options.priceAmount))
-      ? Math.round(Number(options.priceAmount) * (100 - (Number(options.discountPercent) || 0)) / 100)
-      : Math.round(Number(product.price) * 1000000);
+    const current = currentPrice(product, options);
     const percent = Number(options.discountPercent ?? product.discountPercent) || 0;
     const discounted = percent > 0 && percent < 100;
     const listAmount = Number.isFinite(Number(options.priceAmount)) ? Number(options.priceAmount) : current / (1 - percent / 100);
@@ -42,5 +43,5 @@
     const html = `<article class="${classes}" data-product-id="${esc(product.id)}" data-product-card="v1"${options.salesPlanId ? ` data-sales-plan-id="${esc(options.salesPlanId)}" data-sales-plan-name="${esc(options.salesPlanName || "")}" data-sales-plan-code="${esc(options.salesPlanCode || "")}" data-sales-plan-label="${esc(options.salesPlanLabel || "")}"` : ""}><div class="product-image${search ? " search-page-card-media" : ""}"><a href="${esc(productUrl)}" aria-label="مشاهده ${esc(product.name)}"><img src="${esc(options.image || product.image)}" alt="${esc(product.name)}" width="800" height="800" loading="lazy" decoding="async"></a><div class="product-card-actions" role="group" aria-label="عملیات محصول"><button class="favorite" type="button" data-product-id="${esc(product.id)}" aria-label="افزودن به علاقه‌مندی‌ها" aria-pressed="false"><i class="bi bi-heart" aria-hidden="true"></i></button><button class="compare-trigger" type="button" data-product-id="${esc(product.id)}" aria-label="افزودن به مقایسه" aria-pressed="false"><i class="bi bi-arrow-left-right" aria-hidden="true"></i></button></div>${imageBadge}</div><div class="${bodyClass}">${slider ? title : `<div${search ? ' class="search-page-card-heading"' : ""}>${title}</div>`}<p class="${slider ? "product-card-sale-price" : search ? "search-product-price search-page-card-price" : favorite ? "favorite-item-price" : "product-card-price"} ${(options.discountPercent ?? product.discountPercent) > 0 ? "has-discount" : "is-regular"}">${price(product, options)}</p>${slider ? action : ""}</div>${slider ? "" : action}</article>`;
     return slider ? `<div class="showcase-slide">${html}</div>` : html;
   };
-  window.HNProductCard = Object.freeze({ render, price });
+  window.HNProductCard = Object.freeze({ render, price, currentPrice });
 })(window);

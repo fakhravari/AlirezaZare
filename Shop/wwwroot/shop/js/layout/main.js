@@ -56,12 +56,7 @@ $(function () {
 
       const startsAt = plan.startsAtUtc ? Date.parse(plan.startsAtUtc) : NaN;
       const endsAt = plan.endsAtUtc ? Date.parse(plan.endsAtUtc) : NaN;
-      if (
-        (Number.isFinite(startsAt) && now < startsAt) ||
-        (Number.isFinite(endsAt) && now >= endsAt)
-      )
-        return [];
-
+      if ((Number.isFinite(startsAt) && now < startsAt) || (Number.isFinite(endsAt) && now >= endsAt)) return [];
       return [{ product, plan, offer, priceAmount, discountPercent }];
     });
     const productsWithActiveOffers = new Set(
@@ -111,13 +106,7 @@ $(function () {
               .replaceAll("popularSearchesTitle", "mobileMenuPopularSearchesTitle"),
           );
       };
-    const normalizeSearchText = (value) =>
-      String(value || "")
-        .toLocaleLowerCase("fa-IR")
-        .replace(/[يى]/g, "ی")
-        .replace(/ك/g, "ک")
-        .replace(/\s+/g, " ")
-        .trim();
+    const normalizeSearchText = window.HNUI.normalizeSearchText;
     const recentSearchKey = "hn-header-recent-searches";
     const popularSearches = [
       "دریل شارژی",
@@ -157,8 +146,10 @@ $(function () {
     };
     let suggestionsCloseTimer = 0;
     let suggestionsRenderTimer = 0;
+    let planExpiryRenderTimer = 0;
     const closeSuggestions = () => {
       window.clearTimeout(suggestionsCloseTimer);
+      window.clearInterval(planExpiryRenderTimer);
       suggestions.hidden = true;
       searchInput.setAttribute("aria-expanded", "false");
       if (!isDrawerSearch)
@@ -183,6 +174,21 @@ $(function () {
       }, 500);
     };
     const searchUrl = (query) => `Search?q=${encodeURIComponent(query)}`;
+    const schedulePlanExpiryRefresh = () => {
+      window.clearInterval(planExpiryRenderTimer);
+      const now = Date.now();
+      const expiries = headerSearchListings
+        .map(({ plan }) => plan?.endsAtUtc ? Date.parse(plan.endsAtUtc) : NaN)
+        .filter((end) => Number.isFinite(end) && end > now);
+      if (!expiries.length) return;
+      planExpiryRenderTimer = window.setInterval(() => {
+        if (Math.min(...expiries) > Date.now()) return;
+        window.clearInterval(planExpiryRenderTimer);
+        planExpiryRenderTimer = 0;
+        if (!suggestions.hidden && Array.from(normalizeSearchText(searchInput.value)).length >= 3)
+          renderSuggestions();
+      }, Math.min(1000, Math.max(50, Math.min(...expiries) - now)));
+    };
     const renderSuggestions = () => {
       const query = normalizeSearchText(searchInput.value);
       if (Array.from(query).length < 3) {
@@ -190,7 +196,15 @@ $(function () {
         return;
       }
 
+      const now = Date.now();
       const matches = headerSearchListings
+        .filter(({ plan }) => {
+          if (!plan) return true;
+          const startsAt = plan.startsAtUtc ? Date.parse(plan.startsAtUtc) : NaN;
+          const endsAt = plan.endsAtUtc ? Date.parse(plan.endsAtUtc) : NaN;
+          return (!Number.isFinite(startsAt) || now >= startsAt) &&
+            (!Number.isFinite(endsAt) || now < endsAt);
+        })
         .map((listing) => {
           const { product, plan } = listing;
           const productName = String(product.name || "").replace(/\s+\d+$/, "");
@@ -267,6 +281,7 @@ $(function () {
         .querySelectorAll('[role="option"]')
         .forEach((option) => option.removeAttribute("role"));
       openSuggestions();
+      schedulePlanExpiryRefresh();
     };
 
     searchInput.addEventListener("input", () => {

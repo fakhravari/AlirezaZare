@@ -170,6 +170,14 @@
         String(arabicDigits.indexOf(digit)),
       );
   const formatNumber = (value) => Number(value).toLocaleString("fa-IR");
+  const normalizeSearchText = (value) => String(value ?? "")
+    .normalize("NFKC")
+    .toLocaleLowerCase("fa-IR")
+    .replace(/[يى]/g, "ی")
+    .replace(/ك/g, "ک")
+    .replace(/[\u200c\u200f\u202a-\u202e]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
   const escapeHtml = (value) =>
     String(value ?? "").replace(
       /[&<>"']/g,
@@ -373,6 +381,7 @@
     toPersianDigits,
     toEnglishDigits,
     formatNumber,
+    normalizeSearchText,
     escapeHtml,
     setMessage,
     setMessageType,

@@ -15,6 +15,7 @@
 |---|---|
 | `HNUI.STORAGE_KEYS` | کلیدهای پایهٔ auth/cart |
 | `HNUI.storage.get/set/remove/json/writable` | خواندن/نوشتن مقاوم در برابر خطای browser storage؛ `set` برای favorite/compare رویداد list را dispatch می‌کند |
+| `HNUI.normalizeSearchText(value)` | نرمال‌سازی مشترک عبارت فارسی/انگلیسی و نویسه‌های نامرئی برای پیشنهادهای هدر و نتایج Search |
 | `HNUI.ready(callback)` | اجرای callback پس از آماده‌شدن DOM |
 | `HNUI.mount(name, root, initialize)` | اجرای یک‌باره برای نام مؤلفه و root؛ root غایب یا نصب دوباره false برمی‌گرداند؛ خطای initialize دوباره قابل تلاش است |
 | `HNUI.EVENTS`, `HNUI.emit(type, detail)` | نام ثابت رویداد و کنترل payloadهای cart/auth؛ برای رویداد مشترک CustomEvent موازی نسازید |
@@ -112,3 +113,6 @@
 [فهرست این بخش](README.md) · [فهرست مستندات](../README.md)
 
 آخرین تطبیق با کد: ۲ نوامبر ۲۰۲۶.
+
+
+قیمت نهایی کارت مشترک در HNProductCard.currentPrice(product, options) محاسبه می‌شود. فیلتر و مرتب‌سازی قیمت باید از همین تابع استفاده کنند تا تخفیف offer دوبار اعمال نشود و قیمت فروش عادی با مبلغ نهایی کارت یکسان بماند.

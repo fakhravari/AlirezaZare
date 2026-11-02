@@ -248,7 +248,7 @@
 
   #mobileMenu .mobile-menu-search-suggestion-copy > strong {
     color: #102a43;
-    font-size: 11px;
+    font-size: 13px;
     font-weight: 750;
   }
 
@@ -259,7 +259,7 @@
     align-items: center;
     gap: 5px;
     color: #718092;
-    font-size: 9px;
+    font-size: 11px;
   }
 
   #mobileMenu .mobile-menu-search-suggestion-details {
@@ -282,7 +282,7 @@
     border-radius: 999px;
     background: #fff9e5;
     color: #77540e;
-    font-size: 8px;
+    font-size: 10px;
     font-weight: 750;
     line-height: 1.4;
     text-overflow: ellipsis;
@@ -300,12 +300,12 @@
     gap: 5px;
     white-space: nowrap;
     color: #a87b27;
-    font-size: 10px;
+    font-size: 12px;
   }
 
   #mobileMenu .mobile-menu-search-suggestion-copy > b > del {
     color: #9aa5af;
-    font-size: 8px;
+    font-size: 9px;
     text-decoration-thickness: 1px;
   }
 
