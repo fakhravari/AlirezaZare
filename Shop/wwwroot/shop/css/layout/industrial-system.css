@@ -11262,13 +11262,17 @@ body .electrical-swiper .swiper-pagination-bullet-active {
   align-items: center;
   gap: 7px;
   padding: 6px 12px;
-  border: 1px solid rgba(255, 220, 120, 0.38);
+  border: 1px solid rgba(255, 255, 255, 0.8);
   border-radius: 999px;
-  background: rgba(7, 26, 46, 0.8);
-  color: #ffdc78;
+  background: linear-gradient(135deg, #ffdf63, #f6c515);
+  color: #102a43;
   font-size: 12px;
   font-weight: 800;
-  backdrop-filter: blur(8px);
+  box-shadow: 0 6px 16px rgba(4, 16, 35, 0.2);
+}
+
+.home-page #journal .journal-main-featured > i {
+  color: #102a43;
 }
 
 .home-page #journal .journal-main-featured-meta {
@@ -11282,27 +11286,6 @@ body .electrical-swiper .swiper-pagination-bullet-active {
   gap: 7px;
 }
 
-.home-page #journal .journal-main-featured-meta time {
-  display: inline-flex;
-  min-height: 34px;
-  align-items: center;
-  gap: 5px;
-  padding: 6px 10px;
-  border: 1px solid rgba(255, 255, 255, 0.24);
-  border-radius: 999px;
-  background: rgba(7, 26, 46, 0.8);
-  color: #fff;
-  font-size: 12px;
-  font-weight: 700;
-  white-space: nowrap;
-  backdrop-filter: blur(8px);
-}
-
-.home-page #journal .journal-main-featured-meta i {
-  color: #f6c515;
-  font-size: 16px;
-}
-
 .home-page #journal .journal-list-card-meta {
   display: flex;
   min-width: 0;
@@ -11314,7 +11297,7 @@ body .electrical-swiper .swiper-pagination-bullet-active {
 .home-page #journal .journal-list-card-meta time {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
   color: #77869a;
   font-size: 12px;
   font-weight: 650;
@@ -11324,6 +11307,14 @@ body .electrical-swiper .swiper-pagination-bullet-active {
 .home-page #journal .journal-list-card-meta time i {
   color: #a78350;
   font-size: 13px;
+}
+
+.home-page #journal .journal-list-card-meta time > span,
+.home-page #journal .journal-main-meta time > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
 }
 
 .home-page #journal .journal-main-cta {
@@ -11477,17 +11468,16 @@ body .electrical-swiper .swiper-pagination-bullet-active {
   display: grid;
   grid-area: number;
   width: 30px;
-  height: auto;
+  height: 30px;
   flex: 0 0 30px;
-  align-self: stretch;
+  align-self: center;
   place-items: center;
-  padding-inline-end: 7px;
-  border: 0;
-  border-inline-end: 2px solid #d6b24b;
-  border-radius: 0;
-  background: transparent;
+  padding: 0;
+  border: 1px solid rgba(178, 138, 79, 0.24);
+  border-radius: 9px;
+  background: linear-gradient(145deg, #fff7d9, #f8e6ac);
   color: #89682f;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 900;
 }
 
@@ -11596,13 +11586,13 @@ body .electrical-swiper .swiper-pagination-bullet-active {
 .home-page #journal .journal-list-card-meta small {
   display: inline-flex;
   width: fit-content;
-  margin-top: 3px;
-  padding: 2px 8px;
+  margin-top: 0;
+  padding: 3px 9px;
   border: 1px solid rgba(178, 146, 96, 0.18);
   border-radius: 999px;
   background: #fffaf0;
   color: #916b30 !important;
-  font-size: 12px !important;
+  font-size: 11px !important;
   font-weight: 700;
 }
 
@@ -11646,16 +11636,6 @@ body .electrical-swiper .swiper-pagination-bullet-active {
     left: 12px;
     justify-content: flex-start;
     gap: 5px;
-  }
-
-  .home-page #journal .journal-main-featured-meta time {
-    min-height: 30px;
-    padding: 5px 8px;
-    font-size: 12px;
-  }
-
-  .home-page #journal .journal-main-featured-meta time i {
-    font-size: 15px;
   }
 
   .home-page #journal .journal-main-cta {
