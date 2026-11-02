@@ -94,6 +94,10 @@
   vertical-align: 0;
 }
 
+#productView .product-accessory-check > i::before {
+  vertical-align: 0;
+}
+
 #productView .product-accessory input:checked + .product-accessory-check {
   border-color: #173b5d;
   background: #173b5d;
