@@ -17,9 +17,7 @@ body {
 h1,
 h2,
 h3,
-.brand,
-.search-brand,
-.footer-logo {
+.brand {
   letter-spacing: -0.035em;
 }
 .section-head h2,
@@ -31,15 +29,13 @@ h3,
 }
 .eyebrow,
 .page-kicker,
-.search-kicker,
 .section-title > span {
   color: #8e6b34;
   letter-spacing: 0.035em;
 }
 
 /* Crisp dark glass navigation with restrained gold details. */
-.navbar,
-.search-header {
+.navbar {
   border-bottom: 1px solid rgba(222, 197, 143, 0.18);
   background: rgba(7, 20, 38, 0.92);
   box-shadow: 0 14px 45px rgba(1, 8, 18, 0.18);
@@ -68,18 +64,13 @@ h3,
   pointer-events: none;
 }
 .navbar .brand,
-.search-brand,
-.navbar .nav-link,
-.search-header nav a {
+.navbar .nav-link {
   color: #f8f4eb;
 }
-.navbar .nav-link:hover,
-.search-header nav a:hover {
+.navbar .nav-link:hover {
   color: var(--luxury-gold-light);
 }
 .brand > span,
-.search-brand > span,
-.footer-logo > span,
 .login-brand > span {
   border: 1px solid rgba(222, 197, 143, 0.62);
   background: linear-gradient(145deg, #c9b17f, #a58c5e);
@@ -231,10 +222,6 @@ h3,
   min-height: 194px;
 }
 
-.search-product-body {
-  min-height: 188px;
-}
-
 .product-info > div > small,
 .showcase-card-body > small,
 .rail-card > small,
@@ -299,8 +286,7 @@ h3,
   line-height: 1.7;
 }
 
-.rail-card > strong,
-.search-product-info > strong {
+.rail-card > strong {
   font-size: 17px;
 }
 
@@ -397,8 +383,7 @@ h3,
 .submit-btn,
 .subscribe button,
 .quick-add-cart,
-.page-cta a,
-.view-all-link {
+.page-cta a {
   border-color: var(--luxury-navy);
   background: linear-gradient(135deg, #10233d, #061223);
   color: #fff;
@@ -409,8 +394,7 @@ h3,
 .submit-btn:hover,
 .subscribe button:hover,
 .quick-add-cart:hover,
-.page-cta a:hover,
-.view-all-link:hover {
+.page-cta a:hover {
   border-color: var(--luxury-gold);
   background: linear-gradient(135deg, #c8b07c, #aa9060);
   color: #071426;
@@ -442,8 +426,7 @@ h3,
 }
 
 @media (max-width: 991px) {
-  .navbar,
-  .search-header {
+  .navbar {
     background: rgba(7, 20, 38, 0.97);
   }
   .hero .navbar:not(.scrolled) {
@@ -564,8 +547,7 @@ h3,
 
 /* Refined mobile navigation drawers. */
 @media (max-width: 991px) {
-  .mobile-menu.offcanvas,
-  .search-mobile-menu {
+  .mobile-menu.offcanvas {
     border: 0 !important;
     border-left: 1px solid rgba(212, 192, 146, 0.22) !important;
     background:
@@ -585,8 +567,7 @@ h3,
     background: rgba(255, 255, 255, 0.018) !important;
   }
 
-  .mobile-menu .btn-close,
-  .search-mobile-menu > button {
+  .mobile-menu .btn-close {
     border: 1px solid rgba(212, 192, 146, 0.34) !important;
     border-radius: 11px !important;
     background-color: rgba(212, 192, 146, 0.08) !important;
@@ -595,16 +576,14 @@ h3,
     opacity: 1 !important;
   }
 
-  .mobile-menu .btn-close:hover,
-  .search-mobile-menu > button:hover {
+  .mobile-menu .btn-close:hover {
     border-color: rgba(212, 192, 146, 0.58) !important;
     background-color: rgba(212, 192, 146, 0.15) !important;
   }
 
   .mobile-menu .offcanvas-body > a,
-  .mobile-menu .mobile-category-toggle,
-  .mobile-menu .mobile-category > button,
-  .search-mobile-menu > a {
+.mobile-menu .mobile-category-toggle,
+.mobile-menu .mobile-category > button {
     min-height: 57px;
     padding-inline: 10px !important;
     border: 0 !important;
@@ -622,15 +601,13 @@ h3,
   }
 
   .mobile-menu .offcanvas-body > a:hover,
-  .mobile-menu .offcanvas-body > a:focus-visible,
-  .mobile-menu .mobile-category-toggle:hover,
-  .mobile-menu .mobile-category-toggle:focus-visible,
-  .mobile-menu .mobile-category > button:hover,
-  .mobile-menu .mobile-category > button:focus-visible,
-  .mobile-menu .mobile-category > button[aria-expanded="true"],
-  .mobile-menu .mobile-category-toggle[aria-expanded="true"],
-  .search-mobile-menu > a:hover,
-  .search-mobile-menu > a:focus-visible {
+.mobile-menu .offcanvas-body > a:focus-visible,
+.mobile-menu .mobile-category-toggle:hover,
+.mobile-menu .mobile-category-toggle:focus-visible,
+.mobile-menu .mobile-category > button:hover,
+.mobile-menu .mobile-category > button:focus-visible,
+.mobile-menu .mobile-category > button[aria-expanded="true"],
+.mobile-menu .mobile-category-toggle[aria-expanded="true"] {
     padding-right: 10px !important;
     border-bottom-color: rgba(212, 192, 146, 0.26) !important;
     background: linear-gradient(
@@ -926,10 +903,6 @@ h3,
   box-shadow:
     0 0 0 3px rgba(189, 163, 111, 0.11),
     0 8px 22px rgba(7, 20, 38, 0.07);
-}
-
-#loginModal .resend-code {
-  display: none;
 }
 
 @media (max-width: 575px) {
@@ -1337,8 +1310,7 @@ h3,
   .submit-btn,
   .subscribe button,
   .quick-add-cart,
-  .page-cta a,
-  .view-all-link
+  .page-cta a
 ):hover,
 :where(
   .add-cart,
@@ -1346,8 +1318,7 @@ h3,
   .submit-btn,
   .subscribe button,
   .quick-add-cart,
-  .page-cta a,
-  .view-all-link
+  .page-cta a
 ):focus-visible {
   border-color: var(--luxury-border-strong) !important;
   background: linear-gradient(135deg, #183451, #0c2037) !important;

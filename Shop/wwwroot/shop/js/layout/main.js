@@ -661,7 +661,6 @@ $(function () {
     ".brand-card",
     ".featured-main",
     ".featured-side",
-    ".recommend-box",
     ".testimonial-intro",
     ".testimonial-card",
     ".story-image",
@@ -669,7 +668,6 @@ $(function () {
     ".journal-main",
     ".journal-list",
     ".benefit",
-    ".store-card",
     ".newsletter",
   ];
   const $revealItems = $(revealSelectors.join(", "));

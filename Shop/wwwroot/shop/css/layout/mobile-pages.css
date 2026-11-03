@@ -885,8 +885,7 @@
 @media (max-width: 767px) {
   .mobile-page--home-index > main > section > .container,
   .mobile-page--home-index #collection > .container,
-  .mobile-page--home-index .category-showcase > .container,
-  .mobile-page--home-index #recommendations > .container {
+  .mobile-page--home-index .category-showcase > .container {
     box-sizing: border-box;
     width: calc(100% - 12px) !important;
     max-width: none !important;
@@ -1709,26 +1708,6 @@
 
 /* Keep related-product cards readable in the narrow two-column mobile grid. */
 @media (max-width: 575px) {
-  #productView .product-detail-related-card .product-related-meta {
-    min-width: 0;
-    min-height: 20px !important;
-    margin: 0 0 2px !important;
-    justify-content: flex-start;
-    overflow: hidden;
-  }
-
-  #productView .product-detail-related-card .product-related-category {
-    display: none !important;
-  }
-
-  #productView .product-detail-related-card .product-related-brand {
-    min-width: 0;
-    max-width: 100%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
   #productView .product-detail-related-card .product-info > p {
     box-sizing: border-box;
     width: 100%;
@@ -1975,10 +1954,6 @@
   #productView .product-purchase-trust,
   #productView .product-variant-options {
     padding-inline: 11px;
-  }
-
-  #productView .product-detail-related-card .product-related-meta {
-    display: none !important;
   }
 
 }

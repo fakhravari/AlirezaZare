@@ -180,10 +180,6 @@
       inset 0 0 0 1px rgba(255, 255, 255, 0.9) !important;
   }
 
-  #mainNav .mega-content {
-    background: transparent !important;
-  }
-
   /* Shared item card treatment for brand and category menus. */
   #mainNav .brand-menu .dropdown-item {
     position: relative !important;
@@ -215,8 +211,4 @@
 
   /* A restrained, premium hover only for the category rail. */
 
-  /* Turn the four long lists into compact collection panels. */
-  #mainNav .mega-content {
-    padding: 4px 16px 0 !important;
-  }
 }

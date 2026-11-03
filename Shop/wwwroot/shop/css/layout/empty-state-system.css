@@ -78,7 +78,7 @@
   line-height: 1.9;
 }
 
-.empty-state-card :is(.compare-empty-kicker, .empty-state-kicker) {
+.empty-state-card .compare-empty-kicker {
   color: #9a7540 !important;
   font-weight: 750;
 }

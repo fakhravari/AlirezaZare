@@ -843,7 +843,6 @@
 
 #productView :is(
   .product-detail-description,
-  .product-detail-intro,
   .product-detail-content-panel > p,
   #product-intro > p,
   .product-expert-grid p,
@@ -906,7 +905,6 @@
 @media (max-width: 575px) {
   #productView :is(
     .product-detail-description,
-    .product-detail-intro,
     .product-detail-content-panel > p,
     #product-intro > p,
     .product-expert-grid p,
@@ -1140,7 +1138,6 @@
   padding: 13px;
 }
 
-#productView .product-purchase-panel .product-price-heading,
 #productView .product-purchase-panel .product-price-context,
 #productView .product-purchase-panel .product-detail-base-price,
 #productView .product-purchase-panel .product-detail-extras-price,

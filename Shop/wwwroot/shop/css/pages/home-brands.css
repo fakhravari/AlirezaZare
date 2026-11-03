@@ -127,69 +127,6 @@
   }
 }
 
-.brand-mark {
-  display: flex;
-  min-height: 45px;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: #1b1b1b;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 16px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  line-height: 1.1;
-}
-
-.brand-image-placeholder {
-  display: flex;
-  width: 100%;
-  min-height: 124px;
-  align-items: center;
-  justify-content: center;
-  border: 1px dashed #c8b99f;
-  border-radius: 10px;
-  background: linear-gradient(135deg, #faf8f4, #f1eadf);
-  color: #a18b6c;
-  font-family: "Vazirmatn", Tahoma, sans-serif;
-  font-size: 13px;
-  font-weight: 500;
-}
-
-.brand-mark small {
-  margin-top: 5px;
-  font-family: inherit;
-  font-size: 8px;
-  font-weight: 400;
-  letter-spacing: 1.5px;
-}
-
-.brand-patek {
-  font-size: 13px;
-  letter-spacing: 0.5px;
-}
-
-.brand-police {
-  font-size: 25px;
-  letter-spacing: 3px;
-}
-
-.brand-polo {
-  font-size: 25px;
-  font-style: italic;
-  letter-spacing: 2px;
-}
-
-.brand-exchange {
-  font-size: 12px;
-  letter-spacing: 0.5px;
-}
-
-.brand-beverly,
-.brand-santa {
-  font-size: 11px;
-  letter-spacing: 0.5px;
-}
 
 .brand-card > strong {
   overflow: hidden;
@@ -221,18 +158,6 @@
     padding: 14px 8px 10px;
   }
 
-  .brand-image-placeholder {
-    min-height: 112px;
-  }
-
-  .brand-mark {
-    font-size: 13px;
-  }
-
-  .brand-police,
-  .brand-polo {
-    font-size: 20px;
-  }
 
   .brand-card > strong {
     font-size: 12px;
@@ -261,9 +186,6 @@
   margin-bottom: 0;
 }
 
-.brands-slider .brand-image-placeholder {
-  flex: 0 0 124px;
-}
 
 .brands-section {
   padding-bottom: 40px;
@@ -276,7 +198,4 @@
   .brands-slider .brand-card {
     min-height: 138px;
   }
-  .brands-slider .brand-image-placeholder {
-    flex-basis: 112px;
   }
-}

@@ -22,14 +22,12 @@
 .home-page #amazing,
 .home-page #bestsellers,
 .home-page #newest,
-.home-page #recommendations,
 .home-page #journal {
   background: #f5f7f8;
 }
 
 .home-page #collection > .container,
 .home-page .category-showcase > .container,
-.home-page #recommendations .recommend-box,
 .home-page #journal > .container {
   border-color: var(--home-warm-line);
   background: linear-gradient(145deg, #fffefa 0%, #fff 54%, #fbf8f0 100%);
@@ -130,14 +128,12 @@
   .home-page #amazing,
   .home-page #bestsellers,
   .home-page #newest,
-  .home-page #recommendations,
   .home-page #journal {
     background: #f5f7f8;
   }
 
   .home-page #collection > .container,
   .home-page .category-showcase > .container,
-  .home-page #recommendations .recommend-box,
   .home-page #journal > .container {
     box-shadow: 0 10px 28px rgba(65, 52, 31, 0.065);
   }

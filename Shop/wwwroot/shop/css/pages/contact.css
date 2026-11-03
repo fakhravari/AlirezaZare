@@ -399,46 +399,6 @@
   color: #9b5551;
   font-size: 16px;
 }
-.branches-kicker {
-  color: var(--industrial-yellow-dark);
-  font-size: 12px;
-  font-weight: 700;
-}
-.branch-icon {
-  --ui-icon-tile-border: color-mix(
-    in srgb,
-    var(--industrial-yellow) 14%,
-    white
-  );
-}
-.branch-label {
-  padding: 5px 10px;
-  border-radius: 6px;
-  background: var(--industrial-bg);
-  color: var(--industrial-steel);
-  font-size: 11px;
-}
-.branch-address {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  color: var(--industrial-steel);
-  margin-bottom: 26px;
-}
-.branch-address > i {
-  color: var(--industrial-yellow-dark);
-  flex-shrink: 0;
-  font-size: 14px;
-}
-.branch-address address {
-  font-style: normal;
-  font-size: 13px;
-  line-height: 2;
-  margin: 0;
-}
-.branch-map:hover {
-  color: var(--industrial-yellow-dark);
-}
 .contact-hero ~ main .contact-form .contact-submit {
   display: inline-flex;
   align-items: center;
@@ -487,8 +447,7 @@
   transform: translateY(0);
   box-shadow: none;
 }
-.contact-submit:focus-visible,
-.branch-map:focus-visible {
+.contact-submit:focus-visible {
   outline: 3px solid var(--industrial-yellow);
   outline-offset: 4px;
 }

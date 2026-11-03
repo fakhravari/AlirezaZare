@@ -1,18 +1,4 @@
-/* Shared login modal. The home-page login is the reference implementation. */
-.shared-login-overlay {
-  position: fixed;
-  z-index: 10070;
-  inset: 0;
-  background: #000;
-  backdrop-filter: blur(10px);
-  opacity: 0;
-  visibility: hidden;
-  transition: 0.25s;
-}
-.shared-login-overlay.open {
-  opacity: 0.62;
-  visibility: visible;
-}
+/* Shared dialog surface used by the profile editor. */
 .shared-login-modal {
   box-sizing: border-box;
   position: fixed;
@@ -206,24 +192,6 @@
   background: transparent;
   color: #8b7659;
   font-size: 13px;
-}
-.shared-login-modal .resend-code {
-  display: flex;
-  margin-top: 18px;
-  align-items: center;
-  justify-content: space-between;
-  color: #7b8490;
-  font-size: 11px;
-}
-.shared-login-modal .resend-code button {
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: #a28762;
-  font-size: 11px;
-}
-.shared-login-modal .resend-code button:disabled {
-  color: #aaa;
 }
 @media (max-width: 575px) {
   .shared-login-modal {

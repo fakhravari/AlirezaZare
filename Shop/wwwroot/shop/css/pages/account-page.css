@@ -278,11 +278,6 @@
   background: var(--industrial-bg);
   color: #a05a55;
 }
-.stat-questions {
-  background: color-mix(in srgb, var(--industrial-yellow) 14%, white);
-  color: var(--industrial-yellow-dark);
-}
-
 .account-stats article > div {
   display: flex;
   min-width: 0;
@@ -299,67 +294,6 @@
   color: var(--industrial-steel);
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.overview-panels {
-  display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(230px, 0.8fr);
-  gap: 18px;
-}
-
-.overview-panels > article {
-  min-width: 0;
-  padding: 19px;
-  border: 1px solid var(--color-line);
-  border-radius: 18px;
-  background: #fff;
-  box-shadow: 0 8px 22px rgba(16, 42, 67, 0.045);
-}
-
-.overview-panel-title {
-  display: flex;
-  margin-bottom: 16px;
-  align-items: center;
-  gap: 9px;
-}
-
-.overview-panel-title i {
-  color: var(--industrial-yellow-dark);
-}
-.overview-panel-title h3 {
-  margin: 0;
-  color: var(--industrial-navy);
-  font-size: 17px;
-}
-
-.overview-empty {
-  min-height: 132px;
-  padding: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  text-align: center;
-  border: 1px solid #e5ebef;
-  border-radius: 14px;
-  background: linear-gradient(145deg, #f8fafb, #f1f5f7);
-}
-
-.overview-empty > i {
-  margin-bottom: 10px;
-  color: var(--industrial-yellow-dark);
-  font-size: 25px;
-}
-.overview-empty strong {
-  color: var(--industrial-steel);
-  font-size: 14px;
-}
-.overview-empty p {
-  max-width: 360px;
-  margin: 7px 0 0;
-  color: var(--industrial-steel);
-  font-size: 12px;
-  line-height: 1.9;
 }
 
 .account-section > h2,
@@ -696,16 +630,6 @@
   box-shadow: inset -3px 0 #d6a315;
 }
 
-.draft-text {
-  overflow-wrap: anywhere;
-  white-space: pre-wrap;
-}
-
-.account-empty-note {
-  padding: 25px;
-  color: var(--industrial-steel);
-}
-
 #questionList {
   margin-top: 20px;
 }
@@ -741,9 +665,6 @@
   }
   .account-stats {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  .overview-panels {
-    grid-template-columns: 1fr;
   }
 }
 
@@ -939,9 +860,6 @@
   border-radius: 9px;
   object-fit: cover;
   background: var(--industrial-bg);
-}
-.order-products-multiple img + img {
-  margin-inline-start: -22px;
 }
 .order-products > div {
   min-width: 0;
@@ -1390,8 +1308,7 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
 .profile-edit-dialog .profile-edit-form input[name="lastName"] {
   direction: rtl;
 }
-.profile-edit-dialog .profile-edit-full,
-.profile-edit-dialog .profile-edit-status {
+.profile-edit-dialog .profile-edit-full {
   grid-column: 1 / -1;
 }
 .profile-edit-dialog .profile-edit-gender {
@@ -1479,27 +1396,6 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
   width: 100%;
   margin-top: 5px;
 }
-.profile-edit-dialog .profile-edit-cancel {
-  width: 100%;
-  padding: 4px 0 0;
-  border: 0;
-  background: transparent;
-  color: var(--industrial-steel);
-  font: inherit;
-  font-size: 12px;
-  cursor: pointer;
-}
-.profile-edit-dialog .profile-edit-cancel:hover {
-  color: var(--industrial-navy);
-}
-.profile-edit-dialog .profile-edit-status {
-  display: block;
-  min-height: 18px;
-  color: #39704b;
-  font-size: 11px;
-  text-align: center;
-}
-
 @media (max-width: 560px) {
   dialog.shared-login-modal.profile-edit-dialog {
     min-height: 0;
@@ -1507,8 +1403,7 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
   .profile-edit-dialog .profile-edit-form {
     grid-template-columns: 1fr;
   }
-  .profile-edit-dialog .profile-edit-full,
-  .profile-edit-dialog .profile-edit-status {
+  .profile-edit-dialog .profile-edit-full {
     grid-column: auto;
   }
 }
@@ -1714,8 +1609,7 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
 .overview-empty p,
 .address-selected-badge,
 #orders .orders-heading > div > span,
-.orders-pagination :is(p, button),
-.profile-edit-dialog .profile-edit-cancel {
+.orders-pagination :is(p, button) {
   font-size: 13px;
 }
 
@@ -1729,8 +1623,7 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
 #orders .profile-order-card footer,
 #orders .order-status,
 .profile-edit-dialog .profile-edit-kicker,
-.profile-edit-dialog .profile-edit-form .profile-edit-validation,
-.profile-edit-dialog .profile-edit-status {
+.profile-edit-dialog .profile-edit-form .profile-edit-validation {
   font-size: 12px !important;
 }
 
@@ -2093,10 +1986,6 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
   }
 }
 
-.overview-panel-title i {
-  color: #b98d00;
-}
-
 .overview-coupon-list {
   display: grid;
   gap: 10px;
@@ -2318,46 +2207,9 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
   }
 }
 
-.overview-coupon-copy {
-  display: grid;
-  min-width: 0;
-  grid-area: details;
-  gap: 3px;
-}
 
-.overview-coupon-code {
-  grid-area: code;
-  justify-self: start;
-  padding: 7px 10px;
-  border: 1px dashed color-mix(in srgb, var(--color-gold) 55%, white);
-  border-radius: 9px;
-  background: #fff;
-  color: var(--color-navy);
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  white-space: nowrap;
-}
 
-.overview-coupon-copy strong {
-  color: var(--color-navy);
-  font-size: 13px;
-}
 
-.overview-coupon-copy small {
-  color: var(--industrial-steel);
-  font-size: 11px;
-}
-
-@media (max-width: 767px) {
-  .overview-panels > article {
-    padding: 14px;
-  }
-
-  .overview-coupon-copy {
-    gap: 3px;
-  }
-
-}
 
 #addresses .account-section-heading {
   margin-bottom: 30px;
@@ -2655,42 +2507,6 @@ body.inner-page.mobile-page--profile-favorites #favoritesView .favorite-item-car
   font-size: 11px;
 }
 
-#overview.account-overview .overview-panels {
-  gap: 14px;
-  align-items: stretch;
-}
-
-#overview.account-overview .overview-panels > article {
-  padding: 17px;
-  border-color: #e1e7ec;
-  border-radius: 16px;
-  background: linear-gradient(150deg, #fff, #fdfdfc);
-  box-shadow: 0 7px 20px rgba(16, 42, 67, 0.04);
-}
-
-#overview.account-overview .overview-panel-title {
-  min-height: 34px;
-  margin-bottom: 12px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #edf0f2;
-}
-
-#overview.account-overview .overview-panel-title > i {
-  display: grid;
-  width: 32px;
-  height: 32px;
-  flex: 0 0 32px;
-  place-items: center;
-  border: 1px solid #efdfaa;
-  border-radius: 10px;
-  background: #fff8e4;
-  color: #806000;
-}
-
-#overview.account-overview .overview-panel-title h3 {
-  font-size: 15px;
-}
-
 @media (max-width: 767px) {
   #overview.account-overview .overview-heading {
     gap: 10px;
@@ -2721,9 +2537,6 @@ body.inner-page.mobile-page--profile-favorites #favoritesView .favorite-item-car
     min-height: 112px;
   }
 
-  #overview.account-overview .overview-panels > article {
-    padding: 14px;
-  }
 }
 
 @media (max-width: 1279px) {

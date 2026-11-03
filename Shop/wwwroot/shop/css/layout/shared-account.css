@@ -12,25 +12,6 @@
     0 0 0 1px rgba(255, 255, 255, 0.82) inset !important;
   backdrop-filter: blur(22px);
 }
-.shared-account-popover {
-  position: fixed;
-  z-index: 2200;
-  top: 92px;
-  left: 24px;
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(12px) scale(0.985);
-  transform-origin: top left;
-  transition:
-    opacity 0.22s,
-    visibility 0.22s,
-    transform 0.22s;
-}
-.shared-account-popover.open {
-  opacity: 1;
-  visibility: visible;
-  transform: none;
-}
 .shared-account-card .account-user {
   position: relative;
   display: grid;
@@ -249,8 +230,7 @@
     display: none;
   }
 
-  .shared-account-card.account-panel,
-  .shared-account-card.shared-account-popover {
+  .shared-account-card.account-panel {
     position: fixed !important;
     z-index: 7000 !important;
     isolation: isolate;
@@ -278,14 +258,12 @@
       transform 0.32s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
     overscroll-behavior: contain;
   }
-  .shared-account-card.account-panel.open,
-  .shared-account-card.shared-account-popover.open {
+  .shared-account-card.account-panel.open {
     opacity: 1 !important;
     visibility: visible !important;
     transform: translateY(0) !important;
   }
-  .shared-account-card.account-panel:before,
-  .shared-account-card.shared-account-popover:before {
+  .shared-account-card.account-panel:before {
     display: none !important;
     content: none !important;
   }
