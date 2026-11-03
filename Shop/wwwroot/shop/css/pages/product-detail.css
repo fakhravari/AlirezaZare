@@ -33,11 +33,11 @@
 
 @media (max-width: 575px) {
   .product-detail-page > .flow-main.container {
-    width: calc(100% - 24px);
+    width: calc(100% - 16px);
   }
 
   .product-detail-page #productView {
-    padding-inline: 8px;
+    padding-inline: 4px;
   }
 }
 

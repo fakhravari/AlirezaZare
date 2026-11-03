@@ -1896,12 +1896,12 @@
 
 @media (max-width: 575px) {
   .product-detail-page > .flow-main.container {
-    padding-inline: 8px !important;
+    padding-inline: 0;
   }
 
   #productView .product-detail-layout {
-    gap: 10px;
-    margin-bottom: 28px;
+    gap: 8px;
+    margin-bottom: 20px;
   }
 
   #productView .product-detail-gallery {
@@ -1909,18 +1909,19 @@
   }
 
   #productView .product-detail-summary {
-    padding: 14px;
+    padding: 10px;
   }
 
   #productView :is(.product-detail-content-panel, .product-detail-related) {
-    padding: 14px 11px;
+    padding: 12px 10px;
   }
 
   #productView .product-detail-price,
+  #productView .product-purchase-panel,
   #productView .product-accessories,
   #productView .product-purchase-trust,
   #productView .product-variant-options {
-    padding-inline: 11px;
+    padding-inline: 10px;
   }
 
 }

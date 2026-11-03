@@ -1141,6 +1141,7 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                 })
                 .join("")}`;
             let priceDialogTrigger = null;
+            if (!hasPriceVariants) priceScope.remove();
             const selectedPriceCombination = () =>
                 priceCombinations[Number(priceDialog.querySelector('input[name="detail-price-combination"]:checked')?.value)] || priceCombinations[0];
             const syncPriceWatchTrigger = () => {
