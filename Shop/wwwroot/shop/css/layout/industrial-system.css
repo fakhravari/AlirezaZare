@@ -12,7 +12,7 @@ body {
 }
 
 body :not(i):not(.bi) {
-  font-family: var(--font-body) !important;
+  font-family: var(--font-body);
   font-synthesis: none;
 }
 
@@ -25,7 +25,7 @@ body:not(i):not(.bi) h6,
 body:not(i):not(.bi) .section-title,
 body:not(i):not(.bi) .flow-heading,
 body:not(i):not(.bi) .orders-heading {
-  font-family: var(--font-heading) !important;
+  font-family: var(--font-heading);
 }
 
 body::selection {
@@ -6916,7 +6916,7 @@ html
 .compare-trigger:not(.product-detail-compare):not(.active) > i {
   color: #111 !important;
   -webkit-text-fill-color: currentColor !important;
-  -webkit-text-stroke: 0 !important;
+  -webkit-text-stroke: 0;
 }
 
 .compare-trigger:not(.product-detail-compare):not(.active):is(:hover, :focus, :focus-visible, :active) {
@@ -7041,7 +7041,7 @@ html
 .favorite:not(.active) > i {
   color: #111 !important;
   -webkit-text-fill-color: currentColor !important;
-  -webkit-text-stroke: 0 !important;
+  -webkit-text-stroke: 0;
 }
 
 /* Apply the same full-frame crop to the newest-products carousel. */
@@ -7107,7 +7107,7 @@ html
     .search-cart-drawer .search-cart-items) {
   box-sizing: border-box;
   padding-inline: 0 !important;
-  scrollbar-gutter: stable both-edges !important;
+  scrollbar-gutter: stable both-edges;
 }
 
 html
@@ -9248,7 +9248,7 @@ html
 }
 
 .article-checklist {
-  border-inline-start-color: var(--industrial-accent-border) !important;
+  border-inline-start-color: var(--industrial-accent-border);
 }
 
 .product-gallery-dialog-tools button:hover {

@@ -2246,7 +2246,6 @@ body {
   white-space: nowrap;
 }
 #productView .product-accessory-price > .product-price-current {
-  color: #173b5d !important;
   font-size: 13px;
   font-weight: 900;
   line-height: 1.5;

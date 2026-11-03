@@ -48,10 +48,15 @@
       : "";
     sections[placement].push(`<section class="home-sales-plan" data-sales-plan="${escape(plan.id)}" aria-labelledby="homeSalesPlan-${escape(plan.id)}-title"><header class="category-showcase-head"><div><h2 id="homeSalesPlan-${escape(plan.id)}-title">${escape(plan.name)}</h2>${countdown}${plan.label ? `<p>${escape(plan.label)}</p>` : ""}</div><a href="/Search?sales-plan=${encodeURIComponent(plan.id)}">مشاهدهٔ کالاها <i class="bi bi-arrow-left" aria-hidden="true"></i></a></header><div class="row g-3 home-sales-plan-grid" aria-label="کالاهای طرح ${escape(plan.name)}">${offers.map((offer) => {
       const product = products.get(Number(offer.productId));
+      const requiredAccessoryAmount = (product.accessories || []).filter((item) => item.required).reduce((total, item) => {
+        const amount = Number(offer.accessoryPriceAmounts?.[item.id] ?? Number(item.price) * 1000000);
+        return total + (Number.isFinite(amount) ? amount : 0);
+      }, 0);
       return `<div class="col-6 col-sm-4 col-md-3 col-xl-2">${window.HNProductCard.render(product, {
         salesPlanId: plan.id,
         priceAmount: Number(offer.priceAmount),
         discountPercent: Number(offer.discountPercent),
+        priceAdjustmentAmount: requiredAccessoryAmount,
         stockQuantity: Number(offer.stockQuantity),
         salesPlanName: plan.name,
         salesPlanCode: plan.code,

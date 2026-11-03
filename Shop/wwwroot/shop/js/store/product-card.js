@@ -4,7 +4,7 @@
   const esc = (value) => window.HNUI.escapeHtml(value);
   const fa = (value) => window.HNUI.formatNumber(value);
   const currentPrice = (product, options = {}) => Number.isFinite(Number(options.priceAmount))
-    ? Math.round(Number(options.priceAmount) * (100 - (Number(options.discountPercent) || 0)) / 100)
+    ? Math.round(Number(options.priceAmount) * (100 - (Number(options.discountPercent) || 0)) / 100) + Math.max(0, Number(options.priceAdjustmentAmount) || 0)
     : Math.round(Number(product.price) * 1000000);
   const price = (product, options = {}) => {
     const current = currentPrice(product, options);
@@ -24,6 +24,7 @@
       : favorite ? "product-card flow-card favorite-item-card" : "product-card";
     const headingClass = search ? "search-page-card-title" : "";
     const bodyClass = slider ? "showcase-card-body" : "product-info" + (search ? " search-page-card-content" : "");
+    const current = currentPrice(product, options);
     const productUrl = window.HNProductUrl(product, {salesPlanId: options.salesPlanId});
     const title = `<h3 class="${headingClass}"><a class="${slider ? "showcase-product-detail" : ""}" href="${esc(productUrl)}">${esc(product.name)}</a></h3>`;
     const badge = options.badge ?? product.badge;
@@ -35,7 +36,7 @@
       : search ? '<span class="add-cart-label search-page-card-action-label">افزودن</span><span class="search-page-card-action-compact">افزودن</span>' : '<span class="add-cart-label">افزودن به سبد</span>';
     const action = favorite
       ? `<button class="list-remove-button" type="button" data-unlike="${esc(product.id)}" aria-label="حذف ${esc(product.name)} از علاقه‌مندی‌ها"><i class="bi bi-trash3" aria-hidden="true"></i><span>حذف از علاقه‌مندی‌ها</span></button>`
-      : `<button class="add-cart${search ? " search-add-cart search-page-card-action" : ""}${unavailable ? " is-out-of-stock" : ""}" type="button" data-id="${esc(product.id)}" data-name="${esc(product.name)}" data-price="${Number.isFinite(Number(options.priceAmount)) ? Math.round(Number(options.priceAmount) * (100 - (Number(options.discountPercent) || 0)) / 100) : Math.round(product.price * 1000000)}" data-image="${esc(product.image)}"${options.salesPlanId ? ` data-sales-plan-id="${esc(options.salesPlanId)}" data-stock-quantity="${Math.max(0, Number(options.stockQuantity) || 0)}" data-max-purchase-quantity="${Math.max(1, Number(options.maxPurchaseQuantity) || 99)}"` : ""}${options.salesPlanName ? ` data-sales-plan-name="${esc(options.salesPlanName)}"` : ""}${options.salesPlanCode ? ` data-sales-plan-code="${esc(options.salesPlanCode)}"` : ""}${options.salesPlanLabel ? ` data-sales-plan-label="${esc(options.salesPlanLabel)}"` : ""}${unavailable ? ' disabled aria-disabled="true" aria-label="ناموجود" title="موجودی این کالا تمام شده است"' : ""}><i class="bi ${unavailable ? "bi-bag-x" : "bi-bag-plus"}" aria-hidden="true"></i>${actionLabel}</button>`;
+      : `<button class="add-cart${search ? " search-add-cart search-page-card-action" : ""}${unavailable ? " is-out-of-stock" : ""}" type="button" data-id="${esc(product.id)}" data-name="${esc(product.name)}" data-price="${current}" data-image="${esc(product.image)}"${options.salesPlanId ? ` data-sales-plan-id="${esc(options.salesPlanId)}" data-stock-quantity="${Math.max(0, Number(options.stockQuantity) || 0)}" data-max-purchase-quantity="${Math.max(1, Number(options.maxPurchaseQuantity) || 99)}"` : ""}${options.salesPlanName ? ` data-sales-plan-name="${esc(options.salesPlanName)}"` : ""}${options.salesPlanCode ? ` data-sales-plan-code="${esc(options.salesPlanCode)}"` : ""}${options.salesPlanLabel ? ` data-sales-plan-label="${esc(options.salesPlanLabel)}"` : ""}${unavailable ? ' disabled aria-disabled="true" aria-label="ناموجود" title="موجودی این کالا تمام شده است"' : ""}><i class="bi ${unavailable ? "bi-bag-x" : "bi-bag-plus"}" aria-hidden="true"></i>${actionLabel}</button>`;
     const hasSalesPlanBadge = Boolean(options.salesPlanName && options.salesPlanId && options.salesPlanId !== "regular");
     const imageBadge = hasSalesPlanBadge
       ? `<span class="product-sales-plan-badge product-sales-plan-badge--overlay"><i class="bi bi-lightning-charge-fill" aria-hidden="true"></i>${esc(options.salesPlanBadgeLabel || `طرح ${options.salesPlanName}`)}</span>`

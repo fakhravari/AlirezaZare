@@ -26,6 +26,39 @@ if (ownerMap.schemaVersion >= 2) {
 const baseline = JSON.parse(await read('tools/ui-legacy-budget.json'));
 const themeTokensFile = 'Shop/wwwroot/shop/css/core/design-tokens.css';
 const publicThemeToken = /^--(?:color-|font-size-|text-(?:xs|sm|md|base|lg|xl)$|space-|radius-|shadow-(?:card|card-hover)|ui-(?:navy|gold|surface|text|muted|border|radius-|shadow-|ease)|md-|mega-)/;
+const shorthandForLonghand = {
+  'border-top-left-radius': ['border-radius'],
+  'border-top-right-radius': ['border-radius'],
+  'border-bottom-left-radius': ['border-radius'],
+  'border-bottom-right-radius': ['border-radius'],
+  'border-top-color': ['border-top', 'border'], 'border-top-style': ['border-top', 'border'], 'border-top-width': ['border-top', 'border'],
+  'border-right-color': ['border-right', 'border'], 'border-right-style': ['border-right', 'border'], 'border-right-width': ['border-right', 'border'],
+  'border-bottom-color': ['border-bottom', 'border'], 'border-bottom-style': ['border-bottom', 'border'], 'border-bottom-width': ['border-bottom', 'border'],
+  'border-left-color': ['border-left', 'border'], 'border-left-style': ['border-left', 'border'], 'border-left-width': ['border-left', 'border'],
+  'border-color': ['border'], 'border-style': ['border'], 'border-width': ['border'],
+  'padding-top': ['padding'], 'padding-right': ['padding'], 'padding-bottom': ['padding'], 'padding-left': ['padding'],
+  'margin-top': ['margin'], 'margin-right': ['margin'], 'margin-bottom': ['margin'], 'margin-left': ['margin'],
+  top: ['inset'], right: ['inset'], bottom: ['inset'], left: ['inset'],
+  'overflow-x': ['overflow'], 'overflow-y': ['overflow'],
+  'row-gap': ['gap'], 'column-gap': ['gap'],
+  'flex-grow': ['flex'], 'flex-shrink': ['flex'], 'flex-basis': ['flex'],
+  'outline-color': ['outline'], 'outline-style': ['outline'], 'outline-width': ['outline'],
+  'background-color': ['background'], 'background-image': ['background'],
+  'background-position': ['background'], 'background-position-x': ['background'], 'background-position-y': ['background'],
+  'background-repeat': ['background'], 'background-size': ['background'], 'background-attachment': ['background'],
+  'background-origin': ['background'], 'background-clip': ['background'],
+  'font-family': ['font'], 'font-size': ['font'], 'font-style': ['font'], 'font-weight': ['font'],
+  'font-variant': ['font'], 'font-stretch': ['font'], 'line-height': ['font'],
+  'list-style-type': ['list-style'], 'list-style-position': ['list-style'], 'list-style-image': ['list-style'],
+  'column-width': ['columns'], 'column-count': ['columns'],
+  'column-rule-width': ['column-rule'], 'column-rule-style': ['column-rule'], 'column-rule-color': ['column-rule'],
+  'transition-property': ['transition'], 'transition-duration': ['transition'],
+  'transition-timing-function': ['transition'], 'transition-delay': ['transition'],
+  'animation-name': ['animation'], 'animation-duration': ['animation'],
+  'animation-timing-function': ['animation'], 'animation-delay': ['animation'],
+  'animation-iteration-count': ['animation'], 'animation-direction': ['animation'],
+  'animation-fill-mode': ['animation'], 'animation-play-state': ['animation']
+};
 const exists = async file => { try { await fs.access(path.join(root, file)); return true; } catch { return false; } };
 async function files(directory, suffix) {
   const list = [];
@@ -72,8 +105,17 @@ for (const file of styles) {
         if (parent.type === 'rule') selectorPath.unshift(parent.selector);
       }
       selectorPath.push(rule.selector);
-      for (const declaration of rule.nodes || []) {
+      const declarations = (rule.nodes || []).filter(node => node.type === 'decl');
+      for (let index = 0; index < declarations.length; index++) {
+        const declaration = declarations[index];
         if (declaration.type !== 'decl') continue;
+        const coveringShorthands = shorthandForLonghand[declaration.prop] || [];
+        const coveringShorthand = coveringShorthands.find(shorthand => declarations.slice(index + 1).some(
+          later => later.important && later.prop === shorthand
+        ));
+        if (declaration.important && coveringShorthand) {
+          errors.push(`${file}:${declaration.source.start.line}: shadowed !important ${declaration.prop}; a later ${coveringShorthand} shorthand has equal priority`);
+        }
         const key = `${conditions.join('\n')}\0${selectorPath.join('\n')}\0${declaration.prop}`;
         const earlier = declarationsByCascadeKey.get(key);
         if (declaration.important && earlier) {
@@ -96,6 +138,30 @@ for (const file of styles) {
   } catch (error) { errors.push(String(error)); }
 }
 const layout = await read('Shop/Views/Shared/_Shop.cshtml');
+const sharedStyles = [...layout.matchAll(/<link\b[^>]*href="~\/(shop\/css\/[^\"]+\.css)"[^>]*>/gs)].map(match => `Shop/wwwroot/${match[1]}`);
+const sharedImportant = new Map();
+for (const file of sharedStyles) {
+  try {
+    const css = postcss.parse(await read(file), {from: file});
+    css.walkRules(rule => {
+      const conditions = [];
+      const selectorPath = [];
+      for (let parent = rule.parent; parent.type !== 'root'; parent = parent.parent) {
+        if (parent.type === 'atrule') conditions.unshift(`${parent.name} ${parent.params}`);
+        if (parent.type === 'rule') selectorPath.unshift(parent.selector);
+      }
+      selectorPath.push(rule.selector);
+      rule.walkDecls(declaration => {
+        if (!declaration.important) return;
+        const key = `${conditions.join('\n')}\0${selectorPath.join('\n')}\0${declaration.prop}\0${declaration.value.trim()}`;
+        const earlier = sharedImportant.get(key);
+        if (earlier && earlier.file !== file)
+          errors.push(`${file}:${declaration.source.start.line}: duplicate shared !important ${declaration.prop}; same selector, conditions and value already win in ${earlier.file}:${earlier.line}`);
+        sharedImportant.set(key, {file, line: declaration.source.start.line});
+      });
+    });
+  } catch (error) { errors.push(`${file}: ${error.message}`); }
+}
 const dependencies = ['core/storage.js', 'store/cart.js', 'core/ui-core.js', 'store/catalog.js', 'store/product-card.js', 'layout/header-navigation.js', 'layout/main.js', 'store/commerce.js'];
 let previous = -1;
 for (const file of dependencies) {

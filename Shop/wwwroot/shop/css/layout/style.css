@@ -7814,7 +7814,6 @@ textarea:focus-visible {
   }
 
   #mainNav .brand-menu .dropdown-item {
-    min-height: 62px !important;
     padding: 9px 11px;
   }
 

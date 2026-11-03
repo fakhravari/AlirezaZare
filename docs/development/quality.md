@@ -65,6 +65,16 @@ git diff --check
 
 سپس ۲۰ قاعده با ۷۳ declaration دیگر حذف شدند: wrapper و legend چندطرحیِ منسوخ، عنوان برند و heading قدیمی کارت جست‌وجو، کنترل‌های carousel توصیه‌های غیرفعال، aliasهای overlay ورود و پنل popover حساب، و wrapper/فلش/فیلتررنگ‌های rail قدیمی. هشت `!important` مربوط به carousel توصیه‌ها پاک شد. کلاس‌های کارت محصولی که در امضای owner-locked هستند، با وجود نبود مصرف در markup، طبق کنترل `check-ui` حفظ شدند.
 
+در مرحلهٔ نخست کاهش اولویت‌های فعال، دو `!important` فونت عمومی از `industrial-system.css` حذف شد؛ selectorهای بدنه و heading از قواعد عادی مؤلفه‌ها مشخص‌ترند و markup/renderer مقدار inline فونت ندارد. شمار جاری ۲٬۶۴۴ اعلان در ۳۵ stylesheet است. سقف ثبت‌شدهٔ هر فایل در `tools/ui-legacy-budget.json` به شمار جاری دقیق شد؛ کنترل `check-ui` اکنون هر افزایش را رد می‌کند.
+
+دو `border-top-*-radius !important` که در همان rule با `border-radius !important` بعدی پوشانده می‌شدند از `quick-links-menu.css` حذف شدند. `check-ui` برای این الگوی shorthand/longhand و چند خانوادهٔ رایج دیگر هشدار می‌دهد؛ شمار جاری ۲٬۶۴۲ است.
+
+چهار `!important` دیگر از قواعد `.article-checklist`، stroke صفر آیکن‌های غیرفعال و `scrollbar-gutter` سبد حذف شدند؛ selectorهای فعال cascade عادی را برنده می‌کنند. شمار جاری ۲٬۶۳۸ در ۳۵ stylesheet است.
+
+ممیزی ترتیب ۳۰ stylesheet ثابت در `_Shop.cshtml` یک `min-height: 62px !important` تکراری را از `style.css` حذف کرد؛ قاعدهٔ همسان در فایل مالک مگامنو بعدتر بارگذاری می‌شود. کنترل `check-ui` این تکرارها را از این پس می‌گیرد. شمار به ۲٬۶۳۷ در ۳۵ stylesheet رسید.
+
+در View جزئیات محصول، `color: #173b5d !important` در selector قیمت متعلقه داخل `pages.css` با همان مقدار در stylesheet دیرتر و مالک جزئیات تکرار می‌شد؛ اعلان قدیمی حذف شد و امضای قاعدهٔ محافظت‌شده به‌روز شد. شمار به ۲٬۶۳۶ در ۳۵ stylesheet رسید.
+
 ## CI
 
 [quality.yml](../../.github/workflows/quality.yml) دو job دارد: قراردادها/build/HTTP و مرورگر دسکتاپ/موبایل. شکست browser گزارش HTML، trace و تصویر خطا را هفت روز نگه می‌دارد. CI پس از push یا pull request اجرا می‌شود؛ وجود فایل workflow به معنی اجرای موفق آن در GitHub نیست. قیمت، auth و پرداخت این تست‌ها دمو و در context جداگانهٔ آزمایشی‌اند.
