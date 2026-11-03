@@ -20,7 +20,7 @@ public sealed record SalesPlanCatalog(
     {
         ArgumentNullException.ThrowIfNull(productIds);
         SalesPlanCatalog catalog = JsonSerializer.Deserialize<SalesPlanCatalog>(json, JsonOptions)
-            ?? throw new InvalidDataException("Missing sales-plan catalog.");
+                                   ?? throw new InvalidDataException("Missing sales-plan catalog.");
         catalog.Validate(productIds);
         return catalog;
     }
@@ -28,7 +28,7 @@ public sealed record SalesPlanCatalog(
     public static SalesPlanCatalog ParseConfiguration(string json, string catalogJson)
     {
         SalesPlanCatalog configured = JsonSerializer.Deserialize<SalesPlanCatalog>(json, JsonOptions)
-            ?? throw new InvalidDataException("Missing sales-plan configuration.");
+                                      ?? throw new InvalidDataException("Missing sales-plan configuration.");
         if (configured.Plans is null || configured.Offers is null)
             throw new InvalidDataException("Sales-plan configuration must include plans and offers.");
         using JsonDocument catalogDocument = JsonDocument.Parse(catalogJson);
@@ -43,22 +43,26 @@ public sealed record SalesPlanCatalog(
             int id = product.GetProperty("id").GetInt32();
             decimal currentAmount = product.GetProperty("price").GetDecimal() * 1_000_000m;
             decimal discount = product.GetProperty("discountPercent").GetDecimal();
-            decimal listAmount = decimal.Round(currentAmount * 100m / (100m - discount), 0, MidpointRounding.AwayFromZero);
+            decimal listAmount =
+                decimal.Round(currentAmount * 100m / (100m - discount), 0, MidpointRounding.AwayFromZero);
             productIds.Add(id);
             HashSet<string> ids = [];
             HashSet<string> requiredIds = [];
             Dictionary<string, decimal> accessoryPrices = new(StringComparer.Ordinal);
             JsonElement accessoryArray = product.TryGetProperty("accessories", out JsonElement accessoryElement) &&
-                accessoryElement.ValueKind == JsonValueKind.Array ? accessoryElement : default;
+                                         accessoryElement.ValueKind == JsonValueKind.Array
+                ? accessoryElement
+                : default;
             if (accessoryArray.ValueKind == JsonValueKind.Array)
-            foreach (JsonElement accessory in accessoryArray.EnumerateArray())
-            {
-                string accessoryId = accessory.GetProperty("id").GetString()!;
-                ids.Add(accessoryId);
-                if (accessory.GetProperty("required").GetBoolean()) requiredIds.Add(accessoryId);
-                decimal accessoryAmount = accessory.GetProperty("price").GetDecimal() * 1_000_000m;
-                accessoryPrices[accessoryId] = accessoryAmount;
-            }
+                foreach (JsonElement accessory in accessoryArray.EnumerateArray())
+                {
+                    string accessoryId = accessory.GetProperty("id").GetString()!;
+                    ids.Add(accessoryId);
+                    if (accessory.GetProperty("required").GetBoolean()) requiredIds.Add(accessoryId);
+                    decimal accessoryAmount = accessory.GetProperty("price").GetDecimal() * 1_000_000m;
+                    accessoryPrices[accessoryId] = accessoryAmount;
+                }
+
             accessoryIds[id] = ids;
             requiredAccessoryIds[id] = requiredIds;
             accessoryPricesByProduct[id] = accessoryPrices;
@@ -72,14 +76,18 @@ public sealed record SalesPlanCatalog(
         }
 
         if (configured.Offers.Any(offer => offer is null || offer.SalesPlanId == "regular"))
-            throw new InvalidDataException("The default-plan offer is derived from the product catalog and cannot be duplicated.");
+            throw new InvalidDataException(
+                "The default-plan offer is derived from the product catalog and cannot be duplicated.");
         List<ProductSalesOffer> configuredOffers = [];
         foreach (ProductSalesOffer offer in configured.Offers)
         {
-            if (!accessoryIds.TryGetValue(offer.ProductId, out HashSet<string>? productAccessoryIds) || productAccessoryIds is null)
+            if (!accessoryIds.TryGetValue(offer.ProductId, out HashSet<string>? productAccessoryIds) ||
+                productAccessoryIds is null)
                 throw new InvalidDataException("An offer references an unknown product.");
-            Dictionary<string, decimal> resolvedPrices = new(accessoryPricesByProduct[offer.ProductId], StringComparer.Ordinal);
-            IReadOnlyDictionary<string, decimal> overrides = offer.AccessoryPriceAmounts ?? new Dictionary<string, decimal>();
+            Dictionary<string, decimal> resolvedPrices =
+                new(accessoryPricesByProduct[offer.ProductId], StringComparer.Ordinal);
+            IReadOnlyDictionary<string, decimal> overrides =
+                offer.AccessoryPriceAmounts ?? new Dictionary<string, decimal>();
             if (overrides.Keys.Any(key => !productAccessoryIds.Contains(key)))
                 throw new InvalidDataException("An offer references an unknown accessory.");
             foreach ((string accessoryId, decimal amount) in overrides)
@@ -87,7 +95,8 @@ public sealed record SalesPlanCatalog(
             string[] selectedAccessoryIds = offer.AccessoryIds?.ToArray() ?? productAccessoryIds.ToArray();
             if (selectedAccessoryIds.Distinct(StringComparer.Ordinal).Count() != selectedAccessoryIds.Length ||
                 selectedAccessoryIds.Any(id => !productAccessoryIds.Contains(id)) ||
-                requiredAccessoryIds[offer.ProductId].Any(id => !selectedAccessoryIds.Contains(id, StringComparer.Ordinal)))
+                requiredAccessoryIds[offer.ProductId]
+                    .Any(id => !selectedAccessoryIds.Contains(id, StringComparer.Ordinal)))
                 throw new InvalidDataException("An offer has an invalid or incomplete accessory selection.");
             configuredOffers.Add(offer with
             {
@@ -95,6 +104,7 @@ public sealed record SalesPlanCatalog(
                 AccessoryIds = selectedAccessoryIds
             });
         }
+
         SalesPlanCatalog complete = configured with
         {
             Offers = defaultOffers.Concat(configuredOffers).ToArray()
@@ -140,10 +150,11 @@ public sealed record SalesPlanCatalog(
                 !planIds.Contains(offer.SalesPlanId) || !offerKeys.Add(key) ||
                 offer.PriceAmount < 0 || offer.PriceAmount != decimal.Truncate(offer.PriceAmount) ||
                 offer.AccessoryPriceAmounts is null || offer.AccessoryPriceAmounts.Any(price =>
-                    string.IsNullOrWhiteSpace(price.Key) || price.Value < 0 || price.Value != decimal.Truncate(price.Value)) ||
+                    string.IsNullOrWhiteSpace(price.Key) || price.Value < 0 ||
+                    price.Value != decimal.Truncate(price.Value)) ||
                 offer.AccessoryIds is { } configuredAccessoryIds &&
-                    (configuredAccessoryIds.Any(string.IsNullOrWhiteSpace) ||
-                     configuredAccessoryIds.Distinct(StringComparer.Ordinal).Count() != configuredAccessoryIds.Count) ||
+                (configuredAccessoryIds.Any(string.IsNullOrWhiteSpace) ||
+                 configuredAccessoryIds.Distinct(StringComparer.Ordinal).Count() != configuredAccessoryIds.Count) ||
                 offer.SpecificationOverrides is null || offer.SpecificationOverrides.Any(specification =>
                     string.IsNullOrWhiteSpace(specification.Key) || specification.Key.Length > 80 ||
                     string.IsNullOrWhiteSpace(specification.Value) || specification.Value.Length > 240) ||
@@ -165,15 +176,15 @@ public sealed record SalesPlanCatalog(
 
         string planId = requestedPlanId ?? Plans.Single(plan => plan.IsDefault).Id;
         SalesPlan plan = Plans.SingleOrDefault(candidate => candidate.Id == planId)
-            ?? throw new SalesPlanUnavailableException("unknown-plan");
+                         ?? throw new SalesPlanUnavailableException("unknown-plan");
         if (!plan.IsEnabled ||
             (plan.StartsAtUtc is { } starts && nowUtc < starts) ||
             (plan.EndsAtUtc is { } ends && nowUtc >= ends))
             throw new SalesPlanUnavailableException("inactive-plan");
 
         ProductSalesOffer offer = Offers.SingleOrDefault(candidate =>
-            candidate.ProductId == productId && candidate.SalesPlanId == plan.Id)
-            ?? throw new SalesPlanUnavailableException("product-not-in-plan");
+                                      candidate.ProductId == productId && candidate.SalesPlanId == plan.Id)
+                                  ?? throw new SalesPlanUnavailableException("product-not-in-plan");
         if (!offer.IsEnabled) throw new SalesPlanUnavailableException("offer-disabled");
         if (offer.StockQuantity < quantity) throw new SalesPlanUnavailableException("insufficient-stock");
         if (offer.MaxPurchaseQuantity < quantity) throw new SalesPlanUnavailableException("purchase-limit");
@@ -218,7 +229,9 @@ public sealed record ProductSalesOffer(
     int MaxPurchaseQuantity,
     bool IsEnabled)
 {
-    public IReadOnlyDictionary<string, decimal> AccessoryPriceAmounts { get; init; } = new Dictionary<string, decimal>();
+    public IReadOnlyDictionary<string, decimal> AccessoryPriceAmounts { get; init; } =
+        new Dictionary<string, decimal>();
+
     public IReadOnlyList<string>? AccessoryIds { get; init; }
     public IReadOnlyDictionary<string, string> SpecificationOverrides { get; init; } = new Dictionary<string, string>();
 }
@@ -292,7 +305,8 @@ public static class SalesPlanLineIdentity
     public static string Create(int productId, string salesPlanId, string? variantId = null)
     {
         if (productId <= 0) throw new ArgumentOutOfRangeException(nameof(productId));
-        if (string.IsNullOrWhiteSpace(salesPlanId)) throw new ArgumentException("A sales plan is required.", nameof(salesPlanId));
+        if (string.IsNullOrWhiteSpace(salesPlanId))
+            throw new ArgumentException("A sales plan is required.", nameof(salesPlanId));
         return $"{productId}:{variantId?.Trim() ?? "base"}:{salesPlanId.Trim()}";
     }
 }

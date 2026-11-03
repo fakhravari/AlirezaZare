@@ -21,14 +21,20 @@
             <span>بررسی قیمت‌ها</span>
             <span>انتخاب آگاهانه</span>
         </div>
-</div>
+    </div>
 </header>
 <main class="flow-main container compare-page">
-    <section id="compareView" aria-live="polite"><div class="flow-card flow-empty empty-state-card"><i class="bi bi-columns-gap" aria-hidden="true"></i><h2>هنوز محصولی برای مقایسه انتخاب نشده است</h2><p>مدل‌های موردنظرتان را به فهرست مقایسه اضافه کنید.</p><a class="flow-button" asp-controller="Product" asp-action="List">مرور محصولات</a></div></section>
+    <section id="compareView" aria-live="polite">
+        <div class="flow-card flow-empty empty-state-card">
+            <i class="bi bi-columns-gap" aria-hidden="true"></i>
+            <h2>هنوز محصولی برای مقایسه انتخاب نشده است</h2>
+            <p>مدل‌های موردنظرتان را به فهرست مقایسه اضافه کنید.</p><a class="flow-button" asp-controller="Product" asp-action="List">مرور محصولات</a>
+        </div>
+    </section>
 </main>
 
 @section Styles {
-    <link href="~/shop/css/pages/form-confirm-dialog.css" rel="stylesheet" asp-append-version="true" />
+    <link href="~/shop/css/pages/form-confirm-dialog.css" rel="stylesheet" asp-append-version="true"/>
 }
 
 @section Scripts {

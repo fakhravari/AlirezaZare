@@ -37,7 +37,7 @@
                 </div>
                 <p>برای مشاهده مدل‌های موجود، برند موردنظر خود را انتخاب کنید.</p>
             </div>
-<div class="flow-cards brands-grid">
+            <div class="flow-cards brands-grid">
                 @foreach (BrandProfileModel brand in Model.Data)
                 {
                     <article class="flow-card brand-card ui-surface-card">
@@ -51,7 +51,9 @@
                                 <span class="brand-wordmark">@brand.Name.ToUpperInvariant()</span>
                             }
                         </span>
-                        <h2>@brand.Name <small>@brand.PersianName</small></h2>
+                        <h2>
+                            @brand.Name <small>@brand.PersianName</small>
+                        </h2>
                         <p>@brand.Focus</p>
                         <div class="brand-card-actions">
                             <a class="brand-action brand-action-store" href="@Url.Content($"~/search?brand={brand.Slug}")" aria-label="مشاهده محصولات @brand.PersianName">

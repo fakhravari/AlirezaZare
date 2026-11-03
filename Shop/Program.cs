@@ -19,11 +19,14 @@ builder.Services.AddSingleton<Shop.Services.EmailVerificationCodeStore>();
 builder.Services.AddSingleton<Shop.Services.IEmailSender, Shop.Services.SmtpEmailSender>();
 builder.Services.AddSingleton<Shop.Services.IMagazineContentSource, Shop.Services.DemoMagazineContentSource>();
 builder.Services.AddSingleton<Shop.Services.CatalogRepository>();
-builder.Services.AddSingleton<Shop.Services.ICatalogSource>(services => services.GetRequiredService<Shop.Services.CatalogRepository>());
+builder.Services.AddSingleton<Shop.Services.ICatalogSource>(services =>
+    services.GetRequiredService<Shop.Services.CatalogRepository>());
 builder.Services.AddSingleton<Shop.Services.ISalesPlanSource, Shop.Services.DemoSalesPlanSource>();
 builder.Services.AddScoped<Shop.Services.DemoAccountDataSource>();
-builder.Services.AddScoped<Shop.Services.IAccountDataSource>(services => services.GetRequiredService<Shop.Services.DemoAccountDataSource>());
-builder.Services.AddScoped<Shop.Services.ICommerceOfferSource>(services => services.GetRequiredService<Shop.Services.DemoAccountDataSource>());
+builder.Services.AddScoped<Shop.Services.IAccountDataSource>(services =>
+    services.GetRequiredService<Shop.Services.DemoAccountDataSource>());
+builder.Services.AddScoped<Shop.Services.ICommerceOfferSource>(services =>
+    services.GetRequiredService<Shop.Services.DemoAccountDataSource>());
 var persianHtmlEncoderSettings = new TextEncoderSettings(UnicodeRanges.BasicLatin, UnicodeRanges.Arabic);
 persianHtmlEncoderSettings.AllowCharacter('\u200C');
 builder.Services.AddWebEncoders(options => options.TextEncoderSettings = persianHtmlEncoderSettings);
@@ -41,9 +44,11 @@ if (Uri.TryCreate(builder.Configuration["Seo:SiteUrl"], UriKind.Absolute, out va
     {
         string requestHost = context.Request.Host.Host;
         bool localDevelopmentHost = app.Environment.IsDevelopment()
-            && (string.Equals(requestHost, "localhost", StringComparison.OrdinalIgnoreCase)
-                || System.Net.IPAddress.TryParse(requestHost, out var address) && System.Net.IPAddress.IsLoopback(address));
-        if (!localDevelopmentHost && !string.Equals(requestHost, canonicalSite.Host, StringComparison.OrdinalIgnoreCase))
+                                    && (string.Equals(requestHost, "localhost", StringComparison.OrdinalIgnoreCase)
+                                        || System.Net.IPAddress.TryParse(requestHost, out var address) &&
+                                        System.Net.IPAddress.IsLoopback(address));
+        if (!localDevelopmentHost &&
+            !string.Equals(requestHost, canonicalSite.Host, StringComparison.OrdinalIgnoreCase))
         {
             var target = new UriBuilder(canonicalSite)
             {
@@ -57,6 +62,7 @@ if (Uri.TryCreate(builder.Configuration["Seo:SiteUrl"], UriKind.Absolute, out va
         await next();
     });
 }
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");

@@ -28,209 +28,219 @@
 </header>
 
 <main class="search-main search-page container">
-    <button
-        class="mobile-filter-toggle"
-        id="mobileFilterToggle"
-        type="button"
-        aria-controls="filterPanel"
-        aria-expanded="false">
-        <i class="bi bi-sliders" aria-hidden="true"></i> فیلتر پیشرفته
-        <span id="activeFilterCount">۰</span>
-    </button>
-    <aside class="filter-panel" id="filterPanel">
-        <div class="filter-head">
-            <div class="filter-head-copy">
-                <span class="filter-head-title">
-                    <i class="bi bi-funnel" aria-hidden="true"></i>
-                    فیلتر محصولات
-                </span>
-                <small>
-                    <b id="filterResultCount">۰</b>
-                    <span>محصول پیدا شد</span>
-                </small>
-            </div>
-            <button id="closeFilters" type="button" aria-label="بستن">
-                <i class="bi bi-x-lg"></i>
-            </button>
+<button
+    class="mobile-filter-toggle"
+    id="mobileFilterToggle"
+    type="button"
+    aria-controls="filterPanel"
+    aria-expanded="false">
+    <i class="bi bi-sliders" aria-hidden="true"></i> فیلتر پیشرفته
+    <span id="activeFilterCount">۰</span>
+</button>
+<aside class="filter-panel" id="filterPanel">
+    <div class="filter-head">
+        <div class="filter-head-copy">
+            <span class="filter-head-title">
+                <i class="bi bi-funnel" aria-hidden="true"></i>
+                فیلتر محصولات
+            </span>
+            <small>
+                <b id="filterResultCount">۰</b>
+                <span>محصول پیدا شد</span>
+            </small>
         </div>
-        <button class="clear-filters" id="clearFilters" type="button" hidden>
-            <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
-            <span>پاک‌کردن همه فیلترها</span>
-            <span class="clear-filter-count" id="clearFilterCount" aria-label="۰ فیلتر فعال">۰</span>
+        <button id="closeFilters" type="button" aria-label="بستن">
+            <i class="bi bi-x-lg"></i>
         </button>
-        <label class="filter-option filter-discount-option" for="discountFilter">
-            <span><i class="bi bi-tags" aria-hidden="true"></i> فقط کالاهای تخفیف‌دار</span>
-            <input id="discountFilter" name="discounted" type="checkbox" value="1" />
-        </label>
-        <div class="filter-group" data-filter-fa="وضعیت موجودی" data-filter-en="Availability" data-filter-slug="availability">
-            <button type="button" aria-expanded="false">
-                <span class="filter-group-title" data-filter-fa="وضعیت موجودی" data-filter-en="Availability" data-filter-slug="availability">
-                    <i class="bi bi-box-seam" aria-hidden="true"></i><span>وضعیت موجودی</span>
-                </span>
-                <span class="filter-group-arrow"><i class="bi bi-chevron-down" aria-hidden="true"></i></span>
-            </button>
-            <div class="filter-options" id="availabilityFilters">
-                <label class="filter-option filter-choice-option"><input type="radio" name="availability" value="all" checked /><span>همهٔ کالاها</span></label>
-                <label class="filter-option filter-choice-option"><input type="radio" name="availability" value="in-stock" /><span>کالاهای موجود</span></label>
-                <label class="filter-option filter-choice-option"><input type="radio" name="availability" value="out-of-stock" /><span>کالاهای ناموجود</span></label>
+    </div>
+    <button class="clear-filters" id="clearFilters" type="button" hidden>
+        <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
+        <span>پاک‌کردن همه فیلترها</span>
+        <span class="clear-filter-count" id="clearFilterCount" aria-label="۰ فیلتر فعال">۰</span>
+    </button>
+    <label class="filter-option filter-discount-option" for="discountFilter">
+        <span><i class="bi bi-tags" aria-hidden="true"></i> فقط کالاهای تخفیف‌دار</span>
+        <input id="discountFilter" name="discounted" type="checkbox" value="1"/>
+    </label>
+    <div class="filter-group" data-filter-fa="وضعیت موجودی" data-filter-en="Availability" data-filter-slug="availability">
+        <button type="button" aria-expanded="false">
+            <span class="filter-group-title" data-filter-fa="وضعیت موجودی" data-filter-en="Availability" data-filter-slug="availability">
+                <i class="bi bi-box-seam" aria-hidden="true"></i><span>وضعیت موجودی</span>
+            </span>
+            <span class="filter-group-arrow">
+                <i class="bi bi-chevron-down" aria-hidden="true"></i>
+            </span>
+        </button>
+        <div class="filter-options" id="availabilityFilters">
+            <label class="filter-option filter-choice-option">
+                <input type="radio" name="availability" value="all" checked/><span>همهٔ کالاها</span>
+            </label>
+            <label class="filter-option filter-choice-option">
+                <input type="radio" name="availability" value="in-stock"/><span>کالاهای موجود</span>
+            </label>
+            <label class="filter-option filter-choice-option">
+                <input type="radio" name="availability" value="out-of-stock"/><span>کالاهای ناموجود</span>
+            </label>
+        </div>
+    </div>
+    <div class="filter-group" data-filter-fa="طرح فروش" data-filter-en="Sales plan" data-filter-slug="sales-plan">
+        <button type="button" aria-expanded="false">
+            <span class="filter-group-title" data-filter-fa="طرح فروش" data-filter-en="Sales plan" data-filter-slug="sales-plan">
+                <i class="bi bi-lightning-charge" aria-hidden="true"></i><span>طرح فروش</span>
+            </span>
+            <span class="filter-group-arrow">
+                <i class="bi bi-chevron-down" aria-hidden="true"></i>
+            </span>
+        </button>
+        <div class="filter-options" id="salesPlanFilters"></div>
+    </div>
+    <div class="filter-group" data-filter-fa="برند" data-filter-en="Brand" data-filter-slug="brand">
+        <button type="button" aria-expanded="false">
+            <span class="filter-group-title" data-filter-fa="برند" data-filter-en="Brand" data-filter-slug="brand">
+                <i class="bi bi-patch-check" aria-hidden="true"></i><span>برند</span>
+            </span>
+            <span class="filter-group-arrow">
+                <i class="bi bi-chevron-down" aria-hidden="true"></i>
+            </span>
+        </button>
+        <div class="filter-options" id="brandFilters"></div>
+    </div>
+    <div class="filter-group" data-filter-fa="گروه محصول" data-filter-en="Product group" data-filter-slug="product-group">
+        <button type="button" aria-expanded="false">
+            <span class="filter-group-title" data-filter-fa="گروه محصول" data-filter-en="Product group" data-filter-slug="product-group">
+                <i class="bi bi-tools" aria-hidden="true"></i><span>گروه محصول</span>
+            </span>
+            <span class="filter-group-arrow">
+                <i class="bi bi-chevron-down" aria-hidden="true"></i>
+            </span>
+        </button>
+        <div class="filter-options" id="typeFilters"></div>
+    </div>
+    <div class="filter-group" data-filter-fa="نوع تغذیه" data-filter-en="Power type" data-filter-slug="power-type">
+        <button type="button" aria-expanded="false">
+            <span class="filter-group-title" data-filter-fa="نوع تغذیه" data-filter-en="Power type" data-filter-slug="power-type">
+                <i class="bi bi-lightning-charge" aria-hidden="true"></i><span>نوع تغذیه</span>
+            </span>
+            <span class="filter-group-arrow">
+                <i class="bi bi-chevron-down" aria-hidden="true"></i>
+            </span>
+        </button>
+        <div class="filter-options" id="movementFilters"></div>
+    </div>
+    <div class="filter-group" data-filter-fa="محیط کاربرد" data-filter-en="Application environment" data-filter-slug="application-environment">
+        <button type="button" aria-expanded="false">
+            <span class="filter-group-title" data-filter-fa="محیط کاربرد" data-filter-en="Application environment" data-filter-slug="application-environment">
+                <i class="bi bi-building-gear" aria-hidden="true"></i><span>محیط کاربرد</span>
+            </span>
+            <span class="filter-group-arrow">
+                <i class="bi bi-chevron-down" aria-hidden="true"></i>
+            </span>
+        </button>
+        <div class="filter-options" id="strapFilters"></div>
+    </div>
+    <div class="filter-group" data-filter-fa="رنگ" data-filter-en="Color" data-filter-slug="color">
+        <button type="button" aria-expanded="false">
+            <span class="filter-group-title" data-filter-fa="رنگ" data-filter-en="Color" data-filter-slug="color">
+                <i class="bi bi-palette2" aria-hidden="true"></i><span>رنگ</span>
+            </span>
+            <span class="filter-group-arrow">
+                <i class="bi bi-chevron-down" aria-hidden="true"></i>
+            </span>
+        </button>
+        <div class="filter-options" id="colorFilters"></div>
+    </div>
+    <div class="filter-group" data-filter-fa="بازه قیمت تومان" data-filter-en="Price range Toman" data-filter-slug="price-range">
+        <button type="button" aria-expanded="false">
+            <span class="filter-group-title" data-filter-fa="بازه قیمت تومان" data-filter-en="Price range Toman" data-filter-slug="price-range">
+                <i class="bi bi-cash-stack" aria-hidden="true"></i><span>بازه قیمت (تومان)</span>
+            </span>
+            <span class="filter-group-arrow">
+                <i class="bi bi-chevron-down" aria-hidden="true"></i>
+            </span>
+        </button>
+        <div class="price-filter">
+            <div class="price-filter-values" aria-live="polite">
+                <span>از <b id="minPriceLabel">۰</b></span>
+                <span>تا <b id="maxPriceLabel">۶۰</b> میلیون تومان</span>
+            </div>
+            <div class="price-range" dir="ltr" style="--range-start: 0%; --range-end: 100%">
+                <div class="price-range-track" aria-hidden="true"></div>
+                <label class="ui-sr-only" for="minPrice">حداقل قیمت به میلیون تومان</label>
+                <input id="minPrice" class="price-range-input price-range-min" type="range" dir="rtl" min="0" max="60" value="0" step="1" aria-label="حداقل قیمت به میلیون تومان"/>
+                <label class="ui-sr-only" for="maxPrice">حداکثر قیمت به میلیون تومان</label>
+                <input id="maxPrice" class="price-range-input price-range-max" type="range" dir="rtl" min="0" max="60" value="60" step="1" aria-label="حداکثر قیمت به میلیون تومان"/>
             </div>
         </div>
-        <div class="filter-group" data-filter-fa="طرح فروش" data-filter-en="Sales plan" data-filter-slug="sales-plan">
-            <button type="button" aria-expanded="false">
-                <span class="filter-group-title" data-filter-fa="طرح فروش" data-filter-en="Sales plan" data-filter-slug="sales-plan">
-                    <i class="bi bi-lightning-charge" aria-hidden="true"></i><span>طرح فروش</span>
-                </span>
-                <span class="filter-group-arrow"><i class="bi bi-chevron-down" aria-hidden="true"></i></span>
-            </button>
-            <div class="filter-options" id="salesPlanFilters"></div>
-        </div>
-        <div class="filter-group" data-filter-fa="برند" data-filter-en="Brand" data-filter-slug="brand">
-            <button type="button" aria-expanded="false">
-                <span class="filter-group-title" data-filter-fa="برند" data-filter-en="Brand" data-filter-slug="brand">
-                    <i class="bi bi-patch-check" aria-hidden="true"></i><span>برند</span>
-                </span>
-                <span class="filter-group-arrow">
-                    <i class="bi bi-chevron-down" aria-hidden="true"></i>
-                </span>
-            </button>
-            <div class="filter-options" id="brandFilters"></div>
-        </div>
-        <div class="filter-group" data-filter-fa="گروه محصول" data-filter-en="Product group" data-filter-slug="product-group">
-            <button type="button" aria-expanded="false">
-                <span class="filter-group-title" data-filter-fa="گروه محصول" data-filter-en="Product group" data-filter-slug="product-group">
-                    <i class="bi bi-tools" aria-hidden="true"></i><span>گروه محصول</span>
-                </span>
-                <span class="filter-group-arrow">
-                    <i class="bi bi-chevron-down" aria-hidden="true"></i>
-                </span>
-            </button>
-            <div class="filter-options" id="typeFilters"></div>
-        </div>
-        <div class="filter-group" data-filter-fa="نوع تغذیه" data-filter-en="Power type" data-filter-slug="power-type">
-            <button type="button" aria-expanded="false">
-                <span class="filter-group-title" data-filter-fa="نوع تغذیه" data-filter-en="Power type" data-filter-slug="power-type">
-                    <i class="bi bi-lightning-charge" aria-hidden="true"></i><span>نوع تغذیه</span>
-                </span>
-                <span class="filter-group-arrow">
-                    <i class="bi bi-chevron-down" aria-hidden="true"></i>
-                </span>
-            </button>
-            <div class="filter-options" id="movementFilters"></div>
-        </div>
-        <div class="filter-group" data-filter-fa="محیط کاربرد" data-filter-en="Application environment" data-filter-slug="application-environment">
-            <button type="button" aria-expanded="false">
-                <span class="filter-group-title" data-filter-fa="محیط کاربرد" data-filter-en="Application environment" data-filter-slug="application-environment">
-                    <i class="bi bi-building-gear" aria-hidden="true"></i><span>محیط کاربرد</span>
-                </span>
-                <span class="filter-group-arrow">
-                    <i class="bi bi-chevron-down" aria-hidden="true"></i>
-                </span>
-            </button>
-            <div class="filter-options" id="strapFilters"></div>
-        </div>
-        <div class="filter-group" data-filter-fa="رنگ" data-filter-en="Color" data-filter-slug="color">
-            <button type="button" aria-expanded="false">
-                <span class="filter-group-title" data-filter-fa="رنگ" data-filter-en="Color" data-filter-slug="color">
-                    <i class="bi bi-palette2" aria-hidden="true"></i><span>رنگ</span>
-                </span>
-                <span class="filter-group-arrow">
-                    <i class="bi bi-chevron-down" aria-hidden="true"></i>
-                </span>
-            </button>
-            <div class="filter-options" id="colorFilters"></div>
-        </div>
-        <div class="filter-group" data-filter-fa="بازه قیمت تومان" data-filter-en="Price range Toman" data-filter-slug="price-range">
-            <button type="button" aria-expanded="false">
-                <span class="filter-group-title" data-filter-fa="بازه قیمت تومان" data-filter-en="Price range Toman" data-filter-slug="price-range">
-                    <i class="bi bi-cash-stack" aria-hidden="true"></i><span>بازه قیمت (تومان)</span>
-                </span>
-                <span class="filter-group-arrow">
-                    <i class="bi bi-chevron-down" aria-hidden="true"></i>
-                </span>
-            </button>
-            <div class="price-filter">
-                <div class="price-filter-values" aria-live="polite">
-                    <span>از <b id="minPriceLabel">۰</b></span>
-                    <span>تا <b id="maxPriceLabel">۶۰</b> میلیون تومان</span>
-                </div>
-                <div class="price-range" dir="ltr" style="--range-start: 0%; --range-end: 100%">
-                    <div class="price-range-track" aria-hidden="true"></div>
-                    <label class="ui-sr-only" for="minPrice">حداقل قیمت به میلیون تومان</label>
-                    <input id="minPrice" class="price-range-input price-range-min" type="range" dir="rtl" min="0" max="60" value="0" step="1" aria-label="حداقل قیمت به میلیون تومان" />
-                    <label class="ui-sr-only" for="maxPrice">حداکثر قیمت به میلیون تومان</label>
-                    <input id="maxPrice" class="price-range-input price-range-max" type="range" dir="rtl" min="0" max="60" value="60" step="1" aria-label="حداکثر قیمت به میلیون تومان" />
-                </div>
-            </div>
-        </div>
-    </aside>
-    <div class="filter-backdrop" id="filterBackdrop"></div>
+    </div>
+</aside>
+<div class="filter-backdrop" id="filterBackdrop"></div>
 
-    <section class="results-area">
-        <div class="results-toolbar">
-            <div class="search-box">
-                <i class="bi bi-search" aria-hidden="true">
-                </i
-                >
-                <label class="ui-sr-only" for="productSearch">
-                    جستجو در محصولات
-                </label
-                >
-                <input
-                    id="productSearch"
-                    type="search"
-                    placeholder="جستجو در نام، برند یا ویژگی..."
-                    autocomplete="off"/>
-            </div>
-            <div class="sort-box">
-                <span class="sort-label" id="sortProductsLabel"><i class="bi bi-arrow-down-up" aria-hidden="true"></i> مرتب‌سازی</span>
-                <div class="sort-options" role="radiogroup" aria-labelledby="sortProductsLabel">
-                    <label class="sort-option">
-                        <input type="radio" name="productSort" value="recommended" checked />
-                        <span>محبوب‌ترین</span>
-                    </label>
-                    <label class="sort-option">
-                        <input type="radio" name="productSort" value="newest" />
-                        <span>جدیدترین</span>
-                    </label>
-                    <label class="sort-option">
-                        <input type="radio" name="productSort" value="low" />
-                        <span>ارزان‌ترین</span>
-                    </label>
-                    <label class="sort-option">
-                        <input type="radio" name="productSort" value="high" />
-                        <span>گران‌ترین</span>
-                    </label>
-                </div>
-            </div>
+<section class="results-area">
+    <div class="results-toolbar">
+        <div class="search-box">
+            <i class="bi bi-search" aria-hidden="true">
+            </i
+            >
+            <label class="ui-sr-only" for="productSearch">
+                جستجو در محصولات
+            </label
+            >
+            <input
+                id="productSearch"
+                type="search"
+                placeholder="جستجو در نام، برند یا ویژگی..."
+                autocomplete="off"/>
         </div>
-        <div class="results-summary" hidden>
-            <p><b id="resultCount">۰</b> محصول پیدا شد</p>
-            <div class="active-chips" id="activeChips"></div>
-        </div>
-        <div class="product-results search-page-results" id="productResults"></div>
-        <div class="empty-results empty-state-card" id="emptyResults" hidden>
-            <i class="bi bi-search"></i>
-            <h2>محصولی پیدا نشد</h2>
-            <p>فیلترها را تغییر دهید یا همه فیلترها را پاک کنید.</p>
-            <button type="button">پاک‌کردن فیلترها</button>
-        </div>
-        <div class="load-more-state" id="loadMoreState">
-            <span class="loader"></span>
-            <p>در حال بارگذاری محصولات بیشتر...</p>
-        </div>
-        <div class="results-end" id="resultsEnd" role="status" hidden>
-            <div class="end-icon" aria-hidden="true">
-                <i class="bi bi-check2"></i>
-            </div>
-            <div>
-                <strong>به پایان نتایج رسیدید</strong>
-                <p>
-                    هر <b id="endResultCount">۰</b> محصول مطابق انتخاب شما نمایش داده شد.
-                </p>
+        <div class="sort-box">
+            <span class="sort-label" id="sortProductsLabel"><i class="bi bi-arrow-down-up" aria-hidden="true"></i> مرتب‌سازی</span>
+            <div class="sort-options" role="radiogroup" aria-labelledby="sortProductsLabel">
+                <label class="sort-option">
+                    <input type="radio" name="productSort" value="recommended" checked/>
+                    <span>محبوب‌ترین</span>
+                </label>
+                <label class="sort-option">
+                    <input type="radio" name="productSort" value="newest"/>
+                    <span>جدیدترین</span>
+                </label>
+                <label class="sort-option">
+                    <input type="radio" name="productSort" value="low"/>
+                    <span>ارزان‌ترین</span>
+                </label>
+                <label class="sort-option">
+                    <input type="radio" name="productSort" value="high"/>
+                    <span>گران‌ترین</span>
+                </label>
             </div>
         </div>
-        <div id="loadMoreSentinel" aria-hidden="true"></div>
-    </section>
+    </div>
+    <div class="results-summary" hidden>
+        <p><b id="resultCount">۰</b> محصول پیدا شد</p>
+        <div class="active-chips" id="activeChips"></div>
+    </div>
+    <div class="product-results search-page-results" id="productResults"></div>
+    <div class="empty-results empty-state-card" id="emptyResults" hidden>
+        <i class="bi bi-search"></i>
+        <h2>محصولی پیدا نشد</h2>
+        <p>فیلترها را تغییر دهید یا همه فیلترها را پاک کنید.</p>
+        <button type="button">پاک‌کردن فیلترها</button>
+    </div>
+    <div class="load-more-state" id="loadMoreState">
+        <span class="loader"></span>
+        <p>در حال بارگذاری محصولات بیشتر...</p>
+    </div>
+    <div class="results-end" id="resultsEnd" role="status" hidden>
+        <div class="end-icon" aria-hidden="true">
+            <i class="bi bi-check2"></i>
+        </div>
+        <div>
+            <strong>به پایان نتایج رسیدید</strong>
+            <p>
+                هر <b id="endResultCount">۰</b> محصول مطابق انتخاب شما نمایش داده شد.
+            </p>
+        </div>
+    </div>
+    <div id="loadMoreSentinel" aria-hidden="true"></div>
+</section>
 </main>
 
 <partial name="_PurchaseBenefits"/>

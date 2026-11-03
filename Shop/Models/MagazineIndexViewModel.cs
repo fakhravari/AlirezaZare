@@ -1,8 +1,16 @@
 ﻿namespace Shop.Models;
 
 public sealed record MagazineArchivePost(
-    string Slug, string Branch, string Topic, string Area, string Category,
-    string Title, string Summary, string Image, string? PublishedAt, int ReadMinutes);
+    string Slug,
+    string Branch,
+    string Topic,
+    string Area,
+    string Category,
+    string Title,
+    string Summary,
+    string Image,
+    string? PublishedAt,
+    int ReadMinutes);
 
 public sealed record MagazineIndexViewModel(IReadOnlyList<MagazineArchivePost> Posts)
 {
@@ -13,7 +21,6 @@ public sealed record MagazineIndexViewModel(IReadOnlyList<MagazineArchivePost> P
     public int ToolsCount => Posts.Count(post => post.Area == "tools");
     public int ElectricalCount => Posts.Count(post => post.Area == "electrical");
     public int WorkshopCount => Posts.Count(post => post.Area == "workshop");
-
 }
 
 internal static class MagazineArchiveCatalog
@@ -60,6 +67,3 @@ internal static class MagazineArchiveCatalog
         new("clean-store-power-tools", "safety", "tools", "tools"),
     ];
 }
-
-
-

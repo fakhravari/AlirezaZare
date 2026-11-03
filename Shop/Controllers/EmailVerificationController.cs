@@ -9,7 +9,8 @@ namespace Shop.Controllers;
 [ApiController]
 [EnableRateLimiting("email-code")]
 [Route("api/auth/email-code")]
-public sealed partial class EmailVerificationController(EmailVerificationCodeStore codes, IEmailSender emailSender) : ControllerBase
+public sealed partial class EmailVerificationController(EmailVerificationCodeStore codes, IEmailSender emailSender)
+    : ControllerBase
 {
     [HttpPost]
     public async Task<IActionResult> Send([FromBody] EmailCodeRequest request, CancellationToken cancellationToken)
@@ -19,7 +20,8 @@ public sealed partial class EmailVerificationController(EmailVerificationCodeSto
         if (!codes.TryCreate(email, out var code, out var retryAfter))
         {
             var retrySeconds = Math.Max(1, (int)Math.Ceiling(retryAfter.TotalSeconds));
-            return StatusCode(StatusCodes.Status429TooManyRequests, new { message = $"برای ارسال دوباره {retrySeconds} ثانیه صبر کنید." });
+            return StatusCode(StatusCodes.Status429TooManyRequests,
+                new { message = $"برای ارسال دوباره {retrySeconds} ثانیه صبر کنید." });
         }
 
         try
@@ -35,7 +37,8 @@ public sealed partial class EmailVerificationController(EmailVerificationCodeSto
         catch
         {
             codes.Remove(email);
-            return StatusCode(StatusCodes.Status503ServiceUnavailable, new { message = "ارسال ایمیل در حال حاضر ممکن نشد. تنظیمات SMTP را بررسی کنید و دوباره تلاش کنید." });
+            return StatusCode(StatusCodes.Status503ServiceUnavailable,
+                new { message = "ارسال ایمیل در حال حاضر ممکن نشد. تنظیمات SMTP را بررسی کنید و دوباره تلاش کنید." });
         }
     }
 
@@ -54,8 +57,15 @@ public sealed partial class EmailVerificationController(EmailVerificationCodeSto
 
     private static bool IsValidEmail(string email)
     {
-        try { return email.Length <= 254 && new MailAddress(email).Address.Equals(email, StringComparison.OrdinalIgnoreCase); }
-        catch (FormatException) { return false; }
+        try
+        {
+            return email.Length <= 254 &&
+                   new MailAddress(email).Address.Equals(email, StringComparison.OrdinalIgnoreCase);
+        }
+        catch (FormatException)
+        {
+            return false;
+        }
     }
 
     [GeneratedRegex("^[0-9]{6}$", RegexOptions.CultureInvariant)]
@@ -63,4 +73,5 @@ public sealed partial class EmailVerificationController(EmailVerificationCodeSto
 }
 
 public sealed record EmailCodeRequest(string? Email);
+
 public sealed record VerifyEmailCodeRequest(string? Email, string? Code);

@@ -4,17 +4,17 @@
 <header class="page-hero cart-page-hero">
     <div class="container">
         <nav class="cart-breadcrumb" aria-label="مسیر صفحه">
-        <ol>
-            <li>
-                <a asp-controller="Home" asp-action="Index">
-                    <i class="bi bi-house-door" aria-hidden="true"></i><span>خانه</span>
-                </a>
-            </li>
-            <li class="cart-breadcrumb-current">
-                <i class="bi bi-chevron-left" aria-hidden="true"></i><span aria-current="page"><i class="bi bi-bag" aria-hidden="true"></i>سبد خرید</span>
-            </li>
-        </ol>
-    </nav>
+            <ol>
+                <li>
+                    <a asp-controller="Home" asp-action="Index">
+                        <i class="bi bi-house-door" aria-hidden="true"></i><span>خانه</span>
+                    </a>
+                </li>
+                <li class="cart-breadcrumb-current">
+                    <i class="bi bi-chevron-left" aria-hidden="true"></i><span aria-current="page"><i class="bi bi-bag" aria-hidden="true"></i>سبد خرید</span>
+                </li>
+            </ol>
+        </nav>
         <h1>سبد خرید</h1>
         <p>یک قدم نزدیک‌تر به انتخاب شما</p>
         <div class="hero-trail" aria-label="مزایای خرید">
@@ -79,7 +79,18 @@
         </div>
         <p id="paymentMethodStatus" class="payment-method-status" role="status"></p>
     </section>
-    <div id="cartView"><section class="cart-empty-state"><div class="cart-empty-copy"><span class="cart-empty-kicker">سبد خرید</span><h2>سبد خرید شما خالی است</h2><p>برای شروع، محصولات را ببینید یا راهنماهای خرید را بخوانید.</p><div class="cart-empty-actions"><a class="flow-button" asp-controller="Product" asp-action="List">مرور محصولات</a><a class="ui-inline-action" asp-controller="Magazine" asp-action="Index">مطالعهٔ راهنماها</a></div></div></section></div>
+    <div id="cartView">
+        <section class="cart-empty-state">
+            <div class="cart-empty-copy">
+                <span class="cart-empty-kicker">سبد خرید</span>
+                <h2>سبد خرید شما خالی است</h2>
+                <p>برای شروع، محصولات را ببینید یا راهنماهای خرید را بخوانید.</p>
+                <div class="cart-empty-actions">
+                    <a class="flow-button" asp-controller="Product" asp-action="List">مرور محصولات</a><a class="ui-inline-action" asp-controller="Magazine" asp-action="Index">مطالعهٔ راهنماها</a>
+                </div>
+            </div>
+        </section>
+    </div>
     <dialog id="addressDialog" class="address-dialog" aria-labelledby="addressDialogTitle">
         <div class="address-dialog-heading">
             <div class="address-dialog-title">

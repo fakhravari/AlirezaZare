@@ -42,4 +42,3 @@ public static class ProductMediaCatalog
         _ => throw new ArgumentOutOfRangeException(nameof(fileName), fileName, "Unknown product media file.")
     };
 }
-

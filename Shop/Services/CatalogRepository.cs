@@ -11,6 +11,7 @@ public sealed class CatalogRepository(IWebHostEnvironment environment) : ICatalo
         cancellationToken.ThrowIfCancellationRequested();
         return ValueTask.FromResult(Read());
     }
+
     private readonly object _gate = new();
     private readonly string _path = Path.Combine(environment.WebRootPath, "content", "data", "catalog.json");
     private CatalogSnapshot? _snapshot;
@@ -34,7 +35,9 @@ public sealed class CatalogRepository(IWebHostEnvironment environment) : ICatalo
     }
 }
 
-public sealed record CatalogSnapshot(string BrowserJson, IReadOnlyList<ProductSeoEntry> Products,
+public sealed record CatalogSnapshot(
+    string BrowserJson,
+    IReadOnlyList<ProductSeoEntry> Products,
     IReadOnlyList<BrandProfileModel> Brands)
 {
     public static CatalogSnapshot Parse(string source)
@@ -44,9 +47,12 @@ public sealed record CatalogSnapshot(string BrowserJson, IReadOnlyList<ProductSe
         if (root.GetProperty("schemaVersion").GetInt32() != 2)
             throw new InvalidDataException("Unsupported catalog schemaVersion.");
 
-        JsonElement brands = root.GetProperty("brands"), categories = root.GetProperty("categories"),
-            media = root.GetProperty("media"), colors = root.GetProperty("colors"),
-            countries = root.GetProperty("countries"), details = root.GetProperty("details"),
+        JsonElement brands = root.GetProperty("brands"),
+            categories = root.GetProperty("categories"),
+            media = root.GetProperty("media"),
+            colors = root.GetProperty("colors"),
+            countries = root.GetProperty("countries"),
+            details = root.GetProperty("details"),
             attributeDefinitions = root.GetProperty("attributeDefinitions");
         ValidateAttributeDefinitions(attributeDefinitions);
         HashSet<string> specificationFeatures = ValidateSpecificationDefinitions(root);
@@ -65,16 +71,22 @@ public sealed record CatalogSnapshot(string BrowserJson, IReadOnlyList<ProductSe
             if (logo is not null) ValidatePath(logo, "content/brands/");
             BrandProfileModel editorial = BrandCatalog.Find(id) ?? new(id, Text(brand, "name"),
                 Text(brand, "fa"), null, "", "", []);
-            brandProfiles.Add(editorial with { Name = Text(brand, "name"), PersianName = Text(brand, "fa"),
-                LogoFile = logo is null ? null : Path.GetFileName(logo) });
+            brandProfiles.Add(editorial with
+            {
+                Name = Text(brand, "name"), PersianName = Text(brand, "fa"),
+                LogoFile = logo is null ? null : Path.GetFileName(logo)
+            });
         }
+
         foreach (JsonElement country in countries.EnumerateObject().Select(item => item.Value))
             ValidatePath(Text(country, "flag"), "content/countries/flags/");
         foreach (JsonElement detail in details.EnumerateObject().Select(item => item.Value))
         {
-            if (detail.TryGetProperty("specs", out JsonElement sharedSpecs)) ValidateSpecPairs(sharedSpecs, "Shared detail specs");
+            if (detail.TryGetProperty("specs", out JsonElement sharedSpecs))
+                ValidateSpecPairs(sharedSpecs, "Shared detail specs");
             ValidateSpecGroups(detail, "specGroups", "Shared detail");
         }
+
         foreach (JsonElement images in media.EnumerateObject().Select(item => item.Value))
         {
             ValidatePath(Text(images, "main"), "content/products/images/main/");
@@ -85,14 +97,17 @@ public sealed record CatalogSnapshot(string BrowserJson, IReadOnlyList<ProductSe
                 ValidatePath(Text(image, "src"), "content/products/images/main/");
                 ValidatePath(Text(image, "thumbnail"), "content/products/images/thumbnail/");
             }
+
             foreach (JsonElement video in images.GetProperty("videos").EnumerateArray())
                 ValidatePath(video.GetString() ?? "", "content/products/videos/");
         }
+
         foreach (JsonElement product in root.GetProperty("products").EnumerateArray())
         {
             int id = product.GetProperty("id").GetInt32();
             if (id <= 0 || !ids.Add(id)) throw new InvalidDataException($"Invalid/duplicate product id: {id}");
-            string name = Text(product, "name"), englishName = Text(product, "englishName"),
+            string name = Text(product, "name"),
+                englishName = Text(product, "englishName"),
                 slug = Text(product, "slug");
             string code = Text(product, "code");
             if (!codes.Add(code)) throw new InvalidDataException($"Duplicate product code: {id}");
@@ -120,10 +135,12 @@ public sealed record CatalogSnapshot(string BrowserJson, IReadOnlyList<ProductSe
             products.Add(new(id, name, englishName, Text(brand, "name"), Text(category, "fa"), imagePath, slug,
                 code, GetCategoryPath(category, categories)));
         }
+
         if (products.Count == 0) throw new InvalidDataException("The catalog has no products.");
         foreach (JsonElement collection in root.GetProperty("collections").EnumerateObject().Select(item => item.Value))
-            foreach (JsonElement id in collection.EnumerateArray())
-                if (!ids.Contains(id.GetInt32())) throw new InvalidDataException("Unknown product in collection.");
+        foreach (JsonElement id in collection.EnumerateArray())
+            if (!ids.Contains(id.GetInt32()))
+                throw new InvalidDataException("Unknown product in collection.");
 
         // Default System.Text.Json encoding escapes '<', '>' and '&': safe inside a JSON script block.
         return new(JsonSerializer.Serialize(root), products.AsReadOnly(), brandProfiles.AsReadOnly());
@@ -176,7 +193,8 @@ public sealed record CatalogSnapshot(string BrowserJson, IReadOnlyList<ProductSe
                 parentElement.ValueKind is not (JsonValueKind.Null or JsonValueKind.String))
                 throw new InvalidDataException($"Category parentId is missing or invalid: {id}");
             string? parentId = parentElement.ValueKind == JsonValueKind.String
-                ? parentElement.GetString()?.Trim() : null;
+                ? parentElement.GetString()?.Trim()
+                : null;
             if (!category.TryGetProperty("path", out JsonElement pathElement) ||
                 pathElement.ValueKind != JsonValueKind.Array || pathElement.GetArrayLength() == 0)
                 throw new InvalidDataException($"Category path is missing: {id}");
@@ -236,7 +254,8 @@ public sealed record CatalogSnapshot(string BrowserJson, IReadOnlyList<ProductSe
         if (variants.ValueKind is not (JsonValueKind.Object or JsonValueKind.Null))
             throw new InvalidDataException("Variants must be an object or null.");
         foreach (JsonProperty variant in variants.ValueKind == JsonValueKind.Null
-            ? Enumerable.Empty<JsonProperty>() : variants.EnumerateObject())
+                     ? Enumerable.Empty<JsonProperty>()
+                     : variants.EnumerateObject())
         {
             _ = Text(variant.Value, "label");
             HashSet<string> values = new(StringComparer.Ordinal);
@@ -246,8 +265,10 @@ public sealed record CatalogSnapshot(string BrowserJson, IReadOnlyList<ProductSe
                 _ = Text(option, "label");
                 if (option.TryGetProperty("priceDelta", out JsonElement delta)) _ = delta.GetDecimal();
             }
+
             if (values.Count == 0) throw new InvalidDataException("A variant needs an option.");
         }
+
         JsonElement accessoryList = product.GetProperty("accessories");
         if (accessoryList.ValueKind == JsonValueKind.Null) return;
         if (accessoryList.ValueKind != JsonValueKind.Array)
@@ -258,7 +279,8 @@ public sealed record CatalogSnapshot(string BrowserJson, IReadOnlyList<ProductSe
             if (!accessories.Add(Text(accessory, "id"))) throw new InvalidDataException("Duplicate accessory id.");
             _ = Text(accessory, "name");
             _ = accessory.GetProperty("required").GetBoolean();
-            if (accessory.GetProperty("price").GetDecimal() < 0) throw new InvalidDataException("Invalid accessory price.");
+            if (accessory.GetProperty("price").GetDecimal() < 0)
+                throw new InvalidDataException("Invalid accessory price.");
         }
     }
 
@@ -276,8 +298,9 @@ public sealed record CatalogSnapshot(string BrowserJson, IReadOnlyList<ProductSe
         {
             JsonElement value = attribute.Value;
             if (attribute.Name.Length == 0 || attribute.Name[0] is < 'a' or > 'z' || attribute.Name.Any(character =>
-                !(character is >= 'a' and <= 'z' or >= 'A' and <= 'Z' or >= '0' and <= '9' or '-')))
-                throw new InvalidDataException("Catalog attribute ids must be lower-camel identifiers or lowercase slugs.");
+                    !(character is >= 'a' and <= 'z' or >= 'A' and <= 'Z' or >= '0' and <= '9' or '-')))
+                throw new InvalidDataException(
+                    "Catalog attribute ids must be lower-camel identifiers or lowercase slugs.");
             _ = Text(value, "label");
             _ = Text(value, "icon");
             _ = Text(value, "source");
@@ -307,6 +330,7 @@ public sealed record CatalogSnapshot(string BrowserJson, IReadOnlyList<ProductSe
             if (!groups.TryGetProperty(groupId, out _))
                 throw new InvalidDataException($"Unknown specification group: {groupId}");
         }
+
         HashSet<string> featureIds = new(StringComparer.Ordinal);
         foreach (JsonProperty feature in features.EnumerateObject())
         {
@@ -316,6 +340,7 @@ public sealed record CatalogSnapshot(string BrowserJson, IReadOnlyList<ProductSe
                 throw new InvalidDataException($"Unknown specification category: {categoryId}");
             featureIds.Add(feature.Name);
         }
+
         return featureIds;
     }
 
@@ -332,7 +357,8 @@ public sealed record CatalogSnapshot(string BrowserJson, IReadOnlyList<ProductSe
             if (!featureIds.Contains(featureId))
                 throw new InvalidDataException($"Unknown product specification feature: {featureId}");
             if (value.Length == 0 || !assigned.Add(featureId))
-                throw new InvalidDataException("Product specification values must be non-empty and unique per feature.");
+                throw new InvalidDataException(
+                    "Product specification values must be non-empty and unique per feature.");
         }
     }
 
@@ -348,7 +374,8 @@ public sealed record CatalogSnapshot(string BrowserJson, IReadOnlyList<ProductSe
             string title = Text(group, "title").Trim();
             if (title.Length == 0) throw new InvalidDataException($"{context} spec group titles cannot be empty.");
             if (!titles.Add(title)) throw new InvalidDataException("Product spec group titles must be unique.");
-            if (!group.TryGetProperty("specs", out JsonElement specs) || specs.ValueKind != JsonValueKind.Array || specs.GetArrayLength() == 0)
+            if (!group.TryGetProperty("specs", out JsonElement specs) || specs.ValueKind != JsonValueKind.Array ||
+                specs.GetArrayLength() == 0)
                 throw new InvalidDataException("Each product spec group needs at least one spec.");
             ValidateSpecPairs(specs, $"{context} spec group");
             foreach (JsonElement pair in specs.EnumerateArray())
@@ -375,9 +402,11 @@ public sealed record CatalogSnapshot(string BrowserJson, IReadOnlyList<ProductSe
 
     private static string Text(JsonElement item, string property) =>
         item.GetProperty(property).GetString() is { Length: > 0 } text
-            ? text : throw new InvalidDataException($"Missing catalog field: {property}");
+            ? text
+            : throw new InvalidDataException($"Missing catalog field: {property}");
 
     private static JsonElement Reference(JsonElement collection, JsonElement item, string property) =>
         collection.TryGetProperty(Text(item, property), out JsonElement result)
-            ? result : throw new InvalidDataException($"Broken catalog relation: {property}");
+            ? result
+            : throw new InvalidDataException($"Broken catalog relation: {property}");
 }

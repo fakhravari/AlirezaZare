@@ -6,9 +6,9 @@
     var nowUtc = DateTimeOffset.UtcNow;
     var availableSalesPlans = salesPlanCatalog.Plans
         .Where(plan => !plan.IsDefault && plan.IsEnabled &&
-            (plan.StartsAtUtc is null || plan.StartsAtUtc <= nowUtc) &&
-            (plan.EndsAtUtc is null || plan.EndsAtUtc > nowUtc) &&
-            salesPlanCatalog.Offers.Any(offer => offer.SalesPlanId == plan.Id && offer.IsEnabled && offer.StockQuantity > 0))
+                       (plan.StartsAtUtc is null || plan.StartsAtUtc <= nowUtc) &&
+                       (plan.EndsAtUtc is null || plan.EndsAtUtc > nowUtc) &&
+                       salesPlanCatalog.Offers.Any(offer => offer.SalesPlanId == plan.Id && offer.IsEnabled && offer.StockQuantity > 0))
         .OrderBy(plan => plan.Name)
         .ToList();
 }
@@ -16,230 +16,238 @@
     class="offcanvas offcanvas-start mobile-menu"
     tabindex="-1"
     id="mobileMenu">
-    <div class="offcanvas-header">
-        <a class="brand mobile-menu-logo" asp-controller="Home" asp-action="Index" aria-label="برق شیراز؛ مرجع تخصصی ابزار و تجهیزات برقی؛ رفتن به صفحهٔ اصلی">
-            <img class="mobile-menu-logo-image" src="~/content/identity/store-electrical-lockup.svg" alt="" width="360" height="120" decoding="async" asp-append-version="true" />
-        </a>
-        <button
-            type="button"
-            class="mobile-menu-close"
-            data-bs-dismiss="offcanvas"
-            aria-label="بستن">
-            <i class="bi bi-x-lg" aria-hidden="true"></i>
+<div class="offcanvas-header">
+    <a class="brand mobile-menu-logo" asp-controller="Home" asp-action="Index" aria-label="برق شیراز؛ مرجع تخصصی ابزار و تجهیزات برقی؛ رفتن به صفحهٔ اصلی">
+        <img class="mobile-menu-logo-image" src="~/content/identity/store-electrical-lockup.svg" alt="" width="360" height="120" decoding="async" asp-append-version="true"/>
+    </a>
+    <button
+        type="button"
+        class="mobile-menu-close"
+        data-bs-dismiss="offcanvas"
+        aria-label="بستن">
+        <i class="bi bi-x-lg" aria-hidden="true"></i>
+    </button>
+    <form class="mobile-menu-search" id="mobileMenuSearchForm" action="/Search" method="get" role="search">
+        <i class="bi bi-search" aria-hidden="true"></i>
+        <input class="header-search-input" id="mobileMenuSearch" name="q" type="search" placeholder="جستجوی کالا یا برند…" aria-label="جستجوی کالا یا برند" aria-controls="mobileMenuSearchSuggestions" aria-autocomplete="list" aria-expanded="false" autocomplete="off"/>
+        <button type="submit" aria-label="جستجو">
+            <i class="bi bi-arrow-left" aria-hidden="true"></i>
         </button>
-        <form class="mobile-menu-search" id="mobileMenuSearchForm" action="/Search" method="get" role="search">
-            <i class="bi bi-search" aria-hidden="true"></i>
-            <input class="header-search-input" id="mobileMenuSearch" name="q" type="search" placeholder="جستجوی کالا یا برند…" aria-label="جستجوی کالا یا برند" aria-controls="mobileMenuSearchSuggestions" aria-autocomplete="list" aria-expanded="false" autocomplete="off" />
-            <button type="submit" aria-label="جستجو"><i class="bi bi-arrow-left" aria-hidden="true"></i></button>
-            <div class="mobile-menu-search-results" id="mobileMenuSearchSuggestions" role="region" aria-label="پیشنهادهای جستجو" hidden></div>
-        </form>
-    </div>
-    <div class="offcanvas-body">
-        <div class="mobile-accordion">
-            <button
-                class="mobile-category-toggle"
-                type="button"
-                data-bs-toggle="collapse"
-                data-bs-target="#mobileCategories"
-                aria-expanded="false">
-                <span>
-                    <i class="bi bi-grid-3x3-gap"></i> دسته‌بندی
-                </span
-                ><i class="bi bi-plus-lg"></i>
-            </button>
-            <div class="collapse" id="mobileCategories">
-                <div class="mobile-category-list" id="mobileCategoryList">
-                    <div class="mobile-category">
-                        <button type="button" data-bs-toggle="collapse" data-bs-target="#mobilePowerTools" aria-expanded="false">
-                            <span><i class="bi bi-lightning-charge"></i> ابزار برقی</span><i class="bi bi-chevron-down"></i>
-                        </button>
-                        <div class="collapse" id="mobilePowerTools">
-                            <div class="mobile-submenu">
-                                <a href="/Search?q=دریل%20چکشی" data-bs-dismiss="offcanvas">دریل چکشی</a>
-                                <a href="/Search?q=دریل%20و%20پیچ‌گوشتی" data-bs-dismiss="offcanvas">دریل و پیچ‌گوشتی</a>
-                                <a href="/Search?q=پیچ‌گوشتی%20شارژی" data-bs-dismiss="offcanvas">پیچ‌گوشتی شارژی</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="mobile-category">
-                        <button type="button" data-bs-toggle="collapse" data-bs-target="#mobileHandTools" aria-expanded="false">
-                            <span><i class="bi bi-tools"></i> ابزار دستی</span><i class="bi bi-chevron-down"></i>
-                        </button>
-                        <div class="collapse" id="mobileHandTools">
-                            <div class="mobile-submenu">
-                                <a href="/Search?q=ابزار%20دستی%20برق‌کاری" data-bs-dismiss="offcanvas">ابزار دستی برق‌کاری</a>
-                                <a href="/Search?q=مجموعه%20ابزار%20برق‌کاری" data-bs-dismiss="offcanvas">مجموعه ابزار برق‌کاری</a>
-                                <a href="/Search?q=ست%20ابزار" data-bs-dismiss="offcanvas">ست ابزار نصب</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="mobile-category">
-                        <button type="button" data-bs-toggle="collapse" data-bs-target="#mobileMeasurement" aria-expanded="false">
-                            <span><i class="bi bi-speedometer2"></i> ابزار اندازه‌گیری</span><i class="bi bi-chevron-down"></i>
-                        </button>
-                        <div class="collapse" id="mobileMeasurement">
-                            <div class="mobile-submenu">
-                                <a href="/Search?q=مولتی‌متر" data-bs-dismiss="offcanvas">مولتی‌متر</a>
-                                <a href="/Search?q=کلمپ‌متر" data-bs-dismiss="offcanvas">کلمپ‌متر</a>
-                                <a href="/Search?q=تستر%20ولتاژ" data-bs-dismiss="offcanvas">تستر ولتاژ</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="mobile-category">
-                        <button type="button" data-bs-toggle="collapse" data-bs-target="#mobileElectronics" aria-expanded="false">
-                            <span><i class="bi bi-cpu"></i> قطعات و تعمیر برد</span><i class="bi bi-chevron-down"></i>
-                        </button>
-                        <div class="collapse" id="mobileElectronics">
-                            <div class="mobile-submenu">
-                                <a href="/Search?q=ایستگاه%20هویه" data-bs-dismiss="offcanvas">ایستگاه هویه</a>
-                                <a href="/Search?q=هویه%20قلمی" data-bs-dismiss="offcanvas">هویه قلمی</a>
-                                <a href="/Search?q=هیتر%20و%20هویه" data-bs-dismiss="offcanvas">هیتر و هویه</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="mobile-category">
-                        <button type="button" data-bs-toggle="collapse" data-bs-target="#mobileLighting" aria-expanded="false">
-                            <span><i class="bi bi-lightbulb"></i> روشنایی و لامپ</span><i class="bi bi-chevron-down"></i>
-                        </button>
-                        <div class="collapse" id="mobileLighting">
-                            <div class="mobile-submenu">
-                                <a href="/Search?q=چراغ%20کارگاهی" data-bs-dismiss="offcanvas">چراغ کارگاهی</a>
-                                <a href="/Search?q=پروژکتور%20کارگاهی" data-bs-dismiss="offcanvas">پروژکتور کارگاهی</a>
-                                <a href="/Search?q=چراغ%20بازرسی" data-bs-dismiss="offcanvas">چراغ بازرسی</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <a href="Search" data-bs-dismiss="offcanvas">
-            <span><i class="bi bi-shop"></i> فروشگاه</span>
-        </a>
-        @if (availableSalesPlans.Count > 0)
-        {
-            <div class="mobile-accordion mobile-sales-plans-accordion">
-                <button class="mobile-category-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#mobileSalesPlans" aria-expanded="false" aria-controls="mobileSalesPlans">
-                    <span><i class="bi bi-lightning-charge"></i> طرح‌های فروش</span>
-                    <i class="bi bi-plus-lg" aria-hidden="true"></i>
+        <div class="mobile-menu-search-results" id="mobileMenuSearchSuggestions" role="region" aria-label="پیشنهادهای جستجو" hidden></div>
+    </form>
+</div>
+<div class="offcanvas-body">
+<div class="mobile-accordion">
+    <button
+        class="mobile-category-toggle"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#mobileCategories"
+        aria-expanded="false">
+        <span>
+            <i class="bi bi-grid-3x3-gap"></i> دسته‌بندی
+        </span
+        ><i class="bi bi-plus-lg"></i>
+    </button>
+    <div class="collapse" id="mobileCategories">
+        <div class="mobile-category-list" id="mobileCategoryList">
+            <div class="mobile-category">
+                <button type="button" data-bs-toggle="collapse" data-bs-target="#mobilePowerTools" aria-expanded="false">
+                    <span><i class="bi bi-lightning-charge"></i> ابزار برقی</span><i class="bi bi-chevron-down"></i>
                 </button>
-                <div class="collapse" id="mobileSalesPlans">
-                    <div class="mobile-sales-plan-list" aria-label="طرح‌های فروش فعال">
-                        @foreach (var plan in availableSalesPlans)
-                        {
-                            <a class="sales-plan-menu-link" href="@Url.Content($"~/Search?sales-plan={Uri.EscapeDataString(plan.Id)}")" data-bs-dismiss="offcanvas">
-                                <span class="sales-plan-menu-symbol" aria-hidden="true"><i class="bi bi-lightning-charge-fill"></i></span>
-                                <span class="sales-plan-menu-copy"><strong>@plan.Name</strong><small>@(string.IsNullOrWhiteSpace(plan.Label) ? "مشاهدهٔ کالاهای این طرح" : plan.Label)</small></span>
-                                <span class="sales-plan-menu-arrow" aria-hidden="true"><i class="bi bi-arrow-left"></i></span>
-                            </a>
-                        }
+                <div class="collapse" id="mobilePowerTools">
+                    <div class="mobile-submenu">
+                        <a href="/Search?q=دریل%20چکشی" data-bs-dismiss="offcanvas">دریل چکشی</a>
+                        <a href="/Search?q=دریل%20و%20پیچ‌گوشتی" data-bs-dismiss="offcanvas">دریل و پیچ‌گوشتی</a>
+                        <a href="/Search?q=پیچ‌گوشتی%20شارژی" data-bs-dismiss="offcanvas">پیچ‌گوشتی شارژی</a>
                     </div>
                 </div>
             </div>
-        }
-        <div class="mobile-accordion mobile-brands-accordion">
-            <button
-                class="mobile-category-toggle"
-                type="button"
-                data-bs-toggle="collapse"
-                data-bs-target="#mobileBrands"
-                aria-expanded="false">
-                <span>
-                    <i class="bi bi-award"></i> برند
-                </span
-                ><i class="bi bi-plus-lg"></i>
-            </button>
-            <div class="collapse" id="mobileBrands">
-                <div class="mobile-brand-list" aria-label="فهرست برندها">
-                    <a class="mobile-brand-list-all" href="@Url.Content("~/brands")" data-bs-dismiss="offcanvas">
-                        <i class="bi bi-grid-3x3-gap" aria-hidden="true"></i>
-                        <span>معرفی همهٔ برندها</span>
-                        <i class="bi bi-arrow-left" aria-hidden="true"></i>
-                    </a>
-                    @foreach (BrandProfileModel brand in panelCatalog.Brands)
-                    {
-                        <a href="@Url.Content($"~/brands/{brand.Slug}")" data-bs-dismiss="offcanvas">@brand.PersianName</a>
-                    }
+            <div class="mobile-category">
+                <button type="button" data-bs-toggle="collapse" data-bs-target="#mobileHandTools" aria-expanded="false">
+                    <span><i class="bi bi-tools"></i> ابزار دستی</span><i class="bi bi-chevron-down"></i>
+                </button>
+                <div class="collapse" id="mobileHandTools">
+                    <div class="mobile-submenu">
+                        <a href="/Search?q=ابزار%20دستی%20برق‌کاری" data-bs-dismiss="offcanvas">ابزار دستی برق‌کاری</a>
+                        <a href="/Search?q=مجموعه%20ابزار%20برق‌کاری" data-bs-dismiss="offcanvas">مجموعه ابزار برق‌کاری</a>
+                        <a href="/Search?q=ست%20ابزار" data-bs-dismiss="offcanvas">ست ابزار نصب</a>
+                    </div>
                 </div>
             </div>
-        </div>
-        <a href="Magazine" data-bs-dismiss="offcanvas">
-            <span><i class="bi bi-journal-richtext"></i> مجله فنی</span>
-        </a
-        >
-        <div class="mobile-accordion mobile-quick-links-accordion">
-            <button
-                class="mobile-category-toggle"
-                type="button"
-                data-bs-toggle="collapse"
-                data-bs-target="#mobileQuickLinks"
-                aria-expanded="false"
-                aria-controls="mobileQuickLinks">
-                <span><i class="bi bi-info-circle"></i> راهنما و اطلاعات</span>
-                <i class="bi bi-plus-lg quick-links-expand-icon" aria-hidden="true"></i>
-            </button>
-            <div class="collapse" id="mobileQuickLinks">
-                <div class="quick-links-mobile-content">
-                    <section class="quick-links-mobile-group" aria-labelledby="mobileCustomerLinksTitle">
-                        <h3 id="mobileCustomerLinksTitle"><i class="bi bi-headset" aria-hidden="true"></i> خدمات مشتریان</h3>
-                        <div class="mobile-submenu">
-                            <a href="/Tracking" data-bs-dismiss="offcanvas">پیگیری سفارش</a>
-                            <a href="/Shipping" data-bs-dismiss="offcanvas">شرایط ارسال</a>
-                            <a href="/Warranty" data-bs-dismiss="offcanvas">ضمانت اصالت</a>
-                            <a href="/Faq" data-bs-dismiss="offcanvas">پرسش‌های متداول</a>
-                            <a href="/Legal/Returns" data-bs-dismiss="offcanvas">رویه بازگرداندن کالا</a>
-                        </div>
-                    </section>
-                    <section class="quick-links-mobile-group" aria-labelledby="mobileCompanyLinksTitle">
-                        <h3 id="mobileCompanyLinksTitle"><i class="bi bi-building" aria-hidden="true"></i> کمپانی و قوانین</h3>
-                        <div class="mobile-submenu">
-                            <a href="/Home/Index#story" data-bs-dismiss="offcanvas">درباره مجموعه</a>
-                            <a href="/Magazine" data-bs-dismiss="offcanvas">مجله برق و ابزار</a>
-                            <a href="/Contact" data-bs-dismiss="offcanvas">تماس با ما</a>
-                            <a href="/Legal/Privacy" data-bs-dismiss="offcanvas">حریم خصوصی</a>
-                            <a href="/Legal/Terms" data-bs-dismiss="offcanvas">شرایط استفاده</a>
-                        </div>
-                    </section>
+            <div class="mobile-category">
+                <button type="button" data-bs-toggle="collapse" data-bs-target="#mobileMeasurement" aria-expanded="false">
+                    <span><i class="bi bi-speedometer2"></i> ابزار اندازه‌گیری</span><i class="bi bi-chevron-down"></i>
+                </button>
+                <div class="collapse" id="mobileMeasurement">
+                    <div class="mobile-submenu">
+                        <a href="/Search?q=مولتی‌متر" data-bs-dismiss="offcanvas">مولتی‌متر</a>
+                        <a href="/Search?q=کلمپ‌متر" data-bs-dismiss="offcanvas">کلمپ‌متر</a>
+                        <a href="/Search?q=تستر%20ولتاژ" data-bs-dismiss="offcanvas">تستر ولتاژ</a>
+                    </div>
                 </div>
             </div>
-        </div>
-        <a href="About" data-bs-dismiss="offcanvas">
-            <span><i class="bi bi-building"></i> درباره ما</span>
-        </a>
-        <a href="Contact" data-bs-dismiss="offcanvas">
-            <span><i class="bi bi-telephone"></i> تماس با ما</span>
-        </a>
-        <div class="mobile-menu-footer">
-            <div class="mobile-support-head">
-                <a class="mobile-support-icon mobile-support-icon--urgent" href="tel:09369455457" aria-label="تماس فوری با پشتیبانی" data-bs-dismiss="offcanvas">
-                    <img src="/shop/images/icons/urgent-support.svg" alt="" />
-                </a>
-                <div>
-                    <strong>برای انتخاب بهتر کنارتان هستیم</strong>
-                    <span class="mobile-support-status"><i class="bi bi-circle-fill" aria-hidden="true"></i> پاسخ‌گویی واحد فروش</span>
+            <div class="mobile-category">
+                <button type="button" data-bs-toggle="collapse" data-bs-target="#mobileElectronics" aria-expanded="false">
+                    <span><i class="bi bi-cpu"></i> قطعات و تعمیر برد</span><i class="bi bi-chevron-down"></i>
+                </button>
+                <div class="collapse" id="mobileElectronics">
+                    <div class="mobile-submenu">
+                        <a href="/Search?q=ایستگاه%20هویه" data-bs-dismiss="offcanvas">ایستگاه هویه</a>
+                        <a href="/Search?q=هویه%20قلمی" data-bs-dismiss="offcanvas">هویه قلمی</a>
+                        <a href="/Search?q=هیتر%20و%20هویه" data-bs-dismiss="offcanvas">هیتر و هویه</a>
+                    </div>
                 </div>
             </div>
-            <div class="mobile-support-meta">
-                <span><i class="bi bi-clock" aria-hidden="true"></i> راه‌های ارتباطی</span>
-            </div>
-            <div class="mobile-support-socials" aria-label="راه‌های ارتباطی">
-                <span class="mobile-support-social-placeholder" role="img" aria-label="Instagram" title="Instagram">
-                    <i class="bi bi-instagram" aria-hidden="true"></i>
-                </span>
-                <span class="mobile-support-social-placeholder" role="img" aria-label="Telegram" title="Telegram">
-                    <i class="bi bi-telegram" aria-hidden="true"></i>
-                </span>
-                <a href="https://wa.me/989369455457" target="_blank" rel="noopener" aria-label="واتساپ">
-                    <i class="bi bi-whatsapp"></i>
-                </a>
-                <a class="mobile-support-number" href="tel:09369455457" data-bs-dismiss="offcanvas">
-                    <span class="mobile-support-contact-icon" aria-hidden="true">
-                        <i class="bi bi-telephone-outbound"></i>
-                    </span>
-                    <b dir="ltr">09369455457</b>
-                </a>
+            <div class="mobile-category">
+                <button type="button" data-bs-toggle="collapse" data-bs-target="#mobileLighting" aria-expanded="false">
+                    <span><i class="bi bi-lightbulb"></i> روشنایی و لامپ</span><i class="bi bi-chevron-down"></i>
+                </button>
+                <div class="collapse" id="mobileLighting">
+                    <div class="mobile-submenu">
+                        <a href="/Search?q=چراغ%20کارگاهی" data-bs-dismiss="offcanvas">چراغ کارگاهی</a>
+                        <a href="/Search?q=پروژکتور%20کارگاهی" data-bs-dismiss="offcanvas">پروژکتور کارگاهی</a>
+                        <a href="/Search?q=چراغ%20بازرسی" data-bs-dismiss="offcanvas">چراغ بازرسی</a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+</div>
+<a href="Search" data-bs-dismiss="offcanvas">
+    <span><i class="bi bi-shop"></i> فروشگاه</span>
+</a>
+@if (availableSalesPlans.Count > 0)
+{
+    <div class="mobile-accordion mobile-sales-plans-accordion">
+        <button class="mobile-category-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#mobileSalesPlans" aria-expanded="false" aria-controls="mobileSalesPlans">
+            <span><i class="bi bi-lightning-charge"></i> طرح‌های فروش</span>
+            <i class="bi bi-plus-lg" aria-hidden="true"></i>
+        </button>
+        <div class="collapse" id="mobileSalesPlans">
+            <div class="mobile-sales-plan-list" aria-label="طرح‌های فروش فعال">
+                @foreach (var plan in availableSalesPlans)
+                {
+                    <a class="sales-plan-menu-link" href="@Url.Content($"~/Search?sales-plan={Uri.EscapeDataString(plan.Id)}")" data-bs-dismiss="offcanvas">
+                        <span class="sales-plan-menu-symbol" aria-hidden="true">
+                            <i class="bi bi-lightning-charge-fill"></i>
+                        </span>
+                        <span class="sales-plan-menu-copy">
+                            <strong>@plan.Name</strong><small>@(string.IsNullOrWhiteSpace(plan.Label) ? "مشاهدهٔ کالاهای این طرح" : plan.Label)</small>
+                        </span>
+                        <span class="sales-plan-menu-arrow" aria-hidden="true">
+                            <i class="bi bi-arrow-left"></i>
+                        </span>
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+}
+<div class="mobile-accordion mobile-brands-accordion">
+    <button
+        class="mobile-category-toggle"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#mobileBrands"
+        aria-expanded="false">
+        <span>
+            <i class="bi bi-award"></i> برند
+        </span
+        ><i class="bi bi-plus-lg"></i>
+    </button>
+    <div class="collapse" id="mobileBrands">
+        <div class="mobile-brand-list" aria-label="فهرست برندها">
+            <a class="mobile-brand-list-all" href="@Url.Content("~/brands")" data-bs-dismiss="offcanvas">
+                <i class="bi bi-grid-3x3-gap" aria-hidden="true"></i>
+                <span>معرفی همهٔ برندها</span>
+                <i class="bi bi-arrow-left" aria-hidden="true"></i>
+            </a>
+            @foreach (BrandProfileModel brand in panelCatalog.Brands)
+            {
+                <a href="@Url.Content($"~/brands/{brand.Slug}")" data-bs-dismiss="offcanvas">@brand.PersianName</a>
+            }
+        </div>
+    </div>
+</div>
+<a href="Magazine" data-bs-dismiss="offcanvas">
+    <span><i class="bi bi-journal-richtext"></i> مجله فنی</span>
+</a
+>
+<div class="mobile-accordion mobile-quick-links-accordion">
+    <button
+        class="mobile-category-toggle"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#mobileQuickLinks"
+        aria-expanded="false"
+        aria-controls="mobileQuickLinks">
+        <span><i class="bi bi-info-circle"></i> راهنما و اطلاعات</span>
+        <i class="bi bi-plus-lg quick-links-expand-icon" aria-hidden="true"></i>
+    </button>
+    <div class="collapse" id="mobileQuickLinks">
+        <div class="quick-links-mobile-content">
+            <section class="quick-links-mobile-group" aria-labelledby="mobileCustomerLinksTitle">
+                <h3 id="mobileCustomerLinksTitle"><i class="bi bi-headset" aria-hidden="true"></i> خدمات مشتریان</h3>
+                <div class="mobile-submenu">
+                    <a href="/Tracking" data-bs-dismiss="offcanvas">پیگیری سفارش</a>
+                    <a href="/Shipping" data-bs-dismiss="offcanvas">شرایط ارسال</a>
+                    <a href="/Warranty" data-bs-dismiss="offcanvas">ضمانت اصالت</a>
+                    <a href="/Faq" data-bs-dismiss="offcanvas">پرسش‌های متداول</a>
+                    <a href="/Legal/Returns" data-bs-dismiss="offcanvas">رویه بازگرداندن کالا</a>
+                </div>
+            </section>
+            <section class="quick-links-mobile-group" aria-labelledby="mobileCompanyLinksTitle">
+                <h3 id="mobileCompanyLinksTitle"><i class="bi bi-building" aria-hidden="true"></i> کمپانی و قوانین</h3>
+                <div class="mobile-submenu">
+                    <a href="/Home/Index#story" data-bs-dismiss="offcanvas">درباره مجموعه</a>
+                    <a href="/Magazine" data-bs-dismiss="offcanvas">مجله برق و ابزار</a>
+                    <a href="/Contact" data-bs-dismiss="offcanvas">تماس با ما</a>
+                    <a href="/Legal/Privacy" data-bs-dismiss="offcanvas">حریم خصوصی</a>
+                    <a href="/Legal/Terms" data-bs-dismiss="offcanvas">شرایط استفاده</a>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+<a href="About" data-bs-dismiss="offcanvas">
+    <span><i class="bi bi-building"></i> درباره ما</span>
+</a>
+<a href="Contact" data-bs-dismiss="offcanvas">
+    <span><i class="bi bi-telephone"></i> تماس با ما</span>
+</a>
+<div class="mobile-menu-footer">
+    <div class="mobile-support-head">
+        <a class="mobile-support-icon mobile-support-icon--urgent" href="tel:09369455457" aria-label="تماس فوری با پشتیبانی" data-bs-dismiss="offcanvas">
+            <img src="/shop/images/icons/urgent-support.svg" alt=""/>
+        </a>
+        <div>
+            <strong>برای انتخاب بهتر کنارتان هستیم</strong>
+            <span class="mobile-support-status"><i class="bi bi-circle-fill" aria-hidden="true"></i> پاسخ‌گویی واحد فروش</span>
+        </div>
+    </div>
+    <div class="mobile-support-meta">
+        <span><i class="bi bi-clock" aria-hidden="true"></i> راه‌های ارتباطی</span>
+    </div>
+    <div class="mobile-support-socials" aria-label="راه‌های ارتباطی">
+        <span class="mobile-support-social-placeholder" role="img" aria-label="Instagram" title="Instagram">
+            <i class="bi bi-instagram" aria-hidden="true"></i>
+        </span>
+        <span class="mobile-support-social-placeholder" role="img" aria-label="Telegram" title="Telegram">
+            <i class="bi bi-telegram" aria-hidden="true"></i>
+        </span>
+        <a href="https://wa.me/989369455457" target="_blank" rel="noopener" aria-label="واتساپ">
+            <i class="bi bi-whatsapp"></i>
+        </a>
+        <a class="mobile-support-number" href="tel:09369455457" data-bs-dismiss="offcanvas">
+            <span class="mobile-support-contact-icon" aria-hidden="true">
+                <i class="bi bi-telephone-outbound"></i>
+            </span>
+            <b dir="ltr">09369455457</b>
+        </a>
+    </div>
+</div>
+</div>
 </div>
 <div
     class="modal fade login-modal"

@@ -6,16 +6,18 @@
     var nowUtc = DateTimeOffset.UtcNow;
     var availableSalesPlans = salesPlanCatalog.Plans
         .Where(plan => !plan.IsDefault && plan.IsEnabled &&
-            (plan.StartsAtUtc is null || plan.StartsAtUtc <= nowUtc) &&
-            (plan.EndsAtUtc is null || plan.EndsAtUtc > nowUtc) &&
-            salesPlanCatalog.Offers.Any(offer => offer.SalesPlanId == plan.Id && offer.IsEnabled && offer.StockQuantity > 0))
+                       (plan.StartsAtUtc is null || plan.StartsAtUtc <= nowUtc) &&
+                       (plan.EndsAtUtc is null || plan.EndsAtUtc > nowUtc) &&
+                       salesPlanCatalog.Offers.Any(offer => offer.SalesPlanId == plan.Id && offer.IsEnabled && offer.StockQuantity > 0))
         .OrderBy(plan => plan.Name)
         .ToList();
 }
 <nav class="navbar navbar-expand-lg navbar-dark fixed-top" id="mainNav">
 <div class="home-header-top" aria-label="جست‌وجو و پشتیبانی فروشگاه">
     <a class="home-header-support home-header-support-link" href="tel:09369455457" aria-label="تماس فوری با پشتیبانی به شماره 09369455457">
-        <span class="home-header-support-icon" aria-hidden="true"><i class="bi bi-headset"></i></span>
+        <span class="home-header-support-icon" aria-hidden="true">
+            <i class="bi bi-headset"></i>
+        </span>
         <span>
             <small>پشتیبانی فوری و پیگیری سفارش</small><strong dir="ltr">09369455457</strong>
         </span>
@@ -37,194 +39,204 @@
     <i class="bi bi-list"></i>
 </button>
 <a class="navbar-brand brand header-home-link header-brand-lockup" asp-controller="Home" asp-action="Index" aria-label="برق شیراز؛ مرجع تخصصی ابزار و تجهیزات برقی" title="رفتن به صفحهٔ اصلی">
-    <img class="header-brand-image" src="~/content/identity/store-electrical-header.svg" alt="" width="192" height="64" decoding="async" asp-append-version="true" />
+    <img class="header-brand-image" src="~/content/identity/store-electrical-header.svg" alt="" width="192" height="64" decoding="async" asp-append-version="true"/>
 </a>
 <div class="home-nav-groups">
 <div class="home-nav-menu-group">
-<div class="collapse navbar-collapse">
-<ul class="navbar-nav mx-auto gap-lg-2">
-@if (ViewData["HeaderVariant"]?.ToString() == "inner")
-{
-    <li class="nav-item dropdown category-nav-dropdown">
-        <button class="nav-link dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-            <i class="bi bi-grid nav-menu-icon" aria-hidden="true"></i><span>دسته‌بندی قطعات</span>
-        </button>
-        <div class="dropdown-menu category-nav-mega" aria-label="دسته‌بندی محصولات">
-            <aside class="category-mega-sidebar" aria-label="گروه‌های محصول">
-                <div class="electrical-category-heading">
-                    <span><i class="bi bi-list" aria-hidden="true"></i></span> دسته‌بندی قطعات
-                </div>
-                <button type="button" data-mega-category="tools">
-                    <i class="bi bi-lightning-charge"></i><span>ابزار برقی</span><i class="bi bi-chevron-left"></i>
-                </button>
-                <button type="button" data-mega-category="hand-tools">
-                    <i class="bi bi-tools"></i><span>ابزار دستی</span><i class="bi bi-chevron-left"></i>
-                </button>
-                <button type="button" data-mega-category="components">
-                    <i class="bi bi-cpu"></i><span>قطعات الکترونیکی</span><i class="bi bi-chevron-left"></i>
-                </button>
-                <button type="button" data-mega-category="cables">
-                    <i class="bi bi-plug"></i><span>سیم، کابل و اتصالات</span><i class="bi bi-chevron-left"></i>
-                </button>
-                <button type="button" data-mega-category="lighting">
-                    <i class="bi bi-lightbulb"></i><span>روشنایی و لامپ</span><i class="bi bi-chevron-left"></i>
-                </button>
-                <button type="button" data-mega-category="switchgear">
-                    <i class="bi bi-toggle-on"></i><span>کلید و تجهیزات برقی</span><i class="bi bi-chevron-left"></i>
-                </button>
-                <button type="button" data-mega-category="safety">
-                    <i class="bi bi-shield-check"></i><span>ایمنی و حفاظت</span><i class="bi bi-chevron-left"></i>
-                </button>
-                <button type="button" data-mega-category="measurement">
-                    <i class="bi bi-speedometer2"></i><span>ابزار اندازه‌گیری</span><i class="bi bi-chevron-left"></i>
-                </button>
-            </aside>
-            <div class="category-mega-content">
-                <div class="category-mega-panels" id="categoryMegaPanels" aria-live="polite">
-                    <p class="category-mega-hint">برای دیدن زیرشاخه‌ها، یک گروه را انتخاب کنید.</p>
-                </div>
-            </div>
-        </div>
-    </li>
-}
-<li class="nav-item">
-    <a class="nav-link" href="Search">
-        <i class="bi bi-shop nav-menu-icon" aria-hidden="true"></i><span>فروشگاه</span>
-    </a>
-</li>
-<li class="nav-item dropdown brand-dropdown">
-<a class="nav-link dropdown-toggle"
-   href="Home/Index#brands"
-   role="button"
-   data-bs-toggle="dropdown"
-   aria-expanded="false">
-    <i class="bi bi-award nav-menu-icon" aria-hidden="true"></i><span>برند</span><i class="bi bi-chevron-down brand-menu-caret" aria-hidden="true"></i>
-</a>
-<ul class="dropdown-menu brand-menu"
-    style="
+    <div class="collapse navbar-collapse">
+        <ul class="navbar-nav mx-auto gap-lg-2">
+            @if (ViewData["HeaderVariant"]?.ToString() == "inner")
+            {
+                <li class="nav-item dropdown category-nav-dropdown">
+                    <button class="nav-link dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-grid nav-menu-icon" aria-hidden="true"></i><span>دسته‌بندی قطعات</span>
+                    </button>
+                    <div class="dropdown-menu category-nav-mega" aria-label="دسته‌بندی محصولات">
+                        <aside class="category-mega-sidebar" aria-label="گروه‌های محصول">
+                            <div class="electrical-category-heading">
+                                <span>
+                                    <i class="bi bi-list" aria-hidden="true"></i>
+                                </span> دسته‌بندی قطعات
+                            </div>
+                            <button type="button" data-mega-category="tools">
+                                <i class="bi bi-lightning-charge"></i><span>ابزار برقی</span><i class="bi bi-chevron-left"></i>
+                            </button>
+                            <button type="button" data-mega-category="hand-tools">
+                                <i class="bi bi-tools"></i><span>ابزار دستی</span><i class="bi bi-chevron-left"></i>
+                            </button>
+                            <button type="button" data-mega-category="components">
+                                <i class="bi bi-cpu"></i><span>قطعات الکترونیکی</span><i class="bi bi-chevron-left"></i>
+                            </button>
+                            <button type="button" data-mega-category="cables">
+                                <i class="bi bi-plug"></i><span>سیم، کابل و اتصالات</span><i class="bi bi-chevron-left"></i>
+                            </button>
+                            <button type="button" data-mega-category="lighting">
+                                <i class="bi bi-lightbulb"></i><span>روشنایی و لامپ</span><i class="bi bi-chevron-left"></i>
+                            </button>
+                            <button type="button" data-mega-category="switchgear">
+                                <i class="bi bi-toggle-on"></i><span>کلید و تجهیزات برقی</span><i class="bi bi-chevron-left"></i>
+                            </button>
+                            <button type="button" data-mega-category="safety">
+                                <i class="bi bi-shield-check"></i><span>ایمنی و حفاظت</span><i class="bi bi-chevron-left"></i>
+                            </button>
+                            <button type="button" data-mega-category="measurement">
+                                <i class="bi bi-speedometer2"></i><span>ابزار اندازه‌گیری</span><i class="bi bi-chevron-left"></i>
+                            </button>
+                        </aside>
+                        <div class="category-mega-content">
+                            <div class="category-mega-panels" id="categoryMegaPanels" aria-live="polite">
+                                <p class="category-mega-hint">برای دیدن زیرشاخه‌ها، یک گروه را انتخاب کنید.</p>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+            }
+            <li class="nav-item">
+                <a class="nav-link" href="Search">
+                    <i class="bi bi-shop nav-menu-icon" aria-hidden="true"></i><span>فروشگاه</span>
+                </a>
+            </li>
+            <li class="nav-item dropdown brand-dropdown">
+                <a class="nav-link dropdown-toggle"
+                   href="Home/Index#brands"
+                   role="button"
+                   data-bs-toggle="dropdown"
+                   aria-expanded="false">
+                    <i class="bi bi-award nav-menu-icon" aria-hidden="true"></i><span>برند</span><i class="bi bi-chevron-down brand-menu-caret" aria-hidden="true"></i>
+                </a>
+                <ul class="dropdown-menu brand-menu"
+                    style="
                         width: min(1120px, calc(100vw - 48px)) !important;
                         min-height: 390px !important;
                         display: none;
                         ">
-<li class="brand-menu-heading">
-    <span>
-        <strong>برندهای معتبر ابزار</strong>
-        <small>لوگوی برند را انتخاب کنید و محصولاتش را ببینید</small>
-    </span>
-    <b>@headerCatalog.Brands.Count برند</b>
-</li>
-@foreach (BrandProfileModel brand in headerCatalog.Brands)
-{
-    string slug = brand.Slug;
-    <li>
-        <a class="dropdown-item" href="@Url.Content($"~/Search?brand={brand.Slug}")">
-            @if (!string.IsNullOrWhiteSpace(brand.LogoFile))
-            {
-                <span class="brand-menu-logo-frame">
-                    <img class="brand-menu-logo" src="@Url.Content($"~/content/brands/{brand.LogoFile}")" alt="" width="52" height="38" decoding="async" />
-                </span>
-            }
-            else
-            {
-                <span class="brand-menu-logo-frame brand-menu-logo-fallback brand-menu-logo-fallback--@slug" aria-hidden="true">@(slug == "uni-t" ? "UNI-T" : slug == "yihua" ? "YIHUA" : brand.Name)</span>
-            }
-            <span>
-                <strong>@brand.PersianName</strong>
-                <small>@brand.Name</small>
-            </span>
-            <i class="bi bi-chevron-left" aria-hidden="true"></i>
-        </a>
-    </li>
-}
-<li class="brand-menu-footer">
-    <a class="brand-menu-all-link" href="@Url.Content("~/brands")">
-        <span class="brand-menu-cta-copy">
-            <strong>مشاهده همه برندها</strong>
-            <small>برند مناسب ابزار و تجهیزات خود را پیدا کنید</small>
-        </span>
-        <i class="bi bi-arrow-left" aria-hidden="true"></i>
-    </a>
-    <span class="brand-trust">
-        <i class="bi bi-shield-check">
-        </i>
-        <span>
-            <strong>
-                برندهای ابزار
-            </strong><small>ابزار و تجهیزات برق</small>
-        </span>
-    </span>
-</li>
-</ul>
-</li>
-@if (availableSalesPlans.Count > 0)
-{
-    <li class="nav-item dropdown quick-links-dropdown sales-plans-dropdown">
-        <button class="nav-link dropdown-toggle" type="button" aria-expanded="false" aria-controls="salesPlansMenu">
-            <i class="bi bi-lightning-charge nav-menu-icon" aria-hidden="true"></i><span>طرح‌های فروش</span><i class="bi bi-chevron-down quick-links-caret" aria-hidden="true"></i>
-        </button>
-        <div class="dropdown-menu quick-links-menu sales-plan-menu" id="salesPlansMenu" aria-label="طرح‌های فروش فعال">
-            <section class="sales-plan-menu-content" aria-labelledby="salesPlansMenuHeading">
-                <header class="sales-plan-menu-heading">
-                    <span class="sales-plan-menu-heading-icon" aria-hidden="true"><i class="bi bi-stars"></i></span>
-                    <div class="sales-plan-menu-heading-copy">
-                        <small>پیشنهادهای فعال فروشگاه</small>
-                        <h3 id="salesPlansMenuHeading">طرح فروش را انتخاب کنید</h3>
-                    </div>
-                </header>
-                <div class="sales-plan-menu-list">
-                    @foreach (var plan in availableSalesPlans)
+                    <li class="brand-menu-heading">
+                        <span>
+                            <strong>برندهای معتبر ابزار</strong>
+                            <small>لوگوی برند را انتخاب کنید و محصولاتش را ببینید</small>
+                        </span>
+                        <b>@headerCatalog.Brands.Count برند</b>
+                    </li>
+                    @foreach (BrandProfileModel brand in headerCatalog.Brands)
                     {
-                        <a class="sales-plan-menu-link" href="@Url.Content($"~/Search?sales-plan={Uri.EscapeDataString(plan.Id)}")">
-                            <span class="sales-plan-menu-symbol" aria-hidden="true"><i class="bi bi-lightning-charge-fill"></i></span>
-                            <span class="sales-plan-menu-copy"><strong>@plan.Name</strong><small>@(string.IsNullOrWhiteSpace(plan.Label) ? "مشاهدهٔ کالاهای این طرح" : plan.Label)</small></span>
-                            <span class="sales-plan-menu-arrow" aria-hidden="true"><i class="bi bi-arrow-left"></i></span>
-                        </a>
+                        string slug = brand.Slug;
+                        <li>
+                            <a class="dropdown-item" href="@Url.Content($"~/Search?brand={brand.Slug}")">
+                                @if (!string.IsNullOrWhiteSpace(brand.LogoFile))
+                                {
+                                    <span class="brand-menu-logo-frame">
+                                        <img class="brand-menu-logo" src="@Url.Content($"~/content/brands/{brand.LogoFile}")" alt="" width="52" height="38" decoding="async"/>
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="brand-menu-logo-frame brand-menu-logo-fallback brand-menu-logo-fallback--@slug" aria-hidden="true">@(slug == "uni-t" ? "UNI-T" : slug == "yihua" ? "YIHUA" : brand.Name)</span>
+                                }
+                                <span>
+                                    <strong>@brand.PersianName</strong>
+                                    <small>@brand.Name</small>
+                                </span>
+                                <i class="bi bi-chevron-left" aria-hidden="true"></i>
+                            </a>
+                        </li>
                     }
+                    <li class="brand-menu-footer">
+                        <a class="brand-menu-all-link" href="@Url.Content("~/brands")">
+                            <span class="brand-menu-cta-copy">
+                                <strong>مشاهده همه برندها</strong>
+                                <small>برند مناسب ابزار و تجهیزات خود را پیدا کنید</small>
+                            </span>
+                            <i class="bi bi-arrow-left" aria-hidden="true"></i>
+                        </a>
+                        <span class="brand-trust">
+                            <i class="bi bi-shield-check">
+                            </i>
+                            <span>
+                                <strong>
+                                    برندهای ابزار
+                                </strong><small>ابزار و تجهیزات برق</small>
+                            </span>
+                        </span>
+                    </li>
+                </ul>
+            </li>
+            @if (availableSalesPlans.Count > 0)
+            {
+                <li class="nav-item dropdown quick-links-dropdown sales-plans-dropdown">
+                    <button class="nav-link dropdown-toggle" type="button" aria-expanded="false" aria-controls="salesPlansMenu">
+                        <i class="bi bi-lightning-charge nav-menu-icon" aria-hidden="true"></i><span>طرح‌های فروش</span><i class="bi bi-chevron-down quick-links-caret" aria-hidden="true"></i>
+                    </button>
+                    <div class="dropdown-menu quick-links-menu sales-plan-menu" id="salesPlansMenu" aria-label="طرح‌های فروش فعال">
+                        <section class="sales-plan-menu-content" aria-labelledby="salesPlansMenuHeading">
+                            <header class="sales-plan-menu-heading">
+                                <span class="sales-plan-menu-heading-icon" aria-hidden="true">
+                                    <i class="bi bi-stars"></i>
+                                </span>
+                                <div class="sales-plan-menu-heading-copy">
+                                    <small>پیشنهادهای فعال فروشگاه</small>
+                                    <h3 id="salesPlansMenuHeading">طرح فروش را انتخاب کنید</h3>
+                                </div>
+                            </header>
+                            <div class="sales-plan-menu-list">
+                                @foreach (var plan in availableSalesPlans)
+                                {
+                                    <a class="sales-plan-menu-link" href="@Url.Content($"~/Search?sales-plan={Uri.EscapeDataString(plan.Id)}")">
+                                        <span class="sales-plan-menu-symbol" aria-hidden="true">
+                                            <i class="bi bi-lightning-charge-fill"></i>
+                                        </span>
+                                        <span class="sales-plan-menu-copy">
+                                            <strong>@plan.Name</strong><small>@(string.IsNullOrWhiteSpace(plan.Label) ? "مشاهدهٔ کالاهای این طرح" : plan.Label)</small>
+                                        </span>
+                                        <span class="sales-plan-menu-arrow" aria-hidden="true">
+                                            <i class="bi bi-arrow-left"></i>
+                                        </span>
+                                    </a>
+                                }
+                            </div>
+                        </section>
+                    </div>
+                </li>
+            }
+            <li class="nav-item">
+                <a class="nav-link" href="Magazine">
+                    <i class="bi bi-journal-text nav-menu-icon" aria-hidden="true"></i><span>مجله فنی</span>
+                </a>
+            </li>
+            <li class="nav-item dropdown quick-links-dropdown">
+                <button class="nav-link dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-info-circle nav-menu-icon" aria-hidden="true"></i><span>راهنما و اطلاعات</span><i class="bi bi-chevron-down quick-links-caret" aria-hidden="true"></i>
+                </button>
+                <div class="dropdown-menu quick-links-menu" aria-label="راهنما و اطلاعات">
+                    <section class="quick-links-group" aria-labelledby="quickCustomerLinks">
+                        <h3 id="quickCustomerLinks"><i class="bi bi-headset" aria-hidden="true"></i> خدمات مشتریان</h3>
+                        <a href="@Url.Content("~/Tracking")">پیگیری سفارش</a>
+                        <a href="@Url.Content("~/Shipping")">شرایط ارسال</a>
+                        <a href="@Url.Content("~/Warranty")">ضمانت اصالت</a>
+                        <a href="@Url.Content("~/Faq")">پرسش‌های متداول</a>
+                        <a href="@Url.Content("~/Legal/Returns")">رویه بازگرداندن کالا</a>
+                    </section>
+                    <section class="quick-links-group" aria-labelledby="quickCompanyLinks">
+                        <h3 id="quickCompanyLinks"><i class="bi bi-building" aria-hidden="true"></i> کمپانی و قوانین</h3>
+                        <a href="@Url.Content("~/Home/Index#story")">درباره مجموعه</a>
+                        <a href="@Url.Content("~/Magazine")">مجله برق و ابزار</a>
+                        <a href="@Url.Content("~/Contact")">تماس با ما</a>
+                        <a href="@Url.Content("~/Legal/Privacy")">حریم خصوصی</a>
+                        <a href="@Url.Content("~/Legal/Terms")">شرایط استفاده</a>
+                    </section>
                 </div>
-            </section>
-        </div>
-    </li>
-}
-<li class="nav-item">
-    <a class="nav-link" href="Magazine">
-        <i class="bi bi-journal-text nav-menu-icon" aria-hidden="true"></i><span>مجله فنی</span>
-    </a>
-</li>
-<li class="nav-item dropdown quick-links-dropdown">
-    <button class="nav-link dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-        <i class="bi bi-info-circle nav-menu-icon" aria-hidden="true"></i><span>راهنما و اطلاعات</span><i class="bi bi-chevron-down quick-links-caret" aria-hidden="true"></i>
-    </button>
-    <div class="dropdown-menu quick-links-menu" aria-label="راهنما و اطلاعات">
-        <section class="quick-links-group" aria-labelledby="quickCustomerLinks">
-            <h3 id="quickCustomerLinks"><i class="bi bi-headset" aria-hidden="true"></i> خدمات مشتریان</h3>
-            <a href="@Url.Content("~/Tracking")">پیگیری سفارش</a>
-            <a href="@Url.Content("~/Shipping")">شرایط ارسال</a>
-            <a href="@Url.Content("~/Warranty")">ضمانت اصالت</a>
-            <a href="@Url.Content("~/Faq")">پرسش‌های متداول</a>
-            <a href="@Url.Content("~/Legal/Returns")">رویه بازگرداندن کالا</a>
-        </section>
-        <section class="quick-links-group" aria-labelledby="quickCompanyLinks">
-            <h3 id="quickCompanyLinks"><i class="bi bi-building" aria-hidden="true"></i> کمپانی و قوانین</h3>
-            <a href="@Url.Content("~/Home/Index#story")">درباره مجموعه</a>
-            <a href="@Url.Content("~/Magazine")">مجله برق و ابزار</a>
-            <a href="@Url.Content("~/Contact")">تماس با ما</a>
-            <a href="@Url.Content("~/Legal/Privacy")">حریم خصوصی</a>
-            <a href="@Url.Content("~/Legal/Terms")">شرایط استفاده</a>
-        </section>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="About">
+                    <i class="bi bi-info-circle nav-menu-icon" aria-hidden="true"></i><span>درباره ما</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="Contact">
+                    <i class="bi bi-telephone nav-menu-icon" aria-hidden="true"></i><span>تماس با ما</span>
+                </a>
+            </li>
+        </ul>
     </div>
-</li>
-<li class="nav-item">
-    <a class="nav-link" href="About">
-        <i class="bi bi-info-circle nav-menu-icon" aria-hidden="true"></i><span>درباره ما</span>
-    </a>
-</li>
-<li class="nav-item">
-    <a class="nav-link" href="Contact">
-        <i class="bi bi-telephone nav-menu-icon" aria-hidden="true"></i><span>تماس با ما</span>
-    </a>
-</li>
-</ul>
-</div>
 </div>
 <div class="home-nav-action-group">
     <div class="nav-tools">

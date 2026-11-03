@@ -174,7 +174,11 @@
                             <ul>
                                 @foreach (var source in sources)
                                 {
-                                    <li><a href="@source.Url" target="_blank" rel="noopener noreferrer">@source.Title <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i></a></li>
+                                    <li>
+                                        <a href="@source.Url" target="_blank" rel="noopener noreferrer">
+                                            @source.Title <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i>
+                                        </a>
+                                    </li>
                                 }
                             </ul>
                         </section>
@@ -189,17 +193,32 @@
                     </div>
                     <section class="article-feedback" data-article-feedback aria-labelledby="articleFeedbackTitle">
                         <div class="article-feedback-heading">
-                            <div><span class="article-eyebrow">بازخورد خوانندگان</span><h2 id="articleFeedbackTitle">نظر، امتیاز و پسند</h2></div>
-                            <button class="article-like-button" type="button" data-article-like aria-pressed="false"><i class="bi bi-heart" aria-hidden="true"></i><span>پسندیدن</span><b data-article-like-count-inline>۰</b></button>
+                            <div>
+                                <span class="article-eyebrow">بازخورد خوانندگان</span>
+                                <h2 id="articleFeedbackTitle">نظر، امتیاز و پسند</h2>
+                            </div>
+                            <button class="article-like-button" type="button" data-article-like aria-pressed="false">
+                                <i class="bi bi-heart" aria-hidden="true"></i><span>پسندیدن</span><b data-article-like-count-inline>۰</b>
+                            </button>
                         </div>
-                        <div class="article-feedback-summary"><strong><i class="bi bi-star-fill" aria-hidden="true"></i> <span data-feedback-average>—</span> از ۵</strong><span data-feedback-count>۰ نظر</span></div>
+                        <div class="article-feedback-summary">
+                            <strong><i class="bi bi-star-fill" aria-hidden="true"></i> <span data-feedback-average>—</span> از ۵</strong><span data-feedback-count>۰ نظر</span>
+                        </div>
                         <div class="article-feedback-columns">
                             <form class="article-feedback-form" data-feedback-form>
                                 <h3>دیدگاه خود را بنویسید</h3>
                                 <label>نام و نام خانوادگی<input name="name" data-validation="full-name" data-required-message="نام و نام خانوادگی را وارد کنید." maxlength="80" minlength="5" autocomplete="name" placeholder="نام و نام خانوادگی" required></label>
-                                <label>امتیاز<select name="rating" required><option value="5">۵ از ۵</option><option value="4">۴ از ۵</option><option value="3">۳ از ۵</option><option value="2">۲ از ۵</option><option value="1">۱ از ۵</option></select></label>
+                                <label>
+                                    امتیاز
+                                    <select name="rating" required>
+                                        <option value="5">۵ از ۵</option><option value="4">۴ از ۵</option><option value="3">۳ از ۵</option><option value="2">۲ از ۵</option><option value="1">۱ از ۵</option>
+                                    </select>
+                                </label>
                                 <label class="article-feedback-message">متن دیدگاه<textarea name="text" data-required-message="متن دیدگاه را وارد کنید." rows="3" maxlength="1000" required></textarea></label>
-                                <button type="submit"><i class="bi bi-send-fill" aria-hidden="true"></i><span>ثبت دیدگاه</span></button><p role="status" aria-live="polite" data-feedback-status></p>
+                                <button type="submit">
+                                    <i class="bi bi-send-fill" aria-hidden="true"></i><span>ثبت دیدگاه</span>
+                                </button>
+                                <p role="status" aria-live="polite" data-feedback-status></p>
                             </form>
                             <section class="article-feedback-reviews" aria-labelledby="articleFeedbackListTitle">
                                 <h3 id="articleFeedbackListTitle">نظرهای ثبت‌شده</h3>

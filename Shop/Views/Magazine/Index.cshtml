@@ -33,19 +33,33 @@
         <aside class="journal-categories" aria-label="دسته‌بندی مطالب">
             <div class="journal-categories-scroll ui-scrollbar ui-scrollbar--navy">
                 <h2>دسته‌بندی مجله</h2>
-                <button type="button" class="is-active journal-all" data-journal-filter="all" aria-pressed="true"><span class="journal-all-label"><i class="bi bi-grid" aria-hidden="true"></i> همه مطالب</span><span class="journal-category-count">@PersianDigits(Model.Data.TotalCount)</span></button>
+                <button type="button" class="is-active journal-all" data-journal-filter="all" aria-pressed="true">
+                    <span class="journal-all-label"><i class="bi bi-grid" aria-hidden="true"></i> همه مطالب</span><span class="journal-category-count">@PersianDigits(Model.Data.TotalCount)</span>
+                </button>
                 <div class="journal-branch">
-                    <button type="button" data-journal-filter="buying" aria-pressed="false"><i class="bi bi-cart-check" aria-hidden="true"></i><span>راهنمای خرید</span><span class="journal-category-count">@PersianDigits(Model.Data.BuyingCount)</span></button>
+                    <button type="button" data-journal-filter="buying" aria-pressed="false">
+                        <i class="bi bi-cart-check" aria-hidden="true"></i><span>راهنمای خرید</span><span class="journal-category-count">@PersianDigits(Model.Data.BuyingCount)</span>
+                    </button>
                 </div>
                 <div class="journal-branch">
-                    <button type="button" data-journal-filter="education" aria-pressed="false"><i class="bi bi-mortarboard" aria-hidden="true"></i><span>آموزش تخصصی</span><span class="journal-category-count">@PersianDigits(Model.Data.EducationCount)</span></button>
+                    <button type="button" data-journal-filter="education" aria-pressed="false">
+                        <i class="bi bi-mortarboard" aria-hidden="true"></i><span>آموزش تخصصی</span><span class="journal-category-count">@PersianDigits(Model.Data.EducationCount)</span>
+                    </button>
                 </div>
                 <div class="journal-branch journal-branch--areas">
-                    <button type="button" data-journal-filter="safety" aria-pressed="false"><i class="bi bi-shield-check" aria-hidden="true"></i><span>ایمنی و نگهداری</span><span class="journal-category-count">@PersianDigits(Model.Data.SafetyCount)</span></button>
+                    <button type="button" data-journal-filter="safety" aria-pressed="false">
+                        <i class="bi bi-shield-check" aria-hidden="true"></i><span>ایمنی و نگهداری</span><span class="journal-category-count">@PersianDigits(Model.Data.SafetyCount)</span>
+                    </button>
                     <div class="journal-children" aria-label="حوزه‌های مجله">
-                        <button type="button" data-journal-filter="area-tools" aria-pressed="false"><i class="bi bi-tools" aria-hidden="true"></i><span>ابزار و تجهیزات</span><span class="journal-category-count">@PersianDigits(Model.Data.ToolsCount)</span></button>
-                        <button type="button" data-journal-filter="area-electrical" aria-pressed="false"><i class="bi bi-lightning-charge" aria-hidden="true"></i><span>برق و اندازه‌گیری</span><span class="journal-category-count">@PersianDigits(Model.Data.ElectricalCount)</span></button>
-                        <button type="button" data-journal-filter="area-workshop" aria-pressed="false"><i class="bi bi-lightbulb" aria-hidden="true"></i><span>روشنایی و کارگاه</span><span class="journal-category-count">@PersianDigits(Model.Data.WorkshopCount)</span></button>
+                        <button type="button" data-journal-filter="area-tools" aria-pressed="false">
+                            <i class="bi bi-tools" aria-hidden="true"></i><span>ابزار و تجهیزات</span><span class="journal-category-count">@PersianDigits(Model.Data.ToolsCount)</span>
+                        </button>
+                        <button type="button" data-journal-filter="area-electrical" aria-pressed="false">
+                            <i class="bi bi-lightning-charge" aria-hidden="true"></i><span>برق و اندازه‌گیری</span><span class="journal-category-count">@PersianDigits(Model.Data.ElectricalCount)</span>
+                        </button>
+                        <button type="button" data-journal-filter="area-workshop" aria-pressed="false">
+                            <i class="bi bi-lightbulb" aria-hidden="true"></i><span>روشنایی و کارگاه</span><span class="journal-category-count">@PersianDigits(Model.Data.WorkshopCount)</span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -69,14 +83,15 @@
                                 <div class="journal-post-meta">
                                     @if (!string.IsNullOrWhiteSpace(post.PublishedAt))
                                     {
-                                        <span><i class="bi bi-calendar3" aria-hidden="true"></i>@post.PublishedAt</span>
+                                        <span>
+                                            <i class="bi bi-calendar3" aria-hidden="true"></i>@post.PublishedAt
+                                        </span>
                                     }
                                     <span><i class="bi bi-clock" aria-hidden="true"></i>@post.ReadMinutes دقیقه</span>
                                 </div>
                             </div>
                         </a>
                     </article>
-
                 }
             </div>
             <nav id="journal-pagination" class="journal-paging site-pagination" aria-label="صفحه‌بندی مطالب" hidden></nav>

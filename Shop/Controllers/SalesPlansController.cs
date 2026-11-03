@@ -29,7 +29,7 @@ public sealed class SalesPlansController(ISalesPlanSource plans, ICatalogSource 
                 plan.Id, plan.Code, plan.Name, plan.Type, plan.IsDefault, plan.Label,
                 plan.StartsAtUtc, plan.EndsAtUtc, plan.ShowCountdown,
                 active = plan.IsEnabled && (plan.StartsAtUtc is null || now >= plan.StartsAtUtc) &&
-                    (plan.EndsAtUtc is null || now < plan.EndsAtUtc),
+                         (plan.EndsAtUtc is null || now < plan.EndsAtUtc),
                 offer = productOffers.FirstOrDefault(offer => offer.SalesPlanId == plan.Id)
             })
         });
@@ -45,7 +45,8 @@ public sealed class SalesPlansController(ISalesPlanSource plans, ICatalogSource 
             SalesPlanCatalog data = await plans.ReadAsync(cancellationToken);
             SalesPlanQuote quote = data.Quote(request.ProductId, request.SalesPlanId,
                 request.Quantity, DateTimeOffset.UtcNow);
-            ProductSalesOffer selectedOffer = data.Offers.Single(item => item.ProductId == quote.ProductId && item.SalesPlanId == quote.SalesPlanId);
+            ProductSalesOffer selectedOffer = data.Offers.Single(item =>
+                item.ProductId == quote.ProductId && item.SalesPlanId == quote.SalesPlanId);
             (decimal adjustments, IReadOnlyDictionary<string, decimal> accessoryAmounts, int maxQuantity) =
                 await GetValidatedAdjustments(request, selectedOffer, cancellationToken);
             if (request.Quantity > maxQuantity)
@@ -72,12 +73,15 @@ public sealed class SalesPlansController(ISalesPlanSource plans, ICatalogSource 
     }
 
     [HttpPost("validate-cart")]
-    public async Task<IActionResult> ValidateCart([FromBody] CartValidationRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> ValidateCart([FromBody] CartValidationRequest request,
+        CancellationToken cancellationToken)
     {
         if (request.Lines is null || request.Lines.Count is < 1 or > 99)
             return BadRequest(new { code = "invalid-cart" });
-        if (request.Lines.Any(line => line is null || line.ProductId < 1 || string.IsNullOrWhiteSpace(line.SalesPlanId)) ||
-            request.Lines.Select(line => $"{line.ProductId}:{line.SalesPlanId}").Distinct(StringComparer.Ordinal).Count() != request.Lines.Count)
+        if (request.Lines.Any(line =>
+                line is null || line.ProductId < 1 || string.IsNullOrWhiteSpace(line.SalesPlanId)) ||
+            request.Lines.Select(line => $"{line.ProductId}:{line.SalesPlanId}").Distinct(StringComparer.Ordinal)
+                .Count() != request.Lines.Count)
             return BadRequest(new { code = "invalid-cart" });
         var result = new List<object>();
         foreach (CartLineRequest line in request.Lines)
@@ -87,6 +91,7 @@ public sealed class SalesPlansController(ISalesPlanSource plans, ICatalogSource 
             if (quoteResult is not OkObjectResult { Value: { } value }) return quoteResult;
             result.Add(new { line.ProductId, line.SalesPlanId, line.Quantity, quote = value });
         }
+
         return Ok(new { valid = true, lines = result, checkedAtUtc = DateTimeOffset.UtcNow });
     }
 
@@ -101,54 +106,75 @@ public sealed class SalesPlansController(ISalesPlanSource plans, ICatalogSource 
         decimal adjustments = 0m;
         Dictionary<string, decimal> accessoryAmounts = new(StringComparer.Ordinal);
         JsonElement variants = product.TryGetProperty("variants", out JsonElement variantElement) &&
-            variantElement.ValueKind == JsonValueKind.Object ? variantElement : default;
+                               variantElement.ValueKind == JsonValueKind.Object
+            ? variantElement
+            : default;
         HashSet<string> acceptedVariantKeys = new(StringComparer.Ordinal);
         if (variants.ValueKind == JsonValueKind.Object)
-        foreach (JsonProperty feature in variants.EnumerateObject())
-        {
-            acceptedVariantKeys.Add(feature.Name);
-            if (request.Variants is null || !request.Variants.TryGetValue(feature.Name, out string? value))
-                throw new InvalidDataException();
-            JsonElement option = feature.Value.GetProperty("options").EnumerateArray()
-                .FirstOrDefault(item => item.GetProperty("value").GetString() == value);
-            if (option.ValueKind == JsonValueKind.Undefined) throw new InvalidDataException();
-            adjustments += option.GetProperty("priceDelta").GetDecimal() * 1_000_000m;
-        }
+            foreach (JsonProperty feature in variants.EnumerateObject())
+            {
+                acceptedVariantKeys.Add(feature.Name);
+                if (request.Variants is null || !request.Variants.TryGetValue(feature.Name, out string? value))
+                    throw new InvalidDataException();
+                JsonElement option = feature.Value.GetProperty("options").EnumerateArray()
+                    .FirstOrDefault(item => item.GetProperty("value").GetString() == value);
+                if (option.ValueKind == JsonValueKind.Undefined) throw new InvalidDataException();
+                adjustments += option.GetProperty("priceDelta").GetDecimal() * 1_000_000m;
+            }
+
         if (request.Variants is not null && request.Variants.Keys.Any(key => !acceptedVariantKeys.Contains(key)))
             throw new InvalidDataException();
         int maxQuantity = product.TryGetProperty("maxCartQuantity", out JsonElement maxQuantityElement) &&
-            maxQuantityElement.TryGetInt32(out int configuredMax) ? configuredMax : 99;
+                          maxQuantityElement.TryGetInt32(out int configuredMax)
+            ? configuredMax
+            : 99;
         maxQuantity = Math.Clamp(maxQuantity, 1, 99);
-        if (request.AccessoryIds is { } accessoryIds && accessoryIds.Count != accessoryIds.Distinct(StringComparer.Ordinal).Count())
+        if (request.AccessoryIds is { } accessoryIds &&
+            accessoryIds.Count != accessoryIds.Distinct(StringComparer.Ordinal).Count())
             throw new InvalidDataException();
         HashSet<string> selected = new(request.AccessoryIds ?? [], StringComparer.Ordinal);
         JsonElement accessoryList = product.TryGetProperty("accessories", out JsonElement accessoriesElement) &&
-            accessoriesElement.ValueKind == JsonValueKind.Array ? accessoriesElement : default;
+                                    accessoriesElement.ValueKind == JsonValueKind.Array
+            ? accessoriesElement
+            : default;
         if (accessoryList.ValueKind == JsonValueKind.Array)
-        foreach (JsonElement accessory in accessoryList.EnumerateArray())
-        {
-            string id = accessory.GetProperty("id").GetString()!;
-            bool required = accessory.GetProperty("required").GetBoolean();
-            if (selected.Contains(id) && offer.AccessoryIds is { } allowedByOffer && !allowedByOffer.Contains(id, StringComparer.Ordinal))
-                throw new InvalidDataException();
-            if (selected.Contains(id) || required)
+            foreach (JsonElement accessory in accessoryList.EnumerateArray())
             {
-                if (!required && !selected.Contains(id)) continue;
-                if (!offer.AccessoryPriceAmounts.TryGetValue(id, out decimal amount)) throw new InvalidDataException();
-                adjustments += amount;
-                accessoryAmounts[id] = amount;
+                string id = accessory.GetProperty("id").GetString()!;
+                bool required = accessory.GetProperty("required").GetBoolean();
+                if (selected.Contains(id) && offer.AccessoryIds is { } allowedByOffer &&
+                    !allowedByOffer.Contains(id, StringComparer.Ordinal))
+                    throw new InvalidDataException();
+                if (selected.Contains(id) || required)
+                {
+                    if (!required && !selected.Contains(id)) continue;
+                    if (!offer.AccessoryPriceAmounts.TryGetValue(id, out decimal amount))
+                        throw new InvalidDataException();
+                    adjustments += amount;
+                    accessoryAmounts[id] = amount;
+                }
+                else if (selected.Contains(id)) throw new InvalidDataException();
             }
-            else if (selected.Contains(id)) throw new InvalidDataException();
-        }
+
         if (selected.Any(id => accessoryList.ValueKind != JsonValueKind.Array || !accessoryList.EnumerateArray()
                 .Any(accessory => accessory.GetProperty("id").GetString() == id)))
             throw new InvalidDataException();
         return (adjustments, accessoryAmounts, maxQuantity);
     }
 
-    public sealed record QuoteRequest(int ProductId, string? SalesPlanId, int Quantity,
-        Dictionary<string, string>? Variants, IReadOnlyList<string>? AccessoryIds);
+    public sealed record QuoteRequest(
+        int ProductId,
+        string? SalesPlanId,
+        int Quantity,
+        Dictionary<string, string>? Variants,
+        IReadOnlyList<string>? AccessoryIds);
+
     public sealed record CartValidationRequest(IReadOnlyList<CartLineRequest>? Lines);
-    public sealed record CartLineRequest(int ProductId, string SalesPlanId, int Quantity,
-        Dictionary<string, string>? Variants, IReadOnlyList<string>? AccessoryIds);
+
+    public sealed record CartLineRequest(
+        int ProductId,
+        string SalesPlanId,
+        int Quantity,
+        Dictionary<string, string>? Variants,
+        IReadOnlyList<string>? AccessoryIds);
 }

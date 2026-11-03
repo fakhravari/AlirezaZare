@@ -15,7 +15,8 @@ public sealed class DemoMagazineContentSource : IMagazineContentSource
         var posts = MagazineArchiveCatalog.Items.Select((post, index) =>
         {
             MagazineDetailsModel article = JournalArticles.Find(post.Slug)
-                ?? throw new InvalidDataException($"Archive article '{post.Slug}' was not found.");
+                                           ?? throw new InvalidDataException(
+                                               $"Archive article '{post.Slug}' was not found.");
             return new MagazineArchivePost(
                 article.Slug, post.Branch, post.Topic, post.Area, article.Category,
                 article.Title, article.Summary, article.ContentImage, null, 4 + index % 4);

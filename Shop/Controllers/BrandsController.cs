@@ -19,15 +19,19 @@ public sealed class BrandsController : PageController
     [HttpGet("")]
     public async Task<IActionResult> Index()
     {
-        PageModel<IReadOnlyList<BrandProfileModel>> model = new((await _catalog.ReadAsync(HttpContext.RequestAborted)).Brands,
-            new SeoModel("برندهای ابزار برقی و تجهیزات اندازه‌گیری | ندا اولیائی", "معرفی برندهای ابزار برقی، دریل و پیچ‌گوشتی، ابزار اندازه‌گیری و تجهیزات لحیم‌کاری؛ بررسی محصولات و راهنمای انتخاب هر برند.", Breadcrumbs: [new SeoBreadcrumb("خانه", "/"), new SeoBreadcrumb("برندها", "/brands")]));
+        PageModel<IReadOnlyList<BrandProfileModel>> model = new(
+            (await _catalog.ReadAsync(HttpContext.RequestAborted)).Brands,
+            new SeoModel("برندهای ابزار برقی و تجهیزات اندازه‌گیری | ندا اولیائی",
+                "معرفی برندهای ابزار برقی، دریل و پیچ‌گوشتی، ابزار اندازه‌گیری و تجهیزات لحیم‌کاری؛ بررسی محصولات و راهنمای انتخاب هر برند.",
+                Breadcrumbs: [new SeoBreadcrumb("خانه", "/"), new SeoBreadcrumb("برندها", "/brands")]));
         return await PageAsync(model);
     }
 
     [HttpGet("{slug}")]
     public async Task<IActionResult> Details(string slug)
     {
-        BrandProfileModel? brand = (await _catalog.ReadAsync(HttpContext.RequestAborted)).Brands.FirstOrDefault(brand => string.Equals(brand.Slug, slug, StringComparison.OrdinalIgnoreCase));
+        BrandProfileModel? brand = (await _catalog.ReadAsync(HttpContext.RequestAborted)).Brands.FirstOrDefault(brand =>
+            string.Equals(brand.Slug, slug, StringComparison.OrdinalIgnoreCase));
         if (brand is null)
         {
             return NotFound();
@@ -42,16 +46,22 @@ public sealed class BrandsController : PageController
                 brand.Summary,
                 CanonicalUrl: $"/brands/{brand.Slug}",
                 ImageUrl: "/shop/images/heroes/hero-electrical-editorial.png",
-                Breadcrumbs: [new SeoBreadcrumb("خانه", "/"), new SeoBreadcrumb("برندها", "/brands"), new SeoBreadcrumb(brand.PersianName, $"/brands/{brand.Slug}")]));
+                Breadcrumbs:
+                [
+                    new SeoBreadcrumb("خانه", "/"), new SeoBreadcrumb("برندها", "/brands"),
+                    new SeoBreadcrumb(brand.PersianName, $"/brands/{brand.Slug}")
+                ]));
         return await PageAsync(model);
     }
 
     private BrandEditorialDocument? FindEditorial(string slug)
     {
         string contentPath = Path.Combine(_environment.WebRootPath, "content", "data", "brand-editorial.json");
-        BrandEditorialDocument[] documents = JsonSerializer.Deserialize<BrandEditorialDocument[]>(System.IO.File.ReadAllText(contentPath),
+        BrandEditorialDocument[] documents = JsonSerializer.Deserialize<BrandEditorialDocument[]>(
+            System.IO.File.ReadAllText(contentPath),
             new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? [];
 
-        return documents.FirstOrDefault(document => string.Equals(document.Slug, slug, StringComparison.OrdinalIgnoreCase));
+        return documents.FirstOrDefault(document =>
+            string.Equals(document.Slug, slug, StringComparison.OrdinalIgnoreCase));
     }
 }

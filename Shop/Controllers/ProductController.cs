@@ -11,7 +11,8 @@ public sealed class ProductController : PageController
     private readonly ISalesPlanSource _salesPlans;
     private readonly SeoMetadataOptions _seoOptions;
 
-    public ProductController(ICatalogSource catalog, ISalesPlanSource salesPlans, IOptions<SeoMetadataOptions> seoOptions)
+    public ProductController(ICatalogSource catalog, ISalesPlanSource salesPlans,
+        IOptions<SeoMetadataOptions> seoOptions)
     {
         _catalog = catalog;
         _salesPlans = salesPlans;
@@ -22,7 +23,10 @@ public sealed class ProductController : PageController
     public async Task<IActionResult> Index()
     {
         PageModel model = new(
-            new SeoModel("خرید ابزار برقی و تجهیزات فنی | فروشگاه ندا اولیائی", "جستجو و بررسی ابزار برقی، تجهیزات اندازه‌گیری، ابزار لحیم‌کاری و روشنایی؛ کالاها را بر اساس برند، کاربرد و قیمت فیلتر کنید.", CanonicalUrl: "/search", Robots: "noindex, follow", Breadcrumbs: [new SeoBreadcrumb("خانه", "/"), new SeoBreadcrumb("جستجو و انتخاب ابزار", "/search")]),
+            new SeoModel("خرید ابزار برقی و تجهیزات فنی | فروشگاه ندا اولیائی",
+                "جستجو و بررسی ابزار برقی، تجهیزات اندازه‌گیری، ابزار لحیم‌کاری و روشنایی؛ کالاها را بر اساس برند، کاربرد و قیمت فیلتر کنید.",
+                CanonicalUrl: "/search", Robots: "noindex, follow",
+                Breadcrumbs: [new SeoBreadcrumb("خانه", "/"), new SeoBreadcrumb("جستجو و انتخاب ابزار", "/search")]),
             ViewName: "List");
         return await PageAsync(model);
     }
@@ -51,6 +55,7 @@ public sealed class ProductController : PageController
             if (requestedPlan?.EndsAtUtc is { } endsAtUtc && DateTimeOffset.UtcNow >= endsAtUtc)
                 return RedirectPermanent(canonicalPath);
         }
+
         string siteOrigin = SeoUrlBuilder.SiteOrigin(_seoOptions.SiteUrl, Request);
         string siteRoot = SeoUrlBuilder.SiteRoot(_seoOptions.SiteUrl, Request);
         string productImage = SeoUrlBuilder.AbsoluteAssetUrl(siteOrigin, Url.Content($"~/{product.ImagePath}"));
@@ -93,7 +98,8 @@ public sealed class ProductController : PageController
 
     private async Task<IActionResult> CanonicalRedirect(int id)
     {
-        ProductSeoEntry? product = (await _catalog.ReadAsync(HttpContext.RequestAborted)).Products.FirstOrDefault(item => item.Id == id);
+        ProductSeoEntry? product =
+            (await _catalog.ReadAsync(HttpContext.RequestAborted)).Products.FirstOrDefault(item => item.Id == id);
         return product is null ? NotFound() : RedirectPermanent($"/products/{product.Slug}-{product.Id}");
     }
 }

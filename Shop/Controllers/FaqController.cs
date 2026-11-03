@@ -22,7 +22,10 @@ public sealed class FaqController : PageController
             }).ToArray()
         };
         PageModel<IReadOnlyList<FaqEntry>> model = new(FaqCatalog.Items,
-            new SeoModel("پرسش‌های متداول | ندا اولیائی", "پاسخ پرسش‌های رایج درباره انتخاب ابزار، آماده‌سازی خرید، پیگیری سفارش، هزینه و زمان ارسال، ضمانت کالا و روش بازگرداندن آن را یک‌جا بخوانید.", StructuredData: faqData, Breadcrumbs: [new SeoBreadcrumb("خانه", "/"), new SeoBreadcrumb("پرسش‌های متداول", "/faq")]));
+            new SeoModel("پرسش‌های متداول | ندا اولیائی",
+                "پاسخ پرسش‌های رایج درباره انتخاب ابزار، آماده‌سازی خرید، پیگیری سفارش، هزینه و زمان ارسال، ضمانت کالا و روش بازگرداندن آن را یک‌جا بخوانید.",
+                StructuredData: faqData,
+                Breadcrumbs: [new SeoBreadcrumb("خانه", "/"), new SeoBreadcrumb("پرسش‌های متداول", "/faq")]));
         return await PageAsync(model);
     }
 }

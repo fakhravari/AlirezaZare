@@ -70,6 +70,7 @@
             }).ToArray()
         });
     }
+
     var persianJsonEncoderSettings = new TextEncoderSettings(UnicodeRanges.BasicLatin, UnicodeRanges.Arabic);
     persianJsonEncoderSettings.AllowCharacter('\u200C');
     var jsonOptions = new JsonSerializerOptions

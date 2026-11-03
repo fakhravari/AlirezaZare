@@ -5,15 +5,18 @@ using System.Text.Json.Serialization;
 namespace Shop.Models;
 
 // Transport amounts are whole toman (IRT); dates are ISO calendar dates.
-public sealed record AccountData(int SchemaVersion, string Currency,
-    IReadOnlyList<AccountOrder> Orders, IReadOnlyList<AccountCoupon> Coupons)
+public sealed record AccountData(
+    int SchemaVersion,
+    string Currency,
+    IReadOnlyList<AccountOrder> Orders,
+    IReadOnlyList<AccountCoupon> Coupons)
 {
     public static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
     public static AccountData Parse(string json)
     {
         var data = JsonSerializer.Deserialize<AccountData>(json, JsonOptions)
-            ?? throw new InvalidDataException("Missing account data.");
+                   ?? throw new InvalidDataException("Missing account data.");
         if (data.SchemaVersion != 1 || data.Currency != "IRT" || data.Orders is null || data.Coupons is null)
             throw new InvalidDataException("Unsupported account schema or currency.");
         var orders = new HashSet<string>(StringComparer.Ordinal);
@@ -40,20 +43,34 @@ public sealed record AccountData(int SchemaVersion, string Currency,
     }
 }
 
-public sealed record AccountOrder(string Id, string Number, string Status, DateOnly OrderedOn,
-    int ItemCount, decimal TotalAmount, string DeliveryDescription)
+public sealed record AccountOrder(
+    string Id,
+    string Number,
+    string Status,
+    DateOnly OrderedOn,
+    int ItemCount,
+    decimal TotalAmount,
+    string DeliveryDescription)
 {
-    [JsonIgnore] public string StatusLabel => Status switch
+    [JsonIgnore]
+    public string StatusLabel => Status switch
     {
         "shipping" => "در حال ارسال", "processing" => "در حال آماده‌سازی",
         "delivered" => "تحویل‌شده", "cancelled" => "لغوشده", _ => "نامشخص"
     };
+
     [JsonIgnore] public string StatusClass => $"is-{Status}";
     [JsonIgnore] public string DateLabel => AccountDisplay.Date(OrderedOn);
 }
 
-public sealed record AccountCoupon(string Id, string Code, int DiscountPercent, bool Enabled,
-    DateOnly ExpiresOn, int UsageLimit, IReadOnlyList<string> OrderIds)
+public sealed record AccountCoupon(
+    string Id,
+    string Code,
+    int DiscountPercent,
+    bool Enabled,
+    DateOnly ExpiresOn,
+    int UsageLimit,
+    IReadOnlyList<string> OrderIds)
 {
     public bool IsActive(DateOnly today) => Enabled && ExpiresOn >= today;
 }

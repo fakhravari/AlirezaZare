@@ -11,7 +11,8 @@ public interface IAccountDataSource
 // Public offers deliberately expose no order history or customer data.
 public interface ICommerceOfferSource
 {
-    Task<IReadOnlyDictionary<string, int>> ReadOffersAsync(DateOnly today, CancellationToken cancellationToken = default);
+    Task<IReadOnlyDictionary<string, int>> ReadOffersAsync(DateOnly today,
+        CancellationToken cancellationToken = default);
 }
 
 public sealed class DemoAccountDataSource(IWebHostEnvironment environment) : IAccountDataSource, ICommerceOfferSource
@@ -21,7 +22,8 @@ public sealed class DemoAccountDataSource(IWebHostEnvironment environment) : IAc
     public Task<AccountData> ReadAsync(CancellationToken cancellationToken = default) =>
         _requestSnapshot ??= LoadAsync(cancellationToken);
 
-    public async Task<IReadOnlyDictionary<string, int>> ReadOffersAsync(DateOnly today, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyDictionary<string, int>> ReadOffersAsync(DateOnly today,
+        CancellationToken cancellationToken = default)
     {
         var data = await ReadAsync(cancellationToken);
         return data.Coupons.Where(c => c.IsActive(today)).ToDictionary(c => c.Code, c => c.DiscountPercent);

@@ -51,5 +51,6 @@ public sealed class EmailVerificationCodeStore
     }
 
     private static byte[] Hash(string code) => SHA256.HashData(Encoding.UTF8.GetBytes(code));
+
     private sealed record Entry(byte[] CodeHash, DateTimeOffset SentAt, DateTimeOffset ExpiresAt, int Attempts);
 }

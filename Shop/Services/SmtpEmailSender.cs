@@ -4,7 +4,8 @@ using Microsoft.Extensions.Options;
 
 namespace Shop.Services;
 
-public sealed class SmtpEmailSender(IOptions<Models.EmailSmtpOptions> options, ILogger<SmtpEmailSender> logger) : IEmailSender
+public sealed class SmtpEmailSender(IOptions<Models.EmailSmtpOptions> options, ILogger<SmtpEmailSender> logger)
+    : IEmailSender
 {
     private readonly Models.EmailSmtpOptions _settings = options.Value;
 
@@ -22,7 +23,8 @@ public sealed class SmtpEmailSender(IOptions<Models.EmailSmtpOptions> options, I
         using var message = new MailMessage(_settings.From, recipient)
         {
             Subject = "کد تأیید فروشگاه برق شیراز",
-            Body = $"کد تأیید شما: {code}\n\nاین کد تا ۱۰ دقیقه معتبر است. اگر این درخواست از طرف شما نبوده، این پیام را نادیده بگیرید.",
+            Body =
+                $"کد تأیید شما: {code}\n\nاین کد تا ۱۰ دقیقه معتبر است. اگر این درخواست از طرف شما نبوده، این پیام را نادیده بگیرید.",
             IsBodyHtml = false,
             BodyEncoding = System.Text.Encoding.UTF8,
             SubjectEncoding = System.Text.Encoding.UTF8
@@ -41,7 +43,8 @@ public sealed class SmtpEmailSender(IOptions<Models.EmailSmtpOptions> options, I
         }
         catch (Exception exception) when (exception is SmtpException or OperationCanceledException)
         {
-            logger.LogWarning("Verification email delivery failed. Failure type: {FailureType}", exception.GetType().Name);
+            logger.LogWarning("Verification email delivery failed. Failure type: {FailureType}",
+                exception.GetType().Name);
             throw;
         }
     }
