@@ -2838,8 +2838,6 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
   height: 40px;
   place-items: center;
   border-radius: 12px;
-  background: #f2f5f6;
-  color: var(--industrial-yellow-dark);
   font-size: 17px;
 }
 
@@ -3539,14 +3537,6 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
     font-size: 14px !important;
   }
 
-  #productView .product-detail-layout {
-    gap: 13px;
-  }
-
-  #productView .product-detail-gallery {
-    padding: 10px;
-  }
-
   #productView .product-detail-image-frame {
     min-height: 285px;
   }
@@ -3554,10 +3544,6 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
   #productView .product-detail-image {
     height: 270px;
     padding: 23px;
-  }
-
-  #productView .product-detail-summary {
-    padding: 17px;
   }
 
   #productView .product-detail-price > strong {
@@ -4665,10 +4651,6 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
 }
 
 @media (max-width: 575px) {
-  #productView .product-detail-summary {
-    padding: 16px;
-  }
-
   #productView .product-detail-summary > h2 {
     font-size: clamp(23px, 6vw, 28px);
   }
@@ -5104,10 +5086,6 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
   gap: 13px;
 }
 
-#productView .product-detail-related-card {
-  min-height: 390px;
-}
-
 #productView .product-detail-related-card .product-image {
   display: block;
   height: 190px;
@@ -5122,27 +5100,9 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
   object-fit: contain;
 }
 
-#productView .product-detail-related-card .product-info {
-  min-height: 110px;
-  padding: 12px;
-}
-
-#productView .product-detail-related-card .product-info h3 {
-  min-height: 43px;
-  margin: 5px 0;
-  font-size: 13px;
-}
-
 #productView .product-detail-related-card .product-info h3 a {
   color: inherit;
   text-decoration: none;
-}
-
-#productView .product-detail-related-card > .add-cart {
-  width: calc(100% - 20px);
-  min-height: 39px;
-  margin: auto 10px 10px;
-  font-size: 11px;
 }
 
 @media (max-width: 991px) {
@@ -5256,13 +5216,6 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
 
 #mainNav .nav-actions .nav-shortcut.active > i {
   color: #b63c4b;
-}
-
-#productView .product-detail-related-card .product-info > p.has-discount {
-  grid-template-columns: minmax(0, 1fr) auto;
-  grid-template-areas:
-    "current discount"
-    "old discount";
 }
 
 #newestSlider .showcase-card-body > .add-cart > i {
@@ -5700,10 +5653,6 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
   object-position: center;
 }
 
-#productView .product-detail-related-card .product-info {
-  min-height: 128px;
-}
-
 .purchase-benefits--showcase .benefits-intro p {
   max-width: 430px;
   min-height: 58px;
@@ -5866,7 +5815,6 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
 
 @media (max-width: 575px) {
   #productView :is(.product-detail-content-panel, .product-detail-related) {
-    padding: 17px 14px;
     border-radius: 15px;
   }
 
@@ -5880,10 +5828,6 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
   --site-scrollbar-thumb: #c5a43b;
   --site-scrollbar-thumb-hover: #102a43;
   --site-scrollbar-size: 7px;
-}
-
-html {
-  scrollbar-color: var(--site-scrollbar-thumb) var(--site-scrollbar-track);
 }
 
 html::-webkit-scrollbar {
@@ -7691,37 +7635,15 @@ html
 }
 @media (max-width: 700px) {
   .product-gallery-dialog {
-    width: calc(100vw - 16px);
-    max-height: calc(100dvh - 16px);
     border-radius: 16px;
-  }
-  .product-gallery-dialog-shell {
-    height: calc(100dvh - 16px);
-  }
-  .product-gallery-dialog-head {
-    min-height: 66px;
-    padding: 10px 13px;
-  }
-  .product-gallery-dialog-head h2 {
-    max-width: 62vw;
-    font-size: 14px;
   }
   .product-gallery-dialog-tools {
     gap: 7px;
   }
-  .product-gallery-dialog-tools button {
-    width: 36px;
-    height: 36px;
-  }
   .product-gallery-dialog-body {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: minmax(0, 1fr) 144px;
-  }
-  .product-gallery-full-stage {
-    padding: 10px;
   }
   .product-gallery-dialog-rail {
-    grid-template-rows: 34px minmax(0, 1fr);
     border-inline-start: 0;
     border-top: 1px solid #e4e9ee;
   }
@@ -7732,14 +7654,11 @@ html
   }
   .product-gallery-full-thumbs {
     flex-direction: row;
-    gap: 8px;
     overflow-x: auto;
     overflow-y: hidden;
-    padding: 3px 10px 9px;
     scroll-snap-type: x mandatory;
   }
   .product-gallery-full-thumb {
-    width: 125px;
     flex: 0 0 125px;
     aspect-ratio: 1.7;
   }
@@ -8647,13 +8566,6 @@ html
 }
 
 @media (max-width: 575px) {
-  #productView .product-detail-gallery {
-    padding: 12px;
-  }
-
-  #productView .product-detail-summary {
-    padding: 18px;
-  }
 
   #productView .product-detail-summary > h2 {
     font-size: 25px;
@@ -9004,14 +8916,8 @@ html
   text-align: right;
 }
 
-.inner-page .page-hero > .container > h1 {
-  max-width: 100%;
-  margin: 0;
-}
-
 .inner-page .page-hero > .container > .hero-trail {
   justify-content: flex-start;
-  margin-top: 12px;
 }
 
 .inner-page .page-hero > .container > .hero-trail > span,
@@ -9151,12 +9057,7 @@ html
 
 @media (max-width: 767px) {
   .inner-page .page-hero {
-    min-height: 0 !important;
     padding: 22px 0 30px !important;
-  }
-
-  .inner-page .page-hero > .container > h1 {
-    font-size: clamp(30px, 8vw, 40px);
   }
 }
 
@@ -9917,12 +9818,6 @@ body.home-page .product-card .product-info > p {
   flex: 1 1 auto;
 }
 
-#productView .product-detail-related-card .product-info h3 {
-  max-height: 43px;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-}
-
 #productView .product-detail-related-card .product-info > p {
   min-height: 58px;
   margin: auto 0 8px !important;
@@ -9938,7 +9833,6 @@ body.home-page .product-card .product-info > p {
 }
 
 #productView .product-detail-related-card > .add-cart {
-  margin: 0 10px 10px;
   flex: 0 0 auto;
 }
 
@@ -10443,8 +10337,6 @@ body .electrical-swiper .swiper-pagination-bullet-active {
   }
 
   .inner-page #mainNav .navbar-nav > .category-nav-dropdown:is(.show, .is-mega-open) > .nav-link .nav-menu-icon {
-    color: var(--industrial-navy) !important;
-    filter: none;
     transform: scale(1.12);
   }
 
@@ -11764,11 +11656,8 @@ body .electrical-swiper .swiper-pagination-bullet-active {
 /* Refined typography and item rhythm for the desktop category mega menu. */
 @media (min-width: 992px) {
   .inner-page #mainNav .category-nav-mega {
-    right: max(18px, calc((100% - var(--container-wide-max)) / 2));
-    left: max(18px, calc((100% - var(--container-wide-max)) / 2));
     height: min(580px, calc(100vh - 220px));
     min-height: min(460px, calc(100vh - 220px));
-    grid-template-columns: 276px minmax(0, 1fr);
     overflow: hidden;
   }
 
@@ -11781,7 +11670,6 @@ body .electrical-swiper .swiper-pagination-bullet-active {
 
   .inner-page #mainNav .category-mega-content {
     min-height: 0;
-    padding: 20px 22px 16px;
     overflow-y: auto;
     scrollbar-width: thin;
   }

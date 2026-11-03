@@ -128,7 +128,7 @@
   color: var(--industrial-navy);
 }
 .checkout-address-missing p {
-  margin: 5px 0 !important;
+  margin: 5px 0;
 }
 .checkout-address-missing a {
   display: inline-flex;
@@ -142,7 +142,7 @@
   opacity: 0.5;
   cursor: not-allowed;
   filter: grayscale(0.25);
-  box-shadow: none !important;
+  box-shadow: none;
 }
 .cart-products-panel > .cart-address-section {
   width: auto;
@@ -306,8 +306,8 @@ body .selected-address-card-heading > strong {
 .invoice-page .cart-continue-link {
   margin-top: 20px;
 }
-.invoice-demo-note {
-  font-size: 13px !important;
+.invoice-page .cart-summary .invoice-demo-note {
+  font-size: 13px;
   line-height: 1.9;
   color: var(--industrial-steel);
 }
@@ -741,8 +741,8 @@ body .selected-address-card-heading > strong {
   border-color: color-mix(in srgb, var(--industrial-yellow) 14%, white);
   transform: none;
 }
-.payment-method-soon {
-  flex: 0 0 auto !important;
+.payment-method > .payment-method-soon {
+  flex: 0 0 auto;
   padding: 4px 7px;
   border-radius: 999px;
   background: var(--industrial-bg);

@@ -248,11 +248,11 @@
 }
 
 #productView .product-detail-add:disabled {
-  cursor: not-allowed !important;
+  cursor: not-allowed;
   opacity: 0.58;
   filter: saturate(0.55);
-  box-shadow: none !important;
-  transform: none !important;
+  box-shadow: none;
+  transform: none;
 }
 
 @media (max-width: 575px) {

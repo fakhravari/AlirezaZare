@@ -27,7 +27,7 @@ footer .footer-brand-logo {
 }
 
 footer .footer-main > .col-lg-4:first-child > p {
-  text-align: justify !important;
+  text-align: justify;
 }
 @media (max-width: 575px) {
   .home-page footer .footer-main > .col-lg-4:first-child .footer-brand {

@@ -140,6 +140,8 @@ for (const file of styles) {
 const layout = await read('Shop/Views/Shared/_Shop.cshtml');
 const sharedStyles = [...layout.matchAll(/<link\b[^>]*href="~\/(shop\/css\/[^\"]+\.css)"[^>]*>/gs)].map(match => `Shop/wwwroot/${match[1]}`);
 const sharedImportant = new Map();
+const industrialCascade = new Map();
+const reportedIndustrialShadows = new Set();
 for (const file of sharedStyles) {
   try {
     const css = postcss.parse(await read(file), {from: file});
@@ -152,6 +154,16 @@ for (const file of sharedStyles) {
       }
       selectorPath.push(rule.selector);
       rule.walkDecls(declaration => {
+        const cascadeKey = `${conditions.join('\n')}\0${selectorPath.join('\n')}\0${declaration.prop}`;
+        if (file.endsWith('/layout/industrial-system.css')) {
+          industrialCascade.set(cascadeKey, {file, line: declaration.source.start.line, important: declaration.important});
+        } else {
+          const earlierIndustrial = industrialCascade.get(cascadeKey);
+          if (earlierIndustrial && (declaration.important || !earlierIndustrial.important) && !reportedIndustrialShadows.has(cascadeKey)) {
+            errors.push(`${earlierIndustrial.file}:${earlierIndustrial.line}: shadowed declaration ${declaration.prop}; same selector and conditions later win in ${file}:${declaration.source.start.line}`);
+            reportedIndustrialShadows.add(cascadeKey);
+          }
+        }
         if (!declaration.important) return;
         const key = `${conditions.join('\n')}\0${selectorPath.join('\n')}\0${declaration.prop}\0${declaration.value.trim()}`;
         const earlier = sharedImportant.get(key);
