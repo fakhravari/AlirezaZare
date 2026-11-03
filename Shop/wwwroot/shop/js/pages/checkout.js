@@ -92,10 +92,15 @@ window.HNUI.ready(() => window.HNUI.mount("checkout", document, () => {
         const title = document.createElement("strong");
         const street = document.createElement("p");
         const postal = document.createElement("small");
-        title.textContent = `${address.recipient} · ${address.phone}`;
+        const postalCode = document.createElement("span");
+        const phone = document.createElement("span");
+        postal.className = "selected-address-contact";
+        title.textContent = address.recipient;
         const region = [address.province, address.city].filter(Boolean).join("، ");
         street.textContent = `${region}، ${address.street}`;
-        postal.textContent = `کد پستی: ${address.postal}`;
+        postalCode.textContent = `کد پستی: ${address.postal}`;
+        phone.textContent = `تلفن: ${address.phone}`;
+        postal.append(postalCode, phone);
         heading.append(title);
         wrapper.append(heading, street, postal);
         return wrapper;
@@ -152,10 +157,8 @@ window.HNUI.ready(() => window.HNUI.mount("checkout", document, () => {
         addressSection?.classList.toggle("is-selected", Boolean(address));
         if (preview) {
             preview.replaceChildren();
+            preview.hidden = !address;
             if (address) preview.append(addressMarkup(address));
-            else if (addresses.length) {
-                preview.textContent = "آدرس تحویل را از فهرست انتخاب کنید.";
-            }
         }
         if (checkoutPreview) {
             checkoutPreview.replaceChildren();

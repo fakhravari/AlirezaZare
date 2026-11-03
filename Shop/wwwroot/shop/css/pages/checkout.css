@@ -253,6 +253,16 @@
 .address-preview p {
   margin: 8px 0;
 }
+.address-preview[hidden] {
+  display: none;
+}
+
+.selected-address-contact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 18px;
+}
+
 .address-preview small {
   font-size: 13px;
 }

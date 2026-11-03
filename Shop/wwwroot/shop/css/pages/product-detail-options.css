@@ -198,16 +198,17 @@
   align-items: center;
   justify-content: center;
   gap: 5px;
-  padding: 4px 6px;
-  border: 0;
+  padding: 4px 10px;
+  border: 1px solid #e4d5ae;
   border-radius: 8px;
-  background: transparent;
+  background: #fffdf7;
   color: #173b5d;
   font-size: 12px;
   font-weight: 600;
 }
 
 #productView .product-accessory-details:is(:hover, :focus-visible) {
+  border-color: #b9913b;
   background: #fff8e4;
 }
 
