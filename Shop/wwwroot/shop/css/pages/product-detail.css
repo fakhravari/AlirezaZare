@@ -5,7 +5,30 @@
 }
 
 .product-detail-page #productView {
+  --product-type-title: 24px;
+  --product-type-heading: 18px;
+  --product-type-body: 15px;
+  --product-type-label: 13px;
+  --product-type-small: 12px;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
   padding-inline: 16px;
+}
+
+.product-detail-page #productView :is(.product-detail-description, .product-detail-content-panel p, #product-intro .product-intro-copy > p, .product-expert-grid p, .product-question-faq > p, .product-feedback-card > p, .product-feedback-admin-reply > p, .product-feedback-user-text) {
+  font-size: var(--product-type-body);
+  line-height: 2;
+  overflow-wrap: break-word;
+}
+
+.product-detail-page #productView .product-detail-content-panel > header h2,
+.product-detail-page #productView .product-detail-related > header h2 {
+  font-size: var(--product-type-heading);
+  line-height: 1.7;
+}
+
+.product-detail-page #productView .product-detail-tabs > a {
+  font-size: var(--product-type-label);
 }
 
 @media (max-width: 575px) {

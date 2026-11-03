@@ -229,7 +229,7 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                 const discount = regular > current && regular > 0
                     ? Math.round((1 - current / regular) * 100)
                     : 0;
-                return `<span class="product-accessory-price-line"><strong class="product-price-current" data-accessory-current-price><span data-accessory-current-amount>${fa(current)}</span><small>تومان</small></strong><del data-accessory-regular-price${discount ? "" : " hidden"}>${fa(regular)} تومان</del><em class="product-accessory-discount" data-accessory-discount${discount ? "" : " hidden"}>${fa(discount)}٪ تخفیف</em></span>`;
+                return `<span class="product-accessory-price-line"><strong class="product-price-current" data-accessory-current-price><span aria-label="هزینهٔ افزوده">+</span><span data-accessory-current-amount>${fa(current)}</span><small>تومان</small></strong><del data-accessory-regular-price${discount ? "" : " hidden"}>${fa(regular)} تومان</del><em class="product-accessory-discount" data-accessory-discount${discount ? "" : " hidden"}>${fa(discount)}٪ تخفیف</em></span>`;
             };
             const accessoryMarkup = availableAccessories.length
                 ? `<section class="product-accessories" aria-labelledby="productAccessoriesTitle"><header><span class="product-accessories-icon"><i class="bi bi-box-seam" aria-hidden="true"></i></span><span><strong id="productAccessoriesTitle">متعلقات و خدمات کالا</strong><small>موارد الزامی مشخص‌اند؛ بقیه را به‌دلخواه انتخاب کنید.</small></span></header><div class="product-accessory-list">${availableAccessories
@@ -845,6 +845,7 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
             if (accessoriesSection) {
                 const accessoryDialog = document.createElement("dialog");
                 accessoryDialog.className = "product-accessory-dialog";
+                accessoryDialog.setAttribute("closedby", "closerequest");
                 accessoryDialog.setAttribute("aria-labelledby", "productAccessoryDialogTitle");
                 accessoryDialog.innerHTML = '<div class="product-accessory-dialog-shell"><header><div><h2 id="productAccessoryDialogTitle">جزئیات متعلقات و خدمات</h2><p>اطلاعات این مورد را پیش از انتخاب بررسی کنید.</p></div><button type="button" class="site-modal-close" data-accessory-close aria-label="بستن جزئیات"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header><div class="product-accessory-dialog-body" data-accessory-dialog-body></div><div class="product-accessory-dialog-actions"><button type="button" data-accessory-select></button><button type="button" data-accessory-close>بستن</button></div></div>';
                 document.body.append(accessoryDialog);
@@ -873,12 +874,6 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                     accessoryDialog.close();
                 });
                 accessoryDialog.querySelectorAll("[data-accessory-close]").forEach((button) => button.addEventListener("click", () => accessoryDialog.close()));
-                accessoryDialog.addEventListener("click", (event) => {
-                    if (event.target === accessoryDialog) {
-                        const bounds = accessoryDialog.getBoundingClientRect();
-                        if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) accessoryDialog.close();
-                    }
-                });
                 accessoryDialog.addEventListener("close", () => accessoryDialogTrigger?.focus());
             }
             if (accessoriesSection) accessoriesSection.before(inventoryStatus);

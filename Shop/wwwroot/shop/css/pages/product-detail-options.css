@@ -6,7 +6,7 @@
   padding: 17px;
   border: 1px solid #e2e8ef;
   border-radius: 18px;
-  background: linear-gradient(155deg, #fff 0%, #f8fafc 100%);
+  background: #fff;
   box-shadow: 0 10px 26px rgba(16, 42, 67, 0.065);
 }
 
@@ -47,9 +47,9 @@
 
 #productView .product-accessory {
   grid-template-columns: 20px minmax(0, 1fr) auto;
-  min-height: 68px;
-  gap: 11px;
-  padding: 10px 12px;
+  min-height: 88px;
+  gap: 8px 12px;
+  padding: 14px;
   border: 1px solid #e4e9ef;
   border-radius: 14px;
   background: #fff;
@@ -196,20 +196,27 @@
   display: inline-flex;
   min-height: 44px;
   align-items: center;
+  justify-content: center;
   gap: 5px;
   padding: 4px 6px;
   border: 0;
+  border-radius: 8px;
   background: transparent;
-  color: #24649b;
+  color: #173b5d;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 600;
+}
+
+#productView .product-accessory-details:is(:hover, :focus-visible) {
+  background: #fff8e4;
 }
 
 .product-accessory-price-line {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: auto auto;
   align-items: center;
-  gap: 6px 9px;
+  justify-content: start;
+  gap: 3px 10px;
   color: #173b5d;
 }
 
@@ -217,25 +224,29 @@
   display: inline-flex;
   align-items: baseline;
   gap: 5px;
-  font-size: 15px;
-  font-weight: 850;
+  font-size: 17px;
+  font-weight: 900;
 }
 
 .product-accessory-price-line .product-price-current small {
-  font-size: 11px;
-  font-weight: 500;
+  font-size: 12px;
+  font-weight: 600;
 }
 
 .product-accessory-price-line del {
+  grid-column: 1;
+  grid-row: 2;
   color: #7a8794;
   font-size: 11px;
 }
 
 .product-accessory-discount {
-  padding: 2px 7px;
+  grid-column: 2;
+  grid-row: 1;
+  padding: 3px 8px;
   border-radius: 20px;
-  background: #d93848;
-  color: #fff;
+  background: #fff0f1;
+  color: #bc3545;
   font-size: 11px;
   font-style: normal;
   font-weight: 800;
@@ -509,7 +520,7 @@
   }
 
   #productView .product-accessory-price {
-    grid-column: 2;
+    grid-column: 2 / -1;
     display: flex;
     min-width: 0;
     align-items: baseline;
@@ -518,6 +529,17 @@
     width: fit-content;
     max-width: 100%;
     padding: 0;
+  }
+
+  #productView .product-accessory-copy {
+    grid-column: 2 / -1;
+  }
+
+  #productView .product-accessory-details {
+    grid-column: 2 / -1;
+    grid-row: 3;
+    justify-self: start;
+    min-height: 44px;
   }
 
   #productView .product-accessory-price > small {
@@ -540,7 +562,7 @@
     gap: 5px;
     padding-inline: 6px;
     flex-wrap: nowrap;
-    font-size: 11px;
+    font-size: var(--product-type-label);
     white-space: nowrap;
   }
 
@@ -1198,13 +1220,13 @@
   border: 1px solid #e2e8ec;
   border-top: 3px solid #d8e2e7;
   border-radius: 15px;
-  background: linear-gradient(180deg, #fff 0%, #fbfcfd 100%);
+  background: #fff;
   box-shadow: 0 7px 20px rgba(16, 42, 67, 0.045);
 }
 
 #productView #product-specifications .product-spec-group:first-child {
   border-top-color: #d8c47c;
-  background: linear-gradient(180deg, #fffefa 0%, #fff 100%);
+  background: #fff;
 }
 
 #productView #product-specifications .product-spec-group h3 {
@@ -1303,9 +1325,9 @@
 #productView .product-purchase-panel {
   min-width: 0;
   padding: 14px;
-  border: 1px solid #e3d8bc;
+  border: 1px solid var(--industrial-line, #dce3e8);
   border-radius: 18px;
-  background: linear-gradient(165deg, #fffefa, #fff 62%, #f8fafb);
+  background: #fff;
   box-shadow: 0 10px 26px rgba(16, 42, 67, .07);
 }
 
@@ -1375,9 +1397,9 @@
   align-items: center;
   gap: 10px;
   padding: 9px 11px;
-  border: 1px solid #e3e9e8;
+  border: 1px solid var(--industrial-line, #dce3e8);
   border-radius: 12px;
-  background: linear-gradient(135deg, #fff, #f8faf8);
+  background: #f5f7f9;
   color: #24445d;
   font-size: 12px;
 }
@@ -1548,9 +1570,9 @@
 #productView .product-meta-brand-logo,
 #productView .product-meta-identity .product-meta-pill > i {
   display: block;
-  width: 36px;
-  height: 36px;
-  flex: 0 0 36px;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
   padding: 3px;
   border: 1px solid rgba(22, 50, 79, 0.12);
   border-radius: 10px;
@@ -1575,7 +1597,7 @@
 #productView .product-meta-identity-top .product-meta-pill > span > strong,
 #productView .product-meta-identity > .product-meta-code > span > strong {
   color: var(--industrial-navy, #173b5d);
-  font-size: 15px;
+  font-size: var(--product-type-label);
   font-weight: 800;
   line-height: 1.4;
   text-align: center;
@@ -1647,9 +1669,9 @@
   #productView .product-meta-country-flag,
   #productView .product-meta-brand-logo,
   #productView .product-meta-identity .product-meta-pill > i {
-    width: 34px;
-    height: 34px;
-    flex-basis: 34px;
+    width: 38px;
+    height: 38px;
+    flex-basis: 38px;
   }
 
   #productView .product-meta-identity > .product-meta-code {
@@ -1660,17 +1682,17 @@
 
   #productView .product-meta-identity-top .product-meta-pill > span > strong,
   #productView .product-meta-identity > .product-meta-code > span > strong {
-    font-size: 12px;
+    font-size: var(--product-type-label);
   }
 
   #productView .product-meta-identity-top .product-meta-pill > span > small,
   #productView .product-meta-identity > .product-meta-code > span > small {
-    font-size: 10px;
+    font-size: var(--product-type-small);
   }
 
   #productView .product-meta-identity-top .product-meta-pill > span > .product-meta-brand-en,
   #productView .product-meta-identity-top .product-meta-pill > span > .product-meta-country-en {
-    font-size: 10px;
+    font-size: var(--product-type-small);
   }
 }
 
@@ -1683,6 +1705,12 @@
 }
 
 /* Give each product-detail tab a consistent, quiet icon tile. */
+#productView .product-detail-tabs {
+  border-color: var(--industrial-line, #dce3e8);
+  background: #fff;
+  box-shadow: 0 8px 22px rgba(16, 42, 67, 0.06);
+}
+
 #productView .product-detail-tabs > a > i {
   display: grid;
   width: 30px;
@@ -2127,10 +2155,14 @@
 
 #productView .product-detail-summary > h2 {
   margin-block: 10px 8px;
-  font-size: clamp(22px, 2vw, 29px);
+  font-size: var(--product-type-title);
+  line-height: 1.8;
+  overflow-wrap: break-word;
 }
 
 #productView .product-detail-english-name {
+  font-size: var(--product-type-body);
+  line-height: 1.7;
   direction: ltr;
   margin-right: auto;
   margin-left: 0;
@@ -2143,7 +2175,7 @@
   }
 
   #productView .product-detail-summary > h2 {
-    font-size: clamp(20px, 5.3vw, 24px);
+    font-size: var(--product-type-title);
   }
 
   #productView .product-detail-meta .product-meta-category-content > small,
@@ -2307,6 +2339,8 @@
 /* Keep every anchored detail panel below the fixed header and sticky tabs. */
 #productView :is(.product-detail-content-panel, .product-detail-related) {
   scroll-margin-top: 264px;
+  border-color: var(--industrial-line, #dce3e8);
+  background: #fff;
 }
 
 @media (max-width: 991px) {
