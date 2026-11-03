@@ -1933,7 +1933,6 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
     }
     renderCart();
     document.addEventListener("hn:cart-change", renderCart);
-    window.addEventListener("storage", renderCart);
     document.querySelector("#trackingForm")?.addEventListener("submit", (e) => {
         e.preventDefault();
         ui.setMessage(

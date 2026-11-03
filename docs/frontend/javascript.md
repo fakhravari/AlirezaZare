@@ -104,7 +104,7 @@
 | `hn:auth-change` | `detail`: boolean | هدر و بخش account را تازه می‌کند |
 | `hn:auth-required` | `detail: { resume: Function|null }` | بازکردن مدال ورود؛ callback پس از ورود آزمایشی اجرا می‌شود |
 | `hn:lists-change` | بدون `detail` | شمارنده‌ها، favorite/compare button و صفحه‌ها را sync می‌کند |
-| native `storage` | `key`, `newValue`, `oldValue` | همگام‌سازی tabهای دیگر؛ same-tab تغییرات باید از helper/event عبور کند |
+| native `storage` | `key`, `newValue`, `oldValue` | همگام‌سازی tabهای دیگر؛ تغییر cart در `ui-core.js` به `hn:cart-change` تبدیل می‌شود، تغییر address/payment فقط همان بخش را تازه می‌کند و تغییر نامرتبط نباید صفحه را reload کند. same-tab تغییرات باید از helper/event عبور کند |
 
 هنگام افزودن event، یک source of truth حفظ کنید، payload را document کنید، handler را idempotent بنویسید و از dispatch مضاعف در View و shared JS جلوگیری کنید.
 

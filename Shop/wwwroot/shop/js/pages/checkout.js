@@ -13,6 +13,30 @@ window.HNUI.ready(() => window.HNUI.mount("checkout", document, () => {
     let selectedPaymentMethod = ui.storage.get(paymentMethodKey, "zarinpal");
     let salesPlansValid = false;
     let validationAttempt = 0;
+    const readAddresses = () => {
+        try {
+            const value = JSON.parse(ui.storage.get(addressKey, "[]"));
+            return Array.isArray(value)
+                ? value.filter(
+                    (address) =>
+                        address &&
+                        [
+                            "id",
+                            "title",
+                            "recipient",
+                            "phone",
+                            "province",
+                            "street",
+                            "postal",
+                        ].every(
+                            (key) => typeof address[key] === "string" && address[key].trim(),
+                        ),
+                )
+                : [];
+        } catch {
+            return [];
+        }
+    };
     const validateSalesPlanCart = async () => {
         const attempt = ++validationAttempt;
         const currentItems = ui.cart.read();
@@ -53,28 +77,7 @@ window.HNUI.ready(() => window.HNUI.mount("checkout", document, () => {
     }
     ui.storage.set(paymentMethodKey, selectedPaymentMethod);
 
-    try {
-        const value = JSON.parse(ui.storage.get(addressKey, "[]"));
-        if (Array.isArray(value)) {
-            addresses = value.filter(
-                (address) =>
-                    address &&
-                    [
-                        "id",
-                        "title",
-                        "recipient",
-                        "phone",
-                        "province",
-                        "street",
-                        "postal",
-                    ].every(
-                        (key) => typeof address[key] === "string" && address[key].trim(),
-                    ),
-            );
-        }
-    } catch {
-        addresses = [];
-    }
+    addresses = readAddresses();
 
     let selected = ui.storage.get(selectedKey, "");
     const selectedAddress = () =>
@@ -309,7 +312,21 @@ window.HNUI.ready(() => window.HNUI.mount("checkout", document, () => {
         if (payment) validateSalesPlanCart();
     });
 
-    window.addEventListener("storage", () => window.location.reload());
+    window.addEventListener("storage", (event) => {
+        if (event.key === addressKey || event.key === selectedKey) {
+            if (event.key === addressKey) addresses = readAddresses();
+            selected = ui.storage.get(selectedKey, "");
+            renderAddresses();
+            return;
+        }
+        if (event.key !== paymentMethodKey) return;
+        const nextMethod = ui.storage.get(paymentMethodKey, "zarinpal");
+        selectedPaymentMethod = Object.hasOwn(paymentMethods, nextMethod)
+            ? nextMethod
+            : "zarinpal";
+        renderPaymentMethod();
+        syncPayment();
+    });
     renderAddresses();
     if (payment) validateSalesPlanCart();
     renderPaymentMethod();

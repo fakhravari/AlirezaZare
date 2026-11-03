@@ -451,6 +451,29 @@ test('cart defaults, required service and reload use one canonical price', async
   await noHorizontalOverflow(page);
 });
 
+test('cart storage changes sync without reloading the page', async ({page, context}) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('hn-demo-auth', '1');
+    window.__cartPageBootId = crypto.randomUUID();
+  });
+  await page.goto('/cart');
+  const bootId = await page.evaluate(() => window.__cartPageBootId);
+  const navigations = [];
+  page.on('framenavigated', frame => {
+    if (frame === page.mainFrame()) navigations.push(frame.url());
+  });
+
+  const otherTab = await context.newPage();
+  await otherTab.goto('/');
+  await otherTab.evaluate(() => localStorage.setItem('hn-favorites', JSON.stringify(['1'])));
+  await otherTab.evaluate(() => window.HNUI.cart.add(window.HNCatalog.find(1)));
+
+  await expect(page.locator('#cartView .cart-product-row')).toHaveCount(1);
+  expect(await page.evaluate(() => window.__cartPageBootId)).toBe(bootId);
+  expect(navigations).toEqual([]);
+  await otherTab.close();
+});
+
 test('search keeps one result grid while cart and checkout group by sales plan', async ({page}) => {
   await page.addInitScript(() => localStorage.setItem('hn-demo-auth', '1'));
   await page.clock.install({time: new Date('2026-11-01T10:00:00Z')});

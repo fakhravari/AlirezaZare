@@ -1606,7 +1606,6 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
 .account-profile > div :is(small, span),
 .account-tabs a small,
 .account-sidebar-help :is(strong, a),
-.overview-empty p,
 .address-selected-badge,
 #orders .orders-heading > div > span,
 .orders-pagination :is(p, button) {
@@ -1927,7 +1926,6 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
 }
 
 .account-tabs a > i:first-child,
-.overview-panel-title i,
 .account-sidebar-help > i {
   color: var(--color-navy);
 }
