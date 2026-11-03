@@ -1,3 +1,158 @@
+#productView .product-special-sale {
+  --product-detail-icon-color: #ffdb70;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-width: 0;
+  padding: 13px;
+  border: 1px solid rgba(220, 177, 65, .62);
+  border-radius: 16px;
+  background:
+    radial-gradient(circle at 4% 4%, rgba(255, 213, 92, .18), transparent 34%),
+    linear-gradient(145deg, #183a58, #102b43 70%, #17354f);
+  box-shadow: 0 10px 24px rgba(16, 42, 67, .13), inset 0 1px rgba(255, 255, 255, .1);
+  color: #fff;
+}
+
+#productView .product-special-sale::after {
+  position: absolute;
+  z-index: -1;
+  top: -42px;
+  left: -34px;
+  width: 132px;
+  height: 132px;
+  border: 1px solid rgba(255, 224, 143, .12);
+  border-radius: 50%;
+  content: "";
+}
+
+#productView .product-special-sale-heading,
+#productView .product-special-sale-countdown,
+#productView .product-special-sale-price {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+}
+
+#productView .product-special-sale-heading {
+  justify-content: flex-start;
+}
+
+#productView .product-special-sale-mark {
+  --product-detail-icon-color: #17334e;
+  display: grid;
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  place-items: center;
+  border: 1px solid rgba(255, 229, 163, .58);
+  border-radius: 11px;
+  background: linear-gradient(145deg, #ffe27d, #eebc2e);
+  color: #17334e;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, .15);
+}
+
+#productView .product-special-sale-mark i {
+  font-size: 17px;
+}
+
+#productView .product-special-sale-name {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+#productView .product-special-sale-name small {
+  color: rgba(255, 255, 255, .66);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+#productView .product-special-sale-name strong {
+  color: #fff;
+  font-size: 16px;
+  font-weight: 900;
+  line-height: 1.25;
+}
+
+#productView .product-special-sale p {
+  margin: 9px 0 0;
+  color: rgba(255, 255, 255, .75);
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+#productView .product-special-sale-countdown {
+  margin-top: 10px;
+  padding-top: 9px;
+  border-top: 1px solid rgba(255, 255, 255, .14);
+}
+
+#productView .product-special-sale-countdown > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: rgba(255, 255, 255, .83);
+  font-size: 11px;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+#productView .product-special-sale-countdown time,
+#productView .product-special-sale-open {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 34px;
+  padding: 5px 9px;
+  border: 1px solid rgba(255, 223, 131, .52);
+  border-radius: 10px;
+  background: linear-gradient(135deg, #ffe27d, #f3c53f);
+  color: #142d45;
+  direction: rtl;
+  unicode-bidi: isolate;
+  font-size: 12px;
+  font-weight: 950;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, .16);
+}
+
+#productView .product-special-sale-countdown time bdi {
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+#productView .product-special-sale-countdown time .sales-plan-countdown-days {
+  direction: rtl;
+  unicode-bidi: isolate;
+}
+
+#productView .product-special-sale-price {
+  margin-top: 9px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, .1);
+}
+
+#productView .product-special-sale-price > span {
+  color: rgba(255, 255, 255, .7);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+#productView .product-special-sale-price > strong {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  color: #ffdf83;
+  font-size: 15px;
+  font-weight: 950;
+  white-space: nowrap;
+}
+
 #productView .product-detail-price {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
