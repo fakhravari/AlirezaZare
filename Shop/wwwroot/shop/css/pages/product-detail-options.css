@@ -658,7 +658,7 @@
 }
 
 #productView #product-intro .product-intro-toggle[hidden] {
-  display: none !important;
+  display: none;
 }
 
 #productView #product-intro .product-intro-toggle:hover {
@@ -738,7 +738,7 @@
 
 #productView .product-share-menu[hidden],
 #productView .product-share-native[hidden] {
-  display: none !important;
+  display: none;
 }
 
 #productView .product-share-menu {
@@ -1378,7 +1378,7 @@
 }
 
 #productView .product-meta-country-en {
-  color: var(--color-text-muted) !important;
+  color: var(--color-text-muted);
   overflow-wrap: anywhere;
 }
 

@@ -561,12 +561,12 @@
 }
 
 @media (max-width: 575px) {
-  #productView .product-detail-meta > .product-meta-category {
+  body.inner-page #productView .product-detail-meta > .product-meta-category {
     position: static;
     display: flex;
     min-height: 0;
     align-items: center;
-    padding: 8px 9px !important;
+    padding: 8px 9px;
   }
 
   #productView .product-detail-meta > .product-meta-category > i {
