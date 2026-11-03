@@ -1566,12 +1566,6 @@ form .form-field-error[hidden] {
   color: var(--industrial-icon-ink) !important;
 }
 
-.compare-category-icon {
-  border-color: var(--industrial-icon-accent-border) !important;
-  background: var(--industrial-icon-accent-surface) !important;
-  color: var(--industrial-icon-accent-ink) !important;
-}
-
 /* Tables, separators and pagination */
 table,
 thead,
@@ -4334,14 +4328,6 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
   text-decoration: line-through;
   text-decoration-color: #a9b9cd;
   text-decoration-thickness: 1.5px;
-}
-
-.product-detail-sale-meta {
-  display: flex !important;
-  align-items: center;
-  justify-content: flex-start !important;
-  gap: 10px !important;
-  margin-top: 8px;
 }
 
 #productView .product-detail-price > .product-price-current {

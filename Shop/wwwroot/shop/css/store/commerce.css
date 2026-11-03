@@ -1747,10 +1747,10 @@ summary:focus-visible {
   height: 42px;
   flex: 0 0 42px;
   place-items: center;
-  border: 1px solid #f0df9d;
+  border: 1px solid var(--industrial-icon-accent-border);
   border-radius: 13px;
-  background: #fff9e4;
-  color: #967300;
+  background: var(--industrial-icon-accent-surface);
+  color: var(--industrial-icon-accent-ink);
   font-size: 18px;
 }
 .compare-category-heading > span:nth-child(2) {
