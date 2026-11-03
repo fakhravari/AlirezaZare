@@ -448,10 +448,10 @@
     right: 0 !important;
     left: auto !important;
     display: grid !important;
-    width: min(560px, calc(100vw - 32px)) !important;
-    padding: 18px !important;
+    width: min(430px, calc(100vw - 24px)) !important;
+    padding: 10px !important;
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 16px !important;
+    gap: 10px !important;
     border: 1px solid var(--mega-card-border) !important;
     border-top: 3px solid var(--mega-gold-bright) !important;
     border-radius: 0 0 20px 20px !important;
@@ -462,12 +462,15 @@
   .inner-page #mainNav .quick-links-group {
     display: grid;
     min-width: 0;
-    padding: 12px;
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    padding: 10px;
     align-content: start;
-    gap: 4px;
-    border: 1px solid rgba(16, 42, 67, 0.09);
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.82);
+    gap: 6px;
+    border: 1px solid rgba(190, 145, 65, 0.24);
+    border-radius: 13px;
+    background: linear-gradient(145deg, #f8f7f1, #fffdf8 72%);
   }
 
   .inner-page #mainNav .quick-links-group h3 {
@@ -480,8 +483,9 @@
   .inner-page #mainNav .quick-links-group a {
     min-height: 36px;
     padding: 7px 8px;
-    border: 1px solid transparent;
-    border-radius: 8px 13px 8px 13px;
+    border: 1px solid rgba(190, 145, 65, 0.18);
+    border-radius: 10px;
+    background: rgba(255, 253, 248, 0.88);
     color: #526579;
     transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease;
   }

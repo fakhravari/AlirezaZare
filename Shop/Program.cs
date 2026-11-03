@@ -4,8 +4,7 @@ using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
-builder.Services.AddRateLimiter(options => options.AddPolicy("email-code", context =>
-    RateLimitPartition.GetFixedWindowLimiter(
+builder.Services.AddRateLimiter(options => options.AddPolicy("email-code", context => RateLimitPartition.GetFixedWindowLimiter(
         context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
         _ => new FixedWindowRateLimiterOptions
         {
@@ -19,19 +18,17 @@ builder.Services.AddSingleton<Shop.Services.EmailVerificationCodeStore>();
 builder.Services.AddSingleton<Shop.Services.IEmailSender, Shop.Services.SmtpEmailSender>();
 builder.Services.AddSingleton<Shop.Services.IMagazineContentSource, Shop.Services.DemoMagazineContentSource>();
 builder.Services.AddSingleton<Shop.Services.CatalogRepository>();
-builder.Services.AddSingleton<Shop.Services.ICatalogSource>(services =>
-    services.GetRequiredService<Shop.Services.CatalogRepository>());
+builder.Services.AddSingleton<Shop.Services.ICatalogSource>(services => services.GetRequiredService<Shop.Services.CatalogRepository>());
 builder.Services.AddSingleton<Shop.Services.ISalesPlanSource, Shop.Services.DemoSalesPlanSource>();
 builder.Services.AddScoped<Shop.Services.DemoAccountDataSource>();
-builder.Services.AddScoped<Shop.Services.IAccountDataSource>(services =>
-    services.GetRequiredService<Shop.Services.DemoAccountDataSource>());
-builder.Services.AddScoped<Shop.Services.ICommerceOfferSource>(services =>
-    services.GetRequiredService<Shop.Services.DemoAccountDataSource>());
+builder.Services.AddScoped<Shop.Services.IAccountDataSource>(services => services.GetRequiredService<Shop.Services.DemoAccountDataSource>());
+builder.Services.AddScoped<Shop.Services.ICommerceOfferSource>(services => services.GetRequiredService<Shop.Services.DemoAccountDataSource>());
 var persianHtmlEncoderSettings = new TextEncoderSettings(UnicodeRanges.BasicLatin, UnicodeRanges.Arabic);
 persianHtmlEncoderSettings.AllowCharacter('\u200C');
 builder.Services.AddWebEncoders(options => options.TextEncoderSettings = persianHtmlEncoderSettings);
 builder.Services.Configure<Shop.Models.SeoMetadataOptions>(builder.Configuration.GetSection("Seo"));
 builder.Services.Configure<Microsoft.AspNetCore.Routing.RouteOptions>(options => options.LowercaseUrls = true);
+
 var app = builder.Build();
 if (Uri.TryCreate(builder.Configuration["Seo:SiteUrl"], UriKind.Absolute, out var canonicalSite)
     && (canonicalSite.Scheme == Uri.UriSchemeHttp || canonicalSite.Scheme == Uri.UriSchemeHttps)
