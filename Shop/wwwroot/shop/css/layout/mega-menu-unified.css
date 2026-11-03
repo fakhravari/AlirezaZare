@@ -442,7 +442,7 @@
 
 /* Use one shipping-page-matched guide panel on every inner page. */
 @media (min-width: 992px) {
-  .inner-page #mainNav .quick-links-menu {
+  .inner-page #mainNav .quick-links-menu:not(.sales-plan-menu) {
     position: absolute !important;
     top: calc(100% + 16px) !important;
     right: 0 !important;

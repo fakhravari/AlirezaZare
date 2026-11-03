@@ -248,6 +248,31 @@ test('sales plan navigation opens search with that plan selected', async ({page,
   expect(resultPlanIds.every(id => id === 'digi-time')).toBe(true);
 });
 
+test('desktop sales plan menu keeps the same layout on home and inner pages', async ({page, isMobile}) => {
+  test.skip(isMobile);
+
+  const readMenuLayout = async path => {
+    await page.goto(path);
+    await page.locator('.sales-plans-dropdown > button').click();
+    const menu = page.locator('.sales-plan-menu');
+    await expect(menu).toBeVisible();
+    return menu.evaluate(element => {
+      const style = getComputedStyle(element);
+      return {
+        width: style.width,
+        columns: style.gridTemplateColumns,
+        padding: style.padding,
+        borderRadius: style.borderRadius,
+      };
+    });
+  };
+
+  const homeLayout = await readMenuLayout('/');
+  const innerLayout = await readMenuLayout('/cart');
+  expect(innerLayout).toEqual(homeLayout);
+  expect(homeLayout.columns.trim().split(/\\s+/)).toHaveLength(1);
+});
+
 test('mobile header search suggestions use readable type sizes', async ({page, isMobile}) => {
   test.skip(!isMobile);
   await page.goto('/');
