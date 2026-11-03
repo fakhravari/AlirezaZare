@@ -593,8 +593,7 @@
   min-height: 156px;
 }
 
-.product-card .product-info > div > small,
-.search-product.product-card .search-product-heading > small {
+.product-card .product-info > div > small {
   display: block;
   min-height: 18px;
   margin: 0 0 5px;

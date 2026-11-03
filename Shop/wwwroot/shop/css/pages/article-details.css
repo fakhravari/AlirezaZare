@@ -856,8 +856,7 @@
     margin-top: 3mm;
   }
   .article-body p,
-  .article-body .article-section p,
-  .article-body .article-lead {
+  .article-body .article-section p {
     color: var(--industrial-ink) !important;
     font-size: 11pt !important;
     line-height: 1.95 !important;
