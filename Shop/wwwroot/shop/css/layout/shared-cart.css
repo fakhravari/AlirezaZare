@@ -572,7 +572,7 @@ body > .cart-panel .empty-cart > a:hover > i,
   position: relative !important;
   display: flex !important;
   width: 100% !important;
-  min-height: 50px !important;
+  min-height: 46px !important;
   padding: 0 18px !important;
   align-items: center !important;
   justify-content: center !important;
@@ -1253,7 +1253,7 @@ body :is(#cartView, #invoiceItems) .cart-product-details .cart-item-option-chip 
     border-radius: 0 0 22px 22px !important;
   }
   #mainNav .cart-wrap > #cartPanel.cart-panel .cart-items {
-    max-height: 317px;
+    max-height: 380px;
   }
   :where(.cart-head, .search-cart-head) {
     margin: 8px !important;

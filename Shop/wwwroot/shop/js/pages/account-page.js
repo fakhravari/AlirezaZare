@@ -62,9 +62,9 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
                         const isSelected = a.id === selected;
                         return `<article class="flow-card address-account-card${isSelected ? " is-selected" : ""}">
 <header class="address-card-header"><h3><i class="bi bi-bookmark" aria-hidden="true"></i><span>${esc(a.title)}</span></h3>${isSelected ? '<span class="address-selected-badge"><i class="bi bi-check-circle-fill" aria-hidden="true"></i>آدرس انتخابی</span>' : ""}</header>
-<div class="address-card-recipient"><i class="bi bi-person-vcard" aria-hidden="true"></i><strong>${esc(a.recipient)}</strong><span class="address-card-phone"><i class="bi bi-telephone" aria-hidden="true"></i><bdi>${esc(a.phone)}</bdi></span></div>
+<div class="address-card-recipient"><i class="bi bi-person-vcard" aria-hidden="true"></i><strong>${esc(a.recipient)}</strong></div>
 <p class="address-card-location"><i class="bi bi-geo-alt" aria-hidden="true"></i><span>${esc(region)}، ${esc(a.street)}</span></p>
-<p class="address-card-postal"><i class="bi bi-mailbox" aria-hidden="true"></i><span>کد پستی</span><bdi>${esc(a.postal)}</bdi></p>
+<div class="address-card-contact"><span class="address-card-phone"><i class="bi bi-telephone" aria-hidden="true"></i><bdi>${esc(a.phone)}</bdi></span><span class="address-card-postal"><i class="bi bi-mailbox" aria-hidden="true"></i><span>کد پستی</span><bdi>${esc(a.postal)}</bdi></span></div>
 <div class="account-actions address-card-actions"><button class="address-action-select" data-select="${esc(a.id)}" ${isSelected ? "disabled" : ""}><i class="bi bi-check2-circle" aria-hidden="true"></i><span>${isSelected ? "انتخاب شده" : "انتخاب برای تحویل"}</span></button><button data-edit="${esc(a.id)}"><i class="bi bi-pencil-square" aria-hidden="true"></i><span>ویرایش</span></button><button class="address-action-delete" data-delete="${esc(a.id)}"><i class="bi bi-trash3" aria-hidden="true"></i><span>حذف آدرس</span></button></div></article>`;
                     },
                 )

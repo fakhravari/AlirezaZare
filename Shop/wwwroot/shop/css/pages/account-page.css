@@ -519,7 +519,8 @@
 
 .address-card-recipient { align-items: center; flex-wrap: wrap; color: var(--industrial-navy); }
 .address-card-recipient > strong { font-size: 15px; }
-.address-card-phone { margin-inline-start: auto; font-size: 13px; }
+.address-card-contact { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 28px; }
+.address-card-phone { margin-inline-start: 0; font-size: 13px; }
 .address-card-location > span { overflow-wrap: anywhere; }
 .address-card-postal { align-items: center; font-size: 13px; }
 .address-card-postal bdi { color: var(--industrial-navy); font-weight: 700; }
@@ -552,7 +553,9 @@
   .address-account-card .address-card-header h3 { font-size: 16px; }
   .address-selected-badge { padding: 6px 9px; font-size: 11px; }
   .address-card-recipient { align-items: flex-start; }
-  .address-card-phone { flex-basis: 100%; margin-inline-start: 27px; }
+  .address-card-contact { gap: 8px 16px; }
+  .address-card-contact .address-card-phone,
+  .address-card-contact .address-card-postal { font-size: 12px; }
   .address-card-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
   .address-card-actions button { width: 100%; padding-inline: 8px; font-size: 12px; }
   .address-card-actions .address-action-delete { grid-column: 1 / -1; }

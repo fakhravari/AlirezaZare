@@ -9425,7 +9425,7 @@ html
 }
 
 #cartPanel .cart-safety-copy small {
-  font-size: 12px !important;
+  font-size: 11px !important;
 }
 
 #cartPanel .cart-footer > a {
@@ -12408,9 +12408,10 @@ body .electrical-swiper .swiper-pagination-bullet-active {
 /* Keep the cart amount and its pre-order reminder in distinct, readable rows. */
 #cartPanel .cart-footer .cart-total-summary {
   grid-template-columns: minmax(0, 1fr);
-  gap: 9px;
+  gap: 5px;
+  margin-bottom: 8px;
   min-height: 0;
-  padding: 12px 14px;
+  padding: 8px 11px;
 }
 
 #cartPanel .cart-footer .cart-total-amount {
@@ -12432,12 +12433,24 @@ body .electrical-swiper .swiper-pagination-bullet-active {
 #cartPanel .cart-footer .cart-safety-badge {
   width: 100%;
   min-height: 0;
-  padding: 9px 0 0;
+  padding: 6px 0 0;
   border-top: 1px solid rgba(197, 157, 75, 0.24);
   border-inline-start: 0;
 }
 
 #cartPanel .cart-safety-copy {
+  display: flex;
   flex: 1 1 auto;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 3px 8px;
+  line-height: 1.35;
   overflow-wrap: anywhere;
+}
+
+#cartPanel .cart-safety-icon {
+  width: 30px;
+  min-width: 30px;
+  height: 30px;
+  font-size: 16px;
 }

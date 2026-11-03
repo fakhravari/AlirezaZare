@@ -153,10 +153,8 @@ window.HNUI.ready(() => window.HNUI.mount("checkout", document, () => {
         if (preview) {
             preview.replaceChildren();
             if (address) preview.append(addressMarkup(address));
-            else {
-                preview.textContent = addresses.length
-                    ? "آدرس تحویل را از فهرست انتخاب کنید."
-                    : "برای ثبت اولین آدرس، دکمه + را بزنید.";
+            else if (addresses.length) {
+                preview.textContent = "آدرس تحویل را از فهرست انتخاب کنید.";
             }
         }
         if (checkoutPreview) {

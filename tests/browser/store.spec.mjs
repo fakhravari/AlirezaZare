@@ -98,6 +98,20 @@ test('search initially displays 15 products', async ({page}) => {
   await expect(page.locator('#productResults [data-product-card]')).toHaveCount(15);
 });
 
+test('cart address preview stays empty before the first address is added', async ({page}) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('hn-demo-auth', '1');
+    localStorage.setItem('hn-delivery-addresses', '[]');
+    localStorage.removeItem('hn-selected-address');
+  });
+  await page.goto('/search');
+  await page.evaluate(() => window.HNUI.cart.add(window.HNCatalog.find(1)));
+  await page.goto('/cart');
+  await expect(page.locator('#addressPreview')).toBeEmpty();
+  await expect(page.locator('.cart-address-section button[aria-label*="آدرس"]')).toBeVisible();
+  await expect(page.locator('#cartView')).not.toContainText('برای ثبت اولین آدرس، دکمه + را بزنید.');
+});
+
 test('keyboard focus indicators and shared product actions keep their layout', async ({page}) => {
   await page.goto('/');
   const regularProductHref = await page.locator('#productGrid [data-product-card="v1"] h3 a').first().getAttribute('href');
@@ -250,6 +264,7 @@ test('sales plan navigation opens search with that plan selected', async ({page,
 
 test('desktop sales plan menu keeps the same layout on home and inner pages', async ({page, isMobile}) => {
   test.skip(isMobile);
+  await page.addInitScript(() => localStorage.setItem('hn-demo-auth', '1'));
 
   const readMenuLayout = async path => {
     await page.goto(path);
@@ -270,7 +285,7 @@ test('desktop sales plan menu keeps the same layout on home and inner pages', as
   const homeLayout = await readMenuLayout('/');
   const innerLayout = await readMenuLayout('/cart');
   expect(innerLayout).toEqual(homeLayout);
-  expect(homeLayout.columns.trim().split(/\\s+/)).toHaveLength(1);
+  expect(homeLayout.columns.trim().split(/\s+/)).toHaveLength(1);
 });
 
 test('mobile header search suggestions use readable type sizes', async ({page, isMobile}) => {
