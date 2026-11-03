@@ -904,7 +904,7 @@ h6,
   box-shadow: var(--industrial-shadow) !important;
 }
 
-:is(.ui-surface-card, .service-card, .benefit, .testimonial-card) {
+:is(.ui-surface-card, .benefit, .testimonial-card) {
   border-radius: var(--radius-panel-standard, 20px);
 }
 

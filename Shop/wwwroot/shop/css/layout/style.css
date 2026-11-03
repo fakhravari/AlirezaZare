@@ -486,9 +486,7 @@ textarea {
 :where(
   .mobile-menu,
   .cart-head,
-  .trust-strip,
   .hero-stat,
-  .dark-card,
   .footer-widget
 ) {
   border-color: var(--widget-border-dark) !important;
@@ -1492,7 +1490,6 @@ footer {
   }
 
   .hero,
-  .ticker,
   section,
   footer {
     width: 100%;
