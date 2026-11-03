@@ -83,16 +83,12 @@
   opacity: .9;
 }
 
-/* Square product photos stay complete inside their reserved image column. */
 .inner-page .product-detail-hero > .hero-image {
-  inset: 0 auto 0 0;
-  width: 52%;
-  object-fit: contain;
-  object-position: left center;
+  inset: 0;
+  width: 100%;
+  object-fit: cover;
+  object-position: center;
   opacity: 1;
-  filter: drop-shadow(0 16px 24px rgba(3, 14, 34, .32));
-  transform: scale(1.1);
-  transform-origin: left center;
 }
 
 /* Article photography fills its column; contain left empty space beside square images. */

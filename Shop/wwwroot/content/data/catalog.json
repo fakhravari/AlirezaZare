@@ -5873,6 +5873,7 @@
   "products": [
     {
       "id": 1,
+      "companionProductIds": [21, 17, 28, 9, 25, 16],
       "englishName": "Cordless Hammer Drill",
       "name": "دریل چکشی شارژی بوش با سه‌نظام اتوماتیک مناسب نصب و کارگاه",
       "powerSource": "باتری شارژی",
@@ -5974,6 +5975,7 @@
     },
     {
       "id": 2,
+      "companionProductIds": [22, 18, 29, 10, 21, 17],
       "englishName": "Cordless Drill Driver",
       "name": "دریل پیچ‌گوشتی شارژی",
       "powerSource": "باتری شارژی",
@@ -6031,6 +6033,7 @@
     },
     {
       "id": 3,
+      "companionProductIds": [23, 19, 30, 6, 22, 18],
       "englishName": "Electric Hammer Drill",
       "name": "دریل چکشی برقی",
       "powerSource": "برق شهری",
@@ -6109,6 +6112,7 @@
     },
     {
       "id": 4,
+      "companionProductIds": [24, 20, 26, 7, 23, 19],
       "englishName": "Two-Speed Cordless Drill Driver",
       "name": "دریل پیچ‌گوشتی شارژی دوسرعته",
       "powerSource": "باتری شارژی",
@@ -6195,6 +6199,7 @@
     },
     {
       "id": 5,
+      "companionProductIds": [25, 16, 27, 8, 24, 20],
       "englishName": "Electric Hammer Drill with Keyless Chuck",
       "name": "دریل چکشی برقی سه‌نظام اتوماتیک",
       "powerSource": "برق شهری",
@@ -6231,6 +6236,7 @@
     },
     {
       "id": 6,
+      "companionProductIds": [11, 17, 23, 29, 20, 21],
       "englishName": "Digital Multimeter",
       "name": "مولتی‌متر دیجیتال دستی یونی‌تی برای تست و عیب‌یابی مدار",
       "powerSource": "باتری‌خور",
@@ -6317,6 +6323,7 @@
     },
     {
       "id": 7,
+      "companionProductIds": [12, 18, 24, 30, 16, 22],
       "englishName": "Workshop Digital Multimeter",
       "name": "مولتی‌متر دیجیتال کارگاهی",
       "powerSource": "باتری‌خور",
@@ -6360,6 +6367,7 @@
     },
     {
       "id": 8,
+      "companionProductIds": [13, 19, 25, 26, 17, 23],
       "englishName": "Handheld Multimeter with Large Display",
       "name": "مولتی‌متر دستی با نمایشگر بزرگ",
       "powerSource": "باتری‌خور",
@@ -6396,6 +6404,7 @@
     },
     {
       "id": 9,
+      "companionProductIds": [14, 20, 21, 27, 18, 24],
       "englishName": "Digital Clamp Meter",
       "name": "کلمپ‌متر دیجیتال",
       "powerSource": "باتری‌خور",
@@ -6453,6 +6462,7 @@
     },
     {
       "id": 10,
+      "companionProductIds": [15, 16, 22, 28, 19, 25],
       "englishName": "Electrical Installation Digital Multimeter",
       "name": "مولتی‌متر دیجیتال تأسیساتی",
       "powerSource": "باتری‌خور",
@@ -6510,6 +6520,7 @@
     },
     {
       "id": 11,
+      "companionProductIds": [6, 22, 18, 29, 10, 21],
       "englishName": "Digital Soldering Station",
       "name": "ایستگاه هویه دیجیتال یوهوا با کنترل دما برای تعمیر برد",
       "powerSource": "برق شهری",
@@ -6575,6 +6586,7 @@
     },
     {
       "id": 12,
+      "companionProductIds": [7, 23, 19, 30, 6, 22],
       "englishName": "Adjustable Soldering Iron",
       "name": "هویه قلمی با قابلیت تنظیم دما",
       "powerSource": "برق شهری",
@@ -6611,6 +6623,7 @@
     },
     {
       "id": 13,
+      "companionProductIds": [8, 24, 20, 26, 7, 23],
       "englishName": "Hot Air Rework Station",
       "name": "ایستگاه هیتر هوای گرم تعمیر برد",
       "powerSource": "برق شهری",
@@ -6646,6 +6659,7 @@
     },
     {
       "id": 14,
+      "companionProductIds": [9, 25, 16, 27, 8, 24],
       "englishName": "Bench Soldering Station",
       "name": "ایستگاه لحیم‌کاری رومیزی",
       "powerSource": "برق شهری",
@@ -6682,6 +6696,7 @@
     },
     {
       "id": 15,
+      "companionProductIds": [10, 21, 17, 28, 9, 25],
       "englishName": "Lightweight Workshop Soldering Iron",
       "name": "هویه قلمی سبک",
       "powerSource": "برق شهری",
@@ -6718,6 +6733,7 @@
     },
     {
       "id": 16,
+      "companionProductIds": [1, 22, 8, 29, 25, 2],
       "englishName": "Portable LED Work Light",
       "name": "چراغ کار LED شارژی قابل‌حمل فیلیپس برای بازرسی و تعمیر",
       "powerSource": "باتری شارژی",
@@ -6807,6 +6823,7 @@
     },
     {
       "id": 17,
+      "companionProductIds": [2, 23, 9, 30, 21, 3],
       "englishName": "Workshop LED Floodlight",
       "name": "پروژکتور LED کارگاهی",
       "powerSource": "برق شهری",
@@ -6843,6 +6860,7 @@
     },
     {
       "id": 18,
+      "companionProductIds": [3, 24, 10, 26, 22, 4],
       "englishName": "Rechargeable Inspection Light",
       "name": "چراغ بازرسی شارژی",
       "powerSource": "باتری شارژی",
@@ -6880,6 +6898,7 @@
     },
     {
       "id": 19,
+      "companionProductIds": [4, 25, 6, 27, 23, 5],
       "englishName": "LED Work Light with Stand",
       "name": "چراغ کار LED پایه‌دار",
       "powerSource": "باتری شارژی",
@@ -6917,6 +6936,7 @@
     },
     {
       "id": 20,
+      "companionProductIds": [5, 21, 7, 28, 24, 1],
       "englishName": "Portable LED Floodlight",
       "name": "نورافکن LED قابل‌حمل",
       "powerSource": "باتری شارژی",
@@ -6954,6 +6974,7 @@
     },
     {
       "id": 21,
+      "companionProductIds": [1, 7, 18, 29, 20, 6],
       "englishName": "Insulated Electrician Screwdriver Set",
       "name": "ست پیچ‌گوشتی عایق ویها برای نصب و برق‌کاری",
       "powerSource": "دستی",
@@ -6997,6 +7018,7 @@
     },
     {
       "id": 22,
+      "companionProductIds": [2, 8, 19, 30, 16, 7],
       "englishName": "Electrician Pliers Set",
       "name": "ست انبر برق‌کاری",
       "powerSource": "دستی",
@@ -7039,6 +7061,7 @@
     },
     {
       "id": 23,
+      "companionProductIds": [3, 9, 20, 26, 17, 8],
       "englishName": "Insulated Electrician Tool Kit",
       "name": "مجموعه ابزار عایق برق‌کار استنلی برای تعمیر و نگهداری",
       "powerSource": "دستی",
@@ -7076,6 +7099,7 @@
     },
     {
       "id": 24,
+      "companionProductIds": [4, 10, 16, 27, 18, 9],
       "englishName": "Wiring and Installation Tool Set",
       "name": "ست ابزار نصب و سیم‌کشی",
       "powerSource": "دستی",
@@ -7112,6 +7136,7 @@
     },
     {
       "id": 25,
+      "companionProductIds": [5, 6, 17, 28, 19, 10],
       "englishName": "Electrician Tool Bag Set",
       "name": "کیف ابزار برق‌کاری",
       "powerSource": "دستی",
@@ -7148,6 +7173,7 @@
     },
     {
       "id": 26,
+      "companionProductIds": [6, 22, 18, 4, 25, 16],
       "englishName": "Digital Voltage Tester",
       "name": "فازمتر دیجیتال",
       "powerSource": "باتری‌خور",
@@ -7184,6 +7210,7 @@
     },
     {
       "id": 27,
+      "companionProductIds": [7, 23, 19, 5, 21, 17],
       "englishName": "Non-Contact Voltage Tester",
       "name": "تستر ولتاژ غیرتماسی",
       "powerSource": "باتری‌خور",
@@ -7220,6 +7247,7 @@
     },
     {
       "id": 28,
+      "companionProductIds": [8, 24, 20, 1, 22, 18],
       "englishName": "Inductive Voltage Tester",
       "name": "فازمتر القایی",
       "powerSource": "باتری‌خور",
@@ -7256,6 +7284,7 @@
     },
     {
       "id": 29,
+      "companionProductIds": [9, 25, 16, 2, 23, 19],
       "englishName": "Circuit Continuity Tester",
       "name": "تستر پیوستگی مدار",
       "powerSource": "باتری‌خور",
@@ -7292,6 +7321,7 @@
     },
     {
       "id": 30,
+      "companionProductIds": [10, 21, 17, 3, 24, 20],
       "englishName": "Voltage Detector Pen",
       "name": "قلم تست ولتاژ",
       "powerSource": "باتری‌خور",

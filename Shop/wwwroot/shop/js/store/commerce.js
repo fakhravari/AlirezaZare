@@ -221,8 +221,23 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                     .filter((item) => item.required)
                     .map((item) => item.id),
             );
+            const accessoryPrice = (item) =>
+                Number(selectedOffer()?.accessoryPriceAmounts?.[item.id] ?? Number(item.price) * 1000000);
+            const accessoryPriceMarkup = (item) => {
+                const current = accessoryPrice(item);
+                const regular = Number(item.price) * 1000000;
+                const discount = regular > current && regular > 0
+                    ? Math.round((1 - current / regular) * 100)
+                    : 0;
+                return `<span class="product-accessory-price-line"><strong class="product-price-current" data-accessory-current-price><span data-accessory-current-amount>${fa(current)}</span><small>تومان</small></strong><del data-accessory-regular-price${discount ? "" : " hidden"}>${fa(regular)} تومان</del><em class="product-accessory-discount" data-accessory-discount${discount ? "" : " hidden"}>${fa(discount)}٪ تخفیف</em></span>`;
+            };
             const accessoryMarkup = availableAccessories.length
-                ? `<section class="product-accessories" aria-labelledby="productAccessoriesTitle"><header><span class="product-accessories-icon"><i class="bi bi-box-seam" aria-hidden="true"></i></span><span><strong id="productAccessoriesTitle">متعلقات و خدمات کالا</strong><small>موارد الزامی مشخص‌اند؛ بقیه را به‌دلخواه انتخاب کنید.</small></span></header><div class="product-accessory-list">${availableAccessories.map((item) => `<label class="product-accessory${item.required ? " is-required" : ""}"><input type="checkbox" data-accessory-id="${esc(item.id)}" ${item.required ? "checked disabled" : ""}><span class="product-accessory-check" aria-hidden="true"><i class="bi bi-check2"></i></span><span class="product-accessory-copy"><strong>${esc(item.name)}<em class="product-accessory-status ${item.required ? "is-required" : "is-optional"}">${item.required ? '<i class="bi bi-lock-fill" aria-hidden="true"></i> الزامی' : "اختیاری"}</em></strong><small>${esc(item.description)}</small></span><span class="product-accessory-price"><small>افزوده به فاکتور</small><strong class="product-price-current">${item.price ? `+ ${money(Number(item.price) * 1000000)}` : "رایگان"}</strong></span></label>`).join("")}</div></section>`
+                ? `<section class="product-accessories" aria-labelledby="productAccessoriesTitle"><header><span class="product-accessories-icon"><i class="bi bi-box-seam" aria-hidden="true"></i></span><span><strong id="productAccessoriesTitle">متعلقات و خدمات کالا</strong><small>موارد الزامی مشخص‌اند؛ بقیه را به‌دلخواه انتخاب کنید.</small></span></header><div class="product-accessory-list">${availableAccessories
+                    .map((item, index) => {
+                        const inputId = `productAccessory-${p.id}-${index}`;
+                        return `<div class="product-accessory${item.required ? " is-required" : ""}"><input id="${inputId}" type="checkbox" data-accessory-id="${esc(item.id)}" ${item.required ? "checked disabled" : ""}><span class="product-accessory-check" aria-hidden="true"><i class="bi bi-check2"></i></span><label class="product-accessory-copy" for="${inputId}"><strong>${esc(item.name)}<em class="product-accessory-status ${item.required ? "is-required" : "is-optional"}">${item.required ? '<i class="bi bi-lock-fill" aria-hidden="true"></i> الزامی' : "اختیاری"}</em></strong><small>${esc(item.description)}</small></label><span class="product-accessory-price"><small>افزوده به فاکتور</small>${accessoryPriceMarkup(item)}</span><button class="product-accessory-details" type="button" data-accessory-details-id="${esc(item.id)}" aria-haspopup="dialog" aria-label="جزئیات ${esc(item.name)}"><i class="bi bi-info-circle" aria-hidden="true"></i><span>جزئیات</span></button></div>`;
+                    })
+                    .join("")}</div></section>`
                 : "";
             const specs = [
                 ["برند", p.brand],
@@ -245,6 +260,11 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
             const suggestions = related.length
                 ? related
                 : catalog.filter((item) => item.id !== p.id).slice(0, 6);
+            const companionProducts = [...new Set(p.companionProductIds || [])]
+                .filter((id) => id !== p.id)
+                .map((id) => catalog.find((item) => item.id === id))
+                .filter(Boolean)
+                .slice(0, 6);
             const feedbackPages = { reviews: 1, questions: 1 },
                 feedbackPageSize = 3;
             const questionGuideItems = [
@@ -374,6 +394,15 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
 
                         productView.innerHTML = `<div class="product-detail-layout"><section class="product-detail-gallery" aria-label="تصاویر و ویدئوهای محصول"><div class="product-detail-image-frame"><span class="product-detail-image-code"><i class="bi bi-upc-scan" aria-hidden="true"></i> ${esc(p.code)}</span><div class="product-detail-media-frame" id="productDetailMedia">${renderMedia(mainMedia)}</div><button class="product-detail-gallery-open" id="openProductGallery" type="button"><i class="bi bi-grid-3x3-gap" aria-hidden="true"></i><span>مشاهدهٔ همه</span><b>${fa(media.length)}</b></button></div>${thumbMarkup}<div class="product-detail-gallery-caption"><i class="bi bi-images" aria-hidden="true"></i><span>تصاویر و ویدئوهای محصول</span><small>${media.length > 1 ? `${fa(media.length)} فایل رسانه‌ای` : "نمای کامل محصول"}</small></div></section><section class="product-detail-summary" aria-labelledby="productDetailTitle"><div class="product-detail-meta"></div><h2 id="productDetailTitle">${esc(p.name)}</h2><p class="product-detail-description">${esc(p.name)} از گروه ${esc(p.type)}، با ویژگی ${esc(p.powerSource)} و ساختار ${esc(p.useCase)}.</p><div class="product-main-feature-chips" aria-label="ویژگی‌های اصلی"><span><i class="bi bi-grid" aria-hidden="true"></i>${esc(p.type)}</span><span><i class="bi bi-lightning-charge" aria-hidden="true"></i>${esc(p.powerSource)}</span><span><i class="bi bi-building" aria-hidden="true"></i>${esc(p.brand)}</span></div>${variantMarkup}<div class="product-detail-price"><div class="detail-price-heading" aria-label="ابزارهای قیمت"><div class="detail-price-tools" aria-label="ابزارهای قیمت"><button class="detail-price-tool" type="button" data-price-dialog="history" aria-label="نمودار تغییر قیمت" title="نمودار تغییر قیمت"><i class="bi bi-graph-up-arrow" aria-hidden="true"></i></button><button class="detail-price-tool" type="button" data-price-watch-toggle aria-pressed="false" aria-label="به من اطلاع بده" title="به من اطلاع بده"><i class="bi bi-bell" aria-hidden="true"></i></button></div></div><div class="product-price-context"><i class="bi bi-shield-check" aria-hidden="true"></i><span><strong>خرید مطمئن</strong><small>قیمت نهایی همراه با ضمانت اصالت کالا</small></span></div><div class="product-detail-base-price"><div class="product-detail-base-row"><span>قیمت کالا</span><strong id="productBasePrice">${money(p.price * 1000000)}</strong></div><div class="product-detail-sale-meta"></div></div><div class="product-detail-extras-price"><span>هزینهٔ گزینه‌ها و متعلقات</span><strong id="productAddonsPrice"></strong></div><div class="product-detail-total-price"><span>مبلغ قابل پرداخت</span><strong id="productFinalPrice"><span>${fa(p.price * 1000000)}</span><small class="detail-price-unit">تومان</small></strong></div></div><div class="product-detail-actions"><button class="product-detail-add flow-button" id="addProduct" type="button"><i class="bi bi-bag-plus" aria-hidden="true"></i> افزودن به سبد خرید</button><div class="product-detail-secondary-actions"><button class="compare-trigger product-detail-compare${isCompared ? " active" : ""}" type="button" data-product-id="${esc(p.id)}" aria-pressed="${isCompared}" aria-label="${isCompared ? "حذف از مقایسه" : "افزودن به مقایسه"}" title="${isCompared ? "حذف از مقایسه" : "افزودن به مقایسه"}"><i class="bi bi-arrow-left-right" aria-hidden="true"></i><span>مقایسه</span></button><button class="product-detail-favorite" id="saveProduct" type="button" aria-pressed="${isFavorite}" aria-label="${isFavorite ? "حذف از علاقه‌مندی‌ها" : "افزودن به علاقه‌مندی‌ها"}"><i class="bi ${isFavorite ? "bi-heart-fill" : "bi-heart"}" aria-hidden="true"></i><span>علاقه‌مندی</span></button><a href="Cart"><i class="bi bi-basket3" aria-hidden="true"></i> مشاهده سبد</a></div></div><p class="product-detail-status" id="productStatus" role="status" aria-live="polite"></p></section></div><nav class="product-detail-tabs" aria-label="بخش‌های اطلاعات محصول"><a href="#product-intro"><i class="bi bi-file-earmark-text" aria-hidden="true"></i>معرفی</a><a href="#product-expert"><i class="bi bi-clipboard2-pulse" aria-hidden="true"></i>بررسی تخصصی</a><a href="#product-specifications"><i class="bi bi-sliders2" aria-hidden="true"></i>مشخصات</a><a href="#product-reviews"><i class="bi bi-chat-square-text" aria-hidden="true"></i>دیدگاه‌ها <b>${fa(readFeedback("reviews").length)}</b></a><a href="#product-questions"><i class="bi bi-patch-question" aria-hidden="true"></i>پرسش‌ها <b>${fa(readFeedback("questions").length)}</b></a><a href="#product-related"><i class="bi bi-boxes" aria-hidden="true"></i>کالاهای مشابه <b>${fa(suggestions.length)}</b></a></nav><section class="product-detail-content-panel" id="product-intro"><header><span>معرفی محصول</span><h2>${esc(p.name)}؛ انتخابی متناسب با نیاز شما</h2></header><p>این محصول از دستهٔ ${esc(p.type)} است. هنگام انتخاب، نوع ${esc(p.powerSource)} و ساختار ${esc(p.useCase)} را با نیاز و شرایط کاری خود تطبیق دهید. اطلاعات این صفحه بر پایهٔ مشخصات ثبت‌شدهٔ کالا تهیه شده است.</p></section><section class="product-detail-content-panel product-detail-expert" id="product-expert"><header><span>راهنمای انتخاب</span><h2>بررسی تخصصی</h2></header><div class="product-expert-grid"><div><i class="bi bi-tools" aria-hidden="true"></i><strong>دسته و کاربرد</strong><p>${esc(p.type)}؛ برای انتخاب دقیق، نوع کار و میزان استفادهٔ روزانه را در نظر بگیرید.</p></div><div><i class="bi bi-lightning-charge" aria-hidden="true"></i><strong>نوع عملکرد</strong><p>${esc(p.powerSource)}؛ سازگاری منبع تغذیه یا شیوهٔ عملکرد را پیش از خرید بررسی کنید.</p></div><div><i class="bi bi-rulers" aria-hidden="true"></i><strong>ساختار محصول</strong><p>${esc(p.useCase)}؛ ابعاد، لوازم همراه و شرایط نصب را با فضای کارتان تطبیق دهید.</p></div></div></section><section class="product-detail-content-panel" id="product-specifications"><header><span>جزئیات فنی</span><h2>ویژگی‌های اصلی و دیگر ویژگی‌ها</h2></header><div class="product-spec-groups"><section class="product-spec-group"><h3><i class="bi bi-stars" aria-hidden="true"></i>ویژگی‌های اصلی</h3><dl><div><dt>دسته‌بندی</dt><dd>${esc(p.type)}</dd></div><div><dt>نوع عملکرد</dt><dd>${esc(p.powerSource)}</dd></div><div><dt>برند</dt><dd>${esc(p.brand)}</dd></div></dl></section><section class="product-spec-group"><h3><i class="bi bi-list-check" aria-hidden="true"></i>دیگر ویژگی‌ها</h3><dl>${specs.map(([label, value]) => `<div><dt>${esc(label)}</dt><dd>${esc(value)}</dd></div>`).join("")}</dl></section></div></section><section class="product-detail-content-panel" id="product-reviews"><header><span>تجربهٔ خریداران</span><h2>دیدگاه‌ها</h2></header><div class="product-feedback-list" id="productReviewList">${feedbackMarkup("reviews", readFeedback("reviews"))}</div><form class="product-feedback-form" data-feedback-type="reviews"><label>نام و نام خانوادگی<input name="name" autocomplete="name" maxlength="80" minlength="5" data-validation="full-name" required placeholder="نام و نام خانوادگی"></label><label>امتیاز<select name="rating"><option value="5">۵ — عالی</option><option value="4">۴ — خوب</option><option value="3">۳ — متوسط</option><option value="2">۲ — ضعیف</option><option value="1">۱ — خیلی ضعیف</option></select></label><label class="product-feedback-wide">دیدگاه شما<textarea name="text" rows="3" maxlength="800" required placeholder="تجربه یا نکتهٔ خود را بنویسید"></textarea></label><button class="product-feedback-submit" type="submit"><i class="bi bi-send" aria-hidden="true"></i>ثبت دیدگاه</button><small class="product-feedback-note">دیدگاه در این نسخه به‌صورت محلی در همین مرورگر ذخیره می‌شود.</small></form></section><section class="product-detail-content-panel" id="product-questions"><header><span>پاسخ به ابهام‌ها</span><h2>پرسش‌ها</h2></header><div class="product-feedback-list" id="productQuestionList">${feedbackMarkup("questions", readFeedback("questions"))}</div><form class="product-feedback-form product-question-form" data-feedback-type="questions"><label>نام و نام خانوادگی<input name="name" autocomplete="name" maxlength="80" minlength="5" data-validation="full-name" required placeholder="نام و نام خانوادگی"></label><label class="product-feedback-wide">پرسش شما<textarea name="text" rows="3" maxlength="600" required placeholder="سؤال خود دربارهٔ محصول را بنویسید"></textarea></label><button class="product-feedback-submit" type="submit"><i class="bi bi-question-lg" aria-hidden="true"></i>ثبت پرسش</button><small class="product-feedback-note">پرسش در این نسخه به‌صورت محلی در همین مرورگر ذخیره می‌شود.</small></form></section><section class="product-detail-related" id="product-related" aria-labelledby="relatedProductsTitle"><header><span>برای انتخاب بهتر</span><h2 id="relatedProductsTitle">کالاهای مشابه</h2></header><div class="product-detail-related-grid">${suggestions.map((item) => window.HNProductCard.render(item, {variant: "related"})).join("")}</div></section>`;
             let planSummary = null;
+            if (companionProducts.length) {
+                const companionSection = document.createElement("section");
+                companionSection.className = "product-detail-related";
+                companionSection.id = "product-companions";
+                companionSection.setAttribute("aria-labelledby", "companionProductsTitle");
+                companionSection.innerHTML = `<header><span>کالاهای مکمل برای این محصول</span><h2 id="companionProductsTitle">در کنارش خریداری شده</h2></header><div class="product-detail-related-grid">${companionProducts.map((item) => window.HNProductCard.render(item, { variant: "related" })).join("")}</div>`;
+                productView.querySelector("#product-related")?.before(companionSection);
+                productView.querySelector(".product-detail-tabs")?.insertAdjacentHTML("beforeend", `<a href="#product-companions"><i class="bi bi-bag-plus" aria-hidden="true"></i>در کنارش خریداری شده <b>${fa(companionProducts.length)}</b></a>`);
+            }
             if (focusedPlan) {
                 const focusedOffer = offerForPlan(focusedPlan);
                 const isDigiAf = focusedPlan.id === "digi-af";
@@ -813,6 +842,45 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                 accessoryAnchor?.insertAdjacentHTML("afterend", accessoryMarkup);
             }
             const accessoriesSection = productView.querySelector(".product-accessories");
+            if (accessoriesSection) {
+                const accessoryDialog = document.createElement("dialog");
+                accessoryDialog.className = "product-accessory-dialog";
+                accessoryDialog.setAttribute("aria-labelledby", "productAccessoryDialogTitle");
+                accessoryDialog.innerHTML = '<div class="product-accessory-dialog-shell"><header><div><h2 id="productAccessoryDialogTitle">جزئیات متعلقات و خدمات</h2><p>اطلاعات این مورد را پیش از انتخاب بررسی کنید.</p></div><button type="button" class="site-modal-close" data-accessory-close aria-label="بستن جزئیات"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header><div class="product-accessory-dialog-body" data-accessory-dialog-body></div><div class="product-accessory-dialog-actions"><button type="button" data-accessory-select></button><button type="button" data-accessory-close>بستن</button></div></div>';
+                document.body.append(accessoryDialog);
+                let activeAccessory = null;
+                let accessoryDialogTrigger = null;
+                const selectButton = accessoryDialog.querySelector("[data-accessory-select]");
+                accessoriesSection.addEventListener("click", (event) => {
+                    const trigger = event.target.closest("[data-accessory-details-id]");
+                    if (!trigger) {
+                        const row = event.target.closest(".product-accessory");
+                        if (row && !event.target.closest("input, label, button")) row.querySelector("input:not(:disabled)")?.click();
+                        return;
+                    }
+                    activeAccessory = availableAccessories.find((item) => item.id === trigger.dataset.accessoryDetailsId);
+                    if (!activeAccessory) return;
+                    accessoryDialogTrigger = trigger;
+                    accessoryDialog.querySelector("[data-accessory-dialog-body]").innerHTML = `<div class="product-accessory-dialog-summary"><h3>${esc(activeAccessory.name)}</h3>${accessoryPriceMarkup(activeAccessory)}</div><div class="product-accessory-dialog-description"><h3>دربارهٔ این مورد</h3><p>${esc(activeAccessory.description || "توضیح بیشتری برای این مورد ثبت نشده است.")}</p></div><dl><div><dt>وضعیت انتخاب</dt><dd>${activeAccessory.required ? "الزامی؛ همراه با این طرح محاسبه می‌شود" : "اختیاری؛ با انتخاب شما به مبلغ سفارش افزوده می‌شود"}</dd></div><div><dt>کالای مرتبط</dt><dd>${esc(p.name)}</dd></div><div><dt>طرح فروش</dt><dd>${esc(plansForProduct.find((plan) => plan.id === selectedSalesPlanId)?.name || "فروش عادی")}</dd></div></dl>`;
+                    selectButton.disabled = Boolean(activeAccessory.required);
+                    selectButton.textContent = activeAccessory.required ? "این مورد الزامی است" : selectedAccessories.has(activeAccessory.id) ? "حذف از انتخاب‌ها" : "انتخاب این مورد";
+                    accessoryDialog.showModal();
+                });
+                selectButton.addEventListener("click", () => {
+                    if (!activeAccessory || activeAccessory.required) return;
+                    const input = [...accessoriesSection.querySelectorAll("[data-accessory-id]")].find((item) => item.dataset.accessoryId === activeAccessory.id);
+                    input?.click();
+                    accessoryDialog.close();
+                });
+                accessoryDialog.querySelectorAll("[data-accessory-close]").forEach((button) => button.addEventListener("click", () => accessoryDialog.close()));
+                accessoryDialog.addEventListener("click", (event) => {
+                    if (event.target === accessoryDialog) {
+                        const bounds = accessoryDialog.getBoundingClientRect();
+                        if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) accessoryDialog.close();
+                    }
+                });
+                accessoryDialog.addEventListener("close", () => accessoryDialogTrigger?.focus());
+            }
             if (accessoriesSection) accessoriesSection.before(inventoryStatus);
             else productView.querySelector(".product-detail-price")?.before(inventoryStatus);
             const purchaseTrustPanel = productView.querySelector(".product-price-context"),
@@ -1551,9 +1619,8 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                 if (basePriceLabel) basePriceLabel.textContent = money(currentPlanBaseAmount());
                 productView.querySelectorAll("[data-accessory-id]").forEach((input) => {
                     const item = availableAccessories.find((accessory) => accessory.id === input.dataset.accessoryId);
-                    const price = Number(selectedOffer()?.accessoryPriceAmounts?.[input.dataset.accessoryId] ?? Number(item?.price) * 1000000);
-                    const amountLabel = input.closest("label")?.querySelector(".product-accessory-price strong");
-                    if (amountLabel) amountLabel.textContent = price > 0 ? `+ ${money(price)}` : "رایگان";
+                    const amountLabel = input.closest(".product-accessory")?.querySelector(".product-accessory-price");
+                    if (amountLabel && item) amountLabel.innerHTML = accessoryPriceMarkup(item);
                 });
                 const desktopPrice = productView.querySelector("#productFinalPrice");
                 if (desktopPrice) desktopPrice.innerHTML = `<span>${fa(value)}</span><small class="detail-price-unit">تومان</small>`;
