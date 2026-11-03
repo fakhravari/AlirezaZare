@@ -20,22 +20,17 @@ test('empty guest header panels stay closed on hover', async ({page, isMobile}) 
   await expect(page.locator('#loginModal')).toBeVisible();
 });
 
-test('desktop help menu switches between level-two categories and level-three links', async ({page, isMobile}) => {
-  test.skip(isMobile, 'The hierarchy menu is desktop-only; mobile keeps its accordion.');
+test('desktop help menu presents customer and company links in two columns', async ({page, isMobile}) => {
+  test.skip(isMobile, 'The two-column menu is desktop-only; mobile keeps its accordion.');
   await page.goto('/');
   const dropdown = page.locator('#mainNav .quick-links-dropdown:not(.sales-plans-dropdown)');
   await dropdown.locator(':scope > button').click();
-  const menu = dropdown.locator('.quick-links-hierarchy-menu');
+  const menu = dropdown.locator('.quick-links-menu');
   await expect(menu).toBeVisible();
-  await expect(menu.locator('[data-quick-links-panel="customer"]')).toBeVisible();
-  await expect(menu.locator('[data-quick-links-panel="customer"] a')).toHaveCount(5);
-
-  const companyCategory = menu.locator('[data-quick-links-category="company"]');
-  await companyCategory.click();
-  await expect(companyCategory).toHaveAttribute('aria-expanded', 'true');
-  await expect(menu.locator('[data-quick-links-panel="company"]')).toBeVisible();
-  await expect(menu.locator('[data-quick-links-panel="company"] a')).toHaveCount(5);
-  await expect(menu.locator('[data-quick-links-panel="customer"]')).toBeHidden();
+  await expect(menu.locator('.quick-links-group')).toHaveCount(2);
+  await expect(menu.locator('#quickCustomerLinks')).toBeVisible();
+  await expect(menu.locator('#quickCompanyLinks')).toBeVisible();
+  await expect(menu.locator('.quick-links-group a')).toHaveCount(10);
 });
 
 test('mobile help links remain in the existing accordion', async ({page, isMobile}) => {
@@ -44,7 +39,7 @@ test('mobile help links remain in the existing accordion', async ({page, isMobil
   const drawer = page.locator('#mobileMenu');
   await expect(drawer.locator('.mobile-quick-links-accordion')).toBeAttached();
   await expect(drawer.locator('.quick-links-mobile-group')).toHaveCount(2);
-  await expect(page.locator('#mainNav .quick-links-hierarchy-menu')).toBeHidden();
+  await expect(page.locator('#mainNav .quick-links-dropdown:not(.sales-plans-dropdown) .quick-links-menu')).toBeHidden();
 });
 
 test('guest can preview nonempty header panels on hover', async ({page, isMobile}) => {

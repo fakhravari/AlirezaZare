@@ -214,34 +214,6 @@
   document.querySelectorAll("#mainNav .quick-links-dropdown").forEach((dropdown) =>
     bindDropdown(dropdown, {state: "is-quick-links-open", menuSelector: ".quick-links-menu"}));
 
-  document.querySelectorAll("#mainNav .quick-links-hierarchy-menu").forEach((menu) => {
-    const categories = [...menu.querySelectorAll("[data-quick-links-category]")];
-    const panels = [...menu.querySelectorAll("[data-quick-links-panel]")];
-    const activate = (category) => {
-      const key = category.dataset.quickLinksCategory;
-      categories.forEach((item) => {
-        const selected = item === category;
-        item.classList.toggle("is-active", selected);
-        item.setAttribute("aria-expanded", String(selected));
-      });
-      panels.forEach((panel) => { panel.hidden = panel.dataset.quickLinksPanel !== key; });
-    };
-
-    categories.forEach((category, index) => {
-      category.addEventListener("pointerenter", () => activate(category));
-      category.addEventListener("focus", () => activate(category));
-      category.addEventListener("click", () => activate(category));
-      category.addEventListener("keydown", (event) => {
-        if (event.key !== "ArrowDown" && event.key !== "ArrowUp") return;
-        event.preventDefault();
-        const offset = event.key === "ArrowDown" ? 1 : -1;
-        const next = categories[(index + offset + categories.length) % categories.length];
-        activate(next);
-        next.focus();
-      });
-    });
-  });
-
   const categoryRow = document.querySelector(".electrical-home-row");
   const categoryMenu = categoryRow?.querySelector(".electrical-category-menu");
   const categoryPanel = categoryMenu?.querySelector("#electricalSubmenu");
