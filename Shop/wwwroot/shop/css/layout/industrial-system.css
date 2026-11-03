@@ -1250,7 +1250,7 @@ input[type="radio"] {
 }
 
 #loginModal .login-step[hidden] {
-  display: none !important;
+  display: none;
 }
 
 #loginModal .login-step h2 {
@@ -2584,7 +2584,7 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
 }
 
 .header-search-suggestions[hidden] {
-  display: none !important;
+  display: none;
 }
 
 .header-search-suggestions {
