@@ -507,12 +507,6 @@ h3 {
     grid-template-columns: 305px minmax(0, 1fr);
     gap: 24px;
   }
-  .article-sidebar {
-    position: sticky;
-    top: 105px;
-    align-self: start;
-    height: max-content;
-  }
   .article-toc {
     display: block;
   }

@@ -335,9 +335,8 @@
   display: block;
   visibility: hidden;
 }
+/* Keep the focus ring here; the base invalid border and fill are set above. */
 #contactForm .field.is-invalid > :is(input, select, textarea)[aria-invalid="true"] {
-  border-color: #c98c88;
-  background-color: #fffaf9;
   box-shadow: 0 0 0 2px rgba(169, 76, 76, 0.055);
 }
 @media (min-width: 768px) {

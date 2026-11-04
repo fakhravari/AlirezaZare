@@ -291,7 +291,6 @@
   }
 
   .journal-archive {
-    grid-template-columns: 1fr;
     margin-top: 54px;
   }
 
@@ -325,21 +324,12 @@
 }
 
 @media (max-width: 480px) {
-  .journal-grid {
-    grid-template-columns: 1fr;
-  }
-
   .journal-categories {
     padding: 18px 10px;
   }
 
   .journal-categories button {
     padding-inline: 7px;
-    font-size: 13px;
-  }
-
-  .journal-results-heading h2 {
-    font-size: var(--font-size-section-title);
   }
 
   .journal-results-heading > .journal-count-badge {
@@ -568,7 +558,6 @@
   .journal-post > a,
   .journal-post:nth-child(5n + 1) > a {
     grid-template-columns: 1fr;
-    min-height: 0;
   }
 
   .journal-post-image,

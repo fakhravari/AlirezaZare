@@ -778,7 +778,6 @@ textarea {
 .journal em {
   font-family: "Playfair Display", serif;
   color: var(--color-gold);
-  font-weight: 600;
 }
 
 .btn {
@@ -947,7 +946,6 @@ textarea {
   }
 
   .product-tabs button {
-    min-height: 42px;
     padding: 9px 14px;
     font-size: 13px;
   }
@@ -1484,8 +1482,6 @@ footer {
 @media (max-width: 767px) {
   body {
     font-size: 16px;
-    width: 100%;
-    max-width: 100%;
     margin: 0;
   }
 
@@ -1667,10 +1663,6 @@ footer {
     padding: 65px 0;
   }
 
-  .subscribe input {
-    min-width: 0;
-  }
-
   footer {
     padding-top: 62px;
   }
@@ -1685,7 +1677,6 @@ footer {
   }
 
   .footer-main h4 {
-    font-size: 16px;
     margin-bottom: 18px;
   }
 
@@ -3793,7 +3784,6 @@ footer .copyright {
 }
 
 .testimonial-slider .owl-dots {
-  justify-content: center;
   gap: 7px;
   margin-top: 25px;
 }
@@ -3824,9 +3814,6 @@ footer .copyright {
     display: none;
   }
 
-  .testimonial-slider .owl-dots {
-    margin-top: 20px;
-  }
 }
 
 @media (max-width: 767px) {
@@ -4629,7 +4616,6 @@ h6,
 @media (max-width: 575px) {
   .newsletter .container {
     padding: 30px 22px;
-    border-radius: 22px;
     background: linear-gradient(
       180deg,
       #0b2868 0%,
@@ -7288,9 +7274,6 @@ footer .copyright::before {
   }
   .newsletter p {
     font-size: 14px;
-  }
-  .newsletter .subscribe {
-    min-height: 62px;
   }
   .newsletter .subscribe input,
   .newsletter .subscribe button {

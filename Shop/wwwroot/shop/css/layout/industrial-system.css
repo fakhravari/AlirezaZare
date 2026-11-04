@@ -1323,13 +1323,7 @@ input[type="radio"] {
 }
 
 @media (max-width: 575px) {
-  #loginModal .modal-dialog {
-    width: calc(100vw - 20px);
-    margin: 10px auto;
-  }
-
   #loginModal .modal-content {
-    max-height: calc(100dvh - 20px);
     padding: 15px 16px 13px;
   }
 
@@ -4143,12 +4137,7 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
   }
 
   #productView .product-detail-thumbnails {
-    flex-direction: row;
-    align-self: stretch;
-    max-width: 100%;
-    max-height: none;
     overflow-x: auto;
-    overflow-y: hidden;
     padding: 3px 0 7px;
   }
 
@@ -5664,7 +5653,6 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
 
 @media (max-width: 767px) {
   .purchase-benefits--showcase .benefits-intro p {
-    max-width: none;
     min-height: 0;
     padding: 10px 13px;
     font-size: 14px;
@@ -7110,7 +7098,6 @@ html
   #productView .product-detail-tabs > a {
     min-height: 46px;
     padding: 8px 13px;
-    font-size: 14px;
   }
 
   #productView .product-spec-groups {
@@ -7794,11 +7781,6 @@ html
   #cartPanel .cart-footer .cart-safety-badge {
     gap: 5px;
     padding-inline-start: 8px;
-  }
-  #cartPanel .cart-safety-icon {
-    width: 30px;
-    min-width: 30px;
-    height: 30px;
   }
   #cartPanel .cart-safety-copy strong {
     font-size: 11px;
@@ -12105,44 +12087,12 @@ body .electrical-swiper .swiper-pagination-bullet-active {
   }
 }
 
-/* Keep the mobile header-cart total and its safety note in separate rows. */
+/* Center the mobile header-cart safety note beneath the total. */
 @media (max-width: 575px) {
-  #cartPanel .cart-footer .cart-total-summary {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 8px;
-    min-height: 0;
-    padding: 10px;
-  }
-
-  #cartPanel .cart-footer .cart-total-amount {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-  }
-
-  #cartPanel .cart-footer .cart-total-amount > span {
-    flex: 0 0 auto;
-  }
-
-  #cartPanel .cart-footer .cart-total-amount > strong {
-    max-width: 100%;
-    text-align: left;
-  }
-
   #cartPanel .cart-footer .cart-safety-badge {
-    width: 100%;
-    min-height: 0;
-    padding: 8px 0 0;
-    border-top: 1px solid rgba(197, 157, 75, 0.24);
-    border-inline-start: 0;
     align-items: center;
   }
 
-  #cartPanel .cart-safety-copy {
-    flex: 1 1 auto;
-    overflow-wrap: anywhere;
-  }
 }
 
 /* Warm, softly shaped treatment for the second and third category-menu levels. */

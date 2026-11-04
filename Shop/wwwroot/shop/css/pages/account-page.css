@@ -1637,7 +1637,6 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
 
 @media (max-width: 767px) {
   .account-welcome {
-    min-height: 0;
     margin: 12px 0 16px;
     padding: 16px 18px 60px;
     border-radius: 16px;

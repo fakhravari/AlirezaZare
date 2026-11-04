@@ -217,12 +217,7 @@
     padding: 0;
   }
 
-  .mobile-page--favorites-index #favoritesView .favorite-item-card .list-remove-button,
-  .mobile-page--profile-favorites #favoritesView .favorite-item-card .list-remove-button {
-    width: calc(100% - 16px);
-    min-height: 34px;
-    margin: 0 8px 8px;
-    padding: 5px;
+  .mobile-page--favorites-index #favoritesView .favorite-item-card .list-remove-button {
     font-size: 11px;
   }
 
@@ -297,57 +292,14 @@
 }
 
 @media (max-width: 575px) {
-  footer .footer-main > .col-6 {
-    min-width: 0;
-    padding: 12px 10px 10px;
-    border: 1px solid rgba(255, 255, 255, 0.09);
-    border-radius: 14px;
-    background: linear-gradient(
-      145deg,
-      rgba(255, 255, 255, 0.055),
-      rgba(255, 255, 255, 0.018)
-    );
-  }
-
-  footer .footer-main > .col-6 h4 {
-    margin: 0 0 8px;
-    padding-bottom: 10px;
-    color: #f2cc70;
-    font-size: 14px;
-    line-height: 1.5;
-  }
-
   footer .footer-main > div:not(:first-child).col-6 a {
-    position: relative;
     display: block;
     width: 100%;
     min-width: 0;
-    margin: 0;
-    padding: 5px 11px 5px 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-    color: rgba(244, 247, 249, 0.82) !important;
-    font-size: 12.5px;
-    line-height: 1.7;
     overflow-wrap: anywhere;
   }
 
-  footer .footer-main > div:not(:first-child).col-6 a::before {
-    position: absolute;
-    top: 13px;
-    right: 0;
-    width: 4px;
-    height: 4px;
-    border-radius: 50%;
-    background: #e8c36b;
-    content: "";
-  }
-
-  footer .footer-main > div:not(:first-child).col-6 a:last-child {
-    border-bottom: 0;
-  }
-
   footer .footer-main > div:not(:first-child).col-6 a:hover {
-    color: #ffd45a !important;
     transform: none;
   }
 
@@ -364,21 +316,6 @@
     height: auto;
     aspect-ratio: 1;
     object-fit: contain;
-  }
-}
-
-@media (max-width: 359px) {
-  footer .footer-main > .col-6 {
-    padding: 10px 8px 8px;
-  }
-
-  footer .footer-main > .col-6 h4 {
-    font-size: 13px;
-  }
-
-  footer .footer-main > div:not(:first-child).col-6 a {
-    padding-right: 9px;
-    font-size: 11.5px;
   }
 }
 
@@ -769,16 +706,6 @@
     font-size: 11px;
   }
 
-  .mobile-page--favorites-index #favoritesView .favorite-item-card .list-remove-button,
-  .mobile-page--profile-favorites #favoritesView .favorite-item-card .list-remove-button {
-    margin: 0 7px 7px;
-  }
-}
-
-@media (max-width: 389px) {
-  :root {
-    --product-card-image-height: 175px;
-  }
 }
 
 /* Keep profile navigation and favorite-product grids aligned to the RTL start. */
@@ -810,7 +737,6 @@
 @media (max-width: 767px) {
   .inner-page[class*="mobile-page--profile-"] .account-welcome > .profile-breadcrumb {
     right: 12px;
-    left: auto;
   }
 }
 
