@@ -5,19 +5,47 @@
 }
 
 .product-detail-page #productView {
+  --product-color-heading: var(--color-navy);
+  --product-color-text: var(--color-blue);
+  --product-color-muted: var(--color-text-muted);
+  --product-color-surface: var(--color-surface);
+  --product-color-subtle: var(--color-cream);
+  --product-color-border: var(--color-line);
+  --product-color-accent: var(--color-gold);
+  --product-color-accent-soft: #fff8e4;
+  --product-color-danger: #b42336;
+  --product-color-danger-soft: #fff0f1;
+  --product-color-danger-border: #f2cbd0;
+  --product-space-1: var(--space-1);
+  --product-space-2: var(--space-2);
+  --product-space-3: var(--space-3);
+  --product-space-4: var(--space-4);
+  --product-space-5: var(--space-5);
+  --product-space-6: var(--space-6);
+  --product-radius-control: var(--radius-sm);
+  --product-radius-card: var(--radius-md);
+  --product-radius-panel: var(--radius-lg);
+  --product-shadow: var(--shadow-card);
   --product-type-title: 24px;
   --product-type-heading: 18px;
   --product-type-body: 15px;
+  --product-type-control: 14px;
   --product-type-label: 13px;
   --product-type-small: 12px;
+  --product-type-price: 21px;
+  --product-type-total: 26px;
+  color: var(--product-color-text);
+  font-family: var(--font-body);
+  font-size: var(--product-type-body);
+  line-height: var(--leading-normal);
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
-  padding-inline: 16px;
+  padding-inline: var(--product-space-4);
 }
 
 .product-detail-page #productView :is(.product-detail-description, .product-detail-content-panel p, #product-intro .product-intro-copy > p, .product-expert-grid p, .product-question-faq > p, .product-feedback-card > p, .product-feedback-admin-reply > p, .product-feedback-user-text) {
   font-size: var(--product-type-body);
-  line-height: 2;
+  line-height: var(--leading-relaxed);
   overflow-wrap: break-word;
 }
 

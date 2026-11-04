@@ -767,7 +767,7 @@ $(function () {
     if (amazingCount) amazingCount.textContent = faNumber(amazingProducts.length);
     amazingSlider.innerHTML = amazingProducts.map((product) => `<div class="showcase-slide">${window.HNProductCard.render(product, {
       variant: "grid", image: sliderImagePath(product), offer: true,
-      badge: product.discountPercent ? faNumber(product.discountPercent) + "٪ تخفیف" : "منتخب",
+      badge: product.discountPercent ? "" : "منتخب",
     })}</div>`).join("");
     window.HNUI?.enhance(amazingSection);
   }

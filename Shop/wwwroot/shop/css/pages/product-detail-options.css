@@ -213,8 +213,8 @@
 }
 
 .product-accessory-price-line {
-  display: grid;
-  grid-template-columns: auto auto;
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: start;
   gap: 3px 10px;
@@ -235,22 +235,21 @@
 }
 
 .product-accessory-price-line del {
-  grid-column: 1;
-  grid-row: 2;
   color: #7a8794;
   font-size: 11px;
+  white-space: nowrap;
 }
 
 .product-accessory-discount {
-  grid-column: 2;
-  grid-row: 1;
   padding: 3px 8px;
+  border: 1px solid #f2cbd0;
   border-radius: 20px;
   background: #fff0f1;
   color: #bc3545;
   font-size: 11px;
   font-style: normal;
   font-weight: 800;
+  white-space: nowrap;
 }
 
 .product-accessory-price-line [hidden] {
