@@ -11,6 +11,22 @@ async function noHorizontalOverflow(page) {
   expect(width.content).toBeLessThanOrEqual(width.viewport + 1);
 }
 
+test('hidden home category submenu opens on hover and hides on pointer leave', async ({page, isMobile}) => {
+  test.skip(isMobile, 'The desktop category submenu is not rendered on mobile.');
+  await page.goto('/');
+  const submenu = page.locator('#electricalSubmenu');
+  const firstCategory = page.locator('.electrical-category-menu button[data-category]').first();
+  await expect(submenu).toBeHidden();
+  await expect(submenu).toHaveCSS('display', 'none');
+  await firstCategory.hover();
+  await expect(submenu).toBeVisible();
+  await expect(submenu).not.toHaveAttribute('hidden', '');
+  const openDisplay = await submenu.evaluate(element => getComputedStyle(element).display);
+  expect(openDisplay).toBe('grid');
+  await page.mouse.move(1400, 900);
+  await expect(submenu).toBeHidden();
+  await expect(submenu).toHaveCSS('display', 'none');
+});
 test('all home collections render shared cards with one action of each kind', async ({page, isMobile}) => {
   await page.addInitScript(() => localStorage.setItem('hn-demo-auth', '1'));
   await page.clock.install({time: new Date('2026-11-01T10:00:00Z')});
@@ -292,8 +308,12 @@ test('mobile header search suggestions use readable type sizes', async ({page, i
   test.skip(!isMobile);
   await page.goto('/');
   await page.locator('#mainNav .navbar-toggler').click();
+  const suggestions = page.locator('#mobileMenuSearchSuggestions');
+  await expect(suggestions).toBeHidden();
+  await expect(suggestions).toHaveCSS('display', 'none');
   const input = page.locator('.mobile-menu-search .header-search-input');
   await input.fill('DIGI-TIME');
+  await expect(suggestions).toBeVisible();
   const title = page.locator('.mobile-menu-search-suggestion-copy > strong').first();
   await expect(title).toBeVisible();
   const fontSizes = await page.locator('.mobile-menu-search-suggestion-copy').first().evaluate(copy => ({

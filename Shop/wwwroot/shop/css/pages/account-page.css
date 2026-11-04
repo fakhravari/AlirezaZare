@@ -173,7 +173,7 @@
 }
 
 .account-section[hidden] {
-  display: none !important;
+  display: none;
 }
 
 .account-section:not([hidden]) {

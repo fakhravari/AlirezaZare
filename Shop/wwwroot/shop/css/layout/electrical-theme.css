@@ -316,7 +316,7 @@ body {
 }
 
 .electrical-submenu[hidden] {
-  display: none !important;
+  display: none;
 }
 
 .electrical-submenu-column {

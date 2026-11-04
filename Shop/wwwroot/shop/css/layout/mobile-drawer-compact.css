@@ -67,7 +67,7 @@
   }
 
   #mobileMenu .mobile-menu-search-results[hidden] {
-    display: none !important;
+    display: none;
   }
 
   #mobileMenu .mobile-menu-search-results {

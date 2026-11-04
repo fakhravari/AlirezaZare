@@ -156,15 +156,6 @@
   font-size: 10px;
 }
 
-.shared-account-card .account-links a small {
-  display: none !important;
-}
-
-.shared-account-card .account-links a[href*="Questions"],
-.shared-account-card .account-links a[href*="#questions"] {
-  display: none !important;
-}
-
 .shared-account-card .account-links a[href="Profile/Orders"] > b,
 .shared-account-card .account-links a[href="Account#orders"] > b {
   display: none;
