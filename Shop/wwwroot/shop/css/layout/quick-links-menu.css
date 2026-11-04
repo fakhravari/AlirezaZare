@@ -915,7 +915,7 @@ html body #mainNav .home-header-search:focus-within {
     width: min(680px, calc(100vw - 48px)) !important;
     min-height: 302px;
     max-width: calc(100vw - 32px) !important;
-    box-sizing: border-box !important;
+    box-sizing: border-box;
     top: calc(100% + 16px) !important;
     right: 0 !important;
     left: auto !important;

@@ -332,8 +332,8 @@ body .results-toolbar #productSearch:is(:focus, :focus-visible) {
   outline: none !important;
   outline-offset: 0 !important;
   box-shadow: none !important;
-  -webkit-appearance: none !important;
-  appearance: none !important;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 /* Range inputs can draw their own browser focus ring on the track or thumb. */

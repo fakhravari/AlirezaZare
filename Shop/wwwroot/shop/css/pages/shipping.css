@@ -231,17 +231,17 @@
   color: var(--industrial-yellow);
 }
 
-.shipping-action-secondary {
-  border-color: #dce4e9 !important;
-  background: #fff !important;
-  color: var(--shipping-ink) !important;
+.shipping-actions .shipping-action-secondary {
+  border-color: #dce4e9;
+  background: #fff;
+  color: var(--shipping-ink);
 }
 
-.shipping-action-secondary:hover,
-.shipping-action-secondary:focus-visible {
+.shipping-actions .shipping-action-secondary:hover,
+.shipping-actions .shipping-action-secondary:focus-visible {
   transform: translateY(-1px);
-  border-color: #d8bd70 !important;
-  background: #fffaf0 !important;
+  border-color: #d8bd70;
+  background: #fffaf0;
 }
 
 .shipping-action-secondary i {

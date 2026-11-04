@@ -577,7 +577,7 @@ body > .cart-panel .empty-cart > a:hover > i,
   align-items: center !important;
   justify-content: center !important;
   gap: 9px !important;
-  box-sizing: border-box !important;
+  box-sizing: border-box;
   overflow: hidden !important;
   border: 1px solid rgba(255, 255, 255, 0.14) !important;
   border-radius: 13px !important;

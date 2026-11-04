@@ -5299,7 +5299,7 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
 }
 
 #productView .product-detail-image-code {
-  display: none !important;
+  display: none;
 }
 
 #productView .product-detail-meta {
