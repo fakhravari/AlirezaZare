@@ -40,3 +40,33 @@ test('account dialogs fit the viewport and remain usable', async ({page, isMobil
   await page.locator('.form-confirm-cancel').click();
   await expect(page.locator('#addressList [data-delete="sample-address"]')).toBeVisible();
 });
+
+test('order invoice and cart address dialogs fit the viewport', async ({page, isMobile}) => {
+  if (isMobile) await page.setViewportSize({width: 320, height: 640});
+  await page.addInitScript(() => localStorage.setItem('hn-demo-auth', '1'));
+  const checkDialog = async dialog => {
+    await expect(dialog).toBeVisible();
+    const dimensions = await dialog.evaluate(element => {
+      const bounds = element.getBoundingClientRect();
+      return {left: bounds.left, right: bounds.right, top: bounds.top, bottom: bounds.bottom, width: innerWidth, height: innerHeight, scrollWidth: element.scrollWidth, clientWidth: element.clientWidth};
+    });
+    expect(dimensions.left).toBeGreaterThanOrEqual(0);
+    expect(dimensions.right).toBeLessThanOrEqual(dimensions.width);
+    expect(dimensions.top).toBeGreaterThanOrEqual(0);
+    expect(dimensions.bottom).toBeLessThanOrEqual(dimensions.height);
+    expect(dimensions.scrollWidth).toBeLessThanOrEqual(dimensions.clientWidth + 1);
+  };
+  await page.goto('/profile/orders');
+  await page.locator('[data-open-order-invoice]').first().click();
+  await checkDialog(page.locator('#orderInvoiceDialog'));
+  await page.locator('[data-close-order-invoice]').click();
+  await expect(page.locator('#orderInvoiceDialog')).not.toBeVisible();
+
+  await page.goto('/search');
+  await page.evaluate(() => window.HNUI.cart.add(window.HNCatalog.find(1)));
+  await page.goto('/cart');
+  await page.locator('#newAddress').click();
+  await checkDialog(page.locator('#addressDialog'));
+  await page.locator('#closeAddress').click();
+  await expect(page.locator('#addressDialog')).not.toBeVisible();
+});

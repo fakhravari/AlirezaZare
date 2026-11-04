@@ -1327,7 +1327,7 @@ h6 {
   gap: 18px;
   margin-top: 28px;
   color: rgba(255, 255, 255, 0.68);
-  font-size: 11px;
+  font-size: var(--text-xs);
 }
 .article-hero-meta span {
   display: flex;
@@ -1433,7 +1433,7 @@ h6 {
 .article-share-heading small {
   margin-top: 3px;
   color: var(--industrial-muted);
-  font-size: 11px;
+  font-size: var(--text-xs);
 }
 .article-share-actions {
   display: flex;
@@ -1480,7 +1480,7 @@ h6 {
   min-height: 18px;
   margin: 9px 0 -5px;
   color: #52704f;
-  font-size: 11px;
+  font-size: var(--text-xs);
   text-align: center;
 }
 .article-body {
@@ -1499,7 +1499,7 @@ h6 {
 .article-body figcaption {
   margin-top: 9px;
   color: var(--industrial-muted);
-  font-size: 10px;
+  font-size: var(--text-xs);
   text-align: center;
 }
 .article-body h2 {
@@ -1966,7 +1966,7 @@ body {
     display: none;
   }
   .flow-related.shared-related a > span {
-    font-size: 11px;
+    font-size: var(--text-xs);
   }
 }
 

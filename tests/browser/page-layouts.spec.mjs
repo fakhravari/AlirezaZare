@@ -24,3 +24,15 @@ test('main pages fit mobile, tablet and desktop widths', async ({page, isMobile}
     }
   }
 });
+
+test('discounted search prices fit narrow product cards', async ({page, isMobile}) => {
+  if (!isMobile) test.skip();
+  await page.setViewportSize({width: 320, height: 640});
+  await page.goto('/search');
+  const prices = page.locator('.search-page-card-price.has-discount');
+  expect(await prices.count()).toBeGreaterThan(0);
+  for (const price of await prices.all()) {
+    const dimensions = await price.evaluate(element => ({content: element.scrollWidth, available: element.clientWidth}));
+    expect(dimensions.content).toBeLessThanOrEqual(dimensions.available + 1);
+  }
+});

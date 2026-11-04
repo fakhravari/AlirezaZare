@@ -178,7 +178,7 @@
 .search-product .search-page-card-price small {
   margin-right: 3px;
   color: var(--industrial-muted);
-  font-size: 10px;
+  font-size: var(--text-xs);
   font-weight: 600;
 }
 
