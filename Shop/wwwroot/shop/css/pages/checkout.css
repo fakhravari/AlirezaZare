@@ -67,7 +67,7 @@
 }
 .cart-address-section .invoice-section-title p {
   margin-top: 2px;
-  font-size: 10px;
+  font-size: var(--text-xs);
 }
 .cart-address-section > label {
   margin: 8px 0 7px;
@@ -95,7 +95,7 @@
   margin: 4px 0;
 }
 .cart-address-section .address-preview small {
-  font-size: 11px;
+  font-size: var(--text-xs);
 }
 .cart-address-section #addressStatus {
   margin: 9px 0 0;
@@ -543,7 +543,7 @@ body .selected-address-card-heading > strong {
   display: block;
   margin: 0 0 3px;
   color: var(--industrial-yellow);
-  font-size: 11px;
+  font-size: var(--text-xs);
   font-weight: 700;
   letter-spacing: 0.02em;
 }
@@ -556,7 +556,7 @@ body .selected-address-card-heading > strong {
 .address-dialog-heading p {
   margin: 1px 0 0;
   color: color-mix(in srgb, var(--industrial-bg) 75%, transparent);
-  font-size: 11px;
+  font-size: var(--text-xs);
   line-height: 1.8;
 }
 .address-dialog-heading .site-modal-close {
@@ -602,7 +602,7 @@ body .selected-address-card-heading > strong {
     font-size: 18px;
   }
   .address-dialog-heading p {
-    font-size: 10px;
+    font-size: var(--text-xs);
   }
   .address-dialog-heading .site-modal-close {
     width: 34px;
@@ -786,7 +786,7 @@ body .selected-address-card-heading > strong {
   font-size: 15px;
 }
 .cart-summary-column .cart-payment-section .invoice-section-title p {
-  font-size: 10px;
+  font-size: var(--text-xs);
 }
 .cart-summary-column .payment-methods {
   grid-template-columns: minmax(0, 1fr);
@@ -803,10 +803,10 @@ body .selected-address-card-heading > strong {
   flex-basis: 34px;
 }
 .cart-summary-column .payment-method strong {
-  font-size: 11px;
+  font-size: var(--text-xs);
 }
 .cart-summary-column .payment-method small {
-  font-size: 9px;
+  font-size: var(--text-xs);
 }
 .cart-summary-column .payment-method-status {
   display: none;
@@ -837,14 +837,14 @@ body .selected-address-card-heading > strong {
     overflow: hidden;
   }
   .payment-method strong {
-    font-size: 11px;
+    font-size: var(--text-xs);
     line-height: 1.4;
     white-space: nowrap;
   }
   .payment-method small {
     display: -webkit-box;
     overflow: hidden;
-    font-size: 8px;
+    font-size: var(--text-xs);
     line-height: 1.5;
     overflow-wrap: normal;
     word-break: normal;
@@ -862,7 +862,7 @@ body .selected-address-card-heading > strong {
     inset-inline-start: 5px;
     bottom: 5px;
     padding: 2px 4px;
-    font-size: 7px;
+    font-size: var(--text-xs);
   }
 }
 /* Responsive payment copy stays readable inside the summary column. */
@@ -879,7 +879,7 @@ body .selected-address-card-heading > strong {
   -webkit-line-clamp: unset;
 }
 #cartView .payment-method-icon { width: 38px; height: 38px; flex-basis: 38px; }
-#cartView .payment-method-soon { position: static; font-size: 11px; padding: 3px 6px; }
+#cartView .payment-method-soon { position: static; font-size: var(--text-xs); padding: 3px 6px; }
 #cartView .payment-method-check { position: static; font-size: 15px; flex: 0 0 auto; }
 #cartView .payment-method.is-disabled { opacity: 0.78; }
 @media (min-width: 992px) {
@@ -1158,7 +1158,7 @@ body .selected-address-card-heading > strong {
     display: none;
   }
   .cart-related a > span {
-    font-size: 11px;
+    font-size: var(--text-xs);
   }
 }
 
@@ -1322,7 +1322,7 @@ body .selected-address-card-heading > strong {
 
 .checkout-address-missing .checkout-address-action {
   margin-top: 7px;
-  font-size: 11px;
+  font-size: var(--text-xs);
 }
 
 .address-dialog {
@@ -1566,7 +1566,7 @@ body .selected-address-card-heading > strong {
   .address-dialog #addressForm label {
     gap: 4px;
     align-content: start;
-    font-size: 11px;
+    font-size: var(--text-xs);
     line-height: 1.5;
   }
 
@@ -1577,7 +1577,7 @@ body .selected-address-card-heading > strong {
     padding: 3px 5px;
     gap: 3px;
     border-radius: 6px;
-    font-size: 10px;
+    font-size: var(--text-xs);
     line-height: 1.6;
     overflow-wrap: anywhere;
   }
@@ -1590,7 +1590,7 @@ body .selected-address-card-heading > strong {
   .address-dialog #addressForm .address-form-status {
     gap: 6px;
     padding: 7px 8px;
-    font-size: 11px;
+    font-size: var(--text-xs);
     line-height: 1.6;
   }
 
@@ -1644,7 +1644,7 @@ body .selected-address-card-heading > strong {
 
   .address-dialog .address-dialog-kicker,
   .address-dialog #addressForm .invoice-demo-note {
-    font-size: 11px;
+    font-size: var(--text-xs);
     line-height: 1.6;
   }
 }

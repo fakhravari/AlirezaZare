@@ -607,7 +607,7 @@
 .brand-profile-facts .brand-focus-meta > span > :is(small, strong) {
   display: inline;
   margin: 0;
-  font-size: 11px;
+  font-size: var(--text-xs);
   line-height: inherit;
 }
 
@@ -989,7 +989,7 @@
 
   .brands-hero .hero-trail span {
     padding: 7px 9px;
-    font-size: 10px;
+    font-size: var(--text-xs);
   }
 
   .brands-catalogue > .container {

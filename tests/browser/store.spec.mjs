@@ -367,7 +367,7 @@ test('product opens at the top, gallery closes, and detail tabs remain reachable
 test('product detail shows only its URL plan without mixing browser and server clocks', async ({page}) => {
   await page.addInitScript(() => localStorage.setItem('hn-demo-auth', '1'));
   await page.goto('/products/cordless-hammer-drill-1');
-  await expect(page.locator('.product-sales-plans, .product-sales-plan--fixed')).toHaveCount(0);
+  await expect(page.locator('.product-sales-plans, .product-special-sale')).toHaveCount(0);
   const regularPrice = await page.evaluate(() => Number(
     window.HNUI.toEnglishDigits(document.querySelector('#productFinalPrice').textContent).replace(/\D/g, ''),
   ));
@@ -377,13 +377,13 @@ test('product detail shows only its URL plan without mixing browser and server c
   if (Date.now() >= digiTimeEndsAt) {
     await page.goto('/products/cordless-hammer-drill-1?salesPlanId=digi-time');
     await expect(page).not.toHaveURL(/salesPlanId=/);
-    await expect(page.locator('.product-sales-plans, .product-sales-plan--fixed')).toHaveCount(0);
+    await expect(page.locator('.product-sales-plans, .product-special-sale')).toHaveCount(0);
     return;
   }
 
   await page.goto('/products/cordless-hammer-drill-1?salesPlanId=regular');
   await expect(page).not.toHaveURL(/salesPlanId=/);
-  await expect(page.locator('.product-sales-plans, .product-sales-plan--fixed')).toHaveCount(0);
+  await expect(page.locator('.product-sales-plans, .product-special-sale')).toHaveCount(0);
 
   await page.goto('/products/cordless-hammer-drill-1?salesPlanId=digi-time');
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', /\/products\/cordless-hammer-drill-1$/);
@@ -394,7 +394,7 @@ test('product detail shows only its URL plan without mixing browser and server c
     window.HNUI.toEnglishDigits(document.querySelector('#productFinalPrice').textContent).replace(/\D/g, ''),
   ));
   expect(selectedPrice).toBe(23303823);
-  await expect(page.locator('.product-sales-plan--fixed')).toContainText('دیجی‌تایم');
+  await expect(page.locator('.product-special-sale')).toContainText('دیجی‌تایم');
   await expect(page.locator('input[name="productSalesPlan"]')).toHaveCount(0);
   await page.locator('#addProduct').click();
   await expect.poll(() => page.evaluate(() => window.HNUI.cart.read()[0]?.price)).toBe(23303823);
@@ -422,7 +422,7 @@ test('products show their own plan-specific features, accessory choices and pric
   ];
   const readPlanDetails = async (sample, planId) => {
     await page.goto(`${sample.path}?salesPlanId=${planId}`);
-    await expect(page.locator('.product-sales-plan--fixed')).toContainText(planId === 'digi-time' ? 'دیجی‌تایم' : 'دیجی‌اف');
+    await expect(page.locator('.product-special-sale')).toContainText(planId === 'digi-time' ? 'دیجی‌تایم' : 'دیجی‌اف');
     return page.evaluate((feature) => ({
       specification: [...document.querySelectorAll('#product-specifications dt')]
         .find(item => item.textContent.trim() === feature)?.nextElementSibling?.textContent.trim(),

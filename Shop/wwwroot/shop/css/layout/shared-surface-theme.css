@@ -1,15 +1,15 @@
 /* Keep every page on a neutral canvas with a quiet warm tint inside content panels. */
 body,
 body.inner-page {
-  background-color: #f5f7f8;
+  background-color: var(--color-page);
 }
 
 body.inner-page .flow-main,
 body.inner-page .page-section > .container {
-  border-color: #e9e4da;
-  border-radius: 20px;
+  border-color: var(--color-line);
+  border-radius: var(--radius-panel-standard);
   background: linear-gradient(145deg, #fffefa 0%, #fff 68%, #fbfaf6 100%);
-  box-shadow: 0 12px 32px rgba(16, 42, 67, 0.055);
+  box-shadow: var(--shadow-card);
 }
 
 body.inner-page .flow-main {
@@ -66,12 +66,12 @@ body.inner-page .contact-shortcuts > .container {
 #cartPanel .cart-item-info .cart-item-option-chip {
   max-width: 100%;
   padding: 5px 8px;
-  font-size: 11px;
+  font-size: var(--text-xs);
   overflow-wrap: anywhere;
 }
 
 #cartPanel .cart-item-info .cart-item-option-chip > small {
-  font-size: 11px;
+  font-size: var(--text-xs);
 }
 
 #cartPanel .cart-item-info .cart-item-option-chip > strong {
@@ -80,7 +80,7 @@ body.inner-page .contact-shortcuts > .container {
 }
 
 #cartPanel .cart-item-info .cart-item-option-status {
-  font-size: 10px;
+  font-size: var(--text-xs);
 }
 
 @media (max-width: 767px) {

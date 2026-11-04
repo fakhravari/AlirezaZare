@@ -1,5 +1,7 @@
 # پروفایل، آدرس و سفارش‌ها
 
+متن‌های کمکی، وضعیت سفارش و توضیح‌های ویرایش پروفایل در `account-page.css` از مقیاس خوانایی [طراحی مشترک](../frontend/styling.md#قواعد-طراحی-مشترک) استفاده می‌کنند؛ سطح اصلی پنجرهٔ ویرایش در `shared-login.css` تعریف شده است.
+
 
 سفارش و کوپن از `IAccountDataSource` و فایل `Shop/App_Data/account-demo.json` خوانده می‌شوند. مدل `AccountData` رابطهٔ مصرف کوپن با سفارش، شناسه‌ها و مبلغ را اعتبارسنجی می‌کند؛ Razor دادهٔ سفارش تعریف نمی‌کند. `account-page.js` projection فقط‌خواندنی `HNAccountData` را مصرف می‌کند. وضعیت کوپن از enabled و تاریخ انقضا نسبت به تاریخ UTC جاری به دست می‌آید. جزئیات مرزهای فعلی در [اتصال backend](../architecture/backend-readiness.md) است.
 

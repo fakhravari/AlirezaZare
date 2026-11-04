@@ -308,7 +308,7 @@
 .contact-form .field-validation-error,
 .contact-form .field-validation-valid {
   min-height: 17px;
-  font-size: 11px;
+  font-size: var(--text-xs);
   line-height: 1.6;
 }
 .contact-form .field-validation-error {
@@ -328,7 +328,7 @@
   border-radius: 999px;
   background: #fff6f5;
   color: #8f4c4a;
-  font-size: 11px;
+  font-size: var(--text-xs);
   line-height: 1.6;
 }
 .contact-form .field-validation-valid {

@@ -18,10 +18,13 @@
   visibility: visible;
 }
 .form-confirm-dialog {
+  box-sizing: border-box;
   width: min(100%, 440px);
+  max-height: calc(100dvh - 40px);
+  overflow-y: auto;
   padding: 30px;
   border: 1px solid rgba(214, 180, 111, 0.5);
-  border-radius: 22px;
+  border-radius: var(--radius-panel-standard);
   background: linear-gradient(145deg, #fff, var(--industrial-bg));
   box-shadow: 0 28px 80px rgba(3, 18, 33, 0.3);
   color: var(--industrial-navy);
@@ -53,7 +56,7 @@
 .form-confirm-dialog p {
   margin: 0;
   color: var(--industrial-steel);
-  font-size: 13px;
+  font-size: var(--font-size-body);
   line-height: 2;
 }
 .form-confirm-actions {
@@ -64,7 +67,7 @@
 }
 .form-confirm-actions button {
   min-height: 48px;
-  border-radius: 11px;
+  border-radius: var(--radius-sm);
   font: inherit;
   font-size: 13px;
   font-weight: 800;

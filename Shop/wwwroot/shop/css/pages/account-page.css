@@ -207,7 +207,7 @@
   border-radius: 999px;
   background: #fbf7e9;
   color: var(--industrial-yellow-dark);
-  font-size: 11px;
+  font-size: var(--text-xs);
   font-weight: 700;
 }
 
@@ -551,7 +551,7 @@
   .address-account-card { gap: 12px; padding: 16px !important; }
   .address-card-header { align-items: flex-start; }
   .address-account-card .address-card-header h3 { font-size: 16px; }
-  .address-selected-badge { padding: 6px 9px; font-size: 11px; }
+  .address-selected-badge { padding: 6px 9px; font-size: var(--text-xs); }
   .address-card-recipient { align-items: flex-start; }
   .address-card-contact { gap: 8px 16px; }
   .address-card-contact .address-card-phone,
@@ -753,7 +753,7 @@
 }
 .orders-heading span {
   color: var(--industrial-yellow-dark);
-  font-size: 11px;
+  font-size: var(--text-xs);
   font-weight: 700;
 }
 .orders-heading h2 {
@@ -819,7 +819,7 @@
 }
 .profile-order-card time {
   color: var(--industrial-steel);
-  font-size: 11px;
+  font-size: var(--text-xs);
   white-space: nowrap;
 }
 .order-status {
@@ -828,7 +828,7 @@
   gap: 5px;
   padding: 5px 8px;
   border-radius: 999px;
-  font-size: 10px !important;
+  font-size: var(--text-xs) !important;
   white-space: nowrap;
 }
 .order-status.is-shipping {
@@ -880,7 +880,7 @@
 .order-total small {
   margin-top: 4px;
   color: var(--industrial-steel);
-  font-size: 10px;
+  font-size: var(--text-xs);
 }
 .order-total {
   text-align: left;
@@ -894,7 +894,7 @@
 .profile-order-card footer {
   border-top: 1px solid color-mix(in srgb, var(--industrial-yellow) 14%, white);
   background: rgba(246, 240, 229, 0.62);
-  font-size: 11px;
+  font-size: var(--text-xs);
 }
 .profile-order-card footer > span {
   color: var(--industrial-steel);
@@ -944,7 +944,7 @@
   background: #fff;
   color: var(--industrial-navy);
   font: inherit;
-  font-size: 11px;
+  font-size: var(--text-xs);
   font-weight: 700;
   text-decoration: none;
   cursor: pointer;
@@ -1107,7 +1107,7 @@
   .order-invoice-detail { padding: 12px; }
   .order-invoice-master dl > div { flex-wrap: wrap; gap: 5px 12px; }
   .order-invoice-master dd { margin-inline-start: auto; overflow-wrap: anywhere; }
-  .order-invoice-row { grid-template-columns: minmax(0, 1fr) 32px minmax(95px, auto); gap: 6px; padding: 10px 8px; font-size: 11px; }
+  .order-invoice-row { grid-template-columns: minmax(0, 1fr) 32px minmax(95px, auto); gap: 6px; padding: 10px 8px; font-size: var(--text-xs); }
   .order-invoice-row > * { min-width: 0; overflow-wrap: anywhere; }
   .order-invoice-payable { flex-wrap: wrap; align-items: center; gap: 6px 12px; padding: 12px; }
   .order-invoice-payable strong { font-size: 16px; margin-inline-start: auto; }
@@ -1234,7 +1234,7 @@
   background: var(--industrial-yellow);
   box-shadow: none;
   color: var(--industrial-navy);
-  font-size: 10px;
+  font-size: var(--text-xs);
   font-weight: 700;
   white-space: nowrap;
   transition:
@@ -1281,7 +1281,7 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
   display: block;
   margin-bottom: 4px;
   color: var(--industrial-yellow-dark);
-  font-size: 11px;
+  font-size: var(--text-xs);
   font-weight: 700;
 }
 .profile-edit-dialog .login-step h2 {
@@ -1362,7 +1362,7 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
 .profile-edit-dialog .profile-edit-form label small {
   margin-inline-start: 5px;
   color: var(--industrial-yellow-dark);
-  font-size: 10px;
+  font-size: var(--text-xs);
   font-weight: 500;
 }
 .profile-edit-dialog .profile-edit-form input[readonly] {
@@ -1381,7 +1381,7 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
   min-height: 17px;
   margin: 2px 0 0;
   color: #a34343;
-  font-size: 11px;
+  font-size: var(--text-xs);
   font-weight: 400;
   line-height: 1.6;
   visibility: hidden;
@@ -1449,7 +1449,7 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
 #orders .order-total small,
 #orders .profile-order-card footer,
 #orders .orders-pagination p {
-  font-size: 11px;
+  font-size: var(--text-xs);
   line-height: 1.8;
 }
 
@@ -1632,7 +1632,7 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
 .account-profile-edit,
 .account-welcome-art span,
 .profile-edit-dialog .profile-edit-form label small {
-  font-size: 11px;
+  font-size: var(--text-xs);
 }
 
 @media (max-width: 767px) {
@@ -1714,7 +1714,7 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
     left: 12px;
     max-width: calc(100% - 24px);
     min-height: 36px;
-    font-size: 11px;
+    font-size: var(--text-xs);
   }
 
   .inner-page .cart-breadcrumb.profile-breadcrumb ol {
@@ -1980,7 +1980,7 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
 
   .account-stats article > div small {
     overflow: visible;
-    font-size: 11px;
+    font-size: var(--text-xs);
     line-height: 1.45;
     text-overflow: clip;
     white-space: normal;
@@ -2174,7 +2174,7 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
 .profile-coupon-invoice time {
   flex: 0 0 auto;
   color: var(--industrial-steel);
-  font-size: 11px;
+  font-size: var(--text-xs);
 }
 
 .profile-coupon-no-invoices {
@@ -2451,7 +2451,7 @@ body.inner-page.mobile-page--profile-favorites #favoritesView .favorite-item-car
   min-height: 26px;
   padding-inline: 11px;
   background: #fffaf0;
-  font-size: 11px;
+  font-size: var(--text-xs);
 }
 
 #overview.account-overview .overview-heading h2 {
@@ -2505,7 +2505,7 @@ body.inner-page.mobile-page--profile-favorites #favoritesView .favorite-item-car
 #overview.account-overview .account-stats small {
   margin-top: 4px;
   color: #718094;
-  font-size: 11px;
+  font-size: var(--text-xs);
 }
 
 @media (max-width: 767px) {
