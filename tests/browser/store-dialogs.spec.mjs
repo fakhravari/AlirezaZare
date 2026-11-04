@@ -45,3 +45,18 @@ test('article feedback confirmation fits and can be cancelled', async ({page, is
   await expect(page.locator('.form-confirm-dialog')).not.toBeVisible();
   await expect(form.locator('[name="text"]')).toHaveValue('این دیدگاه برای بررسی نمایش فرم است.');
 });
+
+test('login and registration remain usable in a short viewport', async ({page, isMobile}) => {
+  if (isMobile) await page.setViewportSize({width: 320, height: 640});
+  await page.goto('/');
+  await page.locator('#accountToggle').click();
+  const modal = page.locator('#loginModal');
+  await expect(modal).toBeVisible();
+  const content = modal.locator('.modal-content');
+  await expectDialogFits(content);
+  await expect(modal.locator('#loginEmail')).toBeVisible();
+  await modal.locator('#registerModeTab').click();
+  await expect(modal.locator('#registerEmailStep')).toBeVisible();
+  await modal.locator('.login-close').click();
+  await expect(modal).not.toBeVisible();
+});
