@@ -107,16 +107,6 @@
   font-weight: 650;
 }
 
-.account-tabs a small {
-  display: none !important;
-  color: var(--industrial-steel);
-  font-size: 12px;
-}
-
-.account-tabs a[href*="Questions"] {
-  display: none !important;
-}
-
 .account-tabs a > i:last-child {
   color: color-mix(in srgb, var(--industrial-steel) 26%, white);
   font-size: 13px;
@@ -548,7 +538,7 @@
 .address-card-actions .address-action-delete { color: #8b4343; }
 
 @media (max-width: 575.98px) {
-  .address-account-card { gap: 12px; padding: 16px !important; }
+  .address-account-card { gap: 12px; padding: 16px; }
   .address-card-header { align-items: flex-start; }
   .address-account-card .address-card-header h3 { font-size: 16px; }
   .address-selected-badge { padding: 6px 9px; font-size: var(--text-xs); }
@@ -695,8 +685,7 @@
     width: 36px;
     height: 36px;
   }
-  .account-tabs a > i:last-child,
-  .account-tabs a small {
+  .account-tabs a > i:last-child {
     display: none;
   }
   .account-sidebar-help {
@@ -828,7 +817,7 @@
   gap: 5px;
   padding: 5px 8px;
   border-radius: 999px;
-  font-size: var(--text-xs) !important;
+  font-size: var(--text-xs);
   white-space: nowrap;
 }
 .order-status.is-shipping {
@@ -1607,7 +1596,6 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
 
 /* Profile readability: increase compact supporting text by one visual step. */
 .account-profile > div :is(small, span),
-.account-tabs a small,
 .account-sidebar-help :is(strong, a),
 .address-selected-badge,
 #orders .orders-heading > div > span,

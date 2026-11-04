@@ -166,7 +166,7 @@
 }
 
 #productView .product-accessory-price > .product-price-current {
-  color: var(--product-color-heading) !important;
+  color: var(--product-color-heading);
   font-size: var(--product-type-control);
   font-weight: 900;
 }

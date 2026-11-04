@@ -157,7 +157,7 @@
   margin-inline-start: auto;
 }
 .reading-tools-title {
-  display: block !important;
+  display: block;
   min-width: 0;
 }
 .reading-tools-description {
