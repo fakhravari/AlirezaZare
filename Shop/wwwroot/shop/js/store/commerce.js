@@ -405,7 +405,12 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                 companionSection.setAttribute("aria-labelledby", "companionProductsTitle");
                 companionSection.innerHTML = `<header><span>کالاهای مکمل برای این محصول</span><h2 id="companionProductsTitle">در کنارش خریداری شده</h2></header><div class="product-detail-related-grid">${companionProducts.map((item) => window.HNProductCard.render(item, { variant: "related" })).join("")}</div>`;
                 productView.querySelector("#product-related")?.before(companionSection);
-                productView.querySelector(".product-detail-tabs")?.insertAdjacentHTML("beforeend", `<a href="#product-companions"><i class="bi bi-bag-plus" aria-hidden="true"></i>در کنارش خریداری شده <b>${fa(companionProducts.length)}</b></a>`);
+                const productTabs = productView.querySelector(".product-detail-tabs");
+                const relatedTab = productTabs?.querySelector('a[href="#product-related"]');
+                const companionTab = document.createElement("a");
+                companionTab.href = "#product-companions";
+                companionTab.innerHTML = `<i class="bi bi-bag-plus" aria-hidden="true"></i>در کنارش خریداری شده <b>${fa(companionProducts.length)}</b>`;
+                relatedTab?.before(companionTab);
             }
             if (focusedPlan) {
                 const focusedOffer = offerForPlan(focusedPlan);

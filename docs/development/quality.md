@@ -30,7 +30,7 @@ git diff --check
 
 ## مالکیت و جلوگیری از برگشت بدهی
 
-شمار فعلی `!important` برابر ۲٬۵۹۸ در ۳۱ فایل است؛ اعداد پایین این بخش وضعیت هر مرحلهٔ پیشین را نشان می‌دهند. نقطهٔ ادامه در [دفترچهٔ مالکیت UI](../frontend/ui-ownership-roadmap.md) ثبت شده است.
+شمار فعلی `!important` برابر ۲٬۵۹۰ در ۳۱ فایل است؛ اعداد پایین این بخش وضعیت هر مرحلهٔ پیشین را نشان می‌دهند. نقطهٔ ادامه در [دفترچهٔ مالکیت UI](../frontend/ui-ownership-roadmap.md) ثبت شده است.
 
 [ui-owners.json](../../tools/ui-owners.json) مالک‌ها را بر اساس پنج حوزهٔ اصلی گروه‌بندی می‌کند و markup/data/server/JS/CSS اجزا را ثبت می‌کند. [check-ui.mjs](../../tools/check-ui.mjs) مسیرهای مسئول، وجود مالک برای همهٔ فایل‌های CSS/JS برنامه، شناسهٔ یکتا بین گروه‌ها و ترتیب بارگذاری را کنترل می‌کند. قبل از ساخت override یا renderer، این نقشه را بخوانید.
 
@@ -52,7 +52,7 @@ git diff --check
 
 سپس ۳ قاعده و ۹ declaration از نقشه و برچسب شعبهٔ قدیمی، و ۶ قاعده با ۱۸ declaration از آیکن هدر قدیمی، نشانگر carousel، ticker و شبکهٔ محصول بلااستفاده حذف شدند؛ keyframe `ticker` نیز مصرفی نداشت. کد اسلایدرهای فعال حفظ شد.
 
-در ادامه، سکشن قدیمی `#recommendations` و `.recommend-box` در View یا renderer جاری مصرف‌کننده نداشتند؛ ۷ قاعدهٔ مستقل با ۲۸ declaration و ۱۰ `!important` و نیز ۶ شاخهٔ selector آن از CSS خانه و موبایل حذف شدند. پرس‌وجوی reveal متناظر هم از JS برداشته شد. پنج شاخهٔ گروهیِ `.recommend-box` که کنترل مالکیت کارت محصول از تغییرشان جلوگیری می‌کند، باقی ماندند؛ شاخهٔ گروهی `.recommend-head p` هم به همین دلیل حفظ شد. شمار تأییدشدهٔ فعلی CSS برابر ۲٬۶۱۴ `!important` در ۳۲ فایل از ۵۱ است؛ شمار و سقف هر فایل در `tools/ui-legacy-budget.json` ثبت شده‌اند و `npm run check` آن‌ها را کنترل می‌کند. هیچ rule یا at-rule خالی وجود ندارد.
+در ادامه، سکشن قدیمی `#recommendations` و `.recommend-box` در View یا renderer جاری مصرف‌کننده نداشتند؛ ۷ قاعدهٔ مستقل با ۲۸ declaration و ۱۰ `!important` و نیز ۶ شاخهٔ selector آن از CSS خانه و موبایل حذف شدند. پرس‌وجوی reveal متناظر هم از JS برداشته شد. پنج شاخهٔ گروهیِ `.recommend-box` که کنترل مالکیت کارت محصول از تغییرشان جلوگیری می‌کند، باقی ماندند؛ شاخهٔ گروهی `.recommend-head p` هم به همین دلیل حفظ شد. شمار همان مرحله ۲٬۶۱۴ `!important` در ۳۲ فایل از ۵۱ بود؛ شمار و سقف هر فایل در `tools/ui-legacy-budget.json` ثبت شده‌اند و `npm run check` آن‌ها را کنترل می‌کند. هیچ rule یا at-rule خالی وجود ندارد.
 
 در تطبیق بعدی، rule شاخه‌ای `.article-next-step > a.article-consult` هم مصرف‌کننده‌ای در markup نداشت؛ لینک جاری مجله همان style عمومی `.article-next-step > a` را می‌گیرد، پس rule قدیمی با سه declaration حذف شد.
 

@@ -782,15 +782,6 @@ h6,
   background-color: var(--industrial-navy);
 }
 
-.inner-page .page-hero:not(.article-hero)::before {
-  background: linear-gradient(
-    90deg,
-    rgba(16, 42, 67, 0.94),
-    rgba(16, 42, 67, 0.62),
-    rgba(16, 42, 67, 0.28)
-  ) !important;
-}
-
 .inner-page .page-hero :is(h1, h2, p, .hero-trail, .page-kicker) {
   color: #fff;
 }
@@ -979,7 +970,9 @@ textarea:focus-visible,
 /* Forms */
 :is(input, select, textarea):not([type="checkbox"]):not([type="radio"]):not(
     [type="range"]
-  ):not(.is-invalid) {
+  ):not(.is-invalid):not(
+    :where(.contact-form .field.is-valid > :is(input, select, textarea))
+  ) {
   border-color: var(--industrial-line) !important;
   background-color: #fff !important;
   color: var(--industrial-ink) !important;

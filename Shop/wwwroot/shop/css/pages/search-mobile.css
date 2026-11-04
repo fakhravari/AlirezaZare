@@ -1,3 +1,10 @@
+@media (max-width: 991px) {
+  /* Keep the translated, closed mobile offcanvas from widening the search page. */
+  body.mobile-page--product-index {
+    overflow-x: clip;
+  }
+}
+
 @media (max-width: 767px) {
   .search-page {
     width: calc(100% - 16px) !important;
