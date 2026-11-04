@@ -61,6 +61,11 @@
   padding: var(--product-space-6);
 }
 
+.product-detail-page #productView .product-detail-summary {
+  container-type: inline-size;
+  container-name: product-summary;
+}
+
 .product-detail-page #productView :is(.product-detail-content-panel, .product-detail-related) > header {
   margin-bottom: var(--product-space-5);
 }
@@ -91,6 +96,7 @@
 }
 
 .product-detail-page #productView .product-detail-tabs > a {
+  min-height: 44px;
   font-size: var(--product-type-label);
 }
 

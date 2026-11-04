@@ -6,7 +6,7 @@
   min-width: 0;
   padding: 13px;
   border: 1px solid rgba(220, 177, 65, .62);
-  border-radius: 16px;
+  border-radius: var(--product-radius-card);
   background:
     radial-gradient(circle at 4% 4%, rgba(255, 213, 92, .18), transparent 34%),
     linear-gradient(145deg, #183a58, #102b43 70%, #17354f);
@@ -48,7 +48,7 @@
   flex: 0 0 36px;
   place-items: center;
   border: 1px solid rgba(255, 229, 163, .58);
-  border-radius: 11px;
+  border-radius: var(--product-radius-control);
   background: linear-gradient(145deg, #ffe27d, #eebc2e);
   color: #17334e;
   box-shadow: 0 4px 12px rgba(0, 0, 0, .15);
@@ -72,7 +72,7 @@
 
 #productView .product-special-sale-name strong {
   color: #fff;
-  font-size: 16px;
+  font-size: var(--product-type-subheading);
   font-weight: 900;
   line-height: 1.25;
 }
@@ -109,7 +109,7 @@
   min-height: 34px;
   padding: 5px 9px;
   border: 1px solid rgba(255, 223, 131, .52);
-  border-radius: 10px;
+  border-radius: var(--product-radius-control);
   background: linear-gradient(135deg, #ffe27d, #f3c53f);
   color: #142d45;
   direction: rtl;
@@ -174,7 +174,7 @@
   min-width: 0;
   padding: 10px 12px;
   border: 1px solid var(--line, #dbe4ec);
-  border-radius: 12px;
+  border-radius: var(--product-radius-card);
   background: #f8fafc;
   cursor: pointer;
 }
@@ -233,6 +233,15 @@
   justify-content: space-between;
   gap: 12px;
   min-width: 0;
+}
+
+#productView .product-detail-total-price {
+  flex-wrap: wrap;
+  row-gap: var(--product-space-1);
+}
+
+#productView .product-detail-total-price > strong {
+  margin-inline-start: auto;
 }
 
 #productView .product-detail-base-row > span,
@@ -360,7 +369,7 @@
   margin-bottom: 16px;
   padding: 10px 13px;
   border: 1px solid rgba(181, 149, 98, .26);
-  border-radius: 15px;
+  border-radius: var(--product-radius-card);
   background: linear-gradient(110deg, #fffefa, #f8f3e9);
   box-shadow: 0 7px 18px -15px rgba(16, 42, 67, .4), inset 0 1px #fff;
 }
@@ -372,7 +381,7 @@
   height: 38px;
   place-items: center;
   border: 1px solid rgba(181, 149, 98, .26);
-  border-radius: 12px;
+  border-radius: var(--product-radius-card);
   background: #fff;
   color: #92713b;
   font-size: 17px;
@@ -477,7 +486,7 @@
   padding: 16px;
   overflow: hidden;
   border: 1px solid var(--industrial-line, #dce3e8);
-  border-radius: 17px;
+  border-radius: var(--product-radius-panel);
   background: #fff;
   box-shadow: 0 10px 24px -20px rgba(23, 54, 83, 0.5), inset 0 1px #fff;
   color: var(--industrial-navy, #102a56);
@@ -520,7 +529,7 @@
   flex: 0 0 46px;
   place-items: center;
   border: 1px solid #ecdcae;
-  border-radius: 14px;
+  border-radius: var(--product-radius-card);
   background: var(--product-color-accent-soft);
   color: #8b6a1b;
   font-size: 23px;
@@ -566,7 +575,7 @@
   gap: 8px;
   padding: 10px 9px;
   border: 1px solid var(--industrial-line, #dce3e8);
-  border-radius: 12px;
+  border-radius: var(--product-radius-card);
   background: #f5f7f9;
 }
 
@@ -632,7 +641,7 @@
   margin: 16px 0 18px;
   padding: 14px;
   border: 1px solid #e3e8ed;
-  border-radius: 15px;
+  border-radius: var(--product-radius-card);
   background: linear-gradient(145deg, #fff, #f8fafc);
 }
 
@@ -642,7 +651,7 @@
   gap: 8px;
   margin: 0 0 11px;
   color: #183752;
-  font-size: 16px;
+  font-size: var(--product-type-subheading);
   font-weight: 800;
 }
 
@@ -665,7 +674,7 @@
   gap: 3px;
   padding: 8px 10px;
   border: 1px solid #e7ebef;
-  border-radius: 11px;
+  border-radius: var(--product-radius-control);
   background: #f1f4f7;
   color: #183752;
 }
@@ -692,7 +701,7 @@
   justify-content: center;
   gap: 7px;
   border: 1px solid #e5e9ed;
-  border-radius: 10px;
+  border-radius: var(--product-radius-control);
   background: #fff;
   color: #475e73;
   font-size: var(--product-type-label);
@@ -864,7 +873,7 @@
   height: 44px;
   place-items: center;
   border: 1px solid #e4c765;
-  border-radius: 12px;
+  border-radius: var(--product-radius-card);
   background: var(--product-color-heading);
   color: #ffda45;
   box-shadow: 0 3px 10px #102a4333;
@@ -895,7 +904,7 @@
     position: relative;
     width: 36px;
     height: 36px;
-    border-radius: 10px;
+    border-radius: var(--product-radius-control);
     font-size: 17px;
   }
 
@@ -1043,7 +1052,7 @@
   gap: 9px;
   padding: 12px;
   border: 1px solid #e9dfcd;
-  border-radius: 15px;
+  border-radius: var(--product-radius-card);
   background: rgba(255, 255, 255, 0.78);
   cursor: pointer;
 }
@@ -1092,7 +1101,7 @@
   gap: 4px 9px;
   padding: 13px 15px;
   border: 1px solid #ecdfc2;
-  border-radius: 15px;
+  border-radius: var(--product-radius-card);
   background: linear-gradient(110deg, #fff7e5, #fffdf8);
 }
 
@@ -1117,7 +1126,7 @@
 .detail-price-demo-chart {
   padding: 12px 12px 8px;
   border: 1px solid #e9dfcd;
-  border-radius: 16px;
+  border-radius: var(--product-radius-card);
   background: linear-gradient(145deg, #fffdf9, #fffaf1);
 }
 

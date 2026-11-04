@@ -22,16 +22,16 @@
   height: 44px;
   flex-basis: 44px;
   border: 1px solid #ecdcae;
-  border-radius: 14px;
+  border-radius: var(--product-radius-card);
   background: linear-gradient(145deg, #fff9e7, #fff1c4);
   box-shadow: inset 0 1px rgba(255, 255, 255, 0.9);
   color: #8c6918;
-  font-size: 18px;
+  font-size: var(--product-type-heading);
 }
 
 #productView .product-accessories > header strong {
   color: var(--product-color-heading);
-  font-size: 16px;
+  font-size: var(--product-type-subheading);
   font-weight: 900;
 }
 
@@ -51,7 +51,7 @@
   gap: 8px 12px;
   padding: var(--product-space-3);
   border: 1px solid var(--product-color-border);
-  border-radius: 14px;
+  border-radius: var(--product-radius-card);
   background: #fff;
   box-shadow: 0 3px 10px rgba(16, 42, 67, 0.035);
   transition:
@@ -244,7 +244,7 @@
 .product-accessory-discount {
   padding: 3px 8px;
   border: 1px solid var(--product-color-danger-border);
-  border-radius: 20px;
+  border-radius: var(--product-radius-panel);
   background: var(--product-color-danger-soft);
   color: var(--product-color-danger);
   font-size: var(--product-type-small);
@@ -265,7 +265,7 @@
   padding: 0;
   overflow: hidden;
   border: 1px solid #e6dcc4;
-  border-radius: 18px;
+  border-radius: var(--product-radius-panel);
   background: #fff;
   color: var(--product-color-heading);
   box-shadow: 0 24px 80px #102a4340;
@@ -295,7 +295,7 @@
 
 .product-accessory-dialog h2 {
   margin: 0;
-  font-size: 18px;
+  font-size: var(--product-type-heading);
   font-weight: 850;
 }
 
@@ -362,7 +362,7 @@
   flex: 1;
   padding: 8px 12px;
   border: 1px solid #d8e1e9;
-  border-radius: 10px;
+  border-radius: var(--product-radius-control);
   background: #fff;
   color: var(--product-color-heading);
   font-size: var(--product-type-label);
@@ -407,7 +407,7 @@
   flex: 0 0 36px;
   place-items: center;
   border: 1px solid #e5e9ed;
-  border-radius: 11px;
+  border-radius: var(--product-radius-control);
   background: var(--product-color-subtle);
   color: var(--product-color-heading);
   font-size: var(--product-type-body);
@@ -497,7 +497,7 @@
   #productView .product-accessories {
     margin: 14px 0 16px;
     padding: 13px;
-    border-radius: 15px;
+    border-radius: var(--product-radius-card);
   }
 
   #productView .product-accessories > header {
@@ -517,7 +517,7 @@
     gap: 8px;
     min-height: 0;
     padding: 9px;
-    border-radius: 12px;
+    border-radius: var(--product-radius-card);
   }
 
   #productView .product-accessory-price {
@@ -914,7 +914,7 @@
   gap: 7px;
   padding: 8px 10px;
   border: 1px solid var(--industrial-line, #dce3e8);
-  border-radius: 9px;
+  border-radius: var(--product-radius-control);
   background: #fff;
   color: var(--industrial-navy, var(--product-color-heading));
   font: inherit;
@@ -925,7 +925,7 @@
 
 #productView .product-detail-share > i {
   color: #b58b32;
-  font-size: 16px;
+  font-size: var(--product-type-subheading);
 }
 
 #productView .product-detail-share:is(:hover, :focus-visible, [aria-expanded="true"]) {
@@ -957,7 +957,7 @@
   gap: 6px;
   padding: 12px;
   border: 1px solid #e6dcc6;
-  border-radius: 15px;
+  border-radius: var(--product-radius-card);
   background: linear-gradient(145deg, #fff 0%, #fffaf0 100%);
   box-shadow: 0 14px 32px rgba(16, 42, 67, 0.18);
 }
@@ -978,7 +978,7 @@
   gap: 7px;
   padding: 8px 10px;
   border: 1px solid #e1e8ee;
-  border-radius: 9px;
+  border-radius: var(--product-radius-control);
   background: linear-gradient(145deg, #fff, var(--product-color-subtle));
   color: var(--product-color-text);
   font: inherit;
@@ -1004,7 +1004,7 @@
 
 #productView .product-share-menu > :is(a, button) > i {
   color: #a77a24 !important;
-  font-size: 16px;
+  font-size: var(--product-type-subheading);
 }
 
 #productView .product-share-native,
@@ -1021,7 +1021,7 @@
     justify-content: flex-start;
     gap: 8px;
     padding: 7px 11px;
-    border-radius: 9px;
+    border-radius: var(--product-radius-control);
     font-size: var(--product-type-small);
     text-align: right;
   }
@@ -1150,7 +1150,7 @@
     gap: 8px;
     padding: 8px 12px;
     border: 1px solid #dce4e9;
-    border-radius: 12px;
+    border-radius: var(--product-radius-card);
     background: linear-gradient(145deg, #fff, var(--product-color-subtle));
     box-shadow: 0 3px 10px rgba(16, 42, 67, 0.05);
     color: var(--industrial-navy, var(--product-color-heading));
@@ -1175,10 +1175,10 @@
     height: 30px;
     flex: 0 0 30px;
     place-items: center;
-    border-radius: 9px;
+    border-radius: var(--product-radius-control);
     background: #f5f1e5;
     color: #a47d12 !important;
-    font-size: 16px;
+    font-size: var(--product-type-subheading);
     line-height: 1;
     transition:
       background 0.18s ease,
@@ -1221,7 +1221,7 @@
   padding: 14px;
   border: 1px solid var(--product-color-border);
   border-top: 3px solid #d8e2e7;
-  border-radius: 15px;
+  border-radius: var(--product-radius-card);
   background: #fff;
   box-shadow: 0 7px 20px rgba(16, 42, 67, 0.045);
 }
@@ -1249,7 +1249,7 @@
   flex: 0 0 32px;
   place-items: center;
   border: 1px solid #e9e3d2;
-  border-radius: 10px;
+  border-radius: var(--product-radius-control);
   background: #f7f5ef;
   color: #8c7950;
   font-size: var(--product-type-body);
@@ -1279,7 +1279,7 @@
   min-height: 38px;
   align-items: center;
   padding: 7px 10px;
-  border-radius: 9px;
+  border-radius: var(--product-radius-control);
   line-height: 1.5;
   overflow-wrap: anywhere;
 }
@@ -1297,7 +1297,7 @@
     margin-bottom: var(--product-space-6);
     padding: var(--product-space-4);
     border: 1px solid var(--product-color-border);
-    border-radius: 16px;
+    border-radius: var(--product-radius-card);
     background: #fff;
   }
 
@@ -1403,7 +1403,7 @@
   gap: 10px;
   padding: 9px 11px;
   border: 1px solid var(--industrial-line, #dce3e8);
-  border-radius: 12px;
+  border-radius: var(--product-radius-card);
   background: #f5f7f9;
   color: #24445d;
   font-size: var(--product-type-small);
@@ -1551,7 +1551,7 @@
   gap: 8px;
   padding: 8px 10px;
   border: 1px solid var(--product-color-border);
-  border-radius: 14px;
+  border-radius: var(--product-radius-card);
   background: linear-gradient(145deg, #fff, var(--product-color-subtle));
   box-shadow: 0 1px 5px rgba(16, 42, 67, 0.035), inset 0 1px #fff;
   text-align: right;
@@ -1589,7 +1589,7 @@
   flex: 0 0 44px;
   padding: 3px;
   border: 1px solid rgba(22, 50, 79, 0.12);
-  border-radius: 10px;
+  border-radius: var(--product-radius-control);
   background: #fff;
   object-fit: contain;
   box-shadow: 0 1px 4px rgba(16, 42, 67, 0.08);
@@ -1636,7 +1636,7 @@
   gap: 7px;
   padding: 8px 10px;
   border: 1px solid var(--product-color-border);
-  border-radius: 14px;
+  border-radius: var(--product-radius-card);
   background: linear-gradient(145deg, #fff, var(--product-color-subtle));
   box-shadow: 0 1px 5px rgba(16, 42, 67, 0.035), inset 0 1px #fff;
   direction: rtl;
@@ -1661,7 +1661,7 @@
   font-size: var(--product-type-label);
 }
 
-@media (max-width: 640px) {
+@container product-summary (max-width: 420px) {
   #productView .product-meta-identity {
     gap: 6px;
     padding: 0;
@@ -1745,7 +1745,7 @@
   flex: 0 0 30px;
   place-items: center;
   border: 1px solid #dfe6eb;
-  border-radius: 9px;
+  border-radius: var(--product-radius-control);
   background: linear-gradient(145deg, var(--product-color-subtle), #edf2f5);
   color: var(--product-color-heading);
   font-size: var(--product-type-body);
@@ -1969,7 +1969,7 @@
   height: 30px;
   flex: 0 0 30px;
   place-items: center;
-  border-radius: 9px;
+  border-radius: var(--product-radius-control);
   background: #f5f1e5;
   color: #a47d12 !important;
   transition:
@@ -1995,7 +1995,7 @@
     width: 24px;
     height: 24px;
     flex-basis: 24px;
-    border-radius: 10px;
+    border-radius: var(--product-radius-control);
   }
 }
 
@@ -2012,7 +2012,7 @@
   gap: 8px;
   padding: 8px 12px;
   border: 1px solid #dce4e9;
-  border-radius: 12px;
+  border-radius: var(--product-radius-card);
   background: linear-gradient(145deg, #fff, var(--product-color-subtle));
   box-shadow: 0 3px 10px rgba(16, 42, 67, 0.05);
   color: var(--industrial-navy, var(--product-color-heading));
@@ -2037,10 +2037,10 @@
   height: 30px;
   flex: 0 0 30px;
   place-items: center;
-  border-radius: 9px;
+  border-radius: var(--product-radius-control);
   background: #f5f1e5;
   color: #a47d12;
-  font-size: 16px;
+  font-size: var(--product-type-subheading);
   line-height: 1;
   transition:
     background 0.18s ease,
@@ -2072,7 +2072,7 @@
     justify-content: flex-start;
     gap: 8px;
     padding: 7px 11px;
-    border-radius: 9px;
+    border-radius: var(--product-radius-control);
     font-size: var(--product-type-label);
     text-align: right;
   }
@@ -2081,7 +2081,7 @@
     width: 24px;
     height: 24px;
     flex-basis: 24px;
-    border-radius: 10px;
+    border-radius: var(--product-radius-control);
     font-size: var(--product-type-body);
   }
 }
@@ -2104,7 +2104,7 @@
   gap: 9px;
   padding: 8px 11px;
   border-color: #e6e3db;
-  border-radius: 12px;
+  border-radius: var(--product-radius-card);
   background: #fbfbf9;
   box-shadow: none;
 }
@@ -2221,7 +2221,7 @@
 #productView .product-feedback-card .product-feedback-meta > strong {
   min-width: 0;
   overflow: hidden;
-  font-size: 16px;
+  font-size: var(--product-type-subheading);
   font-weight: 750;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -2248,7 +2248,7 @@
 #productView .product-feedback-stars-glyphs {
   direction: ltr;
   unicode-bidi: isolate;
-  font-size: 16px;
+  font-size: var(--product-type-subheading);
   letter-spacing: 0.5px;
 }
 
@@ -2325,7 +2325,7 @@
   margin: 0;
   padding: 10px 13px;
   border: 1px solid rgba(169, 76, 76, 0.14);
-  border-radius: 12px;
+  border-radius: var(--product-radius-card);
   background: #fff6f5;
   color: #8f4c4a;
   font-size: var(--product-type-small);
@@ -2359,7 +2359,7 @@
     .product-feedback-form.product-review-form
     :is(input, select) {
     padding-inline: 8px;
-    font-size: 16px;
+    font-size: var(--product-type-subheading);
   }
 }
 
