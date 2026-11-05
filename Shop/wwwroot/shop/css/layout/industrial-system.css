@@ -9221,7 +9221,7 @@ html
   }
 
   #cartPanel .hn-cart-controls .hn-cart-quantity > button,
-  #cartPanel .hn-cart-controls > .hn-cart-remove {
+  #cartPanel .cart-item .hn-cart-controls > .hn-cart-remove {
     box-sizing: border-box;
     flex-basis: 44px;
     width: 44px;
