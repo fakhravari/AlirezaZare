@@ -1433,6 +1433,20 @@ select {
   }
 }
 
+@media (max-width: 420px) {
+  .sort-box {
+    flex-wrap: wrap;
+    overflow-x: visible;
+    row-gap: 4px;
+  }
+
+  .sort-options {
+    flex: 1 1 100%;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+}
+
 /* Compact filter choices and product specification chips */
 .filter-group.open .filter-options {
   display: grid;

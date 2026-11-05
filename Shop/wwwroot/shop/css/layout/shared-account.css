@@ -318,3 +318,10 @@
     transition: none !important;
   }
 }
+
+@media (max-width: 575px) {
+  :is(.home-page, .inner-page) #mainNav .account-btn > .account-label,
+  :is(.home-page, .inner-page) #mainNav .account-btn > .bi-chevron-down {
+    display: none;
+  }
+}

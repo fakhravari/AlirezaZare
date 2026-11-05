@@ -23,7 +23,7 @@
 
 سفارش و کوپن از Razor و JavaScript خارج و در [account-demo.json](../../Shop/App_Data/account-demo.json) یکپارچه شده‌اند. [AccountData](../../Shop/Models/AccountData.cs) رابطه‌ها و مبالغ را اعتبارسنجی می‌کند. [IAccountDataSource و ICommerceOfferSource](../../Shop/Services/IAccountDataSource.cs) دو مرز مستقل حساب و پیشنهاد عمومی هستند؛ پیاده‌سازی demo یک snapshot به‌ازای درخواست دارد. فایل خارج از wwwroot است و در publish کپی می‌شود. bootstrap عمومی فقط کد و درصد تخفیف را می‌دهد؛ سابقهٔ سفارش فقط در پروفایل serialize می‌شود. احراز هویت واقعی هنوز پیاده نشده است.
 
-ثبت‌نام اکنون کد ایمیل را از [EmailVerificationController](../../Shop/Controllers/EmailVerificationController.cs) می‌گیرد؛ [SmtpEmailSender](../../Shop/Services/SmtpEmailSender.cs) با تنظیمات `Email:Smtp` در appsettings ایمیل می‌فرستد و [EmailVerificationCodeStore](../../Shop/Services/EmailVerificationCodeStore.cs) کد hash‌شدهٔ یک‌بارمصرف را با انقضای ۱۰ دقیقه، حداکثر پنج تلاش و فاصلهٔ ارسال مجدد ۶۰ ثانیه نگه می‌دارد. endpoint ارسال به سقف پنج درخواست در هر IP طی پنج دقیقه محدود است. رمز فعلی در appsettings تنظیم شده تا مطابق محیط این مخزن قابل اجرا باشد؛ در انتشار عمومی باید مقدار `Email__Smtp__Password` از تنظیم محیط استقرار خوانده شود و secret وارد Git نشود. این تغییر فقط تأیید ایمیل را سروری کرده است؛ ساخت حساب پایدار، ورود با گذرواژه و session هنوز دمو هستند. store کدها در حافظهٔ یک process است و برای چند replica باید به cache مشترک منتقل شود.
+ثبت‌نام اکنون کد ایمیل را از [EmailVerificationController](../../Shop/Controllers/EmailVerificationController.cs) می‌گیرد؛ [SmtpEmailSender](../../Shop/Services/SmtpEmailSender.cs) با تنظیمات `Email:Smtp` ایمیل می‌فرستد و [EmailVerificationCodeStore](../../Shop/Services/EmailVerificationCodeStore.cs) کد hash‌شدهٔ یک‌بارمصرف را با انقضای ۱۰ دقیقه، حداکثر پنج تلاش و فاصلهٔ ارسال مجدد ۶۰ ثانیه نگه می‌دارد. endpoint ارسال به سقف پنج درخواست در هر IP طی پنج دقیقه محدود است. TLS برای SMTP فعال است و مقدار password در `appsettings.json` خالی است؛ برای توسعه از `dotnet user-secrets set "Email:Smtp:Password" "<new SMTP secret>" --project Shop/Shop.csproj` و در استقرار از متغیر محیطی `Email__Smtp__Password` استفاده کنید. اتصال دیتابیس و FTP در کد فعلی مصرف‌کننده ندارند و پیکربندی شامل دسترسی آن‌ها از فایل tracked حذف شده است. اطلاعات دسترسی‌ای که پیش‌تر در تنظیم tracked بوده‌اند باید از ارائه‌دهندهٔ مربوط چرخانده شوند؛ این کار بیرون از مخزن و به‌دست دارندهٔ دسترسی انجام می‌شود. این تغییر فقط تأیید ایمیل را سروری کرده است؛ ساخت حساب پایدار، ورود با گذرواژه و session هنوز دمو هستند. store کدها در حافظهٔ یک process است و برای چند replica باید به cache مشترک منتقل شود.
 
 ## پوشش داده و شکاف‌های اتصال
 
@@ -70,7 +70,7 @@
 
 [منبع حقیقت داده](data-sources.md) · [فهرست معماری](README.md) · [فهرست مستندات](../README.md)
 
-آخرین تطبیق با کد: ۱ نوامبر ۲۰۲۶.
+آخرین تطبیق با کد: ۵ نوامبر ۲۰۲۶.
 # Sales-plan API adapter
 
 برای قابلیت طرح‌های فروش، `ISalesPlanSource` مرز منبع داده و `DemoSalesPlanSource` adapter فقط‌خواندنی fixture است. APIهای quote و validate-cart در `SalesPlansController` قیمت، انتخاب ویژگی و متعلقات را از دادهٔ سرور بازسازی می‌کنند. پیاده‌سازی به دیتابیس/رزرو موجودی و ثبت سفارش وصل نیست؛ وضعیت جزئی و کارهای باقی‌مانده در [راهنمای طرح‌های فروش](../store/sales-plans.md) ثبت شده است.

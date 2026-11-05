@@ -64,3 +64,55 @@ test('discounted search prices fit narrow product cards', async ({page, isMobile
     expect(dimensions.content).toBeLessThanOrEqual(dimensions.available + 1);
   }
 });
+
+test('search sort choices wrap instead of clipping at narrow phone widths', async ({page}) => {
+  for (const width of [320, 360, 390]) {
+    await page.setViewportSize({width, height: 800});
+    await page.goto('/search');
+    const sortBox = page.locator('.sort-box');
+    await expect(sortBox).toBeVisible();
+    const layout = await sortBox.evaluate(element => {
+      const box = element.getBoundingClientRect();
+      const choices = [...element.querySelectorAll('.sort-option')].map(choice => {
+        const rect = choice.getBoundingClientRect();
+        return {left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom};
+      });
+      return {
+        width: element.clientWidth,
+        scrollWidth: element.scrollWidth,
+        left: box.left,
+        right: box.right,
+        choices,
+      };
+    });
+    expect(layout.scrollWidth, `${width}px sort panel`).toBeLessThanOrEqual(layout.width + 1);
+    expect(layout.choices.length).toBeGreaterThan(2);
+    for (const choice of layout.choices) {
+      expect(choice.left, `${width}px choice left`).toBeGreaterThanOrEqual(layout.left - 1);
+      expect(choice.right, `${width}px choice right`).toBeLessThanOrEqual(layout.right + 1);
+    }
+  }
+});
+
+test('page-owned placeholder colors override the shared fallback', async ({page}) => {
+  for (const width of [390, 1440]) {
+    await page.setViewportSize({width, height: 800});
+    for (const [path, selector] of [
+      ['/search', '.filter-search input'],
+      ['/tracking', '.tracking-input input'],
+    ]) {
+      await page.goto(path);
+      const placeholder = page.locator(selector).first();
+      const actual = await placeholder.evaluate(element => getComputedStyle(element, '::placeholder').color);
+      const expected = await page.evaluate(() => {
+        const probe = document.createElement('span');
+        probe.style.color = 'var(--industrial-muted)';
+        document.body.append(probe);
+        const color = getComputedStyle(probe).color;
+        probe.remove();
+        return color;
+      });
+      expect(actual, `${path} placeholder color at ${width}px`).toBe(expected);
+    }
+  }
+});

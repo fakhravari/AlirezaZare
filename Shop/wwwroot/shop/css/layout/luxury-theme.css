@@ -518,7 +518,6 @@ h3,
   }
 
   .account-btn .account-label {
-    display: inline-block !important;
     font-size: 13.5px !important;
     font-weight: 700 !important;
     line-height: 1 !important;

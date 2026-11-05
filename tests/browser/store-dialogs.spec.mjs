@@ -57,6 +57,7 @@ test('login and registration remain usable in a short viewport', async ({page, i
   await expect(modal.locator('#loginEmail')).toBeVisible();
   await modal.locator('#registerModeTab').click();
   await expect(modal.locator('#registerEmailStep')).toBeVisible();
+  await expectDialogFits(content);
   await modal.locator('.login-close').click();
   await expect(modal).not.toBeVisible();
 });

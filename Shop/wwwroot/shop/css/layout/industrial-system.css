@@ -60,7 +60,7 @@ h6,
 }
 
 ::placeholder {
-  color: #5d6a73 !important;
+  color: #5d6a73;
   opacity: 1;
   font-size: 0.95em;
   font-weight: 400;
@@ -196,10 +196,6 @@ h6,
 
   .home-page #mainNav .navbar-nav > .nav-item:first-child > .nav-link::after {
     display: none;
-  }
-
-  .home-page #mainNav .brand-dropdown > .nav-link::after {
-    display: none !important;
   }
 
   .home-page #mainNav .nav-tools {
@@ -3961,11 +3957,6 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
 }
 
 @media (max-width: 575px) {
-  #mainNav .account-btn .account-label,
-  #mainNav .account-btn > .bi-chevron-down {
-    display: none !important;
-  }
-
   #mainNav .account-btn,
   .home-page #mainNav .account-btn,
   .inner-page #mainNav .account-btn {

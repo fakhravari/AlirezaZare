@@ -38,6 +38,10 @@
     display: inline-flex !important;
   }
 
+  .home-page #mainNav .brand-dropdown > .nav-link::after {
+    display: none;
+  }
+
   .home-page #mainNav .header-brand-lockup.header-home-link,
   .inner-page #mainNav .header-brand-lockup.header-home-link {
     top: -70px;

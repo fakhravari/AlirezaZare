@@ -20,6 +20,33 @@ test('empty guest header panels stay closed on hover', async ({page, isMobile}) 
   await expect(page.locator('#loginModal')).toBeVisible();
 });
 
+test('mobile account label hides only below its compact-header breakpoint', async ({page}) => {
+  for (const width of [320, 390, 575, 576, 767, 768]) {
+    await page.setViewportSize({width, height: 900});
+    await page.goto('/');
+    const label = page.locator('#mainNav .account-btn > .account-label');
+    const chevron = page.locator('#mainNav .account-btn > .bi-chevron-down');
+    const display = await label.evaluate(element => getComputedStyle(element).display);
+    const chevronDisplay = await chevron.evaluate(element => getComputedStyle(element).display);
+    expect(display === 'none').toBe(width <= 575);
+    expect(chevronDisplay === 'none').toBe(width <= 575);
+    const documentWidth = await page.evaluate(() => document.documentElement.scrollWidth);
+    expect(documentWidth).toBeLessThanOrEqual(width);
+  }
+});
+
+test('desktop home brand caret is hidden by its header owner without important', async ({page, isMobile}) => {
+  if (isMobile) test.skip();
+  for (const width of [1200, 1359, 1360, 1440]) {
+    await page.setViewportSize({width, height: 900});
+    await page.goto('/');
+    const caretDisplay = await page.locator('#mainNav .brand-dropdown > .nav-link').evaluate(element =>
+      getComputedStyle(element, '::after').display,
+    );
+    expect(caretDisplay, `brand caret at ${width}px`).toBe('none');
+  }
+});
+
 test('desktop help menu presents customer and company links in two columns', async ({page, isMobile}) => {
   test.skip(isMobile, 'The two-column menu is desktop-only; mobile keeps its accordion.');
   await page.goto('/');

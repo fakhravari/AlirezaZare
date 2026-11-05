@@ -69,6 +69,8 @@ git diff --check
 
 در مرحلهٔ نخست کاهش اولویت‌های فعال، دو `!important` فونت عمومی از `industrial-system.css` حذف شد؛ selectorهای بدنه و heading از قواعد عادی مؤلفه‌ها مشخص‌ترند و markup/renderer مقدار inline فونت ندارد. شمار جاری ۲٬۶۴۴ اعلان در ۳۵ stylesheet است. سقف ثبت‌شدهٔ هر فایل در `tools/ui-legacy-budget.json` به شمار جاری دقیق شد؛ کنترل `check-ui` اکنون هر افزایش را رد می‌کند.
 
+در بازبینی آنلاین placeholderهای صفحهٔ جستجو و پیگیری سفارش، `color: #5d6a73 !important` در قاعدهٔ پایهٔ `::placeholder` مقدار رنگ تعریف‌شده در فایل‌های مالک صفحه را می‌پوشاند. `!important` از قاعدهٔ پایه برداشته شد؛ رنگ محلی `var(--industrial-muted)` اکنون برنده است و opacity، اندازه و وزن فونت پایه حفظ شدند. یک قاعدهٔ caret خانه نیز از `industrial-system.css` به فایل مالک ناوبری هدر منتقل و بدون `!important` نگه داشته شد؛ selector آن از قاعدهٔ Bootstrap مشخص‌تر است. تست‌های مرورگر مقدار placeholder را در search/tracking و پنهان‌ماندن caret را در چهار عرض دسکتاپ بررسی می‌کنند. شمار جاری ۲٬۵۷۱ `!important` است.
+
 دو `border-top-*-radius !important` که در همان rule با `border-radius !important` بعدی پوشانده می‌شدند از `quick-links-menu.css` حذف شدند. `check-ui` برای این الگوی shorthand/longhand و چند خانوادهٔ رایج دیگر هشدار می‌دهد؛ شمار جاری ۲٬۶۴۲ است.
 
 چهار `!important` دیگر از قواعد `.article-checklist`، stroke صفر آیکن‌های غیرفعال و `scrollbar-gutter` سبد حذف شدند؛ selectorهای فعال cascade عادی را برنده می‌کنند. شمار جاری ۲٬۶۳۸ در ۳۵ stylesheet است.
