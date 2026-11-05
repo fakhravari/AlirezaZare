@@ -30,9 +30,10 @@ test('hidden home category submenu opens on hover and hides on pointer leave', a
 test('desktop and tablet headers keep actions inside the viewport around navigation breakpoints', async ({page, isMobile}) => {
   test.skip(isMobile, 'This regression covers tablet and desktop navigation.');
   for (const route of ['/', '/magazine/choosing-work-drill']) {
+    await page.setViewportSize({width: 992, height: 900});
+    await page.goto(route);
     for (const width of [992, 1024, 1100, 1199, 1200, 1280, 1359, 1360, 1440]) {
       await page.setViewportSize({width, height: 900});
-      await page.goto(route);
       const layout = await page.evaluate(() => {
         const actions = document.querySelector('#mainNav .home-nav-action-group').getBoundingClientRect();
         const toggler = document.querySelector('#mainNav .navbar-toggler');
