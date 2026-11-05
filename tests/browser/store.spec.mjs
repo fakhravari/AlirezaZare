@@ -27,6 +27,37 @@ test('hidden home category submenu opens on hover and hides on pointer leave', a
   await expect(submenu).toBeHidden();
   await expect(submenu).toHaveCSS('display', 'none');
 });
+test('desktop and tablet headers keep actions inside the viewport around navigation breakpoints', async ({page, isMobile}) => {
+  test.skip(isMobile, 'This regression covers tablet and desktop navigation.');
+  for (const route of ['/', '/magazine/choosing-work-drill']) {
+    for (const width of [992, 1024, 1100, 1199, 1200, 1280, 1359, 1360, 1440]) {
+      await page.setViewportSize({width, height: 900});
+      await page.goto(route);
+      const layout = await page.evaluate(() => {
+        const actions = document.querySelector('#mainNav .home-nav-action-group').getBoundingClientRect();
+        const toggler = document.querySelector('#mainNav .navbar-toggler');
+        const menu = document.querySelector('#mainNav .home-nav-menu-group');
+        return {
+          actionsLeft: actions.left,
+          actionsRight: actions.right,
+          togglerVisible: getComputedStyle(toggler).display !== 'none',
+          menuVisible: getComputedStyle(menu).display !== 'none',
+          viewport: innerWidth,
+          document: document.documentElement.scrollWidth,
+        };
+      });
+      expect(layout.actionsLeft, `${route} at ${width}px`).toBeGreaterThanOrEqual(-1);
+      expect(layout.actionsRight, `${route} at ${width}px`).toBeLessThanOrEqual(width + 1);
+      expect(layout.document, `${route} at ${width}px`).toBeLessThanOrEqual(width + 1);
+      expect(layout.togglerVisible, `${route} at ${width}px`).toBe(width < 1200);
+      expect(layout.menuVisible, `${route} at ${width}px`).toBe(width >= 1200);
+    }
+  }
+  await page.setViewportSize({width: 1024, height: 900});
+  await page.goto('/');
+  await page.locator('#mainNav .navbar-toggler').click();
+  await expect(page.locator('#mobileMenu')).toBeVisible();
+});
 test('all home collections render shared cards with one action of each kind', async ({page, isMobile}) => {
   await page.addInitScript(() => localStorage.setItem('hn-demo-auth', '1'));
   await page.clock.install({time: new Date('2026-11-01T10:00:00Z')});

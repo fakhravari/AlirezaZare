@@ -56,6 +56,60 @@
   }
 }
 
+@media (min-width: 992px) and (max-width: 1199.98px) {
+  body.home-page #mainNav > .container {
+    position: relative;
+  }
+
+  body.inner-page #mainNav > .container {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+  }
+
+  body.home-page #mainNav :is(.home-nav-menu-group, .collapse),
+  body.inner-page #mainNav :is(.home-nav-menu-group, .collapse) {
+    display: none;
+  }
+
+  body.home-page #mainNav .home-nav-action-group,
+  body.inner-page #mainNav .home-nav-action-group {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    display: flex;
+    height: 100%;
+    align-items: center;
+  }
+
+  body.home-page #mainNav .navbar-toggler,
+  body.inner-page #mainNav .navbar-toggler {
+    position: absolute;
+    top: auto;
+    right: 28px;
+    bottom: 16px;
+    z-index: 10;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+@media (min-width: 1200px) and (max-width: 1359.98px) {
+  .inner-page #mainNav {
+    --desktop-nav-link-padding: 8px;
+  }
+
+  .inner-page #mainNav .navbar-nav {
+    gap: 4px;
+  }
+
+  .inner-page #mainNav .home-nav-groups {
+    gap: 8px;
+  }
+}
+
 @media (min-width: 576px) and (max-width: 991px) {
   #mainNav {
     --header-actions-gap: 8px;

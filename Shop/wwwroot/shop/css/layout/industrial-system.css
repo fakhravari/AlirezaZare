@@ -3836,7 +3836,7 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
     width: auto;
     height: 46px;
     min-height: 46px;
-    padding: 0 14px !important;
+    padding: 0 var(--desktop-nav-link-padding, 14px) !important;
     align-items: center;
     justify-content: center;
     border: 1px solid transparent;
@@ -9208,6 +9208,33 @@ html
   }
 }
 
+/* Give touch users full-size cart controls in the mobile/tablet header drawer. */
+@media (max-width: 991px) {
+  #cartPanel .cart-item-info > .cart-item-actions {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 6px;
+  }
+
+  #cartPanel .cart-item-actions .hn-cart-controls {
+    justify-self: start;
+    margin-inline-start: 0;
+  }
+
+  #cartPanel .hn-cart-controls .hn-cart-quantity > button,
+  #cartPanel .hn-cart-controls > .hn-cart-remove {
+    box-sizing: border-box;
+    flex-basis: 44px;
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    min-height: 44px;
+  }
+
+  #cartPanel .hn-cart-controls .cart-quantity-value {
+    height: 44px;
+  }
+}
+
 /* Use square, edge-to-edge product imagery in favorites and compare surfaces. */
 :is(#favoritesPanel, #comparePanel) .compare-panel-item {
   grid-template-columns: 72px minmax(0, 1fr) 34px;
@@ -11110,21 +11137,6 @@ body .electrical-swiper .swiper-pagination-bullet-active {
 .newsletter .subscribe input {
   border-top-right-radius: 10px;
   border-bottom-right-radius: 10px;
-}
-
-@media (min-width: 992px) and (max-width: 1199px) {
-  .inner-page #mainNav .navbar-nav {
-    gap: 4px;
-  }
-
-  .inner-page #mainNav .nav-link {
-    padding-inline: 8px !important;
-    font-size: 13px;
-  }
-
-  .inner-page #mainNav .home-nav-groups {
-    gap: 8px;
-  }
 }
 
 /* Keep hero breadcrumbs visually consistent across page templates. */

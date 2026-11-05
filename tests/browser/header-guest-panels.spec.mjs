@@ -78,3 +78,42 @@ test('header cart footer stays compact and preserves room for the item list', as
     checkoutMinHeight: '46px',
   });
 });
+
+test('touch header cart controls have 44px targets without panel overflow', async ({page}) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('hadi-norouzi-cart', JSON.stringify([{id: '1', name: 'Product', price: 100, quantity: 2}]));
+  });
+
+  for (const width of [320, 390, 768, 991]) {
+    await page.setViewportSize({width, height: 900});
+    await page.goto('/');
+    await page.evaluate(() => {
+      document.querySelector('#cartWrap')?.classList.add('open');
+      document.querySelector('#cartPanel')?.classList.add('open');
+    });
+    const controls = page.locator('#cartPanel .cart-item .hn-cart-controls');
+    await expect(controls).toBeVisible();
+    const metrics = await page.evaluate(() => {
+      const panel = document.querySelector('#cartPanel');
+      const buttons = [...panel.querySelectorAll('.hn-cart-controls button')];
+      return {
+        buttons: buttons.map(button => {
+          const rect = button.getBoundingClientRect();
+          return {width: rect.width, height: rect.height};
+        }),
+        panelWidth: panel.clientWidth,
+        panelScrollWidth: panel.scrollWidth,
+        documentWidth: document.documentElement.scrollWidth,
+        viewportWidth: window.innerWidth,
+      };
+    });
+
+    expect(metrics.buttons).toHaveLength(3);
+    for (const button of metrics.buttons) {
+      expect(button.width).toBeGreaterThanOrEqual(44);
+      expect(button.height).toBeGreaterThanOrEqual(44);
+    }
+    expect(metrics.panelScrollWidth).toBeLessThanOrEqual(metrics.panelWidth);
+    expect(metrics.documentWidth).toBeLessThanOrEqual(metrics.viewportWidth);
+  }
+});

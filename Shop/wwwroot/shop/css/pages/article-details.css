@@ -1169,7 +1169,7 @@
       inset 0 1px rgba(255, 255, 255, 0.95),
       0 10px 26px rgba(16, 42, 67, 0.06);
   }
-  .article-enhanced .article-sidebar-scroll {
+  #main-content .article-enhanced .article-sidebar-scroll {
     box-sizing: border-box;
     max-height: calc(100dvh - 216px);
     margin-inline: 0;
@@ -1185,7 +1185,7 @@
     scrollbar-gutter: auto;
     scroll-behavior: smooth;
   }
-  .article-enhanced .article-sidebar-scroll::-webkit-scrollbar {
+  #main-content .article-enhanced .article-sidebar-scroll::-webkit-scrollbar {
     width: 0;
     height: 0;
     display: none;
