@@ -594,10 +594,6 @@ body {
   direction: rtl;
 }
 
-.header-cart {
-  color: #23495d !important;
-}
-
 @media (max-width: 991px) {
   .mobile-menu .mobile-category-toggle > span > i,
   .mobile-menu .mobile-category > button > span > i {

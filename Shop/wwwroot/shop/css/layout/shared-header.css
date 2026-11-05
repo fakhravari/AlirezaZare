@@ -159,19 +159,6 @@
   }
 }
 
-/* Keep the search header actions in the same blue-gray component palette. */
-.header-cart {
-  border-color: #d8dee5 !important;
-  background: #fff !important;
-}
-.header-cart:hover,
-.header-cart:focus-visible {
-  border-color: #9ba9b6 !important;
-  background: #f3f7fb !important;
-  color: #173867 !important;
-  box-shadow: 0 5px 16px rgba(16, 42, 86, 0.12) !important;
-}
-
 /* Keep the signed-in label stable on one line across inner-page headers. */
 
 /* Keep search and account glyph boxes identical in both header variants. */
@@ -209,22 +196,4 @@
   place-items: center;
   font-size: 10px;
   line-height: 1;
-}
-
-@media (max-width: 991px) {
-  .mobile-menu .mobile-category-toggle > span > i,
-  .mobile-menu .mobile-category > button > span > i {
-    display: grid !important;
-    width: 31px !important;
-    height: 31px !important;
-    place-items: center !important;
-    border: 1px solid rgba(223, 194, 127, 0.18) !important;
-    border-radius: 9px !important;
-    font-size: 15px !important;
-    box-shadow: none !important;
-  }
-  .mobile-menu .mobile-category-toggle > span > i,
-  .mobile-menu .mobile-category > button > span > i {
-    margin-left: 0 !important;
-  }
 }

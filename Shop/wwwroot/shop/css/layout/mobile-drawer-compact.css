@@ -536,6 +536,19 @@
     font-size: 14px;
   }
 
+  .mobile-menu .mobile-category-toggle > span > i,
+  .mobile-menu .mobile-category > button > span > i {
+    display: grid;
+    width: 31px;
+    height: 31px;
+    place-items: center;
+    border: 1px solid rgba(223, 194, 127, 0.18);
+    border-radius: 9px;
+    font-size: 15px;
+    box-shadow: none;
+    margin-left: 0;
+  }
+
   .mobile-menu .mobile-submenu {
     padding-top: 4px;
     padding-bottom: 8px;

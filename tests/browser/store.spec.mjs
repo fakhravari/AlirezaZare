@@ -39,6 +39,8 @@ test('inner category mega menu is hidden while navigation is collapsed and opens
   await trigger.click();
   await expect(menu).toBeVisible();
   await expect(menu).toHaveCSS('display', 'grid');
+  await expect(menu.locator('.category-mega-sidebar > button').first()).toHaveCSS('border-radius', '8px');
+  await expect(menu.locator('.category-mega-group > a:not(.category-mega-title)').first()).toHaveCSS('color', 'rgb(82, 101, 121)');
 });
 test('header toggle uses shared owner colors on mobile and tablet home and inner pages', async ({page, isMobile}) => {
   test.skip(isMobile, 'This regression sets both phone and tablet viewport widths.');
@@ -211,6 +213,39 @@ test('all home collections render shared cards with one action of each kind', as
   await expect.poll(() => page.evaluate(() => window.HNUI.cart.read().find(item => item.salesPlanId === 'digi-time')?.price)).toBe(planPrice);
   await expect(page.locator('#cartPanel .cart-sales-plan-badge')).toContainText(/دیجی‌تایم/);
   await noHorizontalOverflow(page);
+});
+
+test('homepage magazine and purchase benefits keep their layout across breakpoints', async ({page}) => {
+  for (const width of [320, 380, 381, 390, 640, 767, 768, 991, 992, 1199, 1200]) {
+    await page.setViewportSize({width, height: 900});
+    await page.goto('/');
+    await expect(page.locator('#services')).toHaveClass(/purchase-benefits/);
+    expect(await page.locator('#services .service, #services.services').count()).toBe(0);
+    const layout = await page.evaluate(() => {
+      const list = document.querySelector('#journal .journal-list');
+      const title = list.querySelector('h4');
+      const stats = list.querySelector('.journal-list-stats');
+      const benefits = document.querySelector('#services .benefits-intro p');
+      return {
+        listDisplay: getComputedStyle(list).display,
+        listColumns: getComputedStyle(list).gridTemplateColumns.split(' ').length,
+        listOverflow: getComputedStyle(list).overflow,
+        titleFontSize: getComputedStyle(title).fontSize,
+        titleWhiteSpace: getComputedStyle(title).whiteSpace,
+        statsGridArea: getComputedStyle(stats).gridArea,
+        benefitsWhiteSpace: getComputedStyle(benefits).whiteSpace
+      };
+    });
+    expect(layout).toMatchObject({
+      listDisplay: 'grid',
+      listColumns: 1,
+      listOverflow: 'visible',
+      titleFontSize: '15px',
+      titleWhiteSpace: 'normal',
+      statsGridArea: 'reading',
+      benefitsWhiteSpace: width <= 1199 ? 'normal' : 'nowrap'
+    });
+  }
 });
 
 test('special-plan grid spacing and columns match the regular home grid across breakpoints', async ({page}) => {

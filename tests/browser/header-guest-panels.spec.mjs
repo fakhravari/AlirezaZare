@@ -69,6 +69,39 @@ test('mobile help links remain in the existing accordion', async ({page, isMobil
   await expect(page.locator('#mainNav .quick-links-dropdown:not(.sales-plans-dropdown) .quick-links-menu')).toBeHidden();
 });
 
+test('mobile drawer category icons keep their 31px layout in their component owner', async ({page, isMobile}) => {
+  test.skip(!isMobile, 'Category icon sizing is specific to the mobile drawer.');
+  await page.goto('/');
+  await page.locator('#mainNav .navbar-toggler').click();
+  const drawer = page.locator('#mobileMenu');
+  await expect(drawer).toBeVisible();
+  const icon = drawer.locator('.mobile-category-toggle > span > i').first();
+  await expect(icon).toBeVisible();
+  const layout = await icon.evaluate(element => {
+    const style = getComputedStyle(element);
+    return {
+      display: style.display,
+      width: style.width,
+      height: style.height,
+      placeItems: style.placeItems,
+      borderRadius: style.borderRadius,
+      fontSize: style.fontSize,
+      boxShadow: style.boxShadow,
+      marginLeft: style.marginLeft,
+    };
+  });
+  expect(layout).toEqual({
+    display: 'grid',
+    width: '31px',
+    height: '31px',
+    placeItems: 'center',
+    borderRadius: '9px',
+    fontSize: '15px',
+    boxShadow: 'none',
+    marginLeft: '0px',
+  });
+});
+
 test('guest can preview nonempty header panels on hover', async ({page, isMobile}) => {
   test.skip(isMobile, 'Hover panels are a desktop interaction.');
   await page.addInitScript(() => {

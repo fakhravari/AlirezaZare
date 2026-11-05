@@ -869,10 +869,7 @@ h6,
 }
 
 .ui-surface-card,
-.product-card,
-.service-card,
 .benefit,
-.store-card,
 .testimonial-card {
   border-color: var(--industrial-line) !important;
   background: #fff !important;
@@ -881,14 +878,6 @@ h6,
 
 :is(.ui-surface-card, .benefit, .testimonial-card) {
   border-radius: var(--radius-panel-standard, 20px);
-}
-
-.ui-surface-card--interactive:hover,
-.product-card:hover,
-.service-card:hover,
-.store-card:hover {
-  border-color: var(--industrial-yellow) !important;
-  box-shadow: var(--industrial-shadow-hover) !important;
 }
 
 /* Buttons and actions */
@@ -1514,9 +1503,7 @@ form .form-field-error[hidden] {
 
 /* Account, cart and modal panels */
 .account-panel,
-.cart-panel,
-.login-modal-content,
-.search-modal-content {
+.cart-panel {
   border-color: var(--industrial-line) !important;
   background: #fff !important;
   color: var(--industrial-ink) !important;
@@ -1530,7 +1517,6 @@ form .form-field-error[hidden] {
 }
 
 .account-avatar,
-.ui-icon-tile,
 .order-product-icon {
   border-color: var(--industrial-icon-border) !important;
   background: var(--industrial-icon-surface) !important;
@@ -1923,7 +1909,7 @@ footer .trust-badges .trust-badge-image {
 /* Keep the mobile header actions in one row when desktop flex rules no longer apply. */
 @media (max-width: 991px) {
   .home-page #mainNav .nav-tools {
-    display: flex !important;
+    display: flex;
     width: auto;
     height: auto;
     flex-direction: row;
@@ -1932,7 +1918,7 @@ footer .trust-badges .trust-badge-image {
   }
 
   .home-page #mainNav .nav-actions {
-    display: flex !important;
+    display: flex;
     height: auto;
     flex: 0 0 auto;
     flex-direction: row;
@@ -8544,7 +8530,6 @@ html
   .inner-page #mainNav .category-mega-sidebar > button {
     border-color: transparent !important;
     border-top: 1px solid #e8edef !important;
-    border-radius: 0 !important;
     background: transparent !important;
     color: var(--industrial-steel) !important;
     box-shadow: none !important;
@@ -8595,10 +8580,6 @@ html
 
   .inner-page #mainNav .category-mega-group {
     border-right-color: #e8edef !important;
-  }
-
-  .inner-page #mainNav .category-mega-group > a:not(.category-mega-title) {
-    color: #5b6c7a !important;
   }
 
   .inner-page
@@ -8823,10 +8804,6 @@ html
     > header
     > span {
     font-size: 12px;
-  }
-
-  .purchase-benefits--showcase .benefits-intro p {
-    white-space: normal;
   }
 }
 
@@ -9262,7 +9239,7 @@ html
 
 /* Slightly widen only the header cart quantity-control outline. */
 
-/* Improve header-cart readability without shrinking text on narrow phones. */
+/* Keep the cart panel title readable without shrinking text on narrow phones. */
 #cartPanel .cart-head .cart-head-title strong {
   font-size: 18px !important;
 }
@@ -9306,7 +9283,7 @@ html
 
 }
 
-/* Shared readable type scale for page content, following the header-cart treatment. */
+/* Share a readable type scale across page content. */
 .inner-page main
   label:not(.product-feedback-name-field):not(
     .product-feedback-rating-field
@@ -10838,14 +10815,11 @@ body .electrical-swiper .swiper-pagination-bullet-active {
   }
 
   .home-page #journal .journal-list {
-    display: grid;
     height: auto;
     min-height: 0;
-    grid-template-columns: minmax(0, 1fr);
     grid-template-rows: auto;
     gap: 9px;
     padding: 10px;
-    overflow: visible;
   }
 
   .home-page #journal .journal-list-heading {
@@ -10881,7 +10855,6 @@ body .electrical-swiper .swiper-pagination-bullet-active {
   }
 
   .home-page #journal .journal-list-stats {
-    grid-area: reading;
     gap: 4px;
   }
 
@@ -10898,9 +10871,7 @@ body .electrical-swiper .swiper-pagination-bullet-active {
 
   .home-page #journal .journal-list h4 {
     display: -webkit-box;
-    font-size: 15px;
     line-height: 1.4;
-    white-space: normal;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
     line-clamp: 2;
@@ -10916,10 +10887,6 @@ body .electrical-swiper .swiper-pagination-bullet-active {
     grid-template-columns: 30px minmax(0, 1fr) 20px;
     grid-template-rows: 24px auto 25px;
     grid-template-areas: "number meta cta" "number title cta" "number reading cta";
-  }
-
-  .home-page #journal .journal-list-stats {
-    grid-area: reading;
   }
 }
 
@@ -12059,7 +12026,7 @@ body .electrical-swiper .swiper-pagination-bullet-active {
   }
 }
 
-/* Center the mobile header-cart safety note beneath the total. */
+/* Center the mobile cart safety note beneath the total. */
 @media (max-width: 575px) {
   #cartPanel .cart-footer .cart-safety-badge {
     align-items: center;

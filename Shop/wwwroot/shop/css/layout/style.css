@@ -1127,46 +1127,6 @@ textarea {
   font-size: 8px;
 }
 
-.service {
-  text-align: center;
-  padding: 10px 45px;
-  position: relative;
-}
-
-.service + .service {
-  border-right: 1px solid #e9e4dc;
-}
-
-.service > span {
-  position: absolute;
-  right: 20px;
-  top: 0;
-  color: #b1a58f;
-  font-size: 11px;
-}
-
-.service > i {
-  width: 68px;
-  height: 68px;
-  border: 1px solid #d6c8b4;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  margin: 0 auto 25px;
-  color: #a08865;
-  font-size: 27px;
-}
-
-.service h3 {
-  font-size: 19px;
-}
-
-.service p {
-  font-size: 14px;
-  line-height: 2;
-  color: #7c8790;
-}
-
 .journal {
   background: #faf8f4;
 }
@@ -1623,23 +1583,6 @@ footer {
     margin-top: 45px;
   }
 
-  .service {
-    padding: 42px 24px;
-  }
-
-  .service + .service {
-    border-right: 0;
-    border-top: 1px solid #e9e4dc;
-  }
-
-  .service h3 {
-    font-size: 19px;
-  }
-
-  .service p {
-    font-size: 14px;
-  }
-
   .journal .section-head {
     align-items: flex-start !important;
     flex-direction: column;
@@ -1695,11 +1638,6 @@ footer {
 }
 
 @media (max-width: 380px) {
-  .hero {
-    height: 800px;
-    min-height: 800px;
-  }
-
   .hero h1,
   .hero h2 {
     font-size: 40px;
@@ -2230,7 +2168,6 @@ img {
 .carousel-item,
 .story,
 #collection,
-.services,
 .journal,
 .newsletter,
 footer {
@@ -3953,7 +3890,6 @@ h6,
 
 .section-head p,
 .story-copy p,
-.service p,
 .newsletter p {
   font-size: 16px;
   line-height: 2.1;
@@ -3970,8 +3906,7 @@ h6,
 .journal-list small,
 .rail-card > small,
 .featured-content > small,
-.featured-side-content > small,
-.service > span {
+.featured-side-content > small {
   font-family: "Vazirmatn", Tahoma, sans-serif;
   font-size: 13px;
   font-weight: 600;
@@ -4049,7 +3984,6 @@ h6,
 
   .section-head p,
   .story-copy p,
-  .service p,
   .newsletter p {
     font-size: 14px;
   }
@@ -4112,122 +4046,13 @@ h6,
   }
 }
 
-/* Final service-card contrast guard */
-
-.services .service h3 {
-  text-shadow: none;
-}
-
-.services .service:hover h3 {
-  color: #0b2f87 !important;
-}
-
-/* Light luxury treatment for the three primary services only */
-.services {
-  padding: 78px 0;
-}
-
-.services::before {
-  opacity: 0.35;
-  background-image: radial-gradient(
-    rgba(143, 111, 63, 0.18) 0.65px,
-    transparent 0.65px
-  );
-  background-size: 15px 15px;
-  mask-image: linear-gradient(
-    to bottom,
-    transparent,
-    #000 25%,
-    #000 75%,
-    transparent
-  );
-}
-
-.services .service {
-  min-height: 270px;
-  padding: 38px 30px 30px;
-  overflow: visible;
-  border: 1px solid rgba(174, 142, 94, 0.22);
-  border-radius: 20px;
-  backdrop-filter: none;
-}
-
-.services .service::before {
-  content: "";
-  position: absolute;
-  right: 28%;
-  top: -1px;
-  left: 28%;
-  height: 3px;
-  border-radius: 0 0 5px 5px;
-  background: linear-gradient(90deg, transparent, #c99d59, transparent);
-}
-
-.services .service::after {
-  right: 25%;
-  bottom: -25px;
-  width: 50%;
-  height: 50px;
-  background: rgba(174, 128, 61, 0.1);
-  filter: blur(20px);
-}
-
-.services .service > span {
-  right: auto;
-  left: 20px;
-  top: 15px;
-  letter-spacing: -1px;
-}
-
-.services .service > i {
-  width: 72px;
-  height: 72px;
-  margin: 0 auto 25px;
-  border: 7px solid #f8f4ed;
-  border-radius: 50%;
-  font-size: 25px;
-  box-shadow:
-    0 0 0 1px rgba(177, 136, 76, 0.32),
-    0 10px 24px rgba(76, 55, 24, 0.12);
-  transform: none;
-}
-
-.services .service > i::before {
-  transform: none;
-}
-
-.services .service h3 {
-  margin-bottom: 13px;
-}
-
-.services .service:hover {
-  transform: translateY(-7px);
-  border-color: rgba(177, 136, 76, 0.46);
-  background: #fff;
-  box-shadow:
-    0 24px 48px rgba(19, 36, 72, 0.14),
-    inset 0 1px #fff;
-}
-
-.services .service:hover > i {
-  background: linear-gradient(145deg, #d9b574, #ad7b37);
-  color: #fff;
-  box-shadow:
-    0 0 0 1px rgba(177, 136, 76, 0.36),
-    0 13px 28px rgba(118, 81, 31, 0.22);
-}
-
 @media (max-width: 991px) {
-  .services {
-    padding: 60px 0;
-  }
 }
 
 /* Balanced justification for long Persian copy */
 .section-head p,
 .testimonial-card > p,
 .story-copy > p,
-.service > p,
 .journal-main p,
 .newsletter p,
 .footer-main p,
@@ -4706,115 +4531,10 @@ h6,
   line-height: 1.55;
 }
 
-/* Premium services and trust strip */
-.services {
-  position: relative;
-  overflow: hidden;
-  padding: 88px 0 82px;
-}
-
-.services::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0.3;
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
-  background-size: 46px 46px;
-}
-
-.services .container {
-  position: relative;
-  z-index: 1;
-}
-
-.services .service {
-  height: 100%;
-  min-height: 250px;
-  padding: 35px 30px 29px;
-  overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 22px;
-  backdrop-filter: blur(8px);
-  transition:
-    transform 0.3s ease,
-    border-color 0.3s ease,
-    background 0.3s ease,
-    box-shadow 0.3s ease;
-}
-
-.services .service::after {
-  content: "";
-  position: absolute;
-  right: 22%;
-  bottom: -45px;
-  width: 56%;
-  height: 72px;
-  border-radius: 50%;
-  background: rgba(204, 162, 96, 0.13);
-  filter: blur(22px);
-}
-
-.services .service > span {
-  right: 20px;
-  top: 17px;
-  font-family: Arial, sans-serif;
-  letter-spacing: 2px;
-}
-
-.services .service > i {
-  position: relative;
-  z-index: 2;
-  width: 70px;
-  height: 70px;
-  margin: 0 auto 22px;
-  border: 1px solid rgba(230, 196, 137, 0.55);
-  border-radius: 22px;
-  font-size: 27px;
-  box-shadow:
-    0 10px 24px rgba(0, 6, 31, 0.3),
-    inset 0 1px rgba(255, 255, 255, 0.5);
-  transform: rotate(45deg);
-}
-
-.services .service > i::before {
-  transform: rotate(-45deg);
-}
-
-.services .service h3 {
-  margin: 0 0 11px;
-}
-
-.services .service p {
-  max-width: 285px;
-  margin: 0 auto;
-}
-
-.services .service:hover {
-  transform: translateY(-8px);
-  border-color: rgba(224, 188, 126, 0.45);
-  background: linear-gradient(
-    145deg,
-    rgba(255, 255, 255, 0.14),
-    rgba(255, 255, 255, 0.065)
-  );
-  box-shadow:
-    0 28px 55px rgba(0, 8, 37, 0.34),
-    inset 0 1px rgba(255, 255, 255, 0.14);
-}
-
 @media (max-width: 991px) {
-  .services {
-    padding: 70px 0;
-  }
 }
 
 @media (max-width: 767px) {
-  .services .service {
-    min-height: 225px;
-  }
 }
 
 @media (max-width: 767px) {
@@ -6689,59 +6409,7 @@ footer .copyright::before {
     font-size: 13px !important;
   }
 }
-
-/* Service typography must remain readable after all theme layers. */
-.services {
-  background:
-    radial-gradient(
-      circle at 50% -30%,
-      rgba(209, 177, 124, 0.14),
-      transparent 45%
-    ),
-    linear-gradient(180deg, #fbfaf7 0%, #f5f1e9 100%) !important;
-  color: #0a245f !important;
-}
-.services .service {
-  border-color: rgba(174, 142, 94, 0.28) !important;
-  background: rgba(255, 255, 255, 0.96) !important;
-  color: #071b5c !important;
-  box-shadow:
-    0 15px 38px rgba(19, 36, 72, 0.1),
-    inset 0 1px #fff;
-  text-align: center !important;
-}
-.services .service h3 {
-  color: #071b5c !important;
-  font-size: 22px !important;
-  font-weight: 800 !important;
-  line-height: 1.55 !important;
-  text-align: center !important;
-}
-.services .service p {
-  color: #46536d !important;
-  font-size: 16px !important;
-  font-weight: 500 !important;
-  line-height: 2.05 !important;
-  text-align: center !important;
-  text-align-last: center !important;
-}
-.services .service > span {
-  color: rgba(11, 34, 117, 0.24) !important;
-  font-size: 32px !important;
-  font-weight: 900 !important;
-}
-.services .service > i {
-  border-color: #f8f4ed !important;
-  background: linear-gradient(145deg, #fff, #eee4d4) !important;
-  color: #9a6a2f !important;
-}
 @media (max-width: 767px) {
-  .services .service h3 {
-    font-size: 20px !important;
-  }
-  .services .service p {
-    font-size: 15px !important;
-  }
 }
 
 /* Cinematic customer-story section */
