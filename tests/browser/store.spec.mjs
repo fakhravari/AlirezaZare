@@ -61,8 +61,13 @@ test('all home collections render shared cards with one action of each kind', as
       titleColor: getComputedStyle(header.querySelector('h2')).color,
       decoration: getComputedStyle(header, '::before').content,
     }));
-    expect(planHeader.background).toContain('linear-gradient');
-    expect(planHeader.radius).toBe('18px');
+    if (isMobile) {
+      expect(planHeader.background).toBe('none');
+      expect(planHeader.radius).toBe('0px');
+    } else {
+      expect(planHeader.background).toContain('linear-gradient');
+      expect(planHeader.radius).toBe('18px');
+    }
     expect(planHeader.titleColor).toBe('rgb(16, 42, 67)');
     expect(planHeader.decoration).toBe('\"\"');
     const product = section.locator('.home-sales-plan-grid > div .product-card').first();
@@ -82,9 +87,40 @@ test('all home collections render shared cards with one action of each kind', as
     const href = await product.locator('h3 a').getAttribute('href');
     expect(new URL(href, 'http://localhost').searchParams.get('salesPlanId')).toBe(planId);
     expect(await product.locator('.add-cart').getAttribute('data-sales-plan-id')).toBe(planId);
-    await expect(product.locator('.product-sales-plan-badge')).toContainText(await product.getAttribute('data-sales-plan-name'));
+    await expect(product.locator('.product-sales-plan-badge')).toHaveText(await product.getAttribute('data-sales-plan-name'));
     const countdown = section.locator('.home-sales-plan-countdown');
     await expect(countdown).toBeVisible();
+    const planLabel = await page.evaluate(id => JSON.parse(document.querySelector('#storeSalesPlans').textContent).plans.find(plan => plan.id === id).label, planId);
+    const mobileCountdownDescription = countdown.locator('.home-sales-plan-countdown-description');
+    const headerDescription = section.locator('.home-sales-plan-header-description');
+    await expect(headerDescription).toHaveText(planLabel);
+    await expect(mobileCountdownDescription).toHaveText(planLabel);
+    if (isMobile) {
+      await expect(mobileCountdownDescription).toBeVisible();
+      await expect(headerDescription).toBeHidden();
+      const mobileHeaderPositions = await section.locator('.category-showcase-head').evaluate(header => {
+        const title = header.querySelector('h2').getBoundingClientRect();
+        const action = header.querySelector(':scope > a').getBoundingClientRect();
+        const countdown = header.querySelector('.home-sales-plan-countdown').getBoundingClientRect();
+        return {titleLeft: title.left, actionRight: action.right, titleTop: title.top, actionTop: action.top, countdownTop: countdown.top, countdownRight: countdown.right, actionLeft: action.left};
+      });
+      expect(mobileHeaderPositions.actionRight).toBeLessThan(mobileHeaderPositions.titleLeft);
+      expect(mobileHeaderPositions.actionTop).toBeLessThan(mobileHeaderPositions.countdownTop);
+      expect(mobileHeaderPositions.countdownRight).toBeGreaterThan(mobileHeaderPositions.actionLeft);
+      const countdownLayout = await countdown.evaluate(element => {
+        const label = element.querySelector('.home-sales-plan-countdown-label').getBoundingClientRect();
+        const description = element.querySelector('.home-sales-plan-countdown-description').getBoundingClientRect();
+        const time = element.querySelector('time').getBoundingClientRect();
+        return {labelTop: label.top, descriptionTop: description.top, labelLeft: label.left, labelRight: label.right, descriptionRight: description.right, timeTop: time.top, timeLeft: time.left, timeRight: time.right};
+      });
+      expect(Math.abs(countdownLayout.timeTop - countdownLayout.labelTop)).toBeLessThan(4);
+      expect(countdownLayout.descriptionTop).toBeGreaterThan(countdownLayout.labelTop);
+      expect(countdownLayout.timeRight).toBeLessThan(countdownLayout.labelLeft);
+      expect(Math.abs(countdownLayout.descriptionRight - countdownLayout.labelRight)).toBeLessThan(4);
+    } else {
+      await expect(mobileCountdownDescription).toBeHidden();
+      await expect(headerDescription).toBeVisible();
+    }
     await expect(countdown).toHaveCSS('border-radius', '15px');
     await expect(countdown.locator('time')).toHaveCSS('font-weight', '900');
     const countdownTime = countdown.locator('time');
@@ -240,7 +276,7 @@ test('search includes active plan offers and preserves the selected offer in car
   await page.locator('#productSearch').fill(listing.product.name);
   const offerCard = page.locator(`#productResults [data-product-id="${listing.offer.productId}"][data-sales-plan-id="${listing.plan.id}"]`);
   await expect(offerCard).toBeVisible();
-  await expect(offerCard.locator('.product-sales-plan-badge')).toContainText(listing.plan.name);
+  await expect(offerCard.locator('.product-sales-plan-badge')).toHaveText(listing.plan.name);
   const expectedPrice = Math.round(listing.offer.priceAmount * (100 - listing.offer.discountPercent) / 100);
   await expect(offerCard.locator('.add-cart')).toHaveAttribute('data-price', String(expectedPrice));
   await offerCard.locator('.add-cart').click();

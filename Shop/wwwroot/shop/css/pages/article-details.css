@@ -1172,7 +1172,7 @@
   .article-enhanced .article-sidebar-scroll {
     box-sizing: border-box;
     max-height: calc(100dvh - 216px);
-    margin-inline: 12px -4px;
+    margin-inline: 0;
     overflow-x: hidden;
     overflow-y: auto;
     --ui-scroll-width: 3px;
@@ -1181,10 +1181,14 @@
     --ui-scroll-thumb-hover: #a98a43;
     --ui-scroll-thumb-border: 0;
     --ui-scroll-thumb-shadow: none;
-    scrollbar-width: thin;
-    scrollbar-color: #cbb779 transparent;
-    scrollbar-gutter: stable;
+    scrollbar-width: none !important;
+    scrollbar-gutter: auto;
     scroll-behavior: smooth;
+  }
+  .article-enhanced .article-sidebar-scroll::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+    display: none !important;
   }
   .article-enhanced .article-toc-scroll {
     margin-left: 8px;

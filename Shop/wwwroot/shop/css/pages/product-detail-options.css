@@ -1786,10 +1786,17 @@
 }
 
 #productView .product-detail-tabs > a > b {
+  display: inline-flex;
+  min-width: 28px;
+  min-height: 28px;
+  align-items: center;
+  justify-content: center;
+  padding-inline: 7px;
   border: 1px solid #e8e1d2;
   border-radius: 8px;
   background: #f5f2eb;
   color: #6f6656;
+  font-size: 14px;
   font-weight: 800;
 }
 

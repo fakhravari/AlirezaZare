@@ -1761,28 +1761,28 @@ footer .trust-badges .trust-badge-image {
   align-items: center;
   justify-content: center;
   padding: 5px 12px !important;
-  border: 1px solid transparent !important;
+  border: 1px solid rgba(16, 42, 67, 0.2) !important;
   border-radius: 999px !important;
   font-size: 12px !important;
   font-weight: 700 !important;
   line-height: 1.2 !important;
-  box-shadow: 0 4px 12px rgba(16, 42, 67, 0.16) !important;
+  box-shadow: 0 4px 10px rgba(16, 42, 67, 0.14) !important;
 }
 
 .badge-best {
-  border-color: var(--industrial-navy) !important;
+  border-color: rgba(255, 214, 72, 0.72) !important;
   background: var(--industrial-navy) !important;
-  color: #fff !important;
+  color: #ffe16b !important;
 }
 
 .badge-new {
-  border-color: var(--industrial-success) !important;
-  background: var(--industrial-success) !important;
+  border-color: rgba(255, 255, 255, 0.42) !important;
+  background: #11805f !important;
   color: #fff !important;
 }
 
 .badge-offer {
-  border-color: var(--industrial-yellow) !important;
+  border-color: rgba(16, 42, 67, 0.22) !important;
   background: var(--industrial-yellow) !important;
   color: var(--industrial-navy) !important;
 }

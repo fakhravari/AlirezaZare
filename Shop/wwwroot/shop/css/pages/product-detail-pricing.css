@@ -867,31 +867,33 @@
 }
 
 #productView .detail-price-tool {
-  --product-detail-icon-color: #ffda45;
+  --product-detail-icon-color: #102a43;
   display: grid;
   width: 44px;
   height: 44px;
   place-items: center;
-  border: 1px solid #e4c765;
+  border: 1px solid #d6b54b;
   border-radius: var(--product-radius-card);
-  background: var(--product-color-heading);
-  color: #ffda45;
-  box-shadow: 0 3px 10px #102a4333;
+  background: rgba(255, 250, 231, 0.97);
+  color: #102a43;
+  box-shadow: 0 3px 10px rgba(16, 42, 67, 0.24), inset 0 1px rgba(255, 255, 255, 0.9);
   font-size: 20px;
   cursor: pointer;
   transition: color .18s ease, background-color .18s ease;
 }
 
 #productView .detail-price-tool:hover {
-  --product-detail-icon-color: #fff;
-  background: #244d70;
-  color: #fff;
+  --product-detail-icon-color: #102a43;
+  border-color: #e0b819;
+  background: linear-gradient(145deg, #ffe36c, #f4bd16);
+  color: #102a43;
 }
 
 #productView .detail-price-tool.is-active {
-  --product-detail-icon-color: var(--product-color-heading);
-  background: #ffda45;
-  color: var(--product-color-heading);
+  --product-detail-icon-color: #102a43;
+  border-color: #e0b819;
+  background: linear-gradient(145deg, #ffe36c, #f4bd16);
+  color: #102a43;
 }
 
 #productView .detail-price-tool:focus-visible {
