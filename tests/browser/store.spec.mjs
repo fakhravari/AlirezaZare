@@ -27,6 +27,42 @@ test('hidden home category submenu opens on hover and hides on pointer leave', a
   await expect(submenu).toBeHidden();
   await expect(submenu).toHaveCSS('display', 'none');
 });
+test('inner category mega menu is hidden while navigation is collapsed and opens at 1200px', async ({page, isMobile}) => {
+  test.skip(isMobile, 'The inner category mega menu is desktop-only.');
+  await page.setViewportSize({width: 1199, height: 900});
+  await page.goto('/magazine/choosing-work-drill');
+  const menu = page.locator('#mainNav .category-nav-mega');
+  const trigger = page.locator('#mainNav .category-nav-dropdown > .nav-link');
+  await expect(menu).toBeHidden();
+
+  await page.setViewportSize({width: 1200, height: 900});
+  await trigger.click();
+  await expect(menu).toBeVisible();
+  await expect(menu).toHaveCSS('display', 'grid');
+});
+test('header toggle uses shared owner colors on mobile and tablet home and inner pages', async ({page, isMobile}) => {
+  test.skip(isMobile, 'This regression sets both phone and tablet viewport widths.');
+  for (const route of ['/', '/magazine/choosing-work-drill']) {
+    await page.setViewportSize({width: 320, height: 844});
+    await page.goto(route);
+    const toggle = page.locator('#mainNav .navbar-toggler');
+    const brand = page.locator('#mainNav .header-brand-lockup');
+    for (const width of [320, 390, 768, 991]) {
+      await page.setViewportSize({width, height: 844});
+      await expect(toggle).toHaveCSS('border-width', '0px');
+      await expect(toggle).toHaveCSS('background-color', 'rgba(255, 255, 255, 0.08)');
+      await expect(toggle).toHaveCSS('color', 'rgb(246, 197, 21)');
+      await expect(brand).toHaveCSS('display', 'none');
+    }
+    for (const width of [992, 1024, 1199]) {
+      await page.setViewportSize({width, height: 900});
+      await expect(toggle).toHaveCSS('border-width', '0px');
+      await expect(toggle).toHaveCSS('background-color', 'rgb(255, 255, 255)');
+      await expect(toggle).toHaveCSS('color', 'rgb(16, 42, 67)');
+      await expect(brand).toBeVisible();
+    }
+  }
+});
 test('desktop and tablet headers keep actions inside the viewport around navigation breakpoints', async ({page, isMobile}) => {
   test.skip(isMobile, 'This regression covers tablet and desktop navigation.');
   for (const route of ['/', '/magazine/choosing-work-drill']) {

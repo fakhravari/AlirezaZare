@@ -10,6 +10,8 @@
 
 در هدر موبایل، ارقام نشانگرهای سبد، علاقه‌مندی و مقایسه ۱۴px هستند؛ اندازهٔ دسکتاپ و تبلت از مقدار پایه پیروی می‌کند.
 
+نمایش لوگوی افقی هدر در `shared-header.css` تا عرض ۹۹۱px پنهان و از ۹۹۲px نمایان است؛ آزمون breakpoint خانه و مقاله را پوشش می‌دهد.
+
 Badgeهای کارت محصول از رنگ‌های شاخص هماهنگ با هویت فروشگاه استفاده می‌کنند: سرمه‌ای و طلایی برای منتخب، سبز برای جدید و طلایی برای پیشنهاد. هر badge حاشیهٔ ظریف هماهنگ با رنگ خود دارد. Badge پلن DigiTime طلایی و DigiAF سبز است؛ لبهٔ بالایی badge با کنترل‌های کارت هم‌راستا و با inset دوازده پیکسلی قرار دارد.
 
 فاصلهٔ کنترل‌های سبد، مقایسه و علاقه‌مندی در هدر موبایل ۸px است تا دکمه‌ها از هم قابل تشخیص بمانند؛ این فاصله از `--header-actions-gap` در `shared-header.css` می‌آید.
@@ -118,8 +120,9 @@ CSS فعلی با ترتیب stylesheetها cascade می‌شود و از `@laye
 | `css/core/design-tokens.css` | رنگ، فاصله، radius، سایه، تایپوگرافی پایه | تنها محل افزودن توکن عمومی جدید؛ مصرف‌کننده‌ها را با نام صریح `--color-*` به آن متصل کنید |
 | `css/core/components.css` | Shared surface and icon component styles, including `.ui-surface-card` and `.ui-icon-tile` | Keep changes in the component owner; avoid parallel page overrides |
 | `css/core/ui-core.css` | utilityهای UI، قفل اسکرول و رفتارهای قابل‌دسترسی مشترک | با قواعد overflow/z-index صفحه تداخل احتمالی دارد |
-| `css/layout/shared-header.css` | toggle حساب، جست‌وجو/سبد هدر و وضعیت responsive | خانه/داخلی را جداگانه تست کنید |
+| `css/layout/shared-header.css` | toggle منوی header (رنگ و چیدمان responsive)، toggle حساب، جست‌وجو/سبد هدر | خانه/داخلی را در موبایل و تبلت جداگانه تست کنید |
 | `css/layout/shared-mega-menu.css` | `.page-mega-*` و مگامنوی دسکتاپ صفحات داخلی | منوی خانه variant دیگری دارد؛ hover و فاصلهٔ اشاره‌گر را تست کنید |
+| `css/layout/mega-menu-unified.css` | ظاهر مشترک مگامنوی خانه و دسته‌بندی صفحات داخلی و جای‌گذاری دسکتاپ | ناوبری داخلی از 1200px افقی می‌شود؛ hidden/open را در دو سوی 1200px بررسی کنید |
 | `css/layout/shared-account.css` | `.shared-account-*`, لینک‌ها و پنل حساب دسکتاپ/موبایل | وضعیت `.open` و breakpoint موبایل مهم است؛ alias قدیمی `shared-account-popover` حذف شده است |
 | `css/layout/shared-cart.css` | پنل‌های cart/favorites/compare، ردیف‌ها، footer و total | چند پنل مشابه دارد؛ selectorها را با ID/root واقعی محدود کنید |
 | `css/layout/shared-login.css` | استایل پایهٔ `.shared-login-modal` برای dialog ویرایش پروفایل و بخشی از قواعد داخلی فرم `#loginModal` | با layout modal سراسری یکی نیست؛ `#loginModal` در `_Panels.cshtml` است و استایل layout آن بین `style.css`, `luxury-theme.css` و `industrial-system.css` تقسیم شده؛ overlay قدیمی بدون markup حذف شده است |

@@ -5,6 +5,11 @@
   --header-action-divider-gap: 12px;
 }
 
+#mainNav .navbar-toggler {
+  background: #fff;
+  color: var(--industrial-navy);
+}
+
 /* The horizontal logo stays in the desktop header; mobile uses the drawer. */
 #mainNav .header-brand-lockup {
   display: none;
@@ -35,7 +40,7 @@
 
 @media (min-width: 992px) {
   #mainNav .header-brand-lockup {
-    display: inline-flex !important;
+    display: inline-flex;
   }
 
   .home-page #mainNav .brand-dropdown > .nav-link::after {
@@ -57,6 +62,20 @@
 @media (max-width: 991px) {
   #mainNav {
     --header-actions-gap: 8px;
+  }
+
+  #mainNav .navbar-toggler {
+    display: grid;
+    place-items: center;
+    line-height: 1;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--industrial-yellow);
+  }
+
+  #mainNav .navbar-toggler > i {
+    display: block;
+    margin: 0;
+    line-height: 1;
   }
 }
 

@@ -670,12 +670,6 @@ h6,
   filter: drop-shadow(0 0 5px rgba(246, 197, 21, 0.42));
 }
 
-@media (max-width: 991.98px) {
-  .inner-page #mainNav .category-nav-mega {
-    display: none !important;
-  }
-}
-
 #mainNav .compare-wrap {
   position: relative;
   display: flex;
@@ -764,12 +758,6 @@ h6,
   background: var(--industrial-navy) !important;
   color: var(--industrial-yellow) !important;
   box-shadow: none !important;
-}
-
-.navbar-toggler {
-  border-color: var(--industrial-line) !important;
-  background: #fff !important;
-  color: var(--industrial-navy) !important;
 }
 
 /* Page heroes */
@@ -1823,12 +1811,6 @@ footer .trust-badges .trust-badge-image {
   .home-nav-menu-group,
   .home-nav-action-group {
     display: contents !important;
-  }
-
-  #mainNav .navbar-toggler {
-    border-color: rgba(255, 255, 255, 0.18) !important;
-    background: rgba(255, 255, 255, 0.08) !important;
-    color: var(--industrial-yellow) !important;
   }
 
   #mainNav .nav-tools > button,
@@ -11616,20 +11598,6 @@ body .electrical-swiper .swiper-pagination-bullet-active {
   border-radius: 999px;
   outline: 2px solid var(--industrial-yellow-dark);
   outline-offset: 4px;
-}
-
-@media (max-width: 991px) {
-  #mainNav .navbar-toggler {
-    display: grid;
-    place-items: center;
-    line-height: 1;
-  }
-
-  #mainNav .navbar-toggler > i {
-    display: block;
-    margin: 0;
-    line-height: 1;
-  }
 }
 
 /* Refined typography and item rhythm for the desktop category mega menu. */
