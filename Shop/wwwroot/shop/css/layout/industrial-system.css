@@ -2559,7 +2559,7 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
   background: transparent !important;
   color: var(--industrial-ink) !important;
   direction: rtl;
-  font-size: 13px !important;
+  font-size: 13px;
   text-align: right;
   -webkit-appearance: none;
   appearance: none;
@@ -3703,7 +3703,7 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
 @media (max-width: 767px) {
   .home-page > section > .container,
   .home-page #home-main-content > section > .container {
-    width: calc(100% - 24px);
+    width: calc(100% - 16px);
   }
 
   .home-page #collection > .container,
@@ -7091,6 +7091,7 @@ html
   #mainNav .nav-actions :is(.nav-count, .cart-btn.cart-icon-theme > b) {
     top: -9px !important;
     right: -7px !important;
+    font-size: 14px !important;
   }
 }
 

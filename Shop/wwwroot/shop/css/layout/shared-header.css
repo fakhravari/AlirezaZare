@@ -52,7 +52,7 @@
 
 @media (max-width: 991px) {
   #mainNav {
-    --header-actions-gap: 5px;
+    --header-actions-gap: 8px;
   }
 }
 

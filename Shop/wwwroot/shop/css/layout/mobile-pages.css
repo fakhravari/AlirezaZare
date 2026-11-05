@@ -813,10 +813,18 @@
   .mobile-page--home-index #collection > .container,
   .mobile-page--home-index .category-showcase > .container {
     box-sizing: border-box;
-    width: calc(100% - 12px) !important;
+    width: calc(100% - 16px) !important;
     max-width: none !important;
+  }
+
+  .mobile-page--home-index #collection > .container,
+  .mobile-page--home-index .category-showcase > .container {
     padding-right: 4px !important;
     padding-left: 4px !important;
+  }
+
+  .mobile-page--home-index :is(#homeSalesTime, #homeSalesPlans) > .container {
+    padding-inline: 0;
   }
 
   .mobile-page--home-index #productGrid {

@@ -109,6 +109,59 @@ test('all home collections render shared cards with one action of each kind', as
   await noHorizontalOverflow(page);
 });
 
+test('special-plan grid spacing and columns match the regular home grid across breakpoints', async ({page}) => {
+  await page.clock.install({time: new Date('2026-11-01T10:00:00Z')});
+  for (const [width, expectedColumns] of [[390, 2], [820, 3], [980, 4], [1280, 5], [1366, 5], [1440, 6], [1792, 6]]) {
+    await page.setViewportSize({width, height: 900});
+    await page.goto('/');
+    await expect(page.locator('#homeSalesTime .home-sales-plan-grid')).toBeVisible();
+    const gutters = await page.evaluate(() => {
+      if (innerWidth >= 1200) document.body.classList.remove('mobile-page--home-index');
+      const normal = getComputedStyle(document.querySelector('#productGrid'));
+      const special = getComputedStyle(document.querySelector('#homeSalesTime .home-sales-plan-grid'));
+      const rowBounds = selector => {
+        const grid = document.querySelector(selector);
+        const firstTop = grid.children[0].getBoundingClientRect().top;
+        const cards = [...grid.children].filter(column => Math.abs(column.getBoundingClientRect().top - firstTop) < 1).map(column => column.querySelector('.product-card').getBoundingClientRect());
+        return {columns: cards.length, left: Math.min(...cards.map(card => card.left)), right: Math.max(...cards.map(card => card.right))};
+      };
+      const collection = document.querySelector('#collection > .container').getBoundingClientRect();
+      const specialPanel = document.querySelector('#homeSalesPlans .home-sales-plan').getBoundingClientRect();
+      const specialHeader = document.querySelector('#homeSalesTime .home-sales-plan .category-showcase-head').getBoundingClientRect();
+      return {mobileHome: document.body.classList.contains('mobile-page--home-index'), normal: [normal.getPropertyValue('--bs-gutter-x').trim(), normal.getPropertyValue('--bs-gutter-y').trim()], special: [special.getPropertyValue('--bs-gutter-x').trim(), special.getPropertyValue('--bs-gutter-y').trim()], regularBounds: rowBounds('#productGrid'), specialBounds: rowBounds('#homeSalesTime .home-sales-plan-grid'), specialHeader: {left: specialHeader.left, right: specialHeader.right}, collectionPanel: {left: collection.left, right: collection.right}, specialPanel: {left: specialPanel.left, right: specialPanel.right}};
+    });
+    expect(gutters.special).toEqual(gutters.normal);
+    expect(gutters.specialBounds.columns).toBe(expectedColumns);
+    if (width <= 767 && gutters.mobileHome) {
+      expect(gutters.specialBounds.left).toBeCloseTo(gutters.regularBounds.left + 4, 0);
+      expect(gutters.specialBounds.right).toBeCloseTo(gutters.regularBounds.right - 4, 0);
+    } else {
+      expect(gutters.specialBounds.left).toBeCloseTo(gutters.regularBounds.left, 0);
+      expect(gutters.specialBounds.right).toBeCloseTo(gutters.regularBounds.right, 0);
+    }
+    expect(gutters.specialPanel.left).toBeCloseTo(gutters.collectionPanel.left, 0);
+    expect(gutters.specialPanel.right).toBeCloseTo(gutters.collectionPanel.right, 0);
+  }
+});
+
+test('mobile homepage section containers keep an even eight-pixel outer gutter', async ({page, isMobile}) => {
+  test.skip(!isMobile, 'The page-wide mobile container contract is specific to the mobile layout.');
+  for (const width of [320, 360, 390, 430, 767]) {
+    await page.setViewportSize({width, height: 900});
+    await page.goto('/');
+    await expect(page.locator('#homeSalesTime > .container')).toBeVisible();
+    const gutters = await page.evaluate(() => ['#homeSalesTime > .container', '#collection > .container'].map(selector => {
+      const rect = document.querySelector(selector).getBoundingClientRect();
+      return {left: rect.left, right: innerWidth - rect.right, width: rect.width};
+    }));
+    for (const gutter of gutters) {
+      expect(gutter.left).toBeCloseTo(8, 0);
+      expect(gutter.right).toBeCloseTo(8, 0);
+      expect(gutter.width).toBeCloseTo(width - 16, 0);
+    }
+  }
+});
+
 test('search initially displays 15 products', async ({page}) => {
   await page.goto('/Search');
   await expect(page.locator('#productResults [data-product-card]')).toHaveCount(15);
