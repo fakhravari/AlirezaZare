@@ -1181,14 +1181,14 @@
     --ui-scroll-thumb-hover: #a98a43;
     --ui-scroll-thumb-border: 0;
     --ui-scroll-thumb-shadow: none;
-    scrollbar-width: none !important;
+    scrollbar-width: none;
     scrollbar-gutter: auto;
     scroll-behavior: smooth;
   }
   .article-enhanced .article-sidebar-scroll::-webkit-scrollbar {
-    width: 0 !important;
-    height: 0 !important;
-    display: none !important;
+    width: 0;
+    height: 0;
+    display: none;
   }
   .article-enhanced .article-toc-scroll {
     margin-left: 8px;
