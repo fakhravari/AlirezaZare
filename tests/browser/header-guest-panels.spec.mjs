@@ -3,7 +3,7 @@ import axe from 'axe-core';
 
 async function expectNoA11yViolations(page, state) {
   const results = await page.evaluate(async () => window.axe.run(document, {
-    runOnly: {type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']},
+    runOnly: {type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa', 'best-practice']},
   }));
   expect(results.violations.map(issue => ({id: issue.id, nodes: issue.nodes.map(node => node.target)})), state).toEqual([]);
 }

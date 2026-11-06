@@ -140,7 +140,7 @@ test('main routes pass automated WCAG accessibility rules', async ({page}) => {
   for (const path of paths) {
     await page.goto(path, {waitUntil: 'domcontentloaded'});
     const results = await page.evaluate(async () => window.axe.run(document, {
-      runOnly: {type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']},
+      runOnly: {type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa', 'best-practice']},
     }));
     for (const issue of results.violations) {
       for (const node of issue.nodes) {
