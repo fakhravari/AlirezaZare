@@ -32,6 +32,51 @@ test('home carousel controls have accessible names', async ({page}) => {
   for (const control of await controls.all()) await expect(control).toHaveAttribute('aria-label', /.+/);
 });
 
+test('home carousel indicators stay visually compact with usable touch areas', async ({page, isMobile}) => {
+  await page.goto('/');
+
+  const heroBullets = page.locator('#heroSwiper .swiper-pagination-bullet');
+  await expect(heroBullets.first()).toBeVisible();
+  const heroMetrics = await heroBullets.evaluateAll(elements => elements.map(element => {
+    const rect = element.getBoundingClientRect();
+    const style = getComputedStyle(element);
+    const mark = getComputedStyle(element, '::before');
+    return {
+      width: rect.width,
+      height: rect.height,
+      visualWidth: mark.width,
+      visualHeight: mark.height,
+      background: style.backgroundColor,
+    };
+  }));
+  expect(heroMetrics.length).toBeGreaterThan(0);
+  for (const metric of heroMetrics) {
+    expect(metric.width).toBe(44);
+    expect(metric.height).toBe(44);
+  }
+  expect(heroMetrics.some(metric => metric.visualWidth === '26px' && metric.visualHeight === '8px')).toBe(true);
+  expect(heroMetrics.some(metric => metric.visualWidth === '8px' && metric.visualHeight === '8px')).toBe(true);
+  for (const metric of heroMetrics) expect(metric.background).toBe('rgba(0, 0, 0, 0)');
+
+  const categoryDots = page.locator('#bestsellersSlider > .owl-dots');
+  if (isMobile) {
+    await expect(categoryDots).toBeHidden();
+  } else {
+    const dotMetrics = await categoryDots.locator('.owl-dot').evaluateAll(elements => elements.map(element => {
+      const button = element.getBoundingClientRect();
+      const mark = getComputedStyle(element.querySelector('span'));
+      return {buttonWidth: button.width, buttonHeight: button.height, markWidth: mark.width, markPadding: mark.padding};
+    }));
+    expect(dotMetrics.length).toBeGreaterThan(0);
+    for (const metric of dotMetrics) {
+      expect(metric.buttonWidth).toBe(28);
+      expect(metric.buttonHeight).toBe(28);
+      expect(metric.markPadding).toBe('0px');
+      expect(['8px', '20px']).toContain(metric.markWidth);
+    }
+  }
+});
+
 test('home hero and carousel motion respect reduced-motion preference', async ({page}) => {
   await page.emulateMedia({reducedMotion: 'reduce'});
   await page.goto('/');
