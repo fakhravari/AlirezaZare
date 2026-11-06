@@ -20,7 +20,7 @@ export default defineConfig({
     command: 'dotnet run --no-build --project Shop/Shop.csproj --no-launch-profile --urls http://127.0.0.1:5198',
     url: 'http://127.0.0.1:5198',
     reuseExistingServer: !process.env.CI,
-    env: {ASPNETCORE_ENVIRONMENT: 'Development'},
+    env: {ASPNETCORE_ENVIRONMENT: 'Development', Seo__SiteUrl: 'http://127.0.0.1:5198/'},
     timeout: 60000,
   },
 });

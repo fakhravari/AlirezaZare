@@ -1,5 +1,18 @@
 import {test, expect} from '@playwright/test';
 
+test('magazine cards and article hero use available product imagery', async ({page}) => {
+  await page.goto('/magazine');
+  const cardImage = page.locator('.journal-post img').first();
+  await cardImage.scrollIntoViewIfNeeded();
+  await expect(cardImage).toHaveAttribute('src', /-main\.webp$/);
+  await expect.poll(() => cardImage.evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true);
+
+  await page.goto('/magazine/choosing-work-drill');
+  const heroImage = page.locator('.article-hero img.hero-image');
+  await expect(heroImage).toHaveAttribute('src', /-main\.webp$/);
+  await expect.poll(() => heroImage.evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true);
+});
+
 test('FAQ answer and contact validation fit the viewport', async ({page, isMobile}) => {
   if (isMobile) await page.setViewportSize({width: 320, height: 640});
   await page.goto('/faq');

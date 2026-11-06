@@ -11,7 +11,7 @@ public static class ProductMediaCatalog
     public static string ForProduct(string englishName, int row)
     {
         string fileName = ProductFileName(englishName, row);
-        return $"content/products/images/main/{fileName}-main.png";
+        return $"content/products/images/main/{fileName}-main.webp";
     }
 
     public static string ForCard(string englishName, int row)
