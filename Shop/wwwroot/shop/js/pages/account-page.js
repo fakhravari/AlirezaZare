@@ -225,7 +225,7 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
                     `<div class="profile-coupon-invoice"><span class="profile-coupon-invoice-number"><i class="bi bi-receipt" aria-hidden="true"></i><bdi dir="ltr">${esc(use.invoice)}</bdi></span><time datetime="${esc(use.dateTime)}">${esc(use.date)}</time></div>`,
                 ).join("")}</div>`
                 : '<p class="profile-coupon-no-invoices">هنوز از این کد در سفارشی استفاده نشده است.</p>';
-            return `<article class="profile-coupon-card ${stateClass}"><header class="profile-coupon-header"><div class="profile-coupon-identity"><button class="profile-coupon-code" type="button" data-copy-coupon="${esc(coupon.code)}" aria-label="کپی کد تخفیف ${esc(coupon.code)}" title="برای کپی کد کلیک کنید"><bdi dir="ltr">${esc(coupon.code)}</bdi><i class="bi bi-copy" aria-hidden="true"></i></button><div><strong>${ui.formatNumber(coupon.discountPercent)}٪ تخفیف خرید</strong><small>${expiryLabel} ${esc(coupon.expiresOn)}</small></div></div><span class="profile-coupon-status ${stateClass}"><i class="bi ${stateIcon}" aria-hidden="true"></i>${stateLabel}</span></header><section class="profile-coupon-usage" aria-label="سوابق استفاده از کد ${esc(coupon.code)}"><div class="profile-coupon-usage-heading"><strong><i class="bi bi-receipt-cutoff" aria-hidden="true"></i>فاکتورهای استفاده‌شده</strong><span>استفاده‌شده: <b>${ui.formatNumber(uses.length)}</b></span><span>سقف استفاده: <b>${ui.formatNumber(usageLimit)}</b></span><span>باقی‌مانده: <b>${ui.formatNumber(remainingUses)}</b></span></div>${invoices}</section></article>`;
+            return `<article class="profile-coupon-card ${stateClass}"><header class="profile-coupon-header"><div class="profile-coupon-identity"><button class="profile-coupon-code" type="button" data-copy-coupon="${esc(coupon.code)}"><span class="ui-sr-only">کپی کد تخفیف</span><bdi dir="ltr">${esc(coupon.code)}</bdi><i class="bi bi-copy" aria-hidden="true"></i></button><div><strong>${ui.formatNumber(coupon.discountPercent)}٪ تخفیف خرید</strong><small>${expiryLabel} ${esc(coupon.expiresOn)}</small></div></div><span class="profile-coupon-status ${stateClass}"><i class="bi ${stateIcon}" aria-hidden="true"></i>${stateLabel}</span></header><section class="profile-coupon-usage" aria-label="سوابق استفاده از کد ${esc(coupon.code)}"><div class="profile-coupon-usage-heading"><strong><i class="bi bi-receipt-cutoff" aria-hidden="true"></i>فاکتورهای استفاده‌شده</strong><span>استفاده‌شده: <b>${ui.formatNumber(uses.length)}</b></span><span>سقف استفاده: <b>${ui.formatNumber(usageLimit)}</b></span><span>باقی‌مانده: <b>${ui.formatNumber(remainingUses)}</b></span></div>${invoices}</section></article>`;
         }).join("");
 
         profileHost.querySelectorAll("[data-copy-coupon]").forEach((button) => {
@@ -266,7 +266,7 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
             button.type = "button";
             button.textContent = label;
             button.disabled = disabled;
-            button.setAttribute("aria-label", accessibleLabel || `صفحه ${label}`);
+            button.setAttribute("aria-label", accessibleLabel ? `${label}، ${accessibleLabel}` : `${label}، صفحه`);
             if (target === page && label === ui.formatNumber(page))
                 button.setAttribute("aria-current", "page");
             button.addEventListener("click", () => {

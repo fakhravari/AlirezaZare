@@ -146,7 +146,7 @@ test('main routes pass automated WCAG accessibility rules', async ({page}) => {
       for (const node of issue.nodes) {
         const target = node.target.join(' ');
         const key = `${issue.id}|${target}`;
-        const finding = allViolations.get(key) || {id: issue.id, impact: issue.impact, target, routes: []};
+        const finding = allViolations.get(key) || {id: issue.id, impact: issue.impact, target, summary: node.failureSummary, routes: []};
         finding.routes.push(path);
         allViolations.set(key, finding);
       }

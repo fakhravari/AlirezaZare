@@ -1,4 +1,12 @@
 import {test, expect} from '@playwright/test';
+import axe from 'axe-core';
+
+async function expectNoA11yViolations(page, state) {
+  const results = await page.evaluate(async () => window.axe.run(document, {
+    runOnly: {type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']},
+  }));
+  expect(results.violations.map(issue => ({id: issue.id, nodes: issue.nodes.map(node => node.target)})), state).toEqual([]);
+}
 
 async function expectDialogFits(dialog) {
   await expect(dialog).toBeVisible();
@@ -34,6 +42,7 @@ test('product dialogs fit and close on small and large screens', async ({page, i
 });
 
 test('product dialogs have accessible names and restore keyboard focus after Escape', async ({page}) => {
+  await page.addInitScript(axe.source);
   await page.goto('/products/cordless-hammer-drill-1');
 
   const accessoryTrigger = page.locator('[data-accessory-details-id]').first();
@@ -41,6 +50,7 @@ test('product dialogs have accessible names and restore keyboard focus after Esc
   await accessoryTrigger.press('Enter');
   const accessoryDialog = page.getByRole('dialog', {name: 'جزئیات متعلقات و خدمات'});
   await expect(accessoryDialog).toBeVisible();
+  await expectNoA11yViolations(page, 'accessory dialog');
   await page.keyboard.press('Escape');
   await expect(accessoryDialog).not.toBeVisible();
   await expect(accessoryTrigger).toBeFocused();
@@ -51,6 +61,7 @@ test('product dialogs have accessible names and restore keyboard focus after Esc
   const galleryTitle = (await page.locator('#productGalleryTitle').textContent()).trim();
   const galleryDialog = page.getByRole('dialog', {name: galleryTitle, exact: true});
   await expect(galleryDialog).toBeVisible();
+  await expectNoA11yViolations(page, 'gallery dialog');
   await page.keyboard.press('Escape');
   await expect(galleryDialog).not.toBeVisible();
   await expect(galleryTrigger).toBeFocused();
@@ -62,6 +73,7 @@ test('product dialogs have accessible names and restore keyboard focus after Esc
   const priceDialog = page.getByRole('dialog', {name: priceTitle, exact: true});
   await expect(priceDialog).toBeVisible();
   await expect(priceDialog).toHaveAttribute('aria-labelledby', 'productPriceDialogTitle');
+  await expectNoA11yViolations(page, 'price history dialog');
   await page.keyboard.press('Escape');
   await expect(priceDialog).not.toBeVisible();
   await expect(priceTrigger).toBeFocused();

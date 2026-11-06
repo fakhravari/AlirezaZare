@@ -619,6 +619,7 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
       const home = appendItem();
       const homeLink = document.createElement("a");
       homeLink.href = "/";
+      homeLink.setAttribute("aria-label", "خانه");
       homeLink.innerHTML = '<i class="bi bi-house-door" aria-hidden="true"></i><span>خانه</span>';
       home.append(homeLink);
       categoryPath.forEach((part, index) => {

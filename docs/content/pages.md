@@ -1,17 +1,17 @@
 # مجله، برند و صفحه‌های خدماتی
 
-در مجله، متن‌های کمکی، اطلاعات دیدگاه و توضیح تصویر در فایل‌های `magazine-luxury.css`، `article-details.css` و `pages.css` و پیام اعتبارسنجی تماس در `contact.css` با مقیاس خوانایی [طراحی مشترک](../frontend/styling.md#قواعد-طراحی-مشترک) هماهنگ شده‌اند. متن کارت‌های پیوند مرتبط خدماتی در موبایل نیز از همین مقیاس پیروی می‌کند.
+در مجله، متن‌های کمکی، اطلاعات دیدگاه و توضیح تصویر در فایل‌های `magazine-luxury.css`، `article-details.css` و `pages.css` و پیام اعتبارسنجی تماس در `contact.css` با مقیاس خوانایی [طراحی مشترک](../frontend/styling.md#قواعد-طراحی-مشترک) هماهنگ شده‌اند. رنگ دسته‌بندی، برچسب و امتیاز مقاله با کنتراست AA بررسی شده و متن کارت‌های پیوند مرتبط خدماتی در موبایل نیز از همین مقیاس پیروی می‌کند.
 
 ## نقشهٔ مسئولیت
 
 | حوزه | منبع داده و صفحه | نکتهٔ تغییر |
 |---|---|---|
 | مجله | [MagazineController](../../Shop/Controllers/MagazineController.cs)، [Views/Magazine](../../Shop/Views/Magazine)، `JournalArticles.cs` و `JournalArticles.Expanded.cs` | مقاله و آمار ثابت؛ `magazine.js` فیلتر/صفحه‌بندی و URL را مدیریت می‌کند |
-| جزئیات مقاله | `Magazine/Details.cshtml`، `article-details.js` و `article-details.css` | TOC، progress، print، share و فاصلهٔ sticky header |
+| جزئیات مقاله | `Magazine/Details.cshtml`، `article-details.js` و `article-details.css` | TOC، progress، print، share و فاصلهٔ sticky header؛ نام کنترل‌های اشتراک و صفحه‌بندی باید متن دیداری را در خود داشته باشد |
 | برند | [BrandsController](../../Shop/Controllers/BrandsController.cs)، [BrandProfileModel.cs](../../Shop/Models/BrandProfileModel.cs)، [Views/Brands](../../Shop/Views/Brands) | هویت در catalog.json و snapshot؛ متن تحریریه در `content/data/brand-editorial.json`؛ شمارش محصول با `brand-product-count.js` |
 | FAQ | `FaqController`، [Faq/Index.cshtml](../../Shop/Views/Faq/Index.cshtml)، `FaqCatalog` | متن صفحه و schema باید از یک کاتالوگ بیایند |
-| تماس | [Contact/Index.cshtml](../../Shop/Views/Contact/Index.cshtml)، `contact.js` و dialog تأیید | دسترسی سریع شامل پیگیری سفارش، ضمانت، FAQ و شرایط ارسال (`/shipping`) است؛ feedback فرم نمونه است و endpoint ارسال واقعی ثبت نشده |
-| معرفی / ارسال / ضمانت / پیگیری | Controller و View هم‌نام | `pages.css` و فایل صفحه؛ پیوندهای چهارگانهٔ محصولات، ارسال، ضمانت و FAQ در این صفحه‌ها از partial مشترک [`_RelatedLinks.cshtml`](../../Shop/Views/Shared/_RelatedLinks.cshtml) و سبک [پوسته](../frontend/layout.md#اجزای-مشترک) استفاده می‌کنند؛ کارت‌ها قاب مستقل دارند و قاب مشترک دور گروه ندارند؛ قاب اصلی راهنمای ضمانت در `warranty.css` با حاشیهٔ دوگانهٔ ظریف طلایی از زمینه جدا می‌شود؛ قاب تصویر همان صفحه فریم گرم، لایهٔ نور و حرکت hover دارد؛ پیگیری فعلی نتیجهٔ واقعی سفارش دریافت نمی‌کند |
+| تماس | [Contact/Index.cshtml](../../Shop/Views/Contact/Index.cshtml)، `contact.js` و dialog تأیید | پیوند تلفن و ایمیل از عنوان و مقدار دیداری خود نام دسترس‌پذیر می‌گیرند؛ دسترسی سریع شامل پیگیری سفارش، ضمانت، FAQ و شرایط ارسال (`/shipping`) است؛ feedback فرم نمونه است و endpoint ارسال واقعی ثبت نشده |
+| معرفی / ارسال / ضمانت / پیگیری | Controller و View هم‌نام | `pages.css` و فایل صفحه؛ پیوندهای چهارگانهٔ محصولات، ارسال، ضمانت و FAQ در این صفحه‌ها از partial مشترک [`_RelatedLinks.cshtml`](../../Shop/Views/Shared/_RelatedLinks.cshtml) و سبک [پوسته](../frontend/layout.md#اجزای-مشترک) استفاده می‌کنند؛ کارت‌ها قاب مستقل دارند و قاب مشترک دور گروه ندارند؛ قاب اصلی راهنمای ضمانت در `warranty.css` با حاشیهٔ دوگانهٔ ظریف طلایی از زمینه جدا می‌شود؛ نشان راهنمای ضمانت از رنگ تیره‌تر برای نسبت کنتراست WCAG AA استفاده می‌کند؛ قاب تصویر همان صفحه فریم گرم، لایهٔ نور و حرکت hover دارد؛ پیگیری فعلی نتیجهٔ واقعی سفارش دریافت نمی‌کند |
 | قوانین | [LegalController](../../Shop/Controllers/LegalController.cs) و [Views/Legal](../../Shop/Views/Legal) | سند حریم خصوصی و terms/returns ریشه‌ها و selectorهای اختصاصی دارند |
 | خطا | [ErrorController](../../Shop/Controllers/ErrorController.cs) و [Error/Index.cshtml](../../Shop/Views/Error/Index.cshtml) | پوستهٔ عمومی همچنان اجرا می‌شود |
 

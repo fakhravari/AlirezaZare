@@ -13,7 +13,7 @@
 |---|---|---|
 | دادهٔ محصول | [catalog.json](../../Shop/wwwroot/content/data/catalog.json) | [CatalogRepository](../../Shop/Services/CatalogRepository.cs) و resolver [catalog.js](../../Shop/wwwroot/shop/js/store/catalog.js) |
 | خانه | [Home/Index.cshtml](../../Shop/Views/Home/Index.cshtml) | `home-sales-plans.js`، `home-collection.css`، `home-warmth.css` و کارت مشترک |
-| Search | [Product/List.cshtml](../../Shop/Views/Product/List.cshtml) | [search.js](../../Shop/wwwroot/shop/js/pages/search.js)، `search.css` و `search-mobile.css` |
+| Search | [Product/List.cshtml](../../Shop/Views/Product/List.cshtml) | [search.js](../../Shop/wwwroot/shop/js/pages/search.js)، `search.css` و `search-mobile.css`؛ لینک خانهٔ breadcrumb در markup اولیه و renderer مسیر دسته‌ها نام «خانه» دارد تا آیکن تنها نماند |
 | مقایسه / علاقه‌مندی | [Compare](../../Shop/Views/Compare/Index.cshtml) و [Favorites](../../Shop/Views/Favorites/Index.cshtml) | `store/commerce.js`؛ `commerce.css` و قواعد responsive مشترک |
 | کارت مشترک | [product-card.js](../../Shop/wwwroot/shop/js/store/product-card.js) و [shared-product-card.css](../../Shop/wwwroot/shop/css/store/shared-product-card.css) | یک renderer با variantهای grid/slider/search/related/favorite؛ مصرف در main/search/commerce |
 

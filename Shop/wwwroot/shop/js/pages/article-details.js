@@ -153,7 +153,9 @@ window.HNUI.mount("pages-article-details", document, () => {
           button.dataset.reviewPage = String(target);
           button.setAttribute(
             "aria-label",
-            current ? `صفحه ${formatNumber(target)}، صفحهٔ فعلی` : `رفتن به صفحه ${formatNumber(target)}`,
+            current
+              ? `${label}، صفحهٔ فعلی`
+              : `${label}، ${label === "قبلی" ? "صفحهٔ قبل" : label === "بعدی" ? "صفحهٔ بعد" : "رفتن به صفحه"}`,
           );
           if (current) button.setAttribute("aria-current", "page");
           button.addEventListener("click", () => {

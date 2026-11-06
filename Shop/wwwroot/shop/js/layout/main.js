@@ -151,14 +151,12 @@ $(function () {
       window.clearTimeout(suggestionsCloseTimer);
       window.clearInterval(planExpiryRenderTimer);
       suggestions.hidden = true;
-      searchInput.setAttribute("aria-expanded", "false");
       if (!isDrawerSearch)
         document.body.classList.remove("has-search-suggestions");
     };
     const openSuggestions = () => {
       window.clearTimeout(suggestionsCloseTimer);
       suggestions.hidden = false;
-      searchInput.setAttribute("aria-expanded", "true");
       if (!isDrawerSearch)
         document.body.classList.add("has-search-suggestions");
     };

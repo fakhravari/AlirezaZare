@@ -1,6 +1,15 @@
 import {test, expect} from '@playwright/test';
+import axe from 'axe-core';
+
+async function expectNoA11yViolations(page, state) {
+  const results = await page.evaluate(async () => window.axe.run(document, {
+    runOnly: {type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']},
+  }));
+  expect(results.violations.map(issue => ({id: issue.id, nodes: issue.nodes.map(node => node.target)})), state).toEqual([]);
+}
 
 test('account dialogs fit the viewport and remain usable', async ({page, isMobile}) => {
+  await page.addInitScript(axe.source);
   if (isMobile) await page.setViewportSize({width: 320, height: 640});
   await page.addInitScript(() => {
     localStorage.setItem('hn-demo-auth', '1');
@@ -27,11 +36,13 @@ test('account dialogs fit the viewport and remain usable', async ({page, isMobil
 
   await page.locator('[data-profile-edit-trigger]').first().click();
   await assertFitsViewport(page.locator('#profileEditDialog'));
+  await expectNoA11yViolations(page, 'profile edit dialog');
   await page.locator('#profileEditDialog [data-profile-edit-close]').click();
   await expect(page.locator('#profileEditDialog')).not.toBeVisible();
 
   await page.locator('#newAddress').click();
   await assertFitsViewport(page.locator('#addressDialog'));
+  await expectNoA11yViolations(page, 'address dialog');
   if (isMobile) {
     for (const field of await page.locator('#addressDialog #addressForm input:not([type="hidden"]), #addressDialog #addressForm select, #addressDialog #addressForm textarea').all()) {
       await expect(field).toHaveCSS('font-size', '16px');
@@ -42,11 +53,13 @@ test('account dialogs fit the viewport and remain usable', async ({page, isMobil
 
   await page.locator('#addressList [data-delete="sample-address"]').click();
   await assertFitsViewport(page.locator('.form-confirm-dialog'));
+  await expectNoA11yViolations(page, 'address delete confirmation');
   await page.locator('.form-confirm-cancel').click();
   await expect(page.locator('#addressList [data-delete="sample-address"]')).toBeVisible();
 });
 
 test('order invoice and cart address dialogs fit the viewport', async ({page, isMobile}) => {
+  await page.addInitScript(axe.source);
   if (isMobile) await page.setViewportSize({width: 320, height: 640});
   await page.addInitScript(() => localStorage.setItem('hn-demo-auth', '1'));
   const checkDialog = async dialog => {
@@ -64,6 +77,7 @@ test('order invoice and cart address dialogs fit the viewport', async ({page, is
   await page.goto('/profile/orders');
   await page.locator('[data-open-order-invoice]').first().click();
   await checkDialog(page.locator('#orderInvoiceDialog'));
+  await expectNoA11yViolations(page, 'order invoice dialog');
   await page.locator('[data-close-order-invoice]').click();
   await expect(page.locator('#orderInvoiceDialog')).not.toBeVisible();
 
@@ -72,6 +86,7 @@ test('order invoice and cart address dialogs fit the viewport', async ({page, is
   await page.goto('/cart');
   await page.locator('#newAddress').click();
   await checkDialog(page.locator('#addressDialog'));
+  await expectNoA11yViolations(page, 'cart address dialog');
   await page.locator('#closeAddress').click();
   await expect(page.locator('#addressDialog')).not.toBeVisible();
 });

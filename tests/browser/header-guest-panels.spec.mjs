@@ -1,4 +1,12 @@
 import {test, expect} from '@playwright/test';
+import axe from 'axe-core';
+
+async function expectNoA11yViolations(page, state) {
+  const results = await page.evaluate(async () => window.axe.run(document, {
+    runOnly: {type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']},
+  }));
+  expect(results.violations.map(issue => ({id: issue.id, nodes: issue.nodes.map(node => node.target)})), state).toEqual([]);
+}
 
 const panels = [
   ['#favoritesToggle', '#favoritesPanel'],
@@ -67,6 +75,15 @@ test('mobile help links remain in the existing accordion', async ({page, isMobil
   await expect(drawer.locator('.mobile-quick-links-accordion')).toBeAttached();
   await expect(drawer.locator('.quick-links-mobile-group')).toHaveCount(2);
   await expect(page.locator('#mainNav .quick-links-dropdown:not(.sales-plans-dropdown) .quick-links-menu')).toBeHidden();
+});
+
+test('mobile navigation drawer passes WCAG checks while open', async ({page, isMobile}) => {
+  test.skip(!isMobile, 'The navigation drawer is a mobile interaction.');
+  await page.addInitScript(axe.source);
+  await page.goto('/');
+  await page.locator('#mainNav .navbar-toggler').click();
+  await expect(page.locator('#mobileMenu')).toBeVisible();
+  await expectNoA11yViolations(page, 'mobile navigation drawer');
 });
 
 test('mobile drawer category icons keep their 31px layout in their component owner', async ({page, isMobile}) => {
