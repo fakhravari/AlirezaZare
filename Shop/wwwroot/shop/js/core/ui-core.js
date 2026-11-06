@@ -37,6 +37,52 @@
   });
   const storage = window.HNStorage.create({ document, emit });
 
+  const apiConfig = document.querySelector('meta[name="api-base-url"]');
+  const apiBaseUrl = new URL(apiConfig?.content || "api/", window.location.href);
+  if (apiBaseUrl.origin !== window.location.origin || !apiBaseUrl.pathname.endsWith("/"))
+    throw new Error("API base URL must be a same-origin path ending in '/'.");
+  const apiTimeoutMs = Number(apiConfig?.dataset?.timeoutMs) || 15000;
+  const api = Object.freeze({
+    baseUrl: apiBaseUrl.href,
+    async request(path, options = {}) {
+      let relativePath = String(path);
+      while (relativePath.startsWith("/")) relativePath = relativePath.slice(1);
+      const url = new URL(relativePath, apiBaseUrl);
+      if (url.origin !== apiBaseUrl.origin || !url.pathname.startsWith(apiBaseUrl.pathname))
+        throw new TypeError("API request path must stay under the configured API base path.");
+
+      const controller = new window.AbortController();
+      const externalSignal = options.signal;
+      let timedOut = false;
+      const abortFromCaller = () => controller.abort();
+      if (externalSignal?.aborted) controller.abort();
+      else externalSignal?.addEventListener("abort", abortFromCaller, { once: true });
+      const timeout = window.setTimeout(() => {
+        timedOut = true;
+        controller.abort();
+      }, apiTimeoutMs);
+
+      try {
+        return await window.fetch(url.href, {
+          ...options,
+          credentials: "same-origin",
+          headers: { Accept: "application/json", ...options.headers },
+          signal: controller.signal,
+        });
+      } catch (error) {
+        if (timedOut) {
+          const timeoutError = new Error("API request timed out.");
+          timeoutError.name = "TimeoutError";
+          throw timeoutError;
+        }
+        throw error;
+      } finally {
+        window.clearTimeout(timeout);
+        externalSignal?.removeEventListener("abort", abortFromCaller);
+      }
+    },
+  });
+
   const ready = (callback) => {
     if (document.readyState === "loading")
       document.addEventListener("DOMContentLoaded", callback, { once: true });
@@ -326,7 +372,7 @@
       button._cartQuotePending = true;
       button.disabled = true;
       try {
-        const response = await fetch("/api/store/sales-plans/quote", {
+        const response = await api.request("store/sales-plans/quote", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ productId: Number(productId), salesPlanId, quantity: 1, variants, accessoryIds }),
@@ -407,6 +453,7 @@
     emit,
     mount,
     storage,
+    api,
     ready,
     cart,
     auth,

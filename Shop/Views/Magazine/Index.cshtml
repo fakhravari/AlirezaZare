@@ -6,7 +6,7 @@
     string PersianDigits(int value) => string.Concat(value.ToString(CultureInfo.InvariantCulture).Select(digit => digit is >= '0' and <= '9' ? (char)('\u06F0' + digit - '0') : digit));
 }
 <header class="page-hero editorial-hero">
-    <img class="hero-image" src="~/shop/images/heroes/hero-electrical-editorial.png" alt="مجله تخصصی برق و ابزار ندا اولیائی"/>
+    <img class="hero-image" src="~/shop/images/heroes/hero-electrical-editorial.webp" alt="مجله تخصصی برق و ابزار ندا اولیائی"/>
     <div class="container">
         <nav class="article-breadcrumb" aria-label="مسیر صفحه">
             <a class="breadcrumb-home" asp-controller="Home" asp-action="Index">

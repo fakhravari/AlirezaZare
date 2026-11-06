@@ -1635,7 +1635,7 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
         rgba(16, 42, 86, 0.92) 58%,
         rgba(16, 42, 86, 0.78) 100%
       ),
-      url("../../images/heroes/hero-electrical-service.png");
+      url("../../images/heroes/hero-electrical-service.webp");
     background-position:
       center,
       62% center;

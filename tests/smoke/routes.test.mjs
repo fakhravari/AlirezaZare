@@ -92,6 +92,33 @@ test('home, search, product, cart, account and content routes serve the same val
   }
 });
 
+test('public store identity is consistent and health endpoint is available', async () => {
+  const home = await (await fetch(base + '/')).text();
+  const contact = await (await fetch(base + '/contact')).text();
+  const tracking = await (await fetch(base + '/tracking')).text();
+  assert.match(home, /<meta property="og:site_name" content="فروشگاه برق و ابزار ندا اولیائی"/);
+  assert.match(home, /<meta name="api-base-url" content="\/api\/" data-timeout-ms="15000"\s*\/?>/);
+  assert.match(home, /aria-label="برق شیراز؛ مرجع تخصصی ابزار و تجهیزات برقی"/);
+  assert.match(home, /wa\.me\/989369455457/);
+  assert.match(home, /tel:(?:\+|&#x2B;)989369455457/);
+  assert.match(contact, /href="tel:(?:\+|&#x2B;)989369455457"/);
+  assert.match(contact, /href="mailto:neda\.oliyai67@gmail\.com"/);
+  assert.match(contact, /neda\.oliyai67@gmail\.com/);
+  assert.match(tracking, /href="tel:(?:\+|&#x2B;)989369455457"/);
+
+  const health = await fetch(base + '/healthz');
+  assert.equal(health.status, 200);
+  assert.deepEqual(await health.json(), {status: 'ok'});
+
+  const staticResponse = await fetch(base + '/shop/css/core/site.css', {
+    headers: {'accept-encoding': 'br, gzip'},
+  });
+  assert.equal(staticResponse.status, 200);
+  assert.match(staticResponse.headers.get('cache-control'), /public,max-age=86400/);
+  assert.match(staticResponse.headers.get('content-encoding'), /br|gzip/);
+  await staticResponse.body?.cancel();
+});
+
 test('canonical redirects resolve in one hop and missing products return 404', async () => {
   for (const route of ['/products/1', '/products/incorrect-1', '/Product?id=1']) {
     const response = await fetch(base + route, {redirect: 'manual'});

@@ -1,4 +1,11 @@
 @model PageModel
+@inject Microsoft.Extensions.Options.IOptions<Shop.Models.SiteIdentityOptions> SiteIdentityOptions
+@{
+    Shop.Models.SiteIdentityOptions identity = SiteIdentityOptions.Value;
+    string phone = identity.SupportPhoneDisplay;
+    string phoneUri = identity.SupportPhoneUri;
+    string email = identity.PublicEmail;
+}
 
 
 <header class="page-hero contact-hero">
@@ -38,27 +45,27 @@
                         موضوع درخواستتان را انتخاب کنید تا پیام یا تماس شما به مسیر
                         مناسب هدایت شود.
                     </p>
-                    <a class="contact-method" href="tel:09369455457" aria-label="تماس مستقیم با شماره 09369455457">
+                    <a class="contact-method" href="tel:@phoneUri" aria-label="تماس مستقیم با شماره @phone">
                         <i class="bi bi-telephone" aria-hidden="true"></i>
                         <span>
                             <small>تماس مستقیم</small>
-                            <strong dir="ltr">09369455457</strong>
+                            <strong dir="ltr">@phone</strong>
                         </span>
                         <i class="bi bi-arrow-up-left contact-method-action" aria-hidden="true"></i>
                     </a>
-                    <a class="contact-method" href="tel:09369455457" aria-label="تماس با پشتیبانی به شماره 09369455457">
+                    <a class="contact-method" href="tel:@phoneUri" aria-label="تماس با پشتیبانی به شماره @phone">
                         <i class="bi bi-headset" aria-hidden="true"></i>
                         <span>
                             <small>پشتیبانی و پیگیری سفارش</small>
-                            <strong dir="ltr">09369455457</strong>
+                            <strong dir="ltr">@phone</strong>
                         </span>
                         <i class="bi bi-arrow-up-left contact-method-action" aria-hidden="true"></i>
                     </a>
-                    <a class="contact-method" href="mailto:neda.oliyai67@gmail.com" aria-label="ارسال ایمیل به neda.oliyai67@gmail.com">
+                    <a class="contact-method" href="mailto:@email" aria-label="ارسال ایمیل به @email">
                         <i class="bi bi-envelope" aria-hidden="true"></i>
                         <span>
                             <small>ایمیل مجموعه</small>
-                            <strong dir="ltr">neda.oliyai67@gmail.com</strong>
+                            <strong dir="ltr">@email</strong>
                         </span>
                         <i class="bi bi-arrow-up-left contact-method-action" aria-hidden="true"></i>
                     </a>

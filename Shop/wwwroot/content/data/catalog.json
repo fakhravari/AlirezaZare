@@ -5133,24 +5133,24 @@
   "media": {
     "product-1": {
       "id": "product-1",
-      "main": "content/products/images/main/cordless-hammer-drill-hn-001-row-001-main.png",
+      "main": "content/products/images/main/cordless-hammer-drill-hn-001-row-001-main.webp",
       "card": "content/products/images/card/cordless-hammer-drill-hn-001-row-001-card-800.jpg",
       "thumbnail": "content/products/images/thumbnail/cordless-hammer-drill-hn-001-row-001-thumbnail-256.jpg",
       "images": [
         {
-          "src": "content/products/images/main/cordless-hammer-drill-hn-001-row-001-main.png",
+          "src": "content/products/images/main/cordless-hammer-drill-hn-001-row-001-main.webp",
           "thumbnail": "content/products/images/thumbnail/cordless-hammer-drill-hn-001-row-001-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/digital-multimeter-hn-006-row-006-main.png",
+          "src": "content/products/images/main/digital-multimeter-hn-006-row-006-main.webp",
           "thumbnail": "content/products/images/thumbnail/digital-multimeter-hn-006-row-006-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/digital-soldering-station-hn-011-row-011-main.png",
+          "src": "content/products/images/main/digital-soldering-station-hn-011-row-011-main.webp",
           "thumbnail": "content/products/images/thumbnail/digital-soldering-station-hn-011-row-011-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/portable-led-work-light-hn-016-row-016-main.png",
+          "src": "content/products/images/main/portable-led-work-light-hn-016-row-016-main.webp",
           "thumbnail": "content/products/images/thumbnail/portable-led-work-light-hn-016-row-016-thumbnail-256.jpg"
         }
       ],
@@ -5158,24 +5158,24 @@
     },
     "product-2": {
       "id": "product-2",
-      "main": "content/products/images/main/cordless-drill-driver-hn-002-row-002-main.png",
+      "main": "content/products/images/main/cordless-drill-driver-hn-002-row-002-main.webp",
       "card": "content/products/images/card/cordless-drill-driver-hn-002-row-002-card-800.jpg",
       "thumbnail": "content/products/images/thumbnail/cordless-drill-driver-hn-002-row-002-thumbnail-256.jpg",
       "images": [
         {
-          "src": "content/products/images/main/cordless-drill-driver-hn-002-row-002-main.png",
+          "src": "content/products/images/main/cordless-drill-driver-hn-002-row-002-main.webp",
           "thumbnail": "content/products/images/thumbnail/cordless-drill-driver-hn-002-row-002-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/digital-multimeter-hn-006-row-006-main.png",
+          "src": "content/products/images/main/digital-multimeter-hn-006-row-006-main.webp",
           "thumbnail": "content/products/images/thumbnail/digital-multimeter-hn-006-row-006-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/digital-soldering-station-hn-011-row-011-main.png",
+          "src": "content/products/images/main/digital-soldering-station-hn-011-row-011-main.webp",
           "thumbnail": "content/products/images/thumbnail/digital-soldering-station-hn-011-row-011-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/portable-led-work-light-hn-016-row-016-main.png",
+          "src": "content/products/images/main/portable-led-work-light-hn-016-row-016-main.webp",
           "thumbnail": "content/products/images/thumbnail/portable-led-work-light-hn-016-row-016-thumbnail-256.jpg"
         }
       ],
@@ -5183,24 +5183,24 @@
     },
     "product-3": {
       "id": "product-3",
-      "main": "content/products/images/main/electric-hammer-drill-hn-003-row-003-main.png",
+      "main": "content/products/images/main/electric-hammer-drill-hn-003-row-003-main.webp",
       "card": "content/products/images/card/electric-hammer-drill-hn-003-row-003-card-800.jpg",
       "thumbnail": "content/products/images/thumbnail/electric-hammer-drill-hn-003-row-003-thumbnail-256.jpg",
       "images": [
         {
-          "src": "content/products/images/main/electric-hammer-drill-hn-003-row-003-main.png",
+          "src": "content/products/images/main/electric-hammer-drill-hn-003-row-003-main.webp",
           "thumbnail": "content/products/images/thumbnail/electric-hammer-drill-hn-003-row-003-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/digital-multimeter-hn-006-row-006-main.png",
+          "src": "content/products/images/main/digital-multimeter-hn-006-row-006-main.webp",
           "thumbnail": "content/products/images/thumbnail/digital-multimeter-hn-006-row-006-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/digital-soldering-station-hn-011-row-011-main.png",
+          "src": "content/products/images/main/digital-soldering-station-hn-011-row-011-main.webp",
           "thumbnail": "content/products/images/thumbnail/digital-soldering-station-hn-011-row-011-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/portable-led-work-light-hn-016-row-016-main.png",
+          "src": "content/products/images/main/portable-led-work-light-hn-016-row-016-main.webp",
           "thumbnail": "content/products/images/thumbnail/portable-led-work-light-hn-016-row-016-thumbnail-256.jpg"
         }
       ],
@@ -5208,24 +5208,24 @@
     },
     "product-4": {
       "id": "product-4",
-      "main": "content/products/images/main/two-speed-cordless-drill-driver-hn-004-row-004-main.png",
+      "main": "content/products/images/main/two-speed-cordless-drill-driver-hn-004-row-004-main.webp",
       "card": "content/products/images/card/two-speed-cordless-drill-driver-hn-004-row-004-card-800.jpg",
       "thumbnail": "content/products/images/thumbnail/two-speed-cordless-drill-driver-hn-004-row-004-thumbnail-256.jpg",
       "images": [
         {
-          "src": "content/products/images/main/two-speed-cordless-drill-driver-hn-004-row-004-main.png",
+          "src": "content/products/images/main/two-speed-cordless-drill-driver-hn-004-row-004-main.webp",
           "thumbnail": "content/products/images/thumbnail/two-speed-cordless-drill-driver-hn-004-row-004-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/digital-multimeter-hn-006-row-006-main.png",
+          "src": "content/products/images/main/digital-multimeter-hn-006-row-006-main.webp",
           "thumbnail": "content/products/images/thumbnail/digital-multimeter-hn-006-row-006-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/digital-soldering-station-hn-011-row-011-main.png",
+          "src": "content/products/images/main/digital-soldering-station-hn-011-row-011-main.webp",
           "thumbnail": "content/products/images/thumbnail/digital-soldering-station-hn-011-row-011-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/portable-led-work-light-hn-016-row-016-main.png",
+          "src": "content/products/images/main/portable-led-work-light-hn-016-row-016-main.webp",
           "thumbnail": "content/products/images/thumbnail/portable-led-work-light-hn-016-row-016-thumbnail-256.jpg"
         }
       ],
@@ -5233,24 +5233,24 @@
     },
     "product-5": {
       "id": "product-5",
-      "main": "content/products/images/main/electric-hammer-drill-with-keyless-chuck-hn-005-row-005-main.png",
+      "main": "content/products/images/main/electric-hammer-drill-with-keyless-chuck-hn-005-row-005-main.webp",
       "card": "content/products/images/card/electric-hammer-drill-with-keyless-chuck-hn-005-row-005-card-800.jpg",
       "thumbnail": "content/products/images/thumbnail/electric-hammer-drill-with-keyless-chuck-hn-005-row-005-thumbnail-256.jpg",
       "images": [
         {
-          "src": "content/products/images/main/electric-hammer-drill-with-keyless-chuck-hn-005-row-005-main.png",
+          "src": "content/products/images/main/electric-hammer-drill-with-keyless-chuck-hn-005-row-005-main.webp",
           "thumbnail": "content/products/images/thumbnail/electric-hammer-drill-with-keyless-chuck-hn-005-row-005-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/digital-multimeter-hn-006-row-006-main.png",
+          "src": "content/products/images/main/digital-multimeter-hn-006-row-006-main.webp",
           "thumbnail": "content/products/images/thumbnail/digital-multimeter-hn-006-row-006-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/digital-soldering-station-hn-011-row-011-main.png",
+          "src": "content/products/images/main/digital-soldering-station-hn-011-row-011-main.webp",
           "thumbnail": "content/products/images/thumbnail/digital-soldering-station-hn-011-row-011-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/portable-led-work-light-hn-016-row-016-main.png",
+          "src": "content/products/images/main/portable-led-work-light-hn-016-row-016-main.webp",
           "thumbnail": "content/products/images/thumbnail/portable-led-work-light-hn-016-row-016-thumbnail-256.jpg"
         }
       ],
@@ -5258,24 +5258,24 @@
     },
     "product-6": {
       "id": "product-6",
-      "main": "content/products/images/main/digital-multimeter-hn-006-row-006-main.png",
+      "main": "content/products/images/main/digital-multimeter-hn-006-row-006-main.webp",
       "card": "content/products/images/card/digital-multimeter-hn-006-row-006-card-800.jpg",
       "thumbnail": "content/products/images/thumbnail/digital-multimeter-hn-006-row-006-thumbnail-256.jpg",
       "images": [
         {
-          "src": "content/products/images/main/digital-multimeter-hn-006-row-006-main.png",
+          "src": "content/products/images/main/digital-multimeter-hn-006-row-006-main.webp",
           "thumbnail": "content/products/images/thumbnail/digital-multimeter-hn-006-row-006-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/cordless-hammer-drill-hn-001-row-001-main.png",
+          "src": "content/products/images/main/cordless-hammer-drill-hn-001-row-001-main.webp",
           "thumbnail": "content/products/images/thumbnail/cordless-hammer-drill-hn-001-row-001-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/digital-soldering-station-hn-011-row-011-main.png",
+          "src": "content/products/images/main/digital-soldering-station-hn-011-row-011-main.webp",
           "thumbnail": "content/products/images/thumbnail/digital-soldering-station-hn-011-row-011-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/portable-led-work-light-hn-016-row-016-main.png",
+          "src": "content/products/images/main/portable-led-work-light-hn-016-row-016-main.webp",
           "thumbnail": "content/products/images/thumbnail/portable-led-work-light-hn-016-row-016-thumbnail-256.jpg"
         }
       ],
@@ -5283,24 +5283,24 @@
     },
     "product-7": {
       "id": "product-7",
-      "main": "content/products/images/main/workshop-digital-multimeter-hn-007-row-007-main.png",
+      "main": "content/products/images/main/workshop-digital-multimeter-hn-007-row-007-main.webp",
       "card": "content/products/images/card/workshop-digital-multimeter-hn-007-row-007-card-800.jpg",
       "thumbnail": "content/products/images/thumbnail/workshop-digital-multimeter-hn-007-row-007-thumbnail-256.jpg",
       "images": [
         {
-          "src": "content/products/images/main/workshop-digital-multimeter-hn-007-row-007-main.png",
+          "src": "content/products/images/main/workshop-digital-multimeter-hn-007-row-007-main.webp",
           "thumbnail": "content/products/images/thumbnail/workshop-digital-multimeter-hn-007-row-007-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/cordless-hammer-drill-hn-001-row-001-main.png",
+          "src": "content/products/images/main/cordless-hammer-drill-hn-001-row-001-main.webp",
           "thumbnail": "content/products/images/thumbnail/cordless-hammer-drill-hn-001-row-001-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/digital-soldering-station-hn-011-row-011-main.png",
+          "src": "content/products/images/main/digital-soldering-station-hn-011-row-011-main.webp",
           "thumbnail": "content/products/images/thumbnail/digital-soldering-station-hn-011-row-011-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/portable-led-work-light-hn-016-row-016-main.png",
+          "src": "content/products/images/main/portable-led-work-light-hn-016-row-016-main.webp",
           "thumbnail": "content/products/images/thumbnail/portable-led-work-light-hn-016-row-016-thumbnail-256.jpg"
         }
       ],
@@ -5308,24 +5308,24 @@
     },
     "product-8": {
       "id": "product-8",
-      "main": "content/products/images/main/handheld-multimeter-with-large-display-hn-008-row-008-main.png",
+      "main": "content/products/images/main/handheld-multimeter-with-large-display-hn-008-row-008-main.webp",
       "card": "content/products/images/card/handheld-multimeter-with-large-display-hn-008-row-008-card-800.jpg",
       "thumbnail": "content/products/images/thumbnail/handheld-multimeter-with-large-display-hn-008-row-008-thumbnail-256.jpg",
       "images": [
         {
-          "src": "content/products/images/main/handheld-multimeter-with-large-display-hn-008-row-008-main.png",
+          "src": "content/products/images/main/handheld-multimeter-with-large-display-hn-008-row-008-main.webp",
           "thumbnail": "content/products/images/thumbnail/handheld-multimeter-with-large-display-hn-008-row-008-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/cordless-hammer-drill-hn-001-row-001-main.png",
+          "src": "content/products/images/main/cordless-hammer-drill-hn-001-row-001-main.webp",
           "thumbnail": "content/products/images/thumbnail/cordless-hammer-drill-hn-001-row-001-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/digital-soldering-station-hn-011-row-011-main.png",
+          "src": "content/products/images/main/digital-soldering-station-hn-011-row-011-main.webp",
           "thumbnail": "content/products/images/thumbnail/digital-soldering-station-hn-011-row-011-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/portable-led-work-light-hn-016-row-016-main.png",
+          "src": "content/products/images/main/portable-led-work-light-hn-016-row-016-main.webp",
           "thumbnail": "content/products/images/thumbnail/portable-led-work-light-hn-016-row-016-thumbnail-256.jpg"
         }
       ],
@@ -5333,24 +5333,24 @@
     },
     "product-9": {
       "id": "product-9",
-      "main": "content/products/images/main/digital-clamp-meter-hn-009-row-009-main.png",
+      "main": "content/products/images/main/digital-clamp-meter-hn-009-row-009-main.webp",
       "card": "content/products/images/card/digital-clamp-meter-hn-009-row-009-card-800.jpg",
       "thumbnail": "content/products/images/thumbnail/digital-clamp-meter-hn-009-row-009-thumbnail-256.jpg",
       "images": [
         {
-          "src": "content/products/images/main/digital-clamp-meter-hn-009-row-009-main.png",
+          "src": "content/products/images/main/digital-clamp-meter-hn-009-row-009-main.webp",
           "thumbnail": "content/products/images/thumbnail/digital-clamp-meter-hn-009-row-009-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/cordless-hammer-drill-hn-001-row-001-main.png",
+          "src": "content/products/images/main/cordless-hammer-drill-hn-001-row-001-main.webp",
           "thumbnail": "content/products/images/thumbnail/cordless-hammer-drill-hn-001-row-001-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/digital-soldering-station-hn-011-row-011-main.png",
+          "src": "content/products/images/main/digital-soldering-station-hn-011-row-011-main.webp",
           "thumbnail": "content/products/images/thumbnail/digital-soldering-station-hn-011-row-011-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/portable-led-work-light-hn-016-row-016-main.png",
+          "src": "content/products/images/main/portable-led-work-light-hn-016-row-016-main.webp",
           "thumbnail": "content/products/images/thumbnail/portable-led-work-light-hn-016-row-016-thumbnail-256.jpg"
         }
       ],
@@ -5358,24 +5358,24 @@
     },
     "product-10": {
       "id": "product-10",
-      "main": "content/products/images/main/electrical-installation-digital-multimeter-hn-010-row-010-main.png",
+      "main": "content/products/images/main/electrical-installation-digital-multimeter-hn-010-row-010-main.webp",
       "card": "content/products/images/card/electrical-installation-digital-multimeter-hn-010-row-010-card-800.jpg",
       "thumbnail": "content/products/images/thumbnail/electrical-installation-digital-multimeter-hn-010-row-010-thumbnail-256.jpg",
       "images": [
         {
-          "src": "content/products/images/main/electrical-installation-digital-multimeter-hn-010-row-010-main.png",
+          "src": "content/products/images/main/electrical-installation-digital-multimeter-hn-010-row-010-main.webp",
           "thumbnail": "content/products/images/thumbnail/electrical-installation-digital-multimeter-hn-010-row-010-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/cordless-hammer-drill-hn-001-row-001-main.png",
+          "src": "content/products/images/main/cordless-hammer-drill-hn-001-row-001-main.webp",
           "thumbnail": "content/products/images/thumbnail/cordless-hammer-drill-hn-001-row-001-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/digital-soldering-station-hn-011-row-011-main.png",
+          "src": "content/products/images/main/digital-soldering-station-hn-011-row-011-main.webp",
           "thumbnail": "content/products/images/thumbnail/digital-soldering-station-hn-011-row-011-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/portable-led-work-light-hn-016-row-016-main.png",
+          "src": "content/products/images/main/portable-led-work-light-hn-016-row-016-main.webp",
           "thumbnail": "content/products/images/thumbnail/portable-led-work-light-hn-016-row-016-thumbnail-256.jpg"
         }
       ],
@@ -5383,24 +5383,24 @@
     },
     "product-11": {
       "id": "product-11",
-      "main": "content/products/images/main/digital-soldering-station-hn-011-row-011-main.png",
+      "main": "content/products/images/main/digital-soldering-station-hn-011-row-011-main.webp",
       "card": "content/products/images/card/digital-soldering-station-hn-011-row-011-card-800.jpg",
       "thumbnail": "content/products/images/thumbnail/digital-soldering-station-hn-011-row-011-thumbnail-256.jpg",
       "images": [
         {
-          "src": "content/products/images/main/digital-soldering-station-hn-011-row-011-main.png",
+          "src": "content/products/images/main/digital-soldering-station-hn-011-row-011-main.webp",
           "thumbnail": "content/products/images/thumbnail/digital-soldering-station-hn-011-row-011-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/cordless-hammer-drill-hn-001-row-001-main.png",
+          "src": "content/products/images/main/cordless-hammer-drill-hn-001-row-001-main.webp",
           "thumbnail": "content/products/images/thumbnail/cordless-hammer-drill-hn-001-row-001-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/digital-multimeter-hn-006-row-006-main.png",
+          "src": "content/products/images/main/digital-multimeter-hn-006-row-006-main.webp",
           "thumbnail": "content/products/images/thumbnail/digital-multimeter-hn-006-row-006-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/portable-led-work-light-hn-016-row-016-main.png",
+          "src": "content/products/images/main/portable-led-work-light-hn-016-row-016-main.webp",
           "thumbnail": "content/products/images/thumbnail/portable-led-work-light-hn-016-row-016-thumbnail-256.jpg"
         }
       ],
@@ -5408,24 +5408,24 @@
     },
     "product-12": {
       "id": "product-12",
-      "main": "content/products/images/main/adjustable-soldering-iron-hn-012-row-012-main.png",
+      "main": "content/products/images/main/adjustable-soldering-iron-hn-012-row-012-main.webp",
       "card": "content/products/images/card/adjustable-soldering-iron-hn-012-row-012-card-800.jpg",
       "thumbnail": "content/products/images/thumbnail/adjustable-soldering-iron-hn-012-row-012-thumbnail-256.jpg",
       "images": [
         {
-          "src": "content/products/images/main/adjustable-soldering-iron-hn-012-row-012-main.png",
+          "src": "content/products/images/main/adjustable-soldering-iron-hn-012-row-012-main.webp",
           "thumbnail": "content/products/images/thumbnail/adjustable-soldering-iron-hn-012-row-012-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/cordless-hammer-drill-hn-001-row-001-main.png",
+          "src": "content/products/images/main/cordless-hammer-drill-hn-001-row-001-main.webp",
           "thumbnail": "content/products/images/thumbnail/cordless-hammer-drill-hn-001-row-001-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/digital-multimeter-hn-006-row-006-main.png",
+          "src": "content/products/images/main/digital-multimeter-hn-006-row-006-main.webp",
           "thumbnail": "content/products/images/thumbnail/digital-multimeter-hn-006-row-006-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/portable-led-work-light-hn-016-row-016-main.png",
+          "src": "content/products/images/main/portable-led-work-light-hn-016-row-016-main.webp",
           "thumbnail": "content/products/images/thumbnail/portable-led-work-light-hn-016-row-016-thumbnail-256.jpg"
         }
       ],
@@ -5433,24 +5433,24 @@
     },
     "product-13": {
       "id": "product-13",
-      "main": "content/products/images/main/hot-air-rework-station-hn-013-row-013-main.png",
+      "main": "content/products/images/main/hot-air-rework-station-hn-013-row-013-main.webp",
       "card": "content/products/images/card/hot-air-rework-station-hn-013-row-013-card-800.jpg",
       "thumbnail": "content/products/images/thumbnail/hot-air-rework-station-hn-013-row-013-thumbnail-256.jpg",
       "images": [
         {
-          "src": "content/products/images/main/hot-air-rework-station-hn-013-row-013-main.png",
+          "src": "content/products/images/main/hot-air-rework-station-hn-013-row-013-main.webp",
           "thumbnail": "content/products/images/thumbnail/hot-air-rework-station-hn-013-row-013-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/cordless-hammer-drill-hn-001-row-001-main.png",
+          "src": "content/products/images/main/cordless-hammer-drill-hn-001-row-001-main.webp",
           "thumbnail": "content/products/images/thumbnail/cordless-hammer-drill-hn-001-row-001-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/digital-multimeter-hn-006-row-006-main.png",
+          "src": "content/products/images/main/digital-multimeter-hn-006-row-006-main.webp",
           "thumbnail": "content/products/images/thumbnail/digital-multimeter-hn-006-row-006-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/portable-led-work-light-hn-016-row-016-main.png",
+          "src": "content/products/images/main/portable-led-work-light-hn-016-row-016-main.webp",
           "thumbnail": "content/products/images/thumbnail/portable-led-work-light-hn-016-row-016-thumbnail-256.jpg"
         }
       ],
@@ -5458,24 +5458,24 @@
     },
     "product-14": {
       "id": "product-14",
-      "main": "content/products/images/main/bench-soldering-station-hn-014-row-014-main.png",
+      "main": "content/products/images/main/bench-soldering-station-hn-014-row-014-main.webp",
       "card": "content/products/images/card/bench-soldering-station-hn-014-row-014-card-800.jpg",
       "thumbnail": "content/products/images/thumbnail/bench-soldering-station-hn-014-row-014-thumbnail-256.jpg",
       "images": [
         {
-          "src": "content/products/images/main/bench-soldering-station-hn-014-row-014-main.png",
+          "src": "content/products/images/main/bench-soldering-station-hn-014-row-014-main.webp",
           "thumbnail": "content/products/images/thumbnail/bench-soldering-station-hn-014-row-014-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/cordless-hammer-drill-hn-001-row-001-main.png",
+          "src": "content/products/images/main/cordless-hammer-drill-hn-001-row-001-main.webp",
           "thumbnail": "content/products/images/thumbnail/cordless-hammer-drill-hn-001-row-001-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/digital-multimeter-hn-006-row-006-main.png",
+          "src": "content/products/images/main/digital-multimeter-hn-006-row-006-main.webp",
           "thumbnail": "content/products/images/thumbnail/digital-multimeter-hn-006-row-006-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/portable-led-work-light-hn-016-row-016-main.png",
+          "src": "content/products/images/main/portable-led-work-light-hn-016-row-016-main.webp",
           "thumbnail": "content/products/images/thumbnail/portable-led-work-light-hn-016-row-016-thumbnail-256.jpg"
         }
       ],
@@ -5483,24 +5483,24 @@
     },
     "product-15": {
       "id": "product-15",
-      "main": "content/products/images/main/lightweight-workshop-soldering-iron-hn-015-row-015-main.png",
+      "main": "content/products/images/main/lightweight-workshop-soldering-iron-hn-015-row-015-main.webp",
       "card": "content/products/images/card/lightweight-workshop-soldering-iron-hn-015-row-015-card-800.jpg",
       "thumbnail": "content/products/images/thumbnail/lightweight-workshop-soldering-iron-hn-015-row-015-thumbnail-256.jpg",
       "images": [
         {
-          "src": "content/products/images/main/lightweight-workshop-soldering-iron-hn-015-row-015-main.png",
+          "src": "content/products/images/main/lightweight-workshop-soldering-iron-hn-015-row-015-main.webp",
           "thumbnail": "content/products/images/thumbnail/lightweight-workshop-soldering-iron-hn-015-row-015-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/cordless-hammer-drill-hn-001-row-001-main.png",
+          "src": "content/products/images/main/cordless-hammer-drill-hn-001-row-001-main.webp",
           "thumbnail": "content/products/images/thumbnail/cordless-hammer-drill-hn-001-row-001-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/digital-multimeter-hn-006-row-006-main.png",
+          "src": "content/products/images/main/digital-multimeter-hn-006-row-006-main.webp",
           "thumbnail": "content/products/images/thumbnail/digital-multimeter-hn-006-row-006-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/portable-led-work-light-hn-016-row-016-main.png",
+          "src": "content/products/images/main/portable-led-work-light-hn-016-row-016-main.webp",
           "thumbnail": "content/products/images/thumbnail/portable-led-work-light-hn-016-row-016-thumbnail-256.jpg"
         }
       ],
@@ -5508,24 +5508,24 @@
     },
     "product-16": {
       "id": "product-16",
-      "main": "content/products/images/main/portable-led-work-light-hn-016-row-016-main.png",
+      "main": "content/products/images/main/portable-led-work-light-hn-016-row-016-main.webp",
       "card": "content/products/images/card/portable-led-work-light-hn-016-row-016-card-800.jpg",
       "thumbnail": "content/products/images/thumbnail/portable-led-work-light-hn-016-row-016-thumbnail-256.jpg",
       "images": [
         {
-          "src": "content/products/images/main/portable-led-work-light-hn-016-row-016-main.png",
+          "src": "content/products/images/main/portable-led-work-light-hn-016-row-016-main.webp",
           "thumbnail": "content/products/images/thumbnail/portable-led-work-light-hn-016-row-016-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/cordless-hammer-drill-hn-001-row-001-main.png",
+          "src": "content/products/images/main/cordless-hammer-drill-hn-001-row-001-main.webp",
           "thumbnail": "content/products/images/thumbnail/cordless-hammer-drill-hn-001-row-001-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/digital-multimeter-hn-006-row-006-main.png",
+          "src": "content/products/images/main/digital-multimeter-hn-006-row-006-main.webp",
           "thumbnail": "content/products/images/thumbnail/digital-multimeter-hn-006-row-006-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/digital-soldering-station-hn-011-row-011-main.png",
+          "src": "content/products/images/main/digital-soldering-station-hn-011-row-011-main.webp",
           "thumbnail": "content/products/images/thumbnail/digital-soldering-station-hn-011-row-011-thumbnail-256.jpg"
         }
       ],
@@ -5533,24 +5533,24 @@
     },
     "product-17": {
       "id": "product-17",
-      "main": "content/products/images/main/workshop-led-floodlight-hn-017-row-017-main.png",
+      "main": "content/products/images/main/workshop-led-floodlight-hn-017-row-017-main.webp",
       "card": "content/products/images/card/workshop-led-floodlight-hn-017-row-017-card-800.jpg",
       "thumbnail": "content/products/images/thumbnail/workshop-led-floodlight-hn-017-row-017-thumbnail-256.jpg",
       "images": [
         {
-          "src": "content/products/images/main/workshop-led-floodlight-hn-017-row-017-main.png",
+          "src": "content/products/images/main/workshop-led-floodlight-hn-017-row-017-main.webp",
           "thumbnail": "content/products/images/thumbnail/workshop-led-floodlight-hn-017-row-017-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/cordless-hammer-drill-hn-001-row-001-main.png",
+          "src": "content/products/images/main/cordless-hammer-drill-hn-001-row-001-main.webp",
           "thumbnail": "content/products/images/thumbnail/cordless-hammer-drill-hn-001-row-001-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/digital-multimeter-hn-006-row-006-main.png",
+          "src": "content/products/images/main/digital-multimeter-hn-006-row-006-main.webp",
           "thumbnail": "content/products/images/thumbnail/digital-multimeter-hn-006-row-006-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/digital-soldering-station-hn-011-row-011-main.png",
+          "src": "content/products/images/main/digital-soldering-station-hn-011-row-011-main.webp",
           "thumbnail": "content/products/images/thumbnail/digital-soldering-station-hn-011-row-011-thumbnail-256.jpg"
         }
       ],
@@ -5558,24 +5558,24 @@
     },
     "product-18": {
       "id": "product-18",
-      "main": "content/products/images/main/rechargeable-inspection-light-hn-018-row-018-main.png",
+      "main": "content/products/images/main/rechargeable-inspection-light-hn-018-row-018-main.webp",
       "card": "content/products/images/card/rechargeable-inspection-light-hn-018-row-018-card-800.jpg",
       "thumbnail": "content/products/images/thumbnail/rechargeable-inspection-light-hn-018-row-018-thumbnail-256.jpg",
       "images": [
         {
-          "src": "content/products/images/main/rechargeable-inspection-light-hn-018-row-018-main.png",
+          "src": "content/products/images/main/rechargeable-inspection-light-hn-018-row-018-main.webp",
           "thumbnail": "content/products/images/thumbnail/rechargeable-inspection-light-hn-018-row-018-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/cordless-hammer-drill-hn-001-row-001-main.png",
+          "src": "content/products/images/main/cordless-hammer-drill-hn-001-row-001-main.webp",
           "thumbnail": "content/products/images/thumbnail/cordless-hammer-drill-hn-001-row-001-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/digital-multimeter-hn-006-row-006-main.png",
+          "src": "content/products/images/main/digital-multimeter-hn-006-row-006-main.webp",
           "thumbnail": "content/products/images/thumbnail/digital-multimeter-hn-006-row-006-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/digital-soldering-station-hn-011-row-011-main.png",
+          "src": "content/products/images/main/digital-soldering-station-hn-011-row-011-main.webp",
           "thumbnail": "content/products/images/thumbnail/digital-soldering-station-hn-011-row-011-thumbnail-256.jpg"
         }
       ],
@@ -5583,24 +5583,24 @@
     },
     "product-19": {
       "id": "product-19",
-      "main": "content/products/images/main/led-work-light-with-stand-hn-019-row-019-main.png",
+      "main": "content/products/images/main/led-work-light-with-stand-hn-019-row-019-main.webp",
       "card": "content/products/images/card/led-work-light-with-stand-hn-019-row-019-card-800.jpg",
       "thumbnail": "content/products/images/thumbnail/led-work-light-with-stand-hn-019-row-019-thumbnail-256.jpg",
       "images": [
         {
-          "src": "content/products/images/main/led-work-light-with-stand-hn-019-row-019-main.png",
+          "src": "content/products/images/main/led-work-light-with-stand-hn-019-row-019-main.webp",
           "thumbnail": "content/products/images/thumbnail/led-work-light-with-stand-hn-019-row-019-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/cordless-hammer-drill-hn-001-row-001-main.png",
+          "src": "content/products/images/main/cordless-hammer-drill-hn-001-row-001-main.webp",
           "thumbnail": "content/products/images/thumbnail/cordless-hammer-drill-hn-001-row-001-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/digital-multimeter-hn-006-row-006-main.png",
+          "src": "content/products/images/main/digital-multimeter-hn-006-row-006-main.webp",
           "thumbnail": "content/products/images/thumbnail/digital-multimeter-hn-006-row-006-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/digital-soldering-station-hn-011-row-011-main.png",
+          "src": "content/products/images/main/digital-soldering-station-hn-011-row-011-main.webp",
           "thumbnail": "content/products/images/thumbnail/digital-soldering-station-hn-011-row-011-thumbnail-256.jpg"
         }
       ],
@@ -5608,24 +5608,24 @@
     },
     "product-20": {
       "id": "product-20",
-      "main": "content/products/images/main/portable-led-floodlight-hn-020-row-020-main.png",
+      "main": "content/products/images/main/portable-led-floodlight-hn-020-row-020-main.webp",
       "card": "content/products/images/card/portable-led-floodlight-hn-020-row-020-card-800.jpg",
       "thumbnail": "content/products/images/thumbnail/portable-led-floodlight-hn-020-row-020-thumbnail-256.jpg",
       "images": [
         {
-          "src": "content/products/images/main/portable-led-floodlight-hn-020-row-020-main.png",
+          "src": "content/products/images/main/portable-led-floodlight-hn-020-row-020-main.webp",
           "thumbnail": "content/products/images/thumbnail/portable-led-floodlight-hn-020-row-020-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/cordless-hammer-drill-hn-001-row-001-main.png",
+          "src": "content/products/images/main/cordless-hammer-drill-hn-001-row-001-main.webp",
           "thumbnail": "content/products/images/thumbnail/cordless-hammer-drill-hn-001-row-001-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/digital-multimeter-hn-006-row-006-main.png",
+          "src": "content/products/images/main/digital-multimeter-hn-006-row-006-main.webp",
           "thumbnail": "content/products/images/thumbnail/digital-multimeter-hn-006-row-006-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/digital-soldering-station-hn-011-row-011-main.png",
+          "src": "content/products/images/main/digital-soldering-station-hn-011-row-011-main.webp",
           "thumbnail": "content/products/images/thumbnail/digital-soldering-station-hn-011-row-011-thumbnail-256.jpg"
         }
       ],
@@ -5633,24 +5633,24 @@
     },
     "product-21": {
       "id": "product-21",
-      "main": "content/products/images/main/insulated-electrician-screwdriver-set-hn-021-row-021-main.png",
+      "main": "content/products/images/main/insulated-electrician-screwdriver-set-hn-021-row-021-main.webp",
       "card": "content/products/images/card/insulated-electrician-screwdriver-set-hn-021-row-021-card-800.jpg",
       "thumbnail": "content/products/images/thumbnail/insulated-electrician-screwdriver-set-hn-021-row-021-thumbnail-256.jpg",
       "images": [
         {
-          "src": "content/products/images/main/insulated-electrician-screwdriver-set-hn-021-row-021-main.png",
+          "src": "content/products/images/main/insulated-electrician-screwdriver-set-hn-021-row-021-main.webp",
           "thumbnail": "content/products/images/thumbnail/insulated-electrician-screwdriver-set-hn-021-row-021-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/cordless-hammer-drill-hn-001-row-001-main.png",
+          "src": "content/products/images/main/cordless-hammer-drill-hn-001-row-001-main.webp",
           "thumbnail": "content/products/images/thumbnail/cordless-hammer-drill-hn-001-row-001-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/digital-soldering-station-hn-011-row-011-main.png",
+          "src": "content/products/images/main/digital-soldering-station-hn-011-row-011-main.webp",
           "thumbnail": "content/products/images/thumbnail/digital-soldering-station-hn-011-row-011-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/portable-led-work-light-hn-016-row-016-main.png",
+          "src": "content/products/images/main/portable-led-work-light-hn-016-row-016-main.webp",
           "thumbnail": "content/products/images/thumbnail/portable-led-work-light-hn-016-row-016-thumbnail-256.jpg"
         }
       ],
@@ -5671,24 +5671,24 @@
     },
     "product-23": {
       "id": "product-23",
-      "main": "content/products/images/main/insulated-electrician-tool-kit-hn-023-row-023-main.png",
+      "main": "content/products/images/main/insulated-electrician-tool-kit-hn-023-row-023-main.webp",
       "card": "content/products/images/card/insulated-electrician-tool-kit-hn-023-row-023-card-800.jpg",
       "thumbnail": "content/products/images/thumbnail/insulated-electrician-tool-kit-hn-023-row-023-thumbnail-256.jpg",
       "images": [
         {
-          "src": "content/products/images/main/insulated-electrician-tool-kit-hn-023-row-023-main.png",
+          "src": "content/products/images/main/insulated-electrician-tool-kit-hn-023-row-023-main.webp",
           "thumbnail": "content/products/images/thumbnail/insulated-electrician-tool-kit-hn-023-row-023-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/cordless-hammer-drill-hn-001-row-001-main.png",
+          "src": "content/products/images/main/cordless-hammer-drill-hn-001-row-001-main.webp",
           "thumbnail": "content/products/images/thumbnail/cordless-hammer-drill-hn-001-row-001-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/digital-soldering-station-hn-011-row-011-main.png",
+          "src": "content/products/images/main/digital-soldering-station-hn-011-row-011-main.webp",
           "thumbnail": "content/products/images/thumbnail/digital-soldering-station-hn-011-row-011-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/portable-led-work-light-hn-016-row-016-main.png",
+          "src": "content/products/images/main/portable-led-work-light-hn-016-row-016-main.webp",
           "thumbnail": "content/products/images/thumbnail/portable-led-work-light-hn-016-row-016-thumbnail-256.jpg"
         }
       ],
@@ -5696,24 +5696,24 @@
     },
     "product-24": {
       "id": "product-24",
-      "main": "content/products/images/main/wiring-and-installation-tool-set-hn-024-row-024-main.png",
+      "main": "content/products/images/main/wiring-and-installation-tool-set-hn-024-row-024-main.webp",
       "card": "content/products/images/card/wiring-and-installation-tool-set-hn-024-row-024-card-800.jpg",
       "thumbnail": "content/products/images/thumbnail/wiring-and-installation-tool-set-hn-024-row-024-thumbnail-256.jpg",
       "images": [
         {
-          "src": "content/products/images/main/wiring-and-installation-tool-set-hn-024-row-024-main.png",
+          "src": "content/products/images/main/wiring-and-installation-tool-set-hn-024-row-024-main.webp",
           "thumbnail": "content/products/images/thumbnail/wiring-and-installation-tool-set-hn-024-row-024-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/cordless-hammer-drill-hn-001-row-001-main.png",
+          "src": "content/products/images/main/cordless-hammer-drill-hn-001-row-001-main.webp",
           "thumbnail": "content/products/images/thumbnail/cordless-hammer-drill-hn-001-row-001-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/digital-soldering-station-hn-011-row-011-main.png",
+          "src": "content/products/images/main/digital-soldering-station-hn-011-row-011-main.webp",
           "thumbnail": "content/products/images/thumbnail/digital-soldering-station-hn-011-row-011-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/portable-led-work-light-hn-016-row-016-main.png",
+          "src": "content/products/images/main/portable-led-work-light-hn-016-row-016-main.webp",
           "thumbnail": "content/products/images/thumbnail/portable-led-work-light-hn-016-row-016-thumbnail-256.jpg"
         }
       ],
@@ -5721,24 +5721,24 @@
     },
     "product-25": {
       "id": "product-25",
-      "main": "content/products/images/main/electrician-tool-bag-set-hn-025-row-025-main.png",
+      "main": "content/products/images/main/electrician-tool-bag-set-hn-025-row-025-main.webp",
       "card": "content/products/images/card/electrician-tool-bag-set-hn-025-row-025-card-800.jpg",
       "thumbnail": "content/products/images/thumbnail/electrician-tool-bag-set-hn-025-row-025-thumbnail-256.jpg",
       "images": [
         {
-          "src": "content/products/images/main/electrician-tool-bag-set-hn-025-row-025-main.png",
+          "src": "content/products/images/main/electrician-tool-bag-set-hn-025-row-025-main.webp",
           "thumbnail": "content/products/images/thumbnail/electrician-tool-bag-set-hn-025-row-025-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/cordless-hammer-drill-hn-001-row-001-main.png",
+          "src": "content/products/images/main/cordless-hammer-drill-hn-001-row-001-main.webp",
           "thumbnail": "content/products/images/thumbnail/cordless-hammer-drill-hn-001-row-001-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/digital-soldering-station-hn-011-row-011-main.png",
+          "src": "content/products/images/main/digital-soldering-station-hn-011-row-011-main.webp",
           "thumbnail": "content/products/images/thumbnail/digital-soldering-station-hn-011-row-011-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/portable-led-work-light-hn-016-row-016-main.png",
+          "src": "content/products/images/main/portable-led-work-light-hn-016-row-016-main.webp",
           "thumbnail": "content/products/images/thumbnail/portable-led-work-light-hn-016-row-016-thumbnail-256.jpg"
         }
       ],
@@ -5746,24 +5746,24 @@
     },
     "product-26": {
       "id": "product-26",
-      "main": "content/products/images/main/digital-voltage-tester-hn-026-row-026-main.png",
+      "main": "content/products/images/main/digital-voltage-tester-hn-026-row-026-main.webp",
       "card": "content/products/images/card/digital-voltage-tester-hn-026-row-026-card-800.jpg",
       "thumbnail": "content/products/images/thumbnail/digital-voltage-tester-hn-026-row-026-thumbnail-256.jpg",
       "images": [
         {
-          "src": "content/products/images/main/digital-voltage-tester-hn-026-row-026-main.png",
+          "src": "content/products/images/main/digital-voltage-tester-hn-026-row-026-main.webp",
           "thumbnail": "content/products/images/thumbnail/digital-voltage-tester-hn-026-row-026-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/cordless-hammer-drill-hn-001-row-001-main.png",
+          "src": "content/products/images/main/cordless-hammer-drill-hn-001-row-001-main.webp",
           "thumbnail": "content/products/images/thumbnail/cordless-hammer-drill-hn-001-row-001-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/digital-soldering-station-hn-011-row-011-main.png",
+          "src": "content/products/images/main/digital-soldering-station-hn-011-row-011-main.webp",
           "thumbnail": "content/products/images/thumbnail/digital-soldering-station-hn-011-row-011-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/portable-led-work-light-hn-016-row-016-main.png",
+          "src": "content/products/images/main/portable-led-work-light-hn-016-row-016-main.webp",
           "thumbnail": "content/products/images/thumbnail/portable-led-work-light-hn-016-row-016-thumbnail-256.jpg"
         }
       ],
@@ -5771,24 +5771,24 @@
     },
     "product-27": {
       "id": "product-27",
-      "main": "content/products/images/main/non-contact-voltage-tester-hn-027-row-027-main.png",
+      "main": "content/products/images/main/non-contact-voltage-tester-hn-027-row-027-main.webp",
       "card": "content/products/images/card/non-contact-voltage-tester-hn-027-row-027-card-800.jpg",
       "thumbnail": "content/products/images/thumbnail/non-contact-voltage-tester-hn-027-row-027-thumbnail-256.jpg",
       "images": [
         {
-          "src": "content/products/images/main/non-contact-voltage-tester-hn-027-row-027-main.png",
+          "src": "content/products/images/main/non-contact-voltage-tester-hn-027-row-027-main.webp",
           "thumbnail": "content/products/images/thumbnail/non-contact-voltage-tester-hn-027-row-027-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/cordless-hammer-drill-hn-001-row-001-main.png",
+          "src": "content/products/images/main/cordless-hammer-drill-hn-001-row-001-main.webp",
           "thumbnail": "content/products/images/thumbnail/cordless-hammer-drill-hn-001-row-001-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/digital-soldering-station-hn-011-row-011-main.png",
+          "src": "content/products/images/main/digital-soldering-station-hn-011-row-011-main.webp",
           "thumbnail": "content/products/images/thumbnail/digital-soldering-station-hn-011-row-011-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/portable-led-work-light-hn-016-row-016-main.png",
+          "src": "content/products/images/main/portable-led-work-light-hn-016-row-016-main.webp",
           "thumbnail": "content/products/images/thumbnail/portable-led-work-light-hn-016-row-016-thumbnail-256.jpg"
         }
       ],
@@ -5796,24 +5796,24 @@
     },
     "product-28": {
       "id": "product-28",
-      "main": "content/products/images/main/inductive-voltage-tester-hn-028-row-028-main.png",
+      "main": "content/products/images/main/inductive-voltage-tester-hn-028-row-028-main.webp",
       "card": "content/products/images/card/inductive-voltage-tester-hn-028-row-028-card-800.jpg",
       "thumbnail": "content/products/images/thumbnail/inductive-voltage-tester-hn-028-row-028-thumbnail-256.jpg",
       "images": [
         {
-          "src": "content/products/images/main/inductive-voltage-tester-hn-028-row-028-main.png",
+          "src": "content/products/images/main/inductive-voltage-tester-hn-028-row-028-main.webp",
           "thumbnail": "content/products/images/thumbnail/inductive-voltage-tester-hn-028-row-028-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/cordless-hammer-drill-hn-001-row-001-main.png",
+          "src": "content/products/images/main/cordless-hammer-drill-hn-001-row-001-main.webp",
           "thumbnail": "content/products/images/thumbnail/cordless-hammer-drill-hn-001-row-001-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/digital-soldering-station-hn-011-row-011-main.png",
+          "src": "content/products/images/main/digital-soldering-station-hn-011-row-011-main.webp",
           "thumbnail": "content/products/images/thumbnail/digital-soldering-station-hn-011-row-011-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/portable-led-work-light-hn-016-row-016-main.png",
+          "src": "content/products/images/main/portable-led-work-light-hn-016-row-016-main.webp",
           "thumbnail": "content/products/images/thumbnail/portable-led-work-light-hn-016-row-016-thumbnail-256.jpg"
         }
       ],
@@ -5821,24 +5821,24 @@
     },
     "product-29": {
       "id": "product-29",
-      "main": "content/products/images/main/circuit-continuity-tester-hn-029-row-029-main.png",
+      "main": "content/products/images/main/circuit-continuity-tester-hn-029-row-029-main.webp",
       "card": "content/products/images/card/circuit-continuity-tester-hn-029-row-029-card-800.jpg",
       "thumbnail": "content/products/images/thumbnail/circuit-continuity-tester-hn-029-row-029-thumbnail-256.jpg",
       "images": [
         {
-          "src": "content/products/images/main/circuit-continuity-tester-hn-029-row-029-main.png",
+          "src": "content/products/images/main/circuit-continuity-tester-hn-029-row-029-main.webp",
           "thumbnail": "content/products/images/thumbnail/circuit-continuity-tester-hn-029-row-029-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/cordless-hammer-drill-hn-001-row-001-main.png",
+          "src": "content/products/images/main/cordless-hammer-drill-hn-001-row-001-main.webp",
           "thumbnail": "content/products/images/thumbnail/cordless-hammer-drill-hn-001-row-001-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/digital-soldering-station-hn-011-row-011-main.png",
+          "src": "content/products/images/main/digital-soldering-station-hn-011-row-011-main.webp",
           "thumbnail": "content/products/images/thumbnail/digital-soldering-station-hn-011-row-011-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/portable-led-work-light-hn-016-row-016-main.png",
+          "src": "content/products/images/main/portable-led-work-light-hn-016-row-016-main.webp",
           "thumbnail": "content/products/images/thumbnail/portable-led-work-light-hn-016-row-016-thumbnail-256.jpg"
         }
       ],
@@ -5846,24 +5846,24 @@
     },
     "product-30": {
       "id": "product-30",
-      "main": "content/products/images/main/voltage-detector-pen-hn-030-row-030-main.png",
+      "main": "content/products/images/main/voltage-detector-pen-hn-030-row-030-main.webp",
       "card": "content/products/images/card/voltage-detector-pen-hn-030-row-030-card-800.jpg",
       "thumbnail": "content/products/images/thumbnail/voltage-detector-pen-hn-030-row-030-thumbnail-256.jpg",
       "images": [
         {
-          "src": "content/products/images/main/voltage-detector-pen-hn-030-row-030-main.png",
+          "src": "content/products/images/main/voltage-detector-pen-hn-030-row-030-main.webp",
           "thumbnail": "content/products/images/thumbnail/voltage-detector-pen-hn-030-row-030-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/cordless-hammer-drill-hn-001-row-001-main.png",
+          "src": "content/products/images/main/cordless-hammer-drill-hn-001-row-001-main.webp",
           "thumbnail": "content/products/images/thumbnail/cordless-hammer-drill-hn-001-row-001-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/digital-soldering-station-hn-011-row-011-main.png",
+          "src": "content/products/images/main/digital-soldering-station-hn-011-row-011-main.webp",
           "thumbnail": "content/products/images/thumbnail/digital-soldering-station-hn-011-row-011-thumbnail-256.jpg"
         },
         {
-          "src": "content/products/images/main/portable-led-work-light-hn-016-row-016-main.png",
+          "src": "content/products/images/main/portable-led-work-light-hn-016-row-016-main.webp",
           "thumbnail": "content/products/images/thumbnail/portable-led-work-light-hn-016-row-016-thumbnail-256.jpg"
         }
       ],

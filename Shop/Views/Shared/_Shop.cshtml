@@ -1,8 +1,10 @@
 @model PageModel
+@inject Microsoft.Extensions.Options.IOptions<Shop.Models.ApiClientOptions> ApiClientOptions
 @{
     string pageController = ViewContext.RouteData.Values["controller"]?.ToString()?.ToLowerInvariant() ?? "home";
     string pageAction = ViewContext.RouteData.Values["action"]?.ToString()?.ToLowerInvariant() ?? "index";
     string mobilePageClass = $"mobile-page--{pageController}-{pageAction}";
+    Shop.Models.ApiClientOptions apiClient = ApiClientOptions.Value;
 }
 <!doctype html>
 <html lang="fa" dir="rtl">
@@ -10,12 +12,14 @@
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <meta name="theme-color" content="#102a43"/>
+    <meta name="api-base-url" content="@Url.Content(apiClient.BasePath)" data-timeout-ms="@apiClient.TimeoutMilliseconds"/>
     <link rel="icon" type="image/svg+xml" href="~/content/identity/store-mark.svg" asp-append-version="true"/>
     <partial name="_SeoMetadata" model="Model"/>
     <base href="@Url.Content("~/")"/>
     <title>@Model.Seo.Title</title>
     <link href="~/shop/vendor/fonts/fonts.css" rel="stylesheet" asp-append-version="true"/>
     <link href="~/shop/vendor/bootstrap/bootstrap.rtl.min.css" rel="stylesheet" asp-append-version="true"/>
+    <link rel="preload" href="~/shop/vendor/bootstrap-icons/fonts/bootstrap-icons.woff2?e34853135f9e39acf64315236852cd5a" as="font" type="font/woff2" crossorigin/>
     <link
         href="~/shop/vendor/bootstrap-icons/bootstrap-icons.min.css"
         asp-append-version="true"

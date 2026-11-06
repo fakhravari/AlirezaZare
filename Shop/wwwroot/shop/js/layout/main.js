@@ -698,7 +698,35 @@ $(function () {
   }
 
   const initOwlCarousel = ($element, options) => {
-    if ($.fn.owlCarousel) $element.owlCarousel(options);
+    if (!$.fn.owlCarousel) return;
+    const updateControlNames = (event) => {
+      const carousel = event?.target || $element[0];
+      carousel?.querySelectorAll(".owl-nav .owl-prev").forEach((button) => {
+        button.setAttribute("role", "button");
+        button.setAttribute("aria-label", "اسلاید قبلی");
+      });
+      carousel?.querySelectorAll(".owl-nav .owl-next").forEach((button) => {
+        button.setAttribute("role", "button");
+        button.setAttribute("aria-label", "اسلاید بعدی");
+      });
+      carousel?.querySelectorAll(".owl-dots .owl-dot").forEach((button, index) => {
+        button.setAttribute("role", "button");
+        button.setAttribute("aria-label", `رفتن به اسلاید ${faNumber(index + 1)}`);
+      });
+    };
+    const initialized = options.onInitialized;
+    const refreshed = options.onRefreshed;
+    $element.owlCarousel({
+      ...options,
+      onInitialized(event) {
+        updateControlNames(event);
+        initialized?.call(this, event);
+      },
+      onRefreshed(event) {
+        updateControlNames(event);
+        refreshed?.call(this, event);
+      },
+    });
   };
 
   const carouselMotion = {
@@ -753,10 +781,10 @@ $(function () {
     ),
   ].slice(0, 6);
   const sliderImagePaths = [
-    "shop/images/sliders/slide-power-tools.png",
-    "shop/images/sliders/slide-measurement-tools.png",
-    "shop/images/sliders/slide-soldering-tools.png",
-    "shop/images/sliders/slide-workshop-lighting.png",
+    "shop/images/sliders/slide-power-tools.webp",
+    "shop/images/sliders/slide-measurement-tools.webp",
+    "shop/images/sliders/slide-soldering-tools.webp",
+    "shop/images/sliders/slide-workshop-lighting.webp",
   ];
   const sliderImagePath = (product) =>
     sliderImagePaths[Number(product.imageSet)] || product.image;
@@ -1133,7 +1161,7 @@ $(function () {
     const $submit = $(mode === "register" ? "#registerEmailForm button[type='submit']" : "#loginEmailForm button[type='submit']");
     $submit.prop("disabled", true);
     try {
-      const response = await fetch("/api/auth/email-code", {
+      const response = await window.HNUI.api.request("auth/email-code", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
@@ -1228,7 +1256,7 @@ $(function () {
     window.HNUI.setMessage($emailOtpError[0], "");
     const $submit = $("#emailOtpForm button[type='submit']").prop("disabled", true);
     try {
-      const response = await fetch("/api/auth/email-code/verify", {
+      const response = await window.HNUI.api.request("auth/email-code/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: $("#sentEmail").text(), code }),

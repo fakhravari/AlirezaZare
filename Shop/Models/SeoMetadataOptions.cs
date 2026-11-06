@@ -3,10 +3,8 @@ namespace Shop.Models;
 public sealed class SeoMetadataOptions
 {
     public string? SiteUrl { get; set; }
-    public string SiteName { get; set; } = "فروشگاه برق و ابزار ندا اولیائی";
     public string Locale { get; set; } = "fa_IR";
-    public string DefaultImagePath { get; set; } = "~/shop/images/heroes/hero-electrical-editorial.png";
-    public string DefaultImageAlt { get; set; } = "ابزار و تجهیزات فنی فروشگاه ندا اولیائی";
+    public string DefaultImagePath { get; set; } = "~/shop/images/heroes/hero-electrical-editorial.webp";
     public string? GoogleSiteVerification { get; set; }
     public string? BingSiteVerification { get; set; }
     public string? FacebookAppId { get; set; }

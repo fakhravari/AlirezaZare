@@ -431,7 +431,6 @@ textarea {
   .product-card,
   .showcase-card,
   .story-card,
-  .service-card,
   .trust-card,
   .branch-card,
   .brand-card,
@@ -456,7 +455,6 @@ textarea {
   .product-card,
   .showcase-card,
   .story-card,
-  .service-card,
   .trust-card,
   .branch-card,
   .brand-card,
@@ -1268,7 +1266,7 @@ footer {
   place-items: center;
 }
 
-.footer-main h4 {
+.footer-main h2 {
   font-size: 14px;
   color: var(--color-gold);
   margin-bottom: 20px;
@@ -1619,7 +1617,7 @@ footer {
     line-height: 1.9;
   }
 
-  .footer-main h4 {
+  .footer-main h2 {
     margin-bottom: 18px;
   }
 
@@ -2561,7 +2559,7 @@ body {
   }
 }
 
-footer .footer-main h4 {
+footer .footer-main h2 {
   font-size: 16px;
 }
 
@@ -2581,7 +2579,7 @@ footer .copyright {
 }
 
 @media (max-width: 767px) {
-  footer .footer-main h4 {
+  footer .footer-main h2 {
     font-size: 18px;
   }
 
@@ -3968,7 +3966,7 @@ h6,
   line-height: 2;
 }
 
-.footer-main h4 {
+.footer-main h2 {
   font-size: 16px;
 }
 
@@ -4000,7 +3998,7 @@ h6,
     font-size: 14px !important;
   }
 
-  .footer-main h4 {
+  .footer-main h2 {
     font-size: 15px;
   }
 
@@ -4070,7 +4068,6 @@ h6,
 .copyright,
 .reviewer small,
 .benefit span,
-.store-contact,
 .store-card > p {
   text-align: right;
 }
@@ -4710,14 +4707,6 @@ h6,
   height: 310px;
 }
 
-.showcase-card-body {
-  display: flex;
-  min-height: 185px;
-  flex-direction: column;
-  align-items: flex-start;
-  padding: 20px 22px 22px;
-}
-
 .showcase-card-body small {
   color: #9d8666;
   font-size: 12px;
@@ -4839,11 +4828,6 @@ h6,
 
   .showcase-card .product-image {
     height: 270px;
-  }
-
-  .showcase-card-body {
-    min-height: 170px;
-    padding: 17px 18px 19px;
   }
 
   .showcase-card-body h3 {
@@ -5012,7 +4996,6 @@ body {
 .journal-main,
 .journal-list,
 .testimonial-card,
-.recommend-box,
 .featured-main,
 .featured-side {
   overflow: hidden;
@@ -5549,8 +5532,7 @@ body {
   .store-card,
   .journal-main,
   .journal-list,
-  .testimonial-card,
-  .recommend-box {
+  .testimonial-card {
     border-radius: var(--md-radius-md);
   }
 
@@ -5717,9 +5699,7 @@ body {
 
 /* Unified accessible color balance */
 .section-head p,
-.recommend-head p,
 .story-copy p,
-.service p,
 .newsletter p,
 .showcase-card-body > small,
 .rail-card > small {
@@ -5824,7 +5804,7 @@ footer .footer-main p {
   color: rgba(255, 255, 255, 0.7);
 }
 
-footer .footer-main h4 {
+footer .footer-main h2 {
   position: relative;
   width: 100%;
   margin-bottom: 18px;
@@ -5833,7 +5813,7 @@ footer .footer-main h4 {
   font-size: 17px;
 }
 
-footer .footer-main h4::after {
+footer .footer-main h2::after {
   content: "";
   position: absolute;
   right: 0;
@@ -5928,7 +5908,7 @@ footer .copyright::before {
     padding-top: 54px;
   }
 
-  footer .footer-main h4 {
+  footer .footer-main h2 {
     font-size: 16px;
   }
 
@@ -7002,8 +6982,7 @@ footer .copyright::before {
 .brand-card,
 .testimonial-card,
 .journal-list,
-.store-card,
-.services .service {
+.store-card {
   border: 1px solid var(--ui-border);
   border-radius: var(--ui-radius-md);
   box-shadow: var(--ui-shadow-1);
@@ -7018,8 +6997,7 @@ footer .copyright::before {
 .rail-card:hover,
 .brand-card:hover,
 .testimonial-card:hover,
-.store-card:hover,
-.services .service:hover {
+.store-card:hover {
   transform: translateY(-5px);
   border-color: rgba(180, 137, 77, 0.42);
   box-shadow: var(--ui-shadow-2);
@@ -7177,8 +7155,7 @@ textarea:focus-visible {
   .rail-card:hover,
   .brand-card:hover,
   .testimonial-card:hover,
-  .store-card:hover,
-  .services .service:hover {
+  .store-card:hover {
     transform: none;
   }
 }
@@ -7190,7 +7167,6 @@ textarea:focus-visible {
   .brand-card,
   .testimonial-card,
   .store-card,
-  .services .service,
   .product-image img,
   .rail-image img,
   .featured-side-image img,

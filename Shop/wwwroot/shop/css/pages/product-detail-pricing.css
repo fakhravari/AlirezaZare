@@ -680,7 +680,7 @@
 }
 
 #productView .product-main-feature-item > small {
-  color: #758395;
+  color: var(--color-text-muted);
   font-size: var(--product-type-small);
   line-height: 1.5;
 }

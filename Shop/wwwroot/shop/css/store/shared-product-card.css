@@ -834,6 +834,11 @@
 .product-detail-sale-meta .price-old,
 .inner-page main .search-product .price-old,
 #productView .product-detail-related-card .product-info > p .price-old {
+  color: var(--color-text-muted);
+  font-size: 14px;
+  font-weight: 650;
+  text-decoration: line-through;
+  text-decoration-color: #a9b9cd;
   text-decoration-thickness: 1px;
 }
 

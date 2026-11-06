@@ -33,6 +33,40 @@ test('product dialogs fit and close on small and large screens', async ({page, i
   await expect(page.locator('.detail-price-dialog')).not.toBeVisible();
 });
 
+test('product dialogs have accessible names and restore keyboard focus after Escape', async ({page}) => {
+  await page.goto('/products/cordless-hammer-drill-1');
+
+  const accessoryTrigger = page.locator('[data-accessory-details-id]').first();
+  await accessoryTrigger.focus();
+  await accessoryTrigger.press('Enter');
+  const accessoryDialog = page.getByRole('dialog', {name: 'جزئیات متعلقات و خدمات'});
+  await expect(accessoryDialog).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(accessoryDialog).not.toBeVisible();
+  await expect(accessoryTrigger).toBeFocused();
+
+  const galleryTrigger = page.locator('#openProductGallery');
+  await galleryTrigger.focus();
+  await galleryTrigger.press('Enter');
+  const galleryTitle = (await page.locator('#productGalleryTitle').textContent()).trim();
+  const galleryDialog = page.getByRole('dialog', {name: galleryTitle, exact: true});
+  await expect(galleryDialog).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(galleryDialog).not.toBeVisible();
+  await expect(galleryTrigger).toBeFocused();
+
+  const priceTrigger = page.locator('[data-price-dialog="history"]');
+  await priceTrigger.focus();
+  await priceTrigger.press('Enter');
+  const priceTitle = (await page.locator('#productPriceDialogTitle').textContent()).trim();
+  const priceDialog = page.getByRole('dialog', {name: priceTitle, exact: true});
+  await expect(priceDialog).toBeVisible();
+  await expect(priceDialog).toHaveAttribute('aria-labelledby', 'productPriceDialogTitle');
+  await page.keyboard.press('Escape');
+  await expect(priceDialog).not.toBeVisible();
+  await expect(priceTrigger).toBeFocused();
+});
+
 test('article feedback confirmation fits and can be cancelled', async ({page, isMobile}) => {
   if (isMobile) await page.setViewportSize({width: 320, height: 640});
   await page.goto('/magazine/multimeter-symbols-guide');

@@ -1,9 +1,13 @@
+@inject Microsoft.Extensions.Options.IOptions<Shop.Models.SiteIdentityOptions> SiteIdentityOptions
+@{
+    Shop.Models.SiteIdentityOptions identity = SiteIdentityOptions.Value;
+}
 <footer>
     <div class="container">
         <div class="row g-4 footer-main">
             <div class="col-lg-4">
-                <a class="brand footer-brand" href="Home/Index#home" aria-label="برق شیراز؛ مرجع تخصصی ابزار و تجهیزات برقی؛ رفتن به صفحهٔ اصلی">
-                    <img class="footer-brand-logo" src="~/content/identity/store-electrical-lockup.svg" alt="برق شیراز؛ مرجع تخصصی ابزار و تجهیزات برقی" width="360" height="120" decoding="async" asp-append-version="true"/>
+                <a class="brand footer-brand" href="Home/Index#home" aria-label="@identity.VisualBrandName؛ مرجع تخصصی ابزار و تجهیزات برقی؛ رفتن به صفحهٔ اصلی">
+                    <img class="footer-brand-logo" src="~/content/identity/store-electrical-lockup.svg" alt="@identity.VisualBrandName؛ مرجع تخصصی ابزار و تجهیزات برقی" width="360" height="120" decoding="async" asp-append-version="true"/>
                 </a>
                 <p>
                     محصولاتی از ابزار برقی، تجهیزات اندازه‌گیری، قطعات الکترونیکی و
@@ -14,7 +18,7 @@
                     <span class="social-placeholder" role="img" aria-label="اینستاگرام" title="اینستاگرام">
                         <i class="bi bi-instagram"></i>
                     </span>
-                    <a href="https://wa.me/989369455457" target="_blank" rel="noopener" aria-label="واتساپ فروشگاه ندا اولیائی">
+                    <a href="https://wa.me/@identity.WhatsAppNumber" target="_blank" rel="noopener noreferrer" aria-label="واتساپ فروشگاه @identity.DisplayName">
                         <i class="bi bi-whatsapp"></i>
                     </a>
                     <span class="social-placeholder" role="img" aria-label="تلگرام" title="تلگرام">
@@ -23,7 +27,7 @@
                     <span class="social-placeholder" role="img" aria-label="لینکدین" title="لینکدین">
                         <i class="bi bi-linkedin"></i>
                     </span>
-                    <a href="tel:09369455457" aria-label="تماس تلفنی با فروشگاه ندا اولیائی">
+                    <a href="tel:@identity.SupportPhoneUri" aria-label="تماس تلفنی با فروشگاه @identity.DisplayName">
                         <i class="bi bi-telephone"></i>
                     </a>
                 </div>
@@ -36,14 +40,14 @@
                 </div>
             </div>
             <div class="col-6 col-lg-2">
-                <h4>دسته‌بندی‌ها</h4>
+                <h2>دسته‌بندی‌ها</h2>
                 <a href="/search?product-group=power-tools">ابزار برقی</a>
                 <a href="/search?product-group=measurement-tools">ابزار اندازه‌گیری</a>
                 <a href="/search?product-group=soldering-and-board-repair">لحیم‌کاری و تعمیر برد</a>
                 <a href="/search?product-group=lighting-and-lamps">روشنایی و لامپ</a>
             </div>
             <div class="col-6 col-lg-2">
-                <h4>خدمات مشتریان</h4>
+                <h2>خدمات مشتریان</h2>
                 <a href="/Tracking">
                     پیگیری سفارش
                 </a>
@@ -56,7 +60,7 @@
                 <a href="/Legal/Returns">رویه بازگرداندن کالا</a>
             </div>
             <div class="col-6 col-lg-2">
-                <h4>کمپانی و قوانین</h4>
+                <h2>کمپانی و قوانین</h2>
                 <a href="Home/Index#story">
                     درباره مجموعه
                 </a>
@@ -67,18 +71,18 @@
                 <a href="/Legal/Terms">شرایط استفاده</a>
             </div>
             <div class="col-6 col-lg-2">
-                <h4>راه‌های ارتباطی</h4>
-                <a href="tel:09369455457">
-                    مدیریت: 09369455457
+                <h2>راه‌های ارتباطی</h2>
+                <a href="tel:@identity.SupportPhoneUri">
+                    مدیریت: @identity.SupportPhoneDisplay
                 </a>
-                <a href="tel:09369455457">
-                    پشتیبانی: 09369455457
+                <a href="tel:@identity.SupportPhoneUri">
+                    پشتیبانی: @identity.SupportPhoneDisplay
                 </a>
             </div>
         </div>
         <div class="copyright">
             <span>
-                © ۱۴۰۵ ندا اولیائی؛ تمامی حقوق محفوظ است.
+                © ۱۴۰۵ @identity.DisplayName؛ تمامی حقوق محفوظ است.
             </span><span>تخصص ما تأمین ابزار و تجهیزات فنی معتبر است.</span>
         </div>
     </div>

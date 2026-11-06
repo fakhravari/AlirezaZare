@@ -6,8 +6,10 @@
 @using Shop.Services
 @model PageModel
 @inject IOptions<SeoMetadataOptions> SeoOptions
+@inject IOptions<SiteIdentityOptions> SiteIdentityOptions
 @{
     SeoMetadataOptions options = SeoOptions.Value;
+    SiteIdentityOptions identity = SiteIdentityOptions.Value;
     string siteOrigin = SeoUrlBuilder.SiteOrigin(options.SiteUrl, Context.Request);
     string siteRoot = SeoUrlBuilder.SiteRoot(options.SiteUrl, Context.Request);
     string requestedCanonical = Model.Seo.CanonicalUrl ?? (Context.Request.Path.Value ?? "/").ToLowerInvariant();
@@ -24,7 +26,7 @@
         : imageExtension == ".jpg" || imageExtension == ".jpeg" ? "image/jpeg"
         : imageExtension == ".gif" ? "image/gif"
         : string.Empty;
-    string imageAlt = Model.Seo.SocialImageAlt ?? options.DefaultImageAlt;
+    string imageAlt = Model.Seo.SocialImageAlt ?? $"ابزار و تجهیزات فنی {identity.StoreName}";
     string googleBotRules = $"{Model.Seo.Robots}, max-image-preview:large, max-snippet:-1, max-video-preview:-1";
     var structuredGraph = new List<object>
     {
@@ -32,7 +34,7 @@
         {
             ["@type"] = "OnlineStore",
             ["@id"] = $"{siteRoot.TrimEnd('/')}#organization",
-            ["name"] = options.SiteName,
+            ["name"] = identity.StoreName,
             ["url"] = siteRoot
         },
         new Dictionary<string, object?>
@@ -40,7 +42,7 @@
             ["@type"] = "WebSite",
             ["@id"] = $"{siteRoot.TrimEnd('/')}#website",
             ["url"] = siteRoot,
-            ["name"] = options.SiteName,
+            ["name"] = identity.StoreName,
             ["inLanguage"] = "fa-IR",
             ["publisher"] = new Dictionary<string, string> { ["@id"] = $"{siteRoot.TrimEnd('/')}#organization" }
         },
@@ -103,7 +105,7 @@
 <meta property="og:title" content="@Model.Seo.Title"/>
 <meta property="og:description" content="@Model.Seo.Description"/>
 <meta property="og:type" content="@Model.Seo.OpenGraphType"/>
-<meta property="og:site_name" content="@options.SiteName"/>
+<meta property="og:site_name" content="@identity.StoreName"/>
 <meta property="og:locale" content="@options.Locale"/>
 <meta property="og:url" content="@canonicalUrl"/>
 <meta property="og:image" content="@socialImage"/>

@@ -1435,7 +1435,7 @@
 
 #productView .product-included-benefits li small {
   overflow: hidden;
-  color: #738498;
+  color: var(--color-text-muted);
   font-size: var(--product-type-small);
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1953,7 +1953,7 @@
   align-items: center;
   gap: 5px;
   margin-top: 7px;
-  color: #7a8791;
+  color: var(--color-text-muted);
   direction: rtl;
   font-size: var(--product-type-small);
   font-weight: 600;

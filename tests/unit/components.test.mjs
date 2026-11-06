@@ -29,6 +29,44 @@ test('shared events reject unknown names and invalid payloads', () => {
   ui.emit(ui.EVENTS.cartChange, []); assert.equal(events.at(-1).type, ui.EVENTS.cartChange);
 });
 
+test('shared API client uses the configured app path and same-origin JSON defaults', async () => {
+  const {ui, window} = runtime(undefined, undefined, '/shop/api/');
+  let request;
+  window.fetch = async (url, options) => { request = {url, options}; return {ok: true}; };
+  const response = await ui.api.request('store/sales-plans/quote', {
+    method: 'POST', headers: {'Content-Type': 'application/json'}, body: '{}',
+  });
+  assert.equal(response.ok, true);
+  assert.equal(request.url, 'https://shop.example/shop/api/store/sales-plans/quote');
+  assert.equal(request.options.credentials, 'same-origin');
+  assert.equal(request.options.headers.Accept, 'application/json');
+  assert.equal(request.options.headers['Content-Type'], 'application/json');
+  assert.equal(request.options.method, 'POST');
+});
+
+test('shared API client rejects origins and paths outside its configured base', async () => {
+  const {ui, window} = runtime();
+  let requestCount = 0;
+  window.fetch = async () => { requestCount++; return {ok: true}; };
+  await assert.rejects(ui.api.request('https://attacker.example/api/auth/email-code'), {name: 'TypeError'});
+  await assert.rejects(ui.api.request('../outside'), {name: 'TypeError'});
+  assert.equal(requestCount, 0);
+  assert.throws(() => runtime(undefined, undefined, 'https://attacker.example/api/'), /same-origin/);
+});
+
+test('shared API client reports timeouts and does not retry requests', async () => {
+  const {ui, window} = runtime();
+  window.setTimeout = callback => { queueMicrotask(callback); return 1; };
+  window.clearTimeout = () => {};
+  let requestCount = 0;
+  window.fetch = (_url, {signal}) => {
+    requestCount++;
+    return new Promise((resolve, reject) => signal.addEventListener('abort', () => reject(new Error('aborted')), {once: true}));
+  };
+  await assert.rejects(ui.api.request('auth/email-code', {method: 'POST', body: '{}'}), {name: 'TimeoutError'});
+  assert.equal(requestCount, 1);
+});
+
 test('all card contexts share escaped identity, price, media and action contracts', () => {
   const {window} = runtime(); const original = window.HNCatalog.find(1);
   const p = {...original, name: '<img src=x onerror=alert(1)>"', image: 'bad" onerror="bad'};

@@ -4,6 +4,7 @@ using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
+builder.Services.AddResponseCompression(options => options.EnableForHttps = true);
 builder.Services.AddRateLimiter(options => options.AddPolicy("email-code", context => RateLimitPartition.GetFixedWindowLimiter(
         context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
         _ => new FixedWindowRateLimiterOptions
@@ -27,6 +28,18 @@ var persianHtmlEncoderSettings = new TextEncoderSettings(UnicodeRanges.BasicLati
 persianHtmlEncoderSettings.AllowCharacter('\u200C');
 builder.Services.AddWebEncoders(options => options.TextEncoderSettings = persianHtmlEncoderSettings);
 builder.Services.Configure<Shop.Models.SeoMetadataOptions>(builder.Configuration.GetSection("Seo"));
+builder.Services.Configure<Shop.Models.SiteIdentityOptions>(builder.Configuration.GetSection("SiteIdentity"));
+builder.Services.AddOptions<Shop.Models.ApiClientOptions>()
+    .BindConfiguration("ApiClient")
+    .Validate(options => options.BasePath.StartsWith("~/", StringComparison.Ordinal)
+                         && options.BasePath.EndsWith("/", StringComparison.Ordinal)
+                         && !options.BasePath.Contains("..", StringComparison.Ordinal)
+                         && !options.BasePath.Contains("?", StringComparison.Ordinal)
+                         && !options.BasePath.Contains("#", StringComparison.Ordinal),
+        "ApiClient:BasePath must be a local application path ending in '/'.")
+    .Validate(options => options.TimeoutMilliseconds is >= 1000 and <= 120000,
+        "ApiClient:TimeoutMilliseconds must be between 1000 and 120000.")
+    .ValidateOnStart();
 builder.Services.Configure<Microsoft.AspNetCore.Routing.RouteOptions>(options => options.LowercaseUrls = true);
 
 var app = builder.Build();
@@ -66,9 +79,22 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseStaticFiles();
+app.UseResponseCompression();
+app.UseStaticFiles(new StaticFileOptions
+{
+    OnPrepareResponse = context =>
+    {
+        var contentType = context.Context.Response.ContentType ?? string.Empty;
+        var maxAge = contentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase)
+            || contentType.StartsWith("font/", StringComparison.OrdinalIgnoreCase)
+            ? "public,max-age=604800,stale-while-revalidate=86400"
+            : "public,max-age=86400,stale-while-revalidate=3600";
+        context.Context.Response.Headers.CacheControl = maxAge;
+    }
+});
 app.UseRouting();
 app.UseStatusCodePagesWithReExecute("/Error/{0}");
 app.UseRateLimiter();
 app.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
+app.MapGet("/healthz", () => Results.Ok(new { status = "ok" })).AllowAnonymous();
 app.Run();

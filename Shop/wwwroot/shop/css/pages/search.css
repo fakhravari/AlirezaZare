@@ -314,7 +314,7 @@ select {
       rgba(6, 24, 63, 0.38) 62%,
       rgba(4, 16, 40, 0.78) 100%
     ),
-    url("/shop/images/heroes/hero-measurement-tools.png");
+    url("/shop/images/heroes/hero-measurement-tools.webp");
   background-position: center, center;
   background-size: cover;
   color: #fff;

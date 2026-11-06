@@ -6,7 +6,7 @@
     "price": 24.5,
     "stockQuantity": 12,
     "image": "content/products/images/card/cordless-hammer-drill-hn-001-row-001-card-800.jpg",
-    "mainImage": "content/products/images/main/cordless-hammer-drill-hn-001-row-001-main.png",
+    "mainImage": "content/products/images/main/cordless-hammer-drill-hn-001-row-001-main.webp",
     "thumbnailImage": "content/products/images/thumbnail/cordless-hammer-drill-hn-001-row-001-thumbnail-256.jpg",
     "url": "/products/cordless-hammer-drill-1"
   },
@@ -17,7 +17,7 @@
     "price": 17,
     "stockQuantity": 0,
     "image": "content/products/images/card/cordless-drill-driver-hn-002-row-002-card-800.jpg",
-    "mainImage": "content/products/images/main/cordless-drill-driver-hn-002-row-002-main.png",
+    "mainImage": "content/products/images/main/cordless-drill-driver-hn-002-row-002-main.webp",
     "thumbnailImage": "content/products/images/thumbnail/cordless-drill-driver-hn-002-row-002-thumbnail-256.jpg",
     "url": "/products/cordless-drill-driver-2"
   },
@@ -28,7 +28,7 @@
     "price": 20,
     "stockQuantity": 7,
     "image": "content/products/images/card/electric-hammer-drill-hn-003-row-003-card-800.jpg",
-    "mainImage": "content/products/images/main/electric-hammer-drill-hn-003-row-003-main.png",
+    "mainImage": "content/products/images/main/electric-hammer-drill-hn-003-row-003-main.webp",
     "thumbnailImage": "content/products/images/thumbnail/electric-hammer-drill-hn-003-row-003-thumbnail-256.jpg",
     "url": "/products/electric-hammer-drill-3"
   },
@@ -39,7 +39,7 @@
     "price": 23,
     "stockQuantity": 3,
     "image": "content/products/images/card/two-speed-cordless-drill-driver-hn-004-row-004-card-800.jpg",
-    "mainImage": "content/products/images/main/two-speed-cordless-drill-driver-hn-004-row-004-main.png",
+    "mainImage": "content/products/images/main/two-speed-cordless-drill-driver-hn-004-row-004-main.webp",
     "thumbnailImage": "content/products/images/thumbnail/two-speed-cordless-drill-driver-hn-004-row-004-thumbnail-256.jpg",
     "url": "/products/two-speed-cordless-drill-driver-4"
   },
@@ -50,7 +50,7 @@
     "price": 26,
     "stockQuantity": 0,
     "image": "content/products/images/card/electric-hammer-drill-with-keyless-chuck-hn-005-row-005-card-800.jpg",
-    "mainImage": "content/products/images/main/electric-hammer-drill-with-keyless-chuck-hn-005-row-005-main.png",
+    "mainImage": "content/products/images/main/electric-hammer-drill-with-keyless-chuck-hn-005-row-005-main.webp",
     "thumbnailImage": "content/products/images/thumbnail/electric-hammer-drill-with-keyless-chuck-hn-005-row-005-thumbnail-256.jpg",
     "url": "/products/electric-hammer-drill-with-keyless-chuck-5"
   },
@@ -61,7 +61,7 @@
     "price": 29,
     "stockQuantity": 18,
     "image": "content/products/images/card/digital-multimeter-hn-006-row-006-card-800.jpg",
-    "mainImage": "content/products/images/main/digital-multimeter-hn-006-row-006-main.png",
+    "mainImage": "content/products/images/main/digital-multimeter-hn-006-row-006-main.webp",
     "thumbnailImage": "content/products/images/thumbnail/digital-multimeter-hn-006-row-006-thumbnail-256.jpg",
     "url": "/products/digital-multimeter-6"
   },
@@ -72,7 +72,7 @@
     "price": 32,
     "stockQuantity": 5,
     "image": "content/products/images/card/workshop-digital-multimeter-hn-007-row-007-card-800.jpg",
-    "mainImage": "content/products/images/main/workshop-digital-multimeter-hn-007-row-007-main.png",
+    "mainImage": "content/products/images/main/workshop-digital-multimeter-hn-007-row-007-main.webp",
     "thumbnailImage": "content/products/images/thumbnail/workshop-digital-multimeter-hn-007-row-007-thumbnail-256.jpg",
     "url": "/products/workshop-digital-multimeter-7"
   },
@@ -83,7 +83,7 @@
     "price": 35,
     "stockQuantity": 0,
     "image": "content/products/images/card/handheld-multimeter-with-large-display-hn-008-row-008-card-800.jpg",
-    "mainImage": "content/products/images/main/handheld-multimeter-with-large-display-hn-008-row-008-main.png",
+    "mainImage": "content/products/images/main/handheld-multimeter-with-large-display-hn-008-row-008-main.webp",
     "thumbnailImage": "content/products/images/thumbnail/handheld-multimeter-with-large-display-hn-008-row-008-thumbnail-256.jpg",
     "url": "/products/handheld-multimeter-with-large-display-8"
   },
@@ -94,7 +94,7 @@
     "price": 38,
     "stockQuantity": 2,
     "image": "content/products/images/card/digital-clamp-meter-hn-009-row-009-card-800.jpg",
-    "mainImage": "content/products/images/main/digital-clamp-meter-hn-009-row-009-main.png",
+    "mainImage": "content/products/images/main/digital-clamp-meter-hn-009-row-009-main.webp",
     "thumbnailImage": "content/products/images/thumbnail/digital-clamp-meter-hn-009-row-009-thumbnail-256.jpg",
     "url": "/products/digital-clamp-meter-9"
   },
@@ -105,7 +105,7 @@
     "price": 41,
     "stockQuantity": 9,
     "image": "content/products/images/card/electrical-installation-digital-multimeter-hn-010-row-010-card-800.jpg",
-    "mainImage": "content/products/images/main/electrical-installation-digital-multimeter-hn-010-row-010-main.png",
+    "mainImage": "content/products/images/main/electrical-installation-digital-multimeter-hn-010-row-010-main.webp",
     "thumbnailImage": "content/products/images/thumbnail/electrical-installation-digital-multimeter-hn-010-row-010-thumbnail-256.jpg",
     "url": "/products/electrical-installation-digital-multimeter-10"
   },
@@ -116,7 +116,7 @@
     "price": 44,
     "stockQuantity": 12,
     "image": "content/products/images/card/digital-soldering-station-hn-011-row-011-card-800.jpg",
-    "mainImage": "content/products/images/main/digital-soldering-station-hn-011-row-011-main.png",
+    "mainImage": "content/products/images/main/digital-soldering-station-hn-011-row-011-main.webp",
     "thumbnailImage": "content/products/images/thumbnail/digital-soldering-station-hn-011-row-011-thumbnail-256.jpg",
     "url": "/products/digital-soldering-station-11"
   },
@@ -127,7 +127,7 @@
     "price": 47,
     "stockQuantity": 0,
     "image": "content/products/images/card/adjustable-soldering-iron-hn-012-row-012-card-800.jpg",
-    "mainImage": "content/products/images/main/adjustable-soldering-iron-hn-012-row-012-main.png",
+    "mainImage": "content/products/images/main/adjustable-soldering-iron-hn-012-row-012-main.webp",
     "thumbnailImage": "content/products/images/thumbnail/adjustable-soldering-iron-hn-012-row-012-thumbnail-256.jpg",
     "url": "/products/adjustable-soldering-iron-12"
   },
@@ -138,7 +138,7 @@
     "price": 50,
     "stockQuantity": 7,
     "image": "content/products/images/card/hot-air-rework-station-hn-013-row-013-card-800.jpg",
-    "mainImage": "content/products/images/main/hot-air-rework-station-hn-013-row-013-main.png",
+    "mainImage": "content/products/images/main/hot-air-rework-station-hn-013-row-013-main.webp",
     "thumbnailImage": "content/products/images/thumbnail/hot-air-rework-station-hn-013-row-013-thumbnail-256.jpg",
     "url": "/products/hot-air-rework-station-13"
   },
@@ -149,7 +149,7 @@
     "price": 53,
     "stockQuantity": 3,
     "image": "content/products/images/card/bench-soldering-station-hn-014-row-014-card-800.jpg",
-    "mainImage": "content/products/images/main/bench-soldering-station-hn-014-row-014-main.png",
+    "mainImage": "content/products/images/main/bench-soldering-station-hn-014-row-014-main.webp",
     "thumbnailImage": "content/products/images/thumbnail/bench-soldering-station-hn-014-row-014-thumbnail-256.jpg",
     "url": "/products/bench-soldering-station-14"
   },
@@ -160,7 +160,7 @@
     "price": 56,
     "stockQuantity": 0,
     "image": "content/products/images/card/lightweight-workshop-soldering-iron-hn-015-row-015-card-800.jpg",
-    "mainImage": "content/products/images/main/lightweight-workshop-soldering-iron-hn-015-row-015-main.png",
+    "mainImage": "content/products/images/main/lightweight-workshop-soldering-iron-hn-015-row-015-main.webp",
     "thumbnailImage": "content/products/images/thumbnail/lightweight-workshop-soldering-iron-hn-015-row-015-thumbnail-256.jpg",
     "url": "/products/lightweight-workshop-soldering-iron-15"
   },
@@ -171,7 +171,7 @@
     "price": 14,
     "stockQuantity": 18,
     "image": "content/products/images/card/portable-led-work-light-hn-016-row-016-card-800.jpg",
-    "mainImage": "content/products/images/main/portable-led-work-light-hn-016-row-016-main.png",
+    "mainImage": "content/products/images/main/portable-led-work-light-hn-016-row-016-main.webp",
     "thumbnailImage": "content/products/images/thumbnail/portable-led-work-light-hn-016-row-016-thumbnail-256.jpg",
     "url": "/products/portable-led-work-light-16"
   },
@@ -182,7 +182,7 @@
     "price": 17,
     "stockQuantity": 5,
     "image": "content/products/images/card/workshop-led-floodlight-hn-017-row-017-card-800.jpg",
-    "mainImage": "content/products/images/main/workshop-led-floodlight-hn-017-row-017-main.png",
+    "mainImage": "content/products/images/main/workshop-led-floodlight-hn-017-row-017-main.webp",
     "thumbnailImage": "content/products/images/thumbnail/workshop-led-floodlight-hn-017-row-017-thumbnail-256.jpg",
     "url": "/products/workshop-led-floodlight-17"
   },
@@ -193,7 +193,7 @@
     "price": 20,
     "stockQuantity": 0,
     "image": "content/products/images/card/rechargeable-inspection-light-hn-018-row-018-card-800.jpg",
-    "mainImage": "content/products/images/main/rechargeable-inspection-light-hn-018-row-018-main.png",
+    "mainImage": "content/products/images/main/rechargeable-inspection-light-hn-018-row-018-main.webp",
     "thumbnailImage": "content/products/images/thumbnail/rechargeable-inspection-light-hn-018-row-018-thumbnail-256.jpg",
     "url": "/products/rechargeable-inspection-light-18"
   },
@@ -204,7 +204,7 @@
     "price": 23,
     "stockQuantity": 2,
     "image": "content/products/images/card/led-work-light-with-stand-hn-019-row-019-card-800.jpg",
-    "mainImage": "content/products/images/main/led-work-light-with-stand-hn-019-row-019-main.png",
+    "mainImage": "content/products/images/main/led-work-light-with-stand-hn-019-row-019-main.webp",
     "thumbnailImage": "content/products/images/thumbnail/led-work-light-with-stand-hn-019-row-019-thumbnail-256.jpg",
     "url": "/products/led-work-light-with-stand-19"
   },
@@ -215,7 +215,7 @@
     "price": 26,
     "stockQuantity": 9,
     "image": "content/products/images/card/portable-led-floodlight-hn-020-row-020-card-800.jpg",
-    "mainImage": "content/products/images/main/portable-led-floodlight-hn-020-row-020-main.png",
+    "mainImage": "content/products/images/main/portable-led-floodlight-hn-020-row-020-main.webp",
     "thumbnailImage": "content/products/images/thumbnail/portable-led-floodlight-hn-020-row-020-thumbnail-256.jpg",
     "url": "/products/portable-led-floodlight-20"
   },
@@ -226,7 +226,7 @@
     "price": 29,
     "stockQuantity": 12,
     "image": "content/products/images/card/insulated-electrician-screwdriver-set-hn-021-row-021-card-800.jpg",
-    "mainImage": "content/products/images/main/insulated-electrician-screwdriver-set-hn-021-row-021-main.png",
+    "mainImage": "content/products/images/main/insulated-electrician-screwdriver-set-hn-021-row-021-main.webp",
     "thumbnailImage": "content/products/images/thumbnail/insulated-electrician-screwdriver-set-hn-021-row-021-thumbnail-256.jpg",
     "url": "/products/insulated-electrician-screwdriver-set-21"
   },
@@ -248,7 +248,7 @@
     "price": 35,
     "stockQuantity": 7,
     "image": "content/products/images/card/insulated-electrician-tool-kit-hn-023-row-023-card-800.jpg",
-    "mainImage": "content/products/images/main/insulated-electrician-tool-kit-hn-023-row-023-main.png",
+    "mainImage": "content/products/images/main/insulated-electrician-tool-kit-hn-023-row-023-main.webp",
     "thumbnailImage": "content/products/images/thumbnail/insulated-electrician-tool-kit-hn-023-row-023-thumbnail-256.jpg",
     "url": "/products/insulated-electrician-tool-kit-23"
   },
@@ -259,7 +259,7 @@
     "price": 38,
     "stockQuantity": 3,
     "image": "content/products/images/card/wiring-and-installation-tool-set-hn-024-row-024-card-800.jpg",
-    "mainImage": "content/products/images/main/wiring-and-installation-tool-set-hn-024-row-024-main.png",
+    "mainImage": "content/products/images/main/wiring-and-installation-tool-set-hn-024-row-024-main.webp",
     "thumbnailImage": "content/products/images/thumbnail/wiring-and-installation-tool-set-hn-024-row-024-thumbnail-256.jpg",
     "url": "/products/wiring-and-installation-tool-set-24"
   },
@@ -270,7 +270,7 @@
     "price": 41,
     "stockQuantity": 0,
     "image": "content/products/images/card/electrician-tool-bag-set-hn-025-row-025-card-800.jpg",
-    "mainImage": "content/products/images/main/electrician-tool-bag-set-hn-025-row-025-main.png",
+    "mainImage": "content/products/images/main/electrician-tool-bag-set-hn-025-row-025-main.webp",
     "thumbnailImage": "content/products/images/thumbnail/electrician-tool-bag-set-hn-025-row-025-thumbnail-256.jpg",
     "url": "/products/electrician-tool-bag-set-25"
   },
@@ -281,7 +281,7 @@
     "price": 44,
     "stockQuantity": 18,
     "image": "content/products/images/card/digital-voltage-tester-hn-026-row-026-card-800.jpg",
-    "mainImage": "content/products/images/main/digital-voltage-tester-hn-026-row-026-main.png",
+    "mainImage": "content/products/images/main/digital-voltage-tester-hn-026-row-026-main.webp",
     "thumbnailImage": "content/products/images/thumbnail/digital-voltage-tester-hn-026-row-026-thumbnail-256.jpg",
     "url": "/products/digital-voltage-tester-26"
   },
@@ -292,7 +292,7 @@
     "price": 47,
     "stockQuantity": 5,
     "image": "content/products/images/card/non-contact-voltage-tester-hn-027-row-027-card-800.jpg",
-    "mainImage": "content/products/images/main/non-contact-voltage-tester-hn-027-row-027-main.png",
+    "mainImage": "content/products/images/main/non-contact-voltage-tester-hn-027-row-027-main.webp",
     "thumbnailImage": "content/products/images/thumbnail/non-contact-voltage-tester-hn-027-row-027-thumbnail-256.jpg",
     "url": "/products/non-contact-voltage-tester-27"
   },
@@ -303,7 +303,7 @@
     "price": 50,
     "stockQuantity": 0,
     "image": "content/products/images/card/inductive-voltage-tester-hn-028-row-028-card-800.jpg",
-    "mainImage": "content/products/images/main/inductive-voltage-tester-hn-028-row-028-main.png",
+    "mainImage": "content/products/images/main/inductive-voltage-tester-hn-028-row-028-main.webp",
     "thumbnailImage": "content/products/images/thumbnail/inductive-voltage-tester-hn-028-row-028-thumbnail-256.jpg",
     "url": "/products/inductive-voltage-tester-28"
   },
@@ -314,7 +314,7 @@
     "price": 53,
     "stockQuantity": 2,
     "image": "content/products/images/card/circuit-continuity-tester-hn-029-row-029-card-800.jpg",
-    "mainImage": "content/products/images/main/circuit-continuity-tester-hn-029-row-029-main.png",
+    "mainImage": "content/products/images/main/circuit-continuity-tester-hn-029-row-029-main.webp",
     "thumbnailImage": "content/products/images/thumbnail/circuit-continuity-tester-hn-029-row-029-thumbnail-256.jpg",
     "url": "/products/circuit-continuity-tester-29"
   },
@@ -325,7 +325,7 @@
     "price": 56,
     "stockQuantity": 9,
     "image": "content/products/images/card/voltage-detector-pen-hn-030-row-030-card-800.jpg",
-    "mainImage": "content/products/images/main/voltage-detector-pen-hn-030-row-030-main.png",
+    "mainImage": "content/products/images/main/voltage-detector-pen-hn-030-row-030-main.webp",
     "thumbnailImage": "content/products/images/thumbnail/voltage-detector-pen-hn-030-row-030-thumbnail-256.jpg",
     "url": "/products/voltage-detector-pen-30"
   }

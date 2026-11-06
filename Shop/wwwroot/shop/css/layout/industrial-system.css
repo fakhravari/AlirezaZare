@@ -790,7 +790,7 @@ h6,
 .search-intro {
   background-image:
     linear-gradient(90deg, rgba(16, 42, 67, 0.3), rgba(16, 42, 67, 0.93)),
-    url("../../images/heroes/hero-electrical-editorial.png");
+    url("../../images/heroes/hero-electrical-editorial.webp");
   background-position: center;
   background-size: cover;
 }
@@ -4245,16 +4245,6 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
   .inner-page .search-product.product-card .search-product-image {
     flex-basis: 195px;
   }
-}
-
-.product-price-deal .price-old,
-.product-detail-sale-meta .price-old {
-  color: #91a5be !important;
-  font-size: 14px;
-  font-weight: 650;
-  text-decoration: line-through;
-  text-decoration-color: #a9b9cd;
-  text-decoration-thickness: 1.5px;
 }
 
 #productView .product-detail-price > .product-price-current {
@@ -9248,10 +9238,6 @@ html
   font-size: 13px !important;
 }
 
-#cartPanel .cart-item-info > strong {
-  line-height: 1.55 !important;
-}
-
 #cartPanel .cart-footer .cart-total-amount > span {
   font-size: 13px;
 }
@@ -9999,9 +9985,14 @@ body .owl-carousel > .owl-dots > .owl-dot {
 body .owl-carousel > .owl-dots > .owl-dot span,
 body .electrical-swiper .swiper-pagination-bullet {
   display: block;
+  box-sizing: content-box;
   width: 8px;
   height: 8px;
+  min-width: 8px;
+  min-height: 8px;
   margin: 0 !important;
+  padding: 8px;
+  background-clip: content-box;
   border: 1px solid rgba(16, 42, 67, 0.24);
   border-radius: 999px;
   background: #d7d0c5;

@@ -323,7 +323,7 @@
 @media (max-width: 767px) {
   .home-page .price-old,
   .inner-page main .price-old {
-    color: #718196 !important;
+    color: var(--color-text-muted) !important;
     font-size: 11px !important;
   }
 
@@ -555,7 +555,7 @@
     box-shadow: none;
   }
 
-  footer .footer-main > .col-6 h4 {
+  footer .footer-main > .col-6 h2 {
     display: block;
     min-height: 0;
     margin: 0 0 8px;
@@ -567,7 +567,7 @@
     line-height: 1.55;
   }
 
-  footer .footer-main > .col-6 h4::after {
+  footer .footer-main > .col-6 h2::after {
     width: 32px;
     height: 2px;
     background: linear-gradient(90deg, rgba(216,180,86,.25), #c59b2d);
@@ -627,7 +627,7 @@
     box-shadow: none;
   }
 
-  footer .footer-main > .col-6:last-child h4 {
+  footer .footer-main > .col-6:last-child h2 {
     color: #173550 !important;
   }
 
@@ -1187,11 +1187,6 @@
     padding: 9px 9px 6px !important;
   }
 
-  .search-page .search-page-card-title {
-    line-height: 1.5 !important;
-  }
-
-
   .product-card > .add-cart,
   .search-page .search-page-card-action,
   #favoritesView .favorite-item-card .list-remove-button {
@@ -1208,10 +1203,6 @@
     height: 42px !important;
     min-height: 42px !important;
     margin: 0 7px 7px !important;
-  }
-
-  .search-page .search-page-card {
-    grid-template-rows: var(--product-card-image-height, 144px) minmax(106px, 1fr) 42px !important;
   }
 
   .search-page .search-page-card-price,

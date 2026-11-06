@@ -1276,7 +1276,6 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                 .querySelector("[data-price-watch-toggle]")
                 ?.addEventListener("click", togglePriceWatch);
             priceDialog.querySelector("[data-price-dialog-close]").addEventListener("click", () => priceDialog.close());
-            priceDialog.addEventListener("cancel", (event) => event.preventDefault());
             priceDialog.addEventListener("close", () => {
                 priceDialogTrigger?.focus({ preventScroll: true });
             });
@@ -1722,7 +1721,7 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                 const selectedAccessoryItems = (p.accessories || []).filter((item) =>
                     selectedAccessories.has(item.id),
                 );
-                const quoteResponse = await fetch("api/store/sales-plans/quote", {
+                const quoteResponse = await window.HNUI.api.request("store/sales-plans/quote", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ productId: p.id, salesPlanId: selectedSalesPlanId, quantity: 1, variants: selectedVariants, accessoryIds: [...selectedAccessories] }),

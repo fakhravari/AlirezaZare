@@ -54,7 +54,7 @@ window.HNUI.ready(() => window.HNUI.mount("checkout", document, () => {
         salesPlansValid = false;
         syncPayment();
         try {
-            const response = await fetch("/api/store/sales-plans/validate-cart", {
+            const response = await window.HNUI.api.request("store/sales-plans/validate-cart", {
                 method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ lines }),
             });
             if (attempt !== validationAttempt) return;

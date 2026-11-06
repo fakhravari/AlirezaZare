@@ -229,7 +229,7 @@
   .search-page .search-page-card-price .price-old {
     grid-area: old;
     justify-self: start;
-    color: #718196 !important;
+    color: var(--color-text-muted) !important;
     font-size: var(--text-xs);
     white-space: nowrap;
   }

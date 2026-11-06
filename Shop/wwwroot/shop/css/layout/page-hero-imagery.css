@@ -44,7 +44,7 @@
 }
 
 .inner-page .compare-page-hero {
-  --page-hero-photo: url("../../images/heroes/hero-product-comparison.png");
+  --page-hero-photo: url("../../images/heroes/hero-product-comparison.webp");
 }
 
 .inner-page .page-hero:not(.article-hero)::before,

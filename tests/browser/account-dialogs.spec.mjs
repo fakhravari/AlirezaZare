@@ -32,6 +32,11 @@ test('account dialogs fit the viewport and remain usable', async ({page, isMobil
 
   await page.locator('#newAddress').click();
   await assertFitsViewport(page.locator('#addressDialog'));
+  if (isMobile) {
+    for (const field of await page.locator('#addressDialog #addressForm input:not([type="hidden"]), #addressDialog #addressForm select, #addressDialog #addressForm textarea').all()) {
+      await expect(field).toHaveCSS('font-size', '16px');
+    }
+  }
   await page.locator('#closeAddress').click();
   await expect(page.locator('#addressDialog')).not.toBeVisible();
 

@@ -12,14 +12,18 @@
         .OrderBy(plan => plan.Name)
         .ToList();
 }
+@inject Microsoft.Extensions.Options.IOptions<Shop.Models.SiteIdentityOptions> SiteIdentityOptions
+@{
+    Shop.Models.SiteIdentityOptions identity = SiteIdentityOptions.Value;
+}
 <nav class="navbar navbar-expand-xl navbar-dark fixed-top" id="mainNav">
 <div class="home-header-top" aria-label="جست‌وجو و پشتیبانی فروشگاه">
-    <a class="home-header-support home-header-support-link" href="tel:09369455457" aria-label="تماس فوری با پشتیبانی به شماره 09369455457">
+    <a class="home-header-support home-header-support-link" href="tel:@identity.SupportPhoneUri">
         <span class="home-header-support-icon" aria-hidden="true">
             <i class="bi bi-headset"></i>
         </span>
         <span>
-            <small>پشتیبانی فوری و پیگیری سفارش</small><strong dir="ltr">09369455457</strong>
+            <small>پشتیبانی فوری و پیگیری سفارش</small><strong dir="ltr">@identity.SupportPhoneDisplay</strong>
         </span>
     </a>
     <form class="home-header-search" action="Search" method="get" role="search">
@@ -38,7 +42,7 @@
         aria-label="باز کردن منو">
     <i class="bi bi-list"></i>
 </button>
-<a class="navbar-brand brand header-home-link header-brand-lockup" asp-controller="Home" asp-action="Index" aria-label="برق شیراز؛ مرجع تخصصی ابزار و تجهیزات برقی" title="رفتن به صفحهٔ اصلی">
+<a class="navbar-brand brand header-home-link header-brand-lockup" asp-controller="Home" asp-action="Index" aria-label="@identity.VisualBrandName؛ مرجع تخصصی ابزار و تجهیزات برقی" title="رفتن به صفحهٔ اصلی">
     <img class="header-brand-image" src="~/content/identity/store-electrical-header.svg" alt="" width="192" height="64" decoding="async" asp-append-version="true"/>
 </a>
 <div class="home-nav-groups">
@@ -244,14 +248,13 @@
             <button class="account-btn logged-out"
                     id="accountToggle"
                     type="button"
-                    aria-label="حساب کاربری"
                     aria-expanded="false"
                     aria-controls="accountPanel">
-                <i class="bi bi-person">
+                <i class="bi bi-person" aria-hidden="true">
                 </i>
                 <span class="account-label">
                     ورود / ثبت‌نام
-                </span><i class="bi bi-chevron-down"></i>
+                </span><i class="bi bi-chevron-down" aria-hidden="true"></i>
             </button>
             <div class="account-panel shared-account-card" id="accountPanel">
                 <div class="account-user">

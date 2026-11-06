@@ -15,6 +15,7 @@
 |---|---|
 | `HNUI.STORAGE_KEYS` | کلیدهای پایهٔ auth/cart |
 | `HNUI.storage.get/set/remove/json/writable` | خواندن/نوشتن مقاوم در برابر خطای browser storage؛ `set` برای favorite/compare رویداد list را dispatch می‌کند |
+| `HNUI.api.request(path, options)` | مسیر را زیر base path محلیِ تنظیم‌شده resolve می‌کند، درخواست را به همان origin محدود می‌کند، `Accept: application/json` و `credentials: same-origin` می‌گذارد و پس از timeout قابل‌تنظیم درخواست را abort می‌کند. retry خودکار ندارد؛ POSTهای OTP/quote/validate نباید بی‌کلید idempotency تکرار شوند. تنظیم در `ApiClient` در `appsettings.json` و metadata پوسته است. |
 | `HNUI.normalizeSearchText(value)` | نرمال‌سازی مشترک عبارت فارسی/انگلیسی و نویسه‌های نامرئی برای پیشنهادهای هدر و نتایج Search |
 | `HNUI.ready(callback)` | اجرای callback پس از آماده‌شدن DOM |
 | `HNUI.mount(name, root, initialize)` | اجرای یک‌باره برای نام مؤلفه و root؛ root غایب یا نصب دوباره false برمی‌گرداند؛ خطای initialize دوباره قابل تلاش است |

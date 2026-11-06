@@ -20,14 +20,14 @@ function cardRuntime() {
 test('plan card uses server quote including required accessory prices', async () => {
   const {r, button, listener} = cardRuntime();
   let request;
-  r.context.fetch = async (url, options) => {
+  r.window.fetch = async (url, options) => {
     request = {url, ...JSON.parse(options.body)};
     return {ok: true, json: async () => ({productId: 1, salesPlanId: 'digi-time',
       planName: 'Digi Time', unitAmount: 23303823, currency: 'IRT',
       accessoryAmounts: {'shipping-insurance': 245000}})};
   };
   await listener({target: {closest: () => button}});
-  assert.equal(request.url, '/api/store/sales-plans/quote');
+  assert.equal(request.url, 'https://shop.example/api/store/sales-plans/quote');
   assert.deepEqual(JSON.parse(JSON.stringify(request.accessoryIds)), ['shipping-insurance']);
   const [item] = r.ui.cart.read();
   assert.equal(item.price, 23303823);

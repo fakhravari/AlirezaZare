@@ -1,4 +1,8 @@
 @model PageModel
+@inject Microsoft.Extensions.Options.IOptions<Shop.Models.SiteIdentityOptions> SiteIdentityOptions
+@{
+    var identity = SiteIdentityOptions.Value;
+}
 
 <header class="page-hero about-hero">
     <div class="container">
@@ -70,7 +74,7 @@
                     <li><i class="bi bi-shield-check" aria-hidden="true"></i> بررسی دقیق وضعیت سفارش</li>
                     <li><i class="bi bi-clock-history" aria-hidden="true"></i> پاسخ‌گویی در ساعات کاری</li>
                 </ul>
-                <a class="flow-button tracking-support-action" href="tel:09369455457">
+                <a class="flow-button tracking-support-action" href="tel:@identity.SupportPhoneUri" aria-label="تماس با پشتیبانی به شماره @identity.SupportPhoneDisplay">
                     <span>تماس با پشتیبانی</span><i class="bi bi-arrow-left" aria-hidden="true"></i>
                 </a>
             </div>

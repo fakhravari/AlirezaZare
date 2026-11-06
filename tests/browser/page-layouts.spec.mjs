@@ -25,6 +25,55 @@ test('main pages fit mobile, tablet and desktop widths', async ({page}) => {
   }
 });
 
+test('home carousel controls have accessible names', async ({page}) => {
+  await page.goto('/');
+  const controls = page.locator('.owl-carousel .owl-dot, .owl-carousel .owl-nav .owl-prev, .owl-carousel .owl-nav .owl-next');
+  await expect(controls.first()).toHaveAttribute('aria-label', /.+/);
+  for (const control of await controls.all()) await expect(control).toHaveAttribute('aria-label', /.+/);
+});
+
+test('home hero and carousel motion respect reduced-motion preference', async ({page}) => {
+  await page.emulateMedia({reducedMotion: 'reduce'});
+  await page.goto('/');
+  const hero = page.locator('#heroSwiper');
+  await expect(hero).toBeVisible();
+  const autoplay = await hero.evaluate(element => element.swiper?.params.autoplay);
+  expect(autoplay === false || autoplay?.enabled === false).toBe(true);
+  await expect(page.locator('#heroSwiper .swiper-pagination-bullet').first())
+    .toHaveCSS('transition-duration', '0s');
+});
+
+test('main routes expose basic document and control names', async ({page}) => {
+  test.setTimeout(120000);
+  for (const path of paths) {
+    await page.goto(path, {waitUntil: 'domcontentloaded'});
+    const issues = await page.evaluate(() => {
+      const visible = element => {
+        const style = getComputedStyle(element);
+        return style.display !== 'none' && style.visibility !== 'hidden' && element.getClientRects().length > 0;
+      };
+      const nameOf = element => {
+        const ids = element.getAttribute('aria-labelledby')?.split(/\s+/) || [];
+        const referenced = ids.map(id => document.getElementById(id)?.textContent?.trim()).filter(Boolean).join(' ');
+        const image = [...element.querySelectorAll('img[alt]')].map(item => item.alt).filter(Boolean).join(' ');
+        return element.getAttribute('aria-label') || referenced || element.labels?.[0]?.textContent?.trim()
+          || element.getAttribute('title') || element.innerText?.trim() || element.textContent?.trim() || image;
+      };
+      const result = [];
+      if (document.querySelectorAll('main').length !== 1) result.push('expected exactly one main landmark');
+      if (document.querySelectorAll('h1').length !== 1) result.push('expected exactly one H1 in document');
+      const ids = [...document.querySelectorAll('[id]')].map(element => element.id);
+      if (new Set(ids).size !== ids.length) result.push('duplicate id');
+      for (const item of document.querySelectorAll('img')) if (!item.hasAttribute('alt')) result.push(`image missing alt: ${item.currentSrc || item.src}`);
+      for (const item of document.querySelectorAll('a[href],button,input:not([type=hidden]),select,textarea,[role=button],[role=link]')) {
+        if (visible(item) && !nameOf(item)) result.push(`unnamed ${item.tagName.toLowerCase()}: ${item.outerHTML.slice(0, 140)}`);
+      }
+      return result;
+    });
+    expect(issues, `${path} basic accessibility`).toEqual([]);
+  }
+});
+
 test('compatibility routes resolve to their current pages', async ({page}) => {
   const aliases = [
     ['/account', '/profile'],
