@@ -1035,10 +1035,11 @@ $(function () {
     $accountToggle
       .toggleClass("logged-out", !userLoggedIn)
       .toggleClass("logged-in", userLoggedIn)
+      .attr("aria-label", userLoggedIn ? "حساب من" : "ورود / ثبت‌نام در حساب کاربری")
       .html(
         userLoggedIn
-          ? '<i class="bi bi-person"></i><span class="account-label">حساب من</span><i class="bi bi-chevron-down"></i>'
-          : '<i class="bi bi-person"></i><span class="account-label">ورود / ثبت‌نام</span><i class="bi bi-chevron-down"></i>',
+          ? '<i class="bi bi-person" aria-hidden="true"></i><span class="account-label">حساب من</span><i class="bi bi-chevron-down" aria-hidden="true"></i>'
+          : '<i class="bi bi-person" aria-hidden="true"></i><span class="account-label">ورود / ثبت‌نام</span><i class="bi bi-chevron-down" aria-hidden="true"></i>',
       );
   };
   placeAccountPanel();

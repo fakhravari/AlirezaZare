@@ -47,5 +47,6 @@
 }
 
 #main-content:focus {
-  outline: none;
+  outline: 2px solid #f6c515;
+  outline-offset: 3px;
 }

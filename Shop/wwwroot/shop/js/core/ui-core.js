@@ -89,6 +89,13 @@
     else callback();
   };
 
+  document.addEventListener("click", (event) => {
+    const link = event.target.closest?.("a.skip-link[href^='#']");
+    if (!link) return;
+    const target = document.getElementById(decodeURIComponent(link.hash.slice(1)));
+    if (target) window.setTimeout(() => target.focus(), 0);
+  });
+
   const cart = window.HNCartModel.create({
     document, emit, storage, cartKey: STORAGE_KEYS.cart,
     requireLogin: (resume) => auth.requireLogin(resume),

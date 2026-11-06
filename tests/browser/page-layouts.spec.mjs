@@ -1,11 +1,12 @@
 import {test, expect} from '@playwright/test';
+import axe from 'axe-core';
 
 const paths = [
   '/', '/search', '/products/cordless-hammer-drill-1', '/cart', '/checkout',
   '/compare', '/favorites', '/profile', '/profile/orders', '/profile/addresses',
   '/profile/favorites', '/profile/coupons', '/profile/pricealerts', '/brands', '/brands/bosch',
   '/magazine', '/magazine/multimeter-symbols-guide', '/contact', '/about',
-  '/faq', '/shipping', '/warranty', '/tracking', '/legal/terms',
+  '/faq', '/shipping', '/warranty', '/tracking', '/legal/terms', '/error', '/Error/404',
   '/legal/privacy', '/legal/returns',
 ];
 
@@ -105,10 +106,22 @@ test('main routes expose basic document and control names', async ({page}) => {
           || element.getAttribute('title') || element.innerText?.trim() || element.textContent?.trim() || image;
       };
       const result = [];
+      if (!document.documentElement.lang) result.push('document missing language');
+      if (document.documentElement.dir !== 'rtl') result.push('document direction should be rtl');
+      if (!document.title.trim()) result.push('document missing title');
       if (document.querySelectorAll('main').length !== 1) result.push('expected exactly one main landmark');
       if (document.querySelectorAll('h1').length !== 1) result.push('expected exactly one H1 in document');
       const ids = [...document.querySelectorAll('[id]')].map(element => element.id);
       if (new Set(ids).size !== ids.length) result.push('duplicate id');
+      for (const item of document.querySelectorAll('[aria-labelledby], [aria-describedby], [aria-controls], [aria-owns], [aria-activedescendant]')) {
+        for (const attribute of ['aria-labelledby', 'aria-describedby', 'aria-controls', 'aria-owns', 'aria-activedescendant']) {
+          const value = item.getAttribute(attribute);
+          if (!value) continue;
+          for (const id of value.trim().split(/\s+/)) {
+            if (!document.getElementById(id)) result.push(`broken ${attribute} reference: ${id}`);
+          }
+        }
+      }
       for (const item of document.querySelectorAll('img')) if (!item.hasAttribute('alt')) result.push(`image missing alt: ${item.currentSrc || item.src}`);
       for (const item of document.querySelectorAll('a[href],button,input:not([type=hidden]),select,textarea,[role=button],[role=link]')) {
         if (visible(item) && !nameOf(item)) result.push(`unnamed ${item.tagName.toLowerCase()}: ${item.outerHTML.slice(0, 140)}`);
@@ -116,6 +129,44 @@ test('main routes expose basic document and control names', async ({page}) => {
       return result;
     });
     expect(issues, `${path} basic accessibility`).toEqual([]);
+  }
+});
+
+test('main routes pass automated WCAG accessibility rules', async ({page}) => {
+  test.setTimeout(180000);
+  await page.addInitScript(() => localStorage.setItem('hn-demo-auth', '1'));
+  await page.addInitScript(axe.source);
+  const allViolations = [];
+  for (const path of paths) {
+    await page.goto(path, {waitUntil: 'domcontentloaded'});
+    const results = await page.evaluate(async () => window.axe.run(document, {
+      runOnly: {type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']},
+    }));
+    const violations = results.violations.map(issue => ({
+      id: issue.id,
+      impact: issue.impact,
+      description: issue.description,
+      nodes: issue.nodes.map(node => ({target: node.target, summary: node.failureSummary})),
+    }));
+    allViolations.push(...violations.map(issue => ({path, ...issue})));
+  }
+  expect(allViolations, 'WCAG accessibility violations across main routes').toEqual([]);
+});
+
+test('shared skip link is the first keyboard stop and transfers focus to main content', async ({page}) => {
+  await page.addInitScript(() => localStorage.setItem('hn-demo-auth', '1'));
+  for (const path of ['/', '/products/cordless-hammer-drill-1', '/profile']) {
+    await page.goto(path);
+    await page.keyboard.press('Tab');
+    const skipLink = page.locator('.skip-link');
+    await expect(skipLink).toBeFocused();
+    await expect(skipLink).toBeVisible();
+    const skipFocus = await skipLink.evaluate(element => ({top: element.getBoundingClientRect().top, outline: getComputedStyle(element).outlineStyle}));
+    expect(skipFocus.top).toBeGreaterThanOrEqual(0);
+    expect(skipFocus.outline).toBe('solid');
+    await page.keyboard.press('Enter');
+    await expect(page.locator('#main-content')).toBeFocused();
+    await expect(page.locator('#main-content')).toHaveCSS('outline-style', 'solid');
   }
 });
 
