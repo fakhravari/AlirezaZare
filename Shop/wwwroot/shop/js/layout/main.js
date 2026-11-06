@@ -495,6 +495,7 @@ $(function () {
     const compareCount = storedListCount("hn-compare");
     $("#favoritesCount").text(faNumber(favoriteCount));
     $("#compareCount").text(faNumber(compareCount));
+    $("#compareToggle").attr("aria-label", `مقایسه محصولات ${faNumber(compareCount)}`);
     renderFavoritePanel();
     renderComparePanel();
     syncFavoriteButtons();

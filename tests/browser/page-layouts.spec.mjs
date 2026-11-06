@@ -136,21 +136,23 @@ test('main routes pass automated WCAG accessibility rules', async ({page}) => {
   test.setTimeout(180000);
   await page.addInitScript(() => localStorage.setItem('hn-demo-auth', '1'));
   await page.addInitScript(axe.source);
-  const allViolations = [];
+  const allViolations = new Map();
   for (const path of paths) {
     await page.goto(path, {waitUntil: 'domcontentloaded'});
     const results = await page.evaluate(async () => window.axe.run(document, {
       runOnly: {type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']},
     }));
-    const violations = results.violations.map(issue => ({
-      id: issue.id,
-      impact: issue.impact,
-      description: issue.description,
-      nodes: issue.nodes.map(node => ({target: node.target, summary: node.failureSummary})),
-    }));
-    allViolations.push(...violations.map(issue => ({path, ...issue})));
+    for (const issue of results.violations) {
+      for (const node of issue.nodes) {
+        const target = node.target.join(' ');
+        const key = `${issue.id}|${target}`;
+        const finding = allViolations.get(key) || {id: issue.id, impact: issue.impact, target, routes: []};
+        finding.routes.push(path);
+        allViolations.set(key, finding);
+      }
+    }
   }
-  expect(allViolations, 'WCAG accessibility violations across main routes').toEqual([]);
+  expect([...allViolations.values()], 'WCAG accessibility violations across main routes').toEqual([]);
 });
 
 test('shared skip link is the first keyboard stop and transfers focus to main content', async ({page}) => {
