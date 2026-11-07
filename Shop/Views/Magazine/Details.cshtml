@@ -241,7 +241,7 @@
         <div class="article-related-track" role="list" aria-label="مقالات مرتبط">
             @foreach (var related in Model.Data.RelatedArticles ?? [])
             {
-                <article class="article-related-card" role="listitem">
+                <div class="article-related-card" role="listitem">
                     <a asp-controller="Magazine" asp-action="Details" asp-route-slug="@related.Slug">
                         <img src="@Url.Content("~/" + related.Image)" alt="" loading="lazy" width="240" height="180"/>
                         <span class="article-related-copy">
@@ -249,7 +249,7 @@
                             <strong>@related.Title</strong>
                         </span>
                     </a>
-                </article>
+                </div>
             }
         </div>
     </section>
