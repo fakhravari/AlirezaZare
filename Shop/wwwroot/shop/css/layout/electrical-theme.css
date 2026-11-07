@@ -416,10 +416,11 @@ body {
   bottom: 16px;
   left: auto;
   display: flex;
+  direction: rtl;
   width: auto;
   align-items: center;
   gap: 4px;
-  padding: 4px 8px;
+  padding: 3px 8px;
   border: 1px solid rgba(255, 255, 255, 0.38);
   border-radius: 999px;
   background: rgba(16, 42, 67, 0.78);
@@ -515,7 +516,7 @@ body {
     bottom: 17px;
     left: auto;
     gap: 4px;
-    padding: 4px 8px;
+    padding: 3px 8px;
     transform: translateX(50%);
   }
   .electrical-swiper .swiper-pagination-bullet {
