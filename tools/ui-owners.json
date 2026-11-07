@@ -432,7 +432,8 @@
           "markup": [
             "Shop/Views/Shared/_Header.cshtml",
             "Shop/Views/Shared/_HomeHeader.cshtml",
-            "Shop/Views/Shared/_InnerHeader.cshtml"
+            "Shop/Views/Shared/_InnerHeader.cshtml",
+            "Shop/Views/Shared/_Panels.cshtml"
           ],
           "js": [
             "Shop/wwwroot/shop/js/layout/header-navigation.js"
