@@ -46,6 +46,7 @@
           "css": [
             "Shop/wwwroot/shop/css/layout/style.css",
             "Shop/wwwroot/shop/css/layout/electrical-theme.css",
+            "Shop/wwwroot/shop/css/layout/industrial-system.css",
             "Shop/wwwroot/shop/css/pages/home-warmth.css",
             "Shop/wwwroot/shop/css/pages/home-collection.css"
           ]

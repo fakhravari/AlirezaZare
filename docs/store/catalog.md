@@ -13,7 +13,7 @@
 |---|---|---|
 | دادهٔ محصول | [catalog.json](../../Shop/wwwroot/content/data/catalog.json) | [CatalogRepository](../../Shop/Services/CatalogRepository.cs) و resolver [catalog.js](../../Shop/wwwroot/shop/js/store/catalog.js) |
 | خانه | [Home/Index.cshtml](../../Shop/Views/Home/Index.cshtml) | `home-sales-plans.js`، `home-collection.css`، `home-warmth.css` و کارت مشترک |
-| Search | [Product/List.cshtml](../../Shop/Views/Product/List.cshtml) | [search.js](../../Shop/wwwroot/shop/js/pages/search.js)، `search.css` و `search-mobile.css`؛ لینک خانهٔ breadcrumb در markup اولیه و renderer مسیر دسته‌ها نام «خانه» دارد تا آیکن تنها نماند |
+| Search | [Product/List.cshtml](../../Shop/Views/Product/List.cshtml) | [search.js](../../Shop/wwwroot/shop/js/pages/search.js)، `search.css` و `search-mobile.css`؛ لینک خانهٔ breadcrumb در markup اولیه و renderer مسیر دسته‌ها نام «خانه» دارد تا آیکن تنها نماند؛ فهرست طرح‌محور مسیر عمومی فروشگاه را نشان می‌دهد |
 | مقایسه / علاقه‌مندی | [Compare](../../Shop/Views/Compare/Index.cshtml) و [Favorites](../../Shop/Views/Favorites/Index.cshtml) | `store/commerce.js`؛ `commerce.css` و قواعد responsive مشترک |
 | کارت مشترک | [product-card.js](../../Shop/wwwroot/shop/js/store/product-card.js) و [shared-product-card.css](../../Shop/wwwroot/shop/css/store/shared-product-card.css) | یک renderer با variantهای grid/slider/search/related/favorite؛ مصرف در main/search/commerce |
 
@@ -70,6 +70,8 @@ CatalogRepository همان JSON را با System.Text.Json می‌خواند و 
 `countries` در همان JSON نام فارسی/انگلیسی و مسیر پرچم را نگه می‌دارد؛ `brands[id].countryCode` اتصال برند را تعیین می‌کند. API سازگار `HNCountries` باقی است و countries.js جداگانه حذف شده است. لوگوی برند و پرچم در `content/` قرار دارند. کشور برند به‌خودی‌خود کشور ساخت همان کالا نیست.
 
 ## فهرست‌ها و URL state
+
+وقتی Search با فیلتر طرح فروش باز است، breadcrumb مسیر دستهٔ پیش‌فرض «ابزار و تجهیزات» را نشان نمی‌دهد؛ مسیر آن «خانه ← فروشگاه ← جستجو و انتخاب» است. پیوند «فروشگاه» به Search عمومی می‌رود. مسیرهای جستجوی دسته‌بندی بدون فیلتر طرح همچنان breadcrumb دستهٔ انتخاب‌شده را نمایش می‌دهند.
 
 در پنل فیلتر Search، «فقط کالاهای تخفیف‌دار» با ۱۲px فاصله از سربرگ پنل می‌آید و پیش از گروه کشویی «وضعیت موجودی» نمایش داده می‌شود؛ گروه «طرح فروش» پس از آن قرار دارد. وقتی فیلتر یا عبارت جست‌وجو فعال باشد، دکمهٔ پاک‌کردن همه نمایش داده می‌شود و badge سمت چپ آن تعداد موارد انتخاب‌شده را از روی چیپ‌های فعال نشان می‌دهد؛ شمارش با badge موبایل یکی است و بازهٔ قیمت یک مورد محسوب می‌شود.
 

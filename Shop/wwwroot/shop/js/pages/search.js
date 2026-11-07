@@ -601,14 +601,17 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
         const category = window.HNCatalog?.categoryForSlug?.(type);
         return category?.path || products.find((product) => product.categorySlug === type)?.categoryPath || ["ابزار و تجهیزات", type];
       });
+      const isSalesPlanListing = state.salesPlan.size > 0;
       const sharedPathLength = selectedPaths.length
         ? selectedPaths[0].findIndex((part, index) => selectedPaths.some((path) => path[index] !== part))
         : 1;
-      const categoryPath = selectedTypes.length === 1
-        ? selectedPaths[0]
-        : selectedTypes.length > 1
-          ? [...selectedPaths[0].slice(0, sharedPathLength < 0 ? selectedPaths[0].length : sharedPathLength), "گروه‌های منتخب"]
-          : ["ابزار و تجهیزات"];
+      const categoryPath = isSalesPlanListing
+        ? ["فروشگاه"]
+        : selectedTypes.length === 1
+          ? selectedPaths[0]
+          : selectedTypes.length > 1
+            ? [...selectedPaths[0].slice(0, sharedPathLength < 0 ? selectedPaths[0].length : sharedPathLength), "گروه‌های منتخب"]
+            : ["ابزار و تجهیزات"];
       breadcrumb.replaceChildren();
       const appendItem = (className) => {
         const item = document.createElement("li");
@@ -633,7 +636,9 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
           return;
         }
         const link = document.createElement("a");
-        link.href = window.HNCatalog?.categoryUrl(categoryPath.slice(0, index + 1)) || `/Search?q=${encodeURIComponent(part)}`;
+        link.href = part === "فروشگاه"
+          ? "/Search"
+          : window.HNCatalog?.categoryUrl(categoryPath.slice(0, index + 1)) || `/Search?q=${encodeURIComponent(part)}`;
         link.textContent = part;
         item.append(link);
       });
@@ -643,7 +648,11 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
       currentSeparator.setAttribute("aria-hidden", "true");
       const currentLabel = document.createElement("span");
       currentLabel.setAttribute("aria-current", "page");
-      currentLabel.textContent = selectedTypes.length ? "نتایج جستجو" : "جستجو و انتخاب ابزار";
+      currentLabel.textContent = isSalesPlanListing
+        ? "جستجو و انتخاب"
+        : selectedTypes.length
+          ? "نتایج جستجو"
+          : "جستجو و انتخاب ابزار";
       current.append(currentSeparator, currentLabel);
     }
     syncUrl();
