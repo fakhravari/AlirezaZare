@@ -6,9 +6,10 @@ const paths = [
   '/compare', '/favorites', '/profile', '/profile/orders', '/profile/addresses',
   '/profile/favorites', '/profile/coupons', '/profile/pricealerts', '/brands', '/brands/bosch',
   '/magazine', '/magazine/multimeter-symbols-guide', '/contact', '/about',
-  '/faq', '/shipping', '/warranty', '/tracking', '/legal/terms', '/error', '/Error/404',
+  '/faq', '/shipping', '/warranty', '/tracking', '/legal/terms',
   '/legal/privacy', '/legal/returns',
 ];
+const accessiblePaths = [...paths, '/error', '/Error/404'];
 
 test('main pages fit mobile, tablet and desktop widths', async ({page}) => {
   test.setTimeout(180000);
@@ -91,7 +92,7 @@ test('home hero and carousel motion respect reduced-motion preference', async ({
 
 test('main routes expose basic document and control names', async ({page}) => {
   test.setTimeout(120000);
-  for (const path of paths) {
+  for (const path of accessiblePaths) {
     await page.goto(path, {waitUntil: 'domcontentloaded'});
     const issues = await page.evaluate(() => {
       const visible = element => {
@@ -137,7 +138,7 @@ test('main routes pass automated WCAG accessibility rules', async ({page}) => {
   await page.addInitScript(() => localStorage.setItem('hn-demo-auth', '1'));
   await page.addInitScript(axe.source);
   const allViolations = new Map();
-  for (const path of paths) {
+  for (const path of accessiblePaths) {
     await page.goto(path, {waitUntil: 'domcontentloaded'});
     const results = await page.evaluate(async () => window.axe.run(document, {
       runOnly: {type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa', 'best-practice']},

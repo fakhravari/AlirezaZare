@@ -24,7 +24,7 @@
                 <header>
                     <div>
                         <span class="order-status @order.StatusClass">
-                            <i class="bi @(order.StatusClass == "is-shipping" ? "bi-truck" : order.StatusClass == "is-processing" ? "bi-hourglass-split" : "bi-check2-circle")" aria-hidden="true"></i> @order.StatusLabel
+                            <i class="bi @order.StatusIcon" aria-hidden="true"></i> @order.StatusLabel
                         </span>
                         <strong>سفارش @order.Number</strong>
                     </div>

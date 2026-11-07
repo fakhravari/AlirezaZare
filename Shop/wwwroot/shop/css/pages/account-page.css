@@ -74,7 +74,7 @@
   display: grid;
   min-height: 58px;
   padding: 7px 9px;
-  grid-template-columns: 36px minmax(0, 1fr) 16px;
+  grid-template-columns: 36px minmax(0, 1fr) auto 16px;
   gap: 9px;
   align-items: center;
   border: 1px solid transparent;
@@ -82,6 +82,22 @@
   border-radius: 12px;
   color: var(--industrial-steel);
   transition: 0.22s ease;
+}
+
+.account-tab-badge {
+  display: inline-grid;
+  min-width: 24px;
+  height: 24px;
+  padding-inline: 6px;
+  place-items: center;
+  border: 1px solid #dce5ed;
+  border-radius: 999px;
+  background: #f1f5f8;
+  color: #405b78;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
 }
 
 .account-tabs a > i:first-child {
@@ -1842,6 +1858,13 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
   color: #34704b;
 }
 
+#orders .order-status.is-pending-payment { background: #fff2dc; color: #805b12; }
+#orders .order-status.is-payment-confirmed { background: #e9f3ff; color: #285e91; }
+#orders .order-status.is-warehouse-confirmed { background: #f0edff; color: #5a4b91; }
+#orders .order-status.is-in-transit { background: #eaf3fb; color: #315f84; }
+#orders .order-status.is-shipped-to-post { background: #e8f5f3; color: #28685f; }
+#orders .order-status.is-cancelled { background: #fff0ef; color: #a43e36; }
+
 #orders .profile-order-card {
   transition:
     border-color 0.2s ease,
@@ -2417,6 +2440,32 @@ body.inner-page.mobile-page--profile-favorites #favoritesView .favorite-item-car
 }
 
 /* Give the account overview a clearer dashboard rhythm. */
+.profile-personal-card {
+  position: relative;
+  margin: 0 0 22px;
+  padding: 18px 24px 52px;
+  border-radius: 8px;
+  background: #f0f2f5;
+  color: #243f79;
+}
+.profile-personal-card > header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+.profile-personal-card > header i { font-size: 22px; }
+.profile-personal-card h3 { margin: 0; font-size: 18px; }
+.profile-personal-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px 14px; padding-inline-end: 112px; }
+.profile-personal-grid > div { display: grid; gap: 5px; text-align: center; }
+.profile-personal-grid span { color: #5c6d86; font-size: 14px; }
+.profile-personal-grid strong { color: #101828; font-size: 14px; overflow-wrap: anywhere; }
+.profile-personal-avatar { position: absolute; inset-inline-end: 20px; top: 50%; display: grid; place-items: center; width: 82px; height: 82px; transform: translateY(-50%); border: 1px solid #e8ebef; border-radius: 50%; background: #fff; box-shadow: 0 8px 18px #1522381c; font-size: 24px; }
+.profile-personal-edit { position: absolute; inset-inline-start: 20px; bottom: 0; padding: 10px 24px; border-radius: 6px 6px 0 0; background: #243f79; color: #fff; text-decoration: none; font-size: 13px; }
+.profile-personal-edit:focus-visible { outline: 3px solid #cfb45e; outline-offset: 2px; }
+.profile-edit-newsletter { display: flex; grid-column: 1 / -1; align-items: center; gap: 10px; color: #334155; }
+.profile-edit-newsletter input { width: 18px; height: 18px; accent-color: #243f79; }
+@media (max-width: 767px) {
+  .profile-personal-card { padding: 16px 14px 54px; }
+  .profile-personal-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); padding-inline-end: 0; }
+  .profile-personal-avatar { display: none; }
+}
+
 #overview.account-overview .overview-heading {
   position: relative;
   margin-bottom: 20px;
@@ -2952,6 +3001,43 @@ body.inner-page.mobile-page--profile-favorites #favoritesView .favorite-item-car
   font: inherit;
   cursor: pointer;
   transition: background-color 160ms ease, border-color 160ms ease;
+}
+
+.profile-messages-demo-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 14px;
+  color: var(--industrial-steel);
+  font-size: 12px;
+}
+.profile-messages-demo-note i { color: var(--industrial-yellow-dark); }
+.profile-messages-list { display: grid; gap: 12px; }
+.profile-message-card {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  align-items: start;
+  gap: 14px;
+  padding: 17px;
+  border: 1px solid #e2e8ed;
+  border-radius: 14px;
+  background: linear-gradient(150deg, #fff 20%, #f8fafb 100%);
+  box-shadow: 0 5px 16px rgba(16, 42, 67, 0.035);
+}
+.profile-message-card.is-unread { border-inline-start: 3px solid var(--industrial-yellow-dark); background: #fffdf7; }
+.profile-message-icon { display: grid; width: 42px; height: 42px; place-items: center; border-radius: 13px; background: #eef3f7; color: var(--industrial-navy); font-size: 18px; }
+.profile-message-card.is-unread .profile-message-icon { background: #fff4d5; color: #806000; }
+.profile-message-content { min-width: 0; }
+.profile-message-content > header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+.profile-message-category { color: var(--industrial-steel); font-size: 11px; }
+.profile-message-content time { color: #718094; font-size: 11px; }
+.profile-message-content h3 { display: flex; align-items: center; flex-wrap: wrap; gap: 9px; margin: 0 0 6px; color: var(--industrial-navy); font-size: 15px; }
+.profile-message-content p { margin: 0; color: #586b7f; font-size: 13px; line-height: 1.9; }
+.profile-message-unread { padding: 2px 8px; border-radius: 999px; background: #fff0c2; color: #735300; font-size: 10px; font-weight: 700; }
+@media (max-width: 575px) {
+  .profile-message-card { grid-template-columns: 34px minmax(0, 1fr); gap: 10px; padding: 13px; }
+  .profile-message-icon { width: 34px; height: 34px; }
+  .profile-message-content h3 { font-size: 14px; }
 }
 
 .profile-price-alert-delete:hover {

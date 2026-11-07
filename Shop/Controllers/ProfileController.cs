@@ -33,6 +33,10 @@ public sealed class ProfileController(Shop.Services.IAccountDataSource accountDa
     public Task<ViewResult> PriceAlerts() => ProfilePage("pricealerts", "به من اطلاع بده",
         "پیگیری‌های قیمت و موجودی کالاهای منتخب را مدیریت کنید.", "bi-bell");
 
+    [HttpGet("Messages")]
+    public Task<ViewResult> Messages() => ProfilePage("messages", "پیام‌ها",
+        "پیام‌ها و اطلاعیه‌های ارسال‌شده از طرف فروشگاه را بخوانید.", "bi-envelope");
+
     private async Task<ViewResult> ProfilePage(string section, string title, string description, string icon)
     {
         var account = await accountDataSource.ReadAsync(HttpContext.RequestAborted);

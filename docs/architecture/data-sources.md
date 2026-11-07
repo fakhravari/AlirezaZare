@@ -19,7 +19,7 @@
 | رسانه‌ها | [ساختار content](../media/images.md) | مسیرهای محصول در catalog.json ثبت‌اند؛ نام فایل از ترتیب آرایه ساخته نمی‌شود |
 
 
-کاتالوگ در مصرف‌کننده‌های سرور از `ICatalogSource.ReadAsync` خوانده می‌شود؛ `CatalogRepository` پیاده‌سازی فایل آن است. سفارش و کوپن در `Shop/App_Data/account-demo.json` با مدل `AccountData` نگهداری می‌شوند؛ `IAccountDataSource` برای حساب و `ICommerceOfferSource` برای پیشنهاد عمومی است. شناسهٔ سفارش مرجع سابقهٔ مصرف کوپن است، تاریخ انتقال ISO و مبلغ حساب عدد صحیح تومان (IRT) است. وضعیت کامل آمادگی و محدودیت‌ها در [اتصال backend](backend-readiness.md) ثبت شده است.
+کاتالوگ در مصرف‌کننده‌های سرور از `ICatalogSource.ReadAsync` خوانده می‌شود؛ `CatalogRepository` پیاده‌سازی فایل آن است. سفارش و کوپن در `Shop/App_Data/account-demo.json` با مدل `AccountData` نگهداری می‌شوند؛ `IAccountDataSource` برای حساب و `ICommerceOfferSource` برای پیشنهاد عمومی است. شناسهٔ سفارش مرجع سابقهٔ مصرف کوپن است، تاریخ انتقال ISO و مبلغ حساب عدد صحیح تومان (IRT) است. وضعیت فاکتور از مجموعهٔ کلیدهای ثابت `AccountOrderStatus` می‌آید؛ شناسه‌ها و شماره‌های تکراری رد می‌شوند. وضعیت کامل آمادگی و محدودیت‌ها در [اتصال backend](backend-readiness.md) ثبت شده است.
 
 ## مدل صفحه و آماده‌سازی برای API
 

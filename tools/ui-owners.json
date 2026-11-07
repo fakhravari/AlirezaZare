@@ -253,6 +253,7 @@
             "Shop/App_Data/account-demo.json"
           ],
           "server": [
+            "Shop/Controllers/ProfileController.cs",
             "Shop/Models/AccountData.cs",
             "Shop/Services/IAccountDataSource.cs"
           ]

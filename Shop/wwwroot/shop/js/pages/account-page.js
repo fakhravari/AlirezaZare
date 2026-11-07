@@ -19,6 +19,17 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
         }).format(date);
     };
     const priceWatchKey = "hn-price-watches-demo";
+    const messagePageSize = 5;
+    const profileMessages = [
+        { title: "به‌روزرسانی ساعات پاسخ‌گویی پشتیبانی", date: "۱۴۰۵/۰۸/۱۴", category: "اطلاعیه", body: "از این پس کارشناسان پشتیبانی همه‌روزه از ساعت ۹ تا ۱۸ پاسخ‌گوی شما هستند.", unread: true },
+        { title: "راهنمای نگهداری ابزار برقی", date: "۱۴۰۵/۰۸/۱۰", category: "راهنمای خرید", body: "برای افزایش عمر ابزار، پس از استفاده گردوغبار را پاک کنید و دستگاه را در محیط خشک نگهداری کنید.", unread: true },
+        { title: "تغییر در شرایط ارسال سفارش‌ها", date: "۱۴۰۵/۰۸/۰۵", category: "اطلاعیه", body: "سفارش‌های ثبت‌شده تا ساعت ۱۲ در روز کاری، طبق روال برای پردازش ارسال می‌شوند.", unread: false },
+        { title: "محصولات تازه به فروشگاه رسیدند", date: "۱۴۰۵/۰۷/۲۸", category: "محصولات", body: "چند مدل تازه از ابزار اندازه‌گیری و تجهیزات ایمنی به فهرست فروشگاه اضافه شده است.", unread: false },
+        { title: "نکته‌هایی برای انتخاب کابل مناسب", date: "۱۴۰۵/۰۷/۲۲", category: "راهنمای خرید", body: "هنگام انتخاب کابل، سطح مقطع را با جریان مصرفی و شرایط نصب متناسب کنید.", unread: false },
+        { title: "اطلاعیهٔ به‌روزرسانی فروشگاه", date: "۱۴۰۵/۰۷/۱۵", category: "اطلاعیه", body: "بخش پیگیری قیمت و موجودی اکنون در پنل کاربری در دسترس شماست.", unread: false },
+        { title: "پیشنهادهای ویژهٔ این ماه", date: "۱۴۰۵/۰۷/۰۸", category: "پیشنهاد", body: "برای مشاهدهٔ پیشنهادهای جاری، صفحهٔ کدهای تخفیف حساب خود را بررسی کنید.", unread: false },
+        { title: "به حساب کاربری خوش آمدید", date: "۱۴۰۵/۰۶/۳۰", category: "حساب کاربری", body: "از پنل پروفایل می‌توانید سفارش‌ها، نشانی‌ها و کالاهای ذخیره‌شده را مدیریت کنید.", unread: false },
+    ];
     const dialog = document.querySelector("#addressDialog"),
         form = document.querySelector("#addressForm");
     const formStatus = document.querySelector("#addressFormStatus");
@@ -185,7 +196,8 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
             ).size
             : 0;
         const values = {
-            statOrders: document.querySelectorAll(".profile-order-card").length,
+            statOrders: [...document.querySelectorAll(".profile-order-card")]
+                .filter((order) => order.dataset.orderStatus === "تحویل‌شده").length,
             statAddresses: read(addressKey).length,
             statFavorites: read("hn-favorites").length,
             statCoupons: activeCoupons.length,
@@ -194,6 +206,17 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
         Object.entries(values).forEach(([id, value]) => {
             const element = document.querySelector(`#${id}`);
             if (element) element.textContent = ui.formatNumber(value);
+        });
+        const counts = {
+            orders: values.statOrders,
+            addresses: values.statAddresses,
+            favorites: values.statFavorites,
+            coupons: values.statCoupons,
+            pricealerts: read(priceWatchKey).length,
+        };
+        Object.entries(counts).forEach(([key, value]) => {
+            const badge = document.querySelector(`[data-account-count="${key}"]`);
+            if (badge) badge.textContent = ui.formatNumber(value);
         });
         renderCoupons();
     }
@@ -303,6 +326,8 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
         const host = document.querySelector("#priceAlertsList");
         if (!host) return;
         const watches = read(priceWatchKey);
+        const badge = document.querySelector('[data-account-count="pricealerts"]');
+        if (badge) badge.textContent = ui.formatNumber(watches.length);
         if (!watches.length) {
             host.innerHTML = '<div class="compare-empty empty-state-card"><div class="compare-empty-art" aria-hidden="true"><span><i class="bi bi-bell-slash"></i></span><i class="bi bi-plus-lg"></i></div><span class="compare-empty-kicker">پیگیری هوشمند قیمت</span><h2>هنوز پیگیری قیمتی ثبت نکرده‌اید</h2><p>در صفحهٔ محصول، «به من اطلاع بده» را فعال کنید تا تغییر قیمت یا موجودی را اینجا دنبال کنید.</p><a class="flow-button" href="/search"><i class="bi bi-search" aria-hidden="true"></i> جست‌وجوی محصولات <i class="bi bi-arrow-left" aria-hidden="true"></i></a><small class="compare-empty-hint"><i class="bi bi-bell" aria-hidden="true"></i> پیگیری را از صفحهٔ هر محصول برای کالا یا ویژگی دلخواهتان ثبت کنید.</small></div>';
             return;
@@ -374,6 +399,7 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
                     return;
                 }
                 renderPriceAlerts();
+                renderOverview();
                 ui.showToast("پیگیری قیمت و موجودی حذف شد.", "success");
                 requestAnimationFrame(() => {
                     const nextDelete = host.querySelector(`[data-delete-price-alert="${Math.min(index, latest.length - 1)}"]`);
@@ -382,6 +408,56 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
             });
         });
     }
+    function renderMessages(moveFocus = false) {
+        const host = document.querySelector("#profileMessagesList");
+        const pagination = document.querySelector("#profileMessagesPagination");
+        if (!host || !pagination) return;
+        const summary = pagination.querySelector("p");
+        const nav = pagination.querySelector("nav");
+        const pageCount = Math.max(1, Math.ceil(profileMessages.length / messagePageSize));
+        const url = new URL(window.location.href);
+        const requested = Number(url.searchParams.get("messagePage"));
+        const page = Number.isSafeInteger(requested) && requested > 0 ? Math.min(requested, pageCount) : 1;
+        const start = (page - 1) * messagePageSize;
+        host.innerHTML = profileMessages.slice(start, start + messagePageSize).map((message) =>
+            `<article class="profile-message-card${message.unread ? " is-unread" : ""}"><span class="profile-message-icon" aria-hidden="true"><i class="bi bi-${message.unread ? "envelope" : "envelope-open"}"></i></span><div class="profile-message-content"><header><span class="profile-message-category">مدیریت فروشگاه · ${esc(message.category)}</span><time>${esc(message.date)}</time></header><h3>${esc(message.title)}${message.unread ? '<span class="profile-message-unread">جدید</span>' : ""}</h3><p>${esc(message.body)}</p></div></article>`,
+        ).join("");
+        summary.textContent = `${ui.formatNumber(start + 1)} تا ${ui.formatNumber(Math.min(start + messagePageSize, profileMessages.length))} از ${ui.formatNumber(profileMessages.length)} پیام`;
+        nav.replaceChildren();
+        nav.hidden = pageCount <= 1;
+        const addButton = (label, target, disabled = false) => {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.textContent = label;
+            button.disabled = disabled;
+            button.setAttribute("aria-label", label === "قبلی" || label === "بعدی" ? `صفحهٔ ${label}` : `صفحه ${label}`);
+            if (target === page && label === ui.formatNumber(page)) button.setAttribute("aria-current", "page");
+            button.addEventListener("click", () => {
+                const next = new URL(window.location.href);
+                if (target === 1) next.searchParams.delete("messagePage");
+                else next.searchParams.set("messagePage", String(target));
+                if (next.href !== window.location.href) history.pushState(null, "", next);
+                renderMessages(true);
+            });
+            nav.append(button);
+        };
+        addButton("قبلی", page - 1, page === 1);
+        for (let target = 1; target <= pageCount; target++) addButton(ui.formatNumber(target), target);
+        addButton("بعدی", page + 1, page === pageCount);
+        pagination.hidden = profileMessages.length <= messagePageSize;
+        if (/\/profile\/messages\/?$/i.test(url.pathname) || url.hash === "#messages") {
+            if (page === 1) url.searchParams.delete("messagePage");
+            else url.searchParams.set("messagePage", String(page));
+            if (url.href !== window.location.href) history.replaceState(null, "", url);
+        }
+        if (moveFocus) {
+            const heading = document.querySelector("#profileMessagesTitle");
+            heading?.focus({ preventScroll: true });
+            heading?.scrollIntoView({ block: "start", behavior: "auto" });
+        }
+    }
+    window.addEventListener("popstate", () => renderMessages());
+
     function navigate() {
         renderOverview();
         const routeSection = {
@@ -390,6 +466,7 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
             favorites: "favorites",
             coupons: "coupons",
             pricealerts: "price-alerts",
+            messages: "messages",
         };
         const routeName = location.pathname
             .split("/")
@@ -399,7 +476,7 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
         const hashSection = location.hash.slice(1);
         const section =
             routeSection[routeName] ||
-            (["orders", "addresses", "favorites", "coupons", "price-alerts"].includes(hashSection)
+            (["orders", "addresses", "favorites", "coupons", "price-alerts", "messages"].includes(hashSection)
                 ? hashSection
                 : "overview");
         document
@@ -448,5 +525,6 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
     renderAddresses();
     renderOverview();
     renderPriceAlerts();
+    renderMessages();
     navigate();
 }));

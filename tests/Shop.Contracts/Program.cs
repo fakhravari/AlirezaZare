@@ -97,13 +97,28 @@ void RejectAccount(Action<JsonNode> mutate)
 
 RejectAccount(n => n["schemaVersion"] = 99);
 RejectAccount(n => n["currency"] = "IRR");
-RejectAccount(n => n["orders"]![1]!["id"] = "order-1");
+RejectAccount(n => n["orders"]![1]!["id"] = account.Orders[0].Id);
+RejectAccount(n => n["orders"]![1]!["id"] = account.Orders[0].Id.ToUpperInvariant());
+RejectAccount(n => n["orders"]![1]!["number"] = account.Orders[0].Number);
 RejectAccount(n => n["orders"]![0]!["totalAmount"] = -1);
 RejectAccount(n => n["orders"]![0]!["totalAmount"] = 1.5);
 RejectAccount(n => n["orders"]![0]!["status"] = "unknown");
+string[] requiredOrderStatuses =
+[
+    Shop.Models.AccountOrderStatus.PendingPayment,
+    Shop.Models.AccountOrderStatus.PaymentConfirmed,
+    Shop.Models.AccountOrderStatus.WarehouseConfirmed,
+    Shop.Models.AccountOrderStatus.InTransit,
+    Shop.Models.AccountOrderStatus.ShippedToPost,
+    Shop.Models.AccountOrderStatus.Delivered,
+    Shop.Models.AccountOrderStatus.Cancelled,
+];
+if (requiredOrderStatuses.Any(status => account.Orders.All(order => order.Status != status)))
+    throw new Exception("Account fixtures must cover every order status.");
 RejectAccount(n => n["coupons"]![0]!["orderIds"]![0] = "missing");
 RejectAccount(n => n["coupons"]![0]!["discountPercent"] = 100);
 RejectAccount(n => n["coupons"]![1]!["code"] = "BAZAR10");
+RejectAccount(n => n["coupons"]![1]!["id"] = account.Coupons[0].Id.ToUpperInvariant());
 var coupon = account.Coupons.First(c => c.Enabled);
 if (!coupon.IsActive(coupon.ExpiresOn) || coupon.IsActive(coupon.ExpiresOn.AddDays(1)) ||
     (coupon with { Enabled = false }).IsActive(coupon.ExpiresOn))

@@ -17,7 +17,7 @@
                         <i class="bi bi-house-door" aria-hidden="true"></i><span>خانه</span>
                     </a>
                 </li>
-                @if (profileSection is "orders" or "addresses" or "favorites" or "coupons" or "pricealerts")
+                @if (profileSection is "orders" or "addresses" or "favorites" or "coupons" or "pricealerts" or "messages")
                 {
                     <li class="profile-breadcrumb-parent">
                         <i class="bi bi-chevron-left" aria-hidden="true"></i>
@@ -64,31 +64,35 @@
                 <i class="bi bi-bag-check"></i>
                 <span>
                     <strong>سفارش‌های من</strong>
-                </span><i class="bi bi-chevron-left"></i>
+                </span><b class="account-tab-badge" data-account-count="orders" aria-label="تعداد سفارش‌های موفق">۰</b><i class="bi bi-chevron-left"></i>
             </a>
             <a asp-controller="Profile" asp-action="Addresses" aria-current="@(profileSection == "addresses" ? "page" : null)">
                 <i class="bi bi-geo-alt"></i>
                 <span>
                     <strong>آدرس‌های من</strong>
-                </span><i class="bi bi-chevron-left"></i>
+                </span><b class="account-tab-badge" data-account-count="addresses" aria-label="تعداد آدرس‌های فعال">۰</b><i class="bi bi-chevron-left"></i>
             </a>
             <a asp-controller="Profile" asp-action="Favorites" aria-current="@(profileSection == "favorites" ? "page" : null)">
                 <i class="bi bi-heart"></i>
                 <span>
                     <strong>علاقه‌مندی‌ها</strong>
-                </span><i class="bi bi-chevron-left"></i>
+                </span><b class="account-tab-badge" data-account-count="favorites" aria-label="تعداد علاقه‌مندی‌ها">۰</b><i class="bi bi-chevron-left"></i>
             </a>
             <a asp-controller="Profile" asp-action="Coupons" aria-current="@(profileSection == "coupons" ? "page" : null)">
                 <i class="bi bi-ticket-perforated"></i>
                 <span>
                     <strong>کدهای تخفیف</strong>
-                </span><i class="bi bi-chevron-left"></i>
+                </span><b class="account-tab-badge" data-account-count="coupons" aria-label="تعداد کدهای تخفیف فعال">۰</b><i class="bi bi-chevron-left"></i>
             </a>
             <a asp-controller="Profile" asp-action="PriceAlerts" aria-current="@(profileSection == "pricealerts" ? "page" : null)">
                 <i class="bi bi-bell"></i>
                 <span>
-                    <strong>به من اطلاع بده</strong>
-                </span><i class="bi bi-chevron-left"></i>
+                    <strong>پیگیری‌های قیمت و موجودی</strong>
+                </span><b class="account-tab-badge" data-account-count="pricealerts" aria-label="تعداد پیگیری‌های فعال">۰</b><i class="bi bi-chevron-left"></i>
+            </a>
+            <a asp-controller="Profile" asp-action="Messages" aria-current="@(profileSection == "messages" ? "page" : null)">
+                <i class="bi bi-envelope"></i>
+                <span><strong>پیام‌ها</strong></span><i class="bi bi-chevron-left"></i>
             </a>
         </nav>
         <div class="account-sidebar-help">
@@ -108,6 +112,17 @@
                     <p>خلاصه‌ای از خریدها و اطلاعات ذخیره‌شده در حساب کاربری</p>
                 </div>
             </div>
+            <section class="profile-personal-card" aria-labelledby="profilePersonalTitle">
+                <header><i class="bi bi-person" aria-hidden="true"></i><h3 id="profilePersonalTitle">مشخصات فردی</h3></header>
+                <div class="profile-personal-grid">
+                    <div><span>نام و نام خانوادگی</span><strong data-profile-value="name">ندا اولیائی</strong></div>
+                    <div><span>پست الکترونیکی</span><strong data-profile-value="email" dir="ltr">example@email.com</strong></div>
+                    <div><span>شماره موبایل</span><strong data-profile-value="phone" dir="ltr">۰۹۳۶۹۴۵۵۴۵۷</strong></div>
+                    <div><span>دریافت خبرنامه</span><strong data-profile-value="newsletter">خیر</strong></div>
+                </div>
+                <a class="profile-personal-edit" href="#profileEditDialog" data-profile-edit-trigger>ویرایش اطلاعات</a>
+                <span class="profile-personal-avatar" aria-hidden="true"><i class="bi bi-person"></i></span>
+            </section>
             <div class="account-stats">
                 <article>
                     <span class="stat-icon stat-orders">
@@ -194,6 +209,20 @@
             </div>
             <div id="priceAlertsList" class="profile-price-alert-list" aria-live="polite"></div>
         </section>
+        <section id="messages" class="account-section profile-messages" hidden="@(profileSection == "messages" ? null : "hidden")">
+            <div class="account-section-heading">
+                <div>
+                    <h2 id="profileMessagesTitle" tabindex="-1">پیام‌های فروشگاه</h2>
+                    <p>اطلاعیه‌ها و پیام‌های ارسال‌شده از طرف مدیر فروشگاه</p>
+                </div>
+            </div>
+            <p class="profile-messages-demo-note"><i class="bi bi-info-circle" aria-hidden="true"></i> پیام‌های این فهرست نمونهٔ نمایشی هستند.</p>
+            <div id="profileMessagesList" class="profile-messages-list" aria-live="polite"></div>
+            <div id="profileMessagesPagination" class="orders-pagination profile-messages-pagination" hidden>
+                <p role="status"></p>
+                <nav class="site-pagination" aria-label="صفحه‌بندی پیام‌ها"></nav>
+            </div>
+        </section>
         <p id="accountStatus" role="status"></p>
     </div>
 </div>
@@ -269,6 +298,10 @@
                     <input name="email" type="email" value="example@email.com" dir="ltr" readonly aria-readonly="true"/><i class="bi bi-envelope" aria-hidden="true"></i>
                 </span><small class="profile-edit-validation field-validation-valid" data-profile-edit-error="email"></small>
             </label>
+            <label class="profile-edit-newsletter profile-edit-full">
+                <input name="newsletter" type="checkbox" />
+                <span>مایلم خبرنامه و پیشنهادهای فروشگاه را دریافت کنم.</span>
+            </label>
             <button class="profile-edit-full" type="submit">ذخیره تغییرات <i class="bi bi-floppy2-fill" aria-hidden="true"></i></button>
         </form>
     </div>
@@ -303,6 +336,14 @@
           if (savedProfile[name]) form.elements[name].value = savedProfile[name];
         });
         if (savedProfile.phone) phone.value = normalizePhone(savedProfile.phone);
+        form.elements.newsletter.checked = savedProfile.newsletter === true;
+        const renderProfile = profile => {
+          document.querySelector('[data-profile-value="name"]').textContent = `${profile.firstName || form.elements.firstName.value} ${profile.lastName || form.elements.lastName.value}`.trim();
+          document.querySelector('[data-profile-value="email"]').textContent = profile.email || form.elements.email.value;
+          document.querySelector('[data-profile-value="phone"]').textContent = window.HNUI.toPersianDigits(profile.phone || phone.value);
+          document.querySelector('[data-profile-value="newsletter"]').textContent = profile.newsletter ? 'بله' : 'خیر';
+        };
+        renderProfile(savedProfile);
         if (savedProfile.gender === 'male' || savedProfile.gender === 'female') {
           const gender = form.querySelector(`[name="gender"][value="${savedProfile.gender}"]`);
           if (gender) gender.checked = true;
@@ -351,11 +392,13 @@
             lastName: form.elements.lastName.value.trim(),
             email: form.elements.email.value.trim(),
             phone: normalizePhone(phone.value),
-            gender: form.querySelector('[name="gender"]:checked').value
+            gender: form.querySelector('[name="gender"]:checked').value,
+            newsletter: form.elements.newsletter.checked
           };
           if (!storage?.set('hn-profile', JSON.stringify(profile))) return;
           const displayName = document.querySelector('.account-profile > div strong');
           if (displayName) displayName.textContent = `${profile.firstName} ${profile.lastName}`;
+          renderProfile(profile);
           document.getElementById('accountStatus').textContent = 'اطلاعات پروفایل ذخیره شد.';
           dialog.close();
         });
