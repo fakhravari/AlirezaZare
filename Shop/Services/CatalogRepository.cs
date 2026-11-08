@@ -3,35 +3,18 @@ using Shop.Models;
 
 namespace Shop.Services;
 
-/// <summary>The JSON catalog is shared by Razor, SEO and the browser. No JavaScript parsing.</summary>
-public sealed class CatalogRepository(IWebHostEnvironment environment) : ICatalogSource
+/// <summary>The database catalog snapshot is shared by Razor, SEO and the browser.</summary>
+public sealed class CatalogRepository(Shop.Database.Application.Store.Contracts.IStoreRuntimeDatasetRepository datasets) : ICatalogSource
 {
-    public ValueTask<CatalogSnapshot> ReadAsync(CancellationToken cancellationToken = default)
+    public async ValueTask<CatalogSnapshot> ReadAsync(CancellationToken cancellationToken = default)
     {
-        cancellationToken.ThrowIfCancellationRequested();
-        return ValueTask.FromResult(Read());
-    }
-
-    private readonly object _gate = new();
-    private readonly string _path = Path.Combine(environment.WebRootPath, "content", "data", "catalog.json");
-    private CatalogSnapshot? _snapshot;
-    private DateTime _lastWrite;
-    private long _length;
-
-    public CatalogSnapshot Read()
-    {
-        lock (_gate)
-        {
-            FileInfo file = new(_path);
-            if (_snapshot is not null && file.LastWriteTimeUtc == _lastWrite && file.Length == _length)
-                return _snapshot;
-
-            CatalogSnapshot next = CatalogSnapshot.Parse(File.ReadAllText(_path));
-            _snapshot = next;
-            _lastWrite = file.LastWriteTimeUtc;
-            _length = file.Length;
-            return next;
-        }
+        string json = await datasets.ReadJsonAsync("catalog", cancellationToken)
+                     ?? throw new InvalidDataException("The Store catalog dataset is missing from the database.");
+        string editorialJson = await datasets.ReadJsonAsync("brandEditorial", cancellationToken)
+                               ?? throw new InvalidDataException("The Store brand editorial dataset is missing from the database.");
+        BrandEditorialDocument[] editorials = JsonSerializer.Deserialize<BrandEditorialDocument[]>(editorialJson,
+            new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? [];
+        return CatalogSnapshot.Parse(json, editorials.ToDictionary(item => item.Slug, StringComparer.OrdinalIgnoreCase));
     }
 }
 
@@ -40,7 +23,8 @@ public sealed record CatalogSnapshot(
     IReadOnlyList<ProductSeoEntry> Products,
     IReadOnlyList<BrandProfileModel> Brands)
 {
-    public static CatalogSnapshot Parse(string source)
+    public static CatalogSnapshot Parse(string source,
+        IReadOnlyDictionary<string, BrandEditorialDocument>? editorialDocuments = null)
     {
         using JsonDocument document = JsonDocument.Parse(source);
         JsonElement root = document.RootElement;
@@ -69,8 +53,27 @@ public sealed record CatalogSnapshot(
             string id = Text(brand, "id");
             string? logo = brand.GetProperty("logo").GetString();
             if (logo is not null) ValidatePath(logo, "content/brands/");
-            BrandProfileModel editorial = BrandCatalog.Find(id) ?? new(id, Text(brand, "name"),
-                Text(brand, "fa"), null, "", "", []);
+            BrandEditorialDocument? sourceEditorial = null;
+            if (editorialDocuments is not null) editorialDocuments.TryGetValue(id, out sourceEditorial);
+            string[] strengths = sourceEditorial?.Strengths.ToArray() ?? [];
+            string introduction = string.Join("\n\n", sourceEditorial?.CompanyIntroductions ?? []);
+            int? foundedYear = int.TryParse(sourceEditorial?.Established, out int parsedYear) ? parsedYear : null;
+            BrandProfileModel editorial = new(id, Text(brand, "name"), Text(brand, "fa"),
+                logo is null ? null : Path.GetFileName(logo), sourceEditorial?.Specialization ?? "",
+                sourceEditorial?.FeaturedProducts ?? "", strengths)
+            {
+                FoundedYear = foundedYear,
+                OfficialUrl = sourceEditorial?.OfficialUrl,
+                Editorial = introduction,
+                EditorialContent = new(sourceEditorial?.ProductFamilies ?? [], strengths,
+                    sourceEditorial?.Audience ?? "")
+                {
+                    Introduction = introduction,
+                    Specialization = sourceEditorial?.Specialization ?? "",
+                    ShoppingAdvice = sourceEditorial?.ShoppingAdvice ?? ""
+                },
+                SourceEditorial = sourceEditorial
+            };
             brandProfiles.Add(editorial with
             {
                 Name = Text(brand, "name"), PersianName = Text(brand, "fa"),

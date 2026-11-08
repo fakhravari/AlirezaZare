@@ -1,6 +1,8 @@
+> وضعیت دادهٔ runtime (۸ نوامبر ۲۰۲۶): داده‌های کاتالوگ، برند، مجله، FAQ، حساب نمونه، جغرافیا و طرح فروش از APIهای متصل به SQL Server خوانده می‌شوند. سبد، علاقه‌مندی، مقایسه، نشانی، checkout، سفارش، پیگیری قیمت و تعامل مقاله از API حساب می‌آیند؛ دیدگاه/پرسش محصول از API محصول. کلیدهای قدیمی Shop در localStorage فقط برای انتقال یک‌باره خوانده و سپس حذف می‌شوند؛ دادهٔ runtime در localStorage نگهداری نمی‌شود.
+
 # آمادگی داده برای اتصال backend
 
-این بازبینی مسیر Controller → مدل/منبع → Razor → JavaScript → storage را بررسی می‌کند. وضعیت زیر متعلق به ۳۰ اکتبر ۲۰۲۶ است؛ وجود دادهٔ نمایشی به معنی وجود API عملیاتی نیست.
+این بازبینی مسیر Controller → مدل/منبع → Razor → JavaScript → storage را بررسی می‌کند. وضعیت زیر متعلق به ۸ نوامبر ۲۰۲۶ است؛ وجود دادهٔ نمایشی به معنی وجود API عملیاتی نیست.
 
 ## بازبینی مدل دادهٔ صفحه‌ها — ۳۰ اکتبر ۲۰۲۶
 
@@ -12,7 +14,7 @@
 | فهرست و دیتیل مجله | فهرست `PageModel<MagazineIndexViewModel>` از `IMagazineContentSource`؛ دیتیل از `PageModel<MagazineDetailsModel>` و `JournalArticles` | فهرست دارای adapter است؛ دیتیل و محتوای مقاله هنوز در مدل ثابت C# هستند و باید منبع CMS/API همان قرارداد را بسازد |
 | FAQ و معرفی برند | `PageModel<IReadOnlyList<FaqEntry>>` و `PageModel<BrandProfileModel>` | ورودی View مدل تایپ‌شده است؛ FAQ ثابت C# و بخشی از متن برند ثابت/JSON است |
 | پروفایل، سفارش و کوپن | `IAccountDataSource` در Controller و projectionهای `ProfilePageViewModel`/`ProfileOrdersViewModel` | View از source مستقل شده؛ adapter حساب دمو است و با endpoint سروری جایگزین می‌شود |
-| آدرس، علاقه‌مندی، مقایسه، سبد و checkout | بیشتر state از `localStorage` و renderer مرورگر می‌آید؛ Razor فقط پوستهٔ اولیه می‌دهد | تا ساخت endpoint، مالک داده مرورگر است. ابتدا قرارداد async سمت کاربر و endpoint لازم است؛ صرف افزودن ViewModel سروری اتصال API ایجاد نمی‌کند |
+| آدرس، علاقه‌مندی، مقایسه، سبد و checkout | API حساب و جدول‌های `[Account]`؛ بازخورد محصول از API محصول | endpointها منبع runtime هستند؛ scriptها در هر بار بارگذاری state حساب را از API می‌خوانند و تغییرها را با API ثبت می‌کنند. درگاه پرداخت واقعی و تکمیل سفارش پس از پرداخت همچنان پیاده‌سازی نشده است |
 | تماس و صفحه‌های خدمات/قوانین | متن تحریریه در View، ورودی فرم سمت مرورگر و metadata در `PageModel` | محتوای ثابت فعلی API ندارد؛ اگر CMS لازم شد، متن/بخش‌ها به مدل محتوای typed و source جدا منتقل شوند |
 
 در این بررسی، منبع حساب از Razor به `ProfileController` منتقل شد و آرشیو مجله از anonymous objectهای داخل View به `MagazineIndexViewModel` و `IMagazineContentSource` رفت. کارت‌های آرشیو از همان `JournalArticles` دیتیل عنوان/خلاصه/تصویر می‌گیرند. تاریخ انتشار برای دادهٔ نمونه خالی می‌ماند چون تاریخ واقعی وجود ندارد؛ زمان مطالعه هم هنوز نمونه است. متن ثابت صفحات محتوا عمداً به مدل‌های نمایشی ساختگی منتقل نشد، چون منبع CMS/API در runtime ندارند.
@@ -21,7 +23,7 @@
 
 کاتالوگ مشترک ساختاریافته است، اما کل پروژه هنوز به backend متصل نیست. مرز قابل‌جایگزینی خواندن کاتالوگ [ICatalogSource](../../Shop/Services/ICatalogSource.cs) است. محصول، برند، sitemap و bootstrap مرورگر از قرارداد async همراه CancellationToken استفاده می‌کنند. پیاده‌سازی فایل همچنان cache همگام دارد؛ adapter شبکه باید داده را با همان CatalogSnapshot.Parse اعتبارسنجی کند و نباید با خطای API بی‌صدا به دادهٔ دمو برگردد.
 
-سفارش و کوپن از Razor و JavaScript خارج و در [account-demo.json](../../Shop/App_Data/account-demo.json) یکپارچه شده‌اند. [AccountData](../../Shop/Models/AccountData.cs) رابطه‌ها و مبالغ را اعتبارسنجی می‌کند. [IAccountDataSource و ICommerceOfferSource](../../Shop/Services/IAccountDataSource.cs) دو مرز مستقل حساب و پیشنهاد عمومی هستند؛ پیاده‌سازی demo یک snapshot به‌ازای درخواست دارد. فایل خارج از wwwroot است و در publish کپی می‌شود. bootstrap عمومی فقط کد و درصد تخفیف را می‌دهد؛ سابقهٔ سفارش فقط در پروفایل serialize می‌شود. احراز هویت واقعی هنوز پیاده نشده است.
+سفارش و کوپن از Razor و JavaScript خارج و در [account-demo.json](../../Shop/Features/Store/Database/Migrations/008-account-magazine-geography.sql) یکپارچه شده‌اند. [AccountData](../../Shop/Models/AccountData.cs) رابطه‌ها و مبالغ را اعتبارسنجی می‌کند. [IAccountDataSource و ICommerceOfferSource](../../Shop/Services/IAccountDataSource.cs) دو مرز مستقل حساب و پیشنهاد عمومی هستند؛ پیاده‌سازی demo یک snapshot به‌ازای درخواست دارد. فایل خارج از wwwroot است و در publish کپی می‌شود. bootstrap عمومی فقط کد و درصد تخفیف را می‌دهد؛ سابقهٔ سفارش فقط در پروفایل serialize می‌شود. احراز هویت واقعی هنوز پیاده نشده است.
 
 ثبت‌نام اکنون کد ایمیل را از [EmailVerificationController](../../Shop/Controllers/EmailVerificationController.cs) می‌گیرد؛ [SmtpEmailSender](../../Shop/Services/SmtpEmailSender.cs) با تنظیمات `Email:Smtp` ایمیل می‌فرستد و [EmailVerificationCodeStore](../../Shop/Services/EmailVerificationCodeStore.cs) کد hash‌شدهٔ یک‌بارمصرف را با انقضای ۱۰ دقیقه، حداکثر پنج تلاش و فاصلهٔ ارسال مجدد ۶۰ ثانیه نگه می‌دارد. endpoint ارسال به سقف پنج درخواست در هر IP طی پنج دقیقه محدود است. TLS برای SMTP فعال است و مقدار password در `appsettings.json` خالی است؛ برای توسعه از `dotnet user-secrets set "Email:Smtp:Password" "<new SMTP secret>" --project Shop/Shop.csproj` و در استقرار از متغیر محیطی `Email__Smtp__Password` استفاده کنید. `npm run check` اکنون فایل‌های `appsettings*.json` tracked را برای secretهای غیرخالی کنترل می‌کند؛ این guard جلوی افزودن accidental credential در تغییرات بعدی را می‌گیرد، اما Git history را اسکن یا پاک نمی‌کند. اتصال دیتابیس و FTP در کد فعلی مصرف‌کننده ندارند و پیکربندی شامل دسترسی آن‌ها از فایل tracked حذف شده است. ممیزی محلی تاریخچهٔ موجود Git، بدون چاپ مقادیر، credentialهای پیکربندی را در ۵ نسخه از ۷ نسخهٔ JSON قابل‌خواندن `appsettings.json` پیدا کرد (۸ revision فایل بررسی شد؛ یکی JSON قابل‌خواندن نبود). وجود ۳ remote-tracking ref محلی نیز انتشار یا دسترس‌پذیری remote را به‌تنهایی ثابت نمی‌کند. دارندهٔ دسترسی باید credentialهای SMTP/DB/FTP سابق را نزد ارائه‌دهندگان بچرخاند؛ اگر commitهای درگیر به remote رسیده‌اند، پاک‌سازی تاریخچه باید با هماهنگی cloneها و مصرف‌کنندگان انجام شود. این اقدام از محیط ارائه‌دهنده و دارندهٔ دسترسی لازم است و از این مخزن انجام نشده است. این تغییر فقط تأیید ایمیل را سروری کرده است؛ ساخت حساب پایدار، ورود با گذرواژه و session هنوز دمو هستند. store کدها در حافظهٔ یک process است و برای چند replica باید به cache مشترک منتقل شود.
 
@@ -32,12 +34,12 @@
 | محصول، دسته، برند، کشور، رنگ، رسانه | catalog.json نسخهٔ ۲؛ شناسه و روابط صریح، دستهٔ برگ و مسیر والد معتبر | نگاشت پاسخ API به قرارداد موجود؛ صفحه‌بندی و facet سروری برای کاتالوگ بزرگ |
 | ویژگی‌ها و گزینه‌ها | فرهنگ attributeDefinitions و specs/specGroups و variants در کاتالوگ | شناسهٔ پایدار SKU برای ترکیب قابل‌فروش؛ ویژگی نمایشی را با موجودیت قابل خرید یکی نگیرید |
 | قیمت و موجودی | قیمت پایه/گزینه‌ها و سقف تعداد در کاتالوگ؛ محاسبهٔ مرورگر | quote سروری شامل قیمت، تخفیف، هزینه‌ها، موجودی و زمان اعتبار؛ بازبینی هنگام ثبت سفارش |
-| فروش چندطرحی | `ISalesPlanSource` و fixture adapter؛ APIهای read/quote/validate؛ انتخاب طرح و قیمت مستقل متعلقات در دیتیل؛ snapshot طرح در سبد و اعتبارسنجی دوبارهٔ پیش‌فاکتور | اتصال به دیتابیس، مدیریت امن، کنترل موجودی پس از پرداخت بدون رزرو اولیه، ثبت سفارش و snapshot پایدار؛ وضعیت نمونه و جزئیات در [فروش چندطرحی](../store/sales-plans.md) |
+| فروش چندطرحی | `ISalesPlanSource` با adapter دیتابیس؛ APIهای read/quote/validate؛ انتخاب طرح و قیمت/مجوز متعلقات از Store و stock از Warehouse؛ snapshot طرح در سبد و اعتبارسنجی دوبارهٔ پیش‌فاکتور | مدیریت امن، کنترل موجودی پس از پرداخت بدون رزرو اولیه، ثبت سفارش و snapshot پایدار؛ وضعیت نمونه و جزئیات در [فروش چندطرحی](../store/sales-plans.md) |
 | تاریخچهٔ قیمت | commerce.js سری دو‌سالهٔ نمایشی تولید می‌کند | سری واقعی با productId، variantId، amount، currency و timestamp؛ مولد دمو در adapter واقعی استفاده نشود |
 | سفارش | AccountOrder با id، number، status، orderedOn، itemCount، totalAmount، deliveryDescription | ردیف کالاها، snapshot عنوان/SKU/گزینه و مبلغ، آدرس تحویل، پرداخت، ارسال، مرجوعی؛ خلاصهٔ موجود فاکتور کامل نیست |
 | کوپن | AccountCoupon؛ id، code، discountPercent، enabled، expiresOn، orderIds؛ مصرف به سفارش معتبر وصل است | محدودیت کاربر/کالا/تعداد مصرف/حداقل مبلغ و اعتبارسنجی تراکنشی در سرور |
 | سبد و checkout | cart.js مدل مشترک قیمت/گزینه دارد؛ checkout پرداخت واقعی ندارد | سبد کاربر و مهمان، نسخهٔ سبد، quote، کلید جلوگیری از ثبت تکراری و نتیجهٔ پرداخت تأییدشده |
-| حساب و ورود | تأیید OTP ایمیل در `/api/auth/email-code` و `/verify`؛ وضعیت ورود هنوز ui-core و localStorage است | ساخت حساب پایدار، ورود با گذرواژه، session و مجوز سرور؛ OTP برای چند replica به store مشترک نیاز دارد |
+| حساب و ورود | تأیید OTP ایمیل و نشست cookie سرور از `/api/auth/email-code` | وضعیت ورود از endpoint نشست خوانده می‌شود؛ OTP برای چند replica به store مشترک نیاز دارد |
 | نشانی | سه مدل Country/Province/City در iran-places.js؛ آدرس محلی | شناسهٔ پایدار مکان، مالکیت آدرس و اعتبارسنجی رابطهٔ شهر/استان در API |
 | علاقه‌مندی و مقایسه | شناسهٔ کالا در storage | همگام‌سازی مهمان/کاربر، حذف id نامعتبر و تصمیم صریح دربارهٔ merge |
 | اطلاع‌رسانی | snapshot قیمت/موجودی و انتخاب ویژگی در hn-price-watches-demo | شناسهٔ پیگیری، مالک کاربر، variantId، کانال و وضعیت فعال؛ ثبت/حذف async و وضعیت خطا |
@@ -70,14 +72,16 @@
 
 [منبع حقیقت داده](data-sources.md) · [فهرست معماری](README.md) · [فهرست مستندات](../README.md)
 
-آخرین تطبیق با کد: ۵ نوامبر ۲۰۲۶.
+آخرین تطبیق با کد: ۸ نوامبر ۲۰۲۶.
 # Sales-plan API adapter
 
-برای قابلیت طرح‌های فروش، `ISalesPlanSource` مرز منبع داده و `DemoSalesPlanSource` adapter فقط‌خواندنی fixture است. APIهای quote و validate-cart در `SalesPlansController` قیمت، انتخاب ویژگی و متعلقات را از دادهٔ سرور بازسازی می‌کنند. پیاده‌سازی به دیتابیس، کنترل تراکنشی موجودی پس از پرداخت و ثبت سفارش وصل نیست؛ وضعیت جزئی و کارهای باقی‌مانده در [راهنمای طرح‌های فروش](../store/sales-plans.md) ثبت شده است.
+برای طرح‌های فروش، `ISalesPlanSource` از `DatabaseSalesPlanSource` و `StoreSalesPlanRepository` تغذیه می‌شود. APIهای read/quote/validate قیمت، موجودی انبار به تفکیک طرح، گزینه‌های خرید، متعلقات مجاز و override مشخصات را از دیتابیس می‌خوانند. مدیریت امن، رزرو/کنترل هم‌زمان موجودی و ثبت سفارش هنوز پیاده نشده‌اند؛ جزئیات در [راهنمای طرح‌های فروش](../store/sales-plans.md) است.
 
 ## نیازمندی‌های سیستم انبار و اتصال به فروشگاه — ۷ نوامبر ۲۰۲۶
 
-این بخش مرجع نیازمندی‌های تأییدشدهٔ سیستم انبار و مرز آن با فروشگاه است. migration اولیهٔ SQL Server در [001-initial-schema.sql](../../Shop/Features/Warehouse/Database/Migrations/001-initial-schema.sql) پیاده شده و روی دیتابیس پیکربندی‌شده اعمال شده است؛ اتصال runtime برنامه، API و رابط انبار هنوز پیاده‌سازی نشده‌اند.
+این بخش مرجع نیازمندی‌های تأییدشدهٔ سیستم انبار و مرز آن با فروشگاه است. migrationهای SQL Server در [001-initial-schema.sql](../../Shop/Features/Warehouse/Database/Migrations/001-initial-schema.sql)، [002-store-relations.sql](../../Shop/Features/Store/Database/Migrations/002-store-relations.sql)، [003-store-catalog-content.sql](../../Shop/Features/Store/Database/Migrations/003-store-catalog-content.sql)، [004-store-fixture-data.sql](../../Shop/Features/Store/Database/Migrations/004-store-fixture-data.sql)، [005-store-api-runtime-data.sql](../../Shop/Features/Store/Database/Migrations/005-store-api-runtime-data.sql)، [006-store-sales-plan-configuration.sql](../../Shop/Features/Store/Database/Migrations/006-store-sales-plan-configuration.sql) و [002-sample-warehouse-data.sql](../../Shop/Features/Warehouse/Database/Migrations/002-sample-warehouse-data.sql) پیاده و روی دیتابیس پیکربندی‌شده اعمال شده‌اند. لایه‌های Domain/Application/Infrastructure، repository خواندنی و API انبار در [راهنمای دیتابیس](database.md) شرح داده شده‌اند.
+
+دادهٔ فروشگاه شامل ۲۵۵ کشور، ۲۱ برند و متن معرفی آن‌ها، ۲۱۸ دسته، ۸ رنگ، ۴ گروه مشخصات، ۲۱ دستهٔ مشخصات، ۲۳ ویژگی، ۱۸ تعریف ویژگی، ۳۰ محصول، ۱۴۵ مقدار مشخصات، ۶ جزئیات محصول، ۳۰ رکورد رسانه، ۴۰ عضو مجموعه، ۱۴ قلم جانبی، ۱۹ صفحه و ۱۰ پرسش FAQ است. جدول‌های پیام تماس و مقاله نیز ساخته شده‌اند اما دادهٔ عملیاتی ندارند. برای نمایش اتصال انبار، fixture فعلی یک شرکت، دو انبار، سه طرح فروش، ۳۰ قلم موجودی، شش رسید قطعی و ۱۸۰ ماندهٔ انبار/طرح ایجاد می‌کند. همهٔ داده‌های این مرحله fixture هستند، نه منبع نهایی کسب‌وکار.
 
 ### نیازمندی‌های تأییدشده
 
@@ -121,9 +125,9 @@
 ### نکته‌های باقی‌مانده برای طراحی فنی
 
 - سیاست دقیق محاسبه/به‌روزرسانی موجودی هنگام تغییر سند موقت/قطعی، ویرایش یا حذف باید در پیاده‌سازی تراکنشی اعمال و آزمون شود.
-- ساختار مدل فنی مرجع مشترک، شناسه‌های پایدار محصول/تنوع و قرارداد API هنوز طراحی نشده‌اند.
-- دادهٔ فعلی فروشگاه نمونه است: کاتالوگ ۳۰ کالا دارد (۷ کالای تنوع‌دار)؛ تنوع‌ها به شکل گزینه‌ها و کلیدهای ترکیبی متنی ثبت شده‌اند و شناسهٔ مستقل ندارند. همچنین فیلد واحد کالا در کاتالوگ نیست. در اتصال انبار باید برای تنوع‌ها شناسهٔ پایدار ایجاد/نگاشت شود و واحد اصلی و ضرایب تبدیل به مدل محصول افزوده شوند.
-- `stockQuantity` در offerهای `sales-plans-demo.json` دادهٔ موجودی نمونه است؛ پس از اتصال، مرجع موجودی واقعی باید موجودی انبار به تفکیک طرح باشد و مقدارهای fixture نباید منبع حقیقت بمانند.
+- جدول‌های پایهٔ محصول و طرح فروش با schema فروشگاه مرتبط‌اند و API خواندنی انبار از repository SQL استفاده می‌کند؛ commandهای نوشتن و احراز هویت مدیر هنوز پیاده‌سازی نشده‌اند؛ APIهای خواندن/quote/validate طرح فروش نیز به repository دیتابیس متصل‌اند.
+- کاتالوگ relational نمونه ۳۰ کالا دارد (۷ کالای تنوع‌دار)؛ تنوع‌ها به شکل گزینه‌ها و کلیدهای ترکیبی متنی ثبت شده‌اند و شناسهٔ مستقل ندارند. همچنین فیلد واحد کالا در کاتالوگ نیست. باید شناسهٔ پایدار تنوع و پیوندش با فروشگاه تعریف شود و واحد اصلی و ضرایب تبدیل به مدل محصول افزوده شوند.
+- دادهٔ اولیهٔ plan/offer در migrationها نمونه است؛ منبع runtime تعداد موجودی API، ماندهٔ انبار متصل به طرح فروش است. رزرو و کنترل هم‌زمان موجودی در زمان ثبت سفارش هنوز لازم است.
 
 ### مرز مسئولیت پیشنهادی برای ادامهٔ طراحی
 
@@ -140,6 +144,6 @@
 ### تصمیم‌های باز برای جلسهٔ طراحی
 
 1. سندها: قواعد محاسبهٔ اتمیک موجودی هنگام تبدیل موقت/قطعی، بازگردانی وضعیت، ویرایش و حذف باید پیاده و آزمون شوند؛ نسخهٔ قبلی سند نگهداری نمی‌شود.
-2. اتصال برنامه: تنظیم provider و دسترسی runtime، API و رابط انبار هنوز پیاده‌سازی نشده‌اند. تطبیق شناسه‌های محصول/تنوع با منبع فروشگاه و قرارداد خواندن/به‌روزرسانی snapshot موجودی نیز پیش از اتصال باید نهایی شود.
+2. اتصال برنامه: API خواندنی انبار به دیتابیس وصل است؛ احراز هویت و مجوز مدیر، عملیات نوشتن تراکنشی از UI و بارگذاری دادهٔ عملیاتی به‌جای fixture باقی مانده‌اند. تطبیق شناسه‌های تنوع با فروشگاه و قرارداد خواندن/به‌روزرسانی snapshot موجودی نیز باید تکمیل شود.
 
 این موارد نیازمندی‌های تأییدشده، migration اولیه و کارهای باقیمانده را ثبت می‌کنند؛ migration فقط ساختار داده و رویهٔ تراکنشی پایه را فراهم می‌کند و به‌تنهایی اتصال عملیاتی برنامه را کامل نمی‌کند.

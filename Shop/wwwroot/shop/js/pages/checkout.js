@@ -3,7 +3,7 @@ window.HNUI.ready(() => window.HNUI.mount("checkout", document, () => {
     const addressKey = "hn-delivery-addresses";
     const selectedKey = "hn-selected-address";
     const paymentMethodKey = "hn-payment-method-v2";
-    const paymentMethods = Object.freeze({ zarinpal: "زرین‌پال", });
+    const paymentMethods = Object.freeze({ zarinpal: "Ø²Ø±ÛŒÙ†â€ŒÙ¾Ø§Ù„", });
     const select = document.querySelector("#addressSelect");
     const preview = document.querySelector("#addressPreview");
     const checkoutPreview = document.querySelector("#checkoutAddressPreview");
@@ -70,7 +70,7 @@ window.HNUI.ready(() => window.HNUI.mount("checkout", document, () => {
         if (attempt !== validationAttempt) return;
         syncPayment();
         const message = document.querySelector("#paymentStatus");
-        if (!salesPlansValid && message) ui.setMessage(message, "قیمت یا موجودی یکی از کالاها با اطلاعات فعلی مطابقت ندارد؛ به سبد بازگردید، کالا را از سبد حذف و دوباره از صفحهٔ محصول اضافه کنید.", "warning");
+        if (!salesPlansValid && message) ui.setMessage(message, "Ù‚ÛŒÙ…Øª ÛŒØ§ Ù…ÙˆØ¬ÙˆØ¯ÛŒ ÛŒÚ©ÛŒ Ø§Ø² Ú©Ø§Ù„Ø§Ù‡Ø§ Ø¨Ø§ Ø§Ø·Ù„Ø§Ø¹Ø§Øª ÙØ¹Ù„ÛŒ Ù…Ø·Ø§Ø¨Ù‚Øª Ù†Ø¯Ø§Ø±Ø¯Ø› Ø¨Ù‡ Ø³Ø¨Ø¯ Ø¨Ø§Ø²Ú¯Ø±Ø¯ÛŒØ¯ØŒ Ú©Ø§Ù„Ø§ Ø±Ø§ Ø§Ø² Ø³Ø¨Ø¯ Ø­Ø°Ù Ùˆ Ø¯ÙˆØ¨Ø§Ø±Ù‡ Ø§Ø² ØµÙØ­Ù‡Ù” Ù…Ø­ØµÙˆÙ„ Ø§Ø¶Ø§ÙÙ‡ Ú©Ù†ÛŒØ¯.", "warning");
     };
     if (!Object.hasOwn(paymentMethods, selectedPaymentMethod)) {
         selectedPaymentMethod = "zarinpal";
@@ -96,10 +96,10 @@ window.HNUI.ready(() => window.HNUI.mount("checkout", document, () => {
         const phone = document.createElement("span");
         postal.className = "selected-address-contact";
         title.textContent = address.recipient;
-        const region = [address.province, address.city].filter(Boolean).join("، ");
-        street.textContent = `${region}، ${address.street}`;
-        postalCode.textContent = `کد پستی: ${address.postal}`;
-        phone.textContent = `تلفن: ${address.phone}`;
+        const region = [address.province, address.city].filter(Boolean).join("ØŒ ");
+        street.textContent = `${region}ØŒ ${address.street}`;
+        postalCode.textContent = `Ú©Ø¯ Ù¾Ø³ØªÛŒ: ${address.postal}`;
+        phone.textContent = `ØªÙ„ÙÙ†: ${address.phone}`;
         postal.append(postalCode, phone);
         heading.append(title);
         wrapper.append(heading, street, postal);
@@ -118,8 +118,8 @@ window.HNUI.ready(() => window.HNUI.mount("checkout", document, () => {
             link.title = ready
                 ? ""
                 : !selectedAddress()
-                    ? "ابتدا آدرس تحویل را انتخاب کنید"
-                    : "ابتدا نحوه پرداخت را انتخاب کنید";
+                    ? "Ø§Ø¨ØªØ¯Ø§ Ø¢Ø¯Ø±Ø³ ØªØ­ÙˆÛŒÙ„ Ø±Ø§ Ø§Ù†ØªØ®Ø§Ø¨ Ú©Ù†ÛŒØ¯"
+                    : "Ø§Ø¨ØªØ¯Ø§ Ù†Ø­ÙˆÙ‡ Ù¾Ø±Ø¯Ø§Ø®Øª Ø±Ø§ Ø§Ù†ØªØ®Ø§Ø¨ Ú©Ù†ÛŒØ¯";
         }
         if (!payment) return;
         payment.disabled =
@@ -138,15 +138,15 @@ window.HNUI.ready(() => window.HNUI.mount("checkout", document, () => {
                 const logo = document.createElement("img");
                 logo.className = "checkout-payment-logo";
                 logo.src = "/content/payments/zarinpal.svg";
-                logo.alt = "نشان زرین‌پال";
+                logo.alt = "Ù†Ø´Ø§Ù† Ø²Ø±ÛŒÙ†â€ŒÙ¾Ø§Ù„";
                 logo.width = 48;
                 logo.height = 48;
                 logo.decoding = "async";
                 const label = document.createElement("span");
-                label.textContent = `پرداخت از طریق ${paymentMethods[selectedPaymentMethod]}`;
+                label.textContent = `Ù¾Ø±Ø¯Ø§Ø®Øª Ø§Ø² Ø·Ø±ÛŒÙ‚ ${paymentMethods[selectedPaymentMethod]}`;
                 checkoutMethod.append(logo, label);
             } else {
-                checkoutMethod.textContent = "روش پرداختی انتخاب نشده است؛ به سبد خرید بازگردید.";
+                checkoutMethod.textContent = "Ø±ÙˆØ´ Ù¾Ø±Ø¯Ø§Ø®ØªÛŒ Ø§Ù†ØªØ®Ø§Ø¨ Ù†Ø´Ø¯Ù‡ Ø§Ø³ØªØ› Ø¨Ù‡ Ø³Ø¨Ø¯ Ø®Ø±ÛŒØ¯ Ø¨Ø§Ø²Ú¯Ø±Ø¯ÛŒØ¯.";
             }
         }
     }
@@ -165,7 +165,7 @@ window.HNUI.ready(() => window.HNUI.mount("checkout", document, () => {
             if (address) checkoutPreview.append(addressMarkup(address));
             else {
                 checkoutPreview.innerHTML =
-                    '<div class="checkout-address-missing"><i class="bi bi-geo-alt"></i><div><strong>آدرسی برای تحویل انتخاب نشده است</strong><p>برای ثبت یا انتخاب آدرس به سبد خرید بازگردید.</p><a class="ui-inline-action checkout-address-action" href="Cart"><i class="bi bi-geo-alt" aria-hidden="true"></i><span>مدیریت آدرس در سبد خرید</span><i class="bi bi-arrow-left" aria-hidden="true"></i></a></div></div>';
+                    '<div class="checkout-address-missing"><i class="bi bi-geo-alt"></i><div><strong>Ø¢Ø¯Ø±Ø³ÛŒ Ø¨Ø±Ø§ÛŒ ØªØ­ÙˆÛŒÙ„ Ø§Ù†ØªØ®Ø§Ø¨ Ù†Ø´Ø¯Ù‡ Ø§Ø³Øª</strong><p>Ø¨Ø±Ø§ÛŒ Ø«Ø¨Øª ÛŒØ§ Ø§Ù†ØªØ®Ø§Ø¨ Ø¢Ø¯Ø±Ø³ Ø¨Ù‡ Ø³Ø¨Ø¯ Ø®Ø±ÛŒØ¯ Ø¨Ø§Ø²Ú¯Ø±Ø¯ÛŒØ¯.</p><a class="ui-inline-action checkout-address-action" href="Cart"><i class="bi bi-geo-alt" aria-hidden="true"></i><span>Ù…Ø¯ÛŒØ±ÛŒØª Ø¢Ø¯Ø±Ø³ Ø¯Ø± Ø³Ø¨Ø¯ Ø®Ø±ÛŒØ¯</span><i class="bi bi-arrow-left" aria-hidden="true"></i></a></div></div>';
             }
         }
         syncPayment();
@@ -178,14 +178,14 @@ window.HNUI.ready(() => window.HNUI.mount("checkout", document, () => {
         }
         select.replaceChildren(
             new Option(
-                addresses.length ? "انتخاب آدرس تحویل" : "هنوز آدرسی ثبت نشده",
+                addresses.length ? "Ø§Ù†ØªØ®Ø§Ø¨ Ø¢Ø¯Ø±Ø³ ØªØ­ÙˆÛŒÙ„" : "Ù‡Ù†ÙˆØ² Ø¢Ø¯Ø±Ø³ÛŒ Ø«Ø¨Øª Ù†Ø´Ø¯Ù‡",
                 "",
             ),
         );
         addresses.forEach((address) =>
             select.add(
                 new Option(
-                    `${address.title} — ${[address.province, address.city].filter(Boolean).join("، ")}، ${address.street}`,
+                    `${address.title} â€” ${[address.province, address.city].filter(Boolean).join("ØŒ ")}ØŒ ${address.street}`,
                     address.id,
                 ),
             ),
@@ -208,7 +208,7 @@ window.HNUI.ready(() => window.HNUI.mount("checkout", document, () => {
             ui.setMessageType(formStatus, message ? (isError ? "error" : "success") : "");
         };
         form.addEventListener("hn:form-invalid", () =>
-            setFormStatus("لطفاً موارد مشخص‌شده را کامل و اصلاح کنید.", true),
+            setFormStatus("Ù„Ø·ÙØ§Ù‹ Ù…ÙˆØ§Ø±Ø¯ Ù…Ø´Ø®Øµâ€ŒØ´Ø¯Ù‡ Ø±Ø§ Ú©Ø§Ù…Ù„ Ùˆ Ø§ØµÙ„Ø§Ø­ Ú©Ù†ÛŒØ¯.", true),
         );
         form
             .querySelector('[name="phone"]')
@@ -217,6 +217,7 @@ window.HNUI.ready(() => window.HNUI.mount("checkout", document, () => {
         select.addEventListener("change", () => {
             selected = select.value;
             ui.storage.set(selectedKey, selected);
+            if (ui.auth.isLoggedIn() && selected) void ui.api.request("account/checkout-preference", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ addressId: Number(selected), paymentMethod: selectedPaymentMethod }) });
             renderPreview();
         });
         document.querySelector("#newAddress").addEventListener("click", () => {
@@ -233,27 +234,50 @@ window.HNUI.ready(() => window.HNUI.mount("checkout", document, () => {
             document.documentElement.classList.remove("address-modal-open");
             document.querySelector("#newAddress").focus();
         });
-        form.addEventListener("submit", (event) => {
+        form.addEventListener("submit", async (event) => {
             event.preventDefault();
             const address = Object.fromEntries(
                 [...new FormData(form)].map(([key, value]) => [key, value.trim()]),
             );
             if (["title", "recipient", "phone", "country", "countryId", "province", "provinceId", "city", "cityId", "street", "postal"].some((key) => !address[key])) {
-                setFormStatus("لطفاً همه مشخصات آدرس را کامل کنید.", true);
+                setFormStatus("Ù„Ø·ÙØ§Ù‹ Ù‡Ù…Ù‡ Ù…Ø´Ø®ØµØ§Øª Ø¢Ø¯Ø±Ø³ Ø±Ø§ Ú©Ø§Ù…Ù„ Ú©Ù†ÛŒØ¯.", true);
                 return;
             }
             address.id = crypto.randomUUID();
+            if (ui.auth.isLoggedIn()) {
+                try {
+                    const response = await ui.api.request("account/addresses", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: address.title, recipient: address.recipient, phone: address.phone, country: address.country, countryId: address.countryId, province: address.province, provinceId: address.provinceId, city: address.city, cityId: address.cityId, street: address.street, postal: address.postal }) });
+                    const result = await response.json().catch(() => ({}));
+                    if (!response.ok || !result.id) throw new Error("Ø°Ø®ÛŒØ±Ù‡ Ù†Ø´Ø§Ù†ÛŒ Ø¯Ø± Ø­Ø³Ø§Ø¨ Ø§Ù†Ø¬Ø§Ù… Ù†Ø´Ø¯.");
+                    address.id = String(result.id);
+                } catch (error) { setFormStatus(error.message || "Ø°Ø®ÛŒØ±Ù‡ Ù†Ø´Ø§Ù†ÛŒ Ø§Ù†Ø¬Ø§Ù… Ù†Ø´Ø¯.", true); return; }
+            }
             addresses.push(address);
             if (!ui.storage.set(addressKey, JSON.stringify(addresses))) {
                 addresses.pop();
                 setFormStatus(
-                    "ذخیره آدرس ممکن نشد. دسترسی مرورگر به فضای ذخیره‌سازی را بررسی کنید.",
+                    "Ø°Ø®ÛŒØ±Ù‡ Ø¢Ø¯Ø±Ø³ Ù…Ù…Ú©Ù† Ù†Ø´Ø¯. Ø¯Ø³ØªØ±Ø³ÛŒ Ù…Ø±ÙˆØ±Ú¯Ø± Ø¨Ù‡ ÙØ¶Ø§ÛŒ Ø°Ø®ÛŒØ±Ù‡â€ŒØ³Ø§Ø²ÛŒ Ø±Ø§ Ø¨Ø±Ø±Ø³ÛŒ Ú©Ù†ÛŒØ¯.",
                     true,
                 );
                 return;
             }
+            const previousSelection = selected;
             selected = address.id;
             ui.storage.set(selectedKey, selected);
+            if (ui.auth.isLoggedIn()) {
+                let preferenceSaved = false;
+                try {
+                    const preferenceResponse = await ui.api.request("account/checkout-preference", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ addressId: Number(selected), paymentMethod: selectedPaymentMethod }) });
+                    preferenceSaved = preferenceResponse.ok;
+                } catch { /* Address is saved; leave checkout selection unchanged until API succeeds. */ }
+                if (!preferenceSaved) {
+                    selected = previousSelection;
+                    ui.storage.set(selectedKey, selected);
+                    setFormStatus("آدرس ذخیره شد، اما ثبت انتخاب آن برای تسویه‌حساب انجام نشد. دوباره آدرس را انتخاب کنید.", true);
+                    renderAddresses();
+                    return;
+                }
+            }
             renderAddresses();
             dialog.close();
         });
@@ -271,8 +295,8 @@ window.HNUI.ready(() => window.HNUI.mount("checkout", document, () => {
             ui.setMessage(
                 status,
                 needsAddress
-                    ? "برای ادامه، ابتدا یک آدرس تحویل ثبت یا انتخاب کنید."
-                    : "برای ادامه، انتخاب نحوه پرداخت الزامی است.",
+                    ? "Ø¨Ø±Ø§ÛŒ Ø§Ø¯Ø§Ù…Ù‡ØŒ Ø§Ø¨ØªØ¯Ø§ ÛŒÚ© Ø¢Ø¯Ø±Ø³ ØªØ­ÙˆÛŒÙ„ Ø«Ø¨Øª ÛŒØ§ Ø§Ù†ØªØ®Ø§Ø¨ Ú©Ù†ÛŒØ¯."
+                    : "Ø¨Ø±Ø§ÛŒ Ø§Ø¯Ø§Ù…Ù‡ØŒ Ø§Ù†ØªØ®Ø§Ø¨ Ù†Ø­ÙˆÙ‡ Ù¾Ø±Ø¯Ø§Ø®Øª Ø§Ù„Ø²Ø§Ù…ÛŒ Ø§Ø³Øª.",
                 "warning",
             );
             target.scrollIntoView({
@@ -287,9 +311,10 @@ window.HNUI.ready(() => window.HNUI.mount("checkout", document, () => {
             if (!radio.checked || !Object.hasOwn(paymentMethods, radio.value)) return;
             selectedPaymentMethod = radio.value;
             ui.storage.set(paymentMethodKey, selectedPaymentMethod);
+            if (ui.auth.isLoggedIn() && selected) void ui.api.request("account/checkout-preference", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ addressId: Number(selected), paymentMethod: selectedPaymentMethod }) });
             ui.setMessage(
                 document.querySelector("#paymentMethodStatus"),
-                `${paymentMethods[selectedPaymentMethod]} به‌عنوان روش پرداخت انتخاب شد.`,
+                `${paymentMethods[selectedPaymentMethod]} Ø¨Ù‡â€ŒØ¹Ù†ÙˆØ§Ù† Ø±ÙˆØ´ Ù¾Ø±Ø¯Ø§Ø®Øª Ø§Ù†ØªØ®Ø§Ø¨ Ø´Ø¯.`,
                 "success",
             );
             renderPaymentMethod();
@@ -298,14 +323,23 @@ window.HNUI.ready(() => window.HNUI.mount("checkout", document, () => {
     });
 
     if (payment) {
-        payment.addEventListener("click", () => {
+        payment.addEventListener("click", async () => {
             syncPayment();
             if (payment.disabled) return;
-            ui.setMessage(
-                document.querySelector("#paymentStatus"),
-                "درگاه پرداخت هنوز فعال نیست؛ سفارشی ثبت یا پرداخت نشده است. برای نهایی کردن خرید با 09369455457 تماس بگیرید.",
-                "warning",
-            );
+            if (!ui.auth.isLoggedIn()) { ui.auth.requireLogin(() => payment.click()); return; }
+            payment.disabled = true;
+            try {
+                const lines = ui.cart.read().map((item) => ({ productId: Number(String(item.id).replace(/:.*$/, "")), salesPlanId: item.salesPlanId || "regular", quantity: item.quantity, options: item.options || {} }));
+                const response = await ui.api.request("account/checkout", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ addressId: Number(selected), paymentMethod: selectedPaymentMethod, lines }) });
+                const result = await response.json().catch(() => ({}));
+                if (!response.ok) throw new Error(result.code === "price-or-stock-changed" ? "قیمت یا موجودی تغییر کرده است؛ سبد را دوباره بررسی کنید." : "ثبت سفارش انجام نشد. نشانی و سبد خرید را بررسی کنید.");
+                ui.cart.write([]);
+                ui.setMessage(document.querySelector("#paymentStatus"), `سفارش ${result.number} ثبت شد و در انتظار پرداخت است. مبلغ: ${ui.formatNumber(result.totalAmount)} تومان`, "success");
+                payment.textContent = `سفارش ${result.number} ثبت شد`;
+            } catch (error) {
+                ui.setMessage(document.querySelector("#paymentStatus"), error.message || "ثبت سفارش انجام نشد.", "error");
+                syncPayment();
+            }
         });
     }
     document.addEventListener("hn:cart-change", () => {
@@ -329,6 +363,31 @@ window.HNUI.ready(() => window.HNUI.mount("checkout", document, () => {
         syncPayment();
     });
     renderAddresses();
+    if (ui.auth.isLoggedIn()) void ui.api.request("account/state").then(async (response) => {
+        if (!response.ok) return;
+        const account = await response.json();
+        if (Array.isArray(account.addresses)) addresses = account.addresses;
+        selected = String(account.checkout?.selectedAddressId || selected || "");
+        if (account.checkout?.paymentMethod) selectedPaymentMethod = account.checkout.paymentMethod;
+        ui.storage.set(addressKey, JSON.stringify(addresses)); ui.storage.set(selectedKey, selected); ui.storage.set(paymentMethodKey, selectedPaymentMethod);
+        if (selected && addresses.some((address) => String(address.id) === selected))
+            await ui.api.request("account/checkout-preference", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ addressId: Number(selected), paymentMethod: selectedPaymentMethod }) });
+        renderAddresses(); renderPaymentMethod();
+    }).catch(() => {});
+    document.addEventListener("hn:auth-change", (event) => {
+        if (!event.detail) return;
+        void ui.api.request("account/state").then(async (response) => {
+            if (!response.ok) return;
+            const account = await response.json();
+            addresses = Array.isArray(account.addresses) ? account.addresses : [];
+            selected = String(account.checkout?.selectedAddressId || ui.storage.get(selectedKey, ""));
+            if (account.checkout?.paymentMethod) selectedPaymentMethod = account.checkout.paymentMethod;
+            ui.storage.set(addressKey, JSON.stringify(addresses)); ui.storage.set(selectedKey, selected); ui.storage.set(paymentMethodKey, selectedPaymentMethod);
+            if (selected && addresses.some((address) => String(address.id) === selected))
+                await ui.api.request("account/checkout-preference", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ addressId: Number(selected), paymentMethod: selectedPaymentMethod }) });
+            renderAddresses(); renderPaymentMethod();
+        }).catch(() => {});
+    });
     if (payment) validateSalesPlanCart();
     renderPaymentMethod();
 }));

@@ -49,14 +49,14 @@ public sealed class ProfileController(Shop.Services.IAccountDataSource accountDa
                 coupon.UsageLimit,
                 coupon.IsActive(today),
                 AccountDisplay.Date(coupon.ExpiresOn),
-                coupon.OrderIds.Select(id => ordersById[id]).Select(order => new ProfileCouponUseViewModel(
+                coupon.OrderIds.Where(ordersById.ContainsKey).Select(id => ordersById[id]).Select(order => new ProfileCouponUseViewModel(
                     order.Number,
                     order.DateLabel,
                     order.OrderedOn.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture)))
                 .ToArray()))
             .ToArray();
         PageModel<ProfilePageViewModel> model = new(
-            new ProfilePageViewModel(section, title, description, icon, account.Orders, coupons),
+            new ProfilePageViewModel(section, title, description, icon, Array.Empty<AccountOrder>(), coupons),
             new SeoModel($"{title} | ندا اولیائی", description, Robots: "noindex, nofollow"),
             "~/Views/Profile/Index.cshtml");
         return await PageAsync(model);

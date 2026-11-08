@@ -31,6 +31,8 @@
 
 ## قرارداد route و سازگاری
 
+endpointهای API از routeهای MVC جدا هستند: `GET /api/warehouse/warehouses` و `GET /api/warehouse/stock` برای دادهٔ انبار، و `GET/POST /api/store/products/{id}/feedback/{type}` برای دیدگاه و پرسش محصول (`type`: `reviews` یا `questions`)؛ query و مدل پاسخ در [لایهٔ دیتابیس](database.md) مستند شده است.
+
 - `Program.cs` گزینهٔ `LowercaseUrls = true` و مسیر پیش‌فرض `{controller=Home}/{action=Index}/{id?}` را دارد. attribute route را کنار این مسیر بخوانید؛ routeهای تولیدشده lowercase هستند.
 - `/search` به `ProductController.Index` و View `List` می‌رسد. کلاس body از controller/action ساخته می‌شود: `mobile-page--product-index`؛ نام View در این کلاس نقشی ندارد.
 - قرارداد slug صریح محصول، تطبیق canonical و هدایت مستقیم مسیرهای قدیمی در [راهنمای محصول](../store/product.md) مستند است؛ مسیر واسط `/products/product-{id}` تولید نمی‌شود. لینک offer طرح، `salesPlanId` را برای نمایش همان طرح حمل می‌کند؛ طرح منقضیِ دارای زمان پایان با redirect دائمی به URL canonical عادی برمی‌گردد و canonical HTML همیشه پارامتر طرح را حذف می‌کند.
@@ -47,4 +49,4 @@ Controller، لینک‌های Razor، تولید لینک در JS، canonical،
 
 [فهرست این بخش](README.md) · [فهرست مستندات](../README.md)
 
-آخرین تطبیق با کد: ۱ نوامبر ۲۰۲۶.
+آخرین تطبیق با کد: ۸ نوامبر ۲۰۲۶.

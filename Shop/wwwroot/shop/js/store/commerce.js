@@ -267,37 +267,8 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                 .slice(0, 6);
             const feedbackPages = { reviews: 1, questions: 1 },
                 feedbackPageSize = 3;
-            const questionGuideItems = [
-                [
-                    "اقلام همراه کالا را از کجا ببینم؟",
-                    "فهرست محتویات و متعلقات در مشخصات همین کالا درج شده است؛ بسته‌بندی مدل‌های مختلف ممکن است تفاوت داشته باشد.",
-                ],
-                [
-                    "چطور سازگاری لوازم جانبی را بررسی کنم؟",
-                    "مدل، ابعاد، نوع اتصال و مشخصات فنی را با کالای اصلی تطبیق دهید؛ هم‌برند بودن به‌تنهایی سازگاری را تضمین نمی‌کند.",
-                ],
-                [
-                    "شرایط ضمانت و خدمات کالا چیست؟",
-                    "مدت و موارد پوشش بسته به کالا متفاوت است؛ شرایط ضمانت ثبت‌شده برای همین محصول را پیش از خرید بررسی کنید.",
-                ],
-                [
-                    "برای استفادهٔ طولانی چه نکته‌ای رعایت کنم؟",
-                    "محدودهٔ کاری و شیوهٔ نگهداری هر مدل متفاوت است؛ مشخصات و دستورالعمل همان کالا را مبنا قرار دهید.",
-                ],
-            ].map(([text, reply], index) => {
-                const createdAt = new Date(
-                    Date.now() - (index + 1) * 86400000,
-                ).toISOString();
-                return {
-                    name: "راهنمای خرید",
-                    text,
-                    rating: 0,
-                    reply,
-                    createdAt,
-                    replyAt: createdAt,
-                    sample: true,
-                };
-            });
+            const serverFeedback = { reviews: [], questions: [] };
+            const legacyFeedback = { reviews: [], questions: [] };
             const readFeedback = (type) => {
                 const seeded = (p.detail?.[type] || []).map(
                     ([name, text, rating, reply, createdAt, replyAt], index) => {
@@ -317,16 +288,14 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                         };
                     },
                 );
-                if (type === "questions") seeded.push(...questionGuideItems);
                 try {
                     const raw = ui.storage.get(
                         `hn-product-${type}-${p.id}`,
                         "__HN_EMPTY__",
                     );
-                    if (raw === "__HN_EMPTY__") return seeded;
+                    if (raw === "__HN_EMPTY__") return [...serverFeedback[type], ...seeded];
                     const value = JSON.parse(raw);
-                    return [
-                        ...(Array.isArray(value)
+                    legacyFeedback[type] = Array.isArray(value)
                             ? value
                                 .filter((item) => item && typeof item.text === "string")
                                 .map((item) => {
@@ -342,11 +311,10 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                                         sample: false,
                                     };
                                 })
-                            : []),
-                        ...seeded,
-                    ];
+                            : [];
+                    return [...serverFeedback[type], ...legacyFeedback[type], ...seeded];
                 } catch {
-                    return seeded;
+                    return [...serverFeedback[type], ...seeded];
                 }
             };
             const ratingStars = (rating) => {
@@ -1529,6 +1497,8 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                     );
             });
             productView.querySelectorAll(".product-feedback-form").forEach((form) => {
+                const feedbackNote = form.querySelector(".product-feedback-note");
+                if (feedbackNote) feedbackNote.textContent = "بازخورد در سرور ثبت می‌شود و پس از تأیید نمایش داده خواهد شد.";
                 const validationSummary = form.querySelector(
                     ".product-feedback-validation-summary",
                 );
@@ -1551,48 +1521,89 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                         confirmed = await window.confirmFormSubmission({
                             title: isReview ? "ثبت دیدگاه برای این محصول؟" : "ثبت پرسش دربارهٔ این محصول؟",
                             message: isReview
-                                ? "پس از تأیید، دیدگاه شما در همین مرورگر ثبت و نمایش داده می‌شود. از آماده بودن متن مطمئن شوید."
-                                : "پس از تأیید، پرسش شما در همین مرورگر ثبت و نمایش داده می‌شود. از آماده بودن متن مطمئن شوید.",
+                                ? "پس از تأیید، دیدگاه به سرور ارسال می‌شود و پس از تأیید مدیر برای بازدیدکنندگان نمایش داده خواهد شد."
+                                : "پس از تأیید، پرسش به سرور ارسال می‌شود و پس از تأیید مدیر برای بازدیدکنندگان نمایش داده خواهد شد.",
                             confirmText: isReview ? "بله، دیدگاه ثبت شود" : "بله، پرسش ثبت شود",
                         });
                     if (!confirmed) return;
-                    const key = `hn-product-${type}-${p.id}`,
-                        items = readFeedback(type);
-                    items.unshift({
-                        name,
-                        text,
-                        rating: Number(data.get("rating")) || 5,
-                        createdAt: new Date().toISOString(),
-                        status: "pending",
-                        sample: false,
-                    });
                     const status = document.querySelector("#productStatus");
-                    const saved = ui.storage.set(
-                        key,
-                        JSON.stringify(items.filter((item) => !item.sample).slice(0, 50)),
-                    );
-                    if (!saved) {
-                        if (status)
-                            ui.setMessage(
-                                status,
-                                "ثبت انجام نشد؛ فضای ذخیره‌سازی مرورگر در دسترس نیست.",
-                                "error",
-                            );
+                    const submitButton = form.querySelector('button[type="submit"]');
+                    if (submitButton) submitButton.disabled = true;
+                    let response;
+                    try {
+                        response = await window.HNUI.api.request(`store/products/${encodeURIComponent(p.id)}/feedback/${type}`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ name, text, rating: type === "reviews" ? Number(data.get("rating")) : null }),
+                        });
+                        if (!response.ok) throw new Error("ثبت بازخورد در سرور انجام نشد.");
+                    } catch (error) {
+                        if (submitButton) submitButton.disabled = false;
+                        if (status) ui.setMessage(status, error.message || "ارتباط با سرور برقرار نشد؛ دوباره تلاش کنید.", "error");
                         return;
                     }
+                    const result = await response.json();
+                    serverFeedback[type].unshift(result.item);
                     feedbackPages[type] = 1;
                     renderProductFeedback(type);
                     form.reset();
+                    if (submitButton) submitButton.disabled = false;
                     if (status)
                         ui.setMessage(
                             status,
-                            type === "reviews" ? "دیدگاه شما ثبت شد و در انتظار تأیید است." : "پرسش شما ثبت شد و در انتظار تأیید است.",
+                            type === "reviews" ? "دیدگاه در سرور ثبت شد و پس از تأیید نمایش داده می‌شود." : "پرسش در سرور ثبت شد و پس از تأیید نمایش داده می‌شود.",
                             "success",
                         );
                 });
             });
             renderProductFeedback("reviews");
             renderProductFeedback("questions");
+            const loadProductFeedback = async (type) => {
+                const key = `hn-product-${type}-${p.id}`;
+                const legacy = ui.storage.json(key, []);
+                let migratedItems = [];
+                if (Array.isArray(legacy) && legacy.length) {
+                    try {
+                        const imported = await window.HNUI.api.request(`store/products/${encodeURIComponent(p.id)}/feedback/${type}/import`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ items: legacy.slice(0, 50).map((item) => ({ name: item.name, text: item.text, rating: type === "reviews" ? Number(item.rating) || 5 : null, createdAt: item.createdAt || null })) }),
+                        });
+                        if (imported.ok) {
+                            migratedItems = legacyFeedback[type].map((item) => ({
+                                name: item.name,
+                                text: item.text,
+                                rating: type === "reviews" ? Number(item.rating) || 5 : null,
+                                createdAt: item.createdAt || new Date().toISOString(),
+                                status: "pending",
+                                sample: false,
+                            }));
+                            ui.storage.remove(key);
+                            ui.storage.remove(`hn-migration-backup:${key}`);
+                            ui.storage.clearLegacy(key);
+                            ui.storage.clearLegacy(`hn-migration-backup:${key}`);
+                            legacyFeedback[type] = [];
+                            serverFeedback[type] = [...migratedItems, ...serverFeedback[type]];
+                            renderProductFeedback(type);
+                        }
+                    } catch { /* Keep legacy entries visible until the server can accept them. */ }
+                }
+                try {
+                    const response = await window.HNUI.api.request(`store/products/${encodeURIComponent(p.id)}/feedback/${type}`);
+                    if (!response.ok) return;
+                    const result = await response.json();
+                    const combined = [
+                        ...(Array.isArray(result.items) ? result.items : []),
+                        ...serverFeedback[type].filter((item) => item.status === "pending"),
+                        ...migratedItems,
+                    ];
+                    serverFeedback[type] = combined.filter((item, index, all) =>
+                        all.findIndex((candidate) => candidate.name === item.name && candidate.text === item.text) === index);
+                    renderProductFeedback(type);
+                } catch { /* Keep the server-backed catalog seed visible during a network failure. */ }
+            };
+            void loadProductFeedback("reviews");
+            void loadProductFeedback("questions");
             const requiredVariantFields = [
                 ...productView.querySelectorAll(
                     '.product-variant-field[data-required="true"]',
@@ -2027,9 +2038,8 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
     function renderFavorites() {
         const view = document.querySelector("#favoritesView");
         if (!view) return;
-        const cache = ui.storage.json("hn-product-cache", {});
         const list = favorites()
-            .map((id) => catalog.find((p) => String(p.id) === id) || cache[id])
+            .map((id) => catalog.find((p) => String(p.id) === id))
             .filter(Boolean);
         const clearAllButton = document.querySelector("#clearFavorites");
         if (clearAllButton) {
@@ -2080,46 +2090,11 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
     const renderCompare = () => {
         const view = document.querySelector("#compareView");
         if (!view) return;
-        const savedCompare = ui.storage.json("hn-compare", []);
-        const demoIds = ["1", "2", "6", "7", "11", "13", "16", "18", "21", "22"];
-        const legacyDemoIds = catalog
-            .slice(0, 3)
-            .map((product) => String(product.id));
-        if (
-            Array.isArray(savedCompare) &&
-            savedCompare.map(String).join(",") === legacyDemoIds.join(",") &&
-            ui.storage.get("hn-compare-demo-seeded", "") === "1"
-        ) {
-            ui.storage.set(
-                "hn-compare",
-                JSON.stringify(
-                    demoIds.filter((id) =>
-                        catalog.some((product) => String(product.id) === id),
-                    ),
-                ),
-            );
-        }
-        if (
-            (!Array.isArray(savedCompare) || savedCompare.length === 0) &&
-            ui.storage.get("hn-compare-demo-seeded", "__HN_EMPTY__") ===
-            "__HN_EMPTY__"
-        ) {
-            ui.storage.set(
-                "hn-compare",
-                JSON.stringify(
-                    demoIds.filter((id) =>
-                        catalog.some((product) => String(product.id) === id),
-                    ),
-                ),
-            );
-            ui.storage.set("hn-compare-demo-seeded", "1");
-        }
         const ids = ui.storage.json("hn-compare", []).map(String);
-        const cache = ui.storage.json("hn-product-cache", {});
         const list = ids
             .map(
                 (id) =>
-                    catalog.find((product) => String(product.id) === id) || cache[id],
+                    catalog.find((product) => String(product.id) === id),
             )
             .filter(Boolean);
         const groups = new Map();

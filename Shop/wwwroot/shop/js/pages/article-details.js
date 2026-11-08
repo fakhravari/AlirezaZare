@@ -9,7 +9,6 @@ window.HNUI.mount("pages-article-details", document, () => {
   const feedback = page.querySelector("[data-article-feedback]");
   if (feedback) {
     const slug = page.dataset.articleSlug;
-    const key = `hn-article-feedback-v1-${slug}`;
     const metrics = { likes: Number(page.dataset.articleLikes) || 0 };
     const seed = [
       { name: "خوانندهٔ مجله", text: "راهنما خلاصه و کاربردی بود؛ نکته‌های انتخاب ابزار کمک‌کننده است.", rating: 5, reply: "خوشحالیم که راهنما برای انتخاب ابزار به شما کمک کرده است." },
@@ -30,13 +29,7 @@ window.HNUI.mount("pages-article-details", document, () => {
     }));
     const pageSize = 5;
     let reviewPage = 1;
-    const readSaved = () => {
-      try {
-        const parsed = JSON.parse(window.HNUI.storage.get(key, "[]"));
-        return Array.isArray(parsed) ? parsed.filter((item) => item && typeof item.name === "string" && typeof item.text === "string" && Number(item.rating) >= 1 && Number(item.rating) <= 5).slice(0, 50) : [];
-      } catch { return []; }
-    };
-    let saved = readSaved();
+    let saved = [];
     const list = feedback.querySelector("[data-feedback-list]");
     const pagination = feedback.querySelector("[data-feedback-pagination]");
     const formatReviewTime = (value) => {
@@ -193,7 +186,7 @@ window.HNUI.mount("pages-article-details", document, () => {
       }
     };
     let likes = Number(metrics.likes) || 0;
-    let liked = window.HNUI.storage.get(`${key}-liked`, "false") === "true";
+    let liked = false;
     const likeButton = feedback.querySelector("[data-article-like]");
     const paintLikes = () => {
       const count = Math.max(0, likes + (liked ? 1 : 0));
@@ -204,11 +197,35 @@ window.HNUI.mount("pages-article-details", document, () => {
       likeStat?.querySelector("[data-article-like-value]")?.replaceChildren(document.createTextNode(count.toLocaleString("fa-IR")));
       likeStat?.setAttribute("aria-label", `${count.toLocaleString("fa-IR")} پسند`);
     };
-    likeButton.addEventListener("click", () => { liked = !liked; window.HNUI.storage.set(`${key}-liked`, String(liked)); paintLikes(); });
+    likeButton.addEventListener("click", async () => {
+      if (!window.HNUI.auth.requireLogin(() => likeButton.click())) return;
+      const next = !liked;
+      try {
+        const response = await window.HNUI.api.request(`account/articles/${encodeURIComponent(slug)}/interactions/like`, { method: "POST" });
+        if (!response.ok) return;
+      } catch { return; }
+      liked = next;
+      paintLikes();
+    });
+    const hydrateFeedback = async () => {
+      if (!window.HNUI.auth.isLoggedIn()) return;
+      const response = await window.HNUI.api.request("account/state");
+      if (!response.ok) return;
+      const account = await response.json();
+      const interactions = account.articleInteractions || [];
+      liked = interactions.some((item) => item.slug === slug && item.type === "like");
+      paintLikes();
+      saved = (account.articleFeedback || []).filter((item) => item.slug === slug).slice(-50);
+      renderFeedback();
+    };
+    if (window.HNUI.auth.isLoggedIn()) void hydrateFeedback().catch(() => {});
+    document.addEventListener("hn:auth-change", (event) => { if (event.detail) void hydrateFeedback().catch(() => {}); });
+    document.addEventListener("hn:legacy-data-imported", () => { void hydrateFeedback().catch(() => {}); });
     feedback.querySelector("[data-feedback-form]").addEventListener("submit", async (event) => {
       event.preventDefault();
       const form = event.currentTarget;
       if (form.dataset.confirming === "true") return;
+      if (!window.HNUI.auth.requireLogin(() => form.requestSubmit())) return;
       const data = new FormData(form);
       const nameField = form.elements.namedItem("name");
       const fullName = String(data.get("name") || "").trim().replace(/\s+/g, " ");
@@ -225,7 +242,7 @@ window.HNUI.mount("pages-article-details", document, () => {
       if (submitButton) submitButton.disabled = true;
       const confirmed = await window.confirmFormSubmission?.({
         title: "دیدگاه شما ثبت شود؟",
-        message: "دیدگاه در همین مرورگر ذخیره می‌شود و تا زمان تأیید با نشان انتظار تأیید در فهرست می‌ماند.",
+        message: "دیدگاه در حساب شما ثبت می‌شود و تا زمان تأیید با نشان انتظار تأیید در فهرست می‌ماند.",
         confirmText: "بله، ثبت دیدگاه",
       });
       form.dataset.confirming = "false";
@@ -233,12 +250,15 @@ window.HNUI.mount("pages-article-details", document, () => {
       if (!confirmed) return;
       const rawRating = String(data.get("rating") || "");
       const rating = rawRating ? Number(rawRating) : null;
+      try {
+        const response = await window.HNUI.api.request(`account/articles/${encodeURIComponent(slug)}/feedback`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: fullName.slice(0, 80), text: String(data.get("text")).trim().slice(0, 1000), rating }) });
+        if (!response.ok) throw new Error("ثبت دیدگاه در حساب انجام نشد.");
+      } catch (error) { feedback.querySelector("[data-feedback-status]").textContent = error.message || "ثبت دیدگاه انجام نشد."; return; }
       saved.push({ name: fullName.slice(0, 80), text: String(data.get("text")).trim().slice(0, 1000), ...(Number.isFinite(rating) && rating >= 1 && rating <= 5 ? { rating } : {}), createdAt: new Date().toISOString(), status: "pending" });
       saved = saved.slice(-50);
-      const stored = window.HNUI.storage.set(key, JSON.stringify(saved));
       reviewPage = 1;
       form.reset(); renderFeedback();
-      feedback.querySelector("[data-feedback-status]").textContent = stored ? "دیدگاه در همین مرورگر ذخیره شد و در انتظار تأیید است." : "دیدگاه نمایش داده شد و در انتظار تأیید است، اما ذخیرهٔ مرورگر در دسترس نیست.";
+      feedback.querySelector("[data-feedback-status]").textContent = "دیدگاه در حساب شما ثبت شد و در انتظار تأیید است.";
     });
     renderFeedback(); paintLikes();
   }

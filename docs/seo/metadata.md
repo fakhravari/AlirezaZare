@@ -1,3 +1,5 @@
+> وضعیت دادهٔ runtime (۸ نوامبر ۲۰۲۶): داده‌های کاتالوگ، برند، مجله، FAQ، حساب نمونه، جغرافیا و طرح فروش از APIهای متصل به SQL Server خوانده می‌شوند. سبد، علاقه‌مندی، مقایسه، نشانی، checkout، سفارش، پیگیری قیمت و تعامل مقاله از API حساب می‌آیند؛ دیدگاه/پرسش محصول از API محصول. کلیدهای قدیمی Shop در localStorage فقط برای انتقال یک‌باره خوانده و سپس حذف می‌شوند؛ دادهٔ runtime در localStorage نگهداری نمی‌شود.
+
 # SEO و metadata مشترک
 
 این راهنما مسیر metadata صفحه‌ها و structured data را توضیح می‌دهد. پیش از تغییر، [منابع داده](../architecture/data-sources.md) و برای URLها [مسیرها](../architecture/routing.md) را ببینید.
@@ -20,7 +22,7 @@ Controller / ساخت PageModel
 | ساخت origin و URL مطلق | `Shop/Services/SeoUrlBuilder.cs` |
 | ساخت meta و JSON-LD | `Shop/Views/Shared/_SeoMetadata.cshtml` |
 | endpointهای crawl | `Shop/Controllers/SeoController.cs` |
-| تعریف FAQ مشترک | `Shop/Models/PageModel.cs` (`FaqCatalog`) |
+| تعریف FAQ مشترک | `FaqController` و جداول `Store.FaqItem`/`Store.ContentPage` |
 
 ## فیلدهای صفحه
 
@@ -50,7 +52,7 @@ Controller / ساخت PageModel
 
 `_SeoMetadata.cshtml` گراف JSON-LD مشترک شامل داده‌های سازمان/فروشگاه، وب‌سایت و صفحه را می‌سازد و در صورت وجود دادهٔ معتبر، structured data صفحه و breadcrumb را به آن اضافه می‌کند. پیش از تغییر schema، مدل، partial و Controller صفحه را با هم دنبال کنید تا منبع دادهٔ واحد حفظ شود.
 
-صفحهٔ FAQ از `FaqCatalog` برای متن پرسش‌وپاسخ قابل‌مشاهده و `FAQPage` JSON-LD استفاده می‌کند. پرسش یا پاسخ را در همان کاتالوگ ویرایش کنید؛ markup موازی در View نسازید.
+صفحهٔ FAQ متن و `FAQPage` JSON-LD را از query دیتابیس مشترک می‌گیرد. پرسش یا پاسخ را در دادهٔ Store ویرایش کنید؛ markup موازی در View نسازید.
 
 ## تنظیمات سراسری اختیاری
 

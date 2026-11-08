@@ -1,11 +1,27 @@
 using System.Text.Encodings.Web;
 using System.Text.Unicode;
 using System.Threading.RateLimiting;
+using Shop.Database.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
+builder.Services.AddAuthorization();
+builder.Services.AddAuthentication("ShopCookie").AddCookie("ShopCookie", options =>
+{
+    options.Cookie.Name = "Shop.Session";
+    options.Cookie.Path = "/";
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+    options.Cookie.SameSite = SameSiteMode.Lax;
+    options.ExpireTimeSpan = TimeSpan.FromDays(30);
+    options.SlidingExpiration = true;
+    options.Events.OnRedirectToLogin = context => { context.Response.StatusCode = 401; return Task.CompletedTask; };
+});
+builder.Services.AddShopDatabase(builder.Configuration);
 builder.Services.AddResponseCompression(options => options.EnableForHttps = true);
-builder.Services.AddRateLimiter(options => options.AddPolicy("email-code", context => RateLimitPartition.GetFixedWindowLimiter(
+builder.Services.AddRateLimiter(options =>
+{
+    options.AddPolicy("email-code", context => RateLimitPartition.GetFixedWindowLimiter(
         context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
         _ => new FixedWindowRateLimiterOptions
         {
@@ -13,17 +29,29 @@ builder.Services.AddRateLimiter(options => options.AddPolicy("email-code", conte
             Window = TimeSpan.FromMinutes(5),
             QueueLimit = 0,
             AutoReplenishment = true
-        })));
+        }));
+    options.AddPolicy("product-feedback", context => RateLimitPartition.GetFixedWindowLimiter(
+        context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+        _ => new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = 12,
+            Window = TimeSpan.FromMinutes(10),
+            QueueLimit = 0,
+            AutoReplenishment = true
+        }));
+});
 builder.Services.Configure<Shop.Models.EmailSmtpOptions>(builder.Configuration.GetSection("Email:Smtp"));
 builder.Services.AddSingleton<Shop.Services.EmailVerificationCodeStore>();
 builder.Services.AddSingleton<Shop.Services.IEmailSender, Shop.Services.SmtpEmailSender>();
-builder.Services.AddSingleton<Shop.Services.IMagazineContentSource, Shop.Services.DemoMagazineContentSource>();
-builder.Services.AddSingleton<Shop.Services.CatalogRepository>();
-builder.Services.AddSingleton<Shop.Services.ICatalogSource>(services => services.GetRequiredService<Shop.Services.CatalogRepository>());
-builder.Services.AddSingleton<Shop.Services.ISalesPlanSource, Shop.Services.DemoSalesPlanSource>();
-builder.Services.AddScoped<Shop.Services.DemoAccountDataSource>();
-builder.Services.AddScoped<Shop.Services.IAccountDataSource>(services => services.GetRequiredService<Shop.Services.DemoAccountDataSource>());
-builder.Services.AddScoped<Shop.Services.ICommerceOfferSource>(services => services.GetRequiredService<Shop.Services.DemoAccountDataSource>());
+builder.Services.AddScoped<Shop.Services.IMagazineContentSource, Shop.Services.DatabaseMagazineContentSource>();
+builder.Services.AddScoped<Shop.Services.CatalogRepository>();
+builder.Services.AddScoped<Shop.Services.ICatalogSource>(services => services.GetRequiredService<Shop.Services.CatalogRepository>());
+builder.Services.AddScoped<Shop.Services.DatabaseSalesPlanSource>();
+builder.Services.AddScoped<Shop.Services.ISalesPlanSource>(services => services.GetRequiredService<Shop.Services.DatabaseSalesPlanSource>());
+builder.Services.AddScoped<Shop.Services.IProductPurchaseConfigurationSource>(services => services.GetRequiredService<Shop.Services.DatabaseSalesPlanSource>());
+builder.Services.AddScoped<Shop.Services.DatabaseAccountDataSource>();
+builder.Services.AddScoped<Shop.Services.IAccountDataSource>(services => services.GetRequiredService<Shop.Services.DatabaseAccountDataSource>());
+builder.Services.AddScoped<Shop.Services.ICommerceOfferSource>(services => services.GetRequiredService<Shop.Services.DatabaseAccountDataSource>());
 var persianHtmlEncoderSettings = new TextEncoderSettings(UnicodeRanges.BasicLatin, UnicodeRanges.Arabic);
 persianHtmlEncoderSettings.AllowCharacter('\u200C');
 builder.Services.AddWebEncoders(options => options.TextEncoderSettings = persianHtmlEncoderSettings);
@@ -93,6 +121,18 @@ app.UseStaticFiles(new StaticFileOptions
     }
 });
 app.UseRouting();
+app.Use(async (context, next) =>
+{
+    if (context.Request.Path.StartsWithSegments("/api"))
+    {
+        context.Response.Headers.CacheControl = "no-store, no-cache, max-age=0";
+        context.Response.Headers.Pragma = "no-cache";
+        context.Response.Headers.Expires = "0";
+    }
+    await next();
+});
+app.UseAuthentication();
+app.UseAuthorization();
 app.UseStatusCodePagesWithReExecute("/Error/{0}");
 app.UseRateLimiter();
 app.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");

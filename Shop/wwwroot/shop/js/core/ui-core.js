@@ -17,6 +17,7 @@
     cartChange: "hn:cart-change", cartAdded: "hn:cart-added", cartStockLimit: "hn:cart-stock-limit",
     authChange: "hn:auth-change", authRequired: "hn:auth-required",
     listsChange: "hn:lists-change",
+    accountDataChange: "hn:account-data-change",
   });
   const emit = (type, detail) => {
     if (!Object.values(EVENTS).includes(type)) throw new Error("Unknown UI event: " + type);
@@ -28,6 +29,8 @@
       throw new TypeError("cart-stock-limit expects {product, limit, remaining, requested, reason}");
     if (type === EVENTS.authRequired && (!detail || (detail.resume !== null && typeof detail.resume !== "function")))
       throw new TypeError("auth-required expects {resume: function|null}");
+    if (type === EVENTS.accountDataChange && detail?.key !== "hn-price-watches-demo")
+      throw new TypeError("account-data-change expects a supported account key");
     document.dispatchEvent(new CustomEvent(type, { detail }));
   };
 
@@ -65,6 +68,7 @@
       try {
         return await window.fetch(url.href, {
           ...options,
+          cache: "no-store",
           credentials: "same-origin",
           headers: { Accept: "application/json", ...options.headers },
           signal: controller.signal,
@@ -116,10 +120,34 @@
       emit("hn:auth-change", true);
     },
     logout() {
-      storage.remove(STORAGE_KEYS.auth);
+      storage.clear();
       emit("hn:auth-change", false);
     },
   };
+
+  document.addEventListener(EVENTS.cartChange, (event) => {
+    if (!auth.isLoggedIn() || !Array.isArray(event.detail)) return;
+    const items = event.detail.map((item) => ({
+      productId: Number(String(item.id).replace(/:.*$/, "")),
+      quantity: Number(item.quantity),
+      salesPlanId: String(item.salesPlanId || "regular"),
+      options: item.options || {},
+    })).filter((item) => Number.isSafeInteger(item.productId) && item.productId > 0);
+    void api.request("account/cart", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ items }) });
+  });
+  document.addEventListener(EVENTS.listsChange, () => {
+    if (!auth.isLoggedIn()) return;
+    for (const kind of ["favorites", "compare"]) {
+      const ids = storage.json(kind === "favorites" ? "hn-favorites" : "hn-compare", []);
+      const productIds = (Array.isArray(ids) ? ids : []).map((id) => Number(id)).filter((id) => Number.isSafeInteger(id) && id > 0);
+      void api.request(`account/lists/${kind}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ productIds }) });
+    }
+  });
+  document.addEventListener(EVENTS.accountDataChange, (event) => {
+    if (!auth.isLoggedIn()) return;
+    const items = storage.json(event.detail.key, []);
+    void api.request("account/price-alerts", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ items: Array.isArray(items) ? items : [] }) });
+  });
 
   let lockCount = 0;
   const scrollLock = {
@@ -365,6 +393,7 @@
   document.addEventListener("click", async (event) => {
     const button = event.target.closest(".add-cart[data-id]");
     if (!button || button._cartQuotePending) return;
+    if (!auth.requireLogin(() => button.click())) return;
     const productId = String(button.dataset.id);
     const salesPlanId = button.dataset.salesPlanId || "regular";
     let salesPlanSnapshot = null;

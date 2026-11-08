@@ -1,18 +1,15 @@
 using Shop.Models;
 using Microsoft.AspNetCore.Mvc;
-using System.Text.Json;
 
 namespace Shop.Controllers;
 
 [Route("brands")]
 public sealed class BrandsController : PageController
 {
-    private readonly IWebHostEnvironment _environment;
     private readonly Shop.Services.ICatalogSource _catalog;
 
-    public BrandsController(IWebHostEnvironment environment, Shop.Services.ICatalogSource catalog)
+    public BrandsController(Shop.Services.ICatalogSource catalog)
     {
-        _environment = environment;
         _catalog = catalog;
     }
 
@@ -37,8 +34,6 @@ public sealed class BrandsController : PageController
             return NotFound();
         }
 
-        brand = brand with { SourceEditorial = FindEditorial(brand.Slug) };
-
         PageModel<BrandProfileModel> model = new(
             brand,
             new SeoModel(
@@ -54,14 +49,4 @@ public sealed class BrandsController : PageController
         return await PageAsync(model);
     }
 
-    private BrandEditorialDocument? FindEditorial(string slug)
-    {
-        string contentPath = Path.Combine(_environment.WebRootPath, "content", "data", "brand-editorial.json");
-        BrandEditorialDocument[] documents = JsonSerializer.Deserialize<BrandEditorialDocument[]>(
-            System.IO.File.ReadAllText(contentPath),
-            new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? [];
-
-        return documents.FirstOrDefault(document =>
-            string.Equals(document.Slug, slug, StringComparison.OrdinalIgnoreCase));
-    }
 }

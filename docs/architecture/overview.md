@@ -1,6 +1,6 @@
 # معماری فعلی پروژه
 
-این پروژه یک برنامهٔ ASP.NET Core MVC با رابط فارسی و RTL است. تنها برنامهٔ وب `Shop.sln`، [پروژهٔ Shop](../../Shop/Shop.csproj) با هدف `net10.0` است؛ solution همچنین پروژهٔ اجرایی بررسی قرارداد [Shop.Contracts](../../tests/Shop.Contracts/Shop.Contracts.csproj) را دارد. گروه‌های مستندات، مرز مسئولیت را توضیح می‌دهند؛ این دسته‌بندی به معنی وجود سرویس‌ها یا پروژه‌های مستقل نیست.
+این پروژه یک برنامهٔ ASP.NET Core MVC با رابط فارسی و RTL است. تنها برنامهٔ وب `Shop.sln`، [پروژهٔ Shop](../../Shop/Shop.csproj) با هدف `net10.0` است؛ solution همچنین یک پروژهٔ دادهٔ [Shop.Database](../../Shop.Data/Shop.Data.csproj) با فولدرهای Domain، Application و Infrastructure و پروژهٔ بررسی قرارداد [Shop.Contracts](../../tests/Shop.Contracts/Shop.Contracts.csproj) را دارد. مرز دقیق لایه‌های داده در [راهنمای دیتابیس](database.md) ثبت شده است.
 
 
 مرزهای قابل‌جایگزینی خواندن داده `ICatalogSource`، `IAccountDataSource` و `ICommerceOfferSource` هستند. وضعیت پیاده‌شده و شکاف‌های اتصال در [آمادگی backend](backend-readiness.md) ثبت شده است.
@@ -16,7 +16,7 @@ Program.cs / middleware / route
   → مرورگر: HNUI، کاتالوگ و rendererهای فروشگاه
 ```
 
-[Program.cs](../../Shop/Program.cs) MVC، encoding متن فارسی، تنظیمات SEO، فایل‌های استاتیک و routing را تنظیم می‌کند. در محیط غیرتوسعه، handler خطا و HSTS نیز فعال‌اند. دیتابیس، EF Core، احراز هویت سروری و API ثبت سفارش در ترکیب فعلی ثبت نشده‌اند.
+[Program.cs](../../Shop/Program.cs) MVC، encoding متن فارسی، تنظیمات SEO، فایل‌های استاتیک، routing و `AddShopDatabase` را تنظیم می‌کند. لایهٔ Infrastructure با EF Core به SQL Server وصل می‌شود؛ APIهای خواندنی انبار از repository در Application می‌خوانند. احراز هویت مدیریتی و API ثبت سفارش هنوز ثبت نشده‌اند.
 
 [PageController](../../Shop/Controllers/PageController.cs) فقط View متناظر یا `ViewName` تعیین‌شده در مدل را برمی‌گرداند. نام `PageAsync` به معنی دسترسی async به دیتابیس نیست؛ پیاده‌سازی فعلی از `Task.FromResult` استفاده می‌کند.
 
@@ -26,6 +26,10 @@ Program.cs / middleware / route
 |---|---|
 | `Shop/Program.cs` | پیکربندی pipeline و route عمومی MVC |
 | `Shop/Controllers/` | مسیرها و آماده‌سازی مدل‌های صفحه |
+| `Shop/Controllers/Api/` | endpointهای HTTP؛ فقط از سرویس‌های Application استفاده می‌کنند |
+| `Shop.Data/Domain/` | موجودیت‌های دامنهٔ مستقل از دیتابیس |
+| `Shop.Data/Application/` | قراردادها، مدل‌های پاسخ و سرویس‌های کاربردی |
+| `Shop.Data/Infrastructure/` | EF Core، `ShopDbContext` و repositoryهای SQL Server |
 | `Shop/Models/` | مدل‌های صفحه/SEO و محتوای ثابت مقاله |
 | `Shop/Views/` | Razor UI؛ صفحات محصول، پروفایل، خرید، محتوا و layoutهای مشترک |
 | `Shop/Views/Shared/_Shop.cshtml` | سند HTML اصلی، ترتیب بارگذاری CSS/JS، هدر/فوتر/پنل‌ها |
@@ -67,4 +71,4 @@ Program.cs / middleware / route
 
 [فهرست این بخش](README.md) · [فهرست مستندات](../README.md)
 
-آخرین تطبیق با کد: ۳۰ اکتبر ۲۰۲۶.
+آخرین تطبیق با کد: ۸ نوامبر ۲۰۲۶.

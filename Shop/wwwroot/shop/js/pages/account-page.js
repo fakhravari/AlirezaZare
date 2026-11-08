@@ -83,7 +83,13 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
             : '<div class="compare-empty empty-state-card"><div class="compare-empty-art" aria-hidden="true"><span><i class="bi bi-geo-alt"></i></span><i class="bi bi-plus-lg"></i></div><span class="compare-empty-kicker">نشانی‌های شما</span><h2>هنوز نشانی‌ای ثبت نکرده‌اید</h2><p>یک آدرس اضافه کنید تا هنگام ثبت سفارش، مقصد تحویل را انتخاب کنید.</p><button class="flow-button" type="button" data-open-address><i class="bi bi-plus-lg" aria-hidden="true"></i> افزودن آدرس <i class="bi bi-arrow-left" aria-hidden="true"></i></button><small class="compare-empty-hint"><i class="bi bi-truck" aria-hidden="true"></i> آدرس ذخیره‌شده در پیش‌فاکتور قابل انتخاب خواهد بود.</small></div>';
         host.querySelectorAll("[data-select]").forEach(
             (b) =>
-            (b.onclick = () => {
+            (b.onclick = async () => {
+                if (!ui.auth.isLoggedIn()) { ui.auth.requireLogin(() => b.click()); return; }
+                const response = await ui.api.request("account/checkout-preference", {
+                    method: "PUT", headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ addressId: Number(b.dataset.select), paymentMethod: "zarinpal" }),
+                });
+                if (!response.ok) { ui.setMessage(status, "ذخیرهٔ نشانی انتخابی در حساب انجام نشد.", "error"); return; }
                 ui.storage.set("hn-selected-address", b.dataset.select);
                 renderAddresses();
             }),
@@ -107,6 +113,11 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
                     confirmText: "بله، حذف شود",
                 });
                 if (!confirmed) return;
+
+                if (ui.auth.isLoggedIn() && /^\d+$/.test(String(addressId))) {
+                    const response = await ui.api.request(`account/addresses/${addressId}`, { method: "DELETE" });
+                    if (!response.ok) { ui.setMessage(status, "حذف نشانی از حساب انجام نشد.", "error"); return; }
+                }
 
                 const currentAddresses = read(addressKey);
                 if (!currentAddresses.some((item) => item.id === addressId)) return;
@@ -157,7 +168,7 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
         document.documentElement.classList.remove("address-modal-open");
         document.querySelector("#newAddress").focus();
     });
-    form.onsubmit = (e) => {
+    form.onsubmit = async (e) => {
         e.preventDefault();
         if (!form.reportValidity()) return;
         const address = Object.fromEntries(
@@ -172,6 +183,13 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
         address.id = editing ||
             (window.crypto?.randomUUID?.() ??
                 `address-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+        if (ui.auth.isLoggedIn()) {
+            const route = editing && /^\d+$/.test(String(editing)) ? `account/addresses/${editing}` : "account/addresses";
+            const response = await ui.api.request(route, { method: editing ? "PUT" : "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: address.title, recipient: address.recipient, phone: address.phone, country: address.country, countryId: address.countryId, province: address.province, provinceId: address.provinceId, city: address.city, cityId: address.cityId, street: address.street, postal: address.postal }) });
+            const result = await response.json().catch(() => ({}));
+            if (!response.ok) { setFormStatus("ذخیره نشانی در حساب انجام نشد.", true); return; }
+            if (result.id) address.id = String(result.id);
+        }
         const addresses = read(addressKey);
         const next = editing
             ? addresses.map((a) => (a.id === editing ? address : a))
@@ -220,6 +238,39 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
         });
         renderCoupons();
     }
+
+    const renderAccountOrders = (orders) => {
+        const host = document.querySelector(".profile-order-list");
+        if (!host || !Array.isArray(orders)) return;
+        const labels = { "pending-payment": "در انتظار پرداخت", "payment-confirmed": "پرداخت تأیید شد", "warehouse-confirmed": "تأیید انبار", "in-transit": "در حال ارسال", "shipped-to-post": "ارسال به پست", delivered: "تحویل‌شده", cancelled: "لغوشده" };
+        host.replaceChildren();
+        for (const order of orders) {
+            const label = labels[order.status] || "نامشخص";
+            const date = new Date(order.orderedAtUtc);
+            const dateLabel = formatPersianDate(date);
+            const card = document.createElement("article");
+            card.className = "profile-order-card";
+            Object.assign(card.dataset, { orderNumber: order.number, orderStatus: label, orderDate: dateLabel, orderDatetime: date.toISOString().slice(0, 10), orderCount: String(order.itemCount), orderAmount: String(order.totalAmount), orderDelivery: label });
+            card.innerHTML = `<header><div><span class="order-status is-${ui.escapeHtml(order.status)}">${ui.escapeHtml(label)}</span><strong>سفارش ${ui.escapeHtml(order.number)}</strong></div><time datetime="${card.dataset.orderDatetime}">${ui.escapeHtml(dateLabel)}</time></header><div class="order-body order-invoice-summary"><div class="order-products"><span class="order-product-icon"><i class="bi bi-receipt-cutoff"></i></span><div><strong>خلاصهٔ فاکتور</strong><small>${ui.formatNumber(order.itemCount)} کالا</small></div></div><div class="order-total"><small>مبلغ سفارش</small><strong>${ui.formatNumber(order.totalAmount)} تومان</strong></div></div><footer><span>${ui.escapeHtml(label)}</span><div class="order-card-actions"><a href="/Tracking"><i class="bi bi-truck"></i> پیگیری سفارش</a><button type="button" data-open-order-invoice>مشاهدهٔ فاکتور</button></div></footer>`;
+            host.append(card);
+        }
+        const total = document.querySelector("#ordersTotal");
+        if (total) total.textContent = `${ui.formatNumber(orders.length)} سفارش`;
+    };
+    const hydrateAccount = async () => {
+        if (!ui.auth.isLoggedIn()) return;
+        try {
+            const response = await ui.api.request("account/state");
+            if (!response.ok) return;
+            const account = await response.json();
+            if (Array.isArray(account.addresses)) ui.storage.set(addressKey, JSON.stringify(account.addresses));
+            if (Array.isArray(account.favorites)) ui.storage.set("hn-favorites", JSON.stringify(account.favorites.map((item) => String(item.id))));
+            if (Array.isArray(account.compare)) ui.storage.set("hn-compare", JSON.stringify(account.compare.map((item) => String(item.id))));
+            if (Array.isArray(account.priceAlerts)) ui.storage.set(priceWatchKey, JSON.stringify(account.priceAlerts));
+            renderAddresses(); renderAccountOrders(account.orders); renderOverview();
+        } catch { }
+    };
+    document.addEventListener("hn:auth-change", (event) => { if (event.detail) void hydrateAccount(); });
     function renderCoupons(moveFocus = false) {
         const profileHost = document.querySelector("#profileCouponsList");
         if (!profileHost) return;
@@ -524,6 +575,7 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
     });
     renderAddresses();
     renderOverview();
+    void hydrateAccount();
     renderPriceAlerts();
     renderMessages();
     navigate();

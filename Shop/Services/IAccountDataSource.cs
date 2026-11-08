@@ -15,7 +15,8 @@ public interface ICommerceOfferSource
         CancellationToken cancellationToken = default);
 }
 
-public sealed class DemoAccountDataSource(IWebHostEnvironment environment) : IAccountDataSource, ICommerceOfferSource
+public sealed class DatabaseAccountDataSource(
+    Shop.Database.Application.Store.Contracts.IStoreRuntimeDatasetRepository datasets) : IAccountDataSource, ICommerceOfferSource
 {
     private Task<AccountData>? _requestSnapshot;
 
@@ -31,7 +32,8 @@ public sealed class DemoAccountDataSource(IWebHostEnvironment environment) : IAc
 
     private async Task<AccountData> LoadAsync(CancellationToken cancellationToken)
     {
-        var path = Path.Combine(environment.ContentRootPath, "App_Data", "account-demo.json");
-        return AccountData.Parse(await File.ReadAllTextAsync(path, cancellationToken));
+        var json = await datasets.ReadAccountJsonAsync(cancellationToken)
+                   ?? throw new InvalidDataException("The account dataset is missing from the database.");
+        return AccountData.Parse(json);
     }
 }

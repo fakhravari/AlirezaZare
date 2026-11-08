@@ -25,32 +25,6 @@ public sealed record FaqEntry(string Question, string Answer, string? LinkText =
     public string StructuredAnswer => LinkText is null ? Answer : $"{Answer} {LinkText}";
 }
 
-public static class FaqCatalog
-{
-    public static IReadOnlyList<FaqEntry> Items { get; } =
-    [
-        new("چطور ابزار مناسب انتخاب کنم؟",
-            "فیلترهای گروه کالا، برند، منبع تغذیه و قیمت را برای محدودکردن گزینه‌ها به‌کار ببرید."),
-        new("آیا امکان خرید آنلاین وجود دارد؟",
-            "در این نسخه پرداخت واقعی فعال نیست؛ برای خرید با فروشگاه تماس بگیرید."),
-        new("چگونه سفارش را پیگیری کنم؟", "تا اتصال سامانهٔ آنلاین، سفارش را از راه پشتیبانی تلفنی پیگیری کنید."),
-        new("هزینه و زمان ارسال چقدر است؟", "مبلغ و زمان تحویل پس از بررسی مقصد و موجودی تأیید می‌شود."),
-        new("شرایط ضمانت و مرجوعی چیست؟", "شرایط ضمانت را در کارت و فاکتور ببینید. راهنمای انصراف و بازگشت کالا در",
-            "رویه بازگرداندن کالا", "/legal/returns"),
-        new("هزینه و زمان ارسال چگونه مشخص می‌شود؟",
-            "روش، هزینه و زمان تقریبی پس از بررسی مقصد و موجودی، پیش از تأیید سفارش هماهنگ می‌شود."),
-        new("برای پیگیری سفارش چه اطلاعاتی لازم است؟",
-            "کد سفارش یا فاکتور و شمارهٔ همراه ثبت‌شده را آماده کنید؛ پیگیری آنلاین هنوز به سامانه وصل نیست."),
-        new("آیا فهرست علاقه‌مندی‌ها و سبد خرید باقی می‌ماند؟",
-            "فهرست‌ها در مرورگر ذخیره می‌شوند؛ پاک‌کردن داده‌ها یا تغییر دستگاه ممکن است آن‌ها را حذف کند."),
-        new("آیا فرم تماس پیام را برای فروشگاه ارسال می‌کند؟",
-            "فرم تماس به سامانهٔ پیام متصل نیست. برای پاسخ از راه‌های تماس استفاده کنید.", "صفحه تماس با ما",
-            "/contact"),
-        new("هنگام دریافت کالا چه مواردی را بررسی کنم؟",
-            "مدل، تعداد، بسته‌بندی و مدارک را با سفارش تطبیق دهید. برای مغایرت یا آسیب، پیش از ارسال مجدد هماهنگ کنید.")
-    ];
-}
-
 public sealed record ProductDetailsModel(int? Id, string? Name = null);
 
 public sealed record ProfilePageViewModel(
@@ -100,3 +74,5 @@ public sealed record MagazineSourceModel(string Title, string Url);
 public sealed record MagazineTagModel(string Label, string Filter);
 
 public sealed record MagazineRelatedArticleModel(string Slug, string Category, string Title, string Image);
+
+public sealed record JournalArticleMetrics(int Views, int Likes, double AverageRating, int Comments);

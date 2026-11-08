@@ -7,8 +7,13 @@ namespace Shop.Controllers;
 public sealed class HomeController : PageController
 {
     private readonly SiteIdentityOptions _identity;
+    private readonly Shop.Services.IMagazineContentSource _magazine;
 
-    public HomeController(IOptions<SiteIdentityOptions> identity) => _identity = identity.Value;
+    public HomeController(IOptions<SiteIdentityOptions> identity, Shop.Services.IMagazineContentSource magazine)
+    {
+        _identity = identity.Value;
+        _magazine = magazine;
+    }
 
     public async Task<IActionResult> Index()
     {
@@ -18,6 +23,7 @@ public sealed class HomeController : PageController
                 $"{_identity.StoreName}؛ بررسی ابزار برقی، تجهیزات اندازه‌گیری، قطعات الکترونیکی و روشنایی همراه با اطلاعات هر کالا و راه ارتباط با فروشگاه."),
             IsHome: true);
 
-        return await PageAsync(model);
+        var magazine = await _magazine.ReadIndexAsync(HttpContext.RequestAborted);
+        return await PageAsync(new PageModel<MagazineIndexViewModel>(magazine, model.Seo, IsHome: true));
     }
 }

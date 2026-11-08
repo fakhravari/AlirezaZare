@@ -11,10 +11,12 @@ public sealed class SeoController : Controller
 {
     private readonly ICatalogSource _catalog;
     private readonly SeoMetadataOptions _options;
+    private readonly IMagazineContentSource _magazine;
 
-    public SeoController(ICatalogSource catalog, IOptions<SeoMetadataOptions> options)
+    public SeoController(ICatalogSource catalog, IMagazineContentSource magazine, IOptions<SeoMetadataOptions> options)
     {
         _catalog = catalog;
+        _magazine = magazine;
         _options = options.Value;
     }
 
@@ -31,6 +33,7 @@ public sealed class SeoController : Controller
     public async Task<IActionResult> Sitemap()
     {
         var catalog = await _catalog.ReadAsync(HttpContext.RequestAborted);
+        var magazine = await _magazine.ReadIndexAsync(HttpContext.RequestAborted);
         string[] staticPaths =
         [
             "/",
@@ -49,7 +52,7 @@ public sealed class SeoController : Controller
 
         IEnumerable<string> paths = staticPaths
             .Concat(catalog.Brands.Select(brand => $"/brands/{brand.Slug}"))
-            .Concat(JournalArticles.Slugs.Select(slug => $"/magazine/{slug}"))
+            .Concat(magazine.Posts.Select(post => $"/magazine/{post.Slug}"))
             .Concat(catalog.Products.Select(product => $"/products/{product.Slug}-{product.Id}"));
 
         XNamespace sitemapNamespace = "http://www.sitemaps.org/schemas/sitemap/0.9";

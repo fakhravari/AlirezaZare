@@ -344,6 +344,19 @@
           document.querySelector('[data-profile-value="newsletter"]').textContent = profile.newsletter ? 'بله' : 'خیر';
         };
         renderProfile(savedProfile);
+        const hydrateProfile = async () => {
+          const response = await window.HNUI.api.request('account/state');
+          if (!response.ok) return;
+          const account = await response.json();
+          Object.assign(savedProfile, { firstName: account.firstName, lastName: account.lastName, email: account.email, phone: account.phone, gender: account.gender, newsletter: account.newsletter });
+          ['firstName', 'lastName', 'email'].forEach(name => { if (savedProfile[name]) form.elements[name].value = savedProfile[name]; });
+          if (savedProfile.phone) phone.value = normalizePhone(savedProfile.phone);
+          form.elements.newsletter.checked = savedProfile.newsletter === true;
+          if (savedProfile.gender) { const gender = form.querySelector(`[name="gender"][value="${savedProfile.gender}"]`); if (gender) gender.checked = true; }
+          storage?.set('hn-profile', JSON.stringify(savedProfile)); renderProfile(savedProfile);
+        };
+        if (window.HNUI?.auth.isLoggedIn()) void hydrateProfile().catch(() => {});
+        document.addEventListener('hn:auth-change', event => { if (event.detail) void hydrateProfile().catch(() => {}); });
         if (savedProfile.gender === 'male' || savedProfile.gender === 'female') {
           const gender = form.querySelector(`[name="gender"][value="${savedProfile.gender}"]`);
           if (gender) gender.checked = true;
@@ -384,7 +397,7 @@
         });
         form.addEventListener('input', validate);
         form.addEventListener('change', validate);
-        form.addEventListener('submit', event => {
+        form.addEventListener('submit', async event => {
           event.preventDefault();
           if (!validate()) return;
           const profile = {
@@ -395,6 +408,10 @@
             gender: form.querySelector('[name="gender"]:checked').value,
             newsletter: form.elements.newsletter.checked
           };
+          if (window.HNUI?.auth.isLoggedIn()) {
+            const response = await window.HNUI.api.request('account/profile', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ firstName: profile.firstName, lastName: profile.lastName, phone: profile.phone, gender: profile.gender, newsletter: profile.newsletter }) });
+            if (!response.ok) { document.getElementById('accountStatus').textContent = 'ذخیرهٔ اطلاعات در حساب انجام نشد.'; return; }
+          }
           if (!storage?.set('hn-profile', JSON.stringify(profile))) return;
           const displayName = document.querySelector('.account-profile > div strong');
           if (displayName) displayName.textContent = `${profile.firstName} ${profile.lastName}`;

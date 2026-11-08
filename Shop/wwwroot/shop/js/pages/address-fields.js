@@ -1,6 +1,7 @@
-window.HNUI.ready(() => window.HNUI.mount("pages-address-fields", document, () => {
+window.HNUI.ready(() => window.HNUI.mount("pages-address-fields", document, async () => {
     const form = document.querySelector("#addressForm");
     if (!form) return;
+    await window.HNIranPlacesReady;
     const data = window.HNIranPlaces;
     if (!data?.countries?.length || !data.provinces?.length || !data.cities?.length)
         throw new Error("The country, province, and city data is unavailable.");

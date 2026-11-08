@@ -7,8 +7,7 @@
     <DefaultItemExcludesInProjectFolder>$(DefaultItemExcludesInProjectFolder);**/bin/**;**/obj/**</DefaultItemExcludesInProjectFolder>
   </PropertyGroup>
   <ItemGroup>
-    <Content Include="App_Data/account-demo.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
-    <Content Include="App_Data/sales-plans-demo.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <ProjectReference Include="..\Shop.Data\Shop.Data.csproj" />
     <Folder Include="wwwroot\content\" />
   </ItemGroup>
 </Project>

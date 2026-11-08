@@ -108,37 +108,42 @@ $(function () {
       };
     const normalizeSearchText = window.HNUI.normalizeSearchText;
     const recentSearchKey = "hn-header-recent-searches";
+    let recentSearches = [];
     const popularSearches = [
-      "دریل شارژی",
-      "مولتی‌متر دیجیتال",
-      "ست مته و سری",
-      "ایستگاه هویه",
-      "چراغ کارگاهی",
+      "Ø¯Ø±ÛŒÙ„ Ø´Ø§Ø±Ú˜ÛŒ",
+      "Ù…ÙˆÙ„ØªÛŒâ€ŒÙ…ØªØ± Ø¯ÛŒØ¬ÛŒØªØ§Ù„",
+      "Ø³Øª Ù…ØªÙ‡ Ùˆ Ø³Ø±ÛŒ",
+      "Ø§ÛŒØ³ØªÚ¯Ø§Ù‡ Ù‡ÙˆÛŒÙ‡",
+      "Ú†Ø±Ø§Øº Ú©Ø§Ø±Ú¯Ø§Ù‡ÛŒ",
     ];
-    const readRecentSearches = () => {
-      const searches = window.HNUI.storage.json(recentSearchKey, []);
-      return Array.isArray(searches)
-        ? searches.filter((item) => typeof item === "string").slice(0, 6)
-        : [];
+    const readRecentSearches = () => recentSearches;
+    const loadRecentSearches = async () => {
+      if (!window.HNUI.auth.isLoggedIn()) { recentSearches = []; return; }
+      try {
+        const response = await window.HNUI.api.request("account/recent-searches");
+        if (!response.ok) return;
+        const result = await response.json();
+        recentSearches = Array.isArray(result.items) ? result.items.filter((item) => typeof item === "string").slice(0, 6) : [];
+      } catch { recentSearches = []; }
     };
-    const rememberSearch = (value) => {
+    const rememberSearch = async (value) => {
       const query = String(value || "")
         .trim()
         .slice(0, 80);
-      if (Array.from(query).length < 3) return;
-      const recent = readRecentSearches().filter(
-        (item) => normalizeSearchText(item) !== normalizeSearchText(query),
-      );
-      window.HNUI.storage.set(
-        recentSearchKey,
-        JSON.stringify([query, ...recent].slice(0, 6)),
-      );
+      if (Array.from(query).length < 3 || !window.HNUI.auth.isLoggedIn()) return;
+      try {
+        const response = await window.HNUI.api.request("account/recent-searches", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query }),
+        });
+        if (response.ok) await loadRecentSearches();
+      } catch { /* Search itself remains available when history cannot be saved. */ }
     };
     const quickSearchLink = (query, icon) =>
       `<a class="header-search-quick-chip" data-search-query="${escapeHtml(query)}" href="${searchUrl(query)}"><i class="bi ${icon}" aria-hidden="true"></i><span>${escapeHtml(query)}</span></a>`;
     const renderQuickSearchPanel = () => {
       const recent = readRecentSearches();
-      suggestions.innerHTML = `<section class="header-search-quick-section" aria-labelledby="recentSearchesTitle"><div class="header-search-quick-heading"><strong id="recentSearchesTitle"><i class="bi bi-clock-history" aria-hidden="true"></i> جستجوهای اخیر</strong>${recent.length ? '<button type="button" data-clear-search-history>پاک‌کردن</button>' : ""}</div>${recent.length ? `<div class="header-search-quick-chips">${recent.map((query) => quickSearchLink(query, "bi-clock-history")).join("")}</div>` : '<p class="header-search-quick-empty">جستجوهای اخیر اینجا نمایش داده می‌شوند.</p>'}</section><section class="header-search-quick-section" aria-labelledby="popularSearchesTitle"><div class="header-search-quick-heading"><strong id="popularSearchesTitle"><i class="bi bi-graph-up-arrow" aria-hidden="true"></i> جستجوهای پرتکرار</strong></div><div class="header-search-quick-chips">${popularSearches.map((query) => quickSearchLink(query, "bi-arrow-up-right")).join("")}</div></section>`;
+      suggestions.innerHTML = `<section class="header-search-quick-section" aria-labelledby="recentSearchesTitle"><div class="header-search-quick-heading"><strong id="recentSearchesTitle"><i class="bi bi-clock-history" aria-hidden="true"></i> Ø¬Ø³ØªØ¬ÙˆÙ‡Ø§ÛŒ Ø§Ø®ÛŒØ±</strong>${recent.length ? '<button type="button" data-clear-search-history>Ù¾Ø§Ú©â€ŒÚ©Ø±Ø¯Ù†</button>' : ""}</div>${recent.length ? `<div class="header-search-quick-chips">${recent.map((query) => quickSearchLink(query, "bi-clock-history")).join("")}</div>` : '<p class="header-search-quick-empty">Ø¬Ø³ØªØ¬ÙˆÙ‡Ø§ÛŒ Ø§Ø®ÛŒØ± Ø§ÛŒÙ†Ø¬Ø§ Ù†Ù…Ø§ÛŒØ´ Ø¯Ø§Ø¯Ù‡ Ù…ÛŒâ€ŒØ´ÙˆÙ†Ø¯.</p>'}</section><section class="header-search-quick-section" aria-labelledby="popularSearchesTitle"><div class="header-search-quick-heading"><strong id="popularSearchesTitle"><i class="bi bi-graph-up-arrow" aria-hidden="true"></i> Ø¬Ø³ØªØ¬ÙˆÙ‡Ø§ÛŒ Ù¾Ø±ØªÚ©Ø±Ø§Ø±</strong></div><div class="header-search-quick-chips">${popularSearches.map((query) => quickSearchLink(query, "bi-arrow-up-right")).join("")}</div></section>`;
       suggestions.innerHTML = isolateDrawerSearchMarkup(
         suggestions.innerHTML,
       );
@@ -250,26 +255,26 @@ $(function () {
         }));
 
       const resultMarkup = matches.length
-        ? `<div class="header-search-suggestions-head"><span><i class="bi bi-stars" aria-hidden="true"></i> پیشنهاد برای جستجوی شما</span><small>${faNumber(matches.length)} پیشنهاد</small></div><ul>${matches
+        ? `<div class="header-search-suggestions-head"><span><i class="bi bi-stars" aria-hidden="true"></i> Ù¾ÛŒØ´Ù†Ù‡Ø§Ø¯ Ø¨Ø±Ø§ÛŒ Ø¬Ø³ØªØ¬ÙˆÛŒ Ø´Ù…Ø§</span><small>${faNumber(matches.length)} Ù¾ÛŒØ´Ù†Ù‡Ø§Ø¯</small></div><ul>${matches
             .map(
               ({ product, plan, currentPrice, listPrice }) => {
                 const planBadge = plan
-                  ? `<span class="header-search-plan-badge" title="${escapeHtml(plan.label || plan.name)}"><i class="bi bi-lightning-charge-fill" aria-hidden="true"></i>طرح ${escapeHtml(plan.name || plan.code)}</span>`
+                  ? `<span class="header-search-plan-badge" title="${escapeHtml(plan.label || plan.name)}"><i class="bi bi-lightning-charge-fill" aria-hidden="true"></i>Ø·Ø±Ø­ ${escapeHtml(plan.name || plan.code)}</span>`
                   : "";
                 const priceMarkup = listPrice
-                  ? `<b><span>${faNumber(currentPrice)} <small>تومان</small></span><del>${faNumber(listPrice)}</del></b>`
-                  : `<b>${faNumber(currentPrice)} <small>تومان</small></b>`;
+                  ? `<b><span>${faNumber(currentPrice)} <small>ØªÙˆÙ…Ø§Ù†</small></span><del>${faNumber(listPrice)}</del></b>`
+                  : `<b>${faNumber(currentPrice)} <small>ØªÙˆÙ…Ø§Ù†</small></b>`;
                 const productUrl = window.HNProductUrl(
                   product,
                   plan ? { salesPlanId: plan.id } : undefined,
                 );
-                return `<li><a class="header-search-suggestion" role="option" href="${escapeHtml(productUrl)}"><span class="header-search-suggestion-image"><img src="${escapeHtml(product.image)}" alt="" loading="lazy" decoding="async"></span><span class="header-search-suggestion-copy"><strong>${escapeHtml(product.name)}</strong><small><span class="header-search-suggestion-details">${escapeHtml(product.brand)} <bdi>· ${escapeHtml(product.type)}</bdi></span>${planBadge}</small>${priceMarkup}</span><i class="bi bi-arrow-left" aria-hidden="true"></i></a></li>`;
+                return `<li><a class="header-search-suggestion" role="option" href="${escapeHtml(productUrl)}"><span class="header-search-suggestion-image"><img src="${escapeHtml(product.image)}" alt="" loading="lazy" decoding="async"></span><span class="header-search-suggestion-copy"><strong>${escapeHtml(product.name)}</strong><small><span class="header-search-suggestion-details">${escapeHtml(product.brand)} <bdi>Â· ${escapeHtml(product.type)}</bdi></span>${planBadge}</small>${priceMarkup}</span><i class="bi bi-arrow-left" aria-hidden="true"></i></a></li>`;
               },
             )
             .join(
               "",
-            )}</ul><a class="header-search-all" href="${searchUrl(searchInput.value.trim())}">مشاهده همه نتایج <i class="bi bi-arrow-left" aria-hidden="true"></i></a>`
-        : `<div class="header-search-empty"><i class="bi bi-search" aria-hidden="true"></i><span>محصولی با این عبارت پیدا نشد.</span><a href="${searchUrl(searchInput.value.trim())}">جستجو در همه محصولات <i class="bi bi-arrow-left" aria-hidden="true"></i></a></div>`;
+            )}</ul><a class="header-search-all" href="${searchUrl(searchInput.value.trim())}">Ù…Ø´Ø§Ù‡Ø¯Ù‡ Ù‡Ù…Ù‡ Ù†ØªØ§ÛŒØ¬ <i class="bi bi-arrow-left" aria-hidden="true"></i></a>`
+        : `<div class="header-search-empty"><i class="bi bi-search" aria-hidden="true"></i><span>Ù…Ø­ØµÙˆÙ„ÛŒ Ø¨Ø§ Ø§ÛŒÙ† Ø¹Ø¨Ø§Ø±Øª Ù¾ÛŒØ¯Ø§ Ù†Ø´Ø¯.</span><a href="${searchUrl(searchInput.value.trim())}">Ø¬Ø³ØªØ¬Ùˆ Ø¯Ø± Ù‡Ù…Ù‡ Ù…Ø­ØµÙˆÙ„Ø§Øª <i class="bi bi-arrow-left" aria-hidden="true"></i></a></div>`;
 
       suggestions.innerHTML = resultMarkup;
       suggestions.innerHTML = isolateDrawerSearchMarkup(
@@ -296,23 +301,31 @@ $(function () {
         if (isDrawerSearch) searchInput.focus();
         return;
       }
-      rememberSearch(searchInput.value);
+      void rememberSearch(searchInput.value);
     });
     suggestions.addEventListener("click", (event) => {
       const clearHistory = event.target.closest("[data-clear-search-history]");
       if (clearHistory) {
-        window.HNUI.storage.set(recentSearchKey, "[]");
+        if (window.HNUI.auth.isLoggedIn()) {
+          void window.HNUI.api.request("account/recent-searches", { method: "DELETE" }).then((response) => {
+            if (response.ok) recentSearches = [];
+          });
+        }
         renderQuickSearchPanel();
         return;
       }
       const link = event.target.closest("a");
-      if (link) rememberSearch(link.dataset.searchQuery || searchInput.value);
+      if (link) void rememberSearch(link.dataset.searchQuery || searchInput.value);
     });
     searchInput.addEventListener("focus", () => {
       window.clearTimeout(suggestionsRenderTimer);
       if (Array.from(normalizeSearchText(searchInput.value)).length >= 3)
         renderSuggestions();
-      else renderQuickSearchPanel();
+      else void loadRecentSearches().then(renderQuickSearchPanel);
+    });
+    document.addEventListener("hn:auth-change", (event) => {
+      recentSearches = [];
+      if (event.detail) void loadRecentSearches().then(renderQuickSearchPanel);
     });
     if (!isDrawerSearch) {
       headerSearchForm.addEventListener("pointerleave", () => {
@@ -435,42 +448,14 @@ $(function () {
         .attr("aria-pressed", String(active));
       $(this).attr(
         "aria-label",
-        active ? "حذف از علاقه‌مندی‌ها" : "افزودن به علاقه‌مندی‌ها",
+        active ? "Ø­Ø°Ù Ø§Ø² Ø¹Ù„Ø§Ù‚Ù‡â€ŒÙ…Ù†Ø¯ÛŒâ€ŒÙ‡Ø§" : "Ø§ÙØ²ÙˆØ¯Ù† Ø¨Ù‡ Ø¹Ù„Ø§Ù‚Ù‡â€ŒÙ…Ù†Ø¯ÛŒâ€ŒÙ‡Ø§",
       );
       $(this)
         .find("i")
         .attr("class", active ? "bi bi-heart-fill" : "bi bi-heart");
     });
   };
-  const cacheProductFromCard = (card, id) => {
-    const cartButton = card?.querySelector(".add-cart[data-id]");
-    if (!cartButton || !id) return;
-    const cache = window.HNUI.storage.json("hn-product-cache", {});
-    const name =
-      cartButton.dataset.name ||
-      card.querySelector("h3")?.textContent.trim() ||
-      "محصول منتخب";
-    cache[String(id)] = {
-      id: String(id),
-      name,
-      brand:
-        card.querySelector(".product-info small, small")?.textContent.trim() ||
-        "",
-      price: Number(cartButton.dataset.price) / 1000000 || 0,
-      image:
-        cartButton.dataset.image ||
-        card
-          .querySelector(".product-image img, .rail-image img")
-          ?.getAttribute("src") ||
-        "content/products/images/card/cordless-hammer-drill-hn-001-row-001-card-800.jpg",
-      type: "مشخصات محصول",
-      powerSource: "مطابق مشخصات کالا",
-      useCase: "مطابق اطلاعات کالا",
-      movement: "مطابق مشخصات کالا",
-      strap: "مطابق اطلاعات کالا",
-    };
-    window.HNUI.storage.set("hn-product-cache", JSON.stringify(cache));
-  };
+  const cacheProductFromCard = (card, id) => Boolean(card && id);
   const readCompareList = () => {
     const list = window.HNUI.storage.json("hn-compare", []);
     return Array.isArray(list) ? [...new Set(list.map(String))] : [];
@@ -482,8 +467,8 @@ $(function () {
       $(this)
         .toggleClass("active", active)
         .attr("aria-pressed", String(active))
-        .attr("aria-label", active ? "حذف از مقایسه" : "افزودن به مقایسه")
-        .attr("title", active ? "حذف از مقایسه" : "افزودن به مقایسه")
+        .attr("aria-label", active ? "Ø­Ø°Ù Ø§Ø² Ù…Ù‚Ø§ÛŒØ³Ù‡" : "Ø§ÙØ²ÙˆØ¯Ù† Ø¨Ù‡ Ù…Ù‚Ø§ÛŒØ³Ù‡")
+        .attr("title", active ? "Ø­Ø°Ù Ø§Ø² Ù…Ù‚Ø§ÛŒØ³Ù‡" : "Ø§ÙØ²ÙˆØ¯Ù† Ø¨Ù‡ Ù…Ù‚Ø§ÛŒØ³Ù‡")
         .find("i")
         .attr("class", "bi bi-arrow-left-right");
     });
@@ -493,7 +478,7 @@ $(function () {
     const compareCount = storedListCount("hn-compare");
     $("#favoritesCount").text(faNumber(favoriteCount));
     $("#compareCount").text(faNumber(compareCount));
-    $("#compareToggle").attr("aria-label", `مقایسه محصولات ${faNumber(compareCount)}`);
+    $("#compareToggle").attr("aria-label", `Ù…Ù‚Ø§ÛŒØ³Ù‡ Ù…Ø­ØµÙˆÙ„Ø§Øª ${faNumber(compareCount)}`);
     renderFavoritePanel();
     renderComparePanel();
     syncFavoriteButtons();
@@ -510,14 +495,10 @@ $(function () {
         image: product.image,
       });
     });
-    const cache = window.HNUI.storage.json("hn-product-cache", {});
-    Object.entries(cache || {}).forEach(([id, product]) => {
-      if (!products.has(String(id))) products.set(String(id), product);
-    });
-    $("#favoritesPanelCount").text(`${faNumber(ids.length)} محصول`);
+    $("#favoritesPanelCount").text(`${faNumber(ids.length)} Ù…Ø­ØµÙˆÙ„`);
     if (!ids.length) {
       $("#favoritesPanelItems").html(
-        '<div class="compare-panel-empty header-panel-empty"><span class="header-panel-empty-icon"><i class="bi bi-heart" aria-hidden="true"></i></span><strong>هنوز محصولی در علاقه‌مندی‌ها نیست</strong><p>برای ذخیره، آیکن قلب روی کارت محصول را بزنید.</p></div>',
+        '<div class="compare-panel-empty header-panel-empty"><span class="header-panel-empty-icon"><i class="bi bi-heart" aria-hidden="true"></i></span><strong>Ù‡Ù†ÙˆØ² Ù…Ø­ØµÙˆÙ„ÛŒ Ø¯Ø± Ø¹Ù„Ø§Ù‚Ù‡â€ŒÙ…Ù†Ø¯ÛŒâ€ŒÙ‡Ø§ Ù†ÛŒØ³Øª</strong><p>Ø¨Ø±Ø§ÛŒ Ø°Ø®ÛŒØ±Ù‡ØŒ Ø¢ÛŒÚ©Ù† Ù‚Ù„Ø¨ Ø±ÙˆÛŒ Ú©Ø§Ø±Øª Ù…Ø­ØµÙˆÙ„ Ø±Ø§ Ø¨Ø²Ù†ÛŒØ¯.</p></div>',
       );
       return;
     }
@@ -525,13 +506,13 @@ $(function () {
       ids
         .map((id) => {
           const product = products.get(id) || {
-            name: "محصول منتخب",
+            name: "Ù…Ø­ØµÙˆÙ„ Ù…Ù†ØªØ®Ø¨",
             price: 0,
             image: "content/products/images/card/cordless-hammer-drill-hn-001-row-001-card-800.jpg",
           };
-          const name = product.name || "محصول منتخب";
+          const name = product.name || "Ù…Ø­ØµÙˆÙ„ Ù…Ù†ØªØ®Ø¨";
           const href = window.HNProductUrl?.(id) || "/search";
-          return `<article class="compare-panel-item" data-favorite-id="${escapeHtml(id)}"><img src="${escapeHtml(product.image || "content/products/images/card/cordless-hammer-drill-hn-001-row-001-card-800.jpg")}" alt="" loading="lazy"><span><strong><a class="header-panel-product-link" href="${escapeHtml(href)}">${escapeHtml(name)}</a></strong><small>${faNumber(Number(product.price) * (Number(product.price) < 1000000 ? 1000000 : 1))} تومان</small></span><button class="cart-remove" type="button" data-favorite-remove="${escapeHtml(id)}" aria-label="حذف ${escapeHtml(name)} از علاقه‌مندی‌ها"><i class="bi bi-trash3" aria-hidden="true"></i></button></article>`;
+          return `<article class="compare-panel-item" data-favorite-id="${escapeHtml(id)}"><img src="${escapeHtml(product.image || "content/products/images/card/cordless-hammer-drill-hn-001-row-001-card-800.jpg")}" alt="" loading="lazy"><span><strong><a class="header-panel-product-link" href="${escapeHtml(href)}">${escapeHtml(name)}</a></strong><small>${faNumber(Number(product.price) * (Number(product.price) < 1000000 ? 1000000 : 1))} ØªÙˆÙ…Ø§Ù†</small></span><button class="cart-remove" type="button" data-favorite-remove="${escapeHtml(id)}" aria-label="Ø­Ø°Ù ${escapeHtml(name)} Ø§Ø² Ø¹Ù„Ø§Ù‚Ù‡â€ŒÙ…Ù†Ø¯ÛŒâ€ŒÙ‡Ø§"><i class="bi bi-trash3" aria-hidden="true"></i></button></article>`;
         })
         .join(""),
     );
@@ -553,7 +534,7 @@ $(function () {
         name:
           button.dataset.name ||
           card?.querySelector("h3")?.textContent.trim() ||
-          "محصول منتخب",
+          "Ù…Ø­ØµÙˆÙ„ Ù…Ù†ØªØ®Ø¨",
         price: Number(button.dataset.price) || 0,
         image:
           button.dataset.image ||
@@ -561,10 +542,10 @@ $(function () {
           "content/products/images/card/cordless-hammer-drill-hn-001-row-001-card-800.jpg",
       });
     });
-    $("#comparePanelCount").text(`${faNumber(ids.length)} محصول`);
+    $("#comparePanelCount").text(`${faNumber(ids.length)} Ù…Ø­ØµÙˆÙ„`);
     if (!ids.length) {
       $("#comparePanelItems").html(
-        '<div class="compare-panel-empty header-panel-empty"><span class="header-panel-empty-icon"><i class="bi bi-arrow-left-right" aria-hidden="true"></i></span><strong>هنوز محصولی برای مقایسه نیست</strong><p>برای مقایسه، آیکن مقایسه روی کارت محصول را بزنید.</p></div>',
+        '<div class="compare-panel-empty header-panel-empty"><span class="header-panel-empty-icon"><i class="bi bi-arrow-left-right" aria-hidden="true"></i></span><strong>Ù‡Ù†ÙˆØ² Ù…Ø­ØµÙˆÙ„ÛŒ Ø¨Ø±Ø§ÛŒ Ù…Ù‚Ø§ÛŒØ³Ù‡ Ù†ÛŒØ³Øª</strong><p>Ø¨Ø±Ø§ÛŒ Ù…Ù‚Ø§ÛŒØ³Ù‡ØŒ Ø¢ÛŒÚ©Ù† Ù…Ù‚Ø§ÛŒØ³Ù‡ Ø±ÙˆÛŒ Ú©Ø§Ø±Øª Ù…Ø­ØµÙˆÙ„ Ø±Ø§ Ø¨Ø²Ù†ÛŒØ¯.</p></div>',
       );
       return;
     }
@@ -572,12 +553,12 @@ $(function () {
       ids
         .map((id) => {
           const product = products.get(id) || {
-            name: "محصول منتخب",
+            name: "Ù…Ø­ØµÙˆÙ„ Ù…Ù†ØªØ®Ø¨",
             price: 0,
             image: "content/products/images/card/cordless-hammer-drill-hn-001-row-001-card-800.jpg",
           };
           const href = window.HNProductUrl?.(id) || "/search";
-          return `<article class="compare-panel-item" data-compare-id="${escapeHtml(id)}"><img src="${escapeHtml(product.image)}" alt="" loading="lazy"><span><strong><a class="header-panel-product-link" href="${escapeHtml(href)}">${escapeHtml(product.name)}</a></strong><small>${faNumber(product.price)} تومان</small></span><button class="cart-remove" type="button" data-compare-remove="${escapeHtml(id)}" aria-label="حذف ${escapeHtml(product.name)} از مقایسه"><i class="bi bi-trash3" aria-hidden="true"></i></button></article>`;
+          return `<article class="compare-panel-item" data-compare-id="${escapeHtml(id)}"><img src="${escapeHtml(product.image)}" alt="" loading="lazy"><span><strong><a class="header-panel-product-link" href="${escapeHtml(href)}">${escapeHtml(product.name)}</a></strong><small>${faNumber(product.price)} ØªÙˆÙ…Ø§Ù†</small></span><button class="cart-remove" type="button" data-compare-remove="${escapeHtml(id)}" aria-label="Ø­Ø°Ù ${escapeHtml(product.name)} Ø§Ø² Ù…Ù‚Ø§ÛŒØ³Ù‡"><i class="bi bi-trash3" aria-hidden="true"></i></button></article>`;
         })
         .join(""),
     );
@@ -702,15 +683,15 @@ $(function () {
       const carousel = event?.target || $element[0];
       carousel?.querySelectorAll(".owl-nav .owl-prev").forEach((button) => {
         button.setAttribute("role", "button");
-        button.setAttribute("aria-label", "اسلاید قبلی");
+        button.setAttribute("aria-label", "Ø§Ø³Ù„Ø§ÛŒØ¯ Ù‚Ø¨Ù„ÛŒ");
       });
       carousel?.querySelectorAll(".owl-nav .owl-next").forEach((button) => {
         button.setAttribute("role", "button");
-        button.setAttribute("aria-label", "اسلاید بعدی");
+        button.setAttribute("aria-label", "Ø§Ø³Ù„Ø§ÛŒØ¯ Ø¨Ø¹Ø¯ÛŒ");
       });
       carousel?.querySelectorAll(".owl-dots .owl-dot").forEach((button, index) => {
         button.setAttribute("role", "button");
-        button.setAttribute("aria-label", `رفتن به اسلاید ${faNumber(index + 1)}`);
+        button.setAttribute("aria-label", `Ø±ÙØªÙ† Ø¨Ù‡ Ø§Ø³Ù„Ø§ÛŒØ¯ ${faNumber(index + 1)}`);
       });
     };
     const initialized = options.onInitialized;
@@ -753,10 +734,10 @@ $(function () {
         .text(product.detail?.intro || product.type);
       $card
         .find(".featured-content > small")
-        .text(`${product.brand} · ${product.type}`);
+        .text(`${product.brand} Â· ${product.type}`);
       $card
         .find(".featured-price, .featured-buy strong")
-        .text(`${faNumber(product.price * 1000000)} تومان`);
+        .text(`${faNumber(product.price * 1000000)} ØªÙˆÙ…Ø§Ù†`);
       $card.find(".add-cart").attr({
         "data-id": String(product.id),
         "data-name": product.name,
@@ -765,7 +746,7 @@ $(function () {
       });
     });
   }
-  const categoryFilters = {"ابزار برقی": "power-tools", "ابزار اندازه‌گیری": "measurement", "لحیم‌کاری و تعمیر برد": "electronics", "روشنایی و لامپ": "lighting"};
+  const categoryFilters = {"Ø§Ø¨Ø²Ø§Ø± Ø¨Ø±Ù‚ÛŒ": "power-tools", "Ø§Ø¨Ø²Ø§Ø± Ø§Ù†Ø¯Ø§Ø²Ù‡â€ŒÚ¯ÛŒØ±ÛŒ": "measurement", "Ù„Ø­ÛŒÙ…â€ŒÚ©Ø§Ø±ÛŒ Ùˆ ØªØ¹Ù…ÛŒØ± Ø¨Ø±Ø¯": "electronics", "Ø±ÙˆØ´Ù†Ø§ÛŒÛŒ Ùˆ Ù„Ø§Ù…Ù¾": "lighting"};
   const grid = document.querySelector("#productGrid");
   if (grid) grid.innerHTML = (window.HNCatalog.collections.selected || []).map((id) => {
     const product = window.HNCatalog.find(id);
@@ -794,7 +775,7 @@ $(function () {
     if (amazingCount) amazingCount.textContent = faNumber(amazingProducts.length);
     amazingSlider.innerHTML = amazingProducts.map((product) => `<div class="showcase-slide">${window.HNProductCard.render(product, {
       variant: "grid", image: sliderImagePath(product), offer: true,
-      badge: product.discountPercent ? "" : "منتخب",
+      badge: product.discountPercent ? "" : "Ù…Ù†ØªØ®Ø¨",
     })}</div>`).join("");
     window.HNUI?.enhance(amazingSection);
   }
@@ -876,7 +857,7 @@ $(function () {
     const $image = $card.find(".product-image, .rail-image").first();
     if (!$image.find(".favorite").length) {
       $image.prepend(
-        '<button class="favorite" type="button" aria-label="افزودن به علاقه‌مندی"><i class="bi bi-heart"></i></button>',
+        '<button class="favorite" type="button" aria-label="Ø§ÙØ²ÙˆØ¯Ù† Ø¨Ù‡ Ø¹Ù„Ø§Ù‚Ù‡â€ŒÙ…Ù†Ø¯ÛŒ"><i class="bi bi-heart"></i></button>',
       );
     }
   });
@@ -988,7 +969,7 @@ $(function () {
           keyboard: true,
         })
       : null;
-  let userLoggedIn = window.HNUI.auth.isLoggedIn();
+  let userLoggedIn = false;
   const protectedRoots = new Set([
     "profile",
     "cart",
@@ -1034,11 +1015,11 @@ $(function () {
     $accountToggle
       .toggleClass("logged-out", !userLoggedIn)
       .toggleClass("logged-in", userLoggedIn)
-      .attr("aria-label", userLoggedIn ? "حساب من" : "ورود / ثبت‌نام در حساب کاربری")
+      .attr("aria-label", userLoggedIn ? "Ø­Ø³Ø§Ø¨ Ù…Ù†" : "ÙˆØ±ÙˆØ¯ / Ø«Ø¨Øªâ€ŒÙ†Ø§Ù… Ø¯Ø± Ø­Ø³Ø§Ø¨ Ú©Ø§Ø±Ø¨Ø±ÛŒ")
       .html(
         userLoggedIn
-          ? '<i class="bi bi-person" aria-hidden="true"></i><span class="account-label">حساب من</span><i class="bi bi-chevron-down" aria-hidden="true"></i>'
-          : '<i class="bi bi-person" aria-hidden="true"></i><span class="account-label">ورود / ثبت‌نام</span><i class="bi bi-chevron-down" aria-hidden="true"></i>',
+          ? '<i class="bi bi-person" aria-hidden="true"></i><span class="account-label">Ø­Ø³Ø§Ø¨ Ù…Ù†</span><i class="bi bi-chevron-down" aria-hidden="true"></i>'
+          : '<i class="bi bi-person" aria-hidden="true"></i><span class="account-label">ÙˆØ±ÙˆØ¯ / Ø«Ø¨Øªâ€ŒÙ†Ø§Ù…</span><i class="bi bi-chevron-down" aria-hidden="true"></i>',
       );
   };
   placeAccountPanel();
@@ -1093,6 +1074,7 @@ $(function () {
 
   let loginMode = "login";
   let pendingAuthMode = "login";
+  let pendingRegistrationProfile = null;
   const $loginEmailStep = $("#loginEmailStep");
   const $registerEmailStep = $("#registerEmailStep");
   const $forgotPasswordStep = $("#forgotPasswordStep");
@@ -1145,14 +1127,14 @@ $(function () {
     if (!emailInput.value.trim() || !emailInput.validity.valid) {
       window.HNUI.setMessage(
         document.querySelector("#forgotPasswordError"),
-        "ایمیل را با قالب صحیح وارد کنید.",
+        "Ø§ÛŒÙ…ÛŒÙ„ Ø±Ø§ Ø¨Ø§ Ù‚Ø§Ù„Ø¨ ØµØ­ÛŒØ­ ÙˆØ§Ø±Ø¯ Ú©Ù†ÛŒØ¯.",
         "error",
       );
       return;
     }
     window.HNUI.setMessage(
       document.querySelector("#forgotPasswordError"),
-      "ارسال ایمیل بازنشانی هنوز به سرویس ایمیل سایت متصل نشده است.",
+      "Ø§Ø±Ø³Ø§Ù„ Ø§ÛŒÙ…ÛŒÙ„ Ø¨Ø§Ø²Ù†Ø´Ø§Ù†ÛŒ Ù‡Ù†ÙˆØ² Ø¨Ù‡ Ø³Ø±ÙˆÛŒØ³ Ø§ÛŒÙ…ÛŒÙ„ Ø³Ø§ÛŒØª Ù…ØªØµÙ„ Ù†Ø´Ø¯Ù‡ Ø§Ø³Øª.",
       "warning",
     );
   });
@@ -1167,10 +1149,10 @@ $(function () {
         body: JSON.stringify({ email }),
       });
       const result = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(result.message || "ارسال کد انجام نشد. دوباره تلاش کنید.");
+      if (!response.ok) throw new Error(result.message || "Ø§Ø±Ø³Ø§Ù„ Ú©Ø¯ Ø§Ù†Ø¬Ø§Ù… Ù†Ø´Ø¯. Ø¯ÙˆØ¨Ø§Ø±Ù‡ ØªÙ„Ø§Ø´ Ú©Ù†ÛŒØ¯.");
     } catch (error) {
       const $message = mode === "register" ? $registerEmailError : $loginEmailError;
-      window.HNUI.setMessage($message[0], error.message || "ارتباط با سرویس ارسال ایمیل برقرار نشد.", "error");
+      window.HNUI.setMessage($message[0], error.message || "Ø§Ø±ØªØ¨Ø§Ø· Ø¨Ø§ Ø³Ø±ÙˆÛŒØ³ Ø§Ø±Ø³Ø§Ù„ Ø§ÛŒÙ…ÛŒÙ„ Ø¨Ø±Ù‚Ø±Ø§Ø± Ù†Ø´Ø¯.", "error");
       return;
     } finally {
       $submit.prop("disabled", false);
@@ -1179,8 +1161,8 @@ $(function () {
     $("#sentEmail").text(email);
     $("#emailOtpTitle").text(
       mode === "register"
-        ? "کد فعال‌سازی را وارد کنید"
-        : "کد ورود را وارد کنید",
+        ? "Ú©Ø¯ ÙØ¹Ø§Ù„â€ŒØ³Ø§Ø²ÛŒ Ø±Ø§ ÙˆØ§Ø±Ø¯ Ú©Ù†ÛŒØ¯"
+        : "Ú©Ø¯ ÙˆØ±ÙˆØ¯ Ø±Ø§ ÙˆØ§Ø±Ø¯ Ú©Ù†ÛŒØ¯",
     );
     $(".login-auth-tabs").addClass("d-none");
     $loginEmailStep.addClass("d-none").prop("hidden", true);
@@ -1188,10 +1170,120 @@ $(function () {
     $emailOtpStep.removeClass("d-none").prop("hidden", false);
     $emailOtpInput.val("").trigger("focus");
   };
-  const completeDemoLogin = () => {
+  const migrateLegacyFeedback = async (account) => {
+    const storage = window.HNUI.storage;
+    for (const key of storage.legacyKeys()) {
+      if (key === recentSearchKey) {
+        const items = storage.json(key, []);
+        let complete = true;
+        for (const query of (Array.isArray(items) ? items : []).slice(0, 6)) {
+          try {
+            const response = await window.HNUI.api.request("account/recent-searches", {
+              method: "POST", headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ query: String(query).slice(0, 80) }),
+            });
+            if (!response.ok) complete = false;
+          } catch { complete = false; }
+        }
+        if (complete) { storage.remove(key); storage.clearLegacy(key); }
+        continue;
+      }
+      const productMatch = key.match(/^hn-product-(reviews|questions)-([1-9]\d*)$/);
+      if (productMatch) {
+        const items = storage.json(key, []);
+        if (!Array.isArray(items) || !items.length) { storage.clearLegacy(key); continue; }
+        try {
+          const response = await window.HNUI.api.request(`store/products/${productMatch[2]}/feedback/${productMatch[1]}/import`, {
+            method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ items: items.slice(0, 50).map((item) => ({
+              name: item.name, text: item.text,
+              rating: productMatch[1] === "reviews" ? Number(item.rating) || 5 : null,
+              createdAt: item.createdAt || null,
+            })) }),
+          });
+          if (response.ok) { storage.remove(key); storage.clearLegacy(key); }
+        } catch { /* Keep the legacy copy in memory until the next API attempt. */ }
+        continue;
+      }
+
+      const likedMatch = key.match(/^hn-article-feedback-v1-(.+)-liked$/);
+      if (likedMatch && storage.legacy(key) === "true") {
+        const slug = likedMatch[1];
+        const alreadyLiked = (account.articleInteractions || []).some((item) => item.slug === slug && item.type === "like");
+        if (!alreadyLiked) {
+          try {
+            const response = await window.HNUI.api.request(`account/articles/${encodeURIComponent(slug)}/interactions/like`, { method: "POST" });
+            if (!response.ok) continue;
+          } catch { continue; }
+        }
+        storage.remove(key); storage.clearLegacy(key);
+        continue;
+      }
+
+      const articleMatch = key.match(/^hn-article-feedback-v1-(?!.*-liked$)(.+)$/);
+      if (!articleMatch) continue;
+      const slug = articleMatch[1];
+      const items = storage.json(key, []);
+      if (!Array.isArray(items) || !items.length) { storage.clearLegacy(key); continue; }
+      const existing = new Set((account.articleFeedback || []).filter((item) => item.slug === slug).map((item) => `${item.name}\n${item.text}`));
+      let complete = true;
+      for (const item of items.slice(0, 50)) {
+        const signature = `${item.name}\n${item.text}`;
+        if (existing.has(signature)) continue;
+        try {
+          const response = await window.HNUI.api.request(`account/articles/${encodeURIComponent(slug)}/feedback`, {
+            method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name: item.name, text: item.text, rating: item.rating ?? null }),
+          });
+          if (!response.ok) { complete = false; continue; }
+          existing.add(signature);
+        } catch { complete = false; }
+      }
+      if (complete) { storage.remove(key); storage.clearLegacy(key); }
+    }
+    document.dispatchEvent(new CustomEvent("hn:legacy-data-imported"));
+  };
+
+  const completeDemoLogin = async () => {
+    try {
+      const response = await window.HNUI.api.request("account/state");
+      if (response.ok) {
+        const account = await response.json();
+        await migrateLegacyFeedback(account);
+        if (account.checkout?.selectedAddressId) window.HNUI.storage.set("hn-selected-address", String(account.checkout.selectedAddressId));
+        if (account.checkout?.paymentMethod) window.HNUI.storage.set("hn-payment-method-v2", account.checkout.paymentMethod);
+        const localAlerts = window.HNUI.storage.json("hn-price-watches-demo", []);
+        const alertKey = (item) => `${item.productId}:${item.scope}:${JSON.stringify(item.variants || {})}`;
+        const mergedAlerts = new Map([...(Array.isArray(account.priceAlerts) ? account.priceAlerts : []), ...(Array.isArray(localAlerts) ? localAlerts : [])].map((item) => [alertKey(item), item]));
+        window.HNUI.storage.set("hn-price-watches-demo", JSON.stringify([...mergedAlerts.values()]));
+        for (const [key, remote] of [["hn-favorites", account.favorites], ["hn-compare", account.compare]]) {
+          const local = window.HNUI.storage.json(key, []);
+          window.HNUI.storage.set(key, JSON.stringify([...new Set([...(Array.isArray(remote) ? remote.map((entry) => String(entry.id)) : []), ...(Array.isArray(local) ? local.map(String) : [])])]));
+        }
+        const addresses = Array.isArray(account.addresses) ? [...account.addresses] : [];
+        for (const address of window.HNUI.storage.json("hn-delivery-addresses", [])) {
+          if (addresses.some((saved) => String(saved.id) === String(address.id))) continue;
+          const savedResponse = await window.HNUI.api.request("account/addresses", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: address.title, recipient: address.recipient, phone: address.phone, country: address.country, countryId: address.countryId, province: address.province, provinceId: address.provinceId, city: address.city, cityId: address.cityId, street: address.street, postal: address.postal }) });
+          if (savedResponse.ok) { const saved = await savedResponse.json(); addresses.push({ ...address, id: String(saved.id) }); }
+        }
+        window.HNUI.storage.set("hn-delivery-addresses", JSON.stringify(addresses));
+        const cart = window.HNUI.cart.read();
+        const restored = (Array.isArray(account.cart) ? account.cart : []).flatMap((line) => {
+          if (cart.some((item) => String(item.id) === String(line.id) && String(item.salesPlanId || "regular") === String(line.salesPlanId))) return [];
+          const product = (window.HNProducts || []).find((candidate) => String(candidate.id) === String(line.id));
+          return product ? [{ ...product, id: String(line.id), quantity: Number(line.quantity), salesPlanId: line.salesPlanId, options: line.options || {} }] : [];
+        });
+        if (restored.length) window.HNUI.cart.write([...cart, ...restored]);
+      }
+    } catch { }
+    if (pendingAuthMode === "register" && pendingRegistrationProfile)
+      await window.HNUI.api.request("account/profile", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(pendingRegistrationProfile) });
     userLoggedIn = true;
     resumeAuthenticatedAction = true;
     window.HNUI.auth.login();
+    for (const key of ["hn-favorites", "hn-compare"]) window.HNUI.storage.set(key, window.HNUI.storage.get(key, "[]"));
+    window.HNUI.storage.set("hn-price-watches-demo", window.HNUI.storage.get("hn-price-watches-demo", "[]"));
+    window.HNUI.cart.write(window.HNUI.cart.read());
     updateAccountUI();
     if (loginModal) loginModal.hide();
     else {
@@ -1209,13 +1301,13 @@ $(function () {
     if (!email || !$("#loginEmail")[0].validity.valid || !password) {
       window.HNUI.setMessage(
         $loginEmailError[0],
-        "ایمیل معتبر و رمز عبور را وارد کنید.",
+        "Ø§ÛŒÙ…ÛŒÙ„ Ù…Ø¹ØªØ¨Ø± Ùˆ Ø±Ù…Ø² Ø¹Ø¨ÙˆØ± Ø±Ø§ ÙˆØ§Ø±Ø¯ Ú©Ù†ÛŒØ¯.",
         "error",
       );
       return;
     }
     window.HNUI.setMessage($loginEmailError[0], "");
-    completeDemoLogin();
+    void requestEmailCode("login", email);
   });
 
   $("#registerEmailForm").on("submit", (event) => {
@@ -1227,11 +1319,12 @@ $(function () {
     if (!firstName || !lastName || !emailInput.validity.valid) {
       window.HNUI.setMessage(
         $registerEmailError[0],
-        "نام، نام خانوادگی و ایمیل معتبر را وارد کنید.",
+        "Ù†Ø§Ù…ØŒ Ù†Ø§Ù… Ø®Ø§Ù†ÙˆØ§Ø¯Ú¯ÛŒ Ùˆ Ø§ÛŒÙ…ÛŒÙ„ Ù…Ø¹ØªØ¨Ø± Ø±Ø§ ÙˆØ§Ø±Ø¯ Ú©Ù†ÛŒØ¯.",
         "error",
       );
       return;
     }
+    pendingRegistrationProfile = { firstName, lastName, phone: null };
     window.HNUI.setMessage($registerEmailError[0], "");
     void requestEmailCode("register", email);
   });
@@ -1248,7 +1341,7 @@ $(function () {
     if (!/^\d{6}$/.test(code)) {
       window.HNUI.setMessage(
         $emailOtpError[0],
-        "کد شش‌رقمی را کامل وارد کنید.",
+        "Ú©Ø¯ Ø´Ø´â€ŒØ±Ù‚Ù…ÛŒ Ø±Ø§ Ú©Ø§Ù…Ù„ ÙˆØ§Ø±Ø¯ Ú©Ù†ÛŒØ¯.",
         "error",
       );
       return;
@@ -1262,10 +1355,10 @@ $(function () {
         body: JSON.stringify({ email: $("#sentEmail").text(), code }),
       });
       const result = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(result.message || "کد تأیید معتبر نیست.");
+      if (!response.ok) throw new Error(result.message || "Ú©Ø¯ ØªØ£ÛŒÛŒØ¯ Ù…Ø¹ØªØ¨Ø± Ù†ÛŒØ³Øª.");
       completeDemoLogin();
     } catch (error) {
-      window.HNUI.setMessage($emailOtpError[0], error.message || "ارتباط با سرویس تأیید برقرار نشد.", "error");
+      window.HNUI.setMessage($emailOtpError[0], error.message || "Ø§Ø±ØªØ¨Ø§Ø· Ø¨Ø§ Ø³Ø±ÙˆÛŒØ³ ØªØ£ÛŒÛŒØ¯ Ø¨Ø±Ù‚Ø±Ø§Ø± Ù†Ø´Ø¯.", "error");
     } finally {
       $submit.prop("disabled", false);
     }
@@ -1306,16 +1399,64 @@ $(function () {
       if (protectedPath) window.location.replace("/");
     }
   });
+  void window.HNUI.api.request("auth/email-code/session").then(async (response) => {
+    const session = response.ok ? await response.json() : { authenticated: false };
+    userLoggedIn = session.authenticated === true;
+    if (userLoggedIn) {
+      try {
+        const stateResponse = await window.HNUI.api.request("account/state");
+        if (stateResponse.ok) {
+          const account = await stateResponse.json();
+          await migrateLegacyFeedback(account);
+          if (account.checkout?.selectedAddressId) window.HNUI.storage.set("hn-selected-address", String(account.checkout.selectedAddressId));
+          if (account.checkout?.paymentMethod) window.HNUI.storage.set("hn-payment-method-v2", account.checkout.paymentMethod);
+          const localAlerts = window.HNUI.storage.json("hn-price-watches-demo", []);
+          const alertKey = (item) => `${item.productId}:${item.scope}:${JSON.stringify(item.variants || {})}`;
+          const mergedAlerts = new Map([...(Array.isArray(account.priceAlerts) ? account.priceAlerts : []), ...(Array.isArray(localAlerts) ? localAlerts : [])].map((item) => [alertKey(item), item]));
+          window.HNUI.storage.set("hn-price-watches-demo", JSON.stringify([...mergedAlerts.values()]));
+          for (const [key, remote] of [["hn-favorites", account.favorites], ["hn-compare", account.compare]]) {
+            const local = window.HNUI.storage.json(key, []);
+            const merged = [...new Set([...(Array.isArray(remote) ? remote.map((entry) => String(entry.id)) : []), ...(Array.isArray(local) ? local.map(String) : [])])];
+            window.HNUI.storage.set(key, JSON.stringify(merged));
+          }
+          if (Array.isArray(account.addresses)) {
+            const localAddresses = window.HNUI.storage.json("hn-delivery-addresses", []);
+            const mergedAddresses = [...account.addresses];
+            for (const address of Array.isArray(localAddresses) ? localAddresses : []) {
+              if (mergedAddresses.some((saved) => String(saved.id) === String(address.id))) continue;
+              const saveResponse = await window.HNUI.api.request("account/addresses", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: address.title, recipient: address.recipient, phone: address.phone, country: address.country, countryId: address.countryId, province: address.province, provinceId: address.provinceId, city: address.city, cityId: address.cityId, street: address.street, postal: address.postal }) });
+              if (!saveResponse.ok) continue;
+              const saved = await saveResponse.json();
+              mergedAddresses.push({ ...address, id: String(saved.id) });
+            }
+            window.HNUI.storage.set("hn-delivery-addresses", JSON.stringify(mergedAddresses));
+          }
+          const localCart = window.HNUI.cart.read();
+          const restored = (Array.isArray(account.cart) ? account.cart : []).flatMap((line) => {
+            if (localCart.some((item) => String(item.id) === String(line.id) && String(item.salesPlanId || "regular") === String(line.salesPlanId))) return [];
+            const product = (window.HNProducts || []).find((candidate) => String(candidate.id) === String(line.id));
+            return product ? [{ ...product, id: String(line.id), quantity: Number(line.quantity), salesPlanId: line.salesPlanId, options: line.options || {} }] : [];
+          });
+          if (restored.length) window.HNUI.cart.write([...localCart, ...restored]);
+        }
+      } catch { }
+      window.HNUI.auth.login();
+      for (const key of ["hn-favorites", "hn-compare"]) window.HNUI.storage.set(key, window.HNUI.storage.get(key, "[]"));
+      window.HNUI.storage.set("hn-price-watches-demo", window.HNUI.storage.get("hn-price-watches-demo", "[]"));
+      window.HNUI.cart.write(window.HNUI.cart.read());
+    } else window.HNUI.storage.remove("hn-demo-auth");
+    updateAccountUI();
+    if (!userLoggedIn && protectedPath) showLoginModal(() => window.location.reload());
+  }).catch(() => { userLoggedIn = false; window.HNUI.storage.remove("hn-demo-auth"); updateAccountUI(); if (protectedPath) showLoginModal(() => window.location.reload()); });
+
   $(".account-links>a:last-child").on("click", (event) => {
     event.preventDefault();
     userLoggedIn = false;
+    void window.HNUI.api.request("auth/email-code/logout", { method: "POST" });
     window.HNUI.auth.logout();
     setAccountOpen(false);
     updateAccountUI();
   });
-  if (protectedPath && !userLoggedIn)
-    showLoginModal(() => window.location.reload());
-
   const saveCart = () => {
     cart = window.HNUI?.cart.write(cart) || cart;
     renderCart();
@@ -1328,8 +1469,8 @@ $(function () {
       0,
     );
     $("#cartCount").text(faNumber(totalCount));
-    $("#cartTitleCount").text(`${faNumber(totalCount)} محصول`);
-    $("#cartTotal").text(`${faNumber(totalPrice)} تومان`);
+    $("#cartTitleCount").text(`${faNumber(totalCount)} Ù…Ø­ØµÙˆÙ„`);
+    $("#cartTotal").text(`${faNumber(totalPrice)} ØªÙˆÙ…Ø§Ù†`);
     $cartFooter.toggle(cart.length > 0);
     const shape = JSON.stringify(cart.map(({ quantity, ...item }) => item));
     if (cart.length && shape === renderedHeaderCartShape) {
@@ -1345,7 +1486,7 @@ $(function () {
     renderedHeaderCartShape = shape;
     if (!cart.length) {
       $cartItems.html(
-        '<div class="empty-cart header-panel-empty"><span class="empty-cart-icon header-panel-empty-icon"><i class="bi bi-cart3" aria-hidden="true"></i></span><strong>سبد خرید شما خالی است</strong><p>برای شروع، یک محصول به سبد خرید اضافه کنید.</p></div>',
+        '<div class="empty-cart header-panel-empty"><span class="empty-cart-icon header-panel-empty-icon"><i class="bi bi-cart3" aria-hidden="true"></i></span><strong>Ø³Ø¨Ø¯ Ø®Ø±ÛŒØ¯ Ø´Ù…Ø§ Ø®Ø§Ù„ÛŒ Ø§Ø³Øª</strong><p>Ø¨Ø±Ø§ÛŒ Ø´Ø±ÙˆØ¹ØŒ ÛŒÚ© Ù…Ø­ØµÙˆÙ„ Ø¨Ù‡ Ø³Ø¨Ø¯ Ø®Ø±ÛŒØ¯ Ø§Ø¶Ø§ÙÙ‡ Ú©Ù†ÛŒØ¯.</p></div>',
       );
       return;
     }
@@ -1358,7 +1499,7 @@ $(function () {
           const href = window.HNProductUrl?.(item.id, {salesPlanId: item.salesPlanId}) || "/search";
           const planDetails = item.salesPlanSnapshot;
           const planBadge = `<span class="cart-sales-plan-badge">${escapeHtml(window.HNUI.cart.salesPlanName(item.salesPlanId, planDetails?.name))}</span>`;
-          return `<div class="cart-item" data-cart-id="${safeId}" data-sales-plan-id="${escapeHtml(item.salesPlanId || "regular")}"><div class="cart-item-primary"><img src="${safeImage}" alt="${safeName}" loading="lazy" decoding="async"><div class="cart-item-info"><strong><a class="header-panel-product-link" href="${escapeHtml(href)}">${safeName}</a></strong>${planBadge}<div class="cart-item-actions"><span>${faNumber(item.price)} تومان</span>${window.HNUI.cart.renderControls(item)}</div></div></div>${cartOptionsMarkup(item)}</div>`;
+          return `<div class="cart-item" data-cart-id="${safeId}" data-sales-plan-id="${escapeHtml(item.salesPlanId || "regular")}"><div class="cart-item-primary"><img src="${safeImage}" alt="${safeName}" loading="lazy" decoding="async"><div class="cart-item-info"><strong><a class="header-panel-product-link" href="${escapeHtml(href)}">${safeName}</a></strong>${planBadge}<div class="cart-item-actions"><span>${faNumber(item.price)} ØªÙˆÙ…Ø§Ù†</span>${window.HNUI.cart.renderControls(item)}</div></div></div>${cartOptionsMarkup(item)}</div>`;
         })
         .join(""),
     );
@@ -1608,15 +1749,15 @@ $(function () {
     }
     $button.attr(
       "aria-label",
-      isFavorite ? "حذف از علاقه‌مندی‌ها" : "افزودن به علاقه‌مندی‌ها",
+      isFavorite ? "Ø­Ø°Ù Ø§Ø² Ø¹Ù„Ø§Ù‚Ù‡â€ŒÙ…Ù†Ø¯ÛŒâ€ŒÙ‡Ø§" : "Ø§ÙØ²ÙˆØ¯Ù† Ø¨Ù‡ Ø¹Ù„Ø§Ù‚Ù‡â€ŒÙ…Ù†Ø¯ÛŒâ€ŒÙ‡Ø§",
     );
     $button
       .find("i")
       .attr("class", isFavorite ? "bi bi-heart-fill" : "bi bi-heart");
     showListActionToast(
       isFavorite
-        ? "محصول به علاقه‌مندی‌ها اضافه شد."
-        : "محصول از علاقه‌مندی‌ها حذف شد.",
+        ? "Ù…Ø­ØµÙˆÙ„ Ø¨Ù‡ Ø¹Ù„Ø§Ù‚Ù‡â€ŒÙ…Ù†Ø¯ÛŒâ€ŒÙ‡Ø§ Ø§Ø¶Ø§ÙÙ‡ Ø´Ø¯."
+        : "Ù…Ø­ØµÙˆÙ„ Ø§Ø² Ø¹Ù„Ø§Ù‚Ù‡â€ŒÙ…Ù†Ø¯ÛŒâ€ŒÙ‡Ø§ Ø­Ø°Ù Ø´Ø¯.",
     );
   });
 
@@ -1695,7 +1836,7 @@ $(function () {
     event.preventDefault();
     window.HNUI.setMessage(
       document.querySelector("#formMessage"),
-      "ثبت‌نام خبرنامه هنوز فعال نیست؛ اطلاعاتی ارسال یا ذخیره نشد.",
+      "Ø«Ø¨Øªâ€ŒÙ†Ø§Ù… Ø®Ø¨Ø±Ù†Ø§Ù…Ù‡ Ù‡Ù†ÙˆØ² ÙØ¹Ø§Ù„ Ù†ÛŒØ³ØªØ› Ø§Ø·Ù„Ø§Ø¹Ø§ØªÛŒ Ø§Ø±Ø³Ø§Ù„ ÛŒØ§ Ø°Ø®ÛŒØ±Ù‡ Ù†Ø´Ø¯.",
       "warning",
     );
     $(event.currentTarget).trigger("reset");
@@ -1710,7 +1851,7 @@ $(function () {
     const name = String(
       $cartButton.data("name") ||
         $root.find("h3").first().text() ||
-        "محصول منتخب",
+        "Ù…Ø­ØµÙˆÙ„ Ù…Ù†ØªØ®Ø¨",
     );
     const productId = String($cartButton.data("id") || "");
     const catalogProduct = (window.HNProducts || []).find(
@@ -1727,7 +1868,7 @@ $(function () {
       ),
       code: catalogProduct
         ? catalogProduct.code
-        : $root.find("small").first().text() || "کد محصول",
+        : $root.find("small").first().text() || "Ú©Ø¯ Ù…Ø­ØµÙˆÙ„",
       brand: catalogProduct?.brand || "",
       type: catalogProduct?.type || "",
       powerSource: catalogProduct?.powerSource || catalogProduct?.movement || "",
@@ -1756,19 +1897,19 @@ $(function () {
     const productId = String($cartButton.data("id") || "");
     if (!$image.find(".favorite").length) {
       $image.prepend(
-        `<button class="favorite" type="button" data-product-id="${escapeHtml(productId)}" aria-label="افزودن به علاقه‌مندی‌ها" aria-pressed="false" title="علاقه‌مندی‌ها"><i class="bi bi-heart" aria-hidden="true"></i></button>`,
+        `<button class="favorite" type="button" data-product-id="${escapeHtml(productId)}" aria-label="Ø§ÙØ²ÙˆØ¯Ù† Ø¨Ù‡ Ø¹Ù„Ø§Ù‚Ù‡â€ŒÙ…Ù†Ø¯ÛŒâ€ŒÙ‡Ø§" aria-pressed="false" title="Ø¹Ù„Ø§Ù‚Ù‡â€ŒÙ…Ù†Ø¯ÛŒâ€ŒÙ‡Ø§"><i class="bi bi-heart" aria-hidden="true"></i></button>`,
       );
     }
     $image.find(".favorite").attr("data-product-id", productId);
     if (productId && !$image.find(".compare-trigger[data-product-id]").length) {
       $image.append(
-        `<button type="button" class="compare-trigger" data-product-id="${escapeHtml(productId)}" aria-label="افزودن به مقایسه" aria-pressed="false" title="افزودن به مقایسه"><i class="bi bi-arrow-left-right" aria-hidden="true"></i></button>`,
+        `<button type="button" class="compare-trigger" data-product-id="${escapeHtml(productId)}" aria-label="Ø§ÙØ²ÙˆØ¯Ù† Ø¨Ù‡ Ù…Ù‚Ø§ÛŒØ³Ù‡" aria-pressed="false" title="Ø§ÙØ²ÙˆØ¯Ù† Ø¨Ù‡ Ù…Ù‚Ø§ÛŒØ³Ù‡"><i class="bi bi-arrow-left-right" aria-hidden="true"></i></button>`,
       );
     }
     let $actions = $image.children(".product-card-actions");
     if (!$actions.length)
       $actions = $(
-        '<div class="product-card-actions" role="group" aria-label="عملیات محصول"></div>',
+        '<div class="product-card-actions" role="group" aria-label="Ø¹Ù…Ù„ÛŒØ§Øª Ù…Ø­ØµÙˆÙ„"></div>',
       ).appendTo($image);
     $image.children(".favorite, .compare-trigger").appendTo($actions);
     const outOfStock = $cartButton.prop("disabled");
@@ -1776,18 +1917,18 @@ $(function () {
       ? "bi bi-bag-x"
       : $cartButton.find("> i").attr("class") || "bi bi-bag-plus";
     $cartButton.html(
-      `<i class="${escapeHtml(cartIconClass)}" aria-hidden="true"></i><span class="add-cart-label">${outOfStock ? "ناموجود" : "افزودن به سبد"}</span>`,
+      `<i class="${escapeHtml(cartIconClass)}" aria-hidden="true"></i><span class="add-cart-label">${outOfStock ? "Ù†Ø§Ù…ÙˆØ¬ÙˆØ¯" : "Ø§ÙØ²ÙˆØ¯Ù† Ø¨Ù‡ Ø³Ø¨Ø¯"}</span>`,
     );
     $cartButton.attr({
-      "aria-label": outOfStock ? "ناموجود" : "افزودن به سبد خرید",
-      title: outOfStock ? "موجودی این کالا تمام شده است" : "افزودن به سبد خرید",
+      "aria-label": outOfStock ? "Ù†Ø§Ù…ÙˆØ¬ÙˆØ¯" : "Ø§ÙØ²ÙˆØ¯Ù† Ø¨Ù‡ Ø³Ø¨Ø¯ Ø®Ø±ÛŒØ¯",
+      title: outOfStock ? "Ù…ÙˆØ¬ÙˆØ¯ÛŒ Ø§ÛŒÙ† Ú©Ø§Ù„Ø§ ØªÙ…Ø§Ù… Ø´Ø¯Ù‡ Ø§Ø³Øª" : "Ø§ÙØ²ÙˆØ¯Ù† Ø¨Ù‡ Ø³Ø¨Ø¯ Ø®Ø±ÛŒØ¯",
     });
     $card.attr("data-action-dock-ready", "true");
     syncCompareButtons();
     syncFavoriteButtons();
     if (!$image.find(".quick").length)
       $image.append(
-        '<button type="button" class="quick">مشاهده سریع <i class="bi bi-arrow-left"></i></button>',
+        '<button type="button" class="quick">Ù…Ø´Ø§Ù‡Ø¯Ù‡ Ø³Ø±ÛŒØ¹ <i class="bi bi-arrow-left"></i></button>',
       );
   };
   const decorateProductCards = (root = document) => {
@@ -1942,8 +2083,8 @@ $(function () {
     }
     showListActionToast(
       isCompared
-        ? "محصول به فهرست مقایسه اضافه شد."
-        : "محصول از فهرست مقایسه حذف شد.",
+        ? "Ù…Ø­ØµÙˆÙ„ Ø¨Ù‡ ÙÙ‡Ø±Ø³Øª Ù…Ù‚Ø§ÛŒØ³Ù‡ Ø§Ø¶Ø§ÙÙ‡ Ø´Ø¯."
+        : "Ù…Ø­ØµÙˆÙ„ Ø§Ø² ÙÙ‡Ø±Ø³Øª Ù…Ù‚Ø§ÛŒØ³Ù‡ Ø­Ø°Ù Ø´Ø¯.",
     );
     setCartOpen(false);
   });
@@ -1957,15 +2098,15 @@ $(function () {
     $quickAdd
       .prop("disabled", unavailable)
       .attr("aria-disabled", String(unavailable))
-      .attr("aria-label", unavailable ? "ناموجود" : "افزودن به سبد خرید")
-      .attr("title", unavailable ? "موجودی این کالا تمام شده است" : "افزودن به سبد خرید")
+      .attr("aria-label", unavailable ? "Ù†Ø§Ù…ÙˆØ¬ÙˆØ¯" : "Ø§ÙØ²ÙˆØ¯Ù† Ø¨Ù‡ Ø³Ø¨Ø¯ Ø®Ø±ÛŒØ¯")
+      .attr("title", unavailable ? "Ù…ÙˆØ¬ÙˆØ¯ÛŒ Ø§ÛŒÙ† Ú©Ø§Ù„Ø§ ØªÙ…Ø§Ù… Ø´Ø¯Ù‡ Ø§Ø³Øª" : "Ø§ÙØ²ÙˆØ¯Ù† Ø¨Ù‡ Ø³Ø¨Ø¯ Ø®Ø±ÛŒØ¯")
       .toggleClass("is-out-of-stock", unavailable)
-      .html(`<i class="bi ${unavailable ? "bi-bag-x" : "bi-bag-plus"}" aria-hidden="true"></i> ${unavailable ? "ناموجود" : "افزودن به سبد خرید"}`);
+      .html(`<i class="bi ${unavailable ? "bi-bag-x" : "bi-bag-plus"}" aria-hidden="true"></i> ${unavailable ? "Ù†Ø§Ù…ÙˆØ¬ÙˆØ¯" : "Ø§ÙØ²ÙˆØ¯Ù† Ø¨Ù‡ Ø³Ø¨Ø¯ Ø®Ø±ÛŒØ¯"}`);
     $(".stock-note > span").html(
-      `<i aria-hidden="true"></i> ${unavailable ? "ناموجود" : "موجود در انبار"}`,
+      `<i aria-hidden="true"></i> ${unavailable ? "Ù†Ø§Ù…ÙˆØ¬ÙˆØ¯" : "Ù…ÙˆØ¬ÙˆØ¯ Ø¯Ø± Ø§Ù†Ø¨Ø§Ø±"}`,
     );
     $(".stock-note > small").text(
-      unavailable ? "موجودی این کالا تمام شده است." : "زمان ارسال بر اساس مقصد و سفارش اعلام می‌شود.",
+      unavailable ? "Ù…ÙˆØ¬ÙˆØ¯ÛŒ Ø§ÛŒÙ† Ú©Ø§Ù„Ø§ ØªÙ…Ø§Ù… Ø´Ø¯Ù‡ Ø§Ø³Øª." : "Ø²Ù…Ø§Ù† Ø§Ø±Ø³Ø§Ù„ Ø¨Ø± Ø§Ø³Ø§Ø³ Ù…Ù‚ØµØ¯ Ùˆ Ø³ÙØ§Ø±Ø´ Ø§Ø¹Ù„Ø§Ù… Ù…ÛŒâ€ŒØ´ÙˆØ¯.",
     );
     $("#quickViewImage").attr({
       src: product.image,
@@ -1973,16 +2114,16 @@ $(function () {
     });
     $("#quickViewTitle").text(product.name);
     $("#quickViewCode").text(
-      `${product.brand ? `${product.brand} · ` : ""}${product.code}`,
+      `${product.brand ? `${product.brand} Â· ` : ""}${product.code}`,
     );
-    $("#quickViewPrice").text(`${faNumber(product.price)} تومان`);
+    $("#quickViewPrice").text(`${faNumber(product.price)} ØªÙˆÙ…Ø§Ù†`);
     $(".quick-description").text(
-      product.detail?.highlights?.[0] || product.detail?.intro || "مشخصات این مدل را بررسی کنید.",
+      product.detail?.highlights?.[0] || product.detail?.intro || "Ù…Ø´Ø®ØµØ§Øª Ø§ÛŒÙ† Ù…Ø¯Ù„ Ø±Ø§ Ø¨Ø±Ø±Ø³ÛŒ Ú©Ù†ÛŒØ¯.",
     );
     const quickSpecs = [
-      ["گروه محصول", product.type],
-      ["منبع تغذیه", product.powerSource || product.movement],
-      ["مورد استفاده", product.useCase || product.strap],
+      ["Ú¯Ø±ÙˆÙ‡ Ù…Ø­ØµÙˆÙ„", product.type],
+      ["Ù…Ù†Ø¨Ø¹ ØªØºØ°ÛŒÙ‡", product.powerSource || product.movement],
+      ["Ù…ÙˆØ±Ø¯ Ø§Ø³ØªÙØ§Ø¯Ù‡", product.useCase || product.strap],
     ].filter(([, value]) => value);
     $("#quickViewSpecs").html(
       quickSpecs
@@ -2069,10 +2210,10 @@ $(function () {
   document.addEventListener("hn:cart-stock-limit", (event) => {
     const { product, stock, limit, reason } = event.detail || {};
     const message = reason === "cart" && Number.isFinite(Number(limit))
-      ? `حداکثر تعداد مجاز برای «${product?.name || "این کالا"}» ${faNumber(Number(limit))} عدد است.`
+      ? `Ø­Ø¯Ø§Ú©Ø«Ø± ØªØ¹Ø¯Ø§Ø¯ Ù…Ø¬Ø§Ø² Ø¨Ø±Ø§ÛŒ Â«${product?.name || "Ø§ÛŒÙ† Ú©Ø§Ù„Ø§"}Â» ${faNumber(Number(limit))} Ø¹Ø¯Ø¯ Ø§Ø³Øª.`
       : product?.name && Number.isFinite(Number(stock))
-        ? `موجودی «${product.name}» فقط ${faNumber(Number(stock))} عدد است؛ تعداد سبد به سقف موجودی رسید.`
-        : "تعداد درخواستی از سقف مجاز کالا بیشتر بود؛ تعداد سبد به‌روزرسانی شد.";
+        ? `Ù…ÙˆØ¬ÙˆØ¯ÛŒ Â«${product.name}Â» ÙÙ‚Ø· ${faNumber(Number(stock))} Ø¹Ø¯Ø¯ Ø§Ø³ØªØ› ØªØ¹Ø¯Ø§Ø¯ Ø³Ø¨Ø¯ Ø¨Ù‡ Ø³Ù‚Ù Ù…ÙˆØ¬ÙˆØ¯ÛŒ Ø±Ø³ÛŒØ¯.`
+        : "ØªØ¹Ø¯Ø§Ø¯ Ø¯Ø±Ø®ÙˆØ§Ø³ØªÛŒ Ø§Ø² Ø³Ù‚Ù Ù…Ø¬Ø§Ø² Ú©Ø§Ù„Ø§ Ø¨ÛŒØ´ØªØ± Ø¨ÙˆØ¯Ø› ØªØ¹Ø¯Ø§Ø¯ Ø³Ø¨Ø¯ Ø¨Ù‡â€ŒØ±ÙˆØ²Ø±Ø³Ø§Ù†ÛŒ Ø´Ø¯.";
     showListActionToast(message, "warning");
   });
   });

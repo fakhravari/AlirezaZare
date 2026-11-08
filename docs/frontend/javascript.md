@@ -1,8 +1,10 @@
+> وضعیت دادهٔ runtime (۸ نوامبر ۲۰۲۶): داده‌های کاتالوگ، برند، مجله، FAQ، حساب نمونه، جغرافیا و طرح فروش از APIهای متصل به SQL Server خوانده می‌شوند. سبد، علاقه‌مندی، مقایسه، نشانی، checkout، سفارش، پیگیری قیمت و تعامل مقاله از API حساب می‌آیند؛ دیدگاه/پرسش محصول از API محصول. کلیدهای قدیمی Shop در localStorage فقط برای انتقال یک‌باره خوانده و سپس حذف می‌شوند؛ دادهٔ runtime در localStorage نگهداری نمی‌شود.
+
 # قرارداد JavaScript و state مرورگر
 
 مسیرهای کوتاه `js/` در این صفحه نسبت به `Shop/wwwroot/shop/` هستند. برای ورود از صفحه به script، [نقشهٔ صفحه‌ها](../architecture/routing.md) و [ترتیب اجرا](layout.md) را ببینید.
 
-ورودی ذخیره‌شده در مرورگر باید پیش از رندر escape و validate شود. fallback و migration در storage.js است؛ handler اختصاصی را به ریشهٔ صفحه محدود کنید و با `HNUI.mount` یک‌بار ثبت کنید. کارت مشترک فروشگاه در [product-card.js](../../Shop/wwwroot/shop/js/store/product-card.js) optionهای طرح فروش را دریافت می‌کند؛ renderer صفحهٔ اول در [home-sales-plans.js](../../Shop/wwwroot/shop/js/pages/home-sales-plans.js) پلن عادی را حذف و برای offerهای ویژه کارت می‌سازد. افزودن از این کارت‌ها `salesPlanId` و snapshot نمایشی (نام، کد، مبلغ واحد، موجودی و سقف خرید) را به `HNUI.cart` می‌دهد؛ نام پلن ویژه در کارت و سبد هدر دیده می‌شود، اما پلن عادی برچسب ندارد. snapshot فقط برای نمایش است و Checkout باید آن را از API دوباره اعتبارسنجی کند. قرارداد دامنه در [فروش چندطرحی](../store/sales-plans.md) مرجع است.
+ورودی API و payload انتقال legacy باید پیش از رندر escape و validate شود. انتقال legacy در `storage.js` است؛ handler اختصاصی را به ریشهٔ صفحه محدود کنید و با `HNUI.mount` یک‌بار ثبت کنید. کارت مشترک فروشگاه در [product-card.js](../../Shop/wwwroot/shop/js/store/product-card.js) optionهای طرح فروش را دریافت می‌کند؛ renderer صفحهٔ اول در [home-sales-plans.js](../../Shop/wwwroot/shop/js/pages/home-sales-plans.js) پلن عادی را حذف و برای offerهای ویژه کارت می‌سازد. افزودن از این کارت‌ها `salesPlanId` و snapshot نمایشی (نام، کد، مبلغ واحد، موجودی و سقف خرید) را به `HNUI.cart` می‌دهد؛ نام پلن ویژه در کارت و سبد هدر دیده می‌شود، اما پلن عادی برچسب ندارد. snapshot فقط برای نمایش است و Checkout باید آن را از API دوباره اعتبارسنجی کند. قرارداد دامنه در [فروش چندطرحی](../store/sales-plans.md) مرجع است.
 
 
 `store/account-data.js` پس از JSONهای `commerceData` و (فقط در پروفایل) `accountData` اجرا می‌شود و projection فقط‌خواندنی `HNAccountData` را پیش از مصرف سبد و حساب منتشر می‌کند. دادهٔ خراب، غایب یا نسخهٔ ناشناخته به آرایه/پیشنهاد خالی تبدیل می‌شود. bootstrap عمومی سابقهٔ سفارش ندارد.
@@ -21,9 +23,9 @@
 | `HNUI.mount(name, root, initialize)` | اجرای یک‌باره برای نام مؤلفه و root؛ root غایب یا نصب دوباره false برمی‌گرداند؛ خطای initialize دوباره قابل تلاش است |
 | `HNUI.EVENTS`, `HNUI.emit(type, detail)` | نام ثابت رویداد و کنترل payloadهای cart/auth؛ برای رویداد مشترک CustomEvent موازی نسازید |
 | `HNUI.cart.read/write/add/update/remove/totals/quantityLimit/renderOptions/renderControls` | normalize مشترک، renderer مشترک گزینه‌ها و کنترل تعداد/حذف، validation ساده و مدیریت سبد؛ `write` رویداد cart را dispatch می‌کند |
-| `HNUI.auth.isLoggedIn/login/logout/requireLogin` | وضعیت ورود در مرورگر؛ `requireLogin(resume)` برای ورود نداشتن رویداد `hn:auth-required` می‌فرستد و callback را پس از ورود ادامه می‌دهد |
+| `HNUI.auth.isLoggedIn/login/logout/requireLogin` | وضعیت نشست cookie تأییدشده در صفحه؛ `requireLogin(resume)` برای کاربر واردنشده رویداد `hn:auth-required` می‌فرستد و callback را پس از ورود ادامه می‌دهد |
 
-فرم ثبت‌نام در `layout/main.js` کد را با `POST /api/auth/email-code` درخواست و با `POST /api/auth/email-code/verify` اعتبارسنجی می‌کند؛ کد ثابت یا قابل‌قبول‌بودن هر شش رقم در مرورگر وجود ندارد. کد تأیید سروری است، اما `completeDemoLogin` پس از تأیید هنوز state محلی ورود را فعال می‌کند؛ تا ساخت حساب و session backend اضافه نشده، ورود را احراز هویت پایدار تلقی نکنید. تنظیمات و محدودیت OTP در [مرز داده و backend](../architecture/backend-readiness.md) مرجع‌اند.
+فرم ورود و ثبت‌نام در `layout/main.js` کد را با `POST /api/auth/email-code` درخواست و با `POST /api/auth/email-code/verify` اعتبارسنجی می‌کند؛ پس از تأیید، پاسخ سرور نشست cookie می‌سازد و وضعیت حساب از `GET /api/account/state` خوانده می‌شود. کد ثابت یا پذیرش OTP صرفاً بر اساس طول در مرورگر وجود ندارد. تنظیمات و محدودیت OTP در [مرز داده و backend](../architecture/backend-readiness.md) مرجع‌اند.
 | `HNUI.scrollLock.lock/unlock` | شمارندهٔ قفل scroll با کلاس `ui-scroll-locked` |
 | `HNUI.dialog` | helperهای dialog/focus/keyboard؛ جزئیات دقیق را در همان فایل بخوانید |
 | `HNUI.setMessage`, `setMessageType`, `showToast` | پیام وضعیت و بازخورد UI؛ امضا و پیش‌فرض را در ui-core.js بررسی کنید |
@@ -43,12 +45,12 @@
 | فایل | مسئولیت فعلی | قبل از تغییر چه چیزی را دنبال کنیم |
 |---|---|---|
 | `js/core/ui-core.js` | اتصال APIهای مشترک، auth، event/mount، lock/dialog، format/escape | قرارداد payload و accessibility |
-| `js/core/storage.js` | storage، نسخهٔ رکورد، backup و migration | legacy/future/malformed/quota؛ نوشتن و حذف موفق/ناموفق |
+| `js/core/storage.js` | پاک‌سازی کلیدهای قدیمی Shop و state موقت صفحه | انتقال legacy به API و حذف کلیدهای قدیمی |
 | `js/store/cart.js` | normalize، قیمت، موجودی، سبد و renderer گزینه‌ها | شناسهٔ محصول و قرارداد سبد |
 | `js/layout/header-navigation.js` | باز/بسته، کیبورد، hover و گروه‌های دسته در هدر | trigger واقعی، state صریح و خانه/داخلی |
 | `js/layout/main.js` | پیشنهاد/جست‌وجوی اخیر، شمارنده‌ها، account/login/cart/list panels و هماهنگی خانه؛ پیمایش لینک‌های hash با رعایت `scroll-margin-top` مقصد | جستجوی هدر و drawer پس از ۳ نویسه پیشنهاد محصول و offer طرح فروش فعال و موجود را با debounce ۲۵۰ms می‌سازند؛ offer نام طرح و قیمت ویژه را نشان می‌دهد و پیوندش `salesPlanId` را نگه می‌دارد. submit کمتر از ۳ نویسه متوقف می‌شود. listenerهای delegated و panel state؛ حفظ offset هدر/نوار sticky و پشتیبانی از reduced motion |
 | `js/core/form-validation.js` | validation عمومی/delegated فرم | `data-*`، selector فرم، خطاهای inline و submit handler اختصاصی؛ `data-validation="full-name"` دست‌کم دو بخش نام را می‌سنجد و `data-required-message` متن خطای فیلد اجباری را جایگزین می‌کند |
-| `js/store/catalog.js` | resolverِ catalog.json؛ HNCatalog و APIهای سازگار HNProducts/HNCountries/HNProductColors | شناسه‌های صریح، relation و immutable بودن؛ داده دمو است |
+| `js/store/catalog.js` | resolver دادهٔ دریافت‌شده از دیتابیس؛ HNCatalog و APIهای سازگار HNProducts/HNCountries/HNProductColors | شناسه‌های صریح، relation و immutable بودن |
 | `js/store/product-card.js` | renderer مشترک کارت و قیمت | variantهای grid/slider/search/related/favorite؛ escape و data-* مشترک |
 | `js/pages/home-sales-plans.js` | ساخت بخش‌های صفحهٔ اول برای طرح‌های فروش فعال، با کارت مشترک و offer همان طرح | میزبان‌های خانه، ترتیب طرح‌ها، زمان پایان و حذف offer ناموجود؛ فروش عادی در شبکهٔ عادی خانه باقی می‌ماند |
 | `js/store/commerce.js` | جزئیات محصول، variant/accessory، قیمت، gallery، feedback، cart، coupon، compare و favorites rendering | selectorهای `#productView`, `#cartView`, `#favoritesView`, `#compareView`؛ event/storage و rendererهای HTML؛ موقعیت نشانگر تب محصول با offset نوار چسبان هماهنگ است |
@@ -67,33 +69,13 @@
 
 در منوهای دسکتاپ، حرکت نشانگر می‌تواند منو را باز کند و کلیک روی trigger آن را در حالت باز نگه می‌دارد؛ این کار مانع بسته‌شدن فوری منو هنگام ورود pointer به دکمه می‌شود. بستن با کلیک بیرون، خروج pointer از پنل و Escape انجام می‌شود. در تغییر رفتار trigger، خانه و صفحات داخلی را با pointer و صفحه‌کلید بررسی کنید.
 
-## localStorage: کلیدهای شناخته‌شده
+## دادهٔ مرورگر و منبع API
 
-رکوردهای ساختاریافته با شکل `{schemaVersion: 1, value: ...}` نوشته می‌شوند. آرایه/شیء قدیمی همچنان خوانده می‌شود و در اولین نوشتن نسخه‌دار، نسخهٔ خام یک‌بار در `hn-migration-backup:{key}` حفظ می‌شود. wrapper همیشه مقدار بازشده را به consumer می‌دهد؛ کد مصرف‌کننده نباید envelope را خودش باز کند.
+دادهٔ حساب و تعامل‌های کاربر از API حساب خوانده و همان‌جا ذخیره می‌شوند؛ جستجوهای اخیر نیز از `api/account/recent-searches` می‌آیند. درخواست‌های API با `cache: no-store` ارسال می‌شوند و پاسخ‌های `/api` هدر `Cache-Control: no-store` دارند. بازخورد محصول از API محصول دریافت می‌شود. صفحه برای رندر و تعامل جاری، پاسخ API را در state موقت جاوااسکریپت نگه می‌دارد؛ این state میان بارگذاری صفحه‌ها پایدار نیست و مرجع داده محسوب نمی‌شود.
 
-نسخهٔ جدیدتر خوانده/بازنویسی/حذف نمی‌شود و `storage.writable(key)` false برمی‌گرداند. JSON خراب یا shape اشتباه fallback می‌گیرد؛ نوشتن معتبر می‌تواند آن را با backup اصلاح کند. cart، favorite/compare، آدرس‌ها، پروفایل، cache محصول، جستجوهای اخیر و کلیدهای `hn-product-reviews-{id}`/`hn-product-questions-{id}` قرارداد نسخه‌دار دارند. scalarهایی مثل auth، coupon و شناسهٔ آدرس همچنان رشته‌اند. تغییر schema باید migration صریح و تست داشته باشد؛ storage کاربر را برای رفع خطا پاک نکنید. دادهٔ قدیمی `hn-profile-activity` دیگر مصرف یا پاک نمی‌شود و در مرورگر باقی می‌ماند.
+`storage.js` در شروع، کلیدهای قدیمی متعلق به Shop را فقط برای انتقال یک‌باره می‌خواند و از `localStorage` حذف می‌کند. payload انتقال تا پاسخ موفق API در حافظهٔ همان صفحه می‌ماند و پس از موفقیت کنار گذاشته می‌شود. کد جدید نباید از `localStorage` یا `sessionStorage` برای دادهٔ runtime استفاده کند یا در آن‌ها بنویسد. ورود، سبد، نشانی، فهرست‌ها، پیگیری قیمت، ترجیح checkout، تعامل مقاله و بازخورد محصول باید از endpoint مسئول بخوانند/بنویسند.
 
-کلیدهای زیر دمو و client-side هستند؛ persistence سرور یا دادهٔ قابل‌اعتماد محسوب نمی‌شوند. پیش از migration/پاک‌سازی، همهٔ مصرف‌کننده‌ها را با `rg -n "نام-کلید" Shop` پیدا کنید.
-
-| کلید | مصرف/نکته |
-|---|---|
-| `hadi-norouzi-cart` | cart نرمال‌شده توسط `HNUI.cart` |
-| `hn-demo-auth` | وضعیت ورود در مرورگر (`1`/`true`) |
-| `hn-favorites` | شناسه‌های favorite |
-| `hn-compare` | شناسه‌های مقایسه |
-| `hn-compare-demo-seeded` | علامت مقداردهی اولیهٔ Compare |
-| `hn-product-cache` | cache اطلاعات محصول برای رندر list/panel |
-| `hn-header-recent-searches` | تاریخچهٔ پیشنهاد search در هدر |
-| `hn-demo-coupon` | کد تخفیف demo |
-| `hn-delivery-addresses` | فهرست آدرس‌های ذخیره‌شده در مرورگر |
-| `hn-selected-address` | شناسهٔ آدرس انتخابی |
-| `hn-payment-method-v2` | روش پرداخت انتخابی در مرورگر |
-| `hn-profile` | دادهٔ profile در `Views/Profile/Index.cshtml` |
-| `hn-product-${type}-${productId}` | کلید feedback در `commerce.js`؛ `type` برابر `reviews` یا `questions` است. داده‌های اولیه با دادهٔ ذخیره‌شده ترکیب می‌شوند. |
-| `hn-article-feedback-v1-${slug}` | آرایهٔ خام دیدگاه‌های محلی مقاله، حداکثر ۵۰ مورد؛ این کلید در قرارداد envelope نسخه‌دار storage.js ثبت نشده و `v1` فقط بخشی از نام کلید است. |
-| `hn-article-feedback-v1-${slug}-liked` | وضعیت پسند مقاله به‌صورت رشتهٔ `true`/`false`؛ شمار پایه نمونه است و درخواست عمومی سرور ندارد. |
-
-ممکن است scriptهای دیگر کلید تازه اضافه کنند؛ این جدول هنگام تغییر باید با `rg -n "localStorage|storage\.(get|set|json)|hn-" Shop/wwwroot/shop/js Shop/Views` تطبیق داده شود.
+اگر API در دسترس نباشد، عملیات را موفق اعلام نکنید؛ payloadهای legacy فقط برای انتقال یک‌باره‌اند و state جاری صفحه پس از بارگذاری تازه از API می‌آید. برای تغییر قرارداد API یا انتقال داده، مصرف‌کننده‌ها را با `rg -n "localStorage|sessionStorage|storage\.(get|set|json)|hn-" Shop/wwwroot/shop/js Shop/Views` پیدا کنید و راهنمای حوزه را به‌روز کنید.
 
 ## رویدادهای سفارشی
 

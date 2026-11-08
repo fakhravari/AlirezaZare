@@ -1,3 +1,5 @@
+> وضعیت دادهٔ runtime (۸ نوامبر ۲۰۲۶): داده‌های کاتالوگ، برند، مجله، FAQ، حساب نمونه، جغرافیا و طرح فروش از APIهای متصل به SQL Server خوانده می‌شوند. سبد، علاقه‌مندی، مقایسه، نشانی، checkout، سفارش، پیگیری قیمت و تعامل مقاله از API حساب می‌آیند؛ دیدگاه/پرسش محصول از API محصول. کلیدهای قدیمی Shop در localStorage فقط برای انتقال یک‌باره خوانده و سپس حذف می‌شوند؛ دادهٔ runtime در localStorage نگهداری نمی‌شود.
+
 # کاتالوگ، فهرست‌ها و کارت محصول
 
 متن کمکی فیلتر، خلاصهٔ نتایج و واحد قیمت جستجو از مقیاس خوانایی [طراحی مشترک](../frontend/styling.md#قواعد-طراحی-مشترک) استفاده می‌کنند؛ مالک این بخش `search.css` است و کارت و قیمت همچنان مالکان اختصاصی خود را دارند. در عرض ۳۲۰ پیکسل سرریز داخلی قیمت‌های تخفیف‌دار نیز در آزمون مرورگر بررسی می‌شود.
@@ -11,7 +13,7 @@
 
 | بخش | نقطهٔ شروع | مالک رفتار / ظاهر |
 |---|---|---|
-| دادهٔ محصول | [catalog.json](../../Shop/wwwroot/content/data/catalog.json) | [CatalogRepository](../../Shop/Services/CatalogRepository.cs) و resolver [catalog.js](../../Shop/wwwroot/shop/js/store/catalog.js) |
+| دادهٔ محصول | [catalog.json](../../Shop/Services/CatalogRepository.cs) | [CatalogRepository](../../Shop/Services/CatalogRepository.cs) و resolver [catalog.js](../../Shop/wwwroot/shop/js/store/catalog.js) |
 | خانه | [Home/Index.cshtml](../../Shop/Views/Home/Index.cshtml) | `home-sales-plans.js`، `home-collection.css`، `home-warmth.css` و کارت مشترک |
 | Search | [Product/List.cshtml](../../Shop/Views/Product/List.cshtml) | [search.js](../../Shop/wwwroot/shop/js/pages/search.js)، `search.css` و `search-mobile.css`؛ لینک خانهٔ breadcrumb در markup اولیه و renderer مسیر دسته‌ها نام «خانه» دارد تا آیکن تنها نماند؛ فهرست طرح‌محور مسیر عمومی فروشگاه را نشان می‌دهد |
 | مقایسه / علاقه‌مندی | [Compare](../../Shop/Views/Compare/Index.cshtml) و [Favorites](../../Shop/Views/Favorites/Index.cshtml) | `store/commerce.js`؛ `commerce.css` و قواعد responsive مشترک |

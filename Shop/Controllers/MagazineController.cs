@@ -30,7 +30,7 @@ public sealed class MagazineController : PageController
     [HttpGet("{slug}")]
     public async Task<IActionResult> Details(string slug)
     {
-        if (JournalArticles.Find(slug) is { } relatedArticle)
+        if (await _magazineContent.ReadArticleAsync(slug, HttpContext.RequestAborted) is { } relatedArticle)
         {
             string siteOrigin = SeoUrlBuilder.SiteOrigin(_seoOptions.SiteUrl, Request);
             string siteRoot = SeoUrlBuilder.SiteRoot(_seoOptions.SiteUrl, Request);
