@@ -68,28 +68,7 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext) : ISt
                 SELECT
                     1 AS [schemaVersion],
                     N'IRT' AS [currency],
-                    JSON_QUERY((
-                        SELECT
-                            COALESCE(o.[ExternalOrderKey], CONCAT(N'order-', o.[Id])) AS [id],
-                            o.[OrderNumber] AS [number],
-                            o.[Status] AS [status],
-                            CONVERT(date, o.[OrderedAtUtc]) AS [orderedOn],
-                            o.[ItemCount] AS [itemCount],
-                            o.[TotalAmount] AS [totalAmount],
-                            CASE o.[Status]
-                                WHEN N'pending-payment' THEN N'در انتظار تکمیل پرداخت سفارش'
-                                WHEN N'payment-confirmed' THEN N'پرداخت سفارش تأیید شده است'
-                                WHEN N'warehouse-confirmed' THEN N'موجودی کالا در انبار تأیید شده است'
-                                WHEN N'in-transit' THEN N'مرسوله در مسیر ارسال قرار دارد'
-                                WHEN N'shipped-to-post' THEN N'سفارش به شرکت پست تحویل شد'
-                                WHEN N'delivered' THEN N'سفارش با موفقیت تحویل شد'
-                                WHEN N'cancelled' THEN N'سفارش به درخواست کاربر لغو شد'
-                                ELSE N'وضعیت سفارش ثبت شده است'
-                            END AS [deliveryDescription]
-                        FROM [Account].[CustomerOrder] o
-                        ORDER BY o.[OrderedAtUtc] DESC, o.[Id] DESC
-                        FOR JSON PATH
-                    )) AS [orders],
+                    JSON_QUERY(N'[]') AS [orders],
                     JSON_QUERY((
                         SELECT
                             c.[CouponKey] AS [id],
@@ -98,20 +77,7 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext) : ISt
                             c.[UsageLimit] AS [usageLimit],
                             c.[Enabled] AS [enabled],
                             c.[ExpiresOn] AS [expiresOn],
-                            JSON_QUERY(
-                                N'[' + COALESCE(
-                                    (
-                                        SELECT STRING_AGG(
-                                            CONVERT(nvarchar(max), N'"' + STRING_ESCAPE(COALESCE(o.[ExternalOrderKey], CONCAT(N'order-', o.[Id])), 'json') + N'"'),
-                                            N','
-                                        )
-                                        FROM [Account].[CouponUsage] u
-                                        INNER JOIN [Account].[CustomerOrder] o ON o.[Id] = u.[IdCustomerOrder]
-                                        WHERE u.[IdCoupon] = c.[Id]
-                                    ),
-                                    N''
-                                ) + N']'
-                            ) AS [orderIds]
+                            JSON_QUERY(N'[]') AS [orderIds]
                         FROM [Account].[Coupon] c
                         ORDER BY c.[Id]
                         FOR JSON PATH
