@@ -22,6 +22,19 @@
         <main id="content" class="app-content" tabindex="-1">
             @RenderBody()
         </main>
+        <div id="admin-toast-region" class="toast-container position-fixed top-0 start-0 p-3" aria-live="polite" aria-atomic="true"></div>
+        <div class="modal fade" id="admin-record-modal" tabindex="-1" aria-labelledby="admin-record-title" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-scrollable modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <div><span class="admin-modal-eyebrow">نمایش اطلاعات</span><h2 class="modal-title fs-5" id="admin-record-title">جزئیات رکورد</h2></div>
+                        <button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="بستن"></button>
+                    </div>
+                    <div class="modal-body" data-admin-record-body></div>
+                    <div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">بستن</button></div>
+                </div>
+            </div>
+        </div>
         <a href="#app" class="btn btn-icon btn-circle btn-theme btn-scroll-to-top" data-toggle="scroll-to-top" aria-label="بازگشت به بالا">
             <i class="fa fa-angle-up" aria-hidden="true"></i>
         </a>
@@ -29,6 +42,8 @@
 
     <script src="~/color_admin/assets/js/vendor.min.js" asp-append-version="true"></script>
     <script src="~/color_admin/assets/js/app.min.js" asp-append-version="true"></script>
+    <script src="~/js/admin-ui.js" asp-append-version="true"></script>
+    <script src="~/js/admin-data.js" asp-append-version="true"></script>
     <script src="~/js/admin-shell.js" asp-append-version="true"></script>
 </body>
 </html>

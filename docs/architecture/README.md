@@ -7,7 +7,7 @@
 | [آمادگی اتصال backend](backend-readiness.md) | مرزهای داده، ایمیل OTP، شکاف‌های اتصال و قرارداد مهاجرت |
 | [نمای کلی](overview.md) | مرز برنامه، لایه‌ها و مسئولیت پوشه‌ها |
 | [مسیرها و صفحه‌ها](routing.md) | route → Controller → View و asset اختصاصی |
-| [منابع داده](data-sources.md) | تفاوت C#، کاتالوگ مرورگر، JSON و state محلی |
+| [منابع داده](data-sources.md) | منبع runtime دیتابیس/API، payloadهای مرورگر و state صفحه |
 | [لایهٔ دیتابیس](database.md) | پروژه‌های Clean Architecture، repositoryها، API انبار و migration دادهٔ نمونه |
 
 راهنمای تازهٔ این حوزه را در همین پوشه ایجاد و در این جدول ثبت کنید؛ جزئیات در [قانون مستندسازی](../development/documentation.md).

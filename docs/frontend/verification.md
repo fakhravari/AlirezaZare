@@ -29,7 +29,7 @@
 | ظاهر با hover اولیه متفاوت است | کلاس active پیش‌فرض، hover/focus CSS، JS category initialization |
 | drawer/modal اسکرول نمی‌خورد | ارتفاع viewport، `overflow-y`, flex child min-height، scroll lock، backdrop و breakpoint |
 | count/cart/list بین tabها فرق دارد | helper `HNUI`, `hn:*` eventها و native `storage` listener |
-| route فقط گاهی render خراب دارد | URL/hash/query/popstate، localStorage demo و script صفحه |
+| route فقط گاهی render خراب دارد | URL/hash/query/popstate، state موقت صفحه، انتقال legacy storage و script صفحه |
 | عکس crop/اندازه متفاوت است | container aspect ratio، `object-fit/object-position` و CSS card owner |
 
 ## ماتریس بازبینی

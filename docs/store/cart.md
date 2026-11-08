@@ -22,7 +22,7 @@
 |---|---|
 | نرمال‌سازی، قیمت و state سبد | [cart.js](../../Shop/wwwroot/shop/js/store/cart.js)، منتشرشده از `HNUI.cart` |
 | state موقت صفحه | [storage.js](../../Shop/wwwroot/shop/js/core/storage.js)، `HNUI.storage` |
-| دادهٔ مبنای محصول | [catalog.json](../../Shop/Services/CatalogRepository.cs) از طریق `HNCatalog`/`HNProducts` |
+| دادهٔ مبنای محصول | [dataset کاتالوگ دیتابیس](../architecture/data-sources.md) از طریق `HNCatalog`/`HNProducts` |
 | رندر سبد / قیمت / تخفیف / اقلام فاکتور | [commerce.js](../../Shop/wwwroot/shop/js/store/commerce.js)، `#cartView` و `#invoiceItems` |
 | پنل هدر | [_Header.cshtml](../../Shop/Views/Shared/_Header.cshtml)، `layout/main.js` و `shared-cart.css`؛ ترتیب و نشان طرح از همان مدل سبد می‌آیند |
 | صفحهٔ سبد | [Cart/Index.cshtml](../../Shop/Views/Cart/Index.cshtml)، `checkout.css`؛ عنوان محصول در پنل‌های سبد، علاقه‌مندی و مقایسهٔ هدر به مسیر canonical جزئیات محصول لینک می‌شود |

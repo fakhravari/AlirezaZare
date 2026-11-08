@@ -49,7 +49,7 @@ Program.cs / middleware / route
 | `Shop/wwwroot/shop/js/pages/` | رفتار مختص یک صفحه یا جریان کاری |
 | `Shop/wwwroot/content/data/` | داده‌های ایستای ساختاریافتهٔ قابل‌ارائه در `wwwroot`، مستقل از کد UI |
 | `Shop/App_Data/` | دادهٔ نمونهٔ سروری که نباید به‌عنوان فایل عمومی در `wwwroot` قرار بگیرد |
-| `Shop/wwwroot/content/products/` | رسانه‌ها در پوشه‌های مشترک بر اساس نوع؛ نام فایل شامل محصول، کد کالا و کاربرد نسخه است و مسیر ویدئو فقط در محصول متناظر `content/data/catalog.json` ثبت می‌شود |
+| `Shop/wwwroot/content/products/` | رسانه‌ها در پوشه‌های مشترک بر اساس نوع؛ نام فایل شامل محصول، کد کالا و کاربرد نسخه است و مسیر ویدئو در payload کاتالوگِ `Store.RuntimeDataset` محصول متناظر ثبت می‌شود |
 | `Shop/wwwroot/shop/images/`, `vendor/` | رسانه‌های قالب، فونت‌ها و وابستگی‌های محلی؛ پیش از جایگزینی/حذف، تمام ارجاعات را بررسی کنید |
 
 `wwwroot/content/` مرز داده‌های عمومی و رسانهٔ وابسته به محتوای سایت است؛ `wwwroot/shop/` محل قالب و منابع UI است. جزئیات رسانه در [راهنمای رسانه](../media/images.md) قرار دارد. artifactهای `ClockTemplate/` را برنامهٔ source عضو solution فرض نکنید؛ قبل از استفاده عضویت و منبع آن را بررسی کنید.

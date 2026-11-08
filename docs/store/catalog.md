@@ -7,13 +7,13 @@
 در عرض‌های حداکثر ۹۹۱px، صفحهٔ جست‌وجو در `search-mobile.css` سرریز افقی بدنه را clip می‌کند تا offcanvas بستهٔ منوی مشترک عرض سند را بزرگ نکند. Drawer باز باید در همان viewport بماند؛ پنل فیلتر در موبایل drawer و از تبلت به بالا ستون کنار نتایج است.
 
 
-مصرف‌کننده‌های سرور از `ICatalogSource.ReadAsync` استفاده می‌کنند؛ پیاده‌سازی فایل `CatalogRepository` است و schemaVersion 2 حفظ شده است. adapter واقعی باید اعتبارسنجی `CatalogSnapshot.Parse` را حفظ کند.
+مصرف‌کننده‌های سرور از `ICatalogSource.ReadAsync` استفاده می‌کنند؛ `CatalogRepository` payload کاتالوگ را از `Store.RuntimeDataset` می‌خواند و schemaVersion 2 را با `CatalogSnapshot.Parse` اعتبارسنجی می‌کند.
 
 ## نقاط ورود و مالکیت
 
 | بخش | نقطهٔ شروع | مالک رفتار / ظاهر |
 |---|---|---|
-| دادهٔ محصول | [catalog.json](../../Shop/Services/CatalogRepository.cs) | [CatalogRepository](../../Shop/Services/CatalogRepository.cs) و resolver [catalog.js](../../Shop/wwwroot/shop/js/store/catalog.js) |
+| دادهٔ محصول | dataset نسخه‌دار کاتالوگ در `Store.RuntimeDataset` (SQL Server) | [CatalogRepository](../../Shop/Services/CatalogRepository.cs) و resolver [catalog.js](../../Shop/wwwroot/shop/js/store/catalog.js) |
 | خانه | [Home/Index.cshtml](../../Shop/Views/Home/Index.cshtml) | `home-sales-plans.js`، `home-collection.css`، `home-warmth.css` و کارت مشترک |
 | Search | [Product/List.cshtml](../../Shop/Views/Product/List.cshtml) | [search.js](../../Shop/wwwroot/shop/js/pages/search.js)، `search.css` و `search-mobile.css`؛ لینک خانهٔ breadcrumb در markup اولیه و renderer مسیر دسته‌ها نام «خانه» دارد تا آیکن تنها نماند؛ فهرست طرح‌محور مسیر عمومی فروشگاه را نشان می‌دهد |
 | مقایسه / علاقه‌مندی | [Compare](../../Shop/Views/Compare/Index.cshtml) و [Favorites](../../Shop/Views/Favorites/Index.cshtml) | `store/commerce.js`؛ `commerce.css` و قواعد responsive مشترک |
@@ -29,7 +29,7 @@
 
 نام نمایشی شش محصول نمونه با شناسه‌های ۱، ۶، ۱۱، ۱۶، ۲۱ و ۲۳ با نام برند و کاربرد موجود در همان رکورد کامل‌تر شده است تا نمونهٔ عنوان بلند در گروه‌های مختلف موجود باشد. این تغییر فقط فیلد `name` را عوض می‌کند؛ شناسه، slug و مشخصات فنی ثابت‌اند.
 
-کاتالوگ فعلی ۳۰ محصول نمونه با `schemaVersion: 2` دارد. `id`، `code` و `slug` در هر رکورد صریح‌اند؛ تغییر ترتیب آرایه، هویت، URL و رسانه را عوض نمی‌کند. شناسهٔ حذف‌شده را به کالای دیگری اختصاص ندهید. URL با `/products/{slug}-{id}` ساخته می‌شود و مسیرهای قدیمی یک‌مرحله‌ای به canonical هدایت می‌شوند.
+seed فعلی دیتابیس ۳۰ محصول نمونه با `schemaVersion: 2` دارد. payload کاتالوگ از SQL خوانده و به `_CatalogData` فرستاده می‌شود؛ فایل JSON محلی دیگر منبع runtime نیست. `id`، `code` و `slug` در هر رکورد صریح‌اند؛ تغییر ترتیب آرایه، هویت، URL و رسانه را عوض نمی‌کند. شناسهٔ حذف‌شده را به کالای دیگری اختصاص ندهید. URL با `/products/{slug}-{id}` ساخته می‌شود و مسیرهای قدیمی یک‌مرحله‌ای به canonical هدایت می‌شوند.
 
 جدول‌های `brands`, `countries`, `categories`, `colors`, `media` و `details` با کلید مشخص نگهداری می‌شوند. هر دسته در `categories` نام فارسی و انگلیسی، `slug` یکتا، `parentId` و `path` دارد؛ دسته‌های ریشه `parentId: null` دارند. `parentId` رابطهٔ مرجع درخت است و `path` باید با زنجیرهٔ والدها یکسان باشد. محصول با `brandId`, `categoryId`, `colorIds`, `mediaId`, `detailId` به آن‌ها متصل است؛ برند با `countryCode` به کشور وصل می‌شود. `categoryId` محصول باید به یک دستهٔ برگ (بدون فرزند) اشاره کند. `collections.selected/bestsellers/newest` فقط شناسهٔ محصول دارند و ترتیب نمایش خانه را تعیین می‌کنند. نام، قیمت، مسیر فایل یا شمارهٔ ردیف کلید رابطه نیست.
 
@@ -59,13 +59,13 @@ resolver کاتالوگ برای هر کالا `attributeValues` را از را�
 
 مشخصات دیتیل از تعریف‌های مرجع `specificationGroups`، `specificationCategories` و `specificationFeatures` و تخصیص‌های `products[].specificationValues` ساخته می‌شود. هر ویژگی به یک دسته، هر دسته به یک گروه و هر مقدار محصول به شناسهٔ ویژگی متصل است؛ عنوان و ترتیب از تعریف مشترک خوانده می‌شوند. این ساختار از مقدارهای متنی تکراری در هر محصول جلوگیری می‌کند و مسیر مهاجرت به API را به رابطه‌های شناسه‌محور نزدیک نگه می‌دارد. مشخصات مشترک خانواده همچنان می‌توانند از `details[detailId].specs/specGroups` بیایند؛ مقادیر محصولی اختصاصی با شناسهٔ ویژگی ثبت می‌شوند. Resolver آن‌ها را برای renderer فعلی به گروه‌های نمایشی تبدیل می‌کند. گروه، دسته، ویژگی یا ارجاع ناموجود، مقدار خالی و تخصیص تکراری در قرارداد C# رد می‌شود. مقدار فنیِ تأییدنشده نسازید؛ مقدار واقعی هر مدل باید در رکورد محصول ثبت شود.
 
-CatalogRepository همان JSON را با System.Text.Json می‌خواند و شناسه/کد تکراری، رابطهٔ شکسته، slug محصول یا دستهٔ نامعتبر/تکراری، نام انگلیسی دستهٔ خالی، مسیر دستهٔ تکراری یا فاقد نیاکان، قیمت/موجودی منفی و collection نامعتبر را رد می‌کند. شناسهٔ ویژگی باید lower-camel یا kebab-case کوچک باشد؛ برچسب، آیکن، منبع و دو پرچم رفتاری نیز اعتبارسنجی می‌شوند. JSON مرورگر با encoder پیش‌فرض امن در `_CatalogData` منتشر می‌شود. دادهٔ قالب، قیمت و موجودی همچنان نمونه است.
+CatalogRepository payload دریافتی از دیتابیس را با System.Text.Json می‌خواند و شناسه/کد تکراری، رابطهٔ شکسته، slug محصول یا دستهٔ نامعتبر/تکراری، نام انگلیسی دستهٔ خالی، مسیر دستهٔ تکراری یا فاقد نیاکان، قیمت/موجودی منفی و collection نامعتبر را رد می‌کند. شناسهٔ ویژگی باید lower-camel یا kebab-case کوچک باشد؛ برچسب، آیکن، منبع و دو پرچم رفتاری نیز اعتبارسنجی می‌شوند. JSON مرورگر با encoder پیش‌فرض امن در `_CatalogData` منتشر می‌شود. دادهٔ seed، قیمت و موجودی فعلی نمونه‌اند.
 
 جستجوی مسیر دسته‌ها با نمایهٔ `Map` انجام می‌شود و گره‌های برگشتی `categoryForSlug` و `categoryForLabel` نیز مانند دادهٔ محصولات تغییرناپذیرند. ترتیب اولویت مشخصات برجسته از عمومی به اختصاصی است: گروه‌های مشترک، `product.specs`، `product.specGroups` قدیمی در صورت وجود و سپس `product.specificationValues` شناسه‌محور. URLهای قدیمی دسته با slugهای قبلی مثل `hammer-drill` هنگام بازیابی به slug فعلی دسته نگاشت می‌شوند.
 
 ## رنگ و کشور
 
-`colors` در catalog.json هشت رنگ اصلی را با شکل `{slug, en, fa, hex}` تعریف می‌کند و `colorIds` محصول به آن‌ها وصل است. slug انگلیسی برای URL و نام فارسی به‌همراه swatch کد رنگ برای نمایش استفاده می‌شود؛ API سازگار `HNProductColors` باقی است.
+`colors` در payload کاتالوگ هشت رنگ اصلی را با شکل `{slug, en, fa, hex}` تعریف می‌کند و `colorIds` محصول به آن‌ها وصل است. slug انگلیسی برای URL و نام فارسی به‌همراه swatch کد رنگ برای نمایش استفاده می‌شود؛ API سازگار `HNProductColors` باقی است.
 
 ویژگی‌های قابل انتخاب محصول در `variants` به شکل کلید ویژگی با `label` و `options` تعریف می‌شوند؛ گزینه‌ها `value`، `label`، `swatch` و `priceDelta` دارند. `variantStock` موجودی هر ترکیب را با کلیدی مانند `color=yellow` نگه می‌دارد؛ برای چند ویژگی، ترتیب کلیدها باید با ترتیب `variants` و قالب `key=value|key=value` هماهنگ باشد. دیتای فعلی رنگ، قیمت و موجودی چند کالا نمونه است و باید پیش از فروش واقعی با منبع موجودی معتبر جایگزین شود.
 

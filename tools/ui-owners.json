@@ -1,6 +1,29 @@
 {
   "schemaVersion": 2,
   "groups": {
+    "admin-panel": {
+      "label": "پنل مدیریت فروشگاه و انبار",
+      "components": {
+        "admin-shell": {
+          "markup": [
+            "Shop.Admin/Views/Shared/_Layout.cshtml",
+            "Shop.Admin/Views/Shared/_AdminSidebar.cshtml"
+          ],
+          "js": [
+            "Shop.Admin/wwwroot/js/admin-shell.js",
+            "Shop.Admin/wwwroot/js/admin-ui.js",
+            "Shop.Admin/wwwroot/js/admin-data.js"
+          ],
+          "css": [
+            "Shop.Admin/wwwroot/css/admin-shell.css"
+          ],
+          "server": [
+            "Shop.Admin/Controllers/Api/StoreCatalogAdminApiController.cs",
+            "Shop.Admin/Controllers/Api/WarehouseAdminApiController.cs"
+          ]
+        }
+      }
+    },
     "home": {
       "label": "صفحهٔ اول",
       "components": {

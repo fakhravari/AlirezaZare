@@ -13,8 +13,13 @@
                 <select id="warehouse-filter" class="form-select" name="warehouseId" data-admin-warehouse-options>
                     <option value="">همهٔ انبارها</option>
                 </select>
+                <label class="visually-hidden" for="stock-plan-filter">طرح فروش</label>
+                <select id="stock-plan-filter" class="form-select" name="salesPlanKey" data-admin-plan-options>
+                    <option value="">همهٔ طرح‌ها</option>
+                </select>
                 <label class="form-check admin-low-stock-filter"><input class="form-check-input" type="checkbox" name="lowStockOnly" value="true" /><span class="form-check-label">فقط کمتر از حداقل</span></label>
                 <button class="btn btn-primary" type="submit"><i class="fa fa-filter me-1" aria-hidden="true"></i>اعمال فیلتر</button>
+                <button class="btn btn-default" type="button" data-admin-reset-filter>پاک‌کردن فیلتر</button>
                 <span class="admin-record-count ms-auto" data-admin-count aria-live="polite"></span>
             </form>
             <div class="admin-data-status" data-admin-status role="status" aria-live="polite">در حال خواندن داده از دیتابیس…</div>

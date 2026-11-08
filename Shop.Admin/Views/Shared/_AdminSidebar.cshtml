@@ -94,6 +94,11 @@
                     <span class="menu-icon"><i class="fa fa-chart-pie" aria-hidden="true"></i></span><span class="menu-text">نمای کلی انبار</span>
                 </a>
             </div>
+            <div class="menu-item @(IsFeature("order-confirmation") ? "active" : "")">
+                <a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="order-confirmation" data-admin-nav>
+                    <span class="menu-icon"><i class="fa fa-clipboard-check" aria-hidden="true"></i></span><span class="menu-text">تأیید سفارش‌های پرداخت‌شده</span>
+                </a>
+            </div>
             <div class="menu-item @(controller == "Warehouses" ? "active" : "")">
                 <a class="menu-link" asp-area="Warehouse" asp-controller="Warehouses" asp-action="Index" data-admin-nav>
                     <span class="menu-icon"><i class="fa fa-warehouse" aria-hidden="true"></i></span><span class="menu-text">انبارها</span>
@@ -114,14 +119,24 @@
                     <div class="menu-item @(IsFeature("receipts") ? "active" : "")"><a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="receipts" data-admin-nav><span class="menu-text">رسید کالا</span></a></div>
                     <div class="menu-item @(IsFeature("dispatches") ? "active" : "")"><a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="dispatches" data-admin-nav><span class="menu-text">حواله خروج</span></a></div>
                     <div class="menu-item @(IsFeature("transfers") ? "active" : "")"><a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="transfers" data-admin-nav><span class="menu-text">انتقال بین انبارها</span></a></div>
+                    <div class="menu-item @(IsFeature("returns") ? "active" : "")"><a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="returns" data-admin-nav><span class="menu-text">مرجوعی کالا</span></a></div>
+                    <div class="menu-item @(IsFeature("stocktake") ? "active" : "")"><a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="stocktake" data-admin-nav><span class="menu-text">انبارگردانی دستی</span></a></div>
                     <div class="menu-item @(IsFeature("adjustments") ? "active" : "")"><a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="adjustments" data-admin-nav><span class="menu-text">اصلاح موجودی</span></a></div>
                     <div class="menu-item @(IsFeature("movements") ? "active" : "")"><a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="movements" data-admin-nav><span class="menu-text">گردش کالا</span></a></div>
                 </div>
             </div>
-            <div class="menu-item @(IsFeature("companies") ? "active" : "")">
-                <a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="companies" data-admin-nav>
-                    <span class="menu-icon"><i class="fa fa-building" aria-hidden="true"></i></span><span class="menu-text">شرکت‌ها و تأمین‌کنندگان</span>
+            <div class="menu-item has-sub @(inWarehouse && new[] { "companies", "references", "units", "document-types", "sales-plan-mapping", "access" }.Contains(feature ?? "", StringComparer.OrdinalIgnoreCase) ? "active expand" : "")">
+                <a href="#warehouse-settings" class="menu-link" aria-expanded="@(inWarehouse && new[] { "companies", "references", "units", "document-types", "sales-plan-mapping", "access" }.Contains(feature ?? "", StringComparer.OrdinalIgnoreCase) ? "true" : "false")">
+                    <span class="menu-icon"><i class="fa fa-sliders" aria-hidden="true"></i></span><span class="menu-text">تعاریف و دسترسی</span><span class="menu-caret"></span>
                 </a>
+                <div id="warehouse-settings" class="menu-submenu">
+                    <div class="menu-item @(IsFeature("companies") ? "active" : "")"><a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="companies" data-admin-nav><span class="menu-text">شرکت‌ها</span></a></div>
+                    <div class="menu-item @(IsFeature("references") ? "active" : "")"><a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="references" data-admin-nav><span class="menu-text">مراجع گردش</span></a></div>
+                    <div class="menu-item @(IsFeature("units") ? "active" : "")"><a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="units" data-admin-nav><span class="menu-text">واحدها و تبدیل کالا</span></a></div>
+                    <div class="menu-item @(IsFeature("sales-plan-mapping") ? "active" : "")"><a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="sales-plan-mapping" data-admin-nav><span class="menu-text">اتصال طرح فروش</span></a></div>
+                    <div class="menu-item @(IsFeature("document-types") ? "active" : "")"><a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="document-types" data-admin-nav><span class="menu-text">انواع اسناد</span></a></div>
+                    <div class="menu-item @(IsFeature("access") ? "active" : "")"><a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="access" data-admin-nav><span class="menu-text">دسترسی انبار</span></a></div>
+                </div>
             </div>
             <div class="menu-divider"></div>
             <div class="menu-item">
