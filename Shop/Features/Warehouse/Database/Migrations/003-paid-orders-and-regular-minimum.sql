@@ -20,14 +20,15 @@ BEGIN TRY
     IF COL_LENGTH(N'Warehouse.PaidOrderInboxLine', N'IdSalesPlanReference') IS NULL
         ALTER TABLE [Warehouse].[PaidOrderInboxLine] ADD [IdSalesPlanReference] BIGINT NULL;
 
-    UPDATE line
-    SET line.[IdSalesPlanReference] = inbox.[IdSalesPlanReference]
-    FROM [Warehouse].[PaidOrderInboxLine] AS line
-    INNER JOIN [Warehouse].[PaidOrderInbox] AS inbox ON inbox.[Id] = line.[IdPaidOrderInbox]
-    WHERE line.[IdSalesPlanReference] IS NULL;
+    EXEC(N'
+        UPDATE line
+        SET line.[IdSalesPlanReference] = inbox.[IdSalesPlanReference]
+        FROM [Warehouse].[PaidOrderInboxLine] AS line
+        INNER JOIN [Warehouse].[PaidOrderInbox] AS inbox ON inbox.[Id] = line.[IdPaidOrderInbox]
+        WHERE line.[IdSalesPlanReference] IS NULL;
 
-    IF EXISTS (SELECT 1 FROM [Warehouse].[PaidOrderInboxLine] WHERE [IdSalesPlanReference] IS NULL)
-        THROW 51030, 'Paid order line could not be assigned to a sales plan.', 1;
+        IF EXISTS (SELECT 1 FROM [Warehouse].[PaidOrderInboxLine] WHERE [IdSalesPlanReference] IS NULL)
+            THROW 51030, ''Paid order line could not be assigned to a sales plan.'', 1;');
 
     ALTER TABLE [Warehouse].[PaidOrderInboxLine] ALTER COLUMN [IdSalesPlanReference] BIGINT NOT NULL;
 
@@ -51,22 +52,23 @@ BEGIN TRY
         );
     END;
 
-    IF COL_LENGTH(N'Warehouse.PaidOrderInbox', N'IdWarehouseDocument') IS NOT NULL
-    BEGIN
-        INSERT INTO [Warehouse].[PaidOrderInboxDocument] ([IdPaidOrderInbox], [IdWarehouseDocument])
-        SELECT inbox.[Id], inbox.[IdWarehouseDocument]
-        FROM [Warehouse].[PaidOrderInbox] AS inbox
-        WHERE inbox.[IdWarehouseDocument] IS NOT NULL
-          AND NOT EXISTS
-          (
-              SELECT 1 FROM [Warehouse].[PaidOrderInboxDocument] AS link
-              WHERE link.[IdWarehouseDocument] = inbox.[IdWarehouseDocument]
-          );
+    EXEC(N'
+        IF COL_LENGTH(N''Warehouse.PaidOrderInbox'', N''IdWarehouseDocument'') IS NOT NULL
+        BEGIN
+            INSERT INTO [Warehouse].[PaidOrderInboxDocument] ([IdPaidOrderInbox], [IdWarehouseDocument])
+            SELECT inbox.[Id], inbox.[IdWarehouseDocument]
+            FROM [Warehouse].[PaidOrderInbox] AS inbox
+            WHERE inbox.[IdWarehouseDocument] IS NOT NULL
+              AND NOT EXISTS
+              (
+                  SELECT 1 FROM [Warehouse].[PaidOrderInboxDocument] AS link
+                  WHERE link.[IdWarehouseDocument] = inbox.[IdWarehouseDocument]
+              );
 
-        IF EXISTS (SELECT 1 FROM sys.foreign_keys WHERE [name] = N'FK_Warehouse_PaidOrderInbox_WarehouseDocument')
-            ALTER TABLE [Warehouse].[PaidOrderInbox] DROP CONSTRAINT [FK_Warehouse_PaidOrderInbox_WarehouseDocument];
-        ALTER TABLE [Warehouse].[PaidOrderInbox] DROP COLUMN [IdWarehouseDocument];
-    END;
+            IF EXISTS (SELECT 1 FROM sys.foreign_keys WHERE [name] = N''FK_Warehouse_PaidOrderInbox_WarehouseDocument'')
+                ALTER TABLE [Warehouse].[PaidOrderInbox] DROP CONSTRAINT [FK_Warehouse_PaidOrderInbox_WarehouseDocument];
+            ALTER TABLE [Warehouse].[PaidOrderInbox] DROP COLUMN [IdWarehouseDocument];
+        END;');
 
     IF EXISTS (SELECT 1 FROM sys.indexes WHERE [object_id] = OBJECT_ID(N'[Warehouse].[WarehouseDocument]') AND [name] = N'UX_Warehouse_WarehouseDocument_CustomerOrder')
         DROP INDEX [UX_Warehouse_WarehouseDocument_CustomerOrder] ON [Warehouse].[WarehouseDocument];
@@ -152,9 +154,9 @@ BEGIN TRY
             (
                 SELECT 1
                 FROM inserted AS balance
-                INNER JOIN [Warehouse].[SalesPlanReference] AS plan
-                    ON plan.[Id] = balance.[IdSalesPlanReference]
-                WHERE plan.[IsRegular] = 0 AND balance.[MinimumQuantity] > 0
+                INNER JOIN [Warehouse].[SalesPlanReference] AS [plan]
+                    ON [plan].[Id] = balance.[IdSalesPlanReference]
+                WHERE [plan].[IsRegular] = 0 AND balance.[MinimumQuantity] > 0
             )
                 THROW 51032, ''Minimum stock can only be configured for the regular sales plan.'', 1;
         END;');

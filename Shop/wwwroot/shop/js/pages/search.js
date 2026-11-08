@@ -858,15 +858,16 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
   }
   function cartOptionsMarkup(item) {
     const escape = window.HNUI?.escapeHtml || ((value) => String(value || ""));
-    const variants = Array.isArray(item.options?.variants)
-      ? item.options.variants
+    const priceOptions = Array.isArray(item.options?.priceOptions)
+      ? item.options.priceOptions
       : [];
     const accessories = Array.isArray(item.options?.accessories)
       ? item.options.accessories
       : [];
-    if (!variants.length && !accessories.length) return "";
-    const variantMarkup = variants.length
-      ? `<div class="cart-item-option-group"><small class="cart-item-option-label">ویژگی‌ها</small><div class="cart-item-option-list cart-item-option-list--variants">${variants
+    const inventoryVariant = item.options?.inventoryVariant;
+    if (!priceOptions.length && !accessories.length && !inventoryVariant) return "";
+    const variantMarkup = priceOptions.length
+      ? `<div class="cart-item-option-group"><small class="cart-item-option-label">گزینه‌های قیمت</small><div class="cart-item-option-list cart-item-option-list--variants">${priceOptions
           .map(
             (option) =>
               `<span class="cart-item-option-chip"><small>${escape(option.label)}</small><strong>${escape(option.value)}</strong>${Number(option.priceDelta) ? `<small class="cart-item-option-price">${Number(option.priceDelta) > 0 ? "+" : "−"} ${fa(Math.abs(Number(option.priceDelta)) * 1000000)} تومان</small>` : ""}</span>`,
@@ -881,7 +882,10 @@ window.HNUI.ready(() => window.HNUI.mount("search", document.querySelector(".sea
           )
           .join("")}</div></div>`
       : "";
-    return `<div class="cart-item-options" aria-label="ویژگی‌ها و متعلقات انتخاب‌شده">${variantMarkup}${accessoryMarkup}</div>`;
+    const inventoryMarkup = inventoryVariant?.name
+      ? `<div class="cart-item-option-group"><small class="cart-item-option-label">تنوع موجودی انبار</small><div class="cart-item-option-list"><span class="cart-item-option-chip"><strong>${escape(inventoryVariant.name)}</strong></span></div></div>`
+      : "";
+    return `<div class="cart-item-options" aria-label="تنوع انبار، گزینه‌های قیمت و متعلقات انتخاب‌شده">${inventoryMarkup}${variantMarkup}${accessoryMarkup}</div>`;
   }
   function updateCartCount() {
     const cart = readCart(),

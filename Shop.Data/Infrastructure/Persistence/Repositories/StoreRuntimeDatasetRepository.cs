@@ -7,29 +7,31 @@ namespace Shop.Database.Infrastructure.Persistence.Repositories;
 
 public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext) : IStoreRuntimeDatasetRepository
 {
-    public async Task<string?> ReadJsonAsync(string datasetKey, CancellationToken cancellationToken)
-    {
-        DbConnection connection = dbContext.Database.GetDbConnection();
-        bool closeWhenDone = connection.State != ConnectionState.Open;
-        if (closeWhenDone) await connection.OpenAsync(cancellationToken);
-        try
-        {
-            await using DbCommand command = connection.CreateCommand();
-            command.CommandText = "SELECT [PayloadJson] FROM [Store].[RuntimeDataset] WHERE [DatasetKey] = @DatasetKey;";
-            DbParameter parameter = command.CreateParameter();
-            parameter.ParameterName = "@DatasetKey";
-            parameter.DbType = DbType.String;
-            parameter.Size = 100;
-            parameter.Value = datasetKey;
-            command.Parameters.Add(parameter);
-            object? result = await command.ExecuteScalarAsync(cancellationToken);
-            return result is null or DBNull ? null : Convert.ToString(result, System.Globalization.CultureInfo.InvariantCulture);
-        }
-        finally
-        {
-            if (closeWhenDone) await connection.CloseAsync();
-        }
-    }
+    public async Task<string?> ReadCatalogJsonAsync(CancellationToken cancellationToken) =>
+        await ReadScalarJsonAsync("""
+            SELECT 2 AS [schemaVersion],
+                   JSON_QUERY((SELECT [GroupKey] AS [id], [Name] AS [name], [SortOrder] AS [order] FROM [Store].[SpecificationGroup] ORDER BY [SortOrder], [Id] FOR JSON PATH)) AS [specificationGroups],
+                   JSON_QUERY((SELECT [CategoryKey] AS [id], [IdSpecificationGroup] AS [groupId], [Name] AS [name], [SortOrder] AS [order] FROM [Store].[SpecificationCategory] ORDER BY [SortOrder], [Id] FOR JSON PATH)) AS [specificationCategories],
+                   JSON_QUERY((SELECT [FeatureKey] AS [id], [IdSpecificationCategory] AS [categoryId], [Label] AS [label], [SortOrder] AS [order] FROM [Store].[SpecificationFeature] ORDER BY [SortOrder], [Id] FOR JSON PATH)) AS [specificationFeatures],
+                   JSON_QUERY((SELECT [AttributeKey] AS [id], [Label] AS [label], [Icon] AS [icon], [SourceKey] AS [source], [FilterKey] AS [filterKey], [IsFilterable] AS [is_filterable], [IsHighlight] AS [is_highlight] FROM [Store].[AttributeDefinition] ORDER BY [Id] FOR JSON PATH)) AS [attributeDefinitions],
+                   JSON_QUERY((SELECT b.[BrandKey] AS [id], b.[NameEn] AS [name], b.[NameFa] AS [fa], b.[LogoPath] AS [logo], c.[CountryCode] AS [countryCode] FROM [Store].[Brand] b LEFT JOIN [Store].[Country] c ON c.[Id] = b.[IdCountry] ORDER BY b.[Id] FOR JSON PATH)) AS [brands],
+                   JSON_QUERY((SELECT [CategoryKey] AS [id], [ParentCategoryKey] AS [parentId], [NameEn] AS [en], [NameFa] AS [fa], [CategoryKey] AS [slug], JSON_QUERY([PathJson]) AS [path] FROM [Store].[Category] WHERE [IsActive] = 1 ORDER BY [SortOrder], [Id] FOR JSON PATH)) AS [categories],
+                   JSON_QUERY((SELECT [ColorKey] AS [id], [NameEn] AS [en], [NameFa] AS [fa], [HexCode] AS [hex] FROM [Store].[Color] ORDER BY [Id] FOR JSON PATH)) AS [colors],
+                   JSON_QUERY((SELECT [CountryCode] AS [id], [NameFa] AS [name], [NameEn] AS [en], [FlagPath] AS [flag] FROM [Store].[Country] ORDER BY [Id] FOR JSON PATH)) AS [countries],
+                   JSON_QUERY((SELECT [DetailKey] AS [id], [Intro] AS [intro], JSON_QUERY([HighlightsJson]) AS [highlights], JSON_QUERY([SpecsJson]) AS [specs], JSON_QUERY([ReviewsJson]) AS [reviews], JSON_QUERY([QuestionsJson]) AS [questions] FROM [Store].[ProductDetail] ORDER BY [Id] FOR JSON PATH)) AS [details],
+                   JSON_QUERY((SELECT [MediaKey] AS [id], [MainPath] AS [main], [CardPath] AS [card], [ThumbnailPath] AS [thumbnail], JSON_QUERY(COALESCE([ImagesJson], N'[]')) AS [images], JSON_QUERY(COALESCE([VideosJson], N'[]')) AS [videos] FROM [Store].[ProductMedia] ORDER BY [Id] FOR JSON PATH)) AS [media],
+                   JSON_QUERY((SELECT CONVERT(INT, p.[StoreProductKey]) AS [id], p.[Name] AS [name], COALESCE(p.[EnglishName], p.[Name]) AS [englishName], p.[Code] AS [code], p.[Slug] AS [slug], b.[BrandKey] AS [brandId], c.[CategoryKey] AS [categoryId], p.[DetailKey] AS [detailId], pm.[MediaKey] AS [mediaId], COALESCE(p.[PowerSource], N'') AS [powerSource], COALESCE(p.[UseCase], N'') AS [useCase], p.[PriceAmount] AS [price], CONVERT(INT, COALESCE((SELECT SUM(sb.[Quantity]) FROM [Warehouse].[InventoryItem] ii INNER JOIN [Warehouse].[Product] wp ON wp.[Id] = ii.[IdProduct] INNER JOIN [Warehouse].[StockBalance] sb ON sb.[IdInventoryItem] = ii.[Id] WHERE wp.[StoreProductKey] = p.[StoreProductKey]), 0)) AS [stockQuantity], COALESCE(p.[MaxPurchaseQuantity], 99) AS [maxCartQuantity], COALESCE(p.[DiscountPercent], 0) AS [discountPercent], p.[Badge] AS [badge], p.[IsNewest] AS [isNewest], p.[NewestOrder] AS [newestOrder], JSON_QUERY(N'[' + COALESCE((SELECT STRING_AGG(CONVERT(nvarchar(max), N'"' + STRING_ESCAPE(c2.[ColorKey], 'json') + N'"'), N',') FROM [Store].[ProductColor] pc INNER JOIN [Store].[Color] c2 ON c2.[Id] = pc.[IdColor] WHERE pc.[IdProduct] = p.[Id]), N'') + N']') AS [colorIds], JSON_QUERY((SELECT sf.[FeatureKey] AS [featureId], psv.[Value] AS [value] FROM [Store].[ProductSpecificationValue] psv INNER JOIN [Store].[SpecificationFeature] sf ON sf.[Id] = psv.[IdSpecificationFeature] WHERE psv.[IdProduct] = p.[Id] FOR JSON PATH)) AS [specificationValues], JSON_QUERY((SELECT a.[AccessoryKey] AS [id], a.[Name] AS [name], pa.[IsRequired] AS [required] FROM [Store].[ProductAccessory] pa INNER JOIN [Store].[Accessory] a ON a.[Id] = pa.[IdAccessory] WHERE pa.[IdProduct] = p.[Id] ORDER BY pa.[SortOrder], pa.[Id] FOR JSON PATH)) AS [accessories], JSON_QUERY(N'{}') AS [variants] FROM [Store].[Product] p LEFT JOIN [Store].[Brand] b ON b.[Id] = p.[IdBrand] LEFT JOIN [Store].[Category] c ON c.[Id] = p.[IdCategory] LEFT JOIN [Store].[ProductMedia] pm ON pm.[IdProduct] = p.[Id] AND pm.[MediaKey] = CONCAT(N'product-', p.[StoreProductKey]) WHERE p.[IsActive] = 1 ORDER BY p.[Id] FOR JSON PATH)) AS [products],
+                   JSON_QUERY((SELECT pc.[CollectionKey] AS [id], JSON_QUERY(N'[' + COALESCE((SELECT STRING_AGG(CONVERT(nvarchar(max), CONVERT(INT, p.[StoreProductKey])), N',') FROM [Store].[ProductCollectionItem] pci INNER JOIN [Store].[Product] p ON p.[Id] = pci.[IdProduct] WHERE pci.[IdProductCollection] = pc.[Id]), N'') + N']') AS [items] FROM [Store].[ProductCollection] pc ORDER BY pc.[Id] FOR JSON PATH)) AS [collections]
+            FOR JSON PATH, WITHOUT_ARRAY_WRAPPER;
+            """, cancellationToken);
+
+    public async Task<string?> ReadBrandEditorialJsonAsync(CancellationToken cancellationToken) =>
+        await ReadScalarJsonAsync("""
+            SELECT b.[BrandKey] AS [slug], e.[Established] AS [established], e.[OfficialUrl] AS [officialUrl], e.[Specialization] AS [specialization], e.[FeaturedProducts] AS [featuredProducts], e.[Audience] AS [audience], e.[ShoppingAdvice] AS [shoppingAdvice], JSON_QUERY(COALESCE(e.[CompanyIntroductionsJson], N'[]')) AS [companyIntroductions], JSON_QUERY(COALESCE(e.[ProductFamiliesJson], N'[]')) AS [productFamilies], JSON_QUERY(COALESCE(e.[StrengthsJson], N'[]')) AS [strengths]
+            FROM [Store].[Brand] b INNER JOIN [Store].[BrandEditorial] e ON e.[IdBrand] = b.[Id]
+            ORDER BY b.[Id]
+            FOR JSON PATH;
+            """, cancellationToken);
 
     public async Task<IReadOnlyList<StoreFaqRow>> ReadFaqAsync(CancellationToken cancellationToken)
     {
@@ -60,12 +62,106 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext) : ISt
     }
 
     public async Task<string?> ReadAccountJsonAsync(CancellationToken cancellationToken) =>
-        await ReadScalarJsonAsync("SELECT TOP (1) [PayloadJson] FROM [Account].[ProfileSnapshot] ORDER BY [Id];",
-            cancellationToken);
+        await ReadScalarJsonAsync("""
+            SELECT
+            (
+                SELECT
+                    1 AS [schemaVersion],
+                    N'IRT' AS [currency],
+                    JSON_QUERY((
+                        SELECT
+                            COALESCE(o.[ExternalOrderKey], CONCAT(N'order-', o.[Id])) AS [id],
+                            o.[OrderNumber] AS [number],
+                            o.[Status] AS [status],
+                            CONVERT(date, o.[OrderedAtUtc]) AS [orderedOn],
+                            o.[ItemCount] AS [itemCount],
+                            o.[TotalAmount] AS [totalAmount],
+                            CASE o.[Status]
+                                WHEN N'pending-payment' THEN N'در انتظار تکمیل پرداخت سفارش'
+                                WHEN N'payment-confirmed' THEN N'پرداخت سفارش تأیید شده است'
+                                WHEN N'warehouse-confirmed' THEN N'موجودی کالا در انبار تأیید شده است'
+                                WHEN N'in-transit' THEN N'مرسوله در مسیر ارسال قرار دارد'
+                                WHEN N'shipped-to-post' THEN N'سفارش به شرکت پست تحویل شد'
+                                WHEN N'delivered' THEN N'سفارش با موفقیت تحویل شد'
+                                WHEN N'cancelled' THEN N'سفارش به درخواست کاربر لغو شد'
+                                ELSE N'وضعیت سفارش ثبت شده است'
+                            END AS [deliveryDescription]
+                        FROM [Account].[CustomerOrder] o
+                        ORDER BY o.[OrderedAtUtc] DESC, o.[Id] DESC
+                        FOR JSON PATH
+                    )),
+                    JSON_QUERY((
+                        SELECT
+                            c.[CouponKey] AS [id],
+                            c.[Code] AS [code],
+                            c.[DiscountPercent] AS [discountPercent],
+                            c.[UsageLimit] AS [usageLimit],
+                            c.[Enabled] AS [enabled],
+                            c.[ExpiresOn] AS [expiresOn],
+                            JSON_QUERY(
+                                N'[' + COALESCE(
+                                    (
+                                        SELECT STRING_AGG(
+                                            CONVERT(nvarchar(max), N'"' + STRING_ESCAPE(COALESCE(o.[ExternalOrderKey], CONCAT(N'order-', o.[Id])), 'json') + N'"'),
+                                            N','
+                                        )
+                                        FROM [Account].[CouponUsage] u
+                                        INNER JOIN [Account].[CustomerOrder] o ON o.[Id] = u.[IdCustomerOrder]
+                                        WHERE u.[IdCoupon] = c.[Id]
+                                    ),
+                                    N''
+                                ) + N']'
+                            ) AS [orderIds]
+                        FROM [Account].[Coupon] c
+                        ORDER BY c.[Id]
+                        FOR JSON PATH
+                    ))
+                FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+            ) AS [Value];
+            """, cancellationToken);
 
     public async Task<string?> ReadMagazineJsonAsync(CancellationToken cancellationToken) =>
-        await ReadScalarJsonAsync("SELECT [PayloadJson] FROM [Store].[RuntimeDataset] WHERE [DatasetKey] = N'magazine';",
-            cancellationToken);
+        await ReadScalarJsonAsync("""
+            SELECT JSON_QUERY((
+                SELECT
+                    a.[Branch] AS [branch], a.[Topic] AS [topic], a.[Area] AS [area],
+                    COALESCE(a.[ReadTimeMinutes], 0) AS [readMinutes],
+                    JSON_QUERY((
+                        SELECT a.[ArticleKey] AS [slug], a.[Category] AS [category], a.[Kicker] AS [kicker],
+                               a.[Title] AS [title], a.[Summary] AS [summary], COALESCE(a.[Author], N'') AS [author],
+                               N'' AS [publishedAt], COALESCE(a.[ReadTimeText], N'') AS [readTime],
+                               a.[HeroImagePath] AS [heroImage], a.[ContentImagePath] AS [contentImage],
+                               a.[Lead] AS [lead],
+                               JSON_QUERY((SELECT s.[Id] AS [id], s.[Heading] AS [title], s.[Body] AS [content]
+                                           FROM [Mag].[MagazineArticleSection] s
+                                           WHERE s.[IdMagazineArticle] = a.[Id]
+                                           ORDER BY s.[SortOrder], s.[Id] FOR JSON PATH)) AS [sections],
+                               a.[Conclusion] AS [conclusion],
+                               JSON_QUERY((SELECT s.[Title] AS [title], s.[Url] AS [url]
+                                           FROM [Mag].[MagazineArticleSource] s
+                                           WHERE s.[IdMagazineArticle] = a.[Id]
+                                           ORDER BY s.[SortOrder], s.[Id] FOR JSON PATH)) AS [sources],
+                               JSON_QUERY((SELECT t.[Label] AS [label], t.[Filter] AS [filter]
+                                           FROM [Mag].[MagazineArticleTag] t
+                                           WHERE t.[IdMagazineArticle] = a.[Id]
+                                           ORDER BY t.[SortOrder], t.[Id] FOR JSON PATH)) AS [tags],
+                               JSON_QUERY((SELECT r.[ArticleSlug] AS [slug], r.[Category] AS [category], r.[Title] AS [title], r.[ImagePath] AS [image]
+                                           FROM [Mag].[MagazineArticleRelated] r
+                                           WHERE r.[IdMagazineArticle] = a.[Id]
+                                           ORDER BY r.[SortOrder], r.[Id] FOR JSON PATH)) AS [relatedArticles],
+                               JSON_QUERY((SELECT COALESCE(m.[Views], 0) AS [views], COALESCE(m.[Likes], 0) AS [likes],
+                                                  COALESCE(m.[AverageRating], 0) AS [averageRating], COALESCE(m.[Comments], 0) AS [comments]
+                                           FOR JSON PATH, WITHOUT_ARRAY_WRAPPER)) AS [metrics]
+                        FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+                    )) AS [article]
+                FROM [Mag].[MagazineArticle] a
+                LEFT JOIN [Mag].[MagazineArticleMetric] m ON m.[IdMagazineArticle] = a.[Id]
+                WHERE a.[IsPublished] = 1
+                ORDER BY a.[Id]
+                FOR JSON PATH
+            )) AS [articles]
+            FOR JSON PATH, WITHOUT_ARRAY_WRAPPER;
+            """, cancellationToken);
 
     public async Task<string> ReadGeographyJsonAsync(CancellationToken cancellationToken)
     {

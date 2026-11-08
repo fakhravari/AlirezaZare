@@ -129,6 +129,7 @@
     if (!auth.isLoggedIn() || !Array.isArray(event.detail)) return;
     const items = event.detail.map((item) => ({
       productId: Number(String(item.id).replace(/:.*$/, "")),
+      variantId: item.variantId || null,
       quantity: Number(item.quantity),
       salesPlanId: String(item.salesPlanId || "regular"),
       options: item.options || {},
@@ -396,14 +397,20 @@
     if (!auth.requireLogin(() => button.click())) return;
     const productId = String(button.dataset.id);
     const salesPlanId = button.dataset.salesPlanId || "regular";
+    const product = (window.HNProducts || []).find((item) => String(item.id) === productId);
+    if (!product) return;
+    let salesPlanData = {};
+    try { salesPlanData = JSON.parse(document.querySelector("#storeSalesPlans")?.textContent || "{}"); } catch { salesPlanData = {}; }
+    const inventoryVariants = (salesPlanData.inventoryVariants || []).filter((variant) => Number(variant.productId) === Number(productId));
+    const configuredPriceOptions = salesPlanData.priceOptions?.[Number(productId)] || [];
+    if (inventoryVariants.length || configuredPriceOptions.length) {
+      window.location.href = window.HNProductUrl?.(product) || `/products/${productId}`;
+      return;
+    }
+    const priceOptions = {};
     let salesPlanSnapshot = null;
     if (salesPlanId !== "regular") {
       if (!auth.requireLogin(() => button.click())) return;
-      const product = (window.HNProducts || []).find((item) => String(item.id) === productId);
-      if (!product) return;
-      const variants = Object.fromEntries(Object.entries(product.variants || {})
-        .map(([key, feature]) => [key, feature.options?.[0]?.value])
-        .filter(([, value]) => value != null));
       const accessoryIds = (product.accessories || []).filter((item) => item.required).map((item) => item.id);
       button._cartQuotePending = true;
       button.disabled = true;
@@ -411,7 +418,7 @@
         const response = await api.request("store/sales-plans/quote", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ productId: Number(productId), salesPlanId, quantity: 1, variants, accessoryIds }),
+          body: JSON.stringify({ productId: Number(productId), salesPlanId, quantity: 1, variantId: null, priceOptions, accessoryIds }),
         });
         if (!response.ok) throw new Error("quote unavailable");
         const quote = await response.json();

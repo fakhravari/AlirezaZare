@@ -283,8 +283,8 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                 if (!string.IsNullOrWhiteSpace(input.Code) && input.Code.Length > 100) return ValidationProblem("کد تنوع حداکثر ۱۰۰ نویسه است.");
                 if (!string.IsNullOrWhiteSpace(input.AttributesJson))
                 {
-                    try { using JsonDocument _ = JsonDocument.Parse(input.AttributesJson); }
-                    catch (JsonException) { return ValidationProblem("ویژگی‌های تنوع باید JSON معتبر باشند."); }
+                    if (!TryReadInventoryAttributeKeys(input.AttributesJson, out HashSet<string> attributeKeys))
+                        return ValidationProblem("ویژگی‌های موجودی باید آرایه‌ای از key، label، value و display معتبر باشند.");
                 }
                 WarehouseProduct? product = await db.Products.SingleOrDefaultAsync(x => x.Id == input.ProductId && x.IsActive, cancellationToken);
                 if (product is null) return ValidationProblem("محصول فعال پیدا نشد.");
@@ -441,6 +441,33 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
 
     private static bool ValidCodeName(string? code, string? name, int codeMax, int nameMax) =>
         !string.IsNullOrWhiteSpace(code) && code.Trim().Length <= codeMax && !string.IsNullOrWhiteSpace(name) && name.Trim().Length <= nameMax;
+
+    private static bool TryReadInventoryAttributeKeys(string json, out HashSet<string> keys)
+    {
+        keys = new(StringComparer.Ordinal);
+        try
+        {
+            using JsonDocument document = JsonDocument.Parse(json);
+            if (document.RootElement.ValueKind != JsonValueKind.Array || document.RootElement.GetArrayLength() is < 1 or > 12) return false;
+            foreach (JsonElement attribute in document.RootElement.EnumerateArray())
+            {
+                if (attribute.ValueKind != JsonValueKind.Object ||
+                    !attribute.TryGetProperty("key", out JsonElement keyElement) || keyElement.ValueKind != JsonValueKind.String ||
+                    !attribute.TryGetProperty("label", out JsonElement labelElement) || labelElement.ValueKind != JsonValueKind.String ||
+                    !attribute.TryGetProperty("value", out JsonElement valueElement) || valueElement.ValueKind != JsonValueKind.String ||
+                    !attribute.TryGetProperty("display", out JsonElement displayElement) || displayElement.ValueKind != JsonValueKind.String) return false;
+                string key = keyElement.GetString()!.Trim();
+                if (!System.Text.RegularExpressions.Regex.IsMatch(key, "^[a-z][a-z0-9-]{0,63}$") || !keys.Add(key) ||
+                    string.IsNullOrWhiteSpace(labelElement.GetString()) || labelElement.GetString()!.Length > 80 ||
+                    string.IsNullOrWhiteSpace(valueElement.GetString()) || valueElement.GetString()!.Length > 100 ||
+                    string.IsNullOrWhiteSpace(displayElement.GetString()) || displayElement.GetString()!.Length > 100) return false;
+                if (attribute.TryGetProperty("swatch", out JsonElement swatch) && swatch.ValueKind != JsonValueKind.Null &&
+                    (swatch.ValueKind != JsonValueKind.String || !System.Text.RegularExpressions.Regex.IsMatch(swatch.GetString() ?? "", "^#[0-9a-fA-F]{6}$"))) return false;
+            }
+            return true;
+        }
+        catch (JsonException) { return false; }
+    }
 
     private sealed record CompanyInput(string Code, string Name, bool IsActive);
     private sealed record WarehouseInput(long CompanyId, string Code, string Name, bool IsSalesWarehouse, long? OwnerSalesPlanId, bool IsActive, bool IsSiteWarehouse);

@@ -43,7 +43,7 @@
 | `/Warehouse/Stock` | [StockController](../../Shop.Admin/Areas/Warehouse/Controllers/StockController.cs) → [Index](../../Shop.Admin/Areas/Warehouse/Views/Stock/Index.cshtml) | موجودی با فیلتر AJAX |
 | `/Warehouse/Features?feature=...` | [FeaturesController](../../Shop.Admin/Areas/Warehouse/Controllers/FeaturesController.cs) → [Index](../../Shop.Admin/Areas/Warehouse/Views/Features/Index.cshtml) | دامنهٔ رسید، حواله، انتقال، اصلاح و گردش؛ API عملیاتی هنوز ندارد |
 
-این routeها در برنامهٔ مستقل `Shop.Admin` هستند. کلیک روی لینک داخلی، محتوای صفحه را با AJAX جایگزین و history مرورگر را به‌روز می‌کند. APIهای خواندن عبارت‌اند از `GET /api/admin/store/catalog/{products|categories|brands|attributes}`، `GET /api/admin/warehouse/warehouses` و `GET /api/admin/warehouse/stock`؛ پاسخ و درخواست با `no-store` هستند. API نوشتن مدیریتی هنوز پیاده‌سازی نشده است.
+این routeها در برنامهٔ مستقل `Shop.Admin` هستند. مسیر `/` برای کاربر ناشناس مستقیماً به `/auth/login` می‌رود و پس از ورود به داشبورد مدیریت هدایت می‌شود. کلیک روی لینک داخلی، محتوای صفحه را با AJAX جایگزین و history مرورگر را به‌روز می‌کند. APIهای خواندن عبارت‌اند از `GET /api/admin/store/catalog/{products|categories|brands|attributes}`، `GET /api/admin/warehouse/warehouses` و `GET /api/admin/warehouse/stock`؛ پاسخ و درخواست با `no-store` هستند. API نوشتن مدیریتی هنوز پیاده‌سازی نشده است.
 
 ## قرارداد route و سازگاری
 

@@ -19,6 +19,8 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
         }).format(date);
     };
     const priceWatchKey = "hn-price-watches-demo";
+    let salesPlanData = {};
+    try { salesPlanData = JSON.parse(document.querySelector("#storeSalesPlans")?.textContent || "{}"); } catch { salesPlanData = {}; }
     const messagePageSize = 5;
     const profileMessages = [
         { title: "به‌روزرسانی ساعات پاسخ‌گویی پشتیبانی", date: "۱۴۰۵/۰۸/۱۴", category: "اطلاعیه", body: "از این پس کارشناسان پشتیبانی همه‌روزه از ساعت ۹ تا ۱۸ پاسخ‌گوی شما هستند.", unread: true },
@@ -386,16 +388,15 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
         host.innerHTML = watches.map((watch, index) => {
             const product = window.HNCatalog?.find(watch.productId);
             const productName = product?.name || `محصول ${watch.productId || "نامشخص"}`;
+            const priceOptions = salesPlanData.priceOptions?.[Number(watch.productId)] || [];
             const variants = watch.scope === "variant" && watch.variants && typeof watch.variants === "object"
                 ? Object.entries(watch.variants).map(([key, value]) => {
-                    const feature = product?.variants?.[key];
-                    const option = feature?.options?.find((item) => item.value === value);
+                    const feature = priceOptions.find((item) => item.key === key);
+                    const option = feature?.values?.find((item) => item.key === value);
                     return `${feature?.label || key}: ${option?.label || value}`;
                 }).join("، ")
                 : "";
-            const hasVariants = Object.values(product?.variants || {}).some(
-                (feature) => Array.isArray(feature?.options) && feature.options.length,
-            );
+            const hasVariants = priceOptions.some((feature) => Array.isArray(feature?.values) && feature.values.length);
             const scopeLabel = watch.scope === "variant"
                 ? (variants || "ویژگی انتخاب‌شده")
                 : hasVariants

@@ -21,6 +21,18 @@
             "Shop.Admin/Controllers/Api/StoreCatalogAdminApiController.cs",
             "Shop.Admin/Controllers/Api/WarehouseAdminApiController.cs"
           ]
+        },
+        "store-variant-prices": {
+          "markup": [
+            "Shop.Admin/Areas/Store/Views/Features/VariantPrices.cshtml"
+          ],
+          "js": [
+            "Shop.Admin/wwwroot/js/admin-variant-prices.js"
+          ],
+          "server": [
+            "Shop.Admin/Controllers/Api/StoreVariantPricesAdminApiController.cs",
+            "Shop.Admin/Areas/Store/Controllers/FeaturesController.cs"
+          ]
         }
       }
     },
@@ -455,7 +467,7 @@
             "Shop/wwwroot/shop/css/pages/warranty.css"
           ],
           "assets": [
-            "Shop/wwwroot/shop/images/heroes/hero-warranty-work-light.png"
+            "Shop/wwwroot/shop/images/heroes/hero-warranty-work-light.webp"
           ]
         },
         "contact-page": {

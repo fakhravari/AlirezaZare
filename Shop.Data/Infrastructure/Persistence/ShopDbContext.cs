@@ -21,6 +21,7 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
     public DbSet<WarehouseDocumentRecord> WarehouseDocuments => Set<WarehouseDocumentRecord>();
     public DbSet<WarehouseDocumentLineRecord> WarehouseDocumentLines => Set<WarehouseDocumentLineRecord>();
     public DbSet<WarehouseStockMovement> WarehouseStockMovements => Set<WarehouseStockMovement>();
+    public DbSet<WarehouseDocumentAudit> WarehouseDocumentAudits => Set<WarehouseDocumentAudit>();
     public DbSet<Warehouse> Warehouses => Set<Warehouse>();
     public DbSet<Company> Companies => Set<Company>();
     public DbSet<SalesPlanReference> SalesPlanReferences => Set<SalesPlanReference>();
@@ -83,6 +84,13 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
         {
             entity.ToTable("RolePermission", "Admin");
             entity.HasKey(x => new { x.IdRole, x.IdPermission });
+            entity.Property(x => x.IdPermission).HasColumnName("IdPermission");
+            entity.HasOne(x => x.Role)
+                .WithMany(x => x.Permissions)
+                .HasForeignKey(x => x.IdRole);
+            entity.HasOne(x => x.Permission)
+                .WithMany()
+                .HasForeignKey(x => x.IdPermission);
         });
         modelBuilder.Entity<AdminUserWarehouseAccess>(entity =>
         {
@@ -175,6 +183,19 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.HasKey(x => x.Id);
             entity.Property(x => x.QuantityDelta).HasPrecision(18, 3);
             entity.Property(x => x.OccurredAtUtc).HasPrecision(3);
+        });
+        modelBuilder.Entity<WarehouseDocumentAudit>(entity =>
+        {
+            entity.ToTable("DocumentAudit", "Warehouse");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.Action).HasMaxLength(20).IsRequired();
+            entity.Property(x => x.ActorUserKey).HasMaxLength(128).IsRequired();
+            entity.Property(x => x.OccurredAtUtc).HasPrecision(3);
+            entity.Property(x => x.Reason).HasMaxLength(1000);
+            entity.Property(x => x.BeforeJson).HasColumnType("nvarchar(max)");
+            entity.Property(x => x.AfterJson).HasColumnType("nvarchar(max)");
+            entity.HasIndex(x => new { x.DocumentId, x.OccurredAtUtc, x.Id });
+            entity.HasIndex(x => new { x.WarehouseId, x.OccurredAtUtc, x.Id });
         });
         modelBuilder.Entity<SalesPlanReference>(entity =>
         {

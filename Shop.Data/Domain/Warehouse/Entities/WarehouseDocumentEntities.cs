@@ -45,3 +45,17 @@ public sealed class WarehouseStockMovement
     public decimal QuantityDelta { get; set; }
     public DateTime OccurredAtUtc { get; set; }
 }
+
+public sealed class WarehouseDocumentAudit
+{
+    public long Id { get; set; }
+    public long DocumentId { get; set; }
+    public long DocumentNumber { get; set; }
+    public long WarehouseId { get; set; }
+    public string Action { get; set; } = string.Empty;
+    public string ActorUserKey { get; set; } = string.Empty;
+    public DateTime OccurredAtUtc { get; set; }
+    public string? Reason { get; set; }
+    public string? BeforeJson { get; set; }
+    public string? AfterJson { get; set; }
+}

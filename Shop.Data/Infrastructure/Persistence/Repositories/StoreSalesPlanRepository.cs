@@ -48,6 +48,14 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
                         INNER JOIN [Warehouse].[InventoryItem] ii ON ii.[Id] = sb.[IdInventoryItem]
                         INNER JOIN [Warehouse].[Product] wp ON wp.[Id] = ii.[IdProduct]
                         INNER JOIN [Warehouse].[SalesPlanReference] spr ON spr.[Id] = sb.[IdSalesPlanReference]
+                        WHERE ii.[IsActive] = 1 AND
+                        (
+                            (ii.[IdProductVariant] IS NOT NULL AND EXISTS
+                                (SELECT 1 FROM [Warehouse].[ProductVariant] activeVariant WHERE activeVariant.[Id] = ii.[IdProductVariant] AND activeVariant.[IsActive] = 1))
+                            OR
+                            (ii.[IdProductVariant] IS NULL AND NOT EXISTS
+                                (SELECT 1 FROM [Warehouse].[ProductVariant] activeVariant WHERE activeVariant.[IdProduct] = wp.[Id] AND activeVariant.[IsActive] = 1))
+                        )
                         GROUP BY wp.[IdStoreProduct], spr.[IdStoreSalesPlan]
                     ), [OfferRows] AS
                     (
@@ -82,6 +90,81 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
                     offers.Add((productId, planId), new(
                         productId, planId, reader.GetDecimal(2), reader.GetDecimal(3),
                         reader.GetInt32(4), reader.GetInt32(5), reader.GetBoolean(6)));
+                }
+            }
+
+            Dictionary<(int ProductId, string Key), ProductPriceOptionBuilder> priceOptions = [];
+            await using (DbCommand command = connection.CreateCommand())
+            {
+                command.CommandText = """
+                    SELECT p.[Id], option.[OptionKey], option.[Label], value.[ValueKey], value.[Label],
+                           CONVERT(DECIMAL(19,0), ROUND(value.[PriceDelta] * 1000000, 0))
+                    FROM [Store].[ProductPurchaseOption] option
+                    INNER JOIN [Store].[Product] p ON p.[Id] = option.[IdProduct] AND p.[IsActive] = 1
+                    INNER JOIN [Store].[ProductPurchaseOptionValue] value ON value.[IdProductPurchaseOption] = option.[Id]
+                    ORDER BY p.[Id], option.[SortOrder], value.[SortOrder];
+                    """;
+                await using DbDataReader reader = await command.ExecuteReaderAsync(cancellationToken);
+                while (await reader.ReadAsync(cancellationToken))
+                {
+                    int productId = checked((int)reader.GetInt64(0));
+                    string key = reader.GetString(1);
+                    var lookup = (productId, key);
+                    if (!priceOptions.TryGetValue(lookup, out ProductPriceOptionBuilder? option))
+                        priceOptions[lookup] = option = new(productId, key, reader.GetString(2));
+                    option.Values.Add(new(reader.GetString(3), reader.GetString(4), reader.GetDecimal(5)));
+                }
+            }
+
+            Dictionary<(int ProductId, long VariantId), InventoryVariantBuilder> inventoryVariants = [];
+            await using (DbCommand command = connection.CreateCommand())
+            {
+                command.CommandText = """
+                    SELECT p.[IdStoreProduct], v.[Id], v.[Name], v.[Code], v.[AttributesJson],
+                           storePlan.[SalesPlanKey], SUM(sb.[Quantity])
+                    FROM [Warehouse].[ProductVariant] v
+                    INNER JOIN [Warehouse].[Product] p ON p.[Id] = v.[IdProduct] AND p.[IsActive] = 1
+                    INNER JOIN [Warehouse].[InventoryItem] ii ON ii.[IdProductVariant] = v.[Id] AND ii.[IsActive] = 1
+                    LEFT JOIN [Warehouse].[SiteWarehouseSetting] setting ON setting.[IdWarehouse] IS NOT NULL
+                    LEFT JOIN [Warehouse].[StockBalance] sb ON sb.[IdWarehouse] = setting.[IdWarehouse] AND sb.[IdInventoryItem] = ii.[Id]
+                    LEFT JOIN [Warehouse].[SalesPlanReference] spr ON spr.[Id] = sb.[IdSalesPlanReference]
+                    LEFT JOIN [Store].[SalesPlan] storePlan ON storePlan.[SalesPlanKey] = spr.[StoreSalesPlanKey]
+                    WHERE v.[IsActive] = 1 AND p.[IdStoreProduct] IS NOT NULL
+                    GROUP BY p.[IdStoreProduct], v.[Id], v.[Name], v.[Code], v.[AttributesJson], storePlan.[SalesPlanKey]
+                    ORDER BY p.[IdStoreProduct], v.[Id], storePlan.[SalesPlanKey];
+                    """;
+                await using DbDataReader reader = await command.ExecuteReaderAsync(cancellationToken);
+                while (await reader.ReadAsync(cancellationToken))
+                {
+                    int productId = checked((int)reader.GetInt64(0));
+                    long variantId = reader.GetInt64(1);
+                    var key = (productId, variantId);
+                    if (!inventoryVariants.TryGetValue(key, out InventoryVariantBuilder? variant))
+                        inventoryVariants[key] = variant = new(productId, variantId, reader.GetString(2),
+                            reader.IsDBNull(3) ? null : reader.GetString(3), reader.IsDBNull(4) ? null : reader.GetString(4));
+                    if (!reader.IsDBNull(5)) variant.StockBySalesPlan[reader.GetString(5)] = reader.IsDBNull(6) ? 0m : reader.GetDecimal(6);
+                }
+            }
+
+            await using (DbCommand command = connection.CreateCommand())
+            {
+                command.CommandText = """
+                    SELECT offer.[IdProductVariant], plan.[SalesPlanKey], offer.[PriceAmount], offer.[DiscountPercent]
+                    FROM [Store].[ProductVariantSalesPlanOffer] offer
+                    INNER JOIN [Store].[SalesPlan] plan ON plan.[Id] = offer.[IdSalesPlan]
+                    INNER JOIN [Warehouse].[ProductVariant] variant ON variant.[Id] = offer.[IdProductVariant] AND variant.[IsActive] = 1
+                    WHERE offer.[IsEnabled] = 1
+                    ORDER BY offer.[IdProductVariant], plan.[SalesPlanKey];
+                    """;
+                await using DbDataReader reader = await command.ExecuteReaderAsync(cancellationToken);
+                while (await reader.ReadAsync(cancellationToken))
+                {
+                    long variantId = reader.GetInt64(0);
+                    InventoryVariantBuilder? variant = inventoryVariants.Values.SingleOrDefault(item => item.VariantId == variantId);
+                    if (variant is null) continue;
+                    string planId = reader.GetString(1);
+                    variant.PriceBySalesPlan[planId] = reader.GetDecimal(2);
+                    variant.DiscountBySalesPlan[planId] = reader.GetDecimal(3);
                 }
             }
 
@@ -135,7 +218,11 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
                         .SpecificationOverrides.Add(reader.GetString(2), reader.GetString(3));
             }
 
-            return new(plans, offers.Values.Select(offer => offer.Build()).ToArray());
+            return new StoreSalesPlanSnapshot(plans, offers.Values.Select(offer => offer.Build()).ToArray(),
+                inventoryVariants.Values.Select(variant => variant.Build()).ToArray())
+            {
+                PriceOptions = priceOptions.Values.Select(option => option.Build()).ToArray()
+            };
         }
         finally
         {
@@ -226,5 +313,34 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
 
         public StoreSalesOfferRow Build() => new(productId, salesPlanId, priceAmount, discountPercent,
             stockQuantity, maxPurchaseQuantity, isEnabled, AccessoryPriceAmounts, AccessoryIds, SpecificationOverrides);
+    }
+
+    private sealed class ProductPriceOptionBuilder(int productId, string key, string label)
+    {
+        public List<StoreProductPriceOptionValueRow> Values { get; } = [];
+        public StoreProductPriceOptionRow Build() => new(productId, key, label, Values);
+    }
+
+    private sealed class InventoryVariantBuilder
+    {
+        public InventoryVariantBuilder(int productId, long variantId, string name, string? code, string? attributesJson)
+        {
+            ProductId = productId;
+            VariantId = variantId;
+            Name = name;
+            Code = code;
+            AttributesJson = attributesJson;
+        }
+
+        private int ProductId { get; }
+        public long VariantId { get; }
+        private string Name { get; }
+        private string? Code { get; }
+        private string? AttributesJson { get; }
+        public Dictionary<string, decimal> StockBySalesPlan { get; } = new(StringComparer.Ordinal);
+        public Dictionary<string, decimal> PriceBySalesPlan { get; } = new(StringComparer.Ordinal);
+        public Dictionary<string, decimal> DiscountBySalesPlan { get; } = new(StringComparer.Ordinal);
+        public StoreInventoryVariantRow Build() => new(ProductId, VariantId, Name, Code, AttributesJson,
+            StockBySalesPlan, PriceBySalesPlan, DiscountBySalesPlan);
     }
 }

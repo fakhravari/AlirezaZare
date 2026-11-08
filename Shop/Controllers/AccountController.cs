@@ -101,9 +101,18 @@ public sealed class AccountController(ShopDbContext db, ISalesPlanSource plans, 
         if (request.Items is null || request.Items.Count > 99 || request.Items.Any(i => i.ProductId < 1 || i.VariantId is < 1 || i.Quantity is < 1 or > 99 || string.IsNullOrWhiteSpace(i.SalesPlanId) || i.SalesPlanId.Length > 64)) return BadRequest(new { code = "invalid-cart" });
         var duplicate = request.Items.GroupBy(i => (i.ProductId, i.SalesPlanId, i.VariantId)).Any(g => g.Count() > 1);
         if (duplicate) return BadRequest(new { code = "duplicate-cart-line" });
-        foreach (var item in request.Items.Where(item => item.VariantId.HasValue))
-            if (!await ProductVariantExistsAsync(item.ProductId, item.VariantId!.Value, ct))
+        SalesPlanCatalog currentCatalog = await plans.ReadAsync(ct);
+        foreach (var item in request.Items)
+        {
+            ProductInventoryVariant[] variants = currentCatalog.InventoryVariants.Where(variant => variant.ProductId == item.ProductId).ToArray();
+            if (variants.Length > 0 && (!item.VariantId.HasValue || variants.All(variant => variant.VariantId != item.VariantId.Value)))
+                return Conflict(new { code = "inventory-variant-required" });
+            if (variants.Length == 0 && item.VariantId.HasValue || item.VariantId.HasValue && !await ProductVariantExistsAsync(item.ProductId, item.VariantId.Value, ct))
                 return Conflict(new { code = "product-variant-unavailable" });
+            if (item.VariantId is { } selectedVariantId &&
+                (!variants.Single(variant => variant.VariantId == selectedVariantId).StockBySalesPlan.TryGetValue(item.SalesPlanId, out decimal stock) || stock < item.Quantity))
+                return Conflict(new { code = "insufficient-stock" });
+        }
         string payload = System.Text.Json.JsonSerializer.Serialize(request.Items, new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web));
         await db.Database.ExecuteSqlInterpolatedAsync($$"""
             SET XACT_ABORT ON; BEGIN TRANSACTION;
@@ -159,6 +168,20 @@ public sealed class AccountController(ShopDbContext db, ISalesPlanSource plans, 
                 if (line.VariantId.HasValue && !await ProductVariantExistsAsync(line.ProductId, line.VariantId.Value, ct))
                     return Conflict(new { code = "product-variant-unavailable" });
                 var quote = catalog.Quote(checked((int)line.ProductId), line.SalesPlanId, line.Quantity, now);
+                ProductInventoryVariant[] warehouseVariants = catalog.InventoryVariants
+                    .Where(variant => variant.ProductId == line.ProductId).ToArray();
+                if (warehouseVariants.Length > 0)
+                {
+                    ProductInventoryVariant? selectedWarehouseVariant = line.VariantId is { } inventoryVariantId
+                        ? warehouseVariants.SingleOrDefault(variant => variant.VariantId == inventoryVariantId)
+                        : null;
+                    if (selectedWarehouseVariant is null ||
+                        !selectedWarehouseVariant.StockBySalesPlan.TryGetValue(line.SalesPlanId, out decimal variantStock) ||
+                        variantStock < line.Quantity)
+                        return Conflict(new { code = "inventory-variant-or-stock-changed" });
+                }
+                else if (line.VariantId.HasValue)
+                    return Conflict(new { code = "product-variant-unavailable" });
                 string? productName = await db.Database.SqlQueryRaw<string>("SELECT [Name] AS [Value] FROM [Store].[Product] WHERE [Id]={0} AND [IsActive]=1", line.ProductId).SingleOrDefaultAsync(ct);
                 if (productName is null) return Conflict(new { code = "product-unavailable" });
                 ProductPurchaseConfiguration? configuration = await purchaseConfigurations.ReadAsync(checked((int)line.ProductId), ct);
@@ -168,8 +191,9 @@ public sealed class AccountController(ShopDbContext db, ISalesPlanSource plans, 
                 var accessoryIds = new HashSet<string>(StringComparer.Ordinal);
                 if (line.Options is { ValueKind: System.Text.Json.JsonValueKind.Object } options)
                 {
-                    if (options.TryGetProperty("variants", out var variants) && variants.ValueKind == System.Text.Json.JsonValueKind.Array)
-                        foreach (var option in variants.EnumerateArray())
+                    if (options.TryGetProperty("priceOptions", out var priceOptions) && priceOptions.ValueKind == System.Text.Json.JsonValueKind.Array ||
+                        options.TryGetProperty("variants", out priceOptions) && priceOptions.ValueKind == System.Text.Json.JsonValueKind.Array)
+                        foreach (var option in priceOptions.EnumerateArray())
                             if (option.TryGetProperty("key", out var key) && option.TryGetProperty("productValue", out var value) && key.GetString() is { } k && value.GetString() is { } v) variantValues[k] = v;
                     if (options.TryGetProperty("accessories", out var accessories) && accessories.ValueKind == System.Text.Json.JsonValueKind.Array)
                         foreach (var accessory in accessories.EnumerateArray())
@@ -180,6 +204,13 @@ public sealed class AccountController(ShopDbContext db, ISalesPlanSource plans, 
                 var offer = catalog.Offers.Single(candidate => candidate.ProductId == quote.ProductId && candidate.SalesPlanId == quote.SalesPlanId);
                 if (configuration.Accessories.Any(a => a.IsRequired && !accessoryIds.Contains(a.Key)) || accessoryIds.Any(id => configuration.Accessories.All(a => a.Key != id)) || offer.AccessoryIds is { } allowed && accessoryIds.Any(id => !allowed.Contains(id, StringComparer.Ordinal))) return Conflict(new { code = "invalid-product-options" });
                 decimal unitAmount = quote.UnitAmount;
+                ProductInventoryVariant? selectedInventoryVariant = catalog.InventoryVariants.SingleOrDefault(variant =>
+                    variant.ProductId == line.ProductId && variant.VariantId == line.VariantId);
+                if (selectedInventoryVariant is not null && selectedInventoryVariant.PriceBySalesPlan.TryGetValue(line.SalesPlanId, out decimal variantPrice))
+                {
+                    decimal variantDiscount = selectedInventoryVariant.DiscountBySalesPlan.GetValueOrDefault(line.SalesPlanId);
+                    unitAmount = decimal.Round(variantPrice * (100m - variantDiscount) / 100m, 0, MidpointRounding.AwayFromZero);
+                }
                 foreach (var option in configuration.Options)
                 {
                     string selected = variantValues[option.Key];

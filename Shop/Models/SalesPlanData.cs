@@ -13,6 +13,9 @@ public sealed record SalesPlanCatalog(
     IReadOnlyList<SalesPlan> Plans,
     IReadOnlyList<ProductSalesOffer> Offers)
 {
+    public IReadOnlyList<ProductInventoryVariant> InventoryVariants { get; init; } = [];
+    public IReadOnlyDictionary<int, IReadOnlyList<SalesPlanPriceOption>> PriceOptions { get; init; } =
+        new Dictionary<int, IReadOnlyList<SalesPlanPriceOption>>();
     public const int CurrentSchemaVersion = 1;
     public static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
@@ -163,6 +166,44 @@ public sealed record SalesPlanCatalog(
                 throw new InvalidDataException("Invalid, duplicate, or unreferenced product sales offer.");
         }
 
+        HashSet<(int ProductId, long VariantId)> inventoryVariantIds = [];
+        foreach (ProductInventoryVariant variant in InventoryVariants)
+        {
+            if (variant is null || variant.ProductId <= 0 || !productIds.Contains(variant.ProductId) ||
+                variant.VariantId <= 0 || !inventoryVariantIds.Add((variant.ProductId, variant.VariantId)) ||
+                string.IsNullOrWhiteSpace(variant.Name) || variant.Name.Length > 300 ||
+                variant.StockBySalesPlan is null || variant.PriceBySalesPlan is null || variant.DiscountBySalesPlan is null ||
+                variant.StockBySalesPlan.Any(stock => !planIds.Contains(stock.Key) || stock.Value < 0 || stock.Value != decimal.Truncate(stock.Value * 1000m) / 1000m) ||
+                variant.PriceBySalesPlan.Any(price => !planIds.Contains(price.Key) || price.Value < 0 || price.Value != decimal.Truncate(price.Value)) ||
+                variant.DiscountBySalesPlan.Any(discount => !planIds.Contains(discount.Key) || discount.Value is < 0 or >= 100))
+                throw new InvalidDataException("Invalid warehouse inventory variant or plan-specific price.");
+            if (variant.Attributes is { } attributes)
+            {
+                if (attributes.ValueKind != JsonValueKind.Array || attributes.GetArrayLength() is < 1 or > 12)
+                    throw new InvalidDataException("Inventory variant attributes must be a non-empty array.");
+                HashSet<string> keys = new(StringComparer.Ordinal);
+                foreach (JsonElement attribute in attributes.EnumerateArray())
+                {
+                    if (attribute.ValueKind != JsonValueKind.Object ||
+                        !attribute.TryGetProperty("key", out JsonElement key) || key.ValueKind != JsonValueKind.String ||
+                        !attribute.TryGetProperty("label", out JsonElement label) || label.ValueKind != JsonValueKind.String ||
+                        !attribute.TryGetProperty("value", out JsonElement value) || value.ValueKind != JsonValueKind.String ||
+                        !attribute.TryGetProperty("display", out JsonElement display) || display.ValueKind != JsonValueKind.String ||
+                        string.IsNullOrWhiteSpace(key.GetString()) || !keys.Add(key.GetString()!) ||
+                        string.IsNullOrWhiteSpace(label.GetString()) || string.IsNullOrWhiteSpace(value.GetString()) || string.IsNullOrWhiteSpace(display.GetString()))
+                        throw new InvalidDataException("Invalid warehouse inventory attribute.");
+                }
+            }
+        }
+        foreach ((int productId, IReadOnlyList<SalesPlanPriceOption> options) in PriceOptions)
+        {
+            if (!productIds.Contains(productId) || options is null || options.Select(option => option.Key).Distinct(StringComparer.Ordinal).Count() != options.Count ||
+                options.Any(option => option is null || string.IsNullOrWhiteSpace(option.Key) || string.IsNullOrWhiteSpace(option.Label) || option.Values is null ||
+                    option.Values.Count == 0 || option.Values.Select(value => value.Key).Distinct(StringComparer.Ordinal).Count() != option.Values.Count ||
+                    option.Values.Any(value => string.IsNullOrWhiteSpace(value.Key) || string.IsNullOrWhiteSpace(value.Label) || value.PriceDelta != decimal.Truncate(value.PriceDelta))))
+                throw new InvalidDataException("Invalid store price options.");
+        }
+
         string defaultPlanId = Plans.Single(plan => plan.IsDefault).Id;
         foreach (int productId in productIds)
             if (!offerKeys.Contains($"{productId}:{defaultPlanId}"))
@@ -207,6 +248,19 @@ public sealed record SalesPlanCatalog(
         !string.IsNullOrWhiteSpace(value) && value.Length <= 64 &&
         Regex.IsMatch(value, "^[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*$", RegexOptions.CultureInvariant);
 }
+
+public sealed record ProductInventoryVariant(
+    int ProductId,
+    long VariantId,
+    string Name,
+    string? Code,
+    JsonElement? Attributes,
+    IReadOnlyDictionary<string, decimal> StockBySalesPlan,
+    IReadOnlyDictionary<string, decimal> PriceBySalesPlan,
+    IReadOnlyDictionary<string, decimal> DiscountBySalesPlan);
+
+public sealed record SalesPlanPriceOption(string Key, string Label, IReadOnlyList<SalesPlanPriceOptionValue> Values);
+public sealed record SalesPlanPriceOptionValue(string Key, string Label, decimal PriceDelta);
 
 public sealed record SalesPlan(
     string Id,

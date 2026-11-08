@@ -7,13 +7,13 @@
 در عرض‌های حداکثر ۹۹۱px، صفحهٔ جست‌وجو در `search-mobile.css` سرریز افقی بدنه را clip می‌کند تا offcanvas بستهٔ منوی مشترک عرض سند را بزرگ نکند. Drawer باز باید در همان viewport بماند؛ پنل فیلتر در موبایل drawer و از تبلت به بالا ستون کنار نتایج است.
 
 
-مصرف‌کننده‌های سرور از `ICatalogSource.ReadAsync` استفاده می‌کنند؛ `CatalogRepository` payload کاتالوگ را از `Store.RuntimeDataset` می‌خواند و schemaVersion 2 را با `CatalogSnapshot.Parse` اعتبارسنجی می‌کند.
+مصرف‌کننده‌های سرور از `ICatalogSource.ReadAsync` استفاده می‌کنند؛ `CatalogRepository` payload کاتالوگ را با query از جدول‌های رابطه‌ای Store و Warehouse می‌سازد و schemaVersion 2 را با `CatalogSnapshot.Parse` اعتبارسنجی می‌کند.
 
 ## نقاط ورود و مالکیت
 
 | بخش | نقطهٔ شروع | مالک رفتار / ظاهر |
 |---|---|---|
-| دادهٔ محصول | dataset نسخه‌دار کاتالوگ در `Store.RuntimeDataset` (SQL Server) | [CatalogRepository](../../Shop/Services/CatalogRepository.cs) و resolver [catalog.js](../../Shop/wwwroot/shop/js/store/catalog.js) |
+| دادهٔ محصول | query رابطه‌ای روی جدول‌های Store و Warehouse (SQL Server) | [CatalogRepository](../../Shop/Services/CatalogRepository.cs) و resolver [catalog.js](../../Shop/wwwroot/shop/js/store/catalog.js) |
 | خانه | [Home/Index.cshtml](../../Shop/Views/Home/Index.cshtml) | `home-sales-plans.js`، `home-collection.css`، `home-warmth.css` و کارت مشترک |
 | Search | [Product/List.cshtml](../../Shop/Views/Product/List.cshtml) | [search.js](../../Shop/wwwroot/shop/js/pages/search.js)، `search.css` و `search-mobile.css`؛ لینک خانهٔ breadcrumb در markup اولیه و renderer مسیر دسته‌ها نام «خانه» دارد تا آیکن تنها نماند؛ فهرست طرح‌محور مسیر عمومی فروشگاه را نشان می‌دهد |
 | مقایسه / علاقه‌مندی | [Compare](../../Shop/Views/Compare/Index.cshtml) و [Favorites](../../Shop/Views/Favorites/Index.cshtml) | `store/commerce.js`؛ `commerce.css` و قواعد responsive مشترک |
@@ -26,6 +26,8 @@
 بخش دیجی‌تایم خانه از `#homeSalesTime` و renderer مشترک طرح‌های فروش استفاده می‌کند. سربرگ آن فشرده است تا نام طرح، زمان باقی‌مانده و پیوند فهرست را نشان دهد و فضای بیشتری برای دیدن کالاها باقی بگذارد؛ در موبایل همین اطلاعات به چیدمان ستونی تبدیل می‌شوند. ظاهر این بخش در `home-collection.css` نگهداری می‌شود.
 
 ## قرارداد محصول
+
+دسته‌بندی‌های رابطه‌ای در `[Store].[Category]` ستون `IconClass` دارند. مقدار آن نام glyph از Bootstrap Icons با پیشوند `bi-` است (برای نمونه `bi-tools`)؛ مقدار ستون کلاس پایهٔ `bi` را ندارد. [Migration 021](../../Shop/Features/Store/Database/Migrations/021-store-category-icon-class.sql) برای دسته‌های موجود آیکن بر اساس نوع دسته تنظیم می‌کند و اگر دستهٔ تازه‌ای ساخته شد، آیکن آن نیز باید هنگام ثبت دسته تعیین شود.
 
 نام نمایشی شش محصول نمونه با شناسه‌های ۱، ۶، ۱۱، ۱۶، ۲۱ و ۲۳ با نام برند و کاربرد موجود در همان رکورد کامل‌تر شده است تا نمونهٔ عنوان بلند در گروه‌های مختلف موجود باشد. این تغییر فقط فیلد `name` را عوض می‌کند؛ شناسه، slug و مشخصات فنی ثابت‌اند.
 
@@ -136,7 +138,7 @@ Search فیلترها و sort را با query string و `popstate` هماهنگ 
 
 [فهرست این بخش](README.md) · [فهرست مستندات](../README.md)
 
-آخرین تطبیق با کد: ۳ نوامبر ۲۰۲۶.
+آخرین تطبیق با کد: ۸ نوامبر ۲۰۲۶.
 
 
 ## نمایش بارگذاری نتایج

@@ -70,7 +70,7 @@ async function files(directory, suffix) {
   return list;
 }
 for (const [component, owner] of Object.entries(owners)) {
-  for (const kind of ['markup', 'data', 'server', 'js', 'css', 'pageOverrides']) {
+  for (const kind of ['markup', 'data', 'server', 'js', 'css', 'assets', 'pageOverrides']) {
     for (const file of owner[kind] || []) if (!await exists(file)) errors.push(`${component}: missing ${kind} owner ${file}`);
   }
 }

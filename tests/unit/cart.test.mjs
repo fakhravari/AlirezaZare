@@ -29,7 +29,7 @@ test('variant and accessory prices use catalog values and ignore tampered duplic
     accessories: [{...optional, selected: true, price: 999}, {...optional, selected: true}],
   }});
   assert.equal(item.price, Math.round((p.price + Number(choice.priceDelta || 0) + optional.price + .35) * 1e6));
-  assert.equal(item.options.variants.filter(v => v.key === variantKey).length, 1);
+  assert.equal(item.options.priceOptions.filter(v => v.key === variantKey).length, 1);
   assert.equal(item.options.accessories.filter(a => a.name === optional.name).length, 1);
   assert.equal(item.name, p.name);
 });
@@ -72,7 +72,7 @@ test('new configurations replace the existing configuration of the same product 
   const [key, f] = Object.entries(p.variants)[0]; const choice = f.options.at(-1);
   const items = r.ui.cart.add({...p, options: {variants: [{key, value: choice.label, productValue: choice.value}]}}, 1);
   assert.equal(items.length, 1); assert.equal(items[0].quantity, 1);
-  assert.equal(items[0].options.variants[0].productValue, choice.value);
+  assert.equal(items[0].options.priceOptions[0].productValue, choice.value);
 });
 
 test('the same product in different sales plans stays in separate cart lines', () => {

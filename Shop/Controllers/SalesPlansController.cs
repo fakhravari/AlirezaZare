@@ -25,6 +25,8 @@ public sealed class SalesPlansController(
         {
             productId,
             currency = data.Currency,
+            inventoryVariants = data.InventoryVariants.Where(variant => variant.ProductId == productId),
+            priceOptions = data.PriceOptions.GetValueOrDefault(productId, []),
             plans = data.Plans.Select(plan => new
             {
                 plan.Id, plan.Code, plan.Name, plan.Type, plan.IsDefault, plan.Label,
@@ -46,19 +48,45 @@ public sealed class SalesPlansController(
             SalesPlanCatalog data = await plans.ReadAsync(cancellationToken);
             SalesPlanQuote quote = data.Quote(request.ProductId, request.SalesPlanId,
                 request.Quantity, DateTimeOffset.UtcNow);
+            string selectedPlanId = quote.SalesPlanId;
+            ProductInventoryVariant[] productInventoryVariants = data.InventoryVariants
+                .Where(variant => variant.ProductId == request.ProductId).ToArray();
+            if (productInventoryVariants.Length > 0)
+            {
+                ProductInventoryVariant? inventoryVariant = request.VariantId is { } variantId
+                    ? productInventoryVariants.SingleOrDefault(variant => variant.VariantId == variantId)
+                    : null;
+                if (inventoryVariant is null) throw new SalesPlanUnavailableException("inventory-variant-required");
+                inventoryVariant.StockBySalesPlan.TryGetValue(selectedPlanId, out decimal variantStock);
+                if (variantStock < request.Quantity) throw new SalesPlanUnavailableException("insufficient-stock");
+            }
+            else if (request.VariantId.HasValue)
+                throw new SalesPlanUnavailableException("product-variant-unavailable");
             ProductSalesOffer selectedOffer = data.Offers.Single(item =>
                 item.ProductId == quote.ProductId && item.SalesPlanId == quote.SalesPlanId);
             (decimal adjustments, IReadOnlyDictionary<string, decimal> accessoryAmounts, int maxQuantity) =
                 await GetValidatedAdjustments(request, selectedOffer, cancellationToken);
             if (request.Quantity > maxQuantity)
                 throw new SalesPlanUnavailableException("purchase-limit");
-            decimal adjustedUnit = checked(quote.UnitAmount + adjustments);
+            decimal listUnitAmount = quote.ListUnitAmount;
+            decimal discountPercent = quote.DiscountPercent;
+            decimal baseUnitAmount = quote.UnitAmount;
+            ProductInventoryVariant? selectedInventoryVariant = data.InventoryVariants.SingleOrDefault(variant =>
+                variant.ProductId == request.ProductId && variant.VariantId == request.VariantId);
+            if (selectedInventoryVariant is not null && selectedInventoryVariant.PriceBySalesPlan.TryGetValue(selectedPlanId, out decimal variantPrice))
+            {
+                listUnitAmount = variantPrice;
+                discountPercent = selectedInventoryVariant.DiscountBySalesPlan.GetValueOrDefault(selectedPlanId);
+                baseUnitAmount = decimal.Round(variantPrice * (100m - discountPercent) / 100m, 0, MidpointRounding.AwayFromZero);
+            }
+            decimal adjustedUnit = checked(baseUnitAmount + adjustments);
             return Ok(new
             {
                 quote.ProductId, quote.SalesPlanId, quote.SalesPlanCode, quote.Quantity,
-                quote.ListUnitAmount, quote.DiscountPercent, unitAmount = adjustedUnit,
+                listUnitAmount, discountPercent, unitAmount = adjustedUnit,
                 totalAmount = checked(adjustedUnit * quote.Quantity), quote.Currency,
                 quote.QuotedAtUtc,
+                variantId = request.VariantId,
                 planName = data.Plans.Single(plan => plan.Id == quote.SalesPlanId).Name,
                 accessoryAmounts
             });
@@ -81,14 +109,14 @@ public sealed class SalesPlansController(
             return BadRequest(new { code = "invalid-cart" });
         if (request.Lines.Any(line =>
                 line is null || line.ProductId < 1 || string.IsNullOrWhiteSpace(line.SalesPlanId)) ||
-            request.Lines.Select(line => $"{line.ProductId}:{line.SalesPlanId}").Distinct(StringComparer.Ordinal)
+            request.Lines.Select(line => $"{line.ProductId}:{line.VariantId?.ToString() ?? "base"}:{line.SalesPlanId}").Distinct(StringComparer.Ordinal)
                 .Count() != request.Lines.Count)
             return BadRequest(new { code = "invalid-cart" });
         var result = new List<object>();
         foreach (CartLineRequest line in request.Lines)
         {
             IActionResult quoteResult = await Quote(new QuoteRequest(line.ProductId, line.SalesPlanId,
-                line.Quantity, line.Variants, line.AccessoryIds), cancellationToken);
+                line.Quantity, line.VariantId, line.PriceOptions, line.AccessoryIds), cancellationToken);
             if (quoteResult is not OkObjectResult { Value: { } value }) return quoteResult;
             result.Add(new { line.ProductId, line.SalesPlanId, line.Quantity, quote = value });
         }
@@ -107,14 +135,14 @@ public sealed class SalesPlansController(
         foreach (ProductPurchaseOption feature in product.Options)
         {
             acceptedVariantKeys.Add(feature.Key);
-            if (request.Variants is null || !request.Variants.TryGetValue(feature.Key, out string? value))
+            if (request.PriceOptions is null || !request.PriceOptions.TryGetValue(feature.Key, out string? value))
                 throw new InvalidDataException();
             ProductPurchaseOptionValue? option = feature.Values.FirstOrDefault(item => item.Key == value);
             if (option is null) throw new InvalidDataException();
             adjustments += option.PriceDelta;
         }
 
-        if (request.Variants is not null && request.Variants.Keys.Any(key => !acceptedVariantKeys.Contains(key)))
+        if (request.PriceOptions is not null && request.PriceOptions.Keys.Any(key => !acceptedVariantKeys.Contains(key)))
             throw new InvalidDataException();
         int maxQuantity = product.MaxPurchaseQuantity;
         maxQuantity = Math.Clamp(maxQuantity, 1, 99);
@@ -143,7 +171,8 @@ public sealed class SalesPlansController(
         int ProductId,
         string? SalesPlanId,
         int Quantity,
-        Dictionary<string, string>? Variants,
+        long? VariantId,
+        Dictionary<string, string>? PriceOptions,
         IReadOnlyList<string>? AccessoryIds);
 
     public sealed record CartValidationRequest(IReadOnlyList<CartLineRequest>? Lines);
@@ -152,6 +181,7 @@ public sealed class SalesPlansController(
         int ProductId,
         string SalesPlanId,
         int Quantity,
-        Dictionary<string, string>? Variants,
+        long? VariantId,
+        Dictionary<string, string>? PriceOptions,
         IReadOnlyList<string>? AccessoryIds);
 }

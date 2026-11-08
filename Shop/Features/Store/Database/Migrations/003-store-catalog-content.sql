@@ -365,7 +365,9 @@ BEGIN TRY
         CONSTRAINT [CK_Store_ContactChannel_Type] CHECK ([ChannelType] IN (N'Phone', N'Email', N'WhatsApp', N'Address', N'Other'))
     );
 
-    CREATE TABLE [Store].[MagazineArticle]
+    IF SCHEMA_ID(N'Mag') IS NULL EXEC(N'CREATE SCHEMA [Mag]');
+
+    CREATE TABLE [Mag].[MagazineArticle]
     (
         [Id] BIGINT IDENTITY(1,1) NOT NULL,
         [ArticleKey] NVARCHAR(150) NOT NULL,
@@ -381,30 +383,30 @@ BEGIN TRY
         [IsPublished] BIT NOT NULL CONSTRAINT [DF_Store_MagazineArticle_IsPublished] DEFAULT (1),
         [CreatedAtUtc] DATETIME2(3) NOT NULL CONSTRAINT [DF_Store_MagazineArticle_CreatedAtUtc] DEFAULT SYSUTCDATETIME(),
         [UpdatedAtUtc] DATETIME2(3) NULL,
-        CONSTRAINT [PK_Store_MagazineArticle] PRIMARY KEY ([Id]),
-        CONSTRAINT [UQ_Store_MagazineArticle_ArticleKey] UNIQUE ([ArticleKey])
+        CONSTRAINT [PK_Mag_MagazineArticle] PRIMARY KEY ([Id]),
+        CONSTRAINT [UQ_Mag_MagazineArticle_ArticleKey] UNIQUE ([ArticleKey])
     );
 
-    CREATE TABLE [Store].[MagazineArticleSection]
+    CREATE TABLE [Mag].[MagazineArticleSection]
     (
         [Id] BIGINT IDENTITY(1,1) NOT NULL,
         [IdMagazineArticle] BIGINT NOT NULL,
         [Heading] NVARCHAR(300) NOT NULL,
         [Body] NVARCHAR(MAX) NOT NULL,
         [SortOrder] INT NOT NULL,
-        CONSTRAINT [PK_Store_MagazineArticleSection] PRIMARY KEY ([Id]),
-        CONSTRAINT [FK_Store_MagazineArticleSection_Article] FOREIGN KEY ([IdMagazineArticle]) REFERENCES [Store].[MagazineArticle] ([Id])
+        CONSTRAINT [PK_Mag_MagazineArticleSection] PRIMARY KEY ([Id]),
+        CONSTRAINT [FK_Mag_MagazineArticleSection_Article] FOREIGN KEY ([IdMagazineArticle]) REFERENCES [Mag].[MagazineArticle] ([Id])
     );
 
-    CREATE TABLE [Store].[MagazineArticleSource]
+    CREATE TABLE [Mag].[MagazineArticleSource]
     (
         [Id] BIGINT IDENTITY(1,1) NOT NULL,
         [IdMagazineArticle] BIGINT NOT NULL,
         [Title] NVARCHAR(300) NOT NULL,
         [Url] NVARCHAR(2000) NOT NULL,
         [SortOrder] INT NOT NULL,
-        CONSTRAINT [PK_Store_MagazineArticleSource] PRIMARY KEY ([Id]),
-        CONSTRAINT [FK_Store_MagazineArticleSource_Article] FOREIGN KEY ([IdMagazineArticle]) REFERENCES [Store].[MagazineArticle] ([Id])
+        CONSTRAINT [PK_Mag_MagazineArticleSource] PRIMARY KEY ([Id]),
+        CONSTRAINT [FK_Mag_MagazineArticleSource_Article] FOREIGN KEY ([IdMagazineArticle]) REFERENCES [Mag].[MagazineArticle] ([Id])
     );
 
     ALTER TABLE [Store].[Product] ADD [IdBrand] BIGINT NULL, [IdCategory] BIGINT NULL, [DetailKey] NVARCHAR(100) NULL, [EnglishName] NVARCHAR(300) NULL, [PowerSource] NVARCHAR(200) NULL, [UseCase] NVARCHAR(500) NULL, [PriceAmount] DECIMAL(19,0) NULL, [DiscountPercent] DECIMAL(5,2) NULL, [MaxPurchaseQuantity] INT NULL, [Slug] NVARCHAR(200) NULL, [Badge] NVARCHAR(100) NULL, [IsNewest] BIT NOT NULL CONSTRAINT [DF_Store_Product_IsNewest] DEFAULT (0), [NewestOrder] INT NULL;

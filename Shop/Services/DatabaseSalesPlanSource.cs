@@ -18,7 +18,25 @@ public sealed class DatabaseSalesPlanSource(IStoreSalesPlanRepository repository
                 AccessoryPriceAmounts = offer.AccessoryPriceAmounts,
                 AccessoryIds = offer.AccessoryIds,
                 SpecificationOverrides = offer.SpecificationOverrides
-            }).ToArray());
+            }).ToArray())
+        {
+            InventoryVariants = snapshot.InventoryVariants.Select(variant => new ProductInventoryVariant(
+                variant.ProductId, variant.VariantId, variant.Name, variant.Code,
+                ParseAttributes(variant.AttributesJson), variant.StockBySalesPlan,
+                variant.PriceBySalesPlan, variant.DiscountBySalesPlan)).ToArray(),
+            PriceOptions = snapshot.PriceOptions.GroupBy(option => option.ProductId).ToDictionary(
+                group => group.Key,
+                group => (IReadOnlyList<SalesPlanPriceOption>)group.Select(option => new SalesPlanPriceOption(
+                    option.Key, option.Label, option.Values.Select(value => new SalesPlanPriceOptionValue(
+                        value.Key, value.Label, value.PriceDelta)).ToArray())).ToArray())
+        };
+    }
+
+    private static System.Text.Json.JsonElement? ParseAttributes(string? json)
+    {
+        if (string.IsNullOrWhiteSpace(json)) return null;
+        using var document = System.Text.Json.JsonDocument.Parse(json);
+        return document.RootElement.Clone();
     }
 
     public async Task<ProductPurchaseConfiguration?> ReadAsync(int productId, CancellationToken cancellationToken = default)

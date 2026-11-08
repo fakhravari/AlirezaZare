@@ -211,10 +211,16 @@
         is_filterable: definition.is_filterable === true, is_highlight: true});
     };
     if (variantDefinition?.is_highlight) {
-      for (const [variantKey, variant] of Object.entries(product.variants || {})) {
-        const options = (variant.options || []).map((option) => String(option.label || "").trim()).filter(Boolean);
-        addDynamicAttribute(`variant-${variantKey}`, String(variant.label || "").trim(), options.join(" / "), variantDefinition);
-      }
+      let salesPlanData = {};
+      try { salesPlanData = JSON.parse(document.querySelector("#storeSalesPlans")?.textContent || "{}"); } catch { salesPlanData = {}; }
+      const warehouseVariants = (salesPlanData.inventoryVariants || []).filter((variant) => Number(variant.productId) === Number(product.id));
+      const groupedAttributes = new Map();
+      warehouseVariants.forEach((variant) => (variant.attributes || []).forEach((attribute) => {
+        if (!groupedAttributes.has(attribute.key)) groupedAttributes.set(attribute.key, { label: attribute.label, values: new Set() });
+        groupedAttributes.get(attribute.key).values.add(attribute.display || attribute.value);
+      }));
+      for (const [variantKey, attribute] of groupedAttributes)
+        addDynamicAttribute(`inventory-${variantKey}`, attribute.label, [...attribute.values].join(" / "), variantDefinition);
     }
     if (technicalDefinition?.is_highlight) {
       for (const [label, value] of resolvedSpecs)

@@ -42,7 +42,8 @@ window.HNUI.ready(() => window.HNUI.mount("checkout", document, () => {
         const currentItems = ui.cart.read();
         const lines = currentItems.map((item) => ({
             productId: Number(item.id), salesPlanId: item.salesPlanId || "regular", quantity: item.quantity,
-            variants: Object.fromEntries((item.options?.variants || []).map((option) => [option.key, option.productValue || option.value])),
+            variantId: item.variantId || null,
+            priceOptions: Object.fromEntries((item.options?.priceOptions || []).map((option) => [option.key, option.productValue || option.value])),
             accessoryIds: (item.options?.accessories || []).filter((item) => item.selected !== false).map((item) => item.id),
         }));
         if (!lines.length) {
@@ -64,6 +65,7 @@ window.HNUI.ready(() => window.HNUI.mount("checkout", document, () => {
                     result.lines.length === currentItems.length && result.lines.every((line, index) =>
                         line.productId === Number(currentItems[index].id) &&
                         line.salesPlanId === currentItems[index].salesPlanId &&
+                        Number(line.quote?.variantId || 0) === Number(currentItems[index].variantId || 0) &&
                         Number(line.quote?.unitAmount) === Number(currentItems[index].price));
             } else salesPlansValid = false;
         } catch { salesPlansValid = false; }
@@ -329,7 +331,7 @@ window.HNUI.ready(() => window.HNUI.mount("checkout", document, () => {
             if (!ui.auth.isLoggedIn()) { ui.auth.requireLogin(() => payment.click()); return; }
             payment.disabled = true;
             try {
-                const lines = ui.cart.read().map((item) => ({ productId: Number(String(item.id).replace(/:.*$/, "")), salesPlanId: item.salesPlanId || "regular", quantity: item.quantity, options: item.options || {} }));
+                const lines = ui.cart.read().map((item) => ({ productId: Number(String(item.id).replace(/:.*$/, "")), salesPlanId: item.salesPlanId || "regular", quantity: item.quantity, variantId: item.variantId || null, options: item.options || {} }));
                 const response = await ui.api.request("account/checkout", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ addressId: Number(selected), paymentMethod: selectedPaymentMethod, lines }) });
                 const result = await response.json().catch(() => ({}));
                 if (!response.ok) throw new Error(result.code === "price-or-stock-changed" ? "قیمت یا موجودی تغییر کرده است؛ سبد را دوباره بررسی کنید." : "ثبت سفارش انجام نشد. نشانی و سبد خرید را بررسی کنید.");

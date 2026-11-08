@@ -53,7 +53,7 @@
         return item;
 
       const options = item.options || {};
-      if ((options.variants || []).length || (options.accessories || []).length)
+      if ((options.priceOptions || options.variants || []).length || (options.accessories || []).length)
         return item;
 
       const legacyOptions = originalName.slice(product.name.length + 2);
@@ -95,26 +95,32 @@
       return {
         ...item,
         name: product.name,
-        options: { variants, accessories },
+        options: { priceOptions: variants, accessories },
       };
     };
     const normalizeOptions = (options, product) => {
       const cleanText = (text, limit) => String(text || "").trim().slice(0, limit);
-      const variants = Array.isArray(options?.variants)
-        ? options.variants
+      const productPriceOptions = getSalesPlanData().priceOptions?.[Number(product?.id)] || [];
+      const priceOptionMap = Object.fromEntries(productPriceOptions.map((feature) => [feature.key, {
+        label: feature.label,
+        options: (feature.values || []).map((value) => ({ value: value.key, label: value.label, priceDelta: Number(value.priceDelta) / 1000000 })),
+      }]));
+      const savedPriceOptions = Array.isArray(options?.priceOptions) ? options.priceOptions : options?.variants;
+      const priceOptions = Array.isArray(savedPriceOptions)
+        ? savedPriceOptions
             .filter((option) => option && typeof option === "object")
             .map((option) => {
               const key = cleanText(option.key, 50);
               const value = cleanText(option.value, 80);
               const productValue = cleanText(option.productValue, 80);
-              const productOption = product?.variants?.[key]?.options?.find(
+              const productOption = priceOptionMap[key]?.options?.find(
                 (candidate) =>
                   candidate.value === productValue || candidate.label === value,
               );
               const savedDelta = Number(option.priceDelta);
               return {
                 key,
-                label: cleanText(product?.variants?.[key]?.label || option.label, 50),
+                label: cleanText(priceOptionMap[key]?.label || option.label, 50),
                 value: productOption?.label || value,
                 productValue: productOption?.value || productValue,
                 priceDelta: product
@@ -123,16 +129,16 @@
               };
             })
             .filter((option) => option.label && option.value && (!product ||
-              product.variants?.[option.key]?.options?.some((candidate) => candidate.value === option.productValue || candidate.label === option.value)))
+              priceOptionMap[option.key]?.options?.some((candidate) => candidate.value === option.productValue || candidate.label === option.value)))
             .filter((option, index, all) => all.findIndex((candidate) => candidate.key === option.key) === index)
             .slice(0, 12)
         : [];
-      const selectedVariantKeys = new Set(variants.map((option) => option.key));
-      Object.entries(product?.variants || {}).forEach(([key, feature]) => {
+      const selectedVariantKeys = new Set(priceOptions.map((option) => option.key));
+      Object.entries(priceOptionMap).forEach(([key, feature]) => {
         if (selectedVariantKeys.has(key)) return;
         const option = feature.options?.[0];
         if (!option) return;
-        variants.push({
+        priceOptions.push({
           key,
           label: cleanText(feature.label, 50),
           value: cleanText(option.label, 80),
@@ -178,7 +184,10 @@
           selected: Boolean(accessory.required),
         });
       });
-      return { variants: variants.slice(0, 12), accessories };
+      const inventoryVariant = options?.inventoryVariant && typeof options.inventoryVariant === "object"
+        ? { id: Number(options.inventoryVariant.id) || null, name: cleanText(options.inventoryVariant.name, 120), attributes: Array.isArray(options.inventoryVariant.attributes) ? options.inventoryVariant.attributes.slice(0, 12) : [] }
+        : null;
+      return { priceOptions: priceOptions.slice(0, 12), accessories, inventoryVariant };
     };
     const normalizeImage = (image) =>
       String(image || "")
@@ -205,7 +214,7 @@
         }
         const configuredPrice = item.salesPlanSnapshot?.unitAmount != null ? Number(item.salesPlanSnapshot.unitAmount) :
           item.salesPlanId && item.salesPlanId !== "regular" && Number.isFinite(Number(item.price)) ? Number(item.price) : product ? Math.round((Number(product.price) +
-          options.variants.reduce((sum, option) => sum + Number(option.priceDelta || 0), 0) +
+          options.priceOptions.reduce((sum, option) => sum + Number(option.priceDelta || 0), 0) +
           options.accessories.filter((accessory) => accessory.selected).reduce((sum, accessory) => sum + Number(accessory.price || 0), 0)
         ) * 1000000) : Number(item.price);
         return {
@@ -213,6 +222,7 @@
           id: String(item.id || "")
             .slice(0, 80)
             .replace(/^(\d+):.*$/, "$1"),
+          variantId: Number.isSafeInteger(Number(item.variantId)) && Number(item.variantId) > 0 ? Number(item.variantId) : null,
           salesPlanId: String(item.salesPlanId || item.salesPlanSnapshot?.id || "regular").trim().slice(0, 64),
           salesPlanSnapshot: item.salesPlanSnapshot && typeof item.salesPlanSnapshot === "object" ? item.salesPlanSnapshot : null,
           name: String(product?.name || item.name || "").slice(0, 120),
@@ -236,7 +246,7 @@
       );
     const uniqueItems = new Map();
     normalizedItems.forEach((item) => {
-      const lineKey = `${item.id}:${item.salesPlanId}`;
+      const lineKey = `${item.id}:${item.variantId || "base"}:${item.salesPlanId}`;
       const existing = uniqueItems.get(lineKey);
       if (!existing) {
         uniqueItems.set(lineKey, item);
@@ -275,6 +285,14 @@
   const availableStock = (item) => {
     const product = productForCartItem(item);
     if (!product) return null;
+    const warehouseVariants = (getSalesPlanData().inventoryVariants || []).filter((variant) => Number(variant.productId) === Number(product.id));
+    if (warehouseVariants.length) {
+      if (!item.variantId) return null;
+      const selectedVariant = warehouseVariants.find((variant) => Number(variant.variantId) === Number(item.variantId));
+      if (!selectedVariant) return 0;
+      const variantPlanStock = Number(selectedVariant.stockBySalesPlan?.[item.salesPlanId] ?? 0);
+      return Number.isFinite(variantPlanStock) && variantPlanStock >= 0 ? Math.floor(variantPlanStock) : 0;
+    }
     const rawStock =
       product.stockQuantity ??
       product.inventoryCount ??
@@ -288,20 +306,6 @@
         : Number.NaN;
     if (!Number.isFinite(stock) || stock < 0) return null;
 
-    const variantKeys = Object.keys(product.variants || {});
-    if (variantKeys.length && product.variantStock) {
-      const selected = new Map(
-        (item.options?.variants || []).map((option) => [option.key, option.productValue]),
-      );
-      const hasCombination = variantKeys.every((key) => selected.get(key));
-      if (hasCombination) {
-        const combinationKey = variantKeys
-          .map((key) => `${key}=${selected.get(key)}`)
-          .join("|");
-        if (Object.prototype.hasOwnProperty.call(product.variantStock, combinationKey))
-          stock = Number(product.variantStock[combinationKey]);
-      }
-    }
     return Number.isFinite(stock) && stock >= 0 ? Math.floor(stock) : null;
   };
 
@@ -329,16 +333,17 @@
       return `<div class="hn-cart-controls" data-sales-plan-id="${escapeHtml(item.salesPlanId || "regular")}" role="group" aria-label="تعداد ${escapeHtml(item.name)}"><div class="hn-cart-quantity"><button type="button" ${attribute("plus")} aria-label="افزایش تعداد" ${item.quantity >= this.quantityLimit(item) ? "disabled" : ""}><i class="bi bi-plus" aria-hidden="true"></i></button><span class="cart-quantity-value">${formatNumber(item.quantity)}</span><button type="button" ${attribute("minus")} aria-label="کاهش تعداد" ${item.quantity <= 1 ? "disabled" : ""}><i class="bi bi-dash" aria-hidden="true"></i></button></div><button type="button" class="hn-cart-remove" ${attribute("remove")} aria-label="حذف ${escapeHtml(item.name)} از سبد"><i class="bi bi-trash3" aria-hidden="true"></i></button></div>`;
     },
     renderOptions(item) {
-      const variants = Array.isArray(item.options?.variants)
-        ? item.options.variants
+      const priceOptions = Array.isArray(item.options?.priceOptions)
+        ? item.options.priceOptions
         : [];
       const accessories = Array.isArray(item.options?.accessories)
         ? item.options.accessories.filter((accessory) => accessory.selected !== false)
         : [];
-      if (!variants.length && !accessories.length) return "";
+      const inventoryVariant = item.options?.inventoryVariant;
+      if (!priceOptions.length && !accessories.length && !inventoryVariant) return "";
       const money = (amount) => `${formatNumber(amount)} تومان`;
-      const variantsMarkup = variants.length
-        ? `<div class="cart-item-option-group"><small class="cart-item-option-label">ویژگی‌ها</small><div class="cart-item-option-list cart-item-option-list--variants">${variants
+      const variantsMarkup = priceOptions.length
+        ? `<div class="cart-item-option-group"><small class="cart-item-option-label">گزینه‌های قیمت</small><div class="cart-item-option-list cart-item-option-list--variants">${priceOptions
             .map((option) => `<span class="cart-item-option-chip"><small class="cart-item-option-name">${escapeHtml(option.label)}</small><strong>${escapeHtml(option.value)}</strong>${Number(option.priceDelta) ? `<small class="cart-item-option-price">${Number(option.priceDelta) > 0 ? "+" : "−"} ${money(Math.abs(Number(option.priceDelta)) * 1000000)}</small>` : ""}</span>`)
             .join("")}</div></div>`
         : "";
@@ -347,7 +352,10 @@
             .map((accessory) => `<span class="cart-item-option-chip cart-item-option-chip--accessory"><small class="cart-item-option-name">${escapeHtml(accessory.name)}</small><small class="cart-item-option-status ${accessory.required ? "is-required" : "is-optional"}">${accessory.required ? "الزامی" : "اختیاری"}</small><small class="cart-item-option-price">${Number(accessory.price) > 0 ? `+ ${money(Number(accessory.price) * 1000000)}` : "رایگان"}</small></span>`)
             .join("")}</div></div>`
         : "";
-      return `<div class="cart-item-options" aria-label="ویژگی‌ها و متعلقات انتخاب‌شده">${variantsMarkup}${accessoriesMarkup}</div>`;
+      const inventoryVariantMarkup = inventoryVariant?.name
+        ? `<div class="cart-item-option-group"><small class="cart-item-option-label">تنوع موجودی انبار</small><div class="cart-item-option-list"><span class="cart-item-option-chip"><strong>${escapeHtml(inventoryVariant.name)}</strong></span></div></div>`
+        : "";
+      return `<div class="cart-item-options" aria-label="تنوع انبار، گزینه‌های قیمت و متعلقات انتخاب‌شده">${inventoryVariantMarkup}${variantsMarkup}${accessoriesMarkup}</div>`;
     },
     read() {
       try {
@@ -376,7 +384,7 @@
       const requestedQuantity = Math.max(1, Number.parseInt(quantity, 10) || 1);
       const safeProduct = normalizeCart([{ ...product, quantity }])[0];
       if (!safeProduct) return items;
-      const existing = items.find((item) => item.id === safeProduct.id && item.salesPlanId === safeProduct.salesPlanId);
+      const existing = items.find((item) => item.id === safeProduct.id && item.variantId === safeProduct.variantId && item.salesPlanId === safeProduct.salesPlanId);
       const sameConfiguration =
         existing &&
         existing.salesPlanId === safeProduct.salesPlanId &&
@@ -416,7 +424,7 @@
         items.push(safeProduct);
       }
       const savedItems = this.write(items);
-      const saved = savedItems.find((item) => item.id === safeProduct.id && item.salesPlanId === safeProduct.salesPlanId);
+      const saved = savedItems.find((item) => item.id === safeProduct.id && item.variantId === safeProduct.variantId && item.salesPlanId === safeProduct.salesPlanId);
       if (!saved || saved.quantity !== (sameConfiguration ? existing.quantity : safeProduct.quantity) || JSON.stringify(saved.options) !== JSON.stringify(safeProduct.options)) return savedItems;
       emit("hn:cart-added", {
             product: safeProduct,
@@ -425,13 +433,13 @@
           });
       return savedItems;
     },
-    update(id, quantity, salesPlanId = "regular") {
+    update(id, quantity, salesPlanId = "regular", variantId = null) {
       const items = this.read();
-      const item = items.find((entry) => entry.id === String(id) && entry.salesPlanId === String(salesPlanId || "regular"));
+      const item = items.find((entry) => entry.id === String(id) && entry.salesPlanId === String(salesPlanId || "regular") && entry.variantId === (variantId ?? null));
       if (!item) return items;
       const nextQuantity = Number.parseInt(quantity, 10);
       if (!Number.isFinite(nextQuantity) || nextQuantity < 1) {
-        return this.remove(id, salesPlanId);
+        return this.remove(id, salesPlanId, variantId);
       }
       const stock = availableStock(item);
       const cartLimit = productCartLimit(productForCartItem(item));
@@ -448,7 +456,7 @@
               reason: stock !== null && stock <= cartLimit ? "stock" : "cart",
             });
       }
-      if (!limitedQuantity) return this.remove(id, salesPlanId);
+      if (!limitedQuantity) return this.remove(id, salesPlanId, variantId);
       item.quantity = limitedQuantity;
       return this.write(items);
     },
@@ -457,8 +465,8 @@
       const cartLimit = productCartLimit(productForCartItem(item));
       return stock === null ? cartLimit : Math.min(stock, cartLimit);
     },
-    remove(id, salesPlanId = "regular") {
-      return this.write(this.read().filter((item) => item.id !== String(id) || item.salesPlanId !== String(salesPlanId || "regular")));
+    remove(id, salesPlanId = "regular", variantId = null) {
+      return this.write(this.read().filter((item) => item.id !== String(id) || item.salesPlanId !== String(salesPlanId || "regular") || item.variantId !== (variantId ?? null)));
     },
     totals() {
       return this.read().reduce(

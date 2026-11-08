@@ -29,14 +29,16 @@ BEGIN TRY
     IF COL_LENGTH(N'Warehouse.ProductVariant', N'IdStoreProduct') IS NULL
         ALTER TABLE [Warehouse].[ProductVariant] ADD [IdStoreProduct] BIGINT NULL;
 
-    UPDATE variant
-    SET variant.[IdStoreProduct] = product.[IdStoreProduct]
-    FROM [Warehouse].[ProductVariant] AS variant
-    INNER JOIN [Warehouse].[Product] AS product ON product.[Id] = variant.[IdProduct]
-    WHERE variant.[IdStoreProduct] IS NULL;
+    EXEC sys.sp_executesql N'
+        UPDATE variant
+        SET variant.[IdStoreProduct] = product.[IdStoreProduct]
+        FROM [Warehouse].[ProductVariant] AS variant
+        INNER JOIN [Warehouse].[Product] AS product ON product.[Id] = variant.[IdProduct]
+        WHERE variant.[IdStoreProduct] IS NULL;';
 
-    IF EXISTS (SELECT 1 FROM [Warehouse].[ProductVariant] WHERE [IdStoreProduct] IS NULL)
-        THROW 51041, 'A warehouse product variant is missing its store product relation.', 1;
+    EXEC sys.sp_executesql N'
+        IF EXISTS (SELECT 1 FROM [Warehouse].[ProductVariant] WHERE [IdStoreProduct] IS NULL)
+            THROW 51041, ''A warehouse product variant is missing its store product relation.'', 1;';
 
     ALTER TABLE [Warehouse].[ProductVariant] ALTER COLUMN [IdStoreProduct] BIGINT NOT NULL;
 

@@ -20,7 +20,7 @@ public sealed class StoreCatalogAdminApiController(IStoreRuntimeDatasetRepositor
         if (page < 1 || pageSize is < 1 or > 200)
             return ValidationProblem("شماره صفحه باید مثبت و اندازهٔ صفحه بین ۱ تا ۲۰۰ باشد.");
 
-        string? json = await datasets.ReadJsonAsync("catalog", cancellationToken);
+        string? json = await datasets.ReadCatalogJsonAsync(cancellationToken);
         if (string.IsNullOrWhiteSpace(json))
             return Problem(statusCode: StatusCodes.Status503ServiceUnavailable,
                 title: "دادهٔ کاتالوگ در دیتابیس در دسترس نیست.");

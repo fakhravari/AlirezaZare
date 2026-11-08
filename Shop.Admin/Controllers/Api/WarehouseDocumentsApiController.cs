@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -128,6 +129,18 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db) : Controll
         try
         {
             await RebuildStockAsync(document.Id, cancellationToken);
+            db.WarehouseDocumentAudits.Add(new WarehouseDocumentAudit
+            {
+                DocumentId = document.Id,
+                DocumentNumber = document.DocumentNumber,
+                WarehouseId = document.IdWarehouse,
+                Action = "Created",
+                ActorUserKey = CurrentActorKey(),
+                OccurredAtUtc = DateTime.UtcNow,
+                Reason = document.Reason,
+                AfterJson = await CaptureSnapshotAsync(document.Id, cancellationToken)
+            });
+            await db.SaveChangesAsync(cancellationToken);
             await transaction.CommitAsync(cancellationToken);
             return Ok(new { document.Id, document.DocumentNumber, message = "سند انبار ثبت شد." });
         }
@@ -157,6 +170,7 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db) : Controll
         await using var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
         try
         {
+            string before = await CaptureSnapshotAsync(id, cancellationToken);
             await ReverseMovementsAndClearLinesAsync(id, cancellationToken);
             document.IdWarehouse = input.WarehouseId;
             document.IdDocumentType = input.DocumentTypeId;
@@ -171,6 +185,19 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db) : Controll
             AddLines(id, lines);
             await db.SaveChangesAsync(cancellationToken);
             await RebuildStockAsync(id, cancellationToken);
+            db.WarehouseDocumentAudits.Add(new WarehouseDocumentAudit
+            {
+                DocumentId = document.Id,
+                DocumentNumber = document.DocumentNumber,
+                WarehouseId = document.IdWarehouse,
+                Action = "Updated",
+                ActorUserKey = CurrentActorKey(),
+                OccurredAtUtc = DateTime.UtcNow,
+                Reason = document.Reason,
+                BeforeJson = before,
+                AfterJson = await CaptureSnapshotAsync(id, cancellationToken)
+            });
+            await db.SaveChangesAsync(cancellationToken);
             await transaction.CommitAsync(cancellationToken);
             return Ok(new { document.Id, document.DocumentNumber, message = "سند و گردش موجودی باهم به‌روزرسانی شدند." });
         }
@@ -193,7 +220,19 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db) : Controll
         await using var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
         try
         {
+            string before = await CaptureSnapshotAsync(id, cancellationToken);
             await ReverseMovementsAndClearLinesAsync(id, cancellationToken);
+            db.WarehouseDocumentAudits.Add(new WarehouseDocumentAudit
+            {
+                DocumentId = document.Id,
+                DocumentNumber = document.DocumentNumber,
+                WarehouseId = document.IdWarehouse,
+                Action = "Deleted",
+                ActorUserKey = CurrentActorKey(),
+                OccurredAtUtc = DateTime.UtcNow,
+                Reason = document.Reason,
+                BeforeJson = before
+            });
             db.WarehouseDocuments.Remove(document);
             await db.SaveChangesAsync(cancellationToken);
             await transaction.CommitAsync(cancellationToken);
@@ -290,6 +329,41 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db) : Controll
     private Task<int> RebuildStockAsync(long documentId, CancellationToken cancellationToken) =>
         db.Database.ExecuteSqlInterpolatedAsync($"EXEC [Warehouse].[RebuildDocumentStock] @IdDocument={documentId}", cancellationToken);
 
+    private async Task<string> CaptureSnapshotAsync(long documentId, CancellationToken cancellationToken)
+    {
+        WarehouseDocumentRecord document = await db.WarehouseDocuments.AsNoTracking().Include(x => x.Lines)
+            .SingleAsync(x => x.Id == documentId, cancellationToken);
+        return JsonSerializer.Serialize(new
+        {
+            document.Id,
+            document.DocumentNumber,
+            document.IdWarehouse,
+            document.IdDocumentType,
+            document.IdParty,
+            document.IdSalesPlanReference,
+            document.DocumentDate,
+            document.Status,
+            document.CustomerOrderKey,
+            document.ExternalReference,
+            document.Reason,
+            document.CreatedByUserKey,
+            document.CreatedAtUtc,
+            document.UpdatedByUserKey,
+            document.UpdatedAtUtc,
+            Lines = document.Lines.OrderBy(x => x.Id).Select(line => new
+            {
+                line.IdInventoryItem,
+                line.IdUnit,
+                line.Quantity,
+                line.ConversionFactor,
+                line.BaseQuantity,
+                line.ProductNameSnapshot,
+                line.VariantNameSnapshot,
+                line.UnitNameSnapshot
+            })
+        });
+    }
+
     private async Task ReverseMovementsAndClearLinesAsync(long documentId, CancellationToken cancellationToken)
     {
         await db.Database.ExecuteSqlInterpolatedAsync($"""
@@ -339,6 +413,7 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db) : Controll
 
     private long CurrentUserId() => long.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out long id) ? id : 0;
     private string CurrentUserKey() => User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.Identity?.Name ?? "system";
+    private string CurrentActorKey() => $"{CurrentUserKey()}:{User.Identity?.Name ?? "system"}";
 
     private sealed record PreparedLine(long InventoryItemId, long UnitId, decimal Quantity, decimal ConversionFactor,
         decimal BaseQuantity, string ProductName, string? VariantName, string UnitName);

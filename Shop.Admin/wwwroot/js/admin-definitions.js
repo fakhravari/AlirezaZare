@@ -11,7 +11,7 @@
         units: { fields: [["code", "کد واحد", "text", true], ["name", "نام واحد", "text", true]], columns: [["code", "کد"], ["name", "واحد"], ["isActive", "وضعیت", "active"]] },
         "document-types": { fields: [["code", "کد نوع سند", "text", true], ["name", "نام سند", "text", true], ["direction", "جهت سند", "select", true, [["R", "رسید"], ["I", "حواله"]]], ["affectsStock", "بر موجودی اثر دارد", "checkbox" ]], columns: [["code", "کد"], ["name", "نوع سند"], ["direction", "جهت", "direction"], ["affectsStock", "اثر موجودی", "affects"], ["isActive", "وضعیت", "active"]] }
         ,"product-units": { fields: [["productId", "کالا", "products", true], ["unitId", "واحد", "units", true], ["conversionFactor", "ضریب تبدیل به واحد اصلی", "number", true], ["isBaseUnit", "واحد اصلی کالا", "checkbox"]], columns: [["productName", "کالا"], ["unitName", "واحد"], ["conversionFactor", "ضریب تبدیل"], ["isBaseUnit", "اصلی", "base"], ["isActive", "وضعیت", "active"]] },
-        variants: { fields: [["productId", "کالا", "products", true], ["name", "نام تنوع", "text", true], ["code", "کد تنوع", "text"], ["attributesJson", "ویژگی‌ها (JSON)", "text"]], columns: [["productName", "کالا"], ["name", "تنوع"], ["code", "کد"], ["isActive", "وضعیت", "active"]] }
+        variants: { fields: [["productId", "کالا", "products", true], ["name", "نام تنوع", "text", true], ["code", "کد تنوع", "text"], ["attributesJson", "ویژگی‌های موجودی (JSON)", "textarea"]], columns: [["productName", "کالا"], ["name", "تنوع"], ["code", "کد"], ["isActive", "وضعیت", "active"]] }
     };
     const esc = value => value == null || value === "" ? "—" : String(value);
     function setStatus(page, message, error = false) {
@@ -70,7 +70,7 @@
             const check = element("input", null, "form-check-input"); check.type = "checkbox"; check.name = key; check.checked = Boolean(data[key]); check.id = `definition-${key}`;
             const caption = element("label", label, "form-check-label"); caption.htmlFor = check.id; wrap.className = "form-check mb-3"; wrap.append(check, caption);
         } else {
-            const control = ["select", "warehouses", "products", "units", "companies", "plans"].includes(type) ? element("select", null, "form-select") : element("input", null, "form-control");
+            const control = ["select", "warehouses", "products", "units", "companies", "plans"].includes(type) ? element("select", null, "form-select") : type === "textarea" ? element("textarea", null, "form-control") : element("input", null, "form-control");
             control.name = key; control.id = `definition-${key}`; control.required = required;
             if (type === "select") for (const [value, name] of choices) { const option = element("option", name); option.value = value; control.append(option); }
             if (["warehouses", "products", "units", "companies", "plans"].includes(type)) {
@@ -79,6 +79,7 @@
                 for (const row of choices) { const option = element("option", type === "warehouses" ? `${row.name} (${row.code})` : (row.name || row.displayName)); option.value = row.id; control.append(option); }
             }
             if (type === "text") control.type = "text";
+            if (type === "textarea") { control.rows = 4; control.placeholder = '[{"key":"color","label":"رنگ","value":"yellow","display":"زرد"}]'; }
             if (type === "number") { control.type = "number"; control.min = key === "conversionFactor" ? "0.000000001" : "1"; control.step = key === "conversionFactor" ? "any" : "1"; }
             if (type === "select" || ["warehouses", "products", "units", "companies", "plans"].includes(type)) control.value = data[key] == null ? "" : String(data[key]);
             else control.value = data[key] ?? (key === "conversionFactor" ? "1" : "");

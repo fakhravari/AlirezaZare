@@ -1520,12 +1520,12 @@ $(function () {
     );
     if (!item) return;
     if ($button.data("action") === "plus")
-      window.HNUI.cart.update(item.id, item.quantity + 1, item.salesPlanId);
+      window.HNUI.cart.update(item.id, item.quantity + 1, item.salesPlanId, item.variantId);
     if ($button.data("action") === "minus")
-      window.HNUI.cart.update(item.id, item.quantity - 1, item.salesPlanId);
+      window.HNUI.cart.update(item.id, item.quantity - 1, item.salesPlanId, item.variantId);
     if ($button.data("action") === "remove") {
       event.stopPropagation();
-      window.HNUI.cart.remove(item.id, item.salesPlanId);
+      window.HNUI.cart.remove(item.id, item.salesPlanId, item.variantId);
       setCartOpen(true);
     }
   });
