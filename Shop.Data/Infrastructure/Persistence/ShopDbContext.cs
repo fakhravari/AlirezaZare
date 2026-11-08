@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Shop.Database.Domain.Admin.Entities;
 using Shop.Database.Domain.Account.Entities;
 using Shop.Database.Domain.Store.Entities;
 using Shop.Database.Domain.Warehouse.Entities;
@@ -7,6 +8,19 @@ namespace Shop.Database.Infrastructure.Persistence;
 
 public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbContext(options)
 {
+    public DbSet<AdminSystemUser> AdminSystemUsers => Set<AdminSystemUser>();
+    public DbSet<AdminRole> AdminRoles => Set<AdminRole>();
+    public DbSet<AdminPermission> AdminPermissions => Set<AdminPermission>();
+    public DbSet<AdminUserRole> AdminUserRoles => Set<AdminUserRole>();
+    public DbSet<AdminRolePermission> AdminRolePermissions => Set<AdminRolePermission>();
+    public DbSet<AdminUserWarehouseAccess> AdminUserWarehouseAccesses => Set<AdminUserWarehouseAccess>();
+    public DbSet<WarehouseDocumentType> WarehouseDocumentTypes => Set<WarehouseDocumentType>();
+    public DbSet<WarehouseUnit> WarehouseUnits => Set<WarehouseUnit>();
+    public DbSet<WarehouseParty> WarehouseParties => Set<WarehouseParty>();
+    public DbSet<WarehouseProductUnit> WarehouseProductUnits => Set<WarehouseProductUnit>();
+    public DbSet<WarehouseDocumentRecord> WarehouseDocuments => Set<WarehouseDocumentRecord>();
+    public DbSet<WarehouseDocumentLineRecord> WarehouseDocumentLines => Set<WarehouseDocumentLineRecord>();
+    public DbSet<WarehouseStockMovement> WarehouseStockMovements => Set<WarehouseStockMovement>();
     public DbSet<Warehouse> Warehouses => Set<Warehouse>();
     public DbSet<Company> Companies => Set<Company>();
     public DbSet<SalesPlanReference> SalesPlanReferences => Set<SalesPlanReference>();
@@ -21,6 +35,61 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<AdminSystemUser>(entity =>
+        {
+            entity.ToTable("SystemUser", "Admin");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.UserName).HasMaxLength(100).IsRequired();
+            entity.Property(x => x.DisplayName).HasMaxLength(160).IsRequired();
+            entity.Property(x => x.PasswordHash).HasMaxLength(500).IsRequired();
+            entity.Property(x => x.SecurityStamp).IsRequired();
+            entity.Property(x => x.NormalizedUserName).HasMaxLength(100).IsRequired();
+            entity.HasIndex(x => x.NormalizedUserName).IsUnique();
+            entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
+            entity.Property(x => x.LastLoginAtUtc).HasPrecision(3);
+            entity.Property(x => x.UpdatedAtUtc).HasPrecision(3);
+            entity.HasMany(x => x.Roles).WithOne(x => x.User).HasForeignKey(x => x.IdUser);
+            entity.HasMany(x => x.WarehouseAccess).WithOne(x => x.User).HasForeignKey(x => x.IdUser);
+        });
+        modelBuilder.Entity<AdminRole>(entity =>
+        {
+            entity.ToTable("Role", "Admin");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.RoleKey).HasMaxLength(100).IsRequired();
+            entity.Property(x => x.Name).HasMaxLength(160).IsRequired();
+            entity.HasIndex(x => x.RoleKey).IsUnique();
+            entity.HasMany(x => x.Users).WithOne(x => x.Role).HasForeignKey(x => x.IdRole);
+            entity.HasMany(x => x.Permissions).WithOne(x => x.Role).HasForeignKey(x => x.IdRole);
+        });
+        modelBuilder.Entity<AdminPermission>(entity =>
+        {
+            entity.ToTable("Permission", "Admin");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.PermissionKey).HasMaxLength(160).IsRequired();
+            entity.Property(x => x.Name).HasMaxLength(160).IsRequired();
+            entity.Property(x => x.ParentKey).HasColumnName("ParentPermissionKey").HasMaxLength(160);
+            entity.Property(x => x.Area).HasMaxLength(80).IsRequired();
+            entity.Property(x => x.Controller).HasMaxLength(100).IsRequired();
+            entity.Property(x => x.Action).HasMaxLength(100).IsRequired();
+            entity.Property(x => x.FeatureKey).HasMaxLength(100);
+            entity.HasIndex(x => x.PermissionKey).IsUnique();
+        });
+        modelBuilder.Entity<AdminUserRole>(entity =>
+        {
+            entity.ToTable("SystemUserRole", "Admin");
+            entity.HasKey(x => new { x.IdUser, x.IdRole });
+        });
+        modelBuilder.Entity<AdminRolePermission>(entity =>
+        {
+            entity.ToTable("RolePermission", "Admin");
+            entity.HasKey(x => new { x.IdRole, x.IdPermission });
+        });
+        modelBuilder.Entity<AdminUserWarehouseAccess>(entity =>
+        {
+            entity.ToTable("SystemUserWarehouseAccess", "Admin");
+            entity.HasKey(x => new { x.IdUser, x.IdWarehouse });
+        });
+
         modelBuilder.Entity<Warehouse>(entity =>
         {
             entity.ToTable("Warehouse", "Warehouse");
@@ -31,6 +100,81 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
         {
             entity.ToTable("Company", "Warehouse");
             entity.HasKey(x => x.Id);
+            entity.Property(x => x.Code).HasMaxLength(50).IsRequired();
+            entity.Property(x => x.Name).HasMaxLength(200).IsRequired();
+        });
+        modelBuilder.Entity<WarehouseDocumentType>(entity =>
+        {
+            entity.ToTable("DocumentType", "Warehouse");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.Code).HasMaxLength(50).IsRequired();
+            entity.Property(x => x.Name).HasMaxLength(150).IsRequired();
+            entity.Property(x => x.Direction).HasColumnType("char(1)").IsRequired();
+            entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
+            entity.Property(x => x.UpdatedAtUtc).HasPrecision(3);
+            entity.HasIndex(x => x.Code).IsUnique();
+        });
+        modelBuilder.Entity<WarehouseUnit>(entity =>
+        {
+            entity.ToTable("Unit", "Warehouse");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.Code).HasMaxLength(50).IsRequired();
+            entity.Property(x => x.Name).HasMaxLength(100).IsRequired();
+            entity.HasIndex(x => x.Code).IsUnique();
+        });
+        modelBuilder.Entity<WarehouseParty>(entity =>
+        {
+            entity.ToTable("Party", "Warehouse");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.PartyType).HasMaxLength(30).IsRequired();
+            entity.Property(x => x.ExternalPartyKey).HasMaxLength(128);
+            entity.Property(x => x.Name).HasMaxLength(200).IsRequired();
+            entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
+            entity.Property(x => x.UpdatedAtUtc).HasPrecision(3);
+            entity.HasOne<Warehouse>().WithMany().HasForeignKey(x => x.IdWarehouse);
+        });
+        modelBuilder.Entity<WarehouseProductUnit>(entity =>
+        {
+            entity.ToTable("ProductUnit", "Warehouse");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.ConversionFactor).HasPrecision(18, 9);
+            entity.HasIndex(x => new { x.IdProduct, x.IdUnit }).IsUnique();
+            entity.HasOne<WarehouseProduct>().WithMany().HasForeignKey(x => x.IdProduct);
+            entity.HasOne<WarehouseUnit>().WithMany().HasForeignKey(x => x.IdUnit);
+        });
+        modelBuilder.Entity<WarehouseDocumentRecord>(entity =>
+        {
+            entity.ToTable("WarehouseDocument", "Warehouse");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.Status).HasColumnType("char(1)").IsRequired();
+            entity.Property(x => x.CustomerOrderKey).HasMaxLength(128);
+            entity.Property(x => x.ExternalReference).HasMaxLength(128);
+            entity.Property(x => x.Reason).HasMaxLength(1000);
+            entity.Property(x => x.CreatedByUserKey).HasMaxLength(128).IsRequired();
+            entity.Property(x => x.UpdatedByUserKey).HasMaxLength(128);
+            entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
+            entity.Property(x => x.UpdatedAtUtc).HasPrecision(3);
+            entity.HasIndex(x => new { x.CustomerOrderKey, x.IdSalesPlanReference }).IsUnique()
+                .HasFilter("[CustomerOrderKey] IS NOT NULL");
+            entity.HasMany(x => x.Lines).WithOne().HasForeignKey(x => x.IdDocument);
+        });
+        modelBuilder.Entity<WarehouseDocumentLineRecord>(entity =>
+        {
+            entity.ToTable("WarehouseDocumentLine", "Warehouse");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.Quantity).HasPrecision(18, 3);
+            entity.Property(x => x.ConversionFactor).HasPrecision(18, 9);
+            entity.Property(x => x.BaseQuantity).HasPrecision(18, 3);
+            entity.Property(x => x.ProductNameSnapshot).HasMaxLength(300).IsRequired();
+            entity.Property(x => x.VariantNameSnapshot).HasMaxLength(300);
+            entity.Property(x => x.UnitNameSnapshot).HasMaxLength(100).IsRequired();
+        });
+        modelBuilder.Entity<WarehouseStockMovement>(entity =>
+        {
+            entity.ToTable("StockMovement", "Warehouse");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.QuantityDelta).HasPrecision(18, 3);
+            entity.Property(x => x.OccurredAtUtc).HasPrecision(3);
         });
         modelBuilder.Entity<SalesPlanReference>(entity =>
         {
@@ -53,18 +197,29 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.ToTable("InventoryItem", "Warehouse");
             entity.HasKey(x => x.Id);
             entity.HasOne(x => x.Product).WithMany(x => x.InventoryItems).HasForeignKey(x => x.IdProduct);
-            entity.HasOne(x => x.ProductVariant).WithMany().HasForeignKey(x => x.IdProductVariant);
+            entity.HasOne(x => x.ProductVariant).WithMany().HasForeignKey(x => new { x.IdProductVariant, x.IdProduct })
+                .HasPrincipalKey(x => new { x.Id, x.IdProduct });
         });
         modelBuilder.Entity<WarehouseProduct>(entity =>
         {
             entity.ToTable("Product", "Warehouse");
             entity.HasKey(x => x.Id);
+            entity.HasAlternateKey(x => new { x.Id, x.IdStoreProduct });
             entity.Property(x => x.IdStoreProduct).HasColumnName("IdStoreProduct");
         });
         modelBuilder.Entity<ProductVariant>(entity =>
         {
             entity.ToTable("ProductVariant", "Warehouse");
             entity.HasKey(x => x.Id);
+            entity.HasAlternateKey(x => new { x.Id, x.IdProduct });
+            entity.HasAlternateKey(x => new { x.Id, x.IdStoreProduct });
+            entity.Property(x => x.Code).HasMaxLength(100);
+            entity.Property(x => x.Name).HasMaxLength(300).IsRequired();
+            entity.Property(x => x.AttributesJson).HasColumnType("nvarchar(max)");
+            entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
+            entity.Property(x => x.UpdatedAtUtc).HasPrecision(3);
+            entity.HasOne(x => x.Product).WithMany().HasForeignKey(x => new { x.IdProduct, x.IdStoreProduct })
+                .HasPrincipalKey(x => new { x.Id, x.IdStoreProduct });
         });
         modelBuilder.Entity<StoreProduct>(entity =>
         {

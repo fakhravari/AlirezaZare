@@ -4,6 +4,7 @@ using Shop.Database.Application.Store.Contracts;
 
 namespace Shop.Admin.Controllers.Api;
 
+[Area("Store")]
 [ApiController]
 [Route("api/admin/store/catalog")]
 public sealed class StoreCatalogAdminApiController(IStoreRuntimeDatasetRepository datasets) : ControllerBase

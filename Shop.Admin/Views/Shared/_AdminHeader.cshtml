@@ -22,5 +22,12 @@
                 <span>نمای کلی</span>
             </a>
         </div>
+        <div class="navbar-item d-flex align-items-center gap-2">
+            <span class="small">@User.FindFirst("display_name")?.Value</span>
+            <form asp-controller="Auth" asp-action="Logout" method="post">
+                @Html.AntiForgeryToken()
+                <button class="btn btn-sm btn-outline-secondary" type="submit">خروج</button>
+            </form>
+        </div>
     </div>
 </header>

@@ -12,6 +12,8 @@ public sealed class FeaturesController : Controller
         ViewData["Title"] = page.Title;
         ViewData["AreaTitle"] = page.AreaTitle;
         ViewData["FeatureId"] = page.FeatureId;
+        if (page.FeatureId is "reviews" or "questions")
+            return View("~/Areas/Store/Views/Features/Feedback.cshtml", page);
         return View("~/Areas/Store/Views/Features/Index.cshtml", page);
     }
 }

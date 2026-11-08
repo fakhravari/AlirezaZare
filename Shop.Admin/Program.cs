@@ -1,9 +1,46 @@
 using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
+using System.Threading.RateLimiting;
+using Shop.Admin.Security;
+using Shop.Database.Domain.Admin.Entities;
 using Shop.Database.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
-builder.Services.AddAuthorization();
+builder.Services.AddAuthentication("AdminCookie")
+    .AddCookie("AdminCookie", options =>
+    {
+        options.Cookie.Name = "Shop.Admin.Session";
+        options.Cookie.HttpOnly = true;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+        options.Cookie.SameSite = SameSiteMode.Strict;
+        options.LoginPath = "/auth/login";
+        options.AccessDeniedPath = "/auth/denied";
+        options.SlidingExpiration = true;
+        options.ExpireTimeSpan = TimeSpan.FromHours(8);
+        options.EventsType = typeof(AdminCookieEvents);
+    });
+builder.Services.AddAuthorization(options =>
+    options.FallbackPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build());
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.AddFixedWindowLimiter("admin-login", limiter =>
+    {
+        limiter.PermitLimit = 5;
+        limiter.Window = TimeSpan.FromMinutes(1);
+        limiter.QueueLimit = 0;
+        limiter.AutoReplenishment = true;
+    });
+});
+builder.Services.AddSingleton<PasswordHasher<AdminSystemUser>>();
+builder.Services.AddScoped<AdminAuthentication>();
+builder.Services.AddScoped<AdminCookieEvents>();
+builder.Services.Configure<MvcOptions>(options => options.Filters.Add<AdminPermissionFilter>());
 
 IConfiguration databaseConfiguration = builder.Configuration;
 string? connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -28,7 +65,10 @@ if (string.IsNullOrWhiteSpace(connectionString))
 }
 
 if (!string.IsNullOrWhiteSpace(connectionString))
+{
     builder.Services.AddShopDatabase(databaseConfiguration);
+    builder.Services.AddHostedService<AdminBootstrapper>();
+}
 
 var app = builder.Build();
 
@@ -54,6 +94,8 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
+app.UseRateLimiter();
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.MapControllerRoute(

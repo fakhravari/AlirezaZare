@@ -41,6 +41,10 @@
                 method: "GET", cache: "no-store", signal: controller.signal,
                 headers: { Accept: "text/html", "X-Requested-With": "XMLHttpRequest" }
             });
+            if (response.redirected && new URL(response.url).pathname.toLowerCase() === "/auth/login") {
+                window.location.assign(response.url);
+                return;
+            }
             const html = await response.text();
             if (!response.ok) throw new Error(`بارگذاری صفحه با خطای ${response.status} روبه‌رو شد.`);
             const nextDocument = new DOMParser().parseFromString(html, "text/html");
@@ -51,6 +55,11 @@
             if (pushState) history.pushState({ admin: true }, "", target.href);
             setActiveNavigation(target);
             window.AdminPages?.initialize(content);
+            window.AdminUsers?.initialize(content);
+            window.AdminDocuments?.initialize(content);
+            window.AdminDefinitions?.initialize(content);
+            window.AdminMovements?.initialize(content);
+            window.AdminFeedback?.initialize(content);
             const heading = content.querySelector("h1");
             if (heading) {
                 heading.tabIndex = -1;
@@ -81,6 +90,20 @@
 
     window.addEventListener("popstate", () => void navigate(location.href, false));
     if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", () => window.AdminPages?.initialize(content), { once: true });
-    } else window.AdminPages?.initialize(content);
+        document.addEventListener("DOMContentLoaded", () => {
+            window.AdminPages?.initialize(content);
+            window.AdminUsers?.initialize(content);
+            window.AdminDocuments?.initialize(content);
+            window.AdminDefinitions?.initialize(content);
+            window.AdminMovements?.initialize(content);
+            window.AdminFeedback?.initialize(content);
+        }, { once: true });
+    } else {
+        window.AdminPages?.initialize(content);
+        window.AdminUsers?.initialize(content);
+        window.AdminDocuments?.initialize(content);
+        window.AdminDefinitions?.initialize(content);
+        window.AdminMovements?.initialize(content);
+        window.AdminFeedback?.initialize(content);
+    }
 })();

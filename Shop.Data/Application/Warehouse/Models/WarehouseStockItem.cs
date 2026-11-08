@@ -2,6 +2,8 @@ namespace Shop.Database.Application.Warehouse.Models;
 
 public sealed record WarehouseStockItem(
     long IdWarehouse,
+    long IdInventoryItem,
+    long IdSalesPlanReference,
     string WarehouseCode,
     string WarehouseName,
     long IdStoreProduct,
@@ -11,6 +13,7 @@ public sealed record WarehouseStockItem(
     string? VariantName,
     string SalesPlanKey,
     string SalesPlanName,
+    bool IsRegularSalesPlan,
     decimal Quantity,
     decimal MinimumQuantity,
     bool IsLowStock);

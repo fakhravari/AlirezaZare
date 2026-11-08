@@ -71,6 +71,12 @@
             details.innerHTML = '<i class="fa fa-eye" aria-hidden="true"></i><span class="visually-hidden">نمایش جزئیات</span>';
             details.setAttribute("aria-label", "نمایش جزئیات رکورد");
             actions.append(details);
+            if (page.dataset.adminPage === "stock" && page.dataset.canMinimum === "true" && page.__adminRows[index]?.isRegularSalesPlan) {
+                const minimum = document.createElement("button");
+                minimum.type = "button"; minimum.className = "btn btn-xs btn-default ms-1";
+                minimum.dataset.adminMinimum = String(index); minimum.textContent = "تنظیم حداقل";
+                actions.append(minimum);
+            }
             row.append(actions);
             body.append(row);
         });
@@ -239,6 +245,19 @@
             if (item) ui.showRecord("جزئیات رکورد", item);
             return;
         }
+        const minimumButton = event.target.closest("[data-admin-minimum]");
+        if (minimumButton) {
+            const page = minimumButton.closest("[data-admin-page]"), item = page?.__adminRows?.[Number(minimumButton.dataset.adminMinimum)];
+            const form = document.querySelector("[data-minimum-form]");
+            if (item && form) {
+                form.elements.warehouseId.value = item.idWarehouse;
+                form.elements.inventoryItemId.value = item.idInventoryItem;
+                form.elements.minimumQuantity.value = item.minimumQuantity;
+                document.querySelector("[data-minimum-product]").textContent = `${item.productName}${item.variantName ? ` — ${item.variantName}` : ""} · ${item.warehouseName} · ${item.salesPlanName}`;
+                window.bootstrap?.Modal?.getOrCreateInstance(document.getElementById("admin-minimum-modal")).show();
+            }
+            return;
+        }
         const stepButton = event.target.closest("[data-admin-page-step]");
         if (stepButton && !stepButton.disabled) {
             const page = stepButton.closest("[data-admin-page]");
@@ -249,6 +268,16 @@
     });
 
     document.addEventListener("submit", event => {
+        const minimumForm = event.target.closest("[data-minimum-form]");
+        if (minimumForm) {
+            event.preventDefault();
+            const body = { warehouseId: Number(minimumForm.elements.warehouseId.value), inventoryItemId: Number(minimumForm.elements.inventoryItemId.value), minimumQuantity: Number(minimumForm.elements.minimumQuantity.value) };
+            const token = minimumForm.querySelector('[name="__RequestVerificationToken"]')?.value || "";
+            void ui.getJson("/api/admin/warehouse/stock/minimum", { method: "PUT", headers: { "Content-Type": "application/json", RequestVerificationToken: token }, body: JSON.stringify(body) })
+                .then(result => { ui.notify(result.message, "success"); window.bootstrap?.Modal?.getInstance(document.getElementById("admin-minimum-modal"))?.hide(); const page = minimumForm.closest("main")?.querySelector('[data-admin-page="stock"]') || document.querySelector('[data-admin-page="stock"]'); if (page) void loadStock(page, Number(page.dataset.adminPageNumber || 1)); })
+                .catch(error => ui.notify(error.message || "ذخیرهٔ حداقل ناموفق بود.", "danger"));
+            return;
+        }
         const form = event.target.closest("[data-admin-filter]");
         if (!form) return;
         event.preventDefault();

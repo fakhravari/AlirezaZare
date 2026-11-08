@@ -21,7 +21,7 @@ public sealed class AccountController(ShopDbContext db, ISalesPlanSource plans, 
     {
         const string sql = """
             SELECT (SELECT p.[Id] id,p.[Email] email,p.[FirstName] firstName,p.[LastName] lastName,p.[Phone] phone,p.[Gender] gender,p.[NewsletterEnabled] newsletter,
-              JSON_QUERY((SELECT ci.[IdProduct] id,ci.[Quantity] quantity,ci.[SalesPlanKey] salesPlanId,JSON_QUERY(ci.[OptionsJson]) options FROM [Account].[Cart] c JOIN [Account].[CartItem] ci ON ci.[IdCart]=c.[Id] WHERE c.[IdProfile]={0} FOR JSON PATH)) cart,
+              JSON_QUERY((SELECT ci.[IdProduct] id,ci.[IdProductVariant] variantId,ci.[Quantity] quantity,ci.[SalesPlanKey] salesPlanId,JSON_QUERY(ci.[OptionsJson]) options FROM [Account].[Cart] c JOIN [Account].[CartItem] ci ON ci.[IdCart]=c.[Id] WHERE c.[IdProfile]={0} FOR JSON PATH)) cart,
               JSON_QUERY((SELECT a.[Id] id,a.[Title] title,a.[Recipient] recipient,a.[Phone] phone,a.[Country] country,a.[CountryId] countryId,a.[Province] province,a.[ProvinceId] provinceId,a.[City] city,a.[CityId] cityId,a.[Street] street,a.[PostalCode] postal,a.[IsDefault] isDefault FROM [Account].[Address] a WHERE a.[IdProfile]={0} FOR JSON PATH)) addresses,
               JSON_QUERY((SELECT f.[IdProduct] id FROM [Account].[Favorite] f WHERE f.[IdProfile]={0} FOR JSON PATH)) favorites,
               JSON_QUERY((SELECT x.[IdProduct] id FROM [Account].[CompareItem] x WHERE x.[IdProfile]={0} FOR JSON PATH)) compare,
@@ -29,7 +29,7 @@ public sealed class AccountController(ShopDbContext db, ISalesPlanSource plans, 
               JSON_QUERY((SELECT ai.[ArticleSlug] slug,ai.[InteractionType] type FROM [Account].[ArticleInteraction] ai WHERE ai.[IdProfile]={0} FOR JSON PATH)) articleInteractions,
               JSON_QUERY((SELECT af.[ArticleSlug] slug,af.[DisplayName] name,af.[FeedbackText] text,af.[Rating] rating,af.[Status] status,af.[CreatedAtUtc] createdAt FROM [Account].[ArticleFeedback] af WHERE af.[IdProfile]={0} FOR JSON PATH)) articleFeedback,
               JSON_QUERY((SELECT cp.[IdSelectedAddress] selectedAddressId,cp.[PaymentMethod] paymentMethod FROM [Account].[CheckoutPreference] cp WHERE cp.[IdProfile]={0} FOR JSON PATH,WITHOUT_ARRAY_WRAPPER)) checkout,
-              JSON_QUERY((SELECT o.[Id] id,o.[OrderNumber] number,o.[Status] status,o.[OrderedAtUtc] orderedAtUtc,o.[ItemCount] itemCount,o.[TotalAmount] totalAmount,JSON_QUERY((SELECT i.[IdProduct] productId,i.[ProductNameSnapshot] name,i.[SalesPlanKey] salesPlanId,i.[Quantity] quantity,i.[UnitAmount] unitAmount,JSON_QUERY(i.[OptionsJson]) options FROM [Account].[CustomerOrderItem] i WHERE i.[IdCustomerOrder]=o.[Id] FOR JSON PATH)) items FROM [Account].[CustomerOrder] o WHERE o.[IdProfile]={0} ORDER BY o.[Id] DESC FOR JSON PATH)) orders
+              JSON_QUERY((SELECT o.[Id] id,o.[OrderNumber] number,o.[Status] status,o.[OrderedAtUtc] orderedAtUtc,o.[ItemCount] itemCount,o.[TotalAmount] totalAmount,JSON_QUERY((SELECT i.[IdProduct] productId,i.[IdProductVariant] variantId,i.[ProductNameSnapshot] name,i.[SalesPlanKey] salesPlanId,i.[Quantity] quantity,i.[UnitAmount] unitAmount,JSON_QUERY(i.[OptionsJson]) options FROM [Account].[CustomerOrderItem] i WHERE i.[IdCustomerOrder]=o.[Id] FOR JSON PATH)) items FROM [Account].[CustomerOrder] o WHERE o.[IdProfile]={0} ORDER BY o.[Id] DESC FOR JSON PATH)) orders
             FROM [Account].[Profile] p WHERE p.[Id]={0} FOR JSON PATH,WITHOUT_ARRAY_WRAPPER) AS [Value];
             """;
         var json = await db.Database.SqlQueryRaw<string>(sql, ProfileId).SingleOrDefaultAsync(ct);
@@ -98,19 +98,22 @@ public sealed class AccountController(ShopDbContext db, ISalesPlanSource plans, 
     [HttpPut("cart")]
     public async Task<IActionResult> SaveCart([FromBody] CartRequest request, CancellationToken ct)
     {
-        if (request.Items is null || request.Items.Count > 99 || request.Items.Any(i => i.ProductId < 1 || i.Quantity is < 1 or > 99 || string.IsNullOrWhiteSpace(i.SalesPlanId) || i.SalesPlanId.Length > 64)) return BadRequest(new { code = "invalid-cart" });
-        var duplicate = request.Items.GroupBy(i => $"{i.ProductId}:{i.SalesPlanId}", StringComparer.Ordinal).Any(g => g.Count() > 1);
+        if (request.Items is null || request.Items.Count > 99 || request.Items.Any(i => i.ProductId < 1 || i.VariantId is < 1 || i.Quantity is < 1 or > 99 || string.IsNullOrWhiteSpace(i.SalesPlanId) || i.SalesPlanId.Length > 64)) return BadRequest(new { code = "invalid-cart" });
+        var duplicate = request.Items.GroupBy(i => (i.ProductId, i.SalesPlanId, i.VariantId)).Any(g => g.Count() > 1);
         if (duplicate) return BadRequest(new { code = "duplicate-cart-line" });
+        foreach (var item in request.Items.Where(item => item.VariantId.HasValue))
+            if (!await ProductVariantExistsAsync(item.ProductId, item.VariantId!.Value, ct))
+                return Conflict(new { code = "product-variant-unavailable" });
         string payload = System.Text.Json.JsonSerializer.Serialize(request.Items, new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web));
         await db.Database.ExecuteSqlInterpolatedAsync($$"""
             SET XACT_ABORT ON; BEGIN TRANSACTION;
             IF NOT EXISTS(SELECT 1 FROM [Account].[Cart] WHERE [IdProfile]={{ProfileId}}) INSERT INTO [Account].[Cart]([IdProfile]) VALUES({{ProfileId}});
             DECLARE @CartId BIGINT=(SELECT [Id] FROM [Account].[Cart] WHERE [IdProfile]={{ProfileId}});
             DELETE FROM [Account].[CartItem] WHERE [IdCart]=@CartId;
-            INSERT INTO [Account].[CartItem]([IdCart],[IdProduct],[SalesPlanKey],[Quantity],[OptionsJson])
-            SELECT @CartId,p.[Id],j.[SalesPlanId],j.[Quantity],COALESCE(j.[OptionsJson],N'{}')
-            FROM OPENJSON({{payload}}) WITH([ProductId] BIGINT '$.productId',[SalesPlanId] NVARCHAR(64) '$.salesPlanId',[Quantity] INT '$.quantity',[OptionsJson] NVARCHAR(MAX) '$.options' AS JSON) j
-            JOIN [Store].[Product] p ON p.[StoreProductKey]=CONVERT(NVARCHAR(128),j.[ProductId]) AND p.[IsActive]=1;
+            INSERT INTO [Account].[CartItem]([IdCart],[IdProduct],[IdProductVariant],[SalesPlanKey],[Quantity],[OptionsJson])
+            SELECT @CartId,p.[Id],j.[VariantId],j.[SalesPlanId],j.[Quantity],COALESCE(j.[OptionsJson],N'{}')
+            FROM OPENJSON({{payload}}) WITH([ProductId] BIGINT '$.productId',[VariantId] BIGINT '$.variantId',[SalesPlanId] NVARCHAR(64) '$.salesPlanId',[Quantity] INT '$.quantity',[OptionsJson] NVARCHAR(MAX) '$.options' AS JSON) j
+            JOIN [Store].[Product] p ON p.[Id]=j.[ProductId] AND p.[IsActive]=1;
             IF @@ROWCOUNT<>(SELECT COUNT(*) FROM OPENJSON({{payload}})) THROW 51001,'Cart contains an unavailable product.',1;
             UPDATE [Account].[Cart] SET [UpdatedAtUtc]=SYSUTCDATETIME() WHERE [Id]=@CartId;
             COMMIT TRANSACTION;
@@ -143,7 +146,7 @@ public sealed class AccountController(ShopDbContext db, ISalesPlanSource plans, 
     public async Task<IActionResult> Checkout([FromBody] CheckoutRequest request, CancellationToken ct)
     {
         if (request.Lines is null || request.Lines.Count is < 1 or > 99 || request.AddressId < 1 || request.PaymentMethod != "zarinpal") return BadRequest(new { code = "invalid-checkout" });
-        if (request.Lines.Any(i => i.ProductId < 1 || i.Quantity is < 1 or > 99 || string.IsNullOrWhiteSpace(i.SalesPlanId)) || request.Lines.Select(i => $"{i.ProductId}:{i.SalesPlanId}").Distinct(StringComparer.Ordinal).Count() != request.Lines.Count) return BadRequest(new { code = "invalid-cart" });
+        if (request.Lines.Any(i => i.ProductId < 1 || i.VariantId is < 1 || i.Quantity is < 1 or > 99 || string.IsNullOrWhiteSpace(i.SalesPlanId)) || request.Lines.Select(i => (i.ProductId, i.SalesPlanId, i.VariantId)).Distinct().Count() != request.Lines.Count) return BadRequest(new { code = "invalid-cart" });
         string? addressSnapshot = await db.Database.SqlQueryRaw<string>("SELECT (SELECT [Title] title,[Recipient] recipient,[Phone] phone,[Country] country,[Province] province,[City] city,[Street] street,[PostalCode] postal FROM [Account].[Address] WHERE [Id]={0} AND [IdProfile]={1} FOR JSON PATH,WITHOUT_ARRAY_WRAPPER) AS [Value]", request.AddressId, ProfileId).SingleOrDefaultAsync(ct);
         if (string.IsNullOrWhiteSpace(addressSnapshot)) return BadRequest(new { code = "address-not-owned" });
         var catalog = await plans.ReadAsync(ct);
@@ -153,6 +156,8 @@ public sealed class AccountController(ShopDbContext db, ISalesPlanSource plans, 
         {
             foreach (var line in request.Lines)
             {
+                if (line.VariantId.HasValue && !await ProductVariantExistsAsync(line.ProductId, line.VariantId.Value, ct))
+                    return Conflict(new { code = "product-variant-unavailable" });
                 var quote = catalog.Quote(checked((int)line.ProductId), line.SalesPlanId, line.Quantity, now);
                 string? productName = await db.Database.SqlQueryRaw<string>("SELECT [Name] AS [Value] FROM [Store].[Product] WHERE [Id]={0} AND [IsActive]=1", line.ProductId).SingleOrDefaultAsync(ct);
                 if (productName is null) return Conflict(new { code = "product-unavailable" });
@@ -200,12 +205,16 @@ public sealed class AccountController(ShopDbContext db, ISalesPlanSource plans, 
         foreach (var item in priced)
         {
             string options = item.Line.Options.HasValue ? item.Line.Options.Value.GetRawText() : "{}";
-            await db.Database.ExecuteSqlInterpolatedAsync($"INSERT INTO [Account].[CustomerOrderItem]([IdCustomerOrder],[IdProduct],[ProductNameSnapshot],[SalesPlanKey],[Quantity],[UnitAmount],[OptionsJson]) VALUES({orderId},{item.Line.ProductId},{item.ProductName},{item.Line.SalesPlanId},{item.Line.Quantity},{item.UnitAmount},{options})", ct);
+            await db.Database.ExecuteSqlInterpolatedAsync($"INSERT INTO [Account].[CustomerOrderItem]([IdCustomerOrder],[IdProduct],[IdProductVariant],[ProductNameSnapshot],[SalesPlanKey],[Quantity],[UnitAmount],[OptionsJson]) VALUES({orderId},{item.Line.ProductId},{item.Line.VariantId},{item.ProductName},{item.Line.SalesPlanId},{item.Line.Quantity},{item.UnitAmount},{options})", ct);
         }
         await db.Database.ExecuteSqlInterpolatedAsync($"IF NOT EXISTS(SELECT 1 FROM [Account].[CheckoutPreference] WHERE [IdProfile]={ProfileId}) INSERT INTO [Account].[CheckoutPreference]([IdProfile],[IdSelectedAddress],[PaymentMethod]) VALUES({ProfileId},{request.AddressId},{request.PaymentMethod}); ELSE UPDATE [Account].[CheckoutPreference] SET [IdSelectedAddress]={request.AddressId},[PaymentMethod]={request.PaymentMethod},[UpdatedAtUtc]=SYSUTCDATETIME() WHERE [IdProfile]={ProfileId}; DELETE ci FROM [Account].[CartItem] ci JOIN [Account].[Cart] c ON c.[Id]=ci.[IdCart] WHERE c.[IdProfile]={ProfileId};", ct);
         await transaction.CommitAsync(ct);
         return Ok(new { id = orderId, number, status = "pending-payment", itemCount = count, totalAmount = total, orderedAtUtc = DateTimeOffset.UtcNow, message = "سفارش ثبت شد و در انتظار پرداخت است." });
     }
+
+    private async Task<bool> ProductVariantExistsAsync(long productId, long variantId, CancellationToken cancellationToken) =>
+        await db.Database.SqlQueryRaw<int>("SELECT COUNT(*) AS [Value] FROM [Warehouse].[ProductVariant] v INNER JOIN [Warehouse].[Product] p ON p.[Id]=v.[IdProduct] WHERE p.[IdStoreProduct]={0} AND v.[Id]={1} AND v.[IsActive]=1 AND p.[IsActive]=1", productId, variantId)
+            .SingleAsync(cancellationToken) == 1;
 
     [HttpDelete("addresses/{id:long}")]
     public async Task<IActionResult> DeleteAddress(long id, CancellationToken ct)
@@ -299,7 +308,7 @@ public sealed class AccountController(ShopDbContext db, ISalesPlanSource plans, 
 
     public sealed record ProfileRequest(string FirstName, string LastName, string? Phone, string? Gender = null, bool Newsletter = false);
     public sealed record CartRequest(IReadOnlyList<CartLineRequest>? Items);
-    public sealed record CartLineRequest(long ProductId, int Quantity, string SalesPlanId, System.Text.Json.JsonElement? Options);
+    public sealed record CartLineRequest(long ProductId, int Quantity, string SalesPlanId, System.Text.Json.JsonElement? Options, long? VariantId = null);
     public sealed record CheckoutRequest(long AddressId, string PaymentMethod, IReadOnlyList<CartLineRequest>? Lines);
     public sealed record CheckoutPreferenceRequest(long? AddressId, string PaymentMethod);
     public sealed record ListRequest(IReadOnlyList<long>? ProductIds);

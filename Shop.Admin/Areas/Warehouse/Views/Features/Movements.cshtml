@@ -1,0 +1,10 @@
+@model Shop.Admin.Models.FeaturePageViewModel
+<div class="admin-page" data-admin-movements data-api="@ViewData["ApiUrl"]">
+    @await Html.PartialAsync("_AdminPageIntro", (Model.Title, Model.Description))
+    <section class="panel panel-inverse"><div class="panel-heading"><h2 class="panel-title">گردش اسناد و موجودی</h2></div><div class="panel-body">
+        <form class="admin-filter-bar" data-movement-filter><label class="visually-hidden" for="movement-search">جست‌وجو</label><input class="form-control" id="movement-search" name="search" placeholder="کالا، نوع سند یا دلیل" /><label class="visually-hidden" for="movement-warehouse">انبار</label><select class="form-select" name="warehouseId" id="movement-warehouse"><option value="">همهٔ انبارهای مجاز</option></select><label class="visually-hidden" for="movement-from">از تاریخ</label><input class="form-control" type="date" name="from" id="movement-from" /><label class="visually-hidden" for="movement-to">تا تاریخ</label><input class="form-control" type="date" name="to" id="movement-to" /><button class="btn btn-primary" type="submit">جست‌وجو</button><button class="btn btn-default" type="reset" data-movement-reset>پاک‌کردن</button></form>
+        <div class="admin-data-status" data-movement-status role="status" aria-live="polite">در حال بارگذاری…</div>
+        <div class="table-responsive"><table class="table table-striped table-hover align-middle"><thead><tr><th>تاریخ</th><th>شماره</th><th>نوع سند</th><th>انبار</th><th>طرح</th><th>کالا / تنوع</th><th>مقدار سند</th><th>مقدار گردش</th><th>وضعیت</th><th>دلیل</th></tr></thead><tbody data-movement-rows></tbody></table></div>
+        <div class="admin-pagination" data-movement-pagination><button class="btn btn-default btn-sm" type="button" data-movement-page="-1">قبلی</button><span data-movement-page-label></span><button class="btn btn-default btn-sm" type="button" data-movement-page="1">بعدی</button></div>
+    </div></section>
+</div>

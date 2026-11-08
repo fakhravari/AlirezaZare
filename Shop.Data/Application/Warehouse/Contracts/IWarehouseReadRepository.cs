@@ -13,4 +13,12 @@ public interface IWarehouseReadRepository
         int page,
         int pageSize,
         CancellationToken cancellationToken);
+    Task<IReadOnlyList<WarehouseStockItem>> GetStockForWarehousesAsync(
+        IReadOnlyCollection<long> warehouseIds,
+        string? salesPlanKey,
+        string? search,
+        bool lowStockOnly,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken);
 }

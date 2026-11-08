@@ -27,7 +27,7 @@ Shop.Data/
 
 `pageSize` بین ۱ تا ۲۰۰ محدود است. کلید طرح مانند `regular`، `digi-time` یا `digi-af` است. API فقط GET دارد و تغییر سند/موجودی را انجام نمی‌دهد؛ تغییرات موجودی باید از command کاربردی و رویهٔ تراکنشی انبار عبور کنند.
 
-APIهای انبار اکنون برای مرحلهٔ اتصال پنل قابل فراخوانی‌اند. چون احراز هویت مدیریتی در برنامه هنوز پیکربندی نشده، پیش از استقرار عمومی باید آن‌ها به مجوز مدیر محدود شوند.
+API عمومی انبار برای خواندن کاتالوگ انبار و موجودی است. APIهای نوشتن سند و تعاریف در `Shop.Admin` محافظت‌شده با cookie احراز هویت مستقل، مجوز درختی، ضد CSRF و دسترسی انبار کاربر هستند. هویت مدیر در `[Admin]` است و از حساب مشتری `[Account].[Profile]` جدا نگهداری می‌شود. جزئیات عملیات و محدودیت‌های باقی‌مانده در [راهنمای پنل](../admin/README.md) آمده است.
 
 ## اتصال و اجرای migration
 
@@ -40,13 +40,23 @@ Infrastructure مقدار `ConnectionStrings:DefaultConnection` را می‌خو
 3. [007-store-runtime-datasets.sql](../../Shop/Features/Store/Database/Migrations/007-store-runtime-datasets.sql) برای انتقال snapshot کاتالوگ، تحریریهٔ برند و FAQ به `Store.RuntimeDataset` و [008-account-magazine-geography.sql](../../Shop/Features/Store/Database/Migrations/008-account-magazine-geography.sql) برای حساب نمونه، محتوای مجله و جداول جغرافیا.
 4. [002-sample-warehouse-data.sql](../../Shop/Features/Warehouse/Database/Migrations/002-sample-warehouse-data.sql) برای شرکت، انبار فروش و ذخیره، واحد، محصولات نگاشت‌شده، رسیدهای قطعی و موجودی نمونه.
 5. [009-repair-persian-text.sql](../../Shop/Features/Store/Database/Migrations/009-repair-persian-text.sql) برای بازیابی رشته‌هایی که با code page اشتباه ذخیره شده بودند. این migration داده‌های Store، Warehouse و Account را اصلاح می‌کند و در هر دو schema ثبت می‌شود.
-6. Migrationهای [010](../../Shop/Features/Store/Database/Migrations/010-account-commerce.sql)، [011](../../Shop/Features/Store/Database/Migrations/011-account-article-feedback.sql)، [012](../../Shop/Features/Store/Database/Migrations/012-account-profile-preferences.sql)، [013](../../Shop/Features/Store/Database/Migrations/013-account-price-alerts.sql) و [014](../../Shop/Features/Store/Database/Migrations/014-product-feedback.sql) برای داده‌های حساب، سفارش، تعامل مقاله، هشدار قیمت و دیدگاه/پرسش محصول.
+6. Migrationهای [010](../../Shop/Features/Store/Database/Migrations/010-account-commerce.sql)، [011](../../Shop/Features/Store/Database/Migrations/011-account-article-feedback.sql)، [012](../../Shop/Features/Store/Database/Migrations/012-account-profile-preferences.sql)، [013](../../Shop/Features/Store/Database/Migrations/013-account-price-alerts.sql)، [014](../../Shop/Features/Store/Database/Migrations/014-product-feedback.sql) و [015](../../Shop/Features/Store/Database/Migrations/015-account-recent-searches.sql) برای داده‌های حساب، سفارش، تعامل مقاله، هشدار قیمت، دیدگاه/پرسش و جست‌وجوهای اخیر.
+7. بعد از migrationهای قبلی، [003-paid-orders-and-regular-minimum.sql](../../Shop/Features/Warehouse/Database/Migrations/003-paid-orders-and-regular-minimum.sql) و [004-document-external-reference.sql](../../Shop/Features/Warehouse/Database/Migrations/004-document-external-reference.sql) را به‌ترتیب اجرا کنید؛ اولی سفارش چندطرحی و حداقل موجودی طرح عادی را مدل می‌کند و دومی شمارهٔ سفارش/مرجع بیرونی سند دستی را جدا از کلید سفارش خودکار نگه می‌دارد.
+8. سپس [016-account-warehouse-variants.sql](../../Shop/Features/Store/Database/Migrations/016-account-warehouse-variants.sql) را اجرا کنید تا شناسهٔ تنوع مشترک به سبد و ردیف سفارش متصل شود.
+9. در پایان [001-system-users-and-permissions.sql](../../Shop.Admin/Database/Migrations/001-system-users-and-permissions.sql) را اجرا کنید. این migration هویت مستقل کاربران پنل، نقش، مجوزهای درختی و دسترسی انتخابی کاربران به انبار را در schema جداگانهٔ `Admin` می‌سازد.
+10. سپس [002-store-feedback-permissions.sql](../../Shop.Admin/Database/Migrations/002-store-feedback-permissions.sql) را اجرا کنید تا مشاهده و مدیریت دیدگاه‌ها/پرسش‌های فروشگاه به‌صورت مجوزهای جداگانه به درخت دسترسی افزوده شوند.
+
+Migrationهای 003 و 016 اصلاحات افزایشی‌اند و دادهٔ موجود را حفظ می‌کنند: طرح سربرگ صندوق پرداخت‌شده به ردیف‌های موجود منتقل می‌شود، ارجاع سند یک‌به‌یک به رابطهٔ یک‌به‌چند تبدیل می‌شود، و حداقل‌های قدیمیِ طرح‌های غیرعادی به طرح عادی همان انبار/قلم منتقل می‌شوند (در صورت چند مقدار، بیشترین مقدار نگه داشته می‌شود). شناسهٔ تنوع در CartItem و CustomerOrderItem nullable است تا سفارش/سبدهای قدیمی حفظ شوند؛ API ذخیرهٔ سبد و checkout اکنون این شناسه را می‌خواند/می‌نویسد و تعلق آن به محصول را کنترل می‌کند. این migrationها هنوز روی پایگاه میزبان اجرا نشده‌اند.
 
 `CatalogRepository`، `DatabaseMagazineContentSource` و `DatabaseAccountDataSource` از repository دیتابیس می‌خوانند. `Store.RuntimeDataset` نگهدارندهٔ payloadهای JSON عمومی است؛ دادهٔ جغرافیا و FAQ از جدول‌های رابطه‌ای خوانده می‌شود. فایل‌های JSON اولیه از Shop حذف شده‌اند و migrationهای seed مرجع بازسازی دیتابیس‌اند. وضعیت منابع کاربر در [منابع داده](data-sources.md) آمده است.
 
 فایل‌های migration شامل رشته‌های فارسی UTF-8 هستند؛ اجرای دستی با `sqlcmd` باید code page ورودی و خروجی را UTF-8 تنظیم کند (برای نمونه `-f 65001`). از اجرای اسکریپت با code page پیش‌فرض Windows خودداری کنید؛ همان کاراکترها را می‌تواند به mojibake تبدیل کند.
 
 Migration دادهٔ نمونه idempotent است و ماندهٔ `StockBalance` را مستقیم درج نمی‌کند؛ رسیدهای قطعی را ثبت و برای هر سند `Warehouse.RebuildDocumentStock` را اجرا می‌کند. داده‌ها fixture نمایشی‌اند و نباید به‌عنوان موجودی واقعی کسب‌وکار استفاده شوند.
+
+بازبینی ساختار ۸ نوامبر ۲۰۲۶ نشان داد سفارش فروشگاه `SalesPlanKey` را در سطح ردیف نگه می‌دارد، درحالی‌که صندوق انبار طرح را در سربرگ ثبت می‌کرد و سند نیز فقط یک طرح دارد. Migration 003 طرح را به هر ردیف صندوق منتقل می‌کند، برای هر سفارش/طرح سند یکتا می‌سازد و چند سند حاصل را به یک صندوق وصل می‌کند. بنابراین پردازش اتمی یک سفارش می‌تواند برای هر طرح سند جدا بسازد. همچنین حداقل موجودی فقط برای طرح عادی مجاز است و مقدار صفر هشدار کمبود ایجاد نمی‌کند.
+
+تنوع انبار اکنون شناسهٔ سراسری و رابطه با محصول فروشگاه دارد. Migration 016 همین شناسه را در سبد و ردیف سفارش با FK ترکیبی (محصول + تنوع) تثبیت می‌کند؛ گزینه‌های قدیمی در `OptionsJson` حفظ می‌شوند. API انتخاب تنوع و ثبت سفارش این شناسه را می‌خواند و ذخیره می‌کند. هویت مدیر در schema جداگانهٔ `Admin` قرار دارد و هیچ کلید خارجی یا اشتراکی با `[Account].[Profile]` ندارد. نقش، درخت مجوز و دسترسی به انبار به کاربر سیستمی وصل می‌شوند. ورود اولیه با تنظیم امن `AdminBootstrap` انجام می‌شود و migration رمز یا حساب پیش‌فرض تولید نمی‌کند. migration 002 سطح مجوز جداگانه برای خواندن و moderation بازخوردها اضافه می‌کند.
 
 ## مسیر توسعه
 

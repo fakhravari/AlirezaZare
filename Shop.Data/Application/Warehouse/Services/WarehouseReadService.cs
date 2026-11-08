@@ -21,4 +21,19 @@ public sealed class WarehouseReadService(IWarehouseReadRepository repository) : 
         if (pageSize is < 1 or > 200) throw new ArgumentOutOfRangeException(nameof(pageSize));
         return repository.GetStockAsync(warehouseId, salesPlanKey, search?.Trim(), lowStockOnly, page, pageSize, cancellationToken);
     }
+
+    public Task<IReadOnlyList<WarehouseStockItem>> GetStockForWarehousesAsync(
+        IReadOnlyCollection<long> warehouseIds,
+        string? salesPlanKey,
+        string? search,
+        bool lowStockOnly,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken)
+    {
+        if (page < 1) throw new ArgumentOutOfRangeException(nameof(page));
+        if (pageSize is < 1 or > 200) throw new ArgumentOutOfRangeException(nameof(pageSize));
+        if (warehouseIds.Count == 0) return Task.FromResult<IReadOnlyList<WarehouseStockItem>>([]);
+        return repository.GetStockForWarehousesAsync(warehouseIds, salesPlanKey, search?.Trim(), lowStockOnly, page, pageSize, cancellationToken);
+    }
 }

@@ -6,5 +6,6 @@ public sealed class SalesPlanReference
     public string StoreSalesPlanKey { get; set; } = string.Empty;
     public string DisplayName { get; set; } = string.Empty;
     public bool IsRegular { get; set; }
+    public bool IsActive { get; set; }
     public ICollection<StockBalance> StockBalances { get; set; } = new List<StockBalance>();
 }
