@@ -29,6 +29,22 @@
 | `/legal/returns` | [LegalController](../../Shop/Controllers/LegalController.cs) → [Returns](../../Shop/Views/Legal/Returns.cshtml) | `pages/pages.css` | — | شرایط بازگشت |
 | `/error` و `/Error/{statusCode}` | [ErrorController](../../Shop/Controllers/ErrorController.cs) → [Index](../../Shop/Views/Error/Index.cshtml) | — | — | خطاهای 4xx/5xx صفحهٔ راهنمای بدون ایندکس می‌گیرند و status اصلی حفظ می‌شود |
 
+## پنل مدیریت
+
+| مسیر | Controller → View | وضعیت |
+|---|---|---|
+| `/` | [HomeController](../../Shop.Admin/Controllers/HomeController.cs) → انتقال به پنل | ورودی برنامه |
+| `/Admin/Home/Index` | [HomeController](../../Shop.Admin/Areas/Admin/Controllers/HomeController.cs) → [Index](../../Shop.Admin/Areas/Admin/Views/Home/Index.cshtml) | پیشخوان کل و لینک حوزه‌ها |
+| `/Store/Dashboard/Index` | [DashboardController](../../Shop.Admin/Areas/Store/Controllers/DashboardController.cs) → [Index](../../Shop.Admin/Areas/Store/Views/Dashboard/Index.cshtml) | پیشخوان فروشگاه |
+| `/Store/Catalog/Products`، `/Categories`، `/Brands`، `/Attributes` | [CatalogController](../../Shop.Admin/Areas/Store/Controllers/CatalogController.cs) → [Index](../../Shop.Admin/Areas/Store/Views/Catalog/Index.cshtml) | فهرست‌های کاتالوگ از API خوانده می‌شوند |
+| `/Store/Features?feature=...` | [FeaturesController](../../Shop.Admin/Areas/Store/Controllers/FeaturesController.cs) → [Index](../../Shop.Admin/Areas/Store/Views/Features/Index.cshtml) | دامنهٔ سفارش، مشتری، بازخورد و محتوا؛ API مدیریتی هنوز ندارد |
+| `/Warehouse/Dashboard/Index` | [DashboardController](../../Shop.Admin/Areas/Warehouse/Controllers/DashboardController.cs) → [Index](../../Shop.Admin/Areas/Warehouse/Views/Dashboard/Index.cshtml) | پیشخوان انبار |
+| `/Warehouse/Warehouses` | [WarehousesController](../../Shop.Admin/Areas/Warehouse/Controllers/WarehousesController.cs) → [Index](../../Shop.Admin/Areas/Warehouse/Views/Warehouses/Index.cshtml) | فهرست انبارها از API |
+| `/Warehouse/Stock` | [StockController](../../Shop.Admin/Areas/Warehouse/Controllers/StockController.cs) → [Index](../../Shop.Admin/Areas/Warehouse/Views/Stock/Index.cshtml) | موجودی با فیلتر AJAX |
+| `/Warehouse/Features?feature=...` | [FeaturesController](../../Shop.Admin/Areas/Warehouse/Controllers/FeaturesController.cs) → [Index](../../Shop.Admin/Areas/Warehouse/Views/Features/Index.cshtml) | دامنهٔ رسید، حواله، انتقال، اصلاح و گردش؛ API عملیاتی هنوز ندارد |
+
+این routeها در برنامهٔ مستقل `Shop.Admin` هستند. کلیک روی لینک داخلی، محتوای صفحه را با AJAX جایگزین و history مرورگر را به‌روز می‌کند. APIهای خواندن عبارت‌اند از `GET /api/admin/store/catalog/{products|categories|brands|attributes}`، `GET /api/admin/warehouse/warehouses` و `GET /api/admin/warehouse/stock`؛ پاسخ و درخواست با `no-store` هستند. API نوشتن مدیریتی هنوز پیاده‌سازی نشده است.
+
 ## قرارداد route و سازگاری
 
 endpointهای API از routeهای MVC جدا هستند: `GET /api/warehouse/warehouses` و `GET /api/warehouse/stock` برای دادهٔ انبار، و `GET/POST /api/store/products/{id}/feedback/{type}` برای دیدگاه و پرسش محصول (`type`: `reviews` یا `questions`)؛ query و مدل پاسخ در [لایهٔ دیتابیس](database.md) مستند شده است.

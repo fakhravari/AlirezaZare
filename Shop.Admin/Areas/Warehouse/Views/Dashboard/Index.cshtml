@@ -1,0 +1,24 @@
+<div class="admin-page" data-admin-page="warehouse-dashboard">
+    @await Html.PartialAsync("_AdminPageIntro", ("نمای کلی انبار", "مرور انبارها و ماندهٔ کالاها از داده‌های دیتابیس."))
+    <div class="row g-3 g-xl-4">
+        <div class="col-md-6 col-xxl-4">
+            <a class="panel panel-inverse admin-module-card" asp-area="Warehouse" asp-controller="Warehouses" asp-action="Index" data-admin-nav>
+                <span class="admin-module-card__icon bg-blue"><i class="fa fa-warehouse" aria-hidden="true"></i></span>
+                <span class="admin-module-card__title">انبارها</span><span class="admin-module-card__text">فهرست انبارها و وضعیت فعال بودن</span>
+            </a>
+        </div>
+        <div class="col-md-6 col-xxl-4">
+            <a class="panel panel-inverse admin-module-card" asp-area="Warehouse" asp-controller="Stock" asp-action="Index" data-admin-nav>
+                <span class="admin-module-card__icon bg-green"><i class="fa fa-boxes-stacked" aria-hidden="true"></i></span>
+                <span class="admin-module-card__title">موجودی کالا</span><span class="admin-module-card__text">فیلتر بر اساس انبار، طرح فروش و کمبود</span>
+            </a>
+        </div>
+        <div class="col-md-6 col-xxl-4">
+            <a class="panel panel-inverse admin-module-card" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="movements" data-admin-nav>
+                <span class="admin-module-card__icon bg-orange"><i class="fa fa-arrows-rotate" aria-hidden="true"></i></span>
+                <span class="admin-module-card__title">گردش و عملیات</span><span class="admin-module-card__text">رسید، حواله، انتقال و اصلاح موجودی</span>
+            </a>
+        </div>
+    </div>
+    <div class="alert alert-info mt-4" role="note"><i class="fa fa-circle-info me-1" aria-hidden="true"></i>فهرست موجودی از API خوانده می‌شود. رسید، حواله، انتقال و اصلاح موجودی پس از تعریف قرارداد ثبت و سطح دسترسی مدیر فعال خواهند شد.</div>
+</div>

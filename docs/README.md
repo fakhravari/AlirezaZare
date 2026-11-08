@@ -4,7 +4,7 @@
 
 ## مسیر سریع بررسی
 
-1. [نمای کلی معماری](architecture/overview.md) را بخوانید؛ برنامهٔ اجرایی `Shop/` و الگوی فعلی MVC است.
+1. [نمای کلی معماری](architecture/overview.md) را بخوانید؛ `Shop/` فروشگاه و `Shop.Admin/` پنل مدیریتی MVC هستند.
 2. صفحه را در [نقشهٔ route، View و asset](architecture/routing.md) پیدا کنید.
 3. [منبع حقیقت داده](architecture/data-sources.md) را مشخص کنید؛ سپس راهنمای حوزهٔ مربوط را از جدول زیر باز کنید.
 4. در تغییر UI، [پوسته و ترتیب منابع](frontend/layout.md) و مالک CSS/JS را بررسی کنید.
@@ -18,6 +18,7 @@
 | [رابط کاربری](frontend/README.md) | پوسته، طراحی، JS مشترک و بازبینی UI | [ترتیب منابع](frontend/layout.md) |
 | [فروشگاه](store/README.md) | کاتالوگ، فیلتر، محصول، سبد و تسویه | [کاتالوگ و فهرست‌ها](store/catalog.md) |
 | [حساب کاربری](account/README.md) | ثبت‌نام و تأیید ایمیل، پروفایل، آدرس و سفارش | [پروفایل](account/profile.md) |
+| [مدیریت](admin/README.md) | پنل مدیریت فروشگاه و انبار | [راهنمای پنل](admin/README.md) |
 | [محتوا و خدمات](content/README.md) | مجله، برند، FAQ، قوانین و هویت | [صفحه‌های محتوایی](content/pages.md) |
 | [رسانه](media/README.md) | پوشه‌ها، نام‌گذاری، تصاویر، ویدئو و ابعاد | [راهنمای رسانه](media/images.md) |
 | [SEO](seo/README.md) | metadata، canonical، schema و crawl | [metadata](seo/metadata.md) |
@@ -44,7 +45,7 @@
 - [AGENTS.md ریشهٔ مخزن](../AGENTS.md) این قانون را برای تغییرات کل پروژه اعمال می‌کند؛ [روند عامل](AGENTS.md) مراحل کار را مشخص می‌کند.
 - کد و runtime مرجع نهایی‌اند. مسیرها و ترتیب منابع snapshot هستند؛ پس از کشف اختلاف، راهنمای مسئول به‌روز شود.
 - تأیید کد ایمیل ثبت‌نام از backend و SMTP انجام می‌شود؛ ایجاد حساب و session، محصولات، سبد، کوپن و پرداخت هنوز عمدتاً نمونه/محلی‌اند. وضعیت هر مرز در [منابع داده](architecture/data-sources.md) آمده است.
-- `Shop/` برنامهٔ وب است؛ `tests/Shop.Contracts` قرارداد C# را بررسی می‌کند. تست‌های JS، HTTP و مرورگر و workflow CI در [کیفیت](development/quality.md) توضیح داده شده‌اند؛ build موفق جای تست رفتار و ظاهر نیست.
+- `Shop/` فروشگاه عمومی و `Shop.Admin/` پنل مدیریتی وب هستند؛ `tests/Shop.Contracts` قرارداد C# را بررسی می‌کند. تست‌های JS، HTTP و مرورگر و workflow CI در [کیفیت](development/quality.md) توضیح داده شده‌اند؛ build موفق جای تست رفتار و ظاهر نیست.
 
 برای بررسی ساختار و لینک‌های مستندات از ریشهٔ مخزن اجرا کنید:
 

@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#20252b" />
+    <title>@ViewData["Title"] - مدیریت فروشگاه</title>
+    <link rel="stylesheet" href="~/color_admin/assets/css/vendor.min.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/color_admin/assets/css/default/app-rtl.min.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/color_admin/assets/css/persian-font.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/admin-shell.css" asp-append-version="true" />
+</head>
+<body>
+    <div id="loader" class="app-loader"><span class="spinner"></span></div>
+    <div id="app" class="app app-header-fixed app-sidebar-fixed">
+        @await Html.PartialAsync("_AdminHeader")
+        @await Html.PartialAsync("_AdminSidebar")
+        <div class="app-sidebar-bg" data-bs-theme="dark"></div>
+        <div class="app-sidebar-mobile-backdrop">
+            <a href="#content" data-dismiss="app-sidebar-mobile" class="stretched-link" aria-label="بستن منو"></a>
+        </div>
+        <main id="content" class="app-content" tabindex="-1">
+            @RenderBody()
+        </main>
+        <a href="#app" class="btn btn-icon btn-circle btn-theme btn-scroll-to-top" data-toggle="scroll-to-top" aria-label="بازگشت به بالا">
+            <i class="fa fa-angle-up" aria-hidden="true"></i>
+        </a>
+    </div>
+
+    <script src="~/color_admin/assets/js/vendor.min.js" asp-append-version="true"></script>
+    <script src="~/color_admin/assets/js/app.min.js" asp-append-version="true"></script>
+    <script src="~/js/admin-shell.js" asp-append-version="true"></script>
+</body>
+</html>

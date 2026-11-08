@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>AlirezaZare-Shop-Admin-Local</UserSecretsId>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Shop.Data\Shop.Data.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Keep the supplied demo library in source control without putting every demo/plugin in the app asset manifest. -->
+    <Content Remove="wwwroot/color_admin/pages/**/*" />
+    <Content Remove="wwwroot/color_admin/assets/plugins/**/*" />
+    <Content Remove="wwwroot/color_admin/assets/data/**/*" />
+    <Content Remove="wwwroot/color_admin/assets/demo/**/*" />
+  </ItemGroup>
+</Project>

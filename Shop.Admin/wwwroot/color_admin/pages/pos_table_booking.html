@@ -1,0 +1,2356 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+	<meta charset="utf-8" />
+	<title>مدیریت رنگ | POS - رزرو میز</title>
+	<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport" />
+	<meta content="" name="description" />
+	<meta content="" name="author" />
+	
+	<!-- ================== BEGIN core-css ================== -->
+	<link href="../assets/css/vendor.min.css" rel="stylesheet" />
+	<link href="../assets/css/default/app-rtl.min.css" rel="stylesheet" />
+	<!-- ================== END core-css ================== -->
+	<link href="../assets/css/persian-font.css" rel="stylesheet" />
+</head>
+<body class='pace-top'>
+	<!-- BEGIN #loader -->
+	<div id="loader" class="app-loader">
+		<span class="spinner"></span>
+	</div>
+	<!-- END #loader -->
+
+	<!-- BEGIN #app -->
+	<div id="app" class="app app-content-full-height app-without-sidebar app-without-header">
+		<!-- BEGIN #content -->
+		<div id="content" class="app-content p-0">
+			<!-- BEGIN pos -->
+			<div class="pos pos-with-header" id="pos">
+				<!-- BEGIN pos-header -->
+				<div class="pos-header">
+					<div class="logo">
+						<a href="index.html">
+							<div class="logo-img"><i class="fa fa-bowl-rice fs-2"></i></div>
+							<div class="logo-text">کاج و شام</div>
+						</a>
+					</div>
+					<div class="time" id="time">00:00</div>
+					<div class="nav">
+						<div class="nav-item">
+							<a href="pos_counter_checkout.html" class="nav-link">
+								<i class="far fa-credit-card nav-icon"></i>
+							</a>
+						</div>
+						<div class="nav-item">
+							<a href="pos_kitchen_order.html" class="nav-link">
+								<i class="far fa-clock nav-icon"></i>
+							</a>
+						</div>
+						<div class="nav-item">
+							<a href="pos_table_booking.html" class="nav-link">
+								<i class="far fa-calendar-check nav-icon"></i>
+							</a>
+						</div>
+						<div class="nav-item">
+							<a href="pos_menu_stock.html" class="nav-link">
+								<i class="fa fa-chart-pie nav-icon"></i>
+							</a>
+						</div>
+					</div>
+				</div>
+				<!-- END pos-header -->
+				
+				<!-- BEGIN pos-content -->
+				<div class="pos-content">
+					<div class="pos-content-container p-4">
+						<div class="d-md-flex align-items-center mb-4">
+							<div class="pos-booking-title flex-1">
+								<div class="fs-24px mb-1">جدول موجود (8/20)</div>
+								<div class="mb-2 mb-md-0 d-flex">
+									<div class="d-flex align-items-center me-3">
+										<i class="fa fa-circle fa-fw text-gray-700 fs-9px me-1"></i> تکمیل شد
+									</div>
+									<div class="d-flex align-items-center me-3">
+										<i class="fa fa-circle fa-fw text-warning fs-9px me-1"></i> آینده
+									</div>
+									<div class="d-flex align-items-center me-3">
+										<i class="fa fa-circle fa-fw text-success fs-9px me-1"></i> در حال انجام است
+									</div>
+								</div>
+							</div>
+							<div>
+								<div class="w-200px">
+									<input type="date" class="form-control form-control-lg fs-13px" placeholder="امروز" />
+								</div>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+								<a href="#" data-bs-toggle="modal" data-bs-target="#modalPosBooking" class="pos-table-booking">
+									<div class="pos-table-booking-container">
+										<div class="pos-table-booking-header">
+											<div class="d-flex align-items-center">
+												<div class="flex-1">
+													<div class="title">جدول</div>
+													<div class="no">01</div>
+													<div class="desc">حداکثر 4 نفر</div>
+												</div>
+												<div class="text-theme display-5">
+													<iconify-icon icon="solar:check-circle-line-duotone"></iconify-icon>
+												</div>
+											</div>
+										</div>
+										<div class="pos-table-booking-body">
+											<div class="booking">
+												<div class="time">ساعت 08:00 صبح</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 09:00 صبح</div>
+												<div class="info">رزرو شده توسط شان</div>
+												<div class="status completed"><i class="fa fa-circle"></i></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 10:00 صبح</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 11:00 صبح</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking highlight">
+												<div class="time">ساعت 12:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 01:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 02:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 03:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 04:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 05:00 بعد از ظهر</div>
+												<div class="info">رزرو شده توسط Irene Wong (4pax)</div>
+												<div class="status upcoming"><i class="fa fa-circle"></i></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 06:00 بعد از ظهر</div>
+												<div class="info">رزرو شده توسط Irene Wong (4pax)</div>
+												<div class="status upcoming"><i class="fa fa-circle"></i></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 07:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 08:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 09:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 10:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+										</div>
+									</div>
+								</a>
+							</div>
+							<div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+								<a href="#" data-bs-toggle="modal" data-bs-target="#modalPosBooking" class="pos-table-booking">
+									<div class="pos-table-booking-container">
+										<div class="pos-table-booking-header">
+											<div class="d-flex align-items-center">
+												<div class="flex-1">
+													<div class="title">جدول</div>
+													<div class="no">02</div>
+													<div class="desc">حداکثر 8 نفر</div>
+												</div>
+												<div class="text-gray-600 display-5">
+													<iconify-icon icon="solar:check-circle-line-duotone"></iconify-icon>
+												</div>
+											</div>
+										</div>
+										<div class="pos-table-booking-body">
+											<div class="booking">
+												<div class="time">ساعت 08:00 صبح</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 09:00 صبح</div>
+												<div class="info">-</div>
+													<div class="info-desc"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 10:00 صبح</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 11:00 صبح</div>
+												<div class="info">در صبحانه پیاده روی کنید</div>
+												<div class="status completed"><i class="fa fa-circle"></i></div>
+											</div>
+											<div class="booking highlight">
+												<div class="time">ساعت 12:00 شب</div>
+												<div class="info">رزرو شده توسط John (8pax)</div>
+												<div class="status in-progress"><i class="fa fa-circle"></i></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 01:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 02:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 03:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 04:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 05:00 بعد از ظهر</div>
+													<div class="info-title">-</div>
+													<div class="info-desc"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 06:00 بعد از ظهر</div>
+												<div class="info">رزرو شده توسط Terry (6pax)</div>
+												<div class="status upcoming"><i class="fa fa-circle"></i></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 07:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 08:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 09:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 10:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+										</div>
+									</div>
+								</a>
+							</div>
+							<div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+								<a href="#" data-bs-toggle="modal" data-bs-target="#modalPosBooking" class="pos-table-booking">
+									<div class="pos-table-booking-container">
+										<div class="pos-table-booking-header">
+											<div class="d-flex align-items-center">
+												<div class="flex-1">
+													<div class="title">جدول</div>
+													<div class="no">03</div>
+													<div class="desc">حداکثر 8 نفر</div>
+												</div>
+												<div class="text-gray-600 display-5">
+													<iconify-icon icon="solar:check-circle-line-duotone"></iconify-icon>
+												</div>
+											</div>
+										</div>
+										<div class="pos-table-booking-body">
+											<div class="booking">
+												<div class="time">ساعت 08:00 صبح</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 09:00 صبح</div>
+												<div class="info">-</div>
+													<div class="info-desc"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 10:00 صبح</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 11:00 صبح</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking highlight">
+												<div class="time">ساعت 12:00 شب</div>
+												<div class="info">در ناهار پیاده روی کنید</div>
+												<div class="status in-progress"><i class="fa fa-circle"></i></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 01:00 بعد از ظهر</div>
+												<div class="info">رزرو شده توسط لیزا (8pax)</div>
+												<div class="status upcoming"><i class="fa fa-circle"></i></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 02:00 بعد از ظهر</div>
+												<div class="info">رزرو شده توسط لیزا (8pax)</div>
+												<div class="status upcoming"><i class="fa fa-circle"></i></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 03:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 04:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 05:00 بعد از ظهر</div>
+													<div class="info-title">-</div>
+													<div class="info-desc"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 06:00 بعد از ظهر</div>
+												<div class="info">رزرو شده توسط تری</div>
+												<div class="status upcoming"><i class="fa fa-circle"></i></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 07:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 08:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 09:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 10:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+										</div>
+									</div>
+								</a>
+							</div>
+							<div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+								<a href="#" data-bs-toggle="modal" data-bs-target="#modalPosBooking" class="pos-table-booking">
+									<div class="pos-table-booking-container">
+										<div class="pos-table-booking-header">
+											<div class="d-flex align-items-center">
+												<div class="flex-1">
+													<div class="title">جدول</div>
+													<div class="no">04</div>
+													<div class="desc">حداکثر 4 نفر</div>
+												</div>
+												<div class="text-gray-600 display-5">
+													<iconify-icon icon="solar:check-circle-line-duotone"></iconify-icon>
+												</div>
+											</div>
+										</div>
+										<div class="pos-table-booking-body">
+											<div class="booking">
+												<div class="time">ساعت 08:00 صبح</div>
+												<div class="info">در صبحانه پیاده روی کنید</div>
+												<div class="status completed"><i class="fa fa-circle"></i></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 09:00 صبح</div>
+												<div class="info">در صبحانه پیاده روی کنید</div>
+												<div class="status completed"><i class="fa fa-circle"></i></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 10:00 صبح</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 11:00 صبح</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking highlight">
+												<div class="time">ساعت 12:00 شب</div>
+												<div class="info">در ناهار پیاده روی کنید</div>
+												<div class="status in-progress"><i class="fa fa-circle"></i></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 01:00 بعد از ظهر</div>
+												<div class="info">رزرو شده توسط ریچارد (4pax)</div>
+												<div class="status upcoming"><i class="fa fa-circle"></i></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 02:00 بعد از ظهر</div>
+												<div class="info">رزرو شده توسط ریچارد (4pax)</div>
+												<div class="status upcoming"><i class="fa fa-circle"></i></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 03:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 04:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 05:00 بعد از ظهر</div>
+													<div class="info-title">-</div>
+													<div class="info-desc"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 06:00 بعد از ظهر</div>
+												<div class="info">رزرو شده توسط پل (3pax)</div>
+												<div class="status upcoming"><i class="fa fa-circle"></i></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 07:00 بعد از ظهر</div>
+												<div class="info">رزرو شده توسط پل (3pax)</div>
+												<div class="status upcoming"><i class="fa fa-circle"></i></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 08:00 شب</div>
+												<div class="info">رزرو شده توسط پل (3pax)</div>
+												<div class="status upcoming"><i class="fa fa-circle"></i></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 09:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 10:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+										</div>
+									</div>
+								</a>
+							</div>
+							<div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+								<a href="#" data-bs-toggle="modal" data-bs-target="#modalPosBooking" class="pos-table-booking">
+									<div class="pos-table-booking-container">
+										<div class="pos-table-booking-header">
+											<div class="d-flex align-items-center">
+												<div class="flex-1">
+													<div class="title">جدول</div>
+													<div class="no">05</div>
+													<div class="desc">حداکثر 4 نفر</div>
+												</div>
+												<div class="text-gray-600 display-5">
+													<iconify-icon icon="solar:check-circle-line-duotone"></iconify-icon>
+												</div>
+											</div>
+										</div>
+										<div class="pos-table-booking-body">
+											<div class="booking">
+												<div class="time">ساعت 08:00 صبح</div>
+												<div class="info">در صبحانه پیاده روی کنید</div>
+												<div class="status completed"><i class="fa fa-circle"></i></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 09:00 صبح</div>
+												<div class="info">در صبحانه پیاده روی کنید</div>
+												<div class="status completed"><i class="fa fa-circle"></i></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 10:00 صبح</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 11:00 صبح</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking highlight">
+												<div class="time">ساعت 12:00 شب</div>
+												<div class="info">در ناهار پیاده روی کنید</div>
+												<div class="status in-progress"><i class="fa fa-circle"></i></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 01:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 02:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 03:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 04:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 05:00 بعد از ظهر</div>
+													<div class="info-title">-</div>
+													<div class="info-desc"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 06:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 07:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 08:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 09:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 10:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+										</div>
+									</div>
+								</a>
+							</div>
+							<div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+								<a href="#" data-bs-toggle="modal" data-bs-target="#modalPosBooking" class="pos-table-booking">
+									<div class="pos-table-booking-container">
+										<div class="pos-table-booking-header">
+											<div class="d-flex align-items-center">
+												<div class="flex-1">
+													<div class="title">جدول</div>
+													<div class="no">06</div>
+													<div class="desc">حداکثر 4 نفر</div>
+												</div>
+												<div class="pe-1 text-theme display-5">
+													<iconify-icon icon="solar:check-circle-line-duotone"></iconify-icon>
+												</div>
+											</div>
+										</div>
+										<div class="pos-table-booking-body">
+											<div class="booking">
+												<div class="time">ساعت 08:00 صبح</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 09:00 صبح</div>
+												<div class="info">در صبحانه پیاده روی کنید</div>
+												<div class="status completed"><i class="fa fa-circle"></i></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 10:00 صبح</div>
+												<div class="info">در صبحانه پیاده روی کنید</div>
+												<div class="status completed"><i class="fa fa-circle"></i></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 11:00 صبح</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking highlight">
+												<div class="time">ساعت 12:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 01:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 02:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 03:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 04:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 05:00 بعد از ظهر</div>
+													<div class="info-title">-</div>
+													<div class="info-desc"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 06:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 07:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 08:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 09:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 10:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+										</div>
+									</div>
+								</a>
+							</div>
+							<div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+								<a href="#" data-bs-toggle="modal" data-bs-target="#modalPosBooking" class="pos-table-booking">
+									<div class="pos-table-booking-container">
+										<div class="pos-table-booking-header">
+											<div class="d-flex align-items-center">
+												<div class="flex-1">
+													<div class="title">جدول</div>
+													<div class="no">07</div>
+													<div class="desc">حداکثر 6 نفر</div>
+												</div>
+												<div class="text-gray-600 display-5">
+													<iconify-icon icon="solar:check-circle-line-duotone"></iconify-icon>
+												</div>
+											</div>
+										</div>
+										<div class="pos-table-booking-body">
+											<div class="booking">
+												<div class="time">ساعت 08:00 صبح</div>
+												<div class="info">در صبحانه پیاده روی کنید</div>
+												<div class="status completed"><i class="fa fa-circle"></i></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 09:00 صبح</div>
+												<div class="info">در صبحانه پیاده روی کنید</div>
+												<div class="status completed"><i class="fa fa-circle"></i></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 10:00 صبح</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 11:00 صبح</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking highlight">
+												<div class="time">ساعت 12:00 شب</div>
+												<div class="info">در ناهار پیاده روی کنید</div>
+												<div class="status in-progress"><i class="fa fa-circle"></i></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 01:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 02:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 03:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 04:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 05:00 بعد از ظهر</div>
+													<div class="info-title">-</div>
+													<div class="info-desc"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 06:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 07:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 08:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 09:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 10:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+										</div>
+									</div>
+								</a>
+							</div>
+							<div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+								<a href="#" data-bs-toggle="modal" data-bs-target="#modalPosBooking" class="pos-table-booking">
+									<div class="pos-table-booking-container">
+										<div class="pos-table-booking-header">
+											<div class="d-flex align-items-center">
+												<div class="flex-1">
+													<div class="title">جدول</div>
+													<div class="no">08</div>
+													<div class="desc">حداکثر 4 نفر</div>
+												</div>
+												<div class="text-gray-600 display-5">
+													<iconify-icon icon="solar:check-circle-line-duotone"></iconify-icon>
+												</div>
+											</div>
+										</div>
+										<div class="pos-table-booking-body">
+											<div class="booking">
+												<div class="time">ساعت 08:00 صبح</div>
+												<div class="info">در صبحانه پیاده روی کنید</div>
+												<div class="status completed"><i class="fa fa-circle"></i></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 09:00 صبح</div>
+												<div class="info">در صبحانه پیاده روی کنید</div>
+												<div class="status completed"><i class="fa fa-circle"></i></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 10:00 صبح</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 11:00 صبح</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking highlight">
+												<div class="time">ساعت 12:00 شب</div>
+												<div class="info">در ناهار پیاده روی کنید</div>
+												<div class="status in-progress"><i class="fa fa-circle"></i></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 01:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 02:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 03:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 04:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 05:00 بعد از ظهر</div>
+													<div class="info-title">-</div>
+													<div class="info-desc"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 06:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 07:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 08:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 09:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 10:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+										</div>
+									</div>
+								</a>
+							</div>
+							<div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+								<a href="#" data-bs-toggle="modal" data-bs-target="#modalPosBooking" class="pos-table-booking">
+									<div class="pos-table-booking-container">
+										<div class="pos-table-booking-header">
+											<div class="d-flex align-items-center">
+												<div class="flex-1">
+													<div class="title">جدول</div>
+													<div class="no">09</div>
+													<div class="desc">حداکثر 4 نفر</div>
+												</div>
+												<div class="pe-1 text-theme display-5">
+													<iconify-icon icon="solar:check-circle-line-duotone"></iconify-icon>
+												</div>
+											</div>
+										</div>
+										<div class="pos-table-booking-body">
+											<div class="booking">
+												<div class="time">ساعت 08:00 صبح</div>
+												<div class="info">در صبحانه پیاده روی کنید</div>
+												<div class="status completed"><i class="fa fa-circle"></i></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 09:00 صبح</div>
+												<div class="info">در صبحانه پیاده روی کنید</div>
+												<div class="status completed"><i class="fa fa-circle"></i></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 10:00 صبح</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 11:00 صبح</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking highlight">
+												<div class="time">ساعت 12:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 01:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 02:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 03:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 04:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 05:00 بعد از ظهر</div>
+													<div class="info-title">-</div>
+													<div class="info-desc"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 06:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 07:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 08:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 09:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 10:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+										</div>
+									</div>
+								</a>
+							</div>
+							<div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+								<a href="#" data-bs-toggle="modal" data-bs-target="#modalPosBooking" class="pos-table-booking">
+									<div class="pos-table-booking-container">
+										<div class="pos-table-booking-header">
+											<div class="d-flex align-items-center">
+												<div class="flex-1">
+													<div class="title">جدول</div>
+													<div class="no">10</div>
+													<div class="desc">حداکثر 4 نفر</div>
+												</div>
+												<div class="text-gray-600 display-5">
+													<iconify-icon icon="solar:check-circle-line-duotone"></iconify-icon>
+												</div>
+											</div>
+										</div>
+										<div class="pos-table-booking-body">
+											<div class="booking">
+												<div class="time">ساعت 08:00 صبح</div>
+												<div class="info">در صبحانه پیاده روی کنید</div>
+												<div class="status completed"><i class="fa fa-circle"></i></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 09:00 صبح</div>
+												<div class="info">در صبحانه پیاده روی کنید</div>
+												<div class="status completed"><i class="fa fa-circle"></i></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 10:00 صبح</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 11:00 صبح</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking highlight">
+												<div class="time">ساعت 12:00 شب</div>
+												<div class="info">در ناهار پیاده روی کنید</div>
+												<div class="status in-progress"><i class="fa fa-circle"></i></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 01:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 02:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 03:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 04:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 05:00 بعد از ظهر</div>
+													<div class="info-title">-</div>
+													<div class="info-desc"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 06:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 07:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 08:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 09:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 10:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+										</div>
+									</div>
+								</a>
+							</div>
+							<div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+								<a href="#" data-bs-toggle="modal" data-bs-target="#modalPosBooking" class="pos-table-booking">
+									<div class="pos-table-booking-container">
+										<div class="pos-table-booking-header">
+											<div class="d-flex align-items-center">
+												<div class="flex-1">
+													<div class="title">جدول</div>
+													<div class="no">11</div>
+													<div class="desc">حداکثر 4 نفر</div>
+												</div>
+												<div class="pe-1 text-theme display-5">
+													<iconify-icon icon="solar:check-circle-line-duotone"></iconify-icon>
+												</div>
+											</div>
+										</div>
+										<div class="pos-table-booking-body">
+											<div class="booking">
+												<div class="time">ساعت 08:00 صبح</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 09:00 صبح</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 10:00 صبح</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 11:00 صبح</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking highlight">
+												<div class="time">ساعت 12:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 01:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 02:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 03:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 04:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 05:00 بعد از ظهر</div>
+													<div class="info-title">-</div>
+													<div class="info-desc"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 06:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 07:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 08:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 09:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 10:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+										</div>
+									</div>
+								</a>
+							</div>
+							<div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+								<a href="#" data-bs-toggle="modal" data-bs-target="#modalPosBooking" class="pos-table-booking">
+									<div class="pos-table-booking-container">
+										<div class="pos-table-booking-header">
+											<div class="d-flex align-items-center">
+												<div class="flex-1">
+													<div class="title">جدول</div>
+													<div class="no">12</div>
+													<div class="desc">حداکثر 4 نفر</div>
+												</div>
+												<div class="pe-1 text-theme display-5">
+													<iconify-icon icon="solar:check-circle-line-duotone"></iconify-icon>
+												</div>
+											</div>
+										</div>
+										<div class="pos-table-booking-body">
+											<div class="booking">
+												<div class="time">ساعت 08:00 صبح</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 09:00 صبح</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 10:00 صبح</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 11:00 صبح</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking highlight">
+												<div class="time">ساعت 12:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 01:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 02:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 03:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 04:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 05:00 بعد از ظهر</div>
+													<div class="info-title">-</div>
+													<div class="info-desc"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 06:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 07:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 08:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 09:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 10:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+										</div>
+									</div>
+								</a>
+							</div>
+							<div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+								<a href="#" data-bs-toggle="modal" data-bs-target="#modalPosBooking" class="pos-table-booking">
+									<div class="pos-table-booking-container">
+										<div class="pos-table-booking-header">
+											<div class="d-flex align-items-center">
+												<div class="flex-1">
+													<div class="title">جدول</div>
+													<div class="no">13</div>
+													<div class="desc">حداکثر 4 نفر</div>
+												</div>
+												<div class="pe-1 text-theme display-5">
+													<iconify-icon icon="solar:check-circle-line-duotone"></iconify-icon>
+												</div>
+											</div>
+										</div>
+										<div class="pos-table-booking-body">
+											<div class="booking">
+												<div class="time">ساعت 08:00 صبح</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 09:00 صبح</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 10:00 صبح</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 11:00 صبح</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking highlight">
+												<div class="time">ساعت 12:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 01:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 02:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 03:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 04:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 05:00 بعد از ظهر</div>
+													<div class="info-title">-</div>
+													<div class="info-desc"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 06:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 07:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 08:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 09:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 10:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+										</div>
+									</div>
+								</a>
+							</div>
+							<div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+								<a href="#" data-bs-toggle="modal" data-bs-target="#modalPosBooking" class="pos-table-booking">
+									<div class="pos-table-booking-container">
+										<div class="pos-table-booking-header">
+											<div class="d-flex align-items-center">
+												<div class="flex-1">
+													<div class="title">جدول</div>
+													<div class="no">14</div>
+													<div class="desc">حداکثر 6 نفر</div>
+												</div>
+												<div class="text-gray-600 display-5">
+													<iconify-icon icon="solar:check-circle-line-duotone"></iconify-icon>
+												</div>
+											</div>
+										</div>
+										<div class="pos-table-booking-body">
+											<div class="booking">
+												<div class="time">ساعت 08:00 صبح</div>
+												<div class="info">در صبحانه پیاده روی کنید</div>
+												<div class="status completed"><i class="fa fa-circle"></i></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 09:00 صبح</div>
+												<div class="info">در صبحانه پیاده روی کنید</div>
+												<div class="status completed"><i class="fa fa-circle"></i></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 10:00 صبح</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 11:00 صبح</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking highlight">
+												<div class="time">ساعت 12:00 شب</div>
+												<div class="info">در ناهار پیاده روی کنید</div>
+												<div class="status in-progress"><i class="fa fa-circle"></i></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 01:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 02:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 03:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 04:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 05:00 بعد از ظهر</div>
+													<div class="info-title">-</div>
+													<div class="info-desc"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 06:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 07:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 08:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 09:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 10:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+										</div>
+									</div>
+								</a>
+							</div>
+							<div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+								<a href="#" data-bs-toggle="modal" data-bs-target="#modalPosBooking" class="pos-table-booking">
+									<div class="pos-table-booking-container">
+										<div class="pos-table-booking-header">
+											<div class="d-flex align-items-center">
+												<div class="flex-1">
+													<div class="title">جدول</div>
+													<div class="no">15</div>
+													<div class="desc">حداکثر 6 نفر</div>
+												</div>
+												<div class="text-gray-600 display-5">
+													<iconify-icon icon="solar:check-circle-line-duotone"></iconify-icon>
+												</div>
+											</div>
+										</div>
+										<div class="pos-table-booking-body">
+											<div class="booking">
+												<div class="time">ساعت 08:00 صبح</div>
+												<div class="info">در صبحانه پیاده روی کنید</div>
+												<div class="status completed"><i class="fa fa-circle"></i></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 09:00 صبح</div>
+												<div class="info">در صبحانه پیاده روی کنید</div>
+												<div class="status completed"><i class="fa fa-circle"></i></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 10:00 صبح</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 11:00 صبح</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking highlight">
+												<div class="time">ساعت 12:00 شب</div>
+												<div class="info">در ناهار پیاده روی کنید</div>
+												<div class="status in-progress"><i class="fa fa-circle"></i></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 01:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 02:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 03:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 04:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 05:00 بعد از ظهر</div>
+													<div class="info-title">-</div>
+													<div class="info-desc"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 06:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 07:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 08:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 09:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 10:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+										</div>
+									</div>
+								</a>
+							</div>
+							<div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+								<a href="#" data-bs-toggle="modal" data-bs-target="#modalPosBooking" class="pos-table-booking">
+									<div class="pos-table-booking-container">
+										<div class="pos-table-booking-header">
+											<div class="d-flex align-items-center">
+												<div class="flex-1">
+													<div class="title">جدول</div>
+													<div class="no">16</div>
+													<div class="desc">حداکثر 4 نفر</div>
+												</div>
+												<div class="pe-1 text-theme display-5">
+													<iconify-icon icon="solar:check-circle-line-duotone"></iconify-icon>
+												</div>
+											</div>
+										</div>
+										<div class="pos-table-booking-body">
+											<div class="booking">
+												<div class="time">ساعت 08:00 صبح</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 09:00 صبح</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 10:00 صبح</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 11:00 صبح</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking highlight">
+												<div class="time">ساعت 12:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 01:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 02:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 03:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 04:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 05:00 بعد از ظهر</div>
+													<div class="info-title">-</div>
+													<div class="info-desc"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 06:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 07:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 08:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 09:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 10:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+										</div>
+									</div>
+								</a>
+							</div>
+							<div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+								<a href="#" data-bs-toggle="modal" data-bs-target="#modalPosBooking" class="pos-table-booking">
+									<div class="pos-table-booking-container">
+										<div class="pos-table-booking-header">
+											<div class="d-flex align-items-center">
+												<div class="flex-1">
+													<div class="title">جدول</div>
+													<div class="no">17</div>
+													<div class="desc">حداکثر 4 نفر</div>
+												</div>
+												<div class="pe-1 text-theme display-5">
+													<iconify-icon icon="solar:check-circle-line-duotone"></iconify-icon>
+												</div>
+											</div>
+										</div>
+										<div class="pos-table-booking-body">
+											<div class="booking">
+												<div class="time">ساعت 08:00 صبح</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 09:00 صبح</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 10:00 صبح</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 11:00 صبح</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking highlight">
+												<div class="time">ساعت 12:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 01:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 02:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 03:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 04:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 05:00 بعد از ظهر</div>
+													<div class="info-title">-</div>
+													<div class="info-desc"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 06:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 07:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 08:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 09:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 10:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+										</div>
+									</div>
+								</a>
+							</div>
+							<div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+								<a href="#" data-bs-toggle="modal" data-bs-target="#modalPosBooking" class="pos-table-booking">
+									<div class="pos-table-booking-container">
+										<div class="pos-table-booking-header">
+											<div class="d-flex align-items-center">
+												<div class="flex-1">
+													<div class="title">جدول</div>
+													<div class="no">18</div>
+													<div class="desc">حداکثر 6 نفر</div>
+												</div>
+												<div class="text-gray-600 display-5">
+													<iconify-icon icon="solar:check-circle-line-duotone"></iconify-icon>
+												</div>
+											</div>
+										</div>
+										<div class="pos-table-booking-body">
+											<div class="booking">
+												<div class="time">ساعت 08:00 صبح</div>
+												<div class="info">در صبحانه پیاده روی کنید</div>
+												<div class="status completed"><i class="fa fa-circle"></i></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 09:00 صبح</div>
+												<div class="info">در صبحانه پیاده روی کنید</div>
+												<div class="status completed"><i class="fa fa-circle"></i></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 10:00 صبح</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 11:00 صبح</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking highlight">
+												<div class="time">ساعت 12:00 شب</div>
+												<div class="info">در ناهار پیاده روی کنید</div>
+												<div class="status in-progress"><i class="fa fa-circle"></i></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 01:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 02:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 03:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 04:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 05:00 بعد از ظهر</div>
+													<div class="info-title">-</div>
+													<div class="info-desc"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 06:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 07:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 08:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 09:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 10:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+										</div>
+									</div>
+								</a>
+							</div>
+							<div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+								<a href="#" data-bs-toggle="modal" data-bs-target="#modalPosBooking" class="pos-table-booking">
+									<div class="pos-table-booking-container">
+										<div class="pos-table-booking-header">
+											<div class="d-flex align-items-center">
+												<div class="flex-1">
+													<div class="title">جدول</div>
+													<div class="no">19</div>
+													<div class="desc">حداکثر 6 نفر</div>
+												</div>
+												<div class="text-gray-600 display-5">
+													<iconify-icon icon="solar:check-circle-line-duotone"></iconify-icon>
+												</div>
+											</div>
+										</div>
+										<div class="pos-table-booking-body">
+											<div class="booking">
+												<div class="time">ساعت 08:00 صبح</div>
+												<div class="info">در صبحانه پیاده روی کنید</div>
+												<div class="status completed"><i class="fa fa-circle"></i></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 09:00 صبح</div>
+												<div class="info">در صبحانه پیاده روی کنید</div>
+												<div class="status completed"><i class="fa fa-circle"></i></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 10:00 صبح</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 11:00 صبح</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking highlight">
+												<div class="time">ساعت 12:00 شب</div>
+												<div class="info">در ناهار پیاده روی کنید</div>
+												<div class="status in-progress"><i class="fa fa-circle"></i></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 01:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 02:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 03:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 04:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 05:00 بعد از ظهر</div>
+													<div class="info-title">-</div>
+													<div class="info-desc"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 06:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 07:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 08:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 09:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 10:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+										</div>
+									</div>
+								</a>
+							</div>
+							<div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+								<a href="#" data-bs-toggle="modal" data-bs-target="#modalPosBooking" class="pos-table-booking">
+									<div class="pos-table-booking-container">
+										<div class="pos-table-booking-header">
+											<div class="d-flex align-items-center">
+												<div class="flex-1">
+													<div class="title">جدول</div>
+													<div class="no">20</div>
+													<div class="desc">حداکثر 6 نفر</div>
+												</div>
+												<div class="text-gray-600 display-5">
+													<iconify-icon icon="solar:check-circle-line-duotone"></iconify-icon>
+												</div>
+											</div>
+										</div>
+										<div class="pos-table-booking-body">
+											<div class="booking">
+												<div class="time">ساعت 08:00 صبح</div>
+												<div class="info">در صبحانه پیاده روی کنید</div>
+												<div class="status completed"><i class="fa fa-circle"></i></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 09:00 صبح</div>
+												<div class="info">در صبحانه پیاده روی کنید</div>
+												<div class="status completed"><i class="fa fa-circle"></i></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 10:00 صبح</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 11:00 صبح</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking highlight">
+												<div class="time">ساعت 12:00 شب</div>
+												<div class="info">در ناهار پیاده روی کنید</div>
+												<div class="status in-progress"><i class="fa fa-circle"></i></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 01:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 02:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 03:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 04:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 05:00 بعد از ظهر</div>
+													<div class="info-title">-</div>
+													<div class="info-desc"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 06:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 07:00 بعد از ظهر</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 08:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 09:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+											<div class="booking">
+												<div class="time">ساعت 10:00 شب</div>
+												<div class="info">-</div>
+												<div class="status"></div>
+											</div>
+										</div>
+									</div>
+								</a>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- END pos-content -->
+			</div>
+			<!-- END pos -->
+		</div>
+		<!-- END #content -->
+		
+		<!-- BEGIN theme-panel -->
+		<div class="theme-panel">
+			<a href="javascript:;" data-toggle="theme-panel-expand" class="theme-collapse-btn"><i class="fa fa-cog"></i></a>
+			<div class="theme-panel-content" data-scrollbar="true" data-height="100%">
+				<h5>تنظیمات برنامه</h5>
+				
+				<!-- BEGIN theme-list -->
+				<div class="theme-list">
+					<div class="theme-list-item"><a href="javascript:;" class="theme-list-link bg-red" data-theme-class="theme-red" data-toggle="theme-selector" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-container="body" data-bs-title="قرمز">&nbsp;</a></div>
+					<div class="theme-list-item"><a href="javascript:;" class="theme-list-link bg-pink" data-theme-class="theme-pink" data-toggle="theme-selector" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-container="body" data-bs-title="صورتی">&nbsp;</a></div>
+					<div class="theme-list-item"><a href="javascript:;" class="theme-list-link bg-orange" data-theme-class="theme-orange" data-toggle="theme-selector" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-container="body" data-bs-title="نارنجی">&nbsp;</a></div>
+					<div class="theme-list-item"><a href="javascript:;" class="theme-list-link bg-yellow" data-theme-class="theme-yellow" data-toggle="theme-selector" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-container="body" data-bs-title="زرد">&nbsp;</a></div>
+					<div class="theme-list-item"><a href="javascript:;" class="theme-list-link bg-lime" data-theme-class="theme-lime" data-toggle="theme-selector" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-container="body" data-bs-title="آهک">&nbsp;</a></div>
+					<div class="theme-list-item"><a href="javascript:;" class="theme-list-link bg-green" data-theme-class="theme-green" data-toggle="theme-selector" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-container="body" data-bs-title="سبز">&nbsp;</a></div>
+					<div class="theme-list-item active"><a href="javascript:;" class="theme-list-link bg-teal" data-theme-class="" data-toggle="theme-selector" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-container="body" data-bs-title="پیش فرض">&nbsp;</a></div>
+					<div class="theme-list-item"><a href="javascript:;" class="theme-list-link bg-cyan" data-theme-class="theme-cyan" data-toggle="theme-selector" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-container="body" data-bs-title="فیروزه ای">&nbsp;</a></div>
+					<div class="theme-list-item"><a href="javascript:;" class="theme-list-link bg-blue" data-theme-class="theme-blue" data-toggle="theme-selector" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-container="body" data-bs-title="آبی">&nbsp;</a></div>
+					<div class="theme-list-item"><a href="javascript:;" class="theme-list-link bg-purple" data-theme-class="theme-purple" data-toggle="theme-selector" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-container="body" data-bs-title="بنفش">&nbsp;</a></div>
+					<div class="theme-list-item"><a href="javascript:;" class="theme-list-link bg-indigo" data-theme-class="theme-indigo" data-toggle="theme-selector" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-container="body" data-bs-title="نیل">&nbsp;</a></div>
+					<div class="theme-list-item"><a href="javascript:;" class="theme-list-link bg-black" data-theme-class="theme-gray-600" data-toggle="theme-selector" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-container="body" data-bs-title="مشکی">&nbsp;</a></div>
+				</div>
+				<!-- END theme-list -->
+				
+				<div class="theme-panel-divider"></div>
+				
+				<div class="row mt-10px">
+					<div class="col-8 control-label text-body fw-bold">
+						<div>حالت تاریک <span class="badge bg-primary ms-1 py-2px position-relative" style="top: -1px;">جدید</span></div>
+						<div class="lh-14">
+							<small class="text-body opacity-50">
+								ظاهر را طوری تنظیم کنید که تابش خیره کننده را کاهش داده و به چشمان خود استراحت دهید.
+							</small>
+						</div>
+					</div>
+					<div class="col-4 d-flex">
+						<div class="form-check form-switch ms-auto mb-0">
+							<input type="checkbox" class="form-check-input" name="app-theme-dark-mode" id="appThemeDarkMode" value="1" />
+							<label class="form-check-label" for="appThemeDarkMode">&nbsp;</label>
+						</div>
+					</div>
+				</div>
+				
+				<div class="theme-panel-divider"></div>
+				
+				<!-- BEGIN theme-switch -->
+				<div class="row mt-10px align-items-center">
+					<div class="col-8 control-label text-body fw-bold">هدر ثابت شد</div>
+					<div class="col-4 d-flex">
+						<div class="form-check form-switch ms-auto mb-0">
+							<input type="checkbox" class="form-check-input" name="app-header-fixed" id="appHeaderFixed" value="1" checked />
+							<label class="form-check-label" for="appHeaderFixed">&nbsp;</label>
+						</div>
+					</div>
+				</div>
+				<div class="row mt-10px align-items-center">
+					<div class="col-8 control-label text-body fw-bold">هدر معکوس</div>
+					<div class="col-4 d-flex">
+						<div class="form-check form-switch ms-auto mb-0">
+							<input type="checkbox" class="form-check-input" name="app-header-inverse" id="appHeaderInverse" value="1" />
+							<label class="form-check-label" for="appHeaderInverse">&nbsp;</label>
+						</div>
+					</div>
+				</div>
+				<div class="row mt-10px align-items-center">
+					<div class="col-8 control-label text-body fw-bold">نوار کناری ثابت شد</div>
+					<div class="col-4 d-flex">
+						<div class="form-check form-switch ms-auto mb-0">
+							<input type="checkbox" class="form-check-input" name="app-sidebar-fixed" id="appSidebarFixed" value="1" checked />
+							<label class="form-check-label" for="appSidebarFixed">&nbsp;</label>
+						</div>
+					</div>
+				</div>
+				<div class="row mt-10px align-items-center">
+					<div class="col-8 control-label text-body fw-bold">شبکه نوار کناری</div>
+					<div class="col-4 d-flex">
+						<div class="form-check form-switch ms-auto mb-0">
+							<input type="checkbox" class="form-check-input" name="app-sidebar-grid" id="appSidebarGrid" value="1" />
+							<label class="form-check-label" for="appSidebarGrid">&nbsp;</label>
+						</div>
+					</div>
+				</div>
+				<div class="row mt-10px align-items-center">
+					<div class="col-8 control-label text-body fw-bold">گرادیان فعال شد</div>
+					<div class="col-4 d-flex">
+						<div class="form-check form-switch ms-auto mb-0">
+							<input type="checkbox" class="form-check-input" name="app-gradient-enabled" id="appGradientEnabled" value="1" />
+							<label class="form-check-label" for="appGradientEnabled">&nbsp;</label>
+						</div>
+					</div>
+				</div>
+				<!-- END theme-switch -->
+				
+				<div class="theme-panel-divider"></div>
+				
+				<h5>طراحی مدیریت (6)</h5>
+				<!-- BEGIN theme-version -->
+				<div class="theme-version">
+					<div class="theme-version-item">
+						<a href="https://seantheme.com/color-admin/admin/html/" class="theme-version-link active">
+							<span style="background-image: url(../assets/img/theme/default.jpg);" class="theme-version-cover"></span>
+						</a>
+					</div>
+					<div class="theme-version-item">
+						<a href="https://seantheme.com/color-admin/admin/transparent/" class="theme-version-link">
+							<span style="background-image: url(../assets/img/theme/transparent.jpg);" class="theme-version-cover"></span>
+						</a>
+					</div>
+					<div class="theme-version-item">
+						<a href="https://seantheme.com/color-admin/admin/apple/" class="theme-version-link">
+							<span style="background-image: url(../assets/img/theme/apple.jpg);" class="theme-version-cover"></span>
+						</a>
+					</div>
+					<div class="theme-version-item">
+						<a href="https://seantheme.com/color-admin/admin/material/" class="theme-version-link">
+							<span style="background-image: url(../assets/img/theme/material.jpg);" class="theme-version-cover"></span>
+						</a>
+					</div>
+					<div class="theme-version-item">
+						<a href="https://seantheme.com/color-admin/admin/facebook/" class="theme-version-link">
+							<span style="background-image: url(../assets/img/theme/facebook.jpg);" class="theme-version-cover"></span>
+						</a>
+					</div>
+					<div class="theme-version-item">
+						<a href="https://seantheme.com/color-admin/admin/google/" class="theme-version-link">
+							<span style="background-image: url(../assets/img/theme/google.jpg);" class="theme-version-cover"></span>
+						</a>
+					</div>
+				</div>
+				<!-- END theme-version -->
+				
+				<div class="theme-panel-divider"></div>
+				
+				<h5>زبان نسخه (9)</h5>
+				<!-- BEGIN theme-version -->
+				<div class="theme-version">
+					<div class="theme-version-item">
+						<a href="https://seantheme.com/color-admin/admin/html/" class="theme-version-link active">
+							<span style="background-image: url(../assets/img/version/html.jpg);" class="theme-version-cover"></span>
+						</a>
+					</div>
+					<div class="theme-version-item">
+						<a href="https://seantheme.com/color-admin/admin/ajax/" class="theme-version-link">
+							<span style="background-image: url(../assets/img/version/ajax.jpg);" class="theme-version-cover"></span>
+						</a>
+					</div>
+					<div class="theme-version-item">
+						<a href="https://seantheme.com/color-admin/admin/angularjs/" class="theme-version-link">
+							<span style="background-image: url(../assets/img/version/angular1x.jpg);" class="theme-version-cover"></span>
+						</a>
+					</div>
+					<div class="theme-version-item">
+						<a href="https://seantheme.com/color-admin/admin/angularjs18/" class="theme-version-link">
+							<span style="background-image: url(../assets/img/version/angular10x.jpg);" class="theme-version-cover"></span>
+						</a>
+					</div>
+					<div class="theme-version-item">
+						<a href="https://seantheme.com/color-admin/admin/svelte/" class="theme-version-link">
+							<span style="background-image: url(../assets/img/version/svelte.jpg);" class="theme-version-cover"></span>
+						</a>
+					</div>
+					<div class="theme-version-item">
+						<a href="javascript:alert('Laravel 11 Version only available in downloaded version.');" class="theme-version-link">
+							<span style="background-image: url(../assets/img/version/laravel.jpg);" class="theme-version-cover"></span>
+						</a>
+					</div>
+					<div class="theme-version-item">
+						<a href="javascript:alert('Django Version only available in downloaded version.');" class="theme-version-link">
+							<span style="background-image: url(../assets/img/version/django.jpg);" class="theme-version-cover"></span>
+						</a>
+					</div>
+					<div class="theme-version-item">
+						<a href="https://seantheme.com/color-admin/admin/vue3/" class="theme-version-link">
+							<span style="background-image: url(../assets/img/version/vuejs.jpg);" class="theme-version-cover"></span>
+						</a>
+					</div>
+					<div class="theme-version-item">
+						<a href="https://seantheme.com/color-admin/admin/react/" class="theme-version-link">
+							<span style="background-image: url(../assets/img/version/reactjs.jpg);" class="theme-version-cover"></span>
+						</a>
+					</div>
+					<div class="theme-version-item">
+						<a href="javascript:alert('.NET Core 8.0 MVC Version only available in downloaded version.');" class="theme-version-link">
+							<span style="background-image: url(../assets/img/version/dotnet.jpg);" class="theme-version-cover"></span>
+						</a>
+					</div>
+				</div>
+				<!-- END theme-version -->
+				
+				<div class="theme-panel-divider"></div>
+				
+				<h5>طراحی پیشانی (5)</h5>
+				<!-- BEGIN theme-version -->
+				<div class="theme-version">
+					<div class="theme-version-item">
+						<a href="https://seantheme.com/color-admin/frontend/one-page-parallax/" class="theme-version-link">
+							<span style="background-image: url(../assets/img/theme/one-page-parallax.jpg);" class="theme-version-cover"></span>
+						</a>
+					</div>
+					<div class="theme-version-item">
+						<a href="https://seantheme.com/color-admin/frontend/e-commerce/" class="theme-version-link">
+							<span style="background-image: url(../assets/img/theme/e-commerce.jpg);" class="theme-version-cover"></span>
+						</a>
+					</div>
+					<div class="theme-version-item">
+						<a href="https://seantheme.com/color-admin/frontend/blog/" class="theme-version-link">
+							<span style="background-image: url(../assets/img/theme/blog.jpg);" class="theme-version-cover"></span>
+						</a>
+					</div>
+					<div class="theme-version-item">
+						<a href="https://seantheme.com/color-admin/frontend/forum/" class="theme-version-link">
+							<span style="background-image: url(../assets/img/theme/forum.jpg);" class="theme-version-cover"></span>
+						</a>
+					</div>
+					<div class="theme-version-item">
+						<a href="https://seantheme.com/color-admin/frontend/corporate/" class="theme-version-link">
+							<span style="background-image: url(../assets/img/theme/corporate.jpg);" class="theme-version-cover"></span>
+						</a>
+					</div>
+				</div>
+				<!-- END theme-version -->
+				
+				<div class="theme-panel-divider"></div>
+				
+				<a href="https://seantheme.com/color-admin/documentation/" class="btn btn-dark d-block w-100 rounded-pill mb-10px" target="_blank"><b>مستندات</b></a>
+				<a href="javascript:;" class="btn btn-default d-block w-100 rounded-pill" data-toggle="reset-local-storage"><b>ذخیره‌سازی محلی را بازنشانی کنید</b></a>
+			</div>
+		</div>
+		<!-- END theme-panel -->
+		<!-- BEGIN scroll-top-btn -->
+		<a href="javascript:;" class="btn btn-icon btn-circle btn-theme btn-scroll-to-top" data-toggle="scroll-to-top"><i class="fa fa-angle-up"></i></a>
+		<!-- END scroll-top-btn -->
+	</div>
+	<!-- END #app -->
+	
+	<!-- BEGIN #modalPosBooking -->
+	<div class="modal modal-pos-booking fade" id="modalPosBooking">
+		<div class="modal-dialog modal-lg">
+			<div class="modal-content border-0">
+				<div class="modal-body">
+					<div class="d-flex align-items-center mb-3">
+						<h4 class="modal-title d-flex align-items-center"><i class="fa fa-bowl-rice fs-2 me-2 my-n1"></i> جدول 01 <small class="fs-13px fw-bold ms-2">حداکثر 4 نفر</small></h4>
+						<a href="#" data-bs-dismiss="modal" class="ms-auto btn-close"></a>
+					</div>
+					<div class="row">
+						<div class="col-lg-6">
+							<div class="form-group mb-2">
+								<div class="input-group">
+									<div class="input-group-text fw-bold">ساعت 08:00 صبح</div>
+									<input type="text" class="form-control" placeholder="" />
+								</div>
+							</div>
+							<div class="form-group mb-2">
+								<div class="input-group">
+									<div class="input-group-text fw-bold">ساعت 09:00 صبح</div>
+									<input type="text" class="form-control" placeholder="" value="Reserved by Sean" />
+								</div>
+							</div>
+							<div class="form-group mb-2">
+								<div class="input-group">
+									<div class="input-group-text fw-bold">ساعت 10:00 صبح</div>
+									<input type="text" class="form-control" placeholder="" />
+								</div>
+							</div>
+							<div class="form-group mb-2">
+								<div class="input-group">
+									<div class="input-group-text fw-bold">ساعت 11:00 صبح</div>
+									<input type="text" class="form-control" placeholder="" />
+								</div>
+							</div>
+							<div class="form-group mb-2">
+								<div class="input-group">
+									<div class="input-group-text fw-bold">ساعت 12:00 شب</div>
+									<input type="text" class="form-control" placeholder="" />
+								</div>
+							</div>
+							<div class="form-group mb-2">
+								<div class="input-group">
+									<div class="input-group-text fw-bold">ساعت 01:00 بعد از ظهر</div>
+									<input type="text" class="form-control" placeholder="" />
+								</div>
+							</div>
+							<div class="form-group mb-2">
+								<div class="input-group">
+									<div class="input-group-text fw-bold">ساعت 02:00 بعد از ظهر</div>
+									<input type="text" class="form-control" placeholder="" />
+								</div>
+							</div>
+							<div class="form-group mb-2">
+								<div class="input-group">
+									<div class="input-group-text fw-bold">ساعت 03:00 بعد از ظهر</div>
+									<input type="text" class="form-control" placeholder="" />
+								</div>
+							</div>
+						</div>
+						<div class="col-lg-6">
+							<div class="form-group mb-2">
+								<div class="input-group">
+									<div class="input-group-text fw-bold">ساعت 04:00 بعد از ظهر</div>
+									<input type="text" class="form-control" placeholder="" />
+								</div>
+							</div>
+							<div class="form-group mb-2">
+								<div class="input-group">
+									<div class="input-group-text fw-bold">ساعت 05:00 بعد از ظهر</div>
+									<input type="text" class="form-control" placeholder="" value="Reserved by Irene Wong (4pax)" />
+								</div>
+							</div>
+							<div class="form-group mb-2">
+								<div class="input-group">
+									<div class="input-group-text fw-bold">ساعت 06:00 بعد از ظهر</div>
+									<input type="text" class="form-control" placeholder="" value="Reserved by Irene Wong (4pax)" />
+								</div>
+							</div>
+							<div class="form-group mb-2">
+								<div class="input-group">
+									<div class="input-group-text fw-bold">ساعت 07:00 بعد از ظهر</div>
+									<input type="text" class="form-control" placeholder="" />
+								</div>
+							</div>
+							<div class="form-group mb-2">
+								<div class="input-group">
+									<div class="input-group-text fw-bold">ساعت 08:00 شب</div>
+									<input type="text" class="form-control" placeholder="" />
+								</div>
+							</div>
+							<div class="form-group mb-2">
+								<div class="input-group">
+									<div class="input-group-text fw-bold">ساعت 09:00 شب</div>
+									<input type="text" class="form-control" placeholder="" />
+								</div>
+							</div>
+							<div class="form-group mb-2">
+								<div class="input-group">
+									<div class="input-group-text fw-bold">ساعت 10:00 شب</div>
+									<input type="text" class="form-control" placeholder="" />
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<a href="#" class="btn btn-default w-100px" data-bs-dismiss="modal">لغو کنید</a>
+					<button type="submit" class="btn btn-success w-100px">کتاب</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- END #modalPosBooking -->
+	
+	<!-- ================== BEGIN core-js ================== -->
+	<script src="../assets/js/vendor.min.js"></script>
+	<script src="../assets/js/app.min.js"></script>
+	<!-- ================== END core-js ================== -->
+	
+	<!-- ================== BEGIN page-js ================== -->
+	<script src="../assets/js/demo/pos-header.demo.js"></script>
+	<script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>
+	<!-- ================== END page-js ================== -->
+</body>
+</html>

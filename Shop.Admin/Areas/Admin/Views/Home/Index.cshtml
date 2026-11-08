@@ -1,0 +1,42 @@
+@{
+    ViewData["Title"] = "پیشخوان کل";
+    ViewData["AreaTitle"] = "سامانهٔ مدیریت";
+}
+
+<div class="admin-page" data-admin-page="home">
+    @await Html.PartialAsync("_AdminPageIntro", ("پیشخوان کل", "دسترسی جداگانه به مدیریت فروشگاه و عملیات انبار."))
+    <div class="row g-3 g-xl-4">
+        <div class="col-xl-6">
+            <section class="panel panel-inverse h-100 admin-area-card" aria-labelledby="store-area-title">
+                <div class="panel-heading"><h2 class="panel-title" id="store-area-title"><i class="fa fa-store me-2" aria-hidden="true"></i>مدیریت فروشگاه</h2></div>
+                <div class="panel-body">
+                    <p class="text-muted">کاتالوگ و اجزای عملیاتی فروشگاه در یک حوزهٔ مستقل.</p>
+                    <div class="admin-shortcut-grid">
+                        <a asp-area="Store" asp-controller="Dashboard" asp-action="Index" data-admin-nav><i class="fa fa-gauge-high" aria-hidden="true"></i><span>نمای کلی فروشگاه</span></a>
+                        <a asp-area="Store" asp-controller="Catalog" asp-action="Products" data-admin-nav><i class="fa fa-box-open" aria-hidden="true"></i><span>محصولات</span></a>
+                        <a asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="orders" data-admin-nav><i class="fa fa-receipt" aria-hidden="true"></i><span>سفارش‌ها</span></a>
+                        <a asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="reviews" data-admin-nav><i class="fa fa-comments" aria-hidden="true"></i><span>بازخورد محصول</span></a>
+                    </div>
+                </div>
+            </section>
+        </div>
+        <div class="col-xl-6">
+            <section class="panel panel-inverse h-100 admin-area-card" aria-labelledby="warehouse-area-title">
+                <div class="panel-heading"><h2 class="panel-title" id="warehouse-area-title"><i class="fa fa-warehouse me-2" aria-hidden="true"></i>مدیریت انبار</h2></div>
+                <div class="panel-body">
+                    <p class="text-muted">موجودی و عملیات هر انبار در حوزه‌ای جدا از فروشگاه.</p>
+                    <div class="admin-shortcut-grid">
+                        <a asp-area="Warehouse" asp-controller="Dashboard" asp-action="Index" data-admin-nav><i class="fa fa-chart-pie" aria-hidden="true"></i><span>نمای کلی انبار</span></a>
+                        <a asp-area="Warehouse" asp-controller="Warehouses" asp-action="Index" data-admin-nav><i class="fa fa-building" aria-hidden="true"></i><span>انبارها</span></a>
+                        <a asp-area="Warehouse" asp-controller="Stock" asp-action="Index" data-admin-nav><i class="fa fa-boxes-stacked" aria-hidden="true"></i><span>موجودی کالا</span></a>
+                        <a asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="movements" data-admin-nav><i class="fa fa-arrows-rotate" aria-hidden="true"></i><span>گردش کالا</span></a>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+    <div class="alert alert-info mt-4 mb-0" role="note">
+        <i class="fa fa-circle-info me-1" aria-hidden="true"></i>
+        فهرست کالا، دسته‌ها، برندها، ویژگی‌ها، انبارها و موجودی از API و دیتابیس خوانده می‌شود؛ هیچ عدد نمایشی یا ذخیره‌سازی مرورگری در پیشخوان استفاده نمی‌شود.
+    </div>
+</div>

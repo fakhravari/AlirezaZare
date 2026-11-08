@@ -1,6 +1,6 @@
 # معماری فعلی پروژه
 
-این پروژه یک برنامهٔ ASP.NET Core MVC با رابط فارسی و RTL است. تنها برنامهٔ وب `Shop.sln`، [پروژهٔ Shop](../../Shop/Shop.csproj) با هدف `net10.0` است؛ solution همچنین یک پروژهٔ دادهٔ [Shop.Database](../../Shop.Data/Shop.Data.csproj) با فولدرهای Domain، Application و Infrastructure و پروژهٔ بررسی قرارداد [Shop.Contracts](../../tests/Shop.Contracts/Shop.Contracts.csproj) را دارد. مرز دقیق لایه‌های داده در [راهنمای دیتابیس](database.md) ثبت شده است.
+solution دو برنامهٔ ASP.NET Core MVC دارد: فروشگاه عمومی [Shop](../../Shop/Shop.csproj) و پنل مدیریتی [Shop.Admin](../../Shop.Admin/Shop.Admin.csproj)، هر دو با هدف `net10.0`. پنل به assembly دیتابیس [Shop.Database](../../Shop.Data/Shop.Data.csproj) با فولدرهای Domain، Application و Infrastructure ارجاع دارد. پروژهٔ قرارداد [Shop.Contracts](../../tests/Shop.Contracts/Shop.Contracts.csproj) برای بررسی قراردادهای C# است. مرز داده و وضعیت فعلی پنل در [راهنمای دیتابیس](database.md) و [راهنمای مدیریت](../admin/README.md) ثبت شده است.
 
 
 مرزهای قابل‌جایگزینی خواندن داده `ICatalogSource`، `IAccountDataSource` و `ICommerceOfferSource` هستند. وضعیت پیاده‌شده و شکاف‌های اتصال در [آمادگی backend](backend-readiness.md) ثبت شده است.
@@ -16,7 +16,7 @@ Program.cs / middleware / route
   → مرورگر: HNUI، کاتالوگ و rendererهای فروشگاه
 ```
 
-[Program.cs](../../Shop/Program.cs) MVC، encoding متن فارسی، تنظیمات SEO، فایل‌های استاتیک، routing و `AddShopDatabase` را تنظیم می‌کند. لایهٔ Infrastructure با EF Core به SQL Server وصل می‌شود؛ APIهای خواندنی انبار از repository در Application می‌خوانند. احراز هویت مدیریتی و API ثبت سفارش هنوز ثبت نشده‌اند.
+[Shop/Program.cs](../../Shop/Program.cs) فروشگاه و [Shop.Admin/Program.cs](../../Shop.Admin/Program.cs) پنل را پیکربندی می‌کنند. پنل از پوستهٔ RTL قالب Color Admin استفاده می‌کند، مرور داخلی را با AJAX انجام می‌دهد و پاسخ‌ها را بدون cache می‌فرستد. APIهای خواندنی کاتالوگ و انبار از repositoryهای `Shop.Database` می‌خوانند. احراز هویت مدیر، API سفارش‌ها و عملیات نوشتن مدیریتی هنوز پیاده‌سازی نشده‌اند.
 
 [PageController](../../Shop/Controllers/PageController.cs) فقط View متناظر یا `ViewName` تعیین‌شده در مدل را برمی‌گرداند. نام `PageAsync` به معنی دسترسی async به دیتابیس نیست؛ پیاده‌سازی فعلی از `Task.FromResult` استفاده می‌کند.
 
@@ -24,7 +24,12 @@ Program.cs / middleware / route
 
 | مسیر | مسئولیت |
 |---|---|
-| `Shop/Program.cs` | پیکربندی pipeline و route عمومی MVC |
+| `Shop/Program.cs` | پیکربندی pipeline و route فروشگاه عمومی |
+| `Shop.Admin/Program.cs` | پیکربندی routeهای پنل؛ سرویس دیتابیس را در صورت وجود connection string ثبت می‌کند |
+| `Shop.Admin/Areas/Admin/` | پیشخوان کل و ورود به حوزه‌های مدیریت |
+| `Shop.Admin/Areas/Store/` | پیشخوان فروشگاه، کاتالوگ خواندنی و دامنه‌های مدیریتی فروشگاه |
+| `Shop.Admin/Areas/Warehouse/` | پیشخوان، فهرست انبارها و موجودی خواندنی و دامنه‌های عملیات انبار |
+| `Shop.Admin/wwwroot/color_admin/` | قالب Color Admin؛ برنامه فقط assetهای پایهٔ پوستهٔ RTL را بارگذاری می‌کند |
 | `Shop/Controllers/` | مسیرها و آماده‌سازی مدل‌های صفحه |
 | `Shop/Controllers/Api/` | endpointهای HTTP؛ فقط از سرویس‌های Application استفاده می‌کنند |
 | `Shop.Data/Domain/` | موجودیت‌های دامنهٔ مستقل از دیتابیس |

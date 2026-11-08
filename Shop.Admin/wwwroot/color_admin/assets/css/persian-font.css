@@ -1,0 +1,25 @@
+@font-face {
+  font-family: 'IRANSansX';
+  src: url('../webfonts/IRANSansX-Regular.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'IRANSansX';
+  src: url('../webfonts/IRANSansX-Medium.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+}
+
+:root {
+  --bs-font-sans-serif: 'IRANSansX', sans-serif;
+  --bs-body-font-family: 'IRANSansX', sans-serif;
+}
+
+body, button, input, select, textarea,
+h1, h2, h3, h4, h5, h6, p, td, th, label {
+  font-family: 'IRANSansX', sans-serif !important;
+}

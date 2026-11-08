@@ -1,0 +1,1499 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+	<meta charset="utf-8" />
+	<title>مدیریت رنگ | فرم X-Editable Page</title>
+	<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport" />
+	<meta content="" name="description" />
+	<meta content="" name="author" />
+	
+	<!-- ================== BEGIN core-css ================== -->
+	<link href="../assets/css/vendor.min.css" rel="stylesheet" />
+	<link href="../assets/css/default/app-rtl.min.css" rel="stylesheet" />
+	<!-- ================== END core-css ================== -->
+	
+	<!-- ================== BEGIN page-css ================== -->
+	<link href="../assets/plugins/x-editable-bs4/dist/bootstrap4-editable/css/bootstrap-editable.css" rel="stylesheet" />
+	<link href="../assets/plugins/x-editable-bs4/dist/inputs-ext/address/address.css" rel="stylesheet" />
+	<link href="../assets/plugins/x-editable-bs4/dist/inputs-ext/typeaheadjs/lib/typeahead.js-bootstrap.css" rel="stylesheet" />
+	<link href="../assets/plugins/bootstrap-datetime-picker/css/bootstrap-datetimepicker.min.css" rel="stylesheet" />
+	<link href="../assets/plugins/bootstrap3-wysihtml5-bower/dist/bootstrap3-wysihtml5.min.css" rel="stylesheet" />
+	<link href="../assets/plugins/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css" rel="stylesheet" />
+	<link href="../assets/plugins/bootstrap-datepicker/dist/css/bootstrap-datepicker3.min.css" rel="stylesheet" />
+	<link href="../assets/plugins/select2/dist/css/select2.min.css" rel="stylesheet" />
+	<!-- ================== END page-css ================== -->
+	<link href="../assets/css/persian-font.css" rel="stylesheet" />
+</head>
+<body>
+	<!-- BEGIN #loader -->
+	<div id="loader" class="app-loader">
+		<span class="spinner"></span>
+	</div>
+	<!-- END #loader -->
+
+	<!-- BEGIN #app -->
+	<div id="app" class="app app-header-fixed app-sidebar-fixed">
+		<!-- BEGIN #header -->
+		<div id="header" class="app-header">
+			<!-- BEGIN navbar-header -->
+			<div class="navbar-header">
+				<a href="index.html" class="navbar-brand"><span class="navbar-logo"></span> <b class="me-3px">رنگ</b> مدیر</a>
+				<button type="button" class="navbar-mobile-toggler" data-toggle="app-sidebar-mobile">
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+				</button>
+			</div>
+			<!-- END navbar-header -->
+			<!-- BEGIN header-nav -->
+			<div class="navbar-nav">
+				<div class="navbar-item navbar-form">
+					<form action="" method="POST" name="search">
+						<div class="form-group">
+							<input type="text" class="form-control" placeholder="کلمه کلیدی را وارد کنید" />
+							<button type="submit" class="btn btn-search"><i class="fa fa-search"></i></button>
+						</div>
+					</form>
+				</div>
+				<div class="navbar-item dropdown">
+					<a href="#" data-bs-toggle="dropdown" class="navbar-link dropdown-toggle icon">
+						<i class="fa fa-bell"></i>
+						<span class="badge">5</span>
+					</a>
+					<div class="dropdown-menu media-list dropdown-menu-end">
+						<div class="dropdown-header">اطلاعیه ها (5)</div>
+						<a href="javascript:;" class="dropdown-item media">
+							<div class="media-left">
+								<i class="fa fa-bug media-object bg-gray-500"></i>
+							</div>
+							<div class="media-body">
+								<h6 class="media-heading">گزارش های خطای سرور <i class="fa fa-exclamation-circle text-danger"></i></h6>
+								<div class="text-muted fs-10px">3 دقیقه پیش</div>
+							</div>
+						</a>
+						<a href="javascript:;" class="dropdown-item media">
+							<div class="media-left">
+								<img src="../assets/img/user/user-1.jpg" class="media-object" alt="" />
+								<i class="fab fa-facebook-messenger text-blue media-object-icon"></i>
+							</div>
+							<div class="media-body">
+								<h6 class="media-heading">جان اسمیت</h6>
+								<p>Quisque pulvinar tellus sit amet sem scelerisque tincidunt.</p>
+								<div class="text-muted fs-10px">25 دقیقه پیش</div>
+							</div>
+						</a>
+						<a href="javascript:;" class="dropdown-item media">
+							<div class="media-left">
+								<img src="../assets/img/user/user-2.jpg" class="media-object" alt="" />
+								<i class="fab fa-facebook-messenger text-blue media-object-icon"></i>
+							</div>
+							<div class="media-body">
+								<h6 class="media-heading">اولیویا</h6>
+								<p>Quisque pulvinar tellus sit amet sem scelerisque tincidunt.</p>
+								<div class="text-muted fs-10px">35 دقیقه پیش</div>
+							</div>
+						</a>
+						<a href="javascript:;" class="dropdown-item media">
+							<div class="media-left">
+								<i class="fa fa-plus media-object bg-gray-500"></i>
+							</div>
+							<div class="media-body">
+								<h6 class="media-heading"> کاربر جدید ثبت نام کرد</h6>
+								<div class="text-muted fs-10px">1 ساعت پیش</div>
+							</div>
+						</a>
+						<a href="javascript:;" class="dropdown-item media">
+							<div class="media-left">
+								<i class="fa fa-envelope media-object bg-gray-500"></i>
+								<i class="fab fa-google text-warning media-object-icon fs-14px"></i>
+							</div>
+							<div class="media-body">
+								<h6 class="media-heading"> ایمیل جدید از جان</h6>
+								<div class="text-muted fs-10px">2 ساعت پیش</div>
+							</div>
+						</a>
+						<div class="dropdown-footer text-center">
+							<a href="javascript:;" class="text-decoration-none">مشاهده بیشتر</a>
+						</div>
+					</div>
+				</div>
+				
+				<div class="navbar-item navbar-user dropdown">
+					<a href="#" class="navbar-link dropdown-toggle d-flex align-items-center" data-bs-toggle="dropdown">
+						<img src="../assets/img/user/user-13.jpg" alt="" /> 
+						<span>
+							<span class="d-none d-md-inline">آدام شوارتز</span>
+							<b class="caret"></b>
+						</span>
+					</a>
+					<div class="dropdown-menu dropdown-menu-end me-1">
+						<a href="extra_profile.html" class="dropdown-item">ویرایش نمایه</a>
+						<a href="email_inbox.html" class="dropdown-item d-flex align-items-center">
+							صندوق ورودی
+							<span class="badge bg-danger rounded-pill ms-auto pb-4px">2</span> 
+						</a>
+						<a href="calendar.html" class="dropdown-item">تقویم</a>
+						<a href="extra_settings_page.html" class="dropdown-item">تنظیمات</a>
+						<div class="dropdown-divider"></div>
+						<a href="login.html" class="dropdown-item">از سیستم خارج شوید</a>
+					</div>
+				</div>
+			</div>
+			<!-- END header-nav -->
+		</div>
+		<!-- END #header -->
+	
+		<!-- BEGIN #sidebar -->
+		<div id="sidebar" class="app-sidebar" data-bs-theme="dark">
+			<!-- BEGIN scrollbar -->
+			<div class="app-sidebar-content" data-scrollbar="true" data-height="100%">
+				<!-- BEGIN menu -->
+				<div class="menu">
+					<div class="menu-profile">
+						<a href="javascript:;" class="menu-profile-link" data-toggle="app-sidebar-profile" data-target="#appSidebarProfileMenu">
+							<div class="menu-profile-cover with-shadow"></div>
+							<div class="menu-profile-image">
+								<img src="../assets/img/user/user-13.jpg" alt="" />
+							</div>
+							<div class="menu-profile-info">
+								<div class="d-flex align-items-center">
+									<div class="flex-grow-1">
+										شان نگو
+									</div>
+									<div class="menu-caret ms-auto"></div>
+								</div>
+								<small>توسعه دهنده Frontend</small>
+							</div>
+						</a>
+					</div>
+					<div id="appSidebarProfileMenu" class="collapse">
+						<div class="menu-item pt-5px">
+							<a href="javascript:;" class="menu-link">
+								<div class="menu-icon"><i class="fa fa-cog"></i></div>
+								<div class="menu-text">تنظیمات</div>
+							</a>
+						</div>
+						<div class="menu-item">
+							<a href="javascript:;" class="menu-link">
+								<div class="menu-icon"><i class="fa fa-pencil-alt"></i></div>
+								<div class="menu-text"> ارسال بازخورد</div>
+							</a>
+						</div>
+						<div class="menu-item pb-5px">
+							<a href="javascript:;" class="menu-link">
+								<div class="menu-icon"><i class="fa fa-question-circle"></i></div>
+								<div class="menu-text"> کمک می کند</div>
+							</a>
+						</div>
+						<div class="menu-divider m-0"></div>
+					</div>
+					<div class="menu-header">ناوبری</div>
+					<div class="menu-item has-sub">
+						<a href="javascript:;" class="menu-link">
+							<div class="menu-icon">
+								<i class="fa fa-sitemap"></i>							</div>
+							<div class="menu-text">داشبورد</div>
+							<div class="menu-caret"></div>
+						</a>
+						<div class="menu-submenu">
+							<div class="menu-item">
+								<a href="index.html" class="menu-link"><div class="menu-text">داشبورد v1</div></a>
+							</div>
+							<div class="menu-item">
+								<a href="index_v2.html" class="menu-link"><div class="menu-text">داشبورد نسخه 2</div></a>
+							</div>
+							<div class="menu-item">
+								<a href="index_v3.html" class="menu-link"><div class="menu-text">داشبورد نسخه 3</div></a>
+							</div>
+						</div>
+					</div>
+					<div class="menu-item has-sub">
+						<a href="javascript:;" class="menu-link">
+							<div class="menu-icon">
+								<i class="fa fa-hdd"></i>
+							</div>
+							<div class="menu-text">ایمیل</div>
+							<div class="menu-badge">10</div>
+						</a>
+						<div class="menu-submenu">
+							<div class="menu-item">
+								<a href="email_inbox.html" class="menu-link">
+									<div class="menu-text">صندوق ورودی</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="email_compose.html" class="menu-link">
+									<div class="menu-text">نوشتن</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="email_detail.html" class="menu-link">
+									<div class="menu-text">جزئیات</div>
+								</a>
+							</div>
+						</div>
+					</div>
+					<div class="menu-item">
+						<a href="widget.html" class="menu-link">
+							<div class="menu-icon">
+								<i class="fab fa-simplybuilt"></i>
+							</div>
+							<div class="menu-text">ابزارک ها <span class="menu-label">جدید</span></div>
+						</a>
+					</div>
+					<div class="menu-item has-sub">
+						<a href="javascript:;" class="menu-link">
+							<div class="menu-icon">
+								<i class="fa fa-gem"></i>
+							</div>
+							<div class="menu-text">عناصر رابط کاربری <span class="menu-label">جدید</span></div> 
+							<div class="menu-caret"></div>
+						</a>
+						<div class="menu-submenu">
+							<div class="menu-item">
+								<a href="ui_general.html" class="menu-link">
+									<div class="menu-text">ژنرال <i class="fa fa-paper-plane text-theme"></i></div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="ui_typography.html" class="menu-link">
+									<div class="menu-text">تایپوگرافی</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="ui_tabs_accordions.html" class="menu-link">
+									<div class="menu-text">زبانه ها و آکاردئون ها</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="ui_unlimited_tabs.html" class="menu-link">
+									<div class="menu-text">زبانه های Nav نامحدود</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="ui_modal_notification.html" class="menu-link">
+									<div class="menu-text">مدال و اعلان <i class="fa fa-paper-plane text-theme"></i></div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="ui_widget_boxes.html" class="menu-link">
+									<div class="menu-text">جعبه های ویجت</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="ui_media_object.html" class="menu-link">
+									<div class="menu-text">شی رسانه</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="ui_buttons.html" class="menu-link">
+									<div class="menu-text">دکمه ها <i class="fa fa-paper-plane text-theme"></i></div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="ui_icon_fontawesome.html" class="menu-link">
+									<div class="menu-text">FontAwesome</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="ui_icon_bootstrap.html" class="menu-link">
+									<div class="menu-text">آیکون های بوت استرپ <i class="fa fa-paper-plane text-theme"></i></div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="ui_icon_duotone.html" class="menu-link">
+									<div class="menu-text">آیکون های دوتن <i class="fa fa-paper-plane text-theme"></i></div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="ui_icon_simple_line_icons.html" class="menu-link">
+									<div class="menu-text">آیکون های خط ساده</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="ui_icon_ionicons.html" class="menu-link">
+									<div class="menu-text">Ionicons</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="ui_tree.html" class="menu-link">
+									<div class="menu-text">نمای درخت</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="ui_language_bar_icon.html" class="menu-link">
+									<div class="menu-text">نوار زبان و نماد</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="ui_social_buttons.html" class="menu-link">
+									<div class="menu-text">دکمه های اجتماعی</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="ui_tour.html" class="menu-link">
+									<div class="menu-text">مقدمه JS</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="ui_offcanvas_toasts.html" class="menu-link">
+									<div class="menu-text">آف بوم و نان تست <i class="fa fa-paper-plane text-theme"></i></div>
+								</a>
+							</div>
+						</div>
+					</div>
+					<div class="menu-item ">
+						<a href="bootstrap_5.html" class="menu-link">
+							<div class="menu-icon-img">
+								<img src="../assets/img/logo/logo-bs5.png" alt="" />
+							</div>
+							<div class="menu-text">بوت استرپ 5 <span class="menu-label">جدید</span></div> 
+						</a>
+					</div>
+					<div class="menu-item has-sub active">
+						<a href="javascript:;" class="menu-link">
+							<div class="menu-icon">
+								<i class="fa fa-list-ol"></i>
+							</div>
+							<div class="menu-text">موارد فرم <span class="menu-label">جدید</span></div>
+							<div class="menu-caret"></div>
+						</a>
+						<div class="menu-submenu">
+							<div class="menu-item">
+								<a href="form_elements.html" class="menu-link">
+									<div class="menu-text">عناصر فرم <i class="fa fa-paper-plane text-theme"></i></div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="form_plugins.html" class="menu-link">
+									<div class="menu-text">پلاگین های فرم <i class="fa fa-paper-plane text-theme"></i></div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="form_slider_switcher.html" class="menu-link">
+									<div class="menu-text">اسلایدر فرم + سوئیچر</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="form_validation.html" class="menu-link">
+									<div class="menu-text">اعتبار سنجی فرم</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="form_wizards.html" class="menu-link">
+									<div class="menu-text">جادوگران <i class="fa fa-paper-plane text-theme"></i></div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="form_wysiwyg.html" class="menu-link">
+									<div class="menu-text">WYSIWYG</div>
+								</a>
+							</div>
+							<div class="menu-item active">
+								<a href="form_editable.html" class="menu-link">
+									<div class="menu-text">X-Editable</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="form_multiple_upload.html" class="menu-link">
+									<div class="menu-text">آپلود چند فایل</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="form_summernote.html" class="menu-link">
+									<div class="menu-text">یادداشت تابستانی</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="form_dropzone.html" class="menu-link">
+									<div class="menu-text">دراپ زون</div>
+								</a>
+							</div>
+						</div>
+					</div>
+					<div class="menu-item has-sub">
+						<a href="javascript:;" class="menu-link">
+							<div class="menu-icon">
+								<i class="fa fa-table"></i>
+							</div>
+							<div class="menu-text">جداول</div>
+							<div class="menu-caret"></div>
+						</a>
+						<div class="menu-submenu">
+							<div class="menu-item">
+								<a href="table_basic.html" class="menu-link">
+									<div class="menu-text">جداول پایه</div>
+								</a>
+							</div>
+							<div class="menu-item has-sub">
+								<a href="javascript:;" class="menu-link">
+									<div class="menu-text">جداول مدیریت شده</div>
+									<div class="menu-caret"></div>
+								</a>
+								<div class="menu-submenu">
+									<div class="menu-item">
+										<a href="table_manage.html" class="menu-link">
+											<div class="menu-text">پیش فرض</div>
+										</a>
+									</div>
+									<div class="menu-item">
+										<a href="table_manage_buttons.html" class="menu-link">
+											<div class="menu-text">دکمه ها</div>
+										</a>
+									</div>
+									<div class="menu-item">
+										<a href="table_manage_colreorder.html" class="menu-link">
+											<div class="menu-text">ColReorder</div>
+										</a>
+									</div>
+									<div class="menu-item">
+										<a href="table_manage_fixed_columns.html" class="menu-link">
+											<div class="menu-text">ستون ثابت</div>
+										</a>
+									</div>
+									<div class="menu-item">
+										<a href="table_manage_fixed_header.html" class="menu-link">
+											<div class="menu-text">هدر ثابت</div>
+										</a>
+									</div>
+									<div class="menu-item">
+										<a href="table_manage_keytable.html" class="menu-link">
+											<div class="menu-text">جدول کلید</div>
+										</a>
+									</div>
+									<div class="menu-item">
+										<a href="table_manage_responsive.html" class="menu-link">
+											<div class="menu-text">پاسخگو</div>
+										</a>
+									</div>
+									<div class="menu-item">
+										<a href="table_manage_rowreorder.html" class="menu-link">
+											<div class="menu-text">RowReorder</div>
+										</a>
+									</div>
+									<div class="menu-item">
+										<a href="table_manage_scroller.html" class="menu-link">
+											<div class="menu-text">اسکرولر</div>
+										</a>
+									</div>
+									<div class="menu-item">
+										<a href="table_manage_select.html" class="menu-link">
+											<div class="menu-text">انتخاب کنید</div>
+										</a>
+									</div>
+									<div class="menu-item">
+										<a href="table_manage_combine.html" class="menu-link">
+											<div class="menu-text">ترکیب پسوند</div>
+										</a>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="menu-item has-sub">
+						<a href="javascript:;" class="menu-link">
+							<div class="menu-icon">
+								<i class="fa fa-cash-register"></i>
+							</div>
+							<div class="menu-text">سیستم POS <span class="menu-label">جدید</span></div> 
+							<div class="menu-caret"></div>
+						</a>
+						<div class="menu-submenu">
+							<div class="menu-item">
+								<a href="pos_customer_order.html" target="_blank" class="menu-link">
+									<div class="menu-text">سفارش مشتری</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="pos_kitchen_order.html" target="_blank" class="menu-link">
+									<div class="menu-text">سفارش آشپزخانه</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="pos_counter_checkout.html" target="_blank" class="menu-link">
+									<div class="menu-text">پیشخوان پرداخت</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="pos_table_booking.html" target="_blank" class="menu-link">
+									<div class="menu-text">رزرو میز</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="pos_menu_stock.html" target="_blank" class="menu-link">
+									<div class="menu-text">سهام منو</div>
+								</a>
+							</div>
+						</div>
+					</div>
+					<div class="menu-item has-sub">
+						<a href="javascript:;" class="menu-link">
+							<div class="menu-icon">
+								<i class="fa fa-star"></i>
+							</div>
+							<div class="menu-text">قسمت جلویی <span class="menu-label">جدید</span></div>
+							<div class="menu-caret"></div>
+						</a>
+						<div class="menu-submenu">
+							<div class="menu-item">
+								<a href="https://seantheme.com/color-admin/frontend/one-page-parallax/" target="_blank" class="menu-link">
+									<div class="menu-text">اختلاف منظر یک صفحه</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="https://seantheme.com/color-admin/frontend/blog/" target="_blank" class="menu-link">
+									<div class="menu-text">وبلاگ</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="https://seantheme.com/color-admin/frontend/forum/" target="_blank" class="menu-link">
+									<div class="menu-text">انجمن</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="https://seantheme.com/color-admin/frontend/e-commerce/" target="_blank" class="menu-link">
+									<div class="menu-text">تجارت الکترونیک</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="https://seantheme.com/color-admin/frontend/corporate/" target="_blank" class="menu-link">
+									<div class="menu-text">شرکتی <i class="fa fa-paper-plane text-theme"></i></div>
+								</a>
+							</div>
+						</div>
+					</div>
+					<div class="menu-item has-sub">
+						<a href="javascript:;" class="menu-link">
+							<div class="menu-icon">
+								<i class="fa fa-envelope"></i>
+							</div>
+							<div class="menu-text">قالب ایمیل</div>
+							<div class="menu-caret"></div>
+						</a>
+						<div class="menu-submenu">
+							<div class="menu-item">
+								<a href="email_system.html" class="menu-link">
+									<div class="menu-text">قالب سیستم</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="email_newsletter.html" class="menu-link">
+									<div class="menu-text">قالب خبرنامه</div>
+								</a>
+							</div>
+						</div>
+					</div>
+					<div class="menu-item has-sub">
+						<a href="javascript:;" class="menu-link">
+							<div class="menu-icon">
+								<i class="fa fa-chart-pie"></i>
+							</div>
+							<div class="menu-text">نمودار</div>
+							<div class="menu-caret"></div>
+						</a>
+						<div class="menu-submenu">
+							<div class="menu-item">
+								<a href="chart-flot.html" class="menu-link">
+									<div class="menu-text">نمودار فلوت</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="chart-js.html" class="menu-link">
+									<div class="menu-text">نمودار JS</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="chart-d3.html" class="menu-link">
+									<div class="menu-text">نمودار d3</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="chart-apex.html" class="menu-link">
+									<div class="menu-text">نمودار اوج</div>
+								</a>
+							</div>
+						</div>
+					</div>
+					<div class="menu-item">
+						<a href="landing.html" class="menu-link">
+							<div class="menu-icon">
+								<i class="fa fa-crown"></i> 
+							</div>
+							<div class="menu-text">صفحه فرود <span class="menu-label">جدید</span></div>
+						</a>
+					</div>
+					<div class="menu-item">
+						<a href="calendar.html" class="menu-link">
+							<div class="menu-icon">
+								<i class="fa fa-calendar"></i> 
+							</div>
+							<div class="menu-text">تقویم</div>
+						</a>
+					</div>
+					<div class="menu-item has-sub">
+						<a href="javascript:;" class="menu-link">
+							<div class="menu-icon">
+								<i class="fa fa-map"></i>
+							</div>
+							<div class="menu-text">نقشه</div>
+							<div class="menu-caret"></div>
+						</a>
+						<div class="menu-submenu">
+							<div class="menu-item">
+								<a href="map_vector.html" class="menu-link">
+									<div class="menu-text">نقشه برداری</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="map_google.html" class="menu-link">
+									<div class="menu-text">نقشه گوگل</div>
+								</a>
+							</div>
+						</div>
+					</div>
+					<div class="menu-item has-sub">
+						<a href="javascript:;" class="menu-link">
+							<div class="menu-icon">
+								<i class="fa fa-image"></i>
+							</div>
+							<div class="menu-text">گالری</div>
+							<div class="menu-caret"></div>
+						</a>
+						<div class="menu-submenu">
+							<div class="menu-item">
+								<a href="gallery.html" class="menu-link">
+									<div class="menu-text">گالری v1</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="gallery_v2.html" class="menu-link">
+									<div class="menu-text">گالری نسخه 2</div>
+								</a>
+							</div>
+						</div>
+					</div>
+					<div class="menu-item has-sub">
+						<a href="javascript:;" class="menu-link">
+							<div class="menu-icon">
+								<i class="fa fa-cogs"></i>
+							</div>
+							<div class="menu-text">گزینه های صفحه <span class="menu-label">جدید</span></div>
+							<div class="menu-caret"></div>
+						</a>
+						<div class="menu-submenu">
+							<div class="menu-item">
+								<a href="page_blank.html" class="menu-link">
+									<div class="menu-text">صفحه خالی</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="page_with_footer.html" class="menu-link">
+									<div class="menu-text">صفحه با پاورقی</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="page_with_fixed_footer.html" class="menu-link">
+									<div class="menu-text">صفحه با پاورقی ثابت <i class="fa fa-paper-plane text-theme"></i></div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="page_without_sidebar.html" class="menu-link">
+									<div class="menu-text">صفحه بدون نوار کناری</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="page_with_right_sidebar.html" class="menu-link">
+									<div class="menu-text">صفحه با نوار کناری سمت راست</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="page_with_minified_sidebar.html" class="menu-link">
+									<div class="menu-text">صفحه با نوار کناری Minified</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="page_with_two_sidebar.html" class="menu-link">
+									<div class="menu-text">صفحه با دو نوار کناری</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="page_with_line_icons.html" class="menu-link">
+									<div class="menu-text">صفحه با نمادهای خط</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="page_with_ionicons.html" class="menu-link">
+									<div class="menu-text">صفحه با Ionicons</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="page_full_height.html" class="menu-link">
+									<div class="menu-text">محتوای قد کامل</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="page_with_wide_sidebar.html" class="menu-link">
+									<div class="menu-text">صفحه با نوار کناری گسترده</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="page_with_light_sidebar.html" class="menu-link">
+									<div class="menu-text">صفحه با نوار کناری نور</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="page_with_mega_menu.html" class="menu-link">
+									<div class="menu-text">صفحه با مگا منو</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="page_with_top_menu.html" class="menu-link">
+									<div class="menu-text">صفحه با منوی بالا</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="page_with_boxed_layout.html" class="menu-link">
+									<div class="menu-text">صفحه با طرح بندی جعبه ای</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="page_with_mixed_menu.html" class="menu-link">
+									<div class="menu-text">صفحه با منوی ترکیبی</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="page_boxed_layout_with_mixed_menu.html" class="menu-link">
+									<div class="menu-text">طرح بندی جعبه ای با منوی ترکیبی</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="page_with_transparent_sidebar.html" class="menu-link">
+									<div class="menu-text">صفحه با نوار کناری شفاف</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="page_with_search_sidebar.html" class="menu-link">
+									<div class="menu-text">صفحه با نوار کناری جستجو <i class="fa fa-paper-plane text-theme"></i></div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="page_with_hover_sidebar.html" class="menu-link">
+									<div class="menu-text">صفحه با نوار کناری Hover <i class="fa fa-paper-plane text-theme"></i></div>
+								</a>
+							</div>
+						</div>
+					</div>
+					<div class="menu-item has-sub">
+						<a href="javascript:;" class="menu-link">
+							<div class="menu-icon">
+								<i class="fa fa-gift"></i>
+							</div>
+							<div class="menu-text">اضافی <span class="menu-label">جدید</span></div>
+							<div class="menu-caret"></div>
+						</a>
+						<div class="menu-submenu">
+							<div class="menu-item">
+								<a href="extra_timeline.html" class="menu-link">
+									<div class="menu-text">جدول زمانی</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="extra_coming_soon.html" class="menu-link">
+									<div class="menu-text">به زودی صفحه</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="extra_search_results.html" class="menu-link">
+									<div class="menu-text">نتایج جستجو</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="extra_invoice.html" class="menu-link">
+									<div class="menu-text">فاکتور</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="extra_404_error.html" class="menu-link">
+									<div class="menu-text">صفحه خطای 404</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="extra_profile.html" class="menu-link">
+									<div class="menu-text">صفحه نمایه</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="extra_scrum_board.html" class="menu-link">
+									<div class="menu-text">اسکرام برد <i class="fa fa-paper-plane text-theme"></i></div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="extra_cookie_acceptance_banner.html" class="menu-link">
+									<div class="menu-text">بنر پذیرش کوکی <i class="fa fa-paper-plane text-theme"></i></div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="extra_orders.html" class="menu-link">
+									<div class="menu-text">سفارشات <i class="fa fa-paper-plane text-theme"></i></div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="extra_order_details.html" class="menu-link">
+									<div class="menu-text">جزئیات سفارش <i class="fa fa-paper-plane text-theme"></i></div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="extra_products.html" class="menu-link">
+									<div class="menu-text">محصولات <i class="fa fa-paper-plane text-theme"></i></div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="extra_product_details.html" class="menu-link">
+									<div class="menu-text">جزئیات محصول <i class="fa fa-paper-plane text-theme"></i></div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="extra_file_manager.html" class="menu-link">
+									<div class="menu-text">مدیر فایل <i class="fa fa-paper-plane text-theme"></i></div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="extra_pricing_page.html" class="menu-link">
+									<div class="menu-text">صفحه قیمت گذاری <i class="fa fa-paper-plane text-theme"></i></div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="extra_messenger_page.html" class="menu-link">
+									<div class="menu-text">صفحه مسنجر <i class="fa fa-paper-plane text-theme"></i></div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="extra_data_management.html" class="menu-link">
+									<div class="menu-text">مدیریت داده ها <i class="fa fa-paper-plane text-theme"></i></div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="extra_settings_page.html" class="menu-link">
+									<div class="menu-text">صفحه تنظیمات <i class="fa fa-paper-plane text-theme"></i></div>
+								</a>
+							</div>
+						</div>
+					</div>
+					<div class="menu-item has-sub">
+						<a href="javascript:;" class="menu-link">
+							<div class="menu-icon">
+								<i class="fa fa-key"></i>
+							</div>
+							<div class="menu-text">ورود و ثبت نام</div>
+							<div class="menu-caret"></div>
+						</a>
+						<div class="menu-submenu">
+							<div class="menu-item">
+								<a href="login.html" class="menu-link">
+									<div class="menu-text">وارد شوید</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="login_v2.html" class="menu-link">
+									<div class="menu-text">ورود نسخه 2</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="login_v3.html" class="menu-link">
+									<div class="menu-text">ورود نسخه 3</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="register_v3.html" class="menu-link">
+									<div class="menu-text">ثبت نام نسخه 3</div>
+								</a>
+							</div>
+						</div>
+					</div>
+					<div class="menu-item has-sub">
+						<a href="javascript:;" class="menu-link">
+							<div class="menu-icon">
+								<i class="fa fa-cubes"></i>
+							</div>
+							<div class="menu-text">نسخه <span class="menu-label">جدید</span></div>
+							<div class="menu-caret"></div>
+						</a>
+						<div class="menu-submenu">
+							<div class="menu-item">
+								<a href="https://seantheme.com/color-admin/admin/html/" class="menu-link">
+									<div class="menu-text">HTML</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="https://seantheme.com/color-admin/admin/ajax/" class="menu-link">
+									<div class="menu-text">AJAX</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="https://seantheme.com/color-admin/admin/angularjs/" class="menu-link">
+									<div class="menu-text">ANGULAR JS</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="https://seantheme.com/color-admin/admin/angularjs18/" class="menu-link">
+									<div class="menu-text">ANGULAR JS 18</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="javascript:alert('Laravel 11 Version only available in downloaded version.');" class="menu-link">
+									<div class="menu-text">LARAVEL 11</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="https://seantheme.com/color-admin/admin/vue3/" class="menu-link">
+									<div class="menu-text">VUE 3 + Vite JS</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="https://seantheme.com/color-admin/admin/react/" class="menu-link">
+									<div class="menu-text">واکنش 18</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="javascript:alert('.NET Core 8.0 MVC Version only available in downloaded version.');" class="menu-link">
+									<div class="menu-text">ASP.NET <i class="fa fa-paper-plane text-theme"></i></div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="javascript:alert('Django Version only available in downloaded version.');" class="menu-link">
+									<div class="menu-text">DJANGO <i class="fa fa-paper-plane text-theme"></i></div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="https://seantheme.com/color-admin/admin/svelte/" class="menu-link">
+									<div class="menu-text">SVELTE <i class="fa fa-paper-plane text-theme"></i></div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="https://seantheme.com/color-admin/admin/material/" class="menu-link">
+									<div class="menu-text">طراحی مواد</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="https://seantheme.com/color-admin/admin/apple/" class="menu-link">
+									<div class="menu-text">طراحی سیب</div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="https://seantheme.com/color-admin/admin/transparent/" class="menu-link">
+									<div class="menu-text">طراحی شفاف <i class="fa fa-paper-plane text-theme"></i></div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="https://seantheme.com/color-admin/admin/facebook/" class="menu-link">
+									<div class="menu-text">طراحی فیس بوک <i class="fa fa-paper-plane text-theme"></i></div>
+								</a>
+							</div>
+							<div class="menu-item">
+								<a href="https://seantheme.com/color-admin/admin/google/" class="menu-link">
+									<div class="menu-text">طراحی گوگل <i class="fa fa-paper-plane text-theme"></i></div>
+								</a>
+							</div>
+						</div>
+					</div>
+					<div class="menu-item has-sub">
+						<a href="javascript:;" class="menu-link">
+							<div class="menu-icon">
+								<i class="fa fa-medkit"></i>
+							</div>
+							<div class="menu-text">یاور</div>
+							<div class="menu-caret"></div>
+						</a>
+						<div class="menu-submenu">
+							<div class="menu-item">
+								<a href="helper_css.html" class="menu-link">
+									<div class="menu-text">کلاس های CSS از پیش تعریف شده</div>
+								</a>
+							</div>
+						</div>
+					</div>
+					<div class="menu-item has-sub">
+						<a href="javascript:;" class="menu-link">
+							<div class="menu-icon">
+								<i class="fa fa-align-left"></i>
+							</div>
+							<div class="menu-text">سطح منو</div>
+							<div class="menu-caret"></div>
+						</a>
+						<div class="menu-submenu">
+							<div class="menu-item has-sub">
+								<a href="javascript:;" class="menu-link">
+									<div class="menu-text">منو 1.1</div>
+									<div class="menu-caret"></div>
+								</a>
+								<div class="menu-submenu">
+									<div class="menu-item has-sub">
+										<a href="javascript:;" class="menu-link">
+											<div class="menu-text">منوی 2.1</div>
+											<div class="menu-caret"></div>
+										</a>
+										<div class="menu-submenu">
+											<div class="menu-item"><a href="javascript:;" class="menu-link"><div class="menu-text">منو 3.1</div></a></div>
+											<div class="menu-item"><a href="javascript:;" class="menu-link"><div class="menu-text">منوی 3.2</div></a></div>
+										</div>
+									</div>
+									<div class="menu-item"><a href="javascript:;" class="menu-link"><div class="menu-text">منوی 2.2</div></a></div>
+									<div class="menu-item"><a href="javascript:;" class="menu-link"><div class="menu-text">منوی 2.3</div></a></div>
+								</div>
+							</div>
+							<div class="menu-item"><a href="javascript:;" class="menu-link"><div class="menu-text">منو 1.2</div></a></div>
+							<div class="menu-item"><a href="javascript:;" class="menu-link"><div class="menu-text">منو 1.3</div></a></div>
+						</div>
+					</div>
+					
+					<!-- BEGIN minify-button -->
+					<div class="menu-item d-flex">
+						<a href="javascript:;" class="app-sidebar-minify-btn ms-auto d-flex align-items-center text-decoration-none" data-toggle="app-sidebar-minify"><i class="fa fa-angle-double-left"></i></a>
+					</div>
+					<!-- END minify-button -->
+				</div>
+				<!-- END menu -->
+			</div>
+			<!-- END scrollbar -->
+		</div>
+		<div class="app-sidebar-bg" data-bs-theme="dark"></div>
+		<div class="app-sidebar-mobile-backdrop"><a href="#" data-dismiss="app-sidebar-mobile" class="stretched-link"></a></div>
+		<!-- END #sidebar -->
+		
+		<!-- BEGIN #content -->
+		<div id="content" class="app-content">
+			<!-- BEGIN breadcrumb -->
+			<ol class="breadcrumb float-xl-end">
+				<li class="breadcrumb-item"><a href="javascript:;">صفحه اصلی</a></li>
+				<li class="breadcrumb-item"><a href="javascript:;">موارد فرم</a></li>
+				<li class="breadcrumb-item active">X-Editable</li>
+			</ol>
+			<!-- END breadcrumb -->
+			<!-- BEGIN page-header -->
+			<h1 class="page-header">X-Editable <small>متن کوچک هدر به اینجا می رود...</small></h1>
+			<!-- END page-header -->
+			
+			<!-- BEGIN row -->
+			<div class="row">
+				<!-- BEGIN col-8 -->
+				<div class="col-xl-8">
+					<!-- BEGIN panel -->
+					<div class="panel panel-inverse">
+						<div class="panel-heading">
+							<h4 class="panel-title">فرم قابل ویرایش</h4>
+							<div class="panel-heading-btn">
+								<a href="javascript:;" class="btn btn-xs btn-icon btn-default" data-toggle="panel-expand"><i class="fa fa-expand"></i></a>
+								<a href="javascript:;" class="btn btn-xs btn-icon btn-success" data-toggle="panel-reload"><i class="fa fa-redo"></i></a>
+								<a href="javascript:;" class="btn btn-xs btn-icon btn-warning" data-toggle="panel-collapse"><i class="fa fa-minus"></i></a>
+								<a href="javascript:;" class="btn btn-xs btn-icon btn-danger" data-toggle="panel-remove"><i class="fa fa-times"></i></a>
+							</div>
+						</div>
+						<!-- BEGIN table-responsive -->
+						<div class="table-responsive">
+							<table id="user" class="table table-bordered table-panel mb-0">
+								<thead>
+									<tr>
+										<th width="20%">نام فیلد</th>
+										<th width="40%">مقدار فیلد</th>
+										<th>توضیحات</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td class="bg-body bg-opacity-50">نام کاربری</td>
+										<td><a href="javascript:;" id="username" data-type="text" data-pk="1" data-title="نام کاربری را وارد کنید">ابر کاربر </a></td>
+										<td><span class="text-body">فیلد متنی ساده </span></td>
+									</tr>
+									<tr>
+										<td class="bg-body bg-opacity-50">نام کوچک</td>
+										<td><a href="javascript:;" id="firstname" data-type="text" data-pk="1" data-placement="right" data-placeholder="مورد نیاز" data-title="نام خود را وارد کنید"></a></td>
+										<td><span class="text-body">فیلد متن الزامی، در اصل خالی است </span></td>
+									</tr>
+									<tr>
+										<td class="bg-body bg-opacity-50">جنسیت</td>
+										<td><a href="javascript:;" id="sex" data-type="select" data-pk="1" data-value="" data-title="جنسیت را انتخاب کنید"></a></td>
+										<td><span class="text-body">انتخاب کنید، از آرایه js بارگیری شده است. نمایش سفارشی</span></td>
+									</tr>
+									<tr>
+										<td class="bg-body bg-opacity-50">گروه</td>
+										<td><a href="javascript:;" id="group" data-type="select" data-pk="1" data-value="5" data-source="/groups" data-title="گروه را انتخاب کنید">مدیر</a></td>
+										<td><span class="text-body">انتخاب کنید، از سرور بارگیری شده است. <strong>بدون دکمه</strong> حالت </span></td>
+									</tr>
+									<tr>
+										<td class="bg-body bg-opacity-50">خطا هنگام بارگیری</td>
+										<td><a href="javascript:;" id="status" data-type="select" data-pk="1" data-value="0" data-source="/status" data-title="وضعیت را انتخاب کنید">فعال </a></td>
+										<td><span class="text-body">خطا هنگام بارگیری موارد لیست</span></td>
+									</tr>
+									<tr>
+										<td class="bg-body bg-opacity-50">برنامه ریزی برای تعطیلات؟</td>
+										<td><a href="javascript:;" id="vacation" data-type="date" data-viewformat="dd.mm.yyyy" data-pk="1" data-placement="right" data-title="چه زمانی می خواهید تعطیلات شروع شود؟">25.02.2024</a></td>
+										<td><span class="text-body">خرماگیر </span></td>
+									</tr>
+									<tr>
+										<td class="bg-body bg-opacity-50">تاریخ تولد</td>
+										<td><a href="javascript:;" id="dob" data-type="combodate" data-value="1984-05-15" data-format="YYYY-MM-DD" data-viewformat="DD/MM/YYYY" data-template="D / MMM / YYYY" data-pk="1" data-title="تاریخ تولد را انتخاب کنید"></a></td>
+										<td><span class="text-body">فیلد تاریخ (combodate) </span></td>
+									</tr>
+									<tr>
+										<td class="bg-body bg-opacity-50">رویداد راه اندازی</td>
+										<td><a href="javascript:;" id="event" data-type="combodate" data-template="D MMM YYYY HH:mm" data-format="YYYY-MM-DD HH:mm" data-viewformat="MMM D, YYYY, HH:mm" data-pk="1" data-title="تنظیم تاریخ و زمان رویداد"></a></td>
+										<td><span class="text-body">فیلد Datetime (combodate)</span></td>
+									</tr>
+									<tr>
+										<td class="bg-body bg-opacity-50">شروع جلسه</td>
+										<td><a href="javascript:;" id="meeting_start" data-type="datetime" data-pk="1" data-url="/post" data-placement="right" data-title="تنظیم تاریخ و زمان">15/03/2024 12:45</a></td>
+										<td><span class="text-body">تاریخ بوت استرپ</span></td>
+									</tr>
+									<tr>
+										<td class="bg-body bg-opacity-50">نظرات</td>
+										<td>
+											<a href="javascript:;" id="comments" data-type="textarea" data-pk="1" data-placeholder="نظرات شما اینجا..." data-original-title="نظرات را وارد کنید">عالی<br />کاربر!</a></td>
+										<td>
+											<span class="text-body">
+											Textarea. دکمه های زیر ارسال توسط <i>ctrl+enter</i>
+											</span>
+										</td>
+									</tr>
+									<tr>
+										<td class="bg-body bg-opacity-50">وضعیت را تایپ کنید</td>
+										<td><a href="javascript:;" id="state" data-type="typeaheadjs" data-pk="1" data-placement="right" data-title="شروع به تایپ State.."></a></td>
+										<td><span class="text-body">توییتر typeahead.js</span></td>
+									</tr>
+									<tr>
+										<td class="bg-body bg-opacity-50">میوه های تازه</td>
+										<td><a href="javascript:;" id="fruits" data-type="checklist" data-value="1,2" data-title="میوه ها را انتخاب کنید"></a></td>
+										<td><span class="text-body">چک لیست</span></td>
+									</tr>
+									<tr>
+										<td class="bg-body bg-opacity-50">برچسب ها</td>
+										<td><a href="javascript:;" id="tags" data-type="select2" data-pk="1" data-title="برچسب ها را وارد کنید">html، جاوا اسکریپت </a></td>
+										<td><span class="text-body">Select2 (حالت برچسب‌ها) </span></td>
+									</tr>
+									<tr>
+										<td class="bg-body bg-opacity-50">کشور</td>
+										<td><a href="javascript:;" id="country" data-type="select2" data-pk="1" data-value="BS" data-title="کشور را انتخاب کنید"></a></td>
+										<td><span class="text-body">Select2 (حالت کشویی)</span></td>
+									</tr>
+									<tr>
+										<td class="bg-body bg-opacity-50">آدرس</td>
+										<td><a href="javascript:;" id="address" data-type="address" data-pk="1" data-title="لطفا آدرس را پر کنید"></a></td>
+										<td><span class="text-body">ورودی سفارشی شما، چندین فیلد</span></td>
+									</tr>
+									<tr>
+										<td class="bg-body bg-opacity-50">یادداشت ها</td>
+										<td>
+											<div id="note" data-pk="1" data-type="wysihtml5" data-toggle="manual" data-title="یادداشت ها را وارد کنید">
+												<h3>WYSIWYG</h3>
+												 WYSIWYG یعنی <i>آنچه می بینید همان چیزی است که به دست می آورید</i>.<br />
+												 اما ممکن است به:
+												<ul>
+													<li>
+														 WYSIWYG (آلبوم)، آلبومی محصول ۲۰۰۰ توسط چومباوامبا
+													</li>
+													<li>
+														 «Whatcha See is Whatcha Get»، آهنگی از The Dramatics در سال ۱۹۷۱
+													</li>
+													<li>
+														 جشنواره فیلم WYSIWYG، جشنواره سالانه فیلم مسیحی
+													</li>
+												</ul>
+												<p><i>منبع:</i><a href="http://en.wikipedia.org/wiki/WYSIWYG_%28disambiguation%29">wikipedia.org</a></p>
+											</div>
+										</td>
+										<td>
+											<a href="javascript:;" id="pencil"><i class="fa fa-pencil"></i> [ویرایش]</a>
+											<br />
+											<span class="text-body">Wysihtml5 (فقط بوت استرپ).<br />تغییر با عنصر دیگر</span>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+						<!-- END table-responsive -->
+						<!-- BEGIN hljs-wrapper -->
+						<div class="hljs-wrapper rounded-0 rounded-bottom">
+							<pre><code class="html" data-url="../assets/data/form-editable/code-1.json"></code></pre>
+						</div>
+						<!-- END hljs-wrapper -->
+					</div>
+					<!-- END panel -->
+				</div>
+				<!-- END col-8 -->
+				<!-- BEGIN col-4 -->
+				<div class="col-xl-4">
+					<div class="alert alert-yellow alert-dismissible fade show">
+						<div class="fs-14px"><i class="fa fa-info-circle"></i> <b>پاپاور</b> حالت ویرایش هنوز در Bootstrap 5 پشتیبانی نمی شود.</div>
+						<hr />
+						<div>ما اکنون آن را با حالت ویرایش درون خطی پیاده سازی می کنیم تا زمانی که افزونه با popover در Bootstrap 5 پشتیبانی کند.</div>
+						<button class="btn-close" data-bs-dismiss="alert"></button>
+					</div>
+					<h4 class="mb-15px"><b>کنسول</b><br /><small>(همه درخواست های ajax در اینجا شبیه سازی می شوند)</small></h4>
+					<div>
+						<textarea id="console" rows="20" class="form-control" placeholder="start click on the editable text field and made the changes"></textarea>
+					</div>
+				</div>
+				<!-- END col-4 -->
+			</div>
+			<!-- END row -->
+		</div>
+		<!-- END #content -->
+		
+		<!-- BEGIN theme-panel -->
+		<div class="theme-panel">
+			<a href="javascript:;" data-toggle="theme-panel-expand" class="theme-collapse-btn"><i class="fa fa-cog"></i></a>
+			<div class="theme-panel-content" data-scrollbar="true" data-height="100%">
+				<h5>تنظیمات برنامه</h5>
+				
+				<!-- BEGIN theme-list -->
+				<div class="theme-list">
+					<div class="theme-list-item"><a href="javascript:;" class="theme-list-link bg-red" data-theme-class="theme-red" data-toggle="theme-selector" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-container="body" data-bs-title="قرمز">&nbsp;</a></div>
+					<div class="theme-list-item"><a href="javascript:;" class="theme-list-link bg-pink" data-theme-class="theme-pink" data-toggle="theme-selector" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-container="body" data-bs-title="صورتی">&nbsp;</a></div>
+					<div class="theme-list-item"><a href="javascript:;" class="theme-list-link bg-orange" data-theme-class="theme-orange" data-toggle="theme-selector" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-container="body" data-bs-title="نارنجی">&nbsp;</a></div>
+					<div class="theme-list-item"><a href="javascript:;" class="theme-list-link bg-yellow" data-theme-class="theme-yellow" data-toggle="theme-selector" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-container="body" data-bs-title="زرد">&nbsp;</a></div>
+					<div class="theme-list-item"><a href="javascript:;" class="theme-list-link bg-lime" data-theme-class="theme-lime" data-toggle="theme-selector" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-container="body" data-bs-title="آهک">&nbsp;</a></div>
+					<div class="theme-list-item"><a href="javascript:;" class="theme-list-link bg-green" data-theme-class="theme-green" data-toggle="theme-selector" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-container="body" data-bs-title="سبز">&nbsp;</a></div>
+					<div class="theme-list-item active"><a href="javascript:;" class="theme-list-link bg-teal" data-theme-class="" data-toggle="theme-selector" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-container="body" data-bs-title="پیش فرض">&nbsp;</a></div>
+					<div class="theme-list-item"><a href="javascript:;" class="theme-list-link bg-cyan" data-theme-class="theme-cyan" data-toggle="theme-selector" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-container="body" data-bs-title="فیروزه ای">&nbsp;</a></div>
+					<div class="theme-list-item"><a href="javascript:;" class="theme-list-link bg-blue" data-theme-class="theme-blue" data-toggle="theme-selector" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-container="body" data-bs-title="آبی">&nbsp;</a></div>
+					<div class="theme-list-item"><a href="javascript:;" class="theme-list-link bg-purple" data-theme-class="theme-purple" data-toggle="theme-selector" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-container="body" data-bs-title="بنفش">&nbsp;</a></div>
+					<div class="theme-list-item"><a href="javascript:;" class="theme-list-link bg-indigo" data-theme-class="theme-indigo" data-toggle="theme-selector" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-container="body" data-bs-title="نیل">&nbsp;</a></div>
+					<div class="theme-list-item"><a href="javascript:;" class="theme-list-link bg-black" data-theme-class="theme-gray-600" data-toggle="theme-selector" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-container="body" data-bs-title="مشکی">&nbsp;</a></div>
+				</div>
+				<!-- END theme-list -->
+				
+				<div class="theme-panel-divider"></div>
+				
+				<div class="row mt-10px">
+					<div class="col-8 control-label text-body fw-bold">
+						<div>حالت تاریک <span class="badge bg-primary ms-1 py-2px position-relative" style="top: -1px;">جدید</span></div>
+						<div class="lh-14">
+							<small class="text-body opacity-50">
+								ظاهر را طوری تنظیم کنید که تابش خیره کننده را کاهش داده و به چشمان خود استراحت دهید.
+							</small>
+						</div>
+					</div>
+					<div class="col-4 d-flex">
+						<div class="form-check form-switch ms-auto mb-0">
+							<input type="checkbox" class="form-check-input" name="app-theme-dark-mode" id="appThemeDarkMode" value="1" />
+							<label class="form-check-label" for="appThemeDarkMode">&nbsp;</label>
+						</div>
+					</div>
+				</div>
+				
+				<div class="theme-panel-divider"></div>
+				
+				<!-- BEGIN theme-switch -->
+				<div class="row mt-10px align-items-center">
+					<div class="col-8 control-label text-body fw-bold">هدر ثابت شد</div>
+					<div class="col-4 d-flex">
+						<div class="form-check form-switch ms-auto mb-0">
+							<input type="checkbox" class="form-check-input" name="app-header-fixed" id="appHeaderFixed" value="1" checked />
+							<label class="form-check-label" for="appHeaderFixed">&nbsp;</label>
+						</div>
+					</div>
+				</div>
+				<div class="row mt-10px align-items-center">
+					<div class="col-8 control-label text-body fw-bold">هدر معکوس</div>
+					<div class="col-4 d-flex">
+						<div class="form-check form-switch ms-auto mb-0">
+							<input type="checkbox" class="form-check-input" name="app-header-inverse" id="appHeaderInverse" value="1" />
+							<label class="form-check-label" for="appHeaderInverse">&nbsp;</label>
+						</div>
+					</div>
+				</div>
+				<div class="row mt-10px align-items-center">
+					<div class="col-8 control-label text-body fw-bold">نوار کناری ثابت شد</div>
+					<div class="col-4 d-flex">
+						<div class="form-check form-switch ms-auto mb-0">
+							<input type="checkbox" class="form-check-input" name="app-sidebar-fixed" id="appSidebarFixed" value="1" checked />
+							<label class="form-check-label" for="appSidebarFixed">&nbsp;</label>
+						</div>
+					</div>
+				</div>
+				<div class="row mt-10px align-items-center">
+					<div class="col-8 control-label text-body fw-bold">شبکه نوار کناری</div>
+					<div class="col-4 d-flex">
+						<div class="form-check form-switch ms-auto mb-0">
+							<input type="checkbox" class="form-check-input" name="app-sidebar-grid" id="appSidebarGrid" value="1" />
+							<label class="form-check-label" for="appSidebarGrid">&nbsp;</label>
+						</div>
+					</div>
+				</div>
+				<div class="row mt-10px align-items-center">
+					<div class="col-8 control-label text-body fw-bold">گرادیان فعال شد</div>
+					<div class="col-4 d-flex">
+						<div class="form-check form-switch ms-auto mb-0">
+							<input type="checkbox" class="form-check-input" name="app-gradient-enabled" id="appGradientEnabled" value="1" />
+							<label class="form-check-label" for="appGradientEnabled">&nbsp;</label>
+						</div>
+					</div>
+				</div>
+				<!-- END theme-switch -->
+				
+				<div class="theme-panel-divider"></div>
+				
+				<h5>طراحی مدیریت (6)</h5>
+				<!-- BEGIN theme-version -->
+				<div class="theme-version">
+					<div class="theme-version-item">
+						<a href="https://seantheme.com/color-admin/admin/html/" class="theme-version-link active">
+							<span style="background-image: url(../assets/img/theme/default.jpg);" class="theme-version-cover"></span>
+						</a>
+					</div>
+					<div class="theme-version-item">
+						<a href="https://seantheme.com/color-admin/admin/transparent/" class="theme-version-link">
+							<span style="background-image: url(../assets/img/theme/transparent.jpg);" class="theme-version-cover"></span>
+						</a>
+					</div>
+					<div class="theme-version-item">
+						<a href="https://seantheme.com/color-admin/admin/apple/" class="theme-version-link">
+							<span style="background-image: url(../assets/img/theme/apple.jpg);" class="theme-version-cover"></span>
+						</a>
+					</div>
+					<div class="theme-version-item">
+						<a href="https://seantheme.com/color-admin/admin/material/" class="theme-version-link">
+							<span style="background-image: url(../assets/img/theme/material.jpg);" class="theme-version-cover"></span>
+						</a>
+					</div>
+					<div class="theme-version-item">
+						<a href="https://seantheme.com/color-admin/admin/facebook/" class="theme-version-link">
+							<span style="background-image: url(../assets/img/theme/facebook.jpg);" class="theme-version-cover"></span>
+						</a>
+					</div>
+					<div class="theme-version-item">
+						<a href="https://seantheme.com/color-admin/admin/google/" class="theme-version-link">
+							<span style="background-image: url(../assets/img/theme/google.jpg);" class="theme-version-cover"></span>
+						</a>
+					</div>
+				</div>
+				<!-- END theme-version -->
+				
+				<div class="theme-panel-divider"></div>
+				
+				<h5>زبان نسخه (9)</h5>
+				<!-- BEGIN theme-version -->
+				<div class="theme-version">
+					<div class="theme-version-item">
+						<a href="https://seantheme.com/color-admin/admin/html/" class="theme-version-link active">
+							<span style="background-image: url(../assets/img/version/html.jpg);" class="theme-version-cover"></span>
+						</a>
+					</div>
+					<div class="theme-version-item">
+						<a href="https://seantheme.com/color-admin/admin/ajax/" class="theme-version-link">
+							<span style="background-image: url(../assets/img/version/ajax.jpg);" class="theme-version-cover"></span>
+						</a>
+					</div>
+					<div class="theme-version-item">
+						<a href="https://seantheme.com/color-admin/admin/angularjs/" class="theme-version-link">
+							<span style="background-image: url(../assets/img/version/angular1x.jpg);" class="theme-version-cover"></span>
+						</a>
+					</div>
+					<div class="theme-version-item">
+						<a href="https://seantheme.com/color-admin/admin/angularjs18/" class="theme-version-link">
+							<span style="background-image: url(../assets/img/version/angular10x.jpg);" class="theme-version-cover"></span>
+						</a>
+					</div>
+					<div class="theme-version-item">
+						<a href="https://seantheme.com/color-admin/admin/svelte/" class="theme-version-link">
+							<span style="background-image: url(../assets/img/version/svelte.jpg);" class="theme-version-cover"></span>
+						</a>
+					</div>
+					<div class="theme-version-item">
+						<a href="javascript:alert('Laravel 11 Version only available in downloaded version.');" class="theme-version-link">
+							<span style="background-image: url(../assets/img/version/laravel.jpg);" class="theme-version-cover"></span>
+						</a>
+					</div>
+					<div class="theme-version-item">
+						<a href="javascript:alert('Django Version only available in downloaded version.');" class="theme-version-link">
+							<span style="background-image: url(../assets/img/version/django.jpg);" class="theme-version-cover"></span>
+						</a>
+					</div>
+					<div class="theme-version-item">
+						<a href="https://seantheme.com/color-admin/admin/vue3/" class="theme-version-link">
+							<span style="background-image: url(../assets/img/version/vuejs.jpg);" class="theme-version-cover"></span>
+						</a>
+					</div>
+					<div class="theme-version-item">
+						<a href="https://seantheme.com/color-admin/admin/react/" class="theme-version-link">
+							<span style="background-image: url(../assets/img/version/reactjs.jpg);" class="theme-version-cover"></span>
+						</a>
+					</div>
+					<div class="theme-version-item">
+						<a href="javascript:alert('.NET Core 8.0 MVC Version only available in downloaded version.');" class="theme-version-link">
+							<span style="background-image: url(../assets/img/version/dotnet.jpg);" class="theme-version-cover"></span>
+						</a>
+					</div>
+				</div>
+				<!-- END theme-version -->
+				
+				<div class="theme-panel-divider"></div>
+				
+				<h5>طراحی پیشانی (5)</h5>
+				<!-- BEGIN theme-version -->
+				<div class="theme-version">
+					<div class="theme-version-item">
+						<a href="https://seantheme.com/color-admin/frontend/one-page-parallax/" class="theme-version-link">
+							<span style="background-image: url(../assets/img/theme/one-page-parallax.jpg);" class="theme-version-cover"></span>
+						</a>
+					</div>
+					<div class="theme-version-item">
+						<a href="https://seantheme.com/color-admin/frontend/e-commerce/" class="theme-version-link">
+							<span style="background-image: url(../assets/img/theme/e-commerce.jpg);" class="theme-version-cover"></span>
+						</a>
+					</div>
+					<div class="theme-version-item">
+						<a href="https://seantheme.com/color-admin/frontend/blog/" class="theme-version-link">
+							<span style="background-image: url(../assets/img/theme/blog.jpg);" class="theme-version-cover"></span>
+						</a>
+					</div>
+					<div class="theme-version-item">
+						<a href="https://seantheme.com/color-admin/frontend/forum/" class="theme-version-link">
+							<span style="background-image: url(../assets/img/theme/forum.jpg);" class="theme-version-cover"></span>
+						</a>
+					</div>
+					<div class="theme-version-item">
+						<a href="https://seantheme.com/color-admin/frontend/corporate/" class="theme-version-link">
+							<span style="background-image: url(../assets/img/theme/corporate.jpg);" class="theme-version-cover"></span>
+						</a>
+					</div>
+				</div>
+				<!-- END theme-version -->
+				
+				<div class="theme-panel-divider"></div>
+				
+				<a href="https://seantheme.com/color-admin/documentation/" class="btn btn-dark d-block w-100 rounded-pill mb-10px" target="_blank"><b>مستندات</b></a>
+				<a href="javascript:;" class="btn btn-default d-block w-100 rounded-pill" data-toggle="reset-local-storage"><b>ذخیره‌سازی محلی را بازنشانی کنید</b></a>
+			</div>
+		</div>
+		<!-- END theme-panel -->
+		<!-- BEGIN scroll-top-btn -->
+		<a href="javascript:;" class="btn btn-icon btn-circle btn-theme btn-scroll-to-top" data-toggle="scroll-to-top"><i class="fa fa-angle-up"></i></a>
+		<!-- END scroll-top-btn -->
+	</div>
+	<!-- END #app -->
+	
+	<!-- ================== BEGIN core-js ================== -->
+	<script src="../assets/js/vendor.min.js"></script>
+	<script src="../assets/js/app.min.js"></script>
+	<!-- ================== END core-js ================== -->
+	
+	<!-- ================== BEGIN page-js ================== -->
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+	<script src="../assets/plugins/jquery-migrate/dist/jquery-migrate.min.js"></script>
+	<script src="../assets/plugins/x-editable-bs4/dist/bootstrap4-editable/js/bootstrap-editable.min.js"></script>
+	<script src="../assets/plugins/x-editable-bs4/dist/inputs-ext/address/address.js"></script>
+	<script src="../assets/plugins/x-editable-bs4/dist/inputs-ext/typeaheadjs/lib/typeahead.js"></script>
+	<script src="../assets/plugins/x-editable-bs4/dist/inputs-ext/typeaheadjs/typeaheadjs.js"></script>
+	<script src="../assets/plugins/x-editable-bs4/dist/inputs-ext/wysihtml5/wysihtml5.js"></script>
+	<script src="../assets/plugins/bootstrap3-wysihtml5-bower/dist/bootstrap3-wysihtml5.all.min.js"></script>
+	<script src="../assets/plugins/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+	<script src="../assets/plugins/bootstrap-datetime-picker/js/bootstrap-datetimepicker.min.js"></script>
+	<script src="../assets/plugins/select2/dist/js/select2.full.min.js"></script>
+	<script src="../assets/plugins/jquery-mockjax/dist/jquery.mockjax.min.js"></script>
+	<script src="../assets/plugins/moment/min/moment.min.js"></script>
+	<script src="../assets/js/demo/form-editable.demo.js"></script>
+	<script src="../assets/plugins/@highlightjs/cdn-assets/highlight.min.js"></script>
+	<script src="../assets/js/demo/render.highlight.js"></script>
+	<!-- ================== END page-js ================== -->
+</body>
+</html>

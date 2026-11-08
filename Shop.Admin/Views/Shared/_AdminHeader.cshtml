@@ -1,0 +1,26 @@
+<header id="header" class="app-header">
+    <div class="navbar-header">
+        <a class="navbar-brand" asp-area="Admin" asp-controller="Home" asp-action="Index" data-admin-nav>
+            <span class="navbar-logo" aria-hidden="true"></span>
+            <span class="admin-brand-name">مدیریت</span>
+            <span class="admin-brand-caption">فروشگاه و انبار</span>
+        </a>
+        <button type="button" class="navbar-mobile-toggler" data-toggle="app-sidebar-mobile" aria-label="باز کردن منوی اصلی">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+        </button>
+    </div>
+    <div class="navbar-nav">
+        <div class="navbar-item admin-header-context">
+            <span class="admin-header-context__label">@ViewData["AreaTitle"]</span>
+            <span class="admin-header-context__title">@ViewData["Title"]</span>
+        </div>
+        <div class="navbar-item">
+            <a class="navbar-link admin-header-home" asp-area="Admin" asp-controller="Home" asp-action="Index" data-admin-nav>
+                <i class="fa fa-house" aria-hidden="true"></i>
+                <span>نمای کلی</span>
+            </a>
+        </div>
+    </div>
+</header>
