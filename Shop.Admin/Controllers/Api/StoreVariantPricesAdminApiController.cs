@@ -15,16 +15,16 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db) : Con
         if (!CanManage()) return Forbid();
         const string sql = """
             SELECT variant.[Id] AS [VariantId], product.[Name] AS [ProductName], variant.[Name] AS [VariantName],
-                   variant.[Code] AS [Code], variant.[AttributesJson] AS [AttributesJson], plan.[SalesPlanKey] AS [SalesPlanId],
-                   plan.[Name] AS [SalesPlanName], offer.[PriceAmount] AS [PriceAmount], offer.[DiscountPercent] AS [DiscountPercent],
+                   variant.[Code] AS [Code], variant.[AttributesJson] AS [AttributesJson], [plan].[SalesPlanKey] AS [SalesPlanId],
+                   [plan].[Name] AS [SalesPlanName], offer.[PriceAmount] AS [PriceAmount], offer.[DiscountPercent] AS [DiscountPercent],
                    offer.[IsEnabled] AS [IsEnabled]
             FROM [Warehouse].[ProductVariant] variant
             INNER JOIN [Warehouse].[Product] warehouseProduct ON warehouseProduct.[Id] = variant.[IdProduct] AND warehouseProduct.[IsActive] = 1
             INNER JOIN [Store].[Product] product ON product.[Id] = warehouseProduct.[IdStoreProduct] AND product.[IsActive] = 1
-            CROSS JOIN [Store].[SalesPlan] plan
-            LEFT JOIN [Store].[ProductVariantSalesPlanOffer] offer ON offer.[IdProductVariant] = variant.[Id] AND offer.[IdSalesPlan] = plan.[Id]
+            CROSS JOIN [Store].[SalesPlan] [plan]
+            LEFT JOIN [Store].[ProductVariantSalesPlanOffer] offer ON offer.[IdProductVariant] = variant.[Id] AND offer.[IdSalesPlan] = [plan].[Id]
             WHERE variant.[IsActive] = 1
-            ORDER BY product.[Name], variant.[Name], plan.[Code];
+            ORDER BY product.[Name], variant.[Name], [plan].[Code];
             """;
         return Ok(await db.Database.SqlQueryRaw<VariantPlanPriceRow>(sql).ToListAsync(cancellationToken));
     }
@@ -44,7 +44,7 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db) : Con
             SELECT COUNT(*) AS [Value]
             FROM [Warehouse].[ProductVariant] variant
             INNER JOIN [Warehouse].[Product] product ON product.[Id] = variant.[IdProduct] AND product.[IsActive] = 1
-            INNER JOIN [Store].[SalesPlan] plan ON plan.[SalesPlanKey] = {0} AND plan.[IsEnabled] = 1
+            INNER JOIN [Store].[SalesPlan] [plan] ON [plan].[SalesPlanKey] = {0} AND [plan].[IsEnabled] = 1
             WHERE variant.[Id] = {1} AND variant.[IsActive] = 1;
             """, salesPlanId, variantId).SingleAsync(cancellationToken);
         if (valid == 0) return NotFound(new { code = "variant-or-plan-not-found" });
@@ -71,8 +71,8 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db) : Con
             return ValidationProblem("تنوع یا طرح فروش معتبر نیست.");
         await db.Database.ExecuteSqlInterpolatedAsync($"""
             DELETE offer FROM [Store].[ProductVariantSalesPlanOffer] offer
-            INNER JOIN [Store].[SalesPlan] plan ON plan.[Id] = offer.[IdSalesPlan]
-            WHERE offer.[IdProductVariant] = {variantId} AND plan.[SalesPlanKey] = {salesPlanId};
+            INNER JOIN [Store].[SalesPlan] [plan] ON [plan].[Id] = offer.[IdSalesPlan]
+            WHERE offer.[IdProductVariant] = {variantId} AND [plan].[SalesPlanKey] = {salesPlanId};
             """, cancellationToken);
         return Ok(new { saved = true, message = "قیمت اختصاصی حذف شد و قیمت پایهٔ کالا/طرح اعمال می‌شود." });
     }

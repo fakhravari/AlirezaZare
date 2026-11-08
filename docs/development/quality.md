@@ -18,6 +18,8 @@ git diff --check
 
 `test:http` باید پس از build اجرا شود؛ DLL ساخته‌شده را روی پورت آزاد با محیط Development اجرا و پس از بررسی متوقف می‌کند. هم‌زمان با build روی همان DLL اجرا نکنید.
 
+وضعیت بررسی ۹ نوامبر ۲۰۲۶: پس از حذف فایل‌های runtime محلی، `npm test` و برنامهٔ `tests/Shop.Contracts` هنوز به `Shop/wwwroot/content/data/catalog.json` وابسته‌اند و تا جایگزینی دادهٔ تست شکست می‌خورند. `dotnet test` اجرای برنامهٔ قرارداد را تضمین نمی‌کند؛ آن را با دستور جداگانهٔ بالا اجرا کنید. `npm run check` نیز تا حذف secret از تنظیمات tracked متوقف می‌شود.
+
 | کنترل | پوشش | محدودیت |
 |---|---|---|
 | `npm run check` | تنظیمات JSON برنامهٔ tracked برای secretهای غیرخالی، syntax همهٔ JSهای برنامه، parse CSS، مالکیت component، سقف !important، جایگاه توکن‌های عمومی تم در design-tokens.css، ترتیب dependency و ساختار/لینک docs | secretهای تاریخچهٔ Git را پاک یا rotate نمی‌کند؛ جای بررسی بصری را نمی‌گیرد |

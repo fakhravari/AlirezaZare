@@ -21,15 +21,15 @@ public sealed class AccountController(ShopDbContext db, ISalesPlanSource plans, 
     {
         const string sql = """
             SELECT (SELECT p.[Id] id,p.[Email] email,p.[FirstName] firstName,p.[LastName] lastName,p.[Phone] phone,p.[Gender] gender,p.[NewsletterEnabled] newsletter,
-              JSON_QUERY((SELECT ci.[IdProduct] id,ci.[IdProductVariant] variantId,ci.[Quantity] quantity,ci.[SalesPlanKey] salesPlanId,JSON_QUERY(ci.[OptionsJson]) options FROM [Account].[Cart] c JOIN [Account].[CartItem] ci ON ci.[IdCart]=c.[Id] WHERE c.[IdProfile]={0} FOR JSON PATH)) cart,
+              JSON_QUERY((SELECT ci.[IdProduct] id,ci.[IdProductVariant] variantId,ci.[Quantity] quantity,sp.[SalesPlanKey] salesPlanId,JSON_QUERY(ci.[OptionsJson]) options FROM [Account].[Cart] c JOIN [Account].[CartItem] ci ON ci.[IdCart]=c.[Id] JOIN [Store].[SalesPlan] sp ON sp.[Id]=ci.[IdSalesPlan] WHERE c.[IdProfile]={0} FOR JSON PATH)) cart,
               JSON_QUERY((SELECT a.[Id] id,a.[Title] title,a.[Recipient] recipient,a.[Phone] phone,a.[Country] country,a.[CountryId] countryId,a.[Province] province,a.[ProvinceId] provinceId,a.[City] city,a.[CityId] cityId,a.[Street] street,a.[PostalCode] postal,a.[IsDefault] isDefault FROM [Account].[Address] a WHERE a.[IdProfile]={0} FOR JSON PATH)) addresses,
               JSON_QUERY((SELECT f.[IdProduct] id FROM [Account].[Favorite] f WHERE f.[IdProfile]={0} FOR JSON PATH)) favorites,
               JSON_QUERY((SELECT x.[IdProduct] id FROM [Account].[CompareItem] x WHERE x.[IdProfile]={0} FOR JSON PATH)) compare,
               JSON_QUERY((SELECT pa.[IdProduct] productId,pa.[Scope] scope,JSON_QUERY(pa.[VariantsJson]) variants,pa.[PriceAtRegistration] priceAtRegistration,pa.[StockAtRegistration] stockAtRegistration,pa.[CreatedAtUtc] createdAt FROM [Account].[PriceAlert] pa WHERE pa.[IdProfile]={0} FOR JSON PATH)) priceAlerts,
-              JSON_QUERY((SELECT ai.[ArticleSlug] slug,ai.[InteractionType] type FROM [Account].[ArticleInteraction] ai WHERE ai.[IdProfile]={0} FOR JSON PATH)) articleInteractions,
-              JSON_QUERY((SELECT af.[ArticleSlug] slug,af.[DisplayName] name,af.[FeedbackText] text,af.[Rating] rating,af.[Status] status,af.[CreatedAtUtc] createdAt FROM [Account].[ArticleFeedback] af WHERE af.[IdProfile]={0} FOR JSON PATH)) articleFeedback,
+              JSON_QUERY((SELECT a.[ArticleKey] slug,ai.[InteractionType] type FROM [Account].[ArticleInteraction] ai JOIN [Mag].[MagazineArticle] a ON a.[Id]=ai.[IdMagazineArticle] WHERE ai.[IdProfile]={0} FOR JSON PATH)) articleInteractions,
+              JSON_QUERY((SELECT a.[ArticleKey] slug,af.[DisplayName] name,af.[FeedbackText] text,af.[Rating] rating,af.[Status] status,af.[CreatedAtUtc] createdAt FROM [Account].[ArticleFeedback] af JOIN [Mag].[MagazineArticle] a ON a.[Id]=af.[IdMagazineArticle] WHERE af.[IdProfile]={0} FOR JSON PATH)) articleFeedback,
               JSON_QUERY((SELECT cp.[IdSelectedAddress] selectedAddressId,cp.[PaymentMethod] paymentMethod FROM [Account].[CheckoutPreference] cp WHERE cp.[IdProfile]={0} FOR JSON PATH,WITHOUT_ARRAY_WRAPPER)) checkout,
-              JSON_QUERY((SELECT o.[Id] id,o.[OrderNumber] number,o.[Status] status,o.[OrderedAtUtc] orderedAtUtc,o.[ItemCount] itemCount,o.[TotalAmount] totalAmount,JSON_QUERY((SELECT i.[IdProduct] productId,i.[IdProductVariant] variantId,i.[ProductNameSnapshot] name,i.[SalesPlanKey] salesPlanId,i.[Quantity] quantity,i.[UnitAmount] unitAmount,JSON_QUERY(i.[OptionsJson]) options FROM [Account].[CustomerOrderItem] i WHERE i.[IdCustomerOrder]=o.[Id] FOR JSON PATH)) items FROM [Account].[CustomerOrder] o WHERE o.[IdProfile]={0} ORDER BY o.[Id] DESC FOR JSON PATH)) orders
+              JSON_QUERY((SELECT o.[Id] id,o.[OrderNumber] number,o.[Status] status,o.[OrderedAtUtc] orderedAtUtc,o.[ItemCount] itemCount,o.[TotalAmount] totalAmount,JSON_QUERY((SELECT i.[IdProduct] productId,i.[IdProductVariant] variantId,i.[ProductNameSnapshot] name,sp.[SalesPlanKey] salesPlanId,i.[Quantity] quantity,i.[UnitAmount] unitAmount,JSON_QUERY(i.[OptionsJson]) options FROM [Account].[CustomerOrderItem] i JOIN [Store].[SalesPlan] sp ON sp.[Id]=i.[IdSalesPlan] WHERE i.[IdCustomerOrder]=o.[Id] FOR JSON PATH)) items FROM [Account].[CustomerOrder] o WHERE o.[IdProfile]={0} ORDER BY o.[Id] DESC FOR JSON PATH)) orders
             FROM [Account].[Profile] p WHERE p.[Id]={0} FOR JSON PATH,WITHOUT_ARRAY_WRAPPER) AS [Value];
             """;
         var json = await db.Database.SqlQueryRaw<string>(sql, ProfileId).SingleOrDefaultAsync(ct);
@@ -119,10 +119,11 @@ public sealed class AccountController(ShopDbContext db, ISalesPlanSource plans, 
             IF NOT EXISTS(SELECT 1 FROM [Account].[Cart] WHERE [IdProfile]={{ProfileId}}) INSERT INTO [Account].[Cart]([IdProfile]) VALUES({{ProfileId}});
             DECLARE @CartId BIGINT=(SELECT [Id] FROM [Account].[Cart] WHERE [IdProfile]={{ProfileId}});
             DELETE FROM [Account].[CartItem] WHERE [IdCart]=@CartId;
-            INSERT INTO [Account].[CartItem]([IdCart],[IdProduct],[IdProductVariant],[SalesPlanKey],[Quantity],[OptionsJson])
-            SELECT @CartId,p.[Id],j.[VariantId],j.[SalesPlanId],j.[Quantity],COALESCE(j.[OptionsJson],N'{}')
+            INSERT INTO [Account].[CartItem]([IdCart],[IdProduct],[IdProductVariant],[IdSalesPlan],[Quantity],[OptionsJson])
+            SELECT @CartId,p.[Id],j.[VariantId],sp.[Id],j.[Quantity],COALESCE(j.[OptionsJson],N'{}')
             FROM OPENJSON({{payload}}) WITH([ProductId] BIGINT '$.productId',[VariantId] BIGINT '$.variantId',[SalesPlanId] NVARCHAR(64) '$.salesPlanId',[Quantity] INT '$.quantity',[OptionsJson] NVARCHAR(MAX) '$.options' AS JSON) j
-            JOIN [Store].[Product] p ON p.[Id]=j.[ProductId] AND p.[IsActive]=1;
+            JOIN [Store].[Product] p ON p.[Id]=j.[ProductId] AND p.[IsActive]=1
+            JOIN [Store].[SalesPlan] sp ON sp.[SalesPlanKey]=j.[SalesPlanId] AND sp.[IsEnabled]=1;
             IF @@ROWCOUNT<>(SELECT COUNT(*) FROM OPENJSON({{payload}})) THROW 51001,'Cart contains an unavailable product.',1;
             UPDATE [Account].[Cart] SET [UpdatedAtUtc]=SYSUTCDATETIME() WHERE [Id]=@CartId;
             COMMIT TRANSACTION;
@@ -134,10 +135,8 @@ public sealed class AccountController(ShopDbContext db, ISalesPlanSource plans, 
     public async Task<IActionResult> AddAddress(AddressRequest a, CancellationToken ct)
     {
         if (new[] { a.Title,a.Recipient,a.Phone,a.Country,a.CountryId,a.Province,a.ProvinceId,a.City,a.CityId,a.Street,a.Postal }.Any(v => string.IsNullOrWhiteSpace(v)) || a.Street!.Length > 500) return BadRequest(new { code = "invalid-address" });
-        await using var transaction = await db.Database.BeginTransactionAsync(ct);
-        await db.Database.ExecuteSqlInterpolatedAsync($"INSERT INTO [Account].[Address]([IdProfile],[Title],[Recipient],[Phone],[Country],[CountryId],[Province],[ProvinceId],[City],[CityId],[Street],[PostalCode]) VALUES({ProfileId},{a.Title!.Trim()},{a.Recipient!.Trim()},{a.Phone!.Trim()},{a.Country!.Trim()},{a.CountryId!.Trim()},{a.Province!.Trim()},{a.ProvinceId!.Trim()},{a.City!.Trim()},{a.CityId!.Trim()},{a.Street!.Trim()},{a.Postal!.Trim()})", ct);
-        long id = await db.Database.SqlQueryRaw<long>("SELECT CONVERT(BIGINT,SCOPE_IDENTITY()) AS [Value]").SingleAsync(ct);
-        await transaction.CommitAsync(ct);
+        List<long> inserted = await db.Database.SqlQuery<long>($"INSERT INTO [Account].[Address]([IdProfile],[Title],[Recipient],[Phone],[Country],[CountryId],[Province],[ProvinceId],[City],[CityId],[Street],[PostalCode]) OUTPUT INSERTED.[Id] AS [Value] VALUES({ProfileId},{a.Title!.Trim()},{a.Recipient!.Trim()},{a.Phone!.Trim()},{a.Country!.Trim()},{a.CountryId!.Trim()},{a.Province!.Trim()},{a.ProvinceId!.Trim()},{a.City!.Trim()},{a.CityId!.Trim()},{a.Street!.Trim()},{a.Postal!.Trim()})").ToListAsync(ct);
+        long id = inserted.Single();
         return Ok(new { saved = true, id = id.ToString(System.Globalization.CultureInfo.InvariantCulture) });
     }
 
@@ -231,12 +230,13 @@ public sealed class AccountController(ShopDbContext db, ISalesPlanSource plans, 
         int count = priced.Sum(x => x.Line.Quantity);
         string number = $"ND{DateTime.UtcNow:yyMMddHHmmss}{Random.Shared.Next(1000, 9999)}";
         await using var transaction = await db.Database.BeginTransactionAsync(ct);
-        await db.Database.ExecuteSqlInterpolatedAsync($"INSERT INTO [Account].[CustomerOrder]([IdProfile],[IdAddress],[OrderNumber],[PaymentMethod],[ItemCount],[TotalAmount],[AddressSnapshotJson]) VALUES({ProfileId},{request.AddressId},{number},{request.PaymentMethod},{count},{total},{addressSnapshot})", ct);
-        long orderId = await db.Database.SqlQueryRaw<long>("SELECT CONVERT(BIGINT,SCOPE_IDENTITY()) AS [Value]").SingleAsync(ct);
+        List<long> insertedOrders = await db.Database.SqlQuery<long>($"INSERT INTO [Account].[CustomerOrder]([IdProfile],[IdAddress],[OrderNumber],[PaymentMethod],[ItemCount],[TotalAmount],[AddressSnapshotJson]) OUTPUT INSERTED.[Id] AS [Value] VALUES({ProfileId},{request.AddressId},{number},{request.PaymentMethod},{count},{total},{addressSnapshot})").ToListAsync(ct);
+        long orderId = insertedOrders.Single();
         foreach (var item in priced)
         {
             string options = item.Line.Options.HasValue ? item.Line.Options.Value.GetRawText() : "{}";
-            await db.Database.ExecuteSqlInterpolatedAsync($"INSERT INTO [Account].[CustomerOrderItem]([IdCustomerOrder],[IdProduct],[IdProductVariant],[ProductNameSnapshot],[SalesPlanKey],[Quantity],[UnitAmount],[OptionsJson]) VALUES({orderId},{item.Line.ProductId},{item.Line.VariantId},{item.ProductName},{item.Line.SalesPlanId},{item.Line.Quantity},{item.UnitAmount},{options})", ct);
+            int insertedItems = await db.Database.ExecuteSqlInterpolatedAsync($"INSERT INTO [Account].[CustomerOrderItem]([IdCustomerOrder],[IdProduct],[IdProductVariant],[ProductNameSnapshot],[IdSalesPlan],[Quantity],[UnitAmount],[OptionsJson]) SELECT {orderId},{item.Line.ProductId},{item.Line.VariantId},{item.ProductName},[Id],{item.Line.Quantity},{item.UnitAmount},{options} FROM [Store].[SalesPlan] WHERE [SalesPlanKey]={item.Line.SalesPlanId}", ct);
+            if (insertedItems != 1) throw new InvalidOperationException("The sales plan no longer exists.");
         }
         await db.Database.ExecuteSqlInterpolatedAsync($"IF NOT EXISTS(SELECT 1 FROM [Account].[CheckoutPreference] WHERE [IdProfile]={ProfileId}) INSERT INTO [Account].[CheckoutPreference]([IdProfile],[IdSelectedAddress],[PaymentMethod]) VALUES({ProfileId},{request.AddressId},{request.PaymentMethod}); ELSE UPDATE [Account].[CheckoutPreference] SET [IdSelectedAddress]={request.AddressId},[PaymentMethod]={request.PaymentMethod},[UpdatedAtUtc]=SYSUTCDATETIME() WHERE [IdProfile]={ProfileId}; DELETE ci FROM [Account].[CartItem] ci JOIN [Account].[Cart] c ON c.[Id]=ci.[IdCart] WHERE c.[IdProfile]={ProfileId};", ct);
         await transaction.CommitAsync(ct);
@@ -320,7 +320,8 @@ public sealed class AccountController(ShopDbContext db, ISalesPlanSource plans, 
     public async Task<IActionResult> ToggleArticleInteraction(string slug, string type, CancellationToken ct)
     {
         if (slug.Length is < 1 or > 160 || !slug.All(c => char.IsAsciiLetterOrDigit(c) || c == '-') || type is not ("like" or "bookmark" or "read")) return BadRequest(new { code = "invalid-interaction" });
-        await db.Database.ExecuteSqlInterpolatedAsync($"IF EXISTS(SELECT 1 FROM [Account].[ArticleInteraction] WHERE [IdProfile]={ProfileId} AND [ArticleSlug]={slug} AND [InteractionType]={type}) DELETE FROM [Account].[ArticleInteraction] WHERE [IdProfile]={ProfileId} AND [ArticleSlug]={slug} AND [InteractionType]={type}; ELSE INSERT INTO [Account].[ArticleInteraction]([IdProfile],[ArticleSlug],[InteractionType]) VALUES({ProfileId},{slug},{type});", ct);
+        if (await db.Database.SqlQuery<int>($"SELECT COUNT(*) AS [Value] FROM [Mag].[MagazineArticle] WHERE [ArticleKey]={slug} AND [IsPublished]=1").SingleAsync(ct) == 0) return NotFound(new { code = "article-not-found" });
+        await db.Database.ExecuteSqlInterpolatedAsync($"DECLARE @articleId BIGINT=(SELECT [Id] FROM [Mag].[MagazineArticle] WHERE [ArticleKey]={slug}); IF EXISTS(SELECT 1 FROM [Account].[ArticleInteraction] WHERE [IdProfile]={ProfileId} AND [IdMagazineArticle]=@articleId AND [InteractionType]={type}) DELETE FROM [Account].[ArticleInteraction] WHERE [IdProfile]={ProfileId} AND [IdMagazineArticle]=@articleId AND [InteractionType]={type}; ELSE INSERT INTO [Account].[ArticleInteraction]([IdProfile],[IdMagazineArticle],[InteractionType]) VALUES({ProfileId},@articleId,{type});", ct);
         return Ok(new { saved = true });
     }
 
@@ -330,10 +331,10 @@ public sealed class AccountController(ShopDbContext db, ISalesPlanSource plans, 
         string name = (request.Name ?? "").Trim();
         string text = (request.Text ?? "").Trim();
         if (slug.Length is < 1 or > 160 || !slug.All(c => char.IsAsciiLetterOrDigit(c) || c == '-') || name.Length is < 3 or > 80 || name.Split(' ', StringSplitOptions.RemoveEmptyEntries).Length < 2 || text.Length is < 1 or > 1000 || request.Rating is < 1 or > 5) return BadRequest(new { code = "invalid-feedback" });
-        await using var transaction = await db.Database.BeginTransactionAsync(ct);
-        await db.Database.ExecuteSqlInterpolatedAsync($"INSERT INTO [Account].[ArticleFeedback]([IdProfile],[ArticleSlug],[DisplayName],[FeedbackText],[Rating]) VALUES({ProfileId},{slug},{name},{text},{request.Rating})", ct);
-        long id = await db.Database.SqlQueryRaw<long>("SELECT CONVERT(BIGINT,SCOPE_IDENTITY()) AS [Value]").SingleAsync(ct);
-        await transaction.CommitAsync(ct);
+        if (await db.Database.SqlQuery<int>($"SELECT COUNT(*) AS [Value] FROM [Mag].[MagazineArticle] WHERE [ArticleKey]={slug} AND [IsPublished]=1").SingleAsync(ct) == 0) return NotFound(new { code = "article-not-found" });
+        List<long> inserted = await db.Database.SqlQuery<long>($"INSERT INTO [Account].[ArticleFeedback]([IdProfile],[IdMagazineArticle],[DisplayName],[FeedbackText],[Rating]) OUTPUT INSERTED.[Id] AS [Value] SELECT {ProfileId},[Id],{name},{text},{request.Rating} FROM [Mag].[MagazineArticle] WHERE [ArticleKey]={slug} AND [IsPublished]=1").ToListAsync(ct);
+        if (inserted.Count == 0) return NotFound(new { code = "article-not-found" });
+        long id = inserted.Single();
         return Ok(new { saved = true, id, status = "pending" });
     }
 

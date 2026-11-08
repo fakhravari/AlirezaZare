@@ -97,12 +97,12 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
             await using (DbCommand command = connection.CreateCommand())
             {
                 command.CommandText = """
-                    SELECT p.[Id], option.[OptionKey], option.[Label], value.[ValueKey], value.[Label],
-                           CONVERT(DECIMAL(19,0), ROUND(value.[PriceDelta] * 1000000, 0))
-                    FROM [Store].[ProductPurchaseOption] option
-                    INNER JOIN [Store].[Product] p ON p.[Id] = option.[IdProduct] AND p.[IsActive] = 1
-                    INNER JOIN [Store].[ProductPurchaseOptionValue] value ON value.[IdProductPurchaseOption] = option.[Id]
-                    ORDER BY p.[Id], option.[SortOrder], value.[SortOrder];
+                    SELECT p.[Id], opt.[OptionKey], opt.[Label], val.[ValueKey], val.[Label],
+                           CONVERT(DECIMAL(19,0), ROUND(val.[PriceDelta] * 1000000, 0))
+                    FROM [Store].[ProductPurchaseOption] opt
+                    INNER JOIN [Store].[Product] p ON p.[Id] = opt.[IdProduct] AND p.[IsActive] = 1
+                    INNER JOIN [Store].[ProductPurchaseOptionValue] val ON val.[IdProductPurchaseOption] = opt.[Id]
+                    ORDER BY p.[Id], opt.[SortOrder], val.[SortOrder];
                     """;
                 await using DbDataReader reader = await command.ExecuteReaderAsync(cancellationToken);
                 while (await reader.ReadAsync(cancellationToken))
@@ -149,12 +149,12 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
             await using (DbCommand command = connection.CreateCommand())
             {
                 command.CommandText = """
-                    SELECT offer.[IdProductVariant], plan.[SalesPlanKey], offer.[PriceAmount], offer.[DiscountPercent]
+                    SELECT offer.[IdProductVariant], [plan].[SalesPlanKey], offer.[PriceAmount], offer.[DiscountPercent]
                     FROM [Store].[ProductVariantSalesPlanOffer] offer
-                    INNER JOIN [Store].[SalesPlan] plan ON plan.[Id] = offer.[IdSalesPlan]
+                    INNER JOIN [Store].[SalesPlan] [plan] ON [plan].[Id] = offer.[IdSalesPlan]
                     INNER JOIN [Warehouse].[ProductVariant] variant ON variant.[Id] = offer.[IdProductVariant] AND variant.[IsActive] = 1
                     WHERE offer.[IsEnabled] = 1
-                    ORDER BY offer.[IdProductVariant], plan.[SalesPlanKey];
+                    ORDER BY offer.[IdProductVariant], [plan].[SalesPlanKey];
                     """;
                 await using DbDataReader reader = await command.ExecuteReaderAsync(cancellationToken);
                 while (await reader.ReadAsync(cancellationToken))

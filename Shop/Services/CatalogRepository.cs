@@ -28,7 +28,7 @@ public sealed class CatalogRepository(Shop.Database.Application.Store.Contracts.
             foreach (JsonNode? row in rows)
             {
                 if (row is not JsonObject item || item["id"]?.GetValue<string>() is not { } id) continue;
-                relation[id] = property == "collections" ? item["items"] : item;
+                relation[id] = (property == "collections" ? item["items"] : item)?.DeepClone();
             }
             root[property] = relation;
         }
