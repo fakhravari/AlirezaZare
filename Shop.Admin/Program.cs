@@ -1,4 +1,3 @@
-using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -42,33 +41,8 @@ builder.Services.AddScoped<AdminAuthentication>();
 builder.Services.AddScoped<AdminCookieEvents>();
 builder.Services.Configure<MvcOptions>(options => options.Filters.Add<AdminPermissionFilter>());
 
-IConfiguration databaseConfiguration = builder.Configuration;
-string? connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-if (string.IsNullOrWhiteSpace(connectionString))
-{
-    string shopSettings = Path.GetFullPath(Path.Combine(builder.Environment.ContentRootPath, "..", "Shop", "appsettings.json"));
-    IConfiguration sharedSettings = new ConfigurationBuilder()
-        .AddJsonFile(shopSettings, optional: true, reloadOnChange: true)
-        .Build();
-
-    connectionString = sharedSettings.GetConnectionString("DefaultConnection");
-    if (!string.IsNullOrWhiteSpace(connectionString))
-    {
-        databaseConfiguration = new ConfigurationBuilder()
-            .AddConfiguration(builder.Configuration)
-            .AddInMemoryCollection(new Dictionary<string, string?>
-            {
-                ["ConnectionStrings:DefaultConnection"] = connectionString
-            })
-            .Build();
-    }
-}
-
-if (!string.IsNullOrWhiteSpace(connectionString))
-{
-    builder.Services.AddShopDatabase(databaseConfiguration);
-    builder.Services.AddHostedService<AdminBootstrapper>();
-}
+builder.Services.AddShopDatabase(builder.Configuration);
+builder.Services.AddHostedService<AdminBootstrapper>();
 
 var app = builder.Build();
 

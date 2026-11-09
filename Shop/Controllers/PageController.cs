@@ -10,10 +10,12 @@ public abstract class PageController : Controller
     {
         SiteIdentityOptions identity = HttpContext.RequestServices
             .GetRequiredService<IOptions<SiteIdentityOptions>>().Value;
+
         string StoreName(string value) => value
             .Replace("فروشگاه برق و ابزار ندا اولیائی", identity.StoreName, StringComparison.Ordinal)
             .Replace("فروشگاه ندا اولیائی", identity.StoreName, StringComparison.Ordinal)
             .Replace("ندا اولیائی", identity.DisplayName, StringComparison.Ordinal);
+
         model = model with
         {
             Seo = model.Seo with

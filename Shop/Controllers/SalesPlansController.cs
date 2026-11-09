@@ -62,6 +62,7 @@ public sealed class SalesPlansController(
             }
             else if (request.VariantId.HasValue)
                 throw new SalesPlanUnavailableException("product-variant-unavailable");
+
             ProductSalesOffer selectedOffer = data.Offers.Single(item =>
                 item.ProductId == quote.ProductId && item.SalesPlanId == quote.SalesPlanId);
             (decimal adjustments, IReadOnlyDictionary<string, decimal> accessoryAmounts, int maxQuantity) =
@@ -73,12 +74,15 @@ public sealed class SalesPlansController(
             decimal baseUnitAmount = quote.UnitAmount;
             ProductInventoryVariant? selectedInventoryVariant = data.InventoryVariants.SingleOrDefault(variant =>
                 variant.ProductId == request.ProductId && variant.VariantId == request.VariantId);
-            if (selectedInventoryVariant is not null && selectedInventoryVariant.PriceBySalesPlan.TryGetValue(selectedPlanId, out decimal variantPrice))
+            if (selectedInventoryVariant is not null &&
+                selectedInventoryVariant.PriceBySalesPlan.TryGetValue(selectedPlanId, out decimal variantPrice))
             {
                 listUnitAmount = variantPrice;
                 discountPercent = selectedInventoryVariant.DiscountBySalesPlan.GetValueOrDefault(selectedPlanId);
-                baseUnitAmount = decimal.Round(variantPrice * (100m - discountPercent) / 100m, 0, MidpointRounding.AwayFromZero);
+                baseUnitAmount = decimal.Round(variantPrice * (100m - discountPercent) / 100m, 0,
+                    MidpointRounding.AwayFromZero);
             }
+
             decimal adjustedUnit = checked(baseUnitAmount + adjustments);
             return Ok(new
             {
@@ -109,7 +113,8 @@ public sealed class SalesPlansController(
             return BadRequest(new { code = "invalid-cart" });
         if (request.Lines.Any(line =>
                 line is null || line.ProductId < 1 || string.IsNullOrWhiteSpace(line.SalesPlanId)) ||
-            request.Lines.Select(line => $"{line.ProductId}:{line.VariantId?.ToString() ?? "base"}:{line.SalesPlanId}").Distinct(StringComparer.Ordinal)
+            request.Lines.Select(line => $"{line.ProductId}:{line.VariantId?.ToString() ?? "base"}:{line.SalesPlanId}")
+                .Distinct(StringComparer.Ordinal)
                 .Count() != request.Lines.Count)
             return BadRequest(new { code = "invalid-cart" });
         var result = new List<object>();
@@ -127,7 +132,8 @@ public sealed class SalesPlansController(
     private async Task<(decimal, IReadOnlyDictionary<string, decimal>, int)> GetValidatedAdjustments(
         QuoteRequest request, ProductSalesOffer offer, CancellationToken cancellationToken)
     {
-        ProductPurchaseConfiguration? product = await purchaseConfigurations.ReadAsync(request.ProductId, cancellationToken);
+        ProductPurchaseConfiguration? product =
+            await purchaseConfigurations.ReadAsync(request.ProductId, cancellationToken);
         if (product is null) throw new InvalidDataException();
         decimal adjustments = 0m;
         Dictionary<string, decimal> accessoryAmounts = new(StringComparer.Ordinal);
@@ -142,7 +148,8 @@ public sealed class SalesPlansController(
             adjustments += option.PriceDelta;
         }
 
-        if (request.PriceOptions is not null && request.PriceOptions.Keys.Any(key => !acceptedVariantKeys.Contains(key)))
+        if (request.PriceOptions is not null &&
+            request.PriceOptions.Keys.Any(key => !acceptedVariantKeys.Contains(key)))
             throw new InvalidDataException();
         int maxQuantity = product.MaxPurchaseQuantity;
         maxQuantity = Math.Clamp(maxQuantity, 1, 99);
@@ -150,9 +157,11 @@ public sealed class SalesPlansController(
             accessoryIds.Count != accessoryIds.Distinct(StringComparer.Ordinal).Count())
             throw new InvalidDataException();
         HashSet<string> selected = new(request.AccessoryIds ?? [], StringComparer.Ordinal);
-        HashSet<string> allowedAccessoryIds = product.Accessories.Select(accessory => accessory.Key).ToHashSet(StringComparer.Ordinal);
+        HashSet<string> allowedAccessoryIds =
+            product.Accessories.Select(accessory => accessory.Key).ToHashSet(StringComparer.Ordinal);
         if (selected.Any(id => !allowedAccessoryIds.Contains(id)) ||
-            offer.AccessoryIds is { } allowedByOffer && selected.Any(id => !allowedByOffer.Contains(id, StringComparer.Ordinal)))
+            offer.AccessoryIds is { } allowedByOffer &&
+            selected.Any(id => !allowedByOffer.Contains(id, StringComparer.Ordinal)))
             throw new InvalidDataException();
 
         foreach (ProductAccessory accessory in product.Accessories)

@@ -8,7 +8,10 @@ public sealed record StoreSalesPlanSnapshot(
     public IReadOnlyList<StoreProductPriceOptionRow> PriceOptions { get; init; } = [];
 }
 
-public sealed record StoreProductPriceOptionRow(int ProductId, string Key, string Label,
+public sealed record StoreProductPriceOptionRow(
+    int ProductId,
+    string Key,
+    string Label,
     IReadOnlyList<StoreProductPriceOptionValueRow> Values);
 
 public sealed record StoreProductPriceOptionValueRow(string Key, string Label, decimal PriceDelta);

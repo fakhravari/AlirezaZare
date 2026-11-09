@@ -110,9 +110,20 @@ public sealed class StoreCatalogAdminApiController(IStoreRuntimeDatasetRepositor
             ? value.GetString() ?? fallback
             : fallback;
 
-    private sealed record ProductRow(int Id, string Code, string Name, string EnglishName, string BrandName,
-        string CategoryName, decimal Price, int StockQuantity, decimal DiscountPercent);
+    private sealed record ProductRow(
+        int Id,
+        string Code,
+        string Name,
+        string EnglishName,
+        string BrandName,
+        string CategoryName,
+        decimal Price,
+        int StockQuantity,
+        decimal DiscountPercent);
+
     private sealed record CategoryRow(string Id, string Name, string EnglishName, string Slug, string ParentId);
+
     private sealed record BrandRow(string Id, string Name, string EnglishName, string CountryCode);
+
     private sealed record AttributeRow(string Key, string Name, string Source, bool IsFilterable, bool IsHighlight);
 }

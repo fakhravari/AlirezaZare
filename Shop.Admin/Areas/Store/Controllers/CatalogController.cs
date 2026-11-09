@@ -6,7 +6,10 @@ namespace Shop.Admin.Areas.Store.Controllers;
 public sealed class CatalogController : Controller
 {
     public IActionResult Products() => CatalogPage("products", "محصولات", "کالاها و وضعیت پایهٔ کاتالوگ فروشگاه.");
-    public IActionResult Categories() => CatalogPage("categories", "دسته‌بندی‌ها", "ساختار درختی دسته‌بندی‌های کاتالوگ.");
+
+    public IActionResult Categories() =>
+        CatalogPage("categories", "دسته‌بندی‌ها", "ساختار درختی دسته‌بندی‌های کاتالوگ.");
+
     public IActionResult Brands() => CatalogPage("brands", "برندها", "برندهای متصل به کالاهای فروشگاه.");
     public IActionResult Attributes() => CatalogPage("attributes", "ویژگی‌ها", "تعریف ویژگی‌های فیلتر و مشخصات کالا.");
 

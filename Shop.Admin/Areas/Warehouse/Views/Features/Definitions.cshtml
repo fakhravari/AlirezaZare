@@ -3,30 +3,68 @@
     @await Html.PartialAsync("_AdminPageIntro", (Model.Title, Model.Description))
     @if (Model.FeatureId == "sales-plan-mapping")
     {
-        <section class="panel panel-inverse"><div class="panel-heading"><h2 class="panel-title">اتصال انبار فروش به فروشگاه</h2></div><div class="panel-body">
-            <div class="admin-data-status" data-definition-status role="status" aria-live="polite">در حال بارگذاری…</div>
-            <form data-mapping-form class="row g-3"><div class="col-md-4"><label class="form-label" for="mapping-company">شرکت</label><select class="form-select" id="mapping-company" name="companyId" required></select></div><div class="col-md-4"><label class="form-label" for="mapping-warehouse">انبار فروش</label><select class="form-select" id="mapping-warehouse" name="warehouseId" required></select></div><div class="col-md-4"><label class="form-label" for="mapping-plan">طرح فروش سایت</label><select class="form-select" id="mapping-plan" name="salesPlanId" required></select></div><div class="col-12"><button class="btn btn-primary" type="submit">ذخیرهٔ اتصال</button></div></form>
-        </div></section>
+        <section class="panel panel-inverse">
+            <div class="panel-heading">
+                <h2 class="panel-title">اتصال انبار فروش به فروشگاه</h2>
+            </div>
+            <div class="panel-body">
+                <div class="admin-data-status" data-definition-status role="status" aria-live="polite">در حال بارگذاری…</div>
+                <form data-mapping-form class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label" for="mapping-company">شرکت</label><select class="form-select" id="mapping-company" name="companyId" required></select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" for="mapping-warehouse">انبار فروش</label><select class="form-select" id="mapping-warehouse" name="warehouseId" required></select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" for="mapping-plan">طرح فروش سایت</label><select class="form-select" id="mapping-plan" name="salesPlanId" required></select>
+                    </div>
+                    <div class="col-12">
+                        <button class="btn btn-primary" type="submit">ذخیرهٔ اتصال</button>
+                    </div>
+                </form>
+            </div>
+        </section>
     }
     else
     {
-        <section class="panel panel-inverse"><div class="panel-heading"><h2 class="panel-title">فهرست تعریف‌ها</h2><div class="panel-heading-btn"><button type="button" class="btn btn-primary btn-sm" data-definition-create><i class="fa fa-plus me-1" aria-hidden="true"></i>افزودن</button></div></div><div class="panel-body">
-            @if (new[] { "units", "product-units", "variants" }.Contains(Model.FeatureId, StringComparer.OrdinalIgnoreCase))
-            {
-                <nav class="nav nav-pills mb-3" aria-label="تعریف‌های واحد و تنوع">
-                    <a class="nav-link @(Model.FeatureId == "units" ? "active" : "")" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="units" data-admin-nav>واحدها</a>
-                    <a class="nav-link @(Model.FeatureId == "product-units" ? "active" : "")" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="product-units" data-admin-nav>واحد و ضریب کالا</a>
-                    <a class="nav-link @(Model.FeatureId == "variants" ? "active" : "")" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="variants" data-admin-nav>تنوع کالا</a>
-                </nav>
-            }
-            <div class="admin-data-status" data-definition-status role="status" aria-live="polite">در حال بارگذاری…</div>
-            <div class="table-responsive"><table class="table table-striped table-hover align-middle"><thead data-definition-head></thead><tbody data-definition-rows></tbody></table></div>
-        </div></section>
+        <section class="panel panel-inverse">
+            <div class="panel-heading">
+                <h2 class="panel-title">فهرست تعریف‌ها</h2>
+                <div class="panel-heading-btn">
+                    <button type="button" class="btn btn-primary btn-sm" data-definition-create><i class="fa fa-plus me-1" aria-hidden="true"></i>افزودن</button>
+                </div>
+            </div>
+            <div class="panel-body">
+                @if (new[] { "units", "product-units", "variants" }.Contains(Model.FeatureId, StringComparer.OrdinalIgnoreCase))
+                {
+                    <nav class="nav nav-pills mb-3" aria-label="تعریف‌های واحد و تنوع">
+                        <a class="nav-link @(Model.FeatureId == "units" ? "active" : "")" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="units" data-admin-nav>واحدها</a>
+                        <a class="nav-link @(Model.FeatureId == "product-units" ? "active" : "")" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="product-units" data-admin-nav>واحد و ضریب کالا</a>
+                        <a class="nav-link @(Model.FeatureId == "variants" ? "active" : "")" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="variants" data-admin-nav>تنوع کالا</a>
+                    </nav>
+                }
+                <div class="admin-data-status" data-definition-status role="status" aria-live="polite">در حال بارگذاری…</div>
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover align-middle">
+                        <thead data-definition-head></thead><tbody data-definition-rows></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
     }
 </div>
-<div class="modal fade" id="admin-definition-modal" tabindex="-1" aria-labelledby="admin-definition-title" aria-hidden="true"><div class="modal-dialog"><form class="modal-content" data-definition-form>
-    @Html.AntiForgeryToken()<input type="hidden" name="id" />
-    <div class="modal-header"><h2 class="modal-title fs-5" id="admin-definition-title">افزودن تعریف</h2><button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="بستن"></button></div>
-    <div class="modal-body" data-definition-fields></div>
-    <div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button type="submit" class="btn btn-primary">ذخیره</button></div>
-</form></div></div>
+<div class="modal fade" id="admin-definition-modal" tabindex="-1" aria-labelledby="admin-definition-title" aria-hidden="true">
+    <div class="modal-dialog">
+        <form class="modal-content" data-definition-form>
+            @Html.AntiForgeryToken()<input type="hidden" name="id"/>
+            <div class="modal-header">
+                <h2 class="modal-title fs-5" id="admin-definition-title">افزودن تعریف</h2><button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="بستن"></button>
+            </div>
+            <div class="modal-body" data-definition-fields></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button type="submit" class="btn btn-primary">ذخیره</button>
+            </div>
+        </form>
+    </div>
+</div>

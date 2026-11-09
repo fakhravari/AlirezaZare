@@ -92,7 +92,9 @@
             </a>
             <a asp-controller="Profile" asp-action="Messages" aria-current="@(profileSection == "messages" ? "page" : null)">
                 <i class="bi bi-envelope"></i>
-                <span><strong>پیام‌ها</strong></span><i class="bi bi-chevron-left"></i>
+                <span>
+                    <strong>پیام‌ها</strong>
+                </span><i class="bi bi-chevron-left"></i>
             </a>
         </nav>
         <div class="account-sidebar-help">
@@ -113,15 +115,28 @@
                 </div>
             </div>
             <section class="profile-personal-card" aria-labelledby="profilePersonalTitle">
-                <header><i class="bi bi-person" aria-hidden="true"></i><h3 id="profilePersonalTitle">مشخصات فردی</h3></header>
+                <header>
+                    <i class="bi bi-person" aria-hidden="true"></i>
+                    <h3 id="profilePersonalTitle">مشخصات فردی</h3>
+                </header>
                 <div class="profile-personal-grid">
-                    <div><span>نام و نام خانوادگی</span><strong data-profile-value="name">ندا اولیائی</strong></div>
-                    <div><span>پست الکترونیکی</span><strong data-profile-value="email" dir="ltr">example@email.com</strong></div>
-                    <div><span>شماره موبایل</span><strong data-profile-value="phone" dir="ltr">۰۹۳۶۹۴۵۵۴۵۷</strong></div>
-                    <div><span>دریافت خبرنامه</span><strong data-profile-value="newsletter">خیر</strong></div>
+                    <div>
+                        <span>نام و نام خانوادگی</span><strong data-profile-value="name">ندا اولیائی</strong>
+                    </div>
+                    <div>
+                        <span>پست الکترونیکی</span><strong data-profile-value="email" dir="ltr">example@email.com</strong>
+                    </div>
+                    <div>
+                        <span>شماره موبایل</span><strong data-profile-value="phone" dir="ltr">۰۹۳۶۹۴۵۵۴۵۷</strong>
+                    </div>
+                    <div>
+                        <span>دریافت خبرنامه</span><strong data-profile-value="newsletter">خیر</strong>
+                    </div>
                 </div>
                 <a class="profile-personal-edit" href="#profileEditDialog" data-profile-edit-trigger>ویرایش اطلاعات</a>
-                <span class="profile-personal-avatar" aria-hidden="true"><i class="bi bi-person"></i></span>
+                <span class="profile-personal-avatar" aria-hidden="true">
+                    <i class="bi bi-person"></i>
+                </span>
             </section>
             <div class="account-stats">
                 <article>
@@ -299,7 +314,7 @@
                 </span><small class="profile-edit-validation field-validation-valid" data-profile-edit-error="email"></small>
             </label>
             <label class="profile-edit-newsletter profile-edit-full">
-                <input name="newsletter" type="checkbox" />
+                <input name="newsletter" type="checkbox"/>
                 <span>مایلم خبرنامه و پیشنهادهای فروشگاه را دریافت کنم.</span>
             </label>
             <button class="profile-edit-full" type="submit">ذخیره تغییرات <i class="bi bi-floppy2-fill" aria-hidden="true"></i></button>

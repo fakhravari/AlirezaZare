@@ -22,6 +22,7 @@ public static class DependencyInjection
         services.AddScoped<IWarehouseReadService, WarehouseReadService>();
         services.AddScoped<IStoreSalesPlanRepository, StoreSalesPlanRepository>();
         services.AddScoped<IStoreRuntimeDatasetRepository, StoreRuntimeDatasetRepository>();
+        services.AddScoped<IStoreSiteIdentityRepository, StoreSiteIdentityRepository>();
         services.AddScoped<IProductFeedbackRepository, StoreProductFeedbackRepository>();
         return services;
     }

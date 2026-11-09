@@ -48,5 +48,4 @@ public sealed class BrandsController : PageController
                 ]));
         return await PageAsync(model);
     }
-
 }

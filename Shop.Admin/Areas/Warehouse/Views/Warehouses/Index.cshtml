@@ -3,12 +3,16 @@
     <section class="panel panel-inverse">
         <div class="panel-heading">
             <h2 class="panel-title">فهرست انبارها</h2>
-            <div class="panel-heading-btn"><button class="btn btn-xs btn-icon btn-default" type="button" data-admin-refresh aria-label="بارگذاری دوباره"><i class="fa fa-rotate" aria-hidden="true"></i></button></div>
+            <div class="panel-heading-btn">
+                <button class="btn btn-xs btn-icon btn-default" type="button" data-admin-refresh aria-label="بارگذاری دوباره">
+                    <i class="fa fa-rotate" aria-hidden="true"></i>
+                </button>
+            </div>
         </div>
         <div class="panel-body">
             <form class="admin-filter-bar" data-admin-filter>
                 <label class="visually-hidden" for="warehouse-search">جست‌وجوی انبار</label>
-                <input id="warehouse-search" class="form-control" type="search" name="q" placeholder="نام انبار یا شرکت" autocomplete="off" />
+                <input id="warehouse-search" class="form-control" type="search" name="q" placeholder="نام انبار یا شرکت" autocomplete="off"/>
                 <button class="btn btn-primary" type="submit"><i class="fa fa-magnifying-glass me-1" aria-hidden="true"></i>جست‌وجو</button>
                 <button class="btn btn-default" type="button" data-admin-reset-filter>پاک‌کردن فیلتر</button>
                 <span class="admin-record-count ms-auto" data-admin-count aria-live="polite"></span>
@@ -16,7 +20,11 @@
             <div class="admin-data-status" data-admin-status role="status" aria-live="polite">در حال خواندن داده از دیتابیس…</div>
             <div class="table-responsive admin-table-wrap">
                 <table class="table table-striped table-hover align-middle mb-0">
-                    <thead><tr><th scope="col">کد</th><th scope="col">نام انبار</th><th scope="col">شرکت</th><th scope="col">کاربری فروش</th><th scope="col">وضعیت</th></tr></thead>
+                    <thead>
+                    <tr>
+                        <th scope="col">کد</th><th scope="col">نام انبار</th><th scope="col">شرکت</th><th scope="col">کاربری فروش</th><th scope="col">وضعیت</th>
+                    </tr>
+                    </thead>
                     <tbody data-admin-results></tbody>
                 </table>
             </div>

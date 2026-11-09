@@ -49,11 +49,12 @@ public sealed class ProfileController(Shop.Services.IAccountDataSource accountDa
                 coupon.UsageLimit,
                 coupon.IsActive(today),
                 AccountDisplay.Date(coupon.ExpiresOn),
-                coupon.OrderIds.Where(ordersById.ContainsKey).Select(id => ordersById[id]).Select(order => new ProfileCouponUseViewModel(
-                    order.Number,
-                    order.DateLabel,
-                    order.OrderedOn.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture)))
-                .ToArray()))
+                coupon.OrderIds.Where(ordersById.ContainsKey).Select(id => ordersById[id]).Select(order =>
+                        new ProfileCouponUseViewModel(
+                            order.Number,
+                            order.DateLabel,
+                            order.OrderedOn.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture)))
+                    .ToArray()))
             .ToArray();
         PageModel<ProfilePageViewModel> model = new(
             new ProfilePageViewModel(section, title, description, icon, Array.Empty<AccountOrder>(), coupons),

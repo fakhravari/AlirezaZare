@@ -21,7 +21,8 @@ public sealed class WarehouseReadRepository(ShopDbContext dbContext) : IWarehous
         int page,
         int pageSize,
         CancellationToken cancellationToken)
-        => await GetStockCoreAsync(warehouseId, null, salesPlanKey, search, lowStockOnly, page, pageSize, cancellationToken);
+        => await GetStockCoreAsync(warehouseId, null, salesPlanKey, search, lowStockOnly, page, pageSize,
+            cancellationToken);
 
     public async Task<IReadOnlyList<WarehouseStockItem>> GetStockForWarehousesAsync(
         IReadOnlyCollection<long> warehouseIds,
@@ -31,7 +32,8 @@ public sealed class WarehouseReadRepository(ShopDbContext dbContext) : IWarehous
         int page,
         int pageSize,
         CancellationToken cancellationToken) =>
-        await GetStockCoreAsync(null, warehouseIds, salesPlanKey, search, lowStockOnly, page, pageSize, cancellationToken);
+        await GetStockCoreAsync(null, warehouseIds, salesPlanKey, search, lowStockOnly, page, pageSize,
+            cancellationToken);
 
     private async Task<IReadOnlyList<WarehouseStockItem>> GetStockCoreAsync(
         long? warehouseId,
@@ -44,15 +46,19 @@ public sealed class WarehouseReadRepository(ShopDbContext dbContext) : IWarehous
         CancellationToken cancellationToken)
     {
         var query = from warehouse in dbContext.Warehouses.AsNoTracking()
-                    from inventoryItem in dbContext.InventoryItems.AsNoTracking()
-                    from plan in dbContext.SalesPlanReferences.AsNoTracking()
-                    join balance in dbContext.StockBalances.AsNoTracking()
-                        on new { IdWarehouse = warehouse.Id, IdInventoryItem = inventoryItem.Id, IdSalesPlanReference = plan.Id }
-                        equals new { balance.IdWarehouse, balance.IdInventoryItem, balance.IdSalesPlanReference } into balances
-                    from balance in balances.DefaultIfEmpty()
-                    where warehouse.IsActive && warehouse.Company.IsActive && inventoryItem.IsActive && inventoryItem.Product.IsActive
-                        && (inventoryItem.ProductVariant == null || inventoryItem.ProductVariant!.IsActive) && plan.IsActive
-                    select new { warehouse, inventoryItem, plan, balance };
+            from inventoryItem in dbContext.InventoryItems.AsNoTracking()
+            from plan in dbContext.SalesPlanReferences.AsNoTracking()
+            join balance in dbContext.StockBalances.AsNoTracking()
+                on new
+                {
+                    IdWarehouse = warehouse.Id, IdInventoryItem = inventoryItem.Id, IdSalesPlanReference = plan.Id
+                }
+                equals new { balance.IdWarehouse, balance.IdInventoryItem, balance.IdSalesPlanReference } into balances
+            from balance in balances.DefaultIfEmpty()
+            where warehouse.IsActive && warehouse.Company.IsActive && inventoryItem.IsActive &&
+                  inventoryItem.Product.IsActive
+                  && (inventoryItem.ProductVariant == null || inventoryItem.ProductVariant!.IsActive) && plan.IsActive
+            select new { warehouse, inventoryItem, plan, balance };
 
         if (warehouseId.HasValue) query = query.Where(x => x.warehouse.Id == warehouseId.Value);
         if (warehouseIds is not null) query = query.Where(x => warehouseIds.Contains(x.warehouse.Id));
@@ -60,11 +66,13 @@ public sealed class WarehouseReadRepository(ShopDbContext dbContext) : IWarehous
             query = query.Where(x => x.plan.StoreSalesPlanKey == salesPlanKey);
         if (!string.IsNullOrWhiteSpace(search))
             query = query.Where(x => x.inventoryItem.Product.Name.Contains(search)
-                || x.inventoryItem.Product.StoreProductKey.Contains(search)
-                || (x.inventoryItem.ProductVariant != null && x.inventoryItem.ProductVariant.Name.Contains(search)));
+                                     || x.inventoryItem.Product.StoreProductKey.Contains(search)
+                                     || (x.inventoryItem.ProductVariant != null &&
+                                         x.inventoryItem.ProductVariant.Name.Contains(search)));
         if (lowStockOnly)
             query = query.Where(x => x.plan.IsRegular && x.balance != null
-                && x.balance.MinimumQuantity > 0 && x.balance.Quantity <= x.balance.MinimumQuantity);
+                                                      && x.balance.MinimumQuantity > 0 &&
+                                                      x.balance.Quantity <= x.balance.MinimumQuantity);
 
         return await query.OrderBy(x => x.warehouse.Name)
             .ThenBy(x => x.inventoryItem.Product.Name)
@@ -88,7 +96,8 @@ public sealed class WarehouseReadRepository(ShopDbContext dbContext) : IWarehous
                 x.plan.IsRegular,
                 x.balance == null ? 0m : x.balance.Quantity,
                 x.plan.IsRegular && x.balance != null ? x.balance.MinimumQuantity : 0m,
-                x.plan.IsRegular && x.balance != null && x.balance.MinimumQuantity > 0 && x.balance.Quantity <= x.balance.MinimumQuantity))
+                x.plan.IsRegular && x.balance != null && x.balance.MinimumQuantity > 0 &&
+                x.balance.Quantity <= x.balance.MinimumQuantity))
             .ToListAsync(cancellationToken);
     }
 }

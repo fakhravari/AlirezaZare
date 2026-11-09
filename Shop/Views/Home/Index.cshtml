@@ -7,52 +7,55 @@
 
 
 <main id="home-main-content">
-<section class="home-sales-plans" id="homeSalesTime" aria-label="پیشنهادهای دیجی‌تایم" hidden>
-    <div class="container" id="homeSalesTimeContent"></div>
-</section>
+    <section class="home-sales-plans" id="homeSalesTime" aria-label="پیشنهادهای دیجی‌تایم" hidden>
+        <div class="container" id="homeSalesTimeContent"></div>
+    </section>
 
-<partial name="_Collection"/>
+    <partial name="_Collection"/>
 
-<partial name="_Offers"/>
+    <partial name="_Offers"/>
 
-<partial name="_Bestsellers"/>
+    <partial name="_Bestsellers"/>
 
-<partial name="_Newest"/>
+    <partial name="_Newest"/>
 
-<partial name="_Brands"/>
+    <partial name="_Brands"/>
 
 
-<partial name="_Testimonials"/>
+    <partial name="_Testimonials"/>
 
-<partial name="_PurchaseBenefits"/>
+    <partial name="_PurchaseBenefits"/>
 
-<section class="journal py-section" id="journal">
-    <div class="container">
-        <div class="section-head d-flex justify-content-between align-items-end mb-md-5">
-            <div><span class="eyebrow dark">مجله تخصصی برق و ابزار</span><h2>راهنمای خرید و <em>کار با ابزار</em></h2></div>
-            <a asp-controller="Magazine" asp-action="Index">مشاهده همه مطالب <i class="bi bi-arrow-left"></i></a>
-        </div>
-        <div class="row g-4">
-            @if (Model is PageModel<MagazineIndexViewModel> page)
-            {
-                foreach (var post in page.Data.Posts.Take(6))
+    <section class="journal py-section" id="journal">
+        <div class="container">
+            <div class="section-head d-flex justify-content-between align-items-end mb-md-5">
+                <div>
+                    <span class="eyebrow dark">مجله تخصصی برق و ابزار</span>
+                    <h2>راهنمای خرید و <em>کار با ابزار</em></h2>
+                </div>
+                <a asp-controller="Magazine" asp-action="Index">مشاهده همه مطالب <i class="bi bi-arrow-left"></i></a>
+            </div>
+            <div class="row g-4">
+                @if (Model is PageModel<MagazineIndexViewModel> page)
                 {
-                    <div class="col-md-4">
-                        <article class="journal-card">
-                            <a asp-controller="Magazine" asp-action="Details" asp-route-slug="@post.Slug">
-                                <img loading="lazy" decoding="async" src="@Url.Content("~/" + post.Image)" alt="@post.Title" />
-                                <h3>@post.Title</h3>
-                            </a>
-                            <p>@post.Summary</p>
-                            <small>@post.ReadMinutes دقیقه مطالعه</small>
-                        </article>
-                    </div>
+                    foreach (var post in page.Data.Posts.Take(6))
+                    {
+                        <div class="col-md-4">
+                            <article class="journal-card">
+                                <a asp-controller="Magazine" asp-action="Details" asp-route-slug="@post.Slug">
+                                    <img loading="lazy" decoding="async" src="@Url.Content("~/" + post.Image)" alt="@post.Title"/>
+                                    <h3>@post.Title</h3>
+                                </a>
+                                <p>@post.Summary</p>
+                                <small>@post.ReadMinutes دقیقه مطالعه</small>
+                            </article>
+                        </div>
+                    }
                 }
-            }
+            </div>
         </div>
-    </div>
-</section>
-<partial name="_Newsletter"/>
+    </section>
+    <partial name="_Newsletter"/>
 </main>
 
 @section PageStyles {

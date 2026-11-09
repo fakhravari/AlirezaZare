@@ -13,16 +13,18 @@ namespace Shop.Admin.Security;
 
 public sealed class AdminAuthentication(ShopDbContext db, PasswordHasher<AdminSystemUser> passwordHasher)
 {
-    public async Task<ClaimsPrincipal?> SignInAsync(string userName, string password, CancellationToken cancellationToken)
+    public async Task<ClaimsPrincipal?> SignInAsync(string userName, string password,
+        CancellationToken cancellationToken)
     {
         string normalizedName = userName.Trim().ToUpperInvariant();
         AdminSystemUser? user = await db.AdminSystemUsers
             .Include(x => x.WarehouseAccess)
             .Include(x => x.Roles).ThenInclude(x => x.Role)
-                .ThenInclude(x => x.Permissions).ThenInclude(x => x.Permission)
+            .ThenInclude(x => x.Permissions).ThenInclude(x => x.Permission)
             .SingleOrDefaultAsync(x => x.NormalizedUserName == normalizedName && x.IsActive, cancellationToken);
 
-        if (user is null || passwordHasher.VerifyHashedPassword(user, user.PasswordHash, password) == PasswordVerificationResult.Failed)
+        if (user is null || passwordHasher.VerifyHashedPassword(user, user.PasswordHash, password) ==
+            PasswordVerificationResult.Failed)
             return null;
 
         user.LastLoginAtUtc = DateTime.UtcNow;
@@ -40,14 +42,18 @@ public sealed class AdminAuthentication(ShopDbContext db, PasswordHasher<AdminSy
         foreach (long warehouseId in user.WarehouseAccess.Select(x => x.IdWarehouse))
             claims.Add(new Claim("admin_warehouse", warehouseId.ToString()));
 
-        AdminPermission[] allPermissions = await db.AdminPermissions.AsNoTracking().Where(x => x.IsActive).ToArrayAsync(cancellationToken);
-        var children = allPermissions.GroupBy(x => x.ParentKey ?? "").ToDictionary(x => x.Key, x => x.ToArray(), StringComparer.OrdinalIgnoreCase);
+        AdminPermission[] allPermissions =
+            await db.AdminPermissions.AsNoTracking().Where(x => x.IsActive).ToArrayAsync(cancellationToken);
+        var children = allPermissions.GroupBy(x => x.ParentKey ?? "")
+            .ToDictionary(x => x.Key, x => x.ToArray(), StringComparer.OrdinalIgnoreCase);
         var granted = new Dictionary<string, AdminPermission>(StringComparer.OrdinalIgnoreCase);
+
         void Grant(AdminPermission permission)
         {
             if (!granted.TryAdd(permission.PermissionKey, permission)) return;
             if (children.TryGetValue(permission.PermissionKey, out AdminPermission[]? descendants))
-                foreach (AdminPermission descendant in descendants) Grant(descendant);
+                foreach (AdminPermission descendant in descendants)
+                    Grant(descendant);
         }
 
         foreach (AdminRole role in user.Roles.Select(x => x.Role).Where(x => x.IsActive))
@@ -56,19 +62,27 @@ public sealed class AdminAuthentication(ShopDbContext db, PasswordHasher<AdminSy
             foreach (AdminPermission permission in role.Permissions.Select(x => x.Permission).Where(x => x.IsActive))
                 Grant(permission);
         }
+
         foreach (AdminPermission permission in granted.Values.Where(x => !string.IsNullOrWhiteSpace(x.Area)
-                     && !string.IsNullOrWhiteSpace(x.Controller) && !string.IsNullOrWhiteSpace(x.Action)))
-            claims.Add(new Claim("admin_permission", RoutePermission(permission.Area, permission.Controller, permission.Action, permission.FeatureKey)));
+                                                                         && !string.IsNullOrWhiteSpace(x.Controller) &&
+                                                                         !string.IsNullOrWhiteSpace(x.Action)))
+            claims.Add(new Claim("admin_permission",
+                RoutePermission(permission.Area, permission.Controller, permission.Action, permission.FeatureKey)));
 
         var identity = new ClaimsIdentity(claims, "AdminCookie");
         return new ClaimsPrincipal(identity);
     }
 
     public static string RoutePermission(string area, string controller, string action, string? featureKey = null) =>
-        string.IsNullOrWhiteSpace(featureKey) ? $"{area}:{controller}:{action}" : $"{area}:{controller}:{action}:{featureKey}";
+        string.IsNullOrWhiteSpace(featureKey)
+            ? $"{area}:{controller}:{action}"
+            : $"{area}:{controller}:{action}:{featureKey}";
 }
 
-public sealed class AdminBootstrapper(IServiceScopeFactory scopeFactory, IConfiguration configuration, ILogger<AdminBootstrapper> logger) : IHostedService
+public sealed class AdminBootstrapper(
+    IServiceScopeFactory scopeFactory,
+    IConfiguration configuration,
+    ILogger<AdminBootstrapper> logger) : IHostedService
 {
     public async Task StartAsync(CancellationToken cancellationToken)
     {
@@ -79,7 +93,8 @@ public sealed class AdminBootstrapper(IServiceScopeFactory scopeFactory, IConfig
             return;
         if (password.Length < 12 || password.Length > 200)
         {
-            logger.LogError("AdminBootstrap password must be between 12 and 200 characters; no initial system user was created.");
+            logger.LogError(
+                "AdminBootstrap password must be between 12 and 200 characters; no initial system user was created.");
             return;
         }
 
@@ -88,7 +103,8 @@ public sealed class AdminBootstrapper(IServiceScopeFactory scopeFactory, IConfig
         if (await db.AdminSystemUsers.AnyAsync(cancellationToken))
             return;
 
-        AdminRole? fullAccess = await db.AdminRoles.SingleOrDefaultAsync(x => x.RoleKey == "system.full-access", cancellationToken);
+        AdminRole? fullAccess =
+            await db.AdminRoles.SingleOrDefaultAsync(x => x.RoleKey == "system.full-access", cancellationToken);
         if (fullAccess is null)
         {
             logger.LogError("Admin schema is not installed; the configured initial system user was not created.");
@@ -123,6 +139,7 @@ public sealed class AdminCookieEvents(ShopDbContext db) : CookieAuthenticationEv
             context.Response.StatusCode = StatusCodes.Status401Unauthorized;
             return;
         }
+
         await base.RedirectToLogin(context);
     }
 
@@ -133,6 +150,7 @@ public sealed class AdminCookieEvents(ShopDbContext db) : CookieAuthenticationEv
             context.Response.StatusCode = StatusCodes.Status403Forbidden;
             return;
         }
+
         await base.RedirectToAccessDenied(context);
     }
 

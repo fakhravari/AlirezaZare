@@ -15,7 +15,11 @@ builder.Services.AddAuthentication("ShopCookie").AddCookie("ShopCookie", options
     options.Cookie.SameSite = SameSiteMode.Lax;
     options.ExpireTimeSpan = TimeSpan.FromDays(30);
     options.SlidingExpiration = true;
-    options.Events.OnRedirectToLogin = context => { context.Response.StatusCode = 401; return Task.CompletedTask; };
+    options.Events.OnRedirectToLogin = context =>
+    {
+        context.Response.StatusCode = 401;
+        return Task.CompletedTask;
+    };
 });
 builder.Services.AddShopDatabase(builder.Configuration);
 builder.Services.AddResponseCompression(options => options.EnableForHttps = true);
@@ -45,18 +49,26 @@ builder.Services.AddSingleton<Shop.Services.EmailVerificationCodeStore>();
 builder.Services.AddSingleton<Shop.Services.IEmailSender, Shop.Services.SmtpEmailSender>();
 builder.Services.AddScoped<Shop.Services.IMagazineContentSource, Shop.Services.DatabaseMagazineContentSource>();
 builder.Services.AddScoped<Shop.Services.CatalogRepository>();
-builder.Services.AddScoped<Shop.Services.ICatalogSource>(services => services.GetRequiredService<Shop.Services.CatalogRepository>());
+builder.Services.AddScoped<Shop.Services.ICatalogSource>(services =>
+    services.GetRequiredService<Shop.Services.CatalogRepository>());
 builder.Services.AddScoped<Shop.Services.DatabaseSalesPlanSource>();
-builder.Services.AddScoped<Shop.Services.ISalesPlanSource>(services => services.GetRequiredService<Shop.Services.DatabaseSalesPlanSource>());
-builder.Services.AddScoped<Shop.Services.IProductPurchaseConfigurationSource>(services => services.GetRequiredService<Shop.Services.DatabaseSalesPlanSource>());
+builder.Services.AddScoped<Shop.Services.ISalesPlanSource>(services =>
+    services.GetRequiredService<Shop.Services.DatabaseSalesPlanSource>());
+builder.Services.AddScoped<Shop.Services.IProductPurchaseConfigurationSource>(services =>
+    services.GetRequiredService<Shop.Services.DatabaseSalesPlanSource>());
 builder.Services.AddScoped<Shop.Services.DatabaseAccountDataSource>();
-builder.Services.AddScoped<Shop.Services.IAccountDataSource>(services => services.GetRequiredService<Shop.Services.DatabaseAccountDataSource>());
-builder.Services.AddScoped<Shop.Services.ICommerceOfferSource>(services => services.GetRequiredService<Shop.Services.DatabaseAccountDataSource>());
+builder.Services.AddScoped<Shop.Services.IAccountDataSource>(services =>
+    services.GetRequiredService<Shop.Services.DatabaseAccountDataSource>());
+builder.Services.AddScoped<Shop.Services.ICommerceOfferSource>(services =>
+    services.GetRequiredService<Shop.Services.DatabaseAccountDataSource>());
 var persianHtmlEncoderSettings = new TextEncoderSettings(UnicodeRanges.BasicLatin, UnicodeRanges.Arabic);
 persianHtmlEncoderSettings.AllowCharacter('\u200C');
 builder.Services.AddWebEncoders(options => options.TextEncoderSettings = persianHtmlEncoderSettings);
 builder.Services.Configure<Shop.Models.SeoMetadataOptions>(builder.Configuration.GetSection("Seo"));
-builder.Services.Configure<Shop.Models.SiteIdentityOptions>(builder.Configuration.GetSection("SiteIdentity"));
+builder.Services.AddMemoryCache();
+builder.Services.AddScoped<Shop.Services.DatabaseSiteIdentitySource>();
+builder.Services.AddScoped<Shop.Services.SiteIdentityRequestContext>();
+builder.Services.AddScoped<Microsoft.Extensions.Options.IOptions<Shop.Models.SiteIdentityOptions>, Shop.Services.RequestSiteIdentityOptions>();
 builder.Services.AddOptions<Shop.Models.ApiClientOptions>()
     .BindConfiguration("ApiClient")
     .Validate(options => options.BasePath.StartsWith("~/", StringComparison.Ordinal)
@@ -114,13 +126,14 @@ app.UseStaticFiles(new StaticFileOptions
     {
         var contentType = context.Context.Response.ContentType ?? string.Empty;
         var maxAge = contentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase)
-            || contentType.StartsWith("font/", StringComparison.OrdinalIgnoreCase)
+                     || contentType.StartsWith("font/", StringComparison.OrdinalIgnoreCase)
             ? "public,max-age=604800,stale-while-revalidate=86400"
             : "public,max-age=86400,stale-while-revalidate=3600";
         context.Context.Response.Headers.CacheControl = maxAge;
     }
 });
 app.UseRouting();
+app.UseMiddleware<Shop.Services.SiteIdentityRequestMiddleware>();
 app.Use(async (context, next) =>
 {
     if (context.Request.Path.StartsWithSegments("/api"))
@@ -129,6 +142,7 @@ app.Use(async (context, next) =>
         context.Response.Headers.Pragma = "no-cache";
         context.Response.Headers.Expires = "0";
     }
+
     await next();
 });
 app.UseAuthentication();

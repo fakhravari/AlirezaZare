@@ -1,12 +1,16 @@
 @model (string Title, string Description)
 <div class="admin-page-intro">
     <div>
-        <div class="admin-breadcrumb"><a asp-area="Admin" asp-controller="Home" asp-action="Index" data-admin-nav>پیشخوان کل</a><i class="fa fa-angle-left" aria-hidden="true"></i><span>@ViewData["AreaTitle"]</span></div>
+        <div class="admin-breadcrumb">
+            <a asp-area="Admin" asp-controller="Home" asp-action="Index" data-admin-nav>پیشخوان کل</a><i class="fa fa-angle-left" aria-hidden="true"></i><span>@ViewData["AreaTitle"]</span>
+        </div>
         <h1>@Model.Title</h1>
         <p>@Model.Description</p>
     </div>
     @if (ViewData["DataSourceLabel"] is string source)
     {
-        <div class="admin-page-intro__aside"><i class="fa fa-database me-1" aria-hidden="true"></i>@source</div>
+        <div class="admin-page-intro__aside">
+            <i class="fa fa-database me-1" aria-hidden="true"></i>@source
+        </div>
     }
 </div>

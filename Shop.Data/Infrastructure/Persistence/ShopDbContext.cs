@@ -30,6 +30,7 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
     public DbSet<WarehouseProduct> Products => Set<WarehouseProduct>();
     public DbSet<ProductVariant> ProductVariants => Set<ProductVariant>();
     public DbSet<StoreProduct> StoreProducts => Set<StoreProduct>();
+    public DbSet<StoreSiteIdentity> StoreSiteIdentities => Set<StoreSiteIdentity>();
     public DbSet<ProductFeedback> ProductFeedback => Set<ProductFeedback>();
     public DbSet<AccountProfile> AccountProfiles => Set<AccountProfile>();
     public DbSet<AccountRecentSearch> AccountRecentSearches => Set<AccountRecentSearch>();
@@ -209,7 +210,8 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.HasIndex(x => new { x.IdWarehouse, x.IdInventoryItem, x.IdSalesPlanReference }).IsUnique();
             entity.HasOne(x => x.Warehouse).WithMany(x => x.StockBalances).HasForeignKey(x => x.IdWarehouse);
             entity.HasOne(x => x.InventoryItem).WithMany().HasForeignKey(x => x.IdInventoryItem);
-            entity.HasOne(x => x.SalesPlanReference).WithMany(x => x.StockBalances).HasForeignKey(x => x.IdSalesPlanReference);
+            entity.HasOne(x => x.SalesPlanReference).WithMany(x => x.StockBalances)
+                .HasForeignKey(x => x.IdSalesPlanReference);
             entity.Property(x => x.Quantity).HasPrecision(18, 3);
             entity.Property(x => x.MinimumQuantity).HasPrecision(18, 3);
         });
@@ -247,6 +249,19 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.ToTable("Product", "Store");
             entity.HasKey(x => x.Id);
             entity.Property(x => x.StoreProductKey).HasMaxLength(128).IsRequired();
+        });
+        modelBuilder.Entity<StoreSiteIdentity>(entity =>
+        {
+            entity.ToTable("SiteIdentity", "Store");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.DisplayName).HasMaxLength(160).IsRequired();
+            entity.Property(x => x.StoreName).HasMaxLength(240).IsRequired();
+            entity.Property(x => x.VisualBrandName).HasMaxLength(160).IsRequired();
+            entity.Property(x => x.SupportPhoneDisplay).HasMaxLength(32).IsRequired();
+            entity.Property(x => x.SupportPhoneUri).HasMaxLength(40).IsRequired();
+            entity.Property(x => x.WhatsAppNumber).HasMaxLength(32).IsRequired();
+            entity.Property(x => x.PublicEmail).HasMaxLength(254).IsRequired();
+            entity.Property(x => x.UpdatedAtUtc).HasPrecision(3);
         });
         modelBuilder.Entity<AccountProfile>(entity =>
         {

@@ -9,7 +9,8 @@ namespace Shop.Admin.Areas.Admin.Controllers;
 [Area("Admin")]
 [ApiController]
 [Route("api/admin/users")]
-public sealed class UsersApiController(ShopDbContext db, PasswordHasher<AdminSystemUser> passwordHasher) : ControllerBase
+public sealed class UsersApiController(ShopDbContext db, PasswordHasher<AdminSystemUser> passwordHasher)
+    : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> GetUsers(CancellationToken cancellationToken)
@@ -29,7 +30,8 @@ public sealed class UsersApiController(ShopDbContext db, PasswordHasher<AdminSys
             }).ToListAsync(cancellationToken);
 
         var roles = await db.AdminRoles.AsNoTracking().OrderBy(x => x.Name)
-            .Select(x => new { x.Id, x.RoleKey, x.Name, x.IsActive, permissionIds = x.Permissions.Select(p => p.IdPermission) })
+            .Select(x => new
+                { x.Id, x.RoleKey, x.Name, x.IsActive, permissionIds = x.Permissions.Select(p => p.IdPermission) })
             .ToListAsync(cancellationToken);
         var permissions = await db.AdminPermissions.AsNoTracking().Where(x => x.IsActive)
             .OrderBy(x => x.SortOrder).ThenBy(x => x.Name)
@@ -62,22 +64,28 @@ public sealed class UsersApiController(ShopDbContext db, PasswordHasher<AdminSys
                 .SingleOrDefaultAsync(x => x.Id == input.Id, cancellationToken);
         if (input.Id is not null && user is null)
             return NotFound();
-        if (await db.AdminSystemUsers.AnyAsync(x => x.NormalizedUserName == normalized && x.Id != (input.Id ?? 0), cancellationToken))
+        if (await db.AdminSystemUsers.AnyAsync(x => x.NormalizedUserName == normalized && x.Id != (input.Id ?? 0),
+                cancellationToken))
             return ValidationProblem("این نام کاربری قبلاً ثبت شده است.");
 
         long[] roleIds = input.RoleIds.Distinct().ToArray();
         long[] warehouseIds = input.WarehouseIds.Distinct().ToArray();
-        if (await db.AdminRoles.CountAsync(x => roleIds.Contains(x.Id) && x.IsActive, cancellationToken) != roleIds.Length)
+        if (await db.AdminRoles.CountAsync(x => roleIds.Contains(x.Id) && x.IsActive, cancellationToken) !=
+            roleIds.Length)
             return ValidationProblem("یکی از نقش‌های انتخاب‌شده معتبر یا فعال نیست.");
-        if (await db.Warehouses.CountAsync(x => warehouseIds.Contains(x.Id) && x.IsActive, cancellationToken) != warehouseIds.Length)
+        if (await db.Warehouses.CountAsync(x => warehouseIds.Contains(x.Id) && x.IsActive, cancellationToken) !=
+            warehouseIds.Length)
             return ValidationProblem("یکی از انبارهای انتخاب‌شده معتبر یا فعال نیست.");
 
         bool targetHasFullAccess = user?.Roles.Any(x => x.Role.RoleKey == "system.full-access") == true;
-        bool willHaveFullAccess = await db.AdminRoles.AnyAsync(x => roleIds.Contains(x.Id) && x.RoleKey == "system.full-access", cancellationToken);
+        bool willHaveFullAccess =
+            await db.AdminRoles.AnyAsync(x => roleIds.Contains(x.Id) && x.RoleKey == "system.full-access",
+                cancellationToken);
         bool remainsActive = input.IsActive;
         if (targetHasFullAccess && (!willHaveFullAccess || !remainsActive)
-            && !await db.AdminSystemUsers.AnyAsync(x => x.IsActive && x.Id != user!.Id
-                && x.Roles.Any(r => r.Role.RoleKey == "system.full-access" && r.Role.IsActive), cancellationToken))
+                                && !await db.AdminSystemUsers.AnyAsync(x => x.IsActive && x.Id != user!.Id
+                                        && x.Roles.Any(r => r.Role.RoleKey == "system.full-access" && r.Role.IsActive),
+                                    cancellationToken))
             return ValidationProblem("سامانه باید دست‌کم یک کاربر فعال با دسترسی کامل داشته باشد.");
 
         user ??= new AdminSystemUser { CreatedAtUtc = DateTime.UtcNow };
@@ -109,9 +117,11 @@ public sealed class UsersApiController(ShopDbContext db, PasswordHasher<AdminSys
 
     [HttpPut("roles/{id:long}")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> SaveRole(long id, [FromBody] SaveRoleInput input, CancellationToken cancellationToken)
+    public async Task<IActionResult> SaveRole(long id, [FromBody] SaveRoleInput input,
+        CancellationToken cancellationToken)
     {
-        AdminRole? role = await db.AdminRoles.Include(x => x.Permissions).SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
+        AdminRole? role = await db.AdminRoles.Include(x => x.Permissions)
+            .SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
         if (role is null)
             return NotFound();
         if (string.IsNullOrWhiteSpace(input.Name) || input.Name.Trim().Length > 160)
@@ -121,11 +131,14 @@ public sealed class UsersApiController(ShopDbContext db, PasswordHasher<AdminSys
 
         long[] permissionIds = input.PermissionIds.Distinct().ToArray();
         if (role.RoleKey == "system.full-access")
-            permissionIds = await db.AdminPermissions.Where(x => x.IsActive).Select(x => x.Id).ToArrayAsync(cancellationToken);
-        if (await db.AdminPermissions.CountAsync(x => permissionIds.Contains(x.Id) && x.IsActive, cancellationToken) != permissionIds.Length)
+            permissionIds = await db.AdminPermissions.Where(x => x.IsActive).Select(x => x.Id)
+                .ToArrayAsync(cancellationToken);
+        if (await db.AdminPermissions.CountAsync(x => permissionIds.Contains(x.Id) && x.IsActive, cancellationToken) !=
+            permissionIds.Length)
             return ValidationProblem("یکی از مجوزهای انتخاب‌شده معتبر یا فعال نیست.");
 
-        await using var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
+        await using var transaction =
+            await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
         role.Name = input.Name.Trim();
         role.IsActive = input.IsActive;
         db.AdminRolePermissions.RemoveRange(role.Permissions);
@@ -144,7 +157,8 @@ public sealed class UsersApiController(ShopDbContext db, PasswordHasher<AdminSys
     public async Task<IActionResult> CreateRole([FromBody] CreateRoleInput input, CancellationToken cancellationToken)
     {
         string key = input.RoleKey.Trim().ToLowerInvariant();
-        if (key.Length is < 2 or > 100 || key.Any(character => !(char.IsAsciiLetterOrDigit(character) || character is '.' or '-' or '_')))
+        if (key.Length is < 2 or > 100 || key.Any(character =>
+                !(char.IsAsciiLetterOrDigit(character) || character is '.' or '-' or '_')))
             return ValidationProblem("کلید نقش فقط می‌تواند شامل حروف انگلیسی، عدد، نقطه، خط تیره و زیرخط باشد.");
         if (string.IsNullOrWhiteSpace(input.Name) || input.Name.Trim().Length > 160)
             return ValidationProblem("نام نقش الزامی است و حداکثر ۱۶۰ نویسه دارد.");
@@ -157,7 +171,8 @@ public sealed class UsersApiController(ShopDbContext db, PasswordHasher<AdminSys
 
     [HttpPost("{id:long}/reset-password")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> ResetPassword(long id, [FromBody] ResetPasswordInput input, CancellationToken cancellationToken)
+    public async Task<IActionResult> ResetPassword(long id, [FromBody] ResetPasswordInput input,
+        CancellationToken cancellationToken)
     {
         if (input.Password.Length < 12 || input.Password.Length > 200)
             return ValidationProblem("گذرواژه باید بین ۱۲ تا ۲۰۰ نویسه باشد.");
@@ -172,8 +187,17 @@ public sealed class UsersApiController(ShopDbContext db, PasswordHasher<AdminSys
     }
 }
 
-public sealed record SaveSystemUserInput(long? Id, string UserName, string DisplayName, string? Password, bool IsActive,
-    long[] RoleIds, long[] WarehouseIds);
+public sealed record SaveSystemUserInput(
+    long? Id,
+    string UserName,
+    string DisplayName,
+    string? Password,
+    bool IsActive,
+    long[] RoleIds,
+    long[] WarehouseIds);
+
 public sealed record SaveRoleInput(string Name, bool IsActive, long[] PermissionIds);
+
 public sealed record CreateRoleInput(string RoleKey, string Name);
+
 public sealed record ResetPasswordInput(string Password);

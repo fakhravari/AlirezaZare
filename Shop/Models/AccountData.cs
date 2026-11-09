@@ -54,11 +54,9 @@ public sealed record AccountOrder(
     decimal TotalAmount,
     string DeliveryDescription)
 {
-    [JsonIgnore]
-    public string StatusLabel => AccountOrderStatus.Label(Status);
+    [JsonIgnore] public string StatusLabel => AccountOrderStatus.Label(Status);
 
-    [JsonIgnore]
-    public string StatusIcon => AccountOrderStatus.Icon(Status);
+    [JsonIgnore] public string StatusIcon => AccountOrderStatus.Icon(Status);
 
     [JsonIgnore] public string StatusClass => $"is-{Status}";
     [JsonIgnore] public string DateLabel => AccountDisplay.Date(OrderedOn);

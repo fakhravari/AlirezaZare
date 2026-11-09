@@ -25,7 +25,8 @@ public sealed class StoreProductFeedbackRepository(ShopDbContext dbContext) : IP
 
         List<ProductFeedback> rows = await dbContext.ProductFeedback.AsNoTracking()
             .Where(x => x.IdProduct == idProduct && x.FeedbackType == type &&
-                (x.Status == "approved" || (x.Status == "pending" && profileId.HasValue && x.IdProfile == profileId)))
+                        (x.Status == "approved" ||
+                         (x.Status == "pending" && profileId.HasValue && x.IdProfile == profileId)))
             .OrderByDescending(x => x.CreatedAtUtc).ThenByDescending(x => x.Id)
             .Take(500).ToListAsync(cancellationToken);
 
@@ -33,7 +34,8 @@ public sealed class StoreProductFeedbackRepository(ShopDbContext dbContext) : IP
             x.Id, x.DisplayName, x.FeedbackText, x.Rating, x.Status, x.AdminReply,
             new DateTimeOffset(DateTime.SpecifyKind(x.CreatedAtUtc, DateTimeKind.Utc)),
             x.RepliedAtUtc is DateTime repliedAt
-                ? new DateTimeOffset(DateTime.SpecifyKind(repliedAt, DateTimeKind.Utc)) : null)).ToArray();
+                ? new DateTimeOffset(DateTime.SpecifyKind(repliedAt, DateTimeKind.Utc))
+                : null)).ToArray();
         return new ProductFeedbackSnapshot(items, totalCount, averageRating);
     }
 
@@ -108,6 +110,7 @@ public sealed class StoreProductFeedbackRepository(ShopDbContext dbContext) : IP
             dbContext.ProductFeedback.AddRange(imported);
             await dbContext.SaveChangesAsync(cancellationToken);
         }
+
         await transaction.CommitAsync(cancellationToken);
         return imported.Count;
     }

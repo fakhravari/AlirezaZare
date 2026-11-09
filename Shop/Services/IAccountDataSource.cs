@@ -16,7 +16,8 @@ public interface ICommerceOfferSource
 }
 
 public sealed class DatabaseAccountDataSource(
-    Shop.Database.Application.Store.Contracts.IStoreRuntimeDatasetRepository datasets) : IAccountDataSource, ICommerceOfferSource
+    Shop.Database.Application.Store.Contracts.IStoreRuntimeDatasetRepository datasets)
+    : IAccountDataSource, ICommerceOfferSource
 {
     private Task<AccountData>? _requestSnapshot;
 

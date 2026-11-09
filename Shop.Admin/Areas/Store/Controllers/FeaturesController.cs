@@ -17,6 +17,7 @@ public sealed class FeaturesController : Controller
             ViewData["ApiUrl"] = "/api/admin/store/variant-prices";
             return View("~/Areas/Store/Views/Features/VariantPrices.cshtml", page);
         }
+
         if (page.FeatureId is "reviews" or "questions")
             return View("~/Areas/Store/Views/Features/Feedback.cshtml", page);
         return View("~/Areas/Store/Views/Features/Index.cshtml", page);

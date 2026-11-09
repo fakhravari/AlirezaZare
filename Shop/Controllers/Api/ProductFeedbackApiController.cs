@@ -53,9 +53,10 @@ public sealed class ProductFeedbackApiController(IProductFeedbackRepository feed
             return BadRequest(new { code = "invalid-feedback-import" });
         int maxTextLength = type == "reviews" ? 800 : 600;
         if (request.Items.Any(item => item is null || (item.Name?.Trim().Length ?? 0) is < 5 or > 80 ||
-            item.Name!.Split(' ', StringSplitOptions.RemoveEmptyEntries).Length < 2 ||
-            (item.Text?.Trim().Length ?? 0) is < 1 || item.Text!.Trim().Length > maxTextLength ||
-            type == "reviews" && item.Rating is not (>= 1 and <= 5)))
+                                      item.Name!.Split(' ', StringSplitOptions.RemoveEmptyEntries).Length < 2 ||
+                                      (item.Text?.Trim().Length ?? 0) is < 1 ||
+                                      item.Text!.Trim().Length > maxTextLength ||
+                                      type == "reviews" && item.Rating is not (>= 1 and <= 5)))
             return BadRequest(new { code = "invalid-feedback-import" });
 
         ProductFeedbackLegacyItem[] items = request.Items.Select(item => new ProductFeedbackLegacyItem(
@@ -71,6 +72,8 @@ public sealed class ProductFeedbackApiController(IProductFeedbackRepository feed
     private static bool IsValidType(string type) => type is "reviews" or "questions";
 
     public sealed record FeedbackRequest(string? Name, string? Text, byte? Rating);
+
     public sealed record LegacyFeedbackRequest(IReadOnlyList<LegacyFeedbackItem>? Items);
+
     public sealed record LegacyFeedbackItem(string? Name, string? Text, byte? Rating, DateTimeOffset? CreatedAt);
 }

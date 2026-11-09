@@ -2,12 +2,16 @@
 <div class="admin-page" data-admin-page="feature">
     @await Html.PartialAsync("_AdminPageIntro", (Model.Title, Model.Description))
     <section class="panel panel-inverse admin-feature-panel">
-        <div class="panel-heading"><h2 class="panel-title">دامنهٔ این بخش</h2></div>
+        <div class="panel-heading">
+            <h2 class="panel-title">دامنهٔ این بخش</h2>
+        </div>
         <div class="panel-body">
             <ul class="admin-capability-list">
                 @foreach (string capability in Model.Capabilities)
                 {
-                    <li><i class="fa fa-check" aria-hidden="true"></i>@capability</li>
+                    <li>
+                        <i class="fa fa-check" aria-hidden="true"></i>@capability
+                    </li>
                 }
             </ul>
             <div class="alert alert-warning mb-0" role="status">

@@ -20,7 +20,8 @@ public sealed class DatabaseMagazineContentSource(
             post.Article.PublishedAt, post.ReadMinutes)).ToArray());
     }
 
-    public async Task<MagazineDetailsModel?> ReadArticleAsync(string slug, CancellationToken cancellationToken = default) =>
+    public async Task<MagazineDetailsModel?> ReadArticleAsync(string slug,
+        CancellationToken cancellationToken = default) =>
         (await ReadDatasetAsync(cancellationToken)).Articles
         .Select(item => item.Article)
         .FirstOrDefault(article => string.Equals(article.Slug, slug, StringComparison.OrdinalIgnoreCase));
@@ -38,4 +39,8 @@ public sealed class DatabaseMagazineContentSource(
 public sealed record MagazineDataset(IReadOnlyList<MagazineDatasetArticle> Articles);
 
 public sealed record MagazineDatasetArticle(
-    string Branch, string Topic, string Area, int ReadMinutes, MagazineDetailsModel Article);
+    string Branch,
+    string Topic,
+    string Area,
+    int ReadMinutes,
+    MagazineDetailsModel Article);

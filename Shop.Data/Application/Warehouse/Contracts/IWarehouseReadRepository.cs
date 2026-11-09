@@ -5,6 +5,7 @@ namespace Shop.Database.Application.Warehouse.Contracts;
 public interface IWarehouseReadRepository
 {
     Task<IReadOnlyList<WarehouseInfo>> GetWarehousesAsync(CancellationToken cancellationToken);
+
     Task<IReadOnlyList<WarehouseStockItem>> GetStockAsync(
         long? warehouseId,
         string? salesPlanKey,
@@ -13,6 +14,7 @@ public interface IWarehouseReadRepository
         int page,
         int pageSize,
         CancellationToken cancellationToken);
+
     Task<IReadOnlyList<WarehouseStockItem>> GetStockForWarehousesAsync(
         IReadOnlyCollection<long> warehouseIds,
         string? salesPlanKey,

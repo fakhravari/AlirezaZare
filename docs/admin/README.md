@@ -41,7 +41,7 @@
 
 ترتیب و توضیح migrationها در [راهنمای پایگاه داده](../architecture/database.md) است. migrationهای جدید انبار `003-paid-orders-and-regular-minimum.sql`، `004-document-external-reference.sql` و `005-document-audit.sql` هستند؛ migration `016-account-warehouse-variants.sql` شناسهٔ تنوع را به سبد و سفارش وصل می‌کند؛ migration `001-system-users-and-permissions.sql` schema مستقل کاربران پنل را می‌سازد و `002-store-feedback-permissions.sql` مجوزهای API بازخورد فروشگاه را اضافه می‌کند. migrationها در این تغییر روی دیتابیس میزبان اجرا نشده‌اند.
 
-در نبود `ConnectionStrings:DefaultConnection`، پنل مقدار پیکربندی فروشگاه را fallback می‌گیرد؛ اسرار اتصال در مستندات کپی نشده‌اند. نبود connection string مانع بالا آمدن برنامه می‌شود، اما API دیتابیسی در دسترس نخواهد بود.
+پنل تنظیمات مستقل [appsettings.json](../../Shop.Admin/appsettings.json) دارد و فایل تنظیمات فروشگاه را نمی‌خواند. مقدار `ConnectionStrings:DefaultConnection` در فایل قابل‌انتشار خالی است؛ برای توسعه آن را در `Shop.Admin/appsettings.Development.json` محلیِ خارج از Git یا User Secrets پروژهٔ پنل تنظیم کنید. برای استقرار از متغیر محیطی `ConnectionStrings__DefaultConnection` یا منبع امن پیکربندی میزبان استفاده کنید. هر دو برنامه می‌توانند جداگانه به یک پایگاه اشاره کنند؛ در نبود مقدار اتصال، پنل با خطای پیکربندی شروع نمی‌شود. تنظیمات bootstrap کاربر اول نیز باید جداگانه و امن برای پنل فراهم شوند.
 
 برای اجرا از ریشهٔ مخزن: `dotnet run --project Shop.Admin/Shop.Admin.csproj`.
 

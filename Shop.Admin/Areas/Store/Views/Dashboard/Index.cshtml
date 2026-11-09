@@ -3,36 +3,48 @@
     <div class="row g-3 g-xl-4">
         <div class="col-md-6 col-xxl-3">
             <a class="panel panel-inverse admin-module-card" asp-area="Store" asp-controller="Catalog" asp-action="Products" data-admin-nav>
-                <span class="admin-module-card__icon bg-blue"><i class="fa fa-box-open" aria-hidden="true"></i></span>
+                <span class="admin-module-card__icon bg-blue">
+                    <i class="fa fa-box-open" aria-hidden="true"></i>
+                </span>
                 <span class="admin-module-card__title">کاتالوگ کالا</span><span class="admin-module-card__text">محصولات، دسته‌ها، برندها و ویژگی‌ها</span>
             </a>
         </div>
         <div class="col-md-6 col-xxl-3">
             <a class="panel panel-inverse admin-module-card" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="orders" data-admin-nav>
-                <span class="admin-module-card__icon bg-orange"><i class="fa fa-receipt" aria-hidden="true"></i></span>
+                <span class="admin-module-card__icon bg-orange">
+                    <i class="fa fa-receipt" aria-hidden="true"></i>
+                </span>
                 <span class="admin-module-card__title">سفارش‌ها</span><span class="admin-module-card__text">چرخهٔ پرداخت، آماده‌سازی و ارسال</span>
             </a>
         </div>
         <div class="col-md-6 col-xxl-3">
             <a class="panel panel-inverse admin-module-card" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="customers" data-admin-nav>
-                <span class="admin-module-card__icon bg-green"><i class="fa fa-users" aria-hidden="true"></i></span>
+                <span class="admin-module-card__icon bg-green">
+                    <i class="fa fa-users" aria-hidden="true"></i>
+                </span>
                 <span class="admin-module-card__title">مشتریان</span><span class="admin-module-card__text">پروفایل، نشانی و سابقهٔ خرید</span>
             </a>
         </div>
         <div class="col-md-6 col-xxl-3">
             <a class="panel panel-inverse admin-module-card" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="reviews" data-admin-nav>
-                <span class="admin-module-card__icon bg-purple"><i class="fa fa-comments" aria-hidden="true"></i></span>
+                <span class="admin-module-card__icon bg-purple">
+                    <i class="fa fa-comments" aria-hidden="true"></i>
+                </span>
                 <span class="admin-module-card__title">بازخورد محصول</span><span class="admin-module-card__text">دیدگاه‌ها و پرسش‌های مشتریان</span>
             </a>
         </div>
     </div>
     <section class="panel panel-inverse mt-3">
-        <div class="panel-heading"><h2 class="panel-title">بخش‌های کاتالوگ</h2></div>
-        <div class="panel-body"><div class="admin-inline-links">
-            <a asp-area="Store" asp-controller="Catalog" asp-action="Products" data-admin-nav>محصولات <i class="fa fa-arrow-left" aria-hidden="true"></i></a>
-            <a asp-area="Store" asp-controller="Catalog" asp-action="Categories" data-admin-nav>دسته‌بندی‌ها <i class="fa fa-arrow-left" aria-hidden="true"></i></a>
-            <a asp-area="Store" asp-controller="Catalog" asp-action="Brands" data-admin-nav>برندها <i class="fa fa-arrow-left" aria-hidden="true"></i></a>
-            <a asp-area="Store" asp-controller="Catalog" asp-action="Attributes" data-admin-nav>ویژگی‌ها <i class="fa fa-arrow-left" aria-hidden="true"></i></a>
-        </div></div>
+        <div class="panel-heading">
+            <h2 class="panel-title">بخش‌های کاتالوگ</h2>
+        </div>
+        <div class="panel-body">
+            <div class="admin-inline-links">
+                <a asp-area="Store" asp-controller="Catalog" asp-action="Products" data-admin-nav>محصولات <i class="fa fa-arrow-left" aria-hidden="true"></i></a>
+                <a asp-area="Store" asp-controller="Catalog" asp-action="Categories" data-admin-nav>دسته‌بندی‌ها <i class="fa fa-arrow-left" aria-hidden="true"></i></a>
+                <a asp-area="Store" asp-controller="Catalog" asp-action="Brands" data-admin-nav>برندها <i class="fa fa-arrow-left" aria-hidden="true"></i></a>
+                <a asp-area="Store" asp-controller="Catalog" asp-action="Attributes" data-admin-nav>ویژگی‌ها <i class="fa fa-arrow-left" aria-hidden="true"></i></a>
+            </div>
+        </div>
     </section>
 </div>

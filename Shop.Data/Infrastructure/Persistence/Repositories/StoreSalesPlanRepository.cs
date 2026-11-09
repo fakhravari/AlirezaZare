@@ -20,11 +20,11 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
             await using (DbCommand command = connection.CreateCommand())
             {
                 command.CommandText = """
-                    SELECT [SalesPlanKey], [Code], [Name], [PlanType], [IsDefault], [IsEnabled],
-                           [StartsAtUtc], [EndsAtUtc], [Label], [ShowCountdown]
-                    FROM [Store].[SalesPlan]
-                    ORDER BY [IsDefault] DESC, [Code];
-                    """;
+                                      SELECT [SalesPlanKey], [Code], [Name], [PlanType], [IsDefault], [IsEnabled],
+                                             [StartsAtUtc], [EndsAtUtc], [Label], [ShowCountdown]
+                                      FROM [Store].[SalesPlan]
+                                      ORDER BY [IsDefault] DESC, [Code];
+                                      """;
                 await using DbDataReader reader = await command.ExecuteReaderAsync(cancellationToken);
                 while (await reader.ReadAsync(cancellationToken))
                     plans.Add(new(
@@ -39,49 +39,49 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
             await using (DbCommand command = connection.CreateCommand())
             {
                 command.CommandText = """
-                    WITH [SiteStock] AS
-                    (
-                        SELECT wp.[IdStoreProduct] AS [IdProduct], spr.[IdStoreSalesPlan] AS [IdSalesPlan],
-                               SUM(sb.[Quantity]) AS [Quantity]
-                        FROM [Warehouse].[SiteWarehouseSetting] setting
-                        INNER JOIN [Warehouse].[StockBalance] sb ON sb.[IdWarehouse] = setting.[IdWarehouse]
-                        INNER JOIN [Warehouse].[InventoryItem] ii ON ii.[Id] = sb.[IdInventoryItem]
-                        INNER JOIN [Warehouse].[Product] wp ON wp.[Id] = ii.[IdProduct]
-                        INNER JOIN [Warehouse].[SalesPlanReference] spr ON spr.[Id] = sb.[IdSalesPlanReference]
-                        WHERE ii.[IsActive] = 1 AND
-                        (
-                            (ii.[IdProductVariant] IS NOT NULL AND EXISTS
-                                (SELECT 1 FROM [Warehouse].[ProductVariant] activeVariant WHERE activeVariant.[Id] = ii.[IdProductVariant] AND activeVariant.[IsActive] = 1))
-                            OR
-                            (ii.[IdProductVariant] IS NULL AND NOT EXISTS
-                                (SELECT 1 FROM [Warehouse].[ProductVariant] activeVariant WHERE activeVariant.[IdProduct] = wp.[Id] AND activeVariant.[IsActive] = 1))
-                        )
-                        GROUP BY wp.[IdStoreProduct], spr.[IdStoreSalesPlan]
-                    ), [OfferRows] AS
-                    (
-                        SELECT p.[Id] AS [IdProduct], sp.[Id] AS [IdSalesPlan], sp.[SalesPlanKey],
-                               CONVERT(DECIMAL(19,0), ROUND(p.[PriceAmount] * 100.0 /
-                                   (100.0 - ISNULL(p.[DiscountPercent], 0)), 0)) AS [PriceAmount],
-                               ISNULL(p.[DiscountPercent], 0) AS [DiscountPercent],
-                               p.[MaxPurchaseQuantity], p.[IsActive] AS [IsEnabled]
-                        FROM [Store].[Product] p
-                        CROSS JOIN [Store].[SalesPlan] sp
-                        WHERE sp.[IsDefault] = 1
-                        UNION ALL
-                        SELECT p.[Id], sp.[Id], sp.[SalesPlanKey], o.[PriceAmount], o.[DiscountPercent],
-                               o.[MaxPurchaseQuantity], CONVERT(BIT, CASE WHEN o.[IsEnabled] = 1 AND p.[IsActive] = 1 AND sp.[IsEnabled] = 1 THEN 1 ELSE 0 END)
-                        FROM [Store].[ProductSalesPlanOffer] o
-                        INNER JOIN [Store].[Product] p ON p.[Id] = o.[IdProduct]
-                        INNER JOIN [Store].[SalesPlan] sp ON sp.[Id] = o.[IdSalesPlan]
-                    )
-                    SELECT o.[IdProduct], o.[SalesPlanKey], o.[PriceAmount], o.[DiscountPercent],
-                           CONVERT(INT, ISNULL(s.[Quantity], 0)), o.[MaxPurchaseQuantity],
-                           CONVERT(BIT, CASE WHEN o.[IsEnabled] = 1 AND sp.[IsEnabled] = 1 THEN 1 ELSE 0 END)
-                    FROM [OfferRows] o
-                    INNER JOIN [Store].[SalesPlan] sp ON sp.[Id] = o.[IdSalesPlan]
-                    LEFT JOIN [SiteStock] s ON s.[IdProduct] = o.[IdProduct] AND s.[IdSalesPlan] = o.[IdSalesPlan]
-                    ORDER BY o.[IdProduct], o.[SalesPlanKey];
-                    """;
+                                      WITH [SiteStock] AS
+                                      (
+                                          SELECT wp.[IdStoreProduct] AS [IdProduct], spr.[IdStoreSalesPlan] AS [IdSalesPlan],
+                                                 SUM(sb.[Quantity]) AS [Quantity]
+                                          FROM [Warehouse].[SiteWarehouseSetting] setting
+                                          INNER JOIN [Warehouse].[StockBalance] sb ON sb.[IdWarehouse] = setting.[IdWarehouse]
+                                          INNER JOIN [Warehouse].[InventoryItem] ii ON ii.[Id] = sb.[IdInventoryItem]
+                                          INNER JOIN [Warehouse].[Product] wp ON wp.[Id] = ii.[IdProduct]
+                                          INNER JOIN [Warehouse].[SalesPlanReference] spr ON spr.[Id] = sb.[IdSalesPlanReference]
+                                          WHERE ii.[IsActive] = 1 AND
+                                          (
+                                              (ii.[IdProductVariant] IS NOT NULL AND EXISTS
+                                                  (SELECT 1 FROM [Warehouse].[ProductVariant] activeVariant WHERE activeVariant.[Id] = ii.[IdProductVariant] AND activeVariant.[IsActive] = 1))
+                                              OR
+                                              (ii.[IdProductVariant] IS NULL AND NOT EXISTS
+                                                  (SELECT 1 FROM [Warehouse].[ProductVariant] activeVariant WHERE activeVariant.[IdProduct] = wp.[Id] AND activeVariant.[IsActive] = 1))
+                                          )
+                                          GROUP BY wp.[IdStoreProduct], spr.[IdStoreSalesPlan]
+                                      ), [OfferRows] AS
+                                      (
+                                          SELECT p.[Id] AS [IdProduct], sp.[Id] AS [IdSalesPlan], sp.[SalesPlanKey],
+                                                 CONVERT(DECIMAL(19,0), ROUND(p.[PriceAmount] * 100.0 /
+                                                     (100.0 - ISNULL(p.[DiscountPercent], 0)), 0)) AS [PriceAmount],
+                                                 ISNULL(p.[DiscountPercent], 0) AS [DiscountPercent],
+                                                 p.[MaxPurchaseQuantity], p.[IsActive] AS [IsEnabled]
+                                          FROM [Store].[Product] p
+                                          CROSS JOIN [Store].[SalesPlan] sp
+                                          WHERE sp.[IsDefault] = 1
+                                          UNION ALL
+                                          SELECT p.[Id], sp.[Id], sp.[SalesPlanKey], o.[PriceAmount], o.[DiscountPercent],
+                                                 o.[MaxPurchaseQuantity], CONVERT(BIT, CASE WHEN o.[IsEnabled] = 1 AND p.[IsActive] = 1 AND sp.[IsEnabled] = 1 THEN 1 ELSE 0 END)
+                                          FROM [Store].[ProductSalesPlanOffer] o
+                                          INNER JOIN [Store].[Product] p ON p.[Id] = o.[IdProduct]
+                                          INNER JOIN [Store].[SalesPlan] sp ON sp.[Id] = o.[IdSalesPlan]
+                                      )
+                                      SELECT o.[IdProduct], o.[SalesPlanKey], o.[PriceAmount], o.[DiscountPercent],
+                                             CONVERT(INT, ISNULL(s.[Quantity], 0)), o.[MaxPurchaseQuantity],
+                                             CONVERT(BIT, CASE WHEN o.[IsEnabled] = 1 AND sp.[IsEnabled] = 1 THEN 1 ELSE 0 END)
+                                      FROM [OfferRows] o
+                                      INNER JOIN [Store].[SalesPlan] sp ON sp.[Id] = o.[IdSalesPlan]
+                                      LEFT JOIN [SiteStock] s ON s.[IdProduct] = o.[IdProduct] AND s.[IdSalesPlan] = o.[IdSalesPlan]
+                                      ORDER BY o.[IdProduct], o.[SalesPlanKey];
+                                      """;
                 await using DbDataReader reader = await command.ExecuteReaderAsync(cancellationToken);
                 while (await reader.ReadAsync(cancellationToken))
                 {
@@ -97,13 +97,13 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
             await using (DbCommand command = connection.CreateCommand())
             {
                 command.CommandText = """
-                    SELECT p.[Id], opt.[OptionKey], opt.[Label], val.[ValueKey], val.[Label],
-                           CONVERT(DECIMAL(19,0), ROUND(val.[PriceDelta] * 1000000, 0))
-                    FROM [Store].[ProductPurchaseOption] opt
-                    INNER JOIN [Store].[Product] p ON p.[Id] = opt.[IdProduct] AND p.[IsActive] = 1
-                    INNER JOIN [Store].[ProductPurchaseOptionValue] val ON val.[IdProductPurchaseOption] = opt.[Id]
-                    ORDER BY p.[Id], opt.[SortOrder], val.[SortOrder];
-                    """;
+                                      SELECT p.[Id], opt.[OptionKey], opt.[Label], val.[ValueKey], val.[Label],
+                                             CONVERT(DECIMAL(19,0), ROUND(val.[PriceDelta] * 1000000, 0))
+                                      FROM [Store].[ProductPurchaseOption] opt
+                                      INNER JOIN [Store].[Product] p ON p.[Id] = opt.[IdProduct] AND p.[IsActive] = 1
+                                      INNER JOIN [Store].[ProductPurchaseOptionValue] val ON val.[IdProductPurchaseOption] = opt.[Id]
+                                      ORDER BY p.[Id], opt.[SortOrder], val.[SortOrder];
+                                      """;
                 await using DbDataReader reader = await command.ExecuteReaderAsync(cancellationToken);
                 while (await reader.ReadAsync(cancellationToken))
                 {
@@ -120,19 +120,19 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
             await using (DbCommand command = connection.CreateCommand())
             {
                 command.CommandText = """
-                    SELECT p.[IdStoreProduct], v.[Id], v.[Name], v.[Code], v.[AttributesJson],
-                           storePlan.[SalesPlanKey], SUM(sb.[Quantity])
-                    FROM [Warehouse].[ProductVariant] v
-                    INNER JOIN [Warehouse].[Product] p ON p.[Id] = v.[IdProduct] AND p.[IsActive] = 1
-                    INNER JOIN [Warehouse].[InventoryItem] ii ON ii.[IdProductVariant] = v.[Id] AND ii.[IsActive] = 1
-                    LEFT JOIN [Warehouse].[SiteWarehouseSetting] setting ON setting.[IdWarehouse] IS NOT NULL
-                    LEFT JOIN [Warehouse].[StockBalance] sb ON sb.[IdWarehouse] = setting.[IdWarehouse] AND sb.[IdInventoryItem] = ii.[Id]
-                    LEFT JOIN [Warehouse].[SalesPlanReference] spr ON spr.[Id] = sb.[IdSalesPlanReference]
-                    LEFT JOIN [Store].[SalesPlan] storePlan ON storePlan.[SalesPlanKey] = spr.[StoreSalesPlanKey]
-                    WHERE v.[IsActive] = 1 AND p.[IdStoreProduct] IS NOT NULL
-                    GROUP BY p.[IdStoreProduct], v.[Id], v.[Name], v.[Code], v.[AttributesJson], storePlan.[SalesPlanKey]
-                    ORDER BY p.[IdStoreProduct], v.[Id], storePlan.[SalesPlanKey];
-                    """;
+                                      SELECT p.[IdStoreProduct], v.[Id], v.[Name], v.[Code], v.[AttributesJson],
+                                             storePlan.[SalesPlanKey], SUM(sb.[Quantity])
+                                      FROM [Warehouse].[ProductVariant] v
+                                      INNER JOIN [Warehouse].[Product] p ON p.[Id] = v.[IdProduct] AND p.[IsActive] = 1
+                                      INNER JOIN [Warehouse].[InventoryItem] ii ON ii.[IdProductVariant] = v.[Id] AND ii.[IsActive] = 1
+                                      LEFT JOIN [Warehouse].[SiteWarehouseSetting] setting ON setting.[IdWarehouse] IS NOT NULL
+                                      LEFT JOIN [Warehouse].[StockBalance] sb ON sb.[IdWarehouse] = setting.[IdWarehouse] AND sb.[IdInventoryItem] = ii.[Id]
+                                      LEFT JOIN [Warehouse].[SalesPlanReference] spr ON spr.[Id] = sb.[IdSalesPlanReference]
+                                      LEFT JOIN [Store].[SalesPlan] storePlan ON storePlan.[SalesPlanKey] = spr.[StoreSalesPlanKey]
+                                      WHERE v.[IsActive] = 1 AND p.[IdStoreProduct] IS NOT NULL
+                                      GROUP BY p.[IdStoreProduct], v.[Id], v.[Name], v.[Code], v.[AttributesJson], storePlan.[SalesPlanKey]
+                                      ORDER BY p.[IdStoreProduct], v.[Id], storePlan.[SalesPlanKey];
+                                      """;
                 await using DbDataReader reader = await command.ExecuteReaderAsync(cancellationToken);
                 while (await reader.ReadAsync(cancellationToken))
                 {
@@ -141,26 +141,29 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
                     var key = (productId, variantId);
                     if (!inventoryVariants.TryGetValue(key, out InventoryVariantBuilder? variant))
                         inventoryVariants[key] = variant = new(productId, variantId, reader.GetString(2),
-                            reader.IsDBNull(3) ? null : reader.GetString(3), reader.IsDBNull(4) ? null : reader.GetString(4));
-                    if (!reader.IsDBNull(5)) variant.StockBySalesPlan[reader.GetString(5)] = reader.IsDBNull(6) ? 0m : reader.GetDecimal(6);
+                            reader.IsDBNull(3) ? null : reader.GetString(3),
+                            reader.IsDBNull(4) ? null : reader.GetString(4));
+                    if (!reader.IsDBNull(5))
+                        variant.StockBySalesPlan[reader.GetString(5)] = reader.IsDBNull(6) ? 0m : reader.GetDecimal(6);
                 }
             }
 
             await using (DbCommand command = connection.CreateCommand())
             {
                 command.CommandText = """
-                    SELECT offer.[IdProductVariant], [plan].[SalesPlanKey], offer.[PriceAmount], offer.[DiscountPercent]
-                    FROM [Store].[ProductVariantSalesPlanOffer] offer
-                    INNER JOIN [Store].[SalesPlan] [plan] ON [plan].[Id] = offer.[IdSalesPlan]
-                    INNER JOIN [Warehouse].[ProductVariant] variant ON variant.[Id] = offer.[IdProductVariant] AND variant.[IsActive] = 1
-                    WHERE offer.[IsEnabled] = 1
-                    ORDER BY offer.[IdProductVariant], [plan].[SalesPlanKey];
-                    """;
+                                      SELECT offer.[IdProductVariant], [plan].[SalesPlanKey], offer.[PriceAmount], offer.[DiscountPercent]
+                                      FROM [Store].[ProductVariantSalesPlanOffer] offer
+                                      INNER JOIN [Store].[SalesPlan] [plan] ON [plan].[Id] = offer.[IdSalesPlan]
+                                      INNER JOIN [Warehouse].[ProductVariant] variant ON variant.[Id] = offer.[IdProductVariant] AND variant.[IsActive] = 1
+                                      WHERE offer.[IsEnabled] = 1
+                                      ORDER BY offer.[IdProductVariant], [plan].[SalesPlanKey];
+                                      """;
                 await using DbDataReader reader = await command.ExecuteReaderAsync(cancellationToken);
                 while (await reader.ReadAsync(cancellationToken))
                 {
                     long variantId = reader.GetInt64(0);
-                    InventoryVariantBuilder? variant = inventoryVariants.Values.SingleOrDefault(item => item.VariantId == variantId);
+                    InventoryVariantBuilder? variant =
+                        inventoryVariants.Values.SingleOrDefault(item => item.VariantId == variantId);
                     if (variant is null) continue;
                     string planId = reader.GetString(1);
                     variant.PriceBySalesPlan[planId] = reader.GetDecimal(2);
@@ -171,25 +174,25 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
             await using (DbCommand command = connection.CreateCommand())
             {
                 command.CommandText = """
-                    WITH [OfferPairs] AS
-                    (
-                        SELECT p.[Id] AS [IdProduct], sp.[Id] AS [IdSalesPlan], sp.[SalesPlanKey], CONVERT(BIGINT, NULL) AS [IdOffer]
-                        FROM [Store].[Product] p CROSS JOIN [Store].[SalesPlan] sp WHERE sp.[IsDefault] = 1
-                        UNION ALL
-                        SELECT o.[IdProduct], o.[IdSalesPlan], sp.[SalesPlanKey], o.[Id]
-                        FROM [Store].[ProductSalesPlanOffer] o
-                        INNER JOIN [Store].[SalesPlan] sp ON sp.[Id] = o.[IdSalesPlan]
-                    )
-                    SELECT pair.[IdProduct], pair.[SalesPlanKey], a.[AccessoryKey],
-                           CASE WHEN pair.[IdOffer] IS NULL THEN pa.[PriceAmount] ELSE oa.[PriceAmount] END AS [PriceAmount]
-                    FROM [OfferPairs] pair
-                    INNER JOIN [Store].[ProductAccessory] pa ON pa.[IdProduct] = pair.[IdProduct]
-                    INNER JOIN [Store].[Accessory] a ON a.[Id] = pa.[IdAccessory] AND a.[IsActive] = 1
-                    LEFT JOIN [Store].[ProductSalesPlanOfferAccessory] oa ON oa.[IdProductSalesPlanOffer] = pair.[IdOffer] AND oa.[IdAccessory] = a.[Id]
-                    WHERE (pair.[IdOffer] IS NULL OR oa.[IsAllowed] = 1)
-                      AND CASE WHEN pair.[IdOffer] IS NULL THEN pa.[PriceAmount] ELSE oa.[PriceAmount] END IS NOT NULL
-                    ORDER BY pair.[IdProduct], pair.[SalesPlanKey], pa.[SortOrder];
-                    """;
+                                      WITH [OfferPairs] AS
+                                      (
+                                          SELECT p.[Id] AS [IdProduct], sp.[Id] AS [IdSalesPlan], sp.[SalesPlanKey], CONVERT(BIGINT, NULL) AS [IdOffer]
+                                          FROM [Store].[Product] p CROSS JOIN [Store].[SalesPlan] sp WHERE sp.[IsDefault] = 1
+                                          UNION ALL
+                                          SELECT o.[IdProduct], o.[IdSalesPlan], sp.[SalesPlanKey], o.[Id]
+                                          FROM [Store].[ProductSalesPlanOffer] o
+                                          INNER JOIN [Store].[SalesPlan] sp ON sp.[Id] = o.[IdSalesPlan]
+                                      )
+                                      SELECT pair.[IdProduct], pair.[SalesPlanKey], a.[AccessoryKey],
+                                             CASE WHEN pair.[IdOffer] IS NULL THEN pa.[PriceAmount] ELSE oa.[PriceAmount] END AS [PriceAmount]
+                                      FROM [OfferPairs] pair
+                                      INNER JOIN [Store].[ProductAccessory] pa ON pa.[IdProduct] = pair.[IdProduct]
+                                      INNER JOIN [Store].[Accessory] a ON a.[Id] = pa.[IdAccessory] AND a.[IsActive] = 1
+                                      LEFT JOIN [Store].[ProductSalesPlanOfferAccessory] oa ON oa.[IdProductSalesPlanOffer] = pair.[IdOffer] AND oa.[IdAccessory] = a.[Id]
+                                      WHERE (pair.[IdOffer] IS NULL OR oa.[IsAllowed] = 1)
+                                        AND CASE WHEN pair.[IdOffer] IS NULL THEN pa.[PriceAmount] ELSE oa.[PriceAmount] END IS NOT NULL
+                                      ORDER BY pair.[IdProduct], pair.[SalesPlanKey], pa.[SortOrder];
+                                      """;
                 await using DbDataReader reader = await command.ExecuteReaderAsync(cancellationToken);
                 while (await reader.ReadAsync(cancellationToken))
                 {
@@ -205,13 +208,13 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
             await using (DbCommand command = connection.CreateCommand())
             {
                 command.CommandText = """
-                    SELECT p.[Id], sp.[SalesPlanKey], ov.[SpecificationKey], ov.[Value]
-                    FROM [Store].[ProductSalesPlanOfferSpecificationOverride] ov
-                    INNER JOIN [Store].[ProductSalesPlanOffer] o ON o.[Id] = ov.[IdProductSalesPlanOffer]
-                    INNER JOIN [Store].[Product] p ON p.[Id] = o.[IdProduct]
-                    INNER JOIN [Store].[SalesPlan] sp ON sp.[Id] = o.[IdSalesPlan]
-                    ORDER BY p.[Id], sp.[SalesPlanKey], ov.[SpecificationKey];
-                    """;
+                                      SELECT p.[Id], sp.[SalesPlanKey], ov.[SpecificationKey], ov.[Value]
+                                      FROM [Store].[ProductSalesPlanOfferSpecificationOverride] ov
+                                      INNER JOIN [Store].[ProductSalesPlanOffer] o ON o.[Id] = ov.[IdProductSalesPlanOffer]
+                                      INNER JOIN [Store].[Product] p ON p.[Id] = o.[IdProduct]
+                                      INNER JOIN [Store].[SalesPlan] sp ON sp.[Id] = o.[IdSalesPlan]
+                                      ORDER BY p.[Id], sp.[SalesPlanKey], ov.[SpecificationKey];
+                                      """;
                 await using DbDataReader reader = await command.ExecuteReaderAsync(cancellationToken);
                 while (await reader.ReadAsync(cancellationToken))
                     offers[(checked((int)reader.GetInt64(0)), reader.GetString(1))]
@@ -243,7 +246,8 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
             int maxPurchaseQuantity;
             await using (DbCommand command = connection.CreateCommand())
             {
-                command.CommandText = "SELECT [MaxPurchaseQuantity] FROM [Store].[Product] WHERE [Id] = @ProductId AND [IsActive] = 1;";
+                command.CommandText =
+                    "SELECT [MaxPurchaseQuantity] FROM [Store].[Product] WHERE [Id] = @ProductId AND [IsActive] = 1;";
                 AddProductIdParameter(command, productId);
                 object? result = await command.ExecuteScalarAsync(cancellationToken);
                 if (result is null or DBNull) return null;
@@ -254,12 +258,12 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
             await using (DbCommand command = connection.CreateCommand())
             {
                 command.CommandText = """
-                    SELECT o.[OptionKey], v.[ValueKey], CONVERT(DECIMAL(19,0), ROUND(v.[PriceDelta] * 1000000, 0))
-                    FROM [Store].[ProductPurchaseOption] o
-                    INNER JOIN [Store].[ProductPurchaseOptionValue] v ON v.[IdProductPurchaseOption] = o.[Id]
-                    WHERE o.[IdProduct] = @ProductId
-                    ORDER BY o.[SortOrder], v.[SortOrder];
-                    """;
+                                      SELECT o.[OptionKey], v.[ValueKey], CONVERT(DECIMAL(19,0), ROUND(v.[PriceDelta] * 1000000, 0))
+                                      FROM [Store].[ProductPurchaseOption] o
+                                      INNER JOIN [Store].[ProductPurchaseOptionValue] v ON v.[IdProductPurchaseOption] = o.[Id]
+                                      WHERE o.[IdProduct] = @ProductId
+                                      ORDER BY o.[SortOrder], v.[SortOrder];
+                                      """;
                 AddProductIdParameter(command, productId);
                 await using DbDataReader reader = await command.ExecuteReaderAsync(cancellationToken);
                 while (await reader.ReadAsync(cancellationToken))
@@ -275,15 +279,16 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
             await using (DbCommand command = connection.CreateCommand())
             {
                 command.CommandText = """
-                    SELECT a.[AccessoryKey], pa.[IsRequired]
-                    FROM [Store].[ProductAccessory] pa
-                    INNER JOIN [Store].[Accessory] a ON a.[Id] = pa.[IdAccessory] AND a.[IsActive] = 1
-                    WHERE pa.[IdProduct] = @ProductId
-                    ORDER BY pa.[SortOrder];
-                    """;
+                                      SELECT a.[AccessoryKey], pa.[IsRequired]
+                                      FROM [Store].[ProductAccessory] pa
+                                      INNER JOIN [Store].[Accessory] a ON a.[Id] = pa.[IdAccessory] AND a.[IsActive] = 1
+                                      WHERE pa.[IdProduct] = @ProductId
+                                      ORDER BY pa.[SortOrder];
+                                      """;
                 AddProductIdParameter(command, productId);
                 await using DbDataReader reader = await command.ExecuteReaderAsync(cancellationToken);
-                while (await reader.ReadAsync(cancellationToken)) accessories.Add(new(reader.GetString(0), reader.GetBoolean(1)));
+                while (await reader.ReadAsync(cancellationToken))
+                    accessories.Add(new(reader.GetString(0), reader.GetBoolean(1)));
             }
 
             return new(maxPurchaseQuantity,
@@ -304,8 +309,14 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
         command.Parameters.Add(parameter);
     }
 
-    private sealed class OfferBuilder(int productId, string salesPlanId, decimal priceAmount,
-        decimal discountPercent, int stockQuantity, int maxPurchaseQuantity, bool isEnabled)
+    private sealed class OfferBuilder(
+        int productId,
+        string salesPlanId,
+        decimal priceAmount,
+        decimal discountPercent,
+        int stockQuantity,
+        int maxPurchaseQuantity,
+        bool isEnabled)
     {
         public Dictionary<string, decimal> AccessoryPriceAmounts { get; } = new(StringComparer.Ordinal);
         public List<string> AccessoryIds { get; } = [];
@@ -340,6 +351,7 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
         public Dictionary<string, decimal> StockBySalesPlan { get; } = new(StringComparer.Ordinal);
         public Dictionary<string, decimal> PriceBySalesPlan { get; } = new(StringComparer.Ordinal);
         public Dictionary<string, decimal> DiscountBySalesPlan { get; } = new(StringComparer.Ordinal);
+
         public StoreInventoryVariantRow Build() => new(ProductId, VariantId, Name, Code, AttributesJson,
             StockBySalesPlan, PriceBySalesPlan, DiscountBySalesPlan);
     }

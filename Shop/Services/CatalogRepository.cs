@@ -5,23 +5,31 @@ using Shop.Models;
 namespace Shop.Services;
 
 /// <summary>The database catalog snapshot is shared by Razor, SEO and the browser.</summary>
-public sealed class CatalogRepository(Shop.Database.Application.Store.Contracts.IStoreRuntimeDatasetRepository datasets) : ICatalogSource
+public sealed class CatalogRepository(Shop.Database.Application.Store.Contracts.IStoreRuntimeDatasetRepository datasets)
+    : ICatalogSource
 {
     public async ValueTask<CatalogSnapshot> ReadAsync(CancellationToken cancellationToken = default)
     {
         string json = await datasets.ReadCatalogJsonAsync(cancellationToken)
-                     ?? throw new InvalidDataException("The Store catalog dataset is missing from the database.");
+                      ?? throw new InvalidDataException("The Store catalog dataset is missing from the database.");
         string editorialJson = await datasets.ReadBrandEditorialJsonAsync(cancellationToken)
-                               ?? throw new InvalidDataException("The Store brand editorial dataset is missing from the database.");
+                               ?? throw new InvalidDataException(
+                                   "The Store brand editorial dataset is missing from the database.");
         BrandEditorialDocument[] editorials = JsonSerializer.Deserialize<BrandEditorialDocument[]>(editorialJson,
             new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? [];
-        return CatalogSnapshot.Parse(NormalizeRelationObjects(json), editorials.ToDictionary(item => item.Slug, StringComparer.OrdinalIgnoreCase));
+        return CatalogSnapshot.Parse(NormalizeRelationObjects(json),
+            editorials.ToDictionary(item => item.Slug, StringComparer.OrdinalIgnoreCase));
     }
 
     private static string NormalizeRelationObjects(string json)
     {
-        JsonObject root = JsonNode.Parse(json)?.AsObject() ?? throw new InvalidDataException("The Store catalog query returned invalid JSON.");
-        foreach (string property in new[] { "specificationGroups", "specificationCategories", "specificationFeatures", "attributeDefinitions", "brands", "categories", "colors", "countries", "details", "media", "collections" })
+        JsonObject root = JsonNode.Parse(json)?.AsObject() ??
+                          throw new InvalidDataException("The Store catalog query returned invalid JSON.");
+        foreach (string property in new[]
+                 {
+                     "specificationGroups", "specificationCategories", "specificationFeatures", "attributeDefinitions",
+                     "brands", "categories", "colors", "countries", "details", "media", "collections"
+                 })
         {
             if (root[property] is not JsonArray rows) continue;
             JsonObject relation = new();
@@ -30,8 +38,10 @@ public sealed class CatalogRepository(Shop.Database.Application.Store.Contracts.
                 if (row is not JsonObject item || item["id"]?.GetValue<string>() is not { } id) continue;
                 relation[id] = (property == "collections" ? item["items"] : item)?.DeepClone();
             }
+
             root[property] = relation;
         }
+
         return root.ToJsonString(new JsonSerializerOptions(JsonSerializerDefaults.Web));
     }
 }
