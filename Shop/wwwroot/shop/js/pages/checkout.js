@@ -344,6 +344,13 @@ window.HNUI.ready(() => window.HNUI.mount("checkout", document, () => {
                 payment.textContent = `سفارش ${result.number} ثبت شد`;
                 if (typeof result.simulatedPaymentUrl === "string" && /^\/payment\/simulated\/\d+$/.test(result.simulatedPaymentUrl)) {
                     window.location.assign(result.simulatedPaymentUrl);
+                } else {
+                    try {
+                        const redirectUrl = await ui.payment.start(Number(result.id));
+                        window.location.assign(redirectUrl);
+                    } catch (paymentError) {
+                        ui.setMessage(document.querySelector("#paymentStatus"), `سفارش ${result.number} ثبت شد و در انتظار پرداخت است. ${paymentError.message || "درگاه پرداخت در دسترس نیست."}`, "error");
+                    }
                 }
             } catch (error) {
                 ui.setMessage(document.querySelector("#paymentStatus"), error.message || "ثبت سفارش انجام نشد.", "error");

@@ -52,9 +52,14 @@
             if (!nextContent) throw new Error("ساختار صفحهٔ دریافت‌شده معتبر نیست.");
             content.innerHTML = nextContent.innerHTML;
             document.title = nextDocument.title;
+            for (const selector of [".admin-header-context__label", ".admin-header-context__title"]) {
+                const current = document.querySelector(selector), next = nextDocument.querySelector(selector);
+                if (current && next) current.textContent = next.textContent;
+            }
             if (pushState) history.pushState({ admin: true }, "", target.href);
             setActiveNavigation(target);
             window.AdminPages?.initialize(content);
+            window.AdminPaidOrdersDispatch?.initialize(content);
             window.AdminUsers?.initialize(content);
             window.AdminDocuments?.initialize(content);
             window.AdminDefinitions?.initialize(content);
@@ -93,6 +98,7 @@
     if (document.readyState === "loading") {
         document.addEventListener("DOMContentLoaded", () => {
             window.AdminPages?.initialize(content);
+            window.AdminPaidOrdersDispatch?.initialize(content);
             window.AdminUsers?.initialize(content);
             window.AdminDocuments?.initialize(content);
             window.AdminDefinitions?.initialize(content);
@@ -102,6 +108,7 @@
         }, { once: true });
     } else {
         window.AdminPages?.initialize(content);
+        window.AdminPaidOrdersDispatch?.initialize(content);
         window.AdminUsers?.initialize(content);
         window.AdminDocuments?.initialize(content);
         window.AdminDefinitions?.initialize(content);

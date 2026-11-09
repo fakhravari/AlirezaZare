@@ -82,7 +82,8 @@
                             <label class="form-label" for="system-user-display">نام نمایشی</label><input class="form-control" id="system-user-display" name="displayName" maxlength="160" required/>
                         </div>
                         <div class="col-md-8" data-new-password>
-                            <label class="form-label" for="system-user-password">گذرواژهٔ اولیه</label><input class="form-control" id="system-user-password" name="password" type="password" minlength="12" autocomplete="new-password"/>
+                            <label class="form-label" for="system-user-password">گذرواژهٔ اولیه</label><input class="form-control" id="system-user-password" name="password" type="password" minlength="12" maxlength="200" autocomplete="new-password"/>
+                            <small class="form-text">گذرواژه باید بین ۱۲ تا ۲۰۰ نویسه باشد.</small>
                         </div>
                         <div class="col-md-4 d-flex align-items-end">
                             <label class="form-check mb-2">

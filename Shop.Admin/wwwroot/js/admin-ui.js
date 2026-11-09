@@ -9,7 +9,7 @@
         discountPercent: "درصد تخفیف", stockQuantity: "موجودی", warehouseId: "شناسهٔ انبار",
         warehouseCode: "کد انبار", warehouseName: "انبار", companyName: "شرکت", isSalesWarehouse: "انبار فروش",
         isActive: "وضعیت", storeProductKey: "شناسهٔ محصول فروشگاه", productName: "کالا", variantName: "تنوع",
-        salesPlanName: "طرح فروش", quantity: "موجودی", minimumQuantity: "حداقل موجودی", isLowStock: "وضعیت حداقل"
+        salesPlanName: "طرح فروش", unitName: "واحد اصلی", quantity: "موجودی", minimumQuantity: "حداقل موجودی", isLowStock: "وضعیت حداقل"
     };
 
     function notify(message, kind = "info") {
@@ -51,7 +51,10 @@
         });
         let body;
         try { body = await response.json(); } catch { body = null; }
-        if (!response.ok) throw new Error(body?.detail || body?.title || `پاسخ سرور ${response.status} بود.`);
+        if (!response.ok) {
+            const validation = body?.errors && Object.values(body.errors).flat().find(message => typeof message === "string" && message.trim());
+            throw new Error(body?.detail || validation || body?.title || `پاسخ سرور ${response.status} بود.`);
+        }
         return body;
     }
 

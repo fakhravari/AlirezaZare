@@ -25,7 +25,7 @@ a { text-decoration-thickness: from-font; }
 .admin-page { width: 100%; max-width: 1680px; margin-inline: auto; }
 .admin-page-intro { display: flex; justify-content: space-between; align-items: end; gap: 24px; margin: 3px 0 23px; }
 .admin-page-intro h1 { margin: 11px 0 3px; color: var(--admin-ink); font-size: clamp(20px, 2vw, 25px); font-weight: 700; }
-.admin-page-intro p { margin: 0; color: var(--admin-muted); font-size: 13px; }
+.admin-page-intro p { margin: 0; color: #526071; font-size: 14px; }
 .admin-breadcrumb { display: flex; align-items: center; gap: 9px; color: #8792a1; font-size: 11px; }
 .admin-breadcrumb a { color: #526071; }
 .admin-page-intro__aside { flex: 0 0 auto; padding: 6px 10px; border: 1px solid var(--admin-line); border-radius: 5px; background: #fff; color: #697686; font-size: 11px; }
@@ -50,8 +50,9 @@ a { text-decoration-thickness: from-font; }
 .admin-low-stock-filter .form-check-input { float: none; margin: 0; }
 .admin-record-count { color: var(--admin-muted); font-size: 11px; }
 .admin-table-wrap { min-height: 100px; }
-.admin-table-wrap .table { font-size: 12px; }
-.admin-table-wrap th { white-space: nowrap; color: #647182; font-size: 11px; font-weight: 600; }
+.admin-page .table-responsive { position: relative; }
+.admin-table-wrap .table { font-size: 14px; }
+.admin-table-wrap th { white-space: nowrap; color: #526071; font-size: 13px; font-weight: 600; }
 .admin-table-wrap td { min-width: 82px; }
 .admin-data-status { padding: 10px 0; color: #758191; font-size: 12px; }
 .admin-data-status:empty { display: none; }
@@ -68,6 +69,9 @@ a { text-decoration-thickness: from-font; }
 .admin-record-details dd { color: var(--admin-ink); }
 .admin-row-actions { width: 1%; white-space: nowrap; }
 .admin-row-actions .btn { min-width: 34px; }
+.admin-document-lines select[data-document-item] { min-width: 200px; }
+.admin-document-lines select[data-document-unit] { min-width: 120px; }
+.admin-document-lines input[data-document-quantity] { min-width: 110px; }
 .admin-empty-state { padding: 28px 12px; color: var(--admin-muted); text-align: center; font-size: 12px; }
 .admin-pagination { display: flex; justify-content: center; align-items: center; gap: 14px; margin-top: 14px; font-size: 12px; }
 .admin-readonly-note { display: flex; align-items: start; gap: 7px; margin: 17px 0 0; color: #818c99; font-size: 10px; line-height: 1.8; }

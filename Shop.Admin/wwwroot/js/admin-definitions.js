@@ -3,6 +3,7 @@
     const ui = window.AdminUI;
     if (!ui) return;
     const initialized = new WeakSet();
+    const formRequests = new WeakMap();
     const fmt = new Intl.NumberFormat("fa-IR");
     const configs = {
         "stock-owners": { fields: [["code", "کد", "text", true], ["displayName", "نام", "text", true], ["idStockOwnerType", "نوع", "select", true, [["1", "طرح فروش"], ["2", "مالک"]]]], columns: [["code", "کد"], ["displayName", "نام"], ["idStockOwnerType", "نوع"], ["isActive", "وضعیت", "active"]] },
@@ -47,17 +48,31 @@
                 row.append(element("td", esc(value)));
             }
             const actions = element("td", null, "text-nowrap");
+            if (item.isActive === false && page.dataset.definitionSection === "units" && page.dataset.canEdit === "true") {
+                const activate = element("button", "فعال‌سازی", "btn btn-sm btn-outline-success");
+                activate.type = "button";
+                activate.addEventListener("click", async () => {
+                    if (activate.disabled) return;
+                    activate.disabled = true;
+                    try { const result = await request(page, `${page.dataset.api}/units/${item.id}`, "PUT", { code: item.code, name: item.name, isActive: true }); ui.notify(result.message, "success"); await load(page); }
+                    catch (error) { ui.notify(error.message, "danger"); }
+                    finally { activate.disabled = false; }
+                });
+                actions.append(activate);
+            }
             if (item.isActive !== false) {
                 if (page.dataset.canEdit === "true") {
-                    const edit = element("button", "ویرایش", "btn btn-sm btn-default me-1"); edit.type = "button"; edit.addEventListener("click", () => openForm(page, item, config));
+                    const edit = element("button", "ویرایش", "btn btn-sm btn-default me-1"); edit.type = "button"; edit.addEventListener("click", () => void openForm(page, item, config).catch(error => ui.notify(error.message || "بازکردن فرم ناموفق بود.", "danger")));
                     actions.append(edit);
                 }
                 if (page.dataset.canDeactivate === "true" && page.dataset.definitionSection !== "stock-owners") {
                 const deactivate = element("button", "غیرفعال‌سازی", "btn btn-sm btn-outline-danger"); deactivate.type = "button";
                 deactivate.addEventListener("click", async () => {
-                    if (!window.confirm("این تعریف غیرفعال شود؟ سابقهٔ گردش‌ها حفظ می‌شود.")) return;
+                    if (deactivate.disabled || !window.confirm("این تعریف غیرفعال شود؟ سابقهٔ گردش‌ها حفظ می‌شود.")) return;
+                    deactivate.disabled = true;
                     try { const result = await request(page, `${page.dataset.api}/${page.dataset.definitionSection}/${item.id}/deactivate`, "POST", {}); ui.notify(result.message, "success"); await load(page); }
                     catch (error) { ui.notify(error.message, "danger"); }
+                    finally { deactivate.disabled = false; }
                 });
                 actions.append(deactivate);
                 }
@@ -86,7 +101,7 @@
             }
             if (type === "text") control.type = "text";
             if (type === "textarea") { control.rows = 4; control.placeholder = '[{"key":"color","label":"رنگ","value":"yellow","display":"زرد"}]'; }
-            if (type === "number") { control.type = "number"; control.min = key === "conversionFactor" ? "0.000000001" : "1"; control.step = key === "conversionFactor" ? "any" : "1"; }
+            if (type === "number") { control.type = "number"; control.min = key === "conversionFactor" ? "0.000000001" : "1"; control.step = key === "conversionFactor" ? "any" : "1"; if (key === "conversionFactor") control.max = "999999999.999999999"; }
             if (type === "select" || ["warehouses", "products", "units", "companies", "plans"].includes(type)) control.value = data[key] == null ? "" : String(data[key]);
             else control.value = data[key] ?? (key === "conversionFactor" ? "1" : "");
             const caption = element("label", label, "form-label"); caption.htmlFor = control.id; wrap.append(caption, control);
@@ -94,13 +109,16 @@
         host.append(wrap);
     }
     async function openForm(page, data, config) {
+        const sequence = (formRequests.get(page) || 0) + 1;
+        formRequests.set(page, sequence);
         const form = document.querySelector("[data-definition-form]"), host = form.querySelector("[data-definition-fields]");
-        host.replaceChildren(); form.reset(); form.elements.id.value = data?.id || "";
         if (data && page.dataset.definitionSection === "warehouses") data = { ...data, companyId: data.idCompany, ownerSalesPlanId: data.idOwnerSalesPlanReference };
         if (data && page.dataset.definitionSection === "references") data = { ...data, warehouseId: data.idWarehouse };
         if (data && page.dataset.definitionSection === "product-units") data = { ...data, productId: data.idProduct, unitId: data.idUnit };
         let lookups = { warehouses: [] };
         if (["references", "product-units", "variants", "warehouses"].includes(page.dataset.definitionSection)) lookups = await request(page, `${page.dataset.api}/lookups`);
+        if (!page.isConnected || formRequests.get(page) !== sequence) return;
+        host.replaceChildren(); form.reset(); form.elements.id.value = data?.id || "";
         for (const field of config.fields) {
             if (field[0] === "isSiteWarehouse" && page.dataset.fullAccess !== "true") continue;
             addField(host, field, data || {}, lookups);
@@ -133,9 +151,11 @@
             const actions = element("td"), remove = element("button", "حذف اتصال", "btn btn-sm btn-outline-danger");
             remove.type = "button";
             remove.addEventListener("click", async () => {
-                if (!window.confirm("اتصال این مالک به انبار حذف شود؟")) return;
+                if (remove.disabled || !window.confirm("اتصال این مالک به انبار حذف شود؟")) return;
+                remove.disabled = true;
                 try { const result = await request(page, `${page.dataset.api}/sales-plan-mapping/${link.idWarehouse}/${link.idStockOwner}`, "DELETE", {}); ui.notify(result.message, "success"); await loadMapping(page); }
                 catch (error) { ui.notify(error.message, "danger"); }
+                finally { remove.disabled = false; }
             });
             actions.append(remove); row.append(actions);
             rows.append(row);
@@ -158,18 +178,29 @@
         try {
             if (section === "sales-plan-mapping") {
                 const mapping = page.querySelector("[data-mapping-form]");
-                mapping.addEventListener("submit", async event => { event.preventDefault(); try { const result = await request(page, `${page.dataset.api}/sales-plan-mapping`, "PUT", { companyId: Number(mapping.elements.companyId.value), warehouseId: Number(mapping.elements.warehouseId.value), salesPlanId: Number(mapping.elements.salesPlanId.value) }); ui.notify(result.message, "success"); await loadMapping(page); } catch (error) { ui.notify(error.message, "danger"); } });
+                mapping.addEventListener("submit", async event => { event.preventDefault(); if (mapping.dataset.saving === "true") return; const submit = mapping.querySelector('[type="submit"]'); mapping.dataset.saving = "true"; submit.disabled = true; try { const result = await request(page, `${page.dataset.api}/sales-plan-mapping`, "PUT", { companyId: Number(mapping.elements.companyId.value), warehouseId: Number(mapping.elements.warehouseId.value), salesPlanId: Number(mapping.elements.salesPlanId.value) }); ui.notify(result.message, "success"); await loadMapping(page); } catch (error) { ui.notify(error.message, "danger"); } finally { mapping.dataset.saving = "false"; submit.disabled = false; } });
             } else {
                 const config = configs[section];
                 const createButton = page.querySelector("[data-definition-create]");
                 createButton.hidden = page.dataset.canCreate !== "true";
-                createButton.addEventListener("click", () => void openForm(page, null, config));
+                createButton.addEventListener("click", () => void openForm(page, null, config).catch(error => ui.notify(error.message || "بازکردن فرم ناموفق بود.", "danger")));
                 form.addEventListener("submit", async event => {
-                    event.preventDefault(); const values = new FormData(form), id = values.get("id"); const body = {};
+                    event.preventDefault();
+                    if (form.dataset.saving === "true") return;
+                    for (const [key, label, type, required] of config.fields) {
+                        const control = form.elements.namedItem(key);
+                        if (required && type === "text" && control && !control.value.trim()) {
+                            ui.notify(`${label} را وارد کنید.`, "danger"); control.focus(); return;
+                        }
+                    }
+                    const values = new FormData(form), id = values.get("id"); const body = {};
                     for (const [key, , type] of config.fields) body[key] = type === "checkbox" ? values.get(key) === "on" : (key === "idStockOwnerType" || ["number", "products", "units", "warehouses", "companies", "plans"].includes(type) ? Number(values.get(key)) || null : values.get(key));
                     body.isActive = true;
+                    const submit = form.querySelector('[type="submit"]');
+                    form.dataset.saving = "true"; submit.disabled = true;
                     try { const result = await request(page, `${page.dataset.api}/${section}${id ? `/${id}` : ""}`, id ? "PUT" : "POST", body); ui.notify(result.message, "success"); window.bootstrap?.Modal?.getInstance(document.getElementById("admin-definition-modal"))?.hide(); await load(page); }
                     catch (error) { ui.notify(error.message, "danger"); }
+                    finally { form.dataset.saving = "false"; submit.disabled = false; }
                 });
             }
             await load(page);

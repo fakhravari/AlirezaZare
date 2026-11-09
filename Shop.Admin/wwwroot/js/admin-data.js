@@ -87,6 +87,12 @@
                 file.dataset.productFile = String(index); file.textContent = "فایل محصول";
                 actions.append(file);
             }
+            if (page.dataset.adminSection === "brands" && page.dataset.canUploadImage === "true") {
+                const upload = document.createElement("button");
+                upload.type = "button"; upload.className = "btn btn-xs btn-default ms-1";
+                upload.dataset.brandImage = String(index); upload.textContent = "نشان برند";
+                actions.append(upload);
+            }
             if (page.dataset.adminPage === "stock" && page.dataset.canMinimum === "true" && page.__adminRows[index]?.isRegularSalesPlan) {
                 const minimum = document.createElement("button");
                 minimum.type = "button"; minimum.className = "btn btn-xs btn-default ms-1";
@@ -139,14 +145,9 @@
         } finally { finishRequest(page, controller); }
     }
 
-    async function loadPlans(select, signal) {
-        const selected = select.value;
-        const data = await ui.getJson("/api/store/sales-plans", { signal });
-        const plans = Array.isArray(data?.plans) ? data.plans : [];
-        const options = [new Option("همهٔ طرح‌ها", "")];
-        plans.forEach(plan => options.push(new Option(plan.name, plan.id)));
-        select.replaceChildren(...options);
-        if (plans.some(plan => String(plan.id) === selected)) select.value = selected;
+    async function loadPlans(signal) {
+        const data = await ui.getJson("/api/admin/warehouse/stock/plans", { signal });
+        return Array.isArray(data) ? data : [];
     }
 
     async function loadWarehouses(page, announce = false) {
@@ -197,9 +198,9 @@
             const planSelect = page.querySelector("[data-admin-plan-options]");
             if (warehouseSelect && !warehouseSelect.dataset.loaded) tasks.push(ui.getJson(page.dataset.adminWarehousesApi, { signal: controller.signal }));
             else tasks.push(Promise.resolve(null));
-            if (planSelect && !planSelect.dataset.loaded) tasks.push(loadPlans(planSelect, controller.signal).then(() => true));
+            if (planSelect && !planSelect.dataset.loaded) tasks.push(loadPlans(controller.signal));
             else tasks.push(Promise.resolve(null));
-            const [items, warehouses] = await Promise.all(tasks);
+            const [items, warehouses, plans] = await Promise.all(tasks);
             if (!page.isConnected || requests.get(page) !== controller) return;
             if (warehouseSelect && warehouses) {
                 const selected = warehouseSelect.value;
@@ -209,12 +210,19 @@
                 warehouseSelect.value = selected;
                 warehouseSelect.dataset.loaded = "true";
             }
-            if (planSelect) planSelect.dataset.loaded = "true";
+            if (planSelect && plans) {
+                const selected = planSelect.value;
+                const options = [new Option("همهٔ طرح‌ها", "")];
+                plans.forEach(plan => options.push(new Option(plan.name, plan.id)));
+                planSelect.replaceChildren(...options);
+                if (plans.some(plan => String(plan.id) === selected)) planSelect.value = selected;
+                planSelect.dataset.loaded = "true";
+            }
             const rows = Array.isArray(items) ? items : [];
             renderRows(page, rows, item => [
                 `${item.warehouseName} (${item.warehouseCode})`, item.storeProductKey,
                 item.variantName ? `${item.productName} ـ ${item.variantName}` : item.productName,
-                item.salesPlanName, ui.formatNumber(item.quantity), ui.formatNumber(item.minimumQuantity),
+                item.salesPlanName, item.unitName, ui.formatNumber(item.quantity), ui.formatNumber(item.minimumQuantity),
                 item.isLowStock ? "کمتر از حداقل" : "مناسب"
             ]);
             updateCount(page, 0, rows.length, false);
@@ -278,6 +286,17 @@
     }
 
     document.addEventListener("click", event => {
+        const brandButton = event.target.closest("[data-brand-image]");
+        if (brandButton) {
+            const page = brandButton.closest('[data-admin-section="brands"]');
+            const item = page?.__adminRows?.[Number(brandButton.dataset.brandImage)];
+            const form = document.querySelector("[data-brand-image-form]");
+            if (!item || !form) return;
+            form.reset(); form.elements.brandKey.value = item.id;
+            form.querySelector("[data-brand-image-name]").textContent = item.name;
+            window.bootstrap?.Modal?.getOrCreateInstance(document.getElementById("brand-image-modal")).show();
+            return;
+        }
         const fileButton = event.target.closest("[data-product-file]");
         if (fileButton) {
             const page = fileButton.closest('[data-admin-section="products"]');
@@ -337,6 +356,7 @@
                         "شماره سفارش": order.orderNumber, "دادهٔ نمونه": order.isSample ? "بله" : "خیر", "مشتری": order.customerName,
                         "وضعیت": order.status === "simulated-payment-confirmed" ? "پرداخت آزمایشی تأیید شده" : order.status === "pending-payment" ? "در انتظار پرداخت" : order.status,
                         "مبلغ تومان": order.totalAmount,
+                        "شناسه حواله": order.idWarehouseDocument || "ثبت نشده",
                         "نشانی ثبت‌شده": Object.values(address).filter(value => typeof value === "string" && value).join("، "),
                         "اقلام": items.map(line => `${line.name}، ${ui.formatNumber(line.quantity)} عدد، مبلغ واحد ${ui.formatNumber(line.unitAmount)} تومان، طرح ${line.salesPlan}`).join(" ؛ ") || "جزئیات اقلام ثبت نشده است"
                     });
@@ -369,6 +389,16 @@
     });
 
     document.addEventListener("submit", event => {
+        const brandForm = event.target.closest("[data-brand-image-form]");
+        if (brandForm) {
+            event.preventDefault();
+            const save = brandForm.querySelector('[type="submit"]'); save.disabled = true;
+            void ui.getJson("/api/admin/store/media", { method: "POST", body: new FormData(brandForm) })
+                .then(result => { ui.notify(result.message, "success"); window.bootstrap?.Modal?.getInstance(document.getElementById("brand-image-modal"))?.hide(); })
+                .catch(error => ui.notify(error.message || "بارگذاری نشان ناموفق بود.", "danger"))
+                .finally(() => { save.disabled = false; });
+            return;
+        }
         const fileForm = event.target.closest("[data-product-file-form]");
         if (fileForm) {
             event.preventDefault();
@@ -425,11 +455,15 @@
         const minimumForm = event.target.closest("[data-minimum-form]");
         if (minimumForm) {
             event.preventDefault();
+            if (minimumForm.dataset.saving === "true") return;
             const body = { warehouseId: Number(minimumForm.elements.warehouseId.value), inventoryItemId: Number(minimumForm.elements.inventoryItemId.value), minimumQuantity: Number(minimumForm.elements.minimumQuantity.value) };
             const token = minimumForm.querySelector('[name="__RequestVerificationToken"]')?.value || "";
+            const save = minimumForm.querySelector('[type="submit"]');
+            minimumForm.dataset.saving = "true"; save.disabled = true;
             void ui.getJson("/api/admin/warehouse/stock/minimum", { method: "PUT", headers: { "Content-Type": "application/json", RequestVerificationToken: token }, body: JSON.stringify(body) })
                 .then(result => { ui.notify(result.message, "success"); window.bootstrap?.Modal?.getInstance(document.getElementById("admin-minimum-modal"))?.hide(); const page = minimumForm.closest("main")?.querySelector('[data-admin-page="stock"]') || document.querySelector('[data-admin-page="stock"]'); if (page) void loadStock(page, Number(page.dataset.adminPageNumber || 1)); })
-                .catch(error => ui.notify(error.message || "ذخیرهٔ حداقل ناموفق بود.", "danger"));
+                .catch(error => ui.notify(error.message || "ذخیرهٔ حداقل ناموفق بود.", "danger"))
+                .finally(() => { minimumForm.dataset.saving = "false"; save.disabled = false; });
             return;
         }
         const form = event.target.closest("[data-admin-filter]");

@@ -40,7 +40,7 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
             SELECT o.[Id], o.[OrderNumber], o.[Status], o.[PaymentMethod], o.[ItemCount], o.[TotalAmount], o.[OrderedAtUtc],
                    CONVERT(bit, CASE WHEN o.[PaymentMethod] = N'demo' AND o.[ExternalOrderKey] LIKE N'demo-order-%' THEN 1 ELSE 0 END) AS [IsSample],
                    LTRIM(RTRIM(CONCAT(p.[FirstName], N' ', p.[LastName]))) AS [CustomerName],
-                   COALESCE(o.[AddressSnapshotJson], CONCAT(NCHAR(123), NCHAR(125))) AS [AddressSnapshotJson],
+                   o.[IdWarehouseDocument], COALESCE(o.[AddressSnapshotJson], CONCAT(NCHAR(123), NCHAR(125))) AS [AddressSnapshotJson],
                    COALESCE((SELECT i.[ProductNameSnapshot] AS [name], i.[Quantity] AS [quantity], i.[UnitAmount] AS [unitAmount],
                            s.[SalesPlanKey] AS [salesPlan], JSON_QUERY(i.[OptionsJson]) AS [options]
                     FROM [Store].[OrderItem] i JOIN [Warehouse].[SalesPlanReference] s ON s.[Id] = i.[IdSalesPlan]
@@ -65,6 +65,7 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
 
     public sealed class OrderDetailsRow : OrderRow
     {
+        public long? IdWarehouseDocument { get; set; }
         public string AddressSnapshotJson { get; set; } = "{}";
         public string ItemsJson { get; set; } = "[]";
     }

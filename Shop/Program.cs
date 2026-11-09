@@ -5,6 +5,7 @@ using Shop.Database.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
+builder.Services.AddAntiforgery(options => options.HeaderName = "RequestVerificationToken");
 builder.Services.AddAuthorization();
 builder.Services.AddAuthentication("ShopCookie").AddCookie("ShopCookie", options =>
 {
@@ -46,6 +47,10 @@ builder.Services.AddRateLimiter(options =>
 });
 builder.Services.AddSingleton<Shop.Services.EmailVerificationCodeStore>();
 builder.Services.AddScoped<Shop.Services.IEmailSender, Shop.Services.SmtpEmailSender>();
+builder.Services.AddScoped<Shop.Services.IPaymentGateway, Shop.Services.UnconfiguredPaymentGateway>();
+builder.Services.AddScoped<Shop.Services.PaymentService>();
+builder.Services.AddScoped<Shop.Services.PaidOrderOutboxProcessor>();
+builder.Services.AddHostedService<Shop.Services.PaidOrderOutboxWorker>();
 builder.Services.AddScoped<Shop.Services.IMagazineContentSource, Shop.Services.DatabaseMagazineContentSource>();
 builder.Services.AddScoped<Shop.Services.CatalogRepository>();
 builder.Services.AddScoped<Shop.Services.ICatalogSource>(services =>

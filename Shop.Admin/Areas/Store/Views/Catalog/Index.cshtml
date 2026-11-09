@@ -68,7 +68,7 @@
                 <span data-admin-page-label></span>
                 <button type="button" class="btn btn-default btn-sm" data-admin-page-step="1">بعدی</button>
             </div>
-            <p class="admin-readonly-note"><i class="fa fa-lock" aria-hidden="true"></i> @(catalogSection == "categories" ? "محتوای مشترک محصول در دسته قابل ویرایش است." : catalogSection == "products" ? "مدیر دارای دسترسی کامل می‌تواند تصویر، ویدئو و فایل کالا را بارگذاری کند." : "فهرست از API خوانده می‌شود؛ تغییر اطلاعات تا آماده‌شدن API مدیریتی فعال نیست.")</p>
+            <p class="admin-readonly-note"><i class="fa fa-lock" aria-hidden="true"></i> @(catalogSection == "categories" ? "محتوای مشترک محصول در دسته قابل ویرایش است." : catalogSection == "products" ? "مدیر دارای دسترسی کامل می‌تواند تصویر، ویدئو و فایل کالا را بارگذاری کند." : catalogSection == "brands" ? "مدیر دارای دسترسی کامل می‌تواند نشان برند را بارگذاری کند." : "فهرست از API خوانده می‌شود؛ تغییر اطلاعات تا آماده‌شدن API مدیریتی فعال نیست.")</p>
         </div>
     </section>
 </div>
@@ -118,6 +118,17 @@
                 <label for="category-specs" class="form-label">مشخصات عمومی، هر خط به شکل «عنوان | مقدار»</label><textarea id="category-specs" name="specs" class="form-control" rows="5"></textarea>
             </div>
             <div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button type="submit" class="btn btn-primary">ذخیره</button></div>
+        </form></div>
+    </div>
+}
+@if (catalogSection == "brands" && User.IsInRole("system.full-access"))
+{
+    <div class="modal fade" id="brand-image-modal" tabindex="-1" aria-labelledby="brand-image-title" aria-hidden="true">
+        <div class="modal-dialog"><form class="modal-content" data-brand-image-form enctype="multipart/form-data">
+            @Html.AntiForgeryToken()<input type="hidden" name="brandKey" /><input type="hidden" name="kind" value="brand" />
+            <div class="modal-header"><h2 class="modal-title fs-5" id="brand-image-title">نشان برند</h2><button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="بستن"></button></div>
+            <div class="modal-body"><p data-brand-image-name></p><label for="brand-image-file" class="form-label">تصویر JPEG، PNG یا WebP، حداکثر ۱۰ مگابایت</label><input id="brand-image-file" name="file" type="file" accept="image/jpeg,image/png,image/webp" class="form-control" required /></div>
+            <div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button type="submit" class="btn btn-primary">بارگذاری نشان</button></div>
         </form></div>
     </div>
 }

@@ -1,0 +1,23 @@
+@model Shop.Admin.Models.FeaturePageViewModel
+<div class="admin-page" data-paid-orders-dispatch>
+    @await Html.PartialAsync("_AdminPageIntro", (Model.Title, Model.Description))
+    <section class="panel panel-inverse">
+        <div class="panel-heading"><h2 class="panel-title">سفارش‌های پرداخت‌شده آماده حواله</h2></div>
+        <div class="panel-body">
+            <form data-dispatch-form>
+                @Html.AntiForgeryToken()
+                <div class="d-flex flex-wrap gap-2 align-items-center mb-3">
+                    <button class="btn btn-primary" type="submit" data-dispatch-submit>صدور یک حواله برای انتخاب‌شده‌ها</button>
+                    <button class="btn btn-default" type="button" data-dispatch-refresh>بارگذاری دوباره</button>
+                    <span data-dispatch-count aria-live="polite"></span>
+                </div>
+                <div data-dispatch-status role="status" aria-live="polite"></div>
+                <div class="table-responsive"><table class="table table-striped align-middle"><thead><tr>
+                    <th><input type="checkbox" data-dispatch-all aria-label="انتخاب همه سفارش‌های نمایش‌داده‌شده" /></th>
+                    <th>شماره سفارش</th><th>مشتری</th><th>تعداد</th><th>مبلغ تومان</th><th>زمان تأیید پرداخت</th>
+                </tr></thead><tbody data-dispatch-rows></tbody></table></div>
+                <p class="text-muted">حداکثر ۲۰۰ سفارش قدیمی‌تر آمادهٔ حواله نمایش داده می‌شود. همهٔ سفارش‌های انتخاب‌شده در یک حواله ثبت می‌شوند.</p>
+            </form>
+        </div>
+    </section>
+</div>

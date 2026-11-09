@@ -14,7 +14,8 @@
     bool canWarehouseOperations = new[] { "receipts", "dispatches", "transfers", "returns", "stocktake", "adjustments", "movements" }.Any(id => Can($"Warehouse:Features:Index:{id}"));
     bool canWarehouseSettings = new[] { "companies", "references", "units", "product-units", "variants", "document-types", "sales-plan-mapping", "stock-owners" }.Any(id => Can($"Warehouse:Features:Index:{id}"));
     bool catalogOpen = inStore && string.Equals(controller, "Catalog", StringComparison.OrdinalIgnoreCase);
-    bool salesOpen = inStore && (new[] { "Orders", "Promotions" }.Contains(controller, StringComparer.OrdinalIgnoreCase) || IsFeature("orders") || IsFeature("promotions"));
+    bool salesOpen = inStore && (new[] { "Orders", "Promotions" }.Contains(controller, StringComparer.OrdinalIgnoreCase) || IsFeature("orders") || IsFeature("promotions") || IsFeature("paid-orders-dispatch"));
+    bool reportsOpen = inWarehouse && (controller == "Stock" || IsFeature("movements"));
 }
 <aside id="sidebar" class="app-sidebar" data-bs-theme="dark" aria-label="ناوبری پنل">
 <div class="app-sidebar-content" data-scrollbar="true" data-height="100%">
@@ -108,6 +109,12 @@
         <span class="menu-caret"></span>
     </a>
     <div id="store-sales" class="menu-submenu">
+        @if (User.IsInRole("system.full-access"))
+        {
+            <div class="menu-item @(IsFeature("paid-orders-dispatch") ? "active" : "")">
+                <a class="menu-link" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="paid-orders-dispatch" data-admin-nav><span class="menu-text">حواله سفارش‌های پرداخت‌شده</span></a>
+            </div>
+        }
         <div class="menu-item @(IsFeature("orders") ? "active" : "")" hidden="@(!Can("Store:Features:Index:orders"))">
             <a class="menu-link" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="orders" data-admin-nav>
                 <span class="menu-text">سفارش‌ها</span>
@@ -183,6 +190,15 @@
         </span><span class="menu-text">موجودی کالا</span>
     </a>
 </div>
+<div class="menu-item has-sub @(reportsOpen ? "active expand" : "")" hidden="@(!Can("Warehouse:Stock:Index") && !Can("Warehouse:Features:Index:movements"))">
+    <a href="#warehouse-reports" class="menu-link" aria-expanded="@(reportsOpen ? "true" : "false")">
+        <span class="menu-icon"><i class="fa fa-chart-bar" aria-hidden="true"></i></span><span class="menu-text">گزارش‌های انبار</span><span class="menu-caret"></span>
+    </a>
+    <div id="warehouse-reports" class="menu-submenu">
+        <div class="menu-item" hidden="@(!Can("Warehouse:Stock:Index"))"><a class="menu-link" asp-area="Warehouse" asp-controller="Stock" asp-action="Index" data-admin-nav><span class="menu-text">موجودی و حداقل موجودی</span></a></div>
+        <div class="menu-item" hidden="@(!Can("Warehouse:Features:Index:movements"))"><a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="movements" data-admin-nav><span class="menu-text">کاردکس و تاریخچهٔ اسناد</span></a></div>
+    </div>
+</div>
 <div class="menu-item has-sub @(inWarehouse && controller == "Features" && canWarehouseOperations ? "active expand" : "")" hidden="@(!canWarehouseOperations)">
     <a href="#warehouse-operations" class="menu-link" aria-expanded="@(inWarehouse && controller == "Features" ? "true" : "false")">
         <span class="menu-icon">
@@ -224,7 +240,7 @@
         </div>
         <div class="menu-item @(IsFeature("movements") ? "active" : "")" hidden="@(!Can("Warehouse:Features:Index:movements"))">
             <a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="movements" data-admin-nav>
-                <span class="menu-text">گردش کالا</span>
+                <span class="menu-text">کاردکس و گردش کالا</span>
             </a>
         </div>
     </div>

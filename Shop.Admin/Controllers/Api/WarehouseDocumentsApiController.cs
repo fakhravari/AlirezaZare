@@ -107,7 +107,7 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db) : Controll
             document.Reason, document.ExternalReference, document.CustomerOrderKey, document.CreatedByUserKey,
             document.CreatedAtUtc,
             document.UpdatedByUserKey, document.UpdatedAtUtc,
-            document.Lines.OrderBy(x => x.Id).Select(x => new DocumentLineDetail(x.IdInventoryItem, x.IdUnit,
+            document.Lines.OrderBy(x => x.Id).Select(x => new DocumentLineDetail(x.IdInventoryItem, x.IdUnit, x.IdSalesPlanReference ?? document.IdSalesPlanReference,
                 x.Quantity, x.ConversionFactor, x.BaseQuantity, x.ProductNameSnapshot, x.VariantNameSnapshot,
                 x.UnitNameSnapshot)).ToArray()));
     }
@@ -122,6 +122,7 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db) : Controll
         if (failure is not null) return failure;
         IActionResult? lineFailure = ValidateLines(input.Lines);
         if (lineFailure is not null) return lineFailure;
+        if (!await ValidLinePlansAsync(input, cancellationToken)) return ValidationProblem("طرح یکی از اقلام به انبار اختصاص ندارد یا غیرفعال است.");
         PreparedLine[] lines = await PrepareLinesAsync(input.Lines!, cancellationToken);
         if (lines.Length != input.Lines!.Count)
             return ValidationProblem("کالا یا واحد انتخاب‌شده برای یکی از اقلام معتبر نیست.");
@@ -185,6 +186,7 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db) : Controll
         if (failure is not null) return failure;
         IActionResult? lineFailure = ValidateLines(input.Lines);
         if (lineFailure is not null) return lineFailure;
+        if (!await ValidLinePlansAsync(input, cancellationToken)) return ValidationProblem("طرح یکی از اقلام به انبار اختصاص ندارد یا غیرفعال است.");
         PreparedLine[] lines = await PrepareLinesAsync(input.Lines!, cancellationToken);
         if (lines.Length != input.Lines!.Count)
             return ValidationProblem("کالا یا واحد انتخاب‌شده برای یکی از اقلام معتبر نیست.");
@@ -319,6 +321,16 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db) : Controll
         return null;
     }
 
+    private async Task<bool> ValidLinePlansAsync(SaveWarehouseDocumentInput input, CancellationToken cancellationToken)
+    {
+        long[] plans = input.Lines!.Select(line => line.SalesPlanId ?? input.SalesPlanId).Distinct().ToArray();
+        int count = await (from owner in db.WarehouseStockOwners.AsNoTracking()
+            join plan in db.SalesPlanReferences.AsNoTracking() on owner.IdStockOwner equals plan.Id
+            where owner.IdWarehouse == input.WarehouseId && plan.IsActive && plans.Contains(plan.Id)
+            select plan.Id).CountAsync(cancellationToken);
+        return count == plans.Length;
+    }
+
     private async Task<PreparedLine[]> PrepareLinesAsync(IReadOnlyList<WarehouseDocumentLineInput> input,
         CancellationToken cancellationToken)
     {
@@ -344,7 +356,7 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db) : Controll
             decimal quantity = decimal.Truncate(line.Quantity * 1000m) / 1000m;
             decimal baseQuantity = decimal.Truncate(quantity * unit.ConversionFactor * 1000m) / 1000m;
             if (quantity <= 0 || baseQuantity <= 0 || baseQuantity > 999999999999999.999m) return [];
-            result.Add(new PreparedLine(item.Id, unit.IdUnit, quantity, unit.ConversionFactor, baseQuantity,
+            result.Add(new PreparedLine(item.Id, unit.IdUnit, line.SalesPlanId, quantity, unit.ConversionFactor, baseQuantity,
                 item.Product.Name, item.ProductVariant?.Name, unit.Name));
         }
 
@@ -359,6 +371,7 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db) : Controll
                 IdDocument = documentId,
                 IdInventoryItem = line.InventoryItemId,
                 IdUnit = line.UnitId,
+                IdSalesPlanReference = line.SalesPlanId,
                 Quantity = line.Quantity,
                 ConversionFactor = line.ConversionFactor,
                 BaseQuantity = line.BaseQuantity,
@@ -397,6 +410,7 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db) : Controll
             {
                 line.IdInventoryItem,
                 line.IdUnit,
+                line.IdSalesPlanReference,
                 line.Quantity,
                 line.ConversionFactor,
                 line.BaseQuantity,
@@ -468,6 +482,7 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db) : Controll
     private sealed record PreparedLine(
         long InventoryItemId,
         long UnitId,
+        long? SalesPlanId,
         decimal Quantity,
         decimal ConversionFactor,
         decimal BaseQuantity,
@@ -515,6 +530,7 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db) : Controll
     private sealed record DocumentLineDetail(
         long InventoryItemId,
         long UnitId,
+        long SalesPlanId,
         decimal Quantity,
         decimal ConversionFactor,
         decimal BaseQuantity,
@@ -534,4 +550,4 @@ public sealed record SaveWarehouseDocumentInput(
     string? ExternalReference,
     IReadOnlyList<WarehouseDocumentLineInput>? Lines);
 
-public sealed record WarehouseDocumentLineInput(long InventoryItemId, long UnitId, decimal Quantity);
+public sealed record WarehouseDocumentLineInput(long InventoryItemId, long UnitId, decimal Quantity, long? SalesPlanId);

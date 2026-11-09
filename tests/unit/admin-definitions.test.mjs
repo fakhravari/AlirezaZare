@@ -1,0 +1,33 @@
+﻿import test from "node:test";
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import vm from "node:vm";
+
+test("definition lookup responses cannot reopen a detached page or overwrite a newer form", async () => {
+  const source = await readFile(new URL("../../Shop.Admin/wwwroot/js/admin-definitions.js", import.meta.url), "utf8");
+  const pending = [], handlers = {}, notifications = [];
+  let shows = 0, resets = 0;
+  const element = () => ({ children: [], classList: { toggle() {} }, append(...nodes) { this.children.push(...nodes); }, replaceChildren() { this.children = []; } });
+  const host = element();
+  const form = { elements: { id: {} }, reset() { resets++; }, querySelector: () => host, addEventListener() {} };
+  const create = { addEventListener(type, fn) { handlers.create = fn; } };
+  const head = element(), body = element(), status = element();
+  const page = { isConnected: true, dataset: { definitionSection: "references", api: "/definitions", canCreate: "true" }, querySelector(selector) { return ({ "[data-definition-create]": create, "[data-definition-head]": head, "[data-definition-rows]": body, "[data-definition-status]": status })[selector]; } };
+  const document = { createElement: element, querySelector: selector => selector === "[data-definition-form]" ? form : null, getElementById: () => ({}) };
+  const window = { AdminUI: { notify: message => notifications.push(message), getJson(url) { if (!url.endsWith("/lookups")) return Promise.resolve([]); return new Promise(resolve => pending.push(resolve)); } }, bootstrap: { Modal: { getOrCreateInstance: () => ({ show() { shows++; } }) } } };
+  vm.runInNewContext(source, { window, document, WeakSet, WeakMap, Intl });
+  await window.AdminDefinitions.initialize({ querySelector: () => page });
+  handlers.create(); handlers.create();
+  pending[1]({ warehouses: [] });
+  await new Promise(resolve => setImmediate(resolve));
+  pending[0]({ warehouses: [] });
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(shows, 1);
+  assert.equal(resets, 1);
+  handlers.create(); page.isConnected = false;
+  pending[2]({ warehouses: [] });
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(shows, 1);
+  assert.equal(resets, 1);
+  assert.deepEqual(notifications, []);
+});

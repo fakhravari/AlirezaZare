@@ -9,6 +9,27 @@ using Microsoft.EntityFrameworkCore;
 using Shop.Database.Domain.Warehouse.Entities;
 using Shop.Database.Infrastructure.Persistence;
 
+var confirmedPayment = new PaymentGatewayVerification(true, 250000m, "gateway-reference", "receipt-reference", DateTimeOffset.UtcNow);
+if (!PaymentVerificationRules.Matches(250000m, "gateway-reference", confirmedPayment) ||
+    PaymentVerificationRules.Matches(250001m, "gateway-reference", confirmedPayment) ||
+    PaymentVerificationRules.Matches(250000m, "other-reference", confirmedPayment) ||
+    PaymentVerificationRules.Matches(250000m, "gateway-reference", confirmedPayment with { Verified = false }) ||
+    PaymentVerificationRules.Matches(250000m, "gateway-reference", confirmedPayment with { ReceiptReference = "" }) ||
+    PaymentVerificationRules.Matches(250000m, "gateway-reference", confirmedPayment with { DefinitivelyFailed = true }) ||
+    PaymentVerificationRules.Matches(250000m, "gateway-reference", confirmedPayment with { PaidAtUtc = null }) ||
+    PaymentVerificationRules.Matches(250000m, "gateway-reference", confirmedPayment with { PaidAtUtc = DateTimeOffset.UtcNow.AddDays(1) }))
+    throw new Exception("Payment verification accepted an unverified or mismatched transaction.");
+var declinedPayment = confirmedPayment with { Verified = false, DefinitivelyFailed = true };
+if (!PaymentVerificationRules.IsDefinitiveFailure("gateway-reference", declinedPayment) ||
+    PaymentVerificationRules.IsDefinitiveFailure("another-reference", declinedPayment) ||
+    PaymentVerificationRules.IsDefinitiveFailure("gateway-reference", declinedPayment with { DefinitivelyFailed = false }))
+    throw new Exception("A payment failure was not tied to an authoritative matching reference.");
+var gatewayStub = new UnconfiguredPaymentGateway();
+if ((await gatewayStub.RequestAsync(Guid.NewGuid(), 250000m, CancellationToken.None)).Available ||
+    (await gatewayStub.VerifyAsync("reference", 250000m, new QueryCollection(), CancellationToken.None)).Verified)
+    throw new Exception("An unconfigured gateway must never report a payment as available or verified.");
+Console.WriteLine("Payment contracts OK: unconfigured gateway fails closed and verified amount/reference are checked.");
+
 string sourcePath = args.Length > 0
     ? Path.GetFullPath(args[0])
     : Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../fixtures/catalog.json"));

@@ -407,6 +407,8 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                 if (product is null ||
                     !await db.WarehouseUnits.AnyAsync(x => x.Id == input.UnitId && x.IsActive, cancellationToken))
                     return ValidationProblem("کالا یا واحد فعال پیدا نشد.");
+                if (input.IsBaseUnit && product.IdBaseUnit != input.UnitId)
+                    return Conflict(new { detail = "تغییر واحد اصلی کالا بدون تبدیل مانده‌ها و سوابق مجاز نیست." });
                 WarehouseProductUnit? entity = id.HasValue
                     ? await db.WarehouseProductUnits.SingleOrDefaultAsync(x => x.Id == id, cancellationToken)
                     : await db.WarehouseProductUnits.SingleOrDefaultAsync(

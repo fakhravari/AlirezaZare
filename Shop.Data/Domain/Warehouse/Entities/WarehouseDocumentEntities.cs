@@ -26,6 +26,7 @@ public sealed class WarehouseDocumentLineRecord
     public long IdDocument { get; set; }
     public long IdInventoryItem { get; set; }
     public long IdUnit { get; set; }
+    public long? IdSalesPlanReference { get; set; }
     public decimal Quantity { get; set; }
     public decimal ConversionFactor { get; set; }
     public decimal BaseQuantity { get; set; }

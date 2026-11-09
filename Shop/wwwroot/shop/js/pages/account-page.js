@@ -258,7 +258,9 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
             Object.assign(card.dataset, { orderNumber: order.number, orderStatus: label, orderDate: dateLabel, orderDatetime: date.toISOString().slice(0, 10), orderCount: String(order.itemCount), orderAmount: String(order.totalAmount), orderDelivery: label });
             const simulationLink = simulationAvailable && order.status === "pending-payment" && Number.isSafeInteger(order.id) && order.id > 0
                 ? `<a href="/payment/simulated/${order.id}">ادامهٔ پرداخت آزمایشی</a>` : "";
-            card.innerHTML = `<header><div><span class="order-status is-${ui.escapeHtml(order.status)}">${ui.escapeHtml(label)}</span><strong>سفارش ${ui.escapeHtml(order.number)}</strong></div><time datetime="${card.dataset.orderDatetime}">${ui.escapeHtml(dateLabel)}</time></header><div class="order-body order-invoice-summary"><div class="order-products"><span class="order-product-icon"><i class="bi bi-receipt-cutoff"></i></span><div><strong>خلاصهٔ فاکتور</strong><small>${ui.formatNumber(order.itemCount)} کالا</small></div></div><div class="order-total"><small>مبلغ سفارش</small><strong>${ui.formatNumber(order.totalAmount)} تومان</strong></div></div><footer><span>${ui.escapeHtml(label)}</span><div class="order-card-actions">${simulationLink}<a href="/Tracking"><i class="bi bi-truck"></i> پیگیری سفارش</a><button type="button" data-open-order-invoice>مشاهدهٔ فاکتور</button></div></footer>`;
+            const paymentButton = !simulationAvailable && !order.isSample && order.status === "pending-payment" && Number.isSafeInteger(order.id) && order.id > 0
+                ? `<button type="button" data-pay-order="${order.id}">ادامهٔ پرداخت</button>` : "";
+            card.innerHTML = `<header><div><span class="order-status is-${ui.escapeHtml(order.status)}">${ui.escapeHtml(label)}</span><strong>سفارش ${ui.escapeHtml(order.number)}</strong></div><time datetime="${card.dataset.orderDatetime}">${ui.escapeHtml(dateLabel)}</time></header><div class="order-body order-invoice-summary"><div class="order-products"><span class="order-product-icon"><i class="bi bi-receipt-cutoff"></i></span><div><strong>خلاصهٔ فاکتور</strong><small>${ui.formatNumber(order.itemCount)} کالا</small></div></div><div class="order-total"><small>مبلغ سفارش</small><strong>${ui.formatNumber(order.totalAmount)} تومان</strong></div></div><footer><span>${ui.escapeHtml(label)}</span><div class="order-card-actions">${simulationLink}${paymentButton}<a href="/Tracking"><i class="bi bi-truck"></i> پیگیری سفارش</a><button type="button" data-open-order-invoice>مشاهدهٔ فاکتور</button></div></footer>`;
             host.append(card);
         }
         const total = document.querySelector("#ordersTotal");
@@ -552,6 +554,14 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
     window.addEventListener("hashchange", navigate);
     const invoiceDialog = document.getElementById("orderInvoiceDialog");
     const formatToman = (amount) => `${ui.formatNumber(Number(amount) || 0)} تومان`;
+    document.addEventListener("click", async (event) => {
+        const button = event.target.closest("[data-pay-order]");
+        if (!button || button.disabled) return;
+        button.disabled = true;
+        try { window.location.assign(await ui.payment.start(Number(button.dataset.payOrder))); }
+        catch (error) { ui.showToast(error.message || "درگاه پرداخت در دسترس نیست.", "error"); }
+        finally { button.disabled = false; }
+    });
     document.addEventListener("click", (event) => {
             const button = event.target.closest("[data-open-order-invoice]");
             if (!button) return;

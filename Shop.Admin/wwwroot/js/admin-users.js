@@ -6,6 +6,7 @@
     const initialized = new WeakSet();
     let data;
     let modal;
+    let loadSequence = 0;
 
     const token = () => document.querySelector('input[name="__RequestVerificationToken"]')?.value || "";
     const request = (url, method = "GET", body) => ui.getJson(url, {
@@ -23,14 +24,20 @@
     };
 
     async function load(page) {
+        if (page.isConnected === false) return;
+        const sequence = ++loadSequence;
         const status = page.querySelector("[data-users-status]");
+        status.classList.remove("is-error");
         status.textContent = "در حال بارگذاری…";
         try {
-            data = await request(page.dataset.api);
+            const result = await request(page.dataset.api);
+            if (sequence !== loadSequence || page.isConnected === false) return;
+            data = result;
             renderUsers(page);
             renderRoles(page);
             status.textContent = "";
         } catch (error) {
+            if (sequence !== loadSequence || page.isConnected === false) return;
             status.textContent = error.message;
             status.classList.add("is-error");
         }
@@ -109,6 +116,7 @@
 
     function renderRoles(page) {
         const select = page.querySelector("[data-role-select]");
+        const previousRole = select.value;
         select.replaceChildren();
         for (const role of data.roles) {
             const option = el("option", role.name);
@@ -116,6 +124,7 @@
             option.dataset.roleKey = role.roleKey;
             select.append(option);
         }
+        if (data.roles.some(role => String(role.id) === previousRole)) select.value = previousRole;
         page.querySelector("[data-role-active]").checked = byId(data.roles, Number(select.value))?.isActive ?? false;
         renderPermissions(page);
     }
@@ -169,12 +178,17 @@
         const passwordModal = window.bootstrap.Modal.getOrCreateInstance(node);
         node.querySelector("[data-password-form]").addEventListener("submit", async event => {
             event.preventDefault();
-            const password = new FormData(event.currentTarget).get("password");
+            const form = event.currentTarget;
+            if (form.dataset.saving === "true") return;
+            const password = new FormData(form).get("password");
+            const submit = form.querySelector('[type="submit"]');
+            form.dataset.saving = "true"; submit.disabled = true;
             try {
                 const result = await request(`${page.dataset.api}/${user.id}/reset-password`, "POST", { password });
                 ui.notify(result.message, "success");
                 passwordModal.hide();
             } catch (error) { ui.notify(error.message, "danger"); }
+            finally { form.dataset.saving = "false"; submit.disabled = false; }
         });
         node.addEventListener("hidden.bs.modal", () => node.remove(), { once: true });
         passwordModal.show();
@@ -190,26 +204,39 @@
         const page = root.querySelector?.("[data-admin-users]");
         if (!page || initialized.has(page)) return;
         initialized.add(page);
+        data = undefined;
         modal = window.bootstrap?.Modal?.getOrCreateInstance(document.getElementById("admin-user-modal"));
-        page.querySelector("[data-user-create]").addEventListener("click", () => openUserModal(page));
-        page.querySelector("[data-role-select]").addEventListener("change", () => renderPermissions(page));
-        page.querySelector("[data-role-save]").addEventListener("click", async () => {
+        page.querySelector("[data-user-create]").addEventListener("click", () => { if (data) openUserModal(page); else ui.notify("اطلاعات کاربران هنوز بارگذاری نشده است.", "danger"); });
+        page.querySelector("[data-role-select]").addEventListener("change", () => { if (data) renderPermissions(page); });
+        page.querySelector("[data-role-save]").addEventListener("click", async event => {
+            const button = event.currentTarget;
+            if (button.disabled) return;
+            if (!data) { ui.notify("اطلاعات نقش‌ها هنوز بارگذاری نشده است.", "danger"); return; }
             const roleId = Number(page.querySelector("[data-role-select]").value);
             const permissionIds = [...page.querySelectorAll("[data-permission-tree] input:checked")].map(input => Number(input.value));
             const selectedRole = byId(data.roles, roleId);
+            const name = page.querySelector("[data-role-name]");
+            if (!selectedRole) { ui.notify("نقش را انتخاب کنید.", "danger"); return; }
+            if (!name.value.trim()) { ui.notify("نام نقش را وارد کنید.", "danger"); name.focus(); return; }
+            button.disabled = true;
             try {
                 const result = await request(`${page.dataset.api}/roles/${roleId}`, "PUT", {
-                    name: page.querySelector("[data-role-name]").value,
+                    name: name.value,
                     isActive: page.querySelector("[data-role-active]").checked,
                     permissionIds
                 });
                 ui.notify(result.message, "success");
                 await load(page);
             } catch (error) { ui.notify(error.message, "danger"); }
+            finally { button.disabled = false; }
         });
         page.querySelector("[data-role-create-form]").addEventListener("submit", async event => {
             event.preventDefault();
             const form = event.currentTarget;
+            if (form.dataset.saving === "true") return;
+            if (!form.elements.name.value.trim()) { ui.notify("نام نقش را وارد کنید.", "danger"); form.elements.name.focus(); return; }
+            const submit = form.querySelector('[type="submit"]');
+            form.dataset.saving = "true"; submit.disabled = true;
             try {
                 const result = await request(`${page.dataset.api}/roles`, "POST", {
                     roleKey: form.elements.roleKey.value,
@@ -219,10 +246,18 @@
                 form.reset();
                 await load(page);
             } catch (error) { ui.notify(error.message, "danger"); }
+            finally { form.dataset.saving = "false"; submit.disabled = false; }
         });
         document.querySelector("[data-user-form]").addEventListener("submit", async event => {
             event.preventDefault();
             const form = event.currentTarget;
+            if (form.dataset.saving === "true") return;
+            for (const [name, label] of [["userName", "نام کاربری"], ["displayName", "نام نمایشی"]]) {
+                if (!form.elements[name].value.trim()) { ui.notify(`${label} را وارد کنید.`, "danger"); form.elements[name].focus(); return; }
+            }
+            if (form.elements.password.required && !form.elements.password.value.trim()) {
+                ui.notify("گذرواژهٔ اولیه را وارد کنید.", "danger"); form.elements.password.focus(); return;
+            }
             const selected = name => [...form.querySelectorAll(`[name="${name}"]:checked`)].map(input => Number(input.value));
             const userId = Number(form.elements.id.value) || null;
             const body = {
@@ -234,12 +269,15 @@
                 roleIds: selected("roleIds"),
                 warehouseIds: selected("warehouseIds")
             };
+            const submit = form.querySelector('[type="submit"]');
+            form.dataset.saving = "true"; submit.disabled = true;
             try {
                 const result = await request(page.dataset.api, "POST", body);
                 ui.notify(result.message, "success");
                 modal.hide();
                 await load(page);
             } catch (error) { ui.notify(error.message, "danger"); }
+            finally { form.dataset.saving = "false"; submit.disabled = false; }
         });
         void load(page);
     }

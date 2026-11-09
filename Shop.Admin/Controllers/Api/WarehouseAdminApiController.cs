@@ -64,6 +64,7 @@ public sealed class WarehouseAdminApiController(IWarehouseReadService warehouseR
     }
 
     [HttpGet("stock")]
+    [HttpGet("stock/plans")]
     [ProducesResponseType<IReadOnlyList<WarehouseStockItem>>(StatusCodes.Status200OK)]
     public async Task<ActionResult<IReadOnlyList<WarehouseStockItem>>> GetStock(
         [FromQuery] long? warehouseId,
@@ -74,6 +75,11 @@ public sealed class WarehouseAdminApiController(IWarehouseReadService warehouseR
         [FromQuery] int pageSize = 50,
         CancellationToken cancellationToken = default)
     {
+        if (Request.Path.Value?.EndsWith("/stock/plans", StringComparison.OrdinalIgnoreCase) == true)
+            return Ok(await db.SalesPlanReferences.AsNoTracking().Where(x => x.IsActive)
+                .OrderBy(x => x.DisplayName)
+                .Select(x => new { id = x.StoreSalesPlanKey, name = x.DisplayName })
+                .ToListAsync(cancellationToken));
         if (page is < 1 or > 100000 || pageSize is < 1 or > 200)
             return ValidationProblem("شمارهٔ صفحه باید بین ۱ تا ۱۰۰۰۰۰ و اندازهٔ صفحه بین ۱ تا ۲۰۰ باشد.");
 

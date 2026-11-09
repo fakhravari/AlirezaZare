@@ -5,6 +5,7 @@
     if (!ui) return;
     const initialized = new WeakSet();
     const format = new Intl.NumberFormat("fa-IR", { maximumFractionDigits: 3 });
+    const formatFactor = new Intl.NumberFormat("fa-IR", { maximumFractionDigits: 9 });
     let lookups;
     let modal;
     let pageNumber = 1;
@@ -40,7 +41,9 @@
     }
 
     async function loadLookups(page) {
-        if (!lookups) lookups = await send(`${page.dataset.api}/lookups`);
+        const result = await send(`${page.dataset.api}/lookups`);
+        if (!page.isConnected) return false;
+        lookups = result;
         const filterWarehouse = page.querySelector("[data-document-warehouses]");
         const formWarehouse = document.querySelector("[data-document-warehouse]");
         filterWarehouse.replaceChildren();
@@ -51,10 +54,14 @@
             option(filterWarehouse, warehouse.id, `${warehouse.name} (${warehouse.code})`);
             option(formWarehouse, warehouse.id, `${warehouse.name} (${warehouse.code})`);
         }
-        fillSelect(document.querySelector("[data-document-types]"), filteredTypes(page), "انتخاب نوع سند", item => item.name, item => item.id);
+        const types = filteredTypes(page);
+        fillSelect(document.querySelector("[data-document-types]"), types,
+            types.length ? "انتخاب نوع سند" : "نوع سند مناسب تعریف نشده است", item => item.name, item => item.id);
+        document.querySelector("[data-document-types-help]").hidden = types.length > 0;
         fillSelect(document.querySelector("[data-document-plans]"), [], "ابتدا انبار را انتخاب کنید", item => item.displayName, item => item.id);
         formWarehouse.onchange = () => updateDocumentOwners(formWarehouse.form);
         fillSelect(document.querySelector("[data-document-parties]"), lookups.parties, "انتخاب مرجع", item => `${item.name} (${partyLabel(item.partyType)})`, item => item.id);
+        return true;
     }
 
     function filteredTypes(page) {
@@ -109,7 +116,7 @@
             const actions = node("td", null, "text-nowrap");
             const edit = node("button", "ویرایش", "btn btn-sm btn-default me-1");
             edit.type = "button";
-            edit.addEventListener("click", () => void openEditor(page, item.id));
+            edit.addEventListener("click", () => void openEditor(page, item.id).catch(error => { status(page, error.message || "بازکردن سند ناموفق بود.", true); ui.notify(error.message || "بازکردن سند ناموفق بود.", "danger"); }));
             const remove = node("button", "حذف", "btn btn-sm btn-outline-danger");
             remove.type = "button";
             remove.addEventListener("click", async () => {
@@ -139,6 +146,11 @@
         const preferred = warehouse?.isSalesWarehouse ? owners.find(plan => plan.isRegular)?.id : warehouse?.idOwnerSalesPlanReference;
         const selected = selectedId ?? preferred ?? (owners.length === 1 ? owners[0].id : null);
         setSelect(select, selected);
+        form.querySelectorAll("[data-document-line-plan]").forEach(lineSelect => {
+            const previous = lineSelect.value;
+            fillSelect(lineSelect, owners, "انتخاب مالک کالا", item => item.displayName, item => item.id);
+            setSelect(lineSelect, owners.some(owner => String(owner.id) === previous) ? previous : selected);
+        });
     }
 
     async function openEditor(page, id = null) {
@@ -154,6 +166,7 @@
         if (id) {
             try {
                 const detail = await send(`${page.dataset.api}/${id}`);
+                if (!page.isConnected) return;
                 form.elements.id.value = String(detail.id);
                 setSelect(form.elements.warehouseId, detail.warehouseId);
                 setSelect(form.elements.documentTypeId, detail.documentTypeId);
@@ -165,25 +178,38 @@
                 form.elements.externalReference.value = detail.externalReference || "";
                 for (const line of detail.lines) appendLine(form, line);
             } catch (error) { ui.notify(error.message, "danger"); return; }
-        }
+        } else appendLine(form);
         document.getElementById("admin-document-title").textContent = id ? "ویرایش سند انبار" : "ثبت سند انبار";
         modal.show();
     }
 
     function appendLine(form, initial = null) {
         const body = form.querySelector("[data-document-lines]");
+        if (body.rows.length >= 200) { ui.notify("هر سند حداکثر ۲۰۰ قلم دارد.", "danger"); return; }
         const row = document.createElement("tr");
         const itemCell = node("td");
         const itemSelect = node("select", null, "form-select");
         itemSelect.required = true;
+        itemSelect.setAttribute("aria-label", "کالا یا تنوع قلم سند");
         itemSelect.dataset.documentItem = "";
         option(itemSelect, "", "انتخاب کالا / تنوع");
         for (const item of lookups.inventoryItems)
             option(itemSelect, item.id, item.variantName ? `${item.productName} — ${item.variantName}` : item.productName);
         itemCell.append(itemSelect);
+        const planCell = node("td");
+        const planSelect = node("select", null, "form-select");
+        planSelect.required = true;
+        planSelect.dataset.documentLinePlan = "";
+        planSelect.setAttribute("aria-label", "طرح یا مالک قلم سند");
+        const warehouseId = Number(form.elements.warehouseId.value);
+        const allowed = new Set(lookups.ownerLinks.filter(link => link.idWarehouse === warehouseId).map(link => link.idStockOwner));
+        fillSelect(planSelect, lookups.plans.filter(plan => allowed.has(plan.id)), "انتخاب مالک کالا", item => item.displayName, item => item.id);
+        setSelect(planSelect, initial?.salesPlanId ?? form.elements.salesPlanId.value);
+        planCell.append(planSelect);
         const unitCell = node("td");
         const unitSelect = node("select", null, "form-select");
         unitSelect.required = true;
+        unitSelect.setAttribute("aria-label", "واحد قلم سند");
         unitSelect.dataset.documentUnit = "";
         unitCell.append(unitSelect);
         const quantityCell = node("td");
@@ -191,7 +217,9 @@
         quantity.type = "number";
         quantity.min = "0.001";
         quantity.step = "0.001";
+        quantity.max = "999999999999999.999";
         quantity.required = true;
+        quantity.setAttribute("aria-label", "مقدار قلم سند");
         quantity.dataset.documentQuantity = "";
         quantityCell.append(quantity);
         const factor = node("td", "—", "text-nowrap");
@@ -201,22 +229,22 @@
         const actionCell = node("td");
         const remove = node("button", "حذف", "btn btn-sm btn-outline-danger");
         remove.type = "button";
+        remove.setAttribute("aria-label", "حذف قلم سند");
         remove.addEventListener("click", () => row.remove());
         actionCell.append(remove);
-        row.append(itemCell, unitCell, quantityCell, factor, base, actionCell);
+        row.append(itemCell, planCell, unitCell, quantityCell, factor, base, actionCell);
 
         const updateUnits = () => {
             unitSelect.replaceChildren();
             option(unitSelect, "", "انتخاب واحد");
             const selectedItem = lookups.inventoryItems.find(item => item.id === Number(itemSelect.value));
             for (const unit of selectedItem?.units || []) option(unitSelect, unit.id, unit.name);
-            if (initial?.unitId) unitSelect.value = String(initial.unitId);
             updateBase();
         };
         const updateBase = () => {
             const selectedItem = lookups.inventoryItems.find(item => item.id === Number(itemSelect.value));
             const selectedUnit = selectedItem?.units.find(unit => unit.id === Number(unitSelect.value));
-            factor.textContent = selectedUnit ? format.format(selectedUnit.conversionFactor) : "—";
+            factor.textContent = selectedUnit ? formatFactor.format(selectedUnit.conversionFactor) : "—";
             const raw = Number(quantity.value || 0) * Number(selectedUnit?.conversionFactor || 0);
             base.textContent = selectedUnit && raw > 0 ? format.format(Math.trunc(raw * 1000) / 1000) : "—";
         };
@@ -228,6 +256,8 @@
             itemSelect.value = String(initial.inventoryItemId);
             quantity.value = initial.quantity;
             updateUnits();
+            unitSelect.value = String(initial.unitId);
+            updateBase();
         }
     }
 
@@ -235,13 +265,17 @@
         const page = root.querySelector?.("[data-admin-documents]");
         if (!page || initialized.has(page)) return;
         initialized.add(page);
+        pageNumber = 1;
+        requestSerial++;
         modal = window.bootstrap?.Modal?.getOrCreateInstance(document.getElementById("admin-document-modal"));
+        const createButton = page.querySelector("[data-document-create]");
+        createButton.hidden = page.dataset.canCreate !== "true";
+        createButton.disabled = true;
         void (async () => {
             try {
-                await loadLookups(page);
-                const createButton = page.querySelector("[data-document-create]");
-                createButton.hidden = page.dataset.canCreate !== "true";
-                createButton.addEventListener("click", () => void openEditor(page));
+                if (!await loadLookups(page)) return;
+                createButton.disabled = false;
+                createButton.addEventListener("click", () => void openEditor(page).catch(error => { status(page, error.message || "بازکردن فرم سند ناموفق بود.", true); ui.notify(error.message || "بازکردن فرم سند ناموفق بود.", "danger"); }));
                 const referenceLabel = document.querySelector("[data-reference-label]");
                 const referenceInput = document.querySelector("[data-document-reference]");
                 if (page.dataset.documentFeature === "returns") {
@@ -255,13 +289,20 @@
                 document.querySelector("[data-document-form]").addEventListener("submit", async event => {
                     event.preventDefault();
                     const form = event.currentTarget;
+                    if (form.dataset.saving === "true") return;
                     const lines = [...form.querySelectorAll("[data-document-lines] tr")].map(row => ({
                         inventoryItemId: Number(row.querySelector("[data-document-item]").value),
                         unitId: Number(row.querySelector("[data-document-unit]").value),
+                        salesPlanId: Number(row.querySelector("[data-document-line-plan]").value),
                         quantity: Number(row.querySelector("[data-document-quantity]").value)
                     }));
-                    if (!lines.length || lines.some(line => !line.inventoryItemId || !line.unitId || !line.quantity)) {
+                    if (!lines.length || lines.some(line => !line.inventoryItemId || !line.unitId || !line.salesPlanId || !line.quantity)) {
                         ui.notify("برای هر قلم، کالا، واحد و مقدار را انتخاب کنید.", "danger");
+                        return;
+                    }
+                    if (!form.elements.reason.value.trim()) {
+                        ui.notify("دلیل سند را وارد کنید.", "danger");
+                        form.elements.reason.focus();
                         return;
                     }
                     const body = {
@@ -276,12 +317,16 @@
                         lines
                     };
                     const id = Number(form.elements.id.value);
+                    const submit = form.querySelector('[type="submit"]');
+                    form.dataset.saving = "true";
+                    submit.disabled = true;
                     try {
                         const result = await send(id ? `${page.dataset.api}/${id}` : page.dataset.api, id ? "PUT" : "POST", body);
                         ui.notify(result.message, "success");
                         modal.hide();
                         await loadDocuments(page);
                     } catch (error) { ui.notify(error.message, "danger"); }
+                    finally { form.dataset.saving = "false"; submit.disabled = false; }
                 });
                 await loadDocuments(page);
             } catch (error) { status(page, error.message, true); }

@@ -26,12 +26,19 @@ public sealed class StoreMediaUploadApiController(ShopDbContext db, FtpMediaStor
     [HttpPost]
     [ValidateAntiForgeryToken]
     [RequestSizeLimit(52_000_000)]
-    public async Task<IActionResult> Upload([FromForm] string kind, IFormFile file, [FromForm] long? productId, [FromForm] string? title, CancellationToken cancellationToken)
+    public async Task<IActionResult> Upload([FromForm] string kind, IFormFile file, [FromForm] long? productId, [FromForm] string? title, [FromForm] string? brandKey, CancellationToken cancellationToken)
     {
         bool image = ImageFolders.TryGetValue(kind ?? "", out var imageFolder);
         bool document = kind == "product-document";
         bool video = kind == "product-video";
         if (!image && !document && !video) return BadRequest(new { title = "نوع رسانه نامعتبر است." });
+        brandKey = brandKey?.Trim();
+        if (!string.IsNullOrEmpty(brandKey))
+        {
+            if (kind != "brand" || brandKey.Length > 100) return BadRequest(new { title = "برند نامعتبر است." });
+            var brand = await db.Database.SqlQueryRaw<MediaRow>("SELECT [Id] FROM [Store].[Brand] WHERE [BrandKey] = {0}", brandKey).SingleOrDefaultAsync(cancellationToken);
+            if (brand is null) return NotFound(new { title = "برند پیدا نشد." });
+        }
         string? mediaKey = null;
         if (document || video)
         {
@@ -109,12 +116,12 @@ public sealed class StoreMediaUploadApiController(ShopDbContext db, FtpMediaStor
                 if (result != FtpStatus.Success) throw new IOException("Thumbnail upload failed.");
                 uploaded.Add("/" + thumbnail);
             }
-            if (document || video)
+            if (document || video || !string.IsNullOrEmpty(brandKey))
             {
                 databaseStarted = true;
                 if (document)
                     await db.Database.ExecuteSqlInterpolatedAsync($"INSERT INTO [Store].[ProductDocument] ([IdProduct], [Title], [Path]) VALUES ({productId}, {title}, {path})", cancellationToken);
-                else
+                else if (video)
                 {
                     int updated = await db.Database.ExecuteSqlInterpolatedAsync($"UPDATE [Store].[ProductMedia] SET [VideosJson] = JSON_MODIFY(COALESCE([VideosJson], N'[]'), 'append $', {path}) WHERE [IdProduct] = {productId} AND [MediaKey] = {mediaKey}", cancellationToken);
                     if (updated == 0)
@@ -124,8 +131,19 @@ public sealed class StoreMediaUploadApiController(ShopDbContext db, FtpMediaStor
                         return Conflict(new { title = "رسانهٔ کالا دیگر وجود ندارد؛ دوباره تلاش کنید." });
                     }
                 }
+                else
+                {
+                    int updated = await db.Database.ExecuteSqlInterpolatedAsync($"UPDATE [Store].[Brand] SET [LogoPath] = {path} WHERE [BrandKey] = {brandKey}", cancellationToken);
+                    if (updated == 0)
+                    {
+                        foreach (string item in uploaded)
+                            try { await ftp.DeleteFile(item, CancellationToken.None); }
+                            catch (Exception cleanupException) { logger.LogWarning(cleanupException, "Failed to clean up uploaded media"); }
+                        return Conflict(new { title = "برند دیگر وجود ندارد؛ دوباره تلاش کنید." });
+                    }
+                }
             }
-            return Ok(new { message = document || video ? "فایل بارگذاری و به کالا متصل شد." : "فایل بارگذاری شد.", path, thumbnail });
+            return Ok(new { message = document || video ? "فایل بارگذاری و به کالا متصل شد." : !string.IsNullOrEmpty(brandKey) ? "نشان برند ذخیره شد." : "فایل بارگذاری شد.", path, thumbnail });
         }
         catch (Exception exception)
         {

@@ -13,6 +13,7 @@ public sealed record WarehouseStockItem(
     string? VariantName,
     string SalesPlanKey,
     string SalesPlanName,
+    string UnitName,
     bool IsRegularSalesPlan,
     decimal Quantity,
     decimal MinimumQuantity,

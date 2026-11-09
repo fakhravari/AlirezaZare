@@ -93,6 +93,24 @@
     else callback();
   };
 
+  const payment = Object.freeze({
+    async start(orderId) {
+      if (!Number.isSafeInteger(orderId) || orderId < 1) throw new TypeError("Invalid order ID.");
+      const tokenResponse = await api.request("payment/token");
+      if (!tokenResponse.ok) throw new Error("دریافت مجوز پرداخت انجام نشد.");
+      const { token } = await tokenResponse.json();
+      if (typeof token !== "string" || !token) throw new Error("مجوز پرداخت معتبر نیست.");
+      const response = await api.request(`payment/orders/${orderId}/start`, {
+        method: "POST", headers: { RequestVerificationToken: token },
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.message || "درگاه پرداخت در دسترس نیست؛ سفارش در انتظار پرداخت است.");
+      const redirect = new URL(result.redirectUrl);
+      if (redirect.protocol !== "https:" || redirect.username || redirect.password) throw new Error("نشانی درگاه معتبر نیست.");
+      return redirect.href;
+    },
+  });
+
   document.addEventListener("click", (event) => {
     const link = event.target.closest?.("a.skip-link[href^='#']");
     if (!link) return;
@@ -497,6 +515,7 @@
     mount,
     storage,
     api,
+    payment,
     ready,
     cart,
     auth,

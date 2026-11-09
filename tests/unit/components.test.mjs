@@ -67,6 +67,20 @@ test('shared API client reports timeouts and does not retry requests', async () 
   assert.equal(requestCount, 1);
 });
 
+test('payment starts with a CSRF token and refuses an insecure gateway URL', async () => {
+  const {ui, window} = runtime();
+  const requests = [];
+  window.fetch = async (url, options) => {
+    requests.push({url, options});
+    return {ok: true, json: async () => requests.length === 1 ? {token: 'csrf-token'} : {redirectUrl: 'http://gateway.example/pay'}};
+  };
+  await assert.rejects(ui.payment.start(123), /نشانی درگاه معتبر نیست/);
+  assert.equal(requests.length, 2);
+  assert.equal(requests[1].options.method, 'POST');
+  assert.equal(requests[1].options.headers.RequestVerificationToken, 'csrf-token');
+  assert.match(requests[1].url, /\/api\/payment\/orders\/123\/start$/);
+});
+
 test('all card contexts share escaped identity, price, media and action contracts', () => {
   const {window} = runtime(); const original = window.HNCatalog.find(1);
   const p = {...original, name: '<img src=x onerror=alert(1)>"', image: 'bad" onerror="bad'};

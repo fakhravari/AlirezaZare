@@ -1,6 +1,15 @@
 @model Shop.Admin.Models.FeaturePageViewModel
 <div class="admin-page" data-admin-documents data-api="@ViewData["ApiUrl"]" data-document-feature="@Model.FeatureId" data-can-create="@(User.HasClaim("admin_permission", "Warehouse:DocumentsApi:Create") ? "true" : "false")" data-can-edit="@(User.HasClaim("admin_permission", "Warehouse:DocumentsApi:Update") ? "true" : "false")" data-can-delete="@(User.HasClaim("admin_permission", "Warehouse:DocumentsApi:Delete") ? "true" : "false")">
     @await Html.PartialAsync("_AdminPageIntro", (Model.Title, Model.Description))
+    <p class="alert alert-info" role="note">این فهرست همهٔ سندهای انبار را نشان می‌دهد. برای محدودکردن نتایج از فیلترهای انبار و وضعیت استفاده کنید.</p>
+    @if (Model.FeatureId == "transfers")
+    {
+        <p class="alert alert-warning" role="note">هر سند فقط یک انبار را تغییر می‌دهد. انتقال خودکار میان دو انبار در این فرم انجام نمی‌شود؛ برای انتقال باید سند خروج و سند ورود جداگانه ثبت شوند.</p>
+    }
+    @if (Model.FeatureId == "stocktake")
+    {
+        <p class="alert alert-info" role="note">این فرم سند دستی ثبت می‌کند و اختلاف شمارش با موجودی را به‌صورت خودکار محاسبه نمی‌کند.</p>
+    }
     <section class="panel panel-inverse">
         <div class="panel-heading">
             <h2 class="panel-title">سندهای انبار</h2>
@@ -52,12 +61,13 @@
                 <div class="row g-3">
                     <div class="col-md-6 col-xl-4">
                         <label class="form-label" for="document-type">نوع سند</label><select id="document-type" name="documentTypeId" class="form-select" required data-document-types></select>
+                        <small class="form-text" data-document-types-help hidden>ابتدا نوع سند مناسب را در <a href="/Warehouse/Features?feature=document-types">تعریف انواع اسناد</a> اضافه یا فعال کنید.@if (Model.FeatureId == "returns") { <text> نام نوع مرجوعی باید شامل «مرجوع» یا کد آن شامل return باشد.</text> }</small>
                     </div>
                     <div class="col-md-6 col-xl-4">
                         <label class="form-label" for="document-warehouse">انبار</label><select id="document-warehouse" name="warehouseId" class="form-select" required data-document-warehouse></select>
                     </div>
                     <div class="col-md-6 col-xl-4">
-                        <label class="form-label" for="document-plan">مالک کالا / طرح فروش</label><select id="document-plan" name="salesPlanId" class="form-select" required data-document-plans></select>
+                        <label class="form-label" for="document-plan">طرح پیش‌فرض اقلام</label><select id="document-plan" name="salesPlanId" class="form-select" required data-document-plans></select>
                     </div>
                     <div class="col-md-6 col-xl-4">
                         <label class="form-label" for="document-party">مرجع</label><select id="document-party" name="partyId" class="form-select" required data-document-parties></select>
@@ -82,10 +92,10 @@
                     <h3 class="h6 mb-0">اقلام سند</h3><button class="btn btn-outline-primary btn-sm" type="button" data-document-line-add>افزودن قلم</button>
                 </div>
                 <div class="table-responsive">
-                    <table class="table table-bordered align-middle">
+                    <table class="table table-bordered align-middle admin-document-lines">
                         <thead>
                         <tr>
-                            <th>کالا / تنوع</th><th>واحد</th><th>مقدار</th><th>ضریب تبدیل</th><th>مقدار واحد اصلی</th><th></th>
+                            <th>کالا / تنوع</th><th>طرح / مالک</th><th>واحد</th><th>مقدار</th><th>ضریب تبدیل</th><th>مقدار واحد اصلی</th><th></th>
                         </tr>
                         </thead><tbody data-document-lines></tbody>
                     </table>

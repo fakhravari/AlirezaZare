@@ -48,6 +48,7 @@ public sealed class WarehouseReadRepository(ShopDbContext dbContext) : IWarehous
         var query = from warehouse in dbContext.Warehouses.AsNoTracking()
             from inventoryItem in dbContext.InventoryItems.AsNoTracking()
             from plan in dbContext.SalesPlanReferences.AsNoTracking()
+            join unit in dbContext.WarehouseUnits.AsNoTracking() on inventoryItem.Product.IdBaseUnit equals unit.Id
             join balance in dbContext.StockBalances.AsNoTracking()
                 on new
                 {
@@ -58,7 +59,8 @@ public sealed class WarehouseReadRepository(ShopDbContext dbContext) : IWarehous
             where warehouse.IsActive && warehouse.Company.IsActive && inventoryItem.IsActive &&
                   inventoryItem.Product.IsWarehouseEnabled
                   && (inventoryItem.ProductVariant == null || inventoryItem.ProductVariant!.IsActive) && plan.IsActive
-            select new { warehouse, inventoryItem, plan, balance };
+                  && dbContext.WarehouseStockOwners.Any(owner => owner.IdWarehouse == warehouse.Id && owner.IdStockOwner == plan.Id)
+            select new { warehouse, inventoryItem, plan, unit, balance };
 
         if (warehouseId.HasValue) query = query.Where(x => x.warehouse.Id == warehouseId.Value);
         if (warehouseIds is not null) query = query.Where(x => warehouseIds.Contains(x.warehouse.Id));
@@ -93,6 +95,7 @@ public sealed class WarehouseReadRepository(ShopDbContext dbContext) : IWarehous
                 x.inventoryItem.ProductVariant == null ? null : x.inventoryItem.ProductVariant.Name,
                 x.plan.StoreSalesPlanKey,
                 x.plan.DisplayName,
+                x.unit.Name,
                 x.plan.IsRegular,
                 x.balance == null ? 0m : x.balance.Quantity,
                 x.plan.IsRegular && x.balance != null ? x.balance.MinimumQuantity : 0m,

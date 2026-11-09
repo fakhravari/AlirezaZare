@@ -7,6 +7,10 @@ public static class StoreAdminFeatureCatalog
     private static readonly IReadOnlyDictionary<string, FeaturePageViewModel> Pages =
         new Dictionary<string, FeaturePageViewModel>(StringComparer.OrdinalIgnoreCase)
         {
+            ["paid-orders-dispatch"] = new("مدیریت فروشگاه", "paid-orders-dispatch", "حواله سفارش‌های پرداخت‌شده",
+                "صدور یک حواله فروش برای سفارش‌های انتخاب‌شده.",
+                ["انتخاب سفارش‌های پرداخت‌شده", "تجمیع اقلام", "ثبت حواله و وضعیت سفارش"],
+                "فقط سفارش‌های دارای پرداخت تأییدشده و آماده در صف انبار نمایش داده می‌شوند."),
             ["orders"] = new("مدیریت فروشگاه", "orders", "سفارش‌ها",
                 "پیگیری یکپارچهٔ وضعیت خرید، پرداخت، آماده‌سازی، ارسال و مرجوعی.",
                 ["فهرست و جست‌وجوی سفارش‌ها", "جزئیات اقلام و نشانی تحویل", "گردش وضعیت و پیگیری ارسال"],
