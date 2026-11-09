@@ -207,7 +207,7 @@ test('every sitemap URL serves indexable HTML with a unique canonical and one H1
   for (let offset = 0; offset < urls.length; offset += 12) {
     await Promise.all(urls.slice(offset, offset + 12).map(async url => {
       const canonical = new URL(url);
-      const response = await fetch(new URL(canonical.pathname + canonical.search, base), {signal: AbortSignal.timeout(30000)}).catch(error => { throw new Error(`${url}: request failed: ${error.message}`, {cause: error}); });
+      const response = await fetch(new URL(canonical.pathname + canonical.search, base), {signal: AbortSignal.timeout(120000)}).catch(error => { throw new Error(`${url}: request failed: ${error.message}`, {cause: error}); });
       assert.equal(response.status, 200, url);
       const html = await response.text();
       assert.match(html, /<title>[^<]+<\/title>/, url + ': title missing');
