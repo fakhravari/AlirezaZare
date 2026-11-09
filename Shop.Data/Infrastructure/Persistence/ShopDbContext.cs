@@ -262,7 +262,7 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
         });
         modelBuilder.Entity<StoreSiteIdentity>(entity =>
         {
-            entity.ToTable("SiteIdentity", "Store");
+            entity.ToTable("SiteSetting", "Store");
             entity.HasKey(x => x.Id);
             entity.Property(x => x.DisplayName).HasMaxLength(160).IsRequired();
             entity.Property(x => x.StoreName).HasMaxLength(240).IsRequired();
@@ -271,7 +271,7 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.Property(x => x.SupportPhoneUri).HasMaxLength(40).IsRequired();
             entity.Property(x => x.WhatsAppNumber).HasMaxLength(32).IsRequired();
             entity.Property(x => x.PublicEmail).HasMaxLength(254).IsRequired();
-            entity.Property(x => x.UpdatedAtUtc).HasPrecision(3);
+            entity.Property(x => x.UpdatedAtUtc).HasColumnName("IdentityUpdatedAtUtc").HasPrecision(3);
         });
         modelBuilder.Entity<AccountProfile>(entity =>
         {

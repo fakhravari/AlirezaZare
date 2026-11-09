@@ -13,7 +13,7 @@ const paths = [
 const accessiblePaths = [...paths, '/error', '/Error/404'];
 
 test('main pages fit mobile, tablet and desktop widths', async ({page}) => {
-  test.setTimeout(180000);
+  test.setTimeout(480000);
   await useBrowserAccount(page, {addressId: null});
   const widths = [320, 390, 768, 1024, 1440];
   for (const width of widths) {

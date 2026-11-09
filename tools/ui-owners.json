@@ -19,6 +19,9 @@
           ],
           "server": [
             "Shop.Admin/Controllers/Api/StoreCatalogAdminApiController.cs",
+            "Shop.Admin/Controllers/Api/StoreProductImageApiController.cs",
+            "Shop.Admin/Controllers/Api/StoreMediaUploadApiController.cs",
+            "Shop.Admin/Controllers/Api/StoreOrdersAdminApiController.cs",
             "Shop.Admin/Controllers/Api/StoreCategoryContentApiController.cs",
             "Shop.Admin/Controllers/Api/WarehouseAdminApiController.cs"
           ]
@@ -33,6 +36,14 @@
           "server": [
             "Shop.Admin/Controllers/Api/StoreVariantPricesAdminApiController.cs",
             "Shop.Admin/Areas/Store/Controllers/FeaturesController.cs"
+          ]
+        },
+        "site-settings": {
+          "markup": [
+            "Shop.Admin/Areas/Admin/Views/SiteSettings/Index.cshtml"
+          ],
+          "server": [
+            "Shop.Admin/Areas/Admin/Controllers/SiteSettingsController.cs"
           ]
         }
       }

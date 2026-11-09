@@ -1,11 +1,11 @@
 import {execFileSync} from 'node:child_process';
-import {readFileSync} from 'node:fs';
+import {existsSync, readFileSync} from 'node:fs';
 import {findSecrets} from './config-secrets.mjs';
 
 const trackedFiles = execFileSync('git', ['ls-files', '-z', '--', ':(glob,icase)**/appsettings*.json'], {encoding: 'utf8'})
   .split('\0')
   .filter(Boolean)
-  .filter(file => /(^|\/)appsettings(?:\.[^/]+)?\.json$/i.test(file));
+  .filter(file => /(^|\/)appsettings(?:\.[^/]+)?\.json$/i.test(file) && existsSync(file));
 const problems = [];
 
 for (const file of trackedFiles) {

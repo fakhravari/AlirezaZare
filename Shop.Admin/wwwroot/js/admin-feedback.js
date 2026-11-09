@@ -11,7 +11,7 @@
     function openModal(item, page) {
         const form = document.querySelector("[data-feedback-form]"); form.elements.id.value = item.id;
         form.elements.status.value = item.status; form.elements.adminReply.value = item.adminReply || "";
-        document.querySelector("[data-feedback-text]").textContent = `${item.displayName}${item.isSample ? " (نمونه)" : ""} · ${item.storeProductKey}\n${item.feedbackText}`;
+        document.querySelector("[data-feedback-text]").textContent = `${item.displayName}${item.isSample ? " (نمونه)" : ""} · ${item.productName} (${item.storeProductKey})\n${item.feedbackText}`;
         form.elements.status.disabled = page.dataset.canModerate !== "true";
         form.elements.adminReply.disabled = page.dataset.canModerate !== "true";
         form.querySelector("[data-feedback-save]").hidden = page.dataset.canModerate !== "true";
@@ -21,7 +21,7 @@
         const body = page.querySelector("[data-feedback-rows]"); body.replaceChildren();
         for (const item of items) {
             const row = document.createElement("tr");
-            [item.isSample ? "—" : new Date(item.createdAtUtc).toLocaleDateString("fa-IR"), item.storeProductKey, item.isSample ? `${item.displayName} (نمونه)` : item.displayName, item.feedbackText,
+            [item.isSample ? "—" : new Date(item.createdAtUtc).toLocaleDateString("fa-IR"), `${item.productName} (${item.storeProductKey})`, item.isSample ? `${item.displayName} (نمونه)` : item.displayName, item.feedbackText,
                 item.rating == null ? "—" : number.format(item.rating), statusText(item.status), item.adminReply || "—"].forEach(value => row.append(el("td", value)));
             const action = el("td"); const button = el("button", "بررسی", "btn btn-sm btn-default"); button.type = "button"; button.addEventListener("click", () => openModal(item, page)); action.append(button); row.append(action); body.append(row);
         }

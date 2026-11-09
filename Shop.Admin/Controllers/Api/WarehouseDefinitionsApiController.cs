@@ -642,7 +642,7 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
 
     private async Task SetSiteWarehouseAsync(long warehouseId, CancellationToken cancellationToken) =>
         await db.Database.ExecuteSqlInterpolatedAsync(
-            $"IF EXISTS(SELECT 1 FROM [Store].[SiteSetting] WHERE [Id]=1) UPDATE [Store].[SiteSetting] SET [IdWarehouse]={warehouseId},[UpdatedAtUtc]=SYSUTCDATETIME() WHERE [Id]=1; ELSE INSERT INTO [Store].[SiteSetting]([Id],[IdWarehouse]) VALUES(1,{warehouseId});",
+            $"UPDATE [Store].[SiteSetting] SET [IdWarehouse]={warehouseId},[UpdatedAtUtc]=SYSUTCDATETIME() WHERE [Id]=1; IF @@ROWCOUNT=0 THROW 51039, 'Site settings row is missing.', 1;",
             cancellationToken);
 
     private async Task<bool> IsSiteWarehouseAsync(long warehouseId, CancellationToken cancellationToken) =>

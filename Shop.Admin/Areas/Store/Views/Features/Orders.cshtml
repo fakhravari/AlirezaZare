@@ -1,0 +1,19 @@
+@model Shop.Admin.Models.FeaturePageViewModel
+<div class="admin-page" data-admin-page="orders" data-admin-api="/api/admin/store/orders">
+    @await Html.PartialAsync("_AdminPageIntro", (Model.Title, Model.Description))
+    <section class="panel panel-inverse">
+        <div class="panel-heading"><h2 class="panel-title">سفارش‌ها</h2><div class="panel-heading-btn"><button class="btn btn-xs btn-icon btn-default" type="button" data-admin-refresh aria-label="بارگذاری دوباره"><i class="fa fa-rotate" aria-hidden="true"></i></button></div></div>
+        <div class="panel-body">
+            <form class="admin-filter-bar" data-admin-filter>
+                <label class="visually-hidden" for="order-search">جست‌وجوی شماره سفارش یا مشتری</label>
+                <input id="order-search" class="form-control" type="search" name="q" maxlength="100" placeholder="شماره سفارش یا نام مشتری" />
+                <button class="btn btn-primary" type="submit">جست‌وجو</button><span class="admin-record-count ms-auto" data-admin-count aria-live="polite"></span>
+            </form>
+            <div class="admin-data-status" data-admin-status role="status" aria-live="polite">در حال دریافت سفارش‌ها…</div>
+            <div class="table-responsive admin-table-wrap"><table class="table table-striped table-hover align-middle mb-0"><thead><tr><th>شماره</th><th>مشتری</th><th>وضعیت</th><th>پرداخت</th><th>تعداد</th><th>مبلغ تومان</th><th>تاریخ</th><th>جزئیات</th></tr></thead><tbody data-admin-results></tbody></table></div>
+            <div class="admin-empty-state d-none" data-admin-empty>سفارشی پیدا نشد.</div>
+            <div class="admin-pagination" data-admin-pagination hidden><button type="button" class="btn btn-default btn-sm" data-admin-page-step="-1">قبلی</button><span data-admin-page-label></span><button type="button" class="btn btn-default btn-sm" data-admin-page-step="1">بعدی</button></div>
+            <p class="admin-readonly-note">این صفحه فقط مشاهده است. وضعیت پرداخت شبیه‌سازی‌شده معادل پرداخت واقعی نیست و ثبت ارسال از این صفحه انجام نمی‌شود.</p>
+        </div>
+    </section>
+</div>

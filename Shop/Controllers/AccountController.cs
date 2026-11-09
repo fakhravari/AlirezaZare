@@ -33,7 +33,7 @@ public sealed class AccountController(
                              JSON_QUERY((SELECT a.[ArticleKey] slug,ai.[InteractionType] type FROM [Account].[ArticleInteraction] ai JOIN [Mag].[MagazineArticle] a ON a.[Id]=ai.[IdMagazineArticle] WHERE ai.[IdProfile]={0} FOR JSON PATH)) articleInteractions,
                              JSON_QUERY((SELECT a.[ArticleKey] slug,af.[DisplayName] name,af.[FeedbackText] text,af.[Rating] rating,af.[Status] status,af.[CreatedAtUtc] createdAt FROM [Account].[ArticleFeedback] af JOIN [Mag].[MagazineArticle] a ON a.[Id]=af.[IdMagazineArticle] WHERE af.[IdProfile]={0} FOR JSON PATH)) articleFeedback,
                              JSON_QUERY((SELECT cp.[IdSelectedAddress] selectedAddressId,cp.[PaymentMethod] paymentMethod FROM [Account].[CheckoutPreference] cp WHERE cp.[IdProfile]={0} FOR JSON PATH,WITHOUT_ARRAY_WRAPPER)) checkout,
-                             JSON_QUERY((SELECT o.[Id] id,o.[OrderNumber] number,o.[Status] status,o.[OrderedAtUtc] orderedAtUtc,o.[ItemCount] itemCount,o.[TotalAmount] totalAmount,JSON_QUERY((SELECT i.[IdProduct] productId,i.[IdProductVariant] variantId,i.[ProductNameSnapshot] name,sp.[SalesPlanKey] salesPlanId,i.[Quantity] quantity,i.[UnitAmount] unitAmount,JSON_QUERY(i.[OptionsJson]) options FROM [Account].[CustomerOrderItem] i JOIN [Warehouse].[SalesPlanReference] sp ON sp.[Id]=i.[IdSalesPlan] WHERE i.[IdCustomerOrder]=o.[Id] FOR JSON PATH)) items FROM [Account].[CustomerOrder] o WHERE o.[IdProfile]={0} ORDER BY o.[Id] DESC FOR JSON PATH)) orders
+                             JSON_QUERY((SELECT o.[Id] id,o.[OrderNumber] number,o.[Status] status,o.[OrderedAtUtc] orderedAtUtc,o.[ItemCount] itemCount,o.[TotalAmount] totalAmount,JSON_QUERY((SELECT i.[IdProduct] productId,i.[IdProductVariant] variantId,i.[ProductNameSnapshot] name,sp.[SalesPlanKey] salesPlanId,i.[Quantity] quantity,i.[UnitAmount] unitAmount,JSON_QUERY(i.[OptionsJson]) options FROM [Store].[OrderItem] i JOIN [Warehouse].[SalesPlanReference] sp ON sp.[Id]=i.[IdSalesPlan] WHERE i.[IdCustomerOrder]=o.[Id] FOR JSON PATH)) items FROM [Store].[Order] o WHERE o.[IdProfile]={0} ORDER BY o.[Id] DESC FOR JSON PATH)) orders
                            FROM [Account].[Profile] p WHERE p.[Id]={0} FOR JSON PATH,WITHOUT_ARRAY_WRAPPER) AS [Value]
                            """;
         var json = await db.Database.SqlQueryRaw<string>(sql, ProfileId, environment.IsDevelopment() ? 1 : 0).SingleOrDefaultAsync(ct);
@@ -306,14 +306,14 @@ public sealed class AccountController(
         string number = $"ND{DateTime.UtcNow:yyMMddHHmmss}{Random.Shared.Next(1000, 9999)}";
         await using var transaction = await db.Database.BeginTransactionAsync(ct);
         List<long> insertedOrders = await db.Database.SqlQuery<long>(
-                $"INSERT INTO [Account].[CustomerOrder]([IdProfile],[IdAddress],[OrderNumber],[PaymentMethod],[ItemCount],[TotalAmount],[AddressSnapshotJson]) OUTPUT INSERTED.[Id] AS [Value] VALUES({ProfileId},{request.AddressId},{number},{request.PaymentMethod},{count},{total},{addressSnapshot})")
+                $"INSERT INTO [Store].[Order]([IdProfile],[IdAddress],[OrderNumber],[PaymentMethod],[ItemCount],[TotalAmount],[AddressSnapshotJson]) OUTPUT INSERTED.[Id] AS [Value] VALUES({ProfileId},{request.AddressId},{number},{request.PaymentMethod},{count},{total},{addressSnapshot})")
             .ToListAsync(ct);
         long orderId = insertedOrders.Single();
         foreach (var item in priced)
         {
             string options = item.Line.Options.HasValue ? item.Line.Options.Value.GetRawText() : "{}";
             int insertedItems = await db.Database.ExecuteSqlInterpolatedAsync(
-                $"INSERT INTO [Account].[CustomerOrderItem]([IdCustomerOrder],[IdProduct],[IdProductVariant],[ProductNameSnapshot],[IdSalesPlan],[Quantity],[UnitAmount],[OptionsJson]) SELECT {orderId},{item.Line.ProductId},{item.Line.VariantId},{item.ProductName},[Id],{item.Line.Quantity},{item.UnitAmount},{options} FROM [Warehouse].[SalesPlanReference] WHERE [SalesPlanKey]={item.Line.SalesPlanId} AND [IdStockOwnerType]=1",
+                $"INSERT INTO [Store].[OrderItem]([IdCustomerOrder],[IdProduct],[IdProductVariant],[ProductNameSnapshot],[IdSalesPlan],[Quantity],[UnitAmount],[OptionsJson]) SELECT {orderId},{item.Line.ProductId},{item.Line.VariantId},{item.ProductName},[Id],{item.Line.Quantity},{item.UnitAmount},{options} FROM [Warehouse].[SalesPlanReference] WHERE [SalesPlanKey]={item.Line.SalesPlanId} AND [IdStockOwnerType]=1",
                 ct);
             if (insertedItems != 1) throw new InvalidOperationException("The sales plan no longer exists.");
         }
@@ -345,7 +345,7 @@ public sealed class AccountController(
             $"UPDATE [Account].[CheckoutPreference] SET [IdSelectedAddress]=NULL,[UpdatedAtUtc]=SYSUTCDATETIME() WHERE [IdProfile]={ProfileId} AND [IdSelectedAddress]={id};",
             ct);
         await db.Database.ExecuteSqlInterpolatedAsync(
-            $"UPDATE [Account].[CustomerOrder] SET [IdAddress]=NULL WHERE [IdProfile]={ProfileId} AND [IdAddress]={id};",
+            $"UPDATE [Store].[Order] SET [IdAddress]=NULL WHERE [IdProfile]={ProfileId} AND [IdAddress]={id};",
             ct);
         await db.Database.ExecuteSqlInterpolatedAsync(
             $"DELETE FROM [Account].[Address] WHERE [Id]={id} AND [IdProfile]={ProfileId}", ct);

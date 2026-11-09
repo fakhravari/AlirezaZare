@@ -1,26 +1,31 @@
 using System.Net;
 using System.Net.Mail;
-using Microsoft.Extensions.Options;
+using Microsoft.EntityFrameworkCore;
+using Shop.Database.Infrastructure.Persistence;
 
 namespace Shop.Services;
 
-public sealed class SmtpEmailSender(IOptions<Models.EmailSmtpOptions> options, ILogger<SmtpEmailSender> logger)
+public sealed class SmtpEmailSender(ShopDbContext db, IConfiguration configuration, ILogger<SmtpEmailSender> logger)
     : IEmailSender
 {
-    private readonly Models.EmailSmtpOptions _settings = options.Value;
-
     public async Task SendVerificationCodeAsync(string recipient, string code, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(_settings.Host)
-            || _settings.Port is < 1 or > 65535
-            || string.IsNullOrWhiteSpace(_settings.Username)
-            || string.IsNullOrWhiteSpace(_settings.From)
-            || string.IsNullOrWhiteSpace(_settings.Password))
+        var settings = await db.Database.SqlQueryRaw<SmtpSettings>("""
+            SELECT [SmtpHost] AS [Host], [SmtpPort] AS [Port], [SmtpEnableSsl] AS [EnableSsl],
+                   [SmtpUsername] AS [Username], [SmtpFrom] AS [From]
+            FROM [Store].[SiteSetting] WHERE [Id] = 1
+            """).SingleOrDefaultAsync(cancellationToken);
+        string? password = configuration["Email:Smtp:Password"];
+        if (settings is null || string.IsNullOrWhiteSpace(settings.Host)
+            || settings.Port is null or < 1 or > 65535 || settings.EnableSsl is null
+            || string.IsNullOrWhiteSpace(settings.Username)
+            || string.IsNullOrWhiteSpace(settings.From)
+            || string.IsNullOrWhiteSpace(password))
         {
             throw new InvalidOperationException("SMTP settings are incomplete.");
         }
 
-        using var message = new MailMessage(_settings.From, recipient)
+        using var message = new MailMessage(settings.From, recipient)
         {
             Subject = "کد تأیید فروشگاه برق شیراز",
             Body =
@@ -29,10 +34,10 @@ public sealed class SmtpEmailSender(IOptions<Models.EmailSmtpOptions> options, I
             BodyEncoding = System.Text.Encoding.UTF8,
             SubjectEncoding = System.Text.Encoding.UTF8
         };
-        using var client = new SmtpClient(_settings.Host, _settings.Port)
+        using var client = new SmtpClient(settings.Host, settings.Port.Value)
         {
-            EnableSsl = _settings.EnableSsl,
-            Credentials = new NetworkCredential(_settings.Username, _settings.Password),
+            EnableSsl = settings.EnableSsl.Value,
+            Credentials = new NetworkCredential(settings.Username, password),
             Timeout = 15000,
             DeliveryMethod = SmtpDeliveryMethod.Network
         };
@@ -47,5 +52,14 @@ public sealed class SmtpEmailSender(IOptions<Models.EmailSmtpOptions> options, I
                 exception.GetType().Name);
             throw;
         }
+    }
+
+    private sealed class SmtpSettings
+    {
+        public string? Host { get; set; }
+        public int? Port { get; set; }
+        public bool? EnableSsl { get; set; }
+        public string? Username { get; set; }
+        public string? From { get; set; }
     }
 }

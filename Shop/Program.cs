@@ -44,9 +44,8 @@ builder.Services.AddRateLimiter(options =>
             AutoReplenishment = true
         }));
 });
-builder.Services.Configure<Shop.Models.EmailSmtpOptions>(builder.Configuration.GetSection("Email:Smtp"));
 builder.Services.AddSingleton<Shop.Services.EmailVerificationCodeStore>();
-builder.Services.AddSingleton<Shop.Services.IEmailSender, Shop.Services.SmtpEmailSender>();
+builder.Services.AddScoped<Shop.Services.IEmailSender, Shop.Services.SmtpEmailSender>();
 builder.Services.AddScoped<Shop.Services.IMagazineContentSource, Shop.Services.DatabaseMagazineContentSource>();
 builder.Services.AddScoped<Shop.Services.CatalogRepository>();
 builder.Services.AddScoped<Shop.Services.ICatalogSource>(services =>

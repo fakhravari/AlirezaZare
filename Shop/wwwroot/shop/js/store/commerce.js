@@ -384,6 +384,25 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
             if (priceBreakdown) {
                 priceBreakdown.innerHTML = '<div class="product-detail-cost-row"><span>هزینهٔ ویژگی‌ها</span><strong id="productVariantAdjustmentPrice"></strong></div><div class="product-detail-cost-row"><span>متعلقات و خدمات</span><strong id="productAddonsPrice"></strong></div>';
             }
+            const documents = (Array.isArray(p.documents) ? p.documents : []).filter(item =>
+                item && typeof item.title === "string" && /^content\/products\/files\/[a-f0-9]{32}\.pdf$/i.test(item.path || ""));
+            if (documents.length) {
+                const section = document.createElement("section");
+                section.className = "product-detail-content-panel";
+                const heading = document.createElement("h2");
+                heading.textContent = "فایل‌های محصول";
+                section.append(heading);
+                const list = document.createElement("ul");
+                documents.forEach(item => {
+                    const row = document.createElement("li");
+                    const link = document.createElement("a");
+                    link.href = `/${item.path}`; link.textContent = item.title;
+                    link.target = "_blank"; link.rel = "noopener noreferrer";
+                    row.append(link); list.append(row);
+                });
+                section.append(list);
+                productView.querySelector("#product-intro")?.after(section);
+            }
             if (companionProducts.length) {
                 const companionSection = document.createElement("section");
                 companionSection.className = "product-detail-related";

@@ -17,7 +17,7 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db) : Controll
     public async Task<IActionResult> List([FromQuery] long? warehouseId, [FromQuery] string? status,
         [FromQuery] int page = 1, [FromQuery] int pageSize = 50, CancellationToken cancellationToken = default)
     {
-        if (page < 1 || pageSize is < 1 or > 200 || status is not (null or "D" or "F"))
+        if (page is < 1 or > 100000 || pageSize is < 1 or > 200 || status is not (null or "D" or "F"))
             return ValidationProblem("فیلتر صفحه یا وضعیت سند معتبر نیست.");
         long[] allowed = await AllowedWarehouseIdsAsync(cancellationToken);
         if (!User.IsInRole("system.full-access") && warehouseId.HasValue && !allowed.Contains(warehouseId.Value))

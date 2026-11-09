@@ -12,6 +12,11 @@ public sealed class FeaturesController : Controller
         ViewData["Title"] = page.Title;
         ViewData["AreaTitle"] = page.AreaTitle;
         ViewData["FeatureId"] = page.FeatureId;
+        if (page.FeatureId == "orders")
+        {
+            if (!User.IsInRole("system.full-access")) return Forbid();
+            return View("~/Areas/Store/Views/Features/Orders.cshtml", page);
+        }
         if (page.FeatureId == "promotions")
         {
             ViewData["ApiUrl"] = "/api/admin/store/variant-prices";

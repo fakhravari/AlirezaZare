@@ -77,6 +77,16 @@
                 edit.dataset.categoryContent = String(index); edit.textContent = "محتوای دسته";
                 actions.append(edit);
             }
+            if (page.dataset.adminSection === "products" && page.dataset.canUploadImage === "true") {
+                const upload = document.createElement("button");
+                upload.type = "button"; upload.className = "btn btn-xs btn-default ms-1";
+                upload.dataset.productImage = String(index); upload.textContent = "تصویر محصول";
+                actions.append(upload);
+                const file = document.createElement("button");
+                file.type = "button"; file.className = "btn btn-xs btn-default ms-1";
+                file.dataset.productFile = String(index); file.textContent = "فایل محصول";
+                actions.append(file);
+            }
             if (page.dataset.adminPage === "stock" && page.dataset.canMinimum === "true" && page.__adminRows[index]?.isRegularSalesPlan) {
                 const minimum = document.createElement("button");
                 minimum.type = "button"; minimum.className = "btn btn-xs btn-default ms-1";
@@ -220,10 +230,39 @@
         } finally { finishRequest(page, controller); }
     }
 
+    async function loadOrders(page, pageNumber = 1, announce = false) {
+        const api = new URL(page.dataset.adminApi, window.location.origin);
+        api.searchParams.set("page", String(pageNumber));
+        api.searchParams.set("pageSize", String(pageSize));
+        const query = queryValue(page.querySelector("[data-admin-filter]"), "q");
+        if (query) api.searchParams.set("q", query);
+        const controller = beginRequest(page);
+        status(page, "در حال خواندن سفارش‌ها…");
+        try {
+            const result = await ui.getJson(api, { signal: controller.signal });
+            if (!page.isConnected || requests.get(page) !== controller) return;
+            const rows = result.items || [];
+            const labels = { "pending-payment": "در انتظار پرداخت", "simulated-payment-confirmed": "پرداخت آزمایشی تأیید شده" };
+            renderRows(page, rows, item => [item.isSample ? `${item.orderNumber} (نمونه)` : item.orderNumber, item.customerName, labels[item.status] || item.status,
+                item.paymentMethod, ui.formatNumber(item.itemCount), ui.formatNumber(item.totalAmount),
+                new Date(/[zZ]|[+-]\d\d:\d\d$/.test(item.orderedAtUtc) ? item.orderedAtUtc : `${item.orderedAtUtc}Z`).toLocaleString("fa-IR")]);
+            updateCount(page, 0, rows.length, false);
+            updatePagination(page, result.page, result.hasNext);
+            status(page, "سفارش‌ها از دیتابیس دریافت شدند.");
+            if (announce) ui.notify("فهرست سفارش‌ها به‌روز شد.", "success");
+        } catch (error) {
+            if (error.name === "AbortError" || !page.isConnected || requests.get(page) !== controller) return;
+            renderRows(page, [], () => []);
+            status(page, error.message || "دریافت سفارش‌ها ناموفق بود.", true);
+            ui.notify(error.message || "دریافت سفارش‌ها ناموفق بود.", "danger");
+        } finally { finishRequest(page, controller); }
+    }
+
     function refresh(page, announce = true) {
         if (page.dataset.adminPage === "catalog") return loadCatalog(page, Number(page.dataset.adminPageNumber || "1"), announce);
         if (page.dataset.adminPage === "warehouses") return loadWarehouses(page, announce);
         if (page.dataset.adminPage === "stock") return loadStock(page, Number(page.dataset.adminPageNumber || "1"), announce);
+        if (page.dataset.adminPage === "orders") return loadOrders(page, Number(page.dataset.adminPageNumber || "1"), announce);
     }
 
     function initialize(root = document) {
@@ -234,10 +273,33 @@
             if (page.dataset.adminPage === "catalog") void loadCatalog(page, 1, false);
             else if (page.dataset.adminPage === "warehouses") void loadWarehouses(page, false);
             else if (page.dataset.adminPage === "stock") void loadStock(page, 1, false);
+            else if (page.dataset.adminPage === "orders") void loadOrders(page, 1, false);
         });
     }
 
     document.addEventListener("click", event => {
+        const fileButton = event.target.closest("[data-product-file]");
+        if (fileButton) {
+            const page = fileButton.closest('[data-admin-section="products"]');
+            const item = page?.__adminRows?.[Number(fileButton.dataset.productFile)];
+            const form = document.querySelector("[data-product-file-form]");
+            if (!item || !form) return;
+            form.reset(); form.elements.productId.value = item.id;
+            form.querySelector("[data-product-file-name]").textContent = item.name;
+            window.bootstrap?.Modal?.getOrCreateInstance(document.getElementById("product-file-modal")).show();
+            return;
+        }
+        const imageButton = event.target.closest("[data-product-image]");
+        if (imageButton) {
+            const page = imageButton.closest('[data-admin-section="products"]');
+            const item = page?.__adminRows?.[Number(imageButton.dataset.productImage)];
+            const form = document.querySelector("[data-product-image-form]");
+            if (!item || !form) return;
+            form.reset(); form.elements.productId.value = item.id;
+            form.querySelector("[data-product-image-name]").textContent = item.name;
+            window.bootstrap?.Modal?.getOrCreateInstance(document.getElementById("product-image-modal")).show();
+            return;
+        }
         const categoryButton = event.target.closest("[data-category-content]");
         if (categoryButton) {
             const page = categoryButton.closest('[data-admin-section="categories"]');
@@ -266,7 +328,21 @@
         if (detailButton) {
             const page = detailButton.closest("[data-admin-page]");
             const item = page?.__adminRows?.[Number(detailButton.dataset.adminRecord)];
-            if (item) ui.showRecord("جزئیات رکورد", item);
+            if (item && page.dataset.adminPage === "orders") {
+                detailButton.disabled = true;
+                void ui.getJson(`/api/admin/store/orders/${encodeURIComponent(item.id)}`).then(order => {
+                    const address = JSON.parse(order.addressSnapshotJson || "{}");
+                    const items = JSON.parse(order.itemsJson || "[]");
+                    ui.showRecord("جزئیات سفارش", {
+                        "شماره سفارش": order.orderNumber, "دادهٔ نمونه": order.isSample ? "بله" : "خیر", "مشتری": order.customerName,
+                        "وضعیت": order.status === "simulated-payment-confirmed" ? "پرداخت آزمایشی تأیید شده" : order.status === "pending-payment" ? "در انتظار پرداخت" : order.status,
+                        "مبلغ تومان": order.totalAmount,
+                        "نشانی ثبت‌شده": Object.values(address).filter(value => typeof value === "string" && value).join("، "),
+                        "اقلام": items.map(line => `${line.name}، ${ui.formatNumber(line.quantity)} عدد، مبلغ واحد ${ui.formatNumber(line.unitAmount)} تومان، طرح ${line.salesPlan}`).join(" ؛ ") || "جزئیات اقلام ثبت نشده است"
+                    });
+                }).catch(error => ui.notify(error.message || "دریافت جزئیات سفارش ناموفق بود.", "danger"))
+                    .finally(() => { detailButton.disabled = false; });
+            } else if (item) ui.showRecord("جزئیات رکورد", item);
             return;
         }
         const minimumButton = event.target.closest("[data-admin-minimum]");
@@ -288,10 +364,47 @@
             const nextPage = Number(page?.dataset.adminPageNumber || "1") + Number(stepButton.dataset.adminPageStep);
             if (page?.dataset.adminPage === "catalog") void loadCatalog(page, nextPage);
             else if (page?.dataset.adminPage === "stock") void loadStock(page, nextPage);
+            else if (page?.dataset.adminPage === "orders") void loadOrders(page, nextPage);
         }
     });
 
     document.addEventListener("submit", event => {
+        const fileForm = event.target.closest("[data-product-file-form]");
+        if (fileForm) {
+            event.preventDefault();
+            if (fileForm.elements.kind.value === "product-document" && !fileForm.elements.title.value.trim()) {
+                ui.notify("عنوان فایل PDF را وارد کنید.", "danger"); return;
+            }
+            const save = fileForm.querySelector('[type="submit"]'); save.disabled = true;
+            void ui.getJson("/api/admin/store/media", { method: "POST", body: new FormData(fileForm) })
+                .then(result => { ui.notify(result.message, "success"); window.bootstrap?.Modal?.getInstance(document.getElementById("product-file-modal"))?.hide(); })
+                .catch(error => ui.notify(error.message || "بارگذاری فایل ناموفق بود.", "danger"))
+                .finally(() => { save.disabled = false; });
+            return;
+        }
+        const mediaForm = event.target.closest("[data-media-upload-form]");
+        if (mediaForm) {
+            event.preventDefault();
+            const result = mediaForm.querySelector("[data-media-upload-result]");
+            const save = mediaForm.querySelector('[type="submit"]');
+            result.textContent = "در حال بارگذاری…"; save.disabled = true;
+            void ui.getJson("/api/admin/store/media", { method: "POST", body: new FormData(mediaForm) })
+                .then(data => { result.textContent = data.thumbnail ? `مسیر فایل: ${data.path} — تصویر کوچک: ${data.thumbnail}` : `مسیر فایل: ${data.path}`; ui.notify(data.message, "success"); })
+                .catch(error => { result.textContent = error.message || "بارگذاری ناموفق بود."; ui.notify(result.textContent, "danger"); })
+                .finally(() => { save.disabled = false; });
+            return;
+        }
+        const imageForm = event.target.closest("[data-product-image-form]");
+        if (imageForm) {
+            event.preventDefault();
+            const token = imageForm.querySelector('[name="__RequestVerificationToken"]')?.value || "";
+            const save = imageForm.querySelector('[type="submit"]'); save.disabled = true;
+            void ui.getJson(`/api/admin/store/product-images/${encodeURIComponent(imageForm.elements.productId.value)}`, { method: "POST", headers: { RequestVerificationToken: token }, body: new FormData(imageForm) })
+                .then(result => { ui.notify(result.message, "success"); window.bootstrap?.Modal?.getInstance(document.getElementById("product-image-modal"))?.hide(); })
+                .catch(error => ui.notify(error.message || "بارگذاری تصویر ناموفق بود.", "danger"))
+                .finally(() => { save.disabled = false; });
+            return;
+        }
         const categoryForm = event.target.closest("[data-category-content-form]");
         if (categoryForm) {
             event.preventDefault();
@@ -326,6 +439,7 @@
         if (page?.dataset.adminPage === "catalog") void loadCatalog(page, 1);
         else if (page?.dataset.adminPage === "warehouses") void loadWarehouses(page);
         else if (page?.dataset.adminPage === "stock") void loadStock(page, 1);
+        else if (page?.dataset.adminPage === "orders") void loadOrders(page, 1);
     });
 
     document.addEventListener("click", event => {

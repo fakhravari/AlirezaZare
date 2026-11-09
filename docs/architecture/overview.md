@@ -16,7 +16,7 @@ Program.cs / middleware / route
   → مرورگر: HNUI، کاتالوگ و rendererهای فروشگاه
 ```
 
-[Shop/Program.cs](../../Shop/Program.cs) فروشگاه و [Shop.Admin/Program.cs](../../Shop.Admin/Program.cs) پنل را پیکربندی می‌کنند. پنل از پوستهٔ RTL قالب Color Admin استفاده می‌کند، مرور داخلی را با AJAX انجام می‌دهد و پاسخ‌ها را بدون cache می‌فرستد. APIهای خواندنی کاتالوگ و انبار از repositoryهای `Shop.Database` می‌خوانند. احراز هویت مدیر، API سفارش‌ها و عملیات نوشتن مدیریتی هنوز پیاده‌سازی نشده‌اند.
+[Shop/Program.cs](../../Shop/Program.cs) فروشگاه و [Shop.Admin/Program.cs](../../Shop.Admin/Program.cs) پنل را پیکربندی می‌کنند. پنل از پوستهٔ RTL قالب Color Admin استفاده می‌کند، مرور داخلی را با AJAX انجام می‌دهد و پاسخ‌ها را بدون cache می‌فرستد. احراز هویت و مجوزهای مستقل مدیر، بازبینی بازخورد و عملیات اسناد و تعاریف انبار پیاده شده‌اند. مدیریت کامل سفارش، پرداخت واقعی و تأیید سفارش در انبار هنوز متصل نیستند؛ وضعیت هر بخش در [راهنمای مدیریت](../admin/README.md) و [مرزهای داده](data-sources.md) ثبت شده است.
 
 [PageController](../../Shop/Controllers/PageController.cs) فقط View متناظر یا `ViewName` تعیین‌شده در مدل را برمی‌گرداند. نام `PageAsync` به معنی دسترسی async به دیتابیس نیست؛ پیاده‌سازی فعلی از `Task.FromResult` استفاده می‌کند.
 

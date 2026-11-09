@@ -9,5 +9,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Shop.Data\Shop.Data.csproj" />
     <Folder Include="wwwroot\content\" />
+    <Content Update="appsettings.Development.json" CopyToPublishDirectory="Never" />
   </ItemGroup>
 </Project>

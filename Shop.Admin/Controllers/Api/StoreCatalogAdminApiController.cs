@@ -45,10 +45,10 @@ public sealed class StoreCatalogAdminApiController(IStoreRuntimeDatasetRepositor
 
     private static IReadOnlyList<ProductRow> Products(JsonElement root)
     {
-        Dictionary<string, string> brands = root.GetProperty("brands").EnumerateObject()
-            .ToDictionary(item => item.Name, item => Text(item.Value, "fa", Text(item.Value, "name", item.Name)));
-        Dictionary<string, string> categories = root.GetProperty("categories").EnumerateObject()
-            .ToDictionary(item => item.Name, item => Text(item.Value, "fa", item.Name));
+        Dictionary<string, string> brands = root.GetProperty("brands").EnumerateArray()
+            .ToDictionary(item => Text(item, "id", ""), item => Text(item, "fa", Text(item, "name", "")));
+        Dictionary<string, string> categories = root.GetProperty("categories").EnumerateArray()
+            .ToDictionary(item => Text(item, "id", ""), item => Text(item, "fa", ""));
 
         return root.GetProperty("products").EnumerateArray().Select(item =>
         {
@@ -76,19 +76,17 @@ public sealed class StoreCatalogAdminApiController(IStoreRuntimeDatasetRepositor
             Text(item, "parentId", ""))).ToArray();
 
     private static IReadOnlyList<BrandRow> Brands(JsonElement root) =>
-        root.GetProperty("brands").EnumerateObject().Select(item => new BrandRow(
-            Text(item.Value, "id", item.Name),
-            Text(item.Value, "fa", Text(item.Value, "name", "")),
-            Text(item.Value, "name", ""),
-            Text(item.Value, "countryCode", ""))).ToArray();
+        root.GetProperty("brands").EnumerateArray().Select(item => new BrandRow(
+            Text(item, "id", ""), Text(item, "fa", Text(item, "name", "")),
+            Text(item, "name", ""), Text(item, "countryCode", ""))).ToArray();
 
     private static IReadOnlyList<AttributeRow> Attributes(JsonElement root) =>
-        root.GetProperty("attributeDefinitions").EnumerateObject().Select(item => new AttributeRow(
-            item.Name,
-            Text(item.Value, "label", ""),
-            Text(item.Value, "source", ""),
-            item.Value.TryGetProperty("is_filterable", out JsonElement filterable) && filterable.GetBoolean(),
-            item.Value.TryGetProperty("is_highlight", out JsonElement highlight) && highlight.GetBoolean())).ToArray();
+        root.GetProperty("attributeDefinitions").EnumerateArray().Select(item => new AttributeRow(
+            Text(item, "id", ""),
+            Text(item, "label", ""),
+            Text(item, "source", ""),
+            item.TryGetProperty("is_filterable", out JsonElement filterable) && filterable.GetBoolean(),
+            item.TryGetProperty("is_highlight", out JsonElement highlight) && highlight.GetBoolean())).ToArray();
 
     private static object Page<T>(IEnumerable<T> rows, int page, int pageSize)
     {
@@ -98,7 +96,7 @@ public sealed class StoreCatalogAdminApiController(IStoreRuntimeDatasetRepositor
             total = items.Length,
             page,
             pageSize,
-            items = items.Skip((page - 1) * pageSize).Take(pageSize)
+            items = items.Skip((int)Math.Min((long)(page - 1) * pageSize, items.Length)).Take(pageSize)
         };
     }
 

@@ -7,6 +7,8 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Shop.Data\Shop.Data.csproj" />
+    <PackageReference Include="FluentFTP" Version="48.0.3" />
+    <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="15.1.0" />
   </ItemGroup>
   <ItemGroup>
     <!-- Keep the supplied demo library in source control without putting every demo/plugin in the app asset manifest. -->

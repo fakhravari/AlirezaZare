@@ -74,8 +74,8 @@ public sealed class WarehouseAdminApiController(IWarehouseReadService warehouseR
         [FromQuery] int pageSize = 50,
         CancellationToken cancellationToken = default)
     {
-        if (page < 1 || pageSize is < 1 or > 200)
-            return ValidationProblem("شماره صفحه باید مثبت و اندازهٔ صفحه بین ۱ تا ۲۰۰ باشد.");
+        if (page is < 1 or > 100000 || pageSize is < 1 or > 200)
+            return ValidationProblem("شمارهٔ صفحه باید بین ۱ تا ۱۰۰۰۰۰ و اندازهٔ صفحه بین ۱ تا ۲۰۰ باشد.");
 
         if (User.IsInRole("system.full-access"))
             return Ok(await warehouseReadService.GetStockAsync(

@@ -2,7 +2,7 @@
     string catalogSection = (string)ViewData["Section"]!;
     string apiUrl = (string)ViewData["ApiUrl"]!;
 }
-<div class="admin-page" data-admin-page="catalog" data-admin-section="@catalogSection" data-admin-api="@apiUrl" data-can-edit-category="@(User.IsInRole("system.full-access") || (User.HasClaim("admin_permission", "Store:StoreCategoryContentApi:Get") && User.HasClaim("admin_permission", "Store:StoreCategoryContentApi:Update")) ? "true" : "false")">
+<div class="admin-page" data-admin-page="catalog" data-admin-section="@catalogSection" data-admin-api="@apiUrl" data-can-upload-image="@(User.IsInRole("system.full-access") ? "true" : "false")" data-can-edit-category="@(User.IsInRole("system.full-access") || (User.HasClaim("admin_permission", "Store:StoreCategoryContentApi:Get") && User.HasClaim("admin_permission", "Store:StoreCategoryContentApi:Update")) ? "true" : "false")">
     @await Html.PartialAsync("_AdminPageIntro", ((string)ViewData["Title"]!, (string)ViewData["Description"]!))
     <section class="panel panel-inverse">
         <div class="panel-heading">
@@ -68,10 +68,42 @@
                 <span data-admin-page-label></span>
                 <button type="button" class="btn btn-default btn-sm" data-admin-page-step="1">بعدی</button>
             </div>
-            <p class="admin-readonly-note"><i class="fa fa-lock" aria-hidden="true"></i> @(catalogSection == "categories" ? "محتوای مشترک محصول در دسته قابل ویرایش است." : "فهرست از API خوانده می‌شود؛ تغییر اطلاعات تا آماده‌شدن API مدیریتی فعال نیست.")</p>
+            <p class="admin-readonly-note"><i class="fa fa-lock" aria-hidden="true"></i> @(catalogSection == "categories" ? "محتوای مشترک محصول در دسته قابل ویرایش است." : catalogSection == "products" ? "مدیر دارای دسترسی کامل می‌تواند تصویر، ویدئو و فایل کالا را بارگذاری کند." : "فهرست از API خوانده می‌شود؛ تغییر اطلاعات تا آماده‌شدن API مدیریتی فعال نیست.")</p>
         </div>
     </section>
 </div>
+@if (catalogSection == "products" && User.IsInRole("system.full-access"))
+{
+    <div class="modal fade" id="product-image-modal" tabindex="-1" aria-labelledby="product-image-title" aria-hidden="true">
+        <div class="modal-dialog"><form class="modal-content" data-product-image-form enctype="multipart/form-data">
+            @Html.AntiForgeryToken()<input type="hidden" name="productId" />
+            <div class="modal-header"><h2 class="modal-title fs-5" id="product-image-title">تصویر اصلی محصول</h2><button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="بستن"></button></div>
+            <div class="modal-body">
+                <p data-product-image-name></p>
+                <p class="text-muted">تصویر اصلی، کارت و تصویر کوچک به ترتیب تا ۱۶۰۰، ۸۰۰ و ۲۵۶ پیکسل ساخته می‌شوند. تصاویر قبلی گالری حفظ می‌شوند.</p>
+                <label for="product-image-file" class="form-label">انتخاب تصویر، حداکثر ۱۰ مگابایت</label>
+                <input id="product-image-file" name="image" type="file" accept="image/jpeg,image/png,image/webp" class="form-control" required />
+            </div>
+            <div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button type="submit" class="btn btn-primary">بارگذاری تصویر</button></div>
+        </form></div>
+    </div>
+    <div class="modal fade" id="product-file-modal" tabindex="-1" aria-labelledby="product-file-title" aria-hidden="true">
+        <div class="modal-dialog"><form class="modal-content" data-product-file-form enctype="multipart/form-data">
+            @Html.AntiForgeryToken()<input type="hidden" name="productId" />
+            <div class="modal-header"><h2 class="modal-title fs-5" id="product-file-title">فایل محصول</h2><button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="بستن"></button></div>
+            <div class="modal-body">
+                <p data-product-file-name></p>
+                <label for="product-file-kind" class="form-label">نوع فایل</label>
+                <select id="product-file-kind" name="kind" class="form-select mb-3"><option value="product-document">فایل PDF</option><option value="product-video">ویدئوی MP4</option></select>
+                <label for="product-file-description" class="form-label">عنوان فایل PDF</label>
+                <input id="product-file-description" name="title" class="form-control mb-3" maxlength="200" />
+                <label for="product-file-input" class="form-label">فایل PDF تا ۱۰ یا ویدئو تا ۵۰ مگابایت</label>
+                <input id="product-file-input" name="file" type="file" accept="application/pdf,video/mp4" class="form-control" required />
+            </div>
+            <div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button type="submit" class="btn btn-primary">بارگذاری و اتصال</button></div>
+        </form></div>
+    </div>
+}
 @if (catalogSection == "categories")
 {
     <div class="modal fade" id="category-content-modal" tabindex="-1" aria-labelledby="category-content-title" aria-hidden="true">
@@ -80,6 +112,7 @@
             <div class="modal-header"><h2 class="modal-title fs-5" id="category-content-title">محتوای مشترک دسته</h2><button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="بستن"></button></div>
             <div class="modal-body">
                 <p data-category-content-name></p>
+                <p class="text-muted">این محتوا فقط برای کالاهای متصل به همین دسته نمایش داده می‌شود و به زیردسته‌ها منتقل نمی‌شود.</p>
                 <label for="category-intro" class="form-label">معرفی</label><textarea id="category-intro" name="intro" class="form-control mb-3" rows="4" maxlength="10000"></textarea>
                 <label for="category-highlights" class="form-label">نکات برجسته، هر مورد در یک خط</label><textarea id="category-highlights" name="highlights" class="form-control mb-3" rows="4"></textarea>
                 <label for="category-specs" class="form-label">مشخصات عمومی، هر خط به شکل «عنوان | مقدار»</label><textarea id="category-specs" name="specs" class="form-control" rows="5"></textarea>

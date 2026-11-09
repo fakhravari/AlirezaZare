@@ -31,7 +31,7 @@ public sealed class DatabaseSiteIdentitySource(
                 };
         });
 
-        return identity ?? throw new InvalidDataException("The Store.SiteIdentity row (Id = 1) is missing.");
+        return identity ?? throw new InvalidDataException("The Store.SiteSetting row (Id = 1) is missing.");
     }
 }
 

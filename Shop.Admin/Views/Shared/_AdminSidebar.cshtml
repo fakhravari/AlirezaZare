@@ -53,6 +53,14 @@
 }
 
 <div class="menu-header">مدیریت فروشگاه</div>
+@if (User.IsInRole("system.full-access"))
+{
+    <div class="menu-item @(controller == "SiteSettings" ? "active" : "")">
+        <a class="menu-link" asp-area="Admin" asp-controller="SiteSettings" asp-action="Index" data-admin-nav>
+            <span class="menu-icon"><i class="fa fa-gear" aria-hidden="true"></i></span><span class="menu-text">تنظیمات سایت</span>
+        </a>
+    </div>
+}
 <div class="menu-item @(inStore && controller == "Dashboard" ? "active" : "")" hidden="@(!Can("Store:Dashboard:Index"))">
     <a class="menu-link" asp-area="Store" asp-controller="Dashboard" asp-action="Index" data-admin-nav>
         <span class="menu-icon">

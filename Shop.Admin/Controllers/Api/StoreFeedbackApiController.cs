@@ -42,7 +42,7 @@ public sealed class StoreFeedbackApiController(ShopDbContext db) : ControllerBas
             where feedback.FeedbackType == type
             select new
             {
-                feedback.Id, feedback.IdProduct, StoreProductKey = product.ProductKey, feedback.DisplayName,
+                feedback.Id, feedback.IdProduct, StoreProductKey = product.ProductKey, ProductName = product.Name, feedback.DisplayName,
                 feedback.FeedbackText, feedback.Rating, feedback.Status, feedback.AdminReply, feedback.IsSample, feedback.CreatedAtUtc,
                 feedback.RepliedAtUtc
             };
@@ -51,7 +51,7 @@ public sealed class StoreFeedbackApiController(ShopDbContext db) : ControllerBas
         {
             string term = search.Trim();
             query = query.Where(x =>
-                x.StoreProductKey.Contains(term) || x.DisplayName.Contains(term) || x.FeedbackText.Contains(term));
+                x.StoreProductKey.Contains(term) || x.ProductName.Contains(term) || x.DisplayName.Contains(term) || x.FeedbackText.Contains(term));
         }
 
         int total = await query.CountAsync(cancellationToken);

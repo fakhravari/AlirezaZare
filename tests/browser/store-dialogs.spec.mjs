@@ -1,5 +1,6 @@
 import {test, expect} from '@playwright/test';
 import axe from 'axe-core';
+import {useBrowserAccount} from '../helpers/browser-account.mjs';
 
 async function expectNoA11yViolations(page, state, scope = page.locator('body')) {
   const results = await scope.evaluate(async element => window.axe.run(element, {
@@ -81,7 +82,9 @@ test('product dialogs have accessible names and restore keyboard focus after Esc
 
 test('article feedback confirmation fits and can be cancelled', async ({page, isMobile}) => {
   if (isMobile) await page.setViewportSize({width: 320, height: 640});
+  await useBrowserAccount(page);
   await page.goto('/magazine/multimeter-symbols-guide');
+  await expect(page.locator('#accountToggle')).toHaveClass(/logged-in/);
   const form = page.locator('[data-feedback-form]');
   await form.locator('[name="name"]').fill('کاربر آزمایشی');
   await form.locator('[name="text"]').fill('این دیدگاه برای بررسی نمایش فرم است.');
