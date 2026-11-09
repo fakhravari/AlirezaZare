@@ -30,7 +30,7 @@ public sealed class WarehouseAdminApiController(IWarehouseReadService warehouseR
     {
         if (input.WarehouseId < 1 || input.InventoryItemId < 1 || input.MinimumQuantity < 0 ||
             input.MinimumQuantity > 999999999999999.999m)
-            return ValidationProblem("انبار، کالا و حداقل موجودی نامعتبر است.");
+            return ValidationProblem(detail: "انبار، کالا و حداقل موجودی نامعتبر است.", statusCode: 400);
         if (!User.IsInRole("system.full-access") && !GetAllowedWarehouseIds().Contains(input.WarehouseId))
             return Forbid();
         decimal minimum = decimal.Truncate(input.MinimumQuantity * 1000m) / 1000m;
@@ -42,7 +42,7 @@ public sealed class WarehouseAdminApiController(IWarehouseReadService warehouseR
         var regularPlan = await db.SalesPlanReferences.AsNoTracking().Where(x => x.IsRegular && x.IsActive)
             .Select(x => new { x.Id }).SingleOrDefaultAsync(cancellationToken);
         if (!valid || regularPlan is null)
-            return ValidationProblem("انبار یا قلم موجودی فعال نیست یا طرح عادی تعریف نشده است.");
+            return ValidationProblem(detail: "انبار یا قلم موجودی فعال نیست یا طرح عادی تعریف نشده است.", statusCode: 400);
         var balance = await db.StockBalances.SingleOrDefaultAsync(x => x.IdWarehouse == input.WarehouseId
                                                                        && x.IdInventoryItem == input.InventoryItemId &&
                                                                        x.IdSalesPlanReference == regularPlan.Id,
@@ -81,7 +81,7 @@ public sealed class WarehouseAdminApiController(IWarehouseReadService warehouseR
                 .Select(x => new { id = x.StoreSalesPlanKey, name = x.DisplayName })
                 .ToListAsync(cancellationToken));
         if (page is < 1 or > 100000 || pageSize is < 1 or > 200)
-            return ValidationProblem("شمارهٔ صفحه باید بین ۱ تا ۱۰۰۰۰۰ و اندازهٔ صفحه بین ۱ تا ۲۰۰ باشد.");
+            return ValidationProblem(detail: "شمارهٔ صفحه باید بین ۱ تا ۱۰۰۰۰۰ و اندازهٔ صفحه بین ۱ تا ۲۰۰ باشد.", statusCode: 400);
 
         if (User.IsInRole("system.full-access"))
             return Ok(await warehouseReadService.GetStockAsync(

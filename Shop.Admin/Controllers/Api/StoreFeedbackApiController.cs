@@ -36,7 +36,7 @@ public sealed class StoreFeedbackApiController(ShopDbContext db) : ControllerBas
         CancellationToken cancellationToken)
     {
         if (page < 1 || page > 100000 || status is not (null or "pending" or "approved" or "rejected"))
-            return ValidationProblem("فیلتر یا شمارهٔ صفحه معتبر نیست.");
+            return ValidationProblem(detail: "فیلتر یا شمارهٔ صفحه معتبر نیست.", statusCode: 400);
         var query = from feedback in db.ProductFeedback.AsNoTracking()
             join product in db.Products.AsNoTracking() on feedback.IdProduct equals product.Id
             where feedback.FeedbackType == type
@@ -64,7 +64,7 @@ public sealed class StoreFeedbackApiController(ShopDbContext db) : ControllerBas
         CancellationToken cancellationToken)
     {
         if (input.Status is not ("pending" or "approved" or "rejected") || (input.AdminReply?.Length ?? 0) > 1000)
-            return ValidationProblem("وضعیت یا متن پاسخ معتبر نیست.");
+            return ValidationProblem(detail: "وضعیت یا متن پاسخ معتبر نیست.", statusCode: 400);
         ProductFeedback? feedback =
             await db.ProductFeedback.SingleOrDefaultAsync(x => x.Id == id && x.FeedbackType == type, cancellationToken);
         if (feedback is null) return NotFound();

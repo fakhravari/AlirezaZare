@@ -18,7 +18,7 @@ public sealed class StoreCatalogAdminApiController(IStoreRuntimeDatasetRepositor
         CancellationToken cancellationToken = default)
     {
         if (page < 1 || pageSize is < 1 or > 200)
-            return ValidationProblem("شماره صفحه باید مثبت و اندازهٔ صفحه بین ۱ تا ۲۰۰ باشد.");
+            return ValidationProblem(detail: "شماره صفحه باید مثبت و اندازهٔ صفحه بین ۱ تا ۲۰۰ باشد.", statusCode: 400);
 
         string? json = await datasets.ReadCatalogJsonAsync(cancellationToken);
         if (string.IsNullOrWhiteSpace(json))

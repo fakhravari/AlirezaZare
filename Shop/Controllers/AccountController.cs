@@ -194,6 +194,8 @@ public sealed class AccountController(
                 string.IsNullOrWhiteSpace(i.SalesPlanId)) ||
             request.Lines.Select(i => (i.ProductId, i.SalesPlanId, i.VariantId)).Distinct().Count() !=
             request.Lines.Count) return BadRequest(new { code = "invalid-cart" });
+        await using var transaction =
+            await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, ct);
         string? addressSnapshot = await db.Database.SqlQueryRaw<string>(
             "SELECT (SELECT a.[Title] title,a.[Recipient] recipient,a.[Phone] phone,c.[NameFa] country,p.[NameFa] province,city.[NameFa] city,a.[Street] street,a.[PostalCode] postal FROM [Account].[Address] a JOIN [Geo].[Country] c ON c.[Id]=a.[IdCountry] JOIN [Geo].[Province] p ON p.[Id]=a.[IdProvince] AND p.[IdCountry]=a.[IdCountry] JOIN [Geo].[City] city ON city.[Id]=a.[IdCity] AND city.[IdProvince]=a.[IdProvince] AND city.[IdCountry]=a.[IdCountry] WHERE a.[Id]={0} AND a.[IdProfile]={1} FOR JSON PATH,WITHOUT_ARRAY_WRAPPER) AS [Value]",
             request.AddressId, ProfileId).SingleOrDefaultAsync(ct);
@@ -304,7 +306,6 @@ public sealed class AccountController(
         decimal total = priced.Sum(x => checked(x.UnitAmount * x.Line.Quantity));
         int count = priced.Sum(x => x.Line.Quantity);
         string number = $"ND{DateTime.UtcNow:yyMMddHHmmss}{Random.Shared.Next(1000, 9999)}";
-        await using var transaction = await db.Database.BeginTransactionAsync(ct);
         List<long> insertedOrders = await db.Database.SqlQuery<long>(
                 $"INSERT INTO [Store].[Order]([IdProfile],[IdAddress],[OrderNumber],[PaymentMethod],[ItemCount],[TotalAmount],[AddressSnapshotJson]) OUTPUT INSERTED.[Id] AS [Value] VALUES({ProfileId},{request.AddressId},{number},{request.PaymentMethod},{count},{total},{addressSnapshot})")
             .ToListAsync(ct);

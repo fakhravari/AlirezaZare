@@ -20,7 +20,7 @@ public sealed class WarehouseMovementsApiController(ShopDbContext db) : Controll
         if (page < 1 || page > 100000 || warehouseId is <= 0 || (from.HasValue && to.HasValue && from > to)
             || to == DateOnly.MaxValue || search?.Length > 100 || salesPlan?.Length > 100
             || direction is not (null or "" or "R" or "I") || (audit && summary))
-            return ValidationProblem("فیلترها، بازهٔ تاریخ یا شمارهٔ صفحه معتبر نیست.");
+            return ValidationProblem(detail: "فیلترها، بازهٔ تاریخ یا شمارهٔ صفحه معتبر نیست.", statusCode: 400);
         if (audit) return await GetAuditAsync(warehouseId, search, from, to, page, cancellationToken);
         if (summary) return await GetSummaryAsync(warehouseId, search, salesPlan, from, to, page, cancellationToken);
         var query = from line in db.WarehouseDocumentLines.AsNoTracking()

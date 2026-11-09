@@ -35,7 +35,7 @@ public sealed class StoreCategoryContentApiController(ShopDbContext db) : Contro
     public async Task<IActionResult> Update(string key, [FromBody] CategoryContentInput input, CancellationToken cancellationToken)
     {
         if ((input.Intro?.Length ?? 0) > 10000 || !ValidArray(input.Highlights, false) || !ValidArray(input.Specs, true))
-            return ValidationProblem("معرفی یا قالب نکات و مشخصات معتبر نیست.");
+            return ValidationProblem(detail: "معرفی یا قالب نکات و مشخصات معتبر نیست.", statusCode: 400);
         DbConnection connection = db.Database.GetDbConnection();
         bool close = connection.State != ConnectionState.Open;
         if (close) await connection.OpenAsync(cancellationToken);

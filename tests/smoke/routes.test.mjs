@@ -34,6 +34,14 @@ after(async () => {
   server.kill(); await stopped;
 });
 
+test('warehouse pagination validation responds with HTTP 400', async () => {
+  const response = await fetch(base + '/api/warehouse/stock?page=0');
+  assert.equal(response.status, 400);
+  const problem = await response.json();
+  assert.equal(problem.status, 400);
+  assert.ok(problem.detail);
+});
+
 test('geography response is complete and exposes countries with provinces for addresses', async () => {
   const response = await fetch(base + '/api/store/geography');
   assert.equal(response.status, 200);
@@ -208,8 +216,9 @@ test('every sitemap URL serves indexable HTML with a unique canonical and one H1
     await Promise.all(urls.slice(offset, offset + 12).map(async url => {
       const canonical = new URL(url);
       const response = await fetch(new URL(canonical.pathname + canonical.search, base), {signal: AbortSignal.timeout(120000)}).catch(error => { throw new Error(`${url}: request failed: ${error.message}`, {cause: error}); });
-      assert.equal(response.status, 200, url);
       const html = await response.text();
+      const errorTitle = html.match(/<title>([^<]*)<\/title>/i)?.[1] || "";
+      assert.equal(response.status, 200, `${url}${errorTitle ? `: ${errorTitle}` : ""}`);
       assert.match(html, /<title>[^<]+<\/title>/, url + ': title missing');
       assert.match(html, /<meta name="description" content="[^"]+"\s*\/>/, url + ': description missing');
       assert.match(html, /<meta name="robots" content="index, follow"\s*\/>/, url + ': page is not indexable');

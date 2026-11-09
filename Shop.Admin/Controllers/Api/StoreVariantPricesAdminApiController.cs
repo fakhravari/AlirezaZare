@@ -38,8 +38,10 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db) : Con
         if (variantId < 1 || string.IsNullOrWhiteSpace(salesPlanId) || salesPlanId.Length > 64 ||
             input.PriceAmount < 0 || input.PriceAmount != decimal.Truncate(input.PriceAmount) ||
             input.DiscountPercent is < 0 or >= 100)
-            return ValidationProblem("قیمت باید تومان صحیح و تخفیف بین صفر تا کمتر از صد درصد باشد.");
+            return ValidationProblem(detail: "قیمت باید تومان صحیح و تخفیف بین صفر تا کمتر از صد درصد باشد.", statusCode: 400);
 
+        await using var transaction =
+            await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
         int valid = await db.Database.SqlQueryRaw<int>("""
                                                        SELECT COUNT(*) AS [Value]
                                                        FROM [Warehouse].[ProductVariant] variant
@@ -51,7 +53,7 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db) : Con
         if (valid == 0) return NotFound(new { code = "variant-or-plan-not-found" });
 
         await db.Database.ExecuteSqlInterpolatedAsync($"""
-                                                       IF EXISTS (SELECT 1 FROM [Store].[ProductVariantSalesPlanOffer] WHERE [IdProductVariant] = {variantId} AND [IdSalesPlan] = (SELECT [Id] FROM [Warehouse].[SalesPlanReference] WHERE [SalesPlanKey] = {salesPlanId}))
+                                                       IF EXISTS (SELECT 1 FROM [Store].[ProductVariantSalesPlanOffer] WITH (UPDLOCK, HOLDLOCK) WHERE [IdProductVariant] = {variantId} AND [IdSalesPlan] = (SELECT [Id] FROM [Warehouse].[SalesPlanReference] WHERE [SalesPlanKey] = {salesPlanId}))
                                                            UPDATE [Store].[ProductVariantSalesPlanOffer]
                                                            SET [PriceAmount] = {input.PriceAmount}, [DiscountPercent] = {input.DiscountPercent}, [IsEnabled] = {input.IsEnabled}, [UpdatedAtUtc] = SYSUTCDATETIME()
                                                            WHERE [IdProductVariant] = {variantId} AND [IdSalesPlan] = (SELECT [Id] FROM [Warehouse].[SalesPlanReference] WHERE [SalesPlanKey] = {salesPlanId});
@@ -60,6 +62,7 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db) : Con
                                                            SELECT {variantId}, [Id], {input.PriceAmount}, {input.DiscountPercent}, {input.IsEnabled}
                                                            FROM [Warehouse].[SalesPlanReference] WHERE [SalesPlanKey] = {salesPlanId};
                                                        """, cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
         return Ok(new { saved = true, message = "قیمت تنوع و طرح فروش ذخیره شد." });
     }
 
@@ -69,7 +72,7 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db) : Con
     {
         if (!CanManage()) return Forbid();
         if (variantId < 1 || string.IsNullOrWhiteSpace(salesPlanId) || salesPlanId.Length > 64)
-            return ValidationProblem("تنوع یا طرح فروش معتبر نیست.");
+            return ValidationProblem(detail: "تنوع یا طرح فروش معتبر نیست.", statusCode: 400);
         await db.Database.ExecuteSqlInterpolatedAsync($"""
                                                        DELETE offer FROM [Store].[ProductVariantSalesPlanOffer] offer
                                                        INNER JOIN [Warehouse].[SalesPlanReference] [plan] ON [plan].[Id] = offer.[IdSalesPlan]

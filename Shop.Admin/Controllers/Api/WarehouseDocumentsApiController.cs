@@ -18,7 +18,7 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db) : Controll
         [FromQuery] int page = 1, [FromQuery] int pageSize = 50, CancellationToken cancellationToken = default)
     {
         if (page is < 1 or > 100000 || pageSize is < 1 or > 200 || status is not (null or "D" or "F"))
-            return ValidationProblem("فیلتر صفحه یا وضعیت سند معتبر نیست.");
+            return ValidationProblem(detail: "فیلتر صفحه یا وضعیت سند معتبر نیست.", statusCode: 400);
         long[] allowed = await AllowedWarehouseIdsAsync(cancellationToken);
         if (!User.IsInRole("system.full-access") && warehouseId.HasValue && !allowed.Contains(warehouseId.Value))
             return Forbid();
@@ -28,7 +28,6 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db) : Controll
             join type in db.WarehouseDocumentTypes.AsNoTracking() on document.IdDocumentType equals type.Id
             join party in db.WarehouseParties.AsNoTracking() on document.IdParty equals party.Id
             join plan in db.SalesPlanReferences.AsNoTracking() on document.IdSalesPlanReference equals plan.Id
-            where warehouse.IsActive
             select new { document, warehouse, type, party, plan };
 
         if (warehouseId.HasValue) query = query.Where(x => x.document.IdWarehouse == warehouseId.Value);
@@ -122,10 +121,10 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db) : Controll
         if (failure is not null) return failure;
         IActionResult? lineFailure = ValidateLines(input.Lines);
         if (lineFailure is not null) return lineFailure;
-        if (!await ValidLinePlansAsync(input, cancellationToken)) return ValidationProblem("طرح یکی از اقلام به انبار اختصاص ندارد یا غیرفعال است.");
+        if (!await ValidLinePlansAsync(input, cancellationToken)) return ValidationProblem(detail: "طرح یکی از اقلام به انبار اختصاص ندارد یا غیرفعال است.", statusCode: 400);
         PreparedLine[] lines = await PrepareLinesAsync(input.Lines!, cancellationToken);
         if (lines.Length != input.Lines!.Count)
-            return ValidationProblem("کالا یا واحد انتخاب‌شده برای یکی از اقلام معتبر نیست.");
+            return ValidationProblem(detail: "کالا یا واحد انتخاب‌شده برای یکی از اقلام معتبر نیست.", statusCode: 400);
 
         await using var transaction =
             await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
@@ -186,10 +185,10 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db) : Controll
         if (failure is not null) return failure;
         IActionResult? lineFailure = ValidateLines(input.Lines);
         if (lineFailure is not null) return lineFailure;
-        if (!await ValidLinePlansAsync(input, cancellationToken)) return ValidationProblem("طرح یکی از اقلام به انبار اختصاص ندارد یا غیرفعال است.");
+        if (!await ValidLinePlansAsync(input, cancellationToken)) return ValidationProblem(detail: "طرح یکی از اقلام به انبار اختصاص ندارد یا غیرفعال است.", statusCode: 400);
         PreparedLine[] lines = await PrepareLinesAsync(input.Lines!, cancellationToken);
         if (lines.Length != input.Lines!.Count)
-            return ValidationProblem("کالا یا واحد انتخاب‌شده برای یکی از اقلام معتبر نیست.");
+            return ValidationProblem(detail: "کالا یا واحد انتخاب‌شده برای یکی از اقلام معتبر نیست.", statusCode: 400);
 
         await using var transaction =
             await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
@@ -281,7 +280,7 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db) : Controll
             input.Reason.Trim().Length > 1000
             || (input.ExternalReference?.Trim().Length ?? 0) > 128)
         {
-            return ValidationProblem("انبار، نوع سند، مرجع، طرح، تاریخ، وضعیت و دلیل را درست تکمیل کنید.");
+            return ValidationProblem(detail: "انبار، نوع سند، مرجع، طرح، تاریخ، وضعیت و دلیل را درست تکمیل کنید.", statusCode: 400);
         }
 
         bool valid = await db.Warehouses.AnyAsync(x => x.Id == input.WarehouseId && x.IsActive, cancellationToken)
@@ -292,11 +291,11 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db) : Controll
                          cancellationToken);
         if (!valid)
         {
-            return ValidationProblem("یکی از انبار، نوع سند، مرجع یا طرح فروش غیرفعال است.");
+            return ValidationProblem(detail: "یکی از انبار، نوع سند، مرجع یا طرح فروش غیرفعال است.", statusCode: 400);
         }
 
         if (!await db.WarehouseStockOwners.AnyAsync(x => x.IdWarehouse == input.WarehouseId && x.IdStockOwner == input.SalesPlanId, cancellationToken))
-            return ValidationProblem("مالک انتخاب‌شده به این انبار اختصاص داده نشده است.");
+            return ValidationProblem(detail: "مالک انتخاب‌شده به این انبار اختصاص داده نشده است.", statusCode: 400);
 
         long? linkedWarehouseId = await db.WarehouseParties.AsNoTracking().Where(x => x.Id == input.PartyId)
             .Select(x => x.IdWarehouse).SingleOrDefaultAsync(cancellationToken);
@@ -309,7 +308,7 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db) : Controll
             && (string.IsNullOrWhiteSpace(input.ExternalReference)
                 || !await db.WarehouseParties.AnyAsync(x => x.Id == input.PartyId && x.IsActive
                     && (x.PartyType == "Person" || x.PartyType == "Organization"), cancellationToken)))
-            return ValidationProblem("برای سند مرجوعی، مشتری و شمارهٔ سفارش را ثبت کنید.");
+            return ValidationProblem(detail: "برای سند مرجوعی، مشتری و شمارهٔ سفارش را ثبت کنید.", statusCode: 400);
         return null;
     }
 
@@ -317,7 +316,7 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db) : Controll
     {
         if (lines is null || lines.Count is < 1 or > 200 || lines.Any(x =>
                 x.InventoryItemId < 1 || x.UnitId < 1 || x.Quantity <= 0 || x.Quantity > 999999999999999.999m))
-            return ValidationProblem("سند باید یک تا ۲۰۰ قلم با مقدار مثبت داشته باشد.");
+            return ValidationProblem(detail: "سند باید یک تا ۲۰۰ قلم با مقدار مثبت داشته باشد.", statusCode: 400);
         return null;
     }
 

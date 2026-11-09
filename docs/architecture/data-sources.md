@@ -16,6 +16,8 @@
 | تصویر و asset ثابت | فایل‌های `Shop/wwwroot/content` | فایل ثابت رسانه است؛ رکورد و مسیر قابل‌نمایش کالا از دیتابیس می‌آید. |
 | متن ثابت UI و route | Controller، View و `PageModel` | بخشی از کد محصول است، نه رکورد دادهٔ runtime. |
 
+API عمومی موجودی برای پارامترهای صفحه‌بندی نامعتبر، پاسخ مسئله با وضعیت HTTP ۴۰۰ برمی‌گرداند.
+
 ## قرارداد اتصال
 
 لایهٔ دسترسی فروشگاه در پروژهٔ یکپارچهٔ [Shop.Database](../../Shop.Data) قرار دارد. قراردادهای خواندن در `Application`، مدل‌های دامنه در `Domain` و پیاده‌سازی SQL Server در `Infrastructure` هستند. اتصال برنامه از `ConnectionStrings:DefaultConnection` در appsettings خوانده می‌شود؛ دادهٔ `SiteIdentity` در آن قرار ندارد. جزئیات schema و migrationها در [راهنمای دیتابیس](database.md) است.

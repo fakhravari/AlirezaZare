@@ -49,13 +49,13 @@ public sealed class UsersApiController(ShopDbContext db, PasswordHasher<AdminSys
     public async Task<IActionResult> SaveUser([FromBody] SaveSystemUserInput input, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(input.UserName) || string.IsNullOrWhiteSpace(input.DisplayName))
-            return ValidationProblem("نام کاربری و نام نمایشی الزامی است.");
+            return ValidationProblem(detail: "نام کاربری و نام نمایشی الزامی است.", statusCode: 400);
         if (input.UserName.Trim().Length > 100 || input.DisplayName.Trim().Length > 160)
-            return ValidationProblem("طول نام کاربری یا نام نمایشی بیش از حد مجاز است.");
+            return ValidationProblem(detail: "طول نام کاربری یا نام نمایشی بیش از حد مجاز است.", statusCode: 400);
         if (input.Id is null && string.IsNullOrWhiteSpace(input.Password))
-            return ValidationProblem("برای کاربر جدید، گذرواژه الزامی است.");
+            return ValidationProblem(detail: "برای کاربر جدید، گذرواژه الزامی است.", statusCode: 400);
         if (!string.IsNullOrWhiteSpace(input.Password) && input.Password.Length is < 12 or > 200)
-            return ValidationProblem("گذرواژه باید بین ۱۲ تا ۲۰۰ نویسه باشد.");
+            return ValidationProblem(detail: "گذرواژه باید بین ۱۲ تا ۲۰۰ نویسه باشد.", statusCode: 400);
 
         string normalized = input.UserName.Trim().ToUpperInvariant();
         AdminSystemUser? user = input.Id is null
@@ -66,16 +66,16 @@ public sealed class UsersApiController(ShopDbContext db, PasswordHasher<AdminSys
             return NotFound();
         if (await db.AdminSystemUsers.AnyAsync(x => x.NormalizedUserName == normalized && x.Id != (input.Id ?? 0),
                 cancellationToken))
-            return ValidationProblem("این نام کاربری قبلاً ثبت شده است.");
+            return ValidationProblem(detail: "این نام کاربری قبلاً ثبت شده است.", statusCode: 400);
 
         long[] roleIds = input.RoleIds.Distinct().ToArray();
         long[] warehouseIds = input.WarehouseIds.Distinct().ToArray();
         if (await db.AdminRoles.CountAsync(x => roleIds.Contains(x.Id) && x.IsActive, cancellationToken) !=
             roleIds.Length)
-            return ValidationProblem("یکی از نقش‌های انتخاب‌شده معتبر یا فعال نیست.");
+            return ValidationProblem(detail: "یکی از نقش‌های انتخاب‌شده معتبر یا فعال نیست.", statusCode: 400);
         if (await db.Warehouses.CountAsync(x => warehouseIds.Contains(x.Id) && x.IsActive, cancellationToken) !=
             warehouseIds.Length)
-            return ValidationProblem("یکی از انبارهای انتخاب‌شده معتبر یا فعال نیست.");
+            return ValidationProblem(detail: "یکی از انبارهای انتخاب‌شده معتبر یا فعال نیست.", statusCode: 400);
 
         bool targetHasFullAccess = user?.Roles.Any(x => x.Role.RoleKey == "system.full-access") == true;
         bool willHaveFullAccess =
@@ -86,7 +86,7 @@ public sealed class UsersApiController(ShopDbContext db, PasswordHasher<AdminSys
                                 && !await db.AdminSystemUsers.AnyAsync(x => x.IsActive && x.Id != user!.Id
                                         && x.Roles.Any(r => r.Role.RoleKey == "system.full-access" && r.Role.IsActive),
                                     cancellationToken))
-            return ValidationProblem("سامانه باید دست‌کم یک کاربر فعال با دسترسی کامل داشته باشد.");
+            return ValidationProblem(detail: "سامانه باید دست‌کم یک کاربر فعال با دسترسی کامل داشته باشد.", statusCode: 400);
 
         user ??= new AdminSystemUser { CreatedAtUtc = DateTime.UtcNow };
         user.UserName = input.UserName.Trim();
@@ -125,9 +125,9 @@ public sealed class UsersApiController(ShopDbContext db, PasswordHasher<AdminSys
         if (role is null)
             return NotFound();
         if (string.IsNullOrWhiteSpace(input.Name) || input.Name.Trim().Length > 160)
-            return ValidationProblem("نام نقش الزامی است و حداکثر ۱۶۰ نویسه دارد.");
+            return ValidationProblem(detail: "نام نقش الزامی است و حداکثر ۱۶۰ نویسه دارد.", statusCode: 400);
         if (role.RoleKey == "system.full-access" && !input.IsActive)
-            return ValidationProblem("نقش دسترسی کامل قابل غیرفعال‌سازی نیست.");
+            return ValidationProblem(detail: "نقش دسترسی کامل قابل غیرفعال‌سازی نیست.", statusCode: 400);
 
         long[] permissionIds = input.PermissionIds.Distinct().ToArray();
         if (role.RoleKey == "system.full-access")
@@ -135,7 +135,7 @@ public sealed class UsersApiController(ShopDbContext db, PasswordHasher<AdminSys
                 .ToArrayAsync(cancellationToken);
         if (await db.AdminPermissions.CountAsync(x => permissionIds.Contains(x.Id) && x.IsActive, cancellationToken) !=
             permissionIds.Length)
-            return ValidationProblem("یکی از مجوزهای انتخاب‌شده معتبر یا فعال نیست.");
+            return ValidationProblem(detail: "یکی از مجوزهای انتخاب‌شده معتبر یا فعال نیست.", statusCode: 400);
 
         await using var transaction =
             await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
@@ -159,11 +159,11 @@ public sealed class UsersApiController(ShopDbContext db, PasswordHasher<AdminSys
         string key = input.RoleKey.Trim().ToLowerInvariant();
         if (key.Length is < 2 or > 100 || key.Any(character =>
                 !(char.IsAsciiLetterOrDigit(character) || character is '.' or '-' or '_')))
-            return ValidationProblem("کلید نقش فقط می‌تواند شامل حروف انگلیسی، عدد، نقطه، خط تیره و زیرخط باشد.");
+            return ValidationProblem(detail: "کلید نقش فقط می‌تواند شامل حروف انگلیسی، عدد، نقطه، خط تیره و زیرخط باشد.", statusCode: 400);
         if (string.IsNullOrWhiteSpace(input.Name) || input.Name.Trim().Length > 160)
-            return ValidationProblem("نام نقش الزامی است و حداکثر ۱۶۰ نویسه دارد.");
+            return ValidationProblem(detail: "نام نقش الزامی است و حداکثر ۱۶۰ نویسه دارد.", statusCode: 400);
         if (await db.AdminRoles.AnyAsync(x => x.RoleKey == key, cancellationToken))
-            return ValidationProblem("این کلید نقش قبلاً ثبت شده است.");
+            return ValidationProblem(detail: "این کلید نقش قبلاً ثبت شده است.", statusCode: 400);
         db.AdminRoles.Add(new AdminRole { RoleKey = key, Name = input.Name.Trim(), IsActive = true });
         await db.SaveChangesAsync(cancellationToken);
         return Ok(new { message = "نقش جدید ساخته شد." });
@@ -175,7 +175,7 @@ public sealed class UsersApiController(ShopDbContext db, PasswordHasher<AdminSys
         CancellationToken cancellationToken)
     {
         if (input.Password.Length < 12 || input.Password.Length > 200)
-            return ValidationProblem("گذرواژه باید بین ۱۲ تا ۲۰۰ نویسه باشد.");
+            return ValidationProblem(detail: "گذرواژه باید بین ۱۲ تا ۲۰۰ نویسه باشد.", statusCode: 400);
         AdminSystemUser? user = await db.AdminSystemUsers.SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
         if (user is null)
             return NotFound();

@@ -68,15 +68,15 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
         CancellationToken cancellationToken)
     {
         if (input.CompanyId < 1 || input.WarehouseId < 1 || input.SalesPlanId < 1)
-            return ValidationProblem("شرکت، انبار فروش و طرح سایت را انتخاب کنید.");
+            return ValidationProblem(detail: "شرکت، انبار فروش و طرح سایت را انتخاب کنید.", statusCode: 400);
         if (!User.IsInRole("system.full-access")) return Forbid();
         Warehouse? warehouse = await db.Warehouses.SingleOrDefaultAsync(x => x.Id == input.WarehouseId
                                                                              && x.IdCompany == input.CompanyId &&
                                                                              x.Company.IsActive &&
                                                                              x.IsActive, cancellationToken);
-        if (warehouse is null) return ValidationProblem("انبار انتخاب‌شده، انبار فروش فعال شرکت نیست.");
+        if (warehouse is null) return ValidationProblem(detail: "انبار انتخاب‌شده، انبار فروش فعال شرکت نیست.", statusCode: 400);
         if (!await db.SalesPlanReferences.AnyAsync(x => x.Id == input.SalesPlanId && x.IsActive, cancellationToken))
-            return ValidationProblem("طرح فروش انتخاب‌شده فعال نیست.");
+            return ValidationProblem(detail: "طرح فروش انتخاب‌شده فعال نیست.", statusCode: 400);
         if (!await db.WarehouseStockOwners.AnyAsync(x => x.IdWarehouse == input.WarehouseId && x.IdStockOwner == input.SalesPlanId, cancellationToken))
         {
             db.WarehouseStockOwners.Add(new WarehouseStockOwner { IdWarehouse = input.WarehouseId, IdStockOwner = input.SalesPlanId });
@@ -197,9 +197,9 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                 if (!User.IsInRole("system.full-access")) return Forbid();
                 StockOwnerInput? input = Parse<StockOwnerInput>(payload);
                 if (input is null || !ValidCodeName(input.Code, input.DisplayName, 64, 200) || input.IdStockOwnerType is not (1 or 2))
-                    return ValidationProblem("کد، نام و نوع مالک معتبر الزامی است.");
+                    return ValidationProblem(detail: "کد، نام و نوع مالک معتبر الزامی است.", statusCode: 400);
                 if (!id.HasValue && !System.Text.RegularExpressions.Regex.IsMatch(input.Code.Trim(), "^[a-z0-9]+(?:-[a-z0-9]+)*$"))
-                    return ValidationProblem("کد باید با حروف کوچک انگلیسی، عدد و خط تیره باشد.");
+                    return ValidationProblem(detail: "کد باید با حروف کوچک انگلیسی، عدد و خط تیره باشد.", statusCode: 400);
                 if (!id.HasValue && await db.SalesPlanReferences.AnyAsync(x => x.StoreSalesPlanKey == input.Code.Trim() || x.Code == input.Code.Trim(), cancellationToken))
                     return Conflict(new { detail = "این کد قبلاً ثبت شده است." });
                 SalesPlanReference? entity = id.HasValue ? await db.SalesPlanReferences.SingleOrDefaultAsync(x => x.Id == id, cancellationToken) : new();
@@ -228,7 +228,7 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
             {
                 CompanyInput? input = Parse<CompanyInput>(payload);
                 if (input is null || !ValidCodeName(input.Code, input.Name, 50, 200))
-                    return ValidationProblem("کد و نام شرکت را درست وارد کنید.");
+                    return ValidationProblem(detail: "کد و نام شرکت را درست وارد کنید.", statusCode: 400);
                 if (!id.HasValue && !User.IsInRole("system.full-access")) return Forbid();
                 Company entity = id.HasValue
                     ? await db.Companies.SingleOrDefaultAsync(x => x.Id == id, cancellationToken) ?? null!
@@ -247,10 +247,10 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
             {
                 WarehouseInput? input = Parse<WarehouseInput>(payload);
                 if (input is null || input.CompanyId < 1 || !ValidCodeName(input.Code, input.Name, 50, 200))
-                    return ValidationProblem("شرکت، کد و نام انبار را درست وارد کنید.");
+                    return ValidationProblem(detail: "شرکت، کد و نام انبار را درست وارد کنید.", statusCode: 400);
                 if (id.HasValue && !await CanAccessWarehouseAsync(id.Value, cancellationToken)) return Forbid();
                 if (!await db.Companies.AnyAsync(x => x.Id == input.CompanyId && x.IsActive, cancellationToken))
-                    return ValidationProblem("شرکت فعال پیدا نشد.");
+                    return ValidationProblem(detail: "شرکت فعال پیدا نشد.", statusCode: 400);
                 if (!User.IsInRole("system.full-access"))
                 {
                     if (!await CanAccessCompanyAsync(input.CompanyId, cancellationToken)) return Forbid();
@@ -266,11 +266,11 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                                                !await db.SalesPlanReferences.AnyAsync(
                                                    x => x.Id == input.OwnerSalesPlanId && x.IsActive,
                                                    cancellationToken))
-                    return ValidationProblem("برای هر انبار، مالک فعال الزامی است.");
+                    return ValidationProblem(detail: "برای هر انبار، مالک فعال الزامی است.", statusCode: 400);
                 if (input.IsSiteWarehouse && !input.IsSalesWarehouse)
-                    return ValidationProblem("انبار پیش‌فرض سایت باید انبار فروش باشد.");
+                    return ValidationProblem(detail: "انبار پیش‌فرض سایت باید انبار فروش باشد.", statusCode: 400);
                 if (!input.IsActive && (input.IsSiteWarehouse || await IsSiteWarehouseAsync(id ?? 0, cancellationToken)))
-                    return ValidationProblem("انبار متصل به سایت باید فعال باشد.");
+                    return ValidationProblem(detail: "انبار متصل به سایت باید فعال باشد.", statusCode: 400);
                 if (await IsSiteWarehouseAsync(id ?? 0, cancellationToken) && !input.IsSalesWarehouse)
                     return Conflict(new
                         { detail = "انبار متصل به سایت باید تا زمان جابه‌جایی اتصال، انبار فروش بماند." });
@@ -325,7 +325,7 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                 DocumentTypeInput? input = Parse<DocumentTypeInput>(payload);
                 if (input is null || !ValidCodeName(input.Code, input.Name, 50, 150) ||
                     input.Direction is not ("R" or "I"))
-                    return ValidationProblem("کد، نام و جهت سند را درست وارد کنید.");
+                    return ValidationProblem(detail: "کد، نام و جهت سند را درست وارد کنید.", statusCode: 400);
                 WarehouseDocumentType entity = id.HasValue
                     ? await db.WarehouseDocumentTypes.SingleOrDefaultAsync(x => x.Id == id, cancellationToken) ?? null!
                     : new WarehouseDocumentType();
@@ -352,13 +352,13 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                 PartyInput? input = Parse<PartyInput>(payload);
                 if (input is null || !ValidCodeName(input.Name, input.Name, 200, 200)
                                   || input.PartyType is not ("Person" or "Organization" or "Warehouse" or "Other"))
-                    return ValidationProblem("نوع و نام مرجع معتبر نیست.");
+                    return ValidationProblem(detail: "نوع و نام مرجع معتبر نیست.", statusCode: 400);
                 long? linkedWarehouse = input.PartyType == "Warehouse" ? input.WarehouseId : null;
                 if (input.PartyType == "Warehouse" && (linkedWarehouse is null ||
                                                        !await db.Warehouses.AnyAsync(
                                                            x => x.Id == linkedWarehouse && x.IsActive,
                                                            cancellationToken)))
-                    return ValidationProblem("برای مرجع انبار، انبار فعال را انتخاب کنید.");
+                    return ValidationProblem(detail: "برای مرجع انبار، انبار فعال را انتخاب کنید.", statusCode: 400);
                 if (linkedWarehouse.HasValue &&
                     !await CanAccessWarehouseAsync(linkedWarehouse.Value, cancellationToken)) return Forbid();
                 WarehouseParty entity = id.HasValue
@@ -383,7 +383,7 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
             {
                 UnitInput? input = Parse<UnitInput>(payload);
                 if (input is null || !ValidCodeName(input.Code, input.Name, 50, 100))
-                    return ValidationProblem("کد و نام واحد را درست وارد کنید.");
+                    return ValidationProblem(detail: "کد و نام واحد را درست وارد کنید.", statusCode: 400);
                 WarehouseUnit entity = id.HasValue
                     ? await db.WarehouseUnits.SingleOrDefaultAsync(x => x.Id == id, cancellationToken) ?? null!
                     : new WarehouseUnit();
@@ -400,13 +400,13 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                 ProductUnitInput? input = Parse<ProductUnitInput>(payload);
                 if (input is null || input.ProductId < 1 || input.UnitId < 1 || input.ConversionFactor <= 0 ||
                     input.ConversionFactor > 999999999.999999999m)
-                    return ValidationProblem("کالا، واحد و ضریب تبدیل در محدودهٔ مجاز الزامی است.");
+                    return ValidationProblem(detail: "کالا، واحد و ضریب تبدیل در محدودهٔ مجاز الزامی است.", statusCode: 400);
                 WarehouseProduct? product =
                     await db.Products.SingleOrDefaultAsync(x => x.Id == input.ProductId && x.IsWarehouseEnabled,
                         cancellationToken);
                 if (product is null ||
                     !await db.WarehouseUnits.AnyAsync(x => x.Id == input.UnitId && x.IsActive, cancellationToken))
-                    return ValidationProblem("کالا یا واحد فعال پیدا نشد.");
+                    return ValidationProblem(detail: "کالا یا واحد فعال پیدا نشد.", statusCode: 400);
                 if (input.IsBaseUnit && product.IdBaseUnit != input.UnitId)
                     return Conflict(new { detail = "تغییر واحد اصلی کالا بدون تبدیل مانده‌ها و سوابق مجاز نیست." });
                 WarehouseProductUnit? entity = id.HasValue
@@ -421,7 +421,7 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                         { detail = "واحد اصلی کالا باید فعال بماند؛ ابتدا واحد اصلی جایگزین را تعریف کنید." });
                 if (!input.IsBaseUnit && !await db.WarehouseProductUnits.AnyAsync(
                         x => x.IdProduct == input.ProductId && x.IsBaseUnit && x.IsActive, cancellationToken))
-                    return ValidationProblem("ابتدا واحد اصلی فعال کالا را تعریف کنید.");
+                    return ValidationProblem(detail: "ابتدا واحد اصلی فعال کالا را تعریف کنید.", statusCode: 400);
                 await using var transaction =
                     await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
                 entity ??= new WarehouseProductUnit();
@@ -457,20 +457,19 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
             {
                 VariantInput? input = Parse<VariantInput>(payload);
                 if (input is null || input.ProductId < 1 || !ValidCodeName(input.Name, input.Name, 300, 300))
-                    return ValidationProblem("محصول و نام تنوع را وارد کنید.");
+                    return ValidationProblem(detail: "محصول و نام تنوع را وارد کنید.", statusCode: 400);
                 if (!string.IsNullOrWhiteSpace(input.Code) && input.Code.Length > 100)
-                    return ValidationProblem("کد تنوع حداکثر ۱۰۰ نویسه است.");
+                    return ValidationProblem(detail: "کد تنوع حداکثر ۱۰۰ نویسه است.", statusCode: 400);
                 if (!string.IsNullOrWhiteSpace(input.AttributesJson))
                 {
                     if (!TryReadInventoryAttributeKeys(input.AttributesJson, out HashSet<string> attributeKeys))
-                        return ValidationProblem(
-                            "ویژگی‌های موجودی باید آرایه‌ای از key، label، value و display معتبر باشند.");
+                        return ValidationProblem(detail: "ویژگی‌های موجودی باید آرایه‌ای از key، label، value و display معتبر باشند.", statusCode: 400);
                 }
 
                 WarehouseProduct? product =
                     await db.Products.SingleOrDefaultAsync(x => x.Id == input.ProductId && x.IsWarehouseEnabled,
                         cancellationToken);
-                if (product is null) return ValidationProblem("محصول فعال پیدا نشد.");
+                if (product is null) return ValidationProblem(detail: "محصول فعال پیدا نشد.", statusCode: 400);
                 ProductVariant entity = id.HasValue
                     ? await db.ProductVariants.SingleOrDefaultAsync(x => x.Id == id, cancellationToken) ?? null!
                     : new ProductVariant();

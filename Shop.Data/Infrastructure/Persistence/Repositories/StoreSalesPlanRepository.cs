@@ -1,6 +1,7 @@
 using System.Data;
 using System.Data.Common;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using Shop.Database.Application.Store.Contracts;
 using Shop.Database.Application.Store.Models;
 
@@ -8,6 +9,12 @@ namespace Shop.Database.Infrastructure.Persistence.Repositories;
 
 public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSalesPlanRepository
 {
+    private DbCommand CreateCommand(DbConnection connection)
+    {
+        DbCommand command = connection.CreateCommand();
+        command.Transaction = dbContext.Database.CurrentTransaction?.GetDbTransaction();
+        return command;
+    }
     public async Task<StoreSalesPlanSnapshot> ReadSalesPlanSnapshotAsync(CancellationToken cancellationToken)
     {
         DbConnection connection = dbContext.Database.GetDbConnection();
@@ -17,7 +24,7 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
         try
         {
             List<StoreSalesPlanRow> plans = [];
-            await using (DbCommand command = connection.CreateCommand())
+            await using (DbCommand command = CreateCommand(connection))
             {
                 command.CommandText = """
                                       SELECT [SalesPlanKey], [Code], [Name], [PlanType], [IsDefault], [IsEnabled],
@@ -37,7 +44,7 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
             }
 
             Dictionary<(int ProductId, string PlanId), OfferBuilder> offers = [];
-            await using (DbCommand command = connection.CreateCommand())
+            await using (DbCommand command = CreateCommand(connection))
             {
                 command.CommandText = """
                                       WITH [SiteStock] AS
@@ -96,7 +103,7 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
             }
 
             Dictionary<(int ProductId, string Key), ProductPriceOptionBuilder> priceOptions = [];
-            await using (DbCommand command = connection.CreateCommand())
+            await using (DbCommand command = CreateCommand(connection))
             {
                 command.CommandText = """
                                       SELECT p.[Id], opt.[OptionKey], opt.[Label], val.[ValueKey], val.[Label],
@@ -119,7 +126,7 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
             }
 
             Dictionary<(int ProductId, long VariantId), InventoryVariantBuilder> inventoryVariants = [];
-            await using (DbCommand command = connection.CreateCommand())
+            await using (DbCommand command = CreateCommand(connection))
             {
                 command.CommandText = """
                                       SELECT p.[Id], v.[Id], v.[Name], v.[Code], v.[AttributesJson],
@@ -150,7 +157,7 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
                 }
             }
 
-            await using (DbCommand command = connection.CreateCommand())
+            await using (DbCommand command = CreateCommand(connection))
             {
                 command.CommandText = """
                                       SELECT offer.[IdProductVariant], [plan].[SalesPlanKey], offer.[PriceAmount], offer.[DiscountPercent]
@@ -173,7 +180,7 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
                 }
             }
 
-            await using (DbCommand command = connection.CreateCommand())
+            await using (DbCommand command = CreateCommand(connection))
             {
                 command.CommandText = """
                                       WITH [OfferPairs] AS
@@ -208,7 +215,7 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
                 }
             }
 
-            await using (DbCommand command = connection.CreateCommand())
+            await using (DbCommand command = CreateCommand(connection))
             {
                 command.CommandText = """
                                       SELECT p.[Id], sp.[SalesPlanKey], ov.[SpecificationKey], ov.[Value]
@@ -248,7 +255,7 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
         try
         {
             int maxPurchaseQuantity;
-            await using (DbCommand command = connection.CreateCommand())
+            await using (DbCommand command = CreateCommand(connection))
             {
                 command.CommandText =
                     "SELECT [MaxPurchaseQuantity] FROM [Warehouse].[Product] WHERE [Id] = @ProductId AND [IsCatalogActive] = 1 AND [IsStoreEnabled] = 1;";
@@ -259,7 +266,7 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
             }
 
             Dictionary<string, List<ProductPurchaseOptionValueRow>> options = new(StringComparer.Ordinal);
-            await using (DbCommand command = connection.CreateCommand())
+            await using (DbCommand command = CreateCommand(connection))
             {
                 command.CommandText = """
                                       SELECT o.[OptionKey], v.[ValueKey], CONVERT(DECIMAL(19,0), ROUND(v.[PriceDelta] * 1000000, 0))
@@ -280,7 +287,7 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
             }
 
             List<ProductAccessoryRow> accessories = [];
-            await using (DbCommand command = connection.CreateCommand())
+            await using (DbCommand command = CreateCommand(connection))
             {
                 command.CommandText = """
                                       SELECT a.[AccessoryKey], pa.[IsRequired]
