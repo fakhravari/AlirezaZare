@@ -161,7 +161,10 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
                 "postal",
             ])
                 form.elements[field].value = address[field] || "";
-        fields.set(address);
+        if (fields.set(address) === false) {
+            ui.setMessage(status, "ویرایش نشانی خارج از ایران در دسترس نیست.", "error");
+            return;
+        }
         dialog.showModal();
         document.documentElement.classList.add("address-modal-open");
     }
@@ -260,7 +263,8 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
                 ? `<a href="/payment/simulated/${order.id}">ادامهٔ پرداخت آزمایشی</a>` : "";
             const paymentButton = !simulationAvailable && !order.isSample && order.status === "pending-payment" && Number.isSafeInteger(order.id) && order.id > 0
                 ? `<button type="button" data-pay-order="${order.id}">ادامهٔ پرداخت</button>` : "";
-            card.innerHTML = `<header><div><span class="order-status is-${ui.escapeHtml(order.status)}">${ui.escapeHtml(label)}</span><strong>سفارش ${ui.escapeHtml(order.number)}</strong></div><time datetime="${card.dataset.orderDatetime}">${ui.escapeHtml(dateLabel)}</time></header><div class="order-body order-invoice-summary"><div class="order-products"><span class="order-product-icon"><i class="bi bi-receipt-cutoff"></i></span><div><strong>خلاصهٔ فاکتور</strong><small>${ui.formatNumber(order.itemCount)} کالا</small></div></div><div class="order-total"><small>مبلغ سفارش</small><strong>${ui.formatNumber(order.totalAmount)} تومان</strong></div></div><footer><span>${ui.escapeHtml(label)}</span><div class="order-card-actions">${simulationLink}${paymentButton}<a href="/Tracking"><i class="bi bi-truck"></i> پیگیری سفارش</a><button type="button" data-open-order-invoice>مشاهدهٔ فاکتور</button></div></footer>`;
+            const tracking = order.shippingCarrier && order.shippingTrackingCode ? `<p>شرکت حمل: ${ui.escapeHtml(order.shippingCarrier)}، کد رهگیری: <bdi>${ui.escapeHtml(order.shippingTrackingCode)}</bdi></p>` : "";
+            card.innerHTML = `<header><div><span class="order-status is-${ui.escapeHtml(order.status)}">${ui.escapeHtml(label)}</span><strong>سفارش ${ui.escapeHtml(order.number)}</strong></div><time datetime="${card.dataset.orderDatetime}">${ui.escapeHtml(dateLabel)}</time></header><div class="order-body order-invoice-summary"><div class="order-products"><span class="order-product-icon"><i class="bi bi-receipt-cutoff"></i></span><div><strong>خلاصهٔ فاکتور</strong><small>${ui.formatNumber(order.itemCount)} کالا</small></div></div><div class="order-total"><small>مبلغ سفارش</small><strong>${ui.formatNumber(order.totalAmount)} تومان</strong></div></div>${tracking}<footer><span>${ui.escapeHtml(label)}</span><div class="order-card-actions">${simulationLink}${paymentButton}<a href="/Tracking"><i class="bi bi-truck"></i> پیگیری سفارش</a><button type="button" data-open-order-invoice>مشاهدهٔ فاکتور</button></div></footer>`;
             host.append(card);
         }
         const total = document.querySelector("#ordersTotal");

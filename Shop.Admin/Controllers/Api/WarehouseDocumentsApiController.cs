@@ -116,18 +116,23 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db) : Controll
     public async Task<IActionResult> Create([FromBody] SaveWarehouseDocumentInput input,
         CancellationToken cancellationToken)
     {
+        await using var transaction =
+            await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
         if (!await CanAccessWarehouseAsync(input.WarehouseId, cancellationToken)) return Forbid();
-        IActionResult? failure = await ValidateHeaderAsync(input, cancellationToken);
-        if (failure is not null) return failure;
         IActionResult? lineFailure = ValidateLines(input.Lines);
         if (lineFailure is not null) return lineFailure;
+        IActionResult? failure = await ValidateHeaderAsync(input, cancellationToken);
+        if (failure is not null) return failure;
         if (!await ValidLinePlansAsync(input, cancellationToken)) return ValidationProblem(detail: "طرح یکی از اقلام به انبار اختصاص ندارد یا غیرفعال است.", statusCode: 400);
         PreparedLine[] lines = await PrepareLinesAsync(input.Lines!, cancellationToken);
         if (lines.Length != input.Lines!.Count)
             return ValidationProblem(detail: "کالا یا واحد انتخاب‌شده برای یکی از اقلام معتبر نیست.", statusCode: 400);
 
-        await using var transaction =
-            await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
+        // Acquire balance keys before inserting documents so competing issues lock in the same order.
+        foreach (var key in lines.Select(line => new { line.InventoryItemId, PlanId = line.SalesPlanId ?? input.SalesPlanId })
+                     .Distinct().OrderBy(key => key.InventoryItemId).ThenBy(key => key.PlanId))
+            await db.Database.ExecuteSqlInterpolatedAsync($"SELECT [Id] FROM [Warehouse].[StockBalance] WITH (UPDLOCK, HOLDLOCK, INDEX([UQ_Warehouse_StockBalance_Key])) WHERE [IdWarehouse]={input.WarehouseId} AND [IdInventoryItem]={key.InventoryItemId} AND [IdSalesPlanReference]={key.PlanId}", cancellationToken);
+
         var document = new WarehouseDocumentRecord
         {
             IdWarehouse = input.WarehouseId,
@@ -174,24 +179,25 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db) : Controll
     public async Task<IActionResult> Update(long id, [FromBody] SaveWarehouseDocumentInput input,
         CancellationToken cancellationToken)
     {
+        await using var transaction =
+            await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
         WarehouseDocumentRecord? document =
-            await db.WarehouseDocuments.SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
+            await db.WarehouseDocuments.FromSqlInterpolated($"SELECT * FROM [Warehouse].[WarehouseDocument] WITH (UPDLOCK, HOLDLOCK) WHERE [Id]={id}")
+                .SingleOrDefaultAsync(cancellationToken);
         if (document is null) return NotFound();
         if (!await CanAccessWarehouseAsync(document.IdWarehouse, cancellationToken)
             || !await CanAccessWarehouseAsync(input.WarehouseId, cancellationToken)) return Forbid();
+        IActionResult? lineFailure = ValidateLines(input.Lines);
+        if (lineFailure is not null) return lineFailure;
         if (await IsPaidOrderLinkedAsync(id, cancellationToken))
             return Conflict(new { detail = "سند متصل به سفارش از مسیر مدیریت سفارش تغییر می‌کند." });
         IActionResult? failure = await ValidateHeaderAsync(input, cancellationToken);
         if (failure is not null) return failure;
-        IActionResult? lineFailure = ValidateLines(input.Lines);
-        if (lineFailure is not null) return lineFailure;
         if (!await ValidLinePlansAsync(input, cancellationToken)) return ValidationProblem(detail: "طرح یکی از اقلام به انبار اختصاص ندارد یا غیرفعال است.", statusCode: 400);
         PreparedLine[] lines = await PrepareLinesAsync(input.Lines!, cancellationToken);
         if (lines.Length != input.Lines!.Count)
             return ValidationProblem(detail: "کالا یا واحد انتخاب‌شده برای یکی از اقلام معتبر نیست.", statusCode: 400);
 
-        await using var transaction =
-            await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
         try
         {
             string before = await CaptureSnapshotAsync(id, cancellationToken);
@@ -236,15 +242,16 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db) : Controll
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(long id, CancellationToken cancellationToken)
     {
+        await using var transaction =
+            await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
         WarehouseDocumentRecord? document =
-            await db.WarehouseDocuments.SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
+            await db.WarehouseDocuments.FromSqlInterpolated($"SELECT * FROM [Warehouse].[WarehouseDocument] WITH (UPDLOCK, HOLDLOCK) WHERE [Id]={id}")
+                .SingleOrDefaultAsync(cancellationToken);
         if (document is null) return NotFound();
         if (!await CanAccessWarehouseAsync(document.IdWarehouse, cancellationToken)) return Forbid();
         if (await IsPaidOrderLinkedAsync(id, cancellationToken))
             return Conflict(new { detail = "سند متصل به سفارش از مسیر مدیریت سفارش تغییر می‌کند." });
 
-        await using var transaction =
-            await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
         try
         {
             string before = await CaptureSnapshotAsync(id, cancellationToken);

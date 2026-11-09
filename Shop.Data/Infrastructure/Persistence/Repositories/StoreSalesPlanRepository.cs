@@ -84,7 +84,7 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
                                           WHERE p.[IsCatalogActive] = 1 AND p.[IsStoreEnabled] = 1
                                       )
                                       SELECT o.[IdProduct], o.[SalesPlanKey], o.[PriceAmount], o.[DiscountPercent],
-                                             CONVERT(INT, ISNULL(s.[Quantity], 0)), o.[MaxPurchaseQuantity],
+                                             CONVERT(INT, CASE WHEN ISNULL(s.[Quantity], 0) > 2147483647 THEN 2147483647 ELSE FLOOR(ISNULL(s.[Quantity], 0)) END), o.[MaxPurchaseQuantity],
                                              CONVERT(BIT, CASE WHEN o.[IsEnabled] = 1 AND sp.[IsEnabled] = 1 THEN 1 ELSE 0 END)
                                       FROM [OfferRows] o
                                       INNER JOIN [Warehouse].[SalesPlanReference] sp ON sp.[Id] = o.[IdSalesPlan]

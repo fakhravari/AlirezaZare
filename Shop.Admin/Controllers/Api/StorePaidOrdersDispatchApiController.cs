@@ -69,6 +69,20 @@ public sealed class StorePaidOrdersDispatchApiController(ShopDbContext db) : Con
                 SELECT TOP (1) @Plan=l.[IdSalesPlanReference] FROM @Ids ids
                     JOIN [Store].[Order] o ON o.[Id]=ids.[Id] JOIN [Warehouse].[PaidOrderInbox] inbox ON inbox.[StoreOrderKey]=o.[OrderNumber]
                     JOIN [Warehouse].[PaidOrderInboxLine] l ON l.[IdPaidOrderInbox]=inbox.[Id] ORDER BY l.[IdSalesPlanReference];
+                DECLARE @StockKeys TABLE ([ItemId] bigint NOT NULL, [PlanId] bigint NOT NULL, PRIMARY KEY ([ItemId], [PlanId]));
+                INSERT @StockKeys ([ItemId], [PlanId])
+                    SELECT DISTINCT l.[IdInventoryItem], l.[IdSalesPlanReference] FROM @Ids ids
+                    JOIN [Store].[Order] o ON o.[Id]=ids.[Id]
+                    JOIN [Warehouse].[PaidOrderInbox] inbox ON inbox.[StoreOrderKey]=o.[OrderNumber]
+                    JOIN [Warehouse].[PaidOrderInboxLine] l ON l.[IdPaidOrderInbox]=inbox.[Id];
+                DECLARE @LockItem bigint, @LockPlan bigint, @LockBalance bigint;
+                WHILE EXISTS (SELECT 1 FROM @StockKeys)
+                BEGIN
+                    SELECT TOP (1) @LockItem=[ItemId], @LockPlan=[PlanId] FROM @StockKeys ORDER BY [ItemId], [PlanId];
+                    SELECT @LockBalance=[Id] FROM [Warehouse].[StockBalance] WITH (UPDLOCK, HOLDLOCK, INDEX([UQ_Warehouse_StockBalance_Key]))
+                        WHERE [IdWarehouse]=@Warehouse AND [IdInventoryItem]=@LockItem AND [IdSalesPlanReference]=@LockPlan;
+                    DELETE FROM @StockKeys WHERE [ItemId]=@LockItem AND [PlanId]=@LockPlan;
+                END;
                 INSERT [Warehouse].[WarehouseDocument] ([IdWarehouse],[IdDocumentType],[IdParty],[IdSalesPlanReference],[DocumentDate],[Status],[Reason],[CreatedByUserKey])
                     VALUES (@Warehouse,@Type,@Party,@Plan,CONVERT(date,GETDATE()),'F',N'حواله تجمیعی سفارش‌های فروشگاه',{actor});
                 SET @Document=SCOPE_IDENTITY();

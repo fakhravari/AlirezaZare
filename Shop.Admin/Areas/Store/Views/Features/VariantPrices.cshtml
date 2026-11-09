@@ -2,6 +2,24 @@
 <div class="admin-page" data-store-variant-prices data-api="@ViewData["ApiUrl"]" data-can-edit="@(User.IsInRole("system.full-access") || User.HasClaim("admin_permission", "Store:Features:Index:promotions") ? "true" : "false")">
     @await Html.PartialAsync("_AdminPageIntro", ("قیمت تنوع‌ها در طرح فروش", "برای هر تنوع انبار و هر طرح، قیمت فروش مستقل تعیین کنید. در صورت حذف قیمت اختصاصی، قیمت پایهٔ همان کالا و طرح استفاده می‌شود."))
     @Html.AntiForgeryToken()
+    @if (User.IsInRole("system.full-access"))
+    {
+        <section class="panel panel-inverse">
+            <div class="panel-heading"><h2 class="panel-title">بازه و نمایش طرح فروش</h2></div>
+            <div class="panel-body">
+                <p>زمان‌ها به وقت جهانی UTC وارد می‌شوند. ایجاد طرح و اتصال آن به انبار در تعریف مالک کالا انجام می‌شود.</p>
+                <form data-plan-settings>
+                    <div class="mb-3"><label class="form-label" for="plan-settings-id">طرح فروش</label><select id="plan-settings-id" class="form-select" name="id" required></select></div>
+                    <div class="mb-3"><label class="form-label" for="plan-settings-start">شروع (UTC)</label><input id="plan-settings-start" class="form-control" name="startsAtUtc" type="datetime-local" step="1" /></div>
+                    <div class="mb-3"><label class="form-label" for="plan-settings-end">پایان (UTC)</label><input id="plan-settings-end" class="form-control" name="endsAtUtc" type="datetime-local" step="1" /></div>
+                    <div class="mb-3"><label class="form-label" for="plan-settings-label">برچسب</label><input id="plan-settings-label" class="form-control" name="label" maxlength="100" /></div>
+                    <div class="form-check mb-3"><input id="plan-settings-countdown" class="form-check-input" name="showCountdown" type="checkbox" /><label class="form-check-label" for="plan-settings-countdown">نمایش شمارش معکوس</label></div>
+                    <button class="btn btn-primary" type="submit">ذخیرهٔ تنظیمات طرح</button>
+                    <div class="admin-data-status mt-2" data-plan-status role="status" aria-live="polite">در حال دریافت طرح‌ها…</div>
+                </form>
+            </div>
+        </section>
+    }
     <section class="panel panel-inverse">
         <div class="panel-heading">
             <h2 class="panel-title">قیمت تنوع و طرح</h2>

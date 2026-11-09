@@ -67,11 +67,57 @@
         try { const result = await request(page, page.dataset.api); if (requests.get(page) !== serial) return; page._variantPriceRows = Array.isArray(result) ? result : []; render(page); }
         catch (error) { if (requests.get(page) === serial) status(page, error.message || "دریافت قیمت‌ها ناموفق بود.", true); }
     }
+    async function loadPlanSettings(page, selectedId) {
+        const form = page.querySelector("[data-plan-settings]");
+        if (!form) return;
+        const message = form.querySelector("[data-plan-status]");
+        try {
+            const plans = await request(page, `${page.dataset.api}/plans`);
+            if (!page.isConnected) return;
+            page._planSettings = plans;
+            form.elements.id.replaceChildren(...plans.map(plan => new Option(`${plan.displayName} (${plan.code})`, String(plan.id))));
+            if (selectedId && plans.some(plan => String(plan.id) === selectedId)) form.elements.id.value = selectedId;
+            showPlanSettings(page);
+            message.textContent = plans.length ? "" : "طرح فروشی یافت نشد.";
+            form.querySelector('[type="submit"]').disabled = !plans.length;
+        } catch (error) {
+            if (!page.isConnected) return;
+            message.textContent = error.message || "دریافت طرح‌ها ناموفق بود.";
+            form.querySelector('[type="submit"]').disabled = true;
+        }
+    }
+    function showPlanSettings(page) {
+        const form = page.querySelector("[data-plan-settings]");
+        const plan = page._planSettings?.find(item => String(item.id) === form.elements.id.value);
+        const utcValue = value => value ? new Date(value).toISOString().slice(0, 19) : "";
+        form.elements.startsAtUtc.value = utcValue(plan?.startsAtUtc);
+        form.elements.endsAtUtc.value = utcValue(plan?.endsAtUtc);
+        form.elements.label.value = plan?.label || "";
+        form.elements.showCountdown.checked = !!plan?.showCountdown;
+        for (const name of ["startsAtUtc", "endsAtUtc", "showCountdown"]) form.elements[name].disabled = !plan || plan.isRegular;
+    }
     function initialize(root) {
         const page = root.querySelector?.("[data-store-variant-prices]"); if (!page || initialized.has(page)) return; initialized.add(page);
         page._variantPriceRows = [];
         page._variantPriceDrafts = new Map();
         page._variantPriceSaving = new Set();
+        const planForm = page.querySelector("[data-plan-settings]");
+        if (planForm) {
+            planForm.elements.id.addEventListener("change", () => showPlanSettings(page));
+            planForm.addEventListener("submit", async event => {
+                event.preventDefault();
+                const button = planForm.querySelector('[type="submit"]');
+                if (button.disabled) return;
+                const id = planForm.elements.id.value;
+                const toUtc = value => value ? `${value}Z` : null;
+                const body = { startsAtUtc: toUtc(planForm.elements.startsAtUtc.value), endsAtUtc: toUtc(planForm.elements.endsAtUtc.value), label: planForm.elements.label.value, showCountdown: planForm.elements.showCountdown.checked };
+                button.disabled = true;
+                try { const result = await request(page, `${page.dataset.api}/plans/${encodeURIComponent(id)}`, "PUT", body); ui.notify(result.message, "success"); await loadPlanSettings(page, id); }
+                catch (error) { ui.notify(error.message || "ذخیرهٔ تنظیمات طرح ناموفق بود.", "danger"); }
+                finally { if (page.isConnected) button.disabled = false; }
+            });
+            void loadPlanSettings(page);
+        }
         page.querySelector("[data-price-filter]").addEventListener("submit", event => event.preventDefault());
         page.querySelector("[data-price-filter]").addEventListener("input", () => render(page));
         page.querySelector("[data-price-refresh]").addEventListener("click", () => void load(page));

@@ -153,6 +153,10 @@
         </div>
     </div>
 </div>
+@if (User.IsInRole("system.full-access"))
+{
+    <div class="menu-item @(IsFeature("geography") ? "active" : "")"><a class="menu-link" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="geography" data-admin-nav><span class="menu-text">کشورها، استان‌ها و شهرها</span></a></div>
+}
 <div class="menu-item @(IsFeature("content") || IsFeature("settings") ? "active" : "")" hidden="@(!Can("Store:Features:Index:content"))">
     <a class="menu-link" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="content" data-admin-nav>
         <span class="menu-icon">

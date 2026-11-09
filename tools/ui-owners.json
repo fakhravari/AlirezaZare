@@ -22,6 +22,8 @@
             "Shop.Admin/Controllers/Api/StoreProductImageApiController.cs",
             "Shop.Admin/Controllers/Api/StoreMediaUploadApiController.cs",
             "Shop.Admin/Controllers/Api/StoreOrdersAdminApiController.cs",
+            "Shop.Admin/Controllers/Api/StoreCustomersAdminApiController.cs",
+            "Shop.Admin/Controllers/Api/StoreFaqAdminApiController.cs",
             "Shop.Admin/Controllers/Api/StoreCategoryContentApiController.cs",
             "Shop.Admin/Controllers/Api/WarehouseAdminApiController.cs"
           ]

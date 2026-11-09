@@ -9,6 +9,55 @@ using Microsoft.EntityFrameworkCore;
 using Shop.Database.Domain.Warehouse.Entities;
 using Shop.Database.Infrastructure.Persistence;
 
+if (args.Contains("--checkout-main", StringComparer.Ordinal) || args.Contains("--checkout-race", StringComparer.Ordinal))
+{
+    await CheckoutMainTest.RunAsync(args.Contains("--checkout-race", StringComparer.Ordinal));
+    return;
+}
+if (args.Contains("--checkout-variant", StringComparer.Ordinal) || args.Contains("--checkout-variant-race", StringComparer.Ordinal) || args.Contains("--checkout-variant-multiplan", StringComparer.Ordinal))
+{
+    await CheckoutVariantTest.RunAsync(args.Contains("--checkout-variant-race", StringComparer.Ordinal), args.Contains("--checkout-variant-multiplan", StringComparer.Ordinal));
+    return;
+}
+
+static System.Text.Json.JsonElement Json(string value) => System.Text.Json.JsonDocument.Parse(value).RootElement.Clone();
+foreach (string invalid in new[]
+{
+    "[]", "42", "{\"priceOptions\":{}}", "{\"priceOptions\":[1]}",
+    "{\"priceOptions\":[{\"key\":1,\"productValue\":\"x\"}]}",
+    "{\"priceOptions\":[{\"key\":\"x\",\"productValue\":true}]}",
+    "{\"priceOptions\":[{\"key\":\"x\",\"productValue\":\"a\"},{\"key\":\"x\",\"productValue\":\"b\"}]}",
+    "{\"accessories\":[null]}", "{\"accessories\":[{\"id\":5}]}",
+    "{\"accessories\":[{\"id\":\"a\",\"selected\":\"false\"}]}"
+})
+{
+    if (CheckoutOptions.TryRead(Json(invalid), out _)) throw new Exception($"Invalid checkout options accepted: {invalid}");
+    var controller = new AccountController(null!, null!, null!, null!);
+    var request = new AccountController.CheckoutRequest(1, "zarinpal", [new(1, 1, "regular", Json(invalid), ExpectedUnitAmount: 0)]);
+    if (await controller.Checkout(request, CancellationToken.None) is not BadRequestObjectResult)
+        throw new Exception("Malformed checkout options were not rejected before database access.");
+}
+if (!CheckoutOptions.TryRead(Json("{\"priceOptions\":[{\"key\":\"size\",\"productValue\":\"large\"}],\"accessories\":[{\"id\":\"a\"},{\"id\":\"b\",\"selected\":false}]}"), out var parsedOptions) ||
+    parsedOptions.PriceOptions.GetValueOrDefault("size") != "large" || !parsedOptions.AccessoryIds.SetEquals(["a"]) ||
+    !CheckoutOptions.TryRead(Json("{\"variants\":[{\"key\":\"size\",\"productValue\":\"small\"}]}"), out var legacyOptions) ||
+    legacyOptions.PriceOptions.GetValueOrDefault("size") != "small" || !CheckoutOptions.TryRead(null, out _))
+    throw new Exception("Valid checkout options were not parsed correctly.");
+var invalidProductController = new AccountController(null!, null!, null!, null!);
+if (await invalidProductController.SaveCart(new([null!]), CancellationToken.None) is not BadRequestObjectResult)
+    throw new Exception("Null cart item was not rejected before database access.");
+if (await invalidProductController.SavePriceAlerts(new([null!]), CancellationToken.None) is not BadRequestObjectResult ||
+    await invalidProductController.SavePriceAlerts(new([new("1", "variant", Json("[]"), 1, null, DateTimeOffset.UtcNow)]), CancellationToken.None) is not BadRequestObjectResult ||
+    await invalidProductController.SavePriceAlerts(new([new("1", "all", null, 1.5m, null, DateTimeOffset.UtcNow)]), CancellationToken.None) is not BadRequestObjectResult)
+    throw new Exception("Invalid price alerts were not rejected before database access.");
+if (await invalidProductController.Checkout(new(1, "zarinpal", [new((long)int.MaxValue + 1, 1, "regular", null)]), CancellationToken.None) is not BadRequestObjectResult)
+    throw new Exception("Out-of-range product ID was not rejected before database access.");
+if (await invalidProductController.Checkout(new(1, "zarinpal", [null!]), CancellationToken.None) is not BadRequestObjectResult)
+    throw new Exception("Null cart line was not rejected before database access.");
+foreach (decimal? amount in new decimal?[] { null, -1m, 1.5m, 10000000000000000000m })
+    if (await invalidProductController.Checkout(new(1, "zarinpal", [new(1, 1, "regular", null, ExpectedUnitAmount: amount)]), CancellationToken.None) is not BadRequestObjectResult)
+        throw new Exception("Missing or invalid expected unit amount was not rejected before database access.");
+Console.WriteLine("Checkout input contracts OK: malformed options and oversized IDs rejected; valid and legacy options parsed.");
+
 var confirmedPayment = new PaymentGatewayVerification(true, 250000m, "gateway-reference", "receipt-reference", DateTimeOffset.UtcNow);
 if (!PaymentVerificationRules.Matches(250000m, "gateway-reference", confirmedPayment) ||
     PaymentVerificationRules.Matches(250001m, "gateway-reference", confirmedPayment) ||
@@ -35,6 +84,14 @@ string sourcePath = args.Length > 0
     : Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../fixtures/catalog.json"));
 string source = File.ReadAllText(sourcePath);
 CatalogSnapshot snapshot = CatalogSnapshot.Parse(source);
+var withoutFlag = JsonNode.Parse(source)!;
+var firstCountry = withoutFlag["countries"]!.AsObject().First().Value!.AsObject();
+firstCountry.Remove("flag");
+CatalogSnapshot.Parse(withoutFlag.ToJsonString());
+firstCountry["flag"] = "../unsafe.svg";
+try { CatalogSnapshot.Parse(withoutFlag.ToJsonString()); throw new Exception("Unsafe country flag was accepted."); }
+catch (InvalidDataException) { }
+
 if (snapshot.Products.Count != 30 || snapshot.Brands.Count != 21)
     throw new Exception("Catalog extraction changed product/brand identity.");
 if (snapshot.Products.Single(item => item.Id == 1).Slug != "cordless-hammer-drill")

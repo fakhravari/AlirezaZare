@@ -1,0 +1,25 @@
+@model Shop.Admin.Models.FeaturePageViewModel
+<div class="admin-page" data-geography>
+    @await Html.PartialAsync("_AdminPageIntro", (Model.Title, Model.Description))
+    <section class="panel panel-inverse"><div class="panel-heading"><h2 class="panel-title">تعاریف جغرافیایی</h2></div><div class="panel-body">
+        <div class="nav nav-tabs" role="tablist" aria-label="تعاریف جغرافیایی">
+            <button type="button" class="nav-link active" role="tab" id="geo-tab-countries" aria-controls="geo-panel" aria-selected="true" tabindex="0" data-geo-tab="countries">کشورها</button>
+            <button type="button" class="nav-link" role="tab" id="geo-tab-provinces" aria-controls="geo-panel" aria-selected="false" tabindex="-1" data-geo-tab="provinces">استان‌ها</button>
+            <button type="button" class="nav-link" role="tab" id="geo-tab-cities" aria-controls="geo-panel" aria-selected="false" tabindex="-1" data-geo-tab="cities">شهرها</button>
+        </div>
+        <div class="pt-3" role="tabpanel" id="geo-panel" aria-labelledby="geo-tab-countries" data-geo-panel>
+            <form data-geo-form class="row g-2 mb-3">
+                @Html.AntiForgeryToken()<input type="hidden" name="id" />
+                <div class="col-md-3" data-geo-country hidden><label class="form-label" for="geo-country">کشور</label><select class="form-select" id="geo-country" name="countryId"></select></div>
+                <div class="col-md-3" data-geo-province hidden><label class="form-label" for="geo-province">استان</label><select class="form-select" id="geo-province" name="provinceId"></select></div>
+                <div class="col-md-3"><label class="form-label" for="geo-name">نام فارسی</label><input class="form-control" id="geo-name" name="nameFa" required maxlength="150" /></div>
+                <div class="col-md-3"><label class="form-label" for="geo-name-en">نام انگلیسی</label><input class="form-control" id="geo-name-en" name="nameEn" required maxlength="150" /></div>
+                <div class="col-md-2" data-geo-code><label class="form-label" for="geo-code">کد کشور</label><input class="form-control" id="geo-code" name="code" maxlength="8" /></div>
+                <div class="col-12"><button class="btn btn-primary" type="submit">ذخیره</button> <button class="btn btn-default" type="button" data-geo-cancel>فرم جدید</button></div>
+            </form>
+            <label class="form-label" for="geo-search">جست‌وجو</label><input class="form-control mb-3" type="search" id="geo-search" data-geo-search />
+            <p role="status" aria-live="polite" data-geo-status></p><button type="button" class="btn btn-default btn-sm mb-3" data-geo-retry hidden>تلاش دوباره برای دریافت فهرست</button>
+            <div class="table-responsive"><table class="table table-striped table-hover"><thead><tr><th>نام فارسی</th><th>نام انگلیسی</th><th>وابستگی / کد</th><th>عملیات</th></tr></thead><tbody data-geo-rows></tbody></table></div>
+        </div>
+    </div></section>
+</div>

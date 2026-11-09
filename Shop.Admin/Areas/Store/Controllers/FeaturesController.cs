@@ -12,6 +12,11 @@ public sealed class FeaturesController : Controller
         ViewData["Title"] = page.Title;
         ViewData["AreaTitle"] = page.AreaTitle;
         ViewData["FeatureId"] = page.FeatureId;
+        if (page.FeatureId == "geography")
+        {
+            if (!User.IsInRole("system.full-access")) return Forbid();
+            return View("~/Areas/Store/Views/Features/Geography.cshtml", page);
+        }
         if (page.FeatureId == "paid-orders-dispatch")
         {
             if (!User.IsInRole("system.full-access")) return Forbid();
@@ -21,6 +26,16 @@ public sealed class FeaturesController : Controller
         {
             if (!User.IsInRole("system.full-access")) return Forbid();
             return View("~/Areas/Store/Views/Features/Orders.cshtml", page);
+        }
+        if (page.FeatureId == "customers")
+        {
+            if (!User.IsInRole("system.full-access")) return Forbid();
+            return View("~/Areas/Store/Views/Features/Customers.cshtml", page);
+        }
+        if (page.FeatureId == "content")
+        {
+            if (!User.IsInRole("system.full-access")) return Forbid();
+            return View("~/Areas/Store/Views/Features/Faq.cshtml", page);
         }
         if (page.FeatureId == "promotions")
         {

@@ -1,5 +1,6 @@
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @model Shop.Admin.Areas.Admin.Controllers.SiteSettingsInput
+@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
 @{
     ViewData["Title"] = "تنظیمات سایت";
     ViewData["AreaTitle"] = "سامانهٔ مدیریت";
@@ -43,7 +44,7 @@
         <div class="panel-heading"><h2 class="panel-title">بارگذاری رسانهٔ فروشگاه</h2></div>
         <div class="panel-body">
             <p>فایل در پوشهٔ مربوط به خود زیر content ذخیره می‌شود. برای اتصال آن به محتوا، مسیر خروجی را در بخش مربوط ثبت کنید.</p>
-            <form data-media-upload-form enctype="multipart/form-data">
+            <form data-media-upload-form data-public-site-url="@Configuration["PublicSiteUrl"]" enctype="multipart/form-data">
                 @Html.AntiForgeryToken()
                 <div class="row g-3">
                     <div class="col-md-4"><label for="media-kind" class="form-label">کاربرد</label>
@@ -51,10 +52,12 @@
                             <option value="brand">تصویر برند</option><option value="slider">تصویر اسلایدر</option>
                             <option value="testimonial">تصویر دیدگاه</option><option value="trust">نماد اعتماد</option>
                             <option value="identity">هویت فروشگاه</option><option value="payment">نشان پرداخت</option>
-                            <option value="country">تصویر کشور</option>
+                            <option value="country">تصویر کشور</option><option value="article">تصویر مقاله</option>
                         </select>
                     </div>
                     <div class="col-md-8"><label for="media-file" class="form-label">فایل</label><input id="media-file" name="file" type="file" class="form-control" required /></div>
+                    <div class="col-md-4" data-media-country-container hidden><label for="media-country" class="form-label">کشور</label><select id="media-country" name="countryCode" class="form-select" disabled><option value="">کشور را انتخاب کنید</option></select></div>
+                    <div class="col-md-4" data-media-article-container hidden><label for="media-article" class="form-label">مقاله</label><select id="media-article" name="articleKey" class="form-select" disabled><option value="">مقاله را انتخاب کنید</option></select><small class="text-muted">برای تصویر سربرگ و متن مقاله استفاده می‌شود.</small></div>
                     <div class="col-12"><p class="text-muted mb-0">تصاویر JPEG، PNG یا WebP تا ۱۰ مگابایت مجازند. برای تصویر، نسخهٔ کوچک نیز ساخته می‌شود. فایل و ویدئوی محصول را از فهرست کالاها بارگذاری کنید.</p></div>
                     <div class="col-12"><button type="submit" class="btn btn-primary">بارگذاری فایل</button></div>
                     <div class="col-12" data-media-upload-result role="status" aria-live="polite"></div>

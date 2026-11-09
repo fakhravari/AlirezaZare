@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Shop.Database.Infrastructure.Persistence;
 using Shop.Services;
@@ -33,7 +34,7 @@ public sealed class AccountController(
                              JSON_QUERY((SELECT a.[ArticleKey] slug,ai.[InteractionType] type FROM [Account].[ArticleInteraction] ai JOIN [Mag].[MagazineArticle] a ON a.[Id]=ai.[IdMagazineArticle] WHERE ai.[IdProfile]={0} FOR JSON PATH)) articleInteractions,
                              JSON_QUERY((SELECT a.[ArticleKey] slug,af.[DisplayName] name,af.[FeedbackText] text,af.[Rating] rating,af.[Status] status,af.[CreatedAtUtc] createdAt FROM [Account].[ArticleFeedback] af JOIN [Mag].[MagazineArticle] a ON a.[Id]=af.[IdMagazineArticle] WHERE af.[IdProfile]={0} FOR JSON PATH)) articleFeedback,
                              JSON_QUERY((SELECT cp.[IdSelectedAddress] selectedAddressId,cp.[PaymentMethod] paymentMethod FROM [Account].[CheckoutPreference] cp WHERE cp.[IdProfile]={0} FOR JSON PATH,WITHOUT_ARRAY_WRAPPER)) checkout,
-                             JSON_QUERY((SELECT o.[Id] id,o.[OrderNumber] number,o.[Status] status,CONVERT(bit, CASE WHEN o.[PaymentMethod]=N'demo' AND o.[ExternalOrderKey] LIKE N'demo-order-%' THEN 1 ELSE 0 END) isSample,o.[OrderedAtUtc] orderedAtUtc,o.[ItemCount] itemCount,o.[TotalAmount] totalAmount,JSON_QUERY((SELECT i.[IdProduct] productId,i.[IdProductVariant] variantId,i.[ProductNameSnapshot] name,sp.[SalesPlanKey] salesPlanId,i.[Quantity] quantity,i.[UnitAmount] unitAmount,JSON_QUERY(i.[OptionsJson]) options FROM [Store].[OrderItem] i JOIN [Warehouse].[SalesPlanReference] sp ON sp.[Id]=i.[IdSalesPlan] WHERE i.[IdCustomerOrder]=o.[Id] FOR JSON PATH)) items FROM [Store].[Order] o WHERE o.[IdProfile]={0} ORDER BY o.[Id] DESC FOR JSON PATH)) orders
+                             JSON_QUERY((SELECT o.[Id] id,o.[OrderNumber] number,o.[Status] status,o.[ShippingCarrier] shippingCarrier,o.[ShippingTrackingCode] shippingTrackingCode,CONVERT(bit, CASE WHEN o.[PaymentMethod]=N'demo' AND o.[ExternalOrderKey] LIKE N'demo-order-%' THEN 1 ELSE 0 END) isSample,o.[OrderedAtUtc] orderedAtUtc,o.[ItemCount] itemCount,o.[TotalAmount] totalAmount,JSON_QUERY((SELECT i.[IdProduct] productId,i.[IdProductVariant] variantId,i.[ProductNameSnapshot] name,sp.[SalesPlanKey] salesPlanId,i.[Quantity] quantity,i.[UnitAmount] unitAmount,JSON_QUERY(i.[OptionsJson]) options FROM [Store].[OrderItem] i JOIN [Warehouse].[SalesPlanReference] sp ON sp.[Id]=i.[IdSalesPlan] WHERE i.[IdCustomerOrder]=o.[Id] FOR JSON PATH)) items FROM [Store].[Order] o WHERE o.[IdProfile]={0} ORDER BY o.[Id] DESC FOR JSON PATH)) orders
                            FROM [Account].[Profile] p WHERE p.[Id]={0} FOR JSON PATH,WITHOUT_ARRAY_WRAPPER) AS [Value]
                            """;
         var json = await db.Database.SqlQueryRaw<string>(sql, ProfileId, environment.IsDevelopment() ? 1 : 0).SingleOrDefaultAsync(ct);
@@ -109,7 +110,7 @@ public sealed class AccountController(
     public async Task<IActionResult> SaveCart([FromBody] CartRequest request, CancellationToken ct)
     {
         if (request.Items is null || request.Items.Count > 99 || request.Items.Any(i =>
-                i.ProductId < 1 || i.VariantId is < 1 || i.Quantity is < 1 or > 99 ||
+                i is null || i.ProductId < 1 || i.VariantId is < 1 || i.Quantity is < 1 or > 99 ||
                 string.IsNullOrWhiteSpace(i.SalesPlanId) || i.SalesPlanId.Length > 64))
             return BadRequest(new { code = "invalid-cart" });
         var duplicate = request.Items.GroupBy(i => (i.ProductId, i.SalesPlanId, i.VariantId)).Any(g => g.Count() > 1);
@@ -133,7 +134,9 @@ public sealed class AccountController(
 
         string payload = System.Text.Json.JsonSerializer.Serialize(request.Items,
             new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web));
-        await db.Database.ExecuteSqlInterpolatedAsync($$"""
+        try
+        {
+            await db.Database.ExecuteSqlInterpolatedAsync($$"""
                                                         SET XACT_ABORT ON; BEGIN TRANSACTION;
                                                         IF NOT EXISTS(SELECT 1 FROM [Account].[Cart] WHERE [IdProfile]={{ProfileId}}) INSERT INTO [Account].[Cart]([IdProfile]) VALUES({{ProfileId}});
                                                         DECLARE @CartId BIGINT=(SELECT [Id] FROM [Account].[Cart] WHERE [IdProfile]={{ProfileId}});
@@ -147,6 +150,11 @@ public sealed class AccountController(
                                                         UPDATE [Account].[Cart] SET [UpdatedAtUtc]=SYSUTCDATETIME() WHERE [Id]=@CartId;
                                                         COMMIT TRANSACTION;
                                                         """, ct);
+        }
+        catch (SqlException exception) when (exception.Number == 51001)
+        {
+            return Conflict(new { code = "product-or-plan-unavailable" });
+        }
         return Ok(new { saved = true });
     }
 
@@ -190,10 +198,17 @@ public sealed class AccountController(
         if (request.Lines is null || request.Lines.Count is < 1 or > 99 || request.AddressId < 1 ||
             request.PaymentMethod != "zarinpal") return BadRequest(new { code = "invalid-checkout" });
         if (request.Lines.Any(i =>
-                i.ProductId < 1 || i.VariantId is < 1 || i.Quantity is < 1 or > 99 ||
-                string.IsNullOrWhiteSpace(i.SalesPlanId)) ||
+                i is null || i.ProductId is < 1 or > int.MaxValue || i.VariantId is < 1 || i.Quantity is < 1 or > 99 ||
+                string.IsNullOrWhiteSpace(i.SalesPlanId) || i.ExpectedUnitAmount is null or < 0 or > 9999999999999999999m ||
+                decimal.Truncate(i.ExpectedUnitAmount.Value) != i.ExpectedUnitAmount.Value) ||
             request.Lines.Select(i => (i.ProductId, i.SalesPlanId, i.VariantId)).Distinct().Count() !=
             request.Lines.Count) return BadRequest(new { code = "invalid-cart" });
+        var checkoutOptions = new List<CheckoutOptions>(request.Lines.Count);
+        foreach (var line in request.Lines)
+        {
+            if (!CheckoutOptions.TryRead(line.Options, out var parsed)) return BadRequest(new { code = "invalid-product-options" });
+            checkoutOptions.Add(parsed);
+        }
         await using var transaction =
             await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, ct);
         string? addressSnapshot = await db.Database.SqlQueryRaw<string>(
@@ -205,7 +220,7 @@ public sealed class AccountController(
         var priced = new List<(CartLineRequest Line, decimal UnitAmount, string ProductName)>();
         try
         {
-            foreach (var line in request.Lines)
+            foreach (var (line, parsedOptions) in request.Lines.Zip(checkoutOptions))
             {
                 if (line.VariantId.HasValue &&
                     !await ProductVariantExistsAsync(line.ProductId, line.VariantId.Value, ct))
@@ -236,27 +251,8 @@ public sealed class AccountController(
                     await purchaseConfigurations.ReadAsync(checked((int)line.ProductId), ct);
                 if (configuration is null) return Conflict(new { code = "product-options-unavailable" });
                 if (line.Quantity > configuration.MaxPurchaseQuantity) return Conflict(new { code = "purchase-limit" });
-                var variantValues = new Dictionary<string, string>(StringComparer.Ordinal);
-                var accessoryIds = new HashSet<string>(StringComparer.Ordinal);
-                if (line.Options is { ValueKind: System.Text.Json.JsonValueKind.Object } options)
-                {
-                    if (options.TryGetProperty("priceOptions", out var priceOptions) &&
-                        priceOptions.ValueKind == System.Text.Json.JsonValueKind.Array ||
-                        options.TryGetProperty("variants", out priceOptions) &&
-                        priceOptions.ValueKind == System.Text.Json.JsonValueKind.Array)
-                        foreach (var option in priceOptions.EnumerateArray())
-                            if (option.TryGetProperty("key", out var key) &&
-                                option.TryGetProperty("productValue", out var value) && key.GetString() is { } k &&
-                                value.GetString() is { } v)
-                                variantValues[k] = v;
-                    if (options.TryGetProperty("accessories", out var accessories) &&
-                        accessories.ValueKind == System.Text.Json.JsonValueKind.Array)
-                        foreach (var accessory in accessories.EnumerateArray())
-                            if (accessory.TryGetProperty("selected", out var selected) &&
-                                selected.ValueKind == System.Text.Json.JsonValueKind.False) continue;
-                            else if (accessory.TryGetProperty("id", out var id) && id.GetString() is { } accessoryId)
-                                accessoryIds.Add(accessoryId);
-                }
+                var variantValues = parsedOptions.PriceOptions;
+                var accessoryIds = parsedOptions.AccessoryIds;
 
                 if (variantValues.Count != configuration.Options.Count || configuration.Options.Any(option =>
                         !variantValues.TryGetValue(option.Key, out var value) ||
@@ -295,6 +291,8 @@ public sealed class AccountController(
                         unitAmount += amount;
                     }
 
+                if (unitAmount != line.ExpectedUnitAmount)
+                    return Conflict(new { code = "price-or-stock-changed" });
                 priced.Add((line, unitAmount, productName));
             }
         }
@@ -304,17 +302,22 @@ public sealed class AccountController(
         }
 
         decimal total = priced.Sum(x => checked(x.UnitAmount * x.Line.Quantity));
+        if (total > 9999999999999999999m)
+            return Conflict(new { code = "order-amount-out-of-range" });
         int count = priced.Sum(x => x.Line.Quantity);
         string number = $"ND{DateTime.UtcNow:yyMMddHHmmss}{Random.Shared.Next(1000, 9999)}";
+        var totalParameter = new SqlParameter { SqlDbType = System.Data.SqlDbType.Decimal, Precision = 19, Scale = 0, Value = total };
         List<long> insertedOrders = await db.Database.SqlQuery<long>(
-                $"INSERT INTO [Store].[Order]([IdProfile],[IdAddress],[OrderNumber],[PaymentMethod],[ItemCount],[TotalAmount],[AddressSnapshotJson]) OUTPUT INSERTED.[Id] AS [Value] VALUES({ProfileId},{request.AddressId},{number},{request.PaymentMethod},{count},{total},{addressSnapshot})")
+                $"INSERT INTO [Store].[Order]([IdProfile],[IdAddress],[OrderNumber],[PaymentMethod],[ItemCount],[TotalAmount],[AddressSnapshotJson]) OUTPUT INSERTED.[Id] AS [Value] VALUES({ProfileId},{request.AddressId},{number},{request.PaymentMethod},{count},{totalParameter},{addressSnapshot})")
             .ToListAsync(ct);
         long orderId = insertedOrders.Single();
         foreach (var item in priced)
         {
-            string options = item.Line.Options.HasValue ? item.Line.Options.Value.GetRawText() : "{}";
+            string options = item.Line.Options is { ValueKind: System.Text.Json.JsonValueKind.Object } optionSnapshot
+                ? optionSnapshot.GetRawText() : "{}";
+            var unitParameter = new SqlParameter { SqlDbType = System.Data.SqlDbType.Decimal, Precision = 19, Scale = 0, Value = item.UnitAmount };
             int insertedItems = await db.Database.ExecuteSqlInterpolatedAsync(
-                $"INSERT INTO [Store].[OrderItem]([IdCustomerOrder],[IdProduct],[IdProductVariant],[ProductNameSnapshot],[IdSalesPlan],[Quantity],[UnitAmount],[OptionsJson]) SELECT {orderId},{item.Line.ProductId},{item.Line.VariantId},{item.ProductName},[Id],{item.Line.Quantity},{item.UnitAmount},{options} FROM [Warehouse].[SalesPlanReference] WHERE [SalesPlanKey]={item.Line.SalesPlanId} AND [IdStockOwnerType]=1",
+                $"INSERT INTO [Store].[OrderItem]([IdCustomerOrder],[IdProduct],[IdProductVariant],[ProductNameSnapshot],[IdSalesPlan],[Quantity],[UnitAmount],[OptionsJson]) SELECT {orderId},{item.Line.ProductId},{item.Line.VariantId},{item.ProductName},[Id],{item.Line.Quantity},{unitParameter},{options} FROM [Warehouse].[SalesPlanReference] WHERE [SalesPlanKey]={item.Line.SalesPlanId} AND [IdStockOwnerType]=1",
                 ct);
             if (insertedItems != 1) throw new InvalidOperationException("The sales plan no longer exists.");
         }
@@ -401,14 +404,21 @@ public sealed class AccountController(
             request.ProductIds.Distinct().Count() != request.ProductIds.Count)
             return BadRequest(new { code = "invalid-list" });
         string json = System.Text.Json.JsonSerializer.Serialize(request.ProductIds);
-        if (kind == "favorites")
-            await db.Database.ExecuteSqlInterpolatedAsync(
-                $"SET XACT_ABORT ON; BEGIN TRANSACTION; DELETE FROM [Account].[Favorite] WHERE [IdProfile]={ProfileId}; INSERT INTO [Account].[Favorite]([IdProfile],[IdProduct]) SELECT {ProfileId},p.[Id] FROM OPENJSON({json}) j JOIN [Warehouse].[Product] p ON p.[Id]=TRY_CONVERT(BIGINT,j.[value]) AND p.[IsCatalogActive]=1 AND p.[IsStoreEnabled]=1; COMMIT;",
-                ct);
-        else
-            await db.Database.ExecuteSqlInterpolatedAsync(
-                $"SET XACT_ABORT ON; BEGIN TRANSACTION; DELETE FROM [Account].[CompareItem] WHERE [IdProfile]={ProfileId}; INSERT INTO [Account].[CompareItem]([IdProfile],[IdProduct]) SELECT {ProfileId},p.[Id] FROM OPENJSON({json}) j JOIN [Warehouse].[Product] p ON p.[Id]=TRY_CONVERT(BIGINT,j.[value]) AND p.[IsCatalogActive]=1 AND p.[IsStoreEnabled]=1; COMMIT;",
-                ct);
+        try
+        {
+            if (kind == "favorites")
+                await db.Database.ExecuteSqlInterpolatedAsync(
+                    $"SET XACT_ABORT ON; BEGIN TRANSACTION; DELETE FROM [Account].[Favorite] WHERE [IdProfile]={ProfileId}; INSERT INTO [Account].[Favorite]([IdProfile],[IdProduct]) SELECT {ProfileId},p.[Id] FROM OPENJSON({json}) j JOIN [Warehouse].[Product] p ON p.[Id]=TRY_CONVERT(BIGINT,j.[value]) AND p.[IsCatalogActive]=1 AND p.[IsStoreEnabled]=1; IF @@ROWCOUNT<>(SELECT COUNT(*) FROM OPENJSON({json})) THROW 51003,'List contains an unavailable product.',1; COMMIT;",
+                    ct);
+            else
+                await db.Database.ExecuteSqlInterpolatedAsync(
+                    $"SET XACT_ABORT ON; BEGIN TRANSACTION; DELETE FROM [Account].[CompareItem] WHERE [IdProfile]={ProfileId}; INSERT INTO [Account].[CompareItem]([IdProfile],[IdProduct]) SELECT {ProfileId},p.[Id] FROM OPENJSON({json}) j JOIN [Warehouse].[Product] p ON p.[Id]=TRY_CONVERT(BIGINT,j.[value]) AND p.[IsCatalogActive]=1 AND p.[IsStoreEnabled]=1; IF @@ROWCOUNT<>(SELECT COUNT(*) FROM OPENJSON({json})) THROW 51003,'List contains an unavailable product.',1; COMMIT;",
+                    ct);
+        }
+        catch (SqlException exception) when (exception.Number == 51003)
+        {
+            return Conflict(new { code = "product-unavailable" });
+        }
         return Ok(new { saved = true });
     }
 
@@ -421,27 +431,31 @@ public sealed class AccountController(
         var configurations = new HashSet<string>(StringComparer.Ordinal);
         foreach (var item in request.Items)
         {
-            if (!long.TryParse(item.ProductId, out long productId) || productId < 1 ||
-                item.Scope is not ("all" or "variant") || item.PriceAtRegistration < 0 ||
+            if (item is null || !long.TryParse(item.ProductId, out long productId) || productId < 1 ||
+                item.Scope is not ("all" or "variant") || item.PriceAtRegistration is < 0 or > 9999999999999999999m ||
+                decimal.Truncate(item.PriceAtRegistration) != item.PriceAtRegistration ||
                 (item.StockAtRegistration?.Length ?? 0) > 100 ||
-                item.Scope == "variant" && item.Variants is null)
+                item.Scope == "variant" && item.Variants is not { ValueKind: System.Text.Json.JsonValueKind.Object })
                 return BadRequest(new { code = "invalid-price-alert" });
             string? variants = item.Variants is { ValueKind: System.Text.Json.JsonValueKind.Object } value
                 ? value.GetRawText()
                 : null;
             string signature = variants ?? "";
+            if (signature.Length > 500) return BadRequest(new { code = "invalid-price-alert" });
             if (!configurations.Add($"{productId}:{item.Scope}:{signature}"))
                 return BadRequest(new { code = "duplicate-price-alert" });
             normalized.Add(new
             {
-                productId, scope = item.Scope, signature, variantsJson = variants, item.PriceAtRegistration,
+                productId, scope = item.Scope, signature, variantsJson = variants is null ? (System.Text.Json.JsonElement?)null : item.Variants, item.PriceAtRegistration,
                 item.StockAtRegistration, item.CreatedAt
             });
         }
 
         string payload = System.Text.Json.JsonSerializer.Serialize(normalized,
             new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web));
-        await db.Database.ExecuteSqlInterpolatedAsync($$"""
+        try
+        {
+            await db.Database.ExecuteSqlInterpolatedAsync($$"""
                                                         SET XACT_ABORT ON; BEGIN TRANSACTION;
                                                         DELETE FROM [Account].[PriceAlert] WHERE [IdProfile]={{ProfileId}};
                                                         INSERT INTO [Account].[PriceAlert]([IdProfile],[IdProduct],[Scope],[VariantSignature],[VariantsJson],[PriceAtRegistration],[StockAtRegistration],[CreatedAtUtc])
@@ -451,6 +465,11 @@ public sealed class AccountController(
                                                         IF @@ROWCOUNT<>(SELECT COUNT(*) FROM OPENJSON({{payload}})) THROW 51002,'Price alert contains an unavailable product.',1;
                                                         COMMIT TRANSACTION;
                                                         """, ct);
+        }
+        catch (SqlException exception) when (exception.Number == 51002)
+        {
+            return Conflict(new { code = "product-unavailable" });
+        }
         return Ok(new { saved = true });
     }
 
@@ -505,7 +524,8 @@ public sealed class AccountController(
         int Quantity,
         string SalesPlanId,
         System.Text.Json.JsonElement? Options,
-        long? VariantId = null);
+        long? VariantId = null,
+        decimal? ExpectedUnitAmount = null);
 
     public sealed record CheckoutRequest(long AddressId, string PaymentMethod, IReadOnlyList<CartLineRequest>? Lines);
 

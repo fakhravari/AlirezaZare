@@ -1,0 +1,31 @@
+@model Shop.Admin.Models.FeaturePageViewModel
+<div class="admin-page" data-admin-page="customers" data-admin-api="/api/admin/store/customers">
+    @await Html.PartialAsync("_AdminPageIntro", (Model.Title, Model.Description))
+    <section class="panel panel-inverse">
+        <div class="panel-heading"><h2 class="panel-title">مشتریان</h2><div class="panel-heading-btn"><button class="btn btn-xs btn-icon btn-default" type="button" data-admin-refresh aria-label="بارگذاری دوباره"><i class="fa fa-rotate" aria-hidden="true"></i></button></div></div>
+        <div class="panel-body">
+            <form class="admin-filter-bar" data-admin-filter>
+                <label class="visually-hidden" for="customer-search">جست‌وجوی نام، ایمیل یا تلفن مشتری</label>
+                <input id="customer-search" class="form-control" type="search" name="q" maxlength="100" placeholder="نام، ایمیل یا تلفن مشتری" />
+                <button class="btn btn-primary" type="submit">جست‌وجو</button><span class="admin-record-count ms-auto" data-admin-count aria-live="polite"></span>
+            </form>
+            <div class="admin-data-status" data-admin-status role="status" aria-live="polite">در حال دریافت مشتریان…</div>
+            <div class="table-responsive admin-table-wrap"><table class="table table-striped table-hover align-middle mb-0"><thead><tr><th>نام</th><th>ایمیل</th><th>تلفن</th><th>تعداد سفارش</th><th>جزئیات</th></tr></thead><tbody data-admin-results></tbody></table></div>
+            <div class="admin-empty-state d-none" data-admin-empty>مشتری پیدا نشد.</div>
+            <div class="admin-pagination" data-admin-pagination hidden><button type="button" class="btn btn-default btn-sm" data-admin-page-step="-1">قبلی</button><span data-admin-page-label></span><button type="button" class="btn btn-default btn-sm" data-admin-page-step="1">بعدی</button></div>
+            <p>نام و تلفن قابل ویرایش‌اند؛ ایمیل ورود، نشانی‌ها و سفارش‌ها فقط برای مشاهده نمایش داده می‌شوند.</p>
+        </div>
+    </section>
+</div>
+<div class="modal fade" id="customer-editor-modal" tabindex="-1" aria-labelledby="customer-editor-title" aria-hidden="true">
+    <div class="modal-dialog"><form class="modal-content" data-customer-editor>
+        @Html.AntiForgeryToken()<input type="hidden" name="id" />
+        <div class="modal-header"><h2 class="modal-title fs-5" id="customer-editor-title">ویرایش مشتری</h2><button class="btn-close ms-0" type="button" data-bs-dismiss="modal" aria-label="بستن"></button></div>
+        <div class="modal-body">
+            <label class="form-label" for="customer-first-name">نام</label><input class="form-control mb-3" id="customer-first-name" name="firstName" maxlength="100" required />
+            <label class="form-label" for="customer-last-name">نام خانوادگی</label><input class="form-control mb-3" id="customer-last-name" name="lastName" maxlength="100" required />
+            <label class="form-label" for="customer-phone">تلفن</label><input class="form-control mb-3" id="customer-phone" name="phone" maxlength="30" type="tel" />
+        </div>
+        <div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button type="submit" class="btn btn-primary">ذخیره</button></div>
+    </form></div>
+</div>

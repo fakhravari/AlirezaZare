@@ -922,7 +922,7 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
             const brandCountry = window.HNCountries?.[
                 String(p.brandCountryCode || "").toUpperCase()
             ];
-            const brandCountryMark = brandCountry
+            const brandCountryMark = brandCountry?.flag
                 ? `<img class="product-meta-country-flag" src="/${esc(brandCountry.flag)}" alt="" aria-hidden="true" loading="lazy" decoding="async">`
                 : '<i class="bi bi-globe2" aria-hidden="true"></i>';
             const brandCountryContent = brandCountry

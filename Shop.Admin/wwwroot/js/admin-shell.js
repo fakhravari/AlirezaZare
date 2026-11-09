@@ -66,6 +66,7 @@
             window.AdminMovements?.initialize(content);
             window.AdminFeedback?.initialize(content);
             window.AdminVariantPrices?.initialize(content);
+            window.AdminGeography?.initialize(content);
             const heading = content.querySelector("h1");
             if (heading) {
                 heading.tabIndex = -1;
@@ -105,6 +106,7 @@
             window.AdminMovements?.initialize(content);
             window.AdminFeedback?.initialize(content);
             window.AdminVariantPrices?.initialize(content);
+            window.AdminGeography?.initialize(content);
         }, { once: true });
     } else {
         window.AdminPages?.initialize(content);
@@ -115,5 +117,6 @@
         window.AdminMovements?.initialize(content);
         window.AdminFeedback?.initialize(content);
         window.AdminVariantPrices?.initialize(content);
+        window.AdminGeography?.initialize(content);
     }
 })();

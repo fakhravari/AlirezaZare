@@ -22,6 +22,24 @@ test('address dialog waits for geography when opened immediately', async ({page}
   await expect(page.locator('#addressForm [name="provinceId"] option')).not.toHaveCount(0);
 });
 
+test('address form only offers Iranian provinces and cities', async ({page}) => {
+  await useBrowserAccount(page);
+  await page.route('**/api/store/geography', route => route.fulfill({json: {
+    countries: [{id: 1, name: 'آلمان', nameEn: 'Germany', countryCode: 'DE'}, {id: 2, name: 'ایران', nameEn: 'Iran', countryCode: 'IR'}],
+    provinces: [{id: 10, countryId: 1, name: 'برلین'}, {id: 20, countryId: 2, name: 'تهران'}],
+    cities: [{id: 11, countryId: 1, provinceId: 10, name: 'برلین'}, {id: 21, countryId: 2, provinceId: 20, name: 'تهران'}],
+  }}));
+  await page.goto('/profile/addresses');
+  await page.locator('#newAddress').click();
+  const form = page.locator('#addressForm');
+  await expect(form.locator('[name="countryId"]')).toHaveValue('2');
+  await expect(form.locator('[name="provinceId"] option')).toHaveText(['انتخاب استان', 'تهران']);
+  await form.locator('[name="provinceId"]').selectOption('20');
+  await expect(form.locator('[name="cityId"] option')).toHaveText(['انتخاب شهر', 'تهران']);
+  expect(await page.evaluate(() => window.HNAddressFields.set({countryId: 1}))).toBe(false);
+  await expect(form.locator('[name="countryId"]')).toHaveValue('2');
+});
+
 test('account dialogs fit the viewport and remain usable', async ({page, isMobile}) => {
   await page.addInitScript(axe.source);
   if (isMobile) await page.setViewportSize({width: 320, height: 640});

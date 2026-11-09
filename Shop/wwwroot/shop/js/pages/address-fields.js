@@ -24,6 +24,8 @@ window.HNUI.ready(() => window.HNUI.mount("pages-address-fields", document, asyn
         .replace(/[\s‌]+/g, " ")
         .trim();
     const countries = [...data.countries].sort((a, b) => a.name.localeCompare(b.name, "fa"));
+    const defaultCountry = countries.find((item) => String(item.countryCode || "").toUpperCase() === "IR");
+    if (!defaultCountry) throw new Error("Iran geography is unavailable.");
 
     function findLegacyProvince(address, selectedCountry) {
         if (!address.city || address.province) return null;
@@ -57,7 +59,7 @@ window.HNUI.ready(() => window.HNUI.mount("pages-address-fields", document, asyn
         city.value = selectedCity?.name || "";
     }
 
-    function renderProvinces(address = {}, selectedCountry = countries[0]) {
+    function renderProvinces(address = {}, selectedCountry = defaultCountry) {
         country.value = selectedCountry?.name || "";
         countryId.value = selectedCountry ? String(selectedCountry.id) : "";
         const available = selectedCountry
@@ -80,17 +82,14 @@ window.HNUI.ready(() => window.HNUI.mount("pages-address-fields", document, asyn
 
     window.HNAddressFields = {
         set(address = {}) {
-            const selectedCountry = countries.find((item) =>
-                (address.countryId && String(item.id) === String(address.countryId)) ||
-                normalize(item.name) === normalize(address.country) ||
-                normalize(item.nameEn) === normalize(address.country),
-            ) || countries[0];
-            renderProvinces(address, selectedCountry);
+            if (address.countryId && String(address.countryId) !== String(defaultCountry.id)) return false;
+            renderProvinces(address, defaultCountry);
+            return true;
         },
     };
 
     provinceSelect.addEventListener("change", () => {
-        const selectedCountry = countries[0];
+        const selectedCountry = countries.find((item) => String(item.id) === countryId.value);
         const selectedProvince = data.provinces.find((item) =>
             item.countryId === selectedCountry?.id && String(item.id) === provinceSelect.value,
         );

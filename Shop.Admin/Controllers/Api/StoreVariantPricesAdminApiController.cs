@@ -9,6 +9,36 @@ namespace Shop.Admin.Controllers.Api;
 [Route("api/admin/store/variant-prices")]
 public sealed class StoreVariantPricesAdminApiController(ShopDbContext db) : ControllerBase
 {
+    [HttpGet("plans")]
+    public async Task<IActionResult> Plans(CancellationToken cancellationToken)
+    {
+        if (!User.IsInRole("system.full-access")) return Forbid();
+        return Ok(await db.SalesPlanReferences.AsNoTracking().Where(x => x.IdStockOwnerType == 1)
+            .OrderBy(x => x.DisplayName).Select(x => new { x.Id, x.DisplayName, x.Code, x.IsRegular,
+                x.IsActive, x.StartsAtUtc, x.EndsAtUtc, x.Label, x.ShowCountdown }).ToListAsync(cancellationToken));
+    }
+
+    [HttpPut("plans/{id:long}")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> SavePlan(long id, [FromBody] PlanSettingsInput input, CancellationToken cancellationToken)
+    {
+        if (!User.IsInRole("system.full-access")) return Forbid();
+        if (id < 1 || input.Label?.Length > 100 ||
+            (input.StartsAtUtc.HasValue && input.EndsAtUtc.HasValue && input.StartsAtUtc >= input.EndsAtUtc) ||
+            (input.ShowCountdown && !input.EndsAtUtc.HasValue))
+            return ValidationProblem(detail: "بازهٔ طرح یا برچسب نامعتبر است؛ شمارش معکوس به تاریخ پایان نیاز دارد.", statusCode: 400);
+        var plan = await db.SalesPlanReferences.SingleOrDefaultAsync(x => x.Id == id && x.IdStockOwnerType == 1, cancellationToken);
+        if (plan is null) return NotFound();
+        if (plan.IsRegular && (input.StartsAtUtc.HasValue || input.EndsAtUtc.HasValue || input.ShowCountdown))
+            return ValidationProblem(detail: "برای طرح عادی بازه یا شمارش معکوس تعیین نمی‌شود.", statusCode: 400);
+        plan.StartsAtUtc = input.StartsAtUtc?.ToUniversalTime();
+        plan.EndsAtUtc = input.EndsAtUtc?.ToUniversalTime();
+        plan.Label = string.IsNullOrWhiteSpace(input.Label) ? null : input.Label.Trim();
+        plan.ShowCountdown = input.ShowCountdown;
+        await db.SaveChangesAsync(cancellationToken);
+        return Ok(new { message = "تنظیمات طرح فروش ذخیره شد." });
+    }
+
     [HttpGet]
     public async Task<IActionResult> List(CancellationToken cancellationToken)
     {
@@ -99,4 +129,5 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db) : Con
     }
 
     public sealed record VariantPlanPriceInput(decimal PriceAmount, decimal DiscountPercent, bool IsEnabled);
+    public sealed record PlanSettingsInput(DateTimeOffset? StartsAtUtc, DateTimeOffset? EndsAtUtc, string? Label, bool ShowCountdown);
 }

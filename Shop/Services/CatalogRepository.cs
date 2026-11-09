@@ -113,7 +113,8 @@ public sealed record CatalogSnapshot(
         }
 
         foreach (JsonElement country in countries.EnumerateObject().Select(item => item.Value))
-            ValidatePath(Text(country, "flag"), "content/countries/flags/");
+            if (country.TryGetProperty("flag", out JsonElement flag) && flag.ValueKind != JsonValueKind.Null)
+                ValidatePath(flag.GetString() ?? "", "content/countries/flags/");
         foreach (JsonElement detail in details.EnumerateObject().Select(item => item.Value))
         {
             if (detail.TryGetProperty("specs", out JsonElement sharedSpecs))

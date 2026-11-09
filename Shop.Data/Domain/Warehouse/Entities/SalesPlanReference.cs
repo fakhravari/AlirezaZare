@@ -10,6 +10,10 @@ public sealed class SalesPlanReference
     public byte IdStockOwnerType { get; set; }
     public string Code { get; set; } = string.Empty;
     public string PlanType { get; set; } = string.Empty;
+    public DateTimeOffset? StartsAtUtc { get; set; }
+    public DateTimeOffset? EndsAtUtc { get; set; }
+    public string? Label { get; set; }
+    public bool ShowCountdown { get; set; }
     public ICollection<StockBalance> StockBalances { get; set; } = new List<StockBalance>();
 }
 

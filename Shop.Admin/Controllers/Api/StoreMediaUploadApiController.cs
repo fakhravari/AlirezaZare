@@ -19,19 +19,39 @@ public sealed class StoreMediaUploadApiController(ShopDbContext db, FtpMediaStor
         {
             ["brand"] = ("brands", 800), ["slider"] = ("sliders", 1800),
             ["testimonial"] = ("testimonials", 400), ["trust"] = ("trust", 600),
-            ["identity"] = ("identity", 800), ["payment"] = ("payments", 800),
+            ["identity"] = ("identity", 800), ["payment"] = ("payments", 800), ["article"] = ("articles", 1600),
             ["country"] = ("countries/flags", 256)
         };
+
+    [HttpGet("articles")]
+    public async Task<IActionResult> Articles(CancellationToken cancellationToken) =>
+        Ok(await db.Database.SqlQueryRaw<ArticleRow>("SELECT [ArticleKey], [Title] FROM [Mag].[MagazineArticle] ORDER BY [Title], [Id]").ToListAsync(cancellationToken));
 
     [HttpPost]
     [ValidateAntiForgeryToken]
     [RequestSizeLimit(52_000_000)]
-    public async Task<IActionResult> Upload([FromForm] string kind, IFormFile file, [FromForm] long? productId, [FromForm] string? title, [FromForm] string? brandKey, CancellationToken cancellationToken)
+    public async Task<IActionResult> Upload([FromForm] string kind, IFormFile file, [FromForm] long? productId, [FromForm] string? title, [FromForm] string? brandKey, [FromForm] string? countryCode, [FromForm] string? articleKey, CancellationToken cancellationToken)
     {
         bool image = ImageFolders.TryGetValue(kind ?? "", out var imageFolder);
         bool document = kind == "product-document";
         bool video = kind == "product-video";
         if (!image && !document && !video) return BadRequest(new { title = "نوع رسانه نامعتبر است." });
+        countryCode = countryCode?.Trim();
+        if (kind == "country")
+        {
+            if (string.IsNullOrEmpty(countryCode) || countryCode.Length > 8) return BadRequest(new { title = "کشور را انتخاب کنید." });
+            var country = await db.Database.SqlQueryRaw<MediaRow>("SELECT [Id] FROM [Geo].[Country] WHERE [CountryCode] = {0}", countryCode).SingleOrDefaultAsync(cancellationToken);
+            if (country is null) return NotFound(new { title = "کشور پیدا نشد." });
+        }
+        else if (!string.IsNullOrEmpty(countryCode)) return BadRequest(new { title = "کشور برای این نوع رسانه معتبر نیست." });
+        articleKey = articleKey?.Trim();
+        if (kind == "article")
+        {
+            if (string.IsNullOrEmpty(articleKey) || articleKey.Length > 150) return BadRequest(new { title = "مقاله را انتخاب کنید." });
+            var article = await db.Database.SqlQueryRaw<MediaRow>("SELECT [Id] FROM [Mag].[MagazineArticle] WHERE [ArticleKey] = {0}", articleKey).SingleOrDefaultAsync(cancellationToken);
+            if (article is null) return NotFound(new { title = "مقاله پیدا نشد." });
+        }
+        else if (!string.IsNullOrEmpty(articleKey)) return BadRequest(new { title = "مقاله برای این نوع رسانه معتبر نیست." });
         brandKey = brandKey?.Trim();
         if (!string.IsNullOrEmpty(brandKey))
         {
@@ -116,7 +136,7 @@ public sealed class StoreMediaUploadApiController(ShopDbContext db, FtpMediaStor
                 if (result != FtpStatus.Success) throw new IOException("Thumbnail upload failed.");
                 uploaded.Add("/" + thumbnail);
             }
-            if (document || video || !string.IsNullOrEmpty(brandKey))
+            if (document || video || !string.IsNullOrEmpty(brandKey) || kind == "country" || kind == "article")
             {
                 databaseStarted = true;
                 if (document)
@@ -131,6 +151,19 @@ public sealed class StoreMediaUploadApiController(ShopDbContext db, FtpMediaStor
                         return Conflict(new { title = "رسانهٔ کالا دیگر وجود ندارد؛ دوباره تلاش کنید." });
                     }
                 }
+                else if (kind == "country" || kind == "article")
+                {
+                    int updated = kind == "country"
+                        ? await db.Database.ExecuteSqlInterpolatedAsync($"UPDATE [Geo].[Country] SET [FlagPath] = {path} WHERE [CountryCode] = {countryCode}", cancellationToken)
+                        : await db.Database.ExecuteSqlInterpolatedAsync($"UPDATE [Mag].[MagazineArticle] SET [HeroImagePath] = {path}, [ContentImagePath] = {path}, [UpdatedAtUtc] = SYSUTCDATETIME() WHERE [ArticleKey] = {articleKey}", cancellationToken);
+                    if (updated == 0)
+                    {
+                        foreach (string item in uploaded)
+                            try { await ftp.DeleteFile(item, CancellationToken.None); }
+                            catch (Exception cleanupException) { logger.LogWarning(cleanupException, "Failed to clean up uploaded media"); }
+                        return Conflict(new { title = "رکورد دیگر وجود ندارد؛ دوباره تلاش کنید." });
+                    }
+                }
                 else
                 {
                     int updated = await db.Database.ExecuteSqlInterpolatedAsync($"UPDATE [Store].[Brand] SET [LogoPath] = {path} WHERE [BrandKey] = {brandKey}", cancellationToken);
@@ -143,7 +176,7 @@ public sealed class StoreMediaUploadApiController(ShopDbContext db, FtpMediaStor
                     }
                 }
             }
-            return Ok(new { message = document || video ? "فایل بارگذاری و به کالا متصل شد." : !string.IsNullOrEmpty(brandKey) ? "نشان برند ذخیره شد." : "فایل بارگذاری شد.", path, thumbnail });
+            return Ok(new { message = document || video ? "فایل بارگذاری و به کالا متصل شد." : kind == "country" ? "تصویر کشور ذخیره شد." : kind == "article" ? "تصویر مقاله ذخیره شد." : !string.IsNullOrEmpty(brandKey) ? "نشان برند ذخیره شد." : "فایل بارگذاری شد.", path, thumbnail });
         }
         catch (Exception exception)
         {
@@ -159,4 +192,5 @@ public sealed class StoreMediaUploadApiController(ShopDbContext db, FtpMediaStor
 
     public sealed class ProductRow { public string ProductKey { get; set; } = ""; }
     public sealed class MediaRow { public long Id { get; set; } }
+    public sealed class ArticleRow { public string ArticleKey { get; set; } = ""; public string Title { get; set; } = ""; }
 }

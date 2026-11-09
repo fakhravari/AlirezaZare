@@ -13,7 +13,9 @@ window.HNUI.ready(() => window.HNUI.mount("checkout", document, () => {
     let selectedPaymentMethod = ui.storage.get(paymentMethodKey, "zarinpal");
     let salesPlansValid = false;
     let validationAttempt = 0;
+    let checkoutPending = false;
     const readAddresses = () => {
+        let valid = false;
         try {
             const value = JSON.parse(ui.storage.get(addressKey, "[]"));
             return Array.isArray(value)
@@ -61,15 +63,16 @@ window.HNUI.ready(() => window.HNUI.mount("checkout", document, () => {
             if (attempt !== validationAttempt) return;
             if (response.ok) {
                 const result = await response.json();
-                salesPlansValid = result.valid === true && Array.isArray(result.lines) &&
+                valid = result.valid === true && Array.isArray(result.lines) &&
                     result.lines.length === currentItems.length && result.lines.every((line, index) =>
                         line.productId === Number(currentItems[index].id) &&
                         line.salesPlanId === currentItems[index].salesPlanId &&
                         Number(line.quote?.variantId || 0) === Number(currentItems[index].variantId || 0) &&
                         Number(line.quote?.unitAmount) === Number(currentItems[index].price));
-            } else salesPlansValid = false;
-        } catch { salesPlansValid = false; }
+            }
+        } catch { /* A failed validation leaves this attempt invalid. */ }
         if (attempt !== validationAttempt) return;
+        salesPlansValid = valid;
         syncPayment();
         const message = document.querySelector("#paymentStatus");
         if (!salesPlansValid && message) ui.setMessage(message, "قیمت یا موجودی یکی از کالاها با اطلاعات فعلی مطابقت ندارد؛ به سبد بازگردید، کالا را از سبد حذف و دوباره از صفحهٔ محصول اضافه کنید.", "warning");
@@ -125,7 +128,7 @@ window.HNUI.ready(() => window.HNUI.mount("checkout", document, () => {
         }
         if (!payment) return;
         payment.disabled =
-            !ui.cart.read().length || !selectedAddress() || !selectedPaymentMethod || !salesPlansValid;
+            checkoutPending || !ui.cart.read().length || !selectedAddress() || !selectedPaymentMethod || !salesPlansValid;
         if (salesPlansValid) ui.setMessage(document.querySelector("#paymentStatus"), "");
     }
 
@@ -333,12 +336,19 @@ window.HNUI.ready(() => window.HNUI.mount("checkout", document, () => {
             syncPayment();
             if (payment.disabled) return;
             if (!ui.auth.isLoggedIn()) { ui.auth.requireLogin(() => payment.click()); return; }
+            checkoutPending = true;
             payment.disabled = true;
             try {
-                const lines = ui.cart.read().map((item) => ({ productId: Number(String(item.id).replace(/:.*$/, "")), salesPlanId: item.salesPlanId || "regular", quantity: item.quantity, variantId: item.variantId || null, options: item.options || {} }));
+                const lines = ui.cart.read().map((item) => ({ productId: Number(String(item.id).replace(/:.*$/, "")), salesPlanId: item.salesPlanId || "regular", quantity: item.quantity, variantId: item.variantId || null, options: item.options || {}, expectedUnitAmount: item.price }));
                 const response = await ui.api.request("account/checkout", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ addressId: Number(selected), paymentMethod: selectedPaymentMethod, lines }) });
                 const result = await response.json().catch(() => ({}));
-                if (!response.ok) throw new Error(result.code === "price-or-stock-changed" ? "قیمت یا موجودی تغییر کرده است؛ سبد را دوباره بررسی کنید." : "ثبت سفارش انجام نشد. نشانی و سبد خرید را بررسی کنید.");
+                if (!response.ok) {
+                    if (result.code === "price-or-stock-changed") {
+                        validationAttempt++;
+                        salesPlansValid = false;
+                    }
+                    throw new Error(result.code === "price-or-stock-changed" ? "قیمت یا موجودی تغییر کرده است؛ سبد را دوباره بررسی کنید." : result.code === "order-amount-out-of-range" ? "مبلغ سفارش بیش از سقف مجاز است؛ تعداد کالاها را کاهش دهید." : "ثبت سفارش انجام نشد. نشانی و سبد خرید را بررسی کنید.");
+                }
                 ui.cart.write([]);
                 ui.setMessage(document.querySelector("#paymentStatus"), `سفارش ${result.number} ثبت شد و در انتظار پرداخت است. مبلغ: ${ui.formatNumber(result.totalAmount)} تومان`, "success");
                 payment.textContent = `سفارش ${result.number} ثبت شد`;
@@ -353,8 +363,9 @@ window.HNUI.ready(() => window.HNUI.mount("checkout", document, () => {
                     }
                 }
             } catch (error) {
-                ui.setMessage(document.querySelector("#paymentStatus"), error.message || "ثبت سفارش انجام نشد.", "error");
+                checkoutPending = false;
                 syncPayment();
+                ui.setMessage(document.querySelector("#paymentStatus"), error.message || "ثبت سفارش انجام نشد.", "error");
             }
         });
     }
