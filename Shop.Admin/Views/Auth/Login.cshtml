@@ -6,42 +6,58 @@
 <!doctype html>
 <html lang="fa" dir="rtl">
 <head>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>@ViewData["Title"]</title>
-    <link rel="stylesheet" href="~/color_admin/assets/css/vendor.min.css" asp-append-version="true"/>
-    <link rel="stylesheet" href="~/color_admin/assets/css/default/app-rtl.min.css" asp-append-version="true"/>
-    <link rel="stylesheet" href="~/color_admin/assets/css/persian-font.css" asp-append-version="true"/>
-    <link rel="stylesheet" href="~/css/admin-shell.css" asp-append-version="true"/>
+    <link rel="stylesheet" href="~/color_admin/assets/css/vendor.min.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/color_admin/assets/css/default/app-rtl.min.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/color_admin/assets/css/persian-font.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/admin-shell.css" asp-append-version="true" />
 </head>
-<body class="bg-component">
-<main class="container min-vh-100 d-flex align-items-center justify-content-center py-5">
-    <section class="panel panel-inverse w-100" style="max-width: 460px" aria-labelledby="login-title">
-        <div class="panel-heading">
-            <h1 id="login-title" class="panel-title">ورود به سامانهٔ مدیریت</h1>
+<body>
+<main id="app" class="app">
+    <div class="login login-with-news-feed">
+        <div class="news-feed" aria-hidden="true">
+            <div class="news-image" style="background-image: url('@Url.Content("~/color_admin/assets/img/login-bg/login-bg-11.jpg")')"></div>
+            <div class="news-caption">
+                <h2 class="caption-title">مدیریت فروشگاه و انبار</h2>
+                <p>همهٔ ابزارهای مدیریت فروشگاه، سفارش‌ها و موجودی در یک محیط.</p>
+            </div>
         </div>
-        <div class="panel-body">
-            <p class="text-muted">این حساب فقط برای کاربران سیستم است و با حساب مشتریان فروشگاه تفاوت دارد.</p>
-            <form asp-controller="Auth" asp-action="Login" method="post">
-                @Html.AntiForgeryToken()
-                <input asp-for="ReturnUrl" type="hidden"/>
-                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
-                <div class="mb-3">
-                    <label asp-for="UserName" class="form-label">نام کاربری سیستم</label>
-                    <input asp-for="UserName" class="form-control" autocomplete="username" required autofocus/>
+        <section class="login-container" aria-labelledby="login-title">
+            <div class="login-header mb-30px">
+                <div class="brand">
+                    <div class="d-flex align-items-center"><span class="logo" aria-hidden="true"></span><b>پنل مدیریت</b></div>
+                    <small>فروشگاه برق و ابزار ندا اولیائی</small>
                 </div>
-                <div class="mb-3">
-                    <label asp-for="Password" class="form-label">گذرواژه</label>
-                    <input asp-for="Password" class="form-control" type="password" autocomplete="current-password" required/>
-                </div>
-                <div class="form-check mb-3">
-                    <input asp-for="RememberMe" class="form-check-input"/>
-                    <label asp-for="RememberMe" class="form-check-label">مرا به خاطر بسپار</label>
-                </div>
-                <button class="btn btn-theme w-100" type="submit">ورود</button>
-            </form>
-        </div>
-    </section>
+                <div class="icon" aria-hidden="true"><i class="fa fa-lock"></i></div>
+            </div>
+            <div class="login-content">
+                <h1 id="login-title" class="h4 mb-2">خوش آمدید</h1>
+                <p class="text-muted mb-4">برای ورود به سامانهٔ مدیریت، اطلاعات حساب کاربری سیستم را وارد کنید.</p>
+                <form asp-controller="Auth" asp-action="Login" method="post">
+                    @Html.AntiForgeryToken()
+                    <input asp-for="ReturnUrl" type="hidden" />
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                    <div class="form-floating mb-3">
+                        <input asp-for="UserName" class="form-control" placeholder="نام کاربری سیستم" autocomplete="username" required autofocus />
+                        <label asp-for="UserName">نام کاربری سیستم</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input asp-for="Password" class="form-control" type="password" placeholder="گذرواژه" autocomplete="current-password" required />
+                        <label asp-for="Password">گذرواژه</label>
+                    </div>
+                    <div class="form-check admin-login-remember mb-4">
+                        <input asp-for="RememberMe" class="form-check-input" />
+                        <label asp-for="RememberMe" class="form-check-label">مرا به خاطر بسپار</label>
+                    </div>
+                    <button class="btn btn-theme btn-lg w-100" type="submit">ورود به پنل مدیریت</button>
+                </form>
+                <hr class="my-4" />
+                <p class="text-muted mb-0">این صفحه مخصوص کاربران سیستم است و از حساب مشتریان فروشگاه جداست.</p>
+            </div>
+        </section>
+    </div>
 </main>
 </body>
 </html>

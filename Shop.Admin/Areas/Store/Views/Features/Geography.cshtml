@@ -10,11 +10,15 @@
         <div class="pt-3" role="tabpanel" id="geo-panel" aria-labelledby="geo-tab-countries" data-geo-panel>
             <form data-geo-form class="row g-2 mb-3">
                 @Html.AntiForgeryToken()<input type="hidden" name="id" />
-                <div class="col-md-3" data-geo-country hidden><label class="form-label" for="geo-country">کشور</label><select class="form-select" id="geo-country" name="countryId"></select></div>
-                <div class="col-md-3" data-geo-province hidden><label class="form-label" for="geo-province">استان</label><select class="form-select" id="geo-province" name="provinceId"></select></div>
+                <div class="col-md-3" data-geo-country hidden><label class="form-label" for="geo-country-search">جست‌وجوی کشور</label><input class="form-control mb-2" type="search" id="geo-country-search" data-geo-country-search autocomplete="off" aria-controls="geo-country" /><label class="form-label" for="geo-country">کشور</label><select class="form-select" id="geo-country" name="countryId"></select></div>
+                <div class="col-md-3" data-geo-province hidden><label class="form-label" for="geo-province-search">جست‌وجوی استان</label><input class="form-control mb-2" type="search" id="geo-province-search" data-geo-province-search autocomplete="off" aria-controls="geo-province" /><label class="form-label" for="geo-province">استان</label><select class="form-select" id="geo-province" name="provinceId"></select></div>
                 <div class="col-md-3"><label class="form-label" for="geo-name">نام فارسی</label><input class="form-control" id="geo-name" name="nameFa" required maxlength="150" /></div>
                 <div class="col-md-3"><label class="form-label" for="geo-name-en">نام انگلیسی</label><input class="form-control" id="geo-name-en" name="nameEn" required maxlength="150" /></div>
                 <div class="col-md-2" data-geo-code><label class="form-label" for="geo-code">کد کشور</label><input class="form-control" id="geo-code" name="code" maxlength="8" /></div>
+                <div class="col-md-4" data-geo-flag><label class="form-label" for="geo-flag">مسیر تصویر پرچم</label><input class="form-control" id="geo-flag" name="flagPath" maxlength="500" placeholder="content/countries/flags/..." /><small class="text-muted">مسیر فایل بارگذاری‌شده یا نشانی کامل تصویر</small></div>
+                <div class="col-md-2" data-geo-coordinates hidden><label class="form-label" for="geo-latitude">عرض جغرافیایی</label><input class="form-control" id="geo-latitude" name="latitude" type="number" min="-90" max="90" step="0.00000001" /></div>
+                <div class="col-md-2" data-geo-coordinates hidden><label class="form-label" for="geo-longitude">طول جغرافیایی</label><input class="form-control" id="geo-longitude" name="longitude" type="number" min="-180" max="180" step="0.00000001" /></div>
+                <div class="col-md-2 align-self-end" data-geo-center hidden><div class="form-check"><input class="form-check-input" id="geo-center" name="isProvinceCenter" type="checkbox" /><label class="form-check-label" for="geo-center">مرکز استان</label></div></div>
                 <div class="col-12"><button class="btn btn-primary" type="submit">ذخیره</button> <button class="btn btn-default" type="button" data-geo-cancel>فرم جدید</button></div>
             </form>
             <label class="form-label" for="geo-search">جست‌وجو</label><input class="form-control mb-3" type="search" id="geo-search" data-geo-search />

@@ -13,20 +13,27 @@ string name = "Geography test " + key;
 long country = 0, province = 0, city = 0;
 try
 {
-    var input = new StoreGeographyAdminApiController.Input(name, name, key, null, null);
+    var input = new StoreGeographyAdminApiController.Input(name, name, key, null, null, FlagPath: "content/countries/flags/test.webp", Latitude: 35.12345678m, Longitude: 51.12345678m, IsProvinceCenter: true, UpdateDetails: true);
+    if (await controller.Create("countries", input with { FlagPath = "javascript:alert(1)" }, default) is not BadRequestObjectResult) throw new Exception("Unsafe flag path accepted.");
+    if (await controller.Create("provinces", input with { Latitude = 91 }, default) is not BadRequestObjectResult) throw new Exception("Invalid latitude accepted.");
     if (await controller.Create("countries", input with { NameFa = new string('a', 151) }, default) is not BadRequestObjectResult) throw new Exception("Oversized country name accepted.");
     if (await controller.Create("countries", input, default) is not OkObjectResult) throw new Exception("Country create failed.");
     country = await db.Database.SqlQuery<long>($"SELECT [Id] AS [Value] FROM [Geo].[Country] WHERE [CountryCode]={key}").SingleAsync();
+    if (await db.Database.SqlQuery<string>($"SELECT [FlagPath] AS [Value] FROM [Geo].[Country] WHERE [Id]={country}").SingleAsync() != input.FlagPath) throw new Exception("Country flag not persisted.");
     if (await controller.Create("countries", input, default) is not ConflictObjectResult) throw new Exception("Duplicate country code accepted.");
     if (await controller.Update("countries", country, input with { NameEn = "Updated country" }, default) is not OkObjectResult) throw new Exception("Country update failed.");
     if (await db.Database.SqlQuery<string>($"SELECT [NameEn] AS [Value] FROM [Geo].[Country] WHERE [Id]={country}").SingleAsync() != "Updated country") throw new Exception("Country update not persisted.");
+    if (await controller.Update("countries", country, new(name, name, key, null, null), default) is not OkObjectResult || await db.Database.SqlQuery<string>($"SELECT [FlagPath] AS [Value] FROM [Geo].[Country] WHERE [Id]={country}").SingleAsync() != input.FlagPath) throw new Exception("Legacy update changed flag.");
     if (await controller.Create("provinces", input with { CountryId = country }, default) is not OkObjectResult) throw new Exception("Province create failed.");
     province = await db.Database.SqlQuery<long>($"SELECT [Id] AS [Value] FROM [Geo].[Province] WHERE [IdCountry]={country} AND [NameFa]={name}").SingleAsync();
+    if (await db.Database.SqlQuery<decimal>($"SELECT [Latitude] AS [Value] FROM [Geo].[Province] WHERE [Id]={province}").SingleAsync() != input.Latitude) throw new Exception("Province latitude not persisted.");
     if (await controller.Update("provinces", province, input with { NameEn = "Updated province", CountryId = country + 1000000 }, default) is not OkObjectResult) throw new Exception("Province update failed.");
+    if (await controller.Update("provinces", province, input with { Latitude = null, Longitude = null }, default) is not OkObjectResult || await db.Database.SqlQuery<int>($"SELECT COUNT(*) AS [Value] FROM [Geo].[Province] WHERE [Id]={province} AND [Latitude] IS NULL AND [Longitude] IS NULL").SingleAsync() != 1) throw new Exception("Coordinate clearing failed.");
     if (await db.Database.SqlQuery<long>($"SELECT [IdCountry] AS [Value] FROM [Geo].[Province] WHERE [Id]={province}").SingleAsync() != country) throw new Exception("Province parent changed during update.");
     if (await controller.Create("cities", input with { CountryId = country + 1000000, ProvinceId = province }, default) is not BadRequestObjectResult) throw new Exception("Mismatched parent accepted.");
     if (await controller.Create("cities", input with { CountryId = country, ProvinceId = province }, default) is not OkObjectResult) throw new Exception("City create failed.");
     city = await db.Database.SqlQuery<long>($"SELECT [Id] AS [Value] FROM [Geo].[City] WHERE [IdProvince]={province} AND [NameFa]={name}").SingleAsync();
+    if (!await db.Database.SqlQuery<bool>($"SELECT [IsProvinceCenter] AS [Value] FROM [Geo].[City] WHERE [Id]={city}").SingleAsync()) throw new Exception("Province center not persisted.");
     if (await controller.Update("cities", city, input with { NameFa = new string('a', 200), CountryId = 1, ProvinceId = 1 }, default) is not OkObjectResult) throw new Exception("Valid city name rejected.");
     if (await controller.Update("cities", city, input with { NameFa = new string('a', 201) }, default) is not BadRequestObjectResult) throw new Exception("Oversized city name accepted.");
     var cityParent = await db.Database.SqlQuery<long>($"SELECT [IdProvince] AS [Value] FROM [Geo].[City] WHERE [Id]={city}").SingleAsync();
@@ -45,4 +52,5 @@ finally
     if (country != 0) await db.Database.ExecuteSqlInterpolatedAsync($"DELETE FROM [Geo].[Country] WHERE [Id]={country} AND [CountryCode]={key}");
 }
 
+await GeographyConcurrencyTest.RunAsync(cs);
 if (Environment.GetEnvironmentVariable("SHOP_TEST_ADMIN_DLL") is { Length: > 0 } adminDll) await HttpSecurityTest.RunAsync(db, cs, adminDll);

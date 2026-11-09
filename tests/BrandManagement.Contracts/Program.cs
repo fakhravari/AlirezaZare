@@ -45,16 +45,77 @@ try
     var amount = await db.Database.SqlQuery<decimal>($"SELECT [PriceAmount] AS [Value] FROM [Warehouse].[Product] WHERE [Id] = {productId}").SingleAsync();
     if (amount != 21000) throw new Exception("Product price not saved.");
     if (await controller.UpdateProduct(productId, productInput with { DiscountPercent = 100 }, default) is not BadRequestObjectResult) throw new Exception("Invalid discount accepted.");
+    string specialPlan = await db.Database.SqlQueryRaw<string>("SELECT TOP (1) [SalesPlanKey] AS [Value] FROM [Warehouse].[SalesPlanReference] WHERE [IsDefault] = 0 AND [IdStockOwnerType] = 1 ORDER BY [Id]").FirstAsync();
+    long accessoryId = await db.Database.SqlQueryRaw<long>("SELECT TOP (1) a.[Id] AS [Value] FROM [Store].[Accessory] a WHERE a.[IsActive] = 1 ORDER BY a.[Id]").FirstAsync();
+    await db.Database.ExecuteSqlInterpolatedAsync($"INSERT [Store].[ProductAccessory] ([IdProduct], [IdAccessory], [IsRequired], [SortOrder], [PriceAmount]) VALUES ({productId}, {accessoryId}, 1, 1, 100)");
+    var promotions = new StoreVariantPricesAdminApiController(db) { ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext { User = new ClaimsPrincipal(new ClaimsIdentity([new Claim(ClaimTypes.Role, "system.full-access")], "test")) } } };
+    var offer = new StoreVariantPricesAdminApiController.ProductOfferInput(10000, 20, 4, true);
+    if (await promotions.SaveProductOffer(productId, specialPlan, offer, default) is not OkObjectResult) throw new Exception("Product offer creation failed.");
+    int required = await db.Database.SqlQuery<int>($"SELECT COUNT(*) AS [Value] FROM [Store].[ProductSalesPlanOffer] o JOIN [Store].[ProductSalesPlanOfferAccessory] a ON a.[IdProductSalesPlanOffer] = o.[Id] WHERE o.[IdProduct] = {productId} AND a.[IdAccessory] = {accessoryId} AND a.[IsAllowed] = 1 AND a.[PriceAmount] = 100").SingleAsync();
+    if (required != 1) throw new Exception("Required accessory was not copied into offer.");
+    if (await promotions.OfferAccessories(productId, specialPlan, default) is not OkObjectResult) throw new Exception("Offer accessories lookup failed.");
+    if (await promotions.SaveOfferAccessory(productId, specialPlan, accessoryId, new(200, false), default) is not BadRequestObjectResult) throw new Exception("Required accessory was disabled.");
+    if (await promotions.SaveOfferAccessory(productId, specialPlan, accessoryId, new(200, true), default) is not OkObjectResult) throw new Exception("Offer accessory price update failed.");
+    long optionalId = await db.Database.SqlQuery<long>($"SELECT TOP (1) [Id] AS [Value] FROM [Store].[Accessory] WHERE [IsActive] = 1 AND [Id] <> {accessoryId} ORDER BY [Id]").FirstAsync();
+    await db.Database.ExecuteSqlInterpolatedAsync($"INSERT [Store].[ProductAccessory] ([IdProduct], [IdAccessory], [IsRequired], [SortOrder], [PriceAmount]) VALUES ({productId}, {optionalId}, 0, 2, 500)");
+    if (await promotions.SaveOfferAccessory(productId, specialPlan, optionalId, new(300, false), default) is not OkObjectResult) throw new Exception("Optional accessory configuration failed.");
+    int accessorySaved = await db.Database.SqlQuery<int>($"SELECT COUNT(*) AS [Value] FROM [Store].[ProductSalesPlanOffer] o JOIN [Store].[ProductSalesPlanOfferAccessory] a ON a.[IdProductSalesPlanOffer] = o.[Id] WHERE o.[IdProduct] = {productId} AND ((a.[IdAccessory] = {accessoryId} AND a.[IsAllowed] = 1 AND a.[PriceAmount] = 200) OR (a.[IdAccessory] = {optionalId} AND a.[IsAllowed] = 0 AND a.[PriceAmount] = 300))").SingleAsync();
+    if (accessorySaved != 2) throw new Exception("Offer accessory values were not persisted.");
+    var spec = new StoreVariantPricesAdminApiController.OfferSpecification { Key = "توان", Value = "۲۰ وات" };
+    if (await promotions.SaveOfferSpecifications(productId, specialPlan, [spec], default) is not OkObjectResult) throw new Exception("Offer specification save failed.");
+    if (await promotions.OfferSpecifications(productId, specialPlan, default) is not OkObjectResult) throw new Exception("Offer specification read failed.");
+    if (await promotions.SaveOfferSpecifications(productId, specialPlan, [spec, spec], default) is not BadRequestObjectResult) throw new Exception("Duplicate specification accepted.");
+    int specCount = await db.Database.SqlQuery<int>($"SELECT COUNT(*) AS [Value] FROM [Store].[ProductSalesPlanOfferSpecificationOverride] x JOIN [Store].[ProductSalesPlanOffer] o ON o.[Id] = x.[IdProductSalesPlanOffer] WHERE o.[IdProduct] = {productId} AND x.[SpecificationKey] = N'توان' AND x.[Value] = N'۲۰ وات'").SingleAsync();
+    if (specCount != 1) throw new Exception("Offer specification not preserved after invalid save.");
+    if (await promotions.SaveProductOffer(productId, specialPlan, offer with { PriceAmount = 15000, IsEnabled = false }, default) is not OkObjectResult) throw new Exception("Product offer update failed.");
+    int saved = await db.Database.SqlQuery<int>($"SELECT COUNT(*) AS [Value] FROM [Store].[ProductSalesPlanOffer] WHERE [IdProduct] = {productId} AND [PriceAmount] = 15000 AND [IsEnabled] = 0").SingleAsync();
+    if (saved != 1) throw new Exception("Product offer update was not persisted.");
+    if (await promotions.SaveProductOffer(productId, specialPlan, offer with { DiscountPercent = 100 }, default) is not ObjectResult invalid || invalid.StatusCode != 400) throw new Exception("Invalid offer discount accepted.");
+    promotions.ControllerContext.HttpContext.User = new ClaimsPrincipal(new ClaimsIdentity([], "test"));
+    if (await promotions.SaveOfferAccessory(productId, specialPlan, accessoryId, new(200, true), default) is not ForbidResult) throw new Exception("Unauthorized accessory update accepted.");
+    if (await promotions.SaveProductOffer(productId, specialPlan, offer, default) is not ForbidResult) throw new Exception("Unauthorized offer accepted.");
     controller.ControllerContext.HttpContext.User = new ClaimsPrincipal(new ClaimsIdentity([], "test"));
     if (await controller.UpdateProduct(productId, productInput, default) is not ForbidResult) throw new Exception("Unauthorized product update accepted.");
 }
 finally
 {
+    await db.Database.ExecuteSqlInterpolatedAsync($"DELETE a FROM [Store].[ProductSalesPlanOfferAccessory] a JOIN [Store].[ProductSalesPlanOffer] o ON o.[Id] = a.[IdProductSalesPlanOffer] WHERE o.[IdProduct] = {productId}");
+    await db.Database.ExecuteSqlInterpolatedAsync($"DELETE a FROM [Store].[ProductSalesPlanOfferSpecificationOverride] a JOIN [Store].[ProductSalesPlanOffer] o ON o.[Id] = a.[IdProductSalesPlanOffer] WHERE o.[IdProduct] = {productId}");
+    await db.Database.ExecuteSqlInterpolatedAsync($"DELETE FROM [Store].[ProductSalesPlanOffer] WHERE [IdProduct] = {productId}");
+    await db.Database.ExecuteSqlInterpolatedAsync($"DELETE FROM [Store].[ProductAccessory] WHERE [IdProduct] = {productId}");
     await db.Database.ExecuteSqlInterpolatedAsync($"DELETE FROM [Warehouse].[Product] WHERE [Id] = {productId} AND [ProductKey] = {productKey}");
 }
 Console.WriteLine("Brand create, update, validation, authorization and rollback OK.");
 Console.WriteLine("Product update, validation and authorization OK; test product removed.");
+Console.WriteLine("Product offer create, update, required accessory, validation and authorization OK; test data removed.");
 controller.ControllerContext.HttpContext.User = new ClaimsPrincipal(new ClaimsIdentity([new Claim(ClaimTypes.Role, "system.full-access")], "test"));
+string categoryKey = "test-category-" + Guid.NewGuid().ToString("N"), childKey = "test-child-" + Guid.NewGuid().ToString("N");
+long categoryId = 0, childId = 0;
+try
+{
+    var categoryInput = new StoreCatalogAdminApiController.CategoryInput(categoryKey, "گروه آزمایشی", "Test category", null);
+    if (await controller.CreateCategory(categoryInput, default) is not OkObjectResult) throw new Exception("Category creation failed.");
+    categoryId = await db.Database.SqlQuery<long>($"SELECT [Id] AS [Value] FROM [Store].[Category] WHERE [CategoryKey] = {categoryKey}").SingleAsync();
+    if (await controller.CreateCategory(categoryInput, default) is not ConflictObjectResult) throw new Exception("Duplicate category key accepted.");
+    var childInput = new StoreCatalogAdminApiController.CategoryInput(childKey, "زیرگروه آزمایشی", "Test child", categoryId);
+    if (await controller.CreateCategory(childInput, default) is not OkObjectResult) throw new Exception("Child category creation failed.");
+    childId = await db.Database.SqlQuery<long>($"SELECT [Id] AS [Value] FROM [Store].[Category] WHERE [CategoryKey] = {childKey}").SingleAsync();
+    if (await controller.UpdateCategory(categoryKey, categoryInput with { NameFa = "گروه اصلاح‌شده" }, default) is not OkObjectResult) throw new Exception("Category rename failed.");
+    string childPath = await db.Database.SqlQuery<string>($"SELECT [PathJson] AS [Value] FROM [Store].[Category] WHERE [Id] = {childId}").SingleAsync();
+    var categoryPath = System.Text.Json.JsonSerializer.Deserialize<string[]>(childPath);
+    if (categoryPath is null || categoryPath.Length != 2 || categoryPath[0] != "گروه اصلاح‌شده" || categoryPath[1] != "زیرگروه آزمایشی") throw new Exception("Category descendant path was not updated.");
+    if (await controller.UpdateCategory(categoryKey, categoryInput with { ParentId = childId }, default) is not BadRequestObjectResult) throw new Exception("Category reparenting accepted.");
+    if (await controller.CreateCategory(childInput with { Key = "another-" + childKey, ParentId = sample.Category }, default) is not ConflictObjectResult) throw new Exception("Child under published product category accepted.");
+    controller.ControllerContext.HttpContext.User = new ClaimsPrincipal(new ClaimsIdentity([], "test"));
+    if (await controller.CreateCategory(categoryInput, default) is not ForbidResult) throw new Exception("Unauthorized category creation accepted.");
+}
+finally
+{
+    if (childId != 0) await db.Database.ExecuteSqlInterpolatedAsync($"DELETE FROM [Store].[Category] WHERE [Id] = {childId} AND [CategoryKey] = {childKey}");
+    if (categoryId != 0) await db.Database.ExecuteSqlInterpolatedAsync($"DELETE FROM [Store].[Category] WHERE [Id] = {categoryId} AND [CategoryKey] = {categoryKey}");
+}
+controller.ControllerContext.HttpContext.User = new ClaimsPrincipal(new ClaimsIdentity([new Claim(ClaimTypes.Role, "system.full-access")], "test"));
+Console.WriteLine("Category creation, descendant rename, validation and authorization OK; test categories removed.");
 string draftKey = "test-draft-" + Guid.NewGuid().ToString("N");
 var draft = new StoreCatalogAdminApiController.ProductCreateInput(draftKey, draftKey, "کالای آزمایشی", "Test draft", sample.Brand, sample.Category, sample.IdBaseUnit, 1000, 0, 2);
 long draftId = 0;
@@ -69,6 +130,12 @@ try
     if (await controller.PublishProduct(draftId, default) is not OkObjectResult) throw new Exception("Draft publication failed.");
     int publishedDraft = await db.Database.SqlQuery<int>($"SELECT COUNT(*) AS [Value] FROM [Warehouse].[Product] WHERE [Id] = {draftId} AND [IsCatalogActive] = 1").SingleAsync();
     if (publishedDraft != 1) throw new Exception("Draft publication not persisted.");
+    controller.ControllerContext.HttpContext.User = new ClaimsPrincipal(new ClaimsIdentity());
+    if (await controller.UnpublishProduct(draftId, default) is not ForbidResult) throw new Exception("Unauthorized unpublish accepted.");
+    controller.ControllerContext.HttpContext.User = new ClaimsPrincipal(new ClaimsIdentity([new Claim(ClaimTypes.Role, "system.full-access")], "test"));
+    if (await controller.UnpublishProduct(draftId, default) is not OkObjectResult) throw new Exception("Product unpublish failed.");
+    if (await controller.UnpublishProduct(draftId, default) is not ConflictObjectResult) throw new Exception("Unpublished product accepted again.");
+    if (await controller.PublishProduct(draftId, default) is not OkObjectResult) throw new Exception("Product republication failed.");
 }
 finally
 {
@@ -116,9 +183,10 @@ string orderNumber = "TEST-TRACK-" + Guid.NewGuid().ToString("N")[..20];
 long orderId = (await db.Database.SqlQuery<long>($"INSERT [Store].[Order] ([IdProfile], [IdWarehouseDocument], [OrderNumber], [Status], [PaymentMethod], [ItemCount], [TotalAmount], [AddressSnapshotJson]) OUTPUT INSERTED.[Id] AS [Value] VALUES ({profileId}, {documentId}, {orderNumber}, N'warehouse-confirmed', N'test', 1, 1000, N'{{}}')").ToListAsync()).Single();
 try
 {
-    await db.Database.ExecuteSqlInterpolatedAsync($"INSERT [Store].[PaymentAttempt] ([Id], [IdOrder], [Amount], [Status], [GatewayReference], [ReceiptReference], [PaidAtUtc]) VALUES (NEWID(), {orderId}, 1000, N'verified', N'test', N'test', SYSUTCDATETIME())");
     var orders = new StoreOrdersAdminApiController(db) { ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext { User = new ClaimsPrincipal(new ClaimsIdentity([new Claim(ClaimTypes.NameIdentifier, "tracking-test")], "test")) } } };
     var tracking = new StoreOrdersAdminApiController.TrackingInput("پست", "12345", null, null);
+    if (await orders.UpdateTracking(orderId, tracking, default) is not ConflictObjectResult) throw new Exception("Tracking without verified payment accepted.");
+    await db.Database.ExecuteSqlInterpolatedAsync($"INSERT [Store].[PaymentAttempt] ([Id], [IdOrder], [Amount], [Status], [GatewayReference], [ReceiptReference], [PaidAtUtc]) VALUES (NEWID(), {orderId}, 1000, N'verified', N'test', N'test', SYSUTCDATETIME())");
     if (await orders.UpdateTracking(orderId, tracking, default) is not OkObjectResult) throw new Exception("Tracking update failed.");
     if (await orders.UpdateTracking(orderId, tracking, default) is not ConflictObjectResult) throw new Exception("Stale tracking update accepted.");
     if (await orders.UpdateTracking(orderId, tracking with { Carrier = " " }, default) is not BadRequestObjectResult) throw new Exception("Invalid carrier accepted.");
@@ -129,6 +197,8 @@ try
     if (history != 2) throw new Exception("Tracking history is incomplete.");
     if (await orders.UpdateShippingStatus(orderId, new("warehouse-confirmed", "in-transit"), default) is not OkObjectResult) throw new Exception("Shipping status update failed.");
     if (await orders.UpdateShippingStatus(orderId, new("warehouse-confirmed", "in-transit"), default) is not ConflictObjectResult) throw new Exception("Stale shipping status accepted.");
+    await db.Database.ExecuteSqlInterpolatedAsync($"UPDATE [Store].[Order] SET [PaymentMethod] = N'demo', [ExternalOrderKey] = N'demo-order-test' WHERE [Id] = {orderId}");
+    if (await orders.UpdateTracking(orderId, new("پست", "999", "پست", "67890"), default) is not ConflictObjectResult) throw new Exception("Tracking for sample order accepted.");
 }
 finally
 {

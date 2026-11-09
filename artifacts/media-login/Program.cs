@@ -1,0 +1,14 @@
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Shop.Database.Domain.Admin.Entities;
+using Shop.Database.Infrastructure.Persistence;
+var options = new DbContextOptionsBuilder<ShopDbContext>().UseSqlServer("Server=localhost;Database=ShopVerify_Media_20261110;Integrated Security=true;TrustServerCertificate=true").Options;
+await using var db = new ShopDbContext(options);
+var role = await db.AdminRoles.SingleAsync(x => x.RoleKey == "system.full-access");
+var user = new AdminSystemUser { UserName = "media-test-" + Guid.NewGuid().ToString("N")[..8], DisplayName = "Media test", IsActive = true, CreatedAtUtc = DateTime.UtcNow, UpdatedAtUtc = DateTime.UtcNow };
+user.NormalizedUserName = user.UserName.ToUpperInvariant();
+var password = "Test-" + Guid.NewGuid().ToString("N");
+user.PasswordHash = new PasswordHasher<AdminSystemUser>().HashPassword(user, password);
+db.AdminSystemUsers.Add(user); db.AdminUserRoles.Add(new AdminUserRole { User = user, Role = role });
+await db.SaveChangesAsync();
+Console.WriteLine($"{user.UserName}\n{password}");

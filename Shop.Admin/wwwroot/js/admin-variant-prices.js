@@ -67,6 +67,101 @@
         try { const result = await request(page, page.dataset.api); if (requests.get(page) !== serial) return; page._variantPriceRows = Array.isArray(result) ? result : []; render(page); }
         catch (error) { if (requests.get(page) === serial) status(page, error.message || "دریافت قیمت‌ها ناموفق بود.", true); }
     }
+    async function loadOffers(page) {
+        const serial = (page._offerSerial || 0) + 1; page._offerSerial = serial;
+        const message = page.querySelector("[data-offer-status]"); message.textContent = "در حال دریافت پیشنهادها…";
+        try {
+            const rows = await request(page, `${page.dataset.api}/product-offers`);
+            if (!page.isConnected || page._offerSerial !== serial) return;
+            page._offers = Array.isArray(rows) ? rows : []; renderOffers(page);
+        } catch (error) { if (page.isConnected && page._offerSerial === serial) message.textContent = error.message || "دریافت پیشنهادها ناموفق بود."; }
+    }
+    function renderOffers(page) {
+        const query = page.querySelector("[data-offer-filter] input").value.trim().toLocaleLowerCase();
+        const rows = page._offers.filter(item => !query || [item.productName, item.productCode, item.salesPlanName].some(value => String(value || "").toLocaleLowerCase().includes(query)));
+        const body = page.querySelector("[data-offer-rows]"); body.replaceChildren();
+        for (const item of rows) {
+            const key = `${item.productId}\u0000${item.salesPlanId}`, draft = page._offerDrafts.get(key);
+            const row = document.createElement("tr"); row.append(cell(`${item.productName} (${item.productCode})`), cell(item.salesPlanName));
+            const makeNumber = (label, value, min, max, step) => {
+                const td = document.createElement("td"), input = document.createElement("input");
+                input.type = "number"; input.className = "form-control form-control-sm"; input.min = min; input.max = max; input.step = step;
+                input.value = value; input.setAttribute("aria-label", `${label} ${item.productName}، ${item.salesPlanName}`); td.append(input); row.append(td); return input;
+            };
+            const amount = makeNumber("قیمت", draft?.amount ?? (item.priceAmount == null ? "" : String(item.priceAmount)), "0", "9007199254740991", "1");
+            const discount = makeNumber("تخفیف", draft?.discount ?? String(item.discountPercent ?? 0), "0", "99.99", "0.01");
+            const limit = makeNumber("سقف خرید", draft?.limit ?? String(item.maxPurchaseQuantity ?? 99), "1", "99", "1");
+            const activeCell = document.createElement("td"), activeLabel = document.createElement("label"), active = document.createElement("input");
+            active.type = "checkbox"; active.checked = draft?.active ?? (item.isEnabled ?? true); activeLabel.append(active, document.createTextNode(" فعال")); activeCell.append(activeLabel); row.append(activeCell);
+            const remember = () => page._offerDrafts.set(key, { amount: amount.value, discount: discount.value, limit: limit.value, active: active.checked });
+            for (const input of [amount, discount, limit]) input.addEventListener("input", remember); active.addEventListener("change", remember);
+            const actions = document.createElement("td"), save = document.createElement("button"); save.type = "button"; save.className = "btn btn-sm btn-primary"; save.textContent = "ذخیره"; actions.append(save);
+            if (item.priceAmount != null) {
+                const accessories = document.createElement("button"); accessories.type = "button"; accessories.className = "btn btn-sm btn-default ms-1"; accessories.textContent = "متعلقات";
+                accessories.addEventListener("click", () => void openAccessories(page, item)); actions.append(accessories);
+                const specifications = document.createElement("button"); specifications.type = "button"; specifications.className = "btn btn-sm btn-default ms-1"; specifications.textContent = "مشخصات";
+                specifications.addEventListener("click", () => void openSpecifications(page, item)); actions.append(specifications);
+            }
+            row.append(actions);
+            const setBusy = busy => { if (busy) page._offerSaving.add(key); else page._offerSaving.delete(key); for (const input of [amount, discount, limit, active, save]) input.disabled = busy || page.dataset.canEdit !== "true"; };
+            setBusy(page._offerSaving.has(key));
+            save.addEventListener("click", async () => {
+                if (save.disabled) return;
+                const priceAmount = Number(amount.value), discountPercent = Number(discount.value), maxPurchaseQuantity = Number(limit.value);
+                if (!amount.value.trim() || !Number.isSafeInteger(priceAmount) || priceAmount < 0 || !discount.value.trim() || !Number.isFinite(discountPercent) || discountPercent < 0 || discountPercent >= 100 || Math.abs(discountPercent * 100 - Math.round(discountPercent * 100)) > 0.000001 || !Number.isInteger(maxPurchaseQuantity) || maxPurchaseQuantity < 1 || maxPurchaseQuantity > 99) { ui.notify("قیمت، تخفیف یا سقف خرید معتبر نیست.", "danger"); return; }
+                setBusy(true);
+                try { const result = await request(page, `${page.dataset.api}/product-offers/${item.productId}/${encodeURIComponent(item.salesPlanId)}`, "PUT", { priceAmount, discountPercent, maxPurchaseQuantity, isEnabled: active.checked }); page._offerDrafts.delete(key); ui.notify(result.message, "success"); await loadOffers(page); }
+                catch (error) { ui.notify(error.message || "ذخیرهٔ پیشنهاد ناموفق بود.", "danger"); }
+                finally { setBusy(false); if (page.isConnected) renderOffers(page); }
+            });
+            body.append(row);
+        }
+        page.querySelector("[data-offer-count]").textContent = `${number.format(rows.length)} ردیف`;
+        page.querySelector("[data-offer-status]").textContent = rows.length ? "" : "موردی پیدا نشد.";
+    }
+    async function openAccessories(page, offer) {
+        const modal = document.getElementById("offer-accessories-modal"); if (!modal) return;
+        const serial = (page._accessoriesSerial || 0) + 1; page._accessoriesSerial = serial;
+        const message = modal.querySelector("[data-offer-accessories-status]"), body = modal.querySelector("[data-offer-accessories-rows]");
+        body.replaceChildren(); message.textContent = "در حال دریافت متعلقات…";
+        modal.querySelector("[data-offer-accessories-name]").textContent = `${offer.productName} — ${offer.salesPlanName}`;
+        window.bootstrap?.Modal?.getOrCreateInstance(modal).show();
+        const url = `${page.dataset.api}/product-offers/${offer.productId}/${encodeURIComponent(offer.salesPlanId)}/accessories`;
+        try {
+            const items = await request(page, url); if (!page.isConnected || page._accessoriesSerial !== serial) return;
+            message.textContent = items.length ? "" : "متعلقهٔ فعالی برای کالا ثبت نشده است.";
+            for (const item of items) {
+                const row = document.createElement("tr"); row.append(cell(`${item.name}${item.isRequired ? " (اجباری)" : ""}`), cell(number.format(item.basePriceAmount)));
+                const priceCell = document.createElement("td"), price = document.createElement("input"); price.type = "number"; price.min = "0"; price.max = "9007199254740991"; price.step = "1"; price.className = "form-control form-control-sm"; price.value = String(item.priceAmount ?? item.basePriceAmount); price.setAttribute("aria-label", `قیمت ${item.name} در ${offer.salesPlanName}`); priceCell.append(price); row.append(priceCell);
+                const allowedCell = document.createElement("td"), allowed = document.createElement("input"); allowed.type = "checkbox"; allowed.checked = item.isRequired || item.isAllowed; allowed.disabled = item.isRequired || page.dataset.canEdit !== "true"; allowed.setAttribute("aria-label", `مجاز بودن ${item.name}`); allowedCell.append(allowed); row.append(allowedCell);
+                const actions = document.createElement("td"), save = document.createElement("button"); save.type = "button"; save.className = "btn btn-sm btn-primary"; save.textContent = "ذخیره"; save.disabled = page.dataset.canEdit !== "true"; actions.append(save); row.append(actions);
+                save.addEventListener("click", async () => {
+                    if (save.disabled) return;
+                    const priceAmount = Number(price.value);
+                    if (!price.value.trim() || !Number.isSafeInteger(priceAmount) || priceAmount < 0) { ui.notify("قیمت متعلقه باید مبلغ صحیح و غیرمنفی باشد.", "danger"); return; }
+                    save.disabled = true; price.disabled = true; allowed.disabled = true;
+                    try { const result = await request(page, `${url}/${item.accessoryId}`, "PUT", { priceAmount, isAllowed: allowed.checked }); ui.notify(result.message, "success"); }
+                    catch (error) { ui.notify(error.message || "ذخیرهٔ متعلقه ناموفق بود.", "danger"); }
+                    finally { save.disabled = page.dataset.canEdit !== "true"; price.disabled = page.dataset.canEdit !== "true"; allowed.disabled = item.isRequired || page.dataset.canEdit !== "true"; }
+                });
+                price.disabled = page.dataset.canEdit !== "true"; body.append(row);
+            }
+        } catch (error) { if (page.isConnected && page._accessoriesSerial === serial) message.textContent = error.message || "دریافت متعلقات ناموفق بود."; }
+    }
+    async function openSpecifications(page, offer) {
+        const modal = document.getElementById("offer-specifications-modal"), form = modal?.querySelector("[data-offer-specifications-form]"); if (!form) return;
+        const serial = (page._specificationsSerial || 0) + 1; page._specificationsSerial = serial;
+        const message = form.querySelector("[data-offer-specifications-status]"), save = form.querySelector('[type="submit"]');
+        form.elements.specifications.value = ""; form.querySelector("[data-offer-specifications-name]").textContent = `${offer.productName} — ${offer.salesPlanName}`;
+        message.textContent = "در حال دریافت مشخصات…"; save.disabled = true; form._offerUrl = null;
+        window.bootstrap?.Modal?.getOrCreateInstance(modal).show();
+        const url = `${page.dataset.api}/product-offers/${offer.productId}/${encodeURIComponent(offer.salesPlanId)}/specifications`;
+        try {
+            const rows = await request(page, url); if (!page.isConnected || page._specificationsSerial !== serial) return;
+            form.elements.specifications.value = rows.map(row => `${row.key} | ${row.value}`).join("\n"); form._offerUrl = url;
+            message.textContent = ""; save.disabled = page.dataset.canEdit !== "true";
+        } catch (error) { if (page.isConnected && page._specificationsSerial === serial) message.textContent = error.message || "دریافت مشخصات ناموفق بود."; }
+    }
     async function loadPlanSettings(page, selectedId) {
         const form = page.querySelector("[data-plan-settings]");
         if (!form) return;
@@ -101,6 +196,25 @@
         page._variantPriceRows = [];
         page._variantPriceDrafts = new Map();
         page._variantPriceSaving = new Set();
+        page._offers = []; page._offerDrafts = new Map(); page._offerSaving = new Set();
+        const offerFilter = page.querySelector("[data-offer-filter]");
+        if (offerFilter) {
+            offerFilter.addEventListener("submit", event => event.preventDefault());
+            offerFilter.addEventListener("input", () => renderOffers(page));
+            page.querySelector("[data-offer-refresh]").addEventListener("click", () => void loadOffers(page));
+            void loadOffers(page);
+            const specificationForm = document.querySelector("[data-offer-specifications-form]");
+            specificationForm?.addEventListener("submit", async event => {
+                event.preventDefault();
+                const save = specificationForm.querySelector('[type="submit"]'); if (save.disabled || !specificationForm._offerUrl) return;
+                const specs = specificationForm.elements.specifications.value.split(/\r?\n/).map(line => line.trim()).filter(Boolean).map(line => { const index = line.indexOf("|"); return index < 0 ? [line] : [line.slice(0, index).trim(), line.slice(index + 1).trim()]; });
+                if (specs.some(parts => parts.length !== 2 || !parts[0] || !parts[1])) { ui.notify("هر خط باید شامل عنوان و مقدار با جداکنندهٔ | باشد.", "danger"); return; }
+                save.disabled = true;
+                try { const result = await request(page, specificationForm._offerUrl, "PUT", specs.map(([key, value]) => ({ key, value }))); ui.notify(result.message, "success"); window.bootstrap?.Modal?.getInstance(document.getElementById("offer-specifications-modal"))?.hide(); }
+                catch (error) { ui.notify(error.message || "ذخیرهٔ مشخصات ناموفق بود.", "danger"); }
+                finally { if (specificationForm.isConnected) save.disabled = page.dataset.canEdit !== "true"; }
+            });
+        }
         const planForm = page.querySelector("[data-plan-settings]");
         if (planForm) {
             planForm.elements.id.addEventListener("change", () => showPlanSettings(page));

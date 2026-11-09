@@ -11,6 +11,8 @@ html { min-width: 320px; }
 body { font-family: "IRANSansX", sans-serif; }
 button, input, select, textarea { font: inherit; }
 a { text-decoration-thickness: from-font; }
+.admin-login-remember { display: flex; align-items: center; gap: 8px; padding: 0; }
+.admin-login-remember .form-check-input { float: none; flex: 0 0 auto; margin: 0; }
 .app-header .navbar-brand { min-width: 225px; gap: 9px; display: flex; align-items: center; }
 .admin-brand-name { font-weight: 700; }
 .admin-brand-caption { color: #929baa; font-size: 11px; font-weight: 400; margin-inline-start: 4px; }

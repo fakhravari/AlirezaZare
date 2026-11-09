@@ -9,6 +9,12 @@ using Microsoft.EntityFrameworkCore;
 using Shop.Database.Domain.Warehouse.Entities;
 using Shop.Database.Infrastructure.Persistence;
 
+if (args.Contains("--payment-flow", StringComparer.Ordinal))
+{
+    await PaymentFlowTest.RunAsync();
+    return;
+}
+
 if (args.Contains("--checkout-main", StringComparer.Ordinal) || args.Contains("--checkout-race", StringComparer.Ordinal))
 {
     await CheckoutMainTest.RunAsync(args.Contains("--checkout-race", StringComparer.Ordinal));

@@ -25,7 +25,7 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext) : ISt
                                          JSON_QUERY((SELECT pc.[CollectionKey] AS [id], JSON_QUERY(N'[' + COALESCE((SELECT STRING_AGG(CONVERT(nvarchar(max), CONVERT(INT, p.[Id])), N',') FROM [Store].[ProductCollectionItem] pci INNER JOIN [Warehouse].[Product] p ON p.[Id] = pci.[IdProduct] WHERE pci.[IdProductCollection] = pc.[Id] AND p.[IsCatalogActive] = 1 AND p.[IsStoreEnabled] = 1), N'') + N']') AS [items] FROM [Store].[ProductCollection] pc ORDER BY pc.[Id] FOR JSON PATH)) AS [collections]
                                   FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
                                   OPTION (MAX_GRANT_PERCENT = 5);
-                                  """, cancellationToken);
+                                  """, cancellationToken, commandTimeoutSeconds: 90);
 
     public async Task<string?> ReadBrandEditorialJsonAsync(CancellationToken cancellationToken) =>
         await ReadScalarJsonAsync("""
@@ -135,7 +135,7 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext) : ISt
                                       FOR JSON PATH
                                   )) AS [articles]
                                   FOR JSON PATH, WITHOUT_ARRAY_WRAPPER;
-                                  """, cancellationToken);
+                                  """, cancellationToken, commandTimeoutSeconds: 90);
 
     public async Task<string> ReadGeographyJsonAsync(CancellationToken cancellationToken) =>
         await ReadScalarJsonAsync("""
@@ -155,7 +155,8 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext) : ISt
                                   FOR JSON PATH, WITHOUT_ARRAY_WRAPPER;
                                   """, cancellationToken) ?? "{\"countries\":[],\"provinces\":[],\"cities\":[]}";
 
-    private async Task<string?> ReadScalarJsonAsync(string sql, CancellationToken cancellationToken)
+    private async Task<string?> ReadScalarJsonAsync(string sql, CancellationToken cancellationToken,
+        int? commandTimeoutSeconds = null)
     {
         DbConnection connection = dbContext.Database.GetDbConnection();
         bool closeWhenDone = connection.State != ConnectionState.Open;
@@ -165,6 +166,7 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext) : ISt
             await using DbCommand command = connection.CreateCommand();
             command.Transaction = dbContext.Database.CurrentTransaction?.GetDbTransaction();
             command.CommandText = sql;
+            if (commandTimeoutSeconds.HasValue) command.CommandTimeout = commandTimeoutSeconds.Value;
             await using DbDataReader reader =
                 await command.ExecuteReaderAsync(CommandBehavior.SequentialAccess, cancellationToken);
             if (!await reader.ReadAsync(cancellationToken) || reader.IsDBNull(0)) return null;

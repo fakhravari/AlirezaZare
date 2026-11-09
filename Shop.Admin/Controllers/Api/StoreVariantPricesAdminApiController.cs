@@ -130,4 +130,173 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db) : Con
 
     public sealed record VariantPlanPriceInput(decimal PriceAmount, decimal DiscountPercent, bool IsEnabled);
     public sealed record PlanSettingsInput(DateTimeOffset? StartsAtUtc, DateTimeOffset? EndsAtUtc, string? Label, bool ShowCountdown);
+
+    [HttpGet("product-offers")]
+    public async Task<IActionResult> ProductOffers(CancellationToken cancellationToken)
+    {
+        if (!CanManage()) return Forbid();
+        return Ok(await db.Database.SqlQueryRaw<ProductOfferRow>("""
+            SELECT p.[Id] AS [ProductId], p.[Code] AS [ProductCode], p.[Name] AS [ProductName],
+                   s.[SalesPlanKey] AS [SalesPlanId], s.[Name] AS [SalesPlanName],
+                   o.[PriceAmount], o.[DiscountPercent], o.[MaxPurchaseQuantity], o.[IsEnabled]
+            FROM [Warehouse].[Product] p CROSS JOIN [Warehouse].[SalesPlanReference] s
+            LEFT JOIN [Store].[ProductSalesPlanOffer] o ON o.[IdProduct] = p.[Id] AND o.[IdSalesPlan] = s.[Id]
+            WHERE p.[IsStoreEnabled] = 1 AND p.[IsCatalogActive] = 1 AND s.[IdStockOwnerType] = 1 AND s.[IsDefault] = 0
+            ORDER BY p.[Name], s.[Name]
+            """).ToListAsync(cancellationToken));
+    }
+
+    [HttpPut("product-offers/{productId:long}/{salesPlanId}")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> SaveProductOffer(long productId, string salesPlanId, [FromBody] ProductOfferInput input, CancellationToken cancellationToken)
+    {
+        if (!CanManage()) return Forbid();
+        if (productId < 1 || string.IsNullOrWhiteSpace(salesPlanId) || salesPlanId.Length > 128 ||
+            input.PriceAmount < 0 || input.PriceAmount > 9007199254740991m || input.PriceAmount != decimal.Truncate(input.PriceAmount) ||
+            input.DiscountPercent is < 0 or >= 100 || decimal.Round(input.DiscountPercent, 2) != input.DiscountPercent || input.MaxPurchaseQuantity is < 1 or > 99)
+            return ValidationProblem(detail: "قیمت، تخفیف یا حداکثر خرید معتبر نیست.", statusCode: 400);
+        await using var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
+        int valid = await db.Database.SqlQuery<int>($"""
+            SELECT COUNT(*) AS [Value] FROM [Warehouse].[Product] p CROSS JOIN [Warehouse].[SalesPlanReference] s
+            WHERE p.[Id] = {productId} AND p.[IsStoreEnabled] = 1 AND p.[IsCatalogActive] = 1
+              AND s.[SalesPlanKey] = {salesPlanId} AND s.[IdStockOwnerType] = 1 AND s.[IsDefault] = 0
+            """).SingleAsync(cancellationToken);
+        if (valid != 1) return NotFound(new { code = "product-or-plan-not-found" });
+        await db.Database.ExecuteSqlInterpolatedAsync($"""
+            DECLARE @planId BIGINT = (SELECT [Id] FROM [Warehouse].[SalesPlanReference] WHERE [SalesPlanKey] = {salesPlanId});
+            DECLARE @offerId BIGINT = (SELECT [Id] FROM [Store].[ProductSalesPlanOffer] WITH (UPDLOCK, HOLDLOCK) WHERE [IdProduct] = {productId} AND [IdSalesPlan] = @planId);
+            IF @offerId IS NULL
+            BEGIN
+                INSERT [Store].[ProductSalesPlanOffer] ([IdProduct], [IdSalesPlan], [PriceAmount], [DiscountPercent], [MaxPurchaseQuantity], [IsEnabled])
+                VALUES ({productId}, @planId, {input.PriceAmount}, {input.DiscountPercent}, {input.MaxPurchaseQuantity}, {input.IsEnabled});
+                SET @offerId = SCOPE_IDENTITY();
+                INSERT [Store].[ProductSalesPlanOfferAccessory] ([IdProductSalesPlanOffer], [IdAccessory], [PriceAmount], [IsIncludedByDefault], [IsAllowed])
+                SELECT @offerId, pa.[IdAccessory], pa.[PriceAmount], pa.[IsRequired], 1 FROM [Store].[ProductAccessory] pa
+                JOIN [Store].[Accessory] a ON a.[Id] = pa.[IdAccessory] AND a.[IsActive] = 1 WHERE pa.[IdProduct] = {productId};
+            END
+            ELSE
+                UPDATE [Store].[ProductSalesPlanOffer] SET [PriceAmount] = {input.PriceAmount}, [DiscountPercent] = {input.DiscountPercent},
+                    [MaxPurchaseQuantity] = {input.MaxPurchaseQuantity}, [IsEnabled] = {input.IsEnabled}, [UpdatedAtUtc] = SYSUTCDATETIME() WHERE [Id] = @offerId;
+            """, cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
+        return Ok(new { message = "پیشنهاد کالا در طرح ذخیره شد." });
+    }
+
+    public sealed class ProductOfferRow
+    {
+        public long ProductId { get; set; }
+        public string ProductCode { get; set; } = "";
+        public string ProductName { get; set; } = "";
+        public string SalesPlanId { get; set; } = "";
+        public string SalesPlanName { get; set; } = "";
+        public decimal? PriceAmount { get; set; }
+        public decimal? DiscountPercent { get; set; }
+        public int? MaxPurchaseQuantity { get; set; }
+        public bool? IsEnabled { get; set; }
+    }
+    public sealed record ProductOfferInput(decimal PriceAmount, decimal DiscountPercent, int MaxPurchaseQuantity, bool IsEnabled);
+
+    [HttpGet("product-offers/{productId:long}/{salesPlanId}/accessories")]
+    public async Task<IActionResult> OfferAccessories(long productId, string salesPlanId, CancellationToken cancellationToken)
+    {
+        if (!CanManage()) return Forbid();
+        if (productId < 1 || string.IsNullOrWhiteSpace(salesPlanId) || salesPlanId.Length > 128) return BadRequest();
+        int exists = await db.Database.SqlQuery<int>($"""
+            SELECT COUNT(*) AS [Value] FROM [Store].[ProductSalesPlanOffer] o
+            JOIN [Warehouse].[SalesPlanReference] s ON s.[Id] = o.[IdSalesPlan]
+            JOIN [Warehouse].[Product] p ON p.[Id] = o.[IdProduct]
+            WHERE o.[IdProduct] = {productId} AND s.[SalesPlanKey] = {salesPlanId} AND s.[IsDefault] = 0 AND s.[IdStockOwnerType] = 1 AND p.[IsStoreEnabled] = 1 AND p.[IsCatalogActive] = 1
+            """).SingleAsync(cancellationToken);
+        if (exists != 1) return NotFound(new { title = "ابتدا پیشنهاد این کالا و طرح را ذخیره کنید." });
+        return Ok(await db.Database.SqlQuery<OfferAccessoryRow>($"""
+            SELECT a.[Id] AS [AccessoryId], a.[Name], pa.[IsRequired], pa.[PriceAmount] AS [BasePriceAmount],
+                   oa.[PriceAmount], COALESCE(oa.[IsAllowed], CONVERT(bit, 0)) AS [IsAllowed]
+            FROM [Store].[ProductAccessory] pa JOIN [Store].[Accessory] a ON a.[Id] = pa.[IdAccessory] AND a.[IsActive] = 1
+            JOIN [Store].[ProductSalesPlanOffer] o ON o.[IdProduct] = pa.[IdProduct]
+            JOIN [Warehouse].[SalesPlanReference] s ON s.[Id] = o.[IdSalesPlan] AND s.[SalesPlanKey] = {salesPlanId} AND s.[IsDefault] = 0 AND s.[IdStockOwnerType] = 1
+            LEFT JOIN [Store].[ProductSalesPlanOfferAccessory] oa ON oa.[IdProductSalesPlanOffer] = o.[Id] AND oa.[IdAccessory] = a.[Id]
+            WHERE pa.[IdProduct] = {productId} ORDER BY pa.[SortOrder], a.[Name]
+            """).ToListAsync(cancellationToken));
+    }
+
+    [HttpPut("product-offers/{productId:long}/{salesPlanId}/accessories/{accessoryId:long}")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> SaveOfferAccessory(long productId, string salesPlanId, long accessoryId, [FromBody] OfferAccessoryInput input, CancellationToken cancellationToken)
+    {
+        if (!CanManage()) return Forbid();
+        if (productId < 1 || accessoryId < 1 || string.IsNullOrWhiteSpace(salesPlanId) || salesPlanId.Length > 128 ||
+            input.PriceAmount < 0 || input.PriceAmount > 9007199254740991m || input.PriceAmount != decimal.Truncate(input.PriceAmount))
+            return ValidationProblem(detail: "قیمت متعلقه باید مبلغ صحیح و غیرمنفی باشد.", statusCode: 400);
+        await using var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
+        var match = await db.Database.SqlQuery<OfferAccessoryMatch>($"""
+            SELECT o.[Id] AS [OfferId], pa.[IsRequired] FROM [Store].[ProductSalesPlanOffer] o
+            JOIN [Warehouse].[Product] p ON p.[Id] = o.[IdProduct] AND p.[IsStoreEnabled] = 1 AND p.[IsCatalogActive] = 1
+            JOIN [Warehouse].[SalesPlanReference] s ON s.[Id] = o.[IdSalesPlan] AND s.[SalesPlanKey] = {salesPlanId} AND s.[IsDefault] = 0 AND s.[IdStockOwnerType] = 1
+            JOIN [Store].[ProductAccessory] pa ON pa.[IdProduct] = o.[IdProduct] AND pa.[IdAccessory] = {accessoryId}
+            JOIN [Store].[Accessory] a ON a.[Id] = pa.[IdAccessory] AND a.[IsActive] = 1 WHERE o.[IdProduct] = {productId}
+            """).SingleOrDefaultAsync(cancellationToken);
+        if (match is null) return NotFound(new { title = "پیشنهاد یا متعلقهٔ فعال کالا یافت نشد." });
+        if (match.IsRequired && !input.IsAllowed) return BadRequest(new { title = "متعلقهٔ اجباری کالا باید در پیشنهاد مجاز باشد." });
+        await db.Database.ExecuteSqlInterpolatedAsync($"""
+            IF EXISTS (SELECT 1 FROM [Store].[ProductSalesPlanOfferAccessory] WITH (UPDLOCK, HOLDLOCK) WHERE [IdProductSalesPlanOffer] = {match.OfferId} AND [IdAccessory] = {accessoryId})
+                UPDATE [Store].[ProductSalesPlanOfferAccessory] SET [PriceAmount] = {input.PriceAmount}, [IsAllowed] = {input.IsAllowed}
+                WHERE [IdProductSalesPlanOffer] = {match.OfferId} AND [IdAccessory] = {accessoryId};
+            ELSE INSERT [Store].[ProductSalesPlanOfferAccessory] ([IdProductSalesPlanOffer], [IdAccessory], [PriceAmount], [IsIncludedByDefault], [IsAllowed])
+                VALUES ({match.OfferId}, {accessoryId}, {input.PriceAmount}, {match.IsRequired}, {input.IsAllowed});
+            """, cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
+        return Ok(new { message = "متعلقهٔ پیشنهاد ذخیره شد." });
+    }
+
+    public sealed class OfferAccessoryRow { public long AccessoryId { get; set; } public string Name { get; set; } = ""; public bool IsRequired { get; set; } public decimal BasePriceAmount { get; set; } public decimal? PriceAmount { get; set; } public bool IsAllowed { get; set; } }
+    public sealed class OfferAccessoryMatch { public long OfferId { get; set; } public bool IsRequired { get; set; } }
+    public sealed record OfferAccessoryInput(decimal PriceAmount, bool IsAllowed);
+
+    [HttpGet("product-offers/{productId:long}/{salesPlanId}/specifications")]
+    public async Task<IActionResult> OfferSpecifications(long productId, string salesPlanId, CancellationToken cancellationToken)
+    {
+        if (!CanManage()) return Forbid();
+        if (productId < 1 || string.IsNullOrWhiteSpace(salesPlanId) || salesPlanId.Length > 128) return BadRequest();
+        var offer = await FindOffer(productId, salesPlanId, cancellationToken);
+        if (offer is null) return NotFound(new { title = "ابتدا پیشنهاد این کالا و طرح را ذخیره کنید." });
+        return Ok(await db.Database.SqlQuery<OfferSpecification>($"SELECT [SpecificationKey] AS [Key], [Value] FROM [Store].[ProductSalesPlanOfferSpecificationOverride] WHERE [IdProductSalesPlanOffer] = {offer.OfferId} ORDER BY [Id]").ToListAsync(cancellationToken));
+    }
+
+    [HttpPut("product-offers/{productId:long}/{salesPlanId}/specifications")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> SaveOfferSpecifications(long productId, string salesPlanId, [FromBody] List<OfferSpecification> input, CancellationToken cancellationToken)
+    {
+        if (!CanManage()) return Forbid();
+        if (productId < 1 || string.IsNullOrWhiteSpace(salesPlanId) || salesPlanId.Length > 128 || input is null || input.Count > 50 || input.Any(x => x is null)) return BadRequest(new { title = "مشخصات معتبر نیستند." });
+        var specs = input.Select(x => new OfferSpecification { Key = x.Key?.Trim() ?? "", Value = x.Value?.Trim() ?? "" }).ToList();
+        if (specs.Any(x => x.Key.Length is < 1 or > 80 || x.Value.Length is < 1 or > 240 || x.Key.Contains('|') || x.Key.Any(char.IsControl) || x.Value.Any(char.IsControl)) ||
+            specs.Select(x => x.Key).Distinct(StringComparer.OrdinalIgnoreCase).Count() != specs.Count)
+            return BadRequest(new { title = "عنوان‌ها باید یکتا و حداکثر ۸۰ نویسه و مقادیر حداکثر ۲۴۰ نویسه باشند." });
+        await using var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
+        var offer = await FindOffer(productId, salesPlanId, cancellationToken);
+        if (offer is null) return NotFound(new { title = "پیشنهاد کالا و طرح یافت نشد." });
+        string json = System.Text.Json.JsonSerializer.Serialize(specs);
+        try
+        {
+            await db.Database.ExecuteSqlInterpolatedAsync($"""
+                DELETE FROM [Store].[ProductSalesPlanOfferSpecificationOverride] WHERE [IdProductSalesPlanOffer] = {offer.OfferId};
+                INSERT [Store].[ProductSalesPlanOfferSpecificationOverride] ([IdProductSalesPlanOffer], [SpecificationKey], [Value])
+                SELECT {offer.OfferId}, [Key], [Value] FROM OPENJSON({json}) WITH ([Key] nvarchar(80) '$.Key', [Value] nvarchar(240) '$.Value');
+                """, cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
+        }
+        catch (Microsoft.Data.SqlClient.SqlException error) when (error.Number is 2601 or 2627)
+        { return Conflict(new { title = "عنوان مشخصات تکراری است." }); }
+        return Ok(new { message = "مشخصات پیشنهاد ذخیره شد." });
+    }
+
+    private Task<OfferAccessoryMatch?> FindOffer(long productId, string salesPlanId, CancellationToken cancellationToken) =>
+        db.Database.SqlQuery<OfferAccessoryMatch>($"""
+            SELECT o.[Id] AS [OfferId], CONVERT(bit, 0) AS [IsRequired] FROM [Store].[ProductSalesPlanOffer] o
+            JOIN [Warehouse].[Product] p ON p.[Id] = o.[IdProduct] AND p.[IsStoreEnabled] = 1 AND p.[IsCatalogActive] = 1
+            JOIN [Warehouse].[SalesPlanReference] s ON s.[Id] = o.[IdSalesPlan] AND s.[SalesPlanKey] = {salesPlanId} AND s.[IsDefault] = 0 AND s.[IdStockOwnerType] = 1
+            WHERE o.[IdProduct] = {productId}
+            """).SingleOrDefaultAsync(cancellationToken);
+
+    public sealed class OfferSpecification { public string Key { get; set; } = ""; public string Value { get; set; } = ""; }
 }

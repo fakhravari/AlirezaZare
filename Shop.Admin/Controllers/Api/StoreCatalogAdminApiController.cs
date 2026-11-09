@@ -136,6 +136,18 @@ public sealed class StoreCatalogAdminApiController(IStoreRuntimeDatasetRepositor
         return changed == 1 ? Ok(new { message = "کالا منتشر شد." }) : Conflict(new { title = "پیش‌نویس پیدا نشد یا اطلاعات و تصویر آن کامل نیست." });
     }
 
+    [HttpPost("products/manage/{id:long}/unpublish")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> UnpublishProduct(long id, CancellationToken cancellationToken)
+    {
+        if (!User.IsInRole("system.full-access")) return Forbid();
+        int changed = await db.Database.ExecuteSqlInterpolatedAsync($"""
+            UPDATE [Warehouse].[Product] SET [IsCatalogActive] = 0, [UpdatedAtUtc] = SYSUTCDATETIME()
+            WHERE [Id] = {id} AND [IsStoreEnabled] = 1 AND [IsCatalogActive] = 1
+            """, cancellationToken);
+        return changed == 1 ? Ok(new { message = "کالا از انتشار خارج شد و در پیش‌نویس‌ها قرار گرفت." }) : Conflict(new { title = "کالای منتشرشده پیدا نشد." });
+    }
+
     public sealed record ProductCreateInput(string? Key, string? Code, string? Name, string? EnglishName, long BrandId, long CategoryId, long UnitId, decimal PriceAmount, decimal DiscountPercent, int MaxPurchaseQuantity);
     public sealed class DraftProduct { public long Id { get; set; } public string Code { get; set; } = ""; public string Name { get; set; } = ""; public string? BrandName { get; set; } public string? CategoryName { get; set; } public decimal? PriceAmount { get; set; } public bool HasImage { get; set; } }
 
@@ -190,6 +202,87 @@ public sealed class StoreCatalogAdminApiController(IStoreRuntimeDatasetRepositor
 
     public sealed record BrandInput(string? Key, string? NameFa, string? NameEn, string? CountryCode);
     public sealed class CountryRow { public string CountryCode { get; set; } = ""; public string NameFa { get; set; } = ""; }
+
+    [HttpGet("categories/manage/options")]
+    public async Task<IActionResult> CategoryOptions(CancellationToken cancellationToken)
+    {
+        if (!User.IsInRole("system.full-access")) return Forbid();
+        return Ok(await db.Database.SqlQueryRaw<CategoryNode>("SELECT [Id], [CategoryKey], [NameFa], [NameEn], [IdParentCategory], [PathJson], [IsActive] FROM [Store].[Category] WHERE [IsActive] = 1 ORDER BY [NameFa]").ToListAsync(cancellationToken));
+    }
+
+    [HttpPost("categories/manage")]
+    [ValidateAntiForgeryToken]
+    public Task<IActionResult> CreateCategory([FromBody] CategoryInput input, CancellationToken cancellationToken) => SaveCategory(null, input, cancellationToken);
+
+    [HttpPut("categories/manage/{key}")]
+    [ValidateAntiForgeryToken]
+    public Task<IActionResult> UpdateCategory(string key, [FromBody] CategoryInput input, CancellationToken cancellationToken) => SaveCategory(key, input, cancellationToken);
+
+    private async Task<IActionResult> SaveCategory(string? key, CategoryInput input, CancellationToken cancellationToken)
+    {
+        if (!User.IsInRole("system.full-access")) return Forbid();
+        string categoryKey = (key ?? input.Key ?? "").Trim(), nameFa = input.NameFa?.Trim() ?? "", nameEn = input.NameEn?.Trim() ?? "";
+        if (categoryKey.Length is < 1 or > 150 || !System.Text.RegularExpressions.Regex.IsMatch(categoryKey, "^[a-z0-9]+(?:-[a-z0-9]+)*$") ||
+            nameFa.Length is < 1 or > 200 || nameEn.Length is < 1 or > 200 || !nameEn.Any(c => c is >= 'A' and <= 'Z' or >= 'a' and <= 'z') ||
+            nameFa.Any(char.IsControl) || nameEn.Any(char.IsControl) || input.ParentId is <= 0)
+            return BadRequest(new { title = "شناسه یا نام دسته معتبر نیست." });
+        await using var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
+        var nodes = await db.Database.SqlQueryRaw<CategoryNode>("SELECT [Id], [CategoryKey], [NameFa], [NameEn], [IdParentCategory], [PathJson], [IsActive] FROM [Store].[Category] WITH (UPDLOCK, HOLDLOCK)").ToListAsync(cancellationToken);
+        var current = key is null ? null : nodes.SingleOrDefault(x => x.CategoryKey == categoryKey && x.IsActive);
+        if (key is not null && current is null) return NotFound();
+        if (current is null && nodes.Any(x => string.Equals(x.CategoryKey, categoryKey, StringComparison.OrdinalIgnoreCase))) return Conflict(new { title = "شناسهٔ دسته قبلاً ثبت شده است." });
+        long? parentId = current?.IdParentCategory ?? input.ParentId;
+        if (current is not null && input.ParentId != current.IdParentCategory) return BadRequest(new { title = "تغییر والد دسته از این فرم مجاز نیست." });
+        var parent = parentId is null ? null : nodes.SingleOrDefault(x => x.Id == parentId && x.IsActive);
+        if (parentId is not null && parent is null) return BadRequest(new { title = "دستهٔ والد فعال نیست یا وجود ندارد." });
+        if (nodes.Any(x => x.IsActive && x.Id != current?.Id && x.IdParentCategory == parentId && string.Equals(x.NameFa, nameFa, StringComparison.Ordinal)))
+            return Conflict(new { title = "دسته‌ای با این نام در همین سطح وجود دارد." });
+        if (current is null && parent is not null)
+        {
+            int products = await db.Database.SqlQuery<int>($"SELECT COUNT(*) AS [Value] FROM [Warehouse].[Product] WHERE [IdCategory] = {parent.Id} AND [IsStoreEnabled] = 1 AND [IsCatalogActive] = 1").SingleAsync(cancellationToken);
+            if (products != 0) return Conflict(new { title = "برای دستهٔ دارای کالای منتشرشده نمی‌توان زیردسته ساخت؛ ابتدا دستهٔ کالاها را تغییر دهید." });
+        }
+        try
+        {
+            if (current is null)
+            {
+                var parentPath = parent is null ? new List<string>() : JsonSerializer.Deserialize<List<string>>(parent.PathJson) ?? throw new JsonException();
+                parentPath.Add(nameFa);
+                string path = JsonSerializer.Serialize(parentPath);
+                await db.Database.ExecuteSqlInterpolatedAsync($"INSERT [Store].[Category] ([CategoryKey], [NameEn], [NameFa], [PathJson], [IdParentCategory], [SortOrder], [IsActive]) VALUES ({categoryKey}, {nameEn}, {nameFa}, {path}, {parentId}, {parentPath.Count}, 1)", cancellationToken);
+            }
+            else
+            {
+                var oldPath = JsonSerializer.Deserialize<List<string>>(current.PathJson) ?? throw new JsonException();
+                if (oldPath.Count == 0 || oldPath[^1] != current.NameFa) return Conflict(new { title = "مسیر دسته ناسازگار است؛ ابتدا دادهٔ دسته اصلاح شود." });
+                var descendants = new List<CategoryNode> { current };
+                for (int i = 0; i < descendants.Count; i++)
+                {
+                    foreach (var child in nodes.Where(x => x.IdParentCategory == descendants[i].Id))
+                    {
+                        if (descendants.Any(x => x.Id == child.Id)) return Conflict(new { title = "ساختار دسته‌ها دارای چرخه است." });
+                        descendants.Add(child);
+                    }
+                }
+                foreach (var node in descendants)
+                {
+                    var path = JsonSerializer.Deserialize<List<string>>(node.PathJson) ?? throw new JsonException();
+                    if (path.Count < oldPath.Count || !path.Take(oldPath.Count).SequenceEqual(oldPath)) return Conflict(new { title = "مسیر یکی از زیردسته‌ها ناسازگار است." });
+                    path[oldPath.Count - 1] = nameFa;
+                    string newPath = JsonSerializer.Serialize(path);
+                    await db.Database.ExecuteSqlInterpolatedAsync($"UPDATE [Store].[Category] SET [PathJson] = {newPath} WHERE [Id] = {node.Id}", cancellationToken);
+                }
+                await db.Database.ExecuteSqlInterpolatedAsync($"UPDATE [Store].[Category] SET [NameFa] = {nameFa}, [NameEn] = {nameEn} WHERE [Id] = {current.Id}", cancellationToken);
+            }
+            await transaction.CommitAsync(cancellationToken);
+        }
+        catch (JsonException) { return Conflict(new { title = "مسیر دسته ناسازگار است." }); }
+        catch (SqlException error) when (error.Number is 2601 or 2627) { return Conflict(new { title = "شناسهٔ دسته قبلاً ثبت شده است." }); }
+        return Ok(new { message = "دسته ذخیره شد." });
+    }
+
+    public sealed record CategoryInput(string? Key, string? NameFa, string? NameEn, long? ParentId);
+    public sealed class CategoryNode { public long Id { get; set; } public string CategoryKey { get; set; } = ""; public string NameFa { get; set; } = ""; public string NameEn { get; set; } = ""; public long? IdParentCategory { get; set; } public string PathJson { get; set; } = "[]"; public bool IsActive { get; set; } }
 
     [HttpGet("{section}")]
     public async Task<IActionResult> GetSection(

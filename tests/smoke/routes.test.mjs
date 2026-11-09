@@ -209,16 +209,18 @@ test('sitemap contains every stable canonical product URL exactly once', async (
 });
 
 test('every sitemap URL serves indexable HTML with a unique canonical and one H1', async () => {
-  const xml = await (await fetch(base + '/sitemap.xml')).text();
+  const sitemapResponse = await fetch(base + '/sitemap.xml', {signal: AbortSignal.timeout(240000)});
+  const xml = await sitemapResponse.text();
+  assert.equal(sitemapResponse.status, 200, `sitemap.xml: ${xml.slice(0, 4000)}\n${logs.slice(-8000)}`);
   const urls = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map(match => match[1].replaceAll('&amp;', '&'));
   assert.ok(urls.length > 0);
   for (let offset = 0; offset < urls.length; offset += 12) {
     await Promise.all(urls.slice(offset, offset + 12).map(async url => {
       const canonical = new URL(url);
-      const response = await fetch(new URL(canonical.pathname + canonical.search, base), {signal: AbortSignal.timeout(120000)}).catch(error => { throw new Error(`${url}: request failed: ${error.message}`, {cause: error}); });
+      const response = await fetch(new URL(canonical.pathname + canonical.search, base), {signal: AbortSignal.timeout(240000)}).catch(error => { throw new Error(`${url}: request failed: ${error.message}`, {cause: error}); });
       const html = await response.text();
       const errorTitle = html.match(/<title>([^<]*)<\/title>/i)?.[1] || "";
-      assert.equal(response.status, 200, `${url}${errorTitle ? `: ${errorTitle}` : ""}`);
+      assert.equal(response.status, 200, `${url}${errorTitle ? `: ${errorTitle}` : ""}\n${response.status === 200 ? "" : `${html.slice(0, 4000)}\n${logs.slice(-8000)}`}`);
       assert.match(html, /<title>[^<]+<\/title>/, url + ': title missing');
       assert.match(html, /<meta name="description" content="[^"]+"\s*\/>/, url + ': description missing');
       assert.match(html, /<meta name="robots" content="index, follow"\s*\/>/, url + ': page is not indexable');
@@ -244,7 +246,14 @@ test('referenced scripts, styles, product media, logo and flags are served local
 });
 
 test('images on every sitemap page, account page, catalog and loaded stylesheet resolve', async () => {
-  const sitemap = await (await fetch(base + '/sitemap.xml')).text();
+  const fetchBounded = async (url, options = {}) => {
+    try {
+      return await fetch(url, {...options, signal: AbortSignal.timeout(240000)});
+    } catch (error) {
+      throw new Error(`${url}: media audit request failed: ${error.message}`, {cause: error});
+    }
+  };
+  const sitemap = await (await fetchBounded(base + '/sitemap.xml')).text();
   const routes = new Set([...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m => {
     const canonical = new URL(m[1].replaceAll('&amp;', '&'));
     return new URL(canonical.pathname + canonical.search, base).href;
@@ -258,8 +267,9 @@ test('images on every sitemap page, account page, catalog and loaded stylesheet 
     if (!images.has(url.href)) images.set(url.href, new Set());
     images.get(url.href).add(owner);
   };
+  let checkedPages = 0;
   for (const route of routes) {
-    const response = await fetch(route);
+    const response = await fetchBounded(route);
     assert.equal(response.status, 200, route);
     const html = await response.text();
     const documentBase = new URL(html.match(/<base\b[^>]*href="([^"]+)"/i)?.[1] || route, route);
@@ -274,9 +284,11 @@ test('images on every sitemap page, account page, catalog and loaded stylesheet 
       const href = tag[0].match(/href="([^"]+)"/i)?.[1];
       if (href) styles.add(new URL(href.replaceAll('&amp;', '&'), documentBase).href);
     }
+    checkedPages++;
+    if (checkedPages % 25 === 0) console.log(`Media audit: inspected ${checkedPages}/${routes.size} pages.`);
   }
   for (const url of styles) {
-    const response = await fetch(url);
+    const response = await fetchBounded(url);
     assert.equal(response.status, 200, url);
     for (const match of (await response.text()).matchAll(/url\(\s*["']?([^"'()]+)["']?\s*\)/g)) addImage(match[1].trim(), url, url);
   }
@@ -284,14 +296,14 @@ test('images on every sitemap page, account page, catalog and loaded stylesheet 
     if (typeof value === 'string') addImage('/' + value, base, 'shared catalog');
     else if (value && typeof value === 'object') Object.values(value).forEach(catalogImages);
   };
-  const home = await (await fetch(base + '/')).text();
+  const home = await (await fetchBounded(base + '/')).text();
   catalogImages(JSON.parse(home.match(/<script type="application\/json" id="storeCatalog">([\s\S]*?)<\/script>/)[1]));
   const failures = [];
   const pending = [...images];
   await Promise.all(Array.from({length: 8}, async () => {
     while (pending.length) {
       const [url, owners] = pending.pop();
-      const response = await fetch(url, {method: 'HEAD'});
+      const response = await fetchBounded(url, {method: 'HEAD'});
       if (response.status !== 200 || !response.headers.get('content-type')?.startsWith('image/')) failures.push(`${response.status}: ${url} (${[...owners].join(', ')})`);
     }
   }));

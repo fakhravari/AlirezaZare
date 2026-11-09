@@ -103,11 +103,19 @@
                 edit.dataset.categoryContent = String(index); edit.textContent = "محتوای دسته";
                 actions.append(edit);
             }
+            if (page.dataset.adminSection === "categories" && page.dataset.canUploadImage === "true") {
+                const edit = document.createElement("button"); edit.type = "button"; edit.className = "btn btn-xs btn-default ms-1";
+                edit.dataset.categoryEdit = String(index); edit.textContent = "ویرایش دسته"; actions.append(edit);
+            }
             if (page.dataset.adminSection === "products" && page.dataset.canUploadImage === "true") {
                 const edit = document.createElement("button");
                 edit.type = "button"; edit.className = "btn btn-xs btn-default ms-1";
                 edit.dataset.productEdit = String(index); edit.textContent = "ویرایش کالا";
                 actions.append(edit);
+                const unpublish = document.createElement("button");
+                unpublish.type = "button"; unpublish.className = "btn btn-xs btn-default ms-1";
+                unpublish.dataset.productUnpublish = String(index); unpublish.textContent = "خروج از انتشار";
+                actions.append(unpublish);
                 const upload = document.createElement("button");
                 upload.type = "button"; upload.className = "btn btn-xs btn-default ms-1";
                 upload.dataset.productImage = String(index); upload.textContent = "تصویر محصول";
@@ -407,6 +415,27 @@
     });
 
     document.addEventListener("click", event => {
+        const categoryEdit = event.target.closest("[data-category-edit], [data-category-create]");
+        if (categoryEdit) {
+            const page = categoryEdit.closest('[data-admin-section="categories"]'), form = document.querySelector("[data-category-editor]");
+            const item = categoryEdit.hasAttribute("data-category-edit") ? page?.__adminRows?.[Number(categoryEdit.dataset.categoryEdit)] : null;
+            if (!page || !form || categoryEdit.disabled || (categoryEdit.hasAttribute("data-category-edit") && !item)) return;
+            categoryEdit.disabled = true;
+            void ui.getJson("/api/admin/store/catalog/categories/manage/options").then(nodes => {
+                if (!page.isConnected || !form.isConnected) return;
+                const category = item ? nodes.find(node => node.categoryKey === item.id) : null;
+                if (item && !category) throw new Error("دسته دیگر در دسترس نیست؛ فهرست را به‌روز کنید.");
+                form.reset(); form.elements.originalKey.value = category?.categoryKey || "";
+                form.elements.key.value = category?.categoryKey || ""; form.elements.key.readOnly = !!category;
+                form.elements.nameFa.value = category?.nameFa || ""; form.elements.nameEn.value = category?.nameEn || "";
+                form.elements.parentId.replaceChildren(new Option("بدون والد", ""), ...nodes.map(node => new Option(JSON.parse(node.pathJson).join(" / "), String(node.id))));
+                form.elements.parentId.value = category?.idParentCategory == null ? "" : String(category.idParentCategory);
+                form.elements.parentId.disabled = !!category;
+                window.bootstrap?.Modal?.getOrCreateInstance(document.getElementById("category-editor-modal")).show();
+            }).catch(error => ui.notify(error.message || "دریافت دسته‌ها ناموفق بود.", "danger"))
+                .finally(() => { categoryEdit.disabled = false; });
+            return;
+        }
         const trackingButton = event.target.closest("[data-order-tracking]");
         if (trackingButton) {
             const page = trackingButton.closest('[data-admin-page="orders"]');
@@ -437,6 +466,18 @@
                 window.bootstrap?.Modal?.getOrCreateInstance(document.getElementById("product-create-modal")).show();
             }).catch(error => ui.notify(error.message || "دریافت اطلاعات ناموفق بود.", "danger"))
                 .finally(() => { productCreate.disabled = false; });
+            return;
+        }
+        const unpublish = event.target.closest("[data-product-unpublish]");
+        if (unpublish) {
+            const page = unpublish.closest('[data-admin-section="products"]');
+            const item = page?.__adminRows?.[Number(unpublish.dataset.productUnpublish)];
+            if (!item || unpublish.disabled || !window.confirm(`کالای ${item.name} از انتشار خارج شود؟`)) return;
+            const token = document.querySelector('[data-product-create-form] [name="__RequestVerificationToken"]')?.value || "";
+            unpublish.disabled = true;
+            void ui.getJson(`/api/admin/store/catalog/products/manage/${encodeURIComponent(item.id)}/unpublish`, { method: "POST", headers: { RequestVerificationToken: token } })
+                .then(result => { ui.notify(result.message, "success"); refreshProductDrafts(); void loadCatalog(page, 1); })
+                .catch(error => { ui.notify(error.message || "خروج از انتشار ناموفق بود.", "danger"); unpublish.disabled = false; });
             return;
         }
         const publish = event.target.closest("[data-product-publish]");
@@ -658,6 +699,20 @@
     });
 
     document.addEventListener("submit", event => {
+        const categoryEditor = event.target.closest("[data-category-editor]");
+        if (categoryEditor) {
+            event.preventDefault();
+            const save = categoryEditor.querySelector('[type="submit"]'); if (save.disabled) return;
+            const original = categoryEditor.elements.originalKey.value, token = categoryEditor.querySelector('[name="__RequestVerificationToken"]')?.value || "";
+            const parentId = categoryEditor.elements.parentId.value;
+            const body = { key: categoryEditor.elements.key.value, nameFa: categoryEditor.elements.nameFa.value, nameEn: categoryEditor.elements.nameEn.value, parentId: parentId ? Number(parentId) : null };
+            save.disabled = true;
+            void ui.getJson(`/api/admin/store/catalog/categories/manage${original ? `/${encodeURIComponent(original)}` : ""}`, { method: original ? "PUT" : "POST", headers: { "Content-Type": "application/json", RequestVerificationToken: token }, body: JSON.stringify(body) })
+                .then(result => { ui.notify(result.message, "success"); window.bootstrap?.Modal?.getInstance(document.getElementById("category-editor-modal"))?.hide(); const page = document.querySelector('[data-admin-section="categories"]'); if (page) return loadCatalog(page, Number(page.dataset.adminPageNumber || 1)); })
+                .catch(error => ui.notify(error.message || "ذخیرهٔ دسته ناموفق بود.", "danger"))
+                .finally(() => { save.disabled = false; });
+            return;
+        }
         const trackingForm = event.target.closest("[data-order-tracking-form]");
         if (trackingForm) {
             event.preventDefault();

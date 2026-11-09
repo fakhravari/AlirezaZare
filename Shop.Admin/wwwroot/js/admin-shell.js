@@ -9,6 +9,19 @@
     const sidebar = document.getElementById("sidebar");
     if (!content) return;
 
+    if (sidebar) {
+        const syncSubmenu = item => {
+            item.querySelector(":scope > .menu-link[aria-expanded]")
+                ?.setAttribute("aria-expanded", String(item.classList.contains("expand")));
+        };
+        sidebar.querySelectorAll(".menu-item.has-sub").forEach(syncSubmenu);
+        new MutationObserver(records => {
+            records.forEach(record => {
+                if (record.target.matches(".menu-item.has-sub")) syncSubmenu(record.target);
+            });
+        }).observe(sidebar, { subtree: true, attributes: true, attributeFilter: ["class"] });
+    }
+
     let navigationRequest;
 
     function setActiveNavigation(target) {

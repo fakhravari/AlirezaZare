@@ -12,6 +12,10 @@
                 {
                     <button class="btn btn-xs btn-primary" type="button" data-product-create>افزودن کالا</button>
                 }
+                @if (catalogSection == "categories" && User.IsInRole("system.full-access"))
+                {
+                    <button class="btn btn-xs btn-primary" type="button" data-category-create>افزودن دسته</button>
+                }
                 @if (catalogSection == "brands" && User.IsInRole("system.full-access"))
                 {
                     <button class="btn btn-xs btn-primary" type="button" data-brand-create>افزودن برند</button>
@@ -158,6 +162,22 @@
 }
 @if (catalogSection == "categories")
 {
+    @if (User.IsInRole("system.full-access"))
+    {
+        <div class="modal fade" id="category-editor-modal" tabindex="-1" aria-labelledby="category-editor-title" aria-hidden="true">
+            <div class="modal-dialog"><form class="modal-content" data-category-editor>
+                @Html.AntiForgeryToken()<input type="hidden" name="originalKey" />
+                <div class="modal-header"><h2 class="modal-title fs-5" id="category-editor-title">مدیریت دسته</h2><button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="بستن"></button></div>
+                <div class="modal-body">
+                    <label class="form-label" for="category-key">شناسهٔ لاتین</label><input class="form-control mb-3" id="category-key" name="key" maxlength="150" pattern="[a-z0-9]+(-[a-z0-9]+)*" required />
+                    <label class="form-label" for="category-name-fa">نام فارسی</label><input class="form-control mb-3" id="category-name-fa" name="nameFa" maxlength="200" required />
+                    <label class="form-label" for="category-name-en">نام لاتین</label><input class="form-control mb-3" id="category-name-en" name="nameEn" maxlength="200" required />
+                    <label class="form-label" for="category-parent">دستهٔ والد</label><select class="form-select" id="category-parent" name="parentId"></select>
+                    <p class="text-muted mt-2">والد دسته پس از ساخت تغییر نمی‌کند. برای دستهٔ دارای کالای منتشرشده نمی‌توان زیردسته ساخت.</p>
+                </div><div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button type="submit" class="btn btn-primary">ذخیره</button></div>
+            </form></div>
+        </div>
+    }
     <div class="modal fade" id="category-content-modal" tabindex="-1" aria-labelledby="category-content-title" aria-hidden="true">
         <div class="modal-dialog modal-lg"><form class="modal-content" data-category-content-form>
             @Html.AntiForgeryToken()<input type="hidden" name="key" />
