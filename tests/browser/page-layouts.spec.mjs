@@ -1,5 +1,6 @@
 import {test, expect} from '@playwright/test';
 import axe from 'axe-core';
+import {useBrowserAccount} from '../helpers/browser-account.mjs';
 
 const paths = [
   '/', '/search', '/products/cordless-hammer-drill-1', '/cart', '/checkout',
@@ -13,7 +14,7 @@ const accessiblePaths = [...paths, '/error', '/Error/404'];
 
 test('main pages fit mobile, tablet and desktop widths', async ({page}) => {
   test.setTimeout(180000);
-  await page.addInitScript(() => localStorage.setItem('hn-demo-auth', '1'));
+  await useBrowserAccount(page, {addressId: null});
   const widths = [320, 390, 768, 1024, 1440];
   for (const width of widths) {
     await page.setViewportSize({width, height: 800});
@@ -135,7 +136,7 @@ test('main routes expose basic document and control names', async ({page}) => {
 
 test('main routes pass automated WCAG accessibility rules', async ({page}) => {
   test.setTimeout(180000);
-  await page.addInitScript(() => localStorage.setItem('hn-demo-auth', '1'));
+  await useBrowserAccount(page, {addressId: null});
   await page.addInitScript(axe.source);
   const allViolations = new Map();
   for (const path of accessiblePaths) {
@@ -157,8 +158,7 @@ test('main routes pass automated WCAG accessibility rules', async ({page}) => {
 });
 
 test('shared skip link is the first keyboard stop and transfers focus to main content', async ({page}) => {
-  await page.addInitScript(() => localStorage.setItem('hn-demo-auth', '1'));
-  for (const path of ['/', '/products/cordless-hammer-drill-1', '/profile']) {
+  for (const path of ['/', '/products/cordless-hammer-drill-1']) {
     await page.goto(path);
     await page.keyboard.press('Tab');
     const skipLink = page.locator('.skip-link');
@@ -171,6 +171,8 @@ test('shared skip link is the first keyboard stop and transfers focus to main co
     await expect(page.locator('#main-content')).toBeFocused();
     await expect(page.locator('#main-content')).toHaveCSS('outline-style', 'solid');
   }
+  await page.goto('/profile');
+  await expect(page.locator('#loginModal')).toBeVisible();
 });
 
 test('compatibility routes resolve to their current pages', async ({page}) => {

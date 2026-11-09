@@ -2,7 +2,16 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {runtime, source, plain} from '../helpers/runtime.mjs';
 const key = 'hadi-norouzi-cart';
-const loggedIn = (data, seed = {}) => runtime(data, {'hn-demo-auth': '1', ...seed});
+const loggedIn = (data, seed = {}) => {
+  const catalog = data || source();
+  const r = runtime(catalog, {'hn-demo-auth': '1', ...seed});
+  const plans = {priceOptions: Object.fromEntries(catalog.products.map(product => [product.id,
+    Object.entries(product.variants || {}).map(([key, feature]) => ({key, label: feature.label,
+      values: feature.options.map(option => ({key: option.value, label: option.label, priceDelta: (option.priceDelta || 0) * 1e6}))}))]))};
+  const query = r.document.querySelector;
+  r.document.querySelector = selector => selector === '#storeSalesPlans' ? {textContent: JSON.stringify(plans)} : query(selector);
+  return r;
+};
 
 test('required services are included exactly once, including after reload and legacy migration', () => {
   const r = loggedIn();
@@ -11,7 +20,7 @@ test('required services are included exactly once, including after reload and le
   assert.equal(item.price, 24850000);
   assert.equal(item.options.accessories.filter(a => a.required && a.selected).length, 1);
   assert.equal(r.ui.cart.read()[0].price, 24850000);
-  const reloaded = loggedIn(undefined, Object.fromEntries(r.values));
+  const reloaded = loggedIn(undefined, {[key]: r.ui.storage.get(key)});
   assert.equal(reloaded.ui.cart.read()[0].price, 24850000);
   assert.equal(reloaded.ui.cart.add(product)[0].price, 24850000);
   assert.equal(reloaded.ui.cart.totals().price, 49700000);
@@ -50,20 +59,32 @@ test('renaming an accessory preserves the selection through its stable ID', () =
   original.ui.cart.add({...p, options: {accessories: [{...optional, selected: true}]}});
   const changed = source();
   changed.products[0].accessories.find(a => a.id === optional.id).name = 'نام جدید متعلقه';
-  const reloaded = loggedIn(changed, Object.fromEntries(original.values));
+  const reloaded = loggedIn(changed, {[key]: original.ui.storage.get(key)});
   const saved = reloaded.ui.cart.read()[0].options.accessories.find(a => a.id === optional.id);
   assert.equal(saved.selected, true); assert.equal(saved.name, 'نام جدید متعلقه');
   assert.equal(reloaded.ui.cart.read()[0].price, 26100000);
 });
 
-test('out-of-stock variant combinations cannot be added', () => {
-  const data = source();
-  const p = data.products[0];
-  const combination = Object.entries(p.variants).map(([key, f]) => `${key}=${f.options[0].value}`).join('|');
-  p.variantStock = {[combination]: 0};
-  const r = loggedIn(data);
-  assert.deepEqual(plain(r.ui.cart.add(r.window.HNCatalog.find(1))), []);
+test('out-of-stock warehouse variants cannot be added', () => {
+  const r = loggedIn();
+  const query = r.document.querySelector;
+  r.document.querySelector = selector => selector === '#storeSalesPlans'
+    ? {textContent: JSON.stringify({inventoryVariants: [{productId: 1, variantId: 42, stockBySalesPlan: {regular: 0}}]})}
+    : query(selector);
+  assert.deepEqual(plain(r.ui.cart.add({...r.window.HNCatalog.find(1), variantId: 42})), []);
   assert.equal(r.events.some(e => e.type === 'hn:cart-added'), false);
+});
+
+test('account cart restores distinct warehouse variants and avoids duplicate identities', () => {
+  const r = loggedIn();
+  const query = r.document.querySelector;
+  r.document.querySelector = selector => selector === '#storeSalesPlans'
+    ? {textContent: JSON.stringify({inventoryVariants: [42, 43].map(variantId => ({productId: 1, variantId, stockBySalesPlan: {regular: 5}}))})}
+    : query(selector);
+  const lines = [42, 43].map(variantId => ({id: 1, variantId, salesPlanId: 'regular', quantity: 1, options: {}}));
+  assert.deepEqual(plain(r.ui.cart.restoreAccountLines([...lines, lines[0]]).map(item => item.variantId)), [42, 43]);
+  assert.deepEqual(plain(r.ui.cart.restoreAccountLines(lines).map(item => item.variantId)), [42, 43]);
+  assert.deepEqual(plain(r.ui.cart.read().map(item => item.variantId)), [42, 43]);
 });
 
 test('new configurations replace the existing configuration of the same product code', () => {
@@ -124,13 +145,13 @@ test('cart lines follow configured sales-plan type order and expose grouped labe
   assert.equal(r.ui.cart.groupBySalesPlan(items).reduce((sum, group) => sum + group.items.length, 0), 3);
 });
 
-test('future storage and failed writes cannot announce a successful cart addition', () => {
-  for (const future of [true, false]) {
-    const r = loggedIn(undefined, future ? {[key]: JSON.stringify({schemaVersion: 2, value: []})} : {});
-    if (!future) r.window.localStorage.setItem = () => { throw new Error('quota'); };
-    assert.deepEqual(plain(r.ui.cart.add(r.window.HNCatalog.find(1))), []);
-    assert.equal(r.events.some(e => e.type === 'hn:cart-added'), false);
-  }
+test('future legacy data is retained for migration while current cart works in memory', () => {
+  const future = JSON.stringify({schemaVersion: 2, value: []});
+  const r = loggedIn(undefined, {[key]: future});
+  r.window.localStorage.setItem = () => { throw new Error('quota'); };
+  assert.equal(r.ui.storage.legacy(key), future);
+  assert.equal(r.ui.cart.add(r.window.HNCatalog.find(1)).length, 1);
+  assert.equal(r.values.has(key), false);
 });
 
 test('anonymous additions request login without changing the cart', () => {

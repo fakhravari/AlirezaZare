@@ -15,7 +15,7 @@ function checkoutCart() {
   let items = [{id:'1', price:100, quantity:1, salesPlanId:'regular'}];
   const document = {querySelector: selector => selector === '#cartView .cart-checkout-link' ? link : null,
     querySelectorAll: () => [], addEventListener: (name, fn) => { listeners[name] = fn; }};
-  const ui = {ready: fn => fn(), mount: (name, root, fn) => fn(),
+  const ui = {ready: fn => fn(), mount: (name, root, fn) => fn(), auth: {isLoggedIn: () => false},
     storage: {get: (key, fallback) => values[key] ?? fallback, set: (key, value) => {values[key] = value;}},
     cart: {read: () => items}, setMessage() {}};
   const window = {HNUI: ui, addEventListener() {}};

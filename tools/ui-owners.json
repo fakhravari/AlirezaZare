@@ -19,6 +19,7 @@
           ],
           "server": [
             "Shop.Admin/Controllers/Api/StoreCatalogAdminApiController.cs",
+            "Shop.Admin/Controllers/Api/StoreCategoryContentApiController.cs",
             "Shop.Admin/Controllers/Api/WarehouseAdminApiController.cs"
           ]
         },

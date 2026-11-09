@@ -2,7 +2,7 @@
     string catalogSection = (string)ViewData["Section"]!;
     string apiUrl = (string)ViewData["ApiUrl"]!;
 }
-<div class="admin-page" data-admin-page="catalog" data-admin-section="@catalogSection" data-admin-api="@apiUrl">
+<div class="admin-page" data-admin-page="catalog" data-admin-section="@catalogSection" data-admin-api="@apiUrl" data-can-edit-category="@(User.IsInRole("system.full-access") || (User.HasClaim("admin_permission", "Store:StoreCategoryContentApi:Get") && User.HasClaim("admin_permission", "Store:StoreCategoryContentApi:Update")) ? "true" : "false")">
     @await Html.PartialAsync("_AdminPageIntro", ((string)ViewData["Title"]!, (string)ViewData["Description"]!))
     <section class="panel panel-inverse">
         <div class="panel-heading">
@@ -68,7 +68,23 @@
                 <span data-admin-page-label></span>
                 <button type="button" class="btn btn-default btn-sm" data-admin-page-step="1">بعدی</button>
             </div>
-            <p class="admin-readonly-note"><i class="fa fa-lock" aria-hidden="true"></i> فهرست از API خوانده می‌شود؛ تغییر اطلاعات تا آماده‌شدن API مدیریتی فعال نیست.</p>
+            <p class="admin-readonly-note"><i class="fa fa-lock" aria-hidden="true"></i> @(catalogSection == "categories" ? "محتوای مشترک محصول در دسته قابل ویرایش است." : "فهرست از API خوانده می‌شود؛ تغییر اطلاعات تا آماده‌شدن API مدیریتی فعال نیست.")</p>
         </div>
     </section>
 </div>
+@if (catalogSection == "categories")
+{
+    <div class="modal fade" id="category-content-modal" tabindex="-1" aria-labelledby="category-content-title" aria-hidden="true">
+        <div class="modal-dialog modal-lg"><form class="modal-content" data-category-content-form>
+            @Html.AntiForgeryToken()<input type="hidden" name="key" />
+            <div class="modal-header"><h2 class="modal-title fs-5" id="category-content-title">محتوای مشترک دسته</h2><button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="بستن"></button></div>
+            <div class="modal-body">
+                <p data-category-content-name></p>
+                <label for="category-intro" class="form-label">معرفی</label><textarea id="category-intro" name="intro" class="form-control mb-3" rows="4" maxlength="10000"></textarea>
+                <label for="category-highlights" class="form-label">نکات برجسته، هر مورد در یک خط</label><textarea id="category-highlights" name="highlights" class="form-control mb-3" rows="4"></textarea>
+                <label for="category-specs" class="form-label">مشخصات عمومی، هر خط به شکل «عنوان | مقدار»</label><textarea id="category-specs" name="specs" class="form-control" rows="5"></textarea>
+            </div>
+            <div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button type="submit" class="btn btn-primary">ذخیره</button></div>
+        </form></div>
+    </div>
+}

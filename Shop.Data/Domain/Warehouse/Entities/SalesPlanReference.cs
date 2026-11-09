@@ -7,5 +7,14 @@ public sealed class SalesPlanReference
     public string DisplayName { get; set; } = string.Empty;
     public bool IsRegular { get; set; }
     public bool IsActive { get; set; }
+    public byte IdStockOwnerType { get; set; }
+    public string Code { get; set; } = string.Empty;
+    public string PlanType { get; set; } = string.Empty;
     public ICollection<StockBalance> StockBalances { get; set; } = new List<StockBalance>();
+}
+
+public sealed class WarehouseStockOwner
+{
+    public long IdWarehouse { get; set; }
+    public long IdStockOwner { get; set; }
 }

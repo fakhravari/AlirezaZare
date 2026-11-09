@@ -369,6 +369,21 @@
         return [];
       }
     },
+    restoreAccountLines(lines) {
+      const current = this.read();
+      const key = (item) => JSON.stringify([String(item.id), Number(item.variantId) || null, String(item.salesPlanId || "regular")]);
+      const known = new Set(current.map(key));
+      const restored = [];
+      for (const line of Array.isArray(lines) ? lines : []) {
+        const identity = key(line);
+        if (known.has(identity)) continue;
+        const product = (window.HNProducts || []).find((candidate) => String(candidate.id) === String(line.id));
+        if (!product) continue;
+        restored.push({ ...product, id: String(line.id), variantId: line.variantId ?? null, quantity: Number(line.quantity), salesPlanId: line.salesPlanId, options: line.options || {} });
+        known.add(identity);
+      }
+      return restored.length ? this.write([...current, ...restored]) : current;
+    },
     write(items) {
       if (!storage.writable(cartKey)) return this.read();
       const safeItems = enforceCartLimits(normalizeCart(items));

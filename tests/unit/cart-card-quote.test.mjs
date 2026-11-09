@@ -13,7 +13,7 @@ function cardRuntime() {
   r.document.createElement = () => ({classList: {add() {}, remove() {}}, setAttribute() {}, append() {}});
   r.window.clearTimeout = () => {};
   r.window.setTimeout = () => 0;
-  const listener = r.listeners.find(([type]) => type === 'click')[1];
+  const listener = r.listeners.find(([type, callback]) => type === 'click' && String(callback).includes('.add-cart[data-id]'))[1];
   return {r, button, listener};
 }
 
@@ -37,7 +37,7 @@ test('plan card uses server quote including required accessory prices', async ()
 
 test('unavailable plan quote does not add a cart item', async () => {
   const {r, button, listener} = cardRuntime();
-  r.context.fetch = async () => ({ok: false});
+  r.window.fetch = async () => ({ok: false});
   await listener({target: {closest: () => button}});
   assert.equal(r.ui.cart.read().length, 0);
   assert.equal(button.disabled, false);

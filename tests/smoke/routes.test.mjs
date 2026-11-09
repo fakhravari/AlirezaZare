@@ -34,6 +34,17 @@ after(async () => {
   server.kill(); await stopped;
 });
 
+test('geography response is complete and exposes countries with provinces for addresses', async () => {
+  const response = await fetch(base + '/api/store/geography');
+  assert.equal(response.status, 200);
+  const geography = await response.json();
+  const iran = geography.countries.find(country => country.nameEn === 'Iran');
+  assert.ok(iran);
+  assert.ok(geography.provinces.some(province => province.countryId === iran.id));
+  assert.ok(geography.cities.length > 1000);
+  assert.ok(geography.countries.every(country => geography.provinces.some(province => province.countryId === country.id)));
+});
+
 test('account coupons and public offers share values without publishing order history', async () => {
   const home = await (await fetch(base + '/')).text();
   const profile = await (await fetch(base + '/profile/coupons')).text();
@@ -65,6 +76,15 @@ test('sales-plan quotes validate nullable options, plan-specific accessory price
   const priced = await planQuote.json();
   assert.equal(priced.accessoryAmounts['shipping-insurance'], 245000);
 
+  const regularQuote = await quote({productId: 1, salesPlanId: 'regular', quantity: 1,
+    priceOptions: {battery: '2ah', chuck: '10mm'}, accessoryIds: ['shipping-insurance']});
+  assert.equal(regularQuote.status, 200, logs.slice(-2000));
+  const regularPricing = await regularQuote.json();
+  const home = await (await fetch(base + '/')).text();
+  const catalog = JSON.parse(home.match(/<script type="application\/json" id="storeCatalog">([\s\S]*?)<\/script>/)[1]);
+  const insurance = catalog.products.find(product => product.id === 1).accessories.find(item => item.id === 'shipping-insurance');
+  assert.equal(Math.round(insurance.price * 1_000_000), regularPricing.accessoryAmounts['shipping-insurance']);
+
   const duplicateLine = await fetch(base + '/api/store/sales-plans/validate-cart', {
     method: 'POST', headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({lines: [
@@ -81,14 +101,31 @@ test('sales-plan quotes validate nullable options, plan-specific accessory price
 
 test('home, search, product, cart, account and content routes serve the same validated catalog', async () => {
   const routes = ['/', '/search', '/products/cordless-hammer-drill-1', '/products/digital-multimeter-6', '/cart', '/checkout', '/compare', '/favorites', '/profile', '/profile/orders', '/profile/addresses', '/brands', '/brands/bosch', '/contact', '/about'];
+  let catalog;
   for (const route of routes) {
     const response = await fetch(base + route);
     assert.equal(response.status, 200, route + '\n' + logs.slice(-2000));
     const html = await response.text();
     const match = html.match(/<script type="application\/json" id="storeCatalog">([\s\S]*?)<\/script>/);
     assert.ok(match, route + ': shared catalog missing');
-    assert.deepEqual(JSON.parse(match[1]), source(), route);
+    const currentCatalog = JSON.parse(match[1]);
+    if (!catalog) catalog = currentCatalog;
+    assert.deepEqual(currentCatalog, catalog, route);
     assert.ok(html.includes('shop/js/store/product-card.js'));
+  }
+});
+
+test('catalog prices use the same monetary unit as regular sales offers', async () => {
+  const html = await (await fetch(base + '/')).text();
+  const readData = id => JSON.parse(html.match(new RegExp(`<script type="application/json" id="${id}">([\\s\\S]*?)</script>`))[1]);
+  const catalog = readData('storeCatalog');
+  const plans = readData('storeSalesPlans');
+  const regular = plans.plans.find(plan => plan.isDefault);
+  assert.ok(regular);
+  for (const product of catalog.products) {
+    const offer = plans.offers.find(item => item.productId === product.id && item.salesPlanId === regular.id);
+    assert.ok(offer, `missing default offer for ${product.id}`);
+    assert.equal(Math.round(product.price * 1_000_000), Math.round(offer.priceAmount * (100 - offer.discountPercent) / 100), `price for ${product.id}`);
   }
 });
 
@@ -169,7 +206,8 @@ test('every sitemap URL serves indexable HTML with a unique canonical and one H1
   assert.ok(urls.length > 0);
   for (let offset = 0; offset < urls.length; offset += 12) {
     await Promise.all(urls.slice(offset, offset + 12).map(async url => {
-      const response = await fetch(url);
+      const canonical = new URL(url);
+      const response = await fetch(new URL(canonical.pathname + canonical.search, base));
       assert.equal(response.status, 200, url);
       const html = await response.text();
       assert.match(html, /<title>[^<]+<\/title>/, url + ': title missing');
@@ -198,7 +236,10 @@ test('referenced scripts, styles, product media, logo and flags are served local
 
 test('images on every sitemap page, account page, catalog and loaded stylesheet resolve', async () => {
   const sitemap = await (await fetch(base + '/sitemap.xml')).text();
-  const routes = new Set([...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m => m[1].replaceAll('&amp;', '&')));
+  const routes = new Set([...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m => {
+    const canonical = new URL(m[1].replaceAll('&amp;', '&'));
+    return new URL(canonical.pathname + canonical.search, base).href;
+  }));
   for (const route of ['/cart', '/checkout', '/compare', '/favorites', '/profile', '/profile/orders', '/profile/addresses', '/profile/favorites']) routes.add(base + route);
   const images = new Map(), styles = new Set();
   const addImage = (value, parent, owner) => {
@@ -234,7 +275,8 @@ test('images on every sitemap page, account page, catalog and loaded stylesheet 
     if (typeof value === 'string') addImage('/' + value, base, 'shared catalog');
     else if (value && typeof value === 'object') Object.values(value).forEach(catalogImages);
   };
-  catalogImages(source());
+  const home = await (await fetch(base + '/')).text();
+  catalogImages(JSON.parse(home.match(/<script type="application\/json" id="storeCatalog">([\s\S]*?)<\/script>/)[1]));
   const failures = [];
   const pending = [...images];
   await Promise.all(Array.from({length: 8}, async () => {

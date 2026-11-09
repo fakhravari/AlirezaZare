@@ -4,7 +4,8 @@ import vm from 'node:vm';
 import {fileURLToPath} from 'node:url';
 
 export const root = fileURLToPath(new URL('../../', import.meta.url));
-export const source = () => JSON.parse(fs.readFileSync(path.join(root, 'Shop/wwwroot/content/data/catalog.json'), 'utf8'));
+// This is a test-only fixture; the application obtains its catalog from SQL Server.
+export const source = () => JSON.parse(fs.readFileSync(path.join(root, 'tests/fixtures/catalog.json'), 'utf8'));
 export const plain = value => JSON.parse(JSON.stringify(value));
 
 export function runtime(data = source(), seed = {}, apiBasePath = '/api/') {
@@ -22,6 +23,8 @@ export function runtime(data = source(), seed = {}, apiBasePath = '/api/') {
     AbortController, URL, setTimeout, clearTimeout,
     addEventListener: (...args) => listeners.push(args),
     localStorage: {
+      get length() { return values.size; },
+      key: index => [...values.keys()][index] ?? null,
       getItem: key => values.get(key) ?? null,
       setItem: (key, value) => values.set(key, String(value)),
       removeItem: key => values.delete(key),
@@ -35,5 +38,7 @@ export function runtime(data = source(), seed = {}, apiBasePath = '/api/') {
   load('store/cart.js');
   load('core/ui-core.js');
   load('store/product-card.js');
+  // Authentication is hydrated from account state, never from the legacy flag.
+  if (seed['hn-demo-auth'] === '1') { window.HNUI.auth.login(); events.length = 0; }
   return {window, document, values, events, listeners, load, context, ui: window.HNUI};
 }

@@ -1,0 +1,206 @@
+{
+  "schemaVersion": 1,
+  "currency": "IRT",
+  "orders": [
+    {
+      "id": "demo-order-2026-001",
+      "number": "HN-۱۴۰۵۰۶۲۱",
+      "status": "pending-payment",
+      "orderedOn": "2026-09-08",
+      "itemCount": 1,
+      "totalAmount": 24500000,
+      "deliveryDescription": "در انتظار تکمیل پرداخت سفارش"
+    },
+    {
+      "id": "demo-order-2026-002",
+      "number": "HN-۱۴۰۵۰۶۱۸",
+      "status": "payment-confirmed",
+      "orderedOn": "2026-09-05",
+      "itemCount": 2,
+      "totalAmount": 46000000,
+      "deliveryDescription": "پرداخت سفارش تأیید شده است"
+    },
+    {
+      "id": "demo-order-2026-003",
+      "number": "HN-۱۴۰۵۰۵۹۲",
+      "status": "warehouse-confirmed",
+      "orderedOn": "2026-08-22",
+      "itemCount": 1,
+      "totalAmount": 26000000,
+      "deliveryDescription": "موجودی کالا در انبار تأیید شده است"
+    },
+    {
+      "id": "demo-order-2026-004",
+      "number": "HN-۱۴۰۵۰۵۸۵",
+      "status": "in-transit",
+      "orderedOn": "2026-08-17",
+      "itemCount": 1,
+      "totalAmount": 18700000,
+      "deliveryDescription": "مرسوله در مسیر ارسال قرار دارد"
+    },
+    {
+      "id": "demo-order-2026-005",
+      "number": "HN-۱۴۰۵۰۵۷۲",
+      "status": "shipped-to-post",
+      "orderedOn": "2026-08-08",
+      "itemCount": 2,
+      "totalAmount": 51200000,
+      "deliveryDescription": "سفارش به شرکت پست تحویل شد"
+    },
+    {
+      "id": "demo-order-2026-006",
+      "number": "HN-۱۴۰۵۰۵۴۰",
+      "status": "delivered",
+      "orderedOn": "2026-07-30",
+      "itemCount": 1,
+      "totalAmount": 29800000,
+      "deliveryDescription": "سفارش با موفقیت تحویل شد"
+    },
+    {
+      "id": "demo-order-2026-007",
+      "number": "HN-۱۴۰۵۰۴۹۸",
+      "status": "delivered",
+      "orderedOn": "2026-07-21",
+      "itemCount": 1,
+      "totalAmount": 22400000,
+      "deliveryDescription": "سفارش با موفقیت تحویل شد"
+    },
+    {
+      "id": "demo-order-2026-008",
+      "number": "HN-۱۴۰۵۰۴۶۱",
+      "status": "delivered",
+      "orderedOn": "2026-07-08",
+      "itemCount": 2,
+      "totalAmount": 43600000,
+      "deliveryDescription": "سفارش با موفقیت تحویل شد"
+    },
+    {
+      "id": "demo-order-2026-009",
+      "number": "HN-۱۴۰۵۰۴۲۲",
+      "status": "cancelled",
+      "orderedOn": "2026-06-22",
+      "itemCount": 1,
+      "totalAmount": 25900000,
+      "deliveryDescription": "سفارش به درخواست کاربر لغو شد"
+    },
+    {
+      "id": "demo-order-2026-010",
+      "number": "HN-۱۴۰۵۰۳۸۹",
+      "status": "delivered",
+      "orderedOn": "2026-06-09",
+      "itemCount": 1,
+      "totalAmount": 31500000,
+      "deliveryDescription": "سفارش با موفقیت تحویل شد"
+    }
+  ],
+  "coupons": [
+    {
+      "id": "coupon-bazar10",
+      "code": "BAZAR10",
+      "discountPercent": 10,
+      "usageLimit": 10,
+      "enabled": true,
+      "expiresOn": "2027-03-20",
+      "orderIds": [
+        "demo-order-2026-003",
+        "demo-order-2026-006"
+      ]
+    },
+    {
+      "id": "coupon-tools15",
+      "code": "TOOLS15",
+      "discountPercent": 15,
+      "usageLimit": 8,
+      "enabled": true,
+      "expiresOn": "2026-11-21",
+      "orderIds": [
+        "demo-order-2026-001",
+        "demo-order-2026-007"
+      ]
+    },
+    {
+      "id": "coupon-welcome8",
+      "code": "WELCOME8",
+      "discountPercent": 8,
+      "usageLimit": 8,
+      "enabled": true,
+      "expiresOn": "2026-12-21",
+      "orderIds": [
+        "demo-order-2026-002"
+      ]
+    },
+    {
+      "id": "coupon-nimrooz12",
+      "code": "NIMROOZ12",
+      "discountPercent": 12,
+      "usageLimit": 5,
+      "enabled": false,
+      "expiresOn": "2026-08-22",
+      "orderIds": [
+        "demo-order-2026-004"
+      ]
+    },
+    {
+      "id": "coupon-summer8",
+      "code": "SUMMER8",
+      "discountPercent": 8,
+      "usageLimit": 5,
+      "enabled": false,
+      "expiresOn": "2026-08-22",
+      "orderIds": [
+        "demo-order-2026-005"
+      ]
+    },
+    {
+      "id": "coupon-autumn5",
+      "code": "AUTUMN5",
+      "discountPercent": 5,
+      "usageLimit": 5,
+      "enabled": false,
+      "expiresOn": "2026-07-22",
+      "orderIds": [
+        "demo-order-2026-008"
+      ]
+    },
+    {
+      "id": "coupon-order7",
+      "code": "ORDER7",
+      "discountPercent": 7,
+      "usageLimit": 6,
+      "enabled": false,
+      "expiresOn": "2026-07-22",
+      "orderIds": [
+        "demo-order-2026-009"
+      ]
+    },
+    {
+      "id": "coupon-aman15",
+      "code": "AMAN15",
+      "discountPercent": 15,
+      "usageLimit": 6,
+      "enabled": false,
+      "expiresOn": "2026-06-21",
+      "orderIds": [
+        "demo-order-2026-010"
+      ]
+    },
+    {
+      "id": "coupon-bahar15",
+      "code": "BAHAR15",
+      "discountPercent": 15,
+      "usageLimit": 10,
+      "enabled": false,
+      "expiresOn": "2026-07-22",
+      "orderIds": []
+    },
+    {
+      "id": "coupon-old20",
+      "code": "OLD20",
+      "discountPercent": 20,
+      "usageLimit": 10,
+      "enabled": false,
+      "expiresOn": "2026-05-21",
+      "orderIds": []
+    }
+  ]
+}

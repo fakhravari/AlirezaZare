@@ -12,7 +12,7 @@
     bool canStoreSales = Can("Store:Features:Index:orders") || Can("Store:Features:Index:promotions");
     bool canStorePeople = Can("Store:Features:Index:customers") || Can("Store:Features:Index:reviews") || Can("Store:Features:Index:questions");
     bool canWarehouseOperations = new[] { "receipts", "dispatches", "transfers", "returns", "stocktake", "adjustments", "movements" }.Any(id => Can($"Warehouse:Features:Index:{id}"));
-    bool canWarehouseSettings = new[] { "companies", "references", "units", "product-units", "variants", "document-types", "sales-plan-mapping" }.Any(id => Can($"Warehouse:Features:Index:{id}"));
+    bool canWarehouseSettings = new[] { "companies", "references", "units", "product-units", "variants", "document-types", "sales-plan-mapping", "stock-owners" }.Any(id => Can($"Warehouse:Features:Index:{id}"));
     bool catalogOpen = inStore && string.Equals(controller, "Catalog", StringComparison.OrdinalIgnoreCase);
     bool salesOpen = inStore && (new[] { "Orders", "Promotions" }.Contains(controller, StringComparer.OrdinalIgnoreCase) || IsFeature("orders") || IsFeature("promotions"));
 }
@@ -221,8 +221,8 @@
         </div>
     </div>
 </div>
-<div class="menu-item has-sub @(inWarehouse && new[] { "companies", "references", "units", "product-units", "variants", "document-types", "sales-plan-mapping" }.Contains(feature ?? "", StringComparer.OrdinalIgnoreCase) ? "active expand" : "")" hidden="@(!canWarehouseSettings)">
-    <a href="#warehouse-settings" class="menu-link" aria-expanded="@(inWarehouse && new[] { "companies", "references", "units", "product-units", "variants", "document-types", "sales-plan-mapping" }.Contains(feature ?? "", StringComparer.OrdinalIgnoreCase) ? "true" : "false")">
+<div class="menu-item has-sub @(inWarehouse && new[] { "companies", "references", "units", "product-units", "variants", "document-types", "sales-plan-mapping", "stock-owners" }.Contains(feature ?? "", StringComparer.OrdinalIgnoreCase) ? "active expand" : "")" hidden="@(!canWarehouseSettings)">
+    <a href="#warehouse-settings" class="menu-link" aria-expanded="@(inWarehouse && new[] { "companies", "references", "units", "product-units", "variants", "document-types", "sales-plan-mapping", "stock-owners" }.Contains(feature ?? "", StringComparer.OrdinalIgnoreCase) ? "true" : "false")">
         <span class="menu-icon">
             <i class="fa fa-sliders" aria-hidden="true"></i>
         </span><span class="menu-text">تعاریف و دسترسی</span><span class="menu-caret"></span>
@@ -252,6 +252,9 @@
             <a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="variants" data-admin-nav>
                 <span class="menu-text">تنوع کالا</span>
             </a>
+        </div>
+        <div class="menu-item @(IsFeature("stock-owners") ? "active" : "")" hidden="@(!Can("Warehouse:Features:Index:stock-owners"))">
+            <a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="stock-owners" data-admin-nav><span class="menu-text">مالک کالا و طرح فروش</span></a>
         </div>
         <div class="menu-item @(IsFeature("sales-plan-mapping") ? "active" : "")" hidden="@(!Can("Warehouse:Features:Index:sales-plan-mapping"))">
             <a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="sales-plan-mapping" data-admin-nav>

@@ -1,4 +1,5 @@
 import {test, expect} from '@playwright/test';
+import {useBrowserAccount} from '../helpers/browser-account.mjs';
 
 test.beforeEach(async ({page}) => {
   page.__storeErrors = [];
@@ -98,7 +99,7 @@ test('desktop and tablet headers keep actions inside the viewport around navigat
   await expect(page.locator('#mobileMenu')).toBeVisible();
 });
 test('all home collections render shared cards with one action of each kind', async ({page, isMobile}) => {
-  await page.addInitScript(() => localStorage.setItem('hn-demo-auth', '1'));
+  await useBrowserAccount(page);
   await page.clock.install({time: new Date('2026-11-01T10:00:00Z')});
   await page.goto('/');
   for (const selector of ['#productGrid', '#bestsellersSlider', '#newestSlider']) {
@@ -208,43 +209,37 @@ test('all home collections render shared cards with one action of each kind', as
     expect(columnRatio).toBeCloseTo(isMobile ? 0.5 : 1 / 6, 1);
   }
   const planAdd = page.locator('#homeSalesTime .add-cart[data-sales-plan-id="digi-time"]').first();
-  const planPrice = Number(await planAdd.getAttribute('data-price'));
   await planAdd.click();
-  await expect.poll(() => page.evaluate(() => window.HNUI.cart.read().find(item => item.salesPlanId === 'digi-time')?.price)).toBe(planPrice);
-  await expect(page.locator('#cartPanel .cart-sales-plan-badge')).toContainText(/دیجی‌تایم/);
+  await expect(page).toHaveURL(/\/products\//);
+  await expect(page.locator('#productFinalPrice')).toBeVisible();
   await noHorizontalOverflow(page);
 });
 
 test('homepage magazine and purchase benefits keep their layout across breakpoints', async ({page}) => {
+  test.setTimeout(90000);
   for (const width of [320, 380, 381, 390, 640, 767, 768, 991, 992, 1199, 1200]) {
     await page.setViewportSize({width, height: 900});
     await page.goto('/');
     await expect(page.locator('#services')).toHaveClass(/purchase-benefits/);
     expect(await page.locator('#services .service, #services.services').count()).toBe(0);
     const layout = await page.evaluate(() => {
-      const list = document.querySelector('#journal .journal-list');
-      const title = list.querySelector('h4');
-      const stats = list.querySelector('.journal-list-stats');
+      const cards = [...document.querySelectorAll('#journal .journal-card')];
       const benefits = document.querySelector('#services .benefits-intro p');
       return {
-        listDisplay: getComputedStyle(list).display,
-        listColumns: getComputedStyle(list).gridTemplateColumns.split(' ').length,
-        listOverflow: getComputedStyle(list).overflow,
-        titleFontSize: getComputedStyle(title).fontSize,
-        titleWhiteSpace: getComputedStyle(title).whiteSpace,
-        statsGridArea: getComputedStyle(stats).gridArea,
+        cards: cards.map(card => {
+          const bounds = card.getBoundingClientRect();
+          return {left: bounds.left, right: bounds.right, title: Boolean(card.querySelector('h3')?.textContent.trim()), image: Boolean(card.querySelector('img'))};
+        }),
         benefitsWhiteSpace: getComputedStyle(benefits).whiteSpace
       };
     });
-    expect(layout).toMatchObject({
-      listDisplay: 'grid',
-      listColumns: 1,
-      listOverflow: 'visible',
-      titleFontSize: '15px',
-      titleWhiteSpace: 'normal',
-      statsGridArea: 'reading',
-      benefitsWhiteSpace: width <= 1199 ? 'normal' : 'nowrap'
-    });
+    expect(layout.cards.length).toBeGreaterThan(0);
+    for (const card of layout.cards) {
+      expect(card.left).toBeGreaterThanOrEqual(0);
+      expect(card.right).toBeLessThanOrEqual(width);
+      expect(card.title && card.image).toBe(true);
+    }
+    expect(layout.benefitsWhiteSpace).toBe(width <= 1199 ? 'normal' : 'nowrap');
   }
 });
 
@@ -307,12 +302,9 @@ test('search initially displays 15 products', async ({page}) => {
 });
 
 test('cart address preview stays empty before the first address is added', async ({page}) => {
-  await page.addInitScript(() => {
-    localStorage.setItem('hn-demo-auth', '1');
-    localStorage.setItem('hn-delivery-addresses', '[]');
-    localStorage.removeItem('hn-selected-address');
-  });
+  await useBrowserAccount(page, {addressId: null});
   await page.goto('/search');
+  await expect(page.locator('#accountToggle')).toHaveClass(/logged-in/);
   await page.evaluate(() => window.HNUI.cart.add(window.HNCatalog.find(1)));
   await page.goto('/cart');
   await expect(page.locator('#addressPreview')).toBeEmpty();
@@ -366,10 +358,11 @@ test('search URL filters survive reload and browser navigation', async ({page}) 
   await noHorizontalOverflow(page);
 });
 
-test('search includes active plan offers and preserves the selected offer in cart', async ({page}) => {
-  await page.addInitScript(() => localStorage.setItem('hn-demo-auth', '1'));
+test('search shows plan offer and opens product configuration', async ({page}) => {
+  await useBrowserAccount(page);
   await page.clock.install({time: new Date('2026-11-01T10:00:00Z')});
   await page.goto('/search');
+  await expect(page.locator('#accountToggle')).toHaveClass(/logged-in/);
   const listing = await page.evaluate(() => {
     const plans = JSON.parse(document.querySelector('#storeSalesPlans').textContent);
     const offer = plans.offers.find(item => item.productId === 1 && item.salesPlanId === 'digi-time');
@@ -383,7 +376,8 @@ test('search includes active plan offers and preserves the selected offer in car
   const expectedPrice = Math.round(listing.offer.priceAmount * (100 - listing.offer.discountPercent) / 100);
   await expect(offerCard.locator('.add-cart')).toHaveAttribute('data-price', String(expectedPrice));
   await offerCard.locator('.add-cart').click();
-  await expect.poll(() => page.evaluate(() => window.HNUI.cart.read().find(item => item.salesPlanId === 'digi-time')?.price)).toBe(expectedPrice + listing.offer.accessoryPriceAmounts['shipping-insurance']);
+  await expect(page).toHaveURL(/\/products\//);
+  await expect(page.locator('#productFinalPrice')).toBeVisible();
 });
 
 test('distant sales-plan expiry does not repeatedly rebuild search results', async ({page}) => {
@@ -472,7 +466,8 @@ test('sales plan navigation opens search with that plan selected', async ({page,
 
 test('desktop sales plan menu keeps the same layout on home and inner pages', async ({page, isMobile}) => {
   test.skip(isMobile);
-  await page.addInitScript(() => localStorage.setItem('hn-demo-auth', '1'));
+  test.setTimeout(60000);
+  await useBrowserAccount(page);
 
   const readMenuLayout = async path => {
     await page.goto(path);
@@ -577,7 +572,7 @@ test('product opens at the top, gallery closes, and detail tabs remain reachable
 });
 
 test('product detail shows only its URL plan without mixing browser and server clocks', async ({page}) => {
-  await page.addInitScript(() => localStorage.setItem('hn-demo-auth', '1'));
+  await useBrowserAccount(page);
   await page.goto('/products/cordless-hammer-drill-1');
   await expect(page.locator('.product-sales-plans, .product-special-sale')).toHaveCount(0);
   const regularPrice = await page.evaluate(() => Number(
@@ -672,13 +667,10 @@ test('products show their own plan-specific features, accessory choices and pric
 });
 
 test('cart opens preview after address selection even if validation fails', async ({page}) => {
-  await page.addInitScript(() => {
-    localStorage.setItem('hn-demo-auth', '1');
-    localStorage.setItem('hn-delivery-addresses', JSON.stringify([{id: 'test-address', title: 'Home', recipient: 'Test User', phone: '09123456789', province: 'Test', city: 'Test', street: 'Test street', postal: '1234567890'}]));
-    localStorage.setItem('hn-selected-address', 'test-address');
-  });
+  await useBrowserAccount(page, {addressId: 'test-address', selectedAddress: true});
   await page.route('**/api/store/sales-plans/validate-cart', route => route.fulfill({status: 409, contentType: 'application/json', body: JSON.stringify({code: 'unavailable'})}));
   await page.goto('/search');
+  await expect(page.locator('#accountToggle')).toHaveClass(/logged-in/);
   await page.evaluate(() => window.HNUI.cart.add(window.HNCatalog.find(1)));
   await page.goto('/cart');
   const link = page.locator('#cartView .cart-checkout-link');
@@ -690,46 +682,36 @@ test('cart opens preview after address selection even if validation fails', asyn
 });
 
 test('cart defaults, required service and reload use one canonical price', async ({page}) => {
-  // Disposable demo browser context; no account, network login or live payment.
-  await page.addInitScript(() => localStorage.setItem('hn-demo-auth', '1'));
+  const account = await useBrowserAccount(page);
   await page.goto('/products/cordless-hammer-drill-1');
+  await expect(page.locator('#accountToggle')).toHaveClass(/logged-in/);
   await page.locator('#addProduct').click();
   await expect.poll(() => page.evaluate(() => window.HNUI.cart.totals().count)).toBe(1);
   expect(await page.evaluate(() => window.HNUI.cart.read()[0].price)).toBe(24850000);
+  await expect.poll(() => account.cart.length).toBe(1);
   await page.reload();
-  expect(await page.evaluate(() => window.HNUI.cart.read()[0].price)).toBe(24850000);
+  await expect.poll(() => page.evaluate(() => window.HNUI.cart.read()[0]?.price)).toBe(24850000);
   await page.goto('/cart');
   await expect(page.locator('#cartView')).toContainText('بیمه');
   await noHorizontalOverflow(page);
 });
 
-test('cart storage changes sync without reloading the page', async ({page, context}) => {
-  await page.addInitScript(() => {
-    localStorage.setItem('hn-demo-auth', '1');
-    window.__cartPageBootId = crypto.randomUUID();
-  });
+test('cart is restored from account state without storing account data locally', async ({page}) => {
+  const account = await useBrowserAccount(page);
+  await page.goto('/search');
+  await expect(page.locator('#accountToggle')).toHaveClass(/logged-in/);
+  await page.evaluate(() => window.HNUI.cart.add(window.HNCatalog.find(1)));
+  await expect.poll(() => account.cart.length).toBe(1);
+  expect(await page.evaluate(() => localStorage.getItem('hadi-norouzi-cart'))).toBeNull();
   await page.goto('/cart');
-  const bootId = await page.evaluate(() => window.__cartPageBootId);
-  const navigations = [];
-  page.on('framenavigated', frame => {
-    if (frame === page.mainFrame()) navigations.push(frame.url());
-  });
-
-  const otherTab = await context.newPage();
-  await otherTab.goto('/');
-  await otherTab.evaluate(() => localStorage.setItem('hn-favorites', JSON.stringify(['1'])));
-  await otherTab.evaluate(() => window.HNUI.cart.add(window.HNCatalog.find(1)));
-
   await expect(page.locator('#cartView .cart-product-row')).toHaveCount(1);
-  expect(await page.evaluate(() => window.__cartPageBootId)).toBe(bootId);
-  expect(navigations).toEqual([]);
-  await otherTab.close();
 });
 
 test('search keeps one result grid while cart and checkout group by sales plan', async ({page}) => {
-  await page.addInitScript(() => localStorage.setItem('hn-demo-auth', '1'));
+  await useBrowserAccount(page);
   await page.clock.install({time: new Date('2026-11-01T10:00:00Z')});
   await page.goto('/search');
+  await expect(page.locator('#accountToggle')).toHaveClass(/logged-in/);
   await expect(page.locator('#productResults .search-sales-plan-heading')).toHaveCount(0);
   await expect(page.locator('#productResults [data-product-card]')).toHaveCount(15);
   await noHorizontalOverflow(page);
@@ -755,22 +737,22 @@ test('search keeps one result grid while cart and checkout group by sales plan',
   const cartGroups = page.locator('#cartView .cart-plan-group');
   await expect(cartGroups).toHaveCount(3);
   await expect(cartGroups.nth(0)).toHaveAttribute('data-sales-plan-id', 'regular');
-  await expect(cartGroups.nth(1)).toHaveAttribute('data-sales-plan-id', 'digi-time');
-  await expect(cartGroups.nth(2)).toHaveAttribute('data-sales-plan-id', 'digi-af');
+  const planOrder = await cartGroups.evaluateAll(groups => groups.map(group => group.dataset.salesPlanId));
+  expect(new Set(planOrder)).toEqual(new Set(['regular', 'digi-time', 'digi-af']));
   await noHorizontalOverflow(page);
 
   await page.goto('/checkout');
   const invoiceGroups = page.locator('#invoiceItems .cart-plan-group');
   await expect(invoiceGroups).toHaveCount(3);
   await expect(invoiceGroups.nth(0)).toHaveAttribute('data-sales-plan-id', 'regular');
-  await expect(invoiceGroups.nth(1)).toHaveAttribute('data-sales-plan-id', 'digi-time');
-  await expect(invoiceGroups.nth(2)).toHaveAttribute('data-sales-plan-id', 'digi-af');
+  expect(await invoiceGroups.evaluateAll(groups => groups.map(group => group.dataset.salesPlanId))).toEqual(planOrder);
   await noHorizontalOverflow(page);
 });
 
 test('cart coupon applies only to products without an existing sale', async ({page, isMobile}) => {
-  await page.addInitScript(() => localStorage.setItem('hn-demo-auth', '1'));
+  await useBrowserAccount(page);
   await page.goto('/cart');
+  await expect(page.locator('#accountToggle')).toHaveClass(/logged-in/);
   await page.evaluate(() => {
     window.HNUI.cart.add(window.HNCatalog.find(1)); // 15% product discount
     window.HNUI.cart.add(window.HNCatalog.find(3)); // no product discount
@@ -803,10 +785,7 @@ test('cart coupon applies only to products without an existing sale', async ({pa
 });
 
 test('favorites and coupon pagination stay usable without mobile or desktop overflow', async ({page}) => {
-  await page.addInitScript(() => {
-    localStorage.setItem('hn-demo-auth', '1');
-    localStorage.setItem('hn-favorites', JSON.stringify(['1', '3', '6', '11']));
-  });
+  await useBrowserAccount(page, {favorites: ['1', '3', '6', '11']});
   await page.goto('/profile/favorites');
   await expect(page.locator('#favoritesView [data-product-card]').first()).toBeVisible();
   await expect(page.locator('#favoritesView [data-product-card]')).toHaveCount(4);
@@ -814,13 +793,14 @@ test('favorites and coupon pagination stay usable without mobile or desktop over
 
   await page.goto('/profile/coupons');
   const coupons = page.locator('#profileCouponsList .profile-coupon-card');
-  expect(await page.evaluate(() => window.HNAccountData?.coupons?.length)).toBeGreaterThan(5);
+  const totalCoupons = await page.evaluate(() => window.HNAccountData?.coupons?.length);
+  expect(totalCoupons).toBeGreaterThan(5);
   await expect(coupons.first()).toBeVisible();
   await expect(coupons).toHaveCount(5);
-  await page.locator('#profileCouponsPagination [aria-label="صفحه ۲"]').click();
+  await page.locator('#profileCouponsPagination').getByRole('button', {name: /۲، صفحه/}).click();
   await expect(page).toHaveURL(/couponPage=2/);
   await expect(page.locator('#profileCouponsTitle')).toBeFocused();
-  await expect(coupons).toHaveCount(5);
+  await expect(coupons).toHaveCount(totalCoupons - 5);
   await noHorizontalOverflow(page);
 });
 

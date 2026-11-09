@@ -1,0 +1,41 @@
+@using Shop.Controllers
+@model PageModel<SimulatedPaymentPage>
+@{
+    var order = Model.Data.Order;
+}
+<header class="page-hero cart-page-hero">
+    <div class="container"><h1>درگاه پرداخت آزمایشی</h1><p>این صفحه پرداخت را شبیه‌سازی می‌کند و وجهی دریافت نمی‌شود.</p></div>
+</header>
+<main class="flow-main container invoice-page">
+    <section class="flow-card" aria-labelledby="simulatedPaymentTitle">
+        <h2 id="simulatedPaymentTitle">سفارش @order.Number</h2>
+        <p>مبلغ سفارش: @order.Amount.ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("fa-IR")) تومان</p>
+        @if (order.Status == "simulated-payment-confirmed")
+        {
+            <p role="status">پرداخت آزمایشی تأیید شد. این نتیجه پرداخت واقعی نیست و موجودی انبار را تغییر نمی‌دهد.</p>
+            <a class="flow-button" href="/profile/orders">مشاهده سفارش‌ها</a>
+        }
+        else if (order.Status == "pending-payment")
+        {
+            @if (Model.Data.Cancelled) { <p role="status">پرداخت آزمایشی لغو شد؛ سفارش در انتظار پرداخت باقی ماند.</p> }
+            <form method="post" action="/payment/simulated/@order.Id/return">
+                @Html.AntiForgeryToken()
+                <fieldset>
+                    <legend>نتیجهٔ شبیه‌سازی</legend>
+                    <label><input type="radio" name="result" value="approved" checked> تأیید آزمایشی</label>
+                    <label><input type="radio" name="result" value="cancelled"> لغو پرداخت</label>
+                </fieldset>
+                <button class="flow-button" type="submit">بازگشت به فروشگاه</button>
+            </form>
+        }
+        else
+        {
+            <p role="status">این سفارش در وضعیت قابل شبیه‌سازی پرداخت نیست.</p>
+            <a class="flow-button" href="/profile/orders">مشاهده سفارش‌ها</a>
+        }
+    </section>
+</main>
+@section Styles {
+    <link href="~/shop/css/pages/pages.css" rel="stylesheet" asp-append-version="true" />
+    <link href="~/shop/css/pages/checkout.css" rel="stylesheet" asp-append-version="true" />
+}

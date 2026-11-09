@@ -294,35 +294,15 @@
                 </div>
                 <div class="login-step" id="loginEmailStep" role="tabpanel" aria-labelledby="loginModeTab">
                     <h2 id="loginModalTitle">ورود با ایمیل</h2>
-                    <p>برای ورود، ایمیل و رمز عبور خود را وارد کنید.</p>
+                    <p>ایمیل خود را وارد کنید تا کد تأیید برایتان ارسال شود.</p>
                     <form id="loginEmailForm">
                         <label for="loginEmail">ایمیل</label>
                         <div class="login-input">
                             <i class="bi bi-envelope" aria-hidden="true"></i>
-                            <input id="loginEmail" name="email" type="email" inputmode="email" dir="ltr" autocomplete="email" value="fakhravary@gmail.com" required/>
+                            <input id="loginEmail" name="email" type="email" inputmode="email" dir="ltr" autocomplete="email" required/>
                         </div>
-                        <label for="loginPassword">رمز عبور</label>
-                        <div class="login-input">
-                            <i class="bi bi-lock" aria-hidden="true"></i>
-                            <input id="loginPassword" name="password" type="password" dir="ltr" autocomplete="current-password" value="Demo1234!" required/>
-                        </div>
-                        <button type="button" class="login-forgot-link" id="forgotPasswordLink">رمز عبور را فراموش کرده‌اید؟</button>
                         <small class="login-error" id="loginEmailError" role="alert"></small>
                         <button type="submit">ورود به حساب <i class="bi bi-arrow-left"></i></button>
-                    </form>
-                </div>
-                <div class="login-step d-none" id="forgotPasswordStep" hidden>
-                    <button type="button" class="login-back" id="forgotPasswordBack"><i class="bi bi-arrow-right"></i> بازگشت به ورود</button>
-                    <h2>بازیابی رمز عبور</h2>
-                    <p>ایمیل حساب را وارد کنید؛ در صورت فعال‌بودن سرویس، لینک بازیابی فرستاده می‌شود.</p>
-                    <form id="forgotPasswordForm">
-                        <label for="forgotPasswordEmail">ایمیل حساب</label>
-                        <div class="login-input">
-                            <i class="bi bi-envelope" aria-hidden="true"></i>
-                            <input id="forgotPasswordEmail" name="email" type="email" inputmode="email" dir="ltr" autocomplete="email" value="demo@example.com" required/>
-                        </div>
-                        <small class="login-error" id="forgotPasswordError" role="status"></small>
-                        <button type="submit">ارسال لینک بازنشانی <i class="bi bi-arrow-left"></i></button>
                     </form>
                 </div>
                 <div class="login-step d-none" id="registerEmailStep" role="tabpanel" aria-labelledby="registerModeTab" hidden>

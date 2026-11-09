@@ -25,11 +25,11 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
     public DbSet<Warehouse> Warehouses => Set<Warehouse>();
     public DbSet<Company> Companies => Set<Company>();
     public DbSet<SalesPlanReference> SalesPlanReferences => Set<SalesPlanReference>();
+    public DbSet<WarehouseStockOwner> WarehouseStockOwners => Set<WarehouseStockOwner>();
     public DbSet<StockBalance> StockBalances => Set<StockBalance>();
     public DbSet<InventoryItem> InventoryItems => Set<InventoryItem>();
-    public DbSet<WarehouseProduct> Products => Set<WarehouseProduct>();
     public DbSet<ProductVariant> ProductVariants => Set<ProductVariant>();
-    public DbSet<StoreProduct> StoreProducts => Set<StoreProduct>();
+    public DbSet<WarehouseProduct> Products => Set<WarehouseProduct>();
     public DbSet<StoreSiteIdentity> StoreSiteIdentities => Set<StoreSiteIdentity>();
     public DbSet<ProductFeedback> ProductFeedback => Set<ProductFeedback>();
     public DbSet<AccountProfile> AccountProfiles => Set<AccountProfile>();
@@ -155,6 +155,7 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
         {
             entity.ToTable("WarehouseDocument", "Warehouse");
             entity.HasKey(x => x.Id);
+            entity.Property(x => x.DocumentNumber).HasDefaultValueSql("NEXT VALUE FOR [Warehouse].[DocumentNumberSequence]");
             entity.Property(x => x.Status).HasColumnType("char(1)").IsRequired();
             entity.Property(x => x.CustomerOrderKey).HasMaxLength(128);
             entity.Property(x => x.ExternalReference).HasMaxLength(128);
@@ -203,6 +204,11 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.ToTable("SalesPlanReference", "Warehouse");
             entity.HasKey(x => x.Id);
         });
+        modelBuilder.Entity<WarehouseStockOwner>(entity =>
+        {
+            entity.ToTable("WarehouseStockOwner", "Warehouse");
+            entity.HasKey(x => new { x.IdWarehouse, x.IdStockOwner });
+        });
         modelBuilder.Entity<StockBalance>(entity =>
         {
             entity.ToTable("StockBalance", "Warehouse");
@@ -227,28 +233,32 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
         {
             entity.ToTable("Product", "Warehouse");
             entity.HasKey(x => x.Id);
-            entity.HasAlternateKey(x => new { x.Id, x.IdStoreProduct });
-            entity.Property(x => x.IdStoreProduct).HasColumnName("IdStoreProduct");
+            entity.Property(x => x.Id).ValueGeneratedNever();
+            entity.Property(x => x.ProductKey).HasMaxLength(128).IsRequired();
+            entity.Property(x => x.Code).HasMaxLength(100).IsRequired();
+            entity.Property(x => x.Name).HasMaxLength(300).IsRequired();
+            entity.Property(x => x.EnglishName).HasMaxLength(300);
+            entity.Property(x => x.PowerSource).HasMaxLength(200);
+            entity.Property(x => x.UseCase).HasMaxLength(500);
+            entity.Property(x => x.Slug).HasMaxLength(200);
+            entity.Property(x => x.Badge).HasMaxLength(100);
+            entity.Property(x => x.PriceAmount).HasPrecision(19, 0);
+            entity.Property(x => x.DiscountPercent).HasPrecision(5, 2);
+            entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
+            entity.Property(x => x.UpdatedAtUtc).HasPrecision(3);
         });
         modelBuilder.Entity<ProductVariant>(entity =>
         {
             entity.ToTable("ProductVariant", "Warehouse");
             entity.HasKey(x => x.Id);
             entity.HasAlternateKey(x => new { x.Id, x.IdProduct });
-            entity.HasAlternateKey(x => new { x.Id, x.IdStoreProduct });
+            entity.HasAlternateKey(x => new { x.IdProduct, x.Id });
             entity.Property(x => x.Code).HasMaxLength(100);
             entity.Property(x => x.Name).HasMaxLength(300).IsRequired();
             entity.Property(x => x.AttributesJson).HasColumnType("nvarchar(max)");
             entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
             entity.Property(x => x.UpdatedAtUtc).HasPrecision(3);
-            entity.HasOne(x => x.Product).WithMany().HasForeignKey(x => new { x.IdProduct, x.IdStoreProduct })
-                .HasPrincipalKey(x => new { x.Id, x.IdStoreProduct });
-        });
-        modelBuilder.Entity<StoreProduct>(entity =>
-        {
-            entity.ToTable("Product", "Store");
-            entity.HasKey(x => x.Id);
-            entity.Property(x => x.StoreProductKey).HasMaxLength(128).IsRequired();
+            entity.HasOne(x => x.Product).WithMany().HasForeignKey(x => x.IdProduct);
         });
         modelBuilder.Entity<StoreSiteIdentity>(entity =>
         {
@@ -293,7 +303,7 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.Property(x => x.RepliedAtUtc).HasPrecision(3);
             entity.HasIndex(x => new { x.IdProduct, x.FeedbackType, x.Status, x.CreatedAtUtc });
             entity.HasIndex(x => new { x.IdProfile, x.IdProduct, x.FeedbackType });
-            entity.HasOne(x => x.Product).WithMany(x => x.Feedback).HasForeignKey(x => x.IdProduct)
+            entity.HasOne(x => x.Product).WithMany().HasForeignKey(x => x.IdProduct)
                 .OnDelete(DeleteBehavior.Restrict);
             entity.HasOne(x => x.Profile).WithMany(x => x.ProductFeedback).HasForeignKey(x => x.IdProfile)
                 .OnDelete(DeleteBehavior.SetNull);

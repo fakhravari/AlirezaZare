@@ -1,6 +1,12 @@
+(() => {
+if (window.HNAddressFieldsReady) return;
+let resolveAddressFields, rejectAddressFields;
+window.HNAddressFieldsReady = new Promise((resolve, reject) => { resolveAddressFields = resolve; rejectAddressFields = reject; });
+void window.HNAddressFieldsReady.catch(() => {});
 window.HNUI.ready(() => window.HNUI.mount("pages-address-fields", document, async () => {
+    try {
     const form = document.querySelector("#addressForm");
-    if (!form) return;
+    if (!form) { resolveAddressFields(null); return; }
     await window.HNIranPlacesReady;
     const data = window.HNIranPlaces;
     if (!data?.countries?.length || !data.provinces?.length || !data.cities?.length)
@@ -97,4 +103,7 @@ window.HNUI.ready(() => window.HNUI.mount("pages-address-fields", document, asyn
         city.value = selectedCity?.name || "";
     });
     window.HNAddressFields.set();
+    resolveAddressFields(window.HNAddressFields);
+    } catch (error) { rejectAddressFields(error); }
 }));
+})();

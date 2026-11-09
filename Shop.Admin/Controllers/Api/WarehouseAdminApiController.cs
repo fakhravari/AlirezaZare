@@ -38,7 +38,7 @@ public sealed class WarehouseAdminApiController(IWarehouseReadService warehouseR
             await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
         bool valid = await db.Warehouses.AnyAsync(x => x.Id == input.WarehouseId && x.IsActive, cancellationToken)
                      && await db.InventoryItems.AnyAsync(
-                         x => x.Id == input.InventoryItemId && x.IsActive && x.Product.IsActive, cancellationToken);
+                         x => x.Id == input.InventoryItemId && x.IsActive && x.Product.IsWarehouseEnabled, cancellationToken);
         var regularPlan = await db.SalesPlanReferences.AsNoTracking().Where(x => x.IsRegular && x.IsActive)
             .Select(x => new { x.Id }).SingleOrDefaultAsync(cancellationToken);
         if (!valid || regularPlan is null)

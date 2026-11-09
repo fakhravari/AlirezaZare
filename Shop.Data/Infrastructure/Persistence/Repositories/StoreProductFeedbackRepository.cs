@@ -35,7 +35,7 @@ public sealed class StoreProductFeedbackRepository(ShopDbContext dbContext) : IP
             new DateTimeOffset(DateTime.SpecifyKind(x.CreatedAtUtc, DateTimeKind.Utc)),
             x.RepliedAtUtc is DateTime repliedAt
                 ? new DateTimeOffset(DateTime.SpecifyKind(repliedAt, DateTimeKind.Utc))
-                : null)).ToArray();
+                : null, x.IsSample)).ToArray();
         return new ProductFeedbackSnapshot(items, totalCount, averageRating);
     }
 
@@ -116,8 +116,8 @@ public sealed class StoreProductFeedbackRepository(ShopDbContext dbContext) : IP
     }
 
     private Task<long?> ActiveProductIdAsync(int productId, CancellationToken cancellationToken) =>
-        dbContext.StoreProducts.AsNoTracking()
-            .Where(x => x.StoreProductKey == productId.ToString() && x.IsActive)
+        dbContext.Products.AsNoTracking()
+            .Where(x => x.Id == productId && x.IsCatalogActive && x.IsStoreEnabled)
             .Select(x => (long?)x.Id)
             .SingleOrDefaultAsync(cancellationToken);
 

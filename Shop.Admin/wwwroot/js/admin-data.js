@@ -71,6 +71,12 @@
             details.innerHTML = '<i class="fa fa-eye" aria-hidden="true"></i><span class="visually-hidden">نمایش جزئیات</span>';
             details.setAttribute("aria-label", "نمایش جزئیات رکورد");
             actions.append(details);
+            if (page.dataset.adminSection === "categories" && page.dataset.canEditCategory === "true") {
+                const edit = document.createElement("button");
+                edit.type = "button"; edit.className = "btn btn-xs btn-default ms-1";
+                edit.dataset.categoryContent = String(index); edit.textContent = "محتوای دسته";
+                actions.append(edit);
+            }
             if (page.dataset.adminPage === "stock" && page.dataset.canMinimum === "true" && page.__adminRows[index]?.isRegularSalesPlan) {
                 const minimum = document.createElement("button");
                 minimum.type = "button"; minimum.className = "btn btn-xs btn-default ms-1";
@@ -105,7 +111,7 @@
             const columns = item => section === "products"
                 ? [item.code, item.name, item.brandName, item.categoryName, ui.formatNumber(item.price), ui.formatNumber(item.stockQuantity)]
                 : section === "categories"
-                    ? [item.id, item.name, item.englishName, item.slug, item.parentId]
+                    ? [item.id, item.name, item.englishName, item.parentId, item.slug]
                     : section === "brands"
                         ? [item.id, item.name, item.englishName, item.countryCode]
                         : [item.key, item.name, item.source, item.isFilterable ? "بله" : "خیر", item.isHighlight ? "بله" : "خیر"];
@@ -232,6 +238,24 @@
     }
 
     document.addEventListener("click", event => {
+        const categoryButton = event.target.closest("[data-category-content]");
+        if (categoryButton) {
+            const page = categoryButton.closest('[data-admin-section="categories"]');
+            const item = page?.__adminRows?.[Number(categoryButton.dataset.categoryContent)];
+            const form = document.querySelector("[data-category-content-form]");
+            if (!item || !form) return;
+            categoryButton.disabled = true;
+            void ui.getJson(`/api/admin/store/category-content/${encodeURIComponent(item.id)}`)
+                .then(data => {
+                    form.elements.key.value = item.id; form.elements.intro.value = data.intro || "";
+                    form.elements.highlights.value = JSON.parse(data.highlights || "[]").join("\n");
+                    form.elements.specs.value = JSON.parse(data.specs || "[]").map(pair => pair.join(" | ")).join("\n");
+                    form.querySelector("[data-category-content-name]").textContent = item.name;
+                    window.bootstrap?.Modal?.getOrCreateInstance(document.getElementById("category-content-modal")).show();
+                }).catch(error => ui.notify(error.message || "دریافت محتوای دسته ناموفق بود.", "danger"))
+                .finally(() => { categoryButton.disabled = false; });
+            return;
+        }
         const refreshButton = event.target.closest("[data-admin-refresh]");
         if (refreshButton) {
             const page = refreshButton.closest("[data-admin-page]");
@@ -268,6 +292,23 @@
     });
 
     document.addEventListener("submit", event => {
+        const categoryForm = event.target.closest("[data-category-content-form]");
+        if (categoryForm) {
+            event.preventDefault();
+            const lines = value => value.split(/\r?\n/).map(line => line.trim()).filter(Boolean);
+            const specs = lines(categoryForm.elements.specs.value).map(line => line.split("|").map(part => part.trim()));
+            if (specs.some(pair => pair.length !== 2 || pair.some(value => !value))) {
+                ui.notify("هر مشخصه باید یک عنوان و مقدار با جداکنندهٔ | داشته باشد.", "danger"); return;
+            }
+            const token = categoryForm.querySelector('[name="__RequestVerificationToken"]')?.value || "";
+            const body = { intro: categoryForm.elements.intro.value, highlights: JSON.stringify(lines(categoryForm.elements.highlights.value)), specs: JSON.stringify(specs) };
+            const save = categoryForm.querySelector('[type="submit"]'); save.disabled = true;
+            void ui.getJson(`/api/admin/store/category-content/${encodeURIComponent(categoryForm.elements.key.value)}`, { method: "PUT", headers: { "Content-Type": "application/json", RequestVerificationToken: token }, body: JSON.stringify(body) })
+                .then(result => { ui.notify(result.message, "success"); window.bootstrap?.Modal?.getInstance(document.getElementById("category-content-modal"))?.hide(); })
+                .catch(error => ui.notify(error.message || "ذخیرهٔ محتوای دسته ناموفق بود.", "danger"))
+                .finally(() => { save.disabled = false; });
+            return;
+        }
         const minimumForm = event.target.closest("[data-minimum-form]");
         if (minimumForm) {
             event.preventDefault();

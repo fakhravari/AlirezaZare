@@ -52,7 +52,8 @@
             option(formWarehouse, warehouse.id, `${warehouse.name} (${warehouse.code})`);
         }
         fillSelect(document.querySelector("[data-document-types]"), filteredTypes(page), "انتخاب نوع سند", item => item.name, item => item.id);
-        fillSelect(document.querySelector("[data-document-plans]"), lookups.plans, "انتخاب طرح فروش", item => item.displayName, item => item.id);
+        fillSelect(document.querySelector("[data-document-plans]"), [], "ابتدا انبار را انتخاب کنید", item => item.displayName, item => item.id);
+        formWarehouse.onchange = () => updateDocumentOwners(formWarehouse.form);
         fillSelect(document.querySelector("[data-document-parties]"), lookups.parties, "انتخاب مرجع", item => `${item.name} (${partyLabel(item.partyType)})`, item => item.id);
     }
 
@@ -104,7 +105,7 @@
             [format.format(item.number), item.date, item.type, item.warehouse, item.salesPlan, item.party].forEach(value => row.append(node("td", value)));
             const state = node("td");
             state.append(node("span", item.status === "F" ? "قطعی" : "موقت", `badge ${item.status === "F" ? "bg-success" : "bg-warning"}`));
-            row.append(state, node("td", item.affectsStock ? "دارد" : "ندارد"));
+            row.append(state, node("td", item.affectsStock && item.status === "F" ? "دارد" : "ندارد"));
             const actions = node("td", null, "text-nowrap");
             const edit = node("button", "ویرایش", "btn btn-sm btn-default me-1");
             edit.type = "button";
@@ -128,6 +129,18 @@
 
     function setSelect(select, value) { select.value = value == null ? "" : String(value); }
 
+    function updateDocumentOwners(form, selectedId = null) {
+        const warehouseId = Number(form.elements.warehouseId.value);
+        const allowed = new Set(lookups.ownerLinks.filter(link => link.idWarehouse === warehouseId).map(link => link.idStockOwner));
+        const owners = lookups.plans.filter(plan => allowed.has(plan.id));
+        const select = form.elements.salesPlanId;
+        fillSelect(select, owners, "انتخاب مالک کالا", item => item.displayName, item => item.id);
+        const warehouse = lookups.warehouses.find(item => item.id === warehouseId);
+        const preferred = warehouse?.isSalesWarehouse ? owners.find(plan => plan.isRegular)?.id : warehouse?.idOwnerSalesPlanReference;
+        const selected = selectedId ?? preferred ?? (owners.length === 1 ? owners[0].id : null);
+        setSelect(select, selected);
+    }
+
     async function openEditor(page, id = null) {
         const form = document.querySelector("[data-document-form]");
         form.reset();
@@ -137,6 +150,7 @@
         form.elements.documentDate.max = today();
         form.elements.externalReference.value = "";
         form.querySelector("[data-document-lines]").replaceChildren();
+        updateDocumentOwners(form);
         if (id) {
             try {
                 const detail = await send(`${page.dataset.api}/${id}`);
@@ -144,7 +158,7 @@
                 setSelect(form.elements.warehouseId, detail.warehouseId);
                 setSelect(form.elements.documentTypeId, detail.documentTypeId);
                 setSelect(form.elements.partyId, detail.partyId);
-                setSelect(form.elements.salesPlanId, detail.salesPlanId);
+                updateDocumentOwners(form, detail.salesPlanId);
                 form.elements.documentDate.value = detail.date;
                 form.elements.status.value = detail.status;
                 form.elements.reason.value = detail.reason || "";
@@ -234,7 +248,7 @@
                     referenceLabel.textContent = "شمارهٔ سفارش مشتری";
                     referenceInput.required = true;
                 }
-                page.querySelector("[data-document-line-add]").addEventListener("click", () => appendLine(document.querySelector("[data-document-form]")));
+                document.querySelector("[data-document-line-add]").addEventListener("click", () => appendLine(document.querySelector("[data-document-form]")));
                 page.querySelector("[data-document-filter]").addEventListener("submit", event => { event.preventDefault(); pageNumber = 1; void loadDocuments(page); });
                 page.querySelector("[data-document-reset]").addEventListener("click", () => { page.querySelector("[data-document-filter]").reset(); pageNumber = 1; void loadDocuments(page); });
                 page.querySelectorAll("[data-document-page]").forEach(button => button.addEventListener("click", () => { pageNumber = Math.max(1, pageNumber + Number(button.dataset.documentPage)); void loadDocuments(page); }));

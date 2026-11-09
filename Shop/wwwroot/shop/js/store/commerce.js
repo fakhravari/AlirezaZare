@@ -306,30 +306,12 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
             const serverFeedback = { reviews: [], questions: [] };
             const legacyFeedback = { reviews: [], questions: [] };
             const readFeedback = (type) => {
-                const seeded = (p.detail?.[type] || []).map(
-                    ([name, text, rating, reply, createdAt, replyAt], index) => {
-                        const submittedAt =
-                            createdAt ||
-                            new Date(
-                                Date.now() - (index + 1) * 86400000,
-                            ).toISOString();
-                        return {
-                            name: name?.trim() || "کاربر مهمان",
-                            text,
-                            rating: rating || 0,
-                            reply: reply || "",
-                            createdAt: submittedAt,
-                            replyAt: reply ? replyAt || submittedAt : "",
-                            sample: true,
-                        };
-                    },
-                );
                 try {
                     const raw = ui.storage.get(
                         `hn-product-${type}-${p.id}`,
                         "__HN_EMPTY__",
                     );
-                    if (raw === "__HN_EMPTY__") return [...serverFeedback[type], ...seeded];
+                    if (raw === "__HN_EMPTY__") return [...serverFeedback[type]];
                     const value = JSON.parse(raw);
                     legacyFeedback[type] = Array.isArray(value)
                             ? value
@@ -348,9 +330,9 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                                     };
                                 })
                             : [];
-                    return [...serverFeedback[type], ...legacyFeedback[type], ...seeded];
+                    return [...serverFeedback[type], ...legacyFeedback[type]];
                 } catch {
-                    return [...serverFeedback[type], ...seeded];
+                    return [...serverFeedback[type]];
                 }
             };
             const ratingStars = (rating) => {
@@ -376,8 +358,8 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                         .map((item) => {
                             const name = esc(item.name?.trim() || "کاربر مهمان");
                             const isReview = type === "reviews";
-                            const registeredAt = feedbackDateMarkup(item.createdAt);
-                            const replyAt = feedbackDateMarkup(
+                            const registeredAt = item.isSample ? "" : feedbackDateMarkup(item.createdAt);
+                            const replyAt = item.isSample ? "" : feedbackDateMarkup(
                                 item.replyAt,
                                 "product-feedback-admin-datetime",
                             );
@@ -388,10 +370,10 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                                     : "",
                                 registeredAt,
                             ].join("");
-                            const pendingBadge = item.status === "pending" && !item.sample
+                            const pendingBadge = item.status === "pending"
                                 ? '<span class="product-feedback-pending"><i class="bi bi-hourglass-split" aria-hidden="true"></i>در انتظار تأیید</span>'
                                 : "";
-                            return `<article class="product-feedback-card"><div class="product-feedback-meta"><img class="product-feedback-avatar" src="shop/images/guest-avatar.svg" alt="" loading="lazy"><strong title="${name}">${name}</strong>${pendingBadge}<span class="product-feedback-meta-details">${details}</span></div><p class="${type === "questions" ? "product-question-user-text" : "product-feedback-user-text"}">${esc(item.text)}</p>${item.reply ? `<aside class="product-feedback-admin-reply"><div class="product-feedback-admin-meta"><span><i class="bi bi-patch-check-fill" aria-hidden="true"></i>پاسخ مدیر فروشگاه</span>${replyAt}<small>پاسخ رسمی</small></div><p>${esc(item.reply)}</p></aside>` : ""}</article>`;
+                            return `<article class="product-feedback-card"><div class="product-feedback-meta"><img class="product-feedback-avatar" src="shop/images/guest-avatar.svg" alt="" loading="lazy"><strong title="${name}">${name}</strong>${item.isSample ? "<span>نمونه</span>" : ""}${pendingBadge}<span class="product-feedback-meta-details">${details}</span></div><p class="${type === "questions" ? "product-question-user-text" : "product-feedback-user-text"}">${esc(item.text)}</p>${item.reply ? `<aside class="product-feedback-admin-reply"><div class="product-feedback-admin-meta"><span><i class="bi bi-patch-check-fill" aria-hidden="true"></i>${item.isSample ? "پاسخ نمونه" : "پاسخ مدیر فروشگاه"}</span>${replyAt}${item.isSample ? "" : "<small>پاسخ رسمی</small>"}</div><p>${esc(item.reply)}</p></aside>` : ""}</article>`;
                         })
                         .join("")
                     : `<div class="product-feedback-empty empty-state-card"><i class="bi ${type === "reviews" ? "bi-chat-square-heart" : "bi-question-circle"}" aria-hidden="true"></i><strong>${type === "reviews" ? "هنوز دیدگاهی برای این محصول ثبت نشده است." : "هنوز پرسشی دربارهٔ این محصول ثبت نشده است."}</strong><span>${type === "reviews" ? "تجربهٔ استفاده‌تان را با خریداران دیگر به اشتراک بگذارید." : "سؤال خود را ثبت کنید تا اطلاعات این کالا کامل‌تر شود."}</span></div>`;
@@ -1632,7 +1614,7 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                     serverFeedback[type] = combined.filter((item, index, all) =>
                         all.findIndex((candidate) => candidate.name === item.name && candidate.text === item.text) === index);
                     renderProductFeedback(type);
-                } catch { /* Keep the server-backed catalog seed visible during a network failure. */ }
+                } catch { /* Keep currently loaded feedback during a network failure. */ }
             };
             void loadProductFeedback("reviews");
             void loadProductFeedback("questions");
@@ -1944,13 +1926,15 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                 link.textContent = title.textContent;
                 title.replaceWith(link);
             });
-            if (items.length && addressSection) {
-                const addressSlot = view.querySelector(".cart-address-slot");
+            if (addressSection) {
+                addressSection.hidden = !items.length;
+                const addressSlot = items.length && view.querySelector(".cart-address-slot");
                 if (addressSlot) addressSlot.append(addressSection);
                 else view.before(addressSection);
             }
-            if (items.length && paymentSection) {
-                const paymentSlot = view.querySelector(".cart-payment-slot");
+            if (paymentSection) {
+                paymentSection.hidden = !items.length;
+                const paymentSlot = items.length && view.querySelector(".cart-payment-slot");
                 if (paymentSlot) paymentSlot.append(paymentSection);
                 else view.before(paymentSection);
             }

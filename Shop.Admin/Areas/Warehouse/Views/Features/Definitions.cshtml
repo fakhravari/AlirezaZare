@@ -5,7 +5,7 @@
     {
         <section class="panel panel-inverse">
             <div class="panel-heading">
-                <h2 class="panel-title">اتصال انبار فروش به فروشگاه</h2>
+                <h2 class="panel-title">اتصال مالک کالا به انبار شرکت</h2>
             </div>
             <div class="panel-body">
                 <div class="admin-data-status" data-definition-status role="status" aria-live="polite">در حال بارگذاری…</div>
@@ -14,15 +14,16 @@
                         <label class="form-label" for="mapping-company">شرکت</label><select class="form-select" id="mapping-company" name="companyId" required></select>
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label" for="mapping-warehouse">انبار فروش</label><select class="form-select" id="mapping-warehouse" name="warehouseId" required></select>
+                        <label class="form-label" for="mapping-warehouse">انبار</label><select class="form-select" id="mapping-warehouse" name="warehouseId" required></select>
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label" for="mapping-plan">طرح فروش سایت</label><select class="form-select" id="mapping-plan" name="salesPlanId" required></select>
+                        <label class="form-label" for="mapping-plan">مالک کالا یا طرح فروش</label><select class="form-select" id="mapping-plan" name="salesPlanId" required></select>
                     </div>
                     <div class="col-12">
                         <button class="btn btn-primary" type="submit">ذخیرهٔ اتصال</button>
                     </div>
                 </form>
+                <div class="table-responsive mt-3"><table class="table table-striped"><thead><tr><th>شرکت</th><th>انبار</th><th>مالک / طرح</th><th>عملیات</th></tr></thead><tbody data-mapping-rows></tbody></table></div>
             </div>
         </section>
     }

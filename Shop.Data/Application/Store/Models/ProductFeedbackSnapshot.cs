@@ -13,4 +13,5 @@ public sealed record ProductFeedbackItem(
     string Status,
     string? Reply,
     DateTimeOffset CreatedAt,
-    DateTimeOffset? ReplyAt);
+    DateTimeOffset? ReplyAt,
+    bool IsSample = false);

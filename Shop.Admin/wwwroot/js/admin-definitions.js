@@ -5,8 +5,9 @@
     const initialized = new WeakSet();
     const fmt = new Intl.NumberFormat("fa-IR");
     const configs = {
+        "stock-owners": { fields: [["code", "کد", "text", true], ["displayName", "نام", "text", true], ["idStockOwnerType", "نوع", "select", true, [["1", "طرح فروش"], ["2", "مالک"]]]], columns: [["code", "کد"], ["displayName", "نام"], ["idStockOwnerType", "نوع"], ["isActive", "وضعیت", "active"]] },
         companies: { fields: [["code", "کد شرکت", "text", true], ["name", "نام شرکت", "text", true]], columns: [["code", "کد"], ["name", "شرکت"], ["isActive", "وضعیت", "active"]] },
-        warehouses: { fields: [["companyId", "شرکت", "companies", true], ["code", "کد انبار", "text", true], ["name", "نام انبار", "text", true], ["isSalesWarehouse", "انبار فروش است", "checkbox"], ["ownerSalesPlanId", "طرح مالک انبار فروش", "plans"], ["isActive", "فعال", "checkbox"]], columns: [["code", "کد"], ["name", "انبار"], ["companyName", "شرکت"], ["isSalesWarehouse", "انبار فروش", "affects"], ["ownerSalesPlan", "طرح مالک"], ["isActive", "وضعیت", "active"]] },
+        warehouses: { fields: [["companyId", "شرکت", "companies", true], ["code", "کد انبار", "text", true], ["name", "نام انبار", "text", true], ["isSalesWarehouse", "انبار فروش است", "checkbox"], ["ownerSalesPlanId", "طرح مالک انبار فروش", "plans"], ["isSiteWarehouse", "منبع موجودی سایت", "checkbox"]], columns: [["code", "کد"], ["name", "انبار"], ["companyName", "شرکت"], ["isSalesWarehouse", "انبار فروش", "affects"], ["isSiteWarehouse", "منبع موجودی سایت", "siteWarehouse"], ["ownerSalesPlan", "طرح مالک"], ["isActive", "وضعیت", "active"]] },
         references: { fields: [["name", "نام مرجع", "text", true], ["partyType", "نوع مرجع", "select", true, [["Person", "شخص"], ["Organization", "سازمان"], ["Warehouse", "انبار"], ["Other", "سایر"]]], ["warehouseId", "انبار مرتبط", "warehouses"], ["externalPartyKey", "شناسهٔ بیرونی", "text"]], columns: [["name", "نام"], ["partyType", "نوع"], ["idWarehouse", "شناسهٔ انبار"], ["isActive", "وضعیت", "active"]] },
         units: { fields: [["code", "کد واحد", "text", true], ["name", "نام واحد", "text", true]], columns: [["code", "کد"], ["name", "واحد"], ["isActive", "وضعیت", "active"]] },
         "document-types": { fields: [["code", "کد نوع سند", "text", true], ["name", "نام سند", "text", true], ["direction", "جهت سند", "select", true, [["R", "رسید"], ["I", "حواله"]]], ["affectsStock", "بر موجودی اثر دارد", "checkbox" ]], columns: [["code", "کد"], ["name", "نوع سند"], ["direction", "جهت", "direction"], ["affectsStock", "اثر موجودی", "affects"], ["isActive", "وضعیت", "active"]] }
@@ -41,6 +42,8 @@
                 if (format === "direction") value = value === "R" ? "رسید" : "حواله";
                 if (format === "affects") value = value ? "دارد" : "ندارد";
                 if (format === "base") value = value ? "واحد اصلی" : "واحد فرعی";
+                if (format === "siteWarehouse") value = value ? "بله" : "خیر";
+                if (key === "idStockOwnerType") value = value === 1 ? "طرح فروش" : "مالک";
                 row.append(element("td", esc(value)));
             }
             const actions = element("td", null, "text-nowrap");
@@ -49,7 +52,7 @@
                     const edit = element("button", "ویرایش", "btn btn-sm btn-default me-1"); edit.type = "button"; edit.addEventListener("click", () => openForm(page, item, config));
                     actions.append(edit);
                 }
-                if (page.dataset.canDeactivate === "true") {
+                if (page.dataset.canDeactivate === "true" && page.dataset.definitionSection !== "stock-owners") {
                 const deactivate = element("button", "غیرفعال‌سازی", "btn btn-sm btn-outline-danger"); deactivate.type = "button";
                 deactivate.addEventListener("click", async () => {
                     if (!window.confirm("این تعریف غیرفعال شود؟ سابقهٔ گردش‌ها حفظ می‌شود.")) return;
@@ -72,7 +75,10 @@
         } else {
             const control = ["select", "warehouses", "products", "units", "companies", "plans"].includes(type) ? element("select", null, "form-select") : type === "textarea" ? element("textarea", null, "form-control") : element("input", null, "form-control");
             control.name = key; control.id = `definition-${key}`; control.required = required;
-            if (type === "select") for (const [value, name] of choices) { const option = element("option", name); option.value = value; control.append(option); }
+            if (type === "select") {
+                const empty = element("option", "انتخاب کنید"); empty.value = ""; control.append(empty);
+                for (const [value, name] of choices) { const option = element("option", name); option.value = value; control.append(option); }
+            }
             if (["warehouses", "products", "units", "companies", "plans"].includes(type)) {
                 const choices = type === "warehouses" ? lookups.warehouses : (lookups[type] || []);
                 const empty = element("option", type === "warehouses" ? "بدون انبار مرتبط" : "انتخاب کنید"); empty.value = ""; control.append(empty);
@@ -95,10 +101,13 @@
         if (data && page.dataset.definitionSection === "product-units") data = { ...data, productId: data.idProduct, unitId: data.idUnit };
         let lookups = { warehouses: [] };
         if (["references", "product-units", "variants", "warehouses"].includes(page.dataset.definitionSection)) lookups = await request(page, `${page.dataset.api}/lookups`);
-        for (const field of config.fields) addField(host, field, data || {}, lookups);
+        for (const field of config.fields) {
+            if (field[0] === "isSiteWarehouse" && page.dataset.fullAccess !== "true") continue;
+            addField(host, field, data || {}, lookups);
+        }
         if (page.dataset.definitionSection === "warehouses") {
             const sales = form.querySelector('[name="isSalesWarehouse"]'), plan = form.querySelector('[name="ownerSalesPlanId"]');
-            const updatePlan = () => { plan.required = sales.checked; plan.disabled = !sales.checked; if (!sales.checked) plan.value = ""; };
+            const updatePlan = () => { plan.required = true; plan.disabled = false; };
             sales.addEventListener("change", updatePlan); updatePlan();
         }
         document.getElementById("admin-definition-title").textContent = data ? "ویرایش تعریف" : "افزودن تعریف";
@@ -110,15 +119,36 @@
         fill(form.elements.companyId, data.companies, item => item.name);
         const company = form.elements.companyId, warehouse = form.elements.warehouseId;
         const fillWarehouses = () => fill(warehouse, data.warehouses.filter(item => item.idCompany === Number(company.value)), item => `${item.name} (${item.code})`);
-        company.addEventListener("change", fillWarehouses); fillWarehouses();
+        company.onchange = fillWarehouses; fillWarehouses();
         fill(form.elements.salesPlanId, data.plans, item => item.displayName);
-        if (data.siteWarehouseId) { warehouse.value = String(data.siteWarehouseId); const selected = data.warehouses.find(item => item.id === Number(warehouse.value)); if (selected) company.value = String(selected.idCompany); fillWarehouses(); warehouse.value = String(data.siteWarehouseId); }
+        const rows = page.querySelector("[data-mapping-rows]");
+        rows.replaceChildren();
+        for (const link of data.links) {
+            const warehouseRow = data.warehouses.find(item => item.id === link.idWarehouse);
+            const planRow = data.plans.find(item => item.id === link.idStockOwner);
+            if (!warehouseRow || !planRow) continue;
+            const companyRow = data.companies.find(item => item.id === warehouseRow.idCompany);
+            const row = element("tr");
+            row.append(element("td", companyRow?.name || "—"), element("td", warehouseRow.name), element("td", planRow.displayName));
+            const actions = element("td"), remove = element("button", "حذف اتصال", "btn btn-sm btn-outline-danger");
+            remove.type = "button";
+            remove.addEventListener("click", async () => {
+                if (!window.confirm("اتصال این مالک به انبار حذف شود؟")) return;
+                try { const result = await request(page, `${page.dataset.api}/sales-plan-mapping/${link.idWarehouse}/${link.idStockOwner}`, "DELETE", {}); ui.notify(result.message, "success"); await loadMapping(page); }
+                catch (error) { ui.notify(error.message, "danger"); }
+            });
+            actions.append(remove); row.append(actions);
+            rows.append(row);
+        }
+        if (data.siteWarehouseId) { const selected = data.warehouses.find(item => item.id === data.siteWarehouseId); if (selected) { company.value = String(selected.idCompany); fillWarehouses(); warehouse.value = String(selected.id); } }
     }
     async function load(page) {
         const section = page.dataset.definitionSection;
         if (section === "sales-plan-mapping") { await loadMapping(page); setStatus(page, ""); return; }
         const config = configs[section];
-        renderTable(page, await request(page, `${page.dataset.api}/${section}`), config);
+        const rows = await request(page, `${page.dataset.api}/${section}`);
+        renderTable(page, rows, config);
+        if (rows.length) setStatus(page, "");
     }
     async function initialize(root) {
         const page = root.querySelector?.("[data-admin-definitions]");
@@ -128,7 +158,7 @@
         try {
             if (section === "sales-plan-mapping") {
                 const mapping = page.querySelector("[data-mapping-form]");
-                mapping.addEventListener("submit", async event => { event.preventDefault(); try { const result = await request(page, `${page.dataset.api}/sales-plan-mapping`, "PUT", { companyId: Number(mapping.elements.companyId.value), warehouseId: Number(mapping.elements.warehouseId.value), salesPlanId: Number(mapping.elements.salesPlanId.value) }); ui.notify(result.message, "success"); } catch (error) { ui.notify(error.message, "danger"); } });
+                mapping.addEventListener("submit", async event => { event.preventDefault(); try { const result = await request(page, `${page.dataset.api}/sales-plan-mapping`, "PUT", { companyId: Number(mapping.elements.companyId.value), warehouseId: Number(mapping.elements.warehouseId.value), salesPlanId: Number(mapping.elements.salesPlanId.value) }); ui.notify(result.message, "success"); await loadMapping(page); } catch (error) { ui.notify(error.message, "danger"); } });
             } else {
                 const config = configs[section];
                 const createButton = page.querySelector("[data-definition-create]");
@@ -136,7 +166,7 @@
                 createButton.addEventListener("click", () => void openForm(page, null, config));
                 form.addEventListener("submit", async event => {
                     event.preventDefault(); const values = new FormData(form), id = values.get("id"); const body = {};
-                    for (const [key, , type] of config.fields) body[key] = type === "checkbox" ? values.get(key) === "on" : (["number", "products", "units", "warehouses", "companies", "plans"].includes(type) ? Number(values.get(key)) || null : values.get(key));
+                    for (const [key, , type] of config.fields) body[key] = type === "checkbox" ? values.get(key) === "on" : (key === "idStockOwnerType" || ["number", "products", "units", "warehouses", "companies", "plans"].includes(type) ? Number(values.get(key)) || null : values.get(key));
                     body.isActive = true;
                     try { const result = await request(page, `${page.dataset.api}/${section}${id ? `/${id}` : ""}`, id ? "PUT" : "POST", body); ui.notify(result.message, "success"); window.bootstrap?.Modal?.getInstance(document.getElementById("admin-definition-modal"))?.hide(); await load(page); }
                     catch (error) { ui.notify(error.message, "danger"); }

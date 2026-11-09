@@ -6,6 +6,9 @@ namespace Shop.Controllers;
 [Route("Profile")]
 public sealed class ProfileController(Shop.Services.IAccountDataSource accountDataSource) : PageController
 {
+    [HttpGet("/account")]
+    public IActionResult LegacyAccount() => RedirectToAction(nameof(Index));
+
     [HttpGet("")]
     public Task<ViewResult> Index() => ProfilePage("profile", "پروفایل من",
         "جزئیات پروفایل، نشانی‌ها و کالاهای ذخیره‌شده را مدیریت کنید.", "bi-person");

@@ -156,6 +156,7 @@ BEGIN TRY
         (N'warehouse.definitions.variants', N'صفحهٔ تنوع کالا', N'warehouse.definitions', N'Warehouse', N'Features', N'Index', 84),
         (N'warehouse.definitions.document-types', N'صفحهٔ انواع اسناد', N'warehouse.definitions', N'Warehouse', N'Features', N'Index', 84),
         (N'warehouse.definitions.sales-plan-mapping', N'صفحهٔ اتصال طرح فروش', N'warehouse.definitions', N'Warehouse', N'Features', N'Index', 85),
+        (N'warehouse.definitions.stock-owners', N'صفحهٔ مالک کالا', N'warehouse.definitions', N'Warehouse', N'Features', N'Index', 86),
         (N'warehouse.movements', N'صفحهٔ گردش کالا', N'warehouse.root', N'Warehouse', N'Features', N'Index', 86),
         (N'warehouse.definitions.read', N'مشاهدهٔ تعاریف انبار', N'warehouse.definitions', N'Warehouse', N'DefinitionsApi', N'Get', 10),
         (N'warehouse.definitions.create', N'ساخت تعاریف انبار', N'warehouse.definitions', N'Warehouse', N'DefinitionsApi', N'Create', 20),
@@ -175,12 +176,13 @@ BEGIN TRY
         WHEN N'warehouse.definitions.units' THEN N'units' WHEN N'warehouse.definitions.product-units' THEN N'product-units'
         WHEN N'warehouse.definitions.variants' THEN N'variants' WHEN N'warehouse.definitions.document-types' THEN N'document-types'
         WHEN N'warehouse.definitions.sales-plan-mapping' THEN N'sales-plan-mapping'
+        WHEN N'warehouse.definitions.stock-owners' THEN N'stock-owners'
         WHEN N'warehouse.movements' THEN N'movements' END
     WHERE [PermissionKey] IN (N'store.orders',N'store.promotions',N'store.customers',N'store.reviews',N'store.questions',N'store.content',
         N'warehouse.orders',N'warehouse.documents.receipts',N'warehouse.documents.dispatches',N'warehouse.documents.transfers',
         N'warehouse.documents.returns',N'warehouse.documents.stocktake',N'warehouse.documents.adjustments',N'warehouse.definitions.companies',
         N'warehouse.definitions.references',N'warehouse.definitions.units',N'warehouse.definitions.product-units',N'warehouse.definitions.variants',N'warehouse.definitions.document-types',
-        N'warehouse.definitions.sales-plan-mapping',N'warehouse.movements');
+        N'warehouse.definitions.sales-plan-mapping',N'warehouse.definitions.stock-owners',N'warehouse.movements');
 
     UPDATE [Admin].[Permission]
     SET [ParentPermissionKey] = N'warehouse.movements'

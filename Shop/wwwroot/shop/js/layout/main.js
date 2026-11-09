@@ -110,11 +110,11 @@ $(function () {
     const recentSearchKey = "hn-header-recent-searches";
     let recentSearches = [];
     const popularSearches = [
-      "Ø¯Ø±ÛŒÙ„ Ø´Ø§Ø±Ú˜ÛŒ",
-      "Ù…ÙˆÙ„ØªÛŒâ€ŒÙ…ØªØ± Ø¯ÛŒØ¬ÛŒØªØ§Ù„",
-      "Ø³Øª Ù…ØªÙ‡ Ùˆ Ø³Ø±ÛŒ",
-      "Ø§ÛŒØ³ØªÚ¯Ø§Ù‡ Ù‡ÙˆÛŒÙ‡",
-      "Ú†Ø±Ø§Øº Ú©Ø§Ø±Ú¯Ø§Ù‡ÛŒ",
+      "دریل شارژی",
+      "مولتی‌متر دیجیتال",
+      "ست مته و سری",
+      "ایستگاه هویه",
+      "چراغ کارگاهی",
     ];
     const readRecentSearches = () => recentSearches;
     const loadRecentSearches = async () => {
@@ -143,7 +143,7 @@ $(function () {
       `<a class="header-search-quick-chip" data-search-query="${escapeHtml(query)}" href="${searchUrl(query)}"><i class="bi ${icon}" aria-hidden="true"></i><span>${escapeHtml(query)}</span></a>`;
     const renderQuickSearchPanel = () => {
       const recent = readRecentSearches();
-      suggestions.innerHTML = `<section class="header-search-quick-section" aria-labelledby="recentSearchesTitle"><div class="header-search-quick-heading"><strong id="recentSearchesTitle"><i class="bi bi-clock-history" aria-hidden="true"></i> Ø¬Ø³ØªØ¬ÙˆÙ‡Ø§ÛŒ Ø§Ø®ÛŒØ±</strong>${recent.length ? '<button type="button" data-clear-search-history>Ù¾Ø§Ú©â€ŒÚ©Ø±Ø¯Ù†</button>' : ""}</div>${recent.length ? `<div class="header-search-quick-chips">${recent.map((query) => quickSearchLink(query, "bi-clock-history")).join("")}</div>` : '<p class="header-search-quick-empty">Ø¬Ø³ØªØ¬ÙˆÙ‡Ø§ÛŒ Ø§Ø®ÛŒØ± Ø§ÛŒÙ†Ø¬Ø§ Ù†Ù…Ø§ÛŒØ´ Ø¯Ø§Ø¯Ù‡ Ù…ÛŒâ€ŒØ´ÙˆÙ†Ø¯.</p>'}</section><section class="header-search-quick-section" aria-labelledby="popularSearchesTitle"><div class="header-search-quick-heading"><strong id="popularSearchesTitle"><i class="bi bi-graph-up-arrow" aria-hidden="true"></i> Ø¬Ø³ØªØ¬ÙˆÙ‡Ø§ÛŒ Ù¾Ø±ØªÚ©Ø±Ø§Ø±</strong></div><div class="header-search-quick-chips">${popularSearches.map((query) => quickSearchLink(query, "bi-arrow-up-right")).join("")}</div></section>`;
+      suggestions.innerHTML = `<section class="header-search-quick-section" aria-labelledby="recentSearchesTitle"><div class="header-search-quick-heading"><strong id="recentSearchesTitle"><i class="bi bi-clock-history" aria-hidden="true"></i> جستجوهای اخیر</strong>${recent.length ? '<button type="button" data-clear-search-history>پاک‌کردن</button>' : ""}</div>${recent.length ? `<div class="header-search-quick-chips">${recent.map((query) => quickSearchLink(query, "bi-clock-history")).join("")}</div>` : '<p class="header-search-quick-empty">جستجوهای اخیر اینجا نمایش داده می‌شوند.</p>'}</section><section class="header-search-quick-section" aria-labelledby="popularSearchesTitle"><div class="header-search-quick-heading"><strong id="popularSearchesTitle"><i class="bi bi-graph-up-arrow" aria-hidden="true"></i> جستجوهای پرتکرار</strong></div><div class="header-search-quick-chips">${popularSearches.map((query) => quickSearchLink(query, "bi-arrow-up-right")).join("")}</div></section>`;
       suggestions.innerHTML = isolateDrawerSearchMarkup(
         suggestions.innerHTML,
       );
@@ -255,15 +255,15 @@ $(function () {
         }));
 
       const resultMarkup = matches.length
-        ? `<div class="header-search-suggestions-head"><span><i class="bi bi-stars" aria-hidden="true"></i> Ù¾ÛŒØ´Ù†Ù‡Ø§Ø¯ Ø¨Ø±Ø§ÛŒ Ø¬Ø³ØªØ¬ÙˆÛŒ Ø´Ù…Ø§</span><small>${faNumber(matches.length)} Ù¾ÛŒØ´Ù†Ù‡Ø§Ø¯</small></div><ul>${matches
+        ? `<div class="header-search-suggestions-head"><span><i class="bi bi-stars" aria-hidden="true"></i> پیشنهاد برای جستجوی شما</span><small>${faNumber(matches.length)} پیشنهاد</small></div><ul>${matches
             .map(
               ({ product, plan, currentPrice, listPrice }) => {
                 const planBadge = plan
-                  ? `<span class="header-search-plan-badge" title="${escapeHtml(plan.label || plan.name)}"><i class="bi bi-lightning-charge-fill" aria-hidden="true"></i>Ø·Ø±Ø­ ${escapeHtml(plan.name || plan.code)}</span>`
+                  ? `<span class="header-search-plan-badge" title="${escapeHtml(plan.label || plan.name)}"><i class="bi bi-lightning-charge-fill" aria-hidden="true"></i>طرح ${escapeHtml(plan.name || plan.code)}</span>`
                   : "";
                 const priceMarkup = listPrice
-                  ? `<b><span>${faNumber(currentPrice)} <small>ØªÙˆÙ…Ø§Ù†</small></span><del>${faNumber(listPrice)}</del></b>`
-                  : `<b>${faNumber(currentPrice)} <small>ØªÙˆÙ…Ø§Ù†</small></b>`;
+                  ? `<b><span>${faNumber(currentPrice)} <small>تومان</small></span><del>${faNumber(listPrice)}</del></b>`
+                  : `<b>${faNumber(currentPrice)} <small>تومان</small></b>`;
                 const productUrl = window.HNProductUrl(
                   product,
                   plan ? { salesPlanId: plan.id } : undefined,
@@ -273,8 +273,8 @@ $(function () {
             )
             .join(
               "",
-            )}</ul><a class="header-search-all" href="${searchUrl(searchInput.value.trim())}">Ù…Ø´Ø§Ù‡Ø¯Ù‡ Ù‡Ù…Ù‡ Ù†ØªØ§ÛŒØ¬ <i class="bi bi-arrow-left" aria-hidden="true"></i></a>`
-        : `<div class="header-search-empty"><i class="bi bi-search" aria-hidden="true"></i><span>Ù…Ø­ØµÙˆÙ„ÛŒ Ø¨Ø§ Ø§ÛŒÙ† Ø¹Ø¨Ø§Ø±Øª Ù¾ÛŒØ¯Ø§ Ù†Ø´Ø¯.</span><a href="${searchUrl(searchInput.value.trim())}">Ø¬Ø³ØªØ¬Ùˆ Ø¯Ø± Ù‡Ù…Ù‡ Ù…Ø­ØµÙˆÙ„Ø§Øª <i class="bi bi-arrow-left" aria-hidden="true"></i></a></div>`;
+            )}</ul><a class="header-search-all" href="${searchUrl(searchInput.value.trim())}">مشاهده همه نتایج <i class="bi bi-arrow-left" aria-hidden="true"></i></a>`
+        : `<div class="header-search-empty"><i class="bi bi-search" aria-hidden="true"></i><span>محصولی با این عبارت پیدا نشد.</span><a href="${searchUrl(searchInput.value.trim())}">جستجو در همه محصولات <i class="bi bi-arrow-left" aria-hidden="true"></i></a></div>`;
 
       suggestions.innerHTML = resultMarkup;
       suggestions.innerHTML = isolateDrawerSearchMarkup(
@@ -325,7 +325,11 @@ $(function () {
     });
     document.addEventListener("hn:auth-change", (event) => {
       recentSearches = [];
-      if (event.detail) void loadRecentSearches().then(renderQuickSearchPanel);
+      if (event.detail && !suggestions.hidden) {
+        void loadRecentSearches().then(() => {
+          if (!suggestions.hidden) renderQuickSearchPanel();
+        });
+      }
     });
     if (!isDrawerSearch) {
       headerSearchForm.addEventListener("pointerleave", () => {
@@ -448,7 +452,7 @@ $(function () {
         .attr("aria-pressed", String(active));
       $(this).attr(
         "aria-label",
-        active ? "Ø­Ø°Ù Ø§Ø² Ø¹Ù„Ø§Ù‚Ù‡â€ŒÙ…Ù†Ø¯ÛŒâ€ŒÙ‡Ø§" : "Ø§ÙØ²ÙˆØ¯Ù† Ø¨Ù‡ Ø¹Ù„Ø§Ù‚Ù‡â€ŒÙ…Ù†Ø¯ÛŒâ€ŒÙ‡Ø§",
+        active ? "حذف از علاقه‌مندی‌ها" : "افزودن به علاقه‌مندی‌ها",
       );
       $(this)
         .find("i")
@@ -467,8 +471,8 @@ $(function () {
       $(this)
         .toggleClass("active", active)
         .attr("aria-pressed", String(active))
-        .attr("aria-label", active ? "Ø­Ø°Ù Ø§Ø² Ù…Ù‚Ø§ÛŒØ³Ù‡" : "Ø§ÙØ²ÙˆØ¯Ù† Ø¨Ù‡ Ù…Ù‚Ø§ÛŒØ³Ù‡")
-        .attr("title", active ? "Ø­Ø°Ù Ø§Ø² Ù…Ù‚Ø§ÛŒØ³Ù‡" : "Ø§ÙØ²ÙˆØ¯Ù† Ø¨Ù‡ Ù…Ù‚Ø§ÛŒØ³Ù‡")
+        .attr("aria-label", active ? "حذف از مقایسه" : "افزودن به مقایسه")
+        .attr("title", active ? "حذف از مقایسه" : "افزودن به مقایسه")
         .find("i")
         .attr("class", "bi bi-arrow-left-right");
     });
@@ -478,7 +482,7 @@ $(function () {
     const compareCount = storedListCount("hn-compare");
     $("#favoritesCount").text(faNumber(favoriteCount));
     $("#compareCount").text(faNumber(compareCount));
-    $("#compareToggle").attr("aria-label", `Ù…Ù‚Ø§ÛŒØ³Ù‡ Ù…Ø­ØµÙˆÙ„Ø§Øª ${faNumber(compareCount)}`);
+    $("#compareToggle").attr("aria-label", `مقایسه محصولات ${faNumber(compareCount)}`);
     renderFavoritePanel();
     renderComparePanel();
     syncFavoriteButtons();
@@ -495,10 +499,10 @@ $(function () {
         image: product.image,
       });
     });
-    $("#favoritesPanelCount").text(`${faNumber(ids.length)} Ù…Ø­ØµÙˆÙ„`);
+    $("#favoritesPanelCount").text(`${faNumber(ids.length)} محصول`);
     if (!ids.length) {
       $("#favoritesPanelItems").html(
-        '<div class="compare-panel-empty header-panel-empty"><span class="header-panel-empty-icon"><i class="bi bi-heart" aria-hidden="true"></i></span><strong>Ù‡Ù†ÙˆØ² Ù…Ø­ØµÙˆÙ„ÛŒ Ø¯Ø± Ø¹Ù„Ø§Ù‚Ù‡â€ŒÙ…Ù†Ø¯ÛŒâ€ŒÙ‡Ø§ Ù†ÛŒØ³Øª</strong><p>Ø¨Ø±Ø§ÛŒ Ø°Ø®ÛŒØ±Ù‡ØŒ Ø¢ÛŒÚ©Ù† Ù‚Ù„Ø¨ Ø±ÙˆÛŒ Ú©Ø§Ø±Øª Ù…Ø­ØµÙˆÙ„ Ø±Ø§ Ø¨Ø²Ù†ÛŒØ¯.</p></div>',
+        '<div class="compare-panel-empty header-panel-empty"><span class="header-panel-empty-icon"><i class="bi bi-heart" aria-hidden="true"></i></span><strong>هنوز محصولی در علاقه‌مندی‌ها نیست</strong><p>برای ذخیره، آیکن قلب روی کارت محصول را بزنید.</p></div>',
       );
       return;
     }
@@ -506,13 +510,13 @@ $(function () {
       ids
         .map((id) => {
           const product = products.get(id) || {
-            name: "Ù…Ø­ØµÙˆÙ„ Ù…Ù†ØªØ®Ø¨",
+            name: "محصول منتخب",
             price: 0,
             image: "content/products/images/card/cordless-hammer-drill-hn-001-row-001-card-800.jpg",
           };
-          const name = product.name || "Ù…Ø­ØµÙˆÙ„ Ù…Ù†ØªØ®Ø¨";
+          const name = product.name || "محصول منتخب";
           const href = window.HNProductUrl?.(id) || "/search";
-          return `<article class="compare-panel-item" data-favorite-id="${escapeHtml(id)}"><img src="${escapeHtml(product.image || "content/products/images/card/cordless-hammer-drill-hn-001-row-001-card-800.jpg")}" alt="" loading="lazy"><span><strong><a class="header-panel-product-link" href="${escapeHtml(href)}">${escapeHtml(name)}</a></strong><small>${faNumber(Number(product.price) * (Number(product.price) < 1000000 ? 1000000 : 1))} ØªÙˆÙ…Ø§Ù†</small></span><button class="cart-remove" type="button" data-favorite-remove="${escapeHtml(id)}" aria-label="Ø­Ø°Ù ${escapeHtml(name)} Ø§Ø² Ø¹Ù„Ø§Ù‚Ù‡â€ŒÙ…Ù†Ø¯ÛŒâ€ŒÙ‡Ø§"><i class="bi bi-trash3" aria-hidden="true"></i></button></article>`;
+          return `<article class="compare-panel-item" data-favorite-id="${escapeHtml(id)}"><img src="${escapeHtml(product.image || "content/products/images/card/cordless-hammer-drill-hn-001-row-001-card-800.jpg")}" alt="" loading="lazy"><span><strong><a class="header-panel-product-link" href="${escapeHtml(href)}">${escapeHtml(name)}</a></strong><small>${faNumber(Number(product.price) * (Number(product.price) < 1000000 ? 1000000 : 1))} تومان</small></span><button class="cart-remove" type="button" data-favorite-remove="${escapeHtml(id)}" aria-label="حذف ${escapeHtml(name)} از علاقه‌مندی‌ها"><i class="bi bi-trash3" aria-hidden="true"></i></button></article>`;
         })
         .join(""),
     );
@@ -534,7 +538,7 @@ $(function () {
         name:
           button.dataset.name ||
           card?.querySelector("h3")?.textContent.trim() ||
-          "Ù…Ø­ØµÙˆÙ„ Ù…Ù†ØªØ®Ø¨",
+          "محصول منتخب",
         price: Number(button.dataset.price) || 0,
         image:
           button.dataset.image ||
@@ -542,10 +546,10 @@ $(function () {
           "content/products/images/card/cordless-hammer-drill-hn-001-row-001-card-800.jpg",
       });
     });
-    $("#comparePanelCount").text(`${faNumber(ids.length)} Ù…Ø­ØµÙˆÙ„`);
+    $("#comparePanelCount").text(`${faNumber(ids.length)} محصول`);
     if (!ids.length) {
       $("#comparePanelItems").html(
-        '<div class="compare-panel-empty header-panel-empty"><span class="header-panel-empty-icon"><i class="bi bi-arrow-left-right" aria-hidden="true"></i></span><strong>Ù‡Ù†ÙˆØ² Ù…Ø­ØµÙˆÙ„ÛŒ Ø¨Ø±Ø§ÛŒ Ù…Ù‚Ø§ÛŒØ³Ù‡ Ù†ÛŒØ³Øª</strong><p>Ø¨Ø±Ø§ÛŒ Ù…Ù‚Ø§ÛŒØ³Ù‡ØŒ Ø¢ÛŒÚ©Ù† Ù…Ù‚Ø§ÛŒØ³Ù‡ Ø±ÙˆÛŒ Ú©Ø§Ø±Øª Ù…Ø­ØµÙˆÙ„ Ø±Ø§ Ø¨Ø²Ù†ÛŒØ¯.</p></div>',
+        '<div class="compare-panel-empty header-panel-empty"><span class="header-panel-empty-icon"><i class="bi bi-arrow-left-right" aria-hidden="true"></i></span><strong>هنوز محصولی برای مقایسه نیست</strong><p>برای مقایسه، آیکن مقایسه روی کارت محصول را بزنید.</p></div>',
       );
       return;
     }
@@ -553,12 +557,12 @@ $(function () {
       ids
         .map((id) => {
           const product = products.get(id) || {
-            name: "Ù…Ø­ØµÙˆÙ„ Ù…Ù†ØªØ®Ø¨",
+            name: "محصول منتخب",
             price: 0,
             image: "content/products/images/card/cordless-hammer-drill-hn-001-row-001-card-800.jpg",
           };
           const href = window.HNProductUrl?.(id) || "/search";
-          return `<article class="compare-panel-item" data-compare-id="${escapeHtml(id)}"><img src="${escapeHtml(product.image)}" alt="" loading="lazy"><span><strong><a class="header-panel-product-link" href="${escapeHtml(href)}">${escapeHtml(product.name)}</a></strong><small>${faNumber(product.price)} ØªÙˆÙ…Ø§Ù†</small></span><button class="cart-remove" type="button" data-compare-remove="${escapeHtml(id)}" aria-label="Ø­Ø°Ù ${escapeHtml(product.name)} Ø§Ø² Ù…Ù‚Ø§ÛŒØ³Ù‡"><i class="bi bi-trash3" aria-hidden="true"></i></button></article>`;
+          return `<article class="compare-panel-item" data-compare-id="${escapeHtml(id)}"><img src="${escapeHtml(product.image)}" alt="" loading="lazy"><span><strong><a class="header-panel-product-link" href="${escapeHtml(href)}">${escapeHtml(product.name)}</a></strong><small>${faNumber(product.price)} تومان</small></span><button class="cart-remove" type="button" data-compare-remove="${escapeHtml(id)}" aria-label="حذف ${escapeHtml(product.name)} از مقایسه"><i class="bi bi-trash3" aria-hidden="true"></i></button></article>`;
         })
         .join(""),
     );
@@ -683,15 +687,15 @@ $(function () {
       const carousel = event?.target || $element[0];
       carousel?.querySelectorAll(".owl-nav .owl-prev").forEach((button) => {
         button.setAttribute("role", "button");
-        button.setAttribute("aria-label", "Ø§Ø³Ù„Ø§ÛŒØ¯ Ù‚Ø¨Ù„ÛŒ");
+        button.setAttribute("aria-label", "اسلاید قبلی");
       });
       carousel?.querySelectorAll(".owl-nav .owl-next").forEach((button) => {
         button.setAttribute("role", "button");
-        button.setAttribute("aria-label", "Ø§Ø³Ù„Ø§ÛŒØ¯ Ø¨Ø¹Ø¯ÛŒ");
+        button.setAttribute("aria-label", "اسلاید بعدی");
       });
       carousel?.querySelectorAll(".owl-dots .owl-dot").forEach((button, index) => {
         button.setAttribute("role", "button");
-        button.setAttribute("aria-label", `Ø±ÙØªÙ† Ø¨Ù‡ Ø§Ø³Ù„Ø§ÛŒØ¯ ${faNumber(index + 1)}`);
+        button.setAttribute("aria-label", `رفتن به اسلاید ${faNumber(index + 1)}`);
       });
     };
     const initialized = options.onInitialized;
@@ -737,7 +741,7 @@ $(function () {
         .text(`${product.brand} Â· ${product.type}`);
       $card
         .find(".featured-price, .featured-buy strong")
-        .text(`${faNumber(product.price * 1000000)} ØªÙˆÙ…Ø§Ù†`);
+        .text(`${faNumber(product.price * 1000000)} تومان`);
       $card.find(".add-cart").attr({
         "data-id": String(product.id),
         "data-name": product.name,
@@ -746,7 +750,7 @@ $(function () {
       });
     });
   }
-  const categoryFilters = {"Ø§Ø¨Ø²Ø§Ø± Ø¨Ø±Ù‚ÛŒ": "power-tools", "Ø§Ø¨Ø²Ø§Ø± Ø§Ù†Ø¯Ø§Ø²Ù‡â€ŒÚ¯ÛŒØ±ÛŒ": "measurement", "Ù„Ø­ÛŒÙ…â€ŒÚ©Ø§Ø±ÛŒ Ùˆ ØªØ¹Ù…ÛŒØ± Ø¨Ø±Ø¯": "electronics", "Ø±ÙˆØ´Ù†Ø§ÛŒÛŒ Ùˆ Ù„Ø§Ù…Ù¾": "lighting"};
+  const categoryFilters = {"ابزار برقی": "power-tools", "ابزار اندازه‌گیری": "measurement", "لحیم‌کاری و تعمیر برد": "electronics", "روشنایی و لامپ": "lighting"};
   const grid = document.querySelector("#productGrid");
   if (grid) grid.innerHTML = (window.HNCatalog.collections.selected || []).map((id) => {
     const product = window.HNCatalog.find(id);
@@ -775,7 +779,7 @@ $(function () {
     if (amazingCount) amazingCount.textContent = faNumber(amazingProducts.length);
     amazingSlider.innerHTML = amazingProducts.map((product) => `<div class="showcase-slide">${window.HNProductCard.render(product, {
       variant: "grid", image: sliderImagePath(product), offer: true,
-      badge: product.discountPercent ? "" : "Ù…Ù†ØªØ®Ø¨",
+      badge: product.discountPercent ? "" : "منتخب",
     })}</div>`).join("");
     window.HNUI?.enhance(amazingSection);
   }
@@ -857,7 +861,7 @@ $(function () {
     const $image = $card.find(".product-image, .rail-image").first();
     if (!$image.find(".favorite").length) {
       $image.prepend(
-        '<button class="favorite" type="button" aria-label="Ø§ÙØ²ÙˆØ¯Ù† Ø¨Ù‡ Ø¹Ù„Ø§Ù‚Ù‡â€ŒÙ…Ù†Ø¯ÛŒ"><i class="bi bi-heart"></i></button>',
+        '<button class="favorite" type="button" aria-label="افزودن به علاقه‌مندی"><i class="bi bi-heart"></i></button>',
       );
     }
   });
@@ -1015,11 +1019,11 @@ $(function () {
     $accountToggle
       .toggleClass("logged-out", !userLoggedIn)
       .toggleClass("logged-in", userLoggedIn)
-      .attr("aria-label", userLoggedIn ? "Ø­Ø³Ø§Ø¨ Ù…Ù†" : "ÙˆØ±ÙˆØ¯ / Ø«Ø¨Øªâ€ŒÙ†Ø§Ù… Ø¯Ø± Ø­Ø³Ø§Ø¨ Ú©Ø§Ø±Ø¨Ø±ÛŒ")
+      .attr("aria-label", userLoggedIn ? "حساب من" : "ورود / ثبت‌نام در حساب کاربری")
       .html(
         userLoggedIn
-          ? '<i class="bi bi-person" aria-hidden="true"></i><span class="account-label">Ø­Ø³Ø§Ø¨ Ù…Ù†</span><i class="bi bi-chevron-down" aria-hidden="true"></i>'
-          : '<i class="bi bi-person" aria-hidden="true"></i><span class="account-label">ÙˆØ±ÙˆØ¯ / Ø«Ø¨Øªâ€ŒÙ†Ø§Ù…</span><i class="bi bi-chevron-down" aria-hidden="true"></i>',
+          ? '<i class="bi bi-person" aria-hidden="true"></i><span class="account-label">حساب من</span><i class="bi bi-chevron-down" aria-hidden="true"></i>'
+          : '<i class="bi bi-person" aria-hidden="true"></i><span class="account-label">ورود / ثبت‌نام</span><i class="bi bi-chevron-down" aria-hidden="true"></i>',
       );
   };
   placeAccountPanel();
@@ -1077,7 +1081,6 @@ $(function () {
   let pendingRegistrationProfile = null;
   const $loginEmailStep = $("#loginEmailStep");
   const $registerEmailStep = $("#registerEmailStep");
-  const $forgotPasswordStep = $("#forgotPasswordStep");
   const $emailOtpStep = $("#emailOtpStep");
   const $emailOtpInput = $("#loginEmailOtp");
   const $loginEmailError = $("#loginEmailError");
@@ -1094,7 +1097,6 @@ $(function () {
       .attr("aria-selected", String(!isLogin));
     $loginEmailStep.toggleClass("d-none", !isLogin).prop("hidden", !isLogin);
     $registerEmailStep.toggleClass("d-none", isLogin).prop("hidden", isLogin);
-    $forgotPasswordStep.addClass("d-none").prop("hidden", true);
     $emailOtpStep.addClass("d-none").prop("hidden", true);
     $(".login-auth-tabs").removeClass("d-none");
     $loginEmailError.empty();
@@ -1104,40 +1106,6 @@ $(function () {
 
   $("#loginModeTab").on("click", () => selectLoginMode("login"));
   $("#registerModeTab").on("click", () => selectLoginMode("register"));
-
-  $("#forgotPasswordLink").on("click", () => {
-    $("#forgotPasswordEmail").val($("#loginEmail").val().trim());
-    $("#forgotPasswordError").empty();
-    $(".login-auth-tabs").addClass("d-none");
-    $loginEmailStep.addClass("d-none").prop("hidden", true);
-    $registerEmailStep.addClass("d-none").prop("hidden", true);
-    $emailOtpStep.addClass("d-none").prop("hidden", true);
-    $forgotPasswordStep.removeClass("d-none").prop("hidden", false);
-    $("#forgotPasswordEmail").trigger("focus");
-  });
-
-  $("#forgotPasswordBack").on("click", () => {
-    selectLoginMode("login");
-    $("#loginEmail").trigger("focus");
-  });
-
-  $("#forgotPasswordForm").on("submit", (event) => {
-    event.preventDefault();
-    const emailInput = $("#forgotPasswordEmail")[0];
-    if (!emailInput.value.trim() || !emailInput.validity.valid) {
-      window.HNUI.setMessage(
-        document.querySelector("#forgotPasswordError"),
-        "Ø§ÛŒÙ…ÛŒÙ„ Ø±Ø§ Ø¨Ø§ Ù‚Ø§Ù„Ø¨ ØµØ­ÛŒØ­ ÙˆØ§Ø±Ø¯ Ú©Ù†ÛŒØ¯.",
-        "error",
-      );
-      return;
-    }
-    window.HNUI.setMessage(
-      document.querySelector("#forgotPasswordError"),
-      "Ø§Ø±Ø³Ø§Ù„ Ø§ÛŒÙ…ÛŒÙ„ Ø¨Ø§Ø²Ù†Ø´Ø§Ù†ÛŒ Ù‡Ù†ÙˆØ² Ø¨Ù‡ Ø³Ø±ÙˆÛŒØ³ Ø§ÛŒÙ…ÛŒÙ„ Ø³Ø§ÛŒØª Ù…ØªØµÙ„ Ù†Ø´Ø¯Ù‡ Ø§Ø³Øª.",
-      "warning",
-    );
-  });
 
   const requestEmailCode = async (mode, email) => {
     const $submit = $(mode === "register" ? "#registerEmailForm button[type='submit']" : "#loginEmailForm button[type='submit']");
@@ -1149,10 +1117,10 @@ $(function () {
         body: JSON.stringify({ email }),
       });
       const result = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(result.message || "Ø§Ø±Ø³Ø§Ù„ Ú©Ø¯ Ø§Ù†Ø¬Ø§Ù… Ù†Ø´Ø¯. Ø¯ÙˆØ¨Ø§Ø±Ù‡ ØªÙ„Ø§Ø´ Ú©Ù†ÛŒØ¯.");
+      if (!response.ok) throw new Error(result.message || "ارسال کد انجام نشد. دوباره تلاش کنید.");
     } catch (error) {
       const $message = mode === "register" ? $registerEmailError : $loginEmailError;
-      window.HNUI.setMessage($message[0], error.message || "Ø§Ø±ØªØ¨Ø§Ø· Ø¨Ø§ Ø³Ø±ÙˆÛŒØ³ Ø§Ø±Ø³Ø§Ù„ Ø§ÛŒÙ…ÛŒÙ„ Ø¨Ø±Ù‚Ø±Ø§Ø± Ù†Ø´Ø¯.", "error");
+      window.HNUI.setMessage($message[0], error.message || "ارتباط با سرویس ارسال ایمیل برقرار نشد.", "error");
       return;
     } finally {
       $submit.prop("disabled", false);
@@ -1161,8 +1129,8 @@ $(function () {
     $("#sentEmail").text(email);
     $("#emailOtpTitle").text(
       mode === "register"
-        ? "Ú©Ø¯ ÙØ¹Ø§Ù„â€ŒØ³Ø§Ø²ÛŒ Ø±Ø§ ÙˆØ§Ø±Ø¯ Ú©Ù†ÛŒØ¯"
-        : "Ú©Ø¯ ÙˆØ±ÙˆØ¯ Ø±Ø§ ÙˆØ§Ø±Ø¯ Ú©Ù†ÛŒØ¯",
+        ? "کد فعال‌سازی را وارد کنید"
+        : "کد ورود را وارد کنید",
     );
     $(".login-auth-tabs").addClass("d-none");
     $loginEmailStep.addClass("d-none").prop("hidden", true);
@@ -1263,17 +1231,11 @@ $(function () {
         const addresses = Array.isArray(account.addresses) ? [...account.addresses] : [];
         for (const address of window.HNUI.storage.json("hn-delivery-addresses", [])) {
           if (addresses.some((saved) => String(saved.id) === String(address.id))) continue;
-          const savedResponse = await window.HNUI.api.request("account/addresses", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: address.title, recipient: address.recipient, phone: address.phone, country: address.country, countryId: address.countryId, province: address.province, provinceId: address.provinceId, city: address.city, cityId: address.cityId, street: address.street, postal: address.postal }) });
+          const savedResponse = await window.HNUI.api.request("account/addresses", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: address.title, recipient: address.recipient, phone: address.phone, countryId: Number(address.countryId), provinceId: Number(address.provinceId), cityId: Number(address.cityId), street: address.street, postal: address.postal }) });
           if (savedResponse.ok) { const saved = await savedResponse.json(); addresses.push({ ...address, id: String(saved.id) }); }
         }
         window.HNUI.storage.set("hn-delivery-addresses", JSON.stringify(addresses));
-        const cart = window.HNUI.cart.read();
-        const restored = (Array.isArray(account.cart) ? account.cart : []).flatMap((line) => {
-          if (cart.some((item) => String(item.id) === String(line.id) && String(item.salesPlanId || "regular") === String(line.salesPlanId))) return [];
-          const product = (window.HNProducts || []).find((candidate) => String(candidate.id) === String(line.id));
-          return product ? [{ ...product, id: String(line.id), quantity: Number(line.quantity), salesPlanId: line.salesPlanId, options: line.options || {} }] : [];
-        });
-        if (restored.length) window.HNUI.cart.write([...cart, ...restored]);
+        window.HNUI.cart.restoreAccountLines(account.cart);
       }
     } catch { }
     if (pendingAuthMode === "register" && pendingRegistrationProfile)
@@ -1297,11 +1259,10 @@ $(function () {
   $("#loginEmailForm").on("submit", (event) => {
     event.preventDefault();
     const email = $("#loginEmail").val().trim();
-    const password = $("#loginPassword").val();
-    if (!email || !$("#loginEmail")[0].validity.valid || !password) {
+    if (!email || !$("#loginEmail")[0].validity.valid) {
       window.HNUI.setMessage(
         $loginEmailError[0],
-        "Ø§ÛŒÙ…ÛŒÙ„ Ù…Ø¹ØªØ¨Ø± Ùˆ Ø±Ù…Ø² Ø¹Ø¨ÙˆØ± Ø±Ø§ ÙˆØ§Ø±Ø¯ Ú©Ù†ÛŒØ¯.",
+        "ایمیل معتبر وارد کنید.",
         "error",
       );
       return;
@@ -1319,7 +1280,7 @@ $(function () {
     if (!firstName || !lastName || !emailInput.validity.valid) {
       window.HNUI.setMessage(
         $registerEmailError[0],
-        "Ù†Ø§Ù…ØŒ Ù†Ø§Ù… Ø®Ø§Ù†ÙˆØ§Ø¯Ú¯ÛŒ Ùˆ Ø§ÛŒÙ…ÛŒÙ„ Ù…Ø¹ØªØ¨Ø± Ø±Ø§ ÙˆØ§Ø±Ø¯ Ú©Ù†ÛŒØ¯.",
+        "نام، نام خانوادگی و ایمیل معتبر را وارد کنید.",
         "error",
       );
       return;
@@ -1341,7 +1302,7 @@ $(function () {
     if (!/^\d{6}$/.test(code)) {
       window.HNUI.setMessage(
         $emailOtpError[0],
-        "Ú©Ø¯ Ø´Ø´â€ŒØ±Ù‚Ù…ÛŒ Ø±Ø§ Ú©Ø§Ù…Ù„ ÙˆØ§Ø±Ø¯ Ú©Ù†ÛŒØ¯.",
+        "کد شش‌رقمی را کامل وارد کنید.",
         "error",
       );
       return;
@@ -1355,10 +1316,10 @@ $(function () {
         body: JSON.stringify({ email: $("#sentEmail").text(), code }),
       });
       const result = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(result.message || "Ú©Ø¯ ØªØ£ÛŒÛŒØ¯ Ù…Ø¹ØªØ¨Ø± Ù†ÛŒØ³Øª.");
+      if (!response.ok) throw new Error(result.message || "کد تأیید معتبر نیست.");
       completeDemoLogin();
     } catch (error) {
-      window.HNUI.setMessage($emailOtpError[0], error.message || "Ø§Ø±ØªØ¨Ø§Ø· Ø¨Ø§ Ø³Ø±ÙˆÛŒØ³ ØªØ£ÛŒÛŒØ¯ Ø¨Ø±Ù‚Ø±Ø§Ø± Ù†Ø´Ø¯.", "error");
+      window.HNUI.setMessage($emailOtpError[0], error.message || "ارتباط با سرویس تأیید برقرار نشد.", "error");
     } finally {
       $submit.prop("disabled", false);
     }
@@ -1372,7 +1333,7 @@ $(function () {
   });
   $loginModalElement.on("hidden.bs.modal", () => {
     $(
-      "#loginEmailForm, #registerEmailForm, #emailOtpForm, #forgotPasswordForm",
+      "#loginEmailForm, #registerEmailForm, #emailOtpForm",
     ).each(function () {
       this.reset();
     });
@@ -1424,20 +1385,14 @@ $(function () {
             const mergedAddresses = [...account.addresses];
             for (const address of Array.isArray(localAddresses) ? localAddresses : []) {
               if (mergedAddresses.some((saved) => String(saved.id) === String(address.id))) continue;
-              const saveResponse = await window.HNUI.api.request("account/addresses", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: address.title, recipient: address.recipient, phone: address.phone, country: address.country, countryId: address.countryId, province: address.province, provinceId: address.provinceId, city: address.city, cityId: address.cityId, street: address.street, postal: address.postal }) });
+              const saveResponse = await window.HNUI.api.request("account/addresses", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: address.title, recipient: address.recipient, phone: address.phone, countryId: Number(address.countryId), provinceId: Number(address.provinceId), cityId: Number(address.cityId), street: address.street, postal: address.postal }) });
               if (!saveResponse.ok) continue;
               const saved = await saveResponse.json();
               mergedAddresses.push({ ...address, id: String(saved.id) });
             }
             window.HNUI.storage.set("hn-delivery-addresses", JSON.stringify(mergedAddresses));
           }
-          const localCart = window.HNUI.cart.read();
-          const restored = (Array.isArray(account.cart) ? account.cart : []).flatMap((line) => {
-            if (localCart.some((item) => String(item.id) === String(line.id) && String(item.salesPlanId || "regular") === String(line.salesPlanId))) return [];
-            const product = (window.HNProducts || []).find((candidate) => String(candidate.id) === String(line.id));
-            return product ? [{ ...product, id: String(line.id), quantity: Number(line.quantity), salesPlanId: line.salesPlanId, options: line.options || {} }] : [];
-          });
-          if (restored.length) window.HNUI.cart.write([...localCart, ...restored]);
+          window.HNUI.cart.restoreAccountLines(account.cart);
         }
       } catch { }
       window.HNUI.auth.login();
@@ -1469,8 +1424,8 @@ $(function () {
       0,
     );
     $("#cartCount").text(faNumber(totalCount));
-    $("#cartTitleCount").text(`${faNumber(totalCount)} Ù…Ø­ØµÙˆÙ„`);
-    $("#cartTotal").text(`${faNumber(totalPrice)} ØªÙˆÙ…Ø§Ù†`);
+    $("#cartTitleCount").text(`${faNumber(totalCount)} محصول`);
+    $("#cartTotal").text(`${faNumber(totalPrice)} تومان`);
     $cartFooter.toggle(cart.length > 0);
     const shape = JSON.stringify(cart.map(({ quantity, ...item }) => item));
     if (cart.length && shape === renderedHeaderCartShape) {
@@ -1486,7 +1441,7 @@ $(function () {
     renderedHeaderCartShape = shape;
     if (!cart.length) {
       $cartItems.html(
-        '<div class="empty-cart header-panel-empty"><span class="empty-cart-icon header-panel-empty-icon"><i class="bi bi-cart3" aria-hidden="true"></i></span><strong>Ø³Ø¨Ø¯ Ø®Ø±ÛŒØ¯ Ø´Ù…Ø§ Ø®Ø§Ù„ÛŒ Ø§Ø³Øª</strong><p>Ø¨Ø±Ø§ÛŒ Ø´Ø±ÙˆØ¹ØŒ ÛŒÚ© Ù…Ø­ØµÙˆÙ„ Ø¨Ù‡ Ø³Ø¨Ø¯ Ø®Ø±ÛŒØ¯ Ø§Ø¶Ø§ÙÙ‡ Ú©Ù†ÛŒØ¯.</p></div>',
+        '<div class="empty-cart header-panel-empty"><span class="empty-cart-icon header-panel-empty-icon"><i class="bi bi-cart3" aria-hidden="true"></i></span><strong>سبد خرید شما خالی است</strong><p>برای شروع، یک محصول به سبد خرید اضافه کنید.</p></div>',
       );
       return;
     }
@@ -1499,7 +1454,7 @@ $(function () {
           const href = window.HNProductUrl?.(item.id, {salesPlanId: item.salesPlanId}) || "/search";
           const planDetails = item.salesPlanSnapshot;
           const planBadge = `<span class="cart-sales-plan-badge">${escapeHtml(window.HNUI.cart.salesPlanName(item.salesPlanId, planDetails?.name))}</span>`;
-          return `<div class="cart-item" data-cart-id="${safeId}" data-sales-plan-id="${escapeHtml(item.salesPlanId || "regular")}"><div class="cart-item-primary"><img src="${safeImage}" alt="${safeName}" loading="lazy" decoding="async"><div class="cart-item-info"><strong><a class="header-panel-product-link" href="${escapeHtml(href)}">${safeName}</a></strong>${planBadge}<div class="cart-item-actions"><span>${faNumber(item.price)} ØªÙˆÙ…Ø§Ù†</span>${window.HNUI.cart.renderControls(item)}</div></div></div>${cartOptionsMarkup(item)}</div>`;
+          return `<div class="cart-item" data-cart-id="${safeId}" data-sales-plan-id="${escapeHtml(item.salesPlanId || "regular")}"><div class="cart-item-primary"><img src="${safeImage}" alt="${safeName}" loading="lazy" decoding="async"><div class="cart-item-info"><strong><a class="header-panel-product-link" href="${escapeHtml(href)}">${safeName}</a></strong>${planBadge}<div class="cart-item-actions"><span>${faNumber(item.price)} تومان</span>${window.HNUI.cart.renderControls(item)}</div></div></div>${cartOptionsMarkup(item)}</div>`;
         })
         .join(""),
     );
@@ -1749,15 +1704,15 @@ $(function () {
     }
     $button.attr(
       "aria-label",
-      isFavorite ? "Ø­Ø°Ù Ø§Ø² Ø¹Ù„Ø§Ù‚Ù‡â€ŒÙ…Ù†Ø¯ÛŒâ€ŒÙ‡Ø§" : "Ø§ÙØ²ÙˆØ¯Ù† Ø¨Ù‡ Ø¹Ù„Ø§Ù‚Ù‡â€ŒÙ…Ù†Ø¯ÛŒâ€ŒÙ‡Ø§",
+      isFavorite ? "حذف از علاقه‌مندی‌ها" : "افزودن به علاقه‌مندی‌ها",
     );
     $button
       .find("i")
       .attr("class", isFavorite ? "bi bi-heart-fill" : "bi bi-heart");
     showListActionToast(
       isFavorite
-        ? "Ù…Ø­ØµÙˆÙ„ Ø¨Ù‡ Ø¹Ù„Ø§Ù‚Ù‡â€ŒÙ…Ù†Ø¯ÛŒâ€ŒÙ‡Ø§ Ø§Ø¶Ø§ÙÙ‡ Ø´Ø¯."
-        : "Ù…Ø­ØµÙˆÙ„ Ø§Ø² Ø¹Ù„Ø§Ù‚Ù‡â€ŒÙ…Ù†Ø¯ÛŒâ€ŒÙ‡Ø§ Ø­Ø°Ù Ø´Ø¯.",
+        ? "محصول به علاقه‌مندی‌ها اضافه شد."
+        : "محصول از علاقه‌مندی‌ها حذف شد.",
     );
   });
 
@@ -1836,7 +1791,7 @@ $(function () {
     event.preventDefault();
     window.HNUI.setMessage(
       document.querySelector("#formMessage"),
-      "Ø«Ø¨Øªâ€ŒÙ†Ø§Ù… Ø®Ø¨Ø±Ù†Ø§Ù…Ù‡ Ù‡Ù†ÙˆØ² ÙØ¹Ø§Ù„ Ù†ÛŒØ³ØªØ› Ø§Ø·Ù„Ø§Ø¹Ø§ØªÛŒ Ø§Ø±Ø³Ø§Ù„ ÛŒØ§ Ø°Ø®ÛŒØ±Ù‡ Ù†Ø´Ø¯.",
+      "ثبت‌نام خبرنامه هنوز فعال نیست؛ اطلاعاتی ارسال یا ذخیره نشد.",
       "warning",
     );
     $(event.currentTarget).trigger("reset");
@@ -1851,7 +1806,7 @@ $(function () {
     const name = String(
       $cartButton.data("name") ||
         $root.find("h3").first().text() ||
-        "Ù…Ø­ØµÙˆÙ„ Ù…Ù†ØªØ®Ø¨",
+        "محصول منتخب",
     );
     const productId = String($cartButton.data("id") || "");
     const catalogProduct = (window.HNProducts || []).find(
@@ -1868,7 +1823,7 @@ $(function () {
       ),
       code: catalogProduct
         ? catalogProduct.code
-        : $root.find("small").first().text() || "Ú©Ø¯ Ù…Ø­ØµÙˆÙ„",
+        : $root.find("small").first().text() || "کد محصول",
       brand: catalogProduct?.brand || "",
       type: catalogProduct?.type || "",
       powerSource: catalogProduct?.powerSource || catalogProduct?.movement || "",
@@ -1897,19 +1852,19 @@ $(function () {
     const productId = String($cartButton.data("id") || "");
     if (!$image.find(".favorite").length) {
       $image.prepend(
-        `<button class="favorite" type="button" data-product-id="${escapeHtml(productId)}" aria-label="Ø§ÙØ²ÙˆØ¯Ù† Ø¨Ù‡ Ø¹Ù„Ø§Ù‚Ù‡â€ŒÙ…Ù†Ø¯ÛŒâ€ŒÙ‡Ø§" aria-pressed="false" title="Ø¹Ù„Ø§Ù‚Ù‡â€ŒÙ…Ù†Ø¯ÛŒâ€ŒÙ‡Ø§"><i class="bi bi-heart" aria-hidden="true"></i></button>`,
+        `<button class="favorite" type="button" data-product-id="${escapeHtml(productId)}" aria-label="افزودن به علاقه‌مندی‌ها" aria-pressed="false" title="علاقه‌مندی‌ها"><i class="bi bi-heart" aria-hidden="true"></i></button>`,
       );
     }
     $image.find(".favorite").attr("data-product-id", productId);
     if (productId && !$image.find(".compare-trigger[data-product-id]").length) {
       $image.append(
-        `<button type="button" class="compare-trigger" data-product-id="${escapeHtml(productId)}" aria-label="Ø§ÙØ²ÙˆØ¯Ù† Ø¨Ù‡ Ù…Ù‚Ø§ÛŒØ³Ù‡" aria-pressed="false" title="Ø§ÙØ²ÙˆØ¯Ù† Ø¨Ù‡ Ù…Ù‚Ø§ÛŒØ³Ù‡"><i class="bi bi-arrow-left-right" aria-hidden="true"></i></button>`,
+        `<button type="button" class="compare-trigger" data-product-id="${escapeHtml(productId)}" aria-label="افزودن به مقایسه" aria-pressed="false" title="افزودن به مقایسه"><i class="bi bi-arrow-left-right" aria-hidden="true"></i></button>`,
       );
     }
     let $actions = $image.children(".product-card-actions");
     if (!$actions.length)
       $actions = $(
-        '<div class="product-card-actions" role="group" aria-label="Ø¹Ù…Ù„ÛŒØ§Øª Ù…Ø­ØµÙˆÙ„"></div>',
+        '<div class="product-card-actions" role="group" aria-label="عملیات محصول"></div>',
       ).appendTo($image);
     $image.children(".favorite, .compare-trigger").appendTo($actions);
     const outOfStock = $cartButton.prop("disabled");
@@ -1917,18 +1872,18 @@ $(function () {
       ? "bi bi-bag-x"
       : $cartButton.find("> i").attr("class") || "bi bi-bag-plus";
     $cartButton.html(
-      `<i class="${escapeHtml(cartIconClass)}" aria-hidden="true"></i><span class="add-cart-label">${outOfStock ? "Ù†Ø§Ù…ÙˆØ¬ÙˆØ¯" : "Ø§ÙØ²ÙˆØ¯Ù† Ø¨Ù‡ Ø³Ø¨Ø¯"}</span>`,
+      `<i class="${escapeHtml(cartIconClass)}" aria-hidden="true"></i><span class="add-cart-label">${outOfStock ? "ناموجود" : "افزودن به سبد"}</span>`,
     );
     $cartButton.attr({
-      "aria-label": outOfStock ? "Ù†Ø§Ù…ÙˆØ¬ÙˆØ¯" : "Ø§ÙØ²ÙˆØ¯Ù† Ø¨Ù‡ Ø³Ø¨Ø¯ Ø®Ø±ÛŒØ¯",
-      title: outOfStock ? "Ù…ÙˆØ¬ÙˆØ¯ÛŒ Ø§ÛŒÙ† Ú©Ø§Ù„Ø§ ØªÙ…Ø§Ù… Ø´Ø¯Ù‡ Ø§Ø³Øª" : "Ø§ÙØ²ÙˆØ¯Ù† Ø¨Ù‡ Ø³Ø¨Ø¯ Ø®Ø±ÛŒØ¯",
+      "aria-label": outOfStock ? "ناموجود" : "افزودن به سبد خرید",
+      title: outOfStock ? "موجودی این کالا تمام شده است" : "افزودن به سبد خرید",
     });
     $card.attr("data-action-dock-ready", "true");
     syncCompareButtons();
     syncFavoriteButtons();
     if (!$image.find(".quick").length)
       $image.append(
-        '<button type="button" class="quick">Ù…Ø´Ø§Ù‡Ø¯Ù‡ Ø³Ø±ÛŒØ¹ <i class="bi bi-arrow-left"></i></button>',
+        '<button type="button" class="quick">مشاهده سریع <i class="bi bi-arrow-left"></i></button>',
       );
   };
   const decorateProductCards = (root = document) => {
@@ -2083,8 +2038,8 @@ $(function () {
     }
     showListActionToast(
       isCompared
-        ? "Ù…Ø­ØµÙˆÙ„ Ø¨Ù‡ ÙÙ‡Ø±Ø³Øª Ù…Ù‚Ø§ÛŒØ³Ù‡ Ø§Ø¶Ø§ÙÙ‡ Ø´Ø¯."
-        : "Ù…Ø­ØµÙˆÙ„ Ø§Ø² ÙÙ‡Ø±Ø³Øª Ù…Ù‚Ø§ÛŒØ³Ù‡ Ø­Ø°Ù Ø´Ø¯.",
+        ? "محصول به فهرست مقایسه اضافه شد."
+        : "محصول از فهرست مقایسه حذف شد.",
     );
     setCartOpen(false);
   });
@@ -2098,15 +2053,15 @@ $(function () {
     $quickAdd
       .prop("disabled", unavailable)
       .attr("aria-disabled", String(unavailable))
-      .attr("aria-label", unavailable ? "Ù†Ø§Ù…ÙˆØ¬ÙˆØ¯" : "Ø§ÙØ²ÙˆØ¯Ù† Ø¨Ù‡ Ø³Ø¨Ø¯ Ø®Ø±ÛŒØ¯")
-      .attr("title", unavailable ? "Ù…ÙˆØ¬ÙˆØ¯ÛŒ Ø§ÛŒÙ† Ú©Ø§Ù„Ø§ ØªÙ…Ø§Ù… Ø´Ø¯Ù‡ Ø§Ø³Øª" : "Ø§ÙØ²ÙˆØ¯Ù† Ø¨Ù‡ Ø³Ø¨Ø¯ Ø®Ø±ÛŒØ¯")
+      .attr("aria-label", unavailable ? "ناموجود" : "افزودن به سبد خرید")
+      .attr("title", unavailable ? "موجودی این کالا تمام شده است" : "افزودن به سبد خرید")
       .toggleClass("is-out-of-stock", unavailable)
-      .html(`<i class="bi ${unavailable ? "bi-bag-x" : "bi-bag-plus"}" aria-hidden="true"></i> ${unavailable ? "Ù†Ø§Ù…ÙˆØ¬ÙˆØ¯" : "Ø§ÙØ²ÙˆØ¯Ù† Ø¨Ù‡ Ø³Ø¨Ø¯ Ø®Ø±ÛŒØ¯"}`);
+      .html(`<i class="bi ${unavailable ? "bi-bag-x" : "bi-bag-plus"}" aria-hidden="true"></i> ${unavailable ? "ناموجود" : "افزودن به سبد خرید"}`);
     $(".stock-note > span").html(
-      `<i aria-hidden="true"></i> ${unavailable ? "Ù†Ø§Ù…ÙˆØ¬ÙˆØ¯" : "Ù…ÙˆØ¬ÙˆØ¯ Ø¯Ø± Ø§Ù†Ø¨Ø§Ø±"}`,
+      `<i aria-hidden="true"></i> ${unavailable ? "ناموجود" : "موجود در انبار"}`,
     );
     $(".stock-note > small").text(
-      unavailable ? "Ù…ÙˆØ¬ÙˆØ¯ÛŒ Ø§ÛŒÙ† Ú©Ø§Ù„Ø§ ØªÙ…Ø§Ù… Ø´Ø¯Ù‡ Ø§Ø³Øª." : "Ø²Ù…Ø§Ù† Ø§Ø±Ø³Ø§Ù„ Ø¨Ø± Ø§Ø³Ø§Ø³ Ù…Ù‚ØµØ¯ Ùˆ Ø³ÙØ§Ø±Ø´ Ø§Ø¹Ù„Ø§Ù… Ù…ÛŒâ€ŒØ´ÙˆØ¯.",
+      unavailable ? "موجودی این کالا تمام شده است." : "زمان ارسال بر اساس مقصد و سفارش اعلام می‌شود.",
     );
     $("#quickViewImage").attr({
       src: product.image,
@@ -2116,14 +2071,14 @@ $(function () {
     $("#quickViewCode").text(
       `${product.brand ? `${product.brand} Â· ` : ""}${product.code}`,
     );
-    $("#quickViewPrice").text(`${faNumber(product.price)} ØªÙˆÙ…Ø§Ù†`);
+    $("#quickViewPrice").text(`${faNumber(product.price)} تومان`);
     $(".quick-description").text(
-      product.detail?.highlights?.[0] || product.detail?.intro || "Ù…Ø´Ø®ØµØ§Øª Ø§ÛŒÙ† Ù…Ø¯Ù„ Ø±Ø§ Ø¨Ø±Ø±Ø³ÛŒ Ú©Ù†ÛŒØ¯.",
+      product.detail?.highlights?.[0] || product.detail?.intro || "مشخصات این مدل را بررسی کنید.",
     );
     const quickSpecs = [
-      ["Ú¯Ø±ÙˆÙ‡ Ù…Ø­ØµÙˆÙ„", product.type],
-      ["Ù…Ù†Ø¨Ø¹ ØªØºØ°ÛŒÙ‡", product.powerSource || product.movement],
-      ["Ù…ÙˆØ±Ø¯ Ø§Ø³ØªÙØ§Ø¯Ù‡", product.useCase || product.strap],
+      ["گروه محصول", product.type],
+      ["منبع تغذیه", product.powerSource || product.movement],
+      ["مورد استفاده", product.useCase || product.strap],
     ].filter(([, value]) => value);
     $("#quickViewSpecs").html(
       quickSpecs
@@ -2210,10 +2165,10 @@ $(function () {
   document.addEventListener("hn:cart-stock-limit", (event) => {
     const { product, stock, limit, reason } = event.detail || {};
     const message = reason === "cart" && Number.isFinite(Number(limit))
-      ? `Ø­Ø¯Ø§Ú©Ø«Ø± ØªØ¹Ø¯Ø§Ø¯ Ù…Ø¬Ø§Ø² Ø¨Ø±Ø§ÛŒ Â«${product?.name || "Ø§ÛŒÙ† Ú©Ø§Ù„Ø§"}Â» ${faNumber(Number(limit))} Ø¹Ø¯Ø¯ Ø§Ø³Øª.`
+      ? `حداکثر تعداد مجاز برای Â«${product?.name || "این کالا"}Â» ${faNumber(Number(limit))} عدد است.`
       : product?.name && Number.isFinite(Number(stock))
-        ? `Ù…ÙˆØ¬ÙˆØ¯ÛŒ Â«${product.name}Â» ÙÙ‚Ø· ${faNumber(Number(stock))} Ø¹Ø¯Ø¯ Ø§Ø³ØªØ› ØªØ¹Ø¯Ø§Ø¯ Ø³Ø¨Ø¯ Ø¨Ù‡ Ø³Ù‚Ù Ù…ÙˆØ¬ÙˆØ¯ÛŒ Ø±Ø³ÛŒØ¯.`
-        : "ØªØ¹Ø¯Ø§Ø¯ Ø¯Ø±Ø®ÙˆØ§Ø³ØªÛŒ Ø§Ø² Ø³Ù‚Ù Ù…Ø¬Ø§Ø² Ú©Ø§Ù„Ø§ Ø¨ÛŒØ´ØªØ± Ø¨ÙˆØ¯Ø› ØªØ¹Ø¯Ø§Ø¯ Ø³Ø¨Ø¯ Ø¨Ù‡â€ŒØ±ÙˆØ²Ø±Ø³Ø§Ù†ÛŒ Ø´Ø¯.";
+        ? `موجودی Â«${product.name}Â» فقط ${faNumber(Number(stock))} عدد است؛ تعداد سبد به سقف موجودی رسید.`
+        : "تعداد درخواستی از سقف مجاز کالا بیشتر بود؛ تعداد سبد به‌روزرسانی شد.";
     showListActionToast(message, "warning");
   });
   });

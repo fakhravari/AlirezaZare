@@ -121,13 +121,13 @@
                 </header>
                 <div class="profile-personal-grid">
                     <div>
-                        <span>نام و نام خانوادگی</span><strong data-profile-value="name">ندا اولیائی</strong>
+                        <span>نام و نام خانوادگی</span><strong data-profile-value="name">ثبت نشده</strong>
                     </div>
                     <div>
-                        <span>پست الکترونیکی</span><strong data-profile-value="email" dir="ltr">example@email.com</strong>
+                        <span>پست الکترونیکی</span><strong data-profile-value="email" dir="ltr">—</strong>
                     </div>
                     <div>
-                        <span>شماره موبایل</span><strong data-profile-value="phone" dir="ltr">۰۹۳۶۹۴۵۵۴۵۷</strong>
+                        <span>شماره موبایل</span><strong data-profile-value="phone" dir="ltr">—</strong>
                     </div>
                     <div>
                         <span>دریافت خبرنامه</span><strong data-profile-value="newsletter">خیر</strong>
@@ -281,13 +281,13 @@
             <label>
                 نام
                 <span class="login-input">
-                    <input name="firstName" value="محمدحسین" required maxlength="50"/><i class="bi bi-person" aria-hidden="true"></i>
+                    <input name="firstName" required maxlength="50"/><i class="bi bi-person" aria-hidden="true"></i>
                 </span><small class="profile-edit-validation field-validation-valid" data-profile-edit-error="firstName"></small>
             </label>
             <label>
                 نام خانوادگی
                 <span class="login-input">
-                    <input name="lastName" value="فخراوری" required maxlength="50"/><i class="bi bi-person" aria-hidden="true"></i>
+                    <input name="lastName" required maxlength="50"/><i class="bi bi-person" aria-hidden="true"></i>
                 </span><small class="profile-edit-validation field-validation-valid" data-profile-edit-error="lastName"></small>
             </label>
             <fieldset class="profile-edit-gender">
@@ -304,13 +304,13 @@
             <label>
                 شماره موبایل <small>قابل ویرایش</small>
                 <span class="login-input">
-                    <input name="phone" value="09369455457" type="tel" inputmode="numeric" autocomplete="tel" maxlength="11" required dir="ltr" aria-describedby="profileEditPhoneError"/><i class="bi bi-phone" aria-hidden="true"></i>
+                    <input name="phone" type="tel" inputmode="numeric" autocomplete="tel" maxlength="11" required dir="ltr" aria-describedby="profileEditPhoneError"/><i class="bi bi-phone" aria-hidden="true"></i>
                 </span><small id="profileEditPhoneError" class="profile-edit-validation field-validation-valid" data-profile-edit-error="phone" role="alert"></small>
             </label>
             <label class="profile-edit-full">
                 ایمیل <small>فقط‌خواندنی</small>
                 <span class="login-input">
-                    <input name="email" type="email" value="example@email.com" dir="ltr" readonly aria-readonly="true"/><i class="bi bi-envelope" aria-hidden="true"></i>
+                    <input name="email" type="email" dir="ltr" readonly aria-readonly="true"/><i class="bi bi-envelope" aria-hidden="true"></i>
                 </span><small class="profile-edit-validation field-validation-valid" data-profile-edit-error="email"></small>
             </label>
             <label class="profile-edit-newsletter profile-edit-full">
@@ -353,9 +353,12 @@
         if (savedProfile.phone) phone.value = normalizePhone(savedProfile.phone);
         form.elements.newsletter.checked = savedProfile.newsletter === true;
         const renderProfile = profile => {
-          document.querySelector('[data-profile-value="name"]').textContent = `${profile.firstName || form.elements.firstName.value} ${profile.lastName || form.elements.lastName.value}`.trim();
-          document.querySelector('[data-profile-value="email"]').textContent = profile.email || form.elements.email.value;
-          document.querySelector('[data-profile-value="phone"]').textContent = window.HNUI.toPersianDigits(profile.phone || phone.value);
+          const name = `${profile.firstName || form.elements.firstName.value} ${profile.lastName || form.elements.lastName.value}`.trim();
+          document.querySelector('[data-profile-value="name"]').textContent = name || 'ثبت نشده';
+          document.querySelector('[data-profile-value="email"]').textContent = profile.email || form.elements.email.value || '—';
+          document.querySelector('[data-profile-value="phone"]').textContent = window.HNUI.toPersianDigits(profile.phone || phone.value) || '—';
+          const profileName = document.querySelector('.account-profile > div strong');
+          if (profileName) profileName.textContent = name || 'حساب کاربری';
           document.querySelector('[data-profile-value="newsletter"]').textContent = profile.newsletter ? 'بله' : 'خیر';
         };
         renderProfile(savedProfile);

@@ -22,7 +22,7 @@ public sealed class FeaturesController : Controller
         if (new[]
             {
                 "companies", "warehouses", "references", "units", "product-units", "variants", "document-types",
-                "sales-plan-mapping"
+                "sales-plan-mapping", "stock-owners"
             }.Contains(page.FeatureId, StringComparer.OrdinalIgnoreCase))
         {
             ViewData["ApiUrl"] = "/api/admin/warehouse/definitions";

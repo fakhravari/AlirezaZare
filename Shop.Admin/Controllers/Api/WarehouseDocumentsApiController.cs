@@ -54,7 +54,7 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db) : Controll
         var warehouseQuery = db.Warehouses.AsNoTracking().Where(x => x.IsActive);
         if (!User.IsInRole("system.full-access")) warehouseQuery = warehouseQuery.Where(x => allowed.Contains(x.Id));
         var warehouses = await warehouseQuery.OrderBy(x => x.Name)
-            .Select(x => new { x.Id, x.Code, x.Name, x.IdCompany, x.IsSalesWarehouse }).ToListAsync(cancellationToken);
+            .Select(x => new { x.Id, x.Code, x.Name, x.IdCompany, x.IsSalesWarehouse, x.IdOwnerSalesPlanReference }).ToListAsync(cancellationToken);
         var types = await db.WarehouseDocumentTypes.AsNoTracking().Where(x => x.IsActive).OrderBy(x => x.Name)
             .Select(x => new { x.Id, x.Code, x.Name, x.Direction, x.AffectsStock }).ToListAsync(cancellationToken);
         var partyQuery = db.WarehouseParties.AsNoTracking().Where(x => x.IsActive);
@@ -74,7 +74,7 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db) : Controll
             .ToListAsync(cancellationToken);
         var unitGroups = units.GroupBy(x => x.IdProduct).ToDictionary(group => group.Key,
             group => group.Select(x => new { x.Id, x.Name, x.ConversionFactor, x.IsBaseUnit }).ToArray());
-        var items = await db.InventoryItems.AsNoTracking().Where(x => x.IsActive && x.Product.IsActive
+        var items = await db.InventoryItems.AsNoTracking().Where(x => x.IsActive && x.Product.IsWarehouseEnabled
                 && (x.ProductVariant == null || x.ProductVariant.IsActive))
             .OrderBy(x => x.Product.Name).ThenBy(x => x.ProductVariant!.Name)
             .Select(x => new
@@ -88,7 +88,11 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db) : Controll
             item.Id, item.IdProduct, item.IdProductVariant, item.ProductName, item.VariantName, item.IdBaseUnit,
             Units = unitGroups.GetValueOrDefault(item.IdProduct) ?? []
         });
-        return Ok(new { warehouses, types, parties, plans, inventoryItems });
+        long[] warehouseIds = warehouses.Select(w => w.Id).ToArray();
+        var ownerLinks = await db.WarehouseStockOwners.AsNoTracking()
+            .Where(x => warehouseIds.Contains(x.IdWarehouse))
+            .ToListAsync(cancellationToken);
+        return Ok(new { warehouses, types, parties, plans, inventoryItems, ownerLinks });
     }
 
     [HttpGet("{id:long}")]
@@ -289,6 +293,9 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db) : Controll
             return ValidationProblem("یکی از انبار، نوع سند، مرجع یا طرح فروش غیرفعال است.");
         }
 
+        if (!await db.WarehouseStockOwners.AnyAsync(x => x.IdWarehouse == input.WarehouseId && x.IdStockOwner == input.SalesPlanId, cancellationToken))
+            return ValidationProblem("مالک انتخاب‌شده به این انبار اختصاص داده نشده است.");
+
         long? linkedWarehouseId = await db.WarehouseParties.AsNoTracking().Where(x => x.Id == input.PartyId)
             .Select(x => x.IdWarehouse).SingleOrDefaultAsync(cancellationToken);
         if (linkedWarehouseId.HasValue && !await CanAccessWarehouseAsync(linkedWarehouseId.Value, cancellationToken))
@@ -318,7 +325,7 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db) : Controll
         var itemIds = input.Select(x => x.InventoryItemId).ToArray();
         var inventoryItems = await db.InventoryItems.AsNoTracking().Include(x => x.Product)
             .Include(x => x.ProductVariant)
-            .Where(x => itemIds.Contains(x.Id) && x.IsActive && x.Product.IsActive &&
+            .Where(x => itemIds.Contains(x.Id) && x.IsActive && x.Product.IsWarehouseEnabled &&
                         (x.ProductVariant == null || x.ProductVariant.IsActive))
             .ToDictionaryAsync(x => x.Id, cancellationToken);
         var productIds = inventoryItems.Values.Select(x => x.IdProduct).Distinct().ToArray();

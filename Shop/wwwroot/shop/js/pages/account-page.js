@@ -138,7 +138,11 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
             }),
         );
     }
-    function openAddress(address) {
+    async function openAddress(address) {
+        let fields;
+        try { fields = await window.HNAddressFieldsReady; }
+        catch { ui.setMessage(status, "دریافت اطلاعات جغرافیایی ناموفق بود؛ صفحه را دوباره بارگذاری کنید.", "error"); return; }
+        if (!fields) return;
         form.reset();
         editing = address?.id || null;
         document.querySelector("#addressDialogTitle").textContent = editing
@@ -157,7 +161,7 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
                 "postal",
             ])
                 form.elements[field].value = address[field] || "";
-        window.HNAddressFields.set(address);
+        fields.set(address);
         dialog.showModal();
         document.documentElement.classList.add("address-modal-open");
     }
@@ -187,7 +191,7 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
                 `address-${Date.now()}-${Math.random().toString(36).slice(2)}`);
         if (ui.auth.isLoggedIn()) {
             const route = editing && /^\d+$/.test(String(editing)) ? `account/addresses/${editing}` : "account/addresses";
-            const response = await ui.api.request(route, { method: editing ? "PUT" : "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: address.title, recipient: address.recipient, phone: address.phone, country: address.country, countryId: address.countryId, province: address.province, provinceId: address.provinceId, city: address.city, cityId: address.cityId, street: address.street, postal: address.postal }) });
+            const response = await ui.api.request(route, { method: editing ? "PUT" : "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: address.title, recipient: address.recipient, phone: address.phone, countryId: Number(address.countryId), provinceId: Number(address.provinceId), cityId: Number(address.cityId), street: address.street, postal: address.postal }) });
             const result = await response.json().catch(() => ({}));
             if (!response.ok) { setFormStatus("ذخیره نشانی در حساب انجام نشد.", true); return; }
             if (result.id) address.id = String(result.id);
@@ -216,8 +220,7 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
             ).size
             : 0;
         const values = {
-            statOrders: [...document.querySelectorAll(".profile-order-card")]
-                .filter((order) => order.dataset.orderStatus === "تحویل‌شده").length,
+            statOrders: document.querySelectorAll(".profile-order-card").length,
             statAddresses: read(addressKey).length,
             statFavorites: read("hn-favorites").length,
             statCoupons: activeCoupons.length,
@@ -241,10 +244,10 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
         renderCoupons();
     }
 
-    const renderAccountOrders = (orders) => {
+    const renderAccountOrders = (orders, simulationAvailable = false) => {
         const host = document.querySelector(".profile-order-list");
         if (!host || !Array.isArray(orders)) return;
-        const labels = { "pending-payment": "در انتظار پرداخت", "payment-confirmed": "پرداخت تأیید شد", "warehouse-confirmed": "تأیید انبار", "in-transit": "در حال ارسال", "shipped-to-post": "ارسال به پست", delivered: "تحویل‌شده", cancelled: "لغوشده" };
+        const labels = { "pending-payment": "در انتظار پرداخت", "simulated-payment-confirmed": "پرداخت آزمایشی تأیید شد", "payment-confirmed": "پرداخت تأیید شد", "warehouse-confirmed": "تأیید انبار", "in-transit": "در حال ارسال", "shipped-to-post": "ارسال به پست", delivered: "تحویل‌شده", cancelled: "لغوشده" };
         host.replaceChildren();
         for (const order of orders) {
             const label = labels[order.status] || "نامشخص";
@@ -253,7 +256,9 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
             const card = document.createElement("article");
             card.className = "profile-order-card";
             Object.assign(card.dataset, { orderNumber: order.number, orderStatus: label, orderDate: dateLabel, orderDatetime: date.toISOString().slice(0, 10), orderCount: String(order.itemCount), orderAmount: String(order.totalAmount), orderDelivery: label });
-            card.innerHTML = `<header><div><span class="order-status is-${ui.escapeHtml(order.status)}">${ui.escapeHtml(label)}</span><strong>سفارش ${ui.escapeHtml(order.number)}</strong></div><time datetime="${card.dataset.orderDatetime}">${ui.escapeHtml(dateLabel)}</time></header><div class="order-body order-invoice-summary"><div class="order-products"><span class="order-product-icon"><i class="bi bi-receipt-cutoff"></i></span><div><strong>خلاصهٔ فاکتور</strong><small>${ui.formatNumber(order.itemCount)} کالا</small></div></div><div class="order-total"><small>مبلغ سفارش</small><strong>${ui.formatNumber(order.totalAmount)} تومان</strong></div></div><footer><span>${ui.escapeHtml(label)}</span><div class="order-card-actions"><a href="/Tracking"><i class="bi bi-truck"></i> پیگیری سفارش</a><button type="button" data-open-order-invoice>مشاهدهٔ فاکتور</button></div></footer>`;
+            const simulationLink = simulationAvailable && order.status === "pending-payment" && Number.isSafeInteger(order.id) && order.id > 0
+                ? `<a href="/payment/simulated/${order.id}">ادامهٔ پرداخت آزمایشی</a>` : "";
+            card.innerHTML = `<header><div><span class="order-status is-${ui.escapeHtml(order.status)}">${ui.escapeHtml(label)}</span><strong>سفارش ${ui.escapeHtml(order.number)}</strong></div><time datetime="${card.dataset.orderDatetime}">${ui.escapeHtml(dateLabel)}</time></header><div class="order-body order-invoice-summary"><div class="order-products"><span class="order-product-icon"><i class="bi bi-receipt-cutoff"></i></span><div><strong>خلاصهٔ فاکتور</strong><small>${ui.formatNumber(order.itemCount)} کالا</small></div></div><div class="order-total"><small>مبلغ سفارش</small><strong>${ui.formatNumber(order.totalAmount)} تومان</strong></div></div><footer><span>${ui.escapeHtml(label)}</span><div class="order-card-actions">${simulationLink}<a href="/Tracking"><i class="bi bi-truck"></i> پیگیری سفارش</a><button type="button" data-open-order-invoice>مشاهدهٔ فاکتور</button></div></footer>`;
             host.append(card);
         }
         const total = document.querySelector("#ordersTotal");
@@ -269,7 +274,7 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
             if (Array.isArray(account.favorites)) ui.storage.set("hn-favorites", JSON.stringify(account.favorites.map((item) => String(item.id))));
             if (Array.isArray(account.compare)) ui.storage.set("hn-compare", JSON.stringify(account.compare.map((item) => String(item.id))));
             if (Array.isArray(account.priceAlerts)) ui.storage.set(priceWatchKey, JSON.stringify(account.priceAlerts));
-            renderAddresses(); renderAccountOrders(account.orders); renderOverview();
+            renderAddresses(); renderAccountOrders(account.orders, account.simulationAvailable === true); renderOverview();
         } catch { }
     };
     document.addEventListener("hn:auth-change", (event) => { if (event.detail) void hydrateAccount(); });
@@ -547,8 +552,9 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
     window.addEventListener("hashchange", navigate);
     const invoiceDialog = document.getElementById("orderInvoiceDialog");
     const formatToman = (amount) => `${ui.formatNumber(Number(amount) || 0)} تومان`;
-    document.querySelectorAll("[data-open-order-invoice]").forEach((button) => {
-        button.addEventListener("click", () => {
+    document.addEventListener("click", (event) => {
+            const button = event.target.closest("[data-open-order-invoice]");
+            if (!button) return;
             const order = button.closest(".profile-order-card");
             if (!order || !invoiceDialog) return;
             invoiceDialog.querySelector("[data-invoice-number]").textContent = order.dataset.orderNumber;
@@ -559,7 +565,6 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
             invoiceDialog.querySelector("[data-invoice-amount]").textContent = formatToman(order.dataset.orderAmount);
             invoiceDialog.querySelector("[data-invoice-total]").textContent = formatToman(order.dataset.orderAmount);
             if (!invoiceDialog.open) invoiceDialog.showModal();
-        });
     });
     invoiceDialog?.querySelector("[data-close-order-invoice]")?.addEventListener("click", () => invoiceDialog.close());
     invoiceDialog?.addEventListener("click", (event) => {

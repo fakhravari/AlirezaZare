@@ -433,7 +433,7 @@ BEGIN
         WHERE m.[IdDocument] = @IdDocument
         GROUP BY m.[IdWarehouse], m.[IdInventoryItem], m.[IdSalesPlanReference];
 
-        IF @AffectsStock = 1
+        IF @AffectsStock = 1 AND @Status = 'F'
         BEGIN
             INSERT INTO #StockDelta ([IdWarehouse], [IdInventoryItem], [IdSalesPlanReference], [QuantityDelta])
             SELECT
@@ -442,9 +442,7 @@ BEGIN
                 @IdSalesPlanReference,
                 SUM(CASE
                     WHEN @Direction = 'R' AND @Status = 'F' THEN l.[BaseQuantity]
-                    WHEN @Direction = 'R' AND @Status = 'D' THEN -l.[BaseQuantity]
                     WHEN @Direction = 'I' AND @Status = 'F' THEN -l.[BaseQuantity]
-                    WHEN @Direction = 'I' AND @Status = 'D' THEN l.[BaseQuantity]
                     ELSE 0
                 END)
             FROM [Warehouse].[WarehouseDocumentLine] AS l
@@ -452,9 +450,7 @@ BEGIN
             GROUP BY l.[IdInventoryItem]
             HAVING SUM(CASE
                     WHEN @Direction = 'R' AND @Status = 'F' THEN l.[BaseQuantity]
-                    WHEN @Direction = 'R' AND @Status = 'D' THEN -l.[BaseQuantity]
                     WHEN @Direction = 'I' AND @Status = 'F' THEN -l.[BaseQuantity]
-                    WHEN @Direction = 'I' AND @Status = 'D' THEN l.[BaseQuantity]
                     ELSE 0
                 END) <> 0;
         END;
@@ -509,7 +505,7 @@ BEGIN
 
         DELETE FROM [Warehouse].[StockMovement] WHERE [IdDocument] = @IdDocument;
 
-        IF @AffectsStock = 1
+        IF @AffectsStock = 1 AND @Status = 'F'
         BEGIN
             INSERT INTO [Warehouse].[StockMovement]
             (
@@ -523,9 +519,7 @@ BEGIN
                 l.[Id],
                 CASE
                     WHEN @Direction = 'R' AND @Status = 'F' THEN l.[BaseQuantity]
-                    WHEN @Direction = 'R' AND @Status = 'D' THEN -l.[BaseQuantity]
                     WHEN @Direction = 'I' AND @Status = 'F' THEN -l.[BaseQuantity]
-                    WHEN @Direction = 'I' AND @Status = 'D' THEN l.[BaseQuantity]
                 END
             FROM [Warehouse].[WarehouseDocumentLine] AS l
             WHERE l.[IdDocument] = @IdDocument;

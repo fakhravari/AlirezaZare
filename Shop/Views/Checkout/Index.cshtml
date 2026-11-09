@@ -1,4 +1,5 @@
 @model PageModel
+@inject IWebHostEnvironment Environment
 
 <header class="page-hero cart-page-hero checkout-page-hero">
     <div class="container">
@@ -68,8 +69,15 @@
                 </div>
                 <p>پس از افزودن کالا، جمع قیمت محصولات اینجا نمایش داده می‌شود.</p>
             </div>
-            <p class="cart-shipping-note">هزینه ارسال پس از تأیید فروشگاه مشخص می‌شود.</p><button id="finalPayment" type="button" class="flow-button cart-checkout-link" disabled>پرداخت نهایی <i class="bi bi-arrow-left" aria-hidden="true"></i></button>
-            <p class="invoice-demo-note">پرداخت آنلاین هنوز فعال نیست و وجهی دریافت نمی‌شود.</p>
+            <p class="cart-shipping-note">هزینه ارسال پس از تأیید فروشگاه مشخص می‌شود.</p><button id="finalPayment" type="button" class="flow-button cart-checkout-link" disabled>ثبت سفارش <i class="bi bi-arrow-left" aria-hidden="true"></i></button>
+            @if (Environment.IsDevelopment())
+            {
+                <p class="invoice-demo-note">پس از ثبت سفارش، درگاه آزمایشی باز می‌شود؛ وجهی دریافت نمی‌شود.</p>
+            }
+            else
+            {
+                <p class="invoice-demo-note">پرداخت آنلاین هنوز فعال نیست و وجهی دریافت نمی‌شود.</p>
+            }
             <p id="paymentStatus" role="status"></p>
         </aside>
     </div>

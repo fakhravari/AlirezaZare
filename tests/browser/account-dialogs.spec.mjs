@@ -1,5 +1,6 @@
 import {test, expect} from '@playwright/test';
 import axe from 'axe-core';
+import {useBrowserAccount} from '../helpers/browser-account.mjs';
 
 async function expectNoA11yViolations(page, state) {
   const results = await page.evaluate(async () => window.axe.run(document, {
@@ -8,17 +9,23 @@ async function expectNoA11yViolations(page, state) {
   expect(results.violations.map(issue => ({id: issue.id, nodes: issue.nodes.map(node => node.target)})), state).toEqual([]);
 }
 
+test('address dialog waits for geography when opened immediately', async ({page}) => {
+  await useBrowserAccount(page);
+  await page.route('**/api/store/geography', async route => {
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    await route.continue();
+  });
+  await page.goto('/profile/addresses');
+  await expect(page.locator('#accountToggle')).toHaveClass(/logged-in/);
+  await page.locator('#newAddress').click();
+  await expect(page.locator('#addressDialog')).toBeVisible();
+  await expect(page.locator('#addressForm [name="provinceId"] option')).not.toHaveCount(0);
+});
+
 test('account dialogs fit the viewport and remain usable', async ({page, isMobile}) => {
   await page.addInitScript(axe.source);
   if (isMobile) await page.setViewportSize({width: 320, height: 640});
-  await page.addInitScript(() => {
-    localStorage.setItem('hn-demo-auth', '1');
-    localStorage.setItem('hn-delivery-addresses', JSON.stringify([{
-      id: 'sample-address', title: 'خانه', recipient: 'کاربر آزمایشی',
-      phone: '09123456789', province: 'تهران', city: 'تهران',
-      street: 'خیابان نمونه', postal: '1234567890',
-    }]));
-  });
+  await useBrowserAccount(page);
   await page.goto('/profile/addresses');
 
   const assertFitsViewport = async dialog => {
@@ -61,7 +68,7 @@ test('account dialogs fit the viewport and remain usable', async ({page, isMobil
 test('order invoice and cart address dialogs fit the viewport', async ({page, isMobile}) => {
   await page.addInitScript(axe.source);
   if (isMobile) await page.setViewportSize({width: 320, height: 640});
-  await page.addInitScript(() => localStorage.setItem('hn-demo-auth', '1'));
+  await useBrowserAccount(page);
   const checkDialog = async dialog => {
     await expect(dialog).toBeVisible();
     const dimensions = await dialog.evaluate(element => {
@@ -82,8 +89,11 @@ test('order invoice and cart address dialogs fit the viewport', async ({page, is
   await expect(page.locator('#orderInvoiceDialog')).not.toBeVisible();
 
   await page.goto('/search');
+  await expect(page.locator('#accountToggle')).toHaveClass(/logged-in/);
   await page.evaluate(() => window.HNUI.cart.add(window.HNCatalog.find(1)));
   await page.goto('/cart');
+  await expect(page.locator('#cartView .cart-product-row')).toHaveCount(1);
+  await expect(page.locator('#addressSelect option')).toHaveCount(2);
   await page.locator('#newAddress').click();
   await checkDialog(page.locator('#addressDialog'));
   await expectNoA11yViolations(page, 'cart address dialog');

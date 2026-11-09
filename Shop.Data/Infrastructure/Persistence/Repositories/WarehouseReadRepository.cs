@@ -56,7 +56,7 @@ public sealed class WarehouseReadRepository(ShopDbContext dbContext) : IWarehous
                 equals new { balance.IdWarehouse, balance.IdInventoryItem, balance.IdSalesPlanReference } into balances
             from balance in balances.DefaultIfEmpty()
             where warehouse.IsActive && warehouse.Company.IsActive && inventoryItem.IsActive &&
-                  inventoryItem.Product.IsActive
+                  inventoryItem.Product.IsWarehouseEnabled
                   && (inventoryItem.ProductVariant == null || inventoryItem.ProductVariant!.IsActive) && plan.IsActive
             select new { warehouse, inventoryItem, plan, balance };
 
@@ -66,7 +66,7 @@ public sealed class WarehouseReadRepository(ShopDbContext dbContext) : IWarehous
             query = query.Where(x => x.plan.StoreSalesPlanKey == salesPlanKey);
         if (!string.IsNullOrWhiteSpace(search))
             query = query.Where(x => x.inventoryItem.Product.Name.Contains(search)
-                                     || x.inventoryItem.Product.StoreProductKey.Contains(search)
+                                     || x.inventoryItem.Product.ProductKey.Contains(search)
                                      || (x.inventoryItem.ProductVariant != null &&
                                          x.inventoryItem.ProductVariant.Name.Contains(search)));
         if (lowStockOnly)
@@ -86,8 +86,8 @@ public sealed class WarehouseReadRepository(ShopDbContext dbContext) : IWarehous
                 x.plan.Id,
                 x.warehouse.Code,
                 x.warehouse.Name,
-                x.inventoryItem.Product.IdStoreProduct,
-                x.inventoryItem.Product.StoreProductKey,
+                x.inventoryItem.Product.Id,
+                x.inventoryItem.Product.ProductKey,
                 x.inventoryItem.Product.Name,
                 x.inventoryItem.IdProductVariant,
                 x.inventoryItem.ProductVariant == null ? null : x.inventoryItem.ProductVariant.Name,

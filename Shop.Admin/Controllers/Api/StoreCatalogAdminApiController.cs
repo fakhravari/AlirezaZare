@@ -68,12 +68,12 @@ public sealed class StoreCatalogAdminApiController(IStoreRuntimeDatasetRepositor
     }
 
     private static IReadOnlyList<CategoryRow> Categories(JsonElement root) =>
-        root.GetProperty("categories").EnumerateObject().Select(item => new CategoryRow(
-            Text(item.Value, "id", item.Name),
-            Text(item.Value, "fa", ""),
-            Text(item.Value, "en", ""),
-            Text(item.Value, "slug", ""),
-            Text(item.Value, "parentId", ""))).ToArray();
+        root.GetProperty("categories").EnumerateArray().Select(item => new CategoryRow(
+            Text(item, "id", ""),
+            Text(item, "fa", ""),
+            Text(item, "en", ""),
+            Text(item, "slug", ""),
+            Text(item, "parentId", ""))).ToArray();
 
     private static IReadOnlyList<BrandRow> Brands(JsonElement root) =>
         root.GetProperty("brands").EnumerateObject().Select(item => new BrandRow(

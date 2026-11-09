@@ -5,10 +5,13 @@ using Microsoft.Extensions.Options;
 using Shop.Controllers;
 using Shop.Models;
 using Shop.Services;
+using Microsoft.EntityFrameworkCore;
+using Shop.Database.Domain.Warehouse.Entities;
+using Shop.Database.Infrastructure.Persistence;
 
 string sourcePath = args.Length > 0
     ? Path.GetFullPath(args[0])
-    : Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../../Shop/wwwroot/content/data/catalog.json"));
+    : Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../fixtures/catalog.json"));
 string source = File.ReadAllText(sourcePath);
 CatalogSnapshot snapshot = CatalogSnapshot.Parse(source);
 if (snapshot.Products.Count != 30 || snapshot.Brands.Count != 21)
@@ -72,8 +75,7 @@ if (safe.BrowserJson.Contains("<script", StringComparison.OrdinalIgnoreCase) ||
 Console.WriteLine(
     $"C# catalog contracts OK: {rejected} invalid catalogs rejected; canonical identity and safe JSON verified.");
 
-string accountPath =
-    Path.GetFullPath(Path.Combine(Path.GetDirectoryName(sourcePath)!, "../../../App_Data/account-demo.json"));
+string accountPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../fixtures/account-demo.json"));
 string accountSource = File.ReadAllText(accountPath);
 var account = Shop.Models.AccountData.Parse(accountSource);
 if (account.Orders.Count != 10 || account.Coupons.Count != 10)
@@ -314,6 +316,18 @@ if (!expiredRedirect.Permanent || expiredRedirect.Url != "/products/cordless-ham
     throw new Exception("Expired plan URL did not permanently redirect to the canonical product URL.");
 Console.WriteLine(
     "C# product route contract OK: expired sales-plan URLs permanently redirect to the base canonical URL.");
+
+var modelOptions = new DbContextOptionsBuilder<ShopDbContext>()
+    .UseSqlServer("Server=localhost;Database=unused;Integrated Security=True;TrustServerCertificate=True")
+    .Options;
+using (var modelContext = new ShopDbContext(modelOptions))
+{
+    var number = modelContext.Model.FindEntityType(typeof(WarehouseDocumentRecord))!.FindProperty(nameof(WarehouseDocumentRecord.DocumentNumber))!;
+    if (number.GetDefaultValueSql() != "NEXT VALUE FOR [Warehouse].[DocumentNumberSequence]" ||
+        number.ValueGenerated != Microsoft.EntityFrameworkCore.Metadata.ValueGenerated.OnAdd)
+        throw new Exception("New warehouse documents must receive their number from the database sequence.");
+}
+Console.WriteLine("C# warehouse document numbering contract OK.");
 
 sealed class FixedCatalogSource(CatalogSnapshot snapshot) : ICatalogSource
 {

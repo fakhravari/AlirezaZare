@@ -2,6 +2,8 @@
 
 پیش‌نیاز: .NET SDK سازگار با `net10.0`؛ برای کنترل‌های UI و تست‌ها Node.js 24 و وابستگی‌های ثبت‌شده در package-lock.json.
 
+رشتهٔ اتصال `ConnectionStrings:DefaultConnection` را برای محیط توسعه در `Shop/appsettings.Development.json` که در Git نادیده گرفته می‌شود یا در متغیر محیطی `ConnectionStrings__DefaultConnection` قرار دهید. مقدار فایل tracked عمداً خالی است؛ محیط‌های دیگر باید اتصال را از تنظیمات امن همان محیط تأمین کنند.
+
 ```powershell
 dotnet restore Shop.sln
 dotnet build Shop.sln

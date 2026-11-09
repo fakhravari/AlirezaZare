@@ -19,11 +19,11 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db) : Con
                                   [plan].[Name] AS [SalesPlanName], offer.[PriceAmount] AS [PriceAmount], offer.[DiscountPercent] AS [DiscountPercent],
                                   offer.[IsEnabled] AS [IsEnabled]
                            FROM [Warehouse].[ProductVariant] variant
-                           INNER JOIN [Warehouse].[Product] warehouseProduct ON warehouseProduct.[Id] = variant.[IdProduct] AND warehouseProduct.[IsActive] = 1
-                           INNER JOIN [Store].[Product] product ON product.[Id] = warehouseProduct.[IdStoreProduct] AND product.[IsActive] = 1
-                           CROSS JOIN [Store].[SalesPlan] [plan]
+                           INNER JOIN [Warehouse].[Product] product ON product.[Id] = variant.[IdProduct] AND product.[IsWarehouseEnabled] = 1 AND product.[IsCatalogActive] = 1 AND product.[IsStoreEnabled] = 1
+
+                           CROSS JOIN [Warehouse].[SalesPlanReference] [plan]
                            LEFT JOIN [Store].[ProductVariantSalesPlanOffer] offer ON offer.[IdProductVariant] = variant.[Id] AND offer.[IdSalesPlan] = [plan].[Id]
-                           WHERE variant.[IsActive] = 1
+                           WHERE variant.[IsActive] = 1 AND [plan].[IdStockOwnerType] = 1
                            ORDER BY product.[Name], variant.[Name], [plan].[Code];
                            """;
         return Ok(await db.Database.SqlQueryRaw<VariantPlanPriceRow>(sql).ToListAsync(cancellationToken));
@@ -43,21 +43,22 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db) : Con
         int valid = await db.Database.SqlQueryRaw<int>("""
                                                        SELECT COUNT(*) AS [Value]
                                                        FROM [Warehouse].[ProductVariant] variant
-                                                       INNER JOIN [Warehouse].[Product] product ON product.[Id] = variant.[IdProduct] AND product.[IsActive] = 1
-                                                       INNER JOIN [Store].[SalesPlan] [plan] ON [plan].[SalesPlanKey] = {0} AND [plan].[IsEnabled] = 1
+                                                       INNER JOIN [Warehouse].[Product] product ON product.[Id] = variant.[IdProduct] AND product.[IsWarehouseEnabled] = 1 AND product.[IsCatalogActive] = 1 AND product.[IsStoreEnabled] = 1
+
+                                                       INNER JOIN [Warehouse].[SalesPlanReference] [plan] ON [plan].[SalesPlanKey] = {0} AND [plan].[IsEnabled] = 1 AND [plan].[IdStockOwnerType] = 1
                                                        WHERE variant.[Id] = {1} AND variant.[IsActive] = 1;
                                                        """, salesPlanId, variantId).SingleAsync(cancellationToken);
         if (valid == 0) return NotFound(new { code = "variant-or-plan-not-found" });
 
         await db.Database.ExecuteSqlInterpolatedAsync($"""
-                                                       IF EXISTS (SELECT 1 FROM [Store].[ProductVariantSalesPlanOffer] WHERE [IdProductVariant] = {variantId} AND [IdSalesPlan] = (SELECT [Id] FROM [Store].[SalesPlan] WHERE [SalesPlanKey] = {salesPlanId}))
+                                                       IF EXISTS (SELECT 1 FROM [Store].[ProductVariantSalesPlanOffer] WHERE [IdProductVariant] = {variantId} AND [IdSalesPlan] = (SELECT [Id] FROM [Warehouse].[SalesPlanReference] WHERE [SalesPlanKey] = {salesPlanId}))
                                                            UPDATE [Store].[ProductVariantSalesPlanOffer]
                                                            SET [PriceAmount] = {input.PriceAmount}, [DiscountPercent] = {input.DiscountPercent}, [IsEnabled] = {input.IsEnabled}, [UpdatedAtUtc] = SYSUTCDATETIME()
-                                                           WHERE [IdProductVariant] = {variantId} AND [IdSalesPlan] = (SELECT [Id] FROM [Store].[SalesPlan] WHERE [SalesPlanKey] = {salesPlanId});
+                                                           WHERE [IdProductVariant] = {variantId} AND [IdSalesPlan] = (SELECT [Id] FROM [Warehouse].[SalesPlanReference] WHERE [SalesPlanKey] = {salesPlanId});
                                                        ELSE
                                                            INSERT INTO [Store].[ProductVariantSalesPlanOffer] ([IdProductVariant], [IdSalesPlan], [PriceAmount], [DiscountPercent], [IsEnabled])
                                                            SELECT {variantId}, [Id], {input.PriceAmount}, {input.DiscountPercent}, {input.IsEnabled}
-                                                           FROM [Store].[SalesPlan] WHERE [SalesPlanKey] = {salesPlanId};
+                                                           FROM [Warehouse].[SalesPlanReference] WHERE [SalesPlanKey] = {salesPlanId};
                                                        """, cancellationToken);
         return Ok(new { saved = true, message = "قیمت تنوع و طرح فروش ذخیره شد." });
     }
@@ -71,7 +72,7 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db) : Con
             return ValidationProblem("تنوع یا طرح فروش معتبر نیست.");
         await db.Database.ExecuteSqlInterpolatedAsync($"""
                                                        DELETE offer FROM [Store].[ProductVariantSalesPlanOffer] offer
-                                                       INNER JOIN [Store].[SalesPlan] [plan] ON [plan].[Id] = offer.[IdSalesPlan]
+                                                       INNER JOIN [Warehouse].[SalesPlanReference] [plan] ON [plan].[Id] = offer.[IdSalesPlan]
                                                        WHERE offer.[IdProductVariant] = {variantId} AND [plan].[SalesPlanKey] = {salesPlanId};
                                                        """, cancellationToken);
         return Ok(new { saved = true, message = "قیمت اختصاصی حذف شد و قیمت پایهٔ کالا/طرح اعمال می‌شود." });
