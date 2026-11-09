@@ -8,8 +8,11 @@ namespace Shop.Services;
 public sealed class CatalogRepository(Shop.Database.Application.Store.Contracts.IStoreRuntimeDatasetRepository datasets)
     : ICatalogSource
 {
+    private CatalogSnapshot? requestSnapshot;
+
     public async ValueTask<CatalogSnapshot> ReadAsync(CancellationToken cancellationToken = default)
     {
+        if (requestSnapshot is not null) return requestSnapshot;
         string json = await datasets.ReadCatalogJsonAsync(cancellationToken)
                       ?? throw new InvalidDataException("The Store catalog dataset is missing from the database.");
         string editorialJson = await datasets.ReadBrandEditorialJsonAsync(cancellationToken)
@@ -17,7 +20,7 @@ public sealed class CatalogRepository(Shop.Database.Application.Store.Contracts.
                                    "The Store brand editorial dataset is missing from the database.");
         BrandEditorialDocument[] editorials = JsonSerializer.Deserialize<BrandEditorialDocument[]>(editorialJson,
             new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? [];
-        return CatalogSnapshot.Parse(NormalizeRelationObjects(json),
+        return requestSnapshot = CatalogSnapshot.Parse(NormalizeRelationObjects(json),
             editorials.ToDictionary(item => item.Slug, StringComparer.OrdinalIgnoreCase));
     }
 

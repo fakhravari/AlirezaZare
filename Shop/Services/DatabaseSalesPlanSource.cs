@@ -6,10 +6,13 @@ namespace Shop.Services;
 public sealed class DatabaseSalesPlanSource(IStoreSalesPlanRepository repository)
     : ISalesPlanSource, IProductPurchaseConfigurationSource
 {
+    private SalesPlanCatalog? requestSnapshot;
+
     public async ValueTask<SalesPlanCatalog> ReadAsync(CancellationToken cancellationToken = default)
     {
+        if (requestSnapshot is not null) return requestSnapshot;
         var snapshot = await repository.ReadSalesPlanSnapshotAsync(cancellationToken);
-        return new SalesPlanCatalog(1, "IRT",
+        return requestSnapshot = new SalesPlanCatalog(1, "IRT",
             snapshot.Plans.Select(plan => new SalesPlan(plan.Id, plan.Code, plan.Name, plan.Type,
                     plan.IsDefault, plan.IsEnabled, plan.StartsAtUtc, plan.EndsAtUtc, plan.Label, plan.ShowCountdown))
                 .ToArray(),

@@ -16,7 +16,7 @@ before(async () => {
   base = `http://127.0.0.1:${port}`;
   const appDll = process.env.SHOP_TEST_DLL ? path.resolve(root, process.env.SHOP_TEST_DLL) : path.join(root, 'Shop/bin/Debug/net10.0/Shop.dll');
   server = spawn('dotnet', [appDll, '--urls', base], {
-    cwd: path.join(root, 'Shop'), env: {...process.env, ASPNETCORE_ENVIRONMENT: 'Development'}, stdio: ['ignore', 'pipe', 'pipe'],
+    cwd: path.join(root, 'Shop'), env: {...process.env, ASPNETCORE_ENVIRONMENT: 'Development', PaidOrderOutbox__WorkerEnabled: 'false'}, stdio: ['ignore', 'pipe', 'pipe'],
   });
   server.on('exit', () => { exited = true; });
   server.on('error', error => { logs += String(error); exited = true; });

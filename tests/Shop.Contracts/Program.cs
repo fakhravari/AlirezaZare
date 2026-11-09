@@ -350,6 +350,23 @@ using (var modelContext = new ShopDbContext(modelOptions))
 }
 Console.WriteLine("C# warehouse document numbering contract OK.");
 
+var countedCatalog = new CountingRuntimeDataset(source);
+var requestCatalog = new CatalogRepository(countedCatalog);
+await requestCatalog.ReadAsync();
+await requestCatalog.ReadAsync();
+if (countedCatalog.CatalogReads != 1 || countedCatalog.EditorialReads != 1)
+    throw new Exception("Catalog was read more than once in one request scope.");
+await new CatalogRepository(countedCatalog).ReadAsync();
+if (countedCatalog.CatalogReads != 2 || countedCatalog.EditorialReads != 2)
+    throw new Exception("A new request scope did not refresh the catalog.");
+var countedPlans = new CountingSalesPlans();
+var requestPlans = new DatabaseSalesPlanSource(countedPlans);
+await requestPlans.ReadAsync();
+await requestPlans.ReadAsync();
+await new DatabaseSalesPlanSource(countedPlans).ReadAsync();
+if (countedPlans.Reads != 2) throw new Exception("Sales plans were not reused within a request and refreshed in a new request.");
+Console.WriteLine("Request-scoped catalog and sales-plan reuse OK.");
+
 sealed class FixedCatalogSource(CatalogSnapshot snapshot) : ICatalogSource
 {
     public ValueTask<CatalogSnapshot> ReadAsync(CancellationToken cancellationToken = default) =>
@@ -360,4 +377,28 @@ sealed class FixedSalesPlanSource(SalesPlanCatalog snapshot) : ISalesPlanSource
 {
     public ValueTask<SalesPlanCatalog> ReadAsync(CancellationToken cancellationToken = default) =>
         ValueTask.FromResult(snapshot);
+}
+
+
+sealed class CountingRuntimeDataset(string source) : Shop.Database.Application.Store.Contracts.IStoreRuntimeDatasetRepository
+{
+    public int CatalogReads { get; private set; }
+    public int EditorialReads { get; private set; }
+    public Task<string?> ReadCatalogJsonAsync(CancellationToken cancellationToken) { CatalogReads++; return Task.FromResult<string?>(source); }
+    public Task<string?> ReadBrandEditorialJsonAsync(CancellationToken cancellationToken) { EditorialReads++; return Task.FromResult<string?>("[]"); }
+    public Task<string?> ReadAccountJsonAsync(CancellationToken cancellationToken) => throw new NotImplementedException();
+    public Task<string?> ReadMagazineJsonAsync(CancellationToken cancellationToken) => throw new NotImplementedException();
+    public Task<string> ReadGeographyJsonAsync(CancellationToken cancellationToken) => throw new NotImplementedException();
+    public Task<IReadOnlyList<Shop.Database.Application.Store.Contracts.StoreFaqRow>> ReadFaqAsync(CancellationToken cancellationToken) => throw new NotImplementedException();
+}
+
+sealed class CountingSalesPlans : Shop.Database.Application.Store.Contracts.IStoreSalesPlanRepository
+{
+    public int Reads { get; private set; }
+    public Task<Shop.Database.Application.Store.Models.StoreSalesPlanSnapshot> ReadSalesPlanSnapshotAsync(CancellationToken cancellationToken)
+    {
+        Reads++;
+        return Task.FromResult(new Shop.Database.Application.Store.Models.StoreSalesPlanSnapshot([], [], []));
+    }
+    public Task<Shop.Database.Application.Store.Models.ProductPurchaseConfiguration?> ReadProductPurchaseConfigurationAsync(int productId, CancellationToken cancellationToken) => throw new NotImplementedException();
 }

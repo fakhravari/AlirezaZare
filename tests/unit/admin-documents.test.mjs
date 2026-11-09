@@ -29,3 +29,28 @@ test("returning to documents reloads warehouse definitions", async () => {
   assert.equal(version, 2);
   assert.match(second.filterWarehouses.children[1].textContent, /انبار 2/);
 });
+
+
+test("a late document detail cannot overwrite a more recently opened editor", async () => {
+  let source = await readFile(new URL("../../Shop.Admin/wwwroot/js/admin-documents.js", import.meta.url), "utf8");
+  source = source.replace("Object.freeze({ initialize })", "Object.freeze({ initialize, openEditor, setLookups(value) { lookups = value; }, setModal(value) { modal = value; } })");
+  const pending = new Map(), messages = [];
+  const field = () => ({ value: "", append() {}, replaceChildren() {} });
+  const elements = Object.fromEntries(["id", "status", "documentDate", "externalReference", "warehouseId", "documentTypeId", "partyId", "salesPlanId", "reason"].map(key => [key, field()]));
+  const form = { elements, reset() {}, querySelector: () => ({ replaceChildren() {} }), querySelectorAll: () => [] };
+  const document = { querySelector: () => form, getElementById: () => ({}), createElement: () => field() };
+  const window = { AdminUI: { getJson(url) { return new Promise((resolve, reject) => pending.set(url, { resolve, reject })); }, notify(message) { messages.push(message); } } };
+  vm.runInNewContext(source, { window, document, Intl, WeakSet, URLSearchParams, Date, Number, Set });
+  window.AdminDocuments.setLookups({ ownerLinks: [], plans: [], warehouses: [] });
+  let shows = 0; window.AdminDocuments.setModal({ show() { shows++; } });
+  const page = { isConnected: true, dataset: { api: "/documents" } };
+  const first = window.AdminDocuments.openEditor(page, 1);
+  const second = window.AdminDocuments.openEditor(page, 2);
+  pending.get("/documents/2").resolve({ id: 2, warehouseId: 1, lines: [], date: "2026-11-09", status: "D" });
+  await second;
+  pending.get("/documents/1").resolve({ id: 1, warehouseId: 1, lines: [], date: "2026-11-09", status: "D" });
+  await first;
+  assert.equal(form.elements.id.value, "2");
+  assert.equal(shows, 1);
+  assert.deepEqual(messages, []);
+});

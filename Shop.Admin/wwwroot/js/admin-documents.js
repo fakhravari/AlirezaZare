@@ -10,6 +10,7 @@
     let modal;
     let pageNumber = 1;
     let requestSerial = 0;
+    let editorSerial = 0;
 
     const token = () => document.querySelector('[data-document-form] input[name="__RequestVerificationToken"]')?.value || "";
     async function send(url, method = "GET", body) {
@@ -120,12 +121,14 @@
             const remove = node("button", "حذف", "btn btn-sm btn-outline-danger");
             remove.type = "button";
             remove.addEventListener("click", async () => {
-                if (!window.confirm(`سند شمارهٔ ${format.format(item.number)} حذف شود؟ موجودی آن نیز برگردانده می‌شود.`)) return;
+                if (remove.disabled || !window.confirm(`سند شمارهٔ ${format.format(item.number)} حذف شود؟ موجودی آن نیز برگردانده می‌شود.`)) return;
+                remove.disabled = true;
                 try {
                     await send(`${page.dataset.api}/${item.id}`, "DELETE", { delete: true });
                     ui.notify("سند حذف شد.", "success");
                     await loadDocuments(page);
                 } catch (error) { ui.notify(error.message, "danger"); }
+                finally { remove.disabled = false; }
             });
             if (page.dataset.canEdit === "true") actions.append(edit);
             if (page.dataset.canDelete === "true") actions.append(remove);
@@ -154,6 +157,7 @@
     }
 
     async function openEditor(page, id = null) {
+        const serial = ++editorSerial;
         const form = document.querySelector("[data-document-form]");
         form.reset();
         form.elements.id.value = "";
@@ -166,7 +170,7 @@
         if (id) {
             try {
                 const detail = await send(`${page.dataset.api}/${id}`);
-                if (!page.isConnected) return;
+                if (!page.isConnected || serial !== editorSerial) return;
                 form.elements.id.value = String(detail.id);
                 setSelect(form.elements.warehouseId, detail.warehouseId);
                 setSelect(form.elements.documentTypeId, detail.documentTypeId);
@@ -177,7 +181,7 @@
                 form.elements.reason.value = detail.reason || "";
                 form.elements.externalReference.value = detail.externalReference || "";
                 for (const line of detail.lines) appendLine(form, line);
-            } catch (error) { ui.notify(error.message, "danger"); return; }
+            } catch (error) { if (page.isConnected && serial === editorSerial) ui.notify(error.message, "danger"); return; }
         } else appendLine(form);
         document.getElementById("admin-document-title").textContent = id ? "ویرایش سند انبار" : "ثبت سند انبار";
         modal.show();
