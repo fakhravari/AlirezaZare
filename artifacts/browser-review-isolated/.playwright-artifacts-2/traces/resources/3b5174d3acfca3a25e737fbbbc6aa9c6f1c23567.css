@@ -1,0 +1,214 @@
+/* One interaction geometry for the category mega menu on every page. */
+
+#mainNav .brand-menu .dropdown-item:is(:hover, :focus-visible) {
+  padding-right: 14px;
+}
+
+/* Third level only: interactive links inside the four-column content area. */
+
+@media (prefers-reduced-motion: reduce) {
+  .inner-page #mainNav .category-mega-group > a:not(.category-mega-title) {
+    transition: none !important;
+  }
+}
+
+/* Refined brand menu cards. */
+#mainNav .brand-dropdown > .brand-menu {
+  border-top: 3px solid #c99b4f !important;
+}
+#mainNav .brand-dropdown > .brand-menu {
+  width: min(680px, calc(100vw - 48px)) !important;
+  column-gap: 14px !important;
+}
+#mainNav .brand-menu > li {
+  margin: 0 !important;
+}
+#mainNav .brand-menu .dropdown-item {
+  position: relative !important;
+  min-width: 0 !important;
+  margin: 4px 0 !important;
+  align-items: center !important;
+  transition:
+    transform 0.2s,
+    background 0.2s,
+    border-color 0.2s,
+    box-shadow 0.2s !important;
+}
+#mainNav .brand-menu .dropdown-item > span:nth-child(2) {
+  display: flex !important;
+  flex-direction: column !important;
+}
+#mainNav .brand-menu .dropdown-item strong {
+  overflow: hidden !important;
+  font-family: var(--font-body) !important;
+  line-height: 1.6;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+#mainNav .brand-menu .dropdown-item small {
+  overflow: hidden !important;
+  font-family: var(--font-latin) !important;
+  letter-spacing: 0.55px !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+#mainNav .brand-menu .dropdown-item > i {
+  transition:
+    transform 0.2s,
+    color 0.2s !important;
+}
+#mainNav .brand-menu .dropdown-item:hover,
+#mainNav .brand-menu .dropdown-item:focus-visible {
+  border-color: rgba(79, 108, 147, 0.48) !important;
+  background: #fff !important;
+  color: #102a56 !important;
+  box-shadow:
+    0 7px 17px rgba(16, 42, 86, 0.1),
+    inset -3px 0 #c99b4f !important;
+  transform: translateX(-3px) !important;
+}
+#mainNav .brand-menu .dropdown-item:hover > i {
+  color: #173867 !important;
+  transform: translateX(-3px) !important;
+}
+#mainNav .brand-menu-footer {
+  display: flex !important;
+  gap: 10px !important;
+  margin-top: 10px !important;
+  align-items: center !important;
+  border: 1px solid #e6ddcf !important;
+  box-shadow: none !important;
+}
+#mainNav .brand-menu-footer > a {
+  display: flex !important;
+  width: max-content !important;
+  min-width: 0 !important;
+  min-height: 42px !important;
+  flex: 0 0 auto !important;
+  gap: 10px !important;
+  padding: 0 16px !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 10px !important;
+  border: 0 !important;
+  background: #132f4e !important;
+  color: #fff !important;
+  font-size: 11px !important;
+  box-shadow:
+    0 7px 15px rgba(2, 19, 39, 0.22),
+    inset 0 1px rgba(255, 255, 255, 0.34) !important;
+}
+#mainNav .brand-menu-footer > a:hover {
+  transform: translateY(-2px) !important;
+  filter: brightness(1.08) !important;
+}
+#mainNav .brand-menu-footer .brand-trust {
+  display: flex !important;
+  min-width: 184px;
+  gap: 9px !important;
+  align-items: center !important;
+  color: #40516a !important;
+}
+#mainNav .brand-menu-footer .brand-trust > i {
+  color: #a77c3d !important;
+  font-size: 21px !important;
+}
+
+#mainNav .brand-menu-footer .brand-trust strong {
+  color: #40516a;
+  font-size: 13px !important;
+  line-height: 1.7;
+}
+
+#mainNav .brand-menu-footer .brand-trust small {
+  color: #69798d;
+  font-size: 11px !important;
+  line-height: 1.7;
+}
+
+/* Category menu shares the refined brand-menu shell and card language. */
+@media (min-width: 992px) {
+  #mainNav .mega-dropdown > .mega-menu {
+    top: 76px !important;
+    border: 1px solid rgba(113, 135, 166, 0.48) !important;
+    border-top: 3px solid #c99b4f !important;
+    border-radius: 0 0 20px 20px !important;
+  }
+}
+
+/* Shared cool neutral palette for category and brand menus. */
+@media (min-width: 992px) {
+
+  #mainNav .brand-menu-footer {
+    border-color: #e6ddcf !important;
+    background: linear-gradient(110deg, #faf7f1, #f2ece2) !important;
+  }
+
+  /* Keep the brand menu in the site's navy, white, and saffron palette. */
+  #mainNav .brand-dropdown > .brand-menu {
+    border-color: #cbd7e2 !important;
+    border-top-color: #f6c515 !important;
+    background: #f7f9fb !important;
+    box-shadow:
+      0 24px 58px rgba(16, 42, 67, 0.18),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.96) !important;
+  }
+
+  #mainNav .brand-menu .dropdown-item {
+    color: #243b53 !important;
+  }
+
+  #mainNav .brand-menu .dropdown-item:hover,
+  #mainNav .brand-menu .dropdown-item:focus-visible {
+    color: #102a43 !important;
+  }
+
+  #mainNav .brand-menu .dropdown-item > i {
+    color: #8091a1 !important;
+  }
+
+  #mainNav .brand-menu .dropdown-item:hover > i,
+  #mainNav .brand-menu .dropdown-item:focus-visible > i {
+    color: #9a7400 !important;
+  }
+
+  #mainNav .mega-dropdown > .mega-menu {
+    border-color: #d7c2a0 !important;
+    background: linear-gradient(145deg, #fffdf8, #f3eadc) !important;
+    box-shadow:
+      0 24px 58px rgba(76, 51, 21, 0.18),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.9) !important;
+  }
+
+  /* Shared item card treatment for brand and category menus. */
+  #mainNav .brand-menu .dropdown-item {
+    position: relative !important;
+    display: grid !important;
+    min-width: 0 !important;
+    height: 62px !important;
+    min-height: 62px !important;
+    max-height: 62px !important;
+    margin: 4px 0 !important;
+    padding: 7px !important;
+    grid-template-columns: 38px minmax(0, 1fr) 14px !important;
+    gap: 6px !important;
+    align-items: center !important;
+    border-color: #b6a286 !important;
+    background: #f7f1e6 !important;
+    box-shadow: inset -3px 0 #c99b4f !important;
+  }
+
+  /* The category label and arrow use the very same rhythm as a brand card. */
+
+  #mainNav .brand-menu .dropdown-item:hover,
+  #mainNav .brand-menu .dropdown-item:focus-visible {
+    border-color: #a58b62 !important;
+    background: #fbf6ed !important;
+    box-shadow:
+      inset -3px 0 #c99b4f,
+      0 5px 12px rgba(117, 79, 28, 0.08) !important;
+  }
+
+  /* A restrained, premium hover only for the category rail. */
+
+}

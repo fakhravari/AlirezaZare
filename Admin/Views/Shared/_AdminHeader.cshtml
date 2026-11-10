@@ -2,24 +2,24 @@
     <div class="navbar-header">
         <a class="navbar-brand" asp-area="Admin" asp-controller="Home" asp-action="Index" data-admin-nav>
             <span class="navbar-logo" aria-hidden="true"></span>
-            <span class="admin-brand-name">مدیریت</span>
-            <span class="admin-brand-caption">فروشگاه و انبار</span>
+            <span class="fw-bold">مدیریت</span>
+            <small class="ms-1 text-secondary d-none d-lg-inline">فروشگاه و انبار</small>
         </a>
-        <button type="button" class="navbar-mobile-toggler" data-toggle="app-sidebar-mobile" aria-label="باز کردن منوی اصلی">
+        <button type="button" class="navbar-mobile-toggler ms-3" data-toggle="app-sidebar-mobile" aria-label="باز کردن منوی اصلی">
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
         </button>
     </div>
     <div class="navbar-nav">
-        <div class="navbar-item admin-header-context">
-            <span class="admin-header-context__label">@ViewData["AreaTitle"]</span>
-            <span class="admin-header-context__title">@ViewData["Title"]</span>
+        <div class="navbar-item d-none d-md-flex flex-column justify-content-center admin-header-context">
+            <span class="admin-header-context__label small text-muted">@ViewData["AreaTitle"]</span>
+            <span class="admin-header-context__title fw-semibold">@ViewData["Title"]</span>
         </div>
         <div class="navbar-item">
-            <a class="navbar-link admin-header-home" asp-area="Admin" asp-controller="Home" asp-action="Index" data-admin-nav>
+            <a class="navbar-link d-flex align-items-center gap-2" asp-area="Admin" asp-controller="Home" asp-action="Index" data-admin-nav>
                 <i class="fa fa-house" aria-hidden="true"></i>
-                <span>نمای کلی</span>
+                <span class="d-none d-sm-inline">نمای کلی</span>
             </a>
         </div>
         <div class="navbar-item d-flex align-items-center gap-2">

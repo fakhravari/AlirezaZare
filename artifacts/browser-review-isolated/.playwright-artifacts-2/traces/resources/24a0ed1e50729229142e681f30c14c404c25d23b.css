@@ -1,0 +1,105 @@
+/* Keep every page on a neutral canvas with a quiet warm tint inside content panels. */
+body,
+body.inner-page {
+  background-color: var(--color-page);
+}
+
+body.inner-page .flow-main,
+body.inner-page .page-section > .container {
+  border-color: var(--color-line);
+  border-radius: var(--radius-panel-standard);
+  background: linear-gradient(145deg, #fffefa 0%, #fff 68%, #fbfaf6 100%);
+  box-shadow: var(--shadow-card);
+}
+
+body.inner-page .flow-main {
+  box-sizing: border-box;
+  width: min(calc(100% - 48px), 1360px);
+  max-width: 1360px;
+  margin: clamp(28px, 3vw, 40px) auto clamp(40px, 4vw, 56px);
+  padding-inline: clamp(20px, 2.2vw, 32px);
+}
+
+body.inner-page .page-section > .container {
+  box-sizing: border-box;
+  width: min(calc(100% - 48px), 1360px);
+  max-width: 1360px;
+  margin-inline: auto;
+  padding: clamp(20px, 2.2vw, 32px);
+}
+
+body.inner-page .flow-main.cart-page-main {
+  min-height: 0;
+  margin-bottom: 24px;
+}
+
+body.inner-page .contact-section > .container,
+body.inner-page .contact-shortcuts > .container {
+  width: min(calc(100% - 48px), 1360px);
+  max-width: 1360px;
+}
+
+.inner-page .page-hero .page-kicker,
+.inner-page main :is(.page-kicker, .article-eyebrow, .tracking-eyebrow, .journal-kicker) {
+  display: inline-flex;
+  width: fit-content;
+  min-height: 34px;
+  max-width: 100%;
+  box-sizing: border-box;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+#cartPanel .cart-item-info > strong {
+  line-height: 1.65;
+}
+
+#cartPanel .cart-item-info .cart-item-option-label {
+  font-size: 12px;
+}
+
+#cartPanel .cart-item-info .cart-item-option-chip {
+  max-width: 100%;
+  padding: 5px 8px;
+  font-size: var(--text-xs);
+  overflow-wrap: anywhere;
+}
+
+#cartPanel .cart-item-info .cart-item-option-chip > small {
+  font-size: var(--text-xs);
+}
+
+#cartPanel .cart-item-info .cart-item-option-chip > strong {
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+#cartPanel .cart-item-info .cart-item-option-status {
+  font-size: var(--text-xs);
+}
+
+@media (max-width: 767px) {
+  body.inner-page .flow-main,
+  body.inner-page .page-section > .container {
+    border-radius: 16px;
+    box-shadow: 0 8px 22px rgba(16, 42, 67, 0.045);
+  }
+
+  body.inner-page .flow-main {
+    width: calc(100% - 24px);
+    max-width: 100%;
+    margin-block: 16px 24px;
+    padding-inline: 16px;
+  }
+
+  body.inner-page .page-section > .container {
+    width: 100%;
+    max-width: 100%;
+    padding: 16px;
+  }
+}

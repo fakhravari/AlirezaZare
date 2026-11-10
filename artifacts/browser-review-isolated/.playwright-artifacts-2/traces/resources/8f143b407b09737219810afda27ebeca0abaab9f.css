@@ -1,0 +1,9 @@
+html[dir="rtl"] body.home-page main p, html[dir="rtl"] body.inner-page main p, html[dir="rtl"] body footer p { text-align: start; text-align-last: start; line-height: 1.85; }
+html[dir="rtl"] body:is(.home-page, .inner-page) main :is(.flow-empty, .compare-empty, .empty-results) p { text-align: center; text-align-last: center; line-height: 1.8; }
+html[dir="rtl"] body:is(.home-page, .inner-page) main p:is(.text-center) { text-align: center; text-align-last: center; }
+html[dir="rtl"] body:is(.home-page, .inner-page) main p:is(.text-start, [role="status"], .article-share-status) { text-align: start; text-align-last: start; }
+html[dir="rtl"] body:is(.home-page, .inner-page) main p.text-end { text-align: end; text-align-last: end; }
+@media (max-width: 767px) {
+  body:is(.home-page, .inner-page) { font-size: 15px; }
+  html[dir="rtl"] body:is(.home-page, .inner-page) :is(input, textarea, select)::placeholder { font-size: 14px; font-weight: 400; }
+}

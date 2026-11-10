@@ -2,35 +2,39 @@
     @await Html.PartialAsync("_AdminPageIntro", ("نمای کلی فروشگاه", "ورود به کاتالوگ و حوزه‌های اصلی فروشگاه."))
     <div class="row g-3 g-xl-4">
         <div class="col-md-6 col-xxl-3">
-            <a class="panel panel-inverse admin-module-card" asp-area="Store" asp-controller="Catalog" asp-action="Products" data-admin-nav>
-                <span class="admin-module-card__icon bg-blue">
+            <a class="panel panel-inverse h-100 text-decoration-none" asp-area="Store" asp-controller="Catalog" asp-action="Products" data-admin-nav>
+                <span class="panel-body d-flex flex-column align-items-start gap-2">
+                <span class="text-blue fs-20px">
                     <i class="fa fa-box-open" aria-hidden="true"></i>
                 </span>
-                <span class="admin-module-card__title">کاتالوگ کالا</span><span class="admin-module-card__text">محصولات، دسته‌ها، برندها و ویژگی‌ها</span>
+                </span><span class="fw-bold">کاتالوگ کالا</span><span class="text-muted small">محصولات، دسته‌ها، برندها و ویژگی‌ها</span></span>
             </a>
         </div>
         <div class="col-md-6 col-xxl-3">
-            <a class="panel panel-inverse admin-module-card" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="orders" data-admin-nav>
-                <span class="admin-module-card__icon bg-orange">
+            <a class="panel panel-inverse h-100 text-decoration-none" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="orders" data-admin-nav>
+                <span class="panel-body d-flex flex-column align-items-start gap-2">
+                <span class="text-orange fs-20px">
                     <i class="fa fa-receipt" aria-hidden="true"></i>
                 </span>
-                <span class="admin-module-card__title">سفارش‌ها</span><span class="admin-module-card__text">چرخهٔ پرداخت، آماده‌سازی و ارسال</span>
+                </span><span class="fw-bold">سفارش‌ها</span><span class="text-muted small">چرخهٔ پرداخت، آماده‌سازی و ارسال</span></span>
             </a>
         </div>
         <div class="col-md-6 col-xxl-3">
-            <a class="panel panel-inverse admin-module-card" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="customers" data-admin-nav>
-                <span class="admin-module-card__icon bg-green">
+            <a class="panel panel-inverse h-100 text-decoration-none" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="customers" data-admin-nav>
+                <span class="panel-body d-flex flex-column align-items-start gap-2">
+                <span class="text-green fs-20px">
                     <i class="fa fa-users" aria-hidden="true"></i>
                 </span>
-                <span class="admin-module-card__title">مشتریان</span><span class="admin-module-card__text">پروفایل، نشانی و سابقهٔ خرید</span>
+                </span><span class="fw-bold">مشتریان</span><span class="text-muted small">پروفایل، نشانی و سابقهٔ خرید</span></span>
             </a>
         </div>
         <div class="col-md-6 col-xxl-3">
-            <a class="panel panel-inverse admin-module-card" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="reviews" data-admin-nav>
-                <span class="admin-module-card__icon bg-purple">
+            <a class="panel panel-inverse h-100 text-decoration-none" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="reviews" data-admin-nav>
+                <span class="panel-body d-flex flex-column align-items-start gap-2">
+                <span class="text-purple fs-20px">
                     <i class="fa fa-comments" aria-hidden="true"></i>
                 </span>
-                <span class="admin-module-card__title">بازخورد محصول</span><span class="admin-module-card__text">دیدگاه‌ها و پرسش‌های مشتریان</span>
+                </span><span class="fw-bold">بازخورد محصول</span><span class="text-muted small">دیدگاه‌ها و پرسش‌های مشتریان</span></span>
             </a>
         </div>
     </div>
@@ -39,11 +43,11 @@
             <h2 class="panel-title">بخش‌های کاتالوگ</h2>
         </div>
         <div class="panel-body">
-            <div class="admin-inline-links">
-                <a asp-area="Store" asp-controller="Catalog" asp-action="Products" data-admin-nav>محصولات <i class="fa fa-arrow-left" aria-hidden="true"></i></a>
-                <a asp-area="Store" asp-controller="Catalog" asp-action="Categories" data-admin-nav>دسته‌بندی‌ها <i class="fa fa-arrow-left" aria-hidden="true"></i></a>
-                <a asp-area="Store" asp-controller="Catalog" asp-action="Brands" data-admin-nav>برندها <i class="fa fa-arrow-left" aria-hidden="true"></i></a>
-                <a asp-area="Store" asp-controller="Catalog" asp-action="Attributes" data-admin-nav>ویژگی‌ها <i class="fa fa-arrow-left" aria-hidden="true"></i></a>
+            <div class="list-group list-group-horizontal flex-wrap">
+                <a class="list-group-item list-group-item-action" asp-area="Store" asp-controller="Catalog" asp-action="Products" data-admin-nav>محصولات <i class="fa fa-arrow-left ms-2" aria-hidden="true"></i></a>
+                <a class="list-group-item list-group-item-action" asp-area="Store" asp-controller="Catalog" asp-action="Categories" data-admin-nav>دسته‌بندی‌ها <i class="fa fa-arrow-left ms-2" aria-hidden="true"></i></a>
+                <a class="list-group-item list-group-item-action" asp-area="Store" asp-controller="Catalog" asp-action="Brands" data-admin-nav>برندها <i class="fa fa-arrow-left ms-2" aria-hidden="true"></i></a>
+                <a class="list-group-item list-group-item-action" asp-area="Store" asp-controller="Catalog" asp-action="Attributes" data-admin-nav>ویژگی‌ها <i class="fa fa-arrow-left ms-2" aria-hidden="true"></i></a>
             </div>
         </div>
     </section>

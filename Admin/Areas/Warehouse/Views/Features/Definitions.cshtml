@@ -8,7 +8,7 @@
                 <h2 class="panel-title">اتصال مالک کالا به انبار شرکت</h2>
             </div>
             <div class="panel-body">
-                <div class="admin-data-status" data-definition-status role="status" aria-live="polite">در حال بارگذاری…</div>
+                <div class="admin-data-status small text-muted" data-definition-status role="status" aria-live="polite">در حال بارگذاری…</div>
                 <form data-mapping-form class="row g-3">
                     <div class="col-md-4">
                         <label class="form-label" for="mapping-company">شرکت</label><select class="form-select" id="mapping-company" name="companyId" required></select>
@@ -45,7 +45,7 @@
                         <a class="nav-link @(Model.FeatureId == "variants" ? "active" : "")" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="variants" data-admin-nav>تنوع کالا</a>
                     </nav>
                 }
-                <div class="admin-data-status" data-definition-status role="status" aria-live="polite">در حال بارگذاری…</div>
+                <div class="admin-data-status small text-muted" data-definition-status role="status" aria-live="polite">در حال بارگذاری…</div>
                 <div class="table-responsive">
                     <table class="table table-striped table-hover align-middle">
                         <thead data-definition-head></thead><tbody data-definition-rows></tbody>

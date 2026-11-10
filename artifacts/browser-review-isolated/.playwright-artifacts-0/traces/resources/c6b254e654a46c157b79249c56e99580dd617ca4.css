@@ -1,0 +1,18 @@
+.form-confirm-overlay { position: fixed; inset: 0px; z-index: 10050; display: grid; place-items: center; padding: 20px; background: rgba(5, 20, 36, 0.68); backdrop-filter: blur(7px); opacity: 0; visibility: hidden; transition: opacity 0.22s, visibility 0.22s; }
+.form-confirm-overlay.is-open { opacity: 1; visibility: visible; }
+.form-confirm-dialog { box-sizing: border-box; width: min(100%, 440px); max-height: calc(100dvh - 40px); overflow-y: auto; padding: 30px; border: 1px solid rgba(214, 180, 111, 0.5); border-radius: var(--radius-panel-standard); background: linear-gradient(145deg, #fff, var(--industrial-bg)); box-shadow: rgba(3, 18, 33, 0.3) 0px 28px 80px; color: var(--industrial-navy); text-align: center; transform: translateY(16px) scale(0.97); transition: transform 0.22s; }
+.form-confirm-overlay.is-open .form-confirm-dialog { transform: translateY(0px) scale(1); }
+.form-confirm-icon { display: grid; width: 64px; height: 64px; margin: 0px auto 18px; place-items: center; border-radius: 18px; background: var(--industrial-navy); color: var(--industrial-yellow); font-size: 28px; box-shadow: rgba(16, 45, 75, 0.2) 0px 10px 24px; }
+.form-confirm-dialog h2 { margin: 0px 0px 10px; color: var(--industrial-navy); font-size: 22px; font-weight: 800; }
+.form-confirm-dialog p { margin: 0px; color: var(--industrial-steel); font-size: var(--font-size-body); line-height: 2; }
+.form-confirm-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 25px; }
+.form-confirm-actions button { min-height: 48px; border-radius: var(--radius-sm); font-style: inherit; font-variant: inherit; font-stretch: inherit; line-height: inherit; font-family: inherit; font-optical-sizing: inherit; font-size-adjust: inherit; font-kerning: inherit; font-feature-settings: inherit; font-variation-settings: inherit; font-language-override: inherit; font-size: 13px; font-weight: 800; cursor: pointer; transition: 0.2s; }
+.form-confirm-accept { border: 1px solid var(--industrial-yellow-dark); background: var(--industrial-yellow-dark); color: rgb(255, 255, 255); }
+.form-confirm-accept:hover { border-color: var(--industrial-navy); background: var(--industrial-navy); }
+.form-confirm-cancel { border: 1px solid var(--industrial-line); background: rgb(255, 255, 255); color: var(--industrial-steel); }
+.form-confirm-cancel:hover { border-color: var(--industrial-yellow-dark); color: var(--industrial-navy); }
+body.has-form-confirm { overflow: hidden; }
+@media (max-width: 480px) {
+  .form-confirm-dialog { padding: 24px 18px; border-radius: 18px; }
+  .form-confirm-actions { grid-template-columns: 1fr; }
+}

@@ -16,22 +16,23 @@
         const region = document.getElementById("admin-toast-region");
         if (!region || !window.bootstrap?.Toast) return;
         const toast = document.createElement("div");
-        toast.className = `toast admin-toast admin-toast--${kind}`;
+        const themeColor = kind === "danger" ? "danger" : kind === "success" ? "success" : "primary";
+        toast.className = `toast text-bg-${themeColor}`;
         toast.setAttribute("role", kind === "danger" ? "alert" : "status");
         toast.setAttribute("aria-live", kind === "danger" ? "assertive" : "polite");
         toast.setAttribute("aria-atomic", "true");
 
         const row = document.createElement("div");
-        row.className = "d-flex align-items-start gap-2";
+        row.className = "d-flex align-items-center gap-2 p-2";
         const icon = document.createElement("i");
-        icon.className = `fa ${kind === "danger" ? "fa-circle-exclamation" : kind === "success" ? "fa-circle-check" : "fa-circle-info"}`;
+        icon.className = `fa ms-2 ${kind === "danger" ? "fa-circle-exclamation" : kind === "success" ? "fa-circle-check" : "fa-circle-info"}`;
         icon.setAttribute("aria-hidden", "true");
         const text = document.createElement("div");
         text.className = "toast-body";
         text.textContent = message;
         const close = document.createElement("button");
         close.type = "button";
-        close.className = "btn-close ms-auto";
+        close.className = "btn-close btn-close-white ms-auto";
         close.dataset.bsDismiss = "toast";
         close.setAttribute("aria-label", "بستن پیام");
         row.append(icon, text, close);
@@ -70,11 +71,13 @@
         heading.textContent = title;
         body.replaceChildren();
         const list = document.createElement("dl");
-        list.className = "admin-record-details";
+        list.className = "row g-0";
         for (const [key, value] of Object.entries(record || {})) {
             const term = document.createElement("dt");
+            term.className = "col-sm-4 col-lg-3 p-2 border-bottom text-secondary fw-normal";
             term.textContent = labels[key] || key;
             const description = document.createElement("dd");
+            description.className = "col-sm-8 col-lg-9 p-2 border-bottom mb-0";
             if (typeof value === "boolean") description.textContent = value ? "بله" : "خیر";
             else if (value == null || value === "") description.textContent = "—";
             else if (typeof value === "number") description.textContent = numberFormat.format(value);

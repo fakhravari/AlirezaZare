@@ -1,0 +1,8 @@
+.ui-scroll-locked { overflow: hidden !important; }
+.ui-sr-only { position: absolute !important; width: 1px !important; height: 1px !important; padding: 0px !important; margin: -1px !important; overflow: hidden !important; clip: rect(0px, 0px, 0px, 0px) !important; white-space: nowrap !important; border: 0px !important; }
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after { scroll-behavior: auto !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+}
+.skip-link { position: fixed; z-index: 20000; top: 10px; inset-inline-start: 10px; padding: 12px 18px; transform: translateY(-160%); border: 2px solid rgb(246, 197, 21); border-radius: 10px; background: rgb(16, 42, 67); color: rgb(255, 255, 255); font-weight: 700; text-decoration: none; }
+.skip-link:focus-visible { transform: translateY(0px); outline: rgb(255, 255, 255) solid 3px; outline-offset: 2px; }
+#main-content:focus { outline: rgb(246, 197, 21) solid 2px; outline-offset: 3px; }

@@ -2,27 +2,30 @@
     @await Html.PartialAsync("_AdminPageIntro", ("نمای کلی انبار", "مرور انبارها و ماندهٔ کالاها از داده‌های دیتابیس."))
     <div class="row g-3 g-xl-4">
         <div class="col-md-6 col-xxl-4">
-            <a class="panel panel-inverse admin-module-card" asp-area="Warehouse" asp-controller="Warehouses" asp-action="Index" data-admin-nav>
-                <span class="admin-module-card__icon bg-blue">
+            <a class="panel panel-inverse h-100 text-decoration-none" asp-area="Warehouse" asp-controller="Warehouses" asp-action="Index" data-admin-nav>
+                <span class="panel-body d-flex flex-column align-items-start gap-2">
+                <span class="text-blue fs-20px">
                     <i class="fa fa-warehouse" aria-hidden="true"></i>
                 </span>
-                <span class="admin-module-card__title">انبارها</span><span class="admin-module-card__text">فهرست انبارها و وضعیت فعال بودن</span>
+                </span><span class="fw-bold">انبارها</span><span class="text-muted small">فهرست انبارها و وضعیت فعال بودن</span></span>
             </a>
         </div>
         <div class="col-md-6 col-xxl-4">
-            <a class="panel panel-inverse admin-module-card" asp-area="Warehouse" asp-controller="Stock" asp-action="Index" data-admin-nav>
-                <span class="admin-module-card__icon bg-green">
+            <a class="panel panel-inverse h-100 text-decoration-none" asp-area="Warehouse" asp-controller="Stock" asp-action="Index" data-admin-nav>
+                <span class="panel-body d-flex flex-column align-items-start gap-2">
+                <span class="text-green fs-20px">
                     <i class="fa fa-boxes-stacked" aria-hidden="true"></i>
                 </span>
-                <span class="admin-module-card__title">موجودی کالا</span><span class="admin-module-card__text">فیلتر بر اساس انبار، طرح فروش و کمبود</span>
+                </span><span class="fw-bold">موجودی کالا</span><span class="text-muted small">فیلتر بر اساس انبار، طرح فروش و کمبود</span></span>
             </a>
         </div>
         <div class="col-md-6 col-xxl-4">
-            <a class="panel panel-inverse admin-module-card" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="movements" data-admin-nav>
-                <span class="admin-module-card__icon bg-orange">
+            <a class="panel panel-inverse h-100 text-decoration-none" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="movements" data-admin-nav>
+                <span class="panel-body d-flex flex-column align-items-start gap-2">
+                <span class="text-orange fs-20px">
                     <i class="fa fa-arrows-rotate" aria-hidden="true"></i>
                 </span>
-                <span class="admin-module-card__title">گردش و عملیات</span><span class="admin-module-card__text">رسید، حواله، انتقال و اصلاح موجودی</span>
+                </span><span class="fw-bold">گردش و عملیات</span><span class="text-muted small">رسید، حواله، انتقال و اصلاح موجودی</span></span>
             </a>
         </div>
     </div>

@@ -10,6 +10,19 @@ if (args.Contains("--permission-filter", StringComparer.Ordinal))
     return;
 }
 
+if (args.Contains("--http-security-configured", StringComparer.Ordinal))
+{
+    string securityConnection = Environment.GetEnvironmentVariable("SHOP_SECURITY_TEST_CONNECTION")
+        ?? throw new InvalidOperationException("SHOP_SECURITY_TEST_CONNECTION is required for the explicit configured-database security test.");
+    var securityTarget = new SqlConnectionStringBuilder(securityConnection);
+    if (!string.Equals(securityTarget.InitialCatalog, "bsshopir_fakhravari", StringComparison.OrdinalIgnoreCase))
+        throw new InvalidOperationException("The configured-database security test is restricted to bsshopir_fakhravari.");
+    await using var securityDb = new ShopDbContext(new DbContextOptionsBuilder<ShopDbContext>().UseSqlServer(securityConnection).Options);
+    string securityAdminDll = Path.GetFullPath(Path.Combine("Admin", "bin", "Debug", "net10.0", "Admin.dll"));
+    await HttpSecurityTest.RunLimitedRoleAuthorizationAsync(securityDb, securityConnection, securityAdminDll);
+    return;
+}
+
 string cs = Environment.GetEnvironmentVariable("SHOP_TEST_CONNECTION") ?? throw new InvalidOperationException("SHOP_TEST_CONNECTION is required.");
 if (!new SqlConnectionStringBuilder(cs).InitialCatalog.StartsWith("ShopVerify_", StringComparison.OrdinalIgnoreCase)) throw new InvalidOperationException("A ShopVerify_ database is required.");
 await using var db = new ShopDbContext(new DbContextOptionsBuilder<ShopDbContext>().UseSqlServer(cs).Options);

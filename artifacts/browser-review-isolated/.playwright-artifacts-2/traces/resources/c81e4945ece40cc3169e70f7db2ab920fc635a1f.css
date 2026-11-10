@@ -1,0 +1,20 @@
+body .site-pagination, body .site-pagination button, body .site-pagination button > span, body .orders-pagination p, body #journal-count { font-family: var(--font-body, "Vazirmatn", "Estedad", Tahoma, sans-serif); font-size: 13px; font-weight: 600; line-height: 1.7; letter-spacing: 0px; font-variant-numeric: tabular-nums; }
+body .site-pagination { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; width: fit-content; max-width: 100%; margin: 0px auto; padding: 9px; border: 1px solid rgb(225, 213, 195); border-radius: 16px; background: rgb(255, 253, 248); box-shadow: rgba(16, 39, 61, 0.05) 0px 8px 24px; }
+body .site-pagination[hidden] { display: none; }
+body .site-pagination button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-width: 44px; min-height: 44px; padding: 10px 14px; border: 1px solid transparent; border-radius: 10px; background: transparent; color: rgb(24, 53, 78); box-shadow: none; cursor: pointer; transition: background 0.2s, color 0.2s, border-color 0.2s; }
+body .site-pagination button:hover:not(:disabled) { background: rgb(243, 234, 219); border-color: rgb(220, 198, 159); transform: none; }
+body .site-pagination button[aria-current="page"], body .site-pagination button.page-number.active, body .site-pagination button[aria-current="page"]:hover, body .site-pagination button.page-number.active:hover { background: rgb(21, 51, 77); border-color: rgb(21, 51, 77); color: rgb(244, 216, 157); box-shadow: rgba(21, 51, 77, 0.094) 0px 4px 10px; }
+body .site-pagination button:disabled { opacity: 0.35; cursor: default; }
+body .site-pagination button:focus-visible { outline: rgb(173, 134, 73) solid 2px; outline-offset: 3px; }
+body .site-pagination > span { display: grid; min-width: 20px; min-height: 44px; place-items: center; color: rgb(150, 130, 101); }
+body .journal-paging.site-pagination { margin-top: 28px; }
+body .orders-pagination { justify-content: center; flex-direction: column; }
+body .orders-pagination p { margin: 0px; color: var(--color-text-muted); text-align: center; }
+@media (max-width: 575px) {
+  body .site-pagination { gap: 4px; padding: 6px; border-radius: 13px; }
+  body .site-pagination button { min-width: 40px; padding-inline: 10px; }
+  body .site-pagination .page-step span { display: inline; }
+}
+@media (prefers-reduced-motion: reduce) {
+  body .site-pagination button { transition: none; }
+}

@@ -18,7 +18,7 @@
             </div>
         </div>
         <div class="panel-body">
-            <form class="admin-filter-bar" data-document-filter>
+            <form class="admin-filter-bar d-flex flex-wrap align-items-center gap-2 mb-3" data-document-filter>
                 <label class="visually-hidden" for="document-warehouse-filter">انبار</label>
                 <select id="document-warehouse-filter" class="form-select" name="warehouseId" data-document-warehouses>
                     <option value="">همهٔ انبارهای مجاز</option>
@@ -29,7 +29,7 @@
                 </select>
                 <button class="btn btn-primary" type="submit">اعمال فیلتر</button><button class="btn btn-default" type="button" data-document-reset>پاک‌کردن</button>
             </form>
-            <div class="admin-data-status" data-document-status role="status" aria-live="polite">در حال بارگذاری سندها…</div>
+            <div class="admin-data-status small text-muted" data-document-status role="status" aria-live="polite">در حال بارگذاری سندها…</div>
             <div class="table-responsive">
                 <table class="table table-striped table-hover align-middle">
                     <thead>
@@ -42,7 +42,7 @@
                     </thead><tbody data-document-rows></tbody>
                 </table>
             </div>
-            <div class="admin-pagination" data-document-pagination hidden>
+            <div class="admin-pagination d-flex align-items-center justify-content-center gap-3 mt-3" data-document-pagination hidden>
                 <button class="btn btn-default btn-sm" type="button" data-document-page="-1">قبلی</button><span data-document-page-label></span><button class="btn btn-default btn-sm" type="button" data-document-page="1">بعدی</button>
             </div>
         </div>

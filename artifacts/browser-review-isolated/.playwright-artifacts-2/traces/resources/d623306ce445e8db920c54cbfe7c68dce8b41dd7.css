@@ -1,0 +1,31 @@
+.shared-login-modal { box-sizing: border-box; position: fixed; z-index: 10080; top: 50%; left: 50%; width: min(440px, 100% - 28px); max-height: calc(100dvh - 32px); padding: 30px; border: 0px; border-radius: var(--radius-panel-standard); background: var(--color-surface); box-shadow: rgba(3, 15, 53, 0.24) 0px 26px 70px; backdrop-filter: blur(18px); overflow: hidden auto; overscroll-behavior: contain; scrollbar-width: thin; opacity: 0; visibility: hidden; transform: translate(-50%, -46%); transition: 0.3s; }
+.shared-login-modal.open { opacity: 1; visibility: visible; transform: translate(-50%, -50%); }
+.shared-login-modal::before { content: ""; position: absolute; top: -90px; left: -80px; width: 180px; height: 180px; border-radius: 50%; background: rgba(232, 220, 199, 0.3); pointer-events: none; }
+.shared-login-modal .login-close { position: absolute; z-index: 2; top: 18px; left: 18px; display: grid; width: 38px; height: 38px; padding: 0px; place-items: center; border: 0px; border-radius: 50%; background: rgb(242, 238, 232); color: var(--color-navy); }
+.shared-login-modal .login-brand { display: flex; padding: 0px 0px 22px; align-items: center; gap: 12px; border-bottom: 1px solid rgb(232, 226, 217); }
+.shared-login-modal .login-brand > span { display: grid; width: 45px; height: 45px; place-items: center; border-radius: 50%; background: var(--color-navy); color: var(--color-gold); font-size: 20px; font-weight: 700; }
+.shared-login-modal .login-brand > div { display: flex; flex-direction: column; }
+.shared-login-modal .login-brand strong { font-size: 15px; }
+.shared-login-modal .login-brand small { margin-top: 3px; color: var(--color-text-muted); font-size: var(--text-xs); }
+.shared-login-modal .login-step { padding-top: 26px; }
+.shared-login-modal .login-step h2 { margin: 0px 0px 7px; font-size: 21px; line-height: 1.7; }
+.shared-login-modal .login-step > p { margin: 0px 0px 23px; color: rgb(116, 127, 135); font-size: 13px; line-height: 2; }
+.shared-login-modal #pageSentPhone, #loginModal #sentPhone { display: inline-block; direction: ltr; unicode-bidi: isolate; white-space: nowrap; }
+.shared-login-modal label { display: block; margin-bottom: 8px; font-size: 12px; font-weight: 600; }
+.shared-login-modal .login-input { display: flex; padding: 0px 13px; align-items: center; border: 1px solid rgb(216, 210, 202); border-radius: var(--radius-sm); background: rgb(255, 255, 255); box-shadow: rgba(184, 137, 68, 0) 0px 0px 0px 0px; transition: border-color 0.2s, background-color 0.2s, box-shadow 0.2s; }
+.shared-login-modal .login-input i { color: rgb(155, 133, 100); font-size: 20px; transition: color 0.2s, transform 0.2s; }
+.shared-login-modal .login-input input { height: 52px; min-width: 0px; flex: 1 1 0%; padding: 0px 11px; background: transparent; direction: ltr; text-align: right; border: 0px !important; outline: 0px !important; box-shadow: none !important; }
+.shared-login-modal .login-input:focus-within, .login-modal .login-input:focus-within { border-color: rgb(185, 137, 68); background: rgb(255, 253, 248); box-shadow: rgba(185, 137, 68, 0.14) 0px 0px 0px 3px, rgba(16, 42, 86, 0.08) 0px 5px 15px; }
+.shared-login-modal .login-input:focus-within i, .login-modal .login-input:focus-within i { color: var(--color-navy); transform: scale(1.06); }
+.shared-login-modal .login-input input:focus, .shared-login-modal .login-input input:focus-visible, .login-modal .login-input input:focus, .login-modal .login-input input:focus-visible { border: 0px !important; outline: 0px !important; box-shadow: none !important; }
+.shared-login-modal form > button { width: 100%; height: 52px; margin-top: 14px; border: 0px; border-radius: 9px; background: var(--color-navy); color: rgb(255, 255, 255); font-size: 14px; font-weight: 600; }
+.shared-login-modal form > button:hover { background: var(--color-blue); }
+.shared-login-modal form > button i { margin-right: 12px; }
+.shared-login-modal .login-error { display: block; min-height: 23px; color: rgb(182, 66, 66); font-size: 12px; }
+.shared-login-modal .login-back { padding: 0px 0px 12px; border: 0px; background: transparent; color: rgb(139, 118, 89); font-size: 13px; }
+@media (max-width: 575px) {
+  .shared-login-modal { top: 50%; width: calc(-24px + 100vw); max-height: calc(100dvh - 24px); padding: 62px 20px 24px; border-radius: 20px; }
+  .shared-login-modal .login-close { position: sticky; top: 0px; left: auto; z-index: 5; float: left; width: 40px; height: 40px; margin: -48px 0px 8px; border: 1px solid rgb(217, 225, 232); background: rgb(16, 42, 67); color: rgb(255, 255, 255); box-shadow: rgba(16, 42, 67, 0.18) 0px 4px 14px; }
+  .shared-login-modal .login-step h2 { font-size: 19px; }
+  .shared-login-modal .login-step > p { font-size: 12px; }
+}

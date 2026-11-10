@@ -17,9 +17,6 @@
             "Admin/wwwroot/js/admin-ui.js",
             "Admin/wwwroot/js/admin-data.js"
           ],
-          "css": [
-            "Admin/wwwroot/css/admin-shell.css"
-          ],
           "server": [
             "Admin/Controllers/Api/StoreCatalogAdminApiController.cs",
             "Admin/Controllers/Api/StoreProductImageApiController.cs",

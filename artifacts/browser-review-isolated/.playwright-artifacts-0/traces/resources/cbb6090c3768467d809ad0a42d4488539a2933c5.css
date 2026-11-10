@@ -1,0 +1,48 @@
+.shared-account-card { overflow: hidden; color: rgb(38, 54, 80); backdrop-filter: blur(22px); width: 336px !important; padding: 8px !important; border: 1px solid rgba(113, 135, 166, 0.48) !important; border-radius: 22px !important; background: var(--panel-shell-bg) !important; box-shadow: rgba(3, 15, 53, 0.3) 0px 28px 70px, rgba(255, 255, 255, 0.82) 0px 0px 0px 1px inset !important; }
+.shared-account-card .account-user { position: relative; display: grid; min-height: 92px; padding: 17px 16px; grid-template-columns: 52px minmax(0px, 1fr); gap: 12px; align-items: center; overflow: hidden; border: 0px; border-radius: 16px; background: radial-gradient(circle at 8% 10%, rgba(215, 182, 108, 0.2), transparent 32%), linear-gradient(135deg, rgb(23, 56, 103), rgb(11, 37, 80) 70%, rgb(18, 52, 102)); color: rgb(255, 255, 255); }
+.shared-account-card .account-user::after { content: ""; position: absolute; top: -48px; left: -42px; width: 125px; height: 125px; border: 1px solid rgba(230, 199, 139, 0.18); border-radius: 50%; box-shadow: rgba(230, 199, 139, 0.024) 0px 0px 0px 22px; pointer-events: none; }
+.shared-account-card .account-avatar { position: relative; z-index: 1; display: grid; width: 52px; height: 52px; place-items: center; border: 1px solid rgba(255, 240, 207, 0.78); border-radius: 16px; background: linear-gradient(145deg, rgb(239, 211, 144), rgb(201, 155, 79)); color: rgb(16, 42, 86); font-size: 17px; font-weight: 850; box-shadow: rgba(0, 0, 0, 0.2) 0px 8px 18px, rgba(255, 255, 255, 0.7) 0px 1px inset; }
+.shared-account-card .account-user > div { position: relative; z-index: 1; display: flex; min-width: 0px; flex-direction: column; }
+.shared-account-card .account-user strong { overflow: hidden; color: rgb(255, 255, 255); font-size: 15px; font-weight: 800; text-overflow: ellipsis; white-space: nowrap; }
+.shared-account-card .account-user small { margin-top: 5px; color: rgba(255, 255, 255, 0.68); font-size: 12px; }
+.shared-account-card .account-user > i { display: none !important; }
+.shared-account-card .account-links { display: grid; padding: 8px 3px 4px; gap: 7px; }
+.shared-account-card .account-links a, .shared-account-card .account-logout { position: relative; display: grid; width: 100%; min-height: 52px; padding: 0px 11px; grid-template-columns: 40px 1fr auto; align-items: center; gap: 9px; overflow: hidden; border: 1px solid rgba(137, 155, 179, 0.35); border-radius: 13px; background: rgba(255, 255, 255, 0.5); color: rgb(52, 68, 93); font: 650 13px var(--font-body); text-align: right; box-shadow: rgba(16, 42, 86, 0.035) 0px 2px 7px; transition: background-color 0.18s, border-color 0.18s, color 0.18s, transform 0.18s, box-shadow 0.18s; }
+.shared-account-card .account-links a::after { content: ""; position: absolute; top: 10px; right: 0px; bottom: 10px; width: 3px; border-radius: 3px 0px 0px 3px; background: rgb(23, 56, 103); opacity: 0; transform: scaleY(0.45); transition: opacity 0.18s, transform 0.18s; }
+.shared-account-card .account-links a > i, .shared-account-card .account-logout > i { display: grid; width: 38px; height: 38px; place-items: center; border: 1px solid var(--panel-icon-border); border-radius: 11px; background: var(--panel-icon-bg); color: var(--panel-icon-color); font-size: 18px; transition: background-color 0.18s, color 0.18s, transform 0.18s; }
+.shared-account-card .account-links a b { display: grid; width: 24px; height: 24px; place-items: center; border-radius: 8px; background: rgb(229, 210, 173); color: rgb(104, 72, 23); font-size: 10px; }
+.shared-account-card .account-links a[href="Profile/Orders"] > b, .shared-account-card .account-links a[href="Account#orders"] > b { display: none; }
+.shared-account-card .account-links a:hover { border-color: rgba(79, 108, 147, 0.48); background: rgb(255, 255, 255); color: rgb(16, 42, 86); box-shadow: rgba(16, 42, 86, 0.09) 0px 6px 15px; transform: translateX(-2px); }
+.shared-account-card .account-links a:hover::after { opacity: 1; transform: scaleY(1); }
+.shared-account-card .account-links a:hover > i { background: var(--panel-icon-bg-hover); color: rgb(23, 56, 103); transform: scale(1.035); }
+.shared-account-card .account-logout { margin-top: 4px; border: 1px solid rgba(193, 131, 125, 0.27); border-radius: 13px; background: rgba(255, 249, 248, 0.65); color: rgb(156, 85, 82); }
+.shared-account-card .account-logout > i { background: rgb(247, 232, 229); color: rgb(166, 92, 88); }
+.shared-account-card .account-logout:hover { border-color: rgb(223, 183, 178); background: rgb(255, 244, 242); color: rgb(143, 69, 66); box-shadow: rgba(143, 69, 66, 0.08) 0px 6px 15px; transform: translateX(-2px); }
+.shared-account-card .account-user { background: radial-gradient(
+      circle at 8% 10%,
+      color-mix(in srgb, var(--color-gold) 16%, transparent),
+      transparent 34%
+    ),
+    linear-gradient(135deg, var(--color-blue), var(--color-navy)); }
+.shared-account-card .account-avatar { border-color: color-mix(in srgb, var(--color-gold) 52%, white); background: var(--color-gold); color: var(--color-navy); }
+.shared-account-card .account-links a b { border: 1px solid color-mix(in srgb, var(--color-gold) 35%, white); background: color-mix(in srgb, var(--color-gold) 18%, white); color: var(--color-navy); }
+@media (max-width: 991px) {
+  .shared-account-card .account-links a > b { display: none; }
+  .shared-account-card.account-panel { isolation: isolate; overscroll-behavior: contain; position: fixed !important; z-index: 7000 !important; top: calc(env(safe-area-inset-top) + 86px) !important; right: 8px !important; bottom: auto !important; left: 8px !important; width: auto !important; max-height: calc(100dvh - env(safe-area-inset-top) - 98px) !important; padding: 8px 8px calc(8px + env(safe-area-inset-bottom)) !important; overflow: hidden auto !important; border-bottom: 1px solid rgba(113, 135, 166, 0.48) !important; border-radius: 24px !important; opacity: 0 !important; visibility: hidden !important; transform: translateY(-10px) scale(0.985) !important; transform-origin: center top !important; box-shadow: rgba(3, 15, 53, 0.3) 0px 24px 60px, rgba(255, 255, 255, 0.9) 0px 1px inset !important; transition: opacity 0.25s, visibility 0.25s, transform 0.32s cubic-bezier(0.2, 0.8, 0.2, 1) !important; }
+  .shared-account-card.account-panel.open { opacity: 1 !important; visibility: visible !important; transform: translateY(0px) !important; }
+  .shared-account-card.account-panel::before { display: none !important; content: none !important; }
+  .shared-account-card .account-user { min-height: 100px; margin: 0px 0px 6px; padding: 16px 14px; grid-template-columns: 54px minmax(0px, 1fr); gap: 11px; border-radius: 20px !important; }
+  .shared-account-card .account-user::before { content: ""; position: absolute; top: -54px; left: -47px; width: 142px; height: 142px; border: 1px solid rgba(178, 204, 230, 0.2); border-radius: 50%; box-shadow: rgba(178, 204, 230, 0.055) 0px 0px 0px 24px, rgba(178, 204, 230, 0.024) 0px 0px 0px 48px; pointer-events: none; }
+  .shared-account-card .account-user::after { top: -53px; left: -50px; width: 112px; height: 112px; border-color: rgba(206, 224, 240, 0.16); box-shadow: none; }
+  .shared-account-card .account-avatar { width: 54px; height: 54px; border-radius: 15px; font-size: 18px; box-shadow: rgba(0, 0, 0, 0.18) 0px 7px 16px, rgba(255, 255, 255, 0.75) 0px 1px inset; }
+  .shared-account-card .account-user strong { font-size: 15px; }
+  .shared-account-card .account-user small { font-size: 12px; color: rgba(255, 255, 255, 0.64); }
+  .shared-account-card .account-links { gap: 6px; }
+  .shared-account-card .account-links a:hover, .shared-account-card .account-logout:hover { transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .shared-account-card, .shared-account-card * { transition: none !important; }
+}
+@media (max-width: 575px) {
+  :is(.home-page, .inner-page) #mainNav .account-btn > .account-label, :is(.home-page, .inner-page) #mainNav .account-btn > .bi-chevron-down { display: none; }
+}

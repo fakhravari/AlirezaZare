@@ -20,7 +20,7 @@
         const target = page.querySelector("[data-definition-status]");
         if (!target) return;
         target.textContent = message;
-        target.classList.toggle("is-error", error);
+        target.classList.toggle("text-danger", error); target.classList.toggle("text-muted", !error); target.classList.add("small");
         target.classList.toggle("d-none", !message);
     }
     function token(page) { return page.querySelector('[name="__RequestVerificationToken"]')?.value || document.querySelector('[name="__RequestVerificationToken"]')?.value || ""; }

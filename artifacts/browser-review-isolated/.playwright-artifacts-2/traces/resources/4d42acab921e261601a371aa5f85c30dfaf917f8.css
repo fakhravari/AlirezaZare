@@ -1,0 +1,199 @@
+/* Shared account/cart divider used by every header. */
+:root {
+  --header-action-divider: rgba(255, 255, 255, 0.18);
+  --header-action-divider-height: 28px;
+  --header-action-divider-gap: 12px;
+}
+
+#mainNav .navbar-toggler {
+  background: #fff;
+  color: var(--industrial-navy);
+}
+
+/* The horizontal logo stays in the desktop header; mobile uses the drawer. */
+#mainNav .header-brand-lockup {
+  display: none;
+  width: 210px;
+  max-width: min(210px, 40vw);
+  min-width: 0;
+  height: 62px;
+  min-height: 62px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  line-height: 1;
+  text-decoration: none;
+  transition: transform 180ms ease;
+}
+
+#mainNav .header-brand-lockup:is(:hover, :focus-visible) {
+  transform: translateY(-1px);
+}
+
+#mainNav .header-brand-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+@media (min-width: 992px) {
+  #mainNav .header-brand-lockup {
+    display: inline-flex;
+  }
+
+  .home-page #mainNav .brand-dropdown > .nav-link::after {
+    display: none;
+  }
+
+  .home-page #mainNav .header-brand-lockup.header-home-link,
+  .inner-page #mainNav .header-brand-lockup.header-home-link {
+    top: -70px;
+  }
+}
+
+@media (max-width: 1100px) and (min-width: 992px) {
+  #mainNav .header-brand-lockup { width: 185px; height: 58px; min-height: 58px; }
+  .home-page #mainNav .header-brand-lockup.header-home-link,
+  .inner-page #mainNav .header-brand-lockup.header-home-link { top: -67.833px; }
+}
+
+@media (max-width: 991px) {
+  #mainNav {
+    --header-actions-gap: 8px;
+  }
+
+  #mainNav .navbar-toggler {
+    display: grid;
+    place-items: center;
+    line-height: 1;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--industrial-yellow);
+  }
+
+  #mainNav .navbar-toggler > i {
+    display: block;
+    margin: 0;
+    line-height: 1;
+  }
+}
+
+@media (min-width: 992px) and (max-width: 1199.98px) {
+  body.home-page #mainNav > .container {
+    position: relative;
+  }
+
+  body.inner-page #mainNav > .container {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+  }
+
+  body.home-page #mainNav :is(.home-nav-menu-group, .collapse),
+  body.inner-page #mainNav :is(.home-nav-menu-group, .collapse) {
+    display: none;
+  }
+
+  body.home-page #mainNav .home-nav-action-group,
+  body.inner-page #mainNav .home-nav-action-group {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    display: flex;
+    height: 100%;
+    align-items: center;
+  }
+
+  body.home-page #mainNav .navbar-toggler,
+  body.inner-page #mainNav .navbar-toggler {
+    position: absolute;
+    top: auto;
+    right: 28px;
+    bottom: 16px;
+    z-index: 10;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+@media (min-width: 1200px) and (max-width: 1359.98px) {
+  .inner-page #mainNav {
+    --desktop-nav-link-padding: 8px;
+  }
+
+  .inner-page #mainNav .navbar-nav {
+    gap: 4px;
+  }
+
+  .inner-page #mainNav .home-nav-groups {
+    gap: 8px;
+  }
+}
+
+@media (min-width: 576px) and (max-width: 991px) {
+  #mainNav {
+    --header-actions-gap: 8px;
+  }
+}
+
+@media (max-width: 767px) {
+  #mainNav > .container {
+    flex-wrap: nowrap;
+    gap: 4px;
+  }
+}
+
+.account-wrap {
+  padding-left: var(--header-action-divider-gap);
+  margin-left: 4px;
+  border-left: 1px solid var(--header-action-divider);
+}
+@media (max-width: 991px) {
+  .account-wrap {
+    padding-left: 0;
+    margin-left: 0;
+    border-left: 0;
+  }
+}
+
+/* Keep the signed-in label stable on one line across inner-page headers. */
+
+/* Keep search and account glyph boxes identical in both header variants. */
+#mainNav .home-header-search > button > .bi-search {
+  display: grid;
+  width: 20px;
+  height: 20px;
+  place-items: center;
+  font-size: 18px;
+  line-height: 1;
+}
+
+:is(.home-page, .inner-page) #mainNav .account-btn > .bi-person {
+  display: grid;
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+  place-items: center;
+  font-size: 20px;
+  line-height: 1;
+}
+
+:is(.home-page, .inner-page) #mainNav .account-btn > .account-label {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+:is(.home-page, .inner-page) #mainNav .account-btn > .bi-chevron-down {
+  display: grid;
+  width: 12px;
+  height: 12px;
+  flex: 0 0 12px;
+  place-items: center;
+  font-size: 10px;
+  line-height: 1;
+}

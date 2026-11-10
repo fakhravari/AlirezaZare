@@ -37,7 +37,7 @@
     function status(page, message, error = false) {
         const target = page.querySelector("[data-document-status]");
         target.textContent = message;
-        target.classList.toggle("is-error", error);
+        target.classList.toggle("text-danger", error); target.classList.toggle("text-muted", !error); target.classList.add("small");
         target.classList.toggle("d-none", !message);
     }
 

@@ -6,7 +6,7 @@
     const token = (page) => page.querySelector('[name="__RequestVerificationToken"]')?.value || "";
     const status = (page, message, error = false) => {
         const node = page.querySelector("[data-price-status]"); node.textContent = message;
-        node.classList.toggle("is-error", error); node.classList.toggle("d-none", !message);
+        node.classList.toggle("text-danger", error); node.classList.toggle("text-muted", !error); node.classList.add("small"); node.classList.toggle("d-none", !message);
     };
     async function request(page, url, method = "GET", body) {
         return ui.getJson(url, { method, headers: { ...(body ? { "Content-Type": "application/json" } : {}), ...(method !== "GET" ? { RequestVerificationToken: token(page) } : {}) }, ...(body ? { body: JSON.stringify(body) } : {}) });

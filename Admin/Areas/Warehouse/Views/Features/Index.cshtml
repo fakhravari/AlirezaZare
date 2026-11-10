@@ -6,11 +6,11 @@
             <h2 class="panel-title">دامنهٔ این بخش</h2>
         </div>
         <div class="panel-body">
-            <ul class="admin-capability-list">
+            <ul class="list-group list-group-flush mb-4">
                 @foreach (string capability in Model.Capabilities)
                 {
-                    <li>
-                        <i class="fa fa-check" aria-hidden="true"></i>@capability
+                    <li class="list-group-item d-flex align-items-start gap-2 px-0">
+                        <i class="fa fa-check text-success mt-1" aria-hidden="true"></i><span>@capability</span>
                     </li>
                 }
             </ul>

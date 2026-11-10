@@ -10,7 +10,7 @@
             </div>
         </div>
         <div class="panel-body">
-            <form class="admin-filter-bar admin-filter-bar--warehouse" data-admin-filter>
+            <form class="admin-filter-bar admin-filter-bar--warehouse d-flex flex-wrap align-items-center gap-2 mb-3" data-admin-filter>
                 <label class="visually-hidden" for="stock-search">جست‌وجوی کالا</label>
                 <input id="stock-search" class="form-control" type="search" name="search" placeholder="نام کالا یا کد کالا" autocomplete="off"/>
                 <label class="visually-hidden" for="warehouse-filter">انتخاب انبار</label>
@@ -26,9 +26,9 @@
                 </label>
                 <button class="btn btn-primary" type="submit"><i class="fa fa-filter me-1" aria-hidden="true"></i>اعمال فیلتر</button>
                 <button class="btn btn-default" type="button" data-admin-reset-filter>پاک‌کردن فیلتر</button>
-                <span class="admin-record-count ms-auto" data-admin-count aria-live="polite"></span>
+                <span class="admin-record-count ms-auto small text-muted" data-admin-count aria-live="polite"></span>
             </form>
-            <div class="admin-data-status" data-admin-status role="status" aria-live="polite">در حال خواندن داده از دیتابیس…</div>
+            <div class="admin-data-status small text-muted" data-admin-status role="status" aria-live="polite">در حال خواندن داده از دیتابیس…</div>
             <div class="table-responsive admin-table-wrap">
                 <table class="table table-striped table-hover align-middle mb-0">
                     <thead>
@@ -39,13 +39,13 @@
                     <tbody data-admin-results></tbody>
                 </table>
             </div>
-            <div class="admin-empty-state d-none" data-admin-empty>موجودی منطبق با فیلترها پیدا نشد.</div>
-            <div class="admin-pagination" data-admin-pagination hidden>
+            <div class="admin-empty-state d-none p-4 text-center text-muted small" data-admin-empty>موجودی منطبق با فیلترها پیدا نشد.</div>
+            <div class="admin-pagination d-flex align-items-center justify-content-center gap-3 mt-3" data-admin-pagination hidden>
                 <button type="button" class="btn btn-default btn-sm" data-admin-page-step="-1">قبلی</button>
                 <span data-admin-page-label></span>
                 <button type="button" class="btn btn-default btn-sm" data-admin-page-step="1">بعدی</button>
             </div>
-            <p class="admin-readonly-note"><i class="fa fa-info-circle" aria-hidden="true"></i> حداقل موجودی فقط روی طرح عادی تنظیم می‌شود؛ ثبت رسید، خروج و اصلاح در منوی عملیات انبار قرار دارد.</p>
+            <p class="admin-readonly-note alert alert-info small d-flex align-items-start gap-2 mt-3"><i class="fa fa-info-circle" aria-hidden="true"></i> حداقل موجودی فقط روی طرح عادی تنظیم می‌شود؛ ثبت رسید، خروج و اصلاح در منوی عملیات انبار قرار دارد.</p>
         </div>
     </section>
 </div>

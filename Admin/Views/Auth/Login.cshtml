@@ -12,7 +12,6 @@
     <link rel="stylesheet" href="~/color_admin/assets/css/vendor.min.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/color_admin/assets/css/default/app-rtl.min.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/color_admin/assets/css/persian-font.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/admin-shell.css" asp-append-version="true" />
 </head>
 <body>
 <main id="app" class="app">
@@ -47,8 +46,8 @@
                         <input asp-for="Password" class="form-control" type="password" placeholder="گذرواژه" autocomplete="current-password" required />
                         <label asp-for="Password">گذرواژه</label>
                     </div>
-                    <div class="form-check admin-login-remember mb-4">
-                        <input asp-for="RememberMe" class="form-check-input" />
+                    <div class="form-check d-flex align-items-center gap-2 p-0 mb-4">
+                        <input asp-for="RememberMe" class="form-check-input float-none flex-shrink-0 m-0" />
                         <label asp-for="RememberMe" class="form-check-label">مرا به خاطر بسپار</label>
                     </div>
                     <button class="btn btn-theme btn-lg w-100" type="submit">ورود به پنل مدیریت</button>

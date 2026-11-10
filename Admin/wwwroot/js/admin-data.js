@@ -25,7 +25,7 @@
         const target = page.querySelector("[data-admin-status]");
         if (!target) return;
         target.textContent = message;
-        target.classList.toggle("is-error", isError);
+        target.classList.toggle("text-danger", isError); target.classList.toggle("text-muted", !isError); target.classList.add("small");
         target.classList.toggle("d-none", !message);
     }
 
@@ -428,19 +428,19 @@
     function renderServiceSections(container, sections) {
         container.replaceChildren();
         sections.forEach((section, index) => {
-            const card = document.createElement("fieldset"); card.className = "admin-content-section-card"; card.dataset.serviceSection = "";
-            const legend = document.createElement("legend"); legend.className = "admin-content-section-card__legend"; legend.textContent = `بخش ${index + 1}`;
+            const card = document.createElement("fieldset"); card.className = "admin-content-section-card p-3 mb-3"; card.dataset.serviceSection = "";
+            const legend = document.createElement("legend"); legend.className = "float-none w-auto mb-3 fs-6 fw-semibold"; legend.textContent = `بخش ${index + 1}`;
             const key = document.createElement("input"); key.type = "hidden"; key.value = section.sectionKey || `section-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`; key.dataset.sectionKey = "";
             const headingId = `service-section-heading-${index + 1}`;
             const bodyId = `service-section-body-${index + 1}`;
-            const titleLabel = document.createElement("label"); titleLabel.className = "form-label"; titleLabel.htmlFor = headingId; titleLabel.textContent = "عنوان بخش";
-            const heading = document.createElement("input"); heading.id = headingId; heading.className = "form-control"; heading.maxLength = 300; heading.value = section.heading || ""; heading.dataset.sectionHeading = ""; heading.required = true;
-            const bodyLabel = document.createElement("label"); bodyLabel.className = "form-label mt-3"; bodyLabel.htmlFor = bodyId; bodyLabel.textContent = "متن بخش";
-            const body = document.createElement("textarea"); body.id = bodyId; body.className = "form-control"; body.rows = 5; body.maxLength = 20000; body.value = section.body || ""; body.dataset.sectionBody = ""; body.required = true;
+            const titleLabel = document.createElement("label"); titleLabel.className = "form-label mb-1"; titleLabel.htmlFor = headingId; titleLabel.textContent = "عنوان بخش";
+            const heading = document.createElement("input"); heading.id = headingId; heading.className = "form-control mb-3"; heading.maxLength = 300; heading.value = section.heading || ""; heading.dataset.sectionHeading = ""; heading.required = true;
+            const bodyLabel = document.createElement("label"); bodyLabel.className = "form-label mb-1"; bodyLabel.htmlFor = bodyId; bodyLabel.textContent = "متن بخش";
+            const body = document.createElement("textarea"); body.id = bodyId; body.className = "form-control mb-3"; body.rows = 5; body.maxLength = 20000; body.value = section.body || ""; body.dataset.sectionBody = ""; body.required = true;
             const remove = document.createElement("button"); remove.type = "button"; remove.className = "btn btn-danger btn-sm align-self-start"; remove.dataset.serviceSectionRemove = ""; remove.textContent = "حذف بخش";
             const moveUp = document.createElement("button"); moveUp.type = "button"; moveUp.className = "btn btn-default btn-sm me-1"; moveUp.dataset.serviceSectionMove = "up"; moveUp.textContent = "بالا";
             const moveDown = document.createElement("button"); moveDown.type = "button"; moveDown.className = "btn btn-default btn-sm me-1"; moveDown.dataset.serviceSectionMove = "down"; moveDown.textContent = "پایین";
-            const actions = document.createElement("div"); actions.dataset.sectionActions = ""; actions.setAttribute("aria-label", `عملیات بخش ${index + 1}`); actions.append(moveUp, moveDown, remove);
+            const actions = document.createElement("div"); actions.className = "d-flex flex-wrap gap-2 border-top pt-3"; actions.dataset.sectionActions = ""; actions.setAttribute("aria-label", `عملیات بخش ${index + 1}`); actions.append(moveUp, moveDown, remove);
             card.append(legend, key, titleLabel, heading, bodyLabel, body, actions); container.append(card);
         });
         renumberEditorSections(container, "[data-service-section]", "[data-section-actions]");
@@ -448,14 +448,14 @@
     function renderMagazineSections(container, sections) {
         container.replaceChildren();
         sections.forEach((section, index) => {
-            const card = document.createElement("fieldset"); card.className = "admin-content-section-card"; card.dataset.magSection = "";
-            const legend = document.createElement("legend"); legend.textContent = `بخش ${index + 1}`;
+            const card = document.createElement("fieldset"); card.className = "admin-content-section-card p-3 mb-3"; card.dataset.magSection = "";
+            const legend = document.createElement("legend"); legend.className = "float-none w-auto mb-3 fs-6 fw-semibold"; legend.textContent = `بخش ${index + 1}`;
             const headingId = `mag-section-heading-${index + 1}`, bodyId = `mag-section-body-${index + 1}`;
-            const headingLabel = document.createElement("label"); headingLabel.className = "form-label"; headingLabel.htmlFor = headingId; headingLabel.textContent = "عنوان بخش";
-            const heading = document.createElement("input"); heading.id = headingId; heading.className = "form-control"; heading.maxLength = 300; heading.value = section.heading || ""; heading.required = true; heading.dataset.magSectionHeading = "";
-            const bodyLabel = document.createElement("label"); bodyLabel.className = "form-label mt-3"; bodyLabel.htmlFor = bodyId; bodyLabel.textContent = "متن بخش";
-            const body = document.createElement("textarea"); body.id = bodyId; body.className = "form-control"; body.rows = 5; body.value = section.body || ""; body.required = true; body.dataset.magSectionBody = "";
-            const actions = document.createElement("div"); actions.className = "admin-content-section-card__actions";
+            const headingLabel = document.createElement("label"); headingLabel.className = "form-label mb-1"; headingLabel.htmlFor = headingId; headingLabel.textContent = "عنوان بخش";
+            const heading = document.createElement("input"); heading.id = headingId; heading.className = "form-control mb-3"; heading.maxLength = 300; heading.value = section.heading || ""; heading.required = true; heading.dataset.magSectionHeading = "";
+            const bodyLabel = document.createElement("label"); bodyLabel.className = "form-label mb-1"; bodyLabel.htmlFor = bodyId; bodyLabel.textContent = "متن بخش";
+            const body = document.createElement("textarea"); body.id = bodyId; body.className = "form-control mb-3"; body.rows = 5; body.value = section.body || ""; body.required = true; body.dataset.magSectionBody = "";
+            const actions = document.createElement("div"); actions.className = "d-flex flex-wrap gap-2 border-top pt-3 admin-content-section-card__actions";
             const up = document.createElement("button"); up.type = "button"; up.className = "btn btn-default btn-sm"; up.dataset.magSectionMove = "up"; up.textContent = "بالا";
             const down = document.createElement("button"); down.type = "button"; down.className = "btn btn-default btn-sm"; down.dataset.magSectionMove = "down"; down.textContent = "پایین";
             const remove = document.createElement("button"); remove.type = "button"; remove.className = "btn btn-danger btn-sm"; remove.dataset.magSectionRemove = ""; remove.textContent = "حذف بخش";

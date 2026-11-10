@@ -5,7 +5,7 @@
     const auditLabels = { Created: "ایجاد", Updated: "ویرایش", Deleted: "حذف" };
     const el = (tag, text) => { const item = document.createElement(tag); if (text != null) item.textContent = text; return item; };
     async function get(url) { return ui.getJson(url, { cache: "no-store" }); }
-    function status(page, message, error = false) { const node = page.querySelector("[data-movement-status]"); node.textContent = message; node.classList.toggle("is-error", error); node.classList.toggle("d-none", !message); }
+    function status(page, message, error = false) { const node = page.querySelector("[data-movement-status]"); node.textContent = message; node.classList.toggle("text-danger", error); node.classList.toggle("text-muted", !error); node.classList.add("small"); node.classList.toggle("d-none", !message); }
     function render(page, rows) {
         const body = page.querySelector("[data-movement-rows]"); body.replaceChildren();
         for (const item of rows) {

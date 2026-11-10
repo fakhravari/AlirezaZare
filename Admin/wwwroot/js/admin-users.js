@@ -27,7 +27,7 @@
         if (page.isConnected === false) return;
         const sequence = ++loadSequence;
         const status = page.querySelector("[data-users-status]");
-        status.classList.remove("is-error");
+        status.classList.remove("text-danger"); status.classList.add("text-muted", "small");
         status.textContent = "در حال بارگذاری…";
         try {
             const result = await request(page.dataset.api);
@@ -39,7 +39,7 @@
         } catch (error) {
             if (sequence !== loadSequence || page.isConnected === false) return;
             status.textContent = error.message;
-            status.classList.add("is-error");
+            status.classList.remove("text-muted"); status.classList.add("text-danger", "small");
         }
     }
 

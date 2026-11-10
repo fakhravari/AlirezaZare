@@ -10,6 +10,143 @@ using Shop.Data.Infrastructure.Persistence;
 
 internal static class HttpSecurityTest
 {
+    public static async Task RunLimitedRoleAuthorizationAsync(ShopDbContext db, string connection, string adminDll)
+    {
+        if (!File.Exists(adminDll)) throw new FileNotFoundException("Build the Admin project before this security test.", adminDll);
+
+        string suffix = Guid.NewGuid().ToString("N");
+        string roleKey = "test.limited." + suffix;
+        string userName = "limited-" + suffix;
+        string password = "Test-" + Guid.NewGuid().ToString("N");
+        AdminRole? temporaryRole = null;
+        AdminSystemUser? temporaryUser = null;
+        Process? server = null;
+
+        try
+        {
+            AdminPermission[] grantedPermissions = await db.AdminPermissions.Where(permission => permission.IsActive &&
+                ((permission.Area == "Store" && permission.Controller == "StoreFeedbackApi"
+                  && permission.Action == "Reviews" && permission.FeatureKey == null)
+                 || (permission.Area == "Store" && permission.Controller == "Features"
+                     && permission.Action == "Index" && permission.FeatureKey == "reviews"))).ToArrayAsync();
+            if (grantedPermissions.Length != 2)
+                throw new InvalidOperationException("Both review API and review feature permissions must exist and be active.");
+            temporaryRole = new AdminRole { RoleKey = roleKey, Name = "Temporary limited security test", IsActive = true };
+            temporaryUser = new AdminSystemUser
+            {
+                UserName = userName,
+                NormalizedUserName = userName.ToUpperInvariant(),
+                DisplayName = "Temporary authorization test",
+                IsActive = true,
+                CreatedAtUtc = DateTime.UtcNow,
+                UpdatedAtUtc = DateTime.UtcNow
+            };
+            temporaryUser.PasswordHash = new PasswordHasher<AdminSystemUser>().HashPassword(temporaryUser, password);
+            db.AdminRoles.Add(temporaryRole);
+            db.AdminSystemUsers.Add(temporaryUser);
+            foreach (AdminPermission permission in grantedPermissions)
+                db.AdminRolePermissions.Add(new AdminRolePermission { Role = temporaryRole, Permission = permission });
+            db.AdminUserRoles.Add(new AdminUserRole { User = temporaryUser, Role = temporaryRole });
+            await db.SaveChangesAsync();
+
+            using var listener = new TcpListener(IPAddress.Loopback, 0);
+            listener.Start();
+            int port = ((IPEndPoint)listener.LocalEndpoint).Port;
+            listener.Stop();
+
+            var start = new ProcessStartInfo("dotnet")
+            {
+                UseShellExecute = false,
+                WorkingDirectory = Path.GetFullPath("Admin")
+            };
+            start.ArgumentList.Add(adminDll);
+            start.Environment["ConnectionStrings__DefaultConnection"] = connection;
+            start.Environment["Logging__LogLevel__Default"] = "Warning";
+            start.Environment["ASPNETCORE_ENVIRONMENT"] = "Development";
+            start.Environment["ASPNETCORE_URLS"] = $"https://localhost:{port}";
+            server = Process.Start(start) ?? throw new Exception("Admin test server did not start.");
+
+            HttpClient Client() => new(new HttpClientHandler
+            {
+                AllowAutoRedirect = false,
+                CookieContainer = new CookieContainer(),
+                ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+            }) { BaseAddress = new Uri($"https://localhost:{port}"), Timeout = TimeSpan.FromSeconds(15) };
+
+            using var anonymous = Client();
+            HttpResponseMessage? probe = null;
+            for (int attempt = 0; attempt < 80; attempt++)
+            {
+                try { probe = await anonymous.GetAsync("/api/admin/store/feedback/reviews"); break; }
+                catch (HttpRequestException)
+                {
+                    if (server.HasExited) throw new Exception("Admin test server exited before becoming ready.");
+                    await Task.Delay(250);
+                }
+            }
+            if (probe?.StatusCode != HttpStatusCode.Unauthorized)
+                throw new Exception("Anonymous access to feedback API was not rejected with 401.");
+
+            async Task<string> Token(HttpClient client)
+            {
+                string html = await client.GetStringAsync("/auth/login");
+                var match = Regex.Match(html, "name=\"__RequestVerificationToken\"[^>]*value=\"([^\"]+)\"");
+                return match.Success ? WebUtility.HtmlDecode(match.Groups[1].Value)
+                    : throw new Exception("Login anti-forgery token was missing.");
+            }
+
+            using var restricted = Client();
+            string csrf = await Token(restricted);
+            using var login = await restricted.PostAsync("/auth/login", new FormUrlEncodedContent(new Dictionary<string, string>
+            {
+                ["UserName"] = userName,
+                ["Password"] = password,
+                ["__RequestVerificationToken"] = csrf
+            }));
+            if (login.StatusCode != HttpStatusCode.Redirect)
+                throw new Exception("Temporary limited account could not sign in.");
+
+            if ((await restricted.GetAsync("/api/admin/store/feedback/reviews")).StatusCode != HttpStatusCode.OK)
+                throw new Exception("Limited role could not access its granted reviews permission.");
+            if ((await restricted.GetAsync("/api/admin/store/feedback/questions")).StatusCode != HttpStatusCode.Forbidden)
+                throw new Exception("Limited role could access the ungranted questions permission.");
+            if ((await restricted.GetAsync("/Store/Features?feature=reviews")).StatusCode != HttpStatusCode.OK)
+                throw new Exception("Limited role could not open its granted admin feature page.");
+            HttpResponseMessage ungrantedPage = await restricted.GetAsync("/Store/Features?feature=questions");
+            if (ungrantedPage.StatusCode != HttpStatusCode.Redirect || ungrantedPage.Headers.Location?.AbsolutePath != "/auth/denied")
+                throw new Exception($"An ungranted admin feature did not redirect to the access-denied page (HTTP {(int)ungrantedPage.StatusCode}, {ungrantedPage.Headers.Location}).");
+
+            Console.WriteLine("HTTP role authorization passed: anonymous 401; granted review routes 200; ungranted question API 403 and page redirects to /auth/denied.");
+        }
+        finally
+        {
+            if (server is { HasExited: false })
+            {
+                server.Kill(entireProcessTree: true);
+                await server.WaitForExitAsync();
+            }
+            server?.Dispose();
+
+            if (temporaryUser is not null)
+            {
+                db.AdminUserRoles.RemoveRange(await db.AdminUserRoles.Where(item => item.IdUser == temporaryUser.Id).ToArrayAsync());
+                db.AdminUserWarehouseAccesses.RemoveRange(await db.AdminUserWarehouseAccesses.Where(item => item.IdUser == temporaryUser.Id).ToArrayAsync());
+                db.AdminSystemUsers.Remove(temporaryUser);
+            }
+            if (temporaryRole is not null)
+            {
+                db.AdminRolePermissions.RemoveRange(await db.AdminRolePermissions.Where(item => item.IdRole == temporaryRole.Id).ToArrayAsync());
+                db.AdminRoles.Remove(temporaryRole);
+            }
+            await db.SaveChangesAsync();
+            if (await db.AdminSystemUsers.AnyAsync(item => item.NormalizedUserName == userName.ToUpperInvariant())
+                || await db.AdminRoles.AnyAsync(item => item.RoleKey == roleKey)
+                || await db.AdminRolePermissions.AnyAsync(item => item.Role.RoleKey == roleKey)
+                || await db.AdminUserRoles.AnyAsync(item => item.User.NormalizedUserName == userName.ToUpperInvariant()))
+                throw new InvalidOperationException("Temporary security test records were not fully removed.");
+        }
+    }
+
     public static async Task RunAsync(ShopDbContext db, string connection, string adminDll)
     {
         string suffix = Guid.NewGuid().ToString("N"), password = "Test-" + Guid.NewGuid().ToString("N");
