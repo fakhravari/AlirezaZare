@@ -1,0 +1,7 @@
+﻿using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
+using Shop.Data.Infrastructure.Persistence;
+using var config=JsonDocument.Parse(File.ReadAllText("Admin/appsettings.json"));
+var cs=config.RootElement.GetProperty("ConnectionStrings").GetProperty("DefaultConnection").GetString();
+await using var db=new ShopDbContext(new DbContextOptionsBuilder<ShopDbContext>().UseSqlServer(cs).Options);
+var row=await db.StoreProductMedia.AsNoTracking().SingleAsync(x=>x.IdProduct==31); Console.WriteLine(row.VideosJson);

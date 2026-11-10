@@ -363,7 +363,6 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.Property(x => x.UpdatedAtUtc).HasPrecision(3);
         });
         modelBuilder.Entity<AccountCartReference>(entity => { entity.HasNoKey(); entity.ToTable("Cart", "Account"); });
-        modelBuilder.Entity<AccountCustomerOrderReference>(entity => { entity.HasNoKey(); entity.ToTable("CustomerOrder", "Account"); });
         modelBuilder.Entity<StoreCustomerOrderReference>(entity => { entity.HasNoKey(); entity.ToTable("Order", "Store"); });
         modelBuilder.Entity<AccountRecentSearch>(entity =>
         {
@@ -442,7 +441,7 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
         {
             entity.ToTable("Country", "Geo");
             entity.HasKey(x => x.Id);
-            entity.Property(x => x.CountryCode).HasMaxLength(10).IsRequired();
+            entity.Property(x => x.CountryCode).HasMaxLength(8).IsRequired();
             entity.Property(x => x.NameFa).HasMaxLength(150).IsRequired();
             entity.Property(x => x.NameEn).HasMaxLength(150).IsRequired();
             entity.HasIndex(x => x.CountryCode).IsUnique();

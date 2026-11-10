@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Shop.Data.Application.Store;
@@ -9,7 +10,7 @@ namespace Shop.Admin.Areas.Admin.Controllers;
 
 [Area("Admin")]
 [Authorize(Roles = "system.full-access")]
-public sealed class SiteSettingsController(ShopDbContext db) : Controller
+public sealed class SiteSettingsController(ShopDbContext db, IDataProtectionProvider protection) : Controller
 {
     [HttpGet]
     public async Task<IActionResult> Index(CancellationToken cancellationToken)
@@ -17,12 +18,26 @@ public sealed class SiteSettingsController(ShopDbContext db) : Controller
         var model = await db.Database.SqlQueryRaw<SiteSettingsInput>("""
             SELECT [DisplayName], [StoreName], [VisualBrandName], [SupportPhoneDisplay], [SupportPhoneUri],
                    [WhatsAppNumber], [PublicEmail], [MediaCdnBaseUrl], [IdWarehouse], [SmtpHost], [SmtpPort], [SmtpEnableSsl],
-                   [SmtpUsername], [SmtpFrom], [FtpHost], [FtpPort], [FtpUsername],
-                   CAST(NULL AS nvarchar(1)) AS [FtpPassword],
+                   [SmtpUsername], [SmtpFrom], [SmtpPassword], [FtpHost], [FtpPort], [FtpUsername],
+                   [FtpPassword], [FtpPasswordProtected] AS [LegacyFtpPassword],
                    CAST(CASE WHEN [FtpPassword] IS NULL AND [FtpPasswordProtected] IS NULL THEN 0 ELSE 1 END AS bit) AS [FtpPasswordConfigured]
             FROM [Store].[SiteSetting] WHERE [Id] = 1
             """).SingleOrDefaultAsync(cancellationToken);
         if (model is null) return NotFound();
+        bool ftpPasswordUnreadable = false;
+        if (string.IsNullOrEmpty(model.FtpPassword) && !string.IsNullOrEmpty(model.LegacyFtpPassword))
+        {
+            try { model.FtpPassword = protection.CreateProtector("Shop.Admin.FtpPassword.v1").Unprotect(model.LegacyFtpPassword); }
+            catch (Exception exception) when (exception is System.Security.Cryptography.CryptographicException or FormatException)
+            { ftpPasswordUnreadable = true; ViewData["FtpPasswordReadError"] = "رمز ذخیره‌شدهٔ FTP قابل بازیابی نیست؛ آن را دوباره وارد کنید."; }
+        }
+        model.LegacyFtpPassword = null;
+        ViewData["FtpPasswordStatus"] = !model.FtpPasswordConfigured ? "ثبت نشده"
+            : ftpPasswordUnreadable ? "ثبت شده، اما قابل بازیابی نیست"
+            : string.IsNullOrEmpty(model.FtpPassword) ? "ثبت شده، اما مقدار رمز خالی است"
+            : "ثبت شده و نمایش داده می‌شود";
+        ViewData["SmtpPasswordStatus"] = string.IsNullOrEmpty(model.SmtpPassword)
+            ? "ثبت نشده" : "ثبت شده و نمایش داده می‌شود";
         await PopulateWarehouses(cancellationToken);
         return View(model);
     }
@@ -47,7 +62,8 @@ public sealed class SiteSettingsController(ShopDbContext db) : Controller
                 [SupportPhoneUri]={model.SupportPhoneUri}, [WhatsAppNumber]={model.WhatsAppNumber},
                 [PublicEmail]={model.PublicEmail}, [MediaCdnBaseUrl]={model.MediaCdnBaseUrl}, [IdWarehouse]={model.IdWarehouse}, [SmtpHost]={model.SmtpHost},
                 [SmtpPort]={model.SmtpPort}, [SmtpEnableSsl]={model.SmtpEnableSsl}, [SmtpUsername]={model.SmtpUsername},
-                [SmtpFrom]={model.SmtpFrom}, [FtpHost]={model.FtpHost}, [FtpPort]={model.FtpPort},
+                [SmtpFrom]={model.SmtpFrom}, [SmtpPassword]=COALESCE({model.SmtpPassword}, [SmtpPassword]),
+                [FtpHost]={model.FtpHost}, [FtpPort]={model.FtpPort},
                 [FtpUsername]={model.FtpUsername}, [FtpPassword]=COALESCE({model.FtpPassword}, [FtpPassword]),
                 [FtpPasswordProtected]=CASE WHEN {model.FtpPassword} IS NULL THEN [FtpPasswordProtected] ELSE NULL END,
                 [IdentityUpdatedAtUtc]=SYSUTCDATETIME(), [UpdatedAtUtc]=SYSUTCDATETIME(),
@@ -83,9 +99,11 @@ public sealed class SiteSettingsInput
     public bool SmtpEnableSsl { get; set; }
     [Required, StringLength(320)] public string SmtpUsername { get; set; } = "";
     [Required, StringLength(320), EmailAddress] public string SmtpFrom { get; set; } = "";
+    [StringLength(1024)] public string? SmtpPassword { get; set; }
     [StringLength(255)] public string? FtpHost { get; set; }
     [Range(1, 65535)] public int? FtpPort { get; set; }
     [StringLength(320)] public string? FtpUsername { get; set; }
     [StringLength(1024)] public string? FtpPassword { get; set; }
     public bool FtpPasswordConfigured { get; set; }
+    public string? LegacyFtpPassword { get; set; }
 }

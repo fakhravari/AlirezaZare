@@ -115,8 +115,7 @@ public sealed class StoreCustomersAdminApiController(ShopDbContext db) : Control
     {
         if (id <= 0) return NotFound();
         if (!await db.AccountProfiles.AnyAsync(x => x.Id == id, cancellationToken)) return NotFound();
-        bool hasOrders = await db.Set<Shop.Data.Domain.Account.Entities.AccountCustomerOrderReference>().AnyAsync(x => x.IdProfile == id, cancellationToken)
-            || await db.Set<Shop.Data.Domain.Account.Entities.StoreCustomerOrderReference>().AnyAsync(x => x.IdProfile == id, cancellationToken);
+        bool hasOrders = await db.Set<Shop.Data.Domain.Account.Entities.StoreCustomerOrderReference>().AnyAsync(x => x.IdProfile == id, cancellationToken);
         bool hasCart = await db.Set<Shop.Data.Domain.Account.Entities.AccountCartReference>().AnyAsync(x => x.IdProfile == id, cancellationToken);
         if (hasOrders || hasCart)
             return Conflict(new { title = "مشتری دارای سفارش یا سبد خرید است؛ برای حفظ سابقه، حذف ممکن نیست." });

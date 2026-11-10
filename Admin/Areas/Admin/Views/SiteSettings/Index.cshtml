@@ -28,42 +28,71 @@
             <div class="col-md-6"><label asp-for="SmtpPort" class="form-label">درگاه</label><input asp-for="SmtpPort" type="number" min="1" max="65535" class="form-control" required /></div>
             <div class="col-md-6"><label asp-for="SmtpUsername" class="form-label">نام کاربری SMTP</label><input asp-for="SmtpUsername" dir="ltr" class="form-control" required maxlength="320" /></div>
             <div class="col-md-6"><label asp-for="SmtpFrom" class="form-label">ایمیل فرستنده</label><input asp-for="SmtpFrom" type="email" dir="ltr" class="form-control" required maxlength="320" /></div>
+            <div class="col-md-6"><label asp-for="SmtpPassword" class="form-label">رمز عبور SMTP</label><input asp-for="SmtpPassword" type="text" autocomplete="off" dir="ltr" class="form-control" maxlength="1024" /></div>
             <div class="col-12"><div class="form-check"><input asp-for="SmtpEnableSsl" class="form-check-input" /><label asp-for="SmtpEnableSsl" class="form-check-label">اتصال امن SSL</label></div></div>
-            <p class="text-muted mb-0">رمز SMTP از تنظیمات امن سرور خوانده می‌شود.</p>
+            <p class="text-muted mb-0">وضعیت رمز SMTP: @ViewData["SmtpPasswordStatus"]</p>
+            <p class="text-muted mb-0">رمز SMTP در پایگاه داده به‌صورت متن آشکار ذخیره و برای مدیران دارای دسترسی کامل نمایش داده می‌شود.</p>
         </div></section>
         <section class="panel panel-inverse"><div class="panel-heading"><h2 class="panel-title">فضای تصاویر فروشگاه</h2></div><div class="panel-body row g-3">
             <div class="col-md-6"><label asp-for="MediaCdnBaseUrl" class="form-label">پایهٔ نشانی CDN رسانه‌ها</label><input asp-for="MediaCdnBaseUrl" dir="ltr" class="form-control" maxlength="500" /><span asp-validation-for="MediaCdnBaseUrl" class="text-danger"></span></div>
             <div class="col-md-6"><label asp-for="FtpHost" class="form-label">میزبان FTP</label><input asp-for="FtpHost" dir="ltr" class="form-control" maxlength="255" /></div>
             <div class="col-md-6"><label asp-for="FtpPort" class="form-label">درگاه</label><input asp-for="FtpPort" type="number" min="1" max="65535" class="form-control" /></div>
             <div class="col-md-6"><label asp-for="FtpUsername" class="form-label">نام کاربری</label><input asp-for="FtpUsername" dir="ltr" class="form-control" maxlength="320" /></div>
-            <div class="col-md-6"><label asp-for="FtpPassword" class="form-label">رمز عبور</label><input asp-for="FtpPassword" type="password" autocomplete="new-password" dir="ltr" class="form-control" maxlength="1024" /></div>
-            <p class="text-muted mb-0">ریشهٔ تصاویر /content است. برای حفظ رمز فعلی، کادر رمز را خالی بگذارید. اتصال FTP بدون رمزگذاری انجام می‌شود.</p>
+            <div class="col-md-6"><label asp-for="FtpPassword" class="form-label">رمز عبور</label><input asp-for="FtpPassword" type="text" autocomplete="off" dir="ltr" class="form-control" maxlength="1024" /></div>
+            @if (ViewData["FtpPasswordReadError"] is string passwordError) { <p class="text-danger" role="alert">@passwordError</p> }
+            <p class="text-muted mb-0">وضعیت رمز FTP: @ViewData["FtpPasswordStatus"]</p>
+            <p class="text-muted mb-0">رمز FTP برای مدیران دارای دسترسی کامل به‌صورت آشکار نمایش داده می‌شود. ریشهٔ تصاویر /content است؛ اتصال FTP بدون رمزگذاری انجام می‌شود.</p>
         </div></section>
         <button type="submit" class="btn btn-primary">ذخیرهٔ تنظیمات</button>
     </form>
     <section class="panel panel-inverse mt-3">
         <div class="panel-heading"><h2 class="panel-title">بارگذاری رسانهٔ فروشگاه</h2></div>
         <div class="panel-body">
-            <p>فایل در پوشهٔ مربوط به خود زیر content ذخیره می‌شود. برای اتصال آن به محتوا، مسیر خروجی را در بخش مربوط ثبت کنید.</p>
-            <form data-media-upload-form enctype="multipart/form-data">
-                @Html.AntiForgeryToken()
-                <div class="row g-3">
-                    <div class="col-md-4"><label for="media-kind" class="form-label">کاربرد</label>
-                        <select id="media-kind" name="kind" class="form-select" required>
-                            <option value="brand">تصویر برند</option><option value="slider">تصویر اسلایدر</option>
-                            <option value="testimonial">تصویر دیدگاه</option><option value="trust">نماد اعتماد</option>
-                            <option value="identity">هویت فروشگاه</option><option value="payment">نشان پرداخت</option>
-                            <option value="country">تصویر کشور</option><option value="article">تصویر مقاله</option>
-                        </select>
+            <p>هر نوع رسانه فرم مستقل دارد و فایل در پوشهٔ مربوط به همان کاربرد زیر content ذخیره می‌شود. برای اتصال تصویر به محتوا، فرم کشور یا مقاله را انتخاب کنید.</p>
+            @{ var mediaTargets = new[] {
+                (Kind: "brand", Title: "تصویر برند", Description: "برای نشان برندها؛ اتصال به رکورد برند را از فهرست برندها انجام دهید."),
+                (Kind: "slider", Title: "تصویر اسلایدر", Description: "برای بنرهای اسلایدر فروشگاه؛ مسیر فایل پس از بارگذاری نمایش داده می‌شود."),
+                (Kind: "testimonial", Title: "تصویر دیدگاه", Description: "برای تصویرهای همراه دیدگاه‌های فروشگاه."),
+                (Kind: "trust", Title: "نماد اعتماد", Description: "برای نمادهای اعتماد و مجوزهای فروشگاه."),
+                (Kind: "identity", Title: "هویت فروشگاه", Description: "برای لوگو و نشان هویت بصری فروشگاه."),
+                (Kind: "payment", Title: "نشان پرداخت", Description: "برای نشان‌های درگاه و روش‌های پرداخت."),
+                (Kind: "country", Title: "تصویر کشور", Description: "پس از انتخاب کشور، تصویر به همان رکورد کشور متصل می‌شود."),
+                (Kind: "article", Title: "تصویر مقاله", Description: "پس از انتخاب مقاله، تصویر سربرگ به همان مقاله متصل می‌شود.")
+            }; }
+            <div class="row g-3">
+                @foreach (var target in mediaTargets)
+                {
+                    var fileId = $"media-file-{target.Kind}";
+                    <div class="col-md-6 col-xl-4">
+                        <section class="panel panel-default h-100" aria-labelledby="media-title-@target.Kind">
+                            <div class="panel-heading"><h3 id="media-title-@target.Kind" class="panel-title">@target.Title</h3></div>
+                            <div class="panel-body">
+                                <p class="text-muted">@target.Description</p>
+                                <form data-media-upload-form enctype="multipart/form-data">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="kind" value="@target.Kind" />
+                                    @if (target.Kind == "country")
+                                    {
+                                        <label for="media-country" class="form-label">کشور</label>
+                                        <select id="media-country" name="countryCode" class="form-select mb-3" data-media-options="country" required><option value="">برای دریافت فهرست انتخاب کنید</option></select>
+                                    }
+                                    @if (target.Kind == "article")
+                                    {
+                                        <label for="media-article" class="form-label">مقاله</label>
+                                        <select id="media-article" name="articleKey" class="form-select mb-3" data-media-options="article" required><option value="">برای دریافت فهرست انتخاب کنید</option></select>
+                                    }
+                                    <label for="@fileId" class="form-label">فایل تصویر</label>
+                                    <input id="@fileId" name="file" type="file" accept="image/jpeg,image/png,image/webp" class="form-control" required />
+                                    <small class="form-text text-muted d-block mt-2">JPEG، PNG یا WebP تا ۱۰ مگابایت؛ نسخهٔ کوچک نیز ساخته می‌شود.</small>
+                                    <button type="submit" class="btn btn-primary mt-3">بارگذاری @target.Title</button>
+                                    <div class="mt-2" data-media-upload-result role="status" aria-live="polite"></div>
+                                </form>
+                            </div>
+                        </section>
                     </div>
-                    <div class="col-md-8"><label for="media-file" class="form-label">فایل</label><input id="media-file" name="file" type="file" class="form-control" required /></div>
-                    <div class="col-md-4" data-media-country-container hidden><label for="media-country" class="form-label">کشور</label><select id="media-country" name="countryCode" class="form-select" disabled><option value="">کشور را انتخاب کنید</option></select></div>
-                    <div class="col-md-4" data-media-article-container hidden><label for="media-article" class="form-label">مقاله</label><select id="media-article" name="articleKey" class="form-select" disabled><option value="">مقاله را انتخاب کنید</option></select><small class="text-muted">برای تصویر سربرگ و متن مقاله استفاده می‌شود.</small></div>
-                    <div class="col-12"><p class="text-muted mb-0">تصاویر JPEG، PNG یا WebP تا ۱۰ مگابایت مجازند. برای تصویر، نسخهٔ کوچک نیز ساخته می‌شود. فایل و ویدئوی محصول را از فهرست کالاها بارگذاری کنید.</p></div>
-                    <div class="col-12"><button type="submit" class="btn btn-primary">بارگذاری فایل</button></div>
-                    <div class="col-12" data-media-upload-result role="status" aria-live="polite"></div>
-                </div>
-            </form>
+                }
+            </div>
+            <p class="text-muted mb-0">تصویر و ویدئوی محصول را از فهرست کالاها بارگذاری کنید.</p>
         </div>
     </section>
 </div>

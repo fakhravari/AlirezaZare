@@ -575,26 +575,19 @@
         });
     }
 
-    document.addEventListener("change", event => {
-        if (!event.target.matches('[data-media-upload-form] [name="kind"]')) return;
-        const form = event.target.closest("[data-media-upload-form]");
-        const kind = event.target.value;
-        for (const [name, field] of [["country", "countryCode"], ["article", "articleKey"]]) {
-            form.querySelector(`[data-media-${name}-container]`).hidden = kind !== name;
-            form.elements[field].disabled = kind !== name;
-            form.elements[field].required = kind === name;
-            if (kind !== name) form.elements[field].value = "";
-        }
-        if (kind !== "country" && kind !== "article") return;
-        const select = form.elements[kind === "country" ? "countryCode" : "articleKey"];
-        if (select.options.length > 1) return;
-        select.disabled = true;
+    document.addEventListener("focusin", event => {
+        const select = event.target.closest("[data-media-options]");
+        if (!select || select.dataset.loaded === "true" || select.dataset.loading === "true") return;
+        const kind = select.dataset.mediaOptions;
+        select.dataset.loading = "true";
         void ui.getJson(kind === "country" ? "/api/admin/store/catalog/brands/countries" : "/api/admin/store/media/articles")
             .then(items => {
-                select.replaceChildren(new Option(kind === "country" ? "کشور را انتخاب کنید" : "مقاله را انتخاب کنید", ""), ...items.map(item => new Option(kind === "country" ? item.nameFa : item.title, kind === "country" ? item.countryCode : item.articleKey)));
+                const label = kind === "country" ? "کشور را انتخاب کنید" : "مقاله را انتخاب کنید";
+                select.replaceChildren(new Option(label, ""), ...items.map(item => new Option(kind === "country" ? item.nameFa : item.title, kind === "country" ? item.countryCode : item.articleKey)));
+                select.dataset.loaded = "true";
             })
             .catch(error => { ui.notify(error.message || "دریافت فهرست ناموفق بود.", "danger"); })
-            .finally(() => { select.disabled = form.elements.kind.value !== kind; });
+            .finally(() => { delete select.dataset.loading; });
     });
 
     document.addEventListener("click", event => {
@@ -1126,10 +1119,10 @@
             event.preventDefault();
             const result = mediaForm.querySelector("[data-media-upload-result]");
             const save = mediaForm.querySelector('[type="submit"]');
-            if (mediaForm.elements.kind.value === "country" && (!mediaForm.elements.countryCode.value || mediaForm.elements.countryCode.disabled)) {
+            if (mediaForm.elements.kind.value === "country" && (!mediaForm.elements.countryCode.value || mediaForm.elements.countryCode.dataset.loaded !== "true")) {
                 result.textContent = "کشور را انتخاب کنید."; return;
             }
-            if (mediaForm.elements.kind.value === "article" && (!mediaForm.elements.articleKey.value || mediaForm.elements.articleKey.disabled)) {
+            if (mediaForm.elements.kind.value === "article" && (!mediaForm.elements.articleKey.value || mediaForm.elements.articleKey.dataset.loaded !== "true")) {
                 result.textContent = "مقاله را انتخاب کنید."; return;
             }
             result.textContent = "در حال بارگذاری…"; save.disabled = true;

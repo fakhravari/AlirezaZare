@@ -12,10 +12,10 @@ public sealed class SmtpEmailSender(ShopDbContext db, IConfiguration configurati
     {
         var settings = await db.Database.SqlQueryRaw<SmtpSettings>("""
             SELECT [SmtpHost] AS [Host], [SmtpPort] AS [Port], [SmtpEnableSsl] AS [EnableSsl],
-                   [SmtpUsername] AS [Username], [SmtpFrom] AS [From]
+                   [SmtpUsername] AS [Username], [SmtpFrom] AS [From], [SmtpPassword] AS [Password]
             FROM [Store].[SiteSetting] WHERE [Id] = 1
             """).SingleOrDefaultAsync(cancellationToken);
-        string? password = configuration["Email:Smtp:Password"];
+        string? password = settings?.Password ?? configuration["Email:Smtp:Password"];
         if (settings is null || string.IsNullOrWhiteSpace(settings.Host)
             || settings.Port is null or < 1 or > 65535 || settings.EnableSsl is null
             || string.IsNullOrWhiteSpace(settings.Username)
@@ -61,5 +61,6 @@ public sealed class SmtpEmailSender(ShopDbContext db, IConfiguration configurati
         public bool? EnableSsl { get; set; }
         public string? Username { get; set; }
         public string? From { get; set; }
+        public string? Password { get; set; }
     }
 }

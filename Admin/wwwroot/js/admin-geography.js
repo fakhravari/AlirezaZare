@@ -48,7 +48,7 @@
             const columns = {
                 countries: [["شناسه", "id"], ["نام فارسی", "nameFa"], ["نام انگلیسی", "nameEn"], ["کد کشور", "code"], ["مسیر پرچم", "flagPath"]],
                 provinces: [["شناسه", "id"], ["نام فارسی", "nameFa"], ["نام انگلیسی", "nameEn"], ["کشور", "parentName"], ["شناسه کشور", "countryId"], ["عرض جغرافیایی", "latitude"], ["طول جغرافیایی", "longitude"]],
-                cities: [["شناسه", "id"], ["نام فارسی", "nameFa"], ["نام انگلیسی", "nameEn"], ["کشور / استان", "parentName"], ["شناسه کشور", "countryId"], ["شناسه استان", "provinceId"], ["نام کشور منبع", "sourceCountryName"], ["عرض جغرافیایی", "latitude"], ["طول جغرافیایی", "longitude"], ["مرکز استان", "isProvinceCenter"]]
+                cities: [["شناسه", "id"], ["نام فارسی", "nameFa"], ["نام انگلیسی", "nameEn"], ["کشور / استان", "parentName"], ["شناسه کشور", "countryId"], ["شناسه استان", "provinceId"], ["CountryName خام منبع", "sourceCountryName"], ["عرض جغرافیایی", "latitude"], ["طول جغرافیایی", "longitude"], ["مرکز استان", "isProvinceCenter"]]
             }[kind];
             const headings = page.querySelector("thead tr");
             headings.replaceChildren(...[...columns.map(column => column[0]), "عملیات"].map(title => {

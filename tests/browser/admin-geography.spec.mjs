@@ -19,6 +19,7 @@ test('lists show all stored geography fields', async ({page}) => {
   await expect(page.locator('[data-geo-rows]')).toContainText('Iran source');
   await expect(page.locator('[data-geo-rows]')).toContainText('بله');
   await expect(page.locator('thead')).toContainText('شناسه استان');
+  await expect(page.locator('thead')).toContainText('CountryName خام منبع');
 });
 
 test('geography recovers from load failures without repeating a successful save', async ({page}) => {

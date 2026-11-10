@@ -20,12 +20,6 @@ public sealed class AccountCartReference
     public long IdProfile { get; set; }
 }
 
-public sealed class AccountCustomerOrderReference
-{
-    public long Id { get; set; }
-    public long IdProfile { get; set; }
-}
-
 public sealed class StoreCustomerOrderReference
 {
     public long Id { get; set; }
