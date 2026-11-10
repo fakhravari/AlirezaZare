@@ -6,7 +6,7 @@ import vm from "node:vm";
 test("a stale stock request cannot overwrite current plan options", async () => {
   const source = await readFile(new URL("../../Admin/wwwroot/js/admin-data.js", import.meta.url), "utf8");
   const calls = [], listeners = {};
-  const node = () => ({ dataset: {}, value: "", classList: { toggle() {} }, replaceChildren(...children) { this.children = children; }, setAttribute() {}, removeAttribute() {} });
+  const node = () => ({ dataset: {}, value: "", classList: { toggle() {}, add() {}, remove() {} }, replaceChildren(...children) { this.children = children; }, setAttribute() {}, removeAttribute() {} });
   const plans = node(), form = node(), status = node(), rows = node();
   const map = { "[data-admin-filter]": form, "[data-admin-status]": status, "[data-admin-plan-options]": plans, "[data-admin-results]": rows };
   const page = { dataset: { adminPage: "stock", adminApi: "/stock" }, isConnected: true, setAttribute() {}, removeAttribute() {}, querySelector: key => map[key] || null };

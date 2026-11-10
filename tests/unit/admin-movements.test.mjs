@@ -6,7 +6,7 @@ import vm from "node:vm";
 test("movement mode changes ignore an older response", async () => {
   const source = await readFile(new URL("../../Admin/wwwroot/js/admin-movements.js", import.meta.url), "utf8");
   const requests = [];
-  const element = () => ({ dataset: {}, classList: { toggle() {} }, addEventListener(type, fn) { this[type] = fn; }, setAttribute() {}, append(...items) { (this.children ||= []).push(...items); }, replaceChildren() { this.children = []; } });
+  const element = () => ({ dataset: {}, classList: { toggle() {}, add() {}, remove() {} }, addEventListener(type, fn) { this[type] = fn; }, setAttribute() {}, append(...items) { (this.children ||= []).push(...items); }, replaceChildren() { this.children = []; } });
   const stock = element(), audit = element(), rows = element(), filter = element(), prev = element(), next = element();
   stock.dataset.movementMode = "stock"; audit.dataset.movementMode = "audit";
   const map = { "[name=warehouseId]": element(), "[data-movement-filter]": filter, "[data-movement-rows]": rows, "[data-movement-status]": element(), "[data-movement-title]": element(), "[data-movement-head]": element(), "[data-movement-page-label]": element(), '[data-movement-page="-1"]': prev, '[data-movement-page="1"]': next };
@@ -28,7 +28,7 @@ test("movement mode changes ignore an older response", async () => {
 
 test("summary renders opening, receipts, dispatches and closing separately", async () => {
   const source = await readFile(new URL("../../Admin/wwwroot/js/admin-movements.js", import.meta.url), "utf8");
-  const element = () => ({ dataset: {}, classList: { toggle() {} }, addEventListener(type, fn) { this[type] = fn; }, setAttribute() {}, append(...items) { (this.children ||= []).push(...items); }, replaceChildren() { this.children = []; } });
+  const element = () => ({ dataset: {}, classList: { toggle() {}, add() {}, remove() {} }, addEventListener(type, fn) { this[type] = fn; }, setAttribute() {}, append(...items) { (this.children ||= []).push(...items); }, replaceChildren() { this.children = []; } });
   const summary = element(), rows = element(), previous = element(), next = element(), status = element();
   summary.dataset.movementMode = "summary";
   const map = { "[name=warehouseId]": element(), "[data-movement-filter]": element(), "[data-movement-rows]": rows, "[data-movement-status]": status, "[data-movement-title]": element(), "[data-movement-head]": element(), "[data-movement-page-label]": element(), '[data-movement-page="-1"]': previous, '[data-movement-page="1"]': next };

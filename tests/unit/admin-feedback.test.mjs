@@ -7,7 +7,7 @@ test("feedback keeps the latest filter result when requests finish out of order"
   const source = await readFile(new URL("../../Admin/wwwroot/js/admin-feedback.js", import.meta.url), "utf8");
   const requests = [];
   const listeners = {};
-  const element = () => ({ textContent: "", classList: { toggle() {} }, append(...children) { (this.children ||= []).push(...children); }, replaceChildren() { this.children = []; }, addEventListener() {}, dataset: {} });
+  const element = () => ({ textContent: "", classList: { toggle() {}, add() {}, remove() {} }, append(...children) { (this.children ||= []).push(...children); }, replaceChildren() { this.children = []; }, addEventListener() {}, dataset: {} });
   const rows = element(), status = element(), label = element(), previous = element(), next = element();
   const filter = { addEventListener(type, handler) { listeners[type] = handler; } };
   const form = { addEventListener() {} };

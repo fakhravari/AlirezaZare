@@ -7,7 +7,7 @@ test("definition lookup responses cannot reopen a detached page or overwrite a n
   const source = await readFile(new URL("../../Admin/wwwroot/js/admin-definitions.js", import.meta.url), "utf8");
   const pending = [], handlers = {}, notifications = [];
   let shows = 0, resets = 0;
-  const element = () => ({ children: [], classList: { toggle() {} }, append(...nodes) { this.children.push(...nodes); }, replaceChildren() { this.children = []; } });
+  const element = () => ({ children: [], classList: { toggle() {}, add() {}, remove() {} }, append(...nodes) { this.children.push(...nodes); }, replaceChildren() { this.children = []; } });
   const host = element();
   const form = { elements: { id: {} }, reset() { resets++; }, querySelector: () => host, addEventListener() {} };
   const create = { addEventListener(type, fn) { handlers.create = fn; } };

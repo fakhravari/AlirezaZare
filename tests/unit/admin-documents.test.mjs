@@ -6,7 +6,7 @@ import vm from "node:vm";
 test("returning to documents reloads warehouse definitions", async () => {
   const source = await readFile(new URL("../../Admin/wwwroot/js/admin-documents.js", import.meta.url), "utf8");
   let version = 0, current;
-  const node = () => ({ dataset: {}, classList: { toggle() {} }, children: [], value: "", addEventListener() {}, replaceChildren(...items) { this.children = items; }, append(...items) { this.children.push(...items); }, querySelector() { return node(); } });
+  const node = () => ({ dataset: {}, classList: { toggle() {}, add() {}, remove() {} }, children: [], value: "", addEventListener() {}, replaceChildren(...items) { this.children = items; }, append(...items) { this.children.push(...items); }, querySelector() { return node(); } });
   function fixture() {
     const filterWarehouses = node(), page = { isConnected: true, dataset: { api: "/documents", documentFeature: "receipts", canCreate: "true" } };
     const pagination = node(), controls = { "[data-document-warehouses]": filterWarehouses, "[data-document-create]": node(), "[data-document-filter]": node(), "[data-document-reset]": node(), "[data-document-status]": node(), "[data-document-rows]": node(), "[data-document-pagination]": pagination };

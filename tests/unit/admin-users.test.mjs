@@ -13,7 +13,7 @@ test("user form rejects blank names and prevents duplicate saves", async () => {
     addEventListener(type, fn) { handlers.user = fn; }, querySelector: () => submit, querySelectorAll: () => []
   };
   const noop = { addEventListener() {}, classList: { add() {} } };
-  const page = { dataset: { api: "/users" }, querySelector(selector) { return selector === "[data-users-status]" ? { textContent: "", classList: { remove() {} } } : noop; } };
+  const page = { dataset: { api: "/users" }, querySelector(selector) { return selector === "[data-users-status]" ? { textContent: "", classList: { add() {}, remove() {} } } : noop; } };
   const window = { AdminUI: { notify(message) { messages.push(message); }, getJson(url, options) { calls.push(options.method); return new Promise(() => {}); } }, bootstrap: { Modal: { getOrCreateInstance: () => ({ hide() {} }) } } };
   const document = { querySelector: selector => selector === "[data-user-form]" ? form : null, getElementById: () => ({}) };
   vm.runInNewContext(source, { window, document, WeakSet, Intl });
