@@ -412,35 +412,86 @@
             form.hidden = !selectedKey; statusNode.textContent = selectedKey ? "" : "برای ویرایش یک صفحه را انتخاب کنید.";
         } catch (error) { statusNode.textContent = error.message || "دریافت صفحه‌های خدماتی ناموفق بود."; }
     }
+    function renumberEditorSections(container, selector, actionsSelector) {
+        const cards = [...container.querySelectorAll(selector)];
+        cards.forEach((card, index) => {
+            const title = card.querySelector("legend"); if (title) title.textContent = `بخش ${index + 1}`;
+            const actions = card.querySelector(actionsSelector); actions?.setAttribute("aria-label", `عملیات بخش ${index + 1}`);
+            const moveButtons = [...(actions?.querySelectorAll("button") || [])];
+            for (const button of moveButtons) {
+                const direction = button.dataset.serviceSectionMove || button.dataset.magSectionMove;
+                if (direction === "up") button.disabled = index === 0;
+                if (direction === "down") button.disabled = index === cards.length - 1;
+            }
+        });
+    }
     function renderServiceSections(container, sections) {
         container.replaceChildren();
-        sections.forEach(section => {
-            const card = document.createElement("fieldset"); card.className = "card p-3"; card.dataset.serviceSection = "";
+        sections.forEach((section, index) => {
+            const card = document.createElement("fieldset"); card.className = "admin-content-section-card"; card.dataset.serviceSection = "";
+            const legend = document.createElement("legend"); legend.className = "admin-content-section-card__legend"; legend.textContent = `بخش ${index + 1}`;
             const key = document.createElement("input"); key.type = "hidden"; key.value = section.sectionKey || `section-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`; key.dataset.sectionKey = "";
-            const titleLabel = document.createElement("label"); titleLabel.className = "form-label"; titleLabel.textContent = "عنوان بخش";
-            const heading = document.createElement("input"); heading.className = "form-control mb-3"; heading.maxLength = 300; heading.value = section.heading || ""; heading.dataset.sectionHeading = ""; heading.setAttribute("aria-label", "عنوان بخش");
-            const bodyLabel = document.createElement("label"); bodyLabel.className = "form-label"; bodyLabel.textContent = "متن";
-            const body = document.createElement("textarea"); body.className = "form-control mb-3"; body.rows = 5; body.maxLength = 20000; body.value = section.body || ""; body.dataset.sectionBody = ""; body.setAttribute("aria-label", "متن بخش");
+            const headingId = `service-section-heading-${index + 1}`;
+            const bodyId = `service-section-body-${index + 1}`;
+            const titleLabel = document.createElement("label"); titleLabel.className = "form-label"; titleLabel.htmlFor = headingId; titleLabel.textContent = "عنوان بخش";
+            const heading = document.createElement("input"); heading.id = headingId; heading.className = "form-control"; heading.maxLength = 300; heading.value = section.heading || ""; heading.dataset.sectionHeading = ""; heading.required = true;
+            const bodyLabel = document.createElement("label"); bodyLabel.className = "form-label mt-3"; bodyLabel.htmlFor = bodyId; bodyLabel.textContent = "متن بخش";
+            const body = document.createElement("textarea"); body.id = bodyId; body.className = "form-control"; body.rows = 5; body.maxLength = 20000; body.value = section.body || ""; body.dataset.sectionBody = ""; body.required = true;
             const remove = document.createElement("button"); remove.type = "button"; remove.className = "btn btn-danger btn-sm align-self-start"; remove.dataset.serviceSectionRemove = ""; remove.textContent = "حذف بخش";
             const moveUp = document.createElement("button"); moveUp.type = "button"; moveUp.className = "btn btn-default btn-sm me-1"; moveUp.dataset.serviceSectionMove = "up"; moveUp.textContent = "بالا";
             const moveDown = document.createElement("button"); moveDown.type = "button"; moveDown.className = "btn btn-default btn-sm me-1"; moveDown.dataset.serviceSectionMove = "down"; moveDown.textContent = "پایین";
-            const actions = document.createElement("div"); actions.append(moveUp, moveDown, remove);
-            card.append(key, titleLabel, heading, bodyLabel, body, actions); container.append(card);
+            const actions = document.createElement("div"); actions.dataset.sectionActions = ""; actions.setAttribute("aria-label", `عملیات بخش ${index + 1}`); actions.append(moveUp, moveDown, remove);
+            card.append(legend, key, titleLabel, heading, bodyLabel, body, actions); container.append(card);
         });
+        renumberEditorSections(container, "[data-service-section]", "[data-section-actions]");
+    }
+    function renderMagazineSections(container, sections) {
+        container.replaceChildren();
+        sections.forEach((section, index) => {
+            const card = document.createElement("fieldset"); card.className = "admin-content-section-card"; card.dataset.magSection = "";
+            const legend = document.createElement("legend"); legend.textContent = `بخش ${index + 1}`;
+            const headingId = `mag-section-heading-${index + 1}`, bodyId = `mag-section-body-${index + 1}`;
+            const headingLabel = document.createElement("label"); headingLabel.className = "form-label"; headingLabel.htmlFor = headingId; headingLabel.textContent = "عنوان بخش";
+            const heading = document.createElement("input"); heading.id = headingId; heading.className = "form-control"; heading.maxLength = 300; heading.value = section.heading || ""; heading.required = true; heading.dataset.magSectionHeading = "";
+            const bodyLabel = document.createElement("label"); bodyLabel.className = "form-label mt-3"; bodyLabel.htmlFor = bodyId; bodyLabel.textContent = "متن بخش";
+            const body = document.createElement("textarea"); body.id = bodyId; body.className = "form-control"; body.rows = 5; body.value = section.body || ""; body.required = true; body.dataset.magSectionBody = "";
+            const actions = document.createElement("div"); actions.className = "admin-content-section-card__actions";
+            const up = document.createElement("button"); up.type = "button"; up.className = "btn btn-default btn-sm"; up.dataset.magSectionMove = "up"; up.textContent = "بالا";
+            const down = document.createElement("button"); down.type = "button"; down.className = "btn btn-default btn-sm"; down.dataset.magSectionMove = "down"; down.textContent = "پایین";
+            const remove = document.createElement("button"); remove.type = "button"; remove.className = "btn btn-danger btn-sm"; remove.dataset.magSectionRemove = ""; remove.textContent = "حذف بخش";
+            actions.append(up, down, remove); card.append(legend, headingLabel, heading, bodyLabel, body, actions); container.append(card);
+        });
+        renumberEditorSections(container, "[data-mag-section]", ".admin-content-section-card__actions");
     }
     document.addEventListener("click", event => {
+        const magazineAdd = event.target.closest("[data-mag-section-add]");
+        if (magazineAdd) {
+            const form = magazineAdd.closest("[data-mag-editor]"), container = form.querySelector("[data-mag-sections]"), sections = [...container.querySelectorAll("[data-mag-section]")].map(row => ({ heading: row.querySelector("[data-mag-section-heading]").value, body: row.querySelector("[data-mag-section-body]").value }));
+            sections.push({ heading: "", body: "" }); renderMagazineSections(container, sections); container.lastElementChild?.querySelector("[data-mag-section-heading]")?.focus(); return;
+        }
+        const magazineRemove = event.target.closest("[data-mag-section-remove]");
+        if (magazineRemove) { const container = magazineRemove.closest("[data-mag-sections]"); magazineRemove.closest("[data-mag-section]")?.remove(); renumberEditorSections(container, "[data-mag-section]", ".admin-content-section-card__actions"); return; }
+        const magazineMove = event.target.closest("[data-mag-section-move]");
+        if (magazineMove) {
+            const card = magazineMove.closest("[data-mag-section]"), parent = card.parentElement;
+            if (magazineMove.dataset.magSectionMove === "up" && card.previousElementSibling) parent.insertBefore(card, card.previousElementSibling);
+            if (magazineMove.dataset.magSectionMove === "down" && card.nextElementSibling) parent.insertBefore(card.nextElementSibling, card);
+            renumberEditorSections(parent, "[data-mag-section]", ".admin-content-section-card__actions");
+            return;
+        }
         const add = event.target.closest("[data-service-section-add]");
         if (add) {
             const form = add.closest("[data-service-page-editor]"), container = form.querySelector("[data-service-sections]"), existing = [...container.querySelectorAll("[data-service-section]")].map(row => ({ sectionKey: row.querySelector("[data-section-key]").value, heading: row.querySelector("[data-section-heading]").value, body: row.querySelector("[data-section-body]").value }));
             existing.push({ sectionKey: `section-${Date.now()}`, heading: "", body: "" }); renderServiceSections(container, existing); return;
         }
         const remove = event.target.closest("[data-service-section-remove]");
-        if (remove) remove.closest("[data-service-section]")?.remove();
+        if (remove) { const container = remove.closest("[data-service-sections]"); remove.closest("[data-service-section]")?.remove(); renumberEditorSections(container, "[data-service-section]", "[data-section-actions]"); }
         const move = event.target.closest("[data-service-section-move]");
         if (move) {
             const card = move.closest("[data-service-section]"), parent = card.parentElement;
             if (move.dataset.serviceSectionMove === "up" && card.previousElementSibling) parent.insertBefore(card, card.previousElementSibling);
             if (move.dataset.serviceSectionMove === "down" && card.nextElementSibling) parent.insertBefore(card.nextElementSibling, card);
+            renumberEditorSections(parent, "[data-service-section]", "[data-section-actions]");
         }
     });
     document.addEventListener("change", async event => {
@@ -472,7 +523,7 @@
     document.addEventListener("click", async event => {
         const button = event.target.closest("[data-mag-create], [data-mag-action]"); if (!button) return;
         const form = document.querySelector("[data-mag-editor]");
-        if (button.hasAttribute("data-mag-create")) { form.reset(); form.elements.id.value = ""; window.bootstrap?.Modal?.getOrCreateInstance(document.getElementById("mag-editor-modal")).show(); return; }
+        if (button.hasAttribute("data-mag-create")) { form.reset(); form.elements.id.value = ""; renderMagazineSections(form.querySelector("[data-mag-sections]"), []); window.bootstrap?.Modal?.getOrCreateInstance(document.getElementById("mag-editor-modal")).show(); return; }
         if (button.dataset.magAction === "delete") {
             if (!window.confirm("مقاله حذف شود؟")) return;
             const token = document.querySelector("[data-mag-editor] [name=__RequestVerificationToken]")?.value || "";
@@ -482,15 +533,16 @@
         try {
             const item = await ui.getJson(`/api/admin/store/magazine/${button.dataset.id}`); form.reset(); form.elements.id.value = button.dataset.id;
             for (const name of ["articleKey","title","category","summary","author","kicker","branch","topic","area","heroImagePath","contentImagePath","readTimeMinutes","readTimeText","lead","conclusion"]) form.elements[name].value = item[name] || "";
-            form.elements.sections.value = JSON.stringify(item.sections || [], null, 2); form.elements.isPublished.checked = item.isPublished;
+            renderMagazineSections(form.querySelector("[data-mag-sections]"), item.sections || []); form.elements.isPublished.checked = item.isPublished;
             window.bootstrap?.Modal?.getOrCreateInstance(document.getElementById("mag-editor-modal")).show();
         } catch (error) { ui.notify(error.message || "دریافت مقاله ناموفق بود.", "danger"); }
     });
     document.addEventListener("submit", event => {
         const form = event.target.closest("[data-mag-editor]"); if (!form) return;
         event.preventDefault(); const button = form.querySelector('[type="submit"]'); if (button.disabled) return;
-        let sections; try { sections = JSON.parse(form.elements.sections.value || "[]"); if (!Array.isArray(sections)) throw new Error(); }
-        catch { ui.notify("ساختار بخش‌ها باید آرایهٔ JSON معتبر باشد.", "danger"); return; }
+        const sectionRows = [...form.querySelectorAll("[data-mag-section]")];
+        const sections = sectionRows.map(row => ({ heading: row.querySelector("[data-mag-section-heading]").value.trim(), body: row.querySelector("[data-mag-section-body]").value.trim() }));
+        if (sections.some(section => !section.heading || !section.body)) { ui.notify("عنوان و متن همهٔ بخش‌های مقاله را تکمیل کنید.", "danger"); return; }
         const body = {}; for (const name of ["articleKey","title","category","summary","author","kicker","branch","topic","area","heroImagePath","contentImagePath","readTimeText","lead","conclusion"]) body[name] = form.elements[name].value;
         body.readTimeMinutes = form.elements.readTimeMinutes.value ? Number(form.elements.readTimeMinutes.value) : null; body.isPublished = form.elements.isPublished.checked; body.sections = sections;
         button.disabled = true; const id = form.elements.id.value, token = form.querySelector('[name="__RequestVerificationToken"]')?.value || "";
