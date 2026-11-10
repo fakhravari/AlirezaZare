@@ -1,4 +1,4 @@
-namespace Shop.Database.Domain.Account.Entities;
+namespace Shop.Data.Domain.Account.Entities;
 
 public sealed class AccountArticleInteraction
 {

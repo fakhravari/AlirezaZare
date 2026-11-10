@@ -1,6 +1,6 @@
 using System.Text.Json.Nodes;
 
-namespace Shop.Database.Application.Store;
+namespace Shop.Data.Application.Store;
 
 public static class ContentCdn
 {

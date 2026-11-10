@@ -3,12 +3,12 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Shop.Controllers;
-using Shop.Database.Application.Store;
+using Shop.Data.Application.Store;
 using Shop.Models;
 using Shop.Services;
 using Microsoft.EntityFrameworkCore;
-using Shop.Database.Domain.Warehouse.Entities;
-using Shop.Database.Infrastructure.Persistence;
+using Shop.Data.Domain.Warehouse.Entities;
+using Shop.Data.Infrastructure.Persistence;
 
 if (args.Contains("--service-pages-main", StringComparer.Ordinal))
 {
@@ -476,7 +476,7 @@ sealed class FixedSalesPlanSource(SalesPlanCatalog snapshot) : ISalesPlanSource
 }
 
 
-sealed class CountingRuntimeDataset(string source) : Shop.Database.Application.Store.Contracts.IStoreRuntimeDatasetRepository
+sealed class CountingRuntimeDataset(string source) : Shop.Data.Application.Store.Contracts.IStoreRuntimeDatasetRepository
 {
     public int CatalogReads { get; private set; }
     public int EditorialReads { get; private set; }
@@ -485,16 +485,16 @@ sealed class CountingRuntimeDataset(string source) : Shop.Database.Application.S
     public Task<string?> ReadAccountJsonAsync(CancellationToken cancellationToken) => throw new NotImplementedException();
     public Task<string?> ReadMagazineJsonAsync(CancellationToken cancellationToken) => throw new NotImplementedException();
     public Task<string> ReadGeographyJsonAsync(CancellationToken cancellationToken) => throw new NotImplementedException();
-    public Task<IReadOnlyList<Shop.Database.Application.Store.Contracts.StoreFaqRow>> ReadFaqAsync(CancellationToken cancellationToken) => throw new NotImplementedException();
+    public Task<IReadOnlyList<Shop.Data.Application.Store.Contracts.StoreFaqRow>> ReadFaqAsync(CancellationToken cancellationToken) => throw new NotImplementedException();
 }
 
-sealed class CountingSalesPlans : Shop.Database.Application.Store.Contracts.IStoreSalesPlanRepository
+sealed class CountingSalesPlans : Shop.Data.Application.Store.Contracts.IStoreSalesPlanRepository
 {
     public int Reads { get; private set; }
-    public Task<Shop.Database.Application.Store.Models.StoreSalesPlanSnapshot> ReadSalesPlanSnapshotAsync(CancellationToken cancellationToken)
+    public Task<Shop.Data.Application.Store.Models.StoreSalesPlanSnapshot> ReadSalesPlanSnapshotAsync(CancellationToken cancellationToken)
     {
         Reads++;
-        return Task.FromResult(new Shop.Database.Application.Store.Models.StoreSalesPlanSnapshot([], [], []));
+        return Task.FromResult(new Shop.Data.Application.Store.Models.StoreSalesPlanSnapshot([], [], []));
     }
-    public Task<Shop.Database.Application.Store.Models.ProductPurchaseConfiguration?> ReadProductPurchaseConfigurationAsync(int productId, CancellationToken cancellationToken) => throw new NotImplementedException();
+    public Task<Shop.Data.Application.Store.Models.ProductPurchaseConfiguration?> ReadProductPurchaseConfigurationAsync(int productId, CancellationToken cancellationToken) => throw new NotImplementedException();
 }

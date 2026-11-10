@@ -1,14 +1,14 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Shop.Database.Application.Warehouse.Contracts;
-using Shop.Database.Application.Warehouse.Services;
-using Shop.Database.Application.Store.Contracts;
-using Shop.Database.Application.Store;
-using Shop.Database.Infrastructure.Persistence;
-using Shop.Database.Infrastructure.Persistence.Repositories;
+using Shop.Data.Application.Warehouse.Contracts;
+using Shop.Data.Application.Warehouse.Services;
+using Shop.Data.Application.Store.Contracts;
+using Shop.Data.Application.Store;
+using Shop.Data.Infrastructure.Persistence;
+using Shop.Data.Infrastructure.Persistence.Repositories;
 
-namespace Shop.Database.Infrastructure;
+namespace Shop.Data.Infrastructure;
 
 public static class DependencyInjection
 {

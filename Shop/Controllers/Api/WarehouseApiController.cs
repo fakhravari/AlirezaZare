@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using Shop.Database.Application.Warehouse.Contracts;
-using Shop.Database.Application.Warehouse.Models;
+using Shop.Data.Application.Warehouse.Contracts;
+using Shop.Data.Application.Warehouse.Models;
 
 namespace Shop.Controllers.Api;
 

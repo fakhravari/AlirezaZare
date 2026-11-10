@@ -4,7 +4,7 @@ import { readFile } from "node:fs/promises";
 import vm from "node:vm";
 
 test("feedback keeps the latest filter result when requests finish out of order", async () => {
-  const source = await readFile(new URL("../../Shop.Admin/wwwroot/js/admin-feedback.js", import.meta.url), "utf8");
+  const source = await readFile(new URL("../../Admin/wwwroot/js/admin-feedback.js", import.meta.url), "utf8");
   const requests = [];
   const listeners = {};
   const element = () => ({ textContent: "", classList: { toggle() {} }, append(...children) { (this.children ||= []).push(...children); }, replaceChildren() { this.children = []; }, addEventListener() {}, dataset: {} });

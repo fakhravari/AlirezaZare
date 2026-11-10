@@ -1,6 +1,6 @@
-using Shop.Database.Application.Warehouse.Models;
+using Shop.Data.Application.Warehouse.Models;
 
-namespace Shop.Database.Application.Warehouse.Contracts;
+namespace Shop.Data.Application.Warehouse.Contracts;
 
 public interface IWarehouseReadRepository
 {

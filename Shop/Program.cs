@@ -1,7 +1,7 @@
 using System.Text.Encodings.Web;
 using System.Text.Unicode;
 using System.Threading.RateLimiting;
-using Shop.Database.Infrastructure;
+using Shop.Data.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddScoped<Shop.Filters.MediaCdnViewDataFilter>();

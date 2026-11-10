@@ -1,7 +1,7 @@
-using Shop.Database.Application.Warehouse.Contracts;
-using Shop.Database.Application.Warehouse.Models;
+using Shop.Data.Application.Warehouse.Contracts;
+using Shop.Data.Application.Warehouse.Models;
 
-namespace Shop.Database.Application.Warehouse.Services;
+namespace Shop.Data.Application.Warehouse.Services;
 
 public sealed class WarehouseReadService(IWarehouseReadRepository repository) : IWarehouseReadService
 {

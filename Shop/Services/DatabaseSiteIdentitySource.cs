@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
-using Shop.Database.Application.Store.Contracts;
+using Shop.Data.Application.Store.Contracts;
 using Shop.Models;
 
 namespace Shop.Services;

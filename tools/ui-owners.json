@@ -6,58 +6,58 @@
       "components": {
         "admin-shell": {
           "markup": [
-            "Shop.Admin/Views/Shared/_Layout.cshtml",
-            "Shop.Admin/Views/Shared/_AdminSidebar.cshtml",
-            "Shop.Admin/Areas/Store/Views/Catalog/Index.cshtml",
-            "Shop.Admin/Areas/Store/Views/Features/Faq.cshtml",
-            "Shop.Admin/Areas/Store/Controllers/CatalogController.cs"
+            "Admin/Views/Shared/_Layout.cshtml",
+            "Admin/Views/Shared/_AdminSidebar.cshtml",
+            "Admin/Areas/Store/Views/Catalog/Index.cshtml",
+            "Admin/Areas/Store/Views/Features/Faq.cshtml",
+            "Admin/Areas/Store/Controllers/CatalogController.cs"
           ],
           "js": [
-            "Shop.Admin/wwwroot/js/admin-shell.js",
-            "Shop.Admin/wwwroot/js/admin-ui.js",
-            "Shop.Admin/wwwroot/js/admin-data.js"
+            "Admin/wwwroot/js/admin-shell.js",
+            "Admin/wwwroot/js/admin-ui.js",
+            "Admin/wwwroot/js/admin-data.js"
           ],
           "css": [
-            "Shop.Admin/wwwroot/css/admin-shell.css"
+            "Admin/wwwroot/css/admin-shell.css"
           ],
           "server": [
-            "Shop.Admin/Controllers/Api/StoreCatalogAdminApiController.cs",
-            "Shop.Admin/Controllers/Api/StoreProductImageApiController.cs",
-            "Shop.Admin/Controllers/Api/StoreMediaUploadApiController.cs",
-            "Shop.Admin/Controllers/Api/StoreOrdersAdminApiController.cs",
-            "Shop.Admin/Controllers/Api/StoreCustomersAdminApiController.cs",
-            "Shop.Admin/Controllers/Api/StoreFaqAdminApiController.cs",
-            "Shop.Admin/Controllers/Api/StoreMagazineAdminApiController.cs",
-            "Shop.Admin/Controllers/Api/StoreServicePagesAdminApiController.cs",
-            "Shop.Admin/Controllers/Api/StoreCategoryContentApiController.cs",
-            "Shop.Admin/Controllers/Api/WarehouseAdminApiController.cs",
-            "Shop.Data/Domain/Store/Entities/StoreAttributeDefinition.cs",
-            "Shop.Data/Domain/Store/Entities/MagazineArticle.cs",
-            "Shop.Data/Domain/Store/Entities/StoreProductMedia.cs",
-            "Shop.Data/Domain/Store/Entities/StoreBrand.cs",
-            "Shop.Data/Domain/Store/Entities/StoreCategory.cs",
-            "Shop.Data/Domain/Store/Entities/GeoCountry.cs",
-            "Shop.Data/Infrastructure/Persistence/ShopDbContext.cs"
+            "Admin/Controllers/Api/StoreCatalogAdminApiController.cs",
+            "Admin/Controllers/Api/StoreProductImageApiController.cs",
+            "Admin/Controllers/Api/StoreMediaUploadApiController.cs",
+            "Admin/Controllers/Api/StoreOrdersAdminApiController.cs",
+            "Admin/Controllers/Api/StoreCustomersAdminApiController.cs",
+            "Admin/Controllers/Api/StoreFaqAdminApiController.cs",
+            "Admin/Controllers/Api/StoreMagazineAdminApiController.cs",
+            "Admin/Controllers/Api/StoreServicePagesAdminApiController.cs",
+            "Admin/Controllers/Api/StoreCategoryContentApiController.cs",
+            "Admin/Controllers/Api/WarehouseAdminApiController.cs",
+            "Data/Domain/Store/Entities/StoreAttributeDefinition.cs",
+            "Data/Domain/Store/Entities/MagazineArticle.cs",
+            "Data/Domain/Store/Entities/StoreProductMedia.cs",
+            "Data/Domain/Store/Entities/StoreBrand.cs",
+            "Data/Domain/Store/Entities/StoreCategory.cs",
+            "Data/Domain/Store/Entities/GeoCountry.cs",
+            "Data/Infrastructure/Persistence/ShopDbContext.cs"
           ]
         },
         "store-variant-prices": {
           "markup": [
-            "Shop.Admin/Areas/Store/Views/Features/VariantPrices.cshtml"
+            "Admin/Areas/Store/Views/Features/VariantPrices.cshtml"
           ],
           "js": [
-            "Shop.Admin/wwwroot/js/admin-variant-prices.js"
+            "Admin/wwwroot/js/admin-variant-prices.js"
           ],
           "server": [
-            "Shop.Admin/Controllers/Api/StoreVariantPricesAdminApiController.cs",
-            "Shop.Admin/Areas/Store/Controllers/FeaturesController.cs"
+            "Admin/Controllers/Api/StoreVariantPricesAdminApiController.cs",
+            "Admin/Areas/Store/Controllers/FeaturesController.cs"
           ]
         },
         "site-settings": {
           "markup": [
-            "Shop.Admin/Areas/Admin/Views/SiteSettings/Index.cshtml"
+            "Admin/Areas/Admin/Views/SiteSettings/Index.cshtml"
           ],
           "server": [
-            "Shop.Admin/Areas/Admin/Controllers/SiteSettingsController.cs"
+            "Admin/Areas/Admin/Controllers/SiteSettingsController.cs"
           ]
         }
       }
@@ -80,8 +80,8 @@
             "Shop/wwwroot/shop/css/layout/industrial-system.css"
           ],
           "data": [
-            "Shop.Data/Application/Store/Contracts/IStoreRuntimeDatasetRepository.cs",
-            "Shop.Data/Infrastructure/Persistence/Repositories/StoreRuntimeDatasetRepository.cs"
+            "Data/Application/Store/Contracts/IStoreRuntimeDatasetRepository.cs",
+            "Data/Infrastructure/Persistence/Repositories/StoreRuntimeDatasetRepository.cs"
           ]
         },
         "homepage-newsletter": {
@@ -136,8 +136,8 @@
             "Shop/Views/Shared/_CatalogData.cshtml"
           ],
           "data": [
-            "Shop.Data/Application/Store/Contracts/IStoreRuntimeDatasetRepository.cs",
-            "Shop.Data/Infrastructure/Persistence/Repositories/StoreRuntimeDatasetRepository.cs"
+            "Data/Application/Store/Contracts/IStoreRuntimeDatasetRepository.cs",
+            "Data/Infrastructure/Persistence/Repositories/StoreRuntimeDatasetRepository.cs"
           ],
           "server": [
             "Shop/Services/CatalogRepository.cs",
@@ -152,10 +152,10 @@
             "Shop/Views/Product/List.cshtml"
           ],
           "data": [
-            "Shop.Data/Application/Store/Contracts/IStoreRuntimeDatasetRepository.cs",
-            "Shop.Data/Infrastructure/Persistence/Repositories/StoreRuntimeDatasetRepository.cs",
-            "Shop.Data/Application/Store/Contracts/IStoreSalesPlanRepository.cs",
-            "Shop.Data/Infrastructure/Persistence/Repositories/StoreSalesPlanRepository.cs"
+            "Data/Application/Store/Contracts/IStoreRuntimeDatasetRepository.cs",
+            "Data/Infrastructure/Persistence/Repositories/StoreRuntimeDatasetRepository.cs",
+            "Data/Application/Store/Contracts/IStoreSalesPlanRepository.cs",
+            "Data/Infrastructure/Persistence/Repositories/StoreSalesPlanRepository.cs"
           ],
           "js": [
             "Shop/wwwroot/shop/js/pages/search.js",
@@ -177,8 +177,8 @@
             "Shop/Views/Brands/Details.cshtml"
           ],
           "data": [
-            "Shop.Data/Application/Store/Contracts/IStoreRuntimeDatasetRepository.cs",
-            "Shop.Data/Infrastructure/Persistence/Repositories/StoreRuntimeDatasetRepository.cs"
+            "Data/Application/Store/Contracts/IStoreRuntimeDatasetRepository.cs",
+            "Data/Infrastructure/Persistence/Repositories/StoreRuntimeDatasetRepository.cs"
           ],
           "server": [
             "Shop/Controllers/BrandsController.cs",
@@ -220,10 +220,10 @@
             "Shop/Views/Product/Details.cshtml"
           ],
           "data": [
-            "Shop.Data/Application/Store/Contracts/IStoreRuntimeDatasetRepository.cs",
-            "Shop.Data/Infrastructure/Persistence/Repositories/StoreRuntimeDatasetRepository.cs",
-            "Shop.Data/Application/Store/Contracts/IStoreSalesPlanRepository.cs",
-            "Shop.Data/Infrastructure/Persistence/Repositories/StoreSalesPlanRepository.cs"
+            "Data/Application/Store/Contracts/IStoreRuntimeDatasetRepository.cs",
+            "Data/Infrastructure/Persistence/Repositories/StoreRuntimeDatasetRepository.cs",
+            "Data/Application/Store/Contracts/IStoreSalesPlanRepository.cs",
+            "Data/Infrastructure/Persistence/Repositories/StoreSalesPlanRepository.cs"
           ],
           "server": [
             "Shop/Controllers/ProductController.cs",
@@ -329,8 +329,8 @@
             "Shop/wwwroot/shop/css/pages/account-page.css"
           ],
           "data": [
-            "Shop.Data/Application/Store/Contracts/IStoreRuntimeDatasetRepository.cs",
-            "Shop.Data/Infrastructure/Persistence/Repositories/StoreRuntimeDatasetRepository.cs"
+            "Data/Application/Store/Contracts/IStoreRuntimeDatasetRepository.cs",
+            "Data/Infrastructure/Persistence/Repositories/StoreRuntimeDatasetRepository.cs"
           ],
           "server": [
             "Shop/Controllers/ProfileController.cs",
@@ -391,8 +391,8 @@
             "Shop/wwwroot/shop/css/pages/magazine-luxury.css"
           ],
           "data": [
-            "Shop.Data/Application/Store/Contracts/IStoreRuntimeDatasetRepository.cs",
-            "Shop.Data/Infrastructure/Persistence/Repositories/StoreRuntimeDatasetRepository.cs"
+            "Data/Application/Store/Contracts/IStoreRuntimeDatasetRepository.cs",
+            "Data/Infrastructure/Persistence/Repositories/StoreRuntimeDatasetRepository.cs"
           ]
         },
         "article-detail": {
@@ -411,9 +411,9 @@
             "Shop/wwwroot/shop/css/pages/article-details.css"
           ],
           "data": [
-            "Shop.Data/Application/Store/Contracts/IStoreRuntimeDatasetRepository.cs",
-            "Shop.Data/Infrastructure/Persistence/Repositories/StoreRuntimeDatasetRepository.cs",
-            "Shop.Data/Domain/Account/Entities/AccountArticleInteraction.cs"
+            "Data/Application/Store/Contracts/IStoreRuntimeDatasetRepository.cs",
+            "Data/Infrastructure/Persistence/Repositories/StoreRuntimeDatasetRepository.cs",
+            "Data/Domain/Account/Entities/AccountArticleInteraction.cs"
           ]
         },
         "service-page-content": {
@@ -423,10 +423,10 @@
           "server": [
             "Shop/Controllers/PageController.cs",
             "Shop/Models/PageModel.cs",
-            "Shop.Data/Infrastructure/Persistence/ShopDbContext.cs"
+            "Data/Infrastructure/Persistence/ShopDbContext.cs"
           ],
           "data": [
-            "Shop.Data/Domain/Store/Entities/StoreServicePageContent.cs"
+            "Data/Domain/Store/Entities/StoreServicePageContent.cs"
           ],
           "css": [
             "Shop/wwwroot/shop/css/pages/pages.css"

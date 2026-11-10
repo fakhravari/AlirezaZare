@@ -1,4 +1,4 @@
-namespace Shop.Database.Application.Store.Contracts;
+namespace Shop.Data.Application.Store.Contracts;
 
 public interface IStoreRuntimeDatasetRepository
 {

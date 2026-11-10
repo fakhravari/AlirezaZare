@@ -4,7 +4,7 @@ import { readFile } from "node:fs/promises";
 import vm from "node:vm";
 
 test("user form rejects blank names and prevents duplicate saves", async () => {
-  const source = await readFile(new URL("../../Shop.Admin/wwwroot/js/admin-users.js", import.meta.url), "utf8");
+  const source = await readFile(new URL("../../Admin/wwwroot/js/admin-users.js", import.meta.url), "utf8");
   const handlers = {}, messages = [], calls = [];
   const submit = { disabled: false };
   const field = value => ({ value, focus() {} });
@@ -30,7 +30,7 @@ test("user form rejects blank names and prevents duplicate saves", async () => {
 
 
 test("user actions wait for their data and a detached page ignores a late response", async () => {
-  const source = await readFile(new URL("../../Shop.Admin/wwwroot/js/admin-users.js", import.meta.url), "utf8");
+  const source = await readFile(new URL("../../Admin/wwwroot/js/admin-users.js", import.meta.url), "utf8");
   const handlers = {}, messages = [];
   let resolve;
   const pending = new Promise(done => { resolve = done; });

@@ -1,4 +1,4 @@
-namespace Shop.Database.Domain.Warehouse.Entities;
+namespace Shop.Data.Domain.Warehouse.Entities;
 
 public sealed class Company
 {

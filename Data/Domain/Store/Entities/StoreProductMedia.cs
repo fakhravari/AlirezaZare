@@ -1,4 +1,4 @@
-namespace Shop.Database.Domain.Store.Entities;
+namespace Shop.Data.Domain.Store.Entities;
 
 public sealed class StoreProductMedia
 {

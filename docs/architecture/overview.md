@@ -1,6 +1,6 @@
 # معماری فعلی پروژه
 
-solution دو برنامهٔ ASP.NET Core MVC دارد: فروشگاه عمومی [Shop](../../Shop/Shop.csproj) و پنل مدیریتی [Shop.Admin](../../Shop.Admin/Shop.Admin.csproj)، هر دو با هدف `net10.0`. پنل به assembly دیتابیس [Shop.Database](../../Shop.Data/Shop.Data.csproj) با فولدرهای Domain، Application و Infrastructure ارجاع دارد. پروژهٔ قرارداد [Shop.Contracts](../../tests/Shop.Contracts/Shop.Contracts.csproj) برای بررسی قراردادهای C# است. مرز داده و وضعیت فعلی پنل در [راهنمای دیتابیس](database.md) و [راهنمای مدیریت](../admin/README.md) ثبت شده است.
+solution دو برنامهٔ ASP.NET Core MVC دارد: فروشگاه عمومی [Shop](../../Shop/Shop.csproj) و پنل مدیریتی [Shop.Admin](../../Admin/Admin.csproj)، هر دو با هدف `net10.0`. پنل به assembly دیتابیس [Shop.Data](../../Data/Data.csproj) با فولدرهای Domain، Application و Infrastructure ارجاع دارد. پروژهٔ قرارداد [Shop.Contracts](../../tests/Shop.Contracts/Shop.Contracts.csproj) برای بررسی قراردادهای C# است. مرز داده و وضعیت فعلی پنل در [راهنمای دیتابیس](database.md) و [راهنمای مدیریت](../admin/README.md) ثبت شده است.
 
 
 مرزهای قابل‌جایگزینی خواندن داده `ICatalogSource`، `IAccountDataSource` و `ICommerceOfferSource` هستند. وضعیت پیاده‌شده و شکاف‌های اتصال در [آمادگی backend](backend-readiness.md) ثبت شده است.
@@ -16,7 +16,7 @@ Program.cs / middleware / route
   → مرورگر: HNUI، کاتالوگ و rendererهای فروشگاه
 ```
 
-[Shop/Program.cs](../../Shop/Program.cs) فروشگاه و [Shop.Admin/Program.cs](../../Shop.Admin/Program.cs) پنل را پیکربندی می‌کنند. پنل از پوستهٔ RTL قالب Color Admin استفاده می‌کند، مرور داخلی را با AJAX انجام می‌دهد و پاسخ‌ها را بدون cache می‌فرستد. احراز هویت و مجوزهای مستقل مدیر، بازبینی بازخورد و عملیات اسناد و تعاریف انبار پیاده شده‌اند. مدیریت کامل سفارش، پرداخت واقعی و تأیید سفارش در انبار هنوز متصل نیستند؛ وضعیت هر بخش در [راهنمای مدیریت](../admin/README.md) و [مرزهای داده](data-sources.md) ثبت شده است.
+[Shop/Program.cs](../../Shop/Program.cs) فروشگاه و [Admin/Program.cs](../../Admin/Program.cs) پنل را پیکربندی می‌کنند. پنل از پوستهٔ RTL قالب Color Admin استفاده می‌کند، مرور داخلی را با AJAX انجام می‌دهد و پاسخ‌ها را بدون cache می‌فرستد. احراز هویت و مجوزهای مستقل مدیر، بازبینی بازخورد و عملیات اسناد و تعاریف انبار پیاده شده‌اند. مدیریت کامل سفارش، پرداخت واقعی و تأیید سفارش در انبار هنوز متصل نیستند؛ وضعیت هر بخش در [راهنمای مدیریت](../admin/README.md) و [مرزهای داده](data-sources.md) ثبت شده است.
 
 [PageController](../../Shop/Controllers/PageController.cs) فقط View متناظر یا `ViewName` تعیین‌شده در مدل را برمی‌گرداند. نام `PageAsync` به معنی دسترسی async به دیتابیس نیست؛ پیاده‌سازی فعلی از `Task.FromResult` استفاده می‌کند.
 
@@ -25,16 +25,16 @@ Program.cs / middleware / route
 | مسیر | مسئولیت |
 |---|---|
 | `Shop/Program.cs` | پیکربندی pipeline و route فروشگاه عمومی |
-| `Shop.Admin/Program.cs` | پیکربندی routeهای پنل؛ سرویس دیتابیس را در صورت وجود connection string ثبت می‌کند |
-| `Shop.Admin/Areas/Admin/` | پیشخوان کل و ورود به حوزه‌های مدیریت |
-| `Shop.Admin/Areas/Store/` | پیشخوان فروشگاه، کاتالوگ خواندنی و دامنه‌های مدیریتی فروشگاه |
-| `Shop.Admin/Areas/Warehouse/` | پیشخوان، فهرست انبارها و موجودی خواندنی و دامنه‌های عملیات انبار |
-| `Shop.Admin/wwwroot/color_admin/` | قالب Color Admin؛ برنامه فقط assetهای پایهٔ پوستهٔ RTL را بارگذاری می‌کند |
+| `Admin/Program.cs` | پیکربندی routeهای پنل؛ سرویس دیتابیس را در صورت وجود connection string ثبت می‌کند |
+| `Admin/Areas/Admin/` | پیشخوان کل و ورود به حوزه‌های مدیریت |
+| `Admin/Areas/Store/` | پیشخوان فروشگاه، کاتالوگ خواندنی و دامنه‌های مدیریتی فروشگاه |
+| `Admin/Areas/Warehouse/` | پیشخوان، فهرست انبارها و موجودی خواندنی و دامنه‌های عملیات انبار |
+| `Admin/wwwroot/color_admin/` | قالب Color Admin؛ برنامه فقط assetهای پایهٔ پوستهٔ RTL را بارگذاری می‌کند |
 | `Shop/Controllers/` | مسیرها و آماده‌سازی مدل‌های صفحه |
 | `Shop/Controllers/Api/` | endpointهای HTTP؛ فقط از سرویس‌های Application استفاده می‌کنند |
-| `Shop.Data/Domain/` | موجودیت‌های دامنهٔ مستقل از دیتابیس |
-| `Shop.Data/Application/` | قراردادها، مدل‌های پاسخ و سرویس‌های کاربردی |
-| `Shop.Data/Infrastructure/` | EF Core، `ShopDbContext` و repositoryهای SQL Server |
+| `Data/Domain/` | موجودیت‌های دامنهٔ مستقل از دیتابیس |
+| `Data/Application/` | قراردادها، مدل‌های پاسخ و سرویس‌های کاربردی |
+| `Data/Infrastructure/` | EF Core، `ShopDbContext` و repositoryهای SQL Server |
 | `Shop/Models/` | مدل‌های صفحه/SEO و محتوای ثابت مقاله |
 | `Shop/Views/` | Razor UI؛ صفحات محصول، پروفایل، خرید، محتوا و layoutهای مشترک |
 | `Shop/Views/Shared/_Shop.cshtml` | سند HTML اصلی، ترتیب بارگذاری CSS/JS، هدر/فوتر/پنل‌ها |

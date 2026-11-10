@@ -1,11 +1,11 @@
-﻿using System.Net.Mail;
+using System.Net.Mail;
 using System.Security.Claims;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
-using Shop.Database.Infrastructure.Persistence;
+using Shop.Data.Infrastructure.Persistence;
 using Shop.Services;
 
 namespace Shop.Controllers;

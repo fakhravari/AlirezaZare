@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Shop.Admin.Controllers.Api;
-using Shop.Database.Infrastructure.Persistence;
+using Shop.Data.Infrastructure.Persistence;
 
 string cs = Environment.GetEnvironmentVariable("SHOP_TEST_CONNECTION") ?? throw new InvalidOperationException("SHOP_TEST_CONNECTION is required.");
 if (!new SqlConnectionStringBuilder(cs).InitialCatalog.StartsWith("ShopVerify_", StringComparison.OrdinalIgnoreCase)) throw new InvalidOperationException("A ShopVerify_ database is required.");

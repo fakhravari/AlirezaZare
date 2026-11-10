@@ -5,8 +5,8 @@ using System.Net.Sockets;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Shop.Database.Domain.Admin.Entities;
-using Shop.Database.Infrastructure.Persistence;
+using Shop.Data.Domain.Admin.Entities;
+using Shop.Data.Infrastructure.Persistence;
 
 internal static class HttpSecurityTest
 {

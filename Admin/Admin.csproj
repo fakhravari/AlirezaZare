@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>Shop.Admin</RootNamespace>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>AlirezaZare-Shop-Admin-Local</UserSecretsId>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Data\Data.csproj" />
+    <PackageReference Include="FluentFTP" Version="48.0.3" />
+    <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="15.1.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Keep the supplied demo library in source control without putting every demo/plugin in the app asset manifest. -->
+    <Content Remove="wwwroot/color_admin/pages/**/*" />
+    <Content Remove="wwwroot/color_admin/assets/plugins/**/*" />
+    <Content Remove="wwwroot/color_admin/assets/data/**/*" />
+    <Content Remove="wwwroot/color_admin/assets/demo/**/*" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="wwwroot\content\brands\" />
+    <Folder Include="wwwroot\content\countries\flags\" />
+    <Folder Include="wwwroot\content\identity\" />
+    <Folder Include="wwwroot\content\payments\" />
+    <Folder Include="wwwroot\content\products\files\" />
+    <Folder Include="wwwroot\content\products\images\card\" />
+    <Folder Include="wwwroot\content\products\images\main\" />
+    <Folder Include="wwwroot\content\products\images\thumbnail\" />
+    <Folder Include="wwwroot\content\products\videos\" />
+  </ItemGroup>
+</Project>

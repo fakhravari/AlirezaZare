@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
-using Shop.Database.Infrastructure.Persistence;
+using Shop.Data.Infrastructure.Persistence;
 using Shop.Services;
 
 internal static class PaymentFlowTest

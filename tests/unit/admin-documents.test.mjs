@@ -4,7 +4,7 @@ import { readFile } from "node:fs/promises";
 import vm from "node:vm";
 
 test("returning to documents reloads warehouse definitions", async () => {
-  const source = await readFile(new URL("../../Shop.Admin/wwwroot/js/admin-documents.js", import.meta.url), "utf8");
+  const source = await readFile(new URL("../../Admin/wwwroot/js/admin-documents.js", import.meta.url), "utf8");
   let version = 0, current;
   const node = () => ({ dataset: {}, classList: { toggle() {} }, children: [], value: "", addEventListener() {}, replaceChildren(...items) { this.children = items; }, append(...items) { this.children.push(...items); }, querySelector() { return node(); } });
   function fixture() {
@@ -32,7 +32,7 @@ test("returning to documents reloads warehouse definitions", async () => {
 
 
 test("a late document detail cannot overwrite a more recently opened editor", async () => {
-  let source = await readFile(new URL("../../Shop.Admin/wwwroot/js/admin-documents.js", import.meta.url), "utf8");
+  let source = await readFile(new URL("../../Admin/wwwroot/js/admin-documents.js", import.meta.url), "utf8");
   source = source.replace("Object.freeze({ initialize })", "Object.freeze({ initialize, openEditor, setLookups(value) { lookups = value; }, setModal(value) { modal = value; } })");
   const pending = new Map(), messages = [];
   const field = () => ({ value: "", append() {}, replaceChildren() {} });

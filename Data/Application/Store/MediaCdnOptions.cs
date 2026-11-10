@@ -1,4 +1,4 @@
-namespace Shop.Database.Application.Store;
+namespace Shop.Data.Application.Store;
 
 public sealed class MediaCdnOptions
 {

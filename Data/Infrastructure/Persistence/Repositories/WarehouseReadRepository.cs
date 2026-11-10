@@ -1,9 +1,9 @@
 using Microsoft.EntityFrameworkCore;
-using Shop.Database.Application.Warehouse.Contracts;
-using Shop.Database.Application.Warehouse.Models;
-using Shop.Database.Infrastructure.Persistence;
+using Shop.Data.Application.Warehouse.Contracts;
+using Shop.Data.Application.Warehouse.Models;
+using Shop.Data.Infrastructure.Persistence;
 
-namespace Shop.Database.Infrastructure.Persistence.Repositories;
+namespace Shop.Data.Infrastructure.Persistence.Repositories;
 
 public sealed class WarehouseReadRepository(ShopDbContext dbContext) : IWarehouseReadRepository
 {

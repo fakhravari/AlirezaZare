@@ -5,9 +5,9 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Shop.Admin.Controllers.Api;
-using Shop.Database.Application.Store;
-using Shop.Database.Infrastructure.Persistence;
-using Shop.Database.Infrastructure.Persistence.Repositories;
+using Shop.Data.Application.Store;
+using Shop.Data.Infrastructure.Persistence;
+using Shop.Data.Infrastructure.Persistence.Repositories;
 
 if (args.Contains("--catalog-main", StringComparer.Ordinal))
 {

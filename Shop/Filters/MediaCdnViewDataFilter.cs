@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Shop.Database.Application.Store.Contracts;
+using Shop.Data.Application.Store.Contracts;
 
 namespace Shop.Filters;
 

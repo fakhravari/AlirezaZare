@@ -4,7 +4,7 @@ import { readFile } from "node:fs/promises";
 import vm from "node:vm";
 
 test("price drafts survive search and cannot be saved twice while pending", async () => {
-  const source = await readFile(new URL("../../Shop.Admin/wwwroot/js/admin-variant-prices.js", import.meta.url), "utf8");
+  const source = await readFile(new URL("../../Admin/wwwroot/js/admin-variant-prices.js", import.meta.url), "utf8");
   class Element {
     constructor() { this.children = []; this.dataset = {}; this.classList = { toggle() {} }; this.validity = { valid: true }; this.value = ""; }
     append(...children) { this.children.push(...children); }

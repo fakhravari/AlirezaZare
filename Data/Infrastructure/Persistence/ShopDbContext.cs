@@ -1,10 +1,10 @@
 using Microsoft.EntityFrameworkCore;
-using Shop.Database.Domain.Admin.Entities;
-using Shop.Database.Domain.Account.Entities;
-using Shop.Database.Domain.Store.Entities;
-using Shop.Database.Domain.Warehouse.Entities;
+using Shop.Data.Domain.Admin.Entities;
+using Shop.Data.Domain.Account.Entities;
+using Shop.Data.Domain.Store.Entities;
+using Shop.Data.Domain.Warehouse.Entities;
 
-namespace Shop.Database.Infrastructure.Persistence;
+namespace Shop.Data.Infrastructure.Persistence;
 
 public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbContext(options)
 {

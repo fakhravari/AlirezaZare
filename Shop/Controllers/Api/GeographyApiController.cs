@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using Shop.Database.Application.Store.Contracts;
+using Shop.Data.Application.Store.Contracts;
 
 namespace Shop.Controllers.Api;
 

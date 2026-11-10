@@ -2,8 +2,8 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
-using Shop.Database.Application.Store.Contracts;
-using Shop.Database.Application.Store.Models;
+using Shop.Data.Application.Store.Contracts;
+using Shop.Data.Application.Store.Models;
 
 namespace Shop.Controllers.Api;
 

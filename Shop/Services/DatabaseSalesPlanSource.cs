@@ -1,4 +1,4 @@
-using Shop.Database.Application.Store.Contracts;
+using Shop.Data.Application.Store.Contracts;
 using Shop.Models;
 
 namespace Shop.Services;

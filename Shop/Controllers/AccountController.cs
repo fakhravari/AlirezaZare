@@ -3,10 +3,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using Shop.Database.Infrastructure.Persistence;
+using Shop.Data.Infrastructure.Persistence;
 using Shop.Services;
 using Shop.Models;
-using Shop.Database.Domain.Account.Entities;
+using Shop.Data.Domain.Account.Entities;
 
 namespace Shop.Controllers;
 

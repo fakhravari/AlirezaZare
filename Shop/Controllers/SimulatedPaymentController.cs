@@ -2,7 +2,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Shop.Database.Infrastructure.Persistence;
+using Shop.Data.Infrastructure.Persistence;
 using Shop.Models;
 
 namespace Shop.Controllers;

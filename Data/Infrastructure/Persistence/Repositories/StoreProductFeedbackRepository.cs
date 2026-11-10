@@ -1,11 +1,11 @@
 using System.Data;
 using Microsoft.EntityFrameworkCore;
-using Shop.Database.Application.Store.Contracts;
-using Shop.Database.Application.Store.Models;
-using Shop.Database.Domain.Store.Entities;
-using Shop.Database.Infrastructure.Persistence;
+using Shop.Data.Application.Store.Contracts;
+using Shop.Data.Application.Store.Models;
+using Shop.Data.Domain.Store.Entities;
+using Shop.Data.Infrastructure.Persistence;
 
-namespace Shop.Database.Infrastructure.Persistence.Repositories;
+namespace Shop.Data.Infrastructure.Persistence.Repositories;
 
 public sealed class StoreProductFeedbackRepository(ShopDbContext dbContext) : IProductFeedbackRepository
 {

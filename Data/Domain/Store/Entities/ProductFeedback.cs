@@ -1,7 +1,7 @@
-using Shop.Database.Domain.Account.Entities;
-using Shop.Database.Domain.Warehouse.Entities;
+using Shop.Data.Domain.Account.Entities;
+using Shop.Data.Domain.Warehouse.Entities;
 
-namespace Shop.Database.Domain.Store.Entities;
+namespace Shop.Data.Domain.Store.Entities;
 
 public sealed class ProductFeedback
 {

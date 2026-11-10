@@ -7,8 +7,8 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Shop.Controllers;
-using Shop.Database.Infrastructure.Persistence;
-using Shop.Database.Infrastructure.Persistence.Repositories;
+using Shop.Data.Infrastructure.Persistence;
+using Shop.Data.Infrastructure.Persistence.Repositories;
 using Shop.Models;
 using Shop.Services;
 

@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="../../Shop.Admin/Shop.Admin.csproj" />
+    <ProjectReference Include="../../Admin/Admin.csproj" />
+    <ProjectReference Include="../../Data/Data.csproj" />
   </ItemGroup>
 </Project>

@@ -4,7 +4,7 @@ import { readFile } from "node:fs/promises";
 import vm from "node:vm";
 
 test("a stale stock request cannot overwrite current plan options", async () => {
-  const source = await readFile(new URL("../../Shop.Admin/wwwroot/js/admin-data.js", import.meta.url), "utf8");
+  const source = await readFile(new URL("../../Admin/wwwroot/js/admin-data.js", import.meta.url), "utf8");
   const calls = [], listeners = {};
   const node = () => ({ dataset: {}, value: "", classList: { toggle() {} }, replaceChildren(...children) { this.children = children; }, setAttribute() {}, removeAttribute() {} });
   const plans = node(), form = node(), status = node(), rows = node();

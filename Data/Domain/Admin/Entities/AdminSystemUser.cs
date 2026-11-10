@@ -1,4 +1,4 @@
-namespace Shop.Database.Domain.Admin.Entities;
+namespace Shop.Data.Domain.Admin.Entities;
 
 public sealed class AdminSystemUser
 {

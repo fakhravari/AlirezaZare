@@ -1,6 +1,6 @@
-using Shop.Database.Application.Store.Models;
+using Shop.Data.Application.Store.Models;
 
-namespace Shop.Database.Application.Store.Contracts;
+namespace Shop.Data.Application.Store.Contracts;
 
 public interface IStoreSiteIdentityRepository
 {

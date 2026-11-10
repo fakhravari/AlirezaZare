@@ -1,7 +1,7 @@
 using System.Net;
 using System.Net.Mail;
 using Microsoft.EntityFrameworkCore;
-using Shop.Database.Infrastructure.Persistence;
+using Shop.Data.Infrastructure.Persistence;
 
 namespace Shop.Services;
 

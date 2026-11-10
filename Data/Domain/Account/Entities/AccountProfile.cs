@@ -1,4 +1,4 @@
-namespace Shop.Database.Domain.Account.Entities;
+namespace Shop.Data.Domain.Account.Entities;
 
 public sealed class AccountProfile
 {
@@ -10,8 +10,8 @@ public sealed class AccountProfile
     public DateTime CreatedAtUtc { get; set; }
     public DateTime? UpdatedAtUtc { get; set; }
 
-    public ICollection<Shop.Database.Domain.Store.Entities.ProductFeedback> ProductFeedback { get; set; } =
-        new List<Shop.Database.Domain.Store.Entities.ProductFeedback>();
+    public ICollection<Shop.Data.Domain.Store.Entities.ProductFeedback> ProductFeedback { get; set; } =
+        new List<Shop.Data.Domain.Store.Entities.ProductFeedback>();
 }
 
 public sealed class AccountCartReference

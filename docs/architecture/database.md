@@ -16,7 +16,7 @@ Migration `045-payment-attempts.sql` تلاش مستقل پرداخت و صف م
 
 [Migration 034](../../Shop/Features/Store/Database/Migrations/034-product-feedback-from-details.sql) دیدگاه‌ها و پرسش‌های نمونه را برای هر محصول با وضعیت در انتظار تأیید به جدول بازخورد منتقل و دو ستون JSON را حذف می‌کند. این migration در ۹ نوامبر ۲۰۲۶ روی پایگاه متصل اجرا شد؛ ۱۶۰ دیدگاه و ۱۴۵ پرسش منتقل شدند و سه مورد از هر نوع تأیید شد. همچنین پس از بازسازی جداگانهٔ پایگاه خالی محلی تا 033، migration 034 و اجرای مجدد آن موفق بود و ۱۶۰ دیدگاه و ۱۴۵ پرسش نمونه با وضعیت در انتظار بررسی منتقل شد. اجرای migration در پایگاه‌های دیگر جداگانه لازم است.
 
-این راهنما مرز پروژهٔ دسترسی داده، قرارداد repository و API خواندنی انبار را مشخص می‌کند. Domain، Application و Infrastructure یک پروژهٔ `Shop.Database` هستند و تفکیک آن‌ها با فولدر و namespace انجام می‌شود.
+این راهنما مرز پروژهٔ دسترسی داده، قرارداد repository و API خواندنی انبار را مشخص می‌کند. Domain، Application و Infrastructure یک پروژهٔ `Shop.Data` هستند و تفکیک آن‌ها با فولدر و namespace انجام می‌شود.
 
 ## بازبینی مالکیت schemaها — ۹ نوامبر ۲۰۲۶
 
@@ -44,18 +44,18 @@ Migration `045-payment-attempts.sql` تلاش مستقل پرداخت و صف م
 ## پروژه‌ها و وابستگی‌ها
 
 ```text
-Shop.Data/
+Data/
 ├── Domain/
 ├── Application/
 └── Infrastructure/  ← Shop
 ```
 
-- `Shop.Data/Domain` موجودیت‌های دامنهٔ انبار را نگه می‌دارد.
-- `Shop.Data/Application` قرارداد repository، مدل خروجی و سرویس کاربردی را تعریف می‌کند؛ به EF Core وابسته نیست.
-- `Shop.Data/Infrastructure`، `ShopDbContext` و پیاده‌سازی EF Core/SQL Server را نگه می‌دارد و وابستگی‌ها را با `AddShopDatabase` ثبت می‌کند.
+- `Data/Domain` موجودیت‌های دامنهٔ انبار را نگه می‌دارد.
+- `Data/Application` قرارداد repository، مدل خروجی و سرویس کاربردی را تعریف می‌کند؛ به EF Core وابسته نیست.
+- `Data/Infrastructure`، `ShopDbContext` و پیاده‌سازی EF Core/SQL Server را نگه می‌دارد و وابستگی‌ها را با `AddShopDatabase` ثبت می‌کند.
 - `Shop/Controllers/Api/WarehouseApiController.cs` فقط transport HTTP را مدیریت می‌کند؛ query مستقیم از controller ممنوع است.
 
-مرز وابستگی کد همچنان از Infrastructure به Application و Domain است؛ هر سه namespace در یک assembly و یک پروژه‌اند. Shop فقط به پروژهٔ Shop.Database ارجاع دارد. View و JavaScript به `DbContext` یا Entityهای دیتابیس دسترسی مستقیم ندارند.
+مرز وابستگی کد همچنان از Infrastructure به Application و Domain است؛ هر سه namespace در یک assembly و یک پروژه‌اند. Shop فقط به پروژهٔ Shop.Data ارجاع دارد. View و JavaScript به `DbContext` یا Entityهای دیتابیس دسترسی مستقیم ندارند.
 
 ## APIهای خواندنی
 
@@ -109,11 +109,11 @@ Infrastructure مقدار `ConnectionStrings:DefaultConnection` را می‌خو
    سپس [033-related-article-reference.sql](../../Shop/Features/Store/Database/Migrations/033-related-article-reference.sql) و [034-product-feedback-from-details.sql](../../Shop/Features/Store/Database/Migrations/034-product-feedback-from-details.sql) را اجرا کنید.
    در ادامه [035-unify-product-entity.sql](../../Shop/Features/Store/Database/Migrations/035-unify-product-entity.sql) ستون‌های فروشگاهی را به `Warehouse.Product` منتقل می‌کند، وضعیت‌های انبار و کاتالوگ را تفکیک می‌کند، FKهای ارجاع‌دهنده به `Store.Product` را به ریشهٔ جدید می‌برد و جدول `Store.Product` را حذف می‌کند. Migration داخل تراکنش اجرا می‌شود و در صورت نقص نگاشت یا داده rollback می‌کند.
    سپس [036-category-product-content.sql](../../Shop/Features/Store/Database/Migrations/036-category-product-content.sql) محتوای مشترک را به دسته منتقل و `Store.ProductDetail` را حذف می‌کند؛ در پایگاه متصل ۱۵ دسته این محتوا را دارند.
-20. در پایان [001-system-users-and-permissions.sql](../../Shop.Admin/Database/Migrations/001-system-users-and-permissions.sql) را اجرا کنید. این migration هویت مستقل کاربران پنل، نقش، مجوزهای درختی و دسترسی انتخابی کاربران به انبار را در schema جداگانهٔ `Admin` می‌سازد.
-21. سپس [002-store-feedback-permissions.sql](../../Shop.Admin/Database/Migrations/002-store-feedback-permissions.sql) را اجرا کنید تا مشاهده و مدیریت دیدگاه‌ها/پرسش‌های فروشگاه به‌صورت مجوزهای جداگانه به درخت دسترسی افزوده شوند.
+20. در پایان [001-system-users-and-permissions.sql](../../Admin/Database/Migrations/001-system-users-and-permissions.sql) را اجرا کنید. این migration هویت مستقل کاربران پنل، نقش، مجوزهای درختی و دسترسی انتخابی کاربران به انبار را در schema جداگانهٔ `Admin` می‌سازد.
+21. سپس [002-store-feedback-permissions.sql](../../Admin/Database/Migrations/002-store-feedback-permissions.sql) را اجرا کنید تا مشاهده و مدیریت دیدگاه‌ها/پرسش‌های فروشگاه به‌صورت مجوزهای جداگانه به درخت دسترسی افزوده شوند.
 22. در انتها [005-document-audit.sql](../../Shop/Features/Warehouse/Database/Migrations/005-document-audit.sql) را اجرا کنید تا snapshot تغییرات سندهای انبار مستقل از عمر سند اصلی نگهداری شود.
 23. [006-draft-documents-no-stock-effect.sql](../../Shop/Features/Warehouse/Database/Migrations/006-draft-documents-no-stock-effect.sql) رویهٔ موجودی را اصلاح و گردش سندهای موقت موجود را در تراکنش بازسازی می‌کند؛ موجودی فقط با سند قطعی و نوع مؤثر تغییر می‌کند. این migration در ۹ نوامبر ۲۰۲۶ روی پایگاه متصل به پنل اجرا شد.
-24. [003-category-content-permissions.sql](../../Shop.Admin/Database/Migrations/003-category-content-permissions.sql) مجوزهای محتوای دسته را اضافه می‌کند.
+24. [003-category-content-permissions.sql](../../Admin/Database/Migrations/003-category-content-permissions.sql) مجوزهای محتوای دسته را اضافه می‌کند.
 
 پس از migration 037، اسکریپت [038 تنظیمات SMTP](../../Shop/Features/Store/Database/Migrations/038-site-smtp-settings.sql) و سپس [039 ادغام هویت سایت](../../Shop/Features/Store/Database/Migrations/039-consolidate-site-identity.sql) را اجرا کنید. migration 039 هویت و زمان تغییر آن را به تنظیمات منتقل می‌کند، جدول قدیمی را حذف می‌کند و برای نسخهٔ قدیمی برنامه یک view سازگاری با همان نام می‌سازد. این migration روی پایگاه متصل اجرا شد. پس از جایگزینی همهٔ نسخه‌های قدیمی برنامه، [migration 040](../../Shop/Features/Store/Database/Migrations/040-remove-site-identity-compatibility-view.sql) را برای حذف view اجرا کنید؛ تا آن زمان اجرای 040 باعث اختلال نسخهٔ قدیمی می‌شود.
 

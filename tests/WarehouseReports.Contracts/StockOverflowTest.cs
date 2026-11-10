@@ -2,8 +2,10 @@ using System.Text.Json;
 using System.Data;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using Shop.Database.Infrastructure.Persistence;
-using Shop.Database.Infrastructure.Persistence.Repositories;
+using Microsoft.Extensions.Options;
+using Shop.Data.Application.Store;
+using Shop.Data.Infrastructure.Persistence;
+using Shop.Data.Infrastructure.Persistence.Repositories;
 
 internal static class StockOverflowTest
 {
@@ -26,7 +28,8 @@ internal static class StockOverflowTest
             try
             {
                 var plans = new StoreSalesPlanRepository(db);
-                var catalog = new StoreRuntimeDatasetRepository(db);
+                var mediaCdn = new StoreMediaCdnBaseUrlProvider(db, Options.Create(new MediaCdnOptions()));
+                var catalog = new StoreRuntimeDatasetRepository(db, mediaCdn);
                 decimal? expectedPrice = null;
                 foreach (var (quantity, expectedStock) in new[] { (0.999m, 0), (1.999m, 1), (2147483648m, int.MaxValue) })
                 {

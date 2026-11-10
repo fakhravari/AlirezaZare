@@ -1,4 +1,4 @@
-namespace Shop.Database.Application.Warehouse.Models;
+namespace Shop.Data.Application.Warehouse.Models;
 
 public sealed record WarehouseInfo(
     long Id,

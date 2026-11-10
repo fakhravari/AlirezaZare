@@ -1,4 +1,4 @@
-namespace Shop.Database.Application.Store.Models;
+namespace Shop.Data.Application.Store.Models;
 
 public sealed record ProductPurchaseConfiguration(
     int MaxPurchaseQuantity,

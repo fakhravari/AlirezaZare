@@ -21,7 +21,7 @@ API عمومی موجودی برای پارامترهای صفحه‌بندی ن
 
 ## قرارداد اتصال
 
-لایهٔ دسترسی فروشگاه در پروژهٔ یکپارچهٔ [Shop.Database](../../Shop.Data) قرار دارد. قراردادهای خواندن در `Application`، مدل‌های دامنه در `Domain` و پیاده‌سازی SQL Server در `Infrastructure` هستند. اتصال برنامه از `ConnectionStrings:DefaultConnection` در appsettings خوانده می‌شود؛ دادهٔ `SiteIdentity` در آن قرار ندارد. جزئیات schema و migrationها در [راهنمای دیتابیس](database.md) است.
+لایهٔ دسترسی فروشگاه در پروژهٔ یکپارچهٔ [Shop.Data](../../Shop.Data) قرار دارد. قراردادهای خواندن در `Application`، مدل‌های دامنه در `Domain` و پیاده‌سازی SQL Server در `Infrastructure` هستند. اتصال برنامه از `ConnectionStrings:DefaultConnection` در appsettings خوانده می‌شود؛ دادهٔ `SiteIdentity` در آن قرار ندارد. جزئیات schema و migrationها در [راهنمای دیتابیس](database.md) است.
 
 مهلت اجرای دستورهای SQL خواندن dataset کاتالوگ و مجله ۹۰ ثانیه است و لغو درخواست همچنان به دستور منتقل می‌شود. این تنظیم به این دو پرس‌وجو محدود است و مهلت دیگر عملیات پایگاه را تغییر نمی‌دهد؛ افزایش مهلت به‌تنهایی علت کندی را برطرف نمی‌کند.
 

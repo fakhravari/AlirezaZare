@@ -1,7 +1,7 @@
 using Shop.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Shop.Database.Infrastructure.Persistence;
+using Shop.Data.Infrastructure.Persistence;
 using Microsoft.Extensions.Options;
 
 namespace Shop.Controllers;

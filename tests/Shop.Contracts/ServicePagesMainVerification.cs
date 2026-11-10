@@ -7,7 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Shop.Admin.Controllers.Api;
 using Shop.Controllers;
-using Shop.Database.Infrastructure.Persistence;
+using Shop.Data.Infrastructure.Persistence;
 using Shop.Models;
 
 internal static class ServicePagesMainVerification

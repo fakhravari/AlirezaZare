@@ -5,8 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Shop.Controllers;
-using Shop.Database.Infrastructure.Persistence;
-using Shop.Database.Infrastructure.Persistence.Repositories;
+using Shop.Data.Infrastructure.Persistence;
+using Shop.Data.Infrastructure.Persistence.Repositories;
 using Shop.Services;
 
 internal static class CheckoutVariantTest

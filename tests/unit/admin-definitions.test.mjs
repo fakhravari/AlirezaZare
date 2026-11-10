@@ -1,10 +1,10 @@
-﻿import test from "node:test";
+import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import vm from "node:vm";
 
 test("definition lookup responses cannot reopen a detached page or overwrite a newer form", async () => {
-  const source = await readFile(new URL("../../Shop.Admin/wwwroot/js/admin-definitions.js", import.meta.url), "utf8");
+  const source = await readFile(new URL("../../Admin/wwwroot/js/admin-definitions.js", import.meta.url), "utf8");
   const pending = [], handlers = {}, notifications = [];
   let shows = 0, resets = 0;
   const element = () => ({ children: [], classList: { toggle() {} }, append(...nodes) { this.children.push(...nodes); }, replaceChildren() { this.children = []; } });

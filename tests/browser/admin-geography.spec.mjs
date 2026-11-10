@@ -2,7 +2,7 @@ import {test, expect} from '@playwright/test';
 import {readFile} from 'node:fs/promises';
 
 test('lists show all stored geography fields', async ({page}) => {
-  let html = await readFile('Shop.Admin/Areas/Store/Views/Features/Geography.cshtml', 'utf8');
+  let html = await readFile('Admin/Areas/Store/Views/Features/Geography.cshtml', 'utf8');
   html = html.replace('@model Shop.Admin.Models.FeaturePageViewModel', '').replace('@await Html.PartialAsync("_AdminPageIntro", (Model.Title, Model.Description))', '').replace('@Html.AntiForgeryToken()', '<input name="__RequestVerificationToken" value="test">');
   await page.setContent(html);
   await page.evaluate(() => { window.AdminUI = {notify: () => {}, getJson: async () => ({
@@ -10,7 +10,7 @@ test('lists show all stored geography fields', async ({page}) => {
     provinces: [{id: 2, countryId: 1, nameFa: 'فارس', nameEn: 'Fars', parentName: 'ایران', latitude: 29.5, longitude: 52.5}],
     cities: [{id: 3, countryId: 1, provinceId: 2, nameFa: 'شیراز', nameEn: 'Shiraz', parentName: 'ایران / فارس', sourceCountryName: 'Iran source', latitude: 29.6, longitude: 52.6, isProvinceCenter: true}]
   })}; });
-  await page.addScriptTag({content: await readFile('Shop.Admin/wwwroot/js/admin-geography.js', 'utf8')});
+  await page.addScriptTag({content: await readFile('Admin/wwwroot/js/admin-geography.js', 'utf8')});
   await page.evaluate(() => window.AdminGeography.initialize(document));
   await expect(page.locator('[data-geo-rows]')).toContainText('content/flags/iran.webp');
   await page.locator('[data-geo-tab=provinces]').click();
@@ -22,7 +22,7 @@ test('lists show all stored geography fields', async ({page}) => {
 });
 
 test('geography recovers from load failures without repeating a successful save', async ({page}) => {
-  let html = await readFile('Shop.Admin/Areas/Store/Views/Features/Geography.cshtml', 'utf8');
+  let html = await readFile('Admin/Areas/Store/Views/Features/Geography.cshtml', 'utf8');
   html = html.replace('@model Shop.Admin.Models.FeaturePageViewModel', '').replace('@await Html.PartialAsync("_AdminPageIntro", (Model.Title, Model.Description))', '').replace('@Html.AntiForgeryToken()', '<input name="__RequestVerificationToken" value="test">');
   await page.setContent(html);
   await page.evaluate(() => {
@@ -37,7 +37,7 @@ test('geography recovers from load failures without repeating a successful save'
       return {message: 'ذخیره شد'};
     }};
   });
-  await page.addScriptTag({content: await readFile('Shop.Admin/wwwroot/js/admin-geography.js', 'utf8')});
+  await page.addScriptTag({content: await readFile('Admin/wwwroot/js/admin-geography.js', 'utf8')});
   await page.evaluate(() => window.AdminGeography.initialize(document));
   const retry = page.locator('[data-geo-retry]'), submit = page.locator('[data-geo-form] [type=submit]');
   await expect(retry).toBeVisible(); await expect(submit).toBeDisabled();
@@ -61,7 +61,7 @@ test('geography recovers from load failures without repeating a successful save'
 
 
 test('uncertain network result refreshes the list before another save', async ({page}) => {
-  let html = await readFile('Shop.Admin/Areas/Store/Views/Features/Geography.cshtml', 'utf8');
+  let html = await readFile('Admin/Areas/Store/Views/Features/Geography.cshtml', 'utf8');
   html = html.replace('@model Shop.Admin.Models.FeaturePageViewModel', '').replace('@await Html.PartialAsync("_AdminPageIntro", (Model.Title, Model.Description))', '').replace('@Html.AntiForgeryToken()', '<input name="__RequestVerificationToken" value="test">');
   await page.setContent(html);
   await page.evaluate(() => {
@@ -73,7 +73,7 @@ test('uncertain network result refreshes the list before another save', async ({
       throw new TypeError('Network connection lost');
     }};
   });
-  await page.addScriptTag({content: await readFile('Shop.Admin/wwwroot/js/admin-geography.js', 'utf8')});
+  await page.addScriptTag({content: await readFile('Admin/wwwroot/js/admin-geography.js', 'utf8')});
   await page.evaluate(() => window.AdminGeography.initialize(document));
   const submit = page.locator('[data-geo-form] [type=submit]'); await expect(submit).toBeEnabled();
   await page.locator('#geo-name').fill('کشور آزمایشی'); await page.locator('#geo-name-en').fill('Test'); await page.locator('#geo-code').fill('XX');
@@ -85,7 +85,7 @@ test('uncertain network result refreshes the list before another save', async ({
 });
 
 test('province list follows the selected country and combines with search', async ({page}) => {
-  let html = await readFile('Shop.Admin/Areas/Store/Views/Features/Geography.cshtml', 'utf8');
+  let html = await readFile('Admin/Areas/Store/Views/Features/Geography.cshtml', 'utf8');
   html = html.replace('@model Shop.Admin.Models.FeaturePageViewModel', '').replace('@await Html.PartialAsync("_AdminPageIntro", (Model.Title, Model.Description))', '').replace('@Html.AntiForgeryToken()', '<input name="__RequestVerificationToken" value="test">');
   await page.setContent(html);
   await page.evaluate(() => {
@@ -94,7 +94,7 @@ test('province list follows the selected country and combines with search', asyn
       provinces: [{id: 11, countryId: 1, nameFa: 'تهران', nameEn: 'Tehran', parentName: 'ایران'}, {id: 12, countryId: 1, nameFa: 'فارس', nameEn: 'Fars', parentName: 'ایران'}, {id: 21, countryId: 2, nameFa: 'استانبول', nameEn: 'Istanbul', parentName: 'ترکیه'}], cities: []
     })};
   });
-  await page.addScriptTag({content: await readFile('Shop.Admin/wwwroot/js/admin-geography.js', 'utf8')});
+  await page.addScriptTag({content: await readFile('Admin/wwwroot/js/admin-geography.js', 'utf8')});
   await page.evaluate(() => window.AdminGeography.initialize(document));
   await expect(page.locator('[data-geo-form] [type=submit]')).toBeEnabled();
   await page.locator('[data-geo-tab=provinces]').click();
@@ -109,7 +109,7 @@ test('province list follows the selected country and combines with search', asyn
 });
 
 test('city list follows country and province selections', async ({page}) => {
-  let html = await readFile('Shop.Admin/Areas/Store/Views/Features/Geography.cshtml', 'utf8');
+  let html = await readFile('Admin/Areas/Store/Views/Features/Geography.cshtml', 'utf8');
   html = html.replace('@model Shop.Admin.Models.FeaturePageViewModel', '').replace('@await Html.PartialAsync("_AdminPageIntro", (Model.Title, Model.Description))', '').replace('@Html.AntiForgeryToken()', '<input name="__RequestVerificationToken" value="test">');
   await page.setContent(html);
   await page.evaluate(() => {
@@ -119,7 +119,7 @@ test('city list follows country and province selections', async ({page}) => {
       cities: [{id: 101, countryId: 1, provinceId: 11, nameFa: 'تهران', nameEn: 'Tehran'}, {id: 102, countryId: 1, provinceId: 12, nameFa: 'شیراز', nameEn: 'Shiraz'}, {id: 103, countryId: 2, provinceId: 21, nameFa: 'استانبول', nameEn: 'Istanbul'}]
     })};
   });
-  await page.addScriptTag({content: await readFile('Shop.Admin/wwwroot/js/admin-geography.js', 'utf8')});
+  await page.addScriptTag({content: await readFile('Admin/wwwroot/js/admin-geography.js', 'utf8')});
   await page.evaluate(() => window.AdminGeography.initialize(document));
   await expect(page.locator('[data-geo-form] [type=submit]')).toBeEnabled();
   await page.locator('[data-geo-tab=cities]').click();

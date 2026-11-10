@@ -3,10 +3,10 @@ using System.Data.Common;
 using System.Text.Json.Nodes;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
-using Shop.Database.Application.Store;
-using Shop.Database.Application.Store.Contracts;
+using Shop.Data.Application.Store;
+using Shop.Data.Application.Store.Contracts;
 
-namespace Shop.Database.Infrastructure.Persistence.Repositories;
+namespace Shop.Data.Infrastructure.Persistence.Repositories;
 
 public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext, IMediaCdnBaseUrlProvider mediaCdn) : IStoreRuntimeDatasetRepository
 {

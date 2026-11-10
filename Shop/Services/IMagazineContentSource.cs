@@ -9,7 +9,7 @@ public interface IMagazineContentSource
 }
 
 public sealed class DatabaseMagazineContentSource(
-    Shop.Database.Application.Store.Contracts.IStoreRuntimeDatasetRepository datasets) : IMagazineContentSource
+    Shop.Data.Application.Store.Contracts.IStoreRuntimeDatasetRepository datasets) : IMagazineContentSource
 {
     public async Task<MagazineIndexViewModel> ReadIndexAsync(CancellationToken cancellationToken = default)
     {

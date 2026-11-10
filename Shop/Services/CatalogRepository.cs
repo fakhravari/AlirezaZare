@@ -1,12 +1,12 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using Shop.Database.Application.Store;
+using Shop.Data.Application.Store;
 using Shop.Models;
 
 namespace Shop.Services;
 
 /// <summary>The database catalog snapshot is shared by Razor, SEO and the browser.</summary>
-public sealed class CatalogRepository(Shop.Database.Application.Store.Contracts.IStoreRuntimeDatasetRepository datasets, Shop.Database.Application.Store.Contracts.IMediaCdnBaseUrlProvider? mediaCdn = null)
+public sealed class CatalogRepository(Shop.Data.Application.Store.Contracts.IStoreRuntimeDatasetRepository datasets, Shop.Data.Application.Store.Contracts.IMediaCdnBaseUrlProvider? mediaCdn = null)
     : ICatalogSource
 {
     private CatalogSnapshot? requestSnapshot;
