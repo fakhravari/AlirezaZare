@@ -135,6 +135,19 @@
                 upload.dataset.brandImage = String(index); upload.textContent = "نشان برند";
                 actions.append(upload);
             }
+            if (page.dataset.adminSection === "attributes" && page.dataset.canUploadImage === "true") {
+                const edit = document.createElement("button");
+                edit.type = "button"; edit.className = "btn btn-xs btn-default ms-1";
+                edit.dataset.attributeEdit = String(index); edit.textContent = "ویرایش ویژگی";
+                actions.append(edit);
+            }
+            if (["categories", "brands", "attributes"].includes(page.dataset.adminSection) && page.dataset.canUploadImage === "true") {
+                const statusButton = document.createElement("button");
+                statusButton.type = "button"; statusButton.className = "btn btn-xs btn-default ms-1";
+                statusButton.dataset.catalogStatus = String(index);
+                statusButton.textContent = item.isActive ? "خروج از انتشار" : "انتشار";
+                actions.append(statusButton);
+            }
             if (page.dataset.adminPage === "stock" && page.dataset.canMinimum === "true" && page.__adminRows[index]?.isRegularSalesPlan) {
                 const minimum = document.createElement("button");
                 minimum.type = "button"; minimum.className = "btn btn-xs btn-default ms-1";
@@ -169,10 +182,10 @@
             const columns = item => section === "products"
                 ? [item.code, item.name, item.brandName, item.categoryName, ui.formatNumber(item.price), ui.formatNumber(item.stockQuantity)]
                 : section === "categories"
-                    ? [item.id, item.name, item.englishName, item.parentId, item.slug]
+                    ? [item.id, item.name, item.englishName, item.parentId, item.slug, item.isActive ? "منتشر" : "پیش‌نویس"]
                     : section === "brands"
-                        ? [item.id, item.name, item.englishName, item.countryCode]
-                        : [item.key, item.name, item.source, item.isFilterable ? "بله" : "خیر", item.isHighlight ? "بله" : "خیر"];
+                        ? [item.id, item.name, item.englishName, item.countryCode, item.isActive ? "منتشر" : "پیش‌نویس"]
+                        : [item.key, item.label || item.name, item.sourceKey || item.source, item.filterKey, item.isFilterable ? "بله" : "خیر", item.isHighlight ? "بله" : "خیر", item.isActive ? "منتشر" : "پیش‌نویس"];
             renderRows(page, rows, columns);
             updateCount(page, result.total ?? 0, rows.length);
             updatePagination(page, result.page ?? pageNumber, (result.page ?? pageNumber) * (result.pageSize ?? pageSize) < (result.total ?? 0));
@@ -559,6 +572,60 @@
                 .finally(() => { brandEdit.disabled = false; });
             return;
         }
+        const attributeAction = event.target.closest("[data-attribute-edit], [data-attribute-create]");
+        if (attributeAction) {
+            const page = attributeAction.closest('[data-admin-section="attributes"]');
+            const form = document.querySelector("[data-attribute-editor]");
+            const item = attributeAction.hasAttribute("data-attribute-edit") ? page?.__adminRows?.[Number(attributeAction.dataset.attributeEdit)] : null;
+            if (!page || !form || attributeAction.disabled || (attributeAction.hasAttribute("data-attribute-edit") && !item)) return;
+            attributeAction.disabled = true;
+            const load = item
+                ? ui.getJson(`/api/admin/store/catalog/attributes/manage/${encodeURIComponent(item.key)}`)
+                : Promise.resolve(null);
+            void load.then(data => {
+                if (!page.isConnected || !form.isConnected) return;
+                const attribute = data || {};
+                form.reset();
+                form.elements.originalKey.value = attribute.key || "";
+                form.elements.key.value = attribute.key || "";
+                form.elements.key.readOnly = !!item;
+                form.elements.label.value = attribute.label || "";
+                form.elements.icon.value = attribute.icon || "";
+                form.elements.sourceKey.value = attribute.sourceKey || "";
+                form.elements.filterKey.value = attribute.filterKey || "";
+                form.elements.isFilterable.checked = !!attribute.isFilterable;
+                form.elements.isHighlight.checked = !!attribute.isHighlight;
+                window.bootstrap?.Modal?.getOrCreateInstance(document.getElementById("attribute-editor-modal")).show();
+            }).catch(error => ui.notify(error.message || "دریافت ویژگی ناموفق بود.", "danger"))
+                .finally(() => { attributeAction.disabled = false; });
+            return;
+        }
+        const catalogStatus = event.target.closest("[data-catalog-status]");
+        if (catalogStatus) {
+            const page = catalogStatus.closest('[data-admin-page="catalog"]');
+            const section = page?.dataset.adminSection;
+            const item = page?.__adminRows?.[Number(catalogStatus.dataset.catalogStatus)];
+            if (!page || !item || !["categories", "brands", "attributes"].includes(section) || catalogStatus.disabled) return;
+            const nextActive = !item.isActive;
+            const typeName = section === "categories" ? "دسته" : section === "brands" ? "برند" : "ویژگی";
+            if (!nextActive && !window.confirm(`${typeName} «${item.name || item.label}» از کاتالوگ خارج شود؟`)) return;
+            const editorSelector = section === "categories" ? "[data-category-editor]" : section === "brands" ? "[data-brand-editor]" : "[data-attribute-editor]";
+            const token = document.querySelector(`${editorSelector} [name="__RequestVerificationToken"]`)?.value || "";
+            const key = section === "attributes" ? item.key : item.id;
+            catalogStatus.disabled = true;
+            void ui.getJson(`/api/admin/store/catalog/${section}/manage/${encodeURIComponent(key)}/status`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json", RequestVerificationToken: token },
+                body: JSON.stringify({ isActive: nextActive })
+            }).then(result => {
+                ui.notify(result.message, "success");
+                return loadCatalog(page, Number(page.dataset.adminPageNumber || 1));
+            }).catch(error => {
+                ui.notify(error.message || "تغییر وضعیت انتشار ناموفق بود.", "danger");
+                catalogStatus.disabled = false;
+            });
+            return;
+        }
         const shippingButton = event.target.closest("[data-order-status]");
         if (shippingButton) {
             const page = shippingButton.closest('[data-admin-page="orders"]');
@@ -794,6 +861,36 @@
             void ui.getJson(`/api/admin/store/catalog/brands/manage${original ? `/${encodeURIComponent(original)}` : ""}`, { method: original ? "PUT" : "POST", headers: { "Content-Type": "application/json", RequestVerificationToken: token }, body: JSON.stringify(body) })
                 .then(result => { ui.notify(result.message, "success"); window.bootstrap?.Modal?.getInstance(document.getElementById("brand-editor-modal"))?.hide(); const page = document.querySelector('[data-admin-section="brands"]'); if (page) return loadCatalog(page, Number(page.dataset.adminPageNumber || 1)); })
                 .catch(error => ui.notify(error.message || "ذخیرهٔ برند ناموفق بود.", "danger"))
+                .finally(() => { save.disabled = false; });
+            return;
+        }
+        const attributeEditor = event.target.closest("[data-attribute-editor]");
+        if (attributeEditor) {
+            event.preventDefault();
+            const save = attributeEditor.querySelector('[type="submit"]');
+            if (save.disabled) return;
+            const original = attributeEditor.elements.originalKey.value;
+            const token = attributeEditor.querySelector('[name="__RequestVerificationToken"]')?.value || "";
+            const body = {
+                key: attributeEditor.elements.key.value,
+                label: attributeEditor.elements.label.value,
+                icon: attributeEditor.elements.icon.value,
+                sourceKey: attributeEditor.elements.sourceKey.value,
+                filterKey: attributeEditor.elements.filterKey.value,
+                isFilterable: attributeEditor.elements.isFilterable.checked,
+                isHighlight: attributeEditor.elements.isHighlight.checked
+            };
+            save.disabled = true;
+            void ui.getJson(`/api/admin/store/catalog/attributes/manage${original ? `/${encodeURIComponent(original)}` : ""}`, {
+                method: original ? "PUT" : "POST",
+                headers: { "Content-Type": "application/json", RequestVerificationToken: token },
+                body: JSON.stringify(body)
+            }).then(result => {
+                ui.notify(result.message, "success");
+                window.bootstrap?.Modal?.getInstance(document.getElementById("attribute-editor-modal"))?.hide();
+                const page = document.querySelector('[data-admin-section="attributes"]');
+                if (page) return loadCatalog(page, Number(page.dataset.adminPageNumber || 1));
+            }).catch(error => ui.notify(error.message || "ذخیرهٔ ویژگی ناموفق بود.", "danger"))
                 .finally(() => { save.disabled = false; });
             return;
         }

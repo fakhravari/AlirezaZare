@@ -20,6 +20,10 @@
                 {
                     <button class="btn btn-xs btn-primary" type="button" data-brand-create>افزودن برند</button>
                 }
+                @if (catalogSection == "attributes" && User.IsInRole("system.full-access"))
+                {
+                    <button class="btn btn-xs btn-primary" type="button" data-attribute-create>افزودن ویژگی</button>
+                }
                 <button class="btn btn-xs btn-icon btn-default" type="button" data-admin-refresh aria-label="بارگذاری دوباره">
                     <i class="fa fa-rotate" aria-hidden="true"></i>
                 </button>
@@ -53,6 +57,7 @@
                             <th scope="col">نام لاتین</th>
                             <th scope="col">والد</th>
                             <th scope="col">نشانی</th>
+                            <th scope="col">وضعیت انتشار</th>
                         }
                         else if (catalogSection == "brands")
                         {
@@ -60,14 +65,17 @@
                             <th scope="col">برند</th>
                             <th scope="col">نام لاتین</th>
                             <th scope="col">کشور</th>
+                            <th scope="col">وضعیت انتشار</th>
                         }
                         else
                         {
                             <th scope="col">کلید</th>
                             <th scope="col">ویژگی</th>
                             <th scope="col">منبع</th>
+                            <th scope="col">کلید فیلتر</th>
                             <th scope="col">قابل فیلتر</th>
                             <th scope="col">نمایش برجسته</th>
+                            <th scope="col">وضعیت انتشار</th>
                         }
                     </tr>
                     </thead>
@@ -80,7 +88,7 @@
                 <span data-admin-page-label></span>
                 <button type="button" class="btn btn-default btn-sm" data-admin-page-step="1">بعدی</button>
             </div>
-            <p class="admin-readonly-note"><i class="fa fa-lock" aria-hidden="true"></i> @(catalogSection == "categories" ? "محتوای مشترک محصول در دسته قابل ویرایش است." : catalogSection == "products" ? "مدیر دارای دسترسی کامل می‌تواند تصویر، ویدئو و فایل کالا را بارگذاری کند." : catalogSection == "brands" ? "مدیر دارای دسترسی کامل می‌تواند برند را ایجاد یا ویرایش و نشان آن را بارگذاری کند." : "فهرست از API خوانده می‌شود؛ تغییر اطلاعات تا آماده‌شدن API مدیریتی فعال نیست.")</p>
+            <p class="admin-readonly-note"><i class="fa fa-circle-info" aria-hidden="true"></i> @(catalogSection == "categories" ? "محتوای مشترک محصول در دسته قابل ویرایش است." : catalogSection == "products" ? "مدیر دارای دسترسی کامل می‌تواند تصویر، ویدئو و فایل کالا را بارگذاری کند." : catalogSection == "brands" ? "مدیر دارای دسترسی کامل می‌تواند برند را ایجاد یا ویرایش و نشان آن را بارگذاری کند." : "مدیر دارای دسترسی کامل می‌تواند ویژگی را ایجاد و ویرایش کند؛ کلید ویژگی پس از استفاده ثابت می‌ماند.")</p>
         </div>
     </section>
 </div>
@@ -214,6 +222,25 @@
             <div class="modal-header"><h2 class="modal-title fs-5" id="brand-image-title">نشان برند</h2><button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="بستن"></button></div>
             <div class="modal-body"><p data-brand-image-name></p><label for="brand-image-file" class="form-label">تصویر JPEG، PNG یا WebP، حداکثر ۱۰ مگابایت</label><input id="brand-image-file" name="file" type="file" accept="image/jpeg,image/png,image/webp" class="form-control" required /></div>
             <div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button type="submit" class="btn btn-primary">بارگذاری نشان</button></div>
+        </form></div>
+    </div>
+}
+@if (catalogSection == "attributes" && User.IsInRole("system.full-access"))
+{
+    <div class="modal fade" id="attribute-editor-modal" tabindex="-1" aria-labelledby="attribute-editor-title" aria-hidden="true">
+        <div class="modal-dialog"><form class="modal-content" data-attribute-editor>
+            @Html.AntiForgeryToken()<input type="hidden" name="originalKey" />
+            <div class="modal-header"><h2 class="modal-title fs-5" id="attribute-editor-title">مدیریت ویژگی</h2><button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="بستن"></button></div>
+            <div class="modal-body">
+                <label for="attribute-key" class="form-label">کلید لاتین</label><input id="attribute-key" name="key" class="form-control mb-3" maxlength="100" pattern="[A-Za-z][A-Za-z0-9]*(-[A-Za-z0-9]+)*" required />
+                <label for="attribute-label" class="form-label">عنوان</label><input id="attribute-label" name="label" class="form-control mb-3" maxlength="200" required />
+                <label for="attribute-icon" class="form-label">کلاس آیکن (اختیاری)</label><input id="attribute-icon" name="icon" class="form-control mb-3" maxlength="100" pattern="[a-z0-9-]*" />
+                <label for="attribute-source" class="form-label">کلید منبع (اختیاری)</label><input id="attribute-source" name="sourceKey" class="form-control mb-3" maxlength="100" pattern="[A-Za-z][A-Za-z0-9_:-]*" />
+                <label for="attribute-filter" class="form-label">کلید فیلتر (برای ویژگی قابل‌فیلتر اجباری)</label><input id="attribute-filter" name="filterKey" class="form-control mb-3" maxlength="100" pattern="[A-Za-z][A-Za-z0-9_-]*" />
+                <div class="form-check mb-2"><input id="attribute-filterable" name="isFilterable" type="checkbox" class="form-check-input" /><label for="attribute-filterable" class="form-check-label">نمایش در فیلتر کاتالوگ</label></div>
+                <div class="form-check"><input id="attribute-highlight" name="isHighlight" type="checkbox" class="form-check-input" /><label for="attribute-highlight" class="form-check-label">نمایش برجسته در کارت</label></div>
+            </div>
+            <div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button type="submit" class="btn btn-primary">ذخیره</button></div>
         </form></div>
     </div>
 }

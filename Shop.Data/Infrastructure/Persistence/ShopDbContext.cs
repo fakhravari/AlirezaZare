@@ -32,6 +32,11 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
     public DbSet<WarehouseProduct> Products => Set<WarehouseProduct>();
     public DbSet<StoreSiteIdentity> StoreSiteIdentities => Set<StoreSiteIdentity>();
     public DbSet<ProductFeedback> ProductFeedback => Set<ProductFeedback>();
+    public DbSet<StoreAttributeDefinition> StoreAttributeDefinitions => Set<StoreAttributeDefinition>();
+    public DbSet<StoreProductMedia> StoreProductMedia => Set<StoreProductMedia>();
+    public DbSet<StoreBrand> StoreBrands => Set<StoreBrand>();
+    public DbSet<StoreCategory> StoreCategories => Set<StoreCategory>();
+    public DbSet<GeoCountry> GeoCountries => Set<GeoCountry>();
     public DbSet<AccountProfile> AccountProfiles => Set<AccountProfile>();
     public DbSet<AccountRecentSearch> AccountRecentSearches => Set<AccountRecentSearch>();
 
@@ -307,6 +312,58 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
                 .OnDelete(DeleteBehavior.Restrict);
             entity.HasOne(x => x.Profile).WithMany(x => x.ProductFeedback).HasForeignKey(x => x.IdProfile)
                 .OnDelete(DeleteBehavior.SetNull);
+        });
+        modelBuilder.Entity<StoreAttributeDefinition>(entity =>
+        {
+            entity.ToTable("AttributeDefinition", "Store");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.AttributeKey).HasMaxLength(100).IsRequired();
+            entity.Property(x => x.Label).HasMaxLength(200).IsRequired();
+            entity.Property(x => x.Icon).HasMaxLength(100);
+            entity.Property(x => x.SourceKey).HasMaxLength(100);
+            entity.Property(x => x.FilterKey).HasMaxLength(100);
+            entity.HasIndex(x => x.AttributeKey).IsUnique();
+        });
+        modelBuilder.Entity<StoreProductMedia>(entity =>
+        {
+            entity.ToTable("ProductMedia", "Store");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.MediaKey).HasMaxLength(100).IsRequired();
+            entity.Property(x => x.MainPath).HasMaxLength(1000);
+            entity.Property(x => x.CardPath).HasMaxLength(1000);
+            entity.Property(x => x.ThumbnailPath).HasMaxLength(1000);
+            entity.Property(x => x.ImagesJson).HasColumnType("nvarchar(max)");
+            entity.Property(x => x.VideosJson).HasColumnType("nvarchar(max)");
+            entity.HasIndex(x => new { x.IdProduct, x.MediaKey }).IsUnique();
+        });
+        modelBuilder.Entity<StoreBrand>(entity =>
+        {
+            entity.ToTable("Brand", "Store");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.BrandKey).HasMaxLength(100).IsRequired();
+            entity.Property(x => x.NameEn).HasMaxLength(200).IsRequired();
+            entity.Property(x => x.NameFa).HasMaxLength(200).IsRequired();
+            entity.Property(x => x.LogoPath).HasMaxLength(500);
+            entity.HasIndex(x => x.BrandKey).IsUnique();
+        });
+        modelBuilder.Entity<StoreCategory>(entity =>
+        {
+            entity.ToTable("Category", "Store");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.CategoryKey).HasMaxLength(150).IsRequired();
+            entity.Property(x => x.NameEn).HasMaxLength(200).IsRequired();
+            entity.Property(x => x.NameFa).HasMaxLength(200).IsRequired();
+            entity.Property(x => x.PathJson).HasColumnType("nvarchar(max)").IsRequired();
+            entity.HasIndex(x => x.CategoryKey).IsUnique();
+        });
+        modelBuilder.Entity<GeoCountry>(entity =>
+        {
+            entity.ToTable("Country", "Geo");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.CountryCode).HasMaxLength(10).IsRequired();
+            entity.Property(x => x.NameFa).HasMaxLength(150).IsRequired();
+            entity.Property(x => x.NameEn).HasMaxLength(150).IsRequired();
+            entity.HasIndex(x => x.CountryCode).IsUnique();
         });
     }
 }

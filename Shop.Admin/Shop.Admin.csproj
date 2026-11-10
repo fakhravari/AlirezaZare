@@ -17,4 +17,15 @@
     <Content Remove="wwwroot/color_admin/assets/data/**/*" />
     <Content Remove="wwwroot/color_admin/assets/demo/**/*" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="wwwroot\content\brands\" />
+    <Folder Include="wwwroot\content\countries\flags\" />
+    <Folder Include="wwwroot\content\identity\" />
+    <Folder Include="wwwroot\content\payments\" />
+    <Folder Include="wwwroot\content\products\files\" />
+    <Folder Include="wwwroot\content\products\images\card\" />
+    <Folder Include="wwwroot\content\products\images\main\" />
+    <Folder Include="wwwroot\content\products\images\thumbnail\" />
+    <Folder Include="wwwroot\content\products\videos\" />
+  </ItemGroup>
 </Project>

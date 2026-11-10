@@ -7,7 +7,9 @@
         "admin-shell": {
           "markup": [
             "Shop.Admin/Views/Shared/_Layout.cshtml",
-            "Shop.Admin/Views/Shared/_AdminSidebar.cshtml"
+            "Shop.Admin/Views/Shared/_AdminSidebar.cshtml",
+            "Shop.Admin/Areas/Store/Views/Catalog/Index.cshtml",
+            "Shop.Admin/Areas/Store/Controllers/CatalogController.cs"
           ],
           "js": [
             "Shop.Admin/wwwroot/js/admin-shell.js",
@@ -25,7 +27,13 @@
             "Shop.Admin/Controllers/Api/StoreCustomersAdminApiController.cs",
             "Shop.Admin/Controllers/Api/StoreFaqAdminApiController.cs",
             "Shop.Admin/Controllers/Api/StoreCategoryContentApiController.cs",
-            "Shop.Admin/Controllers/Api/WarehouseAdminApiController.cs"
+            "Shop.Admin/Controllers/Api/WarehouseAdminApiController.cs",
+            "Shop.Data/Domain/Store/Entities/StoreAttributeDefinition.cs",
+            "Shop.Data/Domain/Store/Entities/StoreProductMedia.cs",
+            "Shop.Data/Domain/Store/Entities/StoreBrand.cs",
+            "Shop.Data/Domain/Store/Entities/StoreCategory.cs",
+            "Shop.Data/Domain/Store/Entities/GeoCountry.cs",
+            "Shop.Data/Infrastructure/Persistence/ShopDbContext.cs"
           ]
         },
         "store-variant-prices": {

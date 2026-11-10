@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shop.Data", "Shop.Data\Shop
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shop.Admin", "Shop.Admin\Shop.Admin.csproj", "{1D42EA45-286F-4E26-954B-38F4FDF765CD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cdn", "Cdn\Cdn.csproj", "{F3F85222-7A4B-4747-82CF-3F6B1A2B31DD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -71,6 +73,18 @@ Global
 		{1D42EA45-286F-4E26-954B-38F4FDF765CD}.Release|x64.Build.0 = Release|Any CPU
 		{1D42EA45-286F-4E26-954B-38F4FDF765CD}.Release|x86.ActiveCfg = Release|Any CPU
 		{1D42EA45-286F-4E26-954B-38F4FDF765CD}.Release|x86.Build.0 = Release|Any CPU
+		{F3F85222-7A4B-4747-82CF-3F6B1A2B31DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F3F85222-7A4B-4747-82CF-3F6B1A2B31DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F3F85222-7A4B-4747-82CF-3F6B1A2B31DD}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{F3F85222-7A4B-4747-82CF-3F6B1A2B31DD}.Debug|x64.Build.0 = Debug|Any CPU
+		{F3F85222-7A4B-4747-82CF-3F6B1A2B31DD}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F3F85222-7A4B-4747-82CF-3F6B1A2B31DD}.Debug|x86.Build.0 = Debug|Any CPU
+		{F3F85222-7A4B-4747-82CF-3F6B1A2B31DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F3F85222-7A4B-4747-82CF-3F6B1A2B31DD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F3F85222-7A4B-4747-82CF-3F6B1A2B31DD}.Release|x64.ActiveCfg = Release|Any CPU
+		{F3F85222-7A4B-4747-82CF-3F6B1A2B31DD}.Release|x64.Build.0 = Release|Any CPU
+		{F3F85222-7A4B-4747-82CF-3F6B1A2B31DD}.Release|x86.ActiveCfg = Release|Any CPU
+		{F3F85222-7A4B-4747-82CF-3F6B1A2B31DD}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

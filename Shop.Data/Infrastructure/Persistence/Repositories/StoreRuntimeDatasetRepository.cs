@@ -1,5 +1,6 @@
 using System.Data;
 using System.Data.Common;
+using System.Text.Json.Nodes;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Shop.Database.Application.Store.Contracts;
@@ -8,8 +9,9 @@ namespace Shop.Database.Infrastructure.Persistence.Repositories;
 
 public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext) : IStoreRuntimeDatasetRepository
 {
-    public async Task<string?> ReadCatalogJsonAsync(CancellationToken cancellationToken) =>
-        await ReadScalarJsonAsync("""
+    public async Task<string?> ReadCatalogJsonAsync(CancellationToken cancellationToken)
+    {
+        string? json = await ReadScalarJsonAsync("""
                                   SELECT 2 AS [schemaVersion],
                                          JSON_QUERY((SELECT [GroupKey] AS [id], [Name] AS [name], [SortOrder] AS [order] FROM [Store].[SpecificationGroup] ORDER BY [SortOrder], [Id] FOR JSON PATH)) AS [specificationGroups],
                                          JSON_QUERY((SELECT c.[CategoryKey] AS [id], g.[GroupKey] AS [groupId], c.[Name] AS [name], c.[SortOrder] AS [order] FROM [Store].[SpecificationCategory] c JOIN [Store].[SpecificationGroup] g ON g.[Id]=c.[IdSpecificationGroup] ORDER BY c.[SortOrder], c.[Id] FOR JSON PATH)) AS [specificationCategories],
@@ -26,6 +28,36 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext) : ISt
                                   FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
                                   OPTION (MAX_GRANT_PERCENT = 5);
                                   """, cancellationToken, commandTimeoutSeconds: 90);
+        if (string.IsNullOrWhiteSpace(json)) return json;
+
+        var activeBrandKeys = await dbContext.StoreBrands.AsNoTracking().Where(x => x.IsActive)
+            .Select(x => x.BrandKey).ToHashSetAsync(cancellationToken);
+        var activeAttributeKeys = await dbContext.StoreAttributeDefinitions.AsNoTracking().Where(x => x.IsActive)
+            .Select(x => x.AttributeKey).ToHashSetAsync(cancellationToken);
+        var catalog = JsonNode.Parse(json)?.AsObject();
+        if (catalog is null) return json;
+
+        FilterArray(catalog, "brands", item => activeBrandKeys.Contains(item?["id"]?.GetValue<string>() ?? ""));
+        FilterArray(catalog, "attributeDefinitions", item => activeAttributeKeys.Contains(item?["id"]?.GetValue<string>() ?? ""));
+        FilterArray(catalog, "products", item =>
+            activeBrandKeys.Contains(item?["brandId"]?.GetValue<string>() ?? "") &&
+            (item?["categoryId"] is null || catalog["categories"]?.AsArray().Any(category =>
+                string.Equals(category?["id"]?.GetValue<string>(), item["categoryId"]?.GetValue<string>(), StringComparison.Ordinal)) == true));
+        var visibleProductIds = (catalog["products"]?.AsArray() ?? []).Select(item => item?["id"]?.ToJsonString()).ToHashSet(StringComparer.Ordinal);
+        if (catalog["collections"] is JsonArray collections)
+            foreach (var collection in collections)
+                if (collection?["items"] is JsonArray items)
+                    for (int index = items.Count - 1; index >= 0; index--)
+                        if (!visibleProductIds.Contains(items[index]?.ToJsonString())) items.RemoveAt(index);
+        return catalog.ToJsonString();
+    }
+
+    private static void FilterArray(JsonObject root, string name, Func<JsonNode?, bool> keep)
+    {
+        if (root[name] is not JsonArray items) return;
+        for (int index = items.Count - 1; index >= 0; index--)
+            if (!keep(items[index])) items.RemoveAt(index);
+    }
 
     public async Task<string?> ReadBrandEditorialJsonAsync(CancellationToken cancellationToken) =>
         await ReadScalarJsonAsync("""
