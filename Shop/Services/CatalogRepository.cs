@@ -1,11 +1,12 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using Shop.Database.Application.Store;
 using Shop.Models;
 
 namespace Shop.Services;
 
 /// <summary>The database catalog snapshot is shared by Razor, SEO and the browser.</summary>
-public sealed class CatalogRepository(Shop.Database.Application.Store.Contracts.IStoreRuntimeDatasetRepository datasets)
+public sealed class CatalogRepository(Shop.Database.Application.Store.Contracts.IStoreRuntimeDatasetRepository datasets, Shop.Database.Application.Store.Contracts.IMediaCdnBaseUrlProvider? mediaCdn = null)
     : ICatalogSource
 {
     private CatalogSnapshot? requestSnapshot;
@@ -20,8 +21,9 @@ public sealed class CatalogRepository(Shop.Database.Application.Store.Contracts.
                                    "The Store brand editorial dataset is missing from the database.");
         BrandEditorialDocument[] editorials = JsonSerializer.Deserialize<BrandEditorialDocument[]>(editorialJson,
             new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? [];
+        string cdnBaseUrl = mediaCdn is null ? MediaCdnOptions.DefaultBaseUrl : await mediaCdn.GetBaseUrlAsync(cancellationToken);
         return requestSnapshot = CatalogSnapshot.Parse(NormalizeRelationObjects(json),
-            editorials.ToDictionary(item => item.Slug, StringComparer.OrdinalIgnoreCase));
+            editorials.ToDictionary(item => item.Slug, StringComparer.OrdinalIgnoreCase), cdnBaseUrl);
     }
 
     private static string NormalizeRelationObjects(string json)
@@ -55,10 +57,12 @@ public sealed record CatalogSnapshot(
     IReadOnlyList<BrandProfileModel> Brands)
 {
     public static CatalogSnapshot Parse(string source,
-        IReadOnlyDictionary<string, BrandEditorialDocument>? editorialDocuments = null)
+        IReadOnlyDictionary<string, BrandEditorialDocument>? editorialDocuments = null,
+        string? mediaCdnBaseUrl = null)
     {
         using JsonDocument document = JsonDocument.Parse(source);
         JsonElement root = document.RootElement;
+        string configuredCdnBaseUrl = MediaCdnOptions.NormalizeBaseUrl(mediaCdnBaseUrl ?? MediaCdnOptions.DefaultBaseUrl);
         if (root.GetProperty("schemaVersion").GetInt32() != 2)
             throw new InvalidDataException("Unsupported catalog schemaVersion.");
 
@@ -83,7 +87,7 @@ public sealed record CatalogSnapshot(
                 throw new InvalidDataException($"Unknown brand country: {country}");
             string id = Text(brand, "id");
             string? logo = brand.GetProperty("logo").GetString();
-            if (logo is not null) ValidatePath(logo, "content/brands/");
+            if (logo is not null) ValidatePath(logo, "content/brands/", configuredCdnBaseUrl);
             BrandEditorialDocument? sourceEditorial = null;
             if (editorialDocuments is not null) editorialDocuments.TryGetValue(id, out sourceEditorial);
             string[] strengths = sourceEditorial?.Strengths.ToArray() ?? [];
@@ -114,7 +118,7 @@ public sealed record CatalogSnapshot(
 
         foreach (JsonElement country in countries.EnumerateObject().Select(item => item.Value))
             if (country.TryGetProperty("flag", out JsonElement flag) && flag.ValueKind != JsonValueKind.Null)
-                ValidatePath(flag.GetString() ?? "", "content/countries/flags/");
+                ValidatePath(flag.GetString() ?? "", "content/countries/flags/", configuredCdnBaseUrl);
         foreach (JsonElement detail in details.EnumerateObject().Select(item => item.Value))
         {
             if (detail.TryGetProperty("specs", out JsonElement sharedSpecs))
@@ -124,17 +128,17 @@ public sealed record CatalogSnapshot(
 
         foreach (JsonElement images in media.EnumerateObject().Select(item => item.Value))
         {
-            ValidatePath(Text(images, "main"), "content/products/images/main/");
-            ValidatePath(Text(images, "card"), "content/products/images/card/");
-            ValidatePath(Text(images, "thumbnail"), "content/products/images/thumbnail/");
+            ValidatePath(Text(images, "main"), "content/products/images/main/", configuredCdnBaseUrl);
+            ValidatePath(Text(images, "card"), "content/products/images/card/", configuredCdnBaseUrl);
+            ValidatePath(Text(images, "thumbnail"), "content/products/images/thumbnail/", configuredCdnBaseUrl);
             foreach (JsonElement image in images.GetProperty("images").EnumerateArray())
             {
-                ValidatePath(Text(image, "src"), "content/products/images/main/");
-                ValidatePath(Text(image, "thumbnail"), "content/products/images/thumbnail/");
+                ValidatePath(Text(image, "src"), "content/products/images/main/", configuredCdnBaseUrl);
+                ValidatePath(Text(image, "thumbnail"), "content/products/images/thumbnail/", configuredCdnBaseUrl);
             }
 
             foreach (JsonElement video in images.GetProperty("videos").EnumerateArray())
-                ValidatePath(video.GetString() ?? "", "content/products/videos/");
+                ValidatePath(video.GetString() ?? "", "content/products/videos/", configuredCdnBaseUrl);
         }
 
         foreach (JsonElement product in root.GetProperty("products").EnumerateArray())
@@ -181,10 +185,13 @@ public sealed record CatalogSnapshot(
         return new(JsonSerializer.Serialize(root), products.AsReadOnly(), brandProfiles.AsReadOnly());
     }
 
-    private static void ValidatePath(string path, string prefix)
+    private static void ValidatePath(string path, string prefix, string mediaCdnBaseUrl)
     {
-        if (!path.StartsWith(prefix, StringComparison.Ordinal) || path.Contains("..") || path.Contains('\\') ||
-            path.Any(character => !(character is >= 'a' and <= 'z' or >= '0' and <= '9' or '/' or '-' or '_' or '.')))
+        string localPath = path.StartsWith(MediaCdnOptions.NormalizeBaseUrl(mediaCdnBaseUrl), StringComparison.OrdinalIgnoreCase)
+            ? Uri.TryCreate(path, UriKind.Absolute, out Uri? mediaUri) ? mediaUri.AbsolutePath.TrimStart('/') : ""
+            : path.TrimStart('~', '/');
+        if (!localPath.StartsWith(prefix, StringComparison.Ordinal) || localPath.Contains("..") || localPath.Contains('\\') ||
+            localPath.Any(character => !(character is >= 'a' and <= 'z' or >= '0' and <= '9' or '/' or '-' or '_' or '.')))
             throw new InvalidDataException($"Invalid catalog media path: {path}");
     }
 

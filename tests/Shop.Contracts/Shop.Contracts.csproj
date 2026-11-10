@@ -7,5 +7,6 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../../Shop/Shop.csproj" />
+    <ProjectReference Include="../../Shop.Admin/Shop.Admin.csproj" />
   </ItemGroup>
 </Project>

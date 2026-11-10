@@ -15,8 +15,110 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db) : Con
         if (!User.IsInRole("system.full-access")) return Forbid();
         return Ok(await db.SalesPlanReferences.AsNoTracking().Where(x => x.IdStockOwnerType == 1)
             .OrderBy(x => x.DisplayName).Select(x => new { x.Id, x.DisplayName, x.Code, x.IsRegular,
-                x.IsActive, x.StartsAtUtc, x.EndsAtUtc, x.Label, x.ShowCountdown }).ToListAsync(cancellationToken));
+                x.IsActive, x.PlanType, x.StoreSalesPlanKey, x.StartsAtUtc, x.EndsAtUtc, x.Label, x.ShowCountdown }).ToListAsync(cancellationToken));
     }
+
+    [HttpPost("plans")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CreatePlan([FromBody] PlanInput input, CancellationToken cancellationToken)
+    {
+        if (!User.IsInRole("system.full-access")) return Forbid();
+        var error = ValidatePlan(input, true);
+        if (error is not null) return ValidationProblem(detail: error, statusCode: 400);
+        var key = input.Key!.Trim().ToLowerInvariant();
+        var code = input.Code!.Trim();
+        var name = input.DisplayName!.Trim();
+        var type = input.PlanType!.Trim().ToLowerInvariant();
+        if (await db.SalesPlanReferences.AnyAsync(x => x.StoreSalesPlanKey == key || x.Code == code, cancellationToken))
+            return Conflict(new { message = "کلید یا کد این طرح قبلاً ثبت شده است." });
+        await using var transaction = await db.Database.BeginTransactionAsync(cancellationToken);
+        await db.Database.ExecuteSqlInterpolatedAsync($"""
+            INSERT [Warehouse].[SalesPlanReference]
+                ([StoreSalesPlanKey],[DisplayName],[IsRegular],[IsActive],[IdStockOwnerType],[Code],[PlanType],[StartsAtUtc],[EndsAtUtc],[Label],[ShowCountdown])
+            VALUES ({key},{name},0,0,1,{code},{type},{input.StartsAtUtc?.ToUniversalTime()},{input.EndsAtUtc?.ToUniversalTime()},
+                {NormalizeLabel(input.Label)},{input.ShowCountdown});
+            """, cancellationToken);
+        await db.Database.ExecuteSqlInterpolatedAsync($"""
+            INSERT [Warehouse].[WarehouseStockOwner] ([IdWarehouse],[IdStockOwner])
+            SELECT w.[Id], p.[Id] FROM [Warehouse].[Warehouse] w
+            CROSS JOIN [Warehouse].[SalesPlanReference] p
+            WHERE w.[IsSalesWarehouse]=1 AND p.[StoreSalesPlanKey]={key} AND p.[IdStockOwnerType]=1;
+            """, cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
+        var created = await db.SalesPlanReferences.AsNoTracking().Where(x => x.IdStockOwnerType == 1 && x.StoreSalesPlanKey == key)
+            .Select(x => new { x.Id, x.StoreSalesPlanKey }).SingleAsync(cancellationToken);
+        return Ok(new { created.Id, created.StoreSalesPlanKey, message = "طرح فروش به‌صورت پیش‌نویس ساخته شد." });
+    }
+
+    [HttpPut("plans/{id:long}/details")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> UpdatePlan(long id, [FromBody] PlanInput input, CancellationToken cancellationToken)
+    {
+        if (!User.IsInRole("system.full-access")) return Forbid();
+        var error = ValidatePlan(input, false);
+        if (error is not null) return ValidationProblem(detail: error, statusCode: 400);
+        var plan = await db.SalesPlanReferences.SingleOrDefaultAsync(x => x.Id == id && x.IdStockOwnerType == 1, cancellationToken);
+        if (plan is null) return NotFound();
+        if (plan.IsRegular) return ValidationProblem(detail: "مشخصات طرح عادی قابل تغییر نیست.", statusCode: 400);
+        var code = input.Code!.Trim();
+        if (await db.SalesPlanReferences.AnyAsync(x => x.Id != id && x.IdStockOwnerType == 1 && x.Code == code, cancellationToken))
+            return Conflict(new { message = "این کد قبلاً برای طرح دیگری ثبت شده است." });
+        await db.Database.ExecuteSqlInterpolatedAsync($"""
+            UPDATE [Warehouse].[SalesPlanReference] SET [DisplayName]={input.DisplayName!.Trim()},[Code]={code},[PlanType]={input.PlanType!.Trim().ToLowerInvariant()}
+            WHERE [Id]={id} AND [IdStockOwnerType]=1 AND [IsRegular]=0;
+            """, cancellationToken);
+        return Ok(new { message = "مشخصات طرح فروش ذخیره شد." });
+    }
+
+    [HttpPut("plans/{id:long}/publication")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> SetPlanPublication(long id, [FromBody] PlanPublicationInput input, CancellationToken cancellationToken)
+    {
+        if (!User.IsInRole("system.full-access")) return Forbid();
+        var plan = await db.SalesPlanReferences.SingleOrDefaultAsync(x => x.Id == id && x.IdStockOwnerType == 1, cancellationToken);
+        if (plan is null) return NotFound();
+        if (plan.IsRegular && !input.IsActive) return ValidationProblem(detail: "طرح عادی همیشه فعال می‌ماند.", statusCode: 400);
+        await db.Database.ExecuteSqlInterpolatedAsync($"UPDATE [Warehouse].[SalesPlanReference] SET [IsActive]={input.IsActive} WHERE [Id]={id} AND [IdStockOwnerType]=1", cancellationToken);
+        return Ok(new { message = input.IsActive ? "طرح منتشر و فعال شد." : "طرح از فروش خارج شد و سوابق آن حفظ شد." });
+    }
+
+    [HttpDelete("plans/{id:long}")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeletePlan(long id, CancellationToken cancellationToken)
+    {
+        if (!User.IsInRole("system.full-access")) return Forbid();
+        var plan = await db.SalesPlanReferences.AsNoTracking().SingleOrDefaultAsync(x => x.Id == id && x.IdStockOwnerType == 1, cancellationToken);
+        if (plan is null) return NotFound();
+        if (plan.IsRegular) return Conflict(new { message = "طرح عادی حذف‌شدنی نیست." });
+        int references = await db.Database.SqlQuery<int>($"""
+            SELECT (SELECT COUNT(*) FROM [Account].[CartItem] WHERE [IdSalesPlan]={id})+
+                   (SELECT COUNT(*) FROM [Account].[CustomerOrderItem] WHERE [IdSalesPlan]={id})+
+                   (SELECT COUNT(*) FROM [Store].[ProductSalesPlanOffer] WHERE [IdSalesPlan]={id})+
+                   (SELECT COUNT(*) FROM [Store].[ProductVariantSalesPlanOffer] WHERE [IdSalesPlan]={id})+
+                   (SELECT COUNT(*) FROM [Warehouse].[StockBalance] WHERE [IdSalesPlanReference]={id})+
+                   (SELECT COUNT(*) FROM [Warehouse].[WarehouseDocument] WHERE [IdSalesPlanReference]={id})+
+                   (SELECT COUNT(*) FROM [Warehouse].[Warehouse] WHERE [IdOwnerSalesPlanReference]={id}) AS [Value]
+            """).SingleAsync(cancellationToken);
+        if (references > 0) return Conflict(new { message = "این طرح سابقه یا اتصال دارد؛ برای حفظ سوابق آن را غیرفعال کنید." });
+        await using var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
+        await db.Database.ExecuteSqlInterpolatedAsync($"""
+            DELETE link FROM [Warehouse].[WarehouseStockOwner] link
+            INNER JOIN [Warehouse].[Warehouse] w ON w.[Id]=link.[IdWarehouse] AND w.[IsSalesWarehouse]=1
+            WHERE link.[IdStockOwner]={id};
+            DELETE FROM [Warehouse].[SalesPlanReference] WHERE [Id]={id} AND [IdStockOwnerType]=1 AND [IsRegular]=0;
+            """, cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
+        return Ok(new { message = "طرح فروش حذف شد." });
+    }
+
+    private static string? ValidatePlan(PlanInput input, bool creating)
+    {
+        if (creating && (string.IsNullOrWhiteSpace(input.Key) || input.Key.Length > 64 || !System.Text.RegularExpressions.Regex.IsMatch(input.Key, "^[a-z0-9][a-z0-9-]*$"))) return "کلید طرح باید حداکثر ۶۴ نویسه و شامل حروف کوچک انگلیسی، عدد و خط تیره باشد.";
+        if (string.IsNullOrWhiteSpace(input.Code) || input.Code.Length > 64 || string.IsNullOrWhiteSpace(input.DisplayName) || input.DisplayName.Length > 200 || string.IsNullOrWhiteSpace(input.PlanType) || input.PlanType.Length > 30) return "کد، نام و نوع طرح الزامی و باید در محدودهٔ مجاز باشند.";
+        if (input.StartsAtUtc.HasValue && input.EndsAtUtc.HasValue && input.StartsAtUtc >= input.EndsAtUtc || input.Label?.Length > 100 || input.ShowCountdown && !input.EndsAtUtc.HasValue) return "بازه یا برچسب طرح نامعتبر است؛ شمارش معکوس به تاریخ پایان نیاز دارد.";
+        return null;
+    }
+    private static string? NormalizeLabel(string? label) => string.IsNullOrWhiteSpace(label) ? null : label.Trim();
 
     [HttpPut("plans/{id:long}")]
     [ValidateAntiForgeryToken]
@@ -130,6 +232,8 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db) : Con
 
     public sealed record VariantPlanPriceInput(decimal PriceAmount, decimal DiscountPercent, bool IsEnabled);
     public sealed record PlanSettingsInput(DateTimeOffset? StartsAtUtc, DateTimeOffset? EndsAtUtc, string? Label, bool ShowCountdown);
+    public sealed record PlanInput(string? Key, string? Code, string? DisplayName, string? PlanType, DateTimeOffset? StartsAtUtc, DateTimeOffset? EndsAtUtc, string? Label, bool ShowCountdown);
+    public sealed record PlanPublicationInput(bool IsActive);
 
     [HttpGet("product-offers")]
     public async Task<IActionResult> ProductOffers(CancellationToken cancellationToken)

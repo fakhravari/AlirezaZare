@@ -7,9 +7,19 @@
         <section class="panel panel-inverse">
             <div class="panel-heading"><h2 class="panel-title">بازه و نمایش طرح فروش</h2></div>
             <div class="panel-body">
-                <p>زمان‌ها به وقت جهانی UTC وارد می‌شوند. ایجاد طرح و اتصال آن به انبار در تعریف مالک کالا انجام می‌شود.</p>
+                <p>طرح تازه به‌صورت پیش‌نویس ساخته و به انبارهای فروش متصل می‌شود. برای عرضه، آن را منتشر کنید؛ طرح‌های دارای سابقه فقط غیرفعال می‌شوند.</p>
+                <form class="border rounded p-3 mb-3" data-plan-create>
+                    <h3 class="h5">ایجاد طرح فروش</h3>
+                    <div class="row g-2"><div class="col-md-3"><label class="form-label" for="new-plan-key">کلید یکتا</label><input id="new-plan-key" class="form-control" name="key" maxlength="64" pattern="[a-z0-9][a-z0-9-]*" required /></div><div class="col-md-3"><label class="form-label" for="new-plan-code">کد</label><input id="new-plan-code" class="form-control" name="code" maxlength="64" required /></div><div class="col-md-3"><label class="form-label" for="new-plan-name">نام</label><input id="new-plan-name" class="form-control" name="displayName" maxlength="200" required /></div><div class="col-md-3"><label class="form-label" for="new-plan-type">نوع</label><input id="new-plan-type" class="form-control" name="planType" maxlength="30" required /></div></div>
+                    <button class="btn btn-success mt-3" type="submit">ساخت پیش‌نویس</button>
+                </form>
                 <form data-plan-settings>
                     <div class="mb-3"><label class="form-label" for="plan-settings-id">طرح فروش</label><select id="plan-settings-id" class="form-select" name="id" required></select></div>
+                    <div class="row g-2 mb-3"><div class="col-md-4"><label class="form-label" for="plan-settings-code">کد</label><input id="plan-settings-code" class="form-control" name="code" maxlength="64" /></div><div class="col-md-4"><label class="form-label" for="plan-settings-name">نام طرح</label><input id="plan-settings-name" class="form-control" name="displayName" maxlength="200" /></div><div class="col-md-4"><label class="form-label" for="plan-settings-type">نوع</label><input id="plan-settings-type" class="form-control" name="planType" maxlength="30" /></div></div>
+                    <button class="btn btn-default mb-3" type="button" data-plan-details-save>ذخیرهٔ مشخصات</button>
+                    <button class="btn btn-success mb-3" type="button" data-plan-publish>انتشار طرح</button>
+                    <button class="btn btn-warning mb-3" type="button" data-plan-unpublish>خروج از فروش</button>
+                    <button class="btn btn-danger mb-3" type="button" data-plan-delete>حذف طرح بدون سابقه</button>
                     <div class="mb-3"><label class="form-label" for="plan-settings-start">شروع (UTC)</label><input id="plan-settings-start" class="form-control" name="startsAtUtc" type="datetime-local" step="1" /></div>
                     <div class="mb-3"><label class="form-label" for="plan-settings-end">پایان (UTC)</label><input id="plan-settings-end" class="form-control" name="endsAtUtc" type="datetime-local" step="1" /></div>
                     <div class="mb-3"><label class="form-label" for="plan-settings-label">برچسب</label><input id="plan-settings-label" class="form-control" name="label" maxlength="100" /></div>

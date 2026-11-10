@@ -2,6 +2,10 @@
 
 Migration `045-payment-attempts.sql` تلاش مستقل پرداخت و صف ماندگار سفارش تأییدشده را اضافه می‌کند؛ ترتیب استقرار و محدودیت‌های پردازش در [قرارداد پرداخت](../store/payment.md) آمده است.
 
+[Migration 051 محتوای صفحه‌های خدماتی](../../Shop/Features/Store/Database/Migrations/051-service-page-content.sql) جدول بخش‌های `Store.ContentPageSection` را دوباره ایجاد می‌کند و برای معرفی، تماس، ارسال، ضمانت، پیگیری، FAQ و قوانین محتوای اولیه می‌گذارد. این migration بعد از 024 لازم است؛ نسخهٔ اولیهٔ 003 این جدول را ساخته بود و 024 جدول خالی را حذف کرد.
+
+[Migration 052](../../Shop/Features/Store/Database/Migrations/052-correct-service-page-privacy-content.sql) متن اولیهٔ حریم خصوصی را با وضعیت جاری API و نبود نگهداری runtime در `localStorage` هماهنگ می‌کند.
+
 ## مرجع بانک‌های ایران
 
 [Migration 046](../../Shop/Features/Store/Database/Migrations/046-iran-bank-catalog.sql) جدول مستقل `[Store].[Bank]` را برای مرجع بانک‌ها می‌سازد؛ `Id` شناسهٔ پایدار، `Code` کلید متنی یکتا، `NameFa` نام یکتا، `InstitutionType` نوع نهاد و `IsActive` وضعیت انتخاب‌پذیری است. دادهٔ اولیه شامل ۲۷ بانک و مؤسسهٔ اعتباری ملل به‌عنوان `credit-institution` است. بانک مرکزی و بانک‌های منحل یا ادغام‌شده در فهرست اولیه نیستند. `Code` کد رسمی بانک یا پیش‌شمارهٔ کارت نیست. این جدول هنوز API یا صفحهٔ مدیریتی و مصرف‌کنندهٔ پرداخت ندارد و وجود آن به معنی فعال‌بودن درگاه هر بانک نیست.

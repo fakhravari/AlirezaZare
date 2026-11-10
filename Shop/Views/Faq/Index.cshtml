@@ -1,4 +1,7 @@
 @model PageModel<IReadOnlyList<FaqEntry>>
+@{
+    var supportContent = Model.ManagedContent?.Sections.LastOrDefault();
+}
 
 
 <header class="page-hero about-hero">
@@ -12,18 +15,14 @@
                 <i class="breadcrumb-separator bi bi-chevron-left" aria-hidden="true"></i>
                 <span class="breadcrumb-current" aria-current="page">
                     <i class="bi bi-question-circle" aria-hidden="true"></i>
-                    <span>پرسش‌های متداول</span>
+                    <span>@(Model.ManagedContent?.Title ?? "پرسش‌های متداول")</span>
                 </span>
             </span>
         </nav>
-        <h1>پرسش‌های متداول</h1>
-        <p>
-            پاسخ پرسش‌های خرید، پیگیری سفارش و خدمات پس از فروش را اینجا بخوانید.
-        </p>
+        <h1>@(Model.ManagedContent?.Title ?? "پرسش‌های متداول")</h1>
+        <p>@(Model.ManagedContent?.Description ?? "پاسخ پرسش‌های خرید، پیگیری سفارش و خدمات پس از فروش را اینجا بخوانید.")</p>
         <div class="hero-trail">
-            <span>انتخاب</span>
-            <span>سفارش و ارسال</span>
-            <span>خدمات</span>
+            @foreach (var item in (Model.ManagedContent?.Sections ?? []).Take(3).Where(x => !string.IsNullOrWhiteSpace(x.Heading))) { <span>@item.Heading</span> }
         </div>
     </div>
 </header>
@@ -33,7 +32,7 @@
         <header class="faq-list-heading">
             <div>
                 <span class="faq-list-kicker"><i class="bi bi-chat-square-text" aria-hidden="true"></i>پاسخ‌های راهگشا</span>
-                <h2 id="faqListTitle">پرسش‌های پرتکرار</h2>
+        <h2 id="faqListTitle">@(Model.ManagedContent?.Sections.FirstOrDefault()?.Heading ?? "پرسش‌های پرتکرار")</h2>
             </div>
             <span class="faq-count"><i class="bi bi-patch-question" aria-hidden="true"></i>@Model.Data.Count پرسش و پاسخ</span>
         </header>
@@ -69,7 +68,7 @@
             <i class="bi bi-headset" aria-hidden="true"></i>
         </span>
         <span class="faq-contact-copy">
-            <strong>پاسختان را پیدا نکردید؟</strong><small>برای راهنمایی بیشتر با تیم پشتیبانی در تماس باشید.</small>
+            <strong>@(supportContent?.Heading ?? "پاسختان را پیدا نکردید؟")</strong><small>@(supportContent?.Body ?? "برای راهنمایی بیشتر با تیم پشتیبانی در تماس باشید.")</small>
         </span>
         <span class="faq-contact-action">ارتباط با ما <i class="bi bi-arrow-left" aria-hidden="true"></i></span>
     </a>

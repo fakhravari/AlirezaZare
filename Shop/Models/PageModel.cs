@@ -1,6 +1,15 @@
 namespace Shop.Models;
 
-public record PageModel(SeoModel Seo, string? ViewName = null, bool IsHome = false);
+public record PageModel(SeoModel Seo, string? ViewName = null, bool IsHome = false)
+{
+    public string? ContentKey { get; init; }
+    public ManagedPageContent? ManagedContent { get; init; }
+}
+
+public sealed record ManagedPageContent(long Id, string PageKey, string RoutePath, string Title, string Description, bool IsPublished,
+    IReadOnlyList<ManagedPageSection> Sections);
+
+public sealed record ManagedPageSection(long Id, string SectionKey, string? Heading, string? Body, int SortOrder, bool IsPublished);
 
 public sealed record PageModel<TModel>(TModel Data, SeoModel Seo, string? ViewName = null, bool IsHome = false)
     : PageModel(Seo, ViewName, IsHome);

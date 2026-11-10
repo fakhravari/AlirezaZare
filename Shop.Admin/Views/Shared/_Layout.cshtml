@@ -1,9 +1,11 @@
+@{ string cdnBaseUrl = ViewData["MediaCdnBaseUrl"] as string ?? ""; }
 <!doctype html>
 <html lang="fa" dir="rtl">
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <meta name="theme-color" content="#20252b"/>
+    <meta name="media-cdn-base-url" content="@(cdnBaseUrl)"/>
     <title>@ViewData["Title"] - مدیریت فروشگاه</title>
     <link rel="stylesheet" href="~/color_admin/assets/css/vendor.min.css" asp-append-version="true"/>
     <link rel="stylesheet" href="~/color_admin/assets/css/default/app-rtl.min.css" asp-append-version="true"/>

@@ -29,6 +29,8 @@
 | `/legal/returns` | [LegalController](../../Shop/Controllers/LegalController.cs) → [Returns](../../Shop/Views/Legal/Returns.cshtml) | `pages/pages.css` | — | شرایط بازگشت |
 | `/error` و `/Error/{statusCode}` | [ErrorController](../../Shop/Controllers/ErrorController.cs) → [Index](../../Shop/Views/Error/Index.cshtml) | — | — | خطاهای 4xx/5xx صفحهٔ راهنمای بدون ایندکس می‌گیرند و status اصلی حفظ می‌شود |
 
+صفحه‌های درباره، تماس، ارسال، ضمانت، پیگیری و قوانین با `PageController` متن/عنوان/شرح/بخش‌ها را از `Store.ContentPage` می‌خوانند و در [renderer مشترک](../../Shop/Views/Shared/ManagedContentPage.cshtml) نمایش می‌دهند؛ `/faq` همان پرسش‌های دیتابیس را در View اختصاصی نگه می‌دارد و بخش‌های معرفی آن از همین منبع مشترک است. مدیریت و انتشار این صفحه‌ها در `/Store/Features?feature=content` انجام می‌شود و به migrationهای 051 و 052 وابسته است.
+
 ## پنل مدیریت
 
 | مسیر | Controller → View | وضعیت |
@@ -37,7 +39,8 @@
 | `/Admin/Home/Index` | [HomeController](../../Shop.Admin/Areas/Admin/Controllers/HomeController.cs) → [Index](../../Shop.Admin/Areas/Admin/Views/Home/Index.cshtml) | پیشخوان کل و لینک حوزه‌ها |
 | `/Store/Dashboard/Index` | [DashboardController](../../Shop.Admin/Areas/Store/Controllers/DashboardController.cs) → [Index](../../Shop.Admin/Areas/Store/Views/Dashboard/Index.cshtml) | پیشخوان فروشگاه |
 | `/Store/Catalog/Products`، `/Categories`، `/Brands`، `/Attributes` | [CatalogController](../../Shop.Admin/Areas/Store/Controllers/CatalogController.cs) → [Index](../../Shop.Admin/Areas/Store/Views/Catalog/Index.cshtml) | فهرست‌های کاتالوگ از API خوانده می‌شوند |
-| `/Store/Features?feature=...` | [FeaturesController](../../Shop.Admin/Areas/Store/Controllers/FeaturesController.cs) → [Index](../../Shop.Admin/Areas/Store/Views/Features/Index.cshtml) | دامنهٔ سفارش، مشتری، بازخورد و محتوا؛ API مدیریتی هنوز ندارد |
+| `/Store/Features?feature=content` | [FeaturesController](../../Shop.Admin/Areas/Store/Controllers/FeaturesController.cs) → [Faq.cshtml](../../Shop.Admin/Areas/Store/Views/Features/Faq.cshtml) | پرسش‌ها، مقاله‌ها و صفحه‌های خدماتی با API AJAX؛ فقط مدیر کامل |
+| `/Store/Features?feature=...` | [FeaturesController](../../Shop.Admin/Areas/Store/Controllers/FeaturesController.cs) → [Index](../../Shop.Admin/Areas/Store/Views/Features/Index.cshtml) | دامنهٔ سفارش، مشتری و بازخورد |
 | `/Warehouse/Dashboard/Index` | [DashboardController](../../Shop.Admin/Areas/Warehouse/Controllers/DashboardController.cs) → [Index](../../Shop.Admin/Areas/Warehouse/Views/Dashboard/Index.cshtml) | پیشخوان انبار |
 | `/Warehouse/Warehouses` | [WarehousesController](../../Shop.Admin/Areas/Warehouse/Controllers/WarehousesController.cs) → [Index](../../Shop.Admin/Areas/Warehouse/Views/Warehouses/Index.cshtml) | فهرست انبارها از API |
 | `/Warehouse/Stock` | [StockController](../../Shop.Admin/Areas/Warehouse/Controllers/StockController.cs) → [Index](../../Shop.Admin/Areas/Warehouse/Views/Stock/Index.cshtml) | موجودی با فیلتر AJAX |

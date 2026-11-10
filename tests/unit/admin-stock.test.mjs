@@ -17,7 +17,7 @@ test("a stale stock request cannot overwrite current plan options", async () => 
   class FakeOption { constructor(text, value) { this.text = text; this.value = value; } }
   vm.runInNewContext(source, { window, document, URL, AbortController, WeakMap, Promise, FormData: EmptyFormData, Option: FakeOption });
   window.AdminPages.initialize({ querySelectorAll: () => [page] });
-  listeners.click[0]({ target: { closest: key => key === "[data-admin-refresh]" ? refresh : null } });
+  for (const listener of listeners.click) listener({ target: { closest: key => key === "[data-admin-refresh]" ? refresh : null } });
   assert.equal(calls.length, 4);
   calls[2].resolve([]); calls[3].resolve([{ id: "new", name: "جدید" }]);
   await new Promise(resolve => setImmediate(resolve));

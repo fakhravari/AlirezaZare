@@ -1,3 +1,4 @@
+﻿@{ string cdnBaseUrl = ViewData["MediaCdnBaseUrl"] as string ?? ""; }
 <section class="brands-section" id="brands" aria-labelledby="brandsTitle">
 <div class="container">
 <div class="brands-heading">
@@ -9,7 +10,7 @@
 <div class="brand-card-shell">
     <a class="brand-card" href="/search?brand=bosch" aria-label="مشاهده محصولات بوش">
         <span class="brand-logo-frame">
-            <img class="brand-logo-image" src="/content/brands/bosch.svg" alt="لوگوی BOSCH" loading="lazy" decoding="async">
+            <img class="brand-logo-image" src="@(cdnBaseUrl)content/brands/bosch.svg" alt="لوگوی BOSCH" loading="lazy" decoding="async">
         </span>
         <strong>بوش</strong>
     </a>
@@ -20,7 +21,7 @@
 <div class="brand-card-shell">
     <a class="brand-card" href="/search?brand=makita" aria-label="مشاهده محصولات ماکیتا">
         <span class="brand-logo-frame">
-            <img class="brand-logo-image" src="/content/brands/makita.svg" alt="لوگوی MAKITA" loading="lazy" decoding="async">
+            <img class="brand-logo-image" src="@(cdnBaseUrl)content/brands/makita.svg" alt="لوگوی MAKITA" loading="lazy" decoding="async">
         </span>
         <strong>ماکیتا</strong>
     </a>
@@ -31,7 +32,7 @@
 <div class="brand-card-shell">
     <a class="brand-card" href="/search?brand=dewalt" aria-label="مشاهده محصولات دیوالت">
         <span class="brand-logo-frame">
-            <img class="brand-logo-image" src="/content/brands/dewalt.svg" alt="لوگوی DEWALT" loading="lazy" decoding="async">
+            <img class="brand-logo-image" src="@(cdnBaseUrl)content/brands/dewalt.svg" alt="لوگوی DEWALT" loading="lazy" decoding="async">
         </span>
         <strong>دیوالت</strong>
     </a>
@@ -42,7 +43,7 @@
 <div class="brand-card-shell">
     <a class="brand-card" href="/search?brand=ronix" aria-label="مشاهده محصولات رونیکس">
         <span class="brand-logo-frame">
-            <img class="brand-logo-image" src="/content/brands/ronix.png" alt="لوگوی RONIX" loading="lazy" decoding="async">
+            <img class="brand-logo-image" src="@(cdnBaseUrl)content/brands/ronix.png" alt="لوگوی RONIX" loading="lazy" decoding="async">
         </span>
         <strong>رونیکس</strong>
     </a>
@@ -53,7 +54,7 @@
 <div class="brand-card-shell">
     <a class="brand-card" href="/search?brand=tosan" aria-label="مشاهده محصولات توسن">
         <span class="brand-logo-frame">
-            <img class="brand-logo-image" src="/content/brands/tosan.webp" alt="لوگوی TOSAN" loading="lazy" decoding="async">
+            <img class="brand-logo-image" src="@(cdnBaseUrl)content/brands/tosan.webp" alt="لوگوی TOSAN" loading="lazy" decoding="async">
         </span>
         <strong>توسن</strong>
     </a>
@@ -64,7 +65,7 @@
 <div class="brand-card-shell">
     <a class="brand-card" href="/search?brand=uni-t" aria-label="مشاهده محصولات یونی‌تی">
         <span class="brand-logo-frame">
-            <img class="brand-logo-image" src="/content/brands/uni-t.png" alt="لوگوی UNI-T" loading="lazy" decoding="async">
+            <img class="brand-logo-image" src="@(cdnBaseUrl)content/brands/uni-t.png" alt="لوگوی UNI-T" loading="lazy" decoding="async">
         </span>
         <strong>یونی‌تی</strong>
     </a>
@@ -75,7 +76,7 @@
 <div class="brand-card-shell">
     <a class="brand-card" href="/search?brand=fluke" aria-label="مشاهده محصولات فلوک">
         <span class="brand-logo-frame">
-            <img class="brand-logo-image" src="/content/brands/fluke.svg" alt="لوگوی FLUKE" loading="lazy" decoding="async">
+            <img class="brand-logo-image" src="@(cdnBaseUrl)content/brands/fluke.svg" alt="لوگوی FLUKE" loading="lazy" decoding="async">
         </span>
         <strong>فلوک</strong>
     </a>
@@ -86,7 +87,7 @@
 <div class="brand-card-shell">
     <a class="brand-card" href="/search?brand=mastech" aria-label="مشاهده محصولات مستک">
         <span class="brand-logo-frame">
-            <img class="brand-logo-image" src="/content/brands/mastech.png" alt="لوگوی MASTECH" loading="lazy" decoding="async">
+            <img class="brand-logo-image" src="@(cdnBaseUrl)content/brands/mastech.png" alt="لوگوی MASTECH" loading="lazy" decoding="async">
         </span>
         <strong>مستک</strong>
     </a>
@@ -97,7 +98,7 @@
 <div class="brand-card-shell">
     <a class="brand-card" href="/search?brand=kyoritsu" aria-label="مشاهده محصولات کیوریتسو">
         <span class="brand-logo-frame">
-            <img class="brand-logo-image" src="/content/brands/kyoritsu.png" alt="لوگوی KYORITSU" loading="lazy" decoding="async">
+            <img class="brand-logo-image" src="@(cdnBaseUrl)content/brands/kyoritsu.png" alt="لوگوی KYORITSU" loading="lazy" decoding="async">
         </span>
         <strong>کیوریتسو</strong>
     </a>
@@ -108,7 +109,7 @@
 <div class="brand-card-shell">
     <a class="brand-card" href="/search?brand=yihua" aria-label="مشاهده محصولات یوهوا">
         <span class="brand-logo-frame">
-            <img class="brand-logo-image" src="/content/brands/yihua.png" alt="لوگوی YIHUA" loading="lazy" decoding="async">
+            <img class="brand-logo-image" src="@(cdnBaseUrl)content/brands/yihua.png" alt="لوگوی YIHUA" loading="lazy" decoding="async">
         </span>
         <strong>یوهوا</strong>
     </a>
@@ -119,7 +120,7 @@
 <div class="brand-card-shell">
     <a class="brand-card" href="/search?brand=hakko" aria-label="مشاهده محصولات هاکو">
         <span class="brand-logo-frame">
-            <img class="brand-logo-image" src="/content/brands/hakko.png" alt="لوگوی HAKKO" loading="lazy" decoding="async">
+            <img class="brand-logo-image" src="@(cdnBaseUrl)content/brands/hakko.png" alt="لوگوی HAKKO" loading="lazy" decoding="async">
         </span>
         <strong>هاکو</strong>
     </a>
@@ -130,7 +131,7 @@
 <div class="brand-card-shell">
     <a class="brand-card" href="/search?brand=weller" aria-label="مشاهده محصولات ولر">
         <span class="brand-logo-frame">
-            <img class="brand-logo-image" src="/content/brands/weller.svg" alt="لوگوی WELLER" loading="lazy" decoding="async">
+            <img class="brand-logo-image" src="@(cdnBaseUrl)content/brands/weller.svg" alt="لوگوی WELLER" loading="lazy" decoding="async">
         </span>
         <strong>ولر</strong>
     </a>
@@ -141,7 +142,7 @@
 <div class="brand-card-shell">
     <a class="brand-card" href="/search?brand=philips" aria-label="مشاهده محصولات فیلیپس">
         <span class="brand-logo-frame">
-            <img class="brand-logo-image" src="/content/brands/philips.svg" alt="لوگوی PHILIPS" loading="lazy" decoding="async">
+            <img class="brand-logo-image" src="@(cdnBaseUrl)content/brands/philips.svg" alt="لوگوی PHILIPS" loading="lazy" decoding="async">
         </span>
         <strong>فیلیپس</strong>
     </a>
@@ -152,7 +153,7 @@
 <div class="brand-card-shell">
     <a class="brand-card" href="/search?brand=wiha" aria-label="مشاهده محصولات وایها">
         <span class="brand-logo-frame">
-            <img class="brand-logo-image" src="/content/brands/wiha.svg" alt="لوگوی WIHA" loading="lazy" decoding="async">
+            <img class="brand-logo-image" src="@(cdnBaseUrl)content/brands/wiha.svg" alt="لوگوی WIHA" loading="lazy" decoding="async">
         </span>
         <strong>وایها</strong>
     </a>

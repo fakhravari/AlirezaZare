@@ -189,7 +189,14 @@
         form.elements.endsAtUtc.value = utcValue(plan?.endsAtUtc);
         form.elements.label.value = plan?.label || "";
         form.elements.showCountdown.checked = !!plan?.showCountdown;
+        form.elements.code.value = plan?.code || "";
+        form.elements.displayName.value = plan?.displayName || "";
+        form.elements.planType.value = plan?.planType || "";
         for (const name of ["startsAtUtc", "endsAtUtc", "showCountdown"]) form.elements[name].disabled = !plan || plan.isRegular;
+        for (const name of ["code", "displayName", "planType"]) form.elements[name].disabled = !plan || plan.isRegular;
+        for (const selector of ["[data-plan-details-save]", "[data-plan-delete]"]) form.querySelector(selector).disabled = !plan || plan.isRegular;
+        form.querySelector("[data-plan-publish]").disabled = !plan || plan.isRegular || plan.isActive;
+        form.querySelector("[data-plan-unpublish]").disabled = !plan || plan.isRegular || !plan.isActive;
     }
     function initialize(root) {
         const page = root.querySelector?.("[data-store-variant-prices]"); if (!page || initialized.has(page)) return; initialized.add(page);
@@ -217,7 +224,28 @@
         }
         const planForm = page.querySelector("[data-plan-settings]");
         if (planForm) {
+            const refreshPlans = selected => loadPlanSettings(page, selected);
+            page.querySelector("[data-plan-create]").addEventListener("submit", async event => {
+                event.preventDefault(); const form = event.currentTarget, button = form.querySelector('[type="submit"]'); button.disabled = true;
+                try { const result = await request(page, `${page.dataset.api}/plans`, "POST", Object.fromEntries(new FormData(form))); ui.notify(result.message, "success"); form.reset(); await refreshPlans(String(result.id)); }
+                catch (error) { ui.notify(error.message || "ساخت طرح ناموفق بود.", "danger"); } finally { button.disabled = false; }
+            });
             planForm.elements.id.addEventListener("change", () => showPlanSettings(page));
+            planForm.querySelector("[data-plan-details-save]").addEventListener("click", async event => {
+                const button = event.currentTarget, id = planForm.elements.id.value; button.disabled = true;
+                try { const result = await request(page, `${page.dataset.api}/plans/${encodeURIComponent(id)}/details`, "PUT", { code: planForm.elements.code.value, displayName: planForm.elements.displayName.value, planType: planForm.elements.planType.value }); ui.notify(result.message, "success"); await refreshPlans(id); }
+                catch (error) { ui.notify(error.message || "ذخیرهٔ مشخصات ناموفق بود.", "danger"); } finally { button.disabled = false; }
+            });
+            for (const [selector, active] of [["[data-plan-publish]", true], ["[data-plan-unpublish]", false]]) planForm.querySelector(selector).addEventListener("click", async event => {
+                const button = event.currentTarget, id = planForm.elements.id.value; button.disabled = true;
+                try { const result = await request(page, `${page.dataset.api}/plans/${encodeURIComponent(id)}/publication`, "PUT", { isActive: active }); ui.notify(result.message, "success"); await refreshPlans(id); }
+                catch (error) { ui.notify(error.message || "تغییر وضعیت طرح ناموفق بود.", "danger"); } finally { button.disabled = false; }
+            });
+            planForm.querySelector("[data-plan-delete]").addEventListener("click", async event => {
+                const button = event.currentTarget, id = planForm.elements.id.value; if (!id || !window.confirm("طرح بدون سابقه حذف شود؟")) return; button.disabled = true;
+                try { const result = await request(page, `${page.dataset.api}/plans/${encodeURIComponent(id)}`, "DELETE"); ui.notify(result.message, "success"); await refreshPlans(); }
+                catch (error) { ui.notify(error.message || "حذف طرح ناموفق بود.", "danger"); } finally { button.disabled = false; }
+            });
             planForm.addEventListener("submit", async event => {
                 event.preventDefault();
                 const button = planForm.querySelector('[type="submit"]');

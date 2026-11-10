@@ -1,7 +1,8 @@
-@inject Shop.Services.ICatalogSource StoreCatalog
+﻿@inject Shop.Services.ICatalogSource StoreCatalog
 @inject Shop.Services.ISalesPlanSource SalesPlans
 @inject Microsoft.Extensions.Options.IOptions<Shop.Models.SiteIdentityOptions> SiteIdentityOptions
 @{
+    string cdnBaseUrl = ViewData["MediaCdnBaseUrl"] as string ?? "";
     var identity = SiteIdentityOptions.Value;
     var panelCatalog = await StoreCatalog.ReadAsync(Context.RequestAborted);
     var salesPlanCatalog = await SalesPlans.ReadAsync(Context.RequestAborted);
@@ -21,7 +22,7 @@
     aria-label="منوی اصلی موبایل">
 <div class="offcanvas-header">
     <a class="brand mobile-menu-logo" asp-controller="Home" asp-action="Index" aria-label="برق شیراز؛ مرجع تخصصی ابزار و تجهیزات برقی؛ رفتن به صفحهٔ اصلی">
-        <img class="mobile-menu-logo-image" src="~/content/identity/store-electrical-lockup.svg" alt="" width="360" height="120" decoding="async" asp-append-version="true"/>
+        <img class="mobile-menu-logo-image" src="@(cdnBaseUrl)content/identity/store-electrical-lockup.svg" alt="" width="360" height="120" decoding="async"/>
     </a>
     <button
         type="button"
@@ -374,7 +375,7 @@
                         >
                         <span class="viewer-shine">
                         </span
-                        ><img id="quickViewImage" src="~/content/products/images/card/cordless-hammer-drill-hn-001-row-001-card-800.jpg" alt=""/>
+                        ><img id="quickViewImage" src="@(cdnBaseUrl)content/products/images/card/cordless-hammer-drill-hn-001-row-001-card-800.jpg" alt=""/>
                         <div class="viewer-tools">
                             <button type="button" id="viewerRotate">
                                 <i class="bi bi-arrow-repeat"></i> چرخش تصویر

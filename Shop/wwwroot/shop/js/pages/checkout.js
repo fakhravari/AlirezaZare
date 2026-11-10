@@ -1,5 +1,6 @@
-window.HNUI.ready(() => window.HNUI.mount("checkout", document, () => {
+﻿window.HNUI.ready(() => window.HNUI.mount("checkout", document, () => {
     const ui = window.HNUI;
+    const mediaCdnBaseUrl = document.querySelector('meta[name="media-cdn-base-url"]')?.content || "";
     const addressKey = "hn-delivery-addresses";
     const selectedKey = "hn-selected-address";
     const paymentMethodKey = "hn-payment-method-v2";
@@ -142,7 +143,7 @@ window.HNUI.ready(() => window.HNUI.mount("checkout", document, () => {
             if (selectedPaymentMethod) {
                 const logo = document.createElement("img");
                 logo.className = "checkout-payment-logo";
-                logo.src = "/content/payments/zarinpal.svg";
+                logo.src = `${mediaCdnBaseUrl}content/payments/zarinpal.svg`;
                 logo.alt = "نشان زرین‌پال";
                 logo.width = 48;
                 logo.height = 48;

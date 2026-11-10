@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using System.Net.Mail;
 using Shop.Database.Infrastructure.Persistence;
 
 namespace Shop.Admin.Controllers.Api;
@@ -56,27 +58,84 @@ public sealed class StoreCustomersAdminApiController(ShopDbContext db) : Control
         return customer is null ? NotFound() : Ok(customer);
     }
 
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Create([FromBody] CustomerCreate input, CancellationToken cancellationToken)
+    {
+        if (!TryNormalizeEmail(input.Email, out var email)) return BadRequest(new { title = "ایمیل معتبر وارد کنید." });
+        string firstName = input.FirstName?.Trim() ?? "", lastName = input.LastName?.Trim() ?? "";
+        string? phone = NormalizePhone(input.Phone);
+        if (!ValidName(firstName) || !ValidName(lastName) || (phone?.Length ?? 0) > 30)
+            return BadRequest(new { title = "نام، نام خانوادگی یا تلفن معتبر نیست." });
+        if (await db.AccountProfiles.AnyAsync(x => x.Email == email, cancellationToken))
+            return Conflict(new { title = "این ایمیل از قبل برای مشتری دیگری ثبت شده است." });
+        var profile = new Shop.Database.Domain.Account.Entities.AccountProfile
+        {
+            Email = email, FirstName = firstName, LastName = lastName, Phone = phone,
+            CreatedAtUtc = DateTime.UtcNow
+        };
+        db.AccountProfiles.Add(profile);
+        try { await db.SaveChangesAsync(cancellationToken); }
+        catch (DbUpdateException exception) when (exception.InnerException is SqlException { Number: 2601 or 2627 })
+        { return Conflict(new { title = "این ایمیل از قبل برای مشتری دیگری ثبت شده است." }); }
+        return Ok(new { id = profile.Id, message = "مشتری ساخته شد؛ ورود او با کد یک‌بارمصرف ایمیل انجام می‌شود." });
+    }
+
     [HttpPut("{id:long}")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Update(long id, [FromBody] CustomerUpdate input, CancellationToken cancellationToken)
     {
+        if (!TryNormalizeEmail(input.Email, out var email) || input.ExpectedEmail is null || input.ExpectedEmail.Length > 254)
+            return BadRequest(new { title = "ایمیل معتبر نیست یا نسخهٔ مبنا ارسال نشده است." });
         string firstName = input.FirstName?.Trim() ?? "", lastName = input.LastName?.Trim() ?? "";
-        string? phone = string.IsNullOrWhiteSpace(input.Phone) ? null : input.Phone.Trim();
-        if (id <= 0 || firstName.Length is < 1 or > 100 || lastName.Length is < 1 or > 100 ||
-            (phone?.Length ?? 0) > 30 || input.ExpectedFirstName is null || input.ExpectedLastName is null ||
-            input.ExpectedFirstName.Length > 100 || input.ExpectedLastName.Length > 100 || (input.ExpectedPhone?.Length ?? 0) > 30)
+        string? phone = NormalizePhone(input.Phone);
+        if (id <= 0 || !ValidName(firstName) || !ValidName(lastName) || (phone?.Length ?? 0) > 30 ||
+            input.ExpectedFirstName is null || input.ExpectedLastName is null || input.ExpectedFirstName.Length > 100 ||
+            input.ExpectedLastName.Length > 100 || (input.ExpectedPhone?.Length ?? 0) > 30)
             return BadRequest(new { title = "نام، نام خانوادگی یا تلفن معتبر نیست." });
-        int changed = await db.Database.ExecuteSqlInterpolatedAsync($"""
-            UPDATE [Account].[Profile] SET [FirstName] = {firstName}, [LastName] = {lastName}, [Phone] = {phone}, [UpdatedAtUtc] = SYSUTCDATETIME()
-            WHERE [Id] = {id} AND [FirstName] = {input.ExpectedFirstName} AND [LastName] = {input.ExpectedLastName}
-                AND ([Phone] = {input.ExpectedPhone} OR ([Phone] IS NULL AND {input.ExpectedPhone} IS NULL))
-            """, cancellationToken);
-        return changed == 0 ? Conflict(new { title = "اطلاعات مشتری تغییر کرده یا مشتری پیدا نشد؛ فهرست را دوباره بارگذاری کنید." })
-            : Ok(new { message = "اطلاعات مشتری ذخیره شد." });
+        if (await db.AccountProfiles.AnyAsync(x => x.Id != id && x.Email == email, cancellationToken))
+            return Conflict(new { title = "این ایمیل از قبل برای مشتری دیگری ثبت شده است." });
+        try
+        {
+            int changed = await db.AccountProfiles.Where(x => x.Id == id && x.Email == input.ExpectedEmail &&
+                    x.FirstName == input.ExpectedFirstName && x.LastName == input.ExpectedLastName && x.Phone == input.ExpectedPhone)
+                .ExecuteUpdateAsync(update => update.SetProperty(x => x.Email, email)
+                    .SetProperty(x => x.FirstName, firstName).SetProperty(x => x.LastName, lastName)
+                    .SetProperty(x => x.Phone, phone).SetProperty(x => x.UpdatedAtUtc, DateTime.UtcNow), cancellationToken);
+            return changed == 0 ? Conflict(new { title = "اطلاعات مشتری تغییر کرده یا مشتری پیدا نشد؛ فهرست را دوباره بارگذاری کنید." })
+                : Ok(new { message = "اطلاعات مشتری ذخیره شد." });
+        }
+        catch (SqlException exception) when (exception.Number is 2601 or 2627)
+        { return Conflict(new { title = "این ایمیل از قبل برای مشتری دیگری ثبت شده است." }); }
     }
 
-    public sealed record CustomerUpdate(string? FirstName, string? LastName, string? Phone,
-        string? ExpectedFirstName, string? ExpectedLastName, string? ExpectedPhone);
+    [HttpDelete("{id:long}")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Delete(long id, CancellationToken cancellationToken)
+    {
+        if (id <= 0) return NotFound();
+        if (!await db.AccountProfiles.AnyAsync(x => x.Id == id, cancellationToken)) return NotFound();
+        bool hasOrders = await db.Set<Shop.Database.Domain.Account.Entities.AccountCustomerOrderReference>().AnyAsync(x => x.IdProfile == id, cancellationToken)
+            || await db.Set<Shop.Database.Domain.Account.Entities.StoreCustomerOrderReference>().AnyAsync(x => x.IdProfile == id, cancellationToken);
+        bool hasCart = await db.Set<Shop.Database.Domain.Account.Entities.AccountCartReference>().AnyAsync(x => x.IdProfile == id, cancellationToken);
+        if (hasOrders || hasCart)
+            return Conflict(new { title = "مشتری دارای سفارش یا سبد خرید است؛ برای حفظ سابقه، حذف ممکن نیست." });
+        await db.AccountProfiles.Where(x => x.Id == id).ExecuteDeleteAsync(cancellationToken);
+        return Ok(new { message = "پروفایل مشتری حذف شد؛ داده‌های وابستهٔ حساب طبق روابط پایگاه پاک شدند." });
+    }
+
+    private static bool ValidName(string value) => value.Length is >= 1 and <= 100;
+    private static string? NormalizePhone(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+    private static bool TryNormalizeEmail(string? value, out string email)
+    {
+        email = (value ?? "").Trim().ToLowerInvariant();
+        try { return email.Length <= 254 && new MailAddress(email).Address.Equals(email, StringComparison.OrdinalIgnoreCase); }
+        catch (FormatException) { return false; }
+    }
+
+    public sealed record CustomerCreate(string? Email, string? FirstName, string? LastName, string? Phone);
+    public sealed record CustomerUpdate(string? Email, string? FirstName, string? LastName, string? Phone,
+        string? ExpectedEmail, string? ExpectedFirstName, string? ExpectedLastName, string? ExpectedPhone);
 
     public class CustomerRow
     {

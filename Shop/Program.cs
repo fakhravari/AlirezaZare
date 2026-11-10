@@ -4,7 +4,8 @@ using System.Threading.RateLimiting;
 using Shop.Database.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddControllersWithViews();
+builder.Services.AddScoped<Shop.Filters.MediaCdnViewDataFilter>();
+builder.Services.AddControllersWithViews(options => options.Filters.AddService<Shop.Filters.MediaCdnViewDataFilter>());
 builder.Services.AddAntiforgery(options => options.HeaderName = "RequestVerificationToken");
 builder.Services.AddAuthorization();
 builder.Services.AddAuthentication("ShopCookie").AddCookie("ShopCookie", options =>

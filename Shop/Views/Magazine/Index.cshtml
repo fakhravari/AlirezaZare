@@ -75,7 +75,7 @@
                     <article class="journal-post" data-branch="@post.Branch" data-topic="@post.Topic" data-area="@post.Area">
                         <a asp-controller="Magazine" asp-action="Details" asp-route-slug="@post.Slug">
                             <div class="journal-post-image">
-                                <img src="@Url.Content("~/" + post.Image)" alt="@post.Title" loading="lazy"/>
+                                <img src="post.Image" alt="@post.Title" loading="lazy"/>
                                 <span class="journal-kicker">@post.Category</span>
                             </div>
                             <div class="journal-post-copy">

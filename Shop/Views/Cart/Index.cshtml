@@ -1,6 +1,7 @@
-@model PageModel
+﻿@model PageModel
 
 
+@{ string cdnBaseUrl = ViewData["MediaCdnBaseUrl"] as string ?? ""; }
 <header class="page-hero cart-page-hero">
     <div class="container">
         <nav class="cart-breadcrumb" aria-label="مسیر صفحه">
@@ -59,7 +60,7 @@
             <label class="payment-method">
                 <input type="radio" name="paymentMethod" value="zarinpal" checked required>
                 <span class="payment-method-icon">
-                    <img src="~/content/payments/zarinpal.svg" asp-append-version="true" alt="" width="42" height="42" loading="lazy">
+                    <img src="@(cdnBaseUrl)content/payments/zarinpal.svg" alt="" width="42" height="42" loading="lazy">
                 </span>
                 <span>
                     <strong>زرین‌پال</strong><small>درگاه پرداخت هنوز فعال نیست</small>
@@ -69,7 +70,7 @@
             <label class="payment-method is-disabled" aria-disabled="true">
                 <input type="radio" name="paymentMethod" value="snappay" disabled>
                 <span class="payment-method-icon">
-                    <img src="~/content/payments/snappay.svg" asp-append-version="true" alt="" width="42" height="42" loading="lazy">
+                    <img src="@(cdnBaseUrl)content/payments/snappay.svg" alt="" width="42" height="42" loading="lazy">
                 </span>
                 <span>
                     <strong>اسنپ‌پی</strong><small>به‌زودی فعال می‌شود</small>

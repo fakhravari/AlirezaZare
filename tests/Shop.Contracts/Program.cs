@@ -3,11 +3,27 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Shop.Controllers;
+using Shop.Database.Application.Store;
 using Shop.Models;
 using Shop.Services;
 using Microsoft.EntityFrameworkCore;
 using Shop.Database.Domain.Warehouse.Entities;
 using Shop.Database.Infrastructure.Persistence;
+
+if (args.Contains("--service-pages-main", StringComparer.Ordinal))
+{
+    await ServicePagesMainVerification.RunAsync(Environment.GetEnvironmentVariable("SHOP_CATALOG_MAIN_CONNECTION")
+        ?? throw new InvalidOperationException("SHOP_CATALOG_MAIN_CONNECTION is required for the service-page verification."));
+    return;
+}
+
+string FindFixture(string name)
+{
+    string outputFixture = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../fixtures", name));
+    if (File.Exists(outputFixture)) return outputFixture;
+    string workspaceFixture = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "tests", "fixtures", name));
+    return File.Exists(workspaceFixture) ? workspaceFixture : throw new FileNotFoundException($"Contract fixture '{name}' was not found.");
+}
 
 if (args.Contains("--payment-flow", StringComparer.Ordinal))
 {
@@ -87,7 +103,7 @@ Console.WriteLine("Payment contracts OK: unconfigured gateway fails closed and v
 
 string sourcePath = args.Length > 0
     ? Path.GetFullPath(args[0])
-    : Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../fixtures/catalog.json"));
+    : FindFixture("catalog.json");
 string source = File.ReadAllText(sourcePath);
 CatalogSnapshot snapshot = CatalogSnapshot.Parse(source);
 var withoutFlag = JsonNode.Parse(source)!;
@@ -159,7 +175,24 @@ if (safe.BrowserJson.Contains("<script", StringComparison.OrdinalIgnoreCase) ||
 Console.WriteLine(
     $"C# catalog contracts OK: {rejected} invalid catalogs rejected; canonical identity and safe JSON verified.");
 
-string accountPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../fixtures/account-demo.json"));
+if (ContentCdn.ToUrl("content/products/images/main/item.webp", MediaCdnOptions.DefaultBaseUrl) != "https://cdn.bs-shop.ir/content/products/images/main/item.webp" ||
+    ContentCdn.ToUrl("/content/brands/item.svg", MediaCdnOptions.DefaultBaseUrl) != "https://cdn.bs-shop.ir/content/brands/item.svg" ||
+    ContentCdn.ToUrl("https://cdn.bs-shop.ir/content/brands/item.svg", MediaCdnOptions.DefaultBaseUrl) != "https://cdn.bs-shop.ir/content/brands/item.svg" ||
+    ContentCdn.ToUrl("https://images.example.test/item.svg", MediaCdnOptions.DefaultBaseUrl) != "https://images.example.test/item.svg")
+    throw new Exception("Content CDN URL conversion is incorrect.");
+JsonNode rewrittenMedia = JsonNode.Parse(ContentCdn.RewriteJson("{\"image\":\"content/products/item.webp\",\"name\":\"content-aware\"}", MediaCdnOptions.DefaultBaseUrl)!)!;
+if (rewrittenMedia["image"]?.GetValue<string>() != "https://cdn.bs-shop.ir/content/products/item.webp" ||
+    rewrittenMedia["name"]?.GetValue<string>() != "content-aware")
+    throw new Exception("Content CDN JSON rewriting changed the wrong values.");
+if (ContentCdn.ToUrl("content/products/item.webp", "https://assets.example.test") != "https://assets.example.test/content/products/item.webp" ||
+    MediaCdnOptions.NormalizeBaseUrl("https://assets.example.test") != "https://assets.example.test/")
+    throw new Exception("Configured media CDN base URL was not applied or normalized.");
+JsonNode customMedia = JsonNode.Parse(ContentCdn.RewriteJson("{\"image\":\"content/products/item.webp\"}", "https://assets.example.test/")!)!;
+if (customMedia["image"]?.GetValue<string>() != "https://assets.example.test/content/products/item.webp")
+    throw new Exception("Runtime dataset rewriting ignored the configured media CDN base.");
+Console.WriteLine("Content CDN contracts OK: relative paths rewrite, external URLs stay unchanged.");
+
+string accountPath = FindFixture("account-demo.json");
 string accountSource = File.ReadAllText(accountPath);
 var account = Shop.Models.AccountData.Parse(accountSource);
 if (account.Orders.Count != 10 || account.Coupons.Count != 10)

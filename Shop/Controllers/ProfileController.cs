@@ -10,37 +10,37 @@ public sealed class ProfileController(Shop.Services.IAccountDataSource accountDa
     public IActionResult LegacyAccount() => RedirectToAction(nameof(Index));
 
     [HttpGet("")]
-    public Task<ViewResult> Index() => ProfilePage("profile", "پروفایل من",
+    public Task<IActionResult> Index() => ProfilePage("profile", "پروفایل من",
         "جزئیات پروفایل، نشانی‌ها و کالاهای ذخیره‌شده را مدیریت کنید.", "bi-person");
 
     [HttpGet("Edit")]
     public IActionResult Edit() => RedirectToAction(nameof(Index));
 
     [HttpGet("Orders")]
-    public Task<ViewResult> Orders() => ProfilePage("orders", "سفارش‌های من",
+    public Task<IActionResult> Orders() => ProfilePage("orders", "سفارش‌های من",
         "وضعیت سفارش‌ها و سوابق خریدتان را یک‌جا دنبال کنید.", "bi-bag-check");
 
     [HttpGet("Addresses")]
-    public Task<ViewResult> Addresses() => ProfilePage("addresses", "آدرس‌های من",
+    public Task<IActionResult> Addresses() => ProfilePage("addresses", "آدرس‌های من",
         "نشانی‌های تحویل را مدیریت کنید تا خرید بعدی ساده‌تر باشد.", "bi-geo-alt");
 
     [HttpGet("Favorites")]
-    public Task<ViewResult> Favorites() => ProfilePage("favorites", "علاقه‌مندی‌ها",
+    public Task<IActionResult> Favorites() => ProfilePage("favorites", "علاقه‌مندی‌ها",
         "محصول‌های ذخیره‌شده را مرور کنید و برای خرید مقایسه‌شان کنید.", "bi-heart");
 
     [HttpGet("Coupons")]
-    public Task<ViewResult> Coupons() => ProfilePage("coupons", "کدهای تخفیف من",
+    public Task<IActionResult> Coupons() => ProfilePage("coupons", "کدهای تخفیف من",
         "وضعیت کدها، تعداد استفاده و فاکتورهای مرتبط را ببینید.", "bi-ticket-perforated");
 
     [HttpGet("PriceAlerts")]
-    public Task<ViewResult> PriceAlerts() => ProfilePage("pricealerts", "به من اطلاع بده",
+    public Task<IActionResult> PriceAlerts() => ProfilePage("pricealerts", "به من اطلاع بده",
         "پیگیری‌های قیمت و موجودی کالاهای منتخب را مدیریت کنید.", "bi-bell");
 
     [HttpGet("Messages")]
-    public Task<ViewResult> Messages() => ProfilePage("messages", "پیام‌ها",
+    public Task<IActionResult> Messages() => ProfilePage("messages", "پیام‌ها",
         "پیام‌ها و اطلاعیه‌های ارسال‌شده از طرف فروشگاه را بخوانید.", "bi-envelope");
 
-    private async Task<ViewResult> ProfilePage(string section, string title, string description, string icon)
+    private async Task<IActionResult> ProfilePage(string section, string title, string description, string icon)
     {
         var account = await accountDataSource.ReadAsync(HttpContext.RequestAborted);
         var ordersById = account.Orders.ToDictionary(order => order.Id, StringComparer.Ordinal);

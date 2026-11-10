@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Shop.Admin.Services;
+using Shop.Database.Application.Store;
+using Shop.Database.Application.Store.Contracts;
 using Shop.Database.Infrastructure.Persistence;
 
 namespace Shop.Admin.Controllers.Api;
@@ -12,7 +14,7 @@ namespace Shop.Admin.Controllers.Api;
 [ApiController]
 [Authorize(Roles = "system.full-access")]
 [Route("api/admin/store/media")]
-public sealed class StoreMediaUploadApiController(ShopDbContext db, FtpMediaStorage storage, ILogger<StoreMediaUploadApiController> logger) : ControllerBase
+public sealed class StoreMediaUploadApiController(ShopDbContext db, FtpMediaStorage storage, IMediaCdnBaseUrlProvider mediaCdn, ILogger<StoreMediaUploadApiController> logger) : ControllerBase
 {
     private static readonly IReadOnlyDictionary<string, (string Folder, uint Size)> ImageFolders =
         new Dictionary<string, (string, uint)>(StringComparer.Ordinal)
@@ -176,7 +178,15 @@ public sealed class StoreMediaUploadApiController(ShopDbContext db, FtpMediaStor
                     }
                 }
             }
-            return Ok(new { message = document || video ? "فایل بارگذاری و به کالا متصل شد." : kind == "country" ? "تصویر کشور ذخیره شد." : kind == "article" ? "تصویر مقاله ذخیره شد." : !string.IsNullOrEmpty(brandKey) ? "نشان برند ذخیره شد." : "فایل بارگذاری شد.", path, thumbnail });
+            string cdnBaseUrl = await mediaCdn.GetBaseUrlAsync(cancellationToken);
+            return Ok(new
+            {
+                message = document || video ? "فایل بارگذاری و به کالا متصل شد." : kind == "country" ? "تصویر کشور ذخیره شد." : kind == "article" ? "تصویر مقاله ذخیره شد." : !string.IsNullOrEmpty(brandKey) ? "نشان برند ذخیره شد." : "فایل بارگذاری شد.",
+                path,
+                url = ContentCdn.ToUrl(path, cdnBaseUrl),
+                thumbnail,
+                thumbnailUrl = ContentCdn.ToUrl(thumbnail, cdnBaseUrl)
+            });
         }
         catch (Exception exception)
         {

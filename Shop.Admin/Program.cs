@@ -5,11 +5,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using System.Threading.RateLimiting;
 using Shop.Admin.Security;
+using Shop.Admin.Filters;
 using Shop.Database.Domain.Admin.Entities;
 using Shop.Database.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddControllersWithViews();
+builder.Services.AddScoped<MediaCdnViewDataFilter>();
+builder.Services.AddControllersWithViews(options => options.Filters.AddService<MediaCdnViewDataFilter>());
 builder.Services.AddAuthentication("AdminCookie")
     .AddCookie("AdminCookie", options =>
     {

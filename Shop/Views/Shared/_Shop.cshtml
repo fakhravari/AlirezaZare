@@ -1,6 +1,7 @@
-@model PageModel
+﻿@model PageModel
 @inject Microsoft.Extensions.Options.IOptions<Shop.Models.ApiClientOptions> ApiClientOptions
 @{
+    string cdnBaseUrl = ViewData["MediaCdnBaseUrl"] as string ?? "";
     string pageController = ViewContext.RouteData.Values["controller"]?.ToString()?.ToLowerInvariant() ?? "home";
     string pageAction = ViewContext.RouteData.Values["action"]?.ToString()?.ToLowerInvariant() ?? "index";
     string mobilePageClass = $"mobile-page--{pageController}-{pageAction}";
@@ -12,8 +13,9 @@
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <meta name="theme-color" content="#102a43"/>
+    <meta name="media-cdn-base-url" content="@(cdnBaseUrl)"/>
     <meta name="api-base-url" content="@Url.Content(apiClient.BasePath)" data-timeout-ms="@apiClient.TimeoutMilliseconds"/>
-    <link rel="icon" type="image/svg+xml" href="~/content/identity/store-mark.svg" asp-append-version="true"/>
+    <link rel="icon" type="image/svg+xml" href="@(cdnBaseUrl)content/identity/store-mark.svg"/>
     <partial name="_SeoMetadata" model="Model"/>
     <base href="@Url.Content("~/")"/>
     <title>@Model.Seo.Title</title>

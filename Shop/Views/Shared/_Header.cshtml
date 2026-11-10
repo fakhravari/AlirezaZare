@@ -1,6 +1,7 @@
-@inject Shop.Services.ICatalogSource StoreCatalog
+﻿@inject Shop.Services.ICatalogSource StoreCatalog
 @inject Shop.Services.ISalesPlanSource SalesPlans
 @{
+    string cdnBaseUrl = ViewData["MediaCdnBaseUrl"] as string ?? "";
     var headerCatalog = await StoreCatalog.ReadAsync(Context.RequestAborted);
     var salesPlanCatalog = await SalesPlans.ReadAsync(Context.RequestAborted);
     var nowUtc = DateTimeOffset.UtcNow;
@@ -43,7 +44,7 @@
     <i class="bi bi-list"></i>
 </button>
 <a class="navbar-brand brand header-home-link header-brand-lockup" asp-controller="Home" asp-action="Index" aria-label="@identity.VisualBrandName؛ مرجع تخصصی ابزار و تجهیزات برقی" title="رفتن به صفحهٔ اصلی">
-    <img class="header-brand-image" src="~/content/identity/store-electrical-header.svg" alt="" width="192" height="64" decoding="async" asp-append-version="true"/>
+    <img class="header-brand-image" src="@(cdnBaseUrl)content/identity/store-electrical-header.svg" alt="" width="192" height="64" decoding="async"/>
 </a>
 <div class="home-nav-groups">
 <div class="home-nav-menu-group">
@@ -129,7 +130,7 @@
                                 @if (!string.IsNullOrWhiteSpace(brand.LogoFile))
                                 {
                                     <span class="brand-menu-logo-frame">
-                                        <img class="brand-menu-logo" src="@Url.Content($"~/content/brands/{brand.LogoFile}")" alt="" width="52" height="38" decoding="async"/>
+                                        <img class="brand-menu-logo" src="@(cdnBaseUrl)content/brands/@brand.LogoFile" alt="" width="52" height="38" decoding="async"/>
                                     </span>
                                 }
                                 else

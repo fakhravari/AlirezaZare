@@ -9,6 +9,7 @@
             "Shop.Admin/Views/Shared/_Layout.cshtml",
             "Shop.Admin/Views/Shared/_AdminSidebar.cshtml",
             "Shop.Admin/Areas/Store/Views/Catalog/Index.cshtml",
+            "Shop.Admin/Areas/Store/Views/Features/Faq.cshtml",
             "Shop.Admin/Areas/Store/Controllers/CatalogController.cs"
           ],
           "js": [
@@ -26,9 +27,12 @@
             "Shop.Admin/Controllers/Api/StoreOrdersAdminApiController.cs",
             "Shop.Admin/Controllers/Api/StoreCustomersAdminApiController.cs",
             "Shop.Admin/Controllers/Api/StoreFaqAdminApiController.cs",
+            "Shop.Admin/Controllers/Api/StoreMagazineAdminApiController.cs",
+            "Shop.Admin/Controllers/Api/StoreServicePagesAdminApiController.cs",
             "Shop.Admin/Controllers/Api/StoreCategoryContentApiController.cs",
             "Shop.Admin/Controllers/Api/WarehouseAdminApiController.cs",
             "Shop.Data/Domain/Store/Entities/StoreAttributeDefinition.cs",
+            "Shop.Data/Domain/Store/Entities/MagazineArticle.cs",
             "Shop.Data/Domain/Store/Entities/StoreProductMedia.cs",
             "Shop.Data/Domain/Store/Entities/StoreBrand.cs",
             "Shop.Data/Domain/Store/Entities/StoreCategory.cs",
@@ -408,7 +412,24 @@
           ],
           "data": [
             "Shop.Data/Application/Store/Contracts/IStoreRuntimeDatasetRepository.cs",
-            "Shop.Data/Infrastructure/Persistence/Repositories/StoreRuntimeDatasetRepository.cs"
+            "Shop.Data/Infrastructure/Persistence/Repositories/StoreRuntimeDatasetRepository.cs",
+            "Shop.Data/Domain/Account/Entities/AccountArticleInteraction.cs"
+          ]
+        },
+        "service-page-content": {
+          "markup": [
+            "Shop/Views/Shared/ManagedContentPage.cshtml"
+          ],
+          "server": [
+            "Shop/Controllers/PageController.cs",
+            "Shop/Models/PageModel.cs",
+            "Shop.Data/Infrastructure/Persistence/ShopDbContext.cs"
+          ],
+          "data": [
+            "Shop.Data/Domain/Store/Entities/StoreServicePageContent.cs"
+          ],
+          "css": [
+            "Shop/wwwroot/shop/css/pages/pages.css"
           ]
         },
         "about-page": {
@@ -539,10 +560,6 @@
           "css": [
             "Shop/wwwroot/shop/css/layout/shared-header.css",
             "Shop/wwwroot/shop/css/layout/mobile-drawer-compact.css"
-          ],
-          "assets": [
-            "Shop/wwwroot/content/identity/store-electrical-header.svg",
-            "Shop/wwwroot/content/identity/store-electrical-lockup.svg"
           ]
         },
         "header-search": {

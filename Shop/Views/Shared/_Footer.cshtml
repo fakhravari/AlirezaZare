@@ -1,5 +1,6 @@
-@inject Microsoft.Extensions.Options.IOptions<Shop.Models.SiteIdentityOptions> SiteIdentityOptions
+﻿@inject Microsoft.Extensions.Options.IOptions<Shop.Models.SiteIdentityOptions> SiteIdentityOptions
 @{
+    string cdnBaseUrl = ViewData["MediaCdnBaseUrl"] as string ?? "";
     Shop.Models.SiteIdentityOptions identity = SiteIdentityOptions.Value;
 }
 <footer>
@@ -7,7 +8,7 @@
         <div class="row g-4 footer-main">
             <div class="col-lg-4">
                 <a class="brand footer-brand" href="Home/Index#home" aria-label="@identity.VisualBrandName؛ مرجع تخصصی ابزار و تجهیزات برقی؛ رفتن به صفحهٔ اصلی">
-                    <img class="footer-brand-logo" src="~/content/identity/store-electrical-lockup.svg" alt="@identity.VisualBrandName؛ مرجع تخصصی ابزار و تجهیزات برقی" width="360" height="120" decoding="async" asp-append-version="true"/>
+                    <img class="footer-brand-logo" src="@(cdnBaseUrl)content/identity/store-electrical-lockup.svg" alt="@identity.VisualBrandName؛ مرجع تخصصی ابزار و تجهیزات برقی" width="360" height="120" decoding="async"/>
                 </a>
                 <p>
                     محصولاتی از ابزار برقی، تجهیزات اندازه‌گیری، قطعات الکترونیکی و
@@ -35,8 +36,8 @@
                     <a class="trust-badge-image enamad-link" referrerpolicy="origin" target="_blank" rel="noopener" href="https://trustseal.enamad.ir/?id=8270056&amp;Code=magw24ZAYJwl3ZjkoHJrQoG8tZ4dv7MC" aria-label="مشاهده نماد اعتماد الکترونیکی فروشگاه (پنجره جدید)">
                         <img referrerpolicy="origin" src="https://trustseal.enamad.ir/logo.aspx?id=8270056&amp;Code=magw24ZAYJwl3ZjkoHJrQoG8tZ4dv7MC" alt="نماد اعتماد الکترونیکی فروشگاه" code="magw24ZAYJwl3ZjkoHJrQoG8tZ4dv7MC"/>
                     </a>
-                    <img class="trust-badge-image" src="@Url.Content("~/content/trust/trust-kasbokar.webp")" alt="مجوز کسب‌وکارهای مجازی" loading="lazy"/>
-                    <img class="trust-badge-image" src="@Url.Content("~/content/trust/trust-samandehi.webp")" alt="نماد ساماندهی" loading="lazy"/>
+                    <img class="trust-badge-image" src="@(cdnBaseUrl)content/trust/trust-kasbokar.webp" alt="مجوز کسب‌وکارهای مجازی" loading="lazy"/>
+                    <img class="trust-badge-image" src="@(cdnBaseUrl)content/trust/trust-samandehi.webp" alt="نماد ساماندهی" loading="lazy"/>
                 </div>
             </div>
             <div class="col-6 col-lg-2">

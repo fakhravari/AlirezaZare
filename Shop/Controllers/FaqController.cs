@@ -29,6 +29,6 @@ public sealed class FaqController(IStoreRuntimeDatasetRepository content) : Page
                 "پاسخ پرسش‌های رایج درباره انتخاب ابزار، آماده‌سازی خرید، پیگیری سفارش، هزینه و زمان ارسال، ضمانت کالا و روش بازگرداندن آن را یک‌جا بخوانید.",
                 StructuredData: faqData,
                 Breadcrumbs: [new SeoBreadcrumb("خانه", "/"), new SeoBreadcrumb("پرسش‌های متداول", "/faq")]));
-        return await PageAsync(model);
+        return await PageAsync(model with { ContentKey = "faq" });
     }
 }

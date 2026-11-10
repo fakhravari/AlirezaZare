@@ -10,5 +10,6 @@ public sealed class StoreSiteIdentity
     public string SupportPhoneUri { get; set; } = string.Empty;
     public string WhatsAppNumber { get; set; } = string.Empty;
     public string PublicEmail { get; set; } = string.Empty;
+    public string MediaCdnBaseUrl { get; set; } = "https://cdn.bs-shop.ir/";
     public DateTime UpdatedAtUtc { get; set; }
 }

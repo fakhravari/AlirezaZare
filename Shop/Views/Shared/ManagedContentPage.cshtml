@@ -1,0 +1,49 @@
+@model Shop.Models.PageModel
+@inject Microsoft.Extensions.Options.IOptions<Shop.Models.SiteIdentityOptions> SiteIdentityOptions
+@{
+    var managedPage = Model.ManagedContent!;
+    var identity = SiteIdentityOptions.Value;
+    var trail = managedPage.Sections.Take(3).Where(x => !string.IsNullOrWhiteSpace(x.Heading)).Select(x => x.Heading!).ToArray();
+}
+<header class="page-hero about-hero legal-hero">
+    <div class="container">
+        <nav class="article-breadcrumb" aria-label="مسیر صفحه">
+            <a class="breadcrumb-home" asp-controller="Home" asp-action="Index"><i class="bi bi-house-door" aria-hidden="true"></i><span>خانه</span></a>
+            <span class="breadcrumb-step"><i class="breadcrumb-separator bi bi-chevron-left" aria-hidden="true"></i><span class="breadcrumb-current" aria-current="page"><i class="bi bi-file-text" aria-hidden="true"></i><span>@managedPage.Title</span></span></span>
+        </nav>
+        <h1>@managedPage.Title</h1>
+        <p>@managedPage.Description</p>
+        @if (trail.Length > 0) { <div class="hero-trail">@foreach (var item in trail) { <span>@item</span> }</div> }
+    </div>
+</header>
+<main class="flow-main container customer-service-main managed-service-page">
+    @if (managedPage.PageKey == "contact")
+    {
+        <section class="flow-card managed-contact-channels" aria-labelledby="managed-contact-title">
+            <h2 id="managed-contact-title">راه‌های ارتباطی</h2>
+            <p><a href="tel:@identity.SupportPhoneUri">تماس: <bdi>@identity.SupportPhoneDisplay</bdi></a></p>
+            <p><a href="mailto:@identity.PublicEmail">ایمیل: <bdi>@identity.PublicEmail</bdi></a></p>
+            <p><a href="https://wa.me/@identity.WhatsAppNumber">واتساپ: <bdi>@identity.WhatsAppNumber</bdi></a></p>
+        </section>
+    }
+    @foreach (var contentSection in managedPage.Sections)
+    {
+        <article class="flow-card managed-service-section">
+            @if (!string.IsNullOrWhiteSpace(contentSection.Heading))
+            {
+                <h2>@contentSection.Heading</h2>
+            }
+            @foreach (var paragraph in (contentSection.Body ?? "").Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            {
+                <p>@paragraph</p>
+            }
+        </article>
+    }
+    @if (managedPage.PageKey != "contact")
+    {
+        <p class="managed-service-action"><a class="flow-button" asp-controller="Contact" asp-action="Index">ارتباط با پشتیبانی <i class="bi bi-arrow-left" aria-hidden="true"></i></a></p>
+    }
+</main>
+@section Styles {
+    <link href="~/shop/css/pages/pages.css" asp-append-version="true" rel="stylesheet" />
+}

@@ -31,6 +31,12 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
     public DbSet<ProductVariant> ProductVariants => Set<ProductVariant>();
     public DbSet<WarehouseProduct> Products => Set<WarehouseProduct>();
     public DbSet<StoreSiteIdentity> StoreSiteIdentities => Set<StoreSiteIdentity>();
+    public DbSet<MagazineArticle> MagazineArticles => Set<MagazineArticle>();
+    public DbSet<MagazineArticleSection> MagazineArticleSections => Set<MagazineArticleSection>();
+    public DbSet<AccountArticleInteraction> AccountArticleInteractions => Set<AccountArticleInteraction>();
+    public DbSet<StoreContentPage> StoreContentPages => Set<StoreContentPage>();
+    public DbSet<StoreContentPageSection> StoreContentPageSections => Set<StoreContentPageSection>();
+    public DbSet<StoreFaqItem> StoreFaqItems => Set<StoreFaqItem>();
     public DbSet<ProductFeedback> ProductFeedback => Set<ProductFeedback>();
     public DbSet<StoreAttributeDefinition> StoreAttributeDefinitions => Set<StoreAttributeDefinition>();
     public DbSet<StoreProductMedia> StoreProductMedia => Set<StoreProductMedia>();
@@ -42,6 +48,63 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<MagazineArticle>(entity =>
+        {
+            entity.ToTable("MagazineArticle", "Mag");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.ArticleKey).HasMaxLength(150).IsRequired();
+            entity.Property(x => x.Category).HasMaxLength(150).IsRequired();
+            entity.Property(x => x.Title).HasMaxLength(300).IsRequired();
+            entity.Property(x => x.Summary).HasMaxLength(1500).IsRequired();
+            entity.Property(x => x.Author).HasMaxLength(200);
+            entity.Property(x => x.HeroImagePath).HasMaxLength(1000);
+            entity.Property(x => x.ContentImagePath).HasMaxLength(1000);
+            entity.Property(x => x.Branch).HasMaxLength(80);
+            entity.Property(x => x.Topic).HasMaxLength(120);
+            entity.Property(x => x.Area).HasMaxLength(120);
+            entity.Property(x => x.Kicker).HasMaxLength(300);
+            entity.Property(x => x.ReadTimeText).HasMaxLength(80);
+            entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
+            entity.Property(x => x.UpdatedAtUtc).HasPrecision(3);
+            entity.HasIndex(x => x.ArticleKey).IsUnique();
+            entity.HasMany(x => x.Sections).WithOne().HasForeignKey(x => x.IdMagazineArticle).OnDelete(DeleteBehavior.Cascade);
+        });
+        modelBuilder.Entity<MagazineArticleSection>(entity =>
+        {
+            entity.ToTable("MagazineArticleSection", "Mag");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.Heading).HasMaxLength(300).IsRequired();
+            entity.Property(x => x.Body).IsRequired();
+        });
+        modelBuilder.Entity<AccountArticleInteraction>(entity =>
+        {
+            entity.ToTable("ArticleInteraction", "Account");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.InteractionType).HasMaxLength(20).IsRequired();
+            entity.HasIndex(x => new { x.IdProfile, x.IdMagazineArticle, x.InteractionType }).IsUnique();
+        });
+        modelBuilder.Entity<StoreContentPage>(entity =>
+        {
+            entity.ToTable("ContentPage", "Store"); entity.HasKey(x => x.Id);
+            entity.Property(x => x.PageKey).HasMaxLength(150).IsRequired(); entity.Property(x => x.RoutePath).HasMaxLength(300).IsRequired();
+            entity.Property(x => x.Title).HasMaxLength(300).IsRequired(); entity.Property(x => x.Description).HasMaxLength(1000);
+            entity.Property(x => x.ContentSource).HasMaxLength(30).IsRequired(); entity.Property(x => x.UpdatedAtUtc).HasPrecision(3);
+            entity.HasIndex(x => x.PageKey).IsUnique(); entity.HasIndex(x => x.RoutePath).IsUnique();
+            entity.HasMany(x => x.Sections).WithOne().HasForeignKey(x => x.IdContentPage).OnDelete(DeleteBehavior.Cascade);
+        });
+        modelBuilder.Entity<StoreContentPageSection>(entity =>
+        {
+            entity.ToTable("ContentPageSection", "Store"); entity.HasKey(x => x.Id);
+            entity.Property(x => x.SectionKey).HasMaxLength(100).IsRequired(); entity.Property(x => x.Heading).HasMaxLength(300);
+            entity.HasIndex(x => new { x.IdContentPage, x.SectionKey }).IsUnique();
+        });
+        modelBuilder.Entity<StoreFaqItem>(entity =>
+        {
+            entity.ToTable("FaqItem", "Store"); entity.HasKey(x => x.Id);
+            entity.Property(x => x.Question).HasMaxLength(1000).IsRequired(); entity.Property(x => x.Answer).IsRequired();
+            entity.Property(x => x.LinkText).HasMaxLength(300); entity.Property(x => x.LinkUrl).HasMaxLength(1000);
+            entity.HasOne<StoreContentPage>().WithMany().HasForeignKey(x => x.IdContentPage);
+        });
         modelBuilder.Entity<AdminSystemUser>(entity =>
         {
             entity.ToTable("SystemUser", "Admin");
@@ -276,13 +339,23 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.Property(x => x.SupportPhoneUri).HasMaxLength(40).IsRequired();
             entity.Property(x => x.WhatsAppNumber).HasMaxLength(32).IsRequired();
             entity.Property(x => x.PublicEmail).HasMaxLength(254).IsRequired();
+            entity.Property(x => x.MediaCdnBaseUrl).HasMaxLength(500).HasDefaultValue("https://cdn.bs-shop.ir/").IsRequired();
             entity.Property(x => x.UpdatedAtUtc).HasColumnName("IdentityUpdatedAtUtc").HasPrecision(3);
         });
         modelBuilder.Entity<AccountProfile>(entity =>
         {
             entity.ToTable("Profile", "Account");
             entity.HasKey(x => x.Id);
+            entity.Property(x => x.Email).HasMaxLength(254).IsRequired();
+            entity.Property(x => x.FirstName).HasMaxLength(100).IsRequired();
+            entity.Property(x => x.LastName).HasMaxLength(100).IsRequired();
+            entity.Property(x => x.Phone).HasMaxLength(30);
+            entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
+            entity.Property(x => x.UpdatedAtUtc).HasPrecision(3);
         });
+        modelBuilder.Entity<AccountCartReference>(entity => { entity.HasNoKey(); entity.ToTable("Cart", "Account"); });
+        modelBuilder.Entity<AccountCustomerOrderReference>(entity => { entity.HasNoKey(); entity.ToTable("CustomerOrder", "Account"); });
+        modelBuilder.Entity<StoreCustomerOrderReference>(entity => { entity.HasNoKey(); entity.ToTable("Order", "Store"); });
         modelBuilder.Entity<AccountRecentSearch>(entity =>
         {
             entity.ToTable("RecentSearch", "Account");

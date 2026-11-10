@@ -3,11 +3,12 @@ using System.Data.Common;
 using System.Text.Json.Nodes;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using Shop.Database.Application.Store;
 using Shop.Database.Application.Store.Contracts;
 
 namespace Shop.Database.Infrastructure.Persistence.Repositories;
 
-public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext) : IStoreRuntimeDatasetRepository
+public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext, IMediaCdnBaseUrlProvider mediaCdn) : IStoreRuntimeDatasetRepository
 {
     public async Task<string?> ReadCatalogJsonAsync(CancellationToken cancellationToken)
     {
@@ -49,7 +50,7 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext) : ISt
                 if (collection?["items"] is JsonArray items)
                     for (int index = items.Count - 1; index >= 0; index--)
                         if (!visibleProductIds.Contains(items[index]?.ToJsonString())) items.RemoveAt(index);
-        return catalog.ToJsonString();
+        return ContentCdn.RewriteJson(catalog.ToJsonString(), await mediaCdn.GetBaseUrlAsync(cancellationToken));
     }
 
     private static void FilterArray(JsonObject root, string name, Func<JsonNode?, bool> keep)
@@ -59,13 +60,16 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext) : ISt
             if (!keep(items[index])) items.RemoveAt(index);
     }
 
-    public async Task<string?> ReadBrandEditorialJsonAsync(CancellationToken cancellationToken) =>
-        await ReadScalarJsonAsync("""
+    public async Task<string?> ReadBrandEditorialJsonAsync(CancellationToken cancellationToken)
+    {
+        string? json = await ReadScalarJsonAsync("""
                                   SELECT b.[BrandKey] AS [slug], e.[Established] AS [established], e.[OfficialUrl] AS [officialUrl], e.[Specialization] AS [specialization], e.[FeaturedProducts] AS [featuredProducts], e.[Audience] AS [audience], e.[ShoppingAdvice] AS [shoppingAdvice], JSON_QUERY(COALESCE(e.[CompanyIntroductionsJson], N'[]')) AS [companyIntroductions], JSON_QUERY(COALESCE(e.[ProductFamiliesJson], N'[]')) AS [productFamilies], JSON_QUERY(COALESCE(e.[StrengthsJson], N'[]')) AS [strengths]
                                   FROM [Store].[Brand] b INNER JOIN [Store].[BrandEditorial] e ON e.[IdBrand] = b.[Id]
                                   ORDER BY b.[Id]
                                   FOR JSON PATH;
                                   """, cancellationToken);
+        return ContentCdn.RewriteJson(json, await mediaCdn.GetBaseUrlAsync(cancellationToken));
+    }
 
     public async Task<IReadOnlyList<StoreFaqRow>> ReadFaqAsync(CancellationToken cancellationToken)
     {
@@ -120,8 +124,9 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext) : ISt
                                   ) AS [Value];
                                   """, cancellationToken);
 
-    public async Task<string?> ReadMagazineJsonAsync(CancellationToken cancellationToken) =>
-        await ReadScalarJsonAsync("""
+    public async Task<string?> ReadMagazineJsonAsync(CancellationToken cancellationToken)
+    {
+        string? json = await ReadScalarJsonAsync("""
                                   SELECT JSON_QUERY((
                                       SELECT
                                           branch.[BranchKey] AS [branch], topic.[TopicKey] AS [topic], area.[AreaKey] AS [area],
@@ -168,9 +173,12 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext) : ISt
                                   )) AS [articles]
                                   FOR JSON PATH, WITHOUT_ARRAY_WRAPPER;
                                   """, cancellationToken, commandTimeoutSeconds: 90);
+        return ContentCdn.RewriteJson(json, await mediaCdn.GetBaseUrlAsync(cancellationToken));
+    }
 
-    public async Task<string> ReadGeographyJsonAsync(CancellationToken cancellationToken) =>
-        await ReadScalarJsonAsync("""
+    public async Task<string> ReadGeographyJsonAsync(CancellationToken cancellationToken)
+    {
+        string json = await ReadScalarJsonAsync("""
                                   SELECT
                                       JSON_QUERY((SELECT c.[Id] AS [id], c.[NameFa] AS [name], c.[NameEn] AS [nameEn], c.[CountryCode] AS [countryCode]
                                                   FROM [Geo].[Country] c
@@ -186,6 +194,8 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext) : ISt
                                                   FROM [Geo].[City] ORDER BY [IdProvince], [NameFa] FOR JSON PATH)) AS [cities]
                                   FOR JSON PATH, WITHOUT_ARRAY_WRAPPER;
                                   """, cancellationToken) ?? "{\"countries\":[],\"provinces\":[],\"cities\":[]}";
+        return ContentCdn.RewriteJson(json, await mediaCdn.GetBaseUrlAsync(cancellationToken))!;
+    }
 
     private async Task<string?> ReadScalarJsonAsync(string sql, CancellationToken cancellationToken,
         int? commandTimeoutSeconds = null)

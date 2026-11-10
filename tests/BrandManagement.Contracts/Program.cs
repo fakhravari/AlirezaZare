@@ -3,9 +3,30 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Shop.Admin.Controllers.Api;
+using Shop.Database.Application.Store;
 using Shop.Database.Infrastructure.Persistence;
 using Shop.Database.Infrastructure.Persistence.Repositories;
+
+if (args.Contains("--catalog-main", StringComparer.Ordinal))
+{
+    await CatalogMainVerification.Run(Environment.GetEnvironmentVariable("SHOP_CATALOG_MAIN_CONNECTION")
+        ?? throw new InvalidOperationException("SHOP_CATALOG_MAIN_CONNECTION is required for the explicit main catalog check."));
+    return;
+}
+if (args.Contains("--sales-plans-main", StringComparer.Ordinal))
+{
+    await SalesPlansMainVerification.Run(Environment.GetEnvironmentVariable("SHOP_CATALOG_MAIN_CONNECTION")
+        ?? throw new InvalidOperationException("SHOP_CATALOG_MAIN_CONNECTION is required for the explicit main sales-plan check."));
+    return;
+}
+if (args.Contains("--customers-main", StringComparer.Ordinal))
+{
+    await CustomerManagementMainVerification.Run(Environment.GetEnvironmentVariable("SHOP_CATALOG_MAIN_CONNECTION")
+        ?? throw new InvalidOperationException("SHOP_CATALOG_MAIN_CONNECTION is required for the explicit main customer-management check."));
+    return;
+}
 
 string connectionString = Environment.GetEnvironmentVariable("SHOP_TEST_CONNECTION") ?? throw new InvalidOperationException("SHOP_TEST_CONNECTION is required.");
 if (!new SqlConnectionStringBuilder(connectionString).InitialCatalog.StartsWith("ShopVerify_", StringComparison.OrdinalIgnoreCase))
@@ -13,7 +34,8 @@ if (!new SqlConnectionStringBuilder(connectionString).InitialCatalog.StartsWith(
 var options = new DbContextOptionsBuilder<ShopDbContext>().UseSqlServer(connectionString).Options;
 await using var db = new ShopDbContext(options);
 await using var transaction = await db.Database.BeginTransactionAsync();
-var controller = new StoreCatalogAdminApiController(new StoreRuntimeDatasetRepository(db), db)
+var mediaCdn = new StoreMediaCdnBaseUrlProvider(db, Options.Create(new MediaCdnOptions { BaseUrl = "https://cdn.bs-shop.ir/" }));
+var controller = new StoreCatalogAdminApiController(new StoreRuntimeDatasetRepository(db, mediaCdn), db)
 {
     ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext { User = new ClaimsPrincipal(new ClaimsIdentity([new Claim(ClaimTypes.Role, "system.full-access")], "test")) } }
 };
@@ -23,6 +45,10 @@ if (await controller.CreateBrand(input, default) is not OkObjectResult) throw ne
 if (await controller.UpdateBrand(key, input with { NameEn = "Updated" }, default) is not OkObjectResult) throw new Exception("Brand update failed.");
 var name = await db.Database.SqlQuery<string>($"SELECT [NameEn] AS [Value] FROM [Store].[Brand] WHERE [BrandKey] = {key}").SingleAsync();
 if (name != "Updated") throw new Exception("Update was not persisted in transaction.");
+if (await controller.SetBrandStatus(key, new(false), default) is not OkObjectResult) throw new Exception("Brand unpublish failed.");
+bool brandActive = await db.Database.SqlQuery<bool>($"SELECT [IsActive] AS [Value] FROM [Store].[Brand] WHERE [BrandKey] = {key}").SingleAsync();
+if (brandActive) throw new Exception("Brand unpublish was not persisted.");
+if (await controller.SetBrandStatus(key, new(true), default) is not OkObjectResult) throw new Exception("Brand republication failed.");
 if (await controller.CreateBrand(input with { Key = "bad key" }, default) is not BadRequestObjectResult) throw new Exception("Invalid key accepted.");
 if (await controller.CreateBrand(input with { CountryCode = "invalid" }, default) is not BadRequestObjectResult) throw new Exception("Invalid country accepted.");
 controller.ControllerContext.HttpContext.User = new ClaimsPrincipal(new ClaimsIdentity([], "test"));
@@ -100,6 +126,11 @@ try
     var childInput = new StoreCatalogAdminApiController.CategoryInput(childKey, "زیرگروه آزمایشی", "Test child", categoryId);
     if (await controller.CreateCategory(childInput, default) is not OkObjectResult) throw new Exception("Child category creation failed.");
     childId = await db.Database.SqlQuery<long>($"SELECT [Id] AS [Value] FROM [Store].[Category] WHERE [CategoryKey] = {childKey}").SingleAsync();
+    if (await controller.SetCategoryStatus(categoryKey, new(false), default) is not ConflictObjectResult) throw new Exception("Category with active child was unpublished.");
+    if (await controller.SetCategoryStatus(childKey, new(false), default) is not OkObjectResult) throw new Exception("Category unpublish failed.");
+    if (await controller.SetCategoryStatus(categoryKey, new(false), default) is not OkObjectResult) throw new Exception("Parent category unpublish failed.");
+    if (await controller.SetCategoryStatus(categoryKey, new(true), default) is not OkObjectResult) throw new Exception("Category republication failed.");
+    if (await controller.SetCategoryStatus(childKey, new(true), default) is not OkObjectResult) throw new Exception("Child category republication failed.");
     if (await controller.UpdateCategory(categoryKey, categoryInput with { NameFa = "گروه اصلاح‌شده" }, default) is not OkObjectResult) throw new Exception("Category rename failed.");
     string childPath = await db.Database.SqlQuery<string>($"SELECT [PathJson] AS [Value] FROM [Store].[Category] WHERE [Id] = {childId}").SingleAsync();
     var categoryPath = System.Text.Json.JsonSerializer.Deserialize<string[]>(childPath);
@@ -116,6 +147,32 @@ finally
 }
 controller.ControllerContext.HttpContext.User = new ClaimsPrincipal(new ClaimsIdentity([new Claim(ClaimTypes.Role, "system.full-access")], "test"));
 Console.WriteLine("Category creation, descendant rename, validation and authorization OK; test categories removed.");
+
+await using (var attributeTransaction = await db.Database.BeginTransactionAsync())
+{
+    string attributeKey = "test-attribute-" + Guid.NewGuid().ToString("N");
+    var attributeInput = new StoreCatalogAdminApiController.AttributeDefinitionInput(attributeKey, "ویژگی آزمایشی", "test-icon", "test_source", "test-filter", true, false);
+    if (await controller.CreateAttribute(attributeInput, default) is not OkObjectResult) throw new Exception("Attribute creation failed.");
+    if (await controller.UpdateAttribute(attributeKey, attributeInput with { Key = "ignored-new-key", Label = "ویژگی ویرایش‌شده", IsHighlight = true }, default) is not OkObjectResult)
+        throw new Exception("Attribute update failed.");
+    var attribute = await db.StoreAttributeDefinitions.AsNoTracking().SingleAsync(x => x.AttributeKey == attributeKey);
+    if (attribute.Label != "ویژگی ویرایش‌شده" || !attribute.IsHighlight || attribute.AttributeKey != attributeKey)
+        throw new Exception("Attribute update was not persisted or changed its stable key.");
+    if (await controller.SetAttributeStatus(attributeKey, new(false), default) is not OkObjectResult) throw new Exception("Attribute unpublish failed.");
+    attribute = await db.StoreAttributeDefinitions.AsNoTracking().SingleAsync(x => x.AttributeKey == attributeKey);
+    if (attribute.IsActive) throw new Exception("Attribute unpublish was not persisted.");
+    if (await controller.SetAttributeStatus(attributeKey, new(true), default) is not OkObjectResult) throw new Exception("Attribute republication failed.");
+    if (await controller.CreateAttribute(attributeInput with { Key = "bad key" }, default) is not BadRequestObjectResult)
+        throw new Exception("Invalid attribute key accepted.");
+    if (await controller.CreateAttribute(attributeInput with { Key = "test-filter-required", IsFilterable = true, FilterKey = " " }, default) is not BadRequestObjectResult)
+        throw new Exception("Filterable attribute without filter key accepted.");
+    controller.ControllerContext.HttpContext.User = new ClaimsPrincipal(new ClaimsIdentity([], "test"));
+    if (await controller.UpdateAttribute(attributeKey, attributeInput, default) is not ForbidResult) throw new Exception("Unauthorized attribute update accepted.");
+    await attributeTransaction.RollbackAsync();
+}
+controller.ControllerContext.HttpContext.User = new ClaimsPrincipal(new ClaimsIdentity([new Claim(ClaimTypes.Role, "system.full-access")], "test"));
+Console.WriteLine("Attribute create, update, stable key, publication, validation, authorization and rollback OK.");
+
 string draftKey = "test-draft-" + Guid.NewGuid().ToString("N");
 var draft = new StoreCatalogAdminApiController.ProductCreateInput(draftKey, draftKey, "کالای آزمایشی", "Test draft", sample.Brand, sample.Category, sample.IdBaseUnit, 1000, 0, 2);
 long draftId = 0;
@@ -168,7 +225,7 @@ if (customerResult?.Value is not StoreCustomersAdminApiController.CustomerDetail
     throw new Exception("Customer details did not return the existing address.");
 if (await customers.Details(0, default) is not NotFoundResult) throw new Exception("Invalid customer id accepted.");
 await using var customerTransaction = await db.Database.BeginTransactionAsync();
-var update = new StoreCustomersAdminApiController.CustomerUpdate("نام آزمایشی", "نام خانوادگی", "123", customer.FirstName, customer.LastName, customer.Phone);
+var update = new StoreCustomersAdminApiController.CustomerUpdate(customer.Email, "نام آزمایشی", "نام خانوادگی", "123", customer.Email, customer.FirstName, customer.LastName, customer.Phone);
 if (await customers.Update(profileId, update, default) is not OkObjectResult) throw new Exception("Customer update failed.");
 if (await customers.Update(profileId, update, default) is not ConflictObjectResult) throw new Exception("Stale customer update accepted.");
 var updated = (await customers.Details(profileId, default) as OkObjectResult)?.Value as StoreCustomersAdminApiController.CustomerDetails;

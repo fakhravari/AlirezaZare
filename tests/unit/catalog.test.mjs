@@ -165,7 +165,7 @@ test('every catalog product has varied data-driven specification assignments', (
   }
 });
 
-test('every referenced media file exists with exact lowercase casing', () => {
+test('every referenced media path targets lowercase FTP content without local coupling', () => {
   const data = source();
   const files = new Set();
   for (const media of Object.values(data.media)) {
@@ -178,9 +178,7 @@ test('every referenced media file exists with exact lowercase casing', () => {
   for (const file of files) {
     assert.equal(file, file.toLowerCase());
     assert.ok(!file.includes('..') && !file.includes('\\'));
-    const absolute = path.join(root, 'Shop/wwwroot', file);
-    assert.ok(fs.existsSync(absolute), file);
-    assert.ok(fs.readdirSync(path.dirname(absolute)).includes(path.basename(file)), file);
+    assert.ok(file.startsWith('content/'), file);
   }
   const codes = data.products.map(p => p.code);
   assert.equal(new Set(codes).size, codes.length);

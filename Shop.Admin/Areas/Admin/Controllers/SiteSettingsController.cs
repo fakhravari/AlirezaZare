@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Shop.Database.Application.Store;
 using Shop.Database.Infrastructure.Persistence;
 
 namespace Shop.Admin.Areas.Admin.Controllers;
@@ -15,7 +16,7 @@ public sealed class SiteSettingsController(ShopDbContext db) : Controller
     {
         var model = await db.Database.SqlQueryRaw<SiteSettingsInput>("""
             SELECT [DisplayName], [StoreName], [VisualBrandName], [SupportPhoneDisplay], [SupportPhoneUri],
-                   [WhatsAppNumber], [PublicEmail], [IdWarehouse], [SmtpHost], [SmtpPort], [SmtpEnableSsl],
+                   [WhatsAppNumber], [PublicEmail], [MediaCdnBaseUrl], [IdWarehouse], [SmtpHost], [SmtpPort], [SmtpEnableSsl],
                    [SmtpUsername], [SmtpFrom], [FtpHost], [FtpPort], [FtpUsername],
                    CAST(NULL AS nvarchar(1)) AS [FtpPassword],
                    CAST(CASE WHEN [FtpPassword] IS NULL AND [FtpPasswordProtected] IS NULL THEN 0 ELSE 1 END AS bit) AS [FtpPasswordConfigured]
@@ -30,6 +31,8 @@ public sealed class SiteSettingsController(ShopDbContext db) : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Index(SiteSettingsInput model, CancellationToken cancellationToken)
     {
+        try { model.MediaCdnBaseUrl = MediaCdnOptions.NormalizeBaseUrl(model.MediaCdnBaseUrl); }
+        catch (InvalidOperationException) { ModelState.AddModelError(nameof(model.MediaCdnBaseUrl), "نشانی CDN باید مبدأ HTTPS بدون مسیر اضافی باشد."); }
         if (model.IdWarehouse.HasValue && !await db.Warehouses.AnyAsync(w => w.Id == model.IdWarehouse && w.IsActive && w.IsSalesWarehouse && w.Company.IsActive, cancellationToken))
             ModelState.AddModelError(nameof(model.IdWarehouse), "انبار باید انبار فروش فعال یک شرکت فعال باشد.");
         if (!ModelState.IsValid)
@@ -42,7 +45,7 @@ public sealed class SiteSettingsController(ShopDbContext db) : Controller
             UPDATE [Store].[SiteSetting] SET [DisplayName]={model.DisplayName}, [StoreName]={model.StoreName},
                 [VisualBrandName]={model.VisualBrandName}, [SupportPhoneDisplay]={model.SupportPhoneDisplay},
                 [SupportPhoneUri]={model.SupportPhoneUri}, [WhatsAppNumber]={model.WhatsAppNumber},
-                [PublicEmail]={model.PublicEmail}, [IdWarehouse]={model.IdWarehouse}, [SmtpHost]={model.SmtpHost},
+                [PublicEmail]={model.PublicEmail}, [MediaCdnBaseUrl]={model.MediaCdnBaseUrl}, [IdWarehouse]={model.IdWarehouse}, [SmtpHost]={model.SmtpHost},
                 [SmtpPort]={model.SmtpPort}, [SmtpEnableSsl]={model.SmtpEnableSsl}, [SmtpUsername]={model.SmtpUsername},
                 [SmtpFrom]={model.SmtpFrom}, [FtpHost]={model.FtpHost}, [FtpPort]={model.FtpPort},
                 [FtpUsername]={model.FtpUsername}, [FtpPassword]=COALESCE({model.FtpPassword}, [FtpPassword]),
@@ -73,6 +76,7 @@ public sealed class SiteSettingsInput
     [Required, StringLength(40), RegularExpression(@"\+?[0-9]+", ErrorMessage = "شمارهٔ تماس باید با ارقام انگلیسی و در صورت نیاز + آغاز شود.")] public string SupportPhoneUri { get; set; } = "";
     [Required, StringLength(32), RegularExpression(@"[0-9]+", ErrorMessage = "شمارهٔ واتس‌اپ باید فقط شامل ارقام انگلیسی باشد.")] public string WhatsAppNumber { get; set; } = "";
     [Required, StringLength(254), EmailAddress] public string PublicEmail { get; set; } = "";
+    [Required, StringLength(500)] public string MediaCdnBaseUrl { get; set; } = MediaCdnOptions.DefaultBaseUrl;
     public long? IdWarehouse { get; set; }
     [Required, StringLength(255)] public string SmtpHost { get; set; } = "";
     [Required, Range(1, 65535)] public int? SmtpPort { get; set; }

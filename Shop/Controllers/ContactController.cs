@@ -16,6 +16,6 @@ public sealed class ContactController : PageController
             $"تماس با ما | {_identity.DisplayName}",
             $"راه‌های تماس با {_identity.DisplayName} برای مشاوره پیش از خرید، پیگیری سفارش و خدمات پس از فروش.",
             Breadcrumbs: [new SeoBreadcrumb("خانه", "/"), new SeoBreadcrumb("تماس با ما", "/contact")]));
-        return await PageAsync(model);
+        return await PageAsync(model with { ContentKey = "contact" });
     }
 }

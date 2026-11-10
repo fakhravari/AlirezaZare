@@ -10,6 +10,6 @@ public sealed class AboutController : PageController
         PageModel model = new(new SeoModel("درباره ما | ندا اولیائی",
             "با فروشگاه ندا اولیائی آشنا شوید؛ حوزه‌های ابزار برقی، اندازه‌گیری و قطعات فنی، شیوهٔ معرفی محصولات و راه‌های ارتباط با مجموعه را بخوانید.",
             Breadcrumbs: [new SeoBreadcrumb("خانه", "/"), new SeoBreadcrumb("درباره ما", "/about")]));
-        return await PageAsync(model);
+        return await PageAsync(model with { ContentKey = "about" });
     }
 }

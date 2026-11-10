@@ -1,4 +1,5 @@
-﻿<section class="testimonials py-section" id="testimonials">
+﻿@{ string cdnBaseUrl = ViewData["MediaCdnBaseUrl"] as string ?? ""; }
+<section class="testimonials py-section" id="testimonials">
     <div class="container">
         <div class="testimonial-intro">
             <div>
@@ -46,7 +47,7 @@
                     </p>
                     <div class="reviewer">
                         <span class="reviewer-avatar avatar-rose">
-                            <img src="~/content/testimonials/sara.jpg" alt="" loading="lazy" decoding="async" aria-hidden="true">
+                            <img src="@(cdnBaseUrl)content/testimonials/sara.jpg" alt="" loading="lazy" decoding="async" aria-hidden="true">
                         </span>
                         <div>
                             <strong>سارا محمدی</strong><small>خریدار ابزار نصب</small>
@@ -71,7 +72,7 @@
                     </p>
                     <div class="reviewer">
                         <span class="reviewer-avatar avatar-navy">
-                            <img src="~/content/testimonials/milad.jpg" alt="" loading="lazy" decoding="async" aria-hidden="true">
+                            <img src="@(cdnBaseUrl)content/testimonials/milad.jpg" alt="" loading="lazy" decoding="async" aria-hidden="true">
                         </span>
                         <div>
                             <strong>میلاد خلیلی</strong><small>خریدار مولتی‌متر</small>
@@ -97,7 +98,7 @@
                     </p>
                     <div class="reviewer">
                         <span class="reviewer-avatar avatar-cream">
-                            <img src="~/content/testimonials/niloufar.jpg" alt="" loading="lazy" decoding="async" aria-hidden="true">
+                            <img src="@(cdnBaseUrl)content/testimonials/niloufar.jpg" alt="" loading="lazy" decoding="async" aria-hidden="true">
                         </span>
                         <div>
                             <strong>
@@ -125,7 +126,7 @@
                     </p>
                     <div class="reviewer">
                         <span class="reviewer-avatar avatar-navy">
-                            <img src="~/content/testimonials/amirali.jpg" alt="" loading="lazy" decoding="async" aria-hidden="true">
+                            <img src="@(cdnBaseUrl)content/testimonials/amirali.jpg" alt="" loading="lazy" decoding="async" aria-hidden="true">
                         </span>
                         <div>
                             <strong>
@@ -153,7 +154,7 @@
                     </p>
                     <div class="reviewer">
                         <span class="reviewer-avatar avatar-rose">
-                            <img src="~/content/testimonials/leila.jpg" alt="" loading="lazy" decoding="async" aria-hidden="true">
+                            <img src="@(cdnBaseUrl)content/testimonials/leila.jpg" alt="" loading="lazy" decoding="async" aria-hidden="true">
                         </span>
                         <div>
                             <strong>لیلا مرادی</strong><small>خریدار چراغ کارگاهی</small>
@@ -179,7 +180,7 @@
                     </p>
                     <div class="reviewer">
                         <span class="reviewer-avatar avatar-cream">
-                            <img src="~/content/testimonials/reza.jpg" alt="" loading="lazy" decoding="async" aria-hidden="true">
+                            <img src="@(cdnBaseUrl)content/testimonials/reza.jpg" alt="" loading="lazy" decoding="async" aria-hidden="true">
                         </span>
                         <div>
                             <strong>رضا شریفی</strong><small>خریدار ابزار برقی</small>

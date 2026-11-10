@@ -82,6 +82,10 @@
                 edit.type = "button"; edit.className = "btn btn-xs btn-default ms-1";
                 edit.dataset.customerEdit = String(index); edit.textContent = "ویرایش";
                 actions.append(edit);
+                const remove = document.createElement("button");
+                remove.type = "button"; remove.className = "btn btn-xs btn-danger ms-1";
+                remove.dataset.customerDelete = String(index); remove.textContent = "حذف";
+                actions.append(remove);
             }
             if (page.dataset.adminPage === "orders" && !item.isSample) {
                 if (["warehouse-confirmed", "in-transit", "shipped-to-post", "delivered"].includes(item.status)) {
@@ -372,15 +376,129 @@
                 for (const value of [item.question, ui.formatNumber(item.sortOrder), item.isPublished ? "منتشرشده" : "منتشرنشده"]) {
                     const cell = document.createElement("td"); cell.textContent = value; row.append(cell);
                 }
-                const cell = document.createElement("td"), edit = document.createElement("button");
-                edit.type = "button"; edit.className = "btn btn-sm btn-default"; edit.dataset.faqEdit = String(index); edit.textContent = "ویرایش";
-                cell.append(edit); row.append(cell); body.append(row);
+                const cell = document.createElement("td"), edit = document.createElement("button"), remove = document.createElement("button");
+                edit.type = "button"; edit.className = "btn btn-sm btn-default me-1"; edit.dataset.faqEdit = String(index); edit.textContent = "ویرایش";
+                remove.type = "button"; remove.className = "btn btn-sm btn-danger"; remove.dataset.faqDelete = String(index); remove.textContent = "حذف";
+                cell.append(edit, remove); row.append(cell); body.append(row);
             });
             status(page, rows.length ? "" : "پرسشی ثبت نشده است.");
         } catch (error) {
             if (error.name !== "AbortError" && page.isConnected && requests.get(page) === controller) status(page, error.message || "دریافت پرسش‌ها ناموفق بود.", true);
         } finally { finishRequest(page, controller); }
     }
+
+    async function loadMagazine() {
+        const page = document.querySelector("[data-magazine-admin]"); if (!page) return;
+        const statusNode = page.querySelector("[data-mag-status]"), body = page.querySelector("[data-mag-rows]");
+        try {
+            const rows = await ui.getJson(page.dataset.api); body.replaceChildren();
+            rows.forEach(item => {
+                const tr = document.createElement("tr");
+                for (const text of [item.title, item.articleKey, ui.formatNumber(item.count), item.isPublished ? "منتشرشده" : "پیش‌نویس"]) { const td = document.createElement("td"); td.textContent = text; tr.append(td); }
+                const td = document.createElement("td");
+                for (const [label, action] of [["ویرایش", "edit"], ["حذف", "delete"]]) { const button = document.createElement("button"); button.type = "button"; button.className = `btn btn-sm ${action === "delete" ? "btn-danger" : "btn-default"} me-1`; button.dataset.magAction = action; button.dataset.id = item.id; button.textContent = label; td.append(button); }
+                tr.append(td); body.append(tr);
+            });
+            statusNode.textContent = rows.length ? "" : "مقاله‌ای ثبت نشده است.";
+        } catch (error) { statusNode.textContent = error.message || "دریافت مقاله‌ها ناموفق بود."; }
+    }
+    async function loadServicePages(selectedKey = "") {
+        const root = document.querySelector("[data-service-pages]"); if (!root) return;
+        const select = root.querySelector("[data-service-page-select]"), statusNode = root.querySelector("[data-service-page-status]"), form = root.querySelector("[data-service-page-editor]");
+        try {
+            const rows = await ui.getJson(root.dataset.api);
+            select.replaceChildren(new Option("صفحه را انتخاب کنید", ""), ...rows.map(item => new Option(`${item.title} (${item.routePath})`, item.pageKey)));
+            select.value = selectedKey;
+            form.hidden = !selectedKey; statusNode.textContent = selectedKey ? "" : "برای ویرایش یک صفحه را انتخاب کنید.";
+        } catch (error) { statusNode.textContent = error.message || "دریافت صفحه‌های خدماتی ناموفق بود."; }
+    }
+    function renderServiceSections(container, sections) {
+        container.replaceChildren();
+        sections.forEach(section => {
+            const card = document.createElement("fieldset"); card.className = "card p-3"; card.dataset.serviceSection = "";
+            const key = document.createElement("input"); key.type = "hidden"; key.value = section.sectionKey || `section-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`; key.dataset.sectionKey = "";
+            const titleLabel = document.createElement("label"); titleLabel.className = "form-label"; titleLabel.textContent = "عنوان بخش";
+            const heading = document.createElement("input"); heading.className = "form-control mb-3"; heading.maxLength = 300; heading.value = section.heading || ""; heading.dataset.sectionHeading = ""; heading.setAttribute("aria-label", "عنوان بخش");
+            const bodyLabel = document.createElement("label"); bodyLabel.className = "form-label"; bodyLabel.textContent = "متن";
+            const body = document.createElement("textarea"); body.className = "form-control mb-3"; body.rows = 5; body.maxLength = 20000; body.value = section.body || ""; body.dataset.sectionBody = ""; body.setAttribute("aria-label", "متن بخش");
+            const remove = document.createElement("button"); remove.type = "button"; remove.className = "btn btn-danger btn-sm align-self-start"; remove.dataset.serviceSectionRemove = ""; remove.textContent = "حذف بخش";
+            const moveUp = document.createElement("button"); moveUp.type = "button"; moveUp.className = "btn btn-default btn-sm me-1"; moveUp.dataset.serviceSectionMove = "up"; moveUp.textContent = "بالا";
+            const moveDown = document.createElement("button"); moveDown.type = "button"; moveDown.className = "btn btn-default btn-sm me-1"; moveDown.dataset.serviceSectionMove = "down"; moveDown.textContent = "پایین";
+            const actions = document.createElement("div"); actions.append(moveUp, moveDown, remove);
+            card.append(key, titleLabel, heading, bodyLabel, body, actions); container.append(card);
+        });
+    }
+    document.addEventListener("click", event => {
+        const add = event.target.closest("[data-service-section-add]");
+        if (add) {
+            const form = add.closest("[data-service-page-editor]"), container = form.querySelector("[data-service-sections]"), existing = [...container.querySelectorAll("[data-service-section]")].map(row => ({ sectionKey: row.querySelector("[data-section-key]").value, heading: row.querySelector("[data-section-heading]").value, body: row.querySelector("[data-section-body]").value }));
+            existing.push({ sectionKey: `section-${Date.now()}`, heading: "", body: "" }); renderServiceSections(container, existing); return;
+        }
+        const remove = event.target.closest("[data-service-section-remove]");
+        if (remove) remove.closest("[data-service-section]")?.remove();
+        const move = event.target.closest("[data-service-section-move]");
+        if (move) {
+            const card = move.closest("[data-service-section]"), parent = card.parentElement;
+            if (move.dataset.serviceSectionMove === "up" && card.previousElementSibling) parent.insertBefore(card, card.previousElementSibling);
+            if (move.dataset.serviceSectionMove === "down" && card.nextElementSibling) parent.insertBefore(card.nextElementSibling, card);
+        }
+    });
+    document.addEventListener("change", async event => {
+        const select = event.target.closest("[data-service-page-select]"); if (!select) return;
+        const root = select.closest("[data-service-pages]"), form = root.querySelector("[data-service-page-editor]"), statusNode = root.querySelector("[data-service-page-status]"), key = select.value;
+        if (!key) { form.hidden = true; statusNode.textContent = "برای ویرایش یک صفحه را انتخاب کنید."; return; }
+        select.disabled = true; form.hidden = true; statusNode.textContent = "در حال دریافت متن صفحه…";
+        try {
+            const page = await ui.getJson(`${root.dataset.api}/${encodeURIComponent(key)}`);
+            form.elements.title.value = page.title; form.elements.description.value = page.description || "";
+            renderServiceSections(form.querySelector("[data-service-sections]"), page.sections);
+            form.elements.isPublished.checked = page.isPublished; form.hidden = false; statusNode.textContent = "";
+        } catch (error) { form.hidden = true; statusNode.textContent = error.message || "دریافت متن صفحه ناموفق بود."; }
+        finally { select.disabled = false; }
+    });
+    document.addEventListener("submit", event => {
+        const form = event.target.closest("[data-service-page-editor]"); if (!form) return;
+        event.preventDefault(); const root = form.closest("[data-service-pages]"), select = root.querySelector("[data-service-page-select]"), button = form.querySelector('[type="submit"]');
+        const sectionRows = [...form.querySelectorAll("[data-service-section]")];
+        const sections = sectionRows.map(row => ({ sectionKey: row.querySelector("[data-section-key]").value, heading: row.querySelector("[data-section-heading]").value, body: row.querySelector("[data-section-body]").value }));
+        if (!sections.length) { ui.notify("هر صفحه باید دست‌کم یک بخش داشته باشد.", "danger"); return; }
+        const pageKey = select.value;
+        const body = { title: form.elements.title.value, description: form.elements.description.value, isPublished: form.elements.isPublished.checked, sections };
+        const token = form.querySelector('[name="__RequestVerificationToken"]')?.value || ""; button.disabled = true;
+        void ui.getJson(`${root.dataset.api}/${encodeURIComponent(pageKey)}`, { method: "PUT", headers: { "Content-Type": "application/json", RequestVerificationToken: token }, body: JSON.stringify(body) })
+            .then(result => { ui.notify(result.message, "success"); return loadServicePages(pageKey).then(() => select.dispatchEvent(new Event("change", { bubbles: true }))); })
+            .catch(error => ui.notify(error.message || "ذخیرهٔ صفحه ناموفق بود.", "danger")).finally(() => { button.disabled = false; });
+    });
+    document.addEventListener("click", async event => {
+        const button = event.target.closest("[data-mag-create], [data-mag-action]"); if (!button) return;
+        const form = document.querySelector("[data-mag-editor]");
+        if (button.hasAttribute("data-mag-create")) { form.reset(); form.elements.id.value = ""; window.bootstrap?.Modal?.getOrCreateInstance(document.getElementById("mag-editor-modal")).show(); return; }
+        if (button.dataset.magAction === "delete") {
+            if (!window.confirm("مقاله حذف شود؟")) return;
+            const token = document.querySelector("[data-mag-editor] [name=__RequestVerificationToken]")?.value || "";
+            try { const result = await ui.getJson(`/api/admin/store/magazine/${button.dataset.id}`, { method: "DELETE", headers: { RequestVerificationToken: token } }); ui.notify(result.message, "success"); await loadMagazine(); }
+            catch (error) { ui.notify(error.message || "حذف مقاله ناموفق بود.", "danger"); } return;
+        }
+        try {
+            const item = await ui.getJson(`/api/admin/store/magazine/${button.dataset.id}`); form.reset(); form.elements.id.value = button.dataset.id;
+            for (const name of ["articleKey","title","category","summary","author","kicker","branch","topic","area","heroImagePath","contentImagePath","readTimeMinutes","readTimeText","lead","conclusion"]) form.elements[name].value = item[name] || "";
+            form.elements.sections.value = JSON.stringify(item.sections || [], null, 2); form.elements.isPublished.checked = item.isPublished;
+            window.bootstrap?.Modal?.getOrCreateInstance(document.getElementById("mag-editor-modal")).show();
+        } catch (error) { ui.notify(error.message || "دریافت مقاله ناموفق بود.", "danger"); }
+    });
+    document.addEventListener("submit", event => {
+        const form = event.target.closest("[data-mag-editor]"); if (!form) return;
+        event.preventDefault(); const button = form.querySelector('[type="submit"]'); if (button.disabled) return;
+        let sections; try { sections = JSON.parse(form.elements.sections.value || "[]"); if (!Array.isArray(sections)) throw new Error(); }
+        catch { ui.notify("ساختار بخش‌ها باید آرایهٔ JSON معتبر باشد.", "danger"); return; }
+        const body = {}; for (const name of ["articleKey","title","category","summary","author","kicker","branch","topic","area","heroImagePath","contentImagePath","readTimeText","lead","conclusion"]) body[name] = form.elements[name].value;
+        body.readTimeMinutes = form.elements.readTimeMinutes.value ? Number(form.elements.readTimeMinutes.value) : null; body.isPublished = form.elements.isPublished.checked; body.sections = sections;
+        button.disabled = true; const id = form.elements.id.value, token = form.querySelector('[name="__RequestVerificationToken"]')?.value || "";
+        void ui.getJson(`/api/admin/store/magazine${id ? `/${id}` : ""}`, { method: id ? "PUT" : "POST", headers: { "Content-Type": "application/json", RequestVerificationToken: token }, body: JSON.stringify(body) })
+            .then(result => { ui.notify(result.message, "success"); window.bootstrap?.Modal?.getInstance(document.getElementById("mag-editor-modal"))?.hide(); return loadMagazine(); })
+            .catch(error => ui.notify(error.message || "ذخیره مقاله ناموفق بود.", "danger")).finally(() => { button.disabled = false; });
+    });
+    document.addEventListener("DOMContentLoaded", () => void loadMagazine());
 
     function refresh(page, announce = true) {
         if (page.dataset.adminPage === "catalog") return loadCatalog(page, Number(page.dataset.adminPageNumber || "1"), announce);
@@ -400,7 +518,7 @@
             else if (page.dataset.adminPage === "stock") void loadStock(page, 1, false);
             else if (page.dataset.adminPage === "orders") void loadOrders(page, 1, false);
             else if (page.dataset.adminPage === "customers") void loadCustomers(page, 1, false);
-            else if (page.dataset.adminPage === "faq") void loadFaq(page);
+            else if (page.dataset.adminPage === "faq") { void loadFaq(page); void loadMagazine(); void loadServicePages(); }
             else if (page.dataset.adminPage === "product-drafts") void loadProductDrafts(page);
         });
     }
@@ -512,10 +630,33 @@
             const form = document.querySelector("[data-customer-editor]");
             if (!item || !form) return;
             form.reset(); form.elements.id.value = item.id;
+            form.elements.email.value = item.email;
             form.elements.firstName.value = item.firstName; form.elements.lastName.value = item.lastName;
             form.elements.phone.value = item.phone || "";
-            form.__expected = { expectedFirstName: item.firstName, expectedLastName: item.lastName, expectedPhone: item.phone };
+            form.__expected = { expectedEmail: item.email, expectedFirstName: item.firstName, expectedLastName: item.lastName, expectedPhone: item.phone };
+            document.getElementById("customer-editor-title").textContent = "ویرایش مشتری";
             window.bootstrap?.Modal?.getOrCreateInstance(document.getElementById("customer-editor-modal")).show();
+            return;
+        }
+        const customerCreate = event.target.closest("[data-customer-create]");
+        if (customerCreate) {
+            const form = document.querySelector("[data-customer-editor]");
+            if (!form) return;
+            form.reset(); form.elements.id.value = ""; form.__expected = null;
+            document.getElementById("customer-editor-title").textContent = "ایجاد مشتری";
+            window.bootstrap?.Modal?.getOrCreateInstance(document.getElementById("customer-editor-modal")).show();
+            return;
+        }
+        const customerDelete = event.target.closest("[data-customer-delete]");
+        if (customerDelete) {
+            const page = customerDelete.closest('[data-admin-page="customers"]');
+            const item = page?.__adminRows?.[Number(customerDelete.dataset.customerDelete)];
+            if (!item || !window.confirm(`پروفایل ${item.email} حذف شود؟ اگر سفارش یا سبد داشته باشد، سرور حذف را رد می‌کند.`)) return;
+            const form = document.querySelector("[data-customer-editor]"), token = form?.querySelector('[name="__RequestVerificationToken"]')?.value || "";
+            customerDelete.disabled = true;
+            void ui.getJson(`${page.dataset.adminApi}/${encodeURIComponent(item.id)}`, { method: "DELETE", headers: { RequestVerificationToken: token } })
+                .then(result => { ui.notify(result.message, "success"); return loadCustomers(page, Number(page.dataset.adminPageNumber || 1)); })
+                .catch(error => { ui.notify(error.message || "حذف مشتری ناموفق بود.", "danger"); customerDelete.disabled = false; });
             return;
         }
         const faqAction = event.target.closest("[data-faq-create], [data-faq-edit]");
@@ -528,6 +669,16 @@
             form.elements.linkUrl.value = item?.linkUrl || ""; form.elements.sortOrder.value = item?.sortOrder ?? 0;
             form.elements.isPublished.checked = item?.isPublished ?? false;
             window.bootstrap?.Modal?.getOrCreateInstance(document.getElementById("faq-editor-modal")).show();
+            return;
+        }
+        const faqDelete = event.target.closest("[data-faq-delete]");
+        if (faqDelete) {
+            const page = faqDelete.closest('[data-admin-page="faq"]'), item = page?.__faqRows?.[Number(faqDelete.dataset.faqDelete)];
+            if (!page || !item || !window.confirm("این پرسش متداول حذف شود؟")) return;
+            const token = document.querySelector("[data-faq-editor] [name=__RequestVerificationToken]")?.value || ""; faqDelete.disabled = true;
+            void ui.getJson(`${page.dataset.adminApi}/${encodeURIComponent(item.id)}`, { method: "DELETE", headers: { RequestVerificationToken: token } })
+                .then(result => { ui.notify(result.message, "success"); return loadFaq(page); })
+                .catch(error => { faqDelete.disabled = false; ui.notify(error.message || "حذف پرسش ناموفق بود.", "danger"); });
             return;
         }
         const productEdit = event.target.closest("[data-product-edit]");
@@ -811,12 +962,13 @@
         if (customerForm) {
             event.preventDefault();
             const button = customerForm.querySelector('[type="submit"]');
-            if (button.disabled || !customerForm.__expected) return;
+            const id = customerForm.elements.id.value;
+            if (button.disabled || id && !customerForm.__expected) return;
             const token = customerForm.querySelector('[name="__RequestVerificationToken"]')?.value || "";
-            const body = { ...customerForm.__expected, firstName: customerForm.elements.firstName.value, lastName: customerForm.elements.lastName.value, phone: customerForm.elements.phone.value };
+            const body = { ...(customerForm.__expected || {}), email: customerForm.elements.email.value, firstName: customerForm.elements.firstName.value, lastName: customerForm.elements.lastName.value, phone: customerForm.elements.phone.value };
             button.disabled = true;
-            void ui.getJson(`/api/admin/store/customers/${encodeURIComponent(customerForm.elements.id.value)}`, { method: "PUT", headers: { "Content-Type": "application/json", RequestVerificationToken: token }, body: JSON.stringify(body) })
-                .then(result => { ui.notify(result.message, "success"); window.bootstrap?.Modal?.getInstance(document.getElementById("customer-editor-modal"))?.hide(); const page = document.querySelector('[data-admin-page="customers"]'); if (page) return loadCustomers(page, Number(page.dataset.adminPageNumber || 1)); })
+            void ui.getJson(`/api/admin/store/customers${id ? `/${encodeURIComponent(id)}` : ""}`, { method: id ? "PUT" : "POST", headers: { "Content-Type": "application/json", RequestVerificationToken: token }, body: JSON.stringify(body) })
+                .then(result => { ui.notify(result.message, "success"); window.bootstrap?.Modal?.getInstance(document.getElementById("customer-editor-modal"))?.hide(); const page = document.querySelector('[data-admin-page="customers"]'); if (page) return loadCustomers(page, id ? Number(page.dataset.adminPageNumber || 1) : 1); })
                 .catch(error => ui.notify(error.message || "ذخیرهٔ مشتری ناموفق بود.", "danger"))
                 .finally(() => { button.disabled = false; });
             return;
@@ -931,13 +1083,10 @@
             result.textContent = "در حال بارگذاری…"; save.disabled = true;
             void ui.getJson("/api/admin/store/media", { method: "POST", body: new FormData(mediaForm) })
                 .then(data => {
-                    let base;
-                    try {
-                        const configured = new URL(mediaForm.dataset.publicSiteUrl);
-                        if (["http:", "https:"].includes(configured.protocol) && !configured.username && !configured.password && configured.pathname === "/" && !configured.search && !configured.hash) base = configured.origin;
-                    } catch { /* Show the stored relative paths if the public origin is not configured. */ }
-                    const display = path => base && typeof path === "string" && path.startsWith("content/") ? `${base}/${path}` : path;
-                    result.textContent = data.thumbnail ? `نشانی فایل: ${display(data.path)} — تصویر کوچک: ${display(data.thumbnail)}` : `نشانی فایل: ${display(data.path)}`;
+                    const display = (url, path) => url || path;
+                    const fileUrl = display(data.url, data.path);
+                    const thumbnailUrl = display(data.thumbnailUrl, data.thumbnail);
+                    result.textContent = data.thumbnail ? `نشانی فایل: ${fileUrl} — تصویر کوچک: ${thumbnailUrl}` : `نشانی فایل: ${fileUrl}`;
                     ui.notify(data.message, "success");
                 })
                 .catch(error => { result.textContent = error.message || "بارگذاری ناموفق بود."; ui.notify(result.textContent, "danger"); })

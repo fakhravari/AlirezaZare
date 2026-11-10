@@ -12,11 +12,9 @@ namespace Shop.Admin.Controllers.Api;
 public sealed class StoreFaqAdminApiController(ShopDbContext db) : ControllerBase
 {
     [HttpGet]
-    public async Task<IActionResult> List(CancellationToken cancellationToken) => Ok(await db.Database.SqlQueryRaw<FaqRow>("""
-        SELECT f.[Id], f.[Question], f.[Answer], f.[LinkText], f.[LinkUrl], f.[SortOrder], f.[IsPublished]
-        FROM [Store].[FaqItem] f JOIN [Store].[ContentPage] p ON p.[Id] = f.[IdContentPage]
-        WHERE p.[PageKey] = N'faq' ORDER BY f.[SortOrder], f.[Id]
-        """).ToListAsync(cancellationToken));
+    public async Task<IActionResult> List(CancellationToken cancellationToken) => Ok(await db.StoreFaqItems.AsNoTracking()
+        .Where(x => db.StoreContentPages.Any(p => p.Id == x.IdContentPage && p.PageKey == "faq"))
+        .OrderBy(x => x.SortOrder).ThenBy(x => x.Id).Select(x => new FaqRow(x.Id, x.Question, x.Answer, x.LinkText, x.LinkUrl, x.SortOrder, x.IsPublished)).ToListAsync(cancellationToken));
 
     [HttpPost]
     [ValidateAntiForgeryToken]
@@ -35,29 +33,28 @@ public sealed class StoreFaqAdminApiController(ShopDbContext db) : ControllerBas
             (linkText.Length == 0) != (linkUrl.Length == 0) ||
             (linkUrl.Length > 0 && (!linkUrl.StartsWith('/') || !Url.IsLocalUrl(linkUrl) || linkUrl.Any(char.IsControl))))
             return BadRequest(new { title = "پرسش، پاسخ، ترتیب یا پیوند معتبر نیست." });
-        int changed = id is null
-            ? await db.Database.ExecuteSqlInterpolatedAsync($"""
-                INSERT [Store].[FaqItem] ([IdContentPage], [Question], [Answer], [LinkText], [LinkUrl], [SortOrder], [IsPublished])
-                SELECT [Id], {question}, {answer}, NULLIF({linkText}, N''), NULLIF({linkUrl}, N''), {input.SortOrder}, {input.IsPublished}
-                FROM [Store].[ContentPage] WHERE [PageKey] = N'faq'
-                """, cancellationToken)
-            : await db.Database.ExecuteSqlInterpolatedAsync($"""
-                UPDATE f SET [Question] = {question}, [Answer] = {answer}, [LinkText] = NULLIF({linkText}, N''),
-                    [LinkUrl] = NULLIF({linkUrl}, N''), [SortOrder] = {input.SortOrder}, [IsPublished] = {input.IsPublished}
-                FROM [Store].[FaqItem] f JOIN [Store].[ContentPage] p ON p.[Id] = f.[IdContentPage]
-                WHERE f.[Id] = {id} AND p.[PageKey] = N'faq'
-                """, cancellationToken);
-        return changed == 0 ? NotFound() : Ok(new { message = "پرسش متداول ذخیره شد." });
+        var item = id is null ? null : await db.StoreFaqItems.SingleOrDefaultAsync(x => x.Id == id && db.StoreContentPages.Any(p => p.Id == x.IdContentPage && p.PageKey == "faq"), cancellationToken);
+        if (id is not null && item is null) return NotFound();
+        if (id is null)
+        {
+            var page = await db.StoreContentPages.SingleOrDefaultAsync(p => p.PageKey == "faq", cancellationToken);
+            if (page is null) return Conflict(new { title = "صفحهٔ FAQ در دیتابیس تعریف نشده است." });
+            item = new Shop.Database.Domain.Store.Entities.StoreFaqItem { IdContentPage = page.Id };
+            db.StoreFaqItems.Add(item);
+        }
+        item!.Question = question; item.Answer = answer; item.LinkText = linkText.Length == 0 ? null : linkText;
+        item.LinkUrl = linkUrl.Length == 0 ? null : linkUrl; item.SortOrder = input.SortOrder; item.IsPublished = input.IsPublished;
+        await db.SaveChangesAsync(cancellationToken);
+        return Ok(new { message = "پرسش متداول ذخیره شد." });
+    }
+    [HttpDelete("{id:long}"), ValidateAntiForgeryToken]
+    public async Task<IActionResult> Delete(long id, CancellationToken cancellationToken)
+    {
+        var item = await db.StoreFaqItems.SingleOrDefaultAsync(x => x.Id == id && db.StoreContentPages.Any(p => p.Id == x.IdContentPage && p.PageKey == "faq"), cancellationToken);
+        if (item is null) return NotFound();
+        db.StoreFaqItems.Remove(item); await db.SaveChangesAsync(cancellationToken);
+        return Ok(new { message = "پرسش متداول حذف شد." });
     }
     public sealed record FaqInput(string? Question, string? Answer, string? LinkText, string? LinkUrl, int SortOrder, bool IsPublished);
-    public sealed class FaqRow
-    {
-        public long Id { get; set; }
-        public string Question { get; set; } = "";
-        public string Answer { get; set; } = "";
-        public string? LinkText { get; set; }
-        public string? LinkUrl { get; set; }
-        public int SortOrder { get; set; }
-        public bool IsPublished { get; set; }
-    }
+    public sealed record FaqRow(long Id, string Question, string Answer, string? LinkText, string? LinkUrl, int SortOrder, bool IsPublished);
 }
