@@ -16,7 +16,6 @@
     let validationAttempt = 0;
     let checkoutPending = false;
     const readAddresses = () => {
-        let valid = false;
         try {
             const value = JSON.parse(ui.storage.get(addressKey, "[]"));
             return Array.isArray(value)
@@ -57,6 +56,7 @@
         }
         salesPlansValid = false;
         syncPayment();
+        let valid = false;
         try {
             const response = await window.HNUI.api.request("store/sales-plans/validate-cart", {
                 method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ lines }),

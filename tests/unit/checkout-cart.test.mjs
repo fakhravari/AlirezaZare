@@ -62,6 +62,14 @@ function checkoutPayment() {
 const tick = () => new Promise(resolve => setImmediate(resolve));
 const validQuote = {valid:true, lines:[{productId:1, salesPlanId:'regular', quote:{unitAmount:100}}]};
 
+test('checkout reports a failed cart validation and keeps payment disabled', async () => {
+  const page = checkoutPayment();
+  page.requests[0].resolve({ok:false});
+  await tick();
+  assert.equal(page.payment.disabled, true);
+  assert.match(page.status.message, /قیمت یا موجودی/);
+});
+
 test('checkout ignores an older validation whose response body finishes late', async () => {
   const page = checkoutPayment();
   const oldBody = deferred();

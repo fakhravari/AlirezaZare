@@ -32,6 +32,10 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
     public DbSet<WarehouseProduct> Products => Set<WarehouseProduct>();
     public DbSet<StoreSiteIdentity> StoreSiteIdentities => Set<StoreSiteIdentity>();
     public DbSet<MagazineArticle> MagazineArticles => Set<MagazineArticle>();
+    public DbSet<MagazineArticleCategory> MagazineArticleCategories => Set<MagazineArticleCategory>();
+    public DbSet<MagazineArticleBranch> MagazineArticleBranches => Set<MagazineArticleBranch>();
+    public DbSet<MagazineArticleTopic> MagazineArticleTopics => Set<MagazineArticleTopic>();
+    public DbSet<MagazineArticleArea> MagazineArticleAreas => Set<MagazineArticleArea>();
     public DbSet<MagazineArticleSection> MagazineArticleSections => Set<MagazineArticleSection>();
     public DbSet<AccountArticleInteraction> AccountArticleInteractions => Set<AccountArticleInteraction>();
     public DbSet<StoreContentPage> StoreContentPages => Set<StoreContentPage>();
@@ -53,22 +57,27 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.ToTable("MagazineArticle", "Mag");
             entity.HasKey(x => x.Id);
             entity.Property(x => x.ArticleKey).HasMaxLength(150).IsRequired();
-            entity.Property(x => x.Category).HasMaxLength(150).IsRequired();
+            entity.Property(x => x.IdCategory).HasColumnName("IdCategory");
             entity.Property(x => x.Title).HasMaxLength(300).IsRequired();
             entity.Property(x => x.Summary).HasMaxLength(1500).IsRequired();
             entity.Property(x => x.Author).HasMaxLength(200);
             entity.Property(x => x.HeroImagePath).HasMaxLength(1000);
             entity.Property(x => x.ContentImagePath).HasMaxLength(1000);
-            entity.Property(x => x.Branch).HasMaxLength(80);
-            entity.Property(x => x.Topic).HasMaxLength(120);
-            entity.Property(x => x.Area).HasMaxLength(120);
             entity.Property(x => x.Kicker).HasMaxLength(300);
             entity.Property(x => x.ReadTimeText).HasMaxLength(80);
             entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
             entity.Property(x => x.UpdatedAtUtc).HasPrecision(3);
             entity.HasIndex(x => x.ArticleKey).IsUnique();
+            entity.HasOne(x => x.Category).WithMany().HasForeignKey(x => x.IdCategory);
+            entity.HasOne(x => x.Branch).WithMany().HasForeignKey(x => x.IdBranch);
+            entity.HasOne(x => x.Topic).WithMany().HasForeignKey(x => x.IdTopic);
+            entity.HasOne(x => x.Area).WithMany().HasForeignKey(x => x.IdArea);
             entity.HasMany(x => x.Sections).WithOne().HasForeignKey(x => x.IdMagazineArticle).OnDelete(DeleteBehavior.Cascade);
         });
+        modelBuilder.Entity<MagazineArticleCategory>(entity => { entity.ToTable("ArticleCategory", "Mag"); entity.HasKey(x => x.Id); entity.Property(x => x.CategoryKey).HasMaxLength(300).IsRequired(); entity.HasIndex(x => x.CategoryKey).IsUnique(); });
+        modelBuilder.Entity<MagazineArticleBranch>(entity => { entity.ToTable("ArticleBranch", "Mag"); entity.HasKey(x => x.Id); entity.Property(x => x.BranchKey).HasMaxLength(160).IsRequired(); entity.HasIndex(x => x.BranchKey).IsUnique(); });
+        modelBuilder.Entity<MagazineArticleTopic>(entity => { entity.ToTable("ArticleTopic", "Mag"); entity.HasKey(x => x.Id); entity.Property(x => x.TopicKey).HasMaxLength(240).IsRequired(); entity.HasIndex(x => x.TopicKey).IsUnique(); });
+        modelBuilder.Entity<MagazineArticleArea>(entity => { entity.ToTable("ArticleArea", "Mag"); entity.HasKey(x => x.Id); entity.Property(x => x.AreaKey).HasMaxLength(240).IsRequired(); entity.HasIndex(x => x.AreaKey).IsUnique(); });
         modelBuilder.Entity<MagazineArticleSection>(entity =>
         {
             entity.ToTable("MagazineArticleSection", "Mag");

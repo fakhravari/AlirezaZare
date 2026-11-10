@@ -196,6 +196,11 @@
           /^((?:Shop\/)?images\/watch-(?:blue|cream|silver|story|hero))\.(?:jpe?g|png)$/i,
           "$1.webp",
         );
+    const isAllowedImage = (image) => {
+      const cdnBase = document.querySelector('meta[name="media-cdn-base-url"]')?.content || "";
+      const path = cdnBase && image.startsWith(cdnBase) ? image.slice(cdnBase.length) : image;
+      return /^(?:(?:Shop\/)?images\/|\/?content\/products\/)(?:[\w.-]+\/)*[\w.-]+$/i.test(path);
+    };
     const normalizedItems = value
       .filter((item) => item && typeof item === "object")
       .map((rawItem) => {
@@ -242,7 +247,7 @@
           item.name &&
           Number.isFinite(item.price) &&
           item.price >= 0 &&
-          /^(?:(?:Shop\/)?images\/|\/?content\/products\/)(?:[\w.-]+\/)*[\w.-]+$/i.test(item.image),
+          isAllowedImage(item.image),
       );
     const uniqueItems = new Map();
     normalizedItems.forEach((item) => {

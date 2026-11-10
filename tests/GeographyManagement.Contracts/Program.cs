@@ -4,6 +4,12 @@ using Microsoft.EntityFrameworkCore;
 using Shop.Admin.Controllers.Api;
 using Shop.Data.Infrastructure.Persistence;
 
+if (args.Contains("--permission-filter", StringComparer.Ordinal))
+{
+    await AdminPermissionFilterTest.RunAsync();
+    return;
+}
+
 string cs = Environment.GetEnvironmentVariable("SHOP_TEST_CONNECTION") ?? throw new InvalidOperationException("SHOP_TEST_CONNECTION is required.");
 if (!new SqlConnectionStringBuilder(cs).InitialCatalog.StartsWith("ShopVerify_", StringComparison.OrdinalIgnoreCase)) throw new InvalidOperationException("A ShopVerify_ database is required.");
 await using var db = new ShopDbContext(new DbContextOptionsBuilder<ShopDbContext>().UseSqlServer(cs).Options);

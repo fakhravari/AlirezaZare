@@ -1,10 +1,13 @@
 ﻿import {test, expect} from '@playwright/test';
 
 test('product gallery switches between an image and video from catalog data', async ({page}) => {
-  const video = 'content/products/videos/blue-dial-wristwatch-video-01.mp4';
+  let video;
   await page.route('**/products/cordless-hammer-drill-1', async route => {
     const response = await route.fetch();
     const html = await response.text();
+    const cdnBase = html.match(/<meta name="media-cdn-base-url" content="([^"]+)"/)?.[1];
+    if (!cdnBase) throw new Error('Media CDN base URL not found');
+    video = new URL('content/products/videos/blue-dial-wristwatch-video-01.mp4', cdnBase).href;
     const updated = html.replace(/(<script type="application\/json" id="storeCatalog">)([\s\S]*?)(<\/script>)/, (_, start, json, end) => {
       const catalog = JSON.parse(json);
       const product = catalog.products.find(item => item.slug === 'cordless-hammer-drill');

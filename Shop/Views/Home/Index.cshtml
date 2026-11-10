@@ -43,7 +43,7 @@
                         <div class="col-md-4">
                             <article class="journal-card">
                                 <a asp-controller="Magazine" asp-action="Details" asp-route-slug="@post.Slug">
-                                    <img loading="lazy" decoding="async" src="post.Image" alt=""/>
+                                    <img loading="lazy" decoding="async" src="@post.Image" alt=""/>
                                     <h3>@post.Title</h3>
                                 </a>
                                 <p>@post.Summary</p>

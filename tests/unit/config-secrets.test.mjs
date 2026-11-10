@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {findSecrets} from '../../tools/config-secrets.mjs';
+import {findSecrets, isAllowedSecret} from '../../tools/config-secrets.mjs';
 
 test('configuration secret detection catches nested credentials without flagging blanks or env placeholders', () => {
   const config = {
@@ -16,4 +16,12 @@ test('configuration secret detection catches nested credentials without flagging
     'Email:Smtp:Password',
     'Jwt:SigningKey',
   ]);
+});
+
+test('only the explicitly approved default connection fields are allowed', () => {
+  assert.equal(isAllowedSecret('Shop/appsettings.json', 'ConnectionStrings:DefaultConnection'), true);
+  assert.equal(isAllowedSecret('Admin/appsettings.json', 'ConnectionStrings:DefaultConnection'), true);
+  assert.equal(isAllowedSecret('Shop/appsettings.json', 'ConnectionStrings:Other'), false);
+  assert.equal(isAllowedSecret('Shop/appsettings.Development.json', 'ConnectionStrings:DefaultConnection'), false);
+  assert.equal(isAllowedSecret('Admin/appsettings.json', 'Email:Smtp:Password'), false);
 });

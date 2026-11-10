@@ -1,5 +1,6 @@
 import {test, expect} from '@playwright/test';
 import axe from 'axe-core';
+import {useBrowserAccount} from '../helpers/browser-account.mjs';
 
 async function expectNoA11yViolations(page, state) {
   const results = await page.evaluate(async () => window.axe.run(document, {
@@ -119,14 +120,11 @@ test('mobile drawer category icons keep their 31px layout in their component own
   });
 });
 
-test('guest can preview nonempty header panels on hover', async ({page, isMobile}) => {
+test('authenticated user can preview nonempty header panels on hover', async ({page, isMobile}) => {
   test.skip(isMobile, 'Hover panels are a desktop interaction.');
-  await page.addInitScript(() => {
-    localStorage.setItem('hn-favorites', JSON.stringify(['1']));
-    localStorage.setItem('hn-compare', JSON.stringify(['1']));
-    localStorage.setItem('hadi-norouzi-cart', JSON.stringify([{id: '1', name: 'Product', price: 100, quantity: 1}]));
-  });
+  await useBrowserAccount(page, {favorites: [1], compare: [1], cart: [{id: 1, quantity: 1, salesPlanId: 'regular'}]});
   await page.goto('/');
+  await expect(page.locator('#cartPanel .cart-item')).toHaveCount(1);
   for (const [toggle, panel] of panels) {
     await page.locator(toggle).hover();
     await expect(page.locator(panel)).toHaveClass(/\bopen\b/);
@@ -136,10 +134,9 @@ test('guest can preview nonempty header panels on hover', async ({page, isMobile
 });
 
 test('header cart footer stays compact and preserves room for the item list', async ({page, isMobile}) => {
-  await page.addInitScript(() => {
-    localStorage.setItem('hadi-norouzi-cart', JSON.stringify([{id: '1', name: 'Product', price: 100, quantity: 1}]));
-  });
+  await useBrowserAccount(page, {cart: [{id: 1, quantity: 1, salesPlanId: 'regular'}]});
   await page.goto('/');
+  await expect(page.locator('#cartPanel .cart-item')).toHaveCount(1);
   await page.locator('#cartToggle').hover();
 
   const layout = await page.locator('#cartPanel').evaluate(panel => ({
@@ -157,9 +154,7 @@ test('header cart footer stays compact and preserves room for the item list', as
 });
 
 test('touch header cart controls have 44px targets without panel overflow', async ({page}) => {
-  await page.addInitScript(() => {
-    localStorage.setItem('hadi-norouzi-cart', JSON.stringify([{id: '1', name: 'Product', price: 100, quantity: 2}]));
-  });
+  await useBrowserAccount(page, {cart: [{id: 1, quantity: 2, salesPlanId: 'regular'}]});
 
   for (const width of [320, 390, 768, 991]) {
     await page.setViewportSize({width, height: 900});

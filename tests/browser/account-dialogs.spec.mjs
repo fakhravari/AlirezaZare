@@ -86,7 +86,7 @@ test('account dialogs fit the viewport and remain usable', async ({page, isMobil
 test('order invoice and cart address dialogs fit the viewport', async ({page, isMobile}) => {
   await page.addInitScript(axe.source);
   if (isMobile) await page.setViewportSize({width: 320, height: 640});
-  await useBrowserAccount(page);
+  const account = await useBrowserAccount(page);
   const checkDialog = async dialog => {
     await expect(dialog).toBeVisible();
     const dimensions = await dialog.evaluate(element => {
@@ -109,6 +109,7 @@ test('order invoice and cart address dialogs fit the viewport', async ({page, is
   await page.goto('/search');
   await expect(page.locator('#accountToggle')).toHaveClass(/logged-in/);
   await page.evaluate(() => window.HNUI.cart.add(window.HNCatalog.find(1)));
+  await expect.poll(() => account.cart.length).toBe(1);
   await page.goto('/cart');
   await expect(page.locator('#cartView .cart-product-row')).toHaveCount(1);
   await expect(page.locator('#addressSelect option')).toHaveCount(2);

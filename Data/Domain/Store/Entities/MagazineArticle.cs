@@ -4,7 +4,14 @@ public sealed class MagazineArticle
 {
     public long Id { get; set; }
     public string ArticleKey { get; set; } = "";
-    public string Category { get; set; } = "";
+    public long IdCategory { get; set; }
+    public long IdBranch { get; set; }
+    public long IdTopic { get; set; }
+    public long IdArea { get; set; }
+    public MagazineArticleCategory Category { get; set; } = null!;
+    public MagazineArticleBranch Branch { get; set; } = null!;
+    public MagazineArticleTopic Topic { get; set; } = null!;
+    public MagazineArticleArea Area { get; set; } = null!;
     public string Title { get; set; } = "";
     public string Summary { get; set; } = "";
     public string? Author { get; set; }
@@ -17,13 +24,15 @@ public sealed class MagazineArticle
     public bool IsPublished { get; set; }
     public DateTime CreatedAtUtc { get; set; }
     public DateTime? UpdatedAtUtc { get; set; }
-    public string? Branch { get; set; }
-    public string? Topic { get; set; }
-    public string? Area { get; set; }
     public string? Kicker { get; set; }
     public string? ReadTimeText { get; set; }
     public List<MagazineArticleSection> Sections { get; set; } = [];
 }
+
+public sealed class MagazineArticleCategory { public long Id { get; set; } public string CategoryKey { get; set; } = ""; }
+public sealed class MagazineArticleBranch { public long Id { get; set; } public string BranchKey { get; set; } = ""; }
+public sealed class MagazineArticleTopic { public long Id { get; set; } public string TopicKey { get; set; } = ""; }
+public sealed class MagazineArticleArea { public long Id { get; set; } public string AreaKey { get; set; } = ""; }
 
 public sealed class MagazineArticleSection
 {

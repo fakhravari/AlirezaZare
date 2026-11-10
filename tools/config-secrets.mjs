@@ -1,5 +1,10 @@
 const secretKey = /(?:password|passwd|pwd|secret|token|api[-_]?key|connection[-_]?strings?|private[-_]?key|client[-_]?secret|access[-_]?key|signing[-_]?key|credential)/i;
 const placeholder = /^(?:\$\{[^}]+\}|CHANGE_ME|REPLACE_ME|YOUR_[A-Z0-9_]+)$/i;
+const allowedConnections = new Set(['Admin/appsettings.json', 'Shop/appsettings.json']);
+
+export function isAllowedSecret(file, field) {
+  return allowedConnections.has(file) && field === 'ConnectionStrings:DefaultConnection';
+}
 
 export function findSecrets(value, prefix = '', inheritedSecret = false) {
   const findings = [];

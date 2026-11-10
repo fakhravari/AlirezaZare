@@ -13,6 +13,25 @@ const loggedIn = (data, seed = {}) => {
   return r;
 };
 
+test('cart accepts product images on the configured CDN and rejects other origins', () => {
+  const data = source();
+  data.media['product-1'].card = `https://cdn.example.test/${data.media['product-1'].card}`;
+  const r = loggedIn(data);
+  const query = r.document.querySelector;
+  r.document.querySelector = selector => selector === 'meta[name="media-cdn-base-url"]'
+    ? {content: 'https://cdn.example.test/'} : query(selector);
+  assert.equal(r.ui.cart.add(r.window.HNCatalog.find(1)).length, 1);
+  assert.match(r.ui.cart.read()[0].image, /^https:\/\/cdn\.example\.test\/content\/products\//);
+
+  const bad = source();
+  bad.media['product-1'].card = 'https://other.example.test/content/products/image.jpg';
+  const other = loggedIn(bad);
+  const otherQuery = other.document.querySelector;
+  other.document.querySelector = selector => selector === 'meta[name="media-cdn-base-url"]'
+    ? {content: 'https://cdn.example.test/'} : otherQuery(selector);
+  assert.equal(other.ui.cart.add(other.window.HNCatalog.find(1)).length, 0);
+});
+
 test('required services are included exactly once, including after reload and legacy migration', () => {
   const r = loggedIn();
   const product = r.window.HNCatalog.find(1);

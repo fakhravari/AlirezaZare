@@ -2,7 +2,7 @@
 
 پیش‌نیاز: .NET SDK سازگار با `net10.0`؛ برای کنترل‌های UI و تست‌ها Node.js 24 و وابستگی‌های ثبت‌شده در package-lock.json.
 
-رشتهٔ اتصال `ConnectionStrings:DefaultConnection` را برای محیط توسعه در `Shop/appsettings.Development.json` که در Git نادیده گرفته می‌شود یا در متغیر محیطی `ConnectionStrings__DefaultConnection` قرار دهید. مقدار فایل tracked عمداً خالی است؛ محیط‌های دیگر باید اتصال را از تنظیمات امن همان محیط تأمین کنند.
+رشتهٔ اتصال `ConnectionStrings:DefaultConnection` در `Shop/appsettings.json` و `Admin/appsettings.json` طبق تصمیم مالک تنظیم شده است. برای استفاده از پایگاه دیگر می‌توان آن را در تنظیمات محیط یا متغیر `ConnectionStrings__DefaultConnection` بازنویسی کرد.
 
 انتشار `Shop` فایل `appsettings.Development.json` را کپی نمی‌کند؛ اتصال و گذرواژه‌های محیط انتشار باید جداگانه در تنظیمات امن میزبان فراهم شوند. برای اطمینان از نبود فایل قدیمی، انتشار را در پوشهٔ خروجی تازه انجام دهید؛ انتشار مجدد الزاماً فایل‌های باقی‌مانده از خروجی قبلی را حذف نمی‌کند.
 

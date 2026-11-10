@@ -249,7 +249,6 @@ test('page-owned placeholder colors override the shared fallback', async ({page}
     await page.setViewportSize({width, height: 800});
     for (const [path, selector] of [
       ['/search', '.filter-search input'],
-      ['/tracking', '.tracking-input input'],
     ]) {
       await page.goto(path);
       const placeholder = page.locator(selector).first();

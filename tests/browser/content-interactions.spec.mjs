@@ -1,6 +1,12 @@
 import {test, expect} from '@playwright/test';
 
 test('magazine cards and article hero use available product imagery', async ({page}) => {
+  await page.goto('/');
+  const homeImage = page.locator('.journal-card img').first();
+  await homeImage.scrollIntoViewIfNeeded();
+  await expect(homeImage).toHaveAttribute('src', /-main\.webp$/);
+  await expect.poll(() => homeImage.evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true);
+
   await page.goto('/magazine');
   const cardImage = page.locator('.journal-post img').first();
   await cardImage.scrollIntoViewIfNeeded();
@@ -11,9 +17,13 @@ test('magazine cards and article hero use available product imagery', async ({pa
   const heroImage = page.locator('.article-hero img.hero-image');
   await expect(heroImage).toHaveAttribute('src', /-main\.webp$/);
   await expect.poll(() => heroImage.evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true);
+  const contentImage = page.locator('.article-body figure img');
+  await contentImage.scrollIntoViewIfNeeded();
+  await expect(contentImage).toHaveAttribute('src', /-main\.webp$/);
+  await expect.poll(() => contentImage.evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true);
 });
 
-test('FAQ answer and contact validation fit the viewport', async ({page, isMobile}) => {
+test('FAQ answer and managed contact channels fit the viewport', async ({page, isMobile}) => {
   if (isMobile) await page.setViewportSize({width: 320, height: 640});
   await page.goto('/faq');
   const item = page.locator('.faq-item').first();
@@ -24,9 +34,9 @@ test('FAQ answer and contact validation fit the viewport', async ({page, isMobil
   expect(faqWidth.content).toBeLessThanOrEqual(faqWidth.viewport + 1);
 
   await page.goto('/contact');
-  await page.locator('#contactForm [type="submit"]').click();
-  await expect(page.locator('#contactStatus')).toBeVisible();
-  await expect(page.locator('#contactName')).toHaveAttribute('aria-invalid', 'true');
+  await expect(page.locator('.managed-contact-channels a[href^="tel:"]')).toBeVisible();
+  await expect(page.locator('.managed-contact-channels a[href^="mailto:"]')).toBeVisible();
+  await expect(page.locator('.managed-contact-channels a[href^="https://wa.me/"]')).toBeVisible();
   const contactWidth = await page.evaluate(() => ({content: document.documentElement.scrollWidth, viewport: innerWidth}));
   expect(contactWidth.content).toBeLessThanOrEqual(contactWidth.viewport + 1);
 });
