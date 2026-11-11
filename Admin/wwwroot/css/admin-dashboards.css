@@ -1,0 +1,268 @@
+.admin-dashboard {
+    --dashboard-store: #087f8c;
+    --dashboard-warehouse: #32704d;
+    --dashboard-ink: #273746;
+    --dashboard-muted: #657585;
+    --dashboard-border: #dce5ea;
+}
+
+.admin-dashboard__area {
+    --dashboard-accent: var(--dashboard-store);
+    position: relative;
+    overflow: hidden;
+    padding: clamp(1.1rem, 2.4vw, 1.8rem);
+    border: 1px solid var(--dashboard-border);
+    border-inline-start: 4px solid var(--dashboard-accent);
+    border-radius: 1rem;
+    background: #fff;
+    box-shadow: 0 0.35rem 1.2rem rgb(35 54 69 / 6%);
+}
+
+.admin-dashboard__area--warehouse {
+    --dashboard-accent: var(--dashboard-warehouse);
+}
+
+.admin-dashboard__header {
+    display: grid;
+    grid-template-columns: 3.5rem minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.85rem;
+}
+
+.admin-dashboard__icon,
+.admin-dashboard__link-icon,
+.admin-dashboard__system-icon {
+    display: grid;
+    place-items: center;
+    color: var(--dashboard-accent, var(--dashboard-store));
+    background: color-mix(in srgb, var(--dashboard-accent, var(--dashboard-store)) 10%, white);
+}
+
+.admin-dashboard__icon {
+    width: 3.5rem;
+    height: 3.5rem;
+    border: 1px solid color-mix(in srgb, var(--dashboard-accent) 20%, white);
+    border-radius: 1rem;
+    font-size: 1.35rem;
+}
+
+.admin-dashboard__heading {
+    min-width: 0;
+}
+
+.admin-dashboard__eyebrow {
+    display: block;
+    margin-bottom: 0.2rem;
+    color: var(--dashboard-muted);
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+.admin-dashboard__heading h2,
+.admin-dashboard__system-copy h2 {
+    margin: 0;
+    color: var(--dashboard-ink);
+    font-size: clamp(1.12rem, 1.6vw, 1.35rem);
+    font-weight: 700;
+}
+
+.admin-dashboard__overview,
+.admin-dashboard__system-link {
+    display: inline-flex;
+    min-height: 2.75rem;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55rem;
+    padding: 0.55rem 0.8rem;
+    border: 1px solid color-mix(in srgb, var(--dashboard-accent) 28%, white);
+    border-radius: 0.7rem;
+    color: var(--dashboard-accent);
+    background: #fff;
+    font-size: 0.88rem;
+    font-weight: 650;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background-color 150ms ease, border-color 150ms ease, transform 150ms ease;
+}
+
+.admin-dashboard__overview:hover,
+.admin-dashboard__system-link:hover {
+    border-color: var(--dashboard-accent);
+    color: var(--dashboard-accent);
+    background: color-mix(in srgb, var(--dashboard-accent) 6%, white);
+    transform: translateY(-1px);
+}
+
+.admin-dashboard__overview:focus-visible,
+.admin-dashboard__system-link:focus-visible,
+.admin-dashboard__link:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--dashboard-accent, var(--dashboard-store)) 40%, white);
+    outline-offset: 3px;
+}
+
+.admin-dashboard__description {
+    margin: 1rem 0 1.1rem;
+    color: var(--dashboard-muted);
+    line-height: 1.8;
+}
+
+.admin-dashboard__links {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.65rem;
+}
+
+.admin-dashboard__link {
+    --dashboard-accent: var(--dashboard-store);
+    display: grid;
+    min-width: 0;
+    min-height: 4.6rem;
+    grid-template-columns: 2.55rem minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.72rem 0.8rem;
+    border: 1px solid #e2e9ed;
+    border-radius: 0.8rem;
+    color: var(--dashboard-ink);
+    background: #fff;
+    text-decoration: none;
+    transition: border-color 150ms ease, background-color 150ms ease, box-shadow 150ms ease, transform 150ms ease;
+}
+
+.admin-dashboard__area--warehouse .admin-dashboard__link {
+    --dashboard-accent: var(--dashboard-warehouse);
+}
+
+.admin-dashboard__link:hover {
+    border-color: color-mix(in srgb, var(--dashboard-accent) 38%, white);
+    color: var(--dashboard-ink);
+    background: color-mix(in srgb, var(--dashboard-accent) 4%, white);
+    box-shadow: 0 0.3rem 0.85rem rgb(35 54 69 / 7%);
+    transform: translateY(-1px);
+}
+
+.admin-dashboard__link-icon {
+    width: 2.55rem;
+    height: 2.55rem;
+    border-radius: 0.7rem;
+    font-size: 1rem;
+}
+
+.admin-dashboard__link-copy {
+    display: grid;
+    min-width: 0;
+    gap: 0.15rem;
+}
+
+.admin-dashboard__link-copy strong {
+    overflow-wrap: anywhere;
+    font-size: 0.92rem;
+    font-weight: 700;
+}
+
+.admin-dashboard__link-copy small {
+    color: var(--dashboard-muted);
+    font-size: 0.76rem;
+    line-height: 1.55;
+}
+
+.admin-dashboard__arrow {
+    color: var(--dashboard-accent);
+    font-size: 0.8rem;
+    transition: transform 150ms ease;
+}
+
+.admin-dashboard__link:hover .admin-dashboard__arrow {
+    transform: translateX(-3px);
+}
+
+.admin-dashboard__system {
+    --dashboard-accent: #586c7c;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.2rem;
+    border: 1px solid var(--dashboard-border);
+    border-radius: 0.95rem;
+    background: #f8fafb;
+}
+
+.admin-dashboard__system-icon {
+    flex: 0 0 3rem;
+    width: 3rem;
+    height: 3rem;
+    border: 1px solid #dce5ea;
+    border-radius: 0.8rem;
+}
+
+.admin-dashboard__system-copy {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.admin-dashboard__system-copy p {
+    margin: 0.2rem 0 0;
+    color: var(--dashboard-muted);
+    font-size: 0.84rem;
+}
+
+.admin-dashboard__system-link {
+    --dashboard-accent: #586c7c;
+    flex: 0 0 auto;
+}
+
+.admin-dashboard__note {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.65rem;
+    margin: 1rem 0 0;
+    color: var(--dashboard-muted);
+    font-size: 0.82rem;
+    line-height: 1.8;
+}
+
+.admin-dashboard__note i {
+    margin-top: 0.3rem;
+    color: var(--dashboard-store);
+}
+
+@media (max-width: 575.98px) {
+    .admin-dashboard__header {
+        grid-template-columns: 3rem minmax(0, 1fr);
+        gap: 0.7rem;
+    }
+
+    .admin-dashboard__icon {
+        width: 3rem;
+        height: 3rem;
+    }
+
+    .admin-dashboard__overview {
+        grid-column: 2;
+        justify-self: start;
+    min-height: 2.75rem;
+        margin-top: 0.1rem;
+    }
+
+    .admin-dashboard__links {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-dashboard__system {
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+
+    .admin-dashboard__system-link {
+        width: 100%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .admin-dashboard__overview,
+    .admin-dashboard__system-link,
+    .admin-dashboard__link,
+    .admin-dashboard__arrow {
+        transition: none;
+    }
+}

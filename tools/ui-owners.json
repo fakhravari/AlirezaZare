@@ -50,6 +50,9 @@
             "Admin/Areas/Store/Views/Dashboard/Index.cshtml",
             "Admin/Areas/Warehouse/Views/Dashboard/Index.cshtml",
             "Admin/Views/Shared/_AdminPageIntro.cshtml"
+          ],
+          "css": [
+            "Admin/wwwroot/css/admin-dashboards.css"
           ]
         },
         "store-variant-prices": {
