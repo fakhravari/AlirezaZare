@@ -42,6 +42,7 @@ builder.Services.AddSingleton<PasswordHasher<AdminSystemUser>>();
 builder.Services.AddScoped<AdminAuthentication>();
 builder.Services.AddScoped<AdminCookieEvents>();
 builder.Services.AddScoped<Shop.Admin.Services.FtpMediaStorage>();
+builder.Services.AddScoped<Shop.Admin.Services.WarehouseStockLedger>();
 builder.Services.Configure<MvcOptions>(options => options.Filters.Add<AdminPermissionFilter>());
 
 builder.Services.AddShopDatabase(builder.Configuration);

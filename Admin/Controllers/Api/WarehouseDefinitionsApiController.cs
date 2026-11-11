@@ -316,7 +316,8 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                     db.WarehouseStockOwners.Add(new WarehouseStockOwner { IdWarehouse = entity.Id, IdStockOwner = input.OwnerSalesPlanId!.Value });
                     await db.SaveChangesAsync(cancellationToken);
                 }
-                if (input.IsSiteWarehouse) await SetSiteWarehouseAsync(entity.Id, cancellationToken);
+                if (input.IsSiteWarehouse && !await SetSiteWarehouseAsync(entity.Id, cancellationToken))
+                    return Conflict(new { detail = "تنظیمات سایت پیدا نشد." });
                 await transaction.CommitAsync(cancellationToken);
                 return Ok(new { entity.Id, message = "انبار ذخیره شد." });
             }
@@ -506,9 +507,8 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
 
     private async Task<IActionResult> GetWarehousesAsync(CancellationToken cancellationToken)
     {
-        long? siteWarehouseId = await db.Database.SqlQueryRaw<long?>(
-                "SELECT [IdWarehouse] AS [Value] FROM [Store].[SiteSetting] WHERE [Id]=1")
-            .SingleOrDefaultAsync(cancellationToken);
+        long? siteWarehouseId = await db.StoreSiteIdentities.AsNoTracking().Where(x => x.Id == 1)
+            .Select(x => x.IdWarehouse).SingleOrDefaultAsync(cancellationToken);
         var query = from warehouse in db.Warehouses.AsNoTracking()
             join company in db.Companies.AsNoTracking() on warehouse.IdCompany equals company.Id
             join plan in db.SalesPlanReferences.AsNoTracking() on warehouse.IdOwnerSalesPlanReference equals plan.Id
@@ -578,10 +578,8 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
     private async Task<IActionResult> GetSalesPlanMappingAsync(CancellationToken cancellationToken)
     {
         if (!User.IsInRole("system.full-access")) return Forbid();
-        long? siteId = await db.Database
-            .SqlQueryRaw<long?>(
-                "SELECT TOP(1) [IdWarehouse] AS [Value] FROM [Store].[SiteSetting] WHERE [Id]=1")
-            .SingleOrDefaultAsync(cancellationToken);
+        long? siteId = await db.StoreSiteIdentities.AsNoTracking().Where(x => x.Id == 1)
+            .Select(x => x.IdWarehouse).SingleOrDefaultAsync(cancellationToken);
         var companies = await db.Companies.AsNoTracking().Where(x => x.IsActive).OrderBy(x => x.Name)
             .Select(x => new { x.Id, x.Name }).ToListAsync(cancellationToken);
         var warehouses = await db.Warehouses.AsNoTracking().Where(x => x.IsActive)
@@ -641,17 +639,18 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
         return Ok(new { companies, warehouses, plans, units, products });
     }
 
-    private async Task SetSiteWarehouseAsync(long warehouseId, CancellationToken cancellationToken) =>
-        await db.Database.ExecuteSqlInterpolatedAsync(
-            $"UPDATE [Store].[SiteSetting] SET [IdWarehouse]={warehouseId},[UpdatedAtUtc]=SYSUTCDATETIME() WHERE [Id]=1; IF @@ROWCOUNT=0 THROW 51039, 'Site settings row is missing.', 1;",
-            cancellationToken);
+    private async Task<bool> SetSiteWarehouseAsync(long warehouseId, CancellationToken cancellationToken)
+    {
+        var settings = await db.StoreSiteIdentities.SingleOrDefaultAsync(x => x.Id == 1, cancellationToken);
+        if (settings is null) return false;
+        settings.IdWarehouse = warehouseId;
+        settings.SettingsUpdatedAtUtc = DateTime.UtcNow;
+        await db.SaveChangesAsync(cancellationToken);
+        return true;
+    }
 
-    private async Task<bool> IsSiteWarehouseAsync(long warehouseId, CancellationToken cancellationToken) =>
-        await db.Database
-            .SqlQueryRaw<int>(
-                "SELECT COUNT(*) AS [Value] FROM [Store].[SiteSetting] WHERE [Id]=1 AND [IdWarehouse]={0}",
-                warehouseId)
-            .SingleAsync(cancellationToken) > 0;
+    private Task<bool> IsSiteWarehouseAsync(long warehouseId, CancellationToken cancellationToken) =>
+        db.StoreSiteIdentities.AsNoTracking().AnyAsync(x => x.Id == 1 && x.IdWarehouse == warehouseId, cancellationToken);
 
     private async Task<bool> CanAccessWarehouseAsync(long warehouseId, CancellationToken cancellationToken)
     {

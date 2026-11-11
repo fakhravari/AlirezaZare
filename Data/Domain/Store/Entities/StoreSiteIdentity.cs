@@ -25,4 +25,5 @@ public sealed class StoreSiteIdentity
     public string? FtpPasswordProtected { get; set; }
     public string? UpdatedByUserKey { get; set; }
     public DateTime UpdatedAtUtc { get; set; }
+    public DateTime? SettingsUpdatedAtUtc { get; set; }
 }

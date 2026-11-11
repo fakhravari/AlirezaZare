@@ -3,8 +3,10 @@ using System.Security.Claims;
 using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Shop.Admin.Services;
+using Shop.Data.Domain.Account.Entities;
+using Shop.Data.Domain.Warehouse.Entities;
 using Shop.Data.Infrastructure.Persistence;
 
 namespace Shop.Admin.Controllers.Api;
@@ -13,22 +15,25 @@ namespace Shop.Admin.Controllers.Api;
 [ApiController]
 [Authorize(Roles = "system.full-access")]
 [Route("api/admin/store/paid-orders-dispatch")]
-public sealed class StorePaidOrdersDispatchApiController(ShopDbContext db) : ControllerBase
+public sealed class StorePaidOrdersDispatchApiController(ShopDbContext db, WarehouseStockLedger stockLedger) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> List(CancellationToken cancellationToken)
     {
-        var rows = await db.Database.SqlQueryRaw<PaidOrderRow>("""
-            SELECT TOP (200) o.[Id], o.[OrderNumber], o.[TotalAmount], o.[ItemCount], p.[PaidAtUtc],
-                LTRIM(RTRIM(CONCAT(profile.[FirstName], N' ', profile.[LastName]))) AS [CustomerName]
-            FROM [Store].[Order] o
-            JOIN [Account].[Profile] profile ON profile.[Id]=o.[IdProfile]
-            JOIN [Store].[PaymentAttempt] p ON p.[IdOrder]=o.[Id] AND p.[Status]=N'verified' AND p.[Amount]=o.[TotalAmount]
-            JOIN [Warehouse].[PaidOrderInbox] inbox ON inbox.[StoreOrderKey]=o.[OrderNumber] AND inbox.[Status]='P'
-            WHERE o.[Status]=N'payment-confirmed' AND o.[IdWarehouseDocument] IS NULL
-                AND EXISTS (SELECT 1 FROM [Warehouse].[PaidOrderInboxLine] l WHERE l.[IdPaidOrderInbox]=inbox.[Id])
-            ORDER BY p.[PaidAtUtc], o.[Id]
-            """).ToListAsync(cancellationToken);
+        var rows = await (from order in db.StoreCustomerOrders.AsNoTracking()
+                          join profile in db.AccountProfiles.AsNoTracking() on order.IdProfile equals profile.Id
+                          join payment in db.StorePaymentAttempts.AsNoTracking() on order.Id equals payment.IdOrder
+                          join inbox in db.WarehousePaidOrderInboxes.AsNoTracking() on order.OrderNumber equals inbox.StoreOrderKey
+                          where payment.Status == "verified" && payment.Amount == order.TotalAmount && inbox.Status == "P" &&
+                                order.Status == "payment-confirmed" && order.IdWarehouseDocument == null &&
+                                db.WarehousePaidOrderInboxLines.Any(line => line.IdPaidOrderInbox == inbox.Id)
+                          orderby payment.PaidAtUtc, order.Id
+                          select new PaidOrderRow
+                          {
+                              Id = order.Id, OrderNumber = order.OrderNumber, TotalAmount = order.TotalAmount,
+                              ItemCount = order.ItemCount, PaidAtUtc = payment.PaidAtUtc!.Value,
+                              CustomerName = (profile.FirstName + " " + profile.LastName).Trim()
+                          }).Take(200).ToListAsync(cancellationToken);
         return Ok(new { items = rows });
     }
 
@@ -36,89 +41,117 @@ public sealed class StorePaidOrdersDispatchApiController(ShopDbContext db) : Con
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create([FromBody] DispatchInput input, CancellationToken cancellationToken)
     {
-        if (input.OrderIds is null || input.OrderIds.Length is < 1 or > 200 || input.OrderIds.Any(id => id <= 0)
-            || input.OrderIds.Distinct().Count() != input.OrderIds.Length)
+        if (input.OrderIds is null || input.OrderIds.Length is < 1 or > 200 || input.OrderIds.Any(id => id <= 0) ||
+            input.OrderIds.Distinct().Count() != input.OrderIds.Length)
             return BadRequest(new { detail = "سفارش‌های انتخاب‌شده معتبر نیستند." });
-        string ids = JsonSerializer.Serialize(input.OrderIds);
+
         string actor = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.Identity?.Name ?? "system";
+        if (actor.Length > 128) return BadRequest(new { detail = "شناسهٔ مدیر نامعتبر است." });
         await using var transaction = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, cancellationToken);
         try
         {
-            var result = await db.Database.SqlQuery<DispatchResult>($"""
-                DECLARE @Ids TABLE ([Id] bigint NOT NULL PRIMARY KEY);
-                INSERT @Ids SELECT CONVERT(bigint, [value]) FROM OPENJSON({ids});
-                DECLARE @Warehouse bigint, @Type bigint, @Party bigint, @Plan bigint, @Document bigint, @Number bigint;
-                SELECT @Warehouse=s.[IdWarehouse] FROM [Store].[SiteSetting] s
-                    JOIN [Warehouse].[Warehouse] w ON w.[Id]=s.[IdWarehouse] AND w.[IsActive]=1 WHERE s.[Id]=1;
-                SELECT @Type=[Id] FROM [Warehouse].[DocumentType] WHERE [Code]=N'SALES-DISPATCH' AND [IsActive]=1 AND [Direction]='I';
-                SELECT @Party=[Id] FROM [Warehouse].[Party] WHERE [ExternalPartyKey]=N'STORE-SALES' AND [IsActive]=1;
-                IF @Warehouse IS NULL OR @Type IS NULL OR @Party IS NULL THROW 51040, 'Dispatch configuration missing.', 1;
-                IF (SELECT COUNT(*) FROM @Ids) <> (SELECT COUNT(*) FROM @Ids ids
-                    JOIN [Store].[Order] o WITH (UPDLOCK, HOLDLOCK) ON o.[Id]=ids.[Id]
-                    JOIN [Store].[PaymentAttempt] p ON p.[IdOrder]=o.[Id] AND p.[Status]=N'verified' AND p.[Amount]=o.[TotalAmount]
-                    JOIN [Warehouse].[PaidOrderInbox] inbox WITH (UPDLOCK, HOLDLOCK) ON inbox.[StoreOrderKey]=o.[OrderNumber] AND inbox.[Status]='P'
-                    WHERE o.[Status]=N'payment-confirmed' AND o.[IdWarehouseDocument] IS NULL
-                      AND EXISTS (SELECT 1 FROM [Warehouse].[PaidOrderInboxLine] l WHERE l.[IdPaidOrderInbox]=inbox.[Id]))
-                    THROW 51041, 'Orders are no longer eligible.', 1;
-                IF EXISTS (SELECT 1 FROM @Ids ids JOIN [Store].[Order] o ON o.[Id]=ids.[Id]
-                    JOIN [Warehouse].[PaidOrderInbox] inbox ON inbox.[StoreOrderKey]=o.[OrderNumber]
-                    JOIN [Warehouse].[PaidOrderInboxLine] l ON l.[IdPaidOrderInbox]=inbox.[Id]
-                    LEFT JOIN [Warehouse].[WarehouseStockOwner] owner ON owner.[IdWarehouse]=@Warehouse AND owner.[IdStockOwner]=l.[IdSalesPlanReference]
-                    WHERE owner.[IdWarehouse] IS NULL)
-                    THROW 51042, 'Sales plan is not assigned to the sales warehouse.', 1;
-                SELECT TOP (1) @Plan=l.[IdSalesPlanReference] FROM @Ids ids
-                    JOIN [Store].[Order] o ON o.[Id]=ids.[Id] JOIN [Warehouse].[PaidOrderInbox] inbox ON inbox.[StoreOrderKey]=o.[OrderNumber]
-                    JOIN [Warehouse].[PaidOrderInboxLine] l ON l.[IdPaidOrderInbox]=inbox.[Id] ORDER BY l.[IdSalesPlanReference];
-                DECLARE @StockKeys TABLE ([ItemId] bigint NOT NULL, [PlanId] bigint NOT NULL, PRIMARY KEY ([ItemId], [PlanId]));
-                INSERT @StockKeys ([ItemId], [PlanId])
-                    SELECT DISTINCT l.[IdInventoryItem], l.[IdSalesPlanReference] FROM @Ids ids
-                    JOIN [Store].[Order] o ON o.[Id]=ids.[Id]
-                    JOIN [Warehouse].[PaidOrderInbox] inbox ON inbox.[StoreOrderKey]=o.[OrderNumber]
-                    JOIN [Warehouse].[PaidOrderInboxLine] l ON l.[IdPaidOrderInbox]=inbox.[Id];
-                DECLARE @LockItem bigint, @LockPlan bigint, @LockBalance bigint;
-                WHILE EXISTS (SELECT 1 FROM @StockKeys)
-                BEGIN
-                    SELECT TOP (1) @LockItem=[ItemId], @LockPlan=[PlanId] FROM @StockKeys ORDER BY [ItemId], [PlanId];
-                    SELECT @LockBalance=[Id] FROM [Warehouse].[StockBalance] WITH (UPDLOCK, HOLDLOCK, INDEX([UQ_Warehouse_StockBalance_Key]))
-                        WHERE [IdWarehouse]=@Warehouse AND [IdInventoryItem]=@LockItem AND [IdSalesPlanReference]=@LockPlan;
-                    DELETE FROM @StockKeys WHERE [ItemId]=@LockItem AND [PlanId]=@LockPlan;
-                END;
-                INSERT [Warehouse].[WarehouseDocument] ([IdWarehouse],[IdDocumentType],[IdParty],[IdSalesPlanReference],[DocumentDate],[Status],[Reason],[CreatedByUserKey])
-                    VALUES (@Warehouse,@Type,@Party,@Plan,CONVERT(date,GETDATE()),'F',N'حواله تجمیعی سفارش‌های فروشگاه',{actor});
-                SET @Document=SCOPE_IDENTITY();
-                SELECT @Number=[DocumentNumber] FROM [Warehouse].[WarehouseDocument] WHERE [Id]=@Document;
-                INSERT [Warehouse].[WarehouseDocumentLine] ([IdDocument],[IdInventoryItem],[IdUnit],[IdSalesPlanReference],[Quantity],[ConversionFactor],[BaseQuantity],[ProductNameSnapshot],[VariantNameSnapshot],[UnitNameSnapshot])
-                SELECT @Document,l.[IdInventoryItem],l.[IdUnit],l.[IdSalesPlanReference],SUM(l.[Quantity]),l.[ConversionFactor],SUM(l.[BaseQuantity]),product.[Name],variant.[Name],unit.[Name]
-                FROM @Ids ids JOIN [Store].[Order] o ON o.[Id]=ids.[Id]
-                JOIN [Warehouse].[PaidOrderInbox] inbox ON inbox.[StoreOrderKey]=o.[OrderNumber]
-                JOIN [Warehouse].[PaidOrderInboxLine] l ON l.[IdPaidOrderInbox]=inbox.[Id]
-                JOIN [Warehouse].[InventoryItem] item ON item.[Id]=l.[IdInventoryItem]
-                JOIN [Warehouse].[Product] product ON product.[Id]=item.[IdProduct]
-                LEFT JOIN [Warehouse].[ProductVariant] variant ON variant.[Id]=item.[IdProductVariant]
-                JOIN [Warehouse].[Unit] unit ON unit.[Id]=l.[IdUnit]
-                GROUP BY l.[IdInventoryItem],l.[IdUnit],l.[IdSalesPlanReference],l.[ConversionFactor],product.[Name],variant.[Name],unit.[Name];
-                EXEC [Warehouse].[RebuildDocumentStock] @IdDocument=@Document;
-                INSERT [Warehouse].[PaidOrderInboxDocument] ([IdPaidOrderInbox],[IdWarehouseDocument])
-                    SELECT inbox.[Id],@Document FROM @Ids ids JOIN [Store].[Order] o ON o.[Id]=ids.[Id]
-                    JOIN [Warehouse].[PaidOrderInbox] inbox ON inbox.[StoreOrderKey]=o.[OrderNumber];
-                UPDATE inbox SET [Status]='C' FROM [Warehouse].[PaidOrderInbox] inbox JOIN [Store].[Order] o ON o.[OrderNumber]=inbox.[StoreOrderKey] JOIN @Ids ids ON ids.[Id]=o.[Id];
-                UPDATE o SET [IdWarehouseDocument]=@Document,[Status]=N'warehouse-confirmed' FROM [Store].[Order] o JOIN @Ids ids ON ids.[Id]=o.[Id];
-                INSERT [Warehouse].[DocumentAudit] ([DocumentId],[DocumentNumber],[WarehouseId],[Action],[ActorUserKey],[Reason],[AfterJson])
-                    VALUES (@Document,@Number,@Warehouse,N'Created',{actor},N'حواله تجمیعی سفارش‌های فروشگاه',CONCAT(NCHAR(123),NCHAR(34),N'orderIds',NCHAR(34),N':', {ids},NCHAR(125)));
-                SELECT @Document AS [Id], @Number AS [DocumentNumber];
-                """).ToListAsync(cancellationToken);
-            await transaction.CommitAsync(cancellationToken);
-            return Ok(result.Single());
-        }
-        catch (SqlException exception) when (exception.Number is 51002 or 51040 or 51041 or 51042)
-        {
-            return Conflict(new { detail = exception.Number switch
+            long[] ids = input.OrderIds;
+            var orders = await db.StoreCustomerOrders.Where(x => ids.Contains(x.Id)).ToListAsync(cancellationToken);
+            if (orders.Count != ids.Length) return Conflict(new { detail = "وضعیت یکی از سفارش‌ها تغییر کرده است." });
+            var orderIds = orders.Select(x => x.Id).ToArray();
+            var payments = await db.StorePaymentAttempts.Where(x => orderIds.Contains(x.IdOrder) && x.Status == "verified")
+                .ToListAsync(cancellationToken);
+            var orderNumbers = orders.Select(x => x.OrderNumber).ToArray();
+            var inboxes = await db.WarehousePaidOrderInboxes.Include(x => x.Lines)
+                .Where(x => orderNumbers.Contains(x.StoreOrderKey) && x.Status == "P").ToListAsync(cancellationToken);
+            var orderByNumber = orders.ToDictionary(x => x.OrderNumber);
+            if (inboxes.Count != ids.Length || orders.Any(order => order.Status != "payment-confirmed" ||
+                    order.IdWarehouseDocument is not null || (order.PaymentMethod == "demo" && order.ExternalOrderKey?.StartsWith("demo-order-") == true) ||
+                    !payments.Any(payment => payment.IdOrder == order.Id && payment.Amount == order.TotalAmount) ||
+                    !inboxes.Any(inbox => inbox.StoreOrderKey == order.OrderNumber && inbox.Lines.Count > 0)))
+                return Conflict(new { detail = "وضعیت یکی از سفارش‌ها تغییر کرده است؛ فهرست را دوباره بارگذاری کنید." });
+
+            var allLines = inboxes.SelectMany(inbox => inbox.Lines.Select(line => new { Inbox = inbox, Line = line })).ToList();
+            long[] planIds = allLines.Select(x => x.Line.IdSalesPlanReference).Distinct().ToArray();
+            var settings = await db.StoreSiteIdentities.AsNoTracking().SingleOrDefaultAsync(x => x.Id == 1, cancellationToken);
+            var warehouse = settings?.IdWarehouse is long warehouseId
+                ? await db.Warehouses.SingleOrDefaultAsync(x => x.Id == warehouseId && x.IsActive, cancellationToken)
+                : null;
+            var type = await db.WarehouseDocumentTypes.SingleOrDefaultAsync(x => x.Code == "SALES-DISPATCH" && x.IsActive && x.Direction == "I", cancellationToken);
+            var party = await db.WarehouseParties.SingleOrDefaultAsync(x => x.ExternalPartyKey == "STORE-SALES" && x.IsActive, cancellationToken);
+            if (warehouse is null || type is null || party is null)
+                return Conflict(new { detail = "انبار فروش، نوع حواله یا مرجع آن تنظیم نشده است." });
+
+            var assignedPlanIds = await db.WarehouseStockOwners.AsNoTracking()
+                .Where(x => x.IdWarehouse == warehouse.Id && planIds.Contains(x.IdStockOwner))
+                .Select(x => x.IdStockOwner).ToArrayAsync(cancellationToken);
+            if (assignedPlanIds.Length != planIds.Length)
+                return Conflict(new { detail = "طرح یکی از اقلام به انبار فروش متصل نیست." });
+
+            var inboxIds = inboxes.Select(x => x.Id).ToArray();
+            var lineDetails = await (from line in db.WarehousePaidOrderInboxLines.AsNoTracking().Where(x => inboxIds.Contains(x.IdPaidOrderInbox))
+                                     join item in db.InventoryItems.AsNoTracking() on line.IdInventoryItem equals item.Id
+                                     join product in db.Products.AsNoTracking() on item.IdProduct equals product.Id
+                                     join unit in db.WarehouseUnits.AsNoTracking() on line.IdUnit equals unit.Id
+                                     join variant0 in db.ProductVariants.AsNoTracking() on item.IdProductVariant equals variant0.Id into variants
+                                     from variant in variants.DefaultIfEmpty()
+                                     select new
+                                     {
+                                         line.IdInventoryItem, line.IdUnit, line.IdSalesPlanReference,
+                                         line.Quantity, line.ConversionFactor, line.BaseQuantity,
+                                         ProductName = product.Name, VariantName = variant == null ? null : variant.Name,
+                                         UnitName = unit.Name
+                                     }).ToListAsync(cancellationToken);
+
+            var headerPlanId = lineDetails.Min(x => x.IdSalesPlanReference);
+            var document = new WarehouseDocumentRecord
             {
-                51002 => "موجودی برای صدور حواله کافی نیست.",
-                51040 => "انبار فروش، نوع حواله فروش یا مرجع آن تنظیم نشده است.",
-                51042 => "طرح یکی از اقلام به انبار فروش متصل نیست.",
-                _ => "وضعیت یکی از سفارش‌ها تغییر کرده است؛ فهرست را دوباره بارگذاری کنید."
-            }});
+                IdWarehouse = warehouse.Id, IdDocumentType = type.Id, IdParty = party.Id,
+                IdSalesPlanReference = headerPlanId, DocumentDate = DateOnly.FromDateTime(DateTime.Today),
+                Status = "F", Reason = "حوالهٔ تجمیعی سفارش‌های فروشگاه", CreatedByUserKey = actor,
+                CreatedAtUtc = DateTime.UtcNow
+            };
+            db.WarehouseDocuments.Add(document);
+            await db.SaveChangesAsync(cancellationToken);
+
+            foreach (var group in lineDetails.GroupBy(x => new
+                         { x.IdInventoryItem, x.IdUnit, x.IdSalesPlanReference, x.ConversionFactor, x.ProductName, x.VariantName, x.UnitName }))
+            {
+                db.WarehouseDocumentLines.Add(new WarehouseDocumentLineRecord
+                {
+                    IdDocument = document.Id, IdInventoryItem = group.Key.IdInventoryItem,
+                    IdUnit = group.Key.IdUnit, IdSalesPlanReference = group.Key.IdSalesPlanReference,
+                    Quantity = group.Sum(x => x.Quantity), ConversionFactor = group.Key.ConversionFactor,
+                    BaseQuantity = group.Sum(x => x.BaseQuantity), ProductNameSnapshot = group.Key.ProductName,
+                    VariantNameSnapshot = group.Key.VariantName, UnitNameSnapshot = group.Key.UnitName
+                });
+            }
+            await db.SaveChangesAsync(cancellationToken);
+            await stockLedger.RebuildDocumentAsync(document.Id, cancellationToken);
+
+            foreach (var inbox in inboxes)
+            {
+                inbox.Status = "C";
+                var order = orderByNumber[inbox.StoreOrderKey];
+                order.IdWarehouseDocument = document.Id;
+                order.Status = "warehouse-confirmed";
+                db.WarehousePaidOrderInboxDocuments.Add(new WarehousePaidOrderInboxDocument
+                {
+                    IdPaidOrderInbox = inbox.Id, IdWarehouseDocument = document.Id
+                });
+            }
+            db.WarehouseDocumentAudits.Add(new WarehouseDocumentAudit
+            {
+                DocumentId = document.Id, DocumentNumber = document.DocumentNumber, WarehouseId = warehouse.Id,
+                Action = "Created", ActorUserKey = actor, OccurredAtUtc = DateTime.UtcNow,
+                Reason = document.Reason, AfterJson = JsonSerializer.Serialize(new { orderIds = ids })
+            });
+            await db.SaveChangesAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
+            return Ok(new { document.Id, document.DocumentNumber });
+        }
+        catch (InsufficientWarehouseStockException)
+        {
+            return Conflict(new { detail = "موجودی برای صدور حواله کافی نیست." });
+        }
+        catch (DbUpdateException exception) when (exception.InnerException is Microsoft.Data.SqlClient.SqlException { Number: 2601 or 2627 or 547 })
+        {
+            return Conflict(new { detail = "وضعیت یکی از سفارش‌ها یا وابستگی‌های انبار تغییر کرده است." });
         }
     }
 
@@ -131,6 +164,5 @@ public sealed class StorePaidOrdersDispatchApiController(ShopDbContext db) : Con
         public decimal TotalAmount { get; set; }
         public DateTime PaidAtUtc { get; set; }
     }
-    public sealed class DispatchResult { public long Id { get; set; } public long DocumentNumber { get; set; } }
     public sealed record DispatchInput(long[]? OrderIds);
 }

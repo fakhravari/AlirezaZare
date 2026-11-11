@@ -47,6 +47,12 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
     public DbSet<StoreProductDocument> StoreProductDocuments => Set<StoreProductDocument>();
     public DbSet<StoreBrand> StoreBrands => Set<StoreBrand>();
     public DbSet<StoreCategory> StoreCategories => Set<StoreCategory>();
+    public DbSet<StoreProductSalesPlanOffer> StoreProductSalesPlanOffers => Set<StoreProductSalesPlanOffer>();
+    public DbSet<StoreProductVariantSalesPlanOffer> StoreProductVariantSalesPlanOffers => Set<StoreProductVariantSalesPlanOffer>();
+    public DbSet<StoreAccessory> StoreAccessories => Set<StoreAccessory>();
+    public DbSet<StoreProductAccessory> StoreProductAccessories => Set<StoreProductAccessory>();
+    public DbSet<StoreProductSalesPlanOfferAccessory> StoreProductSalesPlanOfferAccessories => Set<StoreProductSalesPlanOfferAccessory>();
+    public DbSet<StoreProductSalesPlanOfferSpecificationOverride> StoreProductSalesPlanOfferSpecificationOverrides => Set<StoreProductSalesPlanOfferSpecificationOverride>();
     public DbSet<GeoCountry> GeoCountries => Set<GeoCountry>();
     public DbSet<GeoProvince> GeoProvinces => Set<GeoProvince>();
     public DbSet<GeoCity> GeoCities => Set<GeoCity>();
@@ -65,6 +71,7 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
     public DbSet<StorePaymentAttempt> StorePaymentAttempts => Set<StorePaymentAttempt>();
     public DbSet<WarehousePaidOrderInbox> WarehousePaidOrderInboxes => Set<WarehousePaidOrderInbox>();
     public DbSet<WarehousePaidOrderInboxLine> WarehousePaidOrderInboxLines => Set<WarehousePaidOrderInboxLine>();
+    public DbSet<WarehousePaidOrderInboxDocument> WarehousePaidOrderInboxDocuments => Set<WarehousePaidOrderInboxDocument>();
     public DbSet<StoreCustomerOrderReference> StoreCustomerOrders => Set<StoreCustomerOrderReference>();
     public DbSet<StoreOrderShippingHistory> StoreOrderShippingHistories => Set<StoreOrderShippingHistory>();
     public DbSet<StoreOrderShipmentTrackingHistory> StoreOrderShipmentTrackingHistories => Set<StoreOrderShipmentTrackingHistory>();
@@ -392,6 +399,8 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
                 .HasForeignKey(x => x.IdSalesPlanReference);
             entity.Property(x => x.Quantity).HasPrecision(18, 3);
             entity.Property(x => x.MinimumQuantity).HasPrecision(18, 3);
+            entity.Property(x => x.UpdatedAtUtc).HasPrecision(3);
+            entity.Property(x => x.Version).IsRowVersion();
         });
         modelBuilder.Entity<InventoryItem>(entity =>
         {
@@ -454,6 +463,7 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.Property(x => x.FtpPasswordProtected).HasMaxLength(2048);
             entity.Property(x => x.UpdatedByUserKey).HasMaxLength(128);
             entity.Property(x => x.UpdatedAtUtc).HasColumnName("IdentityUpdatedAtUtc").HasPrecision(3);
+            entity.Property(x => x.SettingsUpdatedAtUtc).HasColumnName("UpdatedAtUtc").HasPrecision(3);
         });
         modelBuilder.Entity<AccountProfile>(entity =>
         {
@@ -529,6 +539,7 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.Property(x => x.StoreOrderKey).HasMaxLength(128).IsRequired();
             entity.Property(x => x.CustomerKey).HasMaxLength(128).IsRequired();
             entity.Property(x => x.PaymentAtUtc).HasPrecision(3);
+            entity.Property(x => x.Status).HasColumnType("char(1)").HasMaxLength(1).IsRequired();
             entity.HasIndex(x => x.StoreOrderKey).IsUnique();
             entity.HasMany(x => x.Lines).WithOne().HasForeignKey(x => x.IdPaidOrderInbox);
         });
@@ -541,6 +552,13 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.Property(x => x.ConversionFactor).HasPrecision(18, 3);
             entity.Property(x => x.BaseQuantity).HasPrecision(18, 3);
             entity.Property(x => x.ConversionFactor).HasPrecision(18, 9);
+        });
+        modelBuilder.Entity<WarehousePaidOrderInboxDocument>(entity =>
+        {
+            entity.ToTable("PaidOrderInboxDocument", "Warehouse");
+            entity.HasKey(x => x.Id);
+            entity.HasIndex(x => new { x.IdPaidOrderInbox, x.IdWarehouseDocument }).IsUnique();
+            entity.HasIndex(x => x.IdWarehouseDocument).IsUnique();
         });
         modelBuilder.Entity<AccountRecentSearch>(entity =>
         {
@@ -582,6 +600,42 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.Property(x => x.SourceKey).HasMaxLength(100);
             entity.Property(x => x.FilterKey).HasMaxLength(100);
             entity.HasIndex(x => x.AttributeKey).IsUnique();
+        });
+        modelBuilder.Entity<StoreProductSalesPlanOffer>(entity =>
+        {
+            entity.ToTable("ProductSalesPlanOffer", "Store"); entity.HasKey(x => x.Id);
+            entity.Property(x => x.PriceAmount).HasPrecision(19, 0); entity.Property(x => x.DiscountPercent).HasPrecision(5, 2);
+            entity.Property(x => x.CreatedAtUtc).HasPrecision(3); entity.Property(x => x.UpdatedAtUtc).HasPrecision(3);
+            entity.HasIndex(x => new { x.IdProduct, x.IdSalesPlan }).IsUnique();
+        });
+        modelBuilder.Entity<StoreProductVariantSalesPlanOffer>(entity =>
+        {
+            entity.ToTable("ProductVariantSalesPlanOffer", "Store"); entity.HasKey(x => x.Id);
+            entity.Property(x => x.PriceAmount).HasPrecision(19, 0); entity.Property(x => x.DiscountPercent).HasPrecision(5, 2);
+            entity.Property(x => x.CreatedAtUtc).HasPrecision(3); entity.Property(x => x.UpdatedAtUtc).HasPrecision(3);
+            entity.HasIndex(x => new { x.IdProductVariant, x.IdSalesPlan }).IsUnique();
+        });
+        modelBuilder.Entity<StoreAccessory>(entity =>
+        {
+            entity.ToTable("Accessory", "Store"); entity.HasKey(x => x.Id);
+            entity.Property(x => x.AccessoryKey).HasMaxLength(150).IsRequired(); entity.Property(x => x.Name).HasMaxLength(300).IsRequired();
+            entity.Property(x => x.Description).HasMaxLength(1000); entity.HasIndex(x => x.AccessoryKey).IsUnique();
+        });
+        modelBuilder.Entity<StoreProductAccessory>(entity =>
+        {
+            entity.ToTable("ProductAccessory", "Store"); entity.HasKey(x => x.Id);
+            entity.Property(x => x.PriceAmount).HasPrecision(19, 0); entity.HasIndex(x => new { x.IdProduct, x.IdAccessory }).IsUnique();
+        });
+        modelBuilder.Entity<StoreProductSalesPlanOfferAccessory>(entity =>
+        {
+            entity.ToTable("ProductSalesPlanOfferAccessory", "Store"); entity.HasKey(x => x.Id);
+            entity.Property(x => x.PriceAmount).HasPrecision(19, 0); entity.HasIndex(x => new { x.IdProductSalesPlanOffer, x.IdAccessory }).IsUnique();
+        });
+        modelBuilder.Entity<StoreProductSalesPlanOfferSpecificationOverride>(entity =>
+        {
+            entity.ToTable("ProductSalesPlanOfferSpecificationOverride", "Store"); entity.HasKey(x => x.Id);
+            entity.Property(x => x.SpecificationKey).HasMaxLength(100).IsRequired(); entity.Property(x => x.Value).HasMaxLength(1000).IsRequired();
+            entity.HasIndex(x => new { x.IdProductSalesPlanOffer, x.SpecificationKey }).IsUnique();
         });
         modelBuilder.Entity<StoreProductMedia>(entity =>
         {

@@ -1,17 +1,17 @@
 using System.Security.Claims;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Shop.Data.Domain.Warehouse.Entities;
 using Shop.Data.Infrastructure.Persistence;
+using Shop.Admin.Services;
 
 namespace Shop.Admin.Controllers.Api;
 
 [Area("Warehouse")]
 [ApiController]
 [Route("api/admin/warehouse/documents")]
-public sealed class WarehouseDocumentsApiController(ShopDbContext db) : ControllerBase
+public sealed class WarehouseDocumentsApiController(ShopDbContext db, WarehouseStockLedger stockLedger) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> List([FromQuery] long? warehouseId, [FromQuery] string? status,
@@ -129,10 +129,6 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db) : Controll
             return ValidationProblem(detail: "کالا یا واحد انتخاب‌شده برای یکی از اقلام معتبر نیست.", statusCode: 400);
 
         // Acquire balance keys before inserting documents so competing issues lock in the same order.
-        foreach (var key in lines.Select(line => new { line.InventoryItemId, PlanId = line.SalesPlanId ?? input.SalesPlanId })
-                     .Distinct().OrderBy(key => key.InventoryItemId).ThenBy(key => key.PlanId))
-            await db.Database.ExecuteSqlInterpolatedAsync($"SELECT [Id] FROM [Warehouse].[StockBalance] WITH (UPDLOCK, HOLDLOCK, INDEX([UQ_Warehouse_StockBalance_Key])) WHERE [IdWarehouse]={input.WarehouseId} AND [IdInventoryItem]={key.InventoryItemId} AND [IdSalesPlanReference]={key.PlanId}", cancellationToken);
-
         var document = new WarehouseDocumentRecord
         {
             IdWarehouse = input.WarehouseId,
@@ -168,7 +164,7 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db) : Controll
             await transaction.CommitAsync(cancellationToken);
             return Ok(new { document.Id, document.DocumentNumber, message = "سند انبار ثبت شد." });
         }
-        catch (SqlException exception) when (exception.Number == 51002)
+        catch (InsufficientWarehouseStockException)
         {
             return Conflict(new { detail = "موجودی این عملیات منفی می‌شود و سند ذخیره نشد." });
         }
@@ -181,9 +177,10 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db) : Controll
     {
         await using var transaction =
             await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
-        WarehouseDocumentRecord? document =
-            await db.WarehouseDocuments.FromSqlInterpolated($"SELECT * FROM [Warehouse].[WarehouseDocument] WITH (UPDLOCK, HOLDLOCK) WHERE [Id]={id}")
-                .SingleOrDefaultAsync(cancellationToken);
+        int claimed = await db.WarehouseDocuments.Where(x => x.Id == id)
+            .ExecuteUpdateAsync(update => update.SetProperty(x => x.UpdatedAtUtc, DateTime.UtcNow), cancellationToken);
+        if (claimed == 0) return NotFound();
+        WarehouseDocumentRecord? document = await db.WarehouseDocuments.SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
         if (document is null) return NotFound();
         if (!await CanAccessWarehouseAsync(document.IdWarehouse, cancellationToken)
             || !await CanAccessWarehouseAsync(input.WarehouseId, cancellationToken)) return Forbid();
@@ -232,7 +229,7 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db) : Controll
             return Ok(new
                 { document.Id, document.DocumentNumber, message = "سند و گردش موجودی باهم به‌روزرسانی شدند." });
         }
-        catch (SqlException exception) when (exception.Number is 51002 or 51003)
+        catch (InsufficientWarehouseStockException)
         {
             return Conflict(new { detail = "ویرایش سند باعث منفی‌شدن موجودی می‌شود؛ تغییر ثبت نشد." });
         }
@@ -244,9 +241,10 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db) : Controll
     {
         await using var transaction =
             await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
-        WarehouseDocumentRecord? document =
-            await db.WarehouseDocuments.FromSqlInterpolated($"SELECT * FROM [Warehouse].[WarehouseDocument] WITH (UPDLOCK, HOLDLOCK) WHERE [Id]={id}")
-                .SingleOrDefaultAsync(cancellationToken);
+        int claimed = await db.WarehouseDocuments.Where(x => x.Id == id)
+            .ExecuteUpdateAsync(update => update.SetProperty(x => x.UpdatedAtUtc, DateTime.UtcNow), cancellationToken);
+        if (claimed == 0) return NotFound();
+        WarehouseDocumentRecord? document = await db.WarehouseDocuments.SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
         if (document is null) return NotFound();
         if (!await CanAccessWarehouseAsync(document.IdWarehouse, cancellationToken)) return Forbid();
         if (await IsPaidOrderLinkedAsync(id, cancellationToken))
@@ -272,7 +270,7 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db) : Controll
             await transaction.CommitAsync(cancellationToken);
             return Ok(new { deleted = true });
         }
-        catch (SqlException exception) when (exception.Number == 51003)
+        catch (InsufficientWarehouseStockException)
         {
             return Conflict(new { detail = "بازگردانی گردش این سند موجودی منفی ایجاد می‌کند؛ حذف نشد." });
         }
@@ -387,9 +385,8 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db) : Controll
             });
     }
 
-    private Task<int> RebuildStockAsync(long documentId, CancellationToken cancellationToken) =>
-        db.Database.ExecuteSqlInterpolatedAsync($"EXEC [Warehouse].[RebuildDocumentStock] @IdDocument={documentId}",
-            cancellationToken);
+    private Task RebuildStockAsync(long documentId, CancellationToken cancellationToken) =>
+        stockLedger.RebuildDocumentAsync(documentId, cancellationToken);
 
     private async Task<string> CaptureSnapshotAsync(long documentId, CancellationToken cancellationToken)
     {
@@ -429,35 +426,7 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db) : Controll
 
     private async Task ReverseMovementsAndClearLinesAsync(long documentId, CancellationToken cancellationToken)
     {
-        await db.Database.ExecuteSqlInterpolatedAsync($"""
-                                                       IF EXISTS
-                                                       (
-                                                           SELECT 1
-                                                           FROM [Warehouse].[StockBalance] balance WITH (UPDLOCK, HOLDLOCK)
-                                                           INNER JOIN
-                                                           (
-                                                               SELECT [IdWarehouse], [IdInventoryItem], [IdSalesPlanReference], SUM([QuantityDelta]) AS [QuantityDelta]
-                                                               FROM [Warehouse].[StockMovement] WHERE [IdDocument]={documentId}
-                                                               GROUP BY [IdWarehouse], [IdInventoryItem], [IdSalesPlanReference]
-                                                           ) movement ON movement.[IdWarehouse]=balance.[IdWarehouse]
-                                                               AND movement.[IdInventoryItem]=balance.[IdInventoryItem]
-                                                               AND movement.[IdSalesPlanReference]=balance.[IdSalesPlanReference]
-                                                           WHERE balance.[Quantity] - movement.[QuantityDelta] < 0
-                                                       ) THROW 51003, 'Removing this document would make stock negative.', 1;
-
-                                                       UPDATE balance
-                                                       SET balance.[Quantity]=balance.[Quantity]-movement.[QuantityDelta], balance.[UpdatedAtUtc]=SYSUTCDATETIME()
-                                                       FROM [Warehouse].[StockBalance] balance WITH (UPDLOCK, HOLDLOCK)
-                                                       INNER JOIN
-                                                       (
-                                                           SELECT [IdWarehouse], [IdInventoryItem], [IdSalesPlanReference], SUM([QuantityDelta]) AS [QuantityDelta]
-                                                           FROM [Warehouse].[StockMovement] WHERE [IdDocument]={documentId}
-                                                           GROUP BY [IdWarehouse], [IdInventoryItem], [IdSalesPlanReference]
-                                                       ) movement ON movement.[IdWarehouse]=balance.[IdWarehouse]
-                                                           AND movement.[IdInventoryItem]=balance.[IdInventoryItem]
-                                                           AND movement.[IdSalesPlanReference]=balance.[IdSalesPlanReference];
-                                                       DELETE FROM [Warehouse].[StockMovement] WHERE [IdDocument]={documentId};
-                                                       """, cancellationToken);
+        await stockLedger.ReverseMovementsAsync(documentId, cancellationToken);
         await db.WarehouseDocumentLines.Where(x => x.IdDocument == documentId).ExecuteDeleteAsync(cancellationToken);
     }
 
@@ -465,12 +434,8 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db) : Controll
         User.IsInRole("system.full-access") || await db.AdminUserWarehouseAccesses.AsNoTracking()
             .AnyAsync(x => x.IdUser == CurrentUserId() && x.IdWarehouse == id, cancellationToken);
 
-    private async Task<bool> IsPaidOrderLinkedAsync(long documentId, CancellationToken cancellationToken) =>
-        await db.Database
-            .SqlQueryRaw<int>(
-                "SELECT COUNT(*) AS [Value] FROM [Warehouse].[PaidOrderInboxDocument] WHERE [IdWarehouseDocument]={0}",
-                documentId)
-            .SingleAsync(cancellationToken) > 0;
+    private Task<bool> IsPaidOrderLinkedAsync(long documentId, CancellationToken cancellationToken) =>
+        db.WarehousePaidOrderInboxDocuments.AnyAsync(x => x.IdWarehouseDocument == documentId, cancellationToken);
 
     private async Task<long[]> AllowedWarehouseIdsAsync(CancellationToken cancellationToken) =>
         User.IsInRole("system.full-access")

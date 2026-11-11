@@ -189,6 +189,7 @@ public sealed class WarehousePaidOrderInbox
     public string StoreOrderKey { get; set; } = "";
     public string CustomerKey { get; set; } = "";
     public DateTime PaymentAtUtc { get; set; }
+    public string Status { get; set; } = "P";
     public ICollection<WarehousePaidOrderInboxLine> Lines { get; set; } = new List<WarehousePaidOrderInboxLine>();
 }
 
@@ -202,4 +203,11 @@ public sealed class WarehousePaidOrderInboxLine
     public decimal Quantity { get; set; }
     public decimal ConversionFactor { get; set; }
     public decimal BaseQuantity { get; set; }
+}
+
+public sealed class WarehousePaidOrderInboxDocument
+{
+    public long Id { get; set; }
+    public long IdPaidOrderInbox { get; set; }
+    public long IdWarehouseDocument { get; set; }
 }
