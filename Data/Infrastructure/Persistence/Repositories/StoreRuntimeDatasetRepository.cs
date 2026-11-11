@@ -1,8 +1,5 @@
-using System.Data;
-using System.Data.Common;
 using System.Text.Json.Nodes;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
 using Shop.Data.Application.Store;
 using Shop.Data.Application.Store.Contracts;
 
@@ -12,45 +9,100 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext, IMedi
 {
     public async Task<string?> ReadCatalogJsonAsync(CancellationToken cancellationToken)
     {
-        string? json = await ReadScalarJsonAsync("""
-                                  SELECT 2 AS [schemaVersion],
-                                         JSON_QUERY((SELECT [GroupKey] AS [id], [Name] AS [name], [SortOrder] AS [order] FROM [Store].[SpecificationGroup] ORDER BY [SortOrder], [Id] FOR JSON PATH)) AS [specificationGroups],
-                                         JSON_QUERY((SELECT c.[CategoryKey] AS [id], g.[GroupKey] AS [groupId], c.[Name] AS [name], c.[SortOrder] AS [order] FROM [Store].[SpecificationCategory] c JOIN [Store].[SpecificationGroup] g ON g.[Id]=c.[IdSpecificationGroup] ORDER BY c.[SortOrder], c.[Id] FOR JSON PATH)) AS [specificationCategories],
-                                         JSON_QUERY((SELECT f.[FeatureKey] AS [id], c.[CategoryKey] AS [categoryId], f.[Label] AS [label], f.[SortOrder] AS [order] FROM [Store].[SpecificationFeature] f JOIN [Store].[SpecificationCategory] c ON c.[Id]=f.[IdSpecificationCategory] ORDER BY f.[SortOrder], f.[Id] FOR JSON PATH)) AS [specificationFeatures],
-                                         JSON_QUERY((SELECT [AttributeKey] AS [id], [Label] AS [label], [Icon] AS [icon], [SourceKey] AS [source], [FilterKey] AS [filterKey], [IsFilterable] AS [is_filterable], [IsHighlight] AS [is_highlight] FROM [Store].[AttributeDefinition] ORDER BY [Id] FOR JSON PATH)) AS [attributeDefinitions],
-                                         JSON_QUERY((SELECT b.[BrandKey] AS [id], b.[NameEn] AS [name], b.[NameFa] AS [fa], b.[LogoPath] AS [logo], c.[CountryCode] AS [countryCode] FROM [Store].[Brand] b LEFT JOIN [Geo].[Country] c ON c.[Id] = b.[IdCountry] ORDER BY b.[Id] FOR JSON PATH, INCLUDE_NULL_VALUES)) AS [brands],
-                                         JSON_QUERY((SELECT c.[CategoryKey] AS [id], parent.[CategoryKey] AS [parentId], c.[NameEn] AS [en], c.[NameFa] AS [fa], c.[CategoryKey] AS [slug], JSON_QUERY(c.[PathJson]) AS [path] FROM [Store].[Category] c LEFT JOIN [Store].[Category] parent ON parent.[Id] = c.[IdParentCategory] WHERE c.[IsActive] = 1 ORDER BY c.[SortOrder], c.[Id] FOR JSON PATH, INCLUDE_NULL_VALUES)) AS [categories],
-                                         JSON_QUERY((SELECT [ColorKey] AS [id], [NameEn] AS [en], [NameFa] AS [fa], [HexCode] AS [hex] FROM [Store].[Color] ORDER BY [Id] FOR JSON PATH)) AS [colors],
-                                         JSON_QUERY((SELECT [CountryCode] AS [id], [NameFa] AS [name], [NameFa] AS [fa], [NameEn] AS [en], [FlagPath] AS [flag] FROM [Geo].[Country] ORDER BY [Id] FOR JSON PATH)) AS [countries],
-                                         JSON_QUERY((SELECT [CategoryKey] AS [id], [ProductIntro] AS [intro], JSON_QUERY([ProductHighlightsJson]) AS [highlights], JSON_QUERY([ProductSpecsJson]) AS [specs] FROM [Store].[Category] WHERE [IsActive] = 1 ORDER BY [Id] FOR JSON PATH)) AS [details],
-                                         JSON_QUERY((SELECT [MediaKey] AS [id], [MainPath] AS [main], [CardPath] AS [card], [ThumbnailPath] AS [thumbnail], JSON_QUERY(COALESCE([ImagesJson], N'[]')) AS [images], JSON_QUERY(COALESCE([VideosJson], N'[]')) AS [videos] FROM [Store].[ProductMedia] ORDER BY [Id] FOR JSON PATH)) AS [media],
-                                         JSON_QUERY((SELECT CONVERT(INT, p.[Id]) AS [id], p.[Name] AS [name], COALESCE(p.[EnglishName], p.[Name]) AS [englishName], p.[Code] AS [code], p.[Slug] AS [slug], b.[BrandKey] AS [brandId], c.[CategoryKey] AS [categoryId], c.[CategoryKey] AS [detailId], pm.[MediaKey] AS [mediaId], COALESCE(p.[PowerSource], N'') AS [powerSource], COALESCE(p.[UseCase], N'') AS [useCase], (p.[PriceAmount] / 1000000.0) AS [price], CONVERT(INT, CASE WHEN stock.[Quantity] > 2147483647 THEN 2147483647 ELSE FLOOR(ISNULL(stock.[Quantity], 0)) END) AS [stockQuantity], COALESCE(p.[MaxPurchaseQuantity], 99) AS [maxCartQuantity], COALESCE(p.[DiscountPercent], 0) AS [discountPercent], p.[Badge] AS [badge], p.[IsNewest] AS [isNewest], p.[NewestOrder] AS [newestOrder], JSON_QUERY(N'[' + COALESCE((SELECT STRING_AGG(CONVERT(nvarchar(max), N'"' + STRING_ESCAPE(c2.[ColorKey], 'json') + N'"'), N',') FROM [Store].[ProductColor] pc INNER JOIN [Store].[Color] c2 ON c2.[Id] = pc.[IdColor] WHERE pc.[IdProduct] = p.[Id]), N'') + N']') AS [colorIds], JSON_QUERY((SELECT sf.[FeatureKey] AS [featureId], psv.[Value] AS [value] FROM [Store].[ProductSpecificationValue] psv INNER JOIN [Store].[SpecificationFeature] sf ON sf.[Id] = psv.[IdSpecificationFeature] WHERE psv.[IdProduct] = p.[Id] FOR JSON PATH)) AS [specificationValues], JSON_QUERY((SELECT a.[AccessoryKey] AS [id], a.[Name] AS [name], pa.[IsRequired] AS [required], (pa.[PriceAmount] / 1000000.0) AS [price] FROM [Store].[ProductAccessory] pa INNER JOIN [Store].[Accessory] a ON a.[Id] = pa.[IdAccessory] WHERE pa.[IdProduct] = p.[Id] ORDER BY pa.[SortOrder], pa.[Id] FOR JSON PATH, INCLUDE_NULL_VALUES)) AS [accessories], JSON_QUERY((SELECT d.[Title] AS [title], d.[Path] AS [path] FROM [Store].[ProductDocument] d WHERE d.[IdProduct] = p.[Id] ORDER BY d.[Id] FOR JSON PATH)) AS [documents], JSON_QUERY(N'{}') AS [variants] FROM [Warehouse].[Product] p OUTER APPLY (SELECT SUM(sb.[Quantity]) AS [Quantity] FROM [Warehouse].[InventoryItem] ii INNER JOIN [Warehouse].[StockBalance] sb ON sb.[IdInventoryItem] = ii.[Id] WHERE ii.[IdProduct] = p.[Id]) stock LEFT JOIN [Store].[Brand] b ON b.[Id] = p.[IdBrand] LEFT JOIN [Store].[Category] c ON c.[Id] = p.[IdCategory] LEFT JOIN [Store].[ProductMedia] pm ON pm.[IdProduct] = p.[Id] AND pm.[MediaKey] = CONCAT(N'product-', p.[ProductKey]) WHERE p.[IsCatalogActive] = 1 AND p.[IsStoreEnabled] = 1 ORDER BY p.[Id] FOR JSON PATH, INCLUDE_NULL_VALUES)) AS [products],
-                                         JSON_QUERY((SELECT pc.[CollectionKey] AS [id], JSON_QUERY(N'[' + COALESCE((SELECT STRING_AGG(CONVERT(nvarchar(max), CONVERT(INT, p.[Id])), N',') FROM [Store].[ProductCollectionItem] pci INNER JOIN [Warehouse].[Product] p ON p.[Id] = pci.[IdProduct] WHERE pci.[IdProductCollection] = pc.[Id] AND p.[IsCatalogActive] = 1 AND p.[IsStoreEnabled] = 1), N'') + N']') AS [items] FROM [Store].[ProductCollection] pc ORDER BY pc.[Id] FOR JSON PATH)) AS [collections]
-                                  FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
-                                  OPTION (MAX_GRANT_PERCENT = 5);
-                                  """, cancellationToken, commandTimeoutSeconds: 90);
-        if (string.IsNullOrWhiteSpace(json)) return json;
+        var groups = await dbContext.StoreSpecificationGroups.AsNoTracking().OrderBy(x => x.SortOrder).ThenBy(x => x.Id).ToListAsync(cancellationToken);
+        var specCategories = await dbContext.StoreSpecificationCategories.AsNoTracking().OrderBy(x => x.SortOrder).ThenBy(x => x.Id).ToListAsync(cancellationToken);
+        var features = await dbContext.StoreSpecificationFeatures.AsNoTracking().OrderBy(x => x.SortOrder).ThenBy(x => x.Id).ToListAsync(cancellationToken);
+        var attributes = await dbContext.StoreAttributeDefinitions.AsNoTracking().OrderBy(x => x.Id).ToListAsync(cancellationToken);
+        var brands = await dbContext.StoreBrands.AsNoTracking().OrderBy(x => x.Id).ToListAsync(cancellationToken);
+        var countries = await dbContext.GeoCountries.AsNoTracking().OrderBy(x => x.Id).ToListAsync(cancellationToken);
+        var categories = await dbContext.StoreCategories.AsNoTracking().OrderBy(x => x.SortOrder).ThenBy(x => x.Id).ToListAsync(cancellationToken);
+        var colors = await dbContext.StoreColors.AsNoTracking().OrderBy(x => x.Id).ToListAsync(cancellationToken);
+        var media = await dbContext.StoreProductMedia.AsNoTracking().OrderBy(x => x.Id).ToListAsync(cancellationToken);
+        var products = await dbContext.Products.AsNoTracking().Where(x => x.IsCatalogActive && x.IsStoreEnabled).OrderBy(x => x.Id).ToListAsync(cancellationToken);
+        var productIds = products.Select(x => x.Id).ToArray();
+        var inventoryTotals = await (from inventory in dbContext.InventoryItems.AsNoTracking()
+                                     join balance in dbContext.StockBalances.AsNoTracking() on inventory.Id equals balance.IdInventoryItem
+                                     where productIds.Contains(inventory.IdProduct)
+                                     group balance.Quantity by inventory.IdProduct into grouped
+                                     select new { IdProduct = grouped.Key, Quantity = grouped.Sum() }).ToDictionaryAsync(x => x.IdProduct, x => x.Quantity, cancellationToken);
+        var productColors = await dbContext.StoreProductColors.AsNoTracking().Where(x => productIds.Contains(x.IdProduct)).ToListAsync(cancellationToken);
+        var productSpecs = await (from value in dbContext.StoreProductSpecificationValues.AsNoTracking()
+                                   join feature in dbContext.StoreSpecificationFeatures.AsNoTracking() on value.IdSpecificationFeature equals feature.Id
+                                   where productIds.Contains(value.IdProduct)
+                                   select new { value.IdProduct, feature.FeatureKey, value.Value }).ToListAsync(cancellationToken);
+        var productAccessories = await (from link in dbContext.StoreProductAccessories.AsNoTracking()
+                                        join accessory in dbContext.StoreAccessories.AsNoTracking() on link.IdAccessory equals accessory.Id
+                                        where productIds.Contains(link.IdProduct)
+                                        orderby link.SortOrder, link.Id
+                                        select new { link.IdProduct, accessory.AccessoryKey, accessory.Name, link.IsRequired, link.PriceAmount }).ToListAsync(cancellationToken);
+        var documents = await dbContext.StoreProductDocuments.AsNoTracking().Where(x => productIds.Contains(x.IdProduct)).OrderBy(x => x.Id).ToListAsync(cancellationToken);
+        var collections = await dbContext.StoreProductCollections.AsNoTracking().OrderBy(x => x.Id).ToListAsync(cancellationToken);
+        var collectionIds = collections.Select(x => x.Id).ToArray();
+        var collectionItems = await (from item in dbContext.StoreProductCollectionItems.AsNoTracking()
+                                     join product in dbContext.Products.AsNoTracking() on item.IdProduct equals product.Id
+                                     where collectionIds.Contains(item.IdProductCollection) && product.IsCatalogActive && product.IsStoreEnabled
+                                     orderby item.SortOrder, item.Id
+                                     select new { item.IdProductCollection, item.IdProduct }).ToListAsync(cancellationToken);
+        var countryCodeById = countries.ToDictionary(x => x.Id, x => x.CountryCode);
+        var brandKeyById = brands.ToDictionary(x => x.Id, x => x.BrandKey);
+        var categoryById = categories.ToDictionary(x => x.Id);
+        var colorKeyById = colors.ToDictionary(x => x.Id, x => x.ColorKey);
+        var groupKeyById = groups.ToDictionary(x => x.Id, x => x.GroupKey);
+        var specCategoryById = specCategories.ToDictionary(x => x.Id);
 
-        var activeBrandKeys = await dbContext.StoreBrands.AsNoTracking().Where(x => x.IsActive)
-            .Select(x => x.BrandKey).ToHashSetAsync(cancellationToken);
-        var activeAttributeKeys = await dbContext.StoreAttributeDefinitions.AsNoTracking().Where(x => x.IsActive)
-            .Select(x => x.AttributeKey).ToHashSetAsync(cancellationToken);
-        var catalog = JsonNode.Parse(json)?.AsObject();
-        if (catalog is null) return json;
+        var root = new JsonObject { ["schemaVersion"] = 2 };
+        root["specificationGroups"] = new JsonArray(groups.Select(x => (JsonNode?)new JsonObject { ["id"] = x.GroupKey, ["name"] = x.Name, ["order"] = x.SortOrder }).ToArray());
+        root["specificationCategories"] = new JsonArray(specCategories.Select(x => (JsonNode?)new JsonObject { ["id"] = x.CategoryKey, ["groupId"] = groupKeyById.GetValueOrDefault(x.IdSpecificationGroup), ["name"] = x.Name, ["order"] = x.SortOrder }).ToArray());
+        root["specificationFeatures"] = new JsonArray(features.Select(x => (JsonNode?)new JsonObject { ["id"] = x.FeatureKey, ["categoryId"] = specCategoryById.GetValueOrDefault(x.IdSpecificationCategory)?.CategoryKey, ["label"] = x.Label, ["order"] = x.SortOrder }).ToArray());
+        root["attributeDefinitions"] = new JsonArray(attributes.Select(x => (JsonNode?)new JsonObject { ["id"] = x.AttributeKey, ["label"] = x.Label, ["icon"] = x.Icon, ["source"] = x.SourceKey, ["filterKey"] = x.FilterKey, ["is_filterable"] = x.IsFilterable, ["is_highlight"] = x.IsHighlight }).ToArray());
+        root["brands"] = new JsonArray(brands.Select(x => (JsonNode?)new JsonObject { ["id"] = x.BrandKey, ["name"] = x.NameEn, ["fa"] = x.NameFa, ["logo"] = x.LogoPath, ["countryCode"] = x.IdCountry.HasValue ? countryCodeById.GetValueOrDefault(x.IdCountry.Value) : null }).ToArray());
+        var activeCategories = categories.Where(x => x.IsActive).ToArray();
+        var categoryKeyById = categories.ToDictionary(x => x.Id, x => x.CategoryKey);
+        root["categories"] = new JsonArray(activeCategories.Select(x => (JsonNode?)new JsonObject { ["id"] = x.CategoryKey, ["parentId"] = x.IdParentCategory.HasValue ? categoryKeyById.GetValueOrDefault(x.IdParentCategory.Value) : null, ["en"] = x.NameEn, ["fa"] = x.NameFa, ["slug"] = x.CategoryKey, ["path"] = ParseJsonValue(x.PathJson) }).ToArray());
+        root["colors"] = new JsonArray(colors.Select(x => (JsonNode?)new JsonObject { ["id"] = x.ColorKey, ["en"] = x.NameEn, ["fa"] = x.NameFa, ["hex"] = x.HexCode }).ToArray());
+        root["countries"] = new JsonArray(countries.Select(x => (JsonNode?)new JsonObject { ["id"] = x.CountryCode, ["name"] = x.NameFa, ["fa"] = x.NameFa, ["en"] = x.NameEn, ["flag"] = x.FlagPath }).ToArray());
+        root["details"] = new JsonArray(activeCategories.Select(x => { var o = new JsonObject { ["id"] = x.CategoryKey }; AddOptional(o, "intro", x.ProductIntro); if (x.ProductHighlightsJson is not null) o["highlights"] = ParseJsonValue(x.ProductHighlightsJson); if (x.ProductSpecsJson is not null) o["specs"] = ParseJsonValue(x.ProductSpecsJson); return (JsonNode?)o; }).ToArray());
+        root["media"] = new JsonArray(media.Select(x => (JsonNode?)new JsonObject { ["id"] = x.MediaKey, ["main"] = x.MainPath, ["card"] = x.CardPath, ["thumbnail"] = x.ThumbnailPath, ["images"] = ParseJsonArray(x.ImagesJson), ["videos"] = ParseJsonArray(x.VideosJson) }).ToArray());
+        var mediaByKey = media.ToDictionary(x => (x.IdProduct, x.MediaKey));
+        root["products"] = new JsonArray(products.Select(product => {
+            brandKeyById.TryGetValue(product.IdBrand ?? 0, out var brandKey); categoryKeyById.TryGetValue(product.IdCategory ?? 0, out var categoryKey);
+            mediaByKey.TryGetValue((product.Id, "product-" + product.ProductKey), out var productMedia);
+            decimal stock = inventoryTotals.GetValueOrDefault(product.Id);
+            int stockQty = stock >= int.MaxValue ? int.MaxValue : Math.Max(0, (int)Math.Floor(stock));
+            var o = new JsonObject { ["id"] = checked((int)product.Id), ["name"] = product.Name, ["englishName"] = product.EnglishName ?? product.Name, ["code"] = product.Code, ["slug"] = product.Slug, ["brandId"] = brandKey, ["categoryId"] = categoryKey, ["detailId"] = categoryKey, ["mediaId"] = productMedia?.MediaKey, ["powerSource"] = product.PowerSource ?? "", ["useCase"] = product.UseCase ?? "", ["price"] = (product.PriceAmount ?? 0m) / 1_000_000m, ["stockQuantity"] = stockQty, ["maxCartQuantity"] = product.MaxPurchaseQuantity ?? 99, ["discountPercent"] = product.DiscountPercent ?? 0m, ["badge"] = product.Badge, ["isNewest"] = product.IsNewest, ["newestOrder"] = product.NewestOrder };
+            o["colorIds"] = new JsonArray(productColors.Where(x => x.IdProduct == product.Id).Select(x => (JsonNode?)JsonValue.Create(colorKeyById.GetValueOrDefault(x.IdColor))).ToArray());
+            o["specificationValues"] = new JsonArray(productSpecs.Where(x => x.IdProduct == product.Id).Select(x => (JsonNode?)new JsonObject { ["featureId"] = x.FeatureKey, ["value"] = x.Value }).ToArray());
+            o["accessories"] = new JsonArray(productAccessories.Where(x => x.IdProduct == product.Id).Select(x => (JsonNode?)new JsonObject { ["id"] = x.AccessoryKey, ["name"] = x.Name, ["required"] = x.IsRequired, ["price"] = x.PriceAmount / 1_000_000m }).ToArray());
+            o["documents"] = new JsonArray(documents.Where(x => x.IdProduct == product.Id).Select(x => (JsonNode?)new JsonObject { ["title"] = x.Title, ["path"] = x.Path }).ToArray()); o["variants"] = new JsonObject(); return (JsonNode?)o;
+        }).ToArray());
+        root["collections"] = new JsonArray(collections.Select(collection => (JsonNode?)new JsonObject { ["id"] = collection.CollectionKey, ["items"] = new JsonArray(collectionItems.Where(x => x.IdProductCollection == collection.Id).Select(x => (JsonNode?)JsonValue.Create(checked((int)x.IdProduct))).ToArray()) }).ToArray());
 
-        FilterArray(catalog, "brands", item => activeBrandKeys.Contains(item?["id"]?.GetValue<string>() ?? ""));
-        FilterArray(catalog, "attributeDefinitions", item => activeAttributeKeys.Contains(item?["id"]?.GetValue<string>() ?? ""));
-        FilterArray(catalog, "products", item =>
-            activeBrandKeys.Contains(item?["brandId"]?.GetValue<string>() ?? "") &&
-            (item?["categoryId"] is null || catalog["categories"]?.AsArray().Any(category =>
-                string.Equals(category?["id"]?.GetValue<string>(), item["categoryId"]?.GetValue<string>(), StringComparison.Ordinal)) == true));
-        var visibleProductIds = (catalog["products"]?.AsArray() ?? []).Select(item => item?["id"]?.ToJsonString()).ToHashSet(StringComparer.Ordinal);
-        if (catalog["collections"] is JsonArray collections)
-            foreach (var collection in collections)
-                if (collection?["items"] is JsonArray items)
-                    for (int index = items.Count - 1; index >= 0; index--)
-                        if (!visibleProductIds.Contains(items[index]?.ToJsonString())) items.RemoveAt(index);
-        return ContentCdn.RewriteJson(catalog.ToJsonString(), await mediaCdn.GetBaseUrlAsync(cancellationToken));
+        var activeBrandKeys = await dbContext.StoreBrands.AsNoTracking().Where(x => x.IsActive).Select(x => x.BrandKey).ToHashSetAsync(cancellationToken);
+        var activeAttributeKeys = await dbContext.StoreAttributeDefinitions.AsNoTracking().Where(x => x.IsActive).Select(x => x.AttributeKey).ToHashSetAsync(cancellationToken);
+        FilterArray(root, "brands", item => activeBrandKeys.Contains(item?["id"]?.GetValue<string>() ?? ""));
+        FilterArray(root, "attributeDefinitions", item => activeAttributeKeys.Contains(item?["id"]?.GetValue<string>() ?? ""));
+        FilterArray(root, "products", item => activeBrandKeys.Contains(item?["brandId"]?.GetValue<string>() ?? "") && (item?["categoryId"] is null || root["categories"]?.AsArray().Any(category => string.Equals(category?["id"]?.GetValue<string>(), item["categoryId"]?.GetValue<string>(), StringComparison.Ordinal)) == true));
+        var visibleProductIds = (root["products"]?.AsArray() ?? []).Select(item => item?["id"]?.ToJsonString()).ToHashSet(StringComparer.Ordinal);
+        if (root["collections"] is JsonArray collectionArray) foreach (var collection in collectionArray) if (collection?["items"] is JsonArray items) for (int index = items.Count - 1; index >= 0; index--) if (!visibleProductIds.Contains(items[index]?.ToJsonString())) items.RemoveAt(index);
+        return ContentCdn.RewriteJson(root.ToJsonString(), await mediaCdn.GetBaseUrlAsync(cancellationToken));
+    }
+
+    private static void AddOptional(JsonObject target, string name, string? value)
+    {
+        if (value is not null) target[name] = value;
+    }
+
+    private static JsonNode? ParseJsonValue(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value)) return null;
+        try { return JsonNode.Parse(value); } catch (System.Text.Json.JsonException) { return null; }
+    }
+
+    private static JsonNode ParseJsonArray(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value)) return new JsonArray();
+        try { return JsonNode.Parse(value) ?? new JsonArray(); }
+        catch (System.Text.Json.JsonException) { return new JsonArray(); }
     }
 
     private static void FilterArray(JsonObject root, string name, Func<JsonNode?, bool> keep)
@@ -62,13 +114,22 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext, IMedi
 
     public async Task<string?> ReadBrandEditorialJsonAsync(CancellationToken cancellationToken)
     {
-        string? json = await ReadScalarJsonAsync("""
-                                  SELECT b.[BrandKey] AS [slug], e.[Established] AS [established], e.[OfficialUrl] AS [officialUrl], e.[Specialization] AS [specialization], e.[FeaturedProducts] AS [featuredProducts], e.[Audience] AS [audience], e.[ShoppingAdvice] AS [shoppingAdvice], JSON_QUERY(COALESCE(e.[CompanyIntroductionsJson], N'[]')) AS [companyIntroductions], JSON_QUERY(COALESCE(e.[ProductFamiliesJson], N'[]')) AS [productFamilies], JSON_QUERY(COALESCE(e.[StrengthsJson], N'[]')) AS [strengths]
-                                  FROM [Store].[Brand] b INNER JOIN [Store].[BrandEditorial] e ON e.[IdBrand] = b.[Id]
-                                  ORDER BY b.[Id]
-                                  FOR JSON PATH;
-                                  """, cancellationToken);
-        return ContentCdn.RewriteJson(json, await mediaCdn.GetBaseUrlAsync(cancellationToken));
+        var rows = await (from brand in dbContext.StoreBrands.AsNoTracking()
+                          join editorial in dbContext.StoreBrandEditorials.AsNoTracking() on brand.Id equals editorial.IdBrand
+                          orderby brand.Id
+                          select new { brand.BrandKey, editorial.Established, editorial.OfficialUrl, editorial.Specialization, editorial.FeaturedProducts, editorial.Audience, editorial.ShoppingAdvice, editorial.CompanyIntroductionsJson, editorial.ProductFamiliesJson, editorial.StrengthsJson }).ToListAsync(cancellationToken);
+        var items = new JsonArray();
+        foreach (var row in rows)
+        {
+            var item = new JsonObject { ["slug"] = row.BrandKey };
+            AddOptional(item, "established", row.Established); AddOptional(item, "officialUrl", row.OfficialUrl);
+            AddOptional(item, "specialization", row.Specialization); AddOptional(item, "featuredProducts", row.FeaturedProducts);
+            AddOptional(item, "audience", row.Audience); AddOptional(item, "shoppingAdvice", row.ShoppingAdvice);
+            item["companyIntroductions"] = ParseJsonArray(row.CompanyIntroductionsJson);
+            item["productFamilies"] = ParseJsonArray(row.ProductFamiliesJson); item["strengths"] = ParseJsonArray(row.StrengthsJson);
+            items.Add(item);
+        }
+        return ContentCdn.RewriteJson(items.ToJsonString(), await mediaCdn.GetBaseUrlAsync(cancellationToken));
     }
 
     public async Task<IReadOnlyList<StoreFaqRow>> ReadFaqAsync(CancellationToken cancellationToken)
@@ -83,80 +144,52 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext, IMedi
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<string?> ReadAccountJsonAsync(CancellationToken cancellationToken) =>
-        await ReadScalarJsonAsync("""
-                                  SELECT
-                                  (
-                                      SELECT
-                                          1 AS [schemaVersion],
-                                          N'IRT' AS [currency],
-                                          JSON_QUERY(N'[]') AS [orders],
-                                          JSON_QUERY((
-                                              SELECT
-                                                  c.[CouponKey] AS [id],
-                                                  c.[Code] AS [code],
-                                                  c.[DiscountPercent] AS [discountPercent],
-                                                  c.[UsageLimit] AS [usageLimit],
-                                                  c.[Enabled] AS [enabled],
-                                                  c.[ExpiresOn] AS [expiresOn],
-                                                  JSON_QUERY(N'[]') AS [orderIds]
-                                              FROM [Store].[Coupon] c
-                                              ORDER BY c.[Id]
-                                              FOR JSON PATH
-                                          )) AS [coupons]
-                                      FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
-                                  ) AS [Value];
-                                  """, cancellationToken);
+    public async Task<string?> ReadAccountJsonAsync(CancellationToken cancellationToken)
+    {
+        var coupons = await dbContext.AccountCoupons.AsNoTracking().OrderBy(x => x.Id)
+            .Select(x => new { id = x.CouponKey, x.Code, x.DiscountPercent, x.UsageLimit, enabled = x.Enabled, x.ExpiresOn, orderIds = Array.Empty<string>() })
+            .ToListAsync(cancellationToken);
+        return System.Text.Json.JsonSerializer.Serialize(new { schemaVersion = 1, currency = "IRT", orders = Array.Empty<object>(), coupons }, new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web));
+    }
 
     public async Task<string?> ReadMagazineJsonAsync(CancellationToken cancellationToken)
     {
-        string? json = await ReadScalarJsonAsync("""
-                                  SELECT JSON_QUERY((
-                                      SELECT
-                                          branch.[BranchKey] AS [branch], topic.[TopicKey] AS [topic], area.[AreaKey] AS [area],
-                                          COALESCE(a.[ReadTimeMinutes], 0) AS [readMinutes],
-                                          JSON_QUERY((
-                                              SELECT a.[ArticleKey] AS [slug], category.[CategoryKey] AS [category], a.[Kicker] AS [kicker],
-                                                     a.[Title] AS [title], a.[Summary] AS [summary], COALESCE(a.[Author], N'') AS [author],
-                                                     N'' AS [publishedAt], COALESCE(a.[ReadTimeText], N'') AS [readTime],
-                                                     a.[HeroImagePath] AS [heroImage], a.[ContentImagePath] AS [contentImage],
-                                                     a.[Lead] AS [lead],
-                                                     JSON_QUERY((SELECT CONVERT(nvarchar(50), s.[Id]) AS [id], s.[Heading] AS [title], s.[Body] AS [content]
-                                                                 FROM [Mag].[MagazineArticleSection] s
-                                                                 WHERE s.[IdMagazineArticle] = a.[Id]
-                                                                 ORDER BY s.[SortOrder], s.[Id] FOR JSON PATH)) AS [sections],
-                                                     a.[Conclusion] AS [conclusion],
-                                                     JSON_QUERY((SELECT s.[Title] AS [title], s.[Url] AS [url]
-                                                                 FROM [Mag].[MagazineArticleSource] s
-                                                                 WHERE s.[IdMagazineArticle] = a.[Id]
-                                                                 ORDER BY s.[SortOrder], s.[Id] FOR JSON PATH)) AS [sources],
-                                                     JSON_QUERY((SELECT t.[Label] AS [label], t.[Filter] AS [filter]
-                                                                 FROM [Mag].[MagazineArticleTag] t
-                                                                 WHERE t.[IdMagazineArticle] = a.[Id]
-                                                                 ORDER BY t.[SortOrder], t.[Id] FOR JSON PATH)) AS [tags],
-                                                     JSON_QUERY((SELECT related.[ArticleKey] AS [slug], relatedCategory.[CategoryKey] AS [category], related.[Title] AS [title], related.[HeroImagePath] AS [image]
-                                                                 FROM [Mag].[MagazineArticleRelated] r
-                                                                 INNER JOIN [Mag].[MagazineArticle] related ON related.[Id] = r.[IdRelatedArticle]
-                                                                 INNER JOIN [Mag].[ArticleCategory] relatedCategory ON relatedCategory.[Id] = related.[IdCategory]
-                                                                 WHERE r.[IdMagazineArticle] = a.[Id]
-                                                                 ORDER BY r.[SortOrder], r.[Id] FOR JSON PATH)) AS [relatedArticles],
-                                                     JSON_QUERY((SELECT COALESCE(m.[Views], 0) AS [views], COALESCE(m.[Likes], 0) AS [likes],
-                                                                        COALESCE(m.[AverageRating], 0) AS [averageRating], COALESCE(m.[Comments], 0) AS [comments]
-                                                                 FOR JSON PATH, WITHOUT_ARRAY_WRAPPER)) AS [metrics]
-                                              FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
-                                          )) AS [article]
-                                      FROM [Mag].[MagazineArticle] a
-                                      INNER JOIN [Mag].[ArticleCategory] category ON category.[Id] = a.[IdCategory]
-                                      INNER JOIN [Mag].[ArticleBranch] branch ON branch.[Id] = a.[IdBranch]
-                                      INNER JOIN [Mag].[ArticleTopic] topic ON topic.[Id] = a.[IdTopic]
-                                      INNER JOIN [Mag].[ArticleArea] area ON area.[Id] = a.[IdArea]
-                                      LEFT JOIN [Mag].[MagazineArticleMetric] m ON m.[IdMagazineArticle] = a.[Id]
-                                      WHERE a.[IsPublished] = 1
-                                      ORDER BY a.[Id]
-                                      FOR JSON PATH
-                                  )) AS [articles]
-                                  FOR JSON PATH, WITHOUT_ARRAY_WRAPPER;
-                                  """, cancellationToken, commandTimeoutSeconds: 90);
+        var articles = await (from article in dbContext.MagazineArticles.AsNoTracking()
+                              join category in dbContext.MagazineArticleCategories.AsNoTracking() on article.IdCategory equals category.Id
+                              join branch in dbContext.MagazineArticleBranches.AsNoTracking() on article.IdBranch equals branch.Id
+                              join topic in dbContext.MagazineArticleTopics.AsNoTracking() on article.IdTopic equals topic.Id
+                              join area in dbContext.MagazineArticleAreas.AsNoTracking() on article.IdArea equals area.Id
+                              where article.IsPublished
+                              orderby article.Id
+                              select new { article.Id, article.ArticleKey, Category = category.CategoryKey, Branch = branch.BranchKey, Topic = topic.TopicKey, Area = area.AreaKey, article.ReadTimeMinutes, article.Kicker, article.Title, article.Summary, article.Author, article.ReadTimeText, article.HeroImagePath, article.ContentImagePath, article.Lead, article.Conclusion }).ToListAsync(cancellationToken);
+        var articleIds = articles.Select(x => x.Id).ToArray();
+        var sections = await dbContext.MagazineArticleSections.AsNoTracking().Where(x => articleIds.Contains(x.IdMagazineArticle)).OrderBy(x => x.SortOrder).ThenBy(x => x.Id).ToListAsync(cancellationToken);
+        var sources = await dbContext.MagazineArticleSources.AsNoTracking().Where(x => articleIds.Contains(x.IdMagazineArticle)).OrderBy(x => x.SortOrder).ThenBy(x => x.Id).ToListAsync(cancellationToken);
+        var tags = await dbContext.MagazineArticleTags.AsNoTracking().Where(x => articleIds.Contains(x.IdMagazineArticle)).OrderBy(x => x.SortOrder).ThenBy(x => x.Id).ToListAsync(cancellationToken);
+        var related = await (from link in dbContext.MagazineArticleRelated.AsNoTracking()
+                             join relatedArticle in dbContext.MagazineArticles.AsNoTracking() on link.IdRelatedArticle equals relatedArticle.Id
+                             join relatedCategory in dbContext.MagazineArticleCategories.AsNoTracking() on relatedArticle.IdCategory equals relatedCategory.Id
+                             where articleIds.Contains(link.IdMagazineArticle)
+                             orderby link.SortOrder, link.Id
+                             select new { link.IdMagazineArticle, Slug = relatedArticle.ArticleKey, Category = relatedCategory.CategoryKey, relatedArticle.Title, Image = relatedArticle.HeroImagePath })
+            .ToListAsync(cancellationToken);
+        var metrics = await dbContext.MagazineArticleMetrics.AsNoTracking().Where(x => articleIds.Contains(x.IdMagazineArticle)).ToDictionaryAsync(x => x.IdMagazineArticle, cancellationToken);
+        var payload = articles.Select(article => new
+        {
+            article.Branch, article.Topic, article.Area, readMinutes = article.ReadTimeMinutes ?? 0,
+            article = new
+            {
+                slug = article.ArticleKey, category = article.Category, article.Kicker, article.Title, article.Summary, author = article.Author ?? "", publishedAt = "", readTime = article.ReadTimeText ?? "",
+                heroImage = article.HeroImagePath, contentImage = article.ContentImagePath, article.Lead,
+                sections = sections.Where(x => x.IdMagazineArticle == article.Id).Select(x => new { id = x.Id.ToString(), title = x.Heading, content = x.Body }).ToArray(),
+                article.Conclusion,
+                sources = sources.Where(x => x.IdMagazineArticle == article.Id).Select(x => new { x.Title, x.Url }).ToArray(),
+                tags = tags.Where(x => x.IdMagazineArticle == article.Id).Select(x => new { x.Label, x.Filter }).ToArray(),
+                relatedArticles = related.Where(x => x.IdMagazineArticle == article.Id).Select(x => new { slug = x.Slug, category = x.Category, x.Title, image = x.Image }).ToArray(),
+                metrics = metrics.TryGetValue(article.Id, out var metric) ? new { views = metric.Views, likes = metric.Likes, averageRating = metric.AverageRating, comments = metric.Comments } : new { views = 0, likes = 0, averageRating = 0m, comments = 0 }
+            }
+        }).ToArray();
+        string json = System.Text.Json.JsonSerializer.Serialize(new { articles = payload }, new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web) { DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull });
         return ContentCdn.RewriteJson(json, await mediaCdn.GetBaseUrlAsync(cancellationToken));
     }
 
@@ -174,32 +207,4 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext, IMedi
         return ContentCdn.RewriteJson(json, await mediaCdn.GetBaseUrlAsync(cancellationToken))!;
     }
 
-    private async Task<string?> ReadScalarJsonAsync(string sql, CancellationToken cancellationToken,
-        int? commandTimeoutSeconds = null)
-    {
-        DbConnection connection = dbContext.Database.GetDbConnection();
-        bool closeWhenDone = connection.State != ConnectionState.Open;
-        if (closeWhenDone) await connection.OpenAsync(cancellationToken);
-        try
-        {
-            await using DbCommand command = connection.CreateCommand();
-            command.Transaction = dbContext.Database.CurrentTransaction?.GetDbTransaction();
-            command.CommandText = sql;
-            if (commandTimeoutSeconds.HasValue) command.CommandTimeout = commandTimeoutSeconds.Value;
-            await using DbDataReader reader =
-                await command.ExecuteReaderAsync(CommandBehavior.SequentialAccess, cancellationToken);
-            if (!await reader.ReadAsync(cancellationToken) || reader.IsDBNull(0)) return null;
-            var json = new System.Text.StringBuilder();
-            do
-            {
-                json.Append(reader.GetString(0));
-            } while (await reader.ReadAsync(cancellationToken));
-
-            return json.ToString();
-        }
-        finally
-        {
-            if (closeWhenDone) await connection.CloseAsync();
-        }
-    }
 }

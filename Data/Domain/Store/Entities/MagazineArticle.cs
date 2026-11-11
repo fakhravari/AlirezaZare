@@ -43,3 +43,8 @@ public sealed class MagazineArticleSection
     public int SortOrder { get; set; }
 }
 
+public sealed class MagazineArticleSource { public long Id { get; set; } public long IdMagazineArticle { get; set; } public string Title { get; set; } = ""; public string Url { get; set; } = ""; public int SortOrder { get; set; } }
+public sealed class MagazineArticleTag { public long Id { get; set; } public long IdMagazineArticle { get; set; } public string Label { get; set; } = ""; public string Filter { get; set; } = ""; public int SortOrder { get; set; } }
+public sealed class MagazineArticleRelated { public long Id { get; set; } public long IdMagazineArticle { get; set; } public long IdRelatedArticle { get; set; } public string Category { get; set; } = ""; public string Title { get; set; } = ""; public string ImagePath { get; set; } = ""; public int SortOrder { get; set; } }
+public sealed class MagazineArticleMetric { public long IdMagazineArticle { get; set; } public int Views { get; set; } public int Likes { get; set; } public decimal AverageRating { get; set; } public int Comments { get; set; } }
+

@@ -211,3 +211,14 @@ public sealed class WarehousePaidOrderInboxDocument
     public long IdPaidOrderInbox { get; set; }
     public long IdWarehouseDocument { get; set; }
 }
+
+public sealed class AccountCoupon
+{
+    public long Id { get; set; }
+    public string CouponKey { get; set; } = "";
+    public string Code { get; set; } = "";
+    public int DiscountPercent { get; set; }
+    public int UsageLimit { get; set; }
+    public bool Enabled { get; set; }
+    public DateOnly ExpiresOn { get; set; }
+}

@@ -37,6 +37,10 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
     public DbSet<MagazineArticleTopic> MagazineArticleTopics => Set<MagazineArticleTopic>();
     public DbSet<MagazineArticleArea> MagazineArticleAreas => Set<MagazineArticleArea>();
     public DbSet<MagazineArticleSection> MagazineArticleSections => Set<MagazineArticleSection>();
+    public DbSet<MagazineArticleSource> MagazineArticleSources => Set<MagazineArticleSource>();
+    public DbSet<MagazineArticleTag> MagazineArticleTags => Set<MagazineArticleTag>();
+    public DbSet<MagazineArticleRelated> MagazineArticleRelated => Set<MagazineArticleRelated>();
+    public DbSet<MagazineArticleMetric> MagazineArticleMetrics => Set<MagazineArticleMetric>();
     public DbSet<AccountArticleInteraction> AccountArticleInteractions => Set<AccountArticleInteraction>();
     public DbSet<StoreContentPage> StoreContentPages => Set<StoreContentPage>();
     public DbSet<StoreContentPageSection> StoreContentPageSections => Set<StoreContentPageSection>();
@@ -46,6 +50,15 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
     public DbSet<StoreProductMedia> StoreProductMedia => Set<StoreProductMedia>();
     public DbSet<StoreProductDocument> StoreProductDocuments => Set<StoreProductDocument>();
     public DbSet<StoreBrand> StoreBrands => Set<StoreBrand>();
+    public DbSet<StoreBrandEditorial> StoreBrandEditorials => Set<StoreBrandEditorial>();
+    public DbSet<StoreColor> StoreColors => Set<StoreColor>();
+    public DbSet<StoreSpecificationGroup> StoreSpecificationGroups => Set<StoreSpecificationGroup>();
+    public DbSet<StoreSpecificationCategory> StoreSpecificationCategories => Set<StoreSpecificationCategory>();
+    public DbSet<StoreSpecificationFeature> StoreSpecificationFeatures => Set<StoreSpecificationFeature>();
+    public DbSet<StoreProductColor> StoreProductColors => Set<StoreProductColor>();
+    public DbSet<StoreProductSpecificationValue> StoreProductSpecificationValues => Set<StoreProductSpecificationValue>();
+    public DbSet<StoreProductCollection> StoreProductCollections => Set<StoreProductCollection>();
+    public DbSet<StoreProductCollectionItem> StoreProductCollectionItems => Set<StoreProductCollectionItem>();
     public DbSet<StoreCategory> StoreCategories => Set<StoreCategory>();
     public DbSet<StoreProductSalesPlanOffer> StoreProductSalesPlanOffers => Set<StoreProductSalesPlanOffer>();
     public DbSet<StoreProductVariantSalesPlanOffer> StoreProductVariantSalesPlanOffers => Set<StoreProductVariantSalesPlanOffer>();
@@ -59,6 +72,7 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
     public DbSet<GeoProvince> GeoProvinces => Set<GeoProvince>();
     public DbSet<GeoCity> GeoCities => Set<GeoCity>();
     public DbSet<AccountProfile> AccountProfiles => Set<AccountProfile>();
+    public DbSet<AccountCoupon> AccountCoupons => Set<AccountCoupon>();
     public DbSet<AccountRecentSearch> AccountRecentSearches => Set<AccountRecentSearch>();
     public DbSet<AccountCart> AccountCarts => Set<AccountCart>();
     public DbSet<AccountCartItem> AccountCartItems => Set<AccountCartItem>();
@@ -102,6 +116,10 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.HasOne(x => x.Area).WithMany().HasForeignKey(x => x.IdArea);
             entity.HasMany(x => x.Sections).WithOne().HasForeignKey(x => x.IdMagazineArticle).OnDelete(DeleteBehavior.Cascade);
         });
+        modelBuilder.Entity<MagazineArticleSource>(entity => { entity.ToTable("MagazineArticleSource", "Mag"); entity.HasKey(x => x.Id); entity.Property(x => x.Title).HasMaxLength(300).IsRequired(); entity.Property(x => x.Url).HasMaxLength(2000).IsRequired(); });
+        modelBuilder.Entity<MagazineArticleTag>(entity => { entity.ToTable("MagazineArticleTag", "Mag"); entity.HasKey(x => x.Id); entity.Property(x => x.Label).HasMaxLength(300).IsRequired(); entity.Property(x => x.Filter).HasMaxLength(160).IsRequired(); });
+        modelBuilder.Entity<MagazineArticleRelated>(entity => { entity.ToTable("MagazineArticleRelated", "Mag"); entity.HasKey(x => x.Id); entity.Property(x => x.Category).HasMaxLength(150).IsRequired(); entity.Property(x => x.Title).HasMaxLength(300).IsRequired(); entity.Property(x => x.ImagePath).HasMaxLength(1000).IsRequired(); entity.HasOne<MagazineArticle>().WithMany().HasForeignKey(x => x.IdRelatedArticle); });
+        modelBuilder.Entity<MagazineArticleMetric>(entity => { entity.ToTable("MagazineArticleMetric", "Mag"); entity.HasKey(x => x.IdMagazineArticle); entity.Property(x => x.AverageRating).HasPrecision(5, 2); });
         modelBuilder.Entity<MagazineArticleCategory>(entity => { entity.ToTable("ArticleCategory", "Mag"); entity.HasKey(x => x.Id); entity.Property(x => x.CategoryKey).HasMaxLength(300).IsRequired(); entity.HasIndex(x => x.CategoryKey).IsUnique(); });
         modelBuilder.Entity<MagazineArticleBranch>(entity => { entity.ToTable("ArticleBranch", "Mag"); entity.HasKey(x => x.Id); entity.Property(x => x.BranchKey).HasMaxLength(160).IsRequired(); entity.HasIndex(x => x.BranchKey).IsUnique(); });
         modelBuilder.Entity<MagazineArticleTopic>(entity => { entity.ToTable("ArticleTopic", "Mag"); entity.HasKey(x => x.Id); entity.Property(x => x.TopicKey).HasMaxLength(240).IsRequired(); entity.HasIndex(x => x.TopicKey).IsUnique(); });
@@ -467,6 +485,12 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.Property(x => x.UpdatedAtUtc).HasColumnName("IdentityUpdatedAtUtc").HasPrecision(3);
             entity.Property(x => x.SettingsUpdatedAtUtc).HasColumnName("UpdatedAtUtc").HasPrecision(3);
         });
+        modelBuilder.Entity<AccountCoupon>(entity =>
+        {
+            entity.ToTable("Coupon", "Account"); entity.HasKey(x => x.Id);
+            entity.Property(x => x.CouponKey).HasMaxLength(100).IsRequired(); entity.Property(x => x.Code).HasMaxLength(32).IsRequired();
+            entity.HasIndex(x => x.CouponKey).IsUnique(); entity.HasIndex(x => x.Code).IsUnique();
+        });
         modelBuilder.Entity<AccountProfile>(entity =>
         {
             entity.ToTable("Profile", "Account");
@@ -671,6 +695,23 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.Property(x => x.Path).HasMaxLength(450).IsRequired();
             entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
             entity.HasIndex(x => x.Path).IsUnique();
+        });
+        modelBuilder.Entity<StoreColor>(entity => { entity.ToTable("Color", "Store"); entity.HasKey(x => x.Id); entity.Property(x => x.ColorKey).HasMaxLength(80).IsRequired(); entity.Property(x => x.NameEn).HasMaxLength(100).IsRequired(); entity.Property(x => x.NameFa).HasMaxLength(100).IsRequired(); entity.Property(x => x.HexCode).HasColumnType("char(7)"); entity.HasIndex(x => x.ColorKey).IsUnique(); });
+        modelBuilder.Entity<StoreSpecificationGroup>(entity => { entity.ToTable("SpecificationGroup", "Store"); entity.HasKey(x => x.Id); entity.Property(x => x.GroupKey).HasMaxLength(100).IsRequired(); entity.Property(x => x.Name).HasMaxLength(200).IsRequired(); entity.HasIndex(x => x.GroupKey).IsUnique(); });
+        modelBuilder.Entity<StoreSpecificationCategory>(entity => { entity.ToTable("SpecificationCategory", "Store"); entity.HasKey(x => x.Id); entity.Property(x => x.CategoryKey).HasMaxLength(100).IsRequired(); entity.Property(x => x.Name).HasMaxLength(200).IsRequired(); entity.HasIndex(x => x.CategoryKey).IsUnique(); });
+        modelBuilder.Entity<StoreSpecificationFeature>(entity => { entity.ToTable("SpecificationFeature", "Store"); entity.HasKey(x => x.Id); entity.Property(x => x.FeatureKey).HasMaxLength(100).IsRequired(); entity.Property(x => x.Label).HasMaxLength(200).IsRequired(); entity.HasIndex(x => x.FeatureKey).IsUnique(); });
+        modelBuilder.Entity<StoreProductColor>(entity => { entity.ToTable("ProductColor", "Store"); entity.HasKey(x => x.Id); entity.HasIndex(x => new { x.IdProduct, x.IdColor }).IsUnique(); });
+        modelBuilder.Entity<StoreProductSpecificationValue>(entity => { entity.ToTable("ProductSpecificationValue", "Store"); entity.HasKey(x => x.Id); entity.Property(x => x.Value).HasMaxLength(1000).IsRequired(); entity.HasIndex(x => new { x.IdProduct, x.IdSpecificationFeature }).IsUnique(); });
+        modelBuilder.Entity<StoreProductCollection>(entity => { entity.ToTable("ProductCollection", "Store"); entity.HasKey(x => x.Id); entity.Property(x => x.CollectionKey).HasMaxLength(100).IsRequired(); entity.Property(x => x.Name).HasMaxLength(150).IsRequired(); entity.HasIndex(x => x.CollectionKey).IsUnique(); });
+        modelBuilder.Entity<StoreProductCollectionItem>(entity => { entity.ToTable("ProductCollectionItem", "Store"); entity.HasKey(x => x.Id); entity.HasIndex(x => new { x.IdProductCollection, x.IdProduct }).IsUnique(); });
+        modelBuilder.Entity<StoreBrandEditorial>(entity =>
+        {
+            entity.ToTable("BrandEditorial", "Store"); entity.HasKey(x => x.Id);
+            entity.Property(x => x.Established).HasMaxLength(40); entity.Property(x => x.OfficialUrl).HasMaxLength(1000);
+            entity.Property(x => x.Specialization).HasColumnType("nvarchar(max)"); entity.Property(x => x.FeaturedProducts).HasColumnType("nvarchar(max)");
+            entity.Property(x => x.Audience).HasColumnType("nvarchar(max)"); entity.Property(x => x.ShoppingAdvice).HasColumnType("nvarchar(max)");
+            entity.Property(x => x.CompanyIntroductionsJson).HasColumnType("nvarchar(max)"); entity.Property(x => x.ProductFamiliesJson).HasColumnType("nvarchar(max)"); entity.Property(x => x.StrengthsJson).HasColumnType("nvarchar(max)");
+            entity.HasIndex(x => x.IdBrand).IsUnique();
         });
         modelBuilder.Entity<StoreBrand>(entity =>
         {

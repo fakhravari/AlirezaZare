@@ -167,7 +167,7 @@ Migration 017 جدول `[Store].[ProductVariantSalesPlanOffer]` را برای ق
 
 در بازبینی ۱۱ نوامبر ۲۰۲۶، اتصال `Shop` به `ShopDbContext` در پروژهٔ `Data` تأیید شد. ورود با رمز، ساخت/ورود با کد ایمیل، ویرایش پروفایل، تغییر رمز، خواندن تنظیمات SMTP، FAQ و `GET api/account/state` از DbSetهای EF و LINQ استفاده می‌کنند. مدل‌های `AccountProfile`، سبد، نشانی و تقسیمات جغرافیایی، علاقه‌مندی، مقایسه، هشدار قیمت، تعامل/بازخورد مقاله، ترجیحات تسویه، سفارش و اقلام سفارش در `ShopDbContext` نگاشت شده‌اند. خروجی state با JSON serializer در C# ساخته می‌شود؛ `FOR JSON PATH` و SQL دست‌نویس آن حذف شده است.
 
-این انتقال پروژه هنوز کامل نیست. مسیرهای حساب، checkout و پرداخت در Shop اکنون از EF/LINQ استفاده می‌کنند. callback پرداخت وضعیت تلاش، سفارش و ایجاد ورودی انبار را در یک تراکنش انجام می‌دهد؛ صف PaidOrderOutbox دیگر در runtime استفاده نمی‌شود و migration 055 آن را پس از بررسی رکوردهای معوق حذف می‌کند. T-SQL اجرایی هنوز در دو repository دادهٔ فروشگاه، StoreRuntimeDatasetRepository و StoreSalesPlanRepository، باقی است؛ API مدیریت قیمت و طرح فروش اکنون EF است. WarehouseReadRepository نیز از EF/LINQ استفاده می‌کند. Migrationهای نسخه‌دار همچنان SQL هستند و بخشی از queryهای runtime EF محسوب نمی‌شوند.
+این انتقال برای کد اجرایی C# در Shop، Data و Admin کامل شده است: دسترسی runtime به داده‌ها با مدل‌های EF و LINQ انجام می‌شود و query دستی T-SQL یا ADO.NET در این لایه‌ها باقی نمانده است. callback پرداخت نیز تغییر وضعیت تلاش، سفارش و ایجاد ورودی انبار را در یک تراکنش انجام می‌دهد و outbox در runtime استفاده نمی‌شود. فایل‌های SQL نسخه‌دار برای تغییر schema و ابزارهای مستقل آزمون/عملیات از این قاعده جدا هستند و query اجرایی برنامه محسوب نمی‌شوند.
 
 ---
 
