@@ -7,49 +7,35 @@
     @await Html.PartialAsync("_AdminPageIntro", ("پیشخوان کل", "دسترسی جداگانه به مدیریت فروشگاه و عملیات انبار."))
     <div class="row g-3 g-xl-4">
         <div class="col-xl-6">
-            <section class="panel panel-inverse h-100" aria-labelledby="store-area-title">
-                <div class="panel-heading">
-                    <h2 class="panel-title" id="store-area-title"><i class="fa fa-store me-2" aria-hidden="true"></i>مدیریت فروشگاه</h2>
-                </div>
-                <div class="panel-body">
-                    <p class="text-muted">کاتالوگ و اجزای عملیاتی فروشگاه در یک حوزهٔ مستقل.</p>
-                    <div class="list-group list-group-flush mt-3">
-                        <a class="list-group-item list-group-item-action d-flex align-items-center gap-2" asp-area="Store" asp-controller="Dashboard" asp-action="Index" data-admin-nav>
-                            <i class="fa fa-gauge-high" aria-hidden="true"></i><span>نمای کلی فروشگاه</span>
-                        </a>
-                        <a class="list-group-item list-group-item-action d-flex align-items-center gap-2" asp-area="Store" asp-controller="Catalog" asp-action="Products" data-admin-nav>
-                            <i class="fa fa-box-open" aria-hidden="true"></i><span>محصولات</span>
-                        </a>
-                        <a class="list-group-item list-group-item-action d-flex align-items-center gap-2" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="orders" data-admin-nav>
-                            <i class="fa fa-receipt" aria-hidden="true"></i><span>سفارش‌ها</span>
-                        </a>
-                        <a class="list-group-item list-group-item-action d-flex align-items-center gap-2" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="reviews" data-admin-nav>
-                            <i class="fa fa-comments" aria-hidden="true"></i><span>بازخورد محصول</span>
-                        </a>
+            <section class="card border-0 shadow-sm h-100" aria-labelledby="store-area-title">
+                <div class="card-body p-4 p-xl-5">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <span class="d-inline-flex align-items-center justify-content-center rounded-3 bg-light border text-theme p-3" aria-hidden="true"><i class="fa fa-store fs-4"></i></span>
+                        <div><span class="small text-muted">حوزهٔ عملیاتی</span><h2 class="h4 mb-0" id="store-area-title">مدیریت فروشگاه</h2></div>
+                    </div>
+                    <p class="text-muted mb-4">کاتالوگ، سفارش‌ها و ارتباط با مشتریان را از یک بخش مدیریت کنید.</p>
+                    <div class="list-group list-group-flush border-top">
+                        <a class="list-group-item list-group-item-action d-flex align-items-center gap-3 px-0" asp-area="Store" asp-controller="Dashboard" asp-action="Index" data-admin-nav><span class="text-theme"><i class="fa fa-gauge-high" aria-hidden="true"></i></span><span class="flex-grow-1">نمای کلی فروشگاه</span><i class="fa fa-arrow-left small text-muted" aria-hidden="true"></i></a>
+                        <a class="list-group-item list-group-item-action d-flex align-items-center gap-3 px-0" asp-area="Store" asp-controller="Catalog" asp-action="Products" data-admin-nav><span class="text-theme"><i class="fa fa-box-open" aria-hidden="true"></i></span><span class="flex-grow-1">محصولات</span><i class="fa fa-arrow-left small text-muted" aria-hidden="true"></i></a>
+                        <a class="list-group-item list-group-item-action d-flex align-items-center gap-3 px-0" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="orders" data-admin-nav><span class="text-theme"><i class="fa fa-receipt" aria-hidden="true"></i></span><span class="flex-grow-1">سفارش‌ها</span><i class="fa fa-arrow-left small text-muted" aria-hidden="true"></i></a>
+                        <a class="list-group-item list-group-item-action d-flex align-items-center gap-3 px-0" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="reviews" data-admin-nav><span class="text-theme"><i class="fa fa-comments" aria-hidden="true"></i></span><span class="flex-grow-1">بازخورد محصول</span><i class="fa fa-arrow-left small text-muted" aria-hidden="true"></i></a>
                     </div>
                 </div>
             </section>
         </div>
         <div class="col-xl-6">
-            <section class="panel panel-inverse h-100" aria-labelledby="warehouse-area-title">
-                <div class="panel-heading">
-                    <h2 class="panel-title" id="warehouse-area-title"><i class="fa fa-warehouse me-2" aria-hidden="true"></i>مدیریت انبار</h2>
-                </div>
-                <div class="panel-body">
-                    <p class="text-muted">موجودی و عملیات هر انبار در حوزه‌ای جدا از فروشگاه.</p>
-                    <div class="list-group list-group-flush mt-3">
-                        <a class="list-group-item list-group-item-action d-flex align-items-center gap-2" asp-area="Warehouse" asp-controller="Dashboard" asp-action="Index" data-admin-nav>
-                            <i class="fa fa-chart-pie" aria-hidden="true"></i><span>نمای کلی انبار</span>
-                        </a>
-                        <a class="list-group-item list-group-item-action d-flex align-items-center gap-2" asp-area="Warehouse" asp-controller="Warehouses" asp-action="Index" data-admin-nav>
-                            <i class="fa fa-building" aria-hidden="true"></i><span>انبارها</span>
-                        </a>
-                        <a class="list-group-item list-group-item-action d-flex align-items-center gap-2" asp-area="Warehouse" asp-controller="Stock" asp-action="Index" data-admin-nav>
-                            <i class="fa fa-boxes-stacked" aria-hidden="true"></i><span>موجودی کالا</span>
-                        </a>
-                        <a class="list-group-item list-group-item-action d-flex align-items-center gap-2" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="movements" data-admin-nav>
-                            <i class="fa fa-arrows-rotate" aria-hidden="true"></i><span>گردش کالا</span>
-                        </a>
+            <section class="card border-0 shadow-sm h-100" aria-labelledby="warehouse-area-title">
+                <div class="card-body p-4 p-xl-5">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <span class="d-inline-flex align-items-center justify-content-center rounded-3 bg-light border text-teal p-3" aria-hidden="true"><i class="fa fa-warehouse fs-4"></i></span>
+                        <div><span class="small text-muted">حوزهٔ عملیاتی</span><h2 class="h4 mb-0" id="warehouse-area-title">مدیریت انبار</h2></div>
+                    </div>
+                    <p class="text-muted mb-4">موجودی، انبارها و گردش کالا را از یک بخش مدیریت کنید.</p>
+                    <div class="list-group list-group-flush border-top">
+                        <a class="list-group-item list-group-item-action d-flex align-items-center gap-3 px-0" asp-area="Warehouse" asp-controller="Dashboard" asp-action="Index" data-admin-nav><span class="text-teal"><i class="fa fa-chart-pie" aria-hidden="true"></i></span><span class="flex-grow-1">نمای کلی انبار</span><i class="fa fa-arrow-left small text-muted" aria-hidden="true"></i></a>
+                        <a class="list-group-item list-group-item-action d-flex align-items-center gap-3 px-0" asp-area="Warehouse" asp-controller="Warehouses" asp-action="Index" data-admin-nav><span class="text-teal"><i class="fa fa-building" aria-hidden="true"></i></span><span class="flex-grow-1">انبارها</span><i class="fa fa-arrow-left small text-muted" aria-hidden="true"></i></a>
+                        <a class="list-group-item list-group-item-action d-flex align-items-center gap-3 px-0" asp-area="Warehouse" asp-controller="Stock" asp-action="Index" data-admin-nav><span class="text-teal"><i class="fa fa-boxes-stacked" aria-hidden="true"></i></span><span class="flex-grow-1">موجودی کالا</span><i class="fa fa-arrow-left small text-muted" aria-hidden="true"></i></a>
+                        <a class="list-group-item list-group-item-action d-flex align-items-center gap-3 px-0" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="movements" data-admin-nav><span class="text-teal"><i class="fa fa-arrows-rotate" aria-hidden="true"></i></span><span class="flex-grow-1">گردش کالا</span><i class="fa fa-arrow-left small text-muted" aria-hidden="true"></i></a>
                     </div>
                 </div>
             </section>

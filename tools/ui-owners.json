@@ -37,6 +37,14 @@
             "Data/Infrastructure/Persistence/ShopDbContext.cs"
           ]
         },
+        "admin-dashboards": {
+          "markup": [
+            "Admin/Areas/Admin/Views/Home/Index.cshtml",
+            "Admin/Areas/Store/Views/Dashboard/Index.cshtml",
+            "Admin/Areas/Warehouse/Views/Dashboard/Index.cshtml",
+            "Admin/Views/Shared/_AdminPageIntro.cshtml"
+          ]
+        },
         "store-variant-prices": {
           "markup": [
             "Admin/Areas/Store/Views/Features/VariantPrices.cshtml"

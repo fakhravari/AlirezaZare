@@ -1,33 +1,44 @@
+@{
+    ViewData["Title"] = "نمای کلی انبار";
+    ViewData["AreaTitle"] = "مدیریت انبار";
+}
+
 <div class="admin-page" data-admin-page="warehouse-dashboard">
-    @await Html.PartialAsync("_AdminPageIntro", ("نمای کلی انبار", "مرور انبارها و ماندهٔ کالاها از داده‌های دیتابیس."))
+    @await Html.PartialAsync("_AdminPageIntro", ("نمای کلی انبار", "مرور انبارها، موجودی و گردش کالا از مسیرهای اصلی عملیات."))
     <div class="row g-3 g-xl-4">
         <div class="col-md-6 col-xxl-4">
-            <a class="panel panel-inverse h-100 text-decoration-none" asp-area="Warehouse" asp-controller="Warehouses" asp-action="Index" data-admin-nav>
-                <span class="panel-body d-flex flex-column align-items-start gap-2">
-                <span class="text-blue fs-20px">
-                    <i class="fa fa-warehouse" aria-hidden="true"></i>
+            <a class="card border-0 shadow-sm h-100 text-decoration-none" asp-area="Warehouse" asp-controller="Warehouses" asp-action="Index" data-admin-nav>
+                <span class="card-body d-flex flex-column align-items-start p-4">
+                    <span class="rounded-3 bg-light border text-blue p-3 mb-4" aria-hidden="true"><i class="fa fa-warehouse fs-4"></i></span>
+                    <span class="fw-bold text-body">انبارها</span>
+                    <span class="text-muted small mt-2">فهرست انبارها و وضعیت فعال بودن</span>
+                    <span class="d-flex align-items-center gap-2 text-theme small mt-auto pt-4">مدیریت انبارها <i class="fa fa-arrow-left" aria-hidden="true"></i></span>
                 </span>
-                </span><span class="fw-bold">انبارها</span><span class="text-muted small">فهرست انبارها و وضعیت فعال بودن</span></span>
             </a>
         </div>
         <div class="col-md-6 col-xxl-4">
-            <a class="panel panel-inverse h-100 text-decoration-none" asp-area="Warehouse" asp-controller="Stock" asp-action="Index" data-admin-nav>
-                <span class="panel-body d-flex flex-column align-items-start gap-2">
-                <span class="text-green fs-20px">
-                    <i class="fa fa-boxes-stacked" aria-hidden="true"></i>
+            <a class="card border-0 shadow-sm h-100 text-decoration-none" asp-area="Warehouse" asp-controller="Stock" asp-action="Index" data-admin-nav>
+                <span class="card-body d-flex flex-column align-items-start p-4">
+                    <span class="rounded-3 bg-light border text-green p-3 mb-4" aria-hidden="true"><i class="fa fa-boxes-stacked fs-4"></i></span>
+                    <span class="fw-bold text-body">موجودی کالا</span>
+                    <span class="text-muted small mt-2">فیلتر بر اساس انبار، طرح فروش و کمبود</span>
+                    <span class="d-flex align-items-center gap-2 text-theme small mt-auto pt-4">بررسی موجودی <i class="fa fa-arrow-left" aria-hidden="true"></i></span>
                 </span>
-                </span><span class="fw-bold">موجودی کالا</span><span class="text-muted small">فیلتر بر اساس انبار، طرح فروش و کمبود</span></span>
             </a>
         </div>
         <div class="col-md-6 col-xxl-4">
-            <a class="panel panel-inverse h-100 text-decoration-none" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="movements" data-admin-nav>
-                <span class="panel-body d-flex flex-column align-items-start gap-2">
-                <span class="text-orange fs-20px">
-                    <i class="fa fa-arrows-rotate" aria-hidden="true"></i>
+            <a class="card border-0 shadow-sm h-100 text-decoration-none" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="movements" data-admin-nav>
+                <span class="card-body d-flex flex-column align-items-start p-4">
+                    <span class="rounded-3 bg-light border text-orange p-3 mb-4" aria-hidden="true"><i class="fa fa-arrows-rotate fs-4"></i></span>
+                    <span class="fw-bold text-body">گردش و عملیات</span>
+                    <span class="text-muted small mt-2">رسید، حواله، انتقال و اصلاح موجودی</span>
+                    <span class="d-flex align-items-center gap-2 text-theme small mt-auto pt-4">مشاهدهٔ گردش کالا <i class="fa fa-arrow-left" aria-hidden="true"></i></span>
                 </span>
-                </span><span class="fw-bold">گردش و عملیات</span><span class="text-muted small">رسید، حواله، انتقال و اصلاح موجودی</span></span>
             </a>
         </div>
     </div>
-    <div class="alert alert-info mt-4" role="note"><i class="fa fa-circle-info me-1" aria-hidden="true"></i>فهرست موجودی از API خوانده می‌شود. رسید، حواله، انتقال و اصلاح موجودی پس از تعریف قرارداد ثبت و سطح دسترسی مدیر فعال خواهند شد.</div>
+    <div class="alert alert-info d-flex align-items-start gap-2 mt-4 mb-0" role="note">
+        <i class="fa fa-circle-info mt-1" aria-hidden="true"></i>
+        <span>فهرست موجودی از API خوانده می‌شود. رسید، حواله، انتقال و اصلاح موجودی پس از تعریف قرارداد ثبت و سطح دسترسی مدیر فعال خواهند شد.</span>
+    </div>
 </div>

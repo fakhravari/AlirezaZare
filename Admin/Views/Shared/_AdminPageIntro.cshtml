@@ -1,17 +1,19 @@
 @model (string Title, string Description)
-<div class="d-flex flex-column flex-md-row align-items-md-end justify-content-between gap-3 mb-4" data-admin-page-intro>
-    <div>
-        <ol class="breadcrumb mb-1">
+<header class="mb-4 pb-3 border-bottom" data-admin-page-intro>
+    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+        <div>
+            <ol class="breadcrumb mb-2">
             <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="Home" asp-action="Index" data-admin-nav>پیشخوان کل</a></li>
             <li class="breadcrumb-item active" aria-current="page">@ViewData["AreaTitle"]</li>
-        </ol>
-        <h1 class="page-header mb-1">@Model.Title</h1>
-        <p class="text-muted mb-0">@Model.Description</p>
-    </div>
+            </ol>
+            <h1 class="page-header mb-1">@Model.Title</h1>
+            <p class="text-muted mb-0">@Model.Description</p>
+        </div>
     @if (ViewData["DataSourceLabel"] is string source)
     {
-        <div class="badge bg-light text-dark border p-2">
-            <i class="fa fa-database me-1" aria-hidden="true"></i>@source
+        <div class="badge bg-light text-dark border rounded-pill px-3 py-2 align-self-start align-self-md-center">
+            <i class="fa fa-database me-1 text-theme" aria-hidden="true"></i>@source
         </div>
     }
-</div>
+    </div>
+</header>
