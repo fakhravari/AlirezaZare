@@ -54,7 +54,12 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext, IMedi
         root["specificationGroups"] = new JsonArray(groups.Select(x => (JsonNode?)new JsonObject { ["id"] = x.GroupKey, ["name"] = x.Name, ["order"] = x.SortOrder }).ToArray());
         root["specificationCategories"] = new JsonArray(specCategories.Select(x => (JsonNode?)new JsonObject { ["id"] = x.CategoryKey, ["groupId"] = groupKeyById.GetValueOrDefault(x.IdSpecificationGroup), ["name"] = x.Name, ["order"] = x.SortOrder }).ToArray());
         root["specificationFeatures"] = new JsonArray(features.Select(x => (JsonNode?)new JsonObject { ["id"] = x.FeatureKey, ["categoryId"] = specCategoryById.GetValueOrDefault(x.IdSpecificationCategory)?.CategoryKey, ["label"] = x.Label, ["order"] = x.SortOrder }).ToArray());
-        root["attributeDefinitions"] = new JsonArray(attributes.Select(x => (JsonNode?)new JsonObject { ["id"] = x.AttributeKey, ["label"] = x.Label, ["icon"] = x.Icon, ["source"] = x.SourceKey, ["filterKey"] = x.FilterKey, ["is_filterable"] = x.IsFilterable, ["is_highlight"] = x.IsHighlight }).ToArray());
+        root["attributeDefinitions"] = new JsonObject(attributes.Select(x =>
+        {
+            var definition = new JsonObject { ["label"] = x.Label, ["icon"] = x.Icon ?? "", ["source"] = x.SourceKey ?? "", ["is_filterable"] = x.IsFilterable, ["is_highlight"] = x.IsHighlight };
+            AddOptional(definition, "filterKey", x.FilterKey);
+            return KeyValuePair.Create<string, JsonNode?>(x.AttributeKey, definition);
+        }));
         root["brands"] = new JsonArray(brands.Select(x => (JsonNode?)new JsonObject { ["id"] = x.BrandKey, ["name"] = x.NameEn, ["fa"] = x.NameFa, ["logo"] = x.LogoPath, ["countryCode"] = x.IdCountry.HasValue ? countryCodeById.GetValueOrDefault(x.IdCountry.Value) : null }).ToArray());
         var activeCategories = categories.Where(x => x.IsActive).ToArray();
         var categoryKeyById = categories.ToDictionary(x => x.Id, x => x.CategoryKey);
@@ -80,7 +85,9 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext, IMedi
         var activeBrandKeys = await dbContext.StoreBrands.AsNoTracking().Where(x => x.IsActive).Select(x => x.BrandKey).ToHashSetAsync(cancellationToken);
         var activeAttributeKeys = await dbContext.StoreAttributeDefinitions.AsNoTracking().Where(x => x.IsActive).Select(x => x.AttributeKey).ToHashSetAsync(cancellationToken);
         FilterArray(root, "brands", item => activeBrandKeys.Contains(item?["id"]?.GetValue<string>() ?? ""));
-        FilterArray(root, "attributeDefinitions", item => activeAttributeKeys.Contains(item?["id"]?.GetValue<string>() ?? ""));
+        if (root["attributeDefinitions"] is JsonObject attributeDefinitions)
+            foreach (string key in attributeDefinitions.Select(pair => pair.Key).Where(key => !activeAttributeKeys.Contains(key)).ToArray())
+                attributeDefinitions.Remove(key);
         FilterArray(root, "products", item => activeBrandKeys.Contains(item?["brandId"]?.GetValue<string>() ?? "") && (item?["categoryId"] is null || root["categories"]?.AsArray().Any(category => string.Equals(category?["id"]?.GetValue<string>(), item["categoryId"]?.GetValue<string>(), StringComparison.Ordinal)) == true));
         var visibleProductIds = (root["products"]?.AsArray() ?? []).Select(item => item?["id"]?.ToJsonString()).ToHashSet(StringComparer.Ordinal);
         if (root["collections"] is JsonArray collectionArray) foreach (var collection in collectionArray) if (collection?["items"] is JsonArray items) for (int index = items.Count - 1; index >= 0; index--) if (!visibleProductIds.Contains(items[index]?.ToJsonString())) items.RemoveAt(index);

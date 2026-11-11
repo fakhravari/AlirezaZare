@@ -23,7 +23,7 @@ test('magazine cards and article hero use available product imagery', async ({pa
   await expect.poll(() => contentImage.evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true);
 });
 
-test('FAQ answer and managed contact channels fit the viewport', async ({page, isMobile}) => {
+test('FAQ answer and contact channels fit the viewport', async ({page, isMobile}) => {
   if (isMobile) await page.setViewportSize({width: 320, height: 640});
   await page.goto('/faq');
   const item = page.locator('.faq-item').first();
@@ -34,9 +34,9 @@ test('FAQ answer and managed contact channels fit the viewport', async ({page, i
   expect(faqWidth.content).toBeLessThanOrEqual(faqWidth.viewport + 1);
 
   await page.goto('/contact');
-  await expect(page.locator('.managed-contact-channels a[href^="tel:"]')).toBeVisible();
-  await expect(page.locator('.managed-contact-channels a[href^="mailto:"]')).toBeVisible();
-  await expect(page.locator('.managed-contact-channels a[href^="https://wa.me/"]')).toBeVisible();
+  await expect(page.locator('.contact-panel a[href^="tel:"]').first()).toBeVisible();
+  await expect(page.locator('.contact-panel a[href^="mailto:"]')).toBeVisible();
+  await expect(page.locator('a[href^="https://wa.me/"]').first()).toBeVisible();
   const contactWidth = await page.evaluate(() => ({content: document.documentElement.scrollWidth, viewport: innerWidth}));
   expect(contactWidth.content).toBeLessThanOrEqual(contactWidth.viewport + 1);
 });

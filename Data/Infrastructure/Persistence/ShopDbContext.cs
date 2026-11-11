@@ -81,7 +81,6 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
     public DbSet<AccountCompareItem> AccountCompareItems => Set<AccountCompareItem>();
     public DbSet<AccountPriceAlert> AccountPriceAlerts => Set<AccountPriceAlert>();
     public DbSet<AccountArticleFeedback> AccountArticleFeedback => Set<AccountArticleFeedback>();
-    public DbSet<AccountProductFeedback> AccountProductFeedback => Set<AccountProductFeedback>();
     public DbSet<AccountCheckoutPreference> AccountCheckoutPreferences => Set<AccountCheckoutPreference>();
     public DbSet<StoreCustomerOrderItem> StoreCustomerOrderItems => Set<StoreCustomerOrderItem>();
     public DbSet<StorePaymentAttempt> StorePaymentAttempts => Set<StorePaymentAttempt>();
@@ -144,16 +143,6 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.HasKey(x => x.Id);
             entity.Property(x => x.DisplayName).HasMaxLength(80).IsRequired();
             entity.Property(x => x.FeedbackText).HasMaxLength(1000).IsRequired();
-            entity.Property(x => x.Status).HasMaxLength(20).IsRequired();
-            entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
-        });
-        modelBuilder.Entity<AccountProductFeedback>(entity =>
-        {
-            entity.ToTable("ProductFeedback", "Store");
-            entity.HasKey(x => x.Id);
-            entity.Property(x => x.FeedbackType).HasMaxLength(20).IsRequired();
-            entity.Property(x => x.DisplayName).HasMaxLength(80).IsRequired();
-            entity.Property(x => x.FeedbackText).HasMaxLength(800).IsRequired();
             entity.Property(x => x.Status).HasMaxLength(20).IsRequired();
             entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
         });

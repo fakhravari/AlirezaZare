@@ -7,12 +7,16 @@ import path from 'node:path';
 import {setTimeout as delay} from 'node:timers/promises';
 import {root, source} from '../helpers/runtime.mjs';
 
-let server, base, logs = '', exited = false;
+let server, cdnServer, base, cdnBase, logs = '', exited = false, cdnExited = false;
 before(async () => {
-  const probe = net.createServer();
-  await new Promise(resolve => probe.listen(0, '127.0.0.1', resolve));
-  const port = probe.address().port;
-  await new Promise(resolve => probe.close(resolve));
+  const reservePort = async () => {
+    const probe = net.createServer();
+    await new Promise(resolve => probe.listen(0, '127.0.0.1', resolve));
+    const port = probe.address().port;
+    await new Promise(resolve => probe.close(resolve));
+    return port;
+  };
+  const port = await reservePort();
   base = `http://127.0.0.1:${port}`;
   const appDll = process.env.SHOP_TEST_DLL ? path.resolve(root, process.env.SHOP_TEST_DLL) : path.join(root, 'Shop/bin/Debug/net10.0/Shop.dll');
   server = spawn('dotnet', [appDll, '--urls', base], {
@@ -21,17 +25,38 @@ before(async () => {
   server.on('exit', () => { exited = true; });
   server.on('error', error => { logs += String(error); exited = true; });
   for (const stream of [server.stdout, server.stderr]) stream.on('data', data => { logs = (logs + data).slice(-10000); });
+  let shopReady = false;
   for (let attempt = 0; attempt < 150; attempt++) {
-    try { const response = await fetch(base + '/healthz', {signal: AbortSignal.timeout(1000)}); if (response.status === 200) return; } catch {}
+    try { const response = await fetch(base + '/healthz', {signal: AbortSignal.timeout(1000)}); if (response.status === 200) { shopReady = true; break; } } catch {}
     if (exited) break;
     await delay(200);
   }
-  server.kill(); throw new Error('HTTP smoke server did not start:\n' + logs);
+  if (!shopReady) { server.kill(); throw new Error('HTTP smoke server did not start:\n' + logs); }
+
+  const cdnPort = await reservePort();
+  cdnBase = `http://127.0.0.1:${cdnPort}`;
+  const cdnDll = path.join(root, 'Cdn/bin/Debug/net10.0/Cdn.dll');
+  cdnServer = spawn('dotnet', [cdnDll, '--urls', cdnBase], {
+    cwd: path.join(root, 'Cdn'), env: {...process.env, ASPNETCORE_ENVIRONMENT: 'Development'}, stdio: ['ignore', 'pipe', 'pipe'],
+  });
+  cdnServer.on('exit', () => { cdnExited = true; });
+  let cdnLogs = '';
+  for (const stream of [cdnServer.stdout, cdnServer.stderr]) stream.on('data', data => { cdnLogs = (cdnLogs + data).slice(-4000); });
+  const probeAsset = '/content/products/images/main/cordless-hammer-drill-hn-001-row-001-main.webp';
+  for (let attempt = 0; attempt < 150; attempt++) {
+    try { const response = await fetch(cdnBase + probeAsset, {signal: AbortSignal.timeout(1000)}); if (response.status === 200) return; } catch {}
+    if (cdnExited) break;
+    await delay(200);
+  }
+  cdnServer.kill(); throw new Error('Local CDN smoke server did not start:\n' + cdnLogs);
 });
 after(async () => {
-  if (!server || exited) return;
-  const stopped = new Promise(resolve => server.once('exit', resolve));
-  server.kill(); await stopped;
+  const stop = async (child, alreadyExited) => {
+    if (!child || alreadyExited) return;
+    const stopped = new Promise(resolve => child.once('exit', resolve));
+    child.kill(); await stopped;
+  };
+  await Promise.all([stop(server, exited), stop(cdnServer, cdnExited)]);
 });
 
 test('warehouse pagination validation responds with HTTP 400', async () => {
@@ -205,7 +230,12 @@ test('sitemap contains every stable canonical product URL exactly once', async (
   const response = await fetch(base + '/sitemap.xml');
   assert.equal(response.status, 200);
   const xml = await response.text();
-  for (const p of source().products) assert.equal(xml.split(`/products/${p.slug}-${p.id}</loc>`).length - 1, 1);
+  const home = await (await fetch(base + '/')).text();
+  const catalog = JSON.parse(home.match(/<script type="application\/json" id="storeCatalog">([\s\S]*?)<\/script>/)[1]);
+  for (const product of catalog.products) {
+    const path = `/products/${product.slug}-${product.id}`;
+    assert.equal(xml.split(`${path}</loc>`).length - 1, 1, `sitemap entry for runtime catalog product ${product.id}`);
+  }
 });
 
 test('every sitemap URL serves indexable HTML with a unique canonical and one H1', async () => {
@@ -231,16 +261,22 @@ test('every sitemap URL serves indexable HTML with a unique canonical and one H1
   }
 });
 
-test('referenced scripts, styles, product media, logo and flags are served locally', async () => {
+test('referenced scripts and styles are served by Shop and product media, logo and flags by CDN', async () => {
   const html = await (await fetch(base)).text();
   const urls = new Set([...html.matchAll(/(?:src|href)="([^"?#]+)(?:\?[^"#]*)?"/g)].map(m => m[1])
     .filter(url => /(?:\.js|\.css)$/.test(url) && !url.startsWith('http')));
   const d = source(), m = d.media['product-1'];
-  for (const url of [m.main, m.card, m.thumbnail, ...m.videos, d.brands.bosch.logo, d.countries.DE.flag]) urls.add('/' + url);
+  const cdnUrls = [m.main, m.card, m.thumbnail, ...m.videos, d.brands.bosch.logo, d.countries.DE.flag].map(url => '/' + url);
   for (const url of urls) {
     const response = await fetch(new URL(url, base));
     assert.equal(response.status, 200, url);
     assert.ok(!response.headers.get('content-type')?.includes('text/html'), url);
+    await response.body?.cancel();
+  }
+  for (const url of cdnUrls) {
+    const response = await fetch(new URL(url, cdnBase));
+    assert.equal(response.status, 200, `CDN ${url}`);
+    assert.ok(response.headers.get('content-type')?.startsWith('image/'), `CDN content type ${url}`);
     await response.body?.cancel();
   }
 });
@@ -262,7 +298,8 @@ test('images on every sitemap page, account page, catalog and loaded stylesheet 
   const images = new Map(), styles = new Set();
   const addImage = (value, parent, owner) => {
     if (!value || /^(?:data:|#)/i.test(value)) return;
-    const url = new URL(value.replaceAll('&amp;', '&'), parent);
+    let url = new URL(value.replaceAll('&amp;', '&'), parent);
+    if (url.origin === 'https://cdn.bs-shop.ir') url = new URL(url.pathname + url.search, cdnBase);
     if (url.origin !== base || !/\.(?:png|jpe?g|webp|svg|gif|ico|avif)$/i.test(url.pathname)) return;
     if (!images.has(url.href)) images.set(url.href, new Set());
     images.get(url.href).add(owner);
@@ -293,7 +330,7 @@ test('images on every sitemap page, account page, catalog and loaded stylesheet 
     for (const match of (await response.text()).matchAll(/url\(\s*["']?([^"'()]+)["']?\s*\)/g)) addImage(match[1].trim(), url, url);
   }
   const catalogImages = value => {
-    if (typeof value === 'string') addImage('/' + value, base, 'shared catalog');
+    if (typeof value === 'string') addImage(value, base, 'shared catalog');
     else if (value && typeof value === 'object') Object.values(value).forEach(catalogImages);
   };
   const home = await (await fetchBounded(base + '/')).text();

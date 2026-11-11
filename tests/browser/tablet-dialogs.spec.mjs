@@ -81,8 +81,8 @@ test('article feedback and login dialogs fit at tablet width', async ({page}) =>
   const login = page.locator('#loginModal');
   await expect(login).toBeVisible();
   await expectDialogInsideViewport(login.locator('.modal-content'));
-  await login.locator('#registerModeTab').click();
-  await expect(login.locator('#registerEmailStep')).toBeVisible();
-  await expectDialogInsideViewport(login.locator('.modal-content'));
+  await expect(login.locator('#loginPasswordMethod')).toBeVisible();
+  await expect(login.locator('#loginOtpMethod')).toBeVisible();
+  await expect(login.locator('#registerModeTab')).toHaveCount(0);
   await login.locator('.login-close').click();
 });

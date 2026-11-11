@@ -95,7 +95,7 @@ test('article feedback confirmation fits and can be cancelled', async ({page, is
   await expect(form.locator('[name="text"]')).toHaveValue('این دیدگاه برای بررسی نمایش فرم است.');
 });
 
-test('login and registration remain usable in a short viewport', async ({page, isMobile}) => {
+test('password and one-time-code login remain usable without registration in a short viewport', async ({page, isMobile}) => {
   if (isMobile) await page.setViewportSize({width: 320, height: 640});
   await page.goto('/');
   await page.locator('#accountToggle').click();
@@ -104,9 +104,9 @@ test('login and registration remain usable in a short viewport', async ({page, i
   const content = modal.locator('.modal-content');
   await expectDialogFits(content);
   await expect(modal.locator('#loginEmail')).toBeVisible();
-  await modal.locator('#registerModeTab').click();
-  await expect(modal.locator('#registerEmailStep')).toBeVisible();
-  await expectDialogFits(content);
+  await expect(modal.locator('#loginPasswordMethod')).toBeVisible();
+  await expect(modal.locator('#loginOtpMethod')).toBeVisible();
+  await expect(modal.locator('#registerModeTab')).toHaveCount(0);
   await modal.locator('.login-close').click();
   await expect(modal).not.toBeVisible();
 });

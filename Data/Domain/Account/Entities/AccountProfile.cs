@@ -157,19 +157,6 @@ public sealed class StoreCustomerOrderItem
     public string OptionsJson { get; set; } = "{}";
 }
 
-public sealed class AccountProductFeedback
-{
-    public long Id { get; set; }
-    public long IdProfile { get; set; }
-    public long IdProduct { get; set; }
-    public string FeedbackType { get; set; } = "";
-    public string DisplayName { get; set; } = "";
-    public string FeedbackText { get; set; } = "";
-    public int? Rating { get; set; }
-    public string Status { get; set; } = "pending";
-    public DateTime CreatedAtUtc { get; set; }
-}
-
 public sealed class StorePaymentAttempt
 {
     public Guid Id { get; set; }
