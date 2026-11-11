@@ -16,6 +16,12 @@ namespace Shop.Admin.Controllers.Api;
 [Route("api/admin/store/media")]
 public sealed class StoreMediaUploadApiController(ShopDbContext db, FtpMediaStorage storage, IMediaCdnBaseUrlProvider mediaCdn, ILogger<StoreMediaUploadApiController> logger) : ControllerBase
 {
+    private static readonly IReadOnlyDictionary<string, string> LibraryFolders = new Dictionary<string, string>(StringComparer.Ordinal)
+    {
+        ["slider"] = "sliders", ["testimonial"] = "testimonials", ["trust"] = "trust",
+        ["identity"] = "identity", ["payment"] = "payments"
+    };
+
     private static readonly IReadOnlyDictionary<string, (string Folder, uint Size)> ImageFolders =
         new Dictionary<string, (string, uint)>(StringComparer.Ordinal)
         {
@@ -25,9 +31,68 @@ public sealed class StoreMediaUploadApiController(ShopDbContext db, FtpMediaStor
             ["country"] = ("countries/flags", 256)
         };
 
-    [HttpGet("articles")]
-    public async Task<IActionResult> Articles(CancellationToken cancellationToken) =>
-        Ok(await db.Database.SqlQueryRaw<ArticleRow>("SELECT [ArticleKey], [Title] FROM [Mag].[MagazineArticle] ORDER BY [Title], [Id]").ToListAsync(cancellationToken));
+    [HttpGet("library")]
+    public async Task<IActionResult> Library(CancellationToken cancellationToken)
+    {
+        var items = new List<MediaLibraryItem>();
+        using var ftp = await storage.ConnectAsync(cancellationToken);
+        string cdnBaseUrl = await mediaCdn.GetBaseUrlAsync(cancellationToken);
+        foreach ((string kind, string folder) in LibraryFolders)
+        {
+            var entries = await ftp.GetListing($"/content/{folder}", FtpListOption.Recursive, cancellationToken);
+            foreach (var entry in entries.Where(item => item.Type == FtpObjectType.File &&
+                         new[] { ".webp", ".jpg", ".jpeg", ".png", ".svg" }.Contains(Path.GetExtension(item.Name), StringComparer.OrdinalIgnoreCase) &&
+                         !item.Name.EndsWith("-thumbnail.webp", StringComparison.OrdinalIgnoreCase)))
+            {
+                string path = entry.FullName.TrimStart('/');
+                string thumbnailPath = entry.Name.EndsWith(".webp", StringComparison.OrdinalIgnoreCase) ? path[..^5] + "-thumbnail.webp" : path;
+                bool canDelete = TryGetLibraryPaths(path, folder, out _, out _);
+                items.Add(new MediaLibraryItem(kind, path, entry.Name, entry.Size, entry.Modified, ContentCdn.ToUrl(path, cdnBaseUrl), ContentCdn.ToUrl(thumbnailPath, cdnBaseUrl), canDelete));
+            }
+        }
+        return Ok(items.OrderByDescending(item => item.ModifiedUtc).ThenBy(item => item.Kind).ToArray());
+    }
+
+    [HttpPost("delete")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteLibraryItem([FromForm] string kind, [FromForm] string path, CancellationToken cancellationToken)
+    {
+        if (!LibraryFolders.TryGetValue(kind ?? "", out string? folder) || !TryGetLibraryPaths(path, folder, out string? original, out string? thumbnail))
+            return BadRequest(new { title = "رسانهٔ انتخاب‌شده معتبر نیست." });
+        try
+        {
+            using var ftp = await storage.ConnectAsync(cancellationToken);
+            if (!await ftp.FileExists("/" + original, cancellationToken)) return NotFound(new { title = "فایل رسانه پیدا نشد." });
+            await ftp.DeleteFile("/" + original, cancellationToken);
+            if (await ftp.FileExists("/" + original, cancellationToken)) return Problem(statusCode: 502, title: "فایل اصلی از فضای FTP حذف نشد.");
+            if (await ftp.FileExists("/" + thumbnail, cancellationToken))
+            {
+                await ftp.DeleteFile("/" + thumbnail, cancellationToken);
+                if (await ftp.FileExists("/" + thumbnail, cancellationToken)) return Problem(statusCode: 502, title: "فایل اصلی حذف شد، اما تصویر کوچک باقی ماند.");
+            }
+            return Ok(new { message = "رسانه و تصویر کوچک آن حذف شدند." });
+        }
+        catch (Exception exception) when (exception is not OperationCanceledException)
+        {
+            logger.LogWarning(exception, "Media library delete failed for {MediaPath}", path);
+            return Problem(statusCode: 502, title: "حذف انجام نشد؛ اتصال FTP را بررسی کنید.");
+        }
+    }
+
+    private static bool TryGetLibraryPaths(string? path, string folder, out string original, out string thumbnail)
+    {
+        original = thumbnail = "";
+        string prefix = $"content/{folder}/";
+        if (string.IsNullOrWhiteSpace(path) || !path.StartsWith(prefix, StringComparison.Ordinal) || path.Contains('\\') || path.Contains("..", StringComparison.Ordinal)) return false;
+        string relative = path[prefix.Length..];
+        string[] segments = relative.Split('/');
+        if (segments.Length is < 1 or > 2 || segments.Any(segment => segment.Length == 0) ||
+            (segments.Length == 2 && (folder != "sliders" || segments[0] != "mobile")) ||
+            !System.Text.RegularExpressions.Regex.IsMatch(segments[^1], "^[a-f0-9]{32}\\.webp$", System.Text.RegularExpressions.RegexOptions.IgnoreCase)) return false;
+        original = path;
+        thumbnail = path[..^5] + "-thumbnail.webp";
+        return true;
+    }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
@@ -202,5 +267,5 @@ public sealed class StoreMediaUploadApiController(ShopDbContext db, FtpMediaStor
 
     public sealed class ProductRow { public string ProductKey { get; set; } = ""; }
     public sealed class MediaRow { public long Id { get; set; } }
-    public sealed class ArticleRow { public string ArticleKey { get; set; } = ""; public string Title { get; set; } = ""; }
+    public sealed record MediaLibraryItem(string Kind, string Path, string Name, long SizeBytes, DateTime ModifiedUtc, string? Url, string? ThumbnailUrl, bool CanDelete);
 }

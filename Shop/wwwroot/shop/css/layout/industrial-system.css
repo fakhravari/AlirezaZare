@@ -1033,108 +1033,56 @@ input[type="radio"] {
   color: var(--industrial-navy) !important;
 }
 
-#loginModal .login-auth-tabs {
-  position: relative;
+#loginModal .login-auth-methods {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 5px;
-  margin-top: 12px;
-  padding: 5px;
-  border: 1px solid #dce4ea;
-  border-radius: 15px;
-  background: linear-gradient(135deg, #f4f7f9, #e9eff3);
-  box-shadow: inset 0 2px 5px rgba(16, 42, 67, 0.06);
+  gap: 8px;
+  margin: 18px 0 16px;
 }
 
-#loginModal .login-auth-tabs button {
-  position: relative;
-  overflow: hidden;
-  display: flex;
+#loginModal .login-auth-methods button {
+  display: inline-flex;
   min-height: 40px;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  border: 1px solid transparent;
-  border-radius: 11px;
-  background: transparent;
-  color: var(--industrial-muted);
+  padding: 7px 10px;
+  border: 1px solid #d9e1e8;
+  border-radius: 10px;
+  background: #fff;
+  color: #526577;
   font: inherit;
-  font-size: 13px;
-  font-weight: 700;
-  transition:
-    background-color 0.2s ease,
-    color 0.2s ease,
-    box-shadow 0.2s ease,
-    transform 0.2s ease;
+  font-size: 12px;
+  font-weight: 600;
+  transition: border-color 0.18s ease, background-color 0.18s ease, color 0.18s ease;
 }
 
-#loginModal .login-auth-tabs button::before {
-  width: 15px;
-  height: 15px;
-  flex: 0 0 15px;
-  border: 1.5px solid currentColor;
+#loginModal .login-auth-methods button::before {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 14px;
+  border: 1.5px solid #9aaaba;
   border-radius: 50%;
   content: "";
-  transition:
-    border-color 0.2s ease,
-    background-color 0.2s ease,
-    box-shadow 0.2s ease;
 }
 
-#loginModal .login-auth-tabs button.active {
-  border-color: rgba(246, 197, 21, 0.62);
-  background: linear-gradient(135deg, #173a58 0%, #102a43 68%, #0b2035 100%);
-  color: #fff;
-  box-shadow:
-    0 5px 13px rgba(16, 42, 67, 0.24),
-    inset 0 1px rgba(255, 255, 255, 0.12);
+#loginModal .login-auth-methods button.active {
+  border-color: #afc0ce;
+  background: #f4f7f9;
+  color: #102a43;
 }
 
-#loginModal .login-auth-tabs button.active::before {
-  border: 4px solid var(--industrial-yellow);
+#loginModal .login-auth-methods button.active::before {
+  border: 4px solid #173a58;
   background: #fff;
-  box-shadow:
-    0 0 0 2px rgba(246, 197, 21, 0.23),
-    0 0 10px rgba(246, 197, 21, 0.38);
 }
 
-#loginModal .register-name-row {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-}
-
-#loginModal .register-name-row label {
-  min-width: 0;
-}
-
-#loginModal .register-name-row .login-input {
-  gap: 7px;
-  padding-inline: 9px;
-}
-
-#loginModal .register-name-row .login-input input {
-  padding-inline: 4px;
-  direction: rtl;
-  text-align: right;
-}
-
-#loginModal .register-name-row .login-input i {
-  font-size: 16px;
-}
-
-#loginModal .login-auth-tabs button:focus-visible {
-  outline: 2px solid var(--industrial-yellow-dark);
+#loginModal .login-auth-methods button:focus-visible {
+  outline: 2px solid rgba(23, 58, 88, 0.42);
   outline-offset: 2px;
 }
 
-#loginModal .register-name-row input {
-  direction: rtl;
-  text-align: right;
-}
-
-#loginModal #loginEmail,
-#loginModal #registerEmail {
+#loginModal #loginEmail {
   direction: ltr;
   text-align: left;
 }
@@ -1180,13 +1128,6 @@ input[type="radio"] {
 }
 
 @media (max-width: 575px) {
-  #loginModal .register-name-row {
-    gap: 8px;
-  }
-
-  #loginModal .register-name-row .login-input {
-    padding-inline: 7px;
-  }
 }
 
 /* Keep every login step inside the viewport without an inner scrollbar. */
@@ -1255,8 +1196,7 @@ input[type="radio"] {
   padding-block: 10px;
 }
 
-#loginModal .login-step form > label,
-#loginModal .login-step form > .register-name-row {
+#loginModal .login-step form > label {
   margin-bottom: 8px;
 }
 
@@ -1307,14 +1247,6 @@ input[type="radio"] {
   #loginModal .login-brand img {
     width: 38px;
     height: 38px;
-  }
-
-  #loginModal .login-auth-tabs {
-    margin-top: 9px;
-  }
-
-  #loginModal .login-auth-tabs button {
-    min-height: 38px;
   }
 
   #loginModal .login-step {
@@ -1371,14 +1303,6 @@ input[type="radio"] {
   #loginModal .login-brand img {
     width: 34px;
     height: 34px;
-  }
-
-  #loginModal .login-auth-tabs {
-    margin-top: 6px;
-  }
-
-  #loginModal .login-auth-tabs button {
-    min-height: 32px;
   }
 
   #loginModal .login-step {
@@ -1979,6 +1903,7 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
   position: relative;
   display: grid;
   grid-template-columns: minmax(250px, 0.85fr) minmax(0, 1.15fr);
+  height: min(620px, calc(100dvh - 32px));
   max-height: min(680px, calc(100dvh - 32px));
   padding: 0;
   border: 1px solid rgba(255, 255, 255, 0.78);
@@ -2080,18 +2005,18 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
   position: relative;
   display: flex;
   min-width: 0;
+  min-height: 0;
   flex-direction: column;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
   padding: 27px 30px 22px;
   background: #fbfaf7;
 }
 
 #loginModal .login-modal-form-panel .login-brand {
   padding: 0 0 14px;
-}
-
-#loginModal .login-modal-form-panel .login-auth-tabs {
-  flex: 0 0 auto;
 }
 
 #loginModal .login-modal-form-panel .login-step {
@@ -2114,6 +2039,8 @@ html body .payment-method input:focus-visible ~ .payment-method-icon {
 
   #loginModal .modal-content {
     display: flex;
+    height: auto;
+    min-height: 0;
     max-height: calc(100dvh - 20px);
     flex-direction: column;
     border-radius: 20px;

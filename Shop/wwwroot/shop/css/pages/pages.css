@@ -682,31 +682,6 @@ h6 {
 .flow-main.customer-service-main > .flow-related {
   margin-top: 40px;
 }
-.managed-page-content {
-  display: grid;
-  gap: 18px;
-  margin-block: 30px;
-}
-.managed-page-content .managed-service-section {
-  margin: 0;
-  padding: clamp(20px, 3vw, 32px);
-  border: 1px solid var(--border-color, #e8e1d4);
-  border-radius: 18px;
-  background: var(--surface-color, #fff);
-}
-.managed-page-content .managed-service-section h2 {
-  margin: 0 0 12px;
-  color: var(--heading-color, #252525);
-  font-size: clamp(18px, 2vw, 22px);
-}
-.managed-page-content .managed-service-section p {
-  margin: 0;
-  line-height: 2;
-  color: var(--text-color, #555);
-}
-.managed-page-content .managed-service-section p + p {
-  margin-top: 10px;
-}
 .flow-main.legal-main {
   width: min(calc(100% - 48px), 1360px);
   max-width: 1360px;

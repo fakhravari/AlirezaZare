@@ -57,9 +57,33 @@
         body.replaceChildren();
         rows.forEach((item, index) => {
             const row = document.createElement("tr");
-            for (const value of columns(item)) {
+            for (const [columnIndex, value] of columns(item).entries()) {
                 const cell = document.createElement("td");
-                cell.textContent = value == null || value === "" ? "—" : String(value);
+                if (page.dataset.adminSection === "brands" && columnIndex === 1) {
+                    const brand = document.createElement("span");
+                    brand.className = "admin-brand-name-with-logo";
+                    if (item.logoUrl) {
+                        const image = document.createElement("img");
+                        image.className = "admin-brand-logo";
+                        image.src = item.logoUrl;
+                        image.alt = "";
+                        image.loading = "lazy";
+                        image.addEventListener("error", () => image.remove(), { once: true });
+                        brand.append(image);
+                    } else {
+                        const placeholder = document.createElement("span");
+                        placeholder.className = "admin-brand-logo-placeholder";
+                        placeholder.setAttribute("aria-hidden", "true");
+                        placeholder.innerHTML = '<i class="fa fa-image"></i>';
+                        brand.append(placeholder);
+                    }
+                    const name = document.createElement("span");
+                    name.textContent = value == null || value === "" ? "—" : String(value);
+                    brand.append(name);
+                    cell.append(brand);
+                } else {
+                    cell.textContent = value == null || value === "" ? "—" : String(value);
+                }
                 row.append(cell);
             }
             const actions = document.createElement("td");
@@ -169,6 +193,206 @@
         return typeof value === "string" ? value.trim() : value;
     }
 
+    async function loadMediaLibrary(root) {
+        const statusNode = root.querySelector("[data-media-library-status]");
+        const container = root.querySelector("[data-media-library-items]");
+        if (!container) return;
+        if (root.dataset.loading === "true") { root.dataset.reload = "true"; return; }
+        root.dataset.loading = "true";
+        if (statusNode) statusNode.textContent = "در حال دریافت رسانه‌های موجود…";
+        try {
+            const items = await ui.getJson("/api/admin/store/media/library");
+            container.replaceChildren();
+            const labels = { slider: "اسلایدر", testimonial: "دیدگاه", trust: "اعتماد", identity: "هویت فروشگاه", payment: "پرداخت" };
+            for (const item of items) {
+                const card = document.createElement("article"); card.className = "admin-media-card";
+                const label = labels[item.kind] || item.kind;
+                const preview = document.createElement("img"); preview.className = "admin-media-preview"; preview.src = item.thumbnailUrl || item.url || ""; preview.alt = `پیش‌نمایش ${label}`; preview.loading = "lazy";
+                const details = document.createElement("div"); details.className = "admin-media-details";
+                const title = document.createElement("strong"); title.textContent = label;
+                const path = document.createElement("code"); path.dir = "ltr"; path.className = "admin-media-path"; path.textContent = item.path;
+                const meta = document.createElement("small"); meta.className = "text-muted"; meta.textContent = `${ui.formatNumber(Math.ceil(item.sizeBytes / 1024))} کیلوبایت · ${new Date(item.modifiedUtc).toLocaleDateString("fa-IR")}`;
+                details.append(title, path, meta);
+                const actions = document.createElement("div"); actions.className = "admin-media-actions";
+                const copy = document.createElement("button"); copy.type = "button"; copy.className = "btn btn-default btn-sm"; copy.dataset.mediaCopy = item.url || ""; copy.textContent = "کپی نشانی";
+                const remove = document.createElement("button"); remove.type = "button"; remove.className = "btn btn-danger btn-sm"; remove.dataset.mediaDelete = item.path; remove.dataset.mediaKind = item.kind; remove.textContent = "حذف"; remove.disabled = !item.canDelete;
+                if (!item.canDelete) remove.title = "این فایل با بارگذاری پنل ساخته نشده و حذف آن از اینجا مجاز نیست.";
+                actions.append(copy, remove); card.append(preview, details, actions); container.append(card);
+            }
+            if (statusNode) statusNode.textContent = items.length ? `${ui.formatNumber(items.length)} رسانهٔ عمومی` : "رسانه‌ای در این پوشه‌ها ثبت نشده است.";
+        } catch (error) {
+            if (statusNode) statusNode.textContent = error.message || "دریافت کتابخانهٔ رسانه ناموفق بود.";
+        } finally {
+            root.dataset.loading = "false";
+            if (root.dataset.reload === "true") { delete root.dataset.reload; void loadMediaLibrary(root); }
+        }
+    }
+
+    document.addEventListener("click", async event => {
+        const refresh = event.target.closest("[data-media-library-refresh]");
+        if (refresh) { const root = refresh.closest("[data-media-library]"); if (root) void loadMediaLibrary(root); return; }
+        const copy = event.target.closest("[data-media-copy]");
+        if (copy) {
+            if (!copy.dataset.mediaCopy) return;
+            try { await navigator.clipboard.writeText(copy.dataset.mediaCopy); copy.textContent = "کپی شد"; }
+            catch { ui.notify("کپی نشانی در این مرورگر در دسترس نیست.", "danger"); }
+            return;
+        }
+        const remove = event.target.closest("[data-media-delete]");
+        if (remove) {
+            if (!window.confirm("این رسانه و تصویر کوچک آن برای همیشه از فضای فایل حذف شوند؟")) return;
+            const root = remove.closest("[data-media-library]"), form = root?.querySelector("[data-media-library-token]");
+            if (!root || !form) return;
+            const body = new FormData(form); body.set("kind", remove.dataset.mediaKind); body.set("path", remove.dataset.mediaDelete);
+            remove.disabled = true;
+            try { const result = await ui.getJson("/api/admin/store/media/delete", { method: "POST", body }); ui.notify(result.message, "success"); await loadMediaLibrary(root); }
+            catch (error) { ui.notify(error.message || "حذف رسانه ناموفق بود.", "danger"); remove.disabled = false; }
+        }
+    });
+
+    async function loadAllCategories(signal) {
+        const items = [];
+        const size = 200;
+        let currentPage = 1;
+        let total = 0;
+        do {
+            const url = new URL("/api/admin/store/catalog/categories", window.location.origin);
+            url.searchParams.set("page", String(currentPage));
+            url.searchParams.set("pageSize", String(size));
+            const result = await ui.getJson(url, { signal });
+            items.push(...(result.items || []));
+            total = result.total || 0;
+            currentPage++;
+        } while (items.length < total);
+        return items;
+    }
+
+    function renderCategoryTree(page, allRows, search = "") {
+        const body = page.querySelector("[data-admin-results]");
+        const empty = page.querySelector("[data-admin-empty]");
+        if (!body) return;
+
+        const byId = new Map(allRows.map(item => [String(item.id), item]));
+        const normalizedSearch = search.toLocaleLowerCase();
+        const matches = new Set(allRows.filter(item => !normalizedSearch ||
+            [item.id, item.name, item.englishName, item.slug].some(value => String(value || "").toLocaleLowerCase().includes(normalizedSearch)))
+            .map(item => String(item.id)));
+        const included = new Set(matches);
+        if (normalizedSearch) {
+            for (const id of matches) {
+                let parentId = byId.get(id)?.parentId;
+                const visited = new Set([id]);
+                while (parentId && byId.has(String(parentId)) && !visited.has(String(parentId))) {
+                    included.add(String(parentId));
+                    visited.add(String(parentId));
+                    parentId = byId.get(String(parentId)).parentId;
+                }
+            }
+        } else {
+            for (const item of allRows) included.add(String(item.id));
+        }
+
+        const childrenByParent = new Map();
+        for (const item of allRows) {
+            const id = String(item.id);
+            if (!included.has(id)) continue;
+            const parentId = included.has(String(item.parentId)) ? String(item.parentId) : "";
+            if (!childrenByParent.has(parentId)) childrenByParent.set(parentId, []);
+            childrenByParent.get(parentId).push(item);
+        }
+        if (!page.__adminCategoryExpanded) {
+            page.__adminCategoryExpanded = new Set((childrenByParent.get("") || [])
+                .filter(item => (childrenByParent.get(String(item.id)) || []).length)
+                .map(item => String(item.id)));
+        }
+        if (normalizedSearch) {
+            for (const id of matches) {
+                let parentId = byId.get(id)?.parentId;
+                while (parentId && byId.has(String(parentId))) {
+                    page.__adminCategoryExpanded.add(String(parentId));
+                    parentId = byId.get(String(parentId)).parentId;
+                }
+            }
+        }
+
+        const flattened = [];
+        const seen = new Set();
+        const visit = (item, depth) => {
+            const id = String(item.id);
+            if (seen.has(id)) return;
+            seen.add(id);
+            const children = childrenByParent.get(id) || [];
+            flattened.push({ item, depth, hasChildren: children.length > 0 });
+            if (children.length && page.__adminCategoryExpanded.has(id))
+                children.forEach(child => visit(child, depth + 1));
+        };
+        (childrenByParent.get("") || []).forEach(item => visit(item, 0));
+        for (const item of allRows) if (included.has(String(item.id)) && !seen.has(String(item.id))) visit(item, 0);
+
+        page.__adminRows = flattened.map(entry => entry.item);
+        body.replaceChildren();
+        flattened.forEach(({ item, depth, hasChildren }, index) => {
+            const row = document.createElement("tr");
+            row.className = "admin-category-row";
+            row.setAttribute("aria-level", String(depth + 1));
+            const id = String(item.id);
+            if (hasChildren) row.setAttribute("aria-expanded", String(page.__adminCategoryExpanded.has(id)));
+
+            const idCell = document.createElement("td"); idCell.textContent = item.id;
+            const nameCell = document.createElement("td");
+            const label = document.createElement("div"); label.className = "admin-category-tree-label";
+            label.style.paddingInlineStart = `${depth * 1.35}rem`;
+            if (hasChildren) {
+                const toggle = document.createElement("button");
+                toggle.type = "button"; toggle.className = "admin-category-toggle";
+                toggle.setAttribute("aria-expanded", String(page.__adminCategoryExpanded.has(id)));
+                toggle.setAttribute("aria-label", `${page.__adminCategoryExpanded.has(id) ? "بستن" : "بازکردن"} زیرشاخه‌های ${item.name}`);
+                toggle.append(Object.assign(document.createElement("span"), { className: "admin-category-chevron", textContent: "›" }));
+                toggle.addEventListener("click", () => {
+                    if (page.__adminCategoryExpanded.has(id)) page.__adminCategoryExpanded.delete(id);
+                    else page.__adminCategoryExpanded.add(id);
+                    renderCategoryTree(page, page.__adminCategoryData || allRows, queryValue(page.querySelector("[data-admin-filter]"), "q"));
+                });
+                label.append(toggle);
+            } else {
+                label.append(Object.assign(document.createElement("span"), { className: "admin-category-toggle-spacer" }));
+            }
+            label.append(Object.assign(document.createElement("span"), { className: "admin-category-name", textContent: item.name || "—" }));
+            nameCell.append(label);
+
+            const cells = [idCell, nameCell, item.englishName, item.parentId, item.slug, item.isActive ? "منتشر" : "پیش‌نویس"];
+            for (const value of cells.slice(2)) {
+                const cell = document.createElement("td");
+                cell.textContent = value == null || value === "" ? "—" : String(value);
+                row.append(cell);
+            }
+            row.prepend(idCell, nameCell);
+
+            const actions = document.createElement("td"); actions.className = "admin-row-actions";
+            const details = document.createElement("button"); details.type = "button"; details.className = "btn btn-xs btn-default";
+            details.dataset.adminRecord = String(index); details.setAttribute("aria-label", "نمایش جزئیات رکورد");
+            details.innerHTML = '<i class="fa fa-eye" aria-hidden="true"></i><span class="visually-hidden">نمایش جزئیات</span>';
+            actions.append(details);
+            if (page.dataset.canEditCategory === "true") {
+                const content = document.createElement("button"); content.type = "button"; content.className = "btn btn-xs btn-default ms-1";
+                content.dataset.categoryContent = String(index); content.textContent = "محتوای دسته"; actions.append(content);
+            }
+            if (page.dataset.canUploadImage === "true") {
+                const edit = document.createElement("button"); edit.type = "button"; edit.className = "btn btn-xs btn-default ms-1";
+                edit.dataset.categoryEdit = String(index); edit.textContent = "ویرایش دسته"; actions.append(edit);
+                const statusButton = document.createElement("button"); statusButton.type = "button"; statusButton.className = "btn btn-xs btn-default ms-1";
+                statusButton.dataset.catalogStatus = String(index); statusButton.textContent = item.isActive ? "خروج از انتشار" : "انتشار"; actions.append(statusButton);
+            }
+            row.append(actions);
+            body.append(row);
+        });
+        empty?.classList.toggle("d-none", flattened.length > 0);
+        const pagination = page.querySelector("[data-admin-pagination]");
+        if (pagination) pagination.hidden = true;
+        const count = page.querySelector("[data-admin-count]");
+        if (count) count.textContent = `نمایش ${ui.formatNumber(flattened.length)} از ${ui.formatNumber(allRows.length)} دسته`;
+    }
+
     async function loadCatalog(page, pageNumber = 1, announce = false) {
         const form = page.querySelector("[data-admin-filter]");
         const api = new URL(page.dataset.adminApi, window.location.origin);
@@ -179,6 +403,16 @@
         const controller = beginRequest(page);
         status(page, "در حال خواندن داده از دیتابیس…");
         try {
+            if (page.dataset.adminSection === "categories") {
+                const allRows = await loadAllCategories(controller.signal);
+                if (!page.isConnected || requests.get(page) !== controller) return;
+                page.__adminCategoryData = allRows;
+                renderCategoryTree(page, allRows, query);
+                page.dataset.adminPageNumber = "1";
+                status(page, "درخت دسته‌ها از دیتابیس دریافت شد.");
+                if (announce) ui.notify("فهرست به‌روز شد.", "success");
+                return;
+            }
             const result = await ui.getJson(api, { signal: controller.signal });
             if (!page.isConnected || requests.get(page) !== controller) return;
             const section = page.dataset.adminSection;
@@ -198,7 +432,8 @@
         } catch (error) {
             if (error.name === "AbortError") return;
             if (!page.isConnected || requests.get(page) !== controller) return;
-            renderRows(page, [], () => []);
+            if (page.dataset.adminSection === "categories") renderCategoryTree(page, [], query);
+            else renderRows(page, [], () => []);
             status(page, error.message || "دریافت داده ناموفق بود.", true);
             ui.notify(error.message || "دریافت داده ناموفق بود.", "danger");
         } finally { finishRequest(page, controller); }
@@ -396,7 +631,7 @@
                 const tr = document.createElement("tr");
                 for (const text of [item.title, item.articleKey, ui.formatNumber(item.count), item.isPublished ? "منتشرشده" : "پیش‌نویس"]) { const td = document.createElement("td"); td.textContent = text; tr.append(td); }
                 const td = document.createElement("td");
-                for (const [label, action] of [["ویرایش", "edit"], ["حذف", "delete"]]) { const button = document.createElement("button"); button.type = "button"; button.className = `btn btn-sm ${action === "delete" ? "btn-danger" : "btn-default"} me-1`; button.dataset.magAction = action; button.dataset.id = item.id; button.textContent = label; td.append(button); }
+                for (const [label, action] of [["ویرایش", "edit"], ["تصویر", "image"], ["حذف", "delete"]]) { const button = document.createElement("button"); button.type = "button"; button.className = `btn btn-sm ${action === "delete" ? "btn-danger" : "btn-default"} me-1`; button.dataset.magAction = action; button.dataset.id = item.id; button.dataset.articleKey = item.articleKey; button.dataset.articleTitle = item.title; button.textContent = label; td.append(button); }
                 tr.append(td); body.append(tr);
             });
             statusNode.textContent = rows.length ? "" : "مقاله‌ای ثبت نشده است.";
@@ -523,6 +758,14 @@
     document.addEventListener("click", async event => {
         const button = event.target.closest("[data-mag-create], [data-mag-action]"); if (!button) return;
         const form = document.querySelector("[data-mag-editor]");
+        if (button.dataset.magAction === "image") {
+            const mediaForm = document.querySelector("[data-article-image-form]");
+            if (!mediaForm) return;
+            mediaForm.reset(); mediaForm.elements.articleKey.value = button.dataset.articleKey || "";
+            mediaForm.querySelector("[data-article-image-name]").textContent = button.dataset.articleTitle || "";
+            window.bootstrap?.Modal?.getOrCreateInstance(document.getElementById("article-image-modal")).show();
+            return;
+        }
         if (button.hasAttribute("data-mag-create")) { form.reset(); form.elements.id.value = ""; renderMagazineSections(form.querySelector("[data-mag-sections]"), []); window.bootstrap?.Modal?.getOrCreateInstance(document.getElementById("mag-editor-modal")).show(); return; }
         if (button.dataset.magAction === "delete") {
             if (!window.confirm("مقاله حذف شود؟")) return;
@@ -561,6 +804,11 @@
     }
 
     function initialize(root = document) {
+        root.querySelectorAll("[data-media-library]").forEach(page => {
+            if (page.dataset.mediaLibraryInitialized === "true") return;
+            page.dataset.mediaLibraryInitialized = "true";
+            void loadMediaLibrary(page);
+        });
         const pages = root.querySelectorAll("[data-admin-page]");
         pages.forEach(page => {
             if (page.dataset.adminInitialized === "true") return;
@@ -574,21 +822,6 @@
             else if (page.dataset.adminPage === "product-drafts") void loadProductDrafts(page);
         });
     }
-
-    document.addEventListener("focusin", event => {
-        const select = event.target.closest("[data-media-options]");
-        if (!select || select.dataset.loaded === "true" || select.dataset.loading === "true") return;
-        const kind = select.dataset.mediaOptions;
-        select.dataset.loading = "true";
-        void ui.getJson(kind === "country" ? "/api/admin/store/catalog/brands/countries" : "/api/admin/store/media/articles")
-            .then(items => {
-                const label = kind === "country" ? "کشور را انتخاب کنید" : "مقاله را انتخاب کنید";
-                select.replaceChildren(new Option(label, ""), ...items.map(item => new Option(kind === "country" ? item.nameFa : item.title, kind === "country" ? item.countryCode : item.articleKey)));
-                select.dataset.loaded = "true";
-            })
-            .catch(error => { ui.notify(error.message || "دریافت فهرست ناموفق بود.", "danger"); })
-            .finally(() => { delete select.dataset.loading; });
-    });
 
     document.addEventListener("click", event => {
         const categoryEdit = event.target.closest("[data-category-edit], [data-category-create]");
@@ -888,6 +1121,20 @@
                 .finally(() => { categoryButton.disabled = false; });
             return;
         }
+        const treeButton = event.target.closest("[data-category-tree-expand], [data-category-tree-collapse]");
+        if (treeButton) {
+            const page = treeButton.closest('[data-admin-section="categories"]');
+            const rows = page?.__adminCategoryData;
+            if (!page || !rows) return;
+            if (treeButton.hasAttribute("data-category-tree-expand")) {
+                const parentIds = new Set(rows.map(item => String(item.parentId || "")).filter(Boolean));
+                page.__adminCategoryExpanded = new Set(rows.filter(item => parentIds.has(String(item.id))).map(item => String(item.id)));
+            } else {
+                page.__adminCategoryExpanded = new Set();
+            }
+            renderCategoryTree(page, rows, queryValue(page.querySelector("[data-admin-filter]"), "q"));
+            return;
+        }
         const refreshButton = event.target.closest("[data-admin-refresh]");
         if (refreshButton) {
             const page = refreshButton.closest("[data-admin-page]");
@@ -1119,10 +1366,10 @@
             event.preventDefault();
             const result = mediaForm.querySelector("[data-media-upload-result]");
             const save = mediaForm.querySelector('[type="submit"]');
-            if (mediaForm.elements.kind.value === "country" && (!mediaForm.elements.countryCode.value || mediaForm.elements.countryCode.dataset.loaded !== "true")) {
+            if (mediaForm.elements.kind.value === "country" && !mediaForm.elements.countryCode.value) {
                 result.textContent = "کشور را انتخاب کنید."; return;
             }
-            if (mediaForm.elements.kind.value === "article" && (!mediaForm.elements.articleKey.value || mediaForm.elements.articleKey.dataset.loaded !== "true")) {
+            if (mediaForm.elements.kind.value === "article" && !mediaForm.elements.articleKey.value) {
                 result.textContent = "مقاله را انتخاب کنید."; return;
             }
             result.textContent = "در حال بارگذاری…"; save.disabled = true;
@@ -1133,6 +1380,14 @@
                     const thumbnailUrl = display(data.thumbnailUrl, data.thumbnail);
                     result.textContent = data.thumbnail ? `نشانی فایل: ${fileUrl} — تصویر کوچک: ${thumbnailUrl}` : `نشانی فایل: ${fileUrl}`;
                     ui.notify(data.message, "success");
+                    if (mediaForm.elements.kind.value === "country")
+                        document.dispatchEvent(new CustomEvent("admin:media-uploaded", { detail: { kind: "country", countryCode: mediaForm.elements.countryCode.value, path: data.path } }));
+                    if (mediaForm.hasAttribute("data-article-image-form")) {
+                        window.bootstrap?.Modal?.getInstance(document.getElementById("article-image-modal"))?.hide();
+                        void loadMagazine();
+                    }
+                    const library = document.querySelector("[data-media-library]");
+                    if (library) void loadMediaLibrary(library);
                 })
                 .catch(error => { result.textContent = error.message || "بارگذاری ناموفق بود."; ui.notify(result.textContent, "danger"); })
                 .finally(() => { save.disabled = false; });

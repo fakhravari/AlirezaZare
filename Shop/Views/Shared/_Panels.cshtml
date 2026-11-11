@@ -289,16 +289,12 @@
                         ><small>ورود به حساب کاربری</small>
                     </div>
                 </div>
-                <div class="login-auth-tabs" role="tablist" aria-label="نوع دسترسی">
-                    <button type="button" id="loginModeTab" role="tab" aria-selected="true" aria-controls="loginEmailStep" class="active">ورود</button>
-                    <button type="button" id="registerModeTab" role="tab" aria-selected="false" aria-controls="registerEmailStep">ثبت‌نام</button>
-                </div>
-                <div class="login-step" id="loginEmailStep" role="tabpanel" aria-labelledby="loginModeTab">
+                <div class="login-step" id="loginEmailStep" aria-labelledby="loginModalTitle">
                     <h2 id="loginModalTitle">ورود با ایمیل</h2>
                     <p>با کد یک‌بارمصرف ایمیل یا رمز عبور وارد حساب شوید.</p>
                     <div class="login-auth-methods" role="group" aria-label="روش ورود">
-                        <button type="button" id="loginOtpMethod" class="active" aria-pressed="true">کد یک‌بارمصرف</button>
-                        <button type="button" id="loginPasswordMethod" aria-pressed="false">رمز عبور</button>
+                        <button type="button" id="loginOtpMethod" aria-pressed="false">کد یک‌بارمصرف</button>
+                        <button type="button" id="loginPasswordMethod" class="active" aria-pressed="true">رمز عبور</button>
                     </div>
                     <form id="loginEmailForm">
                         <label for="loginEmail">ایمیل</label>
@@ -306,52 +302,13 @@
                             <i class="bi bi-envelope" aria-hidden="true"></i>
                             <input id="loginEmail" name="email" type="email" inputmode="email" dir="ltr" autocomplete="email" required/>
                         </div>
-                        <label for="loginPassword" id="loginPasswordLabel" class="d-none" hidden>رمز عبور</label>
-                        <div class="login-input d-none" id="loginPasswordField" hidden>
+                        <label for="loginPassword" id="loginPasswordLabel">رمز عبور</label>
+                        <div class="login-input" id="loginPasswordField">
                             <i class="bi bi-lock" aria-hidden="true"></i>
-                            <input id="loginPassword" name="password" type="password" dir="ltr" autocomplete="current-password" minlength="10" maxlength="128" tabindex="-1"/>
+                            <input id="loginPassword" name="password" type="password" dir="ltr" autocomplete="current-password" minlength="10" maxlength="128" required/>
                         </div>
                         <small class="login-error" id="loginEmailError" role="alert"></small>
                         <button type="submit"><span id="loginSubmitLabel">دریافت کد ورود</span> <i class="bi bi-arrow-left"></i></button>
-                    </form>
-                </div>
-                <div class="login-step d-none" id="registerEmailStep" role="tabpanel" aria-labelledby="registerModeTab" hidden>
-                    <h2>ساخت حساب کاربری</h2>
-                    <p>نام و ایمیل را وارد کنید؛ کد تأیید مرحلهٔ بعد است.</p>
-                    <form id="registerEmailForm">
-                        <div class="register-name-row">
-                            <label for="registerFirstName">
-                                نام
-                                <span class="login-input">
-                                    <i class="bi bi-person" aria-hidden="true"></i>
-                                    <input id="registerFirstName" name="given-name" type="text" dir="rtl" autocomplete="given-name" value="کاربر" maxlength="50" required/>
-                                </span>
-                            </label>
-                            <label for="registerLastName">
-                                نام خانوادگی
-                                <span class="login-input">
-                                    <i class="bi bi-person" aria-hidden="true"></i>
-                                    <input id="registerLastName" name="family-name" type="text" dir="rtl" autocomplete="family-name" value="آزمایشی" maxlength="60" required/>
-                                </span>
-                            </label>
-                        </div>
-                        <label for="registerEmail">ایمیل</label>
-                        <div class="login-input">
-                            <i class="bi bi-envelope" aria-hidden="true"></i>
-                            <input id="registerEmail" name="email" type="email" inputmode="email" dir="ltr" autocomplete="email" value="fakhravary@gmail.com" required/>
-                        </div>
-                        <label for="registerPassword">رمز عبور <small>(حداقل ۱۰ نویسه)</small></label>
-                        <div class="login-input">
-                            <i class="bi bi-lock" aria-hidden="true"></i>
-                            <input id="registerPassword" name="new-password" type="password" dir="ltr" autocomplete="new-password" minlength="10" maxlength="128" required/>
-                        </div>
-                        <label for="registerPasswordConfirm">تکرار رمز عبور</label>
-                        <div class="login-input">
-                            <i class="bi bi-lock-fill" aria-hidden="true"></i>
-                            <input id="registerPasswordConfirm" name="new-password-confirm" type="password" dir="ltr" autocomplete="new-password" minlength="10" maxlength="128" required/>
-                        </div>
-                        <small class="login-error" id="registerEmailError" role="alert"></small>
-                        <button type="submit">دریافت کد فعال‌سازی <i class="bi bi-arrow-left"></i></button>
                     </form>
                 </div>
                 <div class="login-step d-none" id="emailOtpStep" hidden>

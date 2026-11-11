@@ -34,10 +34,15 @@
                 <label class="visually-hidden" for="catalog-search">جست‌وجوی کاتالوگ</label>
                 <input id="catalog-search" class="form-control" type="search" name="q" placeholder="جست‌وجو در @ViewData["Title"]" autocomplete="off"/>
                 <button class="btn btn-primary" type="submit"><i class="fa fa-magnifying-glass me-1" aria-hidden="true"></i>جست‌وجو</button>
+                @if (catalogSection == "categories")
+                {
+                    <button class="btn btn-default" type="button" data-category-tree-expand>بازکردن همه</button>
+                    <button class="btn btn-default" type="button" data-category-tree-collapse>بستن همه</button>
+                }
                 <span class="admin-record-count ms-auto small text-muted" data-admin-count aria-live="polite"></span>
             </form>
             <div class="admin-data-status small text-muted" data-admin-status role="status" aria-live="polite">در حال خواندن داده از دیتابیس…</div>
-            <div class="table-responsive admin-table-wrap">
+            <div class="table-responsive admin-table-wrap @(catalogSection == "categories" ? "admin-category-tree-wrap" : "")">
                 <table class="table table-striped table-hover align-middle mb-0">
                     <thead>
                     <tr>

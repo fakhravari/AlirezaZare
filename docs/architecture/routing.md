@@ -29,7 +29,7 @@
 | `/legal/returns` | [LegalController](../../Shop/Controllers/LegalController.cs) → [Returns](../../Shop/Views/Legal/Returns.cshtml) | `pages/pages.css` | — | شرایط بازگشت |
 | `/error` و `/Error/{statusCode}` | [ErrorController](../../Shop/Controllers/ErrorController.cs) → [Index](../../Shop/Views/Error/Index.cshtml) | — | — | خطاهای 4xx/5xx صفحهٔ راهنمای بدون ایندکس می‌گیرند و status اصلی حفظ می‌شود |
 
-صفحه‌های درباره، تماس، FAQ، ارسال، ضمانت، پیگیری و قوانین با `PageController` محتوای منتشرشده را از `Store.ContentPage` می‌خوانند. همهٔ این مسیرها View اختصاصی خود را اجرا می‌کنند؛ بنابراین CSS، تم و تعاملات صفحه باقی می‌مانند. عنوان و شرح از رکورد محتوا می‌آید و بخش‌های مدیریت‌شده با partial مشترک درون پوستهٔ هر صفحه نمایش داده می‌شوند. `ManagedContentPage.cshtml` فقط fallback برای کلیدهای ناشناخته است. مدیریت و انتشار این صفحه‌ها در `/Store/Features?feature=content` انجام می‌شود و به migrationهای 051 و 052 وابسته است.
+صفحه‌های درباره، تماس، FAQ، ارسال، ضمانت، پیگیری و قوانین با `PageController` محتوای منتشرشده را از `Store.ContentPage` می‌خوانند. همهٔ این مسیرها View اختصاصی خود را اجرا می‌کنند؛ بنابراین CSS، تم و تعاملات صفحه باقی می‌مانند. عنوان و شرح از رکورد محتوا می‌آید و بخش‌های CMS در اجزای همان قالب قرار می‌گیرند: کارت‌های ارزش درباره، مراحل ارسال و ضمانت، کارت پشتیبانی پیگیری و بخش‌های قانونی داخل سند. partial مشترک `_ManagedPageSections.cshtml` فقط برای ساختار حقوقی است و کارت عمومی خدماتی رندر نمی‌کند. `ManagedContentPage.cshtml` فقط fallback برای کلیدهای ناشناخته است. مدیریت و انتشار این صفحه‌ها در `/Store/Features?feature=content` انجام می‌شود و به migrationهای 051 و 052 وابسته است.
 
 ## پنل مدیریت
 
@@ -37,9 +37,11 @@
 |---|---|---|
 | `/` | [HomeController](../../Admin/Controllers/HomeController.cs) → انتقال به پنل | ورودی برنامه |
 | `/Admin/Home/Index` | [HomeController](../../Admin/Areas/Admin/Controllers/HomeController.cs) → [Index](../../Admin/Areas/Admin/Views/Home/Index.cshtml) | پیشخوان کل و لینک حوزه‌ها |
+| `/Admin/SiteSettings/Index` | [SiteSettingsController](../../Admin/Areas/Admin/Controllers/SiteSettingsController.cs) → [Index](../../Admin/Areas/Admin/Views/SiteSettings/Index.cshtml) | تنظیمات سایت و کتابخانهٔ رسانه‌های عمومی |
 | `/Store/Dashboard/Index` | [DashboardController](../../Admin/Areas/Store/Controllers/DashboardController.cs) → [Index](../../Admin/Areas/Store/Views/Dashboard/Index.cshtml) | پیشخوان فروشگاه |
 | `/Store/Catalog/Products`، `/Categories`، `/Brands`، `/Attributes` | [CatalogController](../../Admin/Areas/Store/Controllers/CatalogController.cs) → [Index](../../Admin/Areas/Store/Views/Catalog/Index.cshtml) | فهرست‌های کاتالوگ از API خوانده می‌شوند |
 | `/Store/Features?feature=content` | [FeaturesController](../../Admin/Areas/Store/Controllers/FeaturesController.cs) → [Faq.cshtml](../../Admin/Areas/Store/Views/Features/Faq.cshtml) | پرسش‌ها، مقاله‌ها و صفحه‌های خدماتی با API AJAX؛ فقط مدیر کامل |
+| `/Store/Features?feature=geography` | [FeaturesController](../../Admin/Areas/Store/Controllers/FeaturesController.cs) → [Geography.cshtml](../../Admin/Areas/Store/Views/Features/Geography.cshtml) | ویرایش جغرافیا و بارگذاری پرچم از ردیف کشور |
 | `/Store/Features?feature=...` | [FeaturesController](../../Admin/Areas/Store/Controllers/FeaturesController.cs) → [Index](../../Admin/Areas/Store/Views/Features/Index.cshtml) | دامنهٔ سفارش، مشتری و بازخورد |
 | `/Warehouse/Dashboard/Index` | [DashboardController](../../Admin/Areas/Warehouse/Controllers/DashboardController.cs) → [Index](../../Admin/Areas/Warehouse/Views/Dashboard/Index.cshtml) | پیشخوان انبار |
 | `/Warehouse/Warehouses` | [WarehousesController](../../Admin/Areas/Warehouse/Controllers/WarehousesController.cs) → [Index](../../Admin/Areas/Warehouse/Views/Warehouses/Index.cshtml) | فهرست انبارها از API |
@@ -51,6 +53,8 @@
 ## قرارداد route و سازگاری
 
 endpointهای API از routeهای MVC جدا هستند: `GET /api/warehouse/warehouses` و `GET /api/warehouse/stock` برای دادهٔ انبار، و `GET/POST /api/store/products/{id}/feedback/{type}` برای دیدگاه و پرسش محصول (`type`: `reviews` یا `questions`)؛ query و مدل پاسخ در [لایهٔ دیتابیس](database.md) مستند شده است.
+
+کتابخانهٔ رسانهٔ تنظیمات سایت از `GET /api/admin/store/media/library` فهرست می‌گیرد و برای فایل‌های بارگذاری‌شدهٔ عمومی `POST /api/admin/store/media/delete` دارد؛ هر دو فقط برای مدیر کامل در دسترس‌اند و حذف با ضد CSRF انجام می‌شود. بارگذاری‌های متصل به رکورد از همان صفحهٔ مالک انجام می‌شوند: برند در کاتالوگ، پرچم در جغرافیا، مقاله در مدیریت محتوا و رسانهٔ کالا در کاتالوگ.
 
 - `Program.cs` گزینهٔ `LowercaseUrls = true` و مسیر پیش‌فرض `{controller=Home}/{action=Index}/{id?}` را دارد. attribute route را کنار این مسیر بخوانید؛ routeهای تولیدشده lowercase هستند.
 - `/search` به `ProductController.Index` و View `List` می‌رسد. کلاس body از controller/action ساخته می‌شود: `mobile-page--product-index`؛ نام View در این کلاس نقشی ندارد.
@@ -68,4 +72,4 @@ Controller، لینک‌های Razor، تولید لینک در JS، canonical،
 
 [فهرست این بخش](README.md) · [فهرست مستندات](../README.md)
 
-آخرین تطبیق با کد: ۸ نوامبر ۲۰۲۶.
+آخرین تطبیق با کد: ۱۱ نوامبر ۲۰۲۶.

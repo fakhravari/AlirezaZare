@@ -1021,11 +1021,11 @@
     $accountToggle
       .toggleClass("logged-out", !userLoggedIn)
       .toggleClass("logged-in", userLoggedIn)
-      .attr("aria-label", userLoggedIn ? "حساب من" : "ورود / ثبت‌نام در حساب کاربری")
+      .attr("aria-label", userLoggedIn ? "حساب من" : "ورود به حساب کاربری")
       .html(
         userLoggedIn
           ? '<i class="bi bi-person" aria-hidden="true"></i><span class="account-label">حساب من</span><i class="bi bi-chevron-down" aria-hidden="true"></i>'
-          : '<i class="bi bi-person" aria-hidden="true"></i><span class="account-label">ورود / ثبت‌نام</span><i class="bi bi-chevron-down" aria-hidden="true"></i>',
+          : '<i class="bi bi-person" aria-hidden="true"></i><span class="account-label">ورود</span><i class="bi bi-chevron-down" aria-hidden="true"></i>',
       );
   };
   placeAccountPanel();
@@ -1078,16 +1078,11 @@
   $accountPanel.on("mouseenter", clearAccountHoverTimer);
   $accountPanel.on("mouseleave", scheduleAccountClose);
 
-  let loginMode = "login";
-  let loginMethod = "otp";
-  let pendingAuthMode = "login";
-  let pendingRegistrationProfile = null;
+  let loginMethod = "password";
   const $loginEmailStep = $("#loginEmailStep");
-  const $registerEmailStep = $("#registerEmailStep");
   const $emailOtpStep = $("#emailOtpStep");
   const $emailOtpInput = $("#loginEmailOtp");
   const $loginEmailError = $("#loginEmailError");
-  const $registerEmailError = $("#registerEmailError");
   const $emailOtpError = $("#emailOtpError");
   const setLoginMethod = (method) => {
     loginMethod = method === "password" ? "password" : "otp";
@@ -1105,32 +1100,11 @@
     $("#loginSubmitLabel").text(usesPassword ? "ورود به حساب" : "دریافت کد ورود");
     $loginEmailError.empty();
   };
-  const selectLoginMode = (mode) => {
-    loginMode = mode === "register" ? "register" : "login";
-    const isLogin = loginMode === "login";
-    $("#loginModeTab")
-      .toggleClass("active", isLogin)
-      .attr("aria-selected", String(isLogin));
-    $("#registerModeTab")
-      .toggleClass("active", !isLogin)
-      .attr("aria-selected", String(!isLogin));
-    $loginEmailStep.toggleClass("d-none", !isLogin).prop("hidden", !isLogin);
-    $registerEmailStep.toggleClass("d-none", isLogin).prop("hidden", isLogin);
-    $emailOtpStep.addClass("d-none").prop("hidden", true);
-    $(".login-auth-tabs").removeClass("d-none");
-    $loginEmailError.empty();
-    $registerEmailError.empty();
-    $emailOtpError.empty();
-    if (isLogin) setLoginMethod("otp");
-  };
-
-  $("#loginModeTab").on("click", () => selectLoginMode("login"));
-  $("#registerModeTab").on("click", () => selectLoginMode("register"));
   $("#loginOtpMethod").on("click", () => setLoginMethod("otp"));
   $("#loginPasswordMethod").on("click", () => setLoginMethod("password"));
 
-  const requestEmailCode = async (mode, email) => {
-    const $submit = $(mode === "register" ? "#registerEmailForm button[type='submit']" : "#loginEmailForm button[type='submit']");
+  const requestEmailCode = async (email) => {
+    const $submit = $("#loginEmailForm button[type='submit']");
     $submit.prop("disabled", true);
     try {
       const response = await window.HNUI.api.request("auth/email-code", {
@@ -1141,22 +1115,14 @@
       const result = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(result.message || "ارسال کد انجام نشد. دوباره تلاش کنید.");
     } catch (error) {
-      const $message = mode === "register" ? $registerEmailError : $loginEmailError;
-      window.HNUI.setMessage($message[0], error.message || "ارتباط با سرویس ارسال ایمیل برقرار نشد.", "error");
+      window.HNUI.setMessage($loginEmailError[0], error.message || "ارتباط با سرویس ارسال ایمیل برقرار نشد.", "error");
       return;
     } finally {
       $submit.prop("disabled", false);
     }
-    pendingAuthMode = mode;
     $("#sentEmail").text(email);
-    $("#emailOtpTitle").text(
-      mode === "register"
-        ? "کد فعال‌سازی را وارد کنید"
-        : "کد ورود را وارد کنید",
-    );
-    $(".login-auth-tabs").addClass("d-none");
+    $("#emailOtpTitle").text("کد ورود را وارد کنید");
     $loginEmailStep.addClass("d-none").prop("hidden", true);
-    $registerEmailStep.addClass("d-none").prop("hidden", true);
     $emailOtpStep.removeClass("d-none").prop("hidden", false);
     $emailOtpInput.val("").trigger("focus");
   };
@@ -1260,8 +1226,6 @@
         window.HNUI.cart.restoreAccountLines(account.cart);
       }
     } catch { }
-    if (pendingAuthMode === "register" && pendingRegistrationProfile)
-      await window.HNUI.api.request("account/profile", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(pendingRegistrationProfile) });
     userLoggedIn = true;
     resumeAuthenticatedAction = true;
     window.HNUI.auth.login();
@@ -1292,7 +1256,7 @@
     }
     window.HNUI.setMessage($loginEmailError[0], "");
     if (loginMethod === "otp") {
-      void requestEmailCode("login", email);
+      void requestEmailCode(email);
       return;
     }
     const password = $("#loginPassword").val();
@@ -1309,38 +1273,12 @@
       });
       const result = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(result.message || "ایمیل یا رمز عبور درست نیست.");
-      pendingAuthMode = "login";
       await completeDemoLogin();
     } catch (error) {
       window.HNUI.setMessage($loginEmailError[0], error.message || "ورود انجام نشد. دوباره تلاش کنید.", "error");
     } finally {
       $submit.prop("disabled", false);
     }
-  });
-
-  $("#registerEmailForm").on("submit", (event) => {
-    event.preventDefault();
-    const emailInput = $("#registerEmail")[0];
-    const email = emailInput.value.trim();
-    const firstName = $("#registerFirstName").val().trim();
-    const lastName = $("#registerLastName").val().trim();
-    const password = $("#registerPassword").val();
-    const passwordConfirmation = $("#registerPasswordConfirm").val();
-    if (!firstName || !lastName || !emailInput.validity.valid || password.length < 10 || password !== passwordConfirmation) {
-      window.HNUI.setMessage(
-        $registerEmailError[0],
-        password.length < 10
-          ? "رمز عبور باید حداقل ۱۰ نویسه باشد."
-          : password !== passwordConfirmation
-            ? "تکرار رمز عبور با آن مطابقت ندارد."
-            : "نام، نام خانوادگی و ایمیل معتبر را وارد کنید.",
-        "error",
-      );
-      return;
-    }
-    pendingRegistrationProfile = { firstName, lastName, phone: null };
-    window.HNUI.setMessage($registerEmailError[0], "");
-    void requestEmailCode("register", email);
   });
 
   $("#loginEmailOtp").on("input", function () {
@@ -1369,13 +1307,13 @@
         body: JSON.stringify({
           email: $("#sentEmail").text(),
           code,
-          mode: pendingAuthMode,
-          password: pendingAuthMode === "register" ? $("#registerPassword").val() : null,
+          mode: "login",
+          password: null,
         }),
       });
       const result = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(result.message || "کد تأیید معتبر نیست.");
-      completeDemoLogin();
+    await completeDemoLogin();
     } catch (error) {
       window.HNUI.setMessage($emailOtpError[0], error.message || "ارتباط با سرویس تأیید برقرار نشد.", "error");
     } finally {
@@ -1384,20 +1322,21 @@
   });
 
   $("#loginEmailBack").on("click", () => {
-    selectLoginMode(pendingAuthMode);
-    $(
-      pendingAuthMode === "register" ? "#registerEmail" : "#loginEmail",
-    ).trigger("focus");
+    $emailOtpStep.addClass("d-none").prop("hidden", true);
+    $loginEmailStep.removeClass("d-none").prop("hidden", false);
+    $("#loginEmail").trigger("focus");
   });
   $loginModalElement.on("hidden.bs.modal", () => {
     $(
-      "#loginEmailForm, #registerEmailForm, #emailOtpForm",
+      "#loginEmailForm, #emailOtpForm",
     ).each(function () {
       this.reset();
     });
     $("#sentEmail").empty();
     $emailOtpInput.val("");
-    selectLoginMode("login");
+    $loginEmailStep.removeClass("d-none").prop("hidden", false);
+    $emailOtpStep.addClass("d-none").prop("hidden", true);
+    setLoginMethod("password");
     const resume = resumeAuthenticatedAction
       ? pendingAuthenticatedAction
       : null;

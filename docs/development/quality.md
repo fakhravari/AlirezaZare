@@ -138,7 +138,7 @@ npx playwright test account-session --workers=1
 
 ## CI
 
-[quality.yml](../../.github/workflows/quality.yml) دو job دارد: قراردادها/build/HTTP و مرورگر دسکتاپ/موبایل. شکست browser گزارش HTML، trace و تصویر خطا را هفت روز نگه می‌دارد. CI پس از push یا pull request اجرا می‌شود؛ وجود فایل workflow به معنی اجرای موفق آن در GitHub نیست. قیمت، auth و پرداخت این تست‌ها دمو و در context جداگانهٔ آزمایشی‌اند.
+در snapshot فعلی مخزن، فایل workflow در `.github/workflows/quality.yml` موجود نیست؛ بنابراین CI مربوط به این بررسی از روی کد این checkout قابل تأیید نیست. آزمون‌های قرارداد، build/HTTP و مرورگر باید طبق فرمان‌های این راهنما جداگانه اجرا شوند. قیمت، auth و پرداخت این تست‌ها دمو و در context جداگانهٔ آزمایشی‌اند.
 
 پس از تغییر، فرمان‌های اجراشده، نتیجه و محدودیت بررسی را دقیق گزارش کنید. [ماتریس UI](../frontend/verification.md) مرجع بررسی بصری، RTL و دسترس‌پذیری است.
 

@@ -11,13 +11,15 @@
             "Admin/Areas/Admin/Views/Users/Index.cshtml",
             "Admin/Areas/Store/Views/Catalog/Index.cshtml",
             "Admin/Areas/Store/Views/Features/Faq.cshtml",
+            "Admin/Areas/Store/Views/Features/Geography.cshtml",
             "Admin/Areas/Store/Controllers/CatalogController.cs"
           ],
           "js": [
             "Admin/wwwroot/js/admin-shell.js",
             "Admin/wwwroot/js/admin-ui.js",
             "Admin/wwwroot/js/admin-data.js",
-            "Admin/wwwroot/js/admin-users.js"
+            "Admin/wwwroot/js/admin-users.js",
+            "Admin/wwwroot/js/admin-geography.js"
           ],
           "css": [
             "Admin/wwwroot/css/admin-ui.css"
@@ -370,6 +372,7 @@
           ],
           "css": [
             "Shop/wwwroot/shop/css/layout/shared-login.css",
+            "Shop/wwwroot/shop/css/layout/industrial-system.css",
             "Shop/wwwroot/shop/css/layout/style.css"
           ],
           "server": [

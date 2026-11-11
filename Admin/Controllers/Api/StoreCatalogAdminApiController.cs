@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Shop.Data.Application.Store.Contracts;
+using Shop.Data.Application.Store;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Shop.Data.Infrastructure.Persistence;
@@ -10,7 +11,7 @@ namespace Shop.Admin.Controllers.Api;
 [Area("Store")]
 [ApiController]
 [Route("api/admin/store/catalog")]
-public sealed class StoreCatalogAdminApiController(IStoreRuntimeDatasetRepository datasets, ShopDbContext db) : ControllerBase
+public sealed class StoreCatalogAdminApiController(IStoreRuntimeDatasetRepository datasets, ShopDbContext db, IMediaCdnBaseUrlProvider mediaCdn) : ControllerBase
 {
     [HttpGet("products/manage/{id:long}")]
     public async Task<IActionResult> ProductEditor(long id, CancellationToken cancellationToken)
@@ -549,11 +550,12 @@ public sealed class StoreCatalogAdminApiController(IStoreRuntimeDatasetRepositor
                               from country in countries.DefaultIfEmpty()
                               orderby brand.NameFa, brand.BrandKey
                               select new BrandRow(brand.BrandKey, brand.NameFa, brand.NameEn,
-                                  country == null ? "" : country.CountryCode, brand.IsActive))
+                                  country == null ? "" : country.CountryCode, brand.LogoPath, brand.IsActive))
                 .Skip((int)Math.Min((long)(page - 1) * pageSize, int.MaxValue))
                 .Take(pageSize)
                 .ToListAsync(cancellationToken);
-            return Ok(new { total, page, pageSize, items = rows });
+            string cdnBaseUrl = await mediaCdn.GetBaseUrlAsync(cancellationToken);
+            return Ok(new { total, page, pageSize, items = rows.Select(row => row with { LogoUrl = ContentCdn.ToUrl(row.LogoPath, cdnBaseUrl) }) });
         }
 
         string? json = await datasets.ReadCatalogJsonAsync(cancellationToken);
@@ -630,5 +632,8 @@ public sealed class StoreCatalogAdminApiController(IStoreRuntimeDatasetRepositor
 
     private sealed record CategoryRow(string Id, string Name, string EnglishName, string Slug, string ParentId, bool IsActive);
 
-    private sealed record BrandRow(string Id, string Name, string EnglishName, string CountryCode, bool IsActive);
+    private sealed record BrandRow(string Id, string Name, string EnglishName, string CountryCode, string? LogoPath, bool IsActive)
+    {
+        public string? LogoUrl { get; init; }
+    }
 }

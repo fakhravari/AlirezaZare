@@ -50,3 +50,11 @@
         <div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button type="submit" class="btn btn-primary">ذخیره</button></div>
     </form></div>
 </div>
+<div class="modal fade" id="article-image-modal" tabindex="-1" aria-labelledby="article-image-title" aria-hidden="true">
+    <div class="modal-dialog"><form class="modal-content" data-media-upload-form data-article-image-form enctype="multipart/form-data">
+        @Html.AntiForgeryToken()<input type="hidden" name="kind" value="article" /><input type="hidden" name="articleKey" />
+        <div class="modal-header"><h2 class="modal-title fs-5" id="article-image-title">تصویر مقاله</h2><button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="بستن"></button></div>
+        <div class="modal-body"><p data-article-image-name></p><label for="article-image-file" class="form-label">فایل تصویر</label><input id="article-image-file" name="file" type="file" accept="image/jpeg,image/png,image/webp" class="form-control" required /><div class="mt-2" data-media-upload-result role="status" aria-live="polite"></div></div>
+        <div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button type="submit" class="btn btn-primary">بارگذاری و اتصال به مقاله</button></div>
+    </form></div>
+</div>

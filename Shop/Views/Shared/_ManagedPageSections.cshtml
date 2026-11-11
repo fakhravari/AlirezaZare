@@ -1,37 +1,14 @@
 @model Shop.Models.ManagedPageContent
-@if (Model.PageKey is "privacy" or "terms" or "returns")
+@foreach (var contentSection in Model.Sections)
 {
-    @foreach (var contentSection in Model.Sections)
-    {
-        <section class="legal-section">
-            @if (!string.IsNullOrWhiteSpace(contentSection.Heading))
-            {
-                <h2>@contentSection.Heading</h2>
-            }
-            @foreach (var paragraph in (contentSection.Body ?? "").Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
-            {
-                <p>@paragraph</p>
-            }
-        </section>
-    }
-}
-else if (Model.Sections.Count > 0)
-{
-    <section class="page-section managed-page-content" aria-label="اطلاعات تکمیلی">
-        <div class="container">
-            @foreach (var contentSection in Model.Sections)
-            {
-                <article class="flow-card managed-service-section">
-                    @if (!string.IsNullOrWhiteSpace(contentSection.Heading))
-                    {
-                        <h2>@contentSection.Heading</h2>
-                    }
-                    @foreach (var paragraph in (contentSection.Body ?? "").Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
-                    {
-                        <p>@paragraph</p>
-                    }
-                </article>
-            }
-        </div>
+    <section class="legal-section">
+        @if (!string.IsNullOrWhiteSpace(contentSection.Heading))
+        {
+            <h2>@contentSection.Heading</h2>
+        }
+        @foreach (var paragraph in (contentSection.Body ?? "").Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            <p>@paragraph</p>
+        }
     </section>
 }

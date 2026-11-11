@@ -1,4 +1,7 @@
 @model PageModel
+@{
+    var warrantySections = Model.ManagedContent?.Sections ?? [];
+}
 
 
 <header class="page-hero about-hero">
@@ -42,9 +45,16 @@
         <div class="warranty-overview">
             <div class="warranty-copy">
                 <span class="warranty-kicker"><i class="bi bi-shield-check" aria-hidden="true"></i> ضمانت و خدمات پس از فروش</span>
-                <h2 id="warrantyTitle">برای استفاده از ضمانت، مدارک محصول را نگه دارید</h2>
-                <p>هنگام تحویل، نام و مدل کالا، شماره سریال و اطلاعات کارت ضمانت را با فاکتور تطبیق دهید. مدت پوشش، اقلام مشمول و شرایط سرویس برای هر محصول متفاوت است؛ مدارک همان کالا مرجع بررسی خواهد بود.</p>
-                <p>اگر برای استفاده از خدمات نیاز به پیگیری داشتید، مدل کالا، تاریخ خرید و شرح کوتاهی از ایراد را آماده کنید. کارشناسان پس از بررسی اطلاعات، مراحل بعدی را با شما هماهنگ می‌کنند.</p>
+                <h2 id="warrantyTitle">@(warrantySections.FirstOrDefault()?.Heading ?? "برای استفاده از ضمانت، مدارک محصول را نگه دارید")</h2>
+                @if (warrantySections.Count > 0)
+                {
+                    @foreach (var paragraph in (warrantySections[0].Body ?? "").Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)) { <p>@paragraph</p> }
+                }
+                else
+                {
+                    <p>هنگام تحویل، نام و مدل کالا، شماره سریال و اطلاعات کارت ضمانت را با فاکتور تطبیق دهید. مدت پوشش، اقلام مشمول و شرایط سرویس برای هر محصول متفاوت است؛ مدارک همان کالا مرجع بررسی خواهد بود.</p>
+                    <p>اگر برای استفاده از خدمات نیاز به پیگیری داشتید، مدل کالا، تاریخ خرید و شرح کوتاهی از ایراد را آماده کنید. کارشناسان پس از بررسی اطلاعات، مراحل بعدی را با شما هماهنگ می‌کنند.</p>
+                }
                 <a class="warranty-contact" asp-controller="Contact" asp-action="Index">ارتباط با خدمات مشتریان <i class="bi bi-arrow-left" aria-hidden="true"></i></a>
             </div>
             <div class="warranty-visual">
@@ -59,6 +69,16 @@
                 <h2 id="warrantyGuidanceTitle">اگر به خدمات نیاز داشتید</h2>
             </header>
             <ol class="warranty-steps">
+                @if (warrantySections.Count > 1)
+                {
+                    var warrantyIcons = new[] { "bi-receipt", "bi-chat-left-text", "bi-headset" };
+                    @for (var i = 1; i < warrantySections.Count; i++)
+                    {
+                        <li><span class="warranty-step-icon"><i class="bi @(warrantyIcons[(i - 1) % warrantyIcons.Length])" aria-hidden="true"></i></span><div><strong>@warrantySections[i].Heading</strong>@foreach (var paragraph in (warrantySections[i].Body ?? "").Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)) { <p>@paragraph</p> }</div></li>
+                    }
+                }
+                else
+                {
                 <li>
                     <span class="warranty-step-icon">
                         <i class="bi bi-receipt" aria-hidden="true"></i>
@@ -86,6 +106,7 @@
                         <p>پوشش و مراحل بعدی بر اساس مدارک محصول و بررسی فروشگاه اعلام می‌شود.</p>
                     </div>
                 </li>
+                }
             </ol>
         </section>
 
@@ -94,7 +115,6 @@
             <p><strong>نکته:</strong> کارت ضمانت و اطلاعات همان محصول، مرجع تعیین مدت پوشش و شرایط خدمات هستند.</p>
         </aside>
     </section>
-    @if (Model.ManagedContent is not null) { <partial name="_ManagedPageSections" model="Model.ManagedContent" /> }
 </main>
 
 @section Styles {

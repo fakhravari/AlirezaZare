@@ -1,4 +1,8 @@
 @model PageModel
+@{
+    var aboutSections = Model.ManagedContent?.Sections ?? [];
+    var aboutOverview = aboutSections.FirstOrDefault();
+}
 
 
 <header class="page-hero about-hero">
@@ -52,13 +56,19 @@
                     <span class="about-eyebrow">
                         معرفی رسمی ندا اولیائی
                     </span>
-                    <h2>ابزار و قطعات برای انتخاب آگاهانه</h2>
-                    <p>
-                        <strong>ندا اولیائی</strong> فروشگاهی در حوزهٔ ابزار برقی، تجهیزات اندازه‌گیری و قطعات فنی است. در صفحهٔ هر محصول می‌توانید مشخصات و اطلاعات موجود را بررسی کنید و برای جزئیات تکمیلی با مجموعه تماس بگیرید.
-                    </p>
-                    <p>
-                        شرایط قیمت، موجودی، ارسال و ضمانت ممکن است بر اساس کالا و سفارش تفاوت داشته باشد؛ اطلاعات قابل‌اعلام و راه‌های پیگیری در صفحات مربوط درج شده‌اند.
-                    </p>
+                    <h2>@(aboutOverview?.Heading ?? "ابزار و قطعات برای انتخاب آگاهانه")</h2>
+                    @if (aboutOverview is not null)
+                    {
+                        @foreach (var paragraph in (aboutOverview.Body ?? "").Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+                        {
+                            <p>@paragraph</p>
+                        }
+                    }
+                    else
+                    {
+                        <p><strong>ندا اولیائی</strong> فروشگاهی در حوزهٔ ابزار برقی، تجهیزات اندازه‌گیری و قطعات فنی است. در صفحهٔ هر محصول می‌توانید مشخصات و اطلاعات موجود را بررسی کنید و برای جزئیات تکمیلی با مجموعه تماس بگیرید.</p>
+                        <p>شرایط قیمت، موجودی، ارسال و ضمانت ممکن است بر اساس کالا و سفارش تفاوت داشته باشد؛ اطلاعات قابل‌اعلام و راه‌های پیگیری در صفحات مربوط درج شده‌اند.</p>
+                    }
                     <a class="article-link" asp-controller="Contact" asp-action="Index">
                         راه‌های ارتباطی با ما <i class="bi bi-arrow-left" aria-hidden="true"></i>
                     </a>
@@ -73,6 +83,27 @@
                 <h2>چیزی فراتر از فروش ابزار</h2>
             </div>
             <div class="row g-4">
+                @if (aboutSections.Count > 2)
+                {
+                    var icons = new[] { "bi-chat-heart", "bi-patch-check", "bi-tools", "bi-stars" };
+                    @for (var i = 2; i < aboutSections.Count; i++)
+                    {
+                        <div class="col-md-6 col-lg-4">
+                            <article class="glass-card value-card">
+                                <span class="value-icon"><i class="bi @(icons[(i - 2) % icons.Length])" aria-hidden="true"></i></span>
+                                <h3>@aboutSections[i].Heading</h3>
+                                @foreach (var paragraph in (aboutSections[i].Body ?? "").Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+                                {
+                                    <p>@paragraph</p>
+                                }
+                            </article>
+                        </div>
+                    }
+                }
+                else
+                {
+                @if (aboutSections.Count == 0)
+                {
                 <div class="col-md-6 col-lg-3">
                     <article class="glass-card value-card">
                         <span class="value-icon">
@@ -113,6 +144,8 @@
                         </p>
                     </article>
                 </div>
+                }
+                }
             </div>
         </div>
     </section>
@@ -122,10 +155,15 @@
                 <div class="col-lg-5">
                     <div class="section-title">
                         <span class="page-kicker about-section-kicker">تعهد ما در هر مرحله</span>
-                        <h2>همراهی از انتخاب تا دریافت کالا</h2>
-                        <p>
-                            تجربهٔ خرید خوب فقط به انتخاب محصول ختم نمی‌شود؛ اطلاعات روشن و پشتیبانی در ادامه هم اهمیت دارد.
-                        </p>
+                        <h2>@(aboutSections.Count > 1 ? aboutSections[1].Heading : "همراهی از انتخاب تا دریافت کالا")</h2>
+                        @if (aboutSections.Count > 1)
+                        {
+                            @foreach (var paragraph in (aboutSections[1].Body ?? "").Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)) { <p>@paragraph</p> }
+                        }
+                        else
+                        {
+                            <p>تجربهٔ خرید خوب فقط به انتخاب محصول ختم نمی‌شود؛ اطلاعات روشن و پشتیبانی در ادامه هم اهمیت دارد.</p>
+                        }
                     </div>
                 </div>
                 <div class="col-lg-7">
@@ -170,7 +208,6 @@
             </div>
         </div>
     </section>
-    @if (Model.ManagedContent is not null) { <partial name="_ManagedPageSections" model="Model.ManagedContent" /> }
 </main>
 
 

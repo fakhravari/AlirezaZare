@@ -65,6 +65,20 @@
                 edit.setAttribute("aria-label", `ویرایش ${item.nameFa}`); del.setAttribute("aria-label", `حذف ${item.nameFa}`);
                 edit.addEventListener("click", () => { if (busy || !available) return; reset(); form.elements.id.value = item.id; form.elements.nameFa.value = item.nameFa; form.elements.nameEn.value = item.nameEn; form.elements.code.value = item.code || ""; form.elements.flagPath.value = item.flagPath || ""; form.elements.latitude.value = item.latitude ?? ""; form.elements.longitude.value = item.longitude ?? ""; form.elements.isProvinceCenter.checked = !!item.isProvinceCenter; if (item.countryId) { form.elements.countryId.value = item.countryId; provinces(item.provinceId); form.elements.countryId.disabled = true; form.elements.provinceId.disabled = true; countrySearch.disabled = true; provinceSearch.disabled = true; } form.elements.nameFa.focus(); });
                 del.addEventListener("click", async () => { if (busy || !available || !window.confirm(`آیا ${item.nameFa} حذف شود؟`)) return; busy = true; try { const result = await request(`${api}/${kind}/${item.id}`, "DELETE"); ui.notify(result.message, "success"); reset(); await refresh(); } catch (error) { await handleMutationError(error); } finally { busy = false; } });
+                if (kind === "countries") {
+                    const upload = document.createElement("button"); upload.type = "button"; upload.className = "btn btn-sm btn-default me-1"; upload.textContent = "بارگذاری پرچم"; upload.setAttribute("aria-label", `بارگذاری پرچم ${item.nameFa}`);
+                    const mediaForm = document.createElement("form"); mediaForm.className = "visually-hidden"; mediaForm.dataset.mediaUploadForm = ""; mediaForm.enctype = "multipart/form-data";
+                    const token = document.createElement("input"); token.type = "hidden"; token.name = "__RequestVerificationToken"; token.value = form.querySelector('[name="__RequestVerificationToken"]').value;
+                    const mediaKind = document.createElement("input"); mediaKind.type = "hidden"; mediaKind.name = "kind"; mediaKind.value = "country";
+                    const countryCode = document.createElement("input"); countryCode.type = "hidden"; countryCode.name = "countryCode"; countryCode.value = item.code;
+                    const file = document.createElement("input"); file.type = "file"; file.name = "file"; file.accept = "image/jpeg,image/png,image/webp"; file.required = true;
+                    const submit = document.createElement("button"); submit.type = "submit";
+                    const result = document.createElement("span"); result.dataset.mediaUploadResult = ""; result.setAttribute("role", "status"); result.setAttribute("aria-live", "polite");
+                    mediaForm.append(token, mediaKind, countryCode, file, submit, result);
+                    upload.addEventListener("click", () => file.click());
+                    file.addEventListener("change", () => { if (file.files.length) mediaForm.requestSubmit(); });
+                    td.append(upload, mediaForm);
+                }
                 td.append(edit, del); tr.append(td); rows.append(tr);
             }
             status.textContent = `${new Intl.NumberFormat("fa-IR").format(items.length)} مورد`;
@@ -83,6 +97,11 @@
             try { data = await request(api); available = true; reset(); render(); submit.disabled = false; }
             catch (error) { rows.replaceChildren(); status.textContent = `دریافت فهرست ناموفق بود: ${error.message}`; retry.hidden = false; }
         }
+        document.addEventListener("admin:media-uploaded", event => {
+            if (event.detail?.kind !== "country") return;
+            const country = data.countries.find(item => item.code === event.detail.countryCode);
+            if (country) { country.flagPath = event.detail.path; if (kind === "countries") render(); }
+        });
         tabs.forEach((tab, index) => {
             tab.addEventListener("click", () => { if (busy || !available) return; kind = tab.dataset.geoTab; provinceCountryFilter = ""; cityProvinceFilter = ""; tabs.forEach(t => { const active = t === tab; t.classList.toggle("active", active); t.setAttribute("aria-selected", String(active)); t.tabIndex = active ? 0 : -1; }); page.querySelector("[data-geo-panel]").setAttribute("aria-labelledby", tab.id); search.value = ""; reset(); render(); });
             tab.addEventListener("keydown", event => { let next; if (event.key === "ArrowRight") next = (index + tabs.length - 1) % tabs.length; else if (event.key === "ArrowLeft") next = (index + 1) % tabs.length; else if (event.key === "Home") next = 0; else if (event.key === "End") next = tabs.length - 1; else return; if (busy || !available) return; event.preventDefault(); tabs[next].focus(); tabs[next].click(); });

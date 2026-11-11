@@ -2,6 +2,8 @@
 @inject Microsoft.Extensions.Options.IOptions<Shop.Models.SiteIdentityOptions> SiteIdentityOptions
 @{
     var identity = SiteIdentityOptions.Value;
+    var trackingSections = Model.ManagedContent?.Sections ?? [];
+    var supportSection = trackingSections.FirstOrDefault(x => x.SectionKey == "support");
 }
 
 <header class="page-hero about-hero">
@@ -74,8 +76,15 @@
                     <i class="bi bi-headset" aria-hidden="true"></i>
                 </span>
                 <span class="tracking-eyebrow"><i class="bi bi-chat-dots" aria-hidden="true"></i>پشتیبانی سفارش</span>
-                <h2>برای پیگیری واقعی تماس بگیرید</h2>
-                <p>این نسخه به سامانه سفارش متصل نیست؛ برای پیگیری، کد سفارش را به پشتیبانی بدهید.</p>
+                <h2>@(supportSection?.Heading ?? "برای پیگیری واقعی تماس بگیرید")</h2>
+                @if (supportSection is not null)
+                {
+                    @foreach (var paragraph in (supportSection.Body ?? "").Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)) { <p>@paragraph</p> }
+                }
+                else
+                {
+                    <p>این نسخه به سامانه سفارش متصل نیست؛ برای پیگیری، کد سفارش را به پشتیبانی بدهید.</p>
+                }
                 <ul class="tracking-support-points">
                     <li><i class="bi bi-shield-check" aria-hidden="true"></i> بررسی دقیق وضعیت سفارش</li>
                     <li><i class="bi bi-clock-history" aria-hidden="true"></i> پاسخ‌گویی در ساعات کاری</li>
@@ -86,7 +95,6 @@
             </div>
         </aside>
     </div>
-    @if (Model.ManagedContent is not null) { <partial name="_ManagedPageSections" model="Model.ManagedContent" /> }
 </main>
 
 @section Styles {
