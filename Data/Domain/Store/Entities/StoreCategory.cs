@@ -10,4 +10,7 @@ public sealed class StoreCategory
     public long? IdParentCategory { get; set; }
     public int SortOrder { get; set; }
     public bool IsActive { get; set; } = true;
+    public string? ProductIntro { get; set; }
+    public string? ProductHighlightsJson { get; set; }
+    public string? ProductSpecsJson { get; set; }
 }

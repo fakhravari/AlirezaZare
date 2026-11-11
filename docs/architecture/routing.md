@@ -37,7 +37,8 @@
 |---|---|---|
 | `/` | [HomeController](../../Admin/Controllers/HomeController.cs) → انتقال به پنل | ورودی برنامه |
 | `/Admin/Home/Index` | [HomeController](../../Admin/Areas/Admin/Controllers/HomeController.cs) → [Index](../../Admin/Areas/Admin/Views/Home/Index.cshtml) | پیشخوان کل و لینک حوزه‌ها |
-| `/Admin/SiteSettings/Index` | [SiteSettingsController](../../Admin/Areas/Admin/Controllers/SiteSettingsController.cs) → [Index](../../Admin/Areas/Admin/Views/SiteSettings/Index.cshtml) | تنظیمات سایت و کتابخانهٔ رسانه‌های عمومی |
+| `/Admin/SiteSettings/Index` | [SiteSettingsController](../../Admin/Areas/Admin/Controllers/SiteSettingsController.cs) → [Index](../../Admin/Areas/Admin/Views/SiteSettings/Index.cshtml) | تنظیمات عمومی سایت و پنل‌های رسانهٔ دیدگاه و هویت |
+| `/Admin/SiteSettings/Slider` | [SiteSettingsController](../../Admin/Areas/Admin/Controllers/SiteSettingsController.cs) → [Slider](../../Admin/Areas/Admin/Views/SiteSettings/Slider.cshtml) | بارگذاری و مدیریت رسانه‌های اسلایدر؛ زیرمنوی تنظیمات سایت |
 | `/Store/Dashboard/Index` | [DashboardController](../../Admin/Areas/Store/Controllers/DashboardController.cs) → [Index](../../Admin/Areas/Store/Views/Dashboard/Index.cshtml) | پیشخوان فروشگاه |
 | `/Store/Catalog/Products`، `/Categories`، `/Brands`، `/Attributes` | [CatalogController](../../Admin/Areas/Store/Controllers/CatalogController.cs) → [Index](../../Admin/Areas/Store/Views/Catalog/Index.cshtml) | فهرست‌های کاتالوگ از API خوانده می‌شوند |
 | `/Store/Features?feature=content` | [FeaturesController](../../Admin/Areas/Store/Controllers/FeaturesController.cs) → [Faq.cshtml](../../Admin/Areas/Store/Views/Features/Faq.cshtml) | پرسش‌ها، مقاله‌ها و صفحه‌های خدماتی با API AJAX؛ فقط مدیر کامل |

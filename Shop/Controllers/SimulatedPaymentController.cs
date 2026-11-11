@@ -18,9 +18,7 @@ public sealed class SimulatedPaymentController(ShopDbContext db, IWebHostEnviron
     public async Task<IActionResult> Index(long id, bool cancelled = false, CancellationToken ct = default)
     {
         if (!environment.IsDevelopment()) return NotFound();
-        var order = (await db.Database.SqlQueryRaw<SimulatedPaymentOrder>(
-            "SELECT [Id], [OrderNumber] AS [Number], [TotalAmount] AS [Amount], [Status] FROM [Store].[Order] WHERE [Id]={0} AND [IdProfile]={1}",
-            id, ProfileId).ToListAsync(ct)).SingleOrDefault();
+        var order = await ReadOrderAsync(id, ct);
         if (order is null) return NotFound();
         return await PageAsync(new PageModel<SimulatedPaymentPage>(
             new(order, cancelled), new SeoModel("پرداخت آزمایشی", "شبیه‌سازی پرداخت سفارش", Robots: "noindex, nofollow"), "Index"));
@@ -32,25 +30,23 @@ public sealed class SimulatedPaymentController(ShopDbContext db, IWebHostEnviron
     {
         if (!environment.IsDevelopment()) return NotFound();
         if (result is not ("approved" or "cancelled")) return BadRequest();
-        var orders = await db.Database.SqlQueryRaw<SimulatedPaymentOrder>(
-            "SELECT [Id], [OrderNumber] AS [Number], [TotalAmount] AS [Amount], [Status] FROM [Store].[Order] WHERE [Id]={0} AND [IdProfile]={1}",
-            id, ProfileId).ToListAsync(ct);
-        var order = orders.SingleOrDefault();
+        var order = await ReadOrderAsync(id, ct);
         if (order is null) return NotFound();
         if (order.Status is not ("pending-payment" or "simulated-payment-confirmed")) return Conflict();
         if (result == "approved" && order.Status == "pending-payment")
-            await db.Database.ExecuteSqlInterpolatedAsync(
-                $"UPDATE [Store].[Order] SET [Status]={"simulated-payment-confirmed"} WHERE [Id]={id} AND [IdProfile]={ProfileId} AND [Status]={"pending-payment"}", ct);
+            await db.StoreCustomerOrders
+                .Where(x => x.Id == id && x.IdProfile == ProfileId && x.Status == "pending-payment")
+                .ExecuteUpdateAsync(update => update.SetProperty(x => x.Status, "simulated-payment-confirmed"), ct);
         return RedirectToAction(nameof(Index), new { id, cancelled = result == "cancelled" && order.Status == "pending-payment" });
     }
+
+    private Task<SimulatedPaymentOrder?> ReadOrderAsync(long id, CancellationToken ct) =>
+        db.StoreCustomerOrders.AsNoTracking()
+            .Where(x => x.Id == id && x.IdProfile == ProfileId)
+            .Select(x => new SimulatedPaymentOrder(x.Id, x.OrderNumber, x.TotalAmount, x.Status))
+            .SingleOrDefaultAsync(ct);
 }
 
-public sealed class SimulatedPaymentOrder
-{
-    public long Id { get; set; }
-    public string Number { get; set; } = "";
-    public decimal Amount { get; set; }
-    public string Status { get; set; } = "";
-}
+public sealed record SimulatedPaymentOrder(long Id, string Number, decimal Amount, string Status);
 
 public sealed record SimulatedPaymentPage(SimulatedPaymentOrder Order, bool Cancelled);

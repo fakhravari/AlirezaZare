@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using FluentFTP;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -23,7 +24,7 @@ public sealed class StoreProductImageApiController(ShopDbContext db, FtpMediaSto
         if (image is null || image.Length is <= 0 or > 10_000_000)
             return BadRequest(new { title = "تصویر باید حداکثر ۱۰ مگابایت باشد." });
 
-        var product = await db.Database.SqlQueryRaw<ProductKeyRow>("SELECT [ProductKey] FROM [Warehouse].[Product] WHERE [Id] = {0} AND [IsStoreEnabled] = 1", productId).SingleOrDefaultAsync(cancellationToken);
+        var product = await db.Products.AsNoTracking().SingleOrDefaultAsync(x => x.Id == productId && x.IsStoreEnabled, cancellationToken);
         if (product is null) return NotFound();
         var variants = new List<(string Path, byte[] Bytes)>();
         string filename = $"product-{productId}-{Guid.NewGuid():N}.webp";
@@ -70,17 +71,29 @@ public sealed class StoreProductImageApiController(ShopDbContext db, FtpMediaSto
             }
             string mediaKey = "product-" + product.ProductKey;
             string gallery = JsonSerializer.Serialize(new[] { new { src = variants[0].Path, thumbnail = variants[2].Path } });
+            var media = await db.StoreProductMedia.SingleOrDefaultAsync(x => x.IdProduct == productId && x.MediaKey == mediaKey, cancellationToken);
+            if (media is null)
+            {
+                media = new Shop.Data.Domain.Store.Entities.StoreProductMedia
+                {
+                    IdProduct = productId, MediaKey = mediaKey,
+                    MainPath = variants[0].Path, CardPath = variants[1].Path, ThumbnailPath = variants[2].Path,
+                    ImagesJson = gallery, VideosJson = "[]"
+                };
+                db.StoreProductMedia.Add(media);
+            }
+            else
+            {
+                media.MainPath = variants[0].Path; media.CardPath = variants[1].Path;
+                media.ThumbnailPath = variants[2].Path;
+                var images = string.IsNullOrWhiteSpace(media.ImagesJson)
+                    ? new JsonArray()
+                    : JsonNode.Parse(media.ImagesJson)?.AsArray() ?? new JsonArray();
+                images.Add(new JsonObject { ["src"] = variants[0].Path, ["thumbnail"] = variants[2].Path });
+                media.ImagesJson = images.ToJsonString();
+            }
+            await db.SaveChangesAsync(cancellationToken);
             databaseStarted = true;
-            await db.Database.ExecuteSqlInterpolatedAsync($"""
-                UPDATE [Store].[ProductMedia] SET [MainPath]={variants[0].Path}, [CardPath]={variants[1].Path},
-                    [ThumbnailPath]={variants[2].Path}, [ImagesJson]=CONCAT(LEFT({gallery}, LEN({gallery}) - 1),
-                        CASE WHEN NOT EXISTS (SELECT 1 FROM OPENJSON(COALESCE([ImagesJson], N'[]'))) THEN N']'
-                        ELSE CONCAT(N',', SUBSTRING(LTRIM(RTRIM([ImagesJson])), 2, LEN(LTRIM(RTRIM([ImagesJson]))))) END)
-                WHERE [IdProduct]={productId} AND [MediaKey]={mediaKey};
-                IF @@ROWCOUNT = 0
-                    INSERT INTO [Store].[ProductMedia] ([IdProduct], [MediaKey], [MainPath], [CardPath], [ThumbnailPath], [ImagesJson], [VideosJson])
-                    VALUES ({productId}, {mediaKey}, {variants[0].Path}, {variants[1].Path}, {variants[2].Path}, {gallery}, N'[]');
-                """, cancellationToken);
             return Ok(new { message = "تصویر محصول و نسخه‌های آن ذخیره شد." });
         }
         catch (Exception exception)
@@ -95,5 +108,4 @@ public sealed class StoreProductImageApiController(ShopDbContext db, FtpMediaSto
         finally { ftp?.Dispose(); }
     }
 
-    public sealed class ProductKeyRow { public string ProductKey { get; set; } = ""; }
 }

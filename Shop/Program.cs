@@ -61,9 +61,6 @@ builder.Services.AddSingleton<IPasswordHasher<string>, PasswordHasher<string>>()
 builder.Services.AddScoped<Shop.Services.IEmailSender, Shop.Services.SmtpEmailSender>();
 builder.Services.AddScoped<Shop.Services.IPaymentGateway, Shop.Services.UnconfiguredPaymentGateway>();
 builder.Services.AddScoped<Shop.Services.PaymentService>();
-builder.Services.AddScoped<Shop.Services.PaidOrderOutboxProcessor>();
-if (builder.Configuration.GetValue("PaidOrderOutbox:WorkerEnabled", true))
-    builder.Services.AddHostedService<Shop.Services.PaidOrderOutboxWorker>();
 builder.Services.AddScoped<Shop.Services.IMagazineContentSource, Shop.Services.DatabaseMagazineContentSource>();
 builder.Services.AddScoped<Shop.Services.CatalogRepository>();
 builder.Services.AddScoped<Shop.Services.ICatalogSource>(services =>

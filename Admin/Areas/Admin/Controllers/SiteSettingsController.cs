@@ -13,17 +13,25 @@ namespace Shop.Admin.Areas.Admin.Controllers;
 public sealed class SiteSettingsController(ShopDbContext db, IDataProtectionProvider protection) : Controller
 {
     [HttpGet]
+    public IActionResult Slider() => View();
+
+    [HttpGet]
     public async Task<IActionResult> Index(CancellationToken cancellationToken)
     {
-        var model = await db.Database.SqlQueryRaw<SiteSettingsInput>("""
-            SELECT [DisplayName], [StoreName], [VisualBrandName], [SupportPhoneDisplay], [SupportPhoneUri],
-                   [WhatsAppNumber], [PublicEmail], [MediaCdnBaseUrl], [IdWarehouse], [SmtpHost], [SmtpPort], [SmtpEnableSsl],
-                   [SmtpUsername], [SmtpFrom], [SmtpPassword], [FtpHost], [FtpPort], [FtpUsername],
-                   [FtpPassword], [FtpPasswordProtected] AS [LegacyFtpPassword],
-                   CAST(CASE WHEN [FtpPassword] IS NULL AND [FtpPasswordProtected] IS NULL THEN 0 ELSE 1 END AS bit) AS [FtpPasswordConfigured]
-            FROM [Store].[SiteSetting] WHERE [Id] = 1
-            """).SingleOrDefaultAsync(cancellationToken);
-        if (model is null) return NotFound();
+        var settings = await db.StoreSiteIdentities.AsNoTracking().SingleOrDefaultAsync(x => x.Id == 1, cancellationToken);
+        if (settings is null) return NotFound();
+        var model = new SiteSettingsInput
+        {
+            DisplayName = settings.DisplayName, StoreName = settings.StoreName, VisualBrandName = settings.VisualBrandName,
+            SupportPhoneDisplay = settings.SupportPhoneDisplay, SupportPhoneUri = settings.SupportPhoneUri,
+            WhatsAppNumber = settings.WhatsAppNumber, PublicEmail = settings.PublicEmail, MediaCdnBaseUrl = settings.MediaCdnBaseUrl,
+            IdWarehouse = settings.IdWarehouse, SmtpHost = settings.SmtpHost ?? "", SmtpPort = settings.SmtpPort,
+            SmtpEnableSsl = settings.SmtpEnableSsl ?? false, SmtpUsername = settings.SmtpUsername ?? "",
+            SmtpFrom = settings.SmtpFrom ?? "", SmtpPassword = settings.SmtpPassword,
+            FtpHost = settings.FtpHost, FtpPort = settings.FtpPort, FtpUsername = settings.FtpUsername,
+            FtpPassword = settings.FtpPassword, LegacyFtpPassword = settings.FtpPasswordProtected,
+            FtpPasswordConfigured = settings.FtpPassword is not null || settings.FtpPasswordProtected is not null
+        };
         bool ftpPasswordUnreadable = false;
         if (string.IsNullOrEmpty(model.FtpPassword) && !string.IsNullOrEmpty(model.LegacyFtpPassword))
         {
@@ -56,21 +64,20 @@ public sealed class SiteSettingsController(ShopDbContext db, IDataProtectionProv
             return View(model);
         }
 
-        int updated = await db.Database.ExecuteSqlInterpolatedAsync($"""
-            UPDATE [Store].[SiteSetting] SET [DisplayName]={model.DisplayName}, [StoreName]={model.StoreName},
-                [VisualBrandName]={model.VisualBrandName}, [SupportPhoneDisplay]={model.SupportPhoneDisplay},
-                [SupportPhoneUri]={model.SupportPhoneUri}, [WhatsAppNumber]={model.WhatsAppNumber},
-                [PublicEmail]={model.PublicEmail}, [MediaCdnBaseUrl]={model.MediaCdnBaseUrl}, [IdWarehouse]={model.IdWarehouse}, [SmtpHost]={model.SmtpHost},
-                [SmtpPort]={model.SmtpPort}, [SmtpEnableSsl]={model.SmtpEnableSsl}, [SmtpUsername]={model.SmtpUsername},
-                [SmtpFrom]={model.SmtpFrom}, [SmtpPassword]=COALESCE({model.SmtpPassword}, [SmtpPassword]),
-                [FtpHost]={model.FtpHost}, [FtpPort]={model.FtpPort},
-                [FtpUsername]={model.FtpUsername}, [FtpPassword]=COALESCE({model.FtpPassword}, [FtpPassword]),
-                [FtpPasswordProtected]=CASE WHEN {model.FtpPassword} IS NULL THEN [FtpPasswordProtected] ELSE NULL END,
-                [IdentityUpdatedAtUtc]=SYSUTCDATETIME(), [UpdatedAtUtc]=SYSUTCDATETIME(),
-                [UpdatedByUserKey]={User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value}
-            WHERE [Id]=1
-            """, cancellationToken);
-        if (updated == 0) return NotFound();
+        var settings = await db.StoreSiteIdentities.SingleOrDefaultAsync(x => x.Id == 1, cancellationToken);
+        if (settings is null) return NotFound();
+        settings.DisplayName = model.DisplayName; settings.StoreName = model.StoreName;
+        settings.VisualBrandName = model.VisualBrandName; settings.SupportPhoneDisplay = model.SupportPhoneDisplay;
+        settings.SupportPhoneUri = model.SupportPhoneUri; settings.WhatsAppNumber = model.WhatsAppNumber;
+        settings.PublicEmail = model.PublicEmail; settings.MediaCdnBaseUrl = model.MediaCdnBaseUrl; settings.IdWarehouse = model.IdWarehouse;
+        settings.SmtpHost = model.SmtpHost; settings.SmtpPort = model.SmtpPort; settings.SmtpEnableSsl = model.SmtpEnableSsl;
+        settings.SmtpUsername = model.SmtpUsername; settings.SmtpFrom = model.SmtpFrom;
+        if (model.SmtpPassword is not null) settings.SmtpPassword = model.SmtpPassword;
+        settings.FtpHost = model.FtpHost; settings.FtpPort = model.FtpPort; settings.FtpUsername = model.FtpUsername;
+        if (model.FtpPassword is not null) { settings.FtpPassword = model.FtpPassword; settings.FtpPasswordProtected = null; }
+        settings.UpdatedAtUtc = DateTime.UtcNow;
+        settings.UpdatedByUserKey = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value;
+        await db.SaveChangesAsync(cancellationToken);
         TempData["SiteSettingsSaved"] = true;
         return RedirectToAction(nameof(Index));
     }

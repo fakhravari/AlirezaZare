@@ -66,10 +66,17 @@
         },
         "site-settings": {
           "markup": [
-            "Admin/Areas/Admin/Views/SiteSettings/Index.cshtml"
+            "Admin/Areas/Admin/Views/SiteSettings/Index.cshtml",
+            "Admin/Areas/Admin/Views/SiteSettings/Slider.cshtml",
+            "Admin/Areas/Admin/Views/SiteSettings/_MediaLibrarySection.cshtml",
+            "Admin/Views/Shared/_AdminSidebar.cshtml"
+          ],
+          "js": [
+            "Admin/wwwroot/js/admin-data.js"
           ],
           "server": [
-            "Admin/Areas/Admin/Controllers/SiteSettingsController.cs"
+            "Admin/Areas/Admin/Controllers/SiteSettingsController.cs",
+            "Admin/Controllers/Api/StoreMediaUploadApiController.cs"
           ]
         }
       }

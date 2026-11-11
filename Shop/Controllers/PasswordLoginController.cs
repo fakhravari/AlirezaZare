@@ -21,22 +21,20 @@ public sealed class PasswordLoginController(
     {
         string email = (request.Email ?? string.Empty).Trim().ToLowerInvariant();
         string password = request.Password ?? string.Empty;
-        if (!IsValidEmail(email) || password.Length is < 10 or > 128)
+        if (!IsValidEmail(email) || string.IsNullOrEmpty(password))
             return Unauthorized(new { code = "invalid-credentials", message = "ایمیل یا رمز عبور درست نیست." });
 
-        string? passwordHash = await db.Database.SqlQueryRaw<string?>(
-                "SELECT [PasswordHash] AS [Value] FROM [Account].[Profile] WHERE [Email] = {0}", email)
+        var profile = await db.AccountProfiles.AsNoTracking()
+            .Where(x => x.Email == email)
+            .Select(x => new { x.Id, x.PasswordHash })
             .SingleOrDefaultAsync(ct);
-        if (string.IsNullOrWhiteSpace(passwordHash) ||
-            passwordHasher.VerifyHashedPassword(email, passwordHash, password) == PasswordVerificationResult.Failed)
+        if (string.IsNullOrWhiteSpace(profile?.PasswordHash) ||
+            passwordHasher.VerifyHashedPassword(email, profile.PasswordHash, password) == PasswordVerificationResult.Failed)
             return Unauthorized(new { code = "invalid-credentials", message = "ایمیل یا رمز عبور درست نیست." });
 
-        long profileId = await db.Database.SqlQueryRaw<long>(
-                "SELECT [Id] AS [Value] FROM [Account].[Profile] WHERE [Email] = {0}", email)
-            .SingleAsync(ct);
         var claims = new[]
         {
-            new Claim(ClaimTypes.NameIdentifier, profileId.ToString()),
+            new Claim(ClaimTypes.NameIdentifier, profile!.Id.ToString()),
             new Claim(ClaimTypes.Email, email),
             new Claim(ClaimTypes.Name, email)
         };

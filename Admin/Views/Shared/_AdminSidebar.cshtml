@@ -5,7 +5,8 @@
     string? feature = ViewData["FeatureId"]?.ToString();
     bool inStore = string.Equals(area, "Store", StringComparison.OrdinalIgnoreCase);
     bool inWarehouse = string.Equals(area, "Warehouse", StringComparison.OrdinalIgnoreCase);
-    bool isHome = string.Equals(area, "Admin", StringComparison.OrdinalIgnoreCase);
+    bool isHome = string.Equals(area, "Admin", StringComparison.OrdinalIgnoreCase)
+        && string.Equals(controller, "Home", StringComparison.OrdinalIgnoreCase);
     bool IsFeature(string id) => string.Equals(feature, id, StringComparison.OrdinalIgnoreCase);
     bool Can(string permission) => User.IsInRole("system.full-access") || User.HasClaim("admin_permission", permission);
     bool canCatalog = Can("Store:Catalog:Products") || Can("Store:Catalog:Categories") || Can("Store:Catalog:Brands") || Can("Store:Catalog:Attributes");
@@ -17,6 +18,7 @@
     bool salesOpen = inStore && (new[] { "Orders", "Promotions" }.Contains(controller, StringComparer.OrdinalIgnoreCase) || IsFeature("orders") || IsFeature("promotions") || IsFeature("paid-orders-dispatch"));
     bool operationsOpen = inWarehouse && new[] { "receipts", "dispatches", "transfers", "returns", "stocktake", "adjustments" }.Contains(feature ?? "", StringComparer.OrdinalIgnoreCase);
     bool reportsOpen = inWarehouse && (controller == "Stock" || IsFeature("movements"));
+    bool siteSettingsOpen = string.Equals(controller, "SiteSettings", StringComparison.OrdinalIgnoreCase);
 }
 <aside id="sidebar" class="app-sidebar" data-bs-theme="dark" aria-label="ناوبری پنل">
 <div class="app-sidebar-content" data-scrollbar="true" data-height="100%">
@@ -43,7 +45,7 @@
         <span class="menu-text">پیشخوان کل</span>
     </a>
 </div>
-@if (User.HasClaim("admin_permission", "Admin:Users:Index"))
+@if (Can("Admin:Users:Index"))
 {
     <div class="menu-header">مدیریت سامانه</div>
     <div class="menu-item @(controller == "Users" ? "active" : "")">
@@ -153,10 +155,22 @@
 }
 @if (User.IsInRole("system.full-access"))
 {
-    <div class="menu-item @(controller == "SiteSettings" ? "active" : "")">
-        <a class="menu-link" asp-area="Admin" asp-controller="SiteSettings" asp-action="Index" data-admin-nav>
-            <span class="menu-icon"><i class="fa fa-gear" aria-hidden="true"></i></span><span class="menu-text">تنظیمات سایت</span>
+    <div class="menu-item has-sub @(siteSettingsOpen ? "active expand" : "")">
+        <a href="#site-settings-menu" class="menu-link" aria-expanded="@(siteSettingsOpen ? "true" : "false")">
+            <span class="menu-icon"><i class="fa fa-gear" aria-hidden="true"></i></span><span class="menu-text">تنظیمات سایت</span><span class="menu-caret"></span>
         </a>
+        <div id="site-settings-menu" class="menu-submenu">
+            <div class="menu-item @(siteSettingsOpen && string.Equals(action, "Index", StringComparison.OrdinalIgnoreCase) ? "active" : "")">
+                <a class="menu-link" asp-area="Admin" asp-controller="SiteSettings" asp-action="Index" data-admin-nav>
+                    <span class="menu-icon"><i class="fa fa-sliders" aria-hidden="true"></i></span><span class="menu-text">تنظیمات عمومی</span>
+                </a>
+            </div>
+            <div class="menu-item @(siteSettingsOpen && string.Equals(action, "Slider", StringComparison.OrdinalIgnoreCase) ? "active" : "")">
+                <a class="menu-link" asp-area="Admin" asp-controller="SiteSettings" asp-action="Slider" data-admin-nav>
+                    <span class="menu-icon"><i class="fa fa-images" aria-hidden="true"></i></span><span class="menu-text">اسلایدر</span>
+                </a>
+            </div>
+        </div>
     </div>
 }
 @if (User.IsInRole("system.full-access"))

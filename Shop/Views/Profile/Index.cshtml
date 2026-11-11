@@ -84,10 +84,10 @@
                     <strong>کدهای تخفیف</strong>
                 </span><b class="account-tab-badge" data-account-count="coupons" aria-label="تعداد کدهای تخفیف فعال">۰</b><i class="bi bi-chevron-left"></i>
             </a>
-            <a asp-controller="Profile" asp-action="PriceAlerts" aria-current="@(profileSection == "pricealerts" ? "page" : null)">
+            <a class="account-tab-pricealerts" asp-controller="Profile" asp-action="PriceAlerts" aria-current="@(profileSection == "pricealerts" ? "page" : null)">
                 <i class="bi bi-bell"></i>
                 <span>
-                    <strong>پیگیری‌های قیمت و موجودی</strong>
+                    <strong>پیگیری قیمت و موجودی</strong>
                 </span><b class="account-tab-badge" data-account-count="pricealerts" aria-label="تعداد پیگیری‌های فعال">۰</b><i class="bi bi-chevron-left"></i>
             </a>
             <a asp-controller="Profile" asp-action="Messages" aria-current="@(profileSection == "messages" ? "page" : null)">
@@ -320,22 +320,22 @@
             <fieldset class="profile-edit-password profile-edit-full">
                 <legend>تغییر رمز عبور</legend>
                 <p id="profilePasswordHint">برای حسابی که رمز دارد، رمز فعلی را وارد کنید.</p>
-                <label>
+                <label class="profile-edit-password-current" hidden>
                     رمز فعلی <small>(اگر برای حساب تنظیم شده است)</small>
                     <span class="login-input">
-                        <input name="currentPassword" type="password" autocomplete="current-password" maxlength="128"/><i class="bi bi-lock" aria-hidden="true"></i>
+                        <input name="currentPassword" type="password" autocomplete="current-password"/><i class="bi bi-lock" aria-hidden="true"></i>
                     </span><small class="profile-edit-validation field-validation-valid" data-profile-edit-error="currentPassword" role="alert"></small>
                 </label>
                 <label>
-                    رمز جدید <small>حداقل ۱۰ نویسه</small>
+                    رمز جدید
                     <span class="login-input">
-                        <input name="newPassword" type="password" autocomplete="new-password" minlength="10" maxlength="128"/><i class="bi bi-lock-fill" aria-hidden="true"></i>
+                        <input name="newPassword" type="password" autocomplete="new-password"/><i class="bi bi-lock-fill" aria-hidden="true"></i>
                     </span><small class="profile-edit-validation field-validation-valid" data-profile-edit-error="newPassword" role="alert"></small>
                 </label>
                 <label>
                     تکرار رمز جدید
                     <span class="login-input">
-                        <input name="newPasswordConfirmation" type="password" autocomplete="new-password" minlength="10" maxlength="128"/><i class="bi bi-lock-fill" aria-hidden="true"></i>
+                        <input name="newPasswordConfirmation" type="password" autocomplete="new-password"/><i class="bi bi-lock-fill" aria-hidden="true"></i>
                     </span><small class="profile-edit-validation field-validation-valid" data-profile-edit-error="newPasswordConfirmation" role="alert"></small>
                 </label>
             </fieldset>
@@ -368,12 +368,20 @@
         const storage = window.HNUI?.storage;
         const savedProfile = storage?.json('hn-profile', {}) || {};
         const phone = form.elements.phone;
+        const currentPasswordField = form.querySelector('.profile-edit-password-current');
         const normalizePhone = value => window.HNUI.toEnglishDigits(value).replace(/\D/g, '').slice(0, 11);
         ['firstName', 'lastName', 'email'].forEach(name => {
           if (savedProfile[name]) form.elements[name].value = savedProfile[name];
         });
         if (savedProfile.phone) phone.value = normalizePhone(savedProfile.phone);
         form.elements.newsletter.checked = savedProfile.newsletter === true;
+        const setPasswordFields = hasPassword => {
+          currentPasswordField.hidden = !hasPassword;
+          document.getElementById('profilePasswordHint').textContent = hasPassword
+            ? 'برای تغییر رمز، رمز فعلی و رمز جدید را وارد کنید.'
+            : 'این حساب هنوز رمز ندارد؛ برای تعیین رمز، رمز جدید و تکرار آن را وارد کنید.';
+        };
+        setPasswordFields(savedProfile.hasPassword === true);
         const renderProfile = profile => {
           const name = `${profile.firstName || form.elements.firstName.value} ${profile.lastName || form.elements.lastName.value}`.trim();
           document.querySelector('[data-profile-value="name"]').textContent = name || 'ثبت نشده';
@@ -389,10 +397,11 @@
           if (!response.ok) return;
           const account = await response.json();
           Object.assign(savedProfile, { firstName: account.firstName, lastName: account.lastName, email: account.email, phone: account.phone, gender: account.gender, newsletter: account.newsletter, hasPassword: account.hasPassword === true });
-          ['firstName', 'lastName', 'email'].forEach(name => { if (savedProfile[name]) form.elements[name].value = savedProfile[name]; });
+          ['firstName', 'lastName'].forEach(name => { form.elements[name].value = savedProfile[name] || ''; });
+          form.elements.email.value = account.email || '';
           if (savedProfile.phone) phone.value = normalizePhone(savedProfile.phone);
           form.elements.newsletter.checked = savedProfile.newsletter === true;
-          document.getElementById('profilePasswordHint').textContent = savedProfile.hasPassword ? 'برای تغییر رمز، رمز فعلی و رمز جدید را وارد کنید.' : 'این حساب هنوز رمز ندارد؛ برای تعیین رمز، فقط رمز جدید و تکرار آن را وارد کنید.';
+          setPasswordFields(savedProfile.hasPassword);
           if (savedProfile.gender) { const gender = form.querySelector(`[name="gender"][value="${savedProfile.gender}"]`); if (gender) gender.checked = true; }
           storage?.set('hn-profile', JSON.stringify(savedProfile)); renderProfile(savedProfile);
         };
@@ -430,7 +439,12 @@
           setError('gender', gender ? '' : 'جنسیت را انتخاب کنید.');
           return firstName && lastName && (!email.value || email.validity.valid) && /^09\d{9}$/.test(normalizedPhone) && gender;
         };
-        document.querySelectorAll('[data-profile-edit-trigger]').forEach(trigger => trigger.addEventListener('click', event => { event.preventDefault(); dialog.showModal(); }));
+        document.querySelectorAll('[data-profile-edit-trigger]').forEach(trigger => trigger.addEventListener('click', event => {
+          event.preventDefault();
+          if (!window.HNUI?.auth.isLoggedIn()) { dialog.showModal(); return; }
+          trigger.setAttribute('aria-busy', 'true');
+          void hydrateProfile().catch(() => {}).finally(() => { trigger.removeAttribute('aria-busy'); dialog.showModal(); });
+        }));
         document.querySelectorAll('[data-profile-edit-close]').forEach(close => close.addEventListener('click', () => dialog.close()));
         phone.addEventListener('input', () => {
           const normalizedPhone = normalizePhone(phone.value);
@@ -445,9 +459,9 @@
           const newPassword = form.elements.newPassword.value;
           const newPasswordConfirmation = form.elements.newPasswordConfirmation.value;
           const changingPassword = Boolean(currentPassword || newPassword || newPasswordConfirmation);
-          if (changingPassword && (newPassword.length < 10 || newPassword !== newPasswordConfirmation || (savedProfile.hasPassword && !currentPassword))) {
-            document.getElementById('accountStatus').textContent = newPassword.length < 10
-              ? 'رمز جدید باید دست‌کم ۱۰ نویسه باشد.'
+          if (changingPassword && (!newPassword || newPassword !== newPasswordConfirmation || (savedProfile.hasPassword && !currentPassword))) {
+            document.getElementById('accountStatus').textContent = !newPassword
+              ? 'رمز جدید را وارد کنید.'
               : newPassword !== newPasswordConfirmation
                 ? 'تکرار رمز جدید مطابقت ندارد.'
                 : 'برای تغییر رمز، رمز فعلی را وارد کنید.';
@@ -470,6 +484,7 @@
                   return;
                 }
                 savedProfile.hasPassword = true;
+                setPasswordFields(true);
                 form.elements.currentPassword.value = '';
                 form.elements.newPassword.value = '';
                 form.elements.newPasswordConfirmation.value = '';

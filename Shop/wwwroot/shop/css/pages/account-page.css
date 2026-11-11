@@ -86,18 +86,19 @@
 
 .account-tab-badge {
   display: inline-grid;
-  min-width: 24px;
-  height: 24px;
-  padding-inline: 6px;
+  min-width: 27px;
+  height: 27px;
+  padding-inline: 7px;
   place-items: center;
-  border: 1px solid #dce5ed;
+  border: 1px solid #cbd8e5;
   border-radius: 999px;
-  background: #f1f5f8;
-  color: #405b78;
-  font-size: 11px;
-  font-weight: 700;
+  background: #e9f0f7;
+  color: #173b63;
+  font-size: 12px;
+  font-weight: 800;
   line-height: 1;
   font-variant-numeric: tabular-nums;
+  box-shadow: inset 0 1px 0 #ffffffb8;
 }
 
 .account-tabs a > i:first-child {
@@ -121,6 +122,18 @@
   color: var(--industrial-navy);
   font-size: 13px;
   font-weight: 650;
+}
+
+.account-tabs a.account-tab-pricealerts > span {
+  overflow: hidden;
+}
+
+.account-tabs a.account-tab-pricealerts strong {
+  overflow: hidden;
+  font-size: 12px;
+  letter-spacing: -0.02em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .account-tabs a > i:last-child {
@@ -637,6 +650,13 @@
   border-color: rgba(183, 136, 23, 0.34);
   background: linear-gradient(110deg, #fff8e3, #fffefa);
   box-shadow: inset -3px 0 #d6a315;
+}
+
+.account-tabs a[aria-current] .account-tab-badge {
+  border-color: #c99b23;
+  background: #f4c832;
+  color: #182b3c;
+  box-shadow: 0 2px 5px rgba(132, 94, 0, 0.18);
 }
 
 #questionList {
@@ -1344,6 +1364,9 @@ dialog.shared-login-modal.profile-edit-dialog::backdrop {
 }
 .profile-edit-dialog .profile-edit-password legend,
 .profile-edit-dialog .profile-edit-password > p {
+  grid-column: 1 / -1;
+}
+.profile-edit-dialog .profile-edit-password-current {
   grid-column: 1 / -1;
 }
 .profile-edit-dialog .profile-edit-password legend {
@@ -2483,8 +2506,11 @@ body.inner-page.mobile-page--profile-favorites #favoritesView .favorite-item-car
 /* Give the account overview a clearer dashboard rhythm. */
 .profile-personal-card {
   position: relative;
+  display: flex;
+  min-height: 260px;
+  flex-direction: column;
   margin: 0 0 22px;
-  padding: 18px 24px 52px;
+  padding: 18px 24px 0;
   border-radius: 8px;
   background: #f0f2f5;
   color: #243f79;
@@ -2497,12 +2523,12 @@ body.inner-page.mobile-page--profile-favorites #favoritesView .favorite-item-car
 .profile-personal-grid span { color: #5c6d86; font-size: 14px; }
 .profile-personal-grid strong { color: #101828; font-size: 14px; overflow-wrap: anywhere; }
 .profile-personal-avatar { position: absolute; inset-inline-end: 20px; top: 50%; display: grid; place-items: center; width: 82px; height: 82px; transform: translateY(-50%); border: 1px solid #e8ebef; border-radius: 50%; background: #fff; box-shadow: 0 8px 18px #1522381c; font-size: 24px; }
-.profile-personal-edit { position: absolute; inset-inline-start: 20px; bottom: 0; padding: 10px 24px; border-radius: 6px 6px 0 0; background: #243f79; color: #fff; text-decoration: none; font-size: 13px; }
+.profile-personal-edit { position: static; display: inline-flex; min-height: 44px; align-items: center; align-self: flex-start; margin-block-start: auto; padding: 10px 24px; border-radius: 6px 6px 0 0; background: #243f79; color: #fff; text-decoration: none; font-size: 13px; }
 .profile-personal-edit:focus-visible { outline: 3px solid #cfb45e; outline-offset: 2px; }
 .profile-edit-newsletter { display: flex; grid-column: 1 / -1; align-items: center; gap: 10px; color: #334155; }
 .profile-edit-newsletter input { width: 18px; height: 18px; accent-color: #243f79; }
 @media (max-width: 767px) {
-  .profile-personal-card { padding: 16px 14px 54px; }
+  .profile-personal-card { padding: 16px 14px 0; }
   .profile-personal-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); padding-inline-end: 0; }
   .profile-personal-avatar { display: none; }
 }

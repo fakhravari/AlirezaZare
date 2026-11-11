@@ -1,5 +1,3 @@
-using System.Data;
-using System.Data.Common;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -15,19 +13,13 @@ public sealed class StoreCategoryContentApiController(ShopDbContext db) : Contro
     [HttpGet("{key}")]
     public async Task<IActionResult> Get(string key, CancellationToken cancellationToken)
     {
-        DbConnection connection = db.Database.GetDbConnection();
-        bool close = connection.State != ConnectionState.Open;
-        if (close) await connection.OpenAsync(cancellationToken);
-        try
+        var category = await db.StoreCategories.AsNoTracking().SingleOrDefaultAsync(x => x.CategoryKey == key, cancellationToken);
+        return category is null ? NotFound() : Ok(new
         {
-            await using DbCommand command = connection.CreateCommand();
-            command.CommandText = "SELECT [ProductIntro], [ProductHighlightsJson], [ProductSpecsJson] FROM [Store].[Category] WHERE [CategoryKey] = @key";
-            Add(command, "@key", key);
-            await using DbDataReader reader = await command.ExecuteReaderAsync(cancellationToken);
-            if (!await reader.ReadAsync(cancellationToken)) return NotFound();
-            return Ok(new { intro = reader.IsDBNull(0) ? "" : reader.GetString(0), highlights = reader.IsDBNull(1) ? "[]" : reader.GetString(1), specs = reader.IsDBNull(2) ? "[]" : reader.GetString(2) });
-        }
-        finally { if (close) await connection.CloseAsync(); }
+            intro = category.ProductIntro ?? "",
+            highlights = category.ProductHighlightsJson ?? "[]",
+            specs = category.ProductSpecsJson ?? "[]"
+        });
     }
 
     [HttpPut("{key}")]
@@ -36,18 +28,13 @@ public sealed class StoreCategoryContentApiController(ShopDbContext db) : Contro
     {
         if ((input.Intro?.Length ?? 0) > 10000 || !ValidArray(input.Highlights, false) || !ValidArray(input.Specs, true))
             return ValidationProblem(detail: "معرفی یا قالب نکات و مشخصات معتبر نیست.", statusCode: 400);
-        DbConnection connection = db.Database.GetDbConnection();
-        bool close = connection.State != ConnectionState.Open;
-        if (close) await connection.OpenAsync(cancellationToken);
-        try
-        {
-            await using DbCommand command = connection.CreateCommand();
-            command.CommandText = "UPDATE [Store].[Category] SET [ProductIntro] = @intro, [ProductHighlightsJson] = @highlights, [ProductSpecsJson] = @specs WHERE [CategoryKey] = @key";
-            Add(command, "@key", key); Add(command, "@intro", input.Intro ?? "");
-            Add(command, "@highlights", input.Highlights!); Add(command, "@specs", input.Specs!);
-            return await command.ExecuteNonQueryAsync(cancellationToken) == 0 ? NotFound() : Ok(new { message = "محتوای دسته ذخیره شد." });
-        }
-        finally { if (close) await connection.CloseAsync(); }
+        var category = await db.StoreCategories.SingleOrDefaultAsync(x => x.CategoryKey == key, cancellationToken);
+        if (category is null) return NotFound();
+        category.ProductIntro = input.Intro ?? "";
+        category.ProductHighlightsJson = input.Highlights!;
+        category.ProductSpecsJson = input.Specs!;
+        await db.SaveChangesAsync(cancellationToken);
+        return Ok(new { message = "محتوای دسته ذخیره شد." });
     }
 
     private static bool ValidArray(string? json, bool pairs)
@@ -67,10 +54,6 @@ public sealed class StoreCategoryContentApiController(ShopDbContext db) : Contro
     private static bool ValidText(JsonElement value) => value.ValueKind == JsonValueKind.String &&
         value.GetString() is { Length: > 0 and <= 1000 } text && !string.IsNullOrWhiteSpace(text);
 
-    private static void Add(DbCommand command, string name, string value)
-    {
-        DbParameter parameter = command.CreateParameter(); parameter.ParameterName = name; parameter.Value = value; command.Parameters.Add(parameter);
-    }
 }
 
 public sealed record CategoryContentInput(string? Intro, string? Highlights, string? Specs);

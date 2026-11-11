@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System.Net.Mail;
+using System.Text.Json;
 using Shop.Data.Infrastructure.Persistence;
 
 namespace Shop.Admin.Controllers.Api;
@@ -21,14 +22,15 @@ public sealed class StoreCustomersAdminApiController(ShopDbContext db) : Control
         if (q.Length > 100 || page is < 1 or > 100000 || pageSize is < 1 or > 100)
             return BadRequest(new { title = "جست‌وجو یا صفحه‌بندی نامعتبر است." });
         int offset = (page - 1) * pageSize, take = pageSize + 1;
-        var rows = await db.Database.SqlQuery<CustomerRow>($"""
-            SELECT p.[Id], p.[FirstName], p.[LastName], p.[Email], p.[Phone], p.[CreatedAtUtc],
-                (SELECT COUNT(*) FROM [Store].[Order] o WHERE o.[IdProfile] = p.[Id]) AS [OrderCount]
-            FROM [Account].[Profile] p
-            WHERE {q} = N'' OR CHARINDEX({q}, CONCAT(p.[FirstName], N' ', p.[LastName])) > 0
-                OR CHARINDEX({q}, p.[Email]) > 0 OR CHARINDEX({q}, COALESCE(p.[Phone], N'')) > 0
-            ORDER BY p.[Id] DESC OFFSET {offset} ROWS FETCH NEXT {take} ROWS ONLY
-            """).ToListAsync(cancellationToken);
+        var rows = await db.AccountProfiles.AsNoTracking()
+            .Where(p => q == "" || (p.FirstName + " " + p.LastName).Contains(q) || p.Email.Contains(q) || (p.Phone ?? "").Contains(q))
+            .OrderByDescending(p => p.Id).Skip(offset).Take(take)
+            .Select(p => new CustomerRow
+            {
+                Id = p.Id, FirstName = p.FirstName, LastName = p.LastName, Email = p.Email,
+                Phone = p.Phone, CreatedAtUtc = p.CreatedAtUtc,
+                OrderCount = db.StoreCustomerOrders.Count(o => o.IdProfile == p.Id)
+            }).ToListAsync(cancellationToken);
         return Ok(new { items = rows.Take(pageSize), page, hasNext = rows.Count > pageSize });
     }
 
@@ -36,25 +38,36 @@ public sealed class StoreCustomersAdminApiController(ShopDbContext db) : Control
     public async Task<IActionResult> Details(long id, CancellationToken cancellationToken)
     {
         if (id <= 0) return NotFound();
-        var customer = await db.Database.SqlQuery<CustomerDetails>($"""
-            SELECT p.[Id], p.[FirstName], p.[LastName], p.[Email], p.[Phone], p.[CreatedAtUtc],
-                (SELECT COUNT(*) FROM [Store].[Order] o WHERE o.[IdProfile] = p.[Id]) AS [OrderCount],
-                COALESCE((SELECT a.[Title], a.[Recipient], a.[Phone], country.[NameFa] AS [Country], province.[NameFa] AS [Province], city.[NameFa] AS [City], a.[Street], a.[PostalCode], a.[IsDefault]
-                    FROM [Account].[Address] a JOIN [Geo].[Country] country ON country.[Id] = a.[IdCountry]
-                    JOIN [Geo].[Province] province ON province.[Id] = a.[IdProvince] AND province.[IdCountry] = a.[IdCountry]
-                    JOIN [Geo].[City] city ON city.[Id] = a.[IdCity] AND city.[IdProvince] = a.[IdProvince] AND city.[IdCountry] = a.[IdCountry]
-                    WHERE a.[IdProfile] = p.[Id] ORDER BY a.[Id] FOR JSON PATH), N'[]') AS [AddressesJson],
-                COALESCE((SELECT TOP (50) o.[OrderNumber], o.[Status], o.[TotalAmount], o.[OrderedAtUtc],
-                    CONVERT(bit, CASE WHEN o.[PaymentMethod] = N'demo' AND o.[ExternalOrderKey] LIKE N'demo-order-%' THEN 1 ELSE 0 END) AS [IsSample]
-                    FROM [Store].[Order] o WHERE o.[IdProfile] = p.[Id] ORDER BY o.[Id] DESC FOR JSON PATH), N'[]') AS [OrdersJson],
-                COALESCE((SELECT TOP (50) f.[FeedbackType], f.[FeedbackText], f.[Status], f.[CreatedAtUtc], f.[IsSample], product.[Name] AS [ProductName]
-                    FROM [Store].[ProductFeedback] f JOIN [Warehouse].[Product] product ON product.[Id] = f.[IdProduct]
-                    WHERE f.[IdProfile] = p.[Id] ORDER BY f.[Id] DESC FOR JSON PATH), N'[]') AS [FeedbackJson],
-                (SELECT COUNT(*) FROM [Account].[Favorite] f WHERE f.[IdProfile] = p.[Id]) AS [FavoriteCount],
-                (SELECT COUNT(*) FROM [Account].[PriceAlert] a WHERE a.[IdProfile] = p.[Id]) AS [PriceAlertCount],
-                (SELECT COUNT(*) FROM [Account].[ArticleInteraction] a WHERE a.[IdProfile] = p.[Id]) AS [ArticleInteractionCount]
-            FROM [Account].[Profile] p WHERE p.[Id] = {id}
-            """).SingleOrDefaultAsync(cancellationToken);
+        var customer = await db.AccountProfiles.AsNoTracking().Where(p => p.Id == id)
+            .Select(p => new CustomerDetails
+            {
+                Id = p.Id, FirstName = p.FirstName, LastName = p.LastName, Email = p.Email,
+                Phone = p.Phone, CreatedAtUtc = p.CreatedAtUtc,
+                OrderCount = db.StoreCustomerOrders.Count(o => o.IdProfile == p.Id),
+                FavoriteCount = db.AccountFavorites.Count(f => f.IdProfile == p.Id),
+                PriceAlertCount = db.AccountPriceAlerts.Count(a => a.IdProfile == p.Id),
+                ArticleInteractionCount = db.AccountArticleInteractions.Count(a => a.IdProfile == p.Id)
+            }).SingleOrDefaultAsync(cancellationToken);
+        if (customer is not null)
+        {
+            var addresses = await (from a in db.AccountAddresses.AsNoTracking().Where(x => x.IdProfile == id)
+                                   join country in db.GeoCountries.AsNoTracking() on a.IdCountry equals country.Id
+                                   join province in db.GeoProvinces.AsNoTracking() on a.IdProvince equals province.Id
+                                   join city in db.GeoCities.AsNoTracking() on a.IdCity equals city.Id
+                                   orderby a.Id
+                                   select new { a.Title, a.Recipient, a.Phone, Country = country.NameFa, Province = province.NameFa,
+                                       City = city.NameFa, a.Street, a.PostalCode, a.IsDefault }).ToListAsync(cancellationToken);
+            var orders = await db.StoreCustomerOrders.AsNoTracking().Where(o => o.IdProfile == id).OrderByDescending(o => o.Id)
+                .Take(50).Select(o => new { o.OrderNumber, o.Status, o.TotalAmount, o.OrderedAtUtc,
+                    IsSample = o.PaymentMethod == "demo" && o.ExternalOrderKey != null && o.ExternalOrderKey.StartsWith("demo-order-") })
+                .ToListAsync(cancellationToken);
+            var feedback = await db.ProductFeedback.AsNoTracking().Where(f => f.IdProfile == id).OrderByDescending(f => f.Id)
+                .Take(50).Select(f => new { f.FeedbackType, f.FeedbackText, f.Status, f.CreatedAtUtc, f.IsSample, ProductName = f.Product.Name })
+                .ToListAsync(cancellationToken);
+            customer.AddressesJson = JsonSerializer.Serialize(addresses);
+            customer.OrdersJson = JsonSerializer.Serialize(orders);
+            customer.FeedbackJson = JsonSerializer.Serialize(feedback);
+        }
         return customer is null ? NotFound() : Ok(customer);
     }
 
@@ -116,7 +129,7 @@ public sealed class StoreCustomersAdminApiController(ShopDbContext db) : Control
         if (id <= 0) return NotFound();
         if (!await db.AccountProfiles.AnyAsync(x => x.Id == id, cancellationToken)) return NotFound();
         bool hasOrders = await db.Set<Shop.Data.Domain.Account.Entities.StoreCustomerOrderReference>().AnyAsync(x => x.IdProfile == id, cancellationToken);
-        bool hasCart = await db.Set<Shop.Data.Domain.Account.Entities.AccountCartReference>().AnyAsync(x => x.IdProfile == id, cancellationToken);
+        bool hasCart = await db.AccountCarts.AnyAsync(x => x.IdProfile == id, cancellationToken);
         if (hasOrders || hasCart)
             return Conflict(new { title = "مشتری دارای سفارش یا سبد خرید است؛ برای حفظ سابقه، حذف ممکن نیست." });
         await db.AccountProfiles.Where(x => x.Id == id).ExecuteDeleteAsync(cancellationToken);

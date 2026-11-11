@@ -10,22 +10,24 @@ public sealed class SmtpEmailSender(ShopDbContext db, IConfiguration configurati
 {
     public async Task SendVerificationCodeAsync(string recipient, string code, CancellationToken cancellationToken)
     {
-        var settings = await db.Database.SqlQueryRaw<SmtpSettings>("""
-            SELECT [SmtpHost] AS [Host], [SmtpPort] AS [Port], [SmtpEnableSsl] AS [EnableSsl],
-                   [SmtpUsername] AS [Username], [SmtpFrom] AS [From], [SmtpPassword] AS [Password]
-            FROM [Store].[SiteSetting] WHERE [Id] = 1
-            """).SingleOrDefaultAsync(cancellationToken);
-        string? password = settings?.Password ?? configuration["Email:Smtp:Password"];
-        if (settings is null || string.IsNullOrWhiteSpace(settings.Host)
-            || settings.Port is null or < 1 or > 65535 || settings.EnableSsl is null
-            || string.IsNullOrWhiteSpace(settings.Username)
-            || string.IsNullOrWhiteSpace(settings.From)
+        var settings = await db.StoreSiteIdentities.AsNoTracking()
+            .Where(x => x.Id == 1)
+            .Select(x => new
+            {
+                x.SmtpHost, x.SmtpPort, x.SmtpEnableSsl, x.SmtpUsername, x.SmtpFrom, x.SmtpPassword
+            })
+            .SingleOrDefaultAsync(cancellationToken);
+        string? password = settings?.SmtpPassword ?? configuration["Email:Smtp:Password"];
+        if (settings is null || string.IsNullOrWhiteSpace(settings.SmtpHost)
+            || settings.SmtpPort is null or < 1 or > 65535 || settings.SmtpEnableSsl is null
+            || string.IsNullOrWhiteSpace(settings.SmtpUsername)
+            || string.IsNullOrWhiteSpace(settings.SmtpFrom)
             || string.IsNullOrWhiteSpace(password))
         {
             throw new InvalidOperationException("SMTP settings are incomplete.");
         }
 
-        using var message = new MailMessage(settings.From, recipient)
+        using var message = new MailMessage(settings.SmtpFrom, recipient)
         {
             Subject = "کد تأیید فروشگاه برق شیراز",
             Body =
@@ -34,10 +36,10 @@ public sealed class SmtpEmailSender(ShopDbContext db, IConfiguration configurati
             BodyEncoding = System.Text.Encoding.UTF8,
             SubjectEncoding = System.Text.Encoding.UTF8
         };
-        using var client = new SmtpClient(settings.Host, settings.Port.Value)
+        using var client = new SmtpClient(settings.SmtpHost, settings.SmtpPort.Value)
         {
-            EnableSsl = settings.EnableSsl.Value,
-            Credentials = new NetworkCredential(settings.Username, password),
+            EnableSsl = settings.SmtpEnableSsl.Value,
+            Credentials = new NetworkCredential(settings.SmtpUsername, password),
             Timeout = 15000,
             DeliveryMethod = SmtpDeliveryMethod.Network
         };
@@ -52,15 +54,5 @@ public sealed class SmtpEmailSender(ShopDbContext db, IConfiguration configurati
                 exception.GetType().Name);
             throw;
         }
-    }
-
-    private sealed class SmtpSettings
-    {
-        public string? Host { get; set; }
-        public int? Port { get; set; }
-        public bool? EnableSsl { get; set; }
-        public string? Username { get; set; }
-        public string? From { get; set; }
-        public string? Password { get; set; }
     }
 }

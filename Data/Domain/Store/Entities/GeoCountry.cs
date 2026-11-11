@@ -6,4 +6,5 @@ public sealed class GeoCountry
     public string CountryCode { get; set; } = string.Empty;
     public string NameFa { get; set; } = string.Empty;
     public string NameEn { get; set; } = string.Empty;
+    public string? FlagPath { get; set; }
 }

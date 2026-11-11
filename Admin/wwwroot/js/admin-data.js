@@ -201,7 +201,9 @@
         root.dataset.loading = "true";
         if (statusNode) statusNode.textContent = "در حال دریافت رسانه‌های موجود…";
         try {
-            const items = await ui.getJson("/api/admin/store/media/library");
+            const allItems = await ui.getJson("/api/admin/store/media/library");
+            const kindFilter = root.dataset.mediaLibraryKind;
+            const items = kindFilter ? allItems.filter(item => item.kind === kindFilter) : allItems;
             container.replaceChildren();
             const labels = { slider: "اسلایدر", testimonial: "دیدگاه", trust: "اعتماد", identity: "هویت فروشگاه", payment: "پرداخت" };
             for (const item of items) {
@@ -1386,7 +1388,7 @@
                         window.bootstrap?.Modal?.getInstance(document.getElementById("article-image-modal"))?.hide();
                         void loadMagazine();
                     }
-                    const library = document.querySelector("[data-media-library]");
+                    const library = mediaForm.closest("[data-media-library]");
                     if (library) void loadMediaLibrary(library);
                 })
                 .catch(error => { result.textContent = error.message || "بارگذاری ناموفق بود."; ui.notify(result.textContent, "danger"); })

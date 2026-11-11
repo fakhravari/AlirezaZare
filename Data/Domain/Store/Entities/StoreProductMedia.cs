@@ -11,3 +11,12 @@ public sealed class StoreProductMedia
     public string? ImagesJson { get; set; }
     public string? VideosJson { get; set; }
 }
+
+public sealed class StoreProductDocument
+{
+    public long Id { get; set; }
+    public long IdProduct { get; set; }
+    public string Title { get; set; } = "";
+    public string Path { get; set; } = "";
+    public DateTime CreatedAtUtc { get; set; }
+}

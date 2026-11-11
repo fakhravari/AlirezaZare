@@ -7,6 +7,10 @@ using Shop.Admin.Services;
 using Shop.Data.Application.Store;
 using Shop.Data.Application.Store.Contracts;
 using Shop.Data.Infrastructure.Persistence;
+using Shop.Data.Domain.Store.Entities;
+using Shop.Data.Domain.Warehouse.Entities;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace Shop.Admin.Controllers.Api;
 
@@ -107,7 +111,7 @@ public sealed class StoreMediaUploadApiController(ShopDbContext db, FtpMediaStor
         if (kind == "country")
         {
             if (string.IsNullOrEmpty(countryCode) || countryCode.Length > 8) return BadRequest(new { title = "کشور را انتخاب کنید." });
-            var country = await db.Database.SqlQueryRaw<MediaRow>("SELECT [Id] FROM [Geo].[Country] WHERE [CountryCode] = {0}", countryCode).SingleOrDefaultAsync(cancellationToken);
+            var country = await db.GeoCountries.SingleOrDefaultAsync(x => x.CountryCode == countryCode, cancellationToken);
             if (country is null) return NotFound(new { title = "کشور پیدا نشد." });
         }
         else if (!string.IsNullOrEmpty(countryCode)) return BadRequest(new { title = "کشور برای این نوع رسانه معتبر نیست." });
@@ -115,7 +119,7 @@ public sealed class StoreMediaUploadApiController(ShopDbContext db, FtpMediaStor
         if (kind == "article")
         {
             if (string.IsNullOrEmpty(articleKey) || articleKey.Length > 150) return BadRequest(new { title = "مقاله را انتخاب کنید." });
-            var article = await db.Database.SqlQueryRaw<MediaRow>("SELECT [Id] FROM [Mag].[MagazineArticle] WHERE [ArticleKey] = {0}", articleKey).SingleOrDefaultAsync(cancellationToken);
+            var article = await db.MagazineArticles.SingleOrDefaultAsync(x => x.ArticleKey == articleKey, cancellationToken);
             if (article is null) return NotFound(new { title = "مقاله پیدا نشد." });
         }
         else if (!string.IsNullOrEmpty(articleKey)) return BadRequest(new { title = "مقاله برای این نوع رسانه معتبر نیست." });
@@ -123,7 +127,7 @@ public sealed class StoreMediaUploadApiController(ShopDbContext db, FtpMediaStor
         if (!string.IsNullOrEmpty(brandKey))
         {
             if (kind != "brand" || brandKey.Length > 100) return BadRequest(new { title = "برند نامعتبر است." });
-            var brand = await db.Database.SqlQueryRaw<MediaRow>("SELECT [Id] FROM [Store].[Brand] WHERE [BrandKey] = {0}", brandKey).SingleOrDefaultAsync(cancellationToken);
+            var brand = await db.StoreBrands.SingleOrDefaultAsync(x => x.BrandKey == brandKey, cancellationToken);
             if (brand is null) return NotFound(new { title = "برند پیدا نشد." });
         }
         string? mediaKey = null;
@@ -133,12 +137,12 @@ public sealed class StoreMediaUploadApiController(ShopDbContext db, FtpMediaStor
             title = title?.Trim();
             if (document && (string.IsNullOrEmpty(title) || title.Length > 200))
                 return BadRequest(new { title = "عنوان فایل باید بین ۱ تا ۲۰۰ نویسه باشد." });
-            var product = await db.Database.SqlQueryRaw<ProductRow>("SELECT [ProductKey] FROM [Warehouse].[Product] WHERE [Id] = {0} AND [IsStoreEnabled] = 1", productId).SingleOrDefaultAsync(cancellationToken);
+            var product = await db.Products.AsNoTracking().SingleOrDefaultAsync(x => x.Id == productId && x.IsStoreEnabled, cancellationToken);
             if (product is null) return NotFound(new { title = "کالای فروشگاهی پیدا نشد." });
             mediaKey = "product-" + product.ProductKey;
             if (video)
             {
-                var media = await db.Database.SqlQueryRaw<MediaRow>("SELECT [Id] FROM [Store].[ProductMedia] WHERE [IdProduct] = {0} AND [MediaKey] = {1}", productId, mediaKey).SingleOrDefaultAsync(cancellationToken);
+                var media = await db.StoreProductMedia.AsNoTracking().SingleOrDefaultAsync(x => x.IdProduct == productId && x.MediaKey == mediaKey, cancellationToken);
                 if (media is null) return Conflict(new { title = "ابتدا تصویر اصلی کالا را ثبت کنید." });
             }
         }
@@ -205,43 +209,62 @@ public sealed class StoreMediaUploadApiController(ShopDbContext db, FtpMediaStor
             }
             if (document || video || !string.IsNullOrEmpty(brandKey) || kind == "country" || kind == "article")
             {
-                databaseStarted = true;
                 if (document)
-                    await db.Database.ExecuteSqlInterpolatedAsync($"INSERT INTO [Store].[ProductDocument] ([IdProduct], [Title], [Path]) VALUES ({productId}, {title}, {path})", cancellationToken);
+                    db.StoreProductDocuments.Add(new StoreProductDocument
+                    {
+                        IdProduct = productId!.Value, Title = title!, Path = path, CreatedAtUtc = DateTime.UtcNow
+                    });
                 else if (video)
                 {
-                    int updated = await db.Database.ExecuteSqlInterpolatedAsync($"UPDATE [Store].[ProductMedia] SET [VideosJson] = JSON_MODIFY(COALESCE([VideosJson], N'[]'), 'append $', {path}) WHERE [IdProduct] = {productId} AND [MediaKey] = {mediaKey}", cancellationToken);
-                    if (updated == 0)
+                    var media = await db.StoreProductMedia.SingleOrDefaultAsync(x => x.IdProduct == productId && x.MediaKey == mediaKey, cancellationToken);
+                    if (media is null)
                     {
-                        try { await ftp.DeleteFile("/" + path, CancellationToken.None); }
-                        catch (Exception cleanupException) { logger.LogWarning(cleanupException, "Failed to clean up uploaded media"); }
+                        await CleanupUploadedAsync(ftp, uploaded);
                         return Conflict(new { title = "رسانهٔ کالا دیگر وجود ندارد؛ دوباره تلاش کنید." });
                     }
+                    JsonArray videos;
+                    try { videos = string.IsNullOrWhiteSpace(media.VideosJson) ? [] : JsonNode.Parse(media.VideosJson)?.AsArray() ?? []; }
+                    catch (JsonException) { throw new InvalidOperationException("Product video list contains invalid JSON."); }
+                    videos.Add(path);
+                    media.VideosJson = videos.ToJsonString();
                 }
                 else if (kind == "country" || kind == "article")
                 {
-                    int updated = kind == "country"
-                        ? await db.Database.ExecuteSqlInterpolatedAsync($"UPDATE [Geo].[Country] SET [FlagPath] = {path} WHERE [CountryCode] = {countryCode}", cancellationToken)
-                        : await db.Database.ExecuteSqlInterpolatedAsync($"UPDATE [Mag].[MagazineArticle] SET [HeroImagePath] = {path}, [ContentImagePath] = {path}, [UpdatedAtUtc] = SYSUTCDATETIME() WHERE [ArticleKey] = {articleKey}", cancellationToken);
-                    if (updated == 0)
+                    bool updated;
+                    if (kind == "country")
                     {
-                        foreach (string item in uploaded)
-                            try { await ftp.DeleteFile(item, CancellationToken.None); }
-                            catch (Exception cleanupException) { logger.LogWarning(cleanupException, "Failed to clean up uploaded media"); }
+                        var country = await db.GeoCountries.SingleOrDefaultAsync(x => x.CountryCode == countryCode, cancellationToken);
+                        updated = country is not null;
+                        if (country is not null) country.FlagPath = path;
+                    }
+                    else
+                    {
+                        var article = await db.MagazineArticles.SingleOrDefaultAsync(x => x.ArticleKey == articleKey, cancellationToken);
+                        updated = article is not null;
+                        if (article is not null)
+                        {
+                            article.HeroImagePath = path; article.ContentImagePath = path;
+                            article.UpdatedAtUtc = DateTime.UtcNow;
+                        }
+                    }
+                    if (!updated)
+                    {
+                        await CleanupUploadedAsync(ftp, uploaded);
                         return Conflict(new { title = "رکورد دیگر وجود ندارد؛ دوباره تلاش کنید." });
                     }
                 }
                 else
                 {
-                    int updated = await db.Database.ExecuteSqlInterpolatedAsync($"UPDATE [Store].[Brand] SET [LogoPath] = {path} WHERE [BrandKey] = {brandKey}", cancellationToken);
-                    if (updated == 0)
+                    var brand = await db.StoreBrands.SingleOrDefaultAsync(x => x.BrandKey == brandKey, cancellationToken);
+                    if (brand is null)
                     {
-                        foreach (string item in uploaded)
-                            try { await ftp.DeleteFile(item, CancellationToken.None); }
-                            catch (Exception cleanupException) { logger.LogWarning(cleanupException, "Failed to clean up uploaded media"); }
+                        await CleanupUploadedAsync(ftp, uploaded);
                         return Conflict(new { title = "برند دیگر وجود ندارد؛ دوباره تلاش کنید." });
                     }
+                    brand.LogoPath = path;
                 }
+                await db.SaveChangesAsync(cancellationToken);
+                databaseStarted = true;
             }
             string cdnBaseUrl = await mediaCdn.GetBaseUrlAsync(cancellationToken);
             return Ok(new
@@ -265,7 +288,12 @@ public sealed class StoreMediaUploadApiController(ShopDbContext db, FtpMediaStor
         finally { ftp?.Dispose(); }
     }
 
-    public sealed class ProductRow { public string ProductKey { get; set; } = ""; }
-    public sealed class MediaRow { public long Id { get; set; } }
+    private async Task CleanupUploadedAsync(AsyncFtpClient ftp, IEnumerable<string> paths)
+    {
+        foreach (string item in paths)
+            try { await ftp.DeleteFile(item, CancellationToken.None); }
+            catch (Exception cleanupException) { logger.LogWarning(cleanupException, "Failed to clean up uploaded media"); }
+    }
+
     public sealed record MediaLibraryItem(string Kind, string Path, string Name, long SizeBytes, DateTime ModifiedUtc, string? Url, string? ThumbnailUrl, bool CanDelete);
 }

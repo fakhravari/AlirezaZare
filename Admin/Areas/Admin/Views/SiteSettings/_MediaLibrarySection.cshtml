@@ -1,0 +1,25 @@
+@model (string Kind, string Title, string Description)
+@{
+    var fileId = $"media-file-{Model.Kind}";
+}
+<section class="panel panel-default mb-0" data-media-library data-media-library-kind="@Model.Kind" aria-labelledby="media-title-@Model.Kind">
+    <div class="panel-heading">
+        <h3 id="media-title-@Model.Kind" class="panel-title">@Model.Title</h3>
+        <div class="panel-heading-btn"><button class="btn btn-default btn-sm" type="button" data-media-library-refresh>بازخوانی فهرست</button></div>
+    </div>
+    <div class="panel-body">
+        <form class="visually-hidden" data-media-library-token>@Html.AntiForgeryToken()</form>
+        <p class="text-muted">@Model.Description</p>
+        <form data-media-upload-form enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="kind" value="@Model.Kind" />
+            <label for="@fileId" class="form-label">فایل تصویر</label>
+            <input id="@fileId" name="file" type="file" accept="image/jpeg,image/png,image/webp" class="form-control" required />
+            <small class="form-text text-muted d-block mt-2">JPEG، PNG یا WebP تا ۱۰ مگابایت؛ نسخهٔ کوچک نیز ساخته می‌شود.</small>
+            <button type="submit" class="btn btn-primary mt-3">بارگذاری @Model.Title</button>
+            <div class="mt-2" data-media-upload-result role="status" aria-live="polite"></div>
+        </form>
+        <div class="admin-media-library mt-4" data-media-library-items aria-live="polite"></div>
+        <p class="admin-data-status small text-muted mt-2" data-media-library-status role="status" aria-live="polite">در حال دریافت رسانه‌های موجود…</p>
+    </div>
+</section>

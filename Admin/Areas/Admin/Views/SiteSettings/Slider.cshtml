@@ -1,0 +1,8 @@
+@{
+    ViewData["Title"] = "اسلایدر فروشگاه";
+    ViewData["AreaTitle"] = "سامانهٔ مدیریت";
+}
+<div class="admin-page">
+    @await Html.PartialAsync("_AdminPageIntro", ("اسلایدر فروشگاه", "بارگذاری و مدیریت تصویرهای بنر اسلایدر فروشگاه."))
+    @await Html.PartialAsync("_MediaLibrarySection", (Kind: "slider", Title: "تصویر اسلایدر", Description: "برای بنرهای اسلایدر فروشگاه؛ مسیر فایل پس از بارگذاری نمایش داده می‌شود."))
+</div>

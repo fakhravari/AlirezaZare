@@ -73,30 +73,14 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext, IMedi
 
     public async Task<IReadOnlyList<StoreFaqRow>> ReadFaqAsync(CancellationToken cancellationToken)
     {
-        DbConnection connection = dbContext.Database.GetDbConnection();
-        bool closeWhenDone = connection.State != ConnectionState.Open;
-        if (closeWhenDone) await connection.OpenAsync(cancellationToken);
-        try
-        {
-            List<StoreFaqRow> rows = [];
-            await using DbCommand command = connection.CreateCommand();
-            command.CommandText = """
-                                  SELECT f.[Question], f.[Answer], f.[LinkText], f.[LinkUrl], f.[SortOrder]
-                                  FROM [Store].[FaqItem] f
-                                  INNER JOIN [Store].[ContentPage] p ON p.[Id] = f.[IdContentPage]
-                                  WHERE p.[PageKey] = N'faq' AND p.[IsPublished] = 1 AND f.[IsPublished] = 1
-                                  ORDER BY f.[SortOrder], f.[Id];
-                                  """;
-            await using DbDataReader reader = await command.ExecuteReaderAsync(cancellationToken);
-            while (await reader.ReadAsync(cancellationToken))
-                rows.Add(new(reader.GetString(0), reader.GetString(1), reader.IsDBNull(2) ? null : reader.GetString(2),
-                    reader.IsDBNull(3) ? null : reader.GetString(3), reader.GetInt32(4)));
-            return rows;
-        }
-        finally
-        {
-            if (closeWhenDone) await connection.CloseAsync();
-        }
+        return await (
+            from faq in dbContext.StoreFaqItems.AsNoTracking()
+            join page in dbContext.StoreContentPages.AsNoTracking()
+                on faq.IdContentPage equals page.Id
+            where page.PageKey == "faq" && page.IsPublished && faq.IsPublished
+            orderby faq.SortOrder, faq.Id
+            select new StoreFaqRow(faq.Question, faq.Answer, faq.LinkText, faq.LinkUrl, faq.SortOrder))
+            .ToListAsync(cancellationToken);
     }
 
     public async Task<string?> ReadAccountJsonAsync(CancellationToken cancellationToken) =>

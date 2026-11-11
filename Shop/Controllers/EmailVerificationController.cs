@@ -65,22 +65,21 @@ public sealed partial class EmailVerificationController(
         if (!isRegistration && request.Password is not null)
             return BadRequest(new { code = "invalid-request" });
         if (!codes.Verify(email, request.Code!)) return BadRequest(new { code = "invalid-code" });
-        await db.Database.ExecuteSqlInterpolatedAsync(
-            $"IF NOT EXISTS(SELECT 1 FROM [Account].[Profile] WHERE [Email]={email}) INSERT INTO [Account].[Profile]([Email]) VALUES({email});",
-            cancellationToken);
+        var profile = await db.AccountProfiles.SingleOrDefaultAsync(x => x.Email == email, cancellationToken);
+        if (profile is null)
+        {
+            profile = new() { Email = email, CreatedAtUtc = DateTime.UtcNow };
+            db.AccountProfiles.Add(profile);
+        }
         if (isRegistration)
         {
-            string passwordHash = passwordHasher.HashPassword(email, request.Password!);
-            await db.Database.ExecuteSqlInterpolatedAsync(
-                $"UPDATE [Account].[Profile] SET [PasswordHash]={passwordHash}, [UpdatedAtUtc]=SYSUTCDATETIME() WHERE [Email]={email};",
-                cancellationToken);
+            profile.PasswordHash = passwordHasher.HashPassword(email, request.Password!);
         }
-        long id = await db.Database
-            .SqlQueryRaw<long>("SELECT [Id] AS [Value] FROM [Account].[Profile] WHERE [Email] = {0}", email)
-            .SingleAsync(cancellationToken);
+        profile.UpdatedAtUtc = DateTime.UtcNow;
+        await db.SaveChangesAsync(cancellationToken);
         var claims = new[]
         {
-            new Claim(ClaimTypes.NameIdentifier, id.ToString()), new Claim(ClaimTypes.Email, email),
+            new Claim(ClaimTypes.NameIdentifier, profile.Id.ToString()), new Claim(ClaimTypes.Email, email),
             new Claim(ClaimTypes.Name, email)
         };
         await HttpContext.SignInAsync("ShopCookie", new ClaimsPrincipal(new ClaimsIdentity(claims, "ShopCookie")));
@@ -115,7 +114,7 @@ public sealed partial class EmailVerificationController(
     }
 
     private static bool IsValidPassword(string? password) =>
-        password is { Length: >= 10 and <= 128 };
+        !string.IsNullOrEmpty(password);
 
     [GeneratedRegex("^[0-9]{6}$", RegexOptions.CultureInvariant)]
     private static partial Regex SixDigitCode();

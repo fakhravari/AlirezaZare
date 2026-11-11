@@ -1,6 +1,7 @@
 using FluentFTP;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
+using System.Data;
 using Shop.Data.Infrastructure.Persistence;
 
 namespace Shop.Admin.Services;
@@ -20,10 +21,17 @@ public sealed class FtpMediaStorage(ShopDbContext db, IDataProtectionProvider pr
             try { password = protection.CreateProtector("Shop.Admin.FtpPassword.v1").Unprotect(settings.LegacyPassword!); }
             catch (Exception exception) when (exception is System.Security.Cryptography.CryptographicException or FormatException)
             { throw new InvalidOperationException("رمز پیشین FTP قابل بازیابی نیست؛ آن را دوباره ثبت کنید.", exception); }
-            await db.Database.ExecuteSqlInterpolatedAsync($"""
-                UPDATE [Store].[SiteSetting] SET [FtpPassword]={password}, [FtpPasswordProtected]=NULL
-                WHERE [Id]=1 AND [FtpPassword] IS NULL AND [FtpPasswordProtected]={settings.LegacyPassword}
-                """, cancellationToken);
+            await using (var transaction = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, cancellationToken))
+            {
+                var identity = await db.StoreSiteIdentities.SingleOrDefaultAsync(x => x.Id == 1, cancellationToken);
+                if (identity is not null && identity.FtpPassword is null && identity.FtpPasswordProtected == settings.LegacyPassword)
+                {
+                    identity.FtpPassword = password;
+                    identity.FtpPasswordProtected = null;
+                    await db.SaveChangesAsync(cancellationToken);
+                }
+                await transaction.CommitAsync(cancellationToken);
+            }
             settings = await ReadSettings(cancellationToken);
             if (settings is null || string.IsNullOrWhiteSpace(settings.Host) || settings.Port is null or < 1 or > 65535 ||
                 string.IsNullOrWhiteSpace(settings.Username) || string.IsNullOrEmpty(settings.Password))
@@ -38,11 +46,12 @@ public sealed class FtpMediaStorage(ShopDbContext db, IDataProtectionProvider pr
     }
 
     private Task<FtpSettingsRow?> ReadSettings(CancellationToken cancellationToken) =>
-        db.Database.SqlQueryRaw<FtpSettingsRow>("""
-            SELECT [FtpHost] AS [Host], [FtpPort] AS [Port], [FtpUsername] AS [Username],
-                   [FtpPassword] AS [Password], [FtpPasswordProtected] AS [LegacyPassword]
-            FROM [Store].[SiteSetting] WHERE [Id]=1
-            """).SingleOrDefaultAsync(cancellationToken);
+        db.StoreSiteIdentities.AsNoTracking().Where(x => x.Id == 1)
+            .Select(x => new FtpSettingsRow
+            {
+                Host = x.FtpHost, Port = x.FtpPort, Username = x.FtpUsername,
+                Password = x.FtpPassword, LegacyPassword = x.FtpPasswordProtected
+            }).SingleOrDefaultAsync(cancellationToken);
 
     public sealed class FtpSettingsRow
     {

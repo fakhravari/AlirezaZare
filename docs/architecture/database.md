@@ -12,7 +12,7 @@ Migration `045-payment-attempts.sql` تلاش مستقل پرداخت و صف م
 
 [Migration 053](../../Shop/Features/Store/Database/Migrations/053-plain-smtp-password-setting.sql) ستون اختیاری `Store.SiteSetting.SmtpPassword` را برای مدیریت رمز SMTP از پنل اضافه می‌کند. این migration در ۱۰ نوامبر ۲۰۲۶ روی پایگاه آنلاین تنظیم‌شده اجرا و وجود ستون و رکورد تاریخچه‌اش تأیید شد. مقدار این ستون بنا به درخواست مالک بدون رمزگذاری ذخیره می‌شود؛ ستون متنی رمز FTP نیز همین وضعیت را دارد.
 
-[Migration 054](../../Shop/Features/Store/Database/Migrations/054-account-profile-password.sql) ستون nullable `Account.Profile.PasswordHash` را برای ورود رمزعبوری اضافه می‌کند؛ حساب‌های قبلی تا تعیین رمز با OTP ایمیل وارد می‌شوند. مقدار ستون فقط hash تولیدشده با `PasswordHasher` است. این migration برای هر پایگاه هدف باید پیش از استقرار نسخهٔ دارای ورود رمز اجرا شود؛ در این تغییر روی پایگاه runtime اجرا نشده است.
+[Migration 054](../../Shop/Features/Store/Database/Migrations/054-account-profile-password.sql) ستون nullable `Account.Profile.PasswordHash` را برای ورود رمزعبوری اضافه می‌کند؛ حساب‌های قبلی تا تعیین رمز با OTP ایمیل وارد می‌شوند. مقدار ستون فقط hash تولیدشده با `PasswordHasher` است. این migration در ۱۱ نوامبر ۲۰۲۶ روی پایگاه runtime تنظیم‌شده اجرا شد؛ وجود ستون و رکورد تاریخچهٔ migration تأیید شد. پیش از استقرار نسخهٔ دارای ورود رمز روی هر پایگاه دیگر، migration را همان‌جا اجرا کنید.
 
 ## مرجع بانک‌های ایران
 
@@ -162,6 +162,12 @@ Migration 017 جدول `[Store].[ProductVariantSalesPlanOffer]` را برای ق
 ## مسیر توسعه
 
 برای افزودن قابلیت، مدل دامنه و قرارداد use case را در Domain/Application اضافه کنید، query/command و mapping دیتابیس را در Infrastructure پیاده کنید، و API را در feature مربوط Shop بسازید. عملیات نوشتن باید با transaction و قواعد ثبت حرکت موجودی سازگار باشد. قراردادهای کلی داده در [منابع داده](data-sources.md) و مرزهای موجودی در [آمادگی backend](backend-readiness.md) نگهداری می‌شوند.
+
+## وضعیت استفادهٔ فروشگاه از EF
+
+در بازبینی ۱۱ نوامبر ۲۰۲۶، اتصال `Shop` به `ShopDbContext` در پروژهٔ `Data` تأیید شد. ورود با رمز، ساخت/ورود با کد ایمیل، ویرایش پروفایل، تغییر رمز، خواندن تنظیمات SMTP، FAQ و `GET api/account/state` از DbSetهای EF و LINQ استفاده می‌کنند. مدل‌های `AccountProfile`، سبد، نشانی و تقسیمات جغرافیایی، علاقه‌مندی، مقایسه، هشدار قیمت، تعامل/بازخورد مقاله، ترجیحات تسویه، سفارش و اقلام سفارش در `ShopDbContext` نگاشت شده‌اند. خروجی state با JSON serializer در C# ساخته می‌شود؛ `FOR JSON PATH` و SQL دست‌نویس آن حذف شده است.
+
+این انتقال پروژه هنوز کامل نیست. مسیرهای حساب، checkout و پرداخت در Shop اکنون از EF/LINQ استفاده می‌کنند. callback پرداخت وضعیت تلاش، سفارش و ایجاد ورودی انبار را در یک تراکنش انجام می‌دهد؛ صف PaidOrderOutbox دیگر در runtime استفاده نمی‌شود و migration 055 آن را پس از بررسی رکوردهای معوق حذف می‌کند. SQL دستی runtime همچنان در Data/Infrastructure/Persistence/Repositories/StoreRuntimeDatasetRepository.cs و StoreSalesPlanRepository.cs و چند API مدیریت در Admin/Controllers/Api/ باقی است. WarehouseReadRepository از EF/LINQ استفاده می‌کند. Migrationهای نسخه‌دار همچنان SQL هستند و بخشی از queryهای runtime EF محسوب نمی‌شوند.
 
 ---
 

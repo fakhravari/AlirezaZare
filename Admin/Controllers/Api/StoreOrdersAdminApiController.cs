@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
+using Shop.Data.Domain.Account.Entities;
 using Shop.Data.Infrastructure.Persistence;
 using System.Security.Claims;
 
@@ -24,23 +26,21 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
         string actor = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.Identity?.Name ?? "system";
         if (actor.Length > 256) return BadRequest(new { title = "شناسهٔ مدیر نامعتبر است." });
         await using var transaction = await db.Database.BeginTransactionAsync(cancellationToken);
-        var changes = await db.Database.SqlQuery<int>($"""
-            DECLARE @changes TABLE ([IdOrder] bigint, [PreviousCarrier] nvarchar(100), [PreviousTrackingCode] nvarchar(100), [Carrier] nvarchar(100), [TrackingCode] nvarchar(100));
-            UPDATE o SET [ShippingCarrier] = {carrier}, [ShippingTrackingCode] = {code}
-            OUTPUT INSERTED.[Id], DELETED.[ShippingCarrier], DELETED.[ShippingTrackingCode], INSERTED.[ShippingCarrier], INSERTED.[ShippingTrackingCode]
-                INTO @changes
-            FROM [Store].[Order] o
-            WHERE o.[Id] = {id} AND o.[Status] IN (N'warehouse-confirmed', N'in-transit', N'shipped-to-post', N'delivered')
-              AND o.[IdWarehouseDocument] IS NOT NULL
-              AND NOT (o.[PaymentMethod] = N'demo' AND COALESCE(o.[ExternalOrderKey], N'') LIKE N'demo-order-%')
-              AND EXISTS (SELECT 1 FROM [Store].[PaymentAttempt] p WHERE p.[IdOrder] = o.[Id] AND p.[Status] = N'verified' AND p.[Amount] = o.[TotalAmount])
-              AND (o.[ShippingCarrier] = {input.ExpectedCarrier} OR (o.[ShippingCarrier] IS NULL AND {input.ExpectedCarrier} IS NULL))
-              AND (o.[ShippingTrackingCode] = {input.ExpectedTrackingCode} OR (o.[ShippingTrackingCode] IS NULL AND {input.ExpectedTrackingCode} IS NULL));
-            INSERT [Store].[OrderShipmentTrackingHistory] ([IdOrder], [PreviousCarrier], [PreviousTrackingCode], [Carrier], [TrackingCode], [ActorUserKey])
-            SELECT [IdOrder], [PreviousCarrier], [PreviousTrackingCode], [Carrier], [TrackingCode], {actor} FROM @changes;
-            SELECT COUNT(*) AS [Value] FROM @changes;
-            """).ToListAsync(cancellationToken);
-        if (changes.Single() != 1) return Conflict(new { title = "اطلاعات سفارش تغییر کرده یا سفارش شرایط ثبت رهگیری را ندارد." });
+        var order = await db.StoreCustomerOrders.SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
+        if (order is null || order.Status is not ("warehouse-confirmed" or "in-transit" or "shipped-to-post" or "delivered") ||
+            order.IdWarehouseDocument is null || (order.PaymentMethod == "demo" && order.ExternalOrderKey?.StartsWith("demo-order-") == true) ||
+            !await db.StorePaymentAttempts.AnyAsync(p => p.IdOrder == id && p.Status == "verified" && p.Amount == order.TotalAmount, cancellationToken) ||
+            order.ShippingCarrier != input.ExpectedCarrier || order.ShippingTrackingCode != input.ExpectedTrackingCode)
+            return Conflict(new { title = "اطلاعات سفارش تغییر کرده یا سفارش شرایط ثبت رهگیری را ندارد." });
+        var previousCarrier = order.ShippingCarrier;
+        var previousTrackingCode = order.ShippingTrackingCode;
+        order.ShippingCarrier = carrier; order.ShippingTrackingCode = code;
+        db.StoreOrderShipmentTrackingHistories.Add(new StoreOrderShipmentTrackingHistory
+        {
+            IdOrder = id, PreviousCarrier = previousCarrier, PreviousTrackingCode = previousTrackingCode,
+            Carrier = carrier, TrackingCode = code, ActorUserKey = actor, ChangedAtUtc = DateTime.UtcNow
+        });
+        await db.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
         return Ok(new { message = "اطلاعات رهگیری ثبت شد." });
     }
@@ -56,19 +56,18 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
         string actor = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.Identity?.Name ?? "system";
         if (actor.Length > 256) return BadRequest(new { title = "شناسهٔ مدیر نامعتبر است." });
         await using var transaction = await db.Database.BeginTransactionAsync(cancellationToken);
-        int changed = await db.Database.ExecuteSqlInterpolatedAsync($"""
-            UPDATE o SET [Status] = {input.Status}
-            FROM [Store].[Order] o
-            WHERE o.[Id] = {id} AND o.[Status] = {input.ExpectedStatus} AND o.[IdWarehouseDocument] IS NOT NULL
-              AND NOT (o.[PaymentMethod] = N'demo' AND COALESCE(o.[ExternalOrderKey], N'') LIKE N'demo-order-%')
-              AND EXISTS (SELECT 1 FROM [Store].[PaymentAttempt] p WHERE p.[IdOrder] = o.[Id]
-                  AND p.[Status] = N'verified' AND p.[Amount] = o.[TotalAmount]);
-            """, cancellationToken);
-        if (changed != 1) return Conflict(new { title = "وضعیت سفارش تغییر کرده یا پرداخت و حوالهٔ معتبر ندارد." });
-        await db.Database.ExecuteSqlInterpolatedAsync($"""
-            INSERT [Store].[OrderShippingHistory] ([IdOrder], [PreviousStatus], [NewStatus], [ActorUserKey])
-            VALUES ({id}, {input.ExpectedStatus}, {input.Status}, {actor});
-            """, cancellationToken);
+        var order = await db.StoreCustomerOrders.SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
+        if (order is null || order.Status != input.ExpectedStatus || order.IdWarehouseDocument is null ||
+            (order.PaymentMethod == "demo" && order.ExternalOrderKey?.StartsWith("demo-order-") == true) ||
+            !await db.StorePaymentAttempts.AnyAsync(p => p.IdOrder == id && p.Status == "verified" && p.Amount == order.TotalAmount, cancellationToken))
+            return Conflict(new { title = "وضعیت سفارش تغییر کرده یا پرداخت و حوالهٔ معتبر ندارد." });
+        order.Status = input.Status;
+        db.StoreOrderShippingHistories.Add(new StoreOrderShippingHistory
+        {
+            IdOrder = id, PreviousStatus = input.ExpectedStatus, NewStatus = input.Status,
+            ActorUserKey = actor, ChangedAtUtc = DateTime.UtcNow
+        });
+        await db.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
         return Ok(new { message = "وضعیت ارسال ثبت شد." });
     }
@@ -82,15 +81,17 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
             return BadRequest(new { title = "جست‌وجو یا صفحه‌بندی نامعتبر است." });
         int offset = (page - 1) * pageSize;
         int take = pageSize + 1;
-        var rows = await db.Database.SqlQuery<OrderRow>($"""
-            SELECT o.[Id], o.[OrderNumber], o.[Status], o.[PaymentMethod], o.[ItemCount], o.[TotalAmount], o.[OrderedAtUtc],
-                   CONVERT(bit, CASE WHEN o.[PaymentMethod] = N'demo' AND o.[ExternalOrderKey] LIKE N'demo-order-%' THEN 1 ELSE 0 END) AS [IsSample],
-                   LTRIM(RTRIM(CONCAT(p.[FirstName], N' ', p.[LastName]))) AS [CustomerName]
-            FROM [Store].[Order] o JOIN [Account].[Profile] p ON p.[Id] = o.[IdProfile]
-            WHERE {q} = N'' OR CHARINDEX({q}, o.[OrderNumber]) > 0
-                OR CHARINDEX({q}, CONCAT(p.[FirstName], N' ', p.[LastName])) > 0
-            ORDER BY o.[Id] DESC OFFSET {offset} ROWS FETCH NEXT {take} ROWS ONLY
-            """).ToListAsync(cancellationToken);
+        var rows = await (from o in db.StoreCustomerOrders.AsNoTracking()
+                          join p in db.AccountProfiles.AsNoTracking() on o.IdProfile equals p.Id
+                          where q == "" || o.OrderNumber.Contains(q) || (p.FirstName + " " + p.LastName).Contains(q)
+                          orderby o.Id descending
+                          select new OrderRow
+                          {
+                              Id = o.Id, OrderNumber = o.OrderNumber, Status = o.Status, PaymentMethod = o.PaymentMethod,
+                              ItemCount = o.ItemCount, TotalAmount = o.TotalAmount, OrderedAtUtc = o.OrderedAtUtc,
+                              IsSample = o.PaymentMethod == "demo" && o.ExternalOrderKey != null && o.ExternalOrderKey.StartsWith("demo-order-"),
+                              CustomerName = (p.FirstName + " " + p.LastName).Trim()
+                          }).Skip(offset).Take(take).ToListAsync(cancellationToken);
         return Ok(new { items = rows.Take(pageSize), page, hasNext = rows.Count > pageSize });
     }
 
@@ -98,19 +99,35 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
     public async Task<IActionResult> Details(long id, CancellationToken cancellationToken)
     {
         if (id <= 0) return NotFound();
-        var order = await db.Database.SqlQuery<OrderDetailsRow>($"""
-            SELECT o.[Id], o.[OrderNumber], o.[Status], o.[PaymentMethod], o.[ItemCount], o.[TotalAmount], o.[OrderedAtUtc],
-                   CONVERT(bit, CASE WHEN o.[PaymentMethod] = N'demo' AND o.[ExternalOrderKey] LIKE N'demo-order-%' THEN 1 ELSE 0 END) AS [IsSample],
-                   LTRIM(RTRIM(CONCAT(p.[FirstName], N' ', p.[LastName]))) AS [CustomerName],
-                   o.[IdWarehouseDocument], o.[ShippingCarrier], o.[ShippingTrackingCode], COALESCE(o.[AddressSnapshotJson], CONCAT(NCHAR(123), NCHAR(125))) AS [AddressSnapshotJson],
-                   COALESCE((SELECT i.[ProductNameSnapshot] AS [name], i.[Quantity] AS [quantity], i.[UnitAmount] AS [unitAmount],
-                           s.[SalesPlanKey] AS [salesPlan], JSON_QUERY(i.[OptionsJson]) AS [options]
-                    FROM [Store].[OrderItem] i JOIN [Warehouse].[SalesPlanReference] s ON s.[Id] = i.[IdSalesPlan]
-                    WHERE i.[IdCustomerOrder] = o.[Id] ORDER BY i.[Id] FOR JSON PATH), N'[]') AS [ItemsJson],
-                   COALESCE((SELECT h.[PreviousStatus], h.[NewStatus], h.[ActorUserKey], h.[ChangedAtUtc]
-                    FROM [Store].[OrderShippingHistory] h WHERE h.[IdOrder] = o.[Id] ORDER BY h.[Id] DESC FOR JSON PATH), N'[]') AS [ShippingHistoryJson]
-            FROM [Store].[Order] o JOIN [Account].[Profile] p ON p.[Id] = o.[IdProfile] WHERE o.[Id] = {id}
-            """).SingleOrDefaultAsync(cancellationToken);
+        var order = await (from o in db.StoreCustomerOrders.AsNoTracking().Where(x => x.Id == id)
+                           join p in db.AccountProfiles.AsNoTracking() on o.IdProfile equals p.Id
+                           select new OrderDetailsRow
+                           {
+                               Id = o.Id, OrderNumber = o.OrderNumber, Status = o.Status, PaymentMethod = o.PaymentMethod,
+                               ItemCount = o.ItemCount, TotalAmount = o.TotalAmount, OrderedAtUtc = o.OrderedAtUtc,
+                               IsSample = o.PaymentMethod == "demo" && o.ExternalOrderKey != null && o.ExternalOrderKey.StartsWith("demo-order-"),
+                               CustomerName = (p.FirstName + " " + p.LastName).Trim(), IdWarehouseDocument = o.IdWarehouseDocument,
+                               ShippingCarrier = o.ShippingCarrier, ShippingTrackingCode = o.ShippingTrackingCode,
+                               AddressSnapshotJson = o.AddressSnapshotJson
+                           }).SingleOrDefaultAsync(cancellationToken);
+        if (order is not null)
+        {
+            var itemRows = await (from i in db.StoreCustomerOrderItems.AsNoTracking().Where(x => x.IdCustomerOrder == id)
+                                  join s in db.SalesPlanReferences.AsNoTracking() on i.IdSalesPlan equals s.Id
+                                  orderby i.Id
+                                  select new { i.ProductNameSnapshot, i.Quantity, i.UnitAmount, s.StoreSalesPlanKey, i.OptionsJson })
+                .ToListAsync(cancellationToken);
+            var items = itemRows.Select(i => new
+            {
+                name = i.ProductNameSnapshot, quantity = i.Quantity, unitAmount = i.UnitAmount,
+                salesPlan = i.StoreSalesPlanKey, options = JsonDocument.Parse(i.OptionsJson).RootElement.Clone()
+            }).ToList();
+            var history = await db.StoreOrderShippingHistories.AsNoTracking().Where(x => x.IdOrder == id)
+                .OrderByDescending(x => x.Id).Select(x => new { x.PreviousStatus, x.NewStatus, x.ActorUserKey, x.ChangedAtUtc })
+                .ToListAsync(cancellationToken);
+            order.ItemsJson = System.Text.Json.JsonSerializer.Serialize(items);
+            order.ShippingHistoryJson = System.Text.Json.JsonSerializer.Serialize(history);
+        }
         return order is null ? NotFound() : Ok(order);
     }
 

@@ -44,11 +44,30 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
     public DbSet<ProductFeedback> ProductFeedback => Set<ProductFeedback>();
     public DbSet<StoreAttributeDefinition> StoreAttributeDefinitions => Set<StoreAttributeDefinition>();
     public DbSet<StoreProductMedia> StoreProductMedia => Set<StoreProductMedia>();
+    public DbSet<StoreProductDocument> StoreProductDocuments => Set<StoreProductDocument>();
     public DbSet<StoreBrand> StoreBrands => Set<StoreBrand>();
     public DbSet<StoreCategory> StoreCategories => Set<StoreCategory>();
     public DbSet<GeoCountry> GeoCountries => Set<GeoCountry>();
+    public DbSet<GeoProvince> GeoProvinces => Set<GeoProvince>();
+    public DbSet<GeoCity> GeoCities => Set<GeoCity>();
     public DbSet<AccountProfile> AccountProfiles => Set<AccountProfile>();
     public DbSet<AccountRecentSearch> AccountRecentSearches => Set<AccountRecentSearch>();
+    public DbSet<AccountCart> AccountCarts => Set<AccountCart>();
+    public DbSet<AccountCartItem> AccountCartItems => Set<AccountCartItem>();
+    public DbSet<AccountAddress> AccountAddresses => Set<AccountAddress>();
+    public DbSet<AccountFavorite> AccountFavorites => Set<AccountFavorite>();
+    public DbSet<AccountCompareItem> AccountCompareItems => Set<AccountCompareItem>();
+    public DbSet<AccountPriceAlert> AccountPriceAlerts => Set<AccountPriceAlert>();
+    public DbSet<AccountArticleFeedback> AccountArticleFeedback => Set<AccountArticleFeedback>();
+    public DbSet<AccountProductFeedback> AccountProductFeedback => Set<AccountProductFeedback>();
+    public DbSet<AccountCheckoutPreference> AccountCheckoutPreferences => Set<AccountCheckoutPreference>();
+    public DbSet<StoreCustomerOrderItem> StoreCustomerOrderItems => Set<StoreCustomerOrderItem>();
+    public DbSet<StorePaymentAttempt> StorePaymentAttempts => Set<StorePaymentAttempt>();
+    public DbSet<WarehousePaidOrderInbox> WarehousePaidOrderInboxes => Set<WarehousePaidOrderInbox>();
+    public DbSet<WarehousePaidOrderInboxLine> WarehousePaidOrderInboxLines => Set<WarehousePaidOrderInboxLine>();
+    public DbSet<StoreCustomerOrderReference> StoreCustomerOrders => Set<StoreCustomerOrderReference>();
+    public DbSet<StoreOrderShippingHistory> StoreOrderShippingHistories => Set<StoreOrderShippingHistory>();
+    public DbSet<StoreOrderShipmentTrackingHistory> StoreOrderShipmentTrackingHistories => Set<StoreOrderShipmentTrackingHistory>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -91,6 +110,82 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.HasKey(x => x.Id);
             entity.Property(x => x.InteractionType).HasMaxLength(20).IsRequired();
             entity.HasIndex(x => new { x.IdProfile, x.IdMagazineArticle, x.InteractionType }).IsUnique();
+        });
+        modelBuilder.Entity<AccountArticleFeedback>(entity =>
+        {
+            entity.ToTable("ArticleFeedback", "Account");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.DisplayName).HasMaxLength(80).IsRequired();
+            entity.Property(x => x.FeedbackText).HasMaxLength(1000).IsRequired();
+            entity.Property(x => x.Status).HasMaxLength(20).IsRequired();
+            entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
+        });
+        modelBuilder.Entity<AccountProductFeedback>(entity =>
+        {
+            entity.ToTable("ProductFeedback", "Store");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.FeedbackType).HasMaxLength(20).IsRequired();
+            entity.Property(x => x.DisplayName).HasMaxLength(80).IsRequired();
+            entity.Property(x => x.FeedbackText).HasMaxLength(800).IsRequired();
+            entity.Property(x => x.Status).HasMaxLength(20).IsRequired();
+            entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
+        });
+        modelBuilder.Entity<AccountCart>(entity =>
+        {
+            entity.ToTable("Cart", "Account");
+            entity.HasKey(x => x.Id);
+            entity.HasIndex(x => x.IdProfile).IsUnique();
+            entity.Property(x => x.UpdatedAtUtc).HasPrecision(3);
+            entity.HasMany(x => x.Items).WithOne().HasForeignKey(x => x.IdCart).OnDelete(DeleteBehavior.Cascade);
+        });
+        modelBuilder.Entity<AccountCartItem>(entity =>
+        {
+            entity.ToTable("CartItem", "Account");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.OptionsJson).HasColumnType("nvarchar(max)").IsRequired();
+            entity.Property(x => x.UpdatedAtUtc).HasPrecision(3);
+        });
+        modelBuilder.Entity<AccountAddress>(entity =>
+        {
+            entity.ToTable("Address", "Account");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.Title).HasMaxLength(100).IsRequired();
+            entity.Property(x => x.Recipient).HasMaxLength(150).IsRequired();
+            entity.Property(x => x.Phone).HasMaxLength(30).IsRequired();
+            entity.Property(x => x.Street).HasMaxLength(500).IsRequired();
+            entity.Property(x => x.PostalCode).HasMaxLength(20).IsRequired();
+            entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
+        });
+        modelBuilder.Entity<AccountFavorite>(entity =>
+        {
+            entity.ToTable("Favorite", "Account");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
+        });
+        modelBuilder.Entity<AccountCompareItem>(entity =>
+        {
+            entity.ToTable("CompareItem", "Account");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
+        });
+        modelBuilder.Entity<AccountPriceAlert>(entity =>
+        {
+            entity.ToTable("PriceAlert", "Account");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.Scope).HasMaxLength(20).IsRequired();
+            entity.Property(x => x.VariantSignature).HasMaxLength(500).IsRequired();
+            entity.Property(x => x.VariantsJson).HasColumnType("nvarchar(max)");
+            entity.Property(x => x.PriceAtRegistration).HasPrecision(19, 0);
+            entity.Property(x => x.StockAtRegistration).HasMaxLength(100);
+            entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
+        });
+        modelBuilder.Entity<AccountCheckoutPreference>(entity =>
+        {
+            entity.ToTable("CheckoutPreference", "Account");
+            entity.HasKey(x => x.Id);
+            entity.HasIndex(x => x.IdProfile).IsUnique();
+            entity.Property(x => x.PaymentMethod).HasMaxLength(40).IsRequired();
+            entity.Property(x => x.UpdatedAtUtc).HasPrecision(3);
         });
         modelBuilder.Entity<StoreContentPage>(entity =>
         {
@@ -349,6 +444,15 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.Property(x => x.WhatsAppNumber).HasMaxLength(32).IsRequired();
             entity.Property(x => x.PublicEmail).HasMaxLength(254).IsRequired();
             entity.Property(x => x.MediaCdnBaseUrl).HasMaxLength(500).HasDefaultValue("https://cdn.bs-shop.ir/").IsRequired();
+            entity.Property(x => x.SmtpHost).HasMaxLength(255);
+            entity.Property(x => x.SmtpUsername).HasMaxLength(320);
+            entity.Property(x => x.SmtpFrom).HasMaxLength(320);
+            entity.Property(x => x.SmtpPassword).HasMaxLength(1024);
+            entity.Property(x => x.FtpHost).HasMaxLength(255);
+            entity.Property(x => x.FtpUsername).HasMaxLength(320);
+            entity.Property(x => x.FtpPassword).HasMaxLength(1024);
+            entity.Property(x => x.FtpPasswordProtected).HasMaxLength(2048);
+            entity.Property(x => x.UpdatedByUserKey).HasMaxLength(128);
             entity.Property(x => x.UpdatedAtUtc).HasColumnName("IdentityUpdatedAtUtc").HasPrecision(3);
         });
         modelBuilder.Entity<AccountProfile>(entity =>
@@ -359,11 +463,85 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.Property(x => x.FirstName).HasMaxLength(100).IsRequired();
             entity.Property(x => x.LastName).HasMaxLength(100).IsRequired();
             entity.Property(x => x.Phone).HasMaxLength(30);
+            entity.Property(x => x.Gender).HasMaxLength(10);
+            entity.Property(x => x.PasswordHash).HasMaxLength(500);
             entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
             entity.Property(x => x.UpdatedAtUtc).HasPrecision(3);
         });
-        modelBuilder.Entity<AccountCartReference>(entity => { entity.HasNoKey(); entity.ToTable("Cart", "Account"); });
-        modelBuilder.Entity<StoreCustomerOrderReference>(entity => { entity.HasNoKey(); entity.ToTable("Order", "Store"); });
+        modelBuilder.Entity<StoreCustomerOrderReference>(entity =>
+        {
+            entity.ToTable("Order", "Store");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.OrderNumber).HasMaxLength(32).IsRequired();
+            entity.Property(x => x.Status).HasMaxLength(30).IsRequired();
+            entity.Property(x => x.TotalAmount).HasPrecision(19, 0);
+            entity.Property(x => x.PaymentMethod).HasMaxLength(40).IsRequired();
+            entity.Property(x => x.ExternalOrderKey).HasMaxLength(100);
+            entity.Property(x => x.ShippingCarrier).HasMaxLength(100);
+            entity.Property(x => x.ShippingTrackingCode).HasMaxLength(100);
+            entity.Property(x => x.OrderedAtUtc).HasPrecision(3);
+            entity.Property(x => x.AddressSnapshotJson).HasColumnType("nvarchar(max)").IsRequired();
+            entity.HasMany(x => x.Items).WithOne().HasForeignKey(x => x.IdCustomerOrder).OnDelete(DeleteBehavior.Cascade);
+        });
+        modelBuilder.Entity<StoreCustomerOrderItem>(entity =>
+        {
+            entity.ToTable("OrderItem", "Store");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.ProductNameSnapshot).HasMaxLength(300).IsRequired();
+            entity.Property(x => x.UnitAmount).HasPrecision(19, 0);
+            entity.Property(x => x.OptionsJson).HasColumnType("nvarchar(max)").IsRequired();
+        });
+        modelBuilder.Entity<StoreOrderShippingHistory>(entity =>
+        {
+            entity.ToTable("OrderShippingHistory", "Store"); entity.HasKey(x => x.Id);
+            entity.Property(x => x.PreviousStatus).HasMaxLength(30).IsRequired();
+            entity.Property(x => x.NewStatus).HasMaxLength(30).IsRequired();
+            entity.Property(x => x.ActorUserKey).HasMaxLength(256).IsRequired();
+            entity.Property(x => x.ChangedAtUtc).HasPrecision(3);
+        });
+        modelBuilder.Entity<StoreOrderShipmentTrackingHistory>(entity =>
+        {
+            entity.ToTable("OrderShipmentTrackingHistory", "Store"); entity.HasKey(x => x.Id);
+            entity.Property(x => x.PreviousCarrier).HasMaxLength(100);
+            entity.Property(x => x.PreviousTrackingCode).HasMaxLength(100);
+            entity.Property(x => x.Carrier).HasMaxLength(100).IsRequired();
+            entity.Property(x => x.TrackingCode).HasMaxLength(100).IsRequired();
+            entity.Property(x => x.ActorUserKey).HasMaxLength(256).IsRequired();
+            entity.Property(x => x.ChangedAtUtc).HasPrecision(3);
+        });
+        modelBuilder.Entity<StorePaymentAttempt>(entity =>
+        {
+            entity.ToTable("PaymentAttempt", "Store");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.Amount).HasPrecision(19, 0);
+            entity.Property(x => x.Status).HasMaxLength(20).IsRequired();
+            entity.Property(x => x.GatewayReference).HasMaxLength(200);
+            entity.Property(x => x.ReceiptReference).HasMaxLength(200);
+            entity.Property(x => x.PaidAtUtc).HasPrecision(3);
+            entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
+            entity.Property(x => x.UpdatedAtUtc).HasPrecision(3);
+        });
+        modelBuilder.Entity<WarehousePaidOrderInbox>(entity =>
+        {
+            entity.ToTable("PaidOrderInbox", "Warehouse");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.Id).ValueGeneratedOnAdd();
+            entity.Property(x => x.StoreOrderKey).HasMaxLength(128).IsRequired();
+            entity.Property(x => x.CustomerKey).HasMaxLength(128).IsRequired();
+            entity.Property(x => x.PaymentAtUtc).HasPrecision(3);
+            entity.HasIndex(x => x.StoreOrderKey).IsUnique();
+            entity.HasMany(x => x.Lines).WithOne().HasForeignKey(x => x.IdPaidOrderInbox);
+        });
+        modelBuilder.Entity<WarehousePaidOrderInboxLine>(entity =>
+        {
+            entity.ToTable("PaidOrderInboxLine", "Warehouse");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.Id).ValueGeneratedOnAdd();
+            entity.Property(x => x.Quantity).HasPrecision(18, 3);
+            entity.Property(x => x.ConversionFactor).HasPrecision(18, 3);
+            entity.Property(x => x.BaseQuantity).HasPrecision(18, 3);
+            entity.Property(x => x.ConversionFactor).HasPrecision(18, 9);
+        });
         modelBuilder.Entity<AccountRecentSearch>(entity =>
         {
             entity.ToTable("RecentSearch", "Account");
@@ -417,6 +595,15 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.Property(x => x.VideosJson).HasColumnType("nvarchar(max)");
             entity.HasIndex(x => new { x.IdProduct, x.MediaKey }).IsUnique();
         });
+        modelBuilder.Entity<StoreProductDocument>(entity =>
+        {
+            entity.ToTable("ProductDocument", "Store");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.Title).HasMaxLength(200).IsRequired();
+            entity.Property(x => x.Path).HasMaxLength(450).IsRequired();
+            entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
+            entity.HasIndex(x => x.Path).IsUnique();
+        });
         modelBuilder.Entity<StoreBrand>(entity =>
         {
             entity.ToTable("Brand", "Store");
@@ -435,6 +622,9 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.Property(x => x.NameEn).HasMaxLength(200).IsRequired();
             entity.Property(x => x.NameFa).HasMaxLength(200).IsRequired();
             entity.Property(x => x.PathJson).HasColumnType("nvarchar(max)").IsRequired();
+            entity.Property(x => x.ProductIntro).HasMaxLength(10000);
+            entity.Property(x => x.ProductHighlightsJson).HasColumnType("nvarchar(max)");
+            entity.Property(x => x.ProductSpecsJson).HasColumnType("nvarchar(max)");
             entity.HasIndex(x => x.CategoryKey).IsUnique();
         });
         modelBuilder.Entity<GeoCountry>(entity =>
@@ -444,7 +634,27 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.Property(x => x.CountryCode).HasMaxLength(8).IsRequired();
             entity.Property(x => x.NameFa).HasMaxLength(150).IsRequired();
             entity.Property(x => x.NameEn).HasMaxLength(150).IsRequired();
+            entity.Property(x => x.FlagPath).HasMaxLength(500);
             entity.HasIndex(x => x.CountryCode).IsUnique();
+        });
+        modelBuilder.Entity<GeoProvince>(entity =>
+        {
+            entity.ToTable("Province", "Geo");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.NameFa).HasMaxLength(150).IsRequired();
+            entity.Property(x => x.NameEn).HasMaxLength(150).IsRequired();
+            entity.Property(x => x.Latitude).HasPrecision(12, 8);
+            entity.Property(x => x.Longitude).HasPrecision(12, 8);
+        });
+        modelBuilder.Entity<GeoCity>(entity =>
+        {
+            entity.ToTable("City", "Geo");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.SourceCountryName).HasMaxLength(200).IsRequired();
+            entity.Property(x => x.NameFa).HasMaxLength(200).IsRequired();
+            entity.Property(x => x.NameEn).HasMaxLength(200).IsRequired();
+            entity.Property(x => x.Latitude).HasPrecision(12, 8);
+            entity.Property(x => x.Longitude).HasPrecision(12, 8);
         });
     }
 }
