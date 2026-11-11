@@ -79,7 +79,9 @@ test('geography response is complete and exposes countries with provinces for ad
 });
 
 test('account coupons and public offers share values without publishing order history', async () => {
-  const home = await (await fetch(base + '/')).text();
+  const homeResponse = await fetch(base + '/');
+  assert.equal(homeResponse.status, 200, logs.slice(-4000));
+  const home = await homeResponse.text();
   const profile = await (await fetch(base + '/profile/coupons')).text();
   const parse = (html, id) => JSON.parse(html.match(new RegExp(`<script type="application/json" id="${id}">([\\s\\S]*?)</script>`))[1]);
   const offers = parse(home, 'commerceData');
@@ -113,7 +115,9 @@ test('sales-plan quotes validate nullable options, plan-specific accessory price
     priceOptions: {battery: '2ah', chuck: '10mm'}, accessoryIds: ['shipping-insurance']});
   assert.equal(regularQuote.status, 200, logs.slice(-2000));
   const regularPricing = await regularQuote.json();
-  const home = await (await fetch(base + '/')).text();
+  const homeResponse = await fetch(base + '/');
+  assert.equal(homeResponse.status, 200, logs.slice(-4000));
+  const home = await homeResponse.text();
   const catalog = JSON.parse(home.match(/<script type="application\/json" id="storeCatalog">([\s\S]*?)<\/script>/)[1]);
   const insurance = catalog.products.find(product => product.id === 1).accessories.find(item => item.id === 'shipping-insurance');
   assert.equal(Math.round(insurance.price * 1_000_000), regularPricing.accessoryAmounts['shipping-insurance']);
