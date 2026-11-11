@@ -1,6 +1,7 @@
 using System.Text.Encodings.Web;
 using System.Text.Unicode;
 using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.Identity;
 using Shop.Data.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -36,6 +37,15 @@ builder.Services.AddRateLimiter(options =>
             QueueLimit = 0,
             AutoReplenishment = true
         }));
+    options.AddPolicy("account-password", context => RateLimitPartition.GetFixedWindowLimiter(
+        context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+        _ => new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = 5,
+            Window = TimeSpan.FromMinutes(10),
+            QueueLimit = 0,
+            AutoReplenishment = true
+        }));
     options.AddPolicy("product-feedback", context => RateLimitPartition.GetFixedWindowLimiter(
         context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
         _ => new FixedWindowRateLimiterOptions
@@ -47,6 +57,7 @@ builder.Services.AddRateLimiter(options =>
         }));
 });
 builder.Services.AddSingleton<Shop.Services.EmailVerificationCodeStore>();
+builder.Services.AddSingleton<IPasswordHasher<string>, PasswordHasher<string>>();
 builder.Services.AddScoped<Shop.Services.IEmailSender, Shop.Services.SmtpEmailSender>();
 builder.Services.AddScoped<Shop.Services.IPaymentGateway, Shop.Services.UnconfiguredPaymentGateway>();
 builder.Services.AddScoped<Shop.Services.PaymentService>();

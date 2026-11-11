@@ -1079,6 +1079,7 @@
   $accountPanel.on("mouseleave", scheduleAccountClose);
 
   let loginMode = "login";
+  let loginMethod = "otp";
   let pendingAuthMode = "login";
   let pendingRegistrationProfile = null;
   const $loginEmailStep = $("#loginEmailStep");
@@ -1088,6 +1089,22 @@
   const $loginEmailError = $("#loginEmailError");
   const $registerEmailError = $("#registerEmailError");
   const $emailOtpError = $("#emailOtpError");
+  const setLoginMethod = (method) => {
+    loginMethod = method === "password" ? "password" : "otp";
+    const usesPassword = loginMethod === "password";
+    $("#loginOtpMethod")
+      .toggleClass("active", !usesPassword)
+      .attr("aria-pressed", String(!usesPassword));
+    $("#loginPasswordMethod")
+      .toggleClass("active", usesPassword)
+      .attr("aria-pressed", String(usesPassword));
+    $("#loginPasswordLabel, #loginPasswordField")
+      .toggleClass("d-none", !usesPassword)
+      .prop("hidden", !usesPassword);
+    $("#loginPassword").prop("required", usesPassword).attr("tabindex", usesPassword ? "0" : "-1");
+    $("#loginSubmitLabel").text(usesPassword ? "ورود به حساب" : "دریافت کد ورود");
+    $loginEmailError.empty();
+  };
   const selectLoginMode = (mode) => {
     loginMode = mode === "register" ? "register" : "login";
     const isLogin = loginMode === "login";
@@ -1104,10 +1121,13 @@
     $loginEmailError.empty();
     $registerEmailError.empty();
     $emailOtpError.empty();
+    if (isLogin) setLoginMethod("otp");
   };
 
   $("#loginModeTab").on("click", () => selectLoginMode("login"));
   $("#registerModeTab").on("click", () => selectLoginMode("register"));
+  $("#loginOtpMethod").on("click", () => setLoginMethod("otp"));
+  $("#loginPasswordMethod").on("click", () => setLoginMethod("password"));
 
   const requestEmailCode = async (mode, email) => {
     const $submit = $(mode === "register" ? "#registerEmailForm button[type='submit']" : "#loginEmailForm button[type='submit']");
@@ -1258,10 +1278,11 @@
     }
   };
 
-  $("#loginEmailForm").on("submit", (event) => {
+  $("#loginEmailForm").on("submit", async (event) => {
     event.preventDefault();
-    const email = $("#loginEmail").val().trim();
-    if (!email || !$("#loginEmail")[0].validity.valid) {
+    const emailInput = $("#loginEmail")[0];
+    const email = emailInput.value.trim();
+    if (!email || !emailInput.validity.valid) {
       window.HNUI.setMessage(
         $loginEmailError[0],
         "ایمیل معتبر وارد کنید.",
@@ -1270,7 +1291,31 @@
       return;
     }
     window.HNUI.setMessage($loginEmailError[0], "");
-    void requestEmailCode("login", email);
+    if (loginMethod === "otp") {
+      void requestEmailCode("login", email);
+      return;
+    }
+    const password = $("#loginPassword").val();
+    if (password.length < 10) {
+      window.HNUI.setMessage($loginEmailError[0], "رمز عبور باید حداقل ۱۰ نویسه باشد.", "error");
+      return;
+    }
+    const $submit = $("#loginEmailForm button[type='submit']").prop("disabled", true);
+    try {
+      const response = await window.HNUI.api.request("auth/password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.message || "ایمیل یا رمز عبور درست نیست.");
+      pendingAuthMode = "login";
+      await completeDemoLogin();
+    } catch (error) {
+      window.HNUI.setMessage($loginEmailError[0], error.message || "ورود انجام نشد. دوباره تلاش کنید.", "error");
+    } finally {
+      $submit.prop("disabled", false);
+    }
   });
 
   $("#registerEmailForm").on("submit", (event) => {
@@ -1279,10 +1324,16 @@
     const email = emailInput.value.trim();
     const firstName = $("#registerFirstName").val().trim();
     const lastName = $("#registerLastName").val().trim();
-    if (!firstName || !lastName || !emailInput.validity.valid) {
+    const password = $("#registerPassword").val();
+    const passwordConfirmation = $("#registerPasswordConfirm").val();
+    if (!firstName || !lastName || !emailInput.validity.valid || password.length < 10 || password !== passwordConfirmation) {
       window.HNUI.setMessage(
         $registerEmailError[0],
-        "نام، نام خانوادگی و ایمیل معتبر را وارد کنید.",
+        password.length < 10
+          ? "رمز عبور باید حداقل ۱۰ نویسه باشد."
+          : password !== passwordConfirmation
+            ? "تکرار رمز عبور با آن مطابقت ندارد."
+            : "نام، نام خانوادگی و ایمیل معتبر را وارد کنید.",
         "error",
       );
       return;
@@ -1315,7 +1366,12 @@
       const response = await window.HNUI.api.request("auth/email-code/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: $("#sentEmail").text(), code }),
+        body: JSON.stringify({
+          email: $("#sentEmail").text(),
+          code,
+          mode: pendingAuthMode,
+          password: pendingAuthMode === "register" ? $("#registerPassword").val() : null,
+        }),
       });
       const result = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(result.message || "کد تأیید معتبر نیست.");

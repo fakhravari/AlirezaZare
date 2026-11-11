@@ -42,7 +42,9 @@ public abstract class PageController : Controller
             if (crumbList is { Length: > 0 }) crumbList[^1] = crumbList[^1] with { Name = title };
             var breadcrumbs = crumbList;
             model = model with { Seo = model.Seo with { Title = title + " | " + identity.DisplayName, Description = description, Breadcrumbs = breadcrumbs }, ManagedContent = managed };
-            if (model.ContentKey is not "faq" and not "contact")
+            // Known content routes have dedicated views with their own theme and interactions.
+            // Keep the generic renderer only as a fallback for future content keys.
+            if (model.ContentKey is not ("faq" or "contact" or "about" or "shipping" or "warranty" or "tracking" or "privacy" or "terms" or "returns"))
                 return View("~/Views/Shared/ManagedContentPage.cshtml", model);
         }
         ViewResult result = string.IsNullOrWhiteSpace(model.ViewName) ? View(model) : View(model.ViewName, model);

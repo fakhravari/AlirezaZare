@@ -22,9 +22,7 @@ public sealed class StoreCatalogAdminApiController(IStoreRuntimeDatasetRepositor
         if (product is null) return NotFound();
         var brands = await db.StoreBrands.AsNoTracking().Where(x => x.IsActive).OrderBy(x => x.NameFa)
             .Select(x => new EditorOption { Id = x.Id, Name = x.NameFa }).ToListAsync(cancellationToken);
-        var categories = await db.StoreCategories.AsNoTracking().Where(x => x.IsActive &&
-                !db.StoreCategories.Any(child => child.IsActive && child.IdParentCategory == x.Id))
-            .OrderBy(x => x.NameFa).Select(x => new EditorOption { Id = x.Id, Name = x.NameFa }).ToListAsync(cancellationToken);
+        var categories = await GetLeafCategoryOptions(cancellationToken);
         return Ok(new { product, brands, categories });
     }
 
@@ -61,6 +59,29 @@ public sealed class StoreCatalogAdminApiController(IStoreRuntimeDatasetRepositor
     public sealed class EditorOption { public long Id { get; set; } public string Name { get; set; } = ""; }
     public sealed record ProductEditorInput(string? Name, string? EnglishName, long BrandId, long CategoryId, decimal PriceAmount, decimal DiscountPercent, int MaxPurchaseQuantity);
 
+    private async Task<List<EditorOption>> GetLeafCategoryOptions(CancellationToken cancellationToken)
+    {
+        var nodes = await db.StoreCategories.AsNoTracking().Where(x => x.IsActive)
+            .Select(x => new { x.Id, x.NameFa, x.IdParentCategory }).ToListAsync(cancellationToken);
+        var byId = nodes.ToDictionary(x => x.Id);
+        var parentIds = nodes.Where(x => x.IdParentCategory.HasValue).Select(x => x.IdParentCategory!.Value).ToHashSet();
+
+        return nodes.Where(x => !parentIds.Contains(x.Id)).Select(node =>
+        {
+            var segments = new List<string>();
+            var visited = new HashSet<long>();
+            var currentId = node.Id;
+            while (visited.Add(currentId) && byId.TryGetValue(currentId, out var current))
+            {
+                segments.Add(current.NameFa);
+                if (current.IdParentCategory is not long parentId) break;
+                currentId = parentId;
+            }
+            segments.Reverse();
+            return new EditorOption { Id = node.Id, Name = string.Join(" / ", segments) };
+        }).OrderBy(x => x.Name, StringComparer.CurrentCulture).ToList();
+    }
+
     [HttpGet("products/drafts")]
     public async Task<IActionResult> ProductDrafts(CancellationToken cancellationToken)
     {
@@ -90,9 +111,7 @@ public sealed class StoreCatalogAdminApiController(IStoreRuntimeDatasetRepositor
         if (!User.IsInRole("system.full-access")) return Forbid();
         var brands = await db.StoreBrands.AsNoTracking().Where(x => x.IsActive).OrderBy(x => x.NameFa)
             .Select(x => new EditorOption { Id = x.Id, Name = x.NameFa }).ToListAsync(cancellationToken);
-        var categories = await db.StoreCategories.AsNoTracking().Where(x => x.IsActive &&
-                !db.StoreCategories.Any(child => child.IsActive && child.IdParentCategory == x.Id))
-            .OrderBy(x => x.NameFa).Select(x => new EditorOption { Id = x.Id, Name = x.NameFa }).ToListAsync(cancellationToken);
+        var categories = await GetLeafCategoryOptions(cancellationToken);
         var units = await db.WarehouseUnits.AsNoTracking().Where(x => x.IsActive).OrderBy(x => x.Name)
             .Select(x => new EditorOption { Id = x.Id, Name = x.Name }).ToListAsync(cancellationToken);
         return Ok(new { brands, categories, units });

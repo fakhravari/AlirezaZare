@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Shop.Data.Infrastructure.Persistence;
 using Shop.Services;
@@ -15,7 +16,8 @@ namespace Shop.Controllers;
 public sealed partial class EmailVerificationController(
     EmailVerificationCodeStore codes,
     IEmailSender emailSender,
-    ShopDbContext db) : ControllerBase
+    ShopDbContext db,
+    IPasswordHasher<string> passwordHasher) : ControllerBase
 {
     [HttpPost]
     [EnableRateLimiting("email-code")]
@@ -55,10 +57,24 @@ public sealed partial class EmailVerificationController(
         var email = NormalizeEmail(request.Email);
         if (!IsValidEmail(email) || !SixDigitCode().IsMatch(request.Code ?? ""))
             return BadRequest(new { code = "invalid-code" });
+        bool isRegistration = string.Equals(request.Mode, "register", StringComparison.Ordinal);
+        if (request.Mode is not ("login" or "register"))
+            return BadRequest(new { code = "invalid-mode", message = "روش تأیید معتبر نیست." });
+        if (isRegistration && !IsValidPassword(request.Password))
+            return BadRequest(new { code = "invalid-password", message = "رمز عبور باید بین ۱۰ تا ۱۲۸ نویسه باشد." });
+        if (!isRegistration && request.Password is not null)
+            return BadRequest(new { code = "invalid-request" });
         if (!codes.Verify(email, request.Code!)) return BadRequest(new { code = "invalid-code" });
         await db.Database.ExecuteSqlInterpolatedAsync(
             $"IF NOT EXISTS(SELECT 1 FROM [Account].[Profile] WHERE [Email]={email}) INSERT INTO [Account].[Profile]([Email]) VALUES({email});",
             cancellationToken);
+        if (isRegistration)
+        {
+            string passwordHash = passwordHasher.HashPassword(email, request.Password!);
+            await db.Database.ExecuteSqlInterpolatedAsync(
+                $"UPDATE [Account].[Profile] SET [PasswordHash]={passwordHash}, [UpdatedAtUtc]=SYSUTCDATETIME() WHERE [Email]={email};",
+                cancellationToken);
+        }
         long id = await db.Database
             .SqlQueryRaw<long>("SELECT [Id] AS [Value] FROM [Account].[Profile] WHERE [Email] = {0}", email)
             .SingleAsync(cancellationToken);
@@ -98,10 +114,13 @@ public sealed partial class EmailVerificationController(
         }
     }
 
+    private static bool IsValidPassword(string? password) =>
+        password is { Length: >= 10 and <= 128 };
+
     [GeneratedRegex("^[0-9]{6}$", RegexOptions.CultureInvariant)]
     private static partial Regex SixDigitCode();
 }
 
 public sealed record EmailCodeRequest(string? Email);
 
-public sealed record VerifyEmailCodeRequest(string? Email, string? Code);
+public sealed record VerifyEmailCodeRequest(string? Email, string? Code, string? Mode, string? Password);

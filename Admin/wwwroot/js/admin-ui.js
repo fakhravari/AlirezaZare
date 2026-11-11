@@ -1,6 +1,44 @@
 (() => {
     "use strict";
 
+    // Admin dialogs stay open when the backdrop is clicked; Escape and explicit
+    // dismiss buttons continue to work. Set this before page scripts create instances.
+    if (window.bootstrap?.Modal?.Default) window.bootstrap.Modal.Default.backdrop = "static";
+
+    function arrangeModalFields(modal) {
+        const body = modal.querySelector(".modal-body");
+        if (!body || body.dataset.adminFieldsArranged || body.querySelector(":scope > .row")) return;
+
+        const children = [...body.children];
+        for (const child of children) {
+            if (!child.matches(".mb-3") || !child.querySelector(":scope > label.form-label")) continue;
+            child.classList.add("admin-modal-field");
+            child.classList.remove("mb-3");
+            if (child.querySelector(":scope > textarea, :scope > input[type=file]")) child.classList.add("admin-modal-field-wide");
+        }
+        for (let index = 0; index < children.length; index++) {
+            const label = children[index];
+            if (!label.matches("label.form-label")) continue;
+            const control = children[index + 1];
+            if (!control?.matches("input:not([type=hidden]), select, textarea")) continue;
+
+            const field = document.createElement("div");
+            field.className = "admin-modal-field";
+            if (control.matches("textarea, input[type=file]")) field.classList.add("admin-modal-field-wide");
+            label.before(field);
+            field.append(label, control);
+            index++;
+        }
+        const fieldCount = body.querySelectorAll(":scope > .admin-modal-field").length;
+        if (fieldCount >= 2) body.classList.add(fieldCount >= 6 ? "admin-modal-grid-three" : "admin-modal-grid-two");
+        if (fieldCount >= 5) modal.querySelector(".modal-dialog")?.classList.add("admin-modal-wide");
+        body.dataset.adminFieldsArranged = "true";
+    }
+
+    document.addEventListener("show.bs.modal", event => {
+        if (event.target instanceof HTMLElement) arrangeModalFields(event.target);
+    });
+
     const numberFormat = new Intl.NumberFormat("fa-IR");
     const labels = {
         id: "شناسه", code: "کد", name: "نام", englishName: "نام لاتین", brandName: "برند",

@@ -12,6 +12,8 @@ Migration `045-payment-attempts.sql` تلاش مستقل پرداخت و صف م
 
 [Migration 053](../../Shop/Features/Store/Database/Migrations/053-plain-smtp-password-setting.sql) ستون اختیاری `Store.SiteSetting.SmtpPassword` را برای مدیریت رمز SMTP از پنل اضافه می‌کند. این migration در ۱۰ نوامبر ۲۰۲۶ روی پایگاه آنلاین تنظیم‌شده اجرا و وجود ستون و رکورد تاریخچه‌اش تأیید شد. مقدار این ستون بنا به درخواست مالک بدون رمزگذاری ذخیره می‌شود؛ ستون متنی رمز FTP نیز همین وضعیت را دارد.
 
+[Migration 054](../../Shop/Features/Store/Database/Migrations/054-account-profile-password.sql) ستون nullable `Account.Profile.PasswordHash` را برای ورود رمزعبوری اضافه می‌کند؛ حساب‌های قبلی تا تعیین رمز با OTP ایمیل وارد می‌شوند. مقدار ستون فقط hash تولیدشده با `PasswordHasher` است. این migration برای هر پایگاه هدف باید پیش از استقرار نسخهٔ دارای ورود رمز اجرا شود؛ در این تغییر روی پایگاه runtime اجرا نشده است.
+
 ## مرجع بانک‌های ایران
 
 [Migration 046](../../Shop/Features/Store/Database/Migrations/046-iran-bank-catalog.sql) جدول مستقل `[Store].[Bank]` را برای مرجع بانک‌ها می‌سازد؛ `Id` شناسهٔ پایدار، `Code` کلید متنی یکتا، `NameFa` نام یکتا، `InstitutionType` نوع نهاد و `IsActive` وضعیت انتخاب‌پذیری است. دادهٔ اولیه شامل ۲۷ بانک و مؤسسهٔ اعتباری ملل به‌عنوان `credit-institution` است. بانک مرکزی و بانک‌های منحل یا ادغام‌شده در فهرست اولیه نیستند. `Code` کد رسمی بانک یا پیش‌شمارهٔ کارت نیست. این جدول هنوز API یا صفحهٔ مدیریتی و مصرف‌کنندهٔ پرداخت ندارد و وجود آن به معنی فعال‌بودن درگاه هر بانک نیست.

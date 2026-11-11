@@ -13,7 +13,7 @@
                 </span>
             </span>
         </nav>
-        <h1>شرایط استفاده</h1>
+        <h1>@(Model.ManagedContent?.Title ?? "شرایط استفاده")</h1>
         <p>نکات استفاده از سایت، حساب کاربری و ثبت سفارش را بخوانید.</p>
         <div class="hero-trail">
             <span>اطلاعات فروشگاه</span><span>حساب و سبد خرید</span><span>ثبت سفارش</span>
@@ -23,6 +23,12 @@
 
 <main class="flow-main container legal-main">
     <article class="flow-card legal-document terms-document">
+        @if (Model.ManagedContent?.Sections.Count > 0)
+        {
+            <partial name="_ManagedPageSections" model="Model.ManagedContent" />
+        }
+        else
+        {
         <section class="legal-section">
             <h2><i class="bi bi-shop" aria-hidden="true"></i> اطلاعات محصولات و قیمت‌ها</h2>
             <p>مشخصات، تصاویر، قیمت و موجودی برای آشنایی و بررسی محصولات نمایش داده می‌شوند و ممکن است نیاز به تأیید فروشگاه داشته باشند. پیش از هر خرید مستقیم، مشخصات نهایی، قیمت، موجودی، هزینه و زمان ارسال را از فروشگاه بپرسید.</p>
@@ -43,6 +49,7 @@
             <h2><i class="bi bi-arrow-repeat" aria-hidden="true"></i> به‌روزرسانی شرایط</h2>
             <p>با اضافه‌شدن امکان ثبت سفارش و پرداخت واقعی، شرایط خرید و خدمات به‌روزرسانی و پیش از نهایی‌کردن سفارش در دسترس شما قرار می‌گیرد. خریدهای تأییدشده تابع اطلاعات و شرایط اعلام‌شده هنگام همان خرید و قوانین لازم‌الاجرا هستند.</p>
         </section>
+        }
         <p class="legal-updated">
             <i class="bi bi-calendar-check" aria-hidden="true"></i><time datetime="2026-10-19">آخرین بازبینی: ۲۷ مهر ۱۴۰۵</time>
         </p>

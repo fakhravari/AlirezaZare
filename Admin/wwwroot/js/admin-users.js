@@ -138,7 +138,13 @@
         page.querySelector("[data-role-active]").disabled = role?.roleKey === "system.full-access";
         page.querySelector("[data-role-active]").checked = role?.isActive ?? false;
         tree.replaceChildren();
-        const children = parentKey => data.permissions.filter(item => (item.parentKey || null) === parentKey);
+        const childrenByParent = new Map();
+        for (const permission of data.permissions) {
+            const parentKey = permission.parentKey || "";
+            if (!childrenByParent.has(parentKey)) childrenByParent.set(parentKey, []);
+            childrenByParent.get(parentKey).push(permission);
+        }
+        const children = parentKey => childrenByParent.get(parentKey || "") || [];
         const effectivePermissions = new Set(role?.permissionIds || []);
         const includeDescendants = permissionKey => {
             for (const child of children(permissionKey)) {
@@ -148,24 +154,56 @@
         };
         for (const selected of data.permissions.filter(item => effectivePermissions.has(item.id)))
             includeDescendants(selected.permissionKey);
-        const appendChildren = (parentKey, depth) => {
+        const hasSelectedDescendant = permissionKey => children(permissionKey).some(child =>
+            effectivePermissions.has(child.id) || hasSelectedDescendant(child.permissionKey));
+        const appendChildren = parentKey => {
+            const list = document.createElement("ul");
+            list.className = "admin-permission-list";
+            list.setAttribute("role", "group");
             for (const permission of children(parentKey)) {
-                const row = el("div", null, "admin-permission-node py-1");
-                row.style.paddingInlineStart = `${depth * 1.5}rem`;
-                const label = el("label", null, "form-check");
+                const descendants = children(permission.permissionKey);
+                const node = el("li", null, "admin-permission-node");
+                node.setAttribute("role", "treeitem");
+                const row = el("div", null, "admin-permission-row");
+                const childList = descendants.length ? appendChildren(permission.permissionKey) : null;
+                const expanded = Boolean(childList && hasSelectedDescendant(permission.permissionKey));
+                if (childList) {
+                    const toggle = el("button", null, "admin-permission-toggle");
+                    toggle.type = "button";
+                    toggle.setAttribute("aria-expanded", String(expanded));
+                    toggle.setAttribute("aria-label", `${expanded ? "بستن" : "بازکردن"} ${permission.name}`);
+                    toggle.append(el("span", "›", "admin-permission-chevron"));
+                    toggle.addEventListener("click", () => {
+                        const open = toggle.getAttribute("aria-expanded") !== "true";
+                        toggle.setAttribute("aria-expanded", String(open));
+                        toggle.setAttribute("aria-label", `${open ? "بستن" : "بازکردن"} ${permission.name}`);
+                        node.setAttribute("aria-expanded", String(open));
+                        childList.hidden = !open;
+                    });
+                    row.append(toggle);
+                    node.setAttribute("aria-expanded", String(expanded));
+                    childList.hidden = !expanded;
+                } else {
+                    row.append(el("span", null, "admin-permission-toggle-spacer"));
+                }
+                const label = el("label", null, "admin-permission-choice");
                 const input = document.createElement("input");
                 input.type = "checkbox";
-                input.className = "form-check-input";
+                input.className = "admin-permission-checkbox";
                 input.value = String(permission.id);
                 input.checked = effectivePermissions.has(permission.id);
                 input.disabled = role?.roleKey === "system.full-access";
-                label.append(input, el("span", permission.name, "form-check-label"));
+                label.append(input, el("span", permission.name, "admin-permission-name"));
                 row.append(label);
-                tree.append(row);
-                appendChildren(permission.permissionKey, depth + 1);
+                node.append(row);
+                if (childList) node.append(childList);
+                list.append(node);
             }
+            return list;
         };
-        appendChildren(null, 0);
+        tree.setAttribute("role", "tree");
+        tree.setAttribute("aria-label", "مجوزهای نقش");
+        tree.replaceChildren(appendChildren(null));
     }
 
     function openPasswordModal(page, user) {

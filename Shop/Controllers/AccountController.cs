@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -17,7 +18,8 @@ public sealed class AccountController(
     ShopDbContext db,
     ISalesPlanSource plans,
     IProductPurchaseConfigurationSource purchaseConfigurations,
-    IWebHostEnvironment environment) : ControllerBase
+    IWebHostEnvironment environment,
+    IPasswordHasher<string> passwordHasher) : ControllerBase
 {
     private long ProfileId => long.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var id) ? id : 0;
 
@@ -25,7 +27,7 @@ public sealed class AccountController(
     public async Task<IActionResult> State(CancellationToken ct)
     {
         const string sql = """
-                           SELECT (SELECT p.[Id] id,p.[Email] email,p.[FirstName] firstName,p.[LastName] lastName,p.[Phone] phone,p.[Gender] gender,p.[NewsletterEnabled] newsletter,CAST({1} AS bit) simulationAvailable,
+                           SELECT (SELECT p.[Id] id,p.[Email] email,p.[FirstName] firstName,p.[LastName] lastName,p.[Phone] phone,p.[Gender] gender,p.[NewsletterEnabled] newsletter,CAST(CASE WHEN p.[PasswordHash] IS NULL THEN 0 ELSE 1 END AS bit) hasPassword,CAST({1} AS bit) simulationAvailable,
                              JSON_QUERY((SELECT ci.[IdProduct] id,ci.[IdProductVariant] variantId,ci.[Quantity] quantity,sp.[SalesPlanKey] salesPlanId,JSON_QUERY(ci.[OptionsJson]) options FROM [Account].[Cart] c JOIN [Account].[CartItem] ci ON ci.[IdCart]=c.[Id] JOIN [Warehouse].[SalesPlanReference] sp ON sp.[Id]=ci.[IdSalesPlan] WHERE c.[IdProfile]={0} FOR JSON PATH)) cart,
                              JSON_QUERY((SELECT CONVERT(varchar(20),a.[Id]) id,a.[Title] title,a.[Recipient] recipient,a.[Phone] phone,c.[NameFa] country,a.[IdCountry] countryId,p.[NameFa] province,a.[IdProvince] provinceId,city.[NameFa] city,a.[IdCity] cityId,a.[Street] street,a.[PostalCode] postal,a.[IsDefault] isDefault FROM [Account].[Address] a JOIN [Geo].[Country] c ON c.[Id]=a.[IdCountry] JOIN [Geo].[Province] p ON p.[Id]=a.[IdProvince] AND p.[IdCountry]=a.[IdCountry] JOIN [Geo].[City] city ON city.[Id]=a.[IdCity] AND city.[IdProvince]=a.[IdProvince] AND city.[IdCountry]=a.[IdCountry] WHERE a.[IdProfile]={0} FOR JSON PATH)) addresses,
                              JSON_QUERY((SELECT f.[IdProduct] id FROM [Account].[Favorite] f WHERE f.[IdProfile]={0} FOR JSON PATH)) favorites,
@@ -104,6 +106,34 @@ public sealed class AccountController(
             $"UPDATE [Account].[Profile] SET [FirstName]={request.FirstName.Trim()},[LastName]={request.LastName.Trim()},[Phone]={request.Phone},[Gender]={request.Gender},[NewsletterEnabled]={request.Newsletter},[UpdatedAtUtc]=SYSUTCDATETIME() WHERE [Id]={ProfileId}",
             ct);
         return Ok(new { saved = true });
+    }
+
+    [HttpPut("password")]
+    [Microsoft.AspNetCore.RateLimiting.EnableRateLimiting("account-password")]
+    public async Task<IActionResult> ChangePassword([FromBody] PasswordChangeRequest request, CancellationToken ct)
+    {
+        if (request.NewPassword is not { Length: >= 10 and <= 128 } ||
+            !string.Equals(request.NewPassword, request.NewPasswordConfirmation, StringComparison.Ordinal))
+            return BadRequest(new { code = "invalid-new-password", message = "رمز جدید باید حداقل ۱۰ نویسه باشد و تکرار آن مطابقت داشته باشد." });
+
+        string email = User.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
+        string? currentHash = await db.Database.SqlQueryRaw<string?>(
+                "SELECT [PasswordHash] AS [Value] FROM [Account].[Profile] WHERE [Id] = {0}", ProfileId)
+            .SingleOrDefaultAsync(ct);
+        if (string.IsNullOrWhiteSpace(email) || currentHash is null &&
+            await db.Database.SqlQuery<int>($"SELECT COUNT(*) AS [Value] FROM [Account].[Profile] WHERE [Id]={ProfileId}")
+                .SingleAsync(ct) == 0) return Unauthorized();
+        if (currentHash is not null &&
+            (string.IsNullOrEmpty(request.CurrentPassword) ||
+             passwordHasher.VerifyHashedPassword(email, currentHash, request.CurrentPassword) == PasswordVerificationResult.Failed))
+            return BadRequest(new { code = "invalid-current-password", message = "رمز فعلی درست نیست." });
+        if (currentHash is null && !string.IsNullOrEmpty(request.CurrentPassword))
+            return BadRequest(new { code = "invalid-current-password", message = "این حساب هنوز رمز عبور ندارد." });
+
+        string passwordHash = passwordHasher.HashPassword(email, request.NewPassword!);
+        await db.Database.ExecuteSqlInterpolatedAsync(
+            $"UPDATE [Account].[Profile] SET [PasswordHash]={passwordHash},[UpdatedAtUtc]=SYSUTCDATETIME() WHERE [Id]={ProfileId}", ct);
+        return Ok(new { changed = true });
     }
 
     [HttpPut("cart")]
@@ -516,6 +546,8 @@ public sealed class AccountController(
         string? Phone,
         string? Gender = null,
         bool Newsletter = false);
+
+    public sealed record PasswordChangeRequest(string? CurrentPassword, string? NewPassword, string? NewPasswordConfirmation);
 
     public sealed record CartRequest(IReadOnlyList<CartLineRequest>? Items);
 

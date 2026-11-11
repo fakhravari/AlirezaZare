@@ -8,6 +8,7 @@
           "markup": [
             "Admin/Views/Shared/_Layout.cshtml",
             "Admin/Views/Shared/_AdminSidebar.cshtml",
+            "Admin/Areas/Admin/Views/Users/Index.cshtml",
             "Admin/Areas/Store/Views/Catalog/Index.cshtml",
             "Admin/Areas/Store/Views/Features/Faq.cshtml",
             "Admin/Areas/Store/Controllers/CatalogController.cs"
@@ -15,7 +16,11 @@
           "js": [
             "Admin/wwwroot/js/admin-shell.js",
             "Admin/wwwroot/js/admin-ui.js",
-            "Admin/wwwroot/js/admin-data.js"
+            "Admin/wwwroot/js/admin-data.js",
+            "Admin/wwwroot/js/admin-users.js"
+          ],
+          "css": [
+            "Admin/wwwroot/css/admin-ui.css"
           ],
           "server": [
             "Admin/Controllers/Api/StoreCatalogAdminApiController.cs",
@@ -339,6 +344,7 @@
           ],
           "server": [
             "Shop/Controllers/ProfileController.cs",
+            "Shop/Controllers/AccountController.cs",
             "Shop/Models/AccountData.cs",
             "Shop/Services/IAccountDataSource.cs",
             "Shop/Services/IAccountDataSource.cs"
@@ -363,7 +369,12 @@
             "Shop/wwwroot/shop/js/layout/main.js"
           ],
           "css": [
-            "Shop/wwwroot/shop/css/layout/shared-login.css"
+            "Shop/wwwroot/shop/css/layout/shared-login.css",
+            "Shop/wwwroot/shop/css/layout/style.css"
+          ],
+          "server": [
+            "Shop/Controllers/EmailVerificationController.cs",
+            "Shop/Controllers/PasswordLoginController.cs"
           ]
         },
         "address-location": {
@@ -423,7 +434,8 @@
         },
         "service-page-content": {
           "markup": [
-            "Shop/Views/Shared/ManagedContentPage.cshtml"
+            "Shop/Views/Shared/ManagedContentPage.cshtml",
+            "Shop/Views/Shared/_ManagedPageSections.cshtml"
           ],
           "server": [
             "Shop/Controllers/PageController.cs",
@@ -442,7 +454,8 @@
             "Shop/Views/About/Index.cshtml"
           ],
           "server": [
-            "Shop/Controllers/AboutController.cs"
+            "Shop/Controllers/AboutController.cs",
+            "Shop/Controllers/PageController.cs"
           ],
           "css": [
             "Shop/wwwroot/shop/css/pages/pages.css",
@@ -471,7 +484,8 @@
             "Shop/Views/Legal/Terms.cshtml"
           ],
           "server": [
-            "Shop/Controllers/LegalController.cs"
+            "Shop/Controllers/LegalController.cs",
+            "Shop/Controllers/PageController.cs"
           ],
           "css": [
             "Shop/wwwroot/shop/css/pages/pages.css"
@@ -482,7 +496,8 @@
             "Shop/Views/Shipping/Index.cshtml"
           ],
           "server": [
-            "Shop/Controllers/ShippingController.cs"
+            "Shop/Controllers/ShippingController.cs",
+            "Shop/Controllers/PageController.cs"
           ],
           "js": [
             "Shop/wwwroot/shop/js/pages/page-content.js"
@@ -497,7 +512,8 @@
             "Shop/Views/Tracking/Index.cshtml"
           ],
           "server": [
-            "Shop/Controllers/TrackingController.cs"
+            "Shop/Controllers/TrackingController.cs",
+            "Shop/Controllers/PageController.cs"
           ],
           "js": [
             "Shop/wwwroot/shop/js/pages/page-content.js"
@@ -516,6 +532,10 @@
           ],
           "assets": [
             "Shop/wwwroot/shop/images/heroes/hero-warranty-work-light.webp"
+          ],
+          "server": [
+            "Shop/Controllers/WarrantyController.cs",
+            "Shop/Controllers/PageController.cs"
           ]
         },
         "contact-page": {

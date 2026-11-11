@@ -19,9 +19,16 @@
                 </span>
             </span>
         </nav>
-        <h1>ضمانت و خدمات پس از فروش</h1>
+        <h1>@(Model.ManagedContent?.Title ?? "ضمانت و خدمات پس از فروش")</h1>
         <p>
-            مدت و پوشش خدمات هر کالا را در مدارک و کارت ضمانت همان مدل بررسی کنید.
+            @if (!string.IsNullOrWhiteSpace(Model.ManagedContent?.Description))
+            {
+                @Model.ManagedContent.Description
+            }
+            else
+            {
+                <text>مدت و پوشش خدمات هر کالا را در مدارک و کارت ضمانت همان مدل بررسی کنید.</text>
+            }
         </p>
         <div class="hero-trail">
             <span>مدارک کالا</span>
@@ -87,6 +94,7 @@
             <p><strong>نکته:</strong> کارت ضمانت و اطلاعات همان محصول، مرجع تعیین مدت پوشش و شرایط خدمات هستند.</p>
         </aside>
     </section>
+    @if (Model.ManagedContent is not null) { <partial name="_ManagedPageSections" model="Model.ManagedContent" /> }
 </main>
 
 @section Styles {

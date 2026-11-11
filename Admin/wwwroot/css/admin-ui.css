@@ -1,0 +1,251 @@
+/* Shared presentation for every management dialog. */
+.modal-backdrop.show {
+    opacity: .62;
+    backdrop-filter: blur(3px);
+}
+
+.modal-dialog {
+    width: min(100% - 1.5rem, 760px);
+    max-width: 760px;
+}
+
+.modal-dialog.modal-lg,
+.modal-dialog.modal-xl {
+    width: min(100% - 1.5rem, 960px);
+    max-width: 960px;
+}
+
+.modal-content {
+    overflow: hidden;
+    border: 1px solid rgba(32, 42, 51, .1);
+    border-radius: 1rem;
+    box-shadow: 0 1.5rem 4rem rgba(15, 30, 45, .22);
+}
+
+.modal-header {
+    padding: 1.15rem 1.4rem;
+    background: linear-gradient(115deg, #f6f8fa, #fff 70%);
+    border-bottom-color: #e7ebef;
+}
+
+.modal-title {
+    color: #202a33;
+    font-weight: 700;
+}
+
+.modal-header > .btn-close {
+    margin-inline-start: auto;
+    margin-inline-end: 0;
+}
+
+.modal-body {
+    padding: 1.4rem;
+}
+
+.modal-body.admin-modal-grid-two,
+.modal-body.admin-modal-grid-three {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: .9rem 1rem;
+}
+
+.admin-modal-field {
+    display: grid;
+    align-content: start;
+    gap: .4rem;
+    min-width: 0;
+}
+
+.admin-modal-field .form-label {
+    margin: 0;
+    color: #40515f;
+    font-weight: 600;
+}
+
+.modal-body.admin-modal-grid-two > :not(.admin-modal-field):not(.form-check),
+.modal-body.admin-modal-grid-three > :not(.admin-modal-field):not(.form-check) {
+    grid-column: 1 / -1;
+    margin-block: 0;
+}
+
+.modal-body .form-check {
+    display: flex;
+    align-items: flex-start;
+    gap: .65rem;
+    min-width: 0;
+    padding: .65rem .8rem;
+    border: 1px solid #e7ebef;
+    border-radius: .65rem;
+    background: #f8fafb;
+}
+
+.modal-body .form-check-input {
+    float: none;
+    flex: 0 0 auto;
+    margin: .15rem 0 0;
+}
+
+.modal-body .form-check-label {
+    line-height: 1.7;
+}
+
+.modal-footer {
+    gap: .6rem;
+    padding: 1rem 1.4rem;
+    background: #f8fafb;
+    border-top-color: #e7ebef;
+}
+
+@media (min-width: 768px) {
+    .modal-body.admin-modal-grid-two,
+    .modal-body.admin-modal-grid-three {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .modal-dialog.admin-modal-wide {
+        width: min(100% - 2rem, 960px);
+        max-width: 960px;
+    }
+
+    .admin-modal-field-wide,
+    .modal-body .form-check {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (min-width: 1200px) {
+    .modal-dialog.admin-modal-wide {
+        width: min(100% - 2rem, 1120px);
+        max-width: 1120px;
+    }
+
+    .modal-body.admin-modal-grid-three {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 575.98px) {
+    .modal-body {
+        padding: 1rem;
+    }
+
+    .modal-header,
+    .modal-footer {
+        padding-inline: 1rem;
+    }
+}
+
+.admin-permission-tree {
+    max-height: min(65vh, 40rem);
+    padding: .75rem;
+    border-color: #dce4e9;
+    background: linear-gradient(145deg, #fbfcfd, #f5f8fa);
+}
+
+.admin-permission-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.admin-permission-node {
+    margin: 0;
+}
+
+.admin-permission-row {
+    display: flex;
+    align-items: center;
+    gap: .45rem;
+    min-height: 2.5rem;
+    padding: .2rem .35rem;
+    border-radius: .5rem;
+    transition: background-color .16s ease, color .16s ease;
+}
+
+.admin-permission-row:hover {
+    background: #eaf1f5;
+}
+
+.admin-permission-toggle,
+.admin-permission-toggle-spacer {
+    display: inline-grid;
+    flex: 0 0 1.7rem;
+    width: 1.7rem;
+    height: 1.7rem;
+    place-items: center;
+}
+
+.admin-permission-toggle {
+    padding: 0;
+    border: 0;
+    border-radius: .4rem;
+    color: #536674;
+    background: transparent;
+    cursor: pointer;
+}
+
+.admin-permission-toggle:hover {
+    color: #155e75;
+    background: #dceaf0;
+}
+
+.admin-permission-toggle:focus-visible,
+.admin-permission-checkbox:focus-visible + .admin-permission-name {
+    outline: 2px solid #167d9a;
+    outline-offset: 2px;
+}
+
+.admin-permission-chevron {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1;
+    transition: transform .16s ease;
+}
+
+.admin-permission-toggle[aria-expanded="true"] .admin-permission-chevron {
+    transform: rotate(90deg);
+}
+
+.admin-permission-choice {
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+    padding: .25rem .4rem;
+    border-radius: .4rem;
+    color: #273844;
+    cursor: pointer;
+}
+
+.admin-permission-checkbox {
+    flex: 0 0 auto;
+    width: 1.1rem;
+    height: 1.1rem;
+    margin: 0;
+    accent-color: #167d9a;
+}
+
+.admin-permission-name {
+    line-height: 1.55;
+}
+
+.admin-permission-checkbox:disabled + .admin-permission-name {
+    color: #586873;
+    cursor: not-allowed;
+}
+
+.admin-permission-list .admin-permission-list {
+    margin-inline-start: 1.15rem;
+    padding-inline-start: .65rem;
+    border-inline-start: 1px solid #d5e0e6;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .admin-permission-row,
+    .admin-permission-chevron {
+        transition: none;
+    }
+}

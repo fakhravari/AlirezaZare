@@ -19,10 +19,16 @@
                 </span>
             </span>
         </nav>
-        <h1>پیگیری سفارش</h1>
+        <h1>@(Model.ManagedContent?.Title ?? "پیگیری سفارش")</h1>
         <p>
-            کد سفارش و شماره همراه ثبت‌شده را برای پیگیری آماده کنید.
-            پشتیبانی در ساعات کاری پاسخ‌گو است.
+            @if (!string.IsNullOrWhiteSpace(Model.ManagedContent?.Description))
+            {
+                @Model.ManagedContent.Description
+            }
+            else
+            {
+                <text>کد سفارش و شماره همراه ثبت‌شده را برای پیگیری آماده کنید. پشتیبانی در ساعات کاری پاسخ‌گو است.</text>
+            }
         </p>
         <div class="hero-trail">
             <span>کد سفارش</span>
@@ -80,6 +86,7 @@
             </div>
         </aside>
     </div>
+    @if (Model.ManagedContent is not null) { <partial name="_ManagedPageSections" model="Model.ManagedContent" /> }
 </main>
 
 @section Styles {

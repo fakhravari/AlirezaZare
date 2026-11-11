@@ -1,4 +1,14 @@
 @model PageModel
+@{
+    var shippingSections = Model.ManagedContent?.Sections ?? [];
+    var shippingIcons = new[] { "bi-clipboard2-check", "bi-box-seam", "bi-box2-heart" };
+    var shippingFallback = new[]
+    {
+        (Heading: "هماهنگی سفارش", Body: "موجودی، نشانی مقصد و زمان آماده‌سازی را پیش از تأیید نهایی با فروشگاه بررسی کنید."),
+        (Heading: "تعیین روش ارسال", Body: "روش ارسال، هزینه و زمان تقریبی تحویل متناسب با مقصد و شرایط سفارش اعلام می‌شود."),
+        (Heading: "بررسی هنگام دریافت", Body: "سلامت بسته و تطابق اقلام را بررسی کنید و هرگونه مغایرت یا آسیب را به پشتیبانی اطلاع دهید.")
+    };
+}
 
 
 <header class="page-hero about-hero">
@@ -16,9 +26,16 @@
                 </span>
             </span>
         </nav>
-        <h1>شرایط ارسال</h1>
+        <h1>@(Model.ManagedContent?.Title ?? "شرایط ارسال")</h1>
         <p>
-            روش، هزینه و زمان تحویل با توجه به مقصد و موجودی سفارش اعلام می‌شود.
+            @if (!string.IsNullOrWhiteSpace(Model.ManagedContent?.Description))
+            {
+                @Model.ManagedContent.Description
+            }
+            else
+            {
+                <text>روش، هزینه و زمان تحویل با توجه به مقصد و موجودی سفارش اعلام می‌شود.</text>
+            }
         </p>
         <div class="hero-trail">
             <span>موجودی</span>
@@ -40,27 +57,22 @@
         </header>
 
         <ol class="shipping-steps">
-            <li class="shipping-step">
-                <span class="shipping-step-top">
-                    <span class="shipping-step-number">۰۱</span><i class="bi bi-clipboard2-check" aria-hidden="true"></i>
-                </span>
-                <h3>هماهنگی سفارش</h3>
-                <p>موجودی، نشانی مقصد و زمان آماده‌سازی را پیش از تأیید نهایی با فروشگاه بررسی کنید.</p>
-            </li>
-            <li class="shipping-step">
-                <span class="shipping-step-top">
-                    <span class="shipping-step-number">۰۲</span><i class="bi bi-box-seam" aria-hidden="true"></i>
-                </span>
-                <h3>تعیین روش ارسال</h3>
-                <p>روش ارسال، هزینه و زمان تقریبی تحویل متناسب با مقصد و شرایط سفارش اعلام می‌شود.</p>
-            </li>
-            <li class="shipping-step">
-                <span class="shipping-step-top">
-                    <span class="shipping-step-number">۰۳</span><i class="bi bi-box2-heart" aria-hidden="true"></i>
-                </span>
-                <h3>بررسی هنگام دریافت</h3>
-                <p>سلامت بسته و تطابق اقلام را بررسی کنید و هرگونه مغایرت یا آسیب را به پشتیبانی اطلاع دهید.</p>
-            </li>
+            @for (var i = 0; i < Math.Max(shippingSections.Count, shippingSections.Count == 0 ? shippingFallback.Length : 0); i++)
+            {
+                var section = shippingSections.Count > 0 ? shippingSections[i] : null;
+                var heading = section?.Heading ?? shippingFallback[i].Heading;
+                var body = section?.Body ?? shippingFallback[i].Body;
+                <li class="shipping-step">
+                    <span class="shipping-step-top">
+                        <span class="shipping-step-number">@((i + 1).ToString("D2", System.Globalization.CultureInfo.GetCultureInfo("fa-IR")))</span><i class="bi @(shippingIcons[i % shippingIcons.Length])" aria-hidden="true"></i>
+                    </span>
+                    <h3>@heading</h3>
+                    @foreach (var paragraph in body.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+                    {
+                        <p>@paragraph</p>
+                    }
+                </li>
+            }
         </ol>
 
         <div class="shipping-note">
