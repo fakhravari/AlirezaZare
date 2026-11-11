@@ -244,71 +244,30 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
         }
     }
 
-    public async Task<ProductPurchaseConfiguration?> ReadProductPurchaseConfigurationAsync(
-        int productId,
-        CancellationToken cancellationToken)
+    public async Task<ProductPurchaseConfiguration?> ReadProductPurchaseConfigurationAsync(int productId, CancellationToken cancellationToken)
     {
-        DbConnection connection = dbContext.Database.GetDbConnection();
-        bool closeWhenDone = connection.State != ConnectionState.Open;
-        if (closeWhenDone) await connection.OpenAsync(cancellationToken);
+        var product = await dbContext.Products.AsNoTracking()
+            .Where(x => x.Id == productId && x.IsCatalogActive && x.IsStoreEnabled)
+            .Select(x => new { x.MaxPurchaseQuantity }).SingleOrDefaultAsync(cancellationToken);
+        if (product?.MaxPurchaseQuantity is not int maxPurchaseQuantity) return null;
 
-        try
-        {
-            int maxPurchaseQuantity;
-            await using (DbCommand command = CreateCommand(connection))
-            {
-                command.CommandText =
-                    "SELECT [MaxPurchaseQuantity] FROM [Warehouse].[Product] WHERE [Id] = @ProductId AND [IsCatalogActive] = 1 AND [IsStoreEnabled] = 1;";
-                AddProductIdParameter(command, productId);
-                object? result = await command.ExecuteScalarAsync(cancellationToken);
-                if (result is null or DBNull) return null;
-                maxPurchaseQuantity = Convert.ToInt32(result, System.Globalization.CultureInfo.InvariantCulture);
-            }
-
-            Dictionary<string, List<ProductPurchaseOptionValueRow>> options = new(StringComparer.Ordinal);
-            await using (DbCommand command = CreateCommand(connection))
-            {
-                command.CommandText = """
-                                      SELECT o.[OptionKey], v.[ValueKey], CONVERT(DECIMAL(19,0), ROUND(v.[PriceDelta] * 1000000, 0))
-                                      FROM [Store].[ProductPurchaseOption] o
-                                      INNER JOIN [Store].[ProductPurchaseOptionValue] v ON v.[IdProductPurchaseOption] = o.[Id]
-                                      WHERE o.[IdProduct] = @ProductId
-                                      ORDER BY o.[SortOrder], v.[SortOrder];
-                                      """;
-                AddProductIdParameter(command, productId);
-                await using DbDataReader reader = await command.ExecuteReaderAsync(cancellationToken);
-                while (await reader.ReadAsync(cancellationToken))
-                {
-                    string optionKey = reader.GetString(0);
-                    if (!options.TryGetValue(optionKey, out List<ProductPurchaseOptionValueRow>? values))
-                        options[optionKey] = values = [];
-                    values.Add(new(reader.GetString(1), reader.GetDecimal(2)));
-                }
-            }
-
-            List<ProductAccessoryRow> accessories = [];
-            await using (DbCommand command = CreateCommand(connection))
-            {
-                command.CommandText = """
-                                      SELECT a.[AccessoryKey], pa.[IsRequired]
-                                      FROM [Store].[ProductAccessory] pa
-                                      INNER JOIN [Store].[Accessory] a ON a.[Id] = pa.[IdAccessory] AND a.[IsActive] = 1
-                                      WHERE pa.[IdProduct] = @ProductId
-                                      ORDER BY pa.[SortOrder];
-                                      """;
-                AddProductIdParameter(command, productId);
-                await using DbDataReader reader = await command.ExecuteReaderAsync(cancellationToken);
-                while (await reader.ReadAsync(cancellationToken))
-                    accessories.Add(new(reader.GetString(0), reader.GetBoolean(1)));
-            }
-
-            return new(maxPurchaseQuantity,
-                options.Select(pair => new ProductPurchaseOptionRow(pair.Key, pair.Value)).ToArray(), accessories);
-        }
-        finally
-        {
-            if (closeWhenDone) await connection.CloseAsync();
-        }
+        var optionRows = await (from option in dbContext.StoreProductPurchaseOptions.AsNoTracking()
+                                join value in dbContext.StoreProductPurchaseOptionValues.AsNoTracking() on option.Id equals value.IdProductPurchaseOption
+                                where option.IdProduct == productId
+                                orderby option.SortOrder, value.SortOrder
+                                select new { option.OptionKey, ValueKey = value.ValueKey, value.PriceDelta }).ToListAsync(cancellationToken);
+        var options = optionRows.GroupBy(x => x.OptionKey, StringComparer.Ordinal)
+            .Select(group => new ProductPurchaseOptionRow(group.Key,
+                group.Select(x => new ProductPurchaseOptionValueRow(x.ValueKey,
+                    decimal.Round(x.PriceDelta * 1_000_000m, 0, MidpointRounding.AwayFromZero))).ToArray()))
+            .ToArray();
+        var accessories = await (from productAccessory in dbContext.StoreProductAccessories.AsNoTracking()
+                                 join accessory in dbContext.StoreAccessories.AsNoTracking() on productAccessory.IdAccessory equals accessory.Id
+                                 where productAccessory.IdProduct == productId && accessory.IsActive
+                                 orderby productAccessory.SortOrder
+                                 select new ProductAccessoryRow(accessory.AccessoryKey, productAccessory.IsRequired))
+            .ToListAsync(cancellationToken);
+        return new(maxPurchaseQuantity, options, accessories);
     }
 
     private static void AddProductIdParameter(DbCommand command, int productId)

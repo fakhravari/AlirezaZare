@@ -162,22 +162,15 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext, IMedi
 
     public async Task<string> ReadGeographyJsonAsync(CancellationToken cancellationToken)
     {
-        string json = await ReadScalarJsonAsync("""
-                                  SELECT
-                                      JSON_QUERY((SELECT c.[Id] AS [id], c.[NameFa] AS [name], c.[NameEn] AS [nameEn], c.[CountryCode] AS [countryCode]
-                                                  FROM [Geo].[Country] c
-                                                  WHERE EXISTS (SELECT 1 FROM [Geo].[Province] p WHERE p.[IdCountry] = c.[Id])
-                                                  ORDER BY c.[Id] FOR JSON PATH)) AS [countries],
-                                      JSON_QUERY((SELECT [Id] AS [id], [IdCountry] AS [countryId], [NameFa] AS [name],
-                                                         [NameEn] AS [nameEn], [Latitude] AS [latitude], [Longitude] AS [longitude]
-                                                  FROM [Geo].[Province] ORDER BY [NameFa] FOR JSON PATH)) AS [provinces],
-                                      JSON_QUERY((SELECT [Id] AS [id], [IdCountry] AS [countryId], [IdProvince] AS [provinceId],
-                                                         [SourceCountryName] AS [sourceCountryName], [NameFa] AS [name],
-                                                         [NameEn] AS [nameEn], [Latitude] AS [latitude], [Longitude] AS [longitude],
-                                                         [IsProvinceCenter] AS [isProvinceCenter]
-                                                  FROM [Geo].[City] ORDER BY [IdProvince], [NameFa] FOR JSON PATH)) AS [cities]
-                                  FOR JSON PATH, WITHOUT_ARRAY_WRAPPER;
-                                  """, cancellationToken) ?? "{\"countries\":[],\"provinces\":[],\"cities\":[]}";
+        var countries = await (from country in dbContext.GeoCountries.AsNoTracking()
+                               where dbContext.GeoProvinces.Any(province => province.IdCountry == country.Id)
+                               orderby country.Id
+                               select new { id = country.Id, name = country.NameFa, nameEn = country.NameEn, countryCode = country.CountryCode }).ToListAsync(cancellationToken);
+        var provinces = await dbContext.GeoProvinces.AsNoTracking().OrderBy(x => x.NameFa)
+            .Select(x => new { id = x.Id, countryId = x.IdCountry, name = x.NameFa, nameEn = x.NameEn, latitude = x.Latitude, longitude = x.Longitude }).ToListAsync(cancellationToken);
+        var cities = await dbContext.GeoCities.AsNoTracking().OrderBy(x => x.IdProvince).ThenBy(x => x.NameFa)
+            .Select(x => new { id = x.Id, countryId = x.IdCountry, provinceId = x.IdProvince, sourceCountryName = x.SourceCountryName, name = x.NameFa, nameEn = x.NameEn, latitude = x.Latitude, longitude = x.Longitude, isProvinceCenter = x.IsProvinceCenter }).ToListAsync(cancellationToken);
+        string json = System.Text.Json.JsonSerializer.Serialize(new { countries, provinces, cities }, new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web));
         return ContentCdn.RewriteJson(json, await mediaCdn.GetBaseUrlAsync(cancellationToken))!;
     }
 

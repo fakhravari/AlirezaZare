@@ -53,6 +53,8 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
     public DbSet<StoreProductAccessory> StoreProductAccessories => Set<StoreProductAccessory>();
     public DbSet<StoreProductSalesPlanOfferAccessory> StoreProductSalesPlanOfferAccessories => Set<StoreProductSalesPlanOfferAccessory>();
     public DbSet<StoreProductSalesPlanOfferSpecificationOverride> StoreProductSalesPlanOfferSpecificationOverrides => Set<StoreProductSalesPlanOfferSpecificationOverride>();
+    public DbSet<StoreProductPurchaseOption> StoreProductPurchaseOptions => Set<StoreProductPurchaseOption>();
+    public DbSet<StoreProductPurchaseOptionValue> StoreProductPurchaseOptionValues => Set<StoreProductPurchaseOptionValue>();
     public DbSet<GeoCountry> GeoCountries => Set<GeoCountry>();
     public DbSet<GeoProvince> GeoProvinces => Set<GeoProvince>();
     public DbSet<GeoCity> GeoCities => Set<GeoCity>();
@@ -600,6 +602,18 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.Property(x => x.SourceKey).HasMaxLength(100);
             entity.Property(x => x.FilterKey).HasMaxLength(100);
             entity.HasIndex(x => x.AttributeKey).IsUnique();
+        });
+        modelBuilder.Entity<StoreProductPurchaseOption>(entity =>
+        {
+            entity.ToTable("ProductPurchaseOption", "Store"); entity.HasKey(x => x.Id);
+            entity.Property(x => x.OptionKey).HasMaxLength(100).IsRequired(); entity.Property(x => x.Label).HasMaxLength(200).IsRequired();
+            entity.HasIndex(x => new { x.IdProduct, x.OptionKey }).IsUnique();
+        });
+        modelBuilder.Entity<StoreProductPurchaseOptionValue>(entity =>
+        {
+            entity.ToTable("ProductPurchaseOptionValue", "Store"); entity.HasKey(x => x.Id);
+            entity.Property(x => x.ValueKey).HasMaxLength(100).IsRequired(); entity.Property(x => x.Label).HasMaxLength(200).IsRequired();
+            entity.Property(x => x.PriceDelta).HasPrecision(19, 2); entity.HasIndex(x => new { x.IdProductPurchaseOption, x.ValueKey }).IsUnique();
         });
         modelBuilder.Entity<StoreProductSalesPlanOffer>(entity =>
         {

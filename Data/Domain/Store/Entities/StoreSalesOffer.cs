@@ -61,3 +61,22 @@ public sealed class StoreProductSalesPlanOfferSpecificationOverride
     public string SpecificationKey { get; set; } = "";
     public string Value { get; set; } = "";
 }
+
+public sealed class StoreProductPurchaseOption
+{
+    public long Id { get; set; }
+    public long IdProduct { get; set; }
+    public string OptionKey { get; set; } = "";
+    public string Label { get; set; } = "";
+    public int SortOrder { get; set; }
+}
+
+public sealed class StoreProductPurchaseOptionValue
+{
+    public long Id { get; set; }
+    public long IdProductPurchaseOption { get; set; }
+    public string ValueKey { get; set; } = "";
+    public string Label { get; set; } = "";
+    public decimal PriceDelta { get; set; }
+    public int SortOrder { get; set; }
+}
