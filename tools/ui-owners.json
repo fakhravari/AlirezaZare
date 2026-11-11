@@ -522,6 +522,10 @@
           "markup": [
             "Shop/Views/Contact/Index.cshtml"
           ],
+          "server": [
+            "Shop/Controllers/ContactController.cs",
+            "Shop/Controllers/PageController.cs"
+          ],
           "js": [
             "Shop/wwwroot/shop/js/pages/contact.js"
           ],

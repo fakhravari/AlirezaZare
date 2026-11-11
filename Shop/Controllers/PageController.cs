@@ -42,7 +42,8 @@ public abstract class PageController : Controller
             if (crumbList is { Length: > 0 }) crumbList[^1] = crumbList[^1] with { Name = title };
             var breadcrumbs = crumbList;
             model = model with { Seo = model.Seo with { Title = title + " | " + identity.DisplayName, Description = description, Breadcrumbs = breadcrumbs }, ManagedContent = managed };
-            if (model.ContentKey != "faq") return View("~/Views/Shared/ManagedContentPage.cshtml", model);
+            if (model.ContentKey is not "faq" and not "contact")
+                return View("~/Views/Shared/ManagedContentPage.cshtml", model);
         }
         ViewResult result = string.IsNullOrWhiteSpace(model.ViewName) ? View(model) : View(model.ViewName, model);
         return result;

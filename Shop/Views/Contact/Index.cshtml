@@ -5,6 +5,7 @@
     string phone = identity.SupportPhoneDisplay;
     string phoneUri = identity.SupportPhoneUri;
     string email = identity.PublicEmail;
+    var managedPage = Model.ManagedContent;
 }
 
 
@@ -23,10 +24,16 @@
                 </span>
             </span>
         </nav>
-        <h1>برای خرید و پشتیبانی <em>کنار شماییم</em></h1>
-        <p>
-            برای خرید، پیگیری سفارش یا خدمات پس از فروش با ما تماس بگیرید.
-        </p>
+        @if (managedPage is not null)
+        {
+            <h1>@managedPage.Title</h1>
+            <p>@managedPage.Description</p>
+        }
+        else
+        {
+            <h1>برای خرید و پشتیبانی <em>کنار شماییم</em></h1>
+            <p>برای خرید، پیگیری سفارش یا خدمات پس از فروش با ما تماس بگیرید.</p>
+        }
         <div class="hero-trail">
             <span>پیش از خرید</span>
             <span>سفارش</span>
@@ -136,6 +143,26 @@
             </div>
         </div>
     </section>
+    @if (managedPage is { Sections.Count: > 0 })
+    {
+        <section class="page-section contact-managed-content" aria-label="اطلاعات تکمیلی تماس">
+            <div class="container">
+                @foreach (var contentSection in managedPage.Sections)
+                {
+                    <article class="flow-card managed-service-section">
+                        @if (!string.IsNullOrWhiteSpace(contentSection.Heading))
+                        {
+                            <h2>@contentSection.Heading</h2>
+                        }
+                        @foreach (var paragraph in (contentSection.Body ?? "").Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+                        {
+                            <p>@paragraph</p>
+                        }
+                    </article>
+                }
+            </div>
+        </section>
+    }
     <section class="page-section contact-shortcuts">
         <div class="container">
             <div class="contact-shortcuts-heading">

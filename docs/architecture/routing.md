@@ -29,7 +29,7 @@
 | `/legal/returns` | [LegalController](../../Shop/Controllers/LegalController.cs) → [Returns](../../Shop/Views/Legal/Returns.cshtml) | `pages/pages.css` | — | شرایط بازگشت |
 | `/error` و `/Error/{statusCode}` | [ErrorController](../../Shop/Controllers/ErrorController.cs) → [Index](../../Shop/Views/Error/Index.cshtml) | — | — | خطاهای 4xx/5xx صفحهٔ راهنمای بدون ایندکس می‌گیرند و status اصلی حفظ می‌شود |
 
-صفحه‌های درباره، تماس، ارسال، ضمانت، پیگیری و قوانین با `PageController` متن/عنوان/شرح/بخش‌ها را از `Store.ContentPage` می‌خوانند و در [renderer مشترک](../../Shop/Views/Shared/ManagedContentPage.cshtml) نمایش می‌دهند؛ `/faq` همان پرسش‌های دیتابیس را در View اختصاصی نگه می‌دارد و بخش‌های معرفی آن از همین منبع مشترک است. مدیریت و انتشار این صفحه‌ها در `/Store/Features?feature=content` انجام می‌شود و به migrationهای 051 و 052 وابسته است.
+صفحه‌های درباره، تماس، ارسال، ضمانت، پیگیری و قوانین با `PageController` محتوای منتشرشده را از `Store.ContentPage` می‌خوانند. `/contact` عنوان، شرح و بخش‌های مدیریت‌شده را در View اختصاصی خود رندر می‌کند تا فرم و تم تماس حفظ شوند؛ `/faq` هم View اختصاصی دارد و باقی صفحه‌ها از [renderer مشترک](../../Shop/Views/Shared/ManagedContentPage.cshtml) استفاده می‌کنند. مدیریت و انتشار این صفحه‌ها در `/Store/Features?feature=content` انجام می‌شود و به migrationهای 051 و 052 وابسته است.
 
 ## پنل مدیریت
 
