@@ -79,7 +79,7 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
             const productPriceOptions = salesPlans.priceOptions?.[p.id] || [];
             const priceOptionMap = Object.fromEntries(productPriceOptions.map((option) => [option.key, {
                 label: option.label,
-                options: (option.values || []).map((value) => ({ value: value.key, label: value.label, priceDelta: Number(value.priceDelta) / 1000000 })),
+                options: (option.values || []).map((value) => ({ value: value.key, label: value.label, priceDelta: Number(value.priceDelta) / 1000000, priceVersionId: Number(value.priceVersionId) || 0 })),
             }]));
             const inventorySelections = {};
             const inventoryVariantAttributes = (variant) => Array.isArray(variant.attributes) ? variant.attributes : [];
@@ -1110,7 +1110,7 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
             const priceDialog = document.createElement("dialog");
             priceDialog.className = "detail-price-dialog";
             priceDialog.setAttribute("aria-labelledby", "productPriceDialogTitle");
-            priceDialog.innerHTML = `<div class="detail-price-dialog-shell"><header class="detail-price-dialog-head"><div><span>قیمت محصول</span><h2 id="productPriceDialogTitle"></h2></div><button type="button" data-price-dialog-close aria-label="بستن"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header><div class="detail-price-dialog-body"><div class="detail-price-dialog-state" data-price-dialog-state role="status" aria-live="polite"></div><div class="detail-price-history-chart" data-price-chart hidden></div></div></div>`;
+            priceDialog.innerHTML = `<div class="detail-price-dialog-shell"><header class="detail-price-dialog-head"><div><span>قیمت محصول</span><h2 id="productPriceDialogTitle"></h2></div><button type="button" data-price-dialog-close aria-label="بستن"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header><div class="detail-price-dialog-body"><fieldset class="detail-price-scope"></fieldset><div class="detail-price-dialog-state" data-price-dialog-state role="status" aria-live="polite"></div><div class="detail-price-history-chart" data-price-chart hidden></div></div></div>`;
             priceDialog
                 .querySelector("[data-price-dialog-close]")
                 .classList.add("site-modal-close");
@@ -1123,10 +1123,11 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                                 variants: { ...combination.variants, [key]: option.value },
                                 labels: [...combination.labels, `${feature.label}: ${option.label}`],
                                 priceDelta: combination.priceDelta + (Number(option.priceDelta) || 0),
+                                optionPriceVersionIds: [...combination.optionPriceVersionIds, option.priceVersionId].filter(id => id > 0),
                             }))),
-                    [{ variants: {}, labels: [], priceDelta: 0 }],
+                    [{ variants: {}, labels: [], priceDelta: 0, optionPriceVersionIds: [] }],
                 )
-                : [{ variants: {}, labels: ["بدون ویژگی"], priceDelta: 0 }];
+                : [{ variants: {}, labels: ["بدون ویژگی"], priceDelta: 0, optionPriceVersionIds: [] }];
             const currentPriceCombinationIndex = () => {
                 const signature = variantSignature(getCurrentPriceVariants());
                 const index = priceCombinations.findIndex(
@@ -1134,6 +1135,15 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                 );
                 return index < 0 ? 0 : index;
             };
+            const priceScope = priceDialog.querySelector(".detail-price-scope");
+            priceScope.innerHTML = `<legend>ترکیب مورد بررسی</legend>${priceCombinations.map((combination, index) => {
+                const checked = index === currentPriceCombinationIndex();
+                const label = combination.labels.join("، ") || "بدون ویژگی";
+                const currentPrice = Math.max(0, Math.round((Number(p.price) + combination.priceDelta) * 1000000));
+                return `<label class="${checked ? "is-selected" : ""}"><input type="radio" name="detail-price-combination" value="${index}" ${checked ? "checked" : ""}><span><strong>${esc(label)}</strong><small>قیمت فعلی: ${money(currentPrice)}</small></span></label>`;
+            }).join("")}`;
+            if (!hasPriceVariants) priceScope.remove();
+            const selectedPriceCombination = () => priceCombinations[Number(priceDialog.querySelector('input[name="detail-price-combination"]:checked')?.value)] || priceCombinations[0];
             let priceDialogTrigger = null;
             const syncPriceWatchTrigger = () => {
                 const trigger = productView.querySelector("[data-price-watch-toggle]");
@@ -1149,9 +1159,13 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                 const state = priceDialog.querySelector("[data-price-dialog-state]");
                 const chart = priceDialog.querySelector("[data-price-chart]");
                 chart.hidden = true;
-                state.innerHTML = '<i class="bi bi-clock-history" aria-hidden="true"></i><strong>دریافت تاریخچهٔ قیمت</strong><span>رکوردهای نسخهٔ قیمت کالا در طرح انتخاب‌شده خوانده می‌شود.</span>';
+                const combination = selectedPriceCombination();
+                priceDialog.querySelectorAll(".detail-price-scope label").forEach(label => label.classList.toggle("is-selected", label.querySelector("input")?.checked === true));
+                state.innerHTML = '<i class="bi bi-clock-history" aria-hidden="true"></i><strong>دریافت تاریخچهٔ قیمت</strong><span>رکوردهای قیمت کالا و ویژگی انتخاب‌شده از پایگاه خوانده می‌شود.</span>';
                 try {
-                    const response = await ui.api.request(`store/sales-plans/products/${p.id}/price-history?salesPlanId=${encodeURIComponent(selectedSalesPlanId)}`);
+                    const query = new URLSearchParams({ salesPlanId: selectedSalesPlanId });
+                    combination.optionPriceVersionIds.forEach(id => query.append("optionPriceVersionIds", String(id)));
+                    const response = await ui.api.request(`store/sales-plans/products/${p.id}/price-history?${query}`);
                     if (!response.ok) throw new Error("price-history-unavailable");
                     const result = await response.json();
                     const history = Array.isArray(result.history) ? result.history : [];
@@ -1159,11 +1173,24 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                         state.innerHTML = '<i class="bi bi-info-circle" aria-hidden="true"></i><strong>تاریخچه‌ای ثبت نشده است</strong><span>برای این کالا و طرح، نسخهٔ قیمت قابل‌نمایشی پیدا نشد.</span>';
                         return;
                     }
-                    const values = history.map(item => Number(item.finalAmount));
+                    const scopes = new Map();
+                    for (const item of history) {
+                        if (!scopes.has(item.scopeKey)) scopes.set(item.scopeKey, []);
+                        scopes.get(item.scopeKey).push(item);
+                    }
+                    const orderedScopes = [...scopes.values()];
+                    const currentByScope = new Map(orderedScopes.map(items => [items[0].scopeKey, Number(items[0].finalAmount)]));
+                    const events = history.map(item => ({ ...item, at: new Date(item.createdAtUtc).getTime() })).sort((a,b) => a.at-b.at || a.priceVersionId-b.priceVersionId);
+                    const values = [];
+                    const timestamps = [];
+                    for (const event of events) {
+                        currentByScope.set(event.scopeKey, Number(event.finalAmount));
+                        timestamps.push(event.at);
+                        values.push([...currentByScope.values()].reduce((sum, amount) => sum + amount, 0));
+                    }
                     const rawMin = Math.min(...values), rawMax = Math.max(...values);
                     const padding = rawMax === rawMin ? Math.max(rawMax * 0.05, 1) : (rawMax - rawMin) * 0.08;
                     const min = Math.max(0, rawMin - padding), max = rawMax + padding;
-                    const timestamps = history.map(item => new Date(item.createdAtUtc).getTime());
                     const firstTime = timestamps[0], lastTime = timestamps.at(-1);
                     const xFor = index => lastTime === firstTime
                         ? 413
@@ -1176,18 +1203,21 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                     const polyline = points.length > 1 ? `<polyline points="${points.join(" ")}" fill="none" stroke="#c39418" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>` : "";
                     const dots = history.map((item, index) => `<circle cx="${xFor(index).toFixed(1)}" cy="${yFor(values[index]).toFixed(1)}" r="4.5" fill="#c39418" stroke="#fff" stroke-width="2"><title>${esc(formatDate(item.createdAtUtc))}: ${esc(money(values[index]))}</title></circle>`).join("");
                     const svg = `<svg viewBox="0 0 700 190" role="img" aria-label="تاریخچهٔ ثبت‌شدهٔ قیمت پایهٔ ${esc(p.name)}"><path d="M146 30H680M146 100H680M146 170H680" stroke="#e4eaf0" stroke-width="1"/>${priceTicks}${polyline}${dots}</svg>`;
-                    const latestItems = history.slice(-10).reverse();
-                    const historyRows = latestItems.map(item => `<li><time datetime="${esc(item.createdAtUtc)}">${esc(formatDate(item.createdAtUtc))}</time><strong>${esc(money(Number(item.finalAmount)))}</strong><span>نسخهٔ قیمت #${fa(item.priceVersionId)}${item.isActive ? " · فعال" : ""}</span></li>`).join("");
-                    state.innerHTML = `<i class="bi bi-graph-up" aria-hidden="true"></i><strong>قیمت پایه بر اساس نسخه‌های ثبت‌شده</strong><span>${fa(history.length)} نسخهٔ قیمت؛ سابقهٔ پیش از آغاز ثبت نسخه‌ها در دسترس نیست.</span>`;
+                    const latestItems = events.slice(-20).reverse();
+                    const historyRows = latestItems.map(item => `<li><time datetime="${esc(item.createdAtUtc)}">${esc(formatDate(item.createdAtUtc))}</time><strong>${esc(money(Number(item.finalAmount)))}</strong><span>${item.component === "product" ? "قیمت پایه" : `ویژگی ${esc(combination.labels.join("، "))}`} · نسخهٔ قیمت #${fa(item.priceVersionId)}${item.isActive ? " · فعال" : ""}</span></li>`).join("");
+                    state.innerHTML = `<i class="bi bi-graph-up" aria-hidden="true"></i><strong>قیمت ${combination.labels.length && combination.labels[0] !== "بدون ویژگی" ? `کالا و ${esc(combination.labels.join("، "))}` : "پایهٔ کالا"} بر اساس نسخه‌های ثبت‌شده</strong><span>${fa(history.length)} رویداد قیمت؛ سابقهٔ پیش از آغاز ثبت نسخه‌ها در دسترس نیست.</span>`;
                     chart.innerHTML = `${svg}<div class="detail-price-chart-legend"><span><i style="--price-series-color:#c39418"></i>قیمت نهایی پس از تخفیف</span></div><div class="detail-price-chart-axis"><span>${esc(formatDate(history[0].createdAtUtc))}</span><span>${esc(formatDate(history.at(-1).createdAtUtc))}</span></div><ol class="detail-price-history-list">${historyRows}</ol>`;
                     chart.hidden = false;
                 } catch {
                     state.innerHTML = '<i class="bi bi-exclamation-circle" aria-hidden="true"></i><strong>دریافت تاریخچه انجام نشد</strong><span>بار دیگر نمودار را باز کنید تا رکوردهای قیمت از پایگاه خوانده شوند.</span>';
                 }
             };
+            priceDialog.addEventListener("change", () => void renderPriceDialogState());
             const openPriceDialog = (trigger) => {
                 priceDialogTrigger = trigger;
-                priceDialog.querySelector("#productPriceDialogTitle").textContent = "تغییرات قیمت پایه";
+                priceDialog.querySelector("#productPriceDialogTitle").textContent = "تغییرات قیمت";
+                const currentIndex = currentPriceCombinationIndex();
+                priceDialog.querySelectorAll('input[name="detail-price-combination"]').forEach((input,index) => input.checked = index === currentIndex);
                 void renderPriceDialogState();
                 priceDialog.showModal();
             };

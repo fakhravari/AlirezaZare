@@ -9,14 +9,22 @@ public sealed class AccountProfile
     public string FirstName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;
     public string? Phone { get; set; }
-    public string? Gender { get; set; }
+    public int? IdGender { get; set; }
+    public AccountGender? Gender { get; set; }
     public bool NewsletterEnabled { get; set; }
-    public string? PasswordHash { get; set; }
+    public string? Password { get; set; }
     public DateTime CreatedAtUtc { get; set; }
     public DateTime? UpdatedAtUtc { get; set; }
 
     public ICollection<Shop.Data.Domain.Store.Entities.ProductFeedback> ProductFeedback { get; set; } =
         new List<Shop.Data.Domain.Store.Entities.ProductFeedback>();
+}
+
+public sealed class AccountGender
+{
+    public int Id { get; set; }
+    public string Code { get; set; } = string.Empty;
+    public string NameFa { get; set; } = string.Empty;
 }
 
 public sealed class AccountCart

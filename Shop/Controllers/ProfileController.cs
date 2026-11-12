@@ -1,10 +1,12 @@
 using Shop.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Shop.Data.Infrastructure.Persistence;
 
 namespace Shop.Controllers;
 
 [Route("Profile")]
-public sealed class ProfileController(Shop.Services.IAccountDataSource accountDataSource) : PageController
+public sealed class ProfileController(Shop.Services.IAccountDataSource accountDataSource, ShopDbContext db) : PageController
 {
     [HttpGet("/account")]
     public IActionResult LegacyAccount() => RedirectToAction(nameof(Index));
@@ -59,8 +61,10 @@ public sealed class ProfileController(Shop.Services.IAccountDataSource accountDa
                             order.OrderedOn.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture)))
                     .ToArray()))
             .ToArray();
+        var genders = await db.AccountGenders.AsNoTracking().OrderBy(x => x.Id)
+            .Select(x => new ProfileGenderOption(x.Id, x.Code, x.NameFa)).ToListAsync(HttpContext.RequestAborted);
         PageModel<ProfilePageViewModel> model = new(
-            new ProfilePageViewModel(section, title, description, icon, Array.Empty<AccountOrder>(), coupons),
+            new ProfilePageViewModel(section, title, description, icon, Array.Empty<AccountOrder>(), coupons, genders),
             new SeoModel($"{title} | ندا اولیائی", description, Robots: "noindex, nofollow"),
             "~/Views/Profile/Index.cshtml");
         return await PageAsync(model);

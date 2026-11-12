@@ -26,10 +26,12 @@ public sealed class PasswordLoginController(
 
         var profile = await db.AccountProfiles.AsNoTracking()
             .Where(x => x.Email == email)
-            .Select(x => new { x.Id, x.PasswordHash })
+            .Select(x => new { x.Id, x.Password })
             .SingleOrDefaultAsync(ct);
-        if (string.IsNullOrWhiteSpace(profile?.PasswordHash) ||
-            passwordHasher.VerifyHashedPassword(email, profile.PasswordHash, password) == PasswordVerificationResult.Failed)
+        if (string.IsNullOrWhiteSpace(profile?.Password) ||
+            (!profile.Password.StartsWith("AQAAAA", StringComparison.Ordinal) && profile.Password != password) ||
+            (profile.Password.StartsWith("AQAAAA", StringComparison.Ordinal) &&
+             passwordHasher.VerifyHashedPassword(email, profile.Password, password) == PasswordVerificationResult.Failed))
             return Unauthorized(new { code = "invalid-credentials", message = "ایمیل یا رمز عبور درست نیست." });
 
         var claims = new[]

@@ -1,15 +1,13 @@
-# معماری و مسیر اجرای پروژه
+# معماری
 
-از این بخش برای شناخت مرزهای برنامه، پیدا کردن مسیر صفحه و تعیین منبع حقیقت داده شروع کنید.
+برای یافتن لایهٔ مسئول یا دنبال‌کردن یک درخواست، از این بخش شروع کنید.
 
-| راهنما | موضوع |
+| راهنما | استفاده |
 |---|---|
-| [آمادگی اتصال backend](backend-readiness.md) | مرزهای داده، ایمیل OTP، شکاف‌های اتصال و قرارداد مهاجرت |
-| [نمای کلی](overview.md) | مرز برنامه، لایه‌ها و مسئولیت پوشه‌ها |
-| [مسیرها و صفحه‌ها](routing.md) | route → Controller → View و asset اختصاصی |
-| [منابع داده](data-sources.md) | منبع runtime دیتابیس/API، payloadهای مرورگر و state صفحه |
-| [لایهٔ دیتابیس](database.md) | پروژه‌های Clean Architecture، repositoryها، API انبار و migration دادهٔ نمونه |
+| [نمای معماری](overview.md) | مرز Shop، Admin و Data |
+| [مسیرها](routing.md) | route به Controller/View و asset |
+| [منابع داده](data-sources.md) | runtime data flow و منبع حقیقت |
+| [پایگاه داده](database.md) | EF Core، migration و schema |
+| [مرزهای backend](backend-readiness.md) | ثبت سرویس و اتصال واقعی/نمونه |
 
-راهنمای تازهٔ این حوزه را در همین پوشه ایجاد و در این جدول ثبت کنید؛ جزئیات در [قانون مستندسازی](../development/documentation.md).
-
-[فهرست مستندات](../README.md)
+از [فهرست اصلی](../README.md) بازگردید. راهنمای محل مستندات: [قانون](../development/documentation.md).

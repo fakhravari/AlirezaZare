@@ -293,12 +293,12 @@
             <fieldset class="profile-edit-gender">
                 <legend>جنسیت</legend>
                 <div>
-                    <label>
-                        <input type="radio" name="gender" value="male" checked/><span>آقا</span>
-                    </label>
-                    <label>
-                        <input type="radio" name="gender" value="female"/><span>خانم</span>
-                    </label>
+                    @foreach (var gender in Model.Data.Genders)
+                    {
+                        <label>
+                            <input type="radio" name="idGender" value="@gender.Id" data-gender-code="@gender.Code"/><span>@gender.NameFa</span>
+                        </label>
+                    }
                 </div><small class="profile-edit-validation field-validation-valid" data-profile-edit-error="gender"></small>
             </fieldset>
             <label>
@@ -369,11 +369,18 @@
         const savedProfile = storage?.json('hn-profile', {}) || {};
         const phone = form.elements.phone;
         const currentPasswordField = form.querySelector('.profile-edit-password-current');
+        const setGender = (idGender, legacyCode) => {
+          const options = [...form.querySelectorAll('[name="idGender"]')];
+          const selected = options.find(option => Number(option.value) === Number(idGender))
+            || options.find(option => legacyCode && option.dataset.genderCode === legacyCode);
+          if (selected) selected.checked = true;
+        };
         const normalizePhone = value => window.HNUI.toEnglishDigits(value).replace(/\D/g, '').slice(0, 11);
         ['firstName', 'lastName', 'email'].forEach(name => {
           if (savedProfile[name]) form.elements[name].value = savedProfile[name];
         });
         if (savedProfile.phone) phone.value = normalizePhone(savedProfile.phone);
+        setGender(savedProfile.idGender, savedProfile.gender);
         form.elements.newsletter.checked = savedProfile.newsletter === true;
         const setPasswordFields = hasPassword => {
           currentPasswordField.hidden = !hasPassword;
@@ -396,28 +403,24 @@
           const response = await window.HNUI.api.request('account/state');
           if (!response.ok) return;
           const account = await response.json();
-          Object.assign(savedProfile, { firstName: account.firstName, lastName: account.lastName, email: account.email, phone: account.phone, gender: account.gender, newsletter: account.newsletter, hasPassword: account.hasPassword === true });
+          Object.assign(savedProfile, { firstName: account.firstName, lastName: account.lastName, email: account.email, phone: account.phone, idGender: account.idGender, newsletter: account.newsletter, hasPassword: account.hasPassword === true });
           ['firstName', 'lastName'].forEach(name => { form.elements[name].value = savedProfile[name] || ''; });
           form.elements.email.value = account.email || '';
           if (savedProfile.phone) phone.value = normalizePhone(savedProfile.phone);
           form.elements.newsletter.checked = savedProfile.newsletter === true;
           setPasswordFields(savedProfile.hasPassword);
-          if (savedProfile.gender) { const gender = form.querySelector(`[name="gender"][value="${savedProfile.gender}"]`); if (gender) gender.checked = true; }
+          setGender(savedProfile.idGender, savedProfile.gender);
           storage?.set('hn-profile', JSON.stringify(savedProfile)); renderProfile(savedProfile);
         };
         if (window.HNUI?.auth.isLoggedIn()) void hydrateProfile().catch(() => {});
         document.addEventListener('hn:auth-change', event => { if (event.detail) void hydrateProfile().catch(() => {}); });
-        if (savedProfile.gender === 'male' || savedProfile.gender === 'female') {
-          const gender = form.querySelector(`[name="gender"][value="${savedProfile.gender}"]`);
-          if (gender) gender.checked = true;
-        }
         const profileName = document.querySelector('.account-profile > div strong');
         if (profileName) {
           profileName.textContent = `${form.elements.firstName.value.trim()} ${form.elements.lastName.value.trim()}`.trim();
         }
         const setError = (name, message) => {
           const host = form.querySelector(`[data-profile-edit-error="${name}"]`);
-          const control = form.querySelector(`[name="${name}"]`);
+          const control = form.querySelector(name === 'gender' ? '[name="idGender"]' : `[name="${name}"]`);
           host.textContent = message;
           host.className = `profile-edit-validation ${message ? 'field-validation-error' : 'field-validation-valid'}`;
           if (name === 'gender') form.querySelector('.profile-edit-gender').classList.toggle('is-invalid', Boolean(message));
@@ -431,7 +434,7 @@
           const lastName = form.elements.lastName.value.trim();
           const email = form.elements.email;
           const normalizedPhone = normalizePhone(phone.value);
-          const gender = form.querySelector('[name="gender"]:checked');
+          const gender = form.querySelector('[name="idGender"]:checked');
           setError('firstName', firstName ? '' : 'نام را وارد کنید.');
           setError('lastName', lastName ? '' : 'نام خانوادگی را وارد کنید.');
           setError('email', !email.value || email.validity.valid ? '' : 'ایمیل را با قالب صحیح وارد کنید.');
@@ -472,7 +475,7 @@
             lastName: form.elements.lastName.value.trim(),
             email: form.elements.email.value.trim(),
             phone: normalizePhone(phone.value),
-            gender: form.querySelector('[name="gender"]:checked').value,
+            idGender: Number(form.querySelector('[name="idGender"]:checked').value),
             newsletter: form.elements.newsletter.checked
           };
           if (window.HNUI?.auth.isLoggedIn()) {
@@ -490,7 +493,7 @@
                 form.elements.newPasswordConfirmation.value = '';
                 document.getElementById('profilePasswordHint').textContent = 'برای تغییر رمز، رمز فعلی و رمز جدید را وارد کنید.';
               }
-              const response = await window.HNUI.api.request('account/profile', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ firstName: profile.firstName, lastName: profile.lastName, phone: profile.phone, gender: profile.gender, newsletter: profile.newsletter }) });
+              const response = await window.HNUI.api.request('account/profile', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ firstName: profile.firstName, lastName: profile.lastName, phone: profile.phone, idGender: profile.idGender, newsletter: profile.newsletter }) });
             if (!response.ok) {
               const result = await response.json().catch(() => ({}));
               document.getElementById('accountStatus').textContent = result.message || 'ذخیرهٔ اطلاعات حساب انجام نشد.';

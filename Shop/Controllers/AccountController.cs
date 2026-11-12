@@ -23,14 +23,6 @@ public sealed class AccountController(
     IWebHostEnvironment environment,
     IPasswordHasher<string> passwordHasher) : ControllerBase
 {
-    public AccountController(
-        ShopDbContext db,
-        ISalesPlanSource plans,
-        IProductPurchaseConfigurationSource purchaseConfigurations,
-        IWebHostEnvironment environment)
-        : this(db, plans, purchaseConfigurations, environment, new PasswordHasher<string>())
-    {
-    }
 
     private long ProfileId => long.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var id) ? id : 0;
 
@@ -41,7 +33,7 @@ public sealed class AccountController(
             .Where(x => x.Id == ProfileId)
             .Select(x => new
             {
-                x.Id, x.Email, x.FirstName, x.LastName, x.Phone, x.Gender, x.NewsletterEnabled, x.PasswordHash
+                x.Id, x.Email, x.FirstName, x.LastName, x.Phone, x.IdGender, x.NewsletterEnabled, x.Password
             })
             .SingleOrDefaultAsync(ct);
         if (profile is null) return NotFound();
@@ -144,9 +136,9 @@ public sealed class AccountController(
             ["firstName"] = profile.FirstName,
             ["lastName"] = profile.LastName,
             ["phone"] = profile.Phone,
-            ["gender"] = profile.Gender,
+            ["idGender"] = profile.IdGender,
             ["newsletter"] = profile.NewsletterEnabled,
-            ["hasPassword"] = profile.PasswordHash is not null,
+            ["hasPassword"] = profile.Password is not null,
             ["simulationAvailable"] = environment.IsDevelopment(),
             ["cart"] = cartRows.Select(item => new
             {
@@ -303,13 +295,15 @@ public sealed class AccountController(
     {
         if (string.IsNullOrWhiteSpace(request.FirstName) || string.IsNullOrWhiteSpace(request.LastName) ||
             request.FirstName.Length > 100 || request.LastName.Length > 100 || (request.Phone?.Length ?? 0) > 30 ||
-            request.Gender is not (null or "male" or "female")) return BadRequest(new { code = "invalid-profile" });
+            request.IdGender is <= 0) return BadRequest(new { code = "invalid-profile" });
+        if (request.IdGender.HasValue && !await db.AccountGenders.AnyAsync(x => x.Id == request.IdGender.Value, ct))
+            return BadRequest(new { code = "invalid-profile" });
         var profile = await db.AccountProfiles.SingleOrDefaultAsync(x => x.Id == ProfileId, ct);
         if (profile is null) return Unauthorized();
         profile.FirstName = request.FirstName.Trim();
         profile.LastName = request.LastName.Trim();
         profile.Phone = request.Phone;
-        profile.Gender = request.Gender;
+        profile.IdGender = request.IdGender;
         profile.NewsletterEnabled = request.Newsletter;
         profile.UpdatedAtUtc = DateTime.UtcNow;
         await db.SaveChangesAsync(ct);
@@ -327,16 +321,17 @@ public sealed class AccountController(
         string email = User.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
         var profile = await db.AccountProfiles.SingleOrDefaultAsync(x => x.Id == ProfileId, ct);
         if (string.IsNullOrWhiteSpace(email) || profile is null) return Unauthorized();
-        string? currentHash = profile.PasswordHash;
-        if (currentHash is not null &&
+        string? currentPassword = profile.Password;
+        if (currentPassword is not null &&
             (string.IsNullOrEmpty(request.CurrentPassword) ||
-             passwordHasher.VerifyHashedPassword(email, currentHash, request.CurrentPassword) == PasswordVerificationResult.Failed))
+             (currentPassword.StartsWith("AQAAAA", StringComparison.Ordinal)
+                 ? passwordHasher.VerifyHashedPassword(email, currentPassword, request.CurrentPassword) == PasswordVerificationResult.Failed
+                 : currentPassword != request.CurrentPassword)))
             return BadRequest(new { code = "invalid-current-password", message = "رمز فعلی درست نیست." });
-        if (currentHash is null && !string.IsNullOrEmpty(request.CurrentPassword))
+        if (currentPassword is null && !string.IsNullOrEmpty(request.CurrentPassword))
             return BadRequest(new { code = "invalid-current-password", message = "این حساب هنوز رمز عبور ندارد." });
 
-        string passwordHash = passwordHasher.HashPassword(email, request.NewPassword!);
-        profile.PasswordHash = passwordHash;
+        profile.Password = request.NewPassword;
         profile.UpdatedAtUtc = DateTime.UtcNow;
         await db.SaveChangesAsync(ct);
         return Ok(new { changed = true });
@@ -878,7 +873,7 @@ public sealed class AccountController(
         string FirstName,
         string LastName,
         string? Phone,
-        string? Gender = null,
+        int? IdGender = null,
         bool Newsletter = false);
 
     public sealed record PasswordChangeRequest(string? CurrentPassword, string? NewPassword, string? NewPasswordConfirmation);

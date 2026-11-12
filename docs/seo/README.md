@@ -1,11 +1,5 @@
-# SEO و metadata
+# SEO
 
-عنوان، canonical، دادهٔ ساختاریافته، robots و sitemap در این بخش مستند می‌شوند.
+مرجع `SeoModel`، metadata و crawl در [metadata.md](metadata.md) است. مصرف‌کنندهٔ مشترک `_SeoMetadata.cshtml` و controllerهای SEO در Shop هستند.
 
-| راهنما | موضوع |
-|---|---|
-| [metadata و crawl](metadata.md) | SeoModel، partial مشترک، تنظیمات و اعتبار داده |
-
-راهنمای تازهٔ این حوزه را در همین پوشه ایجاد و در این جدول ثبت کنید؛ جزئیات در [قانون مستندسازی](../development/documentation.md).
-
-[فهرست مستندات](../README.md)
+[فهرست docs](../README.md)

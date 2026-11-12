@@ -42,7 +42,10 @@ public sealed record ProfilePageViewModel(
     string Description,
     string Icon,
     IReadOnlyList<AccountOrder> Orders,
-    IReadOnlyList<ProfileCouponViewModel> Coupons);
+    IReadOnlyList<ProfileCouponViewModel> Coupons,
+    IReadOnlyList<ProfileGenderOption> Genders);
+
+public sealed record ProfileGenderOption(int Id, string Code, string NameFa);
 
 public sealed record ProfileOrdersViewModel(bool IsActive, IReadOnlyList<AccountOrder> Orders);
 

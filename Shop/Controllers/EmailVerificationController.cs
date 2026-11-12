@@ -4,7 +4,6 @@ using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Shop.Data.Infrastructure.Persistence;
 using Shop.Services;
@@ -16,8 +15,7 @@ namespace Shop.Controllers;
 public sealed partial class EmailVerificationController(
     EmailVerificationCodeStore codes,
     IEmailSender emailSender,
-    ShopDbContext db,
-    IPasswordHasher<string> passwordHasher) : ControllerBase
+    ShopDbContext db) : ControllerBase
 {
     [HttpPost]
     [EnableRateLimiting("email-code")]
@@ -73,7 +71,7 @@ public sealed partial class EmailVerificationController(
         }
         if (isRegistration)
         {
-            profile.PasswordHash = passwordHasher.HashPassword(email, request.Password!);
+            profile.Password = request.Password;
         }
         profile.UpdatedAtUtc = DateTime.UtcNow;
         await db.SaveChangesAsync(cancellationToken);

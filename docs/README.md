@@ -1,57 +1,44 @@
-# راهنمای بررسی پروژه
+# راهنمای پروژه و نقطهٔ شروع
 
-این فهرست نقطهٔ شروع شناخت و تغییر پروژه است. مستندات بر اساس مسئولیت به ۹ گروه تقسیم شده‌اند؛ راهنمای هر بخش در پوشهٔ خودش نگهداری می‌شود.
+آخرین بازبینی مستندات با کد: **۱۲ نوامبر ۲۰۲۶**. کد و رفتار runtime مرجع‌اند؛ این تاریخ یعنی مسیرهای زیر در آن روز بررسی شده‌اند، نه اینکه هر وضعیت محیطی یا دادهٔ زنده تضمین شده باشد.
 
-## مسیر سریع بررسی
+## اگر تازه شروع کرده‌اید یا از ادامهٔ کار جا مانده‌اید
 
-1. [نمای کلی معماری](architecture/overview.md) را بخوانید؛ `Shop/` فروشگاه و `Admin/` پنل مدیریتی MVC هستند.
-2. صفحه را در [نقشهٔ route، View و asset](architecture/routing.md) پیدا کنید.
-3. [منبع حقیقت داده](architecture/data-sources.md) را مشخص کنید؛ سپس راهنمای حوزهٔ مربوط را از جدول زیر باز کنید.
-4. در تغییر UI، [پوسته و ترتیب منابع](frontend/layout.md) و مالک CSS/JS را بررسی کنید.
-5. طبق [روند تغییر](development/workflow.md) اصلاح و [اعتبارسنجی مرتبط](development/setup.md) را انجام دهید.
+۱. `git status --short` و `git diff` را ببینید تا تغییرهای موجود گم نشوند.
+۲. [قواعد مخزن](../AGENTS.md) و [روند کار](AGENTS.md) را بخوانید.
+۳. [نمای معماری](architecture/overview.md) را برای مرز Shop/Admin/Data مرور کنید.
+۴. route را در [نقشهٔ صفحه‌ها](architecture/routing.md) بیابید و زنجیرهٔ Controller → منبع داده → View → asset را در کد دنبال کنید.
+۵. سند حوزه را از جدول زیر انتخاب کنید؛ اگر UI است، مالکیت فایل را در `tools/ui-owners.json` بررسی کنید.
+۶. پس از تغییر، سند مسئول را به‌روز کنید و بررسی‌های متناسب را از [راهنمای کیفیت](development/quality.md) اجرا کنید.
 
-## گروه‌های مستندات
+## نقشهٔ مستندات
 
-| گروه | مسئولیت | راهنمای شروع |
+| بخش | برای چه کاری | شروع |
 |---|---|---|
-| [معماری](architecture/README.md) | ساختار برنامه، مسیر صفحه‌ها و مرز داده | [نمای کلی](architecture/overview.md) |
-| [رابط کاربری](frontend/README.md) | پوسته، طراحی، JS مشترک و بازبینی UI | [ترتیب منابع](frontend/layout.md) |
-| [فروشگاه](store/README.md) | کاتالوگ، فیلتر، محصول، سبد و تسویه | [کاتالوگ و فهرست‌ها](store/catalog.md) |
-| [حساب کاربری](account/README.md) | ثبت‌نام و تأیید ایمیل، پروفایل، آدرس و سفارش | [پروفایل](account/profile.md) |
-| [مدیریت](admin/README.md) | پنل مدیریت فروشگاه و انبار | [راهنمای پنل](admin/README.md) |
-| [محتوا و خدمات](content/README.md) | مجله، برند، FAQ، قوانین و هویت | [صفحه‌های محتوایی](content/pages.md) |
-| [رسانه](media/README.md) | پوشه‌ها، نام‌گذاری، تصاویر، ویدئو و ابعاد | [راهنمای رسانه](media/images.md) |
-| [SEO](seo/README.md) | metadata، canonical، schema و crawl | [metadata](seo/metadata.md) |
-| [توسعه](development/README.md) | اجرا، workflow، مستندسازی و برنامهٔ آینده | [راه‌اندازی](development/setup.md) |
+| معماری | مرز پروژه، route و داده | [نمای کلی](architecture/README.md) |
+| رابط کاربری | layout، CSS، JavaScript و بررسی UI | [راهنمای UI](frontend/README.md) |
+| فروشگاه | کالا، قیمت، سبد و پرداخت | [راهنمای فروشگاه](store/README.md) |
+| حساب | ورود، پروفایل و داده‌های حساب | [راهنمای حساب](account/README.md) |
+| مدیریت | پنل فروشگاه و انبار | [راهنمای مدیریت](admin/README.md) |
+| محتوا | صفحات ثابت و مقاله | [راهنمای محتوا](content/README.md) |
+| رسانه | فایل‌های تصویری و رسانه‌ای | [راهنمای رسانه](media/README.md) |
+| SEO | metadata و قابلیت crawl | [راهنمای SEO](seo/README.md) |
+| توسعه | اجرا، فرایند، کیفیت و مستندات | [راهنمای توسعه](development/README.md) |
 
-## برای یک تغییر مشخص
+## مسیرهای پرتکرار
 
-| نیاز | مرجع اصلی |
+| کار | راهنما |
 |---|---|
-| رنگ، فاصله، responsive یا تداخل CSS | [مالکیت CSS](frontend/styling.md) و [عیب‌یابی](frontend/verification.md) |
-| هدر، مگامنو، modal و ترتیب load | [پوسته](frontend/layout.md) |
-| event، storage، HNUI یا مصرف endpoint تأیید ایمیل | [قرارداد JavaScript](frontend/javascript.md) |
-| فیلتر رنگ، کشور، کارت و لیست محصول | [کاتالوگ](store/catalog.md) |
-| گالری، ویژگی، پرسش و دیدگاه محصول | [جزئیات محصول](store/product.md) |
-| افزودن به سبد، گزینه و مبلغ | [سبد و تسویه](store/cart.md) |
-| تصویر اصلی/کارت/thumbnail، بنر و انتقال محتوا | [رسانه و ابعاد](media/images.md) |
-| نوشتن یا جابه‌جایی راهنما | [قانون مستندسازی](development/documentation.md) و [الگو](development/guide-template.md) |
-| مالکیت مؤلفه، تست خودکار و CI | [کنترل کیفیت و قراردادها](development/quality.md) |
-| وضعیت پیشرفت، محدودیت‌ها و گام بعد | [وضعیت تثبیت](development/roadmap.md) |
-| پیشرفت تفکیک مالکیت و فایل‌های UI | [برنامهٔ مالکیت UI](frontend/ui-ownership-roadmap.md) |
+| یافتن route، Controller و View | [نقشهٔ صفحه‌ها](architecture/routing.md) |
+| پیگیری داده از مرورگر تا DB/API | [منابع داده](architecture/data-sources.md) و [دیتابیس](architecture/database.md) |
+| تغییر قیمت و تاریخچهٔ قیمت | [محصول](store/product.md) و [طرح‌های فروش](store/sales-plans.md) |
+| سبد و مرحلهٔ سفارش | [سبد](store/cart.md) و [پرداخت](store/payment.md) |
+| ترتیب و مالک CSS/JS | [پوسته](frontend/layout.md)، [CSS](frontend/styling.md)، [JavaScript](frontend/javascript.md) |
+| راه‌اندازی و بررسی | [setup](development/setup.md)، [کیفیت](development/quality.md) |
 
-## قواعد اصلی
+## قواعد مرجع
 
-- **راهنمای هر بخش در پوشهٔ همان بخش ساخته و در README آن فهرست می‌شود.** ریشهٔ docs فقط فهرست و قواعد مشترک دارد؛ جزئیات در چند سند تکرار نمی‌شوند.
-- [AGENTS.md ریشهٔ مخزن](../AGENTS.md) این قانون را برای تغییرات کل پروژه اعمال می‌کند؛ [روند عامل](AGENTS.md) مراحل کار را مشخص می‌کند.
-- کد و runtime مرجع نهایی‌اند. مسیرها و ترتیب منابع snapshot هستند؛ پس از کشف اختلاف، راهنمای مسئول به‌روز شود.
-- تأیید ایمیل، نشست cookie، پروفایل، سبد، نشانی‌ها و ایجاد سفارش اولیه به API و SQL متصل‌اند؛ دادهٔ سفارش/پروفایل اولیه نمایشی است و پرداخت واقعی هنوز وصل نیست. وضعیت صدور حواله در [راهنمای مدیریت](admin/README.md) و وضعیت هر مرز در [منابع داده](architecture/data-sources.md) آمده است.
-- `Shop/` فروشگاه عمومی و `Admin/` پنل مدیریتی وب هستند؛ `tests/Shop.Contracts` قرارداد C# را بررسی می‌کند. تست‌های JS، HTTP و مرورگر و workflow CI در [کیفیت](development/quality.md) توضیح داده شده‌اند؛ build موفق جای تست رفتار و ظاهر نیست.
-
-برای بررسی ساختار و لینک‌های مستندات از ریشهٔ مخزن اجرا کنید:
-
-```powershell
-node docs/development/check-docs.mjs
-```
-
-آخرین تطبیق با کد: ۸ نوامبر ۲۰۲۶.
+- هر موضوع یک سند مرجع دارد؛ indexها فقط مسیر می‌دهند.
+- دادهٔ نمونه را با قابلیت عملیاتی اشتباه نگیرید. پیکربندی/محیط و اتصال زنده را پیش از ادعا بررسی کنید.
+- راهنماها در پوشهٔ مسئولیت خود قرار می‌گیرند؛ برای جزئیات [قانون مستندسازی](development/documentation.md) را ببینید.
+- اعتبارسنجی مستندات: `node docs/development/check-docs.mjs` و `git diff --check`.

@@ -75,6 +75,7 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
     public DbSet<GeoProvince> GeoProvinces => Set<GeoProvince>();
     public DbSet<GeoCity> GeoCities => Set<GeoCity>();
     public DbSet<AccountProfile> AccountProfiles => Set<AccountProfile>();
+    public DbSet<AccountGender> AccountGenders => Set<AccountGender>();
     public DbSet<AccountCoupon> AccountCoupons => Set<AccountCoupon>();
     public DbSet<AccountRecentSearch> AccountRecentSearches => Set<AccountRecentSearch>();
     public DbSet<AccountCart> AccountCarts => Set<AccountCart>();
@@ -491,10 +492,19 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.Property(x => x.FirstName).HasMaxLength(100).IsRequired();
             entity.Property(x => x.LastName).HasMaxLength(100).IsRequired();
             entity.Property(x => x.Phone).HasMaxLength(30);
-            entity.Property(x => x.Gender).HasMaxLength(10);
-            entity.Property(x => x.PasswordHash).HasMaxLength(500);
+            entity.Property(x => x.Password).HasMaxLength(500);
             entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
             entity.Property(x => x.UpdatedAtUtc).HasPrecision(3);
+            entity.HasOne(x => x.Gender).WithMany().HasForeignKey(x => x.IdGender)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+        modelBuilder.Entity<AccountGender>(entity =>
+        {
+            entity.ToTable("Gender", "Account");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.Code).HasMaxLength(20).IsRequired();
+            entity.Property(x => x.NameFa).HasMaxLength(40).IsRequired();
+            entity.HasIndex(x => x.Code).IsUnique();
         });
         modelBuilder.Entity<StoreCustomerOrderReference>(entity =>
         {
