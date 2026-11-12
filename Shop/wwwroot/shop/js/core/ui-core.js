@@ -150,7 +150,8 @@
       variantId: item.variantId || null,
       quantity: Number(item.quantity),
       salesPlanId: String(item.salesPlanId || "regular"),
-      options: item.options || {},
+      optionValueIds: (item.options?.priceOptions || []).map((option) => Number(option.id)).filter((id) => Number.isSafeInteger(id) && id > 0),
+      accessoryIds: (item.options?.accessories || []).filter((accessory) => accessory.selected !== false).map((accessory) => Number(accessory.productAccessoryId)).filter((id) => Number.isSafeInteger(id) && id > 0),
     })).filter((item) => Number.isSafeInteger(item.productId) && item.productId > 0);
     void api.request("account/cart", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ items }) })
       .then(async (response) => {
@@ -442,22 +443,27 @@
     try { salesPlanData = JSON.parse(document.querySelector("#storeSalesPlans")?.textContent || "{}"); } catch { salesPlanData = {}; }
     const inventoryVariants = (salesPlanData.inventoryVariants || []).filter((variant) => Number(variant.productId) === Number(productId));
     const configuredPriceOptions = salesPlanData.priceOptions?.[Number(productId)] || [];
-    if (inventoryVariants.length || configuredPriceOptions.length) {
+    if (configuredPriceOptions.length) {
       window.location.href = window.HNProductUrl?.(product) || `/products/${productId}`;
       return;
     }
+    const defaultInventoryVariant = inventoryVariants.find((variant) => variant.isDefault);
+    if (inventoryVariants.length && !defaultInventoryVariant) {
+      showToast("برای این کالا تنوع پیش‌فرض ثبت نشده است؛ مدیر فروشگاه باید آن را تعیین کند.", "warning");
+      return;
+    }
     const priceOptions = {};
+    const accessoryIds = (product.accessories || []).filter((item) => item.required).map((item) => item.id);
     let salesPlanSnapshot = null;
-    if (salesPlanId !== "regular") {
+    if (salesPlanId !== "regular" || inventoryVariants.length || configuredPriceOptions.length || accessoryIds.length) {
       if (!auth.requireLogin(() => button.click())) return;
-      const accessoryIds = (product.accessories || []).filter((item) => item.required).map((item) => item.id);
       button._cartQuotePending = true;
       button.disabled = true;
       try {
         const response = await api.request("store/sales-plans/quote", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ productId: Number(productId), salesPlanId, quantity: 1, variantId: null, priceOptions, accessoryIds }),
+          body: JSON.stringify({ productId: Number(productId), salesPlanId, quantity: 1, variantId: defaultInventoryVariant?.variantId ?? null, priceOptions, accessoryIds }),
         });
         if (!response.ok) throw new Error("quote unavailable");
         const quote = await response.json();
@@ -471,13 +477,15 @@
           quotedAtUtc: quote.quotedAtUtc,
         };
       } catch {
-        showToast("دریافت قیمت طرح ممکن نشد؛ دوباره تلاش کنید یا جزئیات محصول را ببینید.", "warning");
+        showToast("افزودن کالا ممکن نشد؛ موجودی یا تنظیمات خرید را بررسی کنید.", "warning");
         return;
       } finally {
         button._cartQuotePending = false;
         button.disabled = false;
       }
     }
+    const selectedAccessoryItems = (product.accessories || []).filter((item) => item.required);
+    const selectedPriceOptions = [];
     const quantityBefore = cart
       .read()
       .filter((item) => item.id === productId)
@@ -489,6 +497,12 @@
         price: button.dataset.price,
         image: button.dataset.image,
         salesPlanId,
+        variantId: defaultInventoryVariant?.variantId ?? null,
+        options: {
+          inventoryVariant: defaultInventoryVariant ? { id: defaultInventoryVariant.variantId, name: defaultInventoryVariant.name, attributes: defaultInventoryVariant.attributes || [] } : null,
+          priceOptions: selectedPriceOptions,
+          accessories: selectedAccessoryItems.map((item) => ({ id: item.id, productAccessoryId: Number(item.productAccessoryId) || 0, name: item.name, price: Number(salesPlanSnapshot?.accessoryPriceAmounts?.[item.id] ?? item.price) / (salesPlanSnapshot?.accessoryPriceAmounts?.[item.id] != null ? 1000000 : 1), required: true })),
+        },
         salesPlanSnapshot,
       },
       1,

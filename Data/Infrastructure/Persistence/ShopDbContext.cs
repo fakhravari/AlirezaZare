@@ -80,6 +80,8 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
     public DbSet<AccountRecentSearch> AccountRecentSearches => Set<AccountRecentSearch>();
     public DbSet<AccountCart> AccountCarts => Set<AccountCart>();
     public DbSet<AccountCartItem> AccountCartItems => Set<AccountCartItem>();
+    public DbSet<AccountCartItemPurchaseOptionValue> AccountCartItemPurchaseOptionValues => Set<AccountCartItemPurchaseOptionValue>();
+    public DbSet<AccountCartItemAccessory> AccountCartItemAccessories => Set<AccountCartItemAccessory>();
     public DbSet<AccountAddress> AccountAddresses => Set<AccountAddress>();
     public DbSet<AccountFavorite> AccountFavorites => Set<AccountFavorite>();
     public DbSet<AccountCompareItem> AccountCompareItems => Set<AccountCompareItem>();
@@ -162,8 +164,23 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
         {
             entity.ToTable("CartItem", "Account");
             entity.HasKey(x => x.Id);
-            entity.Property(x => x.OptionsJson).HasColumnType("nvarchar(max)").IsRequired();
             entity.Property(x => x.UpdatedAtUtc).HasPrecision(3);
+            entity.HasMany(x => x.PurchaseOptionValues).WithOne().HasForeignKey(x => x.IdCartItem).OnDelete(DeleteBehavior.Cascade);
+            entity.HasMany(x => x.Accessories).WithOne().HasForeignKey(x => x.IdCartItem).OnDelete(DeleteBehavior.Cascade);
+        });
+        modelBuilder.Entity<AccountCartItemPurchaseOptionValue>(entity =>
+        {
+            entity.ToTable("CartItemPurchaseOptionValue", "Account");
+            entity.HasKey(x => x.Id);
+            entity.HasIndex(x => new { x.IdCartItem, x.IdProductPurchaseOptionValue }).IsUnique();
+            entity.HasOne<StoreProductPurchaseOptionValue>().WithMany().HasForeignKey(x => x.IdProductPurchaseOptionValue);
+        });
+        modelBuilder.Entity<AccountCartItemAccessory>(entity =>
+        {
+            entity.ToTable("CartItemAccessory", "Account");
+            entity.HasKey(x => x.Id);
+            entity.HasIndex(x => new { x.IdCartItem, x.IdProductAccessory }).IsUnique();
+            entity.HasOne<StoreProductAccessory>().WithMany().HasForeignKey(x => x.IdProductAccessory);
         });
         modelBuilder.Entity<AccountAddress>(entity =>
         {
@@ -450,6 +467,7 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.Property(x => x.Code).HasMaxLength(100);
             entity.Property(x => x.Name).HasMaxLength(300).IsRequired();
             entity.Property(x => x.AttributesJson).HasColumnType("nvarchar(max)");
+            entity.Property(x => x.IsDefault).HasDefaultValue(false);
             entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
             entity.Property(x => x.UpdatedAtUtc).HasPrecision(3);
             entity.HasOne(x => x.Product).WithMany().HasForeignKey(x => x.IdProduct);

@@ -16,6 +16,7 @@ public sealed record StoreProductPriceOptionRow(
 
 public sealed record StoreProductPriceOptionValueRow(string Key, string Label, decimal PriceDelta)
 {
+    public long Id { get; init; }
     public long PriceVersionId { get; init; }
 }
 
@@ -25,6 +26,7 @@ public sealed record StoreInventoryVariantRow(
     string Name,
     string? Code,
     string? AttributesJson,
+    bool IsDefault,
     IReadOnlyDictionary<string, decimal> StockBySalesPlan,
     IReadOnlyDictionary<string, decimal> PriceBySalesPlan,
     IReadOnlyDictionary<string, decimal> DiscountBySalesPlan)

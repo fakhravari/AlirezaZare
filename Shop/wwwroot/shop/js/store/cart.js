@@ -103,7 +103,7 @@
       const productPriceOptions = getSalesPlanData().priceOptions?.[Number(product?.id)] || [];
       const priceOptionMap = Object.fromEntries(productPriceOptions.map((feature) => [feature.key, {
         label: feature.label,
-        options: (feature.values || []).map((value) => ({ value: value.key, label: value.label, priceDelta: Number(value.priceDelta) / 1000000 })),
+        options: (feature.values || []).map((value) => ({ id: Number(value.id) || 0, value: value.key, label: value.label, priceDelta: Number(value.priceDelta) / 1000000 })),
       }]));
       const savedPriceOptions = Array.isArray(options?.priceOptions) ? options.priceOptions : options?.variants;
       const priceOptions = Array.isArray(savedPriceOptions)
@@ -119,6 +119,7 @@
               );
               const savedDelta = Number(option.priceDelta);
               return {
+                id: Number(productOption?.id || option.id) || 0,
                 key,
                 label: cleanText(priceOptionMap[key]?.label || option.label, 50),
                 value: productOption?.label || value,
@@ -139,6 +140,7 @@
         const option = feature.options?.[0];
         if (!option) return;
         priceOptions.push({
+          id: Number(option.id) || 0,
           key,
           label: cleanText(feature.label, 50),
           value: cleanText(option.label, 80),
@@ -157,6 +159,7 @@
               const required = product ? Boolean(productAccessory?.required) : Boolean(accessory.required);
               return {
                 id: cleanText(productAccessory?.id || accessory.id, 80),
+                productAccessoryId: Number(productAccessory?.productAccessoryId || accessory.productAccessoryId) || 0,
                 name: cleanText(productAccessory?.name || name, 100),
                 price: Math.max(0, Number(productAccessory?.price ?? accessory.price) || 0),
                 required,

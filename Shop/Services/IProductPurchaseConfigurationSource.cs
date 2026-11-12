@@ -14,6 +14,7 @@ public sealed record ProductPurchaseOption(string Key, IReadOnlyList<ProductPurc
 
 public sealed record ProductPurchaseOptionValue(string Key, decimal PriceDelta)
 {
+    public long Id { get; init; }
     public long PriceVersionId { get; init; }
 }
 

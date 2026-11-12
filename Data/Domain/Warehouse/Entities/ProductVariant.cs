@@ -7,6 +7,7 @@ public sealed class ProductVariant
     public string? Code { get; set; }
     public string Name { get; set; } = string.Empty;
     public string? AttributesJson { get; set; }
+    public bool IsDefault { get; set; }
     public bool IsActive { get; set; }
     public DateTime CreatedAtUtc { get; set; }
     public DateTime? UpdatedAtUtc { get; set; }

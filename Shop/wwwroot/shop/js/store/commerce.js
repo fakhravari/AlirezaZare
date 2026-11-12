@@ -79,7 +79,7 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
             const productPriceOptions = salesPlans.priceOptions?.[p.id] || [];
             const priceOptionMap = Object.fromEntries(productPriceOptions.map((option) => [option.key, {
                 label: option.label,
-                options: (option.values || []).map((value) => ({ value: value.key, label: value.label, priceDelta: Number(value.priceDelta) / 1000000, priceVersionId: Number(value.priceVersionId) || 0 })),
+                options: (option.values || []).map((value) => ({ id: Number(value.id) || 0, value: value.key, label: value.label, priceDelta: Number(value.priceDelta) / 1000000, priceVersionId: Number(value.priceVersionId) || 0 })),
             }]));
             const inventorySelections = {};
             const inventoryVariantAttributes = (variant) => Array.isArray(variant.attributes) ? variant.attributes : [];
@@ -1770,6 +1770,7 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                     const option = feature.options.find((item) => item.value === value);
                     return option
                         ? {
+                            id: Number(option.id) || 0,
                             key,
                             label: feature.label,
                             value: option.label,
@@ -1809,6 +1810,7 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                             priceOptions: chosen.filter(Boolean),
                             accessories: selectedAccessoryItems.map((item) => ({
                                 id: item.id,
+                                productAccessoryId: Number(item.productAccessoryId) || 0,
                                 name: item.name,
                                 price: Number(quote.accessoryAmounts?.[item.id] ?? Number(item.price) * 1000000) / 1000000,
                                 required: Boolean(item.required),

@@ -34,7 +34,7 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext, IMedi
                                         join accessory in dbContext.StoreAccessories.AsNoTracking() on link.IdAccessory equals accessory.Id
                                         where productIds.Contains(link.IdProduct)
                                         orderby link.SortOrder, link.Id
-                                        select new { link.IdProduct, accessory.AccessoryKey, accessory.Name, link.IsRequired, link.PriceAmount }).ToListAsync(cancellationToken);
+                                        select new { link.IdProduct, link.Id, accessory.AccessoryKey, accessory.Name, link.IsRequired, link.PriceAmount }).ToListAsync(cancellationToken);
         var documents = await dbContext.StoreProductDocuments.AsNoTracking().Where(x => productIds.Contains(x.IdProduct)).OrderBy(x => x.Id).ToListAsync(cancellationToken);
         var collections = await dbContext.StoreProductCollections.AsNoTracking().OrderBy(x => x.Id).ToListAsync(cancellationToken);
         var collectionIds = collections.Select(x => x.Id).ToArray();
@@ -77,7 +77,7 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext, IMedi
             var o = new JsonObject { ["id"] = checked((int)product.Id), ["name"] = product.Name, ["englishName"] = product.EnglishName ?? product.Name, ["code"] = product.Code, ["slug"] = product.Slug, ["brandId"] = brandKey, ["categoryId"] = categoryKey, ["detailId"] = categoryKey, ["mediaId"] = productMedia?.MediaKey, ["powerSource"] = product.PowerSource ?? "", ["useCase"] = product.UseCase ?? "", ["price"] = (product.PriceAmount ?? 0m) / 1_000_000m, ["stockQuantity"] = stockQty, ["maxCartQuantity"] = product.MaxPurchaseQuantity ?? 99, ["discountPercent"] = product.DiscountPercent ?? 0m, ["badge"] = product.Badge, ["isNewest"] = product.IsNewest, ["newestOrder"] = product.NewestOrder };
             o["colorIds"] = new JsonArray(productColors.Where(x => x.IdProduct == product.Id).Select(x => (JsonNode?)JsonValue.Create(colorKeyById.GetValueOrDefault(x.IdColor))).ToArray());
             o["specificationValues"] = new JsonArray(productSpecs.Where(x => x.IdProduct == product.Id).Select(x => (JsonNode?)new JsonObject { ["featureId"] = x.FeatureKey, ["value"] = x.Value }).ToArray());
-            o["accessories"] = new JsonArray(productAccessories.Where(x => x.IdProduct == product.Id).Select(x => (JsonNode?)new JsonObject { ["id"] = x.AccessoryKey, ["name"] = x.Name, ["required"] = x.IsRequired, ["price"] = x.PriceAmount / 1_000_000m }).ToArray());
+            o["accessories"] = new JsonArray(productAccessories.Where(x => x.IdProduct == product.Id).Select(x => (JsonNode?)new JsonObject { ["id"] = x.AccessoryKey, ["productAccessoryId"] = x.Id, ["name"] = x.Name, ["required"] = x.IsRequired, ["price"] = x.PriceAmount / 1_000_000m }).ToArray());
             o["documents"] = new JsonArray(documents.Where(x => x.IdProduct == product.Id).Select(x => (JsonNode?)new JsonObject { ["title"] = x.Title, ["path"] = x.Path }).ToArray()); o["variants"] = new JsonObject(); return (JsonNode?)o;
         }).ToArray());
         root["collections"] = new JsonArray(collections.Select(collection => (JsonNode?)new JsonObject { ["id"] = collection.CollectionKey, ["items"] = new JsonArray(collectionItems.Where(x => x.IdProductCollection == collection.Id).Select(x => (JsonNode?)JsonValue.Create(checked((int)x.IdProduct))).ToArray()) }).ToArray());

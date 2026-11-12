@@ -11,6 +11,7 @@ public sealed record ProductPurchaseOptionRow(
 
 public sealed record ProductPurchaseOptionValueRow(string Key, decimal PriceDelta)
 {
+    public long Id { get; init; }
     public long PriceVersionId { get; init; }
 }
 

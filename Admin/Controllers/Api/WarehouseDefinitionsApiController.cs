@@ -40,7 +40,7 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                 select new
                 {
                     variant.Id, variant.IdProduct, ProductName = product.Name,
-                    variant.Code, variant.Name, variant.AttributesJson, variant.IsActive
+                    variant.Code, variant.Name, variant.AttributesJson, variant.IsDefault, variant.IsActive
                 })
             .ToListAsync(cancellationToken)),
         "lookups" => await GetLookupsAsync(cancellationToken),
@@ -478,14 +478,23 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                 if (id.HasValue && entity.IdProduct != input.ProductId &&
                     await db.InventoryItems.AnyAsync(x => x.IdProductVariant == id))
                     return Conflict(new { detail = "تنوع دارای موجودی یا گردش است و به محصول دیگری منتقل نمی‌شود." });
+                bool hasOtherDefault = await db.ProductVariants.AnyAsync(x => x.IdProduct == product.Id &&
+                    x.Id != (id ?? 0) && x.IsDefault && x.IsActive, cancellationToken);
+                bool makeDefault = input.IsDefault || !hasOtherDefault;
+                if (!makeDefault && entity.IsDefault)
+                    return ValidationProblem(detail: "برای هر کالا باید یک تنوع پیش‌فرض فعال باقی بماند.", statusCode: 400);
+                await using var transaction =
+                    await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
+                if (makeDefault)
+                    await db.ProductVariants.Where(x => x.IdProduct == product.Id && x.Id != (id ?? 0) && x.IsDefault)
+                        .ExecuteUpdateAsync(setters => setters.SetProperty(x => x.IsDefault, false), cancellationToken);
                 entity.IdProduct = product.Id;
                 entity.Code = string.IsNullOrWhiteSpace(input.Code) ? null : input.Code.Trim();
                 entity.Name = input.Name.Trim();
                 entity.AttributesJson = string.IsNullOrWhiteSpace(input.AttributesJson) ? null : input.AttributesJson;
+                entity.IsDefault = makeDefault;
                 entity.IsActive = input.IsActive;
                 entity.UpdatedAtUtc = DateTime.UtcNow;
-                await using var transaction =
-                    await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
                 if (!id.HasValue) db.ProductVariants.Add(entity);
                 await db.SaveChangesAsync(cancellationToken);
                 if (!id.HasValue &&
@@ -773,6 +782,7 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
         string Name,
         string? Code,
         string? AttributesJson,
+        bool IsDefault,
         bool IsActive);
 
     public sealed record SalesPlanMappingInput(long CompanyId, long WarehouseId, long SalesPlanId);

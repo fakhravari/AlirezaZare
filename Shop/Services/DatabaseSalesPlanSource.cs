@@ -29,14 +29,14 @@ public sealed class DatabaseSalesPlanSource(IStoreSalesPlanRepository repository
         {
             InventoryVariants = snapshot.InventoryVariants.Select(variant => new ProductInventoryVariant(
                 variant.ProductId, variant.VariantId, variant.Name, variant.Code,
-                ParseAttributes(variant.AttributesJson), variant.StockBySalesPlan,
+                ParseAttributes(variant.AttributesJson), variant.IsDefault, variant.StockBySalesPlan,
                 variant.PriceBySalesPlan, variant.DiscountBySalesPlan)
             { PriceVersionIdsBySalesPlan = variant.PriceVersionIdsBySalesPlan }).ToArray(),
             PriceOptions = snapshot.PriceOptions.GroupBy(option => option.ProductId).ToDictionary(
                 group => group.Key,
                 group => (IReadOnlyList<SalesPlanPriceOption>)group.Select(option => new SalesPlanPriceOption(
                     option.Key, option.Label, option.Values.Select(value => new SalesPlanPriceOptionValue(
-                        value.Key, value.Label, value.PriceDelta) { PriceVersionId = value.PriceVersionId }).ToArray())).ToArray())
+                        value.Key, value.Label, value.PriceDelta) { Id = value.Id, PriceVersionId = value.PriceVersionId }).ToArray())).ToArray())
         };
     }
 
@@ -56,7 +56,7 @@ public sealed class DatabaseSalesPlanSource(IStoreSalesPlanRepository repository
             : new ProductPurchaseConfiguration(
                 configuration.MaxPurchaseQuantity,
                 configuration.Options.Select(option => new ProductPurchaseOption(option.Key,
-                    option.Values.Select(value => new ProductPurchaseOptionValue(value.Key, value.PriceDelta) { PriceVersionId = value.PriceVersionId })
+                    option.Values.Select(value => new ProductPurchaseOptionValue(value.Key, value.PriceDelta) { Id = value.Id, PriceVersionId = value.PriceVersionId })
                         .ToArray())).ToArray(),
                 configuration.Accessories.Select(accessory => new ProductAccessory(accessory.Key, accessory.IsRequired))
                     .ToArray());

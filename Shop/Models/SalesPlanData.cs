@@ -275,6 +275,7 @@ public sealed record ProductInventoryVariant(
     string Name,
     string? Code,
     JsonElement? Attributes,
+    bool IsDefault,
     IReadOnlyDictionary<string, decimal> StockBySalesPlan,
     IReadOnlyDictionary<string, decimal> PriceBySalesPlan,
     IReadOnlyDictionary<string, decimal> DiscountBySalesPlan)
@@ -286,6 +287,7 @@ public sealed record SalesPlanPriceOption(string Key, string Label, IReadOnlyLis
 
 public sealed record SalesPlanPriceOptionValue(string Key, string Label, decimal PriceDelta)
 {
+    public long Id { get; init; }
     public long PriceVersionId { get; init; }
 }
 

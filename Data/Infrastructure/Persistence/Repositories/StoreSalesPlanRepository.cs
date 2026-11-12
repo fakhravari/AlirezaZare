@@ -61,7 +61,7 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
                 if (!priceOptions.TryGetValue(key, out var option)) priceOptions[key] = option = new(key.Item1, row.OptionKey, row.Label);
                 string scope = StorePriceScopes.Option(row.Id);
                 pricesByScope.TryGetValue(scope, out var optionVersion);
-                option.Values.Add(new(row.ValueKey, row.ValueLabel, optionVersion?.PriceAmount ?? decimal.Round(row.PriceDelta * 1_000_000m, 0, MidpointRounding.AwayFromZero)) { PriceVersionId = optionVersion?.Id ?? 0 });
+                option.Values.Add(new(row.ValueKey, row.ValueLabel, optionVersion?.PriceAmount ?? decimal.Round(row.PriceDelta * 1_000_000m, 0, MidpointRounding.AwayFromZero)) { Id = row.Id, PriceVersionId = optionVersion?.Id ?? 0 });
             }
 
             Dictionary<(int ProductId, long VariantId), InventoryVariantBuilder> inventoryVariants = [];
@@ -69,8 +69,8 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
                                           join product in dbContext.Products.AsNoTracking() on variant.IdProduct equals product.Id
                                           where variant.IsActive && product.IsWarehouseEnabled && product.IsCatalogActive && product.IsStoreEnabled &&
                                                 dbContext.InventoryItems.Any(inventory => inventory.IdProductVariant == variant.Id && inventory.IsActive)
-                                          select new { ProductId = variant.IdProduct, VariantId = variant.Id, variant.Name, variant.Code, variant.AttributesJson }).ToListAsync(cancellationToken);
-            foreach (var row in eligibleVariants) inventoryVariants[(checked((int)row.ProductId), row.VariantId)] = new(checked((int)row.ProductId), row.VariantId, row.Name, row.Code, row.AttributesJson);
+                                          select new { ProductId = variant.IdProduct, VariantId = variant.Id, variant.Name, variant.Code, variant.AttributesJson, variant.IsDefault }).ToListAsync(cancellationToken);
+            foreach (var row in eligibleVariants) inventoryVariants[(checked((int)row.ProductId), row.VariantId)] = new(checked((int)row.ProductId), row.VariantId, row.Name, row.Code, row.AttributesJson, row.IsDefault);
             var inventoryStock = await (from inventory in dbContext.InventoryItems.AsNoTracking()
                                         join balance in dbContext.StockBalances.AsNoTracking() on inventory.Id equals balance.IdInventoryItem
                                         join plan in dbContext.SalesPlanReferences.AsNoTracking() on balance.IdSalesPlanReference equals plan.Id
@@ -158,7 +158,8 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
         var product = await dbContext.Products.AsNoTracking()
             .Where(x => x.Id == productId && x.IsCatalogActive && x.IsStoreEnabled)
             .Select(x => new { x.MaxPurchaseQuantity }).SingleOrDefaultAsync(cancellationToken);
-        if (product?.MaxPurchaseQuantity is not int maxPurchaseQuantity) return null;
+        if (product is null) return null;
+        int maxPurchaseQuantity = product.MaxPurchaseQuantity ?? 99;
 
         var optionRows = await (from option in dbContext.StoreProductPurchaseOptions.AsNoTracking()
                                 join value in dbContext.StoreProductPurchaseOptionValues.AsNoTracking() on option.Id equals value.IdProductPurchaseOption
@@ -174,7 +175,7 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
             .Select(group => new ProductPurchaseOptionRow(group.Key,
                 group.Select(x => new ProductPurchaseOptionValueRow(x.ValueKey,
                     optionVersionById.TryGetValue(x.Id, out var version) ? version.PriceAmount : decimal.Round(x.PriceDelta * 1_000_000m, 0, MidpointRounding.AwayFromZero))
-                    { PriceVersionId = optionVersionById.GetValueOrDefault(x.Id)?.Id ?? 0 }).ToArray()))
+                    { Id = x.Id, PriceVersionId = optionVersionById.GetValueOrDefault(x.Id)?.Id ?? 0 }).ToArray()))
             .ToArray();
         var accessories = await (from productAccessory in dbContext.StoreProductAccessories.AsNoTracking()
                                  join accessory in dbContext.StoreAccessories.AsNoTracking() on productAccessory.IdAccessory equals accessory.Id
@@ -213,13 +214,14 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
 
     private sealed class InventoryVariantBuilder
     {
-        public InventoryVariantBuilder(int productId, long variantId, string name, string? code, string? attributesJson)
+        public InventoryVariantBuilder(int productId, long variantId, string name, string? code, string? attributesJson, bool isDefault)
         {
             ProductId = productId;
             VariantId = variantId;
             Name = name;
             Code = code;
             AttributesJson = attributesJson;
+            IsDefault = isDefault;
         }
 
         private int ProductId { get; }
@@ -227,12 +229,13 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
         private string Name { get; }
         private string? Code { get; }
         private string? AttributesJson { get; }
+        private bool IsDefault { get; }
         public Dictionary<string, decimal> StockBySalesPlan { get; } = new(StringComparer.Ordinal);
         public Dictionary<string, decimal> PriceBySalesPlan { get; } = new(StringComparer.Ordinal);
         public Dictionary<string, decimal> DiscountBySalesPlan { get; } = new(StringComparer.Ordinal);
         public Dictionary<string, long> PriceVersionIdsBySalesPlan { get; } = new(StringComparer.Ordinal);
 
-        public StoreInventoryVariantRow Build() => new(ProductId, VariantId, Name, Code, AttributesJson,
+        public StoreInventoryVariantRow Build() => new(ProductId, VariantId, Name, Code, AttributesJson, IsDefault,
             StockBySalesPlan, PriceBySalesPlan, DiscountBySalesPlan) { PriceVersionIdsBySalesPlan = PriceVersionIdsBySalesPlan };
     }
 }

@@ -43,8 +43,23 @@ public sealed class AccountCartItem
     public long? IdProductVariant { get; set; }
     public long IdSalesPlan { get; set; }
     public int Quantity { get; set; }
-    public string OptionsJson { get; set; } = "{}";
     public DateTime UpdatedAtUtc { get; set; }
+    public ICollection<AccountCartItemPurchaseOptionValue> PurchaseOptionValues { get; set; } = new List<AccountCartItemPurchaseOptionValue>();
+    public ICollection<AccountCartItemAccessory> Accessories { get; set; } = new List<AccountCartItemAccessory>();
+}
+
+public sealed class AccountCartItemPurchaseOptionValue
+{
+    public long Id { get; set; }
+    public long IdCartItem { get; set; }
+    public long IdProductPurchaseOptionValue { get; set; }
+}
+
+public sealed class AccountCartItemAccessory
+{
+    public long Id { get; set; }
+    public long IdCartItem { get; set; }
+    public long IdProductAccessory { get; set; }
 }
 
 public sealed class AccountAddress

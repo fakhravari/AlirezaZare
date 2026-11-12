@@ -13,7 +13,7 @@
         units: { fields: [["code", "کد واحد", "text", true], ["name", "نام واحد", "text", true]], columns: [["code", "کد"], ["name", "واحد"], ["isActive", "وضعیت", "active"]] },
         "document-types": { fields: [["code", "کد نوع سند", "text", true], ["name", "نام سند", "text", true], ["direction", "جهت سند", "select", true, [["R", "رسید"], ["I", "حواله"]]], ["affectsStock", "بر موجودی اثر دارد", "checkbox" ]], columns: [["code", "کد"], ["name", "نوع سند"], ["direction", "جهت", "direction"], ["affectsStock", "اثر موجودی", "affects"], ["isActive", "وضعیت", "active"]] }
         ,"product-units": { fields: [["productId", "کالا", "products", true], ["unitId", "واحد", "units", true], ["conversionFactor", "ضریب تبدیل به واحد اصلی", "number", true], ["isBaseUnit", "واحد اصلی کالا", "checkbox"]], columns: [["productName", "کالا"], ["unitName", "واحد"], ["conversionFactor", "ضریب تبدیل"], ["isBaseUnit", "اصلی", "base"], ["isActive", "وضعیت", "active"]] },
-        variants: { fields: [["productId", "کالا", "products", true], ["name", "نام تنوع", "text", true], ["code", "کد تنوع", "text"], ["attributesJson", "ویژگی‌های موجودی (JSON)", "textarea"]], columns: [["productName", "کالا"], ["name", "تنوع"], ["code", "کد"], ["isActive", "وضعیت", "active"]] }
+        variants: { fields: [["productId", "کالا", "products", true], ["name", "نام تنوع", "text", true], ["code", "کد تنوع", "text"], ["attributesJson", "ویژگی‌های موجودی (JSON)", "textarea"], ["isDefault", "تنوع پیش‌فرض", "checkbox"]], columns: [["productName", "کالا"], ["name", "تنوع"], ["code", "کد"], ["isDefault", "پیش‌فرض", "default"], ["isActive", "وضعیت", "active"]] }
     };
     const esc = value => value == null || value === "" ? "—" : String(value);
     function setStatus(page, message, error = false) {
@@ -49,6 +49,7 @@
             for (const [key, , format] of config.columns) {
                 let value = item[key];
                 if (format === "active") value = active(value);
+                if (format === "default") value = value ? "پیش‌فرض" : "خیر";
                 if (format === "direction") value = value === "R" ? "رسید" : "حواله";
                 if (format === "affects") value = value ? "دارد" : "ندارد";
                 if (format === "base") value = value ? "واحد اصلی" : "واحد فرعی";
