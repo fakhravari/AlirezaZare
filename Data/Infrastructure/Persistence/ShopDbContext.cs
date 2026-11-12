@@ -467,7 +467,8 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.Property(x => x.Code).HasMaxLength(100);
             entity.Property(x => x.Name).HasMaxLength(300).IsRequired();
             entity.Property(x => x.AttributesJson).HasColumnType("nvarchar(max)");
-            entity.Property(x => x.IsDefault).HasDefaultValue(false);
+            entity.Property(x => x.IsDefault).HasDefaultValue(false).IsRequired();
+            entity.HasIndex(x => x.IdProduct).IsUnique().HasFilter("[IsDefault] = 1");
             entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
             entity.Property(x => x.UpdatedAtUtc).HasPrecision(3);
             entity.HasOne(x => x.Product).WithMany().HasForeignKey(x => x.IdProduct);

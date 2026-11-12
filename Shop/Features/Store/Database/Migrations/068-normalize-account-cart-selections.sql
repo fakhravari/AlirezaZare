@@ -35,14 +35,14 @@ BEGIN TRY
         IF COL_LENGTH(N'Account.CartItem', N'OptionsJson') IS NOT NULL
         BEGIN
             INSERT INTO [Account].[CartItemPurchaseOptionValue] ([IdCartItem], [IdProductPurchaseOptionValue])
-            SELECT item.[Id], value.[Id]
+            SELECT item.[Id], purchaseValue.[Id]
             FROM [Account].[CartItem] item
             CROSS APPLY OPENJSON(item.[OptionsJson], '$.priceOptions')
                 WITH ([OptionKey] NVARCHAR(50) '$.key', [ValueKey] NVARCHAR(80) '$.productValue') selected
-            JOIN [Store].[ProductPurchaseOption] option ON option.[IdProduct] = item.[IdProduct] AND option.[OptionKey] = selected.[OptionKey]
-            JOIN [Store].[ProductPurchaseOptionValue] value ON value.[IdProductPurchaseOption] = option.[Id] AND value.[ValueKey] = selected.[ValueKey]
+            JOIN [Store].[ProductPurchaseOption] AS purchaseOption ON purchaseOption.[IdProduct] = item.[IdProduct] AND purchaseOption.[OptionKey] = selected.[OptionKey]
+            JOIN [Store].[ProductPurchaseOptionValue] AS purchaseValue ON purchaseValue.[IdProductPurchaseOption] = purchaseOption.[Id] AND purchaseValue.[ValueKey] = selected.[ValueKey]
             WHERE ISJSON(item.[OptionsJson]) = 1
-              AND NOT EXISTS (SELECT 1 FROM [Account].[CartItemPurchaseOptionValue] saved WHERE saved.[IdCartItem] = item.[Id] AND saved.[IdProductPurchaseOptionValue] = value.[Id]);
+              AND NOT EXISTS (SELECT 1 FROM [Account].[CartItemPurchaseOptionValue] saved WHERE saved.[IdCartItem] = item.[Id] AND saved.[IdProductPurchaseOptionValue] = purchaseValue.[Id]);
 
             INSERT INTO [Account].[CartItemAccessory] ([IdCartItem], [IdProductAccessory])
             SELECT item.[Id], link.[Id]
@@ -54,9 +54,7 @@ BEGIN TRY
             WHERE ISJSON(item.[OptionsJson]) = 1 AND ISNULL(selected.[Selected], 1) = 1
               AND NOT EXISTS (SELECT 1 FROM [Account].[CartItemAccessory] saved WHERE saved.[IdCartItem] = item.[Id] AND saved.[IdProductAccessory] = link.[Id]);
 
-            IF EXISTS (SELECT 1 FROM sys.check_constraints WHERE [name] = N'CK_Account_CartItem_Options')
-                ALTER TABLE [Account].[CartItem] DROP CONSTRAINT [CK_Account_CartItem_Options];
-            ALTER TABLE [Account].[CartItem] DROP COLUMN [OptionsJson];
+            -- Keep the legacy JSON snapshot intact; relational rows are added alongside it.
         END;
 
         INSERT INTO [Store].[SchemaMigration] ([MigrationKey]) VALUES (N'068-normalize-account-cart-selections');
