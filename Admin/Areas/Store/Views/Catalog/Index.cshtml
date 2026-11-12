@@ -10,19 +10,19 @@
             <div class="panel-heading-btn">
                 @if (catalogSection == "products" && User.IsInRole("system.full-access"))
                 {
-                    <button class="btn btn-xs btn-primary" type="button" data-product-create>افزودن کالا</button>
+                    <button class="btn btn-xs btn-primary" type="button" data-product-create><i class="fa fa-plus me-1" aria-hidden="true"></i>افزودن کالا</button>
                 }
                 @if (catalogSection == "categories" && User.IsInRole("system.full-access"))
                 {
-                    <button class="btn btn-xs btn-primary" type="button" data-category-create>افزودن دسته</button>
+                    <button class="btn btn-xs btn-primary" type="button" data-category-create><i class="fa fa-plus me-1" aria-hidden="true"></i>افزودن دسته</button>
                 }
                 @if (catalogSection == "brands" && User.IsInRole("system.full-access"))
                 {
-                    <button class="btn btn-xs btn-primary" type="button" data-brand-create>افزودن برند</button>
+                    <button class="btn btn-xs btn-primary" type="button" data-brand-create><i class="fa fa-plus me-1" aria-hidden="true"></i>افزودن برند</button>
                 }
                 @if (catalogSection == "attributes" && User.IsInRole("system.full-access"))
                 {
-                    <button class="btn btn-xs btn-primary" type="button" data-attribute-create>افزودن ویژگی</button>
+                    <button class="btn btn-xs btn-primary" type="button" data-attribute-create><i class="fa fa-plus me-1" aria-hidden="true"></i>افزودن ویژگی</button>
                 }
                 <button class="btn btn-xs btn-icon btn-default" type="button" data-admin-refresh aria-label="بارگذاری دوباره">
                     <i class="fa fa-rotate" aria-hidden="true"></i>
@@ -43,7 +43,7 @@
             </form>
             <div class="admin-data-status small text-muted" data-admin-status role="status" aria-live="polite">در حال خواندن داده از دیتابیس…</div>
             <div class="table-responsive admin-table-wrap @(catalogSection == "categories" ? "admin-category-tree-wrap" : "")">
-                <table class="table table-striped table-hover align-middle mb-0">
+                <table class="table table-striped table-hover align-middle mb-0" data-admin-datatable data-admin-table-mode="@(catalogSection == "categories" ? "tree" : "server")">
                     <thead>
                     <tr>
                         @if (catalogSection == "products")
@@ -54,6 +54,7 @@
                             <th scope="col">دسته‌بندی</th>
                             <th scope="col">قیمت</th>
                             <th scope="col">موجودی</th>
+                            <th scope="col">عملیات</th>
                         }
                         else if (catalogSection == "categories")
                         {
@@ -71,6 +72,15 @@
                             <th scope="col">نام لاتین</th>
                             <th scope="col">کشور</th>
                             <th scope="col">وضعیت انتشار</th>
+                            <th scope="col">عملیات</th>
+                        }
+                        else if (catalogSection == "payment-institutions")
+                        {
+                            <th scope="col">نام درگاه</th>
+                            <th scope="col">شناسه</th>
+                            <th scope="col">لوگو</th>
+                            <th scope="col">مسیر فایل</th>
+                            <th scope="col">عملیات</th>
                         }
                         else
                         {
@@ -81,6 +91,7 @@
                             <th scope="col">قابل فیلتر</th>
                             <th scope="col">نمایش برجسته</th>
                             <th scope="col">وضعیت انتشار</th>
+                            <th scope="col">عملیات</th>
                         }
                     </tr>
                     </thead>
@@ -93,7 +104,7 @@
                 <span data-admin-page-label></span>
                 <button type="button" class="btn btn-default btn-sm" data-admin-page-step="1">بعدی</button>
             </div>
-            <p class="admin-readonly-note alert alert-info small d-flex align-items-start gap-2 mt-3"><i class="fa fa-circle-info" aria-hidden="true"></i> @(catalogSection == "categories" ? "محتوای مشترک محصول در دسته قابل ویرایش است." : catalogSection == "products" ? "مدیر دارای دسترسی کامل می‌تواند تصویر، ویدئو و فایل کالا را بارگذاری کند." : catalogSection == "brands" ? "مدیر دارای دسترسی کامل می‌تواند برند را ایجاد یا ویرایش و نشان آن را بارگذاری کند." : "مدیر دارای دسترسی کامل می‌تواند ویژگی را ایجاد و ویرایش کند؛ کلید ویژگی پس از استفاده ثابت می‌ماند.")</p>
+            <p class="admin-readonly-note alert alert-info small d-flex align-items-start gap-2 mt-3"><i class="fa fa-circle-info" aria-hidden="true"></i> @(catalogSection == "categories" ? "محتوای مشترک محصول در دسته قابل ویرایش است." : catalogSection == "products" ? "مدیر دارای دسترسی کامل می‌تواند تصویر، ویدئو و فایل کالا را بارگذاری کند." : catalogSection == "brands" ? "مدیر دارای دسترسی کامل می‌تواند برند را ایجاد یا ویرایش و نشان آن را بارگذاری کند." : catalogSection == "payment-institutions" ? "تصویرها به WebP و فایل SVG پس از پاک‌سازی ذخیره می‌شود؛ فایل در FTP قرار می‌گیرد و مسیر آن در جدول ثبت می‌شود." : "مدیر دارای دسترسی کامل می‌تواند ویژگی را ایجاد و ویرایش کند؛ کلید ویژگی پس از استفاده ثابت می‌ماند.")</p>
         </div>
     </section>
 </div>
@@ -103,7 +114,7 @@
         <div class="panel-heading"><h2 class="panel-title">پیش‌نویس‌های کالا</h2></div>
         <div class="panel-body"><p>پیش‌نویس پس از ثبت تصویر و انتشار در فروشگاه نمایش داده می‌شود.</p>
             <div class="admin-data-status small text-muted" data-admin-status role="status" aria-live="polite"></div>
-            <div class="table-responsive"><table class="table table-striped align-middle"><thead><tr><th>کد</th><th>نام</th><th>برند</th><th>دسته</th><th>قیمت تومان</th><th>تصویر</th><th>عملیات</th></tr></thead><tbody data-admin-results></tbody></table></div>
+            <div class="table-responsive"><table class="table table-striped align-middle" data-admin-datatable data-admin-table-mode="server"><thead><tr><th>کد</th><th>نام</th><th>برند</th><th>دسته</th><th>قیمت تومان</th><th>تصویر</th><th>عملیات</th></tr></thead><tbody data-admin-results></tbody></table></div>
             <div class="admin-empty-state d-none p-4 text-center text-muted small" data-admin-empty>پیش‌نویسی وجود ندارد.</div>
         </div>
     </section>
@@ -122,7 +133,7 @@
                 <label class="form-label" for="new-product-price">قیمت فروش عادی (تومان)</label><input class="form-control mb-3" id="new-product-price" name="priceAmount" type="number" min="0" max="9007199254740991" step="1" required />
                 <label class="form-label" for="new-product-discount">درصد تخفیف نمایشی</label><input class="form-control mb-3" id="new-product-discount" name="discountPercent" type="number" min="0" max="99.99" step="0.01" value="0" required />
                 <label class="form-label" for="new-product-limit">حداکثر تعداد خرید</label><input class="form-control" id="new-product-limit" name="maxPurchaseQuantity" type="number" min="1" max="99" step="1" value="99" required />
-            </div><div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button type="submit" class="btn btn-primary">ساخت پیش‌نویس</button></div>
+            </div><div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button type="submit" class="btn btn-primary"><i class="fa fa-file-circle-plus me-1" aria-hidden="true"></i>ساخت پیش‌نویس</button></div>
         </form></div>
     </div>
     <div class="modal fade" id="product-editor-modal" tabindex="-1" aria-labelledby="product-editor-title" aria-hidden="true">
@@ -140,7 +151,7 @@
                 <label for="product-edit-limit" class="form-label">حداکثر تعداد خرید</label><input id="product-edit-limit" name="maxPurchaseQuantity" type="number" min="1" max="99" step="1" class="form-control" required />
                 <p class="text-muted mt-2">قیمت نهایی فروش عادی وارد می‌شود؛ قیمت اختصاصی تنوع یا طرح جداگانه تنظیم می‌شود.</p>
             </div>
-            <div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button type="submit" class="btn btn-primary">ذخیره</button></div>
+            <div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button type="submit" class="btn btn-primary"><i class="fa fa-floppy-disk me-1" aria-hidden="true"></i>ذخیره</button></div>
         </form></div>
     </div>
     <div class="modal fade" id="product-image-modal" tabindex="-1" aria-labelledby="product-image-title" aria-hidden="true">
@@ -153,7 +164,7 @@
                 <label for="product-image-file" class="form-label">انتخاب تصویر، حداکثر ۱۰ مگابایت</label>
                 <input id="product-image-file" name="image" type="file" accept="image/jpeg,image/png,image/webp" class="form-control" required />
             </div>
-            <div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button type="submit" class="btn btn-primary">بارگذاری تصویر</button></div>
+            <div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button type="submit" class="btn btn-primary"><i class="fa fa-cloud-arrow-up me-1" aria-hidden="true"></i>بارگذاری تصویر</button></div>
         </form></div>
     </div>
     <div class="modal fade" id="product-file-modal" tabindex="-1" aria-labelledby="product-file-title" aria-hidden="true">
@@ -169,7 +180,18 @@
                 <label for="product-file-input" class="form-label">فایل PDF تا ۱۰ یا ویدئو تا ۵۰ مگابایت</label>
                 <input id="product-file-input" name="file" type="file" accept="application/pdf,video/mp4" class="form-control" required />
             </div>
-            <div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button type="submit" class="btn btn-primary">بارگذاری و اتصال</button></div>
+            <div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button type="submit" class="btn btn-primary"><i class="fa fa-cloud-arrow-up me-1" aria-hidden="true"></i>بارگذاری و اتصال</button></div>
+        </form></div>
+    </div>
+}
+@if (catalogSection == "payment-institutions" && User.IsInRole("system.full-access"))
+{
+    <div class="modal fade" id="payment-institution-image-modal" tabindex="-1" aria-labelledby="payment-institution-image-title" aria-hidden="true">
+        <div class="modal-dialog"><form class="modal-content" data-payment-institution-image-form enctype="multipart/form-data">
+            @Html.AntiForgeryToken()<input type="hidden" name="paymentInstitutionCode" /><input type="hidden" name="kind" value="payment" />
+            <div class="modal-header"><h2 class="modal-title fs-5" id="payment-institution-image-title">لوگوی درگاه</h2><button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="بستن"></button></div>
+            <div class="modal-body"><p data-payment-institution-name></p><label for="payment-institution-image-file" class="form-label">لوگوی PNG یا SVG، حداکثر ۱۰ مگابایت</label><input id="payment-institution-image-file" name="file" type="file" accept="image/jpeg,image/png,image/webp,image/svg+xml" class="form-control" required /></div>
+            <div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button type="submit" class="btn btn-primary">بارگذاری لوگو</button></div>
         </form></div>
     </div>
 }
@@ -187,7 +209,7 @@
                     <label class="form-label" for="category-name-en">نام لاتین</label><input class="form-control mb-3" id="category-name-en" name="nameEn" maxlength="200" required />
                     <label class="form-label" for="category-parent">دستهٔ والد</label><select class="form-select" id="category-parent" name="parentId"></select>
                     <p class="text-muted mt-2">والد دسته پس از ساخت تغییر نمی‌کند. برای دستهٔ دارای کالای منتشرشده نمی‌توان زیردسته ساخت.</p>
-                </div><div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button type="submit" class="btn btn-primary">ذخیره</button></div>
+                </div><div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button type="submit" class="btn btn-primary"><i class="fa fa-floppy-disk me-1" aria-hidden="true"></i>ذخیره</button></div>
             </form></div>
         </div>
     }
@@ -202,7 +224,7 @@
                 <label for="category-highlights" class="form-label">نکات برجسته، هر مورد در یک خط</label><textarea id="category-highlights" name="highlights" class="form-control mb-3" rows="4"></textarea>
                 <label for="category-specs" class="form-label">مشخصات عمومی، هر خط به شکل «عنوان | مقدار»</label><textarea id="category-specs" name="specs" class="form-control" rows="5"></textarea>
             </div>
-            <div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button type="submit" class="btn btn-primary">ذخیره</button></div>
+            <div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button type="submit" class="btn btn-primary"><i class="fa fa-floppy-disk me-1" aria-hidden="true"></i>ذخیره</button></div>
         </form></div>
     </div>
 }
@@ -218,7 +240,7 @@
                 <label for="brand-name-en" class="form-label">نام لاتین</label><input id="brand-name-en" name="nameEn" class="form-control mb-3" maxlength="200" required />
                 <label for="brand-country" class="form-label">کشور</label><select id="brand-country" name="countryCode" class="form-select"></select>
             </div>
-            <div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button type="submit" class="btn btn-primary">ذخیره</button></div>
+            <div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button type="submit" class="btn btn-primary"><i class="fa fa-floppy-disk me-1" aria-hidden="true"></i>ذخیره</button></div>
         </form></div>
     </div>
     <div class="modal fade" id="brand-image-modal" tabindex="-1" aria-labelledby="brand-image-title" aria-hidden="true">
@@ -226,7 +248,7 @@
             @Html.AntiForgeryToken()<input type="hidden" name="brandKey" /><input type="hidden" name="kind" value="brand" />
             <div class="modal-header"><h2 class="modal-title fs-5" id="brand-image-title">نشان برند</h2><button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="بستن"></button></div>
             <div class="modal-body"><p data-brand-image-name></p><label for="brand-image-file" class="form-label">تصویر JPEG، PNG یا WebP، حداکثر ۱۰ مگابایت</label><input id="brand-image-file" name="file" type="file" accept="image/jpeg,image/png,image/webp" class="form-control" required /></div>
-            <div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button type="submit" class="btn btn-primary">بارگذاری نشان</button></div>
+            <div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button type="submit" class="btn btn-primary"><i class="fa fa-cloud-arrow-up me-1" aria-hidden="true"></i>بارگذاری نشان</button></div>
         </form></div>
     </div>
 }
@@ -245,7 +267,7 @@
                 <div class="form-check mb-2"><input id="attribute-filterable" name="isFilterable" type="checkbox" class="form-check-input" /><label for="attribute-filterable" class="form-check-label">نمایش در فیلتر کاتالوگ</label></div>
                 <div class="form-check"><input id="attribute-highlight" name="isHighlight" type="checkbox" class="form-check-input" /><label for="attribute-highlight" class="form-check-label">نمایش برجسته در کارت</label></div>
             </div>
-            <div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button type="submit" class="btn btn-primary">ذخیره</button></div>
+            <div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button type="submit" class="btn btn-primary"><i class="fa fa-floppy-disk me-1" aria-hidden="true"></i>ذخیره</button></div>
         </form></div>
     </div>
 }

@@ -15,16 +15,18 @@ function checkoutCart() {
   let items = [{id:'1', price:100, quantity:1, salesPlanId:'regular'}];
   const document = {querySelector: selector => selector === '#cartView .cart-checkout-link' ? link : null,
     querySelectorAll: () => [], addEventListener: (name, fn) => { listeners[name] = fn; }};
-  const ui = {ready: fn => fn(), mount: (name, root, fn) => fn(), auth: {isLoggedIn: () => false},
-    storage: {get: (key, fallback) => values[key] ?? fallback, set: (key, value) => {values[key] = value;}},
+  const ui = {ready: fn => fn(), mount: (name, root, fn) => fn(), auth: {isLoggedIn: () => true},
+    storage: {get: (key, fallback) => values[key] ?? fallback, set: (key, value) => {values[key] = value;}, hydrate: (key, value) => {values[key] = value; return true;}},
+    api: {request: async () => ({ok: true, json: async () => ({addresses: [address], checkout: {selectedAddressId: "home", paymentMethod: "zarinpal"}})})},
     cart: {read: () => items}, setMessage() {}};
   const window = {HNUI: ui, addEventListener() {}};
   vm.runInNewContext(fs.readFileSync(path.join(root, 'Shop/wwwroot/shop/js/pages/checkout.js'), 'utf8'), {window, document, console});
   return {getLink: () => link, replaceLink: () => {link = makeLink();}, listeners, setItems: value => {items = value;}};
 }
 
-test('selected address enables cart preview and regenerated link follows cart state', () => {
+test('account address enables cart preview and regenerated link follows cart state', async () => {
   const page = checkoutCart();
+  await new Promise(resolve => setImmediate(resolve));
   assert.equal(page.getLink().attributes['aria-disabled'], 'false');
   page.replaceLink();
   page.listeners['hn:cart-change']();
@@ -49,11 +51,14 @@ function checkoutPayment() {
   const status = {};
   const document = {querySelector: selector => selector === '#finalPayment' ? payment : selector === '#paymentStatus' ? status : null,
     querySelectorAll: () => [], addEventListener: (name, fn) => { handlers[name] = fn; }};
-  let loggedIn = false;
+  let loggedIn = true;
   const ui = {ready: fn => fn(), mount: (name, root, fn) => fn(), auth: {isLoggedIn: () => loggedIn},
-    storage: {get: (key, fallback) => values[key] ?? fallback, set: (key, value) => {values[key] = value;}},
+    storage: {get: (key, fallback) => values[key] ?? fallback, set: (key, value) => {values[key] = value;}, hydrate: (key, value) => {values[key] = value; return true;}},
     cart: {read: () => items, write() {}}, setMessage: (element, message) => { if (element) element.message = message; },
-    api: {request: (url, options) => { const pending = deferred(); requests.push({url, options, ...pending}); return pending.promise; }}};
+    api: {request: (url, options) => {
+      if (url === "account/state") return Promise.resolve({ok: true, json: async () => ({addresses: [address], checkout: {selectedAddressId: "1", paymentMethod: "zarinpal"}})});
+      const pending = deferred(); requests.push({url, options, ...pending}); return pending.promise;
+    }}};
   const window = {HNUI: ui, addEventListener() {}};
   vm.runInNewContext(fs.readFileSync(path.join(root, 'Shop/wwwroot/shop/js/pages/checkout.js'), 'utf8'), {window, document, console});
   return {handlers, requests, payment, status, logIn: () => {loggedIn = true;}};

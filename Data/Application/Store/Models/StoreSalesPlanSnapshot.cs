@@ -14,7 +14,10 @@ public sealed record StoreProductPriceOptionRow(
     string Label,
     IReadOnlyList<StoreProductPriceOptionValueRow> Values);
 
-public sealed record StoreProductPriceOptionValueRow(string Key, string Label, decimal PriceDelta);
+public sealed record StoreProductPriceOptionValueRow(string Key, string Label, decimal PriceDelta)
+{
+    public long PriceVersionId { get; init; }
+}
 
 public sealed record StoreInventoryVariantRow(
     int ProductId,
@@ -24,7 +27,10 @@ public sealed record StoreInventoryVariantRow(
     string? AttributesJson,
     IReadOnlyDictionary<string, decimal> StockBySalesPlan,
     IReadOnlyDictionary<string, decimal> PriceBySalesPlan,
-    IReadOnlyDictionary<string, decimal> DiscountBySalesPlan);
+    IReadOnlyDictionary<string, decimal> DiscountBySalesPlan)
+{
+    public IReadOnlyDictionary<string, long> PriceVersionIdsBySalesPlan { get; init; } = new Dictionary<string, long>();
+}
 
 public sealed record StoreSalesPlanRow(
     string Id,
@@ -48,4 +54,8 @@ public sealed record StoreSalesOfferRow(
     bool IsEnabled,
     IReadOnlyDictionary<string, decimal> AccessoryPriceAmounts,
     IReadOnlyList<string> AccessoryIds,
-    IReadOnlyDictionary<string, string> SpecificationOverrides);
+    IReadOnlyDictionary<string, string> SpecificationOverrides)
+{
+    public long PriceVersionId { get; init; }
+    public IReadOnlyDictionary<string, long> AccessoryPriceVersionIds { get; init; } = new Dictionary<string, long>();
+}

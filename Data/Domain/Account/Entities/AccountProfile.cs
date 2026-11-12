@@ -1,3 +1,5 @@
+using Shop.Data.Domain.Store.Entities;
+
 namespace Shop.Data.Domain.Account.Entities;
 
 public sealed class AccountProfile
@@ -112,6 +114,8 @@ public sealed class StoreCustomerOrderReference
     public decimal TotalAmount { get; set; }
     public long? IdAddress { get; set; }
     public string PaymentMethod { get; set; } = "";
+    public long IdBank { get; set; }
+    public StoreBank Bank { get; set; } = null!;
     public string? ExternalOrderKey { get; set; }
     public string? ShippingCarrier { get; set; }
     public string? ShippingTrackingCode { get; set; }
@@ -155,6 +159,7 @@ public sealed class StoreCustomerOrderItem
     public int Quantity { get; set; }
     public decimal UnitAmount { get; set; }
     public string OptionsJson { get; set; } = "{}";
+    public ICollection<StoreOrderItemPriceReference> PriceReferences { get; set; } = new List<StoreOrderItemPriceReference>();
 }
 
 public sealed class StorePaymentAttempt

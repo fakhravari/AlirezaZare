@@ -32,6 +32,7 @@ Badge کارت‌های طرح ویژه فقط نام نهایی طرح را ن�
 
 - `GET /api/store/sales-plans` فهرست عمومی طرح‌ها و offers را می‌دهد.
 - `GET /api/store/sales-plans/products/{productId}` projection همان محصول را می‌دهد.
+- `GET /api/store/sales-plans/products/{productId}/price-history?salesPlanId=...` نسخه‌های تاریخی قیمت پایهٔ کالا را از `Store.PriceVersion` می‌دهد.
 - `POST /api/store/sales-plans/quote` quote یک خط، همراه انتخاب ویژگی و متعلقات را محاسبه می‌کند.
 - `POST /api/store/sales-plans/validate-cart` خطوط سبد را جداگانه دوباره quote می‌کند.
 
@@ -105,3 +106,5 @@ UI محصول، انتخاب قیمت و نمایش متعلقات به quote/va
 [فهرست فروشگاه](README.md) · [فهرست مستندات](../README.md)
 
 آخرین تطبیق با کد: ۱۰ نوامبر ۲۰۲۶.
+
+قیمت‌های قابل فروش از آخرین نسخهٔ فعال هر scope خوانده می‌شوند. تغییر قیمت باید نسخهٔ قبلی را حفظ و نسخهٔ تازه را فعال کند؛ تاریخچهٔ پیش از نصب قابل بازیابی نیست.

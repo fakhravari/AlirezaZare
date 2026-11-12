@@ -7,7 +7,7 @@
     async function get(url) { return ui.getJson(url, { cache: "no-store" }); }
     function status(page, message, error = false) { const node = page.querySelector("[data-movement-status]"); node.textContent = message; node.classList.toggle("text-danger", error); node.classList.toggle("text-muted", !error); node.classList.add("small"); node.classList.toggle("d-none", !message); }
     function render(page, rows) {
-        const body = page.querySelector("[data-movement-rows]"); body.replaceChildren();
+        const body = page.querySelector("[data-movement-rows]"); ui.destroyDataTable(page.querySelector("[data-admin-datatable]")); body.replaceChildren();
         for (const item of rows) {
             const row = document.createElement("tr");
             const product = item.variantNameSnapshot ? `${item.productNameSnapshot} — ${item.variantNameSnapshot}` : item.productNameSnapshot;
@@ -16,9 +16,10 @@
             [item.documentDate, number.format(item.documentNumber), item.documentType, item.warehouse, item.salesPlan, product, quantity, delta, number.format(item.balanceAfter), item.status === "F" ? "قطعی" : "موقت", item.reason].forEach(value => row.append(el("td", value || "—")));
             body.append(row);
         }
+        ui.refreshDataTable(page.querySelector("[data-admin-datatable]"));
     }
     function renderAudit(page, rows) {
-        const body = page.querySelector("[data-movement-rows]"); body.replaceChildren();
+        const body = page.querySelector("[data-movement-rows]"); ui.destroyDataTable(page.querySelector("[data-admin-datatable]")); body.replaceChildren();
         for (const item of rows) {
             const row = document.createElement("tr");
             [new Date(item.occurredAtUtc).toLocaleString("fa-IR"), number.format(item.documentNumber),
@@ -34,9 +35,10 @@
             }
             detailsCell.append(details); row.append(detailsCell); body.append(row);
         }
+        ui.refreshDataTable(page.querySelector("[data-admin-datatable]"));
     }
     function renderSummary(page, rows) {
-        const body = page.querySelector("[data-movement-rows]"); body.replaceChildren();
+        const body = page.querySelector("[data-movement-rows]"); ui.destroyDataTable(page.querySelector("[data-admin-datatable]")); body.replaceChildren();
         for (const item of rows) {
             const row = document.createElement("tr");
             const product = item.variant ? `${item.product} — ${item.variant}` : item.product;
@@ -45,6 +47,7 @@
                 .forEach(value => row.append(el("td", value ?? "—")));
             body.append(row);
         }
+        ui.refreshDataTable(page.querySelector("[data-admin-datatable]"));
     }
     async function load(page) {
         const serial = (requests.get(page) || 0) + 1; requests.set(page, serial);
@@ -63,7 +66,9 @@
             status(page, rows.length ? (mode === "summary" ? `${number.format(result.total)} ردیف در گزارش` : "") : mode === "audit" ? "تغییری برای این فیلتر ثبت نشده است." : "گردشی برای این فیلتر پیدا نشد.");
             page.querySelector("[data-movement-page-label]").textContent = `صفحهٔ ${number.format(current)}`;
             page.querySelector('[data-movement-page="-1"]').disabled = current <= 1;
-            page.querySelector('[data-movement-page="1"]').disabled = rows.length < 100 || (mode !== "stock" && current * 100 >= result.total);
+            const hasNext = rows.length >= 100 && (mode === "stock" || current * 100 < result.total);
+            page.querySelector("[data-movement-pagination]").hidden = current <= 1 && !hasNext;
+            page.querySelector('[data-movement-page="1"]').disabled = !hasNext;
         } catch (error) { if (requests.get(page) === serial) status(page, error.message || "دریافت گردش‌ها ناموفق بود.", true); }
     }
     async function initialize(root) {

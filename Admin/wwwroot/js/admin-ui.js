@@ -39,6 +39,26 @@
         if (event.target instanceof HTMLElement) arrangeModalFields(event.target);
     });
 
+    document.addEventListener("click", event => {
+        if (!(event.target instanceof Element)) return;
+        const collapseButton = event.target.closest("[data-admin-panel-collapse]");
+        if (collapseButton) {
+            const body = collapseButton.closest(".admin-page-widget")?.querySelector(".panel-body");
+            if (body) {
+                body.hidden = !body.hidden;
+                const expanded = !body.hidden;
+                collapseButton.setAttribute("aria-expanded", String(expanded));
+                const label = expanded ? "جمع‌کردن پنل" : "بازکردن پنل";
+                collapseButton.setAttribute("aria-label", label);
+                collapseButton.title = label;
+                const icon = collapseButton.querySelector("i");
+                if (icon) icon.className = `fa ${expanded ? "fa-minus" : "fa-plus"}`;
+            }
+        }
+
+        if (event.target.closest("[data-admin-page-reload]")) window.location.reload();
+    });
+
     const numberFormat = new Intl.NumberFormat("fa-IR");
     const labels = {
         id: "شناسه", code: "کد", name: "نام", englishName: "نام لاتین", brandName: "برند",
@@ -78,6 +98,15 @@
         region.append(toast);
         toast.addEventListener("hidden.bs.toast", () => toast.remove(), { once: true });
         window.bootstrap.Toast.getOrCreateInstance(toast, { delay: 4500 }).show();
+    }
+
+    function withIcon(button, iconName) {
+        if (!(button instanceof HTMLElement) || button.querySelector("i.fa, i.fas, i.far, svg")) return button;
+        const icon = document.createElement("i");
+        icon.className = `fa ${iconName} me-1`;
+        icon.setAttribute("aria-hidden", "true");
+        button.prepend(icon);
+        return button;
     }
 
     async function getJson(url, options = {}) {
@@ -127,10 +156,128 @@
         window.bootstrap.Modal.getOrCreateInstance(modal).show();
     }
 
+    const persianTableLanguage = {
+        emptyTable: "داده‌ای برای نمایش وجود ندارد",
+        info: "نمایش _START_ تا _END_ از _TOTAL_ ردیف",
+        infoEmpty: "نمایش ۰ تا ۰ از ۰ ردیف",
+        infoFiltered: "(فیلترشده از _MAX_ ردیف)",
+        lengthMenu: "نمایش _MENU_ ردیف",
+        loadingRecords: "در حال بارگذاری…",
+        processing: "در حال پردازش…",
+        search: "جست‌وجو:",
+        zeroRecords: "ردیفی با این جست‌وجو پیدا نشد",
+        paginate: { first: "نخست", last: "پایان", next: "بعدی", previous: "قبلی" },
+        aria: {
+            orderable: ": برای مرتب‌سازی کلیک کنید",
+            orderableReverse: ": برای مرتب‌سازی معکوس کلیک کنید",
+            orderableRemove: ": برای برداشتن مرتب‌سازی کلیک کنید",
+            paginate: { first: "نخست", last: "پایان", next: "بعدی", previous: "قبلی", number: "" }
+        }
+    };
+
+    const dataTableInstances = new WeakMap();
+
+    function destroyDataTable(table) {
+        const instance = table && dataTableInstances.get(table);
+        if (!instance) return;
+        instance.destroy();
+        dataTableInstances.delete(table);
+    }
+
+    function getDataTable(table) {
+        return table ? dataTableInstances.get(table) || null : null;
+    }
+
+    function decorateTableActions(table) {
+        const icons = [
+            [/ویرایش|تنظیم/u, "fa-pen"],
+            [/حذف/u, "fa-trash"],
+            [/خروج از انتشار/u, "fa-eye-slash"],
+            [/انتشار/u, "fa-paper-plane"],
+            [/تصویر|نشان/u, "fa-image"],
+            [/فایل/u, "fa-file"],
+            [/رهگیری/u, "fa-truck"],
+            [/گذرواژه/u, "fa-key"],
+            [/کپی/u, "fa-copy"],
+            [/ذخیره|ثبت/u, "fa-floppy-disk"],
+            [/افزودن|ایجاد/u, "fa-plus"],
+            [/جست‌وجو|جستجو/u, "fa-magnifying-glass"],
+            [/نمایش|جزئیات/u, "fa-eye"],
+            [/انصراف/u, "fa-xmark"]
+        ];
+        table.querySelectorAll("tbody button.btn").forEach(button => {
+            if (button.querySelector("i.fa, i.fas, i.far, svg")) return;
+            const text = button.getAttribute("aria-label") || button.textContent || "";
+            const match = icons.find(([pattern]) => pattern.test(text));
+            if (!match) return;
+            const icon = document.createElement("i");
+            icon.className = `fa ${match[1]}`;
+            icon.setAttribute("aria-hidden", "true");
+            button.prepend(icon);
+        });
+    }
+
+    function refreshDataTable(table) {
+        if (!table || !table.matches("[data-admin-datatable]")) return;
+        decorateTableActions(table);
+        if (!window.DataTable) return;
+        destroyDataTable(table);
+        if (table.dataset.adminTableMode === "tree") return;
+        if ([...(table.tBodies[0]?.rows || [])].some(row => [...row.cells].some(cell => cell.colSpan > 1))) return;
+        const rowCount = table.tBodies[0]?.rows.length || 0;
+        const header = table.tHead?.rows[table.tHead.rows.length - 1];
+        const expectedColumns = header ? [...header.cells].reduce((total, cell) => total + cell.colSpan, 0) : 0;
+        const malformedRow = [...(table.tBodies[0]?.rows || [])].find(row => [...row.cells].reduce((total, cell) => total + cell.colSpan, 0) !== expectedColumns);
+        if (expectedColumns && malformedRow) {
+            console.error(`جدول مدیریت راه‌اندازی نشد: تعداد ستون‌های ردیف با سرستون برابر نیست (${table.id || "بدون شناسه"}).`);
+            return;
+        }
+        const externallyPaged = table.dataset.adminTableMode === "server";
+        const pageLength = Number(table.dataset.adminPageLength) || 25;
+        const hasActions = [...(table.tHead?.rows[0]?.cells || [])].some(cell => /عملیات|اقدام/u.test(cell.textContent || ""));
+        const localizePaging = () => {
+            const controls = table.closest(".dt-container")?.querySelectorAll(".dt-paging-button .page-link:not(.first):not(.previous):not(.next):not(.last)") || [];
+            controls.forEach(control => { control.textContent = control.textContent.replace(/\d/g, digit => "۰۱۲۳۴۵۶۷۸۹"[Number(digit)]); });
+        };
+        table.dir = "rtl";
+        const instance = new window.DataTable(table, {
+            language: persianTableLanguage,
+            paging: !externallyPaged && rowCount > pageLength,
+            pageLength,
+            lengthChange: !externallyPaged && rowCount > pageLength,
+            lengthMenu: [[10, 25, 50, 100], ["۱۰", "۲۵", "۵۰", "۱۰۰"]],
+            searching: !externallyPaged && table.dataset.adminTableSearch !== "false",
+            ordering: !externallyPaged,
+            order: [],
+            autoWidth: false,
+            deferRender: true,
+            info: !externallyPaged,
+            infoCallback: (settings, start, end, max, total) => `نمایش ${new Intl.NumberFormat("fa-IR").format(start)} تا ${new Intl.NumberFormat("fa-IR").format(end)} از ${new Intl.NumberFormat("fa-IR").format(total)} ردیف`,
+            columnDefs: hasActions ? [{ targets: -1, orderable: false, searchable: false }] : []
+        });
+        instance.on("draw", localizePaging);
+        dataTableInstances.set(table, instance);
+        const controlRow = table.closest(".dt-container")?.querySelector(".dt-search")?.closest(".dt-layout-end")?.parentElement;
+        const searchCell = controlRow?.querySelector(":scope > .dt-layout-end");
+        if (searchCell) {
+            controlRow.classList.add("admin-datatable-control-row");
+            const startCell = controlRow.querySelector(":scope > .dt-layout-start");
+            if (startCell && searchCell !== controlRow.firstElementChild) controlRow.insertBefore(searchCell, controlRow.firstElementChild);
+            [...controlRow.children].forEach(cell => cell.classList.remove("ms-auto", "me-auto"));
+            searchCell.classList.add("admin-datatable-search-cell");
+            if (startCell && !startCell.querySelector("*") && !startCell.textContent.trim()) startCell.hidden = true;
+        }
+        localizePaging();
+    }
+
     window.AdminUI = Object.freeze({
         getJson,
         notify,
         showRecord,
+        getDataTable,
+        destroyDataTable,
+        refreshDataTable,
+        withIcon,
         formatNumber: value => numberFormat.format(value ?? 0)
     });
 })();

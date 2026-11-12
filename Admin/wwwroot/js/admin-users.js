@@ -30,11 +30,12 @@
         status.classList.remove("text-danger"); status.classList.add("text-muted", "small");
         status.textContent = "در حال بارگذاری…";
         try {
-            const result = await request(page.dataset.api);
+            const result = await request(`${page.dataset.api}?section=${encodeURIComponent(page.dataset.adminUsersPage || "users")}`);
             if (sequence !== loadSequence || page.isConnected === false) return;
             data = result;
-            renderUsers(page);
-            renderRoles(page);
+            if (page.dataset.adminUsersPage === "users") renderUsers(page);
+            if (page.dataset.adminUsersPage === "permissions") renderRoles(page);
+            if (page.dataset.adminUsersPage === "roles") renderRoleManagement(page);
             status.textContent = "";
         } catch (error) {
             if (sequence !== loadSequence || page.isConnected === false) return;
@@ -45,6 +46,7 @@
 
     function renderUsers(page) {
         const body = page.querySelector("[data-users-rows]");
+        ui.destroyDataTable(page.querySelector("[data-admin-datatable]"));
         body.replaceChildren();
         for (const user of data.users) {
             const row = document.createElement("tr");
@@ -61,9 +63,11 @@
             const actions = el("td", null, "text-nowrap");
             const edit = el("button", "ویرایش", "btn btn-sm btn-default me-1");
             edit.type = "button";
+            ui.withIcon(edit, "fa-pen-to-square");
             edit.addEventListener("click", () => openUserModal(page, user));
             const reset = el("button", "گذرواژه", "btn btn-sm btn-outline-secondary");
             reset.type = "button";
+            ui.withIcon(reset, "fa-key");
             reset.addEventListener("click", () => openPasswordModal(page, user));
             actions.append(edit, reset);
             row.append(name, roles, warehouses, state, login, actions);
@@ -76,6 +80,7 @@
             row.append(cell);
             body.append(row);
         }
+        ui.refreshDataTable(page.querySelector("[data-admin-datatable]"));
     }
 
     function addCheck(container, name, id, label, checked, depth = 0) {
@@ -125,7 +130,6 @@
             select.append(option);
         }
         if (data.roles.some(role => String(role.id) === previousRole)) select.value = previousRole;
-        page.querySelector("[data-role-active]").checked = byId(data.roles, Number(select.value))?.isActive ?? false;
         renderPermissions(page);
     }
 
@@ -133,10 +137,8 @@
         const tree = page.querySelector("[data-permission-tree]");
         const roleId = Number(page.querySelector("[data-role-select]").value);
         const role = byId(data.roles, roleId);
-        page.querySelector("[data-role-name]").value = role?.name || "";
-        page.querySelector("[data-role-name]").disabled = role?.roleKey === "system.full-access";
-        page.querySelector("[data-role-active]").disabled = role?.roleKey === "system.full-access";
-        page.querySelector("[data-role-active]").checked = role?.isActive ?? false;
+        const save = page.querySelector("[data-role-save]");
+        save.disabled = !role || role.roleKey === "system.full-access";
         tree.replaceChildren();
         const childrenByParent = new Map();
         for (const permission of data.permissions) {
@@ -206,11 +208,34 @@
         tree.replaceChildren(appendChildren(null));
     }
 
+    function renderRoleManagement(page) {
+        const body = page.querySelector("[data-role-rows]");
+        ui.destroyDataTable(page.querySelector("[data-admin-datatable]"));
+        body.replaceChildren();
+        for (const role of data.roles) {
+            const row = document.createElement("tr");
+            row.append(
+                el("td", role.name),
+                el("td", role.roleKey, "font-monospace"),
+                el("td", new Intl.NumberFormat("fa-IR").format(role.userCount ?? data.users.filter(user => user.roleIds.includes(role.id)).length)),
+                el("td", role.isActive ? "فعال" : "غیرفعال")
+            );
+            const actions = el("td", null, "text-nowrap");
+            const edit = el("button", "ویرایش", "btn btn-sm btn-default");
+            edit.type = "button";
+            edit.dataset.roleEdit = String(role.id);
+            actions.append(edit);
+            row.append(actions);
+            body.append(row);
+        }
+        ui.refreshDataTable(page.querySelector("[data-admin-datatable]"));
+    }
+
     function openPasswordModal(page, user) {
         const old = document.getElementById("admin-password-modal");
         old?.remove();
         const wrapper = document.createElement("div");
-        wrapper.innerHTML = `<div class="modal fade" id="admin-password-modal" tabindex="-1" aria-labelledby="admin-password-title" aria-hidden="true"><div class="modal-dialog"><form class="modal-content" data-password-form><div class="modal-header"><h2 class="modal-title fs-5" id="admin-password-title">تغییر گذرواژه: ${escapeHtml(user.userName)}</h2><button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="بستن"></button></div><div class="modal-body"><label class="form-label" for="admin-new-password">گذرواژهٔ جدید</label><input class="form-control" id="admin-new-password" name="password" type="password" minlength="12" maxlength="200" autocomplete="new-password" required /></div><div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button class="btn btn-primary" type="submit">ذخیرهٔ گذرواژه</button></div></form></div></div>`;
+        wrapper.innerHTML = `<div class="modal fade" id="admin-password-modal" tabindex="-1" aria-labelledby="admin-password-title" aria-hidden="true"><div class="modal-dialog"><form class="modal-content" data-password-form><div class="modal-header"><h2 class="modal-title fs-5" id="admin-password-title">تغییر گذرواژه: ${escapeHtml(user.userName)}</h2><button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="بستن"></button></div><div class="modal-body"><label class="form-label" for="admin-new-password">گذرواژهٔ جدید</label><input class="form-control" id="admin-new-password" name="password" type="password" maxlength="200" autocomplete="new-password" required /><small class="form-text">هر گذرواژهٔ غیرخالی تا ۲۰۰ نویسه پذیرفته می‌شود.</small></div><div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button class="btn btn-primary" type="submit">ذخیرهٔ گذرواژه</button></div></form></div></div>`;
         const node = wrapper.firstElementChild;
         document.body.append(node);
         const passwordModal = window.bootstrap.Modal.getOrCreateInstance(node);
@@ -243,32 +268,31 @@
         if (!page || initialized.has(page)) return;
         initialized.add(page);
         data = undefined;
-        modal = window.bootstrap?.Modal?.getOrCreateInstance(document.getElementById("admin-user-modal"));
-        page.querySelector("[data-user-create]").addEventListener("click", () => { if (data) openUserModal(page); else ui.notify("اطلاعات کاربران هنوز بارگذاری نشده است.", "danger"); });
-        page.querySelector("[data-role-select]").addEventListener("change", () => { if (data) renderPermissions(page); });
-        page.querySelector("[data-role-save]").addEventListener("click", async event => {
+        const mode = page.dataset.adminUsersPage || "users";
+        const roleSelect = page.querySelector("[data-role-select]");
+        if (mode === "users") {
+            modal = window.bootstrap?.Modal?.getOrCreateInstance(document.getElementById("admin-user-modal"));
+            page.querySelector("[data-user-create]").addEventListener("click", () => { if (data) openUserModal(page); else ui.notify("اطلاعات کاربران هنوز بارگذاری نشده است.", "danger"); });
+        }
+        if (roleSelect) roleSelect.addEventListener("change", () => { if (data) renderPermissions(page); });
+        page.querySelector("[data-role-save]")?.addEventListener("click", async event => {
             const button = event.currentTarget;
             if (button.disabled) return;
-            if (!data) { ui.notify("اطلاعات نقش‌ها هنوز بارگذاری نشده است.", "danger"); return; }
-            const roleId = Number(page.querySelector("[data-role-select]").value);
+            const roleId = Number(roleSelect.value);
+            const role = byId(data?.roles || [], roleId);
+            if (!role) { ui.notify("نقش را انتخاب کنید.", "danger"); return; }
             const permissionIds = [...page.querySelectorAll("[data-permission-tree] input:checked")].map(input => Number(input.value));
-            const selectedRole = byId(data.roles, roleId);
-            const name = page.querySelector("[data-role-name]");
-            if (!selectedRole) { ui.notify("نقش را انتخاب کنید.", "danger"); return; }
-            if (!name.value.trim()) { ui.notify("نام نقش را وارد کنید.", "danger"); name.focus(); return; }
             button.disabled = true;
             try {
-                const result = await request(`${page.dataset.api}/roles/${roleId}`, "PUT", {
-                    name: name.value,
-                    isActive: page.querySelector("[data-role-active]").checked,
-                    permissionIds
+                const result = await request(`${page.dataset.api}/roles/${roleId}?section=permissions`, "PUT", {
+                    name: role.name, isActive: role.isActive, permissionIds
                 });
                 ui.notify(result.message, "success");
                 await load(page);
             } catch (error) { ui.notify(error.message, "danger"); }
             finally { button.disabled = false; }
         });
-        page.querySelector("[data-role-create-form]").addEventListener("submit", async event => {
+        page.querySelector("[data-role-create-form]")?.addEventListener("submit", async event => {
             event.preventDefault();
             const form = event.currentTarget;
             if (form.dataset.saving === "true") return;
@@ -277,8 +301,7 @@
             form.dataset.saving = "true"; submit.disabled = true;
             try {
                 const result = await request(`${page.dataset.api}/roles`, "POST", {
-                    roleKey: form.elements.roleKey.value,
-                    name: form.elements.name.value
+                    roleKey: form.elements.roleKey.value, name: form.elements.name.value
                 });
                 ui.notify(result.message, "success");
                 form.reset();
@@ -286,14 +309,48 @@
             } catch (error) { ui.notify(error.message, "danger"); }
             finally { form.dataset.saving = "false"; submit.disabled = false; }
         });
-        document.querySelector("[data-user-form]").addEventListener("submit", async event => {
+        page.querySelector("[data-role-rows]")?.addEventListener("click", event => {
+            const button = event.target.closest("[data-role-edit]");
+            const role = button && byId(data?.roles || [], Number(button.dataset.roleEdit));
+            if (!role) return;
+            const editor = page.querySelector("[data-role-editor]");
+            const form = page.querySelector("[data-role-edit-form]");
+            form.elements.id.value = String(role.id);
+            form.elements.name.value = role.name;
+            form.elements.name.disabled = role.roleKey === "system.full-access";
+            form.elements.isActive.checked = role.isActive;
+            form.elements.isActive.disabled = role.roleKey === "system.full-access";
+            editor.hidden = false;
+            editor.scrollIntoView({ behavior: "smooth", block: "center" });
+        });
+        page.querySelector("[data-role-edit-form]")?.addEventListener("submit", async event => {
+            event.preventDefault();
+            const form = event.currentTarget;
+            if (form.dataset.saving === "true" || !data) return;
+            if (!form.elements.name.value.trim()) { ui.notify("نام نقش را وارد کنید.", "danger"); form.elements.name.focus(); return; }
+            const role = byId(data.roles, Number(form.elements.id.value));
+            if (!role) return;
+            const submit = form.querySelector('[type="submit"]');
+            form.dataset.saving = "true"; submit.disabled = true;
+            try {
+                const result = await request(`${page.dataset.api}/roles/${role.id}?section=roles`, "PUT", {
+                    name: form.elements.name.value,
+                    isActive: form.elements.isActive.checked
+                });
+                ui.notify(result.message, "success");
+                page.querySelector("[data-role-editor]").hidden = true;
+                await load(page);
+            } catch (error) { ui.notify(error.message, "danger"); }
+            finally { form.dataset.saving = "false"; submit.disabled = false; }
+        });
+        page.querySelector("[data-user-form]")?.addEventListener("submit", async event => {
             event.preventDefault();
             const form = event.currentTarget;
             if (form.dataset.saving === "true") return;
             for (const [name, label] of [["userName", "نام کاربری"], ["displayName", "نام نمایشی"]]) {
                 if (!form.elements[name].value.trim()) { ui.notify(`${label} را وارد کنید.`, "danger"); form.elements[name].focus(); return; }
             }
-            if (form.elements.password.required && !form.elements.password.value.trim()) {
+            if (form.elements.password.required && form.elements.password.value.length === 0) {
                 ui.notify("گذرواژهٔ اولیه را وارد کنید.", "danger"); form.elements.password.focus(); return;
             }
             const selected = name => [...form.querySelectorAll(`[name="${name}"]:checked`)].map(input => Number(input.value));

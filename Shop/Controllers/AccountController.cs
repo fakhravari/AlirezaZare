@@ -9,6 +9,7 @@ using Shop.Data.Infrastructure.Persistence;
 using Shop.Services;
 using Shop.Models;
 using Shop.Data.Domain.Account.Entities;
+using Shop.Data.Domain.Store.Entities;
 
 namespace Shop.Controllers;
 
@@ -119,12 +120,22 @@ public sealed class AccountController(
                 where orderIds.Contains(item.IdCustomerOrder)
                 select new
                 {
-                    item.IdCustomerOrder, item.IdProduct, item.IdProductVariant, item.ProductNameSnapshot,
+                    item.Id, item.IdCustomerOrder, item.IdProduct, item.IdProductVariant, item.ProductNameSnapshot,
                     plan.StoreSalesPlanKey, item.Quantity, item.UnitAmount, item.OptionsJson
                 })
                 .ToListAsync(ct);
+        var orderItemIds = orderItemRows.Select(x => x.Id).ToArray();
+        var orderPriceReferences = orderItemIds.Length == 0 ? [] : await (from reference in db.StoreOrderItemPriceReferences.AsNoTracking()
+            join version in db.StorePriceVersions.AsNoTracking() on reference.IdPriceVersion equals version.Id
+            where orderItemIds.Contains(reference.IdOrderItem)
+            select new { reference.IdOrderItem, reference.IdPriceVersion, version.PriceKind, version.PriceAmount, version.DiscountPercent })
+            .ToListAsync(ct);
         var orderItemsById = orderItemRows.GroupBy(x => x.IdCustomerOrder)
             .ToDictionary(group => group.Key, group => group.ToArray());
+        var shippingHistory = orderIds.Length == 0 ? [] : await db.StoreOrderShippingHistories.AsNoTracking()
+            .Where(x => orderIds.Contains(x.IdOrder)).OrderBy(x => x.Id).Select(x => new { x.IdOrder, x.PreviousStatus, x.NewStatus, x.ChangedAtUtc }).ToListAsync(ct);
+        var trackingHistory = orderIds.Length == 0 ? [] : await db.StoreOrderShipmentTrackingHistories.AsNoTracking()
+            .Where(x => orderIds.Contains(x.IdOrder)).OrderBy(x => x.Id).Select(x => new { x.IdOrder, x.Carrier, x.TrackingCode, x.ChangedAtUtc }).ToListAsync(ct);
 
         var state = new Dictionary<string, object?>
         {
@@ -203,8 +214,16 @@ public sealed class AccountController(
                     salesPlanId = item.StoreSalesPlanKey,
                     item.Quantity,
                     item.UnitAmount,
-                    options = ParseJson(item.OptionsJson)
-                }).ToArray()
+                    options = ParseJson(item.OptionsJson),
+                    priceReferences = orderPriceReferences.Where(reference => reference.IdOrderItem == item.Id).Select(reference => new
+                    {
+                        priceVersionId = reference.IdPriceVersion,
+                        component = reference.PriceKind,
+                        calculatedUnitAmount = reference.PriceKind is "option" or "accessory" or "order-snapshot" ? reference.PriceAmount : decimal.Round(reference.PriceAmount * (100m - reference.DiscountPercent) / 100m, 0, MidpointRounding.AwayFromZero)
+                    }).ToArray()
+                }).ToArray(),
+                shippingHistory = shippingHistory.Where(entry => entry.IdOrder == order.Id).Select(entry => new { entry.PreviousStatus, entry.NewStatus, changedAtUtc = AsUtc(entry.ChangedAtUtc) }).ToArray(),
+                trackingHistory = trackingHistory.Where(entry => entry.IdOrder == order.Id).Select(entry => new { entry.Carrier, entry.TrackingCode, changedAtUtc = AsUtc(entry.ChangedAtUtc) }).ToArray()
             }).ToArray()
         };
 
@@ -466,7 +485,7 @@ public sealed class AccountController(
         string addressSnapshot = JsonSerializer.Serialize(address, AccountStateJsonOptions);
         var catalog = await plans.ReadAsync(ct);
         var now = DateTimeOffset.UtcNow;
-        var priced = new List<(CartLineRequest Line, decimal UnitAmount, string ProductName)>();
+        var priced = new List<(CartLineRequest Line, decimal UnitAmount, string ProductName, List<StoreOrderItemPriceReference> PriceReferences)>();
         try
         {
             foreach (var (line, parsedOptions) in request.Lines.Zip(checkoutOptions))
@@ -514,6 +533,7 @@ public sealed class AccountController(
                     accessoryIds.Any(id => !allowed.Contains(id, StringComparer.Ordinal)))
                     return Conflict(new { code = "invalid-product-options" });
                 decimal unitAmount = quote.UnitAmount;
+                var priceReferences = new List<StoreOrderItemPriceReference>();
                 ProductInventoryVariant? selectedInventoryVariant = catalog.InventoryVariants.SingleOrDefault(variant =>
                     variant.ProductId == line.ProductId && variant.VariantId == line.VariantId);
                 if (selectedInventoryVariant is not null &&
@@ -524,11 +544,18 @@ public sealed class AccountController(
                     unitAmount = decimal.Round(variantPrice * (100m - variantDiscount) / 100m, 0,
                         MidpointRounding.AwayFromZero);
                 }
+                long basePriceVersionId = selectedInventoryVariant?.PriceVersionIdsBySalesPlan.GetValueOrDefault(line.SalesPlanId) ?? 0;
+                if (basePriceVersionId == 0) basePriceVersionId = offer.PriceVersionId;
+                if (basePriceVersionId > 0)
+                    priceReferences.Add(new StoreOrderItemPriceReference { IdPriceVersion = basePriceVersionId });
 
                 foreach (var option in configuration.Options)
                 {
                     string selected = variantValues[option.Key];
-                    unitAmount += option.Values.Single(v => v.Key == selected).PriceDelta;
+                    var selectedValue = option.Values.Single(v => v.Key == selected);
+                    unitAmount += selectedValue.PriceDelta;
+                    if (selectedValue.PriceVersionId > 0)
+                        priceReferences.Add(new StoreOrderItemPriceReference { IdPriceVersion = selectedValue.PriceVersionId });
                 }
 
                 foreach (var accessory in configuration.Accessories)
@@ -537,11 +564,13 @@ public sealed class AccountController(
                         if (!offer.AccessoryPriceAmounts.TryGetValue(accessory.Key, out var amount))
                             return Conflict(new { code = "invalid-product-options" });
                         unitAmount += amount;
+                        if (offer.AccessoryPriceVersionIds.TryGetValue(accessory.Key, out long accessoryPriceId) && accessoryPriceId > 0)
+                            priceReferences.Add(new StoreOrderItemPriceReference { IdPriceVersion = accessoryPriceId });
                     }
 
                 if (unitAmount != line.ExpectedUnitAmount)
                     return Conflict(new { code = "price-or-stock-changed" });
-                priced.Add((line, unitAmount, productName));
+                priced.Add((line, unitAmount, productName, priceReferences));
             }
         }
         catch (SalesPlanUnavailableException)
@@ -561,6 +590,11 @@ public sealed class AccountController(
         if (checkoutPlanIds.Count != checkoutPlanKeys.Length)
             return Conflict(new { code = "price-or-stock-changed" });
 
+        var paymentBank = await db.StoreBanks.AsNoTracking()
+            .SingleOrDefaultAsync(x => x.Code == request.PaymentMethod && x.IsActive, ct);
+        if (paymentBank is null || paymentBank.Code != "zarinpal")
+            return Conflict(new { code = "payment-method-unavailable" });
+
         var order = new StoreCustomerOrderReference
         {
             IdProfile = ProfileId,
@@ -568,6 +602,7 @@ public sealed class AccountController(
             OrderNumber = number,
             Status = "pending-payment",
             PaymentMethod = request.PaymentMethod,
+            IdBank = paymentBank.Id,
             ItemCount = count,
             TotalAmount = total,
             AddressSnapshotJson = addressSnapshot,
@@ -581,7 +616,8 @@ public sealed class AccountController(
                 Quantity = item.Line.Quantity,
                 UnitAmount = item.UnitAmount,
                 OptionsJson = item.Line.Options is { ValueKind: System.Text.Json.JsonValueKind.Object } options
-                    ? options.GetRawText() : "{}"
+                    ? options.GetRawText() : "{}",
+                PriceReferences = item.PriceReferences
             }).ToList()
         };
         db.StoreCustomerOrders.Add(order);

@@ -28,9 +28,18 @@
         return ui.getJson(url, { method, headers: { ...(body ? { "Content-Type": "application/json" } : {}), RequestVerificationToken: token(page) }, ...(body ? { body: JSON.stringify(body) } : {}) });
     }
     function element(tag, text, cls) { const node = document.createElement(tag); if (text != null) node.textContent = text; if (cls) node.className = cls; return node; }
+    function actionButton(label, iconName, cls) {
+        const button = element("button", null, cls);
+        button.type = "button";
+        const icon = element("i", null, `fa ${iconName}`);
+        icon.setAttribute("aria-hidden", "true");
+        button.append(icon, document.createTextNode(label));
+        return button;
+    }
     function active(value) { return value ? "فعال" : "غیرفعال"; }
     function renderTable(page, rows, config) {
         const head = page.querySelector("[data-definition-head]"), body = page.querySelector("[data-definition-rows]");
+        ui.destroyDataTable(page.querySelector("[data-admin-datatable]"));
         head.replaceChildren(); body.replaceChildren();
         const tr = document.createElement("tr");
         for (const [, label] of config.columns) tr.append(element("th", label));
@@ -49,8 +58,7 @@
             }
             const actions = element("td", null, "text-nowrap");
             if (item.isActive === false && page.dataset.definitionSection === "units" && page.dataset.canEdit === "true") {
-                const activate = element("button", "فعال‌سازی", "btn btn-sm btn-outline-success");
-                activate.type = "button";
+                const activate = actionButton("فعال‌سازی", "fa-toggle-on", "btn btn-sm btn-outline-success");
                 activate.addEventListener("click", async () => {
                     if (activate.disabled) return;
                     activate.disabled = true;
@@ -62,11 +70,11 @@
             }
             if (item.isActive !== false) {
                 if (page.dataset.canEdit === "true") {
-                    const edit = element("button", "ویرایش", "btn btn-sm btn-default me-1"); edit.type = "button"; edit.addEventListener("click", () => void openForm(page, item, config).catch(error => ui.notify(error.message || "بازکردن فرم ناموفق بود.", "danger")));
+                    const edit = actionButton("ویرایش", "fa-pen-to-square", "btn btn-sm btn-default me-1"); edit.addEventListener("click", () => void openForm(page, item, config).catch(error => ui.notify(error.message || "بازکردن فرم ناموفق بود.", "danger")));
                     actions.append(edit);
                 }
                 if (page.dataset.canDeactivate === "true" && page.dataset.definitionSection !== "stock-owners") {
-                const deactivate = element("button", "غیرفعال‌سازی", "btn btn-sm btn-outline-danger"); deactivate.type = "button";
+                const deactivate = actionButton("غیرفعال‌سازی", "fa-toggle-off", "btn btn-sm btn-outline-danger");
                 deactivate.addEventListener("click", async () => {
                     if (deactivate.disabled || !window.confirm("این تعریف غیرفعال شود؟ سابقهٔ گردش‌ها حفظ می‌شود.")) return;
                     deactivate.disabled = true;
@@ -79,6 +87,7 @@
             }
             row.append(actions); body.append(row);
         }
+        ui.refreshDataTable(page.querySelector("[data-admin-datatable]"));
         if (!rows.length) setStatus(page, "موردی ثبت نشده است.");
     }
     function addField(host, field, data, lookups) {
@@ -140,6 +149,7 @@
         company.onchange = fillWarehouses; fillWarehouses();
         fill(form.elements.salesPlanId, data.plans, item => item.displayName);
         const rows = page.querySelector("[data-mapping-rows]");
+        ui.destroyDataTable(page.querySelector("[data-admin-datatable]"));
         rows.replaceChildren();
         for (const link of data.links) {
             const warehouseRow = data.warehouses.find(item => item.id === link.idWarehouse);
@@ -148,8 +158,7 @@
             const companyRow = data.companies.find(item => item.id === warehouseRow.idCompany);
             const row = element("tr");
             row.append(element("td", companyRow?.name || "—"), element("td", warehouseRow.name), element("td", planRow.displayName));
-            const actions = element("td"), remove = element("button", "حذف اتصال", "btn btn-sm btn-outline-danger");
-            remove.type = "button";
+            const actions = element("td"), remove = actionButton("حذف اتصال", "fa-link-slash", "btn btn-sm btn-outline-danger");
             remove.addEventListener("click", async () => {
                 if (remove.disabled || !window.confirm("اتصال این مالک به انبار حذف شود؟")) return;
                 remove.disabled = true;
@@ -160,6 +169,7 @@
             actions.append(remove); row.append(actions);
             rows.append(row);
         }
+        ui.refreshDataTable(page.querySelector("[data-admin-datatable]"));
         if (data.siteWarehouseId) { const selected = data.warehouses.find(item => item.id === data.siteWarehouseId); if (selected) { company.value = String(selected.idCompany); fillWarehouses(); warehouse.value = String(selected.id); } }
     }
     async function load(page) {

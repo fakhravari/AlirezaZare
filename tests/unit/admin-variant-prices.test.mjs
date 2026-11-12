@@ -17,7 +17,7 @@ test("price drafts survive search and cannot be saved twice while pending", asyn
   const nodes = { "[data-price-filter]": filter, "[data-price-filter] input": search, "[data-price-rows]": body, "[data-price-count]": count, "[data-price-status]": status, "[data-price-refresh]": refresh };
   const page = { dataset: { api: "/prices", canEdit: "true" }, querySelector: selector => nodes[selector] || null };
   const calls = [];
-  const window = { AdminUI: { notify() {}, getJson(url, options) { calls.push(options.method); return options.method === "GET" ? Promise.resolve([{ variantId: 1, productName: "کالا", variantName: "آبی", salesPlanName: "عادی", salesPlanId: "regular", priceAmount: 10, discountPercent: 0 }]) : new Promise(() => {}); } } };
+  const window = { AdminUI: { notify() {}, withIcon() {}, destroyDataTable() {}, refreshDataTable() {}, getJson(url, options) { calls.push(options.method); return options.method === "GET" ? Promise.resolve([{ variantId: 1, productName: "کالا", variantName: "آبی", salesPlanName: "عادی", salesPlanId: "regular", priceAmount: 10, discountPercent: 0 }]) : new Promise(() => {}); } } };
   vm.runInNewContext(source, { window, document: { createElement: () => new Element() }, WeakSet, Map, Set, Intl, Number, encodeURIComponent });
   window.AdminVariantPrices.initialize({ querySelector: () => page });
   await new Promise(resolve => setImmediate(resolve));

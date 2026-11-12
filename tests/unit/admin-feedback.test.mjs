@@ -13,7 +13,7 @@ test("feedback keeps the latest filter result when requests finish out of order"
   const form = { addEventListener() {} };
   const map = { "[data-feedback-filter]": filter, "[data-feedback-status]": status, "[data-feedback-rows]": rows, "[data-feedback-page-label]": label, '[data-feedback-page="-1"]': previous, '[data-feedback-page="1"]': next };
   const page = { dataset: { api: "/feedback" }, querySelector: selector => map[selector], querySelectorAll: () => [] };
-  const window = { AdminUI: { getJson: () => new Promise(resolve => requests.push(resolve)) } };
+  const window = { AdminUI: { destroyDataTable() {}, refreshDataTable() {}, getJson: () => new Promise(resolve => requests.push(resolve)) } };
   const document = { createElement: element, querySelector: selector => selector === "[data-feedback-form]" ? form : null };
   class EmptyFormData { *[Symbol.iterator]() {} }
   vm.runInNewContext(source, { window, document, Intl, URLSearchParams, FormData: EmptyFormData, WeakSet, setTimeout });

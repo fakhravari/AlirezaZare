@@ -1,4 +1,204 @@
 /* Shared presentation for every management dialog. */
+.dt-container,
+.dt-container .dt-layout-row,
+.dt-container .dt-layout-cell {
+    direction: rtl;
+    text-align: right;
+}
+
+.dt-container .dt-layout-row.admin-datatable-control-row {
+    justify-content: flex-start;
+    gap: .75rem;
+}
+
+.dt-container .dt-layout-row.admin-datatable-control-row .admin-datatable-search-cell {
+    text-align: right;
+}
+
+.dt-container .dt-search {
+    margin: 0;
+    direction: rtl;
+    text-align: right;
+}
+
+.dt-container .dt-search label {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+}
+
+.dt-container table.dataTable {
+    direction: rtl;
+    text-align: right;
+    border: 1px solid #cbd5df;
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: .55rem;
+    overflow: hidden;
+}
+
+.dt-container table.dataTable thead th,
+.dt-container table.dataTable tbody td {
+    border: 0;
+    border-block-end: 1px solid #d8e0e7;
+    border-inline-start: 1px solid #d8e0e7;
+    text-align: right;
+    vertical-align: middle;
+}
+
+.dt-container table.dataTable tr > :first-child {
+    border-inline-start: 0;
+}
+
+.dt-container table.dataTable tbody tr:last-child > * {
+    border-block-end: 0;
+}
+
+.dt-container table.dataTable thead th {
+    background: #f3f6f8;
+    color: #253746;
+    font-weight: 700;
+}
+
+.dt-container table.dataTable tbody tr:hover > * {
+    background-color: #f4f9fb;
+}
+
+.dt-container .dt-search input,
+.dt-container .dt-length select {
+    min-height: 2.35rem;
+    margin-inline: .4rem;
+    border: 1px solid #d5dde3;
+    border-radius: .55rem;
+    padding: .35rem .65rem;
+    background-color: #fff;
+}
+
+.admin-header-profile {
+    gap: .55rem;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+}
+
+.admin-header-profile__avatar {
+    display: inline-grid;
+    width: 2rem;
+    height: 2rem;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--bs-teal, #00acac);
+    color: #fff;
+    font-weight: 700;
+}
+
+.navbar-user .dropdown-menu {
+    min-width: 12rem;
+    padding-block: .45rem;
+    border: 1px solid #d8e0e7;
+    border-radius: .6rem;
+    box-shadow: 0 .5rem 1.25rem rgb(32 37 42 / 12%);
+}
+
+.admin-page-widget > .panel-heading {
+    gap: 1rem;
+}
+
+.admin-page-widget > .panel-heading > .panel-heading-btn {
+    margin-inline-start: auto;
+}
+
+.admin-page-widget__context {
+    display: block;
+    margin-top: .15rem;
+    color: rgb(255 255 255 / 68%);
+}
+
+@media (max-width: 767.98px) {
+    /* The RTL theme positions its closed mobile sidebar beyond the right edge. */
+    html,
+    body {
+        overflow-x: clip;
+    }
+}
+
+.dt-container .pagination {
+    gap: .25rem;
+    padding-inline-start: 0;
+}
+
+.dt-container .page-link {
+    border-radius: .4rem;
+}
+
+.modal-header {
+    direction: rtl;
+    justify-content: space-between;
+}
+
+.modal-header .modal-title {
+    margin: 0;
+}
+
+.modal-header .btn-close {
+    flex: 0 0 auto;
+    margin: 0 !important;
+}
+
+#content .btn,
+.modal .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .4rem;
+    min-height: 2.25rem;
+    padding-inline: .8rem;
+    border-radius: .55rem;
+    font-weight: 600;
+    line-height: 1.35;
+    transition: color .16s ease, background-color .16s ease, border-color .16s ease, box-shadow .16s ease, transform .16s ease;
+}
+
+#content .btn-sm,
+#content .btn-xs,
+.modal .btn-sm,
+.modal .btn-xs {
+    min-height: 1.9rem;
+    padding: .3rem .65rem;
+    font-size: .84rem;
+}
+
+#content .btn .fa,
+#content .btn .fas,
+.modal .btn .fa,
+.modal .btn .fas {
+    font-size: .9em;
+    opacity: .82;
+}
+
+#content .btn:hover:not(:disabled),
+.modal .btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+}
+
+#content .btn:focus-visible,
+.modal .btn:focus-visible {
+    outline: 3px solid rgba(22, 125, 154, .28);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 .15rem rgba(22, 125, 154, .12);
+}
+
+#content .table .btn + .btn,
+#content .table td .btn + .btn {
+    margin-inline-start: .25rem;
+}
+
+#content .panel-heading .panel-heading-btn .btn {
+    box-shadow: 0 2px 7px rgba(20, 45, 60, .12);
+}
+
 .modal-backdrop.show {
     opacity: .62;
     backdrop-filter: blur(3px);

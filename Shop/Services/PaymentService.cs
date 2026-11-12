@@ -14,10 +14,11 @@ public sealed class PaymentService(ShopDbContext db, IPaymentGateway gateway, IL
         decimal amount;
         await using (var transaction = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct))
         {
-            var order = await db.StoreCustomerOrders
+            var order = await db.StoreCustomerOrders.Include(x => x.Bank)
                 .SingleOrDefaultAsync(x => x.Id == orderId && x.IdProfile == profileId, ct);
             if (order is null) return new("not-found");
-            if (order.Status != "pending-payment" || order.TotalAmount <= 0 || order.PaymentMethod != "zarinpal") return new("invalid-order");
+            if (order.Status != "pending-payment" || order.TotalAmount <= 0 || order.PaymentMethod != "zarinpal" ||
+                order.Bank is not { Code: "zarinpal", IsActive: true }) return new("invalid-order");
             bool hasItems = await db.StoreCustomerOrderItems.AnyAsync(x => x.IdCustomerOrder == orderId, ct);
             if (!hasItems) return new("invalid-order");
             bool active = await db.StorePaymentAttempts.AnyAsync(x => x.IdOrder == orderId &&

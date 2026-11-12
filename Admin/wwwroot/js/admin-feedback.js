@@ -18,13 +18,14 @@
         window.bootstrap?.Modal?.getOrCreateInstance(document.getElementById("admin-feedback-modal")).show();
     }
     function render(page, items) {
-        const body = page.querySelector("[data-feedback-rows]"); body.replaceChildren();
+        const body = page.querySelector("[data-feedback-rows]"); ui.destroyDataTable(page.querySelector("[data-admin-datatable]")); body.replaceChildren();
         for (const item of items) {
             const row = document.createElement("tr");
             [item.isSample ? "—" : new Date(item.createdAtUtc).toLocaleDateString("fa-IR"), `${item.productName} (${item.storeProductKey})`, item.isSample ? `${item.displayName} (نمونه)` : item.displayName, item.feedbackText,
                 item.rating == null ? "—" : number.format(item.rating), statusText(item.status), item.adminReply || "—"].forEach(value => row.append(el("td", value)));
             const action = el("td"); const button = el("button", "بررسی", "btn btn-sm btn-default"); button.type = "button"; button.addEventListener("click", () => openModal(item, page)); action.append(button); row.append(action); body.append(row);
         }
+        ui.refreshDataTable(page.querySelector("[data-admin-datatable]"));
     }
     async function load(page) {
         const serial = ++requestSerial;
@@ -35,7 +36,9 @@
             setStatus(page, result.items?.length ? "" : "موردی با این فیلتر پیدا نشد.");
             page.querySelector("[data-feedback-page-label]").textContent = `صفحهٔ ${number.format(pageNumber)} · ${number.format(result.total || 0)} مورد`;
             page.querySelector('[data-feedback-page="-1"]').disabled = pageNumber <= 1;
-            page.querySelector('[data-feedback-page="1"]').disabled = pageNumber * result.pageSize >= result.total;
+            const hasNext = pageNumber * result.pageSize < result.total;
+            page.querySelector("[data-feedback-pagination]").hidden = pageNumber <= 1 && !hasNext;
+            page.querySelector('[data-feedback-page="1"]').disabled = !hasNext;
         } catch (error) { if (serial === requestSerial) setStatus(page, error.message || "دریافت بازخوردها ناموفق بود.", true); }
     }
     function initialize(root) {

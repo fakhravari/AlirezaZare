@@ -12,7 +12,7 @@ test("a stale stock request cannot overwrite current plan options", async () => 
   const page = { dataset: { adminPage: "stock", adminApi: "/stock" }, isConnected: true, setAttribute() {}, removeAttribute() {}, querySelector: key => map[key] || null };
   const refresh = { closest: () => page };
   const document = { addEventListener(type, fn) { (listeners[type] ||= []).push(fn); }, querySelector() { return null; } };
-  const window = { location: { origin: "http://localhost" }, AdminUI: { formatNumber: String, notify() {}, getJson(url) { return new Promise(resolve => calls.push({ url: String(url), resolve })); } } };
+  const window = { location: { origin: "http://localhost" }, AdminUI: { formatNumber: String, notify() {}, destroyDataTable() {}, refreshDataTable() {}, getJson(url) { return new Promise(resolve => calls.push({ url: String(url), resolve })); } } };
   class EmptyFormData { get() { return ""; } }
   class FakeOption { constructor(text, value) { this.text = text; this.value = value; } }
   vm.runInNewContext(source, { window, document, URL, AbortController, WeakMap, Promise, FormData: EmptyFormData, Option: FakeOption });

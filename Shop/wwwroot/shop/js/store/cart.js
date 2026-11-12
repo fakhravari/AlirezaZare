@@ -1,7 +1,7 @@
 (function (window) {
   "use strict";
   if (window.HNCartModel) return;
-  window.HNCartModel = Object.freeze({ create({ document, emit, storage, cartKey, requireLogin, formatNumber, escapeHtml }) {
+  window.HNCartModel = Object.freeze({ create({ document, emit, requireLogin, formatNumber, escapeHtml }) {
   const getSalesPlanData = () => {
     try {
       return JSON.parse(document.querySelector("#storeSalesPlans")?.textContent || "{}");
@@ -327,6 +327,9 @@
       }];
     });
 
+  let cartItems = [];
+  let accountReady = false;
+  let restoringAccount = false;
   const cart = {
     sortBySalesPlan,
     groupBySalesPlan,
@@ -363,36 +366,36 @@
       return `<div class="cart-item-options" aria-label="تنوع انبار، گزینه‌های قیمت و متعلقات انتخاب‌شده">${inventoryVariantMarkup}${variantsMarkup}${accessoriesMarkup}</div>`;
     },
     read() {
-      try {
-        const raw = JSON.parse(storage.get(cartKey, "[]"));
-        const normalized = enforceCartLimits(normalizeCart(raw));
-        if (JSON.stringify(raw) !== JSON.stringify(normalized)) {
-          storage.set(cartKey, JSON.stringify(normalized));
-        }
-        return normalized;
-      } catch {
-        return [];
-      }
+      cartItems = enforceCartLimits(normalizeCart(cartItems));
+      return cartItems;
     },
     restoreAccountLines(lines) {
-      const current = this.read();
-      const key = (item) => JSON.stringify([String(item.id), Number(item.variantId) || null, String(item.salesPlanId || "regular")]);
-      const known = new Set(current.map(key));
+      accountReady = true;
       const restored = [];
+      const known = new Set();
       for (const line of Array.isArray(lines) ? lines : []) {
-        const identity = key(line);
+        const identity = JSON.stringify([String(line.id), Number(line.variantId) || null, String(line.salesPlanId || "regular")]);
         if (known.has(identity)) continue;
         const product = (window.HNProducts || []).find((candidate) => String(candidate.id) === String(line.id));
         if (!product) continue;
         restored.push({ ...product, id: String(line.id), variantId: line.variantId ?? null, quantity: Number(line.quantity), salesPlanId: line.salesPlanId, options: line.options || {} });
         known.add(identity);
       }
-      return restored.length ? this.write([...current, ...restored]) : current;
+      restoringAccount = true;
+      try { return this.write(restored); }
+      finally { restoringAccount = false; }
+    },
+    isAccountReady() {
+      return accountReady;
+    },
+    isRestoringAccount() { return restoringAccount; },
+    resetAccount() {
+      accountReady = false;
+      return this.write([]);
     },
     write(items) {
-      if (!storage.writable(cartKey)) return this.read();
       const safeItems = enforceCartLimits(normalizeCart(items));
-      if (!storage.set(cartKey, JSON.stringify(safeItems))) return this.read();
+      cartItems = safeItems;
       emit("hn:cart-change", safeItems);
       return safeItems;
     },
@@ -400,7 +403,6 @@
       if (!requireLogin(() => cart.add(product, quantity, trigger)))
         return null;
       const items = this.read();
-      if (!storage.writable(cartKey)) return items;
       const requestedQuantity = Math.max(1, Number.parseInt(quantity, 10) || 1);
       const safeProduct = normalizeCart([{ ...product, quantity }])[0];
       if (!safeProduct) return items;

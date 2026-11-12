@@ -11,6 +11,7 @@ using Shop.Data.Domain.Store.Entities;
 using Shop.Data.Domain.Warehouse.Entities;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Xml.Linq;
 
 namespace Shop.Admin.Controllers.Api;
 
@@ -101,9 +102,10 @@ public sealed class StoreMediaUploadApiController(ShopDbContext db, FtpMediaStor
     [HttpPost]
     [ValidateAntiForgeryToken]
     [RequestSizeLimit(52_000_000)]
-    public async Task<IActionResult> Upload([FromForm] string kind, IFormFile file, [FromForm] long? productId, [FromForm] string? title, [FromForm] string? brandKey, [FromForm] string? countryCode, [FromForm] string? articleKey, CancellationToken cancellationToken)
+    public async Task<IActionResult> Upload([FromForm] string kind, IFormFile file, [FromForm] long? productId, [FromForm] string? title, [FromForm] string? brandKey, [FromForm] string? countryCode, [FromForm] string? articleKey, [FromForm] string? paymentInstitutionCode, CancellationToken cancellationToken)
     {
         bool image = ImageFolders.TryGetValue(kind ?? "", out var imageFolder);
+        bool vectorLogo = kind == "payment" && file?.ContentType?.Equals("image/svg+xml", StringComparison.OrdinalIgnoreCase) == true;
         bool document = kind == "product-document";
         bool video = kind == "product-video";
         if (!image && !document && !video) return BadRequest(new { title = "نوع رسانه نامعتبر است." });
@@ -130,6 +132,12 @@ public sealed class StoreMediaUploadApiController(ShopDbContext db, FtpMediaStor
             var brand = await db.StoreBrands.SingleOrDefaultAsync(x => x.BrandKey == brandKey, cancellationToken);
             if (brand is null) return NotFound(new { title = "برند پیدا نشد." });
         }
+        paymentInstitutionCode = paymentInstitutionCode?.Trim();
+        if (!string.IsNullOrEmpty(paymentInstitutionCode) && (kind != "payment" || paymentInstitutionCode.Length > 40 ||
+            !System.Text.RegularExpressions.Regex.IsMatch(paymentInstitutionCode, "^[a-z0-9]+(?:-[a-z0-9]+)*$")))
+            return BadRequest(new { title = "شناسهٔ درگاه پرداخت معتبر نیست." });
+        if (!string.IsNullOrEmpty(paymentInstitutionCode) && !await db.StoreBanks.AnyAsync(x => x.Code == paymentInstitutionCode, cancellationToken))
+            return NotFound(new { title = "درگاه پرداخت پیدا نشد." });
         string? mediaKey = null;
         if (document || video)
         {
@@ -157,18 +165,22 @@ public sealed class StoreMediaUploadApiController(ShopDbContext db, FtpMediaStor
         bool supportedImage = header.AsSpan(0, 3).SequenceEqual(new byte[] { 0xff, 0xd8, 0xff }) ||
             header.AsSpan(0, 8).SequenceEqual(new byte[] { 137, 80, 78, 71, 13, 10, 26, 10 }) ||
             (header.AsSpan(0, 4).SequenceEqual("RIFF"u8) && header.AsSpan(8, 4).SequenceEqual("WEBP"u8));
-        if ((image && !supportedImage) || (document && !header.AsSpan(0, 5).SequenceEqual("%PDF-"u8)) ||
+        if ((image && !supportedImage && !vectorLogo) || (document && !header.AsSpan(0, 5).SequenceEqual("%PDF-"u8)) ||
             (video && !header.AsSpan(4, 4).SequenceEqual("ftyp"u8)))
             return BadRequest(new { title = "محتوای فایل با نوع انتخاب‌شده سازگار نیست." });
 
         stream.Position = 0;
         string name = Guid.NewGuid().ToString("N");
         string folder = image ? imageFolder.Folder : document ? "products/files" : "products/videos";
-        string path = $"content/{folder}/{name}.{(image ? "webp" : document ? "pdf" : "mp4")}";
-        string? thumbnail = image ? $"content/{folder}/{name}-thumbnail.webp" : null;
+        byte[]? vectorBytes = vectorLogo ? await SanitizePaymentSvgAsync(stream, cancellationToken) : null;
+        if (vectorLogo && vectorBytes is null) return BadRequest(new { title = "فایل SVG لوگو معتبر یا ایمن نیست." });
+        string path = !string.IsNullOrEmpty(paymentInstitutionCode)
+            ? $"content/payments/{paymentInstitutionCode}-{name}.{(vectorLogo ? "svg" : "webp")}"
+            : $"content/{folder}/{name}.{(image ? "webp" : document ? "pdf" : "mp4")}";
+        string? thumbnail = image && !vectorLogo ? $"content/{folder}/{name}-thumbnail.webp" : null;
         byte[]? mainBytes = null;
         byte[]? thumbnailBytes = null;
-        if (image)
+        if (image && !vectorLogo)
         {
             try
             {
@@ -196,7 +208,9 @@ public sealed class StoreMediaUploadApiController(ShopDbContext db, FtpMediaStor
         try
         {
             ftp = await storage.ConnectAsync(cancellationToken);
-            FtpStatus result = image
+            FtpStatus result = vectorLogo
+                ? await ftp.UploadBytes(vectorBytes!, "/" + path, FtpRemoteExists.Skip, true, null, cancellationToken)
+                : image
                 ? await ftp.UploadBytes(mainBytes!, "/" + path, FtpRemoteExists.Skip, true, null, cancellationToken)
                 : await ftp.UploadStream(stream, "/" + path, FtpRemoteExists.Skip, true, null, cancellationToken);
             if (result != FtpStatus.Success) throw new IOException("Media upload failed.");
@@ -207,7 +221,7 @@ public sealed class StoreMediaUploadApiController(ShopDbContext db, FtpMediaStor
                 if (result != FtpStatus.Success) throw new IOException("Thumbnail upload failed.");
                 uploaded.Add("/" + thumbnail);
             }
-            if (document || video || !string.IsNullOrEmpty(brandKey) || kind == "country" || kind == "article")
+            if (document || video || !string.IsNullOrEmpty(brandKey) || !string.IsNullOrEmpty(paymentInstitutionCode) || kind == "country" || kind == "article")
             {
                 if (document)
                     db.StoreProductDocuments.Add(new StoreProductDocument
@@ -227,6 +241,16 @@ public sealed class StoreMediaUploadApiController(ShopDbContext db, FtpMediaStor
                     catch (JsonException) { throw new InvalidOperationException("Product video list contains invalid JSON."); }
                     videos.Add(path);
                     media.VideosJson = videos.ToJsonString();
+                }
+                else if (!string.IsNullOrEmpty(paymentInstitutionCode))
+                {
+                    var institution = await db.StoreBanks.SingleOrDefaultAsync(x => x.Code == paymentInstitutionCode, cancellationToken);
+                    if (institution is null)
+                    {
+                        await CleanupUploadedAsync(ftp, uploaded);
+                        return Conflict(new { title = "درگاه دیگر وجود ندارد؛ دوباره تلاش کنید." });
+                    }
+                    institution.LogoPath = path;
                 }
                 else if (kind == "country" || kind == "article")
                 {
@@ -293,6 +317,35 @@ public sealed class StoreMediaUploadApiController(ShopDbContext db, FtpMediaStor
         foreach (string item in paths)
             try { await ftp.DeleteFile(item, CancellationToken.None); }
             catch (Exception cleanupException) { logger.LogWarning(cleanupException, "Failed to clean up uploaded media"); }
+    }
+
+    private static async Task<byte[]?> SanitizePaymentSvgAsync(Stream stream, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var settings = new System.Xml.XmlReaderSettings { DtdProcessing = System.Xml.DtdProcessing.Prohibit, XmlResolver = null, MaxCharactersInDocument = 1_000_000 };
+            using var reader = System.Xml.XmlReader.Create(stream, settings);
+            var root = await System.Xml.Linq.XDocument.LoadAsync(reader, System.Xml.Linq.LoadOptions.None, cancellationToken);
+            XNamespace svg = "http://www.w3.org/2000/svg";
+            var allowedElements = new HashSet<string>(StringComparer.Ordinal) { "svg", "g", "path", "circle", "rect", "ellipse", "line", "polyline", "polygon", "defs", "linearGradient", "radialGradient", "stop", "clipPath", "mask", "use" };
+            var allowedAttributes = new HashSet<string>(StringComparer.Ordinal) { "xmlns", "viewBox", "width", "height", "fill", "stroke", "stroke-width", "stroke-linecap", "stroke-linejoin", "fill-rule", "fill-opacity", "stroke-opacity", "opacity", "transform", "d", "cx", "cy", "r", "rx", "ry", "x", "y", "x1", "x2", "y1", "y2", "points", "id", "offset", "stop-color", "stop-opacity", "gradientUnits", "gradientTransform", "clip-path", "mask" };
+            if (root.Root?.Name != svg + "svg") return null;
+            foreach (var element in root.Root.DescendantsAndSelf().ToArray())
+            {
+                if (element.Name.Namespace != svg || !allowedElements.Contains(element.Name.LocalName)) return null;
+                foreach (var attribute in element.Attributes().ToArray())
+                {
+                    if (attribute.IsNamespaceDeclaration) continue;
+                    bool internalXlink = attribute.Name.Namespace == "http://www.w3.org/1999/xlink" && attribute.Name.LocalName == "href" &&
+                        System.Text.RegularExpressions.Regex.IsMatch(attribute.Value, "^#[A-Za-z0-9_-]+$");
+                    if ((!internalXlink && attribute.Name.Namespace != XNamespace.None) || (!internalXlink && !allowedAttributes.Contains(attribute.Name.LocalName)) ||
+                        attribute.Value.Contains("javascript:", StringComparison.OrdinalIgnoreCase) ||
+                        (attribute.Value.Contains("url(", StringComparison.OrdinalIgnoreCase) && !System.Text.RegularExpressions.Regex.IsMatch(attribute.Value, "^url\\(#[A-Za-z0-9_-]+\\)$"))) return null;
+                }
+            }
+            return System.Text.Encoding.UTF8.GetBytes(root.ToString(System.Xml.Linq.SaveOptions.DisableFormatting));
+        }
+        catch (Exception error) when (error is System.Xml.XmlException or InvalidOperationException or ArgumentException) { return null; }
     }
 
     public sealed record MediaLibraryItem(string Kind, string Path, string Name, long SizeBytes, DateTime ModifiedUtc, string? Url, string? ThumbnailUrl, bool CanDelete);

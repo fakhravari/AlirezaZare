@@ -277,11 +277,17 @@ public sealed record ProductInventoryVariant(
     JsonElement? Attributes,
     IReadOnlyDictionary<string, decimal> StockBySalesPlan,
     IReadOnlyDictionary<string, decimal> PriceBySalesPlan,
-    IReadOnlyDictionary<string, decimal> DiscountBySalesPlan);
+    IReadOnlyDictionary<string, decimal> DiscountBySalesPlan)
+{
+    public IReadOnlyDictionary<string, long> PriceVersionIdsBySalesPlan { get; init; } = new Dictionary<string, long>();
+}
 
 public sealed record SalesPlanPriceOption(string Key, string Label, IReadOnlyList<SalesPlanPriceOptionValue> Values);
 
-public sealed record SalesPlanPriceOptionValue(string Key, string Label, decimal PriceDelta);
+public sealed record SalesPlanPriceOptionValue(string Key, string Label, decimal PriceDelta)
+{
+    public long PriceVersionId { get; init; }
+}
 
 public sealed record SalesPlan(
     string Id,
@@ -306,6 +312,9 @@ public sealed record ProductSalesOffer(
 {
     public IReadOnlyDictionary<string, decimal> AccessoryPriceAmounts { get; init; } =
         new Dictionary<string, decimal>();
+
+    public long PriceVersionId { get; init; }
+    public IReadOnlyDictionary<string, long> AccessoryPriceVersionIds { get; init; } = new Dictionary<string, long>();
 
     public IReadOnlyList<string>? AccessoryIds { get; init; }
     public IReadOnlyDictionary<string, string> SpecificationOverrides { get; init; } = new Dictionary<string, string>();

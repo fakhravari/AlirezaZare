@@ -15,6 +15,51 @@ public sealed class UsersApiController(ShopDbContext db, PasswordHasher<AdminSys
     [HttpGet]
     public async Task<IActionResult> GetUsers(CancellationToken cancellationToken)
     {
+        string section = Request.Query["section"].ToString().ToLowerInvariant();
+        if (section is not ("users" or "roles" or "permissions"))
+            return BadRequest(new { message = "بخش درخواست معتبر نیست." });
+
+        if (section == "roles")
+        {
+            var roles = await db.AdminRoles.AsNoTracking().OrderBy(x => x.Name)
+                .Select(x => new { x.Id, x.RoleKey, x.Name, x.IsActive })
+                .ToListAsync(cancellationToken);
+            var userCounts = await db.AdminUserRoles.AsNoTracking().GroupBy(userRole => userRole.IdRole)
+                .Select(group => new { RoleId = group.Key, Count = group.Count() })
+                .ToDictionaryAsync(item => item.RoleId, item => item.Count, cancellationToken);
+            var roleRows = roles.Select(role => new
+            {
+                role.Id, role.RoleKey, role.Name, role.IsActive,
+                userCount = userCounts.GetValueOrDefault(role.Id)
+            });
+            return Ok(new
+            {
+                users = Array.Empty<object>(), roles = roleRows,
+                permissions = Array.Empty<object>(), warehouses = Array.Empty<object>()
+            });
+        }
+
+        if (section == "permissions")
+        {
+            var roles = await db.AdminRoles.AsNoTracking().OrderBy(x => x.Name)
+                .Select(x => new
+                    { x.Id, x.RoleKey, x.Name, x.IsActive, permissionIds = x.Permissions.Select(p => p.IdPermission) })
+                .ToListAsync(cancellationToken);
+            var permissions = await db.AdminPermissions.AsNoTracking().Where(x => x.IsActive)
+                .OrderBy(x => x.SortOrder).ThenBy(x => x.Name)
+                .Select(x => new { x.Id, x.PermissionKey, x.Name, x.ParentKey, x.Area, x.Controller, x.Action })
+                .ToListAsync(cancellationToken);
+            return Ok(new
+            {
+                users = Array.Empty<object>(), roles, permissions,
+                warehouses = Array.Empty<object>()
+            });
+        }
+
+        var userRoles = await db.AdminRoles.AsNoTracking().OrderBy(x => x.Name)
+            .Select(x => new { x.Id, x.RoleKey, x.Name, x.IsActive })
+            .ToListAsync(cancellationToken);
+
         var users = await db.AdminSystemUsers.AsNoTracking()
             .OrderBy(x => x.UserName)
             .Select(x => new
@@ -29,19 +74,11 @@ public sealed class UsersApiController(ShopDbContext db, PasswordHasher<AdminSys
                 warehouseIds = x.WarehouseAccess.Select(w => w.IdWarehouse)
             }).ToListAsync(cancellationToken);
 
-        var roles = await db.AdminRoles.AsNoTracking().OrderBy(x => x.Name)
-            .Select(x => new
-                { x.Id, x.RoleKey, x.Name, x.IsActive, permissionIds = x.Permissions.Select(p => p.IdPermission) })
-            .ToListAsync(cancellationToken);
-        var permissions = await db.AdminPermissions.AsNoTracking().Where(x => x.IsActive)
-            .OrderBy(x => x.SortOrder).ThenBy(x => x.Name)
-            .Select(x => new { x.Id, x.PermissionKey, x.Name, x.ParentKey, x.Area, x.Controller, x.Action })
-            .ToListAsync(cancellationToken);
         var warehouses = await db.Warehouses.AsNoTracking().Where(x => x.IsActive)
             .OrderBy(x => x.Name).Select(x => new { x.Id, x.Name, x.Code, x.IdCompany })
             .ToListAsync(cancellationToken);
 
-        return Ok(new { users, roles, permissions, warehouses });
+        return Ok(new { users, roles = userRoles, permissions = Array.Empty<object>(), warehouses });
     }
 
     [HttpPost]
@@ -52,10 +89,10 @@ public sealed class UsersApiController(ShopDbContext db, PasswordHasher<AdminSys
             return ValidationProblem(detail: "نام کاربری و نام نمایشی الزامی است.", statusCode: 400);
         if (input.UserName.Trim().Length > 100 || input.DisplayName.Trim().Length > 160)
             return ValidationProblem(detail: "طول نام کاربری یا نام نمایشی بیش از حد مجاز است.", statusCode: 400);
-        if (input.Id is null && string.IsNullOrWhiteSpace(input.Password))
+        if (input.Id is null && string.IsNullOrEmpty(input.Password))
             return ValidationProblem(detail: "برای کاربر جدید، گذرواژه الزامی است.", statusCode: 400);
-        if (!string.IsNullOrWhiteSpace(input.Password) && input.Password.Length is < 12 or > 200)
-            return ValidationProblem(detail: "گذرواژه باید بین ۱۲ تا ۲۰۰ نویسه باشد.", statusCode: 400);
+        if (input.Password is { Length: > 200 })
+            return ValidationProblem(detail: "گذرواژه حداکثر ۲۰۰ نویسه می‌تواند داشته باشد.", statusCode: 400);
 
         string normalized = input.UserName.Trim().ToUpperInvariant();
         AdminSystemUser? user = input.Id is null
@@ -95,7 +132,7 @@ public sealed class UsersApiController(ShopDbContext db, PasswordHasher<AdminSys
         user.IsActive = remainsActive;
         user.UpdatedAtUtc = DateTime.UtcNow;
         user.SecurityStamp = Guid.NewGuid();
-        if (!string.IsNullOrWhiteSpace(input.Password))
+        if (!string.IsNullOrEmpty(input.Password))
             user.PasswordHash = passwordHasher.HashPassword(user, input.Password);
 
         if (input.Id is null)
@@ -129,21 +166,30 @@ public sealed class UsersApiController(ShopDbContext db, PasswordHasher<AdminSys
         if (role.RoleKey == "system.full-access" && !input.IsActive)
             return ValidationProblem(detail: "نقش دسترسی کامل قابل غیرفعال‌سازی نیست.", statusCode: 400);
 
-        long[] permissionIds = input.PermissionIds.Distinct().ToArray();
-        if (role.RoleKey == "system.full-access")
-            permissionIds = await db.AdminPermissions.Where(x => x.IsActive).Select(x => x.Id)
-                .ToArrayAsync(cancellationToken);
-        if (await db.AdminPermissions.CountAsync(x => permissionIds.Contains(x.Id) && x.IsActive, cancellationToken) !=
-            permissionIds.Length)
-            return ValidationProblem(detail: "یکی از مجوزهای انتخاب‌شده معتبر یا فعال نیست.", statusCode: 400);
+        bool editRoleDetails = string.Equals(Request.Query["section"], "roles", StringComparison.OrdinalIgnoreCase)
+            || string.IsNullOrWhiteSpace(Request.Query["section"].ToString());
+        long[] permissionIds = [];
+        if (!editRoleDetails)
+        {
+            permissionIds = input.PermissionIds.Distinct().ToArray();
+            if (role.RoleKey == "system.full-access")
+                permissionIds = await db.AdminPermissions.Where(x => x.IsActive).Select(x => x.Id)
+                    .ToArrayAsync(cancellationToken);
+            if (await db.AdminPermissions.CountAsync(x => permissionIds.Contains(x.Id) && x.IsActive, cancellationToken) !=
+                permissionIds.Length)
+                return ValidationProblem(detail: "یکی از مجوزهای انتخاب‌شده معتبر یا فعال نیست.", statusCode: 400);
+        }
 
         await using var transaction =
             await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
         role.Name = input.Name.Trim();
         role.IsActive = input.IsActive;
-        db.AdminRolePermissions.RemoveRange(role.Permissions);
-        foreach (long permissionId in permissionIds)
-            db.AdminRolePermissions.Add(new AdminRolePermission { IdRole = role.Id, IdPermission = permissionId });
+        if (!editRoleDetails)
+        {
+            db.AdminRolePermissions.RemoveRange(role.Permissions);
+            foreach (long permissionId in permissionIds)
+                db.AdminRolePermissions.Add(new AdminRolePermission { IdRole = role.Id, IdPermission = permissionId });
+        }
         await db.SaveChangesAsync(cancellationToken);
         Guid newStamp = Guid.NewGuid();
         await db.AdminSystemUsers.Where(x => x.Roles.Any(userRole => userRole.IdRole == role.Id))
@@ -174,8 +220,8 @@ public sealed class UsersApiController(ShopDbContext db, PasswordHasher<AdminSys
     public async Task<IActionResult> ResetPassword(long id, [FromBody] ResetPasswordInput input,
         CancellationToken cancellationToken)
     {
-        if (input.Password.Length < 12 || input.Password.Length > 200)
-            return ValidationProblem(detail: "گذرواژه باید بین ۱۲ تا ۲۰۰ نویسه باشد.", statusCode: 400);
+        if (string.IsNullOrEmpty(input.Password) || input.Password.Length > 200)
+            return ValidationProblem(detail: "گذرواژه الزامی است و حداکثر ۲۰۰ نویسه می‌تواند داشته باشد.", statusCode: 400);
         AdminSystemUser? user = await db.AdminSystemUsers.SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
         if (user is null)
             return NotFound();

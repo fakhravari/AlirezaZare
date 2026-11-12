@@ -9,6 +9,9 @@ public sealed record ProductPurchaseOptionRow(
     string Key,
     IReadOnlyList<ProductPurchaseOptionValueRow> Values);
 
-public sealed record ProductPurchaseOptionValueRow(string Key, decimal PriceDelta);
+public sealed record ProductPurchaseOptionValueRow(string Key, decimal PriceDelta)
+{
+    public long PriceVersionId { get; init; }
+}
 
 public sealed record ProductAccessoryRow(string Key, bool IsRequired);

@@ -17,7 +17,7 @@
             </form>
             <div class="admin-data-status small text-muted" data-feedback-status role="status" aria-live="polite">در حال بارگذاری…</div>
             <div class="table-responsive">
-                <table class="table table-striped table-hover align-middle">
+                <table class="table table-striped table-hover align-middle" data-admin-datatable data-admin-table-mode="server">
                     <thead>
                     <tr>
                         <th>تاریخ</th><th>محصول</th><th>نام نمایشی</th><th>متن</th><th>امتیاز</th><th>وضعیت</th><th>پاسخ مدیر</th><th>عملیات</th>
@@ -25,7 +25,7 @@
                     </thead><tbody data-feedback-rows></tbody>
                 </table>
             </div>
-            <div class="admin-pagination d-flex align-items-center justify-content-center gap-3 mt-3" data-feedback-pagination>
+            <div class="admin-pagination d-flex align-items-center justify-content-center gap-3 mt-3" data-feedback-pagination hidden>
                 <button class="btn btn-default btn-sm" type="button" data-feedback-page="-1">قبلی</button><span data-feedback-page-label></span><button class="btn btn-default btn-sm" type="button" data-feedback-page="1">بعدی</button>
             </div>
         </div>
@@ -45,7 +45,7 @@
                 </select><label class="form-label" for="feedback-reply">پاسخ مدیر</label><textarea class="form-control" name="adminReply" id="feedback-reply" rows="4" maxlength="1000"></textarea>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button type="submit" class="btn btn-primary" data-feedback-save>ذخیرهٔ بررسی</button>
+                <button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button type="submit" class="btn btn-primary" data-feedback-save><i class="fa fa-floppy-disk me-1" aria-hidden="true"></i>ذخیرهٔ بررسی</button>
             </div>
         </form>
     </div>

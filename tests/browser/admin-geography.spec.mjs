@@ -5,7 +5,7 @@ test('lists show all stored geography fields', async ({page}) => {
   let html = await readFile('Admin/Areas/Store/Views/Features/Geography.cshtml', 'utf8');
   html = html.replace('@model Shop.Admin.Models.FeaturePageViewModel', '').replace('@await Html.PartialAsync("_AdminPageIntro", (Model.Title, Model.Description))', '').replace('@Html.AntiForgeryToken()', '<input name="__RequestVerificationToken" value="test">');
   await page.setContent(html);
-  await page.evaluate(() => { window.AdminUI = {notify: () => {}, getJson: async () => ({
+  await page.evaluate(() => { window.AdminUI = {notify: () => {}, destroyDataTable: () => {}, refreshDataTable: () => {}, getJson: async () => ({
     countries: [{id: 1, nameFa: 'ایران', nameEn: 'Iran', code: 'IR', flagPath: 'content/flags/iran.webp'}],
     provinces: [{id: 2, countryId: 1, nameFa: 'فارس', nameEn: 'Fars', parentName: 'ایران', latitude: 29.5, longitude: 52.5}],
     cities: [{id: 3, countryId: 1, provinceId: 2, nameFa: 'شیراز', nameEn: 'Shiraz', parentName: 'ایران / فارس', sourceCountryName: 'Iran source', latitude: 29.6, longitude: 52.6, isProvinceCenter: true}]
@@ -28,7 +28,7 @@ test('geography recovers from load failures without repeating a successful save'
   await page.setContent(html);
   await page.evaluate(() => {
     window.geoTest = {getCount: 0, saves: 0, notifications: []};
-    window.AdminUI = {notify: (message, kind) => window.geoTest.notifications.push({message, kind}), getJson: async (url, options) => {
+    window.AdminUI = {notify: (message, kind) => window.geoTest.notifications.push({message, kind}), destroyDataTable: () => {}, refreshDataTable: () => {}, getJson: async (url, options) => {
       if (options.method === 'GET') {
         window.geoTest.getCount++;
         if (window.geoTest.getCount === 1 || window.geoTest.getCount === 3) throw new Error('شبکه قطع است');
@@ -67,7 +67,7 @@ test('uncertain network result refreshes the list before another save', async ({
   await page.setContent(html);
   await page.evaluate(() => {
     window.geoTest = {saves: 0, notifications: [], countries: []};
-    window.AdminUI = {notify: message => window.geoTest.notifications.push(message), getJson: async (url, options) => {
+    window.AdminUI = {notify: message => window.geoTest.notifications.push(message), destroyDataTable: () => {}, refreshDataTable: () => {}, getJson: async (url, options) => {
       if (options.method === 'GET') return {countries: [...window.geoTest.countries], provinces: [], cities: []};
       window.geoTest.saves++;
       window.geoTest.countries.push({id: 8, nameFa: 'کشور آزمایشی', nameEn: 'Test', code: 'XX'});
@@ -90,7 +90,7 @@ test('province list follows the selected country and combines with search', asyn
   html = html.replace('@model Shop.Admin.Models.FeaturePageViewModel', '').replace('@await Html.PartialAsync("_AdminPageIntro", (Model.Title, Model.Description))', '').replace('@Html.AntiForgeryToken()', '<input name="__RequestVerificationToken" value="test">');
   await page.setContent(html);
   await page.evaluate(() => {
-    window.AdminUI = {notify: () => {}, getJson: async () => ({
+    window.AdminUI = {notify: () => {}, destroyDataTable: () => {}, refreshDataTable: () => {}, getJson: async () => ({
       countries: [{id: 1, nameFa: 'ایران', nameEn: 'Iran', code: 'IR'}, {id: 2, nameFa: 'ترکیه', nameEn: 'Turkey', code: 'TR'}],
       provinces: [{id: 11, countryId: 1, nameFa: 'تهران', nameEn: 'Tehran', parentName: 'ایران'}, {id: 12, countryId: 1, nameFa: 'فارس', nameEn: 'Fars', parentName: 'ایران'}, {id: 21, countryId: 2, nameFa: 'استانبول', nameEn: 'Istanbul', parentName: 'ترکیه'}], cities: []
     })};
@@ -114,7 +114,7 @@ test('city list follows country and province selections', async ({page}) => {
   html = html.replace('@model Shop.Admin.Models.FeaturePageViewModel', '').replace('@await Html.PartialAsync("_AdminPageIntro", (Model.Title, Model.Description))', '').replace('@Html.AntiForgeryToken()', '<input name="__RequestVerificationToken" value="test">');
   await page.setContent(html);
   await page.evaluate(() => {
-    window.AdminUI = {notify: () => {}, getJson: async () => ({
+    window.AdminUI = {notify: () => {}, destroyDataTable: () => {}, refreshDataTable: () => {}, getJson: async () => ({
       countries: [{id: 1, nameFa: 'ایران', nameEn: 'Iran'}, {id: 2, nameFa: 'ترکیه', nameEn: 'Turkey'}],
       provinces: [{id: 11, countryId: 1, nameFa: 'تهران'}, {id: 12, countryId: 1, nameFa: 'فارس'}, {id: 21, countryId: 2, nameFa: 'استانبول'}],
       cities: [{id: 101, countryId: 1, provinceId: 11, nameFa: 'تهران', nameEn: 'Tehran'}, {id: 102, countryId: 1, provinceId: 12, nameFa: 'شیراز', nameEn: 'Shiraz'}, {id: 103, countryId: 2, provinceId: 21, nameFa: 'استانبول', nameEn: 'Istanbul'}]

@@ -189,6 +189,35 @@ public sealed class AdminPermissionFilter : IAsyncAuthorizationFilter
         string action = Convert.ToString(route.GetValueOrDefault("action")) ?? "";
         string? feature = Convert.ToString(route.GetValueOrDefault("feature"));
         if (string.IsNullOrWhiteSpace(feature)) feature = context.HttpContext.Request.Query["feature"].FirstOrDefault();
+        if (string.IsNullOrWhiteSpace(feature)
+            && string.Equals(area, "Admin", StringComparison.OrdinalIgnoreCase)
+            && string.Equals(controller, "Users", StringComparison.OrdinalIgnoreCase)
+            && string.Equals(action, "Index", StringComparison.OrdinalIgnoreCase))
+        {
+            string? section = context.HttpContext.Request.Query["section"].FirstOrDefault();
+            feature = string.IsNullOrWhiteSpace(section) ? "users" : section;
+        }
+        if (string.Equals(area, "Admin", StringComparison.OrdinalIgnoreCase)
+            && string.Equals(controller, "UsersApi", StringComparison.OrdinalIgnoreCase))
+        {
+            string? section = action switch
+            {
+                "GetUsers" => context.HttpContext.Request.Query["section"].FirstOrDefault() ?? "users",
+                "SaveUser" or "ResetPassword" => "users",
+                "CreateRole" => "roles",
+                "SaveRole" => context.HttpContext.Request.Query["section"].FirstOrDefault() ?? "roles",
+                _ => null
+            };
+            if (string.IsNullOrWhiteSpace(section) && action is "GetUsers" or "SaveRole")
+                section = action == "GetUsers" ? "users" : "roles";
+            if (!string.IsNullOrWhiteSpace(section))
+            {
+                area = "Admin";
+                controller = "Users";
+                action = "Index";
+                feature = section;
+            }
+        }
         if (string.Equals(controller, "Auth", StringComparison.OrdinalIgnoreCase)
             || (string.IsNullOrEmpty(area) && string.Equals(controller, "Home", StringComparison.OrdinalIgnoreCase)))
             return Task.CompletedTask;

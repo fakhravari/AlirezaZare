@@ -14,7 +14,7 @@
     function render(page) {
         const query = page.querySelector("[data-price-filter] input").value.trim().toLocaleLowerCase();
         const rows = page._variantPriceRows.filter((item) => !query || [item.productName, item.variantName, item.salesPlanName, item.code].some((value) => String(value || "").toLocaleLowerCase().includes(query)));
-        const body = page.querySelector("[data-price-rows]"); body.replaceChildren();
+        const body = page.querySelector("[data-price-rows]"); ui.destroyDataTable(page.querySelector("[data-admin-datatable]")); body.replaceChildren();
         for (const item of rows) {
             const key = `${item.variantId}\u0000${item.salesPlanId}`;
             const draft = page._variantPriceDrafts.get(key);
@@ -33,6 +33,7 @@
             const rememberDraft = () => page._variantPriceDrafts.set(key, { amount: amount.value, discount: discount.value, active: active.checked });
             amount.addEventListener("input", rememberDraft); discount.addEventListener("input", rememberDraft); active.addEventListener("change", rememberDraft);
             const actions = document.createElement("td"), save = document.createElement("button"); save.type = "button"; save.className = "btn btn-sm btn-primary"; save.textContent = "ذخیره"; save.disabled = page.dataset.canEdit !== "true";
+            ui.withIcon(save, "fa-floppy-disk");
             let clear;
             const setBusy = busy => { if (busy) page._variantPriceSaving.add(key); else page._variantPriceSaving.delete(key); const disabled = busy || page.dataset.canEdit !== "true"; save.disabled = disabled; amount.disabled = disabled; discount.disabled = disabled; active.disabled = disabled; if (clear) clear.disabled = disabled; };
             save.addEventListener("click", async () => {
@@ -53,12 +54,14 @@
             actions.append(save);
             if (item.priceAmount != null) {
                 clear = document.createElement("button"); clear.type = "button"; clear.className = "btn btn-sm btn-default ms-1"; clear.textContent = "قیمت پایه"; clear.disabled = page.dataset.canEdit !== "true";
+                ui.withIcon(clear, "fa-rotate-left");
                 clear.addEventListener("click", async () => { if (clear.disabled) return; setBusy(true); try { await request(page, `${page.dataset.api}/${item.variantId}/${encodeURIComponent(item.salesPlanId)}`, "DELETE"); page._variantPriceDrafts.delete(key); ui.notify("قیمت اختصاصی حذف شد.", "success"); await load(page); } catch (error) { ui.notify(error.message || "حذف قیمت ناموفق بود.", "danger"); } finally { setBusy(false); render(page); } }); actions.append(clear);
             }
             if (page._variantPriceSaving.has(key)) setBusy(true);
             row.append(actions); body.append(row);
         }
         page.querySelector("[data-price-count]").textContent = `${number.format(rows.length)} ردیف`;
+        ui.refreshDataTable(page.querySelector("[data-admin-datatable]"));
         if (!rows.length) status(page, "موردی با این جست‌وجو پیدا نشد."); else status(page, "");
     }
     async function load(page) {
@@ -76,10 +79,23 @@
             page._offers = Array.isArray(rows) ? rows : []; renderOffers(page);
         } catch (error) { if (page.isConnected && page._offerSerial === serial) message.textContent = error.message || "دریافت پیشنهادها ناموفق بود."; }
     }
+    async function loadHistory(page) {
+        const message = page.querySelector("[data-price-history-status]"), body = page.querySelector("[data-price-history-rows]");
+        message.textContent = "در حال دریافت تاریخچه…"; body.replaceChildren();
+        try {
+            const rows = await request(page, `${page.dataset.api}/price-history?take=200`);
+            for (const item of rows) {
+                const row = document.createElement("tr");
+                row.append(cell(`#${item.id}`), cell(String(item.idProduct)), cell(item.idSalesPlan ?? "—"), cell(item.priceKind), cell(number.format(item.priceAmount)), cell(item.isActive ? "فعال" : "سابقه"), cell(item.createdAtUtc ? new Date(item.createdAtUtc).toLocaleString("fa-IR") : "—"), cell(item.previousVersionId ? `#${item.previousVersionId}` : "—"));
+                body.append(row);
+            }
+            message.textContent = rows.length ? `${number.format(rows.length)} نسخهٔ اخیر` : "هنوز نسخه‌ای ثبت نشده است.";
+        } catch (error) { message.textContent = error.message || "دریافت تاریخچه ناموفق بود."; }
+    }
     function renderOffers(page) {
         const query = page.querySelector("[data-offer-filter] input").value.trim().toLocaleLowerCase();
         const rows = page._offers.filter(item => !query || [item.productName, item.productCode, item.salesPlanName].some(value => String(value || "").toLocaleLowerCase().includes(query)));
-        const body = page.querySelector("[data-offer-rows]"); body.replaceChildren();
+        const body = page.querySelector("[data-offer-rows]"); ui.destroyDataTable(page.querySelector("[data-admin-datatable]")); body.replaceChildren();
         for (const item of rows) {
             const key = `${item.productId}\u0000${item.salesPlanId}`, draft = page._offerDrafts.get(key);
             const row = document.createElement("tr"); row.append(cell(`${item.productName} (${item.productCode})`), cell(item.salesPlanName));
@@ -96,10 +112,13 @@
             const remember = () => page._offerDrafts.set(key, { amount: amount.value, discount: discount.value, limit: limit.value, active: active.checked });
             for (const input of [amount, discount, limit]) input.addEventListener("input", remember); active.addEventListener("change", remember);
             const actions = document.createElement("td"), save = document.createElement("button"); save.type = "button"; save.className = "btn btn-sm btn-primary"; save.textContent = "ذخیره"; actions.append(save);
+            ui.withIcon(save, "fa-floppy-disk");
             if (item.priceAmount != null) {
                 const accessories = document.createElement("button"); accessories.type = "button"; accessories.className = "btn btn-sm btn-default ms-1"; accessories.textContent = "متعلقات";
+                ui.withIcon(accessories, "fa-puzzle-piece");
                 accessories.addEventListener("click", () => void openAccessories(page, item)); actions.append(accessories);
                 const specifications = document.createElement("button"); specifications.type = "button"; specifications.className = "btn btn-sm btn-default ms-1"; specifications.textContent = "مشخصات";
+                ui.withIcon(specifications, "fa-circle-info");
                 specifications.addEventListener("click", () => void openSpecifications(page, item)); actions.append(specifications);
             }
             row.append(actions);
@@ -117,13 +136,14 @@
             body.append(row);
         }
         page.querySelector("[data-offer-count]").textContent = `${number.format(rows.length)} ردیف`;
+        ui.refreshDataTable(page.querySelector("[data-admin-datatable]"));
         page.querySelector("[data-offer-status]").textContent = rows.length ? "" : "موردی پیدا نشد.";
     }
     async function openAccessories(page, offer) {
         const modal = document.getElementById("offer-accessories-modal"); if (!modal) return;
         const serial = (page._accessoriesSerial || 0) + 1; page._accessoriesSerial = serial;
         const message = modal.querySelector("[data-offer-accessories-status]"), body = modal.querySelector("[data-offer-accessories-rows]");
-        body.replaceChildren(); message.textContent = "در حال دریافت متعلقات…";
+        ui.destroyDataTable(body.closest("table")); body.replaceChildren(); message.textContent = "در حال دریافت متعلقات…";
         modal.querySelector("[data-offer-accessories-name]").textContent = `${offer.productName} — ${offer.salesPlanName}`;
         window.bootstrap?.Modal?.getOrCreateInstance(modal).show();
         const url = `${page.dataset.api}/product-offers/${offer.productId}/${encodeURIComponent(offer.salesPlanId)}/accessories`;
@@ -135,6 +155,7 @@
                 const priceCell = document.createElement("td"), price = document.createElement("input"); price.type = "number"; price.min = "0"; price.max = "9007199254740991"; price.step = "1"; price.className = "form-control form-control-sm"; price.value = String(item.priceAmount ?? item.basePriceAmount); price.setAttribute("aria-label", `قیمت ${item.name} در ${offer.salesPlanName}`); priceCell.append(price); row.append(priceCell);
                 const allowedCell = document.createElement("td"), allowed = document.createElement("input"); allowed.type = "checkbox"; allowed.checked = item.isRequired || item.isAllowed; allowed.disabled = item.isRequired || page.dataset.canEdit !== "true"; allowed.setAttribute("aria-label", `مجاز بودن ${item.name}`); allowedCell.append(allowed); row.append(allowedCell);
                 const actions = document.createElement("td"), save = document.createElement("button"); save.type = "button"; save.className = "btn btn-sm btn-primary"; save.textContent = "ذخیره"; save.disabled = page.dataset.canEdit !== "true"; actions.append(save); row.append(actions);
+                ui.withIcon(save, "fa-floppy-disk");
                 save.addEventListener("click", async () => {
                     if (save.disabled) return;
                     const priceAmount = Number(price.value);
@@ -146,6 +167,7 @@
                 });
                 price.disabled = page.dataset.canEdit !== "true"; body.append(row);
             }
+            ui.refreshDataTable(body.closest("table"));
         } catch (error) { if (page.isConnected && page._accessoriesSerial === serial) message.textContent = error.message || "دریافت متعلقات ناموفق بود."; }
     }
     async function openSpecifications(page, offer) {
@@ -264,6 +286,8 @@
         page.querySelector("[data-price-filter]").addEventListener("input", () => render(page));
         page.querySelector("[data-price-refresh]").addEventListener("click", () => void load(page));
         void load(page);
+        page.querySelector("[data-price-history-refresh]")?.addEventListener("click", () => void loadHistory(page));
+        void loadHistory(page);
     }
     window.AdminVariantPrices = Object.freeze({ initialize });
 })();

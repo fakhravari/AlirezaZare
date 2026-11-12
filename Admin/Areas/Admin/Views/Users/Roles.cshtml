@@ -1,0 +1,52 @@
+@{
+    ViewData["Title"] = "نقش‌های کاربران پنل";
+    ViewData["AreaTitle"] = "مدیریت سامانه";
+}
+<div class="admin-page" data-admin-users data-admin-users-page="roles" data-api="/api/admin/users">
+    @await Html.PartialAsync("_AdminPageIntro", ("نقش‌های کاربران پنل", "نقش‌ها را تعریف و نام و وضعیت آن‌ها را مدیریت کنید؛ تنظیم مجوزها در صفحهٔ جداگانهٔ درخت مجوز نقش‌ها انجام می‌شود."))
+    @Html.AntiForgeryToken()
+    <section class="panel panel-inverse">
+        <div class="panel-heading"><h2 class="panel-title">ایجاد نقش</h2></div>
+        <div class="panel-body">
+            <form class="row g-3 align-items-end" data-role-create-form>
+                <div class="col-md-4">
+                    <label class="form-label" for="new-role-key">کلید نقش</label>
+                    <input class="form-control" id="new-role-key" name="roleKey" pattern="[A-Za-z0-9._-]{2,100}" required />
+                </div>
+                <div class="col-md-5">
+                    <label class="form-label" for="new-role-name">نام نقش</label>
+                    <input class="form-control" id="new-role-name" name="name" maxlength="160" required />
+                </div>
+                <div class="col-md-3"><button class="btn btn-primary w-100" type="submit"><i class="fa fa-plus" aria-hidden="true"></i>ایجاد نقش</button></div>
+            </form>
+        </div>
+    </section>
+    <section class="panel panel-inverse mt-4" data-role-editor hidden>
+        <div class="panel-heading"><h2 class="panel-title">ویرایش نقش</h2></div>
+        <div class="panel-body">
+            <form class="row g-3 align-items-end" data-role-edit-form>
+                <input type="hidden" name="id" />
+                <div class="col-md-7">
+                    <label class="form-label" for="edit-role-name">نام نقش</label>
+                    <input class="form-control" id="edit-role-name" name="name" maxlength="160" required />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-check mb-2"><input class="form-check-input" type="checkbox" name="isActive" /><span class="form-check-label">فعال</span></label>
+                </div>
+                <div class="col-md-3"><button class="btn btn-primary w-100" type="submit"><i class="fa fa-floppy-disk" aria-hidden="true"></i>ذخیرهٔ نقش</button></div>
+            </form>
+        </div>
+    </section>
+    <section class="panel panel-inverse mt-4">
+        <div class="panel-heading"><h2 class="panel-title">فهرست نقش‌ها</h2></div>
+        <div class="panel-body">
+            <div class="admin-data-status small text-muted" data-users-status role="status" aria-live="polite">در حال بارگذاری نقش‌ها…</div>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover align-middle" data-admin-datatable>
+                    <thead><tr><th>نام نقش</th><th>کلید</th><th>کاربران</th><th>وضعیت</th><th>عملیات</th></tr></thead>
+                    <tbody data-role-rows></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+</div>

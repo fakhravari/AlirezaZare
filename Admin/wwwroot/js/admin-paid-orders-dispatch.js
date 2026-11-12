@@ -12,16 +12,28 @@
         const status = page.querySelector("[data-dispatch-status]");
         const all = page.querySelector("[data-dispatch-all]");
         const submit = page.querySelector("[data-dispatch-submit]");
+        const checkboxes = () => {
+            const table = page.querySelector("[data-admin-datatable]");
+            const instance = window.AdminUI.getDataTable(table);
+            const rowNodes = instance ? instance.rows().nodes().toArray() : [...rows.rows];
+            return rowNodes.flatMap(row => [...row.querySelectorAll('input[type="checkbox"]')]);
+        };
         let requestVersion = 0;
         let saving = false;
-        const selected = () => [...rows.querySelectorAll('input[type="checkbox"]:checked')].map(input => Number(input.value));
-        const count = () => { page.querySelector("[data-dispatch-count]").textContent = `${format.format(selected().length)} سفارش انتخاب شده`; };
+        const selected = () => checkboxes().filter(input => input.checked).map(input => Number(input.value));
+        const count = () => {
+            const boxes = checkboxes(), checked = boxes.filter(input => input.checked).length;
+            all.checked = boxes.length > 0 && checked === boxes.length;
+            all.indeterminate = checked > 0 && checked < boxes.length;
+            page.querySelector("[data-dispatch-count]").textContent = `${format.format(checked)} سفارش انتخاب شده`;
+        };
         async function load() {
             const version = ++requestVersion;
             status.textContent = "در حال دریافت سفارش‌ها…";
             try {
                 const result = await window.AdminUI.getJson(api);
                 if (version !== requestVersion || !page.isConnected) return;
+                window.AdminUI.destroyDataTable(page.querySelector("[data-admin-datatable]"));
                 rows.replaceChildren();
                 all.checked = false;
                 for (const item of result.items) {
@@ -37,11 +49,12 @@
                     }
                     rows.append(row);
                 }
+                window.AdminUI.refreshDataTable(page.querySelector("[data-admin-datatable]"));
                 status.textContent = result.items.length ? "" : "سفارش آمادهٔ حواله وجود ندارد.";
                 count();
             } catch (error) { if (version === requestVersion && page.isConnected) status.textContent = error.message; }
         }
-        all.addEventListener("change", () => { rows.querySelectorAll('input[type="checkbox"]').forEach(input => { input.checked = all.checked; }); count(); });
+        all.addEventListener("change", () => { checkboxes().forEach(input => { input.checked = all.checked; }); count(); });
         page.querySelector("[data-dispatch-refresh]").addEventListener("click", () => void load());
         form.addEventListener("submit", async event => {
             event.preventDefault();

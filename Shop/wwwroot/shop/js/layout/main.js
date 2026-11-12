@@ -571,9 +571,7 @@
   };
   renderNavCounters();
   document.addEventListener("hn:lists-change", renderNavCounters);
-  window.addEventListener("storage", renderNavCounters);
   document.addEventListener("hn:lists-change", syncCompareButtons);
-  window.addEventListener("storage", syncCompareButtons);
 
   const heroSwiperElement = document.querySelector("#heroSwiper");
   if (heroSwiperElement && window.Swiper) {
@@ -1130,7 +1128,7 @@
     const storage = window.HNUI.storage;
     for (const key of storage.legacyKeys()) {
       if (key === recentSearchKey) {
-        const items = storage.json(key, []);
+        const items = storage.legacyJson(key, []);
         let complete = true;
         for (const query of (Array.isArray(items) ? items : []).slice(0, 6)) {
           try {
@@ -1146,7 +1144,7 @@
       }
       const productMatch = key.match(/^hn-product-(reviews|questions)-([1-9]\d*)$/);
       if (productMatch) {
-        const items = storage.json(key, []);
+        const items = storage.legacyJson(key, []);
         if (!Array.isArray(items) || !items.length) { storage.clearLegacy(key); continue; }
         try {
           const response = await window.HNUI.api.request(`store/products/${productMatch[2]}/feedback/${productMatch[1]}/import`, {
@@ -1179,7 +1177,7 @@
       const articleMatch = key.match(/^hn-article-feedback-v1-(?!.*-liked$)(.+)$/);
       if (!articleMatch) continue;
       const slug = articleMatch[1];
-      const items = storage.json(key, []);
+      const items = storage.legacyJson(key, []);
       if (!Array.isArray(items) || !items.length) { storage.clearLegacy(key); continue; }
       const existing = new Set((account.articleFeedback || []).filter((item) => item.slug === slug).map((item) => `${item.name}\n${item.text}`));
       let complete = true;
@@ -1200,38 +1198,76 @@
     document.dispatchEvent(new CustomEvent("hn:legacy-data-imported"));
   };
 
+  const migrateLegacyAddresses = async (remoteAddresses) => {
+    const storage = window.HNUI.storage;
+    const key = "hn-delivery-addresses";
+    const legacyAddresses = storage.legacyJson(key, []);
+    const addresses = Array.isArray(remoteAddresses) ? [...remoteAddresses] : [];
+    if (!Array.isArray(legacyAddresses) || legacyAddresses.length === 0) {
+      storage.clearLegacy(key);
+      return addresses;
+    }
+    const signature = (address) => [address.title, address.recipient, address.phone, address.street, address.postal]
+      .map((value) => String(value || "").trim().toLowerCase()).join("\n");
+    let complete = true;
+    for (const address of legacyAddresses) {
+      if (addresses.some((saved) => String(saved.id) === String(address.id) || signature(saved) === signature(address))) continue;
+      try {
+        const response = await window.HNUI.api.request("account/addresses", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title: address.title, recipient: address.recipient, phone: address.phone,
+            countryId: Number(address.countryId), provinceId: Number(address.provinceId), cityId: Number(address.cityId),
+            street: address.street, postal: address.postal }),
+        });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok || !result.id) { complete = false; continue; }
+        addresses.push({ ...address, id: String(result.id) });
+      } catch { complete = false; }
+    }
+    if (complete) storage.clearLegacy(key);
+    return addresses;
+  };
+
+  const hydrateAccountState = async (account) => {
+    const storage = window.HNUI.storage;
+    await migrateLegacyFeedback(account);
+    const addresses = await migrateLegacyAddresses(account.addresses);
+    storage.hydrate("hn-delivery-addresses", JSON.stringify(addresses));
+    storage.hydrate("hn-selected-address", account.checkout?.selectedAddressId ? String(account.checkout.selectedAddressId) : "");
+    storage.hydrate("hn-payment-method-v2", account.checkout?.paymentMethod || "zarinpal");
+    const alertKey = (item) => [item.productId, item.scope, JSON.stringify(item.variants || {})].join(":");
+    const legacyAlerts = storage.legacyJson("hn-price-watches-demo", []);
+    const alerts = Array.isArray(account.priceAlerts) ? account.priceAlerts : [];
+    if (Array.isArray(legacyAlerts) && legacyAlerts.length) {
+      const merged = new Map([...alerts, ...legacyAlerts].map((item) => [alertKey(item), item]));
+      storage.hydrate("hn-price-watches-demo", JSON.stringify(alerts));
+      storage.set("hn-price-watches-demo", JSON.stringify([...merged.values()]));
+    } else storage.hydrate("hn-price-watches-demo", JSON.stringify(alerts));
+    for (const [key, remote] of [["hn-favorites", account.favorites], ["hn-compare", account.compare]]) {
+      const ids = Array.isArray(remote) ? remote.map((entry) => String(entry.id)) : [];
+      const legacy = storage.legacyJson(key, []);
+      if (Array.isArray(legacy) && legacy.length) {
+        storage.hydrate(key, JSON.stringify(ids));
+        storage.set(key, JSON.stringify([...new Set([...ids, ...legacy.map(String)])]));
+      } else storage.hydrate(key, JSON.stringify(ids));
+    }
+    window.HNUI.cart.restoreAccountLines(account.cart);
+  };
+
+  const persistHydratedAccountState = () => {
+    const storage = window.HNUI.storage;
+    for (const key of ["hn-favorites", "hn-compare", "hn-price-watches-demo"])
+      storage.set(key, storage.get(key, "[]"));
+  };
+
   const completeDemoLogin = async () => {
-    try {
-      const response = await window.HNUI.api.request("account/state");
-      if (response.ok) {
-        const account = await response.json();
-        await migrateLegacyFeedback(account);
-        if (account.checkout?.selectedAddressId) window.HNUI.storage.set("hn-selected-address", String(account.checkout.selectedAddressId));
-        if (account.checkout?.paymentMethod) window.HNUI.storage.set("hn-payment-method-v2", account.checkout.paymentMethod);
-        const localAlerts = window.HNUI.storage.json("hn-price-watches-demo", []);
-        const alertKey = (item) => `${item.productId}:${item.scope}:${JSON.stringify(item.variants || {})}`;
-        const mergedAlerts = new Map([...(Array.isArray(account.priceAlerts) ? account.priceAlerts : []), ...(Array.isArray(localAlerts) ? localAlerts : [])].map((item) => [alertKey(item), item]));
-        window.HNUI.storage.set("hn-price-watches-demo", JSON.stringify([...mergedAlerts.values()]));
-        for (const [key, remote] of [["hn-favorites", account.favorites], ["hn-compare", account.compare]]) {
-          const local = window.HNUI.storage.json(key, []);
-          window.HNUI.storage.set(key, JSON.stringify([...new Set([...(Array.isArray(remote) ? remote.map((entry) => String(entry.id)) : []), ...(Array.isArray(local) ? local.map(String) : [])])]));
-        }
-        const addresses = Array.isArray(account.addresses) ? [...account.addresses] : [];
-        for (const address of window.HNUI.storage.json("hn-delivery-addresses", [])) {
-          if (addresses.some((saved) => String(saved.id) === String(address.id))) continue;
-          const savedResponse = await window.HNUI.api.request("account/addresses", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: address.title, recipient: address.recipient, phone: address.phone, countryId: Number(address.countryId), provinceId: Number(address.provinceId), cityId: Number(address.cityId), street: address.street, postal: address.postal }) });
-          if (savedResponse.ok) { const saved = await savedResponse.json(); addresses.push({ ...address, id: String(saved.id) }); }
-        }
-        window.HNUI.storage.set("hn-delivery-addresses", JSON.stringify(addresses));
-        window.HNUI.cart.restoreAccountLines(account.cart);
-      }
-    } catch { }
+    const response = await window.HNUI.api.request("account/state");
+    if (!response.ok) throw new Error("وضعیت حساب از پایگاه داده دریافت نشد.");
+    await hydrateAccountState(await response.json());
     userLoggedIn = true;
     resumeAuthenticatedAction = true;
     window.HNUI.auth.login();
-    for (const key of ["hn-favorites", "hn-compare"]) window.HNUI.storage.set(key, window.HNUI.storage.get(key, "[]"));
-    window.HNUI.storage.set("hn-price-watches-demo", window.HNUI.storage.get("hn-price-watches-demo", "[]"));
-    window.HNUI.cart.write(window.HNUI.cart.read());
+    persistHydratedAccountState();
     updateAccountUI();
     if (loginModal) loginModal.hide();
     else {
@@ -1363,39 +1399,13 @@
     if (userLoggedIn) {
       try {
         const stateResponse = await window.HNUI.api.request("account/state");
-        if (stateResponse.ok) {
-          const account = await stateResponse.json();
-          await migrateLegacyFeedback(account);
-          if (account.checkout?.selectedAddressId) window.HNUI.storage.set("hn-selected-address", String(account.checkout.selectedAddressId));
-          if (account.checkout?.paymentMethod) window.HNUI.storage.set("hn-payment-method-v2", account.checkout.paymentMethod);
-          const localAlerts = window.HNUI.storage.json("hn-price-watches-demo", []);
-          const alertKey = (item) => `${item.productId}:${item.scope}:${JSON.stringify(item.variants || {})}`;
-          const mergedAlerts = new Map([...(Array.isArray(account.priceAlerts) ? account.priceAlerts : []), ...(Array.isArray(localAlerts) ? localAlerts : [])].map((item) => [alertKey(item), item]));
-          window.HNUI.storage.set("hn-price-watches-demo", JSON.stringify([...mergedAlerts.values()]));
-          for (const [key, remote] of [["hn-favorites", account.favorites], ["hn-compare", account.compare]]) {
-            const local = window.HNUI.storage.json(key, []);
-            const merged = [...new Set([...(Array.isArray(remote) ? remote.map((entry) => String(entry.id)) : []), ...(Array.isArray(local) ? local.map(String) : [])])];
-            window.HNUI.storage.set(key, JSON.stringify(merged));
-          }
-          if (Array.isArray(account.addresses)) {
-            const localAddresses = window.HNUI.storage.json("hn-delivery-addresses", []);
-            const mergedAddresses = [...account.addresses];
-            for (const address of Array.isArray(localAddresses) ? localAddresses : []) {
-              if (mergedAddresses.some((saved) => String(saved.id) === String(address.id))) continue;
-              const saveResponse = await window.HNUI.api.request("account/addresses", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: address.title, recipient: address.recipient, phone: address.phone, countryId: Number(address.countryId), provinceId: Number(address.provinceId), cityId: Number(address.cityId), street: address.street, postal: address.postal }) });
-              if (!saveResponse.ok) continue;
-              const saved = await saveResponse.json();
-              mergedAddresses.push({ ...address, id: String(saved.id) });
-            }
-            window.HNUI.storage.set("hn-delivery-addresses", JSON.stringify(mergedAddresses));
-          }
-          window.HNUI.cart.restoreAccountLines(account.cart);
-        }
-      } catch { }
-      window.HNUI.auth.login();
-      for (const key of ["hn-favorites", "hn-compare"]) window.HNUI.storage.set(key, window.HNUI.storage.get(key, "[]"));
-      window.HNUI.storage.set("hn-price-watches-demo", window.HNUI.storage.get("hn-price-watches-demo", "[]"));
-      window.HNUI.cart.write(window.HNUI.cart.read());
+        if (!stateResponse.ok) throw new Error("account state unavailable");
+        await hydrateAccountState(await stateResponse.json());
+      } catch { userLoggedIn = false; }
+      if (userLoggedIn) {
+        window.HNUI.auth.login();
+        persistHydratedAccountState();
+      }
     } else window.HNUI.storage.remove("hn-demo-auth");
     updateAccountUI();
     if (!userLoggedIn && protectedPath) showLoginModal(() => window.location.reload());

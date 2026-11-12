@@ -1,4 +1,8 @@
-@{ string cdnBaseUrl = ViewData["MediaCdnBaseUrl"] as string ?? ""; }
+@{
+    string cdnBaseUrl = ViewData["MediaCdnBaseUrl"] as string ?? "";
+    string adminAreaTitle = ViewData["AreaTitle"] as string ?? "مدیریت فروشگاه و انبار";
+    string adminPageTitle = ViewData["Title"] as string ?? adminAreaTitle;
+}
 <!doctype html>
 <html lang="fa" dir="rtl">
 <head>
@@ -9,6 +13,7 @@
     <title>@ViewData["Title"] - مدیریت فروشگاه</title>
     <link rel="stylesheet" href="~/color_admin/assets/css/vendor.min.css" asp-append-version="true"/>
     <link rel="stylesheet" href="~/color_admin/assets/css/default/app-rtl.min.css" asp-append-version="true"/>
+    <link rel="stylesheet" href="~/color_admin/assets/plugins/datatables.net-bs5/css/dataTables.bootstrap5.min.css" asp-append-version="true"/>
     <link rel="stylesheet" href="~/color_admin/assets/css/persian-font.css" asp-append-version="true"/>
     <link rel="stylesheet" href="~/css/admin-ui.css" asp-append-version="true"/>
     <link rel="stylesheet" href="~/css/admin-dashboards.css" asp-append-version="true"/>
@@ -25,7 +30,31 @@
         <a href="#content" data-dismiss="app-sidebar-mobile" class="stretched-link" aria-label="بستن منو"></a>
     </div>
     <main id="content" class="app-content" tabindex="-1">
-        @RenderBody()
+        <section class="panel panel-inverse admin-page-widget" aria-label="پنل @adminPageTitle">
+            <div class="panel-heading">
+                <div>
+                    <div class="panel-title">@adminPageTitle</div>
+                    @if (!string.Equals(adminPageTitle, adminAreaTitle, StringComparison.Ordinal))
+                    {
+                        <small class="admin-page-widget__context">@adminAreaTitle</small>
+                    }
+                </div>
+                <div class="panel-heading-btn">
+                    <button type="button" class="btn btn-xs btn-icon btn-default" data-toggle="panel-expand" aria-label="گسترش پنل" title="گسترش پنل">
+                        <i class="fa fa-expand" aria-hidden="true"></i>
+                    </button>
+                    <button type="button" class="btn btn-xs btn-icon btn-success" data-admin-page-reload aria-label="تازه‌سازی صفحه" title="تازه‌سازی صفحه">
+                        <i class="fa fa-redo" aria-hidden="true"></i>
+                    </button>
+                    <button type="button" class="btn btn-xs btn-icon btn-warning" data-admin-panel-collapse aria-controls="admin-page-widget-body" aria-expanded="true" aria-label="جمع‌کردن پنل" title="جمع‌کردن پنل">
+                        <i class="fa fa-minus" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="panel-body" id="admin-page-widget-body">
+                @RenderBody()
+            </div>
+        </section>
     </main>
     <div id="admin-toast-region" class="toast-container position-fixed top-0 start-0 p-3" aria-live="polite" aria-atomic="true"></div>
     <div class="modal fade" id="admin-record-modal" tabindex="-1" aria-labelledby="admin-record-title" aria-hidden="true">
@@ -52,6 +81,8 @@
 
 <script src="~/color_admin/assets/js/vendor.min.js" asp-append-version="true"></script>
 <script src="~/color_admin/assets/js/app.min.js" asp-append-version="true"></script>
+<script src="~/color_admin/assets/plugins/datatables.net/js/dataTables.min.js" asp-append-version="true"></script>
+<script src="~/color_admin/assets/plugins/datatables.net-bs5/js/dataTables.bootstrap5.min.js" asp-append-version="true"></script>
 <script src="~/js/admin-ui.js" asp-append-version="true"></script>
 <script src="~/js/admin-data.js" asp-append-version="true"></script>
 <script src="~/js/admin-paid-orders-dispatch.js" asp-append-version="true"></script>

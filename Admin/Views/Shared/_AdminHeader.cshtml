@@ -1,3 +1,8 @@
+@{
+    var displayName = User.FindFirst("display_name")?.Value?.Trim();
+    if (string.IsNullOrWhiteSpace(displayName)) displayName = User.Identity?.Name ?? "کاربر پنل";
+    var avatarInitial = displayName.FirstOrDefault();
+}
 <header id="header" class="app-header">
     <div class="navbar-header">
         <a class="navbar-brand" asp-area="Admin" asp-controller="Home" asp-action="Index" data-admin-nav>
@@ -22,12 +27,25 @@
                 <span class="d-none d-sm-inline">نمای کلی</span>
             </a>
         </div>
-        <div class="navbar-item d-flex align-items-center gap-2">
-            <span class="small">@User.FindFirst("display_name")?.Value</span>
-            <form asp-controller="Auth" asp-action="Logout" method="post">
-                @Html.AntiForgeryToken()
-                <button class="btn btn-sm btn-outline-secondary" type="submit">خروج</button>
-            </form>
+        <div class="navbar-item navbar-user dropdown">
+            <button type="button" class="navbar-link dropdown-toggle d-flex align-items-center admin-header-profile" data-bs-toggle="dropdown" aria-expanded="false" aria-label="حساب @displayName">
+                <span class="admin-header-profile__avatar" aria-hidden="true">@avatarInitial</span>
+                <span class="d-none d-sm-inline">@displayName</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end me-1" dir="rtl">
+                <div class="dropdown-header text-end">
+                    <span class="d-block fw-semibold">@displayName</span>
+                    <small class="text-muted">حساب مدیریت</small>
+                </div>
+                <div class="dropdown-divider"></div>
+                <form asp-controller="Auth" asp-action="Logout" method="post">
+                    @Html.AntiForgeryToken()
+                    <button class="dropdown-item text-danger" type="submit">
+                        <i class="fa fa-arrow-right-from-bracket ms-2" aria-hidden="true"></i>
+                        خروج از پنل
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 </header>

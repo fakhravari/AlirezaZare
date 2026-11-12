@@ -54,7 +54,7 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
     let editing = null;
     const status = document.querySelector("#accountStatus");
     const save = (key, value) => {
-        const ok = ui.storage.set(key, JSON.stringify(value));
+        const ok = ui.storage.hydrate(key, JSON.stringify(value));
         if (!ok)
             ui.setMessage(
                 status,
@@ -131,7 +131,7 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
                     )
                 ) {
                     if (currentSelected === addressId)
-                        ui.storage.remove("hn-selected-address");
+                        ui.storage.hydrate("hn-selected-address", "");
                     renderAddresses();
                     ui.setMessage(status, "آدرس حذف شد.", "success");
                 }
@@ -196,8 +196,13 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
             const route = editing && /^\d+$/.test(String(editing)) ? `account/addresses/${editing}` : "account/addresses";
             const response = await ui.api.request(route, { method: editing ? "PUT" : "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: address.title, recipient: address.recipient, phone: address.phone, countryId: Number(address.countryId), provinceId: Number(address.provinceId), cityId: Number(address.cityId), street: address.street, postal: address.postal }) });
             const result = await response.json().catch(() => ({}));
-            if (!response.ok) { setFormStatus("ذخیره نشانی در حساب انجام نشد.", true); return; }
-            if (result.id) address.id = String(result.id);
+            if (!response.ok || !result.id) { setFormStatus("ذخیره نشانی در حساب انجام نشد.", true); return; }
+            address.id = String(result.id);
+            const preferenceResponse = await ui.api.request("account/checkout-preference", {
+                method: "PUT", headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ addressId: Number(address.id), paymentMethod: "zarinpal" }),
+            });
+            if (!preferenceResponse.ok) { setFormStatus("نشانی ذخیره شد، اما انتخاب آن برای تسویه‌حساب ثبت نشد.", true); return; }
         }
         const addresses = read(addressKey);
         const next = editing
@@ -207,7 +212,7 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
             setFormStatus("ذخیره آدرس ممکن نشد. دوباره تلاش کنید.", true);
             return;
         }
-        ui.storage.set("hn-selected-address", address.id);
+        ui.storage.hydrate("hn-selected-address", address.id);
         renderAddresses();
         renderOverview();
         dialog.close();
@@ -258,6 +263,7 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
             const dateLabel = formatPersianDate(date);
             const card = document.createElement("article");
             card.className = "profile-order-card";
+            card._orderDetails = order;
             Object.assign(card.dataset, { orderNumber: order.number, orderStatus: label, orderDate: dateLabel, orderDatetime: date.toISOString().slice(0, 10), orderCount: String(order.itemCount), orderAmount: String(order.totalAmount), orderDelivery: label });
             const simulationLink = simulationAvailable && order.status === "pending-payment" && Number.isSafeInteger(order.id) && order.id > 0
                 ? `<a href="/payment/simulated/${order.id}">ادامهٔ پرداخت آزمایشی</a>` : "";
@@ -276,10 +282,10 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
             const response = await ui.api.request("account/state");
             if (!response.ok) return;
             const account = await response.json();
-            if (Array.isArray(account.addresses)) ui.storage.set(addressKey, JSON.stringify(account.addresses));
-            if (Array.isArray(account.favorites)) ui.storage.set("hn-favorites", JSON.stringify(account.favorites.map((item) => String(item.id))));
-            if (Array.isArray(account.compare)) ui.storage.set("hn-compare", JSON.stringify(account.compare.map((item) => String(item.id))));
-            if (Array.isArray(account.priceAlerts)) ui.storage.set(priceWatchKey, JSON.stringify(account.priceAlerts));
+            if (Array.isArray(account.addresses)) ui.storage.hydrate(addressKey, JSON.stringify(account.addresses));
+            if (Array.isArray(account.favorites)) ui.storage.hydrate("hn-favorites", JSON.stringify(account.favorites.map((item) => String(item.id))));
+            if (Array.isArray(account.compare)) ui.storage.hydrate("hn-compare", JSON.stringify(account.compare.map((item) => String(item.id))));
+            if (Array.isArray(account.priceAlerts)) ui.storage.hydrate(priceWatchKey, JSON.stringify(account.priceAlerts));
             renderAddresses(); renderAccountOrders(account.orders, account.simulationAvailable === true); renderOverview();
         } catch { }
     };
@@ -578,16 +584,32 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
             invoiceDialog.querySelector("[data-invoice-count]").textContent = ui.formatNumber(order.dataset.orderCount);
             invoiceDialog.querySelector("[data-invoice-amount]").textContent = formatToman(order.dataset.orderAmount);
             invoiceDialog.querySelector("[data-invoice-total]").textContent = formatToman(order.dataset.orderAmount);
+            const details = order._orderDetails || {};
+            const lines = invoiceDialog.querySelector("[data-invoice-lines]");
+            lines?.replaceChildren();
+            for (const item of details.items || []) {
+                const row = document.createElement("div"); row.className = "order-invoice-row"; row.setAttribute("role", "row");
+                const description = document.createElement("span"); description.setAttribute("role", "cell");
+                const componentLabels = { product: "کالا", accessory: "متعلقه", option: "گزینه", variant: "تنوع", "order-snapshot": "ثبت سفارش" };
+                const refs = (item.priceReferences || []).map(ref => `نسخهٔ قیمت #${ref.priceVersionId} (${componentLabels[ref.component] || ref.component}): ${formatToman(ref.calculatedUnitAmount)}`).join("، ");
+                description.textContent = refs ? `${item.name} — ${refs}` : item.name;
+                const quantity = document.createElement("span"); quantity.setAttribute("role", "cell"); quantity.textContent = ui.formatNumber(item.quantity);
+                const amount = document.createElement("strong"); amount.setAttribute("role", "cell"); amount.textContent = formatToman(item.unitAmount);
+                row.append(description, quantity, amount); lines?.append(row);
+            }
+            const history = invoiceDialog.querySelector("[data-invoice-history]"); history?.replaceChildren();
+            const statusLabels = { "pending-payment": "در انتظار پرداخت", "payment-confirmed": "پرداخت تأیید شد", "warehouse-confirmed": "تأیید انبار", "shipped-to-post": "تحویل به پست", "in-transit": "در حال ارسال", delivered: "تحویل‌شده", cancelled: "لغوشده" };
+            const events = [
+                ...(details.shippingHistory || []).map(entry => ({ when: entry.changedAtUtc, text: `${statusLabels[entry.previousStatus] || entry.previousStatus} ← ${statusLabels[entry.newStatus] || entry.newStatus}` })),
+                ...(details.trackingHistory || []).map(entry => ({ when: entry.changedAtUtc, text: `رهگیری: ${entry.carrier}، ${entry.trackingCode}` }))
+            ].sort((a, b) => new Date(a.when) - new Date(b.when));
+            for (const entry of events) { const li = document.createElement("li"); li.textContent = `${new Date(entry.when).toLocaleString("fa-IR")} — ${entry.text}`; history?.append(li); }
+            if (!events.length && history) { const li = document.createElement("li"); li.textContent = "هنوز رویدادی برای این سفارش ثبت نشده است."; history.append(li); }
             if (!invoiceDialog.open) invoiceDialog.showModal();
     });
     invoiceDialog?.querySelector("[data-close-order-invoice]")?.addEventListener("click", () => invoiceDialog.close());
     invoiceDialog?.addEventListener("click", (event) => {
         if (event.target === invoiceDialog) invoiceDialog.close();
-    });
-    window.addEventListener("storage", () => {
-        renderAddresses();
-        renderOverview();
-        renderPriceAlerts();
     });
     document.addEventListener("hn:lists-change", () => {
         renderOverview();

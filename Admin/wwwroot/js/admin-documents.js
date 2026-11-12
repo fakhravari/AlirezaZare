@@ -97,16 +97,18 @@
             renderDocuments(page, result.items || []);
             status(page, result.items?.length ? "" : "سندی با این فیلتر پیدا نشد.");
             const pagination = page.querySelector("[data-document-pagination]");
-            pagination.hidden = false;
+            const hasNext = (result.items?.length || 0) >= 50;
+            pagination.hidden = pageNumber <= 1 && !hasNext;
             const label = pagination.querySelector("[data-document-page-label]");
             label.textContent = `صفحهٔ ${format.format(pageNumber)}`;
             pagination.querySelector('[data-document-page="-1"]').disabled = pageNumber <= 1;
-            pagination.querySelector('[data-document-page="1"]').disabled = result.items?.length < 50;
+            pagination.querySelector('[data-document-page="1"]').disabled = !hasNext;
         } catch (error) { if (serial === requestSerial) status(page, error.message, true); }
     }
 
     function renderDocuments(page, items) {
         const body = page.querySelector("[data-document-rows]");
+        ui.destroyDataTable(page.querySelector("[data-admin-datatable]"));
         body.replaceChildren();
         for (const item of items) {
             const row = document.createElement("tr");
@@ -135,6 +137,7 @@
             row.append(actions);
             body.append(row);
         }
+        ui.refreshDataTable(page.querySelector("[data-admin-datatable]"));
     }
 
     function setSelect(select, value) { select.value = value == null ? "" : String(value); }

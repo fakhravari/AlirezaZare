@@ -32,14 +32,17 @@ test('cart accepts product images on the configured CDN and rejects other origin
   assert.equal(other.ui.cart.add(other.window.HNCatalog.find(1)).length, 0);
 });
 
-test('required services are included exactly once, including after reload and legacy migration', () => {
+test('required services are included exactly once and restored from the account API', () => {
   const r = loggedIn();
   const product = r.window.HNCatalog.find(1);
   const [item] = r.ui.cart.add({...product, price: 1});
   assert.equal(item.price, 24850000);
   assert.equal(item.options.accessories.filter(a => a.required && a.selected).length, 1);
   assert.equal(r.ui.cart.read()[0].price, 24850000);
-  const reloaded = loggedIn(undefined, {[key]: r.ui.storage.get(key)});
+  const saved = r.ui.cart.read()[0];
+  const reloaded = loggedIn();
+  assert.equal(reloaded.ui.cart.read().length, 0);
+  reloaded.ui.cart.restoreAccountLines([{id: 1, quantity: 1, salesPlanId: 'regular', options: saved.options}]);
   assert.equal(reloaded.ui.cart.read()[0].price, 24850000);
   assert.equal(reloaded.ui.cart.add(product)[0].price, 24850000);
   assert.equal(reloaded.ui.cart.totals().price, 49700000);
@@ -78,7 +81,9 @@ test('renaming an accessory preserves the selection through its stable ID', () =
   original.ui.cart.add({...p, options: {accessories: [{...optional, selected: true}]}});
   const changed = source();
   changed.products[0].accessories.find(a => a.id === optional.id).name = 'نام جدید متعلقه';
-  const reloaded = loggedIn(changed, {[key]: original.ui.storage.get(key)});
+  const accountLine = original.ui.cart.read()[0];
+  const reloaded = loggedIn(changed);
+  reloaded.ui.cart.restoreAccountLines([{id: 1, quantity: 1, salesPlanId: 'regular', options: accountLine.options}]);
   const saved = reloaded.ui.cart.read()[0].options.accessories.find(a => a.id === optional.id);
   assert.equal(saved.selected, true); assert.equal(saved.name, 'نام جدید متعلقه');
   assert.equal(reloaded.ui.cart.read()[0].price, 26100000);
@@ -164,11 +169,12 @@ test('cart lines follow configured sales-plan type order and expose grouped labe
   assert.equal(r.ui.cart.groupBySalesPlan(items).reduce((sum, group) => sum + group.items.length, 0), 3);
 });
 
-test('future legacy data is retained for migration while current cart works in memory', () => {
+test('legacy browser cart data is discarded and never restored', () => {
   const future = JSON.stringify({schemaVersion: 2, value: []});
   const r = loggedIn(undefined, {[key]: future});
   r.window.localStorage.setItem = () => { throw new Error('quota'); };
-  assert.equal(r.ui.storage.legacy(key), future);
+  assert.equal(r.ui.storage.legacy(key), null);
+  assert.equal(r.ui.cart.read().length, 0);
   assert.equal(r.ui.cart.add(r.window.HNCatalog.find(1)).length, 1);
   assert.equal(r.values.has(key), false);
 });

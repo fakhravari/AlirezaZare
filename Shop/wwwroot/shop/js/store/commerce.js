@@ -1110,7 +1110,7 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
             const priceDialog = document.createElement("dialog");
             priceDialog.className = "detail-price-dialog";
             priceDialog.setAttribute("aria-labelledby", "productPriceDialogTitle");
-            priceDialog.innerHTML = `<div class="detail-price-dialog-shell"><header class="detail-price-dialog-head"><div><span>قیمت محصول</span><h2 id="productPriceDialogTitle"></h2></div><button type="button" data-price-dialog-close aria-label="بستن"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header><div class="detail-price-dialog-body"><fieldset class="detail-price-scope"></fieldset><div class="detail-price-dialog-state" data-price-dialog-state role="status" aria-live="polite"></div><div class="detail-price-demo-chart" data-price-chart></div></div></div>`;
+            priceDialog.innerHTML = `<div class="detail-price-dialog-shell"><header class="detail-price-dialog-head"><div><span>قیمت محصول</span><h2 id="productPriceDialogTitle"></h2></div><button type="button" data-price-dialog-close aria-label="بستن"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header><div class="detail-price-dialog-body"><div class="detail-price-dialog-state" data-price-dialog-state role="status" aria-live="polite"></div><div class="detail-price-history-chart" data-price-chart hidden></div></div></div>`;
             priceDialog
                 .querySelector("[data-price-dialog-close]")
                 .classList.add("site-modal-close");
@@ -1134,22 +1134,7 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                 );
                 return index < 0 ? 0 : index;
             };
-            const priceScope = priceDialog.querySelector(".detail-price-scope");
-            priceScope.innerHTML = `<legend>ترکیب مورد بررسی</legend>${priceCombinations
-                .map((combination, index) => {
-                    const checked = index === currentPriceCombinationIndex();
-                    const label = combination.labels.join("، ");
-                    const currentPrice = Math.max(
-                        0,
-                        Math.round((Number(p.price) + combination.priceDelta) * 1000000),
-                    );
-                    return `<label class="${checked ? "is-selected" : ""}"><input type="radio" name="detail-price-combination" value="${index}" ${checked ? "checked" : ""}><span><strong>${esc(label)}</strong><small>قیمت فعلی: ${money(currentPrice)}</small></span></label>`;
-                })
-                .join("")}`;
             let priceDialogTrigger = null;
-            if (!hasPriceVariants) priceScope.remove();
-            const selectedPriceCombination = () =>
-                priceCombinations[Number(priceDialog.querySelector('input[name="detail-price-combination"]:checked')?.value)] || priceCombinations[0];
             const syncPriceWatchTrigger = () => {
                 const trigger = productView.querySelector("[data-price-watch-toggle]");
                 if (!trigger) return;
@@ -1160,76 +1145,50 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                 trigger.title = active ? "حذف پیگیری قیمت" : "به من اطلاع بده";
                 trigger.innerHTML = '<i class="bi ' + (active ? "bi-bell-fill" : "bi-bell") + '" aria-hidden="true"></i>';
             };
-            const renderPriceDialogState = () => {
-                const combination = selectedPriceCombination();
+            const renderPriceDialogState = async () => {
                 const state = priceDialog.querySelector("[data-price-dialog-state]");
                 const chart = priceDialog.querySelector("[data-price-chart]");
-                const selectedPrice = Math.max(
-                    0,
-                    Math.round((Number(p.price) + combination.priceDelta) * 1000000),
-                );
-                const seedText = `${p.id}:${variantSignature(combination.variants)}`;
-                let seed = 0;
-                for (const character of seedText)
-                    seed = (seed * 31 + character.charCodeAt(0)) >>> 0;
-                const factors = Array.from({ length: 25 }, (_, index) => {
-                    const progress = index / 24;
-                    return (
-                        0.66 +
-                        progress * 0.34 +
-                        Math.sin((index + (seed % 12)) * 0.52) * 0.03 +
-                        Math.sin((index + (seed % 7)) * 1.1) * 0.012
-                    );
-                });
-                const lastFactor = factors.at(-1) || 1;
-                const values = factors.map((factor) =>
-                    Math.round(selectedPrice * (factor / lastFactor)),
-                );
-                const min = Math.min(...values) * 0.97;
-                const max = Math.max(...values) * 1.03 || 1;
-                const points = values
-                    .map((value, index) => {
-                        const x = 146 + (index * 534) / (values.length - 1);
-                        const y = 170 - ((value - min) / Math.max(1, max - min)) * 140;
-                        return `${x.toFixed(1)},${y.toFixed(1)}`;
-                    })
-                    .join(" ");
-                const endY = 170 - ((values.at(-1) - min) / Math.max(1, max - min)) * 140;
-                const middle = (min + max) / 2;
-                const priceTicks = [max, middle, min]
-                    .map((value, index) =>
-                        `<text x="132" y="${[30, 100, 170][index]}" text-anchor="start" dominant-baseline="middle" direction="rtl" font-size="12" fill="#65788a">${esc(money(Math.round(value)))}</text>`,
-                    )
-                    .join("");
-                const rangeStart = new Date();
-                rangeStart.setMonth(rangeStart.getMonth() - 24);
-                const formatMonth = (date) =>
-                    new Intl.DateTimeFormat("fa-IR-u-ca-persian", {
-                        month: "long",
-                        year: "numeric",
-                    }).format(date);
-                const svg = `<svg viewBox="0 0 700 190" role="img" aria-label="نمودار نمایشی ماهانهٔ قیمت ${esc(combination.labels.join("، "))} در دو سال گذشته"><path d="M146 30H680M146 100H680M146 170H680" stroke="#e4eaf0" stroke-width="1"/>${priceTicks}<polyline points="${points}" fill="none" stroke="#c39418" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="680" cy="${endY.toFixed(1)}" r="4.5" fill="#c39418" stroke="#fff" stroke-width="2"/></svg>`;
-                state.innerHTML = '<i class="bi bi-graph-up" aria-hidden="true"></i><strong>روند نمایشی قیمت در دو سال اخیر</strong><span>نمودار ماهانه و نمونه‌سازی‌شده است؛ دادهٔ واقعی فروشگاه نیست.</span>';
-                chart.innerHTML = `${svg}<div class="detail-price-chart-legend"><span><i style="--price-series-color:#c39418"></i>${esc(combination.labels.join("، "))} <b>${money(values.at(-1))}</b></span></div><div class="detail-price-chart-axis"><span>${esc(formatMonth(rangeStart))}</span><span>${esc(formatMonth(new Date()))}</span></div>`;
-                chart.hidden = false;
-                priceDialog
-                    .querySelectorAll(".detail-price-scope label")
-                    .forEach((label) =>
-                        label.classList.toggle(
-                            "is-selected",
-                            label.querySelector("input")?.checked === true,
-                        ),
-                    );
+                chart.hidden = true;
+                state.innerHTML = '<i class="bi bi-clock-history" aria-hidden="true"></i><strong>دریافت تاریخچهٔ قیمت</strong><span>رکوردهای نسخهٔ قیمت کالا در طرح انتخاب‌شده خوانده می‌شود.</span>';
+                try {
+                    const response = await ui.api.request(`store/sales-plans/products/${p.id}/price-history?salesPlanId=${encodeURIComponent(selectedSalesPlanId)}`);
+                    if (!response.ok) throw new Error("price-history-unavailable");
+                    const result = await response.json();
+                    const history = Array.isArray(result.history) ? result.history : [];
+                    if (!history.length) {
+                        state.innerHTML = '<i class="bi bi-info-circle" aria-hidden="true"></i><strong>تاریخچه‌ای ثبت نشده است</strong><span>برای این کالا و طرح، نسخهٔ قیمت قابل‌نمایشی پیدا نشد.</span>';
+                        return;
+                    }
+                    const values = history.map(item => Number(item.finalAmount));
+                    const rawMin = Math.min(...values), rawMax = Math.max(...values);
+                    const padding = rawMax === rawMin ? Math.max(rawMax * 0.05, 1) : (rawMax - rawMin) * 0.08;
+                    const min = Math.max(0, rawMin - padding), max = rawMax + padding;
+                    const timestamps = history.map(item => new Date(item.createdAtUtc).getTime());
+                    const firstTime = timestamps[0], lastTime = timestamps.at(-1);
+                    const xFor = index => lastTime === firstTime
+                        ? 413
+                        : 146 + ((timestamps[index] - firstTime) / (lastTime - firstTime)) * 534;
+                    const yFor = value => 170 - ((value - min) / Math.max(1, max - min)) * 140;
+                    const points = history.map((item, index) => `${xFor(index).toFixed(1)},${yFor(values[index]).toFixed(1)}`);
+                    const priceTicks = [max, (min + max) / 2, min].map((value, index) =>
+                        `<text x="132" y="${[30, 100, 170][index]}" text-anchor="start" dominant-baseline="middle" direction="rtl" font-size="12" fill="#65788a">${esc(money(Math.round(value)))}</text>`).join("");
+                    const formatDate = value => new Intl.DateTimeFormat("fa-IR-u-ca-persian", { year: "numeric", month: "short", day: "numeric" }).format(new Date(value));
+                    const polyline = points.length > 1 ? `<polyline points="${points.join(" ")}" fill="none" stroke="#c39418" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>` : "";
+                    const dots = history.map((item, index) => `<circle cx="${xFor(index).toFixed(1)}" cy="${yFor(values[index]).toFixed(1)}" r="4.5" fill="#c39418" stroke="#fff" stroke-width="2"><title>${esc(formatDate(item.createdAtUtc))}: ${esc(money(values[index]))}</title></circle>`).join("");
+                    const svg = `<svg viewBox="0 0 700 190" role="img" aria-label="تاریخچهٔ ثبت‌شدهٔ قیمت پایهٔ ${esc(p.name)}"><path d="M146 30H680M146 100H680M146 170H680" stroke="#e4eaf0" stroke-width="1"/>${priceTicks}${polyline}${dots}</svg>`;
+                    const latestItems = history.slice(-10).reverse();
+                    const historyRows = latestItems.map(item => `<li><time datetime="${esc(item.createdAtUtc)}">${esc(formatDate(item.createdAtUtc))}</time><strong>${esc(money(Number(item.finalAmount)))}</strong><span>نسخهٔ قیمت #${fa(item.priceVersionId)}${item.isActive ? " · فعال" : ""}</span></li>`).join("");
+                    state.innerHTML = `<i class="bi bi-graph-up" aria-hidden="true"></i><strong>قیمت پایه بر اساس نسخه‌های ثبت‌شده</strong><span>${fa(history.length)} نسخهٔ قیمت؛ سابقهٔ پیش از آغاز ثبت نسخه‌ها در دسترس نیست.</span>`;
+                    chart.innerHTML = `${svg}<div class="detail-price-chart-legend"><span><i style="--price-series-color:#c39418"></i>قیمت نهایی پس از تخفیف</span></div><div class="detail-price-chart-axis"><span>${esc(formatDate(history[0].createdAtUtc))}</span><span>${esc(formatDate(history.at(-1).createdAtUtc))}</span></div><ol class="detail-price-history-list">${historyRows}</ol>`;
+                    chart.hidden = false;
+                } catch {
+                    state.innerHTML = '<i class="bi bi-exclamation-circle" aria-hidden="true"></i><strong>دریافت تاریخچه انجام نشد</strong><span>بار دیگر نمودار را باز کنید تا رکوردهای قیمت از پایگاه خوانده شوند.</span>';
+                }
             };
-            priceDialog.addEventListener("change", renderPriceDialogState);
             const openPriceDialog = (trigger) => {
                 priceDialogTrigger = trigger;
-                priceDialog.querySelector("#productPriceDialogTitle").textContent = "نمودار تغییر قیمت";
-                const currentIndex = currentPriceCombinationIndex();
-                priceDialog
-                    .querySelectorAll("input[name=\"detail-price-combination\"]")
-                    .forEach((input, index) => (input.checked = index === currentIndex));
-                renderPriceDialogState();
+                priceDialog.querySelector("#productPriceDialogTitle").textContent = "تغییرات قیمت پایه";
+                void renderPriceDialogState();
                 priceDialog.showModal();
             };
             const togglePriceWatch = () => {

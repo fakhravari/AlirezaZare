@@ -7,12 +7,12 @@
             <form data-dispatch-form>
                 @Html.AntiForgeryToken()
                 <div class="d-flex flex-wrap gap-2 align-items-center mb-3">
-                    <button class="btn btn-primary" type="submit" data-dispatch-submit>صدور یک حواله برای انتخاب‌شده‌ها</button>
+                    <button class="btn btn-primary" type="submit" data-dispatch-submit><i class="fa fa-truck-fast me-1" aria-hidden="true"></i>صدور یک حواله برای انتخاب‌شده‌ها</button>
                     <button class="btn btn-default" type="button" data-dispatch-refresh>بارگذاری دوباره</button>
                     <span data-dispatch-count aria-live="polite"></span>
                 </div>
                 <div data-dispatch-status role="status" aria-live="polite"></div>
-                <div class="table-responsive"><table class="table table-striped align-middle"><thead><tr>
+                <div class="table-responsive"><table class="table table-striped align-middle" data-admin-datatable data-admin-page-length="25"><thead><tr>
                     <th><input type="checkbox" data-dispatch-all aria-label="انتخاب همه سفارش‌های نمایش‌داده‌شده" /></th>
                     <th>شماره سفارش</th><th>مشتری</th><th>تعداد</th><th>مبلغ تومان</th><th>زمان تأیید پرداخت</th>
                 </tr></thead><tbody data-dispatch-rows></tbody></table></div>

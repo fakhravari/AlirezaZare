@@ -45,6 +45,7 @@
             filterOptions(form.elements.countryId, countrySearch);
         }
         function render() {
+            ui.destroyDataTable(page.querySelector("[data-admin-datatable]"));
             const columns = {
                 countries: [["شناسه", "id"], ["نام فارسی", "nameFa"], ["نام انگلیسی", "nameEn"], ["کد کشور", "code"], ["مسیر پرچم", "flagPath"]],
                 provinces: [["شناسه", "id"], ["نام فارسی", "nameFa"], ["نام انگلیسی", "nameEn"], ["کشور", "parentName"], ["شناسه کشور", "countryId"], ["عرض جغرافیایی", "latitude"], ["طول جغرافیایی", "longitude"]],
@@ -81,6 +82,7 @@
                 }
                 td.append(edit, del); tr.append(td); rows.append(tr);
             }
+            ui.refreshDataTable(page.querySelector("[data-admin-datatable]"));
             status.textContent = `${new Intl.NumberFormat("fa-IR").format(items.length)} مورد`;
         }
         async function handleMutationError(error) {

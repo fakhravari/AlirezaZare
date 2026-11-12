@@ -50,6 +50,7 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
     public DbSet<StoreProductMedia> StoreProductMedia => Set<StoreProductMedia>();
     public DbSet<StoreProductDocument> StoreProductDocuments => Set<StoreProductDocument>();
     public DbSet<StoreBrand> StoreBrands => Set<StoreBrand>();
+    public DbSet<StoreBank> StoreBanks => Set<StoreBank>();
     public DbSet<StoreBrandEditorial> StoreBrandEditorials => Set<StoreBrandEditorial>();
     public DbSet<StoreColor> StoreColors => Set<StoreColor>();
     public DbSet<StoreSpecificationGroup> StoreSpecificationGroups => Set<StoreSpecificationGroup>();
@@ -66,6 +67,8 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
     public DbSet<StoreProductAccessory> StoreProductAccessories => Set<StoreProductAccessory>();
     public DbSet<StoreProductSalesPlanOfferAccessory> StoreProductSalesPlanOfferAccessories => Set<StoreProductSalesPlanOfferAccessory>();
     public DbSet<StoreProductSalesPlanOfferSpecificationOverride> StoreProductSalesPlanOfferSpecificationOverrides => Set<StoreProductSalesPlanOfferSpecificationOverride>();
+    public DbSet<StorePriceVersion> StorePriceVersions => Set<StorePriceVersion>();
+    public DbSet<StoreOrderItemPriceReference> StoreOrderItemPriceReferences => Set<StoreOrderItemPriceReference>();
     public DbSet<StoreProductPurchaseOption> StoreProductPurchaseOptions => Set<StoreProductPurchaseOption>();
     public DbSet<StoreProductPurchaseOptionValue> StoreProductPurchaseOptionValues => Set<StoreProductPurchaseOptionValue>();
     public DbSet<GeoCountry> GeoCountries => Set<GeoCountry>();
@@ -476,7 +479,7 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
         });
         modelBuilder.Entity<AccountCoupon>(entity =>
         {
-            entity.ToTable("Coupon", "Account"); entity.HasKey(x => x.Id);
+            entity.ToTable("Coupon", "Store"); entity.HasKey(x => x.Id);
             entity.Property(x => x.CouponKey).HasMaxLength(100).IsRequired(); entity.Property(x => x.Code).HasMaxLength(32).IsRequired();
             entity.HasIndex(x => x.CouponKey).IsUnique(); entity.HasIndex(x => x.Code).IsUnique();
         });
@@ -501,6 +504,7 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.Property(x => x.Status).HasMaxLength(30).IsRequired();
             entity.Property(x => x.TotalAmount).HasPrecision(19, 0);
             entity.Property(x => x.PaymentMethod).HasMaxLength(40).IsRequired();
+            entity.HasOne(x => x.Bank).WithMany().HasForeignKey(x => x.IdBank).IsRequired().OnDelete(DeleteBehavior.Restrict);
             entity.Property(x => x.ExternalOrderKey).HasMaxLength(100);
             entity.Property(x => x.ShippingCarrier).HasMaxLength(100);
             entity.Property(x => x.ShippingTrackingCode).HasMaxLength(100);
@@ -515,6 +519,28 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.Property(x => x.ProductNameSnapshot).HasMaxLength(300).IsRequired();
             entity.Property(x => x.UnitAmount).HasPrecision(19, 0);
             entity.Property(x => x.OptionsJson).HasColumnType("nvarchar(max)").IsRequired();
+            entity.HasMany(x => x.PriceReferences).WithOne().HasForeignKey(x => x.IdOrderItem).OnDelete(DeleteBehavior.Cascade);
+        });
+        modelBuilder.Entity<StorePriceVersion>(entity =>
+        {
+            entity.ToTable("PriceVersion", "Store");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.ScopeKey).HasMaxLength(300).IsRequired();
+            entity.Property(x => x.PriceKind).HasMaxLength(32).IsRequired();
+            entity.Property(x => x.PriceAmount).HasPrecision(19, 0);
+            entity.Property(x => x.DiscountPercent).HasPrecision(5, 2);
+            entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
+            entity.Property(x => x.ChangedBy).HasMaxLength(256);
+            entity.Property(x => x.ChangeReason).HasMaxLength(300);
+            entity.HasIndex(x => x.ScopeKey).IsUnique().HasFilter("[IsActive] = 1");
+            entity.HasIndex(x => new { x.IdProduct, x.IdSalesPlan, x.PriceKind, x.TargetId, x.Id });
+            entity.HasOne(x => x.PreviousVersion).WithMany().HasForeignKey(x => x.PreviousVersionId).OnDelete(DeleteBehavior.Restrict);
+        });
+        modelBuilder.Entity<StoreOrderItemPriceReference>(entity =>
+        {
+            entity.ToTable("OrderItemPriceReference", "Store");
+            entity.HasKey(x => new { x.IdOrderItem, x.IdPriceVersion });
+            entity.HasOne(x => x.PriceVersion).WithMany().HasForeignKey(x => x.IdPriceVersion).OnDelete(DeleteBehavior.Restrict);
         });
         modelBuilder.Entity<StoreOrderShippingHistory>(entity =>
         {
@@ -711,6 +737,15 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.Property(x => x.NameFa).HasMaxLength(200).IsRequired();
             entity.Property(x => x.LogoPath).HasMaxLength(500);
             entity.HasIndex(x => x.BrandKey).IsUnique();
+        });
+        modelBuilder.Entity<StoreBank>(entity =>
+        {
+            entity.ToTable("Bank", "Store");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.Code).HasMaxLength(40).IsUnicode(false).IsRequired();
+            entity.Property(x => x.NameFa).HasMaxLength(150).IsRequired();
+            entity.Property(x => x.LogoPath).HasMaxLength(500);
+            entity.Property(x => x.IsActive).HasDefaultValue(true);
         });
         modelBuilder.Entity<StoreCategory>(entity =>
         {

@@ -2,16 +2,16 @@
 <div class="admin-page" data-admin-page="faq" data-admin-api="/api/admin/store/faq">
     @await Html.PartialAsync("_AdminPageIntro", ("مدیریت محتوا", "پرسش‌های متداول، مقاله‌های مجله و صفحه‌های خدماتی را از یک صفحه ویرایش و منتشر کنید."))
     <section class="panel panel-inverse">
-        <div class="panel-heading"><h2 class="panel-title">پرسش‌های متداول</h2><div class="panel-heading-btn"><button class="btn btn-primary btn-sm" type="button" data-faq-create>افزودن پرسش</button></div></div>
+        <div class="panel-heading"><h2 class="panel-title">پرسش‌های متداول</h2><div class="panel-heading-btn"><button class="btn btn-primary btn-sm" type="button" data-faq-create><i class="fa fa-plus me-1" aria-hidden="true"></i>افزودن پرسش</button></div></div>
         <div class="panel-body">
             <div class="admin-data-status small text-muted" data-admin-status role="status" aria-live="polite">در حال دریافت پرسش‌ها…</div>
-            <div class="table-responsive admin-table-wrap"><table class="table table-striped table-hover align-middle"><thead><tr><th scope="col">پرسش</th><th scope="col">ترتیب</th><th scope="col">وضعیت</th><th scope="col">عملیات</th></tr></thead><tbody data-faq-rows></tbody></table></div>
+            <div class="table-responsive admin-table-wrap"><table class="table table-striped table-hover align-middle" data-admin-datatable><thead><tr><th scope="col">پرسش</th><th scope="col">ترتیب</th><th scope="col">وضعیت</th><th scope="col">عملیات</th></tr></thead><tbody data-faq-rows></tbody></table></div>
             <p class="admin-editor-help small text-muted">پرسش‌های منتشرنشده در سایت نمایش داده نمی‌شوند. عنوان، معرفی و بخش‌های صفحه در پنل صفحه‌های خدماتی قابل ویرایش است.</p>
         </div>
     </section>
 <section class="panel panel-inverse mt-4" data-magazine-admin data-api="/api/admin/store/magazine">
-    <div class="panel-heading"><h2 class="panel-title">مقاله‌های مجله</h2><div class="panel-heading-btn"><button class="btn btn-primary btn-sm" type="button" data-mag-create>افزودن مقاله</button></div></div>
-    <div class="panel-body"><div class="admin-data-status small text-muted" data-mag-status role="status" aria-live="polite">در حال دریافت مقاله‌ها…</div><div class="table-responsive"><table class="table table-striped"><thead><tr><th>عنوان</th><th>نشانی</th><th>بخش‌ها</th><th>انتشار</th><th>عملیات</th></tr></thead><tbody data-mag-rows></tbody></table></div><p class="admin-editor-help small text-muted">برای هر مقاله عنوان، نشانی، اطلاعات نویسنده و بخش‌های متن را ویرایش کنید. پیش‌نمایش عمومی بعد از انتشار در دسترس است.</p></div>
+    <div class="panel-heading"><h2 class="panel-title">مقاله‌های مجله</h2><div class="panel-heading-btn"><button class="btn btn-primary btn-sm" type="button" data-mag-create><i class="fa fa-plus me-1" aria-hidden="true"></i>افزودن مقاله</button></div></div>
+    <div class="panel-body"><div class="admin-data-status small text-muted" data-mag-status role="status" aria-live="polite">در حال دریافت مقاله‌ها…</div><div class="table-responsive"><table class="table table-striped" data-admin-datatable><thead><tr><th>عنوان</th><th>نشانی</th><th>بخش‌ها</th><th>انتشار</th><th>عملیات</th></tr></thead><tbody data-mag-rows></tbody></table></div><p class="admin-editor-help small text-muted">برای هر مقاله عنوان، نشانی، اطلاعات نویسنده و بخش‌های متن را ویرایش کنید. پیش‌نمایش عمومی بعد از انتشار در دسترس است.</p></div>
 </section>
 <section class="panel panel-inverse mt-4" data-service-pages data-api="/api/admin/store/content/pages">
     <div class="panel-heading"><h2 class="panel-title">صفحه‌های خدماتی</h2></div>
@@ -34,7 +34,7 @@
 <div class="col-12"><label class="form-label" for="mag-lead">مقدمه</label><textarea class="form-control" id="mag-lead" name="lead" rows="3"></textarea></div><div class="col-12"><label class="form-label" for="mag-conclusion">جمع‌بندی</label><textarea class="form-control" id="mag-conclusion" name="conclusion" rows="3"></textarea></div>
 <div class="col-12"><div class="d-flex justify-content-between align-items-center gap-3 mb-2"><div><label class="form-label mb-0">بخش‌های مقاله</label><p class="admin-editor-help small text-muted">برای هر بخش یک عنوان و متن بنویسید؛ ترتیب کارت‌ها ترتیب نمایش در مقاله است.</p></div><button class="btn btn-default btn-sm flex-shrink-0" type="button" data-mag-section-add><i class="fa fa-plus me-1" aria-hidden="true"></i>افزودن بخش</button></div><input type="hidden" name="sections" value="[]" /><div class="d-grid gap-3" data-mag-sections></div></div>
 <div class="col-12"><div class="form-check"><input class="form-check-input" id="mag-published" name="isPublished" type="checkbox" /><label class="form-check-label" for="mag-published">مقاله در سایت منتشر باشد</label></div></div>
-</div><div class="modal-footer"><button class="btn btn-default" type="button" data-bs-dismiss="modal">انصراف</button><button class="btn btn-primary" type="submit">ذخیره</button></div></form></div></div>
+</div><div class="modal-footer"><button class="btn btn-default" type="button" data-bs-dismiss="modal">انصراف</button><button class="btn btn-primary" type="submit"><i class="fa fa-floppy-disk me-1" aria-hidden="true"></i>ذخیره</button></div></form></div></div>
 <div class="modal fade" id="faq-editor-modal" tabindex="-1" aria-labelledby="faq-editor-title" aria-hidden="true">
     <div class="modal-dialog modal-lg"><form class="modal-content" data-faq-editor>
         @Html.AntiForgeryToken()<input type="hidden" name="id" />
@@ -47,7 +47,7 @@
             <label class="form-label" for="faq-order">ترتیب نمایش</label><input id="faq-order" name="sortOrder" type="number" min="0" max="1000000" step="1" class="form-control mb-3" required />
             <div class="form-check"><input id="faq-published" name="isPublished" class="form-check-input" type="checkbox" /><label for="faq-published" class="form-check-label">منتشر شود</label></div>
         </div>
-        <div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button type="submit" class="btn btn-primary">ذخیره</button></div>
+        <div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button type="submit" class="btn btn-primary"><i class="fa fa-floppy-disk me-1" aria-hidden="true"></i>ذخیره</button></div>
     </form></div>
 </div>
 <div class="modal fade" id="article-image-modal" tabindex="-1" aria-labelledby="article-image-title" aria-hidden="true">
@@ -55,6 +55,6 @@
         @Html.AntiForgeryToken()<input type="hidden" name="kind" value="article" /><input type="hidden" name="articleKey" />
         <div class="modal-header"><h2 class="modal-title fs-5" id="article-image-title">تصویر مقاله</h2><button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="بستن"></button></div>
         <div class="modal-body"><p data-article-image-name></p><label for="article-image-file" class="form-label">فایل تصویر</label><input id="article-image-file" name="file" type="file" accept="image/jpeg,image/png,image/webp" class="form-control" required /><div class="mt-2" data-media-upload-result role="status" aria-live="polite"></div></div>
-        <div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button type="submit" class="btn btn-primary">بارگذاری و اتصال به مقاله</button></div>
+        <div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button type="submit" class="btn btn-primary"><i class="fa fa-cloud-arrow-up me-1" aria-hidden="true"></i>بارگذاری و اتصال به مقاله</button></div>
     </form></div>
 </div>

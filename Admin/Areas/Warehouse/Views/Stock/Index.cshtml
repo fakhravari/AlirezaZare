@@ -30,7 +30,7 @@
             </form>
             <div class="admin-data-status small text-muted" data-admin-status role="status" aria-live="polite">در حال خواندن داده از دیتابیس…</div>
             <div class="table-responsive admin-table-wrap">
-                <table class="table table-striped table-hover align-middle mb-0">
+                <table class="table table-striped table-hover align-middle mb-0" data-admin-datatable data-admin-table-mode="server">
                     <thead>
                     <tr>
                         <th scope="col">انبار</th><th scope="col">کد کالا</th><th scope="col">نام کالا</th><th scope="col">طرح فروش</th><th scope="col">واحد اصلی</th><th scope="col">موجودی</th><th scope="col">حداقل</th><th scope="col">وضعیت</th><th scope="col">عملیات</th>
@@ -61,7 +61,7 @@
                 <div class="form-text" id="minimum-quantity-help">مقدار صفر، هشدار حداقل را غیرفعال می‌کند. ارقام اضافه پس از سه رقم اعشار بریده می‌شوند.</div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button class="btn btn-primary" type="submit">ذخیره</button>
+                <button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button class="btn btn-primary" type="submit"><i class="fa fa-floppy-disk me-1" aria-hidden="true"></i>ذخیره</button>
             </div>
         </form>
     </div>

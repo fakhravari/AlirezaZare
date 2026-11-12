@@ -1,0 +1,17 @@
+@using Shop.Models
+@{
+    ViewData["Title"] = "بانک‌ها و درگاه‌های پرداخت";
+    var institutions = (IReadOnlyList<Shop.Controllers.PaymentInstitutionsController.PaymentInstitutionRow>)ViewData["PaymentInstitutions"]!;
+}
+<main class="container py-5" dir="rtl">
+    <h1>بانک‌ها و درگاه‌های پرداخت</h1>
+    <ul class="list-unstyled d-flex flex-wrap gap-3" aria-label="فهرست بانک‌ها و درگاه‌های پرداخت">
+        @foreach (var institution in institutions)
+        {
+            <li class="border rounded p-3 d-flex align-items-center gap-2">
+                @if (institution.LogoUrl is not null) { <img src="@institution.LogoUrl" alt="" width="40" height="40" loading="lazy" /> }
+                <span>@institution.NameFa</span>
+            </li>
+        }
+    </ul>
+</main>

@@ -1,0 +1,24 @@
+@{
+    ViewData["Title"] = "درخت مجوز نقش‌ها";
+    ViewData["AreaTitle"] = "مدیریت سامانه";
+}
+<div class="admin-page" data-admin-users data-admin-users-page="permissions" data-api="/api/admin/users">
+    @await Html.PartialAsync("_AdminPageIntro", ("درخت مجوز نقش‌ها", "مجوزهای هر نقش را از ساختار درختی پنل انتخاب و ذخیره کنید."))
+    @Html.AntiForgeryToken()
+    <section class="panel panel-inverse">
+        <div class="panel-heading"><h2 class="panel-title">انتخاب نقش</h2></div>
+        <div class="panel-body">
+            <div class="admin-data-status small text-muted" data-users-status role="status" aria-live="polite">در حال بارگذاری نقش‌ها…</div>
+            <div class="row g-3 align-items-end">
+                <div class="col-md-8">
+                    <label for="admin-role-select" class="form-label">نقش</label>
+                    <select id="admin-role-select" class="form-select" data-role-select></select>
+                </div>
+                <div class="col-md-4">
+                    <button class="btn btn-primary w-100" type="button" data-role-save><i class="fa fa-floppy-disk" aria-hidden="true"></i>ذخیرهٔ مجوزها</button>
+                </div>
+            </div>
+            <div data-permission-tree class="admin-permission-tree overflow-auto border rounded p-3 mt-4"></div>
+        </div>
+    </section>
+</div>

@@ -1,4 +1,4 @@
-> وضعیت دادهٔ runtime (۸ نوامبر ۲۰۲۶): داده‌های کاتالوگ، برند، مجله، FAQ، حساب نمونه، جغرافیا و طرح فروش از APIهای متصل به SQL Server خوانده می‌شوند. سبد، علاقه‌مندی، مقایسه، نشانی، checkout، سفارش، پیگیری قیمت و تعامل مقاله از API حساب می‌آیند؛ دیدگاه/پرسش محصول از API محصول. کلیدهای قدیمی Shop در localStorage فقط برای انتقال یک‌باره خوانده و سپس حذف می‌شوند؛ دادهٔ runtime در localStorage نگهداری نمی‌شود.
+> وضعیت دادهٔ runtime (۱۲ نوامبر ۲۰۲۶): داده‌های کاتالوگ، برند، مجله، FAQ، حساب نمونه، جغرافیا و طرح فروش از APIهای متصل به SQL Server خوانده می‌شوند. سبد، علاقه‌مندی، مقایسه، نشانی، checkout، سفارش، پیگیری قیمت و تعامل مقاله از API حساب می‌آیند؛ دیدگاه/پرسش محصول از API محصول. دادهٔ جاری از API و state موقت حافظه می‌آید؛ legacyهای پشتیبانی‌شده فقط برای انتقال به API نگه داشته و پس از پاسخ موفق حذف می‌شوند.
 
 # قرارداد JavaScript و state مرورگر
 
@@ -16,7 +16,7 @@
 | API | نقش |
 |---|---|
 | `HNUI.STORAGE_KEYS` | کلیدهای پایهٔ auth/cart |
-| `HNUI.storage.get/set/remove/json/writable` | خواندن/نوشتن مقاوم در برابر خطای browser storage؛ `set` برای favorite/compare رویداد list را dispatch می‌کند |
+| `HNUI.storage.get/set/hydrate/remove/json` | state موقت حافظه؛ `hydrate` دادهٔ API را بی‌اثر جانبی بار می‌کند و `set` برای favorite/compare و پیگیری قیمت رویداد ذخیره در API را dispatch می‌کند |
 | `HNUI.api.request(path, options)` | مسیر را زیر base path محلیِ تنظیم‌شده resolve می‌کند، درخواست را به همان origin محدود می‌کند، `Accept: application/json` و `credentials: same-origin` می‌گذارد و پس از timeout قابل‌تنظیم درخواست را abort می‌کند. retry خودکار ندارد؛ POSTهای OTP/quote/validate نباید بی‌کلید idempotency تکرار شوند. تنظیم در `ApiClient` در `appsettings.json` و metadata پوسته است. |
 | `HNUI.normalizeSearchText(value)` | نرمال‌سازی مشترک عبارت فارسی/انگلیسی و نویسه‌های نامرئی برای پیشنهادهای هدر و نتایج Search |
 | `HNUI.ready(callback)` | اجرای callback پس از آماده‌شدن DOM |
@@ -45,7 +45,7 @@
 | فایل | مسئولیت فعلی | قبل از تغییر چه چیزی را دنبال کنیم |
 |---|---|---|
 | `js/core/ui-core.js` | اتصال APIهای مشترک، auth، event/mount، lock/dialog، format/escape | قرارداد payload و accessibility |
-| `js/core/storage.js` | پاک‌سازی کلیدهای قدیمی Shop و state موقت صفحه | انتقال legacy به API و حذف کلیدهای قدیمی |
+| `js/core/storage.js` | جداسازی legacy برای انتقال API و state موقت حافظه | حفظ منبع DB در state جاری و پاک‌کردن legacy پس از انتقال موفق |
 | `js/store/cart.js` | normalize، قیمت، موجودی، سبد و renderer گزینه‌ها | شناسهٔ محصول و قرارداد سبد |
 | `js/layout/header-navigation.js` | باز/بسته، کیبورد، hover و گروه‌های دسته در هدر | trigger واقعی، state صریح و خانه/داخلی |
 | `js/layout/main.js` | پیشنهاد/جست‌وجوی اخیر، شمارنده‌ها، account/login/cart/list panels و هماهنگی خانه؛ پیمایش لینک‌های hash با رعایت `scroll-margin-top` مقصد | جستجوی هدر و drawer پس از ۳ نویسه پیشنهاد محصول و offer طرح فروش فعال و موجود را با debounce ۲۵۰ms می‌سازند؛ offer نام طرح و قیمت ویژه را نشان می‌دهد و پیوندش `salesPlanId` را نگه می‌دارد. submit کمتر از ۳ نویسه متوقف می‌شود. listenerهای delegated و panel state؛ حفظ offset هدر/نوار sticky و پشتیبانی از reduced motion |
@@ -73,7 +73,7 @@
 
 دادهٔ حساب و تعامل‌های کاربر از API حساب خوانده و همان‌جا ذخیره می‌شوند؛ جستجوهای اخیر نیز از `api/account/recent-searches` می‌آیند. درخواست‌های API با `cache: no-store` ارسال می‌شوند و پاسخ‌های `/api` هدر `Cache-Control: no-store` دارند. بازخورد محصول از API محصول دریافت می‌شود. صفحه برای رندر و تعامل جاری، پاسخ API را در state موقت جاوااسکریپت نگه می‌دارد؛ این state میان بارگذاری صفحه‌ها پایدار نیست و مرجع داده محسوب نمی‌شود.
 
-`storage.js` در شروع، کلیدهای قدیمی متعلق به Shop را فقط برای انتقال یک‌باره می‌خواند و از `localStorage` حذف می‌کند. payload انتقال تا پاسخ موفق API در حافظهٔ همان صفحه می‌ماند و پس از موفقیت کنار گذاشته می‌شود. کد جدید نباید از `localStorage` یا `sessionStorage` برای دادهٔ runtime استفاده کند یا در آن‌ها بنویسد. ورود، سبد، نشانی، فهرست‌ها، پیگیری قیمت، ترجیح checkout، تعامل مقاله و بازخورد محصول باید از endpoint مسئول بخوانند/بنویسند.
+`storage.js` در شروع، کلیدهای قدیمی متعلق به Shop را از state جاری جدا می‌کند. payloadهای قابل‌انتقال تا پاسخ موفق API در بخش legacy می‌مانند و سپس از `localStorage` حذف می‌شوند؛ سبد قدیمی، cache محصول و نشان ورود منتقل نمی‌شوند و پاک می‌شوند. کد جدید نباید از `localStorage` یا `sessionStorage` برای دادهٔ runtime استفاده کند یا در آن‌ها بنویسد. ورود، سبد، نشانی، فهرست‌ها، پیگیری قیمت، ترجیح checkout، تعامل مقاله و بازخورد محصول باید از endpoint مسئول بخوانند/بنویسند. پس از خطای نوشتن فهرست، پیگیری قیمت یا سبد، state از account/state بازیابی می‌شود؛ انتخاب نشانی و پرداخت نیز فقط پس از پاسخ موفق سرور در state رابط ثبت می‌شود.
 
 اگر API در دسترس نباشد، عملیات را موفق اعلام نکنید؛ payloadهای legacy فقط برای انتقال یک‌باره‌اند و state جاری صفحه پس از بارگذاری تازه از API می‌آید. برای تغییر قرارداد API یا انتقال داده، مصرف‌کننده‌ها را با `rg -n "localStorage|sessionStorage|storage\.(get|set|json)|hn-" Shop/wwwroot/shop/js Shop/Views` پیدا کنید و راهنمای حوزه را به‌روز کنید.
 
@@ -87,7 +87,7 @@
 | `hn:auth-change` | `detail`: boolean | هدر و بخش account را تازه می‌کند |
 | `hn:auth-required` | `detail: { resume: Function|null }` | بازکردن مدال ورود؛ callback پس از ورود آزمایشی اجرا می‌شود |
 | `hn:lists-change` | بدون `detail` | شمارنده‌ها، favorite/compare button و صفحه‌ها را sync می‌کند |
-| native `storage` | `key`, `newValue`, `oldValue` | همگام‌سازی tabهای دیگر؛ تغییر cart در `ui-core.js` به `hn:cart-change` تبدیل می‌شود، تغییر address/payment فقط همان بخش را تازه می‌کند و تغییر نامرتبط نباید صفحه را reload کند. same-tab تغییرات باید از helper/event عبور کند |
+| `hn:account-data-change` | `detail: { key }` | ذخیرهٔ پیگیری قیمت در API حساب؛ در خطا state از account/state بازیابی می‌شود |
 
 هنگام افزودن event، یک source of truth حفظ کنید، payload را document کنید، handler را idempotent بنویسید و از dispatch مضاعف در View و shared JS جلوگیری کنید.
 
@@ -95,7 +95,7 @@
 
 [فهرست این بخش](README.md) · [فهرست مستندات](../README.md)
 
-آخرین تطبیق با کد: ۲ نوامبر ۲۰۲۶.
+آخرین تطبیق با کد: ۱۲ نوامبر ۲۰۲۶.
 
 
 قیمت نهایی کارت مشترک در HNProductCard.currentPrice(product, options) محاسبه می‌شود. فیلتر و مرتب‌سازی قیمت باید از همین تابع استفاده کنند تا تخفیف offer دوبار اعمال نشود و قیمت فروش عادی با مبلغ نهایی کارت یکسان بماند.

@@ -36,7 +36,6 @@
 
   const STORAGE_KEYS = Object.freeze({
     auth: "hn-demo-auth",
-    cart: "hadi-norouzi-cart",
   });
   const storage = window.HNStorage.create({ document, emit });
 
@@ -119,7 +118,7 @@
   });
 
   const cart = window.HNCartModel.create({
-    document, emit, storage, cartKey: STORAGE_KEYS.cart,
+    document, emit,
     requireLogin: (resume) => auth.requireLogin(resume),
     formatNumber: (value) => formatNumber(value),
     escapeHtml: (value) => escapeHtml(value),
@@ -139,12 +138,13 @@
     },
     logout() {
       storage.clear();
+      cart.resetAccount();
       emit("hn:auth-change", false);
     },
   };
 
   document.addEventListener(EVENTS.cartChange, (event) => {
-    if (!auth.isLoggedIn() || !Array.isArray(event.detail)) return;
+    if (!auth.isLoggedIn() || !cart.isAccountReady() || cart.isRestoringAccount() || !Array.isArray(event.detail)) return;
     const items = event.detail.map((item) => ({
       productId: Number(String(item.id).replace(/:.*$/, "")),
       variantId: item.variantId || null,
@@ -152,20 +152,41 @@
       salesPlanId: String(item.salesPlanId || "regular"),
       options: item.options || {},
     })).filter((item) => Number.isSafeInteger(item.productId) && item.productId > 0);
-    void api.request("account/cart", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ items }) });
+    void api.request("account/cart", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ items }) })
+      .then(async (response) => {
+        if (response.ok) return;
+        const state = await api.request("account/state");
+        if (state.ok) cart.restoreAccountLines((await state.json()).cart);
+      }).catch(() => {});
   });
   document.addEventListener(EVENTS.listsChange, () => {
     if (!auth.isLoggedIn()) return;
     for (const kind of ["favorites", "compare"]) {
       const ids = storage.json(kind === "favorites" ? "hn-favorites" : "hn-compare", []);
       const productIds = (Array.isArray(ids) ? ids : []).map((id) => Number(id)).filter((id) => Number.isSafeInteger(id) && id > 0);
-      void api.request(`account/lists/${kind}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ productIds }) });
+      const key = kind === "favorites" ? "hn-favorites" : "hn-compare";
+      void api.request(`account/lists/${kind}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ productIds }) })
+        .then(async (response) => {
+          if (response.ok) { storage.clearLegacy(key); return; }
+          const state = await api.request("account/state");
+          if (state.ok) {
+            const account = await state.json();
+            storage.hydrate(key, JSON.stringify((account[kind] || []).map((item) => String(item.id))));
+          }
+        })
+        .catch(() => {});
     }
   });
   document.addEventListener(EVENTS.accountDataChange, (event) => {
     if (!auth.isLoggedIn()) return;
     const items = storage.json(event.detail.key, []);
-    void api.request("account/price-alerts", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ items: Array.isArray(items) ? items : [] }) });
+    void api.request("account/price-alerts", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ items: Array.isArray(items) ? items : [] }) })
+      .then(async (response) => {
+        if (response.ok) { storage.clearLegacy(event.detail.key); return; }
+        const state = await api.request("account/state");
+        if (state.ok) storage.hydrate(event.detail.key, JSON.stringify((await state.json()).priceAlerts || []));
+      })
+      .catch(() => {});
   });
 
   let lockCount = 0;
@@ -501,13 +522,6 @@
       button.classList.remove("added");
     }, 1400);
   });
-  window.addEventListener("storage", (event) => {
-    if (event.key === STORAGE_KEYS.cart)
-      emit("hn:cart-change", cart.read());
-    if (event.key === STORAGE_KEYS.auth)
-      emit("hn:auth-change", auth.isLoggedIn());
-  });
-
   window.HNUI = Object.freeze({
     STORAGE_KEYS,
     EVENTS,

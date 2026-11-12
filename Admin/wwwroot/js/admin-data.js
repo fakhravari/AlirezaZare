@@ -39,7 +39,7 @@
     function updatePagination(page, current, hasNext) {
         const container = page.querySelector("[data-admin-pagination]");
         if (!container) return;
-        container.hidden = false;
+        container.hidden = current <= 1 && !hasNext;
         const label = container.querySelector("[data-admin-page-label]");
         const previous = container.querySelector('[data-admin-page-step="-1"]');
         const next = container.querySelector('[data-admin-page-step="1"]');
@@ -53,13 +53,16 @@
         const body = page.querySelector("[data-admin-results]");
         const empty = page.querySelector("[data-admin-empty]");
         if (!body) return;
+        ui.destroyDataTable(page.querySelector("[data-admin-datatable]"));
         page.__adminRows = rows;
         body.replaceChildren();
         rows.forEach((item, index) => {
             const row = document.createElement("tr");
             for (const [columnIndex, value] of columns(item).entries()) {
                 const cell = document.createElement("td");
-                if (page.dataset.adminSection === "brands" && columnIndex === 1) {
+                if (page.dataset.adminSection === "payment-institutions" && columnIndex === 2 && item.logoUrl) {
+                    const image = document.createElement("img"); image.className = "admin-brand-logo"; image.src = item.logoUrl; image.alt = ""; image.width = 44; image.height = 44; image.loading = "lazy"; image.addEventListener("error", () => image.remove(), { once: true }); cell.append(image);
+                } else if (page.dataset.adminSection === "brands" && columnIndex === 1) {
                     const brand = document.createElement("span");
                     brand.className = "admin-brand-name-with-logo";
                     if (item.logoUrl) {
@@ -88,13 +91,15 @@
             }
             const actions = document.createElement("td");
             actions.className = "admin-row-actions";
-            const details = document.createElement("button");
-            details.type = "button";
-            details.className = "btn btn-xs btn-default";
-            details.dataset.adminRecord = String(index);
-            details.innerHTML = '<i class="fa fa-eye" aria-hidden="true"></i><span class="visually-hidden">نمایش جزئیات</span>';
-            details.setAttribute("aria-label", "نمایش جزئیات رکورد");
-            actions.append(details);
+            if (page.dataset.adminSection !== "payment-institutions") {
+                const details = document.createElement("button");
+                details.type = "button";
+                details.className = "btn btn-xs btn-default";
+                details.dataset.adminRecord = String(index);
+                details.innerHTML = '<i class="fa fa-eye" aria-hidden="true"></i><span class="visually-hidden">نمایش جزئیات</span>';
+                details.setAttribute("aria-label", "نمایش جزئیات رکورد");
+                actions.append(details);
+            }
             if (page.dataset.adminPage === "product-drafts") {
                 const publish = document.createElement("button");
                 publish.type = "button"; publish.className = "btn btn-xs btn-primary ms-1";
@@ -163,6 +168,9 @@
                 upload.dataset.brandImage = String(index); upload.textContent = "نشان برند";
                 actions.append(upload);
             }
+            if (page.dataset.adminSection === "payment-institutions" && page.dataset.canUploadImage === "true") {
+                const upload = document.createElement("button"); upload.type = "button"; upload.className = "btn btn-xs btn-default ms-1"; upload.dataset.paymentInstitutionImage = String(index); upload.textContent = item.logoPath ? "تغییر لوگو" : "بارگذاری لوگو"; actions.append(upload);
+            }
             if (page.dataset.adminSection === "attributes" && page.dataset.canUploadImage === "true") {
                 const edit = document.createElement("button");
                 edit.type = "button"; edit.className = "btn btn-xs btn-default ms-1";
@@ -186,6 +194,7 @@
             body.append(row);
         });
         empty?.classList.toggle("d-none", rows.length > 0);
+        ui.refreshDataTable(page.querySelector("[data-admin-datatable]"));
     }
 
     function queryValue(form, name) {
@@ -332,6 +341,7 @@
         for (const item of allRows) if (included.has(String(item.id)) && !seen.has(String(item.id))) visit(item, 0);
 
         page.__adminRows = flattened.map(entry => entry.item);
+        ui.destroyDataTable(page.querySelector("[data-admin-datatable]"));
         body.replaceChildren();
         flattened.forEach(({ item, depth, hasChildren }, index) => {
             const row = document.createElement("tr");
@@ -377,13 +387,13 @@
             actions.append(details);
             if (page.dataset.canEditCategory === "true") {
                 const content = document.createElement("button"); content.type = "button"; content.className = "btn btn-xs btn-default ms-1";
-                content.dataset.categoryContent = String(index); content.textContent = "محتوای دسته"; actions.append(content);
+                content.dataset.categoryContent = String(index); content.textContent = "محتوای دسته"; ui.withIcon(content, "fa-file-lines"); actions.append(content);
             }
             if (page.dataset.canUploadImage === "true") {
                 const edit = document.createElement("button"); edit.type = "button"; edit.className = "btn btn-xs btn-default ms-1";
-                edit.dataset.categoryEdit = String(index); edit.textContent = "ویرایش دسته"; actions.append(edit);
+                edit.dataset.categoryEdit = String(index); edit.textContent = "ویرایش دسته"; ui.withIcon(edit, "fa-pen-to-square"); actions.append(edit);
                 const statusButton = document.createElement("button"); statusButton.type = "button"; statusButton.className = "btn btn-xs btn-default ms-1";
-                statusButton.dataset.catalogStatus = String(index); statusButton.textContent = item.isActive ? "خروج از انتشار" : "انتشار"; actions.append(statusButton);
+                statusButton.dataset.catalogStatus = String(index); statusButton.textContent = item.isActive ? "خروج از انتشار" : "انتشار"; ui.withIcon(statusButton, item.isActive ? "fa-eye-slash" : "fa-paper-plane"); actions.append(statusButton);
             }
             row.append(actions);
             body.append(row);
@@ -393,6 +403,7 @@
         if (pagination) pagination.hidden = true;
         const count = page.querySelector("[data-admin-count]");
         if (count) count.textContent = `نمایش ${ui.formatNumber(flattened.length)} از ${ui.formatNumber(allRows.length)} دسته`;
+        ui.refreshDataTable(page.querySelector("[data-admin-datatable]"));
     }
 
     async function loadCatalog(page, pageNumber = 1, announce = false) {
@@ -425,6 +436,8 @@
                     ? [item.id, item.name, item.englishName, item.parentId, item.slug, item.isActive ? "منتشر" : "پیش‌نویس"]
                     : section === "brands"
                         ? [item.id, item.name, item.englishName, item.countryCode, item.isActive ? "منتشر" : "پیش‌نویس"]
+                        : section === "payment-institutions"
+                            ? [item.nameFa, item.code, item.logoUrl ? "ثبت شده" : "—", item.logoPath]
                         : [item.key, item.label || item.name, item.sourceKey || item.source, item.filterKey, item.isFilterable ? "بله" : "خیر", item.isHighlight ? "بله" : "خیر", item.isActive ? "منتشر" : "پیش‌نویس"];
             renderRows(page, rows, columns);
             updateCount(page, result.total ?? 0, rows.length);
@@ -607,7 +620,7 @@
             const rows = await ui.getJson(page.dataset.adminApi, { signal: controller.signal });
             if (!page.isConnected || requests.get(page) !== controller) return;
             page.__faqRows = rows;
-            const body = page.querySelector("[data-faq-rows]"); body.replaceChildren();
+            const body = page.querySelector("[data-faq-rows]"); ui.destroyDataTable(page.querySelector("[data-admin-datatable]")); body.replaceChildren();
             rows.forEach((item, index) => {
                 const row = document.createElement("tr");
                 for (const value of [item.question, ui.formatNumber(item.sortOrder), item.isPublished ? "منتشرشده" : "منتشرنشده"]) {
@@ -616,8 +629,10 @@
                 const cell = document.createElement("td"), edit = document.createElement("button"), remove = document.createElement("button");
                 edit.type = "button"; edit.className = "btn btn-sm btn-default me-1"; edit.dataset.faqEdit = String(index); edit.textContent = "ویرایش";
                 remove.type = "button"; remove.className = "btn btn-sm btn-danger"; remove.dataset.faqDelete = String(index); remove.textContent = "حذف";
+                ui.withIcon(edit, "fa-pen-to-square"); ui.withIcon(remove, "fa-trash-can");
                 cell.append(edit, remove); row.append(cell); body.append(row);
             });
+            ui.refreshDataTable(page.querySelector("[data-admin-datatable]"));
             status(page, rows.length ? "" : "پرسشی ثبت نشده است.");
         } catch (error) {
             if (error.name !== "AbortError" && page.isConnected && requests.get(page) === controller) status(page, error.message || "دریافت پرسش‌ها ناموفق بود.", true);
@@ -628,14 +643,15 @@
         const page = document.querySelector("[data-magazine-admin]"); if (!page) return;
         const statusNode = page.querySelector("[data-mag-status]"), body = page.querySelector("[data-mag-rows]");
         try {
-            const rows = await ui.getJson(page.dataset.api); body.replaceChildren();
+            const rows = await ui.getJson(page.dataset.api); ui.destroyDataTable(page.querySelector("[data-admin-datatable]")); body.replaceChildren();
             rows.forEach(item => {
                 const tr = document.createElement("tr");
                 for (const text of [item.title, item.articleKey, ui.formatNumber(item.count), item.isPublished ? "منتشرشده" : "پیش‌نویس"]) { const td = document.createElement("td"); td.textContent = text; tr.append(td); }
                 const td = document.createElement("td");
-                for (const [label, action] of [["ویرایش", "edit"], ["تصویر", "image"], ["حذف", "delete"]]) { const button = document.createElement("button"); button.type = "button"; button.className = `btn btn-sm ${action === "delete" ? "btn-danger" : "btn-default"} me-1`; button.dataset.magAction = action; button.dataset.id = item.id; button.dataset.articleKey = item.articleKey; button.dataset.articleTitle = item.title; button.textContent = label; td.append(button); }
+                for (const [label, action, icon] of [["ویرایش", "edit", "fa-pen-to-square"], ["تصویر", "image", "fa-image"], ["حذف", "delete", "fa-trash-can"]]) { const button = document.createElement("button"); button.type = "button"; button.className = `btn btn-sm ${action === "delete" ? "btn-danger" : "btn-default"} me-1`; button.dataset.magAction = action; button.dataset.id = item.id; button.dataset.articleKey = item.articleKey; button.dataset.articleTitle = item.title; button.textContent = label; ui.withIcon(button, icon); td.append(button); }
                 tr.append(td); body.append(tr);
             });
+            ui.refreshDataTable(page.querySelector("[data-admin-datatable]"));
             statusNode.textContent = rows.length ? "" : "مقاله‌ای ثبت نشده است.";
         } catch (error) { statusNode.textContent = error.message || "دریافت مقاله‌ها ناموفق بود."; }
     }
@@ -1083,6 +1099,17 @@
             window.bootstrap?.Modal?.getOrCreateInstance(document.getElementById("brand-image-modal")).show();
             return;
         }
+        const institutionButton = event.target.closest("[data-payment-institution-image]");
+        if (institutionButton) {
+            const page = institutionButton.closest('[data-admin-section="payment-institutions"]');
+            const item = page?.__adminRows?.[Number(institutionButton.dataset.paymentInstitutionImage)];
+            const form = document.querySelector("[data-payment-institution-image-form]");
+            if (!item || !form) return;
+            form.reset(); form.elements.paymentInstitutionCode.value = item.code;
+            form.querySelector("[data-payment-institution-name]").textContent = item.nameFa;
+            window.bootstrap?.Modal?.getOrCreateInstance(document.getElementById("payment-institution-image-modal")).show();
+            return;
+        }
         const fileButton = event.target.closest("[data-product-file]");
         if (fileButton) {
             const page = fileButton.closest('[data-admin-section="products"]');
@@ -1160,7 +1187,7 @@
                         "شناسه حواله": order.idWarehouseDocument || "ثبت نشده",
                         "شرکت حمل": order.shippingCarrier || "ثبت نشده", "کد رهگیری": order.shippingTrackingCode || "ثبت نشده",
                         "نشانی ثبت‌شده": Object.values(address).filter(value => typeof value === "string" && value).join("، "),
-                        "اقلام": items.map(line => `${line.name}، ${ui.formatNumber(line.quantity)} عدد، مبلغ واحد ${ui.formatNumber(line.unitAmount)} تومان، طرح ${line.salesPlan}`).join(" ؛ ") || "جزئیات اقلام ثبت نشده است",
+                        "اقلام": items.map(line => `${line.name}، ${ui.formatNumber(line.quantity)} عدد، مبلغ واحد ${ui.formatNumber(line.unitAmount)} تومان، طرح ${line.salesPlan}${line.priceReferences?.length ? `، نسخه‌های قیمت: ${line.priceReferences.map(ref => `#${ref.priceVersionId} ${ref.component}=${ui.formatNumber(ref.calculatedUnitAmount)} تومان`).join("، ")}` : "، مرجع نسخهٔ قیمت ثبت نشده"}`).join(" ؛ ") || "جزئیات اقلام ثبت نشده است",
                         "تاریخچهٔ ارسال": history.map(entry => `${entry.PreviousStatus} ← ${entry.NewStatus}، مدیر ${entry.ActorUserKey}، ${entry.ChangedAtUtc} UTC`).join(" ؛ ") || "تغییری ثبت نشده است"
                     });
                 }).catch(error => ui.notify(error.message || "دریافت جزئیات سفارش ناموفق بود.", "danger"))
@@ -1347,6 +1374,16 @@
             void ui.getJson("/api/admin/store/media", { method: "POST", body: new FormData(brandForm) })
                 .then(result => { ui.notify(result.message, "success"); window.bootstrap?.Modal?.getInstance(document.getElementById("brand-image-modal"))?.hide(); })
                 .catch(error => ui.notify(error.message || "بارگذاری نشان ناموفق بود.", "danger"))
+                .finally(() => { save.disabled = false; });
+            return;
+        }
+        const institutionForm = event.target.closest("[data-payment-institution-image-form]");
+        if (institutionForm) {
+            event.preventDefault();
+            const save = institutionForm.querySelector('[type="submit"]'); save.disabled = true;
+            void ui.getJson("/api/admin/store/media", { method: "POST", body: new FormData(institutionForm) })
+                .then(result => { ui.notify(result.message, "success"); window.bootstrap?.Modal?.getInstance(document.getElementById("payment-institution-image-modal"))?.hide(); const page = document.querySelector('[data-admin-section="payment-institutions"]'); if (page) return loadCatalog(page, 1); })
+                .catch(error => ui.notify(error.message || "بارگذاری لوگو ناموفق بود.", "danger"))
                 .finally(() => { save.disabled = false; });
             return;
         }

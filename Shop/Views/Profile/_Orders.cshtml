@@ -92,14 +92,19 @@
                     <div class="order-invoice-row order-invoice-table-heading" role="row">
                         <span role="columnheader">شرح</span><span role="columnheader">تعداد</span><span role="columnheader">مبلغ</span>
                     </div>
-                    <div class="order-invoice-row" role="row">
+                    <div class="order-invoice-lines" data-invoice-lines></div>
+                    <div class="order-invoice-row order-invoice-row-summary" role="row">
                         <span role="cell">کالاهای این سفارش</span><span data-invoice-count role="cell"></span><strong data-invoice-amount role="cell"></strong>
                     </div>
                 </div>
+                <section class="order-invoice-history" aria-label="تاریخچهٔ وضعیت و رهگیری سفارش">
+                    <h4>تاریخچهٔ وضعیت و رهگیری</h4>
+                    <ol data-invoice-history></ol>
+                </section>
                 <div class="order-invoice-payable">
                     <span>مبلغ قابل پرداخت</span><strong data-invoice-total></strong>
                 </div>
-                <p class="order-invoice-demo-note">این بخش خلاصهٔ سفارش ثبت‌شده را نشان می‌دهد؛ ریز کالاها و اطلاعات پرداخت در این نما نمایش داده نمی‌شود.</p>
+                <p class="order-invoice-demo-note">مبلغ هر ردیف از نسخهٔ قیمت ثبت‌شده در سفارش محاسبه شده است. شناسهٔ نسخه برای تطبیق با تاریخچهٔ قیمت نمایش داده می‌شود.</p>
             </section>
         </div>
     </dialog>

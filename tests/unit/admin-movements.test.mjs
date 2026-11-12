@@ -9,9 +9,9 @@ test("movement mode changes ignore an older response", async () => {
   const element = () => ({ dataset: {}, classList: { toggle() {}, add() {}, remove() {} }, addEventListener(type, fn) { this[type] = fn; }, setAttribute() {}, append(...items) { (this.children ||= []).push(...items); }, replaceChildren() { this.children = []; } });
   const stock = element(), audit = element(), rows = element(), filter = element(), prev = element(), next = element();
   stock.dataset.movementMode = "stock"; audit.dataset.movementMode = "audit";
-  const map = { "[name=warehouseId]": element(), "[data-movement-filter]": filter, "[data-movement-rows]": rows, "[data-movement-status]": element(), "[data-movement-title]": element(), "[data-movement-head]": element(), "[data-movement-page-label]": element(), '[data-movement-page="-1"]': prev, '[data-movement-page="1"]': next };
+  const map = { "[name=warehouseId]": element(), "[data-movement-filter]": filter, "[data-movement-rows]": rows, "[data-movement-status]": element(), "[data-movement-title]": element(), "[data-movement-head]": element(), "[data-movement-page-label]": element(), "[data-movement-pagination]": element(), '[data-movement-page="-1"]': prev, '[data-movement-page="1"]': next };
   const page = { dataset: { api: "/movements" }, querySelector: key => map[key], querySelectorAll: key => key === "[data-movement-mode]" ? [stock, audit] : [prev, next] };
-  const window = { AdminUI: { getJson(url) { if (url.includes("warehouses")) return Promise.resolve([]); return new Promise(resolve => requests.push(resolve)); } } };
+  const window = { AdminUI: { destroyDataTable() {}, refreshDataTable() {}, getJson(url) { if (url.includes("warehouses")) return Promise.resolve([]); return new Promise(resolve => requests.push(resolve)); } } };
   class EmptyFormData { *[Symbol.iterator]() {} }
   vm.runInNewContext(source, { window, document: { createElement: element }, WeakSet, WeakMap, Intl, URLSearchParams, FormData: EmptyFormData, setTimeout, Date, JSON });
   void window.AdminMovements.initialize({ querySelector: () => page });
@@ -31,9 +31,9 @@ test("summary renders opening, receipts, dispatches and closing separately", asy
   const element = () => ({ dataset: {}, classList: { toggle() {}, add() {}, remove() {} }, addEventListener(type, fn) { this[type] = fn; }, setAttribute() {}, append(...items) { (this.children ||= []).push(...items); }, replaceChildren() { this.children = []; } });
   const summary = element(), rows = element(), previous = element(), next = element(), status = element();
   summary.dataset.movementMode = "summary";
-  const map = { "[name=warehouseId]": element(), "[data-movement-filter]": element(), "[data-movement-rows]": rows, "[data-movement-status]": status, "[data-movement-title]": element(), "[data-movement-head]": element(), "[data-movement-page-label]": element(), '[data-movement-page="-1"]': previous, '[data-movement-page="1"]': next };
+  const map = { "[name=warehouseId]": element(), "[data-movement-filter]": element(), "[data-movement-rows]": rows, "[data-movement-status]": status, "[data-movement-title]": element(), "[data-movement-head]": element(), "[data-movement-page-label]": element(), "[data-movement-pagination]": element(), '[data-movement-page="-1"]': previous, '[data-movement-page="1"]': next };
   const page = { dataset: { api: "/movements" }, querySelector: key => map[key], querySelectorAll: key => key === "[data-movement-mode]" ? [summary] : [previous, next] };
-  const window = { AdminUI: { getJson(url) {
+  const window = { AdminUI: { destroyDataTable() {}, refreshDataTable() {}, getJson(url) {
     if (url.includes("warehouses")) return Promise.resolve([]);
     if (url.includes("summary=true")) return Promise.resolve({ items: [{ warehouse: "انبار", productKey: "A", product: "کالا", salesPlan: "طرح", unit: "عدد", opening: 10, incoming: 3, outgoing: 2, closing: 11 }], total: 1 });
     return Promise.resolve([]);

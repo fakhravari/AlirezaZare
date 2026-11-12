@@ -12,6 +12,9 @@ public sealed record ProductPurchaseConfiguration(
 
 public sealed record ProductPurchaseOption(string Key, IReadOnlyList<ProductPurchaseOptionValue> Values);
 
-public sealed record ProductPurchaseOptionValue(string Key, decimal PriceDelta);
+public sealed record ProductPurchaseOptionValue(string Key, decimal PriceDelta)
+{
+    public long PriceVersionId { get; init; }
+}
 
 public sealed record ProductAccessory(string Key, bool IsRequired);

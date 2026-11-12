@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Shop.Models;
 using Shop.Services;
+using Shop.Data.Infrastructure.Persistence;
 
 namespace Shop.Controllers;
 
@@ -8,7 +10,8 @@ namespace Shop.Controllers;
 [Route("api/store/sales-plans")]
 public sealed class SalesPlansController(
     ISalesPlanSource plans,
-    IProductPurchaseConfigurationSource purchaseConfigurations) : ControllerBase
+    IProductPurchaseConfigurationSource purchaseConfigurations,
+    ShopDbContext db) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> Index(CancellationToken cancellationToken) =>
@@ -35,6 +38,54 @@ public sealed class SalesPlansController(
                          (plan.EndsAtUtc is null || now < plan.EndsAtUtc),
                 offer = productOffers.FirstOrDefault(offer => offer.SalesPlanId == plan.Id)
             })
+        });
+    }
+
+    [HttpGet("products/{productId:int}/price-history")]
+    public async Task<IActionResult> ProductPriceHistory(int productId, [FromQuery] string? salesPlanId,
+        CancellationToken cancellationToken)
+    {
+        if (productId < 1 || string.IsNullOrWhiteSpace(salesPlanId))
+            return BadRequest(new { code = "invalid-request" });
+
+        SalesPlanCatalog catalog = await plans.ReadAsync(cancellationToken);
+        SalesPlan? plan = catalog.Plans.SingleOrDefault(item => item.Id == salesPlanId);
+        ProductSalesOffer? offer = catalog.Offers.SingleOrDefault(item =>
+            item.ProductId == productId && item.SalesPlanId == salesPlanId);
+        DateTimeOffset now = DateTimeOffset.UtcNow;
+        if (plan is null || offer is null || !plan.IsEnabled || !offer.IsEnabled ||
+            (plan.StartsAtUtc is { } startsAt && now < startsAt) ||
+            (plan.EndsAtUtc is { } endsAt && now >= endsAt))
+            return NotFound(new { code = "price-history-not-found" });
+
+        long? databasePlanId = await db.SalesPlanReferences.AsNoTracking()
+            .Where(item => item.IdStockOwnerType == 1 && item.StoreSalesPlanKey == salesPlanId)
+            .Select(item => (long?)item.Id)
+            .SingleOrDefaultAsync(cancellationToken);
+        if (!databasePlanId.HasValue) return NotFound(new { code = "price-history-not-found" });
+
+        var versions = await db.StorePriceVersions.AsNoTracking()
+            .Where(item => item.IdProduct == productId && item.IdSalesPlan == databasePlanId.Value &&
+                           item.PriceKind == "product")
+            .OrderBy(item => item.CreatedAtUtc).ThenBy(item => item.Id)
+            .Select(item => new { item.Id, item.PriceAmount, item.DiscountPercent, item.IsActive, item.CreatedAtUtc })
+            .ToListAsync(cancellationToken);
+
+        return Ok(new
+        {
+            productId,
+            salesPlanId,
+            currency = catalog.Currency,
+            history = versions.Select(item => new
+            {
+                priceVersionId = item.Id,
+                item.PriceAmount,
+                item.DiscountPercent,
+                finalAmount = decimal.Round(item.PriceAmount * (100m - item.DiscountPercent) / 100m, 0,
+                    MidpointRounding.AwayFromZero),
+                item.IsActive,
+                createdAtUtc = DateTime.SpecifyKind(item.CreatedAtUtc, DateTimeKind.Utc)
+            }).ToArray()
         });
     }
 

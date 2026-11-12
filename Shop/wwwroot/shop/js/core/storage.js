@@ -4,7 +4,7 @@
 
   window.HNStorage = Object.freeze({ create({ emit }) {
     const contracts = Object.freeze({
-      "hadi-norouzi-cart": "array", "hn-favorites": "array", "hn-compare": "array",
+      "hn-favorites": "array", "hn-compare": "array",
       "hn-delivery-addresses": "array", "hn-profile": "object",
       "hn-header-recent-searches": "array",
     });
@@ -23,8 +23,8 @@
       } catch { return { value: null, supported: true }; }
     };
 
-    // Keep old Shop data in memory just long enough for account bootstrap to submit
-    // it to the API, then remove only Shop-owned keys from browser storage.
+    // Runtime values are memory-only. Legacy values stay isolated until account
+    // bootstrap successfully transfers them to the API.
     const values = new Map();
     const legacy = new Map();
     try {
@@ -32,13 +32,11 @@
         const key = window.localStorage.key(index);
         if (key === null || !(key.startsWith("hn-") || key.startsWith("hadi-norouzi-"))) continue;
         const raw = window.localStorage.getItem(key);
-        if (key === "hn-product-cache") {
+        if (key === "hadi-norouzi-cart" || key === "hn-product-cache" || key === "hn-demo-auth") {
           window.localStorage.removeItem(key);
           continue;
         }
-        values.set(key, raw);
         legacy.set(key, raw);
-        window.localStorage.removeItem(key);
       }
     } catch { /* Storage may be disabled; API-backed state remains available. */ }
     values.delete("hn-demo-auth");
@@ -58,6 +56,13 @@
         if (key === "hn-price-watches-demo") emit("hn:account-data-change", { key });
         return true;
       },
+      hydrate(key, value) {
+        const raw = String(value);
+        const normalized = decode(key, raw);
+        if (!normalized.supported || (contractFor(key) && normalized.value === null)) return false;
+        values.set(key, contractFor(key) ? normalized.value : raw);
+        return true;
+      },
       remove(key) {
         values.delete(key);
         return true;
@@ -68,8 +73,18 @@
       writable() { return true; },
       legacy(key) { return legacy.get(key) ?? null; },
       legacyKeys() { return [...legacy.keys()]; },
-      clearLegacy(key) { legacy.delete(key); },
-      clear() { values.clear(); legacy.clear(); },
+      legacyJson(key, fallback = null) {
+        const raw = legacy.get(key);
+        if (raw === undefined) return fallback;
+        const normalized = decode(key, raw);
+        if (!normalized.supported || normalized.value === null) return fallback;
+        try { return JSON.parse(normalized.value) ?? fallback; } catch { return fallback; }
+      },
+      clearLegacy(key) {
+        legacy.delete(key);
+        try { window.localStorage.removeItem(key); } catch { /* Storage may be disabled. */ }
+      },
+      clear() { values.clear(); },
     };
     return Object.freeze(storage);
   }});

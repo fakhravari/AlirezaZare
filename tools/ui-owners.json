@@ -9,9 +9,22 @@
             "Admin/Views/Shared/_Layout.cshtml",
             "Admin/Views/Shared/_AdminSidebar.cshtml",
             "Admin/Areas/Admin/Views/Users/Index.cshtml",
+            "Admin/Areas/Admin/Views/Users/Permissions.cshtml",
+            "Admin/Areas/Admin/Views/Users/Roles.cshtml",
             "Admin/Areas/Store/Views/Catalog/Index.cshtml",
             "Admin/Areas/Store/Views/Features/Faq.cshtml",
             "Admin/Areas/Store/Views/Features/Geography.cshtml",
+            "Admin/Areas/Warehouse/Views/Features/Definitions.cshtml",
+            "Admin/Areas/Store/Views/Features/Customers.cshtml",
+            "Admin/Areas/Store/Views/Features/Orders.cshtml",
+            "Admin/Areas/Store/Views/Features/Faq.cshtml",
+            "Admin/Areas/Store/Views/Features/Feedback.cshtml",
+            "Admin/Areas/Store/Views/Features/PaidOrdersDispatch.cshtml",
+            "Admin/Areas/Store/Views/Catalog/Index.cshtml",
+            "Admin/Areas/Warehouse/Views/Stock/Index.cshtml",
+            "Admin/Areas/Warehouse/Views/Warehouses/Index.cshtml",
+            "Admin/Areas/Warehouse/Views/Features/Documents.cshtml",
+            "Admin/Areas/Warehouse/Views/Features/Movements.cshtml",
             "Admin/Areas/Store/Controllers/CatalogController.cs"
           ],
           "js": [
@@ -19,7 +32,12 @@
             "Admin/wwwroot/js/admin-ui.js",
             "Admin/wwwroot/js/admin-data.js",
             "Admin/wwwroot/js/admin-users.js",
-            "Admin/wwwroot/js/admin-geography.js"
+            "Admin/wwwroot/js/admin-geography.js",
+            "Admin/wwwroot/js/admin-definitions.js",
+            "Admin/wwwroot/js/admin-documents.js",
+            "Admin/wwwroot/js/admin-movements.js",
+            "Admin/wwwroot/js/admin-feedback.js",
+            "Admin/wwwroot/js/admin-paid-orders-dispatch.js"
           ],
           "css": [
             "Admin/wwwroot/css/admin-ui.css"
@@ -34,6 +52,7 @@
             "Admin/Controllers/Api/StoreMagazineAdminApiController.cs",
             "Admin/Controllers/Api/StoreServicePagesAdminApiController.cs",
             "Admin/Controllers/Api/StoreCategoryContentApiController.cs",
+            "Admin/Controllers/Api/PaymentInstitutionsAdminApiController.cs",
             "Admin/Controllers/Api/WarehouseAdminApiController.cs",
             "Data/Domain/Store/Entities/StoreAttributeDefinition.cs",
             "Data/Domain/Store/Entities/MagazineArticle.cs",
@@ -167,6 +186,18 @@
           ],
           "js": [
             "Shop/wwwroot/shop/js/store/catalog.js"
+          ]
+        },
+        "payment-institutions": {
+          "markup": [
+            "Shop/Views/PaymentInstitutions/Index.cshtml"
+          ],
+          "data": [
+            "Data/Domain/Store/Entities/StoreBank.cs",
+            "Data/Infrastructure/Persistence/ShopDbContext.cs"
+          ],
+          "server": [
+            "Shop/Controllers/PaymentInstitutionsController.cs"
           ]
         },
         "product-search": {
