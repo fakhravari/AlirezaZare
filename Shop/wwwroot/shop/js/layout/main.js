@@ -17,6 +17,7 @@
   const searchProducts = Array.isArray(window.HNProducts)
     ? window.HNProducts
     : [];
+  const recentSearchKey = "hn-header-recent-searches";
   const headerSearchListings = (() => {
     let salesPlanCatalog = {};
     try {
@@ -109,7 +110,6 @@
           );
       };
     const normalizeSearchText = window.HNUI.normalizeSearchText;
-    const recentSearchKey = "hn-header-recent-searches";
     let recentSearches = [];
     const popularSearches = [
       "دریل شارژی",
@@ -1296,8 +1296,8 @@
       return;
     }
     const password = $("#loginPassword").val();
-    if (password.length < 10) {
-      window.HNUI.setMessage($loginEmailError[0], "رمز عبور باید حداقل ۱۰ نویسه باشد.", "error");
+    if (password.length < 1) {
+      window.HNUI.setMessage($loginEmailError[0], "رمز عبور را وارد کنید.", "error");
       return;
     }
     const $submit = $("#loginEmailForm button[type='submit']").prop("disabled", true);

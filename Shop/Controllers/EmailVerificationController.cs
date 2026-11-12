@@ -59,7 +59,7 @@ public sealed partial class EmailVerificationController(
         if (request.Mode is not ("login" or "register"))
             return BadRequest(new { code = "invalid-mode", message = "روش تأیید معتبر نیست." });
         if (isRegistration && !IsValidPassword(request.Password))
-            return BadRequest(new { code = "invalid-password", message = "رمز عبور باید بین ۱۰ تا ۱۲۸ نویسه باشد." });
+            return BadRequest(new { code = "invalid-password", message = "رمز عبور باید دست‌کم ۱ نویسه داشته باشد." });
         if (!isRegistration && request.Password is not null)
             return BadRequest(new { code = "invalid-request" });
         if (!codes.Verify(email, request.Code!)) return BadRequest(new { code = "invalid-code" });
@@ -112,7 +112,7 @@ public sealed partial class EmailVerificationController(
     }
 
     private static bool IsValidPassword(string? password) =>
-        !string.IsNullOrEmpty(password);
+        !string.IsNullOrEmpty(password) && password.Length <= 500;
 
     [GeneratedRegex("^[0-9]{6}$", RegexOptions.CultureInvariant)]
     private static partial Regex SixDigitCode();
