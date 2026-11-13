@@ -12,6 +12,8 @@ route → Controller → source/DbContext → View → page script/style. برا
 
 فرم تماس صفحهٔ `/contact` در `Shop/wwwroot/shop/js/pages/contact.js` به `POST /api/store/contact` وصل است. پس از اعتبارسنجی و محدودسازی درخواست، پیام ابتدا در جدول `Store.ContactFormMessage` ثبت می‌شود و سپس اعلان ایمیلی با `IEmailSender` مشترک به `PublicEmail` تلاش می‌شود. خطای اعلان ایمیلی مانع ثبت پیام یا نمایش موفقیت فرم نمی‌شود؛ صندوق مدیریت و وضعیت‌های پیام در [راهنمای پنل مدیریت](../admin/README.md) توضیح داده شده‌اند. ساخت جدول و مجوزها در `078-contact-message-inbox.sql` است.
 
+صفحهٔ `/Tracking` کد سفارش و شمارهٔ همراه را به `POST /api/store/orders/tracking` می‌فرستد. فقط سفارشی پیدا می‌شود که هر دو مقدار با سفارش و شمارهٔ snapshot نشانی ارسال منطبق باشند؛ سفارش نمایشی قابل استعلام نیست. پاسخ وضعیت سفارش و تاریخچهٔ ارسال/رهگیری را برمی‌گرداند و جزئیات خرید یا نشانی را افشا نمی‌کند. پیاده‌سازی API و فرم در `OrderTrackingApiController.cs` و `Shop/wwwroot/shop/js/pages/tracking.js` است؛ مسیر خرید و سفارش در [راهنمای سبد](../store/cart.md) آمده است.
+
 [محتوا](README.md) · [فهرست docs](../README.md)
 
-بازبینی routeها: ۱۲ نوامبر ۲۰۲۶.
+بازبینی routeها: ۱۴ نوامبر ۲۰۲۶.

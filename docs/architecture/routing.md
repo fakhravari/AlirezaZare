@@ -10,6 +10,7 @@
 | جست‌وجو و دیتیل | `ProductController.cs` → `Views/Product/`; مسیر دیتیل `/products/{slug}` و جست‌وجو `/Search` |
 | سبد و checkout | `CartController.cs`, `CheckoutController.cs` → `Views/Cart/`, `Views/Checkout/` |
 | حساب | `AccountController.cs`, `ProfileController.cs` → `Views/Profile/` و endpointهای `/api/account` |
+| پیگیری سفارش | `/Tracking` → `TrackingController.cs` → `POST /api/store/orders/tracking` |
 | پرداخت | `PaymentController.cs` برای `/api/payment`; صفحهٔ موسسات در `PaymentInstitutionsController.cs` |
 | محتوا | `MagazineController`, `BrandsController`, `FaqController`, `PageController` و controllerهای درباره/قانون/ارسال |
 | مقایسه و علاقه‌مندی | `CompareController.cs`, `FavoritesController.cs` و Viewهای متناظر |
@@ -18,6 +19,8 @@
 ## APIهای مهم
 
 فروشگاه APIهای account، sales plan، payment، feedback محصول، جغرافیا و warehouse دارد. route attribute و Authorization را مستقیماً از Controller بخوانید؛ `routing` سند فهرست همهٔ قراردادهای payload نیست. `SalesPlansController` در `/api/store/sales-plans` و تاریخچه/quote را ارائه می‌کند.
+
+فرم تماس و خبرنامهٔ خانه به‌ترتیب از `POST /api/store/contact` و `POST /api/store/newsletter` استفاده می‌کنند. ورود با کد ایمیل در `/api/auth/email-code` است. مسیرهای عمومی محدودسازی درخواست و اعتبارسنجی سمت سرور دارند؛ قرارداد داده را در راهنمای حوزه بخوانید.
 
 ## پنل مدیریت
 
@@ -33,4 +36,4 @@ CSS/JS مستقیم صفحه ممکن است از Razor sectionها بار شو�
 
 [منابع داده](data-sources.md) · [نمای معماری](overview.md) · [فهرست docs](../README.md)
 
-مرور مسیرها: ۱۲ نوامبر ۲۰۲۶.
+مرور مسیرها: ۱۴ نوامبر ۲۰۲۶.

@@ -8,6 +8,8 @@
 
 header خانه و صفحهٔ داخلی از partial جدا استفاده می‌کنند. صفحه‌های محصول و حساب نیز markup/script خود را دارند؛ جزئیات مسیرها در [نقشهٔ route](../architecture/routing.md) آمده است. پوستهٔ Admin مستقل است: `Admin/Views/Shared/_Layout.cshtml`.
 
+فرم خبرنامهٔ footer در `Shop/Views/Home/_Newsletter.cshtml` و handler آن در `Shop/wwwroot/shop/js/layout/main.js` است. handler به `POST /api/store/newsletter` می‌فرستد؛ سرور با نشست معتبر ترجیح حساب را فعال می‌کند و برای مهمان ایمیل را در جدول خبرنامه ثبت می‌کند. قرارداد داده در [راهنمای حساب](../account/profile.md) آمده است.
+
 ## تغییر پوسته
 
 - منابع واقعی را در layout و View پیدا کنید؛ وجود فایل CSS/JS به معنی بارگذاری نیست.
@@ -19,4 +21,4 @@ header خانه و صفحهٔ داخلی از partial جدا استفاده می
 
 [فهرست UI](README.md) · [فهرست docs](../README.md)
 
-بازبینی layout: ۱۲ نوامبر ۲۰۲۶.
+بازبینی layout: ۱۴ نوامبر ۲۰۲۶.

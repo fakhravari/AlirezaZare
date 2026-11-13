@@ -2,11 +2,11 @@
 
 ورود/ثبت‌نام و endpointهای احراز را از `Shop/Controllers/AccountController.cs`، `EmailVerificationController.cs` و `PasswordLoginController.cs` دنبال کنید. صفحهٔ حساب در `ProfileController.cs` و `Shop/Views/Profile/` است. سمت مرورگر، projection حساب در `Shop/wwwroot/shop/js/store/account-data.js` و صفحه در `js/pages/account-page.js` مصرف می‌شود.
 
-ورود با کد ایمیل در `EmailVerificationController` از `EmailVerificationCodeStore` برای کد و از قرارداد مشترک `Data/Application/Email/Contracts/IEmailSender` برای ارسال استفاده می‌کند. مدت اعتبار کد و فاصلهٔ ارسال دوباره از `Store.SiteSetting.EmailVerificationCodeLifetimeMinutes` خوانده می‌شود و مدیر در بخش «ارسال ایمیل» تنظیمات سایت آن را تغییر می‌دهد؛ مقدار پیش‌فرض ۱۵ و بازهٔ مجاز ۱ تا ۱۴۴۰ دقیقه است. درخواست زودهنگام پاسخ محدودیت با زمان باقی‌مانده و پیام معتبر بودن کد قبلی می‌گیرد؛ کد پس از تأیید مصرف می‌شود. جزئیات ستون در [راهنمای دیتابیس](../architecture/database.md) است.
+ورود با کد ایمیل در `EmailVerificationController` از `EmailVerificationCodeStore` برای کد و از قرارداد مشترک `Data/Application/Email/Contracts/IEmailSender` برای ارسال استفاده می‌کند. مدت اعتبار و فاصلهٔ ارسال دوباره از `Store.SiteSetting.EmailVerificationCodeLifetimeMinutes` خوانده می‌شود و مدیر در بخش «ارسال ایمیل» تنظیمات سایت آن را تغییر می‌دهد؛ مقدار پیش‌فرض ۱۵ و بازهٔ مجاز ۱ تا ۱۴۴۰ دقیقه است. در این مدت درخواست دوبارهٔ همان ایمیل محدود می‌شود و پاسخ زمان باقی‌مانده را می‌دهد و می‌گوید کد قبلی معتبر است؛ پس از تأیید کد مصرف می‌شود. hash کد و شمارندهٔ حداکثر پنج تلاش ناموفق در حافظهٔ همان process است، نه دیتابیس. جزئیات ستون در [راهنمای دیتابیس](../architecture/database.md) است.
 
-تنظیم خبرنامهٔ کاربر واردشده در `Account.Profile.NewsletterEnabled` ذخیره می‌شود. فرم خبرنامهٔ صفحهٔ اصلی به `POST /api/store/newsletter` می‌فرستد؛ اگر نشست فروشگاه معتبر باشد، همین ترجیح حساب فعال می‌شود و checkbox پروفایل به‌روزرسانی می‌شود. کنترل پروفایل هم از `PUT /api/account/profile` این مقدار را ذخیره می‌کند. پیگیری سفارش عمومی با `POST /api/store/orders/tracking` به کد سفارش و موبایل snapshot نشانی ارسال نیاز دارد؛ پاسخ فقط وضعیت و تاریخچهٔ ارسال را شامل می‌شود.
+خبرنامهٔ صفحهٔ اصلی به `POST /api/store/newsletter` می‌فرستد. کاربر واردشده با شناسهٔ نشست در `Account.Profile.NewsletterEnabled` ثبت می‌شود؛ برای مهمان، ایمیل lowercase-normalized در `Store.NewsletterSubscriber` ذخیره می‌شود. تکرار ایمیل مهمان پاسخ موفقِ ازقبل‌ثبت‌شده می‌گیرد. کنترل پروفایل هم از `PUT /api/account/profile` ترجیح خبرنامه را ذخیره می‌کند. پیگیری سفارش عمومی با `POST /api/store/orders/tracking` به کد سفارش و موبایل snapshot نشانی ارسال نیاز دارد؛ درخواست‌ها rate-limit می‌شوند و پاسخ فقط وضعیت، شرکت/کد حمل و تاریخچهٔ ارسال را شامل می‌شود.
 
-پس از ورود، `main.js` داده‌های قدیمی مرورگر را به API حساب منتقل می‌کند؛ جستجوهای اخیر هم از این مسیر به `account/recent-searches` منتقل می‌شوند. پیام‌های پروفایل از `GET /api/account/messages` و جدول `Account.Message` دریافت می‌شوند؛ کاربر می‌تواند پیام را خوانده‌شده علامت بزند. مدیر پیام‌ها را از صفحهٔ پیام‌های حساب مشتریان در پنل می‌فرستد.
+پس از ورود، `main.js` داده‌های قدیمی مرورگر را به API حساب منتقل می‌کند؛ جستجوهای اخیر هم از این مسیر به `account/recent-searches` منتقل می‌شوند. پیام‌های پروفایل دیگر دادهٔ نمایشی نیستند: `GET /api/account/messages` فقط پیام‌های پروفایل جاری را از `Account.Message` می‌خواند و `PUT /api/account/messages/{id}/read` وضعیت خواندن همان پیام را با کنترل مالکیت و CSRF ثبت می‌کند. مدیر عنوان، دسته و متن حداکثر ۴۰۰۰ نویسه‌ای را از بخش «پیام‌های حساب مشتریان» پنل می‌فرستد.
 
 ## ردیابی داده
 
@@ -28,4 +28,4 @@ Controller/API → `IAccountDataSource` و implementation ثبت‌شده در `
 
 [حساب](README.md) · [فهرست docs](../README.md)
 
-بازبینی مسیرهای کد: ۱۲ نوامبر ۲۰۲۶.
+بازبینی مسیرهای کد: ۱۴ نوامبر ۲۰۲۶.

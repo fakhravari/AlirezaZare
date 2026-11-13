@@ -18,4 +18,8 @@
 
 برای مسیر دقیق صفحه‌ها از [routing](routing.md)، schema و migration از [database](database.md)، و قابلیت قیمت از [محصول](../store/product.md) و [طرح‌های فروش](../store/sales-plans.md) شروع کنید.
 
-آخرین مرور ساختار کد: ۱۲ نوامبر ۲۰۲۶. وضعیت هر محیط/پایگاه داده باید جداگانه و با شواهد همان محیط تأیید شود.
+ارسال کد ورود و اعلان فرم تماس در Shop از `IEmailSender` مشترک Data استفاده می‌کند؛ پیام فرم تماس پیش از تلاش SMTP در `Store.ContactFormMessage` ذخیره می‌شود. `AddShopDatabase` همین فرستنده را در DI ادمین نیز ثبت می‌کند؛ در کد فعلی پنل فقط تنظیمات SMTP مدیریت می‌شود و ارسال ایمیل از Admin انجام نمی‌گیرد. خبرنامهٔ مهمان در `Store.NewsletterSubscriber` و خبرنامهٔ حساب‌دار در `Account.Profile.NewsletterEnabled` می‌رود. پیام مدیر به مشتری در `Account.Message` ذخیره و از endpointهای پروفایل بر اساس شناسهٔ نشست خوانده می‌شود.
+
+کد تأیید ایمیل در `EmailVerificationCodeStore` به شکل hash و در حافظهٔ همان process نگهداری می‌شود؛ مقدار زمان اعتبار و فاصلهٔ ارسال از `Store.SiteSetting.EmailVerificationCodeLifetimeMinutes` می‌آید. این state بین restart یا چند نمونهٔ برنامه مشترک نیست.
+
+آخرین مرور ساختار کد: ۱۴ نوامبر ۲۰۲۶. وضعیت هر محیط/پایگاه داده باید جداگانه و با شواهد همان محیط تأیید شود.
