@@ -58,7 +58,6 @@ builder.Services.AddRateLimiter(options =>
 });
 builder.Services.AddSingleton<Shop.Services.EmailVerificationCodeStore>();
 builder.Services.AddSingleton<IPasswordHasher<string>, PasswordHasher<string>>();
-builder.Services.AddScoped<Shop.Services.IEmailSender, Shop.Services.SmtpEmailSender>();
 builder.Services.AddScoped<Shop.Services.IPaymentGateway, Shop.Services.UnconfiguredPaymentGateway>();
 builder.Services.AddScoped<Shop.Services.PaymentService>();
 builder.Services.AddScoped<Shop.Services.IMagazineContentSource, Shop.Services.DatabaseMagazineContentSource>();

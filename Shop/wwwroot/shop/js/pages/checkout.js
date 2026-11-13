@@ -358,7 +358,13 @@
                     accessoryIds: (item.options?.accessories || []).filter((accessory) => accessory.selected !== false).map((accessory) => Number(accessory.productAccessoryId)).filter((id) => Number.isSafeInteger(id) && id > 0),
                 }));
                 const saveResponse = await ui.api.request("account/cart", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ items }) });
-                if (!saveResponse.ok) throw new Error("ذخیرهٔ سبد خرید انجام نشد؛ سبد را دوباره بررسی کنید.");
+                if (!saveResponse.ok) {
+                    const saveError = await saveResponse.json().catch(() => ({}));
+                    const stockChanged = ["insufficient-stock", "inventory-variant-required", "offer-disabled", "inactive-plan", "product-not-in-plan", "purchase-limit"].includes(saveError.code);
+                    throw new Error(stockChanged
+                        ? "موجودی یا شرایط فروش یکی از کالاها تغییر کرده است؛ سبد را بازبینی کنید."
+                        : "ذخیرهٔ سبد خرید انجام نشد؛ سبد را دوباره بررسی کنید.");
+                }
                 const couponCode = String(ui.storage.get("hn-coupon-code", ui.storage.get("hn-demo-coupon", ""))).trim().toUpperCase();
                 const response = await ui.api.request("account/checkout", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ addressId: Number(selected), paymentMethod: selectedPaymentMethod, couponCode: couponCode || null }) });
                 const result = await response.json().catch(() => ({}));

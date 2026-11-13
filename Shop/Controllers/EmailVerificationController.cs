@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
+using Shop.Data.Application.Email.Contracts;
 using Shop.Data.Infrastructure.Persistence;
 using Shop.Services;
 
@@ -33,8 +34,10 @@ public sealed partial class EmailVerificationController(
                 });
         try
         {
-            await emailSender.SendVerificationCodeAsync(email, code, cancellationToken);
-            return Ok(new { message = "ایمیل حاوی کد تأیید ارسال شد؛ کد تا ۱۵ دقیقه اعتبار دارد و تا پایان این زمان ایمیل دیگری ارسال نمی‌شود." });
+            var lifetimeMinutes = codes.CodeLifetimeMinutes;
+            var emailBody = $"کد تأیید شما: {code}\n\nاین کد تا {lifetimeMinutes} دقیقه معتبر است. اگر این درخواست از طرف شما نبوده، این پیام را نادیده بگیرید.";
+            await emailSender.SendAsync(email, "کد تأیید فروشگاه برق شیراز", emailBody, cancellationToken);
+            return Ok(new { message = $"ایمیل حاوی کد تأیید ارسال شد؛ کد تا {lifetimeMinutes} دقیقه اعتبار دارد و در این مدت ایمیل دیگری ارسال نمی‌شود." });
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {

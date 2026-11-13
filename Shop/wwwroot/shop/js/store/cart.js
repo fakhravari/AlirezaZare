@@ -293,28 +293,25 @@
   const availableStock = (item) => {
     const product = productForCartItem(item);
     if (!product) return null;
-    const warehouseVariants = (getSalesPlanData().inventoryVariants || []).filter((variant) => Number(variant.productId) === Number(product.id));
+    const salesPlanData = getSalesPlanData();
+    const planOffer = (salesPlanData.offers || []).find((offer) =>
+      Number(offer.productId) === Number(product.id) &&
+      String(offer.salesPlanId) === String(item.salesPlanId || "regular"),
+    );
+    if (!planOffer || !planOffer.isEnabled) return 0;
+    const offerStock = Number(planOffer.stockQuantity);
+    if (!Number.isFinite(offerStock) || offerStock < 0) return 0;
+    const warehouseVariants = (salesPlanData.inventoryVariants || []).filter((variant) => Number(variant.productId) === Number(product.id));
     if (warehouseVariants.length) {
       if (!item.variantId) return null;
       const selectedVariant = warehouseVariants.find((variant) => Number(variant.variantId) === Number(item.variantId));
       if (!selectedVariant) return 0;
       const variantPlanStock = Number(selectedVariant.stockBySalesPlan?.[item.salesPlanId] ?? 0);
-      return Number.isFinite(variantPlanStock) && variantPlanStock >= 0 ? Math.floor(variantPlanStock) : 0;
+      return Number.isFinite(variantPlanStock) && variantPlanStock >= 0
+        ? Math.floor(Math.min(variantPlanStock, offerStock))
+        : 0;
     }
-    const rawStock =
-      product.stockQuantity ??
-      product.inventoryCount ??
-      product.quantityInStock ??
-      product.availableQuantity ??
-      product.stock;
-    let stock =
-      typeof rawStock === "number" ||
-      (typeof rawStock === "string" && rawStock.trim())
-        ? Number(rawStock)
-        : Number.NaN;
-    if (!Number.isFinite(stock) || stock < 0) return null;
-
-    return Number.isFinite(stock) && stock >= 0 ? Math.floor(stock) : null;
+    return Math.floor(offerStock);
   };
 
   const enforceCartLimits = (items) =>

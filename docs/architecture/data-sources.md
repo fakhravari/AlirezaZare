@@ -1,6 +1,6 @@
 # منابع داده و مرزهای اطمینان
 
-برای هر صفحه منبع را از ViewModel/Controller به service، contract و repository ردیابی کنید. ثبت DI در `Shop/Program.cs` نشان می‌دهد کدام implementation runtime مصرف می‌شود؛ نام یک interface به‌تنهایی تضمین اتصال دیتابیس نیست.
+برای هر صفحه منبع را از ViewModel/Controller به service، contract و repository ردیابی کنید. ثبت DI در `Shop/Program.cs` یا `Admin/Program.cs` و extension مشترک `Data/Infrastructure/DependencyInjection.cs` نشان می‌دهد کدام implementation runtime مصرف می‌شود؛ نام یک interface به‌تنهایی تضمین اتصال دیتابیس نیست.
 
 ## لایه‌ها
 
@@ -8,6 +8,7 @@
 - `Shop/Services/`: adapterهای دادهٔ سمت فروشگاه و هماهنگی جریان‌ها.
 - `Data/Application/`: قراردادها و use caseهای داده.
 - `Data/Infrastructure/Persistence/`: EF Core، DbContext و repositoryهای SQL.
+- `Data/Application/Email/` و `Data/Infrastructure/Email/`: قرارداد و فرستندهٔ مشترک SMTP که در هر دو برنامه از `AddShopDatabase` ثبت می‌شود.
 - `Data/Domain/`: entityها و قواعد دامنه.
 - `wwwroot/**/js/`: state و rendering مرورگر؛ snapshot سمت کاربر به‌خودی‌خود منبع قطعی قیمت/سفارش نیست.
 

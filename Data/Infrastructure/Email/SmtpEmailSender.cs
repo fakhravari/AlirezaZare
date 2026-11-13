@@ -1,15 +1,24 @@
 using System.Net;
 using System.Net.Mail;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using Shop.Data.Application.Email.Contracts;
 using Shop.Data.Infrastructure.Persistence;
 
-namespace Shop.Services;
+namespace Shop.Data.Infrastructure.Email;
 
-public sealed class SmtpEmailSender(ShopDbContext db, IConfiguration configuration, ILogger<SmtpEmailSender> logger)
-    : IEmailSender
+public sealed class SmtpEmailSender(
+    ShopDbContext db,
+    IConfiguration configuration,
+    ILogger<SmtpEmailSender> logger) : IEmailSender
 {
-    public async Task SendVerificationCodeAsync(string recipient, string code, CancellationToken cancellationToken)
+    public async Task SendAsync(string recipient, string subject, string body, CancellationToken cancellationToken)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(recipient);
+        ArgumentException.ThrowIfNullOrWhiteSpace(subject);
+        ArgumentNullException.ThrowIfNull(body);
+
         var settings = await db.StoreSiteIdentities.AsNoTracking()
             .Where(x => x.Id == 1)
             .Select(x => new
@@ -29,9 +38,8 @@ public sealed class SmtpEmailSender(ShopDbContext db, IConfiguration configurati
 
         using var message = new MailMessage(settings.SmtpFrom, recipient)
         {
-            Subject = "کد تأیید فروشگاه برق شیراز",
-            Body =
-                $"کد تأیید شما: {code}\n\nاین کد تا ۱۰ دقیقه معتبر است. اگر این درخواست از طرف شما نبوده، این پیام را نادیده بگیرید.",
+            Subject = subject,
+            Body = body,
             IsBodyHtml = false,
             BodyEncoding = System.Text.Encoding.UTF8,
             SubjectEncoding = System.Text.Encoding.UTF8
@@ -50,8 +58,7 @@ public sealed class SmtpEmailSender(ShopDbContext db, IConfiguration configurati
         }
         catch (Exception exception) when (exception is SmtpException or OperationCanceledException)
         {
-            logger.LogWarning("Verification email delivery failed. Failure type: {FailureType}",
-                exception.GetType().Name);
+            logger.LogWarning("Email delivery failed. Failure type: {FailureType}", exception.GetType().Name);
             throw;
         }
     }

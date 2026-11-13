@@ -386,7 +386,7 @@ public sealed class AccountController(
     public async Task<IActionResult> SaveCart([FromBody] CartRequest request, CancellationToken ct)
     {
         if (request.Items is null || request.Items.Count > 99 || request.Items.Any(i =>
-                i is null || i.ProductId < 1 || i.VariantId is < 1 || i.Quantity is < 1 or > 99 ||
+                i is null || i.ProductId is < 1 or > int.MaxValue || i.VariantId is < 1 || i.Quantity is < 1 or > 99 ||
                 string.IsNullOrWhiteSpace(i.SalesPlanId) || i.SalesPlanId.Length > 64))
             return BadRequest(new { code = "invalid-cart" });
         var duplicate = request.Items.GroupBy(i => (i.ProductId, i.SalesPlanId, i.VariantId)).Any(g => g.Count() > 1);
@@ -394,6 +394,18 @@ public sealed class AccountController(
         SalesPlanCatalog currentCatalog = await plans.ReadAsync(ct);
         foreach (var item in request.Items)
         {
+            try
+            {
+                // Recheck the offer's current plan, quantity limit, and product-level stock
+                // before accepting a cart snapshot. Variant stock is checked separately below.
+                currentCatalog.Quote(checked((int)item.ProductId), item.SalesPlanId,
+                    item.Quantity, DateTimeOffset.UtcNow);
+            }
+            catch (SalesPlanUnavailableException exception)
+            {
+                return Conflict(new { code = exception.ReasonCode });
+            }
+
             ProductInventoryVariant[] variants = currentCatalog.InventoryVariants
                 .Where(variant => variant.ProductId == item.ProductId).ToArray();
             if (variants.Length > 0 && (!item.VariantId.HasValue ||

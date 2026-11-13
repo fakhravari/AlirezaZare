@@ -2,7 +2,7 @@
 
 ورود/ثبت‌نام و endpointهای احراز را از `Shop/Controllers/AccountController.cs`، `EmailVerificationController.cs` و `PasswordLoginController.cs` دنبال کنید. صفحهٔ حساب در `ProfileController.cs` و `Shop/Views/Profile/` است. سمت مرورگر، projection حساب در `Shop/wwwroot/shop/js/store/account-data.js` و صفحه در `js/pages/account-page.js` مصرف می‌شود.
 
-ورود با کد ایمیل در `EmailVerificationController` از `EmailVerificationCodeStore` استفاده می‌کند. `EmailVerification:CodeLifetimeMinutes` در `Shop/appsettings.json` مدت اعتبار کد و فاصلهٔ ارسال دوباره برای هر ایمیل را به دقیقه تعیین می‌کند؛ پیش‌فرض ۱۵ و بازهٔ مجاز ۱ تا ۱۴۴۰ دقیقه است. درخواست زودهنگام پاسخ محدودیت با زمان باقی‌مانده و پیام معتبر بودن کد قبلی می‌گیرد؛ کد پس از تأیید مصرف می‌شود.
+ورود با کد ایمیل در `EmailVerificationController` از `EmailVerificationCodeStore` برای کد و از قرارداد مشترک `Data/Application/Email/Contracts/IEmailSender` برای ارسال استفاده می‌کند. `EmailVerification:CodeLifetimeMinutes` در `Shop/appsettings.json` مدت اعتبار کد و فاصلهٔ ارسال دوباره برای هر ایمیل را به دقیقه تعیین می‌کند؛ پیش‌فرض ۱۵ و بازهٔ مجاز ۱ تا ۱۴۴۰ دقیقه است. درخواست زودهنگام پاسخ محدودیت با زمان باقی‌مانده و پیام معتبر بودن کد قبلی می‌گیرد؛ کد پس از تأیید مصرف می‌شود.
 
 پس از ورود، `main.js` داده‌های قدیمی مرورگر را به API حساب منتقل می‌کند؛ جستجوهای اخیر هم از این مسیر به `account/recent-searches` منتقل می‌شوند.
 

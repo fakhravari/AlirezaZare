@@ -7,6 +7,7 @@ namespace Shop.Services;
 public sealed class EmailVerificationCodeStore
 {
     private readonly TimeSpan _codeLifetime;
+    public int CodeLifetimeMinutes { get; }
     private const int MaximumAttempts = 5;
     private readonly ConcurrentDictionary<string, Entry> _entries = new(StringComparer.OrdinalIgnoreCase);
 
@@ -18,6 +19,7 @@ public sealed class EmailVerificationCodeStore
                 "Email verification code lifetime must be between 1 and 1440 minutes.");
 
         _codeLifetime = TimeSpan.FromMinutes(lifetimeMinutes);
+        CodeLifetimeMinutes = lifetimeMinutes;
     }
 
     public bool TryCreate(string email, out string code, out TimeSpan retryAfter)

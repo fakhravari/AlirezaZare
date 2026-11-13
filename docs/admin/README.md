@@ -2,6 +2,8 @@
 
 پنل وب مستقل `Admin/` به پروژهٔ `Data/` متصل است. صفحه‌ها در `Admin/Areas/Store/Views/` و `Admin/Areas/Warehouse/Views/`، endpointها در `Admin/Controllers/Api/` و رفتار مرورگر در `Admin/wwwroot/js/` قرار دارند. برای یافتن owner رابط، `tools/ui-owners.json` را جست‌وجو کنید.
 
+`Admin/Program.cs` با فراخوانی `AddShopDatabase` سرویس مشترک ایمیل `Shop.Data.Application.Email.Contracts.IEmailSender` را از لایهٔ `Data` دریافت می‌کند؛ پیاده‌سازی SMTP تنظیمات فرستنده را از شناسهٔ ۱ در `StoreSiteIdentity` می‌خواند. این سرویس در DI ادمین در دسترس است و برای هر فرایند مدیریتی با نیاز ارسال ایمیل قابل تزریق است.
+
 ## حوزه‌ها
 
 - کاتالوگ و قیمت: APIهای `StoreCatalogAdminApiController` و `StoreVariantPricesAdminApiController`.

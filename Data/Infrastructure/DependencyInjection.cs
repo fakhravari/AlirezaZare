@@ -5,6 +5,8 @@ using Shop.Data.Application.Warehouse.Contracts;
 using Shop.Data.Application.Warehouse.Services;
 using Shop.Data.Application.Store.Contracts;
 using Shop.Data.Application.Store;
+using Shop.Data.Application.Email.Contracts;
+using Shop.Data.Infrastructure.Email;
 using Shop.Data.Infrastructure.Persistence;
 using Shop.Data.Infrastructure.Persistence.Repositories;
 
@@ -19,6 +21,7 @@ public static class DependencyInjection
             throw new InvalidOperationException("ConnectionStrings:DefaultConnection is not configured.");
 
         services.AddDbContext<ShopDbContext>(options => options.UseSqlServer(connectionString));
+        services.AddScoped<IEmailSender, SmtpEmailSender>();
         string mediaCdnBaseUrl = configuration[$"{MediaCdnOptions.SectionName}:BaseUrl"] ?? MediaCdnOptions.DefaultBaseUrl;
         services.AddOptions<MediaCdnOptions>()
             .Configure(options => options.BaseUrl = mediaCdnBaseUrl)
