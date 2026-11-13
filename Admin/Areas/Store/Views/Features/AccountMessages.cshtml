@@ -1,0 +1,27 @@
+@model Shop.Admin.Models.FeaturePageViewModel
+<div class="admin-page" data-admin-account-messages data-api="/api/admin/store/account-messages">
+    @await Html.PartialAsync("_AdminPageIntro", (Model.Title, Model.Description))
+    @Html.AntiForgeryToken()
+    <section class="panel panel-inverse mb-4">
+        <div class="panel-heading"><h2 class="panel-title">ارسال پیام به حساب مشتری</h2></div>
+        <div class="panel-body">
+            <form data-account-message-form>
+                <div class="row g-3">
+                    <div class="col-md-6"><label class="form-label" for="account-message-customer">جست‌وجوی مشتری با نام یا ایمیل</label><input class="form-control" id="account-message-customer" type="search" maxlength="120" autocomplete="off" placeholder="نام یا ایمیل مشتری" list="account-message-customers" required/><datalist id="account-message-customers"></datalist><input type="hidden" name="profileId"/></div>
+                    <div class="col-md-6"><label class="form-label" for="account-message-category">دسته</label><select class="form-select" id="account-message-category" name="category"><option value="notice">اطلاعیه</option><option value="support">پشتیبانی</option><option value="orders">سفارش</option><option value="products">محصولات</option></select></div>
+                    <div class="col-12"><label class="form-label" for="account-message-title">عنوان</label><input class="form-control" id="account-message-title" name="title" maxlength="200" required/></div>
+                    <div class="col-12"><label class="form-label" for="account-message-body">متن پیام</label><textarea class="form-control" id="account-message-body" name="body" rows="4" maxlength="4000" required></textarea></div>
+                    <div class="col-12"><button class="btn btn-primary" type="submit">ثبت و ارسال به حساب</button><span class="small text-muted ms-2" data-account-message-status role="status" aria-live="polite"></span></div>
+                </div>
+            </form>
+        </div>
+    </section>
+    <section class="panel panel-inverse">
+        <div class="panel-heading"><h2 class="panel-title">پیام‌های ارسال‌شده</h2><div class="panel-heading-btn"><button type="button" class="btn btn-xs btn-icon btn-default" data-account-message-refresh aria-label="بارگذاری دوباره"><i class="fa fa-rotate" aria-hidden="true"></i></button></div></div>
+        <div class="panel-body"><form class="admin-filter-bar d-flex flex-wrap gap-2 mb-3" data-account-message-filter><label class="visually-hidden" for="account-message-search">جست‌وجوی پیام‌ها</label><input class="form-control" id="account-message-search" type="search" name="q" maxlength="120" placeholder="نام یا ایمیل مشتری"/><button class="btn btn-primary" type="submit">جست‌وجو</button><span class="admin-record-count ms-auto small text-muted" data-account-message-count></span></form>
+            <div class="admin-data-status small text-muted" data-account-message-load-status role="status" aria-live="polite">در حال دریافت پیام‌ها…</div>
+            <div class="table-responsive admin-table-wrap"><table class="table table-striped table-hover align-middle mb-0"><thead><tr><th>تاریخ</th><th>مشتری</th><th>ایمیل</th><th>عنوان</th><th>دسته</th><th>وضعیت</th><th>متن</th></tr></thead><tbody data-account-message-rows></tbody></table></div>
+            <div class="admin-pagination d-flex align-items-center justify-content-center gap-3 mt-3" data-account-message-pagination hidden><button class="btn btn-default btn-sm" type="button" data-account-message-step="-1">قبلی</button><span data-account-message-page></span><button class="btn btn-default btn-sm" type="button" data-account-message-step="1">بعدی</button></div>
+        </div>
+    </section>
+</div>

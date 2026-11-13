@@ -8,9 +8,18 @@
 
 - کاتالوگ و قیمت: APIهای `StoreCatalogAdminApiController` و `StoreVariantPricesAdminApiController`.
 - سفارش و ارسال: `StoreOrdersAdminApiController` و `StorePaidOrdersDispatchApiController`.
+- صندوق فرم تماس: صفحهٔ `contact-messages` در `FeaturesController`، فهرست و تغییر وضعیت در `StoreContactMessagesAdminApiController` و رابط در `ContactMessages.cshtml`. مجوز صفحه و API در migration `078-contact-message-inbox.sql` ثبت می‌شود.
+- پیام‌های داخل حساب مشتری: صفحهٔ `account-messages` در `FeaturesController` و API `StoreAccountMessagesAdminApiController` برای یافتن مشتری، ثبت پیام و مشاهدهٔ سابقه. مشتری پیام را در `/Profile/Messages` می‌بیند و وضعیت خواندن را ثبت می‌کند.
 - انبار: `WarehouseAdminApiController`، `WarehouseDocumentsApiController` و `WarehouseMovementsApiController`.
 - محتوای فروشگاه: endpointهای FAQ، دسته، مقاله، صفحات خدمات و رسانه در همین پوشهٔ API.
 - حساب مدیر و مجوزها: `Admin/Controllers/AuthController.cs` و مدل‌های `Data/Domain/Admin/Entities/`.
+- تنظیمات سایت و SMTP: `SiteSettingsController` و `Admin/Areas/Admin/Views/SiteSettings/Index.cshtml`؛ عمر کد تأیید ایمیل هم در همین بخش «ارسال ایمیل» تنظیم و در `Store.SiteSetting` ذخیره می‌شود. قرارداد ستون در [راهنمای دیتابیس](../architecture/database.md) آمده است.
+
+فرم تماس، پیام را ابتدا در `Store.ContactFormMessage` ثبت می‌کند و سپس ایمیل اعلان را تلاش می‌کند؛ اگر SMTP در دسترس نباشد، پیام در صندوق باقی می‌ماند. صفحهٔ مدیریت با مجوز `Store:Features:Index:contact-messages` در منوی مشتریان و تعامل‌ها نمایش داده می‌شود. کاربر می‌تواند پیام‌ها را جست‌وجو، مشاهده و بین وضعیت‌های جدید، خوانده‌شده و بسته‌شده جابه‌جا کند.
+
+مدیر از صفحهٔ «پیام‌های حساب مشتریان» پیام را به حساب منتخب می‌فرستد؛ این پیام در `Account.Message` ذخیره می‌شود و در فهرست پیام‌های واقعی پروفایل مشتری ظاهر می‌شود. مجوزهای صفحه و API نیز در migration شمارهٔ ۰۷۸ تعریف شده‌اند.
+
+مدیر از صفحهٔ «پیام‌های حساب مشتریان» پیام را به حساب منتخب می‌فرستد؛ این پیام در `Account.Message` ذخیره می‌شود و در فهرست پیام‌های واقعی پروفایل مشتری ظاهر می‌شود. مجوزهای صفحه و API نیز در migration شمارهٔ ۰۷۸ تعریف شده‌اند.
 
 در تعریف تنوع‌های انبار، `IsDefault` مشخص می‌کند کدام variant برای افزودن سریع از کارت فروشگاه انتخاب شود. در هر محصول حداکثر یک مقدار پیش‌فرض مجاز است؛ اولین variant محصول در صورت نبود پیش‌فرض، خودکار پیش‌فرض می‌شود. ساختار دیتابیس و انتخاب کارت در [طرح‌های فروش](../store/sales-plans.md) ثبت شده است.
 

@@ -1,6 +1,5 @@
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @model Shop.Admin.Areas.Admin.Controllers.SiteSettingsInput
-@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
 @{
     ViewData["Title"] = "تنظیمات سایت";
     ViewData["AreaTitle"] = "سامانهٔ مدیریت";
@@ -29,6 +28,7 @@
             <div class="col-md-6"><label asp-for="SmtpUsername" class="form-label">نام کاربری SMTP</label><input asp-for="SmtpUsername" dir="ltr" class="form-control" required maxlength="320" /></div>
             <div class="col-md-6"><label asp-for="SmtpFrom" class="form-label">ایمیل فرستنده</label><input asp-for="SmtpFrom" type="email" dir="ltr" class="form-control" required maxlength="320" /></div>
             <div class="col-md-6"><label asp-for="SmtpPassword" class="form-label">رمز عبور SMTP</label><input asp-for="SmtpPassword" type="text" autocomplete="off" dir="ltr" class="form-control" maxlength="1024" /></div>
+            <div class="col-md-6"><label asp-for="EmailVerificationCodeLifetimeMinutes" class="form-label">مدت اعتبار کد تأیید ایمیل (دقیقه)</label><input asp-for="EmailVerificationCodeLifetimeMinutes" type="number" min="1" max="1440" class="form-control" required /><span asp-validation-for="EmailVerificationCodeLifetimeMinutes" class="text-danger"></span><small class="form-text text-muted">همین مدت برای محدودیت ارسال دوبارهٔ کد نیز اعمال می‌شود.</small></div>
             <div class="col-12"><div class="form-check"><input asp-for="SmtpEnableSsl" class="form-check-input" /><label asp-for="SmtpEnableSsl" class="form-check-label">اتصال امن SSL</label></div></div>
             <p class="text-muted mb-0">وضعیت رمز SMTP: @ViewData["SmtpPasswordStatus"]</p>
             <p class="text-muted mb-0">رمز SMTP در پایگاه داده به‌صورت متن آشکار ذخیره و برای مدیران دارای دسترسی کامل نمایش داده می‌شود.</p>

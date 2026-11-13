@@ -17,6 +17,7 @@ public sealed class StoreSiteIdentity
     public string? SmtpUsername { get; set; }
     public string? SmtpFrom { get; set; }
     public string? SmtpPassword { get; set; }
+    public int EmailVerificationCodeLifetimeMinutes { get; set; } = 15;
     public long? IdWarehouse { get; set; }
     public string? FtpHost { get; set; }
     public int? FtpPort { get; set; }

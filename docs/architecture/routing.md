@@ -23,6 +23,10 @@
 
 پنل MVC در `Admin/` از Areas استفاده می‌کند. Views و routeها را زیر `Admin/Areas/**/Controllers/` و `Views/` بیابید؛ APIهای JSON عمدتاً در `Admin/Controllers/Api/` هستند. برای یافتن صفحه از منو/Controller و سپس manifest مالکیت UI استفاده کنید. فهرست حوزه‌ها در [admin README](../admin/README.md) است.
 
+مدیریت پیام‌های فرم تماس از `Store/Features?feature=contact-messages` و APIهای `/api/admin/store/contact-messages` عبور می‌کند؛ مجوزها به صفحهٔ `Store:Features:Index:contact-messages` و endpointهای همان API متصل‌اند.
+
+ارسال پیام مدیر به حساب مشتری در `Store/Features?feature=account-messages` و API `/api/admin/store/account-messages` انجام می‌شود. مالک پیام از هویت نشست مشتری در `/api/account/messages` تعیین می‌شود و مشتری در `/Profile/Messages` پیام‌های خودش را می‌بیند.
+
 ## Asset و UI
 
 CSS/JS مستقیم صفحه ممکن است از Razor sectionها بار شود یا از layout مشترک بیاید. فایل موجود در `wwwroot` به معنی load نیست: View و layout را دنبال کنید و `tools/ui-owners.json` را برای مالک ببینید.

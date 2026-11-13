@@ -12,6 +12,8 @@
 
 `ui-core.js` API عمومی `window.HNUI` را فراهم می‌کند؛ `storage.js` و `cart.js` ابزار مشترک فروشگاه‌اند. قراردادهای مربوط به commerce در [سبد](../store/cart.md)، حساب در [پروفایل](../account/profile.md) و داده در [منابع داده](../architecture/data-sources.md) مرجع‌اند.
 
+فرم تماس در `pages/contact.js` و پیگیری سفارش در `pages/tracking.js` از API هم‌مبدأ با `HNUI.api.request` استفاده می‌کنند. فرم خبرنامه در `layout/main.js` نشست را به سرور واگذار می‌کند تا ترجیح حساب یا ایمیل مهمان در مقصد درست ذخیره شود.
+
 پیش از تحویل، checker UI، syntax/test موجود و Console/Network صفحه را بررسی کنید؛ جزئیات [کیفیت](../development/quality.md).
 
 [فهرست UI](README.md) · [فهرست docs](../README.md)

@@ -1,0 +1,20 @@
+@model Shop.Admin.Models.FeaturePageViewModel
+<div class="admin-page" data-admin-contact-messages data-api="/api/admin/store/contact-messages">
+    @await Html.PartialAsync("_AdminPageIntro", (Model.Title, Model.Description))
+    @Html.AntiForgeryToken()
+    <section class="panel panel-inverse">
+        <div class="panel-heading"><h2 class="panel-title">صندوق پیام‌های تماس</h2><div class="panel-heading-btn"><button class="btn btn-xs btn-icon btn-default" type="button" data-contact-refresh aria-label="بارگذاری دوباره"><i class="fa fa-rotate" aria-hidden="true"></i></button></div></div>
+        <div class="panel-body">
+            <form class="admin-filter-bar d-flex flex-wrap align-items-center gap-2 mb-3" data-contact-filter>
+                <label class="visually-hidden" for="contact-search">جست‌وجوی پیام</label><input id="contact-search" class="form-control" type="search" name="q" maxlength="100" placeholder="نام، تلفن یا متن پیام" />
+                <label class="visually-hidden" for="contact-status">وضعیت پیام</label><select id="contact-status" class="form-select" name="status"><option value="">همهٔ وضعیت‌ها</option><option value="new">جدید</option><option value="read">خوانده‌شده</option><option value="closed">بسته‌شده</option></select>
+                <button class="btn btn-primary" type="submit">اعمال فیلتر</button><span class="admin-record-count ms-auto small text-muted" data-contact-count aria-live="polite"></span>
+            </form>
+            <div class="admin-data-status small text-muted" data-contact-status role="status" aria-live="polite">در حال دریافت پیام‌ها…</div>
+            <div class="table-responsive admin-table-wrap"><table class="table table-striped table-hover align-middle mb-0" data-contact-table><thead><tr><th>تاریخ</th><th>نام</th><th>تلفن</th><th>موضوع</th><th>پیام</th><th>وضعیت</th><th>عملیات</th></tr></thead><tbody data-contact-rows></tbody></table></div>
+            <div class="admin-empty-state d-none p-4 text-center text-muted small" data-contact-empty>پیامی پیدا نشد.</div>
+            <div class="admin-pagination d-flex align-items-center justify-content-center gap-3 mt-3" data-contact-pagination hidden><button type="button" class="btn btn-default btn-sm" data-contact-step="-1">قبلی</button><span data-contact-page></span><button type="button" class="btn btn-default btn-sm" data-contact-step="1">بعدی</button></div>
+        </div>
+    </section>
+</div>
+<div class="modal fade" id="contact-message-modal" tabindex="-1" aria-labelledby="contact-message-title" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h2 class="modal-title fs-5" id="contact-message-title">متن پیام</h2><button class="btn-close ms-0" type="button" data-bs-dismiss="modal" aria-label="بستن"></button></div><div class="modal-body"><p class="mb-2" data-contact-sender></p><div class="border rounded p-3 text-break" dir="auto" data-contact-body style="white-space:pre-wrap"></div></div></div></div></div>

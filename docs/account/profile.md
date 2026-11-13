@@ -2,9 +2,11 @@
 
 ورود/ثبت‌نام و endpointهای احراز را از `Shop/Controllers/AccountController.cs`، `EmailVerificationController.cs` و `PasswordLoginController.cs` دنبال کنید. صفحهٔ حساب در `ProfileController.cs` و `Shop/Views/Profile/` است. سمت مرورگر، projection حساب در `Shop/wwwroot/shop/js/store/account-data.js` و صفحه در `js/pages/account-page.js` مصرف می‌شود.
 
-ورود با کد ایمیل در `EmailVerificationController` از `EmailVerificationCodeStore` برای کد و از قرارداد مشترک `Data/Application/Email/Contracts/IEmailSender` برای ارسال استفاده می‌کند. `EmailVerification:CodeLifetimeMinutes` در `Shop/appsettings.json` مدت اعتبار کد و فاصلهٔ ارسال دوباره برای هر ایمیل را به دقیقه تعیین می‌کند؛ پیش‌فرض ۱۵ و بازهٔ مجاز ۱ تا ۱۴۴۰ دقیقه است. درخواست زودهنگام پاسخ محدودیت با زمان باقی‌مانده و پیام معتبر بودن کد قبلی می‌گیرد؛ کد پس از تأیید مصرف می‌شود.
+ورود با کد ایمیل در `EmailVerificationController` از `EmailVerificationCodeStore` برای کد و از قرارداد مشترک `Data/Application/Email/Contracts/IEmailSender` برای ارسال استفاده می‌کند. مدت اعتبار کد و فاصلهٔ ارسال دوباره از `Store.SiteSetting.EmailVerificationCodeLifetimeMinutes` خوانده می‌شود و مدیر در بخش «ارسال ایمیل» تنظیمات سایت آن را تغییر می‌دهد؛ مقدار پیش‌فرض ۱۵ و بازهٔ مجاز ۱ تا ۱۴۴۰ دقیقه است. درخواست زودهنگام پاسخ محدودیت با زمان باقی‌مانده و پیام معتبر بودن کد قبلی می‌گیرد؛ کد پس از تأیید مصرف می‌شود. جزئیات ستون در [راهنمای دیتابیس](../architecture/database.md) است.
 
-پس از ورود، `main.js` داده‌های قدیمی مرورگر را به API حساب منتقل می‌کند؛ جستجوهای اخیر هم از این مسیر به `account/recent-searches` منتقل می‌شوند.
+تنظیم خبرنامهٔ کاربر واردشده در `Account.Profile.NewsletterEnabled` ذخیره می‌شود. فرم خبرنامهٔ صفحهٔ اصلی به `POST /api/store/newsletter` می‌فرستد؛ اگر نشست فروشگاه معتبر باشد، همین ترجیح حساب فعال می‌شود و checkbox پروفایل به‌روزرسانی می‌شود. کنترل پروفایل هم از `PUT /api/account/profile` این مقدار را ذخیره می‌کند. پیگیری سفارش عمومی با `POST /api/store/orders/tracking` به کد سفارش و موبایل snapshot نشانی ارسال نیاز دارد؛ پاسخ فقط وضعیت و تاریخچهٔ ارسال را شامل می‌شود.
+
+پس از ورود، `main.js` داده‌های قدیمی مرورگر را به API حساب منتقل می‌کند؛ جستجوهای اخیر هم از این مسیر به `account/recent-searches` منتقل می‌شوند. پیام‌های پروفایل از `GET /api/account/messages` و جدول `Account.Message` دریافت می‌شوند؛ کاربر می‌تواند پیام را خوانده‌شده علامت بزند. مدیر پیام‌ها را از صفحهٔ پیام‌های حساب مشتریان در پنل می‌فرستد.
 
 ## ردیابی داده
 

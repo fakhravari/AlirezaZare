@@ -12,7 +12,7 @@
     bool Can(string permission) => User.IsInRole("system.full-access") || User.HasClaim("admin_permission", permission);
     bool canCatalog = Can("Store:Catalog:Products") || Can("Store:Catalog:Categories") || Can("Store:Catalog:Brands") || Can("Store:Catalog:Attributes");
     bool canStoreSales = Can("Store:Features:Index:orders") || Can("Store:Features:Index:promotions");
-    bool canStorePeople = Can("Store:Features:Index:customers") || Can("Store:Features:Index:reviews") || Can("Store:Features:Index:questions");
+    bool canStorePeople = Can("Store:Features:Index:customers") || Can("Store:Features:Index:reviews") || Can("Store:Features:Index:questions") || Can("Store:Features:Index:contact-messages") || Can("Store:Features:Index:account-messages");
     bool canWarehouseOperations = new[] { "receipts", "dispatches", "transfers", "returns", "stocktake", "adjustments" }.Any(id => Can($"Warehouse:Features:Index:{id}"));
     bool canWarehouseSettings = new[] { "references", "units", "product-units", "variants", "document-types", "sales-plan-mapping", "stock-owners" }.Any(id => Can($"Warehouse:Features:Index:{id}"));
     bool catalogOpen = inStore && string.Equals(controller, "Catalog", StringComparison.OrdinalIgnoreCase);
@@ -152,8 +152,8 @@
         </div>
     </div>
 </div>
-<div class="menu-item has-sub @(inStore && new[] { "Customers", "Features" }.Contains(controller, StringComparer.OrdinalIgnoreCase) && new[] { "customers", "reviews", "questions" }.Contains(feature ?? "", StringComparer.OrdinalIgnoreCase) ? "active expand" : "")" hidden="@(!canStorePeople)">
-    <a href="#store-customers" class="menu-link" aria-expanded="@(inStore && new[] { "Customers", "Features" }.Contains(controller, StringComparer.OrdinalIgnoreCase) && new[] { "customers", "reviews", "questions" }.Contains(feature ?? "", StringComparer.OrdinalIgnoreCase) ? "true" : "false")">
+    <div class="menu-item has-sub @(inStore && new[] { "Customers", "Features" }.Contains(controller, StringComparer.OrdinalIgnoreCase) && new[] { "customers", "reviews", "questions", "contact-messages", "account-messages" }.Contains(feature ?? "", StringComparer.OrdinalIgnoreCase) ? "active expand" : "")" hidden="@(!canStorePeople)">
+    <a href="#store-customers" class="menu-link" aria-expanded="@(inStore && new[] { "Customers", "Features" }.Contains(controller, StringComparer.OrdinalIgnoreCase) && new[] { "customers", "reviews", "questions", "contact-messages", "account-messages" }.Contains(feature ?? "", StringComparer.OrdinalIgnoreCase) ? "true" : "false")">
         <span class="menu-icon">
             <i class="fa fa-users" aria-hidden="true"></i>
         </span>
@@ -175,6 +175,12 @@
             <a class="menu-link" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="questions" data-admin-nav>
                 <span class="menu-icon"><i class="fa fa-circle-question" aria-hidden="true"></i></span><span class="menu-text">پرسش‌های محصول</span>
             </a>
+        </div>
+        <div class="menu-item @(IsFeature("contact-messages") ? "active" : "")" hidden="@(!Can("Store:Features:Index:contact-messages"))">
+            <a class="menu-link" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="contact-messages" data-admin-nav><span class="menu-icon"><i class="fa fa-envelope" aria-hidden="true"></i></span><span class="menu-text">پیام‌های فرم تماس</span></a>
+        </div>
+        <div class="menu-item @(IsFeature("account-messages") ? "active" : "")" hidden="@(!Can("Store:Features:Index:account-messages"))">
+            <a class="menu-link" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="account-messages" data-admin-nav><span class="menu-icon"><i class="fa fa-envelope-open-text" aria-hidden="true"></i></span><span class="menu-text">پیام‌های حساب مشتریان</span></a>
         </div>
     </div>
 </div>

@@ -28,6 +28,7 @@ public sealed class SiteSettingsController(ShopDbContext db, IDataProtectionProv
             IdWarehouse = settings.IdWarehouse, SmtpHost = settings.SmtpHost ?? "", SmtpPort = settings.SmtpPort,
             SmtpEnableSsl = settings.SmtpEnableSsl ?? false, SmtpUsername = settings.SmtpUsername ?? "",
             SmtpFrom = settings.SmtpFrom ?? "", SmtpPassword = settings.SmtpPassword,
+            EmailVerificationCodeLifetimeMinutes = settings.EmailVerificationCodeLifetimeMinutes,
             FtpHost = settings.FtpHost, FtpPort = settings.FtpPort, FtpUsername = settings.FtpUsername,
             FtpPassword = settings.FtpPassword, LegacyFtpPassword = settings.FtpPasswordProtected,
             FtpPasswordConfigured = settings.FtpPassword is not null || settings.FtpPasswordProtected is not null
@@ -73,6 +74,7 @@ public sealed class SiteSettingsController(ShopDbContext db, IDataProtectionProv
         settings.SmtpHost = model.SmtpHost; settings.SmtpPort = model.SmtpPort; settings.SmtpEnableSsl = model.SmtpEnableSsl;
         settings.SmtpUsername = model.SmtpUsername; settings.SmtpFrom = model.SmtpFrom;
         if (model.SmtpPassword is not null) settings.SmtpPassword = model.SmtpPassword;
+        settings.EmailVerificationCodeLifetimeMinutes = model.EmailVerificationCodeLifetimeMinutes;
         settings.FtpHost = model.FtpHost; settings.FtpPort = model.FtpPort; settings.FtpUsername = model.FtpUsername;
         if (model.FtpPassword is not null) { settings.FtpPassword = model.FtpPassword; settings.FtpPasswordProtected = null; }
         settings.UpdatedAtUtc = DateTime.UtcNow;
@@ -107,6 +109,7 @@ public sealed class SiteSettingsInput
     [Required, StringLength(320)] public string SmtpUsername { get; set; } = "";
     [Required, StringLength(320), EmailAddress] public string SmtpFrom { get; set; } = "";
     [StringLength(1024)] public string? SmtpPassword { get; set; }
+    [Range(1, 1440)] public int EmailVerificationCodeLifetimeMinutes { get; set; } = 15;
     [StringLength(255)] public string? FtpHost { get; set; }
     [Range(1, 65535)] public int? FtpPort { get; set; }
     [StringLength(320)] public string? FtpUsername { get; set; }

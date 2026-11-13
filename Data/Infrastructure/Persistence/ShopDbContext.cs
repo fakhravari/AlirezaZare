@@ -75,6 +75,7 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
     public DbSet<GeoProvince> GeoProvinces => Set<GeoProvince>();
     public DbSet<GeoCity> GeoCities => Set<GeoCity>();
     public DbSet<AccountProfile> AccountProfiles => Set<AccountProfile>();
+    public DbSet<AccountMessage> AccountMessages => Set<AccountMessage>();
     public DbSet<AccountGender> AccountGenders => Set<AccountGender>();
     public DbSet<AccountCoupon> AccountCoupons => Set<AccountCoupon>();
     public DbSet<StoreCouponUsage> StoreCouponUsages => Set<StoreCouponUsage>();
@@ -95,6 +96,8 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
     public DbSet<WarehousePaidOrderInboxLine> WarehousePaidOrderInboxLines => Set<WarehousePaidOrderInboxLine>();
     public DbSet<WarehousePaidOrderInboxDocument> WarehousePaidOrderInboxDocuments => Set<WarehousePaidOrderInboxDocument>();
     public DbSet<StoreCustomerOrderReference> StoreCustomerOrders => Set<StoreCustomerOrderReference>();
+    public DbSet<StoreNewsletterSubscriber> StoreNewsletterSubscribers => Set<StoreNewsletterSubscriber>();
+    public DbSet<StoreContactMessage> StoreContactMessages => Set<StoreContactMessage>();
     public DbSet<StoreOrderShippingHistory> StoreOrderShippingHistories => Set<StoreOrderShippingHistory>();
     public DbSet<StoreOrderShipmentTrackingHistory> StoreOrderShipmentTrackingHistories => Set<StoreOrderShipmentTrackingHistory>();
 
@@ -490,6 +493,7 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.Property(x => x.SmtpUsername).HasMaxLength(320);
             entity.Property(x => x.SmtpFrom).HasMaxLength(320);
             entity.Property(x => x.SmtpPassword).HasMaxLength(1024);
+            entity.Property(x => x.EmailVerificationCodeLifetimeMinutes).HasDefaultValue(15).IsRequired();
             entity.Property(x => x.FtpHost).HasMaxLength(255);
             entity.Property(x => x.FtpUsername).HasMaxLength(320);
             entity.Property(x => x.FtpPassword).HasMaxLength(1024);
@@ -525,6 +529,18 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.HasOne(x => x.Gender).WithMany().HasForeignKey(x => x.IdGender)
                 .OnDelete(DeleteBehavior.Restrict);
         });
+        modelBuilder.Entity<AccountMessage>(entity =>
+        {
+            entity.ToTable("Message", "Account");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.Title).HasMaxLength(200).IsRequired();
+            entity.Property(x => x.Category).HasMaxLength(40).IsRequired();
+            entity.Property(x => x.Body).HasMaxLength(4000).IsRequired();
+            entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
+            entity.Property(x => x.ReadAtUtc).HasPrecision(3);
+            entity.HasOne<AccountProfile>().WithMany().HasForeignKey(x => x.IdProfile).OnDelete(DeleteBehavior.Cascade);
+            entity.HasIndex(x => new { x.IdProfile, x.CreatedAtUtc });
+        });
         modelBuilder.Entity<AccountGender>(entity =>
         {
             entity.ToTable("Gender", "Account");
@@ -551,6 +567,27 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.Property(x => x.OrderedAtUtc).HasPrecision(3);
             entity.Property(x => x.AddressSnapshotJson).HasColumnType("nvarchar(max)").IsRequired();
             entity.HasMany(x => x.Items).WithOne().HasForeignKey(x => x.IdCustomerOrder).OnDelete(DeleteBehavior.Cascade);
+        });
+        modelBuilder.Entity<StoreNewsletterSubscriber>(entity =>
+        {
+            entity.ToTable("NewsletterSubscriber", "Store");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.Email).HasMaxLength(254).IsRequired();
+            entity.Property(x => x.SubscribedAtUtc).HasPrecision(3);
+            entity.HasIndex(x => x.Email).IsUnique();
+        });
+        modelBuilder.Entity<StoreContactMessage>(entity =>
+        {
+            entity.ToTable("ContactFormMessage", "Store");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.Name).HasMaxLength(100).IsRequired();
+            entity.Property(x => x.Phone).HasMaxLength(30).IsRequired();
+            entity.Property(x => x.SubjectKey).HasMaxLength(30).IsRequired();
+            entity.Property(x => x.Message).HasMaxLength(3000).IsRequired();
+            entity.Property(x => x.Status).HasMaxLength(20).IsRequired();
+            entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
+            entity.Property(x => x.UpdatedAtUtc).HasPrecision(3);
+            entity.HasIndex(x => new { x.Status, x.CreatedAtUtc });
         });
         modelBuilder.Entity<StoreCustomerOrderItem>(entity =>
         {

@@ -78,6 +78,8 @@
             window.AdminDefinitions?.initialize(content);
             window.AdminMovements?.initialize(content);
             window.AdminFeedback?.initialize(content);
+            window.AdminContactMessages?.initialize(content);
+            window.AdminAccountMessages?.initialize(content);
             window.AdminVariantPrices?.initialize(content);
             window.AdminGeography?.initialize(content);
             const heading = content.querySelector("h1");
@@ -118,6 +120,8 @@
             window.AdminDefinitions?.initialize(content);
             window.AdminMovements?.initialize(content);
             window.AdminFeedback?.initialize(content);
+            window.AdminContactMessages?.initialize(content);
+            window.AdminAccountMessages?.initialize(content);
             window.AdminVariantPrices?.initialize(content);
             window.AdminGeography?.initialize(content);
         }, { once: true });
@@ -129,6 +133,8 @@
         window.AdminDefinitions?.initialize(content);
         window.AdminMovements?.initialize(content);
         window.AdminFeedback?.initialize(content);
+        window.AdminContactMessages?.initialize(content);
+        window.AdminAccountMessages?.initialize(content);
         window.AdminVariantPrices?.initialize(content);
         window.AdminGeography?.initialize(content);
     }

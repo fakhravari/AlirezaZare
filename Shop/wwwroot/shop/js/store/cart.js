@@ -338,7 +338,12 @@
       const attribute = (action) => index === null
         ? `data-action="${action}"`
         : `data-${action}="${index}"`;
-      return `<div class="hn-cart-controls" data-sales-plan-id="${escapeHtml(item.salesPlanId || "regular")}" role="group" aria-label="تعداد ${escapeHtml(item.name)}"><div class="hn-cart-quantity"><button type="button" ${attribute("plus")} aria-label="افزایش تعداد" ${item.quantity >= this.quantityLimit(item) ? "disabled" : ""}><i class="bi bi-plus" aria-hidden="true"></i></button><span class="cart-quantity-value">${formatNumber(item.quantity)}</span><button type="button" ${attribute("minus")} aria-label="کاهش تعداد" ${item.quantity <= 1 ? "disabled" : ""}><i class="bi bi-dash" aria-hidden="true"></i></button></div><button type="button" class="hn-cart-remove" ${attribute("remove")} aria-label="حذف ${escapeHtml(item.name)} از سبد"><i class="bi bi-trash3" aria-hidden="true"></i></button></div>`;
+      const quantityLimit = this.quantityLimit(item);
+      const atLimit = item.quantity >= quantityLimit;
+      const plusLabel = atLimit
+        ? `افزایش تعداد در دسترس نیست؛ حداکثر ${formatNumber(quantityLimit)} عدد قابل خرید است`
+        : "افزایش تعداد";
+      return `<div class="hn-cart-controls" data-sales-plan-id="${escapeHtml(item.salesPlanId || "regular")}" role="group" aria-label="تعداد ${escapeHtml(item.name)}"><div class="hn-cart-quantity"><button type="button" ${attribute("plus")} aria-label="${escapeHtml(plusLabel)}" title="${escapeHtml(plusLabel)}" ${atLimit ? "disabled" : ""}><i class="bi bi-plus" aria-hidden="true"></i></button><span class="cart-quantity-value">${formatNumber(item.quantity)}</span><button type="button" ${attribute("minus")} aria-label="کاهش تعداد" ${item.quantity <= 1 ? "disabled" : ""}><i class="bi bi-dash" aria-hidden="true"></i></button></div><button type="button" class="hn-cart-remove" ${attribute("remove")} aria-label="حذف ${escapeHtml(item.name)} از سبد"><i class="bi bi-trash3" aria-hidden="true"></i></button></div>`;
     },
     renderOptions(item) {
       const priceOptions = Array.isArray(item.options?.priceOptions)
@@ -424,6 +429,7 @@
       if (safeProduct.quantity < requested) {
         emit("hn:cart-stock-limit", {
               product: safeProduct,
+              operation: "add",
               stock,
               maxCartQuantity: cartLimit,
               limit: quantityLimit,
@@ -470,6 +476,7 @@
       if (limitedQuantity < nextQuantity) {
         emit("hn:cart-stock-limit", {
               product: item,
+              operation: "update",
               stock,
               maxCartQuantity: cartLimit,
               limit: quantityLimit,

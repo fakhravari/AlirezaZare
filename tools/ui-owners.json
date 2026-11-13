@@ -19,6 +19,8 @@
             "Admin/Areas/Store/Views/Features/Orders.cshtml",
             "Admin/Areas/Store/Views/Features/Faq.cshtml",
             "Admin/Areas/Store/Views/Features/Feedback.cshtml",
+            "Admin/Areas/Store/Views/Features/ContactMessages.cshtml",
+            "Admin/Areas/Store/Views/Features/AccountMessages.cshtml",
             "Admin/Areas/Store/Views/Features/PaidOrdersDispatch.cshtml",
             "Admin/Areas/Store/Views/Catalog/Index.cshtml",
             "Admin/Areas/Warehouse/Views/Stock/Index.cshtml",
@@ -37,6 +39,8 @@
             "Admin/wwwroot/js/admin-documents.js",
             "Admin/wwwroot/js/admin-movements.js",
             "Admin/wwwroot/js/admin-feedback.js",
+            "Admin/wwwroot/js/admin-contact-messages.js",
+            "Admin/wwwroot/js/admin-account-messages.js",
             "Admin/wwwroot/js/admin-paid-orders-dispatch.js"
           ],
           "css": [
@@ -47,6 +51,8 @@
             "Admin/Controllers/Api/StoreProductImageApiController.cs",
             "Admin/Controllers/Api/StoreMediaUploadApiController.cs",
             "Admin/Controllers/Api/StoreOrdersAdminApiController.cs",
+            "Admin/Controllers/Api/StoreContactMessagesAdminApiController.cs",
+            "Admin/Controllers/Api/StoreAccountMessagesAdminApiController.cs",
             "Admin/Controllers/Api/StoreCustomersAdminApiController.cs",
             "Admin/Controllers/Api/StoreFaqAdminApiController.cs",
             "Admin/Controllers/Api/StoreMagazineAdminApiController.cs",
@@ -55,6 +61,8 @@
             "Admin/Controllers/Api/PaymentInstitutionsAdminApiController.cs",
             "Admin/Controllers/Api/WarehouseAdminApiController.cs",
             "Data/Domain/Store/Entities/StoreAttributeDefinition.cs",
+            "Data/Domain/Store/Entities/StoreContactMessage.cs",
+            "Data/Domain/Account/Entities/AccountMessage.cs",
             "Data/Domain/Store/Entities/MagazineArticle.cs",
             "Data/Domain/Store/Entities/StoreProductMedia.cs",
             "Data/Domain/Store/Entities/StoreBrand.cs",
@@ -128,6 +136,9 @@
         "homepage-newsletter": {
           "markup": [
             "Shop/Views/Home/_Newsletter.cshtml"
+          ],
+          "js": [
+            "Shop/wwwroot/shop/js/layout/main.js"
           ],
           "css": [
             "Shop/wwwroot/shop/css/layout/style.css",
@@ -556,10 +567,12 @@
           ],
           "server": [
             "Shop/Controllers/TrackingController.cs",
-            "Shop/Controllers/PageController.cs"
+            "Shop/Controllers/PageController.cs",
+            "Shop/Controllers/Api/OrderTrackingApiController.cs"
           ],
           "js": [
-            "Shop/wwwroot/shop/js/pages/page-content.js"
+            "Shop/wwwroot/shop/js/pages/page-content.js",
+            "Shop/wwwroot/shop/js/pages/tracking.js"
           ],
           "css": [
             "Shop/wwwroot/shop/css/pages/pages.css",
@@ -587,7 +600,8 @@
           ],
           "server": [
             "Shop/Controllers/ContactController.cs",
-            "Shop/Controllers/PageController.cs"
+            "Shop/Controllers/PageController.cs",
+            "Shop/Controllers/Api/StoreContactApiController.cs"
           ],
           "js": [
             "Shop/wwwroot/shop/js/pages/contact.js"

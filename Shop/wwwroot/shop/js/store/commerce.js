@@ -4,6 +4,23 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
     const fa = (n) => ui.formatNumber(n);
     const esc = (s) => ui.escapeHtml(s);
     const money = (n) => `${fa(n)} تومان`;
+    const purchaseErrorText = (code) => ({
+        "insufficient-stock": "موجودی کافی از این کالا یا تنوع انتخاب‌شده باقی نمانده است.",
+        "inventory-variant-required": "برای افزودن، تنوع انبار پیش‌فرض قابل‌فروش نیست؛ تنوع دیگری انتخاب کنید.",
+        "product-variant-unavailable": "این تنوع دیگر قابل فروش نیست؛ صفحه را تازه کنید و تنوع دیگری انتخاب کنید.",
+        "inventory-variant-or-stock-changed": "موجودی این تنوع تغییر کرده است؛ سبد را بازبینی کنید.",
+        "purchase-limit": "تعداد انتخاب‌شده از سقف مجاز خرید بیشتر است.",
+        "offer-disabled": "این پیشنهاد فروش غیرفعال است؛ طرح دیگری انتخاب کنید.",
+        "inactive-plan": "مهلت این طرح فروش تمام شده یا هنوز آغاز نشده است.",
+        "product-not-in-plan": "این کالا در طرح فروش انتخاب‌شده عرضه نمی‌شود.",
+        "unknown-plan": "طرح فروش انتخاب‌شده معتبر نیست؛ طرح دیگری انتخاب کنید.",
+        "invalid-product-options": "گزینه‌ها یا متعلقات انتخاب‌شده معتبر نیستند؛ صفحه را تازه کنید و دوباره انتخاب کنید.",
+        "price-or-stock-changed": "قیمت یا موجودی تغییر کرده است؛ سبد را بازبینی کنید.",
+        "product-or-plan-unavailable": "کالا یا طرح فروش دیگر در دسترس نیست؛ صفحه را تازه کنید.",
+        "product-unavailable": "این کالا دیگر در فروشگاه فعال نیست.",
+        "product-options-unavailable": "تنظیمات خرید کالا در دسترس نیست؛ بعداً دوباره تلاش کنید.",
+        "invalid-cart": "اطلاعات سبد معتبر نیست؛ سبد را بازبینی کنید.",
+    })[code] || "وضعیت خرید از فروشگاه دریافت نشد؛ اتصال را بررسی و دوباره تلاش کنید.";
     const cartOptionsMarkup = (item) => ui.cart.renderOptions(item);
     const salePriceMarkup = (product) => window.HNProductCard.price(product);
     const empty = (text) =>
@@ -683,9 +700,12 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                     quantity = Math.min(quantity, Number(currentOffer.stockQuantity));
                 }
                 const quantityKnown = Number.isFinite(quantity) && quantity >= 0;
-                const available = quantityKnown ? quantity > 0 : (!inventoryVariants.length && p.inStock === true);
-                const unavailable = quantityKnown ? quantity === 0 : (!inventoryVariants.length && p.inStock === false);
-                const message = quantityKnown
+                const offerUnavailable = !currentOffer?.isEnabled;
+                const available = !offerUnavailable && (quantityKnown ? quantity > 0 : (!inventoryVariants.length && p.inStock === true));
+                const unavailable = offerUnavailable || (quantityKnown ? quantity === 0 : (!inventoryVariants.length && p.inStock === false));
+                const message = offerUnavailable
+                    ? "این طرح فروش اکنون قابل خرید نیست"
+                    : quantityKnown
                     ? unavailable
                         ? "۰ عدد · ناموجود"
                         : `${fa(quantity)} عدد در انبار`
@@ -711,17 +731,17 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                 productView
                     .querySelectorAll("#addProduct")
                     .forEach((button) => {
-                        button.disabled = unavailable || !currentOffer?.isEnabled;
+                        button.disabled = unavailable;
                         button.setAttribute("aria-disabled", String(unavailable));
                         button.setAttribute(
                             "aria-label",
-                            unavailable ? "ناموجود" : "افزودن به سبد خرید",
+                            offerUnavailable ? "طرح فروش در دسترس نیست" : unavailable ? "ناموجود" : "افزودن به سبد خرید",
                         );
-                        button.title = unavailable
-                            ? "موجودی این کالا تمام شده است"
-                            : "افزودن به سبد خرید";
+                        button.title = offerUnavailable
+                            ? "این طرح فروش اکنون قابل خرید نیست"
+                            : unavailable ? "موجودی این کالا تمام شده است" : "افزودن به سبد خرید";
                         button.classList.toggle("is-out-of-stock", unavailable);
-                        button.innerHTML = `<i class="bi ${unavailable ? "bi-bag-x" : "bi-bag-plus"}" aria-hidden="true"></i> ${unavailable ? "ناموجود" : "افزودن به سبد خرید"}`;
+                        button.innerHTML = `<i class="bi ${unavailable ? "bi-bag-x" : "bi-bag-plus"}" aria-hidden="true"></i> ${offerUnavailable ? "طرح غیرفعال" : unavailable ? "ناموجود" : "افزودن به سبد خرید"}`;
                     });
             };
             productView.querySelectorAll('a[href^="Product?id="]').forEach((link) => {
@@ -1739,8 +1759,10 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                     }),
                 );
             const addProductToCart = async (button) => {
+                const productStatus = productView.querySelector("#productStatus");
+                ui.setMessage(productStatus, "");
                 if (inventoryVariants.length && !selectedInventoryVariant()) {
-                    const status = productView.querySelector("#productStatus");
+                    const status = productStatus;
                     ui.setMessage(status, isInventorySelectionComplete() ? "این ترکیب موجودی تعریف نشده است؛ ترکیب دیگری انتخاب کنید." : "لطفاً تنوع موجودی کالا را انتخاب کنید.", "warning");
                     productView.querySelector(".product-inventory-variant-options")?.scrollIntoView({ behavior: "smooth", block: "center" });
                     productView.querySelector(".product-inventory-variant-options [data-inventory-value]")?.focus();
@@ -1782,16 +1804,26 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                 const selectedAccessoryItems = (p.accessories || []).filter((item) =>
                     selectedAccessories.has(item.id),
                 );
-                const quoteResponse = await window.HNUI.api.request("store/sales-plans/quote", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ productId: p.id, salesPlanId: selectedSalesPlanId, quantity: 1, variantId: selectedInventoryVariant()?.variantId ?? null, priceOptions: selectedVariants, accessoryIds: [...selectedAccessories] }),
-                });
-                if (!quoteResponse.ok) {
-                    ui.setMessage(productView.querySelector("#productStatus"), "این طرح فروش اکنون در دسترس نیست؛ صفحه را تازه کنید یا محصول را از مسیر فروش عادی باز کنید.", "warning");
+                let quote;
+                try {
+                    const quoteResponse = await window.HNUI.api.request("store/sales-plans/quote", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ productId: p.id, salesPlanId: selectedSalesPlanId, quantity: 1, variantId: selectedInventoryVariant()?.variantId ?? null, priceOptions: selectedVariants, accessoryIds: [...selectedAccessories] }),
+                    });
+                    quote = await quoteResponse.json().catch(() => ({}));
+                    if (!quoteResponse.ok) {
+                        ui.setMessage(productView.querySelector("#productStatus"), `افزودن به سبد انجام نشد: ${purchaseErrorText(quote.code)}`, "error");
+                        return;
+                    }
+                } catch {
+                    ui.setMessage(productView.querySelector("#productStatus"), "افزودن به سبد انجام نشد؛ ارتباط با فروشگاه برقرار نشد. اتصال را بررسی و دوباره تلاش کنید.", "error");
                     return;
                 }
-                const quote = await quoteResponse.json();
+                if (Number(quote.productId) !== Number(p.id) || quote.salesPlanId !== selectedSalesPlanId || !Number.isFinite(Number(quote.unitAmount))) {
+                    ui.setMessage(productView.querySelector("#productStatus"), "افزودن به سبد انجام نشد؛ قیمت معتبر از فروشگاه دریافت نشد. صفحه را تازه کنید.", "error");
+                    return;
+                }
                 ui.cart.add(
                     {
                         ...p,
@@ -1879,7 +1911,10 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
         const signature = JSON.stringify(ui.cart.read());
         try {
             const save = await ui.api.request("account/cart", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(cartApiPayload(ui.cart.read())) });
-            if (!save.ok) throw new Error("ذخیرهٔ سبد برای بررسی کد تخفیف انجام نشد.");
+            if (!save.ok) {
+                const result = await save.json().catch(() => ({}));
+                throw new Error(`بررسی کد تخفیف متوقف شد: ${purchaseErrorText(result.code)}`);
+            }
             const response = await ui.api.request("account/coupon/quote", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code: requestedCode }) });
             const result = await response.json().catch(() => ({}));
             if (!response.ok) throw new Error(couponErrorText(result.code));
@@ -1892,7 +1927,9 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
             if (requestedCode === couponCode) {
                 couponQuote = null;
                 couponError = true;
-                couponMessage = error.message || couponErrorText();
+            couponMessage = error.message && !["Failed to fetch", "NetworkError when attempting to fetch resource."].includes(error.message)
+                    ? error.message
+                    : "بررسی کد تخفیف انجام نشد؛ ارتباط با فروشگاه برقرار نشد. اتصال را بررسی و دوباره تلاش کنید.";
             }
         } finally {
             couponRequestPending = false;
@@ -1917,7 +1954,15 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                 const item = items[index];
                 row.querySelector(".cart-quantity-value").textContent = fa(item.quantity);
                 row.querySelector("[data-minus]").disabled = item.quantity <= 1;
-                row.querySelector("[data-plus]").disabled = item.quantity >= ui.cart.quantityLimit(item);
+                const plus = row.querySelector("[data-plus]");
+                const quantityLimit = ui.cart.quantityLimit(item);
+                const atLimit = item.quantity >= quantityLimit;
+                const plusLabel = atLimit
+                    ? `افزایش تعداد در دسترس نیست؛ حداکثر ${fa(quantityLimit)} عدد قابل خرید است`
+                    : "افزایش تعداد";
+                plus.disabled = atLimit;
+                plus.setAttribute("aria-label", plusLabel);
+                plus.title = plusLabel;
                 row.querySelector(".cart-product-line-total > strong").textContent = money(item.price * item.quantity);
             });
             const lines = currentView.querySelector(".cart-summary-lines");
@@ -2129,14 +2174,6 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
         else renderCart();
     });
     if (couponCode && ui.auth.isLoggedIn()) void refreshCouponQuote();
-    document.querySelector("#trackingForm")?.addEventListener("submit", (e) => {
-        e.preventDefault();
-        ui.setMessage(
-            document.querySelector("#trackingStatus"),
-            "استعلام آنلاین فعال نیست. برای دریافت وضعیت واقعی سفارش با پشتیبانی 09369455457 تماس بگیرید.",
-            "warning",
-        );
-    });
     function renderFavorites() {
         const view = document.querySelector("#favoritesView");
         if (!view) return;

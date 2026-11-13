@@ -65,6 +65,13 @@ window.HNUI.mount("pages-contact", document, () => {
     return show ? setError(input, message) : !message;
   };
 
+  const showStatus = (message, type) => {
+    if (!status) return;
+    status.hidden = false;
+    status.className = `contact-form-status${type === "error" ? " is-error" : ""}`;
+    ui.setMessage(status, message, type);
+  };
+
   fields.phone.addEventListener("input", () => {
     const value = ui
       .toEnglishDigits(fields.phone.value)
@@ -90,11 +97,7 @@ window.HNUI.mount("pages-contact", document, () => {
       .filter((input) => !validate(input));
     if (invalid.length) {
       if (status) {
-        status.hidden = false;
-        status.className = "contact-form-status is-error";
-        window.HNUI.setMessageType(status, "error");
-        status.innerHTML =
-          '<i class="bi bi-exclamation-circle-fill" aria-hidden="true"></i><span><span>ارسال انجام نشد.</span><span>لطفاً موارد مشخص‌شده را کامل و اصلاح کنید.</span></span>';
+        showStatus("ارسال انجام نشد. موارد مشخص‌شده را کامل و اصلاح کنید.", "error");
       }
       invalid[0].focus();
       invalid[0]
@@ -104,26 +107,35 @@ window.HNUI.mount("pages-contact", document, () => {
     }
     const confirmed = await window.confirmFormSubmission({
       title: "بررسی اطلاعات واردشده",
-      message: "پیام از این فرم ارسال نمی‌شود. اطلاعات واردشده را بررسی کنید یا از راه‌های ارتباطی درج‌شده استفاده کنید.",
-      confirmText: "متوجه شدم",
+      message: "پیام شما در صندوق پشتیبانی ثبت می‌شود. اطلاعات واردشده را بررسی کنید.",
+      confirmText: "ارسال پیام",
     });
     if (!confirmed) return;
     const button = form.querySelector('button[type="submit"]');
     const original = button.innerHTML;
     button.disabled = true;
-    button.innerHTML = '<i class="bi bi-check2"></i> اطلاعات بررسی شد';
-    if (status) {
-      status.hidden = false;
-      status.className = "contact-form-status";
-      window.HNUI.setMessageType(status, "success");
-      status.innerHTML =
-        '<i class="bi bi-info-circle-fill" aria-hidden="true"></i><span><span>پیام از این فرم ارسال نشد.</span><span>برای ارتباط با ما، از شماره تلفن یا ایمیل درج‌شده استفاده کنید.</span></span>';
-    }
-    window.setTimeout(() => {
-      button.innerHTML = original;
-      button.disabled = false;
+    button.textContent = "در حال ارسال…";
+    try {
+      const response = await ui.api.request("store/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: fields.name.value.trim(),
+          phone: ui.toEnglishDigits(fields.phone.value).replace(/\D/g, ""),
+          subject: fields.subject.value,
+          message: fields.message.value.trim(),
+        }),
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.message || "ارسال پیام انجام نشد. دوباره تلاش کنید.");
+      showStatus(result.message || "پیام شما برای پشتیبانی ثبت شد.", "success");
       form.reset();
       rules.forEach(([input]) => setError(input, ""));
-    }, 2200);
+    } catch (error) {
+      showStatus(error.message || "ارتباط با سرویس ارسال پیام برقرار نشد.", "error");
+    } finally {
+      button.innerHTML = original;
+      button.disabled = false;
+    }
   });
 });

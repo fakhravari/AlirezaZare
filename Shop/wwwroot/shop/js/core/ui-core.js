@@ -455,20 +455,36 @@
     const priceOptions = {};
     const accessoryIds = (product.accessories || []).filter((item) => item.required).map((item) => item.id);
     let salesPlanSnapshot = null;
-    if (salesPlanId !== "regular" || inventoryVariants.length || configuredPriceOptions.length || accessoryIds.length) {
+    {
       if (!auth.requireLogin(() => button.click())) return;
       button._cartQuotePending = true;
       button.disabled = true;
+      let failureMessage = "افزودن به سبد انجام نشد؛ ارتباط با فروشگاه را بررسی و دوباره تلاش کنید.";
       try {
         const response = await api.request("store/sales-plans/quote", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ productId: Number(productId), salesPlanId, quantity: 1, variantId: defaultInventoryVariant?.variantId ?? null, priceOptions, accessoryIds }),
         });
-        if (!response.ok) throw new Error("quote unavailable");
-        const quote = await response.json();
-        if (quote.productId !== Number(productId) || quote.salesPlanId !== salesPlanId || !Number.isFinite(Number(quote.unitAmount)))
+        const quote = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          failureMessage = ({
+            "insufficient-stock": "افزودن به سبد انجام نشد: موجودی کافی از این کالا یا تنوع باقی نمانده است.",
+            "inventory-variant-required": "افزودن به سبد انجام نشد: تنوع انبار انتخاب نشده یا در دسترس نیست.",
+            "product-variant-unavailable": "افزودن به سبد انجام نشد: تنوع انتخاب‌شده دیگر قابل فروش نیست.",
+            "purchase-limit": "افزودن به سبد انجام نشد: تعداد از سقف مجاز خرید بیشتر است.",
+            "offer-disabled": "افزودن به سبد انجام نشد: این پیشنهاد فروش غیرفعال است.",
+            "inactive-plan": "افزودن به سبد انجام نشد: مهلت این طرح فروش تمام شده یا هنوز آغاز نشده است.",
+            "product-not-in-plan": "افزودن به سبد انجام نشد: این کالا در طرح انتخاب‌شده عرضه نمی‌شود.",
+            "unknown-plan": "افزودن به سبد انجام نشد: طرح فروش انتخاب‌شده معتبر نیست.",
+            "invalid-product-options": "افزودن به سبد انجام نشد: گزینه‌ها یا متعلقات خرید معتبر نیستند.",
+          })[quote.code] || failureMessage;
+          throw new Error("quote unavailable");
+        }
+        if (quote.productId !== Number(productId) || quote.salesPlanId !== salesPlanId || !Number.isFinite(Number(quote.unitAmount))) {
+          failureMessage = "افزودن به سبد انجام نشد؛ قیمت معتبر از فروشگاه دریافت نشد. صفحه را تازه کنید و دوباره تلاش کنید.";
           throw new Error("invalid quote");
+        }
         salesPlanSnapshot = {
           id: quote.salesPlanId, name: quote.planName, code: quote.salesPlanCode,
           label: button.dataset.salesPlanLabel || null, unitAmount: Number(quote.unitAmount),
@@ -477,7 +493,7 @@
           quotedAtUtc: quote.quotedAtUtc,
         };
       } catch {
-        showToast("افزودن کالا ممکن نشد؛ موجودی یا تنظیمات خرید را بررسی کنید.", "warning");
+        showToast(`«${product.name}»: ${failureMessage}`, "warning");
         return;
       } finally {
         button._cartQuotePending = false;
@@ -494,7 +510,7 @@
       {
         id: productId,
         name: button.dataset.name,
-        price: button.dataset.price,
+        price: salesPlanSnapshot?.unitAmount ?? button.dataset.price,
         image: button.dataset.image,
         salesPlanId,
         variantId: defaultInventoryVariant?.variantId ?? null,

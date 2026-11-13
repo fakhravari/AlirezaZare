@@ -15,6 +15,41 @@
     let salesPlansValid = false;
     let validationAttempt = 0;
     let checkoutPending = false;
+    const purchaseErrorText = (code) => ({
+        "insufficient-stock": "موجودی کافی از این کالا باقی نمانده است؛ تعداد یا تنوع را در سبد اصلاح کنید.",
+        "inventory-variant-required": "برای یکی از کالاها تنوع انبار را انتخاب کنید.",
+        "inventory-variant-or-stock-changed": "موجودی تنوع یکی از کالاها تغییر کرده است؛ سبد را بازبینی کنید.",
+        "product-variant-unavailable": "تنوع انتخاب‌شده دیگر قابل فروش نیست؛ کالا را از سبد حذف و دوباره انتخاب کنید.",
+        "purchase-limit": "تعداد یکی از کالاها از سقف مجاز خرید بیشتر است.",
+        "offer-disabled": "پیشنهاد فروش یکی از کالاها غیرفعال شده است؛ طرح فروش را تغییر دهید.",
+        "inactive-plan": "طرح فروش یکی از کالاها فعال نیست یا مهلتش تمام شده است.",
+        "product-not-in-plan": "یکی از کالاها در طرح انتخاب‌شده عرضه نمی‌شود.",
+        "unknown-plan": "طرح فروش یکی از کالاها معتبر نیست؛ سبد را بازبینی کنید.",
+        "invalid-product-options": "گزینه‌ها یا متعلقات یکی از کالاها معتبر نیست؛ سبد را اصلاح کنید.",
+        "price-or-stock-changed": "قیمت یا موجودی یکی از کالاها تغییر کرده است؛ سبد را بازبینی کنید.",
+        "product-or-plan-unavailable": "یکی از کالاها یا طرح فروش دیگر در دسترس نیست؛ سبد را اصلاح کنید.",
+        "product-unavailable": "یکی از کالاها دیگر در فروشگاه فعال نیست.",
+        "product-options-unavailable": "تنظیمات خرید یکی از کالاها در دسترس نیست؛ بعداً دوباره تلاش کنید.",
+        "invalid-cart": "ساختار سبد معتبر نیست؛ کالاها را حذف و دوباره اضافه کنید.",
+    })[code] || "وضعیت کالا از فروشگاه تأیید نشد؛ سبد را بازبینی و دوباره تلاش کنید.";
+    const checkoutErrorText = (code) => ({
+        ...Object.fromEntries(["insufficient-stock", "inventory-variant-required", "inventory-variant-or-stock-changed", "product-variant-unavailable", "purchase-limit", "offer-disabled", "inactive-plan", "product-not-in-plan", "unknown-plan", "invalid-product-options", "price-or-stock-changed"].map((key) => [key, purchaseErrorText(key)])),
+        "invalid-cart": "ساختار سبد معتبر نیست؛ کالاها را حذف و دوباره اضافه کنید.",
+        "product-or-plan-unavailable": "یکی از کالاها یا طرح فروش دیگر در دسترس نیست؛ سبد را اصلاح کنید.",
+        "account-cart-empty-or-invalid": "سبد حساب خالی یا نامعتبر است؛ صفحهٔ سبد را تازه کنید.",
+        "invalid-account-cart": "اطلاعات سبد حساب معتبر نیست؛ سبد را دوباره ذخیره کنید.",
+        "invalid-account-cart-options": "انتخاب‌های سبد حساب معتبر نیست؛ گزینه‌های کالا را دوباره انتخاب کنید.",
+        "product-unavailable": "یکی از کالاها دیگر در فروشگاه فعال نیست.",
+        "product-options-unavailable": "تنظیمات خرید یکی از کالاها در دسترس نیست؛ بعداً دوباره تلاش کنید.",
+        "invalid-coupon": "کد تخفیف نامعتبر است؛ فقط حروف انگلیسی و عدد وارد کنید.",
+        "coupon-unavailable": "کد تخفیف منقضی، غیرفعال یا ناشناخته است.",
+        "coupon-limit-reached": "ظرفیت استفاده از این کد تخفیف تکمیل شده است.",
+        "coupon-no-eligible-items": "کد تخفیف روی کالاهای فعلی سبد قابل اعمال نیست.",
+        "order-amount-out-of-range": "مبلغ سفارش از سقف مجاز بیشتر است؛ تعداد کالاها را کاهش دهید.",
+        "address-not-owned": "نشانی انتخاب‌شده در حساب شما ثبت نشده است؛ نشانی دیگری انتخاب کنید.",
+        "payment-method-unavailable": "روش پرداخت در حال حاضر در دسترس نیست؛ بعداً دوباره تلاش کنید.",
+        "invalid-checkout": "نشانی یا روش پرداخت معتبر نیست؛ اطلاعات تسویه‌حساب را بازبینی کنید.",
+    })[code] || "ثبت فاکتور انجام نشد؛ اطلاعات سبد، نشانی و شرایط خرید را بررسی کنید.";
     const readAddresses = () => {
         try {
             const value = JSON.parse(ui.storage.get(addressKey, "[]"));
@@ -57,13 +92,15 @@
         salesPlansValid = false;
         syncPayment();
         let valid = false;
+        let validationMessage = "پیش‌فاکتور تأیید نشد؛ ارتباط با فروشگاه را بررسی و دوباره تلاش کنید.";
         try {
             const response = await window.HNUI.api.request("store/sales-plans/validate-cart", {
                 method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ lines }),
             });
             if (attempt !== validationAttempt) return;
+            const result = await response.json().catch(() => ({}));
+            if (!response.ok) validationMessage = `پیش‌فاکتور تأیید نشد: ${purchaseErrorText(result.code)}`;
             if (response.ok) {
-                const result = await response.json();
                 valid = result.valid === true && Array.isArray(result.lines) &&
                     result.lines.length === currentItems.length && result.lines.every((line, index) =>
                         line.productId === Number(currentItems[index].id) &&
@@ -76,7 +113,9 @@
         salesPlansValid = valid;
         syncPayment();
         const message = document.querySelector("#paymentStatus");
-        if (!salesPlansValid && message) ui.setMessage(message, "قیمت یا موجودی یکی از کالاها با اطلاعات فعلی مطابقت ندارد؛ به سبد بازگردید، کالا را از سبد حذف و دوباره از صفحهٔ محصول اضافه کنید.", "warning");
+        if (!salesPlansValid && message) ui.setMessage(message, validationMessage === "پیش‌فاکتور تأیید نشد؛ ارتباط با فروشگاه را بررسی و دوباره تلاش کنید."
+            ? "پیش‌فاکتور تأیید نشد: قیمت، موجودی یا انتخاب‌های یکی از کالاها با اطلاعات فعلی مطابقت ندارد؛ سبد را بازبینی و در صورت نیاز کالا را دوباره اضافه کنید."
+            : validationMessage, "warning");
     };
     if (!Object.hasOwn(paymentMethods, selectedPaymentMethod)) {
         selectedPaymentMethod = "zarinpal";
@@ -360,10 +399,7 @@
                 const saveResponse = await ui.api.request("account/cart", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ items }) });
                 if (!saveResponse.ok) {
                     const saveError = await saveResponse.json().catch(() => ({}));
-                    const stockChanged = ["insufficient-stock", "inventory-variant-required", "offer-disabled", "inactive-plan", "product-not-in-plan", "purchase-limit"].includes(saveError.code);
-                    throw new Error(stockChanged
-                        ? "موجودی یا شرایط فروش یکی از کالاها تغییر کرده است؛ سبد را بازبینی کنید."
-                        : "ذخیرهٔ سبد خرید انجام نشد؛ سبد را دوباره بررسی کنید.");
+                    throw new Error(`ذخیرهٔ سبد برای ثبت فاکتور انجام نشد: ${checkoutErrorText(saveError.code)}`);
                 }
                 const couponCode = String(ui.storage.get("hn-coupon-code", ui.storage.get("hn-demo-coupon", ""))).trim().toUpperCase();
                 const response = await ui.api.request("account/checkout", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ addressId: Number(selected), paymentMethod: selectedPaymentMethod, couponCode: couponCode || null }) });
@@ -373,7 +409,7 @@
                         validationAttempt++;
                         salesPlansValid = false;
                     }
-                    throw new Error(result.code === "price-or-stock-changed" ? "قیمت یا موجودی تغییر کرده است؛ سبد را دوباره بررسی کنید." : result.code === "order-amount-out-of-range" ? "مبلغ سفارش بیش از سقف مجاز است؛ تعداد کالاها را کاهش دهید." : result.code === "coupon-unavailable" ? "کد تخفیف دیگر معتبر یا فعال نیست." : result.code === "coupon-limit-reached" ? "ظرفیت استفاده از کد تخفیف تکمیل شده است." : result.code === "coupon-no-eligible-items" ? "کد تخفیف روی اقلام فعلی سبد قابل اعمال نیست." : "ثبت سفارش انجام نشد. نشانی و سبد خرید را بررسی کنید.");
+                    throw new Error(`ثبت فاکتور انجام نشد: ${checkoutErrorText(result.code)}`);
                 }
                 ui.storage.remove("hn-coupon-code");
                 ui.storage.remove("hn-demo-coupon");
@@ -394,7 +430,10 @@
             } catch (error) {
                 checkoutPending = false;
                 syncPayment();
-                ui.setMessage(document.querySelector("#paymentStatus"), error.message || "ثبت سفارش انجام نشد.", "error");
+                const message = error.message === "Failed to fetch"
+                    ? "ثبت فاکتور انجام نشد؛ ارتباط با فروشگاه برقرار نشد. اتصال را بررسی و دوباره تلاش کنید."
+                    : error.message || "ثبت فاکتور انجام نشد؛ اطلاعات سبد و نشانی را بررسی کنید.";
+                ui.setMessage(document.querySelector("#paymentStatus"), message, "error");
             }
         });
     }

@@ -268,6 +268,31 @@ public sealed class AccountController(
         return Content(json, "application/json; charset=utf-8");
     }
 
+    [HttpGet("messages")]
+    public async Task<IActionResult> Messages(CancellationToken ct)
+    {
+        var items = await db.AccountMessages.AsNoTracking().Where(x => x.IdProfile == ProfileId)
+            .OrderByDescending(x => x.CreatedAtUtc).ThenByDescending(x => x.Id)
+            .Select(x => new { x.Id, x.Title, x.Category, x.Body, unread = !x.IsRead, x.CreatedAtUtc })
+            .ToListAsync(ct);
+        return Ok(items);
+    }
+
+    [HttpPut("messages/{id:long}/read")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> MarkMessageRead(long id, CancellationToken ct)
+    {
+        var item = await db.AccountMessages.SingleOrDefaultAsync(x => x.Id == id && x.IdProfile == ProfileId, ct);
+        if (item is null) return NotFound();
+        if (!item.IsRead)
+        {
+            item.IsRead = true;
+            item.ReadAtUtc = DateTime.UtcNow;
+            await db.SaveChangesAsync(ct);
+        }
+        return Ok(new { message = "پیام خوانده‌شده علامت خورد." });
+    }
+
     private static readonly JsonSerializerOptions AccountStateJsonOptions = new(JsonSerializerDefaults.Web)
     {
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull

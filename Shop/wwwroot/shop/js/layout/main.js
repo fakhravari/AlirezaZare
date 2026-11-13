@@ -1794,14 +1794,40 @@
     ).hide();
   });
 
-  $("#newsletterForm").on("submit", (event) => {
+  $("#newsletterForm").on("submit", async (event) => {
     event.preventDefault();
-    window.HNUI.setMessage(
-      document.querySelector("#formMessage"),
-      "ثبت‌نام خبرنامه هنوز فعال نیست؛ اطلاعاتی ارسال یا ذخیره نشد.",
-      "warning",
-    );
-    $(event.currentTarget).trigger("reset");
+    const form = event.currentTarget;
+    const email = String(form.elements.email?.value || "").trim();
+    const button = form.querySelector('button[type="submit"]');
+    const original = button.innerHTML;
+    button.disabled = true;
+    window.HNUI.setMessage(document.querySelector("#formMessage"), "در حال ثبت…", "info");
+    try {
+      const response = await window.HNUI.api.request("store/newsletter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.message || "ثبت‌نام انجام نشد. دوباره تلاش کنید.");
+      if (result.forAccount) {
+        document.querySelectorAll('input[name="newsletter"]').forEach((input) => { input.checked = true; });
+        const preference = document.querySelector('[data-profile-value="newsletter"]');
+        if (preference) preference.textContent = "بله";
+      }
+      const message = result.forAccount
+        ? "دریافت خبرنامه برای حساب شما فعال شد."
+        : result.alreadySubscribed
+          ? "این ایمیل پیش‌تر در خبرنامه ثبت شده است."
+          : "ایمیل شما در فهرست خبرنامه ثبت شد.";
+      window.HNUI.setMessage(document.querySelector("#formMessage"), message, "success");
+      form.reset();
+    } catch (error) {
+      window.HNUI.setMessage(document.querySelector("#formMessage"), error.message || "ارتباط با سرویس خبرنامه برقرار نشد.", "error");
+    } finally {
+      button.innerHTML = original;
+      button.disabled = false;
+    }
   });
 
   // Rich product discovery: quick view, comparison, finder and tactile previews.
@@ -2170,12 +2196,13 @@
     flyProductToControl(trigger, product, target);
   });
   document.addEventListener("hn:cart-stock-limit", (event) => {
-    const { product, stock, limit, reason } = event.detail || {};
+    const { product, stock, limit, reason, operation } = event.detail || {};
+    const action = operation === "update" ? "تغییر تعداد" : "افزودن کالا";
     const message = reason === "cart" && Number.isFinite(Number(limit))
-      ? `حداکثر تعداد مجاز برای Â«${product?.name || "این کالا"}Â» ${faNumber(Number(limit))} عدد است.`
+      ? `${action} انجام نشد؛ سقف خرید «${product?.name || "این کالا"}» ${faNumber(Number(limit))} عدد است.`
       : product?.name && Number.isFinite(Number(stock))
-        ? `موجودی Â«${product.name}Â» فقط ${faNumber(Number(stock))} عدد است؛ تعداد سبد به سقف موجودی رسید.`
-        : "تعداد درخواستی از سقف مجاز کالا بیشتر بود؛ تعداد سبد به‌روزرسانی شد.";
+        ? `${action} انجام نشد؛ موجودی «${product.name}» ${faNumber(Number(stock))} عدد است.`
+        : `${action} انجام نشد؛ موجودی یا سقف خرید کالا اجازهٔ این تعداد را نمی‌دهد.`;
     showListActionToast(message, "warning");
   });
   });

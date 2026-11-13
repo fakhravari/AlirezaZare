@@ -4,6 +4,7 @@
     var profileSection = Model.Data.Section;
 }
 <script type="application/json" id="accountData">@Html.Raw(JsonSerializer.Serialize(new { schemaVersion = 1, coupons = Model.Data.Coupons }, AccountData.JsonOptions))</script>
+@Html.AntiForgeryToken()
 
 <main class="flow-main container profile-page-main">
 <header class="account-welcome">
@@ -231,7 +232,7 @@
                     <p>اطلاعیه‌ها و پیام‌های ارسال‌شده از طرف مدیر فروشگاه</p>
                 </div>
             </div>
-            <p class="profile-messages-demo-note"><i class="bi bi-info-circle" aria-hidden="true"></i> پیام‌های این فهرست نمونهٔ نمایشی هستند.</p>
+            <p class="profile-messages-demo-note"><i class="bi bi-info-circle" aria-hidden="true"></i> پیام‌های ارسال‌شده از طرف فروشگاه در اینجا نمایش داده می‌شوند.</p>
             <div id="profileMessagesList" class="profile-messages-list" aria-live="polite"></div>
             <div id="profileMessagesPagination" class="orders-pagination profile-messages-pagination" hidden>
                 <p role="status"></p>

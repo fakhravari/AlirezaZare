@@ -22,16 +22,7 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
     let salesPlanData = {};
     try { salesPlanData = JSON.parse(document.querySelector("#storeSalesPlans")?.textContent || "{}"); } catch { salesPlanData = {}; }
     const messagePageSize = 5;
-    const profileMessages = [
-        { title: "به‌روزرسانی ساعات پاسخ‌گویی پشتیبانی", date: "۱۴۰۵/۰۸/۱۴", category: "اطلاعیه", body: "از این پس کارشناسان پشتیبانی همه‌روزه از ساعت ۹ تا ۱۸ پاسخ‌گوی شما هستند.", unread: true },
-        { title: "راهنمای نگهداری ابزار برقی", date: "۱۴۰۵/۰۸/۱۰", category: "راهنمای خرید", body: "برای افزایش عمر ابزار، پس از استفاده گردوغبار را پاک کنید و دستگاه را در محیط خشک نگهداری کنید.", unread: true },
-        { title: "تغییر در شرایط ارسال سفارش‌ها", date: "۱۴۰۵/۰۸/۰۵", category: "اطلاعیه", body: "سفارش‌های ثبت‌شده تا ساعت ۱۲ در روز کاری، طبق روال برای پردازش ارسال می‌شوند.", unread: false },
-        { title: "محصولات تازه به فروشگاه رسیدند", date: "۱۴۰۵/۰۷/۲۸", category: "محصولات", body: "چند مدل تازه از ابزار اندازه‌گیری و تجهیزات ایمنی به فهرست فروشگاه اضافه شده است.", unread: false },
-        { title: "نکته‌هایی برای انتخاب کابل مناسب", date: "۱۴۰۵/۰۷/۲۲", category: "راهنمای خرید", body: "هنگام انتخاب کابل، سطح مقطع را با جریان مصرفی و شرایط نصب متناسب کنید.", unread: false },
-        { title: "اطلاعیهٔ به‌روزرسانی فروشگاه", date: "۱۴۰۵/۰۷/۱۵", category: "اطلاعیه", body: "بخش پیگیری قیمت و موجودی اکنون در پنل کاربری در دسترس شماست.", unread: false },
-        { title: "پیشنهادهای ویژهٔ این ماه", date: "۱۴۰۵/۰۷/۰۸", category: "پیشنهاد", body: "برای مشاهدهٔ پیشنهادهای جاری، صفحهٔ کدهای تخفیف حساب خود را بررسی کنید.", unread: false },
-        { title: "به حساب کاربری خوش آمدید", date: "۱۴۰۵/۰۶/۳۰", category: "حساب کاربری", body: "از پنل پروفایل می‌توانید سفارش‌ها، نشانی‌ها و کالاهای ذخیره‌شده را مدیریت کنید.", unread: false },
-    ];
+    let profileMessages = [];
     const dialog = document.querySelector("#addressDialog"),
         form = document.querySelector("#addressForm");
     const formStatus = document.querySelector("#addressFormStatus");
@@ -488,10 +479,30 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
         const requested = Number(url.searchParams.get("messagePage"));
         const page = Number.isSafeInteger(requested) && requested > 0 ? Math.min(requested, pageCount) : 1;
         const start = (page - 1) * messagePageSize;
-        host.innerHTML = profileMessages.slice(start, start + messagePageSize).map((message) =>
-            `<article class="profile-message-card${message.unread ? " is-unread" : ""}"><span class="profile-message-icon" aria-hidden="true"><i class="bi bi-${message.unread ? "envelope" : "envelope-open"}"></i></span><div class="profile-message-content"><header><span class="profile-message-category">مدیریت فروشگاه · ${esc(message.category)}</span><time>${esc(message.date)}</time></header><h3>${esc(message.title)}${message.unread ? '<span class="profile-message-unread">جدید</span>' : ""}</h3><p>${esc(message.body)}</p></div></article>`,
-        ).join("");
-        summary.textContent = `${ui.formatNumber(start + 1)} تا ${ui.formatNumber(Math.min(start + messagePageSize, profileMessages.length))} از ${ui.formatNumber(profileMessages.length)} پیام`;
+        host.replaceChildren();
+        for (const message of profileMessages.slice(start, start + messagePageSize)) {
+            const card = document.createElement("article");
+            card.className = `profile-message-card${message.unread ? " is-unread" : ""}`;
+            const icon = document.createElement("span"); icon.className = "profile-message-icon"; icon.setAttribute("aria-hidden", "true"); icon.innerHTML = `<i class="bi bi-${message.unread ? "envelope" : "envelope-open"}"></i>`;
+            const content = document.createElement("div"); content.className = "profile-message-content";
+            const header = document.createElement("header"), category = document.createElement("span"), time = document.createElement("time");
+            category.className = "profile-message-category"; category.textContent = `مدیریت فروشگاه · ${({ notice: "اطلاعیه", support: "پشتیبانی", orders: "سفارش", products: "محصولات" })[message.category] || message.category}`;
+            time.textContent = formatPersianDate(message.createdAtUtc); header.append(category, time);
+            const title = document.createElement("h3"); title.textContent = message.title;
+            if (message.unread) { const badge = document.createElement("span"); badge.className = "profile-message-unread"; badge.textContent = "جدید"; title.append(badge); }
+            const body = document.createElement("p"); body.textContent = message.body; content.append(header, title, body);
+            if (message.unread) {
+                const markRead = document.createElement("button"); markRead.type = "button"; markRead.className = "btn btn-sm btn-outline-secondary"; markRead.textContent = "علامت‌گذاری به‌عنوان خوانده‌شده";
+                markRead.addEventListener("click", async () => {
+                    markRead.disabled = true;
+                    try { const response = await ui.api.request(`account/messages/${message.id}/read`, { method: "PUT", headers: { "Content-Type": "application/json", RequestVerificationToken: document.querySelector('[name="__RequestVerificationToken"]')?.value || "" } }); if (!response.ok) throw new Error(); message.unread = false; renderMessages(); }
+                    catch { markRead.disabled = false; ui.showToast("تغییر وضعیت پیام انجام نشد.", "error"); }
+                });
+                content.append(markRead);
+            }
+            card.append(icon, content); host.append(card);
+        }
+        summary.textContent = profileMessages.length ? `${ui.formatNumber(start + 1)} تا ${ui.formatNumber(Math.min(start + messagePageSize, profileMessages.length))} از ${ui.formatNumber(profileMessages.length)} پیام` : "۰ پیام";
         nav.replaceChildren();
         nav.hidden = pageCount <= 1;
         const addButton = (label, target, disabled = false) => {
@@ -524,6 +535,18 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
             heading?.focus({ preventScroll: true });
             heading?.scrollIntoView({ block: "start", behavior: "auto" });
         }
+    }
+    async function loadProfileMessages() {
+        const host = document.querySelector("#profileMessagesList");
+        if (!host) return;
+        try {
+            const response = await ui.api.request("account/messages");
+            if (!response.ok) throw new Error("messages unavailable");
+            profileMessages = await response.json();
+            document.querySelector(".profile-messages-demo-note")?.remove();
+            renderMessages();
+            if (profileMessages.length === 0) host.textContent = "هنوز پیامی از فروشگاه برای شما ثبت نشده است.";
+        } catch { host.textContent = "دریافت پیام‌های حساب انجام نشد؛ دوباره صفحه را بارگذاری کنید."; }
     }
     window.addEventListener("popstate", () => renderMessages());
 
@@ -626,6 +649,6 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
     renderOverview();
     void hydrateAccount();
     renderPriceAlerts();
-    renderMessages();
+    void loadProfileMessages();
     navigate();
 }));

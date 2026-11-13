@@ -55,7 +55,7 @@
             <label class="tracking-field">
                 <span>کد سفارش</span>
                 <span class="tracking-input">
-                    <input required name="order" autocomplete="off" placeholder="مثلاً HN-۱۴۰۵۰۶۲۱"><i class="bi bi-receipt" aria-hidden="true"></i>
+                    <input required name="order" autocomplete="off" maxlength="32" placeholder="مثلاً ND2611131234561234"><i class="bi bi-receipt" aria-hidden="true"></i>
                 </span>
             </label>
             <label class="tracking-field">
@@ -67,7 +67,8 @@
             <button class="flow-button tracking-submit">
                 <span>بررسی وضعیت</span><i class="bi bi-arrow-left" aria-hidden="true"></i>
             </button>
-            <p id="trackingStatus" role="status"></p>
+            <p id="trackingStatus" role="status" aria-live="polite"></p>
+            <section id="trackingResult" class="tracking-result" aria-live="polite" hidden></section>
         </form>
         <aside class="flow-card tracking-card tracking-support-card">
             <span class="tracking-support-orbit" aria-hidden="true"></span>
@@ -83,7 +84,7 @@
                 }
                 else
                 {
-                    <p>این نسخه به سامانه سفارش متصل نیست؛ برای پیگیری، کد سفارش را به پشتیبانی بدهید.</p>
+                    <p>برای نمایش وضعیت، کد سفارش و شمارهٔ همراه ثبت‌شده در نشانی ارسال را وارد کنید. در صورت ثبت‌نشدن اطلاعات ارسال، با پشتیبانی تماس بگیرید.</p>
                 }
                 <ul class="tracking-support-points">
                     <li><i class="bi bi-shield-check" aria-hidden="true"></i> بررسی دقیق وضعیت سفارش</li>
@@ -104,4 +105,5 @@
 
 @section Scripts {
     <script src="~/shop/js/pages/page-content.js" asp-append-version="true"></script>
+    <script src="~/shop/js/pages/tracking.js" asp-append-version="true"></script>
 }

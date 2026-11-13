@@ -10,6 +10,8 @@ route → Controller → source/DbContext → View → page script/style. برا
 
 نمونه نقاط ورود: `MagazineController`, `BrandsController`, `FaqController`, `AboutController`, `ContactController`, `LegalController`, `ShippingController`, `TrackingController`, `WarrantyController` زیر `Shop/Controllers/`.
 
+فرم تماس صفحهٔ `/contact` در `Shop/wwwroot/shop/js/pages/contact.js` به `POST /api/store/contact` وصل است. پس از اعتبارسنجی و محدودسازی درخواست، پیام ابتدا در جدول `Store.ContactFormMessage` ثبت می‌شود و سپس اعلان ایمیلی با `IEmailSender` مشترک به `PublicEmail` تلاش می‌شود. خطای اعلان ایمیلی مانع ثبت پیام یا نمایش موفقیت فرم نمی‌شود؛ صندوق مدیریت و وضعیت‌های پیام در [راهنمای پنل مدیریت](../admin/README.md) توضیح داده شده‌اند. ساخت جدول و مجوزها در `078-contact-message-inbox.sql` است.
+
 [محتوا](README.md) · [فهرست docs](../README.md)
 
 بازبینی routeها: ۱۲ نوامبر ۲۰۲۶.

@@ -24,17 +24,20 @@ public sealed partial class EmailVerificationController(
     {
         var email = NormalizeEmail(request.Email);
         if (!IsValidEmail(email)) return BadRequest(new { code = "invalid-email", message = "ایمیل معتبر نیست." });
-        if (!codes.TryCreate(email, out var code, out var retryAfter))
+        var lifetimeMinutes = await db.StoreSiteIdentities.AsNoTracking()
+            .Where(x => x.Id == 1).Select(x => x.EmailVerificationCodeLifetimeMinutes)
+            .SingleOrDefaultAsync(cancellationToken);
+        if (lifetimeMinutes is < 1 or > 1440) lifetimeMinutes = 15;
+        if (!codes.TryCreate(email, lifetimeMinutes, out var code, out var retryAfter))
             return StatusCode(StatusCodes.Status429TooManyRequests,
                 new
                 {
                     code = "rate-limited",
-                    message = "در ۱۵ دقیقهٔ گذشته برای این ایمیل کد ارسال شده است؛ کد قبلی تا پایان این زمان معتبر است.",
+                    message = $"در {lifetimeMinutes} دقیقهٔ گذشته برای این ایمیل کد ارسال شده است؛ کد قبلی تا پایان این زمان معتبر است.",
                     retryAfterSeconds = Math.Max(1, (int)Math.Ceiling(retryAfter.TotalSeconds))
                 });
         try
         {
-            var lifetimeMinutes = codes.CodeLifetimeMinutes;
             var emailBody = $"کد تأیید شما: {code}\n\nاین کد تا {lifetimeMinutes} دقیقه معتبر است. اگر این درخواست از طرف شما نبوده، این پیام را نادیده بگیرید.";
             await emailSender.SendAsync(email, "کد تأیید فروشگاه برق شیراز", emailBody, cancellationToken);
             return Ok(new { message = $"ایمیل حاوی کد تأیید ارسال شد؛ کد تا {lifetimeMinutes} دقیقه اعتبار دارد و در این مدت ایمیل دیگری ارسال نمی‌شود." });
