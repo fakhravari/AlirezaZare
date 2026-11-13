@@ -1,5 +1,4 @@
 @model PageModel
-@inject IWebHostEnvironment Environment
 
 <header class="page-hero cart-page-hero checkout-page-hero">
     <div class="container">
@@ -32,7 +31,7 @@
 </header>
 
 <main class="flow-main container invoice-page">
-    <div class="flow-grid">
+    <div class="flow-grid" id="checkoutPanel">
         <section class="flow-card">
             <div class="invoice-section-title">
                 <i class="bi bi-geo-alt"></i>
@@ -69,18 +68,28 @@
                 </div>
                 <p>پس از افزودن کالا، جمع قیمت محصولات اینجا نمایش داده می‌شود.</p>
             </div>
-            <p class="cart-shipping-note">هزینه ارسال پس از تأیید فروشگاه مشخص می‌شود.</p><button id="finalPayment" type="button" class="flow-button cart-checkout-link" disabled>ثبت سفارش <i class="bi bi-arrow-left" aria-hidden="true"></i></button>
-            @if (Environment.IsDevelopment())
-            {
-                <p class="invoice-demo-note">پس از ثبت سفارش، درگاه آزمایشی باز می‌شود؛ وجهی دریافت نمی‌شود.</p>
-            }
-            else
-            {
-                <p class="invoice-demo-note">پرداخت آنلاین هنوز فعال نیست و وجهی دریافت نمی‌شود.</p>
-            }
+            <p class="cart-shipping-note">هزینه ارسال پس از تأیید فروشگاه مشخص می‌شود.</p><button id="finalPayment" type="button" class="flow-button cart-checkout-link" disabled>ثبت نهایی و صدور فاکتور <i class="bi bi-arrow-left" aria-hidden="true"></i></button>
+            <p class="invoice-demo-note">با ثبت نهایی، فاکتور در حساب شما ذخیره می‌شود. درگاه پرداخت هنوز فعال نیست و در این مرحله وجهی دریافت نمی‌شود.</p>
             <p id="paymentStatus" role="status"></p>
         </aside>
     </div>
+    <section id="orderConfirmation" class="flow-card" hidden aria-labelledby="orderConfirmationTitle" aria-live="polite">
+        <div class="invoice-section-title">
+            <i class="bi bi-receipt-cutoff" aria-hidden="true"></i>
+            <div>
+                <h2 id="orderConfirmationTitle">فاکتور سفارش ثبت شد</h2>
+                <p>پرداختی انجام نشده است؛ درگاه آنلاین هنوز فعال نیست.</p>
+            </div>
+        </div>
+        <dl class="invoice-confirmation-details">
+            <div><dt>شماره فاکتور</dt><dd><bdi id="confirmedOrderNumber" dir="ltr"></bdi></dd></div>
+            <div><dt>جمع پیش از تخفیف</dt><dd id="confirmedSubtotal"></dd></div>
+            <div id="confirmedCouponRow" hidden><dt>تخفیف <bdi id="confirmedCouponCode" dir="ltr"></bdi></dt><dd id="confirmedDiscount"></dd></div>
+            <div><dt>مبلغ نهایی فاکتور</dt><dd id="confirmedTotal"></dd></div>
+            <div><dt>وضعیت پرداخت</dt><dd>پرداخت‌نشده</dd></div>
+        </dl>
+        <a class="ui-inline-action" href="/Profile/Orders"><i class="bi bi-person-lines-fill" aria-hidden="true"></i><span>مشاهدهٔ فاکتور در سفارش‌های حساب</span></a>
+    </section>
 
 </main>
 
