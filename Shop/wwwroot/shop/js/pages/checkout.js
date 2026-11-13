@@ -349,16 +349,28 @@
             checkoutPending = true;
             payment.disabled = true;
             try {
-                const lines = ui.cart.read().map((item) => ({ productId: Number(String(item.id).replace(/:.*$/, "")), salesPlanId: item.salesPlanId || "regular", quantity: item.quantity, variantId: item.variantId || null, options: item.options || {}, expectedUnitAmount: item.price }));
-                const response = await ui.api.request("account/checkout", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ addressId: Number(selected), paymentMethod: selectedPaymentMethod, lines }) });
+                const items = ui.cart.read().map((item) => ({
+                    productId: Number(String(item.id).replace(/:.*$/, "")),
+                    salesPlanId: item.salesPlanId || "regular",
+                    quantity: item.quantity,
+                    variantId: item.variantId || null,
+                    optionValueIds: (item.options?.priceOptions || []).map((option) => Number(option.id)).filter((id) => Number.isSafeInteger(id) && id > 0),
+                    accessoryIds: (item.options?.accessories || []).filter((accessory) => accessory.selected !== false).map((accessory) => Number(accessory.productAccessoryId)).filter((id) => Number.isSafeInteger(id) && id > 0),
+                }));
+                const saveResponse = await ui.api.request("account/cart", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ items }) });
+                if (!saveResponse.ok) throw new Error("ذخیرهٔ سبد خرید انجام نشد؛ سبد را دوباره بررسی کنید.");
+                const couponCode = String(ui.storage.get("hn-coupon-code", ui.storage.get("hn-demo-coupon", ""))).trim().toUpperCase();
+                const response = await ui.api.request("account/checkout", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ addressId: Number(selected), paymentMethod: selectedPaymentMethod, couponCode: couponCode || null }) });
                 const result = await response.json().catch(() => ({}));
                 if (!response.ok) {
                     if (result.code === "price-or-stock-changed") {
                         validationAttempt++;
                         salesPlansValid = false;
                     }
-                    throw new Error(result.code === "price-or-stock-changed" ? "قیمت یا موجودی تغییر کرده است؛ سبد را دوباره بررسی کنید." : result.code === "order-amount-out-of-range" ? "مبلغ سفارش بیش از سقف مجاز است؛ تعداد کالاها را کاهش دهید." : "ثبت سفارش انجام نشد. نشانی و سبد خرید را بررسی کنید.");
+                    throw new Error(result.code === "price-or-stock-changed" ? "قیمت یا موجودی تغییر کرده است؛ سبد را دوباره بررسی کنید." : result.code === "order-amount-out-of-range" ? "مبلغ سفارش بیش از سقف مجاز است؛ تعداد کالاها را کاهش دهید." : result.code === "coupon-unavailable" ? "کد تخفیف دیگر معتبر یا فعال نیست." : result.code === "coupon-limit-reached" ? "ظرفیت استفاده از کد تخفیف تکمیل شده است." : result.code === "coupon-no-eligible-items" ? "کد تخفیف روی اقلام فعلی سبد قابل اعمال نیست." : "ثبت سفارش انجام نشد. نشانی و سبد خرید را بررسی کنید.");
                 }
+                ui.storage.remove("hn-coupon-code");
+                ui.storage.remove("hn-demo-coupon");
                 ui.cart.write([]);
                 ui.setMessage(document.querySelector("#paymentStatus"), `سفارش ${result.number} ثبت شد و در انتظار پرداخت است. مبلغ: ${ui.formatNumber(result.totalAmount)} تومان`, "success");
                 payment.textContent = `سفارش ${result.number} ثبت شد`;

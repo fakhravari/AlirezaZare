@@ -135,6 +135,9 @@ public sealed class StoreCustomerOrderReference
     public string OrderNumber { get; set; } = string.Empty;
     public string Status { get; set; } = string.Empty;
     public decimal TotalAmount { get; set; }
+    public decimal SubtotalAmount { get; set; }
+    public long? IdCoupon { get; set; }
+    public decimal CouponDiscountAmount { get; set; }
     public long? IdAddress { get; set; }
     public string PaymentMethod { get; set; } = "";
     public long IdBank { get; set; }
@@ -236,4 +239,10 @@ public sealed class AccountCoupon
     public int UsageLimit { get; set; }
     public bool Enabled { get; set; }
     public DateOnly ExpiresOn { get; set; }
+}
+
+public sealed class StoreCouponUsage
+{
+    public long IdCoupon { get; set; }
+    public long IdCustomerOrder { get; set; }
 }

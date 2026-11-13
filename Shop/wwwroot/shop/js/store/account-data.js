@@ -15,15 +15,8 @@
         }
         return value;
     };
-    const commerce = read("commerceData");
     const account = read("accountData");
-    const offers = commerce?.currency === "IRT" && commerce.couponOffers &&
-        typeof commerce.couponOffers === "object" && !Array.isArray(commerce.couponOffers)
-        ? Object.fromEntries(Object.entries(commerce.couponOffers).filter(([code, percent]) =>
-            /^[A-Z0-9]+$/.test(code) && Number.isInteger(percent) && percent > 0 && percent < 100))
-        : {};
     window.HNAccountData = freeze({
-        couponOffers: offers,
         coupons: Array.isArray(account?.coupons) ? account.coupons : [],
     });
 })();

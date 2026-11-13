@@ -73,8 +73,6 @@ builder.Services.AddScoped<Shop.Services.IProductPurchaseConfigurationSource>(se
 builder.Services.AddScoped<Shop.Services.DatabaseAccountDataSource>();
 builder.Services.AddScoped<Shop.Services.IAccountDataSource>(services =>
     services.GetRequiredService<Shop.Services.DatabaseAccountDataSource>());
-builder.Services.AddScoped<Shop.Services.ICommerceOfferSource>(services =>
-    services.GetRequiredService<Shop.Services.DatabaseAccountDataSource>());
 var persianHtmlEncoderSettings = new TextEncoderSettings(UnicodeRanges.BasicLatin, UnicodeRanges.Arabic);
 persianHtmlEncoderSettings.AllowCharacter('\u200C');
 builder.Services.AddWebEncoders(options => options.TextEncoderSettings = persianHtmlEncoderSettings);

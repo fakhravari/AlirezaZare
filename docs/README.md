@@ -33,6 +33,7 @@
 | پیگیری داده از مرورگر تا DB/API | [منابع داده](architecture/data-sources.md) و [دیتابیس](architecture/database.md) |
 | تغییر قیمت و تاریخچهٔ قیمت | [محصول](store/product.md) و [طرح‌های فروش](store/sales-plans.md) |
 | سبد و مرحلهٔ سفارش | [سبد](store/cart.md) و [پرداخت](store/payment.md) |
+| نمونهٔ گزارش T-SQL سبد | [نمونه‌ها](t-sql/README.md) |
 | ترتیب و مالک CSS/JS | [پوسته](frontend/layout.md)، [CSS](frontend/styling.md)، [JavaScript](frontend/javascript.md) |
 | راه‌اندازی و بررسی | [setup](development/setup.md)، [کیفیت](development/quality.md) |
 

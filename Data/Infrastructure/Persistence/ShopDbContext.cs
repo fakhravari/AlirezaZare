@@ -77,6 +77,7 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
     public DbSet<AccountProfile> AccountProfiles => Set<AccountProfile>();
     public DbSet<AccountGender> AccountGenders => Set<AccountGender>();
     public DbSet<AccountCoupon> AccountCoupons => Set<AccountCoupon>();
+    public DbSet<StoreCouponUsage> StoreCouponUsages => Set<StoreCouponUsage>();
     public DbSet<AccountRecentSearch> AccountRecentSearches => Set<AccountRecentSearch>();
     public DbSet<AccountCart> AccountCarts => Set<AccountCart>();
     public DbSet<AccountCartItem> AccountCartItems => Set<AccountCartItem>();
@@ -503,6 +504,13 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.Property(x => x.CouponKey).HasMaxLength(100).IsRequired(); entity.Property(x => x.Code).HasMaxLength(32).IsRequired();
             entity.HasIndex(x => x.CouponKey).IsUnique(); entity.HasIndex(x => x.Code).IsUnique();
         });
+        modelBuilder.Entity<StoreCouponUsage>(entity =>
+        {
+            entity.ToTable("CouponUsage", "Store");
+            entity.HasKey(x => new { x.IdCoupon, x.IdCustomerOrder });
+            entity.HasOne<AccountCoupon>().WithMany().HasForeignKey(x => x.IdCoupon).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<StoreCustomerOrderReference>().WithMany().HasForeignKey(x => x.IdCustomerOrder).OnDelete(DeleteBehavior.Cascade);
+        });
         modelBuilder.Entity<AccountProfile>(entity =>
         {
             entity.ToTable("Profile", "Account");
@@ -532,6 +540,9 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.Property(x => x.OrderNumber).HasMaxLength(32).IsRequired();
             entity.Property(x => x.Status).HasMaxLength(30).IsRequired();
             entity.Property(x => x.TotalAmount).HasPrecision(19, 0);
+            entity.Property(x => x.SubtotalAmount).HasPrecision(19, 0);
+            entity.Property(x => x.CouponDiscountAmount).HasPrecision(19, 0);
+            entity.HasOne<AccountCoupon>().WithMany().HasForeignKey(x => x.IdCoupon).OnDelete(DeleteBehavior.Restrict);
             entity.Property(x => x.PaymentMethod).HasMaxLength(40).IsRequired();
             entity.HasOne(x => x.Bank).WithMany().HasForeignKey(x => x.IdBank).IsRequired().OnDelete(DeleteBehavior.Restrict);
             entity.Property(x => x.ExternalOrderKey).HasMaxLength(100);

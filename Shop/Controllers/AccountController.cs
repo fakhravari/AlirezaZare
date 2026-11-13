@@ -119,9 +119,16 @@ public sealed class AccountController(
             .Select(x => new
             {
                 x.Id, x.OrderNumber, x.Status, x.ShippingCarrier, ShippingTrackingCode = x.ShippingTrackingCode,
-                x.PaymentMethod, x.ExternalOrderKey, x.OrderedAtUtc, x.ItemCount, x.TotalAmount
+                x.PaymentMethod, x.ExternalOrderKey, x.OrderedAtUtc, x.ItemCount, x.TotalAmount,
+                x.SubtotalAmount, x.IdCoupon, x.CouponDiscountAmount
             })
             .ToListAsync(ct);
+        long[] usedCouponIds = orderRows.Where(order => order.IdCoupon.HasValue)
+            .Select(order => order.IdCoupon!.Value).Distinct().ToArray();
+        var couponCodesById = usedCouponIds.Length == 0
+            ? new Dictionary<long, string>()
+            : await db.AccountCoupons.AsNoTracking().Where(coupon => usedCouponIds.Contains(coupon.Id))
+                .ToDictionaryAsync(coupon => coupon.Id, coupon => coupon.Code, ct);
         var orderIds = orderRows.Select(x => x.Id).ToArray();
         var orderItemRows = orderIds.Length == 0
             ? []
@@ -233,6 +240,9 @@ public sealed class AccountController(
                 orderedAtUtc = AsUtc(order.OrderedAtUtc),
                 order.ItemCount,
                 order.TotalAmount,
+                order.SubtotalAmount,
+                couponCode = order.IdCoupon is { } couponId ? couponCodesById.GetValueOrDefault(couponId) : null,
+                order.CouponDiscountAmount,
                 items = orderItemsById.GetValueOrDefault(order.Id, []).Select(item => new
                 {
                     productId = item.IdProduct,
@@ -419,8 +429,9 @@ public sealed class AccountController(
             if (cartOffer is null || selectedAccessories.Length != accessoryIds.Length ||
                 productAccessories.Any(accessory => accessory.IsRequired && !accessoryIds.Contains(accessory.Id)) ||
                 selectedAccessories.Any(accessory => cartOffer.AccessoryIds is { } allowed &&
-                    !allowed.Contains(accessory.AccessoryKey, StringComparer.Ordinal)))
+                    !allowed.Contains(accessory.AccessoryKey, StringComparer.Ordinal)) || item.Quantity > configuration.MaxPurchaseQuantity)
                 return Conflict(new { code = "invalid-product-options" });
+
         }
 
         long[] productIds = request.Items.Select(x => x.ProductId).Distinct().ToArray();
@@ -513,25 +524,159 @@ public sealed class AccountController(
         return Ok(new { saved = true });
     }
 
+    [HttpPost("coupon/quote")]
+    public async Task<IActionResult> QuoteCoupon([FromBody] CouponRequest request, CancellationToken ct)
+    {
+        string code = NormalizeCouponCode(request.Code);
+        if (code.Length is < 1 or > 32 || code.Any(character => !char.IsAsciiLetterOrDigit(character)))
+            return BadRequest(new { code = "invalid-coupon" });
+
+        var coupon = await db.AccountCoupons.AsNoTracking()
+            .SingleOrDefaultAsync(item => item.Code == code, ct);
+        if (coupon is null || !coupon.Enabled || coupon.ExpiresOn < DateOnly.FromDateTime(DateTime.UtcNow))
+            return NotFound(new { code = "coupon-unavailable" });
+
+        int uses = await db.StoreCouponUsages.CountAsync(item => item.IdCoupon == coupon.Id, ct);
+        if (uses >= coupon.UsageLimit)
+            return Conflict(new { code = "coupon-limit-reached" });
+
+        var storedRows = await (
+            from cart in db.AccountCarts.AsNoTracking()
+            join item in db.AccountCartItems.AsNoTracking() on cart.Id equals item.IdCart
+            join plan in db.SalesPlanReferences.AsNoTracking() on item.IdSalesPlan equals plan.Id
+            where cart.IdProfile == ProfileId
+            select new { item.Id, item.IdProduct, item.IdProductVariant, item.Quantity, SalesPlanId = plan.StoreSalesPlanKey }
+        ).ToListAsync(ct);
+        if (storedRows.Count == 0) return Conflict(new { code = "coupon-cart-empty" });
+
+        var catalog = await plans.ReadAsync(ct);
+        decimal eligibleAmount = 0;
+        decimal subtotalAmount = 0;
+        DateTimeOffset now = DateTimeOffset.UtcNow;
+        foreach (var row in storedRows)
+        {
+            SalesPlanQuote quote;
+            try { quote = catalog.Quote(checked((int)row.IdProduct), row.SalesPlanId, row.Quantity, now); }
+            catch (SalesPlanUnavailableException) { return Conflict(new { code = "price-or-stock-changed" }); }
+            bool eligible = row.SalesPlanId == "regular" && quote.DiscountPercent <= 0;
+            decimal unitAmount = quote.UnitAmount;
+            ProductInventoryVariant? inventoryVariant = catalog.InventoryVariants.SingleOrDefault(variant =>
+                variant.ProductId == row.IdProduct && variant.VariantId == row.IdProductVariant);
+            if (inventoryVariant is not null && inventoryVariant.PriceBySalesPlan.TryGetValue(row.SalesPlanId, out decimal variantPrice))
+            {
+                decimal variantDiscount = inventoryVariant.DiscountBySalesPlan.GetValueOrDefault(row.SalesPlanId);
+                if (variantDiscount > 0) eligible = false;
+                unitAmount = decimal.Round(variantPrice * (100m - variantDiscount) / 100m, 0,
+                    MidpointRounding.AwayFromZero);
+            }
+
+            ProductPurchaseConfiguration? configuration =
+                await purchaseConfigurations.ReadAsync(checked((int)row.IdProduct), ct);
+            if (configuration is null) return Conflict(new { code = "product-options-unavailable" });
+
+            long[] selectedValueIds = await db.AccountCartItemPurchaseOptionValues.AsNoTracking()
+                .Where(selected => selected.IdCartItem == row.Id)
+                .Select(selected => selected.IdProductPurchaseOptionValue).ToArrayAsync(ct);
+            if (selectedValueIds.Length != configuration.Options.Count) return Conflict(new { code = "invalid-product-options" });
+            foreach (var option in configuration.Options)
+            {
+                var value = option.Values.SingleOrDefault(candidate => selectedValueIds.Contains(candidate.Id));
+                if (value is null) return Conflict(new { code = "invalid-product-options" });
+                unitAmount += value.PriceDelta;
+            }
+
+            string[] selectedAccessoryKeys = await (
+                from selected in db.AccountCartItemAccessories.AsNoTracking()
+                join link in db.StoreProductAccessories.AsNoTracking() on selected.IdProductAccessory equals link.Id
+                join accessory in db.StoreAccessories.AsNoTracking() on link.IdAccessory equals accessory.Id
+                where selected.IdCartItem == row.Id
+                select accessory.AccessoryKey
+            ).ToArrayAsync(ct);
+            var offer = catalog.Offers.SingleOrDefault(candidate =>
+                candidate.ProductId == row.IdProduct && candidate.SalesPlanId == row.SalesPlanId);
+            if (offer is null) return Conflict(new { code = "price-or-stock-changed" });
+            foreach (var accessory in configuration.Accessories)
+                if (accessory.IsRequired || selectedAccessoryKeys.Contains(accessory.Key, StringComparer.Ordinal))
+                {
+                    if (!offer.AccessoryPriceAmounts.TryGetValue(accessory.Key, out decimal amount))
+                        return Conflict(new { code = "invalid-product-options" });
+                    unitAmount += amount;
+                }
+            decimal lineAmount = checked(unitAmount * row.Quantity);
+            subtotalAmount += lineAmount;
+            if (eligible) eligibleAmount += lineAmount;
+        }
+
+        if (eligibleAmount <= 0) return Conflict(new { code = "coupon-no-eligible-items" });
+        decimal discountAmount = decimal.Floor(eligibleAmount * coupon.DiscountPercent / 100m);
+        return Ok(new
+        {
+            code = coupon.Code,
+            discountPercent = coupon.DiscountPercent,
+            subtotalAmount,
+            eligibleAmount,
+            discountAmount,
+            totalAfterDiscount = Math.Max(0, subtotalAmount - discountAmount)
+        });
+    }
+
     [HttpPost("checkout")]
     public async Task<IActionResult> Checkout([FromBody] CheckoutRequest request, CancellationToken ct)
     {
-        if (request.Lines is null || request.Lines.Count is < 1 or > 99 || request.AddressId < 1 ||
+        if (request.AddressId < 1 ||
             request.PaymentMethod != "zarinpal") return BadRequest(new { code = "invalid-checkout" });
-        if (request.Lines.Any(i =>
-                i is null || i.ProductId is < 1 or > int.MaxValue || i.VariantId is < 1 || i.Quantity is < 1 or > 99 ||
-                string.IsNullOrWhiteSpace(i.SalesPlanId) || i.ExpectedUnitAmount is null or < 0 or > 9999999999999999999m ||
-                decimal.Truncate(i.ExpectedUnitAmount.Value) != i.ExpectedUnitAmount.Value) ||
-            request.Lines.Select(i => (i.ProductId, i.SalesPlanId, i.VariantId)).Distinct().Count() !=
-            request.Lines.Count) return BadRequest(new { code = "invalid-cart" });
-        var checkoutOptions = new List<CheckoutOptions>(request.Lines.Count);
-        foreach (var line in request.Lines)
-        {
-            if (!CheckoutOptions.TryRead(line.Options, out var parsed)) return BadRequest(new { code = "invalid-product-options" });
-            checkoutOptions.Add(parsed);
-        }
         await using var transaction =
             await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, ct);
+        var storedCartRows = await (
+            from cart in db.AccountCarts.AsNoTracking()
+            join item in db.AccountCartItems.AsNoTracking() on cart.Id equals item.IdCart
+            join plan in db.SalesPlanReferences.AsNoTracking() on item.IdSalesPlan equals plan.Id
+            where cart.IdProfile == ProfileId
+            orderby item.Id
+            select new
+            {
+                item.Id, item.IdProduct, item.IdProductVariant, item.Quantity,
+                SalesPlanId = plan.StoreSalesPlanKey
+            }).ToListAsync(ct);
+        if (storedCartRows.Count is < 1 or > 99)
+            return Conflict(new { code = "account-cart-empty-or-invalid" });
+        long[] storedCartItemIds = storedCartRows.Select(item => item.Id).ToArray();
+        var storedOptionRows = await (
+            from selected in db.AccountCartItemPurchaseOptionValues.AsNoTracking()
+            join value in db.StoreProductPurchaseOptionValues.AsNoTracking() on selected.IdProductPurchaseOptionValue equals value.Id
+            join option in db.StoreProductPurchaseOptions.AsNoTracking() on value.IdProductPurchaseOption equals option.Id
+            where storedCartItemIds.Contains(selected.IdCartItem)
+            select new { selected.IdCartItem, option.OptionKey, ValueKey = value.ValueKey }).ToListAsync(ct);
+        var storedAccessoryRows = await (
+            from selected in db.AccountCartItemAccessories.AsNoTracking()
+            join link in db.StoreProductAccessories.AsNoTracking() on selected.IdProductAccessory equals link.Id
+            join accessory in db.StoreAccessories.AsNoTracking() on link.IdAccessory equals accessory.Id
+            where storedCartItemIds.Contains(selected.IdCartItem)
+            select new { selected.IdCartItem, AccessoryKey = accessory.AccessoryKey }).ToListAsync(ct);
+        var cartLines = storedCartRows.Select(item =>
+        {
+            var selections = new
+            {
+                priceOptions = storedOptionRows.Where(option => option.IdCartItem == item.Id)
+                    .Select(option => new { key = option.OptionKey, productValue = option.ValueKey }).ToArray(),
+                accessories = storedAccessoryRows.Where(accessory => accessory.IdCartItem == item.Id)
+                    .Select(accessory => new { id = accessory.AccessoryKey, selected = true }).ToArray()
+            };
+            JsonElement options = JsonSerializer.SerializeToElement(selections, AccountStateJsonOptions);
+            return new CartLineRequest(item.IdProduct, item.Quantity, item.SalesPlanId, options,
+                item.IdProductVariant);
+        }).ToList();
+        if (cartLines.Any(item => item.ProductId is < 1 or > int.MaxValue || item.VariantId is < 1 ||
+                item.Quantity is < 1 or > 99 || string.IsNullOrWhiteSpace(item.SalesPlanId)) ||
+            cartLines.Select(item => (item.ProductId, item.SalesPlanId, item.VariantId)).Distinct().Count() != cartLines.Count)
+            return Conflict(new { code = "invalid-account-cart" });
+        var checkoutOptions = new List<CheckoutOptions>(cartLines.Count);
+        foreach (var line in cartLines)
+        {
+            if (!CheckoutOptions.TryRead(line.Options, out var parsed))
+                return Conflict(new { code = "invalid-account-cart-options" });
+            checkoutOptions.Add(parsed);
+        }
         var address = await (
             from addressRow in db.AccountAddresses.AsNoTracking()
             join country in db.GeoCountries.AsNoTracking() on addressRow.IdCountry equals country.Id
@@ -549,10 +694,10 @@ public sealed class AccountController(
         string addressSnapshot = JsonSerializer.Serialize(address, AccountStateJsonOptions);
         var catalog = await plans.ReadAsync(ct);
         var now = DateTimeOffset.UtcNow;
-        var priced = new List<(CartLineRequest Line, decimal UnitAmount, string ProductName, List<StoreOrderItemPriceReference> PriceReferences)>();
+        var priced = new List<(CartLineRequest Line, decimal UnitAmount, string ProductName, List<StoreOrderItemPriceReference> PriceReferences, bool CouponEligible)>();
         try
         {
-            foreach (var (line, parsedOptions) in request.Lines.Zip(checkoutOptions))
+            foreach (var (line, parsedOptions) in cartLines.Zip(checkoutOptions))
             {
                 if (line.VariantId.HasValue &&
                     !await ProductVariantExistsAsync(line.ProductId, line.VariantId.Value, ct))
@@ -608,6 +753,9 @@ public sealed class AccountController(
                     unitAmount = decimal.Round(variantPrice * (100m - variantDiscount) / 100m, 0,
                         MidpointRounding.AwayFromZero);
                 }
+                bool couponEligible = line.SalesPlanId == "regular" && quote.DiscountPercent == 0 &&
+                    (selectedInventoryVariant is null ||
+                     selectedInventoryVariant.DiscountBySalesPlan.GetValueOrDefault(line.SalesPlanId) <= 0);
                 long basePriceVersionId = selectedInventoryVariant?.PriceVersionIdsBySalesPlan.GetValueOrDefault(line.SalesPlanId) ?? 0;
                 if (basePriceVersionId == 0) basePriceVersionId = offer.PriceVersionId;
                 if (basePriceVersionId > 0)
@@ -632,9 +780,7 @@ public sealed class AccountController(
                             priceReferences.Add(new StoreOrderItemPriceReference { IdPriceVersion = accessoryPriceId });
                     }
 
-                if (unitAmount != line.ExpectedUnitAmount)
-                    return Conflict(new { code = "price-or-stock-changed" });
-                priced.Add((line, unitAmount, productName, priceReferences));
+                priced.Add((line, unitAmount, productName, priceReferences, couponEligible));
             }
         }
         catch (SalesPlanUnavailableException)
@@ -642,7 +788,27 @@ public sealed class AccountController(
             return Conflict(new { code = "price-or-stock-changed" });
         }
 
-        decimal total = priced.Sum(x => checked(x.UnitAmount * x.Line.Quantity));
+        decimal subtotal = priced.Sum(x => checked(x.UnitAmount * x.Line.Quantity));
+        Shop.Data.Domain.Account.Entities.AccountCoupon? appliedCoupon = null;
+        decimal couponDiscountAmount = 0;
+        if (!string.IsNullOrWhiteSpace(request.CouponCode))
+        {
+            string couponCode = NormalizeCouponCode(request.CouponCode);
+            if (couponCode.Length is < 1 or > 32 || couponCode.Any(character => !char.IsAsciiLetterOrDigit(character)))
+                return BadRequest(new { code = "invalid-coupon" });
+            appliedCoupon = await db.AccountCoupons.SingleOrDefaultAsync(item => item.Code == couponCode, ct);
+            if (appliedCoupon is null || !appliedCoupon.Enabled ||
+                appliedCoupon.ExpiresOn < DateOnly.FromDateTime(DateTime.UtcNow))
+                return Conflict(new { code = "coupon-unavailable" });
+            int couponUses = await db.StoreCouponUsages.CountAsync(item => item.IdCoupon == appliedCoupon.Id, ct);
+            if (couponUses >= appliedCoupon.UsageLimit)
+                return Conflict(new { code = "coupon-limit-reached" });
+            decimal eligibleAmount = priced.Where(item => item.CouponEligible)
+                .Sum(item => checked(item.UnitAmount * item.Line.Quantity));
+            if (eligibleAmount <= 0) return Conflict(new { code = "coupon-no-eligible-items" });
+            couponDiscountAmount = decimal.Floor(eligibleAmount * appliedCoupon.DiscountPercent / 100m);
+        }
+        decimal total = subtotal - couponDiscountAmount;
         if (total > 9999999999999999999m)
             return Conflict(new { code = "order-amount-out-of-range" });
         int count = priced.Sum(x => x.Line.Quantity);
@@ -669,6 +835,9 @@ public sealed class AccountController(
             IdBank = paymentBank.Id,
             ItemCount = count,
             TotalAmount = total,
+            SubtotalAmount = subtotal,
+            IdCoupon = appliedCoupon?.Id,
+            CouponDiscountAmount = couponDiscountAmount,
             AddressSnapshotJson = addressSnapshot,
             OrderedAtUtc = DateTime.UtcNow,
             Items = priced.Select(item => new StoreCustomerOrderItem
@@ -690,10 +859,21 @@ public sealed class AccountController(
                 cart.Id == item.IdCart && cart.IdProfile == ProfileId))
             .ExecuteDeleteAsync(ct);
         await db.SaveChangesAsync(ct);
+        if (appliedCoupon is not null)
+        {
+            db.StoreCouponUsages.Add(new StoreCouponUsage
+            {
+                IdCoupon = appliedCoupon.Id,
+                IdCustomerOrder = order.Id
+            });
+            await db.SaveChangesAsync(ct);
+        }
         await transaction.CommitAsync(ct);
         return Ok(new
         {
             id = order.Id, number, status = "pending-payment", itemCount = count, totalAmount = total,
+            subtotalAmount = subtotal, couponCode = appliedCoupon?.Code,
+            couponDiscountAmount,
             orderedAtUtc = DateTimeOffset.UtcNow, message = "سفارش ثبت شد و در انتظار پرداخت است.",
             simulatedPaymentUrl = environment.IsDevelopment() ? Url.Action("Index", "SimulatedPayment", new { id = order.Id }) : null
         });
@@ -705,6 +885,8 @@ public sealed class AccountController(
             variant.Id == variantId && variant.IdProduct == productId && variant.IsActive &&
             variant.Product.IsWarehouseEnabled && variant.Product.IsCatalogActive &&
             variant.Product.IsStoreEnabled, cancellationToken);
+
+    private static string NormalizeCouponCode(string? code) => (code ?? string.Empty).Trim().ToUpperInvariant();
 
     private async Task SetCheckoutPreferenceAsync(long? addressId, string paymentMethod, CancellationToken ct)
     {
@@ -955,11 +1137,12 @@ public sealed class AccountController(
         string SalesPlanId,
         System.Text.Json.JsonElement? Options,
         long? VariantId = null,
-        decimal? ExpectedUnitAmount = null,
         IReadOnlyList<long>? OptionValueIds = null,
         IReadOnlyList<long>? AccessoryIds = null);
 
-    public sealed record CheckoutRequest(long AddressId, string PaymentMethod, IReadOnlyList<CartLineRequest>? Lines);
+    public sealed record CheckoutRequest(long AddressId, string PaymentMethod, string? CouponCode = null);
+
+    public sealed record CouponRequest(string? Code);
 
     public sealed record CheckoutPreferenceRequest(long? AddressId, string PaymentMethod);
 

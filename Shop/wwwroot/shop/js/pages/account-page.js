@@ -585,6 +585,13 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
             invoiceDialog.querySelector("[data-invoice-amount]").textContent = formatToman(order.dataset.orderAmount);
             invoiceDialog.querySelector("[data-invoice-total]").textContent = formatToman(order.dataset.orderAmount);
             const details = order._orderDetails || {};
+            invoiceDialog.querySelector("[data-invoice-subtotal]").textContent = formatToman(details.subtotalAmount ?? details.totalAmount);
+            const couponRow = invoiceDialog.querySelector("[data-invoice-coupon-row]");
+            if (couponRow) {
+                couponRow.hidden = !(details.couponCode && Number(details.couponDiscountAmount) > 0);
+                invoiceDialog.querySelector("[data-invoice-coupon-code]").textContent = details.couponCode || "";
+                invoiceDialog.querySelector("[data-invoice-discount]").textContent = `− ${formatToman(details.couponDiscountAmount)}`;
+            }
             const lines = invoiceDialog.querySelector("[data-invoice-lines]");
             lines?.replaceChildren();
             for (const item of details.items || []) {
