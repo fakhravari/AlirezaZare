@@ -27,12 +27,14 @@ public sealed partial class EmailVerificationController(
             return StatusCode(StatusCodes.Status429TooManyRequests,
                 new
                 {
-                    code = "rate-limited", retryAfterSeconds = Math.Max(1, (int)Math.Ceiling(retryAfter.TotalSeconds))
+                    code = "rate-limited",
+                    message = "در ۱۵ دقیقهٔ گذشته برای این ایمیل کد ارسال شده است؛ کد قبلی تا پایان این زمان معتبر است.",
+                    retryAfterSeconds = Math.Max(1, (int)Math.Ceiling(retryAfter.TotalSeconds))
                 });
         try
         {
             await emailSender.SendVerificationCodeAsync(email, code, cancellationToken);
-            return Ok(new { message = "کد تأیید ارسال شد و تا ۱۰ دقیقه اعتبار دارد." });
+            return Ok(new { message = "ایمیل حاوی کد تأیید ارسال شد؛ کد تا ۱۵ دقیقه اعتبار دارد و تا پایان این زمان ایمیل دیگری ارسال نمی‌شود." });
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {

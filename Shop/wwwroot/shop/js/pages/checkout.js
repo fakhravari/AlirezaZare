@@ -372,18 +372,19 @@
                 ui.storage.remove("hn-coupon-code");
                 ui.storage.remove("hn-demo-coupon");
                 ui.cart.write([]);
-                ui.setMessage(document.querySelector("#paymentStatus"), `سفارش ${result.number} ثبت شد و در انتظار پرداخت است. مبلغ: ${ui.formatNumber(result.totalAmount)} تومان`, "success");
-                payment.textContent = `سفارش ${result.number} ثبت شد`;
-                if (typeof result.simulatedPaymentUrl === "string" && /^\/payment\/simulated\/\d+$/.test(result.simulatedPaymentUrl)) {
-                    window.location.assign(result.simulatedPaymentUrl);
-                } else {
-                    try {
-                        const redirectUrl = await ui.payment.start(Number(result.id));
-                        window.location.assign(redirectUrl);
-                    } catch (paymentError) {
-                        ui.setMessage(document.querySelector("#paymentStatus"), `سفارش ${result.number} ثبت شد و در انتظار پرداخت است. ${paymentError.message || "درگاه پرداخت در دسترس نیست."}`, "error");
-                    }
-                }
+                const amountText = (amount) => `${ui.formatNumber(Number(amount) || 0)} تومان`;
+                document.querySelector("#confirmedOrderNumber").textContent = result.number || String(result.id || "");
+                document.querySelector("#confirmedSubtotal").textContent = amountText(result.subtotalAmount ?? result.totalAmount);
+                document.querySelector("#confirmedTotal").textContent = amountText(result.totalAmount);
+                const couponDiscount = Number(result.couponDiscountAmount) || 0;
+                const couponRow = document.querySelector("#confirmedCouponRow");
+                couponRow.hidden = !(result.couponCode && couponDiscount > 0);
+                document.querySelector("#confirmedCouponCode").textContent = result.couponCode || "";
+                document.querySelector("#confirmedDiscount").textContent = `− ${amountText(couponDiscount)}`;
+                document.querySelector("#checkoutPanel").hidden = true;
+                document.querySelector("#orderConfirmation").hidden = false;
+                payment.textContent = "فاکتور ثبت شد";
+                document.querySelector("#orderConfirmationTitle").focus?.();
             } catch (error) {
                 checkoutPending = false;
                 syncPayment();

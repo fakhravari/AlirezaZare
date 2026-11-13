@@ -42,6 +42,36 @@
   font-size: 12px;
   line-height: 1.7;
 }
+.invoice-page #orderConfirmation {
+  max-width: 760px;
+  margin: 0 auto;
+  border: 1px solid color-mix(in srgb, var(--industrial-yellow) 24%, white);
+  border-radius: var(--radius-panel-featured, 24px 24px 14px 24px);
+  background: var(--industrial-bg);
+  box-shadow: 0 14px 32px -18px color-mix(in srgb, var(--industrial-navy) 25%, transparent);
+}
+.invoice-confirmation-details {
+  display: grid;
+  gap: 0;
+  margin: 0 0 20px;
+  border-top: 1px solid color-mix(in srgb, var(--industrial-yellow) 18%, white);
+}
+.invoice-confirmation-details > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 2px;
+  border-bottom: 1px solid color-mix(in srgb, var(--industrial-yellow) 18%, white);
+}
+.invoice-confirmation-details dt {
+  color: var(--industrial-steel);
+}
+.invoice-confirmation-details dd {
+  margin: 0;
+  color: var(--industrial-navy);
+  font-weight: 700;
+  text-align: end;
+}
 .cart-address-section {
   width: calc((100% - 28px) * 1.2 / 2.2);
   margin: 20px 0 16px;

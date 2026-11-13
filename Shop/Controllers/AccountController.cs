@@ -560,8 +560,19 @@ public sealed class AccountController(
             catch (SalesPlanUnavailableException) { return Conflict(new { code = "price-or-stock-changed" }); }
             bool eligible = row.SalesPlanId == "regular" && quote.DiscountPercent <= 0;
             decimal unitAmount = quote.UnitAmount;
+            ProductInventoryVariant[] productVariants = catalog.InventoryVariants
+                .Where(variant => variant.ProductId == row.IdProduct).ToArray();
             ProductInventoryVariant? inventoryVariant = catalog.InventoryVariants.SingleOrDefault(variant =>
                 variant.ProductId == row.IdProduct && variant.VariantId == row.IdProductVariant);
+            if (productVariants.Length > 0)
+            {
+                if (inventoryVariant is null ||
+                    !inventoryVariant.StockBySalesPlan.TryGetValue(row.SalesPlanId, out decimal variantStock) ||
+                    variantStock < row.Quantity)
+                    return Conflict(new { code = "inventory-variant-or-stock-changed" });
+            }
+            else if (row.IdProductVariant.HasValue)
+                return Conflict(new { code = "product-variant-unavailable" });
             if (inventoryVariant is not null && inventoryVariant.PriceBySalesPlan.TryGetValue(row.SalesPlanId, out decimal variantPrice))
             {
                 decimal variantDiscount = inventoryVariant.DiscountBySalesPlan.GetValueOrDefault(row.SalesPlanId);
@@ -572,18 +583,26 @@ public sealed class AccountController(
 
             ProductPurchaseConfiguration? configuration =
                 await purchaseConfigurations.ReadAsync(checked((int)row.IdProduct), ct);
-            if (configuration is null) return Conflict(new { code = "product-options-unavailable" });
+            if (configuration is null)
+                return Conflict(new { code = "product-options-unavailable" });
+            if (row.Quantity > configuration.MaxPurchaseQuantity)
+                return Conflict(new { code = "purchase-limit" });
 
             long[] selectedValueIds = await db.AccountCartItemPurchaseOptionValues.AsNoTracking()
                 .Where(selected => selected.IdCartItem == row.Id)
                 .Select(selected => selected.IdProductPurchaseOptionValue).ToArrayAsync(ct);
             if (selectedValueIds.Length != configuration.Options.Count) return Conflict(new { code = "invalid-product-options" });
+            var matchedOptionValueIds = new HashSet<long>();
             foreach (var option in configuration.Options)
             {
-                var value = option.Values.SingleOrDefault(candidate => selectedValueIds.Contains(candidate.Id));
-                if (value is null) return Conflict(new { code = "invalid-product-options" });
-                unitAmount += value.PriceDelta;
+                ProductPurchaseOptionValue[] values = option.Values
+                    .Where(candidate => selectedValueIds.Contains(candidate.Id)).ToArray();
+                if (values.Length != 1) return Conflict(new { code = "invalid-product-options" });
+                matchedOptionValueIds.Add(values[0].Id);
+                unitAmount += values[0].PriceDelta;
             }
+            if (matchedOptionValueIds.Count != selectedValueIds.Length)
+                return Conflict(new { code = "invalid-product-options" });
 
             string[] selectedAccessoryKeys = await (
                 from selected in db.AccountCartItemAccessories.AsNoTracking()
@@ -595,6 +614,13 @@ public sealed class AccountController(
             var offer = catalog.Offers.SingleOrDefault(candidate =>
                 candidate.ProductId == row.IdProduct && candidate.SalesPlanId == row.SalesPlanId);
             if (offer is null) return Conflict(new { code = "price-or-stock-changed" });
+            if (selectedAccessoryKeys.Distinct(StringComparer.Ordinal).Count() != selectedAccessoryKeys.Length ||
+                configuration.Accessories.Any(accessory => accessory.IsRequired &&
+                    !selectedAccessoryKeys.Contains(accessory.Key, StringComparer.Ordinal)) ||
+                selectedAccessoryKeys.Any(key => configuration.Accessories.All(accessory => accessory.Key != key)) ||
+                offer.AccessoryIds is { } allowedAccessories &&
+                    selectedAccessoryKeys.Any(key => !allowedAccessories.Contains(key, StringComparer.Ordinal)))
+                return Conflict(new { code = "invalid-product-options" });
             foreach (var accessory in configuration.Accessories)
                 if (accessory.IsRequired || selectedAccessoryKeys.Contains(accessory.Key, StringComparer.Ordinal))
                 {
