@@ -14,6 +14,7 @@
 - سفارش و ارسال: `StoreOrdersAdminApiController` و `StorePaidOrdersDispatchApiController`.
 - صندوق فرم تماس: صفحهٔ `contact-messages` در `FeaturesController`، فهرست و تغییر وضعیت در `StoreContactMessagesAdminApiController` و رابط در `ContactMessages.cshtml`. مجوز صفحه و API در migration `078-contact-message-inbox.sql` ثبت می‌شود.
 - پیام‌های داخل حساب مشتری: صفحهٔ `account-messages` در `FeaturesController` و API `StoreAccountMessagesAdminApiController` برای یافتن مشتری، ثبت پیام و مشاهدهٔ سابقه. مشتری پیام را در `/Profile/Messages` می‌بیند و وضعیت خواندن را ثبت می‌کند.
+- دکمه‌های عملیات ردیف‌های جدول در پنل با renderer مشترک `Admin/wwwroot/js/admin-ui.js` به شکل آیکن‌دار و عنوان کوتاه تبدیل می‌شوند؛ افزودن ردیف پویا هم همین قرارداد را می‌گیرد و رنگ عملیات اصلی/حذف را حفظ می‌کند.
 - انبار: `WarehouseAdminApiController`، `WarehouseDocumentsApiController` و `WarehouseMovementsApiController`. محاسبه و ثبت ledger سند در `Data/Infrastructure/Warehouse/WarehouseStockLedger.cs` و قرارداد آن در `Data/Application/Warehouse/Contracts/IWarehouseStockLedger.cs` است؛ endpointهای Admin همچنان مالک HTTP، مجوز و تراکنش درخواست‌اند.
 - در تمام فهرست‌ها، فیلترها و انتخاب‌گرهایی که انبار را نشان می‌دهند، شناسهٔ دیداری به‌شکل «نام شرکت / نام انبار (کد)» است؛ پاسخ‌های انبار و موجودی نام شرکت را از رابطهٔ شرکت می‌گیرند.
 - محتوای فروشگاه: endpointهای FAQ، دسته، مقاله، صفحات خدمات و رسانه در همین پوشهٔ API.
