@@ -17,6 +17,8 @@
     <Content Remove="wwwroot/color_admin/assets/plugins/**/*" />
     <Content Remove="wwwroot/color_admin/assets/data/**/*" />
     <Content Remove="wwwroot/color_admin/assets/demo/**/*" />
+    <!-- Summernote is used by the shared RTL content editor in admin forms. -->
+    <Content Include="wwwroot/color_admin/assets/plugins/summernote/dist/**/*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="wwwroot\content\brands\" />

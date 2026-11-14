@@ -807,7 +807,7 @@
             window.bootstrap?.Modal?.getOrCreateInstance(document.getElementById("article-image-modal")).show();
             return;
         }
-        if (button.hasAttribute("data-mag-create")) { form.reset(); form.elements.id.value = ""; renderMagazineSections(form.querySelector("[data-mag-sections]"), []); window.bootstrap?.Modal?.getOrCreateInstance(document.getElementById("mag-editor-modal")).show(); return; }
+        if (button.hasAttribute("data-mag-create")) { form.reset(); form.elements.id.value = ""; for (const name of ["lead", "conclusion"]) window.AdminRichEditor?.setValue(form.elements[name], ""); renderMagazineSections(form.querySelector("[data-mag-sections]"), []); window.bootstrap?.Modal?.getOrCreateInstance(document.getElementById("mag-editor-modal")).show(); return; }
         if (button.dataset.magAction === "delete") {
             if (!window.confirm("مقاله حذف شود؟")) return;
             const token = document.querySelector("[data-mag-editor] [name=__RequestVerificationToken]")?.value || "";
@@ -986,7 +986,7 @@
             const item = faqAction.hasAttribute("data-faq-edit") ? page?.__faqRows?.[Number(faqAction.dataset.faqEdit)] : null;
             if (!page || !form || (faqAction.hasAttribute("data-faq-edit") && !item)) return;
             form.reset(); form.elements.id.value = item?.id || ""; form.elements.question.value = item?.question || "";
-            form.elements.answer.value = item?.answer || ""; form.elements.linkText.value = item?.linkText || "";
+            window.AdminRichEditor?.setValue(form.elements.answer, item?.answer || ""); form.elements.linkText.value = item?.linkText || "";
             form.elements.linkUrl.value = item?.linkUrl || ""; form.elements.sortOrder.value = item?.sortOrder ?? 0;
             form.elements.isPublished.checked = item?.isPublished ?? false;
             window.bootstrap?.Modal?.getOrCreateInstance(document.getElementById("faq-editor-modal")).show();
@@ -1325,7 +1325,7 @@
             event.preventDefault();
             const button = faqForm.querySelector('[type="submit"]'); if (button.disabled) return;
             const id = faqForm.elements.id.value, token = faqForm.querySelector('[name="__RequestVerificationToken"]')?.value || "";
-            const body = { question: faqForm.elements.question.value, answer: faqForm.elements.answer.value, linkText: faqForm.elements.linkText.value, linkUrl: faqForm.elements.linkUrl.value, sortOrder: Number(faqForm.elements.sortOrder.value), isPublished: faqForm.elements.isPublished.checked };
+            const body = { question: faqForm.elements.question.value, answer: window.AdminRichEditor?.getValue(faqForm.elements.answer) ?? faqForm.elements.answer.value, linkText: faqForm.elements.linkText.value, linkUrl: faqForm.elements.linkUrl.value, sortOrder: Number(faqForm.elements.sortOrder.value), isPublished: faqForm.elements.isPublished.checked };
             button.disabled = true;
             void ui.getJson(`/api/admin/store/faq${id ? `/${encodeURIComponent(id)}` : ""}`, { method: id ? "PUT" : "POST", headers: { "Content-Type": "application/json", RequestVerificationToken: token }, body: JSON.stringify(body) })
                 .then(result => { ui.notify(result.message, "success"); window.bootstrap?.Modal?.getInstance(document.getElementById("faq-editor-modal"))?.hide(); const page = document.querySelector('[data-admin-page="faq"]'); if (page) return loadFaq(page); })
