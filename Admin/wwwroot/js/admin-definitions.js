@@ -8,7 +8,7 @@
     const configs = {
         "stock-owners": { fields: [["code", "کد", "text", true], ["displayName", "نام", "text", true], ["idStockOwnerType", "نوع", "select", true, [["1", "طرح فروش"], ["2", "مالک"]]]], columns: [["code", "کد"], ["displayName", "نام"], ["idStockOwnerType", "نوع"], ["isActive", "وضعیت", "active"]] },
         companies: { fields: [["code", "کد شرکت", "text", true], ["name", "نام شرکت", "text", true]], columns: [["code", "کد"], ["name", "شرکت"], ["isActive", "وضعیت", "active"]] },
-        warehouses: { fields: [["companyId", "شرکت", "companies", true], ["code", "کد انبار", "text", true], ["name", "نام انبار", "text", true], ["isSalesWarehouse", "انبار فروش است", "checkbox"], ["ownerSalesPlanId", "طرح مالک انبار فروش", "plans"], ["isSiteWarehouse", "منبع موجودی سایت", "checkbox"]], columns: [["code", "کد"], ["name", "انبار"], ["companyName", "شرکت"], ["isSalesWarehouse", "انبار فروش", "affects"], ["isSiteWarehouse", "منبع موجودی سایت", "siteWarehouse"], ["ownerSalesPlan", "طرح مالک"], ["isActive", "وضعیت", "active"]] },
+        warehouses: { fields: [["companyId", "شرکت", "companies", true], ["code", "کد انبار", "text", true], ["name", "نام انبار", "text", true], ["isSalesWarehouse", "انبار فروش است", "checkbox"], ["ownerSalesPlanId", "طرح مالک انبار فروش", "plans"], ["isSiteWarehouse", "منبع موجودی سایت", "checkbox"]], columns: [["warehouseLabel", "شرکت / انبار"], ["isSalesWarehouse", "انبار فروش", "affects"], ["isSiteWarehouse", "منبع موجودی سایت", "siteWarehouse"], ["ownerSalesPlan", "طرح مالک"], ["isActive", "وضعیت", "active"]] },
         references: { fields: [["name", "نام مرجع", "text", true], ["partyType", "نوع مرجع", "select", true, [["Person", "شخص"], ["Organization", "سازمان"], ["Warehouse", "انبار"], ["Other", "سایر"]]], ["warehouseId", "انبار مرتبط", "warehouses"], ["externalPartyKey", "شناسهٔ بیرونی", "text"]], columns: [["name", "نام"], ["partyType", "نوع"], ["idWarehouse", "شناسهٔ انبار"], ["isActive", "وضعیت", "active"]] },
         units: { fields: [["code", "کد واحد", "text", true], ["name", "نام واحد", "text", true]], columns: [["code", "کد"], ["name", "واحد"], ["isActive", "وضعیت", "active"]] },
         "document-types": { fields: [["code", "کد نوع سند", "text", true], ["name", "نام سند", "text", true], ["direction", "جهت سند", "select", true, [["R", "رسید"], ["I", "حواله"]]], ["affectsStock", "بر موجودی اثر دارد", "checkbox" ]], columns: [["code", "کد"], ["name", "نوع سند"], ["direction", "جهت", "direction"], ["affectsStock", "اثر موجودی", "affects"], ["isActive", "وضعیت", "active"]] }
@@ -48,6 +48,7 @@
             const row = document.createElement("tr");
             for (const [key, , format] of config.columns) {
                 let value = item[key];
+                if (key === "warehouseLabel") value = `${item.companyName} / ${item.name} (${item.code})`;
                 if (format === "active") value = active(value);
                 if (format === "default") value = value ? "پیش‌فرض" : "خیر";
                 if (format === "direction") value = value === "R" ? "رسید" : "حواله";
@@ -107,7 +108,7 @@
             if (["warehouses", "products", "units", "companies", "plans"].includes(type)) {
                 const choices = type === "warehouses" ? lookups.warehouses : (lookups[type] || []);
                 const empty = element("option", type === "warehouses" ? "بدون انبار مرتبط" : "انتخاب کنید"); empty.value = ""; control.append(empty);
-                for (const row of choices) { const option = element("option", type === "warehouses" ? `${row.name} (${row.code})` : (row.name || row.displayName)); option.value = row.id; control.append(option); }
+                for (const row of choices) { const option = element("option", type === "warehouses" ? `${row.companyName} / ${row.name} (${row.code})` : (row.name || row.displayName)); option.value = row.id; control.append(option); }
             }
             if (type === "text") control.type = "text";
             if (type === "textarea") { control.rows = 4; control.placeholder = '[{"key":"color","label":"رنگ","value":"yellow","display":"زرد"}]'; }
@@ -146,7 +147,7 @@
         const fill = (select, rows, label) => { select.replaceChildren(); for (const row of rows) { const option = element("option", label(row)); option.value = row.id; select.append(option); } };
         fill(form.elements.companyId, data.companies, item => item.name);
         const company = form.elements.companyId, warehouse = form.elements.warehouseId;
-        const fillWarehouses = () => fill(warehouse, data.warehouses.filter(item => item.idCompany === Number(company.value)), item => `${item.name} (${item.code})`);
+        const fillWarehouses = () => fill(warehouse, data.warehouses.filter(item => item.idCompany === Number(company.value)), item => `${item.companyName || data.companies.find(companyItem => companyItem.id === item.idCompany)?.name || "—"} / ${item.name} (${item.code})`);
         company.onchange = fillWarehouses; fillWarehouses();
         fill(form.elements.salesPlanId, data.plans, item => item.displayName);
         const rows = page.querySelector("[data-mapping-rows]");
@@ -158,7 +159,7 @@
             if (!warehouseRow || !planRow) continue;
             const companyRow = data.companies.find(item => item.id === warehouseRow.idCompany);
             const row = element("tr");
-            row.append(element("td", companyRow?.name || "—"), element("td", warehouseRow.name), element("td", planRow.displayName));
+            row.append(element("td", `${companyRow?.name || "—"} / ${warehouseRow.name} (${warehouseRow.code})`), element("td", planRow.displayName));
             const actions = element("td"), remove = actionButton("حذف اتصال", "fa-link-slash", "btn btn-sm btn-outline-danger");
             remove.addEventListener("click", async () => {
                 if (remove.disabled || !window.confirm("اتصال این مالک به انبار حذف شود؟")) return;

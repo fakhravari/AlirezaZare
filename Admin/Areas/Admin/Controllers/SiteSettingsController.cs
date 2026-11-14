@@ -94,8 +94,8 @@ public sealed class SiteSettingsController(ShopDbContext db, IDataProtectionProv
     private async Task PopulateWarehouses(CancellationToken cancellationToken) =>
         ViewData["Warehouses"] = await db.Warehouses.AsNoTracking()
             .Where(w => w.IsActive && w.IsSalesWarehouse && w.Company.IsActive)
-            .OrderBy(w => w.Name).Select(w => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
-            { Value = w.Id.ToString(), Text = w.Name + " (" + w.Company.Name + ")" })
+            .OrderBy(w => w.Company.Name).ThenBy(w => w.Name).Select(w => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
+            { Value = w.Id.ToString(), Text = w.Company.Name + " / " + w.Name + " (" + w.Code + ")" })
             .ToListAsync(cancellationToken);
 
     private static string? NormalizeOptionalUrl(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();

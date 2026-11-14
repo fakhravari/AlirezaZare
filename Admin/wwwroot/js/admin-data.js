@@ -49,6 +49,17 @@
         page.dataset.adminPageNumber = String(current);
     }
 
+    function setIconAction(button, label, icon) {
+        button.title = label;
+        button.setAttribute("aria-label", label);
+        ui.withIcon(button, icon);
+        button.querySelector("i")?.classList.remove("me-1");
+        const accessibleLabel = document.createElement("span");
+        accessibleLabel.className = "visually-hidden";
+        accessibleLabel.textContent = label;
+        button.append(accessibleLabel);
+    }
+
     function renderRows(page, rows, columns) {
         const body = page.querySelector("[data-admin-results]");
         const empty = page.querySelector("[data-admin-empty]");
@@ -142,20 +153,20 @@
             }
             if (page.dataset.adminSection === "products" && page.dataset.canUploadImage === "true") {
                 const edit = document.createElement("button");
-                edit.type = "button"; edit.className = "btn btn-xs btn-default ms-1";
-                edit.dataset.productEdit = String(index); edit.textContent = "ویرایش کالا";
+                edit.type = "button"; edit.className = "btn btn-xs btn-default";
+                edit.dataset.productEdit = String(index); setIconAction(edit, "ویرایش کالا", "fa-pen-to-square");
                 actions.append(edit);
                 const unpublish = document.createElement("button");
-                unpublish.type = "button"; unpublish.className = "btn btn-xs btn-default ms-1";
-                unpublish.dataset.productUnpublish = String(index); unpublish.textContent = "خروج از انتشار";
+                unpublish.type = "button"; unpublish.className = "btn btn-xs btn-default";
+                unpublish.dataset.productUnpublish = String(index); setIconAction(unpublish, "خروج از انتشار", "fa-eye-slash");
                 actions.append(unpublish);
                 const upload = document.createElement("button");
-                upload.type = "button"; upload.className = "btn btn-xs btn-default ms-1";
-                upload.dataset.productImage = String(index); upload.textContent = "تصویر محصول";
+                upload.type = "button"; upload.className = "btn btn-xs btn-default";
+                upload.dataset.productImage = String(index); setIconAction(upload, "مدیریت تصویر محصول", "fa-image");
                 actions.append(upload);
                 const file = document.createElement("button");
-                file.type = "button"; file.className = "btn btn-xs btn-default ms-1";
-                file.dataset.productFile = String(index); file.textContent = "فایل محصول";
+                file.type = "button"; file.className = "btn btn-xs btn-default";
+                file.dataset.productFile = String(index); setIconAction(file, "مدیریت فایل‌های محصول", "fa-paperclip");
                 actions.append(file);
             }
             if (page.dataset.adminSection === "brands" && page.dataset.canUploadImage === "true") {
@@ -431,7 +442,7 @@
             const section = page.dataset.adminSection;
             const rows = result.items || [];
             const columns = item => section === "products"
-                ? [item.code, item.name, item.brandName, item.categoryName, ui.formatNumber(item.price), ui.formatNumber(item.stockQuantity)]
+                ? [item.code, item.name, item.brandName, item.categoryName]
                 : section === "categories"
                     ? [item.id, item.name, item.englishName, item.parentId, item.slug, item.isActive ? "منتشر" : "پیش‌نویس"]
                     : section === "brands"
@@ -487,11 +498,11 @@
             if (warehouseSelect) {
                 const selected = warehouseSelect.value;
                 const options = [new Option("همهٔ انبارها", "")];
-                all.forEach(item => options.push(new Option(item.name, String(item.id))));
+                all.forEach(item => options.push(new Option(`${item.companyName} / ${item.name} (${item.code})`, String(item.id))));
                 warehouseSelect.replaceChildren(...options);
                 if (all.some(item => String(item.id) === selected)) warehouseSelect.value = selected;
             }
-            renderRows(page, rows, item => [item.code, item.name, item.companyName, item.isSalesWarehouse ? "بله" : "خیر", item.isActive ? "فعال" : "غیرفعال"]);
+            renderRows(page, rows, item => [`${item.companyName} / ${item.name} (${item.code})`, item.isSalesWarehouse ? "بله" : "خیر", item.isActive ? "فعال" : "غیرفعال"]);
             updateCount(page, all.length, rows.length);
             status(page, "فهرست انبارها از دیتابیس دریافت شد.");
             if (announce) ui.notify("فهرست انبارها به‌روز شد.", "success");
@@ -528,7 +539,7 @@
             if (warehouseSelect && warehouses) {
                 const selected = warehouseSelect.value;
                 const options = [new Option("همهٔ انبارها", "")];
-                (warehouses || []).forEach(item => options.push(new Option(item.name, String(item.id))));
+                (warehouses || []).forEach(item => options.push(new Option(`${item.companyName} / ${item.name} (${item.code})`, String(item.id))));
                 warehouseSelect.replaceChildren(...options);
                 warehouseSelect.value = selected;
                 warehouseSelect.dataset.loaded = "true";
@@ -543,7 +554,7 @@
             }
             const rows = Array.isArray(items) ? items : [];
             renderRows(page, rows, item => [
-                `${item.warehouseName} (${item.warehouseCode})`, item.storeProductKey,
+                `${item.companyName} / ${item.warehouseName} (${item.warehouseCode})`, item.storeProductKey,
                 item.variantName ? `${item.productName} ـ ${item.variantName}` : item.productName,
                 item.salesPlanName, item.unitName, ui.formatNumber(item.quantity), ui.formatNumber(item.minimumQuantity),
                 item.isLowStock ? "کمتر از حداقل" : "مناسب"
@@ -1221,7 +1232,7 @@
                 form.elements.warehouseId.value = item.idWarehouse;
                 form.elements.inventoryItemId.value = item.idInventoryItem;
                 form.elements.minimumQuantity.value = item.minimumQuantity;
-                document.querySelector("[data-minimum-product]").textContent = `${item.productName}${item.variantName ? ` — ${item.variantName}` : ""} · ${item.warehouseName} · ${item.salesPlanName}`;
+                document.querySelector("[data-minimum-product]").textContent = `${item.productName}${item.variantName ? ` — ${item.variantName}` : ""} · ${item.companyName} / ${item.warehouseName} (${item.warehouseCode}) · ${item.salesPlanName}`;
                 window.bootstrap?.Modal?.getOrCreateInstance(document.getElementById("admin-minimum-modal")).show();
             }
             return;

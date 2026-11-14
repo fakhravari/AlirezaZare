@@ -6,6 +6,7 @@ public sealed record WarehouseStockItem(
     long IdSalesPlanReference,
     string WarehouseCode,
     string WarehouseName,
+    string CompanyName,
     long IdProduct,
     string StoreProductKey,
     string ProductName,

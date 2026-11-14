@@ -85,6 +85,7 @@ builder.Services.AddRateLimiter(options =>
 });
 builder.Services.AddSingleton<IPasswordHasher<string>, PasswordHasher<string>>();
 builder.Services.AddScoped<Shop.Data.Application.Store.Contracts.IPaymentGateway, Shop.Services.UnconfiguredPaymentGateway>();
+builder.Services.AddScoped<Shop.Data.Infrastructure.Payments.PaymentService>();
 builder.Services.AddScoped<Shop.Services.IMagazineContentSource, Shop.Services.DatabaseMagazineContentSource>();
 builder.Services.AddScoped<Shop.Services.CatalogRepository>();
 builder.Services.AddScoped<Shop.Services.ICatalogSource>(services =>

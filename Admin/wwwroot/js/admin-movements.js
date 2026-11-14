@@ -75,7 +75,7 @@
         const page = root.querySelector?.("[data-admin-movements]"); if (!page || initialized.has(page)) return; initialized.add(page);
         try {
             const warehouses = await get("/api/admin/warehouse/warehouses"), select = page.querySelector("[name=warehouseId]");
-            for (const warehouse of warehouses) { const option = el("option", `${warehouse.name} (${warehouse.code})`); option.value = warehouse.id; select.append(option); }
+            for (const warehouse of warehouses) { const option = el("option", `${warehouse.companyName} / ${warehouse.name} (${warehouse.code})`); option.value = warehouse.id; select.append(option); }
             page.dataset.mode = "stock";
             page.querySelectorAll("[data-movement-mode]").forEach(button => button.addEventListener("click", () => {
                 page.dataset.mode = button.dataset.movementMode;

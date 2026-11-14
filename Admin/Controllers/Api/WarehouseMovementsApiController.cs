@@ -36,7 +36,8 @@ public sealed class WarehouseMovementsApiController(ShopDbContext db) : Controll
             {
                 document.Id, document.DocumentNumber, document.DocumentDate, document.Status,
                 DocumentType = type.Name, type.Direction, type.AffectsStock,
-                WarehouseId = warehouse.Id, Warehouse = warehouse.Name,
+                WarehouseId = warehouse.Id,
+                Warehouse = warehouse.Company.Name + " / " + warehouse.Name + " (" + warehouse.Code + ")",
                 SalesPlan = plan.DisplayName, SalesPlanKey = plan.StoreSalesPlanKey, line.ProductNameSnapshot, line.VariantNameSnapshot,
                 line.Quantity, line.UnitNameSnapshot, line.ConversionFactor, line.BaseQuantity,
                 QuantityDelta = movement == null ? 0m : movement.QuantityDelta,
@@ -119,7 +120,9 @@ public sealed class WarehouseMovementsApiController(ShopDbContext db) : Controll
         DateOnly startDate = from ?? DateOnly.MinValue;
         var grouped = query.GroupBy(x => new
         {
-            WarehouseId = x.warehouse.Id, Warehouse = x.warehouse.Name, ItemId = x.item.Id,
+            WarehouseId = x.warehouse.Id,
+            Warehouse = x.warehouse.Company.Name + " / " + x.warehouse.Name + " (" + x.warehouse.Code + ")",
+            ItemId = x.item.Id,
             Product = x.item.Product.Name, ProductKey = x.item.Product.ProductKey,
             Variant = x.item.ProductVariant == null ? null : x.item.ProductVariant.Name,
             PlanId = x.plan.Id, SalesPlan = x.plan.DisplayName, Unit = x.unit.Name
@@ -144,7 +147,11 @@ public sealed class WarehouseMovementsApiController(ShopDbContext db) : Controll
     {
         var query = from audit in db.WarehouseDocumentAudits.AsNoTracking()
             join warehouse in db.Warehouses.AsNoTracking() on audit.WarehouseId equals warehouse.Id
-            select new { audit, Warehouse = warehouse.Name };
+            select new
+            {
+                audit,
+                Warehouse = warehouse.Company.Name + " / " + warehouse.Name + " (" + warehouse.Code + ")"
+            };
         if (!User.IsInRole("system.full-access"))
         {
             long userId = long.TryParse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value,

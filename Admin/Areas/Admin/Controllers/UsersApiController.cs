@@ -81,7 +81,8 @@ public sealed class UsersApiController(ShopDbContext db, PasswordHasher<AdminSys
             }).ToListAsync(cancellationToken);
 
         var warehouses = await db.Warehouses.AsNoTracking().Where(x => x.IsActive)
-            .OrderBy(x => x.Name).Select(x => new { x.Id, x.Name, x.Code, x.IdCompany })
+            .OrderBy(x => x.Company.Name).ThenBy(x => x.Name)
+            .Select(x => new { x.Id, x.Name, x.Code, x.IdCompany, CompanyName = x.Company.Name })
             .ToListAsync(cancellationToken);
 
         return Ok(new { users, roles = userRoles, permissions = Array.Empty<object>(), warehouses });

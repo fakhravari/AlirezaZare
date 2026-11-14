@@ -55,7 +55,10 @@
             const roles = el("td", user.roleIds.map(id => byId(data.roles, id)?.name).filter(Boolean).join("، ") || "بدون نقش");
             const warehouses = el("td");
             const isFull = user.roleIds.some(id => byId(data.roles, id)?.roleKey === "system.full-access");
-            warehouses.textContent = isFull ? "همهٔ انبارها" : user.warehouseIds.map(id => byId(data.warehouses, id)?.name).filter(Boolean).join("، ") || "بدون دسترسی";
+            warehouses.textContent = isFull ? "همهٔ انبارها" : user.warehouseIds.map(id => {
+                const warehouse = byId(data.warehouses, id);
+                return warehouse ? `${warehouse.companyName} / ${warehouse.name} (${warehouse.code})` : "";
+            }).filter(Boolean).join("، ") || "بدون دسترسی";
             const state = el("td");
             const badge = el("span", user.isActive ? "فعال" : "غیرفعال", `badge ${user.isActive ? "bg-success" : "bg-secondary"}`);
             state.append(badge);
@@ -115,7 +118,7 @@
         for (const role of data.roles.filter(item => item.isActive))
             addCheck(roles, "roleIds", role.id, role.name, user?.roleIds.includes(role.id) || false);
         for (const warehouse of data.warehouses)
-            addCheck(warehouses, "warehouseIds", warehouse.id, `${warehouse.name} (${warehouse.code})`, user?.warehouseIds.includes(warehouse.id) || false);
+            addCheck(warehouses, "warehouseIds", warehouse.id, `${warehouse.companyName} / ${warehouse.name} (${warehouse.code})`, user?.warehouseIds.includes(warehouse.id) || false);
         modal.show();
     }
 

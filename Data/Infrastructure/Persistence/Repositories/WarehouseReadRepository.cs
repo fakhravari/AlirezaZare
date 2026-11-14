@@ -88,6 +88,7 @@ public sealed class WarehouseReadRepository(ShopDbContext dbContext) : IWarehous
                 x.plan.Id,
                 x.warehouse.Code,
                 x.warehouse.Name,
+                x.warehouse.Company.Name,
                 x.inventoryItem.Product.Id,
                 x.inventoryItem.Product.ProductKey,
                 x.inventoryItem.Product.Name,

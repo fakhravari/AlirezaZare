@@ -63,11 +63,14 @@
     const labels = {
         id: "شناسه", code: "کد", name: "نام", englishName: "نام لاتین", brandName: "برند",
         categoryName: "دسته‌بندی", parentId: "شناسهٔ والد", slug: "نشانی", countryCode: "کد کشور",
-        source: "منبع", isFilterable: "قابل فیلتر", isHighlight: "نمایش برجسته", price: "قیمت",
-        discountPercent: "درصد تخفیف", stockQuantity: "موجودی", warehouseId: "شناسهٔ انبار",
+        source: "منبع", isFilterable: "قابل فیلتر", isHighlight: "نمایش برجسته", price: "قیمت (تومان)",
+        priceAmount: "قیمت پایه (تومان)", discountPercent: "درصد تخفیف", stockQuantity: "موجودی", warehouseId: "شناسهٔ انبار",
         warehouseCode: "کد انبار", warehouseName: "انبار", companyName: "شرکت", isSalesWarehouse: "انبار فروش",
         isActive: "وضعیت", storeProductKey: "شناسهٔ محصول فروشگاه", productName: "کالا", variantName: "تنوع",
-        salesPlanName: "طرح فروش", unitName: "واحد اصلی", quantity: "موجودی", minimumQuantity: "حداقل موجودی", isLowStock: "وضعیت حداقل"
+        salesPlanName: "طرح فروش", unitName: "واحد اصلی", quantity: "موجودی", minimumQuantity: "حداقل موجودی", isLowStock: "وضعیت حداقل",
+        maxPurchaseQuantity: "حداکثر تعداد خرید", createdAtUtc: "زمان ایجاد", updatedAtUtc: "آخرین ویرایش", isCatalogActive: "انتشار در فروشگاه",
+        isStoreEnabled: "فعال در فروشگاه", isWarehouseEnabled: "فعال در انبار", hasImage: "تصویر محصول", idBrand: "شناسهٔ برند",
+        idCategory: "شناسهٔ دسته", idBaseUnit: "شناسهٔ واحد پایه", productKey: "کلید محصول"
     };
 
     function notify(message, kind = "info") {
@@ -137,22 +140,77 @@
 
         heading.textContent = title;
         body.replaceChildren();
-        const list = document.createElement("dl");
-        list.className = "row g-0";
-        for (const [key, value] of Object.entries(record || {})) {
-            const term = document.createElement("dt");
-            term.className = "col-sm-4 col-lg-3 p-2 border-bottom text-secondary fw-normal";
-            term.textContent = labels[key] || key;
-            const description = document.createElement("dd");
-            description.className = "col-sm-8 col-lg-9 p-2 border-bottom mb-0";
-            if (typeof value === "boolean") description.textContent = value ? "بله" : "خیر";
-            else if (value == null || value === "") description.textContent = "—";
-            else if (typeof value === "number") description.textContent = numberFormat.format(value);
-            else if (typeof value === "object") description.textContent = JSON.stringify(value);
-            else description.textContent = String(value);
-            list.append(term, description);
+        const entries = Object.entries(record || {});
+        if (!entries.length) {
+            const empty = document.createElement("p");
+            empty.className = "admin-record-empty";
+            empty.textContent = "اطلاعاتی برای این رکورد ثبت نشده است.";
+            body.append(empty);
+            window.bootstrap.Modal.getOrCreateInstance(modal).show();
+            return;
         }
-        body.append(list);
+
+        const labelFor = key => labels[key] || String(key).replace(/([a-z\d])([A-Z])/g, "$1 $2").replace(/^./, char => char.toLocaleUpperCase("fa-IR"));
+        const makeValue = value => {
+            const container = document.createElement("div");
+            container.className = "admin-record-value";
+            if (value == null || value === "") container.textContent = "—";
+            else if (typeof value === "boolean") container.textContent = value ? "بله" : "خیر";
+            else if (typeof value === "number") container.textContent = numberFormat.format(value);
+            else if (Array.isArray(value)) {
+                if (!value.length) container.textContent = "موردی ثبت نشده است";
+                else {
+                    const list = document.createElement("ul");
+                    list.className = "admin-record-list";
+                    for (const item of value) {
+                        const row = document.createElement("li");
+                        if (item && typeof item === "object") {
+                            const nested = document.createElement("dl");
+                            nested.className = "admin-record-nested-grid";
+                            for (const [key, child] of Object.entries(item)) {
+                                const term = document.createElement("dt"); term.textContent = labelFor(key);
+                                const description = document.createElement("dd"); description.append(makeValue(child));
+                                nested.append(term, description);
+                            }
+                            row.append(nested);
+                        } else row.append(makeValue(item));
+                        list.append(row);
+                    }
+                    container.append(list);
+                }
+            } else if (typeof value === "object") {
+                const nested = document.createElement("dl");
+                nested.className = "admin-record-nested-grid";
+                for (const [key, child] of Object.entries(value)) {
+                    const term = document.createElement("dt"); term.textContent = labelFor(key);
+                    const description = document.createElement("dd"); description.append(makeValue(child));
+                    nested.append(term, description);
+                }
+                container.append(nested);
+            } else container.textContent = String(value);
+            return container;
+        };
+        const groups = [
+            { title: "شناسه و مشخصات", keys: /^(id|code|key|productKey|storeProductKey|name|englishName|brandName|categoryName|parentId|slug|warehouseCode|warehouseName|companyName|productName|variantName|salesPlanName|unitName)$/i },
+            { title: "قیمت و مقدار", keys: /(price|amount|quantity|stock|minimum|discount|maximum|maxPurchase)/i },
+            { title: "وضعیت و زمان", keys: /^(is|has|status|createdAt|updatedAt|deletedAt|publishedAt|.*Utc$)/i }
+        ];
+        const consumed = new Set();
+        const appendSection = (sectionTitle, sectionEntries) => {
+            if (!sectionEntries.length) return;
+            const section = document.createElement("section"); section.className = "admin-record-section";
+            const sectionHeading = document.createElement("h3"); sectionHeading.className = "admin-record-section-title"; sectionHeading.textContent = sectionTitle;
+            const grid = document.createElement("dl"); grid.className = "admin-record-grid";
+            for (const [key, value] of sectionEntries) {
+                const field = document.createElement("div"); field.className = "admin-record-field";
+                const term = document.createElement("dt"); term.className = "admin-record-label"; term.textContent = labelFor(key);
+                const description = document.createElement("dd"); description.className = "admin-record-data"; description.append(makeValue(value));
+                field.append(term, description); grid.append(field); consumed.add(key);
+            }
+            section.append(sectionHeading, grid); body.append(section);
+        };
+        for (const group of groups) appendSection(group.title, entries.filter(([key]) => !consumed.has(key) && group.keys.test(key)));
+        appendSection("اطلاعات تکمیلی", entries.filter(([key]) => !consumed.has(key)));
         window.bootstrap.Modal.getOrCreateInstance(modal).show();
     }
 

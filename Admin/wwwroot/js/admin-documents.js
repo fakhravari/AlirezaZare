@@ -52,8 +52,9 @@
         formWarehouse.replaceChildren();
         option(formWarehouse, "", "انتخاب انبار");
         for (const warehouse of lookups.warehouses) {
-            option(filterWarehouse, warehouse.id, `${warehouse.name} (${warehouse.code})`);
-            option(formWarehouse, warehouse.id, `${warehouse.name} (${warehouse.code})`);
+            const label = `${warehouse.companyName} / ${warehouse.name} (${warehouse.code})`;
+            option(filterWarehouse, warehouse.id, label);
+            option(formWarehouse, warehouse.id, label);
         }
         const types = filteredTypes(page);
         fillSelect(document.querySelector("[data-document-types]"), types,

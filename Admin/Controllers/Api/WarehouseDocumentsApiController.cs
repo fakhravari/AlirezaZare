@@ -39,7 +39,8 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db, IWarehouse
             .Skip((page - 1) * pageSize).Take(pageSize)
             .Select(x => new DocumentListItem(x.document.Id, x.document.IdWarehouse, x.document.IdDocumentType,
                 x.document.IdParty, x.document.IdSalesPlanReference, x.document.DocumentNumber, x.document.DocumentDate,
-                x.document.Status, x.warehouse.Name, x.type.Name, x.type.Direction, x.type.AffectsStock,
+                x.document.Status, x.warehouse.Company.Name + " / " + x.warehouse.Name + " (" + x.warehouse.Code + ")",
+                x.type.Name, x.type.Direction, x.type.AffectsStock,
                 x.party.Name, x.plan.DisplayName, x.document.Reason, x.document.ExternalReference,
                 x.document.CustomerOrderKey))
             .ToListAsync(cancellationToken);
@@ -52,8 +53,8 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db, IWarehouse
         long[] allowed = await AllowedWarehouseIdsAsync(cancellationToken);
         var warehouseQuery = db.Warehouses.AsNoTracking().Where(x => x.IsActive);
         if (!User.IsInRole("system.full-access")) warehouseQuery = warehouseQuery.Where(x => allowed.Contains(x.Id));
-        var warehouses = await warehouseQuery.OrderBy(x => x.Name)
-            .Select(x => new { x.Id, x.Code, x.Name, x.IdCompany, x.IsSalesWarehouse, x.IdOwnerSalesPlanReference }).ToListAsync(cancellationToken);
+        var warehouses = await warehouseQuery.OrderBy(x => x.Company.Name).ThenBy(x => x.Name)
+            .Select(x => new { x.Id, x.Code, x.Name, x.IdCompany, CompanyName = x.Company.Name, x.IsSalesWarehouse, x.IdOwnerSalesPlanReference }).ToListAsync(cancellationToken);
         var types = await db.WarehouseDocumentTypes.AsNoTracking().Where(x => x.IsActive).OrderBy(x => x.Name)
             .Select(x => new { x.Id, x.Code, x.Name, x.Direction, x.AffectsStock }).ToListAsync(cancellationToken);
         var partyQuery = db.WarehouseParties.AsNoTracking().Where(x => x.IsActive);

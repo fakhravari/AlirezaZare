@@ -10,11 +10,12 @@
 
 - صفحهٔ تنظیم اسلایدر در `SiteSettings/Slider` تصویر دسکتاپ/موبایل را به تفکیک شش جایگاه فعلی جایگزین می‌کند. کارت‌های نظر صفحهٔ اصلی از نظرهای تأییدشدهٔ محصولات می‌آیند؛ مدیریت وضعیت و پاسخ از صفحهٔ دیدگاه‌های فروشگاه انجام می‌شود.
 
-- کاتالوگ و قیمت: APIهای `StoreCatalogAdminApiController` و `StoreVariantPricesAdminApiController`.
+- کاتالوگ و قیمت: APIهای `StoreCatalogAdminApiController` و `StoreVariantPricesAdminApiController`. جدول محصولات فقط کد، نام، برند، دسته و عملیات آیکن‌دار را نشان می‌دهد؛ قیمت و موجودی در این جدول نیستند. مدال جزئیات رکورد همهٔ فیلدهای پاسخ انتخاب‌شده را با گروه‌بندی، برچسب فارسی و نمایش تو‌در‌تو برای آرایه‌ها و اشیا نشان می‌دهد.
 - سفارش و ارسال: `StoreOrdersAdminApiController` و `StorePaidOrdersDispatchApiController`.
 - صندوق فرم تماس: صفحهٔ `contact-messages` در `FeaturesController`، فهرست و تغییر وضعیت در `StoreContactMessagesAdminApiController` و رابط در `ContactMessages.cshtml`. مجوز صفحه و API در migration `078-contact-message-inbox.sql` ثبت می‌شود.
 - پیام‌های داخل حساب مشتری: صفحهٔ `account-messages` در `FeaturesController` و API `StoreAccountMessagesAdminApiController` برای یافتن مشتری، ثبت پیام و مشاهدهٔ سابقه. مشتری پیام را در `/Profile/Messages` می‌بیند و وضعیت خواندن را ثبت می‌کند.
 - انبار: `WarehouseAdminApiController`، `WarehouseDocumentsApiController` و `WarehouseMovementsApiController`. محاسبه و ثبت ledger سند در `Data/Infrastructure/Warehouse/WarehouseStockLedger.cs` و قرارداد آن در `Data/Application/Warehouse/Contracts/IWarehouseStockLedger.cs` است؛ endpointهای Admin همچنان مالک HTTP، مجوز و تراکنش درخواست‌اند.
+- در تمام فهرست‌ها، فیلترها و انتخاب‌گرهایی که انبار را نشان می‌دهند، شناسهٔ دیداری به‌شکل «نام شرکت / نام انبار (کد)» است؛ پاسخ‌های انبار و موجودی نام شرکت را از رابطهٔ شرکت می‌گیرند.
 - محتوای فروشگاه: endpointهای FAQ، دسته، مقاله، صفحات خدمات و رسانه در همین پوشهٔ API.
 - حساب مدیر و مجوزها: `Admin/Controllers/AuthController.cs` و مدل‌های `Data/Domain/Admin/Entities/`.
 - درخت مجوز نقش‌ها در `Admin/wwwroot/js/admin-users.js` پس از بارگذاری یا انتخاب نقش، شاخه‌ها را بسته نشان می‌دهد؛ با کنترل هر شاخه می‌توان آن را باز کرد. والد به فرزندان پایین‌دست تعمیم می‌یابد؛ والد وقتی همهٔ فرزندان انتخاب شوند تیک می‌خورد و در انتخاب ناقص به حالت نیمه‌انتخاب‌شده می‌رود. این چیدمان با منطق احراز هویت که انتخاب مجوز والد را به فرزندانش گسترش می‌دهد هماهنگ است.
