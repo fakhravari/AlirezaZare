@@ -2,16 +2,16 @@ using System.Security.Claims;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Shop.Data.Application.Warehouse.Contracts;
 using Shop.Data.Domain.Warehouse.Entities;
 using Shop.Data.Infrastructure.Persistence;
-using Shop.Admin.Services;
 
 namespace Shop.Admin.Controllers.Api;
 
 [Area("Warehouse")]
 [ApiController]
 [Route("api/admin/warehouse/documents")]
-public sealed class WarehouseDocumentsApiController(ShopDbContext db, WarehouseStockLedger stockLedger) : ControllerBase
+public sealed class WarehouseDocumentsApiController(ShopDbContext db, IWarehouseStockLedger stockLedger) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> List([FromQuery] long? warehouseId, [FromQuery] string? status,

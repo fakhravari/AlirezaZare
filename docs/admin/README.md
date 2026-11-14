@@ -10,7 +10,7 @@
 - سفارش و ارسال: `StoreOrdersAdminApiController` و `StorePaidOrdersDispatchApiController`.
 - صندوق فرم تماس: صفحهٔ `contact-messages` در `FeaturesController`، فهرست و تغییر وضعیت در `StoreContactMessagesAdminApiController` و رابط در `ContactMessages.cshtml`. مجوز صفحه و API در migration `078-contact-message-inbox.sql` ثبت می‌شود.
 - پیام‌های داخل حساب مشتری: صفحهٔ `account-messages` در `FeaturesController` و API `StoreAccountMessagesAdminApiController` برای یافتن مشتری، ثبت پیام و مشاهدهٔ سابقه. مشتری پیام را در `/Profile/Messages` می‌بیند و وضعیت خواندن را ثبت می‌کند.
-- انبار: `WarehouseAdminApiController`، `WarehouseDocumentsApiController` و `WarehouseMovementsApiController`.
+- انبار: `WarehouseAdminApiController`، `WarehouseDocumentsApiController` و `WarehouseMovementsApiController`. محاسبه و ثبت ledger سند در `Data/Infrastructure/Warehouse/WarehouseStockLedger.cs` و قرارداد آن در `Data/Application/Warehouse/Contracts/IWarehouseStockLedger.cs` است؛ endpointهای Admin همچنان مالک HTTP، مجوز و تراکنش درخواست‌اند.
 - محتوای فروشگاه: endpointهای FAQ، دسته، مقاله، صفحات خدمات و رسانه در همین پوشهٔ API.
 - حساب مدیر و مجوزها: `Admin/Controllers/AuthController.cs` و مدل‌های `Data/Domain/Admin/Entities/`.
 - تنظیمات سایت و SMTP: `SiteSettingsController` و `Admin/Areas/Admin/Views/SiteSettings/Index.cshtml`؛ عمر کد تأیید ایمیل هم در همین بخش «ارسال ایمیل» تنظیم و در `Store.SiteSetting` ذخیره می‌شود. قرارداد ستون در [راهنمای دیتابیس](../architecture/database.md) آمده است.

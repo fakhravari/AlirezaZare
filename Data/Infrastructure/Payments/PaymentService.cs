@@ -1,9 +1,11 @@
 using System.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Shop.Data.Application.Store.Contracts;
 using Shop.Data.Domain.Account.Entities;
 using Shop.Data.Infrastructure.Persistence;
 
-namespace Shop.Services;
+namespace Shop.Data.Infrastructure.Payments;
 
 public sealed class PaymentService(ShopDbContext db, IPaymentGateway gateway, ILogger<PaymentService> logger)
 {
@@ -56,7 +58,8 @@ public sealed class PaymentService(ShopDbContext db, IPaymentGateway gateway, IL
         return updated == 1 ? new("redirect", redirect) : new("request-unknown");
     }
 
-    public async Task<string> VerifyAsync(Guid attemptId, IQueryCollection callback, CancellationToken ct)
+    public async Task<string> VerifyAsync(Guid attemptId,
+        IReadOnlyDictionary<string, IReadOnlyList<string>> callback, CancellationToken ct)
     {
         var attempt = await db.StorePaymentAttempts.AsNoTracking()
             .Where(x => x.Id == attemptId)
@@ -129,11 +132,8 @@ public sealed class PaymentService(ShopDbContext db, IPaymentGateway gateway, IL
         return "verified";
     }
 
-    public sealed class PaymentOrder { public long Id { get; set; } public decimal TotalAmount { get; set; } public string Status { get; set; } = ""; public string PaymentMethod { get; set; } = ""; }
     public sealed class PaymentAttemptRow { public Guid Id { get; set; } public long IdOrder { get; set; } public decimal Amount { get; set; } public string Status { get; set; } = ""; public string? GatewayReference { get; set; } }
 }
-
-public sealed record PaymentStartResult(string Status, Uri? RedirectUri = null);
 
 public static class PaymentVerificationRules
 {

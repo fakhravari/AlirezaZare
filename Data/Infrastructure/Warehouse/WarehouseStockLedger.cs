@@ -1,10 +1,11 @@
 using Microsoft.EntityFrameworkCore;
+using Shop.Data.Application.Warehouse.Contracts;
 using Shop.Data.Domain.Warehouse.Entities;
 using Shop.Data.Infrastructure.Persistence;
 
-namespace Shop.Admin.Services;
+namespace Shop.Data.Infrastructure.Stock;
 
-public sealed class WarehouseStockLedger(ShopDbContext db)
+public sealed class WarehouseStockLedger(ShopDbContext db) : IWarehouseStockLedger
 {
     public async Task RebuildDocumentAsync(long documentId, CancellationToken ct)
     {
@@ -99,5 +100,3 @@ public sealed class WarehouseStockLedger(ShopDbContext db)
 
     private sealed record StockKey(long WarehouseId, long InventoryItemId, long PlanId);
 }
-
-public sealed class InsufficientWarehouseStockException : Exception { }

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
+using Shop.Data.Application.Account.Contracts;
 using Shop.Data.Application.Email.Contracts;
 using Shop.Data.Infrastructure.Persistence;
 using Shop.Services;
@@ -14,7 +15,7 @@ namespace Shop.Controllers;
 [ApiController]
 [Route("api/auth/email-code")]
 public sealed partial class EmailVerificationController(
-    EmailVerificationCodeStore codes,
+    IEmailVerificationCodeStore codes,
     IEmailSender emailSender,
     ShopDbContext db) : ControllerBase
 {
@@ -28,28 +29,29 @@ public sealed partial class EmailVerificationController(
             .Where(x => x.Id == 1).Select(x => x.EmailVerificationCodeLifetimeMinutes)
             .SingleOrDefaultAsync(cancellationToken);
         if (lifetimeMinutes is < 1 or > 1440) lifetimeMinutes = 15;
-        if (!codes.TryCreate(email, lifetimeMinutes, out var code, out var retryAfter))
+        EmailCodeCreateResult codeResult = await codes.TryCreateAsync(email, lifetimeMinutes, cancellationToken);
+        if (!codeResult.Created)
             return StatusCode(StatusCodes.Status429TooManyRequests,
                 new
                 {
                     code = "rate-limited",
-                    message = $"در {lifetimeMinutes} دقیقهٔ گذشته برای این ایمیل کد ارسال شده است؛ کد قبلی تا پایان این زمان معتبر است.",
-                    retryAfterSeconds = Math.Max(1, (int)Math.Ceiling(retryAfter.TotalSeconds))
+                    message = $"در {codeResult.LifetimeMinutes} دقیقهٔ گذشته برای این ایمیل کد ارسال شده است؛ کد قبلی تا پایان این زمان معتبر است.",
+                    retryAfterSeconds = Math.Max(1, (int)Math.Ceiling(codeResult.RetryAfter.TotalSeconds))
                 });
         try
         {
-            var emailBody = $"کد تأیید شما: {code}\n\nاین کد تا {lifetimeMinutes} دقیقه معتبر است. اگر این درخواست از طرف شما نبوده، این پیام را نادیده بگیرید.";
+            var emailBody = $"کد تأیید شما: {codeResult.Code}\n\nاین کد تا {lifetimeMinutes} دقیقه معتبر است. اگر این درخواست از طرف شما نبوده، این پیام را نادیده بگیرید.";
             await emailSender.SendAsync(email, "کد تأیید فروشگاه برق شیراز", emailBody, cancellationToken);
             return Ok(new { message = $"ایمیل حاوی کد تأیید ارسال شد؛ کد تا {lifetimeMinutes} دقیقه اعتبار دارد و در این مدت ایمیل دیگری ارسال نمی‌شود." });
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
-            codes.Remove(email);
+            await codes.RemoveAsync(email, CancellationToken.None);
             return StatusCode(499);
         }
         catch
         {
-            codes.Remove(email);
+            await codes.RemoveAsync(email, CancellationToken.None);
             return StatusCode(StatusCodes.Status503ServiceUnavailable,
                 new { code = "email-unavailable", message = "ارسال ایمیل در حال حاضر ممکن نیست." });
         }
@@ -70,7 +72,8 @@ public sealed partial class EmailVerificationController(
             return BadRequest(new { code = "invalid-password", message = "رمز عبور باید دست‌کم ۱ نویسه داشته باشد." });
         if (!isRegistration && request.Password is not null)
             return BadRequest(new { code = "invalid-request" });
-        if (!codes.Verify(email, request.Code!)) return BadRequest(new { code = "invalid-code" });
+        if (!await codes.VerifyAsync(email, request.Code!, cancellationToken))
+            return BadRequest(new { code = "invalid-code" });
         var profile = await db.AccountProfiles.SingleOrDefaultAsync(x => x.Email == email, cancellationToken);
         if (profile is null)
         {

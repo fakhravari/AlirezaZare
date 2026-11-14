@@ -2,6 +2,8 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Mvc;
+using Shop.Data.Application.Store.Contracts;
+using Shop.Data.Infrastructure.Payments;
 using Shop.Services;
 
 namespace Shop.Controllers;
@@ -35,7 +37,11 @@ public sealed class PaymentController(PaymentService payments, IAntiforgery anti
     [HttpGet("callback/{attemptId:guid}")]
     public async Task<IActionResult> Callback(Guid attemptId, CancellationToken ct)
     {
-        string result = await payments.VerifyAsync(attemptId, Request.Query, ct);
+        IReadOnlyDictionary<string, IReadOnlyList<string>> callback = Request.Query.ToDictionary(
+            item => item.Key,
+            item => (IReadOnlyList<string>)item.Value.Select(value => value ?? string.Empty).ToArray(),
+            StringComparer.OrdinalIgnoreCase);
+        string result = await payments.VerifyAsync(attemptId, callback, ct);
         return result switch
         {
             "verified" => Ok(new { status = result }),

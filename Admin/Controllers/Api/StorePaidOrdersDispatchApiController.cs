@@ -4,7 +4,7 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Shop.Admin.Services;
+using Shop.Data.Application.Warehouse.Contracts;
 using Shop.Data.Domain.Account.Entities;
 using Shop.Data.Domain.Warehouse.Entities;
 using Shop.Data.Infrastructure.Persistence;
@@ -15,7 +15,7 @@ namespace Shop.Admin.Controllers.Api;
 [ApiController]
 [Authorize(Roles = "system.full-access")]
 [Route("api/admin/store/paid-orders-dispatch")]
-public sealed class StorePaidOrdersDispatchApiController(ShopDbContext db, WarehouseStockLedger stockLedger) : ControllerBase
+public sealed class StorePaidOrdersDispatchApiController(ShopDbContext db, IWarehouseStockLedger stockLedger) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> List(CancellationToken cancellationToken)

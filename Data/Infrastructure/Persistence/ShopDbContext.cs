@@ -75,6 +75,7 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
     public DbSet<GeoProvince> GeoProvinces => Set<GeoProvince>();
     public DbSet<GeoCity> GeoCities => Set<GeoCity>();
     public DbSet<AccountProfile> AccountProfiles => Set<AccountProfile>();
+    public DbSet<EmailVerificationCode> EmailVerificationCodes => Set<EmailVerificationCode>();
     public DbSet<AccountMessage> AccountMessages => Set<AccountMessage>();
     public DbSet<AccountGender> AccountGenders => Set<AccountGender>();
     public DbSet<AccountCoupon> AccountCoupons => Set<AccountCoupon>();
@@ -227,6 +228,18 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.HasIndex(x => x.IdProfile).IsUnique();
             entity.Property(x => x.PaymentMethod).HasMaxLength(40).IsRequired();
             entity.Property(x => x.UpdatedAtUtc).HasPrecision(3);
+        });
+        modelBuilder.Entity<EmailVerificationCode>(entity =>
+        {
+            entity.ToTable("EmailVerificationCode", "Account");
+            entity.HasKey(x => x.Email);
+            entity.Property(x => x.Email).HasMaxLength(254).IsRequired();
+            entity.Property(x => x.CodeHash).HasMaxLength(32).IsRequired();
+            entity.Property(x => x.SentAtUtc).HasPrecision(3).IsRequired();
+            entity.Property(x => x.ExpiresAtUtc).HasPrecision(3).IsRequired();
+            entity.Property(x => x.LifetimeMinutes).IsRequired();
+            entity.Property(x => x.Attempts).IsRequired();
+            entity.HasIndex(x => x.ExpiresAtUtc);
         });
         modelBuilder.Entity<StoreContentPage>(entity =>
         {

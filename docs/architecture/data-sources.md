@@ -20,6 +20,8 @@
 
 ارسال کد ورود و اعلان فرم تماس در Shop از `IEmailSender` مشترک Data استفاده می‌کند؛ پیام فرم تماس پیش از تلاش SMTP در `Store.ContactFormMessage` ذخیره می‌شود. `AddShopDatabase` همین فرستنده را در DI ادمین نیز ثبت می‌کند؛ در کد فعلی پنل فقط تنظیمات SMTP مدیریت می‌شود و ارسال ایمیل از Admin انجام نمی‌گیرد. خبرنامهٔ مهمان در `Store.NewsletterSubscriber` و خبرنامهٔ حساب‌دار در `Account.Profile.NewsletterEnabled` می‌رود. پیام مدیر به مشتری در `Account.Message` ذخیره و از endpointهای پروفایل بر اساس شناسهٔ نشست خوانده می‌شود.
 
-کد تأیید ایمیل در `EmailVerificationCodeStore` به شکل hash و در حافظهٔ همان process نگهداری می‌شود؛ مقدار زمان اعتبار و فاصلهٔ ارسال از `Store.SiteSetting.EmailVerificationCodeLifetimeMinutes` می‌آید. این state بین restart یا چند نمونهٔ برنامه مشترک نیست.
+کد تأیید ایمیل به شکل hash در `Account.EmailVerificationCode` نگهداری می‌شود؛ پیاده‌سازی `Data/Infrastructure/Identity/DatabaseEmailVerificationCodeStore.cs` برای هر ایمیل قفل application سطح SQL و تراکنش می‌گیرد تا ارسال/تأیید هم‌زمان بین نمونه‌های برنامه هماهنگ بماند. کد خام ذخیره نمی‌شود؛ پس از تأیید حذف می‌شود، رکورد منقضی هنگام تأیید یا پاک‌سازی فرصت‌طلبانه در درخواست کد بعدی حذف می‌شود و ارسال ناموفق نیز آن را پاک می‌کند. مقدار زمان اعتبار از `Store.SiteSetting.EmailVerificationCodeLifetimeMinutes` می‌آید. داده در restart و بین نمونه‌های برنامه مشترک است.
+
+منطق پرداخت/ثبت attempt در `Data/Infrastructure/Payments/PaymentService.cs` است و قرارداد gateway مستقل از ASP.NET در `Data/Application/Store/Contracts/IPaymentGateway.cs` قرار دارد. `Shop/Controllers/PaymentController.cs` فقط نشست، antiforgery و نگاشت پاسخ HTTP را مدیریت می‌کند. دفتر گردش موجودی سند نیز در `Data/Infrastructure/Warehouse/WarehouseStockLedger.cs` قرار دارد؛ endpointهای Admin هنوز مالک کنترل مجوز و تراکنش کلی عملیات هستند.
 
 آخرین مرور ساختار کد: ۱۴ نوامبر ۲۰۲۶. وضعیت هر محیط/پایگاه داده باید جداگانه و با شواهد همان محیط تأیید شود.

@@ -8,7 +8,7 @@
 | [جزئیات محصول](product.md) | قیمت، گزینه‌ها، رسانه و تاریخچه |
 | [سبد و checkout](cart.md) | state مرورگر، quote و ثبت سفارش |
 | [نمونهٔ گزارش T-SQL سبد](../t-sql/README.md) | نمایش سطری اقلام، ویژگی‌ها، متعلقات و محاسبهٔ قیمت |
-| [پرداخت](payment.md) | PaymentController/PaymentService و اتصال gateway |
+| [پرداخت](payment.md) | PaymentController، سرویس کاربردی Data و اتصال gateway |
 | [موسسات پرداخت](payment-institutions.md) | فهرست معرفی‌شده از StoreBank |
 | [طرح‌های فروش](sales-plans.md) | offer، quote و تاریخچهٔ نسخه‌های قیمت |
 
