@@ -1,0 +1,7 @@
+@model Shop.Admin.Models.FeaturePageViewModel
+<div class="admin-page" data-admin-newsletter-subscribers data-api="/api/admin/store/newsletter-subscribers">
+ @await Html.PartialAsync("_AdminPageIntro", (Model.Title, Model.Description)) @Html.AntiForgeryToken()
+ <section class="panel panel-inverse"><div class="panel-heading"><h2 class="panel-title">اعضای خبرنامه</h2><a class="btn btn-xs btn-default" href="/api/admin/store/newsletter-subscribers/export">خروجی CSV</a></div><div class="panel-body">
+ <form data-newsletter-filter class="admin-filter-bar d-flex gap-2 mb-3"><input class="form-control" name="q" placeholder="جست‌وجوی ایمیل"/><label class="form-check"><input class="form-check-input" type="checkbox" name="includeUnsubscribed"/> لغوشده‌ها</label><button class="btn btn-primary">اعمال</button></form>
+ <div data-newsletter-status class="small text-muted">در حال دریافت…</div><div class="table-responsive"><table class="table table-striped"><thead><tr><th>ایمیل</th><th>تاریخ عضویت</th><th>وضعیت</th><th>عملیات</th></tr></thead><tbody data-newsletter-rows></tbody></table></div>
+ </div></section></div>

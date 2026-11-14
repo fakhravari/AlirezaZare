@@ -35,3 +35,5 @@
 در ۱۴ نوامبر ۲۰۲۶، migration `080-footer-content-and-social-links` روی پایگاه اصلی `bsshopir_fakhravari` اجرا شد. marker ۰۸۰، چهار ستون جدید `Store.SiteSetting` و حفظ توضیح فوتر رکورد تنظیمات تأیید شدند.
 
 بازبینی ساختار: ۱۴ نوامبر ۲۰۲۶.
+- Migration `086-contact-replies-newsletter-admin.sql` ستون ایمیل و پاسخ فرم تماس و تاریخ لغو عضویت خبرنامه را اضافه می‌کند.
+Migration `087-assign-store-feature-permissions.sql` مجوزهای خبرنامه و پاسخ فرم تماس را به نقش `system.full-access-store` تخصیص می‌دهد.

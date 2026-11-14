@@ -30,9 +30,11 @@ public sealed class StoreContactApiController(
     {
         string name = (request.Name ?? string.Empty).Trim();
         string phone = NormalizePhone(request.Phone);
+        string email = (request.Email ?? string.Empty).Trim().ToLowerInvariant();
         string subject = (request.Subject ?? string.Empty).Trim();
         string message = (request.Message ?? string.Empty).Trim();
         if (name.Length is < 3 or > 100 || name.Any(char.IsControl) ||
+            !string.IsNullOrWhiteSpace(email) && (email.Length > 254 || !MailAddress.TryCreate(email, out _)) ||
             phone.Length != 11 || !phone.StartsWith("09", StringComparison.Ordinal) ||
             !Subjects.Contains(subject) || message.Length is < 10 or > 3000 || message.Any(character => character == '\0'))
             return BadRequest(new { code = "invalid-contact-request", message = "اطلاعات فرم تماس را بررسی و کامل کنید." });
@@ -41,6 +43,7 @@ public sealed class StoreContactApiController(
         {
             Name = name,
             Phone = phone,
+            Email = string.IsNullOrWhiteSpace(email) ? null : email,
             SubjectKey = subject,
             Message = message,
             Status = "new",
@@ -94,5 +97,5 @@ public sealed class StoreContactApiController(
         return digits.ToString();
     }
 
-    public sealed record ContactRequest(string? Name, string? Phone, string? Subject, string? Message);
+    public sealed record ContactRequest(string? Name, string? Phone, string? Email, string? Subject, string? Message);
 }

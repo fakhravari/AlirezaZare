@@ -7,6 +7,7 @@ window.HNUI.mount("pages-contact", document, () => {
   const fields = {
     name: form.querySelector("#contactName"),
     phone: form.querySelector("#contactPhone"),
+    email: form.querySelector("#contactEmail"),
     subject: form.querySelector("#contactSubject"),
     message: form.querySelector("#contactMessage"),
   };
@@ -123,6 +124,7 @@ window.HNUI.mount("pages-contact", document, () => {
           name: fields.name.value.trim(),
           phone: ui.toEnglishDigits(fields.phone.value).replace(/\D/g, ""),
           subject: fields.subject.value,
+          email: fields.email.value.trim(),
           message: fields.message.value.trim(),
         }),
       });

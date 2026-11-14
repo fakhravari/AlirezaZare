@@ -32,6 +32,8 @@ public sealed class FeaturesController : Controller
             if (!User.IsInRole("system.full-access")) return Forbid();
             return View("~/Areas/Store/Views/Features/Customers.cshtml", page);
         }
+        if (page.FeatureId == "newsletter-subscribers")
+            return View("~/Areas/Store/Views/Features/NewsletterSubscribers.cshtml", page);
         if (page.FeatureId == "contact-messages")
             return View("~/Areas/Store/Views/Features/ContactMessages.cshtml", page);
         if (page.FeatureId == "account-messages")

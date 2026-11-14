@@ -1,5 +1,8 @@
+using System.Net.Mail;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Shop.Data.Application.Email.Contracts;
+using Shop.Data.Application.Store;
 using Shop.Data.Infrastructure.Persistence;
 
 namespace Shop.Admin.Controllers.Api;
@@ -7,43 +10,49 @@ namespace Shop.Admin.Controllers.Api;
 [Area("Store")]
 [ApiController]
 [Route("api/admin/store/contact-messages")]
-public sealed class StoreContactMessagesAdminApiController(ShopDbContext db) : ControllerBase
+public sealed class StoreContactMessagesAdminApiController(ShopDbContext db, IEmailSender emailSender, ILogger<StoreContactMessagesAdminApiController> logger) : ControllerBase
 {
     [HttpGet]
-    public async Task<IActionResult> List([FromQuery] string? status, [FromQuery] string? q,
-        [FromQuery] int page = 1, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> List([FromQuery] string? status, [FromQuery] string? q, [FromQuery] int page = 1, CancellationToken cancellationToken = default)
     {
-        if (page < 1 || page > 100000 || status is not (null or "" or "new" or "read" or "closed"))
-            return ValidationProblem(detail: "فیلتر یا شمارهٔ صفحه معتبر نیست.", statusCode: 400);
+        if (page < 1 || page > 100000 || status is not (null or "" or "new" or "read" or "closed")) return ValidationProblem(detail: "فیلتر یا شمارهٔ صفحه معتبر نیست.", statusCode: 400);
         var query = db.StoreContactMessages.AsNoTracking().AsQueryable();
         if (!string.IsNullOrEmpty(status)) query = query.Where(x => x.Status == status);
-        if (!string.IsNullOrWhiteSpace(q))
-        {
-            string term = q.Trim();
-            query = query.Where(x => x.Name.Contains(term) || x.Phone.Contains(term) || x.Message.Contains(term));
-        }
+        if (!string.IsNullOrWhiteSpace(q)) { string term = q.Trim(); query = query.Where(x => x.Name.Contains(term) || x.Phone.Contains(term) || (x.Email != null && x.Email.Contains(term)) || x.Message.Contains(term)); }
         int total = await query.CountAsync(cancellationToken);
-        var items = await query.OrderByDescending(x => x.CreatedAtUtc).ThenByDescending(x => x.Id)
-            .Skip((page - 1) * 50).Take(50)
-            .Select(x => new { x.Id, x.Name, x.Phone, x.SubjectKey, x.Message, x.Status, x.CreatedAtUtc })
-            .ToListAsync(cancellationToken);
+        var items = await query.OrderByDescending(x => x.CreatedAtUtc).ThenByDescending(x => x.Id).Skip((page - 1) * 50).Take(50)
+            .Select(x => new { x.Id, x.Name, x.Phone, x.Email, x.SubjectKey, x.Message, x.Status, x.AdminReply, x.RepliedAtUtc, x.ReplyEmailSentAtUtc, x.CreatedAtUtc }).ToListAsync(cancellationToken);
         return Ok(new { total, page, pageSize = 50, items });
     }
 
     [HttpPut("{id:long}/status")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> UpdateStatus(long id, [FromBody] ContactMessageStatusInput input,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> UpdateStatus(long id, [FromBody] ContactMessageStatusInput input, CancellationToken cancellationToken)
     {
-        if (input.Status is not ("new" or "read" or "closed"))
-            return ValidationProblem(detail: "وضعیت پیام معتبر نیست.", statusCode: 400);
-        var item = await db.StoreContactMessages.SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
-        if (item is null) return NotFound();
-        item.Status = input.Status;
-        item.UpdatedAtUtc = DateTime.UtcNow;
-        await db.SaveChangesAsync(cancellationToken);
-        return Ok(new { message = "وضعیت پیام ذخیره شد." });
+        if (input.Status is not ("new" or "read" or "closed")) return ValidationProblem(detail: "وضعیت پیام معتبر نیست.", statusCode: 400);
+        var item = await db.StoreContactMessages.SingleOrDefaultAsync(x => x.Id == id, cancellationToken); if (item is null) return NotFound();
+        item.Status = input.Status; item.UpdatedAtUtc = DateTime.UtcNow; await db.SaveChangesAsync(cancellationToken); return Ok(new { message = "وضعیت پیام ذخیره شد." });
+    }
+
+    [HttpPut("{id:long}/reply")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Reply(long id, [FromBody] ContactMessageReplyInput input, CancellationToken ct)
+    {
+        string reply = (input.Reply ?? string.Empty).Trim();
+        if (reply.Length is < 2 or > 4000) return ValidationProblem(detail: "متن پاسخ باید بین ۲ تا ۴۰۰۰ نویسه باشد.", statusCode: 400);
+        var item = await db.StoreContactMessages.SingleOrDefaultAsync(x => x.Id == id, ct); if (item is null) return NotFound();
+        item.AdminReply = StoreHtmlSanitizer.Sanitize(reply); item.RepliedAtUtc = DateTime.UtcNow; item.UpdatedAtUtc = DateTime.UtcNow; item.Status = "closed";
+        await db.SaveChangesAsync(ct);
+        if (string.IsNullOrWhiteSpace(item.Email) || !MailAddress.TryCreate(item.Email, out var recipient)) return Ok(new { saved = true, emailSent = false, message = "پاسخ ثبت شد؛ برای این پیام ایمیل مشتری ثبت نشده است." });
+        try
+        {
+            string subject = item.SubjectKey switch { "order" => "پاسخ پیگیری سفارش", "consultation" => "پاسخ مشاوره پیش از خرید", "after-sales" => "پاسخ خدمات پس از فروش", "business" => "پاسخ همکاری سازمانی", _ => "پاسخ پیام شما" };
+            await emailSender.SendAsync(recipient.Address, subject, $"سلام {item.Name}\n\n{System.Text.RegularExpressions.Regex.Replace(item.AdminReply, "<[^>]+>", " ")}\n\nبا احترام\nپشتیبانی فروشگاه", ct);
+            item.ReplyEmailSentAtUtc = DateTime.UtcNow; await db.SaveChangesAsync(ct); return Ok(new { saved = true, emailSent = true, message = "پاسخ ثبت و ایمیل ارسال شد." });
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        { logger.LogWarning(ex, "Contact reply email failed for {ContactMessageId}", id); return Ok(new { saved = true, emailSent = false, message = "پاسخ ثبت شد اما ارسال ایمیل ناموفق بود." }); }
     }
 }
-
 public sealed record ContactMessageStatusInput(string Status);
+public sealed record ContactMessageReplyInput(string? Reply);

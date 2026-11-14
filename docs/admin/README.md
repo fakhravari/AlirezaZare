@@ -45,3 +45,7 @@
 ثبت نسخهٔ قیمت از Controllerهای مدیریت خارج شده و در قرارداد `Data/Application/Store/Contracts/IStorePriceVersionService.cs` و پیاده‌سازی `Data/Infrastructure/Persistence/Repositories/StorePriceVersionService.cs` متمرکز است؛ بنابراین ثبت قیمت کالا، تنوع و متعلقه قوانین مبلغ، تخفیف، سابقه و نسخهٔ فعال یکسانی دارد.
 
 بازبینی با کد: ۱۴ نوامبر ۲۰۲۶.
+
+### اعضای خبرنامه و پاسخ فرم تماس
+صفحهٔ newsletter-subscribers اعضای مهمان خبرنامه را جست‌وجو، خروجی CSV و لغو/فعال می‌کند. در contact-messages ایمیل ثبت‌شدهٔ مشتری نمایش داده می‌شود و پاسخ مدیر در رکورد پیام ذخیره و در صورت وجود ایمیل ارسال می‌گردد.
+مجوزهای این دو قابلیت در migrationهای `086-contact-replies-newsletter-admin.sql` و `087-assign-store-feature-permissions.sql` ثبت و به نقش مدیر فروشگاه تخصیص داده می‌شوند.

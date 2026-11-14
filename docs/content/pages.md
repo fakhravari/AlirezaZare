@@ -19,3 +19,5 @@ route → Controller → source/DbContext → View → page script/style. برا
 [محتوا](README.md) · [فهرست docs](../README.md)
 
 بازبینی routeها: ۱۴ نوامبر ۲۰۲۶.
+
+- فرم تماس ایمیل اختیاری مشتری را برای امکان پاسخ مستقیم پشتیبانی دریافت می‌کند.

@@ -591,6 +591,7 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.HasKey(x => x.Id);
             entity.Property(x => x.Email).HasMaxLength(254).IsRequired();
             entity.Property(x => x.SubscribedAtUtc).HasPrecision(3);
+            entity.Property(x => x.UnsubscribedAtUtc).HasPrecision(3);
             entity.HasIndex(x => x.Email).IsUnique();
         });
         modelBuilder.Entity<StoreContactMessage>(entity =>
@@ -599,8 +600,12 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.HasKey(x => x.Id);
             entity.Property(x => x.Name).HasMaxLength(100).IsRequired();
             entity.Property(x => x.Phone).HasMaxLength(30).IsRequired();
+            entity.Property(x => x.Email).HasMaxLength(254);
             entity.Property(x => x.SubjectKey).HasMaxLength(30).IsRequired();
             entity.Property(x => x.Message).HasMaxLength(3000).IsRequired();
+            entity.Property(x => x.AdminReply).HasMaxLength(4000);
+            entity.Property(x => x.RepliedAtUtc).HasPrecision(3);
+            entity.Property(x => x.ReplyEmailSentAtUtc).HasPrecision(3);
             entity.Property(x => x.Status).HasMaxLength(20).IsRequired();
             entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
             entity.Property(x => x.UpdatedAtUtc).HasPrecision(3);

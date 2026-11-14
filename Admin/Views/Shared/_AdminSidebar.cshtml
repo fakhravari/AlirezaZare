@@ -12,7 +12,7 @@
     bool Can(string permission) => User.IsInRole("system.full-access") || User.HasClaim("admin_permission", permission);
     bool canCatalog = Can("Store:Catalog:Products") || Can("Store:Catalog:Categories") || Can("Store:Catalog:Brands") || Can("Store:Catalog:Attributes");
     bool canStoreSales = User.IsInRole("system.full-access") || Can("Store:Features:Index:promotions");
-    bool canStorePeople = User.IsInRole("system.full-access") || Can("Store:Features:Index:reviews") || Can("Store:Features:Index:questions") || Can("Store:Features:Index:contact-messages") || Can("Store:Features:Index:account-messages");
+    bool canStorePeople = User.IsInRole("system.full-access") || Can("Store:Features:Index:reviews") || Can("Store:Features:Index:questions") || Can("Store:Features:Index:contact-messages") || Can("Store:Features:Index:account-messages") || Can("Store:Features:Index:newsletter-subscribers");
     bool canOverview = Can("Admin:Home:Index") || Can("Store:Dashboard:Index") || Can("Warehouse:Dashboard:Index");
     bool canStore = User.IsInRole("system.full-access") || Can("Store:Dashboard:Index") || canCatalog || canStoreSales || canStorePeople;
     bool canWarehouseOperations = new[] { "receipts", "dispatches", "transfers", "returns", "stocktake", "adjustments" }.Any(id => Can($"Warehouse:Features:Index:{id}"));
@@ -153,8 +153,8 @@
         </div>
     </div>
 </div>
-    <div class="menu-item has-sub @(inStore && new[] { "Customers", "Features" }.Contains(controller, StringComparer.OrdinalIgnoreCase) && new[] { "customers", "reviews", "questions", "contact-messages", "account-messages" }.Contains(feature ?? "", StringComparer.OrdinalIgnoreCase) ? "active expand" : "")" hidden="@(!canStorePeople)">
-    <a href="#store-customers" class="menu-link" aria-expanded="@(inStore && new[] { "Customers", "Features" }.Contains(controller, StringComparer.OrdinalIgnoreCase) && new[] { "customers", "reviews", "questions", "contact-messages", "account-messages" }.Contains(feature ?? "", StringComparer.OrdinalIgnoreCase) ? "true" : "false")">
+    <div class="menu-item has-sub @(inStore && new[] { "Customers", "Features" }.Contains(controller, StringComparer.OrdinalIgnoreCase) && new[] { "customers", "reviews", "questions", "contact-messages", "account-messages", "newsletter-subscribers" }.Contains(feature ?? "", StringComparer.OrdinalIgnoreCase) ? "active expand" : "")" hidden="@(!canStorePeople)">
+    <a href="#store-customers" class="menu-link" aria-expanded="@(inStore && new[] { "Customers", "Features" }.Contains(controller, StringComparer.OrdinalIgnoreCase) && new[] { "customers", "reviews", "questions", "contact-messages", "account-messages", "newsletter-subscribers" }.Contains(feature ?? "", StringComparer.OrdinalIgnoreCase) ? "true" : "false")">
         <span class="menu-icon">
             <i class="fa fa-users" aria-hidden="true"></i>
         </span>
@@ -180,6 +180,7 @@
         <div class="menu-item @(IsFeature("contact-messages") ? "active" : "")" hidden="@(!Can("Store:Features:Index:contact-messages"))">
             <a class="menu-link" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="contact-messages" data-admin-nav><span class="menu-icon"><i class="fa fa-envelope" aria-hidden="true"></i></span><span class="menu-text">پیام‌های فرم تماس</span></a>
         </div>
+        <div class="menu-item @(IsFeature("newsletter-subscribers") ? "active" : "")" hidden="@(!Can("Store:Features:Index:newsletter-subscribers"))"><a class="menu-link" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="newsletter-subscribers" data-admin-nav><span class="menu-icon"><i class="fa fa-newspaper" aria-hidden="true"></i></span><span class="menu-text">اعضای خبرنامه</span></a></div>
         <div class="menu-item @(IsFeature("account-messages") ? "active" : "")" hidden="@(!Can("Store:Features:Index:account-messages"))">
             <a class="menu-link" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="account-messages" data-admin-nav><span class="menu-icon"><i class="fa fa-envelope-open-text" aria-hidden="true"></i></span><span class="menu-text">پیام‌های حساب مشتریان</span></a>
         </div>
