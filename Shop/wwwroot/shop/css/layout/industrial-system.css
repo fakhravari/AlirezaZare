@@ -9938,10 +9938,10 @@ body #heroSwiper .swiper-pagination-bullet {
   position: relative;
   display: block;
   box-sizing: border-box;
-  width: 44px;
-  height: 44px;
-  min-width: 44px;
-  min-height: 44px;
+  width: 30px;
+  height: 30px;
+  min-width: 30px;
+  min-height: 30px;
   padding: 0;
   border: 0;
   background: transparent;
@@ -9952,8 +9952,8 @@ body #heroSwiper .swiper-pagination-bullet::before {
   top: 50%;
   left: 50%;
   box-sizing: border-box;
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
   border: 1px solid rgba(16, 42, 67, 0.24);
   border-radius: 999px;
   background: #d7d0c5;
@@ -9986,7 +9986,7 @@ body .owl-carousel > .owl-dots > .owl-dot.active span {
 }
 
 body #heroSwiper .swiper-pagination-bullet-active::before {
-  width: 26px;
+  width: 16px;
   border-color: var(--industrial-yellow);
   background: var(--industrial-yellow);
 }
