@@ -45,7 +45,9 @@ DECLARE @ProfileId BIGINT = 90;
         SELECT TOP (1) version.PriceAmount, version.DiscountPercent
         FROM Store.PriceVersion AS version
         WHERE version.IsActive = 1
-          AND version.ScopeKey = CONCAT(N'product/',ci.IdProduct,N'/plan/',ci.IdSalesPlan)
+          AND version.IdProduct = ci.IdProduct
+          AND version.IdSalesPlan = ci.IdSalesPlan
+          AND version.PriceKind = N'product'
         ORDER BY version.Id DESC
     ) AS pp
     OUTER APPLY
@@ -53,7 +55,9 @@ DECLARE @ProfileId BIGINT = 90;
         SELECT TOP (1) version.PriceAmount, version.DiscountPercent
         FROM Store.PriceVersion AS version
         WHERE version.IsActive = 1
-          AND version.ScopeKey = CONCAT(N'variant/',ci.IdProductVariant,N'/plan/',ci.IdSalesPlan)
+          AND version.IdProductVariant = ci.IdProductVariant
+          AND version.IdSalesPlan = ci.IdSalesPlan
+          AND version.PriceKind = N'variant'
         ORDER BY version.Id DESC
     ) AS vp
     WHERE c.IdProfile = @ProfileId
@@ -112,7 +116,7 @@ Components AS
     (
         SELECT TOP (1) version.PriceAmount
         FROM Store.PriceVersion AS version
-        WHERE version.IsActive = 1 AND version.ScopeKey = CONCAT(N'option/', value.Id)
+        WHERE version.IsActive = 1 AND version.IdOptionValue = value.Id
         ORDER BY version.Id DESC
     ) AS optionVersion
 
@@ -154,7 +158,10 @@ Components AS
         SELECT TOP (1) version.PriceAmount
         FROM Store.PriceVersion AS version
         WHERE version.IsActive = 1
-          AND version.ScopeKey = CONCAT(N'accessory/',cr.IdProduct,N'/',pa.IdAccessory,N'/plan/',cr.IdSalesPlan)
+          AND version.IdProduct = cr.IdProduct
+          AND version.IdAccessory = pa.IdAccessory
+          AND version.IdSalesPlan = cr.IdSalesPlan
+          AND version.PriceKind = N'accessory'
         ORDER BY version.Id DESC
     ) AS accessoryVersion
     WHERE pa.IsRequired = 1 OR selected.Id IS NOT NULL

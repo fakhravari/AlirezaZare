@@ -967,3 +967,9 @@
         padding: .85rem;
     }
 }
+
+/* Shared RTL rich text editor used by content and customer communication forms. */
+.note-editor.note-frame { border-color: var(--bs-border-color, #d9e1e7); }
+.note-editor .note-editing-area .note-editable { direction: rtl; text-align: right; min-height: 150px; font-family: inherit; line-height: 1.9; }
+.note-toolbar { direction: rtl; }
+.note-btn-group { margin-left: .25rem; margin-right: 0; }

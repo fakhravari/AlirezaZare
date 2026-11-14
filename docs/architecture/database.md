@@ -12,7 +12,7 @@
 
 هیچ سندی فهرست ثابتِ «همهٔ migrationهای اجراشده» نیست؛ وضعیت اجرای هر پایگاه را از جدول history/marker همان پایگاه و migration runner واقعی بخوانید. پیش از حذف یا بازسازی داده، backup، شمارش وابستگی و مجوز صریح لازم است.
 
-دامنه‌های اصلی در entityهای `Store`، `Account`، `Warehouse` و `Admin` تفکیک شده‌اند. قیمت نسخه‌ای در `Store.PriceVersion` است؛ تاریخچهٔ قبل از نصب نسخه‌بندی را نمی‌توان از snapshot اولیه بازسازی کرد. مرجع قراردادها: [قیمت محصول](../store/product.md) و [دیتابیس و داده‌ها](data-sources.md).
+دامنه‌های اصلی در entityهای `Store`، `Account`، `Warehouse` و `Admin` تفکیک شده‌اند. قیمت نسخه‌ای در `Store.PriceVersion` است. مایگریشن `082-price-version-typed-references.sql` ارجاع polymorphic قدیمی را به ستون‌های FK نوع‌دار تبدیل و `ScopeKey` و `TargetId` را حذف کرد؛ مایگریشن `083-price-version-remove-kind.sql` ستون تکراری `PriceKind` را حذف کرد و `084-price-version-single-reference.sql` پرشدن هم‌زمان بیش از یک FK را ممنوع کرد. نوع مؤلفه از تنها FK پرشده نتیجه می‌شود و تطبیق و یکتایی قیمت فعال بر کلیدهای FK استوار است. تاریخچهٔ قبل از نصب نسخه‌بندی را نمی‌توان از snapshot اولیه بازسازی کرد. مرجع قراردادها: [قیمت محصول](../store/product.md)، [طرح‌های فروش](../store/sales-plans.md) و [دیتابیس و داده‌ها](data-sources.md).
 
 ثبت‌نام خبرنامهٔ کاربران مهمان در entity `StoreNewsletterSubscriber` و جدول `Store.NewsletterSubscriber` نگهداری می‌شود؛ ایمیل با حروف کوچک canonical و دارای unique index است. کاربران واردشده در جدول جدید درج نمی‌شوند و از `Account.Profile.NewsletterEnabled` استفاده می‌کنند. ایجاد جدول و اصلاح متن محتوای seed در `076-customer-support-and-newsletter.sql` است؛ فایل SQL باید طبق فرایند استقرار روی هر پایگاه هدف اجرا و marker آن بررسی شود.
 

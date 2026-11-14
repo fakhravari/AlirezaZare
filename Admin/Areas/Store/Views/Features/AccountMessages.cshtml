@@ -10,7 +10,7 @@
                     <div class="col-md-6"><label class="form-label" for="account-message-customer">جست‌وجوی مشتری با نام یا ایمیل</label><input class="form-control" id="account-message-customer" type="search" maxlength="120" autocomplete="off" placeholder="نام یا ایمیل مشتری" list="account-message-customers" required/><datalist id="account-message-customers"></datalist><input type="hidden" name="profileId"/></div>
                     <div class="col-md-6"><label class="form-label" for="account-message-category">دسته</label><select class="form-select" id="account-message-category" name="category"><option value="notice">اطلاعیه</option><option value="support">پشتیبانی</option><option value="orders">سفارش</option><option value="products">محصولات</option></select></div>
                     <div class="col-12"><label class="form-label" for="account-message-title">عنوان</label><input class="form-control" id="account-message-title" name="title" maxlength="200" required/></div>
-                    <div class="col-12"><label class="form-label" for="account-message-body">متن پیام</label><textarea class="form-control" id="account-message-body" name="body" rows="4" maxlength="4000" required></textarea></div>
+                    <div class="col-12"><label class="form-label" for="account-message-body">متن پیام</label><textarea class="form-control" data-rich-editor id="account-message-body" name="body" rows="4" maxlength="4000" required></textarea></div>
                     <div class="col-12"><button class="btn btn-primary" type="submit">ثبت و ارسال به حساب</button><span class="small text-muted ms-2" data-account-message-status role="status" aria-live="polite"></span></div>
                 </div>
             </form>

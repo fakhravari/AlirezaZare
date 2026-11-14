@@ -46,7 +46,8 @@
             if (!form.elements.profileId.value) { ui.notify("ابتدا مشتری را از پیشنهادهای جست‌وجو انتخاب کنید.", "danger"); return; }
             const submit = form.querySelector('[type="submit"]'); submit.disabled = true;
             try {
-                const result = await ui.getJson(page.dataset.api, { method: "POST", headers: { "Content-Type": "application/json", RequestVerificationToken: token(page) }, body: JSON.stringify({ profileId: Number(form.elements.profileId.value), title: form.elements.title.value, category: form.elements.category.value, body: form.elements.body.value }) });
+                const messageBody = window.AdminRichEditor?.getValue(form.elements.body) ?? form.elements.body.value;
+                const result = await ui.getJson(page.dataset.api, { method: "POST", headers: { "Content-Type": "application/json", RequestVerificationToken: token(page) }, body: JSON.stringify({ profileId: Number(form.elements.profileId.value), title: form.elements.title.value, category: form.elements.category.value, body: messageBody }) });
                 ui.notify(result.message, "success"); form.reset(); form.elements.profileId.value = ""; pageNumber = 1; await load(page);
             } catch (error) { ui.notify(error.message || "ثبت پیام ناموفق بود.", "danger"); }
             finally { submit.disabled = false; }

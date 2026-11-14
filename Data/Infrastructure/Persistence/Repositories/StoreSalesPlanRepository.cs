@@ -29,16 +29,21 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
         var activePriceRows = await dbContext.StorePriceVersions.AsNoTracking()
             .Where(x => x.IsActive && products.Select(p => p.Id).Contains(x.IdProduct))
             .OrderByDescending(x => x.Id).ToListAsync(cancellationToken);
-        var pricesByScope = activePriceRows.GroupBy(x => x.ScopeKey, StringComparer.Ordinal)
-            .ToDictionary(group => group.Key, group => group.First(), StringComparer.Ordinal);
+        var planProductPrices = activePriceRows.Where(x => !x.IdProductVariant.HasValue && !x.IdOptionValue.HasValue &&
+                                                           !x.IdAccessory.HasValue && !x.IdOrderItem.HasValue && x.IdSalesPlan.HasValue)
+            .ToDictionary(x => (x.IdProduct, x.IdSalesPlan!.Value));
+        var optionPrices = activePriceRows.Where(x => x.IdOptionValue.HasValue).ToDictionary(x => x.IdOptionValue!.Value);
+        var variantPrices = activePriceRows.Where(x => x.IdProductVariant.HasValue && x.IdSalesPlan.HasValue)
+            .ToDictionary(x => (x.IdProductVariant!.Value, x.IdSalesPlan!.Value));
+        var accessoryPrices = activePriceRows.Where(x => x.IdAccessory.HasValue && x.IdSalesPlan.HasValue)
+            .ToDictionary(x => (x.IdProduct, x.IdAccessory!.Value, x.IdSalesPlan!.Value));
         Dictionary<(int ProductId, string PlanId), OfferBuilder> offers = [];
         foreach (var product in products)
             foreach (var plan in planEntities)
             {
                 var custom = customOffers.SingleOrDefault(x => x.IdProduct == product.Id && x.IdSalesPlan == plan.Id);
                 if (custom is null && !plan.IsRegular) continue;
-                string priceScope = StorePriceScopes.Product(product.Id, plan.Id);
-                pricesByScope.TryGetValue(priceScope, out var priceVersion);
+                planProductPrices.TryGetValue((product.Id, plan.Id), out var priceVersion);
                 decimal discount = priceVersion?.DiscountPercent ?? custom?.DiscountPercent ?? product.DiscountPercent ?? 0m;
                 decimal price = priceVersion?.PriceAmount ?? custom?.PriceAmount ?? decimal.Round((product.PriceAmount ?? 0m) * 100m / (100m - discount), 0, MidpointRounding.AwayFromZero);
                 decimal stock = siteStock.GetValueOrDefault((product.Id, plan.Id));
@@ -59,8 +64,7 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
         {
             var key = (checked((int)row.IdProduct), row.OptionKey);
             if (!priceOptions.TryGetValue(key, out var option)) priceOptions[key] = option = new(key.Item1, row.OptionKey, row.Label);
-            string scope = StorePriceScopes.Option(row.Id);
-            pricesByScope.TryGetValue(scope, out var optionVersion);
+            optionPrices.TryGetValue(row.Id, out var optionVersion);
             option.Values.Add(new(row.ValueKey, row.ValueLabel, optionVersion?.PriceAmount ?? decimal.Round(row.PriceDelta * 1_000_000m, 0, MidpointRounding.AwayFromZero)) { Id = row.Id, PriceVersionId = optionVersion?.Id ?? 0 });
         }
 
@@ -91,8 +95,7 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
         foreach (var row in variantOfferRows)
         {
             if (!variantById.TryGetValue(row.IdProductVariant, out var variant)) continue;
-            string scope = StorePriceScopes.Variant(row.IdProductVariant, row.Id);
-            pricesByScope.TryGetValue(scope, out var priceVersion);
+            variantPrices.TryGetValue((row.IdProductVariant, row.Id), out var priceVersion);
             variant.PriceBySalesPlan[row.StoreSalesPlanKey] = priceVersion?.PriceAmount ?? row.PriceAmount;
             variant.DiscountBySalesPlan[row.StoreSalesPlanKey] = priceVersion?.DiscountPercent ?? row.DiscountPercent;
             if (priceVersion is not null) variant.PriceVersionIdsBySalesPlan[row.StoreSalesPlanKey] = priceVersion.Id;
@@ -118,15 +121,13 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
                 {
                     var overrideRow = offerAccessoryOverrides.FirstOrDefault(x => x.IdProductSalesPlanOffer == customOffer!.Id && x.IdAccessory == accessory.IdAccessory);
                     if (overrideRow is null || !overrideRow.IsAllowed) continue;
-                    string scope = StorePriceScopes.Accessory(productId, accessory.IdAccessory, plan.Id);
-                    pricesByScope.TryGetValue(scope, out var accessoryVersion);
+                    accessoryPrices.TryGetValue((productId, accessory.IdAccessory, plan.Id), out var accessoryVersion);
                     price = accessoryVersion?.PriceAmount ?? overrideRow.PriceAmount;
                     if (accessoryVersion is not null) pair.Value.AccessoryPriceVersionIds[accessory.AccessoryKey] = accessoryVersion.Id;
                 }
                 else
                 {
-                    string scope = StorePriceScopes.Accessory(productId, accessory.IdAccessory, plan.Id);
-                    pricesByScope.TryGetValue(scope, out var accessoryVersion);
+                    accessoryPrices.TryGetValue((productId, accessory.IdAccessory, plan.Id), out var accessoryVersion);
                     price = accessoryVersion?.PriceAmount ?? accessory.PriceAmount;
                     if (accessoryVersion is not null) pair.Value.AccessoryPriceVersionIds[accessory.AccessoryKey] = accessoryVersion.Id;
                 }
@@ -168,9 +169,9 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
                                 select new { option.OptionKey, ValueKey = value.ValueKey, value.Id, value.PriceDelta }).ToListAsync(cancellationToken);
         var optionIds = optionRows.Select(x => x.Id).ToArray();
         var optionVersions = await dbContext.StorePriceVersions.AsNoTracking()
-            .Where(x => x.IsActive && x.PriceKind == StorePriceKinds.Option && optionIds.Contains(x.TargetId!.Value))
+            .Where(x => x.IsActive && x.IdOptionValue.HasValue && optionIds.Contains(x.IdOptionValue.Value))
             .OrderByDescending(x => x.Id).ToListAsync(cancellationToken);
-        var optionVersionById = optionVersions.GroupBy(x => x.TargetId!.Value).ToDictionary(group => group.Key, group => group.First());
+        var optionVersionById = optionVersions.ToDictionary(x => x.IdOptionValue!.Value);
         var options = optionRows.GroupBy(x => x.OptionKey, StringComparer.Ordinal)
             .Select(group => new ProductPurchaseOptionRow(group.Key,
                 group.Select(x => new ProductPurchaseOptionValueRow(x.ValueKey,

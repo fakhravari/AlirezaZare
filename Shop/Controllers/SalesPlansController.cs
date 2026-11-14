@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Shop.Models;
 using Shop.Services;
+using Shop.Data.Domain.Store.Entities;
 using Shop.Data.Infrastructure.Persistence;
 
 namespace Shop.Controllers;
@@ -80,24 +81,26 @@ public sealed class SalesPlansController(
             ? []
             : await db.StorePriceVersions.AsNoTracking()
                 .Where(item => selectedOptionIds.Contains(item.Id) && item.IdProduct == productId &&
-                               item.PriceKind == "option" && item.IsActive)
-                .Select(item => new { item.Id, item.ScopeKey })
+                               item.IdOptionValue.HasValue && item.IdProductVariant == null && item.IdAccessory == null &&
+                               item.IdOrderItem == null && item.IsActive)
+                .Select(item => new { item.Id, item.IdOptionValue })
                 .ToListAsync(cancellationToken);
         if (selectedOptions.Count != selectedOptionIds.Length)
             return BadRequest(new { code = "invalid-price-history-scope" });
 
         var productVersions = await db.StorePriceVersions.AsNoTracking()
-            .Where(item => item.IdProduct == productId && item.IdSalesPlan == databasePlanId.Value && item.PriceKind == "product")
+            .Where(item => item.IdProduct == productId && item.IdSalesPlan == databasePlanId.Value &&
+                           item.IdProductVariant == null && item.IdOptionValue == null && item.IdAccessory == null && item.IdOrderItem == null)
             .OrderBy(item => item.CreatedAtUtc).ThenBy(item => item.Id)
-            .Select(item => new { item.Id, item.ScopeKey, item.PriceKind, item.PriceAmount, item.DiscountPercent, item.IsActive, item.CreatedAtUtc })
+            .Select(item => new { item.Id, item.IdOptionValue, item.IdProductVariant, item.IdAccessory, item.IdOrderItem, item.PriceAmount, item.DiscountPercent, item.IsActive, item.CreatedAtUtc })
             .ToListAsync(cancellationToken);
-        string[] optionScopes = selectedOptions.Select(item => item.ScopeKey).ToArray();
-        var optionVersions = optionScopes.Length == 0
+        long[] optionValueIds = selectedOptions.Select(item => item.IdOptionValue!.Value).ToArray();
+        var optionVersions = optionValueIds.Length == 0
             ? []
             : await db.StorePriceVersions.AsNoTracking()
-                .Where(item => optionScopes.Contains(item.ScopeKey))
+                .Where(item => item.IdOptionValue.HasValue && optionValueIds.Contains(item.IdOptionValue.Value))
                 .OrderBy(item => item.CreatedAtUtc).ThenBy(item => item.Id)
-                .Select(item => new { item.Id, item.ScopeKey, item.PriceKind, item.PriceAmount, item.DiscountPercent, item.IsActive, item.CreatedAtUtc })
+                .Select(item => new { item.Id, item.IdOptionValue, item.IdProductVariant, item.IdAccessory, item.IdOrderItem, item.PriceAmount, item.DiscountPercent, item.IsActive, item.CreatedAtUtc })
                 .ToListAsync(cancellationToken);
 
         var versions = productVersions.Concat(optionVersions)
@@ -105,8 +108,10 @@ public sealed class SalesPlansController(
             .Select(item => new
             {
                 item.Id,
-                item.ScopeKey,
-                item.PriceKind,
+                item.IdOptionValue,
+                item.IdProductVariant,
+                item.IdAccessory,
+                item.IdOrderItem,
                 item.PriceAmount,
                 item.DiscountPercent,
                 item.IsActive,
@@ -121,8 +126,8 @@ public sealed class SalesPlansController(
             history = versions.Select(item => new
             {
                 priceVersionId = item.Id,
-                component = item.PriceKind,
-                scopeKey = item.ScopeKey,
+                component = StorePriceVersionReference.GetComponent(item.IdProductVariant, item.IdOptionValue, item.IdAccessory, item.IdOrderItem),
+                targetId = item.IdOptionValue ?? item.IdProductVariant ?? item.IdAccessory ?? item.IdOrderItem,
                 item.PriceAmount,
                 item.DiscountPercent,
                 finalAmount = decimal.Round(item.PriceAmount * (100m - item.DiscountPercent) / 100m, 0,

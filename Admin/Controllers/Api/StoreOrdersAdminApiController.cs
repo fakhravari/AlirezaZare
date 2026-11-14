@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using Shop.Data.Domain.Account.Entities;
+using Shop.Data.Domain.Store.Entities;
 using Shop.Data.Infrastructure.Persistence;
 using System.Security.Claims;
 
@@ -145,7 +146,7 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
                                     join v in db.StorePriceVersions.AsNoTracking() on r.IdPriceVersion equals v.Id
                                     where itemRows.Select(i => i.Id).Contains(r.IdOrderItem)
                                     orderby r.IdOrderItem, r.IdPriceVersion
-                                    select new { r.IdOrderItem, r.IdPriceVersion, v.ScopeKey, v.PriceKind, v.PriceAmount, v.DiscountPercent, v.IsActive, v.CreatedAtUtc, v.ChangeReason })
+                                    select new { r.IdOrderItem, r.IdPriceVersion, v.IdProductVariant, v.IdOptionValue, v.IdAccessory, PriceVersionOrderItemId = v.IdOrderItem, v.PriceAmount, v.DiscountPercent, v.IsActive, v.CreatedAtUtc, v.ChangeReason })
                 .ToListAsync(cancellationToken);
             var items = itemRows.Select(i => new
             {
@@ -154,7 +155,19 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
                 unitAmount = i.UnitAmount,
                 salesPlan = i.StoreSalesPlanKey,
                 options = JsonDocument.Parse(i.OptionsJson).RootElement.Clone(),
-                priceReferences = references.Where(r => r.IdOrderItem == i.Id).Select(r => new { priceVersionId = r.IdPriceVersion, component = r.PriceKind, calculatedUnitAmount = r.PriceKind is "option" or "accessory" or "order-snapshot" ? r.PriceAmount : decimal.Round(r.PriceAmount * (100m - r.DiscountPercent) / 100m, 0, MidpointRounding.AwayFromZero), scope = r.ScopeKey, priceKind = r.PriceKind, recordedPriceAmount = r.PriceAmount, discountPercent = r.DiscountPercent, isCurrent = r.IsActive, recordedAtUtc = r.CreatedAtUtc, reason = r.ChangeReason }).ToArray()
+                priceReferences = references.Where(r => r.IdOrderItem == i.Id).Select(r => new
+                {
+                    priceVersionId = r.IdPriceVersion,
+                    component = StorePriceVersionReference.GetComponent(r.IdProductVariant, r.IdOptionValue, r.IdAccessory, r.PriceVersionOrderItemId),
+                    calculatedUnitAmount = StorePriceVersionReference.AppliesDiscount(r.IdOptionValue, r.IdAccessory, r.PriceVersionOrderItemId)
+                        ? decimal.Round(r.PriceAmount * (100m - r.DiscountPercent) / 100m, 0, MidpointRounding.AwayFromZero)
+                        : r.PriceAmount,
+                    recordedPriceAmount = r.PriceAmount,
+                    discountPercent = r.DiscountPercent,
+                    isCurrent = r.IsActive,
+                    recordedAtUtc = r.CreatedAtUtc,
+                    reason = r.ChangeReason
+                }).ToArray()
             }).ToList();
             var history = await db.StoreOrderShippingHistories.AsNoTracking().Where(x => x.IdOrder == id)
                 .OrderByDescending(x => x.Id).Select(x => new { x.PreviousStatus, x.NewStatus, x.ActorUserKey, x.ChangedAtUtc })

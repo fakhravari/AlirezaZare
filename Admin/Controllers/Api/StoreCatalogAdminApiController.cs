@@ -57,7 +57,7 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
         var regularPlans = await db.SalesPlanReferences.Where(x => x.IsRegular && x.IdStockOwnerType == 1).Select(x => x.Id).ToListAsync(cancellationToken);
         decimal listAmount = decimal.Round(input.PriceAmount * 100m / (100m - input.DiscountPercent), 0, MidpointRounding.AwayFromZero);
         foreach (long planId in regularPlans)
-            await AppendPriceVersionAsync(StorePriceScopes.Product(id, planId), id, planId, listAmount, input.DiscountPercent, cancellationToken);
+            await AppendPriceVersionAsync(id, planId, listAmount, input.DiscountPercent, cancellationToken);
         await transaction.CommitAsync(cancellationToken);
         return Ok(new { message = "اطلاعات کالا ذخیره شد." });
     }
@@ -65,11 +65,12 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
     public sealed class EditorOption { public long Id { get; set; } public string Name { get; set; } = ""; }
     public sealed record ProductEditorInput(string? Name, string? EnglishName, long BrandId, long CategoryId, decimal PriceAmount, decimal DiscountPercent, int MaxPurchaseQuantity);
 
-    private async Task AppendPriceVersionAsync(string scope, long productId, long planId, decimal amount, decimal discount, CancellationToken ct)
+    private async Task AppendPriceVersionAsync(long productId, long planId, decimal amount, decimal discount, CancellationToken ct)
     {
-        var prior = await db.StorePriceVersions.SingleOrDefaultAsync(x => x.ScopeKey == scope && x.IsActive, ct);
+        var prior = await db.StorePriceVersions.SingleOrDefaultAsync(x => x.IdProduct == productId && x.IdSalesPlan == planId &&
+            x.IdProductVariant == null && x.IdOptionValue == null && x.IdAccessory == null && x.IdOrderItem == null && x.IsActive, ct);
         if (prior is not null) prior.IsActive = false;
-        db.StorePriceVersions.Add(new StorePriceVersion { ScopeKey = scope, IdProduct = productId, IdSalesPlan = planId, PriceKind = StorePriceKinds.Product, PriceAmount = amount, DiscountPercent = discount, IsActive = true, CreatedAtUtc = DateTime.UtcNow, ChangedBy = User.Identity?.Name, PreviousVersionId = prior?.Id });
+        db.StorePriceVersions.Add(new StorePriceVersion { IdProduct = productId, IdSalesPlan = planId, PriceAmount = amount, DiscountPercent = discount, IsActive = true, CreatedAtUtc = DateTime.UtcNow, ChangedBy = User.Identity?.Name, PreviousVersionId = prior?.Id });
         await db.SaveChangesAsync(ct);
     }
 

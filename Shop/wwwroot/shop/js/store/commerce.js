@@ -1193,18 +1193,28 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                         state.innerHTML = '<i class="bi bi-info-circle" aria-hidden="true"></i><strong>تاریخچه‌ای ثبت نشده است</strong><span>برای این کالا و طرح، نسخهٔ قیمت قابل‌نمایشی پیدا نشد.</span>';
                         return;
                     }
+                    const historyKey = item => item.component === "product"
+                        ? `product:${result.productId}:${result.salesPlanId}`
+                        : item.component === "option"
+                            ? `option:${item.targetId}`
+                            : item.component === "variant"
+                                ? `variant:${item.targetId}:${result.salesPlanId}`
+                                : item.component === "accessory"
+                                    ? `accessory:${item.targetId}:${result.salesPlanId}`
+                                    : `order-snapshot:${item.targetId}`;
                     const scopes = new Map();
                     for (const item of history) {
-                        if (!scopes.has(item.scopeKey)) scopes.set(item.scopeKey, []);
-                        scopes.get(item.scopeKey).push(item);
+                        const key = historyKey(item);
+                        if (!scopes.has(key)) scopes.set(key, []);
+                        scopes.get(key).push(item);
                     }
                     const orderedScopes = [...scopes.values()];
-                    const currentByScope = new Map(orderedScopes.map(items => [items[0].scopeKey, Number(items[0].finalAmount)]));
-                    const events = history.map(item => ({ ...item, at: new Date(item.createdAtUtc).getTime() })).sort((a,b) => a.at-b.at || a.priceVersionId-b.priceVersionId);
+                    const currentByScope = new Map(orderedScopes.map(items => [historyKey(items[0]), Number(items[0].finalAmount)]));
+                    const events = history.map(item => ({ ...item, historyKey: historyKey(item), at: new Date(item.createdAtUtc).getTime() })).sort((a,b) => a.at-b.at || a.priceVersionId-b.priceVersionId);
                     const values = [];
                     const timestamps = [];
                     for (const event of events) {
-                        currentByScope.set(event.scopeKey, Number(event.finalAmount));
+                        currentByScope.set(event.historyKey, Number(event.finalAmount));
                         timestamps.push(event.at);
                         values.push([...currentByScope.values()].reduce((sum, amount) => sum + amount, 0));
                     }

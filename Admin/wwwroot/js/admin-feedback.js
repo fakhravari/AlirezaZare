@@ -10,7 +10,7 @@
     async function request(url, method = "GET", body) { return ui.getJson(url, { method, headers: body ? { "Content-Type": "application/json", RequestVerificationToken: token() } : {}, ...(body ? { body: JSON.stringify(body) } : {}) }); }
     function openModal(item, page) {
         const form = document.querySelector("[data-feedback-form]"); form.elements.id.value = item.id;
-        form.elements.status.value = item.status; form.elements.adminReply.value = item.adminReply || "";
+        form.elements.status.value = item.status; window.AdminRichEditor?.setValue(form.elements.adminReply, item.adminReply || "");
         document.querySelector("[data-feedback-text]").textContent = `${item.displayName}${item.isSample ? " (نمونه)" : ""} · ${item.productName} (${item.storeProductKey})\n${item.feedbackText}`;
         form.elements.status.disabled = page.dataset.canModerate !== "true";
         form.elements.adminReply.disabled = page.dataset.canModerate !== "true";
@@ -52,7 +52,8 @@
             const submit = form.querySelector('[type="submit"]');
             form.dataset.saving = "true"; submit.disabled = true;
             try {
-                const result = await request(`${page.dataset.api}/${id}`, "PUT", { status: form.elements.status.value, adminReply: form.elements.adminReply.value || null });
+                const adminReply = window.AdminRichEditor?.getValue(form.elements.adminReply) ?? form.elements.adminReply.value;
+                const result = await request(`${page.dataset.api}/${id}`, "PUT", { status: form.elements.status.value, adminReply: adminReply || null });
                 ui.notify(result.message, "success"); window.bootstrap?.Modal?.getInstance(document.getElementById("admin-feedback-modal"))?.hide(); await load(page);
             } catch (error) { ui.notify(error.message || "ذخیرهٔ بررسی ناموفق بود.", "danger"); }
             finally { form.dataset.saving = "false"; submit.disabled = false; }

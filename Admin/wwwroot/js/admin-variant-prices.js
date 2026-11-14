@@ -114,7 +114,7 @@
             const rows = await request(page, `${page.dataset.api}/price-history?take=200`);
             for (const item of rows) {
                 const row = document.createElement("tr");
-                row.append(cell(`#${item.id}`), cell(String(item.idProduct)), cell(item.idSalesPlan ?? "—"), cell(item.priceKind), cell(number.format(item.priceAmount)), cell(item.isActive ? "فعال" : "سابقه"), cell(item.createdAtUtc ? new Date(item.createdAtUtc).toLocaleString("fa-IR") : "—"), cell(item.previousVersionId ? `#${item.previousVersionId}` : "—"));
+                row.append(cell(`#${item.id}`), cell(String(item.idProduct)), cell(item.idSalesPlan ?? "—"), cell(item.targetType), cell(number.format(item.priceAmount)), cell(item.isActive ? "فعال" : "سابقه"), cell(item.createdAtUtc ? new Date(item.createdAtUtc).toLocaleString("fa-IR") : "—"), cell(item.previousVersionId ? `#${item.previousVersionId}` : "—"));
                 body.append(row);
             }
             message.textContent = rows.length ? `${number.format(rows.length)} نسخهٔ اخیر` : "هنوز نسخه‌ای ثبت نشده است.";

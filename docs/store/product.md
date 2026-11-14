@@ -4,9 +4,9 @@
 
 ## تغییر ویژگی صفحه
 
-markup و ViewModel را با projection سرور هماهنگ کنید؛ انتخاب variant و option باید با quote سرور هم‌خوان باشد. تاریخچهٔ قیمت مرجعش [Store.PriceVersion](../../Data/Domain/Store/Entities/StorePriceVersion.cs) است و endpoint آن در `SalesPlansController.ProductPriceHistory` قرار دارد. درخواست `GET /api/store/sales-plans/products/{productId}/price-history` با `salesPlanId` و شناسهٔ نسخه‌های option انتخاب‌شده، رویدادهای قیمت پایه و optionهای معتبر را برمی‌گرداند. هر نسخه شامل ID، scope، مبلغ، تخفیف، وضعیت فعال و زمان UTC است.
+markup و ViewModel را با projection سرور هماهنگ کنید؛ انتخاب variant و option باید با quote سرور هم‌خوان باشد. تاریخچهٔ قیمت مرجعش [Store.PriceVersion](../../Data/Domain/Store/Entities/StorePriceVersion.cs) است و endpoint آن در `SalesPlansController.ProductPriceHistory` قرار دارد. درخواست `GET /api/store/sales-plans/products/{productId}/price-history` با `salesPlanId` و شناسهٔ نسخه‌های option انتخاب‌شده، رویدادهای قیمت پایه و optionهای معتبر را برمی‌گرداند. هر نسخه شامل ID، نوع مؤلفه، شناسهٔ هدف FK در صورت وجود، مبلغ، تخفیف، وضعیت فعال و زمان UTC است.
 
-هر scope یک نسخهٔ فعال جاری دارد؛ نسخه‌های قبلی برای تاریخچه حفظ می‌شوند. order item به نسخه‌های اعمال‌شده با `StoreOrderItemPriceReference` متصل است تا بررسی مبلغ سفارش ممکن باشد. جدول جداگانهٔ تاریخچهٔ محصول در این قرارداد مرجع نیست.
+هر ترکیب کلیدهای محصول، طرح فروش و FK نوع‌دار یک نسخهٔ فعال جاری دارد؛ نوع مؤلفه از تنها FK پرشده نتیجه می‌شود و نسخه‌های قبلی برای تاریخچه حفظ می‌شوند. order item به نسخه‌های اعمال‌شده با `StoreOrderItemPriceReference` متصل است تا بررسی مبلغ سفارش ممکن باشد. جدول جداگانهٔ تاریخچهٔ محصول در این قرارداد مرجع نیست.
 
 نسخه‌بندی از شروع ثبت داده‌ها تاریخچه می‌سازد؛ migration آغازین snapshot زمان نصب را ثبت می‌کند و سابقهٔ پیش از آن قابل بازسازی نیست. بخش‌هایی که رکورد تاریخی ندارند نباید نمودار ساختگی نشان دهند. مرجع جزئیات طرح و quote: [sales-plans](sales-plans.md).
 

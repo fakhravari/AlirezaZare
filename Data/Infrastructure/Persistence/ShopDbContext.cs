@@ -619,16 +619,19 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
         {
             entity.ToTable("PriceVersion", "Store");
             entity.HasKey(x => x.Id);
-            entity.Property(x => x.ScopeKey).HasMaxLength(300).IsRequired();
-            entity.Property(x => x.PriceKind).HasMaxLength(32).IsRequired();
             entity.Property(x => x.PriceAmount).HasPrecision(19, 0);
             entity.Property(x => x.DiscountPercent).HasPrecision(5, 2);
             entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
             entity.Property(x => x.ChangedBy).HasMaxLength(256);
             entity.Property(x => x.ChangeReason).HasMaxLength(300);
-            entity.HasIndex(x => x.ScopeKey).IsUnique().HasFilter("[IsActive] = 1");
-            entity.HasIndex(x => new { x.IdProduct, x.IdSalesPlan, x.PriceKind, x.TargetId, x.Id });
+            entity.HasIndex(x => new { x.IdProduct, x.IdSalesPlan, x.IdProductVariant, x.IdOptionValue, x.IdAccessory, x.IdOrderItem, x.Id });
+            entity.HasOne<WarehouseProduct>().WithMany().HasForeignKey(x => x.IdProduct).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<SalesPlanReference>().WithMany().HasForeignKey(x => x.IdSalesPlan).OnDelete(DeleteBehavior.Restrict);
             entity.HasOne(x => x.PreviousVersion).WithMany().HasForeignKey(x => x.PreviousVersionId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<ProductVariant>().WithMany().HasForeignKey(x => new { x.IdProductVariant, x.IdProduct }).HasPrincipalKey(x => new { x.Id, x.IdProduct }).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<StoreProductPurchaseOptionValue>().WithMany().HasForeignKey(x => x.IdOptionValue).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<StoreAccessory>().WithMany().HasForeignKey(x => x.IdAccessory).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<StoreCustomerOrderItem>().WithMany().HasForeignKey(x => x.IdOrderItem).OnDelete(DeleteBehavior.Restrict);
         });
         modelBuilder.Entity<StoreOrderItemPriceReference>(entity =>
         {

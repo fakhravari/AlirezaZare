@@ -712,7 +712,7 @@
             const titleLabel = document.createElement("label"); titleLabel.className = "form-label mb-1"; titleLabel.htmlFor = headingId; titleLabel.textContent = "عنوان بخش";
             const heading = document.createElement("input"); heading.id = headingId; heading.className = "form-control mb-3"; heading.maxLength = 300; heading.value = section.heading || ""; heading.dataset.sectionHeading = ""; heading.required = true;
             const bodyLabel = document.createElement("label"); bodyLabel.className = "form-label mb-1"; bodyLabel.htmlFor = bodyId; bodyLabel.textContent = "متن بخش";
-            const body = document.createElement("textarea"); body.id = bodyId; body.className = "form-control mb-3"; body.rows = 5; body.maxLength = 20000; body.value = section.body || ""; body.dataset.sectionBody = ""; body.required = true;
+            const body = document.createElement("textarea"); body.id = bodyId; body.className = "form-control mb-3"; body.rows = 5; body.maxLength = 20000; body.value = section.body || ""; body.dataset.sectionBody = ""; body.dataset.richEditor = ""; body.required = true;
             const remove = document.createElement("button"); remove.type = "button"; remove.className = "btn btn-danger btn-sm align-self-start"; remove.dataset.serviceSectionRemove = ""; remove.textContent = "حذف بخش";
             const moveUp = document.createElement("button"); moveUp.type = "button"; moveUp.className = "btn btn-default btn-sm me-1"; moveUp.dataset.serviceSectionMove = "up"; moveUp.textContent = "بالا";
             const moveDown = document.createElement("button"); moveDown.type = "button"; moveDown.className = "btn btn-default btn-sm me-1"; moveDown.dataset.serviceSectionMove = "down"; moveDown.textContent = "پایین";
@@ -730,7 +730,7 @@
             const headingLabel = document.createElement("label"); headingLabel.className = "form-label mb-1"; headingLabel.htmlFor = headingId; headingLabel.textContent = "عنوان بخش";
             const heading = document.createElement("input"); heading.id = headingId; heading.className = "form-control mb-3"; heading.maxLength = 300; heading.value = section.heading || ""; heading.required = true; heading.dataset.magSectionHeading = "";
             const bodyLabel = document.createElement("label"); bodyLabel.className = "form-label mb-1"; bodyLabel.htmlFor = bodyId; bodyLabel.textContent = "متن بخش";
-            const body = document.createElement("textarea"); body.id = bodyId; body.className = "form-control mb-3"; body.rows = 5; body.value = section.body || ""; body.required = true; body.dataset.magSectionBody = "";
+            const body = document.createElement("textarea"); body.id = bodyId; body.className = "form-control mb-3"; body.rows = 5; body.value = section.body || ""; body.required = true; body.dataset.magSectionBody = ""; body.dataset.richEditor = "";
             const actions = document.createElement("div"); actions.className = "d-flex flex-wrap gap-2 border-top pt-3 admin-content-section-card__actions";
             const up = document.createElement("button"); up.type = "button"; up.className = "btn btn-default btn-sm"; up.dataset.magSectionMove = "up"; up.textContent = "بالا";
             const down = document.createElement("button"); down.type = "button"; down.className = "btn btn-default btn-sm"; down.dataset.magSectionMove = "down"; down.textContent = "پایین";
@@ -742,7 +742,7 @@
     document.addEventListener("click", event => {
         const magazineAdd = event.target.closest("[data-mag-section-add]");
         if (magazineAdd) {
-            const form = magazineAdd.closest("[data-mag-editor]"), container = form.querySelector("[data-mag-sections]"), sections = [...container.querySelectorAll("[data-mag-section]")].map(row => ({ heading: row.querySelector("[data-mag-section-heading]").value, body: row.querySelector("[data-mag-section-body]").value }));
+            const form = magazineAdd.closest("[data-mag-editor]"), container = form.querySelector("[data-mag-sections]"), sections = [...container.querySelectorAll("[data-mag-section]")].map(row => ({ heading: row.querySelector("[data-mag-section-heading]").value, body: window.AdminRichEditor?.getValue(row.querySelector("[data-mag-section-body]")) ?? row.querySelector("[data-mag-section-body]").value }));
             sections.push({ heading: "", body: "" }); renderMagazineSections(container, sections); container.lastElementChild?.querySelector("[data-mag-section-heading]")?.focus(); return;
         }
         const magazineRemove = event.target.closest("[data-mag-section-remove]");
@@ -757,7 +757,7 @@
         }
         const add = event.target.closest("[data-service-section-add]");
         if (add) {
-            const form = add.closest("[data-service-page-editor]"), container = form.querySelector("[data-service-sections]"), existing = [...container.querySelectorAll("[data-service-section]")].map(row => ({ sectionKey: row.querySelector("[data-section-key]").value, heading: row.querySelector("[data-section-heading]").value, body: row.querySelector("[data-section-body]").value }));
+            const form = add.closest("[data-service-page-editor]"), container = form.querySelector("[data-service-sections]"), existing = [...container.querySelectorAll("[data-service-section]")].map(row => ({ sectionKey: row.querySelector("[data-section-key]").value, heading: row.querySelector("[data-section-heading]").value, body: window.AdminRichEditor?.getValue(row.querySelector("[data-section-body]")) ?? row.querySelector("[data-section-body]").value }));
             existing.push({ sectionKey: `section-${Date.now()}`, heading: "", body: "" }); renderServiceSections(container, existing); return;
         }
         const remove = event.target.closest("[data-service-section-remove]");
@@ -787,7 +787,7 @@
         const form = event.target.closest("[data-service-page-editor]"); if (!form) return;
         event.preventDefault(); const root = form.closest("[data-service-pages]"), select = root.querySelector("[data-service-page-select]"), button = form.querySelector('[type="submit"]');
         const sectionRows = [...form.querySelectorAll("[data-service-section]")];
-        const sections = sectionRows.map(row => ({ sectionKey: row.querySelector("[data-section-key]").value, heading: row.querySelector("[data-section-heading]").value, body: row.querySelector("[data-section-body]").value }));
+        const sections = sectionRows.map(row => ({ sectionKey: row.querySelector("[data-section-key]").value, heading: row.querySelector("[data-section-heading]").value, body: window.AdminRichEditor?.getValue(row.querySelector("[data-section-body]")) ?? row.querySelector("[data-section-body]").value }));
         if (!sections.length) { ui.notify("هر صفحه باید دست‌کم یک بخش داشته باشد.", "danger"); return; }
         const pageKey = select.value;
         const body = { title: form.elements.title.value, description: form.elements.description.value, isPublished: form.elements.isPublished.checked, sections };
@@ -816,7 +816,8 @@
         }
         try {
             const item = await ui.getJson(`/api/admin/store/magazine/${button.dataset.id}`); form.reset(); form.elements.id.value = button.dataset.id;
-            for (const name of ["articleKey","title","category","summary","author","kicker","branch","topic","area","heroImagePath","contentImagePath","readTimeMinutes","readTimeText","lead","conclusion"]) form.elements[name].value = item[name] || "";
+            for (const name of ["articleKey","title","category","summary","author","kicker","branch","topic","area","heroImagePath","contentImagePath","readTimeMinutes","readTimeText"]) form.elements[name].value = item[name] || "";
+            for (const name of ["lead", "conclusion"]) window.AdminRichEditor?.setValue(form.elements[name], item[name] || "");
             renderMagazineSections(form.querySelector("[data-mag-sections]"), item.sections || []); form.elements.isPublished.checked = item.isPublished;
             window.bootstrap?.Modal?.getOrCreateInstance(document.getElementById("mag-editor-modal")).show();
         } catch (error) { ui.notify(error.message || "دریافت مقاله ناموفق بود.", "danger"); }
@@ -825,9 +826,10 @@
         const form = event.target.closest("[data-mag-editor]"); if (!form) return;
         event.preventDefault(); const button = form.querySelector('[type="submit"]'); if (button.disabled) return;
         const sectionRows = [...form.querySelectorAll("[data-mag-section]")];
-        const sections = sectionRows.map(row => ({ heading: row.querySelector("[data-mag-section-heading]").value.trim(), body: row.querySelector("[data-mag-section-body]").value.trim() }));
+        const sections = sectionRows.map(row => ({ heading: row.querySelector("[data-mag-section-heading]").value.trim(), body: (window.AdminRichEditor?.getValue(row.querySelector("[data-mag-section-body]")) ?? row.querySelector("[data-mag-section-body]").value).trim() }));
         if (sections.some(section => !section.heading || !section.body)) { ui.notify("عنوان و متن همهٔ بخش‌های مقاله را تکمیل کنید.", "danger"); return; }
-        const body = {}; for (const name of ["articleKey","title","category","summary","author","kicker","branch","topic","area","heroImagePath","contentImagePath","readTimeText","lead","conclusion"]) body[name] = form.elements[name].value;
+        const body = {}; for (const name of ["articleKey","title","category","summary","author","kicker","branch","topic","area","heroImagePath","contentImagePath","readTimeText"]) body[name] = form.elements[name].value;
+        for (const name of ["lead", "conclusion"]) body[name] = window.AdminRichEditor?.getValue(form.elements[name]) ?? form.elements[name].value;
         body.readTimeMinutes = form.elements.readTimeMinutes.value ? Number(form.elements.readTimeMinutes.value) : null; body.isPublished = form.elements.isPublished.checked; body.sections = sections;
         button.disabled = true; const id = form.elements.id.value, token = form.querySelector('[name="__RequestVerificationToken"]')?.value || "";
         void ui.getJson(`/api/admin/store/magazine${id ? `/${id}` : ""}`, { method: id ? "PUT" : "POST", headers: { "Content-Type": "application/json", RequestVerificationToken: token }, body: JSON.stringify(body) })
