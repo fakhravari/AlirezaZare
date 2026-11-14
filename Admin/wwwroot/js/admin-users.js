@@ -158,6 +158,7 @@
             includeDescendants(selected.permissionKey);
         const hasSelectedDescendant = permissionKey => children(permissionKey).some(child =>
             effectivePermissions.has(child.id) || hasSelectedDescendant(child.permissionKey));
+        const inputsByPermissionKey = new Map();
         const appendChildren = parentKey => {
             const list = document.createElement("ul");
             list.className = "admin-permission-list";
@@ -195,6 +196,36 @@
                 input.value = String(permission.id);
                 input.checked = effectivePermissions.has(permission.id);
                 input.disabled = role?.roleKey === "system.full-access";
+                inputsByPermissionKey.set(permission.permissionKey, input);
+                input.addEventListener("change", () => {
+                    input.indeterminate = false;
+                    const setDescendants = (permissionKey, checked) => {
+                        for (const child of children(permissionKey)) {
+                            const childInput = inputsByPermissionKey.get(child.permissionKey);
+                            if (childInput) {
+                                childInput.checked = checked;
+                                childInput.indeterminate = false;
+                            }
+                            setDescendants(child.permissionKey, checked);
+                        }
+                    };
+                    setDescendants(permission.permissionKey, input.checked);
+
+                    let parentKey = permission.parentKey;
+                    while (parentKey) {
+                        const parentInput = inputsByPermissionKey.get(parentKey);
+                        const siblingInputs = children(parentKey)
+                            .map(child => inputsByPermissionKey.get(child.permissionKey))
+                            .filter(Boolean);
+                        if (parentInput && siblingInputs.length) {
+                            const allSelected = siblingInputs.every(child => child.checked && !child.indeterminate);
+                            const someSelected = siblingInputs.some(child => child.checked || child.indeterminate);
+                            parentInput.checked = allSelected;
+                            parentInput.indeterminate = someSelected && !allSelected;
+                        }
+                        parentKey = data.permissions.find(item => item.permissionKey === parentKey)?.parentKey;
+                    }
+                });
                 label.append(input, el("span", permission.name, "admin-permission-name"));
                 row.append(label);
                 node.append(row);
@@ -206,6 +237,21 @@
         tree.setAttribute("role", "tree");
         tree.setAttribute("aria-label", "مجوزهای نقش");
         tree.replaceChildren(appendChildren(null));
+
+        const refreshParentStates = parentKey => {
+            for (const permission of children(parentKey)) refreshParentStates(permission.permissionKey);
+            if (!parentKey) return;
+            const parentInput = inputsByPermissionKey.get(parentKey);
+            const childInputs = children(parentKey)
+                .map(child => inputsByPermissionKey.get(child.permissionKey))
+                .filter(Boolean);
+            if (!parentInput || !childInputs.length) return;
+            const allSelected = childInputs.every(child => child.checked && !child.indeterminate);
+            const someSelected = childInputs.some(child => child.checked || child.indeterminate);
+            parentInput.checked = allSelected;
+            parentInput.indeterminate = someSelected && !allSelected;
+        };
+        refreshParentStates("");
     }
 
     function renderRoleManagement(page) {

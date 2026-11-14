@@ -17,6 +17,7 @@
 - انبار: `WarehouseAdminApiController`، `WarehouseDocumentsApiController` و `WarehouseMovementsApiController`. محاسبه و ثبت ledger سند در `Data/Infrastructure/Warehouse/WarehouseStockLedger.cs` و قرارداد آن در `Data/Application/Warehouse/Contracts/IWarehouseStockLedger.cs` است؛ endpointهای Admin همچنان مالک HTTP، مجوز و تراکنش درخواست‌اند.
 - محتوای فروشگاه: endpointهای FAQ، دسته، مقاله، صفحات خدمات و رسانه در همین پوشهٔ API.
 - حساب مدیر و مجوزها: `Admin/Controllers/AuthController.cs` و مدل‌های `Data/Domain/Admin/Entities/`.
+- درخت مجوز نقش‌ها در `Admin/wwwroot/js/admin-users.js` والد را به فرزندان پایین‌دست تعمیم می‌دهد؛ والد وقتی همهٔ فرزندان انتخاب شوند تیک می‌خورد و در انتخاب ناقص به حالت نیمه‌انتخاب‌شده می‌رود. این چیدمان با منطق احراز هویت که انتخاب مجوز والد را به فرزندانش گسترش می‌دهد هماهنگ است.
 - تنظیمات سایت و SMTP: `SiteSettingsController` و `Admin/Areas/Admin/Views/SiteSettings/Index.cshtml`؛ عمر کد تأیید ایمیل، توضیح فوتر و نشانی شبکه‌های مجازی هم در همین صفحه تنظیم و در `Store.SiteSetting` ذخیره می‌شوند. قرارداد ستون در [راهنمای دیتابیس](../architecture/database.md) آمده است.
 
 فرم تماس، پیام را ابتدا در `Store.ContactFormMessage` ثبت می‌کند و سپس ایمیل اعلان را تلاش می‌کند؛ اگر SMTP در دسترس نباشد، پیام در صندوق باقی می‌ماند. صفحهٔ مدیریت با مجوز `Store:Features:Index:contact-messages` در منوی مشتریان و تعامل‌ها نمایش داده می‌شود. مدیر می‌تواند پیام‌ها را جست‌وجو و مشاهده کند و بین وضعیت‌های جدید، خوانده‌شده و بسته‌شده جابه‌جا کند.
