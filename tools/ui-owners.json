@@ -31,6 +31,7 @@
             "Admin/Areas/Store/Controllers/CatalogController.cs"
           ],
           "js": [
+            "Admin/wwwroot/lib/bootstrap/bootstrap.bundle.min.js",
             "Admin/wwwroot/js/admin-shell.js",
             "Admin/wwwroot/js/admin-ui.js",
             "Admin/wwwroot/js/admin-data.js",
