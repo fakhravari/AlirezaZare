@@ -24,11 +24,11 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db, IWarehouse
             return Forbid();
 
         var query = from document in db.WarehouseDocuments.AsNoTracking()
-            join warehouse in db.Warehouses.AsNoTracking() on document.IdWarehouse equals warehouse.Id
-            join type in db.WarehouseDocumentTypes.AsNoTracking() on document.IdDocumentType equals type.Id
-            join party in db.WarehouseParties.AsNoTracking() on document.IdParty equals party.Id
-            join plan in db.SalesPlanReferences.AsNoTracking() on document.IdSalesPlanReference equals plan.Id
-            select new { document, warehouse, type, party, plan };
+                    join warehouse in db.Warehouses.AsNoTracking() on document.IdWarehouse equals warehouse.Id
+                    join type in db.WarehouseDocumentTypes.AsNoTracking() on document.IdDocumentType equals type.Id
+                    join party in db.WarehouseParties.AsNoTracking() on document.IdParty equals party.Id
+                    join plan in db.SalesPlanReferences.AsNoTracking() on document.IdSalesPlanReference equals plan.Id
+                    select new { document, warehouse, type, party, plan };
 
         if (warehouseId.HasValue) query = query.Where(x => x.document.IdWarehouse == warehouseId.Value);
         else if (!User.IsInRole("system.full-access"))
@@ -65,12 +65,16 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db, IWarehouse
         var plans = await db.SalesPlanReferences.AsNoTracking().Where(x => x.IsActive).OrderBy(x => x.DisplayName)
             .Select(x => new { x.Id, x.StoreSalesPlanKey, x.DisplayName, x.IsRegular }).ToListAsync(cancellationToken);
         var units = await (from productUnit in db.WarehouseProductUnits.AsNoTracking()
-                join unit in db.WarehouseUnits.AsNoTracking() on productUnit.IdUnit equals unit.Id
-                where productUnit.IsActive && unit.IsActive
-                select new
-                {
-                    productUnit.IdProduct, unit.Id, unit.Name, productUnit.ConversionFactor, productUnit.IsBaseUnit
-                })
+                           join unit in db.WarehouseUnits.AsNoTracking() on productUnit.IdUnit equals unit.Id
+                           where productUnit.IsActive && unit.IsActive
+                           select new
+                           {
+                               productUnit.IdProduct,
+                               unit.Id,
+                               unit.Name,
+                               productUnit.ConversionFactor,
+                               productUnit.IsBaseUnit
+                           })
             .ToListAsync(cancellationToken);
         var unitGroups = units.GroupBy(x => x.IdProduct).ToDictionary(group => group.Key,
             group => group.Select(x => new { x.Id, x.Name, x.ConversionFactor, x.IsBaseUnit }).ToArray());
@@ -79,13 +83,22 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db, IWarehouse
             .OrderBy(x => x.Product.Name).ThenBy(x => x.ProductVariant!.Name)
             .Select(x => new
             {
-                x.Id, x.IdProduct, x.IdProductVariant, ProductName = x.Product.Name,
-                VariantName = x.ProductVariant == null ? null : x.ProductVariant.Name, x.Product.IdBaseUnit
+                x.Id,
+                x.IdProduct,
+                x.IdProductVariant,
+                ProductName = x.Product.Name,
+                VariantName = x.ProductVariant == null ? null : x.ProductVariant.Name,
+                x.Product.IdBaseUnit
             })
             .ToListAsync(cancellationToken);
         var inventoryItems = items.Select(item => new
         {
-            item.Id, item.IdProduct, item.IdProductVariant, item.ProductName, item.VariantName, item.IdBaseUnit,
+            item.Id,
+            item.IdProduct,
+            item.IdProductVariant,
+            item.ProductName,
+            item.VariantName,
+            item.IdBaseUnit,
             Units = unitGroups.GetValueOrDefault(item.IdProduct) ?? []
         });
         long[] warehouseIds = warehouses.Select(w => w.Id).ToArray();
@@ -228,7 +241,7 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db, IWarehouse
             await db.SaveChangesAsync(cancellationToken);
             await transaction.CommitAsync(cancellationToken);
             return Ok(new
-                { document.Id, document.DocumentNumber, message = "سند و گردش موجودی باهم به‌روزرسانی شدند." });
+            { document.Id, document.DocumentNumber, message = "سند و گردش موجودی باهم به‌روزرسانی شدند." });
         }
         catch (InsufficientWarehouseStockException)
         {
@@ -330,9 +343,9 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db, IWarehouse
     {
         long[] plans = input.Lines!.Select(line => line.SalesPlanId ?? input.SalesPlanId).Distinct().ToArray();
         int count = await (from owner in db.WarehouseStockOwners.AsNoTracking()
-            join plan in db.SalesPlanReferences.AsNoTracking() on owner.IdStockOwner equals plan.Id
-            where owner.IdWarehouse == input.WarehouseId && plan.IsActive && plans.Contains(plan.Id)
-            select plan.Id).CountAsync(cancellationToken);
+                           join plan in db.SalesPlanReferences.AsNoTracking() on owner.IdStockOwner equals plan.Id
+                           where owner.IdWarehouse == input.WarehouseId && plan.IsActive && plans.Contains(plan.Id)
+                           select plan.Id).CountAsync(cancellationToken);
         return count == plans.Length;
     }
 
@@ -347,9 +360,9 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db, IWarehouse
             .ToDictionaryAsync(x => x.Id, cancellationToken);
         var productIds = inventoryItems.Values.Select(x => x.IdProduct).Distinct().ToArray();
         var selectedUnits = await (from productUnit in db.WarehouseProductUnits.AsNoTracking()
-                join unit in db.WarehouseUnits.AsNoTracking() on productUnit.IdUnit equals unit.Id
-                where productIds.Contains(productUnit.IdProduct) && productUnit.IsActive && unit.IsActive
-                select new { productUnit.IdProduct, productUnit.IdUnit, productUnit.ConversionFactor, unit.Name })
+                                   join unit in db.WarehouseUnits.AsNoTracking() on productUnit.IdUnit equals unit.Id
+                                   where productIds.Contains(productUnit.IdProduct) && productUnit.IsActive && unit.IsActive
+                                   select new { productUnit.IdProduct, productUnit.IdUnit, productUnit.ConversionFactor, unit.Name })
             .ToListAsync(cancellationToken);
 
         var result = new List<PreparedLine>();

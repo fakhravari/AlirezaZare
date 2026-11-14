@@ -33,7 +33,14 @@ public sealed class AccountController(
             .Where(x => x.Id == ProfileId)
             .Select(x => new
             {
-                x.Id, x.Email, x.FirstName, x.LastName, x.Phone, x.IdGender, x.NewsletterEnabled, x.Password
+                x.Id,
+                x.Email,
+                x.FirstName,
+                x.LastName,
+                x.Phone,
+                x.IdGender,
+                x.NewsletterEnabled,
+                x.Password
             })
             .SingleOrDefaultAsync(ct);
         if (profile is null) return NotFound();
@@ -51,15 +58,30 @@ public sealed class AccountController(
             join value in db.StoreProductPurchaseOptionValues.AsNoTracking() on selected.IdProductPurchaseOptionValue equals value.Id
             join option in db.StoreProductPurchaseOptions.AsNoTracking() on value.IdProductPurchaseOption equals option.Id
             where cartItemIds.Contains(selected.IdCartItem)
-            select new { selected.IdCartItem, value.Id, option.OptionKey, OptionLabel = option.Label,
-                ValueKey = value.ValueKey, ValueLabel = value.Label, value.PriceDelta }).ToListAsync(ct);
+            select new
+            {
+                selected.IdCartItem,
+                value.Id,
+                option.OptionKey,
+                OptionLabel = option.Label,
+                ValueKey = value.ValueKey,
+                ValueLabel = value.Label,
+                value.PriceDelta
+            }).ToListAsync(ct);
         var cartAccessoryRows = cartItemIds.Length == 0 ? [] : await (
             from selected in db.AccountCartItemAccessories.AsNoTracking()
             join link in db.StoreProductAccessories.AsNoTracking() on selected.IdProductAccessory equals link.Id
             join accessory in db.StoreAccessories.AsNoTracking() on link.IdAccessory equals accessory.Id
             where cartItemIds.Contains(selected.IdCartItem)
-            select new { selected.IdCartItem, ProductAccessoryId = link.Id, accessory.AccessoryKey,
-                accessory.Name, link.IsRequired, link.PriceAmount }).ToListAsync(ct);
+            select new
+            {
+                selected.IdCartItem,
+                ProductAccessoryId = link.Id,
+                accessory.AccessoryKey,
+                accessory.Name,
+                link.IsRequired,
+                link.PriceAmount
+            }).ToListAsync(ct);
         var cartVariantRows = cartRows.Where(item => item.IdProductVariant.HasValue).Select(item => item.IdProductVariant!.Value).Distinct().ToArray();
         var cartVariants = cartVariantRows.Length == 0 ? [] : await db.ProductVariants.AsNoTracking()
             .Where(variant => cartVariantRows.Contains(variant.Id))
@@ -75,9 +97,19 @@ public sealed class AccountController(
             where address.IdProfile == ProfileId
             select new
             {
-                address.Id, address.Title, address.Recipient, address.Phone, country.NameFa,
-                address.IdCountry, ProvinceName = province.NameFa, address.IdProvince,
-                CityName = city.NameFa, address.IdCity, address.Street, address.PostalCode, address.IsDefault
+                address.Id,
+                address.Title,
+                address.Recipient,
+                address.Phone,
+                country.NameFa,
+                address.IdCountry,
+                ProvinceName = province.NameFa,
+                address.IdProvince,
+                CityName = city.NameFa,
+                address.IdCity,
+                address.Street,
+                address.PostalCode,
+                address.IsDefault
             })
             .ToListAsync(ct);
 
@@ -89,7 +121,12 @@ public sealed class AccountController(
         var alertRows = await db.AccountPriceAlerts.AsNoTracking().Where(x => x.IdProfile == ProfileId)
             .Select(x => new
             {
-                x.IdProduct, x.Scope, x.VariantsJson, x.PriceAtRegistration, x.StockAtRegistration, x.CreatedAtUtc
+                x.IdProduct,
+                x.Scope,
+                x.VariantsJson,
+                x.PriceAtRegistration,
+                x.StockAtRegistration,
+                x.CreatedAtUtc
             }).ToListAsync(ct);
 
         var interactions = await (
@@ -105,8 +142,12 @@ public sealed class AccountController(
             where entry.IdProfile == ProfileId
             select new
             {
-                slug = article.ArticleKey, name = entry.DisplayName, text = entry.FeedbackText,
-                entry.Rating, entry.Status, entry.CreatedAtUtc
+                slug = article.ArticleKey,
+                name = entry.DisplayName,
+                text = entry.FeedbackText,
+                entry.Rating,
+                entry.Status,
+                entry.CreatedAtUtc
             })
             .ToListAsync(ct);
 
@@ -118,9 +159,19 @@ public sealed class AccountController(
             .OrderByDescending(x => x.Id)
             .Select(x => new
             {
-                x.Id, x.OrderNumber, x.Status, x.ShippingCarrier, ShippingTrackingCode = x.ShippingTrackingCode,
-                x.PaymentMethod, x.ExternalOrderKey, x.OrderedAtUtc, x.ItemCount, x.TotalAmount,
-                x.SubtotalAmount, x.IdCoupon, x.CouponDiscountAmount
+                x.Id,
+                x.OrderNumber,
+                x.Status,
+                x.ShippingCarrier,
+                ShippingTrackingCode = x.ShippingTrackingCode,
+                x.PaymentMethod,
+                x.ExternalOrderKey,
+                x.OrderedAtUtc,
+                x.ItemCount,
+                x.TotalAmount,
+                x.SubtotalAmount,
+                x.IdCoupon,
+                x.CouponDiscountAmount
             })
             .ToListAsync(ct);
         long[] usedCouponIds = orderRows.Where(order => order.IdCoupon.HasValue)
@@ -138,15 +189,22 @@ public sealed class AccountController(
                 where orderIds.Contains(item.IdCustomerOrder)
                 select new
                 {
-                    item.Id, item.IdCustomerOrder, item.IdProduct, item.IdProductVariant, item.ProductNameSnapshot,
-                    plan.StoreSalesPlanKey, item.Quantity, item.UnitAmount, item.OptionsJson
+                    item.Id,
+                    item.IdCustomerOrder,
+                    item.IdProduct,
+                    item.IdProductVariant,
+                    item.ProductNameSnapshot,
+                    plan.StoreSalesPlanKey,
+                    item.Quantity,
+                    item.UnitAmount,
+                    item.OptionsJson
                 })
                 .ToListAsync(ct);
         var orderItemIds = orderItemRows.Select(x => x.Id).ToArray();
         var orderPriceReferences = orderItemIds.Length == 0 ? [] : await (from reference in db.StoreOrderItemPriceReferences.AsNoTracking()
-            join version in db.StorePriceVersions.AsNoTracking() on reference.IdPriceVersion equals version.Id
-            where orderItemIds.Contains(reference.IdOrderItem)
-            select new { reference.IdOrderItem, reference.IdPriceVersion, version.PriceKind, version.PriceAmount, version.DiscountPercent })
+                                                                          join version in db.StorePriceVersions.AsNoTracking() on reference.IdPriceVersion equals version.Id
+                                                                          where orderItemIds.Contains(reference.IdOrderItem)
+                                                                          select new { reference.IdOrderItem, reference.IdPriceVersion, version.PriceKind, version.PriceAmount, version.DiscountPercent })
             .ToListAsync(ct);
         var orderItemsById = orderItemRows.GroupBy(x => x.IdCustomerOrder)
             .ToDictionary(group => group.Key, group => group.ToArray());
@@ -179,13 +237,20 @@ public sealed class AccountController(
                         : null,
                     priceOptions = cartOptionRows.Where(option => option.IdCartItem == item.Id).Select(option => new
                     {
-                        id = option.Id, key = option.OptionKey, label = option.OptionLabel,
-                        value = option.ValueLabel, productValue = option.ValueKey, priceDelta = option.PriceDelta
+                        id = option.Id,
+                        key = option.OptionKey,
+                        label = option.OptionLabel,
+                        value = option.ValueLabel,
+                        productValue = option.ValueKey,
+                        priceDelta = option.PriceDelta
                     }).ToArray(),
                     accessories = cartAccessoryRows.Where(accessory => accessory.IdCartItem == item.Id).Select(accessory => new
                     {
-                        id = accessory.AccessoryKey, productAccessoryId = accessory.ProductAccessoryId,
-                        name = accessory.Name, required = accessory.IsRequired, selected = true,
+                        id = accessory.AccessoryKey,
+                        productAccessoryId = accessory.ProductAccessoryId,
+                        name = accessory.Name,
+                        required = accessory.IsRequired,
+                        selected = true,
                         price = accessory.PriceAmount / 1_000_000m
                     }).ToArray()
                 }
@@ -457,9 +522,9 @@ public sealed class AccountController(
             if (accessoryIds.Distinct().Count() != accessoryIds.Length || accessoryIds.Any(id => id < 1))
                 return BadRequest(new { code = "invalid-product-options" });
             var productAccessories = await (from accessory in db.StoreProductAccessories.AsNoTracking()
-                join definition in db.StoreAccessories.AsNoTracking() on accessory.IdAccessory equals definition.Id
-                where accessory.IdProduct == item.ProductId && definition.IsActive
-                select new { accessory.Id, accessory.IsRequired, definition.AccessoryKey }).ToListAsync(ct);
+                                            join definition in db.StoreAccessories.AsNoTracking() on accessory.IdAccessory equals definition.Id
+                                            where accessory.IdProduct == item.ProductId && definition.IsActive
+                                            select new { accessory.Id, accessory.IsRequired, definition.AccessoryKey }).ToListAsync(ct);
             var selectedAccessories = productAccessories.Where(accessory => accessoryIds.Contains(accessory.Id)).ToArray();
             ProductSalesOffer? cartOffer = currentCatalog.Offers.SingleOrDefault(offer =>
                 offer.ProductId == item.ProductId && offer.SalesPlanId == item.SalesPlanId);
@@ -698,7 +763,10 @@ public sealed class AccountController(
             orderby item.Id
             select new
             {
-                item.Id, item.IdProduct, item.IdProductVariant, item.Quantity,
+                item.Id,
+                item.IdProduct,
+                item.IdProductVariant,
+                item.Quantity,
                 SalesPlanId = plan.StoreSalesPlanKey
             }).ToListAsync(ct);
         if (storedCartRows.Count is < 1 or > 99)
@@ -750,8 +818,14 @@ public sealed class AccountController(
             where addressRow.Id == request.AddressId && addressRow.IdProfile == ProfileId
             select new
             {
-                addressRow.Title, addressRow.Recipient, addressRow.Phone, country = country.NameFa,
-                province = province.NameFa, city = city.NameFa, addressRow.Street, postal = addressRow.PostalCode
+                addressRow.Title,
+                addressRow.Recipient,
+                addressRow.Phone,
+                country = country.NameFa,
+                province = province.NameFa,
+                city = city.NameFa,
+                addressRow.Street,
+                postal = addressRow.PostalCode
             }).SingleOrDefaultAsync(ct);
         if (address is null) return BadRequest(new { code = "address-not-owned" });
         string addressSnapshot = JsonSerializer.Serialize(address, AccountStateJsonOptions);
@@ -934,10 +1008,16 @@ public sealed class AccountController(
         await transaction.CommitAsync(ct);
         return Ok(new
         {
-            id = order.Id, number, status = "pending-payment", itemCount = count, totalAmount = total,
-            subtotalAmount = subtotal, couponCode = appliedCoupon?.Code,
+            id = order.Id,
+            number,
+            status = "pending-payment",
+            itemCount = count,
+            totalAmount = total,
+            subtotalAmount = subtotal,
+            couponCode = appliedCoupon?.Code,
             couponDiscountAmount,
-            orderedAtUtc = DateTimeOffset.UtcNow, message = "سفارش ثبت شد و در انتظار پرداخت است.",
+            orderedAtUtc = DateTimeOffset.UtcNow,
+            message = "سفارش ثبت شد و در انتظار پرداخت است.",
             simulatedPaymentUrl = environment.IsDevelopment() ? Url.Action("Index", "SimulatedPayment", new { id = order.Id }) : null
         });
     }
@@ -1097,8 +1177,13 @@ public sealed class AccountController(
                 return BadRequest(new { code = "duplicate-price-alert" });
             normalized.Add(new
             {
-                productId, scope = item.Scope, signature, variantsJson = variants is null ? (System.Text.Json.JsonElement?)null : item.Variants, item.PriceAtRegistration,
-                item.StockAtRegistration, item.CreatedAt
+                productId,
+                scope = item.Scope,
+                signature,
+                variantsJson = variants is null ? (System.Text.Json.JsonElement?)null : item.Variants,
+                item.PriceAtRegistration,
+                item.StockAtRegistration,
+                item.CreatedAt
             });
         }
 
@@ -1147,7 +1232,7 @@ public sealed class AccountController(
             x.IdProfile == ProfileId && x.IdMagazineArticle == articleId.Value && x.InteractionType == type, ct);
         if (interaction is null)
             db.AccountArticleInteractions.Add(new AccountArticleInteraction
-                { IdProfile = ProfileId, IdMagazineArticle = articleId.Value, InteractionType = type });
+            { IdProfile = ProfileId, IdMagazineArticle = articleId.Value, InteractionType = type });
         else
             db.AccountArticleInteractions.Remove(interaction);
         await db.SaveChangesAsync(ct);

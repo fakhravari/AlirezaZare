@@ -588,14 +588,14 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
         string query = q?.Trim() ?? "";
         if (!string.Equals(section, "products", StringComparison.OrdinalIgnoreCase)) return NotFound();
         var productSource = from product in db.Products.AsNoTracking()
-                     join brand in db.StoreBrands.AsNoTracking().Where(x => x.IsActive)
-                         on product.IdBrand equals (long?)brand.Id
-                     join category0 in db.StoreCategories.AsNoTracking().Where(x => x.IsActive)
-                         on product.IdCategory equals (long?)category0.Id into categories
-                     from category in categories.DefaultIfEmpty()
-                     where product.IsCatalogActive && product.IsStoreEnabled &&
-                           (product.IdCategory == null || category != null)
-                     select new { product, brand, category };
+                            join brand in db.StoreBrands.AsNoTracking().Where(x => x.IsActive)
+                                on product.IdBrand equals (long?)brand.Id
+                            join category0 in db.StoreCategories.AsNoTracking().Where(x => x.IsActive)
+                                on product.IdCategory equals (long?)category0.Id into categories
+                            from category in categories.DefaultIfEmpty()
+                            where product.IsCatalogActive && product.IsStoreEnabled &&
+                                  (product.IdCategory == null || category != null)
+                            select new { product, brand, category };
         if (query.Length > 0)
             productSource = productSource.Where(x => x.product.Code.Contains(query) || x.product.Name.Contains(query) ||
                 (x.product.EnglishName != null && x.product.EnglishName.Contains(query)) || x.brand.NameFa.Contains(query) ||
@@ -605,8 +605,12 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
             .Skip((int)Math.Min((long)(page - 1) * pageSize, int.MaxValue)).Take(pageSize)
             .Select(x => new
             {
-                x.product.Id, x.product.Code, x.product.Name, x.product.EnglishName,
-                BrandName = x.brand.NameFa, CategoryName = x.category == null ? "" : x.category.NameFa,
+                x.product.Id,
+                x.product.Code,
+                x.product.Name,
+                x.product.EnglishName,
+                BrandName = x.brand.NameFa,
+                CategoryName = x.category == null ? "" : x.category.NameFa,
                 Price = (x.product.PriceAmount ?? 0m) / 1_000_000m,
                 DiscountPercent = x.product.DiscountPercent ?? 0m
             }).ToListAsync(cancellationToken);

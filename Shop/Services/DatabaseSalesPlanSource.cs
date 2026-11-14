@@ -36,7 +36,8 @@ public sealed class DatabaseSalesPlanSource(IStoreSalesPlanRepository repository
                 group => group.Key,
                 group => (IReadOnlyList<SalesPlanPriceOption>)group.Select(option => new SalesPlanPriceOption(
                     option.Key, option.Label, option.Values.Select(value => new SalesPlanPriceOptionValue(
-                        value.Key, value.Label, value.PriceDelta) { Id = value.Id, PriceVersionId = value.PriceVersionId }).ToArray())).ToArray())
+                        value.Key, value.Label, value.PriceDelta)
+                    { Id = value.Id, PriceVersionId = value.PriceVersionId }).ToArray())).ToArray())
         };
     }
 

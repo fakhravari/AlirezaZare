@@ -27,8 +27,12 @@ public sealed class StoreCustomersAdminApiController(ShopDbContext db) : Control
             .OrderByDescending(p => p.Id).Skip(offset).Take(take)
             .Select(p => new CustomerRow
             {
-                Id = p.Id, FirstName = p.FirstName, LastName = p.LastName, Email = p.Email,
-                Phone = p.Phone, CreatedAtUtc = p.CreatedAtUtc,
+                Id = p.Id,
+                FirstName = p.FirstName,
+                LastName = p.LastName,
+                Email = p.Email,
+                Phone = p.Phone,
+                CreatedAtUtc = p.CreatedAtUtc,
                 OrderCount = db.StoreCustomerOrders.Count(o => o.IdProfile == p.Id)
             }).ToListAsync(cancellationToken);
         return Ok(new { items = rows.Take(pageSize), page, hasNext = rows.Count > pageSize });
@@ -41,8 +45,12 @@ public sealed class StoreCustomersAdminApiController(ShopDbContext db) : Control
         var customer = await db.AccountProfiles.AsNoTracking().Where(p => p.Id == id)
             .Select(p => new CustomerDetails
             {
-                Id = p.Id, FirstName = p.FirstName, LastName = p.LastName, Email = p.Email,
-                Phone = p.Phone, CreatedAtUtc = p.CreatedAtUtc,
+                Id = p.Id,
+                FirstName = p.FirstName,
+                LastName = p.LastName,
+                Email = p.Email,
+                Phone = p.Phone,
+                CreatedAtUtc = p.CreatedAtUtc,
                 OrderCount = db.StoreCustomerOrders.Count(o => o.IdProfile == p.Id),
                 FavoriteCount = db.AccountFavorites.Count(f => f.IdProfile == p.Id),
                 PriceAlertCount = db.AccountPriceAlerts.Count(a => a.IdProfile == p.Id),
@@ -55,11 +63,27 @@ public sealed class StoreCustomersAdminApiController(ShopDbContext db) : Control
                                    join province in db.GeoProvinces.AsNoTracking() on a.IdProvince equals province.Id
                                    join city in db.GeoCities.AsNoTracking() on a.IdCity equals city.Id
                                    orderby a.Id
-                                   select new { a.Title, a.Recipient, a.Phone, Country = country.NameFa, Province = province.NameFa,
-                                       City = city.NameFa, a.Street, a.PostalCode, a.IsDefault }).ToListAsync(cancellationToken);
+                                   select new
+                                   {
+                                       a.Title,
+                                       a.Recipient,
+                                       a.Phone,
+                                       Country = country.NameFa,
+                                       Province = province.NameFa,
+                                       City = city.NameFa,
+                                       a.Street,
+                                       a.PostalCode,
+                                       a.IsDefault
+                                   }).ToListAsync(cancellationToken);
             var orders = await db.StoreCustomerOrders.AsNoTracking().Where(o => o.IdProfile == id).OrderByDescending(o => o.Id)
-                .Take(50).Select(o => new { o.OrderNumber, o.Status, o.TotalAmount, o.OrderedAtUtc,
-                    IsSample = o.PaymentMethod == "demo" && o.ExternalOrderKey != null && o.ExternalOrderKey.StartsWith("demo-order-") })
+                .Take(50).Select(o => new
+                {
+                    o.OrderNumber,
+                    o.Status,
+                    o.TotalAmount,
+                    o.OrderedAtUtc,
+                    IsSample = o.PaymentMethod == "demo" && o.ExternalOrderKey != null && o.ExternalOrderKey.StartsWith("demo-order-")
+                })
                 .ToListAsync(cancellationToken);
             var feedback = await db.ProductFeedback.AsNoTracking().Where(f => f.IdProfile == id).OrderByDescending(f => f.Id)
                 .Take(50).Select(f => new { f.FeedbackType, f.FeedbackText, f.Status, f.CreatedAtUtc, f.IsSample, ProductName = f.Product.Name })
@@ -84,7 +108,10 @@ public sealed class StoreCustomersAdminApiController(ShopDbContext db) : Control
             return Conflict(new { title = "این ایمیل از قبل برای مشتری دیگری ثبت شده است." });
         var profile = new Shop.Data.Domain.Account.Entities.AccountProfile
         {
-            Email = email, FirstName = firstName, LastName = lastName, Phone = phone,
+            Email = email,
+            FirstName = firstName,
+            LastName = lastName,
+            Phone = phone,
             CreatedAtUtc = DateTime.UtcNow
         };
         db.AccountProfiles.Add(profile);

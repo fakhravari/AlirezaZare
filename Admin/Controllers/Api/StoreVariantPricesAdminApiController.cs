@@ -15,8 +15,20 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db) : Con
     {
         if (!User.IsInRole("system.full-access")) return Forbid();
         return Ok(await db.SalesPlanReferences.AsNoTracking().Where(x => x.IdStockOwnerType == 1)
-            .OrderBy(x => x.DisplayName).Select(x => new { x.Id, x.DisplayName, x.Code, x.IsRegular,
-                x.IsActive, x.PlanType, x.StoreSalesPlanKey, x.StartsAtUtc, x.EndsAtUtc, x.Label, x.ShowCountdown }).ToListAsync(cancellationToken));
+            .OrderBy(x => x.DisplayName).Select(x => new
+            {
+                x.Id,
+                x.DisplayName,
+                x.Code,
+                x.IsRegular,
+                x.IsActive,
+                x.PlanType,
+                x.StoreSalesPlanKey,
+                x.StartsAtUtc,
+                x.EndsAtUtc,
+                x.Label,
+                x.ShowCountdown
+            }).ToListAsync(cancellationToken));
     }
 
     [HttpGet("price-history")]
@@ -48,10 +60,17 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db) : Con
         await using var transaction = await db.Database.BeginTransactionAsync(cancellationToken);
         var plan = new Shop.Data.Domain.Warehouse.Entities.SalesPlanReference
         {
-            StoreSalesPlanKey = key, DisplayName = name, IsRegular = false, IsActive = false,
-            IdStockOwnerType = 1, Code = code, PlanType = type,
-            StartsAtUtc = input.StartsAtUtc?.ToUniversalTime(), EndsAtUtc = input.EndsAtUtc?.ToUniversalTime(),
-            Label = NormalizeLabel(input.Label), ShowCountdown = input.ShowCountdown
+            StoreSalesPlanKey = key,
+            DisplayName = name,
+            IsRegular = false,
+            IsActive = false,
+            IdStockOwnerType = 1,
+            Code = code,
+            PlanType = type,
+            StartsAtUtc = input.StartsAtUtc?.ToUniversalTime(),
+            EndsAtUtc = input.EndsAtUtc?.ToUniversalTime(),
+            Label = NormalizeLabel(input.Label),
+            ShowCountdown = input.ShowCountdown
         };
         db.SalesPlanReferences.Add(plan);
         await db.SaveChangesAsync(cancellationToken);
@@ -175,10 +194,19 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db) : Con
         var items = await rows.OrderBy(x => x.product.Name).ThenBy(x => x.variant.Name).ThenBy(x => x.plan.Code)
             .ThenBy(x => x.variant.Id).ThenBy(x => x.plan.Id)
             .Skip((int)Math.Min((long)(page - 1) * pageSize, int.MaxValue)).Take(pageSize)
-            .Select(x => new VariantPlanPriceRow { VariantId = x.variant.Id, ProductName = x.product.Name, VariantName = x.variant.Name,
-                Code = x.variant.Code, AttributesJson = x.variant.AttributesJson, SalesPlanId = x.plan.StoreSalesPlanKey,
-                SalesPlanName = x.plan.DisplayName, PriceAmount = x.offer == null ? null : x.offer.PriceAmount,
-                DiscountPercent = x.offer == null ? null : x.offer.DiscountPercent, IsEnabled = x.offer == null ? null : x.offer.IsEnabled })
+            .Select(x => new VariantPlanPriceRow
+            {
+                VariantId = x.variant.Id,
+                ProductName = x.product.Name,
+                VariantName = x.variant.Name,
+                Code = x.variant.Code,
+                AttributesJson = x.variant.AttributesJson,
+                SalesPlanId = x.plan.StoreSalesPlanKey,
+                SalesPlanName = x.plan.DisplayName,
+                PriceAmount = x.offer == null ? null : x.offer.PriceAmount,
+                DiscountPercent = x.offer == null ? null : x.offer.DiscountPercent,
+                IsEnabled = x.offer == null ? null : x.offer.IsEnabled
+            })
             .ToListAsync(cancellationToken);
         return Ok(new { items, total, page, pageSize });
     }
@@ -268,10 +296,18 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db) : Con
         var items = await rows.OrderBy(x => x.product.Name).ThenBy(x => x.plan.DisplayName)
             .ThenBy(x => x.product.Id).ThenBy(x => x.plan.Id)
             .Skip((int)Math.Min((long)(page - 1) * pageSize, int.MaxValue)).Take(pageSize)
-            .Select(x => new ProductOfferRow { ProductId = x.product.Id, ProductCode = x.product.Code, ProductName = x.product.Name,
-                SalesPlanId = x.plan.StoreSalesPlanKey, SalesPlanName = x.plan.DisplayName,
-                PriceAmount = x.offer == null ? null : x.offer.PriceAmount, DiscountPercent = x.offer == null ? null : x.offer.DiscountPercent,
-                MaxPurchaseQuantity = x.offer == null ? null : x.offer.MaxPurchaseQuantity, IsEnabled = x.offer == null ? null : x.offer.IsEnabled })
+            .Select(x => new ProductOfferRow
+            {
+                ProductId = x.product.Id,
+                ProductCode = x.product.Code,
+                ProductName = x.product.Name,
+                SalesPlanId = x.plan.StoreSalesPlanKey,
+                SalesPlanName = x.plan.DisplayName,
+                PriceAmount = x.offer == null ? null : x.offer.PriceAmount,
+                DiscountPercent = x.offer == null ? null : x.offer.DiscountPercent,
+                MaxPurchaseQuantity = x.offer == null ? null : x.offer.MaxPurchaseQuantity,
+                IsEnabled = x.offer == null ? null : x.offer.IsEnabled
+            })
             .ToListAsync(cancellationToken);
         return Ok(new { items, total, page, pageSize });
     }
@@ -290,12 +326,14 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db) : Con
         var product = await db.Products.SingleOrDefaultAsync(x => x.Id == productId && x.IsStoreEnabled && x.IsCatalogActive, cancellationToken);
         if (plan is null || product is null) return NotFound(new { code = "product-or-plan-not-found" });
         var offer = await db.StoreProductSalesPlanOffers.SingleOrDefaultAsync(x => x.IdProduct == productId && x.IdSalesPlan == plan.Id, cancellationToken);
-        if (offer is null) {
+        if (offer is null)
+        {
             offer = new Shop.Data.Domain.Store.Entities.StoreProductSalesPlanOffer { IdProduct = productId, IdSalesPlan = plan.Id, PriceAmount = input.PriceAmount, DiscountPercent = input.DiscountPercent, MaxPurchaseQuantity = input.MaxPurchaseQuantity, IsEnabled = input.IsEnabled, CreatedAtUtc = DateTime.UtcNow };
             db.StoreProductSalesPlanOffers.Add(offer); await db.SaveChangesAsync(cancellationToken);
             var accessorySeed = await (from pa in db.StoreProductAccessories join accessory in db.StoreAccessories on pa.IdAccessory equals accessory.Id where pa.IdProduct == productId && accessory.IsActive select new { pa.IdAccessory, pa.PriceAmount, pa.IsRequired }).ToListAsync(cancellationToken);
             db.StoreProductSalesPlanOfferAccessories.AddRange(accessorySeed.Select(x => new Shop.Data.Domain.Store.Entities.StoreProductSalesPlanOfferAccessory { IdProductSalesPlanOffer = offer.Id, IdAccessory = x.IdAccessory, PriceAmount = x.PriceAmount, IsIncludedByDefault = x.IsRequired, IsAllowed = true }));
-        } else { offer.PriceAmount = input.PriceAmount; offer.DiscountPercent = input.DiscountPercent; offer.MaxPurchaseQuantity = input.MaxPurchaseQuantity; offer.IsEnabled = input.IsEnabled; offer.UpdatedAtUtc = DateTime.UtcNow; }
+        }
+        else { offer.PriceAmount = input.PriceAmount; offer.DiscountPercent = input.DiscountPercent; offer.MaxPurchaseQuantity = input.MaxPurchaseQuantity; offer.IsEnabled = input.IsEnabled; offer.UpdatedAtUtc = DateTime.UtcNow; }
         await db.SaveChangesAsync(cancellationToken);
         long priceVersionId = await AppendPriceVersionAsync(StorePriceScopes.Product(productId, plan.Id), productId, plan.Id, StorePriceKinds.Product, null, input.PriceAmount, input.DiscountPercent, cancellationToken);
         await transaction.CommitAsync(cancellationToken);

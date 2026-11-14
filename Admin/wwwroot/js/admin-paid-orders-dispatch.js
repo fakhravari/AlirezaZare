@@ -27,7 +27,11 @@
             const boxes = checkboxes(), checked = boxes.filter(input => input.checked).length;
             all.checked = boxes.length > 0 && checked === boxes.length;
             all.indeterminate = checked > 0 && checked < boxes.length;
-            page.querySelector("[data-dispatch-count]").textContent = `${format.format(selectedIds.size)} سفارش انتخاب‌شده در همهٔ صفحه‌ها${selectedIds.size > 200 ? " · سقف هر حواله ۲۰۰ سفارش است" : ""}`;
+            const selectionLimitMessage = selectedIds.size > 200
+                ? " · سقف هر حواله ۲۰۰ سفارش است"
+                : "";
+            page.querySelector("[data-dispatch-count]").textContent =
+                `${format.format(selectedIds.size)} سفارش انتخاب‌شده در همهٔ صفحه‌ها${selectionLimitMessage}`;
             submit.disabled = saving || selectedIds.size === 0 || selectedIds.size > 200;
             clearSelection.disabled = selectedIds.size === 0;
         };
@@ -51,7 +55,13 @@
                     const checkbox = document.createElement("input");
                     checkbox.type = "checkbox"; checkbox.value = item.id; checkbox.checked = selectedIds.has(item.id);
                     checkbox.setAttribute("aria-label", `انتخاب سفارش ${item.orderNumber}`);
-                    checkbox.addEventListener("change", () => { if (checkbox.checked) selectedIds.add(item.id); else selectedIds.delete(item.id); count(); }); cell.append(checkbox); row.append(cell);
+                    checkbox.addEventListener("change", () => {
+                        if (checkbox.checked) selectedIds.add(item.id);
+                        else selectedIds.delete(item.id);
+                        count();
+                    });
+                    cell.append(checkbox);
+                    row.append(cell);
                     const paidAt = /(?:Z|[+-]\d\d:\d\d)$/i.test(item.paidAtUtc) ? item.paidAtUtc : `${item.paidAtUtc}Z`;
                     for (const value of [item.orderNumber, item.customerName, format.format(item.itemCount), format.format(item.totalAmount), new Date(paidAt).toLocaleString("fa-IR")]) {
                         const column = document.createElement("td"); column.textContent = value; row.append(column);
@@ -61,7 +71,8 @@
                 window.AdminUI.refreshDataTable(page.querySelector("[data-admin-datatable]"));
                 const pager = page.querySelector("[data-dispatch-pagination]");
                 pager.hidden = totalPages <= 1;
-                pager.querySelector("[data-dispatch-page-label]").textContent = `صفحهٔ ${format.format(currentPage)} از ${format.format(totalPages)} · ${format.format(result.total || 0)} سفارش`;
+                pager.querySelector("[data-dispatch-page-label]").textContent =
+                    `صفحهٔ ${format.format(currentPage)} از ${format.format(totalPages)} · ${format.format(result.total || 0)} سفارش`;
                 pager.querySelector('[data-dispatch-page="-1"]').disabled = currentPage <= 1;
                 pager.querySelector('[data-dispatch-page="1"]').disabled = currentPage >= totalPages;
                 status.textContent = result.items.length ? "" : "سفارش آمادهٔ حواله وجود ندارد.";
@@ -69,7 +80,11 @@
             } catch (error) { if (version === requestVersion && page.isConnected) status.textContent = error.message; }
         }
         all.addEventListener("change", () => {
-            checkboxes().forEach(input => { input.checked = all.checked; if (all.checked) selectedIds.add(Number(input.value)); else selectedIds.delete(Number(input.value)); });
+            checkboxes().forEach(input => {
+                input.checked = all.checked;
+                if (all.checked) selectedIds.add(Number(input.value));
+                else selectedIds.delete(Number(input.value));
+            });
             count();
         });
         page.querySelectorAll("[data-dispatch-page]").forEach(button => button.addEventListener("click", () => {

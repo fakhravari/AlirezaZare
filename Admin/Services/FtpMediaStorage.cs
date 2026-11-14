@@ -49,8 +49,11 @@ public sealed class FtpMediaStorage(ShopDbContext db, IDataProtectionProvider pr
         db.StoreSiteIdentities.AsNoTracking().Where(x => x.Id == 1)
             .Select(x => new FtpSettingsRow
             {
-                Host = x.FtpHost, Port = x.FtpPort, Username = x.FtpUsername,
-                Password = x.FtpPassword, LegacyPassword = x.FtpPasswordProtected
+                Host = x.FtpHost,
+                Port = x.FtpPort,
+                Username = x.FtpUsername,
+                Password = x.FtpPassword,
+                LegacyPassword = x.FtpPasswordProtected
             }).SingleOrDefaultAsync(cancellationToken);
 
     public sealed class FtpSettingsRow

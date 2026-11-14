@@ -48,8 +48,11 @@ public sealed class StoreServicePagesAdminApiController(ShopDbContext db) : Cont
             SectionInput section = sections[i];
             page.Sections.Add(new StoreContentPageSection
             {
-                SectionKey = section.SectionKey!.Trim(), Heading = string.IsNullOrWhiteSpace(section.Heading) ? null : section.Heading!.Trim(),
-                Body = section.Body!.Trim(), SortOrder = i, IsPublished = true
+                SectionKey = section.SectionKey!.Trim(),
+                Heading = string.IsNullOrWhiteSpace(section.Heading) ? null : section.Heading!.Trim(),
+                Body = section.Body!.Trim(),
+                SortOrder = i,
+                IsPublished = true
             });
         }
         await db.SaveChangesAsync(ct);

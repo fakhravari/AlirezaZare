@@ -39,8 +39,12 @@ public sealed class StoreContactApiController(
 
         var contactMessage = new StoreContactMessage
         {
-            Name = name, Phone = phone, SubjectKey = subject, Message = message,
-            Status = "new", CreatedAtUtc = DateTime.UtcNow
+            Name = name,
+            Phone = phone,
+            SubjectKey = subject,
+            Message = message,
+            Status = "new",
+            CreatedAtUtc = DateTime.UtcNow
         };
         db.StoreContactMessages.Add(contactMessage);
         await db.SaveChangesAsync(ct);

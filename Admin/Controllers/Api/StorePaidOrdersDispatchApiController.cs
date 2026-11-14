@@ -37,7 +37,8 @@ public sealed class StorePaidOrdersDispatchApiController(ShopDbContext db, IWare
         var rows = await eligible
             .Select(x => new
             {
-                x.order, x.profile,
+                x.order,
+                x.profile,
                 PaidAtUtc = db.StorePaymentAttempts.AsNoTracking()
                     .Where(payment => payment.IdOrder == x.order.Id && payment.Status == "verified" &&
                         payment.Amount == x.order.TotalAmount && payment.PaidAtUtc != null)
@@ -47,8 +48,11 @@ public sealed class StorePaidOrdersDispatchApiController(ShopDbContext db, IWare
             .Skip((int)Math.Min((long)(page - 1) * pageSize, int.MaxValue)).Take(pageSize)
             .Select(x => new PaidOrderRow
             {
-                Id = x.order.Id, OrderNumber = x.order.OrderNumber, TotalAmount = x.order.TotalAmount,
-                ItemCount = x.order.ItemCount, PaidAtUtc = x.PaidAtUtc,
+                Id = x.order.Id,
+                OrderNumber = x.order.OrderNumber,
+                TotalAmount = x.order.TotalAmount,
+                ItemCount = x.order.ItemCount,
+                PaidAtUtc = x.PaidAtUtc,
                 CustomerName = (x.profile.FirstName + " " + x.profile.LastName).Trim()
             }).ToListAsync(cancellationToken);
         return Ok(new { items = rows, total, page, pageSize, hasNext = (long)page * pageSize < total });
@@ -109,33 +113,48 @@ public sealed class StorePaidOrdersDispatchApiController(ShopDbContext db, IWare
                                      from variant in variants.DefaultIfEmpty()
                                      select new
                                      {
-                                         line.IdInventoryItem, line.IdUnit, line.IdSalesPlanReference,
-                                         line.Quantity, line.ConversionFactor, line.BaseQuantity,
-                                         ProductName = product.Name, VariantName = variant == null ? null : variant.Name,
+                                         line.IdInventoryItem,
+                                         line.IdUnit,
+                                         line.IdSalesPlanReference,
+                                         line.Quantity,
+                                         line.ConversionFactor,
+                                         line.BaseQuantity,
+                                         ProductName = product.Name,
+                                         VariantName = variant == null ? null : variant.Name,
                                          UnitName = unit.Name
                                      }).ToListAsync(cancellationToken);
 
             var headerPlanId = lineDetails.Min(x => x.IdSalesPlanReference);
             var document = new WarehouseDocumentRecord
             {
-                IdWarehouse = warehouse.Id, IdDocumentType = type.Id, IdParty = party.Id,
-                IdSalesPlanReference = headerPlanId, DocumentDate = DateOnly.FromDateTime(DateTime.Today),
-                Status = "F", Reason = "حوالهٔ تجمیعی سفارش‌های فروشگاه", CreatedByUserKey = actor,
+                IdWarehouse = warehouse.Id,
+                IdDocumentType = type.Id,
+                IdParty = party.Id,
+                IdSalesPlanReference = headerPlanId,
+                DocumentDate = DateOnly.FromDateTime(DateTime.Today),
+                Status = "F",
+                Reason = "حوالهٔ تجمیعی سفارش‌های فروشگاه",
+                CreatedByUserKey = actor,
                 CreatedAtUtc = DateTime.UtcNow
             };
             db.WarehouseDocuments.Add(document);
             await db.SaveChangesAsync(cancellationToken);
 
             foreach (var group in lineDetails.GroupBy(x => new
-                         { x.IdInventoryItem, x.IdUnit, x.IdSalesPlanReference, x.ConversionFactor, x.ProductName, x.VariantName, x.UnitName }))
+            { x.IdInventoryItem, x.IdUnit, x.IdSalesPlanReference, x.ConversionFactor, x.ProductName, x.VariantName, x.UnitName }))
             {
                 db.WarehouseDocumentLines.Add(new WarehouseDocumentLineRecord
                 {
-                    IdDocument = document.Id, IdInventoryItem = group.Key.IdInventoryItem,
-                    IdUnit = group.Key.IdUnit, IdSalesPlanReference = group.Key.IdSalesPlanReference,
-                    Quantity = group.Sum(x => x.Quantity), ConversionFactor = group.Key.ConversionFactor,
-                    BaseQuantity = group.Sum(x => x.BaseQuantity), ProductNameSnapshot = group.Key.ProductName,
-                    VariantNameSnapshot = group.Key.VariantName, UnitNameSnapshot = group.Key.UnitName
+                    IdDocument = document.Id,
+                    IdInventoryItem = group.Key.IdInventoryItem,
+                    IdUnit = group.Key.IdUnit,
+                    IdSalesPlanReference = group.Key.IdSalesPlanReference,
+                    Quantity = group.Sum(x => x.Quantity),
+                    ConversionFactor = group.Key.ConversionFactor,
+                    BaseQuantity = group.Sum(x => x.BaseQuantity),
+                    ProductNameSnapshot = group.Key.ProductName,
+                    VariantNameSnapshot = group.Key.VariantName,
+                    UnitNameSnapshot = group.Key.UnitName
                 });
             }
             await db.SaveChangesAsync(cancellationToken);
@@ -149,14 +168,20 @@ public sealed class StorePaidOrdersDispatchApiController(ShopDbContext db, IWare
                 order.Status = "warehouse-confirmed";
                 db.WarehousePaidOrderInboxDocuments.Add(new WarehousePaidOrderInboxDocument
                 {
-                    IdPaidOrderInbox = inbox.Id, IdWarehouseDocument = document.Id
+                    IdPaidOrderInbox = inbox.Id,
+                    IdWarehouseDocument = document.Id
                 });
             }
             db.WarehouseDocumentAudits.Add(new WarehouseDocumentAudit
             {
-                DocumentId = document.Id, DocumentNumber = document.DocumentNumber, WarehouseId = warehouse.Id,
-                Action = "Created", ActorUserKey = actor, OccurredAtUtc = DateTime.UtcNow,
-                Reason = document.Reason, AfterJson = JsonSerializer.Serialize(new { orderIds = ids })
+                DocumentId = document.Id,
+                DocumentNumber = document.DocumentNumber,
+                WarehouseId = warehouse.Id,
+                Action = "Created",
+                ActorUserKey = actor,
+                OccurredAtUtc = DateTime.UtcNow,
+                Reason = document.Reason,
+                AfterJson = JsonSerializer.Serialize(new { orderIds = ids })
             });
             await db.SaveChangesAsync(cancellationToken);
             await transaction.CommitAsync(cancellationToken);

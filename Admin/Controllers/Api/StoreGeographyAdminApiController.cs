@@ -62,7 +62,10 @@ public sealed class StoreGeographyAdminApiController(ShopDbContext db) : Control
                         db.GeoCountries.Add(new GeoCountry
                         {
                             Id = await db.GeoCountries.Select(x => (long?)x.Id).MaxAsync(ct) + 1 ?? 1,
-                            CountryCode = code, NameFa = fa, NameEn = en, FlagPath = flag
+                            CountryCode = code,
+                            NameFa = fa,
+                            NameEn = en,
+                            FlagPath = flag
                         });
                         break;
                     case "provinces":
@@ -71,8 +74,11 @@ public sealed class StoreGeographyAdminApiController(ShopDbContext db) : Control
                         db.GeoProvinces.Add(new GeoProvince
                         {
                             Id = await db.GeoProvinces.Select(x => (long?)x.Id).MaxAsync(ct) + 1 ?? 1,
-                            IdCountry = countryId, NameFa = fa, NameEn = en,
-                            Latitude = input.Latitude, Longitude = input.Longitude
+                            IdCountry = countryId,
+                            NameFa = fa,
+                            NameEn = en,
+                            Latitude = input.Latitude,
+                            Longitude = input.Longitude
                         });
                         break;
                     case "cities":
@@ -85,9 +91,13 @@ public sealed class StoreGeographyAdminApiController(ShopDbContext db) : Control
                         db.GeoCities.Add(new GeoCity
                         {
                             Id = await db.GeoCities.Select(x => (long?)x.Id).MaxAsync(ct) + 1 ?? 1,
-                            IdCountry = parent.IdCountry, IdProvince = parent.Id,
-                            SourceCountryName = parent.CountryName, NameFa = fa, NameEn = en,
-                            Latitude = input.Latitude, Longitude = input.Longitude,
+                            IdCountry = parent.IdCountry,
+                            IdProvince = parent.Id,
+                            SourceCountryName = parent.CountryName,
+                            NameFa = fa,
+                            NameEn = en,
+                            Latitude = input.Latitude,
+                            Longitude = input.Longitude,
                             IsProvinceCenter = input.IsProvinceCenter ?? false
                         });
                         break;

@@ -30,8 +30,19 @@ public sealed class StoreAccountMessagesAdminApiController(ShopDbContext db) : C
         if (page < 1 || page > 100000) return ValidationProblem(detail: "شمارهٔ صفحه معتبر نیست.", statusCode: 400);
         var query = from message in db.AccountMessages.AsNoTracking()
                     join profile in db.AccountProfiles.AsNoTracking() on message.IdProfile equals profile.Id
-                    select new { message.Id, message.Title, message.Category, message.Body, message.IsRead, message.CreatedAtUtc,
-                        ProfileId = profile.Id, profile.Email, profile.FirstName, profile.LastName };
+                    select new
+                    {
+                        message.Id,
+                        message.Title,
+                        message.Category,
+                        message.Body,
+                        message.IsRead,
+                        message.CreatedAtUtc,
+                        ProfileId = profile.Id,
+                        profile.Email,
+                        profile.FirstName,
+                        profile.LastName
+                    };
         if (!string.IsNullOrWhiteSpace(q))
         {
             string term = q.Trim();
@@ -52,8 +63,15 @@ public sealed class StoreAccountMessagesAdminApiController(ShopDbContext db) : C
             input.Category is not ("notice" or "support" or "orders" or "products"))
             return ValidationProblem(detail: "اطلاعات پیام معتبر نیست.", statusCode: 400);
         if (!await db.AccountProfiles.AnyAsync(x => x.Id == input.ProfileId, cancellationToken)) return NotFound();
-        db.AccountMessages.Add(new AccountMessage { IdProfile = input.ProfileId, Title = title, Body = body,
-            Category = input.Category, IsRead = false, CreatedAtUtc = DateTime.UtcNow });
+        db.AccountMessages.Add(new AccountMessage
+        {
+            IdProfile = input.ProfileId,
+            Title = title,
+            Body = body,
+            Category = input.Category,
+            IsRead = false,
+            CreatedAtUtc = DateTime.UtcNow
+        });
         await db.SaveChangesAsync(cancellationToken);
         return Ok(new { message = "پیام در حساب مشتری ثبت شد." });
     }

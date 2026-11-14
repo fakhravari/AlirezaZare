@@ -29,13 +29,18 @@ public sealed class UsersApiController(ShopDbContext db, PasswordHasher<AdminSys
                 .ToDictionaryAsync(item => item.RoleId, item => item.Count, cancellationToken);
             var roleRows = roles.Select(role => new
             {
-                role.Id, role.RoleKey, role.Name, role.IsActive,
+                role.Id,
+                role.RoleKey,
+                role.Name,
+                role.IsActive,
                 userCount = userCounts.GetValueOrDefault(role.Id)
             });
             return Ok(new
             {
-                users = Array.Empty<object>(), roles = roleRows,
-                permissions = Array.Empty<object>(), warehouses = Array.Empty<object>()
+                users = Array.Empty<object>(),
+                roles = roleRows,
+                permissions = Array.Empty<object>(),
+                warehouses = Array.Empty<object>()
             });
         }
 
@@ -48,16 +53,21 @@ public sealed class UsersApiController(ShopDbContext db, PasswordHasher<AdminSys
             long[] allPermissionIds = permissions.Select(x => x.Id).ToArray();
             var storedRoles = await db.AdminRoles.AsNoTracking().OrderBy(x => x.Name)
                 .Select(x => new
-                    { x.Id, x.RoleKey, x.Name, x.IsActive, permissionIds = x.Permissions.Select(p => p.IdPermission) })
+                { x.Id, x.RoleKey, x.Name, x.IsActive, permissionIds = x.Permissions.Select(p => p.IdPermission) })
                 .ToListAsync(cancellationToken);
             var roles = storedRoles.Select(role => new
             {
-                role.Id, role.RoleKey, role.Name, role.IsActive,
+                role.Id,
+                role.RoleKey,
+                role.Name,
+                role.IsActive,
                 permissionIds = role.RoleKey == "system.full-access" ? allPermissionIds : role.permissionIds
             });
             return Ok(new
             {
-                users = Array.Empty<object>(), roles, permissions,
+                users = Array.Empty<object>(),
+                roles,
+                permissions,
                 warehouses = Array.Empty<object>()
             });
         }

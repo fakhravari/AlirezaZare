@@ -28,8 +28,13 @@ public sealed class OrderTrackingApiController(ShopDbContext db) : ControllerBas
                         !(x.PaymentMethod == "demo" && x.ExternalOrderKey != null && x.ExternalOrderKey.StartsWith("demo-order-")))
             .Select(x => new
             {
-                x.Id, x.OrderNumber, x.Status, x.OrderedAtUtc, x.ShippingCarrier,
-                x.ShippingTrackingCode, x.AddressSnapshotJson
+                x.Id,
+                x.OrderNumber,
+                x.Status,
+                x.OrderedAtUtc,
+                x.ShippingCarrier,
+                x.ShippingTrackingCode,
+                x.AddressSnapshotJson
             })
             .ToListAsync(ct);
         var order = candidates.FirstOrDefault(x => SnapshotPhoneMatches(x.AddressSnapshotJson, phone));

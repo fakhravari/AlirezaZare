@@ -30,8 +30,12 @@ public sealed class PaymentService(ShopDbContext db, IPaymentGateway gateway, IL
             DateTime now = DateTime.UtcNow;
             db.StorePaymentAttempts.Add(new StorePaymentAttempt
             {
-                Id = attemptId, IdOrder = orderId, Amount = amount, Status = "initiated",
-                CreatedAtUtc = now, UpdatedAtUtc = now
+                Id = attemptId,
+                IdOrder = orderId,
+                Amount = amount,
+                Status = "initiated",
+                CreatedAtUtc = now,
+                UpdatedAtUtc = now
             });
             await db.SaveChangesAsync(ct);
             await transaction.CommitAsync(ct);
@@ -64,7 +68,7 @@ public sealed class PaymentService(ShopDbContext db, IPaymentGateway gateway, IL
         var attempt = await db.StorePaymentAttempts.AsNoTracking()
             .Where(x => x.Id == attemptId)
             .Select(x => new PaymentAttemptRow
-                { Id = x.Id, IdOrder = x.IdOrder, Amount = x.Amount, Status = x.Status, GatewayReference = x.GatewayReference })
+            { Id = x.Id, IdOrder = x.IdOrder, Amount = x.Amount, Status = x.Status, GatewayReference = x.GatewayReference })
             .SingleOrDefaultAsync(ct);
         if (attempt is null) return "not-found";
         if (attempt.Status == "verified") return "verified";

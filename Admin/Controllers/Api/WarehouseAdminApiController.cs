@@ -51,8 +51,11 @@ public sealed class WarehouseAdminApiController(IWarehouseReadService warehouseR
         {
             balance = new StockBalance
             {
-                IdWarehouse = input.WarehouseId, IdInventoryItem = input.InventoryItemId,
-                IdSalesPlanReference = regularPlan.Id, Quantity = 0, MinimumQuantity = minimum
+                IdWarehouse = input.WarehouseId,
+                IdInventoryItem = input.InventoryItemId,
+                IdSalesPlanReference = regularPlan.Id,
+                Quantity = 0,
+                MinimumQuantity = minimum
             };
             db.StockBalances.Add(balance);
         }

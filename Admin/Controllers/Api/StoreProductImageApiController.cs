@@ -76,9 +76,13 @@ public sealed class StoreProductImageApiController(ShopDbContext db, FtpMediaSto
             {
                 media = new Shop.Data.Domain.Store.Entities.StoreProductMedia
                 {
-                    IdProduct = productId, MediaKey = mediaKey,
-                    MainPath = variants[0].Path, CardPath = variants[1].Path, ThumbnailPath = variants[2].Path,
-                    ImagesJson = gallery, VideosJson = "[]"
+                    IdProduct = productId,
+                    MediaKey = mediaKey,
+                    MainPath = variants[0].Path,
+                    CardPath = variants[1].Path,
+                    ThumbnailPath = variants[2].Path,
+                    ImagesJson = gallery,
+                    VideosJson = "[]"
                 };
                 db.StoreProductMedia.Add(media);
             }

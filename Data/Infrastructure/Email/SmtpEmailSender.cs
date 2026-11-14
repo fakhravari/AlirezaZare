@@ -23,7 +23,12 @@ public sealed class SmtpEmailSender(
             .Where(x => x.Id == 1)
             .Select(x => new
             {
-                x.SmtpHost, x.SmtpPort, x.SmtpEnableSsl, x.SmtpUsername, x.SmtpFrom, x.SmtpPassword
+                x.SmtpHost,
+                x.SmtpPort,
+                x.SmtpEnableSsl,
+                x.SmtpUsername,
+                x.SmtpFrom,
+                x.SmtpPassword
             })
             .SingleOrDefaultAsync(cancellationToken);
         string? password = settings?.SmtpPassword ?? configuration["Email:Smtp:Password"];

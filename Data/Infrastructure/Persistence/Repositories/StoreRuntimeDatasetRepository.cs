@@ -27,9 +27,9 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext, IMedi
                                      select new { IdProduct = grouped.Key, Quantity = grouped.Sum() }).ToDictionaryAsync(x => x.IdProduct, x => x.Quantity, cancellationToken);
         var productColors = await dbContext.StoreProductColors.AsNoTracking().Where(x => productIds.Contains(x.IdProduct)).ToListAsync(cancellationToken);
         var productSpecs = await (from value in dbContext.StoreProductSpecificationValues.AsNoTracking()
-                                   join feature in dbContext.StoreSpecificationFeatures.AsNoTracking() on value.IdSpecificationFeature equals feature.Id
-                                   where productIds.Contains(value.IdProduct)
-                                   select new { value.IdProduct, feature.FeatureKey, value.Value }).ToListAsync(cancellationToken);
+                                  join feature in dbContext.StoreSpecificationFeatures.AsNoTracking() on value.IdSpecificationFeature equals feature.Id
+                                  where productIds.Contains(value.IdProduct)
+                                  select new { value.IdProduct, feature.FeatureKey, value.Value }).ToListAsync(cancellationToken);
         var productAccessories = await (from link in dbContext.StoreProductAccessories.AsNoTracking()
                                         join accessory in dbContext.StoreAccessories.AsNoTracking() on link.IdAccessory equals accessory.Id
                                         where productIds.Contains(link.IdProduct)
@@ -69,7 +69,8 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext, IMedi
         root["details"] = new JsonArray(activeCategories.Select(x => { var o = new JsonObject { ["id"] = x.CategoryKey }; AddOptional(o, "intro", x.ProductIntro); if (x.ProductHighlightsJson is not null) o["highlights"] = ParseJsonValue(x.ProductHighlightsJson); if (x.ProductSpecsJson is not null) o["specs"] = ParseJsonValue(x.ProductSpecsJson); return (JsonNode?)o; }).ToArray());
         root["media"] = new JsonArray(media.Select(x => (JsonNode?)new JsonObject { ["id"] = x.MediaKey, ["main"] = x.MainPath, ["card"] = x.CardPath, ["thumbnail"] = x.ThumbnailPath, ["images"] = ParseJsonArray(x.ImagesJson), ["videos"] = ParseJsonArray(x.VideosJson) }).ToArray());
         var mediaByKey = media.ToDictionary(x => (x.IdProduct, x.MediaKey));
-        root["products"] = new JsonArray(products.Select(product => {
+        root["products"] = new JsonArray(products.Select(product =>
+        {
             brandKeyById.TryGetValue(product.IdBrand ?? 0, out var brandKey); categoryKeyById.TryGetValue(product.IdCategory ?? 0, out var categoryKey);
             mediaByKey.TryGetValue((product.Id, "product-" + product.ProductKey), out var productMedia);
             decimal stock = inventoryTotals.GetValueOrDefault(product.Id);
@@ -183,11 +184,23 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext, IMedi
         var metrics = await dbContext.MagazineArticleMetrics.AsNoTracking().Where(x => articleIds.Contains(x.IdMagazineArticle)).ToDictionaryAsync(x => x.IdMagazineArticle, cancellationToken);
         var payload = articles.Select(article => new
         {
-            article.Branch, article.Topic, article.Area, readMinutes = article.ReadTimeMinutes ?? 0,
+            article.Branch,
+            article.Topic,
+            article.Area,
+            readMinutes = article.ReadTimeMinutes ?? 0,
             article = new
             {
-                slug = article.ArticleKey, category = article.Category, article.Kicker, article.Title, article.Summary, author = article.Author ?? "", publishedAt = "", readTime = article.ReadTimeText ?? "",
-                heroImage = article.HeroImagePath, contentImage = article.ContentImagePath, article.Lead,
+                slug = article.ArticleKey,
+                category = article.Category,
+                article.Kicker,
+                article.Title,
+                article.Summary,
+                author = article.Author ?? "",
+                publishedAt = "",
+                readTime = article.ReadTimeText ?? "",
+                heroImage = article.HeroImagePath,
+                contentImage = article.ContentImagePath,
+                article.Lead,
                 sections = sections.Where(x => x.IdMagazineArticle == article.Id).Select(x => new { id = x.Id.ToString(), title = x.Heading, content = x.Body }).ToArray(),
                 article.Conclusion,
                 sources = sources.Where(x => x.IdMagazineArticle == article.Id).Select(x => new { x.Title, x.Url }).ToArray(),

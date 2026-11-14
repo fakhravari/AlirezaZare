@@ -23,16 +23,23 @@ public sealed class StoreMediaUploadApiController(ShopDbContext db, FtpMediaStor
 {
     private static readonly IReadOnlyDictionary<string, string> LibraryFolders = new Dictionary<string, string>(StringComparer.Ordinal)
     {
-        ["slider"] = "sliders", ["testimonial"] = "testimonials", ["trust"] = "trust",
-        ["identity"] = "identity", ["payment"] = "payments"
+        ["slider"] = "sliders",
+        ["testimonial"] = "testimonials",
+        ["trust"] = "trust",
+        ["identity"] = "identity",
+        ["payment"] = "payments"
     };
 
     private static readonly IReadOnlyDictionary<string, (string Folder, uint Size)> ImageFolders =
         new Dictionary<string, (string, uint)>(StringComparer.Ordinal)
         {
-            ["brand"] = ("brands", 800), ["slider"] = ("sliders", 1800),
-            ["testimonial"] = ("testimonials", 400), ["trust"] = ("trust", 600),
-            ["identity"] = ("identity", 800), ["payment"] = ("payments", 800), ["article"] = ("articles", 1600),
+            ["brand"] = ("brands", 800),
+            ["slider"] = ("sliders", 1800),
+            ["testimonial"] = ("testimonials", 400),
+            ["trust"] = ("trust", 600),
+            ["identity"] = ("identity", 800),
+            ["payment"] = ("payments", 800),
+            ["article"] = ("articles", 1600),
             ["country"] = ("countries/flags", 256)
         };
 
@@ -234,7 +241,10 @@ public sealed class StoreMediaUploadApiController(ShopDbContext db, FtpMediaStor
                 if (document)
                     db.StoreProductDocuments.Add(new StoreProductDocument
                     {
-                        IdProduct = productId!.Value, Title = title!, Path = path, CreatedAtUtc = DateTime.UtcNow
+                        IdProduct = productId!.Value,
+                        Title = title!,
+                        Path = path,
+                        CreatedAtUtc = DateTime.UtcNow
                     });
                 else if (video)
                 {

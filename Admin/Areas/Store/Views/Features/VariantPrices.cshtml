@@ -34,10 +34,36 @@
         <div class="panel-heading"><h2 class="panel-title">پیشنهادهای کالا در طرح‌های ویژه</h2><div class="panel-heading-btn"><button type="button" class="btn btn-xs btn-icon btn-default" data-offer-refresh aria-label="بارگذاری دوبارهٔ پیشنهادها"><i class="fa fa-rotate" aria-hidden="true"></i></button></div></div>
         <div class="panel-body">
             <p>قیمت پیش از تخفیف به تومان است. پیشنهاد تازه با متعلقات فعال و قیمت پایهٔ آن‌ها ساخته می‌شود؛ پس از ذخیره، قیمت و مجازبودن متعلقات آن قابل تنظیم است.</p>
-            <form class="admin-filter-bar mb-3 d-flex flex-wrap align-items-center gap-2 mb-3" data-offer-filter><label class="visually-hidden" for="offer-search">جست‌وجوی پیشنهاد</label><input class="form-control" id="offer-search" type="search" maxlength="100" placeholder="جست‌وجوی کالا، کد یا طرح" /><span class="admin-record-count ms-auto small text-muted" data-offer-count aria-live="polite"></span></form>
+            <form class="admin-filter-bar mb-3 d-flex flex-wrap align-items-center gap-2 mb-3" data-offer-filter>
+                <label class="visually-hidden" for="offer-search">جست‌وجوی پیشنهاد</label>
+                <input class="form-control" id="offer-search" type="search" maxlength="100"
+                       placeholder="جست‌وجوی کالا، کد یا طرح" />
+                <span class="admin-record-count ms-auto small text-muted" data-offer-count aria-live="polite"></span>
+            </form>
             <div class="admin-data-status small text-muted" data-offer-status role="status" aria-live="polite">در حال بارگذاری…</div>
-            <div class="table-responsive"><table class="table table-striped table-hover align-middle" data-admin-datatable data-admin-table-mode="server"><thead><tr><th scope="col">کالا</th><th scope="col">طرح</th><th scope="col">قیمت پیش از تخفیف (تومان)</th><th scope="col">تخفیف (%)</th><th scope="col">سقف خرید</th><th scope="col">وضعیت</th><th scope="col">عملیات</th></tr></thead><tbody data-offer-rows></tbody></table></div>
-            <div class="admin-pagination d-flex align-items-center justify-content-center gap-3 mt-3" data-offer-pagination hidden><button type="button" class="btn btn-default btn-sm" data-offer-page="-1">قبلی</button><span data-offer-page-label></span><button type="button" class="btn btn-default btn-sm" data-offer-page="1">بعدی</button></div>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover align-middle"
+                       data-admin-datatable data-admin-table-mode="server">
+                    <thead>
+                    <tr>
+                        <th scope="col">کالا</th>
+                        <th scope="col">طرح</th>
+                        <th scope="col">قیمت پیش از تخفیف (تومان)</th>
+                        <th scope="col">تخفیف (%)</th>
+                        <th scope="col">سقف خرید</th>
+                        <th scope="col">وضعیت</th>
+                        <th scope="col">عملیات</th>
+                    </tr>
+                    </thead>
+                    <tbody data-offer-rows></tbody>
+                </table>
+            </div>
+            <div class="admin-pagination d-flex align-items-center justify-content-center gap-3 mt-3"
+                 data-offer-pagination hidden>
+                <button type="button" class="btn btn-default btn-sm" data-offer-page="-1">قبلی</button>
+                <span data-offer-page-label></span>
+                <button type="button" class="btn btn-default btn-sm" data-offer-page="1">بعدی</button>
+            </div>
         </div>
     </section>
     <section class="panel panel-inverse">
@@ -51,7 +77,10 @@
         </div>
         <div class="panel-body">
             <form class="admin-filter-bar mb-3 d-flex flex-wrap align-items-center gap-2 mb-3" data-price-filter>
-                <label class="visually-hidden" for="variant-price-search">جست‌وجو</label><input class="form-control" id="variant-price-search" type="search" maxlength="100" placeholder="جست‌وجوی کالا، تنوع یا طرح" autocomplete="off"><span class="admin-record-count ms-auto small text-muted" data-price-count aria-live="polite"></span>
+                <label class="visually-hidden" for="variant-price-search">جست‌وجو</label>
+                <input class="form-control" id="variant-price-search" type="search" maxlength="100"
+                       placeholder="جست‌وجوی کالا، تنوع یا طرح" autocomplete="off">
+                <span class="admin-record-count ms-auto small text-muted" data-price-count aria-live="polite"></span>
             </form>
             <div class="admin-data-status small text-muted" data-price-status role="status" aria-live="polite">در حال بارگذاری…</div>
             <div class="table-responsive">
@@ -63,7 +92,12 @@
                     </thead><tbody data-price-rows></tbody>
                 </table>
             </div>
-            <div class="admin-pagination d-flex align-items-center justify-content-center gap-3 mt-3" data-price-pagination hidden><button type="button" class="btn btn-default btn-sm" data-price-page="-1">قبلی</button><span data-price-page-label></span><button type="button" class="btn btn-default btn-sm" data-price-page="1">بعدی</button></div>
+            <div class="admin-pagination d-flex align-items-center justify-content-center gap-3 mt-3"
+                 data-price-pagination hidden>
+                <button type="button" class="btn btn-default btn-sm" data-price-page="-1">قبلی</button>
+                <span data-price-page-label></span>
+                <button type="button" class="btn btn-default btn-sm" data-price-page="1">بعدی</button>
+            </div>
         </div>
     </section>
     <section class="panel panel-inverse mt-3" aria-labelledby="price-history-title">

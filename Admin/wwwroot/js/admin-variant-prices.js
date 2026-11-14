@@ -71,7 +71,8 @@
         }
         const first = page._priceTotal ? (page._pricePage - 1) * pageSize + 1 : 0;
         const last = rows.length ? first + rows.length - 1 : 0;
-        page.querySelector("[data-price-count]").textContent = `نمایش ${number.format(first)} تا ${number.format(last)} از ${number.format(page._priceTotal)} ردیف`;
+        page.querySelector("[data-price-count]").textContent =
+            `نمایش ${number.format(first)} تا ${number.format(last)} از ${number.format(page._priceTotal)} ردیف`;
         ui.refreshDataTable(table);
         if (!rows.length) status(page, "موردی با این جست‌وجو پیدا نشد."); else status(page, "");
     }
@@ -163,7 +164,8 @@
         }
         const first = page._offerTotal ? (page._offerPage - 1) * pageSize + 1 : 0;
         const last = rows.length ? first + rows.length - 1 : 0;
-        page.querySelector("[data-offer-count]").textContent = `نمایش ${number.format(first)} تا ${number.format(last)} از ${number.format(page._offerTotal)} ردیف`;
+        page.querySelector("[data-offer-count]").textContent =
+            `نمایش ${number.format(first)} تا ${number.format(last)} از ${number.format(page._offerTotal)} ردیف`;
         ui.refreshDataTable(table);
         page.querySelector("[data-offer-status]").textContent = rows.length ? "" : "موردی پیدا نشد.";
     }
@@ -258,7 +260,10 @@
         const offerFilter = page.querySelector("[data-offer-filter]");
         if (offerFilter) {
             offerFilter.addEventListener("submit", event => { event.preventDefault(); clearTimeout(page._offerSearchTimer); void loadOffers(page, 1); });
-            offerFilter.addEventListener("input", () => { clearTimeout(page._offerSearchTimer); page._offerSearchTimer = setTimeout(() => void loadOffers(page, 1), 300); });
+            offerFilter.addEventListener("input", () => {
+                clearTimeout(page._offerSearchTimer);
+                page._offerSearchTimer = setTimeout(() => void loadOffers(page, 1), 300);
+            });
             page.querySelectorAll("[data-offer-page]").forEach(button => button.addEventListener("click", () => {
                 if (button.disabled) return;
                 void loadOffers(page, Math.max(1, page._offerPage + Number(button.dataset.offerPage)));
@@ -317,7 +322,10 @@
         }
         const priceFilter = page.querySelector("[data-price-filter]");
         priceFilter.addEventListener("submit", event => { event.preventDefault(); clearTimeout(page._priceSearchTimer); void load(page, 1); });
-        priceFilter.addEventListener("input", () => { clearTimeout(page._priceSearchTimer); page._priceSearchTimer = setTimeout(() => void load(page, 1), 300); });
+        priceFilter.addEventListener("input", () => {
+            clearTimeout(page._priceSearchTimer);
+            page._priceSearchTimer = setTimeout(() => void load(page, 1), 300);
+        });
         page.querySelectorAll("[data-price-page]").forEach(button => button.addEventListener("click", () => {
             if (button.disabled) return;
             void load(page, Math.max(1, page._pricePage + Number(button.dataset.pricePage)));

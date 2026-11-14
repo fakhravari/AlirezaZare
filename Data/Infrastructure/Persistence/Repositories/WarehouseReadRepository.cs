@@ -46,21 +46,23 @@ public sealed class WarehouseReadRepository(ShopDbContext dbContext) : IWarehous
         CancellationToken cancellationToken)
     {
         var query = from warehouse in dbContext.Warehouses.AsNoTracking()
-            from inventoryItem in dbContext.InventoryItems.AsNoTracking()
-            from plan in dbContext.SalesPlanReferences.AsNoTracking()
-            join unit in dbContext.WarehouseUnits.AsNoTracking() on inventoryItem.Product.IdBaseUnit equals unit.Id
-            join balance in dbContext.StockBalances.AsNoTracking()
-                on new
-                {
-                    IdWarehouse = warehouse.Id, IdInventoryItem = inventoryItem.Id, IdSalesPlanReference = plan.Id
-                }
-                equals new { balance.IdWarehouse, balance.IdInventoryItem, balance.IdSalesPlanReference } into balances
-            from balance in balances.DefaultIfEmpty()
-            where warehouse.IsActive && warehouse.Company.IsActive && inventoryItem.IsActive &&
-                  inventoryItem.Product.IsWarehouseEnabled
-                  && (inventoryItem.ProductVariant == null || inventoryItem.ProductVariant!.IsActive) && plan.IsActive
-                  && dbContext.WarehouseStockOwners.Any(owner => owner.IdWarehouse == warehouse.Id && owner.IdStockOwner == plan.Id)
-            select new { warehouse, inventoryItem, plan, unit, balance };
+                    from inventoryItem in dbContext.InventoryItems.AsNoTracking()
+                    from plan in dbContext.SalesPlanReferences.AsNoTracking()
+                    join unit in dbContext.WarehouseUnits.AsNoTracking() on inventoryItem.Product.IdBaseUnit equals unit.Id
+                    join balance in dbContext.StockBalances.AsNoTracking()
+                        on new
+                        {
+                            IdWarehouse = warehouse.Id,
+                            IdInventoryItem = inventoryItem.Id,
+                            IdSalesPlanReference = plan.Id
+                        }
+                        equals new { balance.IdWarehouse, balance.IdInventoryItem, balance.IdSalesPlanReference } into balances
+                    from balance in balances.DefaultIfEmpty()
+                    where warehouse.IsActive && warehouse.Company.IsActive && inventoryItem.IsActive &&
+                          inventoryItem.Product.IsWarehouseEnabled
+                          && (inventoryItem.ProductVariant == null || inventoryItem.ProductVariant!.IsActive) && plan.IsActive
+                          && dbContext.WarehouseStockOwners.Any(owner => owner.IdWarehouse == warehouse.Id && owner.IdStockOwner == plan.Id)
+                    select new { warehouse, inventoryItem, plan, unit, balance };
 
         if (warehouseId.HasValue) query = query.Where(x => x.warehouse.Id == warehouseId.Value);
         if (warehouseIds is not null) query = query.Where(x => warehouseIds.Contains(x.warehouse.Id));

@@ -38,14 +38,23 @@ public sealed class StoreFeedbackApiController(ShopDbContext db) : ControllerBas
         if (page < 1 || page > 100000 || status is not (null or "pending" or "approved" or "rejected"))
             return ValidationProblem(detail: "فیلتر یا شمارهٔ صفحه معتبر نیست.", statusCode: 400);
         var query = from feedback in db.ProductFeedback.AsNoTracking()
-            join product in db.Products.AsNoTracking() on feedback.IdProduct equals product.Id
-            where feedback.FeedbackType == type
-            select new
-            {
-                feedback.Id, feedback.IdProduct, StoreProductKey = product.ProductKey, ProductName = product.Name, feedback.DisplayName,
-                feedback.FeedbackText, feedback.Rating, feedback.Status, feedback.AdminReply, feedback.IsSample, feedback.CreatedAtUtc,
-                feedback.RepliedAtUtc
-            };
+                    join product in db.Products.AsNoTracking() on feedback.IdProduct equals product.Id
+                    where feedback.FeedbackType == type
+                    select new
+                    {
+                        feedback.Id,
+                        feedback.IdProduct,
+                        StoreProductKey = product.ProductKey,
+                        ProductName = product.Name,
+                        feedback.DisplayName,
+                        feedback.FeedbackText,
+                        feedback.Rating,
+                        feedback.Status,
+                        feedback.AdminReply,
+                        feedback.IsSample,
+                        feedback.CreatedAtUtc,
+                        feedback.RepliedAtUtc
+                    };
         if (status is not null) query = query.Where(x => x.Status == status);
         if (!string.IsNullOrWhiteSpace(search))
         {

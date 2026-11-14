@@ -44,9 +44,9 @@ public sealed class MagazineController : PageController
                 ["description"] = relatedArticle.Summary,
                 ["image"] = new[] { articleImage },
                 ["author"] = new Dictionary<string, object?>
-                    { ["@type"] = "Organization", ["name"] = relatedArticle.Author },
+                { ["@type"] = "Organization", ["name"] = relatedArticle.Author },
                 ["publisher"] = new Dictionary<string, object?>
-                    { ["@type"] = "Organization", ["name"] = "فروشگاه ندا اولیائی" },
+                { ["@type"] = "Organization", ["name"] = "فروشگاه ندا اولیائی" },
                 ["mainEntityOfPage"] = articleUrl,
                 ["inLanguage"] = "fa-IR"
             };

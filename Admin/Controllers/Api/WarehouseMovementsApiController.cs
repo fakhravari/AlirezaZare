@@ -24,33 +24,45 @@ public sealed class WarehouseMovementsApiController(ShopDbContext db) : Controll
         if (audit) return await GetAuditAsync(warehouseId, search, from, to, page, cancellationToken);
         if (summary) return await GetSummaryAsync(warehouseId, search, salesPlan, from, to, page, cancellationToken);
         var query = from line in db.WarehouseDocumentLines.AsNoTracking()
-            join document in db.WarehouseDocuments.AsNoTracking() on line.IdDocument equals document.Id
-            join type in db.WarehouseDocumentTypes.AsNoTracking() on document.IdDocumentType equals type.Id
-            join warehouse in db.Warehouses.AsNoTracking() on document.IdWarehouse equals warehouse.Id
-            join plan in db.SalesPlanReferences.AsNoTracking() on (line.IdSalesPlanReference ?? document.IdSalesPlanReference) equals plan.Id
-            join movement in db.WarehouseStockMovements.AsNoTracking() on line.Id equals movement.IdDocumentLine into
-                movements
-            from movement in movements.DefaultIfEmpty()
-            orderby document.DocumentDate descending, document.DocumentNumber descending, line.Id descending
-            select new
-            {
-                document.Id, document.DocumentNumber, document.DocumentDate, document.Status,
-                DocumentType = type.Name, type.Direction, type.AffectsStock,
-                WarehouseId = warehouse.Id,
-                Warehouse = warehouse.Company.Name + " / " + warehouse.Name + " (" + warehouse.Code + ")",
-                SalesPlan = plan.DisplayName, SalesPlanKey = plan.StoreSalesPlanKey, line.ProductNameSnapshot, line.VariantNameSnapshot,
-                line.Quantity, line.UnitNameSnapshot, line.ConversionFactor, line.BaseQuantity,
-                QuantityDelta = movement == null ? 0m : movement.QuantityDelta,
-                BalanceAfter = (from prior in db.WarehouseStockMovements
-                    join priorDocument in db.WarehouseDocuments on prior.IdDocument equals priorDocument.Id
-                    where prior.IdWarehouse == document.IdWarehouse && prior.IdInventoryItem == line.IdInventoryItem
-                          && prior.IdSalesPlanReference == (line.IdSalesPlanReference ?? document.IdSalesPlanReference)
-                          && (priorDocument.DocumentDate < document.DocumentDate ||
-                              (priorDocument.DocumentDate == document.DocumentDate && priorDocument.DocumentNumber < document.DocumentNumber) ||
-                              (priorDocument.DocumentDate == document.DocumentDate && priorDocument.DocumentNumber == document.DocumentNumber && prior.IdDocumentLine <= line.Id))
-                    select (decimal?)prior.QuantityDelta).Sum() ?? 0m,
-                document.Reason, document.CreatedByUserKey
-            };
+                    join document in db.WarehouseDocuments.AsNoTracking() on line.IdDocument equals document.Id
+                    join type in db.WarehouseDocumentTypes.AsNoTracking() on document.IdDocumentType equals type.Id
+                    join warehouse in db.Warehouses.AsNoTracking() on document.IdWarehouse equals warehouse.Id
+                    join plan in db.SalesPlanReferences.AsNoTracking() on (line.IdSalesPlanReference ?? document.IdSalesPlanReference) equals plan.Id
+                    join movement in db.WarehouseStockMovements.AsNoTracking() on line.Id equals movement.IdDocumentLine into
+                        movements
+                    from movement in movements.DefaultIfEmpty()
+                    orderby document.DocumentDate descending, document.DocumentNumber descending, line.Id descending
+                    select new
+                    {
+                        document.Id,
+                        document.DocumentNumber,
+                        document.DocumentDate,
+                        document.Status,
+                        DocumentType = type.Name,
+                        type.Direction,
+                        type.AffectsStock,
+                        WarehouseId = warehouse.Id,
+                        Warehouse = warehouse.Company.Name + " / " + warehouse.Name + " (" + warehouse.Code + ")",
+                        SalesPlan = plan.DisplayName,
+                        SalesPlanKey = plan.StoreSalesPlanKey,
+                        line.ProductNameSnapshot,
+                        line.VariantNameSnapshot,
+                        line.Quantity,
+                        line.UnitNameSnapshot,
+                        line.ConversionFactor,
+                        line.BaseQuantity,
+                        QuantityDelta = movement == null ? 0m : movement.QuantityDelta,
+                        BalanceAfter = (from prior in db.WarehouseStockMovements
+                                        join priorDocument in db.WarehouseDocuments on prior.IdDocument equals priorDocument.Id
+                                        where prior.IdWarehouse == document.IdWarehouse && prior.IdInventoryItem == line.IdInventoryItem
+                                              && prior.IdSalesPlanReference == (line.IdSalesPlanReference ?? document.IdSalesPlanReference)
+                                              && (priorDocument.DocumentDate < document.DocumentDate ||
+                                                  (priorDocument.DocumentDate == document.DocumentDate && priorDocument.DocumentNumber < document.DocumentNumber) ||
+                                                  (priorDocument.DocumentDate == document.DocumentDate && priorDocument.DocumentNumber == document.DocumentNumber && prior.IdDocumentLine <= line.Id))
+                                        select (decimal?)prior.QuantityDelta).Sum() ?? 0m,
+                        document.Reason,
+                        document.CreatedByUserKey
+                    };
         if (!User.IsInRole("system.full-access"))
         {
             long userId = long.TryParse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value,
@@ -97,12 +109,12 @@ public sealed class WarehouseMovementsApiController(ShopDbContext db) : Controll
         DateOnly? from, DateOnly? to, int page, CancellationToken cancellationToken)
     {
         var query = from movement in db.WarehouseStockMovements.AsNoTracking()
-            join document in db.WarehouseDocuments.AsNoTracking() on movement.IdDocument equals document.Id
-            join warehouse in db.Warehouses.AsNoTracking() on movement.IdWarehouse equals warehouse.Id
-            join item in db.InventoryItems.AsNoTracking() on movement.IdInventoryItem equals item.Id
-            join unit in db.WarehouseUnits.AsNoTracking() on item.Product.IdBaseUnit equals unit.Id
-            join plan in db.SalesPlanReferences.AsNoTracking() on movement.IdSalesPlanReference equals plan.Id
-            select new { movement, document, warehouse, item, unit, plan };
+                    join document in db.WarehouseDocuments.AsNoTracking() on movement.IdDocument equals document.Id
+                    join warehouse in db.Warehouses.AsNoTracking() on movement.IdWarehouse equals warehouse.Id
+                    join item in db.InventoryItems.AsNoTracking() on movement.IdInventoryItem equals item.Id
+                    join unit in db.WarehouseUnits.AsNoTracking() on item.Product.IdBaseUnit equals unit.Id
+                    join plan in db.SalesPlanReferences.AsNoTracking() on movement.IdSalesPlanReference equals plan.Id
+                    select new { movement, document, warehouse, item, unit, plan };
         if (!User.IsInRole("system.full-access"))
         {
             long userId = long.TryParse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out long parsed) ? parsed : 0;
@@ -123,13 +135,23 @@ public sealed class WarehouseMovementsApiController(ShopDbContext db) : Controll
             WarehouseId = x.warehouse.Id,
             Warehouse = x.warehouse.Company.Name + " / " + x.warehouse.Name + " (" + x.warehouse.Code + ")",
             ItemId = x.item.Id,
-            Product = x.item.Product.Name, ProductKey = x.item.Product.ProductKey,
+            Product = x.item.Product.Name,
+            ProductKey = x.item.Product.ProductKey,
             Variant = x.item.ProductVariant == null ? null : x.item.ProductVariant.Name,
-            PlanId = x.plan.Id, SalesPlan = x.plan.DisplayName, Unit = x.unit.Name
+            PlanId = x.plan.Id,
+            SalesPlan = x.plan.DisplayName,
+            Unit = x.unit.Name
         }).Select(group => new
         {
-            group.Key.WarehouseId, group.Key.Warehouse, group.Key.ItemId, group.Key.Product,
-            group.Key.ProductKey, group.Key.Variant, group.Key.PlanId, group.Key.SalesPlan, group.Key.Unit,
+            group.Key.WarehouseId,
+            group.Key.Warehouse,
+            group.Key.ItemId,
+            group.Key.Product,
+            group.Key.ProductKey,
+            group.Key.Variant,
+            group.Key.PlanId,
+            group.Key.SalesPlan,
+            group.Key.Unit,
             Opening = group.Sum(x => x.document.DocumentDate < startDate ? x.movement.QuantityDelta : 0m),
             Incoming = group.Sum(x => x.document.DocumentDate >= startDate && x.movement.QuantityDelta > 0 ? x.movement.QuantityDelta : 0m),
             Outgoing = group.Sum(x => x.document.DocumentDate >= startDate && x.movement.QuantityDelta < 0 ? -x.movement.QuantityDelta : 0m),
@@ -146,12 +168,12 @@ public sealed class WarehouseMovementsApiController(ShopDbContext db) : Controll
         int page, CancellationToken cancellationToken)
     {
         var query = from audit in db.WarehouseDocumentAudits.AsNoTracking()
-            join warehouse in db.Warehouses.AsNoTracking() on audit.WarehouseId equals warehouse.Id
-            select new
-            {
-                audit,
-                Warehouse = warehouse.Company.Name + " / " + warehouse.Name + " (" + warehouse.Code + ")"
-            };
+                    join warehouse in db.Warehouses.AsNoTracking() on audit.WarehouseId equals warehouse.Id
+                    select new
+                    {
+                        audit,
+                        Warehouse = warehouse.Company.Name + " / " + warehouse.Name + " (" + warehouse.Code + ")"
+                    };
         if (!User.IsInRole("system.full-access"))
         {
             long userId = long.TryParse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value,
@@ -202,9 +224,16 @@ public sealed class WarehouseMovementsApiController(ShopDbContext db) : Controll
             .Skip((page - 1) * 100).Take(100)
             .Select(x => new
             {
-                x.audit.Id, x.audit.DocumentId, x.audit.DocumentNumber, x.audit.Action,
-                x.audit.ActorUserKey, x.audit.OccurredAtUtc, x.audit.Reason, x.Warehouse,
-                x.audit.BeforeJson, x.audit.AfterJson
+                x.audit.Id,
+                x.audit.DocumentId,
+                x.audit.DocumentNumber,
+                x.audit.Action,
+                x.audit.ActorUserKey,
+                x.audit.OccurredAtUtc,
+                x.audit.Reason,
+                x.Warehouse,
+                x.audit.BeforeJson,
+                x.audit.AfterJson
             }).ToListAsync(cancellationToken);
         return Ok(new { items, total, page, pageSize = 100 });
     }

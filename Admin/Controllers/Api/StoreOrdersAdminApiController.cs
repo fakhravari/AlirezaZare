@@ -37,8 +37,13 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
         order.ShippingCarrier = carrier; order.ShippingTrackingCode = code;
         db.StoreOrderShipmentTrackingHistories.Add(new StoreOrderShipmentTrackingHistory
         {
-            IdOrder = id, PreviousCarrier = previousCarrier, PreviousTrackingCode = previousTrackingCode,
-            Carrier = carrier, TrackingCode = code, ActorUserKey = actor, ChangedAtUtc = DateTime.UtcNow
+            IdOrder = id,
+            PreviousCarrier = previousCarrier,
+            PreviousTrackingCode = previousTrackingCode,
+            Carrier = carrier,
+            TrackingCode = code,
+            ActorUserKey = actor,
+            ChangedAtUtc = DateTime.UtcNow
         });
         await db.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
@@ -64,8 +69,11 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
         order.Status = input.Status;
         db.StoreOrderShippingHistories.Add(new StoreOrderShippingHistory
         {
-            IdOrder = id, PreviousStatus = input.ExpectedStatus, NewStatus = input.Status,
-            ActorUserKey = actor, ChangedAtUtc = DateTime.UtcNow
+            IdOrder = id,
+            PreviousStatus = input.ExpectedStatus,
+            NewStatus = input.Status,
+            ActorUserKey = actor,
+            ChangedAtUtc = DateTime.UtcNow
         });
         await db.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
@@ -87,9 +95,15 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
                           orderby o.Id descending
                           select new OrderRow
                           {
-                              Id = o.Id, OrderNumber = o.OrderNumber, Status = o.Status, PaymentMethod = o.PaymentMethod,
-                              IdBank = o.IdBank, BankName = o.Bank == null ? null : o.Bank.NameFa,
-                              ItemCount = o.ItemCount, TotalAmount = o.TotalAmount, OrderedAtUtc = o.OrderedAtUtc,
+                              Id = o.Id,
+                              OrderNumber = o.OrderNumber,
+                              Status = o.Status,
+                              PaymentMethod = o.PaymentMethod,
+                              IdBank = o.IdBank,
+                              BankName = o.Bank == null ? null : o.Bank.NameFa,
+                              ItemCount = o.ItemCount,
+                              TotalAmount = o.TotalAmount,
+                              OrderedAtUtc = o.OrderedAtUtc,
                               IsSample = o.PaymentMethod == "demo" && o.ExternalOrderKey != null && o.ExternalOrderKey.StartsWith("demo-order-"),
                               CustomerName = (p.FirstName + " " + p.LastName).Trim()
                           }).Skip(offset).Take(take).ToListAsync(cancellationToken);
@@ -104,12 +118,20 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
                            join p in db.AccountProfiles.AsNoTracking() on o.IdProfile equals p.Id
                            select new OrderDetailsRow
                            {
-                               Id = o.Id, OrderNumber = o.OrderNumber, Status = o.Status, PaymentMethod = o.PaymentMethod,
-                               IdBank = o.IdBank, BankName = o.Bank == null ? null : o.Bank.NameFa,
-                               ItemCount = o.ItemCount, TotalAmount = o.TotalAmount, OrderedAtUtc = o.OrderedAtUtc,
+                               Id = o.Id,
+                               OrderNumber = o.OrderNumber,
+                               Status = o.Status,
+                               PaymentMethod = o.PaymentMethod,
+                               IdBank = o.IdBank,
+                               BankName = o.Bank == null ? null : o.Bank.NameFa,
+                               ItemCount = o.ItemCount,
+                               TotalAmount = o.TotalAmount,
+                               OrderedAtUtc = o.OrderedAtUtc,
                                IsSample = o.PaymentMethod == "demo" && o.ExternalOrderKey != null && o.ExternalOrderKey.StartsWith("demo-order-"),
-                               CustomerName = (p.FirstName + " " + p.LastName).Trim(), IdWarehouseDocument = o.IdWarehouseDocument,
-                               ShippingCarrier = o.ShippingCarrier, ShippingTrackingCode = o.ShippingTrackingCode,
+                               CustomerName = (p.FirstName + " " + p.LastName).Trim(),
+                               IdWarehouseDocument = o.IdWarehouseDocument,
+                               ShippingCarrier = o.ShippingCarrier,
+                               ShippingTrackingCode = o.ShippingTrackingCode,
                                AddressSnapshotJson = o.AddressSnapshotJson
                            }).SingleOrDefaultAsync(cancellationToken);
         if (order is not null)
@@ -127,8 +149,11 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
                 .ToListAsync(cancellationToken);
             var items = itemRows.Select(i => new
             {
-                name = i.ProductNameSnapshot, quantity = i.Quantity, unitAmount = i.UnitAmount,
-                salesPlan = i.StoreSalesPlanKey, options = JsonDocument.Parse(i.OptionsJson).RootElement.Clone(),
+                name = i.ProductNameSnapshot,
+                quantity = i.Quantity,
+                unitAmount = i.UnitAmount,
+                salesPlan = i.StoreSalesPlanKey,
+                options = JsonDocument.Parse(i.OptionsJson).RootElement.Clone(),
                 priceReferences = references.Where(r => r.IdOrderItem == i.Id).Select(r => new { priceVersionId = r.IdPriceVersion, component = r.PriceKind, calculatedUnitAmount = r.PriceKind is "option" or "accessory" or "order-snapshot" ? r.PriceAmount : decimal.Round(r.PriceAmount * (100m - r.DiscountPercent) / 100m, 0, MidpointRounding.AwayFromZero), scope = r.ScopeKey, priceKind = r.PriceKind, recordedPriceAmount = r.PriceAmount, discountPercent = r.DiscountPercent, isCurrent = r.IsActive, recordedAtUtc = r.CreatedAtUtc, reason = r.ChangeReason }).ToArray()
             }).ToList();
             var history = await db.StoreOrderShippingHistories.AsNoTracking().Where(x => x.IdOrder == id)

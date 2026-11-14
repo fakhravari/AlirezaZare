@@ -111,7 +111,8 @@ public sealed record CatalogSnapshot(
             };
             brandProfiles.Add(editorial with
             {
-                Name = Text(brand, "name"), PersianName = Text(brand, "fa"),
+                Name = Text(brand, "name"),
+                PersianName = Text(brand, "fa"),
                 LogoFile = logo is null ? null : Path.GetFileName(logo)
             });
         }
@@ -177,9 +178,9 @@ public sealed record CatalogSnapshot(
 
         if (products.Count == 0) throw new InvalidDataException("The catalog has no products.");
         foreach (JsonElement collection in root.GetProperty("collections").EnumerateObject().Select(item => item.Value))
-        foreach (JsonElement id in collection.EnumerateArray())
-            if (!ids.Contains(id.GetInt32()))
-                throw new InvalidDataException("Unknown product in collection.");
+            foreach (JsonElement id in collection.EnumerateArray())
+                if (!ids.Contains(id.GetInt32()))
+                    throw new InvalidDataException("Unknown product in collection.");
 
         // Default System.Text.Json encoding escapes '<', '>' and '&': safe inside a JSON script block.
         return new(JsonSerializer.Serialize(root), products.AsReadOnly(), brandProfiles.AsReadOnly());

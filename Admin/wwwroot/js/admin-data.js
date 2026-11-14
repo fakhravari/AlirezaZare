@@ -486,7 +486,10 @@
         } finally { finishRequest(page, controller); }
     }
 
-    function refreshProductDrafts(pageNumber = 1) { const page = document.querySelector('[data-admin-page="product-drafts"]'); if (page) void loadProductDrafts(page, pageNumber); }
+    function refreshProductDrafts(pageNumber = 1) {
+        const page = document.querySelector('[data-admin-page="product-drafts"]');
+        if (page) void loadProductDrafts(page, pageNumber);
+    }
 
     async function loadPlans(signal) {
         const data = await ui.getJson("/api/admin/warehouse/stock/plans", { signal });

@@ -32,8 +32,15 @@ public sealed class SalesPlansController(
             priceOptions = data.PriceOptions.GetValueOrDefault(productId, []),
             plans = data.Plans.Select(plan => new
             {
-                plan.Id, plan.Code, plan.Name, plan.Type, plan.IsDefault, plan.Label,
-                plan.StartsAtUtc, plan.EndsAtUtc, plan.ShowCountdown,
+                plan.Id,
+                plan.Code,
+                plan.Name,
+                plan.Type,
+                plan.IsDefault,
+                plan.Label,
+                plan.StartsAtUtc,
+                plan.EndsAtUtc,
+                plan.ShowCountdown,
                 active = plan.IsEnabled && (plan.StartsAtUtc is null || now >= plan.StartsAtUtc) &&
                          (plan.EndsAtUtc is null || now < plan.EndsAtUtc),
                 offer = productOffers.FirstOrDefault(offer => offer.SalesPlanId == plan.Id)
@@ -97,8 +104,13 @@ public sealed class SalesPlansController(
             .OrderBy(item => item.CreatedAtUtc).ThenBy(item => item.Id)
             .Select(item => new
             {
-                item.Id, item.ScopeKey, item.PriceKind, item.PriceAmount, item.DiscountPercent,
-                item.IsActive, item.CreatedAtUtc
+                item.Id,
+                item.ScopeKey,
+                item.PriceKind,
+                item.PriceAmount,
+                item.DiscountPercent,
+                item.IsActive,
+                item.CreatedAtUtc
             }).ToArray();
 
         return Ok(new
@@ -169,9 +181,15 @@ public sealed class SalesPlansController(
             decimal adjustedUnit = checked(baseUnitAmount + adjustments);
             return Ok(new
             {
-                quote.ProductId, quote.SalesPlanId, quote.SalesPlanCode, quote.Quantity,
-                listUnitAmount, discountPercent, unitAmount = adjustedUnit,
-                totalAmount = checked(adjustedUnit * quote.Quantity), quote.Currency,
+                quote.ProductId,
+                quote.SalesPlanId,
+                quote.SalesPlanCode,
+                quote.Quantity,
+                listUnitAmount,
+                discountPercent,
+                unitAmount = adjustedUnit,
+                totalAmount = checked(adjustedUnit * quote.Quantity),
+                quote.Currency,
                 quote.QuotedAtUtc,
                 variantId = request.VariantId,
                 planName = data.Plans.Single(plan => plan.Id == quote.SalesPlanId).Name,
