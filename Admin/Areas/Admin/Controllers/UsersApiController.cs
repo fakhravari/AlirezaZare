@@ -41,14 +41,20 @@ public sealed class UsersApiController(ShopDbContext db, PasswordHasher<AdminSys
 
         if (section == "permissions")
         {
-            var roles = await db.AdminRoles.AsNoTracking().OrderBy(x => x.Name)
-                .Select(x => new
-                    { x.Id, x.RoleKey, x.Name, x.IsActive, permissionIds = x.Permissions.Select(p => p.IdPermission) })
-                .ToListAsync(cancellationToken);
             var permissions = await db.AdminPermissions.AsNoTracking().Where(x => x.IsActive)
                 .OrderBy(x => x.SortOrder).ThenBy(x => x.Name)
                 .Select(x => new { x.Id, x.PermissionKey, x.Name, x.ParentKey, x.Area, x.Controller, x.Action })
                 .ToListAsync(cancellationToken);
+            long[] allPermissionIds = permissions.Select(x => x.Id).ToArray();
+            var storedRoles = await db.AdminRoles.AsNoTracking().OrderBy(x => x.Name)
+                .Select(x => new
+                    { x.Id, x.RoleKey, x.Name, x.IsActive, permissionIds = x.Permissions.Select(p => p.IdPermission) })
+                .ToListAsync(cancellationToken);
+            var roles = storedRoles.Select(role => new
+            {
+                role.Id, role.RoleKey, role.Name, role.IsActive,
+                permissionIds = role.RoleKey == "system.full-access" ? allPermissionIds : role.permissionIds
+            });
             return Ok(new
             {
                 users = Array.Empty<object>(), roles, permissions,
@@ -131,7 +137,8 @@ public sealed class UsersApiController(ShopDbContext db, PasswordHasher<AdminSys
         user.DisplayName = input.DisplayName.Trim();
         user.IsActive = remainsActive;
         user.UpdatedAtUtc = DateTime.UtcNow;
-        user.SecurityStamp = Guid.NewGuid();
+        if (input.Id is null || !string.IsNullOrEmpty(input.Password))
+            user.SecurityStamp = Guid.NewGuid();
         if (!string.IsNullOrEmpty(input.Password))
             user.PasswordHash = passwordHasher.HashPassword(user, input.Password);
 
@@ -191,11 +198,8 @@ public sealed class UsersApiController(ShopDbContext db, PasswordHasher<AdminSys
                 db.AdminRolePermissions.Add(new AdminRolePermission { IdRole = role.Id, IdPermission = permissionId });
         }
         await db.SaveChangesAsync(cancellationToken);
-        Guid newStamp = Guid.NewGuid();
-        await db.AdminSystemUsers.Where(x => x.Roles.Any(userRole => userRole.IdRole == role.Id))
-            .ExecuteUpdateAsync(update => update.SetProperty(x => x.SecurityStamp, newStamp), cancellationToken);
         await transaction.CommitAsync(cancellationToken);
-        return Ok(new { message = "مجوزهای نقش ذخیره شد و نشست کاربران آن نقش لغو شد." });
+        return Ok(new { message = "تغییرهای نقش ذخیره شد و دسترسی کاربران در درخواست بعدی به‌روز می‌شود." });
     }
 
     [HttpPost("roles")]

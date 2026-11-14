@@ -31,6 +31,14 @@ public sealed class AdminAuthentication(ShopDbContext db, PasswordHasher<AdminSy
         user.UpdatedAtUtc = DateTime.UtcNow;
         await db.SaveChangesAsync(cancellationToken);
 
+        AdminPermission[] allPermissions =
+            await db.AdminPermissions.AsNoTracking().Where(x => x.IsActive).ToArrayAsync(cancellationToken);
+        return CreatePrincipal(user, allPermissions);
+    }
+
+    internal static ClaimsPrincipal CreatePrincipal(AdminSystemUser user,
+        IReadOnlyCollection<AdminPermission> allPermissions)
+    {
         var claims = new List<Claim>
         {
             new(ClaimTypes.NameIdentifier, user.Id.ToString()),
@@ -38,12 +46,9 @@ public sealed class AdminAuthentication(ShopDbContext db, PasswordHasher<AdminSy
             new("display_name", user.DisplayName),
             new("admin_security_stamp", user.SecurityStamp.ToString("D"))
         };
-
         foreach (long warehouseId in user.WarehouseAccess.Select(x => x.IdWarehouse))
             claims.Add(new Claim("admin_warehouse", warehouseId.ToString()));
 
-        AdminPermission[] allPermissions =
-            await db.AdminPermissions.AsNoTracking().Where(x => x.IsActive).ToArrayAsync(cancellationToken);
         var children = allPermissions.GroupBy(x => x.ParentKey ?? "")
             .ToDictionary(x => x.Key, x => x.ToArray(), StringComparer.OrdinalIgnoreCase);
         var granted = new Dictionary<string, AdminPermission>(StringComparer.OrdinalIgnoreCase);
@@ -59,6 +64,12 @@ public sealed class AdminAuthentication(ShopDbContext db, PasswordHasher<AdminSy
         foreach (AdminRole role in user.Roles.Select(x => x.Role).Where(x => x.IsActive))
         {
             claims.Add(new Claim(ClaimTypes.Role, role.RoleKey));
+            if (role.RoleKey == "system.full-access")
+            {
+                foreach (AdminPermission permission in allPermissions)
+                    Grant(permission);
+                continue;
+            }
             foreach (AdminPermission permission in role.Permissions.Select(x => x.Permission).Where(x => x.IsActive))
                 Grant(permission);
         }
@@ -164,9 +175,35 @@ public sealed class AdminCookieEvents(ShopDbContext db) : CookieAuthenticationEv
             return;
         }
 
-        bool valid = await db.AdminSystemUsers.AsNoTracking().AnyAsync(x =>
-            x.Id == userId && x.IsActive && x.SecurityStamp == stamp, context.HttpContext.RequestAborted);
-        if (!valid) await RejectAsync(context);
+        AdminSystemUser? user = await db.AdminSystemUsers.AsNoTracking()
+            .Include(x => x.WarehouseAccess)
+            .Include(x => x.Roles).ThenInclude(x => x.Role)
+            .ThenInclude(x => x.Permissions).ThenInclude(x => x.Permission)
+            .SingleOrDefaultAsync(x => x.Id == userId && x.IsActive, context.HttpContext.RequestAborted);
+        if (user is null || user.SecurityStamp != stamp)
+        {
+            await RejectAsync(context);
+            return;
+        }
+
+        AdminPermission[] permissions = await db.AdminPermissions.AsNoTracking().Where(x => x.IsActive)
+            .ToArrayAsync(context.HttpContext.RequestAborted);
+        ClaimsPrincipal current = context.Principal!;
+        ClaimsPrincipal refreshed = AdminAuthentication.CreatePrincipal(user, permissions);
+        if (!ClaimsMatch(current, refreshed))
+        {
+            context.ReplacePrincipal(refreshed);
+            context.ShouldRenew = true;
+        }
+    }
+
+    private static bool ClaimsMatch(ClaimsPrincipal current, ClaimsPrincipal refreshed)
+    {
+        string[] currentClaims = current.Claims.Select(claim => claim.Type + "\0" + claim.Value)
+            .OrderBy(value => value, StringComparer.Ordinal).ToArray();
+        string[] refreshedClaims = refreshed.Claims.Select(claim => claim.Type + "\0" + claim.Value)
+            .OrderBy(value => value, StringComparer.Ordinal).ToArray();
+        return currentClaims.SequenceEqual(refreshedClaims, StringComparer.Ordinal);
     }
 
     private static async Task RejectAsync(CookieValidatePrincipalContext context)

@@ -156,8 +156,6 @@
         };
         for (const selected of data.permissions.filter(item => effectivePermissions.has(item.id)))
             includeDescendants(selected.permissionKey);
-        const hasSelectedDescendant = permissionKey => children(permissionKey).some(child =>
-            effectivePermissions.has(child.id) || hasSelectedDescendant(child.permissionKey));
         const inputsByPermissionKey = new Map();
         const appendChildren = parentKey => {
             const list = document.createElement("ul");
@@ -169,7 +167,7 @@
                 node.setAttribute("role", "treeitem");
                 const row = el("div", null, "admin-permission-row");
                 const childList = descendants.length ? appendChildren(permission.permissionKey) : null;
-                const expanded = Boolean(childList && hasSelectedDescendant(permission.permissionKey));
+                const expanded = false;
                 if (childList) {
                     const toggle = el("button", null, "admin-permission-toggle");
                     toggle.type = "button";
