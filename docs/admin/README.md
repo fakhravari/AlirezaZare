@@ -49,3 +49,4 @@
 ### اعضای خبرنامه و پاسخ فرم تماس
 صفحهٔ newsletter-subscribers اعضای مهمان خبرنامه را جست‌وجو، خروجی CSV و لغو/فعال می‌کند. در contact-messages ایمیل ثبت‌شدهٔ مشتری نمایش داده می‌شود و پاسخ مدیر در رکورد پیام ذخیره و در صورت وجود ایمیل ارسال می‌گردد.
 مجوزهای این دو قابلیت در migrationهای `086-contact-replies-newsletter-admin.sql` و `087-assign-store-feature-permissions.sql` ثبت و به نقش مدیر فروشگاه تخصیص داده می‌شوند.
+رفع encoding متن مجوزهای جدید در migration `088-fix-admin-permission-unicode.sql` انجام شده است.

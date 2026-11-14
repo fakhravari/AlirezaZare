@@ -215,7 +215,7 @@
       try { salesPlanData = JSON.parse(document.querySelector("#storeSalesPlans")?.textContent || "{}"); } catch { salesPlanData = {}; }
       const warehouseVariants = (salesPlanData.inventoryVariants || []).filter((variant) => Number(variant.productId) === Number(product.id));
       const groupedAttributes = new Map();
-      warehouseVariants.forEach((variant) => (variant.attributes || []).forEach((attribute) => {
+      warehouseVariants.forEach((variant) => (Array.isArray(variant.attributes) ? variant.attributes : []).forEach((attribute) => {
         if (!groupedAttributes.has(attribute.key)) groupedAttributes.set(attribute.key, { label: attribute.label, values: new Set() });
         groupedAttributes.get(attribute.key).values.add(attribute.display || attribute.value);
       }));

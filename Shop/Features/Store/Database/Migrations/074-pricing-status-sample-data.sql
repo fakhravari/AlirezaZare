@@ -66,10 +66,10 @@ BEGIN TRY
             /* Variant-level active/inactive state and offer visibility. */
             IF NOT EXISTS (SELECT 1 FROM [Warehouse].[ProductVariant] WHERE [IdProduct]=@IdProduct AND [Code]=N'SAMPLE-STATUS-ACTIVE')
                 INSERT [Warehouse].[ProductVariant] ([IdProduct],[Code],[Name],[AttributesJson],[IsActive],[IsDefault])
-                VALUES (@IdProduct,N'SAMPLE-STATUS-ACTIVE',N'تنوع آزمایشی فعال',N'{"sampleStatus":"active"}',1,0);
+                VALUES (@IdProduct,N'SAMPLE-STATUS-ACTIVE',N'تنوع آزمایشی فعال',N'[{"key":"sampleStatus","label":"وضعیت نمونه","value":"active","display":"فعال"}]',1,0);
             IF NOT EXISTS (SELECT 1 FROM [Warehouse].[ProductVariant] WHERE [IdProduct]=@IdProduct AND [Code]=N'SAMPLE-STATUS-INACTIVE')
                 INSERT [Warehouse].[ProductVariant] ([IdProduct],[Code],[Name],[AttributesJson],[IsActive],[IsDefault])
-                VALUES (@IdProduct,N'SAMPLE-STATUS-INACTIVE',N'تنوع آزمایشی غیرفعال',N'{"sampleStatus":"inactive"}',0,0);
+                VALUES (@IdProduct,N'SAMPLE-STATUS-INACTIVE',N'تنوع آزمایشی غیرفعال',N'[{"key":"sampleStatus","label":"وضعیت نمونه","value":"inactive","display":"غیرفعال"}]',0,0);
             DECLARE @IdActiveVariant BIGINT = (SELECT [Id] FROM [Warehouse].[ProductVariant] WHERE [IdProduct]=@IdProduct AND [Code]=N'SAMPLE-STATUS-ACTIVE');
             DECLARE @IdInactiveVariant BIGINT = (SELECT [Id] FROM [Warehouse].[ProductVariant] WHERE [IdProduct]=@IdProduct AND [Code]=N'SAMPLE-STATUS-INACTIVE');
             IF NOT EXISTS (SELECT 1 FROM [Warehouse].[InventoryItem] WHERE [IdProduct]=@IdProduct AND [IdProductVariant]=@IdActiveVariant)
