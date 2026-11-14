@@ -12,7 +12,7 @@ namespace Shop.Admin.Controllers.Api;
 [Area("Store")]
 [ApiController]
 [Route("api/admin/store/catalog")]
-public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBaseUrlProvider mediaCdn) : ControllerBase
+public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBaseUrlProvider mediaCdn, IStorePriceVersionService priceVersions) : ControllerBase
 {
     [HttpGet("products/manage/{id:long}")]
     public async Task<IActionResult> ProductEditor(long id, CancellationToken cancellationToken)
@@ -57,22 +57,13 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
         var regularPlans = await db.SalesPlanReferences.Where(x => x.IsRegular && x.IdStockOwnerType == 1).Select(x => x.Id).ToListAsync(cancellationToken);
         decimal listAmount = decimal.Round(input.PriceAmount * 100m / (100m - input.DiscountPercent), 0, MidpointRounding.AwayFromZero);
         foreach (long planId in regularPlans)
-            await AppendPriceVersionAsync(id, planId, listAmount, input.DiscountPercent, cancellationToken);
+            await priceVersions.AppendAsync(id, planId, null, null, null, listAmount, input.DiscountPercent, User.Identity?.Name, cancellationToken);
         await transaction.CommitAsync(cancellationToken);
         return Ok(new { message = "اطلاعات کالا ذخیره شد." });
     }
 
     public sealed class EditorOption { public long Id { get; set; } public string Name { get; set; } = ""; }
     public sealed record ProductEditorInput(string? Name, string? EnglishName, long BrandId, long CategoryId, decimal PriceAmount, decimal DiscountPercent, int MaxPurchaseQuantity);
-
-    private async Task AppendPriceVersionAsync(long productId, long planId, decimal amount, decimal discount, CancellationToken ct)
-    {
-        var prior = await db.StorePriceVersions.SingleOrDefaultAsync(x => x.IdProduct == productId && x.IdSalesPlan == planId &&
-            x.IdProductVariant == null && x.IdOptionValue == null && x.IdAccessory == null && x.IdOrderItem == null && x.IsActive, ct);
-        if (prior is not null) prior.IsActive = false;
-        db.StorePriceVersions.Add(new StorePriceVersion { IdProduct = productId, IdSalesPlan = planId, PriceAmount = amount, DiscountPercent = discount, IsActive = true, CreatedAtUtc = DateTime.UtcNow, ChangedBy = User.Identity?.Name, PreviousVersionId = prior?.Id });
-        await db.SaveChangesAsync(ct);
-    }
 
     private async Task<List<EditorOption>> GetLeafCategoryOptions(CancellationToken cancellationToken)
     {

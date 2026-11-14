@@ -154,10 +154,7 @@
                         {
                             <h2>@contentSection.Heading</h2>
                         }
-                        @foreach (var paragraph in (contentSection.Body ?? "").Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
-                        {
-                            <p>@paragraph</p>
-                        }
+                        @Html.Raw(StoreHtmlSanitizer.Sanitize(contentSection.Body))
                     </article>
                 }
             </div>

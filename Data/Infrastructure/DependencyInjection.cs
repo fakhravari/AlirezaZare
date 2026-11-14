@@ -39,6 +39,7 @@ public static class DependencyInjection
         services.AddScoped<IMediaCdnBaseUrlProvider, StoreMediaCdnBaseUrlProvider>();
         services.AddScoped<IStoreSiteIdentityRepository, StoreSiteIdentityRepository>();
         services.AddScoped<IProductFeedbackRepository, StoreProductFeedbackRepository>();
+        services.AddScoped<IStorePriceVersionService, StorePriceVersionService>();
         return services;
     }
 }

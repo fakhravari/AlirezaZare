@@ -42,4 +42,6 @@
 
 برای نوشتن پاسخ مشتری، پیام حساب، پاسخ FAQ و متن مقاله، فیلدهای دارای `data-rich-editor` از Summernote Lite محلی با زبان فارسی و چیدمان راست‌به‌چپ استفاده می‌کنند. راه‌اندازی مشترک در `Admin/wwwroot/js/admin-rich-editor.js` است؛ فرم‌های پویا نیز پس از درج در DOM به‌صورت خودکار راه‌اندازی می‌شوند. فایل‌های dist و زبان فارسی در انتشار Admin نگه داشته می‌شوند.
 
+ثبت نسخهٔ قیمت از Controllerهای مدیریت خارج شده و در قرارداد `Data/Application/Store/Contracts/IStorePriceVersionService.cs` و پیاده‌سازی `Data/Infrastructure/Persistence/Repositories/StorePriceVersionService.cs` متمرکز است؛ بنابراین ثبت قیمت کالا، تنوع و متعلقه قوانین مبلغ، تخفیف، سابقه و نسخهٔ فعال یکسانی دارد.
+
 بازبینی با کد: ۱۴ نوامبر ۲۰۲۶.

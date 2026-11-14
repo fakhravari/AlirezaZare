@@ -80,7 +80,7 @@
                 <h2>@(supportSection?.Heading ?? "برای پیگیری واقعی تماس بگیرید")</h2>
                 @if (supportSection is not null)
                 {
-                    @foreach (var paragraph in (supportSection.Body ?? "").Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)) { <p>@paragraph</p> }
+                    @Html.Raw(StoreHtmlSanitizer.Sanitize(supportSection.Body))
                 }
                 else
                 {

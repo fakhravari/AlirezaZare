@@ -67,10 +67,7 @@
                         <span class="shipping-step-number">@((i + 1).ToString("D2", System.Globalization.CultureInfo.GetCultureInfo("fa-IR")))</span><i class="bi @(shippingIcons[i % shippingIcons.Length])" aria-hidden="true"></i>
                     </span>
                     <h3>@heading</h3>
-                    @foreach (var paragraph in body.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
-                    {
-                        <p>@paragraph</p>
-                    }
+                    @Html.Raw(StoreHtmlSanitizer.Sanitize(body))
                 </li>
             }
         </ol>

@@ -132,7 +132,7 @@
                 <article class="article-body">
                     <div class="reading-tools" aria-label="ابزارهای مطالعه">
                         <div class="reading-tools-title">
-                            <span class="reading-tools-description">@Model.Data.Lead</span>
+                            <span class="reading-tools-description">@Html.Raw(StoreHtmlSanitizer.Sanitize(Model.Data.Lead))</span>
                         </div>
                         <div>
                             <button type="button" id="articlePrint"><i class="bi bi-printer" aria-hidden="true"></i> چاپ مقاله</button>
@@ -157,7 +157,7 @@
                         </span>
                         <div>
                             <h3>جمع‌بندی</h3>
-                            <p>@Model.Data.Conclusion</p>
+                            <div class="magazine-conclusion">@Html.Raw(StoreHtmlSanitizer.Sanitize(Model.Data.Conclusion))</div>
                         </div>
                     </div>
                     <div class="article-tags">

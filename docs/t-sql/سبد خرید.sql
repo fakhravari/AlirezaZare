@@ -24,7 +24,7 @@ DECLARE @ProfileId BIGINT = 90;
        AND (sp.EndsAtUtc IS NULL OR sp.EndsAtUtc > SYSUTCDATETIME())
     OUTER APPLY
     (
-        SELECT TOP (1) offer.Id, offer.PriceAmount, offer.DiscountPercent
+        SELECT TOP (1) offer.PriceAmount, offer.DiscountPercent
         FROM Store.ProductSalesPlanOffer AS offer
         WHERE offer.IdProduct = ci.IdProduct
           AND offer.IdSalesPlan = ci.IdSalesPlan
@@ -47,7 +47,10 @@ DECLARE @ProfileId BIGINT = 90;
         WHERE version.IsActive = 1
           AND version.IdProduct = ci.IdProduct
           AND version.IdSalesPlan = ci.IdSalesPlan
-          AND version.PriceKind = N'product'
+          AND version.IdProductVariant IS NULL
+          AND version.IdOptionValue IS NULL
+          AND version.IdAccessory IS NULL
+          AND version.IdOrderItem IS NULL
         ORDER BY version.Id DESC
     ) AS pp
     OUTER APPLY
@@ -55,9 +58,12 @@ DECLARE @ProfileId BIGINT = 90;
         SELECT TOP (1) version.PriceAmount, version.DiscountPercent
         FROM Store.PriceVersion AS version
         WHERE version.IsActive = 1
-          AND version.IdProductVariant = ci.IdProductVariant
+          AND version.IdProduct = ci.IdProduct
           AND version.IdSalesPlan = ci.IdSalesPlan
-          AND version.PriceKind = N'variant'
+          AND version.IdProductVariant = ci.IdProductVariant
+          AND version.IdOptionValue IS NULL
+          AND version.IdAccessory IS NULL
+          AND version.IdOrderItem IS NULL
         ORDER BY version.Id DESC
     ) AS vp
     WHERE c.IdProfile = @ProfileId
@@ -65,7 +71,8 @@ DECLARE @ProfileId BIGINT = 90;
       (
           ci.IdProductVariant IS NULL OR EXISTS
           (
-              SELECT 1 FROM Warehouse.ProductVariant AS activeVariant 
+              SELECT 1
+              FROM Warehouse.ProductVariant AS activeVariant
               WHERE activeVariant.Id = ci.IdProductVariant
                 AND activeVariant.IdProduct = ci.IdProduct
                 AND activeVariant.IsActive = 1
@@ -74,7 +81,6 @@ DECLARE @ProfileId BIGINT = 90;
 ),
 Components AS
 (
-    -- ردیف پایهٔ کالا
     SELECT
         cr.IdProfile,
         cr.IdCart,
@@ -93,7 +99,6 @@ Components AS
 
     UNION ALL
 
-    -- هر ویژگی انتخاب‌شده، یک ردیف
     SELECT
         cr.IdProfile,
         cr.IdCart,
@@ -106,7 +111,7 @@ Components AS
         N'ویژگی' AS RowType,
         CONVERT(BIGINT, value.Id) AS ComponentId,
         CONCAT(purchaseOption.Label, N' / ', value.Label) AS ComponentName,
-        CONVERT(DECIMAL(19, 0),COALESCE(optionVersion.PriceAmount, ROUND(value.PriceDelta * 1000000, 0))) AS BaseAmount,
+        CONVERT(DECIMAL(19, 0), COALESCE(optionVersion.PriceAmount, ROUND(value.PriceDelta * 1000000, 0))) AS BaseAmount,
         CONVERT(DECIMAL(5, 2), 0) AS DiscountPercent
     FROM CartRows AS cr
     JOIN Account.CartItemPurchaseOptionValue AS selected ON selected.IdCartItem = cr.IdCartItem
@@ -116,13 +121,17 @@ Components AS
     (
         SELECT TOP (1) version.PriceAmount
         FROM Store.PriceVersion AS version
-        WHERE version.IsActive = 1 AND version.IdOptionValue = value.Id
+        WHERE version.IsActive = 1
+          AND version.IdOptionValue = value.Id
+          AND version.IdProductVariant IS NULL
+          AND version.IdOptionValue IS NOT NULL
+          AND version.IdAccessory IS NULL
+          AND version.IdOrderItem IS NULL
         ORDER BY version.Id DESC
     ) AS optionVersion
 
     UNION ALL
 
-    -- هر متعلقهٔ اجباری یا انتخاب‌شده، یک ردیف
     SELECT
         cr.IdProfile,
         cr.IdCart,
@@ -135,7 +144,7 @@ Components AS
         N'متعلقه' AS RowType,
         CONVERT(BIGINT, pa.Id) AS ComponentId,
         accessory.Name AS ComponentName,
-        CONVERT(DECIMAL(19, 0),COALESCE(accessoryVersion.PriceAmount, offerAccessory.PriceAmount, pa.PriceAmount, 0)) AS BaseAmount,
+        CONVERT(DECIMAL(19, 0), COALESCE(accessoryVersion.PriceAmount, offerAccessory.PriceAmount, pa.PriceAmount, 0)) AS BaseAmount,
         CONVERT(DECIMAL(5, 2), 0) AS DiscountPercent
     FROM CartRows AS cr
     JOIN Store.ProductAccessory AS pa ON pa.IdProduct = cr.IdProduct
@@ -159,9 +168,11 @@ Components AS
         FROM Store.PriceVersion AS version
         WHERE version.IsActive = 1
           AND version.IdProduct = cr.IdProduct
-          AND version.IdAccessory = pa.IdAccessory
           AND version.IdSalesPlan = cr.IdSalesPlan
-          AND version.PriceKind = N'accessory'
+          AND version.IdAccessory = pa.IdAccessory
+          AND version.IdProductVariant IS NULL
+          AND version.IdOptionValue IS NULL
+          AND version.IdOrderItem IS NULL
         ORDER BY version.Id DESC
     ) AS accessoryVersion
     WHERE pa.IsRequired = 1 OR selected.Id IS NOT NULL
@@ -180,9 +191,9 @@ SELECT
     ComponentName,
     BaseAmount,
     DiscountPercent,
-    CONVERT(DECIMAL(19, 0),ROUND(BaseAmount * DiscountPercent / 100.0, 0)) AS DiscountAmount,
-    CONVERT(DECIMAL(19, 0),BaseAmount - ROUND(BaseAmount * DiscountPercent / 100.0, 0)) AS FinalUnitAmount,
-    CONVERT(DECIMAL(19, 0),(BaseAmount - ROUND(BaseAmount * DiscountPercent / 100.0, 0)) * Quantity) AS LineTotal
+    CONVERT(DECIMAL(19, 0), ROUND(BaseAmount * DiscountPercent / 100.0, 0)) AS DiscountAmount,
+    CONVERT(DECIMAL(19, 0), BaseAmount - ROUND(BaseAmount * DiscountPercent / 100.0, 0)) AS FinalUnitAmount,
+    CONVERT(DECIMAL(19, 0), (BaseAmount - ROUND(BaseAmount * DiscountPercent / 100.0, 0)) * Quantity) AS LineTotal
 FROM Components
 ORDER BY
     IdProfile,

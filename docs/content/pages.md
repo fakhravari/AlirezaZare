@@ -6,6 +6,8 @@
 
 route → Controller → source/DbContext → View → page script/style. برای محتوای قابل مدیریت، endpoint Admin و entity را هم دنبال کنید؛ ویرایشگر مدیریتی و صفحهٔ عمومی دو مالک جدا هستند. رسانه‌ها از [راهنمای رسانه](../media/images.md) پیروی می‌کنند و metadata از [راهنمای SEO](../seo/metadata.md).
 
+متن‌هایی که از ادیتور مدیریت ذخیره می‌شوند، در FAQ، مقاله، تماس، درباره، ارسال، پیگیری، ضمانت و صفحات محتوایی عمومی با `Shop.Infrastructure.Content.StoreHtml` پاک‌سازی و با حفظ قالب‌های مجاز راست‌به‌چپ نمایش داده می‌شوند. تگ‌های ساختاری مانند پاراگراف، عنوان، فهرست و لینک مجازند و ویژگی‌های ناامن حذف می‌شوند؛ متن‌های قدیمی ساده نیز شکست خط خود را حفظ می‌کنند.
+
 پیش از افزودن متن ثابت، بررسی کنید محتوای معادل از CMS/دیتابیس تأمین نمی‌شود. seedهای محتوایی را دادهٔ نمونه معرفی کنید. بررسی: صفحهٔ خالی/محتوا، لینک‌ها، ترتیب RTL، عنوان و تصویر، و viewport موبایل.
 
 نمونه نقاط ورود: `MagazineController`, `BrandsController`, `FaqController`, `AboutController`, `ContactController`, `LegalController`, `ShippingController`, `TrackingController`, `WarrantyController` زیر `Shop/Controllers/`.

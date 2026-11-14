@@ -48,7 +48,7 @@
                 <h2 id="warrantyTitle">@(warrantySections.FirstOrDefault()?.Heading ?? "برای استفاده از ضمانت، مدارک محصول را نگه دارید")</h2>
                 @if (warrantySections.Count > 0)
                 {
-                    @foreach (var paragraph in (warrantySections[0].Body ?? "").Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)) { <p>@paragraph</p> }
+                    @Html.Raw(StoreHtmlSanitizer.Sanitize(warrantySections[0].Body))
                 }
                 else
                 {
@@ -74,7 +74,7 @@
                     var warrantyIcons = new[] { "bi-receipt", "bi-chat-left-text", "bi-headset" };
                     @for (var i = 1; i < warrantySections.Count; i++)
                     {
-                        <li><span class="warranty-step-icon"><i class="bi @(warrantyIcons[(i - 1) % warrantyIcons.Length])" aria-hidden="true"></i></span><div><strong>@warrantySections[i].Heading</strong>@foreach (var paragraph in (warrantySections[i].Body ?? "").Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)) { <p>@paragraph</p> }</div></li>
+                        <li><span class="warranty-step-icon"><i class="bi @(warrantyIcons[(i - 1) % warrantyIcons.Length])" aria-hidden="true"></i></span><div><strong>@warrantySections[i].Heading</strong>@Html.Raw(StoreHtmlSanitizer.Sanitize(warrantySections[i].Body))</div></li>
                     }
                 }
                 else

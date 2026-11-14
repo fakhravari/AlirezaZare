@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Shop.Data.Application.Store.Contracts;
 using Shop.Data.Domain.Store.Entities;
 using Shop.Data.Infrastructure.Persistence;
 
@@ -8,7 +9,7 @@ namespace Shop.Admin.Controllers.Api;
 [Area("Store")]
 [ApiController]
 [Route("api/admin/store/variant-prices")]
-public sealed class StoreVariantPricesAdminApiController(ShopDbContext db) : ControllerBase
+public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStorePriceVersionService priceVersions) : ControllerBase
 {
     [HttpGet("plans")]
     public async Task<IActionResult> Plans(CancellationToken cancellationToken)
@@ -223,7 +224,7 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db) : Con
     public async Task<IActionResult> Save(long variantId, string salesPlanId, [FromBody] VariantPlanPriceInput input, CancellationToken cancellationToken)
     {
         if (!CanManage()) return Forbid();
-        if (variantId < 1 || string.IsNullOrWhiteSpace(salesPlanId) || salesPlanId.Length > 64 || input.PriceAmount < 0 || input.PriceAmount != decimal.Truncate(input.PriceAmount) || input.DiscountPercent is < 0 or >= 100) return ValidationProblem(detail: "قیمت باید تومان صحیح و تخفیف بین صفر تا کمتر از صد درصد باشد.", statusCode: 400);
+        if (variantId < 1 || string.IsNullOrWhiteSpace(salesPlanId) || salesPlanId.Length > 64 || input.PriceAmount < 0 || input.PriceAmount > 9007199254740991m || input.PriceAmount != decimal.Truncate(input.PriceAmount) || input.DiscountPercent is < 0 or >= 100 || decimal.Round(input.DiscountPercent, 2) != input.DiscountPercent) return ValidationProblem(detail: "قیمت باید تومان صحیح و تخفیف بین صفر تا کمتر از صد درصد با حداکثر دو رقم اعشار باشد.", statusCode: 400);
         await using var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
         var plan = await db.SalesPlanReferences.SingleOrDefaultAsync(x => x.StoreSalesPlanKey == salesPlanId && x.IsActive && x.IdStockOwnerType == 1, cancellationToken);
         if (plan is null) return NotFound(new { code = "variant-or-plan-not-found" });
@@ -234,7 +235,7 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db) : Con
         else { offer.PriceAmount = input.PriceAmount; offer.DiscountPercent = input.DiscountPercent; offer.IsEnabled = input.IsEnabled; offer.UpdatedAtUtc = DateTime.UtcNow; }
         await db.SaveChangesAsync(cancellationToken);
         long productId = await db.ProductVariants.Where(x => x.Id == variantId).Select(x => x.IdProduct).SingleAsync(cancellationToken);
-        long priceVersionId = await AppendPriceVersionAsync(productId, plan.Id, variantId, null, input.PriceAmount, input.DiscountPercent, cancellationToken);
+        long priceVersionId = await priceVersions.AppendAsync(productId, plan.Id, variantId, null, null, input.PriceAmount, input.DiscountPercent, User.Identity?.Name, cancellationToken);
         await transaction.CommitAsync(cancellationToken);
         return Ok(new { saved = true, priceVersionId, message = "قیمت تنوع و طرح فروش ذخیره شد." });
     }
@@ -246,24 +247,12 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db) : Con
         if (!CanManage()) return Forbid();
         if (variantId < 1 || string.IsNullOrWhiteSpace(salesPlanId) || salesPlanId.Length > 64) return ValidationProblem(detail: "تنوع یا طرح فروش معتبر نیست.", statusCode: 400);
         var plan = await db.SalesPlanReferences.SingleOrDefaultAsync(x => x.StoreSalesPlanKey == salesPlanId, cancellationToken);
-        if (plan is not null) { var offer = await db.StoreProductVariantSalesPlanOffers.SingleOrDefaultAsync(x => x.IdProductVariant == variantId && x.IdSalesPlan == plan.Id, cancellationToken); if (offer is not null) { db.StoreProductVariantSalesPlanOffers.Remove(offer); var prior = await db.StorePriceVersions.SingleOrDefaultAsync(x => x.IdProductVariant == variantId && x.IdSalesPlan == plan.Id && x.IsActive, cancellationToken); if (prior is not null) prior.IsActive = false; await db.SaveChangesAsync(cancellationToken); } }
+        if (plan is not null) { var offer = await db.StoreProductVariantSalesPlanOffers.SingleOrDefaultAsync(x => x.IdProductVariant == variantId && x.IdSalesPlan == plan.Id, cancellationToken); if (offer is not null) { db.StoreProductVariantSalesPlanOffers.Remove(offer); var productId = await db.ProductVariants.Where(x => x.Id == variantId).Select(x => x.IdProduct).SingleAsync(cancellationToken); await priceVersions.DeactivateAsync(productId, plan.Id, variantId, null, null, cancellationToken); await db.SaveChangesAsync(cancellationToken); } }
         return Ok(new { saved = true, message = "قیمت اختصاصی حذف شد و قیمت پایهٔ کالا/طرح اعمال می‌شود." });
     }
 
     private bool CanManage() => User.IsInRole("system.full-access") ||
                                 User.HasClaim("admin_permission", "Store:Features:Index:promotions");
-
-    private async Task<long> AppendPriceVersionAsync(long productId, long planId, long? productVariantId, long? accessoryId, decimal amount, decimal discount, CancellationToken ct)
-    {
-        var prior = await db.StorePriceVersions.SingleOrDefaultAsync(x => x.IdProduct == productId && x.IdSalesPlan == planId &&
-            x.IdProductVariant == productVariantId && x.IdAccessory == accessoryId &&
-            x.IdOptionValue == null && x.IdOrderItem == null && x.IsActive, ct);
-        if (prior is not null) prior.IsActive = false;
-        var version = new StorePriceVersion { IdProduct = productId, IdSalesPlan = planId, IdProductVariant = productVariantId, IdAccessory = accessoryId, PriceAmount = amount, DiscountPercent = discount, IsActive = true, CreatedAtUtc = DateTime.UtcNow, ChangedBy = User.Identity?.Name, PreviousVersionId = prior?.Id };
-        db.StorePriceVersions.Add(version);
-        await db.SaveChangesAsync(ct);
-        return version.Id;
-    }
 
     public sealed class VariantPlanPriceRow
     {
@@ -344,7 +333,7 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db) : Con
         }
         else { offer.PriceAmount = input.PriceAmount; offer.DiscountPercent = input.DiscountPercent; offer.MaxPurchaseQuantity = input.MaxPurchaseQuantity; offer.IsEnabled = input.IsEnabled; offer.UpdatedAtUtc = DateTime.UtcNow; }
         await db.SaveChangesAsync(cancellationToken);
-        long priceVersionId = await AppendPriceVersionAsync(productId, plan.Id, null, null, input.PriceAmount, input.DiscountPercent, cancellationToken);
+        long priceVersionId = await priceVersions.AppendAsync(productId, plan.Id, null, null, null, input.PriceAmount, input.DiscountPercent, User.Identity?.Name, cancellationToken);
         await transaction.CommitAsync(cancellationToken);
         return Ok(new { priceVersionId, message = "پیشنهاد کالا در طرح ذخیره شد." });
     }
@@ -396,7 +385,7 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db) : Con
         else { overrideRow.PriceAmount = input.PriceAmount; overrideRow.IsAllowed = input.IsAllowed; }
         await db.SaveChangesAsync(cancellationToken);
         long planId = await db.SalesPlanReferences.Where(x => x.StoreSalesPlanKey == salesPlanId).Select(x => x.Id).SingleAsync(cancellationToken);
-        long priceVersionId = await AppendPriceVersionAsync(productId, planId, null, accessoryId, input.PriceAmount, 0, cancellationToken);
+        long priceVersionId = await priceVersions.AppendAsync(productId, planId, null, null, accessoryId, input.PriceAmount, 0, User.Identity?.Name, cancellationToken);
         await transaction.CommitAsync(cancellationToken);
         return Ok(new { priceVersionId, message = "متعلقهٔ پیشنهاد ذخیره شد." });
     }
