@@ -113,8 +113,8 @@
             }
             if (page.dataset.adminPage === "product-drafts") {
                 const publish = document.createElement("button");
-                publish.type = "button"; publish.className = "btn btn-xs btn-primary ms-1";
-                publish.dataset.productPublish = String(index); publish.textContent = "انتشار";
+                publish.type = "button"; publish.className = "btn btn-xs btn-primary";
+                publish.dataset.productPublish = String(index); setIconAction(publish, "انتشار کالا", "fa-paper-plane");
                 publish.disabled = !item.hasImage; actions.append(publish);
             }
             if (page.dataset.adminPage === "customers") {
