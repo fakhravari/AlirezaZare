@@ -34,6 +34,7 @@
             "Admin/wwwroot/js/admin-shell.js",
             "Admin/wwwroot/js/admin-ui.js",
             "Admin/wwwroot/js/admin-data.js",
+            "Admin/wwwroot/js/admin-selects.js",
             "Admin/wwwroot/js/admin-users.js",
             "Admin/wwwroot/js/admin-geography.js",
             "Admin/wwwroot/js/admin-definitions.js",
@@ -693,11 +694,13 @@
         },
         "ui-core": {
           "js": [
-            "Shop/wwwroot/shop/js/core/ui-core.js"
+            "Shop/wwwroot/shop/js/core/ui-core.js",
+            "Shop/wwwroot/shop/js/core/selects.js"
           ],
           "css": [
             "Shop/wwwroot/shop/css/core/ui-core.css",
-            "Shop/wwwroot/shop/css/core/design-tokens.css"
+            "Shop/wwwroot/shop/css/core/design-tokens.css",
+            "Shop/wwwroot/shop/css/core/select2.css"
           ]
         },
         "scrollbar": {

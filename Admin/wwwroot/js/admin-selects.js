@@ -45,4 +45,10 @@
     document.addEventListener("show.bs.modal", event => initialize(event.target));
     document.addEventListener("shown.bs.modal", event => event.target.querySelectorAll(selector).forEach(refresh));
     document.addEventListener("reset", event => setTimeout(() => event.target.querySelectorAll?.(selector).forEach(refresh), 0), true);
+    document.addEventListener("invalid", event => {
+        const select = event.target;
+        if (!(select instanceof HTMLSelectElement) || !$(select).hasClass("select2-hidden-accessible")) return;
+        event.preventDefault();
+        $(select).select2("open");
+    }, true);
 })();

@@ -112,6 +112,65 @@
         return button;
     }
 
+    const actionIcons = [
+        [/جزئیات|نمایش/u, "fa-eye"], [/ویرایش/u, "fa-pen-to-square"], [/گذرواژه|رمز/u, "fa-key"],
+        [/ذخیره|ثبت/u, "fa-floppy-disk"], [/حذف|غیرفعال|لغو/u, "fa-trash-can"], [/فعال/u, "fa-toggle-on"],
+        [/انتشار/u, "fa-paper-plane"], [/تصویر|عکس|نشان|لوگو/u, "fa-image"], [/فایل|پیوست/u, "fa-paperclip"],
+        [/رهگیری/u, "fa-truck-fast"], [/بستن|خوانده/u, "fa-check"], [/بازگشایی/u, "fa-rotate-left"],
+        [/حداقل/u, "fa-sliders"], [/تنظیم/u, "fa-gear"], [/افزودن/u, "fa-plus"], [/کپی/u, "fa-copy"],
+        [/متعلقه/u, "fa-puzzle-piece"], [/مشخصات/u, "fa-circle-info"], [/لینک/u, "fa-link"], [/برگشت/u, "fa-rotate-left"]
+    ];
+
+    function normalizeActionCell(cell) {
+        if (!(cell instanceof HTMLTableCellElement) || !cell.closest("tr")) return;
+        const buttons = [...cell.querySelectorAll("button")];
+        if (!buttons.length) return;
+        cell.classList.add("admin-row-actions");
+
+        for (const button of buttons) {
+            const icon = button.querySelector("i.fa, i.fas, i.far, svg");
+            const alreadyStyled = button.dataset.adminActionStyled === "true";
+            let label = alreadyStyled ? button.textContent.trim() : button.getAttribute("aria-label") || button.title || "";
+            if (!label) {
+                const text = [...button.childNodes]
+                    .filter(node => node.nodeType === Node.TEXT_NODE || (node.nodeType === Node.ELEMENT_NODE && !node.matches("i, svg, .visually-hidden")))
+                    .map(node => node.textContent.trim()).filter(Boolean).join(" ");
+                label = text || button.textContent.trim();
+            }
+            label = label.replace(/\s+/gu, " ").trim() || "عملیات";
+            if (alreadyStyled && icon && button.querySelector(":scope > span")?.textContent.trim() === label) continue;
+            const variant = button.classList.contains("btn-primary") ? "btn-primary"
+                : button.classList.contains("btn-success") || button.classList.contains("btn-outline-success") ? "btn-outline-success"
+                    : button.classList.contains("btn-danger") || button.classList.contains("btn-outline-danger") ? "btn-outline-danger"
+                        : button.classList.contains("btn-warning") ? "btn-warning" : "btn-default";
+            button.className = `btn admin-action-btn ${variant}`;
+            button.title = label;
+            button.setAttribute("aria-label", label);
+
+            const iconName = actionIcons.find(([pattern]) => pattern.test(label))?.[1] || "fa-arrow-pointer";
+            const actionIcon = icon || document.createElement("i");
+            actionIcon.className = icon ? icon.className : `fa ${iconName}`;
+            actionIcon.classList.remove("me-1", "ms-1", "me-2", "ms-2");
+            actionIcon.setAttribute("aria-hidden", "true");
+            const caption = document.createElement("span");
+            caption.textContent = label;
+            button.replaceChildren(actionIcon, caption);
+            button.dataset.adminActionStyled = "true";
+        }
+    }
+
+    function normalizeActionRows(root) {
+        if (root instanceof HTMLTableCellElement) normalizeActionCell(root);
+        else root.closest?.("td") && normalizeActionCell(root.closest("td"));
+        root.querySelectorAll?.("td").forEach(normalizeActionCell);
+    }
+
+    normalizeActionRows(document);
+    new MutationObserver(records => {
+        for (const record of records) for (const node of record.addedNodes)
+            if (node instanceof Element) normalizeActionRows(node);
+    }).observe(document.body, { childList: true, subtree: true });
+
     async function getJson(url, options = {}) {
         const { headers: suppliedHeaders, ...requestOptions } = options;
         const response = await fetch(url, {
