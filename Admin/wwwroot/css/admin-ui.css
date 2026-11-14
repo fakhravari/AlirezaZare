@@ -932,7 +932,33 @@
     text-align: center;
 }
 
+.admin-filter-bar > .form-control,
+.admin-filter-bar > .form-select,
+.admin-filter-bar > .select2-container {
+    flex: 1 1 14rem;
+    min-width: min(100%, 14rem);
+}
+
+.admin-filter-bar > .btn {
+    min-height: 2.35rem;
+}
+
+.admin-filter-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+    gap: .5rem;
+    width: 100%;
+}
+
+.admin-filter-grid--three {
+    grid-template-columns: minmax(0, 1.4fr) repeat(2, minmax(0, 1fr));
+}
+
 @media (max-width: 575.98px) {
+    .admin-filter-grid--three {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
     #admin-record-modal .modal-dialog {
         margin: .5rem;
     }

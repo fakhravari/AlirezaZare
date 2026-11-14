@@ -1,6 +1,6 @@
 (() => {
     "use strict";
-    const ui = window.AdminUI, initialized = new WeakSet(), requests = new WeakMap(), number = new Intl.NumberFormat("fa-IR");
+    const ui = window.AdminUI, initialized = new WeakSet(), requests = new WeakMap(), number = new Intl.NumberFormat("fa-IR"), pageSize = 50;
     if (!ui) return;
     const cell = (value) => { const node = document.createElement("td"); node.textContent = value ?? "—"; return node; };
     const token = (page) => page.querySelector('[name="__RequestVerificationToken"]')?.value || "";
@@ -11,10 +11,19 @@
     async function request(page, url, method = "GET", body) {
         return ui.getJson(url, { method, headers: { ...(body ? { "Content-Type": "application/json" } : {}), ...(method !== "GET" ? { RequestVerificationToken: token(page) } : {}) }, ...(body ? { body: JSON.stringify(body) } : {}) });
     }
+    function updatePager(page, kind, current, total) {
+        const prefix = kind === "offer" ? "offer" : "price";
+        const pager = page.querySelector(`[data-${prefix}-pagination]`);
+        if (!pager) return;
+        const pages = Math.ceil(total / pageSize);
+        pager.hidden = pages <= 1;
+        pager.querySelector(`[data-${prefix}-page-label]`).textContent = `صفحهٔ ${number.format(current)} از ${number.format(Math.max(1, pages))}`;
+        pager.querySelector(`[data-${prefix}-page="-1"]`).disabled = current <= 1;
+        pager.querySelector(`[data-${prefix}-page="1"]`).disabled = current >= pages;
+    }
     function render(page) {
-        const query = page.querySelector("[data-price-filter] input").value.trim().toLocaleLowerCase();
-        const rows = page._variantPriceRows.filter((item) => !query || [item.productName, item.variantName, item.salesPlanName, item.code].some((value) => String(value || "").toLocaleLowerCase().includes(query)));
-        const body = page.querySelector("[data-price-rows]"); ui.destroyDataTable(page.querySelector("[data-admin-datatable]")); body.replaceChildren();
+        const rows = page._variantPriceRows;
+        const body = page.querySelector("[data-price-rows]"), table = body.closest("table"); ui.destroyDataTable(table); body.replaceChildren();
         for (const item of rows) {
             const key = `${item.variantId}\u0000${item.salesPlanId}`;
             const draft = page._variantPriceDrafts.get(key);
@@ -60,23 +69,41 @@
             if (page._variantPriceSaving.has(key)) setBusy(true);
             row.append(actions); body.append(row);
         }
-        page.querySelector("[data-price-count]").textContent = `${number.format(rows.length)} ردیف`;
-        ui.refreshDataTable(page.querySelector("[data-admin-datatable]"));
+        const first = page._priceTotal ? (page._pricePage - 1) * pageSize + 1 : 0;
+        const last = rows.length ? first + rows.length - 1 : 0;
+        page.querySelector("[data-price-count]").textContent = `نمایش ${number.format(first)} تا ${number.format(last)} از ${number.format(page._priceTotal)} ردیف`;
+        ui.refreshDataTable(table);
         if (!rows.length) status(page, "موردی با این جست‌وجو پیدا نشد."); else status(page, "");
     }
-    async function load(page) {
+    async function load(page, pageNumber = page._pricePage || 1) {
         const serial = (requests.get(page) || 0) + 1; requests.set(page, serial);
         status(page, "در حال دریافت قیمت‌ها…");
-        try { const result = await request(page, page.dataset.api); if (requests.get(page) !== serial) return; page._variantPriceRows = Array.isArray(result) ? result : []; render(page); }
+        try {
+            const url = new URL(page.dataset.api, window.location.origin);
+            url.searchParams.set("page", String(pageNumber)); url.searchParams.set("pageSize", String(pageSize));
+            const query = page.querySelector("[data-price-filter] input").value.trim(); if (query) url.searchParams.set("q", query);
+            const result = await request(page, url);
+            if (requests.get(page) !== serial || !page.isConnected) return;
+            const lastPage = Math.max(1, Math.ceil((result.total || 0) / pageSize));
+            if (pageNumber > lastPage) return void await load(page, lastPage);
+            page._pricePage = result.page || pageNumber; page._priceTotal = result.total || 0;
+            page._variantPriceRows = result.items || []; render(page); updatePager(page, "price", page._pricePage, page._priceTotal);
+        }
         catch (error) { if (requests.get(page) === serial) status(page, error.message || "دریافت قیمت‌ها ناموفق بود.", true); }
     }
-    async function loadOffers(page) {
+    async function loadOffers(page, pageNumber = page._offerPage || 1) {
         const serial = (page._offerSerial || 0) + 1; page._offerSerial = serial;
         const message = page.querySelector("[data-offer-status]"); message.textContent = "در حال دریافت پیشنهادها…";
         try {
-            const rows = await request(page, `${page.dataset.api}/product-offers`);
+            const url = new URL(`${page.dataset.api}/product-offers`, window.location.origin);
+            url.searchParams.set("page", String(pageNumber)); url.searchParams.set("pageSize", String(pageSize));
+            const query = page.querySelector("[data-offer-filter] input").value.trim(); if (query) url.searchParams.set("q", query);
+            const result = await request(page, url);
             if (!page.isConnected || page._offerSerial !== serial) return;
-            page._offers = Array.isArray(rows) ? rows : []; renderOffers(page);
+            const lastPage = Math.max(1, Math.ceil((result.total || 0) / pageSize));
+            if (pageNumber > lastPage) return void await loadOffers(page, lastPage);
+            page._offerPage = result.page || pageNumber; page._offerTotal = result.total || 0;
+            page._offers = result.items || []; renderOffers(page); updatePager(page, "offer", page._offerPage, page._offerTotal);
         } catch (error) { if (page.isConnected && page._offerSerial === serial) message.textContent = error.message || "دریافت پیشنهادها ناموفق بود."; }
     }
     async function loadHistory(page) {
@@ -93,9 +120,8 @@
         } catch (error) { message.textContent = error.message || "دریافت تاریخچه ناموفق بود."; }
     }
     function renderOffers(page) {
-        const query = page.querySelector("[data-offer-filter] input").value.trim().toLocaleLowerCase();
-        const rows = page._offers.filter(item => !query || [item.productName, item.productCode, item.salesPlanName].some(value => String(value || "").toLocaleLowerCase().includes(query)));
-        const body = page.querySelector("[data-offer-rows]"); ui.destroyDataTable(page.querySelector("[data-admin-datatable]")); body.replaceChildren();
+        const rows = page._offers;
+        const body = page.querySelector("[data-offer-rows]"), table = body.closest("table"); ui.destroyDataTable(table); body.replaceChildren();
         for (const item of rows) {
             const key = `${item.productId}\u0000${item.salesPlanId}`, draft = page._offerDrafts.get(key);
             const row = document.createElement("tr"); row.append(cell(`${item.productName} (${item.productCode})`), cell(item.salesPlanName));
@@ -135,8 +161,10 @@
             });
             body.append(row);
         }
-        page.querySelector("[data-offer-count]").textContent = `${number.format(rows.length)} ردیف`;
-        ui.refreshDataTable(page.querySelector("[data-admin-datatable]"));
+        const first = page._offerTotal ? (page._offerPage - 1) * pageSize + 1 : 0;
+        const last = rows.length ? first + rows.length - 1 : 0;
+        page.querySelector("[data-offer-count]").textContent = `نمایش ${number.format(first)} تا ${number.format(last)} از ${number.format(page._offerTotal)} ردیف`;
+        ui.refreshDataTable(table);
         page.querySelector("[data-offer-status]").textContent = rows.length ? "" : "موردی پیدا نشد.";
     }
     async function openAccessories(page, offer) {
@@ -225,11 +253,16 @@
         page._variantPriceRows = [];
         page._variantPriceDrafts = new Map();
         page._variantPriceSaving = new Set();
-        page._offers = []; page._offerDrafts = new Map(); page._offerSaving = new Set();
+        page._pricePage = 1; page._priceTotal = 0;
+        page._offers = []; page._offerDrafts = new Map(); page._offerSaving = new Set(); page._offerPage = 1; page._offerTotal = 0;
         const offerFilter = page.querySelector("[data-offer-filter]");
         if (offerFilter) {
-            offerFilter.addEventListener("submit", event => event.preventDefault());
-            offerFilter.addEventListener("input", () => renderOffers(page));
+            offerFilter.addEventListener("submit", event => { event.preventDefault(); clearTimeout(page._offerSearchTimer); void loadOffers(page, 1); });
+            offerFilter.addEventListener("input", () => { clearTimeout(page._offerSearchTimer); page._offerSearchTimer = setTimeout(() => void loadOffers(page, 1), 300); });
+            page.querySelectorAll("[data-offer-page]").forEach(button => button.addEventListener("click", () => {
+                if (button.disabled) return;
+                void loadOffers(page, Math.max(1, page._offerPage + Number(button.dataset.offerPage)));
+            }));
             page.querySelector("[data-offer-refresh]").addEventListener("click", () => void loadOffers(page));
             void loadOffers(page);
             const specificationForm = document.querySelector("[data-offer-specifications-form]");
@@ -282,8 +315,13 @@
             });
             void loadPlanSettings(page);
         }
-        page.querySelector("[data-price-filter]").addEventListener("submit", event => event.preventDefault());
-        page.querySelector("[data-price-filter]").addEventListener("input", () => render(page));
+        const priceFilter = page.querySelector("[data-price-filter]");
+        priceFilter.addEventListener("submit", event => { event.preventDefault(); clearTimeout(page._priceSearchTimer); void load(page, 1); });
+        priceFilter.addEventListener("input", () => { clearTimeout(page._priceSearchTimer); page._priceSearchTimer = setTimeout(() => void load(page, 1), 300); });
+        page.querySelectorAll("[data-price-page]").forEach(button => button.addEventListener("click", () => {
+            if (button.disabled) return;
+            void load(page, Math.max(1, page._pricePage + Number(button.dataset.pricePage)));
+        }));
         page.querySelector("[data-price-refresh]").addEventListener("click", () => void load(page));
         void load(page);
         page.querySelector("[data-price-history-refresh]")?.addEventListener("click", () => void loadHistory(page));

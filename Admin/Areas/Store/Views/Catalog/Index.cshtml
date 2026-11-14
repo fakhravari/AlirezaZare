@@ -111,9 +111,21 @@
     <section class="panel panel-inverse" data-admin-page="product-drafts" data-admin-section="products" data-can-upload-image="true">
         <div class="panel-heading"><h2 class="panel-title">پیش‌نویس‌های کالا</h2></div>
         <div class="panel-body"><p>پیش‌نویس پس از ثبت تصویر و انتشار در فروشگاه نمایش داده می‌شود.</p>
+            <form class="admin-filter-bar d-flex flex-wrap align-items-center gap-2 mb-3" data-admin-filter>
+                <label class="visually-hidden" for="product-drafts-search">جست‌وجوی پیش‌نویس‌ها</label>
+                <input id="product-drafts-search" class="form-control" type="search" name="q" maxlength="100" placeholder="نام، کد، برند یا دستهٔ کالا" autocomplete="off" />
+                <button class="btn btn-primary" type="submit"><i class="fa fa-magnifying-glass me-1" aria-hidden="true"></i>جست‌وجو</button>
+                <button class="btn btn-default" type="button" data-admin-reset-filter>پاک‌کردن</button>
+                <span class="admin-record-count ms-auto small text-muted" data-admin-count aria-live="polite"></span>
+            </form>
             <div class="admin-data-status small text-muted" data-admin-status role="status" aria-live="polite"></div>
             <div class="table-responsive"><table class="table table-striped align-middle" data-admin-datatable data-admin-table-mode="server"><thead><tr><th>کد</th><th>نام</th><th>برند</th><th>دسته</th><th>قیمت تومان</th><th>تصویر</th><th>عملیات</th></tr></thead><tbody data-admin-results></tbody></table></div>
             <div class="admin-empty-state d-none p-4 text-center text-muted small" data-admin-empty>پیش‌نویسی وجود ندارد.</div>
+            <div class="admin-pagination d-flex align-items-center justify-content-center gap-3 mt-3" data-admin-pagination hidden>
+                <button type="button" class="btn btn-default btn-sm" data-admin-page-step="-1">قبلی</button>
+                <span data-admin-page-label></span>
+                <button type="button" class="btn btn-default btn-sm" data-admin-page-step="1">بعدی</button>
+            </div>
         </div>
     </section>
     <div class="modal fade" id="product-create-modal" tabindex="-1" aria-labelledby="product-create-title" aria-hidden="true">

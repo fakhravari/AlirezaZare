@@ -11,16 +11,18 @@
         </div>
         <div class="panel-body">
             <form class="admin-filter-bar admin-filter-bar--warehouse d-flex flex-wrap align-items-center gap-2 mb-3" data-admin-filter>
-                <label class="visually-hidden" for="stock-search">جست‌وجوی کالا</label>
-                <input id="stock-search" class="form-control" type="search" name="search" placeholder="نام کالا یا کد کالا" autocomplete="off"/>
-                <label class="visually-hidden" for="warehouse-filter">انتخاب انبار</label>
-                <select id="warehouse-filter" class="form-select" name="warehouseId" data-admin-warehouse-options>
-                    <option value="">همهٔ انبارها</option>
-                </select>
-                <label class="visually-hidden" for="stock-plan-filter">طرح فروش</label>
-                <select id="stock-plan-filter" class="form-select" name="salesPlanKey" data-admin-plan-options>
-                    <option value="">همهٔ طرح‌ها</option>
-                </select>
+                <div class="admin-filter-grid admin-filter-grid--three">
+                    <label class="visually-hidden" for="stock-search">جست‌وجوی کالا</label>
+                    <input id="stock-search" class="form-control" type="search" name="search" placeholder="نام کالا یا کد کالا" autocomplete="off"/>
+                    <label class="visually-hidden" for="warehouse-filter">انتخاب انبار</label>
+                    <select id="warehouse-filter" class="form-select" name="warehouseId" data-admin-warehouse-options>
+                        <option value="">همهٔ انبارها</option>
+                    </select>
+                    <label class="visually-hidden" for="stock-plan-filter">طرح فروش</label>
+                    <select id="stock-plan-filter" class="form-select" name="salesPlanKey" data-admin-plan-options>
+                        <option value="">همهٔ طرح‌ها</option>
+                    </select>
+                </div>
                 <label class="form-check admin-low-stock-filter">
                     <input class="form-check-input" type="checkbox" name="lowStockOnly" value="true"/><span class="form-check-label">فقط کمتر از حداقل</span>
                 </label>

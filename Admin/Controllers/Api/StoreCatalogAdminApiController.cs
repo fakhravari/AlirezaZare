@@ -1,7 +1,7 @@
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
-using Shop.Data.Application.Store.Contracts;
 using Shop.Data.Application.Store;
+using Shop.Data.Application.Store.Contracts;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Shop.Data.Infrastructure.Persistence;
@@ -12,7 +12,7 @@ namespace Shop.Admin.Controllers.Api;
 [Area("Store")]
 [ApiController]
 [Route("api/admin/store/catalog")]
-public sealed class StoreCatalogAdminApiController(IStoreRuntimeDatasetRepository datasets, ShopDbContext db, IMediaCdnBaseUrlProvider mediaCdn) : ControllerBase
+public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBaseUrlProvider mediaCdn) : ControllerBase
 {
     [HttpGet("products/manage/{id:long}")]
     public async Task<IActionResult> ProductEditor(long id, CancellationToken cancellationToken)
@@ -97,9 +97,15 @@ public sealed class StoreCatalogAdminApiController(IStoreRuntimeDatasetRepositor
     }
 
     [HttpGet("products/drafts")]
-    public async Task<IActionResult> ProductDrafts(CancellationToken cancellationToken)
+    public async Task<IActionResult> ProductDrafts(
+        [FromQuery] string? q,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 50,
+        CancellationToken cancellationToken = default)
     {
         if (!User.IsInRole("system.full-access")) return Forbid();
+        if (page is < 1 or > 100000 || pageSize is < 1 or > 100 || (q?.Length ?? 0) > 100)
+            return ValidationProblem(detail: "شماره صفحه، اندازهٔ صفحه یا عبارت جست‌وجو معتبر نیست.", statusCode: 400);
         var drafts = from product in db.Products.AsNoTracking()
                      where product.IsStoreEnabled && !product.IsCatalogActive
                      join brand in db.StoreBrands.AsNoTracking() on product.IdBrand equals brand.Id into brands
@@ -116,7 +122,15 @@ public sealed class StoreCatalogAdminApiController(IStoreRuntimeDatasetRepositor
                          PriceAmount = product.PriceAmount,
                          HasImage = db.StoreProductMedia.Any(media => media.IdProduct == product.Id && media.MediaKey == "product-" + product.ProductKey)
                      };
-        return Ok(await drafts.OrderByDescending(x => x.Id).ToListAsync(cancellationToken));
+        string query = q?.Trim() ?? "";
+        if (query.Length > 0)
+            drafts = drafts.Where(x => x.Code.Contains(query) || x.Name.Contains(query) ||
+                (x.BrandName != null && x.BrandName.Contains(query)) || (x.CategoryName != null && x.CategoryName.Contains(query)));
+        int total = await drafts.CountAsync(cancellationToken);
+        var items = await drafts.OrderByDescending(x => x.Id)
+            .Skip((int)Math.Min((long)(page - 1) * pageSize, int.MaxValue)).Take(pageSize)
+            .ToListAsync(cancellationToken);
+        return Ok(new { items, total, page, pageSize });
     }
 
     [HttpGet("products/create-options")]
@@ -520,7 +534,7 @@ public sealed class StoreCatalogAdminApiController(IStoreRuntimeDatasetRepositor
         [FromQuery] int pageSize = 50,
         CancellationToken cancellationToken = default)
     {
-        if (page < 1 || pageSize is < 1 or > 200)
+        if (page < 1 || pageSize is < 1 or > 200 || (q?.Length ?? 0) > 100)
             return ValidationProblem(detail: "شماره صفحه باید مثبت و اندازهٔ صفحه بین ۱ تا ۲۰۰ باشد.", statusCode: 400);
 
         if (string.Equals(section, "attributes", StringComparison.OrdinalIgnoreCase))
@@ -571,45 +585,48 @@ public sealed class StoreCatalogAdminApiController(IStoreRuntimeDatasetRepositor
             return Ok(new { total, page, pageSize, items = rows.Select(row => row with { LogoUrl = ContentCdn.ToUrl(row.LogoPath, cdnBaseUrl) }) });
         }
 
-        string? json = await datasets.ReadCatalogJsonAsync(cancellationToken);
-        if (string.IsNullOrWhiteSpace(json))
-            return Problem(statusCode: StatusCodes.Status503ServiceUnavailable,
-                title: "دادهٔ کاتالوگ در دیتابیس در دسترس نیست.");
-
-        using JsonDocument document = JsonDocument.Parse(json);
-        JsonElement root = document.RootElement;
         string query = q?.Trim() ?? "";
-
-        return section.ToLowerInvariant() switch
+        if (!string.Equals(section, "products", StringComparison.OrdinalIgnoreCase)) return NotFound();
+        var productSource = from product in db.Products.AsNoTracking()
+                     join brand in db.StoreBrands.AsNoTracking().Where(x => x.IsActive)
+                         on product.IdBrand equals (long?)brand.Id
+                     join category0 in db.StoreCategories.AsNoTracking().Where(x => x.IsActive)
+                         on product.IdCategory equals (long?)category0.Id into categories
+                     from category in categories.DefaultIfEmpty()
+                     where product.IsCatalogActive && product.IsStoreEnabled &&
+                           (product.IdCategory == null || category != null)
+                     select new { product, brand, category };
+        if (query.Length > 0)
+            productSource = productSource.Where(x => x.product.Code.Contains(query) || x.product.Name.Contains(query) ||
+                (x.product.EnglishName != null && x.product.EnglishName.Contains(query)) || x.brand.NameFa.Contains(query) ||
+                (x.category != null && x.category.NameFa.Contains(query)));
+        int productTotal = await productSource.CountAsync(cancellationToken);
+        var productRows = await productSource.OrderBy(x => x.product.Name).ThenBy(x => x.product.Id)
+            .Skip((int)Math.Min((long)(page - 1) * pageSize, int.MaxValue)).Take(pageSize)
+            .Select(x => new
+            {
+                x.product.Id, x.product.Code, x.product.Name, x.product.EnglishName,
+                BrandName = x.brand.NameFa, CategoryName = x.category == null ? "" : x.category.NameFa,
+                Price = (x.product.PriceAmount ?? 0m) / 1_000_000m,
+                DiscountPercent = x.product.DiscountPercent ?? 0m
+            }).ToListAsync(cancellationToken);
+        long[] productIds = productRows.Select(x => x.Id).ToArray();
+        var productStockTotals = productIds.Length == 0
+            ? new Dictionary<long, decimal>()
+            : await (from inventory in db.InventoryItems.AsNoTracking()
+                     join balance in db.StockBalances.AsNoTracking() on inventory.Id equals balance.IdInventoryItem
+                     where productIds.Contains(inventory.IdProduct)
+                     group balance.Quantity by inventory.IdProduct into grouped
+                     select new { Id = grouped.Key, Quantity = grouped.Sum() })
+                .ToDictionaryAsync(x => x.Id, x => x.Quantity, cancellationToken);
+        var productItems = productRows.Select(x =>
         {
-            "products" => Ok(Page(Products(root).Where(item => Matches(query,
-                item.Code, item.Name, item.EnglishName, item.BrandName, item.CategoryName)), page, pageSize)),
-            _ => NotFound()
-        };
-    }
-
-    private static IReadOnlyList<ProductRow> Products(JsonElement root)
-    {
-        Dictionary<string, string> brands = root.GetProperty("brands").EnumerateArray()
-            .ToDictionary(item => Text(item, "id", ""), item => Text(item, "fa", Text(item, "name", "")));
-        Dictionary<string, string> categories = root.GetProperty("categories").EnumerateArray()
-            .ToDictionary(item => Text(item, "id", ""), item => Text(item, "fa", ""));
-
-        return root.GetProperty("products").EnumerateArray().Select(item =>
-        {
-            string brandId = Text(item, "brandId", "");
-            string categoryId = Text(item, "categoryId", "");
-            return new ProductRow(
-                item.GetProperty("id").GetInt32(),
-                Text(item, "code", ""),
-                Text(item, "name", ""),
-                Text(item, "englishName", ""),
-                brands.GetValueOrDefault(brandId, ""),
-                categories.GetValueOrDefault(categoryId, ""),
-                item.TryGetProperty("price", out JsonElement price) ? price.GetDecimal() : 0,
-                item.TryGetProperty("stockQuantity", out JsonElement stock) ? stock.GetInt32() : 0,
-                item.TryGetProperty("discountPercent", out JsonElement discount) ? discount.GetDecimal() : 0);
-        }).ToArray();
+            decimal stock = productStockTotals.GetValueOrDefault(x.Id);
+            int stockQuantity = stock >= int.MaxValue ? int.MaxValue : Math.Max(0, (int)Math.Floor(stock));
+            return new ProductRow(checked((int)x.Id), x.Code, x.Name, x.EnglishName ?? x.Name,
+                x.BrandName, x.CategoryName, x.Price, stockQuantity, x.DiscountPercent);
+        });
+        return Ok(new { items = productItems, total = productTotal, page, pageSize });
     }
 
     private static object Page<T>(IEnumerable<T> rows, int page, int pageSize, int? knownTotal = null)
@@ -623,9 +640,6 @@ public sealed class StoreCatalogAdminApiController(IStoreRuntimeDatasetRepositor
             items = items.Skip((int)Math.Min((long)(page - 1) * pageSize, items.Length)).Take(pageSize)
         };
     }
-
-    private static bool Matches(string query, params string?[] values) =>
-        query.Length == 0 || values.Any(value => value?.Contains(query, StringComparison.OrdinalIgnoreCase) == true);
 
     private static string Text(JsonElement item, string property, string fallback) =>
         item.TryGetProperty(property, out JsonElement value) && value.ValueKind == JsonValueKind.String

@@ -465,19 +465,28 @@
         } finally { finishRequest(page, controller); }
     }
 
-    async function loadProductDrafts(page) {
+    async function loadProductDrafts(page, pageNumber = Number(page.dataset.adminPageNumber || "1"), announce = false) {
         const controller = beginRequest(page);
         try {
-            const rows = await ui.getJson("/api/admin/store/catalog/products/drafts", { signal: controller.signal });
+            const api = new URL("/api/admin/store/catalog/products/drafts", window.location.origin);
+            api.searchParams.set("page", String(pageNumber));
+            api.searchParams.set("pageSize", String(pageSize));
+            const query = queryValue(page.querySelector("[data-admin-filter]"), "q");
+            if (query) api.searchParams.set("q", query);
+            const result = await ui.getJson(api, { signal: controller.signal });
             if (!page.isConnected || requests.get(page) !== controller) return;
+            const rows = result.items || [];
             renderRows(page, rows, item => [item.code, item.name, item.brandName, item.categoryName, ui.formatNumber(item.priceAmount), item.hasImage ? "ثبت شده" : "ثبت نشده"]);
-            status(page, "");
+            updateCount(page, result.total ?? 0, rows.length);
+            updatePagination(page, result.page ?? pageNumber, (result.page ?? pageNumber) * (result.pageSize ?? pageSize) < (result.total ?? 0));
+            status(page, rows.length ? "پیش‌نویس‌ها از دیتابیس دریافت شدند." : "پیش‌نویسی با این فیلتر پیدا نشد.");
+            if (announce) ui.notify("فهرست پیش‌نویس‌ها به‌روز شد.", "success");
         } catch (error) {
             if (error.name !== "AbortError" && page.isConnected && requests.get(page) === controller) status(page, error.message || "دریافت پیش‌نویس‌ها ناموفق بود.", true);
         } finally { finishRequest(page, controller); }
     }
 
-    function refreshProductDrafts() { const page = document.querySelector('[data-admin-page="product-drafts"]'); if (page) void loadProductDrafts(page); }
+    function refreshProductDrafts(pageNumber = 1) { const page = document.querySelector('[data-admin-page="product-drafts"]'); if (page) void loadProductDrafts(page, pageNumber); }
 
     async function loadPlans(signal) {
         const data = await ui.getJson("/api/admin/warehouse/stock/plans", { signal });
@@ -1245,6 +1254,7 @@
             else if (page?.dataset.adminPage === "stock") void loadStock(page, nextPage);
             else if (page?.dataset.adminPage === "orders") void loadOrders(page, nextPage);
             else if (page?.dataset.adminPage === "customers") void loadCustomers(page, nextPage);
+            else if (page?.dataset.adminPage === "product-drafts") void loadProductDrafts(page, nextPage);
         }
     });
 
@@ -1490,6 +1500,7 @@
         event.preventDefault();
         const page = form.closest("[data-admin-page]");
         if (page?.dataset.adminPage === "catalog") void loadCatalog(page, 1);
+        else if (page?.dataset.adminPage === "product-drafts") void loadProductDrafts(page, 1);
         else if (page?.dataset.adminPage === "warehouses") void loadWarehouses(page);
         else if (page?.dataset.adminPage === "stock") void loadStock(page, 1);
         else if (page?.dataset.adminPage === "orders") void loadOrders(page, 1);
@@ -1503,6 +1514,7 @@
         const form = page?.querySelector("[data-admin-filter]");
         form?.reset();
         if (page?.dataset.adminPage === "catalog") void loadCatalog(page, 1);
+        else if (page?.dataset.adminPage === "product-drafts") void loadProductDrafts(page, 1);
         else if (page?.dataset.adminPage === "warehouses") void loadWarehouses(page);
         else if (page?.dataset.adminPage === "stock") void loadStock(page, 1);
     });

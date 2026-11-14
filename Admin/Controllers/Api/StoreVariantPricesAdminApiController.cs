@@ -153,18 +153,34 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db) : Con
     }
 
     [HttpGet]
-    public async Task<IActionResult> List(CancellationToken cancellationToken)
+    public async Task<IActionResult> List(
+        [FromQuery] string? q,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 50,
+        CancellationToken cancellationToken = default)
     {
         if (!CanManage()) return Forbid();
-        var rows = await (from variant in db.ProductVariants.AsNoTracking()
-                          join product in db.Products.AsNoTracking() on variant.IdProduct equals product.Id
-                          from plan in db.SalesPlanReferences.AsNoTracking().Where(x => x.IdStockOwnerType == 1)
-                          join offer in db.StoreProductVariantSalesPlanOffers.AsNoTracking() on new { VariantId = variant.Id, PlanId = plan.Id } equals new { VariantId = offer.IdProductVariant, PlanId = offer.IdSalesPlan } into offers
-                          from offer in offers.DefaultIfEmpty()
-                          where variant.IsActive && product.IsWarehouseEnabled && product.IsCatalogActive && product.IsStoreEnabled
-                          orderby product.Name, variant.Name, plan.Code
-                          select new VariantPlanPriceRow { VariantId = variant.Id, ProductName = product.Name, VariantName = variant.Name, Code = variant.Code, AttributesJson = variant.AttributesJson, SalesPlanId = plan.StoreSalesPlanKey, SalesPlanName = plan.DisplayName, PriceAmount = offer == null ? null : offer.PriceAmount, DiscountPercent = offer == null ? null : offer.DiscountPercent, IsEnabled = offer == null ? null : offer.IsEnabled }).ToListAsync(cancellationToken);
-        return Ok(rows);
+        if (!ValidPage(page, pageSize, q)) return ValidationProblem(detail: "شماره صفحه، اندازهٔ صفحه یا عبارت جست‌وجو معتبر نیست.", statusCode: 400);
+        string query = q?.Trim() ?? "";
+        var rows = from variant in db.ProductVariants.AsNoTracking()
+                   join product in db.Products.AsNoTracking() on variant.IdProduct equals product.Id
+                   from plan in db.SalesPlanReferences.AsNoTracking().Where(x => x.IdStockOwnerType == 1)
+                   join offer in db.StoreProductVariantSalesPlanOffers.AsNoTracking() on new { VariantId = variant.Id, PlanId = plan.Id } equals new { VariantId = offer.IdProductVariant, PlanId = offer.IdSalesPlan } into offers
+                   from offer in offers.DefaultIfEmpty()
+                   where variant.IsActive && product.IsWarehouseEnabled && product.IsCatalogActive && product.IsStoreEnabled &&
+                         (query == "" || product.Name.Contains(query) || variant.Name.Contains(query) ||
+                          (variant.Code ?? "").Contains(query) || (plan.DisplayName ?? "").Contains(query))
+                   select new { variant, product, plan, offer };
+        int total = await rows.CountAsync(cancellationToken);
+        var items = await rows.OrderBy(x => x.product.Name).ThenBy(x => x.variant.Name).ThenBy(x => x.plan.Code)
+            .ThenBy(x => x.variant.Id).ThenBy(x => x.plan.Id)
+            .Skip((int)Math.Min((long)(page - 1) * pageSize, int.MaxValue)).Take(pageSize)
+            .Select(x => new VariantPlanPriceRow { VariantId = x.variant.Id, ProductName = x.product.Name, VariantName = x.variant.Name,
+                Code = x.variant.Code, AttributesJson = x.variant.AttributesJson, SalesPlanId = x.plan.StoreSalesPlanKey,
+                SalesPlanName = x.plan.DisplayName, PriceAmount = x.offer == null ? null : x.offer.PriceAmount,
+                DiscountPercent = x.offer == null ? null : x.offer.DiscountPercent, IsEnabled = x.offer == null ? null : x.offer.IsEnabled })
+            .ToListAsync(cancellationToken);
+        return Ok(new { items, total, page, pageSize });
     }
 
     [HttpPut("{variantId:long}/{salesPlanId}")]
@@ -232,18 +248,36 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db) : Con
     public sealed record PlanPublicationInput(bool IsActive);
 
     [HttpGet("product-offers")]
-    public async Task<IActionResult> ProductOffers(CancellationToken cancellationToken)
+    public async Task<IActionResult> ProductOffers(
+        [FromQuery] string? q,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 50,
+        CancellationToken cancellationToken = default)
     {
         if (!CanManage()) return Forbid();
-        var rows = await (from product in db.Products.AsNoTracking()
-                          from plan in db.SalesPlanReferences.AsNoTracking().Where(x => x.IdStockOwnerType == 1)
-                          join offer in db.StoreProductSalesPlanOffers.AsNoTracking() on new { ProductId = product.Id, PlanId = plan.Id } equals new { ProductId = offer.IdProduct, PlanId = offer.IdSalesPlan } into offers
-                          from offer in offers.DefaultIfEmpty()
-                          where product.IsStoreEnabled && product.IsCatalogActive && !plan.IsRegular
-                          orderby product.Name, plan.DisplayName
-                          select new ProductOfferRow { ProductId = product.Id, ProductCode = product.Code, ProductName = product.Name, SalesPlanId = plan.StoreSalesPlanKey, SalesPlanName = plan.DisplayName, PriceAmount = offer == null ? null : offer.PriceAmount, DiscountPercent = offer == null ? null : offer.DiscountPercent, MaxPurchaseQuantity = offer == null ? null : offer.MaxPurchaseQuantity, IsEnabled = offer == null ? null : offer.IsEnabled }).ToListAsync(cancellationToken);
-        return Ok(rows);
+        if (!ValidPage(page, pageSize, q)) return ValidationProblem(detail: "شماره صفحه، اندازهٔ صفحه یا عبارت جست‌وجو معتبر نیست.", statusCode: 400);
+        string query = q?.Trim() ?? "";
+        var rows = from product in db.Products.AsNoTracking()
+                   from plan in db.SalesPlanReferences.AsNoTracking().Where(x => x.IdStockOwnerType == 1)
+                   join offer in db.StoreProductSalesPlanOffers.AsNoTracking() on new { ProductId = product.Id, PlanId = plan.Id } equals new { ProductId = offer.IdProduct, PlanId = offer.IdSalesPlan } into offers
+                   from offer in offers.DefaultIfEmpty()
+                   where product.IsStoreEnabled && product.IsCatalogActive && !plan.IsRegular &&
+                         (query == "" || product.Name.Contains(query) || product.Code.Contains(query) || plan.DisplayName.Contains(query))
+                   select new { product, plan, offer };
+        int total = await rows.CountAsync(cancellationToken);
+        var items = await rows.OrderBy(x => x.product.Name).ThenBy(x => x.plan.DisplayName)
+            .ThenBy(x => x.product.Id).ThenBy(x => x.plan.Id)
+            .Skip((int)Math.Min((long)(page - 1) * pageSize, int.MaxValue)).Take(pageSize)
+            .Select(x => new ProductOfferRow { ProductId = x.product.Id, ProductCode = x.product.Code, ProductName = x.product.Name,
+                SalesPlanId = x.plan.StoreSalesPlanKey, SalesPlanName = x.plan.DisplayName,
+                PriceAmount = x.offer == null ? null : x.offer.PriceAmount, DiscountPercent = x.offer == null ? null : x.offer.DiscountPercent,
+                MaxPurchaseQuantity = x.offer == null ? null : x.offer.MaxPurchaseQuantity, IsEnabled = x.offer == null ? null : x.offer.IsEnabled })
+            .ToListAsync(cancellationToken);
+        return Ok(new { items, total, page, pageSize });
     }
+
+    private static bool ValidPage(int page, int pageSize, string? query) =>
+        page is >= 1 and <= 100000 && pageSize is >= 1 and <= 100 && (query?.Length ?? 0) <= 100;
 
     [HttpPut("product-offers/{productId:long}/{salesPlanId}")]
     [ValidateAntiForgeryToken]

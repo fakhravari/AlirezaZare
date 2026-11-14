@@ -18,23 +18,40 @@ namespace Shop.Admin.Controllers.Api;
 public sealed class StorePaidOrdersDispatchApiController(ShopDbContext db, IWarehouseStockLedger stockLedger) : ControllerBase
 {
     [HttpGet]
-    public async Task<IActionResult> List(CancellationToken cancellationToken)
+    public async Task<IActionResult> List(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 50,
+        CancellationToken cancellationToken = default)
     {
-        var rows = await (from order in db.StoreCustomerOrders.AsNoTracking()
-                          join profile in db.AccountProfiles.AsNoTracking() on order.IdProfile equals profile.Id
-                          join payment in db.StorePaymentAttempts.AsNoTracking() on order.Id equals payment.IdOrder
-                          join inbox in db.WarehousePaidOrderInboxes.AsNoTracking() on order.OrderNumber equals inbox.StoreOrderKey
-                          where payment.Status == "verified" && payment.Amount == order.TotalAmount && inbox.Status == "P" &&
-                                order.Status == "payment-confirmed" && order.IdWarehouseDocument == null &&
-                                db.WarehousePaidOrderInboxLines.Any(line => line.IdPaidOrderInbox == inbox.Id)
-                          orderby payment.PaidAtUtc, order.Id
-                          select new PaidOrderRow
-                          {
-                              Id = order.Id, OrderNumber = order.OrderNumber, TotalAmount = order.TotalAmount,
-                              ItemCount = order.ItemCount, PaidAtUtc = payment.PaidAtUtc!.Value,
-                              CustomerName = (profile.FirstName + " " + profile.LastName).Trim()
-                          }).Take(200).ToListAsync(cancellationToken);
-        return Ok(new { items = rows });
+        if (page is < 1 or > 100000 || pageSize is < 1 or > 100)
+            return ValidationProblem(detail: "شماره صفحه یا اندازهٔ صفحه معتبر نیست.", statusCode: 400);
+        var eligible = from order in db.StoreCustomerOrders.AsNoTracking()
+                       join profile in db.AccountProfiles.AsNoTracking() on order.IdProfile equals profile.Id
+                       where order.Status == "payment-confirmed" && order.IdWarehouseDocument == null &&
+                             db.StorePaymentAttempts.Any(payment => payment.IdOrder == order.Id && payment.Status == "verified" &&
+                                 payment.Amount == order.TotalAmount && payment.PaidAtUtc != null) &&
+                             db.WarehousePaidOrderInboxes.Any(inbox => inbox.StoreOrderKey == order.OrderNumber && inbox.Status == "P" &&
+                                 db.WarehousePaidOrderInboxLines.Any(line => line.IdPaidOrderInbox == inbox.Id))
+                       select new { order, profile };
+        int total = await eligible.CountAsync(cancellationToken);
+        var rows = await eligible
+            .Select(x => new
+            {
+                x.order, x.profile,
+                PaidAtUtc = db.StorePaymentAttempts.AsNoTracking()
+                    .Where(payment => payment.IdOrder == x.order.Id && payment.Status == "verified" &&
+                        payment.Amount == x.order.TotalAmount && payment.PaidAtUtc != null)
+                    .OrderBy(payment => payment.PaidAtUtc).Select(payment => payment.PaidAtUtc!.Value).First()
+            })
+            .OrderBy(x => x.PaidAtUtc).ThenBy(x => x.order.Id)
+            .Skip((int)Math.Min((long)(page - 1) * pageSize, int.MaxValue)).Take(pageSize)
+            .Select(x => new PaidOrderRow
+            {
+                Id = x.order.Id, OrderNumber = x.order.OrderNumber, TotalAmount = x.order.TotalAmount,
+                ItemCount = x.order.ItemCount, PaidAtUtc = x.PaidAtUtc,
+                CustomerName = (x.profile.FirstName + " " + x.profile.LastName).Trim()
+            }).ToListAsync(cancellationToken);
+        return Ok(new { items = rows, total, page, pageSize, hasNext = (long)page * pageSize < total });
     }
 
     [HttpPost]

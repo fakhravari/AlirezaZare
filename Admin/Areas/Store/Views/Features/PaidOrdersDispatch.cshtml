@@ -9,14 +9,16 @@
                 <div class="d-flex flex-wrap gap-2 align-items-center mb-3">
                     <button class="btn btn-primary" type="submit" data-dispatch-submit><i class="fa fa-truck-fast me-1" aria-hidden="true"></i>صدور یک حواله برای انتخاب‌شده‌ها</button>
                     <button class="btn btn-default" type="button" data-dispatch-refresh>بارگذاری دوباره</button>
+                    <button class="btn btn-default" type="button" data-dispatch-clear disabled>پاک‌کردن انتخاب‌ها</button>
                     <span data-dispatch-count aria-live="polite"></span>
                 </div>
                 <div data-dispatch-status role="status" aria-live="polite"></div>
-                <div class="table-responsive"><table class="table table-striped align-middle" data-admin-datatable data-admin-page-length="25"><thead><tr>
+                <div class="table-responsive"><table class="table table-striped align-middle" data-admin-datatable data-admin-table-mode="server"><thead><tr>
                     <th><input type="checkbox" data-dispatch-all aria-label="انتخاب همه سفارش‌های نمایش‌داده‌شده" /></th>
                     <th>شماره سفارش</th><th>مشتری</th><th>تعداد</th><th>مبلغ تومان</th><th>زمان تأیید پرداخت</th>
                 </tr></thead><tbody data-dispatch-rows></tbody></table></div>
-                <p class="text-muted">حداکثر ۲۰۰ سفارش قدیمی‌تر آمادهٔ حواله نمایش داده می‌شود. همهٔ سفارش‌های انتخاب‌شده در یک حواله ثبت می‌شوند.</p>
+                <div class="admin-pagination d-flex align-items-center justify-content-center gap-3 mt-3" data-dispatch-pagination hidden><button type="button" class="btn btn-default btn-sm" data-dispatch-page="-1">قبلی</button><span data-dispatch-page-label></span><button type="button" class="btn btn-default btn-sm" data-dispatch-page="1">بعدی</button></div>
+                <p class="text-muted">برای محدود ماندن بار هر درخواست، هر بار ۵۰ سفارش دریافت می‌شود؛ انتخاب سفارش‌ها بین صفحه‌ها حفظ می‌شود و حداکثر ۲۰۰ سفارش در یک حواله ثبت می‌شود.</p>
             </form>
         </div>
     </section>
