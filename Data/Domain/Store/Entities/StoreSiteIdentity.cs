@@ -10,6 +10,10 @@ public sealed class StoreSiteIdentity
     public string SupportPhoneUri { get; set; } = string.Empty;
     public string WhatsAppNumber { get; set; } = string.Empty;
     public string PublicEmail { get; set; } = string.Empty;
+    public string FooterDescription { get; set; } = string.Empty;
+    public string? InstagramUrl { get; set; }
+    public string? TelegramUrl { get; set; }
+    public string? LinkedInUrl { get; set; }
     public string MediaCdnBaseUrl { get; set; } = "https://cdn.bs-shop.ir/";
     public string? SmtpHost { get; set; }
     public int? SmtpPort { get; set; }

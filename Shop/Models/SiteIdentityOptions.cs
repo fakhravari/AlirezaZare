@@ -9,4 +9,8 @@ public sealed class SiteIdentityOptions
     public string SupportPhoneUri { get; set; } = string.Empty;
     public string WhatsAppNumber { get; set; } = string.Empty;
     public string PublicEmail { get; set; } = string.Empty;
+    public string FooterDescription { get; set; } = string.Empty;
+    public string? InstagramUrl { get; set; }
+    public string? TelegramUrl { get; set; }
+    public string? LinkedInUrl { get; set; }
 }

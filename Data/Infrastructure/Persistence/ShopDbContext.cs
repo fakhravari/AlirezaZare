@@ -501,6 +501,10 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.Property(x => x.SupportPhoneUri).HasMaxLength(40).IsRequired();
             entity.Property(x => x.WhatsAppNumber).HasMaxLength(32).IsRequired();
             entity.Property(x => x.PublicEmail).HasMaxLength(254).IsRequired();
+            entity.Property(x => x.FooterDescription).HasMaxLength(1000).HasDefaultValue("").IsRequired();
+            entity.Property(x => x.InstagramUrl).HasMaxLength(500);
+            entity.Property(x => x.TelegramUrl).HasMaxLength(500);
+            entity.Property(x => x.LinkedInUrl).HasMaxLength(500);
             entity.Property(x => x.MediaCdnBaseUrl).HasMaxLength(500).HasDefaultValue("https://cdn.bs-shop.ir/").IsRequired();
             entity.Property(x => x.SmtpHost).HasMaxLength(255);
             entity.Property(x => x.SmtpUsername).HasMaxLength(320);

@@ -27,7 +27,11 @@ public sealed class DatabaseSiteIdentitySource(
                     SupportPhoneDisplay = row.SupportPhoneDisplay,
                     SupportPhoneUri = row.SupportPhoneUri,
                     WhatsAppNumber = row.WhatsAppNumber,
-                    PublicEmail = row.PublicEmail
+                    PublicEmail = row.PublicEmail,
+                    FooterDescription = row.FooterDescription,
+                    InstagramUrl = row.InstagramUrl,
+                    TelegramUrl = row.TelegramUrl,
+                    LinkedInUrl = row.LinkedInUrl
                 };
         });
 

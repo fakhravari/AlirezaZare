@@ -7,4 +7,8 @@ public sealed record StoreSiteIdentitySnapshot(
     string SupportPhoneDisplay,
     string SupportPhoneUri,
     string WhatsAppNumber,
-    string PublicEmail);
+    string PublicEmail,
+    string FooterDescription,
+    string? InstagramUrl,
+    string? TelegramUrl,
+    string? LinkedInUrl);

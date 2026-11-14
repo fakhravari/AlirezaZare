@@ -6,6 +6,8 @@
 
 ## حوزه‌ها
 
+- صفحهٔ تنظیم اسلایدر در `SiteSettings/Slider` تصویر دسکتاپ/موبایل را به تفکیک شش جایگاه فعلی جایگزین می‌کند. کارت‌های نظر صفحهٔ اصلی از نظرهای تأییدشدهٔ محصولات می‌آیند؛ مدیریت وضعیت و پاسخ از صفحهٔ دیدگاه‌های فروشگاه انجام می‌شود.
+
 - کاتالوگ و قیمت: APIهای `StoreCatalogAdminApiController` و `StoreVariantPricesAdminApiController`.
 - سفارش و ارسال: `StoreOrdersAdminApiController` و `StorePaidOrdersDispatchApiController`.
 - صندوق فرم تماس: صفحهٔ `contact-messages` در `FeaturesController`، فهرست و تغییر وضعیت در `StoreContactMessagesAdminApiController` و رابط در `ContactMessages.cshtml`. مجوز صفحه و API در migration `078-contact-message-inbox.sql` ثبت می‌شود.
@@ -13,7 +15,7 @@
 - انبار: `WarehouseAdminApiController`، `WarehouseDocumentsApiController` و `WarehouseMovementsApiController`. محاسبه و ثبت ledger سند در `Data/Infrastructure/Warehouse/WarehouseStockLedger.cs` و قرارداد آن در `Data/Application/Warehouse/Contracts/IWarehouseStockLedger.cs` است؛ endpointهای Admin همچنان مالک HTTP، مجوز و تراکنش درخواست‌اند.
 - محتوای فروشگاه: endpointهای FAQ، دسته، مقاله، صفحات خدمات و رسانه در همین پوشهٔ API.
 - حساب مدیر و مجوزها: `Admin/Controllers/AuthController.cs` و مدل‌های `Data/Domain/Admin/Entities/`.
-- تنظیمات سایت و SMTP: `SiteSettingsController` و `Admin/Areas/Admin/Views/SiteSettings/Index.cshtml`؛ عمر کد تأیید ایمیل هم در همین بخش «ارسال ایمیل» تنظیم و در `Store.SiteSetting` ذخیره می‌شود. قرارداد ستون در [راهنمای دیتابیس](../architecture/database.md) آمده است.
+- تنظیمات سایت و SMTP: `SiteSettingsController` و `Admin/Areas/Admin/Views/SiteSettings/Index.cshtml`؛ عمر کد تأیید ایمیل، توضیح فوتر و نشانی شبکه‌های مجازی هم در همین صفحه تنظیم و در `Store.SiteSetting` ذخیره می‌شوند. قرارداد ستون در [راهنمای دیتابیس](../architecture/database.md) آمده است.
 
 فرم تماس، پیام را ابتدا در `Store.ContactFormMessage` ثبت می‌کند و سپس ایمیل اعلان را تلاش می‌کند؛ اگر SMTP در دسترس نباشد، پیام در صندوق باقی می‌ماند. صفحهٔ مدیریت با مجوز `Store:Features:Index:contact-messages` در منوی مشتریان و تعامل‌ها نمایش داده می‌شود. مدیر می‌تواند پیام‌ها را جست‌وجو و مشاهده کند و بین وضعیت‌های جدید، خوانده‌شده و بسته‌شده جابه‌جا کند.
 

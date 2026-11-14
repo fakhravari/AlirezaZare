@@ -1,4 +1,11 @@
-﻿@{ string cdnBaseUrl = ViewData["MediaCdnBaseUrl"] as string ?? ""; }
+@using Shop.Controllers
+@using System.Globalization
+@{
+    var reviews = ViewData["HomeReviews"] as IReadOnlyList<HomeReviewCard> ?? [];
+    var average = ViewData["HomeReviewAverage"] as double? ?? 0;
+    var reviewCount = ViewData["HomeReviewCount"] as int? ?? 0;
+    var persianCulture = CultureInfo.GetCultureInfo("fa-IR");
+}
 <section class="testimonials py-section" id="testimonials">
     <div class="container">
         <div class="testimonial-intro">
@@ -8,188 +15,60 @@
             </div>
             <div class="testimonial-tools">
                 <div class="rating-summary">
-                    <div class="rating-score">۴٫۹</div>
+                    <div class="rating-score">@(reviewCount == 0 ? "—" : average.ToString("0.0", CultureInfo.InvariantCulture))</div>
                     <div>
-                        <div class="rating-stars" role="img" aria-label="امتیاز ۴٫۹ از ۵">
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill">
-                            </i
-                            ><i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill">
-                            </i
-                            ><i class="bi bi-star-fill"></i>
+                        <div class="rating-stars" role="img" aria-label="امتیاز میانگین @average از ۵">
+                            @for (var star = 0; star < 5; star++)
+                            {
+                                <i class="bi @(star < Math.Round(average) ? "bi-star-fill" : "bi-star")" aria-hidden="true"></i>
+                            }
                         </div>
-                        <strong>
-                            بر پایه بیش از ۱,۲۰۰ خرید موفق
-                        </strong
-                        ><span>کیفیت، اصالت و همراهی تا انتخاب نهایی</span>
+                        @if (reviewCount > 0)
+                        {
+                            <strong>بر پایهٔ @reviewCount نظر تأییدشده</strong>
+                            <span>کیفیت، اصالت و همراهی تا انتخاب نهایی</span>
+                        }
+                        else
+                        {
+                            <strong>هنوز نظری تأیید نشده است</strong>
+                            <span>پس از تأیید دیدگاه‌ها، نظر خریداران اینجا نمایش داده می‌شود.</span>
+                        }
                     </div>
                 </div>
             </div>
         </div>
         <div class="testimonial-slider-wrap">
-            <div
-                class="testimonial-grid testimonial-slider"
-                id="testimonialSlider">
-                <article class="testimonial-card featured-review">
-                    <span class="quote-mark" aria-hidden="true">
-                        <i class="bi bi-chat-quote-fill"></i>
-                    </span>
-                    <div class="rating-stars" role="img" aria-label="۵ ستاره">
-                        <i class="bi bi-star-fill" aria-hidden="true"></i>
-                        <i class="bi bi-star-fill" aria-hidden="true"></i>
-                        <i class="bi bi-star-fill" aria-hidden="true"></i>
-                        <i class="bi bi-star-fill" aria-hidden="true"></i>
-                        <i class="bi bi-star-fill" aria-hidden="true"></i>
-                    </div>
-                    <p>
-                        برای خرید ابزار نصب، مشخصات و اقلام داخل بسته را مقایسه کردم. سفارش مرتب و به‌موقع به دستم رسید.
-                    </p>
-                    <div class="reviewer">
-                        <span class="reviewer-avatar avatar-rose">
-                            <img src="@(cdnBaseUrl)content/testimonials/sara.jpg" alt="" loading="lazy" decoding="async" aria-hidden="true">
-                        </span>
-                        <div>
-                            <strong>سارا محمدی</strong><small>خریدار ابزار نصب</small>
-                            <time class="review-date" datetime="2026-10-07">
-                                <i class="bi bi-calendar3" aria-hidden="true"></i><span>۱۴۰۵/۰۷/۱۵</span>
-                            </time>
+            <div class="testimonial-grid testimonial-slider" id="testimonialSlider">
+                @foreach (var (review, index) in reviews.Select((review, index) => (review, index)))
+                {
+                    <article class="testimonial-card @(index == 0 ? "featured-review" : "")">
+                        <span class="quote-mark" aria-hidden="true"><i class="bi bi-chat-quote-fill"></i></span>
+                        <div class="rating-stars" role="img" aria-label="@review.Rating ستاره از ۵">
+                            @for (var star = 0; star < review.Rating; star++)
+                            {
+                                <i class="bi bi-star-fill" aria-hidden="true"></i>
+                            }
                         </div>
-                    </div>
-                </article>
-                <article class="testimonial-card">
-                    <span class="quote-mark" aria-hidden="true">
-                        <i class="bi bi-chat-quote-fill"></i>
-                    </span>
-                    <div class="rating-stars" role="img" aria-label="۴ ستاره">
-                        <i class="bi bi-star-fill" aria-hidden="true"></i>
-                        <i class="bi bi-star-fill" aria-hidden="true"></i>
-                        <i class="bi bi-star-fill" aria-hidden="true"></i>
-                        <i class="bi bi-star-fill" aria-hidden="true"></i>
-                    </div>
-                    <p>
-                        مولتی‌متر را بر اساس محدوده اندازه‌گیری انتخاب کردم. مشخصات کالا و توضیحات فروشگاه با هم تطبیق داشت.
-                    </p>
-                    <div class="reviewer">
-                        <span class="reviewer-avatar avatar-navy">
-                            <img src="@(cdnBaseUrl)content/testimonials/milad.jpg" alt="" loading="lazy" decoding="async" aria-hidden="true">
-                        </span>
-                        <div>
-                            <strong>میلاد خلیلی</strong><small>خریدار مولتی‌متر</small>
-                            <time class="review-date" datetime="2026-09-30">
-                                <i class="bi bi-calendar3" aria-hidden="true"></i><span>۱۴۰۵/۰۷/۰۸</span>
-                            </time>
+                        <p>@review.Text</p>
+                        <div class="reviewer">
+                            <span class="reviewer-avatar avatar-navy" aria-hidden="true">
+                                <i class="bi bi-person-fill"></i>
+                            </span>
+                            <div>
+                                <strong>@review.DisplayName</strong>
+                                <small>خریدار @review.ProductName</small>
+                                <time class="review-date" datetime="@review.CreatedAtUtc.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)">
+                                    <i class="bi bi-calendar3" aria-hidden="true"></i>
+                                    <span>@review.CreatedAtUtc.ToString("yyyy/MM/dd", persianCulture)</span>
+                                </time>
+                            </div>
                         </div>
-                    </div>
-                </article>
-                <article class="testimonial-card">
-                    <span class="quote-mark" aria-hidden="true">
-                        <i class="bi bi-chat-quote-fill"></i>
-                    </span>
-                    <div class="rating-stars" role="img" aria-label="۵ ستاره">
-                        <i class="bi bi-star-fill" aria-hidden="true"></i>
-                        <i class="bi bi-star-fill" aria-hidden="true"></i>
-                        <i class="bi bi-star-fill" aria-hidden="true"></i>
-                        <i class="bi bi-star-fill" aria-hidden="true"></i>
-                        <i class="bi bi-star-fill" aria-hidden="true"></i>
-                    </div>
-                    <p>
-                        برای انتخاب نوک هویه و دمای مناسب سؤال داشتم؛ راهنمایی فروشگاه کمک کرد گزینه سازگار را پیدا کنم.
-                    </p>
-                    <div class="reviewer">
-                        <span class="reviewer-avatar avatar-cream">
-                            <img src="@(cdnBaseUrl)content/testimonials/niloufar.jpg" alt="" loading="lazy" decoding="async" aria-hidden="true">
-                        </span>
-                        <div>
-                            <strong>
-                                نیلوفر رستمی
-                            </strong
-                            ><small>خریدار ایستگاه هویه</small>
-                            <time class="review-date" datetime="2026-09-24">
-                                <i class="bi bi-calendar3" aria-hidden="true"></i><span>۱۴۰۵/۰۷/۰۲</span>
-                            </time>
-                        </div>
-                    </div>
-                </article>
-                <article class="testimonial-card">
-                    <span class="quote-mark" aria-hidden="true">
-                        <i class="bi bi-chat-quote-fill"></i>
-                    </span>
-                    <div class="rating-stars" role="img" aria-label="۴ ستاره">
-                        <i class="bi bi-star-fill" aria-hidden="true"></i>
-                        <i class="bi bi-star-fill" aria-hidden="true"></i>
-                        <i class="bi bi-star-fill" aria-hidden="true"></i>
-                        <i class="bi bi-star-fill" aria-hidden="true"></i>
-                    </div>
-                    <p>
-                        پیش از خرید چراغ کار درباره نوع پایه و شارژدهی پرسیدم و پاسخ روشنی گرفتم. ارسال هم به‌موقع بود.
-                    </p>
-                    <div class="reviewer">
-                        <span class="reviewer-avatar avatar-navy">
-                            <img src="@(cdnBaseUrl)content/testimonials/amirali.jpg" alt="" loading="lazy" decoding="async" aria-hidden="true">
-                        </span>
-                        <div>
-                            <strong>
-                                امیرعلی کیانی
-                            </strong
-                            ><small>خریدار چراغ کار</small>
-                            <time class="review-date" datetime="2026-09-19">
-                                <i class="bi bi-calendar3" aria-hidden="true"></i><span>۱۴۰۵/۰۶/۲۸</span>
-                            </time>
-                        </div>
-                    </div>
-                </article>
-                <article class="testimonial-card">
-                    <span class="quote-mark" aria-hidden="true">
-                        <i class="bi bi-chat-quote-fill"></i>
-                    </span>
-                    <div class="rating-stars" role="img" aria-label="۴ ستاره">
-                        <i class="bi bi-star-fill" aria-hidden="true"></i>
-                        <i class="bi bi-star-fill" aria-hidden="true"></i>
-                        <i class="bi bi-star-fill" aria-hidden="true"></i>
-                        <i class="bi bi-star-fill" aria-hidden="true"></i>
-                    </div>
-                    <p>
-                        تنوع ابزارها خوب بود و با کمک مشاور، چراغی متناسب با میز تعمیر و فضای کارگاه انتخاب کردم.
-                    </p>
-                    <div class="reviewer">
-                        <span class="reviewer-avatar avatar-rose">
-                            <img src="@(cdnBaseUrl)content/testimonials/leila.jpg" alt="" loading="lazy" decoding="async" aria-hidden="true">
-                        </span>
-                        <div>
-                            <strong>لیلا مرادی</strong><small>خریدار چراغ کارگاهی</small>
-                            <time class="review-date" datetime="2026-09-11">
-                                <i class="bi bi-calendar3" aria-hidden="true"></i><span>۱۴۰۵/۰۶/۲۰</span>
-                            </time>
-                        </div>
-                    </div>
-                </article>
-                <article class="testimonial-card">
-                    <span class="quote-mark" aria-hidden="true">
-                        <i class="bi bi-chat-quote-fill"></i>
-                    </span>
-                    <div class="rating-stars" role="img" aria-label="۵ ستاره">
-                        <i class="bi bi-star-fill" aria-hidden="true"></i>
-                        <i class="bi bi-star-fill" aria-hidden="true"></i>
-                        <i class="bi bi-star-fill" aria-hidden="true"></i>
-                        <i class="bi bi-star-fill" aria-hidden="true"></i>
-                        <i class="bi bi-star-fill" aria-hidden="true"></i>
-                    </div>
-                    <p>
-                        قبل از سفارش ابزار برقی درباره ضمانت و اقلام همراه پرسیدم؛ پاسخ‌گویی پشتیبانی انتخاب را آسان کرد.
-                    </p>
-                    <div class="reviewer">
-                        <span class="reviewer-avatar avatar-cream">
-                            <img src="@(cdnBaseUrl)content/testimonials/reza.jpg" alt="" loading="lazy" decoding="async" aria-hidden="true">
-                        </span>
-                        <div>
-                            <strong>رضا شریفی</strong><small>خریدار ابزار برقی</small>
-                            <time class="review-date" datetime="2026-09-05">
-                                <i class="bi bi-calendar3" aria-hidden="true"></i><span>۱۴۰۵/۰۶/۱۴</span>
-                            </time>
-                        </div>
-                    </div>
-                </article>
+                    </article>
+                }
+                @if (reviews.Count == 0)
+                {
+                    <p class="text-muted">هنوز دیدگاه تأییدشده‌ای برای نمایش ثبت نشده است.</p>
+                }
             </div>
         </div>
     </div>

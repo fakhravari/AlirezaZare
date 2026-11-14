@@ -16,6 +16,10 @@ public sealed class StoreSiteIdentityRepository(ShopDbContext dbContext) : IStor
                 identity.SupportPhoneDisplay,
                 identity.SupportPhoneUri,
                 identity.WhatsAppNumber,
-                identity.PublicEmail))
+                identity.PublicEmail,
+                identity.FooterDescription,
+                identity.InstagramUrl,
+                identity.TelegramUrl,
+                identity.LinkedInUrl))
             .SingleOrDefaultAsync(cancellationToken);
 }

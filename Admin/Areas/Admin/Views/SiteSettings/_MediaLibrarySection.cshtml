@@ -13,6 +13,23 @@
         <form data-media-upload-form enctype="multipart/form-data">
             @Html.AntiForgeryToken()
             <input type="hidden" name="kind" value="@Model.Kind" />
+            @if (Model.Kind == "slider")
+            {
+                <label for="media-slot-slider" class="form-label mt-2">اسلاید</label>
+                <select id="media-slot-slider" name="slideKey" class="form-select">
+                    <option value="electrical-tools-banner">ابزار دقیق</option>
+                    <option value="electrical-components-banner">قطعات</option>
+                    <option value="electrical-lighting-banner">روشنایی</option>
+                    <option value="electrical-tools-pro-banner">ابزار حرفه‌ای</option>
+                    <option value="electrical-components-pro-banner">قطعات حرفه‌ای</option>
+                    <option value="electrical-measurement-banner">اندازه‌گیری</option>
+                </select>
+                <label for="media-variant-slider" class="form-label mt-2">نمایش در</label>
+                <select id="media-variant-slider" name="variant" class="form-select">
+                    <option value="desktop">دسکتاپ</option>
+                    <option value="mobile">موبایل</option>
+                </select>
+            }
             <label for="@fileId" class="form-label">فایل تصویر</label>
             <input id="@fileId" name="file" type="file" accept="image/jpeg,image/png,image/webp" class="form-control" required />
             <small class="form-text text-muted d-block mt-2">JPEG، PNG یا WebP تا ۱۰ مگابایت؛ نسخهٔ کوچک نیز ساخته می‌شود.</small>

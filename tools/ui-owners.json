@@ -11,6 +11,7 @@
             "Admin/Areas/Admin/Views/Users/Index.cshtml",
             "Admin/Areas/Admin/Views/Users/Permissions.cshtml",
             "Admin/Areas/Admin/Views/Users/Roles.cshtml",
+            "Admin/Areas/Admin/Views/SiteSettings/Index.cshtml",
             "Admin/Areas/Store/Views/Catalog/Index.cshtml",
             "Admin/Areas/Store/Views/Features/Faq.cshtml",
             "Admin/Areas/Store/Views/Features/Geography.cshtml",
@@ -48,6 +49,7 @@
           ],
           "server": [
             "Admin/Controllers/Api/StoreCatalogAdminApiController.cs",
+            "Admin/Areas/Admin/Controllers/SiteSettingsController.cs",
             "Admin/Controllers/Api/StoreProductImageApiController.cs",
             "Admin/Controllers/Api/StoreMediaUploadApiController.cs",
             "Admin/Controllers/Api/StoreOrdersAdminApiController.cs",
@@ -147,7 +149,8 @@
         },
         "homepage-testimonials": {
           "markup": [
-            "Shop/Views/Home/_Testimonials.cshtml"
+            "Shop/Views/Home/_Testimonials.cshtml",
+            "Shop/Controllers/HomeController.cs"
           ],
           "css": [
             "Shop/wwwroot/shop/css/pages/home-testimonials.css"
@@ -663,7 +666,17 @@
         },
         "footer": {
           "markup": [
-            "Shop/Views/Shared/_Footer.cshtml"
+            "Shop/Views/Shared/_Footer.cshtml",
+            "Shop/Models/SiteIdentityOptions.cs",
+            "Shop/Services/DatabaseSiteIdentitySource.cs"
+          ],
+          "data": [
+            "Data/Domain/Store/Entities/StoreSiteIdentity.cs",
+            "Data/Application/Store/Models/StoreSiteIdentitySnapshot.cs",
+            "Data/Infrastructure/Persistence/Repositories/StoreSiteIdentityRepository.cs"
+          ],
+          "server": [
+            "Admin/Areas/Admin/Controllers/SiteSettingsController.cs"
           ],
           "css": [
             "Shop/wwwroot/shop/css/layout/shared-footer.css",

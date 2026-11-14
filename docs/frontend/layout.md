@@ -8,6 +8,8 @@
 
 header خانه و صفحهٔ داخلی از partial جدا استفاده می‌کنند. صفحه‌های محصول و حساب نیز markup/script خود را دارند؛ جزئیات مسیرها در [نقشهٔ route](../architecture/routing.md) آمده است. پوستهٔ Admin مستقل است: `Admin/Views/Shared/_Layout.cshtml`.
 
+فوتر در `Shop/Views/Shared/_Footer.cshtml` از `SiteIdentityOptions` می‌خواند. توضیح و لینک‌های اختیاری شبکه‌های اجتماعی (اینستاگرام، تلگرام و لینکدین) از تنظیمات سایت مدیریت می‌شوند؛ لینک‌های خالی رندر نمی‌شوند و عنوان لینک‌ها متنی است. واتس‌اپ و تماس تلفنی از اطلاعات ارتباطی هویت سایت می‌آیند. تنظیمات مدیریتی در [راهنمای Admin](../admin/README.md) و ستون‌ها در [راهنمای دیتابیس](../architecture/database.md) آمده‌اند.
+
 فرم خبرنامهٔ footer در `Shop/Views/Home/_Newsletter.cshtml` و handler آن در `Shop/wwwroot/shop/js/layout/main.js` است. handler به `POST /api/store/newsletter` می‌فرستد؛ سرور با نشست معتبر ترجیح حساب را فعال می‌کند و برای مهمان ایمیل را در جدول خبرنامه ثبت می‌کند. قرارداد داده در [راهنمای حساب](../account/profile.md) آمده است.
 
 ## تغییر پوسته

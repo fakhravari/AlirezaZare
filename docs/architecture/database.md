@@ -24,10 +24,14 @@
 
 مدت اعتبار و فاصلهٔ ارسال مجدد کد ورود ایمیل در `Store.SiteSetting.EmailVerificationCodeLifetimeMinutes` قرار دارد. مهاجرت افزایشی `077-email-verification-code-lifetime.sql` ستون را با مقدار پیش‌فرض ۱۵ دقیقه اضافه می‌کند؛ صفحهٔ «تنظیمات سایت» در پنل مدیریت مقدار ۱ تا ۱۴۴۰ دقیقه را ذخیره می‌کند. رفتار احراز در [راهنمای حساب](../account/profile.md) توضیح داده شده است.
 
+توضیح فوتر و نشانی‌های اختیاری اینستاگرام، تلگرام و لینکدین در ستون‌های `FooterDescription`, `InstagramUrl`, `TelegramUrl` و `LinkedInUrl` از `Store.SiteSetting` ذخیره می‌شوند. صفحهٔ تنظیمات سایت مدیریتشان می‌کند و migration افزایشی `080-footer-content-and-social-links.sql` ستون‌ها را می‌افزاید؛ لینک‌های خالی در فوتر نمایش داده نمی‌شوند. قرارداد رندر در [راهنمای پوسته](../frontend/layout.md) است.
+
 کد تأیید ایمیل در جدول `Account.EmailVerificationCode` فقط به صورت SHA-256 hash ذخیره می‌شود؛ کلید اصلی ایمیل canonical، انقضا و شمارندهٔ تلاش‌ها مانع چند کد هم‌زمان و بیش از پنج تلاش است. `079-database-email-verification-codes.sql` جدول و index انقضا را می‌سازد. migration باید طبق فرایند استقرار روی هر پایگاه هدف اجرا و marker آن جداگانه بررسی شود؛ از آن‌جا که کد خام قبلی فقط در حافظه بود، آن کدهای فعال به این جدول منتقل نمی‌شوند.
 
 [معماری](README.md) · [توسعه](../development/README.md) · [فهرست docs](../README.md)
 
 در ۱۴ نوامبر ۲۰۲۶، markerهای migrationهای `076-customer-support-and-newsletter`, `077-email-verification-code-lifetime` و `078-contact-message-inbox` در پایگاه اصلی بررسی‌شده تأیید شدند؛ ۰۷۷ پیش‌تر ثبت شده بود و ۰۷۶/۰۷۸ همان روز اعمال شدند. جدول‌ها، مجوزهای پنل و مقدار تنظیم اعتبار کد (۱۵ دقیقه) نیز در همان پایگاه بررسی شد. همان روز migration `079-database-email-verification-codes` روی پایگاه اصلی اجرا شد؛ وجود جدول شش‌ستونی `Account.EmailVerificationCode` و marker یکتای ۰۷۹ پس از اجرا تأیید شد. این یادداشت فقط وضعیت همان مقصد در زمان بررسی را ثبت می‌کند و وضعیت محیط‌های دیگر را مشخص نمی‌کند.
+
+در ۱۴ نوامبر ۲۰۲۶، migration `080-footer-content-and-social-links` روی پایگاه اصلی `bsshopir_fakhravari` اجرا شد. marker ۰۸۰، چهار ستون جدید `Store.SiteSetting` و حفظ توضیح فوتر رکورد تنظیمات تأیید شدند.
 
 بازبینی ساختار: ۱۴ نوامبر ۲۰۲۶.

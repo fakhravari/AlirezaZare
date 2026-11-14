@@ -102,9 +102,13 @@ public sealed class StoreMediaUploadApiController(ShopDbContext db, FtpMediaStor
     [HttpPost]
     [ValidateAntiForgeryToken]
     [RequestSizeLimit(52_000_000)]
-    public async Task<IActionResult> Upload([FromForm] string kind, IFormFile file, [FromForm] long? productId, [FromForm] string? title, [FromForm] string? brandKey, [FromForm] string? countryCode, [FromForm] string? articleKey, [FromForm] string? paymentInstitutionCode, CancellationToken cancellationToken)
+    public async Task<IActionResult> Upload([FromForm] string kind, IFormFile file, [FromForm] long? productId, [FromForm] string? title, [FromForm] string? brandKey, [FromForm] string? countryCode, [FromForm] string? articleKey, [FromForm] string? paymentInstitutionCode, [FromForm] string? slideKey, CancellationToken cancellationToken)
     {
+        bool mobileSlider = kind == "slider" && Request.Form["variant"] == "mobile";
         bool image = ImageFolders.TryGetValue(kind ?? "", out var imageFolder);
+        string[] sliderKeys = ["electrical-tools-banner", "electrical-components-banner", "electrical-lighting-banner", "electrical-tools-pro-banner", "electrical-components-pro-banner", "electrical-measurement-banner"];
+        if (kind == "slider" && (slideKey is null || !sliderKeys.Contains(slideKey, StringComparer.Ordinal)))
+            return BadRequest(new { title = "اسلاید معتبری انتخاب نشده است." });
         bool vectorLogo = kind == "payment" && file?.ContentType?.Equals("image/svg+xml", StringComparison.OrdinalIgnoreCase) == true;
         bool document = kind == "product-document";
         bool video = kind == "product-video";
@@ -171,13 +175,17 @@ public sealed class StoreMediaUploadApiController(ShopDbContext db, FtpMediaStor
 
         stream.Position = 0;
         string name = Guid.NewGuid().ToString("N");
-        string folder = image ? imageFolder.Folder : document ? "products/files" : "products/videos";
+        string folder = image ? mobileSlider ? "sliders/mobile" : imageFolder.Folder : document ? "products/files" : "products/videos";
         byte[]? vectorBytes = vectorLogo ? await SanitizePaymentSvgAsync(stream, cancellationToken) : null;
         if (vectorLogo && vectorBytes is null) return BadRequest(new { title = "فایل SVG لوگو معتبر یا ایمن نیست." });
-        string path = !string.IsNullOrEmpty(paymentInstitutionCode)
+        string path = kind == "slider"
+            ? $"content/sliders/{(mobileSlider ? "mobile/" : "")}{slideKey}.webp"
+            : !string.IsNullOrEmpty(paymentInstitutionCode)
             ? $"content/payments/{paymentInstitutionCode}-{name}.{(vectorLogo ? "svg" : "webp")}"
             : $"content/{folder}/{name}.{(image ? "webp" : document ? "pdf" : "mp4")}";
-        string? thumbnail = image && !vectorLogo ? $"content/{folder}/{name}-thumbnail.webp" : null;
+        string? thumbnail = image && !vectorLogo
+            ? kind == "slider" ? path[..^5] + "-thumbnail.webp" : $"content/{folder}/{name}-thumbnail.webp"
+            : null;
         byte[]? mainBytes = null;
         byte[]? thumbnailBytes = null;
         if (image && !vectorLogo)
@@ -211,13 +219,13 @@ public sealed class StoreMediaUploadApiController(ShopDbContext db, FtpMediaStor
             FtpStatus result = vectorLogo
                 ? await ftp.UploadBytes(vectorBytes!, "/" + path, FtpRemoteExists.Skip, true, null, cancellationToken)
                 : image
-                ? await ftp.UploadBytes(mainBytes!, "/" + path, FtpRemoteExists.Skip, true, null, cancellationToken)
+                ? await ftp.UploadBytes(mainBytes!, "/" + path, kind == "slider" ? FtpRemoteExists.Overwrite : FtpRemoteExists.Skip, true, null, cancellationToken)
                 : await ftp.UploadStream(stream, "/" + path, FtpRemoteExists.Skip, true, null, cancellationToken);
             if (result != FtpStatus.Success) throw new IOException("Media upload failed.");
             uploaded.Add("/" + path);
             if (thumbnail is not null)
             {
-                result = await ftp.UploadBytes(thumbnailBytes!, "/" + thumbnail, FtpRemoteExists.Skip, true, null, cancellationToken);
+                result = await ftp.UploadBytes(thumbnailBytes!, "/" + thumbnail, kind == "slider" ? FtpRemoteExists.Overwrite : FtpRemoteExists.Skip, true, null, cancellationToken);
                 if (result != FtpStatus.Success) throw new IOException("Thumbnail upload failed.");
                 uploaded.Add("/" + thumbnail);
             }

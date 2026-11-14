@@ -5,6 +5,17 @@ footer .footer-brand {
   line-height: 0;
 }
 
+footer .socials a {
+  width: auto;
+  min-width: 42px;
+  height: 42px;
+  padding-inline: 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
 footer .footer-brand-logo {
   display: block;
   width: 100%;

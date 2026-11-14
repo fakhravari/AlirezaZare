@@ -25,6 +25,8 @@ public sealed class SiteSettingsController(ShopDbContext db, IDataProtectionProv
             DisplayName = settings.DisplayName, StoreName = settings.StoreName, VisualBrandName = settings.VisualBrandName,
             SupportPhoneDisplay = settings.SupportPhoneDisplay, SupportPhoneUri = settings.SupportPhoneUri,
             WhatsAppNumber = settings.WhatsAppNumber, PublicEmail = settings.PublicEmail, MediaCdnBaseUrl = settings.MediaCdnBaseUrl,
+            FooterDescription = settings.FooterDescription, InstagramUrl = settings.InstagramUrl,
+            TelegramUrl = settings.TelegramUrl, LinkedInUrl = settings.LinkedInUrl,
             IdWarehouse = settings.IdWarehouse, SmtpHost = settings.SmtpHost ?? "", SmtpPort = settings.SmtpPort,
             SmtpEnableSsl = settings.SmtpEnableSsl ?? false, SmtpUsername = settings.SmtpUsername ?? "",
             SmtpFrom = settings.SmtpFrom ?? "", SmtpPassword = settings.SmtpPassword,
@@ -55,6 +57,9 @@ public sealed class SiteSettingsController(ShopDbContext db, IDataProtectionProv
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Index(SiteSettingsInput model, CancellationToken cancellationToken)
     {
+        ValidateHttpsUrl(model.InstagramUrl, nameof(model.InstagramUrl));
+        ValidateHttpsUrl(model.TelegramUrl, nameof(model.TelegramUrl));
+        ValidateHttpsUrl(model.LinkedInUrl, nameof(model.LinkedInUrl));
         try { model.MediaCdnBaseUrl = MediaCdnOptions.NormalizeBaseUrl(model.MediaCdnBaseUrl); }
         catch (InvalidOperationException) { ModelState.AddModelError(nameof(model.MediaCdnBaseUrl), "نشانی CDN باید مبدأ HTTPS بدون مسیر اضافی باشد."); }
         if (model.IdWarehouse.HasValue && !await db.Warehouses.AnyAsync(w => w.Id == model.IdWarehouse && w.IsActive && w.IsSalesWarehouse && w.Company.IsActive, cancellationToken))
@@ -71,6 +76,8 @@ public sealed class SiteSettingsController(ShopDbContext db, IDataProtectionProv
         settings.VisualBrandName = model.VisualBrandName; settings.SupportPhoneDisplay = model.SupportPhoneDisplay;
         settings.SupportPhoneUri = model.SupportPhoneUri; settings.WhatsAppNumber = model.WhatsAppNumber;
         settings.PublicEmail = model.PublicEmail; settings.MediaCdnBaseUrl = model.MediaCdnBaseUrl; settings.IdWarehouse = model.IdWarehouse;
+        settings.FooterDescription = model.FooterDescription; settings.InstagramUrl = NormalizeOptionalUrl(model.InstagramUrl);
+        settings.TelegramUrl = NormalizeOptionalUrl(model.TelegramUrl); settings.LinkedInUrl = NormalizeOptionalUrl(model.LinkedInUrl);
         settings.SmtpHost = model.SmtpHost; settings.SmtpPort = model.SmtpPort; settings.SmtpEnableSsl = model.SmtpEnableSsl;
         settings.SmtpUsername = model.SmtpUsername; settings.SmtpFrom = model.SmtpFrom;
         if (model.SmtpPassword is not null) settings.SmtpPassword = model.SmtpPassword;
@@ -90,6 +97,15 @@ public sealed class SiteSettingsController(ShopDbContext db, IDataProtectionProv
             .OrderBy(w => w.Name).Select(w => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
             { Value = w.Id.ToString(), Text = w.Name + " (" + w.Company.Name + ")" })
             .ToListAsync(cancellationToken);
+
+    private static string? NormalizeOptionalUrl(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+
+    private void ValidateHttpsUrl(string? value, string fieldName)
+    {
+        if (!string.IsNullOrWhiteSpace(value) &&
+            (!Uri.TryCreate(value, UriKind.Absolute, out var uri) || uri.Scheme != Uri.UriSchemeHttps))
+            ModelState.AddModelError(fieldName, "نشانی شبکه باید با HTTPS آغاز شود.");
+    }
 }
 
 public sealed class SiteSettingsInput
@@ -101,6 +117,10 @@ public sealed class SiteSettingsInput
     [Required, StringLength(40), RegularExpression(@"\+?[0-9]+", ErrorMessage = "شمارهٔ تماس باید با ارقام انگلیسی و در صورت نیاز + آغاز شود.")] public string SupportPhoneUri { get; set; } = "";
     [Required, StringLength(32), RegularExpression(@"[0-9]+", ErrorMessage = "شمارهٔ واتس‌اپ باید فقط شامل ارقام انگلیسی باشد.")] public string WhatsAppNumber { get; set; } = "";
     [Required, StringLength(254), EmailAddress] public string PublicEmail { get; set; } = "";
+    [StringLength(1000)] public string FooterDescription { get; set; } = "";
+    [StringLength(500), Url] public string? InstagramUrl { get; set; }
+    [StringLength(500), Url] public string? TelegramUrl { get; set; }
+    [StringLength(500), Url] public string? LinkedInUrl { get; set; }
     [Required, StringLength(500)] public string MediaCdnBaseUrl { get; set; } = MediaCdnOptions.DefaultBaseUrl;
     public long? IdWarehouse { get; set; }
     [Required, StringLength(255)] public string SmtpHost { get; set; } = "";
