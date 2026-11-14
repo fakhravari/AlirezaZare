@@ -19,6 +19,15 @@
 
 ۱. `tools/ui-owners.json` را بخوانید؛ ۲. مسیر markup/CSS/JS واقعی را بررسی کنید؛ ۳. `node tools/check-ui.mjs` اجرا کنید؛ ۴. مرور بصری و نتیجه را ثبت کنید.
 
+## کار فعال: Select2 سراسری برای فهرست‌های انتخاب
+
+- **حوزه/owner:** `admin-panel/admin-shell` و لایهٔ مشترک فروشگاه؛ ownerها در `tools/ui-owners.json`.
+- **وضعیت و درصد:** بررسی و فهرست‌برداری کامل (۱۵٪ از کار). ۳۸ عنصر `<select>` ایستا در Viewهای Admin و Shop پیدا شد؛ کنترل‌های ساخته‌شده با JavaScript نیز باید پوشش داده شوند.
+- **تغییرهای تکمیل‌شده و شاهد:** Select2 در مخزن Admin موجود است؛ Shop هم jQuery دارد. Select2 هنوز در layoutهای اصلی ثبت نشده است.
+- **فایل‌های باقی‌مانده:** layoutهای Admin و Shop، راه‌اندازهای سراسری Select2 برای دو برنامه، stylesheetهای هماهنگ RTL، selectهای پویا و داخل modal، راهنماهای owner.
+- **گام بعدی دقیق:** اضافه‌کردن بارگذاری Select2 و راه‌اندازی تکرارپذیر برای selectهای موجود/دینامیک، با قرارگیری dropdown داخل modal والد و کنترل تغییر گزینه‌ها.
+- **محدودیت/فرمان اجرا‌نشده:** مرور بصری تمام فرم‌ها و modalها هنوز انجام نشده؛ Select2 vendored فعلی زیر `Admin/wwwroot/color_admin/assets/plugins/select2/` است و Shop باید asset قابل‌دسترسی در ریشهٔ خودش داشته باشد.
+
 ## کار تکمیل‌شده: سامان‌دهی منوی Admin
 
 - **حوزه/owner:** `admin-panel/admin-shell` در `tools/ui-owners.json`.
