@@ -38,3 +38,4 @@
 - Migration `086-contact-replies-newsletter-admin.sql` ستون ایمیل و پاسخ فرم تماس و تاریخ لغو عضویت خبرنامه را اضافه می‌کند.
 Migration `087-assign-store-feature-permissions.sql` مجوزهای خبرنامه و پاسخ فرم تماس را به نقش `system.full-access-store` تخصیص می‌دهد.
 Migration `088-fix-admin-permission-unicode.sql` متن چهار مجوز جدید Admin را که در اجرای اولیه با encoding نادرست ثبت شده بود، به Unicode صحیح برمی‌گرداند.
+Migration `089-repair-variant-attributes-json.sql` دادهٔ قدیمی `Warehouse.ProductVariant.AttributesJson` را به آرایهٔ ویژگی معتبر تبدیل می‌کند تا catalog و modal ورود به‌دلیل خطای renderer متوقف نشوند.

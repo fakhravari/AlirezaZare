@@ -19,3 +19,4 @@ markup و ViewModel را با projection سرور هماهنگ کنید؛ انت
 [فروشگاه](README.md) · [منابع داده](../architecture/data-sources.md) · [فهرست docs](../README.md)
 
 بازبینی مسیر و قرارداد: ۱۲ نوامبر ۲۰۲۶.
+ویژگی‌های تنوع انبار در `AttributesJson` باید آرایه‌ای از اشیای دارای `key`, `label`, `value`, `display` باشند.
