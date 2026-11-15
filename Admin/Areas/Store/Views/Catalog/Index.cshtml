@@ -180,6 +180,29 @@
             <div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button type="submit" class="btn btn-primary"><i class="fa fa-floppy-disk me-1" aria-hidden="true"></i>ذخیره</button></div>
         </form></div>
     </div>
+    <div class="modal fade" id="product-benefits-modal" tabindex="-1" aria-labelledby="product-benefits-title" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-lg"><div class="modal-content" data-product-benefits-manager>
+            <div class="modal-header"><div><h2 class="modal-title fs-5" id="product-benefits-title">مزیت‌های کالا</h2><p class="small text-muted mb-0" data-product-benefits-name></p></div><button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="بستن"></button></div>
+            <div class="modal-body">
+                <div data-product-benefits-list-view>
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3"><p class="text-muted mb-0">فقط مزیت‌های فعال در صفحهٔ محصول نمایش داده می‌شوند.</p><button class="btn btn-primary btn-sm" type="button" data-product-benefit-create><i class="fa fa-plus me-1" aria-hidden="true"></i>افزودن مزیت</button></div>
+                    <div class="small text-muted mb-2" data-product-benefits-status role="status" aria-live="polite"></div>
+                    <div class="list-group" data-product-benefits-rows></div>
+                </div>
+                <form class="admin-modal-grid-two d-none" data-product-benefit-editor data-admin-confirm="مزیت کالا ذخیره شود؟">
+                    @Html.AntiForgeryToken()<input type="hidden" name="id" />
+                    <h3 class="h6 admin-modal-field-wide" data-product-benefit-editor-title>افزودن مزیت</h3>
+                    <div class="admin-modal-field"><label class="form-label" for="product-benefit-title">عنوان</label><input class="form-control" id="product-benefit-title" name="title" maxlength="300" required /></div>
+                    <div class="admin-modal-field"><label class="form-label" for="product-benefit-icon">کلاس آیکن</label><input class="form-control" id="product-benefit-icon" name="icon" maxlength="100" placeholder="bi-shield-check" pattern="[a-z0-9-]*" /></div>
+                    <div class="admin-modal-field admin-modal-field-wide"><label class="form-label" for="product-benefit-detail">توضیح</label><textarea class="form-control" id="product-benefit-detail" name="detail" maxlength="1000" rows="2"></textarea></div>
+                    <div class="admin-modal-field"><label class="form-label" for="product-benefit-sort-order">ترتیب نمایش</label><input class="form-control" id="product-benefit-sort-order" name="sortOrder" type="number" min="0" max="100000" step="1" value="0" required /></div>
+                    <div class="admin-modal-field d-flex align-items-end"><label class="form-check mb-2"><input class="form-check-input" name="isActive" type="checkbox" checked /><span class="form-check-label">فعال و قابل نمایش</span></label></div>
+                    <div class="admin-modal-field-wide d-flex justify-content-end gap-2"><button class="btn btn-default" type="button" data-product-benefit-cancel>بازگشت به فهرست</button><button class="btn btn-primary" type="submit">ذخیرهٔ مزیت</button></div>
+                </form>
+            </div>
+            <div class="modal-footer"><button class="btn btn-default" type="button" data-bs-dismiss="modal">بستن</button></div>
+        </div></div>
+    </div>
     <div class="modal fade" id="product-image-modal" tabindex="-1" aria-labelledby="product-image-title" aria-hidden="true">
         <div class="modal-dialog"><form class="modal-content" data-product-image-form data-admin-confirm="تصویر انتخاب‌شده بارگذاری و به کالا متصل شود؟" enctype="multipart/form-data">
             @Html.AntiForgeryToken()<input type="hidden" name="productId" />

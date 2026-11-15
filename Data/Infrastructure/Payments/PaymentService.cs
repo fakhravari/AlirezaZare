@@ -93,30 +93,7 @@ public sealed class PaymentService(ShopDbContext db, IPaymentGateway gateway, IL
         var order = await db.StoreCustomerOrders.SingleOrDefaultAsync(x => x.Id == locked.IdOrder, ct);
         if (order is null || order.Status != "pending-payment" || order.TotalAmount != locked.Amount) return "order-conflict";
         var items = await db.StoreCustomerOrderItems.Where(x => x.IdCustomerOrder == order.Id).ToListAsync(ct);
-        if (items.Count == 0 || await db.WarehousePaidOrderInboxes.AnyAsync(x => x.StoreOrderKey == order.OrderNumber, ct))
-            return "order-conflict";
-        long[] productIds = items.Select(x => x.IdProduct).Distinct().ToArray();
-        var productUnits = await db.Products.AsNoTracking().Where(x => productIds.Contains(x.Id))
-            .Select(x => new { x.Id, x.IdBaseUnit }).ToDictionaryAsync(x => x.Id, x => x.IdBaseUnit, ct);
-        var inventoryItems = await db.InventoryItems.AsNoTracking().Where(x => productIds.Contains(x.IdProduct))
-            .Select(x => new { x.Id, x.IdProduct, x.IdProductVariant }).ToListAsync(ct);
-        var inboxLines = new List<WarehousePaidOrderInboxLine>(items.Count);
-        foreach (var item in items)
-        {
-            if (!productUnits.TryGetValue(item.IdProduct, out long unitId)) return "order-conflict";
-            var inventoryItem = inventoryItems.SingleOrDefault(x =>
-                x.IdProduct == item.IdProduct && x.IdProductVariant == item.IdProductVariant);
-            if (inventoryItem is null) return "order-conflict";
-            inboxLines.Add(new WarehousePaidOrderInboxLine
-            {
-                IdInventoryItem = inventoryItem.Id,
-                IdUnit = unitId,
-                IdSalesPlanReference = item.IdSalesPlan,
-                Quantity = item.Quantity,
-                ConversionFactor = 1,
-                BaseQuantity = item.Quantity
-            });
-        }
+        if (items.Count == 0) return "order-conflict";
         DateTime now = DateTime.UtcNow;
         DateTime paidAtUtc = verification.PaidAtUtc!.Value.UtcDateTime;
         order.Status = "payment-confirmed";
@@ -124,13 +101,6 @@ public sealed class PaymentService(ShopDbContext db, IPaymentGateway gateway, IL
         locked.ReceiptReference = verification.ReceiptReference;
         locked.PaidAtUtc = paidAtUtc;
         locked.UpdatedAtUtc = now;
-        db.WarehousePaidOrderInboxes.Add(new WarehousePaidOrderInbox
-        {
-            StoreOrderKey = order.OrderNumber,
-            CustomerKey = order.IdProfile.ToString(),
-            PaymentAtUtc = paidAtUtc,
-            Lines = inboxLines
-        });
         await db.SaveChangesAsync(ct);
         await transaction.CommitAsync(ct);
         return "verified";

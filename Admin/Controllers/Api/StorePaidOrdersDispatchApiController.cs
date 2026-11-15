@@ -4,6 +4,7 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Shop.Admin.Infrastructure;
 using Shop.Data.Application.Warehouse.Contracts;
 using Shop.Data.Domain.Account.Entities;
 using Shop.Data.Domain.Warehouse.Entities;
@@ -19,20 +20,23 @@ public sealed class StorePaidOrdersDispatchApiController(ShopDbContext db, IWare
 {
     [HttpGet]
     public async Task<IActionResult> List(
+        [FromQuery] string? q = null,
         [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 50,
+        [FromQuery] int pageSize = AdminListQuery.DefaultPageSize,
         CancellationToken cancellationToken = default)
     {
-        if (page is < 1 or > 100000 || pageSize is < 1 or > 100)
-            return ValidationProblem(detail: "شماره صفحه یا اندازهٔ صفحه معتبر نیست.", statusCode: 400);
+        if (!AdminListQuery.TryCreate(page, pageSize, q, out AdminPageRequest paging))
+            return BadRequest(new { title = "عبارت جست‌وجو یا صفحه‌بندی معتبر نیست." });
         var eligible = from order in db.StoreCustomerOrders.AsNoTracking()
                        join profile in db.AccountProfiles.AsNoTracking() on order.IdProfile equals profile.Id
                        where order.Status == "payment-confirmed" && order.IdWarehouseDocument == null &&
                              db.StorePaymentAttempts.Any(payment => payment.IdOrder == order.Id && payment.Status == "verified" &&
                                  payment.Amount == order.TotalAmount && payment.PaidAtUtc != null) &&
-                             db.WarehousePaidOrderInboxes.Any(inbox => inbox.StoreOrderKey == order.OrderNumber && inbox.Status == "P" &&
-                                 db.WarehousePaidOrderInboxLines.Any(line => line.IdPaidOrderInbox == inbox.Id))
+                             db.StoreCustomerOrderItems.Any(item => item.IdCustomerOrder == order.Id)
                        select new { order, profile };
+        if (paging.Search.Length > 0)
+            eligible = eligible.Where(x => x.order.OrderNumber.Contains(paging.Search)
+                || (x.profile.FirstName + " " + x.profile.LastName).Contains(paging.Search));
         int total = await eligible.CountAsync(cancellationToken);
         var rows = await eligible
             .Select(x => new
@@ -45,7 +49,7 @@ public sealed class StorePaidOrdersDispatchApiController(ShopDbContext db, IWare
                     .OrderBy(payment => payment.PaidAtUtc).Select(payment => payment.PaidAtUtc!.Value).First()
             })
             .OrderBy(x => x.PaidAtUtc).ThenBy(x => x.order.Id)
-            .Skip((int)Math.Min((long)(page - 1) * pageSize, int.MaxValue)).Take(pageSize)
+            .Skip(paging.Offset).Take(paging.PageSize)
             .Select(x => new PaidOrderRow
             {
                 Id = x.order.Id,
@@ -55,7 +59,7 @@ public sealed class StorePaidOrdersDispatchApiController(ShopDbContext db, IWare
                 PaidAtUtc = x.PaidAtUtc,
                 CustomerName = (x.profile.FirstName + " " + x.profile.LastName).Trim()
             }).ToListAsync(cancellationToken);
-        return Ok(new { items = rows, total, page, pageSize, hasNext = (long)page * pageSize < total });
+        return Ok(AdminListQuery.CreateResult(rows, total, paging));
     }
 
     [HttpPost]
@@ -75,20 +79,17 @@ public sealed class StorePaidOrdersDispatchApiController(ShopDbContext db, IWare
             var orders = await db.StoreCustomerOrders.Where(x => ids.Contains(x.Id)).ToListAsync(cancellationToken);
             if (orders.Count != ids.Length) return Conflict(new { detail = "وضعیت یکی از سفارش‌ها تغییر کرده است." });
             var orderIds = orders.Select(x => x.Id).ToArray();
-            var payments = await db.StorePaymentAttempts.Where(x => orderIds.Contains(x.IdOrder) && x.Status == "verified")
+            var payments = await db.StorePaymentAttempts.Where(x => orderIds.Contains(x.IdOrder) && x.Status == "verified" && x.PaidAtUtc != null)
                 .ToListAsync(cancellationToken);
-            var orderNumbers = orders.Select(x => x.OrderNumber).ToArray();
-            var inboxes = await db.WarehousePaidOrderInboxes.Include(x => x.Lines)
-                .Where(x => orderNumbers.Contains(x.StoreOrderKey) && x.Status == "P").ToListAsync(cancellationToken);
-            var orderByNumber = orders.ToDictionary(x => x.OrderNumber);
-            if (inboxes.Count != ids.Length || orders.Any(order => order.Status != "payment-confirmed" ||
+            var orderItems = await db.StoreCustomerOrderItems.AsNoTracking()
+                .Where(x => orderIds.Contains(x.IdCustomerOrder)).ToListAsync(cancellationToken);
+            if (orders.Any(order => order.Status != "payment-confirmed" ||
                     order.IdWarehouseDocument is not null || (order.PaymentMethod == "demo" && order.ExternalOrderKey?.StartsWith("demo-order-") == true) ||
                     !payments.Any(payment => payment.IdOrder == order.Id && payment.Amount == order.TotalAmount) ||
-                    !inboxes.Any(inbox => inbox.StoreOrderKey == order.OrderNumber && inbox.Lines.Count > 0)))
+                    !orderItems.Any(item => item.IdCustomerOrder == order.Id)))
                 return Conflict(new { detail = "وضعیت یکی از سفارش‌ها تغییر کرده است؛ فهرست را دوباره بارگذاری کنید." });
 
-            var allLines = inboxes.SelectMany(inbox => inbox.Lines.Select(line => new { Inbox = inbox, Line = line })).ToList();
-            long[] planIds = allLines.Select(x => x.Line.IdSalesPlanReference).Distinct().ToArray();
+            long[] planIds = orderItems.Select(x => x.IdSalesPlan).Distinct().ToArray();
             var settings = await db.StoreSiteIdentities.AsNoTracking().SingleOrDefaultAsync(x => x.Id == 1, cancellationToken);
             var warehouse = settings?.IdWarehouse is long warehouseId
                 ? await db.Warehouses.SingleOrDefaultAsync(x => x.Id == warehouseId && x.IsActive, cancellationToken)
@@ -104,25 +105,44 @@ public sealed class StorePaidOrdersDispatchApiController(ShopDbContext db, IWare
             if (assignedPlanIds.Length != planIds.Length)
                 return Conflict(new { detail = "طرح یکی از اقلام به انبار فروش متصل نیست." });
 
-            var inboxIds = inboxes.Select(x => x.Id).ToArray();
-            var lineDetails = await (from line in db.WarehousePaidOrderInboxLines.AsNoTracking().Where(x => inboxIds.Contains(x.IdPaidOrderInbox))
-                                     join item in db.InventoryItems.AsNoTracking() on line.IdInventoryItem equals item.Id
-                                     join product in db.Products.AsNoTracking() on item.IdProduct equals product.Id
-                                     join unit in db.WarehouseUnits.AsNoTracking() on line.IdUnit equals unit.Id
-                                     join variant0 in db.ProductVariants.AsNoTracking() on item.IdProductVariant equals variant0.Id into variants
-                                     from variant in variants.DefaultIfEmpty()
-                                     select new
-                                     {
-                                         line.IdInventoryItem,
-                                         line.IdUnit,
-                                         line.IdSalesPlanReference,
-                                         line.Quantity,
-                                         line.ConversionFactor,
-                                         line.BaseQuantity,
-                                         ProductName = product.Name,
-                                         VariantName = variant == null ? null : variant.Name,
-                                         UnitName = unit.Name
-                                     }).ToListAsync(cancellationToken);
+            long[] productIds = orderItems.Select(x => x.IdProduct).Distinct().ToArray();
+            long[] variantIds = orderItems.Where(x => x.IdProductVariant.HasValue)
+                .Select(x => x.IdProductVariant!.Value).Distinct().ToArray();
+            var products = await db.Products.AsNoTracking().Where(x => productIds.Contains(x.Id))
+                .Select(x => new { x.Id, x.IdBaseUnit }).ToDictionaryAsync(x => x.Id, cancellationToken);
+            var inventoryItems = await db.InventoryItems.AsNoTracking().Where(x => productIds.Contains(x.IdProduct))
+                .Select(x => new { x.Id, x.IdProduct, x.IdProductVariant }).ToListAsync(cancellationToken);
+            long[] unitIds = products.Values.Select(product => product.IdBaseUnit).Distinct().ToArray();
+            var unitNames = await db.WarehouseUnits.AsNoTracking()
+                .Where(x => unitIds.Contains(x.Id))
+                .Select(x => new { x.Id, x.Name }).ToDictionaryAsync(x => x.Id, x => x.Name, cancellationToken);
+            var variantNames = await db.ProductVariants.AsNoTracking().Where(x => variantIds.Contains(x.Id))
+                .Select(x => new { x.Id, x.Name }).ToDictionaryAsync(x => x.Id, x => x.Name, cancellationToken);
+            var inventoryByProductVariant = inventoryItems.GroupBy(x => (x.IdProduct, x.IdProductVariant))
+                .ToDictionary(x => x.Key, x => x.ToArray());
+            var lineDetails = new List<DispatchLineDetail>(orderItems.Count);
+            foreach (var line in orderItems)
+            {
+                var key = (line.IdProduct, line.IdProductVariant);
+                if (!products.TryGetValue(line.IdProduct, out var product) ||
+                    !unitNames.TryGetValue(product.IdBaseUnit, out string? unitName) ||
+                    !inventoryByProductVariant.TryGetValue(key, out var matches) || matches.Length != 1)
+                    return Conflict(new { detail = "برای یکی از اقلام سفارش، کالا یا واحد انبار متناظر یکتا پیدا نشد." });
+
+                lineDetails.Add(new DispatchLineDetail
+                {
+                    IdCustomerOrder = line.IdCustomerOrder,
+                    IdInventoryItem = matches[0].Id,
+                    IdUnit = product.IdBaseUnit,
+                    IdSalesPlanReference = line.IdSalesPlan,
+                    Quantity = line.Quantity,
+                    ConversionFactor = 1,
+                    BaseQuantity = line.Quantity,
+                    ProductName = line.ProductNameSnapshot,
+                    VariantName = line.IdProductVariant is long variantId ? variantNames.GetValueOrDefault(variantId) : null,
+                    UnitName = unitName
+                });
+            }
 
             var headerPlanId = lineDetails.Min(x => x.IdSalesPlanReference);
             var document = new WarehouseDocumentRecord
@@ -160,17 +180,10 @@ public sealed class StorePaidOrdersDispatchApiController(ShopDbContext db, IWare
             await db.SaveChangesAsync(cancellationToken);
             await stockLedger.RebuildDocumentAsync(document.Id, cancellationToken);
 
-            foreach (var inbox in inboxes)
+            foreach (var order in orders)
             {
-                inbox.Status = "C";
-                var order = orderByNumber[inbox.StoreOrderKey];
                 order.IdWarehouseDocument = document.Id;
                 order.Status = "warehouse-confirmed";
-                db.WarehousePaidOrderInboxDocuments.Add(new WarehousePaidOrderInboxDocument
-                {
-                    IdPaidOrderInbox = inbox.Id,
-                    IdWarehouseDocument = document.Id
-                });
             }
             db.WarehouseDocumentAudits.Add(new WarehouseDocumentAudit
             {
@@ -207,4 +220,18 @@ public sealed class StorePaidOrdersDispatchApiController(ShopDbContext db, IWare
         public DateTime PaidAtUtc { get; set; }
     }
     public sealed record DispatchInput(long[]? OrderIds);
+
+    private sealed class DispatchLineDetail
+    {
+        public long IdCustomerOrder { get; init; }
+        public long IdInventoryItem { get; init; }
+        public long IdUnit { get; init; }
+        public long IdSalesPlanReference { get; init; }
+        public decimal Quantity { get; init; }
+        public decimal ConversionFactor { get; init; }
+        public decimal BaseQuantity { get; init; }
+        public string ProductName { get; init; } = "";
+        public string? VariantName { get; init; }
+        public string UnitName { get; init; } = "";
+    }
 }

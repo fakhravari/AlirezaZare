@@ -49,6 +49,7 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
     public DbSet<StoreAttributeDefinition> StoreAttributeDefinitions => Set<StoreAttributeDefinition>();
     public DbSet<StoreProductMedia> StoreProductMedia => Set<StoreProductMedia>();
     public DbSet<StoreProductDocument> StoreProductDocuments => Set<StoreProductDocument>();
+    public DbSet<StoreProductBenefit> StoreProductBenefits => Set<StoreProductBenefit>();
     public DbSet<StoreBrand> StoreBrands => Set<StoreBrand>();
     public DbSet<StoreBank> StoreBanks => Set<StoreBank>();
     public DbSet<StoreBrandEditorial> StoreBrandEditorials => Set<StoreBrandEditorial>();
@@ -93,9 +94,6 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
     public DbSet<AccountCheckoutPreference> AccountCheckoutPreferences => Set<AccountCheckoutPreference>();
     public DbSet<StoreCustomerOrderItem> StoreCustomerOrderItems => Set<StoreCustomerOrderItem>();
     public DbSet<StorePaymentAttempt> StorePaymentAttempts => Set<StorePaymentAttempt>();
-    public DbSet<WarehousePaidOrderInbox> WarehousePaidOrderInboxes => Set<WarehousePaidOrderInbox>();
-    public DbSet<WarehousePaidOrderInboxLine> WarehousePaidOrderInboxLines => Set<WarehousePaidOrderInboxLine>();
-    public DbSet<WarehousePaidOrderInboxDocument> WarehousePaidOrderInboxDocuments => Set<WarehousePaidOrderInboxDocument>();
     public DbSet<StoreCustomerOrderReference> StoreCustomerOrders => Set<StoreCustomerOrderReference>();
     public DbSet<StoreNewsletterSubscriber> StoreNewsletterSubscribers => Set<StoreNewsletterSubscriber>();
     public DbSet<StoreContactMessage> StoreContactMessages => Set<StoreContactMessage>();
@@ -674,35 +672,6 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
             entity.Property(x => x.UpdatedAtUtc).HasPrecision(3);
         });
-        modelBuilder.Entity<WarehousePaidOrderInbox>(entity =>
-        {
-            entity.ToTable("PaidOrderInbox", "Warehouse");
-            entity.HasKey(x => x.Id);
-            entity.Property(x => x.Id).ValueGeneratedOnAdd();
-            entity.Property(x => x.StoreOrderKey).HasMaxLength(128).IsRequired();
-            entity.Property(x => x.CustomerKey).HasMaxLength(128).IsRequired();
-            entity.Property(x => x.PaymentAtUtc).HasPrecision(3);
-            entity.Property(x => x.Status).HasColumnType("char(1)").HasMaxLength(1).IsRequired();
-            entity.HasIndex(x => x.StoreOrderKey).IsUnique();
-            entity.HasMany(x => x.Lines).WithOne().HasForeignKey(x => x.IdPaidOrderInbox);
-        });
-        modelBuilder.Entity<WarehousePaidOrderInboxLine>(entity =>
-        {
-            entity.ToTable("PaidOrderInboxLine", "Warehouse");
-            entity.HasKey(x => x.Id);
-            entity.Property(x => x.Id).ValueGeneratedOnAdd();
-            entity.Property(x => x.Quantity).HasPrecision(18, 3);
-            entity.Property(x => x.ConversionFactor).HasPrecision(18, 3);
-            entity.Property(x => x.BaseQuantity).HasPrecision(18, 3);
-            entity.Property(x => x.ConversionFactor).HasPrecision(18, 9);
-        });
-        modelBuilder.Entity<WarehousePaidOrderInboxDocument>(entity =>
-        {
-            entity.ToTable("PaidOrderInboxDocument", "Warehouse");
-            entity.HasKey(x => x.Id);
-            entity.HasIndex(x => new { x.IdPaidOrderInbox, x.IdWarehouseDocument }).IsUnique();
-            entity.HasIndex(x => x.IdWarehouseDocument).IsUnique();
-        });
         modelBuilder.Entity<AccountRecentSearch>(entity =>
         {
             entity.ToTable("RecentSearch", "Account");
@@ -803,6 +772,16 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.Property(x => x.ImagesJson).HasColumnType("nvarchar(max)");
             entity.Property(x => x.VideosJson).HasColumnType("nvarchar(max)");
             entity.HasIndex(x => new { x.IdProduct, x.MediaKey }).IsUnique();
+        });
+        modelBuilder.Entity<StoreProductBenefit>(entity =>
+        {
+            entity.ToTable("ProductBenefit", "Store");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.Title).HasMaxLength(300).IsRequired();
+            entity.Property(x => x.Detail).HasMaxLength(1000);
+            entity.Property(x => x.Icon).HasMaxLength(100);
+            entity.Property(x => x.IsActive).HasDefaultValue(true).IsRequired();
+            entity.HasIndex(x => new { x.IdProduct, x.SortOrder, x.Id });
         });
         modelBuilder.Entity<StoreProductDocument>(entity =>
         {

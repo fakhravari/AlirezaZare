@@ -2,6 +2,7 @@ using System.Security.Claims;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Shop.Admin.Infrastructure;
 using Shop.Data.Application.Warehouse.Contracts;
 using Shop.Data.Domain.Warehouse.Entities;
 using Shop.Data.Infrastructure.Persistence;
@@ -15,9 +16,11 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db, IWarehouse
 {
     [HttpGet]
     public async Task<IActionResult> List([FromQuery] long? warehouseId, [FromQuery] string? status,
-        [FromQuery] int page = 1, [FromQuery] int pageSize = 50, CancellationToken cancellationToken = default)
+        [FromQuery] string? q,
+        [FromQuery] int page = 1, [FromQuery] int pageSize = AdminListQuery.DefaultPageSize, CancellationToken cancellationToken = default)
     {
-        if (page is < 1 or > 100000 || pageSize is < 1 or > 200 || status is not (null or "D" or "F"))
+        if (!AdminListQuery.TryCreate(page, pageSize, q, out AdminPageRequest paging)
+            || status is not (null or "D" or "F"))
             return ValidationProblem(detail: "فیلتر صفحه یا وضعیت سند معتبر نیست.", statusCode: 400);
         long[] allowed = await AllowedWarehouseIdsAsync(cancellationToken);
         if (!User.IsInRole("system.full-access") && warehouseId.HasValue && !allowed.Contains(warehouseId.Value))
@@ -34,9 +37,16 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db, IWarehouse
         else if (!User.IsInRole("system.full-access"))
             query = query.Where(x => allowed.Contains(x.document.IdWarehouse));
         if (!string.IsNullOrWhiteSpace(status)) query = query.Where(x => x.document.Status == status);
+        if (paging.Search.Length > 0)
+            query = query.Where(x => (x.document.ExternalReference ?? "").Contains(paging.Search)
+                || (x.document.CustomerOrderKey ?? "").Contains(paging.Search)
+                || x.warehouse.Name.Contains(paging.Search) || x.warehouse.Code.Contains(paging.Search)
+                || x.warehouse.Company.Name.Contains(paging.Search) || x.type.Name.Contains(paging.Search)
+                || x.party.Name.Contains(paging.Search) || x.plan.DisplayName.Contains(paging.Search));
+        int total = await query.CountAsync(cancellationToken);
         var items = await query.OrderByDescending(x => x.document.DocumentDate)
             .ThenByDescending(x => x.document.DocumentNumber)
-            .Skip((page - 1) * pageSize).Take(pageSize)
+            .Skip(paging.Offset).Take(paging.PageSize)
             .Select(x => new DocumentListItem(x.document.Id, x.document.IdWarehouse, x.document.IdDocumentType,
                 x.document.IdParty, x.document.IdSalesPlanReference, x.document.DocumentNumber, x.document.DocumentDate,
                 x.document.Status, x.warehouse.Company.Name + " / " + x.warehouse.Name + " (" + x.warehouse.Code + ")",
@@ -44,7 +54,7 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db, IWarehouse
                 x.party.Name, x.plan.DisplayName, x.document.Reason, x.document.ExternalReference,
                 x.document.CustomerOrderKey))
             .ToListAsync(cancellationToken);
-        return Ok(new { items, page, pageSize });
+        return Ok(AdminListQuery.CreateResult(items, total, paging));
     }
 
     [HttpGet("lookups")]
@@ -449,7 +459,7 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db, IWarehouse
             .AnyAsync(x => x.IdUser == CurrentUserId() && x.IdWarehouse == id, cancellationToken);
 
     private Task<bool> IsPaidOrderLinkedAsync(long documentId, CancellationToken cancellationToken) =>
-        db.WarehousePaidOrderInboxDocuments.AnyAsync(x => x.IdWarehouseDocument == documentId, cancellationToken);
+        db.StoreCustomerOrders.AnyAsync(x => x.IdWarehouseDocument == documentId, cancellationToken);
 
     private async Task<long[]> AllowedWarehouseIdsAsync(CancellationToken cancellationToken) =>
         User.IsInRole("system.full-access")

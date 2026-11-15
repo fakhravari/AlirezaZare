@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Shop.Admin.Infrastructure;
 using System.Net.Mail;
 using System.Text.Json;
 using Shop.Data.Infrastructure.Persistence;
@@ -16,15 +17,16 @@ public sealed class StoreCustomersAdminApiController(ShopDbContext db) : Control
 {
     [HttpGet]
     public async Task<IActionResult> List([FromQuery] string? q, [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 50, CancellationToken cancellationToken = default)
+        [FromQuery] int pageSize = AdminListQuery.DefaultPageSize, CancellationToken cancellationToken = default)
     {
-        q = q?.Trim() ?? "";
-        if (q.Length > 100 || page is < 1 or > 100000 || pageSize is < 1 or > 100)
-            return BadRequest(new { title = "جست‌وجو یا صفحه‌بندی نامعتبر است." });
-        int offset = (page - 1) * pageSize, take = pageSize + 1;
+        if (!AdminListQuery.TryCreate(page, pageSize, q, out AdminPageRequest paging))
+            return ValidationProblem(detail: "عبارت جست‌وجو یا صفحه‌بندی معتبر نیست.", statusCode: 400);
+        q = paging.Search;
+        int total = await db.AccountProfiles.CountAsync(p => q == "" || (p.FirstName + " " + p.LastName).Contains(q)
+            || p.Email.Contains(q) || (p.Phone ?? "").Contains(q), cancellationToken);
         var rows = await db.AccountProfiles.AsNoTracking()
             .Where(p => q == "" || (p.FirstName + " " + p.LastName).Contains(q) || p.Email.Contains(q) || (p.Phone ?? "").Contains(q))
-            .OrderByDescending(p => p.Id).Skip(offset).Take(take)
+            .OrderByDescending(p => p.Id).Skip(paging.Offset).Take(paging.PageSize)
             .Select(p => new CustomerRow
             {
                 Id = p.Id,
@@ -35,7 +37,7 @@ public sealed class StoreCustomersAdminApiController(ShopDbContext db) : Control
                 CreatedAtUtc = p.CreatedAtUtc,
                 OrderCount = db.StoreCustomerOrders.Count(o => o.IdProfile == p.Id)
             }).ToListAsync(cancellationToken);
-        return Ok(new { items = rows.Take(pageSize), page, hasNext = rows.Count > pageSize });
+        return Ok(AdminListQuery.CreateResult(rows, total, paging));
     }
 
     [HttpGet("{id:long}")]

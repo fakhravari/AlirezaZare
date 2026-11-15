@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Shop.Admin.Infrastructure;
 using Shop.Data.Application.Store.Contracts;
 using Shop.Data.Domain.Store.Entities;
 using Shop.Data.Infrastructure.Persistence;
@@ -183,12 +184,12 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
     public async Task<IActionResult> List(
         [FromQuery] string? q,
         [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 50,
+        [FromQuery] int pageSize = AdminListQuery.DefaultPageSize,
         CancellationToken cancellationToken = default)
     {
         if (!CanManage()) return Forbid();
-        if (!ValidPage(page, pageSize, q)) return ValidationProblem(detail: "شماره صفحه، اندازهٔ صفحه یا عبارت جست‌وجو معتبر نیست.", statusCode: 400);
-        string query = q?.Trim() ?? "";
+        if (!AdminListQuery.TryCreate(page, pageSize, q, out AdminPageRequest paging)) return ValidationProblem(detail: "عبارت جست‌وجو یا صفحه‌بندی معتبر نیست.", statusCode: 400);
+        string query = paging.Search;
         var rows = from variant in db.ProductVariants.AsNoTracking()
                    join product in db.Products.AsNoTracking() on variant.IdProduct equals product.Id
                    from plan in db.SalesPlanReferences.AsNoTracking().Where(x => x.IdStockOwnerType == 1)
@@ -201,7 +202,7 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
         int total = await rows.CountAsync(cancellationToken);
         var items = await rows.OrderBy(x => x.product.Name).ThenBy(x => x.variant.Name).ThenBy(x => x.plan.Code)
             .ThenBy(x => x.variant.Id).ThenBy(x => x.plan.Id)
-            .Skip((int)Math.Min((long)(page - 1) * pageSize, int.MaxValue)).Take(pageSize)
+            .Skip(paging.Offset).Take(paging.PageSize)
             .Select(x => new VariantPlanPriceRow
             {
                 VariantId = x.variant.Id,
@@ -216,7 +217,7 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
                 IsEnabled = x.offer == null ? null : x.offer.IsEnabled
             })
             .ToListAsync(cancellationToken);
-        return Ok(new { items, total, page, pageSize });
+        return Ok(AdminListQuery.CreateResult(items, total, paging));
     }
 
     [HttpPut("{variantId:long}/{salesPlanId}")]
@@ -277,12 +278,12 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
     public async Task<IActionResult> ProductOffers(
         [FromQuery] string? q,
         [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 50,
+        [FromQuery] int pageSize = AdminListQuery.DefaultPageSize,
         CancellationToken cancellationToken = default)
     {
         if (!CanManage()) return Forbid();
-        if (!ValidPage(page, pageSize, q)) return ValidationProblem(detail: "شماره صفحه، اندازهٔ صفحه یا عبارت جست‌وجو معتبر نیست.", statusCode: 400);
-        string query = q?.Trim() ?? "";
+        if (!AdminListQuery.TryCreate(page, pageSize, q, out AdminPageRequest paging)) return ValidationProblem(detail: "عبارت جست‌وجو یا صفحه‌بندی معتبر نیست.", statusCode: 400);
+        string query = paging.Search;
         var rows = from product in db.Products.AsNoTracking()
                    from plan in db.SalesPlanReferences.AsNoTracking().Where(x => x.IdStockOwnerType == 1)
                    join offer in db.StoreProductSalesPlanOffers.AsNoTracking() on new { ProductId = product.Id, PlanId = plan.Id } equals new { ProductId = offer.IdProduct, PlanId = offer.IdSalesPlan } into offers
@@ -293,7 +294,7 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
         int total = await rows.CountAsync(cancellationToken);
         var items = await rows.OrderBy(x => x.product.Name).ThenBy(x => x.plan.DisplayName)
             .ThenBy(x => x.product.Id).ThenBy(x => x.plan.Id)
-            .Skip((int)Math.Min((long)(page - 1) * pageSize, int.MaxValue)).Take(pageSize)
+            .Skip(paging.Offset).Take(paging.PageSize)
             .Select(x => new ProductOfferRow
             {
                 ProductId = x.product.Id,
@@ -307,11 +308,8 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
                 IsEnabled = x.offer == null ? null : x.offer.IsEnabled
             })
             .ToListAsync(cancellationToken);
-        return Ok(new { items, total, page, pageSize });
+        return Ok(AdminListQuery.CreateResult(items, total, paging));
     }
-
-    private static bool ValidPage(int page, int pageSize, string? query) =>
-        page is >= 1 and <= 100000 && pageSize is >= 1 and <= 100 && (query?.Length ?? 0) <= 100;
 
     [HttpPut("product-offers/{productId:long}/{salesPlanId}")]
     [ValidateAntiForgeryToken]

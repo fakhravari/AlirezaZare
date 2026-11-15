@@ -42,4 +42,6 @@ Migration `089-repair-variant-attributes-json.sql` دادهٔ قدیمی `Wareho
 
 Migration `090-newsletter-permission-store-manager.sql` مجوز گروهی `store.manager` را به‌عنوان والد صفحهٔ اعضای خبرنامه در درخت مجوزها ثبت می‌کند و آن را به نقش `system.full-access-store` می‌دهد؛ مجوزهای فهرست و تغییر عضویت همچنان زیر مجوز صفحه باقی می‌مانند.
 
-گزارشات فروشگاه به schema تازه نیاز ندارند. Migration `091-store-reports-permissions.sql` مجوز صفحه و endpointهای خواندن و CSV را زیر `store.manager` می‌سازد و دسترسی نقش `system.full-access-store` را از والد می‌گیرد. فایل migration به‌تنهایی به معنی اجرا شدن آن روی هیچ پایگاه داده‌ای نیست.
+گزارشات فروشگاه به schema تازه نیاز ندارند. Migration `091-store-reports-permissions.sql` مجوز صفحه و endpointهای خواندن و خروجی Excel را زیر `store.manager` می‌سازد و دسترسی نقش `system.full-access-store` را از والد می‌گیرد. فایل migration به‌تنهایی به معنی اجرا شدن آن روی هیچ پایگاه داده‌ای نیست.
+
+وضعیت مزیت کالا در `Store.ProductBenefit.IsActive` نگهداری می‌شود؛ migration `092-store-product-benefit-status.sql` ستون را با مقدار پیش‌فرض فعال برای ردیف‌های موجود می‌سازد. migration `093-drop-unused-paid-order-inbox.sql` فقط وقتی سه جدول قدیمی `Warehouse.PaidOrderInbox*` خالی باشند آن‌ها را حذف می‌کند و در صورت وجود داده عمداً متوقف می‌شود.

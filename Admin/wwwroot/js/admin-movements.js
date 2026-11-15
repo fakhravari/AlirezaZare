@@ -52,7 +52,7 @@
     async function load(page) {
         const serial = (requests.get(page) || 0) + 1; requests.set(page, serial);
         const mode = page.dataset.mode;
-        const query = new URLSearchParams(new FormData(page.querySelector("[data-movement-filter]"))), current = Number(page.dataset.page || 1); query.set("page", current);
+        const query = new URLSearchParams(new FormData(page.querySelector("[data-movement-filter]"))), current = Number(page.dataset.page || 1); query.set("page", current); query.set("pageSize", "50");
         if (mode === "audit") query.set("audit", "true");
         if (mode === "summary") query.set("summary", "true");
         page.querySelector("[data-movement-rows]").replaceChildren();
@@ -61,12 +61,12 @@
         try {
             const result = await get(`${page.dataset.api}?${query}`);
             if (requests.get(page) !== serial) return;
-            const rows = mode === "stock" ? result : result.items || [];
+            const rows = result.items || [];
             if (mode === "audit") renderAudit(page, rows); else if (mode === "summary") renderSummary(page, rows); else render(page, rows);
             status(page, rows.length ? (mode === "summary" ? `${number.format(result.total)} ردیف در گزارش` : "") : mode === "audit" ? "تغییری برای این فیلتر ثبت نشده است." : "گردشی برای این فیلتر پیدا نشد.");
             page.querySelector("[data-movement-page-label]").textContent = `صفحهٔ ${number.format(current)}`;
             page.querySelector('[data-movement-page="-1"]').disabled = current <= 1;
-            const hasNext = rows.length >= 100 && (mode === "stock" || current * 100 < result.total);
+            const hasNext = result.hasNext === true;
             page.querySelector("[data-movement-pagination]").hidden = current <= 1 && !hasNext;
             page.querySelector('[data-movement-page="1"]').disabled = !hasNext;
         } catch (error) { if (requests.get(page) === serial) status(page, error.message || "دریافت گردش‌ها ناموفق بود.", true); }

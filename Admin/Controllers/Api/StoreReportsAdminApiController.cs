@@ -1,8 +1,8 @@
 using System.Globalization;
-using System.Text;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Shop.Admin.Infrastructure;
 using Shop.Data.Domain.Account.Entities;
 using Shop.Data.Domain.Store.Entities;
 using Shop.Data.Domain.Warehouse.Entities;
@@ -27,14 +27,14 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
         [FromQuery] DateOnly? to = null,
         [FromQuery] long? warehouseId = null,
         [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 50,
+        [FromQuery] int pageSize = AdminListQuery.DefaultPageSize,
         [FromQuery] string? detail = null,
         [FromQuery] long? id = null,
         [FromQuery] long? salesPlanReferenceId = null,
         CancellationToken cancellationToken = default)
     {
         if (type == "warehouses") return await GetWarehouses(cancellationToken);
-        if (page is < 1 or > 100000 || pageSize is < 1 or > 100 || (page - 1L) * pageSize > int.MaxValue)
+        if (!AdminListQuery.TryCreate(page, pageSize, null, out _))
             return BadRequest(new { title = "شماره یا اندازهٔ صفحه معتبر نیست." });
         if (!TryGetRange(from, to, out DateTime start, out DateTime end, out string? error))
             return BadRequest(new { title = error });
@@ -53,7 +53,7 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
     }
 
     [HttpGet("export")]
-    public async Task<IActionResult> Export(
+    public IActionResult Export(
         [FromQuery] string type = "sales",
         [FromQuery] DateOnly? from = null,
         [FromQuery] DateOnly? to = null,
@@ -72,29 +72,30 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
         };
         if (keys.Length == 0) return BadRequest(new { title = "نوع گزارش معتبر نیست." });
 
-        string[] labels = keys.Select(CsvLabel).ToArray();
-        var csv = new StringBuilder().AppendLine(string.Join(',', labels.Select(CsvEscape)));
-        const int exportPageSize = 1000;
-        int page = 1;
-        int total;
-        do
+        string[] labels = keys.Select(ExportLabel).ToArray();
+        return new AdminExcelFileResult($"store-{type}-report.xlsx", "گزارش", async (worksheet, ct) =>
         {
-            object report = type switch
+            await worksheet.WriteRowAsync(ct, labels);
+            const int exportPageSize = AdminListQuery.ExportBatchSize;
+            int page = 1;
+            int total;
+            do
             {
-                "sales" => await GetSales(start, end, page, exportPageSize, cancellationToken),
-                "products" => await GetProducts(start, end, warehouseId, page, exportPageSize, cancellationToken),
-                "inventory" => await GetInventory(start, end, warehouseId, page, exportPageSize, cancellationToken),
-                _ => await GetCustomers(start, end, page, exportPageSize, cancellationToken)
-            };
-            JsonElement payload = JsonSerializer.SerializeToElement(report);
-            total = payload.GetProperty("total").GetInt32();
-            foreach (JsonElement item in payload.GetProperty("items").EnumerateArray())
-                csv.AppendLine(string.Join(',', keys.Select(key => CsvEscape(CsvValue(item, key)))));
-            page++;
-        } while ((long)(page - 1) * exportPageSize < total);
-
-        byte[] content = Encoding.UTF8.GetPreamble().Concat(Encoding.UTF8.GetBytes(csv.ToString())).ToArray();
-        return File(content, "text/csv; charset=utf-8", $"store-{type}-report.csv");
+                ct.ThrowIfCancellationRequested();
+                object report = type switch
+                {
+                    "sales" => await GetSales(start, end, page, exportPageSize, ct),
+                    "products" => await GetProducts(start, end, warehouseId, page, exportPageSize, ct),
+                    "inventory" => await GetInventory(start, end, warehouseId, page, exportPageSize, ct),
+                    _ => await GetCustomers(start, end, page, exportPageSize, ct)
+                };
+                JsonElement payload = JsonSerializer.SerializeToElement(report);
+                total = payload.GetProperty("total").GetInt32();
+                foreach (JsonElement item in payload.GetProperty("items").EnumerateArray())
+                    await worksheet.WriteRowAsync(ct, keys.Select(key => ExportValue(item, key)).ToArray());
+                page++;
+            } while ((long)(page - 1) * exportPageSize < total);
+        });
     }
 
     private async Task<IActionResult> GetWarehouses(CancellationToken cancellationToken)
@@ -124,6 +125,11 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
         var previous = await PaidOrders().Where(x => x.OrderedAtUtc >= previousStart && x.OrderedAtUtc < start)
             .GroupBy(_ => 1).Select(group => new { Revenue = group.Sum(x => x.TotalAmount) })
             .SingleOrDefaultAsync(cancellationToken);
+        int ordersWithoutVerifiedPayment = await db.StoreCustomerOrders.CountAsync(order =>
+            order.OrderedAtUtc >= start && order.OrderedAtUtc < end && SalesStatuses.Contains(order.Status)
+            && !(order.PaymentMethod == "demo" && order.ExternalOrderKey != null && order.ExternalOrderKey.StartsWith("demo-order-"))
+            && !db.StorePaymentAttempts.Any(payment => payment.IdOrder == order.Id
+                && payment.Status == "verified" && payment.Amount == order.TotalAmount), cancellationToken);
 
         var daily = await orders.GroupBy(x => x.OrderedAtUtc.Date)
             .Select(group => new
@@ -147,12 +153,14 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
             total = daily.Count,
             page,
             pageSize,
+            hasNext = AdminListQuery.HasNext(page, pageSize, daily.Count),
             summary = new
             {
                 orderCount = current?.OrderCount ?? 0,
                 revenue,
                 discount = current?.Discount ?? 0,
                 averageOrderAmount = current?.OrderCount > 0 ? revenue / current.OrderCount : 0,
+                ordersWithoutVerifiedPayment,
                 previousRevenue = previous?.Revenue ?? 0,
                 revenueChangePercent = ChangePercent(revenue, previous?.Revenue ?? 0)
             }
@@ -213,6 +221,7 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
             total,
             page,
             pageSize,
+            hasNext = AdminListQuery.HasNext(page, pageSize, total),
             summary = new { quantity = totalQuantity, revenue = totalRevenue, productCount = total, previousRevenue = previous, revenueChangePercent = ChangePercent(totalRevenue, previous) }
         };
     }
@@ -267,6 +276,7 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
             total,
             page,
             pageSize,
+            hasNext = AdminListQuery.HasNext(page, pageSize, total),
             summary = new { buyerCount = total, newBuyerCount, repeatBuyerCount, revenue, previousBuyerCount = previousBuyers }
         };
     }
@@ -314,6 +324,7 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
             total,
             page,
             pageSize,
+            hasNext = AdminListQuery.HasNext(page, pageSize, total),
             warehouseAccess = fullAccess || allowed.Count > 0,
             summary = new
             {
@@ -349,13 +360,17 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
                     join profile in db.AccountProfiles.AsNoTracking() on order.IdProfile equals profile.Id
                     orderby order.OrderedAtUtc descending
                     select new { order.OrderNumber, order.OrderedAtUtc, Customer = (profile.FirstName + " " + profile.LastName).Trim(), item.Quantity, Amount = item.UnitAmount * item.Quantity };
+        int total = await query.CountAsync(cancellationToken);
         var rows = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
         return new
         {
             title = "سفارش‌های کالا",
             columns = DetailColumns(("orderNumber", "شماره سفارش"), ("date", "تاریخ"), ("customer", "مشتری"), ("quantity", "تعداد"), ("amount", "مبلغ")),
             items = rows.Select(x => new { orderNumber = x.OrderNumber, date = x.OrderedAtUtc.ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture), customer = x.Customer, quantity = x.Quantity, amount = x.Amount }),
-            total = await query.CountAsync(cancellationToken)
+            total,
+            page,
+            pageSize,
+            hasNext = AdminListQuery.HasNext(page, pageSize, total)
         };
     }
 
@@ -364,13 +379,17 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
     {
         var query = PaidOrders().Where(x => x.IdProfile == customerId && x.OrderedAtUtc >= start && x.OrderedAtUtc < end)
             .OrderByDescending(x => x.OrderedAtUtc).Select(x => new { x.OrderNumber, x.OrderedAtUtc, x.Status, x.TotalAmount });
+        int total = await query.CountAsync(cancellationToken);
         var rows = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
         return new
         {
             title = "خریدهای مشتری",
             columns = DetailColumns(("orderNumber", "شماره سفارش"), ("date", "تاریخ"), ("status", "وضعیت"), ("amount", "مبلغ")),
             items = rows.Select(x => new { orderNumber = x.OrderNumber, date = x.OrderedAtUtc.ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture), status = x.Status, amount = x.TotalAmount }),
-            total = await query.CountAsync(cancellationToken)
+            total,
+            page,
+            pageSize,
+            hasNext = AdminListQuery.HasNext(page, pageSize, total)
         };
     }
 
@@ -388,13 +407,17 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
                         && (!salesPlanReferenceId.HasValue || movement.IdSalesPlanReference == salesPlanReferenceId.Value)
                     orderby movement.OccurredAtUtc descending
                     select new { movement.OccurredAtUtc, movement.QuantityDelta, warehouse.Name, warehouse.Code, Company = company.Name, movement.IdDocument };
+        int total = await query.CountAsync(cancellationToken);
         var rows = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
         return new
         {
             title = "گردش موجودی کالا",
             columns = DetailColumns(("date", "تاریخ"), ("warehouse", "شرکت / انبار"), ("change", "تغییر موجودی"), ("document", "سند")),
             items = rows.Select(x => new { date = x.OccurredAtUtc.ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture), warehouse = x.Company + " / " + x.Name + " (" + x.Code + ")", change = x.QuantityDelta, document = x.IdDocument }),
-            total = await query.CountAsync(cancellationToken)
+            total,
+            page,
+            pageSize,
+            hasNext = AdminListQuery.HasNext(page, pageSize, total)
         };
     }
 
@@ -426,7 +449,7 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
     private static object[] DetailColumns(params (string Key, string Label)[] columns) =>
         columns.Select(x => (object)new { key = x.Key, label = x.Label }).ToArray();
 
-    private static string CsvLabel(string key) => key switch
+    private static string ExportLabel(string key) => key switch
     {
         "date" => "تاریخ",
         "orderCount" => "تعداد سفارش",
@@ -447,22 +470,17 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
         _ => key
     };
 
-    private static string CsvValue(JsonElement item, string key)
+    private static object? ExportValue(JsonElement item, string key)
     {
-        if (!item.TryGetProperty(key, out JsonElement value) || value.ValueKind is JsonValueKind.Null or JsonValueKind.Undefined) return "";
+        if (!item.TryGetProperty(key, out JsonElement value) || value.ValueKind is JsonValueKind.Null or JsonValueKind.Undefined) return null;
         return value.ValueKind switch
         {
             JsonValueKind.String => value.GetString() ?? "",
-            JsonValueKind.Number => value.ToString(),
-            JsonValueKind.True => "بله",
-            JsonValueKind.False => "خیر",
+            JsonValueKind.Number when value.TryGetDecimal(out decimal number) => number,
+            JsonValueKind.True => true,
+            JsonValueKind.False => false,
             _ => value.ToString()
         };
     }
 
-    private static string CsvEscape(string value)
-    {
-        if (value.Length > 0 && value[0] is '=' or '+' or '-' or '@') value = "'" + value;
-        return '"' + value.Replace("\"", "\"\"", StringComparison.Ordinal) + '"';
-    }
 }

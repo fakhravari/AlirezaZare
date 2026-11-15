@@ -201,35 +201,6 @@ public sealed class StorePaymentAttempt
     public DateTime UpdatedAtUtc { get; set; }
 }
 
-public sealed class WarehousePaidOrderInbox
-{
-    public long Id { get; set; }
-    public string StoreOrderKey { get; set; } = "";
-    public string CustomerKey { get; set; } = "";
-    public DateTime PaymentAtUtc { get; set; }
-    public string Status { get; set; } = "P";
-    public ICollection<WarehousePaidOrderInboxLine> Lines { get; set; } = new List<WarehousePaidOrderInboxLine>();
-}
-
-public sealed class WarehousePaidOrderInboxLine
-{
-    public long Id { get; set; }
-    public long IdPaidOrderInbox { get; set; }
-    public long IdInventoryItem { get; set; }
-    public long IdUnit { get; set; }
-    public long IdSalesPlanReference { get; set; }
-    public decimal Quantity { get; set; }
-    public decimal ConversionFactor { get; set; }
-    public decimal BaseQuantity { get; set; }
-}
-
-public sealed class WarehousePaidOrderInboxDocument
-{
-    public long Id { get; set; }
-    public long IdPaidOrderInbox { get; set; }
-    public long IdWarehouseDocument { get; set; }
-}
-
 public sealed class AccountCoupon
 {
     public long Id { get; set; }

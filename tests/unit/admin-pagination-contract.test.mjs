@@ -27,10 +27,10 @@ function methodBody(text, signature) {
     assert.fail(`Unclosed method body: ${signature}`);
 }
 
-function assertDatabasePaging(body, label, responsePattern = /items\s*,\s*total\s*,\s*page\s*,\s*pageSize/) {
+function assertDatabasePaging(body, label, responsePattern = /AdminListQuery\.CreateResult|items\s*,\s*total\s*,\s*page\s*,\s*pageSize/) {
     const countIndex = body.indexOf("CountAsync(");
     const skipIndex = body.indexOf(".Skip(");
-    const takeIndex = body.indexOf(".Take(pageSize)");
+    const takeIndex = body.search(/\.Take\((?:paging\.)?PageSize\)/);
     const materializeIndex = body.indexOf("ToListAsync(");
 
     assert.ok(countIndex >= 0, `${label} should calculate the filtered total in the database`);
@@ -46,14 +46,13 @@ test("catalog product and draft lists page in the database", async () => {
     const draftMethod = methodBody(controller, "Task<IActionResult> ProductDrafts(");
     const sectionMethod = methodBody(controller, "Task<IActionResult> GetSection(");
 
-    assert.match(draftMethod, /pageSize is < 1 or > 100/);
-    assert.match(draftMethod, /q\?\.Length \?\? 0\) > 100/);
+    assert.match(draftMethod, /AdminListQuery\.TryCreate\(page, pageSize, q/);
     assertDatabasePaging(draftMethod, "Product drafts");
 
-    assert.match(sectionMethod, /pageSize is < 1 or > 200/);
+    assert.match(sectionMethod, /AdminListQuery\.TryCreate\(page, pageSize, q/);
     assert.match(sectionMethod, /productSource\.CountAsync\(/);
-    assert.match(sectionMethod, /productSource[\s\S]*?\.Skip\([\s\S]*?\.Take\(pageSize\)[\s\S]*?ToListAsync\(/);
-    assert.match(sectionMethod, /items = productItems, total = productTotal, page, pageSize/);
+    assert.match(sectionMethod, /productSource[\s\S]*?\.Skip\([\s\S]*?\.Take\(paging\.PageSize\)[\s\S]*?ToListAsync\(/);
+    assert.match(sectionMethod, /AdminListQuery\.CreateResult\(productItems\.ToArray\(\), productTotal, paging\)/);
 });
 
 test("variant prices and product offers page before materializing rows", async () => {
@@ -62,7 +61,7 @@ test("variant prices and product offers page before materializing rows", async (
     const offers = methodBody(controller, "Task<IActionResult> ProductOffers(");
 
     for (const [label, body] of [["Variant prices", prices], ["Product offers", offers]]) {
-        assert.match(body, /ValidPage\(page, pageSize, q\)/, `${label} should validate paging input`);
+        assert.match(body, /AdminListQuery\.TryCreate\(page, pageSize, q/, `${label} should validate paging input`);
         assertDatabasePaging(body, label);
     }
 });
@@ -71,9 +70,33 @@ test("paid-order dispatch uses bounded pages and stable page ordering", async ()
     const controller = await source("Admin/Controllers/Api/StorePaidOrdersDispatchApiController.cs");
     const list = methodBody(controller, "Task<IActionResult> List(");
 
-    assert.match(list, /pageSize is < 1 or > 100/);
+    assert.match(list, /AdminListQuery\.TryCreate\(page, pageSize, q/);
     assert.match(list, /\.OrderBy\(x => x\.PaidAtUtc\)\.ThenBy\(x => x\.order\.Id\)/);
-    assertDatabasePaging(list, "Paid-order dispatch", /items\s*=\s*rows\s*,\s*total\s*,\s*page\s*,\s*pageSize/);
+    assertDatabasePaging(list, "Paid-order dispatch", /AdminListQuery\.CreateResult\(rows, total, paging\)/);
+});
+
+test("Admin list endpoints share bounded paging, search, response, and Excel export helpers", async () => {
+    const helper = await source("Admin/Infrastructure/AdminListQuery.cs");
+    const newsletter = await source("Admin/Controllers/Api/StoreNewsletterSubscribersAdminApiController.cs");
+    const reports = await source("Admin/Controllers/Api/StoreReportsAdminApiController.cs");
+    const warehouse = await source("Admin/Controllers/Api/WarehouseAdminApiController.cs");
+
+    assert.match(helper, /DefaultPageSize = 50/);
+    assert.match(helper, /MaximumPageSize = 100/);
+    assert.match(helper, /MaximumPage = 100_000/);
+    assert.match(helper, /MaximumSearchLength = 100/);
+    assert.match(helper, /AdminExcelFileResult/);
+    assert.match(helper, /application\/vnd\.openxmlformats-officedocument\.spreadsheetml\.sheet/);
+    assert.match(helper, /MaximumRowsPerSheet = 1_048_576/);
+    assert.match(helper, /ExportBatchSize = 1_000/);
+    assert.match(newsletter, /AdminListQuery\.TryCreate\(page, pageSize, q/);
+    assert.match(newsletter, /AdminListQuery\.CreateResult/);
+    assert.match(newsletter, /AdminExcelFileResult/);
+    assert.match(newsletter, /WriteRowAsync/);
+    assert.match(reports, /AdminListQuery\.ExportBatchSize/);
+    assert.match(reports, /AdminExcelFileResult/);
+    assert.match(reports, /WriteRowAsync/);
+    assert.match(warehouse, /AdminListQuery\.CreateLookaheadResult/);
 });
 
 test("admin list clients send page parameters and consume paged response items", async () => {
@@ -85,6 +108,10 @@ test("admin list clients send page parameters and consume paged response items",
     assert.match(draftLoader, /searchParams\.set\("page"/);
     assert.match(draftLoader, /searchParams\.set\("pageSize"/);
     assert.match(draftLoader, /result\.items/);
+
+    const stockLoader = methodBody(adminData, "async function loadStock(");
+    assert.match(stockLoader, /result\?\.items/);
+    assert.match(stockLoader, /result\?\.hasNext === true/);
 
     assert.match(priceClient, /searchParams\.set\("page"/);
     assert.match(priceClient, /searchParams\.set\("pageSize"/);

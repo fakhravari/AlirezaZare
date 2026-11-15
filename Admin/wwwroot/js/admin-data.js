@@ -5,6 +5,9 @@
     if (!ui) return;
     const requests = new WeakMap();
     const pageSize = 50;
+    let activeBenefitProductId = 0;
+    let activeBenefitProductName = "";
+    let activeProductBenefits = [];
 
     function beginRequest(page) {
         requests.get(page)?.abort();
@@ -47,6 +50,70 @@
         if (previous) previous.disabled = current <= 1;
         if (next) next.disabled = !hasNext;
         page.dataset.adminPageNumber = String(current);
+    }
+
+    async function loadProductBenefits() {
+        const manager = document.querySelector("[data-product-benefits-manager]");
+        const rows = manager?.querySelector("[data-product-benefits-rows]");
+        const status = manager?.querySelector("[data-product-benefits-status]");
+        if (!manager || !rows || !status || activeBenefitProductId < 1) return;
+        status.textContent = "در حال دریافت مزیت‌ها…";
+        rows.replaceChildren();
+        try {
+            activeProductBenefits = await ui.getJson(`/api/admin/store/catalog/products/manage/${encodeURIComponent(activeBenefitProductId)}/benefits`);
+            for (const [index, item] of activeProductBenefits.entries()) {
+                const row = document.createElement("div");
+                row.className = "list-group-item d-flex flex-wrap justify-content-between align-items-center gap-3";
+                const copy = document.createElement("div");
+                copy.className = "flex-grow-1";
+                const title = document.createElement("strong");
+                title.textContent = item.title;
+                const detail = document.createElement("p");
+                detail.className = "small text-muted mb-1";
+                detail.textContent = item.detail || "بدون توضیح";
+                const meta = document.createElement("span");
+                meta.className = "small text-muted";
+                meta.textContent = `${item.icon || "بدون آیکن"} · ترتیب ${ui.formatNumber(item.sortOrder)} · ${item.isActive ? "فعال" : "غیرفعال"}`;
+                copy.append(title, detail, meta);
+                const actions = document.createElement("div");
+                actions.className = "d-flex gap-1";
+                const edit = document.createElement("button");
+                edit.type = "button"; edit.className = "btn btn-xs btn-default"; edit.dataset.productBenefitEdit = String(index);
+                setIconAction(edit, "ویرایش مزیت", "fa-pen-to-square");
+                const toggle = document.createElement("button");
+                toggle.type = "button"; toggle.className = "btn btn-xs btn-default"; toggle.dataset.productBenefitToggle = String(index);
+                toggle.dataset.adminConfirm = `مزیت «${item.title}» ${item.isActive ? "غیرفعال" : "فعال"} شود؟`;
+                setIconAction(toggle, item.isActive ? "غیرفعال‌کردن مزیت" : "فعال‌کردن مزیت", item.isActive ? "fa-eye-slash" : "fa-eye");
+                const remove = document.createElement("button");
+                remove.type = "button"; remove.className = "btn btn-xs btn-danger"; remove.dataset.productBenefitDelete = String(index);
+                remove.dataset.adminConfirm = `مزیت «${item.title}» حذف شود؟`;
+                setIconAction(remove, "حذف مزیت", "fa-trash");
+                actions.append(edit, toggle, remove);
+                row.append(copy, actions);
+                rows.append(row);
+            }
+            status.textContent = activeProductBenefits.length ? `${ui.formatNumber(activeProductBenefits.length)} مزیت ثبت شده است.` : "برای این کالا مزیتی ثبت نشده است.";
+        } catch (error) {
+            status.textContent = error.message || "دریافت مزیت‌های کالا ناموفق بود.";
+        }
+    }
+
+    function showProductBenefitEditor(item = null) {
+        const manager = document.querySelector("[data-product-benefits-manager]");
+        const list = manager?.querySelector("[data-product-benefits-list-view]");
+        const form = manager?.querySelector("[data-product-benefit-editor]");
+        if (!manager || !list || !form) return;
+        form.reset();
+        form.elements.id.value = item?.id || "";
+        form.elements.title.value = item?.title || "";
+        form.elements.detail.value = item?.detail || "";
+        form.elements.icon.value = item?.icon || "";
+        form.elements.sortOrder.value = item?.sortOrder ?? activeProductBenefits.length;
+        form.elements.isActive.checked = item?.isActive ?? true;
+        form.querySelector("[data-product-benefit-editor-title]").textContent = item ? "ویرایش مزیت" : "افزودن مزیت";
+        form.dataset.adminConfirm = item ? "تغییرات مزیت کالا ذخیره شود؟" : "مزیت جدید کالا ثبت شود؟";
+        list.classList.add("d-none");
+        form.classList.remove("d-none");
     }
 
     function setIconAction(button, label, icon) {
@@ -156,6 +223,10 @@
                 edit.type = "button"; edit.className = "btn btn-xs btn-default";
                 edit.dataset.productEdit = String(index); setIconAction(edit, "ویرایش کالا", "fa-pen-to-square");
                 actions.append(edit);
+                const benefits = document.createElement("button");
+                benefits.type = "button"; benefits.className = "btn btn-xs btn-default ms-1";
+                benefits.dataset.productBenefits = String(index); setIconAction(benefits, "مدیریت مزیت‌های کالا", "fa-gift");
+                actions.append(benefits);
                 const unpublish = document.createElement("button");
                 unpublish.type = "button"; unpublish.className = "btn btn-xs btn-default";
                 unpublish.dataset.productUnpublish = String(index); unpublish.dataset.adminConfirm = `کالای ${item.name} از انتشار خارج شود؟`; setIconAction(unpublish, "خروج از انتشار", "fa-eye-slash");
@@ -546,7 +617,7 @@
             else tasks.push(Promise.resolve(null));
             if (planSelect && !planSelect.dataset.loaded) tasks.push(loadPlans(controller.signal));
             else tasks.push(Promise.resolve(null));
-            const [items, warehouses, plans] = await Promise.all(tasks);
+            const [result, warehouses, plans] = await Promise.all(tasks);
             if (!page.isConnected || requests.get(page) !== controller) return;
             if (warehouseSelect && warehouses) {
                 const selected = warehouseSelect.value;
@@ -564,7 +635,7 @@
                 if (plans.some(plan => String(plan.id) === selected)) planSelect.value = selected;
                 planSelect.dataset.loaded = "true";
             }
-            const rows = Array.isArray(items) ? items : [];
+            const rows = Array.isArray(result?.items) ? result.items : [];
             renderRows(page, rows, item => [
                 `${item.companyName} / ${item.warehouseName} (${item.warehouseCode})`, item.storeProductKey,
                 item.variantName ? `${item.productName} ـ ${item.variantName}` : item.productName,
@@ -572,7 +643,7 @@
                 item.isLowStock ? "کمتر از حداقل" : "مناسب"
             ]);
             updateCount(page, 0, rows.length, false);
-            updatePagination(page, pageNumber, rows.length === pageSize);
+            updatePagination(page, pageNumber, result?.hasNext === true);
             status(page, "موجودی از دیتابیس دریافت شد.");
             if (announce) ui.notify("موجودی به‌روز شد.", "success");
         } catch (error) {
@@ -1348,6 +1419,36 @@
                 .finally(() => { save.disabled = false; });
             return;
         }
+        const productBenefitEditor = event.target.closest("[data-product-benefit-editor]");
+        if (productBenefitEditor) {
+            event.preventDefault();
+            const save = productBenefitEditor.querySelector('[type="submit"]');
+            if (save.disabled || activeBenefitProductId < 1) return;
+            const id = productBenefitEditor.elements.id.value;
+            const token = productBenefitEditor.querySelector('[name="__RequestVerificationToken"]')?.value || "";
+            const body = {
+                title: productBenefitEditor.elements.title.value,
+                detail: productBenefitEditor.elements.detail.value,
+                icon: productBenefitEditor.elements.icon.value,
+                sortOrder: Number(productBenefitEditor.elements.sortOrder.value),
+                isActive: productBenefitEditor.elements.isActive.checked
+            };
+            save.disabled = true;
+            void ui.getJson(`/api/admin/store/catalog/products/manage/${encodeURIComponent(activeBenefitProductId)}/benefits${id ? `/${encodeURIComponent(id)}` : ""}`, {
+                method: id ? "PUT" : "POST",
+                headers: { "Content-Type": "application/json", RequestVerificationToken: token },
+                body: JSON.stringify(body)
+            })
+                .then(result => {
+                    ui.notify(result.message, "success");
+                    productBenefitEditor.classList.add("d-none");
+                    productBenefitEditor.closest("[data-product-benefits-manager]")?.querySelector("[data-product-benefits-list-view]")?.classList.remove("d-none");
+                    return loadProductBenefits();
+                })
+                .catch(error => ui.notify(error.message || "ذخیرهٔ مزیت کالا ناموفق بود.", "danger"))
+                .finally(() => { save.disabled = false; });
+            return;
+        }
         const brandEditor = event.target.closest("[data-brand-editor]");
         if (brandEditor) {
             event.preventDefault();
@@ -1513,6 +1614,65 @@
     });
 
     document.addEventListener("click", event => {
+        const manageBenefits = event.target.closest("[data-product-benefits]");
+        if (manageBenefits) {
+            const page = manageBenefits.closest('[data-admin-section="products"]');
+            const product = page?.__adminRows?.[Number(manageBenefits.dataset.productBenefits)];
+            if (!product || manageBenefits.disabled) return;
+            activeBenefitProductId = Number(product.id);
+            activeBenefitProductName = product.name || product.code || "";
+            const manager = document.querySelector("[data-product-benefits-manager]");
+            const editor = manager?.querySelector("[data-product-benefit-editor]");
+            if (!manager || !editor) return;
+            manager.querySelector("[data-product-benefits-name]").textContent = `${activeBenefitProductName} · ${product.code || ""}`;
+            editor.classList.add("d-none");
+            manager.querySelector("[data-product-benefits-list-view]").classList.remove("d-none");
+            window.bootstrap?.Modal?.getOrCreateInstance(document.getElementById("product-benefits-modal")).show();
+            void loadProductBenefits();
+            return;
+        }
+        const addBenefit = event.target.closest("[data-product-benefit-create]");
+        if (addBenefit) { showProductBenefitEditor(); return; }
+        const cancelBenefit = event.target.closest("[data-product-benefit-cancel]");
+        if (cancelBenefit) {
+            const manager = cancelBenefit.closest("[data-product-benefits-manager]");
+            manager?.querySelector("[data-product-benefit-editor]")?.classList.add("d-none");
+            manager?.querySelector("[data-product-benefits-list-view]")?.classList.remove("d-none");
+            return;
+        }
+        const editBenefit = event.target.closest("[data-product-benefit-edit]");
+        if (editBenefit) {
+            const item = activeProductBenefits[Number(editBenefit.dataset.productBenefitEdit)];
+            if (item) showProductBenefitEditor(item);
+            return;
+        }
+        const toggleBenefit = event.target.closest("[data-product-benefit-toggle]");
+        if (toggleBenefit) {
+            const item = activeProductBenefits[Number(toggleBenefit.dataset.productBenefitToggle)];
+            if (!item || toggleBenefit.disabled) return;
+            toggleBenefit.disabled = true;
+            const token = document.querySelector("[data-product-benefit-editor] [name=__RequestVerificationToken]")?.value || "";
+            void ui.getJson(`/api/admin/store/catalog/products/manage/${encodeURIComponent(activeBenefitProductId)}/benefits/${encodeURIComponent(item.id)}`, {
+                method: "PUT", headers: { "Content-Type": "application/json", RequestVerificationToken: token },
+                body: JSON.stringify({ title: item.title, detail: item.detail || "", icon: item.icon || "", sortOrder: item.sortOrder, isActive: !item.isActive })
+            }).then(result => { ui.notify(result.message, "success"); return loadProductBenefits(); })
+                .catch(error => ui.notify(error.message || "تغییر وضعیت مزیت ناموفق بود.", "danger"))
+                .finally(() => { toggleBenefit.disabled = false; });
+            return;
+        }
+        const deleteBenefit = event.target.closest("[data-product-benefit-delete]");
+        if (deleteBenefit) {
+            const item = activeProductBenefits[Number(deleteBenefit.dataset.productBenefitDelete)];
+            if (!item || deleteBenefit.disabled) return;
+            deleteBenefit.disabled = true;
+            const token = document.querySelector("[data-product-benefit-editor] [name=__RequestVerificationToken]")?.value || "";
+            void ui.getJson(`/api/admin/store/catalog/products/manage/${encodeURIComponent(activeBenefitProductId)}/benefits/${encodeURIComponent(item.id)}`, {
+                method: "DELETE", headers: { RequestVerificationToken: token }
+            }).then(result => { ui.notify(result.message, "success"); return loadProductBenefits(); })
+                .catch(error => ui.notify(error.message || "حذف مزیت ناموفق بود.", "danger"))
+                .finally(() => { deleteBenefit.disabled = false; });
+            return;
+        }
         const reset = event.target.closest("[data-admin-reset-filter]");
         if (!reset) return;
         const page = reset.closest("[data-admin-page]");

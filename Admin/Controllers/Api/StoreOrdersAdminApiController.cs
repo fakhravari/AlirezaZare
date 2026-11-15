@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Shop.Admin.Infrastructure;
 using System.Text.Json;
 using Shop.Data.Domain.Account.Entities;
 using Shop.Data.Domain.Store.Entities;
@@ -83,14 +84,12 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
 
     [HttpGet]
     public async Task<IActionResult> List([FromQuery] string? q, [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 50, CancellationToken cancellationToken = default)
+        [FromQuery] int pageSize = AdminListQuery.DefaultPageSize, CancellationToken cancellationToken = default)
     {
-        q = q?.Trim() ?? "";
-        if (q.Length > 100 || page is < 1 or > 100000 || pageSize is < 1 or > 100)
-            return BadRequest(new { title = "جست‌وجو یا صفحه‌بندی نامعتبر است." });
-        int offset = (page - 1) * pageSize;
-        int take = pageSize + 1;
-        var rows = await (from o in db.StoreCustomerOrders.AsNoTracking()
+        if (!AdminListQuery.TryCreate(page, pageSize, q, out AdminPageRequest paging))
+            return ValidationProblem(detail: "عبارت جست‌وجو یا صفحه‌بندی معتبر نیست.", statusCode: 400);
+        q = paging.Search;
+        var query = from o in db.StoreCustomerOrders.AsNoTracking()
                           join p in db.AccountProfiles.AsNoTracking() on o.IdProfile equals p.Id
                           where q == "" || o.OrderNumber.Contains(q) || (p.FirstName + " " + p.LastName).Contains(q)
                           orderby o.Id descending
@@ -107,8 +106,10 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
                               OrderedAtUtc = o.OrderedAtUtc,
                               IsSample = o.PaymentMethod == "demo" && o.ExternalOrderKey != null && o.ExternalOrderKey.StartsWith("demo-order-"),
                               CustomerName = (p.FirstName + " " + p.LastName).Trim()
-                          }).Skip(offset).Take(take).ToListAsync(cancellationToken);
-        return Ok(new { items = rows.Take(pageSize), page, hasNext = rows.Count > pageSize });
+                          };
+        int total = await query.CountAsync(cancellationToken);
+        var rows = await query.Skip(paging.Offset).Take(paging.PageSize).ToListAsync(cancellationToken);
+        return Ok(AdminListQuery.CreateResult(rows, total, paging));
     }
 
     [HttpGet("{id:long}")]

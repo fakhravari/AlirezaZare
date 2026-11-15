@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Shop.Admin.Infrastructure;
 using Shop.Data.Infrastructure.Persistence;
 
 namespace Shop.Admin.Controllers.Api;
@@ -12,17 +13,20 @@ public sealed class WarehouseMovementsApiController(ShopDbContext db) : Controll
     [HttpGet]
     public async Task<IActionResult> Get([FromQuery] long? warehouseId, [FromQuery] string? search,
         [FromQuery] DateOnly? from, [FromQuery] DateOnly? to, [FromQuery] int page = 1,
+        [FromQuery] int pageSize = AdminListQuery.DefaultPageSize,
         [FromQuery] bool audit = false, [FromQuery] bool summary = false, [FromQuery] string? salesPlan = null,
         [FromQuery] string? direction = null, CancellationToken cancellationToken = default)
     {
-        search = search?.Trim();
+        if (!AdminListQuery.TryCreate(page, pageSize, search, out AdminPageRequest paging))
+            return ValidationProblem(detail: "عبارت جست‌وجو یا صفحه‌بندی معتبر نیست.", statusCode: 400);
+        search = paging.Search;
         salesPlan = salesPlan?.Trim();
-        if (page < 1 || page > 100000 || warehouseId is <= 0 || (from.HasValue && to.HasValue && from > to)
-            || to == DateOnly.MaxValue || search?.Length > 100 || salesPlan?.Length > 100
+        if (warehouseId is <= 0 || (from.HasValue && to.HasValue && from > to)
+            || to == DateOnly.MaxValue || salesPlan?.Length > AdminListQuery.MaximumSearchLength
             || direction is not (null or "" or "R" or "I") || (audit && summary))
             return ValidationProblem(detail: "فیلترها، بازهٔ تاریخ یا شمارهٔ صفحه معتبر نیست.", statusCode: 400);
-        if (audit) return await GetAuditAsync(warehouseId, search, from, to, page, cancellationToken);
-        if (summary) return await GetSummaryAsync(warehouseId, search, salesPlan, from, to, page, cancellationToken);
+        if (audit) return await GetAuditAsync(warehouseId, search, from, to, paging, cancellationToken);
+        if (summary) return await GetSummaryAsync(warehouseId, search, salesPlan, from, to, paging, cancellationToken);
         var query = from line in db.WarehouseDocumentLines.AsNoTracking()
                     join document in db.WarehouseDocuments.AsNoTracking() on line.IdDocument equals document.Id
                     join type in db.WarehouseDocumentTypes.AsNoTracking() on document.IdDocumentType equals type.Id
@@ -102,11 +106,11 @@ public sealed class WarehouseMovementsApiController(ShopDbContext db) : Controll
                 x.DocumentType.Contains(term) || x.Reason!.Contains(term));
         }
 
-        return Ok(await query.Skip((page - 1) * 100).Take(100).ToListAsync(cancellationToken));
+        return Ok(await query.Skip(paging.Offset).Take(paging.PageSize).ToListAsync(cancellationToken));
     }
 
     private async Task<IActionResult> GetSummaryAsync(long? warehouseId, string? search, string? salesPlan,
-        DateOnly? from, DateOnly? to, int page, CancellationToken cancellationToken)
+        DateOnly? from, DateOnly? to, AdminPageRequest paging, CancellationToken cancellationToken)
     {
         var query = from movement in db.WarehouseStockMovements.AsNoTracking()
                     join document in db.WarehouseDocuments.AsNoTracking() on movement.IdDocument equals document.Id
@@ -160,12 +164,12 @@ public sealed class WarehouseMovementsApiController(ShopDbContext db) : Controll
         int total = await grouped.CountAsync(cancellationToken);
         var items = await grouped.OrderBy(x => x.Warehouse).ThenBy(x => x.Product).ThenBy(x => x.Variant)
             .ThenBy(x => x.SalesPlan).ThenBy(x => x.ItemId).ThenBy(x => x.PlanId)
-            .Skip((page - 1) * 100).Take(100).ToListAsync(cancellationToken);
-        return Ok(new { items, total, page, pageSize = 100 });
+            .Skip(paging.Offset).Take(paging.PageSize).ToListAsync(cancellationToken);
+        return Ok(AdminListQuery.CreateResult(items, total, paging));
     }
 
     private async Task<IActionResult> GetAuditAsync(long? warehouseId, string? search, DateOnly? from, DateOnly? to,
-        int page, CancellationToken cancellationToken)
+        AdminPageRequest paging, CancellationToken cancellationToken)
     {
         var query = from audit in db.WarehouseDocumentAudits.AsNoTracking()
                     join warehouse in db.Warehouses.AsNoTracking() on audit.WarehouseId equals warehouse.Id
@@ -221,7 +225,7 @@ public sealed class WarehouseMovementsApiController(ShopDbContext db) : Controll
 
         int total = await query.CountAsync(cancellationToken);
         var items = await query.OrderByDescending(x => x.audit.OccurredAtUtc).ThenByDescending(x => x.audit.Id)
-            .Skip((page - 1) * 100).Take(100)
+            .Skip(paging.Offset).Take(paging.PageSize)
             .Select(x => new
             {
                 x.audit.Id,
@@ -235,6 +239,6 @@ public sealed class WarehouseMovementsApiController(ShopDbContext db) : Controll
                 x.audit.BeforeJson,
                 x.audit.AfterJson
             }).ToListAsync(cancellationToken);
-        return Ok(new { items, total, page, pageSize = 100 });
+        return Ok(AdminListQuery.CreateResult(items, total, paging));
     }
 }

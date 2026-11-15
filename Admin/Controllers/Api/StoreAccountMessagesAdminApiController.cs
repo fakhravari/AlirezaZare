@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Shop.Admin.Infrastructure;
 using Shop.Data.Application.Store;
 using Shop.Data.Domain.Account.Entities;
 using Shop.Data.Infrastructure.Persistence;
@@ -14,8 +15,10 @@ public sealed class StoreAccountMessagesAdminApiController(ShopDbContext db) : C
     [HttpGet("customers")]
     public async Task<IActionResult> Customers([FromQuery] string? q, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(q) || q.Trim().Length < 2) return Ok(Array.Empty<object>());
-        string term = q.Trim();
+        string term = AdminListQuery.NormalizeSearch(q);
+        if (term.Length > AdminListQuery.MaximumSearchLength)
+            return ValidationProblem(detail: "عبارت جست‌وجو بیش از حد طولانی است.", statusCode: 400);
+        if (term.Length < 2) return Ok(Array.Empty<object>());
         var rows = await db.AccountProfiles.AsNoTracking()
             .Where(x => x.Email.Contains(term) || x.FirstName.Contains(term) || x.LastName.Contains(term))
             .OrderBy(x => x.FirstName).ThenBy(x => x.LastName).Take(20)
@@ -26,9 +29,11 @@ public sealed class StoreAccountMessagesAdminApiController(ShopDbContext db) : C
 
     [HttpGet]
     public async Task<IActionResult> List([FromQuery] string? q, [FromQuery] int page = 1,
+        [FromQuery] int pageSize = AdminListQuery.DefaultPageSize,
         CancellationToken cancellationToken = default)
     {
-        if (page < 1 || page > 100000) return ValidationProblem(detail: "شمارهٔ صفحه معتبر نیست.", statusCode: 400);
+        if (!AdminListQuery.TryCreate(page, pageSize, q, out AdminPageRequest paging))
+            return ValidationProblem(detail: "عبارت جست‌وجو یا صفحه‌بندی معتبر نیست.", statusCode: 400);
         var query = from message in db.AccountMessages.AsNoTracking()
                     join profile in db.AccountProfiles.AsNoTracking() on message.IdProfile equals profile.Id
                     select new
@@ -44,15 +49,15 @@ public sealed class StoreAccountMessagesAdminApiController(ShopDbContext db) : C
                         profile.FirstName,
                         profile.LastName
                     };
-        if (!string.IsNullOrWhiteSpace(q))
+        if (paging.Search.Length > 0)
         {
-            string term = q.Trim();
+            string term = paging.Search;
             query = query.Where(x => x.Email.Contains(term) || x.FirstName.Contains(term) || x.LastName.Contains(term));
         }
         int total = await query.CountAsync(cancellationToken);
         var items = await query.OrderByDescending(x => x.CreatedAtUtc).ThenByDescending(x => x.Id)
-            .Skip((page - 1) * 50).Take(50).ToListAsync(cancellationToken);
-        return Ok(new { total, page, pageSize = 50, items = items.Select(item => new
+            .Skip(paging.Offset).Take(paging.PageSize).ToListAsync(cancellationToken);
+        var result = items.Select(item => new
         {
             item.Id,
             item.Title,
@@ -64,7 +69,8 @@ public sealed class StoreAccountMessagesAdminApiController(ShopDbContext db) : C
             item.Email,
             item.FirstName,
             item.LastName
-        }) });
+        }).ToArray();
+        return Ok(AdminListQuery.CreateResult(result, total, paging));
     }
 
     [HttpPost]

@@ -70,6 +70,7 @@
             "Data/Domain/Account/Entities/AccountMessage.cs",
             "Data/Domain/Store/Entities/MagazineArticle.cs",
             "Data/Domain/Store/Entities/StoreProductMedia.cs",
+            "Data/Domain/Store/Entities/StoreProductBenefit.cs",
             "Data/Domain/Store/Entities/StoreBrand.cs",
             "Data/Domain/Store/Entities/StoreCategory.cs",
             "Data/Domain/Store/Entities/GeoCountry.cs",
@@ -214,7 +215,8 @@
           ],
           "data": [
             "Data/Application/Store/Contracts/IStoreRuntimeDatasetRepository.cs",
-            "Data/Infrastructure/Persistence/Repositories/StoreRuntimeDatasetRepository.cs"
+            "Data/Infrastructure/Persistence/Repositories/StoreRuntimeDatasetRepository.cs",
+            "Data/Domain/Store/Entities/StoreProductBenefit.cs"
           ],
           "server": [
             "Shop/Services/CatalogRepository.cs",

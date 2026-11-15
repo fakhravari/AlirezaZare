@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Shop.Admin.Infrastructure;
 using Shop.Data.Application.Store;
 using Shop.Data.Domain.Store.Entities;
 using Shop.Data.Infrastructure.Persistence;
@@ -13,13 +14,15 @@ public sealed class StoreFeedbackApiController(ShopDbContext db) : ControllerBas
 {
     [HttpGet("reviews")]
     public Task<IActionResult> Reviews([FromQuery] string? status, [FromQuery] string? search,
-        [FromQuery] int page = 1, CancellationToken cancellationToken = default) =>
-        ListAsync("reviews", status, search, page, cancellationToken);
+        [FromQuery] int page = 1, [FromQuery] int pageSize = AdminListQuery.DefaultPageSize,
+        CancellationToken cancellationToken = default) =>
+        ListAsync("reviews", status, search, page, pageSize, cancellationToken);
 
     [HttpGet("questions")]
     public Task<IActionResult> Questions([FromQuery] string? status, [FromQuery] string? search,
-        [FromQuery] int page = 1, CancellationToken cancellationToken = default) =>
-        ListAsync("questions", status, search, page, cancellationToken);
+        [FromQuery] int page = 1, [FromQuery] int pageSize = AdminListQuery.DefaultPageSize,
+        CancellationToken cancellationToken = default) =>
+        ListAsync("questions", status, search, page, pageSize, cancellationToken);
 
     [HttpPut("reviews/{id:long}")]
     [ValidateAntiForgeryToken]
@@ -33,11 +36,12 @@ public sealed class StoreFeedbackApiController(ShopDbContext db) : ControllerBas
         CancellationToken cancellationToken) =>
         ModerateAsync(id, "questions", input, cancellationToken);
 
-    private async Task<IActionResult> ListAsync(string type, string? status, string? search, int page,
+    private async Task<IActionResult> ListAsync(string type, string? status, string? search, int page, int pageSize,
         CancellationToken cancellationToken)
     {
-        if (page < 1 || page > 100000 || status is not (null or "pending" or "approved" or "rejected"))
-            return ValidationProblem(detail: "فیلتر یا شمارهٔ صفحه معتبر نیست.", statusCode: 400);
+        if (!AdminListQuery.TryCreate(page, pageSize, search, out AdminPageRequest paging)
+            || status is not (null or "pending" or "approved" or "rejected"))
+            return ValidationProblem(detail: "فیلتر یا صفحه‌بندی معتبر نیست.", statusCode: 400);
         var query = from feedback in db.ProductFeedback.AsNoTracking()
                     join product in db.Products.AsNoTracking() on feedback.IdProduct equals product.Id
                     where feedback.FeedbackType == type
@@ -57,22 +61,17 @@ public sealed class StoreFeedbackApiController(ShopDbContext db) : ControllerBas
                         feedback.RepliedAtUtc
                     };
         if (status is not null) query = query.Where(x => x.Status == status);
-        if (!string.IsNullOrWhiteSpace(search))
+        if (paging.Search.Length > 0)
         {
-            string term = search.Trim();
+            string term = paging.Search;
             query = query.Where(x =>
                 x.StoreProductKey.Contains(term) || x.ProductName.Contains(term) || x.DisplayName.Contains(term) || x.FeedbackText.Contains(term));
         }
 
         int total = await query.CountAsync(cancellationToken);
         var items = await query.OrderByDescending(x => x.CreatedAtUtc).ThenByDescending(x => x.Id)
-            .Skip((page - 1) * 50).Take(50).ToListAsync(cancellationToken);
-        return Ok(new
-        {
-            total,
-            page,
-            pageSize = 50,
-            items = items.Select(item => new
+            .Skip(paging.Offset).Take(paging.PageSize).ToListAsync(cancellationToken);
+        var result = items.Select(item => new
             {
                 item.Id,
                 item.IdProduct,
@@ -86,8 +85,8 @@ public sealed class StoreFeedbackApiController(ShopDbContext db) : ControllerBas
                 item.IsSample,
                 item.CreatedAtUtc,
                 item.RepliedAtUtc
-            })
-        });
+            }).ToArray();
+        return Ok(AdminListQuery.CreateResult(result, total, paging));
     }
 
     private async Task<IActionResult> ModerateAsync(long id, string type, FeedbackModerationInput input,

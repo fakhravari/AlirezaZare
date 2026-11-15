@@ -18,7 +18,7 @@ public sealed class WarehouseReadService(IWarehouseReadRepository repository) : 
         CancellationToken cancellationToken)
     {
         if (page < 1) throw new ArgumentOutOfRangeException(nameof(page));
-        if (pageSize is < 1 or > 200) throw new ArgumentOutOfRangeException(nameof(pageSize));
+        if (pageSize is < 1 or > 100) throw new ArgumentOutOfRangeException(nameof(pageSize));
         return repository.GetStockAsync(warehouseId, salesPlanKey, search?.Trim(), lowStockOnly, page, pageSize,
             cancellationToken);
     }
@@ -33,7 +33,7 @@ public sealed class WarehouseReadService(IWarehouseReadRepository repository) : 
         CancellationToken cancellationToken)
     {
         if (page < 1) throw new ArgumentOutOfRangeException(nameof(page));
-        if (pageSize is < 1 or > 200) throw new ArgumentOutOfRangeException(nameof(pageSize));
+        if (pageSize is < 1 or > 100) throw new ArgumentOutOfRangeException(nameof(pageSize));
         if (warehouseIds.Count == 0) return Task.FromResult<IReadOnlyList<WarehouseStockItem>>([]);
         return repository.GetStockForWarehousesAsync(warehouseIds, salesPlanKey, search?.Trim(), lowStockOnly, page,
             pageSize, cancellationToken);

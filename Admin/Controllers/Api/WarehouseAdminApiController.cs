@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Shop.Admin.Infrastructure;
 using Shop.Data.Domain.Warehouse.Entities;
 using Shop.Data.Application.Warehouse.Contracts;
 using Shop.Data.Application.Warehouse.Models;
@@ -68,14 +69,13 @@ public sealed class WarehouseAdminApiController(IWarehouseReadService warehouseR
 
     [HttpGet("stock")]
     [HttpGet("stock/plans")]
-    [ProducesResponseType<IReadOnlyList<WarehouseStockItem>>(StatusCodes.Status200OK)]
-    public async Task<ActionResult<IReadOnlyList<WarehouseStockItem>>> GetStock(
+    public async Task<IActionResult> GetStock(
         [FromQuery] long? warehouseId,
         [FromQuery] string? salesPlanKey,
         [FromQuery] string? search,
         [FromQuery] bool lowStockOnly = false,
         [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 50,
+        [FromQuery] int pageSize = AdminListQuery.DefaultPageSize,
         CancellationToken cancellationToken = default)
     {
         if (Request.Path.Value?.EndsWith("/stock/plans", StringComparison.OrdinalIgnoreCase) == true)
@@ -83,21 +83,29 @@ public sealed class WarehouseAdminApiController(IWarehouseReadService warehouseR
                 .OrderBy(x => x.DisplayName)
                 .Select(x => new { id = x.StoreSalesPlanKey, name = x.DisplayName })
                 .ToListAsync(cancellationToken));
-        if (page is < 1 or > 100000 || pageSize is < 1 or > 200)
-            return ValidationProblem(detail: "شمارهٔ صفحه باید بین ۱ تا ۱۰۰۰۰۰ و اندازهٔ صفحه بین ۱ تا ۲۰۰ باشد.", statusCode: 400);
+        if (!AdminListQuery.TryCreate(page, pageSize, search, out AdminPageRequest paging))
+            return ValidationProblem(detail: "عبارت جست‌وجو یا صفحه‌بندی معتبر نیست.", statusCode: 400);
+        search = paging.Search;
 
-        if (User.IsInRole("system.full-access"))
-            return Ok(await warehouseReadService.GetStockAsync(
-                warehouseId, salesPlanKey, search, lowStockOnly, page, pageSize, cancellationToken));
-
+        bool fullAccess = User.IsInRole("system.full-access");
         HashSet<long> allowed = GetAllowedWarehouseIds();
-        if (warehouseId.HasValue && !allowed.Contains(warehouseId.Value))
+        if (!fullAccess && warehouseId.HasValue && !allowed.Contains(warehouseId.Value))
             return Forbid();
-        if (warehouseId.HasValue)
-            return Ok(await warehouseReadService.GetStockAsync(
-                warehouseId, salesPlanKey, search, lowStockOnly, page, pageSize, cancellationToken));
-        return Ok(await warehouseReadService.GetStockForWarehousesAsync(
-            allowed.ToArray(), salesPlanKey, search, lowStockOnly, page, pageSize, cancellationToken));
+
+        async Task<IReadOnlyList<WarehouseStockItem>> ReadPage(int requestedPage, int requestedSize)
+        {
+            if (fullAccess || warehouseId.HasValue)
+                return await warehouseReadService.GetStockAsync(warehouseId, salesPlanKey, search, lowStockOnly,
+                    requestedPage, requestedSize, cancellationToken);
+
+            return await warehouseReadService.GetStockForWarehousesAsync(allowed.ToArray(), salesPlanKey, search,
+                lowStockOnly, requestedPage, requestedSize, cancellationToken);
+        }
+
+        IReadOnlyList<WarehouseStockItem> items = await ReadPage(paging.Page, paging.PageSize);
+        bool hasNext = items.Count == paging.PageSize
+            && (await ReadPage(paging.Page + 1, 1)).Count > 0;
+        return Ok(AdminListQuery.CreateLookaheadResult(items, hasNext, paging));
     }
 
     private HashSet<long> GetAllowedWarehouseIds() => User.FindAll("admin_warehouse")

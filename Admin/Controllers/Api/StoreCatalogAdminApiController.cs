@@ -5,6 +5,7 @@ using Shop.Data.Application.Store.Contracts;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Shop.Data.Infrastructure.Persistence;
+using Shop.Admin.Infrastructure;
 using Shop.Data.Domain.Store.Entities;
 
 namespace Shop.Admin.Controllers.Api;
@@ -65,6 +66,91 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
     public sealed class EditorOption { public long Id { get; set; } public string Name { get; set; } = ""; }
     public sealed record ProductEditorInput(string? Name, string? EnglishName, long BrandId, long CategoryId, decimal PriceAmount, decimal DiscountPercent, int MaxPurchaseQuantity);
 
+    [HttpGet("products/manage/{id:long}/benefits")]
+    public async Task<IActionResult> ProductBenefits(long id, CancellationToken cancellationToken)
+    {
+        if (!User.IsInRole("system.full-access")) return Forbid();
+        if (!await db.Products.AnyAsync(x => x.Id == id && x.IsStoreEnabled, cancellationToken)) return NotFound();
+        var items = await db.StoreProductBenefits.AsNoTracking().Where(x => x.IdProduct == id)
+            .OrderBy(x => x.SortOrder).ThenBy(x => x.Id)
+            .Select(x => new ProductBenefitRow(x.Id, x.Title, x.Detail, x.Icon, x.SortOrder, x.IsActive))
+            .ToListAsync(cancellationToken);
+        return Ok(items);
+    }
+
+    [HttpPost("products/manage/{id:long}/benefits")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CreateProductBenefit(long id, [FromBody] ProductBenefitInput input, CancellationToken cancellationToken)
+    {
+        if (!User.IsInRole("system.full-access")) return Forbid();
+        if (!TryNormalizeBenefit(input, out var value, out string error)) return BadRequest(new { title = error });
+        if (!await db.Products.AnyAsync(x => x.Id == id && x.IsStoreEnabled, cancellationToken)) return NotFound();
+        var benefit = new StoreProductBenefit
+        {
+            IdProduct = id,
+            Title = value.Title,
+            Detail = value.Detail,
+            Icon = value.Icon,
+            SortOrder = value.SortOrder,
+            IsActive = value.IsActive
+        };
+        db.StoreProductBenefits.Add(benefit);
+        await db.SaveChangesAsync(cancellationToken);
+        return Ok(new { id = benefit.Id, message = "مزیت کالا ثبت شد." });
+    }
+
+    [HttpPut("products/manage/{id:long}/benefits/{benefitId:long}")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> UpdateProductBenefit(long id, long benefitId, [FromBody] ProductBenefitInput input, CancellationToken cancellationToken)
+    {
+        if (!User.IsInRole("system.full-access")) return Forbid();
+        if (!TryNormalizeBenefit(input, out var value, out string error)) return BadRequest(new { title = error });
+        var benefit = await db.StoreProductBenefits.SingleOrDefaultAsync(x => x.Id == benefitId && x.IdProduct == id, cancellationToken);
+        if (benefit is null) return NotFound();
+        benefit.Title = value.Title;
+        benefit.Detail = value.Detail;
+        benefit.Icon = value.Icon;
+        benefit.SortOrder = value.SortOrder;
+        benefit.IsActive = value.IsActive;
+        await db.SaveChangesAsync(cancellationToken);
+        return Ok(new { message = "مزیت کالا ذخیره شد." });
+    }
+
+    [HttpDelete("products/manage/{id:long}/benefits/{benefitId:long}")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteProductBenefit(long id, long benefitId, CancellationToken cancellationToken)
+    {
+        if (!User.IsInRole("system.full-access")) return Forbid();
+        var benefit = await db.StoreProductBenefits.SingleOrDefaultAsync(x => x.Id == benefitId && x.IdProduct == id, cancellationToken);
+        if (benefit is null) return NotFound();
+        db.StoreProductBenefits.Remove(benefit);
+        await db.SaveChangesAsync(cancellationToken);
+        return Ok(new { message = "مزیت کالا حذف شد." });
+    }
+
+    private static bool TryNormalizeBenefit(ProductBenefitInput input, out NormalizedProductBenefit value, out string error)
+    {
+        string title = input.Title?.Trim() ?? "";
+        string detail = input.Detail?.Trim() ?? "";
+        string icon = input.Icon?.Trim() ?? "";
+        if (title.Length is < 1 or > 300 || title.Any(char.IsControl) || detail.Length > 1000 ||
+            input.SortOrder is < 0 or > 100000 || icon.Length > 100 ||
+            icon.Length > 0 && !System.Text.RegularExpressions.Regex.IsMatch(icon, "^[a-z0-9-]+$"))
+        {
+            value = default;
+            error = "عنوان، توضیح، آیکن یا ترتیب مزیت معتبر نیست.";
+            return false;
+        }
+
+        value = new(title, detail.Length == 0 ? null : detail, icon.Length == 0 ? null : icon, input.SortOrder, input.IsActive);
+        error = "";
+        return true;
+    }
+
+    public sealed record ProductBenefitInput(string? Title, string? Detail, string? Icon, int SortOrder, bool IsActive);
+    public sealed record ProductBenefitRow(long Id, string Title, string? Detail, string? Icon, int SortOrder, bool IsActive);
+    private readonly record struct NormalizedProductBenefit(string Title, string? Detail, string? Icon, int SortOrder, bool IsActive);
+
     private async Task<List<EditorOption>> GetLeafCategoryOptions(CancellationToken cancellationToken)
     {
         var nodes = await db.StoreCategories.AsNoTracking().Where(x => x.IsActive)
@@ -92,11 +178,11 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
     public async Task<IActionResult> ProductDrafts(
         [FromQuery] string? q,
         [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 50,
+        [FromQuery] int pageSize = AdminListQuery.DefaultPageSize,
         CancellationToken cancellationToken = default)
     {
         if (!User.IsInRole("system.full-access")) return Forbid();
-        if (page is < 1 or > 100000 || pageSize is < 1 or > 100 || (q?.Length ?? 0) > 100)
+        if (!AdminListQuery.TryCreate(page, pageSize, q, out AdminPageRequest paging))
             return ValidationProblem(detail: "شماره صفحه، اندازهٔ صفحه یا عبارت جست‌وجو معتبر نیست.", statusCode: 400);
         var drafts = from product in db.Products.AsNoTracking()
                      where product.IsStoreEnabled && !product.IsCatalogActive
@@ -114,15 +200,15 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
                          PriceAmount = product.PriceAmount,
                          HasImage = db.StoreProductMedia.Any(media => media.IdProduct == product.Id && media.MediaKey == "product-" + product.ProductKey)
                      };
-        string query = q?.Trim() ?? "";
+        string query = paging.Search;
         if (query.Length > 0)
             drafts = drafts.Where(x => x.Code.Contains(query) || x.Name.Contains(query) ||
                 (x.BrandName != null && x.BrandName.Contains(query)) || (x.CategoryName != null && x.CategoryName.Contains(query)));
         int total = await drafts.CountAsync(cancellationToken);
         var items = await drafts.OrderByDescending(x => x.Id)
-            .Skip((int)Math.Min((long)(page - 1) * pageSize, int.MaxValue)).Take(pageSize)
+            .Skip(paging.Offset).Take(paging.PageSize)
             .ToListAsync(cancellationToken);
-        return Ok(new { items, total, page, pageSize });
+        return Ok(AdminListQuery.CreateResult(items, total, paging));
     }
 
     [HttpGet("products/create-options")]
@@ -523,44 +609,46 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
         string section,
         [FromQuery] string? q,
         [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 50,
+        [FromQuery] int pageSize = AdminListQuery.DefaultPageSize,
         CancellationToken cancellationToken = default)
     {
-        if (page < 1 || pageSize is < 1 or > 200 || (q?.Length ?? 0) > 100)
+        if (!AdminListQuery.TryCreate(page, pageSize, q, out AdminPageRequest paging))
             return ValidationProblem(detail: "شماره صفحه باید مثبت و اندازهٔ صفحه بین ۱ تا ۲۰۰ باشد.", statusCode: 400);
 
         if (string.Equals(section, "attributes", StringComparison.OrdinalIgnoreCase))
         {
             var attributes = db.StoreAttributeDefinitions.AsNoTracking();
-            string attributeQuery = q?.Trim() ?? "";
+            string attributeQuery = paging.Search;
             if (attributeQuery.Length > 0)
                 attributes = attributes.Where(x => x.AttributeKey.Contains(attributeQuery) || x.Label.Contains(attributeQuery) ||
                     (x.SourceKey != null && x.SourceKey.Contains(attributeQuery)) || (x.FilterKey != null && x.FilterKey.Contains(attributeQuery)));
             int total = await attributes.CountAsync(cancellationToken);
             var items = await attributes.OrderBy(x => x.Id)
-                .Skip((int)Math.Min((long)(page - 1) * pageSize, int.MaxValue)).Take(pageSize)
+                .Skip(paging.Offset).Take(paging.PageSize)
                 .Select(x => new AttributeDefinitionRow(x.AttributeKey, x.Label, x.Icon, x.SourceKey, x.FilterKey, x.IsFilterable, x.IsHighlight, x.IsActive))
                 .ToListAsync(cancellationToken);
-            return Ok(new { total, page, pageSize, items });
+            return Ok(AdminListQuery.CreateResult(items, total, paging));
         }
 
         if (string.Equals(section, "categories", StringComparison.OrdinalIgnoreCase))
         {
             var source = db.StoreCategories.AsNoTracking();
-            string categoryQuery = q?.Trim() ?? "";
+            string categoryQuery = paging.Search;
             if (categoryQuery.Length > 0)
                 source = source.Where(x => x.CategoryKey.Contains(categoryQuery) || x.NameFa.Contains(categoryQuery) || x.NameEn.Contains(categoryQuery));
-            var all = await source.OrderBy(x => x.SortOrder).ThenBy(x => x.Id).ToListAsync(cancellationToken);
+            int total = await source.CountAsync(cancellationToken);
+            var all = await source.OrderBy(x => x.SortOrder).ThenBy(x => x.Id)
+                .Skip(paging.Offset).Take(paging.PageSize).ToListAsync(cancellationToken);
             var parents = await db.StoreCategories.AsNoTracking().ToDictionaryAsync(x => x.Id, x => x.CategoryKey, cancellationToken);
             var rows = all.Select(x => new CategoryRow(x.CategoryKey, x.NameFa, x.NameEn, x.CategoryKey,
-                x.IdParentCategory is long parentId && parents.TryGetValue(parentId, out string? parentKey) ? parentKey : "", x.IsActive));
-            return Ok(Page(rows, page, pageSize, all.Count));
+                x.IdParentCategory is long parentId && parents.TryGetValue(parentId, out string? parentKey) ? parentKey : "", x.IsActive)).ToArray();
+            return Ok(AdminListQuery.CreateResult(rows, total, paging));
         }
 
         if (string.Equals(section, "brands", StringComparison.OrdinalIgnoreCase))
         {
             var brands = db.StoreBrands.AsNoTracking();
-            string brandQuery = q?.Trim() ?? "";
+            string brandQuery = paging.Search;
             if (brandQuery.Length > 0)
                 brands = brands.Where(x => x.BrandKey.Contains(brandQuery) || x.NameFa.Contains(brandQuery) || x.NameEn.Contains(brandQuery));
             int total = await brands.CountAsync(cancellationToken);
@@ -570,14 +658,15 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
                               orderby brand.NameFa, brand.BrandKey
                               select new BrandRow(brand.BrandKey, brand.NameFa, brand.NameEn,
                                   country == null ? "" : country.CountryCode, brand.LogoPath, brand.IsActive))
-                .Skip((int)Math.Min((long)(page - 1) * pageSize, int.MaxValue))
-                .Take(pageSize)
+                .Skip(paging.Offset)
+                .Take(paging.PageSize)
                 .ToListAsync(cancellationToken);
             string cdnBaseUrl = await mediaCdn.GetBaseUrlAsync(cancellationToken);
-            return Ok(new { total, page, pageSize, items = rows.Select(row => row with { LogoUrl = ContentCdn.ToUrl(row.LogoPath, cdnBaseUrl) }) });
+            var items = rows.Select(row => row with { LogoUrl = ContentCdn.ToUrl(row.LogoPath, cdnBaseUrl) }).ToArray();
+            return Ok(AdminListQuery.CreateResult(items, total, paging));
         }
 
-        string query = q?.Trim() ?? "";
+        string query = paging.Search;
         if (!string.Equals(section, "products", StringComparison.OrdinalIgnoreCase)) return NotFound();
         var productSource = from product in db.Products.AsNoTracking()
                             join brand in db.StoreBrands.AsNoTracking().Where(x => x.IsActive)
@@ -594,7 +683,7 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
                 (x.category != null && x.category.NameFa.Contains(query)));
         int productTotal = await productSource.CountAsync(cancellationToken);
         var productRows = await productSource.OrderBy(x => x.product.Name).ThenBy(x => x.product.Id)
-            .Skip((int)Math.Min((long)(page - 1) * pageSize, int.MaxValue)).Take(pageSize)
+            .Skip(paging.Offset).Take(paging.PageSize)
             .Select(x => new
             {
                 x.product.Id,
@@ -622,19 +711,7 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
             return new ProductRow(checked((int)x.Id), x.Code, x.Name, x.EnglishName ?? x.Name,
                 x.BrandName, x.CategoryName, x.Price, stockQuantity, x.DiscountPercent);
         });
-        return Ok(new { items = productItems, total = productTotal, page, pageSize });
-    }
-
-    private static object Page<T>(IEnumerable<T> rows, int page, int pageSize, int? knownTotal = null)
-    {
-        T[] items = rows.ToArray();
-        return new
-        {
-            total = knownTotal ?? items.Length,
-            page,
-            pageSize,
-            items = items.Skip((int)Math.Min((long)(page - 1) * pageSize, items.Length)).Take(pageSize)
-        };
+        return Ok(AdminListQuery.CreateResult(productItems.ToArray(), productTotal, paging));
     }
 
     private static string Text(JsonElement item, string property, string fallback) =>

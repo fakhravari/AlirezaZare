@@ -1,6 +1,7 @@
 using System.Net.Mail;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Shop.Admin.Infrastructure;
 using Shop.Data.Application.Email.Contracts;
 using Shop.Data.Application.Store;
 using Shop.Data.Infrastructure.Persistence;
@@ -13,16 +14,20 @@ namespace Shop.Admin.Controllers.Api;
 public sealed class StoreContactMessagesAdminApiController(ShopDbContext db, IEmailSender emailSender, ILogger<StoreContactMessagesAdminApiController> logger) : ControllerBase
 {
     [HttpGet]
-    public async Task<IActionResult> List([FromQuery] string? status, [FromQuery] string? q, [FromQuery] int page = 1, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> List([FromQuery] string? status, [FromQuery] string? q,
+        [FromQuery] int page = 1, [FromQuery] int pageSize = AdminListQuery.DefaultPageSize,
+        CancellationToken cancellationToken = default)
     {
-        if (page < 1 || page > 100000 || status is not (null or "" or "new" or "read" or "closed")) return ValidationProblem(detail: "فیلتر یا شمارهٔ صفحه معتبر نیست.", statusCode: 400);
+        if (!AdminListQuery.TryCreate(page, pageSize, q, out AdminPageRequest paging)
+            || status is not (null or "" or "new" or "read" or "closed"))
+            return ValidationProblem(detail: "فیلتر یا صفحه‌بندی معتبر نیست.", statusCode: 400);
         var query = db.StoreContactMessages.AsNoTracking().AsQueryable();
         if (!string.IsNullOrEmpty(status)) query = query.Where(x => x.Status == status);
-        if (!string.IsNullOrWhiteSpace(q)) { string term = q.Trim(); query = query.Where(x => x.Name.Contains(term) || x.Phone.Contains(term) || (x.Email != null && x.Email.Contains(term)) || x.Message.Contains(term)); }
+        if (paging.Search.Length > 0) query = query.Where(x => x.Name.Contains(paging.Search) || x.Phone.Contains(paging.Search) || (x.Email != null && x.Email.Contains(paging.Search)) || x.Message.Contains(paging.Search));
         int total = await query.CountAsync(cancellationToken);
-        var items = await query.OrderByDescending(x => x.CreatedAtUtc).ThenByDescending(x => x.Id).Skip((page - 1) * 50).Take(50)
+        var items = await query.OrderByDescending(x => x.CreatedAtUtc).ThenByDescending(x => x.Id).Skip(paging.Offset).Take(paging.PageSize)
             .Select(x => new { x.Id, x.Name, x.Phone, x.Email, x.SubjectKey, x.Message, x.Status, x.AdminReply, x.RepliedAtUtc, x.ReplyEmailSentAtUtc, x.CreatedAtUtc }).ToListAsync(cancellationToken);
-        return Ok(new { total, page, pageSize = 50, items });
+        return Ok(AdminListQuery.CreateResult(items, total, paging));
     }
 
     [HttpPut("{id:long}/status")]
