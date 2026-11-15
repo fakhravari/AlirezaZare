@@ -12,7 +12,7 @@ async function source(relativePath) {
 
 test("store report routes and role permissions share one inherited tree", async () => {
     const migration = await source("Shop/Features/Store/Database/Migrations/091-store-reports-permissions.sql");
-    const controller = await source("Admin/Controllers/Api/StoreReportsAdminApiController.cs");
+    const controller = await source("Admin/Areas/Store/Controllers/Api/StoreReportsAdminApiController.cs");
 
     assert.match(migration, /store\.features\.reports[\s\S]*?store\.manager/);
     assert.match(migration, /store\.reports\.read[\s\S]*?StoreReportsAdminApi[\s\S]*?GetReport/);
@@ -25,7 +25,7 @@ test("store report routes and role permissions share one inherited tree", async 
 });
 
 test("store reports cover four views and restrict inventory to allowed warehouses", async () => {
-    const controller = await source("Admin/Controllers/Api/StoreReportsAdminApiController.cs");
+    const controller = await source("Admin/Areas/Store/Controllers/Api/StoreReportsAdminApiController.cs");
     const view = await source("Admin/Areas/Store/Views/Features/Reports.cshtml");
     const client = await source("Admin/wwwroot/js/admin-store-reports.js");
 

@@ -1,6 +1,6 @@
 # تصویرها و رسانه‌های فروشگاه
 
-assetهای ثابت رابط در `Shop/wwwroot/` و محتوای بارگذاری‌شده از مسیرهای مدیریت رسانه/CDN تأمین می‌شوند. uploadهای پنل از `Admin/Controllers/Api/StoreMediaUploadApiController.cs` و تصاویر محصول از `StoreProductImageApiController.cs` عبور می‌کنند. برای هر نوع فایل، قبل از تغییر storage path تنظیمات محیط و API را بررسی کنید.
+assetهای ثابت رابط در `Shop/wwwroot/` و محتوای بارگذاری‌شده از مسیرهای مدیریت رسانه/CDN تأمین می‌شوند. درخواست‌های upload پنل از `Admin/Areas/Store/Controllers/Api/StoreMediaUploadApiController.cs` و تصاویر محصول از `StoreProductImageApiController.cs` عبور می‌کنند؛ اتصال FTP و خواندن/ارتقای تنظیمات رمز در `Data/Infrastructure/Ftp/FtpMediaUploadService.cs` است. برای هر نوع فایل، قبل از تغییر storage path تنظیمات محیط و API را بررسی کنید.
 
 ## قرارداد استفاده
 
@@ -12,7 +12,7 @@ assetهای ثابت رابط در `Shop/wwwroot/` و محتوای بارگذا�
 - alt را بر اساس کارکرد تصویر بنویسید؛ تصویر تزئینی باید از دسترس‌پذیری مخفی بماند.
 - از ابعاد واقعی asset و `srcset`/lazy loading فعلی پیروی کنید؛ اندازهٔ ثابت را بدون بررسی renderer تعمیم ندهید.
 
-مصرف محصول در `Shop/Views/Product/Details.cshtml` و کارت مشترک؛ هویت/لوگو و نام‌گذاری در Viewها و CDN filter پیگیری می‌شوند. تغییر ظاهر در owner مربوط و `tools/ui-owners.json` ثبت است. بررسی: تصویر غایب، مسیر CDN، نسبت تصویر، موبایل و دسترس‌پذیری.
+مصرف محصول در `Shop/Views/Product/Details.cshtml` و کارت مشترک؛ هویت/لوگو و نام‌گذاری در Viewها و فیلتر مشترک `Data/Helpers/MediaCdnViewDataFilter.cs` پیگیری می‌شوند. تغییر ظاهر در owner مربوط و `tools/ui-owners.json` ثبت است. بررسی: تصویر غایب، مسیر CDN، نسبت تصویر، موبایل و دسترس‌پذیری.
 
 [محتوا](../content/README.md) · [فهرست docs](../README.md)
 

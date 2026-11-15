@@ -5,9 +5,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using System.Threading.RateLimiting;
 using Shop.Admin.Security;
-using Shop.Admin.Filters;
 using Shop.Data.Domain.Admin.Entities;
+using Shop.Data.Helpers;
 using Shop.Data.Infrastructure;
+using Shop.Data.Infrastructure.Ftp;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddScoped<MediaCdnViewDataFilter>();
@@ -41,7 +42,7 @@ builder.Services.AddRateLimiter(options =>
 builder.Services.AddSingleton<PasswordHasher<AdminSystemUser>>();
 builder.Services.AddScoped<AdminAuthentication>();
 builder.Services.AddScoped<AdminCookieEvents>();
-builder.Services.AddScoped<Shop.Admin.Services.FtpMediaStorage>();
+builder.Services.AddScoped<FtpMediaUploadService>();
 builder.Services.Configure<MvcOptions>(options => options.Filters.Add<AdminPermissionFilter>());
 
 builder.Services.AddShopDatabase(builder.Configuration);

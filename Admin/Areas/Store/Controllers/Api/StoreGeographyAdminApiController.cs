@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Shop.Data.Domain.Store.Entities;
 using Shop.Data.Infrastructure.Persistence;
 
-namespace Shop.Admin.Controllers.Api;
+namespace Shop.Admin.Areas.Store.Controllers.Api;
 
 [Area("Store"), ApiController, Authorize(Roles = "system.full-access"), Route("api/admin/store/geography")]
 public sealed class StoreGeographyAdminApiController(ShopDbContext db) : ControllerBase

@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Shop.Data.Infrastructure.Persistence;
 
-namespace Shop.Admin.Controllers.Api;
+namespace Shop.Admin.Areas.Store.Controllers.Api;
 
 [Area("Store")]
 [ApiController]

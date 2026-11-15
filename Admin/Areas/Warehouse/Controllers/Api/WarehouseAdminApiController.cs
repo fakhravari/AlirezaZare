@@ -6,7 +6,8 @@ using Shop.Data.Application.Warehouse.Contracts;
 using Shop.Data.Application.Warehouse.Models;
 using Shop.Data.Infrastructure.Persistence;
 
-namespace Shop.Admin.Controllers.Api;
+using Shop.Data.Helpers;
+namespace Shop.Admin.Areas.Warehouse.Controllers.Api;
 
 [Area("Warehouse")]
 [ApiController]

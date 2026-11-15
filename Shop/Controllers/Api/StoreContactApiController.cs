@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Options;
 using Shop.Data.Application.Email.Contracts;
 using Shop.Data.Domain.Store.Entities;
+using Shop.Data.Helpers.Extensions;
 using Shop.Data.Infrastructure.Persistence;
 using Shop.Models;
 
@@ -87,14 +88,7 @@ public sealed class StoreContactApiController(
 
     private static string NormalizePhone(string? value)
     {
-        var digits = new System.Text.StringBuilder();
-        foreach (char character in value ?? string.Empty)
-        {
-            if (character is >= '0' and <= '9') digits.Append(character);
-            else if (character is >= '۰' and <= '۹') digits.Append((char)('0' + character - '۰'));
-            else if (character is >= '٠' and <= '٩') digits.Append((char)('0' + character - '٠'));
-        }
-        return digits.ToString();
+        return new string((value ?? string.Empty).Fa2En().Where(char.IsAsciiDigit).ToArray());
     }
 
     public sealed record ContactRequest(string? Name, string? Phone, string? Email, string? Subject, string? Message);

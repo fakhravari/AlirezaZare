@@ -24,7 +24,7 @@
 
 ## پنل مدیریت
 
-پنل MVC در `Admin/` از Areas استفاده می‌کند. Views و routeها را زیر `Admin/Areas/**/Controllers/` و `Views/` بیابید؛ APIهای JSON عمدتاً در `Admin/Controllers/Api/` هستند. برای یافتن صفحه از منو/Controller و سپس manifest مالکیت UI استفاده کنید. فهرست حوزه‌ها در [admin README](../admin/README.md) است.
+پنل MVC در `Admin/` از Areas استفاده می‌کند. Views و routeها را زیر `Admin/Areas/**/Controllers/` و `Views/` بیابید؛ APIهای JSON در `Admin/Areas/Store/Controllers/Api/` و `Admin/Areas/Warehouse/Controllers/Api/` کنار کنترلرهای همان حوزه قرار دارند؛ کنترلرهای مشترک به‌صورت مستقل در `Admin/Controllers/` می‌مانند. برای یافتن صفحه از منو/Controller و سپس manifest مالکیت UI استفاده کنید. فهرست حوزه‌ها در [admin README](../admin/README.md) است.
 
 مدیریت پیام‌های فرم تماس از `Store/Features?feature=contact-messages` و APIهای `/api/admin/store/contact-messages` عبور می‌کند؛ مجوزها به صفحهٔ `Store:Features:Index:contact-messages` و endpointهای همان API متصل‌اند.
 

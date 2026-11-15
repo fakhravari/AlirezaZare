@@ -3,8 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Shop.Data.Domain.Warehouse.Entities;
 using Shop.Data.Infrastructure.Persistence;
+using WarehouseEntity = Shop.Data.Domain.Warehouse.Entities.Warehouse;
 
-namespace Shop.Admin.Controllers.Api;
+namespace Shop.Admin.Areas.Warehouse.Controllers.Api;
 
 [Area("Warehouse")]
 [ApiController]
@@ -82,7 +83,7 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
         if (input.CompanyId < 1 || input.WarehouseId < 1 || input.SalesPlanId < 1)
             return ValidationProblem(detail: "شرکت، انبار فروش و طرح سایت را انتخاب کنید.", statusCode: 400);
         if (!User.IsInRole("system.full-access")) return Forbid();
-        Warehouse? warehouse = await db.Warehouses.SingleOrDefaultAsync(x => x.Id == input.WarehouseId
+        WarehouseEntity? warehouse = await db.Warehouses.SingleOrDefaultAsync(x => x.Id == input.WarehouseId
                                                                              && x.IdCompany == input.CompanyId &&
                                                                              x.Company.IsActive &&
                                                                              x.IsActive, cancellationToken);
@@ -131,7 +132,7 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                 company.IsActive = false;
                 break;
             case "warehouses":
-                Warehouse? warehouse = await db.Warehouses.SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
+                WarehouseEntity? warehouse = await db.Warehouses.SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
                 if (warehouse is null) return NotFound();
                 if (!await CanAccessWarehouseAsync(id, cancellationToken)) return Forbid();
                 if (await IsSiteWarehouseAsync(id, cancellationToken))
@@ -287,9 +288,9 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                         return Conflict(new
                         { detail = "انبار متصل به سایت باید تا زمان جابه‌جایی اتصال، انبار فروش بماند." });
                     if (input.IsSiteWarehouse && !User.IsInRole("system.full-access")) return Forbid();
-                    Warehouse entity = id.HasValue
+                    WarehouseEntity entity = id.HasValue
                         ? await db.Warehouses.SingleOrDefaultAsync(x => x.Id == id, cancellationToken) ?? null!
-                        : new Warehouse();
+                        : new WarehouseEntity();
                     if (id.HasValue && entity is null) return NotFound();
                     if (id.HasValue && entity.IsSalesWarehouse && !input.IsSalesWarehouse)
                         return Conflict(new
@@ -297,7 +298,7 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                             detail =
                                 "شرکت فعال باید یک انبار فروش داشته باشد؛ برای انتقال نقش، انبار فروش جایگزین را فعال کنید."
                         });
-                    Warehouse? previousSalesWarehouse = input.IsSalesWarehouse
+                    WarehouseEntity? previousSalesWarehouse = input.IsSalesWarehouse
                         ? await db.Warehouses.SingleOrDefaultAsync(
                             x => x.IdCompany == input.CompanyId && x.IsSalesWarehouse && (!id.HasValue || x.Id != id.Value),
                             cancellationToken)

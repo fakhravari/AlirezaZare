@@ -42,7 +42,7 @@ function assertDatabasePaging(body, label, responsePattern = /AdminListQuery\.Cr
 }
 
 test("catalog product and draft lists page in the database", async () => {
-    const controller = await source("Admin/Controllers/Api/StoreCatalogAdminApiController.cs");
+    const controller = await source("Admin/Areas/Store/Controllers/Api/StoreCatalogAdminApiController.cs");
     const draftMethod = methodBody(controller, "Task<IActionResult> ProductDrafts(");
     const sectionMethod = methodBody(controller, "Task<IActionResult> GetSection(");
 
@@ -56,7 +56,7 @@ test("catalog product and draft lists page in the database", async () => {
 });
 
 test("variant prices and product offers page before materializing rows", async () => {
-    const controller = await source("Admin/Controllers/Api/StoreVariantPricesAdminApiController.cs");
+    const controller = await source("Admin/Areas/Store/Controllers/Api/StoreVariantPricesAdminApiController.cs");
     const prices = methodBody(controller, "Task<IActionResult> List(");
     const offers = methodBody(controller, "Task<IActionResult> ProductOffers(");
 
@@ -67,7 +67,7 @@ test("variant prices and product offers page before materializing rows", async (
 });
 
 test("paid-order dispatch uses bounded pages and stable page ordering", async () => {
-    const controller = await source("Admin/Controllers/Api/StorePaidOrdersDispatchApiController.cs");
+    const controller = await source("Admin/Areas/Store/Controllers/Api/StorePaidOrdersDispatchApiController.cs");
     const list = methodBody(controller, "Task<IActionResult> List(");
 
     assert.match(list, /AdminListQuery\.TryCreate\(page, pageSize, q/);
@@ -76,19 +76,20 @@ test("paid-order dispatch uses bounded pages and stable page ordering", async ()
 });
 
 test("Admin list endpoints share bounded paging, search, response, and Excel export helpers", async () => {
-    const helper = await source("Admin/Infrastructure/AdminListQuery.cs");
-    const newsletter = await source("Admin/Controllers/Api/StoreNewsletterSubscribersAdminApiController.cs");
-    const reports = await source("Admin/Controllers/Api/StoreReportsAdminApiController.cs");
-    const warehouse = await source("Admin/Controllers/Api/WarehouseAdminApiController.cs");
+    const helper = await source("Data/Helpers/AdminListQuery.cs");
+    const excel = await source("Admin/Infrastructure/AdminExcelFileResult.cs");
+    const newsletter = await source("Admin/Areas/Store/Controllers/Api/StoreNewsletterSubscribersAdminApiController.cs");
+    const reports = await source("Admin/Areas/Store/Controllers/Api/StoreReportsAdminApiController.cs");
+    const warehouse = await source("Admin/Areas/Warehouse/Controllers/Api/WarehouseAdminApiController.cs");
 
     assert.match(helper, /DefaultPageSize = 50/);
     assert.match(helper, /MaximumPageSize = 100/);
     assert.match(helper, /MaximumPage = 100_000/);
     assert.match(helper, /MaximumSearchLength = 100/);
-    assert.match(helper, /AdminExcelFileResult/);
-    assert.match(helper, /application\/vnd\.openxmlformats-officedocument\.spreadsheetml\.sheet/);
-    assert.match(helper, /MaximumRowsPerSheet = 1_048_576/);
     assert.match(helper, /ExportBatchSize = 1_000/);
+    assert.match(excel, /AdminExcelFileResult/);
+    assert.match(excel, /application\/vnd\.openxmlformats-officedocument\.spreadsheetml\.sheet/);
+    assert.match(excel, /MaximumRowsPerSheet = 1_048_576/);
     assert.match(newsletter, /AdminListQuery\.TryCreate\(page, pageSize, q/);
     assert.match(newsletter, /AdminListQuery\.CreateResult/);
     assert.match(newsletter, /AdminExcelFileResult/);

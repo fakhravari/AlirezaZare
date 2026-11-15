@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Shop.Data.Application.Store.Contracts;
 
-namespace Shop.Admin.Filters;
+namespace Shop.Data.Helpers;
 
 public sealed class MediaCdnViewDataFilter(IMediaCdnBaseUrlProvider mediaCdn) : IAsyncResultFilter
 {

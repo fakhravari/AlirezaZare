@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
+using Shop.Data.Helpers.Extensions;
 using Shop.Data.Infrastructure.Persistence;
 
 namespace Shop.Controllers.Api;
@@ -94,15 +95,7 @@ public sealed class OrderTrackingApiController(ShopDbContext db) : ControllerBas
 
     private static string NormalizePhone(string? value)
     {
-        var digits = new System.Text.StringBuilder();
-        foreach (char character in value ?? string.Empty)
-        {
-            if (character is >= '0' and <= '9') digits.Append(character);
-            else if (character is >= '۰' and <= '۹') digits.Append((char)('0' + character - '۰'));
-            else if (character is >= '٠' and <= '٩') digits.Append((char)('0' + character - '٠'));
-        }
-
-        string normalized = digits.ToString();
+        string normalized = new string((value ?? string.Empty).Fa2En().Where(char.IsAsciiDigit).ToArray());
         if (normalized.StartsWith("0098", StringComparison.Ordinal) && normalized.Length == 14)
             return "0" + normalized[4..];
         if (normalized.StartsWith("98", StringComparison.Ordinal) && normalized.Length == 12)

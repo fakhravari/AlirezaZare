@@ -5,7 +5,7 @@ using Shop.Data.Infrastructure.Persistence;
 using Shop.Data.Application.Store;
 using Shop.Data.Application.Store.Contracts;
 
-namespace Shop.Admin.Controllers.Api;
+namespace Shop.Admin.Areas.Store.Controllers.Api;
 
 [Area("Store")]
 [ApiController]

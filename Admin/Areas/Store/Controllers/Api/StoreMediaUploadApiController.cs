@@ -3,9 +3,9 @@ using ImageMagick;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Shop.Admin.Services;
 using Shop.Data.Application.Store;
 using Shop.Data.Application.Store.Contracts;
+using Shop.Data.Infrastructure.Ftp;
 using Shop.Data.Infrastructure.Persistence;
 using Shop.Data.Domain.Store.Entities;
 using Shop.Data.Domain.Warehouse.Entities;
@@ -13,13 +13,13 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Xml.Linq;
 
-namespace Shop.Admin.Controllers.Api;
+namespace Shop.Admin.Areas.Store.Controllers.Api;
 
 [Area("Store")]
 [ApiController]
 [Authorize(Roles = "system.full-access")]
 [Route("api/admin/store/media")]
-public sealed class StoreMediaUploadApiController(ShopDbContext db, FtpMediaStorage storage, IMediaCdnBaseUrlProvider mediaCdn, ILogger<StoreMediaUploadApiController> logger) : ControllerBase
+public sealed class StoreMediaUploadApiController(ShopDbContext db, FtpMediaUploadService storage, IMediaCdnBaseUrlProvider mediaCdn, ILogger<StoreMediaUploadApiController> logger) : ControllerBase
 {
     private static readonly IReadOnlyDictionary<string, string> LibraryFolders = new Dictionary<string, string>(StringComparer.Ordinal)
     {

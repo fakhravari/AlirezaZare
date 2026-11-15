@@ -5,16 +5,16 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Shop.Data.Infrastructure.Persistence;
-using Shop.Admin.Services;
 using ImageMagick;
+using Shop.Data.Infrastructure.Ftp;
 
-namespace Shop.Admin.Controllers.Api;
+namespace Shop.Admin.Areas.Store.Controllers.Api;
 
 [Area("Store")]
 [ApiController]
 [Authorize(Roles = "system.full-access")]
 [Route("api/admin/store/product-images")]
-public sealed class StoreProductImageApiController(ShopDbContext db, FtpMediaStorage storage, ILogger<StoreProductImageApiController> logger) : ControllerBase
+public sealed class StoreProductImageApiController(ShopDbContext db, FtpMediaUploadService storage, ILogger<StoreProductImageApiController> logger) : ControllerBase
 {
     [HttpPost("{productId:long}")]
     [ValidateAntiForgeryToken]

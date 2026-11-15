@@ -51,20 +51,20 @@
             "Admin/wwwroot/css/admin-ui.css"
           ],
           "server": [
-            "Admin/Controllers/Api/StoreCatalogAdminApiController.cs",
+            "Admin/Areas/Store/Controllers/Api/StoreCatalogAdminApiController.cs",
             "Admin/Areas/Admin/Controllers/SiteSettingsController.cs",
-            "Admin/Controllers/Api/StoreProductImageApiController.cs",
-            "Admin/Controllers/Api/StoreMediaUploadApiController.cs",
-            "Admin/Controllers/Api/StoreOrdersAdminApiController.cs",
-            "Admin/Controllers/Api/StoreContactMessagesAdminApiController.cs",
-            "Admin/Controllers/Api/StoreAccountMessagesAdminApiController.cs",
-            "Admin/Controllers/Api/StoreCustomersAdminApiController.cs",
-            "Admin/Controllers/Api/StoreFaqAdminApiController.cs",
-            "Admin/Controllers/Api/StoreMagazineAdminApiController.cs",
-            "Admin/Controllers/Api/StoreServicePagesAdminApiController.cs",
-            "Admin/Controllers/Api/StoreCategoryContentApiController.cs",
-            "Admin/Controllers/Api/PaymentInstitutionsAdminApiController.cs",
-            "Admin/Controllers/Api/WarehouseAdminApiController.cs",
+            "Admin/Areas/Store/Controllers/Api/StoreProductImageApiController.cs",
+            "Admin/Areas/Store/Controllers/Api/StoreMediaUploadApiController.cs",
+            "Admin/Areas/Store/Controllers/Api/StoreOrdersAdminApiController.cs",
+            "Admin/Areas/Store/Controllers/Api/StoreContactMessagesAdminApiController.cs",
+            "Admin/Areas/Store/Controllers/Api/StoreAccountMessagesAdminApiController.cs",
+            "Admin/Areas/Store/Controllers/Api/StoreCustomersAdminApiController.cs",
+            "Admin/Areas/Store/Controllers/Api/StoreFaqAdminApiController.cs",
+            "Admin/Areas/Store/Controllers/Api/StoreMagazineAdminApiController.cs",
+            "Admin/Areas/Store/Controllers/Api/StoreServicePagesAdminApiController.cs",
+            "Admin/Areas/Store/Controllers/Api/StoreCategoryContentApiController.cs",
+            "Admin/Areas/Store/Controllers/Api/PaymentInstitutionsAdminApiController.cs",
+            "Admin/Areas/Warehouse/Controllers/Api/WarehouseAdminApiController.cs",
             "Data/Domain/Store/Entities/StoreAttributeDefinition.cs",
             "Data/Domain/Store/Entities/StoreContactMessage.cs",
             "Data/Domain/Account/Entities/AccountMessage.cs",
@@ -96,7 +96,7 @@
             "Admin/wwwroot/js/admin-variant-prices.js"
           ],
           "server": [
-            "Admin/Controllers/Api/StoreVariantPricesAdminApiController.cs",
+            "Admin/Areas/Store/Controllers/Api/StoreVariantPricesAdminApiController.cs",
             "Admin/Areas/Store/Controllers/FeaturesController.cs"
           ]
         },
@@ -112,7 +112,7 @@
           ],
           "server": [
             "Admin/Areas/Admin/Controllers/SiteSettingsController.cs",
-            "Admin/Controllers/Api/StoreMediaUploadApiController.cs"
+            "Admin/Areas/Store/Controllers/Api/StoreMediaUploadApiController.cs"
           ]
         },
         "store-reports": {
@@ -123,7 +123,7 @@
             "Admin/wwwroot/js/admin-store-reports.js"
           ],
           "server": [
-            "Admin/Controllers/Api/StoreReportsAdminApiController.cs",
+            "Admin/Areas/Store/Controllers/Api/StoreReportsAdminApiController.cs",
             "Admin/Areas/Store/Features/StoreAdminFeatureCatalog.cs",
             "Admin/Areas/Store/Controllers/FeaturesController.cs"
           ],

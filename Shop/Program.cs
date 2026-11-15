@@ -2,11 +2,12 @@ using System.Text.Encodings.Web;
 using System.Text.Unicode;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Identity;
+using Shop.Data.Helpers;
 using Shop.Data.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddScoped<Shop.Filters.MediaCdnViewDataFilter>();
-builder.Services.AddControllersWithViews(options => options.Filters.AddService<Shop.Filters.MediaCdnViewDataFilter>());
+builder.Services.AddScoped<MediaCdnViewDataFilter>();
+builder.Services.AddControllersWithViews(options => options.Filters.AddService<MediaCdnViewDataFilter>());
 builder.Services.AddAntiforgery(options => options.HeaderName = "RequestVerificationToken");
 builder.Services.AddAuthorization();
 builder.Services.AddAuthentication("ShopCookie").AddCookie("ShopCookie", options =>

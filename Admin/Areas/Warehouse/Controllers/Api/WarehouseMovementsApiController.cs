@@ -3,7 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using Shop.Admin.Infrastructure;
 using Shop.Data.Infrastructure.Persistence;
 
-namespace Shop.Admin.Controllers.Api;
+using Shop.Data.Helpers;
+namespace Shop.Admin.Areas.Warehouse.Controllers.Api;
 
 [Area("Warehouse")]
 [ApiController]

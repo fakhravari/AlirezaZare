@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Shop.Data.Domain.Store.Entities;
 using Shop.Data.Infrastructure.Persistence;
 
-namespace Shop.Admin.Controllers.Api;
+namespace Shop.Admin.Areas.Store.Controllers.Api;
 
 [ApiController]
 [Authorize(Roles = "system.full-access")]

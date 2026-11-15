@@ -8,7 +8,8 @@ using Shop.Data.Infrastructure.Persistence;
 using Shop.Admin.Infrastructure;
 using Shop.Data.Domain.Store.Entities;
 
-namespace Shop.Admin.Controllers.Api;
+using Shop.Data.Helpers;
+namespace Shop.Admin.Areas.Store.Controllers.Api;
 
 [Area("Store")]
 [ApiController]

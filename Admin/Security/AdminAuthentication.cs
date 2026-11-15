@@ -90,10 +90,7 @@ public sealed class AdminAuthentication(ShopDbContext db, PasswordHasher<AdminSy
             : $"{area}:{controller}:{action}:{featureKey}";
 }
 
-public sealed class AdminBootstrapper(
-    IServiceScopeFactory scopeFactory,
-    IConfiguration configuration,
-    ILogger<AdminBootstrapper> logger) : IHostedService
+public sealed class AdminBootstrapper(IServiceScopeFactory scopeFactory, IConfiguration configuration, ILogger<AdminBootstrapper> logger) : IHostedService
 {
     public async Task StartAsync(CancellationToken cancellationToken)
     {
@@ -199,10 +196,8 @@ public sealed class AdminCookieEvents(ShopDbContext db) : CookieAuthenticationEv
 
     private static bool ClaimsMatch(ClaimsPrincipal current, ClaimsPrincipal refreshed)
     {
-        string[] currentClaims = current.Claims.Select(claim => claim.Type + "\0" + claim.Value)
-            .OrderBy(value => value, StringComparer.Ordinal).ToArray();
-        string[] refreshedClaims = refreshed.Claims.Select(claim => claim.Type + "\0" + claim.Value)
-            .OrderBy(value => value, StringComparer.Ordinal).ToArray();
+        string[] currentClaims = current.Claims.Select(claim => claim.Type + "\0" + claim.Value).OrderBy(value => value, StringComparer.Ordinal).ToArray();
+        string[] refreshedClaims = refreshed.Claims.Select(claim => claim.Type + "\0" + claim.Value).OrderBy(value => value, StringComparer.Ordinal).ToArray();
         return currentClaims.SequenceEqual(refreshedClaims, StringComparer.Ordinal);
     }
 
@@ -220,11 +215,12 @@ public sealed class AdminPermissionFilter : IAsyncAuthorizationFilter
         if (context.Filters.Any(filter => filter is IAllowAnonymousFilter))
             return Task.CompletedTask;
 
-        RouteValueDictionary route = context.RouteData.Values;
+        var route = context.RouteData.Values;
         string area = Convert.ToString(route.GetValueOrDefault("area")) ?? "";
         string controller = Convert.ToString(route.GetValueOrDefault("controller")) ?? "";
         string action = Convert.ToString(route.GetValueOrDefault("action")) ?? "";
         string? feature = Convert.ToString(route.GetValueOrDefault("feature"));
+
         if (string.IsNullOrWhiteSpace(feature)) feature = context.HttpContext.Request.Query["feature"].FirstOrDefault();
         if (string.IsNullOrWhiteSpace(feature)
             && string.Equals(area, "Admin", StringComparison.OrdinalIgnoreCase)
@@ -234,8 +230,7 @@ public sealed class AdminPermissionFilter : IAsyncAuthorizationFilter
             string? section = context.HttpContext.Request.Query["section"].FirstOrDefault();
             feature = string.IsNullOrWhiteSpace(section) ? "users" : section;
         }
-        if (string.Equals(area, "Admin", StringComparison.OrdinalIgnoreCase)
-            && string.Equals(controller, "UsersApi", StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(area, "Admin", StringComparison.OrdinalIgnoreCase) && string.Equals(controller, "UsersApi", StringComparison.OrdinalIgnoreCase))
         {
             string? section = action switch
             {
@@ -256,7 +251,8 @@ public sealed class AdminPermissionFilter : IAsyncAuthorizationFilter
             }
         }
         if (string.Equals(controller, "Auth", StringComparison.OrdinalIgnoreCase)
-            || (string.IsNullOrEmpty(area) && string.Equals(controller, "Home", StringComparison.OrdinalIgnoreCase)))
+            || (string.IsNullOrEmpty(area)
+            && string.Equals(controller, "Home", StringComparison.OrdinalIgnoreCase)))
             return Task.CompletedTask;
         string required = AdminAuthentication.RoutePermission(area, controller, action, feature);
         ClaimsPrincipal user = context.HttpContext.User;

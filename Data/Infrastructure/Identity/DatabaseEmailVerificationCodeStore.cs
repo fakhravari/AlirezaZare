@@ -2,7 +2,6 @@ using System.Data;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
 using Shop.Data.Application.Account.Contracts;
 using Shop.Data.Domain.Account.Entities;
 using Shop.Data.Infrastructure.Persistence;
@@ -20,14 +19,10 @@ public sealed class DatabaseEmailVerificationCodeStore(ShopDbContext db) : IEmai
             throw new ArgumentOutOfRangeException(nameof(lifetimeMinutes),
                 "Email verification code lifetime must be between 1 and 1440 minutes.");
 
-        await using var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable,
-            cancellationToken);
-        await AcquireEmailLockAsync(email, cancellationToken);
+        await using var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
         DateTime now = DateTime.UtcNow;
-        await db.EmailVerificationCodes.Where(item => item.ExpiresAtUtc <= now)
-            .ExecuteDeleteAsync(cancellationToken);
-        EmailVerificationCode? existing = await db.EmailVerificationCodes.SingleOrDefaultAsync(
-            item => item.Email == email, cancellationToken);
+        await db.EmailVerificationCodes.Where(item => item.ExpiresAtUtc <= now).ExecuteDeleteAsync(cancellationToken);
+        EmailVerificationCode? existing = await db.EmailVerificationCodes.SingleOrDefaultAsync(item => item.Email == email, cancellationToken);
         if (existing is not null && existing.ExpiresAtUtc > now)
         {
             TimeSpan retryAfter = existing.ExpiresAtUtc - now;
@@ -53,21 +48,15 @@ public sealed class DatabaseEmailVerificationCodeStore(ShopDbContext db) : IEmai
 
     public async Task RemoveAsync(string email, CancellationToken cancellationToken)
     {
-        await using var transaction = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable,
-            cancellationToken);
-        await AcquireEmailLockAsync(email, cancellationToken);
-        await db.EmailVerificationCodes.Where(item => item.Email == email)
-            .ExecuteDeleteAsync(cancellationToken);
+        await using var transaction = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, cancellationToken);
+        await db.EmailVerificationCodes.Where(item => item.Email == email).ExecuteDeleteAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
     }
 
     public async Task<bool> VerifyAsync(string email, string code, CancellationToken cancellationToken)
     {
-        await using var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable,
-            cancellationToken);
-        await AcquireEmailLockAsync(email, cancellationToken);
-        EmailVerificationCode? entry = await db.EmailVerificationCodes.SingleOrDefaultAsync(
-            item => item.Email == email, cancellationToken);
+        await using var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
+        EmailVerificationCode? entry = await db.EmailVerificationCodes.SingleOrDefaultAsync(item => item.Email == email, cancellationToken);
         if (entry is null)
         {
             await transaction.CommitAsync(cancellationToken);
@@ -98,25 +87,4 @@ public sealed class DatabaseEmailVerificationCodeStore(ShopDbContext db) : IEmai
 
     private static byte[] Hash(string code) => SHA256.HashData(Encoding.UTF8.GetBytes(code));
 
-    private async Task AcquireEmailLockAsync(string email, CancellationToken cancellationToken)
-    {
-        string resource = "EmailVerificationCode:" + Convert.ToHexString(Hash(email));
-        await using var command = db.Database.GetDbConnection().CreateCommand();
-        command.Transaction = db.Database.CurrentTransaction?.GetDbTransaction()
-                             ?? throw new InvalidOperationException("Email verification requires an active transaction.");
-        command.CommandText = "DECLARE @lockResult int; " +
-                              "EXEC @lockResult = sys.sp_getapplock @Resource = @resource, " +
-                              "@LockMode = N'Exclusive', @LockOwner = N'Transaction', @LockTimeout = 10000; " +
-                              "SELECT @lockResult;";
-        var parameter = command.CreateParameter();
-        parameter.ParameterName = "@resource";
-        parameter.DbType = DbType.String;
-        parameter.Size = 100;
-        parameter.Value = resource;
-        command.Parameters.Add(parameter);
-
-        object? result = await command.ExecuteScalarAsync(cancellationToken);
-        if (result is null || Convert.ToInt32(result) < 0)
-            throw new TimeoutException("Could not acquire the email verification lock.");
-    }
 }
