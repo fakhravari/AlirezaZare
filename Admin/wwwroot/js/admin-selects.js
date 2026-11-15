@@ -5,10 +5,23 @@
     if (!$?.fn?.select2) return;
 
     const selector = "select:not([data-native-select])";
+    const longOptionLength = 36;
+
+    function prepareModalWidth(select) {
+        const modal = select.closest(".modal");
+        if (!modal) return;
+
+        const hasLongOption = [...select.options].some(option => option.textContent.trim().length > longOptionLength);
+        if (!hasLongOption) return;
+
+        select.closest(".admin-modal-field")?.classList.add("admin-modal-field-wide");
+        modal.querySelector(".modal-dialog")?.classList.add("admin-modal-wide");
+    }
 
     function refresh(select) {
-        if (select instanceof HTMLSelectElement && $(select).hasClass("select2-hidden-accessible"))
-            $(select).trigger("change.select2");
+        if (!(select instanceof HTMLSelectElement)) return;
+        prepareModalWidth(select);
+        if ($(select).hasClass("select2-hidden-accessible")) $(select).trigger("change.select2");
     }
 
     function initialize(root) {
@@ -17,11 +30,14 @@
         if (root.querySelectorAll) selects.push(...root.querySelectorAll(selector));
 
         for (const select of selects) {
+            const modal = select.closest(".modal");
+            if (modal && !modal.classList.contains("show")) continue;
+            prepareModalWidth(select);
+
             if ($(select).hasClass("select2-hidden-accessible")) {
                 refresh(select);
                 continue;
             }
-            const modal = select.closest(".modal");
             $(select).select2({
                 dir: "rtl",
                 language: "fa",
@@ -42,8 +58,7 @@
         }
     }).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["selected", "disabled"] });
 
-    document.addEventListener("show.bs.modal", event => initialize(event.target));
-    document.addEventListener("shown.bs.modal", event => event.target.querySelectorAll(selector).forEach(refresh));
+    document.addEventListener("shown.bs.modal", event => initialize(event.target));
     document.addEventListener("reset", event => setTimeout(() => event.target.querySelectorAll?.(selector).forEach(refresh), 0), true);
     document.addEventListener("invalid", event => {
         const select = event.target;

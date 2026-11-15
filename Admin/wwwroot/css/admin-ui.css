@@ -782,6 +782,8 @@
 .select2-container--default .select2-selection--single .select2-selection__rendered {
     padding: .38rem .7rem .38rem 2rem;
     line-height: 1.5;
+    white-space: normal;
+    overflow-wrap: anywhere;
 }
 
 .select2-container--default .select2-selection--single .select2-selection__arrow {
@@ -816,6 +818,8 @@
 
 .select2-container--default .select2-results__option {
     padding: .5rem .7rem;
+    white-space: normal;
+    overflow-wrap: anywhere;
 }
 
 .select2-container--default .select2-results__option--highlighted[aria-selected] {
