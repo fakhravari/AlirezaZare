@@ -39,6 +39,37 @@
         if (event.target instanceof HTMLElement) arrangeModalFields(event.target);
     });
 
+    function validationLabel(control) {
+        const label = control.labels?.[0]?.textContent || control.getAttribute("aria-label") || control.placeholder || control.name;
+        return (label || "این فیلد").replace(/[：:：*]+$/u, "").replace(/\s+/gu, " ").trim();
+    }
+
+    function setPersianValidationMessage(control) {
+        if (!(control instanceof HTMLInputElement || control instanceof HTMLSelectElement || control instanceof HTMLTextAreaElement)) return;
+        control.setCustomValidity("");
+        if (control.validity.valid) return;
+
+        const label = validationLabel(control);
+        const validity = control.validity;
+        let message = "";
+        if (validity.valueMissing) message = `${label} را وارد یا انتخاب کنید.`;
+        else if (validity.typeMismatch && control.type === "email") message = `قالب ${label} معتبر نیست.`;
+        else if (validity.typeMismatch && control.type === "url") message = `نشانی ${label} معتبر نیست.`;
+        else if (validity.patternMismatch) message = `قالب ${label} با الگوی خواسته‌شده مطابقت ندارد.`;
+        else if (validity.tooShort) message = `${label} باید دست‌کم ${control.minLength} نویسه باشد.`;
+        else if (validity.tooLong) message = `${label} نباید بیشتر از ${control.maxLength} نویسه باشد.`;
+        else if (validity.rangeUnderflow) message = `مقدار ${label} نباید کمتر از ${control.min} باشد.`;
+        else if (validity.rangeOverflow) message = `مقدار ${label} نباید بیشتر از ${control.max} باشد.`;
+        else if (validity.stepMismatch) message = `مقدار ${label} با گام مجاز سازگار نیست.`;
+        else if (validity.badInput) message = `مقدار واردشده برای ${label} معتبر نیست.`;
+
+        if (message) control.setCustomValidity(message);
+    }
+
+    document.addEventListener("input", event => setPersianValidationMessage(event.target));
+    document.addEventListener("change", event => setPersianValidationMessage(event.target));
+    document.addEventListener("invalid", event => setPersianValidationMessage(event.target), true);
+
     document.addEventListener("click", event => {
         if (!(event.target instanceof Element)) return;
         const collapseButton = event.target.closest("[data-admin-panel-collapse]");
