@@ -80,6 +80,7 @@
             window.AdminFeedback?.initialize(content);
             window.AdminContactMessages?.initialize(content);
             window.AdminNewsletterSubscribers?.initialize(content);
+            window.AdminStoreReports?.initialize(content);
             window.AdminAccountMessages?.initialize(content);
             window.AdminVariantPrices?.initialize(content);
             window.AdminGeography?.initialize(content);
@@ -123,6 +124,7 @@
             window.AdminFeedback?.initialize(content);
             window.AdminContactMessages?.initialize(content);
             window.AdminNewsletterSubscribers?.initialize(content);
+            window.AdminStoreReports?.initialize(content);
             window.AdminAccountMessages?.initialize(content);
             window.AdminVariantPrices?.initialize(content);
             window.AdminGeography?.initialize(content);
@@ -137,6 +139,7 @@
         window.AdminFeedback?.initialize(content);
         window.AdminContactMessages?.initialize(content);
             window.AdminNewsletterSubscribers?.initialize(content);
+            window.AdminStoreReports?.initialize(content);
         window.AdminAccountMessages?.initialize(content);
         window.AdminVariantPrices?.initialize(content);
         window.AdminGeography?.initialize(content);

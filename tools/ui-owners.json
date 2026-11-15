@@ -28,7 +28,8 @@
             "Admin/Areas/Warehouse/Views/Warehouses/Index.cshtml",
             "Admin/Areas/Warehouse/Views/Features/Documents.cshtml",
             "Admin/Areas/Warehouse/Views/Features/Movements.cshtml",
-            "Admin/Areas/Store/Controllers/CatalogController.cs"
+            "Admin/Areas/Store/Controllers/CatalogController.cs",
+            "Admin/Areas/Store/Views/Features/Reports.cshtml"
           ],
           "js": [
             "Admin/wwwroot/lib/bootstrap/bootstrap.bundle.min.js",
@@ -111,6 +112,25 @@
           "server": [
             "Admin/Areas/Admin/Controllers/SiteSettingsController.cs",
             "Admin/Controllers/Api/StoreMediaUploadApiController.cs"
+          ]
+        },
+        "store-reports": {
+          "markup": [
+            "Admin/Areas/Store/Views/Features/Reports.cshtml"
+          ],
+          "js": [
+            "Admin/wwwroot/js/admin-store-reports.js"
+          ],
+          "server": [
+            "Admin/Controllers/Api/StoreReportsAdminApiController.cs",
+            "Admin/Areas/Store/Features/StoreAdminFeatureCatalog.cs",
+            "Admin/Areas/Store/Controllers/FeaturesController.cs"
+          ],
+          "data": [
+            "Data/Domain/Account/Entities/AccountProfile.cs",
+            "Data/Domain/Warehouse/Entities/StockBalance.cs",
+            "Data/Domain/Warehouse/Entities/WarehouseDocumentEntities.cs",
+            "Data/Infrastructure/Persistence/ShopDbContext.cs"
           ]
         }
       }

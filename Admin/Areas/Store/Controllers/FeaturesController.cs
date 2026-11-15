@@ -34,6 +34,8 @@ public sealed class FeaturesController : Controller
         }
         if (page.FeatureId == "newsletter-subscribers")
             return View("~/Areas/Store/Views/Features/NewsletterSubscribers.cshtml", page);
+        if (page.FeatureId == "reports")
+            return View("~/Areas/Store/Views/Features/Reports.cshtml", page);
         if (page.FeatureId == "contact-messages")
             return View("~/Areas/Store/Views/Features/ContactMessages.cshtml", page);
         if (page.FeatureId == "account-messages")

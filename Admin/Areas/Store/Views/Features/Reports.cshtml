@@ -1,0 +1,48 @@
+@model Shop.Admin.Models.FeaturePageViewModel
+<div class="admin-page" data-admin-store-reports data-api="/api/admin/store/reports">
+    @await Html.PartialAsync("_AdminPageIntro", (Model.Title, Model.Description))
+    @Html.AntiForgeryToken()
+
+    <section class="panel panel-inverse" aria-labelledby="store-reports-title">
+        <div class="panel-heading d-flex flex-wrap align-items-center justify-content-between gap-2">
+            <h2 class="panel-title" id="store-reports-title">گزارشات فروشگاه</h2>
+            <a class="btn btn-sm btn-default" data-report-export href="/api/admin/store/reports/export?type=sales">
+                <i class="fa fa-file-csv me-1" aria-hidden="true"></i>خروجی CSV
+            </a>
+        </div>
+        <div class="panel-body">
+            <nav class="nav nav-pills gap-2 mb-4" aria-label="نوع گزارش" data-report-tabs>
+                <button class="nav-link active" type="button" data-report-tab="sales" aria-pressed="true">فروش و سفارش‌ها</button>
+                <button class="nav-link" type="button" data-report-tab="products" aria-pressed="false">عملکرد کالاها</button>
+                <button class="nav-link" type="button" data-report-tab="inventory" aria-pressed="false">موجودی و گردش انبار</button>
+                <button class="nav-link" type="button" data-report-tab="customers" aria-pressed="false">مشتریان</button>
+            </nav>
+
+            <form class="admin-filter-bar d-flex flex-wrap align-items-end gap-2 mb-4" data-report-filter>
+                <div><label class="form-label" for="store-report-from">از تاریخ</label><input class="form-control" id="store-report-from" name="from" type="date" required /></div>
+                <div><label class="form-label" for="store-report-to">تا تاریخ</label><input class="form-control" id="store-report-to" name="to" type="date" required /></div>
+                <div data-report-warehouse-filter hidden>
+                    <label class="form-label" for="store-report-warehouse">شرکت / انبار</label>
+                    <select class="form-select" id="store-report-warehouse" name="warehouseId"><option value="">همهٔ انبارهای مجاز</option></select>
+                </div>
+                <button class="btn btn-primary" type="submit"><i class="fa fa-filter me-1" aria-hidden="true"></i>اعمال فیلتر</button>
+                <button class="btn btn-default" type="button" data-report-reset>۳۰ روز اخیر</button>
+            </form>
+
+            <div class="row g-3 mb-4" data-report-summary aria-live="polite"></div>
+            <p class="small text-muted mb-3" data-report-note></p>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover align-middle" data-admin-datatable>
+                    <thead><tr data-report-headings></tr></thead>
+                    <tbody data-report-rows></tbody>
+                </table>
+            </div>
+            <div class="d-flex align-items-center justify-content-between gap-2 mt-3" data-report-pagination hidden>
+                <button type="button" class="btn btn-sm btn-default" data-report-page="-1">صفحهٔ قبل</button>
+                <span class="small text-muted" data-report-page-label></span>
+                <button type="button" class="btn btn-sm btn-default" data-report-page="1">صفحهٔ بعد</button>
+            </div>
+            <div class="small text-muted" data-report-status role="status" aria-live="polite"></div>
+        </div>
+    </section>
+</div>
