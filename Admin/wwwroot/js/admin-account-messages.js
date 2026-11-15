@@ -14,7 +14,10 @@
             const rows = page.querySelector("[data-account-message-rows]"); rows.replaceChildren();
             for (const item of data.items || []) {
                 const row = document.createElement("tr");
-                [new Date(item.createdAtUtc).toLocaleString("fa-IR"), `${item.firstName} ${item.lastName}`, item.email, item.title, categoryLabels[item.category] || item.category, item.isRead ? "خوانده‌شده" : "خوانده‌نشده", item.body].forEach(value => row.append(el("td", value)));
+                [new Date(item.createdAtUtc).toLocaleString("fa-IR"), `${item.firstName} ${item.lastName}`, item.email, item.title, categoryLabels[item.category] || item.category, item.isRead ? "خوانده‌شده" : "خوانده‌نشده"].forEach(value => row.append(el("td", value)));
+                const body = document.createElement("td");
+                body.innerHTML = item.body || "";
+                row.append(body);
                 rows.append(row);
             }
             page.querySelector("[data-account-message-count]").textContent = `${number.format(data.total || 0)} پیام`;

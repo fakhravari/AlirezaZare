@@ -141,6 +141,7 @@
         const roleId = Number(page.querySelector("[data-role-select]").value);
         const role = byId(data.roles, roleId);
         const save = page.querySelector("[data-role-save]");
+        save.dataset.adminConfirm = "مجوزهای این نقش ذخیره شوند؟";
         save.disabled = !role || role.roleKey === "system.full-access";
         tree.replaceChildren();
         const childrenByParent = new Map();
@@ -282,7 +283,7 @@
         const old = document.getElementById("admin-password-modal");
         old?.remove();
         const wrapper = document.createElement("div");
-        wrapper.innerHTML = `<div class="modal fade" id="admin-password-modal" tabindex="-1" aria-labelledby="admin-password-title" aria-hidden="true"><div class="modal-dialog"><form class="modal-content" data-password-form><div class="modal-header"><h2 class="modal-title fs-5" id="admin-password-title">تغییر گذرواژه: ${escapeHtml(user.userName)}</h2><button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="بستن"></button></div><div class="modal-body"><label class="form-label" for="admin-new-password">گذرواژهٔ جدید</label><input class="form-control" id="admin-new-password" name="password" type="password" maxlength="200" autocomplete="new-password" required /><small class="form-text">هر گذرواژهٔ غیرخالی تا ۲۰۰ نویسه پذیرفته می‌شود.</small></div><div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button class="btn btn-primary" type="submit">ذخیرهٔ گذرواژه</button></div></form></div></div>`;
+        wrapper.innerHTML = `<div class="modal fade" id="admin-password-modal" tabindex="-1" aria-labelledby="admin-password-title" aria-hidden="true"><div class="modal-dialog"><form class="modal-content" data-password-form data-admin-confirm="گذرواژهٔ کاربر تغییر کند؟"><div class="modal-header"><h2 class="modal-title fs-5" id="admin-password-title">تغییر گذرواژه: ${escapeHtml(user.userName)}</h2><button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="بستن"></button></div><div class="modal-body"><label class="form-label" for="admin-new-password">گذرواژهٔ جدید</label><input class="form-control" id="admin-new-password" name="password" type="password" maxlength="200" autocomplete="new-password" required /><small class="form-text">هر گذرواژهٔ غیرخالی تا ۲۰۰ نویسه پذیرفته می‌شود.</small></div><div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button class="btn btn-primary" type="submit">ذخیرهٔ گذرواژه</button></div></form></div></div>`;
         const node = wrapper.firstElementChild;
         document.body.append(node);
         const passwordModal = window.bootstrap.Modal.getOrCreateInstance(node);

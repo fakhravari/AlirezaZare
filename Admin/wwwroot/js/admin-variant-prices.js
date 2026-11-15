@@ -41,7 +41,7 @@
             active.type = "checkbox"; active.checked = draft?.active ?? (item.isEnabled !== false); active.disabled = page.dataset.canEdit !== "true"; activeText.textContent = " فعال"; activeLabel.append(active, activeText); activeCell.append(activeLabel); row.append(activeCell);
             const rememberDraft = () => page._variantPriceDrafts.set(key, { amount: amount.value, discount: discount.value, active: active.checked });
             amount.addEventListener("input", rememberDraft); discount.addEventListener("input", rememberDraft); active.addEventListener("change", rememberDraft);
-            const actions = document.createElement("td"), save = document.createElement("button"); save.type = "button"; save.className = "btn btn-sm btn-primary"; save.textContent = "ذخیره"; save.disabled = page.dataset.canEdit !== "true";
+            const actions = document.createElement("td"), save = document.createElement("button"); save.type = "button"; save.className = "btn btn-sm btn-primary"; save.textContent = "ذخیره"; save.dataset.adminConfirm = "قیمت و وضعیت طرح برای این تنوع ذخیره شود؟"; save.disabled = page.dataset.canEdit !== "true";
             ui.withIcon(save, "fa-floppy-disk");
             let clear;
             const setBusy = busy => { if (busy) page._variantPriceSaving.add(key); else page._variantPriceSaving.delete(key); const disabled = busy || page.dataset.canEdit !== "true"; save.disabled = disabled; amount.disabled = disabled; discount.disabled = disabled; active.disabled = disabled; if (clear) clear.disabled = disabled; };
@@ -62,7 +62,7 @@
             });
             actions.append(save);
             if (item.priceAmount != null) {
-                clear = document.createElement("button"); clear.type = "button"; clear.className = "btn btn-sm btn-default ms-1"; clear.textContent = "قیمت پایه"; clear.disabled = page.dataset.canEdit !== "true";
+                clear = document.createElement("button"); clear.type = "button"; clear.className = "btn btn-sm btn-default ms-1"; clear.textContent = "قیمت پایه"; clear.dataset.adminConfirm = "قیمت اختصاصی این تنوع حذف شود؟"; clear.disabled = page.dataset.canEdit !== "true";
                 ui.withIcon(clear, "fa-rotate-left");
                 clear.addEventListener("click", async () => { if (clear.disabled) return; setBusy(true); try { await request(page, `${page.dataset.api}/${item.variantId}/${encodeURIComponent(item.salesPlanId)}`, "DELETE"); page._variantPriceDrafts.delete(key); ui.notify("قیمت اختصاصی حذف شد.", "success"); await load(page); } catch (error) { ui.notify(error.message || "حذف قیمت ناموفق بود.", "danger"); } finally { setBusy(false); render(page); } }); actions.append(clear);
             }
@@ -138,7 +138,7 @@
             active.type = "checkbox"; active.checked = draft?.active ?? (item.isEnabled ?? true); activeLabel.append(active, document.createTextNode(" فعال")); activeCell.append(activeLabel); row.append(activeCell);
             const remember = () => page._offerDrafts.set(key, { amount: amount.value, discount: discount.value, limit: limit.value, active: active.checked });
             for (const input of [amount, discount, limit]) input.addEventListener("input", remember); active.addEventListener("change", remember);
-            const actions = document.createElement("td"), save = document.createElement("button"); save.type = "button"; save.className = "btn btn-sm btn-primary"; save.textContent = "ذخیره"; actions.append(save);
+            const actions = document.createElement("td"), save = document.createElement("button"); save.type = "button"; save.className = "btn btn-sm btn-primary"; save.textContent = "ذخیره"; save.dataset.adminConfirm = "قیمت پیشنهاد و محدودیت خرید ذخیره شوند؟"; actions.append(save);
             ui.withIcon(save, "fa-floppy-disk");
             if (item.priceAmount != null) {
                 const accessories = document.createElement("button"); accessories.type = "button"; accessories.className = "btn btn-sm btn-default ms-1"; accessories.textContent = "متعلقات";
@@ -184,7 +184,7 @@
                 const row = document.createElement("tr"); row.append(cell(`${item.name}${item.isRequired ? " (اجباری)" : ""}`), cell(number.format(item.basePriceAmount)));
                 const priceCell = document.createElement("td"), price = document.createElement("input"); price.type = "number"; price.min = "0"; price.max = "9007199254740991"; price.step = "1"; price.className = "form-control form-control-sm"; price.value = String(item.priceAmount ?? item.basePriceAmount); price.setAttribute("aria-label", `قیمت ${item.name} در ${offer.salesPlanName}`); priceCell.append(price); row.append(priceCell);
                 const allowedCell = document.createElement("td"), allowed = document.createElement("input"); allowed.type = "checkbox"; allowed.checked = item.isRequired || item.isAllowed; allowed.disabled = item.isRequired || page.dataset.canEdit !== "true"; allowed.setAttribute("aria-label", `مجاز بودن ${item.name}`); allowedCell.append(allowed); row.append(allowedCell);
-                const actions = document.createElement("td"), save = document.createElement("button"); save.type = "button"; save.className = "btn btn-sm btn-primary"; save.textContent = "ذخیره"; save.disabled = page.dataset.canEdit !== "true"; actions.append(save); row.append(actions);
+                const actions = document.createElement("td"), save = document.createElement("button"); save.type = "button"; save.className = "btn btn-sm btn-primary"; save.textContent = "ذخیره"; save.dataset.adminConfirm = `قیمت و وضعیت متعلقهٔ ${item.name} ذخیره شود؟`; save.disabled = page.dataset.canEdit !== "true"; actions.append(save); row.append(actions);
                 ui.withIcon(save, "fa-floppy-disk");
                 save.addEventListener("click", async () => {
                     if (save.disabled) return;
@@ -302,7 +302,7 @@
                 catch (error) { ui.notify(error.message || "تغییر وضعیت طرح ناموفق بود.", "danger"); } finally { button.disabled = false; }
             });
             planForm.querySelector("[data-plan-delete]").addEventListener("click", async event => {
-                const button = event.currentTarget, id = planForm.elements.id.value; if (!id || !window.confirm("طرح بدون سابقه حذف شود؟")) return; button.disabled = true;
+                const button = event.currentTarget, id = planForm.elements.id.value; if (!id) return; button.disabled = true;
                 try { const result = await request(page, `${page.dataset.api}/plans/${encodeURIComponent(id)}`, "DELETE"); ui.notify(result.message, "success"); await refreshPlans(); }
                 catch (error) { ui.notify(error.message || "حذف طرح ناموفق بود.", "danger"); } finally { button.disabled = false; }
             });

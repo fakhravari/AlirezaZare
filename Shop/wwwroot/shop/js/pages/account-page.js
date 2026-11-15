@@ -490,7 +490,7 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
             time.textContent = formatPersianDate(message.createdAtUtc); header.append(category, time);
             const title = document.createElement("h3"); title.textContent = message.title;
             if (message.unread) { const badge = document.createElement("span"); badge.className = "profile-message-unread"; badge.textContent = "جدید"; title.append(badge); }
-            const body = document.createElement("p"); body.textContent = message.body; content.append(header, title, body);
+            const body = document.createElement("div"); body.className = "profile-message-body"; body.innerHTML = message.body || ""; content.append(header, title, body);
             if (message.unread) {
                 const markRead = document.createElement("button"); markRead.type = "button"; markRead.className = "btn btn-sm btn-outline-secondary"; markRead.textContent = "علامت‌گذاری به‌عنوان خوانده‌شده";
                 markRead.addEventListener("click", async () => {

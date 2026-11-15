@@ -18,7 +18,7 @@
     </section>
 </div>
 <div class="modal fade" id="customer-editor-modal" tabindex="-1" aria-labelledby="customer-editor-title" aria-hidden="true">
-    <div class="modal-dialog"><form class="modal-content" data-customer-editor>
+    <div class="modal-dialog"><form class="modal-content" data-customer-editor data-admin-confirm="تغییرات حساب مشتری ذخیره شود؟">
         @Html.AntiForgeryToken()<input type="hidden" name="id" />
         <div class="modal-header"><h2 class="modal-title fs-5" id="customer-editor-title">ویرایش مشتری</h2><button class="btn-close ms-0" type="button" data-bs-dismiss="modal" aria-label="بستن"></button></div>
         <div class="modal-body">

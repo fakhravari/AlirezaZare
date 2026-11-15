@@ -8,18 +8,18 @@
             <div class="panel-heading"><h2 class="panel-title">بازه و نمایش طرح فروش</h2></div>
             <div class="panel-body">
                 <p>طرح تازه به‌صورت پیش‌نویس ساخته و به انبارهای فروش متصل می‌شود. برای عرضه، آن را منتشر کنید؛ طرح‌های دارای سابقه فقط غیرفعال می‌شوند.</p>
-                <form class="border rounded p-3 mb-3" data-plan-create>
+                <form class="border rounded p-3 mb-3" data-plan-create data-admin-confirm="طرح فروش جدید ساخته شود؟">
                     <h3 class="h5">ایجاد طرح فروش</h3>
                     <div class="row g-2"><div class="col-md-3"><label class="form-label" for="new-plan-key">کلید یکتا</label><input id="new-plan-key" class="form-control" name="key" maxlength="64" pattern="[a-z0-9][a-z0-9-]*" required /></div><div class="col-md-3"><label class="form-label" for="new-plan-code">کد</label><input id="new-plan-code" class="form-control" name="code" maxlength="64" required /></div><div class="col-md-3"><label class="form-label" for="new-plan-name">نام</label><input id="new-plan-name" class="form-control" name="displayName" maxlength="200" required /></div><div class="col-md-3"><label class="form-label" for="new-plan-type">نوع</label><input id="new-plan-type" class="form-control" name="planType" maxlength="30" required /></div></div>
                     <button class="btn btn-success mt-3" type="submit"><i class="fa fa-file-circle-plus me-1" aria-hidden="true"></i>ساخت پیش‌نویس</button>
                 </form>
-                <form data-plan-settings>
+                <form data-plan-settings data-admin-confirm="تنظیمات طرح فروش ذخیره شود؟">
                     <div class="mb-3"><label class="form-label" for="plan-settings-id">طرح فروش</label><select id="plan-settings-id" class="form-select" name="id" required></select></div>
                     <div class="row g-2 mb-3"><div class="col-md-4"><label class="form-label" for="plan-settings-code">کد</label><input id="plan-settings-code" class="form-control" name="code" maxlength="64" /></div><div class="col-md-4"><label class="form-label" for="plan-settings-name">نام طرح</label><input id="plan-settings-name" class="form-control" name="displayName" maxlength="200" /></div><div class="col-md-4"><label class="form-label" for="plan-settings-type">نوع</label><input id="plan-settings-type" class="form-control" name="planType" maxlength="30" /></div></div>
-                    <button class="btn btn-default mb-3" type="button" data-plan-details-save><i class="fa fa-floppy-disk me-1" aria-hidden="true"></i>ذخیرهٔ مشخصات</button>
-                    <button class="btn btn-success mb-3" type="button" data-plan-publish><i class="fa fa-paper-plane me-1" aria-hidden="true"></i>انتشار طرح</button>
-                    <button class="btn btn-warning mb-3" type="button" data-plan-unpublish><i class="fa fa-eye-slash me-1" aria-hidden="true"></i>خروج از فروش</button>
-                    <button class="btn btn-danger mb-3" type="button" data-plan-delete><i class="fa fa-trash-can me-1" aria-hidden="true"></i>حذف طرح بدون سابقه</button>
+                    <button class="btn btn-default mb-3" type="button" data-plan-details-save data-admin-confirm="مشخصات طرح فروش ذخیره شود؟"><i class="fa fa-floppy-disk me-1" aria-hidden="true"></i>ذخیرهٔ مشخصات</button>
+                    <button class="btn btn-success mb-3" type="button" data-plan-publish data-admin-confirm="طرح فروش منتشر شود؟"><i class="fa fa-paper-plane me-1" aria-hidden="true"></i>انتشار طرح</button>
+                    <button class="btn btn-warning mb-3" type="button" data-plan-unpublish data-admin-confirm="طرح از فروش خارج شود؟"><i class="fa fa-eye-slash me-1" aria-hidden="true"></i>خروج از فروش</button>
+                    <button class="btn btn-danger mb-3" type="button" data-plan-delete data-admin-confirm="طرح فروش حذف شود؟"><i class="fa fa-trash-can me-1" aria-hidden="true"></i>حذف طرح بدون سابقه</button>
                     <div class="mb-3"><label class="form-label" for="plan-settings-start">شروع (UTC)</label><input id="plan-settings-start" class="form-control" name="startsAtUtc" type="datetime-local" step="1" /></div>
                     <div class="mb-3"><label class="form-label" for="plan-settings-end">پایان (UTC)</label><input id="plan-settings-end" class="form-control" name="endsAtUtc" type="datetime-local" step="1" /></div>
                     <div class="mb-3"><label class="form-label" for="plan-settings-label">برچسب</label><input id="plan-settings-label" class="form-control" name="label" maxlength="100" /></div>
@@ -106,7 +106,7 @@
     </section>
 </div>
 <div class="modal fade" id="offer-specifications-modal" tabindex="-1" aria-labelledby="offer-specifications-title" aria-hidden="true">
-    <div class="modal-dialog modal-lg"><form class="modal-content" data-offer-specifications-form>
+    <div class="modal-dialog modal-lg"><form class="modal-content" data-offer-specifications-form data-admin-confirm="مشخصات نمایشی پیشنهاد ذخیره شود؟">
         <div class="modal-header"><h2 class="modal-title fs-5" id="offer-specifications-title">مشخصات نمایشی پیشنهاد</h2><button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="بستن"></button></div>
         <div class="modal-body"><p data-offer-specifications-name></p><label class="form-label" for="offer-specifications-text">هر خط: عنوان مشخصه | مقدار این طرح</label><textarea id="offer-specifications-text" class="form-control" name="specifications" rows="8"></textarea><div class="admin-data-status mt-2 small text-muted" data-offer-specifications-status role="status" aria-live="polite"></div></div>
         <div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button type="submit" class="btn btn-primary"><i class="fa fa-floppy-disk me-1" aria-hidden="true"></i>ذخیره</button></div>

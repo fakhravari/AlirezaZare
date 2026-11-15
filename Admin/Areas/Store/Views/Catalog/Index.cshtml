@@ -145,43 +145,43 @@
         </div>
     </section>
     <div class="modal fade" id="product-create-modal" tabindex="-1" aria-labelledby="product-create-title" aria-hidden="true">
-        <div class="modal-dialog modal-lg"><form class="modal-content" data-product-create-form>
+        <div class="modal-dialog modal-dialog-scrollable modal-lg"><form class="modal-content" data-product-create-form data-admin-confirm="پیش‌نویس کالا با اطلاعات واردشده ساخته شود؟">
             @Html.AntiForgeryToken()
             <div class="modal-header"><h2 class="modal-title fs-5" id="product-create-title">افزودن پیش‌نویس کالا</h2><button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="بستن"></button></div>
-            <div class="modal-body">
-                <label class="form-label" for="new-product-key">شناسه و نشانی لاتین</label><input class="form-control mb-3" id="new-product-key" name="key" maxlength="100" pattern="[a-z0-9]+(-[a-z0-9]+)*" required />
-                <label class="form-label" for="new-product-code">کد کالا</label><input class="form-control mb-3" id="new-product-code" name="code" maxlength="100" required />
-                <label class="form-label" for="new-product-name">نام فارسی</label><input class="form-control mb-3" id="new-product-name" name="name" maxlength="300" required />
-                <label class="form-label" for="new-product-english">نام لاتین</label><input class="form-control mb-3" id="new-product-english" name="englishName" maxlength="300" required />
-                <label class="form-label" for="new-product-brand">برند</label><select class="form-select mb-3" id="new-product-brand" name="brandId" required></select>
-                <label class="form-label" for="new-product-category">دستهٔ برگ</label><select class="form-select mb-3" id="new-product-category" name="categoryId" required></select>
-                <label class="form-label" for="new-product-unit">واحد پایه</label><select class="form-select mb-3" id="new-product-unit" name="unitId" required></select>
-                <label class="form-label" for="new-product-price">قیمت فروش عادی (تومان)</label><input class="form-control mb-3" id="new-product-price" name="priceAmount" type="number" min="0" max="9007199254740991" step="1" required />
-                <label class="form-label" for="new-product-discount">درصد تخفیف نمایشی</label><input class="form-control mb-3" id="new-product-discount" name="discountPercent" type="number" min="0" max="99.99" step="0.01" value="0" required />
-                <label class="form-label" for="new-product-limit">حداکثر تعداد خرید</label><input class="form-control" id="new-product-limit" name="maxPurchaseQuantity" type="number" min="1" max="99" step="1" value="99" required />
+            <div class="modal-body admin-modal-grid-two">
+                <div class="admin-modal-field"><label class="form-label" for="new-product-key">شناسه و نشانی لاتین</label><input class="form-control" id="new-product-key" name="key" maxlength="100" pattern="[a-z0-9]+(-[a-z0-9]+)*" required /></div>
+                <div class="admin-modal-field"><label class="form-label" for="new-product-code">کد کالا</label><input class="form-control" id="new-product-code" name="code" maxlength="100" required /></div>
+                <div class="admin-modal-field"><label class="form-label" for="new-product-name">نام فارسی</label><input class="form-control" id="new-product-name" name="name" maxlength="300" required /></div>
+                <div class="admin-modal-field"><label class="form-label" for="new-product-english">نام لاتین</label><input class="form-control" id="new-product-english" name="englishName" maxlength="300" required /></div>
+                <div class="admin-modal-field"><label class="form-label" for="new-product-brand">برند</label><select class="form-select" id="new-product-brand" name="brandId" required></select></div>
+                <div class="admin-modal-field"><label class="form-label" for="new-product-category">دستهٔ برگ</label><select class="form-select" id="new-product-category" name="categoryId" required></select></div>
+                <div class="admin-modal-field"><label class="form-label" for="new-product-unit">واحد پایه</label><select class="form-select" id="new-product-unit" name="unitId" required></select></div>
+                <div class="admin-modal-field"><label class="form-label" for="new-product-price">قیمت فروش عادی (تومان)</label><input class="form-control" id="new-product-price" name="priceAmount" type="number" min="0" max="9007199254740991" step="1" required /></div>
+                <div class="admin-modal-field"><label class="form-label" for="new-product-discount">درصد تخفیف نمایشی</label><input class="form-control" id="new-product-discount" name="discountPercent" type="number" min="0" max="99.99" step="0.01" value="0" required /></div>
+                <div class="admin-modal-field"><label class="form-label" for="new-product-limit">حداکثر تعداد خرید</label><input class="form-control" id="new-product-limit" name="maxPurchaseQuantity" type="number" min="1" max="99" step="1" value="99" required /></div>
             </div><div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button type="submit" class="btn btn-primary"><i class="fa fa-file-circle-plus me-1" aria-hidden="true"></i>ساخت پیش‌نویس</button></div>
         </form></div>
     </div>
     <div class="modal fade" id="product-editor-modal" tabindex="-1" aria-labelledby="product-editor-title" aria-hidden="true">
-        <div class="modal-dialog modal-lg"><form class="modal-content" data-product-editor>
+        <div class="modal-dialog modal-dialog-scrollable modal-lg"><form class="modal-content" data-product-editor data-admin-confirm="تغییرات اطلاعات کالا ثبت شود؟">
             @Html.AntiForgeryToken()<input type="hidden" name="id" />
             <div class="modal-header"><h2 class="modal-title fs-5" id="product-editor-title">ویرایش اطلاعات کالا</h2><button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="بستن"></button></div>
-            <div class="modal-body">
-                <p data-product-editor-code></p>
-                <label for="product-edit-name" class="form-label">نام فارسی</label><input id="product-edit-name" name="name" class="form-control mb-3" maxlength="300" required />
-                <label for="product-edit-english" class="form-label">نام لاتین</label><input id="product-edit-english" name="englishName" class="form-control mb-3" maxlength="300" required />
-                <label for="product-edit-brand" class="form-label">برند</label><select id="product-edit-brand" name="brandId" class="form-select mb-3" required></select>
-                <label for="product-edit-category" class="form-label">دستهٔ برگ</label><select id="product-edit-category" name="categoryId" class="form-select mb-3" required></select>
-                <label for="product-edit-price" class="form-label">قیمت نهایی فروش عادی (تومان)</label><input id="product-edit-price" name="priceAmount" type="number" min="0" max="9007199254740991" step="1" class="form-control mb-3" required />
-                <label for="product-edit-discount" class="form-label">درصد تخفیف نمایشی</label><input id="product-edit-discount" name="discountPercent" type="number" min="0" max="99.99" step="0.01" class="form-control mb-3" required />
-                <label for="product-edit-limit" class="form-label">حداکثر تعداد خرید</label><input id="product-edit-limit" name="maxPurchaseQuantity" type="number" min="1" max="99" step="1" class="form-control" required />
-                <p class="text-muted mt-2">قیمت نهایی فروش عادی وارد می‌شود؛ قیمت اختصاصی تنوع یا طرح جداگانه تنظیم می‌شود.</p>
+            <div class="modal-body admin-modal-grid-two">
+                <p class="admin-modal-field-wide">کد کالا: <span data-product-editor-code></span></p>
+                <div class="admin-modal-field"><label for="product-edit-name" class="form-label">نام فارسی</label><input id="product-edit-name" name="name" class="form-control" maxlength="300" required /></div>
+                <div class="admin-modal-field"><label for="product-edit-english" class="form-label">نام لاتین</label><input id="product-edit-english" name="englishName" class="form-control" maxlength="300" required /></div>
+                <div class="admin-modal-field"><label for="product-edit-brand" class="form-label">برند</label><select id="product-edit-brand" name="brandId" class="form-select" required></select></div>
+                <div class="admin-modal-field"><label for="product-edit-category" class="form-label">دستهٔ برگ</label><select id="product-edit-category" name="categoryId" class="form-select" required></select></div>
+                <div class="admin-modal-field"><label for="product-edit-price" class="form-label">قیمت نهایی فروش عادی (تومان)</label><input id="product-edit-price" name="priceAmount" type="number" min="0" max="9007199254740991" step="1" class="form-control" required /></div>
+                <div class="admin-modal-field"><label for="product-edit-discount" class="form-label">درصد تخفیف نمایشی</label><input id="product-edit-discount" name="discountPercent" type="number" min="0" max="99.99" step="0.01" class="form-control" required /></div>
+                <div class="admin-modal-field"><label for="product-edit-limit" class="form-label">حداکثر تعداد خرید</label><input id="product-edit-limit" name="maxPurchaseQuantity" type="number" min="1" max="99" step="1" class="form-control" required /></div>
+                <p class="admin-modal-field-wide text-muted mb-0">قیمت نهایی فروش عادی وارد می‌شود؛ قیمت اختصاصی تنوع یا طرح جداگانه تنظیم می‌شود.</p>
             </div>
             <div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button type="submit" class="btn btn-primary"><i class="fa fa-floppy-disk me-1" aria-hidden="true"></i>ذخیره</button></div>
         </form></div>
     </div>
     <div class="modal fade" id="product-image-modal" tabindex="-1" aria-labelledby="product-image-title" aria-hidden="true">
-        <div class="modal-dialog"><form class="modal-content" data-product-image-form enctype="multipart/form-data">
+        <div class="modal-dialog"><form class="modal-content" data-product-image-form data-admin-confirm="تصویر انتخاب‌شده بارگذاری و به کالا متصل شود؟" enctype="multipart/form-data">
             @Html.AntiForgeryToken()<input type="hidden" name="productId" />
             <div class="modal-header"><h2 class="modal-title fs-5" id="product-image-title">تصویر اصلی محصول</h2><button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="بستن"></button></div>
             <div class="modal-body">
@@ -194,7 +194,7 @@
         </form></div>
     </div>
     <div class="modal fade" id="product-file-modal" tabindex="-1" aria-labelledby="product-file-title" aria-hidden="true">
-        <div class="modal-dialog"><form class="modal-content" data-product-file-form enctype="multipart/form-data">
+        <div class="modal-dialog"><form class="modal-content" data-product-file-form data-admin-confirm="فایل انتخاب‌شده بارگذاری و به کالا متصل شود؟" enctype="multipart/form-data">
             @Html.AntiForgeryToken()<input type="hidden" name="productId" />
             <div class="modal-header"><h2 class="modal-title fs-5" id="product-file-title">فایل محصول</h2><button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="بستن"></button></div>
             <div class="modal-body">
@@ -213,7 +213,7 @@
 @if (catalogSection == "payment-institutions" && User.IsInRole("system.full-access"))
 {
     <div class="modal fade" id="payment-institution-image-modal" tabindex="-1" aria-labelledby="payment-institution-image-title" aria-hidden="true">
-        <div class="modal-dialog"><form class="modal-content" data-payment-institution-image-form enctype="multipart/form-data">
+        <div class="modal-dialog"><form class="modal-content" data-payment-institution-image-form data-admin-confirm="نشان درگاه بارگذاری شود؟" enctype="multipart/form-data">
             @Html.AntiForgeryToken()<input type="hidden" name="paymentInstitutionCode" /><input type="hidden" name="kind" value="payment" />
             <div class="modal-header"><h2 class="modal-title fs-5" id="payment-institution-image-title">لوگوی درگاه</h2><button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="بستن"></button></div>
             <div class="modal-body"><p data-payment-institution-name></p><label for="payment-institution-image-file" class="form-label">لوگوی PNG یا SVG، حداکثر ۱۰ مگابایت</label><input id="payment-institution-image-file" name="file" type="file" accept="image/jpeg,image/png,image/webp,image/svg+xml" class="form-control" required /></div>
@@ -226,7 +226,7 @@
     @if (User.IsInRole("system.full-access"))
     {
         <div class="modal fade" id="category-editor-modal" tabindex="-1" aria-labelledby="category-editor-title" aria-hidden="true">
-            <div class="modal-dialog"><form class="modal-content" data-category-editor>
+            <div class="modal-dialog"><form class="modal-content" data-category-editor data-admin-confirm="اطلاعات دسته ثبت شود؟">
                 @Html.AntiForgeryToken()<input type="hidden" name="originalKey" />
                 <div class="modal-header"><h2 class="modal-title fs-5" id="category-editor-title">مدیریت دسته</h2><button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="بستن"></button></div>
                 <div class="modal-body">
@@ -240,7 +240,7 @@
         </div>
     }
     <div class="modal fade" id="category-content-modal" tabindex="-1" aria-labelledby="category-content-title" aria-hidden="true">
-        <div class="modal-dialog modal-lg"><form class="modal-content" data-category-content-form>
+        <div class="modal-dialog modal-lg"><form class="modal-content" data-category-content-form data-admin-confirm="محتوای دسته ذخیره شود؟">
             @Html.AntiForgeryToken()<input type="hidden" name="key" />
             <div class="modal-header"><h2 class="modal-title fs-5" id="category-content-title">محتوای مشترک دسته</h2><button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="بستن"></button></div>
             <div class="modal-body">
@@ -257,7 +257,7 @@
 @if (catalogSection == "brands" && User.IsInRole("system.full-access"))
 {
     <div class="modal fade" id="brand-editor-modal" tabindex="-1" aria-labelledby="brand-editor-title" aria-hidden="true">
-        <div class="modal-dialog"><form class="modal-content" data-brand-editor>
+        <div class="modal-dialog"><form class="modal-content" data-brand-editor data-admin-confirm="اطلاعات برند ثبت شود؟">
             @Html.AntiForgeryToken()<input type="hidden" name="originalKey" />
             <div class="modal-header"><h2 class="modal-title fs-5" id="brand-editor-title">مدیریت برند</h2><button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="بستن"></button></div>
             <div class="modal-body">
@@ -270,7 +270,7 @@
         </form></div>
     </div>
     <div class="modal fade" id="brand-image-modal" tabindex="-1" aria-labelledby="brand-image-title" aria-hidden="true">
-        <div class="modal-dialog"><form class="modal-content" data-brand-image-form enctype="multipart/form-data">
+        <div class="modal-dialog"><form class="modal-content" data-brand-image-form data-admin-confirm="نشان برند بارگذاری شود؟" enctype="multipart/form-data">
             @Html.AntiForgeryToken()<input type="hidden" name="brandKey" /><input type="hidden" name="kind" value="brand" />
             <div class="modal-header"><h2 class="modal-title fs-5" id="brand-image-title">نشان برند</h2><button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="بستن"></button></div>
             <div class="modal-body"><p data-brand-image-name></p><label for="brand-image-file" class="form-label">تصویر JPEG، PNG یا WebP، حداکثر ۱۰ مگابایت</label><input id="brand-image-file" name="file" type="file" accept="image/jpeg,image/png,image/webp" class="form-control" required /></div>
@@ -281,7 +281,7 @@
 @if (catalogSection == "attributes" && User.IsInRole("system.full-access"))
 {
     <div class="modal fade" id="attribute-editor-modal" tabindex="-1" aria-labelledby="attribute-editor-title" aria-hidden="true">
-        <div class="modal-dialog"><form class="modal-content" data-attribute-editor>
+        <div class="modal-dialog"><form class="modal-content" data-attribute-editor data-admin-confirm="تعریف ویژگی ثبت شود؟">
             @Html.AntiForgeryToken()<input type="hidden" name="originalKey" />
             <div class="modal-header"><h2 class="modal-title fs-5" id="attribute-editor-title">مدیریت ویژگی</h2><button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="بستن"></button></div>
             <div class="modal-body">

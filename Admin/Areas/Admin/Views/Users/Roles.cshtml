@@ -8,7 +8,7 @@
     <section class="panel panel-inverse">
         <div class="panel-heading"><h2 class="panel-title">ایجاد نقش</h2></div>
         <div class="panel-body">
-            <form class="row g-3 align-items-end" data-role-create-form>
+            <form class="row g-3 align-items-end" data-role-create-form data-admin-confirm="نقش جدید ساخته شود؟">
                 <div class="col-md-4">
                     <label class="form-label" for="new-role-key">کلید نقش</label>
                     <input class="form-control" id="new-role-key" name="roleKey" pattern="[A-Za-z0-9._-]{2,100}" required />
@@ -24,7 +24,7 @@
     <section class="panel panel-inverse mt-4" data-role-editor hidden>
         <div class="panel-heading"><h2 class="panel-title">ویرایش نقش</h2></div>
         <div class="panel-body">
-            <form class="row g-3 align-items-end" data-role-edit-form>
+            <form class="row g-3 align-items-end" data-role-edit-form data-admin-confirm="تغییرات نقش ذخیره شوند؟">
                 <input type="hidden" name="id" />
                 <div class="col-md-7">
                     <label class="form-label" for="edit-role-name">نام نقش</label>

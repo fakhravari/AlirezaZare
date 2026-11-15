@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Shop.Data.Application.Store;
 using Shop.Data.Domain.Account.Entities;
 using Shop.Data.Infrastructure.Persistence;
 
@@ -51,14 +52,26 @@ public sealed class StoreAccountMessagesAdminApiController(ShopDbContext db) : C
         int total = await query.CountAsync(cancellationToken);
         var items = await query.OrderByDescending(x => x.CreatedAtUtc).ThenByDescending(x => x.Id)
             .Skip((page - 1) * 50).Take(50).ToListAsync(cancellationToken);
-        return Ok(new { total, page, pageSize = 50, items });
+        return Ok(new { total, page, pageSize = 50, items = items.Select(item => new
+        {
+            item.Id,
+            item.Title,
+            item.Category,
+            Body = StoreHtmlSanitizer.Sanitize(item.Body),
+            item.IsRead,
+            item.CreatedAtUtc,
+            item.ProfileId,
+            item.Email,
+            item.FirstName,
+            item.LastName
+        }) });
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Send([FromBody] AccountMessageInput input, CancellationToken cancellationToken)
     {
-        string title = input.Title?.Trim() ?? "", body = input.Body?.Trim() ?? "";
+        string title = input.Title?.Trim() ?? "", body = StoreHtmlSanitizer.Sanitize(input.Body).Trim();
         if (input.ProfileId <= 0 || title.Length is < 2 or > 200 || body.Length is < 1 or > 4000 ||
             input.Category is not ("notice" or "support" or "orders" or "products"))
             return ValidationProblem(detail: "اطلاعات پیام معتبر نیست.", statusCode: 400);

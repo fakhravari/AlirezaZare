@@ -8,7 +8,7 @@
             <button type="button" class="nav-link" role="tab" id="geo-tab-cities" aria-controls="geo-panel" aria-selected="false" tabindex="-1" data-geo-tab="cities">شهرها</button>
         </div>
         <div class="pt-3" role="tabpanel" id="geo-panel" aria-labelledby="geo-tab-countries" data-geo-panel>
-            <form data-geo-form class="row g-2 mb-3">
+            <form data-geo-form data-admin-confirm="اطلاعات ناحیهٔ جغرافیایی ذخیره شود؟" class="row g-2 mb-3">
                 @Html.AntiForgeryToken()<input type="hidden" name="id" />
                 <div class="col-md-3" data-geo-country hidden><label class="form-label" for="geo-country-search">جست‌وجوی کشور</label><input class="form-control mb-2" type="search" id="geo-country-search" data-geo-country-search autocomplete="off" aria-controls="geo-country" /><label class="form-label" for="geo-country">کشور</label><select class="form-select" id="geo-country" name="countryId"></select></div>
                 <div class="col-md-3" data-geo-province hidden><label class="form-label" for="geo-province-search">جست‌وجوی استان</label><input class="form-control mb-2" type="search" id="geo-province-search" data-geo-province-search autocomplete="off" aria-controls="geo-province" /><label class="form-label" for="geo-province">استان</label><select class="form-select" id="geo-province" name="provinceId"></select></div>

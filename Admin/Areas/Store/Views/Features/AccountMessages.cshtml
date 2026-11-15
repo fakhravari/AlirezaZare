@@ -5,7 +5,7 @@
     <section class="panel panel-inverse mb-4">
         <div class="panel-heading"><h2 class="panel-title">ارسال پیام به حساب مشتری</h2></div>
         <div class="panel-body">
-            <form data-account-message-form>
+            <form data-account-message-form data-admin-confirm="این پیام در حساب مشتری ثبت و ارسال شود؟">
                 <div class="row g-3">
                     <div class="col-md-6"><label class="form-label" for="account-message-customer">جست‌وجوی مشتری با نام یا ایمیل</label><input class="form-control" id="account-message-customer" type="search" maxlength="120" autocomplete="off" placeholder="نام یا ایمیل مشتری" list="account-message-customers" required/><datalist id="account-message-customers"></datalist><input type="hidden" name="profileId"/></div>
                     <div class="col-md-6"><label class="form-label" for="account-message-category">دسته</label><select class="form-select" id="account-message-category" name="category"><option value="notice">اطلاعیه</option><option value="support">پشتیبانی</option><option value="orders">سفارش</option><option value="products">محصولات</option></select></div>

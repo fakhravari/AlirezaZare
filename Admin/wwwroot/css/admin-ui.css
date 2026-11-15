@@ -340,6 +340,15 @@
     border-top-color: #e7ebef;
 }
 
+.admin-action-confirm-modal .modal-body {
+    color: #40515f;
+    line-height: 1.9;
+}
+
+.admin-action-confirm-modal .modal-footer {
+    justify-content: flex-start;
+}
+
 @media (min-width: 768px) {
     .modal-body.admin-modal-grid-two,
     .modal-body.admin-modal-grid-three {
@@ -973,3 +982,41 @@
 .note-editor .note-editing-area .note-editable { direction: rtl; text-align: right; min-height: 150px; font-family: inherit; line-height: 1.9; }
 .note-toolbar { direction: rtl; }
 .note-btn-group { margin-left: .25rem; margin-right: 0; }
+.admin-rich-editor-has-picker {
+    position: relative;
+}
+
+.admin-rich-editor-emoji-picker {
+    position: absolute;
+    z-index: 1080;
+    inset-block-start: calc(100% + 6px);
+    inset-inline-start: 0;
+    display: grid;
+    grid-template-columns: repeat(6, 38px);
+    gap: 4px;
+    width: max-content;
+    max-width: min(260px, calc(100vw - 32px));
+    padding: 8px;
+    border: 1px solid #d9e0e8;
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: 0 8px 24px rgb(23 36 51 / 18%);
+    direction: ltr;
+}
+
+.admin-rich-editor-emoji-option {
+    display: grid;
+    width: 38px;
+    height: 38px;
+    place-items: center;
+    border: 0;
+    border-radius: 7px;
+    background: transparent;
+    font-size: 21px;
+}
+
+.admin-rich-editor-emoji-option:hover,
+.admin-rich-editor-emoji-option:focus-visible {
+    outline: 0;
+    background: #edf3f8;
+}

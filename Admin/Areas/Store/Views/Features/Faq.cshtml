@@ -17,7 +17,7 @@
     <div class="panel-heading"><h2 class="panel-title">صفحه‌های خدماتی</h2></div>
     <div class="panel-body">
         <div class="row g-3 mb-3"><div class="col-md-8"><label class="form-label" for="service-page-select">صفحه‌ای که می‌خواهید ویرایش کنید</label><select class="form-select" id="service-page-select" data-service-page-select aria-describedby="service-page-select-help"><option value="">در حال دریافت صفحه‌ها…</option></select><p class="admin-editor-help small text-muted" id="service-page-select-help">با انتخاب هر صفحه، متن فعلی آن برای ویرایش بارگذاری می‌شود.</p></div><div class="col-md-4 d-flex align-items-end"><span class="admin-data-status small text-muted" data-service-page-status role="status" aria-live="polite"></span></div></div>
-        <form data-service-page-editor hidden>
+        <form data-service-page-editor data-admin-confirm="محتوای صفحهٔ خدمات ذخیره شود؟" hidden>
             @Html.AntiForgeryToken()
             <div class="row g-3"><div class="col-md-6"><label class="form-label" for="service-page-title">عنوان صفحه</label><input class="form-control" id="service-page-title" name="title" maxlength="300" required /></div><div class="col-md-6"><label class="form-label" for="service-page-description">شرح و توضیح بالای صفحه</label><input class="form-control" id="service-page-description" name="description" maxlength="1000" /></div>
                 <div class="col-12"><div class="d-flex justify-content-between align-items-center gap-3 mb-2"><div><label class="form-label mb-0">محتوای صفحه</label><p class="admin-editor-help small text-muted">بخش‌ها به همان ترتیبی که در این فهرست می‌بینید در سایت نمایش داده می‌شوند.</p></div><button class="btn btn-default btn-sm flex-shrink-0" type="button" data-service-section-add><i class="fa fa-plus me-1" aria-hidden="true"></i>افزودن بخش</button></div><div class="d-grid gap-3" data-service-sections></div></div>
@@ -28,7 +28,7 @@
     </div>
 </section>
 </div>
-<div class="modal fade" id="mag-editor-modal" tabindex="-1" aria-labelledby="mag-editor-title" aria-hidden="true"><div class="modal-dialog modal-xl"><form class="modal-content" data-mag-editor>@Html.AntiForgeryToken()<input type="hidden" name="id" />
+<div class="modal fade" id="mag-editor-modal" tabindex="-1" aria-labelledby="mag-editor-title" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable modal-xl"><form class="modal-content" data-mag-editor data-admin-confirm="مقاله با این محتوا ذخیره شود؟">@Html.AntiForgeryToken()<input type="hidden" name="id" />
 <div class="modal-header"><h2 class="modal-title fs-5" id="mag-editor-title">ویرایش مقاله</h2><button class="btn-close ms-0" type="button" data-bs-dismiss="modal" aria-label="بستن"></button></div><div class="modal-body row g-3">
 @foreach (var field in new[] { ("articleKey","نشانی لاتین مقاله","text",true,150),("title","عنوان","text",true,300),("category","دسته","text",true,150),("summary","خلاصه","text",true,1500),("author","نویسنده","text",false,200),("kicker","روتیتر","text",false,300),("branch","شاخه","text",true,160),("topic","موضوع","text",true,240),("area","حوزه","text",true,240),("heroImagePath","مسیر تصویر اصلی","text",false,1000),("contentImagePath","مسیر تصویر متن","text",false,1000),("readTimeMinutes","زمان مطالعه (دقیقه)","number",false,0),("readTimeText","متن زمان مطالعه","text",false,80) }) { <div class="col-md-6"><label class="form-label" for="mag-@field.Item1">@field.Item2</label><input class="form-control" id="mag-@field.Item1" name="@field.Item1" type="@field.Item3" maxlength="@(field.Item5 > 0 ? field.Item5 : null)" required="@(field.Item4 ? "required" : null)" min="@(field.Item1 == "readTimeMinutes" ? "1" : null)" max="@(field.Item1 == "readTimeMinutes" ? "180" : null)" /></div> }
 <div class="col-12"><label class="form-label" for="mag-lead">مقدمه</label><textarea class="form-control" data-rich-editor id="mag-lead" name="lead" rows="3"></textarea></div><div class="col-12"><label class="form-label" for="mag-conclusion">جمع‌بندی</label><textarea class="form-control" data-rich-editor id="mag-conclusion" name="conclusion" rows="3"></textarea></div>
@@ -36,7 +36,7 @@
 <div class="col-12"><div class="form-check"><input class="form-check-input" id="mag-published" name="isPublished" type="checkbox" /><label class="form-check-label" for="mag-published">مقاله در سایت منتشر باشد</label></div></div>
 </div><div class="modal-footer"><button class="btn btn-default" type="button" data-bs-dismiss="modal">انصراف</button><button class="btn btn-primary" type="submit"><i class="fa fa-floppy-disk me-1" aria-hidden="true"></i>ذخیره</button></div></form></div></div>
 <div class="modal fade" id="faq-editor-modal" tabindex="-1" aria-labelledby="faq-editor-title" aria-hidden="true">
-    <div class="modal-dialog modal-lg"><form class="modal-content" data-faq-editor>
+    <div class="modal-dialog modal-dialog-scrollable modal-lg"><form class="modal-content" data-faq-editor data-admin-confirm="پرسش و پاسخ ذخیره شود؟">
         @Html.AntiForgeryToken()<input type="hidden" name="id" />
         <div class="modal-header"><h2 class="modal-title fs-5" id="faq-editor-title">ویرایش پرسش متداول</h2><button class="btn-close ms-0" type="button" data-bs-dismiss="modal" aria-label="بستن"></button></div>
         <div class="modal-body">
@@ -51,7 +51,7 @@
     </form></div>
 </div>
 <div class="modal fade" id="article-image-modal" tabindex="-1" aria-labelledby="article-image-title" aria-hidden="true">
-    <div class="modal-dialog"><form class="modal-content" data-media-upload-form data-article-image-form enctype="multipart/form-data">
+    <div class="modal-dialog"><form class="modal-content" data-media-upload-form data-article-image-form data-admin-confirm="تصویر انتخاب‌شده برای مقاله بارگذاری شود؟" enctype="multipart/form-data">
         @Html.AntiForgeryToken()<input type="hidden" name="kind" value="article" /><input type="hidden" name="articleKey" />
         <div class="modal-header"><h2 class="modal-title fs-5" id="article-image-title">تصویر مقاله</h2><button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="بستن"></button></div>
         <div class="modal-body"><p data-article-image-name></p><label for="article-image-file" class="form-label">فایل تصویر</label><input id="article-image-file" name="file" type="file" accept="image/jpeg,image/png,image/webp" class="form-control" required /><div class="mt-2" data-media-upload-result role="status" aria-live="polite"></div></div>

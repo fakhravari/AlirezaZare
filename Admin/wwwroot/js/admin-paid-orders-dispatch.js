@@ -97,7 +97,6 @@
             if (saving) return;
             const orderIds = selected();
             if (!orderIds.length) { status.textContent = "ابتدا سفارش‌ها را انتخاب کنید."; return; }
-            if (!window.confirm(`برای ${format.format(orderIds.length)} سفارش یک حواله فروش قطعی صادر شود؟`)) return;
             saving = true;
             count();
             try {

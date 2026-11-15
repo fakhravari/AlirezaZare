@@ -9,7 +9,7 @@
             </div>
             <div class="panel-body">
                 <div class="admin-data-status small text-muted" data-definition-status role="status" aria-live="polite">در حال بارگذاری…</div>
-                <form data-mapping-form class="row g-3">
+                <form data-mapping-form data-admin-confirm="اتصال طرح فروش به انبار ذخیره شود؟" class="row g-3">
                     <div class="col-md-4">
                         <label class="form-label" for="mapping-company">شرکت</label><select class="form-select" id="mapping-company" name="companyId" required></select>
                     </div>
@@ -57,7 +57,7 @@
 </div>
 <div class="modal fade" id="admin-definition-modal" tabindex="-1" aria-labelledby="admin-definition-title" aria-hidden="true">
     <div class="modal-dialog">
-        <form class="modal-content" data-definition-form>
+        <form class="modal-content" data-definition-form data-admin-confirm="تعریف انبار ذخیره شود؟">
             @Html.AntiForgeryToken()<input type="hidden" name="id"/>
             <div class="modal-header">
                 <h2 class="modal-title fs-5" id="admin-definition-title">افزودن تعریف</h2><button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="بستن"></button>

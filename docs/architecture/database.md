@@ -39,3 +39,5 @@
 Migration `087-assign-store-feature-permissions.sql` مجوزهای خبرنامه و پاسخ فرم تماس را به نقش `system.full-access-store` تخصیص می‌دهد.
 Migration `088-fix-admin-permission-unicode.sql` متن چهار مجوز جدید Admin را که در اجرای اولیه با encoding نادرست ثبت شده بود، به Unicode صحیح برمی‌گرداند.
 Migration `089-repair-variant-attributes-json.sql` دادهٔ قدیمی `Warehouse.ProductVariant.AttributesJson` را به آرایهٔ ویژگی معتبر تبدیل می‌کند تا catalog و modal ورود به‌دلیل خطای renderer متوقف نشوند.
+
+Migration `090-newsletter-permission-store-manager.sql` مجوز گروهی `store.manager` را به‌عنوان والد صفحهٔ اعضای خبرنامه در درخت مجوزها ثبت می‌کند و آن را به نقش `system.full-access-store` می‌دهد؛ مجوزهای فهرست و تغییر عضویت همچنان زیر مجوز صفحه باقی می‌مانند.

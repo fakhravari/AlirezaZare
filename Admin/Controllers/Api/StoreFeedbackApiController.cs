@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Shop.Data.Application.Store;
 using Shop.Data.Domain.Store.Entities;
 using Shop.Data.Infrastructure.Persistence;
 
@@ -66,7 +67,27 @@ public sealed class StoreFeedbackApiController(ShopDbContext db) : ControllerBas
         int total = await query.CountAsync(cancellationToken);
         var items = await query.OrderByDescending(x => x.CreatedAtUtc).ThenByDescending(x => x.Id)
             .Skip((page - 1) * 50).Take(50).ToListAsync(cancellationToken);
-        return Ok(new { total, page, pageSize = 50, items });
+        return Ok(new
+        {
+            total,
+            page,
+            pageSize = 50,
+            items = items.Select(item => new
+            {
+                item.Id,
+                item.IdProduct,
+                item.StoreProductKey,
+                item.ProductName,
+                item.DisplayName,
+                item.FeedbackText,
+                item.Rating,
+                item.Status,
+                AdminReply = item.AdminReply is null ? null : StoreHtmlSanitizer.Sanitize(item.AdminReply),
+                item.IsSample,
+                item.CreatedAtUtc,
+                item.RepliedAtUtc
+            })
+        });
     }
 
     private async Task<IActionResult> ModerateAsync(long id, string type, FeedbackModerationInput input,
@@ -78,7 +99,9 @@ public sealed class StoreFeedbackApiController(ShopDbContext db) : ControllerBas
             await db.ProductFeedback.SingleOrDefaultAsync(x => x.Id == id && x.FeedbackType == type, cancellationToken);
         if (feedback is null) return NotFound();
         feedback.Status = input.Status;
-        feedback.AdminReply = string.IsNullOrWhiteSpace(input.AdminReply) ? null : input.AdminReply.Trim();
+        feedback.AdminReply = string.IsNullOrWhiteSpace(input.AdminReply)
+            ? null
+            : StoreHtmlSanitizer.Sanitize(input.AdminReply).Trim();
         feedback.RepliedAtUtc = feedback.AdminReply is null ? null : DateTime.UtcNow;
         await db.SaveChangesAsync(cancellationToken);
         return Ok(new { message = type == "reviews" ? "وضعیت دیدگاه ذخیره شد." : "وضعیت پرسش و پاسخ ذخیره شد." });

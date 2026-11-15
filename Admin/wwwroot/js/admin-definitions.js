@@ -77,8 +77,9 @@
                 }
                 if (page.dataset.canDeactivate === "true" && page.dataset.definitionSection !== "stock-owners") {
                 const deactivate = actionButton("غیرفعال‌سازی", "fa-toggle-off", "btn btn-sm btn-outline-danger");
+                deactivate.dataset.adminConfirm = "این تعریف غیرفعال شود؟ سابقهٔ گردش‌ها حفظ می‌شود.";
                 deactivate.addEventListener("click", async () => {
-                    if (deactivate.disabled || !window.confirm("این تعریف غیرفعال شود؟ سابقهٔ گردش‌ها حفظ می‌شود.")) return;
+                    if (deactivate.disabled) return;
                     deactivate.disabled = true;
                     try { const result = await request(page, `${page.dataset.api}/${page.dataset.definitionSection}/${item.id}/deactivate`, "POST", {}); ui.notify(result.message, "success"); await load(page); }
                     catch (error) { ui.notify(error.message, "danger"); }
@@ -161,8 +162,9 @@
             const row = element("tr");
             row.append(element("td", `${companyRow?.name || "—"} / ${warehouseRow.name} (${warehouseRow.code})`), element("td", planRow.displayName));
             const actions = element("td"), remove = actionButton("حذف اتصال", "fa-link-slash", "btn btn-sm btn-outline-danger");
+            remove.dataset.adminConfirm = "اتصال این مالک به انبار حذف شود؟";
             remove.addEventListener("click", async () => {
-                if (remove.disabled || !window.confirm("اتصال این مالک به انبار حذف شود؟")) return;
+                if (remove.disabled) return;
                 remove.disabled = true;
                 try { const result = await request(page, `${page.dataset.api}/sales-plan-mapping/${link.idWarehouse}/${link.idStockOwner}`, "DELETE", {}); ui.notify(result.message, "success"); await loadMapping(page); }
                 catch (error) { ui.notify(error.message, "danger"); }

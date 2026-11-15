@@ -10,7 +10,7 @@
     <div class="panel-body">
         <form class="visually-hidden" data-media-library-token>@Html.AntiForgeryToken()</form>
         <p class="text-muted">@Model.Description</p>
-        <form data-media-upload-form enctype="multipart/form-data">
+        <form data-media-upload-form data-admin-confirm="فایل‌های انتخاب‌شده بارگذاری شوند؟" enctype="multipart/form-data">
             @Html.AntiForgeryToken()
             <input type="hidden" name="kind" value="@Model.Kind" />
             @if (Model.Kind == "slider")

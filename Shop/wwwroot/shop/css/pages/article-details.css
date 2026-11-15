@@ -245,7 +245,8 @@
   background: var(--article-soft);
   color: var(--industrial-yellow-dark);
 }
-.article-enhanced .article-section p {
+.article-enhanced .article-section p,
+.article-enhanced .article-section-content {
   line-height: 2.25;
   color: var(--industrial-steel);
 }

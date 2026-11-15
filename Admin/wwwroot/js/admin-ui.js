@@ -177,6 +177,82 @@
             if (node instanceof Element) normalizeActionRows(node);
     }).observe(document.body, { childList: true, subtree: true });
 
+    function ensureConfirmModal() {
+        let modal = document.getElementById("admin-action-confirm-modal");
+        if (modal) return modal;
+
+        modal = document.createElement("div");
+        modal.className = "modal fade admin-action-confirm-modal";
+        modal.id = "admin-action-confirm-modal";
+        modal.tabIndex = -1;
+        modal.setAttribute("aria-labelledby", "admin-action-confirm-title");
+        modal.setAttribute("aria-hidden", "true");
+        modal.innerHTML = `<div class="modal-dialog modal-dialog-centered modal-sm"><div class="modal-content"><div class="modal-header"><h2 class="modal-title fs-5" id="admin-action-confirm-title">تأیید عملیات</h2><button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="بستن"></button></div><div class="modal-body"><p class="mb-0" data-admin-confirm-message></p></div><div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button type="button" class="btn btn-primary" data-admin-confirm-accept>تأیید و ادامه</button></div></div></div>`;
+        document.body.append(modal);
+        return modal;
+    }
+
+    function confirmAction(message, title = "تأیید عملیات") {
+        const modal = ensureConfirmModal();
+        if (!window.bootstrap?.Modal) return Promise.resolve(window.confirm(message || "آیا از انجام این تغییر مطمئن هستید؟"));
+
+        return new Promise(resolve => {
+            const heading = modal.querySelector("#admin-action-confirm-title");
+            const content = modal.querySelector("[data-admin-confirm-message]");
+            const accept = modal.querySelector("[data-admin-confirm-accept]");
+            const instance = window.bootstrap.Modal.getOrCreateInstance(modal, { backdrop: "static" });
+            let approved = false;
+            heading.textContent = title;
+            content.textContent = message || "آیا از انجام این تغییر مطمئن هستید؟";
+            const finish = () => {
+                accept.removeEventListener("click", approve);
+                modal.removeEventListener("hidden.bs.modal", finish);
+                resolve(approved);
+            };
+            const approve = () => { approved = true; instance.hide(); };
+            accept.addEventListener("click", approve, { once: true });
+            modal.addEventListener("hidden.bs.modal", finish, { once: true });
+            instance.show();
+        });
+    }
+
+    const pendingConfirmations = new WeakSet();
+    const approvedButtons = new WeakSet();
+    const approvedForms = new WeakSet();
+    document.addEventListener("click", event => {
+        if (!(event.target instanceof Element)) return;
+        const button = event.target.closest("button[data-admin-confirm]");
+        if (!button || approvedButtons.has(button) || pendingConfirmations.has(button)) return;
+        if (button.type === "submit" && button.form?.hasAttribute("data-admin-confirm")) return;
+
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        pendingConfirmations.add(button);
+        void confirmAction(button.dataset.adminConfirm).then(approved => {
+            if (!approved || !button.isConnected || button.disabled) return;
+            approvedButtons.add(button);
+            button.click();
+            approvedButtons.delete(button);
+        }).finally(() => pendingConfirmations.delete(button));
+    }, true);
+
+    document.addEventListener("submit", event => {
+        const form = event.target;
+        if (!(form instanceof HTMLFormElement) || !form.hasAttribute("data-admin-confirm") || approvedForms.has(form) || pendingConfirmations.has(form)) return;
+
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        pendingConfirmations.add(form);
+        const submitter = event.submitter;
+        void confirmAction(form.dataset.adminConfirm).then(approved => {
+            if (!approved || !form.isConnected) return;
+            approvedForms.add(form);
+            if (submitter) form.requestSubmit(submitter);
+            else form.requestSubmit();
+            approvedForms.delete(form);
+        }).finally(() => pendingConfirmations.delete(form));
+    }, true);
+
     async function getJson(url, options = {}) {
         const { headers: suppliedHeaders, ...requestOptions } = options;
         const response = await fetch(url, {
@@ -395,6 +471,7 @@
 
     window.AdminUI = Object.freeze({
         getJson,
+        confirm: confirmAction,
         notify,
         showRecord,
         getDataTable,

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Shop.Data.Infrastructure.Persistence;
+using Shop.Data.Application.Store;
 using Shop.Services;
 using Shop.Models;
 using Shop.Data.Domain.Account.Entities;
@@ -342,7 +343,15 @@ public sealed class AccountController(
             .OrderByDescending(x => x.CreatedAtUtc).ThenByDescending(x => x.Id)
             .Select(x => new { x.Id, x.Title, x.Category, x.Body, unread = !x.IsRead, x.CreatedAtUtc })
             .ToListAsync(ct);
-        return Ok(items);
+        return Ok(items.Select(item => new
+        {
+            item.Id,
+            item.Title,
+            item.Category,
+            Body = StoreHtmlSanitizer.Sanitize(item.Body),
+            item.unread,
+            item.CreatedAtUtc
+        }));
     }
 
     [HttpPut("messages/{id:long}/read")]

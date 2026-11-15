@@ -22,7 +22,10 @@
         for (const item of items) {
             const row = document.createElement("tr");
             [item.isSample ? "—" : new Date(item.createdAtUtc).toLocaleDateString("fa-IR"), `${item.productName} (${item.storeProductKey})`, item.isSample ? `${item.displayName} (نمونه)` : item.displayName, item.feedbackText,
-                item.rating == null ? "—" : number.format(item.rating), statusText(item.status), item.adminReply || "—"].forEach(value => row.append(el("td", value)));
+                item.rating == null ? "—" : number.format(item.rating), statusText(item.status)].forEach(value => row.append(el("td", value)));
+            const reply = el("td");
+            reply.innerHTML = item.adminReply || "—";
+            row.append(reply);
             const action = el("td"); const button = el("button", "بررسی", "btn btn-sm btn-default"); button.type = "button"; button.addEventListener("click", () => openModal(item, page)); action.append(button); row.append(action); body.append(row);
         }
         ui.refreshDataTable(page.querySelector("[data-admin-datatable]"));

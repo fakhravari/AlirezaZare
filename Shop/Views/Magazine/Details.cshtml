@@ -1,4 +1,5 @@
 @using System.Globalization
+@using Shop.Data.Application.Store
 @model PageModel<MagazineDetailsModel>
 @{
     var articleMetrics = Model.Data.Metrics ?? new JournalArticleMetrics(0, 0, 0, 0);
@@ -147,7 +148,7 @@
                     {
                         <section class="article-section">
                             <h2 id="@item.Id">@item.Title</h2>
-                            <p>@item.Content</p>
+                            <div class="article-section-content">@Html.Raw(StoreHtmlSanitizer.Sanitize(item.Content))</div>
                         </section>
                     }
 

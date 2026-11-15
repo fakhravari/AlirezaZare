@@ -123,8 +123,9 @@
             edit.addEventListener("click", () => void openEditor(page, item.id).catch(error => { status(page, error.message || "بازکردن سند ناموفق بود.", true); ui.notify(error.message || "بازکردن سند ناموفق بود.", "danger"); }));
             const remove = node("button", "حذف", "btn btn-sm btn-outline-danger");
             remove.type = "button";
+            remove.dataset.adminConfirm = `سند شمارهٔ ${format.format(item.number)} حذف شود؟ موجودی آن نیز برگردانده می‌شود.`;
             remove.addEventListener("click", async () => {
-                if (remove.disabled || !window.confirm(`سند شمارهٔ ${format.format(item.number)} حذف شود؟ موجودی آن نیز برگردانده می‌شود.`)) return;
+                if (remove.disabled) return;
                 remove.disabled = true;
                 try {
                     await send(`${page.dataset.api}/${item.id}`, "DELETE", { delete: true });

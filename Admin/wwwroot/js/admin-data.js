@@ -114,7 +114,7 @@
             if (page.dataset.adminPage === "product-drafts") {
                 const publish = document.createElement("button");
                 publish.type = "button"; publish.className = "btn btn-xs btn-primary";
-                publish.dataset.productPublish = String(index); setIconAction(publish, "انتشار کالا", "fa-paper-plane");
+                publish.dataset.productPublish = String(index); publish.dataset.adminConfirm = `کالای ${item.name} منتشر شود؟`; setIconAction(publish, "انتشار کالا", "fa-paper-plane");
                 publish.disabled = !item.hasImage; actions.append(publish);
             }
             if (page.dataset.adminPage === "customers") {
@@ -124,7 +124,7 @@
                 actions.append(edit);
                 const remove = document.createElement("button");
                 remove.type = "button"; remove.className = "btn btn-xs btn-danger ms-1";
-                remove.dataset.customerDelete = String(index); remove.textContent = "حذف";
+                remove.dataset.customerDelete = String(index); remove.dataset.adminConfirm = `پروفایل ${item.email} حذف شود؟`; remove.textContent = "حذف";
                 actions.append(remove);
             }
             if (page.dataset.adminPage === "orders" && !item.isSample) {
@@ -137,7 +137,7 @@
                 for (const [value, label] of next) {
                     const button = document.createElement("button");
                     button.type = "button"; button.className = "btn btn-xs btn-default ms-1";
-                    button.dataset.orderStatus = value; button.dataset.orderIndex = String(index); button.textContent = label;
+                    button.dataset.orderStatus = value; button.dataset.adminConfirm = `وضعیت سفارش ${item.orderNumber} ثبت شود؟`; button.dataset.orderIndex = String(index); button.textContent = label;
                     actions.append(button);
                 }
             }
@@ -158,7 +158,7 @@
                 actions.append(edit);
                 const unpublish = document.createElement("button");
                 unpublish.type = "button"; unpublish.className = "btn btn-xs btn-default";
-                unpublish.dataset.productUnpublish = String(index); setIconAction(unpublish, "خروج از انتشار", "fa-eye-slash");
+                unpublish.dataset.productUnpublish = String(index); unpublish.dataset.adminConfirm = `کالای ${item.name} از انتشار خارج شود؟`; setIconAction(unpublish, "خروج از انتشار", "fa-eye-slash");
                 actions.append(unpublish);
                 const upload = document.createElement("button");
                 upload.type = "button"; upload.className = "btn btn-xs btn-default";
@@ -191,7 +191,7 @@
             if (["categories", "brands", "attributes"].includes(page.dataset.adminSection) && page.dataset.canUploadImage === "true") {
                 const statusButton = document.createElement("button");
                 statusButton.type = "button"; statusButton.className = "btn btn-xs btn-default ms-1";
-                statusButton.dataset.catalogStatus = String(index);
+                statusButton.dataset.catalogStatus = String(index); statusButton.dataset.adminConfirm = item.isActive ? `«${item.name || item.label}» از کاتالوگ خارج شود؟` : `«${item.name || item.label}» در کاتالوگ فعال شود؟`;
                 statusButton.textContent = item.isActive ? "خروج از انتشار" : "انتشار";
                 actions.append(statusButton);
             }
@@ -237,7 +237,7 @@
                 details.append(title, path, meta);
                 const actions = document.createElement("div"); actions.className = "admin-media-actions";
                 const copy = document.createElement("button"); copy.type = "button"; copy.className = "btn btn-default btn-sm"; copy.dataset.mediaCopy = item.url || ""; copy.textContent = "کپی نشانی";
-                const remove = document.createElement("button"); remove.type = "button"; remove.className = "btn btn-danger btn-sm"; remove.dataset.mediaDelete = item.path; remove.dataset.mediaKind = item.kind; remove.textContent = "حذف"; remove.disabled = !item.canDelete;
+                const remove = document.createElement("button"); remove.type = "button"; remove.className = "btn btn-danger btn-sm"; remove.dataset.mediaDelete = item.path; remove.dataset.adminConfirm = "این رسانه و تصویر کوچک آن برای همیشه حذف شوند؟"; remove.dataset.mediaKind = item.kind; remove.textContent = "حذف"; remove.disabled = !item.canDelete;
                 if (!item.canDelete) remove.title = "این فایل با بارگذاری پنل ساخته نشده و حذف آن از اینجا مجاز نیست.";
                 actions.append(copy, remove); card.append(preview, details, actions); container.append(card);
             }
@@ -262,7 +262,7 @@
         }
         const remove = event.target.closest("[data-media-delete]");
         if (remove) {
-            if (!window.confirm("این رسانه و تصویر کوچک آن برای همیشه از فضای فایل حذف شوند؟")) return;
+
             const root = remove.closest("[data-media-library]"), form = root?.querySelector("[data-media-library-token]");
             if (!root || !form) return;
             const body = new FormData(form); body.set("kind", remove.dataset.mediaKind); body.set("path", remove.dataset.mediaDelete);
@@ -651,7 +651,7 @@
                 }
                 const cell = document.createElement("td"), edit = document.createElement("button"), remove = document.createElement("button");
                 edit.type = "button"; edit.className = "btn btn-sm btn-default me-1"; edit.dataset.faqEdit = String(index); edit.textContent = "ویرایش";
-                remove.type = "button"; remove.className = "btn btn-sm btn-danger"; remove.dataset.faqDelete = String(index); remove.textContent = "حذف";
+                remove.type = "button"; remove.className = "btn btn-sm btn-danger"; remove.dataset.faqDelete = String(index); remove.dataset.adminConfirm = "این پرسش متداول حذف شود؟"; remove.textContent = "حذف";
                 ui.withIcon(edit, "fa-pen-to-square"); ui.withIcon(remove, "fa-trash-can");
                 cell.append(edit, remove); row.append(cell); body.append(row);
             });
@@ -671,7 +671,7 @@
                 const tr = document.createElement("tr");
                 for (const text of [item.title, item.articleKey, ui.formatNumber(item.count), item.isPublished ? "منتشرشده" : "پیش‌نویس"]) { const td = document.createElement("td"); td.textContent = text; tr.append(td); }
                 const td = document.createElement("td");
-                for (const [label, action, icon] of [["ویرایش", "edit", "fa-pen-to-square"], ["تصویر", "image", "fa-image"], ["حذف", "delete", "fa-trash-can"]]) { const button = document.createElement("button"); button.type = "button"; button.className = `btn btn-sm ${action === "delete" ? "btn-danger" : "btn-default"} me-1`; button.dataset.magAction = action; button.dataset.id = item.id; button.dataset.articleKey = item.articleKey; button.dataset.articleTitle = item.title; button.textContent = label; ui.withIcon(button, icon); td.append(button); }
+                for (const [label, action, icon] of [["ویرایش", "edit", "fa-pen-to-square"], ["تصویر", "image", "fa-image"], ["حذف", "delete", "fa-trash-can"]]) { const button = document.createElement("button"); button.type = "button"; button.className = `btn btn-sm ${action === "delete" ? "btn-danger" : "btn-default"} me-1`; button.dataset.magAction = action; if (action === "delete") button.dataset.adminConfirm = "مقاله حذف شود؟"; button.dataset.id = item.id; button.dataset.articleKey = item.articleKey; button.dataset.articleTitle = item.title; button.textContent = label; ui.withIcon(button, icon); td.append(button); }
                 tr.append(td); body.append(tr);
             });
             ui.refreshDataTable(page.querySelector("[data-admin-datatable]"));
@@ -809,7 +809,7 @@
         }
         if (button.hasAttribute("data-mag-create")) { form.reset(); form.elements.id.value = ""; for (const name of ["lead", "conclusion"]) window.AdminRichEditor?.setValue(form.elements[name], ""); renderMagazineSections(form.querySelector("[data-mag-sections]"), []); window.bootstrap?.Modal?.getOrCreateInstance(document.getElementById("mag-editor-modal")).show(); return; }
         if (button.dataset.magAction === "delete") {
-            if (!window.confirm("مقاله حذف شود؟")) return;
+
             const token = document.querySelector("[data-mag-editor] [name=__RequestVerificationToken]")?.value || "";
             try { const result = await ui.getJson(`/api/admin/store/magazine/${button.dataset.id}`, { method: "DELETE", headers: { RequestVerificationToken: token } }); ui.notify(result.message, "success"); await loadMagazine(); }
             catch (error) { ui.notify(error.message || "حذف مقاله ناموفق بود.", "danger"); } return;
@@ -924,7 +924,7 @@
         if (unpublish) {
             const page = unpublish.closest('[data-admin-section="products"]');
             const item = page?.__adminRows?.[Number(unpublish.dataset.productUnpublish)];
-            if (!item || unpublish.disabled || !window.confirm(`کالای ${item.name} از انتشار خارج شود؟`)) return;
+            if (!item || unpublish.disabled) return;
             const token = document.querySelector('[data-product-create-form] [name="__RequestVerificationToken"]')?.value || "";
             unpublish.disabled = true;
             void ui.getJson(`/api/admin/store/catalog/products/manage/${encodeURIComponent(item.id)}/unpublish`, { method: "POST", headers: { RequestVerificationToken: token } })
@@ -936,7 +936,7 @@
         if (publish) {
             const page = publish.closest('[data-admin-page="product-drafts"]');
             const item = page?.__adminRows?.[Number(publish.dataset.productPublish)];
-            if (!item || publish.disabled || !window.confirm(`کالای ${item.name} منتشر شود؟`)) return;
+            if (!item || publish.disabled) return;
             const token = document.querySelector('[data-product-create-form] [name="__RequestVerificationToken"]')?.value || "";
             publish.disabled = true;
             void ui.getJson(`/api/admin/store/catalog/products/manage/${encodeURIComponent(item.id)}/publish`, { method: "POST", headers: { RequestVerificationToken: token } })
@@ -972,7 +972,7 @@
         if (customerDelete) {
             const page = customerDelete.closest('[data-admin-page="customers"]');
             const item = page?.__adminRows?.[Number(customerDelete.dataset.customerDelete)];
-            if (!item || !window.confirm(`پروفایل ${item.email} حذف شود؟ اگر سفارش یا سبد داشته باشد، سرور حذف را رد می‌کند.`)) return;
+            if (!item) return;
             const form = document.querySelector("[data-customer-editor]"), token = form?.querySelector('[name="__RequestVerificationToken"]')?.value || "";
             customerDelete.disabled = true;
             void ui.getJson(`${page.dataset.adminApi}/${encodeURIComponent(item.id)}`, { method: "DELETE", headers: { RequestVerificationToken: token } })
@@ -995,7 +995,7 @@
         const faqDelete = event.target.closest("[data-faq-delete]");
         if (faqDelete) {
             const page = faqDelete.closest('[data-admin-page="faq"]'), item = page?.__faqRows?.[Number(faqDelete.dataset.faqDelete)];
-            if (!page || !item || !window.confirm("این پرسش متداول حذف شود؟")) return;
+            if (!page || !item) return;
             const token = document.querySelector("[data-faq-editor] [name=__RequestVerificationToken]")?.value || ""; faqDelete.disabled = true;
             void ui.getJson(`${page.dataset.adminApi}/${encodeURIComponent(item.id)}`, { method: "DELETE", headers: { RequestVerificationToken: token } })
                 .then(result => { ui.notify(result.message, "success"); return loadFaq(page); })
@@ -1013,7 +1013,7 @@
                 if (!page.isConnected) return;
                 const product = data.product;
                 form.reset(); form.elements.id.value = product.id;
-                form.querySelector("[data-product-editor-code]").textContent = `کد کالا: ${product.code}`;
+                form.querySelector("[data-product-editor-code]").textContent = String(product.code);
                 form.elements.name.value = product.name; form.elements.englishName.value = product.englishName || product.name;
                 form.elements.brandId.replaceChildren(new Option("انتخاب برند", ""), ...data.brands.map(brand => new Option(brand.name, String(brand.id))));
                 form.elements.categoryId.replaceChildren(new Option("انتخاب دسته", ""), ...data.categories.map(category => new Option(category.name, String(category.id))));
@@ -1080,7 +1080,7 @@
             if (!page || !item || !["categories", "brands", "attributes"].includes(section) || catalogStatus.disabled) return;
             const nextActive = !item.isActive;
             const typeName = section === "categories" ? "دسته" : section === "brands" ? "برند" : "ویژگی";
-            if (!nextActive && !window.confirm(`${typeName} «${item.name || item.label}» از کاتالوگ خارج شود؟`)) return;
+
             const editorSelector = section === "categories" ? "[data-category-editor]" : section === "brands" ? "[data-brand-editor]" : "[data-attribute-editor]";
             const token = document.querySelector(`${editorSelector} [name="__RequestVerificationToken"]`)?.value || "";
             const key = section === "attributes" ? item.key : item.id;
@@ -1102,7 +1102,7 @@
         if (shippingButton) {
             const page = shippingButton.closest('[data-admin-page="orders"]');
             const item = page?.__adminRows?.[Number(shippingButton.dataset.orderIndex)];
-            if (!item || shippingButton.disabled || !window.confirm(`وضعیت سفارش ${item.orderNumber} ثبت شود؟`)) return;
+            if (!item || shippingButton.disabled) return;
             shippingButton.disabled = true;
             const token = page.querySelector('[name="__RequestVerificationToken"]')?.value || "";
             void ui.getJson(`${page.dataset.adminApi}/${encodeURIComponent(item.id)}/shipping-status`, {
