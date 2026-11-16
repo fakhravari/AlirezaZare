@@ -31,6 +31,15 @@ test('admin Select2 keeps native events and modal controls working', async ({ pa
   await page.locator('.select2-results__option', { hasText: 'Turkey' }).click();
   await expect(page.locator('#province + .select2 .select2-selection__rendered')).toHaveText('Ankara');
   expect(await page.evaluate(() => window.changeCounts)).toEqual({ native: 1, jquery: 1 });
+  await page.evaluate(() => {
+    const dynamic = document.createElement('select');
+    dynamic.id = 'dynamic';
+    dynamic.append(new Option('Dynamic option', '1'));
+    document.body.append(dynamic);
+  });
+  await expect(page.locator('#dynamic + .select2 .select2-selection__rendered')).toHaveText('Dynamic option');
+  await page.evaluate(() => { document.querySelector('#dynamic').disabled = true; });
+  await expect(page.locator('#dynamic + .select2')).toHaveClass(/select2-container--disabled/);
 
   await page.evaluate(() => {
     document.querySelector('#status').value = '2';
@@ -41,4 +50,11 @@ test('admin Select2 keeps native events and modal controls working', async ({ pa
   await expect(page.locator('#editor .select2-search__field')).toBeVisible();
   await page.evaluate(() => { window.jQuery('#status').select2('close'); document.querySelector('#editor-form').reset(); });
   await expect(page.locator('#status + .select2 .select2-selection__rendered')).toHaveText('First');
+  await page.evaluate(() => { window.bootstrap.Modal.getInstance(document.querySelector('#editor')).hide(); });
+  await expect(page.locator('#editor')).not.toHaveClass(/show/);
+  await page.evaluate(() => {
+    document.querySelector('#status').value = '2';
+    window.bootstrap.Modal.getInstance(document.querySelector('#editor')).show();
+  });
+  await expect(page.locator('#status + .select2 .select2-selection__rendered')).toHaveText('Second');
 });
