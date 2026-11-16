@@ -6,6 +6,7 @@ using Shop.Data.Helpers;
 using Shop.Data.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddPersistentDataProtection(builder.Configuration, builder.Environment.ContentRootPath, builder.Environment.EnvironmentName);
 builder.Services.AddScoped<MediaCdnViewDataFilter>();
 builder.Services.AddControllersWithViews(options => options.Filters.AddService<MediaCdnViewDataFilter>());
 builder.Services.AddAntiforgery(options => options.HeaderName = "RequestVerificationToken");

@@ -11,6 +11,7 @@ using Shop.Data.Infrastructure;
 using Shop.Data.Infrastructure.Ftp;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddPersistentDataProtection(builder.Configuration, builder.Environment.ContentRootPath, builder.Environment.EnvironmentName);
 builder.Services.AddScoped<MediaCdnViewDataFilter>();
 builder.Services.AddControllersWithViews(options => options.Filters.AddService<MediaCdnViewDataFilter>());
 builder.Services.AddAuthentication("AdminCookie").AddCookie("AdminCookie", options =>

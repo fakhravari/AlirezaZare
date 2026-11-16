@@ -7,7 +7,12 @@
     <DefaultItemExcludesInProjectFolder>$(DefaultItemExcludesInProjectFolder);**/bin/**;**/obj/**</DefaultItemExcludesInProjectFolder>
   </PropertyGroup>
   <ItemGroup>
+    <Content Remove="keys/**/*" />
+    <None Remove="keys/**/*" />
+    <Content Remove="App_Data/keys/**/*" />
+    <None Remove="App_Data/keys/**/*" />
     <ProjectReference Include="..\Data\Data.csproj" />
+    <Folder Include="keys\" />
     <Folder Include="wwwroot\content\" />
     <Content Update="appsettings.Development.json" CopyToPublishDirectory="Never" />
   </ItemGroup>

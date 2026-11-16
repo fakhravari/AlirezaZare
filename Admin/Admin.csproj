@@ -12,6 +12,10 @@
     <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="15.1.0" />
   </ItemGroup>
   <ItemGroup>
+    <Content Remove="keys/**/*" />
+    <None Remove="keys/**/*" />
+    <Content Remove="App_Data/keys/**/*" />
+    <None Remove="App_Data/keys/**/*" />
     <!-- Keep the supplied demo library in source control without putting every demo/plugin in the app asset manifest. -->
     <Content Remove="wwwroot/color_admin/pages/**/*" />
     <Content Remove="wwwroot/color_admin/assets/plugins/**/*" />
@@ -28,6 +32,7 @@
     <Content Include="wwwroot/color_admin/assets/plugins/select2/dist/js/i18n/fa.js" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="keys\" />
     <Folder Include="wwwroot\content\brands\" />
     <Folder Include="wwwroot\content\countries\flags\" />
     <Folder Include="wwwroot\content\identity\" />
