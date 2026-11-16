@@ -430,6 +430,7 @@
           ],
           "js": [
             "Shop/wwwroot/shop/js/pages/account-page.js",
+            "Shop/wwwroot/shop/js/pages/profile-edit.js",
             "Shop/wwwroot/shop/js/store/account-data.js"
           ],
           "css": [
