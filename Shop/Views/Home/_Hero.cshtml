@@ -1,4 +1,4 @@
-﻿@{ string cdnBaseUrl = ViewData["MediaCdnBaseUrl"] as string ?? ""; }
+﻿@{ string cdnBaseUrl = ViewData["MediaCdnBaseUrl"] as string ?? ""; var slides = ViewData["HomeSliders"] as List<Shop.Data.Domain.Store.Entities.StoreSlider> ?? new(); }
 <section class="electrical-showcase" aria-label="دسته‌بندی و پیشنهادهای فروشگاه">
     <div class="electrical-home-row">
         <aside class="electrical-category-menu" id="productCategories" aria-label="مگامنوی دسته‌بندی قطعات">
@@ -35,42 +35,12 @@
         </aside>
         <div id="heroSwiper" class="swiper hero-swiper electrical-swiper">
             <div class="swiper-wrapper">
-                <div class="swiper-slide electrical-slide electrical-slide-tools">
-                    <picture>
-                        <source media="(max-width: 991px)" srcset="@(cdnBaseUrl)content/sliders/mobile/electrical-tools-banner.webp"/>
-                        <img class="electrical-banner-image" src="@(cdnBaseUrl)content/sliders/electrical-tools-banner.webp" alt="ابزار دقیق برای کار حرفه‌ای؛ برای هر کار، ابزار درست. همراه پروژه‌های خانه و کارگاه." fetchpriority="high"/>
-                    </picture>
-                </div>
-                <div class="swiper-slide electrical-slide electrical-slide-parts">
-                    <picture>
-                        <source media="(max-width: 991px)" srcset="@(cdnBaseUrl)content/sliders/mobile/electrical-components-banner.webp"/>
-                        <img class="electrical-banner-image" src="@(cdnBaseUrl)content/sliders/electrical-components-banner.webp" alt="قطعات برای ساخت و تعمیر؛ ایده‌هایت را روشن کن. ابزار و قطعات برای پروژه‌های دقیق." loading="lazy"/>
-                    </picture>
-                </div>
-                <div class="swiper-slide electrical-slide electrical-slide-lighting">
-                    <picture>
-                        <source media="(max-width: 991px)" srcset="@(cdnBaseUrl)content/sliders/mobile/electrical-lighting-banner.webp"/>
-                        <img class="electrical-banner-image" src="@(cdnBaseUrl)content/sliders/electrical-lighting-banner.webp" alt="روشنایی و تجهیزات کارگاهی؛ نور بهتر، کار دقیق‌تر. برای خانه و محیط کار." loading="lazy"/>
-                    </picture>
-                </div>
-                <div class="swiper-slide electrical-slide electrical-slide-tools">
-                    <picture>
-                        <source media="(max-width: 991px)" srcset="@(cdnBaseUrl)content/sliders/mobile/electrical-tools-pro-banner.webp"/>
-                        <img class="electrical-banner-image" src="@(cdnBaseUrl)content/sliders/electrical-tools-pro-banner.webp" alt="ابزار برقی برای کار حرفه‌ای؛ قدرت در دستان تو. انتخابی برای خانه و کارگاه." loading="lazy"/>
-                    </picture>
-                </div>
-                <div class="swiper-slide electrical-slide electrical-slide-parts">
-                    <picture>
-                        <source media="(max-width: 991px)" srcset="@(cdnBaseUrl)content/sliders/mobile/electrical-components-pro-banner.webp"/>
-                        <img class="electrical-banner-image" src="@(cdnBaseUrl)content/sliders/electrical-components-pro-banner.webp" alt="قطعات برای ساخت و تعمیر؛ همراه ایده‌های تازه. ابزار و قطعات ساخت و تعمیر." loading="lazy"/>
-                    </picture>
-                </div>
-                <div class="swiper-slide electrical-slide electrical-slide-measurement">
-                    <picture>
-                        <source media="(max-width: 991px)" srcset="@(cdnBaseUrl)content/sliders/mobile/electrical-measurement-banner.webp"/>
-                        <img class="electrical-banner-image" src="@(cdnBaseUrl)content/sliders/electrical-measurement-banner.webp" alt="ابزار اندازه‌گیری دقیق؛ با اطمینان اندازه بگیر. ابزار تست برای بررسی مدارها." loading="lazy"/>
-                    </picture>
-                </div>
+                @foreach (var slide in slides)
+                {
+                    <div class="swiper-slide electrical-slide" data-show-mobile="@slide.ShowOnMobile.ToString().ToLowerInvariant()" data-show-desktop="@slide.ShowOnDesktop.ToString().ToLowerInvariant()">
+                        <a href="@slide.Url"><img class="electrical-banner-image" src="@(cdnBaseUrl)@slide.ImagePath" alt="@slide.Title" loading="lazy" /></a>
+                    </div>
+                }
             </div>
             <button class="electrical-arrow electrical-prev" type="button" aria-label="اسلاید قبلی">
                 <i class="bi bi-chevron-right"></i>

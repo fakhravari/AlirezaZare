@@ -29,6 +29,12 @@ public sealed class FeaturesController : Controller
             return View("~/Areas/Warehouse/Views/Features/Definitions.cshtml", page);
         }
 
+        if (page.FeatureId == "order-confirmation")
+        {
+            ViewData["WarehouseOrderQueue"] = true;
+            return View("~/Areas/Store/Views/Features/PaidOrdersDispatch.cshtml", page);
+        }
+
         if (page.FeatureId == "movements")
         {
             ViewData["ApiUrl"] = "/api/admin/warehouse/movements";

@@ -109,12 +109,13 @@ public sealed record CatalogSnapshot(
                 },
                 SourceEditorial = sourceEditorial
             };
-            brandProfiles.Add(editorial with
-            {
-                Name = Text(brand, "name"),
-                PersianName = Text(brand, "fa"),
-                LogoFile = logo is null ? null : Path.GetFileName(logo)
-            });
+            if (!brand.TryGetProperty("showInStore", out JsonElement showInStore) || showInStore.ValueKind != JsonValueKind.False)
+                brandProfiles.Add(editorial with
+                {
+                    Name = Text(brand, "name"),
+                    PersianName = Text(brand, "fa"),
+                    LogoFile = logo is null ? null : Path.GetFileName(logo)
+                });
         }
 
         foreach (JsonElement country in countries.EnumerateObject().Select(item => item.Value))

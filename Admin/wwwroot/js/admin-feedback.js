@@ -37,18 +37,14 @@
         try {
             const result = await request(`${page.dataset.api}?${query}`); if (serial !== requestSerial) return; render(page, result.items || []);
             setStatus(page, result.items?.length ? "" : "موردی با این فیلتر پیدا نشد.");
-            page.querySelector("[data-feedback-page-label]").textContent = `صفحهٔ ${number.format(pageNumber)} · ${number.format(result.total || 0)} مورد`;
-            page.querySelector('[data-feedback-page="-1"]').disabled = pageNumber <= 1;
-            const hasNext = pageNumber * result.pageSize < result.total;
-            page.querySelector("[data-feedback-pagination]").hidden = pageNumber <= 1 && !hasNext;
-            page.querySelector('[data-feedback-page="1"]').disabled = !hasNext;
+            ui.renderNumberedPagination(page.querySelector("[data-feedback-pagination]"), pageNumber,
+                Math.ceil((result.total || 0) / (result.pageSize || 50)), target => { pageNumber = target; void load(page); }, "صفحه‌بندی بازخوردها");
         } catch (error) { if (serial === requestSerial) setStatus(page, error.message || "دریافت بازخوردها ناموفق بود.", true); }
     }
     function initialize(root) {
         const page = root.querySelector?.("[data-admin-feedback]"); if (!page || initialized.has(page)) return; initialized.add(page); pageNumber = 1;
         page.querySelector("[data-feedback-filter]").addEventListener("submit", event => { event.preventDefault(); pageNumber = 1; void load(page); });
         page.querySelector("[data-feedback-filter]").addEventListener("reset", () => { pageNumber = 1; setTimeout(() => void load(page), 0); });
-        page.querySelectorAll("[data-feedback-page]").forEach(button => button.addEventListener("click", () => { pageNumber = Math.max(1, pageNumber + Number(button.dataset.feedbackPage)); void load(page); }));
         document.querySelector("[data-feedback-form]").addEventListener("submit", async event => {
             event.preventDefault(); const form = event.currentTarget, id = form.elements.id.value;
             if (form.dataset.saving === "true") return;

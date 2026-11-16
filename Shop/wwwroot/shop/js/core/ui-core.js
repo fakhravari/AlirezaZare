@@ -292,6 +292,47 @@
         String(arabicDigits.indexOf(digit)),
       );
   const formatNumber = (value) => Number(value).toLocaleString("fa-IR");
+
+  function renderPagination(nav, currentPage, totalPages, onPage, ariaLabel = "صفحه‌بندی") {
+    if (!nav) return;
+    const pages = Math.max(1, Number(totalPages) || 1);
+    const current = Math.min(pages, Math.max(1, Number(currentPage) || 1));
+    const addButton = (label, target, disabled = false, active = false) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.textContent = label;
+      button.disabled = disabled;
+      button.setAttribute("aria-label", active
+        ? `صفحهٔ ${formatNumber(target)}، صفحهٔ فعلی`
+        : label === "قبلی" || label === "بعدی"
+          ? `رفتن به صفحهٔ ${label}`
+          : `رفتن به صفحهٔ ${formatNumber(target)}`);
+      if (active) button.setAttribute("aria-current", "page");
+      button.addEventListener("click", () => {
+        if (!disabled && target !== current) onPage(target);
+      });
+      nav.append(button);
+    };
+    nav.replaceChildren();
+    nav.hidden = pages <= 1;
+    nav.setAttribute("aria-label", ariaLabel);
+    addButton("قبلی", current - 1, current <= 1);
+    const visible = [...new Set([1, current - 1, current, current + 1, pages])]
+      .filter((page) => page >= 1 && page <= pages)
+      .sort((first, second) => first - second);
+    let previous = 0;
+    for (const page of visible) {
+      if (previous && page - previous > 1) {
+        const gap = document.createElement("span");
+        gap.textContent = "…";
+        gap.setAttribute("aria-hidden", "true");
+        nav.append(gap);
+      }
+      addButton(formatNumber(page), page, false, page === current);
+      previous = page;
+    }
+    addButton("بعدی", current + 1, current >= pages);
+  }
   const normalizeSearchText = (value) => String(value ?? "")
     .normalize("NFKC")
     .toLocaleLowerCase("fa-IR")
@@ -569,6 +610,7 @@
     toPersianDigits,
     toEnglishDigits,
     formatNumber,
+    renderPagination,
     normalizeSearchText,
     escapeHtml,
     setMessage,

@@ -24,12 +24,12 @@
         const warehouseSelect = filter.elements.warehouseId;
         let type = "sales", pageNumber = 1, serial = 0;
 
-        const dateValue = date => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
         const setLastDays = days => {
             const today = new Date();
             const start = new Date(today.getFullYear(), today.getMonth(), today.getDate() - days + 1);
-            fromInput.value = dateValue(start);
-            toInput.value = dateValue(today);
+            const format = date => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+            window.AdminPersianDatePicker.setValue(fromInput, format(start));
+            window.AdminPersianDatePicker.setValue(toInput, format(today));
         };
         function queryString(extra = {}) {
             const query = new URLSearchParams({ type, from: fromInput.value, to: toInput.value, page: String(pageNumber), pageSize: "50" });
@@ -100,10 +100,8 @@
             }
             const pagination = page.querySelector("[data-report-pagination]");
             const pages = Math.max(1, Math.ceil((result.total || 0) / (result.pageSize || 50)));
-            pagination.hidden = pages <= 1;
-            pagination.querySelector('[data-report-page="-1"]').disabled = pageNumber <= 1;
-            pagination.querySelector('[data-report-page="1"]').disabled = pageNumber >= pages;
-            page.querySelector("[data-report-page-label]").textContent = `صفحهٔ ${number.format(pageNumber)} از ${number.format(pages)}`;
+            ui.renderNumberedPagination(pagination, pageNumber, pages,
+                target => { pageNumber = target; void load(); }, `صفحه‌بندی گزارش ${config.title}`);
         }
 
         function updateExportLink() {
@@ -172,15 +170,17 @@
         });
         filter.addEventListener("submit", event => { event.preventDefault(); pageNumber = 1; void load(); });
         page.querySelector("[data-report-reset]").addEventListener("click", () => { setLastDays(30); pageNumber = 1; void load(); });
-        page.querySelectorAll("[data-report-page]").forEach(button => button.addEventListener("click", () => { pageNumber = Math.max(1, pageNumber + Number(button.dataset.reportPage)); void load(); }));
         page.querySelector("[data-report-rows]").addEventListener("click", event => { const button = event.target.closest("[data-report-detail]"); if (button) void showDetails(button); });
-        warehouseSelect.addEventListener("change", () => { if (type === "inventory") { pageNumber = 1; void load(); } });
-
         setLastDays(30);
         void ui.getJson(`${page.dataset.api}?type=warehouses`).then(result => {
             for (const warehouse of result.items || []) warehouseSelect.add(new Option(warehouse.label, warehouse.id));
-        }).catch(error => { page.querySelector("[data-report-status]").textContent = error.message || "دریافت فهرست انبارها ناموفق بود."; });
-        void load();
+            if (result.defaultWarehouseId != null) warehouseSelect.value = String(result.defaultWarehouseId);
+            else warehouseSelect.add(new Option("انبار فروش مجاز در دسترس نیست", "", true, true));
+            void load();
+        }).catch(error => {
+            page.querySelector("[data-report-status]").textContent = error.message || "دریافت فهرست انبارها ناموفق بود.";
+            void load();
+        });
     }
 
     window.AdminStoreReports = Object.freeze({ initialize });

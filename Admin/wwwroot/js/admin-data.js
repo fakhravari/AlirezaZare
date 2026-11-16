@@ -39,16 +39,11 @@
             : `${ui.formatNumber(visible)} ردیف در این صفحه`;
     }
 
-    function updatePagination(page, current, hasNext) {
+    function updatePagination(page, current, hasNext, totalPages, onPage) {
         const container = page.querySelector("[data-admin-pagination]");
         if (!container) return;
-        container.hidden = current <= 1 && !hasNext;
-        const label = container.querySelector("[data-admin-page-label]");
-        const previous = container.querySelector('[data-admin-page-step="-1"]');
-        const next = container.querySelector('[data-admin-page-step="1"]');
-        if (label) label.textContent = `صفحهٔ ${ui.formatNumber(current)}`;
-        if (previous) previous.disabled = current <= 1;
-        if (next) next.disabled = !hasNext;
+        const pages = Math.max(current, Number(totalPages) || 0, hasNext ? current + 1 : 1);
+        ui.renderNumberedPagination(container, current, pages, onPage, "صفحه‌بندی فهرست");
         page.dataset.adminPageNumber = String(current);
     }
 
@@ -95,6 +90,70 @@
             status.textContent = activeProductBenefits.length ? `${ui.formatNumber(activeProductBenefits.length)} مزیت ثبت شده است.` : "برای این کالا مزیتی ثبت نشده است.";
         } catch (error) {
             status.textContent = error.message || "دریافت مزیت‌های کالا ناموفق بود.";
+        }
+    }
+
+    async function loadProductImages(productId) {
+        const form = document.querySelector("[data-product-image-form]");
+        const gallery = form?.querySelector("[data-product-image-gallery]");
+        const status = form?.querySelector("[data-product-image-status]");
+        if (!form || !gallery || !status || !productId) return;
+
+        gallery.replaceChildren();
+        status.textContent = "در حال خواندن تصاویر ثبت‌شده…";
+        try {
+            const result = await ui.getJson(`/api/admin/store/product-images/${encodeURIComponent(productId)}`);
+            const images = result.images || [];
+            for (const image of images) {
+                const card = document.createElement("article");
+                card.className = "admin-product-image-card";
+                const preview = document.createElement("img");
+                preview.src = image.thumbnailUrl || image.url || "";
+                preview.alt = `تصویر کالا${image.isDefault ? "، پیش‌فرض" : ""}`;
+                preview.loading = "lazy";
+                preview.addEventListener("error", () => preview.remove(), { once: true });
+
+                const heading = document.createElement("div");
+                heading.className = "d-flex align-items-center justify-content-between gap-2";
+                const name = document.createElement("span");
+                name.className = "small text-muted text-break";
+                name.textContent = image.path?.split("/").at(-1) || "تصویر کالا";
+                heading.append(name);
+                if (image.isDefault) {
+                    const badge = document.createElement("span");
+                    badge.className = "badge text-bg-primary flex-shrink-0";
+                    badge.textContent = "پیش‌فرض";
+                    heading.append(badge);
+                }
+
+                const actions = document.createElement("div");
+                actions.className = "d-flex flex-wrap gap-2";
+                if (!image.isDefault) {
+                    const makeDefault = document.createElement("button");
+                    makeDefault.type = "button";
+                    makeDefault.className = "btn btn-default btn-sm";
+                    makeDefault.dataset.productImageDefault = image.path;
+                    makeDefault.dataset.adminConfirm = "این تصویر به عنوان پیش‌فرض کالا انتخاب شود؟";
+                    makeDefault.textContent = "انتخاب به‌عنوان پیش‌فرض";
+                    actions.append(makeDefault);
+                }
+                const remove = document.createElement("button");
+                remove.type = "button";
+                remove.className = "btn btn-danger btn-sm";
+                remove.dataset.productImageDelete = image.path;
+                remove.dataset.adminConfirm = "این تصویر از گالری کالا حذف شود؟";
+                remove.textContent = "حذف تصویر";
+                remove.disabled = image.isDefault;
+                if (image.isDefault) remove.title = "برای حذف، ابتدا تصویر دیگری را پیش‌فرض کنید.";
+                actions.append(remove);
+                card.append(preview, heading, actions);
+                gallery.append(card);
+            }
+            status.textContent = images.length
+                ? `${ui.formatNumber(images.length)} تصویر ثبت شده است.`
+                : "هنوز تصویری برای این کالا ثبت نشده است.";
+        } catch (error) {
+            status.textContent = error.message || "دریافت تصاویر ثبت‌شده ناموفق بود.";
         }
     }
 
@@ -284,7 +343,50 @@
         return typeof value === "string" ? value.trim() : value;
     }
 
+    async function loadSliders(root) {
+        const container = root.querySelector("[data-media-library-items]");
+        const status = root.querySelector("[data-media-library-status]");
+        try {
+            const slides = await ui.getJson("/api/admin/store/media/sliders");
+            container.replaceChildren();
+            for (const slide of slides) {
+                const form = document.createElement("form");
+                form.className = "admin-media-card";
+                form.dataset.sliderEdit = slide.id;
+                form.innerHTML = '<img class="admin-media-preview" alt="" loading="lazy"><div class="admin-media-details"><label>عنوان<input name="title" class="form-control" required maxlength="200"></label><label>نشانی لینک<input name="url" class="form-control" dir="ltr" required maxlength="1000"></label><label><input name="showOnMobile" type="checkbox" value="true"> موبایل</label><label><input name="showOnDesktop" type="checkbox" value="true"> دسکتاپ</label><code class="admin-media-path" dir="ltr"></code><div class="admin-media-actions"><button class="btn btn-primary btn-sm" type="submit">ذخیره</button><button class="btn btn-danger btn-sm" type="button" data-slider-delete data-admin-confirm="این اسلاید از فروشگاه حذف شود؟">حذف</button></div></div>';
+                form.querySelector("img").src = slide.imageUrl || "";
+                form.querySelector("img").alt = slide.title;
+                form.elements.title.value = slide.title; form.elements.url.value = slide.url;
+                form.elements.showOnMobile.checked = slide.showOnMobile; form.elements.showOnDesktop.checked = slide.showOnDesktop;
+                form.querySelector("code").textContent = slide.imagePath;
+                container.append(form);
+            }
+            status.textContent = slides.length ? ui.formatNumber(slides.length) + " اسلاید" : "اسلایدی ثبت نشده است.";
+        } catch (error) { status.textContent = error.message || "دریافت اسلایدها ناموفق بود."; }
+    }
+
+    document.addEventListener("submit", async event => {
+        const form = event.target.closest("[data-slider-edit]");
+        if (!form) return;
+        event.preventDefault();
+        const body = new FormData(form);
+        body.set("showOnMobile", form.elements.showOnMobile.checked ? "true" : "false");
+        body.set("showOnDesktop", form.elements.showOnDesktop.checked ? "true" : "false");
+        body.set("__RequestVerificationToken", form.closest("[data-media-library]").querySelector('[data-media-library-token] [name="__RequestVerificationToken"]').value);
+        try { const result = await ui.getJson('/api/admin/store/media/sliders/' + encodeURIComponent(form.dataset.sliderEdit), { method: "POST", body }); ui.notify(result.message, "success"); }
+        catch (error) { ui.notify(error.message || "ذخیره اسلاید ناموفق بود.", "danger"); }
+    });
+    document.addEventListener("click", async event => {
+        const button = event.target.closest("[data-slider-delete]");
+        if (!button) return;
+        const form = button.closest("[data-slider-edit]"), root = form.closest("[data-media-library]");
+        const body = new FormData(root.querySelector("[data-media-library-token]"));
+        try { const result = await ui.getJson('/api/admin/store/media/sliders/' + encodeURIComponent(form.dataset.sliderEdit) + '/delete', { method: "POST", body }); ui.notify(result.message, "success"); await loadSliders(root); }
+        catch (error) { ui.notify(error.message || "حذف اسلاید ناموفق بود.", "danger"); }
+    });
+
     async function loadMediaLibrary(root) {
+        if (root.dataset.mediaLibraryKind === "slider") return loadSliders(root);
         const statusNode = root.querySelector("[data-media-library-status]");
         const container = root.querySelector("[data-media-library-items]");
         if (!container) return;
@@ -345,7 +447,7 @@
 
     async function loadAllCategories(signal) {
         const items = [];
-        const size = 200;
+        const size = pageSize;
         let currentPage = 1;
         let total = 0;
         do {
@@ -353,8 +455,11 @@
             url.searchParams.set("page", String(currentPage));
             url.searchParams.set("pageSize", String(size));
             const result = await ui.getJson(url, { signal });
-            items.push(...(result.items || []));
-            total = result.total || 0;
+            const pageItems = result.items || [];
+            if (pageItems.length === 0) break;
+            items.push(...pageItems);
+            total = result.total ?? items.length;
+            if (result.hasNext === false) break;
             currentPage++;
         } while (items.length < total);
         return items;
@@ -473,9 +578,12 @@
             }
             if (page.dataset.canUploadImage === "true") {
                 const edit = document.createElement("button"); edit.type = "button"; edit.className = "btn btn-xs btn-default ms-1";
-                edit.dataset.categoryEdit = String(index); edit.textContent = "ویرایش دسته"; ui.withIcon(edit, "fa-pen-to-square"); actions.append(edit);
+                edit.dataset.categoryEdit = String(index); setIconAction(edit, "ویرایش دسته", "fa-pen-to-square"); actions.append(edit);
                 const statusButton = document.createElement("button"); statusButton.type = "button"; statusButton.className = "btn btn-xs btn-default ms-1";
-                statusButton.dataset.catalogStatus = String(index); statusButton.textContent = item.isActive ? "خروج از انتشار" : "انتشار"; ui.withIcon(statusButton, item.isActive ? "fa-eye-slash" : "fa-paper-plane"); actions.append(statusButton);
+                statusButton.dataset.catalogStatus = String(index);
+                statusButton.dataset.adminConfirm = `دستهٔ «${item.name}» ${item.isActive ? "از انتشار خارج" : "منتشر"} شود؟`;
+                setIconAction(statusButton, item.isActive ? "خروج از انتشار" : "انتشار", item.isActive ? "fa-eye-slash" : "fa-paper-plane");
+                actions.append(statusButton);
             }
             row.append(actions);
             body.append(row);
@@ -488,11 +596,137 @@
         ui.refreshDataTable(page.querySelector("[data-admin-datatable]"));
     }
 
+    function attributeGroup(item) {
+        const source = String(item.sourceKey || "");
+        if (["brand", "category", "country", "code"].includes(source)) return "identity";
+        if (["powerSource", "useCase", "color"].includes(source)) return "product";
+        if (source.startsWith("spec:") || source === "specs") return "technical";
+        if (source === "variants") return "variants";
+        if (["price", "stockQuantity", "discountPercent"].includes(source)) return "commerce";
+        return "other";
+    }
+
+    function renderAttributeTree(page, rows) {
+        const body = page.querySelector("[data-admin-results]");
+        const empty = page.querySelector("[data-admin-empty]");
+        if (!body) return;
+
+        ui.destroyDataTable(page.querySelector("[data-admin-datatable]"));
+        page.__adminRows = rows;
+        if (!page.__adminAttributeExpanded) {
+            page.__adminAttributeExpanded = new Set(["identity", "product", "technical", "variants", "commerce", "other"]);
+        }
+        const groups = [
+            { key: "identity", label: "شناسه و اطلاعات پایه" },
+            { key: "product", label: "ویژگی‌های کالا" },
+            { key: "technical", label: "مشخصات فنی" },
+            { key: "variants", label: "تنوع و گزینه‌ها" },
+            { key: "commerce", label: "قیمت و وضعیت خرید" },
+            { key: "other", label: "سایر ویژگی‌ها" }
+        ].map(group => ({ ...group, items: rows.filter(item => attributeGroup(item) === group.key) }))
+            .filter(group => group.items.length > 0);
+
+        body.replaceChildren();
+        for (const group of groups) {
+            const expanded = page.__adminAttributeExpanded.has(group.key);
+            const groupRow = document.createElement("tr");
+            groupRow.className = "admin-category-row admin-attribute-group-row";
+            groupRow.setAttribute("aria-level", "1");
+            groupRow.setAttribute("aria-expanded", String(expanded));
+            const groupCell = document.createElement("td");
+            groupCell.colSpan = 7;
+            const toggle = document.createElement("button");
+            toggle.type = "button";
+            toggle.className = "admin-category-toggle admin-attribute-group-toggle";
+            toggle.dataset.attributeTreeToggle = group.key;
+            toggle.setAttribute("aria-expanded", String(expanded));
+            toggle.setAttribute("aria-label", `${expanded ? "بستن" : "بازکردن"} گروه ${group.label}`);
+            toggle.append(Object.assign(document.createElement("span"), {
+                className: `admin-category-chevron${expanded ? " is-expanded" : ""}`,
+                textContent: "›"
+            }));
+            toggle.append(Object.assign(document.createElement("span"), { textContent: group.label }));
+            toggle.append(Object.assign(document.createElement("span"), {
+                className: "badge bg-secondary-subtle text-secondary-emphasis",
+                textContent: ui.formatNumber(group.items.length)
+            }));
+            groupCell.append(toggle);
+            const groupActions = document.createElement("td");
+            groupActions.className = "admin-row-actions";
+            groupRow.append(groupCell, groupActions);
+            body.append(groupRow);
+
+            if (!expanded) continue;
+            for (const item of group.items) {
+                const index = rows.indexOf(item);
+                const row = document.createElement("tr");
+                row.className = "admin-category-row admin-attribute-row";
+                row.setAttribute("aria-level", "2");
+                const values = [
+                    item.key,
+                    item.label,
+                    item.sourceKey,
+                    item.filterKey,
+                    item.isFilterable ? "بله" : "خیر",
+                    item.isHighlight ? "بله" : "خیر",
+                    item.isActive ? "منتشر" : "پیش‌نویس"
+                ];
+                values.forEach((value, valueIndex) => {
+                    const cell = document.createElement("td");
+                    if (valueIndex === 1) {
+                        const label = document.createElement("div");
+                        label.className = "admin-category-tree-label admin-attribute-tree-label";
+                        label.style.paddingInlineStart = "1.35rem";
+                        label.append(Object.assign(document.createElement("span"), { className: "admin-category-toggle-spacer" }));
+                        label.append(Object.assign(document.createElement("span"), {
+                            className: "admin-category-name",
+                            textContent: value == null || value === "" ? "—" : String(value)
+                        }));
+                        cell.append(label);
+                    } else {
+                        cell.textContent = value == null || value === "" ? "—" : String(value);
+                    }
+                    row.append(cell);
+                });
+
+                const actions = document.createElement("td");
+                actions.className = "admin-row-actions";
+                const details = document.createElement("button");
+                details.type = "button";
+                details.className = "btn btn-xs btn-default";
+                details.dataset.adminRecord = String(index);
+                setIconAction(details, "نمایش جزئیات ویژگی", "fa-eye");
+                actions.append(details);
+                if (page.dataset.canUploadImage === "true") {
+                    const edit = document.createElement("button");
+                    edit.type = "button";
+                    edit.className = "btn btn-xs btn-default ms-1";
+                    edit.dataset.attributeEdit = String(index);
+                    setIconAction(edit, "ویرایش ویژگی", "fa-pen-to-square");
+                    actions.append(edit);
+
+                    const status = document.createElement("button");
+                    status.type = "button";
+                    status.className = "btn btn-xs btn-default ms-1";
+                    status.dataset.catalogStatus = String(index);
+                    status.dataset.adminConfirm = `ویژگی «${item.label}» ${item.isActive ? "از انتشار خارج" : "منتشر"} شود؟`;
+                    setIconAction(status, item.isActive ? "خروج از انتشار" : "انتشار", item.isActive ? "fa-eye-slash" : "fa-paper-plane");
+                    actions.append(status);
+                }
+                row.append(actions);
+                body.append(row);
+            }
+        }
+
+        empty?.classList.toggle("d-none", rows.length > 0);
+        ui.refreshDataTable(page.querySelector("[data-admin-datatable]"));
+    }
+
     async function loadCatalog(page, pageNumber = 1, announce = false) {
         const form = page.querySelector("[data-admin-filter]");
         const api = new URL(page.dataset.adminApi, window.location.origin);
         api.searchParams.set("page", String(pageNumber));
-        api.searchParams.set("pageSize", String(pageSize));
+        api.searchParams.set("pageSize", String(page.dataset.adminSection === "attributes" ? 200 : pageSize));
         const query = queryValue(form, "q");
         if (query) api.searchParams.set("q", query);
         const controller = beginRequest(page);
@@ -517,23 +751,31 @@
                 : section === "categories"
                     ? [item.id, item.name, item.englishName, item.parentId, item.slug, item.isActive ? "منتشر" : "پیش‌نویس"]
                     : section === "brands"
-                        ? [item.id, item.name, item.englishName, item.countryCode, item.isActive ? "منتشر" : "پیش‌نویس"]
+                        ? [item.id, item.name, item.englishName, item.countryCode, item.isActive ? "منتشر" : "پیش‌نویس", item.showInStore ? "نمایش داده شود" : "مخفی"]
                         : section === "payment-institutions"
                             ? [item.nameFa, item.code, item.logoUrl ? "ثبت شده" : "—", item.logoPath]
                         : [item.key, item.label || item.name, item.sourceKey || item.source, item.filterKey, item.isFilterable ? "بله" : "خیر", item.isHighlight ? "بله" : "خیر", item.isActive ? "منتشر" : "پیش‌نویس"];
-            renderRows(page, rows, columns);
+            if (section === "attributes") renderAttributeTree(page, rows);
+            else renderRows(page, rows, columns);
             updateCount(page, result.total ?? 0, rows.length);
-            updatePagination(page, result.page ?? pageNumber, (result.page ?? pageNumber) * (result.pageSize ?? pageSize) < (result.total ?? 0));
+            const current = result.page ?? pageNumber;
+            updatePagination(page, current, current * (result.pageSize ?? pageSize) < (result.total ?? 0), Math.ceil((result.total ?? 0) / (result.pageSize ?? pageSize)), target => loadCatalog(page, target));
             status(page, "داده‌ها از دیتابیس دریافت شد.");
             if (announce) ui.notify("فهرست به‌روز شد.", "success");
         } catch (error) {
             if (error.name === "AbortError") return;
             if (!page.isConnected || requests.get(page) !== controller) return;
             if (page.dataset.adminSection === "categories") renderCategoryTree(page, [], query);
+            else if (page.dataset.adminSection === "attributes") renderAttributeTree(page, []);
             else renderRows(page, [], () => []);
             status(page, error.message || "دریافت داده ناموفق بود.", true);
             ui.notify(error.message || "دریافت داده ناموفق بود.", "danger");
         } finally { finishRequest(page, controller); }
+    }
+
+    function refreshBrandList() {
+        const page = document.querySelector('[data-admin-page="catalog"][data-admin-section="brands"]');
+        if (page) return loadCatalog(page, 1);
     }
 
     async function loadProductDrafts(page, pageNumber = Number(page.dataset.adminPageNumber || "1"), announce = false) {
@@ -549,7 +791,8 @@
             const rows = result.items || [];
             renderRows(page, rows, item => [item.code, item.name, item.brandName, item.categoryName, ui.formatNumber(item.priceAmount), item.hasImage ? "ثبت شده" : "ثبت نشده"]);
             updateCount(page, result.total ?? 0, rows.length);
-            updatePagination(page, result.page ?? pageNumber, (result.page ?? pageNumber) * (result.pageSize ?? pageSize) < (result.total ?? 0));
+            const current = result.page ?? pageNumber;
+            updatePagination(page, current, current * (result.pageSize ?? pageSize) < (result.total ?? 0), Math.ceil((result.total ?? 0) / (result.pageSize ?? pageSize)), target => loadProductDrafts(page, target));
             status(page, rows.length ? "پیش‌نویس‌ها از دیتابیس دریافت شدند." : "پیش‌نویسی با این فیلتر پیدا نشد.");
             if (announce) ui.notify("فهرست پیش‌نویس‌ها به‌روز شد.", "success");
         } catch (error) {
@@ -643,7 +886,7 @@
                 item.isLowStock ? "کمتر از حداقل" : "مناسب"
             ]);
             updateCount(page, 0, rows.length, false);
-            updatePagination(page, pageNumber, result?.hasNext === true);
+            updatePagination(page, pageNumber, result?.hasNext === true, 0, target => loadStock(page, target));
             status(page, "موجودی از دیتابیس دریافت شد.");
             if (announce) ui.notify("موجودی به‌روز شد.", "success");
         } catch (error) {
@@ -659,8 +902,13 @@
         const api = new URL(page.dataset.adminApi, window.location.origin);
         api.searchParams.set("page", String(pageNumber));
         api.searchParams.set("pageSize", String(pageSize));
-        const query = queryValue(page.querySelector("[data-admin-filter]"), "q");
+        const filter = page.querySelector("[data-admin-filter]");
+        const query = queryValue(filter, "q");
         if (query) api.searchParams.set("q", query);
+        for (const name of ["status", "from", "to"]) {
+            const value = queryValue(filter, name);
+            if (value) api.searchParams.set(name, value);
+        }
         const controller = beginRequest(page);
         status(page, "در حال خواندن سفارش‌ها…");
         try {
@@ -672,7 +920,7 @@
                 item.paymentMethod, ui.formatNumber(item.itemCount), ui.formatNumber(item.totalAmount),
                 new Date(/[zZ]|[+-]\d\d:\d\d$/.test(item.orderedAtUtc) ? item.orderedAtUtc : `${item.orderedAtUtc}Z`).toLocaleString("fa-IR")]);
             updateCount(page, 0, rows.length, false);
-            updatePagination(page, result.page, result.hasNext);
+            updatePagination(page, result.page, result.hasNext, Math.ceil((result.total ?? 0) / (result.pageSize ?? pageSize)), target => loadOrders(page, target));
             status(page, "سفارش‌ها از دیتابیس دریافت شدند.");
             if (announce) ui.notify("فهرست سفارش‌ها به‌روز شد.", "success");
         } catch (error) {
@@ -697,7 +945,7 @@
             const rows = result.items || [];
             renderRows(page, rows, item => [`${item.firstName} ${item.lastName}`.trim(), item.email, item.phone, ui.formatNumber(item.orderCount)]);
             updateCount(page, 0, rows.length, false);
-            updatePagination(page, result.page, result.hasNext);
+            updatePagination(page, result.page, result.hasNext, Math.ceil((result.total ?? 0) / (result.pageSize ?? pageSize)), target => loadCustomers(page, target));
             status(page, "مشتریان از دیتابیس دریافت شدند.");
             if (announce) ui.notify("فهرست مشتریان به‌روز شد.", "success");
         } catch (error) {
@@ -811,6 +1059,21 @@
         renumberEditorSections(container, "[data-mag-section]", ".admin-content-section-card__actions");
     }
     document.addEventListener("click", event => {
+        const productSectionButton = event.target.closest("[data-product-section-switch]");
+        if (productSectionButton) {
+            const selectedSection = productSectionButton.dataset.productSectionSwitch;
+            document.querySelectorAll("[data-product-section-switch]").forEach(button => {
+                const selected = button === productSectionButton;
+                button.classList.toggle("active", selected);
+                button.setAttribute("aria-pressed", String(selected));
+            });
+            document.querySelectorAll("[data-product-section]").forEach(section => {
+                section.hidden = section.dataset.productSection !== selectedSection;
+            });
+            const table = document.querySelector(`#${selectedSection === "drafts" ? "product-drafts-section" : "published-products-section"} [data-admin-datatable]`);
+            if (table) ui.refreshDataTable(table);
+            return;
+        }
         const magazineAdd = event.target.closest("[data-mag-section-add]");
         if (magazineAdd) {
             const form = magazineAdd.closest("[data-mag-editor]"), container = form.querySelector("[data-mag-sections]"), sections = [...container.querySelectorAll("[data-mag-section]")].map(row => ({ heading: row.querySelector("[data-mag-section-heading]").value, body: window.AdminRichEditor?.getValue(row.querySelector("[data-mag-section-body]")) ?? row.querySelector("[data-mag-section-body]").value }));
@@ -907,7 +1170,6 @@
             .then(result => { ui.notify(result.message, "success"); window.bootstrap?.Modal?.getInstance(document.getElementById("mag-editor-modal"))?.hide(); return loadMagazine(); })
             .catch(error => ui.notify(error.message || "ذخیره مقاله ناموفق بود.", "danger")).finally(() => { button.disabled = false; });
     });
-    document.addEventListener("DOMContentLoaded", () => void loadMagazine());
 
     function refresh(page, announce = true) {
         if (page.dataset.adminPage === "catalog") return loadCatalog(page, Number(page.dataset.adminPageNumber || "1"), announce);
@@ -932,7 +1194,9 @@
             else if (page.dataset.adminPage === "stock") void loadStock(page, 1, false);
             else if (page.dataset.adminPage === "orders") void loadOrders(page, 1, false);
             else if (page.dataset.adminPage === "customers") void loadCustomers(page, 1, false);
-            else if (page.dataset.adminPage === "faq") { void loadFaq(page); void loadMagazine(); void loadServicePages(); }
+            else if (page.dataset.adminPage === "faq") void loadFaq(page);
+            else if (page.dataset.adminPage === "content-magazine") void loadMagazine();
+            else if (page.dataset.adminPage === "content-pages") void loadServicePages();
             else if (page.dataset.adminPage === "product-drafts") void loadProductDrafts(page);
         });
     }
@@ -1108,6 +1372,7 @@
                 form.reset(); form.elements.originalKey.value = item?.id || "";
                 form.elements.key.value = item?.id || ""; form.elements.key.readOnly = !!item;
                 form.elements.nameFa.value = item?.name || ""; form.elements.nameEn.value = item?.englishName || "";
+                form.elements.showInStore.checked = item ? !!item.showInStore : true;
                 form.elements.countryCode.replaceChildren(new Option("بدون کشور", ""), ...countries.map(country => new Option(country.nameFa, country.countryCode)));
                 form.elements.countryCode.value = item?.countryCode || "";
                 window.bootstrap?.Modal?.getOrCreateInstance(document.getElementById("brand-editor-modal")).show();
@@ -1226,6 +1491,43 @@
             form.reset(); form.elements.productId.value = item.id;
             form.querySelector("[data-product-image-name]").textContent = item.name;
             window.bootstrap?.Modal?.getOrCreateInstance(document.getElementById("product-image-modal")).show();
+            void loadProductImages(item.id);
+            return;
+        }
+        const defaultImageButton = event.target.closest("[data-product-image-default]");
+        if (defaultImageButton) {
+            const form = defaultImageButton.closest("[data-product-image-form]");
+            const productId = form?.elements.productId.value;
+            if (!productId || defaultImageButton.disabled) return;
+            defaultImageButton.disabled = true;
+            const token = form.querySelector('[name="__RequestVerificationToken"]')?.value || "";
+            void ui.getJson(`/api/admin/store/product-images/${encodeURIComponent(productId)}/default`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json", RequestVerificationToken: token },
+                body: JSON.stringify({ path: defaultImageButton.dataset.productImageDefault })
+            }).then(result => {
+                ui.notify(result.message, "success");
+                return loadProductImages(productId);
+            }).catch(error => ui.notify(error.message || "تغییر تصویر پیش‌فرض ناموفق بود.", "danger"))
+                .finally(() => { defaultImageButton.disabled = false; });
+            return;
+        }
+        const deleteImageButton = event.target.closest("[data-product-image-delete]");
+        if (deleteImageButton) {
+            const form = deleteImageButton.closest("[data-product-image-form]");
+            const productId = form?.elements.productId.value;
+            if (!productId || deleteImageButton.disabled) return;
+            deleteImageButton.disabled = true;
+            const token = form.querySelector('[name="__RequestVerificationToken"]')?.value || "";
+            const path = encodeURIComponent(deleteImageButton.dataset.productImageDelete);
+            void ui.getJson(`/api/admin/store/product-images/${encodeURIComponent(productId)}?path=${path}`, {
+                method: "DELETE", headers: { RequestVerificationToken: token }
+            }).then(result => {
+                ui.notify(result.message, "success");
+                refreshProductDrafts();
+                return loadProductImages(productId);
+            }).catch(error => ui.notify(error.message || "حذف تصویر ناموفق بود.", "danger"))
+                .finally(() => { deleteImageButton.disabled = false; });
             return;
         }
         const categoryButton = event.target.closest("[data-category-content]");
@@ -1260,6 +1562,27 @@
             renderCategoryTree(page, rows, queryValue(page.querySelector("[data-admin-filter]"), "q"));
             return;
         }
+        const attributeGroupButton = event.target.closest("[data-attribute-tree-toggle]");
+        if (attributeGroupButton) {
+            const page = attributeGroupButton.closest('[data-admin-section="attributes"]');
+            const group = attributeGroupButton.dataset.attributeTreeToggle;
+            if (!page || !group) return;
+            if (page.__adminAttributeExpanded.has(group)) page.__adminAttributeExpanded.delete(group);
+            else page.__adminAttributeExpanded.add(group);
+            renderAttributeTree(page, page.__adminRows || []);
+            return;
+        }
+        const attributeTreeAction = event.target.closest("[data-attribute-tree-expand], [data-attribute-tree-collapse]");
+        if (attributeTreeAction) {
+            const page = attributeTreeAction.closest('[data-admin-section="attributes"]');
+            if (!page) return;
+            const groups = new Set((page.__adminRows || []).map(attributeGroup));
+            page.__adminAttributeExpanded = attributeTreeAction.hasAttribute("data-attribute-tree-expand")
+                ? groups
+                : new Set();
+            renderAttributeTree(page, page.__adminRows || []);
+            return;
+        }
         const refreshButton = event.target.closest("[data-admin-refresh]");
         if (refreshButton) {
             const page = refreshButton.closest("[data-admin-page]");
@@ -1287,6 +1610,27 @@
                         "تاریخچهٔ ارسال": history.map(entry => `${entry.PreviousStatus} ← ${entry.NewStatus}، مدیر ${entry.ActorUserKey}، ${entry.ChangedAtUtc} UTC`).join(" ؛ ") || "تغییری ثبت نشده است"
                     });
                 }).catch(error => ui.notify(error.message || "دریافت جزئیات سفارش ناموفق بود.", "danger"))
+                    .finally(() => { detailButton.disabled = false; });
+            } else if (item && page.dataset.adminSection === "products") {
+                detailButton.disabled = true;
+                void ui.getJson(`/api/admin/store/catalog/products/${encodeURIComponent(item.id)}/details`).then(product => {
+                    if (!page.isConnected) return;
+                    const parseJson = value => {
+                        if (!value) return null;
+                        try { return JSON.parse(value); } catch { return value; }
+                    };
+                    const variants = (product.variants || []).map(variant => ({
+                        ...variant,
+                        attributes: parseJson(variant.attributesJson)
+                    }));
+                    variants.forEach(variant => delete variant.attributesJson);
+                    const media = product.media ? {
+                        ...product.media,
+                        imageList: parseJson(product.media.imageList),
+                        videoList: parseJson(product.media.videoList)
+                    } : null;
+                    ui.showRecord("جزئیات کامل کالا", { ...product, variants, media });
+                }).catch(error => ui.notify(error.message || "دریافت جزئیات کالا ناموفق بود.", "danger"))
                     .finally(() => { detailButton.disabled = false; });
             } else if (item && page.dataset.adminPage === "customers") {
                 detailButton.disabled = true;
@@ -1321,16 +1665,6 @@
                 window.bootstrap?.Modal?.getOrCreateInstance(document.getElementById("admin-minimum-modal")).show();
             }
             return;
-        }
-        const stepButton = event.target.closest("[data-admin-page-step]");
-        if (stepButton && !stepButton.disabled) {
-            const page = stepButton.closest("[data-admin-page]");
-            const nextPage = Number(page?.dataset.adminPageNumber || "1") + Number(stepButton.dataset.adminPageStep);
-            if (page?.dataset.adminPage === "catalog") void loadCatalog(page, nextPage);
-            else if (page?.dataset.adminPage === "stock") void loadStock(page, nextPage);
-            else if (page?.dataset.adminPage === "orders") void loadOrders(page, nextPage);
-            else if (page?.dataset.adminPage === "customers") void loadCustomers(page, nextPage);
-            else if (page?.dataset.adminPage === "product-drafts") void loadProductDrafts(page, nextPage);
         }
     });
 
@@ -1456,10 +1790,10 @@
             if (save.disabled) return;
             const original = brandEditor.elements.originalKey.value;
             const token = brandEditor.querySelector('[name="__RequestVerificationToken"]')?.value || "";
-            const body = { key: brandEditor.elements.key.value, nameFa: brandEditor.elements.nameFa.value, nameEn: brandEditor.elements.nameEn.value, countryCode: brandEditor.elements.countryCode.value };
+            const body = { key: brandEditor.elements.key.value, nameFa: brandEditor.elements.nameFa.value, nameEn: brandEditor.elements.nameEn.value, countryCode: brandEditor.elements.countryCode.value, showInStore: brandEditor.elements.showInStore.checked };
             save.disabled = true;
             void ui.getJson(`/api/admin/store/catalog/brands/manage${original ? `/${encodeURIComponent(original)}` : ""}`, { method: original ? "PUT" : "POST", headers: { "Content-Type": "application/json", RequestVerificationToken: token }, body: JSON.stringify(body) })
-                .then(result => { ui.notify(result.message, "success"); window.bootstrap?.Modal?.getInstance(document.getElementById("brand-editor-modal"))?.hide(); const page = document.querySelector('[data-admin-section="brands"]'); if (page) return loadCatalog(page, Number(page.dataset.adminPageNumber || 1)); })
+                .then(result => { ui.notify(result.message, "success"); window.bootstrap?.Modal?.getInstance(document.getElementById("brand-editor-modal"))?.hide(); return refreshBrandList(); })
                 .catch(error => ui.notify(error.message || "ذخیرهٔ برند ناموفق بود.", "danger"))
                 .finally(() => { save.disabled = false; });
             return;
@@ -1499,7 +1833,7 @@
             event.preventDefault();
             const save = brandForm.querySelector('[type="submit"]'); save.disabled = true;
             void ui.getJson("/api/admin/store/media", { method: "POST", body: new FormData(brandForm) })
-                .then(result => { ui.notify(result.message, "success"); window.bootstrap?.Modal?.getInstance(document.getElementById("brand-image-modal"))?.hide(); })
+                .then(result => { ui.notify(result.message, "success"); window.bootstrap?.Modal?.getInstance(document.getElementById("brand-image-modal"))?.hide(); return refreshBrandList(); })
                 .catch(error => ui.notify(error.message || "بارگذاری نشان ناموفق بود.", "danger"))
                 .finally(() => { save.disabled = false; });
             return;
@@ -1564,8 +1898,14 @@
             event.preventDefault();
             const token = imageForm.querySelector('[name="__RequestVerificationToken"]')?.value || "";
             const save = imageForm.querySelector('[type="submit"]'); save.disabled = true;
-            void ui.getJson(`/api/admin/store/product-images/${encodeURIComponent(imageForm.elements.productId.value)}`, { method: "POST", headers: { RequestVerificationToken: token }, body: new FormData(imageForm) })
-                .then(result => { ui.notify(result.message, "success"); window.bootstrap?.Modal?.getInstance(document.getElementById("product-image-modal"))?.hide(); refreshProductDrafts(); })
+            const productId = imageForm.elements.productId.value;
+            void ui.getJson(`/api/admin/store/product-images/${encodeURIComponent(productId)}`, { method: "POST", headers: { RequestVerificationToken: token }, body: new FormData(imageForm) })
+                .then(result => {
+                    ui.notify(result.message, "success");
+                    imageForm.elements.images.value = "";
+                    refreshProductDrafts();
+                    return loadProductImages(productId);
+                })
                 .catch(error => ui.notify(error.message || "بارگذاری تصویر ناموفق بود.", "danger"))
                 .finally(() => { save.disabled = false; });
             return;
@@ -1609,6 +1949,7 @@
         else if (page?.dataset.adminPage === "product-drafts") void loadProductDrafts(page, 1);
         else if (page?.dataset.adminPage === "warehouses") void loadWarehouses(page);
         else if (page?.dataset.adminPage === "stock") void loadStock(page, 1);
+        else if (page?.dataset.adminPage === "orders") void loadOrders(page, 1);
         else if (page?.dataset.adminPage === "orders") void loadOrders(page, 1);
         else if (page?.dataset.adminPage === "customers") void loadCustomers(page, 1);
     });

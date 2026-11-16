@@ -85,14 +85,37 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
 
     [HttpGet]
     public async Task<IActionResult> List([FromQuery] string? q, [FromQuery] int page = 1,
-        [FromQuery] int pageSize = AdminListQuery.DefaultPageSize, CancellationToken cancellationToken = default)
+        [FromQuery] int pageSize = AdminListQuery.DefaultPageSize, [FromQuery] string? status = null,
+        [FromQuery] DateOnly? from = null, [FromQuery] DateOnly? to = null,
+        CancellationToken cancellationToken = default)
     {
         if (!AdminListQuery.TryCreate(page, pageSize, q, out AdminPageRequest paging))
             return ValidationProblem(detail: "عبارت جست‌وجو یا صفحه‌بندی معتبر نیست.", statusCode: 400);
+        string normalizedStatus = status?.Trim() ?? "";
+        if (normalizedStatus.Length > 40 || normalizedStatus.Any(char.IsControl) ||
+            normalizedStatus != "" && normalizedStatus is not ("pending-payment" or "simulated-payment-confirmed" or
+                "payment-confirmed" or "warehouse-confirmed" or "in-transit" or "shipped-to-post" or "delivered" or "cancelled"))
+            return ValidationProblem(detail: "وضعیت سفارش معتبر نیست.", statusCode: 400);
+        if (from.HasValue && to.HasValue && from.Value > to.Value)
+            return ValidationProblem(detail: "تاریخ شروع باید قبل از تاریخ پایان باشد.", statusCode: 400);
+        if (to == DateOnly.MaxValue)
+            return ValidationProblem(detail: "تاریخ پایان معتبر نیست.", statusCode: 400);
+        if (from.HasValue && to.HasValue && to.Value.DayNumber - from.Value.DayNumber > 365)
+            return ValidationProblem(detail: "بازهٔ تاریخ نمی‌تواند بیشتر از ۳۶۶ روز باشد.", statusCode: 400);
+
         q = paging.Search;
+        DateTime? fromUtc = from.HasValue
+            ? DateTime.SpecifyKind(from.Value.ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc)
+            : null;
+        DateTime? untilUtc = to.HasValue
+            ? DateTime.SpecifyKind(to.Value.AddDays(1).ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc)
+            : null;
         var query = from o in db.StoreCustomerOrders.AsNoTracking()
                           join p in db.AccountProfiles.AsNoTracking() on o.IdProfile equals p.Id
-                          where q == "" || o.OrderNumber.Contains(q) || (p.FirstName + " " + p.LastName).Contains(q)
+                          where (q == "" || o.OrderNumber.Contains(q) || (p.FirstName + " " + p.LastName).Contains(q))
+                              && (normalizedStatus == "" || o.Status == normalizedStatus)
+                              && (!fromUtc.HasValue || o.OrderedAtUtc >= fromUtc.Value)
+                              && (!untilUtc.HasValue || o.OrderedAtUtc < untilUtc.Value)
                           orderby o.Id descending
                           select new OrderRow
                           {

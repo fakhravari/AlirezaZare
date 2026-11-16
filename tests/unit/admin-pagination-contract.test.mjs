@@ -75,6 +75,17 @@ test("paid-order dispatch uses bounded pages and stable page ordering", async ()
     assertDatabasePaging(list, "Paid-order dispatch", /AdminListQuery\.CreateResult\(rows, total, paging\)/);
 });
 
+test("warehouse movements return the paged contract consumed by the movement UI", async () => {
+    const controller = await source("Admin/Areas/Warehouse/Controllers/Api/WarehouseMovementsApiController.cs");
+    const movements = methodBody(controller, "Task<IActionResult> Get(");
+    const client = await source("Admin/wwwroot/js/admin-movements.js");
+
+    assert.match(movements, /AdminListQuery\.TryCreate\(page, pageSize, search/);
+    assertDatabasePaging(movements, "Warehouse movements");
+    assert.match(client, /const rows = result\.items \|\| \[\]/);
+    assert.match(client, /result\.hasNext === true/);
+});
+
 test("Admin list endpoints share bounded paging, search, response, and Excel export helpers", async () => {
     const helper = await source("Data/Helpers/AdminListQuery.cs");
     const excel = await source("Admin/Infrastructure/AdminExcelFileResult.cs");

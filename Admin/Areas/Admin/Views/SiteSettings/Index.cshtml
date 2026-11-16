@@ -55,18 +55,8 @@
     <section class="panel panel-inverse mt-3" aria-labelledby="site-settings-media-title">
         <div class="panel-heading"><h2 id="site-settings-media-title" class="panel-title">رسانه‌های فروشگاه</h2></div>
         <div class="panel-body">
-            <p>تصویرهای دیدگاه و هویت فروشگاه را در بخش مربوط بارگذاری و مدیریت کنید. اسلایدر در زیرمنوی تنظیمات سایت قرار دارد.</p>
+            <p>تصویر هویت فروشگاه را در این بخش مدیریت کنید. اسلایدر در زیرمنوی تنظیمات سایت و تصویر دیدگاه‌ها در بخش «مشتریان و بازخورد» قرار دارد.</p>
             <div class="accordion" id="siteSettingsMediaAccordion">
-                <div class="accordion-item">
-                    <h3 class="accordion-header" id="siteSettingsTestimonialsHeading">
-                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#siteSettingsTestimonials" aria-expanded="true" aria-controls="siteSettingsTestimonials">تصویرهای دیدگاه</button>
-                    </h3>
-                    <div id="siteSettingsTestimonials" class="accordion-collapse collapse show" aria-labelledby="siteSettingsTestimonialsHeading" data-bs-parent="#siteSettingsMediaAccordion">
-                        <div class="accordion-body">
-                            @await Html.PartialAsync("_MediaLibrarySection", (Kind: "testimonial", Title: "تصویر دیدگاه", Description: "تصویرهای همراه دیدگاه‌های فروشگاه."))
-                        </div>
-                    </div>
-                </div>
                 <div class="accordion-item">
                     <h3 class="accordion-header" id="siteSettingsIdentityHeading">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#siteSettingsIdentity" aria-expanded="false" aria-controls="siteSettingsIdentity">تصویرهای هویت فروشگاه</button>

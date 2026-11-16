@@ -19,11 +19,18 @@
             </nav>
 
             <form class="admin-filter-bar d-flex flex-wrap align-items-end gap-2 mb-4" data-report-filter>
-                <div><label class="form-label" for="store-report-from">از تاریخ</label><input class="form-control" id="store-report-from" name="from" type="date" required /></div>
-                <div><label class="form-label" for="store-report-to">تا تاریخ</label><input class="form-control" id="store-report-to" name="to" type="date" required /></div>
+                <div class="admin-report-date-field">
+                    <label class="form-label" for="store-report-from">از تاریخ</label>
+                    <input class="form-control" id="store-report-from" name="from" type="date" required autocomplete="off" />
+                </div>
+                <div class="admin-report-date-field">
+                    <label class="form-label" for="store-report-to">تا تاریخ</label>
+                    <input class="form-control" id="store-report-to" name="to" type="date" required autocomplete="off" />
+                </div>
                 <div data-report-warehouse-filter hidden>
                     <label class="form-label" for="store-report-warehouse">شرکت / انبار</label>
-                    <select class="form-select" id="store-report-warehouse" name="warehouseId"><option value="">همهٔ انبارهای مجاز</option></select>
+                    <select class="form-select" id="store-report-warehouse" name="warehouseId" disabled aria-describedby="store-report-warehouse-note"></select>
+                    <small class="form-text text-muted" id="store-report-warehouse-note">انبار فروش پیش‌فرض فروشگاه</small>
                 </div>
                 <button class="btn btn-primary" type="submit"><i class="fa fa-filter me-1" aria-hidden="true"></i>اعمال فیلتر</button>
                 <button class="btn btn-default" type="button" data-report-reset>۳۰ روز اخیر</button>
@@ -37,7 +44,7 @@
                     <tbody data-report-rows></tbody>
                 </table>
             </div>
-            <div class="d-flex align-items-center justify-content-between gap-2 mt-3" data-report-pagination hidden>
+            <div class="admin-pagination" data-report-pagination hidden>
                 <button type="button" class="btn btn-sm btn-default" data-report-page="-1">صفحهٔ قبل</button>
                 <span class="small text-muted" data-report-page-label></span>
                 <button type="button" class="btn btn-sm btn-default" data-report-page="1">صفحهٔ بعد</button>

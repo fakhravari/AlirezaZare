@@ -152,9 +152,10 @@ public sealed class AccountController(
             })
             .ToListAsync(ct);
 
-        var checkout = await db.AccountCheckoutPreferences.AsNoTracking().Where(x => x.IdProfile == ProfileId)
-            .Select(x => new { selectedAddressId = x.IdSelectedAddress, paymentMethod = x.PaymentMethod })
-            .SingleOrDefaultAsync(ct);
+        var checkout = await db.StoreCustomerOrders.AsNoTracking().Where(x => x.IdProfile == ProfileId)
+            .OrderByDescending(x => x.Id)
+            .Select(x => new { selectedAddressId = x.IdAddress, paymentMethod = x.PaymentMethod })
+            .FirstOrDefaultAsync(ct);
 
         var orderRows = await db.StoreCustomerOrders.AsNoTracking().Where(x => x.IdProfile == ProfileId)
             .OrderByDescending(x => x.Id)
@@ -624,19 +625,6 @@ public sealed class AccountController(
         return Ok(new { saved = true, id = address.Id.ToString(System.Globalization.CultureInfo.InvariantCulture) });
     }
 
-    [HttpPut("checkout-preference")]
-    public async Task<IActionResult> SaveCheckoutPreference([FromBody] CheckoutPreferenceRequest request,
-        CancellationToken ct)
-    {
-        if (request.AddressId is null or < 1 || request.PaymentMethod != "zarinpal")
-            return BadRequest(new { code = "invalid-checkout-preference" });
-        if (!await db.AccountAddresses.AnyAsync(x => x.Id == request.AddressId && x.IdProfile == ProfileId, ct))
-            return BadRequest(new { code = "address-not-owned" });
-        await SetCheckoutPreferenceAsync(request.AddressId, request.PaymentMethod, ct);
-        await db.SaveChangesAsync(ct);
-        return Ok(new { saved = true });
-    }
-
     [HttpPost("coupon/quote")]
     public async Task<IActionResult> QuoteCoupon([FromBody] CouponRequest request, CancellationToken ct)
     {
@@ -1002,7 +990,6 @@ public sealed class AccountController(
             }).ToList()
         };
         db.StoreCustomerOrders.Add(order);
-        await SetCheckoutPreferenceAsync(request.AddressId, request.PaymentMethod, ct);
         await db.AccountCartItems.Where(item => db.AccountCarts.Any(cart =>
                 cart.Id == item.IdCart && cart.IdProfile == ProfileId))
             .ExecuteDeleteAsync(ct);
@@ -1042,31 +1029,10 @@ public sealed class AccountController(
 
     private static string NormalizeCouponCode(string? code) => (code ?? string.Empty).Trim().ToUpperInvariant();
 
-    private async Task SetCheckoutPreferenceAsync(long? addressId, string paymentMethod, CancellationToken ct)
-    {
-        var preference = await db.AccountCheckoutPreferences
-            .SingleOrDefaultAsync(x => x.IdProfile == ProfileId, ct);
-        if (preference is null)
-        {
-            preference = new AccountCheckoutPreference { IdProfile = ProfileId };
-            db.AccountCheckoutPreferences.Add(preference);
-        }
-        preference.IdSelectedAddress = addressId;
-        preference.PaymentMethod = paymentMethod;
-        preference.UpdatedAtUtc = DateTime.UtcNow;
-    }
-
     [HttpDelete("addresses/{id:long}")]
     public async Task<IActionResult> DeleteAddress(long id, CancellationToken ct)
     {
         await using var transaction = await db.Database.BeginTransactionAsync(ct);
-        var preference = await db.AccountCheckoutPreferences
-            .SingleOrDefaultAsync(x => x.IdProfile == ProfileId && x.IdSelectedAddress == id, ct);
-        if (preference is not null)
-        {
-            preference.IdSelectedAddress = null;
-            preference.UpdatedAtUtc = DateTime.UtcNow;
-        }
         await db.StoreCustomerOrders.Where(x => x.IdProfile == ProfileId && x.IdAddress == id)
             .ExecuteUpdateAsync(update => update.SetProperty(x => x.IdAddress, (long?)null), ct);
         var address = await db.AccountAddresses.SingleOrDefaultAsync(x => x.Id == id && x.IdProfile == ProfileId, ct);
@@ -1302,8 +1268,6 @@ public sealed class AccountController(
     public sealed record CheckoutRequest(long AddressId, string PaymentMethod, string? CouponCode = null);
 
     public sealed record CouponRequest(string? Code);
-
-    public sealed record CheckoutPreferenceRequest(long? AddressId, string PaymentMethod);
 
     public sealed record ListRequest(IReadOnlyList<long>? ProductIds);
 

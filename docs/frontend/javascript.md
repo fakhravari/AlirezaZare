@@ -12,9 +12,15 @@
 
 `ui-core.js` API عمومی `window.HNUI` را فراهم می‌کند؛ `storage.js` و `cart.js` ابزار مشترک فروشگاه‌اند. قراردادهای مربوط به commerce در [سبد](../store/cart.md)، حساب در [پروفایل](../account/profile.md) و داده در [منابع داده](../architecture/data-sources.md) مرجع‌اند.
 
+صفحه‌بندی شماره‌دار Shop از `HNUI.renderPagination` و ظاهر سراسری `css/store/pagination.css` استفاده می‌کند. صفحه‌بندی APIهای Admin از `AdminUI.renderNumberedPagination` و `.admin-pagination` در `Admin/wwwroot/css/admin-ui.css` استفاده می‌کند. این rendererها شمارهٔ جاری و اطراف آن، ابتدا/انتها و سه‌نقطه را در فهرست‌های بلند نشان می‌دهند؛ «قبلی/بعدی» همواره در دسترس است و هر فهرست owner خودش را برای بارگذاری صفحهٔ انتخاب‌شده نگه می‌دارد. جدول‌های کامل Client-side همچنان شماره‌بندی DataTables را دارند.
+
 انتخاب‌گرهای بومی در layoutهای اصلی Shop و Admin به Select2 فارسی/RTL تبدیل می‌شوند؛ راه‌انداز مشترک هر برنامه selectهای جدیدی را که بعداً به DOM اضافه می‌شوند نیز می‌گیرد. برای select داخل modal، dropdown باید در خود modal بماند. پس از تغییر programmatic گزینه‌ها، مقدار انتخاب‌شده را با رویداد `change` هماهنگ کنید؛ برای کنترل‌های استثنایی که باید native بمانند از `data-native-select` استفاده کنید.
 
+همهٔ ورودی‌های `date` و `datetime-local` پنل Admin در `Admin/wwwroot/js/admin-persian-datetime.js` به MD.BootstrapPersianDateTimePicker و تقویم شمسی وصل می‌شوند؛ راه‌انداز فرم‌های بعداً افزوده‌شده و مدال‌ها را هم پوشش می‌دهد. مقدار پنهان اصلی، شناسه و `name` کنترل را نگه می‌دارد تا APIها تاریخ میلادی استاندارد دریافت کنند. برای فیلدهای UTC، مقدار میلادی به‌شکل تاریخ و ساعت UTC بدون پسوند منطقهٔ زمانی نگهداری می‌شود تا endpoint فعلی همان قرارداد را دریافت کند. فایل‌های کتابخانهٔ Bootstrap 5 در `Admin/wwwroot/lib/persian-datetimepicker/` از نسخهٔ npm `5.0.1` می‌آیند.
+
 در پنل مدیریت، `Admin/wwwroot/js/admin-ui.js` پیام‌های اعتبارسنجی بومی فرم را به فارسی تبدیل می‌کند. شنونده‌های مشترک `input`، `change` و `invalid` با `setCustomValidity` خطای فیلدهای الزامی، ایمیل/نشانی نامعتبر، الگوی نامنطبق، طول، بازهٔ عددی و گام را با نام برچسب فیلد نشان می‌دهند. برای قیدهای تازه، متن پیام در همین نگاشت مشترک افزوده شود تا tooltip بومی مرورگر با زبان صفحه هماهنگ بماند.
+
+ویرایشگر مشترک `Admin/wwwroot/js/admin-rich-editor.js` ارتفاع معمول ۱۹۰ پیکسل دارد؛ textarea مشخص می‌تواند با `data-rich-editor-height` ارتفاعی بین ۱۲۰ تا ۶۰۰ پیکسل درخواست کند. این ویژگی برای پاسخ‌های طولانی مدیریتی استفاده می‌شود و ابزار و پاک‌سازی HTML مشترک را تغییر نمی‌دهد.
 
 فرم تماس در `pages/contact.js`، پیگیری سفارش در `pages/tracking.js` و پیام‌های پروفایل در `pages/account-page.js` از API هم‌مبدأ با `HNUI.api.request` استفاده می‌کنند. فرم خبرنامه در `layout/main.js` نشست را به سرور واگذار می‌کند تا ترجیح حساب یا ایمیل مهمان در مقصد درست ذخیره شود. جزئیات مسیر و مالکیت داده در [راهنمای حساب](../account/profile.md)، [صفحه‌های محتوا](../content/pages.md) و [منابع داده](../architecture/data-sources.md) است.
 
@@ -22,4 +28,4 @@
 
 [فهرست UI](README.md) · [فهرست docs](../README.md)
 
-بازبینی: ۱۴ نوامبر ۲۰۲۶.
+بازبینی: ۱۶ نوامبر ۲۰۲۶.

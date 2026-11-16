@@ -135,40 +135,16 @@ window.HNUI.mount("pages-article-details", document, () => {
         }
         list.append(card);
       });
-      pagination.replaceChildren();
-      pagination.hidden = pageCount <= 1;
-      if (pageCount > 1) {
-        const addPageButton = (label, target, disabled, current = false) => {
-          const button = document.createElement("button");
-          button.type = "button";
-          button.textContent = label;
-          button.disabled = disabled;
-          button.dataset.reviewPage = String(target);
-          button.setAttribute(
-            "aria-label",
-            current
-              ? `${label}، صفحهٔ فعلی`
-              : `${label}، ${label === "قبلی" ? "صفحهٔ قبل" : label === "بعدی" ? "صفحهٔ بعد" : "رفتن به صفحه"}`,
-          );
-          if (current) button.setAttribute("aria-current", "page");
-          button.addEventListener("click", () => {
-            reviewPage = target;
-            renderFeedback();
-            const firstReview = list.querySelector(".article-feedback-card");
-            firstReview?.focus({ preventScroll: true });
-            firstReview?.scrollIntoView({
-              behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
-              block: "start",
-            });
-          });
-          pagination.append(button);
-        };
-        addPageButton("قبلی", reviewPage - 1, reviewPage === 1);
-        for (let target = 1; target <= pageCount; target++) {
-          addPageButton(formatNumber(target), target, false, target === reviewPage);
-        }
-        addPageButton("بعدی", reviewPage + 1, reviewPage === pageCount);
-      }
+      window.HNUI.renderPagination(pagination, reviewPage, pageCount, (target) => {
+        reviewPage = target;
+        renderFeedback();
+        const firstReview = list.querySelector(".article-feedback-card");
+        firstReview?.focus({ preventScroll: true });
+        firstReview?.scrollIntoView({
+          behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+          block: "start",
+        });
+      }, "صفحه‌بندی دیدگاه‌های مقاله");
       const ratedEntries = [...saved, ...seed].filter((item) => Number(item.rating) >= 1 && Number(item.rating) <= 5);
       const all = [...saved, ...seed];
       const average = ratedEntries.length

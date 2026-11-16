@@ -56,7 +56,6 @@
         if (mode === "audit") query.set("audit", "true");
         if (mode === "summary") query.set("summary", "true");
         page.querySelector("[data-movement-rows]").replaceChildren();
-        page.querySelectorAll("[data-movement-page]").forEach(button => { button.disabled = true; });
         status(page, "در حال دریافت اطلاعات…");
         try {
             const result = await get(`${page.dataset.api}?${query}`);
@@ -64,11 +63,10 @@
             const rows = result.items || [];
             if (mode === "audit") renderAudit(page, rows); else if (mode === "summary") renderSummary(page, rows); else render(page, rows);
             status(page, rows.length ? (mode === "summary" ? `${number.format(result.total)} ردیف در گزارش` : "") : mode === "audit" ? "تغییری برای این فیلتر ثبت نشده است." : "گردشی برای این فیلتر پیدا نشد.");
-            page.querySelector("[data-movement-page-label]").textContent = `صفحهٔ ${number.format(current)}`;
-            page.querySelector('[data-movement-page="-1"]').disabled = current <= 1;
             const hasNext = result.hasNext === true;
-            page.querySelector("[data-movement-pagination]").hidden = current <= 1 && !hasNext;
-            page.querySelector('[data-movement-page="1"]').disabled = !hasNext;
+            const totalPages = Number.isFinite(result.total) ? Math.ceil(result.total / (result.pageSize || 50)) : current + (hasNext ? 1 : 0);
+            ui.renderNumberedPagination(page.querySelector("[data-movement-pagination]"), current, totalPages,
+                target => { page.dataset.page = String(target); void load(page); }, "صفحه‌بندی گردش انبار");
         } catch (error) { if (requests.get(page) === serial) status(page, error.message || "دریافت گردش‌ها ناموفق بود.", true); }
     }
     async function initialize(root) {
@@ -96,7 +94,6 @@
             }));
             page.querySelector("[data-movement-filter]").addEventListener("submit", event => { event.preventDefault(); page.dataset.page = "1"; void load(page); });
             page.querySelector("[data-movement-filter]").addEventListener("reset", () => { page.dataset.page = "1"; setTimeout(() => void load(page), 0); });
-            page.querySelectorAll("[data-movement-page]").forEach(button => button.addEventListener("click", () => { page.dataset.page = String(Math.max(1, Number(page.dataset.page || 1) + Number(button.dataset.movementPage))); void load(page); }));
             await load(page);
         } catch (error) { status(page, error.message || "بارگذاری فیلترها ناموفق بود.", true); }
     }

@@ -30,6 +30,128 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
         return Ok(new { product, brands, categories });
     }
 
+    [HttpGet("products/{id:long}/details")]
+    public async Task<IActionResult> ProductDetails(long id, CancellationToken cancellationToken)
+    {
+        var product = await db.Products.AsNoTracking()
+            .Where(x => x.Id == id && x.IsStoreEnabled)
+            .Select(x => new
+            {
+                x.Id, x.ProductKey, x.Code, x.Name, x.EnglishName, x.IdBrand, x.IdCategory, x.IdBaseUnit,
+                x.PowerSource, x.UseCase, x.PriceAmount, x.DiscountPercent, x.MaxPurchaseQuantity,
+                x.Slug, x.Badge, x.IsNewest, x.NewestOrder, x.IsStoreEnabled, x.IsCatalogActive,
+                x.IsWarehouseEnabled, x.CreatedAtUtc, x.UpdatedAtUtc
+            })
+            .SingleOrDefaultAsync(cancellationToken);
+        if (product is null) return NotFound();
+
+        string? brandName = product.IdBrand is long brandId
+            ? await db.StoreBrands.AsNoTracking().Where(x => x.Id == brandId).Select(x => x.NameFa).SingleOrDefaultAsync(cancellationToken)
+            : null;
+        string? unitName = await db.WarehouseUnits.AsNoTracking()
+            .Where(x => x.Id == product.IdBaseUnit).Select(x => x.Name).SingleOrDefaultAsync(cancellationToken);
+
+        string? categoryPath = null;
+        if (product.IdCategory is long categoryId)
+        {
+            var categories = await db.StoreCategories.AsNoTracking()
+                .Select(x => new { x.Id, x.IdParentCategory, x.NameFa }).ToListAsync(cancellationToken);
+            var categoriesById = categories.ToDictionary(x => x.Id);
+            var segments = new List<string>();
+            var visited = new HashSet<long>();
+            long currentId = categoryId;
+            while (visited.Add(currentId) && categoriesById.TryGetValue(currentId, out var category))
+            {
+                segments.Add(category.NameFa);
+                if (category.IdParentCategory is not long parentId) break;
+                currentId = parentId;
+            }
+            segments.Reverse();
+            categoryPath = string.Join(" / ", segments);
+        }
+
+        var variants = await db.ProductVariants.AsNoTracking().Where(x => x.IdProduct == id)
+            .OrderByDescending(x => x.IsDefault).ThenBy(x => x.Name)
+            .Select(x => new { x.Id, x.Code, x.Name, x.AttributesJson, x.IsDefault, x.IsActive, x.CreatedAtUtc, x.UpdatedAtUtc })
+            .ToListAsync(cancellationToken);
+        var inventory = await (from balance in db.StockBalances.AsNoTracking()
+                               join item in db.InventoryItems.AsNoTracking() on balance.IdInventoryItem equals item.Id
+                               join warehouse in db.Warehouses.AsNoTracking() on balance.IdWarehouse equals warehouse.Id
+                               join company in db.Companies.AsNoTracking() on warehouse.IdCompany equals company.Id
+                               join plan in db.SalesPlanReferences.AsNoTracking() on balance.IdSalesPlanReference equals plan.Id
+                               where item.IdProduct == id
+                               orderby company.Name, warehouse.Name, plan.DisplayName
+                               select new
+                               {
+                                   CompanyName = company.Name,
+                                   WarehouseName = warehouse.Name,
+                                   WarehouseCode = warehouse.Code,
+                                   SalesPlanName = plan.DisplayName,
+                                   balance.Quantity,
+                                   balance.MinimumQuantity,
+                                   balance.UpdatedAtUtc
+                               }).ToListAsync(cancellationToken);
+        var benefits = await db.StoreProductBenefits.AsNoTracking().Where(x => x.IdProduct == id)
+            .OrderBy(x => x.SortOrder).ThenBy(x => x.Id)
+            .Select(x => new { x.Title, x.Detail, x.Icon, x.SortOrder, x.IsActive })
+            .ToListAsync(cancellationToken);
+        var specifications = await (from value in db.StoreProductSpecificationValues.AsNoTracking()
+                                    join feature in db.StoreSpecificationFeatures.AsNoTracking() on value.IdSpecificationFeature equals feature.Id
+                                    where value.IdProduct == id
+                                    orderby feature.SortOrder
+                                    select new { Feature = feature.Label, value.Value })
+            .ToListAsync(cancellationToken);
+        var documents = await db.StoreProductDocuments.AsNoTracking().Where(x => x.IdProduct == id)
+            .OrderByDescending(x => x.CreatedAtUtc)
+            .Select(x => new { x.Title, x.Path, x.CreatedAtUtc })
+            .ToListAsync(cancellationToken);
+        var media = await db.StoreProductMedia.AsNoTracking().Where(x => x.IdProduct == id)
+            .Select(x => new { x.MainPath, x.CardPath, x.ThumbnailPath, x.ImagesJson, x.VideosJson })
+            .FirstOrDefaultAsync(cancellationToken);
+
+        return Ok(new
+        {
+            product.Id,
+            product.ProductKey,
+            product.Code,
+            product.Name,
+            product.EnglishName,
+            BrandName = brandName,
+            CategoryName = categoryPath,
+            UnitName = unitName,
+            product.IdBrand,
+            product.IdCategory,
+            product.IdBaseUnit,
+            product.PowerSource,
+            product.UseCase,
+            product.PriceAmount,
+            product.DiscountPercent,
+            product.MaxPurchaseQuantity,
+            product.Slug,
+            product.Badge,
+            product.IsNewest,
+            product.NewestOrder,
+            product.IsStoreEnabled,
+            product.IsCatalogActive,
+            product.IsWarehouseEnabled,
+            product.CreatedAtUtc,
+            product.UpdatedAtUtc,
+            Variants = variants,
+            StockByWarehouseAndPlan = inventory,
+            Benefits = benefits,
+            Specifications = specifications,
+            Documents = documents,
+            Media = media is null ? null : new
+            {
+                media.MainPath,
+                media.CardPath,
+                media.ThumbnailPath,
+                ImageList = media.ImagesJson,
+                VideoList = media.VideosJson
+            }
+        });
+    }
+
     [HttpPut("products/manage/{id:long}")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> UpdateProduct(long id, [FromBody] ProductEditorInput input, CancellationToken cancellationToken)
@@ -363,6 +485,7 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
             brand.NameFa = nameFa;
             brand.NameEn = nameEn;
             brand.IdCountry = countryId;
+            if (input.ShowInStore.HasValue) brand.ShowInStore = input.ShowInStore.Value;
             await db.SaveChangesAsync(cancellationToken);
             return Ok(new { message = "برند ذخیره شد." });
         }
@@ -372,7 +495,7 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
         }
     }
 
-    public sealed record BrandInput(string? Key, string? NameFa, string? NameEn, string? CountryCode);
+    public sealed record BrandInput(string? Key, string? NameFa, string? NameEn, string? CountryCode, bool? ShowInStore);
     public sealed class CountryRow { public string CountryCode { get; set; } = ""; public string NameFa { get; set; } = ""; }
 
     [HttpGet("categories/manage/options")]
@@ -596,8 +719,6 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
         if (!User.IsInRole("system.full-access")) return Forbid();
         var brand = await db.StoreBrands.SingleOrDefaultAsync(x => x.BrandKey == key, cancellationToken);
         if (brand is null) return NotFound();
-        if (!input.IsActive && await db.Products.AnyAsync(x => x.IsStoreEnabled && x.IsCatalogActive && x.IdBrand == brand.Id, cancellationToken))
-            return Conflict(new { title = "ابتدا کالاهای منتشرشدهٔ این برند را از انتشار خارج کنید." });
         brand.IsActive = input.IsActive;
         await db.SaveChangesAsync(cancellationToken);
         return Ok(new { message = input.IsActive ? "برند منتشر شد." : "برند از کاتالوگ خارج شد." });
@@ -658,7 +779,7 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
                               from country in countries.DefaultIfEmpty()
                               orderby brand.NameFa, brand.BrandKey
                               select new BrandRow(brand.BrandKey, brand.NameFa, brand.NameEn,
-                                  country == null ? "" : country.CountryCode, brand.LogoPath, brand.IsActive))
+                                  country == null ? "" : country.CountryCode, brand.LogoPath, brand.IsActive, brand.ShowInStore))
                 .Skip(paging.Offset)
                 .Take(paging.PageSize)
                 .ToListAsync(cancellationToken);
@@ -733,7 +854,7 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
 
     private sealed record CategoryRow(string Id, string Name, string EnglishName, string Slug, string ParentId, bool IsActive);
 
-    private sealed record BrandRow(string Id, string Name, string EnglishName, string CountryCode, string? LogoPath, bool IsActive)
+    private sealed record BrandRow(string Id, string Name, string EnglishName, string CountryCode, string? LogoPath, bool IsActive, bool ShowInStore)
     {
         public string? LogoUrl { get; init; }
     }

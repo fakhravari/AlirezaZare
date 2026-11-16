@@ -4,6 +4,7 @@ public sealed class Warehouse
 {
     public long Id { get; set; }
     public long IdCompany { get; set; }
+    public long IdWarehouseType { get; set; }
     public long? IdOwnerSalesPlanReference { get; set; }
     public string Code { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;

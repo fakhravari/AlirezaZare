@@ -318,6 +318,10 @@
         data = undefined;
         const mode = page.dataset.adminUsersPage || "users";
         const roleSelect = page.querySelector("[data-role-select]");
+        const roleCreateModalElement = document.getElementById("admin-role-create-modal");
+        const roleEditModalElement = document.getElementById("admin-role-edit-modal");
+        const roleCreateModal = roleCreateModalElement && window.bootstrap?.Modal?.getOrCreateInstance(roleCreateModalElement);
+        const roleEditModal = roleEditModalElement && window.bootstrap?.Modal?.getOrCreateInstance(roleEditModalElement);
         if (mode === "users") {
             modal = window.bootstrap?.Modal?.getOrCreateInstance(document.getElementById("admin-user-modal"));
             page.querySelector("[data-user-create]").addEventListener("click", () => { if (data) openUserModal(page); else ui.notify("اطلاعات کاربران هنوز بارگذاری نشده است.", "danger"); });
@@ -353,6 +357,7 @@
                 });
                 ui.notify(result.message, "success");
                 form.reset();
+                roleCreateModal?.hide();
                 await load(page);
             } catch (error) { ui.notify(error.message, "danger"); }
             finally { form.dataset.saving = "false"; submit.disabled = false; }
@@ -361,15 +366,13 @@
             const button = event.target.closest("[data-role-edit]");
             const role = button && byId(data?.roles || [], Number(button.dataset.roleEdit));
             if (!role) return;
-            const editor = page.querySelector("[data-role-editor]");
             const form = page.querySelector("[data-role-edit-form]");
             form.elements.id.value = String(role.id);
             form.elements.name.value = role.name;
             form.elements.name.disabled = role.roleKey === "system.full-access";
             form.elements.isActive.checked = role.isActive;
             form.elements.isActive.disabled = role.roleKey === "system.full-access";
-            editor.hidden = false;
-            editor.scrollIntoView({ behavior: "smooth", block: "center" });
+            roleEditModal?.show();
         });
         page.querySelector("[data-role-edit-form]")?.addEventListener("submit", async event => {
             event.preventDefault();
@@ -386,7 +389,7 @@
                     isActive: form.elements.isActive.checked
                 });
                 ui.notify(result.message, "success");
-                page.querySelector("[data-role-editor]").hidden = true;
+                roleEditModal?.hide();
                 await load(page);
             } catch (error) { ui.notify(error.message, "danger"); }
             finally { form.dataset.saving = "false"; submit.disabled = false; }

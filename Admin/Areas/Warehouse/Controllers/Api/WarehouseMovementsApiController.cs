@@ -107,7 +107,9 @@ public sealed class WarehouseMovementsApiController(ShopDbContext db) : Controll
                 x.DocumentType.Contains(term) || x.Reason!.Contains(term));
         }
 
-        return Ok(await query.Skip(paging.Offset).Take(paging.PageSize).ToListAsync(cancellationToken));
+        int total = await query.CountAsync(cancellationToken);
+        var items = await query.Skip(paging.Offset).Take(paging.PageSize).ToListAsync(cancellationToken);
+        return Ok(AdminListQuery.CreateResult(items, total, paging));
     }
 
     private async Task<IActionResult> GetSummaryAsync(long? warehouseId, string? search, string? salesPlan,

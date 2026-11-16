@@ -92,7 +92,7 @@
 
     const numberFormat = new Intl.NumberFormat("fa-IR");
     const labels = {
-        id: "شناسه", code: "کد", name: "نام", englishName: "نام لاتین", brandName: "برند",
+        id: "شناسه", code: "کد", name: "نام", englishName: "نام لاتین", brandName: "برند", logoPath: "مسیر لوگو", logoUrl: "نشانی لوگو",
         categoryName: "دسته‌بندی", parentId: "شناسهٔ والد", slug: "نشانی", countryCode: "کد کشور",
         source: "منبع", isFilterable: "قابل فیلتر", isHighlight: "نمایش برجسته", price: "قیمت (تومان)",
         priceAmount: "قیمت پایه (تومان)", discountPercent: "درصد تخفیف", stockQuantity: "موجودی", warehouseId: "شناسهٔ انبار",
@@ -101,7 +101,14 @@
         salesPlanName: "طرح فروش", unitName: "واحد اصلی", quantity: "موجودی", minimumQuantity: "حداقل موجودی", isLowStock: "وضعیت حداقل",
         maxPurchaseQuantity: "حداکثر تعداد خرید", createdAtUtc: "زمان ایجاد", updatedAtUtc: "آخرین ویرایش", isCatalogActive: "انتشار در فروشگاه",
         isStoreEnabled: "فعال در فروشگاه", isWarehouseEnabled: "فعال در انبار", hasImage: "تصویر محصول", idBrand: "شناسهٔ برند",
-        idCategory: "شناسهٔ دسته", idBaseUnit: "شناسهٔ واحد پایه", productKey: "کلید محصول"
+        idCategory: "شناسهٔ دسته", idBaseUnit: "شناسهٔ واحد پایه", productKey: "کلید محصول",
+        powerSource: "منبع تغذیه", useCase: "کاربرد", badge: "نشان کالا", isNewest: "کالای جدید",
+        newestOrder: "ترتیب کالای جدید", variants: "تنوع‌ها", attributes: "ویژگی‌های تنوع", attributesJson: "ویژگی‌های تنوع",
+        stockByWarehouseAndPlan: "موجودی به تفکیک انبار و طرح", benefits: "مزیت‌های کالا", specifications: "مشخصات فنی",
+        feature: "عنوان مشخصه", value: "مقدار", documents: "فایل‌های کالا", media: "رسانهٔ کالا",
+        mainPath: "مسیر تصویر اصلی", cardPath: "مسیر تصویر کارت", thumbnailPath: "مسیر تصویر بندانگشتی",
+        imageList: "تصاویر تکمیلی", videoList: "ویدئوها", detail: "توضیح", icon: "آیکن", sortOrder: "ترتیب",
+        isDefault: "تنوع پیش‌فرض", title: "عنوان", path: "مسیر فایل"
     };
 
     function notify(message, kind = "info") {
@@ -376,7 +383,32 @@
             for (const [key, value] of sectionEntries) {
                 const field = document.createElement("div"); field.className = "admin-record-field";
                 const term = document.createElement("dt"); term.className = "admin-record-label"; term.textContent = labelFor(key);
-                const description = document.createElement("dd"); description.className = "admin-record-data"; description.append(makeValue(value));
+                const description = document.createElement("dd"); description.className = "admin-record-data";
+                if ((key === "logoPath" || key === "logoUrl") && typeof value === "string" && value.length > 0) {
+                    const input = document.createElement("input");
+                    input.className = "form-control form-control-sm admin-record-copy-value";
+                    input.type = "text";
+                    input.value = value;
+                    input.readOnly = true;
+                    input.setAttribute("aria-label", labelFor(key));
+                    input.addEventListener("focus", () => input.select());
+                    input.addEventListener("click", () => input.select());
+                    description.append(input);
+                    if (key === "logoUrl") {
+                        const preview = document.createElement("img");
+                        preview.className = "admin-record-logo-preview";
+                        preview.src = value;
+                        preview.alt = "پیش‌نمایش لوگوی برند";
+                        preview.loading = "lazy";
+                        preview.addEventListener("error", () => {
+                            const unavailable = document.createElement("span");
+                            unavailable.className = "admin-record-logo-unavailable";
+                            unavailable.textContent = "پیش‌نمایش لوگو در دسترس نیست.";
+                            preview.replaceWith(unavailable);
+                        }, { once: true });
+                        description.append(preview);
+                    }
+                } else description.append(makeValue(value));
                 field.append(term, description); grid.append(field); consumed.add(key);
             }
             section.append(sectionHeading, grid); body.append(section);
@@ -500,6 +532,50 @@
         localizePaging();
     }
 
+    function renderNumberedPagination(container, currentPage, totalPages, onPage, label = "صفحه‌بندی") {
+        if (!container) return;
+        const pageCount = Math.max(1, Number(totalPages) || 1);
+        const page = Math.min(pageCount, Math.max(1, Number(currentPage) || 1));
+        const format = new Intl.NumberFormat("fa-IR");
+        container.replaceChildren();
+        container.hidden = pageCount <= 1;
+        container.setAttribute("role", "navigation");
+        container.setAttribute("aria-label", label);
+
+        const addButton = (text, target, { disabled = false, current = false, title } = {}) => {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = `btn btn-sm ${current ? "btn-primary" : "btn-default"}`;
+            button.textContent = text;
+            button.disabled = disabled;
+            if (current) button.setAttribute("aria-current", "page");
+            if (title) button.setAttribute("aria-label", title);
+            button.addEventListener("click", () => {
+                if (!disabled && target !== page) onPage(target);
+            });
+            container.append(button);
+        };
+        const addGap = () => {
+            const gap = document.createElement("span");
+            gap.className = "admin-pagination__gap";
+            gap.textContent = "…";
+            gap.setAttribute("aria-hidden", "true");
+            container.append(gap);
+        };
+
+        addButton("قبلی", page - 1, { disabled: page <= 1, title: "صفحهٔ قبل" });
+        const visiblePages = [...new Set([1, page - 1, page, page + 1, pageCount])]
+            .filter(value => value >= 1 && value <= pageCount)
+            .sort((first, second) => first - second);
+        let previous = 0;
+        for (const target of visiblePages) {
+            if (previous && target - previous > 1) addGap();
+            addButton(format.format(target), target, { current: target === page, title: `صفحهٔ ${format.format(target)}` });
+            previous = target;
+        }
+        addButton("بعدی", page + 1, { disabled: page >= pageCount, title: "صفحهٔ بعد" });
+    }
+
     window.AdminUI = Object.freeze({
         getJson,
         confirm: confirmAction,
@@ -509,6 +585,7 @@
         destroyDataTable,
         refreshDataTable,
         withIcon,
+        renderNumberedPagination,
         formatNumber: value => numberFormat.format(value ?? 0)
     });
 })();

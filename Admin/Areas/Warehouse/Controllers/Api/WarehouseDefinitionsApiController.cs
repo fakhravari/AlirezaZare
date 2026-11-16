@@ -19,6 +19,7 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
     {
         "companies" => await GetCompaniesAsync(cancellationToken),
         "warehouses" => await GetWarehousesAsync(cancellationToken),
+        "warehouse-types" => Ok(await db.WarehouseTypes.AsNoTracking().OrderBy(x => x.Name).ToListAsync(cancellationToken)),
         "document-types" => Ok(await db.WarehouseDocumentTypes.AsNoTracking().OrderBy(x => x.Name)
             .Select(x => new { x.Id, x.Code, x.Name, x.Direction, x.AffectsStock, x.IsActive })
             .ToListAsync(cancellationToken)),
@@ -242,6 +243,8 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                     CompanyInput? input = Parse<CompanyInput>(payload);
                     if (input is null || !ValidCodeName(input.Code, input.Name, 50, 200))
                         return ValidationProblem(detail: "کد و نام شرکت را درست وارد کنید.", statusCode: 400);
+                    if (input.Phone?.Trim().Length > 50 || input.Address?.Trim().Length > 500 || input.Description?.Trim().Length > 2000)
+                        return ValidationProblem(detail: "طول تلفن، آدرس یا توضیحات بیش از حد مجاز است.", statusCode: 400);
                     if (!id.HasValue && !User.IsInRole("system.full-access")) return Forbid();
                     Company entity = id.HasValue
                         ? await db.Companies.SingleOrDefaultAsync(x => x.Id == id, cancellationToken) ?? null!
@@ -251,16 +254,38 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                         !await CanAccessCompanyAsync(id.Value, cancellationToken)) return Forbid();
                     entity.Code = input.Code.Trim();
                     entity.Name = input.Name.Trim();
+                    entity.Phone = NormalizeOptional(input.Phone);
+                    entity.Address = NormalizeOptional(input.Address);
+                    entity.Description = NormalizeOptional(input.Description);
                     entity.IsActive = input.IsActive;
                     if (!id.HasValue) db.Companies.Add(entity);
                     await db.SaveChangesAsync(cancellationToken);
                     return Ok(new { entity.Id, message = "شرکت ذخیره شد." });
                 }
+            case "warehouse-types":
+                {
+                    if (!User.IsInRole("system.full-access")) return Forbid();
+                    WarehouseTypeInput? input = Parse<WarehouseTypeInput>(payload);
+                    string name = input?.Name?.Trim() ?? "";
+                    if (name.Length is < 1 or > 200) return ValidationProblem(detail: "نام انبار را وارد کنید.", statusCode: 400);
+                    await using var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
+                    if (await db.WarehouseTypes.AnyAsync(x => x.Name == name && (!id.HasValue || x.Id != id.Value), cancellationToken)) return Conflict(new { detail = "این نام انبار قبلاً ثبت شده است." });
+                    WarehouseType? type = id.HasValue ? await db.WarehouseTypes.SingleOrDefaultAsync(x => x.Id == id, cancellationToken) : new WarehouseType();
+                    if (type is null) return NotFound();
+                    type.Name = name;
+                    if (!id.HasValue) db.WarehouseTypes.Add(type);
+                    else foreach (var warehouse in await db.Warehouses.Where(x => x.IdWarehouseType == id.Value).ToListAsync(cancellationToken)) warehouse.Name = name;
+                    await db.SaveChangesAsync(cancellationToken);
+                    await transaction.CommitAsync(cancellationToken);
+                    return Ok(new { type.Id, message = "نام انبار ذخیره شد." });
+                }
             case "warehouses":
                 {
                     WarehouseInput? input = Parse<WarehouseInput>(payload);
-                    if (input is null || input.CompanyId < 1 || !ValidCodeName(input.Code, input.Name, 50, 200))
+                    if (input is null || input.CompanyId < 1 || input.WarehouseTypeId < 1 || string.IsNullOrWhiteSpace(input.Code) || input.Code.Trim().Length > 50)
                         return ValidationProblem(detail: "شرکت، کد و نام انبار را درست وارد کنید.", statusCode: 400);
+                    WarehouseType? warehouseType = await db.WarehouseTypes.SingleOrDefaultAsync(x => x.Id == input.WarehouseTypeId, cancellationToken);
+                    if (warehouseType is null) return ValidationProblem(detail: "نوع انبار پیدا نشد.", statusCode: 400);
                     if (id.HasValue && !await CanAccessWarehouseAsync(id.Value, cancellationToken)) return Forbid();
                     if (!await db.Companies.AnyAsync(x => x.Id == input.CompanyId && x.IsActive, cancellationToken))
                         return ValidationProblem(detail: "شرکت فعال پیدا نشد.", statusCode: 400);
@@ -311,6 +336,8 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                         });
                     await using var transaction =
                         await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
+                    if (await db.Warehouses.AnyAsync(x => x.IdCompany == input.CompanyId && x.IdWarehouseType == input.WarehouseTypeId && (!id.HasValue || x.Id != id.Value), cancellationToken))
+                        return Conflict(new { detail = "این نوع انبار قبلاً به شرکت تخصیص داده شده است." });
                     if (previousSalesWarehouse is not null)
                     {
                         previousSalesWarehouse.IsSalesWarehouse = false;
@@ -318,7 +345,8 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
 
                     entity.IdCompany = input.CompanyId;
                     entity.Code = input.Code.Trim();
-                    entity.Name = input.Name.Trim();
+                    entity.Name = warehouseType.Name;
+                    entity.IdWarehouseType = warehouseType.Id;
                     entity.IsSalesWarehouse = input.IsSalesWarehouse;
                     entity.IdOwnerSalesPlanReference = input.OwnerSalesPlanId;
                     entity.IsActive = input.IsActive;
@@ -541,6 +569,7 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                     {
                         warehouse.Id,
                         warehouse.IdCompany,
+                        warehouse.IdWarehouseType,
                         CompanyName = company.Name,
                         warehouse.Code,
                         warehouse.Name,
@@ -580,7 +609,7 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
             query = query.Where(x => companyIds.Contains(x.Id));
         }
 
-        return Ok(await query.OrderBy(x => x.Name).Select(x => new { x.Id, x.Code, x.Name, x.IsActive })
+        return Ok(await query.OrderBy(x => x.Name).Select(x => new { x.Id, x.Code, x.Name, x.Phone, x.Address, x.Description, x.IsActive })
             .ToListAsync(cancellationToken));
     }
 
@@ -726,6 +755,8 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
         !string.IsNullOrWhiteSpace(code) && code.Trim().Length <= codeMax && !string.IsNullOrWhiteSpace(name) &&
         name.Trim().Length <= nameMax;
 
+    private static string? NormalizeOptional(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+
     private static bool TryReadInventoryAttributeKeys(string json, out HashSet<string> keys)
     {
         keys = new(StringComparer.Ordinal);
@@ -768,12 +799,14 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
 
     private sealed record StockOwnerInput(string Code, string DisplayName, byte IdStockOwnerType, bool IsActive);
 
-    private sealed record CompanyInput(string Code, string Name, bool IsActive);
+    private sealed record CompanyInput(string Code, string Name, string? Phone, string? Address, string? Description, bool IsActive);
+
+    private sealed record WarehouseTypeInput(string Name);
 
     private sealed record WarehouseInput(
         long CompanyId,
         string Code,
-        string Name,
+        long WarehouseTypeId,
         bool IsSalesWarehouse,
         long? OwnerSalesPlanId,
         bool IsActive,

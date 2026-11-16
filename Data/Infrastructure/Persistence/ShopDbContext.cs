@@ -22,6 +22,7 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
     public DbSet<WarehouseDocumentLineRecord> WarehouseDocumentLines => Set<WarehouseDocumentLineRecord>();
     public DbSet<WarehouseStockMovement> WarehouseStockMovements => Set<WarehouseStockMovement>();
     public DbSet<WarehouseDocumentAudit> WarehouseDocumentAudits => Set<WarehouseDocumentAudit>();
+    public DbSet<WarehouseType> WarehouseTypes => Set<WarehouseType>();
     public DbSet<Warehouse> Warehouses => Set<Warehouse>();
     public DbSet<Company> Companies => Set<Company>();
     public DbSet<SalesPlanReference> SalesPlanReferences => Set<SalesPlanReference>();
@@ -30,6 +31,7 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
     public DbSet<InventoryItem> InventoryItems => Set<InventoryItem>();
     public DbSet<ProductVariant> ProductVariants => Set<ProductVariant>();
     public DbSet<WarehouseProduct> Products => Set<WarehouseProduct>();
+    public DbSet<StoreSlider> StoreSliders => Set<StoreSlider>();
     public DbSet<StoreSiteIdentity> StoreSiteIdentities => Set<StoreSiteIdentity>();
     public DbSet<MagazineArticle> MagazineArticles => Set<MagazineArticle>();
     public DbSet<MagazineArticleCategory> MagazineArticleCategories => Set<MagazineArticleCategory>();
@@ -46,6 +48,7 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
     public DbSet<StoreContentPageSection> StoreContentPageSections => Set<StoreContentPageSection>();
     public DbSet<StoreFaqItem> StoreFaqItems => Set<StoreFaqItem>();
     public DbSet<ProductFeedback> ProductFeedback => Set<ProductFeedback>();
+    public DbSet<StoreHomeTestimonial> StoreHomeTestimonials => Set<StoreHomeTestimonial>();
     public DbSet<StoreAttributeDefinition> StoreAttributeDefinitions => Set<StoreAttributeDefinition>();
     public DbSet<StoreProductMedia> StoreProductMedia => Set<StoreProductMedia>();
     public DbSet<StoreProductDocument> StoreProductDocuments => Set<StoreProductDocument>();
@@ -91,7 +94,6 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
     public DbSet<AccountCompareItem> AccountCompareItems => Set<AccountCompareItem>();
     public DbSet<AccountPriceAlert> AccountPriceAlerts => Set<AccountPriceAlert>();
     public DbSet<AccountArticleFeedback> AccountArticleFeedback => Set<AccountArticleFeedback>();
-    public DbSet<AccountCheckoutPreference> AccountCheckoutPreferences => Set<AccountCheckoutPreference>();
     public DbSet<StoreCustomerOrderItem> StoreCustomerOrderItems => Set<StoreCustomerOrderItem>();
     public DbSet<StorePaymentAttempt> StorePaymentAttempts => Set<StorePaymentAttempt>();
     public DbSet<StoreCustomerOrderReference> StoreCustomerOrders => Set<StoreCustomerOrderReference>();
@@ -102,6 +104,14 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<StoreSlider>(entity =>
+        {
+            entity.ToTable("Slider", "Store");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.Title).HasMaxLength(200).IsRequired();
+            entity.Property(x => x.Url).HasMaxLength(1000).IsRequired();
+            entity.Property(x => x.ImagePath).HasMaxLength(1000).IsRequired();
+        });
         modelBuilder.Entity<MagazineArticle>(entity =>
         {
             entity.ToTable("MagazineArticle", "Mag");
@@ -219,14 +229,6 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.Property(x => x.StockAtRegistration).HasMaxLength(100);
             entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
         });
-        modelBuilder.Entity<AccountCheckoutPreference>(entity =>
-        {
-            entity.ToTable("CheckoutPreference", "Account");
-            entity.HasKey(x => x.Id);
-            entity.HasIndex(x => x.IdProfile).IsUnique();
-            entity.Property(x => x.PaymentMethod).HasMaxLength(40).IsRequired();
-            entity.Property(x => x.UpdatedAtUtc).HasPrecision(3);
-        });
         modelBuilder.Entity<EmailVerificationCode>(entity =>
         {
             entity.ToTable("EmailVerificationCode", "Account");
@@ -328,6 +330,15 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.ToTable("Warehouse", "Warehouse");
             entity.HasKey(x => x.Id);
             entity.HasOne(x => x.Company).WithMany(x => x.Warehouses).HasForeignKey(x => x.IdCompany);
+            entity.HasOne<WarehouseType>().WithMany().HasForeignKey(x => x.IdWarehouseType);
+            entity.HasIndex(x => new { x.IdCompany, x.IdWarehouseType }).IsUnique();
+        });
+        modelBuilder.Entity<WarehouseType>(entity =>
+        {
+            entity.ToTable("WarehouseType", "Warehouse");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.Name).HasMaxLength(200).IsRequired();
+            entity.HasIndex(x => x.Name).IsUnique();
         });
         modelBuilder.Entity<Company>(entity =>
         {
@@ -335,6 +346,9 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.HasKey(x => x.Id);
             entity.Property(x => x.Code).HasMaxLength(50).IsRequired();
             entity.Property(x => x.Name).HasMaxLength(200).IsRequired();
+            entity.Property(x => x.Phone).HasMaxLength(50);
+            entity.Property(x => x.Address).HasMaxLength(500);
+            entity.Property(x => x.Description).HasMaxLength(2000);
         });
         modelBuilder.Entity<WarehouseDocumentType>(entity =>
         {
@@ -702,6 +716,15 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.HasOne(x => x.Profile).WithMany(x => x.ProductFeedback).HasForeignKey(x => x.IdProfile)
                 .OnDelete(DeleteBehavior.SetNull);
         });
+        modelBuilder.Entity<StoreHomeTestimonial>(entity =>
+        {
+            entity.ToTable("HomeTestimonial", "Store");
+            entity.HasKey(x => x.IdProductFeedback);
+            entity.Property(x => x.ImagePath).HasMaxLength(500);
+            entity.Property(x => x.UpdatedAtUtc).HasPrecision(3);
+            entity.HasOne(x => x.Feedback).WithMany().HasForeignKey(x => x.IdProductFeedback)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
         modelBuilder.Entity<StoreAttributeDefinition>(entity =>
         {
             entity.ToTable("AttributeDefinition", "Store");
@@ -817,6 +840,7 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.Property(x => x.NameEn).HasMaxLength(200).IsRequired();
             entity.Property(x => x.NameFa).HasMaxLength(200).IsRequired();
             entity.Property(x => x.LogoPath).HasMaxLength(500);
+            entity.Property(x => x.ShowInStore).HasDefaultValue(true).IsRequired();
             entity.HasIndex(x => x.BrandKey).IsUnique();
         });
         modelBuilder.Entity<StoreBank>(entity =>

@@ -14,4 +14,6 @@ CSS فروشگاه در `Shop/wwwroot/shop/css/` دسته‌بندی شده اس
 
 بازبینی: `node tools/check-ui.mjs` و مرور مرورگری متناسب؛ این checker جای QA بصری نیست. روش تکمیلی در [verification](verification.md) است.
 
+دکمه‌های عملیات در `admin-ui.css` با `.admin-action-btn` یکدست می‌شوند. hover حذف باید روی زمینهٔ قرمز روشن، رنگ متن قرمز تیره را حفظ کند؛ selector داخل `#content` عمداً از رنگ سفید پیش‌فرض قالب برنده می‌شود.
+
 [پوسته](layout.md) · [فهرست UI](README.md) · [فهرست docs](../README.md)

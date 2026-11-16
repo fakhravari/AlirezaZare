@@ -250,6 +250,16 @@ public sealed class AdminPermissionFilter : IAsyncAuthorizationFilter
                 feature = section;
             }
         }
+        if (string.Equals(area, "Store", StringComparison.OrdinalIgnoreCase)
+            && string.Equals(controller, "StorePaidOrdersDispatchApi", StringComparison.OrdinalIgnoreCase)
+            && string.Equals(action, "List", StringComparison.OrdinalIgnoreCase)
+            && context.HttpContext.Request.Query["warehouseQueue"] == "true")
+        {
+            area = "Warehouse";
+            controller = "Features";
+            action = "Index";
+            feature = "order-confirmation";
+        }
         if (string.Equals(controller, "Auth", StringComparison.OrdinalIgnoreCase)
             || (string.IsNullOrEmpty(area)
             && string.Equals(controller, "Home", StringComparison.OrdinalIgnoreCase)))

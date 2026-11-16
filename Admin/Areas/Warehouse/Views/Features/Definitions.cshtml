@@ -29,11 +29,25 @@
     }
     else
     {
+        @if (Model.FeatureId == "warehouses")
+        {
+            <section class="panel panel-inverse">
+                <div class="panel-heading"><h2 class="panel-title">نام انبارها</h2></div>
+                <div class="panel-body">
+                    <form class="d-flex flex-wrap gap-2 mb-3" data-warehouse-type-form data-admin-confirm="نام انبار ذخیره شود؟">
+                        <label class="visually-hidden" for="warehouse-type-name">نام انبار</label>
+                        <input id="warehouse-type-name" class="form-control" name="name" maxlength="200" required placeholder="نام انبار" />
+                        <button class="btn btn-primary" type="submit">افزودن نام انبار</button>
+                    </form>
+                    <ul class="list-group" data-warehouse-types></ul>
+                </div>
+            </section>
+        }
         <section class="panel panel-inverse">
             <div class="panel-heading">
-                <h2 class="panel-title">فهرست تعریف‌ها</h2>
+                <h2 class="panel-title">@(Model.FeatureId == "warehouses" ? "تخصیص انبار به شرکت" : "فهرست تعریف‌ها")</h2>
                 <div class="panel-heading-btn">
-                    <button type="button" class="btn btn-primary btn-sm" data-definition-create><i class="fa fa-plus me-1" aria-hidden="true"></i>افزودن</button>
+                    <button type="button" class="btn btn-primary btn-sm" data-definition-create><i class="fa fa-plus me-1" aria-hidden="true"></i>@(Model.FeatureId == "warehouses" ? "افزودن تخصیص" : "افزودن")</button>
                 </div>
             </div>
             <div class="panel-body">

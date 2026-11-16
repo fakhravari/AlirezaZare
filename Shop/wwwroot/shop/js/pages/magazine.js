@@ -54,64 +54,13 @@ window.HNUI.mount("pages-magazine", document, () => {
     count.textContent = matches.length
       ? `${number(start + 1)} تا ${number(Math.min(start + perPage, matches.length))} از ${number(matches.length)} مطلب`
       : "مطلبی در این دسته وجود ندارد";
-    nav.replaceChildren();
-    nav.hidden = pages <= 1;
-    const add = (label, target, disabled, current = false) => {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.textContent = label;
-      button.disabled = disabled;
-      button.setAttribute(
-        "aria-label",
-        current
-          ? `صفحه ${number(target)}، صفحه فعلی`
-          : label === "قبلی" || label === "بعدی"
-            ? `صفحه ${label}`
-            : `صفحه ${number(target)}`,
-      );
-      if (current) button.setAttribute("aria-current", "page");
-      button.addEventListener("click", () => {
-        page = target;
-        render();
-        saveLocation();
-        heading.focus({ preventScroll: true });
-        heading.scrollIntoView({ block: "start", behavior: "auto" });
-      });
-      nav.append(button);
-    };
-    add("قبلی", page - 1, page === 1);
-    const visibleCount = 5;
-    const firstPage =
-      pages <= visibleCount
-        ? 1
-        : page <= 3
-          ? 1
-          : page >= pages - 2
-            ? pages - visibleCount + 1
-            : page - 2;
-    const visiblePages = [
-      ...new Set([
-        ...Array.from(
-          { length: Math.min(visibleCount, pages) },
-          (_, index) => firstPage + index,
-        ),
-        pages,
-      ]),
-    ].sort((a, b) => a - b);
-    let previous = 0;
-    visiblePages.forEach((value) => {
-      if (previous && value - previous === 2)
-        add(number(previous + 1), previous + 1, false);
-      else if (previous && value - previous > 2) {
-        const gap = document.createElement("span");
-        gap.textContent = "…";
-        gap.setAttribute("aria-hidden", "true");
-        nav.append(gap);
-      }
-      add(number(value), value, false, value === page);
-      previous = value;
-    });
-    add("بعدی", page + 1, page === pages);
+    window.HNUI.renderPagination(nav, page, pages, (target) => {
+      page = target;
+      render();
+      saveLocation();
+      heading.focus({ preventScroll: true });
+      heading.scrollIntoView({ block: "start", behavior: "auto" });
+    }, "صفحه‌بندی مجله");
   }
   function focusFirstResult() {
     const firstResult = posts.find((post) => !post.hidden)?.querySelector("a");

@@ -32,7 +32,7 @@
         const key = window.localStorage.key(index);
         if (key === null || !(key.startsWith("hn-") || key.startsWith("hadi-norouzi-"))) continue;
         const raw = window.localStorage.getItem(key);
-        if (key === "hadi-norouzi-cart" || key === "hn-product-cache" || key === "hn-demo-auth") {
+        if (key === "hadi-norouzi-cart" || key === "hn-product-cache" || key === "hn-demo-auth" || key === "hn-selected-address" || key === "hn-payment-method-v2") {
           window.localStorage.removeItem(key);
           continue;
         }

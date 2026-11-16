@@ -1507,47 +1507,24 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                 if (type === "questions") decorateQuestionCards(items, start);
                 if (tab) tab.textContent = fa(items.length);
                 if (pagination)
-                    pagination.innerHTML =
-                        pages > 1
-                            ? `<button type="button" data-feedback-page="${Math.max(1, feedbackPages[type] - 1)}" aria-label="صفحهٔ قبل" ${feedbackPages[type] === 1 ? "disabled" : ""}><i class="bi bi-chevron-right" aria-hidden="true"></i></button>${Array.from(
-                                { length: pages },
-                                (_, index) => index + 1,
-                            )
-                                .map(
-                                    (page) =>
-                                        `<button type="button" data-feedback-page="${page}" aria-label="صفحهٔ ${fa(page)}" ${page === feedbackPages[type] ? 'aria-current="page"' : ""}>${fa(page)}</button>`,
-                                )
-                                .join(
-                                    "",
-                                )}<button type="button" data-feedback-page="${Math.min(pages, feedbackPages[type] + 1)}" aria-label="صفحهٔ بعد" ${feedbackPages[type] === pages ? "disabled" : ""}><i class="bi bi-chevron-left" aria-hidden="true"></i></button>`
-                            : "";
+                    window.HNUI.renderPagination(pagination, feedbackPages[type], pages, (target) => {
+                        feedbackPages[type] = target;
+                        renderProductFeedback(type);
+                        const feedbackList = productView.querySelector(
+                            type === "reviews" ? "#productReviewList" : "#productQuestionList",
+                        );
+                        const feedbackSection = feedbackList?.closest(
+                            ".product-detail-content-panel",
+                        );
+                        if (feedbackSection)
+                            window.requestAnimationFrame(() =>
+                                feedbackSection.scrollIntoView({
+                                    behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+                                    block: "start",
+                                }),
+                            );
+                    }, type === "reviews" ? "صفحه‌بندی دیدگاه‌ها" : "صفحه‌بندی پرسش‌ها");
             };
-            productView.addEventListener("click", (event) => {
-                const button = event.target.closest(
-                    "[data-feedback-pagination] button[data-feedback-page]",
-                );
-                if (!button) return;
-                const type = button.closest("[data-feedback-pagination]").dataset
-                    .feedbackPagination;
-                feedbackPages[type] = Number(button.dataset.feedbackPage) || 1;
-                renderProductFeedback(type);
-                const feedbackList = productView.querySelector(
-                    type === "reviews" ? "#productReviewList" : "#productQuestionList",
-                );
-                const feedbackSection = feedbackList?.closest(
-                    ".product-detail-content-panel",
-                );
-                if (feedbackSection)
-                    window.requestAnimationFrame(() =>
-                        feedbackSection.scrollIntoView({
-                            behavior: window.matchMedia("(prefers-reduced-motion: reduce)")
-                                .matches
-                                ? "auto"
-                                : "smooth",
-                            block: "start",
-                        }),
-                    );
-            });
             productView.querySelectorAll(".product-feedback-form").forEach((form) => {
                 const feedbackNote = form.querySelector(".product-feedback-note");
                 if (feedbackNote) feedbackNote.textContent = "بازخورد در سرور ثبت می‌شود و پس از تأیید نمایش داده خواهد شد.";

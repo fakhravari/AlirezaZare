@@ -4,6 +4,7 @@
     string? action = ViewContext.RouteData.Values["action"]?.ToString();
     string? feature = ViewData["FeatureId"]?.ToString();
     string? userSection = Context.Request.Query["section"].ToString();
+    string? contentSection = ViewData["ContentSection"]?.ToString();
     bool inStore = string.Equals(area, "Store", StringComparison.OrdinalIgnoreCase);
     bool inWarehouse = string.Equals(area, "Warehouse", StringComparison.OrdinalIgnoreCase);
     bool isHome = string.Equals(area, "Admin", StringComparison.OrdinalIgnoreCase)
@@ -12,16 +13,19 @@
     bool Can(string permission) => User.IsInRole("system.full-access") || User.HasClaim("admin_permission", permission);
     bool canCatalog = Can("Store:Catalog:Products") || Can("Store:Catalog:Categories") || Can("Store:Catalog:Brands") || Can("Store:Catalog:Attributes");
     bool canStoreSales = User.IsInRole("system.full-access") || Can("Store:Features:Index:promotions");
-    bool canStorePeople = User.IsInRole("system.full-access") || Can("Store:Features:Index:reviews") || Can("Store:Features:Index:questions") || Can("Store:Features:Index:contact-messages") || Can("Store:Features:Index:account-messages") || Can("Store:Features:Index:newsletter-subscribers");
+    bool canStorePeople = User.IsInRole("system.full-access") || Can("Store:Features:Index:reviews") || Can("Store:Features:Index:testimonials") || Can("Store:Features:Index:questions") || Can("Store:Features:Index:contact-messages") || Can("Store:Features:Index:account-messages") || Can("Store:Features:Index:newsletter-subscribers");
     bool canStoreReports = Can("Store:Features:Index:reports");
     bool canOverview = Can("Admin:Home:Index") || Can("Store:Dashboard:Index") || Can("Warehouse:Dashboard:Index");
     bool canStore = User.IsInRole("system.full-access") || Can("Store:Dashboard:Index") || canCatalog || canStoreSales || canStorePeople || canStoreReports;
-    bool canWarehouseOperations = new[] { "receipts", "dispatches", "transfers", "returns", "stocktake", "adjustments" }.Any(id => Can($"Warehouse:Features:Index:{id}"));
+    bool canWarehouseOperations = new[] { "order-confirmation", "receipts", "dispatches", "transfers", "returns", "stocktake", "adjustments" }.Any(id => Can($"Warehouse:Features:Index:{id}"));
     bool canWarehouseSettings = new[] { "references", "units", "product-units", "variants", "document-types", "sales-plan-mapping", "stock-owners" }.Any(id => Can($"Warehouse:Features:Index:{id}"));
+    bool canWarehouseStructure = Can("Warehouse:Warehouses:Index") || Can("Warehouse:Features:Index:companies") || Can("Warehouse:Stock:Index");
     bool canWarehouse = Can("Warehouse:Dashboard:Index") || Can("Warehouse:Features:Index:order-confirmation") || Can("Warehouse:Features:Index:companies") || Can("Warehouse:Warehouses:Index") || Can("Warehouse:Features:Index:movements") || canWarehouseOperations || canWarehouseSettings || Can("Warehouse:Stock:Index");
     bool catalogOpen = inStore && string.Equals(controller, "Catalog", StringComparison.OrdinalIgnoreCase);
-    bool salesOpen = inStore && (new[] { "Orders", "Promotions" }.Contains(controller, StringComparer.OrdinalIgnoreCase) || IsFeature("orders") || IsFeature("promotions") || IsFeature("paid-orders-dispatch"));
-    bool operationsOpen = inWarehouse && new[] { "receipts", "dispatches", "transfers", "returns", "stocktake", "adjustments" }.Contains(feature ?? "", StringComparer.OrdinalIgnoreCase);
+    bool salesOpen = inStore && (string.Equals(controller, "Orders", StringComparison.OrdinalIgnoreCase) || IsFeature("orders") || IsFeature("paid-orders-dispatch"));
+    bool promotionsOpen = inStore && IsFeature("promotions");
+    bool operationsOpen = inWarehouse && new[] { "order-confirmation", "receipts", "dispatches", "transfers", "returns", "stocktake", "adjustments" }.Contains(feature ?? "", StringComparer.OrdinalIgnoreCase);
+    bool warehouseStructureOpen = inWarehouse && (string.Equals(controller, "Warehouses", StringComparison.OrdinalIgnoreCase) || string.Equals(controller, "Stock", StringComparison.OrdinalIgnoreCase) || IsFeature("companies"));
     bool reportsOpen = inWarehouse && IsFeature("movements");
     bool systemAccessOpen = string.Equals(controller, "Users", StringComparison.OrdinalIgnoreCase);
     bool canAdminUsers = Can("Admin:Users:Index:users");
@@ -147,15 +151,30 @@
                 <span class="menu-icon"><i class="fa fa-receipt" aria-hidden="true"></i></span><span class="menu-text">سفارش‌ها</span>
             </a>
         </div>
-        <div class="menu-item @(IsFeature("promotions") ? "active" : "")" hidden="@(!Can("Store:Features:Index:promotions"))">
-            <a class="menu-link" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="promotions" data-admin-nav>
-                <span class="menu-icon"><i class="fa fa-percent" aria-hidden="true"></i></span><span class="menu-text">طرح‌های فروش و تخفیف</span>
-            </a>
+    </div>
+</div>
+<div class="menu-item has-sub @(promotionsOpen ? "active expand" : "")" hidden="@(!Can("Store:Features:Index:promotions"))">
+    <a href="#store-promotions" class="menu-link" aria-expanded="@(promotionsOpen ? "true" : "false")">
+        <span class="menu-icon"><i class="fa fa-percent" aria-hidden="true"></i></span>
+        <span class="menu-text">طرح‌های فروش و تخفیف</span><span class="menu-caret"></span>
+    </a>
+    <div id="store-promotions" class="menu-submenu">
+        <div class="menu-item @(promotionsOpen && Context.Request.Query["section"] == "plans" ? "active" : "")" hidden="@(!User.IsInRole("system.full-access"))">
+            <a class="menu-link" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="promotions" asp-route-section="plans" data-admin-nav><span class="menu-icon"><i class="fa fa-calendar-days" aria-hidden="true"></i></span><span class="menu-text">مدیریت طرح‌ها</span></a>
+        </div>
+        <div class="menu-item @(promotionsOpen && Context.Request.Query["section"] == "offers" ? "active" : "")">
+            <a class="menu-link" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="promotions" asp-route-section="offers" data-admin-nav><span class="menu-icon"><i class="fa fa-tags" aria-hidden="true"></i></span><span class="menu-text">پیشنهادهای کالا</span></a>
+        </div>
+        <div class="menu-item @(promotionsOpen && Context.Request.Query["section"] == "variant-prices" ? "active" : "")">
+            <a class="menu-link" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="promotions" asp-route-section="variant-prices" data-admin-nav><span class="menu-icon"><i class="fa fa-money-bill-wave" aria-hidden="true"></i></span><span class="menu-text">قیمت تنوع‌ها</span></a>
+        </div>
+        <div class="menu-item @(promotionsOpen && Context.Request.Query["section"] == "history" ? "active" : "")">
+            <a class="menu-link" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="promotions" asp-route-section="history" data-admin-nav><span class="menu-icon"><i class="fa fa-clock-rotate-left" aria-hidden="true"></i></span><span class="menu-text">تاریخچهٔ قیمت</span></a>
         </div>
     </div>
 </div>
-    <div class="menu-item has-sub @(inStore && new[] { "Customers", "Features" }.Contains(controller, StringComparer.OrdinalIgnoreCase) && new[] { "customers", "reviews", "questions", "contact-messages", "account-messages", "newsletter-subscribers" }.Contains(feature ?? "", StringComparer.OrdinalIgnoreCase) ? "active expand" : "")" hidden="@(!canStorePeople)">
-    <a href="#store-customers" class="menu-link" aria-expanded="@(inStore && new[] { "Customers", "Features" }.Contains(controller, StringComparer.OrdinalIgnoreCase) && new[] { "customers", "reviews", "questions", "contact-messages", "account-messages", "newsletter-subscribers" }.Contains(feature ?? "", StringComparer.OrdinalIgnoreCase) ? "true" : "false")">
+    <div class="menu-item has-sub @(inStore && new[] { "Customers", "Features" }.Contains(controller, StringComparer.OrdinalIgnoreCase) && new[] { "customers", "reviews", "testimonials", "questions", "contact-messages", "account-messages", "newsletter-subscribers" }.Contains(feature ?? "", StringComparer.OrdinalIgnoreCase) ? "active expand" : "")" hidden="@(!canStorePeople)">
+    <a href="#store-customers" class="menu-link" aria-expanded="@(inStore && new[] { "Customers", "Features" }.Contains(controller, StringComparer.OrdinalIgnoreCase) && new[] { "customers", "reviews", "testimonials", "questions", "contact-messages", "account-messages", "newsletter-subscribers" }.Contains(feature ?? "", StringComparer.OrdinalIgnoreCase) ? "true" : "false")">
         <span class="menu-icon">
             <i class="fa fa-users" aria-hidden="true"></i>
         </span>
@@ -171,6 +190,11 @@
         <div class="menu-item @(IsFeature("reviews") ? "active" : "")" hidden="@(!Can("Store:Features:Index:reviews"))">
             <a class="menu-link" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="reviews" data-admin-nav>
                 <span class="menu-icon"><i class="fa fa-comments" aria-hidden="true"></i></span><span class="menu-text">دیدگاه‌های محصول</span>
+            </a>
+        </div>
+        <div class="menu-item @(IsFeature("testimonials") ? "active" : "")" hidden="@(!Can("Store:Features:Index:testimonials"))">
+            <a class="menu-link" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="testimonials" data-admin-nav>
+                <span class="menu-icon"><i class="fa fa-image" aria-hidden="true"></i></span><span class="menu-text">دیدگاه‌های صفحهٔ نخست</span>
             </a>
         </div>
         <div class="menu-item @(IsFeature("questions") ? "active" : "")" hidden="@(!Can("Store:Features:Index:questions"))">
@@ -217,13 +241,19 @@
     </div>
 }
 <div class="menu-item @(IsFeature("geography") ? "active" : "")" hidden="@(!User.IsInRole("system.full-access"))"><a class="menu-link" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="geography" data-admin-nav><span class="menu-icon"><i class="fa fa-earth-asia" aria-hidden="true"></i></span><span class="menu-text">مناطق جغرافیایی</span></a></div>
-<div class="menu-item @(IsFeature("content") || IsFeature("settings") ? "active" : "")" hidden="@(!User.IsInRole("system.full-access"))">
-    <a class="menu-link" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="content" data-admin-nav>
-        <span class="menu-icon">
-            <i class="fa fa-file-lines" aria-hidden="true"></i>
-        </span><span class="menu-text">محتوا و صفحات</span>
-    </a>
-</div>
+@if (User.IsInRole("system.full-access"))
+{
+    <div class="menu-item has-sub @(IsFeature("content") ? "active expand" : "")">
+        <a href="#content-menu" class="menu-link" aria-expanded="@(IsFeature("content") ? "true" : "false")">
+            <span class="menu-icon"><i class="fa fa-file-lines" aria-hidden="true"></i></span><span class="menu-text">مدیریت محتوا</span><span class="menu-caret"></span>
+        </a>
+        <div id="content-menu" class="menu-submenu">
+            <div class="menu-item @(IsFeature("content") && contentSection == "faq" ? "active" : "")"><a class="menu-link" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="content" asp-route-section="faq" data-admin-nav><span class="menu-icon"><i class="fa fa-circle-question" aria-hidden="true"></i></span><span class="menu-text">پرسش‌های متداول</span></a></div>
+            <div class="menu-item @(IsFeature("content") && contentSection == "magazine" ? "active" : "")"><a class="menu-link" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="content" asp-route-section="magazine" data-admin-nav><span class="menu-icon"><i class="fa fa-newspaper" aria-hidden="true"></i></span><span class="menu-text">مقاله‌های مجله</span></a></div>
+            <div class="menu-item @(IsFeature("content") && contentSection == "pages" ? "active" : "")"><a class="menu-link" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="content" asp-route-section="pages" data-admin-nav><span class="menu-icon"><i class="fa fa-file-lines" aria-hidden="true"></i></span><span class="menu-text">صفحه‌های خدماتی</span></a></div>
+        </div>
+    </div>
+}
 
 @if (canWarehouse)
 {
@@ -236,25 +266,13 @@
         </span><span class="menu-text">نمای کلی انبار</span>
     </a>
 </div>
-<div class="menu-item @(IsFeature("order-confirmation") ? "active" : "")" hidden="@(!Can("Warehouse:Features:Index:order-confirmation"))">
-    <a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="order-confirmation" data-admin-nav>
-        <span class="menu-icon">
-            <i class="fa fa-clipboard-check" aria-hidden="true"></i>
-        </span><span class="menu-text">تأیید سفارش‌های پرداخت‌شده</span>
-    </a>
-</div>
-<div class="menu-item @(controller == "Warehouses" ? "active" : "")" hidden="@(!Can("Warehouse:Warehouses:Index"))">
-    <a class="menu-link" asp-area="Warehouse" asp-controller="Warehouses" asp-action="Index" data-admin-nav>
-        <span class="menu-icon">
-            <i class="fa fa-warehouse" aria-hidden="true"></i>
-        </span><span class="menu-text">انبارها</span>
-    </a>
-</div>
-<div class="menu-item @(inWarehouse && string.Equals(controller, "Stock", StringComparison.OrdinalIgnoreCase) ? "active" : "")" hidden="@(!Can("Warehouse:Stock:Index"))">
-    <a class="menu-link" asp-area="Warehouse" asp-controller="Stock" asp-action="Index" data-admin-nav><span class="menu-icon"><i class="fa fa-boxes-stacked" aria-hidden="true"></i></span><span class="menu-text">موجودی انبار</span></a>
-</div>
-<div class="menu-item @(IsFeature("companies") ? "active" : "")" hidden="@(!Can("Warehouse:Features:Index:companies"))">
-    <a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="companies" data-admin-nav><span class="menu-icon"><i class="fa fa-building" aria-hidden="true"></i></span><span class="menu-text">شرکت‌ها و تأمین‌کنندگان</span></a>
+<div class="menu-item has-sub @(warehouseStructureOpen ? "active expand" : "")" hidden="@(!canWarehouseStructure)">
+    <a href="#warehouse-structure" class="menu-link" aria-expanded="@(warehouseStructureOpen ? "true" : "false")"><span class="menu-icon"><i class="fa fa-warehouse" aria-hidden="true"></i></span><span class="menu-text">انبار و موجودی</span><span class="menu-caret"></span></a>
+    <div id="warehouse-structure" class="menu-submenu">
+        <div class="menu-item @(controller == "Warehouses" ? "active" : "")" hidden="@(!Can("Warehouse:Warehouses:Index"))"><a class="menu-link" asp-area="Warehouse" asp-controller="Warehouses" asp-action="Index" data-admin-nav><span class="menu-icon"><i class="fa fa-warehouse" aria-hidden="true"></i></span><span class="menu-text">انبارها</span></a></div>
+        <div class="menu-item @(IsFeature("companies") ? "active" : "")" hidden="@(!Can("Warehouse:Features:Index:companies"))"><a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="companies" data-admin-nav><span class="menu-icon"><i class="fa fa-building" aria-hidden="true"></i></span><span class="menu-text">شرکت‌ها</span></a></div>
+        <div class="menu-item @(inWarehouse && string.Equals(controller, "Stock", StringComparison.OrdinalIgnoreCase) ? "active" : "")" hidden="@(!Can("Warehouse:Stock:Index"))"><a class="menu-link" asp-area="Warehouse" asp-controller="Stock" asp-action="Index" data-admin-nav><span class="menu-icon"><i class="fa fa-boxes-stacked" aria-hidden="true"></i></span><span class="menu-text">موجودی انبار</span></a></div>
+    </div>
 </div>
 <div class="menu-item has-sub @(reportsOpen ? "active expand" : "")" hidden="@(!Can("Warehouse:Features:Index:movements"))">
     <a href="#warehouse-reports" class="menu-link" aria-expanded="@(reportsOpen ? "true" : "false")">
@@ -273,6 +291,7 @@
         <span class="menu-caret"></span>
     </a>
     <div id="warehouse-operations" class="menu-submenu">
+        <div class="menu-item @(IsFeature("order-confirmation") ? "active" : "")" hidden="@(!Can("Warehouse:Features:Index:order-confirmation"))"><a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="order-confirmation" data-admin-nav><span class="menu-icon"><i class="fa fa-clipboard-check" aria-hidden="true"></i></span><span class="menu-text">تأیید سفارش‌های پرداخت‌شده</span></a></div>
         <div class="menu-item @(IsFeature("receipts") ? "active" : "")" hidden="@(!Can("Warehouse:Features:Index:receipts"))">
             <a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="receipts" data-admin-nav>
                 <span class="menu-icon"><i class="fa fa-file-import" aria-hidden="true"></i></span><span class="menu-text">رسید کالا</span>

@@ -590,11 +590,20 @@
           playPromise.catch(() => {});
       }
     };
-    const heroSwiper = new Swiper(heroSwiperElement, {
+    const heroWrapper = heroSwiperElement.querySelector(".swiper-wrapper");
+    const allHeroSlides = Array.from(heroWrapper.children);
+    let heroSwiper;
+    const heroMedia = window.matchMedia("(max-width: 991px)");
+    const renderHeroSlides = () => {
+      if (heroSwiper) heroSwiper.destroy(true, true);
+      heroWrapper.replaceChildren(...allHeroSlides.filter(slide => heroMedia.matches ? slide.dataset.showMobile === "true" : slide.dataset.showDesktop === "true"));
+      if (!heroWrapper.children.length) { heroSwiperElement.style.display = "none"; heroSwiper = null; return; }
+      heroSwiperElement.style.display = "";
+      heroSwiper = new Swiper(heroSwiperElement, {
       effect: "fade",
       fadeEffect: { crossFade: true },
       speed: 700,
-      loop: true,
+      loop: heroWrapper.children.length > 1,
       grabCursor: true,
       watchSlidesProgress: true,
       autoplay: prefersReducedMotion
@@ -617,6 +626,9 @@
         slideChangeTransitionStart: playActiveHeroVideo,
       },
     });
+    };
+    renderHeroSlides();
+    heroMedia.addEventListener("change", renderHeroSlides);
     if (prefersReducedMotion) {
       heroSwiperElement
         .querySelectorAll(".hero-video")
@@ -1233,8 +1245,6 @@
     await migrateLegacyFeedback(account);
     const addresses = await migrateLegacyAddresses(account.addresses);
     storage.hydrate("hn-delivery-addresses", JSON.stringify(addresses));
-    storage.hydrate("hn-selected-address", account.checkout?.selectedAddressId ? String(account.checkout.selectedAddressId) : "");
-    storage.hydrate("hn-payment-method-v2", account.checkout?.paymentMethod || "zarinpal");
     const alertKey = (item) => [item.productId, item.scope, JSON.stringify(item.variants || {})].join(":");
     const legacyAlerts = storage.legacyJson("hn-price-watches-demo", []);
     const alerts = Array.isArray(account.priceAlerts) ? account.priceAlerts : [];

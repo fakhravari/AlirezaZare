@@ -15,20 +15,12 @@
             <input type="hidden" name="kind" value="@Model.Kind" />
             @if (Model.Kind == "slider")
             {
-                <label for="media-slot-slider" class="form-label mt-2">اسلاید</label>
-                <select id="media-slot-slider" name="slideKey" class="form-select">
-                    <option value="electrical-tools-banner">ابزار دقیق</option>
-                    <option value="electrical-components-banner">قطعات</option>
-                    <option value="electrical-lighting-banner">روشنایی</option>
-                    <option value="electrical-tools-pro-banner">ابزار حرفه‌ای</option>
-                    <option value="electrical-components-pro-banner">قطعات حرفه‌ای</option>
-                    <option value="electrical-measurement-banner">اندازه‌گیری</option>
-                </select>
-                <label for="media-variant-slider" class="form-label mt-2">نمایش در</label>
-                <select id="media-variant-slider" name="variant" class="form-select">
-                    <option value="desktop">دسکتاپ</option>
-                    <option value="mobile">موبایل</option>
-                </select>
+                <label for="slider-title" class="form-label mt-2">عنوان</label>
+                <input id="slider-title" name="title" class="form-control" maxlength="200" required />
+                <label for="slider-url" class="form-label mt-2">نشانی لینک</label>
+                <input id="slider-url" name="url" class="form-control" dir="ltr" maxlength="1000" placeholder="/products" required />
+                <label class="d-block mt-2"><input type="checkbox" name="showOnMobile" value="true" checked /> نمایش در موبایل</label>
+                <label class="d-block"><input type="checkbox" name="showOnDesktop" value="true" checked /> نمایش در دسکتاپ</label>
             }
             <label for="@fileId" class="form-label">فایل تصویر</label>
             <input id="@fileId" name="file" type="file" accept="image/jpeg,image/png,image/webp" class="form-control" required />

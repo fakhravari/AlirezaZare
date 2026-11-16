@@ -16,10 +16,12 @@
             "Admin/Areas/Store/Views/Features/Faq.cshtml",
             "Admin/Areas/Store/Views/Features/Geography.cshtml",
             "Admin/Areas/Warehouse/Views/Features/Definitions.cshtml",
+            "Admin/Areas/Warehouse/Views/Features/Index.cshtml",
             "Admin/Areas/Store/Views/Features/Customers.cshtml",
             "Admin/Areas/Store/Views/Features/Orders.cshtml",
             "Admin/Areas/Store/Views/Features/Faq.cshtml",
             "Admin/Areas/Store/Views/Features/Feedback.cshtml",
+            "Admin/Areas/Store/Views/Features/Testimonials.cshtml",
             "Admin/Areas/Store/Views/Features/ContactMessages.cshtml",
             "Admin/Areas/Store/Views/Features/AccountMessages.cshtml",
             "Admin/Areas/Store/Views/Features/PaidOrdersDispatch.cshtml",
@@ -33,8 +35,10 @@
           ],
           "js": [
             "Admin/wwwroot/lib/bootstrap/bootstrap.bundle.min.js",
+            "Admin/wwwroot/lib/persian-datetimepicker/mds.bs.datetimepicker.js",
             "Admin/wwwroot/js/admin-shell.js",
             "Admin/wwwroot/js/admin-ui.js",
+            "Admin/wwwroot/js/admin-persian-datetime.js",
             "Admin/wwwroot/js/admin-data.js",
             "Admin/wwwroot/js/admin-selects.js",
             "Admin/wwwroot/js/admin-users.js",
@@ -43,18 +47,22 @@
             "Admin/wwwroot/js/admin-documents.js",
             "Admin/wwwroot/js/admin-movements.js",
             "Admin/wwwroot/js/admin-feedback.js",
+            "Admin/wwwroot/js/admin-home-testimonials.js",
             "Admin/wwwroot/js/admin-contact-messages.js",
             "Admin/wwwroot/js/admin-account-messages.js",
             "Admin/wwwroot/js/admin-paid-orders-dispatch.js"
           ],
           "css": [
-            "Admin/wwwroot/css/admin-ui.css"
+            "Admin/wwwroot/css/admin-ui.css",
+            "Admin/wwwroot/css/admin-home-testimonials.css",
+            "Admin/wwwroot/lib/persian-datetimepicker/mds.bs.datetimepicker.style.css"
           ],
           "server": [
             "Admin/Areas/Store/Controllers/Api/StoreCatalogAdminApiController.cs",
             "Admin/Areas/Admin/Controllers/SiteSettingsController.cs",
             "Admin/Areas/Store/Controllers/Api/StoreProductImageApiController.cs",
             "Admin/Areas/Store/Controllers/Api/StoreMediaUploadApiController.cs",
+            "Admin/Areas/Store/Controllers/Api/StoreHomeTestimonialsAdminApiController.cs",
             "Admin/Areas/Store/Controllers/Api/StoreOrdersAdminApiController.cs",
             "Admin/Areas/Store/Controllers/Api/StoreContactMessagesAdminApiController.cs",
             "Admin/Areas/Store/Controllers/Api/StoreAccountMessagesAdminApiController.cs",
@@ -70,6 +78,7 @@
             "Data/Domain/Account/Entities/AccountMessage.cs",
             "Data/Domain/Store/Entities/MagazineArticle.cs",
             "Data/Domain/Store/Entities/StoreProductMedia.cs",
+            "Data/Domain/Store/Entities/StoreHomeTestimonial.cs",
             "Data/Domain/Store/Entities/StoreProductBenefit.cs",
             "Data/Domain/Store/Entities/StoreBrand.cs",
             "Data/Domain/Store/Entities/StoreCategory.cs",
@@ -199,6 +208,14 @@
         "homepage-brands": {
           "markup": [
             "Shop/Views/Home/_Brands.cshtml"
+          ],
+          "server": [
+            "Shop/Controllers/HomeController.cs",
+            "Shop/Services/CatalogRepository.cs"
+          ],
+          "data": [
+            "Data/Infrastructure/Persistence/Repositories/StoreRuntimeDatasetRepository.cs",
+            "Data/Domain/Store/Entities/StoreBrand.cs"
           ],
           "css": [
             "Shop/wwwroot/shop/css/pages/home-brands.css"

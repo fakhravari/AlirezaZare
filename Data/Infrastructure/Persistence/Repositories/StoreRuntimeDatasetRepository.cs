@@ -64,7 +64,7 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext, IMedi
             AddOptional(definition, "filterKey", x.FilterKey);
             return KeyValuePair.Create<string, JsonNode?>(x.AttributeKey, definition);
         }));
-        root["brands"] = new JsonArray(brands.Select(x => (JsonNode?)new JsonObject { ["id"] = x.BrandKey, ["name"] = x.NameEn, ["fa"] = x.NameFa, ["logo"] = x.LogoPath, ["countryCode"] = x.IdCountry.HasValue ? countryCodeById.GetValueOrDefault(x.IdCountry.Value) : null }).ToArray());
+        root["brands"] = new JsonArray(brands.Select(x => (JsonNode?)new JsonObject { ["id"] = x.BrandKey, ["name"] = x.NameEn, ["fa"] = x.NameFa, ["logo"] = x.LogoPath, ["showInStore"] = x.ShowInStore, ["countryCode"] = x.IdCountry.HasValue ? countryCodeById.GetValueOrDefault(x.IdCountry.Value) : null }).ToArray());
         var activeCategories = categories.Where(x => x.IsActive).ToArray();
         var categoryKeyById = categories.ToDictionary(x => x.Id, x => x.CategoryKey);
         root["categories"] = new JsonArray(activeCategories.Select(x => (JsonNode?)new JsonObject { ["id"] = x.CategoryKey, ["parentId"] = x.IdParentCategory.HasValue ? categoryKeyById.GetValueOrDefault(x.IdParentCategory.Value) : null, ["en"] = x.NameEn, ["fa"] = x.NameFa, ["slug"] = x.CategoryKey, ["path"] = ParseJsonValue(x.PathJson) }).ToArray());
@@ -135,6 +135,7 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext, IMedi
     {
         var rows = await (from brand in dbContext.StoreBrands.AsNoTracking()
                           join editorial in dbContext.StoreBrandEditorials.AsNoTracking() on brand.Id equals editorial.IdBrand
+                          where brand.IsActive
                           orderby brand.Id
                           select new { brand.BrandKey, editorial.Established, editorial.OfficialUrl, editorial.Specialization, editorial.FeaturedProducts, editorial.Audience, editorial.ShoppingAdvice, editorial.CompanyIntroductionsJson, editorial.ProductFamiliesJson, editorial.StrengthsJson }).ToListAsync(cancellationToken);
         var items = new JsonArray();

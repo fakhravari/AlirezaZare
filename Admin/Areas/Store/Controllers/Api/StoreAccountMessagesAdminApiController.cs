@@ -31,10 +31,24 @@ public sealed class StoreAccountMessagesAdminApiController(ShopDbContext db) : C
     [HttpGet]
     public async Task<IActionResult> List([FromQuery] string? q, [FromQuery] int page = 1,
         [FromQuery] int pageSize = AdminListQuery.DefaultPageSize,
+        [FromQuery] DateOnly? from = null, [FromQuery] DateOnly? to = null,
         CancellationToken cancellationToken = default)
     {
         if (!AdminListQuery.TryCreate(page, pageSize, q, out AdminPageRequest paging))
             return ValidationProblem(detail: "عبارت جست‌وجو یا صفحه‌بندی معتبر نیست.", statusCode: 400);
+        if (from.HasValue && to.HasValue && from.Value > to.Value)
+            return ValidationProblem(detail: "تاریخ شروع باید قبل از تاریخ پایان باشد.", statusCode: 400);
+        if (to == DateOnly.MaxValue)
+            return ValidationProblem(detail: "تاریخ پایان معتبر نیست.", statusCode: 400);
+        if (from.HasValue && to.HasValue && to.Value.DayNumber - from.Value.DayNumber > 365)
+            return ValidationProblem(detail: "بازهٔ تاریخ نمی‌تواند بیشتر از ۳۶۶ روز باشد.", statusCode: 400);
+
+        DateTime? fromUtc = from.HasValue
+            ? DateTime.SpecifyKind(from.Value.ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc)
+            : null;
+        DateTime? untilUtc = to.HasValue
+            ? DateTime.SpecifyKind(to.Value.AddDays(1).ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc)
+            : null;
         var query = from message in db.AccountMessages.AsNoTracking()
                     join profile in db.AccountProfiles.AsNoTracking() on message.IdProfile equals profile.Id
                     select new
@@ -50,6 +64,8 @@ public sealed class StoreAccountMessagesAdminApiController(ShopDbContext db) : C
                         profile.FirstName,
                         profile.LastName
                     };
+        if (fromUtc.HasValue) query = query.Where(x => x.CreatedAtUtc >= fromUtc.Value);
+        if (untilUtc.HasValue) query = query.Where(x => x.CreatedAtUtc < untilUtc.Value);
         if (paging.Search.Length > 0)
         {
             string term = paging.Search;

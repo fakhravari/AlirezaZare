@@ -7,6 +7,8 @@
         const page = root.querySelector?.("[data-paid-orders-dispatch]");
         if (!page || initialized.has(page)) return;
         initialized.add(page);
+        const canDispatch = page.dataset.canDispatch === "true";
+        const warehouseQueue = page.dataset.warehouseQueue === "true";
         const form = page.querySelector("[data-dispatch-form]");
         const rows = page.querySelector("[data-dispatch-rows]");
         const status = page.querySelector("[data-dispatch-status]");
@@ -18,7 +20,7 @@
             const table = page.querySelector("[data-admin-datatable]");
             const instance = window.AdminUI.getDataTable(table);
             const rowNodes = instance ? instance.rows().nodes().toArray() : [...rows.rows];
-            return rowNodes.flatMap(row => [...row.querySelectorAll('input[type="checkbox"]')]);
+            return rowNodes.flatMap(row => [...row.querySelectorAll('input[type="checkbox"]:not(:disabled)')]);
         };
         let requestVersion = 0, currentPage = 1, totalPages = 1;
         let saving = false;
@@ -40,6 +42,7 @@
             status.textContent = "در حال دریافت سفارش‌ها…";
             try {
                 const url = new URL(api, window.location.origin);
+                if (warehouseQueue) url.searchParams.set("warehouseQueue", "true");
                 url.searchParams.set("page", String(pageNumber)); url.searchParams.set("pageSize", String(pageSize));
                 const result = await window.AdminUI.getJson(url);
                 if (version !== requestVersion || !page.isConnected) return;
@@ -53,28 +56,28 @@
                     const row = document.createElement("tr");
                     const cell = document.createElement("td");
                     const checkbox = document.createElement("input");
-                    checkbox.type = "checkbox"; checkbox.value = item.id; checkbox.checked = selectedIds.has(item.id);
+                    checkbox.type = "checkbox"; checkbox.value = item.id; checkbox.disabled = item.isSample || !canDispatch; checkbox.checked = selectedIds.has(item.id);
+                    if (checkbox.disabled) checkbox.checked = false;
                     checkbox.setAttribute("aria-label", `انتخاب سفارش ${item.orderNumber}`);
                     checkbox.addEventListener("change", () => {
                         if (checkbox.checked) selectedIds.add(item.id);
                         else selectedIds.delete(item.id);
                         count();
                     });
+                    if (item.isSample) checkbox.setAttribute("aria-label", "سفارش نمونه؛ صدور حواله غیرفعال است");
                     cell.append(checkbox);
                     row.append(cell);
                     const paidAt = /(?:Z|[+-]\d\d:\d\d)$/i.test(item.paidAtUtc) ? item.paidAtUtc : `${item.paidAtUtc}Z`;
-                    for (const value of [item.orderNumber, item.customerName, format.format(item.itemCount), format.format(item.totalAmount), new Date(paidAt).toLocaleString("fa-IR")]) {
+                    for (const value of [item.orderNumber, item.customerName, format.format(item.itemCount), format.format(item.totalAmount), item.isSample ? "—" : new Date(paidAt).toLocaleString("fa-IR")]) {
                         const column = document.createElement("td"); column.textContent = value; row.append(column);
                     }
+                    if (item.isSample) { const label = document.createElement("span"); label.className = "badge bg-secondary ms-2"; label.textContent = "نمونه، بدون پرداخت واقعی"; row.cells[1].append(" ", label); }
                     rows.append(row);
                 }
                 window.AdminUI.refreshDataTable(page.querySelector("[data-admin-datatable]"));
                 const pager = page.querySelector("[data-dispatch-pagination]");
-                pager.hidden = totalPages <= 1;
-                pager.querySelector("[data-dispatch-page-label]").textContent =
-                    `صفحهٔ ${format.format(currentPage)} از ${format.format(totalPages)} · ${format.format(result.total || 0)} سفارش`;
-                pager.querySelector('[data-dispatch-page="-1"]').disabled = currentPage <= 1;
-                pager.querySelector('[data-dispatch-page="1"]').disabled = currentPage >= totalPages;
+                window.AdminUI.renderNumberedPagination(pager, currentPage, totalPages,
+                    target => { void load(target); }, "صفحه‌بندی حوالهٔ سفارش‌ها");
                 status.textContent = result.items.length ? "" : "سفارش آمادهٔ حواله وجود ندارد.";
                 count();
             } catch (error) { if (version === requestVersion && page.isConnected) status.textContent = error.message; }
@@ -87,14 +90,11 @@
             });
             count();
         });
-        page.querySelectorAll("[data-dispatch-page]").forEach(button => button.addEventListener("click", () => {
-            if (!button.disabled) void load(Math.max(1, currentPage + Number(button.dataset.dispatchPage)));
-        }));
         clearSelection.addEventListener("click", () => { selectedIds.clear(); void load(currentPage); });
         page.querySelector("[data-dispatch-refresh]").addEventListener("click", () => void load());
         form.addEventListener("submit", async event => {
             event.preventDefault();
-            if (saving) return;
+            if (saving || !canDispatch) return;
             const orderIds = selected();
             if (!orderIds.length) { status.textContent = "ابتدا سفارش‌ها را انتخاب کنید."; return; }
             saving = true;
@@ -106,6 +106,7 @@
             } catch (error) { status.textContent = error.message; }
             finally { saving = false; count(); }
         });
+        all.disabled = !canDispatch;
         void load();
     }
     window.AdminPaidOrdersDispatch = Object.freeze({ initialize });

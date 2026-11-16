@@ -77,11 +77,10 @@
                 }
 
                 page.querySelector("[data-newsletter-status]").textContent = `${number.format(result.total || 0)} عضو`;
-                page.querySelector("[data-newsletter-page-label]").textContent = `صفحهٔ ${number.format(pageNumber)}`;
                 const hasNext = result.hasNext === true;
-                page.querySelector('[data-newsletter-page="-1"]').disabled = pageNumber <= 1;
-                page.querySelector('[data-newsletter-page="1"]').disabled = !hasNext;
-                page.querySelector("[data-newsletter-pagination]").hidden = pageNumber <= 1 && !hasNext;
+                const totalPages = Number.isFinite(result.total) ? Math.ceil(result.total / (result.pageSize || pageSize)) : pageNumber + (hasNext ? 1 : 0);
+                ui.renderNumberedPagination(page.querySelector("[data-newsletter-pagination]"), pageNumber, totalPages,
+                    target => { pageNumber = target; void load(); }, "صفحه‌بندی اعضای خبرنامه");
                 setStatus(result.items?.length ? "" : "عضوی با این فیلتر پیدا نشد.");
 
                 const exportQuery = new URLSearchParams(new FormData(page.querySelector("[data-newsletter-filter]")));
@@ -97,12 +96,6 @@
             event.preventDefault();
             pageNumber = 1;
             void load();
-        });
-        page.querySelectorAll("[data-newsletter-page]").forEach(button => {
-            button.addEventListener("click", () => {
-                pageNumber = Math.max(1, pageNumber + Number(button.dataset.newsletterPage));
-                void load();
-            });
         });
         void load();
     }

@@ -1,8 +1,36 @@
 @model Shop.Admin.Models.FeaturePageViewModel
+@{
+    string promotionSection = ViewData["PromotionSection"]?.ToString() ?? "offers";
+    string sectionTitle = promotionSection switch
+    {
+        "plans" => "مدیریت طرح‌های فروش",
+        "offers" => "پیشنهادهای کالا و تخفیف",
+        "variant-prices" => "قیمت تنوع‌ها",
+        "history" => "تاریخچهٔ قیمت",
+        _ => Model.Title
+    };
+    string sectionDescription = promotionSection switch
+    {
+        "plans" => "ساخت طرح، تنظیم بازهٔ اجرا و مدیریت انتشار طرح‌های فروش.",
+        "offers" => "مدیریت قیمت، تخفیف، ظرفیت خرید و متعلقات پیشنهادهای کالا.",
+        "variant-prices" => "تنظیم قیمت و تخفیف اختصاصی هر تنوع انبار در طرح فروش.",
+        "history" => "بازبینی نسخه‌های ثبت‌شدهٔ قیمت کالاها و طرح‌های فروش.",
+        _ => Model.Description
+    };
+}
 <div class="admin-page" data-store-variant-prices data-api="@ViewData["ApiUrl"]" data-can-edit="@(User.IsInRole("system.full-access") || User.HasClaim("admin_permission", "Store:Features:Index:promotions") ? "true" : "false")">
-    @await Html.PartialAsync("_AdminPageIntro", ("قیمت تنوع‌ها در طرح فروش", "برای هر تنوع انبار و هر طرح، قیمت فروش مستقل تعیین کنید. در صورت حذف قیمت اختصاصی، قیمت پایهٔ همان کالا و طرح استفاده می‌شود."))
+    @await Html.PartialAsync("_AdminPageIntro", (sectionTitle, sectionDescription))
+    <nav class="nav nav-pills gap-2 mb-3" aria-label="بخش‌های طرح فروش">
+        @if (User.IsInRole("system.full-access"))
+        {
+            <a class="nav-link @(promotionSection == "plans" ? "active" : "")" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="promotions" asp-route-section="plans" data-admin-nav>مدیریت طرح‌ها</a>
+        }
+        <a class="nav-link @(promotionSection == "offers" ? "active" : "")" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="promotions" asp-route-section="offers" data-admin-nav>پیشنهادهای کالا</a>
+        <a class="nav-link @(promotionSection == "variant-prices" ? "active" : "")" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="promotions" asp-route-section="variant-prices" data-admin-nav>قیمت تنوع‌ها</a>
+        <a class="nav-link @(promotionSection == "history" ? "active" : "")" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="promotions" asp-route-section="history" data-admin-nav>تاریخچهٔ قیمت</a>
+    </nav>
     @Html.AntiForgeryToken()
-    @if (User.IsInRole("system.full-access"))
+    @if (promotionSection == "plans" && User.IsInRole("system.full-access"))
     {
         <section class="panel panel-inverse">
             <div class="panel-heading"><h2 class="panel-title">بازه و نمایش طرح فروش</h2></div>
@@ -30,6 +58,8 @@
             </div>
         </section>
     }
+    @if (promotionSection == "offers")
+    {
     <section class="panel panel-inverse">
         <div class="panel-heading"><h2 class="panel-title">پیشنهادهای کالا در طرح‌های ویژه</h2><div class="panel-heading-btn"><button type="button" class="btn btn-xs btn-icon btn-default" data-offer-refresh aria-label="بارگذاری دوبارهٔ پیشنهادها"><i class="fa fa-rotate" aria-hidden="true"></i></button></div></div>
         <div class="panel-body">
@@ -66,6 +96,9 @@
             </div>
         </div>
     </section>
+    }
+    @if (promotionSection == "variant-prices")
+    {
     <section class="panel panel-inverse">
         <div class="panel-heading">
             <h2 class="panel-title">قیمت تنوع و طرح</h2>
@@ -100,11 +133,17 @@
             </div>
         </div>
     </section>
+    }
+    @if (promotionSection == "history")
+    {
     <section class="panel panel-inverse mt-3" aria-labelledby="price-history-title">
         <div class="panel-heading d-flex align-items-center justify-content-between"><h2 class="panel-title" id="price-history-title">تاریخچهٔ قیمت</h2><button type="button" class="btn btn-xs btn-icon btn-default" data-price-history-refresh aria-label="بارگذاری تاریخچه"><i class="fa fa-clock-rotate-left" aria-hidden="true"></i></button></div>
         <div class="panel-body"><div class="small text-muted mb-2" data-price-history-status role="status" aria-live="polite">در حال دریافت تاریخچه…</div><div class="table-responsive"><table class="table table-sm table-striped"><thead><tr><th>شناسه</th><th>کالا</th><th>طرح</th><th>نوع</th><th>مبلغ</th><th>وضعیت</th><th>زمان ثبت</th><th>نسخهٔ قبل</th></tr></thead><tbody data-price-history-rows></tbody></table></div></div>
     </section>
+    }
 </div>
+@if (promotionSection == "offers")
+{
 <div class="modal fade" id="offer-specifications-modal" tabindex="-1" aria-labelledby="offer-specifications-title" aria-hidden="true">
     <div class="modal-dialog modal-lg"><form class="modal-content" data-offer-specifications-form data-admin-confirm="مشخصات نمایشی پیشنهاد ذخیره شود؟">
         <div class="modal-header"><h2 class="modal-title fs-5" id="offer-specifications-title">مشخصات نمایشی پیشنهاد</h2><button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="بستن"></button></div>
@@ -112,6 +151,9 @@
         <div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button type="submit" class="btn btn-primary"><i class="fa fa-floppy-disk me-1" aria-hidden="true"></i>ذخیره</button></div>
     </form></div>
 </div>
+}
+@if (promotionSection == "offers")
+{
 <div class="modal fade" id="offer-accessories-modal" tabindex="-1" aria-labelledby="offer-accessories-title" aria-hidden="true">
     <div class="modal-dialog modal-lg"><div class="modal-content">
         <div class="modal-header"><h2 class="modal-title fs-5" id="offer-accessories-title">متعلقات پیشنهاد</h2><button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="بستن"></button></div>
@@ -121,3 +163,4 @@
         </div><div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">بستن</button></div>
     </div></div>
 </div>
+}

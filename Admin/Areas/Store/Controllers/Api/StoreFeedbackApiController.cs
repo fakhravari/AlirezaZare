@@ -16,14 +16,16 @@ public sealed class StoreFeedbackApiController(ShopDbContext db) : ControllerBas
     [HttpGet("reviews")]
     public Task<IActionResult> Reviews([FromQuery] string? status, [FromQuery] string? search,
         [FromQuery] int page = 1, [FromQuery] int pageSize = AdminListQuery.DefaultPageSize,
+        [FromQuery] DateOnly? from = null, [FromQuery] DateOnly? to = null,
         CancellationToken cancellationToken = default) =>
-        ListAsync("reviews", status, search, page, pageSize, cancellationToken);
+        ListAsync("reviews", status, search, page, pageSize, from, to, cancellationToken);
 
     [HttpGet("questions")]
     public Task<IActionResult> Questions([FromQuery] string? status, [FromQuery] string? search,
         [FromQuery] int page = 1, [FromQuery] int pageSize = AdminListQuery.DefaultPageSize,
+        [FromQuery] DateOnly? from = null, [FromQuery] DateOnly? to = null,
         CancellationToken cancellationToken = default) =>
-        ListAsync("questions", status, search, page, pageSize, cancellationToken);
+        ListAsync("questions", status, search, page, pageSize, from, to, cancellationToken);
 
     [HttpPut("reviews/{id:long}")]
     [ValidateAntiForgeryToken]
@@ -38,11 +40,25 @@ public sealed class StoreFeedbackApiController(ShopDbContext db) : ControllerBas
         ModerateAsync(id, "questions", input, cancellationToken);
 
     private async Task<IActionResult> ListAsync(string type, string? status, string? search, int page, int pageSize,
+        DateOnly? from, DateOnly? to,
         CancellationToken cancellationToken)
     {
         if (!AdminListQuery.TryCreate(page, pageSize, search, out AdminPageRequest paging)
             || status is not (null or "pending" or "approved" or "rejected"))
             return ValidationProblem(detail: "فیلتر یا صفحه‌بندی معتبر نیست.", statusCode: 400);
+        if (from.HasValue && to.HasValue && from.Value > to.Value)
+            return ValidationProblem(detail: "تاریخ شروع باید قبل از تاریخ پایان باشد.", statusCode: 400);
+        if (to == DateOnly.MaxValue)
+            return ValidationProblem(detail: "تاریخ پایان معتبر نیست.", statusCode: 400);
+        if (from.HasValue && to.HasValue && to.Value.DayNumber - from.Value.DayNumber > 365)
+            return ValidationProblem(detail: "بازهٔ تاریخ نمی‌تواند بیشتر از ۳۶۶ روز باشد.", statusCode: 400);
+
+        DateTime? fromUtc = from.HasValue
+            ? DateTime.SpecifyKind(from.Value.ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc)
+            : null;
+        DateTime? untilUtc = to.HasValue
+            ? DateTime.SpecifyKind(to.Value.AddDays(1).ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc)
+            : null;
         var query = from feedback in db.ProductFeedback.AsNoTracking()
                     join product in db.Products.AsNoTracking() on feedback.IdProduct equals product.Id
                     where feedback.FeedbackType == type
@@ -62,6 +78,8 @@ public sealed class StoreFeedbackApiController(ShopDbContext db) : ControllerBas
                         feedback.RepliedAtUtc
                     };
         if (status is not null) query = query.Where(x => x.Status == status);
+        if (fromUtc.HasValue) query = query.Where(x => x.CreatedAtUtc >= fromUtc.Value);
+        if (untilUtc.HasValue) query = query.Where(x => x.CreatedAtUtc < untilUtc.Value);
         if (paging.Search.Length > 0)
         {
             string term = paging.Search;

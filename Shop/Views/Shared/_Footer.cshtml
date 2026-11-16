@@ -2,6 +2,11 @@
 @{
     string cdnBaseUrl = ViewData["MediaCdnBaseUrl"] as string ?? "";
     Shop.Models.SiteIdentityOptions identity = SiteIdentityOptions.Value;
+    string fallbackSocialUrl = Url.Content("~/Contact");
+    bool hasInstagramUrl = !string.IsNullOrWhiteSpace(identity.InstagramUrl);
+    bool hasTelegramUrl = !string.IsNullOrWhiteSpace(identity.TelegramUrl);
+    bool hasLinkedInUrl = !string.IsNullOrWhiteSpace(identity.LinkedInUrl);
+    bool hasWhatsAppNumber = !string.IsNullOrWhiteSpace(identity.WhatsAppNumber);
 }
 <footer>
     <div class="container">
@@ -12,11 +17,11 @@
                 </a>
                 @if (!string.IsNullOrWhiteSpace(identity.FooterDescription)) { <p>@identity.FooterDescription</p> }
                 <div class="socials" aria-label="شبکه‌های اجتماعی و راه‌های ارتباطی">
-                    @if (!string.IsNullOrWhiteSpace(identity.InstagramUrl)) { <a href="@identity.InstagramUrl" target="_blank" rel="noopener noreferrer">اینستاگرام</a> }
-                    <a href="https://wa.me/@identity.WhatsAppNumber" target="_blank" rel="noopener noreferrer">واتس‌اپ</a>
-                    @if (!string.IsNullOrWhiteSpace(identity.TelegramUrl)) { <a href="@identity.TelegramUrl" target="_blank" rel="noopener noreferrer">تلگرام</a> }
-                    @if (!string.IsNullOrWhiteSpace(identity.LinkedInUrl)) { <a href="@identity.LinkedInUrl" target="_blank" rel="noopener noreferrer">لینکدین</a> }
-                    <a href="tel:@identity.SupportPhoneUri">تماس تلفنی</a>
+                    <a href="@(hasInstagramUrl ? identity.InstagramUrl : fallbackSocialUrl)" target="@(hasInstagramUrl ? "_blank" : null)" rel="@(hasInstagramUrl ? "noopener noreferrer" : null)" aria-label="اینستاگرام" title="اینستاگرام"><i class="bi bi-instagram" aria-hidden="true"></i><span class="visually-hidden">اینستاگرام</span></a>
+                    <a href="@(hasWhatsAppNumber ? $"https://wa.me/{identity.WhatsAppNumber}" : fallbackSocialUrl)" target="@(hasWhatsAppNumber ? "_blank" : null)" rel="@(hasWhatsAppNumber ? "noopener noreferrer" : null)" aria-label="واتس‌اپ" title="واتس‌اپ"><i class="bi bi-whatsapp" aria-hidden="true"></i><span class="visually-hidden">واتس‌اپ</span></a>
+                    <a href="@(hasTelegramUrl ? identity.TelegramUrl : fallbackSocialUrl)" target="@(hasTelegramUrl ? "_blank" : null)" rel="@(hasTelegramUrl ? "noopener noreferrer" : null)" aria-label="تلگرام" title="تلگرام"><i class="bi bi-telegram" aria-hidden="true"></i><span class="visually-hidden">تلگرام</span></a>
+                    <a href="@(hasLinkedInUrl ? identity.LinkedInUrl : fallbackSocialUrl)" target="@(hasLinkedInUrl ? "_blank" : null)" rel="@(hasLinkedInUrl ? "noopener noreferrer" : null)" aria-label="لینکدین" title="لینکدین"><i class="bi bi-linkedin" aria-hidden="true"></i><span class="visually-hidden">لینکدین</span></a>
+                    <a href="tel:@identity.SupportPhoneUri" aria-label="تماس تلفنی" title="تماس تلفنی"><i class="bi bi-telephone" aria-hidden="true"></i><span class="visually-hidden">تماس تلفنی</span></a>
                 </div>
                 <div class="trust-badges" aria-label="نمادهای اعتماد">
                     <a class="trust-badge-image enamad-link" referrerpolicy="origin" target="_blank" rel="noopener" href="https://trustseal.enamad.ir/?id=8270056&amp;Code=magw24ZAYJwl3ZjkoHJrQoG8tZ4dv7MC" aria-label="مشاهده نماد اعتماد الکترونیکی فروشگاه (پنجره جدید)">

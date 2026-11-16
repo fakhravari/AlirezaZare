@@ -4,10 +4,17 @@
 }
 <div class="admin-page" data-admin-page="catalog" data-admin-section="@catalogSection" data-admin-api="@apiUrl" data-can-upload-image="@(User.IsInRole("system.full-access") ? "true" : "false")" data-can-edit-category="@(User.IsInRole("system.full-access") || (User.HasClaim("admin_permission", "Store:StoreCategoryContentApi:Get") && User.HasClaim("admin_permission", "Store:StoreCategoryContentApi:Update")) ? "true" : "false")">
     @await Html.PartialAsync("_AdminPageIntro", ((string)ViewData["Title"]!, (string)ViewData["Description"]!))
-    <section class="panel panel-inverse">
+    @if (catalogSection == "products" && User.IsInRole("system.full-access"))
+    {
+        <div class="nav nav-pills gap-2 mb-3" role="group" aria-label="بخش‌های کالا">
+            <button class="nav-link active" type="button" data-product-section-switch="products" aria-controls="published-products-section" aria-pressed="true">محصولات</button>
+            <button class="nav-link" type="button" data-product-section-switch="drafts" aria-controls="product-drafts-section" aria-pressed="false">پیش‌نویس‌های کالا</button>
+        </div>
+    }
+    <section class="panel panel-inverse" id="published-products-section" data-product-section="products">
         <div class="panel-heading">
             <h2 class="panel-title">@ViewData["Title"]</h2>
-            <div class="panel-heading-btn">
+            <div class="panel-heading-btn d-flex align-items-center gap-2">
                 @if (catalogSection == "products" && User.IsInRole("system.full-access"))
                 {
                     <button class="btn btn-xs btn-primary" type="button" data-product-create><i class="fa fa-plus me-1" aria-hidden="true"></i>افزودن کالا</button>
@@ -39,11 +46,16 @@
                     <button class="btn btn-default" type="button" data-category-tree-expand>بازکردن همه</button>
                     <button class="btn btn-default" type="button" data-category-tree-collapse>بستن همه</button>
                 }
+                @if (catalogSection == "attributes")
+                {
+                    <button class="btn btn-default" type="button" data-attribute-tree-expand>بازکردن همه</button>
+                    <button class="btn btn-default" type="button" data-attribute-tree-collapse>بستن همه</button>
+                }
                 <span class="admin-record-count ms-auto small text-muted" data-admin-count aria-live="polite"></span>
             </form>
             <div class="admin-data-status small text-muted" data-admin-status role="status" aria-live="polite">در حال خواندن داده از دیتابیس…</div>
-            <div class="table-responsive admin-table-wrap @(catalogSection == "categories" ? "admin-category-tree-wrap" : "")">
-                <table class="table table-striped table-hover align-middle mb-0" data-admin-datatable data-admin-table-mode="@(catalogSection == "categories" ? "tree" : "server")">
+            <div class="table-responsive admin-table-wrap @((catalogSection is "categories" or "attributes") ? "admin-category-tree-wrap" : "")">
+                <table class="table table-striped table-hover align-middle mb-0" data-admin-datatable data-admin-table-mode="@((catalogSection is "categories" or "attributes") ? "tree" : "server")">
                     <thead>
                     <tr>
                         @if (catalogSection == "products")
@@ -62,6 +74,7 @@
                             <th scope="col">والد</th>
                             <th scope="col">نشانی</th>
                             <th scope="col">وضعیت انتشار</th>
+                            <th scope="col">عملیات</th>
                         }
                         else if (catalogSection == "brands")
                         {
@@ -70,6 +83,7 @@
                             <th scope="col">نام لاتین</th>
                             <th scope="col">کشور</th>
                             <th scope="col">وضعیت انتشار</th>
+                            <th scope="col">نمایش در فروشگاه</th>
                             <th scope="col">عملیات</th>
                         }
                         else if (catalogSection == "payment-institutions")
@@ -105,10 +119,10 @@
             <p class="admin-readonly-note alert alert-info small d-flex align-items-start gap-2 mt-3"><i class="fa fa-circle-info" aria-hidden="true"></i> @(catalogSection == "categories" ? "محتوای مشترک محصول در دسته قابل ویرایش است." : catalogSection == "products" ? "مدیر دارای دسترسی کامل می‌تواند تصویر، ویدئو و فایل کالا را بارگذاری کند." : catalogSection == "brands" ? "مدیر دارای دسترسی کامل می‌تواند برند را ایجاد یا ویرایش و نشان آن را بارگذاری کند." : catalogSection == "payment-institutions" ? "تصویرها به WebP و فایل SVG پس از پاک‌سازی ذخیره می‌شود؛ فایل در FTP قرار می‌گیرد و مسیر آن در جدول ثبت می‌شود." : "مدیر دارای دسترسی کامل می‌تواند ویژگی را ایجاد و ویرایش کند؛ کلید ویژگی پس از استفاده ثابت می‌ماند.")</p>
         </div>
     </section>
-</div>
+    </div>
 @if (catalogSection == "products" && User.IsInRole("system.full-access"))
 {
-    <section class="panel panel-inverse" data-admin-page="product-drafts" data-admin-section="products" data-can-upload-image="true">
+    <section class="panel panel-inverse" id="product-drafts-section" data-product-section="drafts" data-admin-page="product-drafts" data-admin-section="products" data-can-upload-image="true" hidden>
         <div class="panel-heading"><h2 class="panel-title">پیش‌نویس‌های کالا</h2></div>
         <div class="panel-body"><p>پیش‌نویس پس از ثبت تصویر و انتشار در فروشگاه نمایش داده می‌شود.</p>
             <form class="admin-filter-bar d-flex flex-wrap align-items-center gap-2 mb-3" data-admin-filter>
@@ -166,15 +180,15 @@
         <div class="modal-dialog modal-dialog-scrollable modal-lg"><form class="modal-content" data-product-editor data-admin-confirm="تغییرات اطلاعات کالا ثبت شود؟">
             @Html.AntiForgeryToken()<input type="hidden" name="id" />
             <div class="modal-header"><h2 class="modal-title fs-5" id="product-editor-title">ویرایش اطلاعات کالا</h2><button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="بستن"></button></div>
-            <div class="modal-body admin-modal-grid-two">
+            <div class="modal-body admin-modal-grid-two admin-product-editor-grid">
                 <p class="admin-modal-field-wide">کد کالا: <span data-product-editor-code></span></p>
-                <div class="admin-modal-field"><label for="product-edit-name" class="form-label">نام فارسی</label><input id="product-edit-name" name="name" class="form-control" maxlength="300" required /></div>
-                <div class="admin-modal-field"><label for="product-edit-english" class="form-label">نام لاتین</label><input id="product-edit-english" name="englishName" class="form-control" maxlength="300" required /></div>
-                <div class="admin-modal-field"><label for="product-edit-brand" class="form-label">برند</label><select id="product-edit-brand" name="brandId" class="form-select" required></select></div>
-                <div class="admin-modal-field"><label for="product-edit-category" class="form-label">دستهٔ برگ</label><select id="product-edit-category" name="categoryId" class="form-select" required></select></div>
-                <div class="admin-modal-field"><label for="product-edit-price" class="form-label">قیمت نهایی فروش عادی (تومان)</label><input id="product-edit-price" name="priceAmount" type="number" min="0" max="9007199254740991" step="1" class="form-control" required /></div>
-                <div class="admin-modal-field"><label for="product-edit-discount" class="form-label">درصد تخفیف نمایشی</label><input id="product-edit-discount" name="discountPercent" type="number" min="0" max="99.99" step="0.01" class="form-control" required /></div>
-                <div class="admin-modal-field"><label for="product-edit-limit" class="form-label">حداکثر تعداد خرید</label><input id="product-edit-limit" name="maxPurchaseQuantity" type="number" min="1" max="99" step="1" class="form-control" required /></div>
+                <div class="admin-modal-field admin-product-name"><label for="product-edit-name" class="form-label">نام فارسی</label><input id="product-edit-name" name="name" class="form-control" maxlength="300" required /></div>
+                <div class="admin-modal-field admin-product-english"><label for="product-edit-english" class="form-label">نام لاتین</label><input id="product-edit-english" name="englishName" class="form-control" maxlength="300" required /></div>
+                <div class="admin-modal-field admin-product-brand"><label for="product-edit-brand" class="form-label">برند</label><select id="product-edit-brand" name="brandId" class="form-select" required></select></div>
+                <div class="admin-modal-field admin-product-category"><label for="product-edit-category" class="form-label">دستهٔ برگ</label><select id="product-edit-category" name="categoryId" class="form-select" required></select></div>
+                <div class="admin-modal-field admin-product-price"><label for="product-edit-price" class="form-label">قیمت نهایی فروش عادی (تومان)</label><input id="product-edit-price" name="priceAmount" type="number" min="0" max="9007199254740991" step="1" class="form-control" required /></div>
+                <div class="admin-modal-field admin-product-discount"><label for="product-edit-discount" class="form-label">درصد تخفیف نمایشی</label><input id="product-edit-discount" name="discountPercent" type="number" min="0" max="99.99" step="0.01" class="form-control" required /></div>
+                <div class="admin-modal-field admin-product-limit"><label for="product-edit-limit" class="form-label">حداکثر تعداد خرید</label><input id="product-edit-limit" name="maxPurchaseQuantity" type="number" min="1" max="99" step="1" class="form-control" required /></div>
                 <p class="admin-modal-field-wide text-muted mb-0">قیمت نهایی فروش عادی وارد می‌شود؛ قیمت اختصاصی تنوع یا طرح جداگانه تنظیم می‌شود.</p>
             </div>
             <div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button type="submit" class="btn btn-primary"><i class="fa fa-floppy-disk me-1" aria-hidden="true"></i>ذخیره</button></div>
@@ -204,16 +218,20 @@
         </div></div>
     </div>
     <div class="modal fade" id="product-image-modal" tabindex="-1" aria-labelledby="product-image-title" aria-hidden="true">
-        <div class="modal-dialog"><form class="modal-content" data-product-image-form data-admin-confirm="تصویر انتخاب‌شده بارگذاری و به کالا متصل شود؟" enctype="multipart/form-data">
+        <div class="modal-dialog modal-dialog-scrollable modal-lg"><form class="modal-content" data-product-image-form data-admin-confirm="تصاویر انتخاب‌شده بارگذاری و به کالا متصل شوند؟" enctype="multipart/form-data">
             @Html.AntiForgeryToken()<input type="hidden" name="productId" />
-            <div class="modal-header"><h2 class="modal-title fs-5" id="product-image-title">تصویر اصلی محصول</h2><button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="بستن"></button></div>
+            <div class="modal-header"><div><h2 class="modal-title fs-5" id="product-image-title">تصویر محصول</h2><p class="small text-muted mb-0" data-product-image-name></p></div><button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="بستن"></button></div>
             <div class="modal-body">
-                <p data-product-image-name></p>
-                <p class="text-muted">تصویر اصلی، کارت و تصویر کوچک به ترتیب تا ۱۶۰۰، ۸۰۰ و ۲۵۶ پیکسل ساخته می‌شوند. تصاویر قبلی گالری حفظ می‌شوند.</p>
-                <label for="product-image-file" class="form-label">انتخاب تصویر، حداکثر ۱۰ مگابایت</label>
-                <input id="product-image-file" name="image" type="file" accept="image/jpeg,image/png,image/webp" class="form-control" required />
+                <p class="text-muted">حداکثر ۱۰ تصویر را هم‌زمان انتخاب کنید؛ حجم هر فایل حداکثر ۱۰ مگابایت و مجموع بارگذاری حداکثر ۵۵ مگابایت باشد. اگر پیش‌فرضی ثبت نشده باشد، اولین تصویر پیش‌فرض می‌شود.</p>
+                <label for="product-image-file" class="form-label">انتخاب تصاویر</label>
+                <input id="product-image-file" name="images" type="file" accept="image/jpeg,image/png,image/webp" class="form-control" multiple required />
+                <div class="d-flex justify-content-end mt-3">
+                    <button type="submit" class="btn btn-primary"><i class="fa fa-cloud-arrow-up me-1" aria-hidden="true"></i>بارگذاری تصاویر</button>
+                </div>
+                <div class="small text-muted mt-4 mb-2" data-product-image-status role="status" aria-live="polite"></div>
+                <div class="admin-product-image-gallery" data-product-image-gallery></div>
             </div>
-            <div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button type="submit" class="btn btn-primary"><i class="fa fa-cloud-arrow-up me-1" aria-hidden="true"></i>بارگذاری تصویر</button></div>
+            <div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">بستن</button></div>
         </form></div>
     </div>
     <div class="modal fade" id="product-file-modal" tabindex="-1" aria-labelledby="product-file-title" aria-hidden="true">
@@ -288,6 +306,7 @@
                 <label for="brand-name-fa" class="form-label">نام فارسی</label><input id="brand-name-fa" name="nameFa" class="form-control mb-3" maxlength="200" required />
                 <label for="brand-name-en" class="form-label">نام لاتین</label><input id="brand-name-en" name="nameEn" class="form-control mb-3" maxlength="200" required />
                 <label for="brand-country" class="form-label">کشور</label><select id="brand-country" name="countryCode" class="form-select"></select>
+                <div class="form-check mt-3"><input id="brand-show-in-store" name="showInStore" type="checkbox" value="true" class="form-check-input" checked /><label for="brand-show-in-store" class="form-check-label">نمایش در فروشگاه</label></div>
             </div>
             <div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button type="submit" class="btn btn-primary"><i class="fa fa-floppy-disk me-1" aria-hidden="true"></i>ذخیره</button></div>
         </form></div>
@@ -296,7 +315,7 @@
         <div class="modal-dialog"><form class="modal-content" data-brand-image-form data-admin-confirm="نشان برند بارگذاری شود؟" enctype="multipart/form-data">
             @Html.AntiForgeryToken()<input type="hidden" name="brandKey" /><input type="hidden" name="kind" value="brand" />
             <div class="modal-header"><h2 class="modal-title fs-5" id="brand-image-title">نشان برند</h2><button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="بستن"></button></div>
-            <div class="modal-body"><p data-brand-image-name></p><label for="brand-image-file" class="form-label">تصویر JPEG، PNG یا WebP، حداکثر ۱۰ مگابایت</label><input id="brand-image-file" name="file" type="file" accept="image/jpeg,image/png,image/webp" class="form-control" required /></div>
+            <div class="modal-body"><p data-brand-image-name></p><label for="brand-image-file" class="form-label">تصویر JPEG، PNG، WebP یا SVG، حداکثر ۱۰ مگابایت</label><input id="brand-image-file" name="file" type="file" accept="image/jpeg,image/png,image/webp,image/svg+xml,.svg" class="form-control" required /></div>
             <div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button type="submit" class="btn btn-primary"><i class="fa fa-cloud-arrow-up me-1" aria-hidden="true"></i>بارگذاری نشان</button></div>
         </form></div>
     </div>

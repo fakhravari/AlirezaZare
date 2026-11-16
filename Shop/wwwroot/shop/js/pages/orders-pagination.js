@@ -37,41 +37,14 @@ window.HNUI.mount("pages-orders-pagination", document, () => {
     summary.textContent = cards.length
       ? `${number(start + 1)} تا ${number(Math.min(start + pageSize, cards.length))} از ${number(cards.length)} سفارش`
       : "هنوز سفارشی ثبت نشده است";
-    nav.replaceChildren();
-    nav.hidden = pageCount <= 1;
-    function add(label, target, disabled = false) {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.textContent = label;
-      button.disabled = disabled;
-      button.setAttribute("aria-label", `صفحه ${label}`);
-      if (target === page && label === number(page))
-        button.setAttribute("aria-current", "page");
-      button.addEventListener("click", () => {
-        const next = new URL(window.location.href);
-        if (target === 1) next.searchParams.delete("page");
-        else next.searchParams.set("page", target);
-        if (next.href !== window.location.href)
-          history.pushState(null, "", next);
-        render(true);
-      });
-      nav.append(button);
-    }
-    add("قبلی", page - 1, page === 1);
-    let previous = 0;
-    for (const target of [...new Set([1, page - 1, page, page + 1, pageCount])]
-      .filter((value) => value >= 1 && value <= pageCount)
-      .sort((a, b) => a - b)) {
-      if (previous && target - previous > 1) {
-        const gap = document.createElement("span");
-        gap.textContent = "…";
-        gap.setAttribute("aria-hidden", "true");
-        nav.append(gap);
-      }
-      add(number(target), target);
-      previous = target;
-    }
-    add("بعدی", page + 1, page === pageCount);
+    window.HNUI.renderPagination(nav, page, pageCount, (target) => {
+      const next = new URL(window.location.href);
+      if (target === 1) next.searchParams.delete("page");
+      else next.searchParams.set("page", target);
+      if (next.href !== window.location.href)
+        history.pushState(null, "", next);
+      render(true);
+    }, "صفحه‌بندی سفارش‌ها");
     if (/\/orders\/?$/i.test(url.pathname) || url.hash === "#orders") {
       if (page === 1) url.searchParams.delete("page");
       else url.searchParams.set("page", page);

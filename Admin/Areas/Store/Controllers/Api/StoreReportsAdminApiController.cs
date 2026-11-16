@@ -39,6 +39,8 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
             return BadRequest(new { title = "شماره یا اندازهٔ صفحه معتبر نیست." });
         if (!TryGetRange(from, to, out DateTime start, out DateTime end, out string? error))
             return BadRequest(new { title = error });
+        if (type is "products" or "inventory" || detail == "inventory-movements")
+            warehouseId = await GetDefaultSalesWarehouseIdAsync(cancellationToken) ?? 0;
         if (!string.IsNullOrWhiteSpace(detail))
             return await GetDetails(detail, id, start, end, warehouseId, salesPlanReferenceId, page, pageSize, cancellationToken);
 
@@ -54,7 +56,7 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
     }
 
     [HttpGet("export")]
-    public IActionResult Export(
+    public async Task<IActionResult> Export(
         [FromQuery] string type = "sales",
         [FromQuery] DateOnly? from = null,
         [FromQuery] DateOnly? to = null,
@@ -63,6 +65,8 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
     {
         if (!TryGetRange(from, to, out DateTime start, out DateTime end, out string? error))
             return BadRequest(new { title = error });
+        if (type is "products" or "inventory")
+            warehouseId = await GetDefaultSalesWarehouseIdAsync(cancellationToken) ?? 0;
         string[] keys = type switch
         {
             "sales" => ["date", "orderCount", "revenue", "discount"],
@@ -104,11 +108,28 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
         bool fullAccess = User.IsInRole("system.full-access");
         HashSet<long> allowed = AllowedWarehouseIds();
         var warehouses = await db.Warehouses.AsNoTracking()
-            .Where(x => x.IsActive && x.IsSalesWarehouse && (fullAccess || allowed.Contains(x.Id)))
+            .Where(x => x.IsActive && x.Company.IsActive && x.IsSalesWarehouse && (fullAccess || allowed.Contains(x.Id)))
             .OrderBy(x => x.Company.Name).ThenBy(x => x.Name)
             .Select(x => new { x.Id, Label = x.Company.Name + " / " + x.Name + " (" + x.Code + ")" })
             .ToListAsync(cancellationToken);
-        return Ok(new { items = warehouses, warehouseAccess = fullAccess || allowed.Count > 0 });
+        long? defaultWarehouseId = await GetDefaultSalesWarehouseIdAsync(cancellationToken);
+        return Ok(new { items = warehouses, defaultWarehouseId, warehouseAccess = fullAccess || allowed.Count > 0 });
+    }
+
+    private async Task<long?> GetDefaultSalesWarehouseIdAsync(CancellationToken cancellationToken)
+    {
+        bool fullAccess = User.IsInRole("system.full-access");
+        HashSet<long> allowed = AllowedWarehouseIds();
+        long? configuredWarehouseId = await db.StoreSiteIdentities.AsNoTracking()
+            .Where(x => x.Id == 1)
+            .Select(x => x.IdWarehouse)
+            .SingleOrDefaultAsync(cancellationToken);
+        var warehouses = db.Warehouses.AsNoTracking()
+            .Where(x => x.IsActive && x.Company.IsActive && x.IsSalesWarehouse && (fullAccess || allowed.Contains(x.Id)));
+        if (configuredWarehouseId.HasValue && await warehouses.AnyAsync(x => x.Id == configuredWarehouseId.Value, cancellationToken))
+            return configuredWarehouseId;
+        return await warehouses.OrderBy(x => x.Company.Name).ThenBy(x => x.Name)
+            .Select(x => (long?)x.Id).FirstOrDefaultAsync(cancellationToken);
     }
 
     private async Task<object> GetSales(DateTime start, DateTime end, int page, int pageSize,
@@ -195,7 +216,8 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
 
         HashSet<long> allowed = AllowedWarehouseIds();
         bool fullAccess = User.IsInRole("system.full-access");
-        var stockQuery = db.StockBalances.AsNoTracking().Where(x => fullAccess || allowed.Contains(x.IdWarehouse));
+        var stockQuery = db.StockBalances.AsNoTracking().Where(x => x.Warehouse.IsActive && x.Warehouse.Company.IsActive
+            && x.Warehouse.IsSalesWarehouse && (fullAccess || allowed.Contains(x.IdWarehouse)));
         if (warehouseId.HasValue)
             stockQuery = stockQuery.Where(x => x.IdWarehouse == warehouseId.Value);
         var stock = await stockQuery.GroupBy(x => x.InventoryItem.IdProduct)
@@ -288,7 +310,8 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
         bool fullAccess = User.IsInRole("system.full-access");
         HashSet<long> allowed = AllowedWarehouseIds();
         var balances = db.StockBalances.AsNoTracking()
-            .Where(x => x.Warehouse.IsActive && x.Warehouse.IsSalesWarehouse && (fullAccess || allowed.Contains(x.IdWarehouse)));
+            .Where(x => x.Warehouse.IsActive && x.Warehouse.Company.IsActive && x.Warehouse.IsSalesWarehouse
+                && (fullAccess || allowed.Contains(x.IdWarehouse)));
         if (warehouseId.HasValue) balances = balances.Where(x => x.IdWarehouse == warehouseId.Value);
         int total = await balances.CountAsync(cancellationToken);
         int lowStockCount = await balances.CountAsync(x => x.MinimumQuantity > 0 && x.Quantity <= x.MinimumQuantity, cancellationToken);

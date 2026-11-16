@@ -55,38 +55,24 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
         return ok;
     };
     function renderAddresses() {
-        const addresses = read(addressKey),
-            selected = ui.storage.get("hn-selected-address", "");
+        const addresses = read(addressKey);
         const host = document.querySelector("#addressList");
         host.innerHTML = addresses.length
             ? addresses
                 .map(
                     (a) => {
                         const region = [a.province, a.city].filter(Boolean).join("، ");
-                        const isSelected = a.id === selected;
-                        return `<article class="flow-card address-account-card${isSelected ? " is-selected" : ""}">
-<header class="address-card-header"><h3><i class="bi bi-bookmark" aria-hidden="true"></i><span>${esc(a.title)}</span></h3>${isSelected ? '<span class="address-selected-badge"><i class="bi bi-check-circle-fill" aria-hidden="true"></i>آدرس انتخابی</span>' : ""}</header>
+
+                        return `<article class="flow-card address-account-card">
+<header class="address-card-header"><h3><i class="bi bi-bookmark" aria-hidden="true"></i><span>${esc(a.title)}</span></h3></header>
 <div class="address-card-recipient"><i class="bi bi-person-vcard" aria-hidden="true"></i><strong>${esc(a.recipient)}</strong></div>
 <p class="address-card-location"><i class="bi bi-geo-alt" aria-hidden="true"></i><span>${esc(region)}، ${esc(a.street)}</span></p>
 <div class="address-card-contact"><span class="address-card-phone"><i class="bi bi-telephone" aria-hidden="true"></i><bdi>${esc(a.phone)}</bdi></span><span class="address-card-postal"><i class="bi bi-mailbox" aria-hidden="true"></i><span>کد پستی</span><bdi>${esc(a.postal)}</bdi></span></div>
-<div class="account-actions address-card-actions"><button class="address-action-select" data-select="${esc(a.id)}" ${isSelected ? "disabled" : ""}><i class="bi bi-check2-circle" aria-hidden="true"></i><span>${isSelected ? "انتخاب شده" : "انتخاب برای تحویل"}</span></button><button data-edit="${esc(a.id)}"><i class="bi bi-pencil-square" aria-hidden="true"></i><span>ویرایش</span></button><button class="address-action-delete" data-delete="${esc(a.id)}"><i class="bi bi-trash3" aria-hidden="true"></i><span>حذف آدرس</span></button></div></article>`;
+<div class="account-actions address-card-actions"><button data-edit="${esc(a.id)}"><i class="bi bi-pencil-square" aria-hidden="true"></i><span>ویرایش</span></button><button class="address-action-delete" data-delete="${esc(a.id)}"><i class="bi bi-trash3" aria-hidden="true"></i><span>حذف آدرس</span></button></div></article>`;
                     },
                 )
                 .join("")
             : '<div class="compare-empty empty-state-card"><div class="compare-empty-art" aria-hidden="true"><span><i class="bi bi-geo-alt"></i></span><i class="bi bi-plus-lg"></i></div><span class="compare-empty-kicker">نشانی‌های شما</span><h2>هنوز نشانی‌ای ثبت نکرده‌اید</h2><p>یک آدرس اضافه کنید تا هنگام ثبت سفارش، مقصد تحویل را انتخاب کنید.</p><button class="flow-button" type="button" data-open-address><i class="bi bi-plus-lg" aria-hidden="true"></i> افزودن آدرس <i class="bi bi-arrow-left" aria-hidden="true"></i></button><small class="compare-empty-hint"><i class="bi bi-truck" aria-hidden="true"></i> آدرس ذخیره‌شده در پیش‌فاکتور قابل انتخاب خواهد بود.</small></div>';
-        host.querySelectorAll("[data-select]").forEach(
-            (b) =>
-            (b.onclick = async () => {
-                if (!ui.auth.isLoggedIn()) { ui.auth.requireLogin(() => b.click()); return; }
-                const response = await ui.api.request("account/checkout-preference", {
-                    method: "PUT", headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ addressId: Number(b.dataset.select), paymentMethod: "zarinpal" }),
-                });
-                if (!response.ok) { ui.setMessage(status, "ذخیرهٔ نشانی انتخابی در حساب انجام نشد.", "error"); return; }
-                ui.storage.set("hn-selected-address", b.dataset.select);
-                renderAddresses();
-            }),
-        );
         host
             .querySelectorAll("[data-edit]")
             .forEach(
@@ -114,15 +100,12 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
 
                 const currentAddresses = read(addressKey);
                 if (!currentAddresses.some((item) => item.id === addressId)) return;
-                const currentSelected = ui.storage.get("hn-selected-address", "");
                 if (
                     save(
                         addressKey,
                         currentAddresses.filter((item) => item.id !== addressId),
                     )
                 ) {
-                    if (currentSelected === addressId)
-                        ui.storage.hydrate("hn-selected-address", "");
                     renderAddresses();
                     ui.setMessage(status, "آدرس حذف شد.", "success");
                 }
@@ -189,11 +172,6 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
             const result = await response.json().catch(() => ({}));
             if (!response.ok || !result.id) { setFormStatus("ذخیره نشانی در حساب انجام نشد.", true); return; }
             address.id = String(result.id);
-            const preferenceResponse = await ui.api.request("account/checkout-preference", {
-                method: "PUT", headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ addressId: Number(address.id), paymentMethod: "zarinpal" }),
-            });
-            if (!preferenceResponse.ok) { setFormStatus("نشانی ذخیره شد، اما انتخاب آن برای تسویه‌حساب ثبت نشد.", true); return; }
         }
         const addresses = read(addressKey);
         const next = editing
@@ -203,11 +181,10 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
             setFormStatus("ذخیره آدرس ممکن نشد. دوباره تلاش کنید.", true);
             return;
         }
-        ui.storage.hydrate("hn-selected-address", address.id);
         renderAddresses();
         renderOverview();
         dialog.close();
-        ui.setMessage(status, "آدرس ذخیره و برای تحویل انتخاب شد.", "success");
+        ui.setMessage(status, "آدرس ذخیره شد.", "success");
     };
     function renderOverview() {
         const compareList = ui.storage.json("hn-compare", []);
@@ -342,32 +319,14 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
         pageStatus.textContent = couponHistory.length
             ? `${ui.formatNumber(start + 1)} تا ${ui.formatNumber(Math.min(start + pageSize, couponHistory.length))} از ${ui.formatNumber(couponHistory.length)} کد`
             : "کدی ثبت نشده است";
-        pageNav.replaceChildren();
-        pageNav.hidden = pageCount <= 1;
-
-        const addPageButton = (label, target, disabled = false, accessibleLabel) => {
-            const button = document.createElement("button");
-            button.type = "button";
-            button.textContent = label;
-            button.disabled = disabled;
-            button.setAttribute("aria-label", accessibleLabel ? `${label}، ${accessibleLabel}` : `${label}، صفحه`);
-            if (target === page && label === ui.formatNumber(page))
-                button.setAttribute("aria-current", "page");
-            button.addEventListener("click", () => {
-                const next = new URL(window.location.href);
-                if (target === 1) next.searchParams.delete("couponPage");
-                else next.searchParams.set("couponPage", String(target));
-                if (next.href !== window.location.href)
-                    history.pushState(null, "", next);
-                renderCoupons(true);
-            });
-            pageNav.append(button);
-        };
-
-        addPageButton("قبلی", page - 1, page === 1, "صفحهٔ قبل");
-        for (let target = 1; target <= pageCount; target++)
-            addPageButton(ui.formatNumber(target), target);
-        addPageButton("بعدی", page + 1, page === pageCount, "صفحهٔ بعد");
+        window.HNUI.renderPagination(pageNav, page, pageCount, (target) => {
+            const next = new URL(window.location.href);
+            if (target === 1) next.searchParams.delete("couponPage");
+            else next.searchParams.set("couponPage", String(target));
+            if (next.href !== window.location.href)
+                history.pushState(null, "", next);
+            renderCoupons(true);
+        }, "صفحه‌بندی کدهای تخفیف");
 
         if (window.location.pathname.replace(/\/+$/, "") === "/profile/coupons") {
             const normalizedUrl = new URL(window.location.href);
@@ -503,27 +462,13 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
             card.append(icon, content); host.append(card);
         }
         summary.textContent = profileMessages.length ? `${ui.formatNumber(start + 1)} تا ${ui.formatNumber(Math.min(start + messagePageSize, profileMessages.length))} از ${ui.formatNumber(profileMessages.length)} پیام` : "۰ پیام";
-        nav.replaceChildren();
-        nav.hidden = pageCount <= 1;
-        const addButton = (label, target, disabled = false) => {
-            const button = document.createElement("button");
-            button.type = "button";
-            button.textContent = label;
-            button.disabled = disabled;
-            button.setAttribute("aria-label", label === "قبلی" || label === "بعدی" ? `صفحهٔ ${label}` : `صفحه ${label}`);
-            if (target === page && label === ui.formatNumber(page)) button.setAttribute("aria-current", "page");
-            button.addEventListener("click", () => {
-                const next = new URL(window.location.href);
-                if (target === 1) next.searchParams.delete("messagePage");
-                else next.searchParams.set("messagePage", String(target));
-                if (next.href !== window.location.href) history.pushState(null, "", next);
-                renderMessages(true);
-            });
-            nav.append(button);
-        };
-        addButton("قبلی", page - 1, page === 1);
-        for (let target = 1; target <= pageCount; target++) addButton(ui.formatNumber(target), target);
-        addButton("بعدی", page + 1, page === pageCount);
+        window.HNUI.renderPagination(nav, page, pageCount, (target) => {
+            const next = new URL(window.location.href);
+            if (target === 1) next.searchParams.delete("messagePage");
+            else next.searchParams.set("messagePage", String(target));
+            if (next.href !== window.location.href) history.pushState(null, "", next);
+            renderMessages(true);
+        }, "صفحه‌بندی پیام‌های حساب");
         pagination.hidden = profileMessages.length <= messagePageSize;
         if (/\/profile\/messages\/?$/i.test(url.pathname) || url.hash === "#messages") {
             if (page === 1) url.searchParams.delete("messagePage");

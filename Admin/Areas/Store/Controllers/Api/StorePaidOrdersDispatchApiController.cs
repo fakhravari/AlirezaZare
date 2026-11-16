@@ -15,24 +15,35 @@ namespace Shop.Admin.Areas.Store.Controllers.Api;
 
 [Area("Store")]
 [ApiController]
-[Authorize(Roles = "system.full-access")]
+[Authorize]
 [Route("api/admin/store/paid-orders-dispatch")]
 public sealed class StorePaidOrdersDispatchApiController(ShopDbContext db, IWarehouseStockLedger stockLedger) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> List(
+        [FromQuery] bool warehouseQueue = false,
         [FromQuery] string? q = null,
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = AdminListQuery.DefaultPageSize,
         CancellationToken cancellationToken = default)
     {
+        if (!User.IsInRole("system.full-access"))
+        {
+            if (!warehouseQueue) return Forbid();
+            var warehouseId = await db.StoreSiteIdentities.AsNoTracking().Where(x => x.Id == 1)
+                .Select(x => x.IdWarehouse).SingleOrDefaultAsync(cancellationToken);
+            if (warehouseId is null || !User.HasClaim("admin_warehouse", warehouseId.Value.ToString(System.Globalization.CultureInfo.InvariantCulture)))
+                return Forbid();
+        }
         if (!AdminListQuery.TryCreate(page, pageSize, q, out AdminPageRequest paging))
             return BadRequest(new { title = "عبارت جست‌وجو یا صفحه‌بندی معتبر نیست." });
         var eligible = from order in db.StoreCustomerOrders.AsNoTracking()
                        join profile in db.AccountProfiles.AsNoTracking() on order.IdProfile equals profile.Id
                        where order.Status == "payment-confirmed" && order.IdWarehouseDocument == null &&
-                             db.StorePaymentAttempts.Any(payment => payment.IdOrder == order.Id && payment.Status == "verified" &&
-                                 payment.Amount == order.TotalAmount && payment.PaidAtUtc != null) &&
+                             ((warehouseQueue && order.PaymentMethod == "demo" && order.ExternalOrderKey != null && order.ExternalOrderKey.StartsWith("demo-order-")) ||
+                              (!(order.PaymentMethod == "demo" && order.ExternalOrderKey != null && order.ExternalOrderKey.StartsWith("demo-order-")) &&
+                               db.StorePaymentAttempts.Any(payment => payment.IdOrder == order.Id && payment.Status == "verified" &&
+                                   payment.Amount == order.TotalAmount && payment.PaidAtUtc != null))) &&
                              db.StoreCustomerOrderItems.Any(item => item.IdCustomerOrder == order.Id)
                        select new { order, profile };
         if (paging.Search.Length > 0)
@@ -44,10 +55,11 @@ public sealed class StorePaidOrdersDispatchApiController(ShopDbContext db, IWare
             {
                 x.order,
                 x.profile,
+                IsSample = x.order.PaymentMethod == "demo" && x.order.ExternalOrderKey != null && x.order.ExternalOrderKey.StartsWith("demo-order-"),
                 PaidAtUtc = db.StorePaymentAttempts.AsNoTracking()
                     .Where(payment => payment.IdOrder == x.order.Id && payment.Status == "verified" &&
                         payment.Amount == x.order.TotalAmount && payment.PaidAtUtc != null)
-                    .OrderBy(payment => payment.PaidAtUtc).Select(payment => payment.PaidAtUtc!.Value).First()
+                    .OrderBy(payment => payment.PaidAtUtc).Select(payment => payment.PaidAtUtc).FirstOrDefault() ?? x.order.OrderedAtUtc
             })
             .OrderBy(x => x.PaidAtUtc).ThenBy(x => x.order.Id)
             .Skip(paging.Offset).Take(paging.PageSize)
@@ -58,12 +70,14 @@ public sealed class StorePaidOrdersDispatchApiController(ShopDbContext db, IWare
                 TotalAmount = x.order.TotalAmount,
                 ItemCount = x.order.ItemCount,
                 PaidAtUtc = x.PaidAtUtc,
-                CustomerName = (x.profile.FirstName + " " + x.profile.LastName).Trim()
+                CustomerName = (x.profile.FirstName + " " + x.profile.LastName).Trim(),
+                IsSample = x.IsSample
             }).ToListAsync(cancellationToken);
         return Ok(AdminListQuery.CreateResult(rows, total, paging));
     }
 
     [HttpPost]
+    [Authorize(Roles = "system.full-access")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create([FromBody] DispatchInput input, CancellationToken cancellationToken)
     {
@@ -219,6 +233,7 @@ public sealed class StorePaidOrdersDispatchApiController(ShopDbContext db, IWare
         public int ItemCount { get; set; }
         public decimal TotalAmount { get; set; }
         public DateTime PaidAtUtc { get; set; }
+        public bool IsSample { get; set; }
     }
     public sealed record DispatchInput(long[]? OrderIds);
 

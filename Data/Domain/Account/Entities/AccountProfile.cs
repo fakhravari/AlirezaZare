@@ -119,15 +119,6 @@ public sealed class AccountArticleFeedback
     public DateTime CreatedAtUtc { get; set; }
 }
 
-public sealed class AccountCheckoutPreference
-{
-    public long Id { get; set; }
-    public long IdProfile { get; set; }
-    public long? IdSelectedAddress { get; set; }
-    public string PaymentMethod { get; set; } = "";
-    public DateTime UpdatedAtUtc { get; set; }
-}
-
 public sealed class StoreCustomerOrderReference
 {
     public long Id { get; set; }

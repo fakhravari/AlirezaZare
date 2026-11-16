@@ -2,8 +2,6 @@
     const ui = window.HNUI;
     const mediaCdnBaseUrl = document.querySelector('meta[name="media-cdn-base-url"]')?.content || "";
     const addressKey = "hn-delivery-addresses";
-    const selectedKey = "hn-selected-address";
-    const paymentMethodKey = "hn-payment-method-v2";
     const paymentMethods = Object.freeze({ zarinpal: "زرین‌پال", });
     const select = document.querySelector("#addressSelect");
     const preview = document.querySelector("#addressPreview");
@@ -11,7 +9,8 @@
     const payment = document.querySelector("#finalPayment");
     const cartCheckoutLink = () => document.querySelector("#cartView .cart-checkout-link");
     let addresses = [];
-    let selectedPaymentMethod = "zarinpal";
+    const checkoutPage = document.querySelector(".invoice-page");
+    let selectedPaymentMethod = checkoutPage?.dataset.paymentMethod || "zarinpal";
     let salesPlansValid = false;
     let validationAttempt = 0;
     let checkoutPending = false;
@@ -122,7 +121,7 @@
     }
     addresses = readAddresses();
 
-    let selected = "";
+    let selected = checkoutPage?.dataset.addressId || "";
     const selectedAddress = () =>
         addresses.find((address) => address.id === selected);
 
@@ -259,18 +258,7 @@
             .after(form.querySelector('[name="postal"]').closest("label"));
         select.addEventListener("change", async () => {
             const next = select.value;
-            if (ui.auth.isLoggedIn() && next) {
-                try {
-                    const response = await ui.api.request("account/checkout-preference", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ addressId: Number(next), paymentMethod: selectedPaymentMethod }) });
-                    if (!response.ok) throw new Error();
-                } catch {
-                    select.value = selected;
-                    ui.setMessage(document.querySelector("#addressStatus"), "ثبت انتخاب نشانی در حساب انجام نشد.", "error");
-                    return;
-                }
-            }
             selected = next;
-            ui.storage.hydrate(selectedKey, selected);
             renderPreview();
         });
         document.querySelector("#newAddress").addEventListener("click", async () => {
@@ -312,26 +300,27 @@
             addresses.push(address);
             ui.storage.hydrate(addressKey, JSON.stringify(addresses));
             const nextSelection = address.id;
-            {
-                let preferenceSaved = false;
-                try {
-                    const preferenceResponse = await ui.api.request("account/checkout-preference", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ addressId: Number(nextSelection), paymentMethod: selectedPaymentMethod }) });
-                    preferenceSaved = preferenceResponse.ok;
-                } catch { /* Address is saved; leave checkout selection unchanged until API succeeds. */ }
-                if (!preferenceSaved) {
-                    setFormStatus("آدرس ذخیره شد، اما ثبت انتخاب آن برای تسویه‌حساب انجام نشد. دوباره آدرس را انتخاب کنید.", true);
-                    renderAddresses();
-                    return;
-                }
-            }
             selected = nextSelection;
-            ui.storage.hydrate(selectedKey, selected);
             renderAddresses();
             dialog.close();
         });
         document.addEventListener("click", (event) => {
             const link = event.target.closest("#cartView .cart-checkout-link");
-            if (!link || link.getAttribute("aria-disabled") !== "true") return;
+            if (!link) return;
+            if (link.getAttribute("aria-disabled") !== "true") {
+                event.preventDefault();
+                const form = document.createElement("form");
+                form.method = "post";
+                form.action = link.href;
+                for (const [name, value] of [["addressId", selected], ["paymentMethod", selectedPaymentMethod]]) {
+                    const input = document.createElement("input");
+                    input.type = "hidden"; input.name = name; input.value = value;
+                    form.append(input);
+                }
+                document.body.append(form);
+                form.submit();
+                return;
+            }
             event.preventDefault();
             const needsAddress = !selectedAddress();
             const target = needsAddress
@@ -358,18 +347,7 @@
         radio.addEventListener("change", async () => {
             if (!radio.checked || !Object.hasOwn(paymentMethods, radio.value)) return;
             const next = radio.value;
-            if (ui.auth.isLoggedIn() && selected) {
-                try {
-                    const response = await ui.api.request("account/checkout-preference", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ addressId: Number(selected), paymentMethod: next }) });
-                    if (!response.ok) throw new Error();
-                } catch {
-                    renderPaymentMethod();
-                    ui.setMessage(document.querySelector("#paymentMethodStatus"), "ثبت روش پرداخت در حساب انجام نشد.", "error");
-                    return;
-                }
-            }
             selectedPaymentMethod = next;
-            ui.storage.hydrate(paymentMethodKey, selectedPaymentMethod);
             ui.setMessage(
                 document.querySelector("#paymentMethodStatus"),
                 `${paymentMethods[selectedPaymentMethod]} به‌عنوان روش پرداخت انتخاب شد.`,
@@ -447,9 +425,8 @@
         if (!response.ok) return;
         const account = await response.json();
         if (Array.isArray(account.addresses)) addresses = account.addresses;
-        selected = String(account.checkout?.selectedAddressId || "");
-        if (account.checkout?.paymentMethod) selectedPaymentMethod = account.checkout.paymentMethod;
-        ui.storage.hydrate(addressKey, JSON.stringify(addresses)); ui.storage.hydrate(selectedKey, selected); ui.storage.hydrate(paymentMethodKey, selectedPaymentMethod);
+        if (!selected) selected = String(account.checkout?.selectedAddressId || "");
+        ui.storage.hydrate(addressKey, JSON.stringify(addresses));
         renderAddresses(); renderPaymentMethod();
     }).catch(() => {});
     document.addEventListener("hn:auth-change", (event) => {
@@ -458,9 +435,8 @@
             if (!response.ok) return;
             const account = await response.json();
             addresses = Array.isArray(account.addresses) ? account.addresses : [];
-            selected = String(account.checkout?.selectedAddressId || "");
-            if (account.checkout?.paymentMethod) selectedPaymentMethod = account.checkout.paymentMethod;
-            ui.storage.hydrate(addressKey, JSON.stringify(addresses)); ui.storage.hydrate(selectedKey, selected); ui.storage.hydrate(paymentMethodKey, selectedPaymentMethod);
+            if (!selected) selected = String(account.checkout?.selectedAddressId || "");
+            ui.storage.hydrate(addressKey, JSON.stringify(addresses));
             renderAddresses(); renderPaymentMethod();
         }).catch(() => {});
     });

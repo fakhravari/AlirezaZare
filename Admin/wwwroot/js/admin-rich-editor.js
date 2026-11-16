@@ -90,7 +90,11 @@
         root.querySelectorAll?.("textarea[data-rich-editor]").forEach(textarea => {
             if (textarea.dataset.richEditorReady === "true") return;
             textarea.dataset.richEditorReady = "true";
-            $(textarea).summernote(settings);
+            const requestedHeight = Number(textarea.dataset.richEditorHeight);
+            const editorSettings = Number.isFinite(requestedHeight) && requestedHeight > 0
+                ? { ...settings, height: Math.min(600, Math.max(120, requestedHeight)) }
+                : settings;
+            $(textarea).summernote(editorSettings);
         });
     }
     window.AdminRichEditor = Object.freeze({

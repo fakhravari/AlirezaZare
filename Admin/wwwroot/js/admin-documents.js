@@ -99,11 +99,8 @@
             status(page, result.items?.length ? "" : "سندی با این فیلتر پیدا نشد.");
             const pagination = page.querySelector("[data-document-pagination]");
             const hasNext = (result.items?.length || 0) >= 50;
-            pagination.hidden = pageNumber <= 1 && !hasNext;
-            const label = pagination.querySelector("[data-document-page-label]");
-            label.textContent = `صفحهٔ ${format.format(pageNumber)}`;
-            pagination.querySelector('[data-document-page="-1"]').disabled = pageNumber <= 1;
-            pagination.querySelector('[data-document-page="1"]').disabled = !hasNext;
+            const pages = Number.isFinite(result.total) ? Math.ceil(result.total / (result.pageSize || 50)) : pageNumber + (hasNext ? 1 : 0);
+                ui.renderNumberedPagination(pagination, pageNumber, pages, target => { pageNumber = target; void loadDocuments(page); }, "صفحه‌بندی اسناد");
         } catch (error) { if (serial === requestSerial) status(page, error.message, true); }
     }
 
@@ -294,7 +291,6 @@
                 document.querySelector("[data-document-line-add]").addEventListener("click", () => appendLine(document.querySelector("[data-document-form]")));
                 page.querySelector("[data-document-filter]").addEventListener("submit", event => { event.preventDefault(); pageNumber = 1; void loadDocuments(page); });
                 page.querySelector("[data-document-reset]").addEventListener("click", () => { page.querySelector("[data-document-filter]").reset(); pageNumber = 1; void loadDocuments(page); });
-                page.querySelectorAll("[data-document-page]").forEach(button => button.addEventListener("click", () => { pageNumber = Math.max(1, pageNumber + Number(button.dataset.documentPage)); void loadDocuments(page); }));
                 document.querySelector("[data-document-form]").addEventListener("submit", async event => {
                     event.preventDefault();
                     const form = event.currentTarget;

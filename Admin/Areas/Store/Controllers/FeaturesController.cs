@@ -6,7 +6,7 @@ namespace Shop.Admin.Areas.Store.Controllers;
 [Area("Store")]
 public sealed class FeaturesController : Controller
 {
-    public IActionResult Index(string feature)
+    public IActionResult Index(string feature, string? section = null)
     {
         if (!StoreAdminFeatureCatalog.TryGet(feature ?? "", out var page)) return NotFound();
         ViewData["Title"] = page.Title;
@@ -43,16 +43,36 @@ public sealed class FeaturesController : Controller
         if (page.FeatureId == "content")
         {
             if (!User.IsInRole("system.full-access")) return Forbid();
+            string[] sections = ["faq", "magazine", "pages"];
+            if (!sections.Contains(section ?? "", StringComparer.OrdinalIgnoreCase))
+                return RedirectToAction(nameof(Index), new { feature = page.FeatureId, section = "faq" });
+            section = section!.ToLowerInvariant();
+            ViewData["ContentSection"] = section;
+            ViewData["Title"] = section switch
+            {
+                "magazine" => "مقاله‌های مجله",
+                "pages" => "صفحه‌های خدماتی",
+                _ => "پرسش‌های متداول"
+            };
             return View("~/Areas/Store/Views/Features/Faq.cshtml", page);
         }
         if (page.FeatureId == "promotions")
         {
+            string[] sections = ["plans", "offers", "variant-prices", "history"];
+            string defaultSection = User.IsInRole("system.full-access") ? "plans" : "offers";
+            if (!sections.Contains(section ?? "", StringComparer.OrdinalIgnoreCase))
+                return RedirectToAction(nameof(Index), new { feature = page.FeatureId, section = defaultSection });
+            section = section!.ToLowerInvariant();
+            if (section == "plans" && !User.IsInRole("system.full-access")) return Forbid();
+            ViewData["PromotionSection"] = section;
             ViewData["ApiUrl"] = "/api/admin/store/variant-prices";
             return View("~/Areas/Store/Views/Features/VariantPrices.cshtml", page);
         }
 
         if (page.FeatureId is "reviews" or "questions")
             return View("~/Areas/Store/Views/Features/Feedback.cshtml", page);
+        if (page.FeatureId == "testimonials")
+            return View("~/Areas/Store/Views/Features/Testimonials.cshtml", page);
         return View("~/Areas/Store/Views/Features/Index.cshtml", page);
     }
 }

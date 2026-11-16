@@ -6,6 +6,9 @@
         if (!page || initialized.has(page)) return;
         initialized.add(page);
         const form = page.querySelector("[data-geo-form]"), status = page.querySelector("[data-geo-status]"), rows = page.querySelector("[data-geo-rows]"), search = page.querySelector("[data-geo-search]");
+        const modal = page.querySelector("[data-geo-modal]");
+        const modalTitle = page.querySelector("[data-geo-modal-title]");
+        const modalInstance = window.bootstrap?.Modal?.getOrCreateInstance(modal);
         let data = { countries: [], provinces: [], cities: [] }, kind = "countries", provinceCountryFilter = "", cityProvinceFilter = "", busy = true, available = false;
         const tabs = [...page.querySelectorAll("[data-geo-tab]")], submit = form.querySelector('[type="submit"]'), retry = page.querySelector("[data-geo-retry]");
         submit.disabled = true;
@@ -25,7 +28,11 @@
         function reset() {
             form.reset(); form.elements.id.value = ""; countrySearch.value = ""; provinceSearch.value = "";
             form.elements.countryId.replaceChildren(new Option("کشور را انتخاب کنید", ""), ...data.countries.map(c => new Option(c.nameFa, c.id)));
-            if (kind !== "countries") form.elements.countryId.value = provinceCountryFilter;
+            if (kind !== "countries") {
+                const iranId = data.countries.find(country => country.code === "IR")?.id;
+                form.elements.countryId.value = provinceCountryFilter || String(iranId || "");
+                provinceCountryFilter = form.elements.countryId.value;
+            }
             if (kind !== "countries" && form.elements.countryId.value !== provinceCountryFilter) { provinceCountryFilter = ""; cityProvinceFilter = ""; }
             provinces(kind === "cities" ? cityProvinceFilter : "");
             if (kind === "cities" && form.elements.provinceId.value !== cityProvinceFilter) cityProvinceFilter = "";
@@ -47,7 +54,7 @@
         function render() {
             ui.destroyDataTable(page.querySelector("[data-admin-datatable]"));
             const columns = {
-                countries: [["شناسه", "id"], ["نام فارسی", "nameFa"], ["نام انگلیسی", "nameEn"], ["کد کشور", "code"], ["مسیر پرچم", "flagPath"]],
+                countries: [["شناسه", "id"], ["پرچم", "flagUrl"], ["نام فارسی", "nameFa"], ["نام انگلیسی", "nameEn"], ["کد کشور", "code"]],
                 provinces: [["شناسه", "id"], ["نام فارسی", "nameFa"], ["نام انگلیسی", "nameEn"], ["کشور", "parentName"], ["شناسه کشور", "countryId"], ["عرض جغرافیایی", "latitude"], ["طول جغرافیایی", "longitude"]],
                 cities: [["شناسه", "id"], ["نام فارسی", "nameFa"], ["نام انگلیسی", "nameEn"], ["کشور / استان", "parentName"], ["شناسه کشور", "countryId"], ["شناسه استان", "provinceId"], ["CountryName خام منبع", "sourceCountryName"], ["عرض جغرافیایی", "latitude"], ["طول جغرافیایی", "longitude"], ["مرکز استان", "isProvinceCenter"]]
             }[kind];
@@ -60,12 +67,49 @@
             const items = data[kind].filter(x => (kind === "countries" || !provinceCountryFilter || String(x.countryId) === provinceCountryFilter) && (kind !== "cities" || !cityProvinceFilter || String(x.provinceId) === cityProvinceFilter) && columns.some(([, key]) => normalize(display(x, key)).includes(query)));
             for (const item of items) {
                 const tr = document.createElement("tr");
-                for (const [, key] of columns) { const td = document.createElement("td"); td.textContent = display(item, key); tr.append(td); }
+                for (const [, key] of columns) {
+                    const td = document.createElement("td");
+                    if (kind === "countries" && key === "flagUrl" && item.flagUrl) {
+                        const image = document.createElement("img");
+                        image.className = "geo-country-flag";
+                        image.src = item.flagUrl;
+                        image.alt = `پرچم ${item.nameFa}`;
+                        image.loading = "lazy";
+                        image.decoding = "async";
+                        image.addEventListener("error", () => { td.textContent = "پرچم در دسترس نیست"; }, { once: true });
+                        td.append(image);
+                    } else {
+                        td.textContent = display(item, key);
+                    }
+                    tr.append(td);
+                }
                 const td = document.createElement("td"), edit = document.createElement("button"), del = document.createElement("button");
                 edit.type = del.type = "button"; edit.className = "btn btn-sm btn-default me-1"; del.className = "btn btn-sm btn-danger"; edit.textContent = "ویرایش"; del.textContent = "حذف";
                 del.dataset.adminConfirm = `آیا ${item.nameFa} حذف شود؟`;
                 edit.setAttribute("aria-label", `ویرایش ${item.nameFa}`); del.setAttribute("aria-label", `حذف ${item.nameFa}`);
-                edit.addEventListener("click", () => { if (busy || !available) return; reset(); form.elements.id.value = item.id; form.elements.nameFa.value = item.nameFa; form.elements.nameEn.value = item.nameEn; form.elements.code.value = item.code || ""; form.elements.flagPath.value = item.flagPath || ""; form.elements.latitude.value = item.latitude ?? ""; form.elements.longitude.value = item.longitude ?? ""; form.elements.isProvinceCenter.checked = !!item.isProvinceCenter; if (item.countryId) { form.elements.countryId.value = item.countryId; provinces(item.provinceId); form.elements.countryId.disabled = true; form.elements.provinceId.disabled = true; countrySearch.disabled = true; provinceSearch.disabled = true; } form.elements.nameFa.focus(); });
+                edit.addEventListener("click", () => {
+                    if (busy || !available) return;
+                    reset();
+                    form.elements.id.value = item.id;
+                    form.elements.nameFa.value = item.nameFa;
+                    form.elements.nameEn.value = item.nameEn;
+                    form.elements.code.value = item.code || "";
+                    form.elements.flagPath.value = item.flagPath || "";
+                    form.elements.latitude.value = item.latitude ?? "";
+                    form.elements.longitude.value = item.longitude ?? "";
+                    form.elements.isProvinceCenter.checked = !!item.isProvinceCenter;
+                    if (item.countryId) {
+                        form.elements.countryId.value = item.countryId;
+                        provinces(item.provinceId);
+                        form.elements.countryId.disabled = true;
+                        form.elements.provinceId.disabled = true;
+                        countrySearch.disabled = true;
+                        provinceSearch.disabled = true;
+                    }
+                    modalTitle.textContent = `ویرایش ${item.nameFa}`;
+                    modalInstance?.show();
+                    window.setTimeout(() => form.elements.nameFa.focus(), 150);
+                });
                 del.addEventListener("click", async () => { if (busy || !available) return; busy = true; try { const result = await request(`${api}/${kind}/${item.id}`, "DELETE"); ui.notify(result.message, "success"); reset(); await refresh(); } catch (error) { await handleMutationError(error); } finally { busy = false; } });
                 if (kind === "countries") {
                     const upload = document.createElement("button"); upload.type = "button"; upload.className = "btn btn-sm btn-default me-1"; upload.textContent = "بارگذاری پرچم"; upload.setAttribute("aria-label", `بارگذاری پرچم ${item.nameFa}`);
@@ -103,7 +147,10 @@
         document.addEventListener("admin:media-uploaded", event => {
             if (event.detail?.kind !== "country") return;
             const country = data.countries.find(item => item.code === event.detail.countryCode);
-            if (country) { country.flagPath = event.detail.path; if (kind === "countries") render(); }
+            if (country) {
+                country.flagPath = event.detail.path;
+                void refresh();
+            }
         });
         tabs.forEach((tab, index) => {
             tab.addEventListener("click", () => { if (busy || !available) return; kind = tab.dataset.geoTab; provinceCountryFilter = ""; cityProvinceFilter = ""; tabs.forEach(t => { const active = t === tab; t.classList.toggle("active", active); t.setAttribute("aria-selected", String(active)); t.tabIndex = active ? 0 : -1; }); page.querySelector("[data-geo-panel]").setAttribute("aria-labelledby", tab.id); search.value = ""; reset(); render(); });
@@ -113,10 +160,28 @@
         provinceSearch.addEventListener("input", () => filterOptions(form.elements.provinceId, provinceSearch));
         form.elements.countryId.addEventListener("change", () => { provinceSearch.value = ""; provinces(); filterOptions(form.elements.countryId, countrySearch); if (kind !== "countries" && !busy && available) { provinceCountryFilter = form.elements.countryId.value; cityProvinceFilter = ""; render(); } });
         form.elements.provinceId.addEventListener("change", () => { if (kind === "cities" && !busy && available) { cityProvinceFilter = form.elements.provinceId.value; filterOptions(form.elements.provinceId, provinceSearch); render(); } });
-        page.querySelector("[data-geo-cancel]").addEventListener("click", () => { if (!busy) reset(); }); search.addEventListener("input", () => { if (!busy && available) render(); });
+        page.querySelector("[data-geo-create]").addEventListener("click", () => {
+            if (busy || !available) return;
+            reset();
+            const labels = { countries: "کشور", provinces: "استان", cities: "شهر" };
+            modalTitle.textContent = `افزودن ${labels[kind]}`;
+            modalInstance?.show();
+        });
+        search.addEventListener("input", () => { if (!busy && available) render(); });
         form.addEventListener("submit", async event => { event.preventDefault(); if (busy || !available || !form.reportValidity()) return; busy = true; const button = form.querySelector('[type="submit"]'); button.disabled = true;
             const id = form.elements.id.value, body = { nameFa: form.elements.nameFa.value, nameEn: form.elements.nameEn.value, code: form.elements.code.value, countryId: Number(form.elements.countryId.value) || null, provinceId: Number(form.elements.provinceId.value) || null, flagPath: form.elements.flagPath.value, latitude: form.elements.latitude.value === "" ? null : Number(form.elements.latitude.value), longitude: form.elements.longitude.value === "" ? null : Number(form.elements.longitude.value), isProvinceCenter: form.elements.isProvinceCenter.checked, updateDetails: true };
-            try { const result = await request(`${api}/${kind}${id ? `/${id}` : ""}`, id ? "PUT" : "POST", body); ui.notify(result.message, "success"); reset(); await refresh(); } catch (error) { await handleMutationError(error); } finally { busy = false; button.disabled = !available; }
+            try {
+                const result = await request(`${api}/${kind}${id ? `/${id}` : ""}`, id ? "PUT" : "POST", body);
+                ui.notify(result.message, "success");
+                modalInstance?.hide();
+                reset();
+                await refresh();
+            } catch (error) {
+                await handleMutationError(error);
+            } finally {
+                busy = false;
+                button.disabled = !available;
+            }
         });
         retry.addEventListener("click", async () => { if (busy) return; busy = true; await refresh(); busy = false; });
         reset(); refresh().finally(() => { busy = false; });

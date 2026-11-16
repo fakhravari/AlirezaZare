@@ -1,0 +1,15 @@
+.home-testimonial-preview {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.home-testimonial-order {
+    width: 5.5rem;
+}
+
+.home-testimonial-text {
+    max-width: 32rem;
+    white-space: normal;
+}

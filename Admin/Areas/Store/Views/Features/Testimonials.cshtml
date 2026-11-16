@@ -1,0 +1,24 @@
+@model Shop.Admin.Models.FeaturePageViewModel
+<div class="admin-page" data-admin-home-testimonials data-api="/api/admin/store/home-testimonials?feature=testimonials">
+    @await Html.PartialAsync("_AdminPageIntro", (Model.Title, Model.Description))
+    @Html.AntiForgeryToken()
+    <section class="panel panel-inverse">
+        <div class="panel-heading"><h2 class="panel-title">دیدگاه‌های تأییدشده</h2></div>
+        <div class="panel-body">
+            <form class="admin-filter-bar d-flex flex-wrap align-items-center gap-2 mb-3" data-home-testimonial-filter>
+                <label class="visually-hidden" for="home-testimonial-search">جست‌وجو</label>
+                <input class="form-control" id="home-testimonial-search" name="search" type="search" maxlength="100" placeholder="نام مشتری، کالا یا متن دیدگاه" />
+                <button class="btn btn-primary" type="submit">جست‌وجو</button>
+                <button class="btn btn-default" type="reset">پاک‌کردن</button>
+            </form>
+            <p class="admin-data-status small text-muted" data-home-testimonial-status role="status" aria-live="polite">در حال بارگذاری…</p>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover align-middle mb-0">
+                    <thead><tr><th>نمایش</th><th>ترتیب</th><th>تصویر</th><th>دیدگاه</th><th>محصول</th><th>تاریخ</th><th>عملیات</th></tr></thead>
+                    <tbody data-home-testimonial-rows></tbody>
+                </table>
+            </div>
+            <div class="admin-pagination d-flex align-items-center justify-content-center gap-3 mt-3" data-home-testimonial-pagination></div>
+        </div>
+    </section>
+</div>

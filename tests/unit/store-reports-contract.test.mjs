@@ -19,7 +19,7 @@ test("store report routes and role permissions share one inherited tree", async 
     assert.match(migration, /store\.reports\.export[\s\S]*?StoreReportsAdminApi[\s\S]*?Export/);
     assert.match(migration, /system\.full-access-store[\s\S]*?store\.manager/);
     assert.match(controller, /\[Route\("api\/admin\/store\/reports"\)\]/);
-    assert.match(controller, /\[HttpGet\("export"\)\][\s\S]*?IActionResult Export/);
+    assert.match(controller, /\[HttpGet\("export"\)\][\s\S]*?Task<IActionResult> Export/);
     assert.match(controller, /const int exportPageSize = AdminListQuery\.ExportBatchSize/);
     assert.match(controller, /while \(\(long\)\(page - 1\) \* exportPageSize < total\)/);
 });

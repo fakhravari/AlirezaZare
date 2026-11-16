@@ -22,10 +22,8 @@
             }
             page.querySelector("[data-account-message-count]").textContent = `${number.format(data.total || 0)} پیام`;
             status(page, data.items?.length ? "" : "پیامی ثبت نشده است.");
-            page.querySelector("[data-account-message-page]").textContent = `صفحهٔ ${number.format(pageNumber)}`;
-            page.querySelector('[data-account-message-step="-1"]').disabled = pageNumber <= 1;
-            page.querySelector('[data-account-message-step="1"]').disabled = pageNumber * data.pageSize >= data.total;
-            page.querySelector("[data-account-message-pagination]").hidden = data.total <= data.pageSize;
+            ui.renderNumberedPagination(page.querySelector("[data-account-message-pagination]"), pageNumber,
+                Math.ceil((data.total || 0) / (data.pageSize || 50)), target => { pageNumber = target; void load(page); }, "صفحه‌بندی پیام‌های حساب");
         } catch (error) { if (id === serial) status(page, error.message || "دریافت پیام‌ها ناموفق بود.", true); }
     }
     async function searchCustomers(page, query) {
@@ -38,9 +36,14 @@
     }
     function initialize(root) {
         const page = root.querySelector?.("[data-admin-account-messages]"); if (!page || initialized.has(page)) return; initialized.add(page);
-        const filter = page.querySelector("[data-account-message-filter]"); filter.addEventListener("submit", event => { event.preventDefault(); pageNumber = 1; void load(page); });
+        const filter = page.querySelector("[data-account-message-filter]");
+        filter.addEventListener("submit", event => { event.preventDefault(); pageNumber = 1; void load(page); });
+        page.querySelector("[data-account-message-reset]").addEventListener("click", () => {
+            filter.reset();
+            pageNumber = 1;
+            void load(page);
+        });
         page.querySelector("[data-account-message-refresh]").addEventListener("click", () => void load(page));
-        page.querySelectorAll("[data-account-message-step]").forEach(button => button.addEventListener("click", () => { pageNumber = Math.max(1, pageNumber + Number(button.dataset.accountMessageStep)); void load(page); }));
         const form = page.querySelector("[data-account-message-form]"), customerInput = page.querySelector("#account-message-customer");
         let timer; customerInput.addEventListener("input", () => { form.elements.profileId.value = ""; clearTimeout(timer); timer = setTimeout(() => void searchCustomers(page, customerInput.value), 250); });
         customerInput.addEventListener("change", () => { const match = customers.find(item => `${item.firstName} ${item.lastName} · ${item.email}` === customerInput.value); form.elements.profileId.value = match?.id || ""; });

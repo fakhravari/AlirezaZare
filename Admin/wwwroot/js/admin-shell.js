@@ -78,6 +78,7 @@
             window.AdminDefinitions?.initialize(content);
             window.AdminMovements?.initialize(content);
             window.AdminFeedback?.initialize(content);
+            window.AdminHomeTestimonials?.initialize(content);
             window.AdminContactMessages?.initialize(content);
             window.AdminNewsletterSubscribers?.initialize(content);
             window.AdminStoreReports?.initialize(content);
@@ -122,6 +123,7 @@
             window.AdminDefinitions?.initialize(content);
             window.AdminMovements?.initialize(content);
             window.AdminFeedback?.initialize(content);
+            window.AdminHomeTestimonials?.initialize(content);
             window.AdminContactMessages?.initialize(content);
             window.AdminNewsletterSubscribers?.initialize(content);
             window.AdminStoreReports?.initialize(content);
@@ -137,6 +139,7 @@
         window.AdminDefinitions?.initialize(content);
         window.AdminMovements?.initialize(content);
         window.AdminFeedback?.initialize(content);
+        window.AdminHomeTestimonials?.initialize(content);
         window.AdminContactMessages?.initialize(content);
             window.AdminNewsletterSubscribers?.initialize(content);
             window.AdminStoreReports?.initialize(content);

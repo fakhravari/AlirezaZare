@@ -15,11 +15,11 @@
         const prefix = kind === "offer" ? "offer" : "price";
         const pager = page.querySelector(`[data-${prefix}-pagination]`);
         if (!pager) return;
-        const pages = Math.ceil(total / pageSize);
-        pager.hidden = pages <= 1;
-        pager.querySelector(`[data-${prefix}-page-label]`).textContent = `صفحهٔ ${number.format(current)} از ${number.format(Math.max(1, pages))}`;
-        pager.querySelector(`[data-${prefix}-page="-1"]`).disabled = current <= 1;
-        pager.querySelector(`[data-${prefix}-page="1"]`).disabled = current >= pages;
+        const pages = Math.max(1, Math.ceil(total / pageSize));
+        ui.renderNumberedPagination(pager, current, pages, target => {
+            if (kind === "offer") void loadOffers(page, target);
+            else void load(page, target);
+        }, kind === "offer" ? "صفحه‌بندی پیشنهادها" : "صفحه‌بندی قیمت‌ها");
     }
     function render(page) {
         const rows = page._variantPriceRows;
@@ -237,8 +237,8 @@
         const form = page.querySelector("[data-plan-settings]");
         const plan = page._planSettings?.find(item => String(item.id) === form.elements.id.value);
         const utcValue = value => value ? new Date(value).toISOString().slice(0, 19) : "";
-        form.elements.startsAtUtc.value = utcValue(plan?.startsAtUtc);
-        form.elements.endsAtUtc.value = utcValue(plan?.endsAtUtc);
+        window.AdminPersianDatePicker?.setValue(form.elements.startsAtUtc, utcValue(plan?.startsAtUtc));
+        window.AdminPersianDatePicker?.setValue(form.elements.endsAtUtc, utcValue(plan?.endsAtUtc));
         form.elements.label.value = plan?.label || "";
         form.elements.showCountdown.checked = !!plan?.showCountdown;
         form.elements.code.value = plan?.code || "";
@@ -264,10 +264,6 @@
                 clearTimeout(page._offerSearchTimer);
                 page._offerSearchTimer = setTimeout(() => void loadOffers(page, 1), 300);
             });
-            page.querySelectorAll("[data-offer-page]").forEach(button => button.addEventListener("click", () => {
-                if (button.disabled) return;
-                void loadOffers(page, Math.max(1, page._offerPage + Number(button.dataset.offerPage)));
-            }));
             page.querySelector("[data-offer-refresh]").addEventListener("click", () => void loadOffers(page));
             void loadOffers(page);
             const specificationForm = document.querySelector("[data-offer-specifications-form]");
@@ -321,19 +317,19 @@
             void loadPlanSettings(page);
         }
         const priceFilter = page.querySelector("[data-price-filter]");
-        priceFilter.addEventListener("submit", event => { event.preventDefault(); clearTimeout(page._priceSearchTimer); void load(page, 1); });
-        priceFilter.addEventListener("input", () => {
-            clearTimeout(page._priceSearchTimer);
-            page._priceSearchTimer = setTimeout(() => void load(page, 1), 300);
-        });
-        page.querySelectorAll("[data-price-page]").forEach(button => button.addEventListener("click", () => {
-            if (button.disabled) return;
-            void load(page, Math.max(1, page._pricePage + Number(button.dataset.pricePage)));
-        }));
-        page.querySelector("[data-price-refresh]").addEventListener("click", () => void load(page));
-        void load(page);
-        page.querySelector("[data-price-history-refresh]")?.addEventListener("click", () => void loadHistory(page));
-        void loadHistory(page);
+        if (priceFilter) {
+            priceFilter.addEventListener("submit", event => { event.preventDefault(); clearTimeout(page._priceSearchTimer); void load(page, 1); });
+            priceFilter.addEventListener("input", () => {
+                clearTimeout(page._priceSearchTimer);
+                page._priceSearchTimer = setTimeout(() => void load(page, 1), 300);
+            });
+            page.querySelector("[data-price-refresh]")?.addEventListener("click", () => void load(page));
+            void load(page);
+        }
+        if (page.querySelector("[data-price-history-status]")) {
+            page.querySelector("[data-price-history-refresh]")?.addEventListener("click", () => void loadHistory(page));
+            void loadHistory(page);
+        }
     }
     window.AdminVariantPrices = Object.freeze({ initialize });
 })();

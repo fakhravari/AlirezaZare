@@ -51,8 +51,15 @@
                         </div>
                         <p>@review.Text</p>
                         <div class="reviewer">
-                            <span class="reviewer-avatar avatar-navy" aria-hidden="true">
-                                <i class="bi bi-person-fill"></i>
+                            <span class="reviewer-avatar avatar-navy">
+                                @if (!string.IsNullOrWhiteSpace(review.ImageUrl))
+                                {
+                                    <img src="@review.ImageUrl" alt="تصویر @review.DisplayName" loading="lazy" decoding="async" />
+                                }
+                                else
+                                {
+                                    <i class="bi bi-person-fill" aria-hidden="true"></i>
+                                }
                             </span>
                             <div>
                                 <strong>@review.DisplayName</strong>

@@ -9,4 +9,5 @@ public sealed class StoreBrand
     public string NameFa { get; set; } = string.Empty;
     public string? LogoPath { get; set; }
     public bool IsActive { get; set; } = true;
+    public bool ShowInStore { get; set; } = true;
 }

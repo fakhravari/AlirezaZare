@@ -27,16 +27,13 @@
             page.querySelector("[data-contact-count]").textContent = `${number.format(result.total || 0)} پیام`;
             page.querySelector("[data-contact-empty]").classList.toggle("d-none", Boolean(result.items?.length));
             message(page, result.items?.length ? "" : "پیامی با این فیلتر پیدا نشد.");
-            page.querySelector("[data-contact-page]").textContent = `صفحهٔ ${number.format(pageNumber)}`;
-            page.querySelector('[data-contact-step="-1"]').disabled = pageNumber <= 1;
-            page.querySelector('[data-contact-step="1"]').disabled = pageNumber * result.pageSize >= result.total;
-            page.querySelector("[data-contact-pagination]").hidden = result.total <= result.pageSize;
+            ui.renderNumberedPagination(page.querySelector("[data-contact-pagination]"), pageNumber,
+                Math.ceil((result.total || 0) / (result.pageSize || 50)), target => { pageNumber = target; void load(page); }, "صفحه‌بندی پیام‌های تماس");
         } catch (error) { if (requestId === serial) message(page, error.message || "دریافت پیام‌ها ناموفق بود.", true); }
     }
     function initialize(root) {
         const page = root.querySelector?.("[data-admin-contact-messages]"); if (!page || initialized.has(page)) return; initialized.add(page);
         page.querySelector("[data-contact-filter]").addEventListener("submit", event => { event.preventDefault(); pageNumber = 1; void load(page); });
-        page.querySelectorAll("[data-contact-step]").forEach(button => button.addEventListener("click", () => { pageNumber = Math.max(1, pageNumber + Number(button.dataset.contactStep)); void load(page); }));
         const replyButton = page.querySelector("[data-contact-send-reply]"); if (replyButton) { replyButton.dataset.adminConfirm = "پاسخ برای فرستندهٔ پیام ثبت و ارسال شود؟"; replyButton.addEventListener("click", async()=>{const b=replyButton;b.disabled=true;try{const r=await ui.getJson(`${page.dataset.api}/${page.dataset.contactId}/reply`,{method:"PUT",headers:{"Content-Type":"application/json",RequestVerificationToken:token()},body:JSON.stringify({reply:page.querySelector("[data-contact-reply]").value})});page.querySelector("[data-contact-reply-status]").textContent=r.message;ui.notify(r.message,r.emailSent?"success":"warning");await load(page)}catch(e){ui.notify(e.message||"ثبت پاسخ ناموفق بود.","danger")}finally{b.disabled=false}}); } page.querySelector("[data-contact-refresh]").addEventListener("click", () => void load(page)); void load(page);
     }
     window.AdminContactMessages = Object.freeze({ initialize });

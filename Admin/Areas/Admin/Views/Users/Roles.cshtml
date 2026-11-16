@@ -5,40 +5,13 @@
 <div class="admin-page" data-admin-users data-admin-users-page="roles" data-api="/api/admin/users">
     @await Html.PartialAsync("_AdminPageIntro", ("نقش‌های کاربران پنل", "نقش‌ها را تعریف و نام و وضعیت آن‌ها را مدیریت کنید؛ تنظیم مجوزها در صفحهٔ جداگانهٔ درخت مجوز نقش‌ها انجام می‌شود."))
     @Html.AntiForgeryToken()
-    <section class="panel panel-inverse">
-        <div class="panel-heading"><h2 class="panel-title">ایجاد نقش</h2></div>
-        <div class="panel-body">
-            <form class="row g-3 align-items-end" data-role-create-form data-admin-confirm="نقش جدید ساخته شود؟">
-                <div class="col-md-4">
-                    <label class="form-label" for="new-role-key">کلید نقش</label>
-                    <input class="form-control" id="new-role-key" name="roleKey" pattern="[A-Za-z0-9._-]{2,100}" required />
-                </div>
-                <div class="col-md-5">
-                    <label class="form-label" for="new-role-name">نام نقش</label>
-                    <input class="form-control" id="new-role-name" name="name" maxlength="160" required />
-                </div>
-                <div class="col-md-3"><button class="btn btn-primary w-100" type="submit"><i class="fa fa-plus" aria-hidden="true"></i>ایجاد نقش</button></div>
-            </form>
-        </div>
-    </section>
-    <section class="panel panel-inverse mt-4" data-role-editor hidden>
-        <div class="panel-heading"><h2 class="panel-title">ویرایش نقش</h2></div>
-        <div class="panel-body">
-            <form class="row g-3 align-items-end" data-role-edit-form data-admin-confirm="تغییرات نقش ذخیره شوند؟">
-                <input type="hidden" name="id" />
-                <div class="col-md-7">
-                    <label class="form-label" for="edit-role-name">نام نقش</label>
-                    <input class="form-control" id="edit-role-name" name="name" maxlength="160" required />
-                </div>
-                <div class="col-md-2">
-                    <label class="form-check mb-2"><input class="form-check-input" type="checkbox" name="isActive" /><span class="form-check-label">فعال</span></label>
-                </div>
-                <div class="col-md-3"><button class="btn btn-primary w-100" type="submit"><i class="fa fa-floppy-disk" aria-hidden="true"></i>ذخیرهٔ نقش</button></div>
-            </form>
-        </div>
-    </section>
     <section class="panel panel-inverse mt-4">
-        <div class="panel-heading"><h2 class="panel-title">فهرست نقش‌ها</h2></div>
+        <div class="panel-heading d-flex align-items-center justify-content-between">
+            <h2 class="panel-title">فهرست نقش‌ها</h2>
+            <button class="btn btn-primary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#admin-role-create-modal">
+                <i class="fa fa-plus" aria-hidden="true"></i> ایجاد نقش
+            </button>
+        </div>
         <div class="panel-body">
             <div class="admin-data-status small text-muted" data-users-status role="status" aria-live="polite">در حال بارگذاری نقش‌ها…</div>
             <div class="table-responsive">
@@ -49,4 +22,56 @@
             </div>
         </div>
     </section>
+</div>
+
+<div class="modal fade" id="admin-role-create-modal" tabindex="-1" aria-labelledby="admin-role-create-title" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form class="modal-content" data-role-create-form data-admin-confirm="نقش جدید ساخته شود؟">
+            <div class="modal-header">
+                <h2 class="modal-title fs-5" id="admin-role-create-title">ایجاد نقش</h2>
+                <button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="بستن"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label" for="new-role-key">کلید نقش</label>
+                    <input class="form-control" id="new-role-key" name="roleKey" pattern="[A-Za-z0-9._-]{2,100}" required />
+                    <div class="form-text">کلید یکتا و شامل حروف لاتین، عدد، نقطه، خط تیره یا زیرخط باشد.</div>
+                </div>
+                <div>
+                    <label class="form-label" for="new-role-name">نام نقش</label>
+                    <input class="form-control" id="new-role-name" name="name" maxlength="160" required />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" type="button" data-bs-dismiss="modal">انصراف</button>
+                <button class="btn btn-primary" type="submit"><i class="fa fa-plus" aria-hidden="true"></i> ایجاد نقش</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal fade" id="admin-role-edit-modal" tabindex="-1" aria-labelledby="admin-role-edit-title" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form class="modal-content" data-role-edit-form data-admin-confirm="تغییرات نقش ذخیره شوند؟">
+            <input type="hidden" name="id" />
+            <div class="modal-header">
+                <h2 class="modal-title fs-5" id="admin-role-edit-title">ویرایش نقش</h2>
+                <button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="بستن"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label" for="edit-role-name">نام نقش</label>
+                    <input class="form-control" id="edit-role-name" name="name" maxlength="160" required />
+                </div>
+                <label class="form-check">
+                    <input class="form-check-input" type="checkbox" name="isActive" />
+                    <span class="form-check-label">نقش فعال باشد</span>
+                </label>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" type="button" data-bs-dismiss="modal">انصراف</button>
+                <button class="btn btn-primary" type="submit"><i class="fa fa-floppy-disk" aria-hidden="true"></i> ذخیرهٔ نقش</button>
+            </div>
+        </form>
+    </div>
 </div>

@@ -2,19 +2,27 @@ using System.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Shop.Data.Application.Store;
+using Shop.Data.Application.Store.Contracts;
 using Shop.Data.Domain.Store.Entities;
 using Shop.Data.Infrastructure.Persistence;
 
 namespace Shop.Admin.Areas.Store.Controllers.Api;
 
 [Area("Store"), ApiController, Authorize(Roles = "system.full-access"), Route("api/admin/store/geography")]
-public sealed class StoreGeographyAdminApiController(ShopDbContext db) : ControllerBase
+public sealed class StoreGeographyAdminApiController(ShopDbContext db, IMediaCdnBaseUrlProvider mediaCdn) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> List(CancellationToken ct)
     {
         var countries = await db.GeoCountries.AsNoTracking().OrderBy(x => x.NameFa)
-            .Select(x => new Place(x.Id, x.NameFa, x.NameEn, x.CountryCode, null, null, null, x.FlagPath, null, null, null, null)).ToListAsync(ct);
+            .Select(x => new { x.Id, x.NameFa, x.NameEn, Code = x.CountryCode, x.FlagPath }).ToListAsync(ct);
+        string cdnBaseUrl = await mediaCdn.GetBaseUrlAsync(ct);
+        var countryItems = countries.Select(x => new
+        {
+            x.Id, x.NameFa, x.NameEn, x.Code, x.FlagPath,
+            FlagUrl = string.IsNullOrWhiteSpace(x.FlagPath) ? null : ContentCdn.ToUrl(x.FlagPath, cdnBaseUrl)
+        }).ToArray();
         var provinces = await (from province in db.GeoProvinces.AsNoTracking()
                                join country in db.GeoCountries.AsNoTracking() on province.IdCountry equals country.Id
                                orderby province.NameFa
@@ -27,7 +35,7 @@ public sealed class StoreGeographyAdminApiController(ShopDbContext db) : Control
                             select new Place(city.Id, city.NameFa, city.NameEn, null, city.IdCountry, city.IdProvince,
                                 country.NameFa + " / " + province.NameFa, null, city.SourceCountryName,
                                 city.Latitude, city.Longitude, city.IsProvinceCenter)).ToListAsync(ct);
-        return Ok(new { countries, provinces, cities });
+        return Ok(new { countries = countryItems, provinces, cities });
     }
 
     [HttpPost("{kind}"), ValidateAntiForgeryToken]

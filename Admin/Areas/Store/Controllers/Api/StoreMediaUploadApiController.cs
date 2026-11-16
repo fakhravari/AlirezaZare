@@ -109,14 +109,13 @@ public sealed class StoreMediaUploadApiController(ShopDbContext db, FtpMediaUplo
     [HttpPost]
     [ValidateAntiForgeryToken]
     [RequestSizeLimit(52_000_000)]
-    public async Task<IActionResult> Upload([FromForm] string kind, IFormFile file, [FromForm] long? productId, [FromForm] string? title, [FromForm] string? brandKey, [FromForm] string? countryCode, [FromForm] string? articleKey, [FromForm] string? paymentInstitutionCode, [FromForm] string? slideKey, CancellationToken cancellationToken)
+    public async Task<IActionResult> Upload([FromForm] string kind, IFormFile file, [FromForm] long? productId, [FromForm] string? title, [FromForm] string? brandKey, [FromForm] string? countryCode, [FromForm] string? articleKey, [FromForm] string? paymentInstitutionCode, CancellationToken cancellationToken)
     {
-        bool mobileSlider = kind == "slider" && Request.Form["variant"] == "mobile";
         bool image = ImageFolders.TryGetValue(kind ?? "", out var imageFolder);
-        string[] sliderKeys = ["electrical-tools-banner", "electrical-components-banner", "electrical-lighting-banner", "electrical-tools-pro-banner", "electrical-components-pro-banner", "electrical-measurement-banner"];
-        if (kind == "slider" && (slideKey is null || !sliderKeys.Contains(slideKey, StringComparer.Ordinal)))
-            return BadRequest(new { title = "اسلاید معتبری انتخاب نشده است." });
-        bool vectorLogo = kind == "payment" && file?.ContentType?.Equals("image/svg+xml", StringComparison.OrdinalIgnoreCase) == true;
+        string? sliderUrl = Request.Form["url"].ToString().Trim();
+        if (kind == "slider" && !ValidSlider(title, sliderUrl))
+            return BadRequest(new { title = "عنوان و نشانی معتبر برای اسلاید وارد کنید." });
+        bool vectorLogo = (kind == "payment" || kind == "brand") && file?.ContentType?.Equals("image/svg+xml", StringComparison.OrdinalIgnoreCase) == true;
         bool document = kind == "product-document";
         bool video = kind == "product-video";
         if (!image && !document && !video) return BadRequest(new { title = "نوع رسانه نامعتبر است." });
@@ -182,14 +181,12 @@ public sealed class StoreMediaUploadApiController(ShopDbContext db, FtpMediaUplo
 
         stream.Position = 0;
         string name = Guid.NewGuid().ToString("N");
-        string folder = image ? mobileSlider ? "sliders/mobile" : imageFolder.Folder : document ? "products/files" : "products/videos";
-        byte[]? vectorBytes = vectorLogo ? await SanitizePaymentSvgAsync(stream, cancellationToken) : null;
+        string folder = image ? imageFolder.Folder : document ? "products/files" : "products/videos";
+        byte[]? vectorBytes = vectorLogo ? await SanitizeSvgAsync(stream, cancellationToken) : null;
         if (vectorLogo && vectorBytes is null) return BadRequest(new { title = "فایل SVG لوگو معتبر یا ایمن نیست." });
-        string path = kind == "slider"
-            ? $"content/sliders/{(mobileSlider ? "mobile/" : "")}{slideKey}.webp"
-            : !string.IsNullOrEmpty(paymentInstitutionCode)
+        string path = !string.IsNullOrEmpty(paymentInstitutionCode)
             ? $"content/payments/{paymentInstitutionCode}-{name}.{(vectorLogo ? "svg" : "webp")}"
-            : $"content/{folder}/{name}.{(image ? "webp" : document ? "pdf" : "mp4")}";
+            : $"content/{folder}/{name}.{(vectorLogo ? "svg" : image ? "webp" : document ? "pdf" : "mp4")}";
         string? thumbnail = image && !vectorLogo
             ? kind == "slider" ? path[..^5] + "-thumbnail.webp" : $"content/{folder}/{name}-thumbnail.webp"
             : null;
@@ -226,19 +223,22 @@ public sealed class StoreMediaUploadApiController(ShopDbContext db, FtpMediaUplo
             FtpStatus result = vectorLogo
                 ? await ftp.UploadBytes(vectorBytes!, "/" + path, FtpRemoteExists.Skip, true, null, cancellationToken)
                 : image
-                ? await ftp.UploadBytes(mainBytes!, "/" + path, kind == "slider" ? FtpRemoteExists.Overwrite : FtpRemoteExists.Skip, true, null, cancellationToken)
+                ? await ftp.UploadBytes(mainBytes!, "/" + path, FtpRemoteExists.Skip, true, null, cancellationToken)
                 : await ftp.UploadStream(stream, "/" + path, FtpRemoteExists.Skip, true, null, cancellationToken);
             if (result != FtpStatus.Success) throw new IOException("Media upload failed.");
             uploaded.Add("/" + path);
             if (thumbnail is not null)
             {
-                result = await ftp.UploadBytes(thumbnailBytes!, "/" + thumbnail, kind == "slider" ? FtpRemoteExists.Overwrite : FtpRemoteExists.Skip, true, null, cancellationToken);
+                result = await ftp.UploadBytes(thumbnailBytes!, "/" + thumbnail, FtpRemoteExists.Skip, true, null, cancellationToken);
                 if (result != FtpStatus.Success) throw new IOException("Thumbnail upload failed.");
                 uploaded.Add("/" + thumbnail);
             }
-            if (document || video || !string.IsNullOrEmpty(brandKey) || !string.IsNullOrEmpty(paymentInstitutionCode) || kind == "country" || kind == "article")
+            if (kind == "slider" || document || video || !string.IsNullOrEmpty(brandKey) || !string.IsNullOrEmpty(paymentInstitutionCode) || kind == "country" || kind == "article")
             {
-                if (document)
+                if (kind == "slider")
+                    db.StoreSliders.Add(new StoreSlider { Title = title!.Trim(), Url = sliderUrl!, ImagePath = path,
+                        ShowOnMobile = Request.Form["showOnMobile"] == "true", ShowOnDesktop = Request.Form["showOnDesktop"] == "true" });
+                else if (document)
                     db.StoreProductDocuments.Add(new StoreProductDocument
                     {
                         IdProduct = productId!.Value,
@@ -330,6 +330,44 @@ public sealed class StoreMediaUploadApiController(ShopDbContext db, FtpMediaUplo
         finally { ftp?.Dispose(); }
     }
 
+    private static bool ValidSlider(string? title, string? url) =>
+        !string.IsNullOrWhiteSpace(title) && title.Trim().Length <= 200 &&
+        !string.IsNullOrWhiteSpace(url) && url.Length <= 1000 && !url.Any(char.IsControl) &&
+        ((url.StartsWith("/", StringComparison.Ordinal) && !url.StartsWith("//", StringComparison.Ordinal) && !url.Contains('\\')) ||
+         (Uri.TryCreate(url, UriKind.Absolute, out var parsed) && (parsed.Scheme == Uri.UriSchemeHttp || parsed.Scheme == Uri.UriSchemeHttps)));
+
+    [HttpGet("sliders")]
+    public async Task<IActionResult> Sliders(CancellationToken ct)
+    {
+        var slides = await db.StoreSliders.AsNoTracking().OrderBy(x => x.Id).ToListAsync(ct);
+        string cdn = await mediaCdn.GetBaseUrlAsync(ct);
+        return Ok(slides.Select(x => new { x.Id, x.Title, x.Url, x.ImagePath, x.ShowOnMobile, x.ShowOnDesktop, imageUrl = ContentCdn.ToUrl(x.ImagePath, cdn) }));
+    }
+
+    [HttpPost("sliders/{id:long}")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> UpdateSlider(long id, [FromForm] string? title, [FromForm] string? url, [FromForm] bool showOnMobile, [FromForm] bool showOnDesktop, CancellationToken ct)
+    {
+        url = url?.Trim();
+        if (!ValidSlider(title, url)) return BadRequest(new { title = "عنوان و نشانی معتبر برای اسلاید وارد کنید." });
+        var slide = await db.StoreSliders.FindAsync([id], ct);
+        if (slide is null) return NotFound();
+        slide.Title = title!.Trim(); slide.Url = url!; slide.ShowOnMobile = showOnMobile; slide.ShowOnDesktop = showOnDesktop;
+        await db.SaveChangesAsync(ct);
+        return Ok(new { message = "اسلاید ذخیره شد." });
+    }
+
+    [HttpPost("sliders/{id:long}/delete")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteSlider(long id, CancellationToken ct)
+    {
+        var slide = await db.StoreSliders.FindAsync([id], ct);
+        if (slide is null) return NotFound();
+        db.StoreSliders.Remove(slide);
+        await db.SaveChangesAsync(ct);
+        return Ok(new { message = "اسلاید از فروشگاه حذف شد." });
+    }
+
     private async Task CleanupUploadedAsync(AsyncFtpClient ftp, IEnumerable<string> paths)
     {
         foreach (string item in paths)
@@ -337,7 +375,7 @@ public sealed class StoreMediaUploadApiController(ShopDbContext db, FtpMediaUplo
             catch (Exception cleanupException) { logger.LogWarning(cleanupException, "Failed to clean up uploaded media"); }
     }
 
-    private static async Task<byte[]?> SanitizePaymentSvgAsync(Stream stream, CancellationToken cancellationToken)
+    private static async Task<byte[]?> SanitizeSvgAsync(Stream stream, CancellationToken cancellationToken)
     {
         try
         {
