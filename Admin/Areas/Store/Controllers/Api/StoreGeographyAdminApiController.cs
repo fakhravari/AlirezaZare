@@ -64,6 +64,7 @@ public sealed class StoreGeographyAdminApiController(ShopDbContext db, IMediaCdn
             return BadRequest(new { title = "مختصات جغرافیایی معتبر نیست." });
 
         await using var transaction = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
+        long? savedId = id;
         try
         {
             if (id is null)
@@ -71,14 +72,16 @@ public sealed class StoreGeographyAdminApiController(ShopDbContext db, IMediaCdn
                 switch (kind)
                 {
                     case "countries":
-                        db.GeoCountries.Add(new GeoCountry
+                        var newCountry = new GeoCountry
                         {
                             Id = await db.GeoCountries.Select(x => (long?)x.Id).MaxAsync(ct) + 1 ?? 1,
                             CountryCode = code,
                             NameFa = fa,
                             NameEn = en,
                             FlagPath = flag
-                        });
+                        };
+                        db.GeoCountries.Add(newCountry);
+                        savedId = newCountry.Id;
                         break;
                     case "provinces":
                         if (input.CountryId is not long countryId || !await db.GeoCountries.AnyAsync(x => x.Id == countryId, ct))
@@ -155,7 +158,7 @@ public sealed class StoreGeographyAdminApiController(ShopDbContext db, IMediaCdn
 
             await transaction.CommitAsync(ct);
 
-            return Ok(new { message = "اطلاعات ذخیره شد." });
+            return Ok(new { message = "اطلاعات ذخیره شد.", id = savedId });
         }
         catch (DbUpdateException ex) when (ex.InnerException is Microsoft.Data.SqlClient.SqlException { Number: 2601 or 2627 or 547 or 515 })
         {

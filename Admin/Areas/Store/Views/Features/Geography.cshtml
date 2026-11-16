@@ -2,10 +2,10 @@
 <div class="admin-page" data-geography>
     @await Html.PartialAsync("_AdminPageIntro", (Model.Title, Model.Description))
     <section class="panel panel-inverse"><div class="panel-heading"><h2 class="panel-title">تعاریف جغرافیایی</h2></div><div class="panel-body">
-        <div class="nav nav-tabs" role="tablist" aria-label="تعاریف جغرافیایی">
-            <button type="button" class="nav-link active" role="tab" id="geo-tab-countries" aria-controls="geo-panel" aria-selected="true" tabindex="0" data-geo-tab="countries">کشورها</button>
-            <button type="button" class="nav-link" role="tab" id="geo-tab-provinces" aria-controls="geo-panel" aria-selected="false" tabindex="-1" data-geo-tab="provinces">استان‌ها</button>
-            <button type="button" class="nav-link" role="tab" id="geo-tab-cities" aria-controls="geo-panel" aria-selected="false" tabindex="-1" data-geo-tab="cities">شهرها</button>
+        <div class="geo-tabs" role="tablist" aria-label="تعاریف جغرافیایی">
+            <button type="button" class="geo-tab active" role="tab" id="geo-tab-countries" aria-controls="geo-panel" aria-selected="true" tabindex="0" data-geo-tab="countries"><i class="fa fa-globe" aria-hidden="true"></i><span>کشورها</span></button>
+            <button type="button" class="geo-tab" role="tab" id="geo-tab-provinces" aria-controls="geo-panel" aria-selected="false" tabindex="-1" data-geo-tab="provinces"><i class="fa fa-map" aria-hidden="true"></i><span>استان‌ها</span></button>
+            <button type="button" class="geo-tab" role="tab" id="geo-tab-cities" aria-controls="geo-panel" aria-selected="false" tabindex="-1" data-geo-tab="cities"><i class="fa fa-city" aria-hidden="true"></i><span>شهرها</span></button>
         </div>
         <div class="pt-3" role="tabpanel" id="geo-panel" aria-labelledby="geo-tab-countries" data-geo-panel>
             <div class="d-flex flex-wrap align-items-end gap-3 mb-3">
@@ -43,7 +43,14 @@
                         <div class="col-md-6"><label class="form-label" for="geo-name">نام فارسی</label><input class="form-control" id="geo-name" name="nameFa" required maxlength="200" /></div>
                         <div class="col-md-6"><label class="form-label" for="geo-name-en">نام انگلیسی</label><input class="form-control" id="geo-name-en" name="nameEn" required maxlength="200" /></div>
                         <div class="col-md-6" data-geo-code><label class="form-label" for="geo-code">کد کشور</label><input class="form-control" id="geo-code" name="code" maxlength="8" /></div>
-                        <div class="col-md-6" data-geo-flag><label class="form-label" for="geo-flag">مسیر تصویر پرچم</label><input class="form-control" id="geo-flag" name="flagPath" maxlength="500" placeholder="content/countries/flags/..." /><small class="text-muted">مسیر فایل بارگذاری‌شده یا نشانی کامل تصویر</small></div>
+                        <div class="col-md-6" data-geo-flag>
+                            <label class="form-label" for="geo-flag">تصویر پرچم</label>
+                            <input class="form-control" id="geo-flag" name="flagFile" type="file" accept="image/jpeg,image/png,image/webp" />
+                            <input type="hidden" name="flagPath" />
+                            <small class="text-muted">فایل JPG، PNG یا WebP تا ۱۰ مگابایت انتخاب کنید. انتخاب تصویر اختیاری است.</small>
+                            <div class="text-muted small" data-geo-existing-flag hidden>برای این کشور تصویری ثبت شده است؛ برای جایگزینی فایل جدید انتخاب کنید.</div>
+                            <div class="small mt-1" data-geo-upload-status role="status" aria-live="polite"></div>
+                        </div>
                         <div class="col-md-6" data-geo-coordinates hidden><label class="form-label" for="geo-latitude">عرض جغرافیایی</label><input class="form-control" id="geo-latitude" name="latitude" type="number" min="-90" max="90" step="0.00000001" /></div>
                         <div class="col-md-6" data-geo-coordinates hidden><label class="form-label" for="geo-longitude">طول جغرافیایی</label><input class="form-control" id="geo-longitude" name="longitude" type="number" min="-180" max="180" step="0.00000001" /></div>
                         <div class="col-12" data-geo-center hidden><div class="form-check"><input class="form-check-input" id="geo-center" name="isProvinceCenter" type="checkbox" /><label class="form-check-label" for="geo-center">مرکز استان</label></div></div>

@@ -5,6 +5,8 @@
     var average = ViewData["HomeReviewAverage"] as double? ?? 0;
     var reviewCount = ViewData["HomeReviewCount"] as int? ?? 0;
     var persianCulture = CultureInfo.GetCultureInfo("fa-IR");
+    var cdnBaseUrl = ViewData["MediaCdnBaseUrl"] as string ?? "";
+    string[] defaultPortraits = ["sara.jpg", "milad.jpg", "niloufar.jpg", "amirali.jpg", "leila.jpg", "reza.jpg"];
 }
 <section class="testimonials py-section" id="testimonials">
     <div class="container">
@@ -42,12 +44,20 @@
                 @foreach (var (review, index) in reviews.Select((review, index) => (review, index)))
                 {
                     <article class="testimonial-card @(index == 0 ? "featured-review" : "")">
-                        <span class="quote-mark" aria-hidden="true"><i class="bi bi-chat-quote-fill"></i></span>
-                        <div class="rating-stars" role="img" aria-label="@review.Rating ستاره از ۵">
-                            @for (var star = 0; star < review.Rating; star++)
-                            {
-                                <i class="bi bi-star-fill" aria-hidden="true"></i>
-                            }
+                        <div class="testimonial-card-header">
+                            <div class="rating-stars" role="img" aria-label="@review.Rating ستاره از ۵">
+                                @for (var star = 0; star < review.Rating; star++)
+                                {
+                                    <i class="bi bi-star-fill" aria-hidden="true"></i>
+                                }
+                            </div>
+                            <div class="testimonial-card-meta">
+                                <time class="review-date" datetime="@review.CreatedAtUtc.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)">
+                                    <i class="bi bi-calendar3" aria-hidden="true"></i>
+                                    <span>@review.CreatedAtUtc.ToString("yyyy/MM/dd", persianCulture)</span>
+                                </time>
+                                <span class="quote-mark" aria-hidden="true"><i class="bi bi-chat-quote-fill"></i></span>
+                            </div>
                         </div>
                         <p>@review.Text</p>
                         <div class="reviewer">
@@ -58,16 +68,12 @@
                                 }
                                 else
                                 {
-                                    <i class="bi bi-person-fill" aria-hidden="true"></i>
+                                    <img src="@(cdnBaseUrl)content/testimonials/@defaultPortraits[index % defaultPortraits.Length]" alt="" loading="lazy" decoding="async" />
                                 }
                             </span>
                             <div>
                                 <strong>@review.DisplayName</strong>
                                 <small>خریدار @review.ProductName</small>
-                                <time class="review-date" datetime="@review.CreatedAtUtc.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)">
-                                    <i class="bi bi-calendar3" aria-hidden="true"></i>
-                                    <span>@review.CreatedAtUtc.ToString("yyyy/MM/dd", persianCulture)</span>
-                                </time>
                             </div>
                         </div>
                     </article>

@@ -102,6 +102,35 @@
   color: #4c5870 !important;
 }
 
+.home-page .testimonials .testimonial-card-header,
+.home-page .testimonials .testimonial-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.home-page .testimonials .testimonial-card-header {
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.home-page .testimonials .testimonial-card .quote-mark {
+  position: static;
+  flex: 0 0 34px;
+}
+
+.home-page .testimonials .testimonial-card .reviewer > div {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: "name" "category";
+}
+
+.home-page .testimonials .testimonial-card .reviewer > div > small {
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.7;
+}
+
 .testimonials .owl-dots .owl-dot span {
   background: #c7c0b4 !important;
 }

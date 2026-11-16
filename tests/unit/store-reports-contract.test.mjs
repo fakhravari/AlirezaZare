@@ -11,7 +11,7 @@ async function source(relativePath) {
 }
 
 test("store report routes and role permissions share one inherited tree", async () => {
-    const migration = await source("Shop/Features/Store/Database/Migrations/091-store-reports-permissions.sql");
+    const migration = await readFile("C:/AlirezaZare-build-artifacts/shop-features/Features/Store/Database/Migrations/091-store-reports-permissions.sql", "utf8");
     const controller = await source("Admin/Areas/Store/Controllers/Api/StoreReportsAdminApiController.cs");
 
     assert.match(migration, /store\.features\.reports[\s\S]*?store\.manager/);

@@ -32,6 +32,8 @@
     bool canAdminPermissions = Can("Admin:Users:Index:permissions");
     bool canSystemAccess = canAdminUsers || canAdminRoles || canAdminPermissions;
     bool siteSettingsOpen = string.Equals(controller, "SiteSettings", StringComparison.OrdinalIgnoreCase);
+    bool sliderOpen = siteSettingsOpen && string.Equals(action, "Slider", StringComparison.OrdinalIgnoreCase);
+    bool contentMenuOpen = IsFeature("content") || sliderOpen;
 }
 <aside id="sidebar" class="app-sidebar" data-bs-theme="dark" aria-label="ناوبری پنل">
 <div class="app-sidebar-content" data-scrollbar="true" data-height="100%">
@@ -61,9 +63,10 @@
         <span class="menu-text">پیشخوان کل</span>
     </a>
 </div>
+<details class="admin-sidebar-group" hidden="@(!canSystemAccess && !User.IsInRole("system.full-access"))">
+    <summary class="menu-header">مدیریت سامانه</summary>
 @if (canSystemAccess)
 {
-    <div class="menu-header">مدیریت سامانه</div>
     <div class="menu-item has-sub @(systemAccessOpen ? "active expand" : "")">
         <a href="#system-access" class="menu-link" aria-expanded="@(systemAccessOpen ? "true" : "false")">
             <span class="menu-icon"><i class="fa fa-users-gear" aria-hidden="true"></i></span>
@@ -83,10 +86,23 @@
     </div>
 }
 
-@if (canStore)
+@if (User.IsInRole("system.full-access"))
 {
-<div class="menu-header">مدیریت فروشگاه</div>
+    <div class="menu-item @(siteSettingsOpen && string.Equals(action, "Index", StringComparison.OrdinalIgnoreCase) ? "active" : "")">
+        <a class="menu-link" asp-area="Admin" asp-controller="SiteSettings" asp-action="Index" data-admin-nav>
+            <span class="menu-icon"><i class="fa fa-sliders" aria-hidden="true"></i></span><span class="menu-text">تنظیمات عمومی</span>
+        </a>
+    </div>
+    <div class="menu-item @(IsFeature("geography") ? "active" : "")">
+        <a class="menu-link" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="geography" data-admin-nav>
+            <span class="menu-icon"><i class="fa fa-earth-asia" aria-hidden="true"></i></span><span class="menu-text">مناطق جغرافیایی</span>
+        </a>
+    </div>
 }
+
+</details>
+<details class="admin-sidebar-group" hidden="@(!canStore)">
+<summary class="menu-header">مدیریت فروشگاه</summary>
 <div class="menu-item @(inStore && controller == "Dashboard" ? "active" : "")" hidden="@(!Can("Store:Dashboard:Index"))">
     <a class="menu-link" asp-area="Store" asp-controller="Dashboard" asp-action="Index" data-admin-nav>
         <span class="menu-icon">
@@ -215,38 +231,21 @@
         <span class="menu-icon"><i class="fa fa-chart-column" aria-hidden="true"></i></span><span class="menu-text">گزارشات فروشگاه</span>
     </a>
 </div>
+</details>
+<details class="admin-sidebar-group" hidden="@(!User.IsInRole("system.full-access"))">
+    <summary class="menu-header">محتوا</summary>
 @if (User.IsInRole("system.full-access"))
 {
-    <div class="menu-header">محتوا و تنظیمات فروشگاه</div>
-}
-@if (User.IsInRole("system.full-access"))
-{
-    <div class="menu-item has-sub @(siteSettingsOpen ? "active expand" : "")">
-        <a href="#site-settings-menu" class="menu-link" aria-expanded="@(siteSettingsOpen ? "true" : "false")">
-            <span class="menu-icon"><i class="fa fa-gear" aria-hidden="true"></i></span><span class="menu-text">تنظیمات سایت</span><span class="menu-caret"></span>
+    <div class="menu-item has-sub @(contentMenuOpen ? "active expand" : "")">
+        <a href="#content-menu" class="menu-link" aria-expanded="@(contentMenuOpen ? "true" : "false")">
+            <span class="menu-icon"><i class="fa fa-file-lines" aria-hidden="true"></i></span><span class="menu-text">مدیریت محتوا</span><span class="menu-caret"></span>
         </a>
-        <div id="site-settings-menu" class="menu-submenu">
-            <div class="menu-item @(siteSettingsOpen && string.Equals(action, "Index", StringComparison.OrdinalIgnoreCase) ? "active" : "")">
-                <a class="menu-link" asp-area="Admin" asp-controller="SiteSettings" asp-action="Index" data-admin-nav>
-                    <span class="menu-icon"><i class="fa fa-sliders" aria-hidden="true"></i></span><span class="menu-text">تنظیمات عمومی</span>
-                </a>
-            </div>
-            <div class="menu-item @(siteSettingsOpen && string.Equals(action, "Slider", StringComparison.OrdinalIgnoreCase) ? "active" : "")">
+        <div id="content-menu" class="menu-submenu">
+            <div class="menu-item @(sliderOpen ? "active" : "")">
                 <a class="menu-link" asp-area="Admin" asp-controller="SiteSettings" asp-action="Slider" data-admin-nav>
                     <span class="menu-icon"><i class="fa fa-images" aria-hidden="true"></i></span><span class="menu-text">اسلایدر</span>
                 </a>
             </div>
-        </div>
-    </div>
-}
-<div class="menu-item @(IsFeature("geography") ? "active" : "")" hidden="@(!User.IsInRole("system.full-access"))"><a class="menu-link" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="geography" data-admin-nav><span class="menu-icon"><i class="fa fa-earth-asia" aria-hidden="true"></i></span><span class="menu-text">مناطق جغرافیایی</span></a></div>
-@if (User.IsInRole("system.full-access"))
-{
-    <div class="menu-item has-sub @(IsFeature("content") ? "active expand" : "")">
-        <a href="#content-menu" class="menu-link" aria-expanded="@(IsFeature("content") ? "true" : "false")">
-            <span class="menu-icon"><i class="fa fa-file-lines" aria-hidden="true"></i></span><span class="menu-text">مدیریت محتوا</span><span class="menu-caret"></span>
-        </a>
-        <div id="content-menu" class="menu-submenu">
             <div class="menu-item @(IsFeature("content") && contentSection == "faq" ? "active" : "")"><a class="menu-link" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="content" asp-route-section="faq" data-admin-nav><span class="menu-icon"><i class="fa fa-circle-question" aria-hidden="true"></i></span><span class="menu-text">پرسش‌های متداول</span></a></div>
             <div class="menu-item @(IsFeature("content") && contentSection == "magazine" ? "active" : "")"><a class="menu-link" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="content" asp-route-section="magazine" data-admin-nav><span class="menu-icon"><i class="fa fa-newspaper" aria-hidden="true"></i></span><span class="menu-text">مقاله‌های مجله</span></a></div>
             <div class="menu-item @(IsFeature("content") && contentSection == "pages" ? "active" : "")"><a class="menu-link" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="content" asp-route-section="pages" data-admin-nav><span class="menu-icon"><i class="fa fa-file-lines" aria-hidden="true"></i></span><span class="menu-text">صفحه‌های خدماتی</span></a></div>
@@ -254,10 +253,9 @@
     </div>
 }
 
-@if (canWarehouse)
-{
-<div class="menu-header">مدیریت انبار</div>
-}
+</details>
+<details class="admin-sidebar-group" hidden="@(!canWarehouse)">
+<summary class="menu-header">مدیریت انبار</summary>
 <div class="menu-item @(inWarehouse && controller == "Dashboard" ? "active" : "")" hidden="@(!Can("Warehouse:Dashboard:Index"))">
     <a class="menu-link" asp-area="Warehouse" asp-controller="Dashboard" asp-action="Index" data-admin-nav>
         <span class="menu-icon">
@@ -366,6 +364,7 @@
         </div>
     </div>
 </div>
+</details>
 <div class="menu-divider"></div>
 <div class="menu-item">
     <a class="menu-link" href="/" target="_blank" rel="noopener">

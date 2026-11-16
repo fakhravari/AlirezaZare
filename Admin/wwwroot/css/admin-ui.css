@@ -1,3 +1,42 @@
+/* Top-level sidebar groups use native details so they start closed. */
+.app-sidebar .menu .admin-sidebar-group > summary.menu-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 44px;
+    padding: 10px 20px;
+    cursor: pointer;
+    list-style: none;
+    font-size: 13px;
+}
+
+.app-sidebar .menu .admin-sidebar-group > summary::-webkit-details-marker {
+    display: none;
+}
+
+.app-sidebar .menu .admin-sidebar-group > summary::after {
+    content: "+";
+    font-size: 18px;
+    line-height: 1;
+}
+
+.app-sidebar .menu .admin-sidebar-group[open] > summary::after {
+    content: "−";
+}
+
+.app-sidebar .menu .admin-sidebar-group > summary:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: -3px;
+}
+
+.app-sidebar .menu .admin-sidebar-group .menu-item.has-sub > .menu-submenu {
+    display: none;
+}
+
+.app-sidebar .menu .admin-sidebar-group .menu-item.has-sub.expand > .menu-submenu {
+    display: block;
+}
+
 /* Shared presentation for every management dialog. */
 .dt-container,
 .dt-container .dt-layout-row,
@@ -1178,6 +1217,55 @@
     outline: 0;
     background: #edf3f8;
 }
+.admin-page[data-geography] .geo-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .4rem;
+    width: fit-content;
+    max-width: 100%;
+    padding: .35rem;
+    border: 1px solid #dce5ee;
+    border-radius: .85rem;
+    background: #f2f6fa;
+}
+
+.admin-page[data-geography] .geo-tab {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .55rem;
+    min-width: 7.5rem;
+    min-height: 2.8rem;
+    padding: .55rem 1rem;
+    border: 0;
+    border-radius: .6rem;
+    background: transparent;
+    color: #52677b;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.admin-page[data-geography] .geo-tab:hover {
+    background: #e2edf7;
+    color: #1269a8;
+}
+
+.admin-page[data-geography] .geo-tab.active {
+    background: #247cc2;
+    color: #fff;
+    box-shadow: 0 3px 8px rgb(36 124 194 / 25%);
+}
+
+.admin-page[data-geography] .geo-tab:focus-visible {
+    outline: 3px solid #163e69;
+    outline-offset: 2px;
+}
+
+@media (max-width: 575px) {
+    .admin-page[data-geography] .geo-tabs { width: 100%; flex-wrap: nowrap; }
+    .admin-page[data-geography] .geo-tab { flex: 1 1 0; min-width: 0; padding-inline: .35rem; }
+}
+
 .geo-country-flag {
     display: block;
     width: 2.5rem;

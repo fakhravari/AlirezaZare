@@ -8,6 +8,8 @@
         const form = page.querySelector("[data-geo-form]"), status = page.querySelector("[data-geo-status]"), rows = page.querySelector("[data-geo-rows]"), search = page.querySelector("[data-geo-search]");
         const modal = page.querySelector("[data-geo-modal]");
         const modalTitle = page.querySelector("[data-geo-modal-title]");
+        const flagStatus = page.querySelector("[data-geo-upload-status]");
+        const existingFlag = page.querySelector("[data-geo-existing-flag]");
         const modalInstance = window.bootstrap?.Modal?.getOrCreateInstance(modal);
         let data = { countries: [], provinces: [], cities: [] }, kind = "countries", provinceCountryFilter = "", cityProvinceFilter = "", busy = true, available = false;
         const tabs = [...page.querySelectorAll("[data-geo-tab]")], submit = form.querySelector('[type="submit"]'), retry = page.querySelector("[data-geo-retry]");
@@ -47,12 +49,16 @@
             page.querySelectorAll("[data-geo-coordinates]").forEach(element => { element.hidden = !country; });
             page.querySelector("[data-geo-center]").hidden = !province;
             form.elements.flagPath.disabled = country;
+            form.elements.flagFile.disabled = country;
+            existingFlag.hidden = true;
+            flagStatus.textContent = "";
             form.elements.latitude.disabled = form.elements.longitude.disabled = !country;
             form.elements.isProvinceCenter.disabled = !province;
             filterOptions(form.elements.countryId, countrySearch);
         }
         function render() {
             ui.destroyDataTable(page.querySelector("[data-admin-datatable]"));
+            page.querySelector("[data-admin-datatable]").dataset.adminPageLength = kind === "countries" ? "20" : "25";
             const columns = {
                 countries: [["شناسه", "id"], ["پرچم", "flagUrl"], ["نام فارسی", "nameFa"], ["نام انگلیسی", "nameEn"], ["کد کشور", "code"]],
                 provinces: [["شناسه", "id"], ["نام فارسی", "nameFa"], ["نام انگلیسی", "nameEn"], ["کشور", "parentName"], ["شناسه کشور", "countryId"], ["عرض جغرافیایی", "latitude"], ["طول جغرافیایی", "longitude"]],
@@ -95,6 +101,7 @@
                     form.elements.nameEn.value = item.nameEn;
                     form.elements.code.value = item.code || "";
                     form.elements.flagPath.value = item.flagPath || "";
+                    existingFlag.hidden = !item.flagPath;
                     form.elements.latitude.value = item.latitude ?? "";
                     form.elements.longitude.value = item.longitude ?? "";
                     form.elements.isProvinceCenter.checked = !!item.isProvinceCenter;
@@ -169,9 +176,34 @@
         });
         search.addEventListener("input", () => { if (!busy && available) render(); });
         form.addEventListener("submit", async event => { event.preventDefault(); if (busy || !available || !form.reportValidity()) return; busy = true; const button = form.querySelector('[type="submit"]'); button.disabled = true;
-            const id = form.elements.id.value, body = { nameFa: form.elements.nameFa.value, nameEn: form.elements.nameEn.value, code: form.elements.code.value, countryId: Number(form.elements.countryId.value) || null, provinceId: Number(form.elements.provinceId.value) || null, flagPath: form.elements.flagPath.value, latitude: form.elements.latitude.value === "" ? null : Number(form.elements.latitude.value), longitude: form.elements.longitude.value === "" ? null : Number(form.elements.longitude.value), isProvinceCenter: form.elements.isProvinceCenter.checked, updateDetails: true };
+            const id = form.elements.id.value, flagFile = kind === "countries" ? form.elements.flagFile.files[0] : null;
+            if (flagFile && (flagFile.size === 0 || flagFile.size > 10_000_000)) {
+                flagStatus.textContent = "حجم تصویر باید بیشتر از صفر و حداکثر ۱۰ مگابایت باشد.";
+                busy = false; button.disabled = false; return;
+            }
+            const body = { nameFa: form.elements.nameFa.value, nameEn: form.elements.nameEn.value, code: form.elements.code.value, countryId: Number(form.elements.countryId.value) || null, provinceId: Number(form.elements.provinceId.value) || null, flagPath: form.elements.flagPath.value, latitude: form.elements.latitude.value === "" ? null : Number(form.elements.latitude.value), longitude: form.elements.longitude.value === "" ? null : Number(form.elements.longitude.value), isProvinceCenter: form.elements.isProvinceCenter.checked, updateDetails: !flagFile };
             try {
                 const result = await request(`${api}/${kind}${id ? `/${id}` : ""}`, id ? "PUT" : "POST", body);
+                if (flagFile) {
+                    if (!id && !result.id) throw new Error("کشور ذخیره شد، اما شناسهٔ آن دریافت نشد؛ فهرست را بررسی کنید.");
+                    if (!id) form.elements.id.value = result.id;
+                    const upload = new FormData();
+                    upload.set("kind", "country");
+                    upload.set("countryCode", body.code.trim().toUpperCase());
+                    upload.set("file", flagFile);
+                    const token = form.querySelector('[name="__RequestVerificationToken"]').value;
+                    flagStatus.textContent = "در حال بارگذاری پرچم…";
+                    try {
+                        const media = await ui.getJson("/api/admin/store/media", { method: "POST", headers: { RequestVerificationToken: token }, body: upload });
+                        form.elements.flagPath.value = media.path;
+                    } catch (error) {
+                        modalTitle.textContent = `ویرایش ${body.nameFa}`;
+                        flagStatus.textContent = `کشور ذخیره شد، اما پرچم بارگذاری نشد: ${error.message || "خطای ارتباط"}. برای تلاش دوباره ذخیره را بزنید.`;
+                        ui.notify(flagStatus.textContent, "danger");
+                        try { data = await request(api); render(); } catch { status.textContent = "فهرست به‌روز نشد؛ دوباره دریافت کنید."; }
+                        return;
+                    }
+                }
                 ui.notify(result.message, "success");
                 modalInstance?.hide();
                 reset();

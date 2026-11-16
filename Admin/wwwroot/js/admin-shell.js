@@ -15,6 +15,14 @@
                 ?.setAttribute("aria-expanded", String(item.classList.contains("expand")));
         };
         sidebar.querySelectorAll(".menu-item.has-sub").forEach(syncSubmenu);
+        sidebar.addEventListener("click", event => {
+            const link = event.target.closest(".admin-sidebar-group .menu-item.has-sub > .menu-link");
+            if (!link || !sidebar.contains(link)) return;
+            event.preventDefault();
+            const item = link.parentElement;
+            item.classList.toggle("expand");
+            syncSubmenu(item);
+        });
         new MutationObserver(records => {
             records.forEach(record => {
                 if (record.target.matches(".menu-item.has-sub")) syncSubmenu(record.target);

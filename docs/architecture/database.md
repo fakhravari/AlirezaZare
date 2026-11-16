@@ -5,7 +5,7 @@
 ## هنگام تغییر schema
 
 1. entity، نگاشت Fluent و repository مصرف‌کننده را با هم پیدا کنید.
-2. migrationهای موجود را با `rg --files Data Shop | rg 'Migrations|\.sql$'` بیابید و بررسی کنید؛ در این مخزن ممکن است migrationهای SQL در پوشهٔ featureهای `Shop/Features/**/Database/Migrations/` نیز باشند.
+2. migrationهای موجود در مخزن را با `rg --files Data Shop | rg 'Migrations|\.sql$'` بیابید و بررسی کنید. پوشهٔ قبلی `Shop/Features` در این محیط به `C:\AlirezaZare-build-artifacts\shop-features\Features` منتقل شده و migrationهای SQL آن خارج از مخزن هستند.
 3. migration افزایشی و امن برای دادهٔ موجود بسازید؛ ترتیب اجرا و پیش‌شرط‌ها را مستند کنید.
 4. اجرای محلی/مقصد را جداگانه بررسی کنید و marker ثبت‌شده در همان DB را از وجود فایل migration تفکیک کنید.
 5. قرارداد مصرف‌کننده را در راهنمای حوزه به‌روز کنید.

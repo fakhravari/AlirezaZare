@@ -496,6 +496,7 @@
         }
         const externallyPaged = table.dataset.adminTableMode === "server";
         const pageLength = Number(table.dataset.adminPageLength) || 25;
+        const pageLengths = [...new Set([10, pageLength, 25, 50, 100])].sort((a, b) => a - b);
         const hasActions = [...(table.tHead?.rows[0]?.cells || [])].some(cell => /عملیات|اقدام/u.test(cell.textContent || ""));
         const localizePaging = () => {
             const controls = table.closest(".dt-container")?.querySelectorAll(".dt-paging-button .page-link:not(.first):not(.previous):not(.next):not(.last)") || [];
@@ -507,7 +508,7 @@
             paging: !externallyPaged && rowCount > pageLength,
             pageLength,
             lengthChange: !externallyPaged && rowCount > pageLength,
-            lengthMenu: [[10, 25, 50, 100], ["۱۰", "۲۵", "۵۰", "۱۰۰"]],
+            lengthMenu: [pageLengths, pageLengths.map(length => new Intl.NumberFormat("fa-IR").format(length))],
             searching: !externallyPaged && table.dataset.adminTableSearch !== "false",
             ordering: !externallyPaged,
             order: [],
