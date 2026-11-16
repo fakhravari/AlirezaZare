@@ -16,6 +16,7 @@
         submit.disabled = true;
         const request = (url, method = "GET", body) => ui.getJson(url, { method, headers: { ...(body ? { "Content-Type": "application/json" } : {}), ...(method !== "GET" ? { RequestVerificationToken: form.querySelector('[name="__RequestVerificationToken"]').value } : {}) }, ...(body ? { body: JSON.stringify(body) } : {}) });
         const countrySearch = page.querySelector("[data-geo-country-search]"), provinceSearch = page.querySelector("[data-geo-province-search]");
+        const countryFilter = page.querySelector("[data-geo-filter-country]"), provinceFilter = page.querySelector("[data-geo-filter-province]");
         const normalize = value => value.toLocaleLowerCase().replace(/[يى]/g, "ی").replace(/ك/g, "ک").replace(/[\s‌]+/g, " ").trim();
         function filterOptions(select, input) {
             const query = normalize(input.value);
@@ -27,17 +28,25 @@
             form.elements.provinceId.value = String(selected || "");
             filterOptions(form.elements.provinceId, provinceSearch);
         }
+        function updateFilters() {
+            page.querySelector("[data-geo-filter-country-container]").hidden = kind === "countries";
+            page.querySelector("[data-geo-filter-province-container]").hidden = kind !== "cities";
+            countryFilter.replaceChildren(new Option("همهٔ کشورها", ""), ...data.countries.map(country => new Option(country.nameFa, country.id)));
+            countryFilter.value = provinceCountryFilter;
+            if (countryFilter.value !== provinceCountryFilter) provinceCountryFilter = "";
+            provinceFilter.replaceChildren(new Option("همهٔ استان‌ها", ""), ...data.provinces.filter(province => !provinceCountryFilter || String(province.countryId) === provinceCountryFilter).map(province => new Option(province.nameFa, province.id)));
+            provinceFilter.value = cityProvinceFilter;
+            if (provinceFilter.value !== cityProvinceFilter) cityProvinceFilter = "";
+        }
         function reset() {
             form.reset(); form.elements.id.value = ""; countrySearch.value = ""; provinceSearch.value = "";
             form.elements.countryId.replaceChildren(new Option("کشور را انتخاب کنید", ""), ...data.countries.map(c => new Option(c.nameFa, c.id)));
             if (kind !== "countries") {
                 const iranId = data.countries.find(country => country.code === "IR")?.id;
-                form.elements.countryId.value = provinceCountryFilter || String(iranId || "");
-                provinceCountryFilter = form.elements.countryId.value;
+                const selectedProvince = kind === "cities" ? data.provinces.find(province => String(province.id) === cityProvinceFilter) : null;
+                form.elements.countryId.value = provinceCountryFilter || String(selectedProvince?.countryId || iranId || "");
             }
-            if (kind !== "countries" && form.elements.countryId.value !== provinceCountryFilter) { provinceCountryFilter = ""; cityProvinceFilter = ""; }
             provinces(kind === "cities" ? cityProvinceFilter : "");
-            if (kind === "cities" && form.elements.provinceId.value !== cityProvinceFilter) cityProvinceFilter = "";
             const country = kind !== "countries", province = kind === "cities";
             form.elements.nameFa.maxLength = form.elements.nameEn.maxLength = province ? 200 : 150;
             page.querySelector("[data-geo-country]").hidden = !country; page.querySelector("[data-geo-province]").hidden = !province; page.querySelector("[data-geo-code]").hidden = country;
@@ -108,10 +117,6 @@
                     if (item.countryId) {
                         form.elements.countryId.value = item.countryId;
                         provinces(item.provinceId);
-                        form.elements.countryId.disabled = true;
-                        form.elements.provinceId.disabled = true;
-                        countrySearch.disabled = true;
-                        provinceSearch.disabled = true;
                     }
                     modalTitle.textContent = `ویرایش ${item.nameFa}`;
                     modalInstance?.show();
@@ -148,7 +153,7 @@
         }
         async function refresh() {
             available = false; submit.disabled = true; retry.hidden = true; status.textContent = "در حال دریافت اطلاعات…";
-            try { data = await request(api); available = true; reset(); render(); submit.disabled = false; }
+            try { data = await request(api); available = true; updateFilters(); reset(); render(); submit.disabled = false; }
             catch (error) { rows.replaceChildren(); status.textContent = `دریافت فهرست ناموفق بود: ${error.message}`; retry.hidden = false; }
         }
         document.addEventListener("admin:media-uploaded", event => {
@@ -160,13 +165,15 @@
             }
         });
         tabs.forEach((tab, index) => {
-            tab.addEventListener("click", () => { if (busy || !available) return; kind = tab.dataset.geoTab; provinceCountryFilter = ""; cityProvinceFilter = ""; tabs.forEach(t => { const active = t === tab; t.classList.toggle("active", active); t.setAttribute("aria-selected", String(active)); t.tabIndex = active ? 0 : -1; }); page.querySelector("[data-geo-panel]").setAttribute("aria-labelledby", tab.id); search.value = ""; reset(); render(); });
+            tab.addEventListener("click", () => { if (busy || !available) return; kind = tab.dataset.geoTab; provinceCountryFilter = ""; cityProvinceFilter = ""; tabs.forEach(t => { const active = t === tab; t.classList.toggle("active", active); t.setAttribute("aria-selected", String(active)); t.tabIndex = active ? 0 : -1; }); page.querySelector("[data-geo-panel]").setAttribute("aria-labelledby", tab.id); search.value = ""; updateFilters(); reset(); render(); });
             tab.addEventListener("keydown", event => { let next; if (event.key === "ArrowRight") next = (index + tabs.length - 1) % tabs.length; else if (event.key === "ArrowLeft") next = (index + 1) % tabs.length; else if (event.key === "Home") next = 0; else if (event.key === "End") next = tabs.length - 1; else return; if (busy || !available) return; event.preventDefault(); tabs[next].focus(); tabs[next].click(); });
         });
         countrySearch.addEventListener("input", () => filterOptions(form.elements.countryId, countrySearch));
         provinceSearch.addEventListener("input", () => filterOptions(form.elements.provinceId, provinceSearch));
-        form.elements.countryId.addEventListener("change", () => { provinceSearch.value = ""; provinces(); filterOptions(form.elements.countryId, countrySearch); if (kind !== "countries" && !busy && available) { provinceCountryFilter = form.elements.countryId.value; cityProvinceFilter = ""; render(); } });
-        form.elements.provinceId.addEventListener("change", () => { if (kind === "cities" && !busy && available) { cityProvinceFilter = form.elements.provinceId.value; filterOptions(form.elements.provinceId, provinceSearch); render(); } });
+        countryFilter.addEventListener("change", () => { provinceCountryFilter = countryFilter.value; cityProvinceFilter = ""; updateFilters(); if (!busy && available) render(); });
+        provinceFilter.addEventListener("change", () => { cityProvinceFilter = provinceFilter.value; if (!busy && available) render(); });
+        form.elements.countryId.addEventListener("change", () => { provinceSearch.value = ""; provinces(); filterOptions(form.elements.countryId, countrySearch); });
+        form.elements.provinceId.addEventListener("change", () => filterOptions(form.elements.provinceId, provinceSearch));
         page.querySelector("[data-geo-create]").addEventListener("click", () => {
             if (busy || !available) return;
             reset();

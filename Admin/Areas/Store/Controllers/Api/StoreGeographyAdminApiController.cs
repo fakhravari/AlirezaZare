@@ -136,6 +136,18 @@ public sealed class StoreGeographyAdminApiController(ShopDbContext db, IMediaCdn
                     var province = await db.GeoProvinces.SingleOrDefaultAsync(x => x.Id == id, ct);
                     if (province is null) return NotFound(new { title = "رکورد پیدا نشد." });
 
+                    if (input.CountryId is not long countryId || !await db.GeoCountries.AnyAsync(x => x.Id == countryId, ct))
+                        return BadRequest(new { title = "کشور معتبر را انتخاب کنید." });
+
+                    if (province.IdCountry != countryId)
+                    {
+                        await db.GeoCities.Where(x => x.IdProvince == province.Id)
+                            .ExecuteUpdateAsync(setters => setters.SetProperty(x => x.IdCountry, countryId), ct);
+                        await db.AccountAddresses.Where(x => x.IdProvince == province.Id)
+                            .ExecuteUpdateAsync(setters => setters.SetProperty(x => x.IdCountry, countryId), ct);
+                        province.IdCountry = countryId;
+                    }
+
                     province.NameFa = fa; province.NameEn = en;
 
                     if (input.UpdateDetails) { province.Latitude = input.Latitude; province.Longitude = input.Longitude; }
@@ -144,6 +156,20 @@ public sealed class StoreGeographyAdminApiController(ShopDbContext db, IMediaCdn
                 {
                     var city = await db.GeoCities.SingleOrDefaultAsync(x => x.Id == id, ct);
                     if (city is null) return NotFound(new { title = "رکورد پیدا نشد." });
+
+                    var parent = await db.GeoProvinces.Where(x => x.Id == input.ProvinceId)
+                        .Select(x => new { x.Id, x.IdCountry }).SingleOrDefaultAsync(ct);
+                    if (parent is null || parent.IdCountry != input.CountryId)
+                        return BadRequest(new { title = "استان و کشور معتبر را انتخاب کنید." });
+
+                    if (city.IdCountry != parent.IdCountry || city.IdProvince != parent.Id)
+                    {
+                        await db.AccountAddresses.Where(x => x.IdCity == city.Id)
+                            .ExecuteUpdateAsync(setters => setters.SetProperty(x => x.IdCountry, parent.IdCountry)
+                                .SetProperty(x => x.IdProvince, parent.Id), ct);
+                        city.IdCountry = parent.IdCountry;
+                        city.IdProvince = parent.Id;
+                    }
 
                     city.NameFa = fa; city.NameEn = en;
 

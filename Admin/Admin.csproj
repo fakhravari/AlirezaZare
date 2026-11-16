@@ -19,6 +19,10 @@
     <Content Remove="wwwroot/color_admin/assets/demo/**/*" />
     <!-- Summernote is used by the shared RTL content editor in admin forms. -->
     <Content Include="wwwroot/color_admin/assets/plugins/summernote/dist/**/*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <!-- DataTables is required by the shared admin table renderer. -->
+    <Content Include="wwwroot/color_admin/assets/plugins/datatables.net/js/dataTables.min.js" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="wwwroot/color_admin/assets/plugins/datatables.net-bs5/js/dataTables.bootstrap5.min.js" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="wwwroot/color_admin/assets/plugins/datatables.net-bs5/css/dataTables.bootstrap5.min.css" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="wwwroot\content\brands\" />

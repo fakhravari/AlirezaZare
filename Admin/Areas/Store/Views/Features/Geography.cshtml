@@ -9,6 +9,8 @@
         </div>
         <div class="pt-3" role="tabpanel" id="geo-panel" aria-labelledby="geo-tab-countries" data-geo-panel>
             <div class="d-flex flex-wrap align-items-end gap-3 mb-3">
+                <div data-geo-filter-country-container hidden><label class="form-label" for="geo-filter-country">کشور</label><select class="form-select" id="geo-filter-country" data-geo-filter-country></select></div>
+                <div data-geo-filter-province-container hidden><label class="form-label" for="geo-filter-province">استان</label><select class="form-select" id="geo-filter-province" data-geo-filter-province></select></div>
                 <div class="flex-grow-1"><label class="form-label" for="geo-search">جست‌وجو</label><input class="form-control" type="search" id="geo-search" data-geo-search /></div>
                 <button class="btn btn-primary" type="button" data-geo-create><i class="fa fa-plus me-1" aria-hidden="true"></i>افزودن</button>
             </div>
