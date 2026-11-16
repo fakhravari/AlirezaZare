@@ -57,6 +57,15 @@
                 },
                 dropdownParent: modal ? $(modal) : $(document.body)
             });
+            const element = $(select).data("select2").$element;
+            const trigger = element.trigger;
+            element.trigger = function (event, ...args) {
+                if (event === "input" || event === "change") {
+                    select.dispatchEvent(new Event(event, { bubbles: true }));
+                    return this;
+                }
+                return trigger.call(this, event, ...args);
+            };
         }
     }
 
