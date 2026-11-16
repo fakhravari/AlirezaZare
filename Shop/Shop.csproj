@@ -11,8 +11,10 @@
     <None Remove="keys/**/*" />
     <Content Remove="App_Data/keys/**/*" />
     <None Remove="App_Data/keys/**/*" />
+    <Content Include="App_Data\keys\key-8f28200b-941a-404c-a205-71b9ead71c9c.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <ProjectReference Include="..\Data\Data.csproj" />
-    <Folder Include="keys\" />
     <Folder Include="wwwroot\content\" />
     <Content Update="appsettings.Development.json" CopyToPublishDirectory="Never" />
   </ItemGroup>
