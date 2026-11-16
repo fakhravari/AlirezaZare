@@ -20,6 +20,7 @@ public sealed class StoreMagazineAdminApiController(ShopDbContext db) : Controll
     public async Task<IActionResult> Get(long id, CancellationToken ct)
     {
         var article = await db.MagazineArticles.AsNoTracking().Include(x => x.Sections).Include(x => x.Category).Include(x => x.Branch).Include(x => x.Topic).Include(x => x.Area).SingleOrDefaultAsync(x => x.Id == id, ct);
+
         return article is null ? NotFound() : Ok(new ArticleInput(article.ArticleKey, article.Category.CategoryKey, article.Title, article.Summary, article.Author,
             article.Kicker, article.Branch.BranchKey, article.Topic.TopicKey, article.Area.AreaKey, article.HeroImagePath, article.ContentImagePath,
             article.ReadTimeMinutes, article.ReadTimeText, article.Lead, article.Conclusion, article.IsPublished,
@@ -44,21 +45,20 @@ public sealed class StoreMagazineAdminApiController(ShopDbContext db) : Controll
             input.ReadTimeMinutes is < 1 or > 180 || (input.Sections?.Count ?? 0) > 40 ||
             (input.Sections ?? []).Any(s => string.IsNullOrWhiteSpace(s.Heading) || s.Heading.Trim().Length > 300 || string.IsNullOrWhiteSpace(s.Body)))
             return BadRequest(new { title = "اطلاعات مقاله یا بخش‌های آن معتبر نیست." });
+
         if (await db.MagazineArticles.AnyAsync(x => x.ArticleKey == key && x.Id != (id ?? 0), ct))
             return Conflict(new { title = "این نشانی مقاله قبلاً استفاده شده است." });
+
         if (string.IsNullOrWhiteSpace(input.Branch) || input.Branch.Trim().Length > 160 ||
             string.IsNullOrWhiteSpace(input.Topic) || input.Topic.Trim().Length > 240 ||
             string.IsNullOrWhiteSpace(input.Area) || input.Area.Trim().Length > 240)
             return BadRequest(new { title = "دسته، شاخه، موضوع و حوزهٔ مقاله را کامل و معتبر وارد کنید." });
+
         var categoryKey = input.Category!.Trim(); var branchKey = input.Branch.Trim(); var topicKey = input.Topic.Trim(); var areaKey = input.Area.Trim();
-        var category = await db.MagazineArticleCategories.SingleOrDefaultAsync(x => x.CategoryKey == categoryKey, ct)
-            ?? new MagazineArticleCategory { CategoryKey = categoryKey };
-        var branch = await db.MagazineArticleBranches.SingleOrDefaultAsync(x => x.BranchKey == branchKey, ct)
-            ?? new MagazineArticleBranch { BranchKey = branchKey };
-        var topic = await db.MagazineArticleTopics.SingleOrDefaultAsync(x => x.TopicKey == topicKey, ct)
-            ?? new MagazineArticleTopic { TopicKey = topicKey };
-        var area = await db.MagazineArticleAreas.SingleOrDefaultAsync(x => x.AreaKey == areaKey, ct)
-            ?? new MagazineArticleArea { AreaKey = areaKey };
+        var category = await db.MagazineArticleCategories.SingleOrDefaultAsync(x => x.CategoryKey == categoryKey, ct) ?? new MagazineArticleCategory { CategoryKey = categoryKey };
+        var branch = await db.MagazineArticleBranches.SingleOrDefaultAsync(x => x.BranchKey == branchKey, ct) ?? new MagazineArticleBranch { BranchKey = branchKey };
+        var topic = await db.MagazineArticleTopics.SingleOrDefaultAsync(x => x.TopicKey == topicKey, ct) ?? new MagazineArticleTopic { TopicKey = topicKey };
+        var area = await db.MagazineArticleAreas.SingleOrDefaultAsync(x => x.AreaKey == areaKey, ct) ?? new MagazineArticleArea { AreaKey = areaKey };
         if (category.Id == 0) db.MagazineArticleCategories.Add(category);
         if (branch.Id == 0) db.MagazineArticleBranches.Add(branch);
         if (topic.Id == 0) db.MagazineArticleTopics.Add(topic);
@@ -66,6 +66,7 @@ public sealed class StoreMagazineAdminApiController(ShopDbContext db) : Controll
         var article = id is null ? new MagazineArticle { CreatedAtUtc = DateTime.UtcNow } :
             await db.MagazineArticles.Include(x => x.Sections).SingleOrDefaultAsync(x => x.Id == id, ct) ?? null!;
         if (article is null) return NotFound();
+
         article.ArticleKey = key; article.Category = category; article.Branch = branch; article.Topic = topic; article.Area = area; article.Title = input.Title.Trim();
         article.Summary = input.Summary.Trim(); article.Author = Clean(input.Author); article.Kicker = Clean(input.Kicker);
         article.HeroImagePath = Clean(input.HeroImagePath); article.ContentImagePath = Clean(input.ContentImagePath);
@@ -77,6 +78,7 @@ public sealed class StoreMagazineAdminApiController(ShopDbContext db) : Controll
         foreach (var section in input.Sections ?? []) article.Sections.Add(new MagazineArticleSection { Heading = section.Heading.Trim(), Body = section.Body.Trim(), SortOrder = order++ });
         if (id is null) db.MagazineArticles.Add(article);
         await db.SaveChangesAsync(ct);
+
         return Ok(new { message = "مقاله ذخیره شد.", id = article.Id });
     }
 
@@ -85,8 +87,10 @@ public sealed class StoreMagazineAdminApiController(ShopDbContext db) : Controll
     {
         var article = await db.MagazineArticles.Include(x => x.Sections).SingleOrDefaultAsync(x => x.Id == id, ct);
         if (article is null) return NotFound();
+
         if (await db.AccountArticleInteractions.AnyAsync(x => x.IdMagazineArticle == id, ct))
             return Conflict(new { title = "برای مقاله تعامل کاربر ثبت شده است؛ ابتدا انتشار آن را غیرفعال کنید." });
+
         db.MagazineArticles.Remove(article); await db.SaveChangesAsync(ct); return Ok(new { message = "مقاله حذف شد." });
     }
 

@@ -58,15 +58,14 @@ public sealed class ProfileController(Shop.Services.IAccountDataSource accountDa
                         new ProfileCouponUseViewModel(
                             order.Number,
                             order.DateLabel,
-                            order.OrderedOn.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture)))
-                    .ToArray()))
-            .ToArray();
+                            order.OrderedOn.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture))).ToArray())).ToArray();
         var genders = await db.AccountGenders.AsNoTracking().OrderBy(x => x.Id)
             .Select(x => new ProfileGenderOption(x.Id, x.Code, x.NameFa)).ToListAsync(HttpContext.RequestAborted);
         PageModel<ProfilePageViewModel> model = new(
             new ProfilePageViewModel(section, title, description, icon, Array.Empty<AccountOrder>(), coupons, genders),
             new SeoModel($"{title} | ندا اولیائی", description, Robots: "noindex, nofollow"),
             "~/Views/Profile/Index.cshtml");
+
         return await PageAsync(model);
     }
 }

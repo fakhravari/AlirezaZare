@@ -21,6 +21,7 @@ public sealed class CatalogController : Controller
         ViewData["Description"] = "نام و لوگوی درگاه‌های نمایش‌داده‌شده در فروشگاه.";
         ViewData["Section"] = "payment-institutions";
         ViewData["ApiUrl"] = "/api/admin/store/payment-institutions";
+
         return View("Index");
     }
 
@@ -33,6 +34,7 @@ public sealed class CatalogController : Controller
         ViewData["Description"] = description;
         ViewData["Section"] = section;
         ViewData["ApiUrl"] = $"/api/admin/store/catalog/{section}";
+
         return View("Index");
     }
 }

@@ -26,10 +26,12 @@ public static class AdminListQuery
             || normalizedSearch.Any(char.IsControl))
         {
             request = default;
+
             return false;
         }
 
         request = new AdminPageRequest(page, size, (int)offset, normalizedSearch);
+
         return true;
     }
 

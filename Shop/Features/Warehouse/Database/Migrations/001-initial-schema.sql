@@ -508,9 +508,7 @@ BEGIN
         IF @AffectsStock = 1 AND @Status = 'F'
         BEGIN
             INSERT INTO [Warehouse].[StockMovement]
-            (
-                [IdWarehouse], [IdInventoryItem], [IdSalesPlanReference], [IdDocument], [IdDocumentLine], [QuantityDelta]
-            )
+            ( [IdWarehouse], [IdInventoryItem], [IdSalesPlanReference], [IdDocument], [IdDocumentLine], [QuantityDelta] )
             SELECT
                 @IdWarehouse,
                 l.[IdInventoryItem],

@@ -22,20 +22,14 @@ public sealed class StoreNewsletterSubscribersAdminApiController(ShopDbContext d
         if (!AdminListQuery.TryCreate(page, pageSize, q, out AdminPageRequest paging))
             return ValidationProblem(detail: "عبارت جست‌وجو یا صفحه‌بندی معتبر نیست.", statusCode: 400);
 
-        IQueryable<Shop.Data.Domain.Store.Entities.StoreNewsletterSubscriber> query =
-            db.StoreNewsletterSubscribers.AsNoTracking();
+        IQueryable<Shop.Data.Domain.Store.Entities.StoreNewsletterSubscriber> query = db.StoreNewsletterSubscribers.AsNoTracking();
         if (!includeUnsubscribed)
             query = query.Where(x => x.UnsubscribedAtUtc == null);
         if (paging.Search.Length > 0)
             query = query.Where(x => x.Email.Contains(paging.Search));
 
         int total = await query.CountAsync(cancellationToken);
-        var items = await query.OrderByDescending(x => x.SubscribedAtUtc)
-            .ThenByDescending(x => x.Id)
-            .Skip(paging.Offset)
-            .Take(paging.PageSize)
-            .Select(x => new { x.Id, x.Email, x.SubscribedAtUtc, x.UnsubscribedAtUtc })
-            .ToListAsync(cancellationToken);
+        var items = await query.OrderByDescending(x => x.SubscribedAtUtc).ThenByDescending(x => x.Id).Skip(paging.Offset).Take(paging.PageSize).Select(x => new { x.Id, x.Email, x.SubscribedAtUtc, x.UnsubscribedAtUtc }).ToListAsync(cancellationToken);
 
         return Ok(AdminListQuery.CreateResult(items, total, paging));
     }
@@ -50,6 +44,7 @@ public sealed class StoreNewsletterSubscribersAdminApiController(ShopDbContext d
 
         item.UnsubscribedAtUtc = input.Subscribed ? null : DateTime.UtcNow;
         await db.SaveChangesAsync(cancellationToken);
+
         return Ok(new { message = input.Subscribed ? "عضویت فعال شد." : "عضویت لغو شد." });
     }
 
@@ -61,8 +56,7 @@ public sealed class StoreNewsletterSubscribersAdminApiController(ShopDbContext d
         if (search.Length > AdminListQuery.MaximumSearchLength || search.Any(char.IsControl))
             return ValidationProblem(detail: "عبارت جست‌وجو معتبر نیست.", statusCode: 400);
 
-        IQueryable<Shop.Data.Domain.Store.Entities.StoreNewsletterSubscriber> query =
-            db.StoreNewsletterSubscribers.AsNoTracking();
+        IQueryable<Shop.Data.Domain.Store.Entities.StoreNewsletterSubscriber> query = db.StoreNewsletterSubscribers.AsNoTracking();
         if (!includeUnsubscribed)
             query = query.Where(x => x.UnsubscribedAtUtc == null);
         if (search.Length > 0)
@@ -75,10 +69,7 @@ public sealed class StoreNewsletterSubscribersAdminApiController(ShopDbContext d
             while (true)
             {
                 ct.ThrowIfCancellationRequested();
-                var rows = await query.Where(x => x.Id > lastId).OrderBy(x => x.Id)
-                    .Take(AdminListQuery.ExportBatchSize)
-                    .Select(x => new { x.Id, x.Email, x.SubscribedAtUtc, x.UnsubscribedAtUtc })
-                    .ToListAsync(ct);
+                var rows = await query.Where(x => x.Id > lastId).OrderBy(x => x.Id).Take(AdminListQuery.ExportBatchSize).Select(x => new { x.Id, x.Email, x.SubscribedAtUtc, x.UnsubscribedAtUtc }).ToListAsync(ct);
                 if (rows.Count == 0) break;
 
                 foreach (var row in rows)

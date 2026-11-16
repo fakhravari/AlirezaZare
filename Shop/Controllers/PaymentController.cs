@@ -24,6 +24,7 @@ public sealed class PaymentController(PaymentService payments, IAntiforgery anti
     {
         long profileId = long.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var id) ? id : 0;
         PaymentStartResult result = await payments.StartAsync(orderId, profileId, ct);
+
         return result.Status switch
         {
             "redirect" => Ok(new { redirectUrl = result.RedirectUri!.AbsoluteUri }),
@@ -42,6 +43,7 @@ public sealed class PaymentController(PaymentService payments, IAntiforgery anti
             item => (IReadOnlyList<string>)item.Value.Select(value => value ?? string.Empty).ToArray(),
             StringComparer.OrdinalIgnoreCase);
         string result = await payments.VerifyAsync(attemptId, callback, ct);
+
         return result switch
         {
             "verified" => Ok(new { status = result }),

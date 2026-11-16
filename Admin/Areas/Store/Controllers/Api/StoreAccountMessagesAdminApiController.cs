@@ -19,12 +19,12 @@ public sealed class StoreAccountMessagesAdminApiController(ShopDbContext db) : C
         string term = AdminListQuery.NormalizeSearch(q);
         if (term.Length > AdminListQuery.MaximumSearchLength)
             return ValidationProblem(detail: "عبارت جست‌وجو بیش از حد طولانی است.", statusCode: 400);
+
         if (term.Length < 2) return Ok(Array.Empty<object>());
-        var rows = await db.AccountProfiles.AsNoTracking()
-            .Where(x => x.Email.Contains(term) || x.FirstName.Contains(term) || x.LastName.Contains(term))
-            .OrderBy(x => x.FirstName).ThenBy(x => x.LastName).Take(20)
-            .Select(x => new { x.Id, x.Email, x.FirstName, x.LastName })
-            .ToListAsync(cancellationToken);
+
+        var rows = await db.AccountProfiles.AsNoTracking().Where(x => x.Email.Contains(term) || x.FirstName.Contains(term) || x.LastName.Contains(term))
+            .OrderBy(x => x.FirstName).ThenBy(x => x.LastName).Take(20).Select(x => new { x.Id, x.Email, x.FirstName, x.LastName }).ToListAsync(cancellationToken);
+
         return Ok(rows);
     }
 
@@ -36,19 +36,18 @@ public sealed class StoreAccountMessagesAdminApiController(ShopDbContext db) : C
     {
         if (!AdminListQuery.TryCreate(page, pageSize, q, out AdminPageRequest paging))
             return ValidationProblem(detail: "عبارت جست‌وجو یا صفحه‌بندی معتبر نیست.", statusCode: 400);
+
         if (from.HasValue && to.HasValue && from.Value > to.Value)
             return ValidationProblem(detail: "تاریخ شروع باید قبل از تاریخ پایان باشد.", statusCode: 400);
+
         if (to == DateOnly.MaxValue)
             return ValidationProblem(detail: "تاریخ پایان معتبر نیست.", statusCode: 400);
+
         if (from.HasValue && to.HasValue && to.Value.DayNumber - from.Value.DayNumber > 365)
             return ValidationProblem(detail: "بازهٔ تاریخ نمی‌تواند بیشتر از ۳۶۶ روز باشد.", statusCode: 400);
 
-        DateTime? fromUtc = from.HasValue
-            ? DateTime.SpecifyKind(from.Value.ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc)
-            : null;
-        DateTime? untilUtc = to.HasValue
-            ? DateTime.SpecifyKind(to.Value.AddDays(1).ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc)
-            : null;
+        DateTime? fromUtc = from.HasValue ? DateTime.SpecifyKind(from.Value.ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc) : null;
+        DateTime? untilUtc = to.HasValue ? DateTime.SpecifyKind(to.Value.AddDays(1).ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc) : null;
         var query = from message in db.AccountMessages.AsNoTracking()
                     join profile in db.AccountProfiles.AsNoTracking() on message.IdProfile equals profile.Id
                     select new
@@ -72,8 +71,7 @@ public sealed class StoreAccountMessagesAdminApiController(ShopDbContext db) : C
             query = query.Where(x => x.Email.Contains(term) || x.FirstName.Contains(term) || x.LastName.Contains(term));
         }
         int total = await query.CountAsync(cancellationToken);
-        var items = await query.OrderByDescending(x => x.CreatedAtUtc).ThenByDescending(x => x.Id)
-            .Skip(paging.Offset).Take(paging.PageSize).ToListAsync(cancellationToken);
+        var items = await query.OrderByDescending(x => x.CreatedAtUtc).ThenByDescending(x => x.Id) .Skip(paging.Offset).Take(paging.PageSize).ToListAsync(cancellationToken);
         var result = items.Select(item => new
         {
             item.Id,
@@ -87,6 +85,7 @@ public sealed class StoreAccountMessagesAdminApiController(ShopDbContext db) : C
             item.FirstName,
             item.LastName
         }).ToArray();
+
         return Ok(AdminListQuery.CreateResult(result, total, paging));
     }
 
@@ -98,7 +97,9 @@ public sealed class StoreAccountMessagesAdminApiController(ShopDbContext db) : C
         if (input.ProfileId <= 0 || title.Length is < 2 or > 200 || body.Length is < 1 or > 4000 ||
             input.Category is not ("notice" or "support" or "orders" or "products"))
             return ValidationProblem(detail: "اطلاعات پیام معتبر نیست.", statusCode: 400);
+
         if (!await db.AccountProfiles.AnyAsync(x => x.Id == input.ProfileId, cancellationToken)) return NotFound();
+
         db.AccountMessages.Add(new AccountMessage
         {
             IdProfile = input.ProfileId,
@@ -109,6 +110,7 @@ public sealed class StoreAccountMessagesAdminApiController(ShopDbContext db) : C
             CreatedAtUtc = DateTime.UtcNow
         });
         await db.SaveChangesAsync(cancellationToken);
+
         return Ok(new { message = "پیام در حساب مشتری ثبت شد." });
     }
 }

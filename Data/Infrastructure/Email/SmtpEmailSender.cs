@@ -19,9 +19,7 @@ public sealed class SmtpEmailSender(
         ArgumentException.ThrowIfNullOrWhiteSpace(subject);
         ArgumentNullException.ThrowIfNull(body);
 
-        var settings = await db.StoreSiteIdentities.AsNoTracking()
-            .Where(x => x.Id == 1)
-            .Select(x => new
+        var settings = await db.StoreSiteIdentities.AsNoTracking().Where(x => x.Id == 1).Select(x => new
             {
                 x.SmtpHost,
                 x.SmtpPort,
@@ -29,8 +27,7 @@ public sealed class SmtpEmailSender(
                 x.SmtpUsername,
                 x.SmtpFrom,
                 x.SmtpPassword
-            })
-            .SingleOrDefaultAsync(cancellationToken);
+            }).SingleOrDefaultAsync(cancellationToken);
         string? password = settings?.SmtpPassword ?? configuration["Email:Smtp:Password"];
         if (settings is null || string.IsNullOrWhiteSpace(settings.SmtpHost)
             || settings.SmtpPort is null or < 1 or > 65535 || settings.SmtpEnableSsl is null

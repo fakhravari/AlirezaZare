@@ -22,7 +22,9 @@ public sealed class StoreServicePagesAdminApiController(ShopDbContext db) : Cont
     public async Task<IActionResult> Get(string pageKey, CancellationToken ct)
     {
         if (!EditableKeys.Contains(pageKey)) return NotFound();
+
         var page = await db.StoreContentPages.AsNoTracking().Include(x => x.Sections).SingleOrDefaultAsync(x => x.PageKey == pageKey, ct);
+
         return page is null ? NotFound() : Ok(new PageInput(page.Title, page.Description ?? "", page.IsPublished,
             page.Sections.OrderBy(x => x.SortOrder).ThenBy(x => x.Id)
                 .Select(x => new SectionInput(x.SectionKey, x.Heading ?? "", x.Body ?? "", x.IsPublished)).ToList()));
@@ -32,6 +34,7 @@ public sealed class StoreServicePagesAdminApiController(ShopDbContext db) : Cont
     public async Task<IActionResult> Update(string pageKey, [FromBody] PageInput input, CancellationToken ct)
     {
         if (!EditableKeys.Contains(pageKey)) return NotFound();
+
         string title = input.Title?.Trim() ?? "", description = input.Description?.Trim() ?? "";
         var sections = input.Sections ?? [];
         if (title.Length is < 1 or > 300 || description.Length > 1000 || sections.Count is < 1 or > 50 ||
@@ -39,8 +42,10 @@ public sealed class StoreServicePagesAdminApiController(ShopDbContext db) : Cont
                 (x.Heading?.Length ?? 0) > 300 || string.IsNullOrWhiteSpace(x.Body) || x.Body.Length > 20000) ||
             sections.Select(x => x.SectionKey).Distinct(StringComparer.Ordinal).Count() != sections.Count)
             return BadRequest(new { title = "عنوان، شرح یا بخش‌های صفحه معتبر نیستند." });
+
         var page = await db.StoreContentPages.Include(x => x.Sections).SingleOrDefaultAsync(x => x.PageKey == pageKey, ct);
         if (page is null) return NotFound();
+
         page.Title = title; page.Description = description; page.ContentSource = "Database"; page.IsPublished = input.IsPublished; page.UpdatedAtUtc = DateTime.UtcNow;
         page.Sections.Clear();
         for (int i = 0; i < sections.Count; i++)
@@ -56,6 +61,7 @@ public sealed class StoreServicePagesAdminApiController(ShopDbContext db) : Cont
             });
         }
         await db.SaveChangesAsync(ct);
+
         return Ok(new { message = "صفحهٔ خدماتی ذخیره شد." });
     }
 

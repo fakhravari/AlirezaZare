@@ -28,6 +28,7 @@ public sealed class ProductController : PageController
                 CanonicalUrl: "/search", Robots: "noindex, follow",
                 Breadcrumbs: [new SeoBreadcrumb("خانه", "/"), new SeoBreadcrumb("جستجو و انتخاب ابزار", "/search")]),
             ViewName: "List");
+
         return await PageAsync(model);
     }
 
@@ -39,19 +40,18 @@ public sealed class ProductController : PageController
             return NotFound();
 
         CatalogSnapshot catalog = (await _catalog.ReadAsync(HttpContext.RequestAborted));
-        ProductSeoEntry? product = catalog.Products
-            .FirstOrDefault(item => item.Id == id);
+        ProductSeoEntry? product = catalog.Products.FirstOrDefault(item => item.Id == id);
         if (product is null) return NotFound();
 
         string canonicalPath = $"/products/{product.Slug}-{product.Id}";
         if (!string.Equals(slug, $"{product.Slug}-{product.Id}", StringComparison.Ordinal))
             return RedirectPermanent(canonicalPath);
+
         if (!string.IsNullOrWhiteSpace(salesPlanId) &&
             !string.Equals(salesPlanId, "regular", StringComparison.Ordinal))
         {
             SalesPlanCatalog plans = await _salesPlans.ReadAsync(HttpContext.RequestAborted);
-            SalesPlan? requestedPlan = plans.Plans.FirstOrDefault(plan =>
-                string.Equals(plan.Id, salesPlanId, StringComparison.Ordinal));
+            SalesPlan? requestedPlan = plans.Plans.FirstOrDefault(plan => string.Equals(plan.Id, salesPlanId, StringComparison.Ordinal));
             if (requestedPlan?.EndsAtUtc is { } endsAtUtc && DateTimeOffset.UtcNow >= endsAtUtc)
                 return RedirectPermanent(canonicalPath);
         }
@@ -60,8 +60,7 @@ public sealed class ProductController : PageController
         string siteRoot = SeoUrlBuilder.SiteRoot(_seoOptions.SiteUrl, Request);
         string productImage = SeoUrlBuilder.AbsoluteAssetUrl(siteOrigin, Url.Content($"~/{product.ImagePath}"));
         List<SeoBreadcrumb> breadcrumbs = [new("خانه", "/")];
-        breadcrumbs.AddRange(product.CategoryPath.Select(category =>
-            new SeoBreadcrumb(category.Name, $"/Search?product-group={Uri.EscapeDataString(category.Slug)}")));
+        breadcrumbs.AddRange(product.CategoryPath.Select(category => new SeoBreadcrumb(category.Name, $"/Search?product-group={Uri.EscapeDataString(category.Slug)}")));
         breadcrumbs.Add(new(product.Name, canonicalPath));
         var structuredData = new Dictionary<string, object?>
         {
@@ -85,6 +84,7 @@ public sealed class ProductController : PageController
                 StructuredData: structuredData,
                 SocialImageAlt: product.Name,
                 Breadcrumbs: breadcrumbs));
+
         return await PageAsync(model);
     }
 
@@ -98,8 +98,8 @@ public sealed class ProductController : PageController
 
     private async Task<IActionResult> CanonicalRedirect(int id)
     {
-        ProductSeoEntry? product =
-            (await _catalog.ReadAsync(HttpContext.RequestAborted)).Products.FirstOrDefault(item => item.Id == id);
+        ProductSeoEntry? product = (await _catalog.ReadAsync(HttpContext.RequestAborted)).Products.FirstOrDefault(item => item.Id == id);
+
         return product is null ? NotFound() : RedirectPermanent($"/products/{product.Slug}-{product.Id}");
     }
 }

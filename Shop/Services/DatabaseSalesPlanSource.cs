@@ -11,11 +11,12 @@ public sealed class DatabaseSalesPlanSource(IStoreSalesPlanRepository repository
     public async ValueTask<SalesPlanCatalog> ReadAsync(CancellationToken cancellationToken = default)
     {
         if (requestSnapshot is not null) return requestSnapshot;
+
         var snapshot = await repository.ReadSalesPlanSnapshotAsync(cancellationToken);
+
         return requestSnapshot = new SalesPlanCatalog(1, "IRT",
             snapshot.Plans.Select(plan => new SalesPlan(plan.Id, plan.Code, plan.Name, plan.Type,
-                    plan.IsDefault, plan.IsEnabled, plan.StartsAtUtc, plan.EndsAtUtc, plan.Label, plan.ShowCountdown))
-                .ToArray(),
+                    plan.IsDefault, plan.IsEnabled, plan.StartsAtUtc, plan.EndsAtUtc, plan.Label, plan.ShowCountdown)).ToArray(),
             snapshot.Offers.Select(offer => new ProductSalesOffer(offer.ProductId, offer.SalesPlanId,
                 offer.PriceAmount, offer.DiscountPercent, offer.StockQuantity, offer.MaxPurchaseQuantity,
                 offer.IsEnabled)
@@ -44,7 +45,9 @@ public sealed class DatabaseSalesPlanSource(IStoreSalesPlanRepository repository
     private static System.Text.Json.JsonElement? ParseAttributes(string? json)
     {
         if (string.IsNullOrWhiteSpace(json)) return null;
+
         using var document = System.Text.Json.JsonDocument.Parse(json);
+
         return document.RootElement.Clone();
     }
 
@@ -52,6 +55,7 @@ public sealed class DatabaseSalesPlanSource(IStoreSalesPlanRepository repository
         CancellationToken cancellationToken = default)
     {
         var configuration = await repository.ReadProductPurchaseConfigurationAsync(productId, cancellationToken);
+
         return configuration is null
             ? null
             : new ProductPurchaseConfiguration(
@@ -59,7 +63,6 @@ public sealed class DatabaseSalesPlanSource(IStoreSalesPlanRepository repository
                 configuration.Options.Select(option => new ProductPurchaseOption(option.Key,
                     option.Values.Select(value => new ProductPurchaseOptionValue(value.Key, value.PriceDelta) { Id = value.Id, PriceVersionId = value.PriceVersionId })
                         .ToArray())).ToArray(),
-                configuration.Accessories.Select(accessory => new ProductAccessory(accessory.Key, accessory.IsRequired))
-                    .ToArray());
+                configuration.Accessories.Select(accessory => new ProductAccessory(accessory.Key, accessory.IsRequired)).ToArray());
     }
 }

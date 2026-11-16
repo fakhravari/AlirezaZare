@@ -12,20 +12,23 @@ public sealed class PaymentService(ShopDbContext db, IPaymentGateway gateway, IL
     public async Task<PaymentStartResult> StartAsync(long orderId, long profileId, CancellationToken ct)
     {
         if (orderId < 1 || profileId < 1) return new("not-found");
+
         Guid attemptId = Guid.NewGuid();
         decimal amount;
         await using (var transaction = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct))
         {
-            var order = await db.StoreCustomerOrders.Include(x => x.Bank)
-                .SingleOrDefaultAsync(x => x.Id == orderId && x.IdProfile == profileId, ct);
+            var order = await db.StoreCustomerOrders.Include(x => x.Bank).SingleOrDefaultAsync(x => x.Id == orderId && x.IdProfile == profileId, ct);
             if (order is null) return new("not-found");
+
             if (order.Status != "pending-payment" || order.TotalAmount <= 0 || order.PaymentMethod != "zarinpal" ||
                 order.Bank is not { Code: "zarinpal", IsActive: true }) return new("invalid-order");
+
             bool hasItems = await db.StoreCustomerOrderItems.AnyAsync(x => x.IdCustomerOrder == orderId, ct);
             if (!hasItems) return new("invalid-order");
-            bool active = await db.StorePaymentAttempts.AnyAsync(x => x.IdOrder == orderId &&
-                (x.Status == "initiated" || x.Status == "awaiting"), ct);
+
+            bool active = await db.StorePaymentAttempts.AnyAsync(x => x.IdOrder == orderId && (x.Status == "initiated" || x.Status == "awaiting"), ct);
             if (active) return new("already-started");
+
             amount = order.TotalAmount;
             DateTime now = DateTime.UtcNow;
             db.StorePaymentAttempts.Add(new StorePaymentAttempt
@@ -38,6 +41,7 @@ public sealed class PaymentService(ShopDbContext db, IPaymentGateway gateway, IL
                 UpdatedAtUtc = now
             });
             await db.SaveChangesAsync(ct);
+
             await transaction.CommitAsync(ct);
         }
 
@@ -48,31 +52,31 @@ public sealed class PaymentService(ShopDbContext db, IPaymentGateway gateway, IL
         if (!requested.Available)
         {
             await db.StorePaymentAttempts.Where(x => x.Id == attemptId && x.Status == "initiated")
-                .ExecuteUpdateAsync(update => update.SetProperty(x => x.Status, "unavailable")
-                    .SetProperty(x => x.UpdatedAtUtc, DateTime.UtcNow), ct);
+                .ExecuteUpdateAsync(update => update.SetProperty(x => x.Status, "unavailable").SetProperty(x => x.UpdatedAtUtc, DateTime.UtcNow), ct);
+
             return new("unavailable");
         }
         if (string.IsNullOrWhiteSpace(requested.GatewayReference) || requested.GatewayReference.Length > 200 ||
             requested.RedirectUri is not { IsAbsoluteUri: true, Scheme: "https" } redirect || !string.IsNullOrEmpty(redirect.UserInfo))
             return new("request-unknown");
+
         int updated = await db.StorePaymentAttempts.Where(x => x.Id == attemptId && x.Status == "initiated")
-            .ExecuteUpdateAsync(update => update.SetProperty(x => x.Status, "awaiting")
-                .SetProperty(x => x.GatewayReference, requested.GatewayReference)
-                .SetProperty(x => x.UpdatedAtUtc, DateTime.UtcNow), ct);
+            .ExecuteUpdateAsync(update => update.SetProperty(x => x.Status, "awaiting").SetProperty(x => x.GatewayReference, requested.GatewayReference).SetProperty(x => x.UpdatedAtUtc, DateTime.UtcNow), ct);
+
         return updated == 1 ? new("redirect", redirect) : new("request-unknown");
     }
 
     public async Task<string> VerifyAsync(Guid attemptId,
         IReadOnlyDictionary<string, IReadOnlyList<string>> callback, CancellationToken ct)
     {
-        var attempt = await db.StorePaymentAttempts.AsNoTracking()
-            .Where(x => x.Id == attemptId)
-            .Select(x => new PaymentAttemptRow
-            { Id = x.Id, IdOrder = x.IdOrder, Amount = x.Amount, Status = x.Status, GatewayReference = x.GatewayReference })
-            .SingleOrDefaultAsync(ct);
+        var attempt = await db.StorePaymentAttempts.AsNoTracking().Where(x => x.Id == attemptId).Select(x => new PaymentAttemptRow
+            { Id = x.Id, IdOrder = x.IdOrder, Amount = x.Amount, Status = x.Status, GatewayReference = x.GatewayReference }).SingleOrDefaultAsync(ct);
         if (attempt is null) return "not-found";
+
         if (attempt.Status == "verified") return "verified";
+
         if (attempt.Status != "awaiting" || string.IsNullOrEmpty(attempt.GatewayReference)) return "not-ready";
+
         PaymentGatewayVerification verification;
         try { verification = await gateway.VerifyAsync(attempt.GatewayReference, attempt.Amount, callback, ct); }
         catch (OperationCanceledException) { throw; }
@@ -80,8 +84,8 @@ public sealed class PaymentService(ShopDbContext db, IPaymentGateway gateway, IL
         if (PaymentVerificationRules.IsDefinitiveFailure(attempt.GatewayReference, verification))
         {
             int failed = await db.StorePaymentAttempts.Where(x => x.Id == attemptId && x.Status == "awaiting")
-                .ExecuteUpdateAsync(update => update.SetProperty(x => x.Status, "failed")
-                    .SetProperty(x => x.UpdatedAtUtc, DateTime.UtcNow), ct);
+                .ExecuteUpdateAsync(update => update.SetProperty(x => x.Status, "failed").SetProperty(x => x.UpdatedAtUtc, DateTime.UtcNow), ct);
+
             return failed == 1 ? "failed" : "not-ready";
         }
         if (!PaymentVerificationRules.Matches(attempt.Amount, attempt.GatewayReference, verification)) return "unverified";
@@ -89,11 +93,15 @@ public sealed class PaymentService(ShopDbContext db, IPaymentGateway gateway, IL
         await using var transaction = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
         var locked = await db.StorePaymentAttempts.SingleAsync(x => x.Id == attemptId, ct);
         if (locked.Status == "verified") return "verified";
+
         if (locked.Status != "awaiting" || !PaymentVerificationRules.Matches(locked.Amount, locked.GatewayReference, verification)) return "not-ready";
+
         var order = await db.StoreCustomerOrders.SingleOrDefaultAsync(x => x.Id == locked.IdOrder, ct);
         if (order is null || order.Status != "pending-payment" || order.TotalAmount != locked.Amount) return "order-conflict";
+
         var items = await db.StoreCustomerOrderItems.Where(x => x.IdCustomerOrder == order.Id).ToListAsync(ct);
         if (items.Count == 0) return "order-conflict";
+
         DateTime now = DateTime.UtcNow;
         DateTime paidAtUtc = verification.PaidAtUtc!.Value.UtcDateTime;
         order.Status = "payment-confirmed";
@@ -102,7 +110,9 @@ public sealed class PaymentService(ShopDbContext db, IPaymentGateway gateway, IL
         locked.PaidAtUtc = paidAtUtc;
         locked.UpdatedAtUtc = now;
         await db.SaveChangesAsync(ct);
+
         await transaction.CommitAsync(ct);
+
         return "verified";
     }
 

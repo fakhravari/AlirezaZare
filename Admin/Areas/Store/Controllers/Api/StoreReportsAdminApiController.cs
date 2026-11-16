@@ -35,10 +35,13 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
         CancellationToken cancellationToken = default)
     {
         if (type == "warehouses") return await GetWarehouses(cancellationToken);
+
         if (!AdminListQuery.TryCreate(page, pageSize, null, out _))
             return BadRequest(new { title = "شماره یا اندازهٔ صفحه معتبر نیست." });
+
         if (!TryGetRange(from, to, out DateTime start, out DateTime end, out string? error))
             return BadRequest(new { title = error });
+
         if (type is "products" or "inventory" || detail == "inventory-movements")
             warehouseId = await GetDefaultSalesWarehouseIdAsync(cancellationToken) ?? 0;
         if (!string.IsNullOrWhiteSpace(detail))
@@ -52,6 +55,7 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
             "customers" => await GetCustomers(start, end, page, pageSize, cancellationToken),
             _ => null
         };
+
         return result is null ? BadRequest(new { title = "نوع گزارش معتبر نیست." }) : Ok(result);
     }
 
@@ -65,6 +69,7 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
     {
         if (!TryGetRange(from, to, out DateTime start, out DateTime end, out string? error))
             return BadRequest(new { title = error });
+
         if (type is "products" or "inventory")
             warehouseId = await GetDefaultSalesWarehouseIdAsync(cancellationToken) ?? 0;
         string[] keys = type switch
@@ -78,6 +83,7 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
         if (keys.Length == 0) return BadRequest(new { title = "نوع گزارش معتبر نیست." });
 
         string[] labels = keys.Select(ExportLabel).ToArray();
+
         return new AdminExcelFileResult($"store-{type}-report.xlsx", "گزارش", async (worksheet, ct) =>
         {
             await worksheet.WriteRowAsync(ct, labels);
@@ -109,10 +115,9 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
         HashSet<long> allowed = AllowedWarehouseIds();
         var warehouses = await db.Warehouses.AsNoTracking()
             .Where(x => x.IsActive && x.Company.IsActive && x.IsSalesWarehouse && (fullAccess || allowed.Contains(x.Id)))
-            .OrderBy(x => x.Company.Name).ThenBy(x => x.Name)
-            .Select(x => new { x.Id, Label = x.Company.Name + " / " + x.Name + " (" + x.Code + ")" })
-            .ToListAsync(cancellationToken);
+            .OrderBy(x => x.Company.Name).ThenBy(x => x.Name).Select(x => new { x.Id, Label = x.Company.Name + " / " + x.Name + " (" + x.Code + ")" }).ToListAsync(cancellationToken);
         long? defaultWarehouseId = await GetDefaultSalesWarehouseIdAsync(cancellationToken);
+
         return Ok(new { items = warehouses, defaultWarehouseId, warehouseAccess = fullAccess || allowed.Count > 0 });
     }
 
@@ -120,16 +125,12 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
     {
         bool fullAccess = User.IsInRole("system.full-access");
         HashSet<long> allowed = AllowedWarehouseIds();
-        long? configuredWarehouseId = await db.StoreSiteIdentities.AsNoTracking()
-            .Where(x => x.Id == 1)
-            .Select(x => x.IdWarehouse)
-            .SingleOrDefaultAsync(cancellationToken);
-        var warehouses = db.Warehouses.AsNoTracking()
-            .Where(x => x.IsActive && x.Company.IsActive && x.IsSalesWarehouse && (fullAccess || allowed.Contains(x.Id)));
+        long? configuredWarehouseId = await db.StoreSiteIdentities.AsNoTracking().Where(x => x.Id == 1).Select(x => x.IdWarehouse).SingleOrDefaultAsync(cancellationToken);
+        var warehouses = db.Warehouses.AsNoTracking() .Where(x => x.IsActive && x.Company.IsActive && x.IsSalesWarehouse && (fullAccess || allowed.Contains(x.Id)));
         if (configuredWarehouseId.HasValue && await warehouses.AnyAsync(x => x.Id == configuredWarehouseId.Value, cancellationToken))
             return configuredWarehouseId;
-        return await warehouses.OrderBy(x => x.Company.Name).ThenBy(x => x.Name)
-            .Select(x => (long?)x.Id).FirstOrDefaultAsync(cancellationToken);
+
+        return await warehouses.OrderBy(x => x.Company.Name).ThenBy(x => x.Name).Select(x => (long?)x.Id).FirstOrDefaultAsync(cancellationToken);
     }
 
     private async Task<object> GetSales(DateTime start, DateTime end, int page, int pageSize,
@@ -145,16 +146,14 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
             Discount = group.Sum(x => x.CouponDiscountAmount)
         }).SingleOrDefaultAsync(cancellationToken);
         var previous = await PaidOrders().Where(x => x.OrderedAtUtc >= previousStart && x.OrderedAtUtc < start)
-            .GroupBy(_ => 1).Select(group => new { Revenue = group.Sum(x => x.TotalAmount) })
-            .SingleOrDefaultAsync(cancellationToken);
+            .GroupBy(_ => 1).Select(group => new { Revenue = group.Sum(x => x.TotalAmount) }).SingleOrDefaultAsync(cancellationToken);
         int ordersWithoutVerifiedPayment = await db.StoreCustomerOrders.CountAsync(order =>
             order.OrderedAtUtc >= start && order.OrderedAtUtc < end && SalesStatuses.Contains(order.Status)
             && !(order.PaymentMethod == "demo" && order.ExternalOrderKey != null && order.ExternalOrderKey.StartsWith("demo-order-"))
             && !db.StorePaymentAttempts.Any(payment => payment.IdOrder == order.Id
                 && payment.Status == "verified" && payment.Amount == order.TotalAmount), cancellationToken);
 
-        var daily = await orders.GroupBy(x => x.OrderedAtUtc.Date)
-            .Select(group => new
+        var daily = await orders.GroupBy(x => x.OrderedAtUtc.Date).Select(group => new
             {
                 Date = group.Key,
                 OrderCount = group.Count(),
@@ -169,6 +168,7 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
             discount = x.Discount
         }).ToArray();
         decimal revenue = current?.Revenue ?? 0;
+
         return new
         {
             items,
@@ -209,10 +209,8 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
                               join order in PaidOrders() on item.IdCustomerOrder equals order.Id
                               where order.OrderedAtUtc >= start.AddDays(-((end - start).Days)) && order.OrderedAtUtc < start
                               group item by 1 into g
-                              select g.Sum(x => x.UnitAmount * x.Quantity))
-            .SingleOrDefaultAsync(cancellationToken);
-        var values = await sold.OrderByDescending(x => x.Revenue).ThenBy(x => x.ProductName)
-            .Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
+                              select g.Sum(x => x.UnitAmount * x.Quantity)).SingleOrDefaultAsync(cancellationToken);
+        var values = await sold.OrderByDescending(x => x.Revenue).ThenBy(x => x.ProductName) .Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
 
         HashSet<long> allowed = AllowedWarehouseIds();
         bool fullAccess = User.IsInRole("system.full-access");
@@ -230,6 +228,7 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
                                    join order in PaidOrders() on item.IdCustomerOrder equals order.Id
                                    where order.OrderedAtUtc >= start && order.OrderedAtUtc < end
                                    select item.Quantity).SumAsync(cancellationToken);
+
         return new
         {
             items = values.Select(x => new
@@ -272,19 +271,18 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
                           FirstPurchase = g.Min(x => x.order.OrderedAtUtc)
                       };
         int total = await grouped.CountAsync(cancellationToken);
-        var firstPurchase = PaidOrders().GroupBy(x => x.IdProfile)
-            .Select(group => new { CustomerId = group.Key, FirstPurchase = group.Min(x => x.OrderedAtUtc) });
+        var firstPurchase = PaidOrders().GroupBy(x => x.IdProfile) .Select(group => new { CustomerId = group.Key, FirstPurchase = group.Min(x => x.OrderedAtUtc) });
         int newBuyerCount = await firstPurchase.CountAsync(x => x.FirstPurchase >= start && x.FirstPurchase < end, cancellationToken);
         int repeatBuyerCount = await grouped.CountAsync(x => x.OrderCount > 1, cancellationToken);
         decimal revenue = await currentOrders.SumAsync(x => (decimal?)x.TotalAmount, cancellationToken) ?? 0;
         int previousBuyers = await PaidOrders().Where(x => x.OrderedAtUtc >= start.AddDays(-((end - start).Days)) && x.OrderedAtUtc < start)
             .Select(x => x.IdProfile).Distinct().CountAsync(cancellationToken);
-        var values = await grouped.OrderByDescending(x => x.Revenue).ThenBy(x => x.CustomerName)
-            .Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
+        var values = await grouped.OrderByDescending(x => x.Revenue).ThenBy(x => x.CustomerName) .Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
         long[] customerIds = values.Select(x => x.CustomerId).ToArray();
         Dictionary<long, DateTime> firstPurchases = await PaidOrders().Where(x => customerIds.Contains(x.IdProfile))
             .GroupBy(x => x.IdProfile).Select(g => new { CustomerId = g.Key, FirstPurchase = g.Min(x => x.OrderedAtUtc) })
             .ToDictionaryAsync(x => x.CustomerId, x => x.FirstPurchase, cancellationToken);
+
         return new
         {
             items = values.Select(x => new
@@ -309,17 +307,14 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
     {
         bool fullAccess = User.IsInRole("system.full-access");
         HashSet<long> allowed = AllowedWarehouseIds();
-        var balances = db.StockBalances.AsNoTracking()
-            .Where(x => x.Warehouse.IsActive && x.Warehouse.Company.IsActive && x.Warehouse.IsSalesWarehouse
+        var balances = db.StockBalances.AsNoTracking().Where(x => x.Warehouse.IsActive && x.Warehouse.Company.IsActive && x.Warehouse.IsSalesWarehouse
                 && (fullAccess || allowed.Contains(x.IdWarehouse)));
         if (warehouseId.HasValue) balances = balances.Where(x => x.IdWarehouse == warehouseId.Value);
         int total = await balances.CountAsync(cancellationToken);
         int lowStockCount = await balances.CountAsync(x => x.MinimumQuantity > 0 && x.Quantity <= x.MinimumQuantity, cancellationToken);
         int outOfStockCount = await balances.CountAsync(x => x.Quantity <= 0, cancellationToken);
         var values = await balances.OrderBy(x => x.Warehouse.Company.Name).ThenBy(x => x.Warehouse.Name)
-            .ThenBy(x => x.InventoryItem.Product.Name).ThenBy(x => x.SalesPlanReference.DisplayName)
-            .Skip((page - 1) * pageSize).Take(pageSize)
-            .Select(x => new
+            .ThenBy(x => x.InventoryItem.Product.Name).ThenBy(x => x.SalesPlanReference.DisplayName).Skip((page - 1) * pageSize).Take(pageSize).Select(x => new
             {
                 warehouseId = x.IdWarehouse,
                 inventoryItemId = x.IdInventoryItem,
@@ -342,6 +337,7 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
                 MovementOut = group.Where(x => x.QuantityDelta < 0).Sum(x => (decimal?)-x.QuantityDelta) ?? 0
             }).SingleOrDefaultAsync(cancellationToken);
         decimal quantityTotal = await balances.SumAsync(x => (decimal?)x.Quantity, cancellationToken) ?? 0;
+
         return new
         {
             items = values,
@@ -366,6 +362,7 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
         long? warehouseId, long? salesPlanReferenceId, int page, int pageSize, CancellationToken cancellationToken)
     {
         if (id is null or <= 0) return BadRequest(new { title = "شناسهٔ ردیف گزارش معتبر نیست." });
+
         object? result = detail switch
         {
             "product-orders" => await GetProductOrders(id.Value, start, end, page, pageSize, cancellationToken),
@@ -373,6 +370,7 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
             "inventory-movements" => await GetInventoryMovements(id.Value, start, end, warehouseId, salesPlanReferenceId, page, pageSize, cancellationToken),
             _ => null
         };
+
         return result is null ? BadRequest(new { title = "نوع جزئیات معتبر نیست." }) : Ok(result);
     }
 
@@ -386,6 +384,7 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
                     select new { order.OrderNumber, order.OrderedAtUtc, Customer = (profile.FirstName + " " + profile.LastName).Trim(), item.Quantity, Amount = item.UnitAmount * item.Quantity };
         int total = await query.CountAsync(cancellationToken);
         var rows = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
+
         return new
         {
             title = "سفارش‌های کالا",
@@ -405,6 +404,7 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
             .OrderByDescending(x => x.OrderedAtUtc).Select(x => new { x.OrderNumber, x.OrderedAtUtc, x.Status, x.TotalAmount });
         int total = await query.CountAsync(cancellationToken);
         var rows = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
+
         return new
         {
             title = "خریدهای مشتری",
@@ -433,6 +433,7 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
                     select new { movement.OccurredAtUtc, movement.QuantityDelta, warehouse.Name, warehouse.Code, Company = company.Name, movement.IdDocument };
         int total = await query.CountAsync(cancellationToken);
         var rows = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
+
         return new
         {
             title = "گردش موجودی کالا",
@@ -445,14 +446,11 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
         };
     }
 
-    private IQueryable<StoreCustomerOrderReference> PaidOrders() => db.StoreCustomerOrders.AsNoTracking()
-        .Where(order => SalesStatuses.Contains(order.Status)
+    private IQueryable<StoreCustomerOrderReference> PaidOrders() => db.StoreCustomerOrders.AsNoTracking().Where(order => SalesStatuses.Contains(order.Status)
             && !(order.PaymentMethod == "demo" && order.ExternalOrderKey != null && order.ExternalOrderKey.StartsWith("demo-order-"))
             && db.StorePaymentAttempts.Any(payment => payment.IdOrder == order.Id && payment.Status == "verified" && payment.Amount == order.TotalAmount));
 
-    private HashSet<long> AllowedWarehouseIds() => User.FindAll("admin_warehouse")
-        .Select(claim => long.TryParse(claim.Value, out long id) ? id : 0)
-        .Where(id => id > 0).ToHashSet();
+    private HashSet<long> AllowedWarehouseIds() => User.FindAll("admin_warehouse").Select(claim => long.TryParse(claim.Value, out long id) ? id : 0).Where(id => id > 0).ToHashSet();
 
     private static bool TryGetRange(DateOnly? from, DateOnly? to, out DateTime start, out DateTime end, out string? error)
     {
@@ -461,9 +459,11 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
         DateOnly startDate = from ?? endDate.AddDays(-29);
         start = DateTime.SpecifyKind(startDate.ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc);
         end = DateTime.SpecifyKind(endDate.AddDays(1).ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc);
+
         if (startDate > endDate) { error = "تاریخ شروع باید قبل از تاریخ پایان باشد."; return false; }
         if ((endDate.DayNumber - startDate.DayNumber) > 365) { error = "بازهٔ گزارش نمی‌تواند بیشتر از ۳۶۶ روز باشد."; return false; }
         error = null;
+
         return true;
     }
 
@@ -497,6 +497,7 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
     private static object? ExportValue(JsonElement item, string key)
     {
         if (!item.TryGetProperty(key, out JsonElement value) || value.ValueKind is JsonValueKind.Null or JsonValueKind.Undefined) return null;
+
         return value.ValueKind switch
         {
             JsonValueKind.String => value.GetString() ?? "",

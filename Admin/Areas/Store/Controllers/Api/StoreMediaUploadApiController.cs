@@ -62,6 +62,7 @@ public sealed class StoreMediaUploadApiController(ShopDbContext db, FtpMediaUplo
                 items.Add(new MediaLibraryItem(kind, path, entry.Name, entry.Size, entry.Modified, ContentCdn.ToUrl(path, cdnBaseUrl), ContentCdn.ToUrl(thumbnailPath, cdnBaseUrl), canDelete));
             }
         }
+
         return Ok(items.OrderByDescending(item => item.ModifiedUtc).ThenBy(item => item.Kind).ToArray());
     }
 
@@ -71,22 +72,27 @@ public sealed class StoreMediaUploadApiController(ShopDbContext db, FtpMediaUplo
     {
         if (!LibraryFolders.TryGetValue(kind ?? "", out string? folder) || !TryGetLibraryPaths(path, folder, out string? original, out string? thumbnail))
             return BadRequest(new { title = "رسانهٔ انتخاب‌شده معتبر نیست." });
+
         try
         {
             using var ftp = await storage.ConnectAsync(cancellationToken);
             if (!await ftp.FileExists("/" + original, cancellationToken)) return NotFound(new { title = "فایل رسانه پیدا نشد." });
+
             await ftp.DeleteFile("/" + original, cancellationToken);
             if (await ftp.FileExists("/" + original, cancellationToken)) return Problem(statusCode: 502, title: "فایل اصلی از فضای FTP حذف نشد.");
+
             if (await ftp.FileExists("/" + thumbnail, cancellationToken))
             {
                 await ftp.DeleteFile("/" + thumbnail, cancellationToken);
                 if (await ftp.FileExists("/" + thumbnail, cancellationToken)) return Problem(statusCode: 502, title: "فایل اصلی حذف شد، اما تصویر کوچک باقی ماند.");
             }
+
             return Ok(new { message = "رسانه و تصویر کوچک آن حذف شدند." });
         }
         catch (Exception exception) when (exception is not OperationCanceledException)
         {
             logger.LogWarning(exception, "Media library delete failed for {MediaPath}", path);
+
             return Problem(statusCode: 502, title: "حذف انجام نشد؛ اتصال FTP را بررسی کنید.");
         }
     }
@@ -96,13 +102,16 @@ public sealed class StoreMediaUploadApiController(ShopDbContext db, FtpMediaUplo
         original = thumbnail = "";
         string prefix = $"content/{folder}/";
         if (string.IsNullOrWhiteSpace(path) || !path.StartsWith(prefix, StringComparison.Ordinal) || path.Contains('\\') || path.Contains("..", StringComparison.Ordinal)) return false;
+
         string relative = path[prefix.Length..];
         string[] segments = relative.Split('/');
         if (segments.Length is < 1 or > 2 || segments.Any(segment => segment.Length == 0) ||
             (segments.Length == 2 && (folder != "sliders" || segments[0] != "mobile")) ||
             !System.Text.RegularExpressions.Regex.IsMatch(segments[^1], "^[a-f0-9]{32}\\.webp$", System.Text.RegularExpressions.RegexOptions.IgnoreCase)) return false;
+
         original = path;
         thumbnail = path[..^5] + "-thumbnail.webp";
+
         return true;
     }
 
@@ -115,14 +124,17 @@ public sealed class StoreMediaUploadApiController(ShopDbContext db, FtpMediaUplo
         string? sliderUrl = Request.Form["url"].ToString().Trim();
         if (kind == "slider" && !ValidSlider(title, sliderUrl))
             return BadRequest(new { title = "عنوان و نشانی معتبر برای اسلاید وارد کنید." });
+
         bool vectorLogo = (kind == "payment" || kind == "brand") && file?.ContentType?.Equals("image/svg+xml", StringComparison.OrdinalIgnoreCase) == true;
         bool document = kind == "product-document";
         bool video = kind == "product-video";
         if (!image && !document && !video) return BadRequest(new { title = "نوع رسانه نامعتبر است." });
+
         countryCode = countryCode?.Trim();
         if (kind == "country")
         {
             if (string.IsNullOrEmpty(countryCode) || countryCode.Length > 8) return BadRequest(new { title = "کشور را انتخاب کنید." });
+
             var country = await db.GeoCountries.SingleOrDefaultAsync(x => x.CountryCode == countryCode, cancellationToken);
             if (country is null) return NotFound(new { title = "کشور پیدا نشد." });
         }
@@ -131,6 +143,7 @@ public sealed class StoreMediaUploadApiController(ShopDbContext db, FtpMediaUplo
         if (kind == "article")
         {
             if (string.IsNullOrEmpty(articleKey) || articleKey.Length > 150) return BadRequest(new { title = "مقاله را انتخاب کنید." });
+
             var article = await db.MagazineArticles.SingleOrDefaultAsync(x => x.ArticleKey == articleKey, cancellationToken);
             if (article is null) return NotFound(new { title = "مقاله پیدا نشد." });
         }
@@ -139,6 +152,7 @@ public sealed class StoreMediaUploadApiController(ShopDbContext db, FtpMediaUplo
         if (!string.IsNullOrEmpty(brandKey))
         {
             if (kind != "brand" || brandKey.Length > 100) return BadRequest(new { title = "برند نامعتبر است." });
+
             var brand = await db.StoreBrands.SingleOrDefaultAsync(x => x.BrandKey == brandKey, cancellationToken);
             if (brand is null) return NotFound(new { title = "برند پیدا نشد." });
         }
@@ -146,17 +160,22 @@ public sealed class StoreMediaUploadApiController(ShopDbContext db, FtpMediaUplo
         if (!string.IsNullOrEmpty(paymentInstitutionCode) && (kind != "payment" || paymentInstitutionCode.Length > 40 ||
             !System.Text.RegularExpressions.Regex.IsMatch(paymentInstitutionCode, "^[a-z0-9]+(?:-[a-z0-9]+)*$")))
             return BadRequest(new { title = "شناسهٔ درگاه پرداخت معتبر نیست." });
+
         if (!string.IsNullOrEmpty(paymentInstitutionCode) && !await db.StoreBanks.AnyAsync(x => x.Code == paymentInstitutionCode, cancellationToken))
             return NotFound(new { title = "درگاه پرداخت پیدا نشد." });
+
         string? mediaKey = null;
         if (document || video)
         {
             if (productId is null or <= 0) return BadRequest(new { title = "کالا را انتخاب کنید." });
+
             title = title?.Trim();
             if (document && (string.IsNullOrEmpty(title) || title.Length > 200))
                 return BadRequest(new { title = "عنوان فایل باید بین ۱ تا ۲۰۰ نویسه باشد." });
+
             var product = await db.Products.AsNoTracking().SingleOrDefaultAsync(x => x.Id == productId && x.IsStoreEnabled, cancellationToken);
             if (product is null) return NotFound(new { title = "کالای فروشگاهی پیدا نشد." });
+
             mediaKey = "product-" + product.ProductKey;
             if (video)
             {
@@ -172,6 +191,7 @@ public sealed class StoreMediaUploadApiController(ShopDbContext db, FtpMediaUplo
         byte[] header = new byte[12];
         int count = await stream.ReadAtLeastAsync(header, header.Length, false, cancellationToken);
         if (count < header.Length) return BadRequest(new { title = "فایل معتبر نیست." });
+
         bool supportedImage = header.AsSpan(0, 3).SequenceEqual(new byte[] { 0xff, 0xd8, 0xff }) ||
             header.AsSpan(0, 8).SequenceEqual(new byte[] { 137, 80, 78, 71, 13, 10, 26, 10 }) ||
             (header.AsSpan(0, 4).SequenceEqual("RIFF"u8) && header.AsSpan(8, 4).SequenceEqual("WEBP"u8));
@@ -184,12 +204,11 @@ public sealed class StoreMediaUploadApiController(ShopDbContext db, FtpMediaUplo
         string folder = image ? imageFolder.Folder : document ? "products/files" : "products/videos";
         byte[]? vectorBytes = vectorLogo ? await SanitizeSvgAsync(stream, cancellationToken) : null;
         if (vectorLogo && vectorBytes is null) return BadRequest(new { title = "فایل SVG لوگو معتبر یا ایمن نیست." });
+
         string path = !string.IsNullOrEmpty(paymentInstitutionCode)
             ? $"content/payments/{paymentInstitutionCode}-{name}.{(vectorLogo ? "svg" : "webp")}"
             : $"content/{folder}/{name}.{(vectorLogo ? "svg" : image ? "webp" : document ? "pdf" : "mp4")}";
-        string? thumbnail = image && !vectorLogo
-            ? kind == "slider" ? path[..^5] + "-thumbnail.webp" : $"content/{folder}/{name}-thumbnail.webp"
-            : null;
+        string? thumbnail = image && !vectorLogo ? kind == "slider" ? path[..^5] + "-thumbnail.webp" : $"content/{folder}/{name}-thumbnail.webp" : null;
         byte[]? mainBytes = null;
         byte[]? thumbnailBytes = null;
         if (image && !vectorLogo)
@@ -199,6 +218,7 @@ public sealed class StoreMediaUploadApiController(ShopDbContext db, FtpMediaUplo
                 var info = new MagickImageInfo(stream);
                 if ((long)info.Width * info.Height > 40_000_000)
                     return BadRequest(new { title = "ابعاد تصویر بیش از حد مجاز است." });
+
                 stream.Position = 0;
                 using var source = new MagickImage(stream);
                 source.AutoOrient();
@@ -239,19 +259,14 @@ public sealed class StoreMediaUploadApiController(ShopDbContext db, FtpMediaUplo
                     db.StoreSliders.Add(new StoreSlider { Title = title!.Trim(), Url = sliderUrl!, ImagePath = path,
                         ShowOnMobile = Request.Form["showOnMobile"] == "true", ShowOnDesktop = Request.Form["showOnDesktop"] == "true" });
                 else if (document)
-                    db.StoreProductDocuments.Add(new StoreProductDocument
-                    {
-                        IdProduct = productId!.Value,
-                        Title = title!,
-                        Path = path,
-                        CreatedAtUtc = DateTime.UtcNow
-                    });
+                    db.StoreProductDocuments.Add(new StoreProductDocument { IdProduct = productId!.Value, Title = title!, Path = path, CreatedAtUtc = DateTime.UtcNow });
                 else if (video)
                 {
                     var media = await db.StoreProductMedia.SingleOrDefaultAsync(x => x.IdProduct == productId && x.MediaKey == mediaKey, cancellationToken);
                     if (media is null)
                     {
                         await CleanupUploadedAsync(ftp, uploaded);
+
                         return Conflict(new { title = "رسانهٔ کالا دیگر وجود ندارد؛ دوباره تلاش کنید." });
                     }
                     JsonArray videos;
@@ -266,6 +281,7 @@ public sealed class StoreMediaUploadApiController(ShopDbContext db, FtpMediaUplo
                     if (institution is null)
                     {
                         await CleanupUploadedAsync(ftp, uploaded);
+
                         return Conflict(new { title = "درگاه دیگر وجود ندارد؛ دوباره تلاش کنید." });
                     }
                     institution.LogoPath = path;
@@ -292,6 +308,7 @@ public sealed class StoreMediaUploadApiController(ShopDbContext db, FtpMediaUplo
                     if (!updated)
                     {
                         await CleanupUploadedAsync(ftp, uploaded);
+
                         return Conflict(new { title = "رکورد دیگر وجود ندارد؛ دوباره تلاش کنید." });
                     }
                 }
@@ -301,14 +318,17 @@ public sealed class StoreMediaUploadApiController(ShopDbContext db, FtpMediaUplo
                     if (brand is null)
                     {
                         await CleanupUploadedAsync(ftp, uploaded);
+
                         return Conflict(new { title = "برند دیگر وجود ندارد؛ دوباره تلاش کنید." });
                     }
                     brand.LogoPath = path;
                 }
                 await db.SaveChangesAsync(cancellationToken);
+
                 databaseStarted = true;
             }
             string cdnBaseUrl = await mediaCdn.GetBaseUrlAsync(cancellationToken);
+
             return Ok(new
             {
                 message = document || video ? "فایل بارگذاری و به کالا متصل شد." : kind == "country" ? "تصویر کشور ذخیره شد." : kind == "article" ? "تصویر مقاله ذخیره شد." : !string.IsNullOrEmpty(brandKey) ? "نشان برند ذخیره شد." : "فایل بارگذاری شد.",
@@ -325,6 +345,7 @@ public sealed class StoreMediaUploadApiController(ShopDbContext db, FtpMediaUplo
                 foreach (string item in uploaded)
                     try { await ftp.DeleteFile(item, CancellationToken.None); } catch (Exception cleanupException) { logger.LogWarning(cleanupException, "Failed to clean up uploaded media"); }
             if (exception is OperationCanceledException) throw;
+
             return Problem(statusCode: 502, title: "بارگذاری انجام نشد؛ تنظیمات FTP و اتصال را بررسی کنید.");
         }
         finally { ftp?.Dispose(); }
@@ -341,6 +362,7 @@ public sealed class StoreMediaUploadApiController(ShopDbContext db, FtpMediaUplo
     {
         var slides = await db.StoreSliders.AsNoTracking().OrderBy(x => x.Id).ToListAsync(ct);
         string cdn = await mediaCdn.GetBaseUrlAsync(ct);
+
         return Ok(slides.Select(x => new { x.Id, x.Title, x.Url, x.ImagePath, x.ShowOnMobile, x.ShowOnDesktop, imageUrl = ContentCdn.ToUrl(x.ImagePath, cdn) }));
     }
 
@@ -350,10 +372,13 @@ public sealed class StoreMediaUploadApiController(ShopDbContext db, FtpMediaUplo
     {
         url = url?.Trim();
         if (!ValidSlider(title, url)) return BadRequest(new { title = "عنوان و نشانی معتبر برای اسلاید وارد کنید." });
+
         var slide = await db.StoreSliders.FindAsync([id], ct);
         if (slide is null) return NotFound();
+
         slide.Title = title!.Trim(); slide.Url = url!; slide.ShowOnMobile = showOnMobile; slide.ShowOnDesktop = showOnDesktop;
         await db.SaveChangesAsync(ct);
+
         return Ok(new { message = "اسلاید ذخیره شد." });
     }
 
@@ -363,8 +388,10 @@ public sealed class StoreMediaUploadApiController(ShopDbContext db, FtpMediaUplo
     {
         var slide = await db.StoreSliders.FindAsync([id], ct);
         if (slide is null) return NotFound();
+
         db.StoreSliders.Remove(slide);
         await db.SaveChangesAsync(ct);
+
         return Ok(new { message = "اسلاید از فروشگاه حذف شد." });
     }
 
@@ -386,9 +413,11 @@ public sealed class StoreMediaUploadApiController(ShopDbContext db, FtpMediaUplo
             var allowedElements = new HashSet<string>(StringComparer.Ordinal) { "svg", "g", "path", "circle", "rect", "ellipse", "line", "polyline", "polygon", "defs", "linearGradient", "radialGradient", "stop", "clipPath", "mask", "use" };
             var allowedAttributes = new HashSet<string>(StringComparer.Ordinal) { "xmlns", "viewBox", "width", "height", "fill", "stroke", "stroke-width", "stroke-linecap", "stroke-linejoin", "fill-rule", "fill-opacity", "stroke-opacity", "opacity", "transform", "d", "cx", "cy", "r", "rx", "ry", "x", "y", "x1", "x2", "y1", "y2", "points", "id", "offset", "stop-color", "stop-opacity", "gradientUnits", "gradientTransform", "clip-path", "mask" };
             if (root.Root?.Name != svg + "svg") return null;
+
             foreach (var element in root.Root.DescendantsAndSelf().ToArray())
             {
                 if (element.Name.Namespace != svg || !allowedElements.Contains(element.Name.LocalName)) return null;
+
                 foreach (var attribute in element.Attributes().ToArray())
                 {
                     if (attribute.IsNamespaceDeclaration) continue;
@@ -399,6 +428,7 @@ public sealed class StoreMediaUploadApiController(ShopDbContext db, FtpMediaUplo
                         (attribute.Value.Contains("url(", StringComparison.OrdinalIgnoreCase) && !System.Text.RegularExpressions.Regex.IsMatch(attribute.Value, "^url\\(#[A-Za-z0-9_-]+\\)$"))) return null;
                 }
             }
+
             return System.Text.Encoding.UTF8.GetBytes(root.ToString(System.Xml.Linq.SaveOptions.DisableFormatting));
         }
         catch (Exception error) when (error is System.Xml.XmlException or InvalidOperationException or ArgumentException) { return null; }

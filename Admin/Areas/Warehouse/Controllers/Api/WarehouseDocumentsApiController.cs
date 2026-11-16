@@ -23,6 +23,7 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db, IWarehouse
         if (!AdminListQuery.TryCreate(page, pageSize, q, out AdminPageRequest paging)
             || status is not (null or "D" or "F"))
             return ValidationProblem(detail: "فیلتر صفحه یا وضعیت سند معتبر نیست.", statusCode: 400);
+
         long[] allowed = await AllowedWarehouseIdsAsync(cancellationToken);
         if (!User.IsInRole("system.full-access") && warehouseId.HasValue && !allowed.Contains(warehouseId.Value))
             return Forbid();
@@ -45,16 +46,13 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db, IWarehouse
                 || x.warehouse.Company.Name.Contains(paging.Search) || x.type.Name.Contains(paging.Search)
                 || x.party.Name.Contains(paging.Search) || x.plan.DisplayName.Contains(paging.Search));
         int total = await query.CountAsync(cancellationToken);
-        var items = await query.OrderByDescending(x => x.document.DocumentDate)
-            .ThenByDescending(x => x.document.DocumentNumber)
-            .Skip(paging.Offset).Take(paging.PageSize)
-            .Select(x => new DocumentListItem(x.document.Id, x.document.IdWarehouse, x.document.IdDocumentType,
+        var items = await query.OrderByDescending(x => x.document.DocumentDate).ThenByDescending(x => x.document.DocumentNumber).Skip(paging.Offset).Take(paging.PageSize).Select(x => new DocumentListItem(x.document.Id, x.document.IdWarehouse, x.document.IdDocumentType,
                 x.document.IdParty, x.document.IdSalesPlanReference, x.document.DocumentNumber, x.document.DocumentDate,
                 x.document.Status, x.warehouse.Company.Name + " / " + x.warehouse.Name + " (" + x.warehouse.Code + ")",
                 x.type.Name, x.type.Direction, x.type.AffectsStock,
                 x.party.Name, x.plan.DisplayName, x.document.Reason, x.document.ExternalReference,
-                x.document.CustomerOrderKey))
-            .ToListAsync(cancellationToken);
+                x.document.CustomerOrderKey)).ToListAsync(cancellationToken);
+
         return Ok(AdminListQuery.CreateResult(items, total, paging));
     }
 
@@ -71,8 +69,7 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db, IWarehouse
         var partyQuery = db.WarehouseParties.AsNoTracking().Where(x => x.IsActive);
         if (!User.IsInRole("system.full-access"))
             partyQuery = partyQuery.Where(x => x.IdWarehouse == null || allowed.Contains(x.IdWarehouse.Value));
-        var parties = await partyQuery.OrderBy(x => x.Name)
-            .Select(x => new { x.Id, x.Name, x.PartyType, x.IdWarehouse }).ToListAsync(cancellationToken);
+        var parties = await partyQuery.OrderBy(x => x.Name).Select(x => new { x.Id, x.Name, x.PartyType, x.IdWarehouse }).ToListAsync(cancellationToken);
         var plans = await db.SalesPlanReferences.AsNoTracking().Where(x => x.IsActive).OrderBy(x => x.DisplayName)
             .Select(x => new { x.Id, x.StoreSalesPlanKey, x.DisplayName, x.IsRegular }).ToListAsync(cancellationToken);
         var units = await (from productUnit in db.WarehouseProductUnits.AsNoTracking()
@@ -85,14 +82,11 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db, IWarehouse
                                unit.Name,
                                productUnit.ConversionFactor,
                                productUnit.IsBaseUnit
-                           })
-            .ToListAsync(cancellationToken);
+                           }).ToListAsync(cancellationToken);
         var unitGroups = units.GroupBy(x => x.IdProduct).ToDictionary(group => group.Key,
             group => group.Select(x => new { x.Id, x.Name, x.ConversionFactor, x.IsBaseUnit }).ToArray());
         var items = await db.InventoryItems.AsNoTracking().Where(x => x.IsActive && x.Product.IsWarehouseEnabled
-                && (x.ProductVariant == null || x.ProductVariant.IsActive))
-            .OrderBy(x => x.Product.Name).ThenBy(x => x.ProductVariant!.Name)
-            .Select(x => new
+                && (x.ProductVariant == null || x.ProductVariant.IsActive)).OrderBy(x => x.Product.Name).ThenBy(x => x.ProductVariant!.Name).Select(x => new
             {
                 x.Id,
                 x.IdProduct,
@@ -100,8 +94,7 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db, IWarehouse
                 ProductName = x.Product.Name,
                 VariantName = x.ProductVariant == null ? null : x.ProductVariant.Name,
                 x.Product.IdBaseUnit
-            })
-            .ToListAsync(cancellationToken);
+            }).ToListAsync(cancellationToken);
         var inventoryItems = items.Select(item => new
         {
             item.Id,
@@ -113,19 +106,19 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db, IWarehouse
             Units = unitGroups.GetValueOrDefault(item.IdProduct) ?? []
         });
         long[] warehouseIds = warehouses.Select(w => w.Id).ToArray();
-        var ownerLinks = await db.WarehouseStockOwners.AsNoTracking()
-            .Where(x => warehouseIds.Contains(x.IdWarehouse))
-            .ToListAsync(cancellationToken);
+        var ownerLinks = await db.WarehouseStockOwners.AsNoTracking().Where(x => warehouseIds.Contains(x.IdWarehouse)).ToListAsync(cancellationToken);
+
         return Ok(new { warehouses, types, parties, plans, inventoryItems, ownerLinks });
     }
 
     [HttpGet("{id:long}")]
     public async Task<IActionResult> Detail(long id, CancellationToken cancellationToken)
     {
-        WarehouseDocumentRecord? document = await db.WarehouseDocuments.AsNoTracking().Include(x => x.Lines)
-            .SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
+        WarehouseDocumentRecord? document = await db.WarehouseDocuments.AsNoTracking().Include(x => x.Lines) .SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
         if (document is null) return NotFound();
+
         if (!await CanAccessWarehouseAsync(document.IdWarehouse, cancellationToken)) return Forbid();
+
         return Ok(new DocumentDetail(document.Id, document.IdWarehouse, document.IdDocumentType, document.IdParty,
             document.IdSalesPlanReference, document.DocumentNumber, document.DocumentDate, document.Status,
             document.Reason, document.ExternalReference, document.CustomerOrderKey, document.CreatedByUserKey,
@@ -141,14 +134,17 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db, IWarehouse
     public async Task<IActionResult> Create([FromBody] SaveWarehouseDocumentInput input,
         CancellationToken cancellationToken)
     {
-        await using var transaction =
-            await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
+        await using var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
         if (!await CanAccessWarehouseAsync(input.WarehouseId, cancellationToken)) return Forbid();
+
         IActionResult? lineFailure = ValidateLines(input.Lines);
         if (lineFailure is not null) return lineFailure;
+
         IActionResult? failure = await ValidateHeaderAsync(input, cancellationToken);
         if (failure is not null) return failure;
+
         if (!await ValidLinePlansAsync(input, cancellationToken)) return ValidationProblem(detail: "طرح یکی از اقلام به انبار اختصاص ندارد یا غیرفعال است.", statusCode: 400);
+
         PreparedLine[] lines = await PrepareLinesAsync(input.Lines!, cancellationToken);
         if (lines.Length != input.Lines!.Count)
             return ValidationProblem(detail: "کالا یا واحد انتخاب‌شده برای یکی از اقلام معتبر نیست.", statusCode: 400);
@@ -169,8 +165,10 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db, IWarehouse
         };
         db.WarehouseDocuments.Add(document);
         await db.SaveChangesAsync(cancellationToken);
+
         AddLines(document.Id, lines);
         await db.SaveChangesAsync(cancellationToken);
+
         try
         {
             await RebuildStockAsync(document.Id, cancellationToken);
@@ -186,7 +184,9 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db, IWarehouse
                 AfterJson = await CaptureSnapshotAsync(document.Id, cancellationToken)
             });
             await db.SaveChangesAsync(cancellationToken);
+
             await transaction.CommitAsync(cancellationToken);
+
             return Ok(new { document.Id, document.DocumentNumber, message = "سند انبار ثبت شد." });
         }
         catch (InsufficientWarehouseStockException)
@@ -200,22 +200,27 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db, IWarehouse
     public async Task<IActionResult> Update(long id, [FromBody] SaveWarehouseDocumentInput input,
         CancellationToken cancellationToken)
     {
-        await using var transaction =
-            await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
-        int claimed = await db.WarehouseDocuments.Where(x => x.Id == id)
-            .ExecuteUpdateAsync(update => update.SetProperty(x => x.UpdatedAtUtc, DateTime.UtcNow), cancellationToken);
+        await using var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
+        int claimed = await db.WarehouseDocuments.Where(x => x.Id == id) .ExecuteUpdateAsync(update => update.SetProperty(x => x.UpdatedAtUtc, DateTime.UtcNow), cancellationToken);
         if (claimed == 0) return NotFound();
+
         WarehouseDocumentRecord? document = await db.WarehouseDocuments.SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
         if (document is null) return NotFound();
+
         if (!await CanAccessWarehouseAsync(document.IdWarehouse, cancellationToken)
             || !await CanAccessWarehouseAsync(input.WarehouseId, cancellationToken)) return Forbid();
+
         IActionResult? lineFailure = ValidateLines(input.Lines);
         if (lineFailure is not null) return lineFailure;
+
         if (await IsPaidOrderLinkedAsync(id, cancellationToken))
             return Conflict(new { detail = "سند متصل به سفارش از مسیر مدیریت سفارش تغییر می‌کند." });
+
         IActionResult? failure = await ValidateHeaderAsync(input, cancellationToken);
         if (failure is not null) return failure;
+
         if (!await ValidLinePlansAsync(input, cancellationToken)) return ValidationProblem(detail: "طرح یکی از اقلام به انبار اختصاص ندارد یا غیرفعال است.", statusCode: 400);
+
         PreparedLine[] lines = await PrepareLinesAsync(input.Lines!, cancellationToken);
         if (lines.Length != input.Lines!.Count)
             return ValidationProblem(detail: "کالا یا واحد انتخاب‌شده برای یکی از اقلام معتبر نیست.", statusCode: 400);
@@ -236,6 +241,7 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db, IWarehouse
             document.UpdatedAtUtc = DateTime.UtcNow;
             AddLines(id, lines);
             await db.SaveChangesAsync(cancellationToken);
+
             await RebuildStockAsync(id, cancellationToken);
             db.WarehouseDocumentAudits.Add(new WarehouseDocumentAudit
             {
@@ -250,9 +256,10 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db, IWarehouse
                 AfterJson = await CaptureSnapshotAsync(id, cancellationToken)
             });
             await db.SaveChangesAsync(cancellationToken);
+
             await transaction.CommitAsync(cancellationToken);
-            return Ok(new
-            { document.Id, document.DocumentNumber, message = "سند و گردش موجودی باهم به‌روزرسانی شدند." });
+
+            return Ok(new { document.Id, document.DocumentNumber, message = "سند و گردش موجودی باهم به‌روزرسانی شدند." });
         }
         catch (InsufficientWarehouseStockException)
         {
@@ -264,14 +271,15 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db, IWarehouse
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(long id, CancellationToken cancellationToken)
     {
-        await using var transaction =
-            await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
-        int claimed = await db.WarehouseDocuments.Where(x => x.Id == id)
-            .ExecuteUpdateAsync(update => update.SetProperty(x => x.UpdatedAtUtc, DateTime.UtcNow), cancellationToken);
+        await using var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
+        int claimed = await db.WarehouseDocuments.Where(x => x.Id == id) .ExecuteUpdateAsync(update => update.SetProperty(x => x.UpdatedAtUtc, DateTime.UtcNow), cancellationToken);
         if (claimed == 0) return NotFound();
+
         WarehouseDocumentRecord? document = await db.WarehouseDocuments.SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
         if (document is null) return NotFound();
+
         if (!await CanAccessWarehouseAsync(document.IdWarehouse, cancellationToken)) return Forbid();
+
         if (await IsPaidOrderLinkedAsync(id, cancellationToken))
             return Conflict(new { detail = "سند متصل به سفارش از مسیر مدیریت سفارش تغییر می‌کند." });
 
@@ -292,7 +300,9 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db, IWarehouse
             });
             db.WarehouseDocuments.Remove(document);
             await db.SaveChangesAsync(cancellationToken);
+
             await transaction.CommitAsync(cancellationToken);
+
             return Ok(new { deleted = true });
         }
         catch (InsufficientWarehouseStockException)
@@ -327,10 +337,10 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db, IWarehouse
         if (!await db.WarehouseStockOwners.AnyAsync(x => x.IdWarehouse == input.WarehouseId && x.IdStockOwner == input.SalesPlanId, cancellationToken))
             return ValidationProblem(detail: "مالک انتخاب‌شده به این انبار اختصاص داده نشده است.", statusCode: 400);
 
-        long? linkedWarehouseId = await db.WarehouseParties.AsNoTracking().Where(x => x.Id == input.PartyId)
-            .Select(x => x.IdWarehouse).SingleOrDefaultAsync(cancellationToken);
+        long? linkedWarehouseId = await db.WarehouseParties.AsNoTracking().Where(x => x.Id == input.PartyId) .Select(x => x.IdWarehouse).SingleOrDefaultAsync(cancellationToken);
         if (linkedWarehouseId.HasValue && !await CanAccessWarehouseAsync(linkedWarehouseId.Value, cancellationToken))
             return Forbid();
+
         var selectedType = await db.WarehouseDocumentTypes.AsNoTracking().Where(x => x.Id == input.DocumentTypeId)
             .Select(x => new { x.Code, x.Name }).SingleAsync(cancellationToken);
         if ((selectedType.Code.Contains("return", StringComparison.OrdinalIgnoreCase) ||
@@ -339,6 +349,7 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db, IWarehouse
                 || !await db.WarehouseParties.AnyAsync(x => x.Id == input.PartyId && x.IsActive
                     && (x.PartyType == "Person" || x.PartyType == "Organization"), cancellationToken)))
             return ValidationProblem(detail: "برای سند مرجوعی، مشتری و شمارهٔ سفارش را ثبت کنید.", statusCode: 400);
+
         return null;
     }
 
@@ -347,6 +358,7 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db, IWarehouse
         if (lines is null || lines.Count is < 1 or > 200 || lines.Any(x =>
                 x.InventoryItemId < 1 || x.UnitId < 1 || x.Quantity <= 0 || x.Quantity > 999999999999999.999m))
             return ValidationProblem(detail: "سند باید یک تا ۲۰۰ قلم با مقدار مثبت داشته باشد.", statusCode: 400);
+
         return null;
     }
 
@@ -357,6 +369,7 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db, IWarehouse
                            join plan in db.SalesPlanReferences.AsNoTracking() on owner.IdStockOwner equals plan.Id
                            where owner.IdWarehouse == input.WarehouseId && plan.IsActive && plans.Contains(plan.Id)
                            select plan.Id).CountAsync(cancellationToken);
+
         return count == plans.Length;
     }
 
@@ -364,11 +377,8 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db, IWarehouse
         CancellationToken cancellationToken)
     {
         var itemIds = input.Select(x => x.InventoryItemId).ToArray();
-        var inventoryItems = await db.InventoryItems.AsNoTracking().Include(x => x.Product)
-            .Include(x => x.ProductVariant)
-            .Where(x => itemIds.Contains(x.Id) && x.IsActive && x.Product.IsWarehouseEnabled &&
-                        (x.ProductVariant == null || x.ProductVariant.IsActive))
-            .ToDictionaryAsync(x => x.Id, cancellationToken);
+        var inventoryItems = await db.InventoryItems.AsNoTracking().Include(x => x.Product).Include(x => x.ProductVariant).Where(x => itemIds.Contains(x.Id) && x.IsActive && x.Product.IsWarehouseEnabled &&
+                        (x.ProductVariant == null || x.ProductVariant.IsActive)).ToDictionaryAsync(x => x.Id, cancellationToken);
         var productIds = inventoryItems.Values.Select(x => x.IdProduct).Distinct().ToArray();
         var selectedUnits = await (from productUnit in db.WarehouseProductUnits.AsNoTracking()
                                    join unit in db.WarehouseUnits.AsNoTracking() on productUnit.IdUnit equals unit.Id
@@ -380,11 +390,14 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db, IWarehouse
         foreach (WarehouseDocumentLineInput line in input)
         {
             if (!inventoryItems.TryGetValue(line.InventoryItemId, out InventoryItem? item) || item is null) return [];
+
             var unit = selectedUnits.SingleOrDefault(x => x.IdProduct == item.IdProduct && x.IdUnit == line.UnitId);
             if (unit is null) return [];
+
             decimal quantity = decimal.Truncate(line.Quantity * 1000m) / 1000m;
             decimal baseQuantity = decimal.Truncate(quantity * unit.ConversionFactor * 1000m) / 1000m;
             if (quantity <= 0 || baseQuantity <= 0 || baseQuantity > 999999999999999.999m) return [];
+
             result.Add(new PreparedLine(item.Id, unit.IdUnit, line.SalesPlanId, quantity, unit.ConversionFactor, baseQuantity,
                 item.Product.Name, item.ProductVariant?.Name, unit.Name));
         }
@@ -415,8 +428,8 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db, IWarehouse
 
     private async Task<string> CaptureSnapshotAsync(long documentId, CancellationToken cancellationToken)
     {
-        WarehouseDocumentRecord document = await db.WarehouseDocuments.AsNoTracking().Include(x => x.Lines)
-            .SingleAsync(x => x.Id == documentId, cancellationToken);
+        WarehouseDocumentRecord document = await db.WarehouseDocuments.AsNoTracking().Include(x => x.Lines) .SingleAsync(x => x.Id == documentId, cancellationToken);
+
         return JsonSerializer.Serialize(new
         {
             document.Id,

@@ -35,8 +35,7 @@ public sealed class HomeController : PageController
 
         var magazine = await _magazine.ReadIndexAsync(HttpContext.RequestAborted);
         ViewData["HomeBrands"] = (await _catalog.ReadAsync(HttpContext.RequestAborted)).Brands;
-        var approvedReviews = _db.ProductFeedback.AsNoTracking()
-            .Where(x => x.FeedbackType == "reviews" && x.Status == "approved");
+        var approvedReviews = _db.ProductFeedback.AsNoTracking().Where(x => x.FeedbackType == "reviews" && x.Status == "approved");
         int reviewCount = await approvedReviews.CountAsync(HttpContext.RequestAborted);
         double reviewAverage = reviewCount == 0 ? 0 : await approvedReviews.AverageAsync(x => (double?)(x.Rating ?? 0), HttpContext.RequestAborted) ?? 0;
         var reviewItems = await (from featured in _db.StoreHomeTestimonials.AsNoTracking()
@@ -44,8 +43,7 @@ public sealed class HomeController : PageController
             where featured.IsActive
             orderby featured.SortOrder, feedback.CreatedAtUtc descending, feedback.Id descending
             select new { feedback.DisplayName, ProductName = feedback.Product.Name, feedback.FeedbackText,
-                Rating = feedback.Rating ?? 0, feedback.CreatedAtUtc, featured.ImagePath })
-            .ToListAsync(HttpContext.RequestAborted);
+                Rating = feedback.Rating ?? 0, feedback.CreatedAtUtc, featured.ImagePath }).ToListAsync(HttpContext.RequestAborted);
         string cdnBaseUrl = await _mediaCdn.GetBaseUrlAsync(HttpContext.RequestAborted);
         var reviews = reviewItems.Select(x => new HomeReviewCard(x.DisplayName, x.ProductName, x.FeedbackText,
             x.Rating, x.CreatedAtUtc, string.IsNullOrWhiteSpace(x.ImagePath) ? null : ContentCdn.ToUrl(x.ImagePath, cdnBaseUrl))).ToArray();
@@ -53,6 +51,7 @@ public sealed class HomeController : PageController
         ViewData["HomeReviews"] = reviews;
         ViewData["HomeReviewAverage"] = Math.Round(reviewAverage, 1);
         ViewData["HomeReviewCount"] = reviewCount;
+
         return await PageAsync(new PageModel<MagazineIndexViewModel>(magazine, model.Seo, IsHome: true));
     }
 }

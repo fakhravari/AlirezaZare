@@ -8,10 +8,7 @@ namespace Shop.Data.Infrastructure.Persistence.Repositories;
 public sealed class WarehouseReadRepository(ShopDbContext dbContext) : IWarehouseReadRepository
 {
     public async Task<IReadOnlyList<WarehouseInfo>> GetWarehousesAsync(CancellationToken cancellationToken) =>
-        await dbContext.Warehouses.AsNoTracking()
-            .OrderBy(x => x.Name)
-            .Select(x => new WarehouseInfo(x.Id, x.Code, x.Name, x.Company.Name, x.IsSalesWarehouse, x.IsActive))
-            .ToListAsync(cancellationToken);
+        await dbContext.Warehouses.AsNoTracking().OrderBy(x => x.Name).Select(x => new WarehouseInfo(x.Id, x.Code, x.Name, x.Company.Name, x.IsSalesWarehouse, x.IsActive)).ToListAsync(cancellationToken);
 
     public async Task<IReadOnlyList<WarehouseStockItem>> GetStockAsync(
         long? warehouseId,
@@ -74,17 +71,9 @@ public sealed class WarehouseReadRepository(ShopDbContext dbContext) : IWarehous
                                      || (x.inventoryItem.ProductVariant != null &&
                                          x.inventoryItem.ProductVariant.Name.Contains(search)));
         if (lowStockOnly)
-            query = query.Where(x => x.plan.IsRegular && x.balance != null
-                                                      && x.balance.MinimumQuantity > 0 &&
-                                                      x.balance.Quantity <= x.balance.MinimumQuantity);
+            query = query.Where(x => x.plan.IsRegular && x.balance != null && x.balance.MinimumQuantity > 0 && x.balance.Quantity <= x.balance.MinimumQuantity);
 
-        return await query.OrderBy(x => x.warehouse.Name)
-            .ThenBy(x => x.inventoryItem.Product.Name)
-            .ThenBy(x => x.inventoryItem.ProductVariant == null ? string.Empty : x.inventoryItem.ProductVariant.Name)
-            .ThenBy(x => x.plan.StoreSalesPlanKey)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .Select(x => new WarehouseStockItem(
+        return await query.OrderBy(x => x.warehouse.Name).ThenBy(x => x.inventoryItem.Product.Name).ThenBy(x => x.inventoryItem.ProductVariant == null ? string.Empty : x.inventoryItem.ProductVariant.Name).ThenBy(x => x.plan.StoreSalesPlanKey).Skip((page - 1) * pageSize).Take(pageSize).Select(x => new WarehouseStockItem(
                 x.warehouse.Id,
                 x.inventoryItem.Id,
                 x.plan.Id,
@@ -103,7 +92,6 @@ public sealed class WarehouseReadRepository(ShopDbContext dbContext) : IWarehous
                 x.balance == null ? 0m : x.balance.Quantity,
                 x.plan.IsRegular && x.balance != null ? x.balance.MinimumQuantity : 0m,
                 x.plan.IsRegular && x.balance != null && x.balance.MinimumQuantity > 0 &&
-                x.balance.Quantity <= x.balance.MinimumQuantity))
-            .ToListAsync(cancellationToken);
+                x.balance.Quantity <= x.balance.MinimumQuantity)).ToListAsync(cancellationToken);
     }
 }

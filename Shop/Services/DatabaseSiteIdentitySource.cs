@@ -17,6 +17,7 @@ public sealed class DatabaseSiteIdentitySource(
         {
             entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(1);
             var row = await repository.ReadAsync(cancellationToken);
+
             return row is null
                 ? null
                 : new SiteIdentityOptions
@@ -65,6 +66,7 @@ public sealed class SiteIdentityRequestMiddleware(RequestDelegate next)
             context.Request.Path.StartsWithSegments("/healthz"))
         {
             await next(context);
+
             return;
         }
 

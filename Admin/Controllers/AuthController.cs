@@ -27,29 +27,28 @@ public sealed class AuthController(IServiceProvider services) : Controller
         if (authentication is null)
         {
             ModelState.AddModelError(string.Empty, "اتصال پایگاه دادهٔ پنل پیکربندی نشده است.");
+
             return View(input);
         }
 
         try
         {
-            ClaimsPrincipal? principal =
-                await authentication.SignInAsync(input.UserName, input.Password, cancellationToken);
+            ClaimsPrincipal? principal = await authentication.SignInAsync(input.UserName, input.Password, cancellationToken);
             if (principal is null)
             {
                 ModelState.AddModelError(string.Empty, "نام کاربری یا گذرواژه معتبر نیست.");
+
                 return View(input);
             }
 
-            await HttpContext.SignInAsync("AdminCookie", principal,
-                new AuthenticationProperties { IsPersistent = input.RememberMe });
-            return Url.IsLocalUrl(input.ReturnUrl)
-                ? LocalRedirect(input.ReturnUrl!)
-                : RedirectToAction("Index", "Home", new { area = "Admin" });
+            await HttpContext.SignInAsync("AdminCookie", principal, new AuthenticationProperties { IsPersistent = input.RememberMe });
+
+            return Url.IsLocalUrl(input.ReturnUrl) ? LocalRedirect(input.ReturnUrl!) : RedirectToAction("Index", "Home", new { area = "Admin" });
         }
         catch (Microsoft.Data.SqlClient.SqlException)
         {
-            ModelState.AddModelError(string.Empty,
-                "ساختار کاربران سامانه آماده نیست. migration بخش مدیریت را اجرا کنید.");
+            ModelState.AddModelError(string.Empty, "ساختار کاربران سامانه آماده نیست. migration بخش مدیریت را اجرا کنید.");
+
             return View(input);
         }
     }
@@ -60,6 +59,7 @@ public sealed class AuthController(IServiceProvider services) : Controller
     public async Task<IActionResult> Logout()
     {
         await HttpContext.SignOutAsync("AdminCookie");
+
         return RedirectToAction(nameof(Login));
     }
 

@@ -10,6 +10,7 @@ public sealed class DashboardController : Controller
         ViewData["Title"] = "نمای کلی انبار";
         ViewData["AreaTitle"] = "مدیریت انبار";
         ViewData["FeatureId"] = "overview";
+
         return View();
     }
 }

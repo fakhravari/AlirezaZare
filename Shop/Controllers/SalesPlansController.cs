@@ -25,6 +25,7 @@ public sealed class SalesPlansController(
         DateTimeOffset now = DateTimeOffset.UtcNow;
         var productOffers = data.Offers.Where(offer => offer.ProductId == productId).ToArray();
         if (productOffers.Length == 0) return NotFound(new { code = "product-not-found" });
+
         return Ok(new
         {
             productId,
@@ -58,18 +59,14 @@ public sealed class SalesPlansController(
 
         SalesPlanCatalog catalog = await plans.ReadAsync(cancellationToken);
         SalesPlan? plan = catalog.Plans.SingleOrDefault(item => item.Id == salesPlanId);
-        ProductSalesOffer? offer = catalog.Offers.SingleOrDefault(item =>
-            item.ProductId == productId && item.SalesPlanId == salesPlanId);
+        ProductSalesOffer? offer = catalog.Offers.SingleOrDefault(item => item.ProductId == productId && item.SalesPlanId == salesPlanId);
         DateTimeOffset now = DateTimeOffset.UtcNow;
         if (plan is null || offer is null || !plan.IsEnabled || !offer.IsEnabled ||
             (plan.StartsAtUtc is { } startsAt && now < startsAt) ||
             (plan.EndsAtUtc is { } endsAt && now >= endsAt))
             return NotFound(new { code = "price-history-not-found" });
 
-        long? databasePlanId = await db.SalesPlanReferences.AsNoTracking()
-            .Where(item => item.IdStockOwnerType == 1 && item.StoreSalesPlanKey == salesPlanId)
-            .Select(item => (long?)item.Id)
-            .SingleOrDefaultAsync(cancellationToken);
+        long? databasePlanId = await db.SalesPlanReferences.AsNoTracking().Where(item => item.IdStockOwnerType == 1 && item.StoreSalesPlanKey == salesPlanId).Select(item => (long?)item.Id).SingleOrDefaultAsync(cancellationToken);
         if (!databasePlanId.HasValue) return NotFound(new { code = "price-history-not-found" });
 
         long[] selectedOptionIds = optionPriceVersionIds ?? [];
@@ -79,12 +76,9 @@ public sealed class SalesPlansController(
 
         var selectedOptions = selectedOptionIds.Length == 0
             ? []
-            : await db.StorePriceVersions.AsNoTracking()
-                .Where(item => selectedOptionIds.Contains(item.Id) && item.IdProduct == productId &&
+            : await db.StorePriceVersions.AsNoTracking().Where(item => selectedOptionIds.Contains(item.Id) && item.IdProduct == productId &&
                                item.IdOptionValue.HasValue && item.IdProductVariant == null && item.IdAccessory == null &&
-                               item.IdOrderItem == null && item.IsActive)
-                .Select(item => new { item.Id, item.IdOptionValue })
-                .ToListAsync(cancellationToken);
+                               item.IdOrderItem == null && item.IsActive).Select(item => new { item.Id, item.IdOptionValue }).ToListAsync(cancellationToken);
         if (selectedOptions.Count != selectedOptionIds.Length)
             return BadRequest(new { code = "invalid-price-history-scope" });
 
@@ -97,15 +91,12 @@ public sealed class SalesPlansController(
         long[] optionValueIds = selectedOptions.Select(item => item.IdOptionValue!.Value).ToArray();
         var optionVersions = optionValueIds.Length == 0
             ? []
-            : await db.StorePriceVersions.AsNoTracking()
-                .Where(item => item.IdOptionValue.HasValue && optionValueIds.Contains(item.IdOptionValue.Value))
+            : await db.StorePriceVersions.AsNoTracking().Where(item => item.IdOptionValue.HasValue && optionValueIds.Contains(item.IdOptionValue.Value))
                 .OrderBy(item => item.CreatedAtUtc).ThenBy(item => item.Id)
                 .Select(item => new { item.Id, item.IdOptionValue, item.IdProductVariant, item.IdAccessory, item.IdOrderItem, item.PriceAmount, item.DiscountPercent, item.IsActive, item.CreatedAtUtc })
                 .ToListAsync(cancellationToken);
 
-        var versions = productVersions.Concat(optionVersions)
-            .OrderBy(item => item.CreatedAtUtc).ThenBy(item => item.Id)
-            .Select(item => new
+        var versions = productVersions.Concat(optionVersions).OrderBy(item => item.CreatedAtUtc).ThenBy(item => item.Id).Select(item => new
             {
                 item.Id,
                 item.IdOptionValue,
@@ -143,14 +134,13 @@ public sealed class SalesPlansController(
     {
         if (request.ProductId < 1 || request.Quantity is < 1 or > 99)
             return BadRequest(new { code = "invalid-request" });
+
         try
         {
             SalesPlanCatalog data = await plans.ReadAsync(cancellationToken);
-            SalesPlanQuote quote = data.Quote(request.ProductId, request.SalesPlanId,
-                request.Quantity, DateTimeOffset.UtcNow);
+            SalesPlanQuote quote = data.Quote(request.ProductId, request.SalesPlanId, request.Quantity, DateTimeOffset.UtcNow);
             string selectedPlanId = quote.SalesPlanId;
-            ProductInventoryVariant[] productInventoryVariants = data.InventoryVariants
-                .Where(variant => variant.ProductId == request.ProductId).ToArray();
+            ProductInventoryVariant[] productInventoryVariants = data.InventoryVariants.Where(variant => variant.ProductId == request.ProductId).ToArray();
             if (productInventoryVariants.Length > 0)
             {
                 ProductInventoryVariant? inventoryVariant = request.VariantId is { } variantId
@@ -163,8 +153,7 @@ public sealed class SalesPlansController(
             else if (request.VariantId.HasValue)
                 throw new SalesPlanUnavailableException("product-variant-unavailable");
 
-            ProductSalesOffer selectedOffer = data.Offers.Single(item =>
-                item.ProductId == quote.ProductId && item.SalesPlanId == quote.SalesPlanId);
+            ProductSalesOffer selectedOffer = data.Offers.Single(item => item.ProductId == quote.ProductId && item.SalesPlanId == quote.SalesPlanId);
             (decimal adjustments, IReadOnlyDictionary<string, decimal> accessoryAmounts, int maxQuantity) =
                 await GetValidatedAdjustments(request, selectedOffer, cancellationToken);
             if (request.Quantity > maxQuantity)
@@ -179,11 +168,11 @@ public sealed class SalesPlansController(
             {
                 listUnitAmount = variantPrice;
                 discountPercent = selectedInventoryVariant.DiscountBySalesPlan.GetValueOrDefault(selectedPlanId);
-                baseUnitAmount = decimal.Round(variantPrice * (100m - discountPercent) / 100m, 0,
-                    MidpointRounding.AwayFromZero);
+                baseUnitAmount = decimal.Round(variantPrice * (100m - discountPercent) / 100m, 0, MidpointRounding.AwayFromZero);
             }
 
             decimal adjustedUnit = checked(baseUnitAmount + adjustments);
+
             return Ok(new
             {
                 quote.ProductId,
@@ -217,18 +206,19 @@ public sealed class SalesPlansController(
     {
         if (request.Lines is null || request.Lines.Count is < 1 or > 99)
             return BadRequest(new { code = "invalid-cart" });
+
         if (request.Lines.Any(line =>
                 line is null || line.ProductId < 1 || string.IsNullOrWhiteSpace(line.SalesPlanId)) ||
-            request.Lines.Select(line => $"{line.ProductId}:{line.VariantId?.ToString() ?? "base"}:{line.SalesPlanId}")
-                .Distinct(StringComparer.Ordinal)
-                .Count() != request.Lines.Count)
+            request.Lines.Select(line => $"{line.ProductId}:{line.VariantId?.ToString() ?? "base"}:{line.SalesPlanId}").Distinct(StringComparer.Ordinal).Count() != request.Lines.Count)
             return BadRequest(new { code = "invalid-cart" });
+
         var result = new List<object>();
         foreach (CartLineRequest line in request.Lines)
         {
             IActionResult quoteResult = await Quote(new QuoteRequest(line.ProductId, line.SalesPlanId,
                 line.Quantity, line.VariantId, line.PriceOptions, line.AccessoryIds), cancellationToken);
             if (quoteResult is not OkObjectResult { Value: { } value }) return quoteResult;
+
             result.Add(new { line.ProductId, line.SalesPlanId, line.Quantity, quote = value });
         }
 
@@ -238,8 +228,7 @@ public sealed class SalesPlansController(
     private async Task<(decimal, IReadOnlyDictionary<string, decimal>, int)> GetValidatedAdjustments(
         QuoteRequest request, ProductSalesOffer offer, CancellationToken cancellationToken)
     {
-        ProductPurchaseConfiguration? product =
-            await purchaseConfigurations.ReadAsync(request.ProductId, cancellationToken);
+        ProductPurchaseConfiguration? product = await purchaseConfigurations.ReadAsync(request.ProductId, cancellationToken);
         if (product is null) throw new InvalidDataException();
         decimal adjustments = 0m;
         Dictionary<string, decimal> accessoryAmounts = new(StringComparer.Ordinal);
@@ -263,8 +252,7 @@ public sealed class SalesPlansController(
             accessoryIds.Count != accessoryIds.Distinct(StringComparer.Ordinal).Count())
             throw new InvalidDataException();
         HashSet<string> selected = new(request.AccessoryIds ?? [], StringComparer.Ordinal);
-        HashSet<string> allowedAccessoryIds =
-            product.Accessories.Select(accessory => accessory.Key).ToHashSet(StringComparer.Ordinal);
+        HashSet<string> allowedAccessoryIds = product.Accessories.Select(accessory => accessory.Key).ToHashSet(StringComparer.Ordinal);
         if (selected.Any(id => !allowedAccessoryIds.Contains(id)) ||
             offer.AccessoryIds is { } allowedByOffer &&
             selected.Any(id => !allowedByOffer.Contains(id, StringComparer.Ordinal)))

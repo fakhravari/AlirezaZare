@@ -22,13 +22,13 @@ public sealed class StoreCustomersAdminApiController(ShopDbContext db) : Control
     {
         if (!AdminListQuery.TryCreate(page, pageSize, q, out AdminPageRequest paging))
             return ValidationProblem(detail: "عبارت جست‌وجو یا صفحه‌بندی معتبر نیست.", statusCode: 400);
+
         q = paging.Search;
         int total = await db.AccountProfiles.CountAsync(p => q == "" || (p.FirstName + " " + p.LastName).Contains(q)
             || p.Email.Contains(q) || (p.Phone ?? "").Contains(q), cancellationToken);
         var rows = await db.AccountProfiles.AsNoTracking()
             .Where(p => q == "" || (p.FirstName + " " + p.LastName).Contains(q) || p.Email.Contains(q) || (p.Phone ?? "").Contains(q))
-            .OrderByDescending(p => p.Id).Skip(paging.Offset).Take(paging.PageSize)
-            .Select(p => new CustomerRow
+            .OrderByDescending(p => p.Id).Skip(paging.Offset).Take(paging.PageSize).Select(p => new CustomerRow
             {
                 Id = p.Id,
                 FirstName = p.FirstName,
@@ -38,6 +38,7 @@ public sealed class StoreCustomersAdminApiController(ShopDbContext db) : Control
                 CreatedAtUtc = p.CreatedAtUtc,
                 OrderCount = db.StoreCustomerOrders.Count(o => o.IdProfile == p.Id)
             }).ToListAsync(cancellationToken);
+
         return Ok(AdminListQuery.CreateResult(rows, total, paging));
     }
 
@@ -45,8 +46,8 @@ public sealed class StoreCustomersAdminApiController(ShopDbContext db) : Control
     public async Task<IActionResult> Details(long id, CancellationToken cancellationToken)
     {
         if (id <= 0) return NotFound();
-        var customer = await db.AccountProfiles.AsNoTracking().Where(p => p.Id == id)
-            .Select(p => new CustomerDetails
+
+        var customer = await db.AccountProfiles.AsNoTracking().Where(p => p.Id == id).Select(p => new CustomerDetails
             {
                 Id = p.Id,
                 FirstName = p.FirstName,
@@ -78,16 +79,14 @@ public sealed class StoreCustomersAdminApiController(ShopDbContext db) : Control
                                        a.PostalCode,
                                        a.IsDefault
                                    }).ToListAsync(cancellationToken);
-            var orders = await db.StoreCustomerOrders.AsNoTracking().Where(o => o.IdProfile == id).OrderByDescending(o => o.Id)
-                .Take(50).Select(o => new
+            var orders = await db.StoreCustomerOrders.AsNoTracking().Where(o => o.IdProfile == id).OrderByDescending(o => o.Id).Take(50).Select(o => new
                 {
                     o.OrderNumber,
                     o.Status,
                     o.TotalAmount,
                     o.OrderedAtUtc,
                     IsSample = o.PaymentMethod == "demo" && o.ExternalOrderKey != null && o.ExternalOrderKey.StartsWith("demo-order-")
-                })
-                .ToListAsync(cancellationToken);
+                }).ToListAsync(cancellationToken);
             var feedback = await db.ProductFeedback.AsNoTracking().Where(f => f.IdProfile == id).OrderByDescending(f => f.Id)
                 .Take(50).Select(f => new { f.FeedbackType, f.FeedbackText, f.Status, f.CreatedAtUtc, f.IsSample, ProductName = f.Product.Name })
                 .ToListAsync(cancellationToken);
@@ -95,6 +94,7 @@ public sealed class StoreCustomersAdminApiController(ShopDbContext db) : Control
             customer.OrdersJson = JsonSerializer.Serialize(orders);
             customer.FeedbackJson = JsonSerializer.Serialize(feedback);
         }
+
         return customer is null ? NotFound() : Ok(customer);
     }
 
@@ -103,12 +103,15 @@ public sealed class StoreCustomersAdminApiController(ShopDbContext db) : Control
     public async Task<IActionResult> Create([FromBody] CustomerCreate input, CancellationToken cancellationToken)
     {
         if (!TryNormalizeEmail(input.Email, out var email)) return BadRequest(new { title = "ایمیل معتبر وارد کنید." });
+
         string firstName = input.FirstName?.Trim() ?? "", lastName = input.LastName?.Trim() ?? "";
         string? phone = NormalizePhone(input.Phone);
         if (!ValidName(firstName) || !ValidName(lastName) || (phone?.Length ?? 0) > 30)
             return BadRequest(new { title = "نام، نام خانوادگی یا تلفن معتبر نیست." });
+
         if (await db.AccountProfiles.AnyAsync(x => x.Email == email, cancellationToken))
             return Conflict(new { title = "این ایمیل از قبل برای مشتری دیگری ثبت شده است." });
+
         var profile = new Shop.Data.Domain.Account.Entities.AccountProfile
         {
             Email = email,
@@ -121,6 +124,7 @@ public sealed class StoreCustomersAdminApiController(ShopDbContext db) : Control
         try { await db.SaveChangesAsync(cancellationToken); }
         catch (DbUpdateException exception) when (exception.InnerException is SqlException { Number: 2601 or 2627 })
         { return Conflict(new { title = "این ایمیل از قبل برای مشتری دیگری ثبت شده است." }); }
+
         return Ok(new { id = profile.Id, message = "مشتری ساخته شد؛ ورود او با کد یک‌بارمصرف ایمیل انجام می‌شود." });
     }
 
@@ -130,14 +134,17 @@ public sealed class StoreCustomersAdminApiController(ShopDbContext db) : Control
     {
         if (!TryNormalizeEmail(input.Email, out var email) || input.ExpectedEmail is null || input.ExpectedEmail.Length > 254)
             return BadRequest(new { title = "ایمیل معتبر نیست یا نسخهٔ مبنا ارسال نشده است." });
+
         string firstName = input.FirstName?.Trim() ?? "", lastName = input.LastName?.Trim() ?? "";
         string? phone = NormalizePhone(input.Phone);
         if (id <= 0 || !ValidName(firstName) || !ValidName(lastName) || (phone?.Length ?? 0) > 30 ||
             input.ExpectedFirstName is null || input.ExpectedLastName is null || input.ExpectedFirstName.Length > 100 ||
             input.ExpectedLastName.Length > 100 || (input.ExpectedPhone?.Length ?? 0) > 30)
             return BadRequest(new { title = "نام، نام خانوادگی یا تلفن معتبر نیست." });
+
         if (await db.AccountProfiles.AnyAsync(x => x.Id != id && x.Email == email, cancellationToken))
             return Conflict(new { title = "این ایمیل از قبل برای مشتری دیگری ثبت شده است." });
+
         try
         {
             int changed = await db.AccountProfiles.Where(x => x.Id == id && x.Email == input.ExpectedEmail &&
@@ -145,6 +152,7 @@ public sealed class StoreCustomersAdminApiController(ShopDbContext db) : Control
                 .ExecuteUpdateAsync(update => update.SetProperty(x => x.Email, email)
                     .SetProperty(x => x.FirstName, firstName).SetProperty(x => x.LastName, lastName)
                     .SetProperty(x => x.Phone, phone).SetProperty(x => x.UpdatedAtUtc, DateTime.UtcNow), cancellationToken);
+
             return changed == 0 ? Conflict(new { title = "اطلاعات مشتری تغییر کرده یا مشتری پیدا نشد؛ فهرست را دوباره بارگذاری کنید." })
                 : Ok(new { message = "اطلاعات مشتری ذخیره شد." });
         }
@@ -157,12 +165,16 @@ public sealed class StoreCustomersAdminApiController(ShopDbContext db) : Control
     public async Task<IActionResult> Delete(long id, CancellationToken cancellationToken)
     {
         if (id <= 0) return NotFound();
+
         if (!await db.AccountProfiles.AnyAsync(x => x.Id == id, cancellationToken)) return NotFound();
+
         bool hasOrders = await db.Set<Shop.Data.Domain.Account.Entities.StoreCustomerOrderReference>().AnyAsync(x => x.IdProfile == id, cancellationToken);
         bool hasCart = await db.AccountCarts.AnyAsync(x => x.IdProfile == id, cancellationToken);
         if (hasOrders || hasCart)
             return Conflict(new { title = "مشتری دارای سفارش یا سبد خرید است؛ برای حفظ سابقه، حذف ممکن نیست." });
+
         await db.AccountProfiles.Where(x => x.Id == id).ExecuteDeleteAsync(cancellationToken);
+
         return Ok(new { message = "پروفایل مشتری حذف شد؛ داده‌های وابستهٔ حساب طبق روابط پایگاه پاک شدند." });
     }
 

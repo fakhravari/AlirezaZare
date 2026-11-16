@@ -26,8 +26,10 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
             carrier.Any(char.IsControl) || code.Any(char.IsControl) ||
             (input.ExpectedCarrier?.Length ?? 0) > 100 || (input.ExpectedTrackingCode?.Length ?? 0) > 100)
             return BadRequest(new { title = "شرکت حمل یا کد رهگیری معتبر نیست." });
+
         string actor = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.Identity?.Name ?? "system";
         if (actor.Length > 256) return BadRequest(new { title = "شناسهٔ مدیر نامعتبر است." });
+
         await using var transaction = await db.Database.BeginTransactionAsync(cancellationToken);
         var order = await db.StoreCustomerOrders.SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
         if (order is null || order.Status is not ("warehouse-confirmed" or "in-transit" or "shipped-to-post" or "delivered") ||
@@ -35,6 +37,7 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
             !await db.StorePaymentAttempts.AnyAsync(p => p.IdOrder == id && p.Status == "verified" && p.Amount == order.TotalAmount, cancellationToken) ||
             order.ShippingCarrier != input.ExpectedCarrier || order.ShippingTrackingCode != input.ExpectedTrackingCode)
             return Conflict(new { title = "اطلاعات سفارش تغییر کرده یا سفارش شرایط ثبت رهگیری را ندارد." });
+
         var previousCarrier = order.ShippingCarrier;
         var previousTrackingCode = order.ShippingTrackingCode;
         order.ShippingCarrier = carrier; order.ShippingTrackingCode = code;
@@ -49,7 +52,9 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
             ChangedAtUtc = DateTime.UtcNow
         });
         await db.SaveChangesAsync(cancellationToken);
+
         await transaction.CommitAsync(cancellationToken);
+
         return Ok(new { message = "اطلاعات رهگیری ثبت شد." });
     }
 
@@ -61,14 +66,17 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
             !((input.ExpectedStatus == "warehouse-confirmed" && input.Status is "in-transit" or "shipped-to-post") ||
               (input.ExpectedStatus is "in-transit" or "shipped-to-post" && input.Status == "delivered")))
             return BadRequest(new { title = "تغییر وضعیت ارسال مجاز نیست." });
+
         string actor = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.Identity?.Name ?? "system";
         if (actor.Length > 256) return BadRequest(new { title = "شناسهٔ مدیر نامعتبر است." });
+
         await using var transaction = await db.Database.BeginTransactionAsync(cancellationToken);
         var order = await db.StoreCustomerOrders.SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
         if (order is null || order.Status != input.ExpectedStatus || order.IdWarehouseDocument is null ||
             (order.PaymentMethod == "demo" && order.ExternalOrderKey?.StartsWith("demo-order-") == true) ||
             !await db.StorePaymentAttempts.AnyAsync(p => p.IdOrder == id && p.Status == "verified" && p.Amount == order.TotalAmount, cancellationToken))
             return Conflict(new { title = "وضعیت سفارش تغییر کرده یا پرداخت و حوالهٔ معتبر ندارد." });
+
         order.Status = input.Status;
         db.StoreOrderShippingHistories.Add(new StoreOrderShippingHistory
         {
@@ -79,7 +87,9 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
             ChangedAtUtc = DateTime.UtcNow
         });
         await db.SaveChangesAsync(cancellationToken);
+
         await transaction.CommitAsync(cancellationToken);
+
         return Ok(new { message = "وضعیت ارسال ثبت شد." });
     }
 
@@ -91,25 +101,25 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
     {
         if (!AdminListQuery.TryCreate(page, pageSize, q, out AdminPageRequest paging))
             return ValidationProblem(detail: "عبارت جست‌وجو یا صفحه‌بندی معتبر نیست.", statusCode: 400);
+
         string normalizedStatus = status?.Trim() ?? "";
         if (normalizedStatus.Length > 40 || normalizedStatus.Any(char.IsControl) ||
             normalizedStatus != "" && normalizedStatus is not ("pending-payment" or "simulated-payment-confirmed" or
                 "payment-confirmed" or "warehouse-confirmed" or "in-transit" or "shipped-to-post" or "delivered" or "cancelled"))
             return ValidationProblem(detail: "وضعیت سفارش معتبر نیست.", statusCode: 400);
+
         if (from.HasValue && to.HasValue && from.Value > to.Value)
             return ValidationProblem(detail: "تاریخ شروع باید قبل از تاریخ پایان باشد.", statusCode: 400);
+
         if (to == DateOnly.MaxValue)
             return ValidationProblem(detail: "تاریخ پایان معتبر نیست.", statusCode: 400);
+
         if (from.HasValue && to.HasValue && to.Value.DayNumber - from.Value.DayNumber > 365)
             return ValidationProblem(detail: "بازهٔ تاریخ نمی‌تواند بیشتر از ۳۶۶ روز باشد.", statusCode: 400);
 
         q = paging.Search;
-        DateTime? fromUtc = from.HasValue
-            ? DateTime.SpecifyKind(from.Value.ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc)
-            : null;
-        DateTime? untilUtc = to.HasValue
-            ? DateTime.SpecifyKind(to.Value.AddDays(1).ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc)
-            : null;
+        DateTime? fromUtc = from.HasValue ? DateTime.SpecifyKind(from.Value.ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc) : null;
+        DateTime? untilUtc = to.HasValue ? DateTime.SpecifyKind(to.Value.AddDays(1).ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc) : null;
         var query = from o in db.StoreCustomerOrders.AsNoTracking()
                           join p in db.AccountProfiles.AsNoTracking() on o.IdProfile equals p.Id
                           where (q == "" || o.OrderNumber.Contains(q) || (p.FirstName + " " + p.LastName).Contains(q))
@@ -133,6 +143,7 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
                           };
         int total = await query.CountAsync(cancellationToken);
         var rows = await query.Skip(paging.Offset).Take(paging.PageSize).ToListAsync(cancellationToken);
+
         return Ok(AdminListQuery.CreateResult(rows, total, paging));
     }
 
@@ -140,6 +151,7 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
     public async Task<IActionResult> Details(long id, CancellationToken cancellationToken)
     {
         if (id <= 0) return NotFound();
+
         var order = await (from o in db.StoreCustomerOrders.AsNoTracking().Where(x => x.Id == id)
                            join p in db.AccountProfiles.AsNoTracking() on o.IdProfile equals p.Id
                            select new OrderDetailsRow
@@ -200,6 +212,7 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
             order.ItemsJson = System.Text.Json.JsonSerializer.Serialize(items);
             order.ShippingHistoryJson = System.Text.Json.JsonSerializer.Serialize(history);
         }
+
         return order is null ? NotFound() : Ok(order);
     }
 

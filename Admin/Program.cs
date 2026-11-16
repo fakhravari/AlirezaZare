@@ -13,8 +13,7 @@ using Shop.Data.Infrastructure.Ftp;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddScoped<MediaCdnViewDataFilter>();
 builder.Services.AddControllersWithViews(options => options.Filters.AddService<MediaCdnViewDataFilter>());
-builder.Services.AddAuthentication("AdminCookie")
-    .AddCookie("AdminCookie", options =>
+builder.Services.AddAuthentication("AdminCookie").AddCookie("AdminCookie", options =>
     {
         options.Cookie.Name = "Shop.Admin.Session";
         options.Cookie.HttpOnly = true;
@@ -26,8 +25,7 @@ builder.Services.AddAuthentication("AdminCookie")
         options.ExpireTimeSpan = TimeSpan.FromHours(8);
         options.EventsType = typeof(AdminCookieEvents);
     });
-builder.Services.AddAuthorization(options =>
-    options.FallbackPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build());
+builder.Services.AddAuthorization(options => options.FallbackPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build());
 builder.Services.AddRateLimiter(options =>
 {
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
@@ -57,6 +55,7 @@ app.Use(async (context, next) =>
         context.Response.Headers.CacheControl = "no-store, no-cache, must-revalidate, max-age=0";
         context.Response.Headers.Pragma = "no-cache";
         context.Response.Headers.Expires = "0";
+
         return Task.CompletedTask;
     });
 
@@ -76,11 +75,7 @@ app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-app.MapControllerRoute(
-    name: "areas",
-    pattern: "{area:exists}/{controller=Dashboard}/{action=Index}/{id?}");
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+app.MapControllerRoute( name: "areas", pattern: "{area:exists}/{controller=Dashboard}/{action=Index}/{id?}");
+app.MapControllerRoute( name: "default", pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();

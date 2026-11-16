@@ -7,8 +7,7 @@
     string? contentSection = ViewData["ContentSection"]?.ToString();
     bool inStore = string.Equals(area, "Store", StringComparison.OrdinalIgnoreCase);
     bool inWarehouse = string.Equals(area, "Warehouse", StringComparison.OrdinalIgnoreCase);
-    bool isHome = string.Equals(area, "Admin", StringComparison.OrdinalIgnoreCase)
-        && string.Equals(controller, "Home", StringComparison.OrdinalIgnoreCase);
+    bool isHome = string.Equals(area, "Admin", StringComparison.OrdinalIgnoreCase) && string.Equals(controller, "Home", StringComparison.OrdinalIgnoreCase);
     bool IsFeature(string id) => string.Equals(feature, id, StringComparison.OrdinalIgnoreCase);
     bool Can(string permission) => User.IsInRole("system.full-access") || User.HasClaim("admin_permission", permission);
     bool canCatalog = Can("Store:Catalog:Products") || Can("Store:Catalog:Categories") || Can("Store:Catalog:Brands") || Can("Store:Catalog:Attributes");

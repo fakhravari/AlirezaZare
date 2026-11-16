@@ -18,7 +18,9 @@ public sealed class ProductFeedbackApiController(IProductFeedbackRepository feed
     public async Task<IActionResult> List(int productId, string type, CancellationToken cancellationToken)
     {
         if (!IsValidType(type)) return BadRequest(new { code = "invalid-feedback-type" });
+
         ProductFeedbackSnapshot? snapshot = await feedback.ReadAsync(productId, type, ProfileId, cancellationToken);
+
         return snapshot is null ? NotFound() : Ok(snapshot);
     }
 
@@ -28,6 +30,7 @@ public sealed class ProductFeedbackApiController(IProductFeedbackRepository feed
         CancellationToken cancellationToken)
     {
         if (!IsValidType(type)) return BadRequest(new { code = "invalid-feedback-type" });
+
         string name = (request.Name ?? string.Empty).Trim();
         string text = (request.Text ?? string.Empty).Trim();
         int maxTextLength = type == "reviews" ? 800 : 600;
@@ -39,8 +42,9 @@ public sealed class ProductFeedbackApiController(IProductFeedbackRepository feed
 
         long? id = await feedback.AddAsync(productId, ProfileId, type, name, text, request.Rating, cancellationToken);
         if (!id.HasValue) return NotFound();
-        var item = new ProductFeedbackItem(id.Value, name, text, request.Rating, "pending", null,
-            DateTimeOffset.UtcNow, null);
+
+        var item = new ProductFeedbackItem(id.Value, name, text, request.Rating, "pending", null, DateTimeOffset.UtcNow, null);
+
         return Ok(new { saved = true, item });
     }
 
@@ -51,6 +55,7 @@ public sealed class ProductFeedbackApiController(IProductFeedbackRepository feed
     {
         if (!IsValidType(type) || request.Items is null || request.Items.Count is < 1 or > 50)
             return BadRequest(new { code = "invalid-feedback-import" });
+
         int maxTextLength = type == "reviews" ? 800 : 600;
         if (request.Items.Any(item => item is null || (item.Name?.Trim().Length ?? 0) is < 5 or > 80 ||
                                       item.Name!.Split(' ', StringSplitOptions.RemoveEmptyEntries).Length < 2 ||
@@ -66,6 +71,7 @@ public sealed class ProductFeedbackApiController(IProductFeedbackRepository feed
             item.CreatedAt)).ToArray();
         int? imported = await feedback.ImportLegacyAsync(productId, ProfileId, type, items, cancellationToken);
         if (!imported.HasValue) return NotFound();
+
         return Ok(new { saved = true, imported });
     }
 

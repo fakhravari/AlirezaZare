@@ -14,6 +14,7 @@ public sealed class StoreCategoryContentApiController(ShopDbContext db) : Contro
     public async Task<IActionResult> Get(string key, CancellationToken cancellationToken)
     {
         var category = await db.StoreCategories.AsNoTracking().SingleOrDefaultAsync(x => x.CategoryKey == key, cancellationToken);
+
         return category is null ? NotFound() : Ok(new
         {
             intro = category.ProductIntro ?? "",
@@ -28,21 +29,26 @@ public sealed class StoreCategoryContentApiController(ShopDbContext db) : Contro
     {
         if ((input.Intro?.Length ?? 0) > 10000 || !ValidArray(input.Highlights, false) || !ValidArray(input.Specs, true))
             return ValidationProblem(detail: "معرفی یا قالب نکات و مشخصات معتبر نیست.", statusCode: 400);
+
         var category = await db.StoreCategories.SingleOrDefaultAsync(x => x.CategoryKey == key, cancellationToken);
         if (category is null) return NotFound();
+
         category.ProductIntro = input.Intro ?? "";
         category.ProductHighlightsJson = input.Highlights!;
         category.ProductSpecsJson = input.Specs!;
         await db.SaveChangesAsync(cancellationToken);
+
         return Ok(new { message = "محتوای دسته ذخیره شد." });
     }
 
     private static bool ValidArray(string? json, bool pairs)
     {
         if (json is null || json.Length > 30000) return false;
+
         try
         {
             using JsonDocument doc = JsonDocument.Parse(json);
+
             return doc.RootElement.ValueKind == JsonValueKind.Array && doc.RootElement.GetArrayLength() <= 100 &&
                    doc.RootElement.EnumerateArray().All(x => pairs
                        ? x.ValueKind == JsonValueKind.Array && x.GetArrayLength() == 2 && x.EnumerateArray().All(ValidText)

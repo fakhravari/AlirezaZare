@@ -9,8 +9,8 @@ public sealed class ErrorController : PageController
     public async Task<IActionResult> Index()
     {
         Response.StatusCode = 500;
-        PageModel model = new(new SeoModel("خطا | فروشگاه ندا اولیائی",
-            "در پردازش درخواست مشکلی رخ داد. به صفحهٔ اصلی برگردید یا دوباره تلاش کنید.", Robots: "noindex, nofollow"));
+        PageModel model = new(new SeoModel("خطا | فروشگاه ندا اولیائی", "در پردازش درخواست مشکلی رخ داد. به صفحهٔ اصلی برگردید یا دوباره تلاش کنید.", Robots: "noindex, nofollow"));
+
         return await PageAsync(model);
     }
 
@@ -27,6 +27,7 @@ public sealed class ErrorController : PageController
                 ? "این نشانی در فروشگاه پیدا نشد. از جستجوی کالاها استفاده کنید یا به صفحهٔ اصلی برگردید."
                 : "در پردازش این درخواست مشکلی رخ داد. دوباره تلاش کنید یا به صفحهٔ اصلی برگردید.",
             Robots: "noindex, nofollow"), ViewName: "Index");
+
         return await PageAsync(model);
     }
 }

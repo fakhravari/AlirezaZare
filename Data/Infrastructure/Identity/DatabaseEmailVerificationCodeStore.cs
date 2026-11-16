@@ -16,8 +16,7 @@ public sealed class DatabaseEmailVerificationCodeStore(ShopDbContext db) : IEmai
         CancellationToken cancellationToken)
     {
         if (lifetimeMinutes is < 1 or > 1440)
-            throw new ArgumentOutOfRangeException(nameof(lifetimeMinutes),
-                "Email verification code lifetime must be between 1 and 1440 minutes.");
+            throw new ArgumentOutOfRangeException(nameof(lifetimeMinutes), "Email verification code lifetime must be between 1 and 1440 minutes.");
 
         await using var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
         DateTime now = DateTime.UtcNow;
@@ -27,6 +26,7 @@ public sealed class DatabaseEmailVerificationCodeStore(ShopDbContext db) : IEmai
         {
             TimeSpan retryAfter = existing.ExpiresAtUtc - now;
             await transaction.CommitAsync(cancellationToken);
+
             return new(false, null, retryAfter, existing.LifetimeMinutes);
         }
 
@@ -42,7 +42,9 @@ public sealed class DatabaseEmailVerificationCodeStore(ShopDbContext db) : IEmai
         existing.LifetimeMinutes = lifetimeMinutes;
         existing.Attempts = 0;
         await db.SaveChangesAsync(cancellationToken);
+
         await transaction.CommitAsync(cancellationToken);
+
         return new(true, code, TimeSpan.Zero, lifetimeMinutes);
     }
 
@@ -60,6 +62,7 @@ public sealed class DatabaseEmailVerificationCodeStore(ShopDbContext db) : IEmai
         if (entry is null)
         {
             await transaction.CommitAsync(cancellationToken);
+
             return false;
         }
 
@@ -67,7 +70,9 @@ public sealed class DatabaseEmailVerificationCodeStore(ShopDbContext db) : IEmai
         {
             db.EmailVerificationCodes.Remove(entry);
             await db.SaveChangesAsync(cancellationToken);
+
             await transaction.CommitAsync(cancellationToken);
+
             return false;
         }
 
@@ -75,13 +80,17 @@ public sealed class DatabaseEmailVerificationCodeStore(ShopDbContext db) : IEmai
         {
             db.EmailVerificationCodes.Remove(entry);
             await db.SaveChangesAsync(cancellationToken);
+
             await transaction.CommitAsync(cancellationToken);
+
             return true;
         }
 
         entry.Attempts++;
         await db.SaveChangesAsync(cancellationToken);
+
         await transaction.CommitAsync(cancellationToken);
+
         return false;
     }
 

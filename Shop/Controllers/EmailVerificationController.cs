@@ -25,9 +25,8 @@ public sealed partial class EmailVerificationController(
     {
         var email = NormalizeEmail(request.Email);
         if (!IsValidEmail(email)) return BadRequest(new { code = "invalid-email", message = "ایمیل معتبر نیست." });
-        var lifetimeMinutes = await db.StoreSiteIdentities.AsNoTracking()
-            .Where(x => x.Id == 1).Select(x => x.EmailVerificationCodeLifetimeMinutes)
-            .SingleOrDefaultAsync(cancellationToken);
+
+        var lifetimeMinutes = await db.StoreSiteIdentities.AsNoTracking().Where(x => x.Id == 1).Select(x => x.EmailVerificationCodeLifetimeMinutes).SingleOrDefaultAsync(cancellationToken);
         if (lifetimeMinutes is < 1 or > 1440) lifetimeMinutes = 15;
         EmailCodeCreateResult codeResult = await codes.TryCreateAsync(email, lifetimeMinutes, cancellationToken);
         if (!codeResult.Created)
@@ -38,22 +37,25 @@ public sealed partial class EmailVerificationController(
                     message = $"در {codeResult.LifetimeMinutes} دقیقهٔ گذشته برای این ایمیل کد ارسال شده است؛ کد قبلی تا پایان این زمان معتبر است.",
                     retryAfterSeconds = Math.Max(1, (int)Math.Ceiling(codeResult.RetryAfter.TotalSeconds))
                 });
+
         try
         {
             var emailBody = $"کد تأیید شما: {codeResult.Code}\n\nاین کد تا {lifetimeMinutes} دقیقه معتبر است. اگر این درخواست از طرف شما نبوده، این پیام را نادیده بگیرید.";
             await emailSender.SendAsync(email, "کد تأیید فروشگاه برق شیراز", emailBody, cancellationToken);
+
             return Ok(new { message = $"ایمیل حاوی کد تأیید ارسال شد؛ کد تا {lifetimeMinutes} دقیقه اعتبار دارد و در این مدت ایمیل دیگری ارسال نمی‌شود." });
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
             await codes.RemoveAsync(email, CancellationToken.None);
+
             return StatusCode(499);
         }
         catch
         {
             await codes.RemoveAsync(email, CancellationToken.None);
-            return StatusCode(StatusCodes.Status503ServiceUnavailable,
-                new { code = "email-unavailable", message = "ارسال ایمیل در حال حاضر ممکن نیست." });
+
+            return StatusCode(StatusCodes.Status503ServiceUnavailable, new { code = "email-unavailable", message = "ارسال ایمیل در حال حاضر ممکن نیست." });
         }
     }
 
@@ -65,15 +67,20 @@ public sealed partial class EmailVerificationController(
         var email = NormalizeEmail(request.Email);
         if (!IsValidEmail(email) || !SixDigitCode().IsMatch(request.Code ?? ""))
             return BadRequest(new { code = "invalid-code" });
+
         bool isRegistration = string.Equals(request.Mode, "register", StringComparison.Ordinal);
         if (request.Mode is not ("login" or "register"))
             return BadRequest(new { code = "invalid-mode", message = "روش تأیید معتبر نیست." });
+
         if (isRegistration && !IsValidPassword(request.Password))
             return BadRequest(new { code = "invalid-password", message = "رمز عبور باید دست‌کم ۱ نویسه داشته باشد." });
+
         if (!isRegistration && request.Password is not null)
             return BadRequest(new { code = "invalid-request" });
+
         if (!await codes.VerifyAsync(email, request.Code!, cancellationToken))
             return BadRequest(new { code = "invalid-code" });
+
         var profile = await db.AccountProfiles.SingleOrDefaultAsync(x => x.Email == email, cancellationToken);
         if (profile is null)
         {
@@ -86,12 +93,10 @@ public sealed partial class EmailVerificationController(
         }
         profile.UpdatedAtUtc = DateTime.UtcNow;
         await db.SaveChangesAsync(cancellationToken);
-        var claims = new[]
-        {
-            new Claim(ClaimTypes.NameIdentifier, profile.Id.ToString()), new Claim(ClaimTypes.Email, email),
-            new Claim(ClaimTypes.Name, email)
-        };
+
+        var claims = new[] { new Claim(ClaimTypes.NameIdentifier, profile.Id.ToString()), new Claim(ClaimTypes.Email, email), new Claim(ClaimTypes.Name, email) };
         await HttpContext.SignInAsync("ShopCookie", new ClaimsPrincipal(new ClaimsIdentity(claims, "ShopCookie")));
+
         return Ok(new { authenticated = true, email });
     }
 
@@ -104,6 +109,7 @@ public sealed partial class EmailVerificationController(
     public async Task<IActionResult> Logout()
     {
         await HttpContext.SignOutAsync("ShopCookie");
+
         return Ok(new { authenticated = false });
     }
 
@@ -113,8 +119,7 @@ public sealed partial class EmailVerificationController(
     {
         try
         {
-            return email.Length <= 254 &&
-                   new MailAddress(email).Address.Equals(email, StringComparison.OrdinalIgnoreCase);
+            return email.Length <= 254 && new MailAddress(email).Address.Equals(email, StringComparison.OrdinalIgnoreCase);
         }
         catch (FormatException)
         {

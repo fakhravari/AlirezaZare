@@ -35,6 +35,7 @@ public sealed class StoreGeographyAdminApiController(ShopDbContext db, IMediaCdn
                             select new Place(city.Id, city.NameFa, city.NameEn, null, city.IdCountry, city.IdProvince,
                                 country.NameFa + " / " + province.NameFa, null, city.SourceCountryName,
                                 city.Latitude, city.Longitude, city.IsProvinceCenter)).ToListAsync(ct);
+
         return Ok(new { countries = countryItems, provinces, cities });
     }
 
@@ -48,14 +49,17 @@ public sealed class StoreGeographyAdminApiController(ShopDbContext db, IMediaCdn
     {
         string fa = input.NameFa?.Trim() ?? "", en = input.NameEn?.Trim() ?? "", code = input.Code?.Trim().ToUpperInvariant() ?? "";
         if (kind is not ("countries" or "provinces" or "cities")) return BadRequest();
+
         int maxNameLength = kind == "cities" ? 200 : 150;
         if (fa.Length < 1 || fa.Length > maxNameLength || en.Length < 1 || en.Length > maxNameLength ||
             (kind == "countries" && (code.Length is < 1 or > 8 || !code.All(char.IsAsciiLetterOrDigit))))
             return BadRequest(new { title = "اطلاعات واردشده معتبر نیست." });
+
         string? flag = string.IsNullOrWhiteSpace(input.FlagPath) ? null : input.FlagPath.Trim();
         if (flag?.Length > 500 || (flag is not null && !flag.StartsWith("content/", StringComparison.OrdinalIgnoreCase) &&
             !(Uri.TryCreate(flag, UriKind.Absolute, out var uri) && uri.Scheme is "http" or "https")))
             return BadRequest(new { title = "مسیر پرچم باید مسیر content/ یا نشانی HTTP معتبر باشد." });
+
         if (input.Latitude is < -90 or > 90 || input.Longitude is < -180 or > 180)
             return BadRequest(new { title = "مختصات جغرافیایی معتبر نیست." });
 
@@ -92,8 +96,7 @@ public sealed class StoreGeographyAdminApiController(ShopDbContext db, IMediaCdn
                     case "cities":
                         var parent = await db.GeoProvinces.Where(x => x.Id == input.ProvinceId)
                             .Join(db.GeoCountries, province => province.IdCountry, country => country.Id,
-                                (province, country) => new { province.Id, province.IdCountry, CountryName = country.NameFa })
-                            .SingleOrDefaultAsync(ct);
+                                (province, country) => new { province.Id, province.IdCountry, CountryName = country.NameFa }).SingleOrDefaultAsync(ct);
                         if (parent is null || parent.IdCountry != input.CountryId)
                             return BadRequest(new { title = "استان و کشور معتبر را انتخاب کنید." });
                         db.GeoCities.Add(new GeoCity
@@ -117,23 +120,30 @@ public sealed class StoreGeographyAdminApiController(ShopDbContext db, IMediaCdn
                 {
                     var country = await db.GeoCountries.SingleOrDefaultAsync(x => x.Id == id, ct);
                     if (country is null) return NotFound(new { title = "رکورد پیدا نشد." });
+
                     if (country.CountryCode == "IR" && code != "IR")
                         return Conflict(new { title = "کد کشور ایران برای ثبت نشانی‌ها باید IR باقی بماند." });
+
                     country.NameFa = fa; country.NameEn = en; country.CountryCode = code;
+
                     if (input.UpdateDetails) country.FlagPath = flag;
                 }
                 else if (kind == "provinces")
                 {
                     var province = await db.GeoProvinces.SingleOrDefaultAsync(x => x.Id == id, ct);
                     if (province is null) return NotFound(new { title = "رکورد پیدا نشد." });
+
                     province.NameFa = fa; province.NameEn = en;
+
                     if (input.UpdateDetails) { province.Latitude = input.Latitude; province.Longitude = input.Longitude; }
                 }
                 else
                 {
                     var city = await db.GeoCities.SingleOrDefaultAsync(x => x.Id == id, ct);
                     if (city is null) return NotFound(new { title = "رکورد پیدا نشد." });
+
                     city.NameFa = fa; city.NameEn = en;
+
                     if (input.UpdateDetails)
                     {
                         city.Latitude = input.Latitude; city.Longitude = input.Longitude;
@@ -142,7 +152,9 @@ public sealed class StoreGeographyAdminApiController(ShopDbContext db, IMediaCdn
                 }
             }
             await db.SaveChangesAsync(ct);
+
             await transaction.CommitAsync(ct);
+
             return Ok(new { message = "اطلاعات ذخیره شد." });
         }
         catch (DbUpdateException ex) when (ex.InnerException is Microsoft.Data.SqlClient.SqlException { Number: 2601 or 2627 or 547 or 515 })
@@ -161,6 +173,7 @@ public sealed class StoreGeographyAdminApiController(ShopDbContext db, IMediaCdn
             "cities" => await DeleteAsync(db.GeoCities, id, ct),
             _ => -1
         };
+
         return deleted == -1 ? BadRequest() : deleted == -2
             ? Conflict(new { title = "این مورد در داده‌های دیگر استفاده شده و قابل حذف نیست." }) : deleted == 0
             ? NotFound(new { title = "رکورد پیدا نشد." })
@@ -171,6 +184,7 @@ public sealed class StoreGeographyAdminApiController(ShopDbContext db, IMediaCdn
     {
         var entity = await set.FindAsync([id], ct);
         if (entity is null) return 0;
+
         set.Remove(entity);
         try { return await db.SaveChangesAsync(ct); }
         catch (DbUpdateException ex) when (ex.InnerException is Microsoft.Data.SqlClient.SqlException { Number: 547 })

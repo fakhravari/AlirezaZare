@@ -20,14 +20,19 @@ public sealed class WarehouseMovementsApiController(ShopDbContext db) : Controll
     {
         if (!AdminListQuery.TryCreate(page, pageSize, search, out AdminPageRequest paging))
             return ValidationProblem(detail: "عبارت جست‌وجو یا صفحه‌بندی معتبر نیست.", statusCode: 400);
+
         search = paging.Search;
         salesPlan = salesPlan?.Trim();
+
         if (warehouseId is <= 0 || (from.HasValue && to.HasValue && from > to)
             || to == DateOnly.MaxValue || salesPlan?.Length > AdminListQuery.MaximumSearchLength
             || direction is not (null or "" or "R" or "I") || (audit && summary))
             return ValidationProblem(detail: "فیلترها، بازهٔ تاریخ یا شمارهٔ صفحه معتبر نیست.", statusCode: 400);
+
         if (audit) return await GetAuditAsync(warehouseId, search, from, to, paging, cancellationToken);
+
         if (summary) return await GetSummaryAsync(warehouseId, search, salesPlan, from, to, paging, cancellationToken);
+
         var query = from line in db.WarehouseDocumentLines.AsNoTracking()
                     join document in db.WarehouseDocuments.AsNoTracking() on line.IdDocument equals document.Id
                     join type in db.WarehouseDocumentTypes.AsNoTracking() on document.IdDocumentType equals type.Id
@@ -70,12 +75,8 @@ public sealed class WarehouseMovementsApiController(ShopDbContext db) : Controll
                     };
         if (!User.IsInRole("system.full-access"))
         {
-            long userId = long.TryParse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value,
-                out long parsed)
-                ? parsed
-                : 0;
-            long[] allowed = await db.AdminUserWarehouseAccesses.AsNoTracking().Where(x => x.IdUser == userId)
-                .Select(x => x.IdWarehouse).ToArrayAsync(cancellationToken);
+            long userId = long.TryParse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out long parsed) ? parsed : 0;
+            long[] allowed = await db.AdminUserWarehouseAccesses.AsNoTracking().Where(x => x.IdUser == userId) .Select(x => x.IdWarehouse).ToArrayAsync(cancellationToken);
             query = query.Where(x => allowed.Contains(x.WarehouseId));
         }
 
@@ -83,10 +84,7 @@ public sealed class WarehouseMovementsApiController(ShopDbContext db) : Controll
         {
             if (!User.IsInRole("system.full-access"))
             {
-                long userId = long.TryParse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value,
-                    out long parsed)
-                    ? parsed
-                    : 0;
+                long userId = long.TryParse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out long parsed) ? parsed : 0;
                 if (!await db.AdminUserWarehouseAccesses.AnyAsync(
                         x => x.IdUser == userId && x.IdWarehouse == warehouseId, cancellationToken)) return Forbid();
             }
@@ -109,6 +107,7 @@ public sealed class WarehouseMovementsApiController(ShopDbContext db) : Controll
 
         int total = await query.CountAsync(cancellationToken);
         var items = await query.Skip(paging.Offset).Take(paging.PageSize).ToListAsync(cancellationToken);
+
         return Ok(AdminListQuery.CreateResult(items, total, paging));
     }
 
@@ -125,9 +124,9 @@ public sealed class WarehouseMovementsApiController(ShopDbContext db) : Controll
         if (!User.IsInRole("system.full-access"))
         {
             long userId = long.TryParse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out long parsed) ? parsed : 0;
-            long[] allowed = await db.AdminUserWarehouseAccesses.AsNoTracking().Where(x => x.IdUser == userId)
-                .Select(x => x.IdWarehouse).ToArrayAsync(cancellationToken);
+            long[] allowed = await db.AdminUserWarehouseAccesses.AsNoTracking().Where(x => x.IdUser == userId) .Select(x => x.IdWarehouse).ToArrayAsync(cancellationToken);
             if (warehouseId.HasValue && !allowed.Contains(warehouseId.Value)) return Forbid();
+
             query = query.Where(x => allowed.Contains(x.movement.IdWarehouse));
         }
         if (warehouseId.HasValue) query = query.Where(x => x.movement.IdWarehouse == warehouseId.Value);
@@ -166,8 +165,8 @@ public sealed class WarehouseMovementsApiController(ShopDbContext db) : Controll
         });
         int total = await grouped.CountAsync(cancellationToken);
         var items = await grouped.OrderBy(x => x.Warehouse).ThenBy(x => x.Product).ThenBy(x => x.Variant)
-            .ThenBy(x => x.SalesPlan).ThenBy(x => x.ItemId).ThenBy(x => x.PlanId)
-            .Skip(paging.Offset).Take(paging.PageSize).ToListAsync(cancellationToken);
+            .ThenBy(x => x.SalesPlan).ThenBy(x => x.ItemId).ThenBy(x => x.PlanId).Skip(paging.Offset).Take(paging.PageSize).ToListAsync(cancellationToken);
+
         return Ok(AdminListQuery.CreateResult(items, total, paging));
     }
 
@@ -183,12 +182,8 @@ public sealed class WarehouseMovementsApiController(ShopDbContext db) : Controll
                     };
         if (!User.IsInRole("system.full-access"))
         {
-            long userId = long.TryParse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value,
-                out long parsed)
-                ? parsed
-                : 0;
-            long[] allowed = await db.AdminUserWarehouseAccesses.AsNoTracking().Where(x => x.IdUser == userId)
-                .Select(x => x.IdWarehouse).ToArrayAsync(cancellationToken);
+            long userId = long.TryParse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out long parsed) ? parsed : 0;
+            long[] allowed = await db.AdminUserWarehouseAccesses.AsNoTracking().Where(x => x.IdUser == userId) .Select(x => x.IdWarehouse).ToArrayAsync(cancellationToken);
             query = query.Where(x => allowed.Contains(x.audit.WarehouseId));
         }
 
@@ -196,10 +191,7 @@ public sealed class WarehouseMovementsApiController(ShopDbContext db) : Controll
         {
             if (!User.IsInRole("system.full-access"))
             {
-                long userId = long.TryParse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value,
-                    out long parsed)
-                    ? parsed
-                    : 0;
+                long userId = long.TryParse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out long parsed) ? parsed : 0;
                 if (!await db.AdminUserWarehouseAccesses.AnyAsync(
                         x => x.IdUser == userId && x.IdWarehouse == warehouseId, cancellationToken)) return Forbid();
             }
@@ -222,14 +214,11 @@ public sealed class WarehouseMovementsApiController(ShopDbContext db) : Controll
         if (!string.IsNullOrWhiteSpace(search))
         {
             string term = search.Trim();
-            query = query.Where(x =>
-                (x.audit.Reason != null && x.audit.Reason.Contains(term)) || x.audit.ActorUserKey.Contains(term));
+            query = query.Where(x => (x.audit.Reason != null && x.audit.Reason.Contains(term)) || x.audit.ActorUserKey.Contains(term));
         }
 
         int total = await query.CountAsync(cancellationToken);
-        var items = await query.OrderByDescending(x => x.audit.OccurredAtUtc).ThenByDescending(x => x.audit.Id)
-            .Skip(paging.Offset).Take(paging.PageSize)
-            .Select(x => new
+        var items = await query.OrderByDescending(x => x.audit.OccurredAtUtc).ThenByDescending(x => x.audit.Id).Skip(paging.Offset).Take(paging.PageSize).Select(x => new
             {
                 x.audit.Id,
                 x.audit.DocumentId,
@@ -242,6 +231,7 @@ public sealed class WarehouseMovementsApiController(ShopDbContext db) : Controll
                 x.audit.BeforeJson,
                 x.audit.AfterJson
             }).ToListAsync(cancellationToken);
+
         return Ok(AdminListQuery.CreateResult(items, total, paging));
     }
 }

@@ -1,12 +1,12 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Shop.Data.Application.Account.Contracts;
+using Shop.Data.Application.Email.Contracts;
+using Shop.Data.Application.Store;
+using Shop.Data.Application.Store.Contracts;
 using Shop.Data.Application.Warehouse.Contracts;
 using Shop.Data.Application.Warehouse.Services;
-using Shop.Data.Application.Store.Contracts;
-using Shop.Data.Application.Store;
-using Shop.Data.Application.Email.Contracts;
-using Shop.Data.Application.Account.Contracts;
 using Shop.Data.Infrastructure.Email;
 using Shop.Data.Infrastructure.Identity;
 using Shop.Data.Infrastructure.Persistence;
@@ -27,11 +27,15 @@ public static class DependencyInjection
         services.AddScoped<IEmailSender, SmtpEmailSender>();
         services.AddScoped<IEmailVerificationCodeStore, DatabaseEmailVerificationCodeStore>();
         services.AddScoped<IWarehouseStockLedger, WarehouseStockLedger>();
+
         string mediaCdnBaseUrl = configuration[$"{MediaCdnOptions.SectionName}:BaseUrl"] ?? MediaCdnOptions.DefaultBaseUrl;
-        services.AddOptions<MediaCdnOptions>()
-            .Configure(options => options.BaseUrl = mediaCdnBaseUrl)
-            .Validate(options => { try { MediaCdnOptions.NormalizeBaseUrl(options.BaseUrl); return true; } catch (InvalidOperationException) { return false; } }, "MediaCdn:BaseUrl must be a valid HTTPS origin.")
-            .ValidateOnStart();
+        services.AddOptions<MediaCdnOptions>().Configure(options => options.BaseUrl = mediaCdnBaseUrl)
+            .Validate(options =>
+            {
+                try { MediaCdnOptions.NormalizeBaseUrl(options.BaseUrl); return true; }
+                catch (InvalidOperationException) { return false; }
+            }, "MediaCdn:BaseUrl must be a valid HTTPS origin.").ValidateOnStart();
+
         services.AddScoped<IWarehouseReadRepository, WarehouseReadRepository>();
         services.AddScoped<IWarehouseReadService, WarehouseReadService>();
         services.AddScoped<IStoreSalesPlanRepository, StoreSalesPlanRepository>();
@@ -40,6 +44,7 @@ public static class DependencyInjection
         services.AddScoped<IStoreSiteIdentityRepository, StoreSiteIdentityRepository>();
         services.AddScoped<IProductFeedbackRepository, StoreProductFeedbackRepository>();
         services.AddScoped<IStorePriceVersionService, StorePriceVersionService>();
+
         return services;
     }
 }

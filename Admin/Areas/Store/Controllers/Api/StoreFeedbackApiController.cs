@@ -46,19 +46,18 @@ public sealed class StoreFeedbackApiController(ShopDbContext db) : ControllerBas
         if (!AdminListQuery.TryCreate(page, pageSize, search, out AdminPageRequest paging)
             || status is not (null or "pending" or "approved" or "rejected"))
             return ValidationProblem(detail: "فیلتر یا صفحه‌بندی معتبر نیست.", statusCode: 400);
+
         if (from.HasValue && to.HasValue && from.Value > to.Value)
             return ValidationProblem(detail: "تاریخ شروع باید قبل از تاریخ پایان باشد.", statusCode: 400);
+
         if (to == DateOnly.MaxValue)
             return ValidationProblem(detail: "تاریخ پایان معتبر نیست.", statusCode: 400);
+
         if (from.HasValue && to.HasValue && to.Value.DayNumber - from.Value.DayNumber > 365)
             return ValidationProblem(detail: "بازهٔ تاریخ نمی‌تواند بیشتر از ۳۶۶ روز باشد.", statusCode: 400);
 
-        DateTime? fromUtc = from.HasValue
-            ? DateTime.SpecifyKind(from.Value.ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc)
-            : null;
-        DateTime? untilUtc = to.HasValue
-            ? DateTime.SpecifyKind(to.Value.AddDays(1).ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc)
-            : null;
+        DateTime? fromUtc = from.HasValue ? DateTime.SpecifyKind(from.Value.ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc) : null;
+        DateTime? untilUtc = to.HasValue ? DateTime.SpecifyKind(to.Value.AddDays(1).ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc) : null;
         var query = from feedback in db.ProductFeedback.AsNoTracking()
                     join product in db.Products.AsNoTracking() on feedback.IdProduct equals product.Id
                     where feedback.FeedbackType == type
@@ -83,13 +82,11 @@ public sealed class StoreFeedbackApiController(ShopDbContext db) : ControllerBas
         if (paging.Search.Length > 0)
         {
             string term = paging.Search;
-            query = query.Where(x =>
-                x.StoreProductKey.Contains(term) || x.ProductName.Contains(term) || x.DisplayName.Contains(term) || x.FeedbackText.Contains(term));
+            query = query.Where(x => x.StoreProductKey.Contains(term) || x.ProductName.Contains(term) || x.DisplayName.Contains(term) || x.FeedbackText.Contains(term));
         }
 
         int total = await query.CountAsync(cancellationToken);
-        var items = await query.OrderByDescending(x => x.CreatedAtUtc).ThenByDescending(x => x.Id)
-            .Skip(paging.Offset).Take(paging.PageSize).ToListAsync(cancellationToken);
+        var items = await query.OrderByDescending(x => x.CreatedAtUtc).ThenByDescending(x => x.Id) .Skip(paging.Offset).Take(paging.PageSize).ToListAsync(cancellationToken);
         var result = items.Select(item => new
             {
                 item.Id,
@@ -105,6 +102,7 @@ public sealed class StoreFeedbackApiController(ShopDbContext db) : ControllerBas
                 item.CreatedAtUtc,
                 item.RepliedAtUtc
             }).ToArray();
+
         return Ok(AdminListQuery.CreateResult(result, total, paging));
     }
 
@@ -113,15 +111,15 @@ public sealed class StoreFeedbackApiController(ShopDbContext db) : ControllerBas
     {
         if (input.Status is not ("pending" or "approved" or "rejected") || (input.AdminReply?.Length ?? 0) > 1000)
             return ValidationProblem(detail: "وضعیت یا متن پاسخ معتبر نیست.", statusCode: 400);
-        ProductFeedback? feedback =
-            await db.ProductFeedback.SingleOrDefaultAsync(x => x.Id == id && x.FeedbackType == type, cancellationToken);
+
+        ProductFeedback? feedback = await db.ProductFeedback.SingleOrDefaultAsync(x => x.Id == id && x.FeedbackType == type, cancellationToken);
         if (feedback is null) return NotFound();
+
         feedback.Status = input.Status;
-        feedback.AdminReply = string.IsNullOrWhiteSpace(input.AdminReply)
-            ? null
-            : StoreHtmlSanitizer.Sanitize(input.AdminReply).Trim();
+        feedback.AdminReply = string.IsNullOrWhiteSpace(input.AdminReply) ? null : StoreHtmlSanitizer.Sanitize(input.AdminReply).Trim();
         feedback.RepliedAtUtc = feedback.AdminReply is null ? null : DateTime.UtcNow;
         await db.SaveChangesAsync(cancellationToken);
+
         return Ok(new { message = type == "reviews" ? "وضعیت دیدگاه ذخیره شد." : "وضعیت پرسش و پاسخ ذخیره شد." });
     }
 }

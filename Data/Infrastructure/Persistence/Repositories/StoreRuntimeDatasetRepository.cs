@@ -35,10 +35,7 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext, IMedi
                                         where productIds.Contains(link.IdProduct)
                                         orderby link.SortOrder, link.Id
                                         select new { link.IdProduct, link.Id, accessory.AccessoryKey, accessory.Name, link.IsRequired, link.PriceAmount }).ToListAsync(cancellationToken);
-        var productBenefits = await dbContext.StoreProductBenefits.AsNoTracking()
-            .Where(x => productIds.Contains(x.IdProduct) && x.IsActive)
-            .OrderBy(x => x.SortOrder).ThenBy(x => x.Id)
-            .ToListAsync(cancellationToken);
+        var productBenefits = await dbContext.StoreProductBenefits.AsNoTracking().Where(x => productIds.Contains(x.IdProduct) && x.IsActive).OrderBy(x => x.SortOrder).ThenBy(x => x.Id).ToListAsync(cancellationToken);
         var documents = await dbContext.StoreProductDocuments.AsNoTracking().Where(x => productIds.Contains(x.IdProduct)).OrderBy(x => x.Id).ToListAsync(cancellationToken);
         var collections = await dbContext.StoreProductCollections.AsNoTracking().OrderBy(x => x.Id).ToListAsync(cancellationToken);
         var collectionIds = collections.Select(x => x.Id).ToArray();
@@ -62,6 +59,7 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext, IMedi
         {
             var definition = new JsonObject { ["label"] = x.Label, ["icon"] = x.Icon ?? "", ["source"] = x.SourceKey ?? "", ["is_filterable"] = x.IsFilterable, ["is_highlight"] = x.IsHighlight };
             AddOptional(definition, "filterKey", x.FilterKey);
+
             return KeyValuePair.Create<string, JsonNode?>(x.AttributeKey, definition);
         }));
         root["brands"] = new JsonArray(brands.Select(x => (JsonNode?)new JsonObject { ["id"] = x.BrandKey, ["name"] = x.NameEn, ["fa"] = x.NameFa, ["logo"] = x.LogoPath, ["showInStore"] = x.ShowInStore, ["countryCode"] = x.IdCountry.HasValue ? countryCodeById.GetValueOrDefault(x.IdCountry.Value) : null }).ToArray());
@@ -103,6 +101,7 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext, IMedi
         FilterArray(root, "products", item => activeBrandKeys.Contains(item?["brandId"]?.GetValue<string>() ?? "") && (item?["categoryId"] is null || root["categories"]?.AsArray().Any(category => string.Equals(category?["id"]?.GetValue<string>(), item["categoryId"]?.GetValue<string>(), StringComparison.Ordinal)) == true));
         var visibleProductIds = (root["products"]?.AsArray() ?? []).Select(item => item?["id"]?.ToJsonString()).ToHashSet(StringComparer.Ordinal);
         if (root["collections"] is JsonArray collectionArray) foreach (var collection in collectionArray) if (collection?["items"] is JsonArray items) for (int index = items.Count - 1; index >= 0; index--) if (!visibleProductIds.Contains(items[index]?.ToJsonString())) items.RemoveAt(index);
+
         return ContentCdn.RewriteJson(root.ToJsonString(), await mediaCdn.GetBaseUrlAsync(cancellationToken));
     }
 
@@ -114,12 +113,14 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext, IMedi
     private static JsonNode? ParseJsonValue(string? value)
     {
         if (string.IsNullOrWhiteSpace(value)) return null;
+
         try { return JsonNode.Parse(value); } catch (System.Text.Json.JsonException) { return null; }
     }
 
     private static JsonNode ParseJsonArray(string? value)
     {
         if (string.IsNullOrWhiteSpace(value)) return new JsonArray();
+
         try { return JsonNode.Parse(value) ?? new JsonArray(); }
         catch (System.Text.Json.JsonException) { return new JsonArray(); }
     }
@@ -127,6 +128,7 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext, IMedi
     private static void FilterArray(JsonObject root, string name, Func<JsonNode?, bool> keep)
     {
         if (root[name] is not JsonArray items) return;
+
         for (int index = items.Count - 1; index >= 0; index--)
             if (!keep(items[index])) items.RemoveAt(index);
     }
@@ -149,6 +151,7 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext, IMedi
             item["productFamilies"] = ParseJsonArray(row.ProductFamiliesJson); item["strengths"] = ParseJsonArray(row.StrengthsJson);
             items.Add(item);
         }
+
         return ContentCdn.RewriteJson(items.ToJsonString(), await mediaCdn.GetBaseUrlAsync(cancellationToken));
     }
 
@@ -160,8 +163,7 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext, IMedi
                 on faq.IdContentPage equals page.Id
             where page.PageKey == "faq" && page.IsPublished && faq.IsPublished
             orderby faq.SortOrder, faq.Id
-            select new StoreFaqRow(faq.Question, faq.Answer, faq.LinkText, faq.LinkUrl, faq.SortOrder))
-            .ToListAsync(cancellationToken);
+            select new StoreFaqRow(faq.Question, faq.Answer, faq.LinkText, faq.LinkUrl, faq.SortOrder)).ToListAsync(cancellationToken);
     }
 
     public async Task<string?> ReadAccountJsonAsync(CancellationToken cancellationToken)
@@ -169,6 +171,7 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext, IMedi
         var coupons = await dbContext.AccountCoupons.AsNoTracking().OrderBy(x => x.Id)
             .Select(x => new { id = x.CouponKey, x.Code, x.DiscountPercent, x.UsageLimit, enabled = x.Enabled, x.ExpiresOn, orderIds = Array.Empty<string>() })
             .ToListAsync(cancellationToken);
+
         return System.Text.Json.JsonSerializer.Serialize(new { schemaVersion = 1, currency = "IRT", orders = Array.Empty<object>(), coupons }, new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web));
     }
 
@@ -222,6 +225,7 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext, IMedi
             }
         }).ToArray();
         string json = System.Text.Json.JsonSerializer.Serialize(new { articles = payload }, new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web) { DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull });
+
         return ContentCdn.RewriteJson(json, await mediaCdn.GetBaseUrlAsync(cancellationToken));
     }
 
@@ -236,6 +240,7 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext, IMedi
         var cities = await dbContext.GeoCities.AsNoTracking().OrderBy(x => x.IdProvince).ThenBy(x => x.NameFa)
             .Select(x => new { id = x.Id, countryId = x.IdCountry, provinceId = x.IdProvince, sourceCountryName = x.SourceCountryName, name = x.NameFa, nameEn = x.NameEn, latitude = x.Latitude, longitude = x.Longitude, isProvinceCenter = x.IsProvinceCenter }).ToListAsync(cancellationToken);
         string json = System.Text.Json.JsonSerializer.Serialize(new { countries, provinces, cities }, new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web));
+
         return ContentCdn.RewriteJson(json, await mediaCdn.GetBaseUrlAsync(cancellationToken))!;
     }
 

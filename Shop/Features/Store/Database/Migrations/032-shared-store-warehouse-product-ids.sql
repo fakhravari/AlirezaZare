@@ -16,10 +16,7 @@ IF COL_LENGTH(N'Store.Product', N'IsStoreEnabled') IS NULL
         CONSTRAINT [DF_Store_Product_IsStoreEnabled] DEFAULT (1) WITH VALUES;
 
 CREATE TABLE #ProductIdMap
-(
-    [OldId] BIGINT NOT NULL PRIMARY KEY,
-    [SharedId] BIGINT NOT NULL UNIQUE
-);
+( [OldId] BIGINT NOT NULL PRIMARY KEY, [SharedId] BIGINT NOT NULL UNIQUE );
 INSERT INTO #ProductIdMap ([OldId], [SharedId])
 SELECT [Id], [IdStoreProduct] FROM [Warehouse].[Product];
 

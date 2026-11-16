@@ -10,11 +10,9 @@ public abstract class PageController : Controller
 {
     protected async Task<IActionResult> PageAsync(PageModel model)
     {
-        SiteIdentityOptions identity = HttpContext.RequestServices
-            .GetRequiredService<IOptions<SiteIdentityOptions>>().Value;
+        SiteIdentityOptions identity = HttpContext.RequestServices.GetRequiredService<IOptions<SiteIdentityOptions>>().Value;
 
-        string StoreName(string value) => value
-            .Replace("فروشگاه برق و ابزار ندا اولیائی", identity.StoreName, StringComparison.Ordinal)
+        string StoreName(string value) => value.Replace("فروشگاه برق و ابزار ندا اولیائی", identity.StoreName, StringComparison.Ordinal)
             .Replace("فروشگاه ندا اولیائی", identity.StoreName, StringComparison.Ordinal)
             .Replace("ندا اولیائی", identity.DisplayName, StringComparison.Ordinal);
 
@@ -30,9 +28,9 @@ public abstract class PageController : Controller
         if (model.ContentKey is not null)
         {
             var db = HttpContext.RequestServices.GetRequiredService<ShopDbContext>();
-            var page = await db.StoreContentPages.AsNoTracking().Include(x => x.Sections)
-                .SingleOrDefaultAsync(x => x.PageKey == model.ContentKey, HttpContext.RequestAborted);
+            var page = await db.StoreContentPages.AsNoTracking().Include(x => x.Sections) .SingleOrDefaultAsync(x => x.PageKey == model.ContentKey, HttpContext.RequestAborted);
             if (page is null || !page.IsPublished) return NotFound();
+
             string title = StoreName(page.Title);
             string description = StoreName(page.Description ?? "");
             var managed = new ManagedPageContent(page.Id, page.PageKey, page.RoutePath, title, description, page.IsPublished,
@@ -48,6 +46,7 @@ public abstract class PageController : Controller
                 return View("~/Views/Shared/ManagedContentPage.cshtml", model);
         }
         ViewResult result = string.IsNullOrWhiteSpace(model.ViewName) ? View(model) : View(model.ViewName, model);
+
         return result;
     }
 }

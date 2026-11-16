@@ -92,8 +92,7 @@ public sealed class WarehouseStockLedger(ShopDbContext db) : IWarehouseStockLedg
             if (delta == 0) continue;
             int updated = await db.StockBalances.Where(x => x.IdWarehouse == key.WarehouseId &&
                     x.IdInventoryItem == key.InventoryItemId && x.IdSalesPlanReference == key.PlanId && x.Quantity + delta >= 0)
-                .ExecuteUpdateAsync(update => update.SetProperty(x => x.Quantity, x => x.Quantity + delta)
-                    .SetProperty(x => x.UpdatedAtUtc, now), ct);
+                .ExecuteUpdateAsync(update => update.SetProperty(x => x.Quantity, x => x.Quantity + delta).SetProperty(x => x.UpdatedAtUtc, now), ct);
             if (updated != 1) throw new InsufficientWarehouseStockException();
         }
     }

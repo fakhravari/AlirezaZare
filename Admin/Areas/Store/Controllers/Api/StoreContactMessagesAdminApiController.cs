@@ -22,12 +22,14 @@ public sealed class StoreContactMessagesAdminApiController(ShopDbContext db, IEm
         if (!AdminListQuery.TryCreate(page, pageSize, q, out AdminPageRequest paging)
             || status is not (null or "" or "new" or "read" or "closed"))
             return ValidationProblem(detail: "فیلتر یا صفحه‌بندی معتبر نیست.", statusCode: 400);
+
         var query = db.StoreContactMessages.AsNoTracking().AsQueryable();
         if (!string.IsNullOrEmpty(status)) query = query.Where(x => x.Status == status);
         if (paging.Search.Length > 0) query = query.Where(x => x.Name.Contains(paging.Search) || x.Phone.Contains(paging.Search) || (x.Email != null && x.Email.Contains(paging.Search)) || x.Message.Contains(paging.Search));
         int total = await query.CountAsync(cancellationToken);
         var items = await query.OrderByDescending(x => x.CreatedAtUtc).ThenByDescending(x => x.Id).Skip(paging.Offset).Take(paging.PageSize)
             .Select(x => new { x.Id, x.Name, x.Phone, x.Email, x.SubjectKey, x.Message, x.Status, x.AdminReply, x.RepliedAtUtc, x.ReplyEmailSentAtUtc, x.CreatedAtUtc }).ToListAsync(cancellationToken);
+
         return Ok(AdminListQuery.CreateResult(items, total, paging));
     }
 
@@ -36,7 +38,9 @@ public sealed class StoreContactMessagesAdminApiController(ShopDbContext db, IEm
     public async Task<IActionResult> UpdateStatus(long id, [FromBody] ContactMessageStatusInput input, CancellationToken cancellationToken)
     {
         if (input.Status is not ("new" or "read" or "closed")) return ValidationProblem(detail: "وضعیت پیام معتبر نیست.", statusCode: 400);
+
         var item = await db.StoreContactMessages.SingleOrDefaultAsync(x => x.Id == id, cancellationToken); if (item is null) return NotFound();
+
         item.Status = input.Status; item.UpdatedAtUtc = DateTime.UtcNow; await db.SaveChangesAsync(cancellationToken); return Ok(new { message = "وضعیت پیام ذخیره شد." });
     }
 
@@ -46,10 +50,14 @@ public sealed class StoreContactMessagesAdminApiController(ShopDbContext db, IEm
     {
         string reply = (input.Reply ?? string.Empty).Trim();
         if (reply.Length is < 2 or > 4000) return ValidationProblem(detail: "متن پاسخ باید بین ۲ تا ۴۰۰۰ نویسه باشد.", statusCode: 400);
+
         var item = await db.StoreContactMessages.SingleOrDefaultAsync(x => x.Id == id, ct); if (item is null) return NotFound();
+
         item.AdminReply = StoreHtmlSanitizer.Sanitize(reply); item.RepliedAtUtc = DateTime.UtcNow; item.UpdatedAtUtc = DateTime.UtcNow; item.Status = "closed";
         await db.SaveChangesAsync(ct);
+
         if (string.IsNullOrWhiteSpace(item.Email) || !MailAddress.TryCreate(item.Email, out var recipient)) return Ok(new { saved = true, emailSent = false, message = "پاسخ ثبت شد؛ برای این پیام ایمیل مشتری ثبت نشده است." });
+
         try
         {
             string subject = item.SubjectKey switch { "order" => "پاسخ پیگیری سفارش", "consultation" => "پاسخ مشاوره پیش از خرید", "after-sales" => "پاسخ خدمات پس از فروش", "business" => "پاسخ همکاری سازمانی", _ => "پاسخ پیام شما" };

@@ -26,15 +26,12 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
         var siteStock = stockRows.ToDictionary(x => (x.IdProduct, x.IdSalesPlanReference), x => x.Quantity);
         var products = await dbContext.Products.AsNoTracking().Where(x => x.IsCatalogActive && x.IsStoreEnabled).ToListAsync(cancellationToken);
         var customOffers = await dbContext.StoreProductSalesPlanOffers.AsNoTracking().ToListAsync(cancellationToken);
-        var activePriceRows = await dbContext.StorePriceVersions.AsNoTracking()
-            .Where(x => x.IsActive && products.Select(p => p.Id).Contains(x.IdProduct))
-            .OrderByDescending(x => x.Id).ToListAsync(cancellationToken);
+        var activePriceRows = await dbContext.StorePriceVersions.AsNoTracking().Where(x => x.IsActive && products.Select(p => p.Id).Contains(x.IdProduct)).OrderByDescending(x => x.Id).ToListAsync(cancellationToken);
         var planProductPrices = activePriceRows.Where(x => !x.IdProductVariant.HasValue && !x.IdOptionValue.HasValue &&
                                                            !x.IdAccessory.HasValue && !x.IdOrderItem.HasValue && x.IdSalesPlan.HasValue)
             .ToDictionary(x => (x.IdProduct, x.IdSalesPlan!.Value));
         var optionPrices = activePriceRows.Where(x => x.IdOptionValue.HasValue).ToDictionary(x => x.IdOptionValue!.Value);
-        var variantPrices = activePriceRows.Where(x => x.IdProductVariant.HasValue && x.IdSalesPlan.HasValue)
-            .ToDictionary(x => (x.IdProductVariant!.Value, x.IdSalesPlan!.Value));
+        var variantPrices = activePriceRows.Where(x => x.IdProductVariant.HasValue && x.IdSalesPlan.HasValue) .ToDictionary(x => (x.IdProductVariant!.Value, x.IdSalesPlan!.Value));
         var accessoryPrices = activePriceRows.Where(x => x.IdAccessory.HasValue && x.IdSalesPlan.HasValue)
             .ToDictionary(x => (x.IdProduct, x.IdAccessory!.Value, x.IdSalesPlan!.Value));
         Dictionary<(int ProductId, string PlanId), OfferBuilder> offers = [];
@@ -98,6 +95,7 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
             variantPrices.TryGetValue((row.IdProductVariant, row.Id), out var priceVersion);
             variant.PriceBySalesPlan[row.StoreSalesPlanKey] = priceVersion?.PriceAmount ?? row.PriceAmount;
             variant.DiscountBySalesPlan[row.StoreSalesPlanKey] = priceVersion?.DiscountPercent ?? row.DiscountPercent;
+
             if (priceVersion is not null) variant.PriceVersionIdsBySalesPlan[row.StoreSalesPlanKey] = priceVersion.Id;
         }
 
@@ -156,10 +154,10 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
 
     public async Task<ProductPurchaseConfiguration?> ReadProductPurchaseConfigurationAsync(int productId, CancellationToken cancellationToken)
     {
-        var product = await dbContext.Products.AsNoTracking()
-            .Where(x => x.Id == productId && x.IsCatalogActive && x.IsStoreEnabled)
+        var product = await dbContext.Products.AsNoTracking().Where(x => x.Id == productId && x.IsCatalogActive && x.IsStoreEnabled)
             .Select(x => new { x.MaxPurchaseQuantity }).SingleOrDefaultAsync(cancellationToken);
         if (product is null) return null;
+
         int maxPurchaseQuantity = product.MaxPurchaseQuantity ?? 99;
 
         var optionRows = await (from option in dbContext.StoreProductPurchaseOptions.AsNoTracking()
@@ -172,18 +170,16 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
             .Where(x => x.IsActive && x.IdOptionValue.HasValue && optionIds.Contains(x.IdOptionValue.Value))
             .OrderByDescending(x => x.Id).ToListAsync(cancellationToken);
         var optionVersionById = optionVersions.ToDictionary(x => x.IdOptionValue!.Value);
-        var options = optionRows.GroupBy(x => x.OptionKey, StringComparer.Ordinal)
-            .Select(group => new ProductPurchaseOptionRow(group.Key,
+        var options = optionRows.GroupBy(x => x.OptionKey, StringComparer.Ordinal).Select(group => new ProductPurchaseOptionRow(group.Key,
                 group.Select(x => new ProductPurchaseOptionValueRow(x.ValueKey,
                     optionVersionById.TryGetValue(x.Id, out var version) ? version.PriceAmount : decimal.Round(x.PriceDelta * 1_000_000m, 0, MidpointRounding.AwayFromZero))
-                { Id = x.Id, PriceVersionId = optionVersionById.GetValueOrDefault(x.Id)?.Id ?? 0 }).ToArray()))
-            .ToArray();
+                { Id = x.Id, PriceVersionId = optionVersionById.GetValueOrDefault(x.Id)?.Id ?? 0 }).ToArray())).ToArray();
         var accessories = await (from productAccessory in dbContext.StoreProductAccessories.AsNoTracking()
                                  join accessory in dbContext.StoreAccessories.AsNoTracking() on productAccessory.IdAccessory equals accessory.Id
                                  where productAccessory.IdProduct == productId && accessory.IsActive
                                  orderby productAccessory.SortOrder
-                                 select new ProductAccessoryRow(accessory.AccessoryKey, productAccessory.IsRequired))
-            .ToListAsync(cancellationToken);
+                                 select new ProductAccessoryRow(accessory.AccessoryKey, productAccessory.IsRequired)).ToListAsync(cancellationToken);
+
         return new(maxPurchaseQuantity, options, accessories);
     }
 

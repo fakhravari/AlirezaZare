@@ -33,6 +33,7 @@ public sealed class StoreProductImageApiController(
     public async Task<IActionResult> GetImages(long productId, CancellationToken cancellationToken)
     {
         if (!await db.Products.AnyAsync(x => x.Id == productId && x.IsStoreEnabled, cancellationToken)) return NotFound();
+
         var media = await GetMediaAsync(productId, cancellationToken);
         var images = ReadGallery(media?.ImagesJson);
         AddImageIfMissing(images, media?.MainPath, media?.ThumbnailPath);
@@ -41,9 +42,11 @@ public sealed class StoreProductImageApiController(
         {
             string? path = ReadString(item, "src");
             string? thumbnail = ReadString(item, "thumbnail");
+
             return new ProductImageItem(path!, ContentCdn.ToUrl(path, cdnBaseUrl), ContentCdn.ToUrl(thumbnail, cdnBaseUrl),
                 string.Equals(path, media?.MainPath, StringComparison.OrdinalIgnoreCase));
         }).Where(x => !string.IsNullOrWhiteSpace(x.Path)).ToArray();
+
         return Ok(new { images = items });
     }
 
@@ -57,8 +60,7 @@ public sealed class StoreProductImageApiController(
             images.Sum(image => image.Length) > MaximumRequestSize)
             return BadRequest(new { title = "حداکثر ۱۰ تصویر و هرکدام حداکثر ۱۰ مگابایت انتخاب کنید." });
 
-        var product = await db.Products.AsNoTracking()
-            .SingleOrDefaultAsync(x => x.Id == productId && x.IsStoreEnabled, cancellationToken);
+        var product = await db.Products.AsNoTracking().SingleOrDefaultAsync(x => x.Id == productId && x.IsStoreEnabled, cancellationToken);
         if (product is null) return NotFound();
 
         var preparedImages = new List<PreparedImage>(images.Count);
@@ -92,8 +94,7 @@ public sealed class StoreProductImageApiController(
             }
 
             string mediaKey = "product-" + product.ProductKey;
-            var media = await db.StoreProductMedia.SingleOrDefaultAsync(
-                x => x.IdProduct == productId && x.MediaKey == mediaKey, cancellationToken);
+            var media = await db.StoreProductMedia.SingleOrDefaultAsync( x => x.IdProduct == productId && x.MediaKey == mediaKey, cancellationToken);
             var gallery = ReadGallery(media?.ImagesJson);
             AddImageIfMissing(gallery, media?.MainPath, media?.ThumbnailPath);
 
@@ -115,7 +116,9 @@ public sealed class StoreProductImageApiController(
 
             media.ImagesJson = gallery.ToJsonString();
             await db.SaveChangesAsync(cancellationToken);
+
             databaseSaved = true;
+
             return Ok(new { message = "تصاویر کالا بارگذاری و ثبت شدند." });
         }
         catch (Exception exception) when (exception is not OperationCanceledException)
@@ -126,6 +129,7 @@ public sealed class StoreProductImageApiController(
                     try { await ftp.DeleteFile(path, CancellationToken.None); }
                     catch (Exception cleanupException) { logger.LogWarning(cleanupException, "Failed to clean up uploaded image"); }
             if (exception is OperationCanceledException) throw;
+
             return Problem(statusCode: 502, title: "بارگذاری انجام نشد؛ اتصال FTP و تنظیمات سرور را بررسی کنید.");
         }
         finally
@@ -140,6 +144,7 @@ public sealed class StoreProductImageApiController(
     {
         var media = await GetMediaAsync(productId, cancellationToken);
         if (media is null) return NotFound();
+
         var gallery = ReadGallery(media.ImagesJson);
         JsonNode? selected = gallery.FirstOrDefault(item => string.Equals(ReadString(item, "src"), input.Path, StringComparison.OrdinalIgnoreCase));
         if (selected is null || !IsValidImagePath(input.Path, productId))
@@ -147,6 +152,7 @@ public sealed class StoreProductImageApiController(
 
         SetDefaultImage(media, input.Path, ReadString(selected, "thumbnail") ?? GetVariantPath(input.Path, "thumbnail"));
         await db.SaveChangesAsync(cancellationToken);
+
         return Ok(new { message = "تصویر پیش‌فرض کالا تغییر کرد." });
     }
 
@@ -156,6 +162,7 @@ public sealed class StoreProductImageApiController(
     {
         var media = await GetMediaAsync(productId, cancellationToken);
         if (media is null) return NotFound();
+
         if (string.Equals(media.MainPath, path, StringComparison.OrdinalIgnoreCase))
             return Conflict(new { title = "تصویر پیش‌فرض قابل حذف نیست؛ ابتدا تصویر دیگری را پیش‌فرض کنید." });
 
@@ -169,6 +176,7 @@ public sealed class StoreProductImageApiController(
             }
 
         if (index < 0 || !IsValidImagePath(path, productId)) return NotFound();
+
         try
         {
             using AsyncFtpClient ftp = await storage.ConnectAsync(cancellationToken);
@@ -184,24 +192,23 @@ public sealed class StoreProductImageApiController(
         catch (Exception exception) when (exception is not OperationCanceledException)
         {
             logger.LogWarning(exception, "Product image files could not be deleted for product {ProductId}", productId);
+
             return Problem(statusCode: 502, title: "تصویر از FTP حذف نشد؛ رکورد گالری حفظ شد. اتصال FTP را بررسی کنید.");
         }
 
         gallery.RemoveAt(index);
         media.ImagesJson = gallery.ToJsonString();
         await db.SaveChangesAsync(cancellationToken);
+
         return Ok(new { message = "تصویر از گالری کالا حذف شد." });
     }
 
     private async Task<StoreProductMedia?> GetMediaAsync(long productId, CancellationToken cancellationToken)
     {
-        string? productKey = await db.Products.AsNoTracking()
-            .Where(x => x.Id == productId && x.IsStoreEnabled)
-            .Select(x => x.ProductKey)
-            .SingleOrDefaultAsync(cancellationToken);
+        string? productKey = await db.Products.AsNoTracking().Where(x => x.Id == productId && x.IsStoreEnabled).Select(x => x.ProductKey).SingleOrDefaultAsync(cancellationToken);
         if (productKey is null) return null;
-        return await db.StoreProductMedia.SingleOrDefaultAsync(
-            x => x.IdProduct == productId && x.MediaKey == $"product-{productKey}", cancellationToken);
+
+        return await db.StoreProductMedia.SingleOrDefaultAsync( x => x.IdProduct == productId && x.MediaKey == $"product-{productKey}", cancellationToken);
     }
 
     private static async Task<PreparedImage> PrepareImageAsync(IFormFile image, long productId, CancellationToken cancellationToken)
@@ -245,6 +252,7 @@ public sealed class StoreProductImageApiController(
     private static void AddImageIfMissing(JsonArray gallery, string? mainPath, string? thumbnailPath)
     {
         if (string.IsNullOrWhiteSpace(mainPath) || gallery.Any(item => string.Equals(ReadString(item, "src"), mainPath, StringComparison.OrdinalIgnoreCase))) return;
+
         gallery.Insert(0, new JsonObject { ["src"] = mainPath, ["thumbnail"] = thumbnailPath });
     }
 

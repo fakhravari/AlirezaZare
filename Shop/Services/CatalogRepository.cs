@@ -14,22 +14,21 @@ public sealed class CatalogRepository(Shop.Data.Application.Store.Contracts.ISto
     public async ValueTask<CatalogSnapshot> ReadAsync(CancellationToken cancellationToken = default)
     {
         if (requestSnapshot is not null) return requestSnapshot;
-        string json = await datasets.ReadCatalogJsonAsync(cancellationToken)
-                      ?? throw new InvalidDataException("The Store catalog dataset is missing from the database.");
+
+        string json = await datasets.ReadCatalogJsonAsync(cancellationToken) ?? throw new InvalidDataException("The Store catalog dataset is missing from the database.");
         string editorialJson = await datasets.ReadBrandEditorialJsonAsync(cancellationToken)
                                ?? throw new InvalidDataException(
                                    "The Store brand editorial dataset is missing from the database.");
         BrandEditorialDocument[] editorials = JsonSerializer.Deserialize<BrandEditorialDocument[]>(editorialJson,
             new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? [];
         string cdnBaseUrl = mediaCdn is null ? MediaCdnOptions.DefaultBaseUrl : await mediaCdn.GetBaseUrlAsync(cancellationToken);
-        return requestSnapshot = CatalogSnapshot.Parse(NormalizeRelationObjects(json),
-            editorials.ToDictionary(item => item.Slug, StringComparer.OrdinalIgnoreCase), cdnBaseUrl);
+
+        return requestSnapshot = CatalogSnapshot.Parse(NormalizeRelationObjects(json), editorials.ToDictionary(item => item.Slug, StringComparer.OrdinalIgnoreCase), cdnBaseUrl);
     }
 
     private static string NormalizeRelationObjects(string json)
     {
-        JsonObject root = JsonNode.Parse(json)?.AsObject() ??
-                          throw new InvalidDataException("The Store catalog query returned invalid JSON.");
+        JsonObject root = JsonNode.Parse(json)?.AsObject() ?? throw new InvalidDataException("The Store catalog query returned invalid JSON.");
         foreach (string property in new[]
                  {
                      "specificationGroups", "specificationCategories", "specificationFeatures", "attributeDefinitions",
@@ -110,12 +109,7 @@ public sealed record CatalogSnapshot(
                 SourceEditorial = sourceEditorial
             };
             if (!brand.TryGetProperty("showInStore", out JsonElement showInStore) || showInStore.ValueKind != JsonValueKind.False)
-                brandProfiles.Add(editorial with
-                {
-                    Name = Text(brand, "name"),
-                    PersianName = Text(brand, "fa"),
-                    LogoFile = logo is null ? null : Path.GetFileName(logo)
-                });
+                brandProfiles.Add(editorial with { Name = Text(brand, "name"), PersianName = Text(brand, "fa"), LogoFile = logo is null ? null : Path.GetFileName(logo) });
         }
 
         foreach (JsonElement country in countries.EnumerateObject().Select(item => item.Value))
@@ -147,16 +141,12 @@ public sealed record CatalogSnapshot(
         {
             int id = product.GetProperty("id").GetInt32();
             if (id <= 0 || !ids.Add(id)) throw new InvalidDataException($"Invalid/duplicate product id: {id}");
-            string name = Text(product, "name"),
-                englishName = Text(product, "englishName"),
-                slug = Text(product, "slug");
+            string name = Text(product, "name"), englishName = Text(product, "englishName"), slug = Text(product, "slug");
             string code = Text(product, "code");
             if (!codes.Add(code)) throw new InvalidDataException($"Duplicate product code: {id}");
             if (slug.Any(character => !(character is >= 'a' and <= 'z' or >= '0' and <= '9' or '-')))
                 throw new InvalidDataException($"Invalid product slug: {id}");
-            JsonElement brand = Reference(brands, product, "brandId"),
-                category = Reference(categories, product, "categoryId"),
-                images = Reference(media, product, "mediaId");
+            JsonElement brand = Reference(brands, product, "brandId"), category = Reference(categories, product, "categoryId"), images = Reference(media, product, "mediaId");
             if (nonLeafCategories.Contains(Text(category, "id")))
                 throw new InvalidDataException($"Product category must be a leaf category: {id}");
             _ = Reference(details, product, "detailId");
@@ -173,8 +163,7 @@ public sealed record CatalogSnapshot(
             ValidateOptions(product);
             ValidateProductSpecs(product);
             ValidateProductSpecificationValues(product, specificationFeatures);
-            products.Add(new(id, name, englishName, Text(brand, "name"), Text(category, "fa"), imagePath, slug,
-                code, GetCategoryPath(category, categories)));
+            products.Add(new(id, name, englishName, Text(brand, "name"), Text(category, "fa"), imagePath, slug, code, GetCategoryPath(category, categories)));
         }
 
         if (products.Count == 0) throw new InvalidDataException("The catalog has no products.");
@@ -215,6 +204,7 @@ public sealed record CatalogSnapshot(
         }
 
         path.Reverse();
+
         return path.AsReadOnly();
     }
 
@@ -236,15 +226,11 @@ public sealed record CatalogSnapshot(
             if (!category.TryGetProperty("parentId", out JsonElement parentElement) ||
                 parentElement.ValueKind is not (JsonValueKind.Null or JsonValueKind.String))
                 throw new InvalidDataException($"Category parentId is missing or invalid: {id}");
-            string? parentId = parentElement.ValueKind == JsonValueKind.String
-                ? parentElement.GetString()?.Trim()
-                : null;
+            string? parentId = parentElement.ValueKind == JsonValueKind.String ? parentElement.GetString()?.Trim() : null;
             if (!category.TryGetProperty("path", out JsonElement pathElement) ||
                 pathElement.ValueKind != JsonValueKind.Array || pathElement.GetArrayLength() == 0)
                 throw new InvalidDataException($"Category path is missing: {id}");
-            string[] path = pathElement.EnumerateArray()
-                .Select(segment => segment.ValueKind == JsonValueKind.String ? segment.GetString()?.Trim() ?? "" : "")
-                .ToArray();
+            string[] path = pathElement.EnumerateArray().Select(segment => segment.ValueKind == JsonValueKind.String ? segment.GetString()?.Trim() ?? "" : "").ToArray();
 
             if (!StringComparer.Ordinal.Equals(id, property.Name))
                 throw new InvalidDataException($"Category key/id mismatch: {property.Name}");
@@ -261,8 +247,7 @@ public sealed record CatalogSnapshot(
             categoryNodes.Add((id, parentId, path));
         }
 
-        Dictionary<string, string> categoryIdByPath = categoryNodes.ToDictionary(
-            node => string.Join("\u001f", node.Path), node => node.Id, StringComparer.Ordinal);
+        Dictionary<string, string> categoryIdByPath = categoryNodes.ToDictionary( node => string.Join("\u001f", node.Path), node => node.Id, StringComparer.Ordinal);
         HashSet<string> nonLeafCategories = [];
         foreach ((string id, string? parentId, string[] path) in categoryNodes)
         {
@@ -315,6 +300,7 @@ public sealed record CatalogSnapshot(
 
         JsonElement accessoryList = product.GetProperty("accessories");
         if (accessoryList.ValueKind == JsonValueKind.Null) return;
+
         if (accessoryList.ValueKind != JsonValueKind.Array)
             throw new InvalidDataException("Accessories must be an array or null.");
         HashSet<string> accessories = new(StringComparer.Ordinal);
@@ -323,6 +309,7 @@ public sealed record CatalogSnapshot(
             if (!accessories.Add(Text(accessory, "id"))) throw new InvalidDataException("Duplicate accessory id.");
             _ = Text(accessory, "name");
             _ = accessory.GetProperty("required").GetBoolean();
+
             if (accessory.GetProperty("price").GetDecimal() < 0)
                 throw new InvalidDataException("Invalid accessory price.");
         }
@@ -331,6 +318,7 @@ public sealed record CatalogSnapshot(
     private static void ValidateProductSpecs(JsonElement product)
     {
         if (!product.TryGetProperty("specs", out JsonElement specs)) return;
+
         ValidateSpecPairs(specs, "Product specs");
     }
 
@@ -343,13 +331,13 @@ public sealed record CatalogSnapshot(
             JsonElement value = attribute.Value;
             if (attribute.Name.Length == 0 || attribute.Name[0] is < 'a' or > 'z' || attribute.Name.Any(character =>
                     !(character is >= 'a' and <= 'z' or >= 'A' and <= 'Z' or >= '0' and <= '9' or '-')))
-                throw new InvalidDataException(
-                    "Catalog attribute ids must be lower-camel identifiers or lowercase slugs.");
+                throw new InvalidDataException( "Catalog attribute ids must be lower-camel identifiers or lowercase slugs.");
             _ = Text(value, "label");
             _ = Text(value, "icon");
             _ = Text(value, "source");
             _ = value.GetProperty("is_filterable").GetBoolean();
             _ = value.GetProperty("is_highlight").GetBoolean();
+
             if (value.TryGetProperty("filterKey", out JsonElement filterKey) &&
                 filterKey.ValueKind != JsonValueKind.String)
                 throw new InvalidDataException("Catalog attribute filterKey must be a string.");
@@ -391,6 +379,7 @@ public sealed record CatalogSnapshot(
     private static void ValidateProductSpecificationValues(JsonElement product, HashSet<string> featureIds)
     {
         if (!product.TryGetProperty("specificationValues", out JsonElement values)) return;
+
         if (values.ValueKind != JsonValueKind.Array)
             throw new InvalidDataException("Product specificationValues must be an array.");
         HashSet<string> assigned = new(StringComparer.Ordinal);
@@ -401,14 +390,14 @@ public sealed record CatalogSnapshot(
             if (!featureIds.Contains(featureId))
                 throw new InvalidDataException($"Unknown product specification feature: {featureId}");
             if (value.Length == 0 || !assigned.Add(featureId))
-                throw new InvalidDataException(
-                    "Product specification values must be non-empty and unique per feature.");
+                throw new InvalidDataException( "Product specification values must be non-empty and unique per feature.");
         }
     }
 
     private static void ValidateSpecGroups(JsonElement item, string propertyName, string context)
     {
         if (!item.TryGetProperty(propertyName, out JsonElement groups)) return;
+
         if (groups.ValueKind != JsonValueKind.Array)
             throw new InvalidDataException($"{context} specGroups must be an array.");
         HashSet<string> titles = new(StringComparer.OrdinalIgnoreCase);

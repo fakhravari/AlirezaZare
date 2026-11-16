@@ -33,18 +33,22 @@ public sealed class StoreFaqAdminApiController(ShopDbContext db) : ControllerBas
             (linkText.Length == 0) != (linkUrl.Length == 0) ||
             (linkUrl.Length > 0 && (!linkUrl.StartsWith('/') || !Url.IsLocalUrl(linkUrl) || linkUrl.Any(char.IsControl))))
             return BadRequest(new { title = "پرسش، پاسخ، ترتیب یا پیوند معتبر نیست." });
+
         var item = id is null ? null : await db.StoreFaqItems.SingleOrDefaultAsync(x => x.Id == id && db.StoreContentPages.Any(p => p.Id == x.IdContentPage && p.PageKey == "faq"), cancellationToken);
         if (id is not null && item is null) return NotFound();
+
         if (id is null)
         {
             var page = await db.StoreContentPages.SingleOrDefaultAsync(p => p.PageKey == "faq", cancellationToken);
             if (page is null) return Conflict(new { title = "صفحهٔ FAQ در دیتابیس تعریف نشده است." });
+
             item = new Shop.Data.Domain.Store.Entities.StoreFaqItem { IdContentPage = page.Id };
             db.StoreFaqItems.Add(item);
         }
         item!.Question = question; item.Answer = answer; item.LinkText = linkText.Length == 0 ? null : linkText;
         item.LinkUrl = linkUrl.Length == 0 ? null : linkUrl; item.SortOrder = input.SortOrder; item.IsPublished = input.IsPublished;
         await db.SaveChangesAsync(cancellationToken);
+
         return Ok(new { message = "پرسش متداول ذخیره شد." });
     }
     [HttpDelete("{id:long}"), ValidateAntiForgeryToken]
@@ -52,7 +56,9 @@ public sealed class StoreFaqAdminApiController(ShopDbContext db) : ControllerBas
     {
         var item = await db.StoreFaqItems.SingleOrDefaultAsync(x => x.Id == id && db.StoreContentPages.Any(p => p.Id == x.IdContentPage && p.PageKey == "faq"), cancellationToken);
         if (item is null) return NotFound();
+
         db.StoreFaqItems.Remove(item); await db.SaveChangesAsync(cancellationToken);
+
         return Ok(new { message = "پرسش متداول حذف شد." });
     }
     public sealed record FaqInput(string? Question, string? Answer, string? LinkText, string? LinkUrl, int SortOrder, bool IsPublished);

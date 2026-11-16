@@ -206,12 +206,7 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.Property(x => x.PostalCode).HasMaxLength(20).IsRequired();
             entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
         });
-        modelBuilder.Entity<AccountFavorite>(entity =>
-        {
-            entity.ToTable("Favorite", "Account");
-            entity.HasKey(x => x.Id);
-            entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
-        });
+        modelBuilder.Entity<AccountFavorite>(entity => { entity.ToTable("Favorite", "Account"); entity.HasKey(x => x.Id); entity.Property(x => x.CreatedAtUtc).HasPrecision(3); });
         modelBuilder.Entity<AccountCompareItem>(entity =>
         {
             entity.ToTable("CompareItem", "Account");
@@ -302,28 +297,16 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.Property(x => x.FeatureKey).HasMaxLength(100);
             entity.HasIndex(x => x.PermissionKey).IsUnique();
         });
-        modelBuilder.Entity<AdminUserRole>(entity =>
-        {
-            entity.ToTable("SystemUserRole", "Admin");
-            entity.HasKey(x => new { x.IdUser, x.IdRole });
-        });
+        modelBuilder.Entity<AdminUserRole>(entity => { entity.ToTable("SystemUserRole", "Admin"); entity.HasKey(x => new { x.IdUser, x.IdRole }); });
         modelBuilder.Entity<AdminRolePermission>(entity =>
         {
             entity.ToTable("RolePermission", "Admin");
             entity.HasKey(x => new { x.IdRole, x.IdPermission });
             entity.Property(x => x.IdPermission).HasColumnName("IdPermission");
-            entity.HasOne(x => x.Role)
-                .WithMany(x => x.Permissions)
-                .HasForeignKey(x => x.IdRole);
-            entity.HasOne(x => x.Permission)
-                .WithMany()
-                .HasForeignKey(x => x.IdPermission);
+            entity.HasOne(x => x.Role).WithMany(x => x.Permissions).HasForeignKey(x => x.IdRole);
+            entity.HasOne(x => x.Permission).WithMany().HasForeignKey(x => x.IdPermission);
         });
-        modelBuilder.Entity<AdminUserWarehouseAccess>(entity =>
-        {
-            entity.ToTable("SystemUserWarehouseAccess", "Admin");
-            entity.HasKey(x => new { x.IdUser, x.IdWarehouse });
-        });
+        modelBuilder.Entity<AdminUserWarehouseAccess>(entity => { entity.ToTable("SystemUserWarehouseAccess", "Admin"); entity.HasKey(x => new { x.IdUser, x.IdWarehouse }); });
 
         modelBuilder.Entity<Warehouse>(entity =>
         {
@@ -402,8 +385,7 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.Property(x => x.UpdatedByUserKey).HasMaxLength(128);
             entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
             entity.Property(x => x.UpdatedAtUtc).HasPrecision(3);
-            entity.HasIndex(x => new { x.CustomerOrderKey, x.IdSalesPlanReference }).IsUnique()
-                .HasFilter("[CustomerOrderKey] IS NOT NULL");
+            entity.HasIndex(x => new { x.CustomerOrderKey, x.IdSalesPlanReference }).IsUnique().HasFilter("[CustomerOrderKey] IS NOT NULL");
             entity.HasMany(x => x.Lines).WithOne().HasForeignKey(x => x.IdDocument);
         });
         modelBuilder.Entity<WarehouseDocumentLineRecord>(entity =>
@@ -437,16 +419,8 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.HasIndex(x => new { x.DocumentId, x.OccurredAtUtc, x.Id });
             entity.HasIndex(x => new { x.WarehouseId, x.OccurredAtUtc, x.Id });
         });
-        modelBuilder.Entity<SalesPlanReference>(entity =>
-        {
-            entity.ToTable("SalesPlanReference", "Warehouse");
-            entity.HasKey(x => x.Id);
-        });
-        modelBuilder.Entity<WarehouseStockOwner>(entity =>
-        {
-            entity.ToTable("WarehouseStockOwner", "Warehouse");
-            entity.HasKey(x => new { x.IdWarehouse, x.IdStockOwner });
-        });
+        modelBuilder.Entity<SalesPlanReference>(entity => { entity.ToTable("SalesPlanReference", "Warehouse"); entity.HasKey(x => x.Id); });
+        modelBuilder.Entity<WarehouseStockOwner>(entity => { entity.ToTable("WarehouseStockOwner", "Warehouse"); entity.HasKey(x => new { x.IdWarehouse, x.IdStockOwner }); });
         modelBuilder.Entity<StockBalance>(entity =>
         {
             entity.ToTable("StockBalance", "Warehouse");
@@ -454,8 +428,7 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.HasIndex(x => new { x.IdWarehouse, x.IdInventoryItem, x.IdSalesPlanReference }).IsUnique();
             entity.HasOne(x => x.Warehouse).WithMany(x => x.StockBalances).HasForeignKey(x => x.IdWarehouse);
             entity.HasOne(x => x.InventoryItem).WithMany().HasForeignKey(x => x.IdInventoryItem);
-            entity.HasOne(x => x.SalesPlanReference).WithMany(x => x.StockBalances)
-                .HasForeignKey(x => x.IdSalesPlanReference);
+            entity.HasOne(x => x.SalesPlanReference).WithMany(x => x.StockBalances).HasForeignKey(x => x.IdSalesPlanReference);
             entity.Property(x => x.Quantity).HasPrecision(18, 3);
             entity.Property(x => x.MinimumQuantity).HasPrecision(18, 3);
             entity.Property(x => x.UpdatedAtUtc).HasPrecision(3);
@@ -466,8 +439,7 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.ToTable("InventoryItem", "Warehouse");
             entity.HasKey(x => x.Id);
             entity.HasOne(x => x.Product).WithMany(x => x.InventoryItems).HasForeignKey(x => x.IdProduct);
-            entity.HasOne(x => x.ProductVariant).WithMany().HasForeignKey(x => new { x.IdProductVariant, x.IdProduct })
-                .HasPrincipalKey(x => new { x.Id, x.IdProduct });
+            entity.HasOne(x => x.ProductVariant).WithMany().HasForeignKey(x => new { x.IdProductVariant, x.IdProduct }) .HasPrincipalKey(x => new { x.Id, x.IdProduct });
         });
         modelBuilder.Entity<WarehouseProduct>(entity =>
         {
@@ -555,8 +527,7 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.Property(x => x.Password).HasMaxLength(500);
             entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
             entity.Property(x => x.UpdatedAtUtc).HasPrecision(3);
-            entity.HasOne(x => x.Gender).WithMany().HasForeignKey(x => x.IdGender)
-                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(x => x.Gender).WithMany().HasForeignKey(x => x.IdGender).OnDelete(DeleteBehavior.Restrict);
         });
         modelBuilder.Entity<AccountMessage>(entity =>
         {
@@ -695,8 +666,7 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.Property(x => x.SearchedAtUtc).HasPrecision(3);
             entity.HasIndex(x => new { x.IdProfile, x.SearchKey }).IsUnique();
             entity.HasIndex(x => new { x.IdProfile, x.SearchedAtUtc });
-            entity.HasOne<AccountProfile>().WithMany().HasForeignKey(x => x.IdProfile)
-                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne<AccountProfile>().WithMany().HasForeignKey(x => x.IdProfile).OnDelete(DeleteBehavior.Cascade);
         });
         modelBuilder.Entity<ProductFeedback>(entity =>
         {
@@ -711,10 +681,8 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.Property(x => x.RepliedAtUtc).HasPrecision(3);
             entity.HasIndex(x => new { x.IdProduct, x.FeedbackType, x.Status, x.CreatedAtUtc });
             entity.HasIndex(x => new { x.IdProfile, x.IdProduct, x.FeedbackType });
-            entity.HasOne(x => x.Product).WithMany().HasForeignKey(x => x.IdProduct)
-                .OnDelete(DeleteBehavior.Restrict);
-            entity.HasOne(x => x.Profile).WithMany(x => x.ProductFeedback).HasForeignKey(x => x.IdProfile)
-                .OnDelete(DeleteBehavior.SetNull);
+            entity.HasOne(x => x.Product).WithMany().HasForeignKey(x => x.IdProduct).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(x => x.Profile).WithMany(x => x.ProductFeedback).HasForeignKey(x => x.IdProfile).OnDelete(DeleteBehavior.SetNull);
         });
         modelBuilder.Entity<StoreHomeTestimonial>(entity =>
         {
@@ -722,8 +690,7 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.HasKey(x => x.IdProductFeedback);
             entity.Property(x => x.ImagePath).HasMaxLength(500);
             entity.Property(x => x.UpdatedAtUtc).HasPrecision(3);
-            entity.HasOne(x => x.Feedback).WithMany().HasForeignKey(x => x.IdProductFeedback)
-                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(x => x.Feedback).WithMany().HasForeignKey(x => x.IdProductFeedback).OnDelete(DeleteBehavior.Cascade);
         });
         modelBuilder.Entity<StoreAttributeDefinition>(entity =>
         {

@@ -19,8 +19,8 @@ public sealed class DatabaseAccountDataSource(
 
     private async Task<AccountData> LoadAsync(CancellationToken cancellationToken)
     {
-        var json = await datasets.ReadAccountJsonAsync(cancellationToken)
-                   ?? throw new InvalidDataException("The account dataset is missing from the database.");
+        var json = await datasets.ReadAccountJsonAsync(cancellationToken) ?? throw new InvalidDataException("The account dataset is missing from the database.");
+
         return AccountData.Parse(json);
     }
 }

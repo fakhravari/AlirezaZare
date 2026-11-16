@@ -48,14 +48,11 @@ public sealed class StoreHomeTestimonialsAdminApiController(
         if (paging.Search.Length > 0)
         {
             string term = paging.Search;
-            query = query.Where(x => x.DisplayName.Contains(term) || x.FeedbackText.Contains(term)
-                || x.ProductName.Contains(term) || x.ProductKey.Contains(term));
+            query = query.Where(x => x.DisplayName.Contains(term) || x.FeedbackText.Contains(term) || x.ProductName.Contains(term) || x.ProductKey.Contains(term));
         }
 
         int total = await query.CountAsync(cancellationToken);
-        var items = await query.OrderByDescending(x => x.IsActive).ThenBy(x => x.SortOrder)
-            .ThenByDescending(x => x.CreatedAtUtc).ThenByDescending(x => x.Id)
-            .Skip(paging.Offset).Take(paging.PageSize).ToListAsync(cancellationToken);
+        var items = await query.OrderByDescending(x => x.IsActive).ThenBy(x => x.SortOrder).ThenByDescending(x => x.CreatedAtUtc).ThenByDescending(x => x.Id).Skip(paging.Offset).Take(paging.PageSize).ToListAsync(cancellationToken);
         string cdnBaseUrl = await mediaCdn.GetBaseUrlAsync(cancellationToken);
         var result = items.Select(item => new
         {
@@ -63,6 +60,7 @@ public sealed class StoreHomeTestimonialsAdminApiController(
             item.ProductName, item.ProductKey, item.IsActive, item.SortOrder, item.ImagePath,
             ImageUrl = string.IsNullOrWhiteSpace(item.ImagePath) ? null : ContentCdn.ToUrl(item.ImagePath, cdnBaseUrl)
         }).ToArray();
+
         return Ok(AdminListQuery.CreateResult(result, total, paging));
     }
 
@@ -71,6 +69,7 @@ public sealed class StoreHomeTestimonialsAdminApiController(
     public async Task<IActionResult> Save(long id, [FromBody] HomeTestimonialInput input, CancellationToken cancellationToken)
     {
         if (input.SortOrder is < 0 or > 9999) return BadRequest(new { title = "ترتیب باید بین صفر و ۹۹۹۹ باشد." });
+
         if (!await db.ProductFeedback.AnyAsync(x => x.Id == id && x.FeedbackType == "reviews" && x.Status == "approved", cancellationToken))
             return NotFound(new { title = "فقط دیدگاه تأییدشده قابل نمایش در صفحهٔ نخست است." });
 
@@ -84,6 +83,7 @@ public sealed class StoreHomeTestimonialsAdminApiController(
         item.SortOrder = input.SortOrder;
         item.UpdatedAtUtc = DateTime.UtcNow;
         await db.SaveChangesAsync(cancellationToken);
+
         return Ok(new { message = "تنظیم نمایش دیدگاه ذخیره شد." });
     }
 
@@ -94,6 +94,7 @@ public sealed class StoreHomeTestimonialsAdminApiController(
     {
         if (file is null || file.Length is <= 0 or > 10_000_000)
             return BadRequest(new { title = "تصویر باید حداکثر ۱۰ مگابایت باشد." });
+
         if (!await db.ProductFeedback.AnyAsync(x => x.Id == id && x.FeedbackType == "reviews" && x.Status == "approved", cancellationToken))
             return NotFound(new { title = "دیدگاه تأییدشده پیدا نشد." });
 
@@ -107,12 +108,14 @@ public sealed class StoreHomeTestimonialsAdminApiController(
             || sourceBytes.Length >= 8 && sourceBytes.AsSpan(0, 8).SequenceEqual(new byte[] { 137, 80, 78, 71, 13, 10, 26, 10 })
             || sourceBytes.Length >= 12 && sourceBytes.AsSpan(0, 4).SequenceEqual("RIFF"u8) && sourceBytes.AsSpan(8, 4).SequenceEqual("WEBP"u8);
         if (!supportedImage) return BadRequest(new { title = "فقط تصویر JPEG، PNG یا WebP پذیرفته می‌شود." });
+
         byte[] mainBytes;
         byte[] thumbBytes;
         try
         {
             using var source = new MagickImage(sourceBytes);
             if ((long)source.Width * source.Height > 40_000_000) return BadRequest(new { title = "ابعاد تصویر بیش از حد مجاز است." });
+
             source.AutoOrient();
             using var main = source.Clone();
             main.Resize(new MagickGeometry(600, 600) { Greater = true });
@@ -146,10 +149,12 @@ public sealed class StoreHomeTestimonialsAdminApiController(
             item.ImagePath = imagePath;
             item.UpdatedAtUtc = DateTime.UtcNow;
             await db.SaveChangesAsync(cancellationToken);
+
             try { await DeleteStoredImageAsync(ftp, previousPath, cancellationToken); }
             catch (Exception exception) when (exception is not OperationCanceledException)
             { logger.LogWarning(exception, "Previous home testimonial image could not be removed for review {ReviewId}", id); }
             string baseUrl = await mediaCdn.GetBaseUrlAsync(cancellationToken);
+
             return Ok(new { message = "تصویر دیدگاه بارگذاری شد.", imagePath, imageUrl = ContentCdn.ToUrl(imagePath, baseUrl) });
         }
         catch (Exception exception) when (exception is not OperationCanceledException)
@@ -160,6 +165,7 @@ public sealed class StoreHomeTestimonialsAdminApiController(
                 await DeleteStoredImageAsync(ftp, imagePath, cancellationToken);
                 await DeleteStoredImageAsync(ftp, thumbnailPath, cancellationToken);
             }
+
             return Problem(statusCode: 502, title: "بارگذاری تصویر انجام نشد؛ اتصال FTP را بررسی کنید.");
         }
         finally { ftp?.Dispose(); }
@@ -171,6 +177,7 @@ public sealed class StoreHomeTestimonialsAdminApiController(
     {
         StoreHomeTestimonial? item = await db.StoreHomeTestimonials.SingleOrDefaultAsync(x => x.IdProductFeedback == id, cancellationToken);
         if (item is null || string.IsNullOrWhiteSpace(item.ImagePath)) return NotFound();
+
         try
         {
             using AsyncFtpClient ftp = await storage.ConnectAsync(cancellationToken);
@@ -178,11 +185,13 @@ public sealed class StoreHomeTestimonialsAdminApiController(
             item.ImagePath = null;
             item.UpdatedAtUtc = DateTime.UtcNow;
             await db.SaveChangesAsync(cancellationToken);
+
             return Ok(new { message = "تصویر دیدگاه حذف شد." });
         }
         catch (Exception exception) when (exception is not OperationCanceledException)
         {
             logger.LogWarning(exception, "Home testimonial image delete failed for review {ReviewId}", id);
+
             return Problem(statusCode: 502, title: "حذف تصویر انجام نشد؛ اتصال FTP را بررسی کنید.");
         }
     }
@@ -191,6 +200,7 @@ public sealed class StoreHomeTestimonialsAdminApiController(
     {
         if (string.IsNullOrWhiteSpace(path) || !path.StartsWith("content/testimonials/", StringComparison.Ordinal)
             || path.Contains("..", StringComparison.Ordinal) || path.Contains('\\')) return;
+
         string thumb = path.EndsWith(".webp", StringComparison.OrdinalIgnoreCase) ? path[..^5] + "-thumbnail.webp" : "";
         if (await ftp.FileExists("/" + path, cancellationToken)) await ftp.DeleteFile("/" + path, cancellationToken);
         if (thumb.Length > 0 && await ftp.FileExists("/" + thumb, cancellationToken)) await ftp.DeleteFile("/" + thumb, cancellationToken);

@@ -16,11 +16,11 @@ public sealed class PaymentInstitutionsAdminApiController(ShopDbContext db, IMed
     [HttpGet]
     public async Task<IActionResult> List(CancellationToken cancellationToken)
     {
-        var rows = await db.StoreBanks.AsNoTracking().OrderBy(x => x.Id)
-            .Select(x => new { x.Id, x.Code, x.NameFa, x.LogoPath, x.IsActive }).ToListAsync(cancellationToken);
+        var rows = await db.StoreBanks.AsNoTracking().OrderBy(x => x.Id) .Select(x => new { x.Id, x.Code, x.NameFa, x.LogoPath, x.IsActive }).ToListAsync(cancellationToken);
         string cdn = await mediaCdn.GetBaseUrlAsync(cancellationToken);
         var items = rows.Select(x => new PaymentInstitutionRow(x.Id, x.Code, x.NameFa, x.LogoPath,
             x.LogoPath is null ? null : ContentCdn.ToUrl(x.LogoPath, cdn), x.IsActive)).ToArray();
+
         return Ok(new { total = items.Length, page = 1, pageSize = items.Length, items });
     }
 

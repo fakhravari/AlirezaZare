@@ -87,6 +87,7 @@ public sealed class AdminExcelWorksheetWriter : IDisposable
         if (SheetCount == 1 && _rowsOnSheet == 0)
             _headerValues = values.ToArray();
         WriteValues(values);
+
         return Task.CompletedTask;
     }
 
@@ -129,6 +130,7 @@ public sealed class AdminExcelWorksheetWriter : IDisposable
     public void Complete()
     {
         if (_completed) return;
+
         EndSheet();
         _completed = true;
     }
@@ -151,6 +153,7 @@ public sealed class AdminExcelWorksheetWriter : IDisposable
     private void EndSheet()
     {
         if (_writer is null) return;
+
         _writer.WriteEndElement();
         _writer.WriteEndElement();
         _writer.WriteEndDocument();
@@ -168,6 +171,7 @@ public sealed class AdminExcelWorksheetWriter : IDisposable
             buffer[--index] = (char)('A' + column % 26);
             column /= 26;
         }
+
         return new string(buffer[index..]);
     }
 }

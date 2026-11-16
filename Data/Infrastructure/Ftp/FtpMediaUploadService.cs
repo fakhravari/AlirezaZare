@@ -9,9 +9,7 @@ public sealed class FtpMediaUploadService(ShopDbContext db, IDataProtectionProvi
 {
     public async Task<AsyncFtpClient> ConnectAsync(CancellationToken cancellationToken)
     {
-        FtpSettingsRow settings = RequireValidSettings(
-            await ReadSettings(cancellationToken), allowLegacyPassword: true,
-            "تنظیمات FTP در صفحهٔ تنظیمات سایت کامل نیست.");
+        FtpSettingsRow settings = RequireValidSettings( await ReadSettings(cancellationToken), allowLegacyPassword: true, "تنظیمات FTP در صفحهٔ تنظیمات سایت کامل نیست.");
 
         if (string.IsNullOrEmpty(settings.Password))
         {
@@ -21,14 +19,11 @@ public sealed class FtpMediaUploadService(ShopDbContext db, IDataProtectionProvi
             catch (Exception exception) when (exception is System.Security.Cryptography.CryptographicException or FormatException)
             { throw new InvalidOperationException("رمز پیشین FTP قابل بازیابی نیست؛ آن را دوباره ثبت کنید.", exception); }
 
-            await db.StoreSiteIdentities
-                .Where(identity => identity.Id == 1 && identity.FtpPassword == null && identity.FtpPasswordProtected == legacyPassword)
-                .ExecuteUpdateAsync(update => update
-                    .SetProperty(identity => identity.FtpPassword, password)
+            await db.StoreSiteIdentities.Where(identity => identity.Id == 1 && identity.FtpPassword == null && identity.FtpPasswordProtected == legacyPassword)
+                .ExecuteUpdateAsync(update => update.SetProperty(identity => identity.FtpPassword, password)
                     .SetProperty(identity => identity.FtpPasswordProtected, (string?)null), cancellationToken);
 
-            settings = RequireValidSettings(await ReadSettings(cancellationToken), allowLegacyPassword: false,
-                "تنظیمات FTP تغییر کرده است؛ دوباره تلاش کنید.");
+            settings = RequireValidSettings(await ReadSettings(cancellationToken), allowLegacyPassword: false, "تنظیمات FTP تغییر کرده است؛ دوباره تلاش کنید.");
         }
 
         var client = new AsyncFtpClient(settings.Host!, settings.Username!, settings.Password!, settings.Port!.Value);
@@ -51,8 +46,7 @@ public sealed class FtpMediaUploadService(ShopDbContext db, IDataProtectionProvi
 
     private Task<FtpSettingsRow?> ReadSettings(CancellationToken cancellationToken) =>
         db.StoreSiteIdentities.AsNoTracking().Where(x => x.Id == 1).Select(x => new FtpSettingsRow
-            (x.FtpHost, x.FtpPort, x.FtpUsername, x.FtpPassword, x.FtpPasswordProtected))
-        .SingleOrDefaultAsync(cancellationToken);
+            (x.FtpHost, x.FtpPort, x.FtpUsername, x.FtpPassword, x.FtpPasswordProtected)).SingleOrDefaultAsync(cancellationToken);
 
     private sealed record FtpSettingsRow(string? Host, int? Port, string? Username, string? Password, string? LegacyPassword);
 }

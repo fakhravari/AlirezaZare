@@ -20,6 +20,7 @@ public sealed class SiteSettingsController(ShopDbContext db, IDataProtectionProv
     {
         var settings = await db.StoreSiteIdentities.AsNoTracking().SingleOrDefaultAsync(x => x.Id == 1, cancellationToken);
         if (settings is null) return NotFound();
+
         var model = new SiteSettingsInput
         {
             DisplayName = settings.DisplayName,
@@ -61,9 +62,9 @@ public sealed class SiteSettingsController(ShopDbContext db, IDataProtectionProv
             : ftpPasswordUnreadable ? "ثبت شده، اما قابل بازیابی نیست"
             : string.IsNullOrEmpty(model.FtpPassword) ? "ثبت شده، اما مقدار رمز خالی است"
             : "ثبت شده و نمایش داده می‌شود";
-        ViewData["SmtpPasswordStatus"] = string.IsNullOrEmpty(model.SmtpPassword)
-            ? "ثبت نشده" : "ثبت شده و نمایش داده می‌شود";
+        ViewData["SmtpPasswordStatus"] = string.IsNullOrEmpty(model.SmtpPassword) ? "ثبت نشده" : "ثبت شده و نمایش داده می‌شود";
         await PopulateWarehouses(cancellationToken);
+
         return View(model);
     }
 
@@ -74,18 +75,22 @@ public sealed class SiteSettingsController(ShopDbContext db, IDataProtectionProv
         ValidateHttpsUrl(model.InstagramUrl, nameof(model.InstagramUrl));
         ValidateHttpsUrl(model.TelegramUrl, nameof(model.TelegramUrl));
         ValidateHttpsUrl(model.LinkedInUrl, nameof(model.LinkedInUrl));
+
         try { model.MediaCdnBaseUrl = MediaCdnOptions.NormalizeBaseUrl(model.MediaCdnBaseUrl); }
         catch (InvalidOperationException) { ModelState.AddModelError(nameof(model.MediaCdnBaseUrl), "نشانی CDN باید مبدأ HTTPS بدون مسیر اضافی باشد."); }
+
         if (model.IdWarehouse.HasValue && !await db.Warehouses.AnyAsync(w => w.Id == model.IdWarehouse && w.IsActive && w.IsSalesWarehouse && w.Company.IsActive, cancellationToken))
             ModelState.AddModelError(nameof(model.IdWarehouse), "انبار باید انبار فروش فعال یک شرکت فعال باشد.");
         if (!ModelState.IsValid)
         {
             await PopulateWarehouses(cancellationToken);
+
             return View(model);
         }
 
         var settings = await db.StoreSiteIdentities.SingleOrDefaultAsync(x => x.Id == 1, cancellationToken);
         if (settings is null) return NotFound();
+
         settings.DisplayName = model.DisplayName; settings.StoreName = model.StoreName;
         settings.VisualBrandName = model.VisualBrandName; settings.SupportPhoneDisplay = model.SupportPhoneDisplay;
         settings.SupportPhoneUri = model.SupportPhoneUri; settings.WhatsAppNumber = model.WhatsAppNumber;
@@ -94,23 +99,25 @@ public sealed class SiteSettingsController(ShopDbContext db, IDataProtectionProv
         settings.TelegramUrl = NormalizeOptionalUrl(model.TelegramUrl); settings.LinkedInUrl = NormalizeOptionalUrl(model.LinkedInUrl);
         settings.SmtpHost = model.SmtpHost; settings.SmtpPort = model.SmtpPort; settings.SmtpEnableSsl = model.SmtpEnableSsl;
         settings.SmtpUsername = model.SmtpUsername; settings.SmtpFrom = model.SmtpFrom;
+
         if (model.SmtpPassword is not null) settings.SmtpPassword = model.SmtpPassword;
         settings.EmailVerificationCodeLifetimeMinutes = model.EmailVerificationCodeLifetimeMinutes;
         settings.FtpHost = model.FtpHost; settings.FtpPort = model.FtpPort; settings.FtpUsername = model.FtpUsername;
+
         if (model.FtpPassword is not null) { settings.FtpPassword = model.FtpPassword; settings.FtpPasswordProtected = null; }
         settings.UpdatedAtUtc = DateTime.UtcNow;
         settings.UpdatedByUserKey = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value;
         await db.SaveChangesAsync(cancellationToken);
+
         TempData["SiteSettingsSaved"] = true;
+
         return RedirectToAction(nameof(Index));
     }
 
     private async Task PopulateWarehouses(CancellationToken cancellationToken) =>
-        ViewData["Warehouses"] = await db.Warehouses.AsNoTracking()
-            .Where(w => w.IsActive && w.IsSalesWarehouse && w.Company.IsActive)
+        ViewData["Warehouses"] = await db.Warehouses.AsNoTracking().Where(w => w.IsActive && w.IsSalesWarehouse && w.Company.IsActive)
             .OrderBy(w => w.Company.Name).ThenBy(w => w.Name).Select(w => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
-            { Value = w.Id.ToString(), Text = w.Company.Name + " / " + w.Name + " (" + w.Code + ")" })
-            .ToListAsync(cancellationToken);
+            { Value = w.Id.ToString(), Text = w.Company.Name + " / " + w.Name + " (" + w.Code + ")" }).ToListAsync(cancellationToken);
 
     private static string? NormalizeOptionalUrl(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
 

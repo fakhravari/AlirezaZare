@@ -17,10 +17,7 @@ public sealed class AdminAuthentication(ShopDbContext db, PasswordHasher<AdminSy
         CancellationToken cancellationToken)
     {
         string normalizedName = userName.Trim().ToUpperInvariant();
-        AdminSystemUser? user = await db.AdminSystemUsers
-            .Include(x => x.WarehouseAccess)
-            .Include(x => x.Roles).ThenInclude(x => x.Role)
-            .ThenInclude(x => x.Permissions).ThenInclude(x => x.Permission)
+        AdminSystemUser? user = await db.AdminSystemUsers.Include(x => x.WarehouseAccess).Include(x => x.Roles).ThenInclude(x => x.Role).ThenInclude(x => x.Permissions).ThenInclude(x => x.Permission)
             .SingleOrDefaultAsync(x => x.NormalizedUserName == normalizedName && x.IsActive, cancellationToken);
 
         if (user is null || passwordHasher.VerifyHashedPassword(user, user.PasswordHash, password) ==
@@ -31,8 +28,8 @@ public sealed class AdminAuthentication(ShopDbContext db, PasswordHasher<AdminSy
         user.UpdatedAtUtc = DateTime.UtcNow;
         await db.SaveChangesAsync(cancellationToken);
 
-        AdminPermission[] allPermissions =
-            await db.AdminPermissions.AsNoTracking().Where(x => x.IsActive).ToArrayAsync(cancellationToken);
+        AdminPermission[] allPermissions = await db.AdminPermissions.AsNoTracking().Where(x => x.IsActive).ToArrayAsync(cancellationToken);
+
         return CreatePrincipal(user, allPermissions);
     }
 
@@ -49,13 +46,13 @@ public sealed class AdminAuthentication(ShopDbContext db, PasswordHasher<AdminSy
         foreach (long warehouseId in user.WarehouseAccess.Select(x => x.IdWarehouse))
             claims.Add(new Claim("admin_warehouse", warehouseId.ToString()));
 
-        var children = allPermissions.GroupBy(x => x.ParentKey ?? "")
-            .ToDictionary(x => x.Key, x => x.ToArray(), StringComparer.OrdinalIgnoreCase);
+        var children = allPermissions.GroupBy(x => x.ParentKey ?? "").ToDictionary(x => x.Key, x => x.ToArray(), StringComparer.OrdinalIgnoreCase);
         var granted = new Dictionary<string, AdminPermission>(StringComparer.OrdinalIgnoreCase);
 
         void Grant(AdminPermission permission)
         {
             if (!granted.TryAdd(permission.PermissionKey, permission)) return;
+
             if (children.TryGetValue(permission.PermissionKey, out AdminPermission[]? descendants))
                 foreach (AdminPermission descendant in descendants)
                     Grant(descendant);
@@ -77,10 +74,10 @@ public sealed class AdminAuthentication(ShopDbContext db, PasswordHasher<AdminSy
         foreach (AdminPermission permission in granted.Values.Where(x => !string.IsNullOrWhiteSpace(x.Area)
                                                                          && !string.IsNullOrWhiteSpace(x.Controller) &&
                                                                          !string.IsNullOrWhiteSpace(x.Action)))
-            claims.Add(new Claim("admin_permission",
-                RoutePermission(permission.Area, permission.Controller, permission.Action, permission.FeatureKey)));
+            claims.Add(new Claim("admin_permission", RoutePermission(permission.Area, permission.Controller, permission.Action, permission.FeatureKey)));
 
         var identity = new ClaimsIdentity(claims, "AdminCookie");
+
         return new ClaimsPrincipal(identity);
     }
 
@@ -99,10 +96,11 @@ public sealed class AdminBootstrapper(IServiceScopeFactory scopeFactory, IConfig
         string? displayName = configuration["AdminBootstrap:DisplayName"];
         if (string.IsNullOrWhiteSpace(userName) || string.IsNullOrWhiteSpace(password))
             return;
+
         if (password.Length < 12 || password.Length > 200)
         {
-            logger.LogError(
-                "AdminBootstrap password must be between 12 and 200 characters; no initial system user was created.");
+            logger.LogError( "AdminBootstrap password must be between 12 and 200 characters; no initial system user was created.");
+
             return;
         }
 
@@ -111,11 +109,11 @@ public sealed class AdminBootstrapper(IServiceScopeFactory scopeFactory, IConfig
         if (await db.AdminSystemUsers.AnyAsync(cancellationToken))
             return;
 
-        AdminRole? fullAccess =
-            await db.AdminRoles.SingleOrDefaultAsync(x => x.RoleKey == "system.full-access", cancellationToken);
+        AdminRole? fullAccess = await db.AdminRoles.SingleOrDefaultAsync(x => x.RoleKey == "system.full-access", cancellationToken);
         if (fullAccess is null)
         {
             logger.LogError("Admin schema is not installed; the configured initial system user was not created.");
+
             return;
         }
 
@@ -132,6 +130,7 @@ public sealed class AdminBootstrapper(IServiceScopeFactory scopeFactory, IConfig
         db.AdminSystemUsers.Add(user);
         db.AdminUserRoles.Add(new AdminUserRole { User = user, Role = fullAccess });
         await db.SaveChangesAsync(cancellationToken);
+
         logger.LogInformation("Created the initial system user from AdminBootstrap configuration.");
     }
 
@@ -145,6 +144,7 @@ public sealed class AdminCookieEvents(ShopDbContext db) : CookieAuthenticationEv
         if (context.Request.Path.StartsWithSegments("/api"))
         {
             context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+
             return;
         }
 
@@ -156,6 +156,7 @@ public sealed class AdminCookieEvents(ShopDbContext db) : CookieAuthenticationEv
         if (context.Request.Path.StartsWithSegments("/api"))
         {
             context.Response.StatusCode = StatusCodes.Status403Forbidden;
+
             return;
         }
 
@@ -169,22 +170,20 @@ public sealed class AdminCookieEvents(ShopDbContext db) : CookieAuthenticationEv
         if (!long.TryParse(idText, out long userId) || !Guid.TryParse(stampText, out Guid stamp))
         {
             await RejectAsync(context);
+
             return;
         }
 
-        AdminSystemUser? user = await db.AdminSystemUsers.AsNoTracking()
-            .Include(x => x.WarehouseAccess)
-            .Include(x => x.Roles).ThenInclude(x => x.Role)
-            .ThenInclude(x => x.Permissions).ThenInclude(x => x.Permission)
+        AdminSystemUser? user = await db.AdminSystemUsers.AsNoTracking().Include(x => x.WarehouseAccess).Include(x => x.Roles).ThenInclude(x => x.Role).ThenInclude(x => x.Permissions).ThenInclude(x => x.Permission)
             .SingleOrDefaultAsync(x => x.Id == userId && x.IsActive, context.HttpContext.RequestAborted);
         if (user is null || user.SecurityStamp != stamp)
         {
             await RejectAsync(context);
+
             return;
         }
 
-        AdminPermission[] permissions = await db.AdminPermissions.AsNoTracking().Where(x => x.IsActive)
-            .ToArrayAsync(context.HttpContext.RequestAborted);
+        AdminPermission[] permissions = await db.AdminPermissions.AsNoTracking().Where(x => x.IsActive).ToArrayAsync(context.HttpContext.RequestAborted);
         ClaimsPrincipal current = context.Principal!;
         ClaimsPrincipal refreshed = AdminAuthentication.CreatePrincipal(user, permissions);
         if (!ClaimsMatch(current, refreshed))
@@ -198,6 +197,7 @@ public sealed class AdminCookieEvents(ShopDbContext db) : CookieAuthenticationEv
     {
         string[] currentClaims = current.Claims.Select(claim => claim.Type + "\0" + claim.Value).OrderBy(value => value, StringComparer.Ordinal).ToArray();
         string[] refreshedClaims = refreshed.Claims.Select(claim => claim.Type + "\0" + claim.Value).OrderBy(value => value, StringComparer.Ordinal).ToArray();
+
         return currentClaims.SequenceEqual(refreshedClaims, StringComparer.Ordinal);
     }
 
@@ -264,6 +264,7 @@ public sealed class AdminPermissionFilter : IAsyncAuthorizationFilter
             || (string.IsNullOrEmpty(area)
             && string.Equals(controller, "Home", StringComparison.OrdinalIgnoreCase)))
             return Task.CompletedTask;
+
         string required = AdminAuthentication.RoutePermission(area, controller, action, feature);
         ClaimsPrincipal user = context.HttpContext.User;
 
@@ -273,6 +274,7 @@ public sealed class AdminPermissionFilter : IAsyncAuthorizationFilter
             return Task.CompletedTask;
 
         context.Result = new ForbidResult();
+
         return Task.CompletedTask;
     }
 }

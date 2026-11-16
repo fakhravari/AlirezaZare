@@ -75,15 +75,8 @@
 
     var persianJsonEncoderSettings = new TextEncoderSettings(UnicodeRanges.BasicLatin, UnicodeRanges.Arabic);
     persianJsonEncoderSettings.AllowCharacter('\u200C');
-    var jsonOptions = new JsonSerializerOptions
-    {
-        Encoder = JavaScriptEncoder.Create(persianJsonEncoderSettings)
-    };
-    string structuredDataJson = JsonSerializer.Serialize(new Dictionary<string, object?>
-    {
-        ["@context"] = "https://schema.org",
-        ["@graph"] = structuredGraph
-    }, jsonOptions);
+    var jsonOptions = new JsonSerializerOptions { Encoder = JavaScriptEncoder.Create(persianJsonEncoderSettings) };
+    string structuredDataJson = JsonSerializer.Serialize(new Dictionary<string, object?> { ["@context"] = "https://schema.org", ["@graph"] = structuredGraph }, jsonOptions);
 }
 <meta name="description" content="@Model.Seo.Description"/>
 <meta name="robots" content="@Model.Seo.Robots"/>

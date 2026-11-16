@@ -27,6 +27,7 @@ public sealed class StorePriceVersionService(ShopDbContext db) : IStorePriceVers
         };
         db.StorePriceVersions.Add(version);
         await db.SaveChangesAsync(cancellationToken);
+
         return version.Id;
     }
 
@@ -34,8 +35,10 @@ public sealed class StorePriceVersionService(ShopDbContext db) : IStorePriceVers
     {
         var active = await FindActiveAsync(productId, salesPlanId, productVariantId, optionValueId, accessoryId, cancellationToken);
         if (active is null) return false;
+
         active.IsActive = false;
         await db.SaveChangesAsync(cancellationToken);
+
         return true;
     }
 

@@ -21,6 +21,7 @@ public sealed class BrandsController : PageController
             new SeoModel("برندهای ابزار برقی و تجهیزات اندازه‌گیری | ندا اولیائی",
                 "معرفی برندهای ابزار برقی، دریل و پیچ‌گوشتی، ابزار اندازه‌گیری و تجهیزات لحیم‌کاری؛ بررسی محصولات و راهنمای انتخاب هر برند.",
                 Breadcrumbs: [new SeoBreadcrumb("خانه", "/"), new SeoBreadcrumb("برندها", "/brands")]));
+
         return await PageAsync(model);
     }
 
@@ -46,6 +47,7 @@ public sealed class BrandsController : PageController
                     new SeoBreadcrumb("خانه", "/"), new SeoBreadcrumb("برندها", "/brands"),
                     new SeoBreadcrumb(brand.PersianName, $"/brands/{brand.Slug}")
                 ]));
+
         return await PageAsync(model);
     }
 }

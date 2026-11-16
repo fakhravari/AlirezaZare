@@ -11,6 +11,7 @@ public sealed class StockController : Controller
         ViewData["AreaTitle"] = "مدیریت انبار";
         ViewData["FeatureId"] = "stock";
         ViewData["DataSourceLabel"] = "خواندن از دیتابیس با API";
+
         return View();
     }
 }

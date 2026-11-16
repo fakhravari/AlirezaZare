@@ -25,9 +25,11 @@ public sealed class StoreNewsletterApiController(ShopDbContext db) : ControllerB
 
             var profile = await db.AccountProfiles.SingleOrDefaultAsync(x => x.Id == profileId, ct);
             if (profile is null) return Unauthorized();
+
             profile.NewsletterEnabled = true;
             profile.UpdatedAtUtc = DateTime.UtcNow;
             await db.SaveChangesAsync(ct);
+
             return Ok(new { subscribed = true, forAccount = true });
         }
 
@@ -48,6 +50,7 @@ public sealed class StoreNewsletterApiController(ShopDbContext db) : ControllerB
         {
             db.Entry(subscriber).State = EntityState.Detached;
             if (!await db.StoreNewsletterSubscribers.AnyAsync(x => x.Email == email, ct)) throw;
+
             return Ok(new { subscribed = true, alreadySubscribed = true });
         }
 
@@ -59,6 +62,7 @@ public sealed class StoreNewsletterApiController(ShopDbContext db) : ControllerB
     private static bool IsValidEmail(string email)
     {
         if (email.Length is < 3 or > 254) return false;
+
         try { return new MailAddress(email).Address.Equals(email, StringComparison.OrdinalIgnoreCase); }
         catch (FormatException) { return false; }
     }
