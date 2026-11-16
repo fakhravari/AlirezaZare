@@ -6,6 +6,14 @@
 
     const selector = "select:not([data-native-select])";
     const longOptionLength = 36;
+    const defaultMatcher = $.fn.select2.defaults.defaults.matcher;
+
+    function visibleOptions(data) {
+        if (data.element?.hidden) return null;
+        if (!data.children) return data;
+        const children = data.children.map(visibleOptions).filter(Boolean);
+        return children.length ? { ...data, children } : null;
+    }
 
     function prepareModalWidth(select) {
         const modal = select.closest(".modal");
@@ -43,6 +51,10 @@
                 language: "fa",
                 width: "100%",
                 minimumResultsForSearch: 0,
+                matcher: (params, data) => {
+                    const visible = visibleOptions(data);
+                    return visible ? defaultMatcher(params, visible) : null;
+                },
                 dropdownParent: modal ? $(modal) : $(document.body)
             });
         }
@@ -53,8 +65,12 @@
         for (const record of records) {
             if (record.type === "childList") {
                 for (const node of record.addedNodes) if (node instanceof Element) initialize(node);
-                if (record.target instanceof HTMLSelectElement) refresh(record.target);
-            } else if (record.target instanceof HTMLSelectElement) refresh(record.target);
+                const select = record.target instanceof Element ? record.target.closest("select") : null;
+                if (select) refresh(select);
+            } else {
+                const select = record.target instanceof Element ? record.target.closest("select") : null;
+                if (select) refresh(select);
+            }
         }
     }).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["selected", "disabled"] });
 

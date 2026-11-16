@@ -23,6 +23,9 @@
     <Content Include="wwwroot/color_admin/assets/plugins/datatables.net/js/dataTables.min.js" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <Content Include="wwwroot/color_admin/assets/plugins/datatables.net-bs5/js/dataTables.bootstrap5.min.js" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <Content Include="wwwroot/color_admin/assets/plugins/datatables.net-bs5/css/dataTables.bootstrap5.min.css" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="wwwroot/color_admin/assets/plugins/select2/dist/css/select2.min.css" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="wwwroot/color_admin/assets/plugins/select2/dist/js/select2.min.js" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="wwwroot/color_admin/assets/plugins/select2/dist/js/i18n/fa.js" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="wwwroot\content\brands\" />

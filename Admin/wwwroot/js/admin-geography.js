@@ -26,6 +26,7 @@
             const country = form.elements.countryId.value;
             form.elements.provinceId.replaceChildren(new Option("استان را انتخاب کنید", ""), ...data.provinces.filter(p => String(p.countryId) === country).map(p => new Option(p.nameFa, p.id)));
             form.elements.provinceId.value = String(selected || "");
+            form.elements.provinceId.setCustomValidity("");
             filterOptions(form.elements.provinceId, provinceSearch);
         }
         function updateFilters() {
@@ -40,6 +41,7 @@
         }
         function reset() {
             form.reset(); form.elements.id.value = ""; countrySearch.value = ""; provinceSearch.value = "";
+            [...form.elements].forEach(element => { if (typeof element.setCustomValidity === "function") element.setCustomValidity(""); });
             form.elements.countryId.replaceChildren(new Option("کشور را انتخاب کنید", ""), ...data.countries.map(c => new Option(c.nameFa, c.id)));
             if (kind !== "countries") {
                 const iranId = data.countries.find(country => country.code === "IR")?.id;
