@@ -7,7 +7,8 @@ test('Persian date filters select Gregorian values and reset both controls', {sk
   const browser = await chromium.launch({headless: true});
   t.after(() => browser.close());
   const page = await browser.newPage({viewport: {width: 375, height: 800}});
-  await page.setContent('<form><label for="from">From</label><input id="from" type="date" name="from"><button type="reset">Reset</button><button type="button" id="outside" style="position:fixed;bottom:5px;left:5px">Outside</button></form>');
+  await page.setContent('<form class="admin-filter-bar"><label for="from">From</label><input id="from" type="date" name="from"><button type="reset">Reset</button><button type="button" id="outside" style="position:fixed;bottom:5px;left:5px">Outside</button></form>');
+  await page.evaluate(() => { window.submitted = []; document.querySelector('form').addEventListener('submit', event => { event.preventDefault(); window.submitted.push(event.target.elements.from.value); }); });
   await page.addStyleTag({path: 'Admin/wwwroot/color_admin/assets/css/vendor.min.css'});
   await page.addStyleTag({path: 'Admin/wwwroot/color_admin/assets/css/default/app-rtl.min.css'});
   await page.addStyleTag({path: 'Admin/wwwroot/lib/persian-datetimepicker/mds.bs.datetimepicker.style.css'});
@@ -46,9 +47,11 @@ test('Persian date filters select Gregorian values and reset both controls', {sk
   await page.waitForFunction(() => document.querySelector('#from').value);
   const value = await page.locator('#from').inputValue();
   assert.match(value, /^\d{4}-\d{2}-\d{2}$/);
+  assert.deepEqual(await page.evaluate(() => window.submitted), [value]);
   assert.match(await page.locator('#from-persian').inputValue(), /[۰-۹]/);
   assert.equal(await page.evaluate(() => new FormData(document.querySelector('form')).get('from')), value);
   await page.getByRole('button', {name: 'Reset'}).click();
   await page.waitForFunction(() => !document.querySelector('#from-persian').value && !document.querySelector('#from').value);
   assert.equal(await page.locator('#from').inputValue(), '');
+  assert.deepEqual(await page.evaluate(() => window.submitted), [value]);
 });

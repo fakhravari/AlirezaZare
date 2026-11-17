@@ -73,6 +73,7 @@
             dateFormat: kind === "datetime-local" ? "yyyy-MM-ddTHH:mm:ss" : "yyyy-MM-dd",
             selectedDate: selectedDate || undefined,
             selectedDateToShow: selectedDate || new Date(),
+            onDayClick: () => input.dispatchEvent(new Event("change", { bubbles: true })),
             modalMode: false
         });
 

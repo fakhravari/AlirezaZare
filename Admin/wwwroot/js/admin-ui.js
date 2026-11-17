@@ -739,6 +739,16 @@
         addButton("بعدی", page + 1, { disabled: page >= pageCount, title: "صفحهٔ بعد" });
     }
 
+    // Filter forms retain their existing submit handlers and paging/validation logic.
+    document.addEventListener("change", event => {
+        const control = event.target;
+        if (!(control instanceof HTMLSelectElement) &&
+            !(control instanceof HTMLInputElement && (control.matches('[type="checkbox"], [type="radio"], [type="date"], [type="datetime-local"]') || control.hasAttribute("data-admin-persian-date-value")))) return;
+        const form = control.form;
+        if (!form?.matches(".admin-filter-bar, .admin-sales-plans__filter") || !form.matches(":valid")) return;
+        form.requestSubmit();
+    });
+
     window.AdminUI = Object.freeze({
         getJson,
         confirm: confirmAction,

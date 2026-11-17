@@ -19,7 +19,7 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext, IMedi
         var categories = await dbContext.StoreCategories.AsNoTracking().OrderBy(x => x.SortOrder).ThenBy(x => x.Id).ToListAsync(cancellationToken);
         var colors = await dbContext.StoreColors.AsNoTracking().OrderBy(x => x.Id).ToListAsync(cancellationToken);
         var assets = await dbContext.StoreProductAssets.AsNoTracking().OrderBy(x => x.SortOrder).ThenBy(x => x.Id).ToListAsync(cancellationToken);
-        var badges = await dbContext.StoreProductBadges.AsNoTracking().ToDictionaryAsync(x => x.Id, x => x.Title, cancellationToken);
+        var badges = await dbContext.StoreProductBadges.AsNoTracking().ToDictionaryAsync(x => x.Id, cancellationToken);
         var products = await dbContext.Products.AsNoTracking().Where(x => x.IsStoreEnabled).OrderBy(x => x.Id).ToListAsync(cancellationToken);
         var productIds = products.Select(x => x.Id).ToArray();
         var inventoryTotals = await (from inventory in dbContext.InventoryItems.AsNoTracking()
@@ -83,7 +83,8 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext, IMedi
             brandKeyById.TryGetValue(product.IdBrand ?? 0, out var brandKey); categoryKeyById.TryGetValue(product.IdCategory ?? 0, out var categoryKey);
             decimal stock = inventoryTotals.GetValueOrDefault(product.Id);
             int stockQty = stock >= int.MaxValue ? int.MaxValue : Math.Max(0, (int)Math.Floor(stock));
-            var o = new JsonObject { ["id"] = checked((int)product.Id), ["name"] = product.Name, ["englishName"] = product.EnglishName ?? product.Name, ["code"] = product.ProductKey, ["slug"] = product.Slug, ["brandId"] = brandKey, ["categoryId"] = categoryKey, ["detailId"] = categoryKey, ["mediaId"] = "product-" + product.ProductKey, ["price"] = (product.PriceAmount ?? 0m) / 1_000_000m, ["stockQuantity"] = stockQty, ["maxCartQuantity"] = product.MaxPurchaseQuantity ?? 99, ["discountPercent"] = product.DiscountPercent ?? 0m, ["badge"] = product.IdProductBadge is long badgeId ? badges.GetValueOrDefault(badgeId) : null };
+            var badge = product.IdProductBadge is long badgeId ? badges.GetValueOrDefault(badgeId) : null;
+            var o = new JsonObject { ["id"] = checked((int)product.Id), ["name"] = product.Name, ["englishName"] = product.EnglishName ?? product.Name, ["code"] = product.ProductKey, ["slug"] = product.Slug, ["brandId"] = brandKey, ["categoryId"] = categoryKey, ["detailId"] = categoryKey, ["mediaId"] = "product-" + product.ProductKey, ["price"] = (product.PriceAmount ?? 0m) / 1_000_000m, ["stockQuantity"] = stockQty, ["maxCartQuantity"] = product.MaxPurchaseQuantity ?? 99, ["discountPercent"] = product.DiscountPercent ?? 0m, ["badge"] = badge?.Title, ["badgeColor"] = badge?.BackgroundColor };
             o["colorIds"] = new JsonArray(productColors.Where(x => x.IdProduct == product.Id).Select(x => (JsonNode?)JsonValue.Create(colorKeyById.GetValueOrDefault(x.IdColor))).ToArray());
             o["specificationValues"] = new JsonArray(productSpecs.Where(x => x.IdProduct == product.Id).Select(x => (JsonNode?)new JsonObject { ["featureId"] = x.FeatureKey, ["value"] = x.Value }).ToArray());
             o["includedBenefits"] = new JsonArray(productBenefits.Where(x => x.IdProduct == product.Id).Select(x => (JsonNode?)new JsonObject

@@ -16,6 +16,17 @@ test('product badges appear only in the regular sales plan', async () => {
   assert.doesNotMatch(render({salesPlanId: 'special', salesPlanName: 'طرح ویژه'}), /نشان نمونه/);
   assert.match(render({salesPlanId: 'special', salesPlanName: 'طرح ویژه'}), /طرح ویژه/);
   assert.doesNotMatch(render({salesPlanId: 'unknown'}), /نشان نمونه/);
+  product.badgeColor = '#FFFFFF';
+  assert.match(render({}), /background:#FFFFFF!important;color:#000000!important/);
+  assert.match(render({}), /border:1px solid #000000!important/);
+  product.badgeColor = '#102A43';
+  assert.match(render({}), /background:#102A43!important;color:#ffffff!important/);
+  assert.match(render({}), /border:1px solid #ffffff!important/);
+  product.badgeColor = '#fff;display:none';
+  assert.doesNotMatch(render({}), /display:none/);
+  product.badgeColor = '#FFFFFF';
+  assert.doesNotMatch(render({badge: 'منتخب'}), /background:#FFFFFF/);
+  assert.doesNotMatch(render({salesPlanId: 'special', salesPlanName: 'طرح ویژه'}), /background:#FFFFFF/);
 });
 
 test('badge migration transfers old values before dropping the legacy column', async () => {

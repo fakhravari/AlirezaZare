@@ -80,6 +80,7 @@
             if (pushState) history.pushState({ admin: true }, "", target.href);
             setActiveNavigation(target);
             window.AdminPages?.initialize(content);
+            window.AdminProductBadges?.initialize(content);
             window.AdminPaidOrdersDispatch?.initialize(content);
             window.AdminUsers?.initialize(content);
             window.AdminDocuments?.initialize(content);
@@ -125,6 +126,7 @@
     if (document.readyState === "loading") {
         document.addEventListener("DOMContentLoaded", () => {
             window.AdminPages?.initialize(content);
+            window.AdminProductBadges?.initialize(content);
             window.AdminPaidOrdersDispatch?.initialize(content);
             window.AdminUsers?.initialize(content);
             window.AdminDocuments?.initialize(content);
@@ -141,6 +143,7 @@
         }, { once: true });
     } else {
         window.AdminPages?.initialize(content);
+        window.AdminProductBadges?.initialize(content);
         window.AdminPaidOrdersDispatch?.initialize(content);
         window.AdminUsers?.initialize(content);
         window.AdminDocuments?.initialize(content);

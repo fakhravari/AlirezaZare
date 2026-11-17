@@ -12,7 +12,7 @@ public sealed class StoreProductBadgesApiController(ShopDbContext db) : Controll
 {
     [HttpGet]
     public async Task<IActionResult> List(CancellationToken ct) => Ok(await db.StoreProductBadges.AsNoTracking()
-        .OrderBy(x => x.Title).Select(x => new { x.Id, x.Title, ProductCount = db.Products.Count(p => p.IdProductBadge == x.Id) }).ToListAsync(ct));
+        .OrderBy(x => x.Title).Select(x => new { x.Id, x.Title, x.BackgroundColor, ProductCount = db.Products.Count(p => p.IdProductBadge == x.Id) }).ToListAsync(ct));
 
     [HttpPost]
     [ValidateAntiForgeryToken]
@@ -25,16 +25,19 @@ public sealed class StoreProductBadgesApiController(ShopDbContext db) : Controll
     private async Task<IActionResult> Save(long? id, BadgeInput input, CancellationToken ct)
     {
         string title = input.Title?.Trim() ?? "";
+        string color = (input.BackgroundColor ?? "#102A43").Trim().ToUpperInvariant();
         if (title.Length is < 1 or > 100) return BadRequest(new { title = "عنوان نشان باید بین ۱ تا ۱۰۰ نویسه باشد." });
+        if (!System.Text.RegularExpressions.Regex.IsMatch(color, "^#[0-9A-F]{6}$")) return BadRequest(new { title = "رنگ نشان معتبر نیست." });
         await using var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, ct);
         if (await db.StoreProductBadges.AnyAsync(x => x.Id != id && x.Title == title, ct)) return Conflict(new { title = "این نشان قبلاً ثبت شده است." });
         StoreProductBadge? badge = id.HasValue ? await db.StoreProductBadges.SingleOrDefaultAsync(x => x.Id == id.Value, ct) : new StoreProductBadge();
         if (badge is null) return NotFound();
         badge.Title = title;
+        badge.BackgroundColor = color;
         if (!id.HasValue) db.StoreProductBadges.Add(badge);
         await db.SaveChangesAsync(ct);
         await transaction.CommitAsync(ct);
-        return Ok(new { badge.Id, badge.Title });
+        return Ok(new { badge.Id, badge.Title, badge.BackgroundColor });
     }
 
     [HttpDelete("{id:long}")]
@@ -52,11 +55,13 @@ public sealed class StoreProductBadgesApiController(ShopDbContext db) : Controll
     }
 
     [HttpGet("products")]
-    public async Task<IActionResult> Products([FromQuery] string? q, [FromQuery] int page = 1, CancellationToken ct = default)
+    public async Task<IActionResult> Products([FromQuery] string? q, [FromQuery] long? badgeId, [FromQuery] bool withoutBadge = false, [FromQuery] int page = 1, CancellationToken ct = default)
     {
         q = q?.Trim() ?? "";
-        if (q.Length > 100 || page is < 1 or > 100000) return BadRequest();
+        if (q.Length > 100 || page is < 1 or > 100000 || badgeId is < 1 || (badgeId.HasValue && withoutBadge)) return BadRequest();
         var query = db.Products.AsNoTracking().Where(x => q == "" || x.Name.Contains(q) || x.ProductKey.Contains(q));
+        if (badgeId.HasValue) query = query.Where(x => x.IdProductBadge == badgeId.Value);
+        if (withoutBadge) query = query.Where(x => x.IdProductBadge == null);
         int total = await query.CountAsync(ct);
         var items = await query.OrderBy(x => x.Name).ThenBy(x => x.Id).Skip((page - 1) * 30).Take(30)
             .Select(x => new { x.Id, x.Name, code = x.ProductKey, x.IdProductBadge }).ToListAsync(ct);
@@ -78,6 +83,6 @@ public sealed class StoreProductBadgesApiController(ShopDbContext db) : Controll
         return Ok(new { saved = true });
     }
 
-    public sealed record BadgeInput(string? Title);
+    public sealed record BadgeInput(string? Title, string? BackgroundColor);
     public sealed record AssignmentInput(long? BadgeId);
 }

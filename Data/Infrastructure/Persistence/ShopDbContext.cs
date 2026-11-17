@@ -464,6 +464,7 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.ToTable("ProductBadge", "Store");
             entity.HasKey(x => x.Id);
             entity.Property(x => x.Title).HasMaxLength(100).IsRequired();
+            entity.Property(x => x.BackgroundColor).HasMaxLength(7).IsUnicode(false).IsRequired();
             entity.HasIndex(x => x.Title).IsUnique();
         });
         modelBuilder.Entity<ProductVariant>(entity =>
