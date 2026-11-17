@@ -5,6 +5,12 @@
     // dismiss buttons continue to work. Set this before page scripts create instances.
     if (window.bootstrap?.Modal?.Default) window.bootstrap.Modal.Default.backdrop = "static";
 
+    function initStatusSwitch(input) {
+        input.dataset.adminSwitch = "";
+        input.setAttribute("role", "switch");
+        return input;
+    }
+
     function arrangeModalFields(modal) {
         const body = modal.querySelector(".modal-body");
         if (!body || body.dataset.adminFieldsArranged || body.querySelector(":scope > .row")) return;
@@ -143,7 +149,7 @@
         id: "شناسه", code: "کد", name: "نام", englishName: "نام لاتین", brandName: "برند", logoPath: "مسیر لوگو", logoUrl: "نشانی لوگو",
         categoryName: "دسته‌بندی", parentId: "شناسهٔ والد", slug: "نشانی", countryCode: "کد کشور",
         source: "منبع", isFilterable: "قابل فیلتر", isHighlight: "نمایش برجسته", price: "قیمت (تومان)",
-        priceAmount: "قیمت پایه (تومان)", discountPercent: "درصد تخفیف", stockQuantity: "موجودی", warehouseId: "شناسهٔ انبار",
+        priceAmount: "قیمت (تومان)", totalAmount: "مبلغ کل (تومان)", unitAmount: "مبلغ واحد (تومان)", discountPercent: "درصد تخفیف", stockQuantity: "موجودی", warehouseId: "شناسهٔ انبار",
         warehouseCode: "کد انبار", warehouseName: "انبار", companyName: "شرکت", isSalesWarehouse: "انبار فروش",
         isActive: "وضعیت", storeProductKey: "شناسهٔ محصول فروشگاه", productName: "کالا", variantName: "تنوع",
         salesPlanName: "طرح فروش", unitName: "واحد اصلی", quantity: "موجودی", minimumQuantity: "حداقل موجودی", isLowStock: "وضعیت حداقل",
@@ -744,6 +750,7 @@
         refreshDataTable,
         withIcon,
         renderNumberedPagination,
+        initStatusSwitch,
         initPriceInput,
         setPriceValue,
         priceValue,

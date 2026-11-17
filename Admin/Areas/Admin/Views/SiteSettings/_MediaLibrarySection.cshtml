@@ -19,8 +19,8 @@
                 <input id="slider-title" name="title" class="form-control" maxlength="200" required />
                 <label for="slider-url" class="form-label mt-2">نشانی لینک</label>
                 <input id="slider-url" name="url" class="form-control" dir="ltr" maxlength="1000" placeholder="/products" required />
-                <label class="d-block mt-2"><input type="checkbox" name="showOnMobile" value="true" checked /> نمایش در موبایل</label>
-                <label class="d-block"><input type="checkbox" name="showOnDesktop" value="true" checked /> نمایش در دسکتاپ</label>
+                <label class="d-block mt-2"><input data-admin-switch role="switch" type="checkbox" name="showOnMobile" value="true" checked /> نمایش در موبایل</label>
+                <label class="d-block"><input data-admin-switch role="switch" type="checkbox" name="showOnDesktop" value="true" checked /> نمایش در دسکتاپ</label>
             }
             <label for="@fileId" class="form-label">فایل تصویر</label>
             <input id="@fileId" name="file" type="file" accept="image/jpeg,image/png,image/webp" class="form-control" required />

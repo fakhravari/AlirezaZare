@@ -53,14 +53,14 @@
             row.append(cell(item.productName), cell(item.variantName), cell(item.salesPlanName));
             const amountCell = document.createElement("td"), amount = document.createElement("input");
             amount.type = "text"; amount.max = "9007199254740991"; amount.className = "form-control form-control-sm";
-            amount.setAttribute("aria-label", `قیمت ${item.productName}، ${item.variantName}، ${item.salesPlanName}`);
+            amount.setAttribute("aria-label", `قیمت (تومان) ${item.productName}، ${item.variantName}، ${item.salesPlanName}`);
             ui.setPriceValue(amount, draft?.amount ?? (item.priceAmount == null ? "" : String(item.priceAmount))); amount.disabled = page.dataset.canEdit !== "true"; amountCell.append(amount); row.append(amountCell);
             const discountCell = document.createElement("td"), discount = document.createElement("input");
             discount.type = "number"; discount.min = "0"; discount.max = "99.99"; discount.step = "0.01"; discount.className = "form-control form-control-sm";
             discount.setAttribute("aria-label", `درصد تخفیف ${item.productName}، ${item.variantName}، ${item.salesPlanName}`);
             discount.value = draft?.discount ?? (item.discountPercent == null ? "0" : String(item.discountPercent)); discount.disabled = page.dataset.canEdit !== "true"; discountCell.append(discount); row.append(discountCell);
             const activeCell = document.createElement("td"), activeLabel = document.createElement("label"), active = document.createElement("input"), activeText = document.createElement("span");
-            active.type = "checkbox"; active.checked = draft?.active ?? (item.isEnabled !== false); active.disabled = page.dataset.canEdit !== "true"; activeText.textContent = " فعال"; activeLabel.append(active, activeText); activeCell.append(activeLabel); row.append(activeCell);
+            active.type = "checkbox"; ui.initStatusSwitch(active); active.checked = draft?.active ?? (item.isEnabled !== false); active.disabled = page.dataset.canEdit !== "true"; activeText.textContent = " فعال"; activeLabel.append(active, activeText); activeCell.append(activeLabel); row.append(activeCell);
             const rememberDraft = () => page._variantPriceDrafts.set(key, { amount: amount.value, discount: discount.value, active: active.checked });
             amount.addEventListener("input", rememberDraft); discount.addEventListener("input", rememberDraft); active.addEventListener("change", rememberDraft);
             const actions = document.createElement("td"), save = document.createElement("button"); save.type = "button"; save.className = "btn btn-sm btn-primary"; save.textContent = "ذخیره"; save.dataset.adminConfirm = "قیمت و وضعیت طرح برای این تنوع ذخیره شود؟"; save.disabled = page.dataset.canEdit !== "true";
@@ -129,8 +129,8 @@
     }
     async function loadHistory(page) {
         const serial = (page._historySerial || 0) + 1; page._historySerial = serial;
-        const message = page.querySelector("[data-price-history-status]"), body = page.querySelector("[data-price-history-rows]");
-        message.textContent = "در حال دریافت تاریخچه…"; body.replaceChildren();
+        const message = page.querySelector("[data-price-history-status]"), body = page.querySelector("[data-price-history-rows]"), table = body.closest("table");
+        ui.destroyDataTable(table); message.textContent = "در حال دریافت تاریخچه…"; body.replaceChildren();
         try {
             const url = filterUrl(page, "/price-history", "[data-history-filter]"); url.searchParams.set("take", "200");
             const rows = await request(page, url);
@@ -140,6 +140,7 @@
                 row.append(cell(`#${item.id}`), cell(item.productName || `#${item.idProduct}`), cell(item.idSalesPlan ?? "—"), cell(item.targetType), cell(number.format(item.priceAmount)), cell(item.isActive ? "فعال" : "سابقه"), cell(window.AdminUI.formatDateTime(item.createdAtUtc)), cell(item.previousVersionId ? `#${item.previousVersionId}` : "—"));
                 body.append(row);
             }
+            ui.refreshDataTable(table);
             message.textContent = rows.length ? `${number.format(rows.length)} نسخهٔ اخیر` : "هنوز نسخه‌ای ثبت نشده است.";
         } catch (error) { if (serial === page._historySerial) message.textContent = error.message || "دریافت تاریخچه ناموفق بود."; }
     }
@@ -152,13 +153,13 @@
             const makeNumber = (label, value, min, max, step) => {
                 const td = document.createElement("td"), input = document.createElement("input");
                 input.type = label === "قیمت" ? "text" : "number"; input.className = "form-control form-control-sm"; input.min = min; input.max = max; input.step = step;
-                input.setAttribute("aria-label", `${label} ${item.productName}، ${item.salesPlanName}`); if (label === "قیمت") ui.setPriceValue(input, value); else input.value = value; td.append(input); row.append(td); return input;
+                input.setAttribute("aria-label", `${label}${label === "قیمت" ? " (تومان)" : ""} ${item.productName}، ${item.salesPlanName}`); if (label === "قیمت") ui.setPriceValue(input, value); else input.value = value; td.append(input); row.append(td); return input;
             };
             const amount = makeNumber("قیمت", draft?.amount ?? (item.priceAmount == null ? "" : String(item.priceAmount)), "0", "9007199254740991", "1");
             const discount = makeNumber("تخفیف", draft?.discount ?? String(item.discountPercent ?? 0), "0", "99.99", "0.01");
             const limit = makeNumber("سقف خرید", draft?.limit ?? String(item.maxPurchaseQuantity ?? 99), "1", "99", "1");
             const activeCell = document.createElement("td"), activeLabel = document.createElement("label"), active = document.createElement("input");
-            active.type = "checkbox"; active.checked = draft?.active ?? (item.isEnabled ?? true); activeLabel.append(active, document.createTextNode(" فعال")); activeCell.append(activeLabel); row.append(activeCell);
+            active.type = "checkbox"; ui.initStatusSwitch(active); active.checked = draft?.active ?? (item.isEnabled ?? true); activeLabel.append(active, document.createTextNode(" فعال")); activeCell.append(activeLabel); row.append(activeCell);
             const remember = () => page._offerDrafts.set(key, { amount: amount.value, discount: discount.value, limit: limit.value, active: active.checked });
             for (const input of [amount, discount, limit]) input.addEventListener("input", remember); active.addEventListener("change", remember);
             const actions = document.createElement("td"), save = document.createElement("button"); save.type = "button"; save.className = "btn btn-sm btn-primary"; save.textContent = "ذخیره"; save.dataset.adminConfirm = "قیمت پیشنهاد و محدودیت خرید ذخیره شوند؟"; actions.append(save);
@@ -205,8 +206,8 @@
             message.textContent = items.length ? "" : "متعلقهٔ فعالی برای کالا ثبت نشده است.";
             for (const item of items) {
                 const row = document.createElement("tr"); row.append(cell(`${item.name}${item.isRequired ? " (اجباری)" : ""}`), cell(number.format(item.basePriceAmount)));
-                const priceCell = document.createElement("td"), price = document.createElement("input"); price.type = "text"; price.max = "9007199254740991"; price.className = "form-control form-control-sm"; price.setAttribute("aria-label", `قیمت ${item.name} در ${offer.salesPlanName}`); ui.setPriceValue(price, item.priceAmount ?? item.basePriceAmount); priceCell.append(price); row.append(priceCell);
-                const allowedCell = document.createElement("td"), allowed = document.createElement("input"); allowed.type = "checkbox"; allowed.checked = item.isRequired || item.isAllowed; allowed.disabled = item.isRequired || page.dataset.canEdit !== "true"; allowed.setAttribute("aria-label", `مجاز بودن ${item.name}`); allowedCell.append(allowed); row.append(allowedCell);
+                const priceCell = document.createElement("td"), price = document.createElement("input"); price.type = "text"; price.max = "9007199254740991"; price.className = "form-control form-control-sm"; price.setAttribute("aria-label", `قیمت (تومان) ${item.name} در ${offer.salesPlanName}`); ui.setPriceValue(price, item.priceAmount ?? item.basePriceAmount); priceCell.append(price); row.append(priceCell);
+                const allowedCell = document.createElement("td"), allowed = document.createElement("input"); allowed.type = "checkbox"; ui.initStatusSwitch(allowed); allowed.checked = item.isRequired || item.isAllowed; allowed.disabled = item.isRequired || page.dataset.canEdit !== "true"; allowed.setAttribute("aria-label", `مجاز بودن ${item.name}`); allowedCell.append(allowed); row.append(allowedCell);
                 const actions = document.createElement("td"), save = document.createElement("button"); save.type = "button"; save.className = "btn btn-sm btn-primary"; save.textContent = "ذخیره"; save.dataset.adminConfirm = `قیمت و وضعیت متعلقهٔ ${item.name} ذخیره شود؟`; save.disabled = page.dataset.canEdit !== "true"; actions.append(save); row.append(actions);
                 ui.withIcon(save, "fa-floppy-disk");
                 save.addEventListener("click", async () => {
@@ -260,6 +261,12 @@
     function showPlanSettings(page) {
         const form = page.querySelector("[data-plan-settings]");
         const plan = page._planSettings?.find(item => String(item.id) === form.elements.id.value);
+        const publication = form.querySelector("[data-plan-publication]");
+        if (publication) {
+            publication.hidden = !plan;
+            publication.textContent = plan?.isRegular ? "فروش عادی" : plan?.isActive ? "منتشرشده" : "غیرفعال";
+            publication.dataset.active = String(!!plan?.isActive);
+        }
         const utcValue = value => value ? new Date(value).toISOString().slice(0, 19) : "";
         window.AdminPersianDatePicker?.setValue(form.elements.startsAtUtc, utcValue(plan?.startsAtUtc));
         window.AdminPersianDatePicker?.setValue(form.elements.endsAtUtc, utcValue(plan?.endsAtUtc));

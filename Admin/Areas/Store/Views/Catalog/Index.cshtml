@@ -197,8 +197,8 @@
                     <div class="admin-product-accessory-grid mb-2">
                         <div class="admin-modal-field"><label for="accessory-price" class="form-label">قیمت پایه (تومان)</label><input id="accessory-price" class="form-control" name="priceAmount" type="text" inputmode="numeric" dir="ltr" data-admin-price max="9007199254740991" required /></div>
                         <div class="admin-modal-field"><label for="accessory-order" class="form-label">ترتیب نمایش</label><input id="accessory-order" class="form-control" name="sortOrder" type="number" min="0" max="2147483647" step="1" value="0" required /></div>
-                        <div class="admin-modal-field d-flex align-items-end"><div class="form-check"><input id="accessory-required" name="isRequired" type="checkbox" class="form-check-input" /><label for="accessory-required" class="form-check-label">متعلقه اجباری است</label></div></div>
-                        <div class="admin-modal-field d-flex align-items-end"><div class="form-check"><input id="accessory-active" name="isActive" type="checkbox" class="form-check-input" checked /><label for="accessory-active" class="form-check-label">متعلقه فعال است</label></div></div>
+                        <div class="admin-modal-field d-flex align-items-end"><div class="form-check"><input data-admin-switch role="switch" id="accessory-required" name="isRequired" type="checkbox" class="form-check-input" /><label for="accessory-required" class="form-check-label">متعلقه اجباری است</label></div></div>
+                        <div class="admin-modal-field d-flex align-items-end"><div class="form-check"><input data-admin-switch role="switch" id="accessory-active" name="isActive" type="checkbox" class="form-check-input" checked /><label for="accessory-active" class="form-check-label">متعلقه فعال است</label></div></div>
                     </div>
                     <button type="submit" class="btn btn-primary">ذخیره متعلقه</button>
                     <button type="button" class="btn btn-default" data-product-accessory-reset>متعلقهٔ جدید</button>
@@ -239,7 +239,7 @@
                     <div class="admin-modal-field"><label class="form-label" for="product-benefit-title">عنوان</label><input class="form-control" id="product-benefit-title" name="title" maxlength="300" required /></div>
                     <div class="admin-modal-field"><label class="form-label" for="product-benefit-icon">کلاس آیکن</label><input class="form-control" id="product-benefit-icon" name="icon" maxlength="100" placeholder="bi-shield-check" pattern="[a-z0-9-]*" /></div>
                     <div class="admin-modal-field"><label class="form-label" for="product-benefit-sort-order">ترتیب نمایش</label><input class="form-control" id="product-benefit-sort-order" name="sortOrder" type="number" min="0" max="100000" step="1" value="0" required /></div>
-                    <div class="admin-modal-field d-flex align-items-end"><label class="form-check mb-0"><input class="form-check-input" name="isActive" type="checkbox" checked /><span class="form-check-label">فعال و قابل نمایش</span></label></div>
+                    <div class="admin-modal-field d-flex align-items-end"><label class="form-check mb-0"><input data-admin-switch role="switch" class="form-check-input" name="isActive" type="checkbox" checked /><span class="form-check-label">فعال و قابل نمایش</span></label></div>
                     <div class="admin-modal-field admin-modal-field-wide"><label class="form-label" for="product-benefit-detail">توضیح</label><textarea class="form-control" id="product-benefit-detail" name="detail" maxlength="1000" rows="2"></textarea></div>
                     <div class="admin-modal-field-wide d-flex justify-content-end gap-2"><button class="btn btn-default" type="button" data-product-benefit-cancel>بازگشت به فهرست</button><button class="btn btn-primary" type="submit">ذخیرهٔ مزیت</button></div>
                 </form>
@@ -339,7 +339,7 @@
                 <label for="brand-name-fa" class="form-label">نام فارسی</label><input id="brand-name-fa" name="nameFa" class="form-control mb-3" maxlength="200" required />
                 <label for="brand-name-en" class="form-label">نام لاتین</label><input id="brand-name-en" name="nameEn" class="form-control mb-3" maxlength="200" required />
                 <label for="brand-country" class="form-label">کشور</label><select id="brand-country" name="countryCode" class="form-select"></select>
-                <div class="form-check mt-3"><input id="brand-show-in-store" name="showInStore" type="checkbox" value="true" class="form-check-input" checked /><label for="brand-show-in-store" class="form-check-label">نمایش در فروشگاه</label></div>
+                <div class="form-check mt-3"><input data-admin-switch role="switch" id="brand-show-in-store" name="showInStore" type="checkbox" value="true" class="form-check-input" checked /><label for="brand-show-in-store" class="form-check-label">نمایش در فروشگاه</label></div>
             </div>
             <div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button type="submit" class="btn btn-primary"><i class="fa fa-floppy-disk me-1" aria-hidden="true"></i>ذخیره</button></div>
         </form></div>
@@ -365,8 +365,8 @@
                 <label for="attribute-icon" class="form-label">کلاس آیکن (اختیاری)</label><input id="attribute-icon" name="icon" class="form-control mb-3" maxlength="100" pattern="[a-z0-9-]*" />
                 <label for="attribute-source" class="form-label">کلید منبع (اختیاری)</label><input id="attribute-source" name="sourceKey" class="form-control mb-3" maxlength="100" pattern="[A-Za-z][A-Za-z0-9_:-]*" />
                 <label for="attribute-filter" class="form-label">کلید فیلتر (برای ویژگی قابل‌فیلتر اجباری)</label><input id="attribute-filter" name="filterKey" class="form-control mb-3" maxlength="100" pattern="[A-Za-z][A-Za-z0-9_-]*" />
-                <div class="form-check mb-2"><input id="attribute-filterable" name="isFilterable" type="checkbox" class="form-check-input" /><label for="attribute-filterable" class="form-check-label">نمایش در فیلتر کاتالوگ</label></div>
-                <div class="form-check"><input id="attribute-highlight" name="isHighlight" type="checkbox" class="form-check-input" /><label for="attribute-highlight" class="form-check-label">نمایش برجسته در کارت</label></div>
+                <div class="form-check mb-2"><input data-admin-switch role="switch" id="attribute-filterable" name="isFilterable" type="checkbox" class="form-check-input" /><label for="attribute-filterable" class="form-check-label">نمایش در فیلتر کاتالوگ</label></div>
+                <div class="form-check"><input data-admin-switch role="switch" id="attribute-highlight" name="isHighlight" type="checkbox" class="form-check-input" /><label for="attribute-highlight" class="form-check-label">نمایش برجسته در کارت</label></div>
             </div>
             <div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button type="submit" class="btn btn-primary"><i class="fa fa-floppy-disk me-1" aria-hidden="true"></i>ذخیره</button></div>
         </form></div>

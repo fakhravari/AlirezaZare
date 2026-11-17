@@ -118,8 +118,8 @@
                 renderSummary(result.summary);
                 renderTable(result);
                 const dateRange = `${dateLabel(fromInput.value)} تا ${dateLabel(toInput.value)}`;
-                const paymentWarning = summary.ordersWithoutVerifiedPayment
-                    ? ` ${number.format(summary.ordersWithoutVerifiedPayment)} سفارش با وضعیت فروش/ارسال، تأیید پرداخت معتبر ندارند و از مبلغ فروش کنار گذاشته شده‌اند.`
+                const paymentWarning = result.summary?.ordersWithoutVerifiedPayment
+                    ? ` ${number.format(result.summary.ordersWithoutVerifiedPayment)} سفارش با وضعیت فروش/ارسال، تأیید پرداخت معتبر ندارند و از مبلغ فروش کنار گذاشته شده‌اند.`
                     : "";
                 page.querySelector("[data-report-note]").textContent = type === "inventory"
                     ? `موجودی لحظه‌ای است؛ گردش‌ها برای بازهٔ ${dateRange} محاسبه شده‌اند. ${result.warehouseAccess === false ? "برای این حساب انبار مجازی تعریف نشده است." : ""}`

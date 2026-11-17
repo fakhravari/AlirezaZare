@@ -23,6 +23,7 @@
         if (!(input instanceof HTMLInputElement) || instances.has(input) || !window.mds?.MdsPersianDateTimePicker) return;
 
         const kind = input.type;
+        const defaultValue = input.defaultValue;
         const originalId = input.id || `admin-date-${crypto.randomUUID()}`;
         const textId = `${originalId}-persian`;
         input.id = originalId;
@@ -65,9 +66,17 @@
             modalMode: true
         });
 
+        // In modal mode the library creates the Bootstrap modal asynchronously
+        // and does not attach an opening handler to the input itself.
+        textInput.addEventListener("click", () => {
+            const open = () => { if (!textInput.disabled && picker.getBsModalInstance()) picker.show(); };
+            if (picker.getBsModalInstance()) open();
+            else window.setTimeout(open, 350);
+        });
+
         instances.set(input, { picker, textInput, kind });
         if (selectedDate) picker.setDate(selectedDate);
-        input.form?.addEventListener("reset", () => window.setTimeout(() => setValue(input, input.defaultValue)));
+        input.form?.addEventListener("reset", () => window.setTimeout(() => setValue(input, defaultValue)));
 
         new MutationObserver(() => { textInput.disabled = input.disabled; }).observe(input, {
             attributes: true,

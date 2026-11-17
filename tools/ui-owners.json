@@ -104,6 +104,9 @@
           "js": [
             "Admin/wwwroot/js/admin-variant-prices.js"
           ],
+          "css": [
+            "Admin/wwwroot/css/admin-sales-plans.css"
+          ],
           "server": [
             "Admin/Areas/Store/Controllers/Api/StoreVariantPricesAdminApiController.cs",
             "Admin/Areas/Store/Controllers/FeaturesController.cs"

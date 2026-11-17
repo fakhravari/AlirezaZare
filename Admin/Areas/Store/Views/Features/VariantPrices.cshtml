@@ -23,34 +23,43 @@
     @Html.AntiForgeryToken()
     @if (promotionSection == "plans" && User.IsInRole("system.full-access"))
     {
-        <section class="panel panel-inverse">
-            <div class="panel-heading"><h2 class="panel-title">بازه و نمایش طرح فروش</h2></div>
-            <div class="panel-body">
-                <form class="admin-filter-bar mb-3 d-flex flex-wrap align-items-center gap-2" data-plan-filter>
+        <section class="panel panel-inverse admin-sales-plans">
+            <div class="panel-heading"><h2 class="panel-title">مدیریت طرح‌های فروش</h2></div>
+            <div class="panel-body admin-sales-plans__body">
+                <div class="admin-sales-plans__section">
+                <h3 class="admin-sales-plans__title"><i class="fa fa-magnifying-glass" aria-hidden="true"></i> جست‌وجوی طرح</h3>
+                <form class="admin-sales-plans__filter" data-plan-filter>
                     <label class="visually-hidden" for="plan-product-search">جست‌وجوی کالا</label><input id="plan-product-search" class="form-control" type="search" name="q" maxlength="100" placeholder="نام یا کد کالای دارای قیمت در طرح" />
                     <label for="plan-filter-from">از تاریخ اجرای طرح</label><input id="plan-filter-from" class="form-control" type="date" name="from" />
                     <label for="plan-filter-to">تا تاریخ اجرای طرح</label><input id="plan-filter-to" class="form-control" type="date" name="to" />
                     <button class="btn btn-primary" type="submit">اعمال فیلتر</button><button class="btn btn-default" type="reset">پاک‌کردن</button>
                 </form>
-                <p class="small text-muted">فیلتر تاریخ، طرح‌های هم‌پوشان با بازه را نشان می‌دهد؛ طرح بدون تاریخ، باز در نظر گرفته می‌شود.</p>
-                <p>طرح تازه به‌صورت پیش‌نویس ساخته و به انبارهای فروش متصل می‌شود. برای عرضه، آن را منتشر کنید؛ طرح‌های دارای سابقه فقط غیرفعال می‌شوند.</p>
-                <form class="border rounded p-3 mb-3" data-plan-create data-admin-confirm="طرح فروش جدید ساخته شود؟">
-                    <h3 class="h5">ایجاد طرح فروش</h3>
+                <p class="admin-sales-plans__help">طرح‌های هم‌پوشان با بازه نمایش داده می‌شوند؛ طرح بدون تاریخ، باز در نظر گرفته می‌شود.</p>
+                </div>
+                <details class="admin-sales-plans__section admin-sales-plans__create">
+                <summary class="admin-sales-plans__title"><i class="fa fa-circle-plus" aria-hidden="true"></i> ایجاد طرح فروش جدید</summary>
+                <p class="admin-sales-plans__help">طرح جدید به‌صورت پیش‌نویس ساخته می‌شود؛ پس از تنظیم، آن را منتشر کنید.</p>
+                <form data-plan-create data-admin-confirm="طرح فروش جدید ساخته شود؟">
                     <div class="row g-2"><div class="col-md-3"><label class="form-label" for="new-plan-key">کلید یکتا</label><input id="new-plan-key" class="form-control" name="key" maxlength="64" pattern="[a-z0-9][a-z0-9-]*" required /></div><div class="col-md-3"><label class="form-label" for="new-plan-code">کد</label><input id="new-plan-code" class="form-control" name="code" maxlength="64" required /></div><div class="col-md-3"><label class="form-label" for="new-plan-name">نام</label><input id="new-plan-name" class="form-control" name="displayName" maxlength="200" required /></div><div class="col-md-3"><label class="form-label" for="new-plan-type">نوع</label><input id="new-plan-type" class="form-control" name="planType" maxlength="30" required /></div></div>
                     <button class="btn btn-success mt-3" type="submit"><i class="fa fa-file-circle-plus me-1" aria-hidden="true"></i>ساخت پیش‌نویس</button>
                 </form>
-                <form data-plan-settings data-admin-confirm="تنظیمات طرح فروش ذخیره شود؟">
+                </details>
+                <form class="admin-sales-plans__section" data-plan-settings data-admin-confirm="تنظیمات طرح فروش ذخیره شود؟">
+                    <div class="admin-sales-plans__heading"><h3 class="admin-sales-plans__title"><i class="fa fa-sliders" aria-hidden="true"></i> ویرایش و انتشار طرح</h3><span class="admin-sales-plans__badge" data-plan-publication hidden></span></div>
                     <div class="mb-3"><label class="form-label" for="plan-settings-id">طرح فروش</label><select id="plan-settings-id" class="form-select" name="id" required></select></div>
+                    <h4 class="admin-sales-plans__subtitle">مشخصات طرح</h4>
                     <div class="row g-2 mb-3"><div class="col-md-4"><label class="form-label" for="plan-settings-code">کد</label><input id="plan-settings-code" class="form-control" name="code" maxlength="64" /></div><div class="col-md-4"><label class="form-label" for="plan-settings-name">نام طرح</label><input id="plan-settings-name" class="form-control" name="displayName" maxlength="200" /></div><div class="col-md-4"><label class="form-label" for="plan-settings-type">نوع</label><input id="plan-settings-type" class="form-control" name="planType" maxlength="30" /></div></div>
                     <button class="btn btn-default mb-3" type="button" data-plan-details-save data-admin-confirm="مشخصات طرح فروش ذخیره شود؟"><i class="fa fa-floppy-disk me-1" aria-hidden="true"></i>ذخیرهٔ مشخصات</button>
-                    <button class="btn btn-success mb-3" type="button" data-plan-publish data-admin-confirm="طرح فروش منتشر شود؟"><i class="fa fa-paper-plane me-1" aria-hidden="true"></i>انتشار طرح</button>
-                    <button class="btn btn-warning mb-3" type="button" data-plan-unpublish data-admin-confirm="طرح از فروش خارج شود؟"><i class="fa fa-eye-slash me-1" aria-hidden="true"></i>خروج از فروش</button>
-                    <button class="btn btn-danger mb-3" type="button" data-plan-delete data-admin-confirm="طرح فروش حذف شود؟"><i class="fa fa-trash-can me-1" aria-hidden="true"></i>حذف طرح بدون سابقه</button>
-                    <div class="mb-3"><label class="form-label" for="plan-settings-start">شروع (UTC)</label><input id="plan-settings-start" class="form-control" name="startsAtUtc" type="datetime-local" step="1" /></div>
-                    <div class="mb-3"><label class="form-label" for="plan-settings-end">پایان (UTC)</label><input id="plan-settings-end" class="form-control" name="endsAtUtc" type="datetime-local" step="1" /></div>
+                    <h4 class="admin-sales-plans__subtitle">زمان و نمایش</h4>
+                    <div class="row g-2 mb-3"><div class="col-md-6"><label class="form-label" for="plan-settings-start">شروع (UTC)</label><input id="plan-settings-start" class="form-control" name="startsAtUtc" type="datetime-local" step="1" /></div>
+                    <div class="col-md-6"><label class="form-label" for="plan-settings-end">پایان (UTC)</label><input id="plan-settings-end" class="form-control" name="endsAtUtc" type="datetime-local" step="1" /></div></div>
                     <div class="mb-3"><label class="form-label" for="plan-settings-label">برچسب</label><input id="plan-settings-label" class="form-control" name="label" maxlength="100" /></div>
-                    <div class="form-check mb-3"><input id="plan-settings-countdown" class="form-check-input" name="showCountdown" type="checkbox" /><label class="form-check-label" for="plan-settings-countdown">نمایش شمارش معکوس</label></div>
+                    <div class="form-check mb-3"><input data-admin-switch role="switch" id="plan-settings-countdown" class="form-check-input" name="showCountdown" type="checkbox" /><label class="form-check-label" for="plan-settings-countdown">نمایش شمارش معکوس</label></div>
                     <button class="btn btn-primary" type="submit"><i class="fa fa-floppy-disk me-1" aria-hidden="true"></i>ذخیرهٔ تنظیمات طرح</button>
+                    <div class="admin-sales-plans__publication"><h4 class="admin-sales-plans__subtitle">انتشار و حذف</h4><p class="admin-sales-plans__help">برای عرضه، طرح را منتشر کنید؛ طرح‌های دارای سابقه فقط غیرفعال می‌شوند.</p><div class="admin-sales-plans__actions">
+                    <button class="btn btn-success" type="button" data-plan-publish data-admin-confirm="طرح فروش منتشر شود؟"><i class="fa fa-paper-plane me-1" aria-hidden="true"></i>انتشار طرح</button>
+                    <button class="btn btn-warning" type="button" data-plan-unpublish data-admin-confirm="طرح از فروش خارج شود؟"><i class="fa fa-eye-slash me-1" aria-hidden="true"></i>خروج از فروش</button>
+                    <button class="btn btn-danger" type="button" data-plan-delete data-admin-confirm="طرح فروش حذف شود؟"><i class="fa fa-trash-can me-1" aria-hidden="true"></i>حذف طرح بدون سابقه</button></div></div>
                     <div class="admin-data-status mt-2 small text-muted" data-plan-status role="status" aria-live="polite">در حال دریافت طرح‌ها…</div>
                 </form>
             </div>
@@ -151,7 +160,7 @@
                 <label for="history-to">تا تاریخ ثبت</label><input id="history-to" class="form-control" type="date" name="to" />
                 <button class="btn btn-primary" type="submit">اعمال فیلتر</button><button class="btn btn-default" type="reset">پاک‌کردن</button>
             </form>
-            <div class="small text-muted mb-2" data-price-history-status role="status" aria-live="polite">در حال دریافت تاریخچه…</div><div class="table-responsive"><table class="table table-sm table-striped"><thead><tr><th>شناسه</th><th>کالا</th><th>طرح</th><th>نوع</th><th>مبلغ (تومان)</th><th>وضعیت</th><th>زمان ثبت</th><th>نسخهٔ قبل</th></tr></thead><tbody data-price-history-rows></tbody></table></div>
+            <div class="small text-muted mb-2" data-price-history-status role="status" aria-live="polite">در حال دریافت تاریخچه…</div><div class="table-responsive"><table class="table table-striped table-hover align-middle" data-admin-datatable data-admin-table-mode="server"><thead><tr><th scope="col">شناسه</th><th scope="col">کالا</th><th scope="col">طرح</th><th scope="col">نوع</th><th scope="col">مبلغ (تومان)</th><th scope="col">وضعیت</th><th scope="col">زمان ثبت</th><th scope="col">نسخهٔ قبل</th></tr></thead><tbody data-price-history-rows></tbody></table></div>
         </div>
     </section>
     }

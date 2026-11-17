@@ -14,7 +14,9 @@ CSS فروشگاه در `Shop/wwwroot/shop/css/` دسته‌بندی شده اس
 
 بازبینی: `node tools/check-ui.mjs` و مرور مرورگری متناسب؛ این checker جای QA بصری نیست. روش تکمیلی در [verification](verification.md) است.
 
-دکمه‌های عملیات در `admin-ui.css` با `.admin-action-btn` یکدست می‌شوند. hover حذف باید روی زمینهٔ قرمز روشن، رنگ متن قرمز تیره را حفظ کند؛ selector داخل `#content` عمداً از رنگ سفید پیش‌فرض قالب برنده می‌شود.
+دکمه‌های عملیات در `admin-ui.css` با `.admin-action-btn` یکدست می‌شوند و همهٔ گونه‌ها حاشیهٔ قابل مشاهده دارند؛ حاشیهٔ عملیات حساس مانند حذف و فعال‌سازی رنگ معنایی خود را حفظ می‌کند. hover حذف باید روی زمینهٔ قرمز روشن، رنگ متن قرمز تیره را حفظ کند؛ selector داخل `#content` عمداً از رنگ سفید پیش‌فرض قالب برنده می‌شود.
+
+سویچ وضعیت پنل مدیریت در `admin-ui.css` مالک مشترک دارد: ورودی checkbox با `data-admin-switch` و `role="switch"` همچنان مقدار و رفتار بومی فرم را حفظ می‌کند. برای ورودی‌های ساخته‌شده با JavaScript از `AdminUI.initStatusSwitch` استفاده می‌شود؛ انتخاب ردیف‌ها، دسترسی‌ها و فیلترهای چندگزینه‌ای checkbox باقی می‌مانند.
 
 [پوسته](layout.md) · [فهرست UI](README.md) · [فهرست docs](../README.md)
 `nAdmin section navigation shares the nav-pills and geography tab styles in Admin/wwwroot/css/admin-ui.css, including active, hover, keyboard focus, and wrapping on narrow screens.

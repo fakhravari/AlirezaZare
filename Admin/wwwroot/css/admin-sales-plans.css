@@ -1,0 +1,55 @@
+.admin-sales-plans__body {
+    display: grid;
+    gap: 1rem;
+    background: #f3f6f8;
+}
+
+.admin-sales-plans__section {
+    min-width: 0;
+    padding: 1.25rem;
+    border: 1px solid #d6e0e6;
+    border-radius: .8rem;
+    background: #fff;
+}
+
+.admin-sales-plans__title {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    margin: 0 0 1rem;
+    color: #173c54;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.admin-sales-plans__title i { color: #1675aa; }
+.admin-sales-plans__create summary { cursor: pointer; margin-bottom: 0; }
+.admin-sales-plans__create[open] summary { margin-bottom: 1rem; }
+.admin-sales-plans__create summary:focus-visible { outline: 2px solid #1675aa; outline-offset: 4px; }
+.admin-sales-plans__help { margin: .65rem 0 0; color: #596d7b; font-size: .85rem; }
+.admin-sales-plans__create .admin-sales-plans__help { margin: 0 0 1rem; }
+
+.admin-sales-plans__filter, .admin-sales-plans__actions, .admin-sales-plans__heading {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .65rem;
+}
+
+.admin-sales-plans__filter input[type="search"] { flex: 2 1 15rem; width: auto; }
+.admin-sales-plans__filter .admin-persian-date-input { flex: 1 1 10rem; width: auto; }
+.admin-sales-plans__filter label:not(.visually-hidden) { color: #354e5e; font-weight: 600; }
+.admin-sales-plans__heading { justify-content: space-between; margin-bottom: 1rem; }
+.admin-sales-plans__heading .admin-sales-plans__title { margin: 0; }
+.admin-sales-plans__badge { padding: .3rem .7rem; border-radius: 999px; background: #edf1f4; color: #445b69; font-weight: 700; }
+.admin-sales-plans__badge[data-active="true"] { background: #e3f5ea; color: #216c42; }
+.admin-sales-plans__subtitle { margin: 1rem 0 .75rem; color: #254b61; font-size: .9rem; font-weight: 700; }
+.admin-sales-plans__publication { margin-top: 1.25rem; padding-top: .25rem; border-top: 1px solid #dce5ea; }
+.admin-sales-plans__actions { margin-top: .8rem; }
+
+@media (max-width: 575px) {
+    .admin-sales-plans__section { padding: 1rem; }
+    .admin-sales-plans__filter input[type="search"],
+    .admin-sales-plans__filter .admin-persian-date-input { flex-basis: 100%; }
+    .admin-sales-plans__filter label:not(.visually-hidden) { flex-basis: 100%; }
+}

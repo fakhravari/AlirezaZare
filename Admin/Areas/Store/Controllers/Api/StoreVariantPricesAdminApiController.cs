@@ -24,7 +24,7 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
         var plans = db.SalesPlanReferences.AsNoTracking().Where(x => x.IdStockOwnerType == 1);
         var startOffset = start.HasValue ? new DateTimeOffset(start.Value) : (DateTimeOffset?)null;
         var endOffset = end.HasValue ? new DateTimeOffset(end.Value) : (DateTimeOffset?)null;
-        if (startOffset.HasValue) plans = plans.Where(x => !x.EndsAtUtc.HasValue || x.EndsAtUtc.Value >= startOffset.Value);
+        if (startOffset.HasValue) plans = plans.Where(x => !x.EndsAtUtc.HasValue || x.EndsAtUtc.Value > startOffset.Value);
         if (endOffset.HasValue) plans = plans.Where(x => !x.StartsAtUtc.HasValue || x.StartsAtUtc.Value < endOffset.Value);
         if (search.Length > 0)
         {
@@ -254,7 +254,7 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
                    join offer in db.StoreProductVariantSalesPlanOffers.AsNoTracking() on new { VariantId = variant.Id, PlanId = plan.Id } equals new { VariantId = offer.IdProductVariant, PlanId = offer.IdSalesPlan } into offers
                    from offer in offers.DefaultIfEmpty()
                    where variant.IsActive && product.IsWarehouseEnabled && product.IsStoreEnabled &&
-                         (query == "" || product.Name.Contains(query) || variant.Name.Contains(query) ||
+                         (query == "" || product.Name.Contains(query) || product.Code.Contains(query) || variant.Name.Contains(query) ||
                           (variant.Code ?? "").Contains(query) || (plan.DisplayName ?? "").Contains(query))
                    select new { variant, product, plan, offer };
         if (start.HasValue) rows = rows.Where(x => x.offer != null && x.offer.CreatedAtUtc >= start.Value);

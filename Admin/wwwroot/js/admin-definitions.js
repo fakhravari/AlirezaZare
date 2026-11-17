@@ -102,7 +102,7 @@
         const [key, label, type = "text", required = false, choices = []] = field;
         const wrap = element("div", null, "mb-3");
         if (type === "checkbox") {
-            const check = element("input", null, "form-check-input"); check.type = "checkbox"; check.name = key; check.checked = Boolean(data[key]); check.id = `definition-${key}`;
+            const check = element("input", null, "form-check-input"); check.type = "checkbox"; ui.initStatusSwitch(check); check.name = key; check.checked = Boolean(data[key]); check.id = `definition-${key}`;
             const caption = element("label", label, "form-check-label"); caption.htmlFor = check.id; wrap.className = "form-check mb-3"; wrap.append(check, caption);
         } else {
             const control = ["select", "warehouses", "products", "units", "companies", "plans", "warehouse-types"].includes(type) ? element("select", null, "form-select") : type === "textarea" ? element("textarea", null, "form-control") : element("input", null, "form-control");

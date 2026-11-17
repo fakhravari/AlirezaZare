@@ -30,7 +30,7 @@
                 const row = document.createElement("tr");
                 const activeCell = document.createElement("td");
                 const active = document.createElement("input");
-                active.type = "checkbox"; active.className = "form-check-input"; active.checked = item.isActive;
+                active.type = "checkbox"; active.className = "form-check-input"; ui.initStatusSwitch(active); active.checked = item.isActive;
                 active.setAttribute("aria-label", `نمایش دیدگاه ${item.displayName} در صفحهٔ نخست`);
                 activeCell.append(active); row.append(activeCell);
 
