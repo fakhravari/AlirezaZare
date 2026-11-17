@@ -238,6 +238,39 @@
   flex: 1;
   min-width: 0;
 }
+.address-select-wrap > .select2-container {
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+}
+.address-select-wrap .select2-selection--single {
+  display: flex;
+  align-items: center;
+  height: 46px;
+  min-height: 46px;
+  border-color: #d5dfe6;
+  border-radius: 10px;
+  font-size: 13px;
+}
+.address-select-wrap .select2-selection--single .select2-selection__rendered {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  padding: .5rem .8rem .5rem 2.25rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.address-select-wrap .select2-dropdown {
+  border-color: #d5dfe6;
+  box-shadow: 0 .5rem 1.25rem rgb(18 38 52 / 10%);
+  font-size: 13px;
+}
+.address-select-wrap .select2-results__option {
+  overflow-wrap: anywhere;
+  line-height: 1.7;
+}
+.address-select-wrap .select2-hidden-accessible ~ i { display: none; }
 .address-select-wrap select {
   appearance: none;
   width: 100%;

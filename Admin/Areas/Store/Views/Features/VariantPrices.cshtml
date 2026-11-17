@@ -73,8 +73,7 @@
             <p>قیمت پیش از تخفیف به تومان است. پیشنهاد تازه با متعلقات فعال و قیمت پایهٔ آن‌ها ساخته می‌شود؛ پس از ذخیره، قیمت و مجازبودن متعلقات آن قابل تنظیم است.</p>
             <form class="admin-filter-bar mb-3 d-flex flex-wrap align-items-center gap-2 mb-3" data-offer-filter>
                 <label class="visually-hidden" for="offer-search">جست‌وجوی پیشنهاد</label>
-                <input class="form-control" id="offer-search" name="q" type="search" maxlength="100"
-                       placeholder="جست‌وجوی کالا، کد یا طرح" />
+                <select class="form-select" id="offer-search" name="productIds" multiple data-product-filter aria-label="انتخاب کالا با نام یا کد"></select>
                 <label for="offer-from">از تاریخ ثبت قیمت</label><input id="offer-from" class="form-control" type="date" name="from" />
                 <label for="offer-to">تا تاریخ ثبت قیمت</label><input id="offer-to" class="form-control" type="date" name="to" />
                 <button class="btn btn-primary" type="submit">اعمال فیلتر</button><button class="btn btn-default" type="reset">پاک‌کردن</button>
@@ -122,8 +121,7 @@
         <div class="panel-body">
             <form class="admin-filter-bar mb-3 d-flex flex-wrap align-items-center gap-2 mb-3" data-price-filter>
                 <label class="visually-hidden" for="variant-price-search">جست‌وجو</label>
-                <input class="form-control" id="variant-price-search" name="q" type="search" maxlength="100"
-                       placeholder="جست‌وجوی کالا، تنوع یا طرح" autocomplete="off">
+                <select class="form-select" id="variant-price-search" name="productIds" multiple data-product-filter aria-label="انتخاب کالا با نام یا کد"></select>
                 <label for="variant-price-from">از تاریخ ثبت قیمت</label><input id="variant-price-from" class="form-control" type="date" name="from" />
                 <label for="variant-price-to">تا تاریخ ثبت قیمت</label><input id="variant-price-to" class="form-control" type="date" name="to" />
                 <button class="btn btn-primary" type="submit">اعمال فیلتر</button><button class="btn btn-default" type="reset">پاک‌کردن</button>
@@ -155,7 +153,7 @@
         <div class="panel-heading d-flex align-items-center justify-content-between"><h2 class="panel-title" id="price-history-title">تاریخچهٔ قیمت</h2><button type="button" class="btn btn-xs btn-icon btn-default" data-price-history-refresh aria-label="بارگذاری تاریخچه"><i class="fa fa-clock-rotate-left" aria-hidden="true"></i></button></div>
         <div class="panel-body">
             <form class="admin-filter-bar mb-3 d-flex flex-wrap align-items-center gap-2" data-history-filter>
-                <label class="visually-hidden" for="history-product-search">جست‌وجوی کالا</label><input id="history-product-search" class="form-control" type="search" name="q" maxlength="100" placeholder="نام یا کد کالا" />
+                <label class="visually-hidden" for="history-product-search">جست‌وجوی کالا</label><select id="history-product-search" class="form-select" name="productIds" multiple data-product-filter aria-label="انتخاب کالا با نام یا کد"></select>
                 <label for="history-from">از تاریخ ثبت</label><input id="history-from" class="form-control" type="date" name="from" />
                 <label for="history-to">تا تاریخ ثبت</label><input id="history-to" class="form-control" type="date" name="to" />
                 <button class="btn btn-primary" type="submit">اعمال فیلتر</button><button class="btn btn-default" type="reset">پاک‌کردن</button>

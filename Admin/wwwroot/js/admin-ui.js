@@ -214,7 +214,7 @@
     ];
 
     function normalizeActionCell(cell) {
-        if (!(cell instanceof HTMLTableCellElement) || !cell.closest("tr")) return;
+        if (!(cell instanceof HTMLTableCellElement) || !cell.closest("tr") || cell.closest("[data-mds-dtp], .mds-bs-dtp-container")) return;
         const buttons = [...cell.querySelectorAll("button")];
         if (!buttons.length) return;
         cell.classList.add("admin-row-actions");

@@ -37,7 +37,7 @@
 }
 
 .admin-sales-plans__filter input[type="search"] { flex: 2 1 15rem; width: auto; }
-.admin-sales-plans__filter .admin-persian-date-input { flex: 1 1 10rem; width: auto; }
+.admin-sales-plans__filter .admin-persian-date-input { flex: 0 1 11rem; width: 11rem; min-width: 0; max-width: 100%; }
 .admin-sales-plans__filter label:not(.visually-hidden) { color: #354e5e; font-weight: 600; }
 .admin-sales-plans__heading { justify-content: space-between; margin-bottom: 1rem; }
 .admin-sales-plans__heading .admin-sales-plans__title { margin: 0; }
@@ -47,9 +47,10 @@
 .admin-sales-plans__publication { margin-top: 1.25rem; padding-top: .25rem; border-top: 1px solid #dce5ea; }
 .admin-sales-plans__actions { margin-top: .8rem; }
 
+.admin-row-actions.admin-pricing-row-actions { justify-content: flex-start; }
+
 @media (max-width: 575px) {
     .admin-sales-plans__section { padding: 1rem; }
-    .admin-sales-plans__filter input[type="search"],
-    .admin-sales-plans__filter .admin-persian-date-input { flex-basis: 100%; }
+    .admin-sales-plans__filter input[type="search"] { flex-basis: 100%; }
     .admin-sales-plans__filter label:not(.visually-hidden) { flex-basis: 100%; }
 }

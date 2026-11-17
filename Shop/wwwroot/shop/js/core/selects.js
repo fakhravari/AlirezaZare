@@ -22,13 +22,23 @@
                 continue;
             }
             const modal = select.closest(".modal");
+            const addressPicker = select.closest(".address-select-wrap");
             $(select).select2({
                 dir: "rtl",
                 language: "fa",
                 width: "100%",
                 minimumResultsForSearch: 0,
-                dropdownParent: modal ? $(modal) : $(document.body)
+                dropdownParent: modal ? $(modal) : addressPicker ? $(addressPicker) : $(document.body)
             });
+            const element = $(select).data("select2").$element;
+            const trigger = element.trigger;
+            element.trigger = function (event, ...args) {
+                if (event === "input" || event === "change") {
+                    select.dispatchEvent(new Event(event, { bubbles: true }));
+                    return this;
+                }
+                return trigger.call(this, event, ...args);
+            };
         }
     }
 

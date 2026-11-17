@@ -4,6 +4,16 @@
     const dateSelector = 'input[type="date"], input[type="datetime-local"]';
     const instances = new WeakMap();
     let observer;
+    let activePopover;
+
+    document.addEventListener("pointerdown", event => {
+        const state = activePopover;
+        if (!state) return;
+        const popover = document.getElementById(state.textInput.getAttribute("aria-describedby"));
+        if (state.textInput.contains(event.target) || popover?.contains(event.target)) return;
+        if (state.shown) state.picker.hide();
+        else state.dismissWhenShown = true;
+    }, true);
 
     function parseValue(value, kind) {
         if (!value) return null;
@@ -63,15 +73,28 @@
             dateFormat: kind === "datetime-local" ? "yyyy-MM-ddTHH:mm:ss" : "yyyy-MM-dd",
             selectedDate: selectedDate || undefined,
             selectedDateToShow: selectedDate || new Date(),
-            modalMode: true
+            modalMode: false
         });
 
-        // In modal mode the library creates the Bootstrap modal asynchronously
-        // and does not attach an opening handler to the input itself.
+        const popoverState = { picker, textInput, shown: false, dismissWhenShown: false };
+        textInput.addEventListener("show.bs.popover", () => {
+            popoverState.shown = false;
+            popoverState.dismissWhenShown = false;
+            activePopover = popoverState;
+        });
+        textInput.addEventListener("shown.bs.popover", () => {
+            popoverState.shown = true;
+            if (popoverState.dismissWhenShown) picker.hide();
+        });
+        textInput.addEventListener("hidden.bs.popover", () => {
+            if (activePopover === popoverState) activePopover = undefined;
+        });
+
+        // The library attaches its click handler after creating the popover.
         textInput.addEventListener("click", () => {
-            const open = () => { if (!textInput.disabled && picker.getBsModalInstance()) picker.show(); };
-            if (picker.getBsModalInstance()) open();
-            else window.setTimeout(open, 350);
+            if (!picker.getBsPopoverInstance()) window.setTimeout(() => {
+                if (!textInput.disabled) picker.show();
+            }, 200);
         });
 
         instances.set(input, { picker, textInput, kind });

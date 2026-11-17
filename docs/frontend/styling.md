@@ -18,5 +18,9 @@ CSS فروشگاه در `Shop/wwwroot/shop/css/` دسته‌بندی شده اس
 
 سویچ وضعیت پنل مدیریت در `admin-ui.css` مالک مشترک دارد: ورودی checkbox با `data-admin-switch` و `role="switch"` همچنان مقدار و رفتار بومی فرم را حفظ می‌کند. برای ورودی‌های ساخته‌شده با JavaScript از `AdminUI.initStatusSwitch` استفاده می‌شود؛ انتخاب ردیف‌ها، دسترسی‌ها و فیلترهای چندگزینه‌ای checkbox باقی می‌مانند.
 
+بازشوی تاریخ‌نگار شمسی در `admin-ui.css` عرض محدود و چیدمان سازگار با موبایل دارد؛ بازنویسی `!important` فقط عرض ثابت درون‌خطی کنترل‌های کتابخانه را حذف می‌کند. دکمه‌های تقویم از یکدست‌سازی دکمه‌های عملیات جدول مستثنا هستند.
+
+ورودی تاریخ در نوار فیلتر مدیریت و فیلتر طرح‌های فروش عرض ترجیحی ۱۱rem دارد و به اندازهٔ فضای خالی ردیف کشیده نمی‌شود؛ در صفحهٔ باریک می‌تواند کوچک‌تر شود.
+
 [پوسته](layout.md) · [فهرست UI](README.md) · [فهرست docs](../README.md)
 `nAdmin section navigation shares the nav-pills and geography tab styles in Admin/wwwroot/css/admin-ui.css, including active, hover, keyboard focus, and wrapping on narrow screens.

@@ -21,6 +21,7 @@
             const value = form.elements[name]?.value.trim();
             if (value) url.searchParams.set(name, value);
         }
+        for (const option of form.querySelectorAll('[name="productIds"] option:checked')) url.searchParams.append("productIds", option.value);
         return url;
     }
     function bindFilter(form, reload) {
@@ -63,7 +64,7 @@
             active.type = "checkbox"; ui.initStatusSwitch(active); active.checked = draft?.active ?? (item.isEnabled !== false); active.disabled = page.dataset.canEdit !== "true"; activeText.textContent = " فعال"; activeLabel.append(active, activeText); activeCell.append(activeLabel); row.append(activeCell);
             const rememberDraft = () => page._variantPriceDrafts.set(key, { amount: amount.value, discount: discount.value, active: active.checked });
             amount.addEventListener("input", rememberDraft); discount.addEventListener("input", rememberDraft); active.addEventListener("change", rememberDraft);
-            const actions = document.createElement("td"), save = document.createElement("button"); save.type = "button"; save.className = "btn btn-sm btn-primary"; save.textContent = "ذخیره"; save.dataset.adminConfirm = "قیمت و وضعیت طرح برای این تنوع ذخیره شود؟"; save.disabled = page.dataset.canEdit !== "true";
+            const actions = document.createElement("td"), save = document.createElement("button"); actions.className = "admin-pricing-row-actions"; save.type = "button"; save.className = "btn btn-sm btn-primary"; save.textContent = "ذخیره"; save.dataset.adminConfirm = "قیمت و وضعیت طرح برای این تنوع ذخیره شود؟"; save.disabled = page.dataset.canEdit !== "true";
             ui.withIcon(save, "fa-floppy-disk");
             let clear;
             const setBusy = busy => { if (busy) page._variantPriceSaving.add(key); else page._variantPriceSaving.delete(key); const disabled = busy || page.dataset.canEdit !== "true"; save.disabled = disabled; amount.disabled = disabled; discount.disabled = disabled; active.disabled = disabled; if (clear) clear.disabled = disabled; };
@@ -162,7 +163,7 @@
             active.type = "checkbox"; ui.initStatusSwitch(active); active.checked = draft?.active ?? (item.isEnabled ?? true); activeLabel.append(active, document.createTextNode(" فعال")); activeCell.append(activeLabel); row.append(activeCell);
             const remember = () => page._offerDrafts.set(key, { amount: amount.value, discount: discount.value, limit: limit.value, active: active.checked });
             for (const input of [amount, discount, limit]) input.addEventListener("input", remember); active.addEventListener("change", remember);
-            const actions = document.createElement("td"), save = document.createElement("button"); save.type = "button"; save.className = "btn btn-sm btn-primary"; save.textContent = "ذخیره"; save.dataset.adminConfirm = "قیمت پیشنهاد و محدودیت خرید ذخیره شوند؟"; actions.append(save);
+            const actions = document.createElement("td"), save = document.createElement("button"); actions.className = "admin-pricing-row-actions"; save.type = "button"; save.className = "btn btn-sm btn-primary"; save.textContent = "ذخیره"; save.dataset.adminConfirm = "قیمت پیشنهاد و محدودیت خرید ذخیره شوند؟"; actions.append(save);
             ui.withIcon(save, "fa-floppy-disk");
             if (item.priceAmount != null) {
                 const accessories = document.createElement("button"); accessories.type = "button"; accessories.className = "btn btn-sm btn-default ms-1"; accessories.textContent = "متعلقات";

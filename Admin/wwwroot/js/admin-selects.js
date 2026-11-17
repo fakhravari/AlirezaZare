@@ -46,16 +46,50 @@
                 refresh(select);
                 continue;
             }
+            const productFilter = select.matches("[data-product-filter]");
+            const productApi = select.closest("[data-store-variant-prices]")?.dataset.api;
             $(select).select2({
                 dir: "rtl",
                 language: "fa",
                 width: "100%",
                 minimumResultsForSearch: 0,
+                ...(productFilter && productApi ? {
+                    placeholder: "انتخاب کالا با نام یا کد",
+                    closeOnSelect: false,
+                    ajax: {
+                        url: `${productApi}/products`,
+                        delay: 250,
+                        data: params => ({ q: params.term || "", page: params.page || 1 }),
+                        processResults: data => ({
+                            results: data.items.map(item => ({ id: String(item.id), text: `${item.name} (${item.code})` })),
+                            pagination: { more: data.more }
+                        })
+                    },
+                    templateResult: item => {
+                        if (!item.id) return item.text;
+                        const label = document.createElement("span");
+                        label.className = "admin-product-filter-option";
+                        const box = document.createElement("input");
+                        box.type = "checkbox";
+                        box.value = String(item.id);
+                        box.tabIndex = -1;
+                        box.setAttribute("aria-hidden", "true");
+                        box.checked = [...select.selectedOptions].some(option => option.value === String(item.id));
+                        label.append(box, document.createTextNode(item.text));
+                        return $(label);
+                    }
+                } : {}),
                 matcher: (params, data) => {
                     const visible = visibleOptions(data);
                     return visible ? defaultMatcher(params, visible) : null;
                 },
                 dropdownParent: modal ? $(modal) : $(document.body)
+            });
+            if (productFilter) $(select).on("select2:select select2:unselect", () => {
+                const selected = new Set([...select.selectedOptions].map(option => option.value));
+                document.querySelectorAll(".select2-container--open .admin-product-filter-option input").forEach(box => {
+                    box.checked = selected.has(box.value);
+                });
             });
             const element = $(select).data("select2").$element;
             const trigger = element.trigger;

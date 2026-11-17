@@ -465,6 +465,16 @@ input[type="checkbox"][data-admin-switch]:disabled { cursor: not-allowed; opacit
     text-align: right;
 }
 
+.mds-bs-persian-datetime-picker-popover {
+    width: 320px;
+    max-width: calc(100vw - 1rem);
+}
+.mds-bs-persian-datetime-picker-popover .popover-body { padding: .5rem; }
+.mds-bs-persian-datetime-picker-popover .mds-bs-dtp-container { min-width: 0; }
+.mds-bs-persian-datetime-picker-popover .mds-bs-dtp-container .btn { min-height: 1.9rem; padding: .2rem .25rem; }
+/* Override the vendor's inline widths so calendar controls fit narrow screens. */
+.mds-bs-persian-datetime-picker-popover .mds-bs-dtp-container th[style*="width"] { width: auto !important; }
+
 .modal-body.admin-modal-grid-two > :not(.admin-modal-field):not(.form-check),
 .modal-body.admin-modal-grid-three > :not(.admin-modal-field):not(.form-check) {
     grid-column: 1 / -1;
@@ -1266,6 +1276,16 @@ input[type="checkbox"][data-admin-switch]:disabled { cursor: not-allowed; opacit
     flex: 1 1 14rem;
     min-width: min(100%, 14rem);
 }
+
+.admin-filter-bar > .admin-persian-date-input {
+    flex: 0 1 11rem;
+    width: 11rem;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.admin-product-filter-option { display: flex; align-items: center; gap: .5rem; }
+.admin-product-filter-option input { pointer-events: none; }
 
 .admin-filter-bar > .btn {
     min-height: 2.35rem;

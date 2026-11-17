@@ -49,8 +49,21 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
             }).ToListAsync(cancellationToken));
     }
 
+    [HttpGet("products")]
+    public async Task<IActionResult> Products([FromQuery] string? q, [FromQuery] int page = 1, CancellationToken cancellationToken = default)
+    {
+        if (!CanManage()) return Forbid();
+        var search = q?.Trim() ?? "";
+        if (search.Length > 100 || page < 1 || page > 10000) return ValidationProblem(detail: "عبارت جست‌وجو یا صفحه معتبر نیست.", statusCode: 400);
+        const int size = 30;
+        var products = db.Products.AsNoTracking().Where(x => search == "" || x.Name.Contains(search) || x.Code.Contains(search));
+        var items = await products.OrderBy(x => x.Name).ThenBy(x => x.Id).Skip((page - 1) * size).Take(size + 1)
+            .Select(x => new { x.Id, x.Name, x.Code }).ToListAsync(cancellationToken);
+        return Ok(new { items = items.Take(size), more = items.Count > size });
+    }
+
     [HttpGet("price-history")]
-    public async Task<IActionResult> PriceHistory([FromQuery] long? productId, [FromQuery] long? salesPlanId, [FromQuery] string? q, [FromQuery] DateOnly? from, [FromQuery] DateOnly? to, [FromQuery] int take = 100, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> PriceHistory([FromQuery] long? productId, [FromQuery] long[]? productIds, [FromQuery] long? salesPlanId, [FromQuery] string? q, [FromQuery] DateOnly? from, [FromQuery] DateOnly? to, [FromQuery] int take = 100, CancellationToken cancellationToken = default)
     {
         if (!CanManage()) return Forbid();
 
@@ -63,6 +76,7 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
         if (end.HasValue) query = query.Where(x => x.CreatedAtUtc < end.Value);
         if (search.Length > 0) query = query.Where(x => db.Products.Any(product => product.Id == x.IdProduct && (product.Name.Contains(search) || product.Code.Contains(search))));
         if (productId.HasValue) query = query.Where(x => x.IdProduct == productId.Value);
+        if (productIds is { Length: > 0 }) query = query.Where(x => productIds.Contains(x.IdProduct));
         if (salesPlanId.HasValue) query = query.Where(x => x.IdSalesPlan == salesPlanId.Value);
 
         return Ok(await query.OrderByDescending(x => x.Id).Take(take).Select(x => new
@@ -236,6 +250,7 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
     [HttpGet]
     public async Task<IActionResult> List(
         [FromQuery] string? q,
+        [FromQuery] long[]? productIds,
         [FromQuery] DateOnly? from,
         [FromQuery] DateOnly? to,
         [FromQuery] int page = 1,
@@ -257,6 +272,7 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
                          (query == "" || product.Name.Contains(query) || product.Code.Contains(query) || variant.Name.Contains(query) ||
                           (variant.Code ?? "").Contains(query) || (plan.DisplayName ?? "").Contains(query))
                    select new { variant, product, plan, offer };
+        if (productIds is { Length: > 0 }) rows = rows.Where(x => productIds.Contains(x.product.Id));
         if (start.HasValue) rows = rows.Where(x => x.offer != null && x.offer.CreatedAtUtc >= start.Value);
         if (end.HasValue) rows = rows.Where(x => x.offer != null && x.offer.CreatedAtUtc < end.Value);
         int total = await rows.CountAsync(cancellationToken);
@@ -354,6 +370,7 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
     [HttpGet("product-offers")]
     public async Task<IActionResult> ProductOffers(
         [FromQuery] string? q,
+        [FromQuery] long[]? productIds,
         [FromQuery] DateOnly? from,
         [FromQuery] DateOnly? to,
         [FromQuery] int page = 1,
@@ -373,6 +390,7 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
                    where product.IsStoreEnabled && !plan.IsRegular &&
                          (query == "" || product.Name.Contains(query) || product.Code.Contains(query) || plan.DisplayName.Contains(query))
                    select new { product, plan, offer };
+        if (productIds is { Length: > 0 }) rows = rows.Where(x => productIds.Contains(x.product.Id));
         if (start.HasValue) rows = rows.Where(x => x.offer != null && x.offer.CreatedAtUtc >= start.Value);
         if (end.HasValue) rows = rows.Where(x => x.offer != null && x.offer.CreatedAtUtc < end.Value);
         int total = await rows.CountAsync(cancellationToken);
