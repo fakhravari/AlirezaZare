@@ -181,6 +181,7 @@
         if (accessories.length >= 12) return;
         accessories.push({
           id: cleanText(accessory.id, 80),
+          productAccessoryId: Number(accessory.productAccessoryId) || 0,
           name: cleanText(accessory.name, 100),
           price: Math.max(0, Number(accessory.price) || 0),
           required: Boolean(accessory.required),
