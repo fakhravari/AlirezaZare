@@ -306,13 +306,11 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                         item.id !== p.id &&
                         (item.type === p.type ||
                             item.brand === p.brand ||
-                            item.powerSource === p.powerSource ||
-                            item.useCase === p.useCase),
+                            (typeof p.powerSource === "string" && p.powerSource.trim() && item.powerSource === p.powerSource) ||
+                            (typeof p.useCase === "string" && p.useCase.trim() && item.useCase === p.useCase)),
                 )
                 .slice(0, 6);
-            const suggestions = related.length
-                ? related
-                : catalog.filter((item) => item.id !== p.id).slice(0, 6);
+            const suggestions = related;
             const companionProducts = [...new Set(p.companionProductIds || [])]
                 .filter((id) => id !== p.id)
                 .map((id) => catalog.find((item) => item.id === id))
@@ -932,9 +930,10 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                 );
             const productMeta = productView.querySelector(".product-detail-meta");
             const brandPersianName = p.brandFa || p.brand;
+            const mediaPath = (path) => /^https?:\/\//i.test(path) ? path : `/${path.replace(/^\/+/, "")}`;
             const brandLogoPath = p.brandLogo;
             const brandMark = brandLogoPath
-                ? `<img class="product-meta-brand-logo" src="/${esc(brandLogoPath)}" alt="" aria-hidden="true" decoding="async">`
+                ? `<img class="product-meta-brand-logo" src="${esc(mediaPath(brandLogoPath))}" alt="" aria-hidden="true" decoding="async">`
                 : '<i class="bi bi-patch-check" aria-hidden="true"></i>';
             const categoryPath =
                 Array.isArray(p.categoryPath) && p.categoryPath.length
@@ -944,7 +943,7 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                 String(p.brandCountryCode || "").toUpperCase()
             ];
             const brandCountryMark = brandCountry?.flag
-                ? `<img class="product-meta-country-flag" src="/${esc(brandCountry.flag)}" alt="" aria-hidden="true" loading="lazy" decoding="async">`
+                ? `<img class="product-meta-country-flag" src="${esc(mediaPath(brandCountry.flag))}" alt="" aria-hidden="true" loading="lazy" decoding="async">`
                 : '<i class="bi bi-globe2" aria-hidden="true"></i>';
             const brandCountryContent = brandCountry
                 ? `<span><small>کشور</small><strong>${esc(brandCountry.fa)}</strong><small class="product-meta-country-en" lang="en" dir="ltr">${esc(brandCountry.en)}</small></span>`

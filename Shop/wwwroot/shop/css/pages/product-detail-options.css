@@ -1426,19 +1426,17 @@
 }
 
 #productView .product-included-benefits li strong {
-  overflow: hidden;
+  overflow-wrap: anywhere;
   font-size: var(--product-type-label);
   font-weight: 800;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: normal;
 }
 
 #productView .product-included-benefits li small {
-  overflow: hidden;
+  overflow-wrap: anywhere;
   color: var(--color-text-muted);
   font-size: var(--product-type-small);
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: normal;
 }
 
 #productView .product-included-benefits li > b {

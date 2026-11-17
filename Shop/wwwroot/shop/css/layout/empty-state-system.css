@@ -39,7 +39,8 @@
 }
 
 .empty-state-card > i,
-.empty-state-card .compare-empty-art > span {
+.empty-state-card .compare-empty-art > span,
+#productView .product-feedback-empty.empty-state-card > i {
   display: grid;
   width: 66px;
   min-width: 66px;
@@ -62,7 +63,6 @@
   border-radius: 18px;
   background: linear-gradient(145deg, #183a5d, #102a48);
   box-shadow: 0 10px 22px -12px rgba(16, 42, 67, .5), 0 0 0 7px rgba(255, 250, 240, .82);
-  color: #f0d28b;
 }
 
 .empty-state-card > :is(h2, h3, strong) {
