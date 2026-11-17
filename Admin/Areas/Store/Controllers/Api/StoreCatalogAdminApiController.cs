@@ -36,7 +36,7 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
                            join accessory in db.StoreAccessories.AsNoTracking() on link.IdAccessory equals accessory.Id
                            where link.IdProduct == id
                            orderby link.SortOrder, link.Id
-                           select new { link.Id, accessory.Name, accessory.Description, accessory.IsActive, link.IsRequired, link.SortOrder,
+                           select new { link.Id, accessory.Name, accessory.Description, accessory.IsActive, link.IsRequired, link.SortOrder, link.DisplayDiscountPercent,
                                PriceAmount = (from version in db.StorePriceVersions join plan in db.SalesPlanReferences on version.IdSalesPlan equals (long?)plan.Id where version.IdProduct == id && version.IdAccessory == link.IdAccessory && version.IsActive && plan.IsRegular && plan.IdStockOwnerType == 1 orderby plan.Id select (decimal?)version.PriceAmount).FirstOrDefault() })
                           .ToListAsync(cancellationToken);
         return Ok(items);
@@ -50,10 +50,10 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
         if (!ValidAccessory(input)) return BadRequest(new { title = "نام، توضیح، ترتیب یا قیمت متعلقه معتبر نیست." });
         await using var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
         if (!await db.Products.AnyAsync(x => x.Id == id, cancellationToken)) return NotFound();
-        var accessory = new StoreAccessory { AccessoryKey = $"accessory-{Guid.NewGuid():N}", Name = input.Name.Trim(), Description = input.Description?.Trim(), IsActive = input.IsActive };
+        var accessory = new StoreAccessory { Name = input.Name.Trim(), Description = input.Description?.Trim(), IsActive = input.IsActive };
         db.StoreAccessories.Add(accessory);
         await db.SaveChangesAsync(cancellationToken);
-        var link = new StoreProductAccessory { IdProduct = id, IdAccessory = accessory.Id, IsRequired = input.IsRequired, SortOrder = input.SortOrder };
+        var link = new StoreProductAccessory { IdProduct = id, IdAccessory = accessory.Id, IsRequired = input.IsRequired, SortOrder = input.SortOrder, DisplayDiscountPercent = input.DisplayDiscountPercent };
         db.StoreProductAccessories.Add(link);
         var offers = await db.StoreProductSalesPlanOffers.Where(x => x.IdProduct == id).ToListAsync(cancellationToken);
         db.StoreProductSalesPlanOfferAccessories.AddRange(offers.Select(x => new StoreProductSalesPlanOfferAccessory { IdProductSalesPlanOffer = x.Id, IdAccessory = accessory.Id, IsAllowed = true, IsIncludedByDefault = input.IsRequired }));
@@ -78,7 +78,7 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
         if (await db.StoreProductAccessories.AnyAsync(x => x.IdAccessory == accessory.Id && x.Id != link.Id, cancellationToken) && (accessory.Name != input.Name.Trim() || (accessory.Description ?? "") != (input.Description?.Trim() ?? "") || accessory.IsActive != input.IsActive))
             return Conflict(new { title = "نام، توضیح و وضعیت متعلقهٔ مشترک از این مسیر قابل تغییر نیست." });
         accessory.Name = input.Name.Trim(); accessory.Description = input.Description?.Trim(); accessory.IsActive = input.IsActive;
-        link.IsRequired = input.IsRequired; link.SortOrder = input.SortOrder;
+        link.IsRequired = input.IsRequired; link.SortOrder = input.SortOrder; link.DisplayDiscountPercent = input.DisplayDiscountPercent;
         if (input.IsRequired)
         {
             var overrides = await (from row in db.StoreProductSalesPlanOfferAccessories join offer in db.StoreProductSalesPlanOffers on row.IdProductSalesPlanOffer equals offer.Id where offer.IdProduct == id && row.IdAccessory == accessory.Id select row).ToListAsync(cancellationToken);
@@ -100,8 +100,8 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
         return Ok(new { message = "متعلقهٔ کالا ذخیره شد." });
     }
 
-    public sealed record ProductAccessoryInput(string Name, string? Description, decimal PriceAmount, bool IsRequired, int SortOrder, bool IsActive);
-    private static bool ValidAccessory(ProductAccessoryInput input) => input is not null && !string.IsNullOrWhiteSpace(input.Name) && input.Name.Trim().Length <= 300 && (input.Description?.Trim().Length ?? 0) <= 1000 && input.SortOrder >= 0 && input.PriceAmount >= 0 && input.PriceAmount <= 9007199254740991m && input.PriceAmount == decimal.Truncate(input.PriceAmount);
+    public sealed record ProductAccessoryInput(string Name, string? Description, decimal PriceAmount, bool IsRequired, int SortOrder, bool IsActive, decimal? DisplayDiscountPercent = null);
+    private static bool ValidAccessory(ProductAccessoryInput input) => input is not null && !string.IsNullOrWhiteSpace(input.Name) && input.Name.Trim().Length <= 300 && (input.Description?.Trim().Length ?? 0) <= 1000 && input.SortOrder >= 0 && input.PriceAmount >= 0 && input.PriceAmount <= 9007199254740991m && input.PriceAmount == decimal.Truncate(input.PriceAmount) && (!input.DisplayDiscountPercent.HasValue || (input.DisplayDiscountPercent.Value is >= 0 and < 100 && decimal.Round(input.DisplayDiscountPercent.Value, 2) == input.DisplayDiscountPercent.Value));
 
     [HttpGet("products/manage/{id:long}")]
     public async Task<IActionResult> ProductEditor(long id, CancellationToken cancellationToken)

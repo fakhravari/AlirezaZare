@@ -751,12 +751,13 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
         modelBuilder.Entity<StoreAccessory>(entity =>
         {
             entity.ToTable("Accessory", "Store"); entity.HasKey(x => x.Id);
-            entity.Property(x => x.AccessoryKey).HasMaxLength(150).IsRequired(); entity.Property(x => x.Name).HasMaxLength(300).IsRequired();
-            entity.Property(x => x.Description).HasMaxLength(1000); entity.HasIndex(x => x.AccessoryKey).IsUnique();
+            entity.Property(x => x.Name).HasMaxLength(300).IsRequired();
+            entity.Property(x => x.Description).HasMaxLength(1000);
         });
         modelBuilder.Entity<StoreProductAccessory>(entity =>
         {
             entity.ToTable("ProductAccessory", "Store"); entity.HasKey(x => x.Id);
+            entity.Property(x => x.DisplayDiscountPercent).HasPrecision(5, 2);
             entity.HasIndex(x => new { x.IdProduct, x.IdAccessory }).IsUnique();
         });
         modelBuilder.Entity<StoreProductSalesPlanOfferAccessory>(entity =>

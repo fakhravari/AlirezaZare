@@ -295,7 +295,8 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                 const discount = regular > current && regular > 0
                     ? Math.round((1 - current / regular) * 100)
                     : 0;
-                return `<span class="product-accessory-price-line"><strong class="product-price-current" data-accessory-current-price><span aria-label="هزینهٔ افزوده">+</span><span data-accessory-current-amount>${fa(current)}</span><small>تومان</small></strong><del data-accessory-regular-price${discount ? "" : " hidden"}>${fa(regular)} تومان</del><em class="product-accessory-discount" data-accessory-discount${discount ? "" : " hidden"}>${fa(discount)}٪ تخفیف</em></span>`;
+                const displayDiscount = item.displayDiscountPercent == null ? discount : Number(item.displayDiscountPercent);
+                return `<span class="product-accessory-price-line"><strong class="product-price-current" data-accessory-current-price><span aria-label="هزینهٔ افزوده">+</span><span data-accessory-current-amount>${fa(current)}</span><small>تومان</small></strong><del data-accessory-regular-price${discount ? "" : " hidden"}>${fa(regular)} تومان</del><em class="product-accessory-discount" data-accessory-discount${displayDiscount > 0 ? "" : " hidden"}>${fa(displayDiscount)}٪ تخفیف</em></span>`;
             };
             const accessoryMarkup = availableAccessories.length
                 ? `<section class="product-accessories" aria-labelledby="productAccessoriesTitle"><header><span class="product-accessories-icon"><i class="bi bi-box-seam" aria-hidden="true"></i></span><span><strong id="productAccessoriesTitle">متعلقات و خدمات کالا</strong><small>موارد الزامی مشخص‌اند؛ بقیه را به‌دلخواه انتخاب کنید.</small></span></header><div class="product-accessory-list">${availableAccessories

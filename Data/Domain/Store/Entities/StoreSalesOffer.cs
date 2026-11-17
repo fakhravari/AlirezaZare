@@ -24,7 +24,6 @@ public sealed class StoreProductVariantSalesPlanOffer
 public sealed class StoreAccessory
 {
     public long Id { get; set; }
-    public string AccessoryKey { get; set; } = "";
     public string Name { get; set; } = "";
     public string? Description { get; set; }
     public bool IsActive { get; set; }
@@ -36,6 +35,7 @@ public sealed class StoreProductAccessory
     public long IdProduct { get; set; }
     public long IdAccessory { get; set; }
     public bool IsRequired { get; set; }
+    public decimal? DisplayDiscountPercent { get; set; }
     public int SortOrder { get; set; }
 }
 

@@ -26,7 +26,7 @@
             for (const [index, item] of items.entries()) {
                 const row = document.createElement("div"); row.className = "list-group-item d-flex flex-wrap justify-content-between align-items-center gap-2";
                 const text = document.createElement("span");
-                text.textContent = `${item.name} · ${ui.formatNumber(item.priceAmount)} تومان · ${item.isRequired ? "اجباری" : "اختیاری"}${item.isActive ? "" : " · غیرفعال"}`;
+                text.textContent = `${item.name} · ${ui.formatNumber(item.priceAmount)} تومان${item.displayDiscountPercent != null ? ` · تخفیف نمایشی ${ui.formatNumber(item.displayDiscountPercent)}٪` : ""} · ${item.isRequired ? "اجباری" : "اختیاری"}${item.isActive ? "" : " · غیرفعال"}`;
                 const edit = document.createElement("button"); edit.type = "button"; edit.className = "btn btn-sm btn-default";
                 edit.dataset.productAccessoryEdit = String(index); edit.textContent = "ویرایش";
                 row.append(text, edit); rows.append(row);
@@ -39,7 +39,7 @@
         const form = document.querySelector("[data-product-accessory-form]"); if (!form) return;
         form.reset(); form.elements.id.value = item?.id || "";
         form.elements.name.value = item?.name || ""; form.elements.description.value = item?.description || "";
-        ui.setPriceValue(form.elements.priceAmount, item?.priceAmount ?? ""); form.elements.sortOrder.value = item?.sortOrder ?? 0;
+        ui.setPriceValue(form.elements.priceAmount, item?.priceAmount ?? ""); form.elements.displayDiscountPercent.value = item?.displayDiscountPercent ?? ""; form.elements.sortOrder.value = item?.sortOrder ?? 0;
         form.elements.isRequired.checked = item?.isRequired || false;
         form.elements.isActive.checked = item?.isActive ?? true;
         form.querySelector("[data-product-accessory-form-title]").textContent = item ? "ویرایش متعلقه" : "افزودن متعلقه";
@@ -52,7 +52,8 @@
         const priceAmount = ui.priceValue(form.elements.priceAmount), sortOrder = Number(form.elements.sortOrder.value);
         if (!Number.isSafeInteger(priceAmount) || priceAmount < 0 || !Number.isInteger(sortOrder) || sortOrder < 0 || sortOrder > 2147483647) { ui.notify("قیمت یا ترتیب معتبر نیست.", "danger"); return; }
         const productId = accessoryProductId, id = form.elements.id.value, save = form.querySelector('[type="submit"]');
-        const body = { name: form.elements.name.value.trim(), description: form.elements.description.value.trim(), priceAmount, sortOrder, isRequired: form.elements.isRequired.checked, isActive: form.elements.isActive.checked };
+        const displayDiscountPercent = form.elements.displayDiscountPercent.value === "" ? null : Number(form.elements.displayDiscountPercent.value);
+        const body = { name: form.elements.name.value.trim(), description: form.elements.description.value.trim(), priceAmount, displayDiscountPercent, sortOrder, isRequired: form.elements.isRequired.checked, isActive: form.elements.isActive.checked };
         const token = form.querySelector('[name="__RequestVerificationToken"]').value;
         form.dataset.saving = "true"; save.disabled = true;
         void ui.getJson(`/api/admin/store/catalog/products/manage/${productId}/accessories${id ? `/${encodeURIComponent(id)}` : ""}`, { method: id ? "PUT" : "POST", headers: { "Content-Type": "application/json", RequestVerificationToken: token }, body: JSON.stringify(body) })

@@ -76,7 +76,7 @@ public sealed class AccountController(
             {
                 selected.IdCartItem,
                 ProductAccessoryId = link.Id,
-                accessory.AccessoryKey,
+                AccessoryId = accessory.Id,
                 accessory.Name,
                 link.IsRequired,
                 PriceAmount = db.StorePriceVersions.Where(v => v.IdProduct == link.IdProduct && v.IdAccessory == link.IdAccessory && v.IdSalesPlan == cartItem.IdSalesPlan && v.IsActive).Select(v => (decimal?)v.PriceAmount).FirstOrDefault()
@@ -230,7 +230,7 @@ public sealed class AccountController(
                     }).ToArray(),
                     accessories = cartAccessoryRows.Where(accessory => accessory.IdCartItem == item.Id).Select(accessory => new
                     {
-                        id = accessory.AccessoryKey,
+                        id = accessory.AccessoryId.ToString(System.Globalization.CultureInfo.InvariantCulture),
                         productAccessoryId = accessory.ProductAccessoryId,
                         name = accessory.Name,
                         required = accessory.IsRequired,
@@ -517,13 +517,13 @@ public sealed class AccountController(
             var productAccessories = await (from accessory in db.StoreProductAccessories.AsNoTracking()
                                             join definition in db.StoreAccessories.AsNoTracking() on accessory.IdAccessory equals definition.Id
                                             where accessory.IdProduct == item.ProductId && definition.IsActive
-                                            select new { accessory.Id, accessory.IsRequired, definition.AccessoryKey }).ToListAsync(ct);
+                                            select new { accessory.Id, accessory.IsRequired, AccessoryId = definition.Id }).ToListAsync(ct);
             var selectedAccessories = productAccessories.Where(accessory => accessoryIds.Contains(accessory.Id)).ToArray();
             ProductSalesOffer? cartOffer = currentCatalog.Offers.SingleOrDefault(offer => offer.ProductId == item.ProductId && offer.SalesPlanId == item.SalesPlanId);
             if (cartOffer is null || selectedAccessories.Length != accessoryIds.Length ||
                 productAccessories.Any(accessory => accessory.IsRequired && !accessoryIds.Contains(accessory.Id)) ||
                 selectedAccessories.Any(accessory => cartOffer.AccessoryIds is { } allowed &&
-                    !allowed.Contains(accessory.AccessoryKey, StringComparer.Ordinal)) || item.Quantity > configuration.MaxPurchaseQuantity)
+                    !allowed.Contains(accessory.AccessoryId.ToString(System.Globalization.CultureInfo.InvariantCulture), StringComparer.Ordinal)) || item.Quantity > configuration.MaxPurchaseQuantity)
                 return Conflict(new { code = "invalid-product-options" });
 
         }
@@ -682,13 +682,14 @@ public sealed class AccountController(
             if (matchedOptionValueIds.Count != selectedValueIds.Length)
                 return Conflict(new { code = "invalid-product-options" });
 
-            string[] selectedAccessoryKeys = await (
+            long[] selectedAccessoryIds = await (
                 from selected in db.AccountCartItemAccessories.AsNoTracking()
                 join link in db.StoreProductAccessories.AsNoTracking() on selected.IdProductAccessory equals link.Id
                 join accessory in db.StoreAccessories.AsNoTracking() on link.IdAccessory equals accessory.Id
                 where selected.IdCartItem == row.Id
-                select accessory.AccessoryKey
+                select accessory.Id
             ).ToArrayAsync(ct);
+            string[] selectedAccessoryKeys = selectedAccessoryIds.Select(id => id.ToString(System.Globalization.CultureInfo.InvariantCulture)).ToArray();
             var offer = catalog.Offers.SingleOrDefault(candidate => candidate.ProductId == row.IdProduct && candidate.SalesPlanId == row.SalesPlanId);
             if (offer is null) return Conflict(new { code = "price-or-stock-changed" });
 
@@ -765,7 +766,7 @@ public sealed class AccountController(
             join link in db.StoreProductAccessories.AsNoTracking() on selected.IdProductAccessory equals link.Id
             join accessory in db.StoreAccessories.AsNoTracking() on link.IdAccessory equals accessory.Id
             where storedCartItemIds.Contains(selected.IdCartItem)
-            select new { selected.IdCartItem, AccessoryKey = accessory.AccessoryKey }).ToListAsync(ct);
+            select new { selected.IdCartItem, AccessoryId = accessory.Id }).ToListAsync(ct);
         var cartLines = storedCartRows.Select(item =>
         {
             var selections = new
@@ -773,7 +774,7 @@ public sealed class AccountController(
                 priceOptions = storedOptionRows.Where(option => option.IdCartItem == item.Id)
                     .Select(option => new { key = option.OptionKey, productValue = option.ValueKey }).ToArray(),
                 accessories = storedAccessoryRows.Where(accessory => accessory.IdCartItem == item.Id)
-                    .Select(accessory => new { id = accessory.AccessoryKey, selected = true }).ToArray()
+                    .Select(accessory => new { id = accessory.AccessoryId.ToString(System.Globalization.CultureInfo.InvariantCulture), selected = true }).ToArray()
             };
             JsonElement options = JsonSerializer.SerializeToElement(selections, AccountStateJsonOptions);
 

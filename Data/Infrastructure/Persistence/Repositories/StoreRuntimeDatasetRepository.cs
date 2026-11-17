@@ -43,7 +43,7 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext, IMedi
                                         join accessory in dbContext.StoreAccessories.AsNoTracking() on link.IdAccessory equals accessory.Id
                                         where productIds.Contains(link.IdProduct) && accessory.IsActive
                                         orderby link.SortOrder, link.Id
-                                        select new { link.IdProduct, link.Id, AccessoryId = accessory.Id, accessory.AccessoryKey, accessory.Name, link.IsRequired }).ToListAsync(cancellationToken);
+                                        select new { link.IdProduct, link.Id, AccessoryId = accessory.Id, accessory.Name, link.IsRequired, link.DisplayDiscountPercent }).ToListAsync(cancellationToken);
         var regularAccessoryPrices = await (from version in dbContext.StorePriceVersions.AsNoTracking()
                                             join plan in dbContext.SalesPlanReferences.AsNoTracking() on version.IdSalesPlan equals (long?)plan.Id
                                             where productIds.Contains(version.IdProduct) && version.IsActive && version.IdAccessory != null && plan.IsRegular && plan.IdStockOwnerType == 1
@@ -108,7 +108,7 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext, IMedi
                 ["detail"] = x.Detail,
                 ["icon"] = x.Icon
             }).ToArray());
-            o["accessories"] = new JsonArray(productAccessories.Where(x => x.IdProduct == product.Id).Select(x => (JsonNode?)new JsonObject { ["id"] = x.AccessoryKey, ["productAccessoryId"] = x.Id, ["name"] = x.Name, ["required"] = x.IsRequired, ["price"] = regularAccessoryPriceByTarget.GetValueOrDefault((x.IdProduct, x.AccessoryId)) / 1_000_000m }).ToArray());
+            o["accessories"] = new JsonArray(productAccessories.Where(x => x.IdProduct == product.Id).Select(x => (JsonNode?)new JsonObject { ["id"] = x.AccessoryId.ToString(System.Globalization.CultureInfo.InvariantCulture), ["productAccessoryId"] = x.Id, ["name"] = x.Name, ["required"] = x.IsRequired, ["displayDiscountPercent"] = x.DisplayDiscountPercent, ["price"] = regularAccessoryPriceByTarget.GetValueOrDefault((x.IdProduct, x.AccessoryId)) / 1_000_000m }).ToArray());
             o["documents"] = new JsonArray(assets.Where(x => x.IdProduct == product.Id && x.IdMediaType == ProductMediaTypes.Document).Select(x => (JsonNode?)new JsonObject { ["title"] = x.Title, ["path"] = x.Path }).ToArray()); o["variants"] = new JsonObject(); return (JsonNode?)o;
         }).ToArray());
         root["collections"] = new JsonArray(collections.Select(collection => (JsonNode?)new JsonObject { ["id"] = collection.CollectionKey, ["items"] = new JsonArray(collectionItems.Where(x => x.IdProductCollection == collection.Id).Select(x => (JsonNode?)JsonValue.Create(checked((int)x.IdProduct))).ToArray()) }).ToArray());

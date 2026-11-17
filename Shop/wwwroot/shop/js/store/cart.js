@@ -153,9 +153,13 @@
             .filter((accessory) => accessory && typeof accessory === "object")
             .map((accessory) => {
               const name = cleanText(accessory.name, 100);
-              const productAccessory = (product?.accessories || []).find(
-                (candidate) => accessory.id ? candidate.id === accessory.id : candidate.name === name,
-              );
+              const candidates = product?.accessories || [];
+              const byRelation = Number(accessory.productAccessoryId) > 0
+                ? candidates.find(candidate => Number(candidate.productAccessoryId) === Number(accessory.productAccessoryId)) : null;
+              const byId = candidates.find(candidate => accessory.id && candidate.id === accessory.id);
+              const byName = candidates.filter(candidate => candidate.name === name);
+              const legacyId = !accessory.id || !/^[1-9]\d*$/.test(String(accessory.id));
+              const productAccessory = byRelation || byId || (legacyId && !Number(accessory.productAccessoryId) && byName.length === 1 ? byName[0] : null);
               const required = product ? Boolean(productAccessory?.required) : Boolean(accessory.required);
               return {
                 id: cleanText(productAccessory?.id || accessory.id, 80),
@@ -213,13 +217,20 @@
           (candidate) => String(candidate.id) === String(item.id || "").replace(/^(\d+):.*$/, "$1"),
         );
         const options = normalizeOptions(item.options, product, item.salesPlanId || item.salesPlanSnapshot?.id || "regular");
-        if (item.salesPlanSnapshot?.accessoryPriceAmounts && typeof item.salesPlanSnapshot.accessoryPriceAmounts === "object") {
+        let salesPlanSnapshot = item.salesPlanSnapshot && typeof item.salesPlanSnapshot === "object" ? item.salesPlanSnapshot : null;
+        if (salesPlanSnapshot?.accessoryPriceAmounts && typeof salesPlanSnapshot.accessoryPriceAmounts === "object") {
+          const amounts = { ...salesPlanSnapshot.accessoryPriceAmounts };
           options.accessories = options.accessories.map((accessory) => {
-            const amount = Number(item.salesPlanSnapshot.accessoryPriceAmounts[accessory.id]);
+            const old = (item.options?.accessories || []).find((entry) =>
+              Number(entry.productAccessoryId) > 0 && Number(entry.productAccessoryId) === accessory.productAccessoryId);
+            const value = amounts[accessory.id] ?? (old ? amounts[old.id] : undefined);
+            const amount = value == null ? NaN : Number(value);
+            if (Number.isFinite(amount) && amount >= 0) amounts[accessory.id] = amount;
             return Number.isFinite(amount) && amount >= 0
               ? { ...accessory, price: amount / 1000000 }
               : accessory;
           });
+          salesPlanSnapshot = { ...salesPlanSnapshot, accessoryPriceAmounts: amounts };
         }
         const configuredPrice = item.salesPlanSnapshot?.unitAmount != null ? Number(item.salesPlanSnapshot.unitAmount) :
           item.salesPlanId && item.salesPlanId !== "regular" && Number.isFinite(Number(item.price)) ? Number(item.price) : product ? Math.round((Number(product.price) +
@@ -233,7 +244,7 @@
             .replace(/^(\d+):.*$/, "$1"),
           variantId: Number.isSafeInteger(Number(item.variantId)) && Number(item.variantId) > 0 ? Number(item.variantId) : null,
           salesPlanId: String(item.salesPlanId || item.salesPlanSnapshot?.id || "regular").trim().slice(0, 64),
-          salesPlanSnapshot: item.salesPlanSnapshot && typeof item.salesPlanSnapshot === "object" ? item.salesPlanSnapshot : null,
+          salesPlanSnapshot,
           name: String(product?.name || item.name || "").slice(0, 120),
           price: configuredPrice,
           image: normalizeImage(product?.image || item.image),

@@ -115,7 +115,7 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
                                     join accessory in dbContext.StoreAccessories.AsNoTracking() on productAccessory.IdAccessory equals accessory.Id
                                     where accessory.IsActive
                                     orderby productAccessory.IdProduct, productAccessory.SortOrder
-                                    select new { productAccessory.IdProduct, productAccessory.IdAccessory, accessory.AccessoryKey }).ToListAsync(cancellationToken);
+                                    select new { productAccessory.IdProduct, productAccessory.IdAccessory }).ToListAsync(cancellationToken);
         var offerAccessoryOverrides = await dbContext.StoreProductSalesPlanOfferAccessories.AsNoTracking().ToListAsync(cancellationToken);
         var customOfferByKey = customOffers.ToDictionary(x => (x.IdProduct, x.IdSalesPlan));
         foreach (var pair in offers)
@@ -133,9 +133,10 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
                 }
                 if (!accessoryPrices.TryGetValue((productId, accessory.IdAccessory, plan.Id), out var accessoryVersion))
                     throw new InvalidOperationException($"Missing active price for accessory {accessory.IdAccessory}, product {productId} and plan {plan.Id}.");
-                pair.Value.AccessoryPriceVersionIds[accessory.AccessoryKey] = accessoryVersion.Id;
-                pair.Value.AccessoryIds.Add(accessory.AccessoryKey);
-                pair.Value.AccessoryPriceAmounts[accessory.AccessoryKey] = accessoryVersion.PriceAmount;
+                string accessoryId = accessory.IdAccessory.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                pair.Value.AccessoryPriceVersionIds[accessoryId] = accessoryVersion.Id;
+                pair.Value.AccessoryIds.Add(accessoryId);
+                pair.Value.AccessoryPriceAmounts[accessoryId] = accessoryVersion.PriceAmount;
             }
         }
 
@@ -181,11 +182,12 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
                 group.Select(x => new ProductPurchaseOptionValueRow(x.ValueKey,
                     optionVersionById.TryGetValue(x.Id, out var version) ? version.PriceAmount : throw new InvalidOperationException($"Missing active price for option value {x.Id}."))
                 { Id = x.Id, PriceVersionId = optionVersionById[x.Id].Id }).ToArray())).ToArray();
-        var accessories = await (from productAccessory in dbContext.StoreProductAccessories.AsNoTracking()
+        var accessoryRows = await (from productAccessory in dbContext.StoreProductAccessories.AsNoTracking()
                                  join accessory in dbContext.StoreAccessories.AsNoTracking() on productAccessory.IdAccessory equals accessory.Id
                                  where productAccessory.IdProduct == productId && accessory.IsActive
                                  orderby productAccessory.SortOrder
-                                 select new ProductAccessoryRow(accessory.AccessoryKey, productAccessory.IsRequired)).ToListAsync(cancellationToken);
+                                 select new { accessory.Id, productAccessory.IsRequired }).ToListAsync(cancellationToken);
+        var accessories = accessoryRows.Select(x => new ProductAccessoryRow(x.Id.ToString(System.Globalization.CultureInfo.InvariantCulture), x.IsRequired)).ToArray();
 
         return new(maxPurchaseQuantity, options, accessories);
     }
