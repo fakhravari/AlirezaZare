@@ -15,8 +15,6 @@ public sealed class WarehouseProduct
     public string? Slug { get; set; }
     public long? IdProductBadge { get; set; }
     public Shop.Data.Domain.Store.Entities.StoreProductBadge? ProductBadge { get; set; }
-    public bool IsNewest { get; set; }
-    public int? NewestOrder { get; set; }
     public bool IsStoreEnabled { get; set; }
     public bool IsWarehouseEnabled { get; set; }
     public DateTime CreatedAtUtc { get; set; }

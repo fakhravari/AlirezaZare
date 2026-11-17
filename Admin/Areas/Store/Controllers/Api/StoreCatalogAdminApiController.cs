@@ -114,7 +114,7 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
             {
                 x.Id, x.ProductKey, Code = x.ProductKey, x.Name, x.EnglishName, x.IdBrand, x.IdCategory, x.IdBaseUnit,
                 x.PriceAmount, x.DiscountPercent, x.MaxPurchaseQuantity,
-                x.Slug, Badge = x.ProductBadge == null ? null : x.ProductBadge.Title, x.IsNewest, x.NewestOrder, x.IsStoreEnabled,
+                x.Slug, Badge = x.ProductBadge == null ? null : x.ProductBadge.Title, x.IsStoreEnabled,
                 x.IsWarehouseEnabled, x.CreatedAtUtc, x.UpdatedAtUtc
             }).SingleOrDefaultAsync(cancellationToken);
         if (product is null) return NotFound();
@@ -192,8 +192,6 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
             product.MaxPurchaseQuantity,
             product.Slug,
             product.Badge,
-            product.IsNewest,
-            product.NewestOrder,
             product.IsStoreEnabled,
             product.IsWarehouseEnabled,
             product.CreatedAtUtc,

@@ -1826,7 +1826,7 @@
                         groups: [
                             { title: "مشخصات کالا", compact: true, keys: ["name", "englishName", "code", "productKey", "brandName", "categoryName", "unitName", "slug", "badge"] },
                             { title: "قیمت و شرایط خرید", compact: true, keys: ["priceAmount", "discountPercent", "maxPurchaseQuantity"] },
-                            { title: "وضعیت و زمان", compact: true, keys: ["isStoreEnabled", "isWarehouseEnabled", "isNewest", "newestOrder", "createdAtUtc", "updatedAtUtc"] },
+                            { title: "وضعیت و زمان", compact: true, keys: ["isStoreEnabled", "isWarehouseEnabled", "createdAtUtc", "updatedAtUtc"] },
                             { title: "تنوع‌های کالا", keys: ["variants"] },
                             { title: "موجودی انبار و طرح فروش", keys: ["stockByWarehouseAndPlan"] },
                             { title: "مشخصات فنی", keys: ["specifications"] },
