@@ -1869,10 +1869,6 @@
         : $root.find("small").first().text() || "کد محصول",
       brand: catalogProduct?.brand || "",
       type: catalogProduct?.type || "",
-      powerSource: catalogProduct?.powerSource || catalogProduct?.movement || "",
-      useCase: catalogProduct?.useCase || catalogProduct?.strap || "",
-      movement: catalogProduct?.powerSource || catalogProduct?.movement || "",
-      strap: catalogProduct?.useCase || catalogProduct?.strap || "",
       detail: catalogProduct?.detail || null,
     };
   };
@@ -2120,8 +2116,6 @@
     );
     const quickSpecs = [
       ["گروه محصول", product.type],
-      ["منبع تغذیه", product.powerSource || product.movement],
-      ["مورد استفاده", product.useCase || product.strap],
     ].filter(([, value]) => value);
     $("#quickViewSpecs").html(
       quickSpecs

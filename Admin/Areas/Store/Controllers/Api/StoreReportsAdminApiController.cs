@@ -320,7 +320,7 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
                 inventoryItemId = x.IdInventoryItem,
                 salesPlanReferenceId = x.IdSalesPlanReference,
                 warehouseLabel = x.Warehouse.Company.Name + " / " + x.Warehouse.Name + " (" + x.Warehouse.Code + ")",
-                productCode = x.InventoryItem.Product.Code,
+                productCode = x.InventoryItem.Product.ProductKey,
                 productName = x.InventoryItem.Product.Name,
                 variantName = x.InventoryItem.ProductVariant == null ? "—" : x.InventoryItem.ProductVariant.Name,
                 planName = x.SalesPlanReference.DisplayName,

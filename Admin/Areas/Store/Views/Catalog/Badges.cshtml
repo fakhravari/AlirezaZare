@@ -1,0 +1,18 @@
+<div class="admin-page" data-product-badges>
+    @await Html.PartialAsync("_AdminPageIntro", ("نشان‌های کالا", "تعریف نشان و تخصیص آن به کالا برای نمایش در فروش عادی."))
+    @Html.AntiForgeryToken()
+    <section class="panel panel-inverse"><div class="panel-heading"><h2 class="panel-title">تعریف نشان‌ها</h2></div><div class="panel-body">
+        <form class="d-flex flex-wrap gap-2 mb-3" data-badge-form>
+            <input type="hidden" name="id" /><label class="visually-hidden" for="badge-title">عنوان نشان</label>
+            <input id="badge-title" name="title" class="form-control w-auto" maxlength="100" required placeholder="عنوان نشان" />
+            <button class="btn btn-primary" type="submit">ذخیره نشان</button><button class="btn btn-default" type="button" data-badge-reset>نشان جدید</button>
+        </form>
+        <div class="table-responsive"><table class="table table-striped align-middle"><thead><tr><th>عنوان</th><th>تعداد کالا</th><th>عملیات</th></tr></thead><tbody data-badge-rows></tbody></table></div>
+    </div></section>
+    <section class="panel panel-inverse"><div class="panel-heading"><h2 class="panel-title">تخصیص نشان به کالا</h2></div><div class="panel-body">
+        <form class="admin-filter-bar d-flex flex-wrap gap-2 mb-3" data-badge-search><label class="visually-hidden" for="badge-product-query">نام یا کد کالا</label><input id="badge-product-query" name="q" class="form-control" type="search" maxlength="100" placeholder="نام یا کد کالا" /><button class="btn btn-primary">جست‌وجو</button></form>
+        <p class="small text-muted" role="status" data-badge-status></p>
+        <div class="table-responsive"><table class="table table-striped align-middle"><thead><tr><th>کد کالا</th><th>نام کالا</th><th>نشان فروش عادی</th><th>عملیات</th></tr></thead><tbody data-badge-products></tbody></table></div>
+        <div class="d-flex align-items-center gap-2 mt-3"><button type="button" class="btn btn-default" data-badge-prev>قبلی</button><span data-badge-page></span><button type="button" class="btn btn-default" data-badge-next>بعدی</button></div>
+    </div></section>
+</div>

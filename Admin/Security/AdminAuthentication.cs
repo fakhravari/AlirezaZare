@@ -260,6 +260,13 @@ public sealed class AdminPermissionFilter : IAsyncAuthorizationFilter
             action = "Index";
             feature = "order-confirmation";
         }
+        if (string.Equals(area, "Store", StringComparison.OrdinalIgnoreCase) &&
+            string.Equals(controller, "StoreProductBadgesApi", StringComparison.OrdinalIgnoreCase))
+        {
+            controller = "Catalog";
+            action = "Badges";
+            feature = null;
+        }
         if (string.Equals(controller, "Auth", StringComparison.OrdinalIgnoreCase)
             || (string.IsNullOrEmpty(area)
             && string.Equals(controller, "Home", StringComparison.OrdinalIgnoreCase)))

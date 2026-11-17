@@ -45,8 +45,6 @@
   const state = {
     brand: new Set(),
     type: new Set(),
-    movement: new Set(),
-    strap: new Set(),
     color: new Set(),
     salesPlan: new Set(),
     availability: "all",
@@ -62,20 +60,13 @@
   const filterFields = {
     brand: { fa: "برند", en: "Brand", slug: "brand", attributeId: "brand" },
     type: { fa: "گروه محصول", en: "Product group", slug: "product-group", attributeId: "category" },
-    movement: { fa: "منبع تغذیه", en: "Power source", slug: "power-source", attributeId: "powerSource" },
-    strap: {
-      fa: "مورد استفاده",
-      en: "Application environment",
-      slug: "application-environment",
-      attributeId: "useCase",
-    },
     color: { fa: "رنگ", en: "Color", slug: "color", attributeId: "color" },
     salesPlan: { fa: "طرح فروش", en: "Sales plan", slug: "sales-plan" },
     price: { fa: "بازه قیمت", en: "Price range", slug: "price-range", attributeId: "price" },
   };
   const isFilterable = (key) => attributeDefinitions[filterFields[key]?.attributeId]?.is_filterable === true;
   const hasActiveFilters = () =>
-    ["brand", "type", "movement", "strap", "color", "salesPlan"].some((key) => state[key].size) ||
+    ["brand", "type", "color", "salesPlan"].some((key) => state[key].size) ||
     state.availability !== "all" ||
     state.discountOnly ||
     state.minPrice > 0 ||
@@ -144,98 +135,6 @@
         slug: "hot-air-rework-station",
       },
     },
-    movement: {
-      "باتری شارژی": {
-        en: "Rechargeable battery",
-        slug: "rechargeable-battery",
-      },
-      باتری‌خور: { en: "Battery powered", slug: "battery-powered" },
-      "برق شهری": { en: "Mains powered", slug: "mains-powered" },
-      دستی: { en: "Manual", slug: "manual" },
-    },
-    strap: {
-      "ایمنی و بازرسی": {
-        en: "Safety and inspection",
-        slug: "safety-inspection",
-      },
-      "بازرسی و تعمیر": {
-        en: "Inspection and repair",
-        slug: "inspection-repair",
-      },
-      "برق صنعتی": {
-        en: "Industrial electrical",
-        slug: "industrial-electrical",
-      },
-      "تأسیسات برقی": {
-        en: "Electrical installation",
-        slug: "electrical-installation",
-      },
-      "تست اولیه برق": {
-        en: "Initial electrical testing",
-        slug: "initial-electrical-testing",
-      },
-      "تست و سرویس": { en: "Testing and service", slug: "testing-service" },
-      "تست و عیب‌یابی": {
-        en: "Testing and troubleshooting",
-        slug: "testing-troubleshooting",
-      },
-      "تعمیر برد": { en: "Circuit board repair", slug: "circuit-board-repair" },
-      "تعمیر خودرو": { en: "Automotive repair", slug: "automotive-repair" },
-      "تعمیر و نگهداری": {
-        en: "Maintenance and repair",
-        slug: "maintenance-repair",
-      },
-      "تعمیرات الکترونیک": {
-        en: "Electronics repair",
-        slug: "electronics-repair",
-      },
-      "تعمیرگاه و کارگاه": {
-        en: "Repair shop and workshop",
-        slug: "repair-shop-workshop",
-      },
-      "سیم‌کشی و نصب": {
-        en: "Wiring and installation",
-        slug: "wiring-installation",
-      },
-      "عیب‌یابی برق": {
-        en: "Electrical troubleshooting",
-        slug: "electrical-troubleshooting",
-      },
-      "کارگاه ساختمانی": {
-        en: "Construction workshop",
-        slug: "construction-workshop",
-      },
-      "کارگاه و سرویس": { en: "Workshop service", slug: "workshop-service" },
-      "کارگاه و نصب": {
-        en: "Workshop installation",
-        slug: "workshop-installation",
-      },
-      "محیط کارگاهی": {
-        en: "Workshop environment",
-        slug: "workshop-environment",
-      },
-      "مونتاژ الکترونیک": {
-        en: "Electronics assembly",
-        slug: "electronics-assembly",
-      },
-      "مونتاژ و تعمیر": { en: "Assembly and repair", slug: "assembly-repair" },
-      "نصب و برق‌کاری": {
-        en: "Electrical installation work",
-        slug: "electrical-installation-work",
-      },
-      "نصب و تعمیر": {
-        en: "Installation and repair",
-        slug: "installation-repair",
-      },
-      "نصب و کارگاه": {
-        en: "Installation workshop",
-        slug: "installation-workshop",
-      },
-      "نصب و مونتاژ": {
-        en: "Installation and assembly",
-        slug: "installation-assembly",
-      },
-    },
   };
   const filterValueMeta = (key, value) => {
     if (key === "salesPlan") return {fa: salesPlanFilterNames.get(value) || value, en: value, slug: value};
@@ -269,8 +168,6 @@
   const filterOptions = Object.fromEntries(Object.entries({
     brand: createFilterOptions("brand"),
     type: createCategoryFilterOptions(),
-    movement: createFilterOptions("movement"),
-    strap: createFilterOptions("strap"),
     color: Object.fromEntries(
       [
         ...new Set(
@@ -479,7 +376,7 @@
   }
   function syncCategoryFilters() {
     const facets = window.HNCatalog.categoryFacets(state.type);
-    for (const key of ['brand', 'type', 'movement', 'strap', 'color']) {
+    for (const key of ['brand', 'type', 'color']) {
       const container = $(`#${key}Filters`);
       const allowed = new Set(facets[key]);
       if (key !== 'type') {
@@ -523,12 +420,10 @@
         (!state.brand.size || state.brand.has(p.brand)) &&
         (!selectedTypes.length || selectedTypes.some((type) =>
           window.HNCatalog?.categoryContains?.(type, p.categoryId))) &&
-        (!state.movement.size || state.movement.has(p.powerSource || p.movement)) &&
-        (!state.strap.size || state.strap.has(p.useCase || p.strap)) &&
         (!state.color.size ||
           (p.colors || []).some((color) => state.color.has(color.slug))) &&
         (!state.query ||
-          normalizeFilterSearch(`${p.name} ${p.brand} ${p.type} ${p.englishName || ""} ${p.powerSource || p.movement} ${p._salesPlanListing?.name || ""} ${p._salesPlanListing?.label || ""} ${p._salesPlanListing?.code || ""}`)
+          normalizeFilterSearch(`${p.name} ${p.brand} ${p.type} ${p.englishName || ""} ${p._salesPlanListing?.name || ""} ${p._salesPlanListing?.label || ""} ${p._salesPlanListing?.code || ""}`)
             .includes(normalizeFilterSearch(state.query))) &&
         (!state.salesPlan.size || state.salesPlan.has(p._salesPlanListing?.id || "regular")),
     );
@@ -663,7 +558,7 @@
   }
   function renderChips() {
     const chips = [];
-    ["brand", "type", "movement", "strap", "color", "salesPlan"].forEach((key) =>
+    ["brand", "type", "color", "salesPlan"].forEach((key) =>
       state[key].forEach((value) =>
         chips.push(
           (() => {
@@ -731,7 +626,7 @@
   }
   function clearAll() {
     window.clearTimeout(searchRenderTimer);
-    ["brand", "type", "movement", "strap", "color", "salesPlan"].forEach((key) => state[key].clear());
+    ["brand", "type", "color", "salesPlan"].forEach((key) => state[key].clear());
     state.availability = "all";
     state.discountOnly = false;
     state.minPrice = 0;

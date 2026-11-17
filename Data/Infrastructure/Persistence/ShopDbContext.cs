@@ -53,6 +53,7 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
     public DbSet<StoreProductMediaType> StoreProductMediaTypes => Set<StoreProductMediaType>();
     public DbSet<StoreProductAsset> StoreProductAssets => Set<StoreProductAsset>();
     public DbSet<StoreProductBenefit> StoreProductBenefits => Set<StoreProductBenefit>();
+    public DbSet<StoreProductBadge> StoreProductBadges => Set<StoreProductBadge>();
     public DbSet<StoreBrand> StoreBrands => Set<StoreBrand>();
     public DbSet<StoreBank> StoreBanks => Set<StoreBank>();
     public DbSet<StoreBrandEditorial> StoreBrandEditorials => Set<StoreBrandEditorial>();
@@ -447,19 +448,23 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.HasKey(x => x.Id);
             entity.Property(x => x.Id).ValueGeneratedNever();
             entity.Property(x => x.ProductKey).HasMaxLength(128).IsRequired();
-            entity.Property(x => x.Code).HasMaxLength(100).IsRequired();
             entity.Property(x => x.Name).HasMaxLength(300).IsRequired();
             entity.Property(x => x.EnglishName).HasMaxLength(300).IsRequired();
-            entity.Property(x => x.PowerSource).HasMaxLength(200);
-            entity.Property(x => x.UseCase).HasMaxLength(500);
             entity.Property(x => x.Slug).HasMaxLength(200);
-            entity.Property(x => x.Badge).HasMaxLength(100);
+            entity.HasOne(x => x.ProductBadge).WithMany().HasForeignKey(x => x.IdProductBadge).OnDelete(DeleteBehavior.Restrict);
             entity.Property(x => x.PriceAmount).HasPrecision(19, 0).IsRequired();
             entity.Property(x => x.DiscountPercent).HasPrecision(5, 2).IsRequired();
             entity.Property(x => x.MaxPurchaseQuantity).IsRequired();
             entity.Property(x => x.IsStoreEnabled).HasDefaultValue(false).IsRequired();
             entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
             entity.Property(x => x.UpdatedAtUtc).HasPrecision(3);
+        });
+        modelBuilder.Entity<StoreProductBadge>(entity =>
+        {
+            entity.ToTable("ProductBadge", "Store");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.Title).HasMaxLength(100).IsRequired();
+            entity.HasIndex(x => x.Title).IsUnique();
         });
         modelBuilder.Entity<ProductVariant>(entity =>
         {

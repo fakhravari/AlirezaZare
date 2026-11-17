@@ -156,7 +156,7 @@
         maxPurchaseQuantity: "حداکثر تعداد خرید", createdAtUtc: "زمان ایجاد", updatedAtUtc: "آخرین ویرایش",
         isStoreEnabled: "انتشار در فروشگاه", isWarehouseEnabled: "فعال در انبار", hasImage: "تصویر محصول", idBrand: "شناسهٔ برند",
         idCategory: "شناسهٔ دسته", idBaseUnit: "شناسهٔ واحد پایه", productKey: "کلید محصول",
-        powerSource: "منبع تغذیه", useCase: "کاربرد", badge: "نشان کالا", isNewest: "کالای جدید",
+        badge: "نشان کالا", isNewest: "کالای جدید",
         newestOrder: "ترتیب کالای جدید", variants: "تنوع‌ها", attributes: "ویژگی‌های تنوع", attributesJson: "ویژگی‌های تنوع",
         stockByWarehouseAndPlan: "موجودی به تفکیک انبار و طرح", benefits: "مزیت‌های کالا", specifications: "مشخصات فنی",
         feature: "عنوان مشخصه", value: "مقدار", documents: "فایل‌های کالا", media: "رسانهٔ کالا",

@@ -18,7 +18,7 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
         var stockRows = await (from balance in dbContext.StockBalances.AsNoTracking()
                                join inventory in dbContext.InventoryItems.AsNoTracking() on balance.IdInventoryItem equals inventory.Id
                                join plan in dbContext.SalesPlanReferences.AsNoTracking() on balance.IdSalesPlanReference equals plan.Id
-                               where siteWarehouseIds.Contains(balance.IdWarehouse) && inventory.IsActive &&
+                               where siteWarehouseIds.Contains(balance.IdWarehouse) && inventory.IsActive && inventory.Product.IsWarehouseEnabled &&
                                    ((inventory.IdProductVariant.HasValue && dbContext.ProductVariants.Any(v => v.Id == inventory.IdProductVariant.Value && v.IsActive)) ||
                                     (!inventory.IdProductVariant.HasValue && !dbContext.ProductVariants.Any(v => v.IdProduct == inventory.IdProduct && v.IsActive)))
                                group balance.Quantity by new { inventory.IdProduct, balance.IdSalesPlanReference } into grouped
@@ -68,14 +68,14 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
         Dictionary<(int ProductId, long VariantId), InventoryVariantBuilder> inventoryVariants = [];
         var eligibleVariants = await (from variant in dbContext.ProductVariants.AsNoTracking()
                                       join product in dbContext.Products.AsNoTracking() on variant.IdProduct equals product.Id
-                                      where variant.IsActive && product.IsWarehouseEnabled && product.IsStoreEnabled &&
+                                      where variant.IsActive && product.IsStoreEnabled &&
                                             dbContext.InventoryItems.Any(inventory => inventory.IdProductVariant == variant.Id && inventory.IsActive)
                                       select new { ProductId = variant.IdProduct, VariantId = variant.Id, variant.Name, variant.Code, variant.AttributesJson, variant.IsDefault }).ToListAsync(cancellationToken);
         foreach (var row in eligibleVariants) inventoryVariants[(checked((int)row.ProductId), row.VariantId)] = new(checked((int)row.ProductId), row.VariantId, row.Name, row.Code, row.AttributesJson, row.IsDefault);
         var inventoryStock = await (from inventory in dbContext.InventoryItems.AsNoTracking()
                                     join balance in dbContext.StockBalances.AsNoTracking() on inventory.Id equals balance.IdInventoryItem
                                     join plan in dbContext.SalesPlanReferences.AsNoTracking() on balance.IdSalesPlanReference equals plan.Id
-                                    where inventory.IsActive && inventory.IdProductVariant.HasValue && siteWarehouseIds.Contains(balance.IdWarehouse) && plan.IdStockOwnerType == 1
+                                    where inventory.IsActive && inventory.Product.IsWarehouseEnabled && inventory.IdProductVariant.HasValue && siteWarehouseIds.Contains(balance.IdWarehouse) && plan.IdStockOwnerType == 1
                                     select new { inventory.IdProductVariant, inventory.IdProduct, plan.StoreSalesPlanKey, balance.Quantity }).ToListAsync(cancellationToken);
         var productByVariantId = eligibleVariants.GroupBy(x => x.VariantId).ToDictionary(x => x.Key, x => checked((int)x.First().ProductId));
         foreach (var stock in inventoryStock)

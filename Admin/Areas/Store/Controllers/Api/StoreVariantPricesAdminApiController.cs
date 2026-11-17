@@ -28,7 +28,7 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
         if (endOffset.HasValue) plans = plans.Where(x => !x.StartsAtUtc.HasValue || x.StartsAtUtc.Value < endOffset.Value);
         if (search.Length > 0)
         {
-            var productIds = db.Products.AsNoTracking().Where(x => x.Name.Contains(search) || x.Code.Contains(search)).Select(x => x.Id);
+            var productIds = db.Products.AsNoTracking().Where(x => x.Name.Contains(search) || x.ProductKey.Contains(search)).Select(x => x.Id);
             plans = plans.Where(plan => db.StoreProductSalesPlanOffers.Any(offer => offer.IdSalesPlan == plan.Id && productIds.Contains(offer.IdProduct)) ||
                 db.StoreProductVariantSalesPlanOffers.Any(offer => offer.IdSalesPlan == plan.Id && db.ProductVariants.Any(variant => variant.Id == offer.IdProductVariant && productIds.Contains(variant.IdProduct))) ||
                 db.StorePriceVersions.Any(version => version.IdSalesPlan == plan.Id && productIds.Contains(version.IdProduct) && !version.IdOrderItem.HasValue));
@@ -56,9 +56,9 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
         var search = q?.Trim() ?? "";
         if (search.Length > 100 || page < 1 || page > 10000) return ValidationProblem(detail: "عبارت جست‌وجو یا صفحه معتبر نیست.", statusCode: 400);
         const int size = 30;
-        var products = db.Products.AsNoTracking().Where(x => search == "" || x.Name.Contains(search) || x.Code.Contains(search));
+        var products = db.Products.AsNoTracking().Where(x => search == "" || x.Name.Contains(search) || x.ProductKey.Contains(search));
         var items = await products.OrderBy(x => x.Name).ThenBy(x => x.Id).Skip((page - 1) * size).Take(size + 1)
-            .Select(x => new { x.Id, x.Name, x.Code }).ToListAsync(cancellationToken);
+            .Select(x => new { x.Id, x.Name, Code = x.ProductKey }).ToListAsync(cancellationToken);
         return Ok(new { items = items.Take(size), more = items.Count > size });
     }
 
@@ -74,7 +74,7 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
         if (!TryDateRange(from, to, out var start, out var end)) return ValidationProblem(detail: "بازهٔ تاریخ معتبر نیست.", statusCode: 400);
         if (start.HasValue) query = query.Where(x => x.CreatedAtUtc >= start.Value);
         if (end.HasValue) query = query.Where(x => x.CreatedAtUtc < end.Value);
-        if (search.Length > 0) query = query.Where(x => db.Products.Any(product => product.Id == x.IdProduct && (product.Name.Contains(search) || product.Code.Contains(search))));
+        if (search.Length > 0) query = query.Where(x => db.Products.Any(product => product.Id == x.IdProduct && (product.Name.Contains(search) || product.ProductKey.Contains(search))));
         if (productId.HasValue) query = query.Where(x => x.IdProduct == productId.Value);
         if (productIds is { Length: > 0 }) query = query.Where(x => productIds.Contains(x.IdProduct));
         if (salesPlanId.HasValue) query = query.Where(x => x.IdSalesPlan == salesPlanId.Value);
@@ -268,8 +268,8 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
                    from plan in db.SalesPlanReferences.AsNoTracking().Where(x => x.IdStockOwnerType == 1)
                    join offer in db.StoreProductVariantSalesPlanOffers.AsNoTracking() on new { VariantId = variant.Id, PlanId = plan.Id } equals new { VariantId = offer.IdProductVariant, PlanId = offer.IdSalesPlan } into offers
                    from offer in offers.DefaultIfEmpty()
-                   where variant.IsActive && product.IsWarehouseEnabled && product.IsStoreEnabled &&
-                         (query == "" || product.Name.Contains(query) || product.Code.Contains(query) || variant.Name.Contains(query) ||
+                   where variant.IsActive && product.IsStoreEnabled &&
+                         (query == "" || product.Name.Contains(query) || product.ProductKey.Contains(query) || variant.Name.Contains(query) ||
                           (variant.Code ?? "").Contains(query) || (plan.DisplayName ?? "").Contains(query))
                    select new { variant, product, plan, offer };
         if (productIds is { Length: > 0 }) rows = rows.Where(x => productIds.Contains(x.product.Id));
@@ -306,7 +306,7 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
         var plan = await db.SalesPlanReferences.SingleOrDefaultAsync(x => x.StoreSalesPlanKey == salesPlanId && x.IsActive && x.IdStockOwnerType == 1, cancellationToken);
         if (plan is null) return NotFound(new { code = "variant-or-plan-not-found" });
 
-        bool valid = await db.ProductVariants.AnyAsync(v => v.Id == variantId && v.IsActive && db.Products.Any(p => p.Id == v.IdProduct && p.IsWarehouseEnabled && p.IsStoreEnabled), cancellationToken);
+        bool valid = await db.ProductVariants.AnyAsync(v => v.Id == variantId && v.IsActive && db.Products.Any(p => p.Id == v.IdProduct && p.IsStoreEnabled), cancellationToken);
         if (!valid) return NotFound(new { code = "variant-or-plan-not-found" });
 
         var offer = await db.StoreProductVariantSalesPlanOffers.SingleOrDefaultAsync(x => x.IdProductVariant == variantId && x.IdSalesPlan == plan.Id, cancellationToken);
@@ -388,7 +388,7 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
                    join offer in db.StoreProductSalesPlanOffers.AsNoTracking() on new { ProductId = product.Id, PlanId = plan.Id } equals new { ProductId = offer.IdProduct, PlanId = offer.IdSalesPlan } into offers
                    from offer in offers.DefaultIfEmpty()
                    where product.IsStoreEnabled && !plan.IsRegular &&
-                         (query == "" || product.Name.Contains(query) || product.Code.Contains(query) || plan.DisplayName.Contains(query))
+                         (query == "" || product.Name.Contains(query) || product.ProductKey.Contains(query) || plan.DisplayName.Contains(query))
                    select new { product, plan, offer };
         if (productIds is { Length: > 0 }) rows = rows.Where(x => productIds.Contains(x.product.Id));
         if (start.HasValue) rows = rows.Where(x => x.offer != null && x.offer.CreatedAtUtc >= start.Value);
@@ -397,7 +397,7 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
         var items = await rows.OrderBy(x => x.product.Name).ThenBy(x => x.plan.DisplayName).ThenBy(x => x.product.Id).ThenBy(x => x.plan.Id).Skip(paging.Offset).Take(paging.PageSize).Select(x => new ProductOfferRow
             {
                 ProductId = x.product.Id,
-                ProductCode = x.product.Code,
+                ProductCode = x.product.ProductKey,
                 ProductName = x.product.Name,
                 SalesPlanId = x.plan.StoreSalesPlanKey,
                 SalesPlanName = x.plan.DisplayName,

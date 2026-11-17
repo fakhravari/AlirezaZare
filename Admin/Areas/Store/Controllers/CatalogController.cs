@@ -11,6 +11,13 @@ public sealed class CatalogController : Controller
         CatalogPage("categories", "دسته‌بندی‌ها", "ساختار درختی دسته‌بندی‌های کاتالوگ.");
 
     public IActionResult Brands() => CatalogPage("brands", "برندها", "برندهای متصل به کالاهای فروشگاه.");
+    public IActionResult Badges()
+    {
+        ViewData["Title"] = "نشان‌های کالا";
+        ViewData["AreaTitle"] = "مدیریت فروشگاه";
+        ViewData["FeatureId"] = "badges";
+        return View();
+    }
     public IActionResult Attributes() => CatalogPage("attributes", "ویژگی‌ها", "تعریف ویژگی‌های فیلتر و مشخصات کالا.");
     public IActionResult PaymentInstitutions()
     {

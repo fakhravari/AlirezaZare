@@ -47,8 +47,11 @@
     const current = currentPrice(product, options);
     const productUrl = window.HNProductUrl(product, {salesPlanId: options.salesPlanId});
     const title = `<h3 class="${headingClass}"><a class="${slider ? "showcase-product-detail" : ""}" href="${esc(productUrl)}">${esc(product.name)}</a></h3>`;
-    const badge = options.badge ?? product.badge;
     const rawStock = availableStock(product, options) ?? options.stockQuantity ?? product.stockQuantity ?? product.inventoryCount ?? product.quantityInStock ?? product.availableQuantity ?? product.stock;
+    const planId = options.salesPlanId;
+    const plan = planId ? salesPlanData?.plans?.find((item) => item.id === planId) : null;
+    const regularPlan = !planId || planId === "regular" || plan?.isDefault === true;
+    const badge = regularPlan ? (options.badge ?? product.badge) : null;
     const stock = rawStock === "" || rawStock === null || rawStock === undefined ? Number.NaN : Number(rawStock);
     const unavailable = Number.isFinite(stock) && stock >= 0 ? stock < 1 : product.inStock === false;
     const actionLabel = unavailable
@@ -57,7 +60,7 @@
     const action = favorite
       ? `<button class="list-remove-button" type="button" data-unlike="${esc(product.id)}" aria-label="حذف ${esc(product.name)} از علاقه‌مندی‌ها"><i class="bi bi-trash3" aria-hidden="true"></i><span>حذف از علاقه‌مندی‌ها</span></button>`
       : `<button class="add-cart${search ? " search-add-cart search-page-card-action" : ""}${unavailable ? " is-out-of-stock" : ""}" type="button" data-id="${esc(product.id)}" data-name="${esc(product.name)}" data-price="${current}" data-image="${esc(product.image)}"${options.salesPlanId ? ` data-sales-plan-id="${esc(options.salesPlanId)}" data-stock-quantity="${Math.max(0, Number(options.stockQuantity) || 0)}" data-max-purchase-quantity="${Math.max(1, Number(options.maxPurchaseQuantity) || 99)}"` : ""}${options.salesPlanName ? ` data-sales-plan-name="${esc(options.salesPlanName)}"` : ""}${options.salesPlanCode ? ` data-sales-plan-code="${esc(options.salesPlanCode)}"` : ""}${options.salesPlanLabel ? ` data-sales-plan-label="${esc(options.salesPlanLabel)}"` : ""}${unavailable ? ' disabled aria-disabled="true" aria-label="ناموجود" title="موجودی این کالا تمام شده است"' : ""}><i class="bi ${unavailable ? "bi-bag-x" : "bi-bag-plus"}" aria-hidden="true"></i>${actionLabel}</button>`;
-    const hasSalesPlanBadge = Boolean(options.salesPlanName && options.salesPlanId && options.salesPlanId !== "regular");
+    const hasSalesPlanBadge = Boolean(options.salesPlanName && options.salesPlanId && !regularPlan);
     const imageBadge = hasSalesPlanBadge
       ? `<span class="product-sales-plan-badge product-sales-plan-badge--overlay"><i class="bi bi-lightning-charge-fill" aria-hidden="true"></i>${esc(options.salesPlanName)}</span>`
       : badge ? `<span class="${options.offer ? "badge-offer" : badge === "جدید" ? "badge-new" : "badge-best"}">${esc(badge)}</span>` : "";

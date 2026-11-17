@@ -232,8 +232,6 @@
       categoryPath: [...resolvedCategory.path],
       colors, attributeValues, detail, image: media.card,
       mainImage: media.main, thumbnailImage: media.thumbnail, images: media.images, videos: media.videos,
-      // Compatibility aliases for persisted filters; new code uses explicit names.
-      movement: product.powerSource, strap: product.useCase,
     });
   });
   const byId = new Map(products.map((product) => [String(product.id), product]));
@@ -244,7 +242,7 @@
       selected.some(category => categoryContains(category, product.categoryId)));
     const values = key => [...new Set(scoped.map(product => product[key]).filter(Boolean))];
     return {
-      brand: values('brand'), movement: values('powerSource'), strap: values('useCase'),
+      brand: values('brand'),
       color: [...new Set(scoped.flatMap(product => product.colors.map(color => color.slug)))],
       type: categoryEntries.filter(category =>
         (!selected.length || selected.some(parent => categoryContains(parent, category.id))) &&

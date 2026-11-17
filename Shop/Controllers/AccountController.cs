@@ -1006,7 +1006,7 @@ public sealed class AccountController(
         CancellationToken cancellationToken) =>
         await db.ProductVariants.AsNoTracking().AnyAsync(variant =>
             variant.Id == variantId && variant.IdProduct == productId && variant.IsActive &&
-            variant.Product.IsWarehouseEnabled && variant.Product.IsStoreEnabled, cancellationToken);
+            variant.Product.IsStoreEnabled, cancellationToken);
 
     private static string NormalizeCouponCode(string? code) => (code ?? string.Empty).Trim().ToUpperInvariant();
 

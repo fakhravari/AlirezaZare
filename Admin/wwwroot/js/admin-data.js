@@ -760,7 +760,7 @@
     function attributeGroup(item) {
         const source = String(item.sourceKey || "");
         if (["brand", "category", "country", "code"].includes(source)) return "identity";
-        if (["powerSource", "useCase", "color"].includes(source)) return "product";
+        if (source === "color") return "product";
         if (source.startsWith("spec:") || source === "specs") return "technical";
         if (source === "variants") return "variants";
         if (["price", "stockQuantity", "discountPercent"].includes(source)) return "commerce";
@@ -1512,6 +1512,19 @@
                 .catch(error => { faqDelete.disabled = false; ui.notify(error.message || "حذف پرسش ناموفق بود.", "danger"); });
             return;
         }
+        const badgeCreate = event.target.closest("[data-product-badge-create]");
+        if (badgeCreate) {
+            const form = badgeCreate.closest("[data-product-editor]"), field = form.querySelector("[data-product-badge-title]");
+            const title = field.value.trim();
+            if (!title) { ui.notify("عنوان نشان را وارد کنید.", "danger"); field.focus(); return; }
+            const token = form.querySelector('[name="__RequestVerificationToken"]')?.value || "";
+            badgeCreate.disabled = true;
+            void ui.getJson("/api/admin/store/catalog/product-badges", { method: "POST", headers: { "Content-Type": "application/json", RequestVerificationToken: token }, body: JSON.stringify({ title }) })
+                .then(result => { form.elements.badgeId.add(new Option(result.title, String(result.id), true, true)); form.elements.badgeId.dispatchEvent(new Event("change", { bubbles: true })); field.value = ""; ui.notify("نشان اضافه شد.", "success"); })
+                .catch(error => ui.notify(error.message || "ثبت نشان ناموفق بود.", "danger"))
+                .finally(() => { badgeCreate.disabled = false; });
+            return;
+        }
         const productEdit = event.target.closest("[data-product-edit]");
         if (productEdit) {
             const page = productEdit.closest('[data-admin-section="products"]');
@@ -1523,11 +1536,13 @@
                 if (!page.isConnected) return;
                 const product = data.product;
                 form.reset(); form.elements.id.value = product.id;
-                form.querySelector("[data-product-editor-code]").textContent = String(product.code);
+                form.elements.key.value = product.code;
                 form.elements.name.value = product.name; form.elements.englishName.value = product.englishName || product.name;
                 form.elements.brandId.replaceChildren(new Option("انتخاب برند", ""), ...data.brands.map(brand => new Option(brand.name, String(brand.id))));
                 form.elements.categoryId.replaceChildren(new Option("انتخاب دسته", ""), ...data.categories.map(category => new Option(category.name, String(category.id))));
                 form.elements.brandId.value = String(product.idBrand || ""); form.elements.categoryId.value = String(product.idCategory || "");
+                form.elements.badgeId.replaceChildren(new Option("بدون نشان", ""), ...(data.badges || []).map(badge => new Option(badge.name, String(badge.id))));
+                form.elements.badgeId.value = String(product.idProductBadge || "");
                 ui.setPriceValue(form.elements.priceAmount, product.priceAmount ?? ""); form.elements.discountPercent.value = product.discountPercent ?? 0;
                 form.elements.maxPurchaseQuantity.value = product.maxPurchaseQuantity ?? 99;
                 window.bootstrap?.Modal?.getOrCreateInstance(document.getElementById("product-editor-modal")).show();
@@ -1809,7 +1824,7 @@
                     ui.showRecord("جزئیات کامل کالا", { ...product, variants, media }, {
                         layout: "product",
                         groups: [
-                            { title: "مشخصات کالا", compact: true, keys: ["name", "englishName", "code", "productKey", "brandName", "categoryName", "unitName", "powerSource", "useCase", "slug", "badge"] },
+                            { title: "مشخصات کالا", compact: true, keys: ["name", "englishName", "code", "productKey", "brandName", "categoryName", "unitName", "slug", "badge"] },
                             { title: "قیمت و شرایط خرید", compact: true, keys: ["priceAmount", "discountPercent", "maxPurchaseQuantity"] },
                             { title: "وضعیت و زمان", compact: true, keys: ["isStoreEnabled", "isWarehouseEnabled", "isNewest", "newestOrder", "createdAtUtc", "updatedAtUtc"] },
                             { title: "تنوع‌های کالا", keys: ["variants"] },
@@ -1892,7 +1907,7 @@
             event.preventDefault();
             const save = productCreateForm.querySelector('[type="submit"]'); if (save.disabled) return;
             const fields = productCreateForm.elements;
-            const body = { key: fields.key.value, code: fields.code.value, name: fields.name.value, englishName: fields.englishName.value, brandId: Number(fields.brandId.value), categoryId: Number(fields.categoryId.value), unitId: Number(fields.unitId.value), priceAmount: ui.priceValue(fields.priceAmount), discountPercent: Number(fields.discountPercent.value), maxPurchaseQuantity: Number(fields.maxPurchaseQuantity.value) };
+            const body = { key: fields.key.value, name: fields.name.value, englishName: fields.englishName.value, brandId: Number(fields.brandId.value), categoryId: Number(fields.categoryId.value), unitId: Number(fields.unitId.value), priceAmount: ui.priceValue(fields.priceAmount), discountPercent: Number(fields.discountPercent.value), maxPurchaseQuantity: Number(fields.maxPurchaseQuantity.value) };
             if (!Number.isSafeInteger(body.priceAmount)) { ui.notify("قیمت صحیح و معتبر وارد کنید.", "danger"); return; }
             const token = productCreateForm.querySelector('[name="__RequestVerificationToken"]')?.value || ""; save.disabled = true;
             void ui.getJson("/api/admin/store/catalog/products/manage", { method: "POST", headers: { "Content-Type": "application/json", RequestVerificationToken: token }, body: JSON.stringify(body) })
@@ -1935,7 +1950,7 @@
             const save = productEditor.querySelector('[type="submit"]');
             if (save.disabled) return;
             const token = productEditor.querySelector('[name="__RequestVerificationToken"]')?.value || "";
-            const body = { name: productEditor.elements.name.value, englishName: productEditor.elements.englishName.value, brandId: Number(productEditor.elements.brandId.value), categoryId: Number(productEditor.elements.categoryId.value), priceAmount: ui.priceValue(productEditor.elements.priceAmount), discountPercent: Number(productEditor.elements.discountPercent.value), maxPurchaseQuantity: Number(productEditor.elements.maxPurchaseQuantity.value) };
+            const body = { key: productEditor.elements.key.value, name: productEditor.elements.name.value, englishName: productEditor.elements.englishName.value, brandId: Number(productEditor.elements.brandId.value), categoryId: Number(productEditor.elements.categoryId.value), badgeId: Number(productEditor.elements.badgeId.value) || null, priceAmount: ui.priceValue(productEditor.elements.priceAmount), discountPercent: Number(productEditor.elements.discountPercent.value), maxPurchaseQuantity: Number(productEditor.elements.maxPurchaseQuantity.value) };
             if (!Number.isSafeInteger(body.priceAmount)) { ui.notify("قیمت صحیح و معتبر وارد کنید.", "danger"); return; }
             save.disabled = true;
             void ui.getJson(`/api/admin/store/catalog/products/manage/${encodeURIComponent(productEditor.elements.id.value)}`, { method: "PUT", headers: { "Content-Type": "application/json", RequestVerificationToken: token }, body: JSON.stringify(body) })

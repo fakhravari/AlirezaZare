@@ -95,7 +95,7 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
         if (!User.IsInRole("system.full-access")) return Forbid();
 
         var product = await db.Products.AsNoTracking().Where(x => x.Id == id)
-            .Select(x => new { x.Id, x.Code, x.Name, x.EnglishName, x.IdBrand, x.IdCategory, x.PriceAmount, x.DiscountPercent, x.MaxPurchaseQuantity })
+            .Select(x => new { x.Id, code = x.ProductKey, x.Name, x.EnglishName, x.IdBrand, x.IdCategory, x.IdProductBadge, x.PriceAmount, x.DiscountPercent, x.MaxPurchaseQuantity })
             .SingleOrDefaultAsync(cancellationToken);
         if (product is null) return NotFound();
 
@@ -103,7 +103,8 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
             .Select(x => new EditorOption { Id = x.Id, Name = x.NameFa }).ToListAsync(cancellationToken);
         var categories = await GetLeafCategoryOptions(cancellationToken);
 
-        return Ok(new { product, brands, categories });
+        var badges = await db.StoreProductBadges.AsNoTracking().OrderBy(x => x.Title).Select(x => new EditorOption { Id = x.Id, Name = x.Title }).ToListAsync(cancellationToken);
+        return Ok(new { product, brands, categories, badges });
     }
 
     [HttpGet("products/{id:long}/details")]
@@ -111,9 +112,9 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
     {
         var product = await db.Products.AsNoTracking().Where(x => x.Id == id).Select(x => new
             {
-                x.Id, x.ProductKey, x.Code, x.Name, x.EnglishName, x.IdBrand, x.IdCategory, x.IdBaseUnit,
-                x.PowerSource, x.UseCase, x.PriceAmount, x.DiscountPercent, x.MaxPurchaseQuantity,
-                x.Slug, x.Badge, x.IsNewest, x.NewestOrder, x.IsStoreEnabled,
+                x.Id, x.ProductKey, Code = x.ProductKey, x.Name, x.EnglishName, x.IdBrand, x.IdCategory, x.IdBaseUnit,
+                x.PriceAmount, x.DiscountPercent, x.MaxPurchaseQuantity,
+                x.Slug, Badge = x.ProductBadge == null ? null : x.ProductBadge.Title, x.IsNewest, x.NewestOrder, x.IsStoreEnabled,
                 x.IsWarehouseEnabled, x.CreatedAtUtc, x.UpdatedAtUtc
             }).SingleOrDefaultAsync(cancellationToken);
         if (product is null) return NotFound();
@@ -177,7 +178,7 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
         {
             product.Id,
             product.ProductKey,
-            product.Code,
+            Code = product.ProductKey,
             product.Name,
             product.EnglishName,
             BrandName = brandName,
@@ -186,8 +187,6 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
             product.IdBrand,
             product.IdCategory,
             product.IdBaseUnit,
-            product.PowerSource,
-            product.UseCase,
             product.PriceAmount,
             product.DiscountPercent,
             product.MaxPurchaseQuantity,
@@ -221,8 +220,8 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
     {
         if (!User.IsInRole("system.full-access")) return Forbid();
 
-        string name = input.Name?.Trim() ?? "", englishName = input.EnglishName?.Trim() ?? "";
-        if (id < 1 || name.Length is < 1 or > 300 || englishName.Length is < 1 or > 300 || input.BrandId < 1 || input.CategoryId < 1 ||
+        string name = input.Name?.Trim() ?? "", englishName = input.EnglishName?.Trim() ?? "", key = input.Key?.Trim() ?? "";
+        if (id < 1 || key.Length is < 1 or > 100 || name.Length is < 1 or > 300 || englishName.Length is < 1 or > 300 || input.BrandId < 1 || input.CategoryId < 1 ||
             input.PriceAmount < 0 || input.PriceAmount > 9007199254740991m || input.PriceAmount != decimal.Truncate(input.PriceAmount) ||
             input.DiscountPercent is < 0 or >= 100 || decimal.Round(input.DiscountPercent, 2) != input.DiscountPercent || input.MaxPurchaseQuantity is < 1 or > 99)
             return BadRequest(new { title = "نام، دسته، برند، قیمت، تخفیف یا حداکثر خرید معتبر نیست." });
@@ -231,15 +230,20 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
         bool validCategory = await db.StoreCategories.AnyAsync(c => c.Id == input.CategoryId && c.IsActive &&
             !db.StoreCategories.Any(child => child.IsActive && child.IdParentCategory == c.Id), cancellationToken);
         bool validBrand = await db.StoreBrands.AnyAsync(x => x.Id == input.BrandId && x.IsActive, cancellationToken);
-        if (!validCategory || !validBrand) return BadRequest(new { title = "برند یا دستهٔ برگ معتبر نیست." });
+        bool validBadge = !input.BadgeId.HasValue || await db.StoreProductBadges.AnyAsync(x => x.Id == input.BadgeId.Value, cancellationToken);
+        if (!validCategory || !validBrand || !validBadge) return BadRequest(new { title = "برند، دستهٔ برگ یا نشان معتبر نیست." });
 
         var product = await db.Products.SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
         if (product is null) return NotFound();
+        if (await db.Products.AnyAsync(x => x.Id != id && x.ProductKey == key, cancellationToken))
+            return Conflict(new { title = "کد کالا قبلاً ثبت شده است." });
 
+        product.ProductKey = key;
         product.Name = name;
         product.EnglishName = englishName;
         product.IdBrand = input.BrandId;
         product.IdCategory = input.CategoryId;
+        product.IdProductBadge = input.BadgeId;
         product.PriceAmount = input.PriceAmount;
         product.DiscountPercent = input.DiscountPercent;
         product.MaxPurchaseQuantity = input.MaxPurchaseQuantity;
@@ -256,7 +260,24 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
     }
 
     public sealed class EditorOption { public long Id { get; set; } public string Name { get; set; } = ""; }
-    public sealed record ProductEditorInput(string? Name, string? EnglishName, long BrandId, long CategoryId, decimal PriceAmount, decimal DiscountPercent, int MaxPurchaseQuantity);
+    public sealed record ProductEditorInput(string? Key, string? Name, string? EnglishName, long BrandId, long CategoryId, long? BadgeId, decimal PriceAmount, decimal DiscountPercent, int MaxPurchaseQuantity);
+
+    [HttpPost("product-badges")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CreateProductBadge([FromBody] ProductBadgeInput input, CancellationToken cancellationToken)
+    {
+        if (!User.IsInRole("system.full-access")) return Forbid();
+        string title = input.Title?.Trim() ?? "";
+        if (title.Length is < 1 or > 100) return BadRequest(new { title = "عنوان نشان باید بین ۱ تا ۱۰۰ نویسه باشد." });
+        await using var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
+        if (await db.StoreProductBadges.AnyAsync(x => x.Title == title, cancellationToken)) return Conflict(new { title = "این نشان قبلاً ثبت شده است." });
+        var badge = new StoreProductBadge { Title = title };
+        db.StoreProductBadges.Add(badge);
+        await db.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
+        return Ok(new { badge.Id, badge.Title });
+    }
+    public sealed record ProductBadgeInput(string? Title);
 
     [HttpGet("products/manage/{id:long}/benefits")]
     public async Task<IActionResult> ProductBenefits(long id, CancellationToken cancellationToken)
@@ -401,7 +422,7 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
                      {
                          Id = product.Id,
                          CreatedAtUtc = product.CreatedAtUtc,
-                         Code = product.Code,
+                         Code = product.ProductKey,
                          Name = product.Name,
                          BrandName = brand == null ? null : brand.NameFa,
                          CategoryName = category == null ? null : category.NameFa,
@@ -438,8 +459,8 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
     {
         if (!User.IsInRole("system.full-access")) return Forbid();
 
-        string key = input.Key?.Trim() ?? "", code = input.Code?.Trim() ?? "", name = input.Name?.Trim() ?? "", english = input.EnglishName?.Trim() ?? "";
-        if (key.Length is < 1 or > 100 || !System.Text.RegularExpressions.Regex.IsMatch(key, "^[a-z0-9]+(?:-[a-z0-9]+)*$") || code.Length is < 1 or > 100 ||
+        string key = input.Key?.Trim() ?? "", name = input.Name?.Trim() ?? "", english = input.EnglishName?.Trim() ?? "";
+        if (key.Length > 100 ||
             name.Length is < 1 or > 300 || english.Length is < 1 or > 300 || input.BrandId < 1 || input.CategoryId < 1 || input.UnitId < 1 ||
             input.PriceAmount < 0 || input.PriceAmount > 9007199254740991m || input.PriceAmount != decimal.Truncate(input.PriceAmount) ||
             input.DiscountPercent is < 0 or >= 100 || decimal.Round(input.DiscountPercent, 2) != input.DiscountPercent || input.MaxPurchaseQuantity is < 1 or > 99)
@@ -448,12 +469,15 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
         await using var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
         long id = await db.Products.Select(x => (long?)x.Id).MaxAsync(cancellationToken) is long maxId ? maxId + 1 : 1;
         if (id > int.MaxValue) return Conflict(new { title = "ظرفیت شناسهٔ کالا تکمیل شده است." });
+        if (key.Length == 0) key = id.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        string slug = $"product-{id}";
+        while (await db.Products.AnyAsync(x => x.Slug == slug, cancellationToken)) slug = $"product-{id}-{Guid.NewGuid():N}";
 
         bool validCategory = await db.StoreCategories.AnyAsync(c => c.Id == input.CategoryId && c.IsActive &&
             !db.StoreCategories.Any(child => child.IsActive && child.IdParentCategory == c.Id), cancellationToken);
         bool validBrand = await db.StoreBrands.AnyAsync(x => x.Id == input.BrandId && x.IsActive, cancellationToken);
         bool validUnit = await db.WarehouseUnits.AnyAsync(x => x.Id == input.UnitId && x.IsActive, cancellationToken);
-        bool duplicate = await db.Products.AnyAsync(x => x.Code == code || x.ProductKey == key || x.Slug == key, cancellationToken);
+        bool duplicate = await db.Products.AnyAsync(x => x.ProductKey == key, cancellationToken);
         if (!validCategory || !validBrand || !validUnit || duplicate)
             return Conflict(new { title = "برند، دسته یا واحد معتبر نیست یا شناسه و کد قبلاً ثبت شده‌اند." });
 
@@ -462,7 +486,6 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
             Id = id,
             IdBaseUnit = input.UnitId,
             ProductKey = key,
-            Code = code,
             Name = name,
             EnglishName = english,
             IdBrand = input.BrandId,
@@ -470,7 +493,7 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
             PriceAmount = input.PriceAmount,
             DiscountPercent = input.DiscountPercent,
             MaxPurchaseQuantity = input.MaxPurchaseQuantity,
-            Slug = key,
+            Slug = slug,
             IsStoreEnabled = false,
             IsWarehouseEnabled = true,
             CreatedAtUtc = DateTime.UtcNow
@@ -536,7 +559,7 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
         catch (JsonException) { return false; }
     }
 
-    public sealed record ProductCreateInput(string? Key, string? Code, string? Name, string? EnglishName, long BrandId, long CategoryId, long UnitId, decimal PriceAmount, decimal DiscountPercent, int MaxPurchaseQuantity);
+    public sealed record ProductCreateInput(string? Key, string? Name, string? EnglishName, long BrandId, long CategoryId, long UnitId, decimal PriceAmount, decimal DiscountPercent, int MaxPurchaseQuantity);
     public sealed class DraftProduct { public long Id { get; set; } public DateTime CreatedAtUtc { get; set; } public string Code { get; set; } = ""; public string Name { get; set; } = ""; public string? BrandName { get; set; } public string? CategoryName { get; set; } public decimal? PriceAmount { get; set; } public bool HasImage { get; set; } }
 
     [HttpGet("brands/countries")]
@@ -934,14 +957,14 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
                                   (product.IdCategory == null || category != null)
                             select new { product, brand, category };
         if (query.Length > 0)
-            productSource = productSource.Where(x => x.product.Code.Contains(query) || x.product.Name.Contains(query) ||
+            productSource = productSource.Where(x => x.product.ProductKey.Contains(query) || x.product.Name.Contains(query) ||
                 (x.product.EnglishName != null && x.product.EnglishName.Contains(query)) || x.brand.NameFa.Contains(query) ||
                 (x.category != null && x.category.NameFa.Contains(query)));
         int productTotal = await productSource.CountAsync(cancellationToken);
         var productRows = await productSource.OrderByDescending(x => x.product.CreatedAtUtc).ThenByDescending(x => x.product.Id).Skip(paging.Offset).Take(paging.PageSize).Select(x => new
             {
                 x.product.Id,
-                x.product.Code,
+                Code = x.product.ProductKey,
                 x.product.Name,
                 x.product.EnglishName,
                 BrandName = x.brand.NameFa,
