@@ -16,6 +16,79 @@ namespace Shop.Admin.Areas.Store.Controllers.Api;
 [Route("api/admin/store/catalog")]
 public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBaseUrlProvider mediaCdn, IStorePriceVersionService priceVersions) : ControllerBase
 {
+    [HttpGet("products/manage/{id:long}/accessories")]
+    public async Task<IActionResult> ProductAccessories(long id, CancellationToken cancellationToken)
+    {
+        if (!User.IsInRole("system.full-access")) return Forbid();
+        if (!await db.Products.AnyAsync(x => x.Id == id && x.IsStoreEnabled, cancellationToken)) return NotFound();
+        var items = await (from link in db.StoreProductAccessories.AsNoTracking()
+                           join accessory in db.StoreAccessories.AsNoTracking() on link.IdAccessory equals accessory.Id
+                           where link.IdProduct == id
+                           orderby link.SortOrder, link.Id
+                           select new { link.Id, accessory.Name, accessory.Description, accessory.IsActive, link.IsRequired, link.SortOrder, link.PriceAmount })
+                          .ToListAsync(cancellationToken);
+        return Ok(items);
+    }
+
+    [HttpPost("products/manage/{id:long}/accessories")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CreateProductAccessory(long id, [FromBody] ProductAccessoryInput input, CancellationToken cancellationToken)
+    {
+        if (!User.IsInRole("system.full-access")) return Forbid();
+        if (!ValidAccessory(input)) return BadRequest(new { title = "نام، توضیح، ترتیب یا قیمت متعلقه معتبر نیست." });
+        await using var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
+        if (!await db.Products.AnyAsync(x => x.Id == id && x.IsStoreEnabled, cancellationToken)) return NotFound();
+        var accessory = new StoreAccessory { AccessoryKey = $"accessory-{Guid.NewGuid():N}", Name = input.Name.Trim(), Description = input.Description?.Trim(), IsActive = input.IsActive };
+        db.StoreAccessories.Add(accessory);
+        await db.SaveChangesAsync(cancellationToken);
+        var link = new StoreProductAccessory { IdProduct = id, IdAccessory = accessory.Id, IsRequired = input.IsRequired, SortOrder = input.SortOrder, PriceAmount = input.PriceAmount };
+        db.StoreProductAccessories.Add(link);
+        var offers = await db.StoreProductSalesPlanOffers.Where(x => x.IdProduct == id).ToListAsync(cancellationToken);
+        db.StoreProductSalesPlanOfferAccessories.AddRange(offers.Select(x => new StoreProductSalesPlanOfferAccessory { IdProductSalesPlanOffer = x.Id, IdAccessory = accessory.Id, PriceAmount = input.PriceAmount, IsAllowed = true, IsIncludedByDefault = input.IsRequired }));
+        await db.SaveChangesAsync(cancellationToken);
+        var regularPlans = await db.SalesPlanReferences.Where(x => x.IsRegular && x.IdStockOwnerType == 1).Select(x => x.Id).ToListAsync(cancellationToken);
+        foreach (long planId in regularPlans.Concat(offers.Select(x => x.IdSalesPlan)).Distinct())
+            await priceVersions.AppendAsync(id, planId, null, null, accessory.Id, input.PriceAmount, 0, User.Identity?.Name, cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
+        return Ok(new { link.Id, message = "متعلقه ساخته و به کالا متصل شد." });
+    }
+
+    [HttpPut("products/manage/{id:long}/accessories/{linkId:long}")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> UpdateProductAccessory(long id, long linkId, [FromBody] ProductAccessoryInput input, CancellationToken cancellationToken)
+    {
+        if (!User.IsInRole("system.full-access")) return Forbid();
+        if (!ValidAccessory(input)) return BadRequest(new { title = "نام، توضیح، ترتیب یا قیمت متعلقه معتبر نیست." });
+        await using var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
+        var link = await db.StoreProductAccessories.SingleOrDefaultAsync(x => x.Id == linkId && x.IdProduct == id, cancellationToken);
+        if (link is null) return NotFound();
+        var accessory = await db.StoreAccessories.SingleAsync(x => x.Id == link.IdAccessory, cancellationToken);
+        if (await db.StoreProductAccessories.AnyAsync(x => x.IdAccessory == accessory.Id && x.Id != link.Id, cancellationToken) && (accessory.Name != input.Name.Trim() || (accessory.Description ?? "") != (input.Description?.Trim() ?? "") || accessory.IsActive != input.IsActive))
+            return Conflict(new { title = "نام، توضیح و وضعیت متعلقهٔ مشترک از این مسیر قابل تغییر نیست." });
+        accessory.Name = input.Name.Trim(); accessory.Description = input.Description?.Trim(); accessory.IsActive = input.IsActive;
+        bool priceChanged = link.PriceAmount != input.PriceAmount;
+        link.PriceAmount = input.PriceAmount; link.IsRequired = input.IsRequired; link.SortOrder = input.SortOrder;
+        if (input.IsRequired)
+        {
+            var overrides = await (from row in db.StoreProductSalesPlanOfferAccessories join offer in db.StoreProductSalesPlanOffers on row.IdProductSalesPlanOffer equals offer.Id where offer.IdProduct == id && row.IdAccessory == accessory.Id select row).ToListAsync(cancellationToken);
+            foreach (var row in overrides) { row.IsAllowed = true; row.IsIncludedByDefault = true; }
+            var offerIds = await db.StoreProductSalesPlanOffers.Where(x => x.IdProduct == id).Select(x => x.Id).ToListAsync(cancellationToken);
+            var existingIds = overrides.Select(x => x.IdProductSalesPlanOffer).ToHashSet();
+            db.StoreProductSalesPlanOfferAccessories.AddRange(offerIds.Where(x => !existingIds.Contains(x)).Select(x => new StoreProductSalesPlanOfferAccessory { IdProductSalesPlanOffer = x, IdAccessory = accessory.Id, PriceAmount = link.PriceAmount, IsAllowed = true, IsIncludedByDefault = true }));
+        }
+        await db.SaveChangesAsync(cancellationToken);
+        if (priceChanged)
+        {
+            var regularPlans = await db.SalesPlanReferences.Where(x => x.IsRegular && x.IdStockOwnerType == 1).Select(x => x.Id).ToListAsync(cancellationToken);
+            foreach (long planId in regularPlans) await priceVersions.AppendAsync(id, planId, null, null, accessory.Id, input.PriceAmount, 0, User.Identity?.Name, cancellationToken);
+        }
+        await transaction.CommitAsync(cancellationToken);
+        return Ok(new { message = "متعلقهٔ کالا ذخیره شد." });
+    }
+
+    public sealed record ProductAccessoryInput(string Name, string? Description, decimal PriceAmount, bool IsRequired, int SortOrder, bool IsActive);
+    private static bool ValidAccessory(ProductAccessoryInput input) => input is not null && !string.IsNullOrWhiteSpace(input.Name) && input.Name.Trim().Length <= 300 && (input.Description?.Trim().Length ?? 0) <= 1000 && input.SortOrder >= 0 && input.PriceAmount >= 0 && input.PriceAmount <= 9007199254740991m && input.PriceAmount == decimal.Truncate(input.PriceAmount);
+
     [HttpGet("products/manage/{id:long}")]
     public async Task<IActionResult> ProductEditor(long id, CancellationToken cancellationToken)
     {

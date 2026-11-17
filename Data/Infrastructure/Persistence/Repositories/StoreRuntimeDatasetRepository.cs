@@ -32,7 +32,7 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext, IMedi
                                   select new { value.IdProduct, feature.FeatureKey, value.Value }).ToListAsync(cancellationToken);
         var productAccessories = await (from link in dbContext.StoreProductAccessories.AsNoTracking()
                                         join accessory in dbContext.StoreAccessories.AsNoTracking() on link.IdAccessory equals accessory.Id
-                                        where productIds.Contains(link.IdProduct)
+                                        where productIds.Contains(link.IdProduct) && accessory.IsActive
                                         orderby link.SortOrder, link.Id
                                         select new { link.IdProduct, link.Id, accessory.AccessoryKey, accessory.Name, link.IsRequired, link.PriceAmount }).ToListAsync(cancellationToken);
         var productBenefits = await dbContext.StoreProductBenefits.AsNoTracking().Where(x => productIds.Contains(x.IdProduct) && x.IsActive).OrderBy(x => x.SortOrder).ThenBy(x => x.Id).ToListAsync(cancellationToken);

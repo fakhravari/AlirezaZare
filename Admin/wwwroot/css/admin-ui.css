@@ -103,6 +103,21 @@
     background-color: #f4f9fb;
 }
 
+/* Keep document line controls usable inside their horizontal scroll area. */
+.admin-document-lines {
+    min-width: 850px;
+}
+
+.admin-document-lines th:first-child,
+.admin-document-lines td:first-child {
+    min-width: 210px;
+}
+
+.admin-document-lines th:nth-child(2),
+.admin-document-lines td:nth-child(2) {
+    min-width: 160px;
+}
+
 .dt-container .dt-search input,
 .dt-container .dt-length select {
     min-height: 2.35rem;

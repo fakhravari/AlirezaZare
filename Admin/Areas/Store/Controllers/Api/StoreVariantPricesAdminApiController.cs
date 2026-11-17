@@ -364,6 +364,7 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
         if (plan is null || product is null) return NotFound(new { code = "product-or-plan-not-found" });
 
         var offer = await db.StoreProductSalesPlanOffers.SingleOrDefaultAsync(x => x.IdProduct == productId && x.IdSalesPlan == plan.Id, cancellationToken);
+        List<(long AccessoryId, decimal PriceAmount)> newAccessoryPrices = [];
         if (offer is null)
         {
             offer = new Shop.Data.Domain.Store.Entities.StoreProductSalesPlanOffer { IdProduct = productId, IdSalesPlan = plan.Id, PriceAmount = input.PriceAmount, DiscountPercent = input.DiscountPercent, MaxPurchaseQuantity = input.MaxPurchaseQuantity, IsEnabled = input.IsEnabled, CreatedAtUtc = DateTime.UtcNow };
@@ -371,11 +372,14 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
 
             var accessorySeed = await (from pa in db.StoreProductAccessories join accessory in db.StoreAccessories on pa.IdAccessory equals accessory.Id where pa.IdProduct == productId && accessory.IsActive select new { pa.IdAccessory, pa.PriceAmount, pa.IsRequired }).ToListAsync(cancellationToken);
             db.StoreProductSalesPlanOfferAccessories.AddRange(accessorySeed.Select(x => new Shop.Data.Domain.Store.Entities.StoreProductSalesPlanOfferAccessory { IdProductSalesPlanOffer = offer.Id, IdAccessory = x.IdAccessory, PriceAmount = x.PriceAmount, IsIncludedByDefault = x.IsRequired, IsAllowed = true }));
+            newAccessoryPrices = accessorySeed.Select(x => (x.IdAccessory, x.PriceAmount)).ToList();
         }
         else { offer.PriceAmount = input.PriceAmount; offer.DiscountPercent = input.DiscountPercent; offer.MaxPurchaseQuantity = input.MaxPurchaseQuantity; offer.IsEnabled = input.IsEnabled; offer.UpdatedAtUtc = DateTime.UtcNow; }
         await db.SaveChangesAsync(cancellationToken);
 
         long priceVersionId = await priceVersions.AppendAsync(productId, plan.Id, null, null, null, input.PriceAmount, input.DiscountPercent, User.Identity?.Name, cancellationToken);
+        foreach (var accessory in newAccessoryPrices)
+            await priceVersions.AppendAsync(productId, plan.Id, null, null, accessory.AccessoryId, accessory.PriceAmount, 0, User.Identity?.Name, cancellationToken);
         await transaction.CommitAsync(cancellationToken);
 
         return Ok(new { priceVersionId, message = "پیشنهاد کالا در طرح ذخیره شد." });

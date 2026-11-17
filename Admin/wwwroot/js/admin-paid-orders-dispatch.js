@@ -56,7 +56,7 @@
                     const row = document.createElement("tr");
                     const cell = document.createElement("td");
                     const checkbox = document.createElement("input");
-                    checkbox.type = "checkbox"; checkbox.value = item.id; checkbox.disabled = item.isSample || !canDispatch; checkbox.checked = selectedIds.has(item.id);
+                    checkbox.type = "checkbox"; checkbox.value = item.id; checkbox.disabled = !canDispatch; checkbox.checked = selectedIds.has(item.id);
                     if (checkbox.disabled) checkbox.checked = false;
                     checkbox.setAttribute("aria-label", `انتخاب سفارش ${item.orderNumber}`);
                     checkbox.addEventListener("change", () => {
@@ -64,7 +64,6 @@
                         else selectedIds.delete(item.id);
                         count();
                     });
-                    if (item.isSample) checkbox.setAttribute("aria-label", "سفارش نمونه؛ صدور حواله غیرفعال است");
                     cell.append(checkbox);
                     row.append(cell);
                     const paidAt = /(?:Z|[+-]\d\d:\d\d)$/i.test(item.paidAtUtc) ? item.paidAtUtc : `${item.paidAtUtc}Z`;

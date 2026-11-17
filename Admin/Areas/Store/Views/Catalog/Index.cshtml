@@ -176,6 +176,29 @@
             </div><div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button type="submit" class="btn btn-primary"><i class="fa fa-file-circle-plus me-1" aria-hidden="true"></i>ساخت پیش‌نویس</button></div>
         </form></div>
     </div>
+    <div class="modal fade" id="product-accessories-modal" tabindex="-1" aria-labelledby="product-accessories-title" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable"><div class="modal-content" data-product-accessories-manager>
+            <div class="modal-header"><h2 class="modal-title fs-5" id="product-accessories-title">متعلقات کالا</h2><button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="بستن"></button></div>
+            <div class="modal-body">
+                <p data-product-accessories-name></p>
+                <p class="text-muted">قیمت پایه برای فروش عادی است؛ قیمت و مجازبودن در طرح ویژه جداگانه تنظیم می‌شود.</p>
+                <div data-product-accessories-status role="status" aria-live="polite"></div>
+                <div class="list-group mb-3" data-product-accessories-rows></div>
+                <form data-product-accessory-form data-admin-confirm="متعلقهٔ کالا ذخیره شود؟">
+                    @Html.AntiForgeryToken()<input type="hidden" name="id" />
+                    <h3 class="h5" data-product-accessory-form-title>افزودن متعلقه</h3>
+                    <label for="accessory-name" class="form-label">نام متعلقه</label><input id="accessory-name" class="form-control mb-2" name="name" maxlength="300" required />
+                    <label for="accessory-description" class="form-label">توضیح (اختیاری)</label><textarea id="accessory-description" class="form-control mb-2" name="description" maxlength="1000"></textarea>
+                    <label for="accessory-price" class="form-label">قیمت پایه (تومان)</label><input id="accessory-price" class="form-control mb-2" name="priceAmount" type="number" min="0" max="9007199254740991" step="1" required />
+                    <label for="accessory-order" class="form-label">ترتیب نمایش</label><input id="accessory-order" class="form-control mb-2" name="sortOrder" type="number" min="0" max="2147483647" step="1" value="0" required />
+                    <div class="form-check mb-2"><input id="accessory-required" name="isRequired" type="checkbox" class="form-check-input" /><label for="accessory-required" class="form-check-label">متعلقه اجباری است</label></div>
+                    <div class="form-check mb-2"><input id="accessory-active" name="isActive" type="checkbox" class="form-check-input" checked /><label for="accessory-active" class="form-check-label">متعلقه فعال است</label></div>
+                    <button type="submit" class="btn btn-primary">ذخیره متعلقه</button>
+                    <button type="button" class="btn btn-default" data-product-accessory-reset>متعلقهٔ جدید</button>
+                </form>
+            </div>
+        </div></div>
+    </div>
     <div class="modal fade" id="product-editor-modal" tabindex="-1" aria-labelledby="product-editor-title" aria-hidden="true">
         <div class="modal-dialog modal-dialog-scrollable modal-lg"><form class="modal-content" data-product-editor data-admin-confirm="تغییرات اطلاعات کالا ثبت شود؟">
             @Html.AntiForgeryToken()<input type="hidden" name="id" />

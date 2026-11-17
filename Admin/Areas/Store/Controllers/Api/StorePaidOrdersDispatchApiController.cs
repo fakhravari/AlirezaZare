@@ -95,8 +95,9 @@ public sealed class StorePaidOrdersDispatchApiController(ShopDbContext db, IWare
             var payments = await db.StorePaymentAttempts.Where(x => orderIds.Contains(x.IdOrder) && x.Status == "verified" && x.PaidAtUtc != null) .ToListAsync(cancellationToken);
             var orderItems = await db.StoreCustomerOrderItems.AsNoTracking().Where(x => orderIds.Contains(x.IdCustomerOrder)).ToListAsync(cancellationToken);
             if (orders.Any(order => order.Status != "payment-confirmed" ||
-                    order.IdWarehouseDocument is not null || (order.PaymentMethod == "demo" && order.ExternalOrderKey?.StartsWith("demo-order-") == true) ||
-                    !payments.Any(payment => payment.IdOrder == order.Id && payment.Amount == order.TotalAmount) ||
+                    order.IdWarehouseDocument is not null ||
+                    (!(order.PaymentMethod == "demo" && order.ExternalOrderKey?.StartsWith("demo-order-") == true) &&
+                     !payments.Any(payment => payment.IdOrder == order.Id && payment.Amount == order.TotalAmount)) ||
                     !orderItems.Any(item => item.IdCustomerOrder == order.Id)))
                 return Conflict(new { detail = "وضعیت یکی از سفارش‌ها تغییر کرده است؛ فهرست را دوباره بارگذاری کنید." });
 

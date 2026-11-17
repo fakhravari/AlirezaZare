@@ -8,6 +8,58 @@
     let activeBenefitProductId = 0;
     let activeBenefitProductName = "";
     let activeProductBenefits = [];
+    let accessoryProductId = 0;
+    let productAccessories = [];
+    let accessoryRequest = 0;
+
+    async function loadProductAccessories() {
+        const manager = document.querySelector("[data-product-accessories-manager]");
+        if (!manager || !accessoryProductId) return;
+        const productId = accessoryProductId, serial = ++accessoryRequest;
+        const rows = manager.querySelector("[data-product-accessories-rows]");
+        const status = manager.querySelector("[data-product-accessories-status]");
+        rows.replaceChildren(); status.textContent = "در حال دریافت متعلقات…";
+        try {
+            const items = await ui.getJson(`/api/admin/store/catalog/products/manage/${productId}/accessories`);
+            if (serial !== accessoryRequest || productId !== accessoryProductId) return;
+            productAccessories = items;
+            for (const [index, item] of items.entries()) {
+                const row = document.createElement("div"); row.className = "list-group-item d-flex flex-wrap justify-content-between align-items-center gap-2";
+                const text = document.createElement("span");
+                text.textContent = `${item.name} · ${ui.formatNumber(item.priceAmount)} تومان · ${item.isRequired ? "اجباری" : "اختیاری"}${item.isActive ? "" : " · غیرفعال"}`;
+                const edit = document.createElement("button"); edit.type = "button"; edit.className = "btn btn-sm btn-default";
+                edit.dataset.productAccessoryEdit = String(index); edit.textContent = "ویرایش";
+                row.append(text, edit); rows.append(row);
+            }
+            status.textContent = items.length ? `${ui.formatNumber(items.length)} متعلقه` : "برای این کالا متعلقه‌ای ثبت نشده است.";
+        } catch (error) { if (serial === accessoryRequest) status.textContent = error.message || "دریافت متعلقات ناموفق بود."; }
+    }
+
+    function editProductAccessory(item) {
+        const form = document.querySelector("[data-product-accessory-form]"); if (!form) return;
+        form.reset(); form.elements.id.value = item?.id || "";
+        form.elements.name.value = item?.name || ""; form.elements.description.value = item?.description || "";
+        form.elements.priceAmount.value = item?.priceAmount ?? ""; form.elements.sortOrder.value = item?.sortOrder ?? 0;
+        form.elements.isRequired.checked = item?.isRequired || false;
+        form.elements.isActive.checked = item?.isActive ?? true;
+        form.querySelector("[data-product-accessory-form-title]").textContent = item ? "ویرایش متعلقه" : "افزودن متعلقه";
+    }
+
+    document.addEventListener("submit", event => {
+        const form = event.target.closest("[data-product-accessory-form]"); if (!form) return;
+        event.preventDefault();
+        if (!form.reportValidity() || !accessoryProductId || form.dataset.saving === "true") return;
+        const priceAmount = Number(form.elements.priceAmount.value), sortOrder = Number(form.elements.sortOrder.value);
+        if (!Number.isSafeInteger(priceAmount) || priceAmount < 0 || !Number.isInteger(sortOrder) || sortOrder < 0 || sortOrder > 2147483647) { ui.notify("قیمت یا ترتیب معتبر نیست.", "danger"); return; }
+        const productId = accessoryProductId, id = form.elements.id.value, save = form.querySelector('[type="submit"]');
+        const body = { name: form.elements.name.value.trim(), description: form.elements.description.value.trim(), priceAmount, sortOrder, isRequired: form.elements.isRequired.checked, isActive: form.elements.isActive.checked };
+        const token = form.querySelector('[name="__RequestVerificationToken"]').value;
+        form.dataset.saving = "true"; save.disabled = true;
+        void ui.getJson(`/api/admin/store/catalog/products/manage/${productId}/accessories${id ? `/${encodeURIComponent(id)}` : ""}`, { method: id ? "PUT" : "POST", headers: { "Content-Type": "application/json", RequestVerificationToken: token }, body: JSON.stringify(body) })
+            .then(result => { ui.notify(result.message, "success"); if (productId === accessoryProductId) { editProductAccessory(); void loadProductAccessories(); } })
+            .catch(error => ui.notify(error.message || "ذخیرهٔ متعلقه ناموفق بود.", "danger"))
+            .finally(() => { form.dataset.saving = "false"; save.disabled = false; });
+    });
 
     function beginRequest(page) {
         requests.get(page)?.abort();
@@ -286,6 +338,10 @@
                 benefits.type = "button"; benefits.className = "btn btn-xs btn-default ms-1";
                 benefits.dataset.productBenefits = String(index); setIconAction(benefits, "مدیریت مزیت‌های کالا", "fa-gift");
                 actions.append(benefits);
+                const accessories = document.createElement("button");
+                accessories.type = "button"; accessories.className = "btn btn-xs btn-default ms-1";
+                accessories.dataset.productAccessories = String(index); setIconAction(accessories, "مدیریت متعلقات کالا", "fa-puzzle-piece");
+                actions.append(accessories);
                 const unpublish = document.createElement("button");
                 unpublish.type = "button"; unpublish.className = "btn btn-xs btn-default";
                 unpublish.dataset.productUnpublish = String(index); unpublish.dataset.adminConfirm = `کالای ${item.name} از انتشار خارج شود؟`; setIconAction(unpublish, "خروج از انتشار", "fa-eye-slash");
@@ -1059,6 +1115,20 @@
         renumberEditorSections(container, "[data-mag-section]", ".admin-content-section-card__actions");
     }
     document.addEventListener("click", event => {
+        const manageAccessories = event.target.closest("[data-product-accessories]");
+        if (manageAccessories) {
+            const page = manageAccessories.closest('[data-admin-section="products"]');
+            const product = page?.__adminRows?.[Number(manageAccessories.dataset.productAccessories)];
+            const manager = document.querySelector("[data-product-accessories-manager]");
+            if (!product || !manager || manageAccessories.disabled) return;
+            accessoryProductId = Number(product.id); productAccessories = [];
+            manager.querySelector("[data-product-accessories-name]").textContent = `${product.name} · ${product.code || ""}`;
+            editProductAccessory(); window.bootstrap?.Modal?.getOrCreateInstance(document.getElementById("product-accessories-modal")).show();
+            void loadProductAccessories(); return;
+        }
+        const editAccessory = event.target.closest("[data-product-accessory-edit]");
+        if (editAccessory) { const item = productAccessories[Number(editAccessory.dataset.productAccessoryEdit)]; if (item) editProductAccessory(item); return; }
+        if (event.target.closest("[data-product-accessory-reset]")) { editProductAccessory(); return; }
         const productSectionButton = event.target.closest("[data-product-section-switch]");
         if (productSectionButton) {
             const selectedSection = productSectionButton.dataset.productSectionSwitch;

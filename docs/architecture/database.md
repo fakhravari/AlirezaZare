@@ -5,7 +5,7 @@
 ## هنگام تغییر schema
 
 1. entity، نگاشت Fluent و repository مصرف‌کننده را با هم پیدا کنید.
-2. migrationهای موجود در مخزن را با `rg --files Data Shop | rg 'Migrations|\.sql$'` بیابید و بررسی کنید. پوشهٔ قبلی `Shop/Features` در این محیط به `C:\AlirezaZare-build-artifacts\shop-features\Features` منتقل شده و migrationهای SQL آن خارج از مخزن هستند.
+2. migrationهای موجود در مخزن را با `rg --files Data Shop | rg 'Migrations|\.sql$'` بیابید و بررسی کنید. از پوشهٔ قبلی `Shop/Features`، فایل migration ۰۹۱ گزارش‌ها و seed نمونهٔ صف انبار از تاریخچه بازگردانده شده‌اند؛ سایر فایل‌های منتقل‌شده به `C:\AlirezaZare-build-artifacts\shop-features\Features` در این محیط در دسترس نیستند. بازیابی فایل به معنی اجرای آن در پایگاه مقصد نیست.
 3. migration افزایشی و امن برای دادهٔ موجود بسازید؛ ترتیب اجرا و پیش‌شرط‌ها را مستند کنید.
 4. اجرای محلی/مقصد را جداگانه بررسی کنید و marker ثبت‌شده در همان DB را از وجود فایل migration تفکیک کنید.
 5. قرارداد مصرف‌کننده را در راهنمای حوزه به‌روز کنید.
@@ -17,6 +17,8 @@ Migration `099-home-testimonials.sql` جدول `Store.HomeTestimonial` را بر
 اطلاعات تماس شرکت‌های انبار در entity `Company` و جدول `Warehouse.Company` نگهداری می‌شود. `Phone` تا ۵۰، `Address` تا ۵۰۰ و `Description` تا ۲۰۰۰ نویسه و همگی اختیاری‌اند. migration افزایشی `010-company-contact-details.sql` پس از migration `009-aggregated-sales-dispatch` این ستون‌ها را اضافه می‌کند؛ در ۱۶ نوامبر ۲۰۲۶ روی پایگاه اصلی اعمال و marker و وجود هر سه ستون تأیید شد.
 
 هیچ سندی فهرست ثابتِ «همهٔ migrationهای اجراشده» نیست؛ وضعیت اجرای هر پایگاه را از جدول history/marker همان پایگاه و migration runner واقعی بخوانید. پیش از حذف یا بازسازی داده، backup، شمارش وابستگی و مجوز صریح لازم است.
+
+در ۱۶ نوامبر ۲۰۲۶، متن‌های قابل‌ویرایش پایگاه اصلی `bsshopir_fakhravari` برای الگوی تبدیل اشتباه UTF-8 بررسی شدند. ۱۲ عنوان `Store.Slider.Title` و پنج عنوان `Admin.Permission.Name` که تبدیلشان به فارسی بدون اتلاف و به‌صورت برگشت‌پذیر قابل تأیید بود، در یک تراکنش اصلاح شدند. اسکن مجدد ۲۵۸ ستون متنی قابل‌ویرایش با همین الگو مورد دیگری نیافت؛ این نتیجه همهٔ شکل‌های احتمالی خرابی متن را پوشش نمی‌دهد. نسخهٔ مقادیر پیشین و کلید ردیف‌ها در `C:\AlirezaZare-build-artifacts\text-encoding-repair\before-update.json` نگهداری می‌شود.
 
 دامنه‌های اصلی در entityهای `Store`، `Account`، `Warehouse` و `Admin` تفکیک شده‌اند. قیمت نسخه‌ای در `Store.PriceVersion` است. مایگریشن `082-price-version-typed-references.sql` ارجاع polymorphic قدیمی را به ستون‌های FK نوع‌دار تبدیل و `ScopeKey` و `TargetId` را حذف کرد؛ مایگریشن `083-price-version-remove-kind.sql` ستون تکراری `PriceKind` را حذف کرد، `084-price-version-single-reference.sql` پرشدن هم‌زمان بیش از یک FK را ممنوع کرد و `085-price-version-active-constraints.sql` یکتایی نسخهٔ فعال هر مرجع، مبلغ غیرمنفی و تخفیف بین صفر تا کمتر از صد را enforce می‌کند. نوع مؤلفه از تنها FK پرشده نتیجه می‌شود و تطبیق و یکتایی قیمت فعال بر کلیدهای FK استوار است. تاریخچهٔ قبل از نصب نسخه‌بندی را نمی‌توان از snapshot اولیه بازسازی کرد. مرجع قراردادها: [قیمت محصول](../store/product.md)، [طرح‌های فروش](../store/sales-plans.md) و [دیتابیس و داده‌ها](data-sources.md).
 
