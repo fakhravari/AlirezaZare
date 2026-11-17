@@ -6,6 +6,6 @@ public interface IStoreSalesPlanRepository
 {
     Task<StoreSalesPlanSnapshot> ReadSalesPlanSnapshotAsync(CancellationToken cancellationToken);
 
-    Task<ProductPurchaseConfiguration?> ReadProductPurchaseConfigurationAsync(int productId,
+    Task<ProductPurchaseConfiguration?> ReadProductPurchaseConfigurationAsync(int productId, string salesPlanId,
         CancellationToken cancellationToken);
 }

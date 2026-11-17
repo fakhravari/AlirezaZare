@@ -9,11 +9,9 @@ public sealed class WarehouseProduct
     public string? EnglishName { get; set; }
     public long? IdBrand { get; set; }
     public long? IdCategory { get; set; }
-    public decimal? PriceAmount { get; set; }
-    public decimal? DiscountPercent { get; set; }
     public int? MaxPurchaseQuantity { get; set; }
     public string? Slug { get; set; }
-    public long? IdProductBadge { get; set; }
+    public long? IdBadge { get; set; }
     public Shop.Data.Domain.Store.Entities.StoreProductBadge? ProductBadge { get; set; }
     public bool IsStoreEnabled { get; set; }
     public bool IsWarehouseEnabled { get; set; }

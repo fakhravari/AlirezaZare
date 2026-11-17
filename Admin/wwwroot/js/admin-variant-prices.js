@@ -138,7 +138,7 @@
             if (!page.isConnected || serial !== page._historySerial) return;
             for (const item of rows) {
                 const row = document.createElement("tr");
-                row.append(cell(`#${item.id}`), cell(item.productName || `#${item.idProduct}`), cell(item.idSalesPlan ?? "—"), cell(item.targetType), cell(number.format(item.priceAmount)), cell(item.isActive ? "فعال" : "سابقه"), cell(window.AdminUI.formatDateTime(item.createdAtUtc)), cell(item.previousVersionId ? `#${item.previousVersionId}` : "—"));
+                row.append(cell(`#${item.id}`), cell(item.productName || `#${item.idProduct}`), cell(item.idSalesPlan ?? "—"), cell(item.targetType), cell(number.format(item.priceAmount)), cell(item.isActive ? "فعال" : "سابقه"), cell(window.AdminUI.formatDateTime(item.createdAtUtc)), cell(item.idPreviousVersion ? `#${item.idPreviousVersion}` : "—"));
                 body.append(row);
             }
             ui.refreshDataTable(table);

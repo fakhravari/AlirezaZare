@@ -11,7 +11,7 @@ test('price history uses the shared table without DataTables paging after refres
   await page.route('https://example.test/**', route => {
     if (new URL(route.request().url()).pathname.endsWith('/price-history')) {
       requests++;
-      return route.fulfill({json: Array.from({length: 60}, (_, i) => ({id: i + 1, idProduct: 1, productName: 'Product', targetType: 'product', priceAmount: 1000, createdAtUtc: '2024-03-20T12:00:00Z'}))});
+      return route.fulfill({json: Array.from({length: 60}, (_, i) => ({id: i + 1, idProduct: 1, productName: 'Product', targetType: 'product', priceAmount: 1000, idPreviousVersion: i === 0 ? 42 : null, createdAtUtc: '2024-03-20T12:00:00Z'}))});
     }
     return route.fulfill({contentType: 'text/html', body: ''});
   });
@@ -28,6 +28,7 @@ test('price history uses the shared table without DataTables paging after refres
   await page.addScriptTag({path: 'Admin/wwwroot/js/admin-variant-prices.js'});
   await page.evaluate(() => window.AdminVariantPrices.initialize(document));
   await page.waitForFunction(() => document.querySelectorAll('[data-price-history-rows] tr').length === 60);
+  assert.equal(await page.locator('[data-price-history-rows] tr').first().locator('td').last().textContent(), '#42');
   const table = page.locator('table');
   assert.equal(await table.evaluate(node => window.AdminUI.getDataTable(node).settings()[0].oFeatures.bPaginate), false);
   assert.equal(await page.locator('.dt-paging').count(), 0);

@@ -22,6 +22,14 @@ test('product badges appear only in the regular sales plan', async () => {
   product.badgeColor = '#102A43';
   assert.match(render({}), /background:#102A43!important;color:#ffffff!important/);
   assert.match(render({}), /border:1px solid #ffffff!important/);
+  product.badgeBorderColor = '#FF0011';
+  assert.match(render({}), /border:1px solid #FF0011!important/);
+  product.badgeTextColor = '#123456';
+  assert.match(render({}), /color:#123456!important/);
+  product.badgeTextColor = '#fff;display:none';
+  assert.doesNotMatch(render({}), /display:none/);
+  product.badgeBorderColor = '#fff;display:none';
+  assert.doesNotMatch(render({}), /display:none/);
   product.badgeColor = '#fff;display:none';
   assert.doesNotMatch(render({}), /display:none/);
   product.badgeColor = '#FFFFFF';

@@ -6,9 +6,9 @@ namespace Shop.Data.Infrastructure.Persistence.Repositories;
 
 public sealed class StorePriceVersionService(ShopDbContext db) : IStorePriceVersionService
 {
-    public async Task<long> AppendAsync(long productId, long salesPlanId, long? productVariantId, long? optionValueId, long? accessoryId, decimal amount, decimal discountPercent, string? changedBy, CancellationToken cancellationToken = default)
+    public async Task<long> AppendAsync(long productId, long salesPlanId, long? productVariantId, long? optionValueId, long? accessoryId, decimal amount, decimal discountPercent, long idChangedBy, CancellationToken cancellationToken = default)
     {
-        Validate(amount, discountPercent);
+        Validate(amount, discountPercent, optionValueId.HasValue);
         var prior = await FindActiveAsync(productId, salesPlanId, productVariantId, optionValueId, accessoryId, cancellationToken);
         if (prior is not null) prior.IsActive = false;
         var version = new StorePriceVersion
@@ -22,8 +22,8 @@ public sealed class StorePriceVersionService(ShopDbContext db) : IStorePriceVers
             DiscountPercent = discountPercent,
             IsActive = true,
             CreatedAtUtc = DateTime.UtcNow,
-            ChangedBy = changedBy,
-            PreviousVersionId = prior?.Id
+            IdChangedBy = idChangedBy,
+            IdPreviousVersion = prior?.Id
         };
         db.StorePriceVersions.Add(version);
         await db.SaveChangesAsync(cancellationToken);
@@ -43,11 +43,11 @@ public sealed class StorePriceVersionService(ShopDbContext db) : IStorePriceVers
     }
 
     private Task<StorePriceVersion?> FindActiveAsync(long productId, long salesPlanId, long? productVariantId, long? optionValueId, long? accessoryId, CancellationToken cancellationToken) =>
-        db.StorePriceVersions.SingleOrDefaultAsync(x => x.IdProduct == productId && x.IdSalesPlan == salesPlanId && x.IdProductVariant == productVariantId && x.IdOptionValue == optionValueId && x.IdAccessory == accessoryId && x.IdOrderItem == null && x.IsActive, cancellationToken);
+        db.StorePriceVersions.SingleOrDefaultAsync(x => x.IdProduct == productId && x.IdSalesPlan == salesPlanId && x.IdProductVariant == productVariantId && x.IdOptionValue == optionValueId && x.IdAccessory == accessoryId && x.IsActive, cancellationToken);
 
-    private static void Validate(decimal amount, decimal discountPercent)
+    private static void Validate(decimal amount, decimal discountPercent, bool isOption)
     {
-        if (amount < 0 || amount > 9007199254740991m || amount != decimal.Truncate(amount)) throw new ArgumentOutOfRangeException(nameof(amount));
+        if (amount < (isOption ? -9007199254740991m : 0m) || amount > 9007199254740991m || amount != decimal.Truncate(amount)) throw new ArgumentOutOfRangeException(nameof(amount));
         if (discountPercent < 0 || discountPercent >= 100 || decimal.Round(discountPercent, 2) != discountPercent) throw new ArgumentOutOfRangeException(nameof(discountPercent));
     }
 }

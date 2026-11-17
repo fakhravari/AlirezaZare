@@ -22,6 +22,13 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext, IMedi
         var badges = await dbContext.StoreProductBadges.AsNoTracking().ToDictionaryAsync(x => x.Id, cancellationToken);
         var products = await dbContext.Products.AsNoTracking().Where(x => x.IsStoreEnabled).OrderBy(x => x.Id).ToListAsync(cancellationToken);
         var productIds = products.Select(x => x.Id).ToArray();
+        var regularPrices = await (from version in dbContext.StorePriceVersions.AsNoTracking()
+                                   join plan in dbContext.SalesPlanReferences.AsNoTracking() on version.IdSalesPlan equals (long?)plan.Id
+                                   where productIds.Contains(version.IdProduct) && version.IsActive && plan.IsRegular && plan.IdStockOwnerType == 1 &&
+                                         version.IdProductVariant == null && version.IdOptionValue == null && version.IdAccessory == null
+                                   orderby plan.Id, version.Id descending
+                                   select version).ToListAsync(cancellationToken);
+        var regularPriceByProduct = regularPrices.GroupBy(x => x.IdProduct).ToDictionary(x => x.Key, x => x.First());
         var inventoryTotals = await (from inventory in dbContext.InventoryItems.AsNoTracking()
                                      join balance in dbContext.StockBalances.AsNoTracking() on inventory.Id equals balance.IdInventoryItem
                                      where productIds.Contains(inventory.IdProduct) && inventory.Product.IsWarehouseEnabled
@@ -36,7 +43,13 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext, IMedi
                                         join accessory in dbContext.StoreAccessories.AsNoTracking() on link.IdAccessory equals accessory.Id
                                         where productIds.Contains(link.IdProduct) && accessory.IsActive
                                         orderby link.SortOrder, link.Id
-                                        select new { link.IdProduct, link.Id, accessory.AccessoryKey, accessory.Name, link.IsRequired, link.PriceAmount }).ToListAsync(cancellationToken);
+                                        select new { link.IdProduct, link.Id, AccessoryId = accessory.Id, accessory.AccessoryKey, accessory.Name, link.IsRequired }).ToListAsync(cancellationToken);
+        var regularAccessoryPrices = await (from version in dbContext.StorePriceVersions.AsNoTracking()
+                                            join plan in dbContext.SalesPlanReferences.AsNoTracking() on version.IdSalesPlan equals (long?)plan.Id
+                                            where productIds.Contains(version.IdProduct) && version.IsActive && version.IdAccessory != null && plan.IsRegular && plan.IdStockOwnerType == 1
+                                            orderby plan.Id, version.Id descending
+                                            select version).ToListAsync(cancellationToken);
+        var regularAccessoryPriceByTarget = regularAccessoryPrices.GroupBy(x => (x.IdProduct, x.IdAccessory!.Value)).ToDictionary(x => x.Key, x => x.First().PriceAmount);
         var productBenefits = await dbContext.StoreProductBenefits.AsNoTracking().Where(x => productIds.Contains(x.IdProduct) && x.IsActive).OrderBy(x => x.SortOrder).ThenBy(x => x.Id).ToListAsync(cancellationToken);
         var collections = await dbContext.StoreProductCollections.AsNoTracking().OrderBy(x => x.Id).ToListAsync(cancellationToken);
         var collectionIds = collections.Select(x => x.Id).ToArray();
@@ -83,8 +96,9 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext, IMedi
             brandKeyById.TryGetValue(product.IdBrand ?? 0, out var brandKey); categoryKeyById.TryGetValue(product.IdCategory ?? 0, out var categoryKey);
             decimal stock = inventoryTotals.GetValueOrDefault(product.Id);
             int stockQty = stock >= int.MaxValue ? int.MaxValue : Math.Max(0, (int)Math.Floor(stock));
-            var badge = product.IdProductBadge is long badgeId ? badges.GetValueOrDefault(badgeId) : null;
-            var o = new JsonObject { ["id"] = checked((int)product.Id), ["name"] = product.Name, ["englishName"] = product.EnglishName ?? product.Name, ["code"] = product.ProductKey, ["slug"] = product.Slug, ["brandId"] = brandKey, ["categoryId"] = categoryKey, ["detailId"] = categoryKey, ["mediaId"] = "product-" + product.ProductKey, ["price"] = (product.PriceAmount ?? 0m) / 1_000_000m, ["stockQuantity"] = stockQty, ["maxCartQuantity"] = product.MaxPurchaseQuantity ?? 99, ["discountPercent"] = product.DiscountPercent ?? 0m, ["badge"] = badge?.Title, ["badgeColor"] = badge?.BackgroundColor };
+            var badge = product.IdBadge is long badgeId ? badges.GetValueOrDefault(badgeId) : null;
+            var regularPrice = regularPriceByProduct.GetValueOrDefault(product.Id);
+            var o = new JsonObject { ["id"] = checked((int)product.Id), ["name"] = product.Name, ["englishName"] = product.EnglishName ?? product.Name, ["code"] = product.ProductKey, ["slug"] = product.Slug, ["brandId"] = brandKey, ["categoryId"] = categoryKey, ["detailId"] = categoryKey, ["mediaId"] = "product-" + product.ProductKey, ["price"] = regularPrice is null ? 0m : decimal.Round(regularPrice.PriceAmount * (100m - regularPrice.DiscountPercent) / 100m, 0, MidpointRounding.AwayFromZero) / 1_000_000m, ["stockQuantity"] = stockQty, ["maxCartQuantity"] = product.MaxPurchaseQuantity ?? 99, ["discountPercent"] = regularPrice?.DiscountPercent ?? 0m, ["badge"] = badge?.Title, ["badgeColor"] = badge?.BackgroundColor, ["badgeTextColor"] = badge?.TextColor, ["badgeBorderColor"] = badge?.BorderColor };
             o["colorIds"] = new JsonArray(productColors.Where(x => x.IdProduct == product.Id).Select(x => (JsonNode?)JsonValue.Create(colorKeyById.GetValueOrDefault(x.IdColor))).ToArray());
             o["specificationValues"] = new JsonArray(productSpecs.Where(x => x.IdProduct == product.Id).Select(x => (JsonNode?)new JsonObject { ["featureId"] = x.FeatureKey, ["value"] = x.Value }).ToArray());
             o["includedBenefits"] = new JsonArray(productBenefits.Where(x => x.IdProduct == product.Id).Select(x => (JsonNode?)new JsonObject
@@ -94,7 +108,7 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext, IMedi
                 ["detail"] = x.Detail,
                 ["icon"] = x.Icon
             }).ToArray());
-            o["accessories"] = new JsonArray(productAccessories.Where(x => x.IdProduct == product.Id).Select(x => (JsonNode?)new JsonObject { ["id"] = x.AccessoryKey, ["productAccessoryId"] = x.Id, ["name"] = x.Name, ["required"] = x.IsRequired, ["price"] = x.PriceAmount / 1_000_000m }).ToArray());
+            o["accessories"] = new JsonArray(productAccessories.Where(x => x.IdProduct == product.Id).Select(x => (JsonNode?)new JsonObject { ["id"] = x.AccessoryKey, ["productAccessoryId"] = x.Id, ["name"] = x.Name, ["required"] = x.IsRequired, ["price"] = regularAccessoryPriceByTarget.GetValueOrDefault((x.IdProduct, x.AccessoryId)) / 1_000_000m }).ToArray());
             o["documents"] = new JsonArray(assets.Where(x => x.IdProduct == product.Id && x.IdMediaType == ProductMediaTypes.Document).Select(x => (JsonNode?)new JsonObject { ["title"] = x.Title, ["path"] = x.Path }).ToArray()); o["variants"] = new JsonObject(); return (JsonNode?)o;
         }).ToArray());
         root["collections"] = new JsonArray(collections.Select(collection => (JsonNode?)new JsonObject { ["id"] = collection.CollectionKey, ["items"] = new JsonArray(collectionItems.Where(x => x.IdProductCollection == collection.Id).Select(x => (JsonNode?)JsonValue.Create(checked((int)x.IdProduct))).ToArray()) }).ToArray());

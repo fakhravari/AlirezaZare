@@ -105,6 +105,20 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // Keep CLR/API names stable while using concise foreign-key names in SQL.
+        modelBuilder.Entity<AccountCartItem>().Property(x => x.IdProductVariant).HasColumnName("IdVariant");
+        modelBuilder.Entity<AccountCartItemPurchaseOptionValue>().Property(x => x.IdProductPurchaseOptionValue).HasColumnName("IdOptionValue");
+        modelBuilder.Entity<StoreCustomerOrderReference>().Property(x => x.IdWarehouseDocument).HasColumnName("IdDocument");
+        modelBuilder.Entity<StoreCustomerOrderItem>().Property(x => x.IdProductVariant).HasColumnName("IdVariant");
+        modelBuilder.Entity<StorePriceVersion>().Property(x => x.IdProductVariant).HasColumnName("IdVariant");
+        modelBuilder.Entity<InventoryItem>().Property(x => x.IdProductVariant).HasColumnName("IdVariant");
+        modelBuilder.Entity<StoreProductVariantSalesPlanOffer>().Property(x => x.IdProductVariant).HasColumnName("IdVariant");
+        modelBuilder.Entity<StoreHomeTestimonial>().Property(x => x.IdProductFeedback).HasColumnName("IdFeedback");
+        modelBuilder.Entity<StoreProductPurchaseOptionValue>().Property(x => x.IdProductPurchaseOption).HasColumnName("IdOption");
+        modelBuilder.Entity<StoreProductCollectionItem>().Property(x => x.IdProductCollection).HasColumnName("IdCollection");
+        modelBuilder.Entity<StoreProductSalesPlanOfferAccessory>().Property(x => x.IdProductSalesPlanOffer).HasColumnName("IdOffer");
+        modelBuilder.Entity<StoreProductSalesPlanOfferSpecificationOverride>().Property(x => x.IdProductSalesPlanOffer).HasColumnName("IdOffer");
+        modelBuilder.Entity<Warehouse>().Property(x => x.IdWarehouseType).HasColumnName("IdType");
         modelBuilder.Entity<StoreSlider>(entity =>
         {
             entity.ToTable("Slider", "Store");
@@ -448,12 +462,10 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.HasKey(x => x.Id);
             entity.Property(x => x.Id).ValueGeneratedNever();
             entity.Property(x => x.ProductKey).HasMaxLength(128).IsRequired();
-            entity.Property(x => x.Name).HasMaxLength(300).IsRequired();
-            entity.Property(x => x.EnglishName).HasMaxLength(300).IsRequired();
+            entity.Property(x => x.Name).HasColumnName("NameFa").HasMaxLength(300).IsRequired();
+            entity.Property(x => x.EnglishName).HasColumnName("NameEn").HasMaxLength(300).IsRequired();
             entity.Property(x => x.Slug).HasMaxLength(200);
-            entity.HasOne(x => x.ProductBadge).WithMany().HasForeignKey(x => x.IdProductBadge).OnDelete(DeleteBehavior.Restrict);
-            entity.Property(x => x.PriceAmount).HasPrecision(19, 0).IsRequired();
-            entity.Property(x => x.DiscountPercent).HasPrecision(5, 2).IsRequired();
+            entity.HasOne(x => x.ProductBadge).WithMany().HasForeignKey(x => x.IdBadge).OnDelete(DeleteBehavior.Restrict);
             entity.Property(x => x.MaxPurchaseQuantity).IsRequired();
             entity.Property(x => x.IsStoreEnabled).HasDefaultValue(false).IsRequired();
             entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
@@ -465,6 +477,8 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.HasKey(x => x.Id);
             entity.Property(x => x.Title).HasMaxLength(100).IsRequired();
             entity.Property(x => x.BackgroundColor).HasMaxLength(7).IsUnicode(false).IsRequired();
+            entity.Property(x => x.TextColor).HasMaxLength(7).IsUnicode(false).IsRequired();
+            entity.Property(x => x.BorderColor).HasMaxLength(7).IsUnicode(false).IsRequired();
             entity.HasIndex(x => x.Title).IsUnique();
         });
         modelBuilder.Entity<ProductVariant>(entity =>
@@ -618,16 +632,15 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.Property(x => x.PriceAmount).HasPrecision(19, 0);
             entity.Property(x => x.DiscountPercent).HasPrecision(5, 2);
             entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
-            entity.Property(x => x.ChangedBy).HasMaxLength(256);
+            entity.HasOne<AdminSystemUser>().WithMany().HasForeignKey(x => x.IdChangedBy).OnDelete(DeleteBehavior.Restrict);
             entity.Property(x => x.ChangeReason).HasMaxLength(300);
-            entity.HasIndex(x => new { x.IdProduct, x.IdSalesPlan, x.IdProductVariant, x.IdOptionValue, x.IdAccessory, x.IdOrderItem, x.Id });
+            entity.HasIndex(x => new { x.IdProduct, x.IdSalesPlan, x.IdProductVariant, x.IdOptionValue, x.IdAccessory, x.Id });
             entity.HasOne<WarehouseProduct>().WithMany().HasForeignKey(x => x.IdProduct).OnDelete(DeleteBehavior.Restrict);
             entity.HasOne<SalesPlanReference>().WithMany().HasForeignKey(x => x.IdSalesPlan).OnDelete(DeleteBehavior.Restrict);
-            entity.HasOne(x => x.PreviousVersion).WithMany().HasForeignKey(x => x.PreviousVersionId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(x => x.PreviousVersion).WithMany().HasForeignKey(x => x.IdPreviousVersion).OnDelete(DeleteBehavior.Restrict);
             entity.HasOne<ProductVariant>().WithMany().HasForeignKey(x => new { x.IdProductVariant, x.IdProduct }).HasPrincipalKey(x => new { x.Id, x.IdProduct }).OnDelete(DeleteBehavior.Restrict);
             entity.HasOne<StoreProductPurchaseOptionValue>().WithMany().HasForeignKey(x => x.IdOptionValue).OnDelete(DeleteBehavior.Restrict);
             entity.HasOne<StoreAccessory>().WithMany().HasForeignKey(x => x.IdAccessory).OnDelete(DeleteBehavior.Restrict);
-            entity.HasOne<StoreCustomerOrderItem>().WithMany().HasForeignKey(x => x.IdOrderItem).OnDelete(DeleteBehavior.Restrict);
         });
         modelBuilder.Entity<StoreOrderItemPriceReference>(entity =>
         {
@@ -721,19 +734,17 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
         {
             entity.ToTable("ProductPurchaseOptionValue", "Store"); entity.HasKey(x => x.Id);
             entity.Property(x => x.ValueKey).HasMaxLength(100).IsRequired(); entity.Property(x => x.Label).HasMaxLength(200).IsRequired();
-            entity.Property(x => x.PriceDelta).HasPrecision(19, 2); entity.HasIndex(x => new { x.IdProductPurchaseOption, x.ValueKey }).IsUnique();
+            entity.HasIndex(x => new { x.IdProductPurchaseOption, x.ValueKey }).IsUnique();
         });
         modelBuilder.Entity<StoreProductSalesPlanOffer>(entity =>
         {
             entity.ToTable("ProductSalesPlanOffer", "Store"); entity.HasKey(x => x.Id);
-            entity.Property(x => x.PriceAmount).HasPrecision(19, 0); entity.Property(x => x.DiscountPercent).HasPrecision(5, 2);
             entity.Property(x => x.CreatedAtUtc).HasPrecision(3); entity.Property(x => x.UpdatedAtUtc).HasPrecision(3);
             entity.HasIndex(x => new { x.IdProduct, x.IdSalesPlan }).IsUnique();
         });
         modelBuilder.Entity<StoreProductVariantSalesPlanOffer>(entity =>
         {
             entity.ToTable("ProductVariantSalesPlanOffer", "Store"); entity.HasKey(x => x.Id);
-            entity.Property(x => x.PriceAmount).HasPrecision(19, 0); entity.Property(x => x.DiscountPercent).HasPrecision(5, 2);
             entity.Property(x => x.CreatedAtUtc).HasPrecision(3); entity.Property(x => x.UpdatedAtUtc).HasPrecision(3);
             entity.HasIndex(x => new { x.IdProductVariant, x.IdSalesPlan }).IsUnique();
         });
@@ -746,12 +757,12 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
         modelBuilder.Entity<StoreProductAccessory>(entity =>
         {
             entity.ToTable("ProductAccessory", "Store"); entity.HasKey(x => x.Id);
-            entity.Property(x => x.PriceAmount).HasPrecision(19, 0); entity.HasIndex(x => new { x.IdProduct, x.IdAccessory }).IsUnique();
+            entity.HasIndex(x => new { x.IdProduct, x.IdAccessory }).IsUnique();
         });
         modelBuilder.Entity<StoreProductSalesPlanOfferAccessory>(entity =>
         {
             entity.ToTable("ProductSalesPlanOfferAccessory", "Store"); entity.HasKey(x => x.Id);
-            entity.Property(x => x.PriceAmount).HasPrecision(19, 0); entity.HasIndex(x => new { x.IdProductSalesPlanOffer, x.IdAccessory }).IsUnique();
+            entity.HasIndex(x => new { x.IdProductSalesPlanOffer, x.IdAccessory }).IsUnique();
         });
         modelBuilder.Entity<StoreProductSalesPlanOfferSpecificationOverride>(entity =>
         {

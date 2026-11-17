@@ -3,23 +3,41 @@
   if (window.HNProductCard) return;
   const esc = (value) => window.HNUI.escapeHtml(value);
   const fa = (value) => window.HNUI.formatNumber(value);
-  const badgeStyle = (color) => {
+  const badgeStyle = (color, textColor, borderColor) => {
     if (!/^#[0-9a-f]{6}$/i.test(color || "")) return "";
     const channels = [1, 3, 5].map(index => parseInt(color.slice(index, index + 2), 16) / 255).map(value => value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4);
-    const text = 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2] > 0.179 ? "#000000" : "#ffffff";
-    return ` style="background:${color}!important;color:${text}!important;border:1px solid ${text}!important"`;
+    const fallback = 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2] > 0.179 ? "#000000" : "#ffffff";
+    const text = /^#[0-9a-f]{6}$/i.test(textColor || "") ? textColor : fallback;
+    const border = /^#[0-9a-f]{6}$/i.test(borderColor || "") ? borderColor : fallback;
+    return ` style="background:${color}!important;color:${text}!important;border:1px solid ${border}!important"`;
   };
-  const currentPrice = (product, options = {}) => Number.isFinite(Number(options.priceAmount))
-    ? Math.round(Number(options.priceAmount) * (100 - (Number(options.discountPercent) || 0)) / 100) + Math.max(0, Number(options.priceAdjustmentAmount) || 0)
-    : Math.round(Number(product.price) * 1000000);
   let salesPlanText, salesPlanData;
-  const availableStock = (product, options = {}) => {
+  const getSalesPlanData = () => {
     const text = document.querySelector("#storeSalesPlans")?.textContent || "null";
     if (text !== salesPlanText) {
       salesPlanText = text;
       try { salesPlanData = JSON.parse(text); } catch { salesPlanData = null; }
     }
-    const data = salesPlanData;
+    return salesPlanData;
+  };
+  const priceDetails = (product, options = {}) => {
+    const data = getSalesPlanData();
+    const planId = options.salesPlanId || options.id || data?.plans?.find((plan) => plan.isDefault)?.id;
+    const offer = data?.offers?.find((item) => Number(item.productId) === Number(product.id) && item.salesPlanId === planId);
+    const variant = data?.inventoryVariants?.find((item) => Number(item.productId) === Number(product.id) && item.isDefault);
+    const variantAmount = variant?.priceBySalesPlan?.[planId];
+    const hasAmount = (amount) => amount !== null && amount !== undefined && Number.isFinite(Number(amount));
+    const baseAmount = hasAmount(variantAmount) ? Number(variantAmount) : hasAmount(offer?.priceAmount) ? Number(offer.priceAmount) : hasAmount(options.priceAmount) ? Number(options.priceAmount) : null;
+    const discount = hasAmount(variantAmount) ? Number(variant.discountBySalesPlan?.[planId]) || 0 : Number(offer?.discountPercent ?? options.discountPercent ?? product.discountPercent) || 0;
+    const baseCurrent = baseAmount === null ? Math.round(Number(product.price) * 1000000) : Math.round(baseAmount * (100 - discount) / 100);
+    const optionAmount = (data?.priceOptions?.[Number(product.id)] || []).reduce((sum, feature) => sum + (Number(feature.values?.[0]?.priceBySalesPlan?.[planId] ?? feature.values?.[0]?.priceDelta) || 0), 0);
+    const accessoryAmount = (product.accessories || []).filter((item) => item.required).reduce((sum, item) => sum + (Number(offer?.accessoryPriceAmounts?.[item.id] ?? Number(item.price) * 1000000) || 0), 0);
+    const adjustments = optionAmount + accessoryAmount + (Number(options.priceAdjustmentAmount) || 0);
+    return { current: baseCurrent + adjustments, list: baseAmount ?? Math.round(baseCurrent / (1 - discount / 100)), discount, adjustments };
+  };
+  const currentPrice = (product, options = {}) => priceDetails(product, options).current;
+  const availableStock = (product, options = {}) => {
+    const data = getSalesPlanData();
     if (!Array.isArray(data?.plans) || !Array.isArray(data?.offers) || !Array.isArray(data?.inventoryVariants)) return null;
     const planId = options.salesPlanId || data.plans.find((plan) => plan.isDefault)?.id;
     const offer = data.offers.find((item) => Number(item.productId) === Number(product.id) && item.salesPlanId === planId);
@@ -33,10 +51,9 @@
     return Number.isFinite(stock) ? Math.max(0, stock) : 0;
   };
   const price = (product, options = {}) => {
-    const current = currentPrice(product, options);
-    const percent = Number(options.discountPercent ?? product.discountPercent) || 0;
+    const { current, list, discount: percent, adjustments } = priceDetails(product, options);
     const discounted = percent > 0 && percent < 100;
-    const listAmount = Number.isFinite(Number(options.priceAmount)) ? Number(options.priceAmount) : current / (1 - percent / 100);
+    const listAmount = list + adjustments;
     return `<strong class="product-price-current">${fa(current)} <small>تومان</small></strong>${discounted
       ? `<span class="product-price-deal"><del class="price-old">${fa(Math.round(listAmount))} تومان</del><b class="product-price-discount">٪${fa(percent)}</b></span>` : ""}`;
   };
@@ -69,9 +86,9 @@
     const hasSalesPlanBadge = Boolean(options.salesPlanName && options.salesPlanId && !regularPlan);
     const imageBadge = hasSalesPlanBadge
       ? `<span class="product-sales-plan-badge product-sales-plan-badge--overlay"><i class="bi bi-lightning-charge-fill" aria-hidden="true"></i>${esc(options.salesPlanName)}</span>`
-      : badge ? `<span class="${options.offer ? "badge-offer" : badge === "جدید" ? "badge-new" : "badge-best"}"${options.badge == null ? badgeStyle(product.badgeColor) : ""}>${esc(badge)}</span>` : "";
-    const html = `<article class="${classes}" data-product-id="${esc(product.id)}" data-product-card="v1"${options.salesPlanId ? ` data-sales-plan-id="${esc(options.salesPlanId)}" data-sales-plan-name="${esc(options.salesPlanName || "")}" data-sales-plan-code="${esc(options.salesPlanCode || "")}" data-sales-plan-label="${esc(options.salesPlanLabel || "")}"` : ""}><div class="product-image${search ? " search-page-card-media" : ""}"><a href="${esc(productUrl)}" aria-label="مشاهده ${esc(product.name)}"><img src="${esc(options.image || product.image)}" alt="${esc(product.name)}" width="800" height="800" loading="lazy" decoding="async"></a><div class="product-card-actions" role="group" aria-label="عملیات محصول"><button class="favorite" type="button" data-product-id="${esc(product.id)}" aria-label="افزودن به علاقه‌مندی‌ها" aria-pressed="false"><i class="bi bi-heart" aria-hidden="true"></i></button><button class="compare-trigger" type="button" data-product-id="${esc(product.id)}" aria-label="افزودن به مقایسه" aria-pressed="false"><i class="bi bi-arrow-left-right" aria-hidden="true"></i></button></div>${imageBadge}</div><div class="${bodyClass}">${slider ? title : `<div${search ? ' class="search-page-card-heading"' : ""}>${title}</div>`}<p class="${slider ? "product-card-sale-price" : search ? "search-product-price search-page-card-price" : favorite ? "favorite-item-price" : "product-card-price"} ${(options.discountPercent ?? product.discountPercent) > 0 ? "has-discount" : "is-regular"}">${price(product, options)}</p>${slider ? action : ""}</div>${slider ? "" : action}</article>`;
+      : badge ? `<span class="${options.offer ? "badge-offer" : badge === "جدید" ? "badge-new" : "badge-best"}"${options.badge == null ? badgeStyle(product.badgeColor, product.badgeTextColor, product.badgeBorderColor) : ""}>${esc(badge)}</span>` : "";
+    const html = `<article class="${classes}" data-product-id="${esc(product.id)}" data-product-card="v1"${options.salesPlanId ? ` data-sales-plan-id="${esc(options.salesPlanId)}" data-sales-plan-name="${esc(options.salesPlanName || "")}" data-sales-plan-code="${esc(options.salesPlanCode || "")}" data-sales-plan-label="${esc(options.salesPlanLabel || "")}"` : ""}><div class="product-image${search ? " search-page-card-media" : ""}"><a href="${esc(productUrl)}" aria-label="مشاهده ${esc(product.name)}"><img src="${esc(options.image || product.image)}" alt="${esc(product.name)}" width="800" height="800" loading="lazy" decoding="async"></a><div class="product-card-actions" role="group" aria-label="عملیات محصول"><button class="favorite" type="button" data-product-id="${esc(product.id)}" aria-label="افزودن به علاقه‌مندی‌ها" aria-pressed="false"><i class="bi bi-heart" aria-hidden="true"></i></button><button class="compare-trigger" type="button" data-product-id="${esc(product.id)}" aria-label="افزودن به مقایسه" aria-pressed="false"><i class="bi bi-arrow-left-right" aria-hidden="true"></i></button></div>${imageBadge}</div><div class="${bodyClass}">${slider ? title : `<div${search ? ' class="search-page-card-heading"' : ""}>${title}</div>`}<p class="${slider ? "product-card-sale-price" : search ? "search-product-price search-page-card-price" : favorite ? "favorite-item-price" : "product-card-price"} ${priceDetails(product, options).discount > 0 ? "has-discount" : "is-regular"}">${price(product, options)}</p>${slider ? action : ""}</div>${slider ? "" : action}</article>`;
     return slider ? `<div class="showcase-slide">${html}</div>` : html;
   };
-  window.HNProductCard = Object.freeze({ render, price, currentPrice, availableStock });
+  window.HNProductCard = Object.freeze({ render, price, priceDetails, currentPrice, availableStock });
 })(window);

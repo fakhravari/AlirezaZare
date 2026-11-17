@@ -29,10 +29,12 @@
             const row = body.insertRow(); cell(row, badge.title);
             const colorCell = cell(row, ""), preview = document.createElement("span");
             const color = /^#[0-9a-f]{6}$/i.test(badge.backgroundColor || "") ? badge.backgroundColor : "#102a43";
-            preview.className = "badge"; preview.style.backgroundColor = color; preview.style.color = badgeTextColor(color); preview.style.border = `1px solid ${badgeTextColor(color)}`; preview.textContent = badge.title; colorCell.append(preview);
+            const textColor = /^#[0-9a-f]{6}$/i.test(badge.textColor || "") ? badge.textColor : badgeTextColor(color);
+            const borderColor = /^#[0-9a-f]{6}$/i.test(badge.borderColor || "") ? badge.borderColor : badgeTextColor(color);
+            preview.className = "badge"; preview.style.backgroundColor = color; preview.style.color = textColor; preview.style.border = `1px solid ${borderColor}`; preview.textContent = badge.title; colorCell.append(preview);
             cell(row, String(badge.productCount));
             const actions = cell(row, "");
-            actions.append(button("ویرایش", () => { form.elements.id.value = badge.id; form.elements.title.value = badge.title; form.elements.backgroundColor.value = color; form.elements.title.focus(); }));
+            actions.append(button("ویرایش", () => { form.elements.id.value = badge.id; form.elements.title.value = badge.title; form.elements.backgroundColor.value = color; form.elements.textColor.value = textColor; form.elements.borderColor.value = borderColor; form.elements.title.focus(); }));
             const remove = button("حذف", async () => {
                 if (!window.confirm(`نشان «${badge.title}» حذف شود؟`)) return;
                 try { await ui.getJson(`${api}/${badge.id}`, options("DELETE")); await refresh(); ui.notify("نشان حذف شد.", "success"); } catch (e) { error(e); }
@@ -52,7 +54,7 @@
             const select = document.createElement("select"); select.className = "form-select"; select.setAttribute("aria-label", `نشان ${product.name}`);
             const placeholder = new Option("انتخاب نشان", ""); placeholder.disabled = true; select.add(placeholder);
             for (const badge of badges) select.add(new Option(badge.title, String(badge.id)));
-            select.value = product.idProductBadge == null ? "" : String(product.idProductBadge); const td = cell(row, ""); td.append(select);
+            select.value = product.idBadge == null ? "" : String(product.idBadge); const td = cell(row, ""); td.append(select);
             const actions = cell(row, "");
             const save = button("ذخیره", async () => {
                 if (!select.value) return;
@@ -62,7 +64,7 @@
             save.disabled = !select.value;
             select.addEventListener("change", () => { save.disabled = !select.value; });
             actions.append(save);
-            if (product.idProductBadge != null) actions.append(button("حذف نشان", async () => {
+            if (product.idBadge != null) actions.append(button("حذف نشان", async () => {
                 if (!window.confirm(`نشان کالای «${product.name}» حذف شود؟`)) return;
                 const opts = options("PUT"); opts.body = JSON.stringify({ badgeId: null });
                 try { await ui.getJson(`${api}/products/${product.id}`, opts); await refresh(); ui.notify("نشان از کالا حذف شد.", "success"); } catch (e) { error(e); }
@@ -76,7 +78,7 @@
     async function refresh() { await loadBadges(); await loadProducts(); }
     form.addEventListener("submit", async event => {
         event.preventDefault(); if (!form.reportValidity()) return;
-        const id = form.elements.id.value, opts = options(id ? "PUT" : "POST"); opts.body = JSON.stringify({ title: form.elements.title.value, backgroundColor: form.elements.backgroundColor.value });
+        const id = form.elements.id.value, opts = options(id ? "PUT" : "POST"); opts.body = JSON.stringify({ title: form.elements.title.value, backgroundColor: form.elements.backgroundColor.value, textColor: form.elements.textColor.value, borderColor: form.elements.borderColor.value });
         try { await ui.getJson(id ? `${api}/${id}` : api, opts); form.reset(); form.elements.id.value = ""; await refresh(); ui.notify("نشان ذخیره شد.", "success"); } catch (e) { error(e); }
     });
     root.querySelector("[data-badge-reset]").addEventListener("click", () => { form.reset(); form.elements.id.value = ""; });

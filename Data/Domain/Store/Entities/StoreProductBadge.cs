@@ -5,4 +5,6 @@ public sealed class StoreProductBadge
     public long Id { get; set; }
     public string Title { get; set; } = string.Empty;
     public string BackgroundColor { get; set; } = "#102A43";
+    public string TextColor { get; set; } = "#FFFFFF";
+    public string BorderColor { get; set; } = "#FFFFFF";
 }

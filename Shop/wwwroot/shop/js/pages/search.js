@@ -335,7 +335,7 @@
     return Number.isFinite(quantity) && quantity >= 0 ? quantity > 0 : true;
   };
   const isProductDiscounted = (product) => {
-    const discount = Number(product.discountPercent) || 0;
+    const discount = window.HNProductCard.priceDetails(product, product._salesPlanListing || {}).discount;
     return discount > 0 && discount < 100;
   };
   const normalizeFilterSearch = window.HNUI.normalizeSearchText;
@@ -409,13 +409,13 @@
         (() => {
           const offer = p._salesPlanListing;
           const price = (offer
-            ? window.HNProductCard.currentPrice(p, {priceAmount: offer.priceAmount, discountPercent: offer.discountPercent})
+            ? window.HNProductCard.currentPrice(p, {salesPlanId: offer.id, priceAmount: offer.priceAmount, discountPercent: offer.discountPercent})
             : window.HNProductCard.currentPrice(p)) / 1000000;
-          const discounted = offer ? offer.discountPercent > 0 : isProductDiscounted(p);
+          const discounted = isProductDiscounted(p);
           const available = isProductAvailable(p);
           return isPlanListingActive(offer) &&
             (state.availability === "all" || (state.availability === "in-stock" ? available : !available)) &&
-            (!state.discountOnly || discounted) && price >= state.minPrice && price <= state.maxPrice;
+            (!state.discountOnly || discounted) && price >= state.minPrice && (state.maxPrice === 60 || price <= state.maxPrice);
         })() &&
         (!state.brand.size || state.brand.has(p.brand)) &&
         (!selectedTypes.length || selectedTypes.some((type) =>
@@ -658,7 +658,7 @@
     range.style.setProperty("--range-start", `${(state.minPrice / 60) * 100}%`);
     range.style.setProperty("--range-end", `${(state.maxPrice / 60) * 100}%`);
     $("#minPriceLabel").textContent = fa(state.minPrice);
-    $("#maxPriceLabel").textContent = fa(state.maxPrice);
+    $("#maxPriceLabel").textContent = state.maxPrice === 60 ? `${fa(60)}+` : fa(state.maxPrice);
   }
   buildFilters();
   $$("[data-filter-search]").forEach((input) => {

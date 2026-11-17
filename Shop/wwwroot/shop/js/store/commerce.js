@@ -96,7 +96,7 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
             const productPriceOptions = salesPlans.priceOptions?.[p.id] || [];
             const priceOptionMap = Object.fromEntries(productPriceOptions.map((option) => [option.key, {
                 label: option.label,
-                options: (option.values || []).map((value) => ({ id: Number(value.id) || 0, value: value.key, label: value.label, priceDelta: Number(value.priceDelta) / 1000000, priceVersionId: Number(value.priceVersionId) || 0 })),
+                options: (option.values || []).map((value) => ({ id: Number(value.id) || 0, value: value.key, label: value.label, priceDelta: Number(value.priceDelta) / 1000000, priceVersionId: Number(value.priceVersionId) || 0, priceBySalesPlan: value.priceBySalesPlan, priceVersionIdsBySalesPlan: value.priceVersionIdsBySalesPlan })),
             }]));
             const inventorySelections = {};
             const inventoryVariantAttributes = (variant) => Array.isArray(variant.attributes) ? variant.attributes : [];
@@ -142,11 +142,25 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
             const selectedSalesPlanId = requestedPlan && planIsSelectable(requestedPlan)
                 ? requestedPlan.id
                 : (defaultPlan && planIsSelectable(defaultPlan) ? defaultPlan.id : fallbackPlan?.id || "regular");
+            Object.values(priceOptionMap).flatMap((feature) => feature.options).forEach((option) => {
+                option.priceDelta = Number(option.priceBySalesPlan?.[selectedSalesPlanId] ?? option.priceDelta * 1000000) / 1000000;
+                option.priceVersionId = Number(option.priceVersionIdsBySalesPlan?.[selectedSalesPlanId] ?? option.priceVersionId) || 0;
+            });
             const focusedPlan = requestedPlan && planIsSelectable(requestedPlan) && requestedPlan.id !== "regular"
                 ? requestedPlan
                 : null;
             const requestedPlanUnavailable = Boolean(requestedPlan && !planIsSelectable(requestedPlan));
             const selectedOffer = () => planOffers.find((offer) => offer.salesPlanId === selectedSalesPlanId);
+            const currentPlanBaseAmount = () => {
+                const offer = selectedOffer();
+                const inventoryVariant = selectedInventoryVariant();
+                const variantPrice = inventoryVariant?.priceBySalesPlan?.[selectedSalesPlanId];
+                if (variantPrice !== null && variantPrice !== undefined && Number.isFinite(Number(variantPrice))) {
+                    const discount = Number(inventoryVariant.discountBySalesPlan?.[selectedSalesPlanId] || 0);
+                    return Math.round(Number(variantPrice) * (100 - discount) / 100);
+                }
+                return offer ? Math.round(Number(offer.priceAmount) * (100 - Number(offer.discountPercent)) / 100) : Math.round(Number(p.price) * 1000000);
+            };
             const availableAccessories = (p.accessories || []).filter((item) =>
                 !Array.isArray(selectedOffer()?.accessoryIds) || selectedOffer().accessoryIds.includes(item.id));
             const productSectionHash =
@@ -256,12 +270,11 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                             .map((option) => {
                                 const selected = option.value === selectedValue;
                                 const priceDelta = Number(option.priceDelta) || 0;
-                                const priceHint = priceDelta > 0
-                                    ? `، افزایش قیمت ${money(priceDelta * 1000000)}`
-                                    : "";
-                                const choice = `<button class="product-variant-choice${option.swatch ? " product-variant-choice--swatch" : ""}${selected ? " is-selected" : ""}" type="button" data-value="${esc(option.value)}" data-delta="${priceDelta}" aria-pressed="${selected}">${option.swatch ? `<span class="product-variant-swatch" style="--variant-swatch:${esc(option.swatch)}"></span>` : ""}<span class="product-variant-choice-label">${esc(option.label)}</span>${!option.swatch && priceDelta > 0 ? `<small>+ ${money(priceDelta * 1000000)}</small>` : ""}</button>`;
+                                const deltaText = priceDelta ? `${priceDelta > 0 ? "+" : "−"} ${money(Math.abs(priceDelta) * 1000000)}` : "";
+                                const priceHint = priceDelta ? `، ${priceDelta > 0 ? "افزایش" : "کاهش"} قیمت ${money(Math.abs(priceDelta) * 1000000)}` : "";
+                                const choice = `<button class="product-variant-choice${option.swatch ? " product-variant-choice--swatch" : ""}${selected ? " is-selected" : ""}" type="button" data-value="${esc(option.value)}" data-delta="${priceDelta}" aria-pressed="${selected}" aria-label="${esc(option.label + priceHint)}">${option.swatch ? `<span class="product-variant-swatch" style="--variant-swatch:${esc(option.swatch)}"></span>` : ""}<span class="product-variant-choice-label">${esc(option.label)}</span>${!option.swatch && deltaText ? `<small>${deltaText}</small>` : ""}</button>`;
                                 return option.swatch
-                                    ? `<span class="product-variant-choice-wrap">${choice}${priceDelta > 0 ? `<small class="product-variant-price-delta">+ ${money(priceDelta * 1000000)}</small>` : ""}</span>`
+                                    ? `<span class="product-variant-choice-wrap">${choice}${deltaText ? `<small class="product-variant-price-delta">${deltaText}</small>` : ""}</span>`
                                     : choice;
                             })
                             .join("")}</div></fieldset>`;
@@ -947,26 +960,6 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
             if (productBreadcrumb)
                 productBreadcrumb.innerHTML = `<li><a href="/"><i class="bi bi-house-door" aria-hidden="true"></i><span>خانه</span></a></li>${categoryPath.map((part, index) => `<li><a href="${esc(window.HNCatalog?.categoryUrl(categoryPath.slice(0, index + 1)) || `/Search?q=${encodeURIComponent(part)}`)}">${esc(part)}</a></li>`).join("")}<li class="cart-breadcrumb-current"><span aria-current="page"><i class="bi bi-tools" aria-hidden="true"></i><span class="product-breadcrumb-label">${esc(p.name)}</span></span></li>`;
             productMeta.innerHTML = `<div class="product-meta-identity" role="group" aria-label="اطلاعات برند، کشور و کد محصول"><div class="product-meta-identity-top"><span class="product-meta-pill product-meta-brand">${brandMark}<span><small>برند</small><strong>${esc(brandPersianName)}</strong><small class="product-meta-brand-en" lang="en" dir="ltr">${esc(p.brand)}</small></span></span><span class="product-meta-pill product-meta-country">${brandCountryMark}${brandCountryContent}</span></div><span class="product-meta-pill product-meta-code"><i class="bi bi-upc-scan" aria-hidden="true"></i><span><small>کد محصول</small><strong dir="ltr">${esc(p.code)}</strong></span></span></div><span class="product-meta-pill product-meta-category"><i class="bi bi-grid" aria-hidden="true"></i><span class="product-meta-category-content"><small>مسیر دسته‌بندی</small><ol class="product-meta-path" aria-label="${esc(categoryPath.join("، "))}">${categoryPath.map((part, index) => `<li><a href="${esc(window.HNCatalog?.categoryUrl(categoryPath.slice(0, index + 1)) || `/Search?q=${encodeURIComponent(part)}`)}">${esc(part)}</a></li>`).join("")}</ol></span></span>`;
-            const decorateSalePrice = (node, item) => {
-                const discount = Number(item?.discountPercent) || 0;
-                const current = Math.round(Number(item?.price) * 1000000);
-                if (!node || !current) return;
-                node.innerHTML =
-                    '<strong class="product-price-current">' + money(current) + "</strong>";
-                node.classList.remove("has-discount");
-                if (discount <= 0 || discount >= 100) return;
-                node.classList.add("has-discount");
-                const previous = Math.round(current / (1 - discount / 100));
-                node.insertAdjacentHTML(
-                    "beforeend",
-                    '<span class="product-price-deal"><del class="price-old">' +
-                    money(previous) +
-                    '</del><b class="product-price-discount">٪' +
-                    fa(discount) +
-                    "</b></span>",
-                );
-            };
-            const salePercent = Number(p.discountPercent) || 0;
             const featureChips = productView.querySelector(
                 ".product-main-feature-chips",
             );
@@ -986,24 +979,7 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                 featurePanel.append(featureChips);
             }
             productView.querySelector(".product-detail-price > p")?.remove();
-            const detailPrice = productView.querySelector("#productBasePrice");
             const saleMeta = productView.querySelector(".product-detail-sale-meta");
-            if (salePercent > 0 && salePercent < 100 && detailPrice && saleMeta) {
-                const current = Math.round(p.price * 1000000),
-                    previous = Math.round(current / (1 - salePercent / 100));
-                saleMeta.innerHTML =
-                    '<del class="price-old">' +
-                    money(previous) +
-                    '</del><span class="product-price-discount">٪' +
-                    fa(salePercent) +
-                    " تخفیف کالا</span>";
-            }
-            productView
-                .querySelectorAll(".product-detail-related-card")
-                .forEach((card, index) => {
-                    const item = suggestions[index];
-                    decorateSalePrice(card.querySelector(".product-info > p"), item);
-                });
             productView
                 .querySelectorAll(".product-feedback-note")
                 .forEach((note) => note.remove());
@@ -1152,7 +1128,7 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
             priceScope.innerHTML = `<legend>ترکیب مورد بررسی</legend>${priceCombinations.map((combination, index) => {
                 const checked = index === currentPriceCombinationIndex();
                 const label = combination.labels.join("، ") || "بدون ویژگی";
-                const currentPrice = Math.max(0, Math.round((Number(p.price) + combination.priceDelta) * 1000000));
+                const currentPrice = Math.max(0, Math.round(currentPlanBaseAmount() + combination.priceDelta * 1000000));
                 return `<label class="${checked ? "is-selected" : ""}"><input type="radio" name="detail-price-combination" value="${index}" ${checked ? "checked" : ""}><span><strong>${esc(label)}</strong><small>قیمت فعلی: ${money(currentPrice)}</small></span></label>`;
             }).join("")}`;
             if (!hasPriceVariants) priceScope.remove();
@@ -1173,10 +1149,17 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                 const chart = priceDialog.querySelector("[data-price-chart]");
                 chart.hidden = true;
                 const combination = selectedPriceCombination();
+                priceDialog.querySelectorAll('.detail-price-scope input[name="detail-price-combination"]').forEach(input => {
+                    const entry = priceCombinations[Number(input.value)];
+                    const label = input.closest("label")?.querySelector("small");
+                    if (entry && label) label.textContent = `قیمت فعلی: ${money(Math.max(0, Math.round(currentPlanBaseAmount() + entry.priceDelta * 1000000)))}`;
+                });
                 priceDialog.querySelectorAll(".detail-price-scope label").forEach(label => label.classList.toggle("is-selected", label.querySelector("input")?.checked === true));
                 state.innerHTML = '<i class="bi bi-clock-history" aria-hidden="true"></i><strong>دریافت تاریخچهٔ قیمت</strong><span>رکوردهای قیمت کالا و ویژگی انتخاب‌شده از پایگاه خوانده می‌شود.</span>';
                 try {
                     const query = new URLSearchParams({ salesPlanId: selectedSalesPlanId });
+                    const inventoryVariant = selectedInventoryVariant();
+                    if (inventoryVariant) query.set("variantId", String(inventoryVariant.variantId));
                     combination.optionPriceVersionIds.forEach(id => query.append("optionPriceVersionIds", String(id)));
                     const response = await ui.api.request(`store/sales-plans/products/${p.id}/price-history?${query}`);
                     if (!response.ok) throw new Error("price-history-unavailable");
@@ -1201,13 +1184,15 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                         if (!scopes.has(key)) scopes.set(key, []);
                         scopes.get(key).push(item);
                     }
-                    const orderedScopes = [...scopes.values()];
-                    const currentByScope = new Map(orderedScopes.map(items => [historyKey(items[0]), Number(items[0].finalAmount)]));
+                    const currentByScope = new Map();
                     const events = history.map(item => ({ ...item, historyKey: historyKey(item), at: new Date(item.createdAtUtc).getTime() })).sort((a,b) => a.at-b.at || a.priceVersionId-b.priceVersionId);
                     const values = [];
                     const timestamps = [];
+                    const plottedEvents = [];
                     for (const event of events) {
                         currentByScope.set(event.historyKey, Number(event.finalAmount));
+                        if (currentByScope.size < scopes.size) continue;
+                        plottedEvents.push(event);
                         timestamps.push(event.at);
                         values.push([...currentByScope.values()].reduce((sum, amount) => sum + amount, 0));
                     }
@@ -1219,17 +1204,17 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                         ? 413
                         : 146 + ((timestamps[index] - firstTime) / (lastTime - firstTime)) * 534;
                     const yFor = value => 170 - ((value - min) / Math.max(1, max - min)) * 140;
-                    const points = history.map((item, index) => `${xFor(index).toFixed(1)},${yFor(values[index]).toFixed(1)}`);
+                    const points = plottedEvents.map((item, index) => `${xFor(index).toFixed(1)},${yFor(values[index]).toFixed(1)}`);
                     const priceTicks = [max, (min + max) / 2, min].map((value, index) =>
                         `<text x="132" y="${[30, 100, 170][index]}" text-anchor="start" dominant-baseline="middle" direction="rtl" font-size="12" fill="#65788a">${esc(money(Math.round(value)))}</text>`).join("");
                     const formatDate = value => window.HNUI.formatDateTime(value);
                     const polyline = points.length > 1 ? `<polyline points="${points.join(" ")}" fill="none" stroke="#c39418" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>` : "";
-                    const dots = history.map((item, index) => `<circle cx="${xFor(index).toFixed(1)}" cy="${yFor(values[index]).toFixed(1)}" r="4.5" fill="#c39418" stroke="#fff" stroke-width="2"><title>${esc(formatDate(item.createdAtUtc))}: ${esc(money(values[index]))}</title></circle>`).join("");
+                    const dots = plottedEvents.map((item, index) => `<circle cx="${xFor(index).toFixed(1)}" cy="${yFor(values[index]).toFixed(1)}" r="4.5" fill="#c39418" stroke="#fff" stroke-width="2"><title>${esc(formatDate(item.createdAtUtc))}: ${esc(money(values[index]))}</title></circle>`).join("");
                     const svg = `<svg viewBox="0 0 700 190" role="img" aria-label="تاریخچهٔ ثبت‌شدهٔ قیمت پایهٔ ${esc(p.name)}"><path d="M146 30H680M146 100H680M146 170H680" stroke="#e4eaf0" stroke-width="1"/>${priceTicks}${polyline}${dots}</svg>`;
                     const latestItems = events.slice(-20).reverse();
-                    const historyRows = latestItems.map(item => `<li><time datetime="${esc(item.createdAtUtc)}">${esc(formatDate(item.createdAtUtc))}</time><strong>${esc(money(Number(item.finalAmount)))}</strong><span>${item.component === "product" ? "قیمت پایه" : `ویژگی ${esc(combination.labels.join("، "))}`} · نسخهٔ قیمت #${fa(item.priceVersionId)}${item.isActive ? " · فعال" : ""}</span></li>`).join("");
+                    const historyRows = latestItems.map(item => `<li><time datetime="${esc(item.createdAtUtc)}">${esc(formatDate(item.createdAtUtc))}</time><strong>${esc(money(Number(item.finalAmount)))}</strong><span>${item.component === "variant" ? "قیمت تنوع" : item.component === "product" ? "قیمت پایه" : `ویژگی ${esc(combination.labels.join("، "))}`} · نسخهٔ قیمت #${fa(item.priceVersionId)}${item.isActive ? " · فعال" : ""}</span></li>`).join("");
                     state.innerHTML = `<i class="bi bi-graph-up" aria-hidden="true"></i><strong>قیمت ${combination.labels.length && combination.labels[0] !== "بدون ویژگی" ? `کالا و ${esc(combination.labels.join("، "))}` : "پایهٔ کالا"} بر اساس نسخه‌های ثبت‌شده</strong><span>${fa(history.length)} رویداد قیمت؛ سابقهٔ پیش از آغاز ثبت نسخه‌ها در دسترس نیست.</span>`;
-                    chart.innerHTML = `${svg}<div class="detail-price-chart-legend"><span><i style="--price-series-color:#c39418"></i>قیمت نهایی پس از تخفیف</span></div><div class="detail-price-chart-axis"><span>${esc(formatDate(history[0].createdAtUtc))}</span><span>${esc(formatDate(history.at(-1).createdAtUtc))}</span></div><ol class="detail-price-history-list">${historyRows}</ol>`;
+                    chart.innerHTML = `${svg}<div class="detail-price-chart-legend"><span><i style="--price-series-color:#c39418"></i>قیمت نهایی پس از تخفیف</span></div><div class="detail-price-chart-axis"><span>${esc(formatDate(plottedEvents[0].createdAtUtc))}</span><span>${esc(formatDate(plottedEvents.at(-1).createdAtUtc))}</span></div><ol class="detail-price-history-list">${historyRows}</ol>`;
                     chart.hidden = false;
                 } catch {
                     state.innerHTML = '<i class="bi bi-exclamation-circle" aria-hidden="true"></i><strong>دریافت تاریخچه انجام نشد</strong><span>بار دیگر نمودار را باز کنید تا رکوردهای قیمت از پایگاه خوانده شوند.</span>';
@@ -1264,7 +1249,7 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                         variants: hasPriceVariants ? { ...variants } : null,
                         priceAtRegistration: Math.max(
                             0,
-                            Math.round((Number(p.price) + combination.priceDelta) * 1000000),
+                            Math.round(currentPlanBaseAmount() + combination.priceDelta * 1000000),
                         ),
                         stockAtRegistration:
                             productView.querySelector(".product-stock-status-copy small")?.textContent?.trim() || "",
@@ -1632,16 +1617,6 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                 ),
             ];
             const selectedPlan = () => plansForProduct.find((plan) => plan.id === selectedSalesPlanId);
-            const currentPlanBaseAmount = () => {
-                const offer = selectedOffer();
-                const inventoryVariant = selectedInventoryVariant();
-                const variantPrice = inventoryVariant?.priceBySalesPlan?.[selectedSalesPlanId];
-                if (Number.isFinite(Number(variantPrice))) {
-                    const discount = Number(inventoryVariant.discountBySalesPlan?.[selectedSalesPlanId] || 0);
-                    return Math.round(Number(variantPrice) * (100 - discount) / 100);
-                }
-                return offer ? Math.round(Number(offer.priceAmount) * (100 - Number(offer.discountPercent)) / 100) : Math.round(Number(p.price) * 1000000);
-            };
             const calculateVariantPrice = () =>
                 Math.round(
                     (currentPlanBaseAmount() / 1000000 +
@@ -1660,6 +1635,14 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                 const value = calculateVariantPrice();
                 const basePriceLabel = productView.querySelector("#productBasePrice");
                 if (basePriceLabel) basePriceLabel.textContent = money(currentPlanBaseAmount());
+                const inventoryVariant = selectedInventoryVariant();
+                const variantListAmount = inventoryVariant?.priceBySalesPlan?.[selectedSalesPlanId];
+                const hasVariantPrice = variantListAmount !== null && variantListAmount !== undefined && Number.isFinite(Number(variantListAmount));
+                const offer = selectedOffer();
+                const listAmount = hasVariantPrice ? Number(variantListAmount) : Number(offer?.priceAmount);
+                const discount = hasVariantPrice ? Number(inventoryVariant.discountBySalesPlan?.[selectedSalesPlanId]) || 0 : Number(offer?.discountPercent) || 0;
+                if (saleMeta) saleMeta.innerHTML = discount > 0 && discount < 100 && Number.isFinite(listAmount)
+                    ? `<del class="price-old">${money(listAmount)}</del><span class="product-price-discount">٪${fa(discount)} تخفیف کالا</span>` : "";
                 productView.querySelectorAll("[data-accessory-id]").forEach((input) => {
                     const item = availableAccessories.find((accessory) => accessory.id === input.dataset.accessoryId);
                     const amountLabel = input.closest(".product-accessory")?.querySelector(".product-accessory-price");
@@ -1667,6 +1650,8 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                 });
                 const desktopPrice = productView.querySelector("#productFinalPrice");
                 if (desktopPrice) desktopPrice.innerHTML = `<span>${fa(value)}</span><small class="detail-price-unit">تومان</small>`;
+                const specialPrice = planSummary?.querySelector(".product-special-sale-price strong");
+                if (specialPrice) specialPrice.textContent = money(value);
                 const addonsPrice = productView.querySelector("#productAddonsPrice");
                 const accessoryAmount = Math.round(availableAccessories
                     .filter((item) => selectedAccessories.has(item.id))

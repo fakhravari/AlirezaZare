@@ -1542,7 +1542,7 @@
                 form.elements.categoryId.replaceChildren(new Option("انتخاب دسته", ""), ...data.categories.map(category => new Option(category.name, String(category.id))));
                 form.elements.brandId.value = String(product.idBrand || ""); form.elements.categoryId.value = String(product.idCategory || "");
                 form.elements.badgeId.replaceChildren(new Option("بدون نشان", ""), ...(data.badges || []).map(badge => new Option(badge.name, String(badge.id))));
-                form.elements.badgeId.value = String(product.idProductBadge || "");
+                form.elements.badgeId.value = String(product.idBadge || "");
                 ui.setPriceValue(form.elements.priceAmount, product.priceAmount ?? ""); form.elements.discountPercent.value = product.discountPercent ?? 0;
                 form.elements.maxPurchaseQuantity.value = product.maxPurchaseQuantity ?? 99;
                 window.bootstrap?.Modal?.getOrCreateInstance(document.getElementById("product-editor-modal")).show();

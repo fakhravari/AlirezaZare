@@ -7,12 +7,12 @@ DECLARE @ProfileId BIGINT = 90;
         ci.IdCart,
         ci.Id AS IdCartItem,
         ci.IdProduct,
-        p.Name AS ProductName,
-        ci.IdProductVariant,
+        p.NameFa AS ProductName,
+        ci.IdVariant AS IdProductVariant,
         ci.IdSalesPlan,
         ci.Quantity,
-        COALESCE(vp.PriceAmount, vo.PriceAmount, pp.PriceAmount, po.PriceAmount, p.PriceAmount, 0) AS BaseAmount,
-        COALESCE(vp.DiscountPercent, vo.DiscountPercent, pp.DiscountPercent, po.DiscountPercent, p.DiscountPercent, 0) AS DiscountPercent
+        COALESCE(vp.PriceAmount, pp.PriceAmount, 0) AS BaseAmount,
+        COALESCE(vp.DiscountPercent, pp.DiscountPercent, 0) AS DiscountPercent
     FROM Account.Cart AS c
     JOIN Account.CartItem AS ci ON ci.IdCart = c.Id
     JOIN Warehouse.Product AS p ON p.Id = ci.IdProduct
@@ -23,34 +23,14 @@ DECLARE @ProfileId BIGINT = 90;
        AND (sp.EndsAtUtc IS NULL OR sp.EndsAtUtc > SYSUTCDATETIME())
     OUTER APPLY
     (
-        SELECT TOP (1) offer.PriceAmount, offer.DiscountPercent
-        FROM Store.ProductSalesPlanOffer AS offer
-        WHERE offer.IdProduct = ci.IdProduct
-          AND offer.IdSalesPlan = ci.IdSalesPlan
-          AND offer.IsEnabled = 1
-        ORDER BY offer.Id DESC
-    ) AS po
-    OUTER APPLY
-    (
-        SELECT TOP (1) offer.PriceAmount, offer.DiscountPercent
-        FROM Store.ProductVariantSalesPlanOffer AS offer
-        WHERE offer.IdProductVariant = ci.IdProductVariant
-          AND offer.IdSalesPlan = ci.IdSalesPlan
-          AND offer.IsEnabled = 1
-        ORDER BY offer.Id DESC
-    ) AS vo
-    OUTER APPLY
-    (
         SELECT TOP (1) version.PriceAmount, version.DiscountPercent
         FROM Store.PriceVersion AS version
         WHERE version.IsActive = 1
           AND version.IdProduct = ci.IdProduct
           AND version.IdSalesPlan = ci.IdSalesPlan
-          AND version.IdProductVariant IS NULL
+          AND version.IdVariant IS NULL
           AND version.IdOptionValue IS NULL
-          AND version.IdAccessory IS NULL
-          AND version.IdOrderItem IS NULL
-        ORDER BY version.Id DESC
+          AND version.IdAccessory IS NULL        ORDER BY version.Id DESC
     ) AS pp
     OUTER APPLY
     (
@@ -59,20 +39,19 @@ DECLARE @ProfileId BIGINT = 90;
         WHERE version.IsActive = 1
           AND version.IdProduct = ci.IdProduct
           AND version.IdSalesPlan = ci.IdSalesPlan
-          AND version.IdProductVariant = ci.IdProductVariant
+          AND version.IdVariant = ci.IdVariant
+          AND EXISTS (SELECT 1 FROM Store.ProductVariantSalesPlanOffer AS variantOffer WHERE variantOffer.IdVariant = ci.IdVariant AND variantOffer.IdSalesPlan = ci.IdSalesPlan AND variantOffer.IsEnabled = 1)
           AND version.IdOptionValue IS NULL
-          AND version.IdAccessory IS NULL
-          AND version.IdOrderItem IS NULL
-        ORDER BY version.Id DESC
+          AND version.IdAccessory IS NULL        ORDER BY version.Id DESC
     ) AS vp
     WHERE c.IdProfile = @ProfileId
       AND
       (
-          ci.IdProductVariant IS NULL OR EXISTS
+          ci.IdVariant IS NULL OR EXISTS
           (
               SELECT 1
               FROM Warehouse.ProductVariant AS activeVariant
-              WHERE activeVariant.Id = ci.IdProductVariant
+              WHERE activeVariant.Id = ci.IdVariant
                 AND activeVariant.IdProduct = ci.IdProduct
                 AND activeVariant.IsActive = 1
           )
@@ -110,23 +89,22 @@ Components AS
         N'ویژگی' AS RowType,
         CONVERT(BIGINT, value.Id) AS ComponentId,
         CONCAT(purchaseOption.Label, N' / ', value.Label) AS ComponentName,
-        CONVERT(DECIMAL(19, 0), COALESCE(optionVersion.PriceAmount, ROUND(value.PriceDelta * 1000000, 0))) AS BaseAmount,
+        CONVERT(DECIMAL(19, 0), optionVersion.PriceAmount) AS BaseAmount,
         CONVERT(DECIMAL(5, 2), 0) AS DiscountPercent
     FROM CartRows AS cr
     JOIN Account.CartItemPurchaseOptionValue AS selected ON selected.IdCartItem = cr.IdCartItem
-    JOIN Store.ProductPurchaseOptionValue AS value ON value.Id = selected.IdProductPurchaseOptionValue
-    JOIN Store.ProductPurchaseOption AS purchaseOption ON purchaseOption.Id = value.IdProductPurchaseOption
+    JOIN Store.ProductPurchaseOptionValue AS value ON value.Id = selected.IdOptionValue
+    JOIN Store.ProductPurchaseOption AS purchaseOption ON purchaseOption.Id = value.IdOption
     OUTER APPLY
     (
         SELECT TOP (1) version.PriceAmount
         FROM Store.PriceVersion AS version
         WHERE version.IsActive = 1
           AND version.IdOptionValue = value.Id
-          AND version.IdProductVariant IS NULL
+          AND version.IdSalesPlan = cr.IdSalesPlan
+          AND version.IdVariant IS NULL
           AND version.IdOptionValue IS NOT NULL
-          AND version.IdAccessory IS NULL
-          AND version.IdOrderItem IS NULL
-        ORDER BY version.Id DESC
+          AND version.IdAccessory IS NULL        ORDER BY version.Id DESC
     ) AS optionVersion
 
     UNION ALL
@@ -143,24 +121,12 @@ Components AS
         N'متعلقه' AS RowType,
         CONVERT(BIGINT, pa.Id) AS ComponentId,
         accessory.Name AS ComponentName,
-        CONVERT(DECIMAL(19, 0), COALESCE(accessoryVersion.PriceAmount, offerAccessory.PriceAmount, pa.PriceAmount, 0)) AS BaseAmount,
+        CONVERT(DECIMAL(19, 0), accessoryVersion.PriceAmount) AS BaseAmount,
         CONVERT(DECIMAL(5, 2), 0) AS DiscountPercent
     FROM CartRows AS cr
     JOIN Store.ProductAccessory AS pa ON pa.IdProduct = cr.IdProduct
     JOIN Store.Accessory AS accessory ON accessory.Id = pa.IdAccessory AND accessory.IsActive = 1
     LEFT JOIN Account.CartItemAccessory AS selected ON selected.IdCartItem = cr.IdCartItem AND selected.IdProductAccessory = pa.Id
-    OUTER APPLY
-    (
-        SELECT TOP (1) offerAccessory.PriceAmount
-        FROM Store.ProductSalesPlanOfferAccessory AS offerAccessory
-        JOIN Store.ProductSalesPlanOffer AS offer ON offer.Id = offerAccessory.IdProductSalesPlanOffer
-           AND offer.IdProduct = cr.IdProduct
-           AND offer.IdSalesPlan = cr.IdSalesPlan
-           AND offer.IsEnabled = 1
-        WHERE offerAccessory.IdAccessory = pa.IdAccessory
-          AND offerAccessory.IsAllowed = 1
-        ORDER BY offerAccessory.Id DESC
-    ) AS offerAccessory
     OUTER APPLY
     (
         SELECT TOP (1) version.PriceAmount
@@ -169,10 +135,8 @@ Components AS
           AND version.IdProduct = cr.IdProduct
           AND version.IdSalesPlan = cr.IdSalesPlan
           AND version.IdAccessory = pa.IdAccessory
-          AND version.IdProductVariant IS NULL
-          AND version.IdOptionValue IS NULL
-          AND version.IdOrderItem IS NULL
-        ORDER BY version.Id DESC
+          AND version.IdVariant IS NULL
+          AND version.IdOptionValue IS NULL        ORDER BY version.Id DESC
     ) AS accessoryVersion
     WHERE pa.IsRequired = 1 OR selected.Id IS NOT NULL
 )

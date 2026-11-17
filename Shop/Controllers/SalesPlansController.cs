@@ -52,7 +52,7 @@ public sealed class SalesPlansController(
 
     [HttpGet("products/{productId:int}/price-history")]
     public async Task<IActionResult> ProductPriceHistory(int productId, [FromQuery] string? salesPlanId,
-        [FromQuery] long[]? optionPriceVersionIds, CancellationToken cancellationToken)
+        [FromQuery] long[]? optionPriceVersionIds, [FromQuery] long? variantId, CancellationToken cancellationToken)
     {
         if (productId < 1 || string.IsNullOrWhiteSpace(salesPlanId))
             return BadRequest(new { code = "invalid-request" });
@@ -69,6 +69,13 @@ public sealed class SalesPlansController(
         long? databasePlanId = await db.SalesPlanReferences.AsNoTracking().Where(item => item.IdStockOwnerType == 1 && item.StoreSalesPlanKey == salesPlanId).Select(item => (long?)item.Id).SingleOrDefaultAsync(cancellationToken);
         if (!databasePlanId.HasValue) return NotFound(new { code = "price-history-not-found" });
 
+        var inventoryVariant = variantId.HasValue
+            ? catalog.InventoryVariants.SingleOrDefault(item => item.ProductId == productId && item.VariantId == variantId.Value)
+            : null;
+        if (variantId.HasValue && inventoryVariant is null)
+            return BadRequest(new { code = "invalid-price-history-scope" });
+        long? pricedVariantId = inventoryVariant?.PriceBySalesPlan.ContainsKey(salesPlanId) == true ? variantId : null;
+
         long[] selectedOptionIds = optionPriceVersionIds ?? [];
         if (selectedOptionIds.Length > 10 || selectedOptionIds.Any(id => id <= 0) ||
             selectedOptionIds.Distinct().Count() != selectedOptionIds.Length)
@@ -76,24 +83,25 @@ public sealed class SalesPlansController(
 
         var selectedOptions = selectedOptionIds.Length == 0
             ? []
-            : await db.StorePriceVersions.AsNoTracking().Where(item => selectedOptionIds.Contains(item.Id) && item.IdProduct == productId &&
-                               item.IdOptionValue.HasValue && item.IdProductVariant == null && item.IdAccessory == null &&
-                               item.IdOrderItem == null && item.IsActive).Select(item => new { item.Id, item.IdOptionValue }).ToListAsync(cancellationToken);
+            : await db.StorePriceVersions.AsNoTracking().Where(item => selectedOptionIds.Contains(item.Id) && item.IdProduct == productId && item.IdSalesPlan == databasePlanId.Value &&
+                               item.IdOptionValue.HasValue && item.IdProductVariant == null && item.IdAccessory == null && item.IsActive).Select(item => new { item.Id, item.IdOptionValue }).ToListAsync(cancellationToken);
         if (selectedOptions.Count != selectedOptionIds.Length)
             return BadRequest(new { code = "invalid-price-history-scope" });
 
         var productVersions = await db.StorePriceVersions.AsNoTracking()
             .Where(item => item.IdProduct == productId && item.IdSalesPlan == databasePlanId.Value &&
-                           item.IdProductVariant == null && item.IdOptionValue == null && item.IdAccessory == null && item.IdOrderItem == null)
+                           item.IdProductVariant == pricedVariantId && item.IdOptionValue == null && item.IdAccessory == null)
             .OrderBy(item => item.CreatedAtUtc).ThenBy(item => item.Id)
-            .Select(item => new { item.Id, item.IdOptionValue, item.IdProductVariant, item.IdAccessory, item.IdOrderItem, item.PriceAmount, item.DiscountPercent, item.IsActive, item.CreatedAtUtc })
+            .Select(item => new { item.Id, item.IdOptionValue, item.IdProductVariant, item.IdAccessory, item.PriceAmount, item.DiscountPercent, item.IsActive, item.CreatedAtUtc })
             .ToListAsync(cancellationToken);
+        if (productVersions.Count == 0)
+            return Ok(new { productId, salesPlanId, currency = catalog.Currency, history = Array.Empty<object>() });
         long[] optionValueIds = selectedOptions.Select(item => item.IdOptionValue!.Value).ToArray();
         var optionVersions = optionValueIds.Length == 0
             ? []
-            : await db.StorePriceVersions.AsNoTracking().Where(item => item.IdOptionValue.HasValue && optionValueIds.Contains(item.IdOptionValue.Value))
+            : await db.StorePriceVersions.AsNoTracking().Where(item => item.IdSalesPlan == databasePlanId.Value && item.IdOptionValue.HasValue && optionValueIds.Contains(item.IdOptionValue.Value))
                 .OrderBy(item => item.CreatedAtUtc).ThenBy(item => item.Id)
-                .Select(item => new { item.Id, item.IdOptionValue, item.IdProductVariant, item.IdAccessory, item.IdOrderItem, item.PriceAmount, item.DiscountPercent, item.IsActive, item.CreatedAtUtc })
+                .Select(item => new { item.Id, item.IdOptionValue, item.IdProductVariant, item.IdAccessory, item.PriceAmount, item.DiscountPercent, item.IsActive, item.CreatedAtUtc })
                 .ToListAsync(cancellationToken);
 
         var versions = productVersions.Concat(optionVersions).OrderBy(item => item.CreatedAtUtc).ThenBy(item => item.Id).Select(item => new
@@ -102,7 +110,6 @@ public sealed class SalesPlansController(
                 item.IdOptionValue,
                 item.IdProductVariant,
                 item.IdAccessory,
-                item.IdOrderItem,
                 item.PriceAmount,
                 item.DiscountPercent,
                 item.IsActive,
@@ -117,8 +124,8 @@ public sealed class SalesPlansController(
             history = versions.Select(item => new
             {
                 priceVersionId = item.Id,
-                component = StorePriceVersionReference.GetComponent(item.IdProductVariant, item.IdOptionValue, item.IdAccessory, item.IdOrderItem),
-                targetId = item.IdOptionValue ?? item.IdProductVariant ?? item.IdAccessory ?? item.IdOrderItem,
+                component = StorePriceVersionReference.GetComponent(item.IdProductVariant, item.IdOptionValue, item.IdAccessory),
+                targetId = item.IdOptionValue ?? item.IdProductVariant ?? item.IdAccessory,
                 item.PriceAmount,
                 item.DiscountPercent,
                 finalAmount = decimal.Round(item.PriceAmount * (100m - item.DiscountPercent) / 100m, 0,
@@ -172,6 +179,7 @@ public sealed class SalesPlansController(
             }
 
             decimal adjustedUnit = checked(baseUnitAmount + adjustments);
+            if (adjustedUnit < 0) throw new SalesPlanUnavailableException("invalid-price");
 
             return Ok(new
             {
@@ -228,7 +236,7 @@ public sealed class SalesPlansController(
     private async Task<(decimal, IReadOnlyDictionary<string, decimal>, int)> GetValidatedAdjustments(
         QuoteRequest request, ProductSalesOffer offer, CancellationToken cancellationToken)
     {
-        ProductPurchaseConfiguration? product = await purchaseConfigurations.ReadAsync(request.ProductId, cancellationToken);
+        ProductPurchaseConfiguration? product = await purchaseConfigurations.ReadAsync(request.ProductId, offer.SalesPlanId, cancellationToken);
         if (product is null) throw new InvalidDataException();
         decimal adjustments = 0m;
         Dictionary<string, decimal> accessoryAmounts = new(StringComparer.Ordinal);

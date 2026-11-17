@@ -5,8 +5,6 @@ public sealed class StoreProductSalesPlanOffer
     public long Id { get; set; }
     public long IdProduct { get; set; }
     public long IdSalesPlan { get; set; }
-    public decimal PriceAmount { get; set; }
-    public decimal DiscountPercent { get; set; }
     public int MaxPurchaseQuantity { get; set; }
     public bool IsEnabled { get; set; }
     public DateTime CreatedAtUtc { get; set; }
@@ -18,8 +16,6 @@ public sealed class StoreProductVariantSalesPlanOffer
     public long Id { get; set; }
     public long IdProductVariant { get; set; }
     public long IdSalesPlan { get; set; }
-    public decimal PriceAmount { get; set; }
-    public decimal DiscountPercent { get; set; }
     public bool IsEnabled { get; set; }
     public DateTime CreatedAtUtc { get; set; }
     public DateTime? UpdatedAtUtc { get; set; }
@@ -41,7 +37,6 @@ public sealed class StoreProductAccessory
     public long IdAccessory { get; set; }
     public bool IsRequired { get; set; }
     public int SortOrder { get; set; }
-    public decimal PriceAmount { get; set; }
 }
 
 public sealed class StoreProductSalesPlanOfferAccessory
@@ -49,7 +44,6 @@ public sealed class StoreProductSalesPlanOfferAccessory
     public long Id { get; set; }
     public long IdProductSalesPlanOffer { get; set; }
     public long IdAccessory { get; set; }
-    public decimal PriceAmount { get; set; }
     public bool IsIncludedByDefault { get; set; }
     public bool IsAllowed { get; set; }
 }
@@ -77,6 +71,5 @@ public sealed class StoreProductPurchaseOptionValue
     public long IdProductPurchaseOption { get; set; }
     public string ValueKey { get; set; } = "";
     public string Label { get; set; } = "";
-    public decimal PriceDelta { get; set; }
     public int SortOrder { get; set; }
 }

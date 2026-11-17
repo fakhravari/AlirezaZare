@@ -31,7 +31,7 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
             var productIds = db.Products.AsNoTracking().Where(x => x.Name.Contains(search) || x.ProductKey.Contains(search)).Select(x => x.Id);
             plans = plans.Where(plan => db.StoreProductSalesPlanOffers.Any(offer => offer.IdSalesPlan == plan.Id && productIds.Contains(offer.IdProduct)) ||
                 db.StoreProductVariantSalesPlanOffers.Any(offer => offer.IdSalesPlan == plan.Id && db.ProductVariants.Any(variant => variant.Id == offer.IdProductVariant && productIds.Contains(variant.IdProduct))) ||
-                db.StorePriceVersions.Any(version => version.IdSalesPlan == plan.Id && productIds.Contains(version.IdProduct) && !version.IdOrderItem.HasValue));
+                db.StorePriceVersions.Any(version => version.IdSalesPlan == plan.Id && productIds.Contains(version.IdProduct)));
         }
         return Ok(await plans.OrderBy(x => x.DisplayName).Select(x => new
             {
@@ -68,7 +68,7 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
         if (!CanManage()) return Forbid();
 
         take = Math.Clamp(take, 1, 500);
-        var query = db.StorePriceVersions.AsNoTracking().Where(x => !x.IdOrderItem.HasValue);
+        var query = db.StorePriceVersions.AsNoTracking();
         var search = q?.Trim() ?? "";
         if (search.Length > 100) return ValidationProblem(detail: "عبارت جست‌وجو طولانی است.", statusCode: 400);
         if (!TryDateRange(from, to, out var start, out var end)) return ValidationProblem(detail: "بازهٔ تاریخ معتبر نیست.", statusCode: 400);
@@ -85,8 +85,8 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
                 productName = db.Products.Where(product => product.Id == x.IdProduct).Select(product => product.Name).FirstOrDefault(),
                 targetType = x.IdOptionValue.HasValue ? "option" : x.IdAccessory.HasValue ? "accessory" : x.IdProductVariant.HasValue ? "variant" : "product",
                 targetId = x.IdProductVariant ?? x.IdOptionValue ?? x.IdAccessory,
-                x.IdProductVariant, x.IdOptionValue, x.IdAccessory, x.IdOrderItem,
-                x.PriceAmount, x.DiscountPercent, x.IsActive, x.CreatedAtUtc, x.ChangedBy, x.ChangeReason, x.PreviousVersionId
+                x.IdProductVariant, x.IdOptionValue, x.IdAccessory,
+                x.PriceAmount, x.DiscountPercent, x.IsActive, x.CreatedAtUtc, x.IdChangedBy, x.ChangeReason, x.IdPreviousVersion
             }).ToListAsync(cancellationToken));
     }
 
@@ -286,8 +286,8 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
                 AttributesJson = x.variant.AttributesJson,
                 SalesPlanId = x.plan.StoreSalesPlanKey,
                 SalesPlanName = x.plan.DisplayName,
-                PriceAmount = x.offer == null ? null : x.offer.PriceAmount,
-                DiscountPercent = x.offer == null ? null : x.offer.DiscountPercent,
+                PriceAmount = db.StorePriceVersions.Where(v => v.IdProduct == x.product.Id && v.IdProductVariant == x.variant.Id && v.IdSalesPlan == x.plan.Id && v.IsActive).Select(v => (decimal?)v.PriceAmount).FirstOrDefault(),
+                DiscountPercent = db.StorePriceVersions.Where(v => v.IdProduct == x.product.Id && v.IdProductVariant == x.variant.Id && v.IdSalesPlan == x.plan.Id && v.IsActive).Select(v => (decimal?)v.DiscountPercent).FirstOrDefault(),
                 IsEnabled = x.offer == null ? null : x.offer.IsEnabled
             }).ToListAsync(cancellationToken);
 
@@ -310,12 +310,12 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
         if (!valid) return NotFound(new { code = "variant-or-plan-not-found" });
 
         var offer = await db.StoreProductVariantSalesPlanOffers.SingleOrDefaultAsync(x => x.IdProductVariant == variantId && x.IdSalesPlan == plan.Id, cancellationToken);
-        if (offer is null) db.StoreProductVariantSalesPlanOffers.Add(new Shop.Data.Domain.Store.Entities.StoreProductVariantSalesPlanOffer { IdProductVariant = variantId, IdSalesPlan = plan.Id, PriceAmount = input.PriceAmount, DiscountPercent = input.DiscountPercent, IsEnabled = input.IsEnabled, CreatedAtUtc = DateTime.UtcNow });
-        else { offer.PriceAmount = input.PriceAmount; offer.DiscountPercent = input.DiscountPercent; offer.IsEnabled = input.IsEnabled; offer.UpdatedAtUtc = DateTime.UtcNow; }
+        if (offer is null) db.StoreProductVariantSalesPlanOffers.Add(new Shop.Data.Domain.Store.Entities.StoreProductVariantSalesPlanOffer { IdProductVariant = variantId, IdSalesPlan = plan.Id, IsEnabled = input.IsEnabled, CreatedAtUtc = DateTime.UtcNow });
+        else { offer.IsEnabled = input.IsEnabled; offer.UpdatedAtUtc = DateTime.UtcNow; }
         await db.SaveChangesAsync(cancellationToken);
 
         long productId = await db.ProductVariants.Where(x => x.Id == variantId).Select(x => x.IdProduct).SingleAsync(cancellationToken);
-        long priceVersionId = await priceVersions.AppendAsync(productId, plan.Id, variantId, null, null, input.PriceAmount, input.DiscountPercent, User.Identity?.Name, cancellationToken);
+        long priceVersionId = await priceVersions.AppendAsync(productId, plan.Id, variantId, null, null, input.PriceAmount, input.DiscountPercent, long.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value), cancellationToken);
         await transaction.CommitAsync(cancellationToken);
 
         return Ok(new { saved = true, priceVersionId, message = "قیمت تنوع و طرح فروش ذخیره شد." });
@@ -401,8 +401,8 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
                 ProductName = x.product.Name,
                 SalesPlanId = x.plan.StoreSalesPlanKey,
                 SalesPlanName = x.plan.DisplayName,
-                PriceAmount = x.offer == null ? null : x.offer.PriceAmount,
-                DiscountPercent = x.offer == null ? null : x.offer.DiscountPercent,
+                PriceAmount = db.StorePriceVersions.Where(v => v.IdProduct == x.product.Id && v.IdSalesPlan == x.plan.Id && v.IsActive && v.IdProductVariant == null && v.IdOptionValue == null && v.IdAccessory == null).Select(v => (decimal?)v.PriceAmount).FirstOrDefault(),
+                DiscountPercent = db.StorePriceVersions.Where(v => v.IdProduct == x.product.Id && v.IdSalesPlan == x.plan.Id && v.IsActive && v.IdProductVariant == null && v.IdOptionValue == null && v.IdAccessory == null).Select(v => (decimal?)v.DiscountPercent).FirstOrDefault(),
                 MaxPurchaseQuantity = x.offer == null ? null : x.offer.MaxPurchaseQuantity,
                 IsEnabled = x.offer == null ? null : x.offer.IsEnabled
             }).ToListAsync(cancellationToken);
@@ -425,25 +425,56 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
 
         var offer = await db.StoreProductSalesPlanOffers.SingleOrDefaultAsync(x => x.IdProduct == productId && x.IdSalesPlan == plan.Id, cancellationToken);
         List<(long AccessoryId, decimal PriceAmount)> newAccessoryPrices = [];
+        List<(long OptionId, decimal PriceAmount)> newOptionPrices = [];
         if (offer is null)
         {
-            offer = new Shop.Data.Domain.Store.Entities.StoreProductSalesPlanOffer { IdProduct = productId, IdSalesPlan = plan.Id, PriceAmount = input.PriceAmount, DiscountPercent = input.DiscountPercent, MaxPurchaseQuantity = input.MaxPurchaseQuantity, IsEnabled = input.IsEnabled, CreatedAtUtc = DateTime.UtcNow };
+            offer = new Shop.Data.Domain.Store.Entities.StoreProductSalesPlanOffer { IdProduct = productId, IdSalesPlan = plan.Id, MaxPurchaseQuantity = input.MaxPurchaseQuantity, IsEnabled = input.IsEnabled, CreatedAtUtc = DateTime.UtcNow };
             db.StoreProductSalesPlanOffers.Add(offer); await db.SaveChangesAsync(cancellationToken);
 
-            var accessorySeed = await (from pa in db.StoreProductAccessories join accessory in db.StoreAccessories on pa.IdAccessory equals accessory.Id where pa.IdProduct == productId && accessory.IsActive select new { pa.IdAccessory, pa.PriceAmount, pa.IsRequired }).ToListAsync(cancellationToken);
-            db.StoreProductSalesPlanOfferAccessories.AddRange(accessorySeed.Select(x => new Shop.Data.Domain.Store.Entities.StoreProductSalesPlanOfferAccessory { IdProductSalesPlanOffer = offer.Id, IdAccessory = x.IdAccessory, PriceAmount = x.PriceAmount, IsIncludedByDefault = x.IsRequired, IsAllowed = true }));
-            newAccessoryPrices = accessorySeed.Select(x => (x.IdAccessory, x.PriceAmount)).ToList();
+            var accessorySeed = await (from pa in db.StoreProductAccessories join accessory in db.StoreAccessories on pa.IdAccessory equals accessory.Id where pa.IdProduct == productId && accessory.IsActive select new { pa.IdAccessory, pa.IsRequired, PriceAmount = (from version in db.StorePriceVersions join regular in db.SalesPlanReferences on version.IdSalesPlan equals (long?)regular.Id where version.IdProduct == productId && version.IdAccessory == pa.IdAccessory && version.IsActive && regular.IsRegular && regular.IdStockOwnerType == 1 orderby regular.Id select (decimal?)version.PriceAmount).FirstOrDefault() }).ToListAsync(cancellationToken);
+            if (accessorySeed.Any(x => !x.PriceAmount.HasValue)) return Conflict(new { title = "قیمت عادی متعلقه ثبت نشده است." });
+            db.StoreProductSalesPlanOfferAccessories.AddRange(accessorySeed.Select(x => new Shop.Data.Domain.Store.Entities.StoreProductSalesPlanOfferAccessory { IdProductSalesPlanOffer = offer.Id, IdAccessory = x.IdAccessory, IsIncludedByDefault = x.IsRequired, IsAllowed = true }));
+            newAccessoryPrices = accessorySeed.Select(x => (x.IdAccessory, x.PriceAmount!.Value)).ToList();
+            var optionSeed = await (from option in db.StoreProductPurchaseOptions
+                                    join value in db.StoreProductPurchaseOptionValues on option.Id equals value.IdProductPurchaseOption
+                                    where option.IdProduct == productId && !db.StorePriceVersions.Any(v => v.IdOptionValue == value.Id && v.IdSalesPlan == plan.Id && v.IsActive)
+                                    select new { value.Id, PriceAmount = (from version in db.StorePriceVersions
+                                        join regular in db.SalesPlanReferences on version.IdSalesPlan equals regular.Id
+                                        where version.IdOptionValue == value.Id && version.IsActive && regular.IsRegular && regular.IdStockOwnerType == 1
+                                        select (decimal?)version.PriceAmount).FirstOrDefault() }).ToListAsync(cancellationToken);
+            if (optionSeed.Any(x => !x.PriceAmount.HasValue)) return Conflict(new { code = "missing-regular-option-price" });
+            newOptionPrices = optionSeed.Select(x => (x.Id, x.PriceAmount!.Value)).ToList();
         }
-        else { offer.PriceAmount = input.PriceAmount; offer.DiscountPercent = input.DiscountPercent; offer.MaxPurchaseQuantity = input.MaxPurchaseQuantity; offer.IsEnabled = input.IsEnabled; offer.UpdatedAtUtc = DateTime.UtcNow; }
+        else { offer.MaxPurchaseQuantity = input.MaxPurchaseQuantity; offer.IsEnabled = input.IsEnabled; offer.UpdatedAtUtc = DateTime.UtcNow; }
         await db.SaveChangesAsync(cancellationToken);
 
-        long priceVersionId = await priceVersions.AppendAsync(productId, plan.Id, null, null, null, input.PriceAmount, input.DiscountPercent, User.Identity?.Name, cancellationToken);
+        long priceVersionId = await priceVersions.AppendAsync(productId, plan.Id, null, null, null, input.PriceAmount, input.DiscountPercent, long.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value), cancellationToken);
         foreach (var accessory in newAccessoryPrices)
-            await priceVersions.AppendAsync(productId, plan.Id, null, null, accessory.AccessoryId, accessory.PriceAmount, 0, User.Identity?.Name, cancellationToken);
+            await priceVersions.AppendAsync(productId, plan.Id, null, null, accessory.AccessoryId, accessory.PriceAmount, 0, long.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value), cancellationToken);
+        foreach (var option in newOptionPrices)
+            await priceVersions.AppendAsync(productId, plan.Id, null, option.OptionId, null, option.PriceAmount, 0, long.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value), cancellationToken);
         await transaction.CommitAsync(cancellationToken);
 
         return Ok(new { priceVersionId, message = "پیشنهاد کالا در طرح ذخیره شد." });
     }
+
+    [HttpPut("products/{productId:long}/options/{optionValueId:long}/plans/{salesPlanId}")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> SaveOptionPrice(long productId, long optionValueId, string salesPlanId, [FromBody] OptionPriceInput input, CancellationToken cancellationToken)
+    {
+        if (!CanManage()) return Forbid();
+        if (input.PriceAmount < -9007199254740991m || input.PriceAmount > 9007199254740991m || input.PriceAmount != decimal.Truncate(input.PriceAmount)) return BadRequest();
+        await using var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
+        var plan = await db.SalesPlanReferences.SingleOrDefaultAsync(x => x.StoreSalesPlanKey == salesPlanId && x.IdStockOwnerType == 1, cancellationToken);
+        bool optionExists = await (from option in db.StoreProductPurchaseOptions join value in db.StoreProductPurchaseOptionValues on option.Id equals value.IdProductPurchaseOption where option.IdProduct == productId && value.Id == optionValueId select value.Id).AnyAsync(cancellationToken);
+        if (plan is null || !optionExists) return NotFound();
+        if (!plan.IsRegular && !await db.StoreProductSalesPlanOffers.AnyAsync(x => x.IdProduct == productId && x.IdSalesPlan == plan.Id, cancellationToken)) return NotFound();
+        long id = await priceVersions.AppendAsync(productId, plan.Id, null, optionValueId, null, input.PriceAmount, 0, long.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value), cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
+        return Ok(new { priceVersionId = id });
+    }
+
+    public sealed record OptionPriceInput(decimal PriceAmount);
 
     public sealed class ProductOfferRow
     {
@@ -475,7 +506,9 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
                           from oa in overrides.DefaultIfEmpty()
                           where pa.IdProduct == productId && accessory.IsActive
                           orderby pa.SortOrder, accessory.Name
-                          select new OfferAccessoryRow { AccessoryId = accessory.Id, Name = accessory.Name, IsRequired = pa.IsRequired, BasePriceAmount = pa.PriceAmount, PriceAmount = oa == null ? null : oa.PriceAmount, IsAllowed = oa != null && oa.IsAllowed }).ToListAsync(cancellationToken);
+                          select new OfferAccessoryRow { AccessoryId = accessory.Id, Name = accessory.Name, IsRequired = pa.IsRequired,
+                              BasePriceAmount = (from version in db.StorePriceVersions join regular in db.SalesPlanReferences on version.IdSalesPlan equals (long?)regular.Id where version.IdProduct == productId && version.IdAccessory == accessory.Id && version.IsActive && regular.IsRegular && regular.IdStockOwnerType == 1 orderby regular.Id select (decimal?)version.PriceAmount).FirstOrDefault() ?? 0m,
+                              PriceAmount = (from version in db.StorePriceVersions join plan in db.SalesPlanReferences on version.IdSalesPlan equals (long?)plan.Id where version.IdProduct == productId && version.IdAccessory == accessory.Id && version.IsActive && plan.StoreSalesPlanKey == salesPlanId select (decimal?)version.PriceAmount).FirstOrDefault(), IsAllowed = oa != null && oa.IsAllowed }).ToListAsync(cancellationToken);
 
         return Ok(rows);
     }
@@ -496,12 +529,12 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
         if (productAccessory.IsRequired && !input.IsAllowed) return BadRequest(new { title = "متعلقهٔ اجباری باید در پیشنهاد مجاز باشد." });
 
         var overrideRow = await db.StoreProductSalesPlanOfferAccessories.SingleOrDefaultAsync(x => x.IdProductSalesPlanOffer == offer.OfferId && x.IdAccessory == accessoryId, cancellationToken);
-        if (overrideRow is null) db.StoreProductSalesPlanOfferAccessories.Add(new Shop.Data.Domain.Store.Entities.StoreProductSalesPlanOfferAccessory { IdProductSalesPlanOffer = offer.OfferId, IdAccessory = accessoryId, PriceAmount = input.PriceAmount, IsIncludedByDefault = productAccessory.IsRequired, IsAllowed = input.IsAllowed });
-        else { overrideRow.PriceAmount = input.PriceAmount; overrideRow.IsAllowed = input.IsAllowed; }
+        if (overrideRow is null) db.StoreProductSalesPlanOfferAccessories.Add(new Shop.Data.Domain.Store.Entities.StoreProductSalesPlanOfferAccessory { IdProductSalesPlanOffer = offer.OfferId, IdAccessory = accessoryId, IsIncludedByDefault = productAccessory.IsRequired, IsAllowed = input.IsAllowed });
+        else { overrideRow.IsAllowed = input.IsAllowed; }
         await db.SaveChangesAsync(cancellationToken);
 
         long planId = await db.SalesPlanReferences.Where(x => x.StoreSalesPlanKey == salesPlanId).Select(x => x.Id).SingleAsync(cancellationToken);
-        long priceVersionId = await priceVersions.AppendAsync(productId, planId, null, null, accessoryId, input.PriceAmount, 0, User.Identity?.Name, cancellationToken);
+        long priceVersionId = await priceVersions.AppendAsync(productId, planId, null, null, accessoryId, input.PriceAmount, 0, long.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value), cancellationToken);
         await transaction.CommitAsync(cancellationToken);
 
         return Ok(new { priceVersionId, message = "متعلقهٔ پیشنهاد ذخیره شد." });

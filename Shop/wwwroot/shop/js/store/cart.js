@@ -98,12 +98,12 @@
         options: { priceOptions: variants, accessories },
       };
     };
-    const normalizeOptions = (options, product) => {
+    const normalizeOptions = (options, product, salesPlanId) => {
       const cleanText = (text, limit) => String(text || "").trim().slice(0, limit);
       const productPriceOptions = getSalesPlanData().priceOptions?.[Number(product?.id)] || [];
       const priceOptionMap = Object.fromEntries(productPriceOptions.map((feature) => [feature.key, {
         label: feature.label,
-        options: (feature.values || []).map((value) => ({ id: Number(value.id) || 0, value: value.key, label: value.label, priceDelta: Number(value.priceDelta) / 1000000 })),
+        options: (feature.values || []).map((value) => ({ id: Number(value.id) || 0, value: value.key, label: value.label, priceDelta: Number(value.priceBySalesPlan?.[salesPlanId] ?? value.priceDelta) / 1000000 })),
       }]));
       const savedPriceOptions = Array.isArray(options?.priceOptions) ? options.priceOptions : options?.variants;
       const priceOptions = Array.isArray(savedPriceOptions)
@@ -212,7 +212,7 @@
         const product = (window.HNProducts || []).find(
           (candidate) => String(candidate.id) === String(item.id || "").replace(/^(\d+):.*$/, "$1"),
         );
-        const options = normalizeOptions(item.options, product);
+        const options = normalizeOptions(item.options, product, item.salesPlanId || item.salesPlanSnapshot?.id || "regular");
         if (item.salesPlanSnapshot?.accessoryPriceAmounts && typeof item.salesPlanSnapshot.accessoryPriceAmounts === "object") {
           options.accessories = options.accessories.map((accessory) => {
             const amount = Number(item.salesPlanSnapshot.accessoryPriceAmounts[accessory.id]);

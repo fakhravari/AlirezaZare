@@ -52,6 +52,7 @@ public sealed class AccountController(
         long[] cartItemIds = cartRows.Select(item => item.Id).ToArray();
         var cartOptionRows = cartItemIds.Length == 0 ? [] : await (
             from selected in db.AccountCartItemPurchaseOptionValues.AsNoTracking()
+            join cartItem in db.AccountCartItems.AsNoTracking() on selected.IdCartItem equals cartItem.Id
             join value in db.StoreProductPurchaseOptionValues.AsNoTracking() on selected.IdProductPurchaseOptionValue equals value.Id
             join option in db.StoreProductPurchaseOptions.AsNoTracking() on value.IdProductPurchaseOption equals option.Id
             where cartItemIds.Contains(selected.IdCartItem)
@@ -63,10 +64,11 @@ public sealed class AccountController(
                 OptionLabel = option.Label,
                 ValueKey = value.ValueKey,
                 ValueLabel = value.Label,
-                value.PriceDelta
+                PriceDelta = db.StorePriceVersions.Where(v => v.IdOptionValue == value.Id && v.IdSalesPlan == cartItem.IdSalesPlan && v.IsActive).Select(v => (decimal?)v.PriceAmount / 1_000_000m).FirstOrDefault()
             }).ToListAsync(ct);
         var cartAccessoryRows = cartItemIds.Length == 0 ? [] : await (
             from selected in db.AccountCartItemAccessories.AsNoTracking()
+            join cartItem in db.AccountCartItems.AsNoTracking() on selected.IdCartItem equals cartItem.Id
             join link in db.StoreProductAccessories.AsNoTracking() on selected.IdProductAccessory equals link.Id
             join accessory in db.StoreAccessories.AsNoTracking() on link.IdAccessory equals accessory.Id
             where cartItemIds.Contains(selected.IdCartItem)
@@ -77,7 +79,7 @@ public sealed class AccountController(
                 accessory.AccessoryKey,
                 accessory.Name,
                 link.IsRequired,
-                link.PriceAmount
+                PriceAmount = db.StorePriceVersions.Where(v => v.IdProduct == link.IdProduct && v.IdAccessory == link.IdAccessory && v.IdSalesPlan == cartItem.IdSalesPlan && v.IsActive).Select(v => (decimal?)v.PriceAmount).FirstOrDefault()
             }).ToListAsync(ct);
         var cartVariantRows = cartRows.Where(item => item.IdProductVariant.HasValue).Select(item => item.IdProductVariant!.Value).Distinct().ToArray();
         var cartVariants = cartVariantRows.Length == 0 ? [] : await db.ProductVariants.AsNoTracking().Where(variant => cartVariantRows.Contains(variant.Id))
@@ -187,7 +189,7 @@ public sealed class AccountController(
         var orderPriceReferences = orderItemIds.Length == 0 ? [] : await (from reference in db.StoreOrderItemPriceReferences.AsNoTracking()
                                                                           join version in db.StorePriceVersions.AsNoTracking() on reference.IdPriceVersion equals version.Id
                                                                           where orderItemIds.Contains(reference.IdOrderItem)
-                                                                          select new { reference.IdOrderItem, reference.IdPriceVersion, version.IdProductVariant, version.IdOptionValue, version.IdAccessory, PriceVersionOrderItemId = version.IdOrderItem, version.PriceAmount, version.DiscountPercent })
+                                                                          select new { reference.IdOrderItem, reference.IdPriceVersion, version.IdProductVariant, version.IdOptionValue, version.IdAccessory, version.PriceAmount, version.DiscountPercent })
             .ToListAsync(ct);
         var orderItemsById = orderItemRows.GroupBy(x => x.IdCustomerOrder).ToDictionary(group => group.Key, group => group.ToArray());
         var shippingHistory = orderIds.Length == 0 ? [] : await db.StoreOrderShippingHistories.AsNoTracking()
@@ -224,7 +226,7 @@ public sealed class AccountController(
                         label = option.OptionLabel,
                         value = option.ValueLabel,
                         productValue = option.ValueKey,
-                        priceDelta = option.PriceDelta
+                        priceDelta = option.PriceDelta ?? 0m
                     }).ToArray(),
                     accessories = cartAccessoryRows.Where(accessory => accessory.IdCartItem == item.Id).Select(accessory => new
                     {
@@ -233,7 +235,7 @@ public sealed class AccountController(
                         name = accessory.Name,
                         required = accessory.IsRequired,
                         selected = true,
-                        price = accessory.PriceAmount / 1_000_000m
+                        price = (accessory.PriceAmount ?? 0m) / 1_000_000m
                     }).ToArray()
                 }
             }).ToArray(),
@@ -302,8 +304,8 @@ public sealed class AccountController(
                     priceReferences = orderPriceReferences.Where(reference => reference.IdOrderItem == item.Id).Select(reference => new
                     {
                         priceVersionId = reference.IdPriceVersion,
-                        component = StorePriceVersionReference.GetComponent(reference.IdProductVariant, reference.IdOptionValue, reference.IdAccessory, reference.PriceVersionOrderItemId),
-                        calculatedUnitAmount = StorePriceVersionReference.AppliesDiscount(reference.IdOptionValue, reference.IdAccessory, reference.PriceVersionOrderItemId)
+                        component = StorePriceVersionReference.GetComponent(reference.IdProductVariant, reference.IdOptionValue, reference.IdAccessory),
+                        calculatedUnitAmount = StorePriceVersionReference.AppliesDiscount(reference.IdOptionValue, reference.IdAccessory)
                             ? decimal.Round(reference.PriceAmount * (100m - reference.DiscountPercent) / 100m, 0, MidpointRounding.AwayFromZero)
                             : reference.PriceAmount
                     }).ToArray()
@@ -502,7 +504,7 @@ public sealed class AccountController(
             if (optionValueIds.Distinct().Count() != optionValueIds.Length || optionValueIds.Any(id => id < 1))
                 return BadRequest(new { code = "invalid-product-options" });
 
-            ProductPurchaseConfiguration? configuration = await purchaseConfigurations.ReadAsync(checked((int)item.ProductId), ct);
+            ProductPurchaseConfiguration? configuration = await purchaseConfigurations.ReadAsync(checked((int)item.ProductId), item.SalesPlanId, ct);
             if (configuration is null || configuration.Options.Any(option =>
                     option.Values.Count(value => optionValueIds.Contains(value.Id)) != 1) ||
                 optionValueIds.Length != configuration.Options.Count)
@@ -654,11 +656,11 @@ public sealed class AccountController(
             if (inventoryVariant is not null && inventoryVariant.PriceBySalesPlan.TryGetValue(row.SalesPlanId, out decimal variantPrice))
             {
                 decimal variantDiscount = inventoryVariant.DiscountBySalesPlan.GetValueOrDefault(row.SalesPlanId);
-                if (variantDiscount > 0) eligible = false;
+                eligible = row.SalesPlanId == "regular" && variantDiscount <= 0;
                 unitAmount = decimal.Round(variantPrice * (100m - variantDiscount) / 100m, 0, MidpointRounding.AwayFromZero);
             }
 
-            ProductPurchaseConfiguration? configuration = await purchaseConfigurations.ReadAsync(checked((int)row.IdProduct), ct);
+            ProductPurchaseConfiguration? configuration = await purchaseConfigurations.ReadAsync(checked((int)row.IdProduct), row.SalesPlanId, ct);
             if (configuration is null)
                 return Conflict(new { code = "product-options-unavailable" });
 
@@ -706,6 +708,7 @@ public sealed class AccountController(
 
                     unitAmount += amount;
                 }
+            if (unitAmount < 0) return Conflict(new { code = "invalid-price" });
             decimal lineAmount = checked(unitAmount * row.Quantity);
             subtotalAmount += lineAmount;
             if (eligible) eligibleAmount += lineAmount;
@@ -841,7 +844,7 @@ public sealed class AccountController(
                 string? productName = await db.Products.AsNoTracking().Where(x => x.Id == line.ProductId && x.IsStoreEnabled).Select(x => x.Name).SingleOrDefaultAsync(ct);
                 if (productName is null) return Conflict(new { code = "product-unavailable" });
 
-                ProductPurchaseConfiguration? configuration = await purchaseConfigurations.ReadAsync(checked((int)line.ProductId), ct);
+                ProductPurchaseConfiguration? configuration = await purchaseConfigurations.ReadAsync(checked((int)line.ProductId), line.SalesPlanId, ct);
                 if (configuration is null) return Conflict(new { code = "product-options-unavailable" });
 
                 if (line.Quantity > configuration.MaxPurchaseQuantity) return Conflict(new { code = "purchase-limit" });
@@ -871,9 +874,11 @@ public sealed class AccountController(
                     decimal variantDiscount = selectedInventoryVariant.DiscountBySalesPlan.GetValueOrDefault(line.SalesPlanId);
                     unitAmount = decimal.Round(variantPrice * (100m - variantDiscount) / 100m, 0, MidpointRounding.AwayFromZero);
                 }
-                bool couponEligible = line.SalesPlanId == "regular" && quote.DiscountPercent == 0 &&
-                    (selectedInventoryVariant is null ||
-                     selectedInventoryVariant.DiscountBySalesPlan.GetValueOrDefault(line.SalesPlanId) <= 0);
+                bool hasVariantPrice = selectedInventoryVariant?.PriceBySalesPlan.ContainsKey(line.SalesPlanId) == true;
+                decimal effectiveDiscount = hasVariantPrice
+                    ? selectedInventoryVariant!.DiscountBySalesPlan.GetValueOrDefault(line.SalesPlanId)
+                    : quote.DiscountPercent;
+                bool couponEligible = line.SalesPlanId == "regular" && effectiveDiscount <= 0;
                 long basePriceVersionId = selectedInventoryVariant?.PriceVersionIdsBySalesPlan.GetValueOrDefault(line.SalesPlanId) ?? 0;
                 if (basePriceVersionId == 0) basePriceVersionId = offer.PriceVersionId;
                 if (basePriceVersionId > 0)
@@ -899,6 +904,7 @@ public sealed class AccountController(
                             priceReferences.Add(new StoreOrderItemPriceReference { IdPriceVersion = accessoryPriceId });
                     }
 
+                if (unitAmount < 0) return Conflict(new { code = "invalid-price" });
                 priced.Add((line, unitAmount, productName, priceReferences, couponEligible));
             }
         }

@@ -272,6 +272,8 @@ public sealed record SalesPlanPriceOptionValue(string Key, string Label, decimal
 {
     public long Id { get; init; }
     public long PriceVersionId { get; init; }
+    public IReadOnlyDictionary<string, decimal> PriceBySalesPlan { get; init; } = new Dictionary<string, decimal>();
+    public IReadOnlyDictionary<string, long> PriceVersionIdsBySalesPlan { get; init; } = new Dictionary<string, long>();
 }
 
 public sealed record SalesPlan(

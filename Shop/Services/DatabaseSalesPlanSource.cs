@@ -38,7 +38,7 @@ public sealed class DatabaseSalesPlanSource(IStoreSalesPlanRepository repository
                 group => (IReadOnlyList<SalesPlanPriceOption>)group.Select(option => new SalesPlanPriceOption(
                     option.Key, option.Label, option.Values.Select(value => new SalesPlanPriceOptionValue(
                         value.Key, value.Label, value.PriceDelta)
-                    { Id = value.Id, PriceVersionId = value.PriceVersionId }).ToArray())).ToArray())
+                    { Id = value.Id, PriceVersionId = value.PriceVersionId, PriceBySalesPlan = value.PriceBySalesPlan, PriceVersionIdsBySalesPlan = value.PriceVersionIdsBySalesPlan }).ToArray())).ToArray())
         };
     }
 
@@ -51,10 +51,10 @@ public sealed class DatabaseSalesPlanSource(IStoreSalesPlanRepository repository
         return document.RootElement.Clone();
     }
 
-    public async Task<ProductPurchaseConfiguration?> ReadAsync(int productId,
+    public async Task<ProductPurchaseConfiguration?> ReadAsync(int productId, string salesPlanId,
         CancellationToken cancellationToken = default)
     {
-        var configuration = await repository.ReadProductPurchaseConfigurationAsync(productId, cancellationToken);
+        var configuration = await repository.ReadProductPurchaseConfigurationAsync(productId, salesPlanId, cancellationToken);
 
         return configuration is null
             ? null

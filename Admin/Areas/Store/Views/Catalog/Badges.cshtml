@@ -10,7 +10,9 @@
         <form class="d-flex flex-wrap gap-2 mb-3" data-badge-form>
             <input type="hidden" name="id" /><label class="visually-hidden" for="badge-title">عنوان نشان</label>
             <input id="badge-title" name="title" class="form-control w-auto" maxlength="100" required placeholder="عنوان نشان" />
-            <label class="form-label align-self-center mb-0" for="badge-color">رنگ نشان</label><input id="badge-color" name="backgroundColor" class="form-control form-control-color" type="color" value="#102a43" title="انتخاب رنگ نشان" />
+            <label class="form-label align-self-center mb-0" for="badge-color">رنگ زمینه</label><input id="badge-color" name="backgroundColor" class="form-control form-control-color" type="color" value="#102a43" title="انتخاب رنگ زمینه" />
+            <label class="form-label align-self-center mb-0" for="badge-text-color">رنگ متن</label><input id="badge-text-color" name="textColor" class="form-control form-control-color" type="color" value="#ffffff" title="انتخاب رنگ متن" />
+            <label class="form-label align-self-center mb-0" for="badge-border-color">رنگ حاشیه</label><input id="badge-border-color" name="borderColor" class="form-control form-control-color" type="color" value="#ffffff" title="انتخاب رنگ حاشیه" />
             <button class="btn btn-primary" type="submit">ذخیره نشان</button><button class="btn btn-default" type="button" data-badge-reset>نشان جدید</button>
         </form>
         <div class="table-responsive"><table class="table table-striped align-middle"><thead><tr><th>عنوان</th><th>رنگ</th><th>تعداد کالا</th><th>عملیات</th></tr></thead><tbody data-badge-rows></tbody></table></div>
