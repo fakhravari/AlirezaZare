@@ -173,7 +173,7 @@ public sealed class StoreMediaUploadApiController(ShopDbContext db, FtpMediaUplo
             if (document && (string.IsNullOrEmpty(title) || title.Length > 200))
                 return BadRequest(new { title = "عنوان فایل باید بین ۱ تا ۲۰۰ نویسه باشد." });
 
-            var product = await db.Products.AsNoTracking().SingleOrDefaultAsync(x => x.Id == productId && x.IsStoreEnabled, cancellationToken);
+            var product = await db.Products.AsNoTracking().SingleOrDefaultAsync(x => x.Id == productId, cancellationToken);
             if (product is null) return NotFound(new { title = "کالای فروشگاهی پیدا نشد." });
 
             mediaKey = "product-" + product.ProductKey;

@@ -18,7 +18,7 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext, IMedi
         var categories = await dbContext.StoreCategories.AsNoTracking().OrderBy(x => x.SortOrder).ThenBy(x => x.Id).ToListAsync(cancellationToken);
         var colors = await dbContext.StoreColors.AsNoTracking().OrderBy(x => x.Id).ToListAsync(cancellationToken);
         var media = await dbContext.StoreProductMedia.AsNoTracking().OrderBy(x => x.Id).ToListAsync(cancellationToken);
-        var products = await dbContext.Products.AsNoTracking().Where(x => x.IsCatalogActive && x.IsStoreEnabled).OrderBy(x => x.Id).ToListAsync(cancellationToken);
+        var products = await dbContext.Products.AsNoTracking().Where(x => x.IsStoreEnabled).OrderBy(x => x.Id).ToListAsync(cancellationToken);
         var productIds = products.Select(x => x.Id).ToArray();
         var inventoryTotals = await (from inventory in dbContext.InventoryItems.AsNoTracking()
                                      join balance in dbContext.StockBalances.AsNoTracking() on inventory.Id equals balance.IdInventoryItem
@@ -41,7 +41,7 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext, IMedi
         var collectionIds = collections.Select(x => x.Id).ToArray();
         var collectionItems = await (from item in dbContext.StoreProductCollectionItems.AsNoTracking()
                                      join product in dbContext.Products.AsNoTracking() on item.IdProduct equals product.Id
-                                     where collectionIds.Contains(item.IdProductCollection) && product.IsCatalogActive && product.IsStoreEnabled
+                                     where collectionIds.Contains(item.IdProductCollection) && product.IsStoreEnabled
                                      orderby item.SortOrder, item.Id
                                      select new { item.IdProductCollection, item.IdProduct }).ToListAsync(cancellationToken);
         var countryCodeById = countries.ToDictionary(x => x.Id, x => x.CountryCode);

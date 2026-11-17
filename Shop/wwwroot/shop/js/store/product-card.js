@@ -6,6 +6,26 @@
   const currentPrice = (product, options = {}) => Number.isFinite(Number(options.priceAmount))
     ? Math.round(Number(options.priceAmount) * (100 - (Number(options.discountPercent) || 0)) / 100) + Math.max(0, Number(options.priceAdjustmentAmount) || 0)
     : Math.round(Number(product.price) * 1000000);
+  let salesPlanText, salesPlanData;
+  const availableStock = (product, options = {}) => {
+    const text = document.querySelector("#storeSalesPlans")?.textContent || "null";
+    if (text !== salesPlanText) {
+      salesPlanText = text;
+      try { salesPlanData = JSON.parse(text); } catch { salesPlanData = null; }
+    }
+    const data = salesPlanData;
+    if (!Array.isArray(data?.plans) || !Array.isArray(data?.offers) || !Array.isArray(data?.inventoryVariants)) return null;
+    const planId = options.salesPlanId || data.plans.find((plan) => plan.isDefault)?.id;
+    const offer = data.offers.find((item) => Number(item.productId) === Number(product.id) && item.salesPlanId === planId);
+    if (!offer || !offer.isEnabled) return 0;
+    let stock = Number(offer.stockQuantity);
+    const variants = data.inventoryVariants.filter((item) => Number(item.productId) === Number(product.id));
+    if (variants.length) {
+      const variant = variants.find((item) => item.isDefault);
+      stock = Math.min(stock, Number(variant?.stockBySalesPlan?.[planId] ?? 0));
+    }
+    return Number.isFinite(stock) ? Math.max(0, stock) : 0;
+  };
   const price = (product, options = {}) => {
     const current = currentPrice(product, options);
     const percent = Number(options.discountPercent ?? product.discountPercent) || 0;
@@ -28,9 +48,9 @@
     const productUrl = window.HNProductUrl(product, {salesPlanId: options.salesPlanId});
     const title = `<h3 class="${headingClass}"><a class="${slider ? "showcase-product-detail" : ""}" href="${esc(productUrl)}">${esc(product.name)}</a></h3>`;
     const badge = options.badge ?? product.badge;
-    const rawStock = options.stockQuantity ?? product.stockQuantity ?? product.inventoryCount ?? product.quantityInStock ?? product.availableQuantity ?? product.stock;
+    const rawStock = availableStock(product, options) ?? options.stockQuantity ?? product.stockQuantity ?? product.inventoryCount ?? product.quantityInStock ?? product.availableQuantity ?? product.stock;
     const stock = rawStock === "" || rawStock === null || rawStock === undefined ? Number.NaN : Number(rawStock);
-    const unavailable = Number.isFinite(stock) && stock >= 0 ? stock === 0 : product.inStock === false;
+    const unavailable = Number.isFinite(stock) && stock >= 0 ? stock < 1 : product.inStock === false;
     const actionLabel = unavailable
       ? search ? '<span class="add-cart-label search-page-card-action-label">ناموجود</span><span class="search-page-card-action-compact">ناموجود</span>' : '<span class="add-cart-label">ناموجود</span>'
       : search ? '<span class="add-cart-label search-page-card-action-label">افزودن</span><span class="search-page-card-action-compact">افزودن</span>' : '<span class="add-cart-label">افزودن به سبد</span>';
@@ -44,5 +64,5 @@
     const html = `<article class="${classes}" data-product-id="${esc(product.id)}" data-product-card="v1"${options.salesPlanId ? ` data-sales-plan-id="${esc(options.salesPlanId)}" data-sales-plan-name="${esc(options.salesPlanName || "")}" data-sales-plan-code="${esc(options.salesPlanCode || "")}" data-sales-plan-label="${esc(options.salesPlanLabel || "")}"` : ""}><div class="product-image${search ? " search-page-card-media" : ""}"><a href="${esc(productUrl)}" aria-label="مشاهده ${esc(product.name)}"><img src="${esc(options.image || product.image)}" alt="${esc(product.name)}" width="800" height="800" loading="lazy" decoding="async"></a><div class="product-card-actions" role="group" aria-label="عملیات محصول"><button class="favorite" type="button" data-product-id="${esc(product.id)}" aria-label="افزودن به علاقه‌مندی‌ها" aria-pressed="false"><i class="bi bi-heart" aria-hidden="true"></i></button><button class="compare-trigger" type="button" data-product-id="${esc(product.id)}" aria-label="افزودن به مقایسه" aria-pressed="false"><i class="bi bi-arrow-left-right" aria-hidden="true"></i></button></div>${imageBadge}</div><div class="${bodyClass}">${slider ? title : `<div${search ? ' class="search-page-card-heading"' : ""}>${title}</div>`}<p class="${slider ? "product-card-sale-price" : search ? "search-product-price search-page-card-price" : favorite ? "favorite-item-price" : "product-card-price"} ${(options.discountPercent ?? product.discountPercent) > 0 ? "has-discount" : "is-regular"}">${price(product, options)}</p>${slider ? action : ""}</div>${slider ? "" : action}</article>`;
     return slider ? `<div class="showcase-slide">${html}</div>` : html;
   };
-  window.HNProductCard = Object.freeze({ render, price, currentPrice });
+  window.HNProductCard = Object.freeze({ render, price, currentPrice, availableStock });
 })(window);

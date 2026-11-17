@@ -17,7 +17,6 @@ public sealed class CatalogController : Controller
         ViewData["Title"] = "درگاه‌های پرداخت";
         ViewData["AreaTitle"] = "مدیریت فروشگاه";
         ViewData["FeatureId"] = "payment-institutions";
-        ViewData["DataSourceLabel"] = "خواندن از دیتابیس با API";
         ViewData["Description"] = "نام و لوگوی درگاه‌های نمایش‌داده‌شده در فروشگاه.";
         ViewData["Section"] = "payment-institutions";
         ViewData["ApiUrl"] = "/api/admin/store/payment-institutions";
@@ -30,7 +29,6 @@ public sealed class CatalogController : Controller
         ViewData["Title"] = title;
         ViewData["AreaTitle"] = "مدیریت فروشگاه";
         ViewData["FeatureId"] = section;
-        ViewData["DataSourceLabel"] = "خواندن از دیتابیس با API";
         ViewData["Description"] = description;
         ViewData["Section"] = section;
         ViewData["ApiUrl"] = $"/api/admin/store/catalog/{section}";

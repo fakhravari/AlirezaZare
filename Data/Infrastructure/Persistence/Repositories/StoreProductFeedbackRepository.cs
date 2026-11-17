@@ -109,7 +109,7 @@ public sealed class StoreProductFeedbackRepository(ShopDbContext dbContext) : IP
     }
 
     private Task<long?> ActiveProductIdAsync(int productId, CancellationToken cancellationToken) =>
-        dbContext.Products.AsNoTracking().Where(x => x.Id == productId && x.IsCatalogActive && x.IsStoreEnabled).Select(x => (long?)x.Id).SingleOrDefaultAsync(cancellationToken);
+        dbContext.Products.AsNoTracking().Where(x => x.Id == productId && x.IsStoreEnabled).Select(x => (long?)x.Id).SingleOrDefaultAsync(cancellationToken);
 
     private static DateTime TruncateToMilliseconds(DateTime value) =>
         new(value.Ticks - value.Ticks % TimeSpan.TicksPerMillisecond, DateTimeKind.Utc);

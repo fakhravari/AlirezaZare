@@ -477,29 +477,38 @@
     if (!button || button._cartQuotePending) return;
     if (!auth.requireLogin(() => button.click())) return;
     const productId = String(button.dataset.id);
-    const salesPlanId = button.dataset.salesPlanId || "regular";
+    let salesPlanId = button.dataset.salesPlanId;
     const product = (window.HNProducts || []).find((item) => String(item.id) === productId);
     if (!product) return;
     let salesPlanData = {};
     try { salesPlanData = JSON.parse(document.querySelector("#storeSalesPlans")?.textContent || "{}"); } catch { salesPlanData = {}; }
+    salesPlanId ||= salesPlanData.plans?.find((plan) => plan.isDefault)?.id || "regular";
     const inventoryVariants = (salesPlanData.inventoryVariants || []).filter((variant) => Number(variant.productId) === Number(productId));
     const configuredPriceOptions = salesPlanData.priceOptions?.[Number(productId)] || [];
-    if (configuredPriceOptions.length) {
-      window.location.href = window.HNProductUrl?.(product) || `/products/${productId}`;
-      return;
-    }
+    const selectedPriceOptions = configuredPriceOptions.flatMap (feature => {
+      const option = feature.values?.[0];
+      return option ? [{
+        id: Number(option.id) || 0,
+        key: feature.key,
+        label: feature.label,
+        value: option.label,
+        productValue: option.key,
+        priceDelta: Number(option.priceDelta) / 1000000 || 0,
+      }] : [];
+    });
     const defaultInventoryVariant = inventoryVariants.find((variant) => variant.isDefault);
     if (inventoryVariants.length && !defaultInventoryVariant) {
       showToast("برای این کالا تنوع پیش‌فرض ثبت نشده است؛ مدیر فروشگاه باید آن را تعیین کند.", "warning");
       return;
     }
-    const priceOptions = {};
+    const priceOptions = Object.fromEntries(selectedPriceOptions.map((option) => [option.key, option.productValue]));
     const accessoryIds = (product.accessories || []).filter((item) => item.required).map((item) => item.id);
     let salesPlanSnapshot = null;
     {
       if (!auth.requireLogin(() => button.click())) return;
       button._cartQuotePending = true;
       button.disabled = true;
+      let outOfStock = false;
       let failureMessage = "افزودن به سبد انجام نشد؛ ارتباط با فروشگاه را بررسی و دوباره تلاش کنید.";
       try {
         const response = await api.request("store/sales-plans/quote", {
@@ -509,6 +518,7 @@
         });
         const quote = await response.json().catch(() => ({}));
         if (!response.ok) {
+          outOfStock = quote.code === "insufficient-stock";
           failureMessage = ({
             "insufficient-stock": "افزودن به سبد انجام نشد: موجودی کافی از این کالا یا تنوع باقی نمانده است.",
             "inventory-variant-required": "افزودن به سبد انجام نشد: تنوع انبار انتخاب نشده یا در دسترس نیست.",
@@ -538,11 +548,17 @@
         return;
       } finally {
         button._cartQuotePending = false;
-        button.disabled = false;
+        button.disabled = outOfStock;
+        if (outOfStock) {
+          button.classList.add("is-out-of-stock");
+          button.setAttribute("aria-disabled", "true");
+          button.setAttribute("aria-label", "ناموجود");
+          button.title = "موجودی این کالا تمام شده است";
+          button.innerHTML = '<i class="bi bi-bag-x" aria-hidden="true"></i><span class="add-cart-label">ناموجود</span>';
+        }
       }
     }
     const selectedAccessoryItems = (product.accessories || []).filter((item) => item.required);
-    const selectedPriceOptions = [];
     const quantityBefore = cart
       .read()
       .filter((item) => item.id === productId)

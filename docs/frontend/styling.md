@@ -17,3 +17,4 @@ CSS فروشگاه در `Shop/wwwroot/shop/css/` دسته‌بندی شده اس
 دکمه‌های عملیات در `admin-ui.css` با `.admin-action-btn` یکدست می‌شوند. hover حذف باید روی زمینهٔ قرمز روشن، رنگ متن قرمز تیره را حفظ کند؛ selector داخل `#content` عمداً از رنگ سفید پیش‌فرض قالب برنده می‌شود.
 
 [پوسته](layout.md) · [فهرست UI](README.md) · [فهرست docs](../README.md)
+`nAdmin section navigation shares the nav-pills and geography tab styles in Admin/wwwroot/css/admin-ui.css, including active, hover, keyboard focus, and wrapping on narrow screens.

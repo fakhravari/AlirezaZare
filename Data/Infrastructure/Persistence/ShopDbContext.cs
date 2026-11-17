@@ -449,13 +449,15 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.Property(x => x.ProductKey).HasMaxLength(128).IsRequired();
             entity.Property(x => x.Code).HasMaxLength(100).IsRequired();
             entity.Property(x => x.Name).HasMaxLength(300).IsRequired();
-            entity.Property(x => x.EnglishName).HasMaxLength(300);
+            entity.Property(x => x.EnglishName).HasMaxLength(300).IsRequired();
             entity.Property(x => x.PowerSource).HasMaxLength(200);
             entity.Property(x => x.UseCase).HasMaxLength(500);
             entity.Property(x => x.Slug).HasMaxLength(200);
             entity.Property(x => x.Badge).HasMaxLength(100);
-            entity.Property(x => x.PriceAmount).HasPrecision(19, 0);
-            entity.Property(x => x.DiscountPercent).HasPrecision(5, 2);
+            entity.Property(x => x.PriceAmount).HasPrecision(19, 0).IsRequired();
+            entity.Property(x => x.DiscountPercent).HasPrecision(5, 2).IsRequired();
+            entity.Property(x => x.MaxPurchaseQuantity).IsRequired();
+            entity.Property(x => x.IsStoreEnabled).HasDefaultValue(false).IsRequired();
             entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
             entity.Property(x => x.UpdatedAtUtc).HasPrecision(3);
         });

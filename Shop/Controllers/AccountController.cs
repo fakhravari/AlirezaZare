@@ -529,7 +529,7 @@ public sealed class AccountController(
         long[] productIds = request.Items.Select(x => x.ProductId).Distinct().ToArray();
         string[] planKeys = request.Items.Select(x => x.SalesPlanId).Distinct(StringComparer.Ordinal).ToArray();
         await using var transaction = await db.Database.BeginTransactionAsync( System.Data.IsolationLevel.Serializable, ct);
-        var availableProducts = await db.Products.AsNoTracking().Where(x => productIds.Contains(x.Id) && x.IsCatalogActive && x.IsStoreEnabled).Select(x => x.Id).ToHashSetAsync(ct);
+        var availableProducts = await db.Products.AsNoTracking().Where(x => productIds.Contains(x.Id) && x.IsStoreEnabled).Select(x => x.Id).ToHashSetAsync(ct);
         var planIds = await db.SalesPlanReferences.AsNoTracking().Where(x => planKeys.Contains(x.StoreSalesPlanKey) && x.IsActive && x.IdStockOwnerType == 1)
             .ToDictionaryAsync(x => x.StoreSalesPlanKey, x => x.Id, ct);
         if (availableProducts.Count != productIds.Length || planIds.Count != planKeys.Length)
@@ -838,7 +838,7 @@ public sealed class AccountController(
                 else if (line.VariantId.HasValue)
                     return Conflict(new { code = "product-variant-unavailable" });
 
-                string? productName = await db.Products.AsNoTracking().Where(x => x.Id == line.ProductId && x.IsCatalogActive && x.IsStoreEnabled).Select(x => x.Name).SingleOrDefaultAsync(ct);
+                string? productName = await db.Products.AsNoTracking().Where(x => x.Id == line.ProductId && x.IsStoreEnabled).Select(x => x.Name).SingleOrDefaultAsync(ct);
                 if (productName is null) return Conflict(new { code = "product-unavailable" });
 
                 ProductPurchaseConfiguration? configuration = await purchaseConfigurations.ReadAsync(checked((int)line.ProductId), ct);
@@ -1006,8 +1006,7 @@ public sealed class AccountController(
         CancellationToken cancellationToken) =>
         await db.ProductVariants.AsNoTracking().AnyAsync(variant =>
             variant.Id == variantId && variant.IdProduct == productId && variant.IsActive &&
-            variant.Product.IsWarehouseEnabled && variant.Product.IsCatalogActive &&
-            variant.Product.IsStoreEnabled, cancellationToken);
+            variant.Product.IsWarehouseEnabled && variant.Product.IsStoreEnabled, cancellationToken);
 
     private static string NormalizeCouponCode(string? code) => (code ?? string.Empty).Trim().ToUpperInvariant();
 
@@ -1067,7 +1066,7 @@ public sealed class AccountController(
         if (kind is not ("favorites" or "compare") || productId < 1)
             return BadRequest(new { code = "invalid-list-item" });
 
-        if (!await db.Products.AsNoTracking().AnyAsync(x => x.Id == productId && x.IsCatalogActive && x.IsStoreEnabled, ct))
+        if (!await db.Products.AsNoTracking().AnyAsync(x => x.Id == productId && x.IsStoreEnabled, ct))
             return Conflict(new { code = "product-unavailable" });
 
         await using var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, ct);
@@ -1102,7 +1101,7 @@ public sealed class AccountController(
             return BadRequest(new { code = "invalid-list" });
 
         long[] productIds = request.ProductIds.ToArray();
-        int availableProductCount = await db.Products.AsNoTracking().CountAsync(x => productIds.Contains(x.Id) && x.IsCatalogActive && x.IsStoreEnabled, ct);
+        int availableProductCount = await db.Products.AsNoTracking().CountAsync(x => productIds.Contains(x.Id) && x.IsStoreEnabled, ct);
         if (availableProductCount != productIds.Length)
             return Conflict(new { code = "product-unavailable" });
 
@@ -1161,7 +1160,7 @@ public sealed class AccountController(
         }
 
         long[] alertProductIds = normalized.Select(item => (long)item.GetType().GetProperty("productId")!.GetValue(item)!).Distinct().ToArray();
-        int availableAlertProducts = await db.Products.AsNoTracking() .CountAsync(x => alertProductIds.Contains(x.Id) && x.IsCatalogActive && x.IsStoreEnabled, ct);
+        int availableAlertProducts = await db.Products.AsNoTracking() .CountAsync(x => alertProductIds.Contains(x.Id) && x.IsStoreEnabled, ct);
         if (availableAlertProducts != alertProductIds.Length)
             return Conflict(new { code = "product-unavailable" });
 

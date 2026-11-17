@@ -20,7 +20,7 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
     public async Task<IActionResult> ProductAccessories(long id, CancellationToken cancellationToken)
     {
         if (!User.IsInRole("system.full-access")) return Forbid();
-        if (!await db.Products.AnyAsync(x => x.Id == id && x.IsStoreEnabled, cancellationToken)) return NotFound();
+        if (!await db.Products.AnyAsync(x => x.Id == id, cancellationToken)) return NotFound();
         var items = await (from link in db.StoreProductAccessories.AsNoTracking()
                            join accessory in db.StoreAccessories.AsNoTracking() on link.IdAccessory equals accessory.Id
                            where link.IdProduct == id
@@ -37,7 +37,7 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
         if (!User.IsInRole("system.full-access")) return Forbid();
         if (!ValidAccessory(input)) return BadRequest(new { title = "نام، توضیح، ترتیب یا قیمت متعلقه معتبر نیست." });
         await using var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
-        if (!await db.Products.AnyAsync(x => x.Id == id && x.IsStoreEnabled, cancellationToken)) return NotFound();
+        if (!await db.Products.AnyAsync(x => x.Id == id, cancellationToken)) return NotFound();
         var accessory = new StoreAccessory { AccessoryKey = $"accessory-{Guid.NewGuid():N}", Name = input.Name.Trim(), Description = input.Description?.Trim(), IsActive = input.IsActive };
         db.StoreAccessories.Add(accessory);
         await db.SaveChangesAsync(cancellationToken);
@@ -94,7 +94,7 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
     {
         if (!User.IsInRole("system.full-access")) return Forbid();
 
-        var product = await db.Products.AsNoTracking().Where(x => x.Id == id && x.IsStoreEnabled)
+        var product = await db.Products.AsNoTracking().Where(x => x.Id == id)
             .Select(x => new { x.Id, x.Code, x.Name, x.EnglishName, x.IdBrand, x.IdCategory, x.PriceAmount, x.DiscountPercent, x.MaxPurchaseQuantity })
             .SingleOrDefaultAsync(cancellationToken);
         if (product is null) return NotFound();
@@ -109,11 +109,11 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
     [HttpGet("products/{id:long}/details")]
     public async Task<IActionResult> ProductDetails(long id, CancellationToken cancellationToken)
     {
-        var product = await db.Products.AsNoTracking().Where(x => x.Id == id && x.IsStoreEnabled).Select(x => new
+        var product = await db.Products.AsNoTracking().Where(x => x.Id == id).Select(x => new
             {
                 x.Id, x.ProductKey, x.Code, x.Name, x.EnglishName, x.IdBrand, x.IdCategory, x.IdBaseUnit,
                 x.PowerSource, x.UseCase, x.PriceAmount, x.DiscountPercent, x.MaxPurchaseQuantity,
-                x.Slug, x.Badge, x.IsNewest, x.NewestOrder, x.IsStoreEnabled, x.IsCatalogActive,
+                x.Slug, x.Badge, x.IsNewest, x.NewestOrder, x.IsStoreEnabled,
                 x.IsWarehouseEnabled, x.CreatedAtUtc, x.UpdatedAtUtc
             }).SingleOrDefaultAsync(cancellationToken);
         if (product is null) return NotFound();
@@ -194,7 +194,6 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
             product.IsNewest,
             product.NewestOrder,
             product.IsStoreEnabled,
-            product.IsCatalogActive,
             product.IsWarehouseEnabled,
             product.CreatedAtUtc,
             product.UpdatedAtUtc,
@@ -232,7 +231,7 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
         bool validBrand = await db.StoreBrands.AnyAsync(x => x.Id == input.BrandId && x.IsActive, cancellationToken);
         if (!validCategory || !validBrand) return BadRequest(new { title = "برند یا دستهٔ برگ معتبر نیست." });
 
-        var product = await db.Products.SingleOrDefaultAsync(x => x.Id == id && x.IsStoreEnabled, cancellationToken);
+        var product = await db.Products.SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
         if (product is null) return NotFound();
 
         product.Name = name;
@@ -262,7 +261,7 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
     {
         if (!User.IsInRole("system.full-access")) return Forbid();
 
-        if (!await db.Products.AnyAsync(x => x.Id == id && x.IsStoreEnabled, cancellationToken)) return NotFound();
+        if (!await db.Products.AnyAsync(x => x.Id == id, cancellationToken)) return NotFound();
 
         var items = await db.StoreProductBenefits.AsNoTracking().Where(x => x.IdProduct == id).OrderBy(x => x.SortOrder).ThenBy(x => x.Id).Select(x => new ProductBenefitRow(x.Id, x.Title, x.Detail, x.Icon, x.SortOrder, x.IsActive)).ToListAsync(cancellationToken);
 
@@ -277,7 +276,7 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
 
         if (!TryNormalizeBenefit(input, out var value, out string error)) return BadRequest(new { title = error });
 
-        if (!await db.Products.AnyAsync(x => x.Id == id && x.IsStoreEnabled, cancellationToken)) return NotFound();
+        if (!await db.Products.AnyAsync(x => x.Id == id, cancellationToken)) return NotFound();
 
         var benefit = new StoreProductBenefit
         {
@@ -391,7 +390,7 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
             return ValidationProblem(detail: "شماره صفحه، اندازهٔ صفحه یا عبارت جست‌وجو معتبر نیست.", statusCode: 400);
 
         var drafts = from product in db.Products.AsNoTracking()
-                     where product.IsStoreEnabled && !product.IsCatalogActive
+                     where !product.IsStoreEnabled
                      join brand in db.StoreBrands.AsNoTracking() on product.IdBrand equals brand.Id into brands
                      from brand in brands.DefaultIfEmpty()
                      join category in db.StoreCategories.AsNoTracking() on product.IdCategory equals category.Id into categories
@@ -399,6 +398,7 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
                      select new DraftProduct
                      {
                          Id = product.Id,
+                         CreatedAtUtc = product.CreatedAtUtc,
                          Code = product.Code,
                          Name = product.Name,
                          BrandName = brand == null ? null : brand.NameFa,
@@ -411,7 +411,7 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
             drafts = drafts.Where(x => x.Code.Contains(query) || x.Name.Contains(query) ||
                 (x.BrandName != null && x.BrandName.Contains(query)) || (x.CategoryName != null && x.CategoryName.Contains(query)));
         int total = await drafts.CountAsync(cancellationToken);
-        var items = await drafts.OrderByDescending(x => x.Id).Skip(paging.Offset).Take(paging.PageSize).ToListAsync(cancellationToken);
+        var items = await drafts.OrderByDescending(x => x.CreatedAtUtc).ThenByDescending(x => x.Id).Skip(paging.Offset).Take(paging.PageSize).ToListAsync(cancellationToken);
 
         return Ok(AdminListQuery.CreateResult(items, total, paging));
     }
@@ -469,8 +469,7 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
             DiscountPercent = input.DiscountPercent,
             MaxPurchaseQuantity = input.MaxPurchaseQuantity,
             Slug = key,
-            IsStoreEnabled = true,
-            IsCatalogActive = false,
+            IsStoreEnabled = false,
             IsWarehouseEnabled = true,
             CreatedAtUtc = DateTime.UtcNow
         });
@@ -487,7 +486,7 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
     {
         if (!User.IsInRole("system.full-access")) return Forbid();
 
-        var product = await db.Products.SingleOrDefaultAsync(x => x.Id == id && x.IsStoreEnabled && !x.IsCatalogActive, cancellationToken);
+        var product = await db.Products.SingleOrDefaultAsync(x => x.Id == id && !x.IsStoreEnabled, cancellationToken);
         if (product is null) return Conflict(new { title = "پیش‌نویس پیدا نشد یا اطلاعات و تصویر آن کامل نیست." });
 
         bool validCategory = product.IdCategory is long categoryId && await db.StoreCategories.AnyAsync(c => c.Id == categoryId && c.IsActive &&
@@ -505,7 +504,7 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
         if (!validCategory || !validBrand || !validMedia || !validProduct)
             return Conflict(new { title = "پیش‌نویس پیدا نشد یا اطلاعات و تصویر آن کامل نیست." });
 
-        product.IsCatalogActive = true;
+        product.IsStoreEnabled = true;
         product.UpdatedAtUtc = DateTime.UtcNow;
         await db.SaveChangesAsync(cancellationToken);
 
@@ -518,10 +517,10 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
     {
         if (!User.IsInRole("system.full-access")) return Forbid();
 
-        var product = await db.Products.SingleOrDefaultAsync(x => x.Id == id && x.IsStoreEnabled && x.IsCatalogActive, cancellationToken);
+        var product = await db.Products.SingleOrDefaultAsync(x => x.Id == id && x.IsStoreEnabled, cancellationToken);
         if (product is null) return Conflict(new { title = "کالای منتشرشده پیدا نشد." });
 
-        product.IsCatalogActive = false;
+        product.IsStoreEnabled = false;
         product.UpdatedAtUtc = DateTime.UtcNow;
         await db.SaveChangesAsync(cancellationToken);
 
@@ -537,7 +536,7 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
     }
 
     public sealed record ProductCreateInput(string? Key, string? Code, string? Name, string? EnglishName, long BrandId, long CategoryId, long UnitId, decimal PriceAmount, decimal DiscountPercent, int MaxPurchaseQuantity);
-    public sealed class DraftProduct { public long Id { get; set; } public string Code { get; set; } = ""; public string Name { get; set; } = ""; public string? BrandName { get; set; } public string? CategoryName { get; set; } public decimal? PriceAmount { get; set; } public bool HasImage { get; set; } }
+    public sealed class DraftProduct { public long Id { get; set; } public DateTime CreatedAtUtc { get; set; } public string Code { get; set; } = ""; public string Name { get; set; } = ""; public string? BrandName { get; set; } public string? CategoryName { get; set; } public decimal? PriceAmount { get; set; } public bool HasImage { get; set; } }
 
     [HttpGet("brands/countries")]
     public async Task<IActionResult> BrandCountries(CancellationToken cancellationToken)
@@ -647,7 +646,7 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
 
         if (current is null && parent is not null)
         {
-            bool hasPublishedProducts = await db.Products.AnyAsync(x => x.IdCategory == parent.Id && x.IsStoreEnabled && x.IsCatalogActive, cancellationToken);
+            bool hasPublishedProducts = await db.Products.AnyAsync(x => x.IdCategory == parent.Id && x.IsStoreEnabled, cancellationToken);
             if (hasPublishedProducts) return Conflict(new { title = "برای دستهٔ دارای کالای منتشرشده نمی‌توان زیردسته ساخت؛ ابتدا دستهٔ کالاها را تغییر دهید." });
         }
         try
@@ -834,7 +833,7 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
         if (!input.IsActive)
         {
             bool hasChildren = await db.StoreCategories.AnyAsync(x => x.IsActive && x.IdParentCategory == category.Id, cancellationToken);
-            bool hasPublishedProducts = await db.Products.AnyAsync(x => x.IsStoreEnabled && x.IsCatalogActive && x.IdCategory == category.Id, cancellationToken);
+            bool hasPublishedProducts = await db.Products.AnyAsync(x => x.IsStoreEnabled && x.IdCategory == category.Id, cancellationToken);
             if (hasChildren || hasPublishedProducts)
                 return Conflict(new { title = "ابتدا زیردسته‌ها یا کالاهای منتشرشدهٔ این دسته را غیرفعال کنید." });
         }
@@ -930,7 +929,7 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
                             join category0 in db.StoreCategories.AsNoTracking().Where(x => x.IsActive)
                                 on product.IdCategory equals (long?)category0.Id into categories
                             from category in categories.DefaultIfEmpty()
-                            where product.IsCatalogActive && product.IsStoreEnabled &&
+                            where product.IsStoreEnabled &&
                                   (product.IdCategory == null || category != null)
                             select new { product, brand, category };
         if (query.Length > 0)
@@ -938,7 +937,7 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
                 (x.product.EnglishName != null && x.product.EnglishName.Contains(query)) || x.brand.NameFa.Contains(query) ||
                 (x.category != null && x.category.NameFa.Contains(query)));
         int productTotal = await productSource.CountAsync(cancellationToken);
-        var productRows = await productSource.OrderBy(x => x.product.Name).ThenBy(x => x.product.Id).Skip(paging.Offset).Take(paging.PageSize).Select(x => new
+        var productRows = await productSource.OrderByDescending(x => x.product.CreatedAtUtc).ThenByDescending(x => x.product.Id).Skip(paging.Offset).Take(paging.PageSize).Select(x => new
             {
                 x.product.Id,
                 x.product.Code,

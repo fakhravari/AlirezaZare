@@ -17,7 +17,6 @@ DECLARE @ProfileId BIGINT = 90;
     JOIN Account.CartItem AS ci ON ci.IdCart = c.Id
     JOIN Warehouse.Product AS p ON p.Id = ci.IdProduct
        AND p.IsStoreEnabled = 1
-       AND p.IsCatalogActive = 1
     JOIN Warehouse.SalesPlanReference AS sp ON sp.Id = ci.IdSalesPlan
        AND sp.IsEnabled = 1
        AND (sp.StartsAtUtc IS NULL OR sp.StartsAtUtc <= SYSUTCDATETIME())

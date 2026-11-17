@@ -373,6 +373,24 @@
     font-weight: 600;
 }
 
+.admin-product-benefit-grid,
+.admin-product-accessory-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: .9rem 1rem;
+}
+
+.admin-product-benefit-grid > .admin-modal-field-wide {
+    grid-column: 1 / -1;
+}
+
+@media (min-width: 768px) {
+    .admin-product-benefit-grid,
+    .admin-product-accessory-grid {
+        grid-template-columns: minmax(0, 2fr) minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 1.5fr);
+    }
+}
+
 .admin-feedback-modal-body {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
@@ -465,11 +483,11 @@
     }
 
     .admin-product-name,
-    .admin-product-english,
+    .admin-product-english { grid-column: span 6; }
     .admin-product-brand { grid-column: span 4; }
-    .admin-product-category { grid-column: span 6; }
-    .admin-product-price { grid-column: span 4; }
-    .admin-product-discount { grid-column: span 2; }
+    .admin-product-category { grid-column: span 8; }
+    .admin-product-price { grid-column: span 6; }
+    .admin-product-discount { grid-column: span 3; }
     .admin-product-limit { grid-column: span 3; }
 }
 
@@ -973,6 +991,74 @@
     max-width: min(900px, calc(100vw - 2rem));
 }
 
+.modal#admin-record-modal.admin-record-product .modal-dialog {
+    max-width: min(1440px, calc(100vw - 2rem));
+    height: 75vh;
+}
+
+#admin-record-modal.admin-record-product .modal-body {
+    grid-template-columns: minmax(0, 1fr);
+    align-content: start;
+}
+
+.admin-record-product .admin-record-section:first-child,
+.admin-record-product .admin-record-section-wide {
+    grid-column: 1 / -1;
+}
+
+.admin-record-product .admin-record-section {
+    padding: 1rem;
+    border: 1px solid #dce5eb;
+    border-radius: .85rem;
+    background: #fff;
+}
+
+.admin-record-product .admin-record-section-wide > .admin-record-grid {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.admin-record-product .admin-record-section-compact > .admin-record-grid {
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(150px, 1fr);
+    overflow-x: auto;
+    padding-bottom: .25rem;
+}
+
+.admin-record-product .admin-record-media-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 175px), 1fr));
+    gap: .75rem;
+}
+
+.admin-record-product .admin-record-media-card {
+    min-width: 0;
+    margin: 0;
+    color: #52677b;
+    font-size: .8rem;
+}
+
+.admin-record-product .admin-record-media-card img,
+.admin-record-product .admin-record-media-card video {
+    display: block;
+    width: 100%;
+    height: 130px;
+    margin-bottom: .35rem;
+    border-radius: .45rem;
+    background: #edf3f8;
+    object-fit: contain;
+}
+
+.admin-record-product .admin-record-list {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+    padding: 0;
+    list-style: none;
+}
+
+@media (max-width: 767px) {
+    .admin-record-product .admin-record-nested-grid { grid-template-columns: minmax(0, 1fr); }
+}
+
 #admin-record-modal .modal-content {
     overflow: hidden;
     border: 1px solid #dce5eb;
@@ -1232,53 +1318,63 @@
     outline: 0;
     background: #edf3f8;
 }
-.admin-page[data-geography] .geo-tabs {
+/* Shared section navigation across the admin panel. */
+#content .nav.nav-pills,
+#content .geo-tabs {
     display: flex;
     flex-wrap: wrap;
     gap: .4rem;
     width: fit-content;
     max-width: 100%;
     padding: .35rem;
-    border: 1px solid #dce5ee;
+    border: 1px solid #cbd9e6;
     border-radius: .85rem;
-    background: #f2f6fa;
+    background: #edf3f8;
 }
 
-.admin-page[data-geography] .geo-tab {
+#content .nav-pills .nav-link,
+#content .geo-tab {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: .55rem;
-    min-width: 7.5rem;
     min-height: 2.8rem;
     padding: .55rem 1rem;
-    border: 0;
+    border: 1px solid #cbd9e6;
     border-radius: .6rem;
-    background: transparent;
-    color: #52677b;
+    background: #fff;
+    color: #344d65;
+    text-decoration: none;
     font-weight: 700;
     cursor: pointer;
 }
 
-.admin-page[data-geography] .geo-tab:hover {
+#content .nav-pills .nav-link:hover,
+#content .geo-tab:hover {
+    border-color: #8db5d6;
     background: #e2edf7;
-    color: #1269a8;
+    color: #145b91;
 }
 
-.admin-page[data-geography] .geo-tab.active {
-    background: #247cc2;
+#content .nav-pills .nav-link.active,
+#content .geo-tab.active {
+    border-color: #17649f;
+    background: #176eaf;
     color: #fff;
     box-shadow: 0 3px 8px rgb(36 124 194 / 25%);
 }
 
-.admin-page[data-geography] .geo-tab:focus-visible {
+#content .nav-pills .nav-link:focus-visible,
+#content .geo-tab:focus-visible {
     outline: 3px solid #163e69;
     outline-offset: 2px;
 }
 
 @media (max-width: 575px) {
-    .admin-page[data-geography] .geo-tabs { width: 100%; flex-wrap: nowrap; }
-    .admin-page[data-geography] .geo-tab { flex: 1 1 0; min-width: 0; padding-inline: .35rem; }
+    #content .nav.nav-pills,
+    #content .geo-tabs { width: 100%; }
+    #content .nav-pills .nav-link,
+    #content .geo-tab { flex: 1 1 auto; }
 }
 
 .geo-country-flag {

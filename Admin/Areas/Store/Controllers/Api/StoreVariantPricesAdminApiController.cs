@@ -228,7 +228,7 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
                    from plan in db.SalesPlanReferences.AsNoTracking().Where(x => x.IdStockOwnerType == 1)
                    join offer in db.StoreProductVariantSalesPlanOffers.AsNoTracking() on new { VariantId = variant.Id, PlanId = plan.Id } equals new { VariantId = offer.IdProductVariant, PlanId = offer.IdSalesPlan } into offers
                    from offer in offers.DefaultIfEmpty()
-                   where variant.IsActive && product.IsWarehouseEnabled && product.IsCatalogActive && product.IsStoreEnabled &&
+                   where variant.IsActive && product.IsWarehouseEnabled && product.IsStoreEnabled &&
                          (query == "" || product.Name.Contains(query) || variant.Name.Contains(query) ||
                           (variant.Code ?? "").Contains(query) || (plan.DisplayName ?? "").Contains(query))
                    select new { variant, product, plan, offer };
@@ -263,7 +263,7 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
         var plan = await db.SalesPlanReferences.SingleOrDefaultAsync(x => x.StoreSalesPlanKey == salesPlanId && x.IsActive && x.IdStockOwnerType == 1, cancellationToken);
         if (plan is null) return NotFound(new { code = "variant-or-plan-not-found" });
 
-        bool valid = await db.ProductVariants.AnyAsync(v => v.Id == variantId && v.IsActive && db.Products.Any(p => p.Id == v.IdProduct && p.IsWarehouseEnabled && p.IsCatalogActive && p.IsStoreEnabled), cancellationToken);
+        bool valid = await db.ProductVariants.AnyAsync(v => v.Id == variantId && v.IsActive && db.Products.Any(p => p.Id == v.IdProduct && p.IsWarehouseEnabled && p.IsStoreEnabled), cancellationToken);
         if (!valid) return NotFound(new { code = "variant-or-plan-not-found" });
 
         var offer = await db.StoreProductVariantSalesPlanOffers.SingleOrDefaultAsync(x => x.IdProductVariant == variantId && x.IdSalesPlan == plan.Id, cancellationToken);
@@ -330,7 +330,7 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
                    from plan in db.SalesPlanReferences.AsNoTracking().Where(x => x.IdStockOwnerType == 1)
                    join offer in db.StoreProductSalesPlanOffers.AsNoTracking() on new { ProductId = product.Id, PlanId = plan.Id } equals new { ProductId = offer.IdProduct, PlanId = offer.IdSalesPlan } into offers
                    from offer in offers.DefaultIfEmpty()
-                   where product.IsStoreEnabled && product.IsCatalogActive && !plan.IsRegular &&
+                   where product.IsStoreEnabled && !plan.IsRegular &&
                          (query == "" || product.Name.Contains(query) || product.Code.Contains(query) || plan.DisplayName.Contains(query))
                    select new { product, plan, offer };
         int total = await rows.CountAsync(cancellationToken);
@@ -360,7 +360,7 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
 
         await using var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
         var plan = await db.SalesPlanReferences.SingleOrDefaultAsync(x => x.StoreSalesPlanKey == salesPlanId && x.IdStockOwnerType == 1 && !x.IsRegular, cancellationToken);
-        var product = await db.Products.SingleOrDefaultAsync(x => x.Id == productId && x.IsStoreEnabled && x.IsCatalogActive, cancellationToken);
+        var product = await db.Products.SingleOrDefaultAsync(x => x.Id == productId && x.IsStoreEnabled, cancellationToken);
         if (plan is null || product is null) return NotFound(new { code = "product-or-plan-not-found" });
 
         var offer = await db.StoreProductSalesPlanOffers.SingleOrDefaultAsync(x => x.IdProduct == productId && x.IdSalesPlan == plan.Id, cancellationToken);
@@ -493,7 +493,7 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
         var row = await (from offer in db.StoreProductSalesPlanOffers.AsNoTracking()
                          join product in db.Products.AsNoTracking() on offer.IdProduct equals product.Id
                          join plan in db.SalesPlanReferences.AsNoTracking() on offer.IdSalesPlan equals plan.Id
-                         where offer.IdProduct == productId && plan.StoreSalesPlanKey == salesPlanId && plan.IdStockOwnerType == 1 && !plan.IsRegular && product.IsStoreEnabled && product.IsCatalogActive
+                         where offer.IdProduct == productId && plan.StoreSalesPlanKey == salesPlanId && plan.IdStockOwnerType == 1 && !plan.IsRegular && product.IsStoreEnabled
                          select new OfferAccessoryMatch { OfferId = offer.Id, IsRequired = false }).SingleOrDefaultAsync(cancellationToken);
 
         return row;

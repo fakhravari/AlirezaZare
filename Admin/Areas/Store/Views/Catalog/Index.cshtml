@@ -34,9 +34,13 @@
                 <button class="btn btn-xs btn-icon btn-default" type="button" data-admin-refresh aria-label="بارگذاری دوباره" title="بارگذاری دوبارهٔ فهرست">
                     <i class="fa fa-rotate" aria-hidden="true"></i>
                 </button>
+                @if (catalogSection == "products")
+                {
+                    <button class="btn btn-xs btn-icon btn-default" type="button" data-admin-panel-collapse aria-controls="published-products-body" aria-expanded="true" aria-label="جمع‌کردن پنل" title="جمع‌کردن پنل"><i class="fa fa-minus" aria-hidden="true"></i></button>
+                }
             </div>
         </div>
-        <div class="panel-body">
+        <div class="panel-body" id="published-products-body">
             <form class="admin-filter-bar d-flex flex-wrap align-items-center gap-2 mb-3" data-admin-filter>
                 <label class="visually-hidden" for="catalog-search">جست‌وجوی کاتالوگ</label>
                 <input id="catalog-search" class="form-control" type="search" name="q" placeholder="جست‌وجو در @ViewData["Title"]" autocomplete="off"/>
@@ -123,8 +127,8 @@
 @if (catalogSection == "products" && User.IsInRole("system.full-access"))
 {
     <section class="panel panel-inverse" id="product-drafts-section" data-product-section="drafts" data-admin-page="product-drafts" data-admin-section="products" data-can-upload-image="true" hidden>
-        <div class="panel-heading"><h2 class="panel-title">پیش‌نویس‌های کالا</h2></div>
-        <div class="panel-body"><p>پیش‌نویس پس از ثبت تصویر و انتشار در فروشگاه نمایش داده می‌شود.</p>
+        <div class="panel-heading"><h2 class="panel-title">پیش‌نویس‌های کالا</h2><div class="panel-heading-btn"><button class="btn btn-xs btn-icon btn-default" type="button" data-admin-panel-collapse aria-controls="product-drafts-body" aria-expanded="true" aria-label="جمع‌کردن پنل" title="جمع‌کردن پنل"><i class="fa fa-minus" aria-hidden="true"></i></button></div></div>
+        <div class="panel-body" id="product-drafts-body"><p>پیش‌نویس پس از ثبت تصویر و انتشار در فروشگاه نمایش داده می‌شود.</p>
             <form class="admin-filter-bar d-flex flex-wrap align-items-center gap-2 mb-3" data-admin-filter>
                 <label class="visually-hidden" for="product-drafts-search">جست‌وجوی پیش‌نویس‌ها</label>
                 <input id="product-drafts-search" class="form-control" type="search" name="q" maxlength="100" placeholder="نام، کد، برند یا دستهٔ کالا" autocomplete="off" />
@@ -163,6 +167,7 @@
             @Html.AntiForgeryToken()
             <div class="modal-header"><h2 class="modal-title fs-5" id="product-create-title">افزودن پیش‌نویس کالا</h2><button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="بستن"></button></div>
             <div class="modal-body admin-modal-grid-two">
+                <p class="admin-modal-field-wide">تکمیل همهٔ فیلدها الزامی است.</p>
                 <div class="admin-modal-field"><label class="form-label" for="new-product-key">شناسه و نشانی لاتین</label><input class="form-control" id="new-product-key" name="key" maxlength="100" pattern="[a-z0-9]+(-[a-z0-9]+)*" required /></div>
                 <div class="admin-modal-field"><label class="form-label" for="new-product-code">کد کالا</label><input class="form-control" id="new-product-code" name="code" maxlength="100" required /></div>
                 <div class="admin-modal-field"><label class="form-label" for="new-product-name">نام فارسی</label><input class="form-control" id="new-product-name" name="name" maxlength="300" required /></div>
@@ -189,10 +194,12 @@
                     <h3 class="h5" data-product-accessory-form-title>افزودن متعلقه</h3>
                     <label for="accessory-name" class="form-label">نام متعلقه</label><input id="accessory-name" class="form-control mb-2" name="name" maxlength="300" required />
                     <label for="accessory-description" class="form-label">توضیح (اختیاری)</label><textarea id="accessory-description" class="form-control mb-2" name="description" maxlength="1000"></textarea>
-                    <label for="accessory-price" class="form-label">قیمت پایه (تومان)</label><input id="accessory-price" class="form-control mb-2" name="priceAmount" type="number" min="0" max="9007199254740991" step="1" required />
-                    <label for="accessory-order" class="form-label">ترتیب نمایش</label><input id="accessory-order" class="form-control mb-2" name="sortOrder" type="number" min="0" max="2147483647" step="1" value="0" required />
-                    <div class="form-check mb-2"><input id="accessory-required" name="isRequired" type="checkbox" class="form-check-input" /><label for="accessory-required" class="form-check-label">متعلقه اجباری است</label></div>
-                    <div class="form-check mb-2"><input id="accessory-active" name="isActive" type="checkbox" class="form-check-input" checked /><label for="accessory-active" class="form-check-label">متعلقه فعال است</label></div>
+                    <div class="admin-product-accessory-grid mb-2">
+                        <div class="admin-modal-field"><label for="accessory-price" class="form-label">قیمت پایه (تومان)</label><input id="accessory-price" class="form-control" name="priceAmount" type="number" min="0" max="9007199254740991" step="1" required /></div>
+                        <div class="admin-modal-field"><label for="accessory-order" class="form-label">ترتیب نمایش</label><input id="accessory-order" class="form-control" name="sortOrder" type="number" min="0" max="2147483647" step="1" value="0" required /></div>
+                        <div class="admin-modal-field d-flex align-items-end"><div class="form-check"><input id="accessory-required" name="isRequired" type="checkbox" class="form-check-input" /><label for="accessory-required" class="form-check-label">متعلقه اجباری است</label></div></div>
+                        <div class="admin-modal-field d-flex align-items-end"><div class="form-check"><input id="accessory-active" name="isActive" type="checkbox" class="form-check-input" checked /><label for="accessory-active" class="form-check-label">متعلقه فعال است</label></div></div>
+                    </div>
                     <button type="submit" class="btn btn-primary">ذخیره متعلقه</button>
                     <button type="button" class="btn btn-default" data-product-accessory-reset>متعلقهٔ جدید</button>
                 </form>
@@ -204,7 +211,7 @@
             @Html.AntiForgeryToken()<input type="hidden" name="id" />
             <div class="modal-header"><h2 class="modal-title fs-5" id="product-editor-title">ویرایش اطلاعات کالا</h2><button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="بستن"></button></div>
             <div class="modal-body admin-modal-grid-two admin-product-editor-grid">
-                <p class="admin-modal-field-wide">کد کالا: <span data-product-editor-code></span></p>
+                <p class="admin-modal-field-wide">کد کالا: <span data-product-editor-code></span> ? تکمیل همهٔ فیلدها الزامی است.</p>
                 <div class="admin-modal-field admin-product-name"><label for="product-edit-name" class="form-label">نام فارسی</label><input id="product-edit-name" name="name" class="form-control" maxlength="300" required /></div>
                 <div class="admin-modal-field admin-product-english"><label for="product-edit-english" class="form-label">نام لاتین</label><input id="product-edit-english" name="englishName" class="form-control" maxlength="300" required /></div>
                 <div class="admin-modal-field admin-product-brand"><label for="product-edit-brand" class="form-label">برند</label><select id="product-edit-brand" name="brandId" class="form-select" required></select></div>
@@ -226,14 +233,14 @@
                     <div class="small text-muted mb-2" data-product-benefits-status role="status" aria-live="polite"></div>
                     <div class="list-group" data-product-benefits-rows></div>
                 </div>
-                <form class="admin-modal-grid-two d-none" data-product-benefit-editor data-admin-confirm="مزیت کالا ذخیره شود؟">
+                <form class="admin-product-benefit-grid d-none" data-product-benefit-editor data-admin-confirm="مزیت کالا ذخیره شود؟">
                     @Html.AntiForgeryToken()<input type="hidden" name="id" />
                     <h3 class="h6 admin-modal-field-wide" data-product-benefit-editor-title>افزودن مزیت</h3>
                     <div class="admin-modal-field"><label class="form-label" for="product-benefit-title">عنوان</label><input class="form-control" id="product-benefit-title" name="title" maxlength="300" required /></div>
                     <div class="admin-modal-field"><label class="form-label" for="product-benefit-icon">کلاس آیکن</label><input class="form-control" id="product-benefit-icon" name="icon" maxlength="100" placeholder="bi-shield-check" pattern="[a-z0-9-]*" /></div>
-                    <div class="admin-modal-field admin-modal-field-wide"><label class="form-label" for="product-benefit-detail">توضیح</label><textarea class="form-control" id="product-benefit-detail" name="detail" maxlength="1000" rows="2"></textarea></div>
                     <div class="admin-modal-field"><label class="form-label" for="product-benefit-sort-order">ترتیب نمایش</label><input class="form-control" id="product-benefit-sort-order" name="sortOrder" type="number" min="0" max="100000" step="1" value="0" required /></div>
-                    <div class="admin-modal-field d-flex align-items-end"><label class="form-check mb-2"><input class="form-check-input" name="isActive" type="checkbox" checked /><span class="form-check-label">فعال و قابل نمایش</span></label></div>
+                    <div class="admin-modal-field d-flex align-items-end"><label class="form-check mb-0"><input class="form-check-input" name="isActive" type="checkbox" checked /><span class="form-check-label">فعال و قابل نمایش</span></label></div>
+                    <div class="admin-modal-field admin-modal-field-wide"><label class="form-label" for="product-benefit-detail">توضیح</label><textarea class="form-control" id="product-benefit-detail" name="detail" maxlength="1000" rows="2"></textarea></div>
                     <div class="admin-modal-field-wide d-flex justify-content-end gap-2"><button class="btn btn-default" type="button" data-product-benefit-cancel>بازگشت به فهرست</button><button class="btn btn-primary" type="submit">ذخیرهٔ مزیت</button></div>
                 </form>
             </div>
@@ -258,7 +265,7 @@
         </form></div>
     </div>
     <div class="modal fade" id="product-file-modal" tabindex="-1" aria-labelledby="product-file-title" aria-hidden="true">
-        <div class="modal-dialog"><form class="modal-content" data-product-file-form data-admin-confirm="فایل انتخاب‌شده بارگذاری و به کالا متصل شود؟" enctype="multipart/form-data">
+        <div class="modal-dialog modal-dialog-scrollable modal-lg"><form class="modal-content" data-product-file-form data-admin-confirm="فایل انتخاب‌شده بارگذاری و به کالا متصل شود؟" enctype="multipart/form-data">
             @Html.AntiForgeryToken()<input type="hidden" name="productId" />
             <div class="modal-header"><h2 class="modal-title fs-5" id="product-file-title">فایل محصول</h2><button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="بستن"></button></div>
             <div class="modal-body">
@@ -269,8 +276,11 @@
                 <input id="product-file-description" name="title" class="form-control mb-3" maxlength="200" />
                 <label for="product-file-input" class="form-label">فایل PDF تا ۱۰ یا ویدئو تا ۵۰ مگابایت</label>
                 <input id="product-file-input" name="file" type="file" accept="application/pdf,video/mp4" class="form-control" required />
+                <div class="d-flex justify-content-end mt-3"><button type="submit" class="btn btn-primary"><i class="fa fa-cloud-arrow-up me-1" aria-hidden="true"></i>بارگذاری و اتصال</button></div>
+                <div class="small text-muted mt-4 mb-2" data-product-file-status role="status" aria-live="polite"></div>
+                <div class="admin-product-image-gallery" data-product-file-list></div>
             </div>
-            <div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button type="submit" class="btn btn-primary"><i class="fa fa-cloud-arrow-up me-1" aria-hidden="true"></i>بارگذاری و اتصال</button></div>
+            <div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">بستن</button></div>
         </form></div>
     </div>
 }

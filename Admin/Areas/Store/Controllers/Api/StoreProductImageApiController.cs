@@ -32,7 +32,7 @@ public sealed class StoreProductImageApiController(
     [HttpGet("{productId:long}")]
     public async Task<IActionResult> GetImages(long productId, CancellationToken cancellationToken)
     {
-        if (!await db.Products.AnyAsync(x => x.Id == productId && x.IsStoreEnabled, cancellationToken)) return NotFound();
+        if (!await db.Products.AnyAsync(x => x.Id == productId, cancellationToken)) return NotFound();
 
         var media = await GetMediaAsync(productId, cancellationToken);
         var images = ReadGallery(media?.ImagesJson);
@@ -60,7 +60,7 @@ public sealed class StoreProductImageApiController(
             images.Sum(image => image.Length) > MaximumRequestSize)
             return BadRequest(new { title = "حداکثر ۱۰ تصویر و هرکدام حداکثر ۱۰ مگابایت انتخاب کنید." });
 
-        var product = await db.Products.AsNoTracking().SingleOrDefaultAsync(x => x.Id == productId && x.IsStoreEnabled, cancellationToken);
+        var product = await db.Products.AsNoTracking().SingleOrDefaultAsync(x => x.Id == productId, cancellationToken);
         if (product is null) return NotFound();
 
         var preparedImages = new List<PreparedImage>(images.Count);
@@ -205,7 +205,7 @@ public sealed class StoreProductImageApiController(
 
     private async Task<StoreProductMedia?> GetMediaAsync(long productId, CancellationToken cancellationToken)
     {
-        string? productKey = await db.Products.AsNoTracking().Where(x => x.Id == productId && x.IsStoreEnabled).Select(x => x.ProductKey).SingleOrDefaultAsync(cancellationToken);
+        string? productKey = await db.Products.AsNoTracking().Where(x => x.Id == productId).Select(x => x.ProductKey).SingleOrDefaultAsync(cancellationToken);
         if (productKey is null) return null;
 
         return await db.StoreProductMedia.SingleOrDefaultAsync( x => x.IdProduct == productId && x.MediaKey == $"product-{productKey}", cancellationToken);

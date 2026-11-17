@@ -145,6 +145,59 @@
         }
     }
 
+    let productFileRequest = 0;
+    async function loadProductFiles(productId) {
+        const form = document.querySelector("[data-product-file-form]");
+        const list = form?.querySelector("[data-product-file-list]");
+        const status = form?.querySelector("[data-product-file-status]");
+        if (!form || !list || !status || !productId) return;
+        const serial = ++productFileRequest;
+        list.replaceChildren();
+        status.textContent = "در حال خواندن فایل‌های ثبت‌شده…";
+        try {
+            const product = await ui.getJson(`/api/admin/store/catalog/products/${encodeURIComponent(productId)}/details`);
+            if (serial !== productFileRequest || form.elements.productId.value !== String(productId)) return;
+            const videos = product.media?.videoList ? JSON.parse(product.media.videoList) : [];
+            if (!Array.isArray(videos)) throw new Error("فهرست ویدئوهای کالا معتبر نیست.");
+            const files = [
+                ...(product.documents || []).map(item => ({ title: item.title || "فایل PDF", path: item.path, type: "PDF" })),
+                ...videos.filter(path => typeof path === "string").map(path => ({ title: path.split("/").pop() || "ویدئو", path, type: "MP4" }))
+            ];
+            const cdnBase = document.querySelector('meta[name="media-cdn-base-url"]')?.content || "";
+            for (const file of files) {
+                const card = document.createElement("article");
+                card.className = "admin-product-image-card";
+                const type = document.createElement("span");
+                type.className = "badge text-bg-primary justify-self-start";
+                type.textContent = file.type;
+                const title = document.createElement("strong");
+                title.className = "text-break";
+                title.textContent = file.title;
+                const path = document.createElement("span");
+                path.className = "small text-muted text-break";
+                path.dir = "ltr";
+                path.textContent = file.path || "—";
+                card.append(type, title, path);
+                if (file.path) {
+                    const raw = file.path.trim();
+                    const relative = raw.replace(/^[~/]+/, "");
+                    const url = /^content\//i.test(relative) && cdnBase ? `${cdnBase.replace(/\/$/, "")}/${relative}` : raw;
+                    if (/^https?:\/\//i.test(url)) {
+                        const link = document.createElement("a");
+                        link.className = "btn btn-default btn-sm";
+                        link.href = url; link.target = "_blank"; link.rel = "noopener noreferrer";
+                        link.textContent = "مشاهده فایل";
+                        card.append(link);
+                    }
+                }
+                list.append(card);
+            }
+            status.textContent = files.length ? `${ui.formatNumber(files.length)} فایل ثبت شده است.` : "هنوز فایلی برای این کالا ثبت نشده است.";
+        } catch (error) {
+            if (serial === productFileRequest && form.elements.productId.value === String(productId)) status.textContent = error.message || "دریافت فایل‌های ثبت‌شده ناموفق بود.";
+        }
+    }
+
     async function loadProductImages(productId) {
         const form = document.querySelector("[data-product-image-form]");
         const gallery = form?.querySelector("[data-product-image-gallery]");
@@ -1550,6 +1603,7 @@
             form.reset(); form.elements.productId.value = item.id;
             form.querySelector("[data-product-file-name]").textContent = item.name;
             window.bootstrap?.Modal?.getOrCreateInstance(document.getElementById("product-file-modal")).show();
+            void loadProductFiles(item.id);
             return;
         }
         const imageButton = event.target.closest("[data-product-image]");
@@ -1699,7 +1753,21 @@
                         imageList: parseJson(product.media.imageList),
                         videoList: parseJson(product.media.videoList)
                     } : null;
-                    ui.showRecord("جزئیات کامل کالا", { ...product, variants, media });
+                    ui.showRecord("جزئیات کامل کالا", { ...product, variants, media }, {
+                        layout: "product",
+                        groups: [
+                            { title: "مشخصات کالا", compact: true, keys: ["name", "englishName", "code", "productKey", "brandName", "categoryName", "unitName", "powerSource", "useCase", "slug", "badge"] },
+                            { title: "قیمت و شرایط خرید", compact: true, keys: ["priceAmount", "discountPercent", "maxPurchaseQuantity"] },
+                            { title: "وضعیت و زمان", compact: true, keys: ["isStoreEnabled", "isWarehouseEnabled", "isNewest", "newestOrder", "createdAtUtc", "updatedAtUtc"] },
+                            { title: "تنوع‌های کالا", keys: ["variants"] },
+                            { title: "موجودی انبار و طرح فروش", keys: ["stockByWarehouseAndPlan"] },
+                            { title: "مشخصات فنی", keys: ["specifications"] },
+                            { title: "مزیت‌های کالا", keys: ["benefits"] },
+                            { title: "رسانه و تصاویر", keys: ["media"] },
+                            { title: "فایل‌های کالا", keys: ["documents"] },
+                            { title: "شناسه‌های سیستمی", compact: true, keys: ["id", "idBrand", "idCategory", "idBaseUnit"] }
+                        ]
+                    });
                 }).catch(error => ui.notify(error.message || "دریافت جزئیات کالا ناموفق بود.", "danger"))
                     .finally(() => { detailButton.disabled = false; });
             } else if (item && page.dataset.adminPage === "customers") {
@@ -1925,8 +1993,15 @@
                 ui.notify("عنوان فایل PDF را وارد کنید.", "danger"); return;
             }
             const save = fileForm.querySelector('[type="submit"]'); save.disabled = true;
+            const productId = fileForm.elements.productId.value;
             void ui.getJson("/api/admin/store/media", { method: "POST", body: new FormData(fileForm) })
-                .then(result => { ui.notify(result.message, "success"); window.bootstrap?.Modal?.getInstance(document.getElementById("product-file-modal"))?.hide(); })
+                .then(result => {
+                    ui.notify(result.message, "success");
+                    if (fileForm.elements.productId.value !== productId) return;
+                    fileForm.elements.file.value = "";
+                    fileForm.elements.title.value = "";
+                    return loadProductFiles(productId);
+                })
                 .catch(error => ui.notify(error.message || "بارگذاری فایل ناموفق بود.", "danger"))
                 .finally(() => { save.disabled = false; });
             return;

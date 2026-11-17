@@ -179,13 +179,20 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                 productUnit.IsActive = false;
                 break;
             case "variants":
-                ProductVariant? variant = await db.ProductVariants.SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
-                if (variant is null) return NotFound();
-                variant.IsActive = false;
-                variant.UpdatedAtUtc = DateTime.UtcNow;
-                var inventoryItem = await db.InventoryItems.SingleOrDefaultAsync(x => x.IdProductVariant == id, cancellationToken);
-                if (inventoryItem is not null) inventoryItem.IsActive = false;
-                break;
+                await using (var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken))
+                {
+                    ProductVariant? variant = await db.ProductVariants.SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
+                    if (variant is null) return NotFound();
+                    if (variant.IsDefault)
+                        return Conflict(new { detail = "تنوع پیش‌فرض قابل غیرفعال‌سازی نیست؛ ابتدا تنوع فعال دیگری را پیش‌فرض کنید." });
+                    variant.IsActive = false;
+                    variant.UpdatedAtUtc = DateTime.UtcNow;
+                    var inventoryItem = await db.InventoryItems.SingleOrDefaultAsync(x => x.IdProductVariant == id, cancellationToken);
+                    if (inventoryItem is not null) inventoryItem.IsActive = false;
+                    await db.SaveChangesAsync(cancellationToken);
+                    await transaction.CommitAsync(cancellationToken);
+                    return Ok(new { message = "رکورد غیرفعال شد و سابقه حفظ شد." });
+                }
             default:
                 return NotFound();
         }
@@ -543,19 +550,26 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                     WarehouseProduct? product = await db.Products.SingleOrDefaultAsync(x => x.Id == input.ProductId && x.IsWarehouseEnabled, cancellationToken);
                     if (product is null) return ValidationProblem(detail: "محصول فعال پیدا نشد.", statusCode: 400);
 
+                    await using var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
                     ProductVariant entity = id.HasValue ? await db.ProductVariants.SingleOrDefaultAsync(x => x.Id == id, cancellationToken) ?? null! : new ProductVariant();
                     if (id.HasValue && entity is null) return NotFound();
+
+                    if (entity.IsDefault && (entity.IdProduct != input.ProductId || !input.IsActive))
+                        return Conflict(new { detail = "تنوع پیش‌فرض را نمی‌توان غیرفعال یا به کالای دیگری منتقل کرد؛ ابتدا تنوع فعال دیگری را پیش‌فرض کنید." });
 
                     if (id.HasValue && entity.IdProduct != input.ProductId &&
                         await db.InventoryItems.AnyAsync(x => x.IdProductVariant == id))
                         return Conflict(new { detail = "تنوع دارای موجودی یا گردش است و به محصول دیگری منتقل نمی‌شود." });
 
                     bool hasOtherDefault = await db.ProductVariants.AnyAsync(x => x.IdProduct == product.Id && x.Id != (id ?? 0) && x.IsDefault && x.IsActive, cancellationToken);
-                    bool makeDefault = input.IsDefault || !hasOtherDefault;
+                    if (!id.HasValue && !hasOtherDefault && !input.IsActive)
+                        return ValidationProblem(detail: "نخستین تنوع کالا باید فعال باشد تا به‌عنوان پیش‌فرض ثبت شود.", statusCode: 400);
+                    if (!input.IsActive && input.IsDefault)
+                        return ValidationProblem(detail: "تنوع پیش‌فرض باید فعال باشد.", statusCode: 400);
+                    bool makeDefault = input.IsActive && (input.IsDefault || !hasOtherDefault);
                     if (!makeDefault && entity.IsDefault)
                         return ValidationProblem(detail: "برای هر کالا باید یک تنوع پیش‌فرض فعال باقی بماند.", statusCode: 400);
 
-                    await using var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
                     if (makeDefault)
                         await db.ProductVariants.Where(x => x.IdProduct == product.Id && x.Id != (id ?? 0) && x.IsDefault)
                             .ExecuteUpdateAsync(setters => setters.SetProperty(x => x.IsDefault, false), cancellationToken);

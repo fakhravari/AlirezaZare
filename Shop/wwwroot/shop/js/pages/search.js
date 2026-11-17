@@ -425,6 +425,8 @@
   }
   const fa = (n) => window.HNUI.formatNumber(n);
   const isProductAvailable = (product) => {
+    const saleStock = window.HNProductCard.availableStock(product, { salesPlanId: product._salesPlanListing?.id });
+    if (saleStock !== null) return saleStock >= 1;
     if (typeof product.inStock === "boolean") return product.inStock;
     const inventory =
       product.stockQuantity ??
@@ -513,7 +515,7 @@
             ? window.HNProductCard.currentPrice(p, {priceAmount: offer.priceAmount, discountPercent: offer.discountPercent})
             : window.HNProductCard.currentPrice(p)) / 1000000;
           const discounted = offer ? offer.discountPercent > 0 : isProductDiscounted(p);
-          const available = offer ? offer.stockQuantity > 0 : isProductAvailable(p);
+          const available = isProductAvailable(p);
           return isPlanListingActive(offer) &&
             (state.availability === "all" || (state.availability === "in-stock" ? available : !available)) &&
             (!state.discountOnly || discounted) && price >= state.minPrice && price <= state.maxPrice;

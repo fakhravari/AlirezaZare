@@ -24,7 +24,7 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
                                group balance.Quantity by new { inventory.IdProduct, balance.IdSalesPlanReference } into grouped
                                select new { grouped.Key.IdProduct, grouped.Key.IdSalesPlanReference, Quantity = grouped.Sum() }).ToListAsync(cancellationToken);
         var siteStock = stockRows.ToDictionary(x => (x.IdProduct, x.IdSalesPlanReference), x => x.Quantity);
-        var products = await dbContext.Products.AsNoTracking().Where(x => x.IsCatalogActive && x.IsStoreEnabled).ToListAsync(cancellationToken);
+        var products = await dbContext.Products.AsNoTracking().Where(x => x.IsStoreEnabled).ToListAsync(cancellationToken);
         var customOffers = await dbContext.StoreProductSalesPlanOffers.AsNoTracking().ToListAsync(cancellationToken);
         var activePriceRows = await dbContext.StorePriceVersions.AsNoTracking().Where(x => x.IsActive && products.Select(p => p.Id).Contains(x.IdProduct)).OrderByDescending(x => x.Id).ToListAsync(cancellationToken);
         var planProductPrices = activePriceRows.Where(x => !x.IdProductVariant.HasValue && !x.IdOptionValue.HasValue &&
@@ -46,14 +46,14 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
                 decimal stock = siteStock.GetValueOrDefault((product.Id, plan.Id));
                 int stockQuantity = stock >= int.MaxValue ? int.MaxValue : checked((int)Math.Floor(stock));
                 int maxQuantity = custom?.MaxPurchaseQuantity ?? product.MaxPurchaseQuantity ?? 99;
-                bool enabled = (custom?.IsEnabled ?? true) && product.IsCatalogActive && product.IsStoreEnabled && plan.IsActive;
+                bool enabled = (custom?.IsEnabled ?? true) && product.IsStoreEnabled && plan.IsActive;
                 offers[(checked((int)product.Id), plan.StoreSalesPlanKey)] = new(checked((int)product.Id), plan.StoreSalesPlanKey, price, discount, stockQuantity, maxQuantity, enabled, priceVersion?.Id ?? 0);
             }
 
         var optionRows = await (from option in dbContext.StoreProductPurchaseOptions.AsNoTracking()
                                 join product in dbContext.Products.AsNoTracking() on option.IdProduct equals product.Id
                                 join value in dbContext.StoreProductPurchaseOptionValues.AsNoTracking() on option.Id equals value.IdProductPurchaseOption
-                                where product.IsCatalogActive && product.IsStoreEnabled
+                                where product.IsStoreEnabled
                                 orderby product.Id, option.SortOrder, value.SortOrder
                                 select new { option.IdProduct, option.OptionKey, option.Label, value.Id, value.ValueKey, ValueLabel = value.Label, value.PriceDelta }).ToListAsync(cancellationToken);
         Dictionary<(int ProductId, string Key), ProductPriceOptionBuilder> priceOptions = [];
@@ -68,7 +68,7 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
         Dictionary<(int ProductId, long VariantId), InventoryVariantBuilder> inventoryVariants = [];
         var eligibleVariants = await (from variant in dbContext.ProductVariants.AsNoTracking()
                                       join product in dbContext.Products.AsNoTracking() on variant.IdProduct equals product.Id
-                                      where variant.IsActive && product.IsWarehouseEnabled && product.IsCatalogActive && product.IsStoreEnabled &&
+                                      where variant.IsActive && product.IsWarehouseEnabled && product.IsStoreEnabled &&
                                             dbContext.InventoryItems.Any(inventory => inventory.IdProductVariant == variant.Id && inventory.IsActive)
                                       select new { ProductId = variant.IdProduct, VariantId = variant.Id, variant.Name, variant.Code, variant.AttributesJson, variant.IsDefault }).ToListAsync(cancellationToken);
         foreach (var row in eligibleVariants) inventoryVariants[(checked((int)row.ProductId), row.VariantId)] = new(checked((int)row.ProductId), row.VariantId, row.Name, row.Code, row.AttributesJson, row.IsDefault);
@@ -138,7 +138,7 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
                                        join offer in dbContext.StoreProductSalesPlanOffers.AsNoTracking() on overrideRow.IdProductSalesPlanOffer equals offer.Id
                                        join product in dbContext.Products.AsNoTracking() on offer.IdProduct equals product.Id
                                        join plan in dbContext.SalesPlanReferences.AsNoTracking() on offer.IdSalesPlan equals plan.Id
-                                       where product.IsCatalogActive && product.IsStoreEnabled
+                                       where product.IsStoreEnabled
                                        orderby product.Id, plan.StoreSalesPlanKey, overrideRow.SpecificationKey
                                        select new { product.Id, plan.StoreSalesPlanKey, overrideRow.SpecificationKey, overrideRow.Value }).ToListAsync(cancellationToken);
         foreach (var row in specificationRows)
@@ -154,7 +154,7 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
 
     public async Task<ProductPurchaseConfiguration?> ReadProductPurchaseConfigurationAsync(int productId, CancellationToken cancellationToken)
     {
-        var product = await dbContext.Products.AsNoTracking().Where(x => x.Id == productId && x.IsCatalogActive && x.IsStoreEnabled)
+        var product = await dbContext.Products.AsNoTracking().Where(x => x.Id == productId && x.IsStoreEnabled)
             .Select(x => new { x.MaxPurchaseQuantity }).SingleOrDefaultAsync(cancellationToken);
         if (product is null) return null;
 

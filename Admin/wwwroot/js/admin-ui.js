@@ -74,8 +74,9 @@
         if (!(event.target instanceof Element)) return;
         const collapseButton = event.target.closest("[data-admin-panel-collapse]");
         if (collapseButton) {
-            const body = collapseButton.closest(".admin-page-widget")?.querySelector(".panel-body");
-            if (body) {
+            const panel = collapseButton.closest(".panel");
+            const body = document.getElementById(collapseButton.getAttribute("aria-controls"));
+            if (body && panel?.contains(body)) {
                 body.hidden = !body.hidden;
                 const expanded = !body.hidden;
                 collapseButton.setAttribute("aria-expanded", String(expanded));
@@ -99,8 +100,8 @@
         warehouseCode: "کد انبار", warehouseName: "انبار", companyName: "شرکت", isSalesWarehouse: "انبار فروش",
         isActive: "وضعیت", storeProductKey: "شناسهٔ محصول فروشگاه", productName: "کالا", variantName: "تنوع",
         salesPlanName: "طرح فروش", unitName: "واحد اصلی", quantity: "موجودی", minimumQuantity: "حداقل موجودی", isLowStock: "وضعیت حداقل",
-        maxPurchaseQuantity: "حداکثر تعداد خرید", createdAtUtc: "زمان ایجاد", updatedAtUtc: "آخرین ویرایش", isCatalogActive: "انتشار در فروشگاه",
-        isStoreEnabled: "فعال در فروشگاه", isWarehouseEnabled: "فعال در انبار", hasImage: "تصویر محصول", idBrand: "شناسهٔ برند",
+        maxPurchaseQuantity: "حداکثر تعداد خرید", createdAtUtc: "زمان ایجاد", updatedAtUtc: "آخرین ویرایش",
+        isStoreEnabled: "انتشار در فروشگاه", isWarehouseEnabled: "فعال در انبار", hasImage: "تصویر محصول", idBrand: "شناسهٔ برند",
         idCategory: "شناسهٔ دسته", idBaseUnit: "شناسهٔ واحد پایه", productKey: "کلید محصول",
         powerSource: "منبع تغذیه", useCase: "کاربرد", badge: "نشان کالا", isNewest: "کالای جدید",
         newestOrder: "ترتیب کالای جدید", variants: "تنوع‌ها", attributes: "ویژگی‌های تنوع", attributesJson: "ویژگی‌های تنوع",
@@ -108,7 +109,7 @@
         feature: "عنوان مشخصه", value: "مقدار", documents: "فایل‌های کالا", media: "رسانهٔ کالا",
         mainPath: "مسیر تصویر اصلی", cardPath: "مسیر تصویر کارت", thumbnailPath: "مسیر تصویر بندانگشتی",
         imageList: "تصاویر تکمیلی", videoList: "ویدئوها", detail: "توضیح", icon: "آیکن", sortOrder: "ترتیب",
-        isDefault: "تنوع پیش‌فرض", title: "عنوان", path: "مسیر فایل"
+        isDefault: "تنوع پیش‌فرض", title: "عنوان", path: "مسیر فایل", src: "مسیر تصویر", thumbnail: "مسیر بندانگشتی"
     };
 
     function notify(message, kind = "info") {
@@ -174,6 +175,7 @@
             const accessibleLabel = (button.getAttribute("aria-label") || button.title || visibleText || "عملیات").replace(/\s+/gu, " ").trim();
             const shortLabels = [
                 ["adminRecord", "جزئیات"], ["productEdit", "ویرایش"], ["productUnpublish", "لغو انتشار"],
+                ["productBenefits", "مزیت‌ها"], ["productAccessories", "متعلقات"],
                 ["productImage", "تصویر"], ["productFile", "فایل"], ["productPublish", "انتشار"],
                 ["customerEdit", "ویرایش"], ["customerDelete", "حذف"], ["adminMinimum", "حداقل"],
                 ["orderTracking", "رهگیری"]
@@ -308,7 +310,7 @@
         return body;
     }
 
-    function showRecord(title, record) {
+    function showRecord(title, record, options = {}) {
         const modal = document.getElementById("admin-record-modal");
         const body = modal?.querySelector("[data-admin-record-body]");
         const heading = modal?.querySelector("#admin-record-title");
@@ -317,6 +319,7 @@
             return;
         }
 
+        modal.classList.toggle("admin-record-product", options.layout === "product");
         heading.textContent = title;
         body.replaceChildren();
         const entries = Object.entries(record || {});
@@ -369,22 +372,83 @@
             } else container.textContent = String(value);
             return container;
         };
-        const groups = [
+        const makeProductMedia = media => {
+            const gallery = document.createElement("div");
+            gallery.className = "admin-record-media-gallery";
+            if (!media || typeof media !== "object") {
+                gallery.textContent = "رسانه‌ای برای این کالا ثبت نشده است.";
+                return gallery;
+            }
+            const cdnBase = document.querySelector('meta[name="media-cdn-base-url"]')?.content || "";
+            const mediaUrl = path => {
+                if (typeof path !== "string" || !path.trim()) return null;
+                const raw = path.trim();
+                const relative = raw.replace(/^[~/]+/, "");
+                const candidate = /^content\//i.test(relative) && cdnBase ? `${cdnBase.replace(/\/$/, "")}/${relative}` : raw;
+                try {
+                    const url = new URL(candidate, window.location.origin);
+                    return ["http:", "https:"].includes(url.protocol) ? url.href : null;
+                } catch { return null; }
+            };
+            const appendMedia = (path, label, video = false) => {
+                if (!path) return;
+                const card = document.createElement("figure");
+                card.className = "admin-record-media-card";
+                const caption = document.createElement("figcaption"); caption.textContent = label;
+                const url = mediaUrl(path);
+                if (url) {
+                    const preview = document.createElement(video ? "video" : "img");
+                    if (video) { preview.controls = true; preview.preload = "none"; preview.setAttribute("aria-label", label); }
+                    else { preview.alt = label; preview.loading = "lazy"; }
+                    preview.src = url;
+                    preview.addEventListener("error", () => {
+                        const message = document.createElement("span"); message.textContent = "نمایش فایل ممکن نیست.";
+                        preview.replaceWith(message);
+                    }, { once: true });
+                    card.append(preview);
+                } else {
+                    const message = document.createElement("span"); message.textContent = "نشانی فایل معتبر نیست.";
+                    card.append(message);
+                }
+                card.append(caption); gallery.append(card);
+            };
+            appendMedia(media.mainPath, "تصویر اصلی");
+            appendMedia(media.cardPath, "تصویر کارت");
+            appendMedia(media.thumbnailPath, "تصویر بندانگشتی");
+            if (Array.isArray(media.imageList)) media.imageList.forEach((image, index) => {
+                const path = typeof image === "string" ? image : image?.src || image?.Src || image?.path || image?.Path;
+                appendMedia(path, `تصویر تکمیلی ${numberFormat.format(index + 1)}`);
+            });
+            if (Array.isArray(media.videoList)) media.videoList.forEach((video, index) => {
+                const path = typeof video === "string" ? video : video?.src || video?.Src || video?.path || video?.Path;
+                appendMedia(path, `ویدئو ${numberFormat.format(index + 1)}`, true);
+            });
+            if ((media.imageList && !Array.isArray(media.imageList)) || (media.videoList && !Array.isArray(media.videoList))) {
+                const message = document.createElement("p"); message.textContent = "فهرست رسانه‌های تکمیلی قابل خواندن نیست."; gallery.append(message);
+            }
+            if (!gallery.children.length) gallery.textContent = "رسانه‌ای برای این کالا ثبت نشده است.";
+            return gallery;
+        };
+        const groups = options.groups || [
             { title: "شناسه و مشخصات", keys: /^(id|code|key|productKey|storeProductKey|name|englishName|brandName|categoryName|parentId|slug|warehouseCode|warehouseName|companyName|productName|variantName|salesPlanName|unitName)$/i },
             { title: "قیمت و مقدار", keys: /(price|amount|quantity|stock|minimum|discount|maximum|maxPurchase)/i },
             { title: "وضعیت و زمان", keys: /^(is|has|status|createdAt|updatedAt|deletedAt|publishedAt|.*Utc$)/i }
         ];
         const consumed = new Set();
-        const appendSection = (sectionTitle, sectionEntries) => {
+        const appendSection = (sectionTitle, sectionEntries, compact = false) => {
             if (!sectionEntries.length) return;
             const section = document.createElement("section"); section.className = "admin-record-section";
+            if (compact) section.classList.add("admin-record-section-compact");
+            if (options.layout === "product" && sectionEntries.some(([, value]) => value && typeof value === "object")) section.classList.add("admin-record-section-wide");
             const sectionHeading = document.createElement("h3"); sectionHeading.className = "admin-record-section-title"; sectionHeading.textContent = sectionTitle;
             const grid = document.createElement("dl"); grid.className = "admin-record-grid";
             for (const [key, value] of sectionEntries) {
                 const field = document.createElement("div"); field.className = "admin-record-field";
                 const term = document.createElement("dt"); term.className = "admin-record-label"; term.textContent = labelFor(key);
                 const description = document.createElement("dd"); description.className = "admin-record-data";
-                if ((key === "logoPath" || key === "logoUrl") && typeof value === "string" && value.length > 0) {
+                if (options.layout === "product" && key === "media") {
+                    description.append(makeProductMedia(value));
+                } else if ((key === "logoPath" || key === "logoUrl") && typeof value === "string" && value.length > 0) {
                     const input = document.createElement("input");
                     input.className = "form-control form-control-sm admin-record-copy-value";
                     input.type = "text";
@@ -413,7 +477,12 @@
             }
             section.append(sectionHeading, grid); body.append(section);
         };
-        for (const group of groups) appendSection(group.title, entries.filter(([key]) => !consumed.has(key) && group.keys.test(key)));
+        for (const group of groups) {
+            const sectionEntries = Array.isArray(group.keys)
+                ? group.keys.filter(key => Object.hasOwn(record, key) && !consumed.has(key)).map(key => [key, record[key]])
+                : entries.filter(([key]) => !consumed.has(key) && group.keys.test(key));
+            appendSection(group.title, sectionEntries, group.compact);
+        }
         appendSection("اطلاعات تکمیلی", entries.filter(([key]) => !consumed.has(key)));
         window.bootstrap.Modal.getOrCreateInstance(modal).show();
     }

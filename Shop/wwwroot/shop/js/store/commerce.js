@@ -696,13 +696,14 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                 if (inventoryVariants.length) {
                     const variant = selectedInventoryVariant();
                     quantity = variant ? Number(variant.stockBySalesPlan?.[selectedSalesPlanId] ?? 0) : Number.NaN;
+                    if (currentOffer) quantity = Math.min(quantity, Number(currentOffer.stockQuantity));
                 } else if (currentOffer) {
-                    quantity = Math.min(quantity, Number(currentOffer.stockQuantity));
+                    quantity = Number(currentOffer.stockQuantity);
                 }
                 const quantityKnown = Number.isFinite(quantity) && quantity >= 0;
                 const offerUnavailable = !currentOffer?.isEnabled;
-                const available = !offerUnavailable && (quantityKnown ? quantity > 0 : (!inventoryVariants.length && p.inStock === true));
-                const unavailable = offerUnavailable || (quantityKnown ? quantity === 0 : (!inventoryVariants.length && p.inStock === false));
+                const available = !offerUnavailable && (quantityKnown ? quantity >= 1 : (!inventoryVariants.length && p.inStock === true));
+                const unavailable = offerUnavailable || (quantityKnown ? quantity < 1 : (!inventoryVariants.length && p.inStock === false));
                 const message = offerUnavailable
                     ? "این طرح فروش اکنون قابل خرید نیست"
                     : quantityKnown

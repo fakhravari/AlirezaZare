@@ -19,8 +19,7 @@ public sealed class WarehouseProduct
     public string? Badge { get; set; }
     public bool IsNewest { get; set; }
     public int? NewestOrder { get; set; }
-    public bool IsStoreEnabled { get; set; } = true;
-    public bool IsCatalogActive { get; set; } = true;
+    public bool IsStoreEnabled { get; set; }
     public bool IsWarehouseEnabled { get; set; }
     public DateTime CreatedAtUtc { get; set; }
     public DateTime? UpdatedAtUtc { get; set; }

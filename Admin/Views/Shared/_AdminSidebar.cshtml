@@ -1,3 +1,4 @@
+@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
 @{
     string? area = ViewContext.RouteData.Values["area"]?.ToString();
     string? controller = ViewContext.RouteData.Values["controller"]?.ToString();
@@ -367,7 +368,7 @@
 </details>
 <div class="menu-divider"></div>
 <div class="menu-item">
-    <a class="menu-link" href="/" target="_blank" rel="noopener">
+    <a class="menu-link" href="@(Configuration["PublicSiteUrl"] ?? "https://bs-shop.ir/")" target="_blank" rel="noopener">
         <span class="menu-icon">
             <i class="fa fa-arrow-up-right-from-square" aria-hidden="true"></i>
         </span><span class="menu-text">مشاهدهٔ فروشگاه</span>
