@@ -44,9 +44,53 @@
         return (label || "این فیلد").replace(/[：:：*]+$/u, "").replace(/\s+/gu, " ").trim();
     }
 
+    function priceRaw(value) {
+        return String(value ?? "").replace(/[۰-۹٠-٩]/g, digit => String(digit.charCodeAt(0) - (digit.charCodeAt(0) >= 1776 ? 1776 : 1632))).replace(/[,٬\s]/g, "");
+    }
+
+    function formatPriceInput(input) {
+        if (!(input instanceof HTMLInputElement)) return;
+        const before = input.value, position = input.selectionStart;
+        const raw = priceRaw(before);
+        if (!/^\d*$/.test(raw)) return;
+        input.value = raw.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        if (position != null && document.activeElement === input) {
+            const digitsBefore = priceRaw(before.slice(0, position)).length;
+            let cursor = 0, seen = 0;
+            while (cursor < input.value.length && seen < digitsBefore) if (/\d/.test(input.value[cursor++])) seen++;
+            input.setSelectionRange(cursor, cursor);
+        }
+    }
+
+    function initPriceInput(input) {
+        input.type = "text";
+        input.inputMode = "numeric";
+        input.dir = "ltr";
+        input.dataset.adminPrice = "";
+        formatPriceInput(input);
+        setPersianValidationMessage(input);
+    }
+
+    function priceValue(input) {
+        const raw = priceRaw(input.value);
+        return /^\d+$/.test(raw) ? Number(raw) : NaN;
+    }
+
+    function setPriceValue(input, value) {
+        input.value = value == null ? "" : String(value);
+        initPriceInput(input);
+    }
+
     function setPersianValidationMessage(control) {
         if (!(control instanceof HTMLInputElement || control instanceof HTMLSelectElement || control instanceof HTMLTextAreaElement)) return;
         control.setCustomValidity("");
+        if (control instanceof HTMLInputElement && control.hasAttribute("data-admin-price") && control.value.trim()) {
+            const amount = priceValue(control);
+            if (!Number.isSafeInteger(amount) || amount < 0 || (control.max && amount > Number(control.max))) {
+                control.setCustomValidity(`${validationLabel(control)} باید عدد صحیح و غیرمنفی در محدودهٔ مجاز باشد.`);
+                return;
+            }
+        }
         if (control.validity.valid) return;
 
         const label = validationLabel(control);
@@ -66,7 +110,10 @@
         if (message) control.setCustomValidity(message);
     }
 
-    document.addEventListener("input", event => setPersianValidationMessage(event.target));
+    document.addEventListener("input", event => {
+        if (event.target instanceof HTMLInputElement && event.target.hasAttribute("data-admin-price")) formatPriceInput(event.target);
+        setPersianValidationMessage(event.target);
+    }, true);
     document.addEventListener("change", event => setPersianValidationMessage(event.target));
     document.addEventListener("invalid", event => setPersianValidationMessage(event.target), true);
 
@@ -310,6 +357,20 @@
         return body;
     }
 
+    function formatDateTime(value) {
+        if (value == null || value === "") return "—";
+        const raw = typeof value === "string" ? value.trim() : value;
+        const dateOnly = typeof raw === "string" && /^\d{4}-\d{2}-\d{2}$/.test(raw);
+        const normalized = typeof raw === "string" && /^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}/.test(raw)
+            ? raw.replace(" ", "T").replace(/(?<!Z|[+-]\d{2}:\d{2})$/i, "Z") : raw;
+        const date = new Date(normalized);
+        if (!Number.isFinite(date.getTime())) return "—";
+        return new Intl.DateTimeFormat("fa-IR-u-ca-persian", {
+            dateStyle: "short", ...(dateOnly ? {} : { timeStyle: "short" }),
+            timeZone: dateOnly ? "UTC" : "Asia/Tehran"
+        }).format(date);
+    }
+
     function showRecord(title, record, options = {}) {
         const modal = document.getElementById("admin-record-modal");
         const body = modal?.querySelector("[data-admin-record-body]");
@@ -333,9 +394,31 @@
         }
 
         const labelFor = key => labels[key] || String(key).replace(/([a-z\d])([A-Z])/g, "$1 $2").replace(/^./, char => char.toLocaleUpperCase("fa-IR"));
-        const makeValue = value => {
+        const makeValue = (value, key = "") => {
             const container = document.createElement("div");
             container.className = "admin-record-value";
+            if (typeof value === "string" && /(?:date|time|at(?:utc)?|utc)$/i.test(key) && /^\d{4}-\d{2}-\d{2}/.test(value)) {
+                container.textContent = formatDateTime(value); return container;
+            }
+            if (options.layout === "product" && value && typeof value === "object" && (!Array.isArray(value) || value.length)) {
+                const items = Array.isArray(value) ? value : [value];
+                if (items.every(item => item && typeof item === "object" && !Array.isArray(item))) {
+                    const keys = [...new Set(items.flatMap(item => Object.keys(item)))];
+                    if (!keys.length) { container.textContent = "—"; return container; }
+                    const wrapper = document.createElement("div"); wrapper.className = "admin-record-table-scroll";
+                    const table = document.createElement("table"); table.className = "admin-record-table admin-record-table-nested";
+                    const head = document.createElement("thead"); const header = document.createElement("tr");
+                    for (const key of keys) { const cell = document.createElement("th"); cell.scope = "col"; cell.textContent = labelFor(key); header.append(cell); }
+                    head.append(header); table.append(head);
+                    const rows = document.createElement("tbody");
+                    for (const item of items) {
+                        const row = document.createElement("tr");
+                        for (const key of keys) { const cell = document.createElement("td"); cell.append(makeValue(item[key], key)); row.append(cell); }
+                        rows.append(row);
+                    }
+                    table.append(rows); wrapper.append(table); container.append(wrapper); return container;
+                }
+            }
             if (value == null || value === "") container.textContent = "—";
             else if (typeof value === "boolean") container.textContent = value ? "بله" : "خیر";
             else if (typeof value === "number") container.textContent = numberFormat.format(value);
@@ -351,7 +434,7 @@
                             nested.className = "admin-record-nested-grid";
                             for (const [key, child] of Object.entries(item)) {
                                 const term = document.createElement("dt"); term.textContent = labelFor(key);
-                                const description = document.createElement("dd"); description.append(makeValue(child));
+                                const description = document.createElement("dd"); description.append(makeValue(child, key));
                                 nested.append(term, description);
                             }
                             row.append(nested);
@@ -365,7 +448,7 @@
                 nested.className = "admin-record-nested-grid";
                 for (const [key, child] of Object.entries(value)) {
                     const term = document.createElement("dt"); term.textContent = labelFor(key);
-                    const description = document.createElement("dd"); description.append(makeValue(child));
+                    const description = document.createElement("dd"); description.append(makeValue(child, key));
                     nested.append(term, description);
                 }
                 container.append(nested);
@@ -441,11 +524,15 @@
             if (compact) section.classList.add("admin-record-section-compact");
             if (options.layout === "product" && sectionEntries.some(([, value]) => value && typeof value === "object")) section.classList.add("admin-record-section-wide");
             const sectionHeading = document.createElement("h3"); sectionHeading.className = "admin-record-section-title"; sectionHeading.textContent = sectionTitle;
-            const grid = document.createElement("dl"); grid.className = "admin-record-grid";
+            const productLayout = options.layout === "product";
+            const grid = document.createElement(productLayout ? "table" : "dl");
+            grid.className = productLayout ? "admin-record-table" : "admin-record-grid";
+            const rows = productLayout ? document.createElement("tbody") : grid;
             for (const [key, value] of sectionEntries) {
-                const field = document.createElement("div"); field.className = "admin-record-field";
-                const term = document.createElement("dt"); term.className = "admin-record-label"; term.textContent = labelFor(key);
-                const description = document.createElement("dd"); description.className = "admin-record-data";
+                const field = document.createElement(productLayout ? "tr" : "div"); if (!productLayout) field.className = "admin-record-field";
+                const term = document.createElement(productLayout ? "th" : "dt"); term.className = "admin-record-label"; term.textContent = labelFor(key);
+                if (productLayout) term.scope = "row";
+                const description = document.createElement(productLayout ? "td" : "dd"); description.className = "admin-record-data";
                 if (options.layout === "product" && key === "media") {
                     description.append(makeProductMedia(value));
                 } else if ((key === "logoPath" || key === "logoUrl") && typeof value === "string" && value.length > 0) {
@@ -472,9 +559,10 @@
                         }, { once: true });
                         description.append(preview);
                     }
-                } else description.append(makeValue(value));
-                field.append(term, description); grid.append(field); consumed.add(key);
+                } else description.append(makeValue(value, key));
+                field.append(term, description); rows.append(field); consumed.add(key);
             }
+            if (productLayout) grid.append(rows);
             section.append(sectionHeading, grid); body.append(section);
         };
         for (const group of groups) {
@@ -656,6 +744,10 @@
         refreshDataTable,
         withIcon,
         renderNumberedPagination,
+        initPriceInput,
+        setPriceValue,
+        priceValue,
+        formatDateTime,
         formatNumber: value => numberFormat.format(value ?? 0)
     });
 })();

@@ -110,7 +110,7 @@
         body.replaceChildren();
         for (const item of items) {
             const row = document.createElement("tr");
-            [format.format(item.number), item.date, item.type, item.warehouse, item.salesPlan, item.party].forEach(value => row.append(node("td", value)));
+            [format.format(item.number), ui.formatDateTime(item.date), item.type, item.warehouse, item.salesPlan, item.party].forEach(value => row.append(node("td", value)));
             const state = node("td");
             state.append(node("span", item.status === "F" ? "قطعی" : "موقت", `badge ${item.status === "F" ? "bg-success" : "bg-warning"}`));
             row.append(state, node("td", item.affectsStock && item.status === "F" ? "دارد" : "ندارد"));

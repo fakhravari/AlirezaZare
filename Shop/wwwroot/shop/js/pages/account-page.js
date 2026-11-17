@@ -9,15 +9,7 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
     const couponPageSize = 5;
     const couponHistory = window.HNAccountData?.coupons || [];
     const activeCoupons = couponHistory.filter((coupon) => coupon.active);
-    const formatPersianDate = (value) => {
-        const date = new Date(value);
-        if (!Number.isFinite(date.getTime())) return "";
-        return new Intl.DateTimeFormat("fa-IR-u-ca-persian", {
-            day: "numeric",
-            month: "short",
-            year: "numeric",
-        }).format(date);
-    };
+    const formatPersianDate = ui.formatDateTime;
     const priceWatchKey = "hn-price-watches-demo";
     let salesPlanData = {};
     try { salesPlanData = JSON.parse(document.querySelector("#storeSalesPlans")?.textContent || "{}"); } catch { salesPlanData = {}; }
@@ -227,12 +219,11 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
         host.replaceChildren();
         for (const order of orders) {
             const label = labels[order.status] || "نامشخص";
-            const date = new Date(order.orderedAtUtc);
-            const dateLabel = formatPersianDate(date);
+            const dateLabel = formatPersianDate(order.orderedAtUtc);
             const card = document.createElement("article");
             card.className = "profile-order-card";
             card._orderDetails = order;
-            Object.assign(card.dataset, { orderNumber: order.number, orderStatus: label, orderDate: dateLabel, orderDatetime: date.toISOString().slice(0, 10), orderCount: String(order.itemCount), orderAmount: String(order.totalAmount), orderDelivery: label });
+            Object.assign(card.dataset, { orderNumber: order.number, orderStatus: label, orderDate: dateLabel, orderDatetime: order.orderedAtUtc || "", orderCount: String(order.itemCount), orderAmount: String(order.totalAmount), orderDelivery: label });
             const simulationLink = simulationAvailable && order.status === "pending-payment" && Number.isSafeInteger(order.id) && order.id > 0
                 ? `<a href="/payment/simulated/${order.id}">ادامهٔ پرداخت آزمایشی</a>` : "";
             const paymentButton = !simulationAvailable && !order.isSample && order.status === "pending-payment" && Number.isSafeInteger(order.id) && order.id > 0
@@ -578,7 +569,7 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
                 ...(details.shippingHistory || []).map(entry => ({ when: entry.changedAtUtc, text: `${statusLabels[entry.previousStatus] || entry.previousStatus} ← ${statusLabels[entry.newStatus] || entry.newStatus}` })),
                 ...(details.trackingHistory || []).map(entry => ({ when: entry.changedAtUtc, text: `رهگیری: ${entry.carrier}، ${entry.trackingCode}` }))
             ].sort((a, b) => new Date(a.when) - new Date(b.when));
-            for (const entry of events) { const li = document.createElement("li"); li.textContent = `${new Date(entry.when).toLocaleString("fa-IR")} — ${entry.text}`; history?.append(li); }
+            for (const entry of events) { const li = document.createElement("li"); li.textContent = `${ui.formatDateTime(entry.when)} — ${entry.text}`; history?.append(li); }
             if (!events.length && history) { const li = document.createElement("li"); li.textContent = "هنوز رویدادی برای این سفارش ثبت نشده است."; history.append(li); }
             if (!invoiceDialog.open) invoiceDialog.showModal();
     });

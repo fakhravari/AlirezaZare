@@ -167,9 +167,11 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
                                     where value.IdProduct == id
                                     orderby feature.SortOrder
                                     select new { Feature = feature.Label, value.Value }).ToListAsync(cancellationToken);
-        var documents = await db.StoreProductDocuments.AsNoTracking().Where(x => x.IdProduct == id).OrderByDescending(x => x.CreatedAtUtc).Select(x => new { x.Title, x.Path, x.CreatedAtUtc }).ToListAsync(cancellationToken);
-        var media = await db.StoreProductMedia.AsNoTracking().Where(x => x.IdProduct == id)
-            .Select(x => new { x.MainPath, x.CardPath, x.ThumbnailPath, x.ImagesJson, x.VideosJson }).FirstOrDefaultAsync(cancellationToken);
+        var assets = await db.StoreProductAssets.AsNoTracking().Where(x => x.IdProduct == id).OrderBy(x => x.SortOrder).ThenBy(x => x.Id).ToListAsync(cancellationToken);
+        var documents = assets.Where(x => x.IdMediaType == ProductMediaTypes.Document).OrderByDescending(x => x.CreatedAtUtc).Select(x => new { x.Title, x.Path, x.CreatedAtUtc }).ToList();
+        var media = assets.FirstOrDefault(x => x.IdMediaType == ProductMediaTypes.Image && x.IsDefault);
+        var imageList = assets.Where(x => x.IdMediaType == ProductMediaTypes.Image).Select(x => new { src = x.Path, thumbnail = x.ThumbnailPath }).ToList();
+        var videoList = assets.Where(x => x.IdMediaType == ProductMediaTypes.Video).Select(x => x.Path).ToList();
 
         return Ok(new
         {
@@ -204,11 +206,11 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
             Documents = documents,
             Media = media is null ? null : new
             {
-                media.MainPath,
+                MainPath = media.Path,
                 media.CardPath,
                 media.ThumbnailPath,
-                ImageList = media.ImagesJson,
-                VideoList = media.VideosJson
+                ImageList = JsonSerializer.Serialize(imageList),
+                VideoList = JsonSerializer.Serialize(videoList)
             }
         });
     }
@@ -404,7 +406,7 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
                          BrandName = brand == null ? null : brand.NameFa,
                          CategoryName = category == null ? null : category.NameFa,
                          PriceAmount = product.PriceAmount,
-                         HasImage = db.StoreProductMedia.Any(media => media.IdProduct == product.Id && media.MediaKey == "product-" + product.ProductKey)
+                         HasImage = db.StoreProductAssets.Any(media => media.IdProduct == product.Id && media.IdMediaType == ProductMediaTypes.Image && media.IsDefault)
                      };
         string query = paging.Search;
         if (query.Length > 0)
@@ -492,12 +494,11 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
         bool validCategory = product.IdCategory is long categoryId && await db.StoreCategories.AnyAsync(c => c.Id == categoryId && c.IsActive &&
             !db.StoreCategories.Any(child => child.IsActive && child.IdParentCategory == c.Id), cancellationToken);
         bool validBrand = product.IdBrand is long brandId && await db.StoreBrands.AnyAsync(x => x.Id == brandId && x.IsActive, cancellationToken);
-        var media = await db.StoreProductMedia.AsNoTracking().SingleOrDefaultAsync(x => x.IdProduct == product.Id && x.MediaKey == "product-" + product.ProductKey, cancellationToken);
+        var media = await db.StoreProductAssets.AsNoTracking().SingleOrDefaultAsync(x => x.IdProduct == product.Id && x.IdMediaType == ProductMediaTypes.Image && x.IsDefault, cancellationToken);
         bool validMedia = media is not null &&
-            media.MainPath?.StartsWith("content/products/images/main/", StringComparison.OrdinalIgnoreCase) == true &&
+            media.Path.StartsWith("content/products/images/main/", StringComparison.OrdinalIgnoreCase) &&
             media.CardPath?.StartsWith("content/products/images/card/", StringComparison.OrdinalIgnoreCase) == true &&
-            media.ThumbnailPath?.StartsWith("content/products/images/thumbnail/", StringComparison.OrdinalIgnoreCase) == true &&
-            IsJson(media.ImagesJson) && IsJson(media.VideosJson);
+            media.ThumbnailPath?.StartsWith("content/products/images/thumbnail/", StringComparison.OrdinalIgnoreCase) == true;
         bool validProduct = product.PriceAmount >= 0 && product.MaxPurchaseQuantity is >= 1 and <= 99 &&
             product.DiscountPercent is >= 0 and < 100 && !string.IsNullOrWhiteSpace(product.Slug) &&
             !string.IsNullOrWhiteSpace(product.EnglishName);

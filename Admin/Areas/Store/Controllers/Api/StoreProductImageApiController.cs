@@ -1,5 +1,3 @@
-using System.Text.Json;
-using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using FluentFTP;
 using ImageMagick;
@@ -34,18 +32,10 @@ public sealed class StoreProductImageApiController(
     {
         if (!await db.Products.AnyAsync(x => x.Id == productId, cancellationToken)) return NotFound();
 
-        var media = await GetMediaAsync(productId, cancellationToken);
-        var images = ReadGallery(media?.ImagesJson);
-        AddImageIfMissing(images, media?.MainPath, media?.ThumbnailPath);
+        var images = await db.StoreProductAssets.AsNoTracking().Where(x => x.IdProduct == productId && x.IdMediaType == ProductMediaTypes.Image).OrderBy(x => x.SortOrder).ThenBy(x => x.Id).ToListAsync(cancellationToken);
         string cdnBaseUrl = await mediaCdn.GetBaseUrlAsync(cancellationToken);
-        var items = images.Select(item =>
-        {
-            string? path = ReadString(item, "src");
-            string? thumbnail = ReadString(item, "thumbnail");
-
-            return new ProductImageItem(path!, ContentCdn.ToUrl(path, cdnBaseUrl), ContentCdn.ToUrl(thumbnail, cdnBaseUrl),
-                string.Equals(path, media?.MainPath, StringComparison.OrdinalIgnoreCase));
-        }).Where(x => !string.IsNullOrWhiteSpace(x.Path)).ToArray();
+        var items = images.Select(image => new ProductImageItem(image.Id, image.Path, ContentCdn.ToUrl(image.Path, cdnBaseUrl), ContentCdn.ToUrl(image.ThumbnailPath, cdnBaseUrl),
+            image.IsDefault, image.SortOrder)).ToArray();
 
         return Ok(new { images = items });
     }
@@ -93,29 +83,17 @@ public sealed class StoreProductImageApiController(
                 uploadedPaths.Add(remotePath);
             }
 
-            string mediaKey = "product-" + product.ProductKey;
-            var media = await db.StoreProductMedia.SingleOrDefaultAsync( x => x.IdProduct == productId && x.MediaKey == mediaKey, cancellationToken);
-            var gallery = ReadGallery(media?.ImagesJson);
-            AddImageIfMissing(gallery, media?.MainPath, media?.ThumbnailPath);
-
-            if (media is null)
-            {
-                media = new StoreProductMedia { IdProduct = productId, MediaKey = mediaKey, VideosJson = "[]" };
-                db.StoreProductMedia.Add(media);
-            }
-
+            await using var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
+            var currentImages = db.StoreProductAssets.Where(x => x.IdProduct == productId && x.IdMediaType == ProductMediaTypes.Image);
+            int nextOrder = (await currentImages.MaxAsync(x => (int?)x.SortOrder, cancellationToken) ?? 0) + 1;
+            bool hasDefault = await currentImages.AnyAsync(x => x.IsDefault, cancellationToken);
             foreach (PreparedImage image in preparedImages)
-                gallery.Add(new JsonObject { ["src"] = image.MainPath, ["thumbnail"] = image.ThumbnailPath });
-
-            if (string.IsNullOrWhiteSpace(media.MainPath))
             {
-                string firstPath = ReadString(gallery.FirstOrDefault(), "src") ?? preparedImages[0].MainPath;
-                string firstThumbnail = ReadString(gallery.FirstOrDefault(), "thumbnail") ?? GetVariantPath(firstPath, "thumbnail");
-                SetDefaultImage(media, firstPath, firstThumbnail);
+                db.StoreProductAssets.Add(new StoreProductAsset { IdProduct = productId, IdMediaType = ProductMediaTypes.Image, Path = image.MainPath, CardPath = GetVariantPath(image.MainPath, "card"), ThumbnailPath = image.ThumbnailPath, Title = product.Name, SortOrder = nextOrder++, IsDefault = !hasDefault, CreatedAtUtc = DateTime.UtcNow });
+                hasDefault = true;
             }
-
-            media.ImagesJson = gallery.ToJsonString();
             await db.SaveChangesAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
 
             databaseSaved = true;
 
@@ -142,16 +120,15 @@ public sealed class StoreProductImageApiController(
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> SetDefault(long productId, [FromBody] ProductImageSelection input, CancellationToken cancellationToken)
     {
-        var media = await GetMediaAsync(productId, cancellationToken);
-        if (media is null) return NotFound();
-
-        var gallery = ReadGallery(media.ImagesJson);
-        JsonNode? selected = gallery.FirstOrDefault(item => string.Equals(ReadString(item, "src"), input.Path, StringComparison.OrdinalIgnoreCase));
-        if (selected is null || !IsValidImagePath(input.Path, productId))
-            return BadRequest(new { title = "تصویر انتخاب‌شده در گالری کالا وجود ندارد." });
-
-        SetDefaultImage(media, input.Path, ReadString(selected, "thumbnail") ?? GetVariantPath(input.Path, "thumbnail"));
+        await using var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
+        var images = await db.StoreProductAssets.Where(x => x.IdProduct == productId && x.IdMediaType == ProductMediaTypes.Image).ToListAsync(cancellationToken);
+        var selected = images.SingleOrDefault(x => string.Equals(x.Path, input.Path, StringComparison.OrdinalIgnoreCase));
+        if (selected is null) return NotFound();
+        foreach (var image in images) image.IsDefault = false;
         await db.SaveChangesAsync(cancellationToken);
+        selected.IsDefault = true;
+        await db.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
 
         return Ok(new { message = "تصویر پیش‌فرض کالا تغییر کرد." });
     }
@@ -160,22 +137,9 @@ public sealed class StoreProductImageApiController(
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(long productId, [FromQuery] string path, CancellationToken cancellationToken)
     {
-        var media = await GetMediaAsync(productId, cancellationToken);
-        if (media is null) return NotFound();
-
-        if (string.Equals(media.MainPath, path, StringComparison.OrdinalIgnoreCase))
-            return Conflict(new { title = "تصویر پیش‌فرض قابل حذف نیست؛ ابتدا تصویر دیگری را پیش‌فرض کنید." });
-
-        var gallery = ReadGallery(media.ImagesJson);
-        int index = -1;
-        for (int itemIndex = 0; itemIndex < gallery.Count; itemIndex++)
-            if (string.Equals(ReadString(gallery[itemIndex], "src"), path, StringComparison.OrdinalIgnoreCase))
-            {
-                index = itemIndex;
-                break;
-            }
-
-        if (index < 0 || !IsValidImagePath(path, productId)) return NotFound();
+        var image = await db.StoreProductAssets.SingleOrDefaultAsync(x => x.IdProduct == productId && x.IdMediaType == ProductMediaTypes.Image && x.Path == path, cancellationToken);
+        if (image is null || !IsValidImagePath(path, productId)) return NotFound();
+        if (image.IsDefault) return Conflict(new { title = "تصویر پیش‌فرض قابل حذف نیست؛ ابتدا تصویر دیگری را پیش‌فرض کنید." });
 
         try
         {
@@ -196,19 +160,23 @@ public sealed class StoreProductImageApiController(
             return Problem(statusCode: 502, title: "تصویر از FTP حذف نشد؛ رکورد گالری حفظ شد. اتصال FTP را بررسی کنید.");
         }
 
-        gallery.RemoveAt(index);
-        media.ImagesJson = gallery.ToJsonString();
+        db.StoreProductAssets.Remove(image);
         await db.SaveChangesAsync(cancellationToken);
 
         return Ok(new { message = "تصویر از گالری کالا حذف شد." });
     }
 
-    private async Task<StoreProductMedia?> GetMediaAsync(long productId, CancellationToken cancellationToken)
+    [HttpPut("{productId:long}/order")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Reorder(long productId, [FromBody] ProductImageOrder input, CancellationToken cancellationToken)
     {
-        string? productKey = await db.Products.AsNoTracking().Where(x => x.Id == productId).Select(x => x.ProductKey).SingleOrDefaultAsync(cancellationToken);
-        if (productKey is null) return null;
-
-        return await db.StoreProductMedia.SingleOrDefaultAsync( x => x.IdProduct == productId && x.MediaKey == $"product-{productKey}", cancellationToken);
+        var images = await db.StoreProductAssets.Where(x => x.IdProduct == productId && x.IdMediaType == ProductMediaTypes.Image).ToListAsync(cancellationToken);
+        if (input.Ids is null || input.Ids.Length != images.Count || input.Ids.Distinct().Count() != images.Count || images.Any(x => !input.Ids.Contains(x.Id)))
+            return BadRequest(new { title = "فهرست تصاویر تغییر کرده است؛ دوباره تلاش کنید." });
+        var byId = images.ToDictionary(x => x.Id);
+        for (int i = 0; i < input.Ids.Length; i++) byId[input.Ids[i]].SortOrder = i + 1;
+        await db.SaveChangesAsync(cancellationToken);
+        return Ok(new { message = "ترتیب تصاویر ذخیره شد." });
     }
 
     private static async Task<PreparedImage> PrepareImageAsync(IFormFile image, long productId, CancellationToken cancellationToken)
@@ -243,29 +211,6 @@ public sealed class StoreProductImageApiController(
         return new PreparedImage(variants[0].Path, variants[2].Path, variants);
     }
 
-    private static JsonArray ReadGallery(string? json)
-    {
-        try { return JsonNode.Parse(string.IsNullOrWhiteSpace(json) ? "[]" : json) as JsonArray ?? new JsonArray(); }
-        catch (JsonException) { return new JsonArray(); }
-    }
-
-    private static void AddImageIfMissing(JsonArray gallery, string? mainPath, string? thumbnailPath)
-    {
-        if (string.IsNullOrWhiteSpace(mainPath) || gallery.Any(item => string.Equals(ReadString(item, "src"), mainPath, StringComparison.OrdinalIgnoreCase))) return;
-
-        gallery.Insert(0, new JsonObject { ["src"] = mainPath, ["thumbnail"] = thumbnailPath });
-    }
-
-    private static string? ReadString(JsonNode? item, string property) =>
-        item is JsonObject obj && obj[property] is JsonValue value && value.TryGetValue(out string? text) ? text : null;
-
-    private static void SetDefaultImage(StoreProductMedia media, string mainPath, string thumbnailPath)
-    {
-        media.MainPath = mainPath;
-        media.CardPath = GetVariantPath(mainPath, "card");
-        media.ThumbnailPath = thumbnailPath;
-    }
-
     private static string GetVariantPath(string mainPath, string variant) =>
         mainPath.Replace(MainFolder, $"content/products/images/{variant}/", StringComparison.Ordinal);
 
@@ -277,7 +222,8 @@ public sealed class StoreProductImageApiController(
         Regex.IsMatch(path, $"^content/products/images/main/product-{productId}-[a-f0-9]{{32}}\\.webp$", RegexOptions.CultureInvariant);
 
     public sealed record ProductImageSelection(string Path);
-    public sealed record ProductImageItem(string Path, string? Url, string? ThumbnailUrl, bool IsDefault);
+    public sealed record ProductImageItem(long Id, string Path, string? Url, string? ThumbnailUrl, bool IsDefault, int SortOrder);
+    public sealed record ProductImageOrder(long[] Ids);
     private sealed record ImageVariant(string Path, byte[] Bytes);
     private sealed record PreparedImage(string MainPath, string ThumbnailPath, IReadOnlyList<ImageVariant> Variants);
 }

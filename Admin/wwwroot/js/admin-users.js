@@ -15,7 +15,7 @@
         ...(body ? { body: JSON.stringify(body) } : {})
     });
     const byId = (rows, id) => rows.find(row => row.id === id);
-    const faDate = value => value ? new Intl.DateTimeFormat("fa-IR", { dateStyle: "medium", timeStyle: "short" }).format(new Date(value)) : "—";
+    const faDate = value => window.AdminUI.formatDateTime(value);
     const el = (tag, text, className) => {
         const node = document.createElement(tag);
         if (text != null) node.textContent = text;
@@ -220,10 +220,9 @@
                             .map(child => inputsByPermissionKey.get(child.permissionKey))
                             .filter(Boolean);
                         if (parentInput && siblingInputs.length) {
-                            const allSelected = siblingInputs.every(child => child.checked && !child.indeterminate);
                             const someSelected = siblingInputs.some(child => child.checked || child.indeterminate);
-                            parentInput.checked = allSelected;
-                            parentInput.indeterminate = someSelected && !allSelected;
+                            if (!input.checked) parentInput.checked = false;
+                            parentInput.indeterminate = !parentInput.checked && someSelected;
                         }
                         parentKey = data.permissions.find(item => item.permissionKey === parentKey)?.parentKey;
                     }
@@ -248,10 +247,8 @@
                 .map(child => inputsByPermissionKey.get(child.permissionKey))
                 .filter(Boolean);
             if (!parentInput || !childInputs.length) return;
-            const allSelected = childInputs.every(child => child.checked && !child.indeterminate);
             const someSelected = childInputs.some(child => child.checked || child.indeterminate);
-            parentInput.checked = allSelected;
-            parentInput.indeterminate = someSelected && !allSelected;
+            parentInput.indeterminate = !parentInput.checked && someSelected;
         };
         refreshParentStates("");
     }
@@ -337,12 +334,15 @@
             button.disabled = true;
             try {
                 const result = await request(`${page.dataset.api}/roles/${roleId}?section=permissions`, "PUT", {
-                    name: role.name, isActive: role.isActive, permissionIds
+                    permissionIds
                 });
                 ui.notify(result.message, "success");
                 await load(page);
             } catch (error) { ui.notify(error.message, "danger"); }
-            finally { button.disabled = false; }
+            finally {
+                const selectedRole = byId(data?.roles || [], Number(roleSelect.value));
+                button.disabled = !selectedRole || selectedRole.roleKey === "system.full-access";
+            }
         });
         page.querySelector("[data-role-create-form]")?.addEventListener("submit", async event => {
             event.preventDefault();

@@ -39,7 +39,7 @@
         const form = document.querySelector("[data-product-accessory-form]"); if (!form) return;
         form.reset(); form.elements.id.value = item?.id || "";
         form.elements.name.value = item?.name || ""; form.elements.description.value = item?.description || "";
-        form.elements.priceAmount.value = item?.priceAmount ?? ""; form.elements.sortOrder.value = item?.sortOrder ?? 0;
+        ui.setPriceValue(form.elements.priceAmount, item?.priceAmount ?? ""); form.elements.sortOrder.value = item?.sortOrder ?? 0;
         form.elements.isRequired.checked = item?.isRequired || false;
         form.elements.isActive.checked = item?.isActive ?? true;
         form.querySelector("[data-product-accessory-form-title]").textContent = item ? "ویرایش متعلقه" : "افزودن متعلقه";
@@ -49,7 +49,7 @@
         const form = event.target.closest("[data-product-accessory-form]"); if (!form) return;
         event.preventDefault();
         if (!form.reportValidity() || !accessoryProductId || form.dataset.saving === "true") return;
-        const priceAmount = Number(form.elements.priceAmount.value), sortOrder = Number(form.elements.sortOrder.value);
+        const priceAmount = ui.priceValue(form.elements.priceAmount), sortOrder = Number(form.elements.sortOrder.value);
         if (!Number.isSafeInteger(priceAmount) || priceAmount < 0 || !Number.isInteger(sortOrder) || sortOrder < 0 || sortOrder > 2147483647) { ui.notify("قیمت یا ترتیب معتبر نیست.", "danger"); return; }
         const productId = accessoryProductId, id = form.elements.id.value, save = form.querySelector('[type="submit"]');
         const body = { name: form.elements.name.value.trim(), description: form.elements.description.value.trim(), priceAmount, sortOrder, isRequired: form.elements.isRequired.checked, isActive: form.elements.isActive.checked };
@@ -209,9 +209,44 @@
         try {
             const result = await ui.getJson(`/api/admin/store/product-images/${encodeURIComponent(productId)}`);
             const images = result.images || [];
+            let savingOrder = false;
+            let draggedCard = null;
+            const renumber = () => [...gallery.children].forEach((card, index) => {
+                card.querySelector("[data-image-order-label]").textContent = `ترتیب: ${ui.formatNumber(index + 1)}`;
+                card.querySelector("[data-image-move=previous]").disabled = index === 0 || savingOrder;
+                card.querySelector("[data-image-move=next]").disabled = index === gallery.children.length - 1 || savingOrder;
+                card.draggable = !savingOrder;
+            });
+            const saveOrder = async () => {
+                savingOrder = true; renumber();
+                status.textContent = "در حال ذخیرهٔ ترتیب تصاویر…";
+                try {
+                    const token = form.querySelector('[name="__RequestVerificationToken"]')?.value || "";
+                    await ui.getJson(`/api/admin/store/product-images/${encodeURIComponent(productId)}/order`, {
+                        method: "PUT", headers: { "Content-Type": "application/json", RequestVerificationToken: token },
+                        body: JSON.stringify({ ids: [...gallery.children].map(card => Number(card.dataset.imageId)) })
+                    });
+                    status.textContent = "ترتیب تصاویر ذخیره شد.";
+                } catch (error) {
+                    ui.notify(error.message || "ذخیرهٔ ترتیب تصاویر ناموفق بود.", "danger");
+                    await loadProductImages(productId);
+                } finally { savingOrder = false; renumber(); }
+            };
             for (const image of images) {
                 const card = document.createElement("article");
                 card.className = "admin-product-image-card";
+                card.dataset.imageId = image.id;
+                card.draggable = true;
+                card.addEventListener("dragstart", event => { draggedCard = card; event.dataTransfer.effectAllowed = "move"; });
+                card.addEventListener("dragend", () => { draggedCard = null; });
+                card.addEventListener("dragover", event => { if (draggedCard && draggedCard !== card && !savingOrder) event.preventDefault(); });
+                card.addEventListener("drop", event => {
+                    event.preventDefault();
+                    if (!draggedCard || draggedCard === card || savingOrder) return;
+                    const cards = [...gallery.children];
+                    gallery.insertBefore(draggedCard, cards.indexOf(draggedCard) < cards.indexOf(card) ? card.nextSibling : card);
+                    draggedCard = null; void saveOrder();
+                });
                 const preview = document.createElement("img");
                 preview.src = image.thumbnailUrl || image.url || "";
                 preview.alt = `تصویر کالا${image.isDefault ? "، پیش‌فرض" : ""}`;
@@ -223,7 +258,10 @@
                 const name = document.createElement("span");
                 name.className = "small text-muted text-break";
                 name.textContent = image.path?.split("/").at(-1) || "تصویر کالا";
-                heading.append(name);
+                const orderLabel = document.createElement("strong");
+                orderLabel.className = "small";
+                orderLabel.dataset.imageOrderLabel = "";
+                heading.append(orderLabel, name);
                 if (image.isDefault) {
                     const badge = document.createElement("span");
                     badge.className = "badge text-bg-primary flex-shrink-0";
@@ -233,6 +271,19 @@
 
                 const actions = document.createElement("div");
                 actions.className = "d-flex flex-wrap gap-2";
+                for (const [direction, label] of [["previous", "انتقال به قبل"], ["next", "انتقال به بعد"]]) {
+                    const move = document.createElement("button");
+                    move.type = "button"; move.className = "btn btn-default btn-sm";
+                    move.dataset.imageMove = direction; move.textContent = label;
+                    move.addEventListener("click", () => {
+                        if (savingOrder) return;
+                        const sibling = direction === "previous" ? card.previousElementSibling : card.nextElementSibling;
+                        if (!sibling) return;
+                        gallery.insertBefore(card, direction === "previous" ? sibling : sibling.nextSibling);
+                        void saveOrder();
+                    });
+                    actions.append(move);
+                }
                 if (!image.isDefault) {
                     const makeDefault = document.createElement("button");
                     makeDefault.type = "button";
@@ -254,8 +305,9 @@
                 card.append(preview, heading, actions);
                 gallery.append(card);
             }
+            renumber();
             status.textContent = images.length
-                ? `${ui.formatNumber(images.length)} تصویر ثبت شده است.`
+                ? `${ui.formatNumber(images.length)} تصویر ثبت شده است. ترتیب را با کشیدن یا دکمه‌های جابه‌جایی تغییر دهید.`
                 : "هنوز تصویری برای این کالا ثبت نشده است.";
         } catch (error) {
             status.textContent = error.message || "دریافت تصاویر ثبت‌شده ناموفق بود.";
@@ -515,7 +567,7 @@
                 const details = document.createElement("div"); details.className = "admin-media-details";
                 const title = document.createElement("strong"); title.textContent = label;
                 const path = document.createElement("code"); path.dir = "ltr"; path.className = "admin-media-path"; path.textContent = item.path;
-                const meta = document.createElement("small"); meta.className = "text-muted"; meta.textContent = `${ui.formatNumber(Math.ceil(item.sizeBytes / 1024))} کیلوبایت · ${new Date(item.modifiedUtc).toLocaleDateString("fa-IR")}`;
+                const meta = document.createElement("small"); meta.className = "text-muted"; meta.textContent = `${ui.formatNumber(Math.ceil(item.sizeBytes / 1024))} کیلوبایت · ${ui.formatDateTime(item.modifiedUtc)}`;
                 details.append(title, path, meta);
                 const actions = document.createElement("div"); actions.className = "admin-media-actions";
                 const copy = document.createElement("button"); copy.type = "button"; copy.className = "btn btn-default btn-sm"; copy.dataset.mediaCopy = item.url || ""; copy.textContent = "کپی نشانی";
@@ -1027,7 +1079,7 @@
             const labels = { "pending-payment": "در انتظار پرداخت", "simulated-payment-confirmed": "پرداخت آزمایشی تأیید شده", "payment-confirmed": "پرداخت تأیید شده", "warehouse-confirmed": "تأیید انبار", "in-transit": "در حال ارسال", "shipped-to-post": "تحویل به پست", delivered: "تحویل‌شده", cancelled: "لغوشده" };
             renderRows(page, rows, item => [item.isSample ? `${item.orderNumber} (نمونه)` : item.orderNumber, item.customerName, labels[item.status] || item.status,
                 item.paymentMethod, ui.formatNumber(item.itemCount), ui.formatNumber(item.totalAmount),
-                new Date(/[zZ]|[+-]\d\d:\d\d$/.test(item.orderedAtUtc) ? item.orderedAtUtc : `${item.orderedAtUtc}Z`).toLocaleString("fa-IR")]);
+                ui.formatDateTime(item.orderedAtUtc)]);
             updateCount(page, 0, rows.length, false);
             updatePagination(page, result.page, result.hasNext, Math.ceil((result.total ?? 0) / (result.pageSize ?? pageSize)), target => loadOrders(page, target));
             status(page, "سفارش‌ها از دیتابیس دریافت شدند.");
@@ -1476,7 +1528,7 @@
                 form.elements.brandId.replaceChildren(new Option("انتخاب برند", ""), ...data.brands.map(brand => new Option(brand.name, String(brand.id))));
                 form.elements.categoryId.replaceChildren(new Option("انتخاب دسته", ""), ...data.categories.map(category => new Option(category.name, String(category.id))));
                 form.elements.brandId.value = String(product.idBrand || ""); form.elements.categoryId.value = String(product.idCategory || "");
-                form.elements.priceAmount.value = product.priceAmount ?? ""; form.elements.discountPercent.value = product.discountPercent ?? 0;
+                ui.setPriceValue(form.elements.priceAmount, product.priceAmount ?? ""); form.elements.discountPercent.value = product.discountPercent ?? 0;
                 form.elements.maxPurchaseQuantity.value = product.maxPurchaseQuantity ?? 99;
                 window.bootstrap?.Modal?.getOrCreateInstance(document.getElementById("product-editor-modal")).show();
             }).catch(error => ui.notify(error.message || "دریافت اطلاعات کالا ناموفق بود.", "danger"))
@@ -1602,6 +1654,7 @@
             if (!item || !form) return;
             form.reset(); form.elements.productId.value = item.id;
             form.querySelector("[data-product-file-name]").textContent = item.name;
+            form.elements.title.value = item.name;
             window.bootstrap?.Modal?.getOrCreateInstance(document.getElementById("product-file-modal")).show();
             void loadProductFiles(item.id);
             return;
@@ -1731,7 +1784,7 @@
                         "شرکت حمل": order.shippingCarrier || "ثبت نشده", "کد رهگیری": order.shippingTrackingCode || "ثبت نشده",
                         "نشانی ثبت‌شده": Object.values(address).filter(value => typeof value === "string" && value).join("، "),
                         "اقلام": items.map(line => `${line.name}، ${ui.formatNumber(line.quantity)} عدد، مبلغ واحد ${ui.formatNumber(line.unitAmount)} تومان، طرح ${line.salesPlan}${line.priceReferences?.length ? `، نسخه‌های قیمت: ${line.priceReferences.map(ref => `#${ref.priceVersionId} ${ref.component}=${ui.formatNumber(ref.calculatedUnitAmount)} تومان`).join("، ")}` : "، مرجع نسخهٔ قیمت ثبت نشده"}`).join(" ؛ ") || "جزئیات اقلام ثبت نشده است",
-                        "تاریخچهٔ ارسال": history.map(entry => `${entry.PreviousStatus} ← ${entry.NewStatus}، مدیر ${entry.ActorUserKey}، ${entry.ChangedAtUtc} UTC`).join(" ؛ ") || "تغییری ثبت نشده است"
+                        "تاریخچهٔ ارسال": history.map(entry => `${entry.PreviousStatus} ← ${entry.NewStatus}، مدیر ${entry.ActorUserKey}، ${ui.formatDateTime(entry.ChangedAtUtc)}`).join(" ؛ ") || "تغییری ثبت نشده است"
                     });
                 }).catch(error => ui.notify(error.message || "دریافت جزئیات سفارش ناموفق بود.", "danger"))
                     .finally(() => { detailButton.disabled = false; });
@@ -1839,7 +1892,7 @@
             event.preventDefault();
             const save = productCreateForm.querySelector('[type="submit"]'); if (save.disabled) return;
             const fields = productCreateForm.elements;
-            const body = { key: fields.key.value, code: fields.code.value, name: fields.name.value, englishName: fields.englishName.value, brandId: Number(fields.brandId.value), categoryId: Number(fields.categoryId.value), unitId: Number(fields.unitId.value), priceAmount: Number(fields.priceAmount.value), discountPercent: Number(fields.discountPercent.value), maxPurchaseQuantity: Number(fields.maxPurchaseQuantity.value) };
+            const body = { key: fields.key.value, code: fields.code.value, name: fields.name.value, englishName: fields.englishName.value, brandId: Number(fields.brandId.value), categoryId: Number(fields.categoryId.value), unitId: Number(fields.unitId.value), priceAmount: ui.priceValue(fields.priceAmount), discountPercent: Number(fields.discountPercent.value), maxPurchaseQuantity: Number(fields.maxPurchaseQuantity.value) };
             if (!Number.isSafeInteger(body.priceAmount)) { ui.notify("قیمت صحیح و معتبر وارد کنید.", "danger"); return; }
             const token = productCreateForm.querySelector('[name="__RequestVerificationToken"]')?.value || ""; save.disabled = true;
             void ui.getJson("/api/admin/store/catalog/products/manage", { method: "POST", headers: { "Content-Type": "application/json", RequestVerificationToken: token }, body: JSON.stringify(body) })
@@ -1882,7 +1935,7 @@
             const save = productEditor.querySelector('[type="submit"]');
             if (save.disabled) return;
             const token = productEditor.querySelector('[name="__RequestVerificationToken"]')?.value || "";
-            const body = { name: productEditor.elements.name.value, englishName: productEditor.elements.englishName.value, brandId: Number(productEditor.elements.brandId.value), categoryId: Number(productEditor.elements.categoryId.value), priceAmount: Number(productEditor.elements.priceAmount.value), discountPercent: Number(productEditor.elements.discountPercent.value), maxPurchaseQuantity: Number(productEditor.elements.maxPurchaseQuantity.value) };
+            const body = { name: productEditor.elements.name.value, englishName: productEditor.elements.englishName.value, brandId: Number(productEditor.elements.brandId.value), categoryId: Number(productEditor.elements.categoryId.value), priceAmount: ui.priceValue(productEditor.elements.priceAmount), discountPercent: Number(productEditor.elements.discountPercent.value), maxPurchaseQuantity: Number(productEditor.elements.maxPurchaseQuantity.value) };
             if (!Number.isSafeInteger(body.priceAmount)) { ui.notify("قیمت صحیح و معتبر وارد کنید.", "danger"); return; }
             save.disabled = true;
             void ui.getJson(`/api/admin/store/catalog/products/manage/${encodeURIComponent(productEditor.elements.id.value)}`, { method: "PUT", headers: { "Content-Type": "application/json", RequestVerificationToken: token }, body: JSON.stringify(body) })
@@ -1989,9 +2042,6 @@
         const fileForm = event.target.closest("[data-product-file-form]");
         if (fileForm) {
             event.preventDefault();
-            if (fileForm.elements.kind.value === "product-document" && !fileForm.elements.title.value.trim()) {
-                ui.notify("عنوان فایل PDF را وارد کنید.", "danger"); return;
-            }
             const save = fileForm.querySelector('[type="submit"]'); save.disabled = true;
             const productId = fileForm.elements.productId.value;
             void ui.getJson("/api/admin/store/media", { method: "POST", body: new FormData(fileForm) })
@@ -1999,7 +2049,7 @@
                     ui.notify(result.message, "success");
                     if (fileForm.elements.productId.value !== productId) return;
                     fileForm.elements.file.value = "";
-                    fileForm.elements.title.value = "";
+                    fileForm.elements.title.value = fileForm.querySelector("[data-product-file-name]").textContent;
                     return loadProductFiles(productId);
                 })
                 .catch(error => ui.notify(error.message || "بارگذاری فایل ناموفق بود.", "danger"))

@@ -16,7 +16,7 @@
             const body = page.querySelector("[data-contact-rows]"); body.replaceChildren();
             for (const item of result.items || []) {
                 const row = document.createElement("tr");
-                [new Date(item.createdAtUtc).toLocaleString("fa-IR"), item.name, item.phone, labels[item.subjectKey] || item.subjectKey, item.message.length > 100 ? `${item.message.slice(0, 100)}…` : item.message, states[item.status] || item.status].forEach(value => row.append(el("td", value)));
+                [window.AdminUI.formatDateTime(item.createdAtUtc), item.name, item.phone, labels[item.subjectKey] || item.subjectKey, item.message.length > 100 ? `${item.message.slice(0, 100)}…` : item.message, states[item.status] || item.status].forEach(value => row.append(el("td", value)));
                 const actions = el("td"), detail = el("button", "نمایش", "btn btn-sm btn-default me-1"); detail.type = "button";
                 detail.addEventListener("click", () => { page.dataset.contactId = item.id; page.querySelector("[data-contact-sender]").textContent = `${item.name} · ${item.phone}${item.email ? ` · ${item.email}` : ""} · ${labels[item.subjectKey] || item.subjectKey}`; page.querySelector("[data-contact-body]").textContent = item.message; page.querySelector("[data-contact-reply]").value = item.adminReply || ""; page.querySelector("[data-contact-reply-status]").textContent = item.replyEmailSentAtUtc ? "ایمیل پاسخ قبلاً ارسال شده است." : ""; window.bootstrap?.Modal?.getOrCreateInstance(document.getElementById("contact-message-modal")).show(); });
                 const next = item.status === "new" ? "read" : item.status === "read" ? "closed" : "new";

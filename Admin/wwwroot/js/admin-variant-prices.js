@@ -30,9 +30,9 @@
             const row = document.createElement("tr");
             row.append(cell(item.productName), cell(item.variantName), cell(item.salesPlanName));
             const amountCell = document.createElement("td"), amount = document.createElement("input");
-            amount.type = "number"; amount.min = "0"; amount.step = "1"; amount.className = "form-control form-control-sm"; amount.inputMode = "numeric";
+            amount.type = "text"; amount.max = "9007199254740991"; amount.className = "form-control form-control-sm";
             amount.setAttribute("aria-label", `قیمت ${item.productName}، ${item.variantName}، ${item.salesPlanName}`);
-            amount.value = draft?.amount ?? (item.priceAmount == null ? "" : String(item.priceAmount)); amount.disabled = page.dataset.canEdit !== "true"; amountCell.append(amount); row.append(amountCell);
+            ui.setPriceValue(amount, draft?.amount ?? (item.priceAmount == null ? "" : String(item.priceAmount))); amount.disabled = page.dataset.canEdit !== "true"; amountCell.append(amount); row.append(amountCell);
             const discountCell = document.createElement("td"), discount = document.createElement("input");
             discount.type = "number"; discount.min = "0"; discount.max = "99.99"; discount.step = "0.01"; discount.className = "form-control form-control-sm";
             discount.setAttribute("aria-label", `درصد تخفیف ${item.productName}، ${item.variantName}، ${item.salesPlanName}`);
@@ -52,7 +52,7 @@
                     if (!amount.value.trim()) {
                         await request(page, `${page.dataset.api}/${item.variantId}/${encodeURIComponent(item.salesPlanId)}`, "DELETE");
                     } else {
-                        const priceAmount = Number(amount.value), discountPercent = Number(discount.value || 0);
+                        const priceAmount = ui.priceValue(amount), discountPercent = Number(discount.value || 0);
                         if (!Number.isSafeInteger(priceAmount) || priceAmount < 0 || !Number.isFinite(discountPercent) || discountPercent < 0 || discountPercent >= 100 || !discount.validity.valid) throw new Error("قیمت صحیح و تخفیف تا دو رقم اعشار و کمتر از ۱۰۰ وارد کنید.");
                         await request(page, `${page.dataset.api}/${item.variantId}/${encodeURIComponent(item.salesPlanId)}`, "PUT", { priceAmount, discountPercent, isEnabled: active.checked });
                     }
@@ -114,7 +114,7 @@
             const rows = await request(page, `${page.dataset.api}/price-history?take=200`);
             for (const item of rows) {
                 const row = document.createElement("tr");
-                row.append(cell(`#${item.id}`), cell(String(item.idProduct)), cell(item.idSalesPlan ?? "—"), cell(item.targetType), cell(number.format(item.priceAmount)), cell(item.isActive ? "فعال" : "سابقه"), cell(item.createdAtUtc ? new Date(item.createdAtUtc).toLocaleString("fa-IR") : "—"), cell(item.previousVersionId ? `#${item.previousVersionId}` : "—"));
+                row.append(cell(`#${item.id}`), cell(String(item.idProduct)), cell(item.idSalesPlan ?? "—"), cell(item.targetType), cell(number.format(item.priceAmount)), cell(item.isActive ? "فعال" : "سابقه"), cell(window.AdminUI.formatDateTime(item.createdAtUtc)), cell(item.previousVersionId ? `#${item.previousVersionId}` : "—"));
                 body.append(row);
             }
             message.textContent = rows.length ? `${number.format(rows.length)} نسخهٔ اخیر` : "هنوز نسخه‌ای ثبت نشده است.";
@@ -128,8 +128,8 @@
             const row = document.createElement("tr"); row.append(cell(`${item.productName} (${item.productCode})`), cell(item.salesPlanName));
             const makeNumber = (label, value, min, max, step) => {
                 const td = document.createElement("td"), input = document.createElement("input");
-                input.type = "number"; input.className = "form-control form-control-sm"; input.min = min; input.max = max; input.step = step;
-                input.value = value; input.setAttribute("aria-label", `${label} ${item.productName}، ${item.salesPlanName}`); td.append(input); row.append(td); return input;
+                input.type = label === "قیمت" ? "text" : "number"; input.className = "form-control form-control-sm"; input.min = min; input.max = max; input.step = step;
+                input.setAttribute("aria-label", `${label} ${item.productName}، ${item.salesPlanName}`); if (label === "قیمت") ui.setPriceValue(input, value); else input.value = value; td.append(input); row.append(td); return input;
             };
             const amount = makeNumber("قیمت", draft?.amount ?? (item.priceAmount == null ? "" : String(item.priceAmount)), "0", "9007199254740991", "1");
             const discount = makeNumber("تخفیف", draft?.discount ?? String(item.discountPercent ?? 0), "0", "99.99", "0.01");
@@ -153,7 +153,7 @@
             setBusy(page._offerSaving.has(key));
             save.addEventListener("click", async () => {
                 if (save.disabled) return;
-                const priceAmount = Number(amount.value), discountPercent = Number(discount.value), maxPurchaseQuantity = Number(limit.value);
+                const priceAmount = ui.priceValue(amount), discountPercent = Number(discount.value), maxPurchaseQuantity = Number(limit.value);
                 if (!amount.value.trim() || !Number.isSafeInteger(priceAmount) || priceAmount < 0 || !discount.value.trim() || !Number.isFinite(discountPercent) || discountPercent < 0 || discountPercent >= 100 || Math.abs(discountPercent * 100 - Math.round(discountPercent * 100)) > 0.000001 || !Number.isInteger(maxPurchaseQuantity) || maxPurchaseQuantity < 1 || maxPurchaseQuantity > 99) { ui.notify("قیمت، تخفیف یا سقف خرید معتبر نیست.", "danger"); return; }
                 setBusy(true);
                 try { const result = await request(page, `${page.dataset.api}/product-offers/${item.productId}/${encodeURIComponent(item.salesPlanId)}`, "PUT", { priceAmount, discountPercent, maxPurchaseQuantity, isEnabled: active.checked }); page._offerDrafts.delete(key); ui.notify(result.message, "success"); await loadOffers(page); }
@@ -182,13 +182,13 @@
             message.textContent = items.length ? "" : "متعلقهٔ فعالی برای کالا ثبت نشده است.";
             for (const item of items) {
                 const row = document.createElement("tr"); row.append(cell(`${item.name}${item.isRequired ? " (اجباری)" : ""}`), cell(number.format(item.basePriceAmount)));
-                const priceCell = document.createElement("td"), price = document.createElement("input"); price.type = "number"; price.min = "0"; price.max = "9007199254740991"; price.step = "1"; price.className = "form-control form-control-sm"; price.value = String(item.priceAmount ?? item.basePriceAmount); price.setAttribute("aria-label", `قیمت ${item.name} در ${offer.salesPlanName}`); priceCell.append(price); row.append(priceCell);
+                const priceCell = document.createElement("td"), price = document.createElement("input"); price.type = "text"; price.max = "9007199254740991"; price.className = "form-control form-control-sm"; price.setAttribute("aria-label", `قیمت ${item.name} در ${offer.salesPlanName}`); ui.setPriceValue(price, item.priceAmount ?? item.basePriceAmount); priceCell.append(price); row.append(priceCell);
                 const allowedCell = document.createElement("td"), allowed = document.createElement("input"); allowed.type = "checkbox"; allowed.checked = item.isRequired || item.isAllowed; allowed.disabled = item.isRequired || page.dataset.canEdit !== "true"; allowed.setAttribute("aria-label", `مجاز بودن ${item.name}`); allowedCell.append(allowed); row.append(allowedCell);
                 const actions = document.createElement("td"), save = document.createElement("button"); save.type = "button"; save.className = "btn btn-sm btn-primary"; save.textContent = "ذخیره"; save.dataset.adminConfirm = `قیمت و وضعیت متعلقهٔ ${item.name} ذخیره شود؟`; save.disabled = page.dataset.canEdit !== "true"; actions.append(save); row.append(actions);
                 ui.withIcon(save, "fa-floppy-disk");
                 save.addEventListener("click", async () => {
                     if (save.disabled) return;
-                    const priceAmount = Number(price.value);
+                    const priceAmount = ui.priceValue(price);
                     if (!price.value.trim() || !Number.isSafeInteger(priceAmount) || priceAmount < 0) { ui.notify("قیمت متعلقه باید مبلغ صحیح و غیرمنفی باشد.", "danger"); return; }
                     save.disabled = true; price.disabled = true; allowed.disabled = true;
                     try { const result = await request(page, `${url}/${item.accessoryId}`, "PUT", { priceAmount, isAllowed: allowed.checked }); ui.notify(result.message, "success"); }

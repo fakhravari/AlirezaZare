@@ -361,10 +361,7 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                 if (!value) return "";
                 const date = new Date(value);
                 if (Number.isNaN(date.getTime())) return "";
-                const formatted = new Intl.DateTimeFormat("fa-IR-u-ca-persian", {
-                    dateStyle: "medium",
-                    timeStyle: "short",
-                }).format(date);
+                const formatted = window.HNUI.formatDateTime(value);
                 return `<time class="${className}" datetime="${esc(date.toISOString())}"><i class="bi bi-clock" aria-hidden="true"></i><span>${esc(formatted)}</span></time>`;
             };
             const feedbackMarkup = (type, items) =>
@@ -1229,7 +1226,7 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                     const points = history.map((item, index) => `${xFor(index).toFixed(1)},${yFor(values[index]).toFixed(1)}`);
                     const priceTicks = [max, (min + max) / 2, min].map((value, index) =>
                         `<text x="132" y="${[30, 100, 170][index]}" text-anchor="start" dominant-baseline="middle" direction="rtl" font-size="12" fill="#65788a">${esc(money(Math.round(value)))}</text>`).join("");
-                    const formatDate = value => new Intl.DateTimeFormat("fa-IR-u-ca-persian", { year: "numeric", month: "short", day: "numeric" }).format(new Date(value));
+                    const formatDate = value => window.HNUI.formatDateTime(value);
                     const polyline = points.length > 1 ? `<polyline points="${points.join(" ")}" fill="none" stroke="#c39418" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>` : "";
                     const dots = history.map((item, index) => `<circle cx="${xFor(index).toFixed(1)}" cy="${yFor(values[index]).toFixed(1)}" r="4.5" fill="#c39418" stroke="#fff" stroke-width="2"><title>${esc(formatDate(item.createdAtUtc))}: ${esc(money(values[index]))}</title></circle>`).join("");
                     const svg = `<svg viewBox="0 0 700 190" role="img" aria-label="تاریخچهٔ ثبت‌شدهٔ قیمت پایهٔ ${esc(p.name)}"><path d="M146 30H680M146 100H680M146 170H680" stroke="#e4eaf0" stroke-width="1"/>${priceTicks}${polyline}${dots}</svg>`;

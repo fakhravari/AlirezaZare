@@ -2,6 +2,7 @@ using System.Text.Json.Nodes;
 using Microsoft.EntityFrameworkCore;
 using Shop.Data.Application.Store;
 using Shop.Data.Application.Store.Contracts;
+using Shop.Data.Domain.Store.Entities;
 
 namespace Shop.Data.Infrastructure.Persistence.Repositories;
 
@@ -17,7 +18,7 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext, IMedi
         var countries = await dbContext.GeoCountries.AsNoTracking().OrderBy(x => x.Id).ToListAsync(cancellationToken);
         var categories = await dbContext.StoreCategories.AsNoTracking().OrderBy(x => x.SortOrder).ThenBy(x => x.Id).ToListAsync(cancellationToken);
         var colors = await dbContext.StoreColors.AsNoTracking().OrderBy(x => x.Id).ToListAsync(cancellationToken);
-        var media = await dbContext.StoreProductMedia.AsNoTracking().OrderBy(x => x.Id).ToListAsync(cancellationToken);
+        var assets = await dbContext.StoreProductAssets.AsNoTracking().OrderBy(x => x.SortOrder).ThenBy(x => x.Id).ToListAsync(cancellationToken);
         var products = await dbContext.Products.AsNoTracking().Where(x => x.IsStoreEnabled).OrderBy(x => x.Id).ToListAsync(cancellationToken);
         var productIds = products.Select(x => x.Id).ToArray();
         var inventoryTotals = await (from inventory in dbContext.InventoryItems.AsNoTracking()
@@ -36,7 +37,6 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext, IMedi
                                         orderby link.SortOrder, link.Id
                                         select new { link.IdProduct, link.Id, accessory.AccessoryKey, accessory.Name, link.IsRequired, link.PriceAmount }).ToListAsync(cancellationToken);
         var productBenefits = await dbContext.StoreProductBenefits.AsNoTracking().Where(x => productIds.Contains(x.IdProduct) && x.IsActive).OrderBy(x => x.SortOrder).ThenBy(x => x.Id).ToListAsync(cancellationToken);
-        var documents = await dbContext.StoreProductDocuments.AsNoTracking().Where(x => productIds.Contains(x.IdProduct)).OrderBy(x => x.Id).ToListAsync(cancellationToken);
         var collections = await dbContext.StoreProductCollections.AsNoTracking().OrderBy(x => x.Id).ToListAsync(cancellationToken);
         var collectionIds = collections.Select(x => x.Id).ToArray();
         var collectionItems = await (from item in dbContext.StoreProductCollectionItems.AsNoTracking()
@@ -69,15 +69,20 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext, IMedi
         root["colors"] = new JsonArray(colors.Select(x => (JsonNode?)new JsonObject { ["id"] = x.ColorKey, ["en"] = x.NameEn, ["fa"] = x.NameFa, ["hex"] = x.HexCode }).ToArray());
         root["countries"] = new JsonArray(countries.Select(x => (JsonNode?)new JsonObject { ["id"] = x.CountryCode, ["name"] = x.NameFa, ["fa"] = x.NameFa, ["en"] = x.NameEn, ["flag"] = x.FlagPath }).ToArray());
         root["details"] = new JsonArray(activeCategories.Select(x => { var o = new JsonObject { ["id"] = x.CategoryKey }; AddOptional(o, "intro", x.ProductIntro); if (x.ProductHighlightsJson is not null) o["highlights"] = ParseJsonValue(x.ProductHighlightsJson); if (x.ProductSpecsJson is not null) o["specs"] = ParseJsonValue(x.ProductSpecsJson); return (JsonNode?)o; }).ToArray());
-        root["media"] = new JsonArray(media.Select(x => (JsonNode?)new JsonObject { ["id"] = x.MediaKey, ["main"] = x.MainPath, ["card"] = x.CardPath, ["thumbnail"] = x.ThumbnailPath, ["images"] = ParseJsonArray(x.ImagesJson), ["videos"] = ParseJsonArray(x.VideosJson) }).ToArray());
-        var mediaByKey = media.ToDictionary(x => (x.IdProduct, x.MediaKey));
+        root["media"] = new JsonArray(products.Select(product =>
+        {
+            var images = assets.Where(x => x.IdProduct == product.Id && x.IdMediaType == ProductMediaTypes.Image).ToArray();
+            var main = images.FirstOrDefault(x => x.IsDefault);
+            return (JsonNode?)new JsonObject { ["id"] = "product-" + product.ProductKey, ["main"] = main?.Path, ["card"] = main?.CardPath, ["thumbnail"] = main?.ThumbnailPath,
+                ["images"] = new JsonArray(images.Select(i => (JsonNode?)new JsonObject { ["src"] = i.Path, ["thumbnail"] = i.ThumbnailPath }).ToArray()),
+                ["videos"] = new JsonArray(assets.Where(v => v.IdProduct == product.Id && v.IdMediaType == ProductMediaTypes.Video).Select(v => (JsonNode?)JsonValue.Create(v.Path)).ToArray()) };
+        }).ToArray());
         root["products"] = new JsonArray(products.Select(product =>
         {
             brandKeyById.TryGetValue(product.IdBrand ?? 0, out var brandKey); categoryKeyById.TryGetValue(product.IdCategory ?? 0, out var categoryKey);
-            mediaByKey.TryGetValue((product.Id, "product-" + product.ProductKey), out var productMedia);
             decimal stock = inventoryTotals.GetValueOrDefault(product.Id);
             int stockQty = stock >= int.MaxValue ? int.MaxValue : Math.Max(0, (int)Math.Floor(stock));
-            var o = new JsonObject { ["id"] = checked((int)product.Id), ["name"] = product.Name, ["englishName"] = product.EnglishName ?? product.Name, ["code"] = product.Code, ["slug"] = product.Slug, ["brandId"] = brandKey, ["categoryId"] = categoryKey, ["detailId"] = categoryKey, ["mediaId"] = productMedia?.MediaKey, ["powerSource"] = product.PowerSource ?? "", ["useCase"] = product.UseCase ?? "", ["price"] = (product.PriceAmount ?? 0m) / 1_000_000m, ["stockQuantity"] = stockQty, ["maxCartQuantity"] = product.MaxPurchaseQuantity ?? 99, ["discountPercent"] = product.DiscountPercent ?? 0m, ["badge"] = product.Badge, ["isNewest"] = product.IsNewest, ["newestOrder"] = product.NewestOrder };
+            var o = new JsonObject { ["id"] = checked((int)product.Id), ["name"] = product.Name, ["englishName"] = product.EnglishName ?? product.Name, ["code"] = product.Code, ["slug"] = product.Slug, ["brandId"] = brandKey, ["categoryId"] = categoryKey, ["detailId"] = categoryKey, ["mediaId"] = "product-" + product.ProductKey, ["powerSource"] = product.PowerSource ?? "", ["useCase"] = product.UseCase ?? "", ["price"] = (product.PriceAmount ?? 0m) / 1_000_000m, ["stockQuantity"] = stockQty, ["maxCartQuantity"] = product.MaxPurchaseQuantity ?? 99, ["discountPercent"] = product.DiscountPercent ?? 0m, ["badge"] = product.Badge, ["isNewest"] = product.IsNewest, ["newestOrder"] = product.NewestOrder };
             o["colorIds"] = new JsonArray(productColors.Where(x => x.IdProduct == product.Id).Select(x => (JsonNode?)JsonValue.Create(colorKeyById.GetValueOrDefault(x.IdColor))).ToArray());
             o["specificationValues"] = new JsonArray(productSpecs.Where(x => x.IdProduct == product.Id).Select(x => (JsonNode?)new JsonObject { ["featureId"] = x.FeatureKey, ["value"] = x.Value }).ToArray());
             o["includedBenefits"] = new JsonArray(productBenefits.Where(x => x.IdProduct == product.Id).Select(x => (JsonNode?)new JsonObject
@@ -88,7 +93,7 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext, IMedi
                 ["icon"] = x.Icon
             }).ToArray());
             o["accessories"] = new JsonArray(productAccessories.Where(x => x.IdProduct == product.Id).Select(x => (JsonNode?)new JsonObject { ["id"] = x.AccessoryKey, ["productAccessoryId"] = x.Id, ["name"] = x.Name, ["required"] = x.IsRequired, ["price"] = x.PriceAmount / 1_000_000m }).ToArray());
-            o["documents"] = new JsonArray(documents.Where(x => x.IdProduct == product.Id).Select(x => (JsonNode?)new JsonObject { ["title"] = x.Title, ["path"] = x.Path }).ToArray()); o["variants"] = new JsonObject(); return (JsonNode?)o;
+            o["documents"] = new JsonArray(assets.Where(x => x.IdProduct == product.Id && x.IdMediaType == ProductMediaTypes.Document).Select(x => (JsonNode?)new JsonObject { ["title"] = x.Title, ["path"] = x.Path }).ToArray()); o["variants"] = new JsonObject(); return (JsonNode?)o;
         }).ToArray());
         root["collections"] = new JsonArray(collections.Select(collection => (JsonNode?)new JsonObject { ["id"] = collection.CollectionKey, ["items"] = new JsonArray(collectionItems.Where(x => x.IdProductCollection == collection.Id).Select(x => (JsonNode?)JsonValue.Create(checked((int)x.IdProduct))).ToArray()) }).ToArray());
 

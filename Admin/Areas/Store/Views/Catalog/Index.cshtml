@@ -175,7 +175,7 @@
                 <div class="admin-modal-field"><label class="form-label" for="new-product-brand">برند</label><select class="form-select" id="new-product-brand" name="brandId" required></select></div>
                 <div class="admin-modal-field"><label class="form-label" for="new-product-category">دستهٔ برگ</label><select class="form-select" id="new-product-category" name="categoryId" required></select></div>
                 <div class="admin-modal-field"><label class="form-label" for="new-product-unit">واحد پایه</label><select class="form-select" id="new-product-unit" name="unitId" required></select></div>
-                <div class="admin-modal-field"><label class="form-label" for="new-product-price">قیمت فروش عادی (تومان)</label><input class="form-control" id="new-product-price" name="priceAmount" type="number" min="0" max="9007199254740991" step="1" required /></div>
+                <div class="admin-modal-field"><label class="form-label" for="new-product-price">قیمت فروش عادی (تومان)</label><input class="form-control" id="new-product-price" name="priceAmount" type="text" inputmode="numeric" dir="ltr" data-admin-price max="9007199254740991" required /></div>
                 <div class="admin-modal-field"><label class="form-label" for="new-product-discount">درصد تخفیف نمایشی</label><input class="form-control" id="new-product-discount" name="discountPercent" type="number" min="0" max="99.99" step="0.01" value="0" required /></div>
                 <div class="admin-modal-field"><label class="form-label" for="new-product-limit">حداکثر تعداد خرید</label><input class="form-control" id="new-product-limit" name="maxPurchaseQuantity" type="number" min="1" max="99" step="1" value="99" required /></div>
             </div><div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button type="submit" class="btn btn-primary"><i class="fa fa-file-circle-plus me-1" aria-hidden="true"></i>ساخت پیش‌نویس</button></div>
@@ -195,7 +195,7 @@
                     <label for="accessory-name" class="form-label">نام متعلقه</label><input id="accessory-name" class="form-control mb-2" name="name" maxlength="300" required />
                     <label for="accessory-description" class="form-label">توضیح (اختیاری)</label><textarea id="accessory-description" class="form-control mb-2" name="description" maxlength="1000"></textarea>
                     <div class="admin-product-accessory-grid mb-2">
-                        <div class="admin-modal-field"><label for="accessory-price" class="form-label">قیمت پایه (تومان)</label><input id="accessory-price" class="form-control" name="priceAmount" type="number" min="0" max="9007199254740991" step="1" required /></div>
+                        <div class="admin-modal-field"><label for="accessory-price" class="form-label">قیمت پایه (تومان)</label><input id="accessory-price" class="form-control" name="priceAmount" type="text" inputmode="numeric" dir="ltr" data-admin-price max="9007199254740991" required /></div>
                         <div class="admin-modal-field"><label for="accessory-order" class="form-label">ترتیب نمایش</label><input id="accessory-order" class="form-control" name="sortOrder" type="number" min="0" max="2147483647" step="1" value="0" required /></div>
                         <div class="admin-modal-field d-flex align-items-end"><div class="form-check"><input id="accessory-required" name="isRequired" type="checkbox" class="form-check-input" /><label for="accessory-required" class="form-check-label">متعلقه اجباری است</label></div></div>
                         <div class="admin-modal-field d-flex align-items-end"><div class="form-check"><input id="accessory-active" name="isActive" type="checkbox" class="form-check-input" checked /><label for="accessory-active" class="form-check-label">متعلقه فعال است</label></div></div>
@@ -211,12 +211,12 @@
             @Html.AntiForgeryToken()<input type="hidden" name="id" />
             <div class="modal-header"><h2 class="modal-title fs-5" id="product-editor-title">ویرایش اطلاعات کالا</h2><button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="بستن"></button></div>
             <div class="modal-body admin-modal-grid-two admin-product-editor-grid">
-                <p class="admin-modal-field-wide">کد کالا: <span data-product-editor-code></span> ? تکمیل همهٔ فیلدها الزامی است.</p>
+                <p class="admin-modal-field-wide">کد کالا: <span data-product-editor-code></span></p>
                 <div class="admin-modal-field admin-product-name"><label for="product-edit-name" class="form-label">نام فارسی</label><input id="product-edit-name" name="name" class="form-control" maxlength="300" required /></div>
-                <div class="admin-modal-field admin-product-english"><label for="product-edit-english" class="form-label">نام لاتین</label><input id="product-edit-english" name="englishName" class="form-control" maxlength="300" required /></div>
+                <div class="admin-modal-field admin-product-english"><label for="product-edit-english" class="form-label">نام لاتین</label><input id="product-edit-english" name="englishName" class="form-control" dir="ltr" maxlength="300" required /></div>
                 <div class="admin-modal-field admin-product-brand"><label for="product-edit-brand" class="form-label">برند</label><select id="product-edit-brand" name="brandId" class="form-select" required></select></div>
                 <div class="admin-modal-field admin-product-category"><label for="product-edit-category" class="form-label">دستهٔ برگ</label><select id="product-edit-category" name="categoryId" class="form-select" required></select></div>
-                <div class="admin-modal-field admin-product-price"><label for="product-edit-price" class="form-label">قیمت نهایی فروش عادی (تومان)</label><input id="product-edit-price" name="priceAmount" type="number" min="0" max="9007199254740991" step="1" class="form-control" required /></div>
+                <div class="admin-modal-field admin-product-price"><label for="product-edit-price" class="form-label">قیمت نهایی فروش عادی (تومان)</label><input id="product-edit-price" name="priceAmount" type="text" inputmode="numeric" dir="ltr" data-admin-price max="9007199254740991" class="form-control" required /></div>
                 <div class="admin-modal-field admin-product-discount"><label for="product-edit-discount" class="form-label">درصد تخفیف نمایشی</label><input id="product-edit-discount" name="discountPercent" type="number" min="0" max="99.99" step="0.01" class="form-control" required /></div>
                 <div class="admin-modal-field admin-product-limit"><label for="product-edit-limit" class="form-label">حداکثر تعداد خرید</label><input id="product-edit-limit" name="maxPurchaseQuantity" type="number" min="1" max="99" step="1" class="form-control" required /></div>
                 <p class="admin-modal-field-wide text-muted mb-0">قیمت نهایی فروش عادی وارد می‌شود؛ قیمت اختصاصی تنوع یا طرح جداگانه تنظیم می‌شود.</p>
@@ -272,8 +272,8 @@
                 <p data-product-file-name></p>
                 <label for="product-file-kind" class="form-label">نوع فایل</label>
                 <select id="product-file-kind" name="kind" class="form-select mb-3"><option value="product-document">فایل PDF</option><option value="product-video">ویدئوی MP4</option></select>
-                <label for="product-file-description" class="form-label">عنوان فایل PDF</label>
-                <input id="product-file-description" name="title" class="form-control mb-3" maxlength="200" />
+                <label for="product-file-description" class="form-label">عنوان فایل</label>
+                <input id="product-file-description" name="title" class="form-control mb-3" maxlength="300" />
                 <label for="product-file-input" class="form-label">فایل PDF تا ۱۰ یا ویدئو تا ۵۰ مگابایت</label>
                 <input id="product-file-input" name="file" type="file" accept="application/pdf,video/mp4" class="form-control" required />
                 <div class="d-flex justify-content-end mt-3"><button type="submit" class="btn btn-primary"><i class="fa fa-cloud-arrow-up me-1" aria-hidden="true"></i>بارگذاری و اتصال</button></div>

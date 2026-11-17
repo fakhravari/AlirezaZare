@@ -164,22 +164,23 @@ public sealed class StoreMediaUploadApiController(ShopDbContext db, FtpMediaUplo
         if (!string.IsNullOrEmpty(paymentInstitutionCode) && !await db.StoreBanks.AnyAsync(x => x.Code == paymentInstitutionCode, cancellationToken))
             return NotFound(new { title = "درگاه پرداخت پیدا نشد." });
 
-        string? mediaKey = null;
+        string? productName = null;
         if (document || video)
         {
             if (productId is null or <= 0) return BadRequest(new { title = "کالا را انتخاب کنید." });
 
             title = title?.Trim();
-            if (document && (string.IsNullOrEmpty(title) || title.Length > 200))
-                return BadRequest(new { title = "عنوان فایل باید بین ۱ تا ۲۰۰ نویسه باشد." });
+            if (title?.Length > 300)
+                return BadRequest(new { title = "عنوان فایل نباید بیشتر از ۳۰۰ نویسه باشد." });
 
             var product = await db.Products.AsNoTracking().SingleOrDefaultAsync(x => x.Id == productId, cancellationToken);
             if (product is null) return NotFound(new { title = "کالای فروشگاهی پیدا نشد." });
+            productName = product.Name;
+            if (string.IsNullOrEmpty(title)) title = productName;
 
-            mediaKey = "product-" + product.ProductKey;
             if (video)
             {
-                var media = await db.StoreProductMedia.AsNoTracking().SingleOrDefaultAsync(x => x.IdProduct == productId && x.MediaKey == mediaKey, cancellationToken);
+                var media = await db.StoreProductAssets.AsNoTracking().FirstOrDefaultAsync(x => x.IdProduct == productId && x.IdMediaType == ProductMediaTypes.Image && x.IsDefault, cancellationToken);
                 if (media is null) return Conflict(new { title = "ابتدا تصویر اصلی کالا را ثبت کنید." });
             }
         }
@@ -259,21 +260,18 @@ public sealed class StoreMediaUploadApiController(ShopDbContext db, FtpMediaUplo
                     db.StoreSliders.Add(new StoreSlider { Title = title!.Trim(), Url = sliderUrl!, ImagePath = path,
                         ShowOnMobile = Request.Form["showOnMobile"] == "true", ShowOnDesktop = Request.Form["showOnDesktop"] == "true" });
                 else if (document)
-                    db.StoreProductDocuments.Add(new StoreProductDocument { IdProduct = productId!.Value, Title = title!, Path = path, CreatedAtUtc = DateTime.UtcNow });
+                    db.StoreProductAssets.Add(new StoreProductAsset { IdProduct = productId!.Value, IdMediaType = ProductMediaTypes.Document, Title = title!, Path = path, CreatedAtUtc = DateTime.UtcNow });
                 else if (video)
                 {
-                    var media = await db.StoreProductMedia.SingleOrDefaultAsync(x => x.IdProduct == productId && x.MediaKey == mediaKey, cancellationToken);
+                    var media = await db.StoreProductAssets.FirstOrDefaultAsync(x => x.IdProduct == productId && x.IdMediaType == ProductMediaTypes.Image && x.IsDefault, cancellationToken);
                     if (media is null)
                     {
                         await CleanupUploadedAsync(ftp, uploaded);
 
                         return Conflict(new { title = "رسانهٔ کالا دیگر وجود ندارد؛ دوباره تلاش کنید." });
                     }
-                    JsonArray videos;
-                    try { videos = string.IsNullOrWhiteSpace(media.VideosJson) ? [] : JsonNode.Parse(media.VideosJson)?.AsArray() ?? []; }
-                    catch (JsonException) { throw new InvalidOperationException("Product video list contains invalid JSON."); }
-                    videos.Add(path);
-                    media.VideosJson = videos.ToJsonString();
+                    int nextOrder = (await db.StoreProductAssets.Where(x => x.IdProduct == productId && x.IdMediaType == ProductMediaTypes.Video).MaxAsync(x => (int?)x.SortOrder, cancellationToken) ?? 0) + 1;
+                    db.StoreProductAssets.Add(new StoreProductAsset { IdProduct = productId!.Value, IdMediaType = ProductMediaTypes.Video, Path = path, Title = title ?? productName!, SortOrder = nextOrder, CreatedAtUtc = DateTime.UtcNow });
                 }
                 else if (!string.IsNullOrEmpty(paymentInstitutionCode))
                 {

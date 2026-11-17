@@ -50,8 +50,8 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
     public DbSet<ProductFeedback> ProductFeedback => Set<ProductFeedback>();
     public DbSet<StoreHomeTestimonial> StoreHomeTestimonials => Set<StoreHomeTestimonial>();
     public DbSet<StoreAttributeDefinition> StoreAttributeDefinitions => Set<StoreAttributeDefinition>();
-    public DbSet<StoreProductMedia> StoreProductMedia => Set<StoreProductMedia>();
-    public DbSet<StoreProductDocument> StoreProductDocuments => Set<StoreProductDocument>();
+    public DbSet<StoreProductMediaType> StoreProductMediaTypes => Set<StoreProductMediaType>();
+    public DbSet<StoreProductAsset> StoreProductAssets => Set<StoreProductAsset>();
     public DbSet<StoreProductBenefit> StoreProductBenefits => Set<StoreProductBenefit>();
     public DbSet<StoreBrand> StoreBrands => Set<StoreBrand>();
     public DbSet<StoreBank> StoreBanks => Set<StoreBank>();
@@ -753,17 +753,22 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.Property(x => x.SpecificationKey).HasMaxLength(100).IsRequired(); entity.Property(x => x.Value).HasMaxLength(1000).IsRequired();
             entity.HasIndex(x => new { x.IdProductSalesPlanOffer, x.SpecificationKey }).IsUnique();
         });
-        modelBuilder.Entity<StoreProductMedia>(entity =>
+        modelBuilder.Entity<StoreProductMediaType>(entity =>
         {
-            entity.ToTable("ProductMedia", "Store");
-            entity.HasKey(x => x.Id);
-            entity.Property(x => x.MediaKey).HasMaxLength(100).IsRequired();
-            entity.Property(x => x.MainPath).HasMaxLength(1000);
-            entity.Property(x => x.CardPath).HasMaxLength(1000);
-            entity.Property(x => x.ThumbnailPath).HasMaxLength(1000);
-            entity.Property(x => x.ImagesJson).HasColumnType("nvarchar(max)");
-            entity.Property(x => x.VideosJson).HasColumnType("nvarchar(max)");
-            entity.HasIndex(x => new { x.IdProduct, x.MediaKey }).IsUnique();
+            entity.ToTable("ProductMediaType", "Store"); entity.HasKey(x => x.Id);
+            entity.Property(x => x.Title).HasMaxLength(50).IsRequired();
+            entity.HasIndex(x => x.Title).IsUnique();
+        });
+        modelBuilder.Entity<StoreProductAsset>(entity =>
+        {
+            entity.ToTable("ProductAsset", "Store"); entity.HasKey(x => x.Id);
+            entity.Property(x => x.Path).HasMaxLength(1000).IsRequired();
+            entity.Property(x => x.ThumbnailPath).HasMaxLength(1000).IsRequired();
+            entity.Property(x => x.CardPath).HasMaxLength(1000).IsRequired();
+            entity.Property(x => x.Title).HasMaxLength(300).IsRequired();
+            entity.Property(x => x.CreatedAtUtc).HasPrecision(3).HasDefaultValueSql("SYSUTCDATETIME()").IsRequired();
+            entity.HasOne<StoreProductMediaType>().WithMany().HasForeignKey(x => x.IdMediaType);
+            entity.HasIndex(x => new { x.IdProduct, x.IdMediaType, x.SortOrder, x.Id });
         });
         modelBuilder.Entity<StoreProductBenefit>(entity =>
         {
@@ -774,15 +779,6 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.Property(x => x.Icon).HasMaxLength(100);
             entity.Property(x => x.IsActive).HasDefaultValue(true).IsRequired();
             entity.HasIndex(x => new { x.IdProduct, x.SortOrder, x.Id });
-        });
-        modelBuilder.Entity<StoreProductDocument>(entity =>
-        {
-            entity.ToTable("ProductDocument", "Store");
-            entity.HasKey(x => x.Id);
-            entity.Property(x => x.Title).HasMaxLength(200).IsRequired();
-            entity.Property(x => x.Path).HasMaxLength(450).IsRequired();
-            entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
-            entity.HasIndex(x => x.Path).IsUnique();
         });
         modelBuilder.Entity<StoreColor>(entity => { entity.ToTable("Color", "Store"); entity.HasKey(x => x.Id); entity.Property(x => x.ColorKey).HasMaxLength(80).IsRequired(); entity.Property(x => x.NameEn).HasMaxLength(100).IsRequired(); entity.Property(x => x.NameFa).HasMaxLength(100).IsRequired(); entity.Property(x => x.HexCode).HasColumnType("char(7)"); entity.HasIndex(x => x.ColorKey).IsUnique(); });
         modelBuilder.Entity<StoreSpecificationGroup>(entity => { entity.ToTable("SpecificationGroup", "Store"); entity.HasKey(x => x.Id); entity.Property(x => x.GroupKey).HasMaxLength(100).IsRequired(); entity.Property(x => x.Name).HasMaxLength(200).IsRequired(); entity.HasIndex(x => x.GroupKey).IsUnique(); });

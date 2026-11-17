@@ -51,7 +51,7 @@
                 const text = document.createElement("p"); text.className = "small text-muted mb-0 home-testimonial-text"; text.textContent = item.feedbackText;
                 reviewCell.append(name, text); row.append(reviewCell);
                 row.append(cell(`${item.productName} (${item.productKey})`));
-                row.append(cell(item.createdAtUtc ? new Date(item.createdAtUtc).toLocaleDateString("fa-IR") : "—"));
+                row.append(cell(window.AdminUI.formatDateTime(item.createdAtUtc)));
 
                 const actions = document.createElement("td");
                 const upload = document.createElement("input"); upload.type = "file"; upload.accept = "image/jpeg,image/png,image/webp";

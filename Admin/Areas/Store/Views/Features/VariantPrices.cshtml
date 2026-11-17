@@ -20,21 +20,19 @@
 }
 <div class="admin-page" data-store-variant-prices data-api="@ViewData["ApiUrl"]" data-can-edit="@(User.IsInRole("system.full-access") || User.HasClaim("admin_permission", "Store:Features:Index:promotions") ? "true" : "false")">
     @await Html.PartialAsync("_AdminPageIntro", (sectionTitle, sectionDescription))
-    <nav class="nav nav-pills gap-2 mb-3" aria-label="بخش‌های طرح فروش">
-        @if (User.IsInRole("system.full-access"))
-        {
-            <a class="nav-link @(promotionSection == "plans" ? "active" : "")" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="promotions" asp-route-section="plans" data-admin-nav>مدیریت طرح‌ها</a>
-        }
-        <a class="nav-link @(promotionSection == "offers" ? "active" : "")" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="promotions" asp-route-section="offers" data-admin-nav>پیشنهادهای کالا</a>
-        <a class="nav-link @(promotionSection == "variant-prices" ? "active" : "")" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="promotions" asp-route-section="variant-prices" data-admin-nav>قیمت تنوع‌ها</a>
-        <a class="nav-link @(promotionSection == "history" ? "active" : "")" asp-area="Store" asp-controller="Features" asp-action="Index" asp-route-feature="promotions" asp-route-section="history" data-admin-nav>تاریخچهٔ قیمت</a>
-    </nav>
     @Html.AntiForgeryToken()
     @if (promotionSection == "plans" && User.IsInRole("system.full-access"))
     {
         <section class="panel panel-inverse">
             <div class="panel-heading"><h2 class="panel-title">بازه و نمایش طرح فروش</h2></div>
             <div class="panel-body">
+                <form class="admin-filter-bar mb-3 d-flex flex-wrap align-items-center gap-2" data-plan-filter>
+                    <label class="visually-hidden" for="plan-product-search">جست‌وجوی کالا</label><input id="plan-product-search" class="form-control" type="search" name="q" maxlength="100" placeholder="نام یا کد کالای دارای قیمت در طرح" />
+                    <label for="plan-filter-from">از تاریخ اجرای طرح</label><input id="plan-filter-from" class="form-control" type="date" name="from" />
+                    <label for="plan-filter-to">تا تاریخ اجرای طرح</label><input id="plan-filter-to" class="form-control" type="date" name="to" />
+                    <button class="btn btn-primary" type="submit">اعمال فیلتر</button><button class="btn btn-default" type="reset">پاک‌کردن</button>
+                </form>
+                <p class="small text-muted">فیلتر تاریخ، طرح‌های هم‌پوشان با بازه را نشان می‌دهد؛ طرح بدون تاریخ، باز در نظر گرفته می‌شود.</p>
                 <p>طرح تازه به‌صورت پیش‌نویس ساخته و به انبارهای فروش متصل می‌شود. برای عرضه، آن را منتشر کنید؛ طرح‌های دارای سابقه فقط غیرفعال می‌شوند.</p>
                 <form class="border rounded p-3 mb-3" data-plan-create data-admin-confirm="طرح فروش جدید ساخته شود؟">
                     <h3 class="h5">ایجاد طرح فروش</h3>
@@ -68,8 +66,12 @@
                 <label class="visually-hidden" for="offer-search">جست‌وجوی پیشنهاد</label>
                 <input class="form-control" id="offer-search" type="search" maxlength="100"
                        placeholder="جست‌وجوی کالا، کد یا طرح" />
+                <label for="offer-from">از تاریخ ثبت قیمت</label><input id="offer-from" class="form-control" type="date" name="from" />
+                <label for="offer-to">تا تاریخ ثبت قیمت</label><input id="offer-to" class="form-control" type="date" name="to" />
+                <button class="btn btn-primary" type="submit">اعمال فیلتر</button><button class="btn btn-default" type="reset">پاک‌کردن</button>
                 <span class="admin-record-count ms-auto small text-muted" data-offer-count aria-live="polite"></span>
             </form>
+            <p class="small text-muted">فیلتر تاریخ فقط پیشنهادهایی را نشان می‌دهد که قیمت آن‌ها ثبت شده است.</p>
             <div class="admin-data-status small text-muted" data-offer-status role="status" aria-live="polite">در حال بارگذاری…</div>
             <div class="table-responsive">
                 <table class="table table-striped table-hover align-middle"
@@ -113,8 +115,12 @@
                 <label class="visually-hidden" for="variant-price-search">جست‌وجو</label>
                 <input class="form-control" id="variant-price-search" type="search" maxlength="100"
                        placeholder="جست‌وجوی کالا، تنوع یا طرح" autocomplete="off">
+                <label for="variant-price-from">از تاریخ ثبت قیمت</label><input id="variant-price-from" class="form-control" type="date" name="from" />
+                <label for="variant-price-to">تا تاریخ ثبت قیمت</label><input id="variant-price-to" class="form-control" type="date" name="to" />
+                <button class="btn btn-primary" type="submit">اعمال فیلتر</button><button class="btn btn-default" type="reset">پاک‌کردن</button>
                 <span class="admin-record-count ms-auto small text-muted" data-price-count aria-live="polite"></span>
             </form>
+            <p class="small text-muted">فیلتر تاریخ فقط تنوع‌هایی را نشان می‌دهد که قیمت اختصاصی آن‌ها ثبت شده است.</p>
             <div class="admin-data-status small text-muted" data-price-status role="status" aria-live="polite">در حال بارگذاری…</div>
             <div class="table-responsive">
                 <table class="table table-striped table-hover align-middle" data-admin-datatable data-admin-table-mode="server">
@@ -138,7 +144,15 @@
     {
     <section class="panel panel-inverse mt-3" aria-labelledby="price-history-title">
         <div class="panel-heading d-flex align-items-center justify-content-between"><h2 class="panel-title" id="price-history-title">تاریخچهٔ قیمت</h2><button type="button" class="btn btn-xs btn-icon btn-default" data-price-history-refresh aria-label="بارگذاری تاریخچه"><i class="fa fa-clock-rotate-left" aria-hidden="true"></i></button></div>
-        <div class="panel-body"><div class="small text-muted mb-2" data-price-history-status role="status" aria-live="polite">در حال دریافت تاریخچه…</div><div class="table-responsive"><table class="table table-sm table-striped"><thead><tr><th>شناسه</th><th>کالا</th><th>طرح</th><th>نوع</th><th>مبلغ</th><th>وضعیت</th><th>زمان ثبت</th><th>نسخهٔ قبل</th></tr></thead><tbody data-price-history-rows></tbody></table></div></div>
+        <div class="panel-body">
+            <form class="admin-filter-bar mb-3 d-flex flex-wrap align-items-center gap-2" data-history-filter>
+                <label class="visually-hidden" for="history-product-search">جست‌وجوی کالا</label><input id="history-product-search" class="form-control" type="search" name="q" maxlength="100" placeholder="نام یا کد کالا" />
+                <label for="history-from">از تاریخ ثبت</label><input id="history-from" class="form-control" type="date" name="from" />
+                <label for="history-to">تا تاریخ ثبت</label><input id="history-to" class="form-control" type="date" name="to" />
+                <button class="btn btn-primary" type="submit">اعمال فیلتر</button><button class="btn btn-default" type="reset">پاک‌کردن</button>
+            </form>
+            <div class="small text-muted mb-2" data-price-history-status role="status" aria-live="polite">در حال دریافت تاریخچه…</div><div class="table-responsive"><table class="table table-sm table-striped"><thead><tr><th>شناسه</th><th>کالا</th><th>طرح</th><th>نوع</th><th>مبلغ (تومان)</th><th>وضعیت</th><th>زمان ثبت</th><th>نسخهٔ قبل</th></tr></thead><tbody data-price-history-rows></tbody></table></div>
+        </div>
     </section>
     }
 </div>
@@ -159,7 +173,7 @@
         <div class="modal-header"><h2 class="modal-title fs-5" id="offer-accessories-title">متعلقات پیشنهاد</h2><button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="بستن"></button></div>
         <div class="modal-body"><p data-offer-accessories-name></p><p>متعلقهٔ اجباری همواره مجاز است؛ قیمت هر متعلقه به تومان و برای همین طرح است.</p>
             <div data-offer-accessories-status role="status" aria-live="polite"></div>
-            <div class="table-responsive"><table class="table align-middle" data-admin-datatable><thead><tr><th scope="col">متعلقه</th><th scope="col">قیمت پایه</th><th scope="col">قیمت در طرح</th><th scope="col">مجاز</th><th scope="col">عملیات</th></tr></thead><tbody data-offer-accessories-rows></tbody></table></div>
+            <div class="table-responsive"><table class="table align-middle" data-admin-datatable><thead><tr><th scope="col">متعلقه</th><th scope="col">قیمت پایه (تومان)</th><th scope="col">قیمت در طرح (تومان)</th><th scope="col">مجاز</th><th scope="col">عملیات</th></tr></thead><tbody data-offer-accessories-rows></tbody></table></div>
         </div><div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">بستن</button></div>
     </div></div>
 </div>

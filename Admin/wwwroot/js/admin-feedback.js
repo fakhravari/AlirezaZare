@@ -21,7 +21,7 @@
         const body = page.querySelector("[data-feedback-rows]"); ui.destroyDataTable(page.querySelector("[data-admin-datatable]")); body.replaceChildren();
         for (const item of items) {
             const row = document.createElement("tr");
-            [item.isSample ? "—" : new Date(item.createdAtUtc).toLocaleDateString("fa-IR"), `${item.productName} (${item.storeProductKey})`, item.isSample ? `${item.displayName} (نمونه)` : item.displayName, item.feedbackText,
+            [item.isSample ? "—" : window.AdminUI.formatDateTime(item.createdAtUtc), `${item.productName} (${item.storeProductKey})`, item.isSample ? `${item.displayName} (نمونه)` : item.displayName, item.feedbackText,
                 item.rating == null ? "—" : number.format(item.rating), statusText(item.status)].forEach(value => row.append(el("td", value)));
             const reply = el("td");
             reply.innerHTML = item.adminReply || "—";

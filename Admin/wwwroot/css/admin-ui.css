@@ -478,7 +478,7 @@
         grid-column: 1 / -1;
     }
 
-    .modal-body.admin-product-editor-grid {
+    .modal-body.admin-modal-grid-two.admin-product-editor-grid {
         grid-template-columns: repeat(12, minmax(0, 1fr));
     }
 
@@ -1001,28 +1001,52 @@
     align-content: start;
 }
 
-.admin-record-product .admin-record-section:first-child,
-.admin-record-product .admin-record-section-wide {
-    grid-column: 1 / -1;
-}
-
 .admin-record-product .admin-record-section {
-    padding: 1rem;
-    border: 1px solid #dce5eb;
-    border-radius: .85rem;
-    background: #fff;
+    min-width: 0;
 }
 
-.admin-record-product .admin-record-section-wide > .admin-record-grid {
-    grid-template-columns: minmax(0, 1fr);
-}
-
-.admin-record-product .admin-record-section-compact > .admin-record-grid {
-    grid-template-columns: none;
-    grid-auto-flow: column;
-    grid-auto-columns: minmax(150px, 1fr);
+.admin-record-product .admin-record-table-scroll {
+    max-width: 100%;
     overflow-x: auto;
-    padding-bottom: .25rem;
+}
+
+.admin-record-product .admin-record-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    font-size: .85rem;
+}
+
+.admin-record-product .admin-record-table th,
+.admin-record-product .admin-record-table td {
+    padding: .6rem .75rem;
+    border: 1px solid #dce5eb;
+    text-align: start;
+    vertical-align: top;
+}
+
+.admin-record-product .admin-record-table th {
+    color: #52677b;
+    background: #f1f6f8;
+    font-weight: 600;
+}
+
+.admin-record-product .admin-record-section > .admin-record-table {
+    table-layout: fixed;
+}
+
+.admin-record-product .admin-record-section > .admin-record-table > tbody > tr > th {
+    width: 22%;
+    min-width: 110px;
+}
+
+.admin-record-product .admin-record-table-nested {
+    width: max-content;
+    min-width: 100%;
+}
+
+.admin-record-product .admin-record-table-nested th {
+    white-space: nowrap;
 }
 
 .admin-record-product .admin-record-media-gallery {
@@ -1050,13 +1074,14 @@
 }
 
 .admin-record-product .admin-record-list {
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
-    padding: 0;
-    list-style: none;
+    padding-inline-start: 1.2rem;
 }
 
-@media (max-width: 767px) {
-    .admin-record-product .admin-record-nested-grid { grid-template-columns: minmax(0, 1fr); }
+.admin-record-product .admin-record-list > li {
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
 }
 
 #admin-record-modal .modal-content {
@@ -1385,4 +1410,11 @@
     border-radius: .35rem;
     background: #fff;
     object-fit: cover;
+}
+.admin-product-image-card[draggable="true"] {
+    cursor: grab;
+}
+
+.admin-product-image-card[draggable="true"]:active {
+    cursor: grabbing;
 }

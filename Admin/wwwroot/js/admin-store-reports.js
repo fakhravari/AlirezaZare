@@ -5,12 +5,12 @@
     const initialized = new WeakSet();
     const number = new Intl.NumberFormat("fa-IR");
     const money = value => `${number.format(Number(value || 0))} تومان`;
-    const dateLabel = value => value ? new Date(`${value}T00:00:00`).toLocaleDateString("fa-IR-u-ca-persian") : "—";
+    const dateLabel = value => ui.formatDateTime(value);
     const reports = {
-        sales: { title: "فروش و سفارش‌ها", columns: [["date", "تاریخ"], ["orderCount", "سفارش پرداخت‌شده"], ["revenue", "فروش خالص"], ["discount", "تخفیف"]] },
-        products: { title: "عملکرد کالاها", columns: [["productName", "کالا"], ["quantity", "تعداد فروش"], ["revenue", "مبلغ فروش"], ["orderCount", "تعداد سفارش"], ["stock", "موجودی مجاز"]] },
+        sales: { title: "فروش و سفارش‌ها", columns: [["date", "تاریخ"], ["orderCount", "سفارش پرداخت‌شده"], ["revenue", "فروش خالص (تومان)"], ["discount", "تخفیف (تومان)"]] },
+        products: { title: "عملکرد کالاها", columns: [["productName", "کالا"], ["quantity", "تعداد فروش"], ["revenue", "مبلغ فروش (تومان)"], ["orderCount", "تعداد سفارش"], ["stock", "موجودی مجاز"]] },
         inventory: { title: "موجودی و گردش انبار", columns: [["warehouseLabel", "شرکت / انبار"], ["productCode", "کد کالا"], ["productName", "نام کالا"], ["variantName", "تنوع"], ["planName", "طرح"], ["quantity", "موجودی"], ["minimumQuantity", "حداقل"], ["lastMovement", "آخرین گردش"]] },
-        customers: { title: "مشتریان", columns: [["customerName", "مشتری"], ["email", "ایمیل"], ["orderCount", "سفارش"], ["revenue", "مبلغ خرید"], ["firstPurchase", "اولین خرید"]] }
+        customers: { title: "مشتریان", columns: [["customerName", "مشتری"], ["email", "ایمیل"], ["orderCount", "سفارش"], ["revenue", "مبلغ خرید (تومان)"], ["firstPurchase", "اولین خرید"]] }
     };
 
     function initialize(root) {
@@ -82,7 +82,7 @@
                     const value = item[key];
                     if (["revenue", "discount", "stock", "quantity", "minimumQuantity", "orderCount"].includes(key)) cell.textContent = ["revenue", "discount"].includes(key) ? money(value) : number.format(value || 0);
                     else if (["date", "firstPurchase"].includes(key)) cell.textContent = dateLabel(value);
-                    else if (key === "lastMovement") cell.textContent = value ? new Date(value).toLocaleString("fa-IR-u-ca-persian") : "بدون گردش";
+                    else if (key === "lastMovement") cell.textContent = value ? ui.formatDateTime(value) : "بدون گردش";
                     else cell.textContent = value || "—";
                     row.append(cell);
                 }
@@ -152,7 +152,7 @@
                 const tbody = document.createElement("tbody");
                 for (const item of result.items || []) {
                     const row = document.createElement("tr");
-                    for (const column of result.columns || []) { const td = document.createElement("td"); td.textContent = item[column.key] ?? "—"; row.append(td); }
+                    for (const column of result.columns || []) { const td = document.createElement("td"); td.textContent = column.key === "date" ? ui.formatDateTime(item[column.key]) : item[column.key] ?? "—"; row.append(td); }
                     tbody.append(row);
                 }
                 table.append(tbody); body.append(table);

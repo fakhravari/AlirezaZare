@@ -67,7 +67,7 @@
                     cell.append(checkbox);
                     row.append(cell);
                     const paidAt = /(?:Z|[+-]\d\d:\d\d)$/i.test(item.paidAtUtc) ? item.paidAtUtc : `${item.paidAtUtc}Z`;
-                    for (const value of [item.orderNumber, item.customerName, format.format(item.itemCount), format.format(item.totalAmount), item.isSample ? "—" : new Date(paidAt).toLocaleString("fa-IR")]) {
+                    for (const value of [item.orderNumber, item.customerName, format.format(item.itemCount), format.format(item.totalAmount), item.isSample ? "—" : window.AdminUI.formatDateTime(paidAt)]) {
                         const column = document.createElement("td"); column.textContent = value; row.append(column);
                     }
                     if (item.isSample) { const label = document.createElement("span"); label.className = "badge bg-secondary ms-2"; label.textContent = "نمونه، بدون پرداخت واقعی"; row.cells[1].append(" ", label); }

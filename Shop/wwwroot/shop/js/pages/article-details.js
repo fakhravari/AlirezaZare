@@ -33,15 +33,7 @@ window.HNUI.mount("pages-article-details", document, () => {
     const list = feedback.querySelector("[data-feedback-list]");
     const pagination = feedback.querySelector("[data-feedback-pagination]");
     const formatReviewTime = (value) => {
-      const date = new Date(value);
-      if (Number.isNaN(date.getTime())) return "زمان ثبت نامشخص";
-      return new Intl.DateTimeFormat("fa-IR", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      }).format(date);
+      return window.HNUI.formatDateTime(value) || "زمان ثبت نامشخص";
     };
     const renderFeedback = () => {
       const entries = [...saved, ...seed].sort(

@@ -39,7 +39,7 @@
                     const row = document.createElement("tr");
                     const cells = [
                         item.email,
-                        item.subscribedAtUtc ? new Date(item.subscribedAtUtc).toLocaleString("fa-IR") : "—",
+                        window.AdminUI.formatDateTime(item.subscribedAtUtc),
                         item.unsubscribedAtUtc ? "لغوشده" : "فعال"
                     ];
                     for (const value of cells) {

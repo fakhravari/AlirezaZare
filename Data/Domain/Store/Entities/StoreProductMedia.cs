@@ -1,22 +1,28 @@
 namespace Shop.Data.Domain.Store.Entities;
 
-public sealed class StoreProductMedia
+public static class ProductMediaTypes
 {
-    public long Id { get; set; }
-    public long IdProduct { get; set; }
-    public string MediaKey { get; set; } = string.Empty;
-    public string? MainPath { get; set; }
-    public string? CardPath { get; set; }
-    public string? ThumbnailPath { get; set; }
-    public string? ImagesJson { get; set; }
-    public string? VideosJson { get; set; }
+    public const int Image = 1;
+    public const int Video = 2;
+    public const int Document = 3;
 }
 
-public sealed class StoreProductDocument
+public sealed class StoreProductMediaType
+{
+    public int Id { get; set; }
+    public string Title { get; set; } = "";
+}
+
+public sealed class StoreProductAsset
 {
     public long Id { get; set; }
     public long IdProduct { get; set; }
-    public string Title { get; set; } = "";
+    public int IdMediaType { get; set; }
     public string Path { get; set; } = "";
-    public DateTime CreatedAtUtc { get; set; }
+    public string ThumbnailPath { get; set; } = "";
+    public string CardPath { get; set; } = "";
+    public string Title { get; set; } = "";
+    public int SortOrder { get; set; }
+    public bool IsDefault { get; set; }
+    public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
 }

@@ -14,11 +14,26 @@ namespace Shop.Admin.Areas.Store.Controllers.Api;
 public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStorePriceVersionService priceVersions) : ControllerBase
 {
     [HttpGet("plans")]
-    public async Task<IActionResult> Plans(CancellationToken cancellationToken)
+    public async Task<IActionResult> Plans([FromQuery] string? q, [FromQuery] DateOnly? from, [FromQuery] DateOnly? to, CancellationToken cancellationToken)
     {
         if (!User.IsInRole("system.full-access")) return Forbid();
 
-        return Ok(await db.SalesPlanReferences.AsNoTracking().Where(x => x.IdStockOwnerType == 1).OrderBy(x => x.DisplayName).Select(x => new
+        var search = q?.Trim() ?? "";
+        if (search.Length > 100) return ValidationProblem(detail: "عبارت جست‌وجو طولانی است.", statusCode: 400);
+        if (!TryDateRange(from, to, out var start, out var end)) return ValidationProblem(detail: "بازهٔ تاریخ معتبر نیست.", statusCode: 400);
+        var plans = db.SalesPlanReferences.AsNoTracking().Where(x => x.IdStockOwnerType == 1);
+        var startOffset = start.HasValue ? new DateTimeOffset(start.Value) : (DateTimeOffset?)null;
+        var endOffset = end.HasValue ? new DateTimeOffset(end.Value) : (DateTimeOffset?)null;
+        if (startOffset.HasValue) plans = plans.Where(x => !x.EndsAtUtc.HasValue || x.EndsAtUtc.Value >= startOffset.Value);
+        if (endOffset.HasValue) plans = plans.Where(x => !x.StartsAtUtc.HasValue || x.StartsAtUtc.Value < endOffset.Value);
+        if (search.Length > 0)
+        {
+            var productIds = db.Products.AsNoTracking().Where(x => x.Name.Contains(search) || x.Code.Contains(search)).Select(x => x.Id);
+            plans = plans.Where(plan => db.StoreProductSalesPlanOffers.Any(offer => offer.IdSalesPlan == plan.Id && productIds.Contains(offer.IdProduct)) ||
+                db.StoreProductVariantSalesPlanOffers.Any(offer => offer.IdSalesPlan == plan.Id && db.ProductVariants.Any(variant => variant.Id == offer.IdProductVariant && productIds.Contains(variant.IdProduct))) ||
+                db.StorePriceVersions.Any(version => version.IdSalesPlan == plan.Id && productIds.Contains(version.IdProduct) && !version.IdOrderItem.HasValue));
+        }
+        return Ok(await plans.OrderBy(x => x.DisplayName).Select(x => new
             {
                 x.Id,
                 x.DisplayName,
@@ -35,18 +50,25 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
     }
 
     [HttpGet("price-history")]
-    public async Task<IActionResult> PriceHistory([FromQuery] long? productId, [FromQuery] long? salesPlanId, [FromQuery] int take = 100, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> PriceHistory([FromQuery] long? productId, [FromQuery] long? salesPlanId, [FromQuery] string? q, [FromQuery] DateOnly? from, [FromQuery] DateOnly? to, [FromQuery] int take = 100, CancellationToken cancellationToken = default)
     {
         if (!CanManage()) return Forbid();
 
         take = Math.Clamp(take, 1, 500);
         var query = db.StorePriceVersions.AsNoTracking().Where(x => !x.IdOrderItem.HasValue);
+        var search = q?.Trim() ?? "";
+        if (search.Length > 100) return ValidationProblem(detail: "عبارت جست‌وجو طولانی است.", statusCode: 400);
+        if (!TryDateRange(from, to, out var start, out var end)) return ValidationProblem(detail: "بازهٔ تاریخ معتبر نیست.", statusCode: 400);
+        if (start.HasValue) query = query.Where(x => x.CreatedAtUtc >= start.Value);
+        if (end.HasValue) query = query.Where(x => x.CreatedAtUtc < end.Value);
+        if (search.Length > 0) query = query.Where(x => db.Products.Any(product => product.Id == x.IdProduct && (product.Name.Contains(search) || product.Code.Contains(search))));
         if (productId.HasValue) query = query.Where(x => x.IdProduct == productId.Value);
         if (salesPlanId.HasValue) query = query.Where(x => x.IdSalesPlan == salesPlanId.Value);
 
         return Ok(await query.OrderByDescending(x => x.Id).Take(take).Select(x => new
             {
                 x.Id, x.IdProduct, x.IdSalesPlan,
+                productName = db.Products.Where(product => product.Id == x.IdProduct).Select(product => product.Name).FirstOrDefault(),
                 targetType = x.IdOptionValue.HasValue ? "option" : x.IdAccessory.HasValue ? "accessory" : x.IdProductVariant.HasValue ? "variant" : "product",
                 targetId = x.IdProductVariant ?? x.IdOptionValue ?? x.IdAccessory,
                 x.IdProductVariant, x.IdOptionValue, x.IdAccessory, x.IdOrderItem,
@@ -214,6 +236,8 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
     [HttpGet]
     public async Task<IActionResult> List(
         [FromQuery] string? q,
+        [FromQuery] DateOnly? from,
+        [FromQuery] DateOnly? to,
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = AdminListQuery.DefaultPageSize,
         CancellationToken cancellationToken = default)
@@ -221,6 +245,7 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
         if (!CanManage()) return Forbid();
 
         if (!AdminListQuery.TryCreate(page, pageSize, q, out AdminPageRequest paging)) return ValidationProblem(detail: "عبارت جست‌وجو یا صفحه‌بندی معتبر نیست.", statusCode: 400);
+        if (!TryDateRange(from, to, out var start, out var end)) return ValidationProblem(detail: "بازهٔ تاریخ معتبر نیست.", statusCode: 400);
 
         string query = paging.Search;
         var rows = from variant in db.ProductVariants.AsNoTracking()
@@ -232,6 +257,8 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
                          (query == "" || product.Name.Contains(query) || variant.Name.Contains(query) ||
                           (variant.Code ?? "").Contains(query) || (plan.DisplayName ?? "").Contains(query))
                    select new { variant, product, plan, offer };
+        if (start.HasValue) rows = rows.Where(x => x.offer != null && x.offer.CreatedAtUtc >= start.Value);
+        if (end.HasValue) rows = rows.Where(x => x.offer != null && x.offer.CreatedAtUtc < end.Value);
         int total = await rows.CountAsync(cancellationToken);
         var items = await rows.OrderBy(x => x.product.Name).ThenBy(x => x.variant.Name).ThenBy(x => x.plan.Code)
             .ThenBy(x => x.variant.Id).ThenBy(x => x.plan.Id).Skip(paging.Offset).Take(paging.PageSize).Select(x => new VariantPlanPriceRow
@@ -292,6 +319,16 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
         return Ok(new { saved = true, message = "قیمت اختصاصی حذف شد و قیمت پایهٔ کالا/طرح اعمال می‌شود." });
     }
 
+    private static bool TryDateRange(DateOnly? from, DateOnly? to, out DateTime? start, out DateTime? end)
+    {
+        start = end = null;
+        if ((from.HasValue && to.HasValue && from > to) || from is { Year: < 1900 or > 9998 } || to is { Year: < 1900 or > 9998 }) return false;
+        var timeZone = TimeZoneInfo.FindSystemTimeZoneById("Asia/Tehran");
+        if (from.HasValue) start = TimeZoneInfo.ConvertTimeToUtc(from.Value.ToDateTime(TimeOnly.MinValue), timeZone);
+        if (to.HasValue) end = TimeZoneInfo.ConvertTimeToUtc(to.Value.AddDays(1).ToDateTime(TimeOnly.MinValue), timeZone);
+        return true;
+    }
+
     private bool CanManage() => User.IsInRole("system.full-access") ||
                                 User.HasClaim("admin_permission", "Store:Features:Index:promotions");
 
@@ -317,6 +354,8 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
     [HttpGet("product-offers")]
     public async Task<IActionResult> ProductOffers(
         [FromQuery] string? q,
+        [FromQuery] DateOnly? from,
+        [FromQuery] DateOnly? to,
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = AdminListQuery.DefaultPageSize,
         CancellationToken cancellationToken = default)
@@ -324,6 +363,7 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
         if (!CanManage()) return Forbid();
 
         if (!AdminListQuery.TryCreate(page, pageSize, q, out AdminPageRequest paging)) return ValidationProblem(detail: "عبارت جست‌وجو یا صفحه‌بندی معتبر نیست.", statusCode: 400);
+        if (!TryDateRange(from, to, out var start, out var end)) return ValidationProblem(detail: "بازهٔ تاریخ معتبر نیست.", statusCode: 400);
 
         string query = paging.Search;
         var rows = from product in db.Products.AsNoTracking()
@@ -333,6 +373,8 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
                    where product.IsStoreEnabled && !plan.IsRegular &&
                          (query == "" || product.Name.Contains(query) || product.Code.Contains(query) || plan.DisplayName.Contains(query))
                    select new { product, plan, offer };
+        if (start.HasValue) rows = rows.Where(x => x.offer != null && x.offer.CreatedAtUtc >= start.Value);
+        if (end.HasValue) rows = rows.Where(x => x.offer != null && x.offer.CreatedAtUtc < end.Value);
         int total = await rows.CountAsync(cancellationToken);
         var items = await rows.OrderBy(x => x.product.Name).ThenBy(x => x.plan.DisplayName).ThenBy(x => x.product.Id).ThenBy(x => x.plan.Id).Skip(paging.Offset).Take(paging.PageSize).Select(x => new ProductOfferRow
             {

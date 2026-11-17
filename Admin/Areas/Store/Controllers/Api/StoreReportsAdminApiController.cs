@@ -388,7 +388,7 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
         return new
         {
             title = "سفارش‌های کالا",
-            columns = DetailColumns(("orderNumber", "شماره سفارش"), ("date", "تاریخ"), ("customer", "مشتری"), ("quantity", "تعداد"), ("amount", "مبلغ")),
+            columns = DetailColumns(("orderNumber", "شماره سفارش"), ("date", "تاریخ"), ("customer", "مشتری"), ("quantity", "تعداد"), ("amount", "مبلغ (تومان)")),
             items = rows.Select(x => new { orderNumber = x.OrderNumber, date = x.OrderedAtUtc.ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture), customer = x.Customer, quantity = x.Quantity, amount = x.Amount }),
             total,
             page,
@@ -408,7 +408,7 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
         return new
         {
             title = "خریدهای مشتری",
-            columns = DetailColumns(("orderNumber", "شماره سفارش"), ("date", "تاریخ"), ("status", "وضعیت"), ("amount", "مبلغ")),
+            columns = DetailColumns(("orderNumber", "شماره سفارش"), ("date", "تاریخ"), ("status", "وضعیت"), ("amount", "مبلغ (تومان)")),
             items = rows.Select(x => new { orderNumber = x.OrderNumber, date = x.OrderedAtUtc.ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture), status = x.Status, amount = x.TotalAmount }),
             total,
             page,
@@ -477,8 +477,8 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
     {
         "date" => "تاریخ",
         "orderCount" => "تعداد سفارش",
-        "revenue" => "فروش / خرید",
-        "discount" => "تخفیف",
+        "revenue" => "فروش / خرید (تومان)",
+        "discount" => "تخفیف (تومان)",
         "productName" => "نام کالا",
         "quantity" => "تعداد",
         "stock" => "موجودی مجاز",

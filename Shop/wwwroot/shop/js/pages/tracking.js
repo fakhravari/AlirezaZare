@@ -32,10 +32,7 @@ window.HNUI.mount("pages-order-tracking", document, () => {
   };
 
   const formatDate = (value) => {
-    const date = new Date(value);
-    return Number.isNaN(date.getTime())
-      ? ""
-      : new Intl.DateTimeFormat("fa-IR", { dateStyle: "long", timeStyle: "short" }).format(date);
+    return window.HNUI.formatDateTime(value);
   };
 
   const renderResult = (data) => {
