@@ -11,6 +11,28 @@
     async function request(page, url, method = "GET", body) {
         return ui.getJson(url, { method, headers: { ...(body ? { "Content-Type": "application/json" } : {}), ...(method !== "GET" ? { RequestVerificationToken: token(page) } : {}) }, ...(body ? { body: JSON.stringify(body) } : {}) });
     }
+    function filterUrl(page, path, selector) {
+        const url = new URL(`${page.dataset.api}${path}`, window.location.origin);
+        const form = page.querySelector(selector);
+        if (!form) return url;
+        const from = form.elements.from?.value || "", to = form.elements.to?.value || "";
+        if (from && to && from > to) throw new Error("تاریخ شروع نباید بعد از تاریخ پایان باشد.");
+        for (const name of ["q", "from", "to"]) {
+            const value = form.elements[name]?.value.trim();
+            if (value) url.searchParams.set(name, value);
+        }
+        return url;
+    }
+    function bindFilter(form, reload) {
+        if (!form) return;
+        let timer;
+        form.addEventListener("submit", event => { event.preventDefault(); clearTimeout(timer); reload(); });
+        form.addEventListener("input", event => {
+            if (event.target.name !== "q") return;
+            clearTimeout(timer); timer = setTimeout(reload, 300);
+        });
+        form.addEventListener("reset", () => { clearTimeout(timer); setTimeout(reload, 0); });
+    }
     function updatePager(page, kind, current, total) {
         const prefix = kind === "offer" ? "offer" : "price";
         const pager = page.querySelector(`[data-${prefix}-pagination]`);
@@ -80,9 +102,8 @@
         const serial = (requests.get(page) || 0) + 1; requests.set(page, serial);
         status(page, "در حال دریافت قیمت‌ها…");
         try {
-            const url = new URL(page.dataset.api, window.location.origin);
+            const url = filterUrl(page, "", "[data-price-filter]");
             url.searchParams.set("page", String(pageNumber)); url.searchParams.set("pageSize", String(pageSize));
-            const query = page.querySelector("[data-price-filter] input").value.trim(); if (query) url.searchParams.set("q", query);
             const result = await request(page, url);
             if (requests.get(page) !== serial || !page.isConnected) return;
             const lastPage = Math.max(1, Math.ceil((result.total || 0) / pageSize));
@@ -96,9 +117,8 @@
         const serial = (page._offerSerial || 0) + 1; page._offerSerial = serial;
         const message = page.querySelector("[data-offer-status]"); message.textContent = "در حال دریافت پیشنهادها…";
         try {
-            const url = new URL(`${page.dataset.api}/product-offers`, window.location.origin);
+            const url = filterUrl(page, "/product-offers", "[data-offer-filter]");
             url.searchParams.set("page", String(pageNumber)); url.searchParams.set("pageSize", String(pageSize));
-            const query = page.querySelector("[data-offer-filter] input").value.trim(); if (query) url.searchParams.set("q", query);
             const result = await request(page, url);
             if (!page.isConnected || page._offerSerial !== serial) return;
             const lastPage = Math.max(1, Math.ceil((result.total || 0) / pageSize));
@@ -108,17 +128,20 @@
         } catch (error) { if (page.isConnected && page._offerSerial === serial) message.textContent = error.message || "دریافت پیشنهادها ناموفق بود."; }
     }
     async function loadHistory(page) {
+        const serial = (page._historySerial || 0) + 1; page._historySerial = serial;
         const message = page.querySelector("[data-price-history-status]"), body = page.querySelector("[data-price-history-rows]");
         message.textContent = "در حال دریافت تاریخچه…"; body.replaceChildren();
         try {
-            const rows = await request(page, `${page.dataset.api}/price-history?take=200`);
+            const url = filterUrl(page, "/price-history", "[data-history-filter]"); url.searchParams.set("take", "200");
+            const rows = await request(page, url);
+            if (!page.isConnected || serial !== page._historySerial) return;
             for (const item of rows) {
                 const row = document.createElement("tr");
-                row.append(cell(`#${item.id}`), cell(String(item.idProduct)), cell(item.idSalesPlan ?? "—"), cell(item.targetType), cell(number.format(item.priceAmount)), cell(item.isActive ? "فعال" : "سابقه"), cell(window.AdminUI.formatDateTime(item.createdAtUtc)), cell(item.previousVersionId ? `#${item.previousVersionId}` : "—"));
+                row.append(cell(`#${item.id}`), cell(item.productName || `#${item.idProduct}`), cell(item.idSalesPlan ?? "—"), cell(item.targetType), cell(number.format(item.priceAmount)), cell(item.isActive ? "فعال" : "سابقه"), cell(window.AdminUI.formatDateTime(item.createdAtUtc)), cell(item.previousVersionId ? `#${item.previousVersionId}` : "—"));
                 body.append(row);
             }
             message.textContent = rows.length ? `${number.format(rows.length)} نسخهٔ اخیر` : "هنوز نسخه‌ای ثبت نشده است.";
-        } catch (error) { message.textContent = error.message || "دریافت تاریخچه ناموفق بود."; }
+        } catch (error) { if (serial === page._historySerial) message.textContent = error.message || "دریافت تاریخچه ناموفق بود."; }
     }
     function renderOffers(page) {
         const rows = page._offers;
@@ -218,9 +241,10 @@
         const form = page.querySelector("[data-plan-settings]");
         if (!form) return;
         const message = form.querySelector("[data-plan-status]");
+        const serial = (page._planSerial || 0) + 1; page._planSerial = serial;
         try {
-            const plans = await request(page, `${page.dataset.api}/plans`);
-            if (!page.isConnected) return;
+            const plans = await request(page, filterUrl(page, "/plans", "[data-plan-filter]"));
+            if (!page.isConnected || serial !== page._planSerial) return;
             page._planSettings = plans;
             form.elements.id.replaceChildren(...plans.map(plan => new Option(`${plan.displayName} (${plan.code})`, String(plan.id))));
             if (selectedId && plans.some(plan => String(plan.id) === selectedId)) form.elements.id.value = selectedId;
@@ -228,7 +252,7 @@
             message.textContent = plans.length ? "" : "طرح فروشی یافت نشد.";
             form.querySelector('[type="submit"]').disabled = !plans.length;
         } catch (error) {
-            if (!page.isConnected) return;
+            if (!page.isConnected || serial !== page._planSerial) return;
             message.textContent = error.message || "دریافت طرح‌ها ناموفق بود.";
             form.querySelector('[type="submit"]').disabled = true;
         }
@@ -259,11 +283,7 @@
         page._offers = []; page._offerDrafts = new Map(); page._offerSaving = new Set(); page._offerPage = 1; page._offerTotal = 0;
         const offerFilter = page.querySelector("[data-offer-filter]");
         if (offerFilter) {
-            offerFilter.addEventListener("submit", event => { event.preventDefault(); clearTimeout(page._offerSearchTimer); void loadOffers(page, 1); });
-            offerFilter.addEventListener("input", () => {
-                clearTimeout(page._offerSearchTimer);
-                page._offerSearchTimer = setTimeout(() => void loadOffers(page, 1), 300);
-            });
+            bindFilter(offerFilter, () => void loadOffers(page, 1));
             page.querySelector("[data-offer-refresh]").addEventListener("click", () => void loadOffers(page));
             void loadOffers(page);
             const specificationForm = document.querySelector("[data-offer-specifications-form]");
@@ -281,6 +301,7 @@
         const planForm = page.querySelector("[data-plan-settings]");
         if (planForm) {
             const refreshPlans = selected => loadPlanSettings(page, selected);
+            bindFilter(page.querySelector("[data-plan-filter]"), () => void refreshPlans());
             page.querySelector("[data-plan-create]").addEventListener("submit", async event => {
                 event.preventDefault(); const form = event.currentTarget, button = form.querySelector('[type="submit"]'); button.disabled = true;
                 try { const result = await request(page, `${page.dataset.api}/plans`, "POST", Object.fromEntries(new FormData(form))); ui.notify(result.message, "success"); form.reset(); await refreshPlans(String(result.id)); }
@@ -318,15 +339,12 @@
         }
         const priceFilter = page.querySelector("[data-price-filter]");
         if (priceFilter) {
-            priceFilter.addEventListener("submit", event => { event.preventDefault(); clearTimeout(page._priceSearchTimer); void load(page, 1); });
-            priceFilter.addEventListener("input", () => {
-                clearTimeout(page._priceSearchTimer);
-                page._priceSearchTimer = setTimeout(() => void load(page, 1), 300);
-            });
+            bindFilter(priceFilter, () => void load(page, 1));
             page.querySelector("[data-price-refresh]")?.addEventListener("click", () => void load(page));
             void load(page);
         }
         if (page.querySelector("[data-price-history-status]")) {
+            bindFilter(page.querySelector("[data-history-filter]"), () => void loadHistory(page));
             page.querySelector("[data-price-history-refresh]")?.addEventListener("click", () => void loadHistory(page));
             void loadHistory(page);
         }
