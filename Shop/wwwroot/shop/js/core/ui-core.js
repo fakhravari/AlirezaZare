@@ -506,7 +506,7 @@
         label: feature.label,
         value: option.label,
         productValue: option.key,
-        priceDelta: Number(option.priceDelta) / 1000000 || 0,
+        priceDelta: Number(option.priceBySalesPlan?.[salesPlanId] ?? option.priceDelta) / 1000000 || 0,
       }] : [];
     });
     const defaultInventoryVariant = inventoryVariants.find((variant) => variant.isDefault);

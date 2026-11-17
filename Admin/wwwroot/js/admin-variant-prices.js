@@ -138,7 +138,8 @@
             if (!page.isConnected || serial !== page._historySerial) return;
             for (const item of rows) {
                 const row = document.createElement("tr");
-                row.append(cell(`#${item.id}`), cell(item.productName || `#${item.idProduct}`), cell(item.idSalesPlan ?? "—"), cell(item.targetType), cell(number.format(item.priceAmount)), cell(item.isActive ? "فعال" : "سابقه"), cell(window.AdminUI.formatDateTime(item.createdAtUtc)), cell(item.idPreviousVersion ? `#${item.idPreviousVersion}` : "—"));
+                const target = ({ option: "ویژگی", accessory: "متعلقه", variant: "تنوع", product: "کالا" })[item.targetType] || item.targetType;
+                row.append(cell(`#${item.id}`), cell(item.productName || `#${item.idProduct}`), cell(item.salesPlanName || `#${item.idSalesPlan}`), cell(`${target}${item.targetId ? ` #${item.targetId}` : ""}`), cell(number.format(item.priceAmount)), cell(item.isActive ? "فعال" : "سابقه"), cell(window.AdminUI.formatDateTime(item.createdAtUtc)), cell(item.idPreviousVersion ? `#${item.idPreviousVersion}` : "—"), cell(item.idChangedBy ? `#${item.idChangedBy}` : "—"), cell(item.changeReason || "—"));
                 body.append(row);
             }
             ui.refreshDataTable(table);
@@ -165,6 +166,8 @@
             for (const input of [amount, discount, limit]) input.addEventListener("input", remember); active.addEventListener("change", remember);
             const actions = document.createElement("td"), save = document.createElement("button"); actions.className = "admin-pricing-row-actions"; save.type = "button"; save.className = "btn btn-sm btn-primary"; save.textContent = "ذخیره"; save.dataset.adminConfirm = "قیمت پیشنهاد و محدودیت خرید ذخیره شوند؟"; actions.append(save);
             ui.withIcon(save, "fa-floppy-disk");
+            const options = document.createElement("button"); options.type = "button"; options.className = "btn btn-sm btn-default ms-1"; options.textContent = "قیمت ویژگی‌ها";
+            options.addEventListener("click", () => void openOptionPrices(page, item.productId, item.salesPlanId)); actions.append(options);
             if (item.priceAmount != null) {
                 const accessories = document.createElement("button"); accessories.type = "button"; accessories.className = "btn btn-sm btn-default ms-1"; accessories.textContent = "متعلقات";
                 ui.withIcon(accessories, "fa-puzzle-piece");
@@ -193,6 +196,49 @@
             `نمایش ${number.format(first)} تا ${number.format(last)} از ${number.format(page._offerTotal)} ردیف`;
         ui.refreshDataTable(table);
         page.querySelector("[data-offer-status]").textContent = rows.length ? "" : "موردی پیدا نشد.";
+    }
+    async function openOptionPrices(page, productId, selectedPlan) {
+        const modal = document.getElementById("option-prices-modal"); if (!modal) return;
+        const serial = (page._optionPricesSerial || 0) + 1; page._optionPricesSerial = serial;
+        const message = modal.querySelector("[data-option-prices-status]"), plan = modal.querySelector("[data-option-prices-plan]"), body = modal.querySelector("[data-option-prices-rows]");
+        plan.replaceChildren(); body.replaceChildren(); modal.querySelector("[data-option-prices-name]").textContent = ""; message.textContent = "در حال دریافت قیمت ویژگی‌ها…";
+        window.bootstrap?.Modal?.getOrCreateInstance(modal).show();
+        try {
+            const result = await request(page, `${page.dataset.api}/products/${productId}/option-prices`);
+            if (!page.isConnected || page._optionPricesSerial !== serial) return;
+            modal.querySelector("[data-option-prices-name]").textContent = result.product.name;
+            plan.replaceChildren(...result.plans.map(item => new Option(`${item.displayName}${item.isRegular ? " (عادی)" : ""}`, item.storeSalesPlanKey)));
+            if (result.plans.some(item => item.storeSalesPlanKey === selectedPlan)) plan.value = selectedPlan;
+            const renderOptions = () => {
+                body.replaceChildren();
+                const selected = result.plans.find(item => item.storeSalesPlanKey === plan.value);
+                message.textContent = !selected ? "طرح فروش قابل استفاده‌ای یافت نشد." : result.options.length ? "" : "برای این کالا ویژگی خرید ثبت نشده است.";
+                if (!selected) return;
+                for (const item of result.options) {
+                    const existing = result.prices.find(price => price.idOptionValue === item.id && price.idSalesPlan === selected.id);
+                    const row = document.createElement("tr"); row.append(cell(item.optionLabel), cell(item.valueLabel));
+                    const signCell = document.createElement("td"), sign = document.createElement("select"); sign.className = "form-select form-select-sm"; sign.setAttribute("aria-label", `اثر قیمت ${item.optionLabel}، ${item.valueLabel}`); sign.add(new Option("افزایش", "1")); sign.add(new Option("کاهش", "-1")); sign.value = existing?.priceAmount < 0 ? "-1" : "1"; signCell.append(sign); row.append(signCell);
+                    const priceCell = document.createElement("td"), price = document.createElement("input"); price.type = "text"; price.className = "form-control form-control-sm"; price.setAttribute("aria-label", `مبلغ ${item.optionLabel}، ${item.valueLabel} در ${selected.displayName}`); ui.setPriceValue(price, existing ? Math.abs(existing.priceAmount) : ""); priceCell.append(price); row.append(priceCell);
+                    const actions = document.createElement("td"), save = document.createElement("button"); save.type = "button"; save.className = "btn btn-sm btn-primary"; save.textContent = "ذخیره"; save.dataset.adminConfirm = `قیمت ${item.optionLabel}، ${item.valueLabel} در ${selected.displayName} ذخیره شود؟`; actions.append(save); row.append(actions);
+                    const setBusy = busy => { for (const input of [sign, price, save]) input.disabled = busy || page.dataset.canEdit !== "true"; }; setBusy(false);
+                    save.addEventListener("click", async () => {
+                        if (save.disabled) return;
+                        const amount = ui.priceValue(price);
+                        if (!price.value.trim() || !Number.isSafeInteger(amount) || amount < 0) { ui.notify("مبلغ ویژگی باید عدد صحیح و معتبر باشد.", "danger"); return; }
+                        setBusy(true);
+                        try {
+                            const priceAmount = amount * Number(sign.value);
+                            await request(page, `${page.dataset.api}/products/${productId}/options/${item.id}/plans/${encodeURIComponent(selected.storeSalesPlanKey)}`, "PUT", { priceAmount });
+                            if (existing) existing.priceAmount = priceAmount; else result.prices.push({ idOptionValue: item.id, idSalesPlan: selected.id, priceAmount });
+                            ui.notify("قیمت ویژگی ذخیره شد.", "success");
+                        } catch (error) { ui.notify(error.message || "ذخیرهٔ قیمت ویژگی ناموفق بود.", "danger"); }
+                        finally { setBusy(false); }
+                    });
+                    body.append(row);
+                }
+            };
+            plan.onchange = renderOptions; renderOptions();
+        } catch (error) { if (page.isConnected && page._optionPricesSerial === serial) message.textContent = error.message || "دریافت قیمت ویژگی‌ها ناموفق بود."; }
     }
     async function openAccessories(page, offer) {
         const modal = document.getElementById("offer-accessories-modal"); if (!modal) return;
@@ -292,6 +338,11 @@
         const offerFilter = page.querySelector("[data-offer-filter]");
         if (offerFilter) {
             bindFilter(offerFilter, () => void loadOffers(page, 1));
+            page.querySelector("[data-option-prices-selected]")?.addEventListener("click", () => {
+                const selected = [...offerFilter.querySelectorAll('[name="productIds"] option:checked')];
+                if (selected.length !== 1) { ui.notify("برای مدیریت قیمت ویژگی‌ها، یک کالا انتخاب کنید.", "danger"); return; }
+                void openOptionPrices(page, selected[0].value);
+            });
             page.querySelector("[data-offer-refresh]").addEventListener("click", () => void loadOffers(page));
             void loadOffers(page);
             const specificationForm = document.querySelector("[data-offer-specifications-form]");

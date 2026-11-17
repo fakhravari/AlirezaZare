@@ -83,6 +83,7 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
             {
                 x.Id, x.IdProduct, x.IdSalesPlan,
                 productName = db.Products.Where(product => product.Id == x.IdProduct).Select(product => product.Name).FirstOrDefault(),
+                salesPlanName = db.SalesPlanReferences.Where(plan => plan.Id == x.IdSalesPlan).Select(plan => plan.DisplayName).FirstOrDefault(),
                 targetType = x.IdOptionValue.HasValue ? "option" : x.IdAccessory.HasValue ? "accessory" : x.IdProductVariant.HasValue ? "variant" : "product",
                 targetId = x.IdProductVariant ?? x.IdOptionValue ?? x.IdAccessory,
                 x.IdProductVariant, x.IdOptionValue, x.IdAccessory,
@@ -456,6 +457,28 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
         await transaction.CommitAsync(cancellationToken);
 
         return Ok(new { priceVersionId, message = "پیشنهاد کالا در طرح ذخیره شد." });
+    }
+
+    [HttpGet("products/{productId:long}/option-prices")]
+    public async Task<IActionResult> OptionPrices(long productId, CancellationToken cancellationToken)
+    {
+        if (!CanManage()) return Forbid();
+        var product = await db.Products.AsNoTracking().Where(x => x.Id == productId)
+            .Select(x => new { x.Id, x.Name }).SingleOrDefaultAsync(cancellationToken);
+        if (product is null) return NotFound();
+        var plans = await db.SalesPlanReferences.AsNoTracking()
+            .Where(plan => plan.IdStockOwnerType == 1 && (plan.IsRegular || db.StoreProductSalesPlanOffers.Any(offer => offer.IdProduct == productId && offer.IdSalesPlan == plan.Id)))
+            .OrderByDescending(plan => plan.IsRegular).ThenBy(plan => plan.DisplayName).ThenBy(plan => plan.Id)
+            .Select(plan => new { plan.Id, plan.StoreSalesPlanKey, plan.DisplayName, plan.IsRegular }).ToListAsync(cancellationToken);
+        var options = await (from option in db.StoreProductPurchaseOptions.AsNoTracking()
+                             join value in db.StoreProductPurchaseOptionValues.AsNoTracking() on option.Id equals value.IdProductPurchaseOption
+                             where option.IdProduct == productId
+                             orderby option.SortOrder, option.Id, value.SortOrder, value.Id
+                             select new { value.Id, OptionLabel = option.Label, ValueLabel = value.Label }).ToListAsync(cancellationToken);
+        var prices = await db.StorePriceVersions.AsNoTracking()
+            .Where(x => x.IdProduct == productId && x.IdOptionValue != null && x.IsActive)
+            .Select(x => new { x.IdOptionValue, x.IdSalesPlan, x.PriceAmount }).ToListAsync(cancellationToken);
+        return Ok(new { product, plans, options, prices });
     }
 
     [HttpPut("products/{productId:long}/options/{optionValueId:long}/plans/{salesPlanId}")]
