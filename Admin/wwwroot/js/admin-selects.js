@@ -48,12 +48,25 @@
             }
             const productFilter = select.matches("[data-product-filter]");
             const productApi = select.closest("[data-store-variant-prices]")?.dataset.api;
+            const remoteProductUrl = select.dataset.remoteProductUrl;
             $(select).select2({
                 dir: "rtl",
                 language: "fa",
                 width: "100%",
                 minimumResultsForSearch: 0,
-                ...(productFilter && productApi ? {
+                ...(remoteProductUrl ? {
+                    placeholder: "انتخاب کالا با نام یا کد",
+                    allowClear: true,
+                    ajax: {
+                        url: remoteProductUrl,
+                        delay: 250,
+                        data: params => ({ search: params.term || "", page: params.page || 1 }),
+                        processResults: data => ({
+                            results: data.items.map(item => ({ id: String(item.id), text: `${item.name} (${item.code})` })),
+                            pagination: { more: data.more }
+                        })
+                    }
+                } : productFilter && productApi ? {
                     placeholder: "انتخاب کالا با نام یا کد",
                     closeOnSelect: false,
                     ajax: {

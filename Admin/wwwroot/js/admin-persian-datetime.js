@@ -98,9 +98,15 @@
             }, 200);
         });
 
-        instances.set(input, { picker, textInput, kind });
+        const state = { picker, textInput, kind, revision: 0 };
+        instances.set(input, state);
         if (selectedDate) picker.setDate(selectedDate);
-        input.form?.addEventListener("reset", () => window.setTimeout(() => setValue(input, defaultValue)));
+        input.form?.addEventListener("reset", () => {
+            const revision = state.revision;
+            window.setTimeout(() => {
+                if (state.revision === revision) setValue(input, defaultValue);
+            });
+        });
 
         new MutationObserver(() => { textInput.disabled = input.disabled; }).observe(input, {
             attributes: true,
@@ -116,6 +122,7 @@
     function setValue(input, value) {
         const state = instances.get(input);
         if (!state) return false;
+        state.revision++;
         input.value = value || "";
         const date = parseValue(input.value, state.kind);
         if (date) state.picker.setDate(date);

@@ -6,6 +6,7 @@
     string? feature = ViewData["FeatureId"]?.ToString();
     string? userSection = Context.Request.Query["section"].ToString();
     string? contentSection = ViewData["ContentSection"]?.ToString();
+    string movementSection = ViewData["MovementSection"]?.ToString() ?? "stock";
     bool inStore = string.Equals(area, "Store", StringComparison.OrdinalIgnoreCase);
     bool inWarehouse = string.Equals(area, "Warehouse", StringComparison.OrdinalIgnoreCase);
     bool isHome = string.Equals(area, "Admin", StringComparison.OrdinalIgnoreCase) && string.Equals(controller, "Home", StringComparison.OrdinalIgnoreCase);
@@ -281,7 +282,9 @@
     </a>
     <div id="warehouse-reports" class="menu-submenu">
         <div class="menu-item @(inWarehouse && string.Equals(controller, "Stock", StringComparison.OrdinalIgnoreCase) ? "active" : "")" hidden="@(!Can("Warehouse:Stock:Index"))"><a class="menu-link" asp-area="Warehouse" asp-controller="Stock" asp-action="Index" data-admin-nav><span class="menu-icon"><i class="fa fa-boxes-stacked" aria-hidden="true"></i></span><span class="menu-text">موجودی انبار</span></a></div>
-        <div class="menu-item @(IsFeature("movements") ? "active" : "")" hidden="@(!Can("Warehouse:Features:Index:movements"))"><a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="movements" data-admin-nav><span class="menu-icon"><i class="fa fa-clock-rotate-left" aria-hidden="true"></i></span><span class="menu-text">کاردکس و تاریخچهٔ اسناد</span></a></div>
+        <div class="menu-item @(IsFeature("movements") && movementSection == "stock" ? "active" : "")" hidden="@(!Can("Warehouse:Features:Index:movements"))"><a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="movements" data-admin-nav><span class="menu-icon"><i class="fa fa-arrows-rotate" aria-hidden="true"></i></span><span class="menu-text">گردش موجودی</span></a></div>
+        <div class="menu-item @(IsFeature("movements") && movementSection == "summary" ? "active" : "")" hidden="@(!Can("Warehouse:Features:Index:movements"))"><a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="movements" asp-route-section="summary" data-admin-nav><span class="menu-icon"><i class="fa fa-chart-column" aria-hidden="true"></i></span><span class="menu-text">خلاصهٔ گردش کالا</span></a></div>
+        <div class="menu-item @(IsFeature("movements") && movementSection == "audit" ? "active" : "")" hidden="@(!Can("Warehouse:Features:Index:movements"))"><a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="movements" asp-route-section="audit" data-admin-nav><span class="menu-icon"><i class="fa fa-clock-rotate-left" aria-hidden="true"></i></span><span class="menu-text">تاریخچهٔ تغییر سند</span></a></div>
     </div>
 </div>
 <div class="menu-item has-sub @(operationsOpen ? "active expand" : "")" hidden="@(!canWarehouseOperations)">

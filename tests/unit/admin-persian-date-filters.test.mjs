@@ -33,6 +33,18 @@ test('Persian date filters select Gregorian values and reset both controls', {sk
   assert.ok(sizes.dialog <= 360 && sizes.dialog <= 375);
   assert.ok(sizes.calendar <= sizes.available, JSON.stringify(sizes));
   assert.equal(sizes.font, '14px');
+  const buttonContrast = await page.locator('[data-mds-dtp] button[title="ماه قبل"], [data-mds-dtp] button[data-mds-dtp-go-today]').evaluateAll(buttons => buttons.map(button => {
+    const style = getComputedStyle(button);
+    const luminance = color => {
+      const channels = color.match(/\d+/g).slice(0, 3).map(value => Number(value) / 255)
+        .map(value => value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4);
+      return channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722;
+    };
+    const values = [luminance(style.color), luminance(style.backgroundColor)].sort((a, b) => b - a);
+    return (values[0] + 0.05) / (values[1] + 0.05);
+  }));
+  assert.equal(buttonContrast.length, 2);
+  assert.ok(buttonContrast.every(value => value >= 4.5), JSON.stringify(buttonContrast));
   await page.locator('#outside').click();
   await page.locator('[data-mds-dtp]').waitFor({state: 'detached'});
   await page.waitForTimeout(200);

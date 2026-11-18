@@ -12,29 +12,34 @@ namespace Shop.Admin.Areas.Warehouse.Controllers.Api;
 public sealed class WarehouseMovementsApiController(ShopDbContext db) : ControllerBase
 {
     [HttpGet]
+    [HttpGet("products")]
     public async Task<IActionResult> Get([FromQuery] long? warehouseId, [FromQuery] string? search,
         [FromQuery] DateOnly? from, [FromQuery] DateOnly? to, [FromQuery] int page = 1,
         [FromQuery] int pageSize = AdminListQuery.DefaultPageSize,
         [FromQuery] bool audit = false, [FromQuery] bool summary = false, [FromQuery] string? salesPlan = null,
-        [FromQuery] string? direction = null, CancellationToken cancellationToken = default)
+        [FromQuery] string? direction = null, [FromQuery] long? productId = null, CancellationToken cancellationToken = default)
     {
+        if (Request.Path.Value?.EndsWith("/products", StringComparison.OrdinalIgnoreCase) == true)
+            return await GetProductsAsync(search, page, cancellationToken);
+
         if (!AdminListQuery.TryCreate(page, pageSize, search, out AdminPageRequest paging))
             return ValidationProblem(detail: "عبارت جست‌وجو یا صفحه‌بندی معتبر نیست.", statusCode: 400);
 
         search = paging.Search;
         salesPlan = salesPlan?.Trim();
 
-        if (warehouseId is <= 0 || (from.HasValue && to.HasValue && from > to)
+        if (warehouseId is <= 0 || productId is <= 0 || (audit && productId.HasValue) || (from.HasValue && to.HasValue && from > to)
             || to == DateOnly.MaxValue || salesPlan?.Length > AdminListQuery.MaximumSearchLength
             || direction is not (null or "" or "R" or "I") || (audit && summary))
             return ValidationProblem(detail: "فیلترها، بازهٔ تاریخ یا شمارهٔ صفحه معتبر نیست.", statusCode: 400);
 
         if (audit) return await GetAuditAsync(warehouseId, search, from, to, paging, cancellationToken);
 
-        if (summary) return await GetSummaryAsync(warehouseId, search, salesPlan, from, to, paging, cancellationToken);
+        if (summary) return await GetSummaryAsync(warehouseId, productId, search, salesPlan, from, to, paging, cancellationToken);
 
         var query = from line in db.WarehouseDocumentLines.AsNoTracking()
                     join document in db.WarehouseDocuments.AsNoTracking() on line.IdDocument equals document.Id
+                    join inventoryItem in db.InventoryItems.AsNoTracking() on line.IdInventoryItem equals inventoryItem.Id
                     join type in db.WarehouseDocumentTypes.AsNoTracking() on document.IdDocumentType equals type.Id
                     join warehouse in db.Warehouses.AsNoTracking() on document.IdWarehouse equals warehouse.Id
                     join plan in db.SalesPlanReferences.AsNoTracking() on (line.IdSalesPlanReference ?? document.IdSalesPlanReference) equals plan.Id
@@ -48,6 +53,7 @@ public sealed class WarehouseMovementsApiController(ShopDbContext db) : Controll
                         document.DocumentNumber,
                         document.DocumentDate,
                         document.Status,
+                        ProductId = inventoryItem.IdProduct,
                         DocumentType = type.Name,
                         type.Direction,
                         type.AffectsStock,
@@ -94,6 +100,7 @@ public sealed class WarehouseMovementsApiController(ShopDbContext db) : Controll
 
         if (from.HasValue) query = query.Where(x => x.DocumentDate >= from.Value);
         if (to.HasValue) query = query.Where(x => x.DocumentDate <= to.Value);
+        if (productId.HasValue) query = query.Where(x => x.ProductId == productId.Value);
         if (!string.IsNullOrEmpty(salesPlan)) query = query.Where(x => x.SalesPlan.Contains(salesPlan) || x.SalesPlanKey.Contains(salesPlan));
         if (!string.IsNullOrEmpty(direction)) query = query.Where(x => x.Direction == direction);
         if (!string.IsNullOrWhiteSpace(search))
@@ -111,7 +118,7 @@ public sealed class WarehouseMovementsApiController(ShopDbContext db) : Controll
         return Ok(AdminListQuery.CreateResult(items, total, paging));
     }
 
-    private async Task<IActionResult> GetSummaryAsync(long? warehouseId, string? search, string? salesPlan,
+    private async Task<IActionResult> GetSummaryAsync(long? warehouseId, long? productId, string? search, string? salesPlan,
         DateOnly? from, DateOnly? to, AdminPageRequest paging, CancellationToken cancellationToken)
     {
         var query = from movement in db.WarehouseStockMovements.AsNoTracking()
@@ -130,6 +137,7 @@ public sealed class WarehouseMovementsApiController(ShopDbContext db) : Controll
             query = query.Where(x => allowed.Contains(x.movement.IdWarehouse));
         }
         if (warehouseId.HasValue) query = query.Where(x => x.movement.IdWarehouse == warehouseId.Value);
+        if (productId.HasValue) query = query.Where(x => x.item.IdProduct == productId.Value);
         if (!string.IsNullOrEmpty(search)) query = query.Where(x => x.item.Product.Name.Contains(search)
             || x.item.Product.ProductKey.Contains(search) || (x.item.ProductVariant != null && x.item.ProductVariant.Name.Contains(search)));
         if (!string.IsNullOrEmpty(salesPlan)) query = query.Where(x => x.plan.DisplayName.Contains(salesPlan) || x.plan.StoreSalesPlanKey.Contains(salesPlan));
@@ -168,6 +176,29 @@ public sealed class WarehouseMovementsApiController(ShopDbContext db) : Controll
             .ThenBy(x => x.SalesPlan).ThenBy(x => x.ItemId).ThenBy(x => x.PlanId).Skip(paging.Offset).Take(paging.PageSize).ToListAsync(cancellationToken);
 
         return Ok(AdminListQuery.CreateResult(items, total, paging));
+    }
+
+    private async Task<IActionResult> GetProductsAsync(string? search, int page, CancellationToken cancellationToken)
+    {
+        const int size = 20;
+        if (!AdminListQuery.TryCreate(page, size, search, out AdminPageRequest paging))
+            return ValidationProblem(detail: "عبارت جست‌وجو یا شمارهٔ صفحه معتبر نیست.", statusCode: 400);
+
+        var query = from line in db.WarehouseDocumentLines.AsNoTracking()
+                    join document in db.WarehouseDocuments.AsNoTracking() on line.IdDocument equals document.Id
+                    join item in db.InventoryItems.AsNoTracking() on line.IdInventoryItem equals item.Id
+                    select new { document.IdWarehouse, item.Product.Id, item.Product.Name, Code = item.Product.ProductKey };
+        if (!User.IsInRole("system.full-access"))
+        {
+            long userId = long.TryParse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out long parsed) ? parsed : 0;
+            long[] allowed = await db.AdminUserWarehouseAccesses.AsNoTracking().Where(x => x.IdUser == userId).Select(x => x.IdWarehouse).ToArrayAsync(cancellationToken);
+            query = query.Where(x => allowed.Contains(x.IdWarehouse));
+        }
+        if (!string.IsNullOrEmpty(paging.Search))
+            query = query.Where(x => x.Name.Contains(paging.Search) || x.Code.Contains(paging.Search));
+        var products = await query.Select(x => new { x.Id, x.Name, x.Code }).Distinct()
+            .OrderBy(x => x.Name).ThenBy(x => x.Id).Skip(paging.Offset).Take(size + 1).ToListAsync(cancellationToken);
+        return Ok(new { items = products.Take(size), more = products.Count > size });
     }
 
     private async Task<IActionResult> GetAuditAsync(long? warehouseId, string? search, DateOnly? from, DateOnly? to,

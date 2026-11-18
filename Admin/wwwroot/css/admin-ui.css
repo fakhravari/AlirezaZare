@@ -545,10 +545,51 @@ input[type="checkbox"][data-admin-switch]:disabled { cursor: not-allowed; opacit
 .mds-bs-persian-datetime-picker-popover {
     width: 320px;
     max-width: calc(100vw - 1rem);
+    border: 1px solid #d9e3ed;
+    border-radius: .75rem;
+    box-shadow: 0 .75rem 2rem rgba(20, 45, 70, .16);
 }
-.mds-bs-persian-datetime-picker-popover .popover-body { padding: .5rem; }
+.mds-bs-persian-datetime-picker-popover .popover-header {
+    padding: .55rem .75rem;
+    background: #f4f8fc;
+    color: #173653;
+    font-weight: 700;
+    text-align: center;
+}
+.mds-bs-persian-datetime-picker-popover .popover-body { padding: .65rem; }
 .mds-bs-persian-datetime-picker-popover .mds-bs-dtp-container { min-width: 0; }
-.mds-bs-persian-datetime-picker-popover .mds-bs-dtp-container .btn { min-height: 1.9rem; padding: .2rem .25rem; }
+.mds-bs-persian-datetime-picker-popover .mds-bs-dtp-container .btn { min-height: 2rem; padding: .2rem .25rem; }
+.mds-bs-persian-datetime-picker-popover .btn.btn-light {
+    color: #173653;
+    background-color: #edf3f8;
+    border-color: #dce6ef;
+    font-weight: 600;
+}
+.mds-bs-persian-datetime-picker-popover .btn.btn-light:hover,
+.mds-bs-persian-datetime-picker-popover .btn.btn-light:focus-visible {
+    color: #12385b;
+    background-color: #dcebf7;
+    border-color: #9fc4e2;
+}
+.mds-bs-persian-datetime-picker-popover .mds-bs-dtp-container table table tbody.days tr:first-child > td {
+    padding-block: .45rem;
+    color: #536b80;
+}
+.mds-bs-persian-datetime-picker-popover .mds-bs-dtp-container table table tbody.days td[data-day] {
+    height: 2rem;
+    border-radius: .35rem;
+}
+.mds-bs-persian-datetime-picker-popover .mds-bs-dtp-container table table tbody.days td[data-day][data-today] {
+    color: #145c94;
+    background-color: #e4f2fc;
+    box-shadow: inset 0 0 0 1px #9bc9ea;
+    font-weight: 700;
+}
+.mds-bs-persian-datetime-picker-popover .mds-bs-dtp-container table table tbody.days td[data-day][data-mds-dtp-selected-day] {
+    color: #fff;
+    background-color: #176ba5;
+    font-weight: 700;
+}
 /* Override the vendor's inline widths so calendar controls fit narrow screens. */
 .mds-bs-persian-datetime-picker-popover .mds-bs-dtp-container th[style*="width"] { width: auto !important; }
 

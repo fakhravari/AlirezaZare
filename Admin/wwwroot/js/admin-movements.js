@@ -74,24 +74,17 @@
         try {
             const warehouses = await get("/api/admin/warehouse/warehouses"), select = page.querySelector("[name=warehouseId]");
             for (const warehouse of warehouses) { const option = el("option", `${warehouse.companyName} / ${warehouse.name} (${warehouse.code})`); option.value = warehouse.id; select.append(option); }
-            page.dataset.mode = "stock";
-            page.querySelectorAll("[data-movement-mode]").forEach(button => button.addEventListener("click", () => {
-                page.dataset.mode = button.dataset.movementMode;
-                page.dataset.page = "1";
-                page.querySelector("[data-movement-title]").textContent = page.dataset.mode === "audit" ? "تاریخچهٔ تغییر سندها" : page.dataset.mode === "summary" ? "خلاصهٔ گردش کالا" : "گردش اسناد و موجودی";
-                page.querySelector("[data-movement-head]").innerHTML = page.dataset.mode === "audit"
-                    ? "<tr><th>زمان</th><th>شمارهٔ سند</th><th>عملیات</th><th>انبار</th><th>کاربر سیستم</th><th>دلیل</th><th>جزئیات</th></tr>"
-                    : page.dataset.mode === "summary"
-                        ? "<tr><th>انبار</th><th>کد کالا</th><th>کالا / تنوع</th><th>طرح</th><th>واحد اصلی</th><th>اول دوره</th><th>ورودی</th><th>خروجی</th><th>پایان دوره</th></tr>"
-                    : "<tr><th>تاریخ</th><th>شماره</th><th>نوع سند</th><th>انبار</th><th>طرح</th><th>کالا / تنوع</th><th>مقدار سند</th><th>مقدار گردش</th><th>مانده به واحد اصلی</th><th>وضعیت</th><th>دلیل</th></tr>";
-                page.querySelectorAll("[data-movement-mode]").forEach(item => {
-                    const selected = item === button;
-                    item.classList.toggle("btn-primary", selected);
-                    item.classList.toggle("btn-default", !selected);
-                    item.setAttribute("aria-pressed", String(selected));
-                });
-                void load(page);
-            }));
+            if (!["stock", "summary", "audit"].includes(page.dataset.mode)) page.dataset.mode = "stock";
+            page.dataset.page = "1";
+            page.querySelector("[name=productId]").disabled = page.dataset.mode === "audit";
+            const salesPlan = page.querySelector("[name=salesPlan]");
+            if (salesPlan) salesPlan.disabled = page.dataset.mode === "audit";
+            page.querySelector("[data-movement-head]").innerHTML = page.dataset.mode === "audit"
+                ? "<tr><th>زمان</th><th>شمارهٔ سند</th><th>عملیات</th><th>انبار</th><th>کاربر سیستم</th><th>دلیل</th><th>جزئیات</th></tr>"
+                : page.dataset.mode === "summary"
+                    ? "<tr><th>انبار</th><th>کد کالا</th><th>کالا / تنوع</th><th>طرح</th><th>واحد اصلی</th><th>اول دوره</th><th>ورودی</th><th>خروجی</th><th>پایان دوره</th></tr>"
+                : "<tr><th>تاریخ</th><th>شماره</th><th>نوع سند</th><th>انبار</th><th>طرح</th><th>کالا / تنوع</th><th>مقدار سند</th><th>مقدار گردش</th><th>مانده به واحد اصلی</th><th>وضعیت</th><th>دلیل</th></tr>";
+
             page.querySelector("[data-movement-filter]").addEventListener("submit", event => { event.preventDefault(); page.dataset.page = "1"; void load(page); });
             page.querySelector("[data-movement-filter]").addEventListener("reset", () => { page.dataset.page = "1"; setTimeout(() => void load(page), 0); });
             await load(page);

@@ -1,17 +1,21 @@
 @model Shop.Admin.Models.FeaturePageViewModel
-<div class="admin-page" data-admin-movements data-api="@ViewData["ApiUrl"]">
+<div class="admin-page" data-admin-movements data-mode="@ViewData["MovementSection"]" data-api="@ViewData["ApiUrl"]">
     @await Html.PartialAsync("_AdminPageIntro", (Model.Title, Model.Description))
     <section class="panel panel-inverse">
         <div class="panel-heading">
-            <h2 class="panel-title" data-movement-title>کاردکس و گردش اسناد</h2>
-            <div class="panel-heading-btn btn-group" role="group" aria-label="نوع اطلاعات گردش">
-                <button type="button" class="btn btn-primary btn-sm" data-movement-mode="stock" aria-pressed="true">گردش موجودی</button><button type="button" class="btn btn-default btn-sm" data-movement-mode="summary" aria-pressed="false">خلاصهٔ گردش</button><button type="button" class="btn btn-default btn-sm" data-movement-mode="audit" aria-pressed="false">تاریخچهٔ تغییر سند</button>
-            </div>
+            <h2 class="panel-title" data-movement-title>@Model.Title</h2>
         </div>
         <div class="panel-body">
-            <p>مانده و خلاصهٔ گردش بر اساس سندهای قطعی مؤثر بر موجودی، برای هر کالا، تنوع، انبار و طرح محاسبه می‌شوند.</p>
+            @if ((string?)ViewData["MovementSection"] == "audit")
+            {
+                <p>تاریخچهٔ تغییر سندهای انبار را بررسی کنید.</p>
+            }
+            else
+            {
+                <p>مانده و خلاصهٔ گردش بر اساس سندهای قطعی مؤثر بر موجودی، برای هر کالا، تنوع، انبار و طرح محاسبه می‌شوند.</p>
+            }
             <form class="admin-filter-bar d-flex flex-wrap align-items-center gap-2 mb-3" data-movement-filter>
-                <label class="visually-hidden" for="movement-search">جست‌وجو</label><input class="form-control" id="movement-search" name="search" placeholder="کالا، نوع سند یا دلیل"/><label class="visually-hidden" for="movement-warehouse">انبار</label>
+                <label class="visually-hidden" for="movement-product">کالا</label><select class="form-select" id="movement-product" name="productId" data-remote-product-url="@ViewData["ApiUrl"]/products"><option value="">همهٔ کالاها</option></select><label class="visually-hidden" for="movement-search">جست‌وجوی متنی</label><input class="form-control" id="movement-search" name="search" placeholder="جست‌وجوی متنی"/><label class="visually-hidden" for="movement-warehouse">انبار</label>
                 <select class="form-select" name="warehouseId" id="movement-warehouse">
                     <option value="">همهٔ انبارهای مجاز</option>
                 </select><label class="visually-hidden" for="movement-plan">طرح یا مالک کالا</label><input class="form-control" id="movement-plan" name="salesPlan" maxlength="100" placeholder="نام یا کد طرح"/><label class="visually-hidden" for="movement-from">از تاریخ</label><input class="form-control" type="date" name="from" id="movement-from"/><label class="visually-hidden" for="movement-to">تا تاریخ</label><input class="form-control" type="date" name="to" id="movement-to"/><button class="btn btn-primary" type="submit">جست‌وجو</button><button class="btn btn-default" type="reset" data-movement-reset>پاک‌کردن</button>
@@ -29,7 +33,14 @@
             <div class="admin-pagination d-flex align-items-center justify-content-center gap-3 mt-3" data-movement-pagination hidden>
                 <button class="btn btn-default btn-sm" type="button" data-movement-page="-1">قبلی</button><span data-movement-page-label></span><button class="btn btn-default btn-sm" type="button" data-movement-page="1">بعدی</button>
             </div>
-            <p class="text-muted small mt-2">در خلاصه، ماندهٔ اول دوره پیش از تاریخ شروع و ماندهٔ پایان تا تاریخ پایان است؛ مقادیر بر حسب واحد اصلی کالا هستند. فیلتر طرح در تاریخچهٔ تغییر سند اعمال نمی‌شود.</p>
+            @if ((string?)ViewData["MovementSection"] == "audit")
+            {
+                <p class="text-muted small mt-2">فیلتر کالا و طرح در تاریخچهٔ تغییر سند اعمال نمی‌شوند.</p>
+            }
+            else if ((string?)ViewData["MovementSection"] == "summary")
+            {
+                <p class="text-muted small mt-2">ماندهٔ اول دوره پیش از تاریخ شروع و ماندهٔ پایان تا تاریخ پایان است؛ مقادیر بر حسب واحد اصلی کالا هستند.</p>
+            }
         </div>
     </section>
 </div>

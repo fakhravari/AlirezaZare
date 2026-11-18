@@ -6,7 +6,7 @@ namespace Shop.Admin.Areas.Warehouse.Controllers;
 [Area("Warehouse")]
 public sealed class FeaturesController : Controller
 {
-    public IActionResult Index(string feature)
+    public IActionResult Index(string feature, string? section = null)
     {
         if (!WarehouseAdminFeatureCatalog.TryGet(feature ?? "", out var page)) return NotFound();
 
@@ -42,6 +42,17 @@ public sealed class FeaturesController : Controller
 
         if (page.FeatureId == "movements")
         {
+            string mode = string.IsNullOrWhiteSpace(section) ? "stock" : section.ToLowerInvariant();
+            if (mode is not ("stock" or "summary" or "audit")) return NotFound();
+            string title = mode switch
+            {
+                "summary" => "خلاصهٔ گردش کالا",
+                "audit" => "تاریخچهٔ تغییر سند",
+                _ => "گردش موجودی"
+            };
+            page = page with { Title = title };
+            ViewData["Title"] = title;
+            ViewData["MovementSection"] = mode;
             ViewData["ApiUrl"] = "/api/admin/warehouse/movements";
 
             return View("~/Areas/Warehouse/Views/Features/Movements.cshtml", page);

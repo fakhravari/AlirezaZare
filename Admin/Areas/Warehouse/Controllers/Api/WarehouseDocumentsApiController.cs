@@ -15,6 +15,8 @@ namespace Shop.Admin.Areas.Warehouse.Controllers.Api;
 [Route("api/admin/warehouse/documents")]
 public sealed class WarehouseDocumentsApiController(ShopDbContext db, IWarehouseStockLedger stockLedger) : ControllerBase
 {
+    private const string SalesDispatchTypeCode = "SALES-DISPATCH";
+
     [HttpGet]
     public async Task<IActionResult> List([FromQuery] long? warehouseId, [FromQuery] string? status,
         [FromQuery] string? q,
@@ -64,7 +66,7 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db, IWarehouse
         if (!User.IsInRole("system.full-access")) warehouseQuery = warehouseQuery.Where(x => allowed.Contains(x.Id));
         var warehouses = await warehouseQuery.OrderBy(x => x.Company.Name).ThenBy(x => x.Name)
             .Select(x => new { x.Id, x.Code, x.Name, x.IdCompany, CompanyName = x.Company.Name, x.IsSalesWarehouse, x.IdOwnerSalesPlanReference }).ToListAsync(cancellationToken);
-        var types = await db.WarehouseDocumentTypes.AsNoTracking().Where(x => x.IsActive).OrderBy(x => x.Name)
+        var types = await db.WarehouseDocumentTypes.AsNoTracking().Where(x => x.IsActive && x.Code != SalesDispatchTypeCode).OrderBy(x => x.Name)
             .Select(x => new { x.Id, x.Code, x.Name, x.Direction, x.AffectsStock }).ToListAsync(cancellationToken);
         var partyQuery = db.WarehouseParties.AsNoTracking().Where(x => x.IsActive);
         if (!User.IsInRole("system.full-access"))
@@ -280,6 +282,9 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db, IWarehouse
 
         if (!await CanAccessWarehouseAsync(document.IdWarehouse, cancellationToken)) return Forbid();
 
+        if (document.Status != "D")
+            return Conflict(new { detail = "برای حذف سند، ابتدا وضعیت آن را به موقت تغییر دهید." });
+
         if (await IsPaidOrderLinkedAsync(id, cancellationToken))
             return Conflict(new { detail = "سند متصل به سفارش از مسیر مدیریت سفارش تغییر می‌کند." });
 
@@ -343,6 +348,9 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db, IWarehouse
 
         var selectedType = await db.WarehouseDocumentTypes.AsNoTracking().Where(x => x.Id == input.DocumentTypeId)
             .Select(x => new { x.Code, x.Name }).SingleAsync(cancellationToken);
+        if (string.Equals(selectedType.Code, SalesDispatchTypeCode, StringComparison.OrdinalIgnoreCase))
+            return ValidationProblem(detail: "حوالهٔ فروش فقط از صفحهٔ تأیید سفارش‌های پرداخت‌شده صادر می‌شود.", statusCode: 400);
+
         if ((selectedType.Code.Contains("return", StringComparison.OrdinalIgnoreCase) ||
              selectedType.Name.Contains("مرجوع"))
             && (string.IsNullOrWhiteSpace(input.ExternalReference)

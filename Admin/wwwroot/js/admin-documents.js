@@ -68,7 +68,7 @@
 
     function filteredTypes(page) {
         const feature = page.dataset.documentFeature;
-        let types = lookups.types;
+        let types = lookups.types.filter(type => type.code.toUpperCase() !== "SALES-DISPATCH");
         if (feature === "receipts") types = types.filter(type => type.direction === "R");
         if (feature === "dispatches") types = types.filter(type => type.direction === "I");
         if (feature === "returns") types = types.filter(type => type.code.toLowerCase().includes("return") || type.name.includes("مرجوع"));
@@ -120,7 +120,9 @@
             edit.addEventListener("click", () => void openEditor(page, item.id).catch(error => { status(page, error.message || "بازکردن سند ناموفق بود.", true); ui.notify(error.message || "بازکردن سند ناموفق بود.", "danger"); }));
             const remove = node("button", "حذف", "btn btn-sm btn-outline-danger");
             remove.type = "button";
-            remove.dataset.adminConfirm = `سند شمارهٔ ${format.format(item.number)} حذف شود؟ موجودی آن نیز برگردانده می‌شود.`;
+            remove.disabled = item.status !== "D";
+            if (remove.disabled) remove.title = "برای حذف، ابتدا وضعیت سند را به موقت تغییر دهید.";
+            remove.dataset.adminConfirm = `سند شمارهٔ ${format.format(item.number)} حذف شود؟`;
             remove.addEventListener("click", async () => {
                 if (remove.disabled) return;
                 remove.disabled = true;
@@ -132,7 +134,10 @@
                 finally { remove.disabled = false; }
             });
             if (page.dataset.canEdit === "true") actions.append(edit);
-            if (page.dataset.canDelete === "true") actions.append(remove);
+            if (page.dataset.canDelete === "true") {
+                actions.append(remove);
+                if (remove.disabled) actions.append(node("small", "برای حذف، ابتدا سند را موقت کنید.", "d-block text-muted mt-1"));
+            }
             row.append(actions);
             body.append(row);
         }
@@ -140,6 +145,12 @@
     }
 
     function setSelect(select, value) { select.value = value == null ? "" : String(value); }
+
+    function setDocumentDate(input, value) {
+        const picker = window.AdminPersianDatePicker;
+        picker?.initialize(input);
+        if (!picker?.setValue(input, value)) input.value = value || "";
+    }
 
     function updateDocumentOwners(form, selectedId = null) {
         const warehouseId = Number(form.elements.warehouseId.value);
@@ -164,7 +175,7 @@
         form.reset();
         form.elements.id.value = "";
         form.elements.status.value = "D";
-        form.elements.documentDate.value = today();
+        setDocumentDate(form.elements.documentDate, today());
         form.elements.documentDate.max = today();
         form.elements.externalReference.value = "";
         form.querySelector("[data-document-lines]").replaceChildren();
@@ -178,7 +189,7 @@
                 setSelect(form.elements.documentTypeId, detail.documentTypeId);
                 setSelect(form.elements.partyId, detail.partyId);
                 updateDocumentOwners(form, detail.salesPlanId);
-                form.elements.documentDate.value = detail.date;
+                setDocumentDate(form.elements.documentDate, detail.date);
                 form.elements.status.value = detail.status;
                 form.elements.reason.value = detail.reason || "";
                 form.elements.externalReference.value = detail.externalReference || "";
