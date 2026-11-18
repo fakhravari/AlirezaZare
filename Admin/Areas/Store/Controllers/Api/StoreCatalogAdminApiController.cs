@@ -120,8 +120,14 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
 
         var units = await db.WarehouseUnits.AsNoTracking().Where(x => x.IsActive || x.Id == product.IdBaseUnit).OrderBy(x => x.Name)
             .Select(x => new { x.Id, Name = x.IsActive ? x.Name : x.Name + " (غیرفعال)", x.IsActive }).ToListAsync(cancellationToken);
-        return Ok(new { product = new { product.Id, product.code, product.Name, product.EnglishName, product.IdBrand, product.IdCategory, product.IdBaseUnit, PriceAmount = FinalPrice(price), DiscountPercent = price?.DiscountPercent ?? 0m, product.MaxPurchaseQuantity }, brands, categories, units });
+        bool hasWarehouseDocuments = await HasWarehouseDocuments(id, cancellationToken);
+        return Ok(new { product = new { product.Id, product.code, product.Name, product.EnglishName, product.IdBrand, product.IdCategory, product.IdBaseUnit, PriceAmount = FinalPrice(price), DiscountPercent = price?.DiscountPercent ?? 0m, product.MaxPurchaseQuantity }, brands, categories, units, hasWarehouseDocuments });
     }
+
+    private Task<bool> HasWarehouseDocuments(long productId, CancellationToken cancellationToken) =>
+        (from line in db.WarehouseDocumentLines.AsNoTracking()
+         join item in db.InventoryItems.AsNoTracking() on line.IdInventoryItem equals item.Id
+         where item.IdProduct == productId select line.Id).AnyAsync(cancellationToken);
 
     [HttpGet("products/{id:long}/details")]
     public async Task<IActionResult> ProductDetails(long id, CancellationToken cancellationToken)
@@ -255,9 +261,7 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
         {
             if (!await db.WarehouseUnits.AnyAsync(x => x.Id == input.UnitId && x.IsActive, cancellationToken))
                 return BadRequest(new { title = "واحد پایهٔ انتخاب‌شده فعال نیست." });
-            if (await (from line in db.WarehouseDocumentLines
-                       join item in db.InventoryItems on line.IdInventoryItem equals item.Id
-                       where item.IdProduct == id select line.Id).AnyAsync(cancellationToken))
+            if (await HasWarehouseDocuments(id, cancellationToken))
                 return Conflict(new { title = "برای این کالا سند انبار ثبت شده است؛ تغییر واحد پایه مجاز نیست." });
             await db.WarehouseProductUnits.Where(x => x.IdProduct == id)
                 .ExecuteUpdateAsync(update => update.SetProperty(x => x.IsBaseUnit, false).SetProperty(x => x.IsActive, false), cancellationToken);

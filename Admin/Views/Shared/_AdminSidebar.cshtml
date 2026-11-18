@@ -19,14 +19,15 @@
     bool canStore = User.IsInRole("system.full-access") || Can("Store:Dashboard:Index") || canCatalog || canStoreSales || canStorePeople || canStoreReports;
     bool canWarehouseOperations = new[] { "order-confirmation", "receipts", "dispatches", "transfers", "returns", "stocktake", "adjustments" }.Any(id => Can($"Warehouse:Features:Index:{id}"));
     bool canWarehouseSettings = new[] { "references", "units", "product-units", "variants", "document-types", "sales-plan-mapping", "stock-owners" }.Any(id => Can($"Warehouse:Features:Index:{id}"));
-    bool canWarehouseStructure = Can("Warehouse:Warehouses:Index") || Can("Warehouse:Features:Index:companies") || Can("Warehouse:Stock:Index");
+    bool canWarehouseStructure = Can("Warehouse:Warehouses:Index") || Can("Warehouse:Features:Index:companies");
+    bool canWarehouseReports = Can("Warehouse:Features:Index:movements") || Can("Warehouse:Stock:Index");
     bool canWarehouse = Can("Warehouse:Dashboard:Index") || Can("Warehouse:Features:Index:order-confirmation") || Can("Warehouse:Features:Index:companies") || Can("Warehouse:Warehouses:Index") || Can("Warehouse:Features:Index:movements") || canWarehouseOperations || canWarehouseSettings || Can("Warehouse:Stock:Index");
     bool catalogOpen = inStore && string.Equals(controller, "Catalog", StringComparison.OrdinalIgnoreCase);
     bool salesOpen = inStore && (string.Equals(controller, "Orders", StringComparison.OrdinalIgnoreCase) || IsFeature("orders") || IsFeature("paid-orders-dispatch"));
     bool promotionsOpen = inStore && IsFeature("promotions");
     bool operationsOpen = inWarehouse && new[] { "order-confirmation", "receipts", "dispatches", "transfers", "returns", "stocktake", "adjustments" }.Contains(feature ?? "", StringComparer.OrdinalIgnoreCase);
-    bool warehouseStructureOpen = inWarehouse && (string.Equals(controller, "Warehouses", StringComparison.OrdinalIgnoreCase) || string.Equals(controller, "Stock", StringComparison.OrdinalIgnoreCase) || IsFeature("companies"));
-    bool reportsOpen = inWarehouse && IsFeature("movements");
+    bool warehouseStructureOpen = inWarehouse && (string.Equals(controller, "Warehouses", StringComparison.OrdinalIgnoreCase) || IsFeature("companies"));
+    bool reportsOpen = inWarehouse && (IsFeature("movements") || string.Equals(controller, "Stock", StringComparison.OrdinalIgnoreCase));
     bool systemAccessOpen = string.Equals(controller, "Users", StringComparison.OrdinalIgnoreCase);
     bool canAdminUsers = Can("Admin:Users:Index:users");
     bool canAdminRoles = Can("Admin:Users:Index:roles");
@@ -268,18 +269,18 @@
     </a>
 </div>
 <div class="menu-item has-sub @(warehouseStructureOpen ? "active expand" : "")" hidden="@(!canWarehouseStructure)">
-    <a href="#warehouse-structure" class="menu-link" aria-expanded="@(warehouseStructureOpen ? "true" : "false")"><span class="menu-icon"><i class="fa fa-warehouse" aria-hidden="true"></i></span><span class="menu-text">انبار و موجودی</span><span class="menu-caret"></span></a>
+    <a href="#warehouse-structure" class="menu-link" aria-expanded="@(warehouseStructureOpen ? "true" : "false")"><span class="menu-icon"><i class="fa fa-warehouse" aria-hidden="true"></i></span><span class="menu-text">تعریف شرکت و انبار</span><span class="menu-caret"></span></a>
     <div id="warehouse-structure" class="menu-submenu">
         <div class="menu-item @(controller == "Warehouses" ? "active" : "")" hidden="@(!Can("Warehouse:Warehouses:Index"))"><a class="menu-link" asp-area="Warehouse" asp-controller="Warehouses" asp-action="Index" data-admin-nav><span class="menu-icon"><i class="fa fa-warehouse" aria-hidden="true"></i></span><span class="menu-text">انبارها</span></a></div>
         <div class="menu-item @(IsFeature("companies") ? "active" : "")" hidden="@(!Can("Warehouse:Features:Index:companies"))"><a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="companies" data-admin-nav><span class="menu-icon"><i class="fa fa-building" aria-hidden="true"></i></span><span class="menu-text">شرکت‌ها</span></a></div>
-        <div class="menu-item @(inWarehouse && string.Equals(controller, "Stock", StringComparison.OrdinalIgnoreCase) ? "active" : "")" hidden="@(!Can("Warehouse:Stock:Index"))"><a class="menu-link" asp-area="Warehouse" asp-controller="Stock" asp-action="Index" data-admin-nav><span class="menu-icon"><i class="fa fa-boxes-stacked" aria-hidden="true"></i></span><span class="menu-text">موجودی انبار</span></a></div>
     </div>
 </div>
-<div class="menu-item has-sub @(reportsOpen ? "active expand" : "")" hidden="@(!Can("Warehouse:Features:Index:movements"))">
+<div class="menu-item has-sub @(reportsOpen ? "active expand" : "")" hidden="@(!canWarehouseReports)">
     <a href="#warehouse-reports" class="menu-link" aria-expanded="@(reportsOpen ? "true" : "false")">
         <span class="menu-icon"><i class="fa fa-chart-bar" aria-hidden="true"></i></span><span class="menu-text">گزارش‌های انبار</span><span class="menu-caret"></span>
     </a>
     <div id="warehouse-reports" class="menu-submenu">
+        <div class="menu-item @(inWarehouse && string.Equals(controller, "Stock", StringComparison.OrdinalIgnoreCase) ? "active" : "")" hidden="@(!Can("Warehouse:Stock:Index"))"><a class="menu-link" asp-area="Warehouse" asp-controller="Stock" asp-action="Index" data-admin-nav><span class="menu-icon"><i class="fa fa-boxes-stacked" aria-hidden="true"></i></span><span class="menu-text">موجودی انبار</span></a></div>
         <div class="menu-item @(IsFeature("movements") ? "active" : "")" hidden="@(!Can("Warehouse:Features:Index:movements"))"><a class="menu-link" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="movements" data-admin-nav><span class="menu-icon"><i class="fa fa-clock-rotate-left" aria-hidden="true"></i></span><span class="menu-text">کاردکس و تاریخچهٔ اسناد</span></a></div>
     </div>
 </div>

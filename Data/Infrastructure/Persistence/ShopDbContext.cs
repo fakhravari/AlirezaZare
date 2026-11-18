@@ -438,7 +438,7 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
         modelBuilder.Entity<WarehouseStockOwner>(entity => { entity.ToTable("WarehouseStockOwner", "Warehouse"); entity.HasKey(x => new { x.IdWarehouse, x.IdStockOwner }); });
         modelBuilder.Entity<StockBalance>(entity =>
         {
-            entity.ToTable("StockBalance", "Warehouse");
+            entity.ToTable("StockBalance", "Warehouse", table => table.UseSqlOutputClause(false));
             entity.HasKey(x => x.Id);
             entity.HasIndex(x => new { x.IdWarehouse, x.IdInventoryItem, x.IdSalesPlanReference }).IsUnique();
             entity.HasOne(x => x.Warehouse).WithMany(x => x.StockBalances).HasForeignKey(x => x.IdWarehouse);

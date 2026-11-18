@@ -166,41 +166,42 @@
         <div class="modal-dialog modal-dialog-scrollable modal-lg"><form class="modal-content" data-product-create-form data-admin-confirm="پیش‌نویس کالا با اطلاعات واردشده ساخته شود؟">
             @Html.AntiForgeryToken()
             <div class="modal-header"><h2 class="modal-title fs-5" id="product-create-title">افزودن پیش‌نویس کالا</h2><button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="بستن"></button></div>
-            <div class="modal-body admin-modal-grid-two">
+            <div class="modal-body admin-modal-grid-two admin-product-editor-grid">
                 <div class="admin-modal-field admin-modal-field-wide"><label class="form-label" for="new-product-key">کد کالا (اختیاری)</label><input class="form-control" id="new-product-key" name="key" maxlength="100" dir="ltr" /><small class="text-muted">در صورت خالی‌بودن، شناسهٔ کالا به‌عنوان کد ثبت می‌شود.</small></div>
-                <div class="admin-modal-field"><label class="form-label" for="new-product-name">نام فارسی</label><input class="form-control" id="new-product-name" name="name" maxlength="300" required /></div>
-                <div class="admin-modal-field"><label class="form-label" for="new-product-english">نام لاتین</label><input class="form-control" id="new-product-english" name="englishName" maxlength="300" required /></div>
-                <div class="admin-modal-field"><label class="form-label" for="new-product-brand">برند</label><select class="form-select" id="new-product-brand" name="brandId" required></select></div>
-                <div class="admin-modal-field"><label class="form-label" for="new-product-category">دستهٔ برگ</label><select class="form-select" id="new-product-category" name="categoryId" required></select></div>
-                <div class="admin-modal-field"><label class="form-label" for="new-product-unit">واحد پایه</label><select class="form-select" id="new-product-unit" name="unitId" required></select></div>
-                <div class="admin-modal-field"><label class="form-label" for="new-product-price">قیمت فروش عادی (تومان)</label><input class="form-control" id="new-product-price" name="priceAmount" type="text" inputmode="numeric" dir="ltr" data-admin-price max="9007199254740991" required /></div>
-                <div class="admin-modal-field"><label class="form-label" for="new-product-discount">درصد تخفیف نمایشی</label><input class="form-control" id="new-product-discount" name="discountPercent" type="number" min="0" max="99.99" step="0.01" value="0" required /></div>
-                <div class="admin-modal-field"><label class="form-label" for="new-product-limit">حداکثر تعداد خرید</label><input class="form-control" id="new-product-limit" name="maxPurchaseQuantity" type="number" min="1" max="99" step="1" value="99" required /></div>
+                <div class="admin-modal-field admin-product-name"><label class="form-label" for="new-product-name">نام فارسی</label><input class="form-control" id="new-product-name" name="name" maxlength="300" required /></div>
+                <div class="admin-modal-field admin-product-english"><label class="form-label" for="new-product-english">نام لاتین</label><input class="form-control" id="new-product-english" name="englishName" dir="ltr" maxlength="300" required /></div>
+                <div class="admin-modal-field admin-product-unit"><label class="form-label" for="new-product-unit">واحد پایه</label><select class="form-select" id="new-product-unit" name="unitId" required></select></div>
+                <div class="admin-modal-field admin-product-category"><label class="form-label" for="new-product-category">دستهٔ برگ</label><select class="form-select" id="new-product-category" name="categoryId" required></select></div>
+                <div class="admin-modal-field admin-product-brand"><label class="form-label" for="new-product-brand">برند</label><select class="form-select" id="new-product-brand" name="brandId" required></select></div>
+                <div class="admin-modal-field admin-product-price"><label class="form-label" for="new-product-price">قیمت فروش عادی (تومان)</label><input class="form-control" id="new-product-price" name="priceAmount" type="text" inputmode="numeric" dir="ltr" data-admin-price max="9007199254740991" required /></div>
+                <div class="admin-modal-field admin-product-discount"><label class="form-label" for="new-product-discount">درصد تخفیف نمایشی</label><input class="form-control" id="new-product-discount" name="discountPercent" type="number" min="0" max="99.99" step="0.01" value="0" required /></div>
+                <div class="admin-modal-field admin-product-limit"><label class="form-label" for="new-product-limit">حداکثر تعداد خرید</label><input class="form-control" id="new-product-limit" name="maxPurchaseQuantity" type="number" min="1" max="99" step="1" value="99" required /></div>
             </div><div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button type="submit" class="btn btn-primary"><i class="fa fa-file-circle-plus me-1" aria-hidden="true"></i>ساخت پیش‌نویس</button></div>
         </form></div>
     </div>
     <div class="modal fade" id="product-accessories-modal" tabindex="-1" aria-labelledby="product-accessories-title" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-scrollable"><div class="modal-content" data-product-accessories-manager>
             <div class="modal-header"><h2 class="modal-title fs-5" id="product-accessories-title">متعلقات کالا</h2><button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="بستن"></button></div>
-            <div class="modal-body">
-                <p data-product-accessories-name></p>
-                <p class="text-muted">قیمت پایه برای فروش عادی است؛ قیمت و مجازبودن در طرح ویژه جداگانه تنظیم می‌شود.</p>
-                <div data-product-accessories-status role="status" aria-live="polite"></div>
-                <div class="list-group mb-3" data-product-accessories-rows></div>
-                <form data-product-accessory-form data-admin-confirm="متعلقهٔ کالا ذخیره شود؟">
+            <div class="modal-body admin-accessory-manager">
+                <div class="admin-accessory-context"><span class="admin-accessory-context-label">کالای انتخاب‌شده</span><strong data-product-accessories-name></strong><p>قیمت پایه برای فروش عادی است؛ قیمت و مجازبودن در طرح ویژه جداگانه تنظیم می‌شود.</p></div>
+                <section class="admin-accessory-list" aria-labelledby="product-accessories-list-title">
+                    <div class="admin-accessory-section-heading"><h3 id="product-accessories-list-title">متعلقات ثبت‌شده</h3><span data-product-accessories-status role="status" aria-live="polite"></span></div>
+                    <div class="admin-accessory-items" data-product-accessories-rows></div>
+                </section>
+                <form class="admin-accessory-editor" data-product-accessory-form data-admin-confirm="متعلقهٔ کالا ذخیره شود؟">
                     @Html.AntiForgeryToken()<input type="hidden" name="id" />
-                    <h3 class="h5" data-product-accessory-form-title>افزودن متعلقه</h3>
+                    <div class="admin-accessory-section-heading"><div><h3 data-product-accessory-form-title>افزودن متعلقه</h3><p>مشخصات و تنظیمات متعلقه را وارد کنید.</p></div></div>
                     <label for="accessory-name" class="form-label">نام متعلقه</label><input id="accessory-name" class="form-control mb-2" name="name" maxlength="300" required />
                     <label for="accessory-description" class="form-label">توضیح (اختیاری)</label><textarea id="accessory-description" class="form-control mb-2" name="description" maxlength="1000"></textarea>
                     <div class="admin-product-accessory-grid mb-2">
                         <div class="admin-modal-field"><label for="accessory-price" class="form-label">قیمت پایه (تومان)</label><input id="accessory-price" class="form-control" name="priceAmount" type="text" inputmode="numeric" dir="ltr" data-admin-price max="9007199254740991" required /></div>
                         <div class="admin-modal-field"><label for="accessory-display-discount" class="form-label">درصد تخفیف نمایشی</label><input id="accessory-display-discount" class="form-control" name="displayDiscountPercent" type="number" min="0" max="99.99" step="0.01" /><small class="text-muted">فقط نمایش؛ قیمت واردشده تغییر نمی‌کند.</small></div>
                         <div class="admin-modal-field"><label for="accessory-order" class="form-label">ترتیب نمایش</label><input id="accessory-order" class="form-control" name="sortOrder" type="number" min="0" max="2147483647" step="1" value="0" required /></div>
-                        <div class="admin-modal-field d-flex align-items-end"><div class="form-check"><input data-admin-switch role="switch" id="accessory-required" name="isRequired" type="checkbox" class="form-check-input" /><label for="accessory-required" class="form-check-label">متعلقه اجباری است</label></div></div>
-                        <div class="admin-modal-field d-flex align-items-end"><div class="form-check"><input data-admin-switch role="switch" id="accessory-active" name="isActive" type="checkbox" class="form-check-input" checked /><label for="accessory-active" class="form-check-label">متعلقه فعال است</label></div></div>
+                        <div class="admin-modal-field admin-accessory-switch"><div class="form-check"><input data-admin-switch role="switch" id="accessory-required" name="isRequired" type="checkbox" class="form-check-input" /><label for="accessory-required" class="form-check-label">متعلقه اجباری است</label></div></div>
+                        <div class="admin-modal-field admin-accessory-switch"><div class="form-check"><input data-admin-switch role="switch" id="accessory-active" name="isActive" type="checkbox" class="form-check-input" checked /><label for="accessory-active" class="form-check-label">متعلقه فعال است</label></div></div>
                     </div>
-                    <button type="submit" class="btn btn-primary">ذخیره متعلقه</button>
-                    <button type="button" class="btn btn-default" data-product-accessory-reset>متعلقهٔ جدید</button>
+                    <div class="admin-accessory-actions"><button type="submit" class="btn btn-primary">ذخیره متعلقه</button>
+                    <button type="button" class="btn btn-default" data-product-accessory-reset>متعلقهٔ جدید</button></div>
                 </form>
             </div>
         </div></div>
@@ -213,9 +214,9 @@
                 <div class="admin-modal-field admin-modal-field-wide"><label for="product-edit-key" class="form-label">کد کالا</label><input id="product-edit-key" name="key" class="form-control" maxlength="100" dir="ltr" required /></div>
                 <div class="admin-modal-field admin-product-name"><label for="product-edit-name" class="form-label">نام فارسی</label><input id="product-edit-name" name="name" class="form-control" maxlength="300" required /></div>
                 <div class="admin-modal-field admin-product-english"><label for="product-edit-english" class="form-label">نام لاتین</label><input id="product-edit-english" name="englishName" class="form-control" dir="ltr" maxlength="300" required /></div>
-                <div class="admin-modal-field admin-product-brand"><label for="product-edit-brand" class="form-label">برند</label><select id="product-edit-brand" name="brandId" class="form-select" required></select></div>
+                <div class="admin-modal-field admin-product-unit"><label for="product-edit-unit" class="form-label">واحد پایه</label><select id="product-edit-unit" name="unitId" class="form-select" aria-describedby="product-edit-unit-help" required></select><small id="product-edit-unit-help" class="text-muted" data-product-unit-help></small></div>
                 <div class="admin-modal-field admin-product-category"><label for="product-edit-category" class="form-label">دستهٔ برگ</label><select id="product-edit-category" name="categoryId" class="form-select" required></select></div>
-                <div class="admin-modal-field admin-modal-field-wide"><label for="product-edit-unit" class="form-label">واحد پایه</label><select id="product-edit-unit" name="unitId" class="form-select" required></select><small class="text-muted">تا پیش از ثبت سند انبار قابل تغییر است؛ پس از تغییر، واحدهای فرعی باید دوباره تنظیم شوند.</small></div>
+                <div class="admin-modal-field admin-product-brand"><label for="product-edit-brand" class="form-label">برند</label><select id="product-edit-brand" name="brandId" class="form-select" required></select></div>
                 <div class="admin-modal-field admin-product-price"><label for="product-edit-price" class="form-label">قیمت نهایی فروش عادی (تومان)</label><input id="product-edit-price" name="priceAmount" type="text" inputmode="numeric" dir="ltr" data-admin-price max="9007199254740991" class="form-control" required /></div>
                 <div class="admin-modal-field admin-product-discount"><label for="product-edit-discount" class="form-label">درصد تخفیف نمایشی</label><input id="product-edit-discount" name="discountPercent" type="number" min="0" max="99.99" step="0.01" class="form-control" required /></div>
                 <div class="admin-modal-field admin-product-limit"><label for="product-edit-limit" class="form-label">حداکثر تعداد خرید</label><input id="product-edit-limit" name="maxPurchaseQuantity" type="number" min="1" max="99" step="1" class="form-control" required /></div>
@@ -237,7 +238,7 @@
                     @Html.AntiForgeryToken()<input type="hidden" name="id" />
                     <h3 class="h6 admin-modal-field-wide" data-product-benefit-editor-title>افزودن مزیت</h3>
                     <div class="admin-modal-field"><label class="form-label" for="product-benefit-title">عنوان</label><input class="form-control" id="product-benefit-title" name="title" maxlength="300" required /></div>
-                    <div class="admin-modal-field"><label class="form-label" for="product-benefit-icon">کلاس آیکن</label><input class="form-control" id="product-benefit-icon" name="icon" maxlength="100" placeholder="bi-shield-check" pattern="[a-z0-9-]*" /></div>
+                    <div class="admin-modal-field"><label class="form-label" for="product-benefit-icon">کلاس آیکن</label><input class="form-control" id="product-benefit-icon" name="icon" dir="ltr" maxlength="100" placeholder="bi-shield-check" pattern="[a-z0-9-]*" /></div>
                     <div class="admin-modal-field"><label class="form-label" for="product-benefit-sort-order">ترتیب نمایش</label><input class="form-control" id="product-benefit-sort-order" name="sortOrder" type="number" min="0" max="100000" step="1" value="0" required /></div>
                     <div class="admin-modal-field d-flex align-items-end"><label class="form-check mb-0"><input data-admin-switch role="switch" class="form-check-input" name="isActive" type="checkbox" checked /><span class="form-check-label">فعال و قابل نمایش</span></label></div>
                     <div class="admin-modal-field admin-modal-field-wide"><label class="form-label" for="product-benefit-detail">توضیح</label><textarea class="form-control" id="product-benefit-detail" name="detail" maxlength="1000" rows="2"></textarea></div>
@@ -362,7 +363,7 @@
             <div class="modal-body">
                 <label for="attribute-key" class="form-label">کلید لاتین</label><input id="attribute-key" name="key" class="form-control mb-3" maxlength="100" pattern="[A-Za-z][A-Za-z0-9]*(-[A-Za-z0-9]+)*" required />
                 <label for="attribute-label" class="form-label">عنوان</label><input id="attribute-label" name="label" class="form-control mb-3" maxlength="200" required />
-                <label for="attribute-icon" class="form-label">کلاس آیکن (اختیاری)</label><input id="attribute-icon" name="icon" class="form-control mb-3" maxlength="100" pattern="[a-z0-9-]*" />
+                <label for="attribute-icon" class="form-label">کلاس آیکن (اختیاری)</label><input id="attribute-icon" name="icon" class="form-control mb-3" dir="ltr" maxlength="100" pattern="[a-z0-9-]*" />
                 <label for="attribute-source" class="form-label">کلید منبع (اختیاری)</label><input id="attribute-source" name="sourceKey" class="form-control mb-3" maxlength="100" pattern="[A-Za-z][A-Za-z0-9_:-]*" />
                 <label for="attribute-filter" class="form-label">کلید فیلتر (برای ویژگی قابل‌فیلتر اجباری)</label><input id="attribute-filter" name="filterKey" class="form-control mb-3" maxlength="100" pattern="[A-Za-z][A-Za-z0-9_-]*" />
                 <div class="form-check mb-2"><input data-admin-switch role="switch" id="attribute-filterable" name="isFilterable" type="checkbox" class="form-check-input" /><label for="attribute-filterable" class="form-check-label">نمایش در فیلتر کاتالوگ</label></div>

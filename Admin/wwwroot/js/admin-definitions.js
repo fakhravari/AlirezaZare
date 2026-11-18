@@ -188,7 +188,26 @@
         const types = await request(page, `${page.dataset.api}/warehouse-types`);
         const list = page.querySelector("[data-warehouse-types]");
         list.replaceChildren();
-        for (const item of types) list.append(element("li", item.name, "list-group-item"));
+        for (const item of types) {
+            const row = element("li", null, "list-group-item d-flex justify-content-between align-items-center gap-2");
+            row.append(element("span", item.name));
+            if (page.dataset.fullAccess === "true" && page.dataset.canEdit === "true") {
+                const edit = actionButton("ویرایش", "fa-pen-to-square", "btn btn-sm btn-default");
+                edit.setAttribute("aria-label", `ویرایش نام ${item.name}`);
+                edit.addEventListener("click", () => {
+                    const form = page.querySelector("[data-warehouse-type-form]");
+                    form.hidden = false;
+                    form.dataset.editingId = String(item.id);
+                    form.dataset.adminConfirm = "نام انبار و همهٔ تخصیص‌های مرتبط تغییر کند؟";
+                    form.elements.name.value = item.name;
+                    form.querySelector('[type="submit"]').textContent = "ذخیرهٔ نام انبار";
+                    form.querySelector("[data-warehouse-type-cancel]").hidden = false;
+                    form.elements.name.focus();
+                });
+                row.append(edit);
+            }
+            list.append(row);
+        }
         if (!types.length) list.append(element("li", "نام انباری ثبت نشده است.", "list-group-item text-muted"));
     }
     async function load(page) {
@@ -212,13 +231,26 @@
             } else {
                 if (section === "warehouses") {
                     const typeForm = page.querySelector("[data-warehouse-type-form]");
-                    typeForm.hidden = page.dataset.fullAccess !== "true" || page.dataset.canCreate !== "true";
+                    const resetTypeForm = () => {
+                        typeForm.reset();
+                        delete typeForm.dataset.editingId;
+                        typeForm.dataset.adminConfirm = "نام انبار ذخیره شود؟";
+                        typeForm.querySelector('[type="submit"]').textContent = "افزودن نام انبار";
+                        typeForm.querySelector("[data-warehouse-type-cancel]").hidden = true;
+                        typeForm.hidden = page.dataset.fullAccess !== "true" || page.dataset.canCreate !== "true";
+                    };
+                    resetTypeForm();
+                    typeForm.querySelector("[data-warehouse-type-cancel]").addEventListener("click", resetTypeForm);
                     typeForm.addEventListener("submit", async event => {
                         event.preventDefault();
                         const button = typeForm.querySelector('[type="submit"]');
                         if (button.disabled) return;
+                        const id = typeForm.dataset.editingId;
+                        if (page.dataset.fullAccess !== "true" || (id ? page.dataset.canEdit !== "true" : page.dataset.canCreate !== "true")) return;
+                        const name = typeForm.elements.name.value.trim();
+                        if (!name) { ui.notify("نام انبار را وارد کنید.", "danger"); typeForm.elements.name.focus(); return; }
                         button.disabled = true;
-                        try { const result = await request(page, page.dataset.api + "/warehouse-types", "POST", { name: typeForm.elements.name.value.trim() }); ui.notify(result.message, "success"); typeForm.reset(); await loadWarehouseTypes(page); }
+                        try { const result = await request(page, page.dataset.api + `/warehouse-types${id ? `/${encodeURIComponent(id)}` : ""}`, id ? "PUT" : "POST", { name }); ui.notify(result.message, "success"); resetTypeForm(); await load(page); }
                         catch (error) { ui.notify(error.message, "danger"); }
                         finally { button.disabled = false; }
                     });

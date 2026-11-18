@@ -24,12 +24,17 @@
             if (serial !== accessoryRequest || productId !== accessoryProductId) return;
             productAccessories = items;
             for (const [index, item] of items.entries()) {
-                const row = document.createElement("div"); row.className = "list-group-item d-flex flex-wrap justify-content-between align-items-center gap-2";
-                const text = document.createElement("span");
-                text.textContent = `${item.name} · ${ui.formatNumber(item.priceAmount)} تومان${item.displayDiscountPercent != null ? ` · تخفیف نمایشی ${ui.formatNumber(item.displayDiscountPercent)}٪` : ""} · ${item.isRequired ? "اجباری" : "اختیاری"}${item.isActive ? "" : " · غیرفعال"}`;
-                const edit = document.createElement("button"); edit.type = "button"; edit.className = "btn btn-sm btn-default";
-                edit.dataset.productAccessoryEdit = String(index); edit.textContent = "ویرایش";
-                row.append(text, edit); rows.append(row);
+                const row = document.createElement("article"); row.className = "admin-accessory-item";
+                const content = document.createElement("div"); content.className = "admin-accessory-item-content";
+                const name = document.createElement("strong"); name.className = "admin-accessory-item-name"; name.textContent = item.name;
+                const details = document.createElement("div"); details.className = "admin-accessory-item-details";
+                const badge = (label, className) => { const span = document.createElement("span"); span.className = `admin-accessory-badge ${className}`; span.textContent = label; return span; };
+                details.append(badge(`${ui.formatNumber(item.priceAmount)} تومان`, "is-price"), badge(item.isRequired ? "اجباری" : "اختیاری", item.isRequired ? "is-required" : "is-optional"), badge(item.isActive ? "فعال" : "غیرفعال", item.isActive ? "is-active" : "is-inactive"));
+                if (item.displayDiscountPercent != null) details.append(badge(`تخفیف نمایشی ${ui.formatNumber(item.displayDiscountPercent)}٪`, "is-discount"));
+                content.append(name, details);
+                const edit = document.createElement("button"); edit.type = "button"; edit.className = "btn btn-sm btn-default admin-accessory-edit";
+                edit.dataset.productAccessoryEdit = String(index); edit.textContent = "ویرایش"; edit.setAttribute("aria-label", `ویرایش ${item.name}`);
+                row.append(content, edit); rows.append(row);
             }
             status.textContent = items.length ? `${ui.formatNumber(items.length)} متعلقه` : "برای این کالا متعلقه‌ای ثبت نشده است.";
         } catch (error) { if (serial === accessoryRequest) status.textContent = error.message || "دریافت متعلقات ناموفق بود."; }
@@ -1531,6 +1536,12 @@
                 form.elements.brandId.value = String(product.idBrand || ""); form.elements.categoryId.value = String(product.idCategory || "");
                 form.elements.unitId.replaceChildren(new Option("انتخاب واحد", ""), ...data.units.map(unit => new Option(unit.name, String(unit.id))));
                 form.elements.unitId.value = String(product.idBaseUnit || "");
+                form.elements.unitId.disabled = data.hasWarehouseDocuments !== false;
+                form.querySelector("[data-product-unit-help]").textContent = data.hasWarehouseDocuments === true
+                    ? "برای این کالا سند انبار ثبت شده است و واحد پایه قابل تغییر نیست."
+                    : data.hasWarehouseDocuments === false
+                        ? "پس از تغییر واحد پایه، واحدهای فرعی باید دوباره تنظیم شوند."
+                        : "وضعیت اسناد مشخص نیست؛ تغییر واحد پایه ممکن نیست.";
                 ui.setPriceValue(form.elements.priceAmount, product.priceAmount ?? ""); form.elements.discountPercent.value = product.discountPercent ?? 0;
                 form.elements.maxPurchaseQuantity.value = product.maxPurchaseQuantity ?? 99;
                 window.bootstrap?.Modal?.getOrCreateInstance(document.getElementById("product-editor-modal")).show();

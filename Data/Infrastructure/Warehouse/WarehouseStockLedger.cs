@@ -29,7 +29,7 @@ public sealed class WarehouseStockLedger(ShopDbContext db) : IWarehouseStockLedg
             {
                 decimal delta = line.BaseQuantity * direction;
                 if (delta == 0) continue;
-                long planId = document.IdSalesPlanReference;
+                long planId = line.IdSalesPlanReference ?? document.IdSalesPlanReference;
                 var key = new StockKey(document.IdWarehouse, line.IdInventoryItem, planId);
                 deltas[key] = deltas.GetValueOrDefault(key) + delta;
                 replacement.Add(new WarehouseStockMovement
