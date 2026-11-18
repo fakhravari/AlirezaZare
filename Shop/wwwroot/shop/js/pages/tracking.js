@@ -7,6 +7,8 @@ window.HNUI.mount("pages-order-tracking", document, () => {
   const button = form.querySelector('button[type="submit"]') || form.querySelector("button");
   const labels = {
     "pending-payment": "در انتظار پرداخت",
+    "simulated-payment-confirmed": "پرداخت آزمایشی تأیید شد",
+    "payment-confirmed": "پرداخت تأیید شد",
     "warehouse-confirmed": "تأیید و آماده‌سازی سفارش",
     "in-transit": "در حال ارسال",
     "shipped-to-post": "تحویل به پست",
