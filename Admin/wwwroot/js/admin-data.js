@@ -1513,19 +1513,6 @@
                 .catch(error => { faqDelete.disabled = false; ui.notify(error.message || "حذف پرسش ناموفق بود.", "danger"); });
             return;
         }
-        const badgeCreate = event.target.closest("[data-product-badge-create]");
-        if (badgeCreate) {
-            const form = badgeCreate.closest("[data-product-editor]"), field = form.querySelector("[data-product-badge-title]");
-            const title = field.value.trim();
-            if (!title) { ui.notify("عنوان نشان را وارد کنید.", "danger"); field.focus(); return; }
-            const token = form.querySelector('[name="__RequestVerificationToken"]')?.value || "";
-            badgeCreate.disabled = true;
-            void ui.getJson("/api/admin/store/catalog/product-badges", { method: "POST", headers: { "Content-Type": "application/json", RequestVerificationToken: token }, body: JSON.stringify({ title }) })
-                .then(result => { form.elements.badgeId.add(new Option(result.title, String(result.id), true, true)); form.elements.badgeId.dispatchEvent(new Event("change", { bubbles: true })); field.value = ""; ui.notify("نشان اضافه شد.", "success"); })
-                .catch(error => ui.notify(error.message || "ثبت نشان ناموفق بود.", "danger"))
-                .finally(() => { badgeCreate.disabled = false; });
-            return;
-        }
         const productEdit = event.target.closest("[data-product-edit]");
         if (productEdit) {
             const page = productEdit.closest('[data-admin-section="products"]');
@@ -1542,8 +1529,8 @@
                 form.elements.brandId.replaceChildren(new Option("انتخاب برند", ""), ...data.brands.map(brand => new Option(brand.name, String(brand.id))));
                 form.elements.categoryId.replaceChildren(new Option("انتخاب دسته", ""), ...data.categories.map(category => new Option(category.name, String(category.id))));
                 form.elements.brandId.value = String(product.idBrand || ""); form.elements.categoryId.value = String(product.idCategory || "");
-                form.elements.badgeId.replaceChildren(new Option("بدون نشان", ""), ...(data.badges || []).map(badge => new Option(badge.name, String(badge.id))));
-                form.elements.badgeId.value = String(product.idBadge || "");
+                form.elements.unitId.replaceChildren(new Option("انتخاب واحد", ""), ...data.units.map(unit => new Option(unit.name, String(unit.id))));
+                form.elements.unitId.value = String(product.idBaseUnit || "");
                 ui.setPriceValue(form.elements.priceAmount, product.priceAmount ?? ""); form.elements.discountPercent.value = product.discountPercent ?? 0;
                 form.elements.maxPurchaseQuantity.value = product.maxPurchaseQuantity ?? 99;
                 window.bootstrap?.Modal?.getOrCreateInstance(document.getElementById("product-editor-modal")).show();
@@ -1951,7 +1938,7 @@
             const save = productEditor.querySelector('[type="submit"]');
             if (save.disabled) return;
             const token = productEditor.querySelector('[name="__RequestVerificationToken"]')?.value || "";
-            const body = { key: productEditor.elements.key.value, name: productEditor.elements.name.value, englishName: productEditor.elements.englishName.value, brandId: Number(productEditor.elements.brandId.value), categoryId: Number(productEditor.elements.categoryId.value), badgeId: Number(productEditor.elements.badgeId.value) || null, priceAmount: ui.priceValue(productEditor.elements.priceAmount), discountPercent: Number(productEditor.elements.discountPercent.value), maxPurchaseQuantity: Number(productEditor.elements.maxPurchaseQuantity.value) };
+            const body = { key: productEditor.elements.key.value, name: productEditor.elements.name.value, englishName: productEditor.elements.englishName.value, brandId: Number(productEditor.elements.brandId.value), categoryId: Number(productEditor.elements.categoryId.value), unitId: Number(productEditor.elements.unitId.value), priceAmount: ui.priceValue(productEditor.elements.priceAmount), discountPercent: Number(productEditor.elements.discountPercent.value), maxPurchaseQuantity: Number(productEditor.elements.maxPurchaseQuantity.value) };
             if (!Number.isSafeInteger(body.priceAmount)) { ui.notify("قیمت صحیح و معتبر وارد کنید.", "danger"); return; }
             save.disabled = true;
             void ui.getJson(`/api/admin/store/catalog/products/manage/${encodeURIComponent(productEditor.elements.id.value)}`, { method: "PUT", headers: { "Content-Type": "application/json", RequestVerificationToken: token }, body: JSON.stringify(body) })

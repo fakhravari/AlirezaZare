@@ -167,7 +167,7 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
             case "units":
                 WarehouseUnit? unit = await db.WarehouseUnits.SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
                 if (unit is null) return NotFound();
-                if (await db.WarehouseProductUnits.AnyAsync(x => x.IdUnit == id && x.IsActive, cancellationToken))
+                if (await db.Products.AnyAsync(x => x.IdBaseUnit == id, cancellationToken) || await db.WarehouseProductUnits.AnyAsync(x => x.IdUnit == id && x.IsActive, cancellationToken))
                     return Conflict(new { detail = "این واحد هنوز در تعریف واحدهای کالا استفاده می‌شود؛ ابتدا آن اتصال‌ها را غیرفعال کنید." });
                 unit.IsActive = false;
                 break;
@@ -461,6 +461,13 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
 
                     WarehouseUnit entity = id.HasValue ? await db.WarehouseUnits.SingleOrDefaultAsync(x => x.Id == id, cancellationToken) ?? null! : new WarehouseUnit();
                     if (id.HasValue && entity is null) return NotFound();
+
+                    if (id.HasValue && entity.IsActive && !input.IsActive && !User.IsInRole("system.full-access") &&
+                        !User.HasClaim("admin_permission", "Warehouse:DefinitionsApi:Deactivate")) return Forbid();
+
+                    if (id.HasValue && !input.IsActive && (await db.Products.AnyAsync(x => x.IdBaseUnit == id.Value, cancellationToken) ||
+                        await db.WarehouseProductUnits.AnyAsync(x => x.IdUnit == id.Value && x.IsActive, cancellationToken)))
+                        return Conflict(new { detail = "این واحد برای کالا استفاده می‌شود؛ ابتدا واحدهای وابسته را تغییر دهید یا غیرفعال کنید." });
 
                     entity.Code = input.Code.Trim();
                     entity.Name = input.Name.Trim();

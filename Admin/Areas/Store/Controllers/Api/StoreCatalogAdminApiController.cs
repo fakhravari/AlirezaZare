@@ -109,7 +109,7 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
         if (!User.IsInRole("system.full-access")) return Forbid();
 
         var product = await db.Products.AsNoTracking().Where(x => x.Id == id)
-            .Select(x => new { x.Id, code = x.ProductKey, x.Name, x.EnglishName, x.IdBrand, x.IdCategory, x.IdBadge, x.MaxPurchaseQuantity })
+            .Select(x => new { x.Id, code = x.ProductKey, x.Name, x.EnglishName, x.IdBrand, x.IdCategory, x.IdBaseUnit, x.MaxPurchaseQuantity })
             .SingleOrDefaultAsync(cancellationToken);
         if (product is null) return NotFound();
         var price = await RegularProductPrices().FirstOrDefaultAsync(x => x.IdProduct == id, cancellationToken);
@@ -118,8 +118,9 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
             .Select(x => new EditorOption { Id = x.Id, Name = x.NameFa }).ToListAsync(cancellationToken);
         var categories = await GetLeafCategoryOptions(cancellationToken);
 
-        var badges = await db.StoreProductBadges.AsNoTracking().OrderBy(x => x.Title).Select(x => new EditorOption { Id = x.Id, Name = x.Title }).ToListAsync(cancellationToken);
-        return Ok(new { product = new { product.Id, product.code, product.Name, product.EnglishName, product.IdBrand, product.IdCategory, product.IdBadge, PriceAmount = FinalPrice(price), DiscountPercent = price?.DiscountPercent ?? 0m, product.MaxPurchaseQuantity }, brands, categories, badges });
+        var units = await db.WarehouseUnits.AsNoTracking().Where(x => x.IsActive || x.Id == product.IdBaseUnit).OrderBy(x => x.Name)
+            .Select(x => new { x.Id, Name = x.IsActive ? x.Name : x.Name + " (غیرفعال)", x.IsActive }).ToListAsync(cancellationToken);
+        return Ok(new { product = new { product.Id, product.code, product.Name, product.EnglishName, product.IdBrand, product.IdCategory, product.IdBaseUnit, PriceAmount = FinalPrice(price), DiscountPercent = price?.DiscountPercent ?? 0m, product.MaxPurchaseQuantity }, brands, categories, units });
     }
 
     [HttpGet("products/{id:long}/details")]
@@ -235,7 +236,7 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
         if (!User.IsInRole("system.full-access")) return Forbid();
 
         string name = input.Name?.Trim() ?? "", englishName = input.EnglishName?.Trim() ?? "", key = input.Key?.Trim() ?? "";
-        if (id < 1 || key.Length is < 1 or > 100 || name.Length is < 1 or > 300 || englishName.Length is < 1 or > 300 || input.BrandId < 1 || input.CategoryId < 1 ||
+        if (id < 1 || key.Length is < 1 or > 100 || name.Length is < 1 or > 300 || englishName.Length is < 1 or > 300 || input.BrandId < 1 || input.CategoryId < 1 || input.UnitId < 1 ||
             input.PriceAmount < 0 || input.PriceAmount > 9007199254740991m || input.PriceAmount != decimal.Truncate(input.PriceAmount) ||
             input.DiscountPercent is < 0 or >= 100 || decimal.Round(input.DiscountPercent, 2) != input.DiscountPercent || input.MaxPurchaseQuantity is < 1 or > 99)
             return BadRequest(new { title = "نام، دسته، برند، قیمت، تخفیف یا حداکثر خرید معتبر نیست." });
@@ -246,11 +247,32 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
         bool validCategory = await db.StoreCategories.AnyAsync(c => c.Id == input.CategoryId && c.IsActive &&
             !db.StoreCategories.Any(child => child.IsActive && child.IdParentCategory == c.Id), cancellationToken);
         bool validBrand = await db.StoreBrands.AnyAsync(x => x.Id == input.BrandId && x.IsActive, cancellationToken);
-        bool validBadge = !input.BadgeId.HasValue || await db.StoreProductBadges.AnyAsync(x => x.Id == input.BadgeId.Value, cancellationToken);
-        if (!validCategory || !validBrand || !validBadge) return BadRequest(new { title = "برند، دستهٔ برگ یا نشان معتبر نیست." });
+        if (!validCategory || !validBrand) return BadRequest(new { title = "برند یا دستهٔ برگ معتبر نیست." });
 
         var product = await db.Products.SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
         if (product is null) return NotFound();
+        if (input.UnitId != product.IdBaseUnit)
+        {
+            if (!await db.WarehouseUnits.AnyAsync(x => x.Id == input.UnitId && x.IsActive, cancellationToken))
+                return BadRequest(new { title = "واحد پایهٔ انتخاب‌شده فعال نیست." });
+            if (await (from line in db.WarehouseDocumentLines
+                       join item in db.InventoryItems on line.IdInventoryItem equals item.Id
+                       where item.IdProduct == id select line.Id).AnyAsync(cancellationToken))
+                return Conflict(new { title = "برای این کالا سند انبار ثبت شده است؛ تغییر واحد پایه مجاز نیست." });
+            await db.WarehouseProductUnits.Where(x => x.IdProduct == id)
+                .ExecuteUpdateAsync(update => update.SetProperty(x => x.IsBaseUnit, false).SetProperty(x => x.IsActive, false), cancellationToken);
+            var links = await db.WarehouseProductUnits.Where(x => x.IdProduct == id).ToListAsync(cancellationToken);
+            var baseLink = links.SingleOrDefault(x => x.IdUnit == input.UnitId);
+            if (baseLink is null)
+            {
+                baseLink = new Shop.Data.Domain.Warehouse.Entities.WarehouseProductUnit { IdProduct = id, IdUnit = input.UnitId };
+                db.WarehouseProductUnits.Add(baseLink);
+            }
+            baseLink.IsBaseUnit = true;
+            baseLink.IsActive = true;
+            baseLink.ConversionFactor = 1m;
+            product.IdBaseUnit = input.UnitId;
+        }
         if (await db.Products.AnyAsync(x => x.Id != id && x.ProductKey == key, cancellationToken))
             return Conflict(new { title = "کد کالا قبلاً ثبت شده است." });
 
@@ -259,7 +281,6 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
         product.EnglishName = englishName;
         product.IdBrand = input.BrandId;
         product.IdCategory = input.CategoryId;
-        product.IdBadge = input.BadgeId;
         product.MaxPurchaseQuantity = input.MaxPurchaseQuantity;
         product.UpdatedAtUtc = DateTime.UtcNow;
         await db.SaveChangesAsync(cancellationToken);
@@ -279,7 +300,7 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
     }
 
     public sealed class EditorOption { public long Id { get; set; } public string Name { get; set; } = ""; }
-    public sealed record ProductEditorInput(string? Key, string? Name, string? EnglishName, long BrandId, long CategoryId, long? BadgeId, decimal PriceAmount, decimal DiscountPercent, int MaxPurchaseQuantity);
+    public sealed record ProductEditorInput(string? Key, string? Name, string? EnglishName, long BrandId, long CategoryId, long UnitId, decimal PriceAmount, decimal DiscountPercent, int MaxPurchaseQuantity);
 
     [HttpPost("product-badges")]
     [ValidateAntiForgeryToken]

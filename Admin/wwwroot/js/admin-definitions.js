@@ -10,7 +10,7 @@
         companies: { fields: [["code", "کد شرکت", "text", true], ["name", "نام شرکت", "text", true], ["phone", "تلفن", "text"], ["address", "آدرس", "textarea"], ["description", "توضیحات", "textarea"]], columns: [["code", "کد"], ["name", "شرکت"], ["phone", "تلفن"], ["address", "آدرس"], ["description", "توضیحات"], ["isActive", "وضعیت", "active"]] },
         warehouses: { fields: [["companyId", "شرکت", "companies", true], ["code", "کد انبار", "text", true], ["warehouseTypeId", "نام انبار", "warehouse-types", true], ["isSalesWarehouse", "انبار فروش است", "checkbox"], ["ownerSalesPlanId", "طرح مالک انبار فروش", "plans"], ["isSiteWarehouse", "منبع موجودی سایت", "checkbox"]], columns: [["warehouseLabel", "شرکت / انبار"], ["isSalesWarehouse", "انبار فروش", "affects"], ["isSiteWarehouse", "منبع موجودی سایت", "siteWarehouse"], ["ownerSalesPlan", "طرح مالک"], ["isActive", "وضعیت", "active"]] },
         references: { fields: [["name", "نام مرجع", "text", true], ["partyType", "نوع مرجع", "select", true, [["Person", "شخص"], ["Organization", "سازمان"], ["Warehouse", "انبار"], ["Other", "سایر"]]], ["warehouseId", "انبار مرتبط", "warehouses"], ["externalPartyKey", "شناسهٔ بیرونی", "text"]], columns: [["name", "نام"], ["partyType", "نوع"], ["idWarehouse", "شناسهٔ انبار"], ["isActive", "وضعیت", "active"]] },
-        units: { fields: [["code", "کد واحد", "text", true], ["name", "نام واحد", "text", true]], columns: [["code", "کد"], ["name", "واحد"], ["isActive", "وضعیت", "active"]] },
+        units: { fields: [["code", "کد واحد", "text", true], ["name", "نام واحد", "text", true], ["isActive", "واحد فعال است", "checkbox"]], columns: [["code", "کد"], ["name", "واحد"], ["isActive", "وضعیت", "active"]] },
         "document-types": { fields: [["code", "کد نوع سند", "text", true], ["name", "نام سند", "text", true], ["direction", "جهت سند", "select", true, [["R", "رسید"], ["I", "حواله"]]], ["affectsStock", "بر موجودی اثر دارد", "checkbox" ]], columns: [["code", "کد"], ["name", "نوع سند"], ["direction", "جهت", "direction"], ["affectsStock", "اثر موجودی", "affects"], ["isActive", "وضعیت", "active"]] }
         ,"product-units": { fields: [["productId", "کالا", "products", true], ["unitId", "واحد", "units", true], ["conversionFactor", "ضریب تبدیل به واحد اصلی", "number", true], ["isBaseUnit", "واحد اصلی کالا", "checkbox"]], columns: [["productName", "کالا"], ["unitName", "واحد"], ["conversionFactor", "ضریب تبدیل"], ["isBaseUnit", "اصلی", "base"], ["isActive", "وضعیت", "active"]] },
         variants: { fields: [["productId", "کالا", "products", true], ["name", "نام تنوع", "text", true], ["code", "کد تنوع", "text"], ["attributesJson", "ویژگی‌های موجودی (JSON)", "textarea"], ["isDefault", "تنوع پیش‌فرض", "checkbox"]], columns: [["productName", "کالا"], ["name", "تنوع"], ["code", "کد"], ["isDefault", "پیش‌فرض", "default"], ["isActive", "وضعیت", "active"]] }
@@ -139,8 +139,10 @@
         host.replaceChildren(); form.reset(); form.elements.id.value = data?.id || "";
         for (const field of config.fields) {
             if (field[0] === "isSiteWarehouse" && page.dataset.fullAccess !== "true") continue;
-            addField(host, field, data || {}, lookups);
+            addField(host, field, data || (page.dataset.definitionSection === "units" ? { isActive: true } : {}), lookups);
         }
+        if (data?.isActive && page.dataset.definitionSection === "units" && page.dataset.canDeactivate !== "true")
+            form.elements.isActive.disabled = true;
         if (page.dataset.definitionSection === "warehouses") {
             const sales = form.querySelector('[name="isSalesWarehouse"]'), plan = form.querySelector('[name="ownerSalesPlanId"]');
             const updatePlan = () => { plan.required = true; plan.disabled = false; };
@@ -235,8 +237,8 @@
                         }
                     }
                     const values = new FormData(form), id = values.get("id"); const body = {};
-                    for (const [key, , type] of config.fields) body[key] = type === "checkbox" ? values.get(key) === "on" : (key === "idStockOwnerType" || ["number", "products", "units", "warehouses", "companies", "plans", "warehouse-types"].includes(type) ? Number(values.get(key)) || null : values.get(key));
-                    body.isActive = true;
+                    for (const [key, , type] of config.fields) body[key] = type === "checkbox" ? Boolean(form.elements.namedItem(key)?.checked) : (key === "idStockOwnerType" || ["number", "products", "units", "warehouses", "companies", "plans", "warehouse-types"].includes(type) ? Number(values.get(key)) || null : values.get(key));
+                    if (section !== "units") body.isActive = true;
                     const submit = form.querySelector('[type="submit"]');
                     form.dataset.saving = "true"; submit.disabled = true;
                     try { const result = await request(page, `${page.dataset.api}/${section}${id ? `/${id}` : ""}`, id ? "PUT" : "POST", body); ui.notify(result.message, "success"); window.bootstrap?.Modal?.getInstance(document.getElementById("admin-definition-modal"))?.hide(); await load(page); }
