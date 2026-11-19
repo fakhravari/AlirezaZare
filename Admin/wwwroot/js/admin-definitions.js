@@ -11,7 +11,7 @@
         companies: { fields: [["code", "کد شرکت", "text", true], ["name", "نام شرکت", "text", true], ["phone", "تلفن", "text"], ["address", "آدرس", "textarea"], ["description", "توضیحات", "textarea"]], columns: [["code", "کد"], ["name", "شرکت"], ["phone", "تلفن"], ["address", "آدرس"], ["description", "توضیحات"], ["isActive", "وضعیت", "active"]] },
         warehouses: { fields: [["companyId", "شرکت", "companies", true], ["code", "کد انبار", "text", true], ["warehouseTypeId", "نام انبار", "warehouse-types", true], ["isSalesWarehouse", "انبار فروش است", "checkbox"], ["ownerSalesPlanId", "طرح مالک انبار فروش", "plans"], ["isSiteWarehouse", "منبع موجودی سایت", "checkbox"]], columns: [["warehouseLabel", "شرکت / انبار"], ["isSalesWarehouse", "انبار فروش", "affects"], ["isSiteWarehouse", "منبع موجودی سایت", "siteWarehouse"], ["ownerSalesPlan", "طرح مالک"], ["isActive", "وضعیت", "active"]] },
         references: { fields: [["name", "نام مرجع", "text", true], ["partyType", "نوع مرجع", "select", true, [["Person", "شخص"], ["Organization", "سازمان"], ["Warehouse", "انبار"], ["Other", "سایر"]]], ["warehouseId", "انبار مرتبط", "warehouses"], ["externalPartyKey", "شناسهٔ بیرونی", "text"]], columns: [["name", "نام"], ["partyType", "نوع"], ["idWarehouse", "شناسهٔ انبار"], ["isActive", "وضعیت", "active"]] },
-        units: { fields: [["unitGroupId", "گروه واحد", "unit-groups", true], ["nameFa", "نام فارسی", "text", true], ["nameEn", "نام انگلیسی", "text"], ["isActive", "واحد فعال است", "checkbox"]], columns: [["unitGroupName", "گروه"], ["nameFa", "نام فارسی"], ["nameEn", "نام انگلیسی"], ["isActive", "وضعیت", "active"]] },
+        units: { fields: [["parentId", "گروه والد", "unit-groups", true], ["nameFa", "نام فارسی", "text", true], ["nameEn", "نام انگلیسی", "text"], ["isActive", "واحد فعال است", "checkbox"]], columns: [["parentName", "گروه والد"], ["nameFa", "نام فارسی"], ["nameEn", "نام انگلیسی"], ["isActive", "وضعیت", "active"]] },
         "document-types": { fields: [["code", "کد نوع سند", "text", true], ["name", "نام سند", "text", true], ["direction", "جهت سند", "select", true, [["R", "رسید"], ["I", "حواله"]]], ["affectsStock", "بر موجودی اثر دارد", "checkbox" ]], columns: [["code", "کد"], ["name", "نوع سند"], ["direction", "جهت", "direction"], ["affectsStock", "اثر موجودی", "affects"], ["isActive", "وضعیت", "active"]] }
         ,"product-units": { fields: [["productId", "کالا", "products", true], ["unitId", "واحد", "units", true], ["conversionFactor", "ضریب تبدیل به واحد اصلی", "number", true], ["isBaseUnit", "واحد اصلی کالا", "checkbox"]], columns: [["productName", "کالا"], ["unitName", "واحد"], ["conversionFactor", "ضریب تبدیل"], ["isBaseUnit", "اصلی", "base"], ["isActive", "وضعیت", "active"]] },
         variants: { fields: [["productId", "کالا", "products", true], ["name", "نام تنوع", "text", true], ["code", "کد تنوع", "text"], ["attributes", "ویژگی‌های تنوع", "attributes"], ["isDefault", "تنوع پیش‌فرض", "checkbox"]], columns: [["productName", "کالا"], ["name", "تنوع"], ["code", "کد"], ["attributes", "ویژگی‌ها", "attributes"], ["isDefault", "پیش‌فرض", "default"], ["isActive", "وضعیت", "active"]] }
@@ -161,12 +161,39 @@
     function renderUnitTree(page, groups, units) {
         const tree = page.querySelector("[data-unit-tree]");
         tree.replaceChildren();
-        for (const group of groups) {
-            const members = units.filter(unit => unit.idUnitGroup === group.id);
-            const branch = element("details", null, "list-group-item p-0 mb-2 border rounded");
+        const addUnit = (unit, children) => {
+            const node = element("li", null, "list-group-item d-flex flex-wrap align-items-center justify-content-between gap-2");
+            node.append(element("span", `${unit.nameFa}${unit.nameEn ? ` / ${unit.nameEn}` : ""}${unit.isActive ? "" : " · غیرفعال"}`, unit.isActive ? "" : "text-muted"));
+            const actions = element("div", null, "d-flex flex-wrap gap-1");
+            if (page.dataset.canEdit === "true") {
+                const editUnit = actionButton("ویرایش", "fa-pen-to-square", "btn btn-sm btn-default");
+                editUnit.addEventListener("click", () => void openForm(page, unit, configs.units).catch(error => ui.notify(error.message || "بازکردن فرم ناموفق بود.", "danger")));
+                actions.append(editUnit);
+            }
+            if (unit.isActive ? page.dataset.canDeactivate === "true" : page.dataset.canEdit === "true") {
+                const toggle = actionButton(unit.isActive ? "غیرفعال‌سازی" : "فعال‌سازی", unit.isActive ? "fa-toggle-off" : "fa-toggle-on", unit.isActive ? "btn btn-sm btn-outline-danger" : "btn btn-sm btn-outline-success");
+                if (unit.isActive) toggle.dataset.adminConfirm = "این واحد غیرفعال شود؟ واحد مورد استفادهٔ کالا غیرفعال نمی‌شود.";
+                toggle.addEventListener("click", async () => {
+                    if (toggle.disabled) return; toggle.disabled = true;
+                    try {
+                        const result = unit.isActive
+                            ? await request(page, `${page.dataset.api}/units/${unit.id}/deactivate`, "POST", {})
+                            : await request(page, `${page.dataset.api}/units/${unit.id}`, "PUT", { nameFa: unit.nameFa, nameEn: unit.nameEn, parentId: unit.idParent, isActive: true });
+                        ui.notify(result.message, "success"); await load(page);
+                    } catch (error) { ui.notify(error.message, "danger"); } finally { toggle.disabled = false; }
+                });
+                actions.append(toggle);
+            }
+            if (actions.childElementCount) node.append(actions);
+            children.append(node);
+        };
+        const addGroup = (group, container) => {
+            const branch = element("details", null, "list-group-item p-0 border rounded");
             const summary = element("summary", null, "d-flex align-items-center justify-content-between gap-2 px-3 py-2 fw-semibold");
+            const childGroups = groups.filter(item => item.idParent === group.id);
+            const members = units.filter(unit => unit.idParent === group.id);
             summary.append(element("span", `${group.name}${group.isActive ? "" : " · غیرفعال"}`));
-            summary.append(element("span", `${fmt.format(members.length)} واحد`, "badge bg-light text-dark"));
+            summary.append(element("span", `${fmt.format(childGroups.length)} زیرگروه · ${fmt.format(members.length)} واحد`, "badge bg-light text-dark"));
             branch.append(summary);
             const children = element("ul", null, "list-group list-group-flush px-4 pb-2");
             const groupActions = element("li", null, "list-group-item d-flex flex-wrap justify-content-end gap-2");
@@ -174,7 +201,8 @@
                 const edit = actionButton("ویرایش گروه", "fa-pen-to-square", "btn btn-sm btn-default");
                 edit.addEventListener("click", () => {
                     const form = page.querySelector("[data-unit-group-form]");
-                    form.elements.id.value = group.id; form.elements.name.value = group.name; form.elements.sortOrder.value = group.sortOrder;
+                    form.elements.id.value = group.id; form.elements.name.value = group.name; form.elements.nameEn.value = group.nameEn || "";
+                    form.elements.sortOrder.value = group.sortOrder;
                     form.querySelector('[type="submit"]').textContent = "ذخیرهٔ گروه"; form.querySelector("[data-unit-group-cancel]").hidden = false;
                     form.elements.name.focus();
                 });
@@ -187,7 +215,7 @@
                         try {
                             const result = group.isActive
                                 ? await request(page, `${page.dataset.api}/unit-groups/${group.id}/deactivate`, "POST", {})
-                                : await request(page, `${page.dataset.api}/unit-groups/${group.id}`, "PUT", { name: group.name, sortOrder: group.sortOrder, isActive: true });
+                                : await request(page, `${page.dataset.api}/unit-groups/${group.id}`, "PUT", { name: group.name, nameEn: group.nameEn, sortOrder: group.sortOrder, isActive: true });
                             ui.notify(result.message, "success"); await load(page);
                         } catch (error) { ui.notify(error.message, "danger"); } finally { toggle.disabled = false; }
                     });
@@ -195,35 +223,23 @@
                 }
             }
             if (groupActions.childElementCount) children.append(groupActions);
-            for (const unit of members) {
-                const node = element("li", null, "list-group-item d-flex flex-wrap align-items-center justify-content-between gap-2");
-                node.append(element("span", `${unit.nameFa}${unit.nameEn ? ` / ${unit.nameEn}` : ""}${unit.isActive ? "" : " · غیرفعال"}`, unit.isActive ? "" : "text-muted"));
-                const actions = element("div", null, "d-flex flex-wrap gap-1");
-                if (group.isActive && page.dataset.canEdit === "true") {
-                    const editUnit = actionButton("ویرایش", "fa-pen-to-square", "btn btn-sm btn-default");
-                    editUnit.addEventListener("click", () => void openForm(page, unit, configs.units).catch(error => ui.notify(error.message || "بازکردن فرم ناموفق بود.", "danger")));
-                    actions.append(editUnit);
-                }
-                if (unit.isActive ? page.dataset.canDeactivate === "true" : page.dataset.canEdit === "true") {
-                    const toggle = actionButton(unit.isActive ? "غیرفعال‌سازی" : "فعال‌سازی", unit.isActive ? "fa-toggle-off" : "fa-toggle-on", unit.isActive ? "btn btn-sm btn-outline-danger" : "btn btn-sm btn-outline-success");
-                    if (unit.isActive) toggle.dataset.adminConfirm = "این واحد غیرفعال شود؟ واحد مورد استفادهٔ کالا غیرفعال نمی‌شود.";
-                    toggle.addEventListener("click", async () => {
-                        if (toggle.disabled) return; toggle.disabled = true;
-                        try {
-                            const result = unit.isActive
-                                ? await request(page, `${page.dataset.api}/units/${unit.id}/deactivate`, "POST", {})
-                                : await request(page, `${page.dataset.api}/units/${unit.id}`, "PUT", { nameFa: unit.nameFa, nameEn: unit.nameEn, unitGroupId: unit.idUnitGroup, isActive: true });
-                            ui.notify(result.message, "success"); await load(page);
-                        } catch (error) { ui.notify(error.message, "danger"); } finally { toggle.disabled = false; }
-                    });
-                    actions.append(toggle);
-                }
-                node.append(actions); children.append(node);
-            }
-            if (!members.length) children.append(element("li", "هنوز واحدی در این گروه ثبت نشده است.", "list-group-item text-muted"));
-            branch.append(children); tree.append(branch);
+            for (const childGroup of childGroups) addGroup(childGroup, children);
+            for (const unit of members) addUnit(unit, children);
+            if (!childGroups.length && !members.length) children.append(element("li", "زیرگروه یا واحدی ثبت نشده است.", "list-group-item text-muted"));
+            branch.append(children); container.append(branch);
+        };
+        const roots = element("ul", null, "list-group list-group-flush gap-2");
+        for (const group of groups.filter(item => item.idParent == null)) addGroup(group, roots);
+        const ungrouped = units.filter(unit => unit.idParent == null);
+        if (ungrouped.length) {
+            const section = element("li", null, "list-group-item p-0 border rounded");
+            section.append(element("h3", "واحدهای بدون گروه والد", "h6 px-3 pt-3"));
+            const children = element("ul", null, "list-group list-group-flush px-4 pb-2");
+            for (const unit of ungrouped) addUnit(unit, children);
+            section.append(children); roots.append(section);
         }
-        setStatus(page, groups.length ? "" : "گروهی تعریف نشده است.");
+        tree.append(roots);
+        setStatus(page, groups.length || units.length ? "" : "گروهی تعریف نشده است.");
     }
     function addField(host, field, data, lookups) {
         const [key, label, type = "text", required = false, choices = []] = field;
@@ -289,7 +305,7 @@
         if (data && page.dataset.definitionSection === "warehouses") data = { ...data, companyId: data.idCompany, warehouseTypeId: data.idWarehouseType, ownerSalesPlanId: data.idOwnerSalesPlanReference };
         if (data && page.dataset.definitionSection === "references") data = { ...data, warehouseId: data.idWarehouse };
         if (data && page.dataset.definitionSection === "product-units") data = { ...data, productId: data.idProduct, unitId: data.idUnit };
-        if (data && page.dataset.definitionSection === "units") data = { ...data, unitGroupId: data.idUnitGroup };
+        if (data && page.dataset.definitionSection === "units") data = { ...data, parentId: data.idParent };
         let lookups = { warehouses: [] };
         if (["references", "product-units", "variants", "warehouses"].includes(page.dataset.definitionSection)) lookups = await request(page, `${page.dataset.api}/lookups`);
         if (page.dataset.definitionSection === "warehouses") lookups["warehouse-types"] = await request(page, page.dataset.api + "/warehouse-types");
@@ -438,7 +454,7 @@
                         if (page.dataset.canCreate !== "true" && !id || id && page.dataset.canEdit !== "true") return;
                         const button = groupForm.querySelector('[type="submit"]'); groupForm.dataset.saving = "true"; button.disabled = true;
                         try {
-                            const result = await request(page, `${page.dataset.api}/unit-groups${id ? `/${id}` : ""}`, id ? "PUT" : "POST", { name, sortOrder: Number(groupForm.elements.sortOrder.value) || 0, isActive: true });
+                            const result = await request(page, `${page.dataset.api}/unit-groups${id ? `/${id}` : ""}`, id ? "PUT" : "POST", { name, nameEn: groupForm.elements.nameEn.value.trim() || null, sortOrder: Number(groupForm.elements.sortOrder.value) || 0, isActive: true });
                             ui.notify(result.message, "success"); resetGroupForm(); await load(page);
                         } catch (error) { ui.notify(error.message, "danger"); }
                         finally { groupForm.dataset.saving = "false"; button.disabled = false; }

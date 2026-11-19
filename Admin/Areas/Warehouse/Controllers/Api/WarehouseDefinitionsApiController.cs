@@ -23,12 +23,11 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
         "document-types" => Ok(await db.WarehouseDocumentTypes.AsNoTracking().OrderBy(x => x.Name)
             .Select(x => new { x.Id, x.Code, x.Name, x.Direction, x.AffectsStock, x.IsActive }).ToListAsync(cancellationToken)),
         "references" => await GetReferencesAsync(cancellationToken),
-        "unit-groups" => Ok(await db.WarehouseUnitGroups.AsNoTracking().OrderBy(x => x.SortOrder).ThenBy(x => x.Name)
-            .Select(x => new { x.Id, x.Name, x.IsActive, x.SortOrder }).ToListAsync(cancellationToken)),
-        "units" => Ok(await (from unit in db.WarehouseUnits.AsNoTracking()
-                             join unitGroup in db.WarehouseUnitGroups.AsNoTracking() on unit.IdUnitGroup equals unitGroup.Id
-                             orderby unitGroup.SortOrder, unitGroup.Name, unit.NameFa
-                             select new { unit.Id, unit.NameFa, unit.NameEn, unit.IdUnitGroup, UnitGroupName = unitGroup.Name, unit.IsActive })
+        "unit-groups" => Ok(await db.WarehouseUnits.AsNoTracking().Where(x => x.IdParent == null)
+            .OrderBy(x => x.SortOrder).ThenBy(x => x.NameFa)
+            .Select(x => new { x.Id, Name = x.NameFa, x.NameEn, x.IdParent, x.IsActive, x.SortOrder }).ToListAsync(cancellationToken)),
+        "units" => Ok(await db.WarehouseUnits.AsNoTracking().Where(x => x.IdParent != null).OrderBy(x => x.NameFa)
+            .Select(x => new { x.Id, x.NameFa, x.NameEn, x.IdParent, ParentName = db.WarehouseUnits.Where(parent => parent.Id == x.IdParent).Select(parent => parent.NameFa).FirstOrDefault(), x.IsActive })
             .ToListAsync(cancellationToken)),
         "product-units" => Ok(await (from link in db.WarehouseProductUnits.AsNoTracking()
                                      join product in db.Products.AsNoTracking() on link.IdProduct equals product.Id
@@ -191,9 +190,9 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                 unit.IsActive = false;
                 break;
             case "unit-groups":
-                WarehouseUnitGroup? group = await db.WarehouseUnitGroups.SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
+                WarehouseUnit? group = await db.WarehouseUnits.SingleOrDefaultAsync(x => x.Id == id && x.IdParent == null, cancellationToken);
                 if (group is null) return NotFound();
-                if (await db.WarehouseUnits.AnyAsync(x => x.IdUnitGroup == id && x.IsActive, cancellationToken))
+                if (await db.WarehouseUnits.AnyAsync(x => x.IdParent == id && x.IsActive, cancellationToken))
                     return Conflict(new { detail = "برای غیرفعال‌کردن گروه، ابتدا واحدهای فعال آن را به گروه دیگری منتقل یا غیرفعال کنید." });
                 group.IsActive = false;
                 break;
@@ -482,11 +481,11 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
             case "units":
                 {
                     UnitInput? input = Parse<UnitInput>(payload);
-                    if (input is null || string.IsNullOrWhiteSpace(input.NameFa) || input.NameFa.Trim().Length > 100 || (input.NameEn?.Trim().Length > 100) || input.UnitGroupId < 1)
-                        return ValidationProblem(detail: "گروه و نام فارسی معتبر واحد را وارد کنید؛ نام انگلیسی اختیاری است.", statusCode: 400);
+                    if (input is null || string.IsNullOrWhiteSpace(input.NameFa) || input.NameFa.Trim().Length > 100 || (input.NameEn?.Trim().Length > 100) || !input.ParentId.HasValue)
+                        return ValidationProblem(detail: "نام فارسی واحد و گروه والد فعال الزامی است؛ نام انگلیسی اختیاری است.", statusCode: 400);
 
-                    if (!await db.WarehouseUnitGroups.AnyAsync(x => x.Id == input.UnitGroupId && x.IsActive, cancellationToken))
-                        return ValidationProblem(detail: "گروه واحد انتخاب‌شده فعال نیست.", statusCode: 400);
+                    if (!await db.WarehouseUnits.AnyAsync(x => x.Id == input.ParentId!.Value && x.IdParent == null && x.IsActive, cancellationToken))
+                        return ValidationProblem(detail: "گروه والد انتخاب‌شده فعال نیست.", statusCode: 400);
 
                     WarehouseUnit entity = id.HasValue ? await db.WarehouseUnits.SingleOrDefaultAsync(x => x.Id == id, cancellationToken) ?? null! : new WarehouseUnit();
                     if (id.HasValue && entity is null) return NotFound();
@@ -499,7 +498,7 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
 
                     entity.NameFa = input.NameFa.Trim();
                     entity.NameEn = string.IsNullOrWhiteSpace(input.NameEn) ? null : input.NameEn.Trim();
-                    entity.IdUnitGroup = input.UnitGroupId;
+                    entity.IdParent = input.ParentId;
                     entity.IsActive = input.IsActive;
 
                     if (!id.HasValue) db.WarehouseUnits.Add(entity);
@@ -511,23 +510,25 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                 {
                     UnitGroupInput? input = Parse<UnitGroupInput>(payload);
                     string name = input?.Name?.Trim() ?? "";
-                    if (name.Length is < 1 or > 100 || input!.SortOrder < 0)
+                    if (name.Length is < 1 or > 100 || input!.SortOrder < 0 || input.NameEn?.Trim().Length > 100)
                         return ValidationProblem(detail: "نام گروه و ترتیب نمایش معتبر الزامی است.", statusCode: 400);
-                    if (await db.WarehouseUnitGroups.AnyAsync(x => x.Name == name && (!id.HasValue || x.Id != id.Value), cancellationToken))
+                    if (await db.WarehouseUnits.AnyAsync(x => x.IdParent == null && x.NameFa == name && (!id.HasValue || x.Id != id.Value), cancellationToken))
                         return Conflict(new { detail = "گروهی با این نام از قبل ثبت شده است." });
 
-                    WarehouseUnitGroup? entity = id.HasValue
-                        ? await db.WarehouseUnitGroups.SingleOrDefaultAsync(x => x.Id == id, cancellationToken)
-                        : new WarehouseUnitGroup();
+                    WarehouseUnit? entity = id.HasValue
+                        ? await db.WarehouseUnits.SingleOrDefaultAsync(x => x.Id == id && x.IdParent == null, cancellationToken)
+                        : new WarehouseUnit();
                     if (entity is null) return NotFound();
                     if (id.HasValue && entity.IsActive && !input.IsActive &&
-                        await db.WarehouseUnits.AnyAsync(x => x.IdUnitGroup == id.Value && x.IsActive, cancellationToken))
-                        return Conflict(new { detail = "گروه دارای واحد فعال است؛ ابتدا واحدهای آن را جابه‌جا یا غیرفعال کنید." });
+                        await db.WarehouseUnits.AnyAsync(x => x.IdParent == id.Value && x.IsActive, cancellationToken))
+                        return Conflict(new { detail = "گروه دارای عضو فعال است؛ ابتدا اعضای آن را جابه‌جا یا غیرفعال کنید." });
 
-                    entity.Name = name;
+                    entity.NameFa = name;
+                    entity.NameEn = string.IsNullOrWhiteSpace(input.NameEn) ? null : input.NameEn.Trim();
+                    entity.IdParent = null;
                     entity.SortOrder = input.SortOrder;
                     entity.IsActive = input.IsActive;
-                    if (!id.HasValue) db.WarehouseUnitGroups.Add(entity);
+                    if (!id.HasValue) db.WarehouseUnits.Add(entity);
                     await db.SaveChangesAsync(cancellationToken);
                     return Ok(new { entity.Id, message = "گروه واحد ذخیره شد." });
                 }
@@ -540,7 +541,7 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
 
                     WarehouseProduct? product = await db.Products.SingleOrDefaultAsync(x => x.Id == input.ProductId && x.IsWarehouseEnabled, cancellationToken);
                     if (product is null ||
-                        !await db.WarehouseUnits.AnyAsync(x => x.Id == input.UnitId && x.IsActive, cancellationToken))
+                        !await db.WarehouseUnits.AnyAsync(x => x.Id == input.UnitId && x.IdParent != null && x.IsActive, cancellationToken))
                         return ValidationProblem(detail: "کالا یا واحد فعال پیدا نشد.", statusCode: 400);
 
                     long? currentBaseUnitId = await db.WarehouseProductUnits.AsNoTracking()
@@ -852,7 +853,7 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
         var warehouses = await warehouseQuery.ToListAsync(cancellationToken);
         var plans = await db.SalesPlanReferences.AsNoTracking().Where(x => x.IsActive).OrderBy(x => x.DisplayName)
             .Select(x => new { x.Id, x.DisplayName, x.StoreSalesPlanKey }).ToListAsync(cancellationToken);
-        var units = await db.WarehouseUnits.AsNoTracking().Where(x => x.IsActive).OrderBy(x => x.NameFa) .Select(x => new { x.Id, name = x.NameFa, x.NameFa, x.NameEn }).ToListAsync(cancellationToken);
+        var units = await db.WarehouseUnits.AsNoTracking().Where(x => x.IsActive && x.IdParent != null).OrderBy(x => x.NameFa) .Select(x => new { x.Id, name = x.NameFa, x.NameFa, x.NameEn }).ToListAsync(cancellationToken);
         var products = await (from product in db.Products.AsNoTracking()
                               join baseUnit in db.WarehouseProductUnits.AsNoTracking().Where(x => x.IsBaseUnit && x.IsActive)
                                   on product.Id equals baseUnit.IdProduct
@@ -947,9 +948,9 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
         long? WarehouseId,
         bool IsActive);
 
-    private sealed record UnitInput(string NameFa, string? NameEn, long UnitGroupId, bool IsActive);
+    private sealed record UnitInput(string NameFa, string? NameEn, long? ParentId, bool IsActive);
 
-    private sealed record UnitGroupInput(string Name, int SortOrder, bool IsActive);
+    private sealed record UnitGroupInput(string Name, string? NameEn, int SortOrder, bool IsActive);
 
     private sealed record ProductUnitInput(
         long ProductId,

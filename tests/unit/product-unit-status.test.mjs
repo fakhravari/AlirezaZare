@@ -10,14 +10,14 @@ test('unit status is submitted from the definition form', {skip: !existsSync(chr
   const browser = await chromium.launch({headless: true});
   t.after(() => browser.close());
   const page = await browser.newPage();
-  await page.setContent(`<div data-admin-definitions data-api="/api" data-definition-section="units" data-can-create="true" data-can-edit="true" data-can-deactivate="true"><button data-definition-create>افزودن</button><form data-unit-group-form><input name="id"><input name="name"><input name="sortOrder"><button type="submit"></button><button type="button" data-unit-group-cancel></button></form><div data-unit-tree></div><div data-definition-status></div></div><div id="admin-definition-modal"><h2 id="admin-definition-title"></h2><form data-definition-form><input name="id"><div data-definition-fields></div><button type="submit">ذخیره</button></form></div>`);
+  await page.setContent(`<div data-admin-definitions data-api="/api" data-definition-section="units" data-can-create="true" data-can-edit="true" data-can-deactivate="true"><button data-definition-create>افزودن</button><form data-unit-group-form><input name="id"><input name="name"><input name="nameEn"><input name="sortOrder"><button type="submit"></button><button type="button" data-unit-group-cancel></button></form><div data-unit-tree></div><div data-definition-status></div></div><div id="admin-definition-modal"><h2 id="admin-definition-title"></h2><form data-definition-form><input name="id"><div data-definition-fields></div><button type="submit">ذخیره</button></form></div>`);
   await page.evaluate(() => {
     window.saved = [];
     window.bootstrap = {Modal: {getOrCreateInstance: () => ({show() {}}), getInstance: () => ({hide() {}})}};
     window.AdminUI = {initStatusSwitch() {}, destroyDataTable() {}, refreshDataTable() {}, notify() {}, getJson: async (url, options) => {
       if (options.method === 'GET') return url.endsWith('/unit-groups')
-        ? [{id: 1, name: 'جرم', isActive: true, sortOrder: 0}]
-        : url.endsWith('/units') ? [{id: 10, idUnitGroup: 1, unitGroupName: 'جرم', nameFa: 'کیلوگرم', nameEn: 'Kilogram', isActive: true}] : [];
+        ? [{id: 1, name: 'جرم', idParent: null, isActive: true, sortOrder: 0}]
+        : url.endsWith('/units') ? [{id: 10, idParent: 1, parentName: 'جرم', nameFa: 'کیلوگرم', nameEn: 'Kilogram', isActive: true}] : [];
       window.saved.push(JSON.parse(options.body)); return {message: 'ok'};
     }};
   });
@@ -28,9 +28,9 @@ test('unit status is submitted from the definition form', {skip: !existsSync(chr
   assert.match(await page.locator('[data-unit-tree]').textContent(), /Kilogram/);
   await page.locator('[data-unit-tree] summary').click();
   await page.locator('[data-unit-tree] button').getByText('ویرایش', {exact: true}).click();
-  assert.equal(await page.locator('[data-definition-fields] [name=unitGroupId]').inputValue(), '1');
+  assert.equal(await page.locator('[data-definition-fields] [name=parentId]').inputValue(), '1');
   await page.locator('[data-definition-create]').click();
-  await page.locator('[data-definition-form] [name=unitGroupId]').selectOption('1');
+  await page.locator('[data-definition-form] [name=parentId]').selectOption('1');
   assert.equal(await page.locator('[data-definition-form] [name=isActive]').isChecked(), true);
   await page.locator('[data-definition-form] [name=nameFa]').fill('واحد');
   await page.locator('[data-definition-form] [name=nameEn]').fill('Unit');
@@ -44,7 +44,7 @@ test('unit status is submitted from the definition form', {skip: !existsSync(chr
 test('product editor limits base-unit changes to products without warehouse document lines', async () => {
   const api = await read('Admin/Areas/Store/Controllers/Api/StoreCatalogAdminApiController.cs', 'utf8');
   const markup = await read('Admin/Areas/Store/Views/Catalog/Index.cshtml', 'utf8');
-  assert.match(api, /x\.Id == input\.UnitId && x\.IsActive/);
+  assert.match(api, /x\.Id == input\.UnitId && x\.IdParent != null && x\.IsActive/);
   assert.match(api, /from line in db\.WarehouseDocumentLines[\s\S]*join item in db\.InventoryItems[\s\S]*item\.IdProduct == productId/);
   assert.match(api, /if \(await HasWarehouseDocuments\(id, cancellationToken\)\)/);
   assert.match(api, /baseLink\.ConversionFactor = 1m/);
@@ -52,18 +52,23 @@ test('product editor limits base-unit changes to products without warehouse docu
   assert.doesNotMatch(markup, /data-product-badge-create/);
 });
 
-test('warehouse units are grouped by a required database relation and the migration preserves existing units', async () => {
+test('warehouse unit hierarchy uses nullable parent links and keeps groups in Warehouse.Unit', async () => {
   const api = await read('Admin/Areas/Warehouse/Controllers/Api/WarehouseDefinitionsApiController.cs', 'utf8');
   const model = await read('Data/Infrastructure/Persistence/ShopDbContext.cs', 'utf8');
-  const migration = await read('Shop/Features/Store/Database/Migrations/129-warehouse-unit-groups.sql', 'utf8');
+  const entityModel = await read('Data/Domain/Warehouse/Entities/WarehouseDefinitions.cs', 'utf8');
+  const migration = await read('Shop/Features/Store/Database/Migrations/132-warehouse-unit-parent-tree.sql', 'utf8');
   const view = await read('Admin/Areas/Warehouse/Views/Features/Definitions.cshtml', 'utf8');
-  assert.match(api, /"unit-groups" => Ok\(await db\.WarehouseUnitGroups/);
-  assert.match(api, /unit\.IdUnitGroup, UnitGroupName = unitGroup\.Name/);
-  assert.match(api, /input\.UnitGroupId < 1/);
-  assert.match(api, /x\.IdUnitGroup == id && x\.IsActive/);
-  assert.match(model, /HasOne<WarehouseUnitGroup>\(\)\.WithMany\(\)\.HasForeignKey\(x => x\.IdUnitGroup\)\.OnDelete\(DeleteBehavior\.Restrict\)/);
-  assert.match(migration, /N'سایر واحدها'/);
-  assert.match(migration, /ALTER COLUMN \[IdUnitGroup\] BIGINT NOT NULL/);
+  assert.match(api, /"unit-groups" => Ok\(await db\.WarehouseUnits\.AsNoTracking\(\)\.Where\(x => x\.IdParent == null\)/);
+  assert.match(api, /"units" => Ok\(await db\.WarehouseUnits\.AsNoTracking\(\)\.Where\(x => x\.IdParent != null\)/);
+  assert.match(api, /entity\.IdParent = input\.ParentId/);
+  assert.match(entityModel, /public long\? IdParent \{ get; set; \}/);
+  assert.match(model, /HasForeignKey\(x => x\.IdParent\)\.OnDelete\(DeleteBehavior\.Restrict\)/);
+  assert.doesNotMatch(model, /IsGroup|IdUnitGroup|WarehouseUnitGroup/);
+  assert.match(migration, /\[IdParent\] BIGINT NULL/);
+  assert.match(migration, /DROP COLUMN \[IdUnitGroup\]/);
+  assert.match(migration, /DROP TABLE \[Warehouse\]\.\[UnitGroup\]/);
+  assert.doesNotMatch(migration, /IsGroup/);
+  assert.match(migration, /N'شمارشی'/);
   assert.match(view, /data-unit-tree/);
   assert.match(view, /data-unit-group-form/);
 });
@@ -77,7 +82,7 @@ test('warehouse units expose Persian and English names without a code field', as
   const translationMigration = await read('Shop/Features/Store/Database/Migrations/131-warehouse-unit-english-names.sql', 'utf8');
   assert.match(model, /public string NameFa \{ get; set; \}/);
   assert.match(model, /public string\? NameEn \{ get; set; \}/);
-  assert.doesNotMatch(model.slice(model.indexOf('public sealed class WarehouseUnit\n'), model.indexOf('public sealed class WarehouseUnitGroup')), /Code|public string Name \{/);
+  assert.doesNotMatch(model.slice(model.indexOf('public sealed class WarehouseUnit\n'), model.indexOf('public sealed class WarehouseParty')), /Code|public string Name \{|IsGroup|IdUnitGroup/);
   assert.match(config, /entity\.Property\(x => x\.NameFa\)\.HasMaxLength\(100\)\.IsRequired\(\)/);
   assert.match(api, /entity\.NameFa = input\.NameFa\.Trim\(\)/);
   assert.match(script, /\["nameFa", "نام فارسی"/);
@@ -90,9 +95,13 @@ test('warehouse units expose Persian and English names without a code field', as
 
 test('warehouse definition pages rely on the sidebar instead of repeating the local feature links', async () => {
   const view = await read('Admin/Areas/Warehouse/Views/Features/Definitions.cshtml', 'utf8');
+  const sidebar = await read('Admin/Views/Shared/_AdminSidebar.cshtml', 'utf8');
+  const catalog = await read('Admin/Areas/Warehouse/Features/WarehouseAdminFeatureCatalog.cs', 'utf8');
   assert.doesNotMatch(view, /aria-label="تعریف‌های واحد و تنوع"/);
   assert.match(view, /data-unit-tree/);
   assert.match(view, /data-product-unit-tree/);
+  assert.match(sidebar, /<span class="menu-text">واحدها<\/span>/);
+  assert.match(catalog, /\["units"\] = new\("مدیریت انبار", "units", "واحدها"/);
 });
 
 test('editor locks a documented product unit, sends it on save, and unlocks the next product', {skip: !existsSync(chromium.executablePath())}, async t => {

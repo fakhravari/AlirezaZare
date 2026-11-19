@@ -123,7 +123,7 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
         long? baseUnitId = productUnitLinks.Where(x => x.IsActive && x.IsBaseUnit).Select(x => (long?)x.IdUnit).SingleOrDefault();
         if (!baseUnitId.HasValue) return Conflict(new { title = "واحد پایهٔ فعال برای کالا تعریف نشده است." });
         long[] historicalUnitIds = productUnitLinks.Where(x => !x.IsActive).Select(x => x.IdUnit).ToArray();
-        var units = await db.WarehouseUnits.AsNoTracking().Where(x => x.IsActive || x.Id == baseUnitId.Value).OrderBy(x => x.NameFa)
+        var units = await db.WarehouseUnits.AsNoTracking().Where(x => x.IdParent != null && (x.IsActive || x.Id == baseUnitId.Value)).OrderBy(x => x.NameFa)
             .Where(x => x.Id == baseUnitId.Value || !historicalUnitIds.Contains(x.Id))
             .Select(x => new { x.Id, Name = x.IsActive ? x.NameFa : x.NameFa + " (غیرفعال)", x.IsActive }).ToListAsync(cancellationToken);
         var unitConversions = await (from link in db.WarehouseProductUnits.AsNoTracking()
@@ -300,7 +300,7 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
         bool baseUnitChanged = input.UnitId != currentBaseUnitId.Value;
         if (baseUnitChanged)
         {
-            if (!await db.WarehouseUnits.AnyAsync(x => x.Id == input.UnitId && x.IsActive, cancellationToken))
+            if (!await db.WarehouseUnits.AnyAsync(x => x.Id == input.UnitId && x.IdParent != null && x.IsActive, cancellationToken))
                 return BadRequest(new { title = "واحد پایهٔ انتخاب‌شده فعال نیست." });
             if (await HasWarehouseDocuments(id, cancellationToken))
                 return Conflict(new { title = "برای این کالا سند انبار ثبت شده است؛ تغییر واحد پایه مجاز نیست." });
@@ -390,7 +390,7 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
     private async Task<bool> ActiveUnitsExistAsync(IEnumerable<long> unitIds, CancellationToken cancellationToken)
     {
         long[] ids = unitIds.Distinct().ToArray();
-        return ids.Length == 0 || await db.WarehouseUnits.CountAsync(x => ids.Contains(x.Id) && x.IsActive, cancellationToken) == ids.Length;
+        return ids.Length == 0 || await db.WarehouseUnits.CountAsync(x => ids.Contains(x.Id) && x.IdParent != null && x.IsActive, cancellationToken) == ids.Length;
     }
 
     [HttpPost("product-badges")]
@@ -579,7 +579,7 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
         var brands = await db.StoreBrands.AsNoTracking().Where(x => x.IsActive).OrderBy(x => x.NameFa)
             .Select(x => new EditorOption { Id = x.Id, Name = x.NameFa }).ToListAsync(cancellationToken);
         var categories = await GetLeafCategoryOptions(cancellationToken);
-        var units = await db.WarehouseUnits.AsNoTracking().Where(x => x.IsActive).OrderBy(x => x.NameFa)
+        var units = await db.WarehouseUnits.AsNoTracking().Where(x => x.IsActive && x.IdParent != null).OrderBy(x => x.NameFa)
             .Select(x => new EditorOption { Id = x.Id, Name = x.NameFa }).ToListAsync(cancellationToken);
 
         return Ok(new { brands, categories, units });
