@@ -27,7 +27,7 @@ public sealed record StoreInventoryVariantRow(
     long VariantId,
     string Name,
     string? Code,
-    string? AttributesJson,
+    System.Text.Json.JsonElement? Attributes,
     bool IsDefault,
     IReadOnlyDictionary<string, decimal> StockBySalesPlan,
     IReadOnlyDictionary<string, decimal> PriceBySalesPlan,

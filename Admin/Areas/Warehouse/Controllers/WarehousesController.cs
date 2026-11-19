@@ -11,6 +11,7 @@ public sealed class WarehousesController : Controller
         if (!WarehouseAdminFeatureCatalog.TryGet("warehouses", out var page)) return NotFound();
 
         ViewData["Title"] = page.Title;
+        page = page with { AreaTitle = "مدیریت سامانه" };
         ViewData["AreaTitle"] = page.AreaTitle;
         ViewData["FeatureId"] = page.FeatureId;
         ViewData["ApiUrl"] = "/api/admin/warehouse/definitions";

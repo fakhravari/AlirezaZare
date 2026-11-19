@@ -28,6 +28,7 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
         "product-units" => Ok(await (from link in db.WarehouseProductUnits.AsNoTracking()
                                      join product in db.Products.AsNoTracking() on link.IdProduct equals product.Id
                                      join unit in db.WarehouseUnits.AsNoTracking() on link.IdUnit equals unit.Id
+                                     where !link.IsActive
                                      orderby product.Name, link.IsBaseUnit descending, unit.Name
                                      select new
                                      {
@@ -40,20 +41,7 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                                          link.IsBaseUnit,
                                          link.IsActive
                                      }).ToListAsync(cancellationToken)),
-        "variants" => Ok(await (from variant in db.ProductVariants.AsNoTracking()
-                                join product in db.Products.AsNoTracking() on variant.IdProduct equals product.Id
-                                orderby product.Name, variant.Name
-                                select new
-                                {
-                                    variant.Id,
-                                    variant.IdProduct,
-                                    ProductName = product.Name,
-                                    variant.Code,
-                                    variant.Name,
-                                    variant.AttributesJson,
-                                    variant.IsDefault,
-                                    variant.IsActive
-                                }).ToListAsync(cancellationToken)),
+        "variants" => await GetVariantsAsync(cancellationToken),
         "lookups" => await GetLookupsAsync(cancellationToken),
         "stock-owners" => Ok(await db.SalesPlanReferences.AsNoTracking().OrderBy(x => x.DisplayName)
             .Select(x => new { x.Id, x.StoreSalesPlanKey, x.DisplayName, x.IdStockOwnerType, x.Code, x.PlanType, x.IsActive }).ToListAsync(cancellationToken)),
@@ -61,17 +49,42 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
         _ => NotFound()
     };
 
+    private async Task<IActionResult> GetVariantsAsync(CancellationToken cancellationToken)
+    {
+        if (!CanAccessVariants("variants")) return Forbid();
+        var variants = await (from variant in db.ProductVariants.AsNoTracking()
+                              join product in db.Products.AsNoTracking() on variant.IdProduct equals product.Id
+                              orderby product.Name, variant.Name
+                              select new { variant.Id, variant.IdProduct, ProductName = product.Name, variant.Code, variant.Name, variant.IsDefault, variant.IsActive })
+            .ToListAsync(cancellationToken);
+        long[] ids = variants.Select(x => x.Id).ToArray();
+        var attributes = await (from link in db.ProductVariantAttributeValues.AsNoTracking()
+                                join value in db.ProductAttributeValues.AsNoTracking() on link.IdProductAttributeValue equals value.Id
+                                join attribute in db.ProductAttributes.AsNoTracking() on value.IdProductAttribute equals attribute.Id
+                                where ids.Contains(link.IdProductVariant)
+                                orderby attribute.SortOrder, attribute.Id
+                                select new { link.IdProductVariant, attribute.Key, attribute.Label, value.ValueKey, value.DisplayValue, value.Swatch })
+            .ToListAsync(cancellationToken);
+        var byVariant = attributes.GroupBy(x => x.IdProductVariant).ToDictionary(x => x.Key,
+            x => x.Select(a => new { key = a.Key, label = a.Label, value = a.ValueKey, display = a.DisplayValue, swatch = a.Swatch }).ToArray());
+        return Ok(variants.Select(x => new
+        {
+            x.Id, x.IdProduct, x.ProductName, x.Code, x.Name, x.IsDefault, x.IsActive,
+            Attributes = byVariant.GetValueOrDefault(x.Id) ?? []
+        }));
+    }
+
     [HttpPost("{section}")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(string section, [FromBody] JsonElement payload,
         CancellationToken cancellationToken) =>
-        await SaveCoreAsync(section, null, payload, cancellationToken);
+        !CanAccessVariants(section) ? Forbid() : await SaveCoreAsync(section, null, payload, cancellationToken);
 
     [HttpPut("{section}/{id:long}")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Save(string section, long id, [FromBody] JsonElement payload,
         CancellationToken cancellationToken) =>
-        await SaveCoreAsync(section, id, payload, cancellationToken);
+        !CanAccessVariants(section) ? Forbid() : await SaveCoreAsync(section, id, payload, cancellationToken);
 
     [HttpPut("sales-plan-mapping")]
     [ValidateAntiForgeryToken]
@@ -129,6 +142,7 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Deactivate(string section, long id, CancellationToken cancellationToken)
     {
+        if (!CanAccessVariants(section)) return Forbid();
         switch (section)
         {
             case "companies":
@@ -167,7 +181,7 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
             case "units":
                 WarehouseUnit? unit = await db.WarehouseUnits.SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
                 if (unit is null) return NotFound();
-                if (await db.Products.AnyAsync(x => x.IdBaseUnit == id, cancellationToken) || await db.WarehouseProductUnits.AnyAsync(x => x.IdUnit == id && x.IsActive, cancellationToken))
+                if (await db.WarehouseProductUnits.AnyAsync(x => x.IdUnit == id && x.IsActive, cancellationToken))
                     return Conflict(new { detail = "این واحد هنوز در تعریف واحدهای کالا استفاده می‌شود؛ ابتدا آن اتصال‌ها را غیرفعال کنید." });
                 unit.IsActive = false;
                 break;
@@ -465,8 +479,7 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                     if (id.HasValue && entity.IsActive && !input.IsActive && !User.IsInRole("system.full-access") &&
                         !User.HasClaim("admin_permission", "Warehouse:DefinitionsApi:Deactivate")) return Forbid();
 
-                    if (id.HasValue && !input.IsActive && (await db.Products.AnyAsync(x => x.IdBaseUnit == id.Value, cancellationToken) ||
-                        await db.WarehouseProductUnits.AnyAsync(x => x.IdUnit == id.Value && x.IsActive, cancellationToken)))
+                    if (id.HasValue && !input.IsActive && await db.WarehouseProductUnits.AnyAsync(x => x.IdUnit == id.Value && x.IsActive, cancellationToken))
                         return Conflict(new { detail = "این واحد برای کالا استفاده می‌شود؛ ابتدا واحدهای وابسته را تغییر دهید یا غیرفعال کنید." });
 
                     entity.Code = input.Code.Trim();
@@ -490,7 +503,12 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                         !await db.WarehouseUnits.AnyAsync(x => x.Id == input.UnitId && x.IsActive, cancellationToken))
                         return ValidationProblem(detail: "کالا یا واحد فعال پیدا نشد.", statusCode: 400);
 
-                    if (input.IsBaseUnit && product.IdBaseUnit != input.UnitId)
+                    long? currentBaseUnitId = await db.WarehouseProductUnits.AsNoTracking()
+                        .Where(x => x.IdProduct == input.ProductId && x.IsBaseUnit && x.IsActive)
+                        .Select(x => (long?)x.IdUnit).SingleOrDefaultAsync(cancellationToken);
+                    if (!currentBaseUnitId.HasValue)
+                        return Conflict(new { detail = "برای کالا واحد پایهٔ فعال تعریف نشده است." });
+                    if (input.IsBaseUnit && currentBaseUnitId.Value != input.UnitId)
                         return Conflict(new { detail = "تغییر واحد اصلی کالا بدون تبدیل مانده‌ها و سوابق مجاز نیست." });
 
                     WarehouseProductUnit? entity = id.HasValue
@@ -498,6 +516,8 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                         : await db.WarehouseProductUnits.SingleOrDefaultAsync(
                             x => x.IdProduct == input.ProductId && x.IdUnit == input.UnitId, cancellationToken);
                     if (id.HasValue && entity is null) return NotFound();
+                    if (entity is { IsActive: false })
+                        return Conflict(new { detail = "واحد غیرفعال‌شده فقط در تاریخچه قابل مشاهده است و دوباره فعال نمی‌شود." });
 
                     if (entity is not null && entity.IdProduct != input.ProductId && entity.IsBaseUnit)
                         return Conflict(new { detail = "واحد اصلی کالا را نمی‌توان به کالای دیگری منتقل کرد." });
@@ -516,7 +536,6 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                         await db.WarehouseProductUnits.Where(x =>
                                 x.IdProduct == input.ProductId && x.IsBaseUnit && (!id.HasValue || x.Id != id))
                             .ExecuteUpdateAsync(update => update.SetProperty(x => x.IsBaseUnit, false), cancellationToken);
-                        product.IdBaseUnit = input.UnitId;
                         entity.ConversionFactor = 1m;
                     }
                     else
@@ -548,11 +567,8 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                     if (!string.IsNullOrWhiteSpace(input.Code) && input.Code.Length > 100)
                         return ValidationProblem(detail: "کد تنوع حداکثر ۱۰۰ نویسه است.", statusCode: 400);
 
-                    if (!string.IsNullOrWhiteSpace(input.AttributesJson))
-                    {
-                        if (!TryReadInventoryAttributeKeys(input.AttributesJson, out HashSet<string> attributeKeys))
-                            return ValidationProblem(detail: "ویژگی‌های موجودی باید آرایه‌ای از key، label، value و display معتبر باشند.", statusCode: 400);
-                    }
+                    if (!ValidVariantAttributes(input.Attributes))
+                        return ValidationProblem(detail: "حداکثر ۱۲ ویژگی با کلید یکتا و مقدار معتبر وارد کنید.", statusCode: 400);
 
                     WarehouseProduct? product = await db.Products.SingleOrDefaultAsync(x => x.Id == input.ProductId && x.IsWarehouseEnabled, cancellationToken);
                     if (product is null) return ValidationProblem(detail: "محصول فعال پیدا نشد.", statusCode: 400);
@@ -583,13 +599,15 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                     entity.IdProduct = product.Id;
                     entity.Code = string.IsNullOrWhiteSpace(input.Code) ? null : input.Code.Trim();
                     entity.Name = input.Name.Trim();
-                    entity.AttributesJson = string.IsNullOrWhiteSpace(input.AttributesJson) ? null : input.AttributesJson;
                     entity.IsDefault = makeDefault;
                     entity.IsActive = input.IsActive;
                     entity.UpdatedAtUtc = DateTime.UtcNow;
 
                     if (!id.HasValue) db.ProductVariants.Add(entity);
                     await db.SaveChangesAsync(cancellationToken);
+
+                    if (input.Attributes is not null)
+                        await SaveVariantAttributesAsync(entity, input.Attributes, cancellationToken);
 
                     if (!id.HasValue &&
                         !await db.InventoryItems.AnyAsync(x => x.IdProduct == product.Id && x.IdProductVariant == entity.Id,
@@ -607,6 +625,77 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                 return NotFound();
         }
     }
+
+    private static bool ValidVariantAttributes(IReadOnlyCollection<VariantAttributeInput>? attributes)
+    {
+        if (attributes is null) return true;
+        if (attributes.Count > 12) return false;
+        var keys = new HashSet<string>(StringComparer.Ordinal);
+        foreach (VariantAttributeInput? attribute in attributes)
+        {
+            if (attribute is null) return false;
+            string key = attribute.Key?.Trim() ?? "";
+            string label = attribute.Label?.Trim() ?? "";
+            string value = attribute.Value?.Trim() ?? "";
+            string display = attribute.Display?.Trim() ?? "";
+            string? swatch = string.IsNullOrWhiteSpace(attribute.Swatch) ? null : attribute.Swatch.Trim();
+            if (!System.Text.RegularExpressions.Regex.IsMatch(key, "^[A-Za-z][A-Za-z0-9-]{0,63}$") || !keys.Add(key) ||
+                label.Length is < 1 or > 80 || value.Length is < 1 or > 100 || display.Length is < 1 or > 100 ||
+                swatch is not null && !System.Text.RegularExpressions.Regex.IsMatch(swatch, "^#[0-9a-fA-F]{6}$")) return false;
+        }
+        return true;
+    }
+
+    private bool CanAccessVariants(string section) => !string.Equals(section, "variants", StringComparison.OrdinalIgnoreCase) ||
+        User.IsInRole("system.full-access") || User.HasClaim("admin_permission", "Warehouse:Features:Index:variants");
+
+    private async Task SaveVariantAttributesAsync(ProductVariant variant, IReadOnlyCollection<VariantAttributeInput> input,
+        CancellationToken cancellationToken)
+    {
+        var currentLinks = await db.ProductVariantAttributeValues.Where(x => x.IdProductVariant == variant.Id).ToListAsync(cancellationToken);
+        db.ProductVariantAttributeValues.RemoveRange(currentLinks);
+        if (currentLinks.Count != 0) await db.SaveChangesAsync(cancellationToken);
+        if (input.Count == 0) return;
+
+        string[] keys = input.Select(x => x.Key.Trim()).ToArray();
+        var definitions = await db.ProductAttributes.Where(x => x.IdProduct == variant.IdProduct && keys.Contains(x.Key))
+            .ToDictionaryAsync(x => x.Key, StringComparer.Ordinal, cancellationToken);
+        int sortOrder = 0;
+        foreach (VariantAttributeInput item in input)
+        {
+            string key = item.Key.Trim();
+            if (!definitions.TryGetValue(key, out ProductAttribute? definition))
+            {
+                definition = new ProductAttribute { IdProduct = variant.IdProduct, Key = key, Label = item.Label.Trim(), SortOrder = sortOrder, IsActive = true };
+                db.ProductAttributes.Add(definition);
+                definitions.Add(key, definition);
+            }
+            else
+            {
+                definition.Label = item.Label.Trim();
+                definition.IsActive = true;
+            }
+            definition.SortOrder = sortOrder++;
+
+            ProductAttributeValue? value = await db.ProductAttributeValues.SingleOrDefaultAsync(x =>
+                x.IdProductAttribute == definition.Id && x.ValueKey == item.Value.Trim(), cancellationToken);
+            if (value is null)
+            {
+                value = new ProductAttributeValue { IdProduct = variant.IdProduct, Attribute = definition, ValueKey = item.Value.Trim(), Label = item.Display.Trim(), DisplayValue = item.Display.Trim(), Swatch = NormalizeSwatch(item.Swatch), IsActive = true };
+                db.ProductAttributeValues.Add(value);
+            }
+            else
+            {
+                value.Label = item.Display.Trim();
+                value.DisplayValue = item.Display.Trim();
+                value.Swatch = NormalizeSwatch(item.Swatch);
+                value.IsActive = true;
+            }
+            db.ProductVariantAttributeValues.Add(new ProductVariantAttributeValue { IdProduct = variant.IdProduct, ProductVariant = variant, AttributeValue = value });
+        }
+    }
+
+    private static string? NormalizeSwatch(string? swatch) => string.IsNullOrWhiteSpace(swatch) ? null : swatch.Trim().ToUpperInvariant();
 
     private async Task<IActionResult> GetWarehousesAsync(CancellationToken cancellationToken)
     {
@@ -724,8 +813,13 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
         var plans = await db.SalesPlanReferences.AsNoTracking().Where(x => x.IsActive).OrderBy(x => x.DisplayName)
             .Select(x => new { x.Id, x.DisplayName, x.StoreSalesPlanKey }).ToListAsync(cancellationToken);
         var units = await db.WarehouseUnits.AsNoTracking().Where(x => x.IsActive).OrderBy(x => x.Name) .Select(x => new { x.Id, x.Code, x.Name }).ToListAsync(cancellationToken);
-        var products = await db.Products.AsNoTracking().Where(x => x.IsWarehouseEnabled).OrderBy(x => x.Name)
-            .Select(x => new { x.Id, x.Name, StoreProductKey = x.ProductKey, x.IdBaseUnit }).ToListAsync(cancellationToken);
+        var products = await (from product in db.Products.AsNoTracking()
+                              join baseUnit in db.WarehouseProductUnits.AsNoTracking().Where(x => x.IsBaseUnit && x.IsActive)
+                                  on product.Id equals baseUnit.IdProduct
+                              where product.IsWarehouseEnabled
+                              orderby product.Name
+                              select new { product.Id, product.Name, StoreProductKey = product.ProductKey, IdBaseUnit = baseUnit.IdUnit })
+            .ToListAsync(cancellationToken);
 
         return Ok(new { companies, warehouses, plans, units, products });
     }
@@ -784,49 +878,6 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
 
     private static string? NormalizeOptional(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
 
-    private static bool TryReadInventoryAttributeKeys(string json, out HashSet<string> keys)
-    {
-        keys = new(StringComparer.Ordinal);
-        try
-        {
-            using JsonDocument document = JsonDocument.Parse(json);
-            if (document.RootElement.ValueKind != JsonValueKind.Array ||
-                document.RootElement.GetArrayLength() is < 1 or > 12) return false;
-
-            foreach (JsonElement attribute in document.RootElement.EnumerateArray())
-            {
-                if (attribute.ValueKind != JsonValueKind.Object ||
-                    !attribute.TryGetProperty("key", out JsonElement keyElement) ||
-                    keyElement.ValueKind != JsonValueKind.String ||
-                    !attribute.TryGetProperty("label", out JsonElement labelElement) ||
-                    labelElement.ValueKind != JsonValueKind.String ||
-                    !attribute.TryGetProperty("value", out JsonElement valueElement) ||
-                    valueElement.ValueKind != JsonValueKind.String ||
-                    !attribute.TryGetProperty("display", out JsonElement displayElement) ||
-                    displayElement.ValueKind != JsonValueKind.String) return false;
-
-                string key = keyElement.GetString()!.Trim();
-                if (!System.Text.RegularExpressions.Regex.IsMatch(key, "^[a-z][a-z0-9-]{0,63}$") || !keys.Add(key) ||
-                    string.IsNullOrWhiteSpace(labelElement.GetString()) || labelElement.GetString()!.Length > 80 ||
-                    string.IsNullOrWhiteSpace(valueElement.GetString()) || valueElement.GetString()!.Length > 100 ||
-                    string.IsNullOrWhiteSpace(displayElement.GetString()) ||
-                    displayElement.GetString()!.Length > 100) return false;
-
-                if (attribute.TryGetProperty("swatch", out JsonElement swatch) &&
-                    swatch.ValueKind != JsonValueKind.Null &&
-                    (swatch.ValueKind != JsonValueKind.String ||
-                     !System.Text.RegularExpressions.Regex.IsMatch(swatch.GetString() ?? "", "^#[0-9a-fA-F]{6}$")))
-                    return false;
-            }
-
-            return true;
-        }
-        catch (JsonException)
-        {
-            return false;
-        }
-    }
-
     private sealed record StockOwnerInput(string Code, string DisplayName, byte IdStockOwnerType, bool IsActive);
 
     private sealed record CompanyInput(string Code, string Name, string? Phone, string? Address, string? Description, bool IsActive);
@@ -869,9 +920,11 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
         long ProductId,
         string Name,
         string? Code,
-        string? AttributesJson,
+        VariantAttributeInput[]? Attributes,
         bool IsDefault,
         bool IsActive);
+
+    private sealed record VariantAttributeInput(string Key, string Label, string Value, string Display, string? Swatch);
 
     public sealed record SalesPlanMappingInput(long CompanyId, long WarehouseId, long SalesPlanId);
 }

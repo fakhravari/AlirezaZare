@@ -115,11 +115,14 @@ public sealed class StorePaidOrdersDispatchApiController(ShopDbContext db, IWare
 
             long[] productIds = orderItems.Select(x => x.IdProduct).Distinct().ToArray();
             long[] variantIds = orderItems.Where(x => x.IdProductVariant.HasValue).Select(x => x.IdProductVariant!.Value).Distinct().ToArray();
-            var products = await db.Products.AsNoTracking().Where(x => productIds.Contains(x.Id))
-                .Select(x => new { x.Id, x.IdBaseUnit }).ToDictionaryAsync(x => x.Id, cancellationToken);
+            var baseUnits = await db.WarehouseProductUnits.AsNoTracking()
+                .Where(x => productIds.Contains(x.IdProduct) && x.IsBaseUnit && x.IsActive)
+                .Select(x => new { x.IdProduct, x.IdUnit }).ToListAsync(cancellationToken);
+            var baseUnitByProduct = baseUnits.GroupBy(x => x.IdProduct).Where(group => group.Count() == 1)
+                .ToDictionary(group => group.Key, group => group.Single().IdUnit);
             var inventoryItems = await db.InventoryItems.AsNoTracking().Where(x => productIds.Contains(x.IdProduct))
                 .Select(x => new { x.Id, x.IdProduct, x.IdProductVariant }).ToListAsync(cancellationToken);
-            long[] unitIds = products.Values.Select(product => product.IdBaseUnit).Distinct().ToArray();
+            long[] unitIds = baseUnitByProduct.Values.Distinct().ToArray();
             var unitNames = await db.WarehouseUnits.AsNoTracking().Where(x => unitIds.Contains(x.Id)).Select(x => new { x.Id, x.Name }).ToDictionaryAsync(x => x.Id, x => x.Name, cancellationToken);
             var variantNames = await db.ProductVariants.AsNoTracking().Where(x => variantIds.Contains(x.Id))
                 .Select(x => new { x.Id, x.Name }).ToDictionaryAsync(x => x.Id, x => x.Name, cancellationToken);
@@ -128,8 +131,8 @@ public sealed class StorePaidOrdersDispatchApiController(ShopDbContext db, IWare
             foreach (var line in orderItems)
             {
                 var key = (line.IdProduct, line.IdProductVariant);
-                if (!products.TryGetValue(line.IdProduct, out var product) ||
-                    !unitNames.TryGetValue(product.IdBaseUnit, out string? unitName) ||
+                if (!baseUnitByProduct.TryGetValue(line.IdProduct, out long baseUnitId) ||
+                    !unitNames.TryGetValue(baseUnitId, out string? unitName) ||
                     !inventoryByProductVariant.TryGetValue(key, out var matches) || matches.Length != 1)
                     return Conflict(new { detail = "برای یکی از اقلام سفارش، کالا یا واحد انبار متناظر یکتا پیدا نشد." });
 
@@ -137,7 +140,7 @@ public sealed class StorePaidOrdersDispatchApiController(ShopDbContext db, IWare
                 {
                     IdCustomerOrder = line.IdCustomerOrder,
                     IdInventoryItem = matches[0].Id,
-                    IdUnit = product.IdBaseUnit,
+                    IdUnit = baseUnitId,
                     IdSalesPlanReference = line.IdSalesPlan,
                     Quantity = line.Quantity,
                     ConversionFactor = 1,

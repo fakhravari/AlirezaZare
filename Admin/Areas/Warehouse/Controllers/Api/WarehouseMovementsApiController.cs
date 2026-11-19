@@ -125,7 +125,9 @@ public sealed class WarehouseMovementsApiController(ShopDbContext db) : Controll
                     join document in db.WarehouseDocuments.AsNoTracking() on movement.IdDocument equals document.Id
                     join warehouse in db.Warehouses.AsNoTracking() on movement.IdWarehouse equals warehouse.Id
                     join item in db.InventoryItems.AsNoTracking() on movement.IdInventoryItem equals item.Id
-                    join unit in db.WarehouseUnits.AsNoTracking() on item.Product.IdBaseUnit equals unit.Id
+                    join baseUnit in db.WarehouseProductUnits.AsNoTracking().Where(x => x.IsActive && x.IsBaseUnit)
+                        on item.IdProduct equals baseUnit.IdProduct
+                    join unit in db.WarehouseUnits.AsNoTracking() on baseUnit.IdUnit equals unit.Id
                     join plan in db.SalesPlanReferences.AsNoTracking() on movement.IdSalesPlanReference equals plan.Id
                     select new { movement, document, warehouse, item, unit, plan };
         if (!User.IsInRole("system.full-access"))

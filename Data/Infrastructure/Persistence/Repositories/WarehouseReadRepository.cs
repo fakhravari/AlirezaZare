@@ -45,7 +45,9 @@ public sealed class WarehouseReadRepository(ShopDbContext dbContext) : IWarehous
         var query = from warehouse in dbContext.Warehouses.AsNoTracking()
                     from inventoryItem in dbContext.InventoryItems.AsNoTracking()
                     from plan in dbContext.SalesPlanReferences.AsNoTracking()
-                    join unit in dbContext.WarehouseUnits.AsNoTracking() on inventoryItem.Product.IdBaseUnit equals unit.Id
+                    join baseUnit in dbContext.WarehouseProductUnits.AsNoTracking().Where(x => x.IsActive && x.IsBaseUnit)
+                        on inventoryItem.IdProduct equals baseUnit.IdProduct
+                    join unit in dbContext.WarehouseUnits.AsNoTracking() on baseUnit.IdUnit equals unit.Id
                     join balance in dbContext.StockBalances.AsNoTracking()
                         on new
                         {

@@ -4,9 +4,9 @@ import {readFile} from 'node:fs/promises';
 
 test('warehouse stock belongs to reports and retains independent permission and active state', async () => {
   const sidebar = await readFile('Admin/Views/Shared/_AdminSidebar.cshtml', 'utf8');
-  const structure = sidebar.slice(sidebar.indexOf('<div id="warehouse-structure"'), sidebar.indexOf('<div class="menu-item has-sub @(reportsOpen'));
+  const structure = sidebar.slice(sidebar.indexOf('<div id="system-definitions"'), sidebar.indexOf('<div class="menu-item has-sub @(reportsOpen'));
   const reports = sidebar.slice(sidebar.indexOf('<div id="warehouse-reports"'), sidebar.indexOf('<div class="menu-item has-sub @(operationsOpen'));
-  assert.match(sidebar, /menu-text">تعریف شرکت و انبار</);
+  assert.match(sidebar, /menu-text">تعاریف و دسترسی</);
   assert.doesNotMatch(structure, /asp-controller="Stock"/);
   assert.match(reports, /Can\("Warehouse:Stock:Index"\)[\s\S]*asp-controller="Stock"/);
   assert.match(sidebar, /bool canWarehouseReports = Can\("Warehouse:Features:Index:movements"\) \|\| Can\("Warehouse:Stock:Index"\)/);

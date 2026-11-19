@@ -87,16 +87,20 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db, IWarehouse
                            }).ToListAsync(cancellationToken);
         var unitGroups = units.GroupBy(x => x.IdProduct).ToDictionary(group => group.Key,
             group => group.Select(x => new { x.Id, x.Name, x.ConversionFactor, x.IsBaseUnit }).ToArray());
-        var items = await db.InventoryItems.AsNoTracking().Where(x => x.IsActive && x.Product.IsWarehouseEnabled
-                && (x.ProductVariant == null || x.ProductVariant.IsActive)).OrderBy(x => x.Product.Name).ThenBy(x => x.ProductVariant!.Name).Select(x => new
-            {
-                x.Id,
-                x.IdProduct,
-                x.IdProductVariant,
-                ProductName = x.Product.Name,
-                VariantName = x.ProductVariant == null ? null : x.ProductVariant.Name,
-                x.Product.IdBaseUnit
-            }).ToListAsync(cancellationToken);
+        var items = await (from x in db.InventoryItems.AsNoTracking()
+                           join baseUnit in db.WarehouseProductUnits.AsNoTracking().Where(link => link.IsActive && link.IsBaseUnit)
+                               on x.IdProduct equals baseUnit.IdProduct
+                           where x.IsActive && x.Product.IsWarehouseEnabled
+                               && (x.ProductVariant == null || x.ProductVariant.IsActive)
+                           select new
+                           {
+                               x.Id,
+                               x.IdProduct,
+                               x.IdProductVariant,
+                               ProductName = x.Product.Name,
+                               VariantName = x.ProductVariant == null ? null : x.ProductVariant.Name,
+                               IdBaseUnit = baseUnit.IdUnit
+                           }).OrderBy(x => x.ProductName).ThenBy(x => x.VariantName).ToListAsync(cancellationToken);
         var inventoryItems = items.Select(item => new
         {
             item.Id,

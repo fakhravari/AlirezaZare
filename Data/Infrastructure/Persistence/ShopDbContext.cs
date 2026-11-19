@@ -30,6 +30,9 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
     public DbSet<StockBalance> StockBalances => Set<StockBalance>();
     public DbSet<InventoryItem> InventoryItems => Set<InventoryItem>();
     public DbSet<ProductVariant> ProductVariants => Set<ProductVariant>();
+    public DbSet<ProductAttribute> ProductAttributes => Set<ProductAttribute>();
+    public DbSet<ProductAttributeValue> ProductAttributeValues => Set<ProductAttributeValue>();
+    public DbSet<ProductVariantAttributeValue> ProductVariantAttributeValues => Set<ProductVariantAttributeValue>();
     public DbSet<WarehouseProduct> Products => Set<WarehouseProduct>();
     public DbSet<StoreSlider> StoreSliders => Set<StoreSlider>();
     public DbSet<StoreSiteIdentity> StoreSiteIdentities => Set<StoreSiteIdentity>();
@@ -489,12 +492,43 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.HasAlternateKey(x => new { x.IdProduct, x.Id });
             entity.Property(x => x.Code).HasMaxLength(100);
             entity.Property(x => x.Name).HasMaxLength(300).IsRequired();
-            entity.Property(x => x.AttributesJson).HasColumnType("nvarchar(max)");
             entity.Property(x => x.IsDefault).HasDefaultValue(false).IsRequired();
             entity.HasIndex(x => x.IdProduct).IsUnique().HasFilter("[IsDefault] = 1");
             entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
             entity.Property(x => x.UpdatedAtUtc).HasPrecision(3);
             entity.HasOne(x => x.Product).WithMany().HasForeignKey(x => x.IdProduct);
+        });
+        modelBuilder.Entity<ProductAttribute>(entity =>
+        {
+            entity.ToTable("ProductAttribute", "Warehouse");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.Key).HasMaxLength(64).IsUnicode(false).IsRequired();
+            entity.Property(x => x.Label).HasMaxLength(80).IsRequired();
+            entity.Property(x => x.IsActive).HasDefaultValue(true).IsRequired();
+            entity.HasIndex(x => new { x.IdProduct, x.Key }).IsUnique();
+            entity.HasAlternateKey(x => new { x.Id, x.IdProduct });
+            entity.HasOne(x => x.Product).WithMany().HasForeignKey(x => x.IdProduct).OnDelete(DeleteBehavior.Cascade);
+        });
+        modelBuilder.Entity<ProductAttributeValue>(entity =>
+        {
+            entity.ToTable("ProductAttributeValue", "Warehouse");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.ValueKey).HasMaxLength(100).IsRequired();
+            entity.Property(x => x.Label).HasMaxLength(100).IsRequired();
+            entity.Property(x => x.DisplayValue).HasMaxLength(100).IsRequired();
+            entity.Property(x => x.Swatch).HasMaxLength(7).IsUnicode(false);
+            entity.Property(x => x.IsActive).HasDefaultValue(true).IsRequired();
+            entity.HasIndex(x => new { x.IdProductAttribute, x.ValueKey }).IsUnique();
+            entity.HasAlternateKey(x => new { x.Id, x.IdProduct, x.IdProductAttribute });
+            entity.HasOne(x => x.Attribute).WithMany(x => x.Values).HasForeignKey(x => new { x.IdProductAttribute, x.IdProduct }).HasPrincipalKey(x => new { x.Id, x.IdProduct }).OnDelete(DeleteBehavior.Cascade);
+        });
+        modelBuilder.Entity<ProductVariantAttributeValue>(entity =>
+        {
+            entity.ToTable("ProductVariantAttributeValue", "Warehouse");
+            entity.HasKey(x => new { x.IdProductVariant, x.IdProductAttribute });
+            entity.HasOne(x => x.ProductVariant).WithMany(x => x.AttributeValues).HasForeignKey(x => new { x.IdProductVariant, x.IdProduct }).HasPrincipalKey(x => new { x.Id, x.IdProduct }).OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(x => x.AttributeValue).WithMany(x => x.Variants).HasForeignKey(x => new { x.IdProductAttributeValue, x.IdProduct, x.IdProductAttribute }).HasPrincipalKey(x => new { x.Id, x.IdProduct, x.IdProductAttribute }).OnDelete(DeleteBehavior.Restrict);
+            entity.HasIndex(x => x.IdProductAttributeValue);
         });
         modelBuilder.Entity<StoreSiteIdentity>(entity =>
         {

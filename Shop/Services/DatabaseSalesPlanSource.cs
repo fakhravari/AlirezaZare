@@ -30,7 +30,7 @@ public sealed class DatabaseSalesPlanSource(IStoreSalesPlanRepository repository
         {
             InventoryVariants = snapshot.InventoryVariants.Select(variant => new ProductInventoryVariant(
                 variant.ProductId, variant.VariantId, variant.Name, variant.Code,
-                ParseAttributes(variant.AttributesJson), variant.IsDefault, variant.StockBySalesPlan,
+                variant.Attributes, variant.IsDefault, variant.StockBySalesPlan,
                 variant.PriceBySalesPlan, variant.DiscountBySalesPlan)
             { PriceVersionIdsBySalesPlan = variant.PriceVersionIdsBySalesPlan }).ToArray(),
             PriceOptions = snapshot.PriceOptions.GroupBy(option => option.ProductId).ToDictionary(
@@ -40,15 +40,6 @@ public sealed class DatabaseSalesPlanSource(IStoreSalesPlanRepository repository
                         value.Key, value.Label, value.PriceDelta)
                     { Id = value.Id, PriceVersionId = value.PriceVersionId, PriceBySalesPlan = value.PriceBySalesPlan, PriceVersionIdsBySalesPlan = value.PriceVersionIdsBySalesPlan }).ToArray())).ToArray())
         };
-    }
-
-    private static System.Text.Json.JsonElement? ParseAttributes(string? json)
-    {
-        if (string.IsNullOrWhiteSpace(json)) return null;
-
-        using var document = System.Text.Json.JsonDocument.Parse(json);
-
-        return document.RootElement.Clone();
     }
 
     public async Task<ProductPurchaseConfiguration?> ReadAsync(int productId, string salesPlanId,

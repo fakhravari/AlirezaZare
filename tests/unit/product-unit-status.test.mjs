@@ -55,16 +55,22 @@ test('editor locks a documented product unit, sends it on save, and unlocks the 
     window.AdminUI = {setPriceValue: (input, value) => { input.value = value; }, priceValue: input => Number(input.value), notify() {}, getJson: async (url, options) => {
       if (options) { window.saved = JSON.parse(options.body); return {message: 'ok'}; }
       const id = Number(url.split('/').at(-1));
-      return {product: {id, code: 'p', name: 'Product', englishName: 'Product', idBrand: 1, idCategory: 2, idBaseUnit: 3, priceAmount: 100, discountPercent: 0, maxPurchaseQuantity: 5}, brands: [{id: 1, name: 'Brand'}], categories: [{id: 2, name: 'Category'}], units: [{id: 3, name: 'Unit'}], hasWarehouseDocuments: id === 1};
+      return {product: {id, code: 'p', name: 'Product', englishName: 'Product', idBrand: 1, idCategory: 2, idBaseUnit: 3, priceAmount: 100, discountPercent: 0, maxPurchaseQuantity: 5}, brands: [{id: 1, name: 'Brand'}], categories: [{id: 2, name: 'Category'}], units: [{id: 3, name: 'Unit'}, {id: 4, name: 'Pack'}, {id: 5, name: 'Carton'}], unitConversions: [{idUnit: 4, unitName: 'Pack', conversionFactor: 12}], unavailableUnitIds: [], hasWarehouseDocuments: id === 1};
     }};
   });
   await page.addScriptTag({path: 'Admin/wwwroot/js/admin-data.js'});
   await page.locator('[data-product-edit="0"]').click();
   await page.waitForFunction(() => document.querySelector('[name=unitId]').disabled);
   assert.match(await page.locator('[data-product-unit-help]').textContent(), /سند انبار/);
+  await page.locator('[data-add-unit-conversion="edit"]').click();
+  const conversionRows = page.locator('[data-unit-conversion-row]');
+  await conversionRows.nth(1).locator('[data-unit-conversion-choice]').selectOption('5');
+  await conversionRows.nth(1).locator('[name="conversionFactor"]').fill('24');
   await page.locator('[data-product-editor]').evaluate(form => form.requestSubmit());
   await page.waitForFunction(() => !!window.saved);
-  assert.equal((await page.evaluate(() => window.saved)).unitId, 3);
+  const saved = await page.evaluate(() => window.saved);
+  assert.equal(saved.unitId, 3);
+  assert.deepEqual(saved.unitConversions, [{unitId: 4, conversionFactor: 12}, {unitId: 5, conversionFactor: 24}]);
   await page.locator('[data-product-edit="1"]').click();
   await page.waitForFunction(() => !document.querySelector('[name=unitId]').disabled);
   assert.match(await page.locator('[data-product-unit-help]').textContent(), /واحدهای فرعی/);

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 using Shop.Admin.Infrastructure;
 using Shop.Data.Application.Store.Contracts;
 using Shop.Data.Domain.Store.Entities;
@@ -284,13 +285,23 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
                 ProductName = x.product.Name,
                 VariantName = x.variant.Name,
                 Code = x.variant.Code,
-                AttributesJson = x.variant.AttributesJson,
                 SalesPlanId = x.plan.StoreSalesPlanKey,
                 SalesPlanName = x.plan.DisplayName,
                 PriceAmount = db.StorePriceVersions.Where(v => v.IdProduct == x.product.Id && v.IdProductVariant == x.variant.Id && v.IdSalesPlan == x.plan.Id && v.IsActive).Select(v => (decimal?)v.PriceAmount).FirstOrDefault(),
                 DiscountPercent = db.StorePriceVersions.Where(v => v.IdProduct == x.product.Id && v.IdProductVariant == x.variant.Id && v.IdSalesPlan == x.plan.Id && v.IsActive).Select(v => (decimal?)v.DiscountPercent).FirstOrDefault(),
                 IsEnabled = x.offer == null ? null : x.offer.IsEnabled
             }).ToListAsync(cancellationToken);
+        long[] variantIds = items.Select(x => x.VariantId).Distinct().ToArray();
+        var attributes = await (from link in db.ProductVariantAttributeValues.AsNoTracking()
+                                join value in db.ProductAttributeValues.AsNoTracking() on link.IdProductAttributeValue equals value.Id
+                                join attribute in db.ProductAttributes.AsNoTracking() on value.IdProductAttribute equals attribute.Id
+                                where variantIds.Contains(link.IdProductVariant)
+                                orderby attribute.SortOrder, attribute.Id
+                                select new { link.IdProductVariant, attribute.Key, AttributeLabel = attribute.Label, value.ValueKey, value.DisplayValue, value.Swatch })
+            .ToListAsync(cancellationToken);
+        var attributesByVariant = attributes.GroupBy(x => x.IdProductVariant).ToDictionary(x => x.Key,
+            x => (JsonElement?)JsonSerializer.SerializeToElement(x.Select(a => new { key = a.Key, label = a.AttributeLabel, value = a.ValueKey, display = a.DisplayValue, swatch = a.Swatch }).ToArray()));
+        foreach (VariantPlanPriceRow item in items) item.Attributes = attributesByVariant.GetValueOrDefault(item.VariantId);
 
         return Ok(AdminListQuery.CreateResult(items, total, paging));
     }
@@ -355,7 +366,7 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
         public string ProductName { get; set; } = "";
         public string VariantName { get; set; } = "";
         public string? Code { get; set; }
-        public string? AttributesJson { get; set; }
+        public JsonElement? Attributes { get; set; }
         public string SalesPlanId { get; set; } = "";
         public string SalesPlanName { get; set; } = "";
         public decimal? PriceAmount { get; set; }

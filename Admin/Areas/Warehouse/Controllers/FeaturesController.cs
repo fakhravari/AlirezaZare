@@ -28,6 +28,8 @@ public sealed class FeaturesController : Controller
                 "sales-plan-mapping", "stock-owners"
             }.Contains(page.FeatureId, StringComparer.OrdinalIgnoreCase))
         {
+            page = page with { AreaTitle = "مدیریت سامانه" };
+            ViewData["AreaTitle"] = page.AreaTitle;
             ViewData["ApiUrl"] = "/api/admin/warehouse/definitions";
 
             return View("~/Areas/Warehouse/Views/Features/Definitions.cshtml", page);

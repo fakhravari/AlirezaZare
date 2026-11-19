@@ -83,7 +83,15 @@ public sealed class AccountController(
             }).ToListAsync(ct);
         var cartVariantRows = cartRows.Where(item => item.IdProductVariant.HasValue).Select(item => item.IdProductVariant!.Value).Distinct().ToArray();
         var cartVariants = cartVariantRows.Length == 0 ? [] : await db.ProductVariants.AsNoTracking().Where(variant => cartVariantRows.Contains(variant.Id))
-            .Select(variant => new { variant.Id, variant.Name, variant.AttributesJson }).ToListAsync(ct);
+            .Select(variant => new { variant.Id, variant.Name }).ToListAsync(ct);
+        var cartVariantAttributes = cartVariantRows.Length == 0 ? [] : await (from link in db.ProductVariantAttributeValues.AsNoTracking()
+            join value in db.ProductAttributeValues.AsNoTracking() on link.IdProductAttributeValue equals value.Id
+            join attribute in db.ProductAttributes.AsNoTracking() on value.IdProductAttribute equals attribute.Id
+            where cartVariantRows.Contains(link.IdProductVariant)
+            orderby attribute.SortOrder, attribute.Id
+            select new { link.IdProductVariant, attribute.Key, AttributeLabel = attribute.Label, value.ValueKey, value.DisplayValue, value.Swatch }).ToListAsync(ct);
+        var cartAttributesByVariant = cartVariantAttributes.GroupBy(x => x.IdProductVariant).ToDictionary(x => x.Key,
+            x => (JsonElement?)JsonSerializer.SerializeToElement(x.Select(a => new { key = a.Key, label = a.AttributeLabel, value = a.ValueKey, display = a.DisplayValue, swatch = a.Swatch }).ToArray()));
 
         var addresses = await (
             from address in db.AccountAddresses.AsNoTracking()
@@ -217,7 +225,7 @@ public sealed class AccountController(
                 options = new
                 {
                     inventoryVariant = item.IdProductVariant is { } variantId && cartVariants.FirstOrDefault(variant => variant.Id == variantId) is { } variant
-                        ? new { id = variant.Id, name = variant.Name, attributes = ParseJson(variant.AttributesJson) }
+                        ? new { id = variant.Id, name = variant.Name, attributes = cartAttributesByVariant.GetValueOrDefault(variant.Id) }
                         : null,
                     priceOptions = cartOptionRows.Where(option => option.IdCartItem == item.Id).Select(option => new
                     {

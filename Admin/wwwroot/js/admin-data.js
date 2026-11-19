@@ -11,6 +11,85 @@
     let accessoryProductId = 0;
     let productAccessories = [];
     let accessoryRequest = 0;
+    let productUnitConversionRowId = 0;
+
+    function updateProductUnitConversionOptions(form) {
+        const state = form.__productUnitConversionState;
+        if (!state) return;
+        const baseUnitId = form.elements.unitId.value;
+        const selects = [...state.host.querySelectorAll("[data-unit-conversion-choice]")];
+        for (const select of selects) {
+            const otherSelections = new Set(selects.filter(other => other !== select).map(other => other.value).filter(Boolean));
+            for (const option of select.options) {
+                if (!option.value) continue;
+                option.disabled = option.value === baseUnitId || otherSelections.has(option.value);
+            }
+        }
+    }
+
+    function appendProductUnitConversionRow(form, conversion = {}) {
+        const state = form.__productUnitConversionState;
+        if (!state) return;
+        const id = ++productUnitConversionRowId;
+        const row = document.createElement("div"); row.className = "row g-2 align-items-end"; row.dataset.unitConversionRow = "true";
+        const unitField = document.createElement("div"); unitField.className = "col-md-5";
+        const unitLabel = document.createElement("label"); unitLabel.className = "form-label"; unitLabel.htmlFor = `product-unit-conversion-${id}`; unitLabel.textContent = "واحد تبدیل";
+        const select = document.createElement("select"); select.id = unitLabel.htmlFor; select.className = "form-select"; select.required = true; select.dataset.unitConversionChoice = "true";
+        select.append(new Option("انتخاب واحد", ""));
+        for (const unit of state.units) select.append(new Option(unit.name, String(unit.id)));
+        select.value = conversion.unitId == null ? "" : String(conversion.unitId);
+        unitField.append(unitLabel, select);
+
+        const factorField = document.createElement("div"); factorField.className = "col-md-5";
+        const factorLabel = document.createElement("label"); factorLabel.className = "form-label"; factorLabel.htmlFor = `product-unit-conversion-factor-${id}`; factorLabel.textContent = "ضریب نسبت به واحد پایه";
+        const factor = document.createElement("input"); factor.id = factorLabel.htmlFor; factor.className = "form-control"; factor.type = "number";
+        factor.name = "conversionFactor"; factor.min = "0.000000001"; factor.max = "999999999.999999999"; factor.step = "any"; factor.required = true;
+        factor.value = conversion.conversionFactor == null ? "1" : String(conversion.conversionFactor);
+        factorField.append(factorLabel, factor);
+
+        const removeField = document.createElement("div"); removeField.className = "col-md-2 d-grid";
+        const remove = document.createElement("button"); remove.type = "button"; remove.className = "btn btn-outline-danger"; remove.dataset.removeUnitConversion = "true";
+        remove.textContent = "حذف"; remove.setAttribute("aria-label", "حذف واحد تبدیل از فرم کالا");
+        removeField.append(remove);
+        row.append(unitField, factorField, removeField); state.host.append(row);
+        select.addEventListener("change", () => updateProductUnitConversionOptions(form));
+        updateProductUnitConversionOptions(form);
+    }
+
+    function setProductUnitConversions(form, mode, units, conversions = [], baseUnitId = "", unavailableUnitIds = []) {
+        const host = form.querySelector(`[data-product-${mode}-unit-conversions]`);
+        if (!host) return;
+        const unavailable = new Set(unavailableUnitIds.map(String));
+        const eligibleUnits = units.filter(unit => !unavailable.has(String(unit.id)) || String(unit.id) === String(baseUnitId));
+        const state = { host, units: eligibleUnits, originalBaseUnitId: String(baseUnitId || ""), originalConversions: conversions.map(item => ({ unitId: item.unitId ?? item.idUnit, conversionFactor: item.conversionFactor })) };
+        form.__productUnitConversionState = state;
+        host.replaceChildren();
+        for (const conversion of state.originalConversions) appendProductUnitConversionRow(form, conversion);
+        const baseSelect = form.elements.unitId;
+        baseSelect.onchange = () => {
+            const changed = mode === "edit" && baseSelect.value !== state.originalBaseUnitId;
+            const warning = form.querySelector("[data-product-unit-reset-warning]");
+            if (changed) {
+                host.replaceChildren();
+                if (warning) warning.hidden = false;
+            } else if (mode === "edit" && warning) {
+                warning.hidden = true;
+                host.replaceChildren();
+                for (const conversion of state.originalConversions) appendProductUnitConversionRow(form, conversion);
+            }
+            updateProductUnitConversionOptions(form);
+        };
+        const warning = form.querySelector("[data-product-unit-reset-warning]");
+        if (warning) warning.hidden = true;
+        updateProductUnitConversionOptions(form);
+    }
+
+    function readProductUnitConversions(form) {
+        return [...form.querySelectorAll("[data-unit-conversion-row]")].map(row => ({
+            unitId: Number(row.querySelector("[data-unit-conversion-choice]").value),
+            conversionFactor: Number(row.querySelector('[name="conversionFactor"]').value)
+        }));
+    }
 
     async function loadProductAccessories() {
         const manager = document.querySelector("[data-product-accessories-manager]");
@@ -1383,6 +1462,19 @@
     }
 
     document.addEventListener("click", event => {
+        const addUnitConversion = event.target.closest("[data-add-unit-conversion]");
+        if (addUnitConversion) {
+            const form = document.querySelector(addUnitConversion.dataset.addUnitConversion === "edit" ? "[data-product-editor]" : "[data-product-create-form]");
+            if (form) appendProductUnitConversionRow(form);
+            return;
+        }
+        const removeUnitConversion = event.target.closest("[data-remove-unit-conversion]");
+        if (removeUnitConversion) {
+            const form = removeUnitConversion.closest("form");
+            removeUnitConversion.closest("[data-unit-conversion-row]")?.remove();
+            if (form) updateProductUnitConversionOptions(form);
+            return;
+        }
         const categoryEdit = event.target.closest("[data-category-edit], [data-category-create]");
         if (categoryEdit) {
             const page = categoryEdit.closest('[data-admin-section="categories"]'), form = document.querySelector("[data-category-editor]");
@@ -1431,6 +1523,7 @@
                 form.reset();
                 for (const [field, items] of [["brandId", data.brands], ["categoryId", data.categories], ["unitId", data.units]])
                     form.elements[field].replaceChildren(new Option("انتخاب کنید", ""), ...items.map(item => new Option(item.name, String(item.id))));
+                setProductUnitConversions(form, "create", data.units);
                 window.bootstrap?.Modal?.getOrCreateInstance(document.getElementById("product-create-modal")).show();
             }).catch(error => ui.notify(error.message || "دریافت اطلاعات ناموفق بود.", "danger"))
                 .finally(() => { productCreate.disabled = false; });
@@ -1536,6 +1629,7 @@
                 form.elements.brandId.value = String(product.idBrand || ""); form.elements.categoryId.value = String(product.idCategory || "");
                 form.elements.unitId.replaceChildren(new Option("انتخاب واحد", ""), ...data.units.map(unit => new Option(unit.name, String(unit.id))));
                 form.elements.unitId.value = String(product.idBaseUnit || "");
+                setProductUnitConversions(form, "edit", data.units, data.unitConversions || [], product.idBaseUnit, data.unavailableUnitIds || []);
                 form.elements.unitId.disabled = data.hasWarehouseDocuments !== false;
                 form.querySelector("[data-product-unit-help]").textContent = data.hasWarehouseDocuments === true
                     ? "برای این کالا سند انبار ثبت شده است و واحد پایه قابل تغییر نیست."
@@ -1812,9 +1906,8 @@
                     };
                     const variants = (product.variants || []).map(variant => ({
                         ...variant,
-                        attributes: parseJson(variant.attributesJson)
+                        attributes: variant.attributes || []
                     }));
-                    variants.forEach(variant => delete variant.attributesJson);
                     const media = product.media ? {
                         ...product.media,
                         imageList: parseJson(product.media.imageList),
@@ -1824,6 +1917,7 @@
                         layout: "product",
                         groups: [
                             { title: "مشخصات کالا", compact: true, keys: ["name", "englishName", "code", "productKey", "brandName", "categoryName", "unitName", "slug", "badge"] },
+                            { title: "واحدهای فرعی و ضرایب تبدیل", keys: ["secondaryUnits"] },
                             { title: "قیمت و شرایط خرید", compact: true, keys: ["priceAmount", "discountPercent", "maxPurchaseQuantity"] },
                             { title: "وضعیت و زمان", compact: true, keys: ["isStoreEnabled", "isWarehouseEnabled", "createdAtUtc", "updatedAtUtc"] },
                             { title: "تنوع‌های کالا", keys: ["variants"] },
@@ -1906,7 +2000,7 @@
             event.preventDefault();
             const save = productCreateForm.querySelector('[type="submit"]'); if (save.disabled) return;
             const fields = productCreateForm.elements;
-            const body = { key: fields.key.value, name: fields.name.value, englishName: fields.englishName.value, brandId: Number(fields.brandId.value), categoryId: Number(fields.categoryId.value), unitId: Number(fields.unitId.value), priceAmount: ui.priceValue(fields.priceAmount), discountPercent: Number(fields.discountPercent.value), maxPurchaseQuantity: Number(fields.maxPurchaseQuantity.value) };
+            const body = { key: fields.key.value, name: fields.name.value, englishName: fields.englishName.value, brandId: Number(fields.brandId.value), categoryId: Number(fields.categoryId.value), unitId: Number(fields.unitId.value), unitConversions: readProductUnitConversions(productCreateForm), priceAmount: ui.priceValue(fields.priceAmount), discountPercent: Number(fields.discountPercent.value), maxPurchaseQuantity: Number(fields.maxPurchaseQuantity.value) };
             if (!Number.isSafeInteger(body.priceAmount)) { ui.notify("قیمت صحیح و معتبر وارد کنید.", "danger"); return; }
             const token = productCreateForm.querySelector('[name="__RequestVerificationToken"]')?.value || ""; save.disabled = true;
             void ui.getJson("/api/admin/store/catalog/products/manage", { method: "POST", headers: { "Content-Type": "application/json", RequestVerificationToken: token }, body: JSON.stringify(body) })
@@ -1949,7 +2043,7 @@
             const save = productEditor.querySelector('[type="submit"]');
             if (save.disabled) return;
             const token = productEditor.querySelector('[name="__RequestVerificationToken"]')?.value || "";
-            const body = { key: productEditor.elements.key.value, name: productEditor.elements.name.value, englishName: productEditor.elements.englishName.value, brandId: Number(productEditor.elements.brandId.value), categoryId: Number(productEditor.elements.categoryId.value), unitId: Number(productEditor.elements.unitId.value), priceAmount: ui.priceValue(productEditor.elements.priceAmount), discountPercent: Number(productEditor.elements.discountPercent.value), maxPurchaseQuantity: Number(productEditor.elements.maxPurchaseQuantity.value) };
+            const body = { key: productEditor.elements.key.value, name: productEditor.elements.name.value, englishName: productEditor.elements.englishName.value, brandId: Number(productEditor.elements.brandId.value), categoryId: Number(productEditor.elements.categoryId.value), unitId: Number(productEditor.elements.unitId.value), unitConversions: readProductUnitConversions(productEditor), priceAmount: ui.priceValue(productEditor.elements.priceAmount), discountPercent: Number(productEditor.elements.discountPercent.value), maxPurchaseQuantity: Number(productEditor.elements.maxPurchaseQuantity.value) };
             if (!Number.isSafeInteger(body.priceAmount)) { ui.notify("قیمت صحیح و معتبر وارد کنید.", "danger"); return; }
             save.disabled = true;
             void ui.getJson(`/api/admin/store/catalog/products/manage/${encodeURIComponent(productEditor.elements.id.value)}`, { method: "PUT", headers: { "Content-Type": "application/json", RequestVerificationToken: token }, body: JSON.stringify(body) })

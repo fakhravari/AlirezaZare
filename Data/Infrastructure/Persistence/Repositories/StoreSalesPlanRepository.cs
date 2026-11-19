@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 using Shop.Data.Application.Store.Contracts;
 using Shop.Data.Application.Store.Models;
 using Shop.Data.Domain.Store.Entities;
@@ -81,8 +82,17 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
                                       join product in dbContext.Products.AsNoTracking() on variant.IdProduct equals product.Id
                                       where variant.IsActive && product.IsStoreEnabled &&
                                             dbContext.InventoryItems.Any(inventory => inventory.IdProductVariant == variant.Id && inventory.IsActive)
-                                      select new { ProductId = variant.IdProduct, VariantId = variant.Id, variant.Name, variant.Code, variant.AttributesJson, variant.IsDefault }).ToListAsync(cancellationToken);
-        foreach (var row in eligibleVariants) inventoryVariants[(checked((int)row.ProductId), row.VariantId)] = new(checked((int)row.ProductId), row.VariantId, row.Name, row.Code, row.AttributesJson, row.IsDefault);
+                                      select new { ProductId = variant.IdProduct, VariantId = variant.Id, variant.Name, variant.Code, variant.IsDefault }).ToListAsync(cancellationToken);
+        long[] eligibleVariantIds = eligibleVariants.Select(x => x.VariantId).ToArray();
+        var attributeRows = await (from link in dbContext.ProductVariantAttributeValues.AsNoTracking()
+                                   join value in dbContext.ProductAttributeValues.AsNoTracking() on link.IdProductAttributeValue equals value.Id
+                                   join attribute in dbContext.ProductAttributes.AsNoTracking() on value.IdProductAttribute equals attribute.Id
+                                   where eligibleVariantIds.Contains(link.IdProductVariant) && value.IsActive && attribute.IsActive
+                                   orderby attribute.SortOrder, attribute.Id, value.Id
+                                   select new { link.IdProductVariant, attribute.Key, AttributeLabel = attribute.Label, value.ValueKey, value.DisplayValue, value.Swatch }).ToListAsync(cancellationToken);
+        var attributesByVariant = attributeRows.GroupBy(x => x.IdProductVariant).ToDictionary(group => group.Key,
+            group => (JsonElement?)JsonSerializer.SerializeToElement(group.Select(x => new { key = x.Key, label = x.AttributeLabel, value = x.ValueKey, display = x.DisplayValue, swatch = x.Swatch }).ToArray()));
+        foreach (var row in eligibleVariants) inventoryVariants[(checked((int)row.ProductId), row.VariantId)] = new(checked((int)row.ProductId), row.VariantId, row.Name, row.Code, attributesByVariant.GetValueOrDefault(row.VariantId), row.IsDefault);
         var inventoryStock = await (from inventory in dbContext.InventoryItems.AsNoTracking()
                                     join balance in dbContext.StockBalances.AsNoTracking() on inventory.Id equals balance.IdInventoryItem
                                     join plan in dbContext.SalesPlanReferences.AsNoTracking() on balance.IdSalesPlanReference equals plan.Id
@@ -220,13 +230,13 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
 
     private sealed class InventoryVariantBuilder
     {
-        public InventoryVariantBuilder(int productId, long variantId, string name, string? code, string? attributesJson, bool isDefault)
+        public InventoryVariantBuilder(int productId, long variantId, string name, string? code, JsonElement? attributes, bool isDefault)
         {
             ProductId = productId;
             VariantId = variantId;
             Name = name;
             Code = code;
-            AttributesJson = attributesJson;
+            Attributes = attributes;
             IsDefault = isDefault;
         }
 
@@ -234,14 +244,14 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
         public long VariantId { get; }
         private string Name { get; }
         private string? Code { get; }
-        private string? AttributesJson { get; }
+        private JsonElement? Attributes { get; }
         private bool IsDefault { get; }
         public Dictionary<string, decimal> StockBySalesPlan { get; } = new(StringComparer.Ordinal);
         public Dictionary<string, decimal> PriceBySalesPlan { get; } = new(StringComparer.Ordinal);
         public Dictionary<string, decimal> DiscountBySalesPlan { get; } = new(StringComparer.Ordinal);
         public Dictionary<string, long> PriceVersionIdsBySalesPlan { get; } = new(StringComparer.Ordinal);
 
-        public StoreInventoryVariantRow Build() => new(ProductId, VariantId, Name, Code, AttributesJson, IsDefault,
+        public StoreInventoryVariantRow Build() => new(ProductId, VariantId, Name, Code, Attributes, IsDefault,
             StockBySalesPlan, PriceBySalesPlan, DiscountBySalesPlan)
         { PriceVersionIdsBySalesPlan = PriceVersionIdsBySalesPlan };
     }

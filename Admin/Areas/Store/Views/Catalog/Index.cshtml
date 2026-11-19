@@ -171,6 +171,12 @@
                 <div class="admin-modal-field admin-product-name"><label class="form-label" for="new-product-name">نام فارسی</label><input class="form-control" id="new-product-name" name="name" maxlength="300" required /></div>
                 <div class="admin-modal-field admin-product-english"><label class="form-label" for="new-product-english">نام لاتین</label><input class="form-control" id="new-product-english" name="englishName" dir="ltr" maxlength="300" required /></div>
                 <div class="admin-modal-field admin-product-unit"><label class="form-label" for="new-product-unit">واحد پایه</label><select class="form-select" id="new-product-unit" name="unitId" required></select></div>
+                <fieldset class="admin-modal-field-wide border rounded p-3">
+                    <legend class="float-none w-auto px-1 fs-6 fw-semibold">واحدهای تبدیل کالا</legend>
+                    <p class="small text-muted">واحدهای تعریف‌شده را اضافه کنید و ضریب هرکدام را نسبت به واحد پایه وارد کنید.</p>
+                    <div class="d-grid gap-2" data-product-create-unit-conversions></div>
+                    <button class="btn btn-default btn-sm mt-2" type="button" data-add-unit-conversion="create"><i class="fa fa-plus me-1" aria-hidden="true"></i>افزودن واحد تبدیل</button>
+                </fieldset>
                 <div class="admin-modal-field admin-product-category"><label class="form-label" for="new-product-category">دستهٔ برگ</label><select class="form-select" id="new-product-category" name="categoryId" required></select></div>
                 <div class="admin-modal-field admin-product-brand"><label class="form-label" for="new-product-brand">برند</label><select class="form-select" id="new-product-brand" name="brandId" required></select></div>
                 <div class="admin-modal-field admin-product-price"><label class="form-label" for="new-product-price">قیمت فروش عادی (تومان)</label><input class="form-control" id="new-product-price" name="priceAmount" type="text" inputmode="numeric" dir="ltr" data-admin-price max="9007199254740991" required /></div>
@@ -215,6 +221,13 @@
                 <div class="admin-modal-field admin-product-name"><label for="product-edit-name" class="form-label">نام فارسی</label><input id="product-edit-name" name="name" class="form-control" maxlength="300" required /></div>
                 <div class="admin-modal-field admin-product-english"><label for="product-edit-english" class="form-label">نام لاتین</label><input id="product-edit-english" name="englishName" class="form-control" dir="ltr" maxlength="300" required /></div>
                 <div class="admin-modal-field admin-product-unit"><label for="product-edit-unit" class="form-label">واحد پایه</label><select id="product-edit-unit" name="unitId" class="form-select" aria-describedby="product-edit-unit-help" required></select><small id="product-edit-unit-help" class="text-muted" data-product-unit-help></small></div>
+                <fieldset class="admin-modal-field-wide border rounded p-3">
+                    <legend class="float-none w-auto px-1 fs-6 fw-semibold">واحدهای تبدیل کالا</legend>
+                    <p class="small text-muted">واحدهای فعال کالا را ویرایش کنید یا واحد تبدیل دیگری اضافه کنید. حذف ردیف، اتصال را غیرفعال می‌کند و فقط در تاریخچه دیده می‌شود.</p>
+                    <div class="small text-warning-emphasis mb-2" data-product-unit-reset-warning hidden>با تغییر واحد پایه، ضرایب قبلی باید دوباره تعریف شوند.</div>
+                    <div class="d-grid gap-2" data-product-edit-unit-conversions></div>
+                    <button class="btn btn-default btn-sm mt-2" type="button" data-add-unit-conversion="edit"><i class="fa fa-plus me-1" aria-hidden="true"></i>افزودن واحد تبدیل</button>
+                </fieldset>
                 <div class="admin-modal-field admin-product-category"><label for="product-edit-category" class="form-label">دستهٔ برگ</label><select id="product-edit-category" name="categoryId" class="form-select" required></select></div>
                 <div class="admin-modal-field admin-product-brand"><label for="product-edit-brand" class="form-label">برند</label><select id="product-edit-brand" name="brandId" class="form-select" required></select></div>
                 <div class="admin-modal-field admin-product-price"><label for="product-edit-price" class="form-label">قیمت نهایی فروش عادی (تومان)</label><input id="product-edit-price" name="priceAmount" type="text" inputmode="numeric" dir="ltr" data-admin-price max="9007199254740991" class="form-control" required /></div>

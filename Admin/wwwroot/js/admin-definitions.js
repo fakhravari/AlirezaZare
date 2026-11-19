@@ -5,6 +5,7 @@
     const initialized = new WeakSet();
     const formRequests = new WeakMap();
     const fmt = new Intl.NumberFormat("fa-IR");
+    const conversionFmt = new Intl.NumberFormat("fa-IR", { maximumFractionDigits: 9 });
     const configs = {
         "stock-owners": { fields: [["code", "کد", "text", true], ["displayName", "نام", "text", true], ["idStockOwnerType", "نوع", "select", true, [["1", "طرح فروش"], ["2", "مالک"]]]], columns: [["code", "کد"], ["displayName", "نام"], ["idStockOwnerType", "نوع"], ["isActive", "وضعیت", "active"]] },
         companies: { fields: [["code", "کد شرکت", "text", true], ["name", "نام شرکت", "text", true], ["phone", "تلفن", "text"], ["address", "آدرس", "textarea"], ["description", "توضیحات", "textarea"]], columns: [["code", "کد"], ["name", "شرکت"], ["phone", "تلفن"], ["address", "آدرس"], ["description", "توضیحات"], ["isActive", "وضعیت", "active"]] },
@@ -13,7 +14,7 @@
         units: { fields: [["code", "کد واحد", "text", true], ["name", "نام واحد", "text", true], ["isActive", "واحد فعال است", "checkbox"]], columns: [["code", "کد"], ["name", "واحد"], ["isActive", "وضعیت", "active"]] },
         "document-types": { fields: [["code", "کد نوع سند", "text", true], ["name", "نام سند", "text", true], ["direction", "جهت سند", "select", true, [["R", "رسید"], ["I", "حواله"]]], ["affectsStock", "بر موجودی اثر دارد", "checkbox" ]], columns: [["code", "کد"], ["name", "نوع سند"], ["direction", "جهت", "direction"], ["affectsStock", "اثر موجودی", "affects"], ["isActive", "وضعیت", "active"]] }
         ,"product-units": { fields: [["productId", "کالا", "products", true], ["unitId", "واحد", "units", true], ["conversionFactor", "ضریب تبدیل به واحد اصلی", "number", true], ["isBaseUnit", "واحد اصلی کالا", "checkbox"]], columns: [["productName", "کالا"], ["unitName", "واحد"], ["conversionFactor", "ضریب تبدیل"], ["isBaseUnit", "اصلی", "base"], ["isActive", "وضعیت", "active"]] },
-        variants: { fields: [["productId", "کالا", "products", true], ["name", "نام تنوع", "text", true], ["code", "کد تنوع", "text"], ["attributesJson", "ویژگی‌های موجودی (JSON)", "textarea"], ["isDefault", "تنوع پیش‌فرض", "checkbox"]], columns: [["productName", "کالا"], ["name", "تنوع"], ["code", "کد"], ["isDefault", "پیش‌فرض", "default"], ["isActive", "وضعیت", "active"]] }
+        variants: { fields: [["productId", "کالا", "products", true], ["name", "نام تنوع", "text", true], ["code", "کد تنوع", "text"], ["attributes", "ویژگی‌های تنوع", "attributes"], ["isDefault", "تنوع پیش‌فرض", "checkbox"]], columns: [["productName", "کالا"], ["name", "تنوع"], ["code", "کد"], ["attributes", "ویژگی‌ها", "attributes"], ["isDefault", "پیش‌فرض", "default"], ["isActive", "وضعیت", "active"]] }
     };
     const esc = value => value == null || value === "" ? "—" : String(value);
     function setStatus(page, message, error = false) {
@@ -39,12 +40,16 @@
     function active(value) { return value ? "فعال" : "غیرفعال"; }
     function renderTable(page, rows, config) {
         const head = page.querySelector("[data-definition-head]"), body = page.querySelector("[data-definition-rows]");
+        const referenceType = page.querySelector("[data-reference-type-filter]")?.value;
+        const visibleRows = page.dataset.definitionSection === "references" && referenceType
+            ? rows.filter(item => item.partyType === referenceType)
+            : rows;
         ui.destroyDataTable(page.querySelector("[data-admin-datatable]"));
         head.replaceChildren(); body.replaceChildren();
         const tr = document.createElement("tr");
         for (const [, label] of config.columns) tr.append(element("th", label));
         tr.append(element("th", "عملیات")); head.append(tr);
-        for (const item of rows) {
+        for (const item of visibleRows) {
             const row = document.createElement("tr");
             for (const [key, , format] of config.columns) {
                 let value = item[key];
@@ -55,6 +60,7 @@
                 if (format === "affects") value = value ? "دارد" : "ندارد";
                 if (format === "base") value = value ? "واحد اصلی" : "واحد فرعی";
                 if (format === "siteWarehouse") value = value ? "بله" : "خیر";
+                if (format === "attributes") value = Array.isArray(value) ? value.map(attribute => `${attribute.label}: ${attribute.display}`).join("، ") : "—";
                 if (key === "idStockOwnerType") value = value === 1 ? "طرح فروش" : "مالک";
                 row.append(element("td", esc(value)));
             }
@@ -96,11 +102,78 @@
             row.append(actions); body.append(row);
         }
         ui.refreshDataTable(page.querySelector("[data-admin-datatable]"));
-        if (!rows.length) setStatus(page, "موردی ثبت نشده است.");
+        setStatus(page, visibleRows.length ? "" : (referenceType ? "مرجعی با این نوع پیدا نشد." : "موردی ثبت نشده است."));
+    }
+    function renderProductUnitTree(page, rows, config) {
+        const tree = page.querySelector("[data-product-unit-tree]");
+        ui.destroyDataTable(page.querySelector("[data-admin-datatable]"));
+        tree.replaceChildren();
+        const products = new Map();
+        for (const row of rows) {
+            if (!products.has(row.idProduct)) products.set(row.idProduct, { name: row.productName, units: [] });
+            products.get(row.idProduct).units.push(row);
+        }
+        for (const [productId, product] of products) {
+            const branch = element("details", null, "list-group-item p-0 mb-2 border rounded");
+            const summary = element("summary", null, "d-flex align-items-center justify-content-between gap-2 px-3 py-2 fw-semibold");
+            summary.append(element("span", product.name || `کالا ${fmt.format(productId)}`));
+            summary.append(element("span", `${fmt.format(product.units.length)} واحد`, "badge bg-light text-dark"));
+            branch.append(summary);
+            const children = element("ul", null, "list-group list-group-flush px-4 pb-2");
+            for (const item of product.units) {
+                const node = element("li", null, "list-group-item d-flex flex-wrap align-items-center justify-content-between gap-2");
+                const description = element("div", null, "d-flex flex-column");
+                description.append(element("span", item.unitName || "واحد نامشخص", "fw-semibold"));
+                description.append(element("span", item.isBaseUnit
+                    ? "واحد پایه · ضریب ۱"
+                    : `ضریب ثبت‌شده: ${conversionFmt.format(Number(item.conversionFactor))}`, "small text-muted"));
+                if (item.isActive === false) description.append(element("span", "غیرفعال", "small text-danger"));
+                node.append(description);
+                const actions = element("div", null, "d-flex flex-wrap gap-1");
+                if (item.isActive !== false && page.dataset.canEdit === "true") {
+                    const edit = actionButton("ویرایش", "fa-pen-to-square", "btn btn-sm btn-default");
+                    edit.addEventListener("click", () => void openForm(page, item, config).catch(error => ui.notify(error.message || "بازکردن فرم ناموفق بود.", "danger")));
+                    actions.append(edit);
+                }
+                if (item.isActive !== false && !item.isBaseUnit && page.dataset.canDeactivate === "true") {
+                    const deactivate = actionButton("غیرفعال‌سازی", "fa-toggle-off", "btn btn-sm btn-outline-danger");
+                    deactivate.dataset.adminConfirm = "این واحد تبدیل غیرفعال شود؟ سابقه حفظ می‌شود.";
+                    deactivate.addEventListener("click", async () => {
+                        if (deactivate.disabled) return;
+                        deactivate.disabled = true;
+                        try {
+                            const result = await request(page, `${page.dataset.api}/product-units/${item.id}/deactivate`, "POST", {});
+                            ui.notify(result.message, "success");
+                            await load(page);
+                        } catch (error) { ui.notify(error.message, "danger"); }
+                        finally { deactivate.disabled = false; }
+                    });
+                    actions.append(deactivate);
+                }
+                if (actions.childElementCount) node.append(actions);
+                children.append(node);
+            }
+            branch.append(children);
+            tree.append(branch);
+        }
+        setStatus(page, rows.length ? "" : "واحد غیرفعالی در تاریخچه ثبت نشده است.");
     }
     function addField(host, field, data, lookups) {
         const [key, label, type = "text", required = false, choices = []] = field;
         const wrap = element("div", null, "mb-3");
+        if (type === "attributes") {
+            const caption = element("label", label, "form-label");
+            caption.id = "definition-attributes-label";
+            const list = element("div", null, "d-grid gap-2");
+            list.dataset.variantAttributes = "";
+            list.setAttribute("aria-labelledby", caption.id);
+            for (const attribute of Array.isArray(data[key]) ? data[key] : []) addVariantAttributeRow(list, attribute);
+            const add = actionButton("افزودن ویژگی", "fa-plus", "btn btn-sm btn-outline-primary mt-2");
+            add.addEventListener("click", () => addVariantAttributeRow(list));
+            wrap.append(caption, list, add);
+            host.append(wrap);
+            return;
+        }
         if (type === "checkbox") {
             const check = element("input", null, "form-check-input"); check.type = "checkbox"; ui.initStatusSwitch(check); check.name = key; check.checked = Boolean(data[key]); check.id = `definition-${key}`;
             const caption = element("label", label, "form-check-label"); caption.htmlFor = check.id; wrap.className = "form-check mb-3"; wrap.append(check, caption);
@@ -117,13 +190,30 @@
                 for (const row of choices) { const option = element("option", type === "warehouses" ? `${row.companyName} / ${row.name} (${row.code})` : (row.name || row.displayName)); option.value = row.id; control.append(option); }
             }
             if (type === "text") control.type = "text";
-            if (type === "textarea") { control.rows = 4; if (key === "attributesJson") control.placeholder = '[{"key":"color","label":"رنگ","value":"yellow","display":"زرد"}]'; }
+            if (type === "textarea") control.rows = 4;
             if (type === "number") { control.type = "number"; control.min = key === "conversionFactor" ? "0.000000001" : "1"; control.step = key === "conversionFactor" ? "any" : "1"; if (key === "conversionFactor") control.max = "999999999.999999999"; }
             if (type === "select" || ["warehouses", "products", "units", "companies", "plans", "warehouse-types"].includes(type)) control.value = data[key] == null ? "" : String(data[key]);
             else control.value = data[key] ?? (key === "conversionFactor" ? "1" : "");
             const caption = element("label", label, "form-label"); caption.htmlFor = control.id; wrap.append(caption, control);
         }
         host.append(wrap);
+    }
+    function addVariantAttributeRow(list, data = {}) {
+        if (list.childElementCount >= 12) { ui.notify("برای هر تنوع حداکثر ۱۲ ویژگی ثبت می‌شود.", "danger"); return; }
+        const row = element("div", null, "border rounded p-2");
+        row.dataset.variantAttribute = "";
+        const grid = element("div", null, "row g-2");
+        const fields = [["key", "کلید انگلیسی", "color", 64], ["label", "نام ویژگی", "رنگ", 80], ["value", "مقدار یکتا", "black", 100], ["display", "نمایش", "مشکی", 100], ["swatch", "کد رنگ (اختیاری)", "#000000", 7]];
+        for (const [key, label, placeholder, maxLength] of fields) {
+            const column = element("div", null, "col-12 col-md-6");
+            const input = element("input", null, "form-control form-control-sm");
+            input.type = "text"; input.maxLength = maxLength; input.dataset.attributeField = key;
+            input.value = data[key] ?? ""; input.placeholder = placeholder; input.setAttribute("aria-label", label);
+            column.append(input); grid.append(column);
+        }
+        const remove = actionButton("حذف ویژگی", "fa-trash", "btn btn-sm btn-outline-danger mt-2");
+        remove.addEventListener("click", () => row.remove());
+        row.append(grid, remove); list.append(row);
     }
     async function openForm(page, data, config) {
         const sequence = (formRequests.get(page) || 0) + 1;
@@ -216,8 +306,8 @@
         const config = configs[section];
         if (section === "warehouses") await loadWarehouseTypes(page);
         const rows = await request(page, `${page.dataset.api}/${section}`);
-        renderTable(page, rows, config);
-        if (rows.length) setStatus(page, "");
+        if (section === "product-units") renderProductUnitTree(page, rows.filter(item => item.isActive === false), config);
+        else renderTable(page, rows, config);
     }
     async function initialize(root) {
         const page = root.querySelector?.("[data-admin-definitions]");
@@ -256,6 +346,7 @@
                     });
                 }
                 const config = configs[section];
+                page.querySelector("[data-reference-type-filter]")?.addEventListener("change", () => void load(page));
                 const createButton = page.querySelector("[data-definition-create]");
                 createButton.hidden = page.dataset.canCreate !== "true";
                 createButton.addEventListener("click", () => void openForm(page, null, config).catch(error => ui.notify(error.message || "بازکردن فرم ناموفق بود.", "danger")));
@@ -263,13 +354,18 @@
                     event.preventDefault();
                     if (form.dataset.saving === "true") return;
                     for (const [key, label, type, required] of config.fields) {
+                        if (type === "attributes") continue;
                         const control = form.elements.namedItem(key);
                         if (required && type === "text" && control && !control.value.trim()) {
                             ui.notify(`${label} را وارد کنید.`, "danger"); control.focus(); return;
                         }
                     }
                     const values = new FormData(form), id = values.get("id"); const body = {};
-                    for (const [key, , type] of config.fields) body[key] = type === "checkbox" ? Boolean(form.elements.namedItem(key)?.checked) : (key === "idStockOwnerType" || ["number", "products", "units", "warehouses", "companies", "plans", "warehouse-types"].includes(type) ? Number(values.get(key)) || null : values.get(key));
+                    for (const [key, , type] of config.fields) {
+                        if (type === "attributes") continue;
+                        body[key] = type === "checkbox" ? Boolean(form.elements.namedItem(key)?.checked) : (key === "idStockOwnerType" || ["number", "products", "units", "warehouses", "companies", "plans", "warehouse-types"].includes(type) ? Number(values.get(key)) || null : values.get(key));
+                    }
+                    if (section === "variants") body.attributes = [...form.querySelectorAll("[data-variant-attribute]")].map(row => Object.fromEntries([...row.querySelectorAll("[data-attribute-field]")].map(input => [input.dataset.attributeField, input.value.trim()])));
                     if (section !== "units") body.isActive = true;
                     const submit = form.querySelector('[type="submit"]');
                     form.dataset.saving = "true"; submit.disabled = true;
