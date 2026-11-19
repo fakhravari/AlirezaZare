@@ -790,6 +790,37 @@ input[type="checkbox"][data-admin-switch]:disabled { cursor: not-allowed; opacit
     cursor: not-allowed;
 }
 
+.admin-unit-tree-status {
+    display: inline-grid;
+    flex: 0 0 1.1rem;
+    width: 1.1rem;
+    height: 1.1rem;
+    place-items: center;
+    padding: 0;
+    border: 1px solid #8798a4;
+    border-radius: .2rem;
+    color: #fff;
+    background: #fff;
+    cursor: pointer;
+}
+
+.admin-unit-tree-status[aria-checked="true"] {
+    border-color: #167d9a;
+    background: #167d9a;
+}
+
+.admin-unit-tree-status[aria-checked="true"]::after {
+    content: "✓";
+    font-size: .8rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.admin-unit-tree-status:disabled {
+    opacity: .55;
+    cursor: not-allowed;
+}
+
 .admin-permission-list .admin-permission-list {
     margin-inline-start: 1.15rem;
     padding-inline-start: .65rem;

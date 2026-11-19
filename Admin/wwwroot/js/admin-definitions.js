@@ -161,82 +161,153 @@
     function renderUnitTree(page, groups, units) {
         const tree = page.querySelector("[data-unit-tree]");
         tree.replaceChildren();
-        const addUnit = (unit, children) => {
-            const node = element("li", null, "list-group-item d-flex flex-wrap align-items-center justify-content-between gap-2");
-            node.append(element("span", `${unit.nameFa}${unit.nameEn ? ` / ${unit.nameEn}` : ""}${unit.isActive ? "" : " · غیرفعال"}`, unit.isActive ? "" : "text-muted"));
-            const actions = element("div", null, "d-flex flex-wrap gap-1");
-            if (page.dataset.canEdit === "true") {
-                const editUnit = actionButton("ویرایش", "fa-pen-to-square", "btn btn-sm btn-default");
-                editUnit.addEventListener("click", () => void openForm(page, unit, configs.units).catch(error => ui.notify(error.message || "بازکردن فرم ناموفق بود.", "danger")));
-                actions.append(editUnit);
-            }
-            if (unit.isActive ? page.dataset.canDeactivate === "true" : page.dataset.canEdit === "true") {
-                const toggle = actionButton(unit.isActive ? "غیرفعال‌سازی" : "فعال‌سازی", unit.isActive ? "fa-toggle-off" : "fa-toggle-on", unit.isActive ? "btn btn-sm btn-outline-danger" : "btn btn-sm btn-outline-success");
-                if (unit.isActive) toggle.dataset.adminConfirm = "این واحد غیرفعال شود؟ واحد مورد استفادهٔ کالا غیرفعال نمی‌شود.";
-                toggle.addEventListener("click", async () => {
-                    if (toggle.disabled) return; toggle.disabled = true;
-                    try {
-                        const result = unit.isActive
-                            ? await request(page, `${page.dataset.api}/units/${unit.id}/deactivate`, "POST", {})
-                            : await request(page, `${page.dataset.api}/units/${unit.id}`, "PUT", { nameFa: unit.nameFa, nameEn: unit.nameEn, parentId: unit.idParent, isActive: true });
-                        ui.notify(result.message, "success"); await load(page);
-                    } catch (error) { ui.notify(error.message, "danger"); } finally { toggle.disabled = false; }
-                });
-                actions.append(toggle);
-            }
-            if (actions.childElementCount) node.append(actions);
-            children.append(node);
+        tree.setAttribute("role", "tree");
+        const groupsByParent = new Map();
+        const unitsByParent = new Map();
+        for (const group of groups) {
+            const key = group.idParent == null ? "root" : String(group.idParent);
+            if (!groupsByParent.has(key)) groupsByParent.set(key, []);
+            groupsByParent.get(key).push(group);
+        }
+        for (const unit of units) {
+            const key = unit.idParent == null ? "root" : String(unit.idParent);
+            if (!unitsByParent.has(key)) unitsByParent.set(key, []);
+            unitsByParent.get(key).push(unit);
+        }
+        const groupById = new Map(groups.map(group => [String(group.id), group]));
+        const updateGroupAvailability = group => {
+            const node = [...tree.querySelectorAll("[data-unit-group-id]")].find(item => item.dataset.unitGroupId === String(group.id));
+            if (!node) return;
+            const activeMemberCount = (unitsByParent.get(String(group.id)) || []).filter(unit => unit.isActive).length;
+            const status = node.querySelector(":scope > .admin-permission-row [data-unit-group-status]");
+            const warning = node.querySelector(":scope > .admin-permission-row [data-group-blocked]");
+            const reason = activeMemberCount ? `برای غیرفعال‌کردن گروه، ${fmt.format(activeMemberCount)} واحد فعال را به گروه دیگری منتقل یا غیرفعال کنید.` : "";
+            const canToggle = group.isActive
+                ? page.dataset.canDeactivate === "true" && activeMemberCount === 0
+                : page.dataset.canEdit === "true";
+            status.disabled = !canToggle;
+            status.dataset.blocked = String(Boolean(group.isActive && activeMemberCount));
+            status.title = reason;
+            status.setAttribute("aria-label", `${group.isActive ? "غیرفعال‌کردن" : "فعال‌کردن"} ${group.name}`);
+            if (group.isActive) status.dataset.adminConfirm = "گروه واحد غیرفعال شود؟ گروه دارای واحد فعال قابل غیرفعال‌سازی نیست.";
+            else delete status.dataset.adminConfirm;
+            if (warning) { warning.textContent = reason; warning.hidden = !reason; }
         };
-        const addGroup = (group, container) => {
-            const branch = element("details", null, "list-group-item p-0 border rounded");
-            const summary = element("summary", null, "d-flex align-items-center justify-content-between gap-2 px-3 py-2 fw-semibold");
-            const childGroups = groups.filter(item => item.idParent === group.id);
-            const members = units.filter(unit => unit.idParent === group.id);
-            summary.append(element("span", `${group.name}${group.isActive ? "" : " · غیرفعال"}`));
-            summary.append(element("span", `${fmt.format(childGroups.length)} زیرگروه · ${fmt.format(members.length)} واحد`, "badge bg-light text-dark"));
-            branch.append(summary);
-            const children = element("ul", null, "list-group list-group-flush px-4 pb-2");
-            const groupActions = element("li", null, "list-group-item d-flex flex-wrap justify-content-end gap-2");
-            if (page.dataset.canEdit === "true") {
-                const edit = actionButton("ویرایش گروه", "fa-pen-to-square", "btn btn-sm btn-default");
-                edit.addEventListener("click", () => {
+        const makeRow = (parent, label, active, toggleLabel, toggleUrl, toggleBody, canToggle, editHandler = null, disabledReason = "", displayLabel = () => label, onStatusChange = null, statusDataAttribute = "") => {
+            const row = element("div", null, "admin-permission-row");
+            const children = parent.querySelector(":scope > ul[role=group]");
+            if (children) {
+                const expand = element("button", null, "admin-permission-toggle");
+                expand.type = "button"; expand.setAttribute("aria-expanded", "false"); expand.setAttribute("aria-label", `بازکردن ${label}`);
+                expand.append(element("span", "›", "admin-permission-chevron"));
+                expand.addEventListener("click", () => {
+                    const open = expand.getAttribute("aria-expanded") !== "true";
+                    expand.setAttribute("aria-expanded", String(open));
+                    expand.setAttribute("aria-label", `${open ? "بستن" : "بازکردن"} ${label}`);
+                    parent.setAttribute("aria-expanded", String(open));
+                    children.hidden = !open;
+                });
+                row.append(expand);
+            } else row.append(element("span", null, "admin-permission-toggle-spacer"));
+            const status = element("button", null, "admin-unit-tree-status");
+            status.type = "button"; status.setAttribute("role", "checkbox"); status.setAttribute("aria-checked", String(Boolean(active)));
+            let isActive = Boolean(active);
+            const toggleAllowed = () => typeof canToggle === "function" ? canToggle(isActive) : canToggle;
+            if (statusDataAttribute) status.setAttribute(statusDataAttribute, "");
+            status.setAttribute("aria-label", `${active ? "غیرفعال‌کردن" : "فعال‌کردن"} ${label}`);
+            status.disabled = !toggleAllowed();
+            if (disabledReason) status.title = disabledReason;
+            if (isActive) status.dataset.adminConfirm = toggleLabel;
+            status.addEventListener("click", async () => {
+                if (!toggleAllowed()) return;
+                status.disabled = true;
+                try {
+                    const url = typeof toggleUrl === "function" ? toggleUrl(isActive) : toggleUrl;
+                    const result = await request(page, url, isActive ? "POST" : "PUT", isActive ? {} : toggleBody);
+                    isActive = !isActive;
+                    onStatusChange?.(isActive);
+                    status.setAttribute("aria-checked", String(isActive));
+                    status.setAttribute("aria-label", `${isActive ? "غیرفعال‌کردن" : "فعال‌کردن"} ${displayLabel()}`);
+                    if (isActive) status.dataset.adminConfirm = toggleLabel;
+                    else delete status.dataset.adminConfirm;
+                    choice.textContent = displayLabel();
+                    ui.notify(result.message, "success");
+                } catch (error) { ui.notify(error.message, "danger"); }
+                finally { if (status.isConnected) status.disabled = !toggleAllowed(); }
+            });
+            const choice = element("span", displayLabel(), "admin-permission-name flex-grow-1");
+            row.append(status, choice);
+            if (disabledReason) {
+                const note = element("small", disabledReason, "text-warning-emphasis");
+                note.dataset.groupBlocked = "";
+                row.append(note);
+            }
+            if (editHandler) {
+                const edit = actionButton("ویرایش", "fa-pen-to-square", "btn btn-sm btn-default");
+                edit.addEventListener("click", editHandler);
+                row.append(edit);
+            }
+            const childList = parent.querySelector(":scope > ul[role=group]");
+            if (childList) parent.insertBefore(row, childList);
+            else parent.append(row);
+        };
+        const appendGroup = (group, container) => {
+            const childGroups = groupsByParent.get(String(group.id)) || [];
+            const members = unitsByParent.get(String(group.id)) || [];
+            const activeMemberCount = members.filter(unit => unit.isActive).length;
+            const blockedMessage = activeMemberCount
+                ? `برای غیرفعال‌کردن گروه، ${fmt.format(activeMemberCount)} واحد فعال را به گروه دیگری منتقل یا غیرفعال کنید.`
+                : "";
+            const node = element("li", null, "admin-permission-node"); node.setAttribute("role", "treeitem"); node.setAttribute("aria-expanded", "false");
+            const children = element("ul", null, "admin-permission-list"); children.setAttribute("role", "group"); children.hidden = true;
+            node.append(children);
+            node.dataset.unitGroupId = String(group.id);
+            const groupLabel = () => `${group.name}${group.isActive ? "" : " · غیرفعال"} (${fmt.format(childGroups.length)} زیرگروه · ${fmt.format(members.length)} واحد)`;
+            makeRow(node, group.name, group.isActive,
+                "گروه واحد غیرفعال شود؟ گروه دارای واحد فعال قابل غیرفعال‌سازی نیست.", isActive => `${page.dataset.api}/unit-groups/${group.id}${isActive ? "/deactivate" : ""}`,
+                { name: group.name, nameEn: group.nameEn, sortOrder: group.sortOrder, isActive: true },
+                active => active
+                    ? page.dataset.canDeactivate === "true" && members.filter(unit => unit.isActive).length === 0
+                    : page.dataset.canEdit === "true",
+                page.dataset.canEdit === "true" ? () => {
                     const form = page.querySelector("[data-unit-group-form]");
                     form.elements.id.value = group.id; form.elements.name.value = group.name; form.elements.nameEn.value = group.nameEn || "";
                     form.elements.sortOrder.value = group.sortOrder;
                     form.querySelector('[type="submit"]').textContent = "ذخیرهٔ گروه"; form.querySelector("[data-unit-group-cancel]").hidden = false;
                     form.elements.name.focus();
-                });
-                groupActions.append(edit);
-                if (group.isActive ? page.dataset.canDeactivate === "true" : page.dataset.canEdit === "true") {
-                    const toggle = actionButton(group.isActive ? "غیرفعال‌سازی گروه" : "فعال‌سازی گروه", group.isActive ? "fa-toggle-off" : "fa-toggle-on", group.isActive ? "btn btn-sm btn-outline-danger" : "btn btn-sm btn-outline-success");
-                    if (group.isActive) toggle.dataset.adminConfirm = "گروه واحد غیرفعال شود؟ گروه دارای واحد فعال قابل غیرفعال‌سازی نیست.";
-                    toggle.addEventListener("click", async () => {
-                        if (toggle.disabled) return; toggle.disabled = true;
-                        try {
-                            const result = group.isActive
-                                ? await request(page, `${page.dataset.api}/unit-groups/${group.id}/deactivate`, "POST", {})
-                                : await request(page, `${page.dataset.api}/unit-groups/${group.id}`, "PUT", { name: group.name, nameEn: group.nameEn, sortOrder: group.sortOrder, isActive: true });
-                            ui.notify(result.message, "success"); await load(page);
-                        } catch (error) { ui.notify(error.message, "danger"); } finally { toggle.disabled = false; }
-                    });
-                    groupActions.append(toggle);
-                }
-            }
-            if (groupActions.childElementCount) children.append(groupActions);
-            for (const childGroup of childGroups) addGroup(childGroup, children);
-            for (const unit of members) addUnit(unit, children);
-            if (!childGroups.length && !members.length) children.append(element("li", "زیرگروه یا واحدی ثبت نشده است.", "list-group-item text-muted"));
-            branch.append(children); container.append(branch);
+                } : null, blockedMessage, groupLabel,
+                isActive => { group.isActive = isActive; updateGroupAvailability(group); }, "data-unit-group-status");
+            updateGroupAvailability(group);
+            for (const childGroup of childGroups) appendGroup(childGroup, children);
+            for (const unit of members) appendUnit(unit, children);
+            if (!childGroups.length && !members.length) children.append(element("li", "زیرگروه یا واحدی ثبت نشده است.", "admin-permission-node text-muted"));
+            node.append(children); container.append(node);
         };
-        const roots = element("ul", null, "list-group list-group-flush gap-2");
-        for (const group of groups.filter(item => item.idParent == null)) addGroup(group, roots);
+        const appendUnit = (unit, container) => {
+            const node = element("li", null, "admin-permission-node"); node.setAttribute("role", "treeitem");
+            const unitLabel = () => `${unit.nameFa}${unit.nameEn ? ` / ${unit.nameEn}` : ""}${unit.isActive ? "" : " · غیرفعال"}`;
+            makeRow(node, unit.nameFa, unit.isActive,
+                "این واحد غیرفعال شود؟ واحد مورد استفادهٔ کالا غیرفعال نمی‌شود.", isActive => `${page.dataset.api}/units/${unit.id}${isActive ? "/deactivate" : ""}`,
+                { nameFa: unit.nameFa, nameEn: unit.nameEn, parentId: unit.idParent, isActive: true },
+                active => active ? page.dataset.canDeactivate === "true" : page.dataset.canEdit === "true",
+                page.dataset.canEdit === "true" ? () => void openForm(page, unit, configs.units).catch(error => ui.notify(error.message || "بازکردن فرم ناموفق بود.", "danger")) : null,
+                "", unitLabel, isActive => {
+                    unit.isActive = isActive;
+                    const parentGroup = groupById.get(String(unit.idParent));
+                    if (parentGroup) updateGroupAvailability(parentGroup);
+                });
+            container.append(node);
+        };
+        const roots = element("ul", null, "admin-permission-list"); roots.setAttribute("role", "group");
+        for (const group of groupsByParent.get("root") || []) appendGroup(group, roots);
         const ungrouped = units.filter(unit => unit.idParent == null);
         if (ungrouped.length) {
-            const section = element("li", null, "list-group-item p-0 border rounded");
-            section.append(element("h3", "واحدهای بدون گروه والد", "h6 px-3 pt-3"));
-            const children = element("ul", null, "list-group list-group-flush px-4 pb-2");
-            for (const unit of ungrouped) addUnit(unit, children);
-            section.append(children); roots.append(section);
+            const section = element("li", null, "admin-permission-node"); section.setAttribute("role", "treeitem");
+            const children = element("ul", null, "admin-permission-list"); children.setAttribute("role", "group");
+            section.append(children);
+            makeRow(section, "واحدهای بدون گروه والد", true, "", "", {}, false);
+            for (const unit of ungrouped) appendUnit(unit, children);
+            roots.append(section);
         }
         tree.append(roots);
         setStatus(page, groups.length || units.length ? "" : "گروهی تعریف نشده است.");

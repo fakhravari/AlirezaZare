@@ -13,22 +13,43 @@ test('unit status is submitted from the definition form', {skip: !existsSync(chr
   await page.setContent(`<div data-admin-definitions data-api="/api" data-definition-section="units" data-can-create="true" data-can-edit="true" data-can-deactivate="true"><button data-definition-create>افزودن</button><form data-unit-group-form><input name="id"><input name="name"><input name="nameEn"><input name="sortOrder"><button type="submit"></button><button type="button" data-unit-group-cancel></button></form><div data-unit-tree></div><div data-definition-status></div></div><div id="admin-definition-modal"><h2 id="admin-definition-title"></h2><form data-definition-form><input name="id"><div data-definition-fields></div><button type="submit">ذخیره</button></form></div>`);
   await page.evaluate(() => {
     window.saved = [];
+    window.unitActions = [];
+    window.unitReadCount = 0;
     window.bootstrap = {Modal: {getOrCreateInstance: () => ({show() {}}), getInstance: () => ({hide() {}})}};
     window.AdminUI = {initStatusSwitch() {}, destroyDataTable() {}, refreshDataTable() {}, notify() {}, getJson: async (url, options) => {
-      if (options.method === 'GET') return url.endsWith('/unit-groups')
-        ? [{id: 1, name: 'جرم', idParent: null, isActive: true, sortOrder: 0}]
-        : url.endsWith('/units') ? [{id: 10, idParent: 1, parentName: 'جرم', nameFa: 'کیلوگرم', nameEn: 'Kilogram', isActive: true}] : [];
-      window.saved.push(JSON.parse(options.body)); return {message: 'ok'};
+      if (options.method === 'GET') {
+        if (url.endsWith('/unit-groups')) return [{id: 1, name: 'جرم', idParent: null, isActive: true, sortOrder: 0}];
+        if (url.endsWith('/units')) { window.unitReadCount += 1; return [{id: 10, idParent: 1, parentName: 'جرم', nameFa: 'کیلوگرم', nameEn: 'Kilogram', isActive: true}]; }
+        return [];
+      }
+      if (url.endsWith('/units/10/deactivate')) window.unitActions.push(url);
+      else window.saved.push(JSON.parse(options.body));
+      return {message: 'ok'};
     }};
   });
   await page.addScriptTag({path: 'Admin/wwwroot/js/admin-definitions.js'});
   await page.evaluate(() => window.AdminDefinitions.initialize(document));
-  assert.equal(await page.locator('[data-unit-tree] details').count(), 1);
+  assert.equal(await page.locator('[data-unit-tree][role=tree]').count(), 1);
+  assert.equal(await page.locator('[data-unit-tree] [role=treeitem]').count(), 2);
   assert.match(await page.locator('[data-unit-tree]').textContent(), /کیلوگرم/);
   assert.match(await page.locator('[data-unit-tree]').textContent(), /Kilogram/);
-  await page.locator('[data-unit-tree] summary').click();
-  await page.locator('[data-unit-tree] button').getByText('ویرایش', {exact: true}).click();
+  const group = page.locator('[data-unit-tree] [role=treeitem]').first();
+  assert.equal(await group.locator(':scope > .admin-permission-row [role=checkbox]').isDisabled(), true);
+  assert.match(await group.innerText(), /برای غیرفعال‌کردن گروه، ۱ واحد فعال/u);
+  await group.getByRole('button', {name: 'بازکردن جرم'}).click();
+  const unit = page.locator('[data-unit-tree] [role=treeitem]').nth(1);
+  assert.equal(await unit.getByRole('checkbox').getAttribute('aria-checked'), 'true');
+  await unit.getByRole('button', {name: 'ویرایش'}).click();
   assert.equal(await page.locator('[data-definition-fields] [name=parentId]').inputValue(), '1');
+  const readsBeforeStatusChange = await page.evaluate(() => window.unitReadCount);
+  await unit.getByRole('checkbox').click();
+  await page.waitForFunction(() => window.unitActions.length === 1);
+  assert.deepEqual(await page.evaluate(() => window.unitActions), ['/api/units/10/deactivate']);
+  assert.equal(await page.evaluate(() => window.unitReadCount), readsBeforeStatusChange);
+  assert.equal(await unit.getByRole('checkbox').getAttribute('aria-checked'), 'false');
+  assert.match(await unit.innerText(), /غیرفعال/u);
+  assert.equal(await group.locator(':scope > .admin-permission-row [role=checkbox]').isDisabled(), false);
+  assert.equal(await group.getByText(/برای غیرفعال‌کردن گروه/u).count(), 0);
   await page.locator('[data-definition-create]').click();
   await page.locator('[data-definition-form] [name=parentId]').selectOption('1');
   assert.equal(await page.locator('[data-definition-form] [name=isActive]').isChecked(), true);
