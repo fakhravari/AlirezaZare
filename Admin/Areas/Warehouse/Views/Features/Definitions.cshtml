@@ -57,11 +57,11 @@
         }
         <section class="panel panel-inverse">
             <div class="panel-heading">
-                <h2 class="panel-title">@(Model.FeatureId == "warehouses" ? "تخصیص انبار به شرکت" : Model.FeatureId == "references" ? "مراجع ثبت‌شده" : "فهرست تعریف‌ها")</h2>
+                <h2 class="panel-title">@(Model.FeatureId == "warehouses" ? "تخصیص انبار به شرکت" : Model.FeatureId == "references" ? "مراجع ثبت‌شده" : Model.FeatureId == "units" ? "درخت گروه‌های واحد و واحدها" : "فهرست تعریف‌ها")</h2>
                 <div class="panel-heading-btn">
                     @if (Model.FeatureId != "references")
                     {
-                        <button type="button" class="btn btn-primary btn-sm" data-definition-create><i class="fa fa-plus me-1" aria-hidden="true"></i>@(Model.FeatureId == "warehouses" ? "افزودن تخصیص" : "افزودن")</button>
+                        <button type="button" class="btn btn-primary btn-sm" data-definition-create><i class="fa fa-plus me-1" aria-hidden="true"></i>@(Model.FeatureId == "warehouses" ? "افزودن تخصیص" : Model.FeatureId == "units" ? "افزودن واحد" : "افزودن")</button>
                     }
                 </div>
             </div>
@@ -79,16 +79,22 @@
                         </select>
                     </div>
                 }
-                @if (new[] { "units", "product-units", "variants" }.Contains(Model.FeatureId, StringComparer.OrdinalIgnoreCase))
-                {
-                    <nav class="nav nav-pills mb-3" aria-label="تعریف‌های واحد و تنوع">
-                        <a class="nav-link @(Model.FeatureId == "units" ? "active" : "")" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="units" data-admin-nav>واحدها</a>
-                        <a class="nav-link @(Model.FeatureId == "product-units" ? "active" : "")" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="product-units" data-admin-nav>تاریخچه واحد و ضریب کالا</a>
-                        <a class="nav-link @(Model.FeatureId == "variants" ? "active" : "")" asp-area="Warehouse" asp-controller="Features" asp-action="Index" asp-route-feature="variants" data-admin-nav>تنوع کالا</a>
-                    </nav>
-                }
                 <div class="admin-data-status small text-muted" data-definition-status role="status" aria-live="polite">در حال بارگذاری…</div>
-                @if (Model.FeatureId == "product-units")
+                @if (Model.FeatureId == "units")
+                {
+                    <div class="border rounded p-3 mb-3">
+                        <h3 class="h6">مدیریت گروه واحدها</h3>
+                        <form class="row g-2 align-items-end" data-unit-group-form>
+                            <input type="hidden" name="id" value="" />
+                            <div class="col-12 col-md-6"><label class="form-label" for="unit-group-name">نام گروه</label><input id="unit-group-name" class="form-control" name="name" maxlength="100" required /></div>
+                            <div class="col-6 col-md-2"><label class="form-label" for="unit-group-sort">ترتیب</label><input id="unit-group-sort" class="form-control" name="sortOrder" type="number" min="0" step="1" value="0" required /></div>
+                            <div class="col-6 col-md-4 d-flex gap-2"><button class="btn btn-outline-primary" type="submit">افزودن گروه</button><button class="btn btn-default" type="button" data-unit-group-cancel hidden>انصراف</button></div>
+                        </form>
+                        <p class="small text-muted mt-2 mb-0">واحدهای قبلی در گروه «سایر واحدها» قرار می‌گیرند؛ از فرم ویرایش واحد می‌توانید آن‌ها را به گروه مناسب منتقل کنید.</p>
+                    </div>
+                    <div class="list-group" data-unit-tree aria-label="درخت گروه‌های واحد و واحدها"></div>
+                }
+                else if (Model.FeatureId == "product-units")
                 {
                     <div class="list-group" data-product-unit-tree aria-label="درخت واحدهای کالا"></div>
                 }

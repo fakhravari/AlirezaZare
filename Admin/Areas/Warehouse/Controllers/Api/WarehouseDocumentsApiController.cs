@@ -81,12 +81,12 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db, IWarehouse
                            {
                                productUnit.IdProduct,
                                unit.Id,
-                               unit.Name,
+                               unit.NameFa,
                                productUnit.ConversionFactor,
                                productUnit.IsBaseUnit
                            }).ToListAsync(cancellationToken);
         var unitGroups = units.GroupBy(x => x.IdProduct).ToDictionary(group => group.Key,
-            group => group.Select(x => new { x.Id, x.Name, x.ConversionFactor, x.IsBaseUnit }).ToArray());
+            group => group.Select(x => new { x.Id, Name = x.NameFa, x.ConversionFactor, x.IsBaseUnit }).ToArray());
         var items = await (from x in db.InventoryItems.AsNoTracking()
                            join baseUnit in db.WarehouseProductUnits.AsNoTracking().Where(link => link.IsActive && link.IsBaseUnit)
                                on x.IdProduct equals baseUnit.IdProduct
@@ -395,7 +395,7 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db, IWarehouse
         var selectedUnits = await (from productUnit in db.WarehouseProductUnits.AsNoTracking()
                                    join unit in db.WarehouseUnits.AsNoTracking() on productUnit.IdUnit equals unit.Id
                                    where productIds.Contains(productUnit.IdProduct) && productUnit.IsActive && unit.IsActive
-                                   select new { productUnit.IdProduct, productUnit.IdUnit, productUnit.ConversionFactor, unit.Name })
+                                   select new { productUnit.IdProduct, productUnit.IdUnit, productUnit.ConversionFactor, unit.NameFa })
             .ToListAsync(cancellationToken);
 
         var result = new List<PreparedLine>();
@@ -411,7 +411,7 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db, IWarehouse
             if (quantity <= 0 || baseQuantity <= 0 || baseQuantity > 999999999999999.999m) return [];
 
             result.Add(new PreparedLine(item.Id, unit.IdUnit, line.SalesPlanId, quantity, unit.ConversionFactor, baseQuantity,
-                item.Product.Name, item.ProductVariant?.Name, unit.Name));
+                item.Product.Name, item.ProductVariant?.Name, unit.NameFa));
         }
 
         return result.ToArray();

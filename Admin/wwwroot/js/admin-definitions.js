@@ -11,7 +11,7 @@
         companies: { fields: [["code", "کد شرکت", "text", true], ["name", "نام شرکت", "text", true], ["phone", "تلفن", "text"], ["address", "آدرس", "textarea"], ["description", "توضیحات", "textarea"]], columns: [["code", "کد"], ["name", "شرکت"], ["phone", "تلفن"], ["address", "آدرس"], ["description", "توضیحات"], ["isActive", "وضعیت", "active"]] },
         warehouses: { fields: [["companyId", "شرکت", "companies", true], ["code", "کد انبار", "text", true], ["warehouseTypeId", "نام انبار", "warehouse-types", true], ["isSalesWarehouse", "انبار فروش است", "checkbox"], ["ownerSalesPlanId", "طرح مالک انبار فروش", "plans"], ["isSiteWarehouse", "منبع موجودی سایت", "checkbox"]], columns: [["warehouseLabel", "شرکت / انبار"], ["isSalesWarehouse", "انبار فروش", "affects"], ["isSiteWarehouse", "منبع موجودی سایت", "siteWarehouse"], ["ownerSalesPlan", "طرح مالک"], ["isActive", "وضعیت", "active"]] },
         references: { fields: [["name", "نام مرجع", "text", true], ["partyType", "نوع مرجع", "select", true, [["Person", "شخص"], ["Organization", "سازمان"], ["Warehouse", "انبار"], ["Other", "سایر"]]], ["warehouseId", "انبار مرتبط", "warehouses"], ["externalPartyKey", "شناسهٔ بیرونی", "text"]], columns: [["name", "نام"], ["partyType", "نوع"], ["idWarehouse", "شناسهٔ انبار"], ["isActive", "وضعیت", "active"]] },
-        units: { fields: [["code", "کد واحد", "text", true], ["name", "نام واحد", "text", true], ["isActive", "واحد فعال است", "checkbox"]], columns: [["code", "کد"], ["name", "واحد"], ["isActive", "وضعیت", "active"]] },
+        units: { fields: [["unitGroupId", "گروه واحد", "unit-groups", true], ["nameFa", "نام فارسی", "text", true], ["nameEn", "نام انگلیسی", "text"], ["isActive", "واحد فعال است", "checkbox"]], columns: [["unitGroupName", "گروه"], ["nameFa", "نام فارسی"], ["nameEn", "نام انگلیسی"], ["isActive", "وضعیت", "active"]] },
         "document-types": { fields: [["code", "کد نوع سند", "text", true], ["name", "نام سند", "text", true], ["direction", "جهت سند", "select", true, [["R", "رسید"], ["I", "حواله"]]], ["affectsStock", "بر موجودی اثر دارد", "checkbox" ]], columns: [["code", "کد"], ["name", "نوع سند"], ["direction", "جهت", "direction"], ["affectsStock", "اثر موجودی", "affects"], ["isActive", "وضعیت", "active"]] }
         ,"product-units": { fields: [["productId", "کالا", "products", true], ["unitId", "واحد", "units", true], ["conversionFactor", "ضریب تبدیل به واحد اصلی", "number", true], ["isBaseUnit", "واحد اصلی کالا", "checkbox"]], columns: [["productName", "کالا"], ["unitName", "واحد"], ["conversionFactor", "ضریب تبدیل"], ["isBaseUnit", "اصلی", "base"], ["isActive", "وضعیت", "active"]] },
         variants: { fields: [["productId", "کالا", "products", true], ["name", "نام تنوع", "text", true], ["code", "کد تنوع", "text"], ["attributes", "ویژگی‌های تنوع", "attributes"], ["isDefault", "تنوع پیش‌فرض", "checkbox"]], columns: [["productName", "کالا"], ["name", "تنوع"], ["code", "کد"], ["attributes", "ویژگی‌ها", "attributes"], ["isDefault", "پیش‌فرض", "default"], ["isActive", "وضعیت", "active"]] }
@@ -158,6 +158,73 @@
         }
         setStatus(page, rows.length ? "" : "واحد غیرفعالی در تاریخچه ثبت نشده است.");
     }
+    function renderUnitTree(page, groups, units) {
+        const tree = page.querySelector("[data-unit-tree]");
+        tree.replaceChildren();
+        for (const group of groups) {
+            const members = units.filter(unit => unit.idUnitGroup === group.id);
+            const branch = element("details", null, "list-group-item p-0 mb-2 border rounded");
+            const summary = element("summary", null, "d-flex align-items-center justify-content-between gap-2 px-3 py-2 fw-semibold");
+            summary.append(element("span", `${group.name}${group.isActive ? "" : " · غیرفعال"}`));
+            summary.append(element("span", `${fmt.format(members.length)} واحد`, "badge bg-light text-dark"));
+            branch.append(summary);
+            const children = element("ul", null, "list-group list-group-flush px-4 pb-2");
+            const groupActions = element("li", null, "list-group-item d-flex flex-wrap justify-content-end gap-2");
+            if (page.dataset.canEdit === "true") {
+                const edit = actionButton("ویرایش گروه", "fa-pen-to-square", "btn btn-sm btn-default");
+                edit.addEventListener("click", () => {
+                    const form = page.querySelector("[data-unit-group-form]");
+                    form.elements.id.value = group.id; form.elements.name.value = group.name; form.elements.sortOrder.value = group.sortOrder;
+                    form.querySelector('[type="submit"]').textContent = "ذخیرهٔ گروه"; form.querySelector("[data-unit-group-cancel]").hidden = false;
+                    form.elements.name.focus();
+                });
+                groupActions.append(edit);
+                if (group.isActive ? page.dataset.canDeactivate === "true" : page.dataset.canEdit === "true") {
+                    const toggle = actionButton(group.isActive ? "غیرفعال‌سازی گروه" : "فعال‌سازی گروه", group.isActive ? "fa-toggle-off" : "fa-toggle-on", group.isActive ? "btn btn-sm btn-outline-danger" : "btn btn-sm btn-outline-success");
+                    if (group.isActive) toggle.dataset.adminConfirm = "گروه واحد غیرفعال شود؟ گروه دارای واحد فعال قابل غیرفعال‌سازی نیست.";
+                    toggle.addEventListener("click", async () => {
+                        if (toggle.disabled) return; toggle.disabled = true;
+                        try {
+                            const result = group.isActive
+                                ? await request(page, `${page.dataset.api}/unit-groups/${group.id}/deactivate`, "POST", {})
+                                : await request(page, `${page.dataset.api}/unit-groups/${group.id}`, "PUT", { name: group.name, sortOrder: group.sortOrder, isActive: true });
+                            ui.notify(result.message, "success"); await load(page);
+                        } catch (error) { ui.notify(error.message, "danger"); } finally { toggle.disabled = false; }
+                    });
+                    groupActions.append(toggle);
+                }
+            }
+            if (groupActions.childElementCount) children.append(groupActions);
+            for (const unit of members) {
+                const node = element("li", null, "list-group-item d-flex flex-wrap align-items-center justify-content-between gap-2");
+                node.append(element("span", `${unit.nameFa}${unit.nameEn ? ` / ${unit.nameEn}` : ""}${unit.isActive ? "" : " · غیرفعال"}`, unit.isActive ? "" : "text-muted"));
+                const actions = element("div", null, "d-flex flex-wrap gap-1");
+                if (group.isActive && page.dataset.canEdit === "true") {
+                    const editUnit = actionButton("ویرایش", "fa-pen-to-square", "btn btn-sm btn-default");
+                    editUnit.addEventListener("click", () => void openForm(page, unit, configs.units).catch(error => ui.notify(error.message || "بازکردن فرم ناموفق بود.", "danger")));
+                    actions.append(editUnit);
+                }
+                if (unit.isActive ? page.dataset.canDeactivate === "true" : page.dataset.canEdit === "true") {
+                    const toggle = actionButton(unit.isActive ? "غیرفعال‌سازی" : "فعال‌سازی", unit.isActive ? "fa-toggle-off" : "fa-toggle-on", unit.isActive ? "btn btn-sm btn-outline-danger" : "btn btn-sm btn-outline-success");
+                    if (unit.isActive) toggle.dataset.adminConfirm = "این واحد غیرفعال شود؟ واحد مورد استفادهٔ کالا غیرفعال نمی‌شود.";
+                    toggle.addEventListener("click", async () => {
+                        if (toggle.disabled) return; toggle.disabled = true;
+                        try {
+                            const result = unit.isActive
+                                ? await request(page, `${page.dataset.api}/units/${unit.id}/deactivate`, "POST", {})
+                                : await request(page, `${page.dataset.api}/units/${unit.id}`, "PUT", { nameFa: unit.nameFa, nameEn: unit.nameEn, unitGroupId: unit.idUnitGroup, isActive: true });
+                            ui.notify(result.message, "success"); await load(page);
+                        } catch (error) { ui.notify(error.message, "danger"); } finally { toggle.disabled = false; }
+                    });
+                    actions.append(toggle);
+                }
+                node.append(actions); children.append(node);
+            }
+            if (!members.length) children.append(element("li", "هنوز واحدی در این گروه ثبت نشده است.", "list-group-item text-muted"));
+            branch.append(children); tree.append(branch);
+        }
+        setStatus(page, groups.length ? "" : "گروهی تعریف نشده است.");
+    }
     function addField(host, field, data, lookups) {
         const [key, label, type = "text", required = false, choices = []] = field;
         const wrap = element("div", null, "mb-3");
@@ -178,21 +245,21 @@
             const check = element("input", null, "form-check-input"); check.type = "checkbox"; ui.initStatusSwitch(check); check.name = key; check.checked = Boolean(data[key]); check.id = `definition-${key}`;
             const caption = element("label", label, "form-check-label"); caption.htmlFor = check.id; wrap.className = "form-check mb-3"; wrap.append(check, caption);
         } else {
-            const control = ["select", "warehouses", "products", "units", "companies", "plans", "warehouse-types"].includes(type) ? element("select", null, "form-select") : type === "textarea" ? element("textarea", null, "form-control") : element("input", null, "form-control");
+            const control = ["select", "warehouses", "products", "units", "companies", "plans", "warehouse-types", "unit-groups"].includes(type) ? element("select", null, "form-select") : type === "textarea" ? element("textarea", null, "form-control") : element("input", null, "form-control");
             control.name = key; control.id = `definition-${key}`; control.required = required;
             if (type === "select") {
                 const empty = element("option", "انتخاب کنید"); empty.value = ""; control.append(empty);
                 for (const [value, name] of choices) { const option = element("option", name); option.value = value; control.append(option); }
             }
-            if (["warehouses", "products", "units", "companies", "plans", "warehouse-types"].includes(type)) {
+            if (["warehouses", "products", "units", "companies", "plans", "warehouse-types", "unit-groups"].includes(type)) {
                 const choices = type === "warehouses" ? lookups.warehouses : (lookups[type] || []);
                 const empty = element("option", type === "warehouses" ? "بدون انبار مرتبط" : "انتخاب کنید"); empty.value = ""; control.append(empty);
-                for (const row of choices) { const option = element("option", type === "warehouses" ? `${row.companyName} / ${row.name} (${row.code})` : (row.name || row.displayName)); option.value = row.id; control.append(option); }
+                for (const row of choices.filter(row => row.isActive !== false || String(row.id) === String(data[key] ?? ""))) { const option = element("option", `${row.name || row.displayName}${row.isActive === false ? " (غیرفعال)" : ""}`); option.value = row.id; control.append(option); }
             }
             if (type === "text") control.type = "text";
             if (type === "textarea") control.rows = 4;
             if (type === "number") { control.type = "number"; control.min = key === "conversionFactor" ? "0.000000001" : "1"; control.step = key === "conversionFactor" ? "any" : "1"; if (key === "conversionFactor") control.max = "999999999.999999999"; }
-            if (type === "select" || ["warehouses", "products", "units", "companies", "plans", "warehouse-types"].includes(type)) control.value = data[key] == null ? "" : String(data[key]);
+            if (type === "select" || ["warehouses", "products", "units", "companies", "plans", "warehouse-types", "unit-groups"].includes(type)) control.value = data[key] == null ? "" : String(data[key]);
             else control.value = data[key] ?? (key === "conversionFactor" ? "1" : "");
             const caption = element("label", label, "form-label"); caption.htmlFor = control.id; wrap.append(caption, control);
         }
@@ -222,9 +289,11 @@
         if (data && page.dataset.definitionSection === "warehouses") data = { ...data, companyId: data.idCompany, warehouseTypeId: data.idWarehouseType, ownerSalesPlanId: data.idOwnerSalesPlanReference };
         if (data && page.dataset.definitionSection === "references") data = { ...data, warehouseId: data.idWarehouse };
         if (data && page.dataset.definitionSection === "product-units") data = { ...data, productId: data.idProduct, unitId: data.idUnit };
+        if (data && page.dataset.definitionSection === "units") data = { ...data, unitGroupId: data.idUnitGroup };
         let lookups = { warehouses: [] };
         if (["references", "product-units", "variants", "warehouses"].includes(page.dataset.definitionSection)) lookups = await request(page, `${page.dataset.api}/lookups`);
         if (page.dataset.definitionSection === "warehouses") lookups["warehouse-types"] = await request(page, page.dataset.api + "/warehouse-types");
+        if (page.dataset.definitionSection === "units") lookups["unit-groups"] = await request(page, page.dataset.api + "/unit-groups");
         if (!page.isConnected || formRequests.get(page) !== sequence) return;
         host.replaceChildren(); form.reset(); form.elements.id.value = data?.id || "";
         for (const field of config.fields) {
@@ -305,6 +374,14 @@
         if (section === "sales-plan-mapping") { await loadMapping(page); setStatus(page, ""); return; }
         const config = configs[section];
         if (section === "warehouses") await loadWarehouseTypes(page);
+        if (section === "units") {
+            const [groups, units] = await Promise.all([
+                request(page, `${page.dataset.api}/unit-groups`),
+                request(page, `${page.dataset.api}/units`)
+            ]);
+            renderUnitTree(page, groups, units);
+            return;
+        }
         const rows = await request(page, `${page.dataset.api}/${section}`);
         if (section === "product-units") renderProductUnitTree(page, rows.filter(item => item.isActive === false), config);
         else renderTable(page, rows, config);
@@ -345,6 +422,28 @@
                         finally { button.disabled = false; }
                     });
                 }
+                if (section === "units") {
+                    const groupForm = page.querySelector("[data-unit-group-form]");
+                    const resetGroupForm = () => {
+                        groupForm.reset(); groupForm.elements.id.value = ""; groupForm.elements.sortOrder.value = "0";
+                        groupForm.querySelector('[type="submit"]').textContent = "افزودن گروه";
+                        groupForm.querySelector("[data-unit-group-cancel]").hidden = true;
+                    };
+                    groupForm.hidden = page.dataset.canCreate !== "true" && page.dataset.canEdit !== "true";
+                    groupForm.querySelector("[data-unit-group-cancel]").addEventListener("click", resetGroupForm);
+                    groupForm.addEventListener("submit", async event => {
+                        event.preventDefault(); if (groupForm.dataset.saving === "true") return;
+                        const id = groupForm.elements.id.value, name = groupForm.elements.name.value.trim();
+                        if (!name) { ui.notify("نام گروه را وارد کنید.", "danger"); groupForm.elements.name.focus(); return; }
+                        if (page.dataset.canCreate !== "true" && !id || id && page.dataset.canEdit !== "true") return;
+                        const button = groupForm.querySelector('[type="submit"]'); groupForm.dataset.saving = "true"; button.disabled = true;
+                        try {
+                            const result = await request(page, `${page.dataset.api}/unit-groups${id ? `/${id}` : ""}`, id ? "PUT" : "POST", { name, sortOrder: Number(groupForm.elements.sortOrder.value) || 0, isActive: true });
+                            ui.notify(result.message, "success"); resetGroupForm(); await load(page);
+                        } catch (error) { ui.notify(error.message, "danger"); }
+                        finally { groupForm.dataset.saving = "false"; button.disabled = false; }
+                    });
+                }
                 const config = configs[section];
                 page.querySelector("[data-reference-type-filter]")?.addEventListener("change", () => void load(page));
                 const createButton = page.querySelector("[data-definition-create]");
@@ -363,7 +462,7 @@
                     const values = new FormData(form), id = values.get("id"); const body = {};
                     for (const [key, , type] of config.fields) {
                         if (type === "attributes") continue;
-                        body[key] = type === "checkbox" ? Boolean(form.elements.namedItem(key)?.checked) : (key === "idStockOwnerType" || ["number", "products", "units", "warehouses", "companies", "plans", "warehouse-types"].includes(type) ? Number(values.get(key)) || null : values.get(key));
+                        body[key] = type === "checkbox" ? Boolean(form.elements.namedItem(key)?.checked) : (key === "idStockOwnerType" || ["number", "products", "units", "companies", "plans", "warehouse-types", "unit-groups"].includes(type) ? Number(values.get(key)) || null : values.get(key));
                     }
                     if (section === "variants") body.attributes = [...form.querySelectorAll("[data-variant-attribute]")].map(row => Object.fromEntries([...row.querySelectorAll("[data-attribute-field]")].map(input => [input.dataset.attributeField, input.value.trim()])));
                     if (section !== "units") body.isActive = true;

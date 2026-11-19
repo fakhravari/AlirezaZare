@@ -16,6 +16,7 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
     public DbSet<AdminUserWarehouseAccess> AdminUserWarehouseAccesses => Set<AdminUserWarehouseAccess>();
     public DbSet<WarehouseDocumentType> WarehouseDocumentTypes => Set<WarehouseDocumentType>();
     public DbSet<WarehouseUnit> WarehouseUnits => Set<WarehouseUnit>();
+    public DbSet<WarehouseUnitGroup> WarehouseUnitGroups => Set<WarehouseUnitGroup>();
     public DbSet<WarehouseParty> WarehouseParties => Set<WarehouseParty>();
     public DbSet<WarehouseProductUnit> WarehouseProductUnits => Set<WarehouseProductUnit>();
     public DbSet<WarehouseDocumentRecord> WarehouseDocuments => Set<WarehouseDocumentRecord>();
@@ -366,9 +367,17 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
         {
             entity.ToTable("Unit", "Warehouse");
             entity.HasKey(x => x.Id);
-            entity.Property(x => x.Code).HasMaxLength(50).IsRequired();
+            entity.Property(x => x.NameFa).HasMaxLength(100).IsRequired();
+            entity.Property(x => x.NameEn).HasMaxLength(100);
+            entity.HasOne<WarehouseUnitGroup>().WithMany().HasForeignKey(x => x.IdUnitGroup).OnDelete(DeleteBehavior.Restrict);
+        });
+        modelBuilder.Entity<WarehouseUnitGroup>(entity =>
+        {
+            entity.ToTable("UnitGroup", "Warehouse");
+            entity.HasKey(x => x.Id);
             entity.Property(x => x.Name).HasMaxLength(100).IsRequired();
-            entity.HasIndex(x => x.Code).IsUnique();
+            entity.HasIndex(x => x.Name).IsUnique();
+            entity.HasIndex(x => new { x.SortOrder, x.Name });
         });
         modelBuilder.Entity<WarehouseParty>(entity =>
         {

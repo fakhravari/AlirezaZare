@@ -10,25 +10,35 @@ test('unit status is submitted from the definition form', {skip: !existsSync(chr
   const browser = await chromium.launch({headless: true});
   t.after(() => browser.close());
   const page = await browser.newPage();
-  await page.setContent(`<div data-admin-definitions data-api="/api" data-definition-section="units" data-can-create="true" data-can-edit="true" data-can-deactivate="true"><button data-definition-create>افزودن</button><div data-definition-status></div><table data-admin-datatable><thead data-definition-head></thead><tbody data-definition-rows></tbody></table></div><div id="admin-definition-modal"><h2 id="admin-definition-title"></h2><form data-definition-form><input name="id"><div data-definition-fields></div><button type="submit">ذخیره</button></form></div>`);
+  await page.setContent(`<div data-admin-definitions data-api="/api" data-definition-section="units" data-can-create="true" data-can-edit="true" data-can-deactivate="true"><button data-definition-create>افزودن</button><form data-unit-group-form><input name="id"><input name="name"><input name="sortOrder"><button type="submit"></button><button type="button" data-unit-group-cancel></button></form><div data-unit-tree></div><div data-definition-status></div></div><div id="admin-definition-modal"><h2 id="admin-definition-title"></h2><form data-definition-form><input name="id"><div data-definition-fields></div><button type="submit">ذخیره</button></form></div>`);
   await page.evaluate(() => {
     window.saved = [];
     window.bootstrap = {Modal: {getOrCreateInstance: () => ({show() {}}), getInstance: () => ({hide() {}})}};
     window.AdminUI = {initStatusSwitch() {}, destroyDataTable() {}, refreshDataTable() {}, notify() {}, getJson: async (url, options) => {
-      if (options.method === 'GET') return [];
+      if (options.method === 'GET') return url.endsWith('/unit-groups')
+        ? [{id: 1, name: 'جرم', isActive: true, sortOrder: 0}]
+        : url.endsWith('/units') ? [{id: 10, idUnitGroup: 1, unitGroupName: 'جرم', nameFa: 'کیلوگرم', nameEn: 'Kilogram', isActive: true}] : [];
       window.saved.push(JSON.parse(options.body)); return {message: 'ok'};
     }};
   });
   await page.addScriptTag({path: 'Admin/wwwroot/js/admin-definitions.js'});
   await page.evaluate(() => window.AdminDefinitions.initialize(document));
+  assert.equal(await page.locator('[data-unit-tree] details').count(), 1);
+  assert.match(await page.locator('[data-unit-tree]').textContent(), /کیلوگرم/);
+  assert.match(await page.locator('[data-unit-tree]').textContent(), /Kilogram/);
+  await page.locator('[data-unit-tree] summary').click();
+  await page.locator('[data-unit-tree] button').getByText('ویرایش', {exact: true}).click();
+  assert.equal(await page.locator('[data-definition-fields] [name=unitGroupId]').inputValue(), '1');
   await page.locator('[data-definition-create]').click();
-  assert.equal(await page.locator('[name=isActive]').isChecked(), true);
-  await page.locator('[name=code]').fill('unit');
-  await page.locator('[name=name]').fill('واحد');
-  await page.locator('[name=isActive]').uncheck();
+  await page.locator('[data-definition-form] [name=unitGroupId]').selectOption('1');
+  assert.equal(await page.locator('[data-definition-form] [name=isActive]').isChecked(), true);
+  await page.locator('[data-definition-form] [name=nameFa]').fill('واحد');
+  await page.locator('[data-definition-form] [name=nameEn]').fill('Unit');
+  await page.locator('[data-definition-form] [name=isActive]').uncheck();
   await page.locator('[data-definition-form]').evaluate(form => form.requestSubmit());
   await page.waitForFunction(() => window.saved.length === 1);
   assert.equal((await page.evaluate(() => window.saved[0])).isActive, false);
+  assert.equal((await page.evaluate(() => window.saved[0])).nameEn, 'Unit');
 });
 
 test('product editor limits base-unit changes to products without warehouse document lines', async () => {
@@ -40,6 +50,49 @@ test('product editor limits base-unit changes to products without warehouse docu
   assert.match(api, /baseLink\.ConversionFactor = 1m/);
   assert.match(markup, /id="product-edit-unit"[^>]*name="unitId"/);
   assert.doesNotMatch(markup, /data-product-badge-create/);
+});
+
+test('warehouse units are grouped by a required database relation and the migration preserves existing units', async () => {
+  const api = await read('Admin/Areas/Warehouse/Controllers/Api/WarehouseDefinitionsApiController.cs', 'utf8');
+  const model = await read('Data/Infrastructure/Persistence/ShopDbContext.cs', 'utf8');
+  const migration = await read('Shop/Features/Store/Database/Migrations/129-warehouse-unit-groups.sql', 'utf8');
+  const view = await read('Admin/Areas/Warehouse/Views/Features/Definitions.cshtml', 'utf8');
+  assert.match(api, /"unit-groups" => Ok\(await db\.WarehouseUnitGroups/);
+  assert.match(api, /unit\.IdUnitGroup, UnitGroupName = unitGroup\.Name/);
+  assert.match(api, /input\.UnitGroupId < 1/);
+  assert.match(api, /x\.IdUnitGroup == id && x\.IsActive/);
+  assert.match(model, /HasOne<WarehouseUnitGroup>\(\)\.WithMany\(\)\.HasForeignKey\(x => x\.IdUnitGroup\)\.OnDelete\(DeleteBehavior\.Restrict\)/);
+  assert.match(migration, /N'سایر واحدها'/);
+  assert.match(migration, /ALTER COLUMN \[IdUnitGroup\] BIGINT NOT NULL/);
+  assert.match(view, /data-unit-tree/);
+  assert.match(view, /data-unit-group-form/);
+});
+
+test('warehouse units expose Persian and English names without a code field', async () => {
+  const model = await read('Data/Domain/Warehouse/Entities/WarehouseDefinitions.cs', 'utf8');
+  const config = await read('Data/Infrastructure/Persistence/ShopDbContext.cs', 'utf8');
+  const api = await read('Admin/Areas/Warehouse/Controllers/Api/WarehouseDefinitionsApiController.cs', 'utf8');
+  const script = await read('Admin/wwwroot/js/admin-definitions.js', 'utf8');
+  const schemaMigration = await read('Shop/Features/Store/Database/Migrations/130-warehouse-unit-name-languages.sql', 'utf8');
+  const translationMigration = await read('Shop/Features/Store/Database/Migrations/131-warehouse-unit-english-names.sql', 'utf8');
+  assert.match(model, /public string NameFa \{ get; set; \}/);
+  assert.match(model, /public string\? NameEn \{ get; set; \}/);
+  assert.doesNotMatch(model.slice(model.indexOf('public sealed class WarehouseUnit\n'), model.indexOf('public sealed class WarehouseUnitGroup')), /Code|public string Name \{/);
+  assert.match(config, /entity\.Property\(x => x\.NameFa\)\.HasMaxLength\(100\)\.IsRequired\(\)/);
+  assert.match(api, /entity\.NameFa = input\.NameFa\.Trim\(\)/);
+  assert.match(script, /\["nameFa", "نام فارسی"/);
+  assert.match(script, /\["nameEn", "نام انگلیسی"/);
+  assert.doesNotMatch(script.slice(script.indexOf('units: {'), script.indexOf('"document-types"')), /\["code"/);
+  assert.match(schemaMigration, /sp_rename N'Warehouse\.Unit\.Name', N'NameFa'/);
+  assert.match(schemaMigration, /DROP COLUMN \[Code\]/);
+  assert.match(translationMigration, /WHEN 73 THEN N'Milliliter'/);
+});
+
+test('warehouse definition pages rely on the sidebar instead of repeating the local feature links', async () => {
+  const view = await read('Admin/Areas/Warehouse/Views/Features/Definitions.cshtml', 'utf8');
+  assert.doesNotMatch(view, /aria-label="تعریف‌های واحد و تنوع"/);
+  assert.match(view, /data-unit-tree/);
+  assert.match(view, /data-product-unit-tree/);
 });
 
 test('editor locks a documented product unit, sends it on save, and unlocks the next product', {skip: !existsSync(chromium.executablePath())}, async t => {

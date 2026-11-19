@@ -123,14 +123,14 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
         long? baseUnitId = productUnitLinks.Where(x => x.IsActive && x.IsBaseUnit).Select(x => (long?)x.IdUnit).SingleOrDefault();
         if (!baseUnitId.HasValue) return Conflict(new { title = "واحد پایهٔ فعال برای کالا تعریف نشده است." });
         long[] historicalUnitIds = productUnitLinks.Where(x => !x.IsActive).Select(x => x.IdUnit).ToArray();
-        var units = await db.WarehouseUnits.AsNoTracking().Where(x => x.IsActive || x.Id == baseUnitId.Value).OrderBy(x => x.Name)
+        var units = await db.WarehouseUnits.AsNoTracking().Where(x => x.IsActive || x.Id == baseUnitId.Value).OrderBy(x => x.NameFa)
             .Where(x => x.Id == baseUnitId.Value || !historicalUnitIds.Contains(x.Id))
-            .Select(x => new { x.Id, Name = x.IsActive ? x.Name : x.Name + " (غیرفعال)", x.IsActive }).ToListAsync(cancellationToken);
+            .Select(x => new { x.Id, Name = x.IsActive ? x.NameFa : x.NameFa + " (غیرفعال)", x.IsActive }).ToListAsync(cancellationToken);
         var unitConversions = await (from link in db.WarehouseProductUnits.AsNoTracking()
                                      join unit in db.WarehouseUnits.AsNoTracking() on link.IdUnit equals unit.Id
                                      where link.IdProduct == id && link.IsActive && !link.IsBaseUnit
-                                     orderby unit.Name
-                                     select new { link.IdUnit, UnitName = unit.Name, link.ConversionFactor }).ToListAsync(cancellationToken);
+                                     orderby unit.NameFa
+                                     select new { link.IdUnit, UnitName = unit.NameFa, link.ConversionFactor }).ToListAsync(cancellationToken);
         bool hasWarehouseDocuments = await HasWarehouseDocuments(id, cancellationToken);
         return Ok(new { product = new { product.Id, product.code, product.Name, product.EnglishName, product.IdBrand, product.IdCategory, IdBaseUnit = baseUnitId.Value, PriceAmount = FinalPrice(price), DiscountPercent = price?.DiscountPercent ?? 0m, product.MaxPurchaseQuantity }, brands, categories, units, unitConversions, unavailableUnitIds = historicalUnitIds, hasWarehouseDocuments });
     }
@@ -159,12 +159,12 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
         string? brandName = product.IdBrand is long brandId
             ? await db.StoreBrands.AsNoTracking().Where(x => x.Id == brandId).Select(x => x.NameFa).SingleOrDefaultAsync(cancellationToken)
             : null;
-        string? unitName = await db.WarehouseUnits.AsNoTracking().Where(x => x.Id == baseUnitId.Value).Select(x => x.Name).SingleOrDefaultAsync(cancellationToken);
+        string? unitName = await db.WarehouseUnits.AsNoTracking().Where(x => x.Id == baseUnitId.Value).Select(x => x.NameFa).SingleOrDefaultAsync(cancellationToken);
         var secondaryUnits = await (from link in db.WarehouseProductUnits.AsNoTracking()
                                     join unit in db.WarehouseUnits.AsNoTracking() on link.IdUnit equals unit.Id
                                     where link.IdProduct == id && link.IsActive && !link.IsBaseUnit
-                                    orderby unit.Name
-                                    select new { link.IdUnit, UnitName = unit.Name, link.ConversionFactor })
+                                    orderby unit.NameFa
+                                    select new { link.IdUnit, UnitName = unit.NameFa, link.ConversionFactor })
             .ToListAsync(cancellationToken);
 
         string? categoryPath = null;
@@ -579,8 +579,8 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
         var brands = await db.StoreBrands.AsNoTracking().Where(x => x.IsActive).OrderBy(x => x.NameFa)
             .Select(x => new EditorOption { Id = x.Id, Name = x.NameFa }).ToListAsync(cancellationToken);
         var categories = await GetLeafCategoryOptions(cancellationToken);
-        var units = await db.WarehouseUnits.AsNoTracking().Where(x => x.IsActive).OrderBy(x => x.Name)
-            .Select(x => new EditorOption { Id = x.Id, Name = x.Name }).ToListAsync(cancellationToken);
+        var units = await db.WarehouseUnits.AsNoTracking().Where(x => x.IsActive).OrderBy(x => x.NameFa)
+            .Select(x => new EditorOption { Id = x.Id, Name = x.NameFa }).ToListAsync(cancellationToken);
 
         return Ok(new { brands, categories, units });
     }

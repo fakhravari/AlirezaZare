@@ -123,9 +123,9 @@ public sealed class StorePaidOrdersDispatchApiController(ShopDbContext db, IWare
             var inventoryItems = await db.InventoryItems.AsNoTracking().Where(x => productIds.Contains(x.IdProduct))
                 .Select(x => new { x.Id, x.IdProduct, x.IdProductVariant }).ToListAsync(cancellationToken);
             long[] unitIds = baseUnitByProduct.Values.Distinct().ToArray();
-            var unitNames = await db.WarehouseUnits.AsNoTracking().Where(x => unitIds.Contains(x.Id)).Select(x => new { x.Id, x.Name }).ToDictionaryAsync(x => x.Id, x => x.Name, cancellationToken);
+            var unitNames = await db.WarehouseUnits.AsNoTracking().Where(x => unitIds.Contains(x.Id)).Select(x => new { x.Id, Name = x.NameFa }).ToDictionaryAsync(x => x.Id, x => x.Name, cancellationToken);
             var variantNames = await db.ProductVariants.AsNoTracking().Where(x => variantIds.Contains(x.Id))
-                .Select(x => new { x.Id, x.Name }).ToDictionaryAsync(x => x.Id, x => x.Name, cancellationToken);
+                .Select(x => new { x.Id, Name = x.Name }).ToDictionaryAsync(x => x.Id, x => x.Name, cancellationToken);
             var inventoryByProductVariant = inventoryItems.GroupBy(x => (x.IdProduct, x.IdProductVariant)).ToDictionary(x => x.Key, x => x.ToArray());
             var lineDetails = new List<DispatchLineDetail>(orderItems.Count);
             foreach (var line in orderItems)

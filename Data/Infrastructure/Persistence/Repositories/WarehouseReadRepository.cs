@@ -89,7 +89,7 @@ public sealed class WarehouseReadRepository(ShopDbContext dbContext) : IWarehous
                 x.inventoryItem.ProductVariant == null ? null : x.inventoryItem.ProductVariant.Name,
                 x.plan.StoreSalesPlanKey,
                 x.plan.DisplayName,
-                x.unit.Name,
+                x.unit.NameFa,
                 x.plan.IsRegular,
                 x.balance == null ? 0m : x.balance.Quantity,
                 x.plan.IsRegular && x.balance != null ? x.balance.MinimumQuantity : 0m,

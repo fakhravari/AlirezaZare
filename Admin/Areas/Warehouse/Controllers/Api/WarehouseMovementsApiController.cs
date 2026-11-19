@@ -156,7 +156,7 @@ public sealed class WarehouseMovementsApiController(ShopDbContext db) : Controll
             Variant = x.item.ProductVariant == null ? null : x.item.ProductVariant.Name,
             PlanId = x.plan.Id,
             SalesPlan = x.plan.DisplayName,
-            Unit = x.unit.Name
+            Unit = x.unit.NameFa
         }).Select(group => new
         {
             group.Key.WarehouseId,
