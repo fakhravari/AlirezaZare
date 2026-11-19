@@ -697,10 +697,10 @@
 .article-feedback-admin-reply {
   display: grid;
   width: min(100%, 480px);
-  gap: 8px;
+  gap: 6px;
   margin: 14px 0 0;
   margin-inline-end: auto;
-  padding: 14px 16px;
+  padding: 10px 12px;
   border: 1px solid #ead9a8;
   border-inline-start: 4px solid #d5a91e;
   border-radius: 14px;
@@ -728,7 +728,7 @@
   width: fit-content;
   align-items: center;
   gap: 6px;
-  padding: 4px 9px;
+  padding: 3px 8px;
   border: 1px solid #c5dfcb;
   border-radius: 999px;
   background: #e6f4e9;
@@ -741,7 +741,7 @@
   margin: 0;
   color: #435b4a;
   font-size: 12px;
-  line-height: 1.8;
+  line-height: 1.7;
   text-align: right;
 }
 @media (prefers-reduced-motion: reduce) {

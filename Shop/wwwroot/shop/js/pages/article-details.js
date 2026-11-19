@@ -73,6 +73,7 @@ window.HNUI.mount("pages-article-details", document, () => {
         if (Number.isFinite(rating) && rating >= 1 && rating <= 5) {
           const stars = document.createElement("span");
           stars.className = "article-feedback-stars";
+          stars.setAttribute("role", "img");
           stars.setAttribute("aria-label", `امتیاز ${formatNumber(rating)} از ۵`);
           for (let score = 1; score <= 5; score += 1) {
             const ratingIcon = document.createElement("i");
@@ -80,10 +81,6 @@ window.HNUI.mount("pages-article-details", document, () => {
             ratingIcon.setAttribute("aria-hidden", "true");
             stars.append(ratingIcon);
           }
-          const ratingValue = document.createElement("bdi");
-          ratingValue.dir = "rtl";
-          ratingValue.textContent = `${formatNumber(rating)} از ۵`;
-          stars.append(ratingValue);
           meta.append(stars);
         }
         const separator = document.createElement("span");

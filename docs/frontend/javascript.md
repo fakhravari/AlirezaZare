@@ -31,7 +31,7 @@
 
 ویرایشگر مشترک `Admin/wwwroot/js/admin-rich-editor.js` ارتفاع معمول ۱۹۰ پیکسل دارد؛ textarea مشخص می‌تواند با `data-rich-editor-height` ارتفاعی بین ۱۲۰ تا ۶۰۰ پیکسل درخواست کند. این ویژگی برای پاسخ‌های طولانی مدیریتی استفاده می‌شود و ابزار و پاک‌سازی HTML مشترک را تغییر نمی‌دهد.
 
-فرم تماس در `pages/contact.js`، پیگیری سفارش در `pages/tracking.js` و پیام‌های پروفایل در `pages/account-page.js` از API هم‌مبدأ با `HNUI.api.request` استفاده می‌کنند. فرم خبرنامه در `layout/main.js` نشست را به سرور واگذار می‌کند تا ترجیح حساب یا ایمیل مهمان در مقصد درست ذخیره شود. جزئیات مسیر و مالکیت داده در [راهنمای حساب](../account/profile.md)، [صفحه‌های محتوا](../content/pages.md) و [منابع داده](../architecture/data-sources.md) است.
+فرم تماس در `pages/contact.js` اعتبارسنجی اختصاصی دارد و `core/form-validation.js` فرم‌های سفارشی را از اعتبارسنجی رویدادهای ورودی و reset مستثنا می‌کند تا خطای تکراری نسازد. فرم تماس، پیگیری سفارش در `pages/tracking.js` و پیام‌های پروفایل در `pages/account-page.js` از API هم‌مبدأ با `HNUI.api.request` استفاده می‌کنند. فرم خبرنامه در `layout/main.js` نشست را به سرور واگذار می‌کند تا ترجیح حساب یا ایمیل مهمان در مقصد درست ذخیره شود. جزئیات مسیر و مالکیت داده در [راهنمای حساب](../account/profile.md)، [صفحه‌های محتوا](../content/pages.md) و [منابع داده](../architecture/data-sources.md) است.
 
 پیش از تحویل، checker UI، syntax/test موجود و Console/Network صفحه را بررسی کنید؛ جزئیات [کیفیت](../development/quality.md).
 

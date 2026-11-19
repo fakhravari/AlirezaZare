@@ -1071,9 +1071,15 @@
   word-break: normal;
 }
 
-#productView #product-expert > p.product-expert-intro {
+#productView #product-expert > p.product-expert-intro,
+#productView #product-expert .product-expert-note > p,
+#productView #product-reviews .product-feedback-card > p,
+#productView #product-reviews .product-feedback-admin-reply > p {
   width: 100%;
-  max-width: 78ch;
+  max-width: 100%;
+}
+
+#productView #product-expert > p.product-expert-intro {
   margin-inline: 0;
   direction: rtl;
   text-align: right;

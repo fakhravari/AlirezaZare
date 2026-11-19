@@ -2,7 +2,6 @@ using System.Net.Mail;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
-using Microsoft.Extensions.Options;
 using Shop.Data.Application.Email.Contracts;
 using Shop.Data.Domain.Store.Entities;
 using Shop.Data.Helpers.Extensions;
@@ -16,7 +15,7 @@ namespace Shop.Controllers.Api;
 [Route("api/store/contact")]
 public sealed class StoreContactApiController(
     IEmailSender emailSender,
-    IOptions<SiteIdentityOptions> siteIdentity,
+    Shop.Services.DatabaseSiteIdentitySource siteIdentitySource,
     ShopDbContext db,
     ILogger<StoreContactApiController> logger) : ControllerBase
 {
@@ -62,7 +61,8 @@ public sealed class StoreContactApiController(
             _ => "سایر درخواست‌ها"
         };
         string body = $"درخواست جدید از فرم تماس سایت\n\nنام: {name}\nشماره همراه: {phone}\nموضوع: {subjectLabel}\n\nمتن پیام:\n{message}";
-        string recipient = siteIdentity.Value.PublicEmail?.Trim() ?? string.Empty;
+        SiteIdentityOptions siteIdentity = await siteIdentitySource.ReadAsync(ct);
+        string recipient = siteIdentity.PublicEmail?.Trim() ?? string.Empty;
         bool notificationSent = false;
         try
         {

@@ -313,12 +313,14 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                 ...(p.detail?.specs || []),
             ].filter(([, value]) => String(value ?? "").trim());
             const related = catalog
-                .filter(
-                    (item) =>
-                        item.id !== p.id &&
-                        (item.type === p.type ||
-                            item.brand === p.brand),
-                )
+                .map((item, index) => {
+                    const sameCategory = Boolean(p.type && item.type === p.type);
+                    const sameBrand = Boolean(p.brand && item.brand === p.brand);
+                    return { item, index, score: (sameCategory ? 2 : 0) + (sameBrand ? 1 : 0) };
+                })
+                .filter(({ item, score }) => item.id !== p.id && score > 0)
+                .sort((a, b) => b.score - a.score || a.index - b.index)
+                .map(({ item }) => item)
                 .slice(0, 6);
             const suggestions = related;
             const companionProducts = [...new Set(p.companionProductIds || [])]
@@ -406,6 +408,12 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
             if (priceBreakdown) {
                 priceBreakdown.innerHTML = '<div class="product-detail-cost-row"><span>هزینهٔ ویژگی‌ها</span><strong id="productVariantAdjustmentPrice"></strong></div><div class="product-detail-cost-row"><span>متعلقات و خدمات</span><strong id="productAddonsPrice"></strong></div>';
             }
+            const relatedDescription = document.createElement("p");
+            relatedDescription.className = "product-related-description";
+            relatedDescription.textContent = suggestions.length
+                ? "این کالاها بر اساس دسته‌بندی یا برند مشترک انتخاب شده‌اند؛ کالاهای هم‌دسته در اولویت هستند."
+                : "در حال حاضر کالایی با دسته‌بندی یا برند مشترک پیدا نشد.";
+            productView.querySelector("#product-related > header")?.append(relatedDescription);
             const documents = (Array.isArray(p.documents) ? p.documents : []).filter(item =>
                 item && typeof item.title === "string" && /^content\/products\/files\/[a-f0-9]{32}\.pdf$/i.test(item.path || ""));
             if (documents.length) {
@@ -760,6 +768,10 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                     ".product-detail-gallery-caption > span",
                 ).textContent = "تصویر محصول";
             const questionsPanel = productView.querySelector("#product-questions");
+            const questionsDescription = document.createElement("p");
+            questionsDescription.className = "product-questions-description";
+            questionsDescription.textContent = "پرسش خود را دربارهٔ مشخصات، کاربرد یا سازگاری این کالا ثبت کنید و پرسش‌های دیگران و پاسخ‌های موجود را بخوانید.";
+            questionsPanel.querySelector("header")?.append(questionsDescription);
             const questionList = questionsPanel.querySelector("#productQuestionList");
             const questionForm = questionsPanel.querySelector(
                 ".product-question-form",

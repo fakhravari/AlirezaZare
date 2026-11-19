@@ -39,7 +39,7 @@
   const sections = {featured: [], collection: []};
   plans.forEach((plan) => {
     const offers = (sales.offers || []).filter((offer) =>
-      offer.salesPlanId === plan.id && offer.isEnabled && Number(offer.stockQuantity) > 0 && products.has(Number(offer.productId)));
+      offer.salesPlanId === plan.id && offer.isEnabled && (plan.type === "digi-time" || Number(offer.stockQuantity) > 0) && products.has(Number(offer.productId)));
     if (!offers.length) return;
     const placement = plan.type === "digi-time" ? "featured" : "collection";
     const endTime = plan.endsAtUtc ? Date.parse(plan.endsAtUtc) : NaN;

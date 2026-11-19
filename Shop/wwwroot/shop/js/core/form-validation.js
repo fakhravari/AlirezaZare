@@ -87,6 +87,8 @@ window.HNUI.mount("core-form-validation", document, () => {
   const errorIdFor = (control) =>
     `form-error-${(control.id || control.name || "field").replace(/[^a-zA-Z0-9_-]/g, "-")}`;
 
+  const isCustomForm = (control) => customForms.has(control.form?.id);
+
   const renderError = (control, message) => {
     const id = errorIdFor(control);
     let host = document.getElementById(id);
@@ -191,6 +193,7 @@ window.HNUI.mount("core-form-validation", document, () => {
       )
     )
       return;
+    if (isCustomForm(control)) return;
     if (control.getAttribute("aria-invalid") !== "true") return;
     const message = messageFor(control, String(control.value ?? "").trim());
     renderError(control, message);
@@ -204,6 +207,7 @@ window.HNUI.mount("core-form-validation", document, () => {
       )
     )
       return;
+    if (isCustomForm(control)) return;
     if (control.getAttribute("aria-invalid") !== "true") return;
     if (
       control.matches('input[type="radio"], input[type="checkbox"]') &&
@@ -230,6 +234,7 @@ window.HNUI.mount("core-form-validation", document, () => {
     );
   });
   document.addEventListener("reset", (event) => {
+    if (!(event.target instanceof HTMLFormElement) || customForms.has(event.target.id)) return;
     window.setTimeout(() => {
       event.target
         .querySelectorAll("[aria-invalid], .is-invalid")

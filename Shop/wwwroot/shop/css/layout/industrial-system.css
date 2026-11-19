@@ -845,7 +845,7 @@ h6,
   background-color: #fff !important;
 }
 
-:is(.flow-card, .contact-form, .faq-item, .tracking-card, .shipping-card, .warranty-card, .invoice-card, .checkout-card, .brand-card, .filter-card, .summary-card, .cart-summary, .product-details-card) {
+:is(.flow-card, .contact-form, .faq-item, .tracking-card, .shipping-card, .warranty-card, .invoice-card, .checkout-card, .brand-card, .filter-card, .summary-card, .cart-summary, .product-details-card):not(.contact-managed-content .managed-service-section) {
   border-color: var(--industrial-line) !important;
   border-radius: var(--radius-panel-standard, 20px);
   background: var(--industrial-surface) !important;

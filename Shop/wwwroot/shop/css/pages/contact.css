@@ -1,6 +1,29 @@
 .page-section.contact-section {
   padding-bottom: 20px;
 }
+/* Restore the white, cool-bordered cards used by the earlier contact page. */
+body.inner-page .contact-managed-content .managed-service-section {
+  border-color: #dce3e8;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 10px 28px rgba(16, 42, 67, 0.07);
+  color: #334155;
+}
+body.inner-page .contact-managed-content .managed-service-section h2 {
+  color: #173653;
+}
+body.inner-page .contact-managed-content .managed-service-section :is(p, li) {
+  color: #46515f;
+  line-height: 1.9;
+}
+body.inner-page .contact-managed-content .managed-service-section a {
+  color: #173653;
+  text-decoration-color: rgba(23, 54, 83, 0.4);
+  text-underline-offset: 3px;
+}
+body.inner-page .contact-managed-content .managed-service-section a:hover {
+  color: #173653;
+}
 .inner-page .contact-hero .hero-trail span {
   border-color: rgba(246, 197, 21, 0.24);
   background: rgba(16, 42, 67, 0.68);

@@ -128,6 +128,8 @@ window.HNUI.mount("pages-contact", document, () => {
           message: fields.message.value.trim(),
         }),
       });
+      if (response.status === 429)
+        throw new Error("درخواست‌های زیادی ارسال شده است؛ چند دقیقه صبر کنید و دوباره تلاش کنید.");
       const result = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(result.message || "ارسال پیام انجام نشد. دوباره تلاش کنید.");
       showStatus(result.message || "پیام شما برای پشتیبانی ثبت شد.", "success");

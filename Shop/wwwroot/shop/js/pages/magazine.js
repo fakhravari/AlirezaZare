@@ -9,6 +9,18 @@ window.HNUI.mount("pages-magazine", document, () => {
   let filter = "all";
   let page = 1;
   const number = (value) => window.HNUI.formatNumber(value);
+  function scrollToResultsHeading() {
+    const target = heading.closest(".journal-results-heading") || heading;
+    const fixedHeader = document.getElementById("mainNav");
+    const headerBottom = fixedHeader
+      ? Math.max(0, fixedHeader.getBoundingClientRect().bottom)
+      : 0;
+    const top = Math.max(
+      0,
+      window.scrollY + target.getBoundingClientRect().top - headerBottom - 16,
+    );
+    window.scrollTo({ top, behavior: "auto" });
+  }
   function readLocation() {
     const params = new URLSearchParams(window.location.search);
     filter = params.get("category") || "all";
@@ -59,14 +71,12 @@ window.HNUI.mount("pages-magazine", document, () => {
       render();
       saveLocation();
       heading.focus({ preventScroll: true });
-      heading.scrollIntoView({ block: "start", behavior: "auto" });
+      scrollToResultsHeading();
     }, "صفحه‌بندی مجله");
   }
-  function focusFirstResult() {
-    const firstResult = posts.find((post) => !post.hidden)?.querySelector("a");
-    const target = firstResult || heading;
-    target.focus({ preventScroll: true });
-    target.scrollIntoView({ block: "start", behavior: "auto" });
+  function focusResultsHeading() {
+    heading.focus({ preventScroll: true });
+    scrollToResultsHeading();
   }
   buttons.forEach((button) =>
     button.addEventListener("click", () => {
@@ -74,14 +84,14 @@ window.HNUI.mount("pages-magazine", document, () => {
       page = 1;
       render();
       saveLocation();
-      focusFirstResult();
+      focusResultsHeading();
     }),
   );
   window.addEventListener("popstate", () => {
     readLocation();
     render();
     saveLocation(true);
-    focusFirstResult();
+    focusResultsHeading();
   });
   readLocation();
   render();
