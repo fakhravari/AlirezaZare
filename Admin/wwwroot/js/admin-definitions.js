@@ -181,6 +181,7 @@
             const activeMemberCount = (unitsByParent.get(String(group.id)) || []).filter(unit => unit.isActive).length;
             const status = node.querySelector(":scope > .admin-permission-row [data-unit-group-status]");
             const warning = node.querySelector(":scope > .admin-permission-row [data-group-blocked]");
+            const label = node.querySelector(":scope > .admin-permission-row [data-unit-group-label]");
             const reason = activeMemberCount ? `برای غیرفعال‌کردن گروه، ${fmt.format(activeMemberCount)} واحد فعال را به گروه دیگری منتقل یا غیرفعال کنید.` : "";
             const canToggle = group.isActive
                 ? page.dataset.canDeactivate === "true" && activeMemberCount === 0
@@ -189,11 +190,12 @@
             status.dataset.blocked = String(Boolean(group.isActive && activeMemberCount));
             status.title = reason;
             status.setAttribute("aria-label", `${group.isActive ? "غیرفعال‌کردن" : "فعال‌کردن"} ${group.name}`);
+            label.textContent = `${group.name}${group.isActive ? "" : " · غیرفعال"} (${fmt.format((groupsByParent.get(String(group.id)) || []).length)} زیرگروه · ${fmt.format((unitsByParent.get(String(group.id)) || []).length)} واحد)`;
             if (group.isActive) status.dataset.adminConfirm = "گروه واحد غیرفعال شود؟ گروه دارای واحد فعال قابل غیرفعال‌سازی نیست.";
             else delete status.dataset.adminConfirm;
             if (warning) { warning.textContent = reason; warning.hidden = !reason; }
         };
-        const makeRow = (parent, label, active, toggleLabel, toggleUrl, toggleBody, canToggle, editHandler = null, disabledReason = "", displayLabel = () => label, onStatusChange = null, statusDataAttribute = "") => {
+        const makeRow = (parent, label, active, toggleLabel, toggleUrl, toggleBody, canToggle, editHandler = null, disabledReason = "", displayLabel = () => label, onStatusChange = null, statusDataAttribute = "", deleteOptions = null) => {
             const row = element("div", null, "admin-permission-row");
             const children = parent.querySelector(":scope > ul[role=group]");
             if (children) {
@@ -236,6 +238,7 @@
                 finally { if (status.isConnected) status.disabled = !toggleAllowed(); }
             });
             const choice = element("span", displayLabel(), "admin-permission-name flex-grow-1");
+            if (statusDataAttribute) choice.dataset.unitGroupLabel = "";
             row.append(status, choice);
             if (disabledReason) {
                 const note = element("small", disabledReason, "text-warning-emphasis");
@@ -246,6 +249,22 @@
                 const edit = actionButton("ویرایش", "fa-pen-to-square", "btn btn-sm btn-default");
                 edit.addEventListener("click", editHandler);
                 row.append(edit);
+            }
+            if (deleteOptions?.canDelete && page.dataset.canDelete === "true") {
+                const remove = actionButton("حذف", "fa-trash", "btn btn-sm btn-outline-danger");
+                remove.dataset.adminConfirm = deleteOptions.confirmMessage;
+                remove.addEventListener("click", async () => {
+                    if (remove.disabled) return;
+                    remove.disabled = true;
+                    try {
+                        const result = await request(page, deleteOptions.url, "DELETE");
+                        deleteOptions.onDelete?.();
+                        parent.remove();
+                        ui.notify(result.message, "success");
+                    } catch (error) { ui.notify(error.message, "danger"); }
+                    finally { remove.disabled = false; }
+                });
+                row.append(remove);
             }
             const childList = parent.querySelector(":scope > ul[role=group]");
             if (childList) parent.insertBefore(row, childList);
@@ -276,7 +295,8 @@
                     form.querySelector('[type="submit"]').textContent = "ذخیرهٔ گروه"; form.querySelector("[data-unit-group-cancel]").hidden = false;
                     form.elements.name.focus();
                 } : null, blockedMessage, groupLabel,
-                isActive => { group.isActive = isActive; updateGroupAvailability(group); }, "data-unit-group-status");
+                isActive => { group.isActive = isActive; updateGroupAvailability(group); }, "data-unit-group-status",
+                { canDelete: group.canDelete, url: `${page.dataset.api}/unit-groups/${group.id}`, confirmMessage: `گروه «${group.name}» برای همیشه حذف شود؟`, onDelete: () => { const index = groups.indexOf(group); if (index >= 0) groups.splice(index, 1); } });
             updateGroupAvailability(group);
             for (const childGroup of childGroups) appendGroup(childGroup, children);
             for (const unit of members) appendUnit(unit, children);
@@ -295,7 +315,13 @@
                     unit.isActive = isActive;
                     const parentGroup = groupById.get(String(unit.idParent));
                     if (parentGroup) updateGroupAvailability(parentGroup);
-                });
+                }, "", { canDelete: unit.canDelete, url: `${page.dataset.api}/units/${unit.id}`, confirmMessage: `واحد «${unit.nameFa}» برای همیشه حذف شود؟`, onDelete: () => {
+                    const members = unitsByParent.get(String(unit.idParent)) || [];
+                    const index = members.indexOf(unit); if (index >= 0) members.splice(index, 1);
+                    const allIndex = units.indexOf(unit); if (allIndex >= 0) units.splice(allIndex, 1);
+                    const parentGroup = groupById.get(String(unit.idParent));
+                    if (parentGroup) updateGroupAvailability(parentGroup);
+                } });
             container.append(node);
         };
         const roots = element("ul", null, "admin-permission-list"); roots.setAttribute("role", "group");
@@ -312,7 +338,7 @@
         tree.append(roots);
         setStatus(page, groups.length || units.length ? "" : "گروهی تعریف نشده است.");
     }
-    function addField(host, field, data, lookups) {
+    function addField(host, field, data, lookups, variantTree = []) {
         const [key, label, type = "text", required = false, choices = []] = field;
         const wrap = element("div", null, "mb-3");
         if (type === "attributes") {
@@ -321,9 +347,10 @@
             const list = element("div", null, "d-grid gap-2");
             list.dataset.variantAttributes = "";
             list.setAttribute("aria-labelledby", caption.id);
-            for (const attribute of Array.isArray(data[key]) ? data[key] : []) addVariantAttributeRow(list, attribute);
+            for (const attribute of Array.isArray(data[key]) ? data[key] : []) addVariantAttributeRow(list, variantTree, attribute);
             const add = actionButton("افزودن ویژگی", "fa-plus", "btn btn-sm btn-outline-primary mt-2");
-            add.addEventListener("click", () => addVariantAttributeRow(list));
+            add.disabled = variantTree.length === 0;
+            add.onclick = () => addVariantAttributeRow(list, variantTree);
             wrap.append(caption, list, add);
             host.append(wrap);
             return;
@@ -333,6 +360,14 @@
             const caption = element("label", label, "form-check-label"); caption.htmlFor = check.id; wrap.className = "form-check mb-3"; wrap.append(check, caption);
         } else {
             const control = ["select", "warehouses", "products", "units", "companies", "plans", "warehouse-types", "unit-groups"].includes(type) ? element("select", null, "form-select") : type === "textarea" ? element("textarea", null, "form-control") : element("input", null, "form-control");
+            if (type === "product-fixed") {
+                const product = (lookups.products || []).find(item => String(item.id) === String(data[key] ?? ""));
+                control.id = `definition-${key}`;
+                const caption = element("label", label, "form-label"); caption.htmlFor = control.id;
+                control.removeAttribute("name"); control.type = "text"; control.readOnly = true; control.value = product?.name || data.productName || "کالای ثبت‌شده";
+                const id = element("input"); id.type = "hidden"; id.name = key; id.value = data[key] ?? "";
+                wrap.append(caption, control, id); host.append(wrap); return;
+            }
             control.name = key; control.id = `definition-${key}`; control.required = required;
             if (type === "select") {
                 const empty = element("option", "انتخاب کنید"); empty.value = ""; control.append(empty);
@@ -352,18 +387,32 @@
         }
         host.append(wrap);
     }
-    function addVariantAttributeRow(list, data = {}) {
+    function addVariantAttributeRow(list, tree, data = {}) {
         if (list.childElementCount >= 12) { ui.notify("برای هر تنوع حداکثر ۱۲ ویژگی ثبت می‌شود.", "danger"); return; }
         const row = element("div", null, "border rounded p-2");
         row.dataset.variantAttribute = "";
         const grid = element("div", null, "row g-2");
-        const fields = [["key", "کلید انگلیسی", "color", 64], ["label", "نام ویژگی", "رنگ", 80], ["value", "مقدار یکتا", "black", 100], ["display", "نمایش", "مشکی", 100], ["swatch", "کد رنگ (اختیاری)", "#000000", 7]];
-        for (const [key, label, placeholder, maxLength] of fields) {
+        const attributeSelect = element("select", null, "form-select form-select-sm");
+        attributeSelect.dataset.attributeField = "attributeId"; attributeSelect.setAttribute("aria-label", "ویژگی تنوع");
+        const valueSelect = element("select", null, "form-select form-select-sm");
+        valueSelect.dataset.attributeField = "valueId"; valueSelect.setAttribute("aria-label", "مقدار ویژگی");
+        const fillValues = selectedId => {
+            valueSelect.replaceChildren();
+            const placeholder = element("option", tree.length ? "انتخاب مقدار" : "ابتدا کالایی با درخت تنوع انتخاب کنید"); placeholder.value = ""; valueSelect.append(placeholder);
+            const attribute = tree.find(item => String(item.id) === String(attributeSelect.value));
+            for (const item of attribute?.values || []) { const option = element("option", item.label || item.key); option.value = item.id; valueSelect.append(option); }
+            valueSelect.value = selectedId == null ? "" : String(selectedId);
+            valueSelect.disabled = !attribute;
+        };
+        const emptyAttribute = element("option", tree.length ? "انتخاب ویژگی" : "درخت تنوعی برای این کالا ثبت نشده است"); emptyAttribute.value = ""; attributeSelect.append(emptyAttribute);
+        for (const item of tree) { const option = element("option", item.label); option.value = item.id; attributeSelect.append(option); }
+        attributeSelect.value = data.attributeId == null ? "" : String(data.attributeId);
+        attributeSelect.addEventListener("change", () => fillValues(null));
+        fillValues(data.valueId);
+        for (const [control, label] of [[attributeSelect, "ویژگی"], [valueSelect, "مقدار"]]) {
             const column = element("div", null, "col-12 col-md-6");
-            const input = element("input", null, "form-control form-control-sm");
-            input.type = "text"; input.maxLength = maxLength; input.dataset.attributeField = key;
-            input.value = data[key] ?? ""; input.placeholder = placeholder; input.setAttribute("aria-label", label);
-            column.append(input); grid.append(column);
+            const caption = element("label", label, "form-label small"); caption.htmlFor = `variant-attribute-${label}-${Math.random().toString(36).slice(2)}`;
+            control.id = caption.htmlFor; column.append(caption, control); grid.append(column);
         }
         const remove = actionButton("حذف ویژگی", "fa-trash", "btn btn-sm btn-outline-danger mt-2");
         remove.addEventListener("click", () => row.remove());
@@ -377,15 +426,40 @@
         if (data && page.dataset.definitionSection === "references") data = { ...data, warehouseId: data.idWarehouse };
         if (data && page.dataset.definitionSection === "product-units") data = { ...data, productId: data.idProduct, unitId: data.idUnit };
         if (data && page.dataset.definitionSection === "units") data = { ...data, parentId: data.idParent };
+        if (data && page.dataset.definitionSection === "variants") data = { ...data, productId: data.idProduct };
         let lookups = { warehouses: [] };
         if (["references", "product-units", "variants", "warehouses"].includes(page.dataset.definitionSection)) lookups = await request(page, `${page.dataset.api}/lookups`);
+        let variantTree = [];
+        if (page.dataset.definitionSection === "variants" && data?.productId)
+            variantTree = await request(page, `${page.dataset.api}/variant-options/${encodeURIComponent(data.productId)}${data.id ? `?variantId=${encodeURIComponent(data.id)}` : ""}`);
         if (page.dataset.definitionSection === "warehouses") lookups["warehouse-types"] = await request(page, page.dataset.api + "/warehouse-types");
         if (page.dataset.definitionSection === "units") lookups["unit-groups"] = await request(page, page.dataset.api + "/unit-groups");
         if (!page.isConnected || formRequests.get(page) !== sequence) return;
         host.replaceChildren(); form.reset(); form.elements.id.value = data?.id || "";
-        for (const field of config.fields) {
+        for (const originalField of config.fields) {
+            const field = page.dataset.definitionSection === "variants" && data?.id && originalField[0] === "productId"
+                ? [originalField[0], originalField[1], "product-fixed", false] : originalField;
             if (field[0] === "isSiteWarehouse" && page.dataset.fullAccess !== "true") continue;
-            addField(host, field, data || (page.dataset.definitionSection === "units" ? { isActive: true } : {}), lookups);
+            addField(host, field, data || (page.dataset.definitionSection === "units" ? { isActive: true } : {}), lookups, variantTree);
+        }
+        if (page.dataset.definitionSection === "variants" && !data?.id) {
+            const product = form.elements.namedItem("productId"), list = host.querySelector("[data-variant-attributes]"), add = list?.parentElement?.querySelector("button");
+            let treeRequest = 0;
+            product?.addEventListener("change", async () => {
+                const requestId = ++treeRequest;
+                list?.replaceChildren(); variantTree = [];
+                if (add) add.disabled = true;
+                try {
+                    if (product.value) {
+                        const result = await request(page, `${page.dataset.api}/variant-options/${encodeURIComponent(product.value)}`);
+                        if (requestId === treeRequest && String(product.value) === String(form.elements.namedItem("productId")?.value)) variantTree = result;
+                    }
+                }
+                catch (error) { ui.notify(error.message || "دریافت درخت تنوع ناموفق بود.", "danger"); }
+                if (requestId !== treeRequest) return;
+                if (add) add.disabled = variantTree.length === 0;
+                if (list && add) add.onclick = () => addVariantAttributeRow(list, variantTree);
+            });
         }
         if (data?.isActive && page.dataset.definitionSection === "units" && page.dataset.canDeactivate !== "true")
             form.elements.isActive.disabled = true;
@@ -549,9 +623,14 @@
                     const values = new FormData(form), id = values.get("id"); const body = {};
                     for (const [key, , type] of config.fields) {
                         if (type === "attributes") continue;
-                        body[key] = type === "checkbox" ? Boolean(form.elements.namedItem(key)?.checked) : (key === "idStockOwnerType" || ["number", "products", "units", "companies", "plans", "warehouse-types", "unit-groups"].includes(type) ? Number(values.get(key)) || null : values.get(key));
+                        body[key] = type === "checkbox" ? Boolean(form.elements.namedItem(key)?.checked) : (key === "idStockOwnerType" || ["number", "products", "product-fixed", "units", "companies", "plans", "warehouse-types", "unit-groups"].includes(type) ? Number(values.get(key)) || null : values.get(key));
                     }
-                    if (section === "variants") body.attributes = [...form.querySelectorAll("[data-variant-attribute]")].map(row => Object.fromEntries([...row.querySelectorAll("[data-attribute-field]")].map(input => [input.dataset.attributeField, input.value.trim()])));
+                    if (section === "variants") {
+                        const rows = [...form.querySelectorAll("[data-variant-attribute]")];
+                        const incomplete = rows.find(row => !row.querySelector('[data-attribute-field="attributeId"]')?.value || !row.querySelector('[data-attribute-field="valueId"]')?.value);
+                        if (incomplete) { ui.notify("برای هر ردیف، ویژگی و مقدار آن را از درخت تنوع انتخاب کنید.", "danger"); incomplete.querySelector("select")?.focus(); return; }
+                        body.attributes = rows.map(row => Object.fromEntries([...row.querySelectorAll("[data-attribute-field]")].map(input => [input.dataset.attributeField, Number(input.value) || null])));
+                    }
                     if (section !== "units") body.isActive = true;
                     const submit = form.querySelector('[type="submit"]');
                     form.dataset.saving = "true"; submit.disabled = true;

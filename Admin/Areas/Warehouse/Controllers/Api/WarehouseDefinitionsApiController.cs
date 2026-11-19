@@ -25,9 +25,13 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
         "references" => await GetReferencesAsync(cancellationToken),
         "unit-groups" => Ok(await db.WarehouseUnits.AsNoTracking().Where(x => x.IdParent == null)
             .OrderBy(x => x.SortOrder).ThenBy(x => x.NameFa)
-            .Select(x => new { x.Id, Name = x.NameFa, x.NameEn, x.IdParent, x.IsActive, x.SortOrder }).ToListAsync(cancellationToken)),
+            .Select(x => new { x.Id, Name = x.NameFa, x.NameEn, x.IdParent, x.IsActive, x.SortOrder,
+                CanDelete = !db.WarehouseUnits.Any(child => child.IdParent == x.Id) }).ToListAsync(cancellationToken)),
         "units" => Ok(await db.WarehouseUnits.AsNoTracking().Where(x => x.IdParent != null).OrderBy(x => x.NameFa)
-            .Select(x => new { x.Id, x.NameFa, x.NameEn, x.IdParent, ParentName = db.WarehouseUnits.Where(parent => parent.Id == x.IdParent).Select(parent => parent.NameFa).FirstOrDefault(), x.IsActive })
+            .Select(x => new { x.Id, x.NameFa, x.NameEn, x.IdParent, ParentName = db.WarehouseUnits.Where(parent => parent.Id == x.IdParent).Select(parent => parent.NameFa).FirstOrDefault(), x.IsActive,
+                CanDelete = !db.WarehouseUnits.Any(child => child.IdParent == x.Id) &&
+                            !db.WarehouseProductUnits.Any(link => link.IdUnit == x.Id) &&
+                            !db.WarehouseDocumentLines.Any(line => line.IdUnit == x.Id) })
             .ToListAsync(cancellationToken)),
         "product-units" => Ok(await (from link in db.WarehouseProductUnits.AsNoTracking()
                                      join product in db.Products.AsNoTracking() on link.IdProduct equals product.Id
@@ -67,15 +71,35 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                                 join attribute in db.ProductAttributes.AsNoTracking() on value.IdProductAttribute equals attribute.Id
                                 where ids.Contains(link.IdProductVariant)
                                 orderby attribute.SortOrder, attribute.Id
-                                select new { link.IdProductVariant, attribute.Key, attribute.Label, value.ValueKey, value.DisplayValue, value.Swatch })
+                                select new { link.IdProductVariant, attribute.Id, AttributeKey = attribute.Key, AttributeLabel = attribute.Label, ValueId = value.Id, value.ValueKey, value.DisplayValue, value.Swatch })
             .ToListAsync(cancellationToken);
         var byVariant = attributes.GroupBy(x => x.IdProductVariant).ToDictionary(x => x.Key,
-            x => x.Select(a => new { key = a.Key, label = a.Label, value = a.ValueKey, display = a.DisplayValue, swatch = a.Swatch }).ToArray());
+            x => x.Select(a => new { attributeId = a.Id, valueId = a.ValueId, key = a.AttributeKey, label = a.AttributeLabel, value = a.ValueKey, display = a.DisplayValue, swatch = a.Swatch }).ToArray());
         return Ok(variants.Select(x => new
         {
             x.Id, x.IdProduct, x.ProductName, x.Code, x.Name, x.IsDefault, x.IsActive,
             Attributes = byVariant.GetValueOrDefault(x.Id) ?? []
         }));
+    }
+
+    [HttpGet("variant-options/{productId:long}")]
+    public async Task<IActionResult> GetVariantOptions(long productId, [FromQuery] long? variantId, CancellationToken cancellationToken)
+    {
+        if (!CanAccessVariants("variants")) return Forbid();
+        if (!await db.Products.AnyAsync(x => x.Id == productId && x.IsWarehouseEnabled, cancellationToken)) return NotFound();
+        if (variantId.HasValue && !await db.ProductVariants.AnyAsync(x => x.Id == variantId && x.IdProduct == productId, cancellationToken)) return NotFound();
+        var rows = await (from attribute in db.ProductAttributes.AsNoTracking()
+                          join value in db.ProductAttributeValues.AsNoTracking() on attribute.Id equals value.IdProductAttribute
+                          where attribute.IdProduct == productId && value.IdProduct == productId &&
+                                (attribute.IsActive && value.IsActive || variantId.HasValue && db.ProductVariantAttributeValues.Any(link => link.IdProductVariant == variantId && link.IdProductAttribute == attribute.Id && link.IdProductAttributeValue == value.Id))
+                          orderby attribute.SortOrder, attribute.Id, value.Id
+                          select new { attribute.Id, attribute.Key, attribute.Label, ValueId = value.Id, value.ValueKey, ValueLabel = value.DisplayValue, value.Swatch })
+            .ToListAsync(cancellationToken);
+        return Ok(rows.GroupBy(x => new { x.Id, x.Key, x.Label }).Select(group => new
+        {
+            id = group.Key.Id, key = group.Key.Key, label = group.Key.Label,
+            values = group.Select(x => new { id = x.ValueId, key = x.ValueKey, label = x.ValueLabel, swatch = x.Swatch }).ToArray()
+        }).ToArray());
     }
 
     [HttpPost("{section}")]
@@ -89,6 +113,33 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
     public async Task<IActionResult> Save(string section, long id, [FromBody] JsonElement payload,
         CancellationToken cancellationToken) =>
         !CanAccessVariants(section) ? Forbid() : await SaveCoreAsync(section, id, payload, cancellationToken);
+
+    [HttpDelete("{section}/{id:long}")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteUnusedUnitDefinition(string section, long id, CancellationToken cancellationToken)
+    {
+        if (!User.IsInRole("system.full-access")) return Forbid();
+        if (section is not ("units" or "unit-groups")) return NotFound();
+
+        await using var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
+        WarehouseUnit? unit = await db.WarehouseUnits.SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
+        if (unit is null || (section == "units") != unit.IdParent.HasValue) return NotFound();
+
+        if (section == "units")
+        {
+            bool inUse = await db.WarehouseUnits.AnyAsync(x => x.IdParent == id, cancellationToken) ||
+                         await db.WarehouseProductUnits.AnyAsync(x => x.IdUnit == id, cancellationToken) ||
+                         await db.WarehouseDocumentLines.AnyAsync(x => x.IdUnit == id, cancellationToken);
+            if (inUse) return Conflict(new { detail = "واحدی که زیرواحد، اتصال کالا یا سابقهٔ سند انبار دارد قابل حذف نیست؛ در صورت نیاز آن را غیرفعال کنید." });
+        }
+        else if (await db.WarehouseUnits.AnyAsync(x => x.IdParent == id, cancellationToken))
+            return Conflict(new { detail = "گروه دارای واحد یا زیرگروه است و قابل حذف نیست." });
+
+        db.WarehouseUnits.Remove(unit);
+        await db.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
+        return Ok(new { message = section == "units" ? "واحد حذف شد." : "گروه واحد حذف شد." });
+    }
 
     [HttpPut("sales-plan-mapping")]
     [ValidateAntiForgeryToken]
@@ -602,30 +653,28 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
             case "variants":
                 {
                     VariantInput? input = Parse<VariantInput>(payload);
-                    if (input is null || input.ProductId < 1 || !ValidCodeName(input.Name, input.Name, 300, 300))
-                        return ValidationProblem(detail: "محصول و نام تنوع را وارد کنید.", statusCode: 400);
+                    if (input is null || (!id.HasValue && input.ProductId < 1) || !ValidCodeName(input.Name, input.Name, 300, 300))
+                        return ValidationProblem(detail: "نام تنوع و برای تنوع جدید، کالا را وارد کنید.", statusCode: 400);
 
                     if (!string.IsNullOrWhiteSpace(input.Code) && input.Code.Length > 100)
                         return ValidationProblem(detail: "کد تنوع حداکثر ۱۰۰ نویسه است.", statusCode: 400);
-
-                    if (!ValidVariantAttributes(input.Attributes))
-                        return ValidationProblem(detail: "حداکثر ۱۲ ویژگی با کلید یکتا و مقدار معتبر وارد کنید.", statusCode: 400);
-
-                    WarehouseProduct? product = await db.Products.SingleOrDefaultAsync(x => x.Id == input.ProductId && x.IsWarehouseEnabled, cancellationToken);
-                    if (product is null) return ValidationProblem(detail: "محصول فعال پیدا نشد.", statusCode: 400);
 
                     await using var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
                     ProductVariant entity = id.HasValue ? await db.ProductVariants.SingleOrDefaultAsync(x => x.Id == id, cancellationToken) ?? null! : new ProductVariant();
                     if (id.HasValue && entity is null) return NotFound();
 
-                    if (entity.IsDefault && (entity.IdProduct != input.ProductId || !input.IsActive))
-                        return Conflict(new { detail = "تنوع پیش‌فرض را نمی‌توان غیرفعال یا به کالای دیگری منتقل کرد؛ ابتدا تنوع فعال دیگری را پیش‌فرض کنید." });
+                    if (id.HasValue && entity.IdProduct != input.ProductId)
+                        return Conflict(new { detail = "کالای تنوع پس از ایجاد قابل تغییر نیست." });
+                    long productId = id.HasValue ? entity.IdProduct : input.ProductId;
+                    WarehouseProduct? product = await db.Products.SingleOrDefaultAsync(x => x.Id == productId && x.IsWarehouseEnabled, cancellationToken);
+                    if (product is null) return ValidationProblem(detail: "محصول فعال پیدا نشد.", statusCode: 400);
+                    if (!await ValidVariantAttributesAsync(productId, input.Attributes, cancellationToken))
+                        return ValidationProblem(detail: "ویژگی‌ها و مقدارها باید از درخت تنوع همین کالا انتخاب شوند و ویژگی تکراری نباشد.", statusCode: 400);
 
-                    if (id.HasValue && entity.IdProduct != input.ProductId &&
-                        await db.InventoryItems.AnyAsync(x => x.IdProductVariant == id))
-                        return Conflict(new { detail = "تنوع دارای موجودی یا گردش است و به محصول دیگری منتقل نمی‌شود." });
+                    if (entity.IsDefault && !input.IsActive)
+                        return Conflict(new { detail = "تنوع پیش‌فرض را نمی‌توان غیرفعال کرد؛ ابتدا تنوع فعال دیگری را پیش‌فرض کنید." });
 
-                    bool hasOtherDefault = await db.ProductVariants.AnyAsync(x => x.IdProduct == product.Id && x.Id != (id ?? 0) && x.IsDefault && x.IsActive, cancellationToken);
+                    bool hasOtherDefault = await db.ProductVariants.AnyAsync(x => x.IdProduct == productId && x.Id != (id ?? 0) && x.IsDefault && x.IsActive, cancellationToken);
                     if (!id.HasValue && !hasOtherDefault && !input.IsActive)
                         return ValidationProblem(detail: "نخستین تنوع کالا باید فعال باشد تا به‌عنوان پیش‌فرض ثبت شود.", statusCode: 400);
                     if (!input.IsActive && input.IsDefault)
@@ -635,9 +684,9 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                         return ValidationProblem(detail: "برای هر کالا باید یک تنوع پیش‌فرض فعال باقی بماند.", statusCode: 400);
 
                     if (makeDefault)
-                        await db.ProductVariants.Where(x => x.IdProduct == product.Id && x.Id != (id ?? 0) && x.IsDefault)
+                        await db.ProductVariants.Where(x => x.IdProduct == productId && x.Id != (id ?? 0) && x.IsDefault)
                             .ExecuteUpdateAsync(setters => setters.SetProperty(x => x.IsDefault, false), cancellationToken);
-                    entity.IdProduct = product.Id;
+                    entity.IdProduct = productId;
                     entity.Code = string.IsNullOrWhiteSpace(input.Code) ? null : input.Code.Trim();
                     entity.Name = input.Name.Trim();
                     entity.IsDefault = makeDefault;
@@ -651,10 +700,10 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                         await SaveVariantAttributesAsync(entity, input.Attributes, cancellationToken);
 
                     if (!id.HasValue &&
-                        !await db.InventoryItems.AnyAsync(x => x.IdProduct == product.Id && x.IdProductVariant == entity.Id,
+                        !await db.InventoryItems.AnyAsync(x => x.IdProduct == productId && x.IdProductVariant == entity.Id,
                             cancellationToken))
                     {
-                        db.InventoryItems.Add(new InventoryItem { IdProduct = product.Id, IdProductVariant = entity.Id, IsActive = true });
+                        db.InventoryItems.Add(new InventoryItem { IdProduct = productId, IdProductVariant = entity.Id, IsActive = true });
                         await db.SaveChangesAsync(cancellationToken);
                     }
 
@@ -667,23 +716,13 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
         }
     }
 
-    private static bool ValidVariantAttributes(IReadOnlyCollection<VariantAttributeInput>? attributes)
+    private async Task<bool> ValidVariantAttributesAsync(long productId, IReadOnlyCollection<VariantAttributeInput>? attributes, CancellationToken cancellationToken)
     {
         if (attributes is null) return true;
         if (attributes.Count > 12) return false;
-        var keys = new HashSet<string>(StringComparer.Ordinal);
-        foreach (VariantAttributeInput? attribute in attributes)
-        {
-            if (attribute is null) return false;
-            string key = attribute.Key?.Trim() ?? "";
-            string label = attribute.Label?.Trim() ?? "";
-            string value = attribute.Value?.Trim() ?? "";
-            string display = attribute.Display?.Trim() ?? "";
-            string? swatch = string.IsNullOrWhiteSpace(attribute.Swatch) ? null : attribute.Swatch.Trim();
-            if (!System.Text.RegularExpressions.Regex.IsMatch(key, "^[A-Za-z][A-Za-z0-9-]{0,63}$") || !keys.Add(key) ||
-                label.Length is < 1 or > 80 || value.Length is < 1 or > 100 || display.Length is < 1 or > 100 ||
-                swatch is not null && !System.Text.RegularExpressions.Regex.IsMatch(swatch, "^#[0-9a-fA-F]{6}$")) return false;
-        }
+        if (attributes.Any(x => x is null || x.AttributeId < 1 || x.ValueId < 1) || attributes.Select(x => x.AttributeId).Distinct().Count() != attributes.Count) return false;
+        foreach (VariantAttributeInput item in attributes)
+            if (!await db.ProductAttributeValues.AnyAsync(value => value.Id == item.ValueId && value.IdProduct == productId && value.IdProductAttribute == item.AttributeId && value.Attribute.IdProduct == productId, cancellationToken)) return false;
         return true;
     }
 
@@ -698,45 +737,12 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
         if (currentLinks.Count != 0) await db.SaveChangesAsync(cancellationToken);
         if (input.Count == 0) return;
 
-        string[] keys = input.Select(x => x.Key.Trim()).ToArray();
-        var definitions = await db.ProductAttributes.Where(x => x.IdProduct == variant.IdProduct && keys.Contains(x.Key))
-            .ToDictionaryAsync(x => x.Key, StringComparer.Ordinal, cancellationToken);
-        int sortOrder = 0;
         foreach (VariantAttributeInput item in input)
         {
-            string key = item.Key.Trim();
-            if (!definitions.TryGetValue(key, out ProductAttribute? definition))
-            {
-                definition = new ProductAttribute { IdProduct = variant.IdProduct, Key = key, Label = item.Label.Trim(), SortOrder = sortOrder, IsActive = true };
-                db.ProductAttributes.Add(definition);
-                definitions.Add(key, definition);
-            }
-            else
-            {
-                definition.Label = item.Label.Trim();
-                definition.IsActive = true;
-            }
-            definition.SortOrder = sortOrder++;
-
-            ProductAttributeValue? value = await db.ProductAttributeValues.SingleOrDefaultAsync(x =>
-                x.IdProductAttribute == definition.Id && x.ValueKey == item.Value.Trim(), cancellationToken);
-            if (value is null)
-            {
-                value = new ProductAttributeValue { IdProduct = variant.IdProduct, Attribute = definition, ValueKey = item.Value.Trim(), Label = item.Display.Trim(), DisplayValue = item.Display.Trim(), Swatch = NormalizeSwatch(item.Swatch), IsActive = true };
-                db.ProductAttributeValues.Add(value);
-            }
-            else
-            {
-                value.Label = item.Display.Trim();
-                value.DisplayValue = item.Display.Trim();
-                value.Swatch = NormalizeSwatch(item.Swatch);
-                value.IsActive = true;
-            }
+            ProductAttributeValue value = await db.ProductAttributeValues.SingleAsync(x => x.Id == item.ValueId && x.IdProductAttribute == item.AttributeId && x.IdProduct == variant.IdProduct, cancellationToken);
             db.ProductVariantAttributeValues.Add(new ProductVariantAttributeValue { IdProduct = variant.IdProduct, ProductVariant = variant, AttributeValue = value });
         }
     }
-
-    private static string? NormalizeSwatch(string? swatch) => string.IsNullOrWhiteSpace(swatch) ? null : swatch.Trim().ToUpperInvariant();
 
     private async Task<IActionResult> GetWarehousesAsync(CancellationToken cancellationToken)
     {
@@ -967,7 +973,7 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
         bool IsDefault,
         bool IsActive);
 
-    private sealed record VariantAttributeInput(string Key, string Label, string Value, string Display, string? Swatch);
+    private sealed record VariantAttributeInput(long AttributeId, long ValueId);
 
     public sealed record SalesPlanMappingInput(long CompanyId, long WarehouseId, long SalesPlanId);
 }

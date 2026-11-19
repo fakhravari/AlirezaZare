@@ -10,7 +10,7 @@ test('unit status is submitted from the definition form', {skip: !existsSync(chr
   const browser = await chromium.launch({headless: true});
   t.after(() => browser.close());
   const page = await browser.newPage();
-  await page.setContent(`<div data-admin-definitions data-api="/api" data-definition-section="units" data-can-create="true" data-can-edit="true" data-can-deactivate="true"><button data-definition-create>افزودن</button><form data-unit-group-form><input name="id"><input name="name"><input name="nameEn"><input name="sortOrder"><button type="submit"></button><button type="button" data-unit-group-cancel></button></form><div data-unit-tree></div><div data-definition-status></div></div><div id="admin-definition-modal"><h2 id="admin-definition-title"></h2><form data-definition-form><input name="id"><div data-definition-fields></div><button type="submit">ذخیره</button></form></div>`);
+  await page.setContent(`<div data-admin-definitions data-api="/api" data-definition-section="units" data-can-create="true" data-can-edit="true" data-can-deactivate="true" data-can-delete="true"><button data-definition-create>افزودن</button><form data-unit-group-form><input name="id"><input name="name"><input name="nameEn"><input name="sortOrder"><button type="submit"></button><button type="button" data-unit-group-cancel></button></form><div data-unit-tree></div><div data-definition-status></div></div><div id="admin-definition-modal"><h2 id="admin-definition-title"></h2><form data-definition-form><input name="id"><div data-definition-fields></div><button type="submit">ذخیره</button></form></div>`);
   await page.evaluate(() => {
     window.saved = [];
     window.unitActions = [];
@@ -18,10 +18,11 @@ test('unit status is submitted from the definition form', {skip: !existsSync(chr
     window.bootstrap = {Modal: {getOrCreateInstance: () => ({show() {}}), getInstance: () => ({hide() {}})}};
     window.AdminUI = {initStatusSwitch() {}, destroyDataTable() {}, refreshDataTable() {}, notify() {}, getJson: async (url, options) => {
       if (options.method === 'GET') {
-        if (url.endsWith('/unit-groups')) return [{id: 1, name: 'جرم', idParent: null, isActive: true, sortOrder: 0}];
-        if (url.endsWith('/units')) { window.unitReadCount += 1; return [{id: 10, idParent: 1, parentName: 'جرم', nameFa: 'کیلوگرم', nameEn: 'Kilogram', isActive: true}]; }
+        if (url.endsWith('/unit-groups')) return [{id: 1, name: 'جرم', idParent: null, isActive: true, sortOrder: 0, canDelete: false}];
+        if (url.endsWith('/units')) { window.unitReadCount += 1; return [{id: 10, idParent: 1, parentName: 'جرم', nameFa: 'کیلوگرم', nameEn: 'Kilogram', isActive: true, canDelete: true}]; }
         return [];
       }
+      if (options.method === 'DELETE') { window.unitActions.push(url); return {message: 'deleted'}; }
       if (url.endsWith('/units/10/deactivate')) window.unitActions.push(url);
       else window.saved.push(JSON.parse(options.body));
       return {message: 'ok'};
@@ -50,6 +51,11 @@ test('unit status is submitted from the definition form', {skip: !existsSync(chr
   assert.match(await unit.innerText(), /غیرفعال/u);
   assert.equal(await group.locator(':scope > .admin-permission-row [role=checkbox]').isDisabled(), false);
   assert.equal(await group.getByText(/برای غیرفعال‌کردن گروه/u).count(), 0);
+  await unit.getByRole('button', {name: 'حذف'}).click();
+  await page.waitForFunction(() => window.unitActions.length === 2);
+  assert.deepEqual(await page.evaluate(() => window.unitActions), ['/api/units/10/deactivate', '/api/units/10']);
+  assert.equal(await page.evaluate(() => window.unitReadCount), readsBeforeStatusChange);
+  assert.equal(await page.locator('[data-unit-tree] [role=treeitem]').count(), 1);
   await page.locator('[data-definition-create]').click();
   await page.locator('[data-definition-form] [name=parentId]').selectOption('1');
   assert.equal(await page.locator('[data-definition-form] [name=isActive]').isChecked(), true);
@@ -112,6 +118,16 @@ test('warehouse units expose Persian and English names without a code field', as
   assert.match(schemaMigration, /sp_rename N'Warehouse\.Unit\.Name', N'NameFa'/);
   assert.match(schemaMigration, /DROP COLUMN \[Code\]/);
   assert.match(translationMigration, /WHEN 73 THEN N'Milliliter'/);
+});
+
+test('unused units and empty unit groups can be deleted only by full-access administrators', async () => {
+  const api = await read('Admin/Areas/Warehouse/Controllers/Api/WarehouseDefinitionsApiController.cs', 'utf8');
+  const view = await read('Admin/Areas/Warehouse/Views/Features/Definitions.cshtml', 'utf8');
+  assert.match(api, /\[HttpDelete\("\{section\}\/\{id:long\}"\)\][\s\S]*?User\.IsInRole\("system\.full-access"\)/);
+  assert.match(api, /!db\.WarehouseProductUnits\.Any\(link => link\.IdUnit == x\.Id\)/);
+  assert.match(api, /!db\.WarehouseDocumentLines\.Any\(line => line\.IdUnit == x\.Id\)/);
+  assert.match(api, /else if \(await db\.WarehouseUnits\.AnyAsync\(x => x\.IdParent == id/);
+  assert.match(view, /data-can-delete="@\(User\.IsInRole\("system\.full-access"\)/);
 });
 
 test('warehouse definition pages rely on the sidebar instead of repeating the local feature links', async () => {

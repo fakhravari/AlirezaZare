@@ -1,5 +1,5 @@
 @model Shop.Admin.Models.FeaturePageViewModel
-<div class="admin-page" data-admin-definitions data-api="@ViewData["ApiUrl"]" data-definition-section="@Model.FeatureId" data-full-access="@(User.IsInRole("system.full-access") ? "true" : "false")" data-can-create="@(User.HasClaim("admin_permission", "Warehouse:DefinitionsApi:Create") ? "true" : "false")" data-can-edit="@(User.HasClaim("admin_permission", "Warehouse:DefinitionsApi:Save") ? "true" : "false")" data-can-deactivate="@(User.HasClaim("admin_permission", "Warehouse:DefinitionsApi:Deactivate") ? "true" : "false")">
+<div class="admin-page" data-admin-definitions data-api="@ViewData["ApiUrl"]" data-definition-section="@Model.FeatureId" data-full-access="@(User.IsInRole("system.full-access") ? "true" : "false")" data-can-create="@(User.HasClaim("admin_permission", "Warehouse:DefinitionsApi:Create") ? "true" : "false")" data-can-edit="@(User.HasClaim("admin_permission", "Warehouse:DefinitionsApi:Save") ? "true" : "false")" data-can-deactivate="@(User.HasClaim("admin_permission", "Warehouse:DefinitionsApi:Deactivate") ? "true" : "false")" data-can-delete="@(User.IsInRole("system.full-access") ? "true" : "false")">
     @await Html.PartialAsync("_AdminPageIntro", (Model.Title, Model.Description))
     @if (Model.FeatureId == "sales-plan-mapping")
     {
