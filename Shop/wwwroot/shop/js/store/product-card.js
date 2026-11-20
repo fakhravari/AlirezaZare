@@ -29,6 +29,7 @@
     const variantAmount = variant?.priceBySalesPlan?.[planId];
     const hasAmount = (amount) => amount !== null && amount !== undefined && Number.isFinite(Number(amount));
     if (productVariants.length && (!variant || !hasAmount(variantAmount))) return { current: null, list: null, discount: 0, adjustments: 0, priceUnavailable: true };
+    if (Array.isArray(data?.offers) && !hasAmount(offer?.priceAmount) && !hasAmount(options.priceAmount) && !hasAmount(variantAmount)) return { current: null, list: null, discount: 0, adjustments: 0, priceUnavailable: true };
     const baseAmount = hasAmount(variantAmount) ? Number(variantAmount) : hasAmount(offer?.priceAmount) ? Number(offer.priceAmount) : hasAmount(options.priceAmount) ? Number(options.priceAmount) : null;
     const discount = hasAmount(variantAmount) ? Number(variant.discountBySalesPlan?.[planId]) || 0 : Number(offer?.discountPercent ?? options.discountPercent ?? product.discountPercent) || 0;
     const baseCurrent = baseAmount === null ? Math.round(Number(product.price) * 1000000) : Math.round(baseAmount * (100 - discount) / 100);

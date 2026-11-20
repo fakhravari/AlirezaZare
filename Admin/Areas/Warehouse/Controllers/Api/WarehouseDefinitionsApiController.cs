@@ -679,7 +679,7 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                     long productId = id.HasValue ? entity.IdProduct : input.ProductId;
                     WarehouseProduct? product = await db.Products.SingleOrDefaultAsync(x => x.Id == productId && x.IsWarehouseEnabled, cancellationToken);
                     if (product is null) return ValidationProblem(detail: "محصول فعال پیدا نشد.", statusCode: 400);
-                    if (!await ValidVariantAttributesAsync(productId, input.Attributes, cancellationToken))
+                    if (!await ValidVariantAttributesAsync(productId, id, input.Attributes, cancellationToken))
                         return ValidationProblem(detail: "ویژگی‌ها و مقدارها باید از درخت تنوع همین کالا انتخاب شوند و ویژگی تکراری نباشد.", statusCode: 400);
 
                     if (entity.IsDefault && !input.IsActive)
@@ -727,13 +727,19 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
         }
     }
 
-    private async Task<bool> ValidVariantAttributesAsync(long productId, IReadOnlyCollection<VariantAttributeInput>? attributes, CancellationToken cancellationToken)
+    private async Task<bool> ValidVariantAttributesAsync(long productId, long? variantId,
+        IReadOnlyCollection<VariantAttributeInput>? attributes, CancellationToken cancellationToken)
     {
         if (attributes is null) return true;
         if (attributes.Count > 12) return false;
         if (attributes.Any(x => x is null || x.AttributeId < 1 || x.ValueId < 1) || attributes.Select(x => x.AttributeId).Distinct().Count() != attributes.Count) return false;
         foreach (VariantAttributeInput item in attributes)
-            if (!await db.ProductAttributeValues.AnyAsync(value => value.Id == item.ValueId && value.IdProduct == productId && value.IdProductAttribute == item.AttributeId && value.Attribute.IdProduct == productId, cancellationToken)) return false;
+            if (!await db.ProductAttributeValues.AnyAsync(value => value.Id == item.ValueId && value.IdProduct == productId &&
+                    value.IdProductAttribute == item.AttributeId && value.Attribute.IdProduct == productId &&
+                    ((value.IsActive && value.Attribute.IsActive) || (variantId.HasValue &&
+                        db.ProductVariantAttributeValues.Any(link => link.IdProductVariant == variantId.Value &&
+                            link.IdProduct == productId && link.IdProductAttribute == item.AttributeId &&
+                            link.IdProductAttributeValue == item.ValueId))), cancellationToken)) return false;
         return true;
     }
 

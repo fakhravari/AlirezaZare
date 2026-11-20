@@ -135,13 +135,14 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
             const requestedPlan = plansForProduct.find((plan) => plan.id === requestedPlanId);
             const defaultPlan = plansForProduct.find((plan) => plan.isDefault);
             const fallbackPlan = plansForProduct.find(planIsSelectable) || defaultPlan;
-            const selectedSalesPlanId = requestedPlan && planIsSelectable(requestedPlan)
-                ? requestedPlan.id
-                : (defaultPlan && planIsSelectable(defaultPlan) ? defaultPlan.id : fallbackPlan?.id || "regular");
+            const unavailableSpecialPlan = Boolean(requestedPlan && !requestedPlan.isDefault && !planIsSelectable(requestedPlan));
+            const selectedSalesPlanId = unavailableSpecialPlan
+                ? defaultPlan?.id || "regular"
+                : requestedPlanId || (defaultPlan && planIsSelectable(defaultPlan) ? defaultPlan.id : fallbackPlan?.id || "regular");
             const focusedPlan = requestedPlan && planIsSelectable(requestedPlan) && requestedPlan.id !== "regular"
                 ? requestedPlan
                 : null;
-            const requestedPlanUnavailable = Boolean(requestedPlan && !planIsSelectable(requestedPlan));
+            const requestedPlanUnavailable = Boolean(requestedPlanId && !requestedPlan);
             const selectedOffer = () => planOffers.find((offer) => offer.salesPlanId === selectedSalesPlanId);
             const hasInventoryVariantPrice = (inventoryVariant) => {
                 const amount = inventoryVariant?.priceBySalesPlan?.[selectedSalesPlanId];
@@ -156,7 +157,7 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                     return Math.round(Number(variantPrice) * (100 - discount) / 100);
                 }
                 if (inventoryVariants.length) return null;
-                return offer ? Math.round(Number(offer.priceAmount) * (100 - Number(offer.discountPercent)) / 100) : Math.round(Number(p.price) * 1000000);
+                return offer ? Math.round(Number(offer.priceAmount) * (100 - Number(offer.discountPercent)) / 100) : null;
             };
             const currentPlanBaseAmount = () => priceForInventoryVariant(selectedInventoryVariant());
             const availableAccessories = (p.accessories || []).filter((item) =>
@@ -440,7 +441,9 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                 history.replaceState(null, "", url);
             }
             if (requestedPlanUnavailable)
-                ui.setMessage(productView.querySelector("#productStatus"), "طرح انتخاب‌شده در دسترس نیست؛ یک طرح فعال و موجود انتخاب شد.", "warning");
+                ui.setMessage(productView.querySelector("#productStatus"), "طرح فروش پیدا نشد؛ فروش عادی نمایش داده می‌شود.", "warning");
+            else if (unavailableSpecialPlan)
+                ui.setMessage(productView.querySelector("#productStatus"), "این طرح فروش فعال یا قابل خرید نیست؛ فروش عادی نمایش داده می‌شود.", "warning");
 
             const productSummary = productView.querySelector(".product-detail-summary");
             const purchaseColumn = document.createElement("div");
