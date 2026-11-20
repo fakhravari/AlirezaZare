@@ -28,7 +28,7 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
         var products = await dbContext.Products.AsNoTracking().Where(x => x.IsStoreEnabled).ToListAsync(cancellationToken);
         var customOffers = await dbContext.StoreProductSalesPlanOffers.AsNoTracking().ToListAsync(cancellationToken);
         var activePriceRows = await dbContext.StorePriceVersions.AsNoTracking().Where(x => x.IsActive && products.Select(p => p.Id).Contains(x.IdProduct)).OrderByDescending(x => x.Id).ToListAsync(cancellationToken);
-        var planProductPrices = activePriceRows.Where(x => !x.IdProductVariant.HasValue && !x.IdOptionValue.HasValue &&
+        var planProductPrices = activePriceRows.Where(x => !x.IdProductVariant.HasValue &&
                                                            !x.IdAccessory.HasValue)
             .ToDictionary(x => (x.IdProduct, x.IdSalesPlan));
         var variantPrices = activePriceRows.Where(x => x.IdProductVariant.HasValue).ToDictionary(x => (x.IdProductVariant!.Value, x.IdSalesPlan));

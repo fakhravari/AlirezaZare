@@ -77,16 +77,15 @@ public sealed class SalesPlansController(
 
         var productVersions = await db.StorePriceVersions.AsNoTracking()
             .Where(item => item.IdProduct == productId && item.IdSalesPlan == databasePlanId.Value &&
-                           item.IdProductVariant == pricedVariantId && item.IdOptionValue == null && item.IdAccessory == null)
+                           item.IdProductVariant == pricedVariantId && item.IdAccessory == null)
             .OrderBy(item => item.CreatedAtUtc).ThenBy(item => item.Id)
-            .Select(item => new { item.Id, item.IdOptionValue, item.IdProductVariant, item.IdAccessory, item.PriceAmount, item.DiscountPercent, item.IsActive, item.CreatedAtUtc })
+            .Select(item => new { item.Id, item.IdProductVariant, item.IdAccessory, item.PriceAmount, item.DiscountPercent, item.IsActive, item.CreatedAtUtc })
             .ToListAsync(cancellationToken);
         if (productVersions.Count == 0)
             return Ok(new { productId, salesPlanId, currency = catalog.Currency, history = Array.Empty<object>() });
         var versions = productVersions.Select(item => new
             {
                 item.Id,
-                item.IdOptionValue,
                 item.IdProductVariant,
                 item.IdAccessory,
                 item.PriceAmount,
@@ -103,8 +102,8 @@ public sealed class SalesPlansController(
             history = versions.Select(item => new
             {
                 priceVersionId = item.Id,
-                component = StorePriceVersionReference.GetComponent(item.IdProductVariant, item.IdOptionValue, item.IdAccessory),
-                targetId = item.IdOptionValue ?? item.IdProductVariant ?? item.IdAccessory,
+                component = StorePriceVersionReference.GetComponent(item.IdProductVariant, item.IdAccessory),
+                targetId = item.IdProductVariant ?? item.IdAccessory,
                 item.PriceAmount,
                 item.DiscountPercent,
                 finalAmount = decimal.Round(item.PriceAmount * (100m - item.DiscountPercent) / 100m, 0,

@@ -181,7 +181,7 @@ public sealed class AccountController(
         var orderPriceReferences = orderItemIds.Length == 0 ? [] : await (from reference in db.StoreOrderItemPriceReferences.AsNoTracking()
                                                                           join version in db.StorePriceVersions.AsNoTracking() on reference.IdPriceVersion equals version.Id
                                                                           where orderItemIds.Contains(reference.IdOrderItem)
-                                                                          select new { reference.IdOrderItem, reference.IdPriceVersion, version.IdProductVariant, version.IdOptionValue, version.IdAccessory, version.PriceAmount, version.DiscountPercent })
+                                                                          select new { reference.IdOrderItem, reference.IdPriceVersion, version.IdProductVariant, version.IdAccessory, version.PriceAmount, version.DiscountPercent })
             .ToListAsync(ct);
         var orderItemsById = orderItemRows.GroupBy(x => x.IdCustomerOrder).ToDictionary(group => group.Key, group => group.ToArray());
         var shippingHistory = orderIds.Length == 0 ? [] : await db.StoreOrderShippingHistories.AsNoTracking()
@@ -287,8 +287,8 @@ public sealed class AccountController(
                     priceReferences = orderPriceReferences.Where(reference => reference.IdOrderItem == item.Id).Select(reference => new
                     {
                         priceVersionId = reference.IdPriceVersion,
-                        component = StorePriceVersionReference.GetComponent(reference.IdProductVariant, reference.IdOptionValue, reference.IdAccessory),
-                        calculatedUnitAmount = StorePriceVersionReference.AppliesDiscount(reference.IdOptionValue, reference.IdAccessory)
+                        component = StorePriceVersionReference.GetComponent(reference.IdProductVariant, reference.IdAccessory),
+                        calculatedUnitAmount = StorePriceVersionReference.AppliesDiscount(reference.IdAccessory)
                             ? decimal.Round(reference.PriceAmount * (100m - reference.DiscountPercent) / 100m, 0, MidpointRounding.AwayFromZero)
                             : reference.PriceAmount
                     }).ToArray()

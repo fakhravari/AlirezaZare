@@ -25,7 +25,7 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext, IMedi
         var regularPrices = await (from version in dbContext.StorePriceVersions.AsNoTracking()
                                    join plan in dbContext.SalesPlanReferences.AsNoTracking() on version.IdSalesPlan equals (long?)plan.Id
                                    where productIds.Contains(version.IdProduct) && version.IsActive && plan.IsRegular && plan.IdStockOwnerType == 1 &&
-                                         version.IdProductVariant == null && version.IdOptionValue == null && version.IdAccessory == null
+                                         version.IdProductVariant == null && version.IdAccessory == null
                                    orderby plan.Id, version.Id descending
                                    select version).ToListAsync(cancellationToken);
         var regularPriceByProduct = regularPrices.GroupBy(x => x.IdProduct).ToDictionary(x => x.Key, x => x.First());

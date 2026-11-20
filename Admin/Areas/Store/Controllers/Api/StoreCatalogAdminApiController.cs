@@ -20,7 +20,7 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
         from version in db.StorePriceVersions.AsNoTracking()
         join plan in db.SalesPlanReferences.AsNoTracking() on version.IdSalesPlan equals (long?)plan.Id
         where version.IsActive && plan.IsRegular && plan.IdStockOwnerType == 1 &&
-              version.IdProductVariant == null && version.IdOptionValue == null && version.IdAccessory == null
+              version.IdProductVariant == null && version.IdAccessory == null
         orderby plan.Id, version.Id descending
         select version;
 
@@ -60,7 +60,7 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
         await db.SaveChangesAsync(cancellationToken);
         var regularPlans = await db.SalesPlanReferences.Where(x => x.IsRegular && x.IdStockOwnerType == 1).Select(x => x.Id).ToListAsync(cancellationToken);
         foreach (long planId in regularPlans.Concat(offers.Select(x => x.IdSalesPlan)).Distinct())
-            await priceVersions.AppendAsync(id, planId, null, null, accessory.Id, input.PriceAmount, 0, long.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value), cancellationToken);
+            await priceVersions.AppendAsync(id, planId, null, accessory.Id, input.PriceAmount, 0, long.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value), cancellationToken);
         await transaction.CommitAsync(cancellationToken);
         return Ok(new { link.Id, message = "متعلقه ساخته و به کالا متصل شد." });
     }
@@ -89,13 +89,13 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
             var offerPlans = await db.StoreProductSalesPlanOffers.Where(x => x.IdProduct == id).Select(x => x.IdSalesPlan).ToListAsync(cancellationToken);
             foreach (long planId in offerPlans)
                 if (!await db.StorePriceVersions.AnyAsync(v => v.IdProduct == id && v.IdAccessory == accessory.Id && v.IdSalesPlan == planId && v.IsActive, cancellationToken))
-                    await priceVersions.AppendAsync(id, planId, null, null, accessory.Id, input.PriceAmount, 0, long.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value), cancellationToken);
+                    await priceVersions.AppendAsync(id, planId, null, accessory.Id, input.PriceAmount, 0, long.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value), cancellationToken);
         }
         await db.SaveChangesAsync(cancellationToken);
         var regularPlans = await db.SalesPlanReferences.Where(x => x.IsRegular && x.IdStockOwnerType == 1).Select(x => x.Id).ToListAsync(cancellationToken);
         foreach (long planId in regularPlans)
             if (!await db.StorePriceVersions.AnyAsync(v => v.IdProduct == id && v.IdAccessory == accessory.Id && v.IdSalesPlan == planId && v.IsActive && v.PriceAmount == input.PriceAmount, cancellationToken))
-                await priceVersions.AppendAsync(id, planId, null, null, accessory.Id, input.PriceAmount, 0, long.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value), cancellationToken);
+                await priceVersions.AppendAsync(id, planId, null, accessory.Id, input.PriceAmount, 0, long.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value), cancellationToken);
         await transaction.CommitAsync(cancellationToken);
         return Ok(new { message = "متعلقهٔ کالا ذخیره شد." });
     }
@@ -365,9 +365,9 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
         foreach (long planId in regularPlans)
         {
             var currentPrice = await db.StorePriceVersions.SingleOrDefaultAsync(x => x.IdProduct == id && x.IdSalesPlan == planId && x.IsActive &&
-                x.IdProductVariant == null && x.IdOptionValue == null && x.IdAccessory == null, cancellationToken);
+                x.IdProductVariant == null && x.IdAccessory == null, cancellationToken);
             if (currentPrice is null || FinalPrice(currentPrice) != input.PriceAmount || currentPrice.DiscountPercent != input.DiscountPercent)
-                await priceVersions.AppendAsync(id, planId, null, null, null, listAmount, input.DiscountPercent, long.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value), cancellationToken);
+                await priceVersions.AppendAsync(id, planId, null, null, listAmount, input.DiscountPercent, long.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value), cancellationToken);
         }
         await transaction.CommitAsync(cancellationToken);
 
@@ -653,7 +653,7 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
         var regularPlans = await db.SalesPlanReferences.Where(x => x.IsRegular && x.IdStockOwnerType == 1).Select(x => x.Id).ToListAsync(cancellationToken);
         if (regularPlans.Count == 0) return Conflict(new { title = "طرح فروش عادی تعریف نشده است." });
         foreach (long planId in regularPlans)
-            await priceVersions.AppendAsync(id, planId, null, null, null, listAmount, input.DiscountPercent, long.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value), cancellationToken);
+            await priceVersions.AppendAsync(id, planId, null, null, listAmount, input.DiscountPercent, long.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value), cancellationToken);
 
         await transaction.CommitAsync(cancellationToken);
 

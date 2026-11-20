@@ -93,7 +93,8 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
         if (!p) productView.innerHTML = empty("محصول پیدا نشد");
         else {
             const planOffers = (salesPlans.offers || []).filter((offer) => offer.productId === p.id);
-            const inventoryVariants = (salesPlans.inventoryVariants || []).filter((variant) => variant.productId === p.id);
+            const inventoryVariants = (salesPlans.inventoryVariants || []).filter((variant) => variant.productId === p.id)
+                .sort((left, right) => Number(right.isDefault === true) - Number(left.isDefault === true));
             const inventorySelections = {};
             const inventoryVariantAttributes = (variant) => Array.isArray(variant.attributes) ? variant.attributes : [];
             const hasUnattributedInventoryVariants = inventoryVariants.some((variant) => !inventoryVariantAttributes(variant).length);
@@ -102,6 +103,18 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                 : [];
             if (inventoryVariants.length && (!inventoryAttributeGroups.length || hasUnattributedInventoryVariants))
                 inventoryAttributeGroups.unshift({ key: "__warehouseVariant", label: "مدل موجودی" });
+            const defaultInventoryVariant = inventoryVariants.find((variant) => variant.isDefault) || inventoryVariants[0];
+            if (defaultInventoryVariant) {
+                for (const group of inventoryAttributeGroups) {
+                    if (group.key === "__warehouseVariant") {
+                        inventorySelections[group.key] = String(defaultInventoryVariant.variantId);
+                        continue;
+                    }
+                    const attribute = inventoryVariantAttributes(defaultInventoryVariant).find((item) => item.key === group.key);
+                    inventorySelections[group.key] = attribute ? String(attribute.value) : "__none";
+                }
+            }
+            const inventoryPriceGroupKey = inventoryAttributeGroups[inventoryAttributeGroups.length - 1]?.key;
             const selectedInventoryVariant = () => inventoryVariants.find((variant) =>
                 inventoryAttributeGroups.every((group) => {
                     const selected = inventorySelections[group.key];
@@ -120,7 +133,13 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                             ...inventoryVariants.flatMap((variant) => inventoryVariantAttributes(variant).filter((attribute) => attribute.key === group.key).map((attribute) => [String(attribute.value), { value: String(attribute.value), label: attribute.display || attribute.label || attribute.value, swatch: attribute.swatch }])),
                             ...(inventoryVariants.some((variant) => !inventoryVariantAttributes(variant).some((attribute) => attribute.key === group.key)) ? [["__none", { value: "__none", label: `بدون ${group.label}` }]] : []),
                         ]).values()];
-                    return `<fieldset class="product-variant-field" data-inventory-key="${esc(group.key)}"><legend>${esc(group.label)}</legend><div class="product-variant-choices">${options.map((option) => `<button type="button" class="product-variant-choice${option.swatch ? " product-variant-choice--swatch" : ""}" data-inventory-value="${esc(option.value)}" aria-pressed="false">${option.swatch ? `<span class="product-variant-swatch" style="--variant-swatch:${esc(option.swatch)}"></span>` : ""}<span class="product-variant-choice-label">${esc(option.label)}</span></button>`).join("")}</div></fieldset>`;
+                    return `<fieldset class="product-variant-field" data-inventory-key="${esc(group.key)}"><legend>${esc(group.label)}</legend><div class="product-variant-choices">${options.map((option) => {
+                        const selected = inventorySelections[group.key] === option.value;
+                        const button = `<button type="button" class="product-variant-choice${option.swatch ? " product-variant-choice--swatch" : ""}${selected ? " is-selected" : ""}" data-inventory-value="${esc(option.value)}" data-option-label="${esc(option.label)}" aria-label="${esc(option.label)}" aria-pressed="${selected}">${option.swatch ? `<span class="product-variant-swatch" style="--variant-swatch:${esc(option.swatch)}"></span>` : ""}<span class="product-variant-choice-label">${esc(option.label)}</span></button>`;
+                        return group.key === inventoryPriceGroupKey
+                            ? `<span class="product-variant-choice-wrap">${button}<small class="product-variant-choice-price" data-variant-option-price></small></span>`
+                            : button;
+                    }).join("")}</div></fieldset>`;
                 }).join("")}</div>`
                 : "";
             const plansForProduct = (salesPlans.plans || []).filter((plan) => plan.isDefault || planOffers.some((offer) => offer.salesPlanId === plan.id));
@@ -1592,6 +1611,25 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                     .reduce((sum, item) => sum + Number(selectedOffer()?.accessoryPriceAmounts?.[item.id] ?? Number(item.price) * 1000000), 0));
             };
             const updateVariantPrice = () => {
+                productView.querySelectorAll("[data-variant-option-price]").forEach((label) => {
+                    const button = label.closest(".product-variant-choice-wrap")?.querySelector("[data-inventory-value]");
+                    if (!button || !inventoryPriceGroupKey) return;
+                    const selections = { ...inventorySelections, [inventoryPriceGroupKey]: button.dataset.inventoryValue };
+                    const variant = inventoryVariants.find((candidate) => inventoryAttributeGroups.every((group) => {
+                        const selected = selections[group.key];
+                        if (!selected) return false;
+                        if (group.key === "__warehouseVariant") return String(candidate.variantId) === selected;
+                        return selected === "__none"
+                            ? !inventoryVariantAttributes(candidate).some((attribute) => attribute.key === group.key)
+                            : inventoryVariantAttributes(candidate).some((attribute) => attribute.key === group.key && String(attribute.value) === selected);
+                    }));
+                    const listAmount = variant?.priceBySalesPlan?.[selectedSalesPlanId];
+                    const amount = listAmount === null || listAmount === undefined || !Number.isFinite(Number(listAmount))
+                        ? null
+                        : Math.round(Number(listAmount) * (100 - (Number(variant.discountBySalesPlan?.[selectedSalesPlanId]) || 0)) / 100);
+                    label.textContent = variant ? amount === null ? "بدون قیمت" : money(amount) : "ناموجود";
+                    button.setAttribute("aria-label", `${button.dataset.optionLabel || "تنوع"}، ${label.textContent}`);
+                });
                 const value = calculateVariantPrice();
                 const basePriceLabel = productView.querySelector("#productBasePrice");
                 const baseAmount = currentPlanBaseAmount();

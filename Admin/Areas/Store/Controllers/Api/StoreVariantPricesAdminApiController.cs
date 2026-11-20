@@ -85,9 +85,9 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
                 x.Id, x.IdProduct, x.IdSalesPlan,
                 productName = db.Products.Where(product => product.Id == x.IdProduct).Select(product => product.Name).FirstOrDefault(),
                 salesPlanName = db.SalesPlanReferences.Where(plan => plan.Id == x.IdSalesPlan).Select(plan => plan.DisplayName).FirstOrDefault(),
-                targetType = x.IdOptionValue.HasValue ? "option" : x.IdAccessory.HasValue ? "accessory" : x.IdProductVariant.HasValue ? "variant" : "product",
-                targetId = x.IdProductVariant ?? x.IdOptionValue ?? x.IdAccessory,
-                x.IdProductVariant, x.IdOptionValue, x.IdAccessory,
+                targetType = x.IdAccessory.HasValue ? "accessory" : x.IdProductVariant.HasValue ? "variant" : "product",
+                targetId = x.IdProductVariant ?? x.IdAccessory,
+                x.IdProductVariant, x.IdAccessory,
                 x.PriceAmount, x.DiscountPercent, x.IsActive, x.CreatedAtUtc, x.IdChangedBy, x.ChangeReason, x.IdPreviousVersion
             }).ToListAsync(cancellationToken));
     }
@@ -327,7 +327,7 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
         await db.SaveChangesAsync(cancellationToken);
 
         long productId = await db.ProductVariants.Where(x => x.Id == variantId).Select(x => x.IdProduct).SingleAsync(cancellationToken);
-        long priceVersionId = await priceVersions.AppendAsync(productId, plan.Id, variantId, null, null, input.PriceAmount, input.DiscountPercent, long.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value), cancellationToken);
+        long priceVersionId = await priceVersions.AppendAsync(productId, plan.Id, variantId, null, input.PriceAmount, input.DiscountPercent, long.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value), cancellationToken);
         await transaction.CommitAsync(cancellationToken);
 
         return Ok(new { saved = true, priceVersionId, message = "قیمت تنوع و طرح فروش ذخیره شد." });
@@ -399,8 +399,8 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
                 ProductName = x.product.Name,
                 SalesPlanId = x.plan.StoreSalesPlanKey,
                 SalesPlanName = x.plan.DisplayName,
-                PriceAmount = db.StorePriceVersions.Where(v => v.IdProduct == x.product.Id && v.IdSalesPlan == x.plan.Id && v.IsActive && v.IdProductVariant == null && v.IdOptionValue == null && v.IdAccessory == null).Select(v => (decimal?)v.PriceAmount).FirstOrDefault(),
-                DiscountPercent = db.StorePriceVersions.Where(v => v.IdProduct == x.product.Id && v.IdSalesPlan == x.plan.Id && v.IsActive && v.IdProductVariant == null && v.IdOptionValue == null && v.IdAccessory == null).Select(v => (decimal?)v.DiscountPercent).FirstOrDefault(),
+                PriceAmount = db.StorePriceVersions.Where(v => v.IdProduct == x.product.Id && v.IdSalesPlan == x.plan.Id && v.IsActive && v.IdProductVariant == null && v.IdAccessory == null).Select(v => (decimal?)v.PriceAmount).FirstOrDefault(),
+                DiscountPercent = db.StorePriceVersions.Where(v => v.IdProduct == x.product.Id && v.IdSalesPlan == x.plan.Id && v.IsActive && v.IdProductVariant == null && v.IdAccessory == null).Select(v => (decimal?)v.DiscountPercent).FirstOrDefault(),
                 MaxPurchaseQuantity = x.offer == null ? null : x.offer.MaxPurchaseQuantity,
                 IsEnabled = x.offer == null ? null : x.offer.IsEnabled
             }).ToListAsync(cancellationToken);
@@ -436,9 +436,9 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
         else { offer.MaxPurchaseQuantity = input.MaxPurchaseQuantity; offer.IsEnabled = input.IsEnabled; offer.UpdatedAtUtc = DateTime.UtcNow; }
         await db.SaveChangesAsync(cancellationToken);
 
-        long priceVersionId = await priceVersions.AppendAsync(productId, plan.Id, null, null, null, input.PriceAmount, input.DiscountPercent, long.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value), cancellationToken);
+        long priceVersionId = await priceVersions.AppendAsync(productId, plan.Id, null, null, input.PriceAmount, input.DiscountPercent, long.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value), cancellationToken);
         foreach (var accessory in newAccessoryPrices)
-            await priceVersions.AppendAsync(productId, plan.Id, null, null, accessory.AccessoryId, accessory.PriceAmount, 0, long.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value), cancellationToken);
+            await priceVersions.AppendAsync(productId, plan.Id, null, accessory.AccessoryId, accessory.PriceAmount, 0, long.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value), cancellationToken);
         await transaction.CommitAsync(cancellationToken);
 
         return Ok(new { priceVersionId, message = "پیشنهاد کالا در طرح ذخیره شد." });
@@ -502,7 +502,7 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
         await db.SaveChangesAsync(cancellationToken);
 
         long planId = await db.SalesPlanReferences.Where(x => x.StoreSalesPlanKey == salesPlanId).Select(x => x.Id).SingleAsync(cancellationToken);
-        long priceVersionId = await priceVersions.AppendAsync(productId, planId, null, null, accessoryId, input.PriceAmount, 0, long.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value), cancellationToken);
+        long priceVersionId = await priceVersions.AppendAsync(productId, planId, null, accessoryId, input.PriceAmount, 0, long.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value), cancellationToken);
         await transaction.CommitAsync(cancellationToken);
 
         return Ok(new { priceVersionId, message = "متعلقهٔ پیشنهاد ذخیره شد." });

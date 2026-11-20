@@ -29,7 +29,6 @@ DECLARE @ProfileId BIGINT = 90;
           AND version.IdProduct = ci.IdProduct
           AND version.IdSalesPlan = ci.IdSalesPlan
           AND version.IdVariant IS NULL
-          AND version.IdOptionValue IS NULL
           AND version.IdAccessory IS NULL        ORDER BY version.Id DESC
     ) AS pp
     OUTER APPLY
@@ -41,7 +40,6 @@ DECLARE @ProfileId BIGINT = 90;
           AND version.IdSalesPlan = ci.IdSalesPlan
           AND version.IdVariant = ci.IdVariant
           AND EXISTS (SELECT 1 FROM Store.ProductVariantSalesPlanOffer AS variantOffer WHERE variantOffer.IdVariant = ci.IdVariant AND variantOffer.IdSalesPlan = ci.IdSalesPlan AND variantOffer.IsEnabled = 1)
-          AND version.IdOptionValue IS NULL
           AND version.IdAccessory IS NULL        ORDER BY version.Id DESC
     ) AS vp
     WHERE c.IdProfile = @ProfileId
@@ -86,38 +84,6 @@ Components AS
         cr.IdProductVariant,
         cr.IdSalesPlan,
         cr.Quantity,
-        N'ویژگی' AS RowType,
-        CONVERT(BIGINT, value.Id) AS ComponentId,
-        CONCAT(purchaseOption.Label, N' / ', value.Label) AS ComponentName,
-        CONVERT(DECIMAL(19, 0), optionVersion.PriceAmount) AS BaseAmount,
-        CONVERT(DECIMAL(5, 2), 0) AS DiscountPercent
-    FROM CartRows AS cr
-    JOIN Account.CartItemPurchaseOptionValue AS selected ON selected.IdCartItem = cr.IdCartItem
-    JOIN Store.ProductPurchaseOptionValue AS value ON value.Id = selected.IdOptionValue
-    JOIN Store.ProductPurchaseOption AS purchaseOption ON purchaseOption.Id = value.IdOption
-    OUTER APPLY
-    (
-        SELECT TOP (1) version.PriceAmount
-        FROM Store.PriceVersion AS version
-        WHERE version.IsActive = 1
-          AND version.IdOptionValue = value.Id
-          AND version.IdSalesPlan = cr.IdSalesPlan
-          AND version.IdVariant IS NULL
-          AND version.IdOptionValue IS NOT NULL
-          AND version.IdAccessory IS NULL        ORDER BY version.Id DESC
-    ) AS optionVersion
-
-    UNION ALL
-
-    SELECT
-        cr.IdProfile,
-        cr.IdCart,
-        cr.IdCartItem,
-        cr.IdProduct,
-        cr.ProductName,
-        cr.IdProductVariant,
-        cr.IdSalesPlan,
-        cr.Quantity,
         N'متعلقه' AS RowType,
         CONVERT(BIGINT, pa.Id) AS ComponentId,
         accessory.Name AS ComponentName,
@@ -136,7 +102,7 @@ Components AS
           AND version.IdSalesPlan = cr.IdSalesPlan
           AND version.IdAccessory = pa.IdAccessory
           AND version.IdVariant IS NULL
-          AND version.IdOptionValue IS NULL        ORDER BY version.Id DESC
+        ORDER BY version.Id DESC
     ) AS accessoryVersion
     WHERE pa.IsRequired = 1 OR selected.Id IS NOT NULL
 )
@@ -164,7 +130,6 @@ ORDER BY
     IdCartItem,
     CASE RowType
         WHEN N'کالا' THEN 1
-        WHEN N'ویژگی' THEN 2
-        ELSE 3
+            ELSE 2
     END,
     ComponentId;

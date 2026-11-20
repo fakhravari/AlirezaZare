@@ -76,8 +76,6 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
     public DbSet<StoreProductSalesPlanOfferSpecificationOverride> StoreProductSalesPlanOfferSpecificationOverrides => Set<StoreProductSalesPlanOfferSpecificationOverride>();
     public DbSet<StorePriceVersion> StorePriceVersions => Set<StorePriceVersion>();
     public DbSet<StoreOrderItemPriceReference> StoreOrderItemPriceReferences => Set<StoreOrderItemPriceReference>();
-    public DbSet<StoreProductPurchaseOption> StoreProductPurchaseOptions => Set<StoreProductPurchaseOption>();
-    public DbSet<StoreProductPurchaseOptionValue> StoreProductPurchaseOptionValues => Set<StoreProductPurchaseOptionValue>();
     public DbSet<GeoCountry> GeoCountries => Set<GeoCountry>();
     public DbSet<GeoProvince> GeoProvinces => Set<GeoProvince>();
     public DbSet<GeoCity> GeoCities => Set<GeoCity>();
@@ -90,7 +88,6 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
     public DbSet<AccountRecentSearch> AccountRecentSearches => Set<AccountRecentSearch>();
     public DbSet<AccountCart> AccountCarts => Set<AccountCart>();
     public DbSet<AccountCartItem> AccountCartItems => Set<AccountCartItem>();
-    public DbSet<AccountCartItemPurchaseOptionValue> AccountCartItemPurchaseOptionValues => Set<AccountCartItemPurchaseOptionValue>();
     public DbSet<AccountCartItemAccessory> AccountCartItemAccessories => Set<AccountCartItemAccessory>();
     public DbSet<AccountAddress> AccountAddresses => Set<AccountAddress>();
     public DbSet<AccountFavorite> AccountFavorites => Set<AccountFavorite>();
@@ -109,14 +106,12 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
     {
         // Keep CLR/API names stable while using concise foreign-key names in SQL.
         modelBuilder.Entity<AccountCartItem>().Property(x => x.IdProductVariant).HasColumnName("IdVariant");
-        modelBuilder.Entity<AccountCartItemPurchaseOptionValue>().Property(x => x.IdProductPurchaseOptionValue).HasColumnName("IdOptionValue");
         modelBuilder.Entity<StoreCustomerOrderReference>().Property(x => x.IdWarehouseDocument).HasColumnName("IdDocument");
         modelBuilder.Entity<StoreCustomerOrderItem>().Property(x => x.IdProductVariant).HasColumnName("IdVariant");
         modelBuilder.Entity<StorePriceVersion>().Property(x => x.IdProductVariant).HasColumnName("IdVariant");
         modelBuilder.Entity<InventoryItem>().Property(x => x.IdProductVariant).HasColumnName("IdVariant");
         modelBuilder.Entity<StoreProductVariantSalesPlanOffer>().Property(x => x.IdProductVariant).HasColumnName("IdVariant");
         modelBuilder.Entity<StoreHomeTestimonial>().Property(x => x.IdProductFeedback).HasColumnName("IdFeedback");
-        modelBuilder.Entity<StoreProductPurchaseOptionValue>().Property(x => x.IdProductPurchaseOption).HasColumnName("IdOption");
         modelBuilder.Entity<StoreProductCollectionItem>().Property(x => x.IdProductCollection).HasColumnName("IdCollection");
         modelBuilder.Entity<StoreProductSalesPlanOfferAccessory>().Property(x => x.IdProductSalesPlanOffer).HasColumnName("IdOffer");
         modelBuilder.Entity<StoreProductSalesPlanOfferSpecificationOverride>().Property(x => x.IdProductSalesPlanOffer).HasColumnName("IdOffer");
@@ -194,15 +189,7 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.ToTable("CartItem", "Account");
             entity.HasKey(x => x.Id);
             entity.Property(x => x.UpdatedAtUtc).HasPrecision(3);
-            entity.HasMany(x => x.PurchaseOptionValues).WithOne().HasForeignKey(x => x.IdCartItem).OnDelete(DeleteBehavior.Cascade);
             entity.HasMany(x => x.Accessories).WithOne().HasForeignKey(x => x.IdCartItem).OnDelete(DeleteBehavior.Cascade);
-        });
-        modelBuilder.Entity<AccountCartItemPurchaseOptionValue>(entity =>
-        {
-            entity.ToTable("CartItemPurchaseOptionValue", "Account");
-            entity.HasKey(x => x.Id);
-            entity.HasIndex(x => new { x.IdCartItem, x.IdProductPurchaseOptionValue }).IsUnique();
-            entity.HasOne<StoreProductPurchaseOptionValue>().WithMany().HasForeignKey(x => x.IdProductPurchaseOptionValue);
         });
         modelBuilder.Entity<AccountCartItemAccessory>(entity =>
         {
@@ -661,12 +648,11 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
             entity.HasOne<AdminSystemUser>().WithMany().HasForeignKey(x => x.IdChangedBy).OnDelete(DeleteBehavior.Restrict);
             entity.Property(x => x.ChangeReason).HasMaxLength(300);
-            entity.HasIndex(x => new { x.IdProduct, x.IdSalesPlan, x.IdProductVariant, x.IdOptionValue, x.IdAccessory, x.Id });
+            entity.HasIndex(x => new { x.IdProduct, x.IdSalesPlan, x.IdProductVariant, x.IdAccessory, x.Id });
             entity.HasOne<WarehouseProduct>().WithMany().HasForeignKey(x => x.IdProduct).OnDelete(DeleteBehavior.Restrict);
             entity.HasOne<SalesPlanReference>().WithMany().HasForeignKey(x => x.IdSalesPlan).OnDelete(DeleteBehavior.Restrict);
             entity.HasOne(x => x.PreviousVersion).WithMany().HasForeignKey(x => x.IdPreviousVersion).OnDelete(DeleteBehavior.Restrict);
             entity.HasOne<ProductVariant>().WithMany().HasForeignKey(x => new { x.IdProductVariant, x.IdProduct }).HasPrincipalKey(x => new { x.Id, x.IdProduct }).OnDelete(DeleteBehavior.Restrict);
-            entity.HasOne<StoreProductPurchaseOptionValue>().WithMany().HasForeignKey(x => x.IdOptionValue).OnDelete(DeleteBehavior.Restrict);
             entity.HasOne<StoreAccessory>().WithMany().HasForeignKey(x => x.IdAccessory).OnDelete(DeleteBehavior.Restrict);
         });
         modelBuilder.Entity<StoreOrderItemPriceReference>(entity =>
@@ -750,18 +736,6 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.Property(x => x.SourceKey).HasMaxLength(100);
             entity.Property(x => x.FilterKey).HasMaxLength(100);
             entity.HasIndex(x => x.AttributeKey).IsUnique();
-        });
-        modelBuilder.Entity<StoreProductPurchaseOption>(entity =>
-        {
-            entity.ToTable("ProductPurchaseOption", "Store"); entity.HasKey(x => x.Id);
-            entity.Property(x => x.OptionKey).HasMaxLength(100).IsRequired(); entity.Property(x => x.Label).HasMaxLength(200).IsRequired();
-            entity.HasIndex(x => new { x.IdProduct, x.OptionKey }).IsUnique();
-        });
-        modelBuilder.Entity<StoreProductPurchaseOptionValue>(entity =>
-        {
-            entity.ToTable("ProductPurchaseOptionValue", "Store"); entity.HasKey(x => x.Id);
-            entity.Property(x => x.ValueKey).HasMaxLength(100).IsRequired(); entity.Property(x => x.Label).HasMaxLength(200).IsRequired();
-            entity.HasIndex(x => new { x.IdProductPurchaseOption, x.ValueKey }).IsUnique();
         });
         modelBuilder.Entity<StoreProductSalesPlanOffer>(entity =>
         {

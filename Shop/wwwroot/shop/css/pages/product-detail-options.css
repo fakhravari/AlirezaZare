@@ -1871,7 +1871,7 @@
   font-size: var(--product-type-body);
 }
 
-#productView .product-variant-price-delta {
+#productView .product-variant-choice-price {
   max-width: 100%;
   padding: 2px 6px;
   border: 1px solid #eee7d9;

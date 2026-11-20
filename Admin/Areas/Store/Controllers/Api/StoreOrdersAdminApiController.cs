@@ -183,7 +183,7 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
                                     join v in db.StorePriceVersions.AsNoTracking() on r.IdPriceVersion equals v.Id
                                     where itemRows.Select(i => i.Id).Contains(r.IdOrderItem)
                                     orderby r.IdOrderItem, r.IdPriceVersion
-                                    select new { r.IdOrderItem, r.IdPriceVersion, v.IdProductVariant, v.IdOptionValue, v.IdAccessory, v.PriceAmount, v.DiscountPercent, v.IsActive, v.CreatedAtUtc, v.ChangeReason })
+                                    select new { r.IdOrderItem, r.IdPriceVersion, v.IdProductVariant, v.IdAccessory, v.PriceAmount, v.DiscountPercent, v.IsActive, v.CreatedAtUtc, v.ChangeReason })
                 .ToListAsync(cancellationToken);
             var items = itemRows.Select(i => new
             {
@@ -195,8 +195,8 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
                 priceReferences = references.Where(r => r.IdOrderItem == i.Id).Select(r => new
                 {
                     priceVersionId = r.IdPriceVersion,
-                    component = StorePriceVersionReference.GetComponent(r.IdProductVariant, r.IdOptionValue, r.IdAccessory),
-                    calculatedUnitAmount = StorePriceVersionReference.AppliesDiscount(r.IdOptionValue, r.IdAccessory)
+                    component = StorePriceVersionReference.GetComponent(r.IdProductVariant, r.IdAccessory),
+                    calculatedUnitAmount = StorePriceVersionReference.AppliesDiscount(r.IdAccessory)
                         ? decimal.Round(r.PriceAmount * (100m - r.DiscountPercent) / 100m, 0, MidpointRounding.AwayFromZero)
                         : r.PriceAmount,
                     recordedPriceAmount = r.PriceAmount,
