@@ -13,6 +13,8 @@
   ).matches;
   const faNumber = (number) => window.HNUI.formatNumber(number);
   const escapeHtml = (value) => window.HNUI.escapeHtml(value);
+  const currentProductPrice = (product, options = {}) => window.HNProductCard?.currentPrice(product, options) ?? null;
+  const productPriceText = (amount) => amount !== null && amount !== undefined && Number.isFinite(Number(amount)) ? `${faNumber(amount)} تومان` : "قیمت تنوع ثبت نشده";
   const cartOptionsMarkup = (item) => window.HNUI.cart.renderOptions(item);
   const searchProducts = Array.isArray(window.HNProducts)
     ? window.HNProducts
@@ -60,14 +62,17 @@
       const startsAt = plan.startsAtUtc ? Date.parse(plan.startsAtUtc) : NaN;
       const endsAt = plan.endsAtUtc ? Date.parse(plan.endsAtUtc) : NaN;
       if ((Number.isFinite(startsAt) && now < startsAt) || (Number.isFinite(endsAt) && now >= endsAt)) return [];
-      return [{ product, plan, offer, priceAmount, discountPercent }];
+      const priceDetails = window.HNProductCard?.priceDetails(product, { salesPlanId: plan.id });
+      if (!priceDetails || priceDetails.current == null) return [];
+      return [{ product, plan, offer, priceAmount: priceDetails.list + priceDetails.adjustments, discountPercent: priceDetails.discount, currentPrice: priceDetails.current }];
     });
     const productsWithActiveOffers = new Set(
       offers.map(({ product }) => Number(product.id)),
     );
     const regularListings = searchProducts
       .filter((product) => !productsWithActiveOffers.has(Number(product.id)))
-      .map((product) => ({ product, plan: null, offer: null }));
+      .map((product) => ({ product, plan: null, offer: null, currentPrice: currentProductPrice(product) }))
+      .filter((listing) => listing.currentPrice != null);
 
     return [...regularListings, ...offers];
   })();
@@ -247,14 +252,13 @@
           })(),
         )
         .slice(0, 5)
-        .map(({ product, plan, priceAmount, discountPercent }) => ({
+        .map(({ product, plan, priceAmount, discountPercent, currentPrice }) => ({
           product,
           plan,
-          currentPrice: plan
-            ? Math.round(priceAmount * (100 - discountPercent) / 100)
-            : Math.round(Number(product.price) * 1000000),
+          currentPrice: currentPrice ?? (plan ? Math.round(priceAmount * (100 - discountPercent) / 100) : null),
           listPrice: plan && discountPercent > 0 ? priceAmount : null,
-        }));
+        }))
+        .filter((listing) => listing.currentPrice != null);
 
       const resultMarkup = matches.length
         ? `<div class="header-search-suggestions-head"><span><i class="bi bi-stars" aria-hidden="true"></i> پیشنهاد برای جستجوی شما</span><small>${faNumber(matches.length)} پیشنهاد</small></div><ul>${matches
@@ -497,7 +501,7 @@
         name: product.name,
         brand: product.brand,
         type: product.type,
-        price: Number(product.price) * 1000000,
+        price: currentProductPrice(product),
         image: product.image,
       });
     });
@@ -518,7 +522,7 @@
           };
           const name = product.name || "محصول منتخب";
           const href = window.HNProductUrl?.(id) || "/search";
-          return `<article class="compare-panel-item" data-favorite-id="${escapeHtml(id)}"><img src="${escapeHtml(product.image || defaultProductImage)}" alt="" loading="lazy"><span><strong><a class="header-panel-product-link" href="${escapeHtml(href)}">${escapeHtml(name)}</a></strong><small>${faNumber(Number(product.price) * (Number(product.price) < 1000000 ? 1000000 : 1))} تومان</small></span><button class="cart-remove" type="button" data-favorite-remove="${escapeHtml(id)}" aria-label="حذف ${escapeHtml(name)} از علاقه‌مندی‌ها"><i class="bi bi-trash3" aria-hidden="true"></i></button></article>`;
+          return `<article class="compare-panel-item" data-favorite-id="${escapeHtml(id)}"><img src="${escapeHtml(product.image || defaultProductImage)}" alt="" loading="lazy"><span><strong><a class="header-panel-product-link" href="${escapeHtml(href)}">${escapeHtml(name)}</a></strong><small>${escapeHtml(productPriceText(product.price))}</small></span><button class="cart-remove" type="button" data-favorite-remove="${escapeHtml(id)}" aria-label="حذف ${escapeHtml(name)} از علاقه‌مندی‌ها"><i class="bi bi-trash3" aria-hidden="true"></i></button></article>`;
         })
         .join(""),
     );
@@ -529,7 +533,7 @@
     (window.HNProducts || []).forEach((product) => {
       products.set(String(product.id), {
         name: product.name,
-        price: Number(product.price) * 1000000,
+        price: currentProductPrice(product),
         image: product.image,
       });
     });
@@ -541,7 +545,7 @@
           button.dataset.name ||
           card?.querySelector("h3")?.textContent.trim() ||
           "محصول منتخب",
-        price: Number(button.dataset.price) || 0,
+        price: products.get(String(button.dataset.id))?.price ?? (Number.isFinite(Number(button.dataset.price)) ? Number(button.dataset.price) : null),
         image:
           button.dataset.image ||
           image?.getAttribute("src") ||
@@ -564,7 +568,7 @@
             image: defaultProductImage,
           };
           const href = window.HNProductUrl?.(id) || "/search";
-          return `<article class="compare-panel-item" data-compare-id="${escapeHtml(id)}"><img src="${escapeHtml(product.image)}" alt="" loading="lazy"><span><strong><a class="header-panel-product-link" href="${escapeHtml(href)}">${escapeHtml(product.name)}</a></strong><small>${faNumber(product.price)} تومان</small></span><button class="cart-remove" type="button" data-compare-remove="${escapeHtml(id)}" aria-label="حذف ${escapeHtml(product.name)} از مقایسه"><i class="bi bi-trash3" aria-hidden="true"></i></button></article>`;
+          return `<article class="compare-panel-item" data-compare-id="${escapeHtml(id)}"><img src="${escapeHtml(product.image)}" alt="" loading="lazy"><span><strong><a class="header-panel-product-link" href="${escapeHtml(href)}">${escapeHtml(product.name)}</a></strong><small>${escapeHtml(productPriceText(product.price))}</small></span><button class="cart-remove" type="button" data-compare-remove="${escapeHtml(id)}" aria-label="حذف ${escapeHtml(product.name)} از مقایسه"><i class="bi bi-trash3" aria-hidden="true"></i></button></article>`;
         })
         .join(""),
     );
@@ -751,15 +755,18 @@
       $card
         .find(".featured-content > small")
         .text(`${product.brand} Â· ${product.type}`);
+      const price = currentProductPrice(product);
+      const stock = window.HNProductCard?.availableStock(product);
+      const unavailable = price == null || stock === 0;
       $card
         .find(".featured-price, .featured-buy strong")
-        .text(`${faNumber(product.price * 1000000)} تومان`);
+        .text(productPriceText(price));
       $card.find(".add-cart").attr({
         "data-id": String(product.id),
         "data-name": product.name,
-        "data-price": String(product.price * 1000000),
+        "data-price": price == null ? "" : String(price),
         "data-image": product.image,
-      });
+      }).prop("disabled", unavailable).attr("aria-disabled", String(unavailable));
     });
   }
   const categoryFilters = {"ابزار برقی": "power-tools", "ابزار اندازه‌گیری": "measurement", "لحیم‌کاری و تعمیر برد": "electronics", "روشنایی و لامپ": "lighting"};
@@ -1447,7 +1454,7 @@
     const shape = JSON.stringify(cart.map(({ quantity, ...item }) => item));
     if (cart.length && shape === renderedHeaderCartShape) {
       $cartItems.find("[data-cart-id]").each(function () {
-        const item = cart.find((entry) => String(entry.id) === String(this.dataset.cartId));
+        const item = cart.find((entry) => window.HNUI.cart.identity(entry) === this.dataset.cartLineKey);
         if (!item) return;
         this.querySelector(".cart-quantity-value").textContent = faNumber(item.quantity);
         this.querySelector('[data-action="minus"]').disabled = item.quantity <= 1;
@@ -1471,7 +1478,7 @@
           const href = window.HNProductUrl?.(item.id, {salesPlanId: item.salesPlanId}) || "/search";
           const planDetails = item.salesPlanSnapshot;
           const planBadge = `<span class="cart-sales-plan-badge">${escapeHtml(window.HNUI.cart.salesPlanName(item.salesPlanId, planDetails?.name))}</span>`;
-          return `<div class="cart-item" data-cart-id="${safeId}" data-sales-plan-id="${escapeHtml(item.salesPlanId || "regular")}"><div class="cart-item-primary"><img src="${safeImage}" alt="${safeName}" loading="lazy" decoding="async"><div class="cart-item-info"><strong><a class="header-panel-product-link" href="${escapeHtml(href)}">${safeName}</a></strong>${planBadge}<div class="cart-item-actions"><span>${faNumber(item.price)} تومان</span>${window.HNUI.cart.renderControls(item)}</div></div></div>${cartOptionsMarkup(item)}</div>`;
+          return `<div class="cart-item" data-cart-id="${safeId}" data-cart-line-key="${escapeHtml(window.HNUI.cart.identity(item))}" data-sales-plan-id="${escapeHtml(item.salesPlanId || "regular")}"><div class="cart-item-primary"><img src="${safeImage}" alt="${safeName}" loading="lazy" decoding="async"><div class="cart-item-info"><strong><a class="header-panel-product-link" href="${escapeHtml(href)}">${safeName}</a></strong>${planBadge}<div class="cart-item-actions"><span>${faNumber(item.price)} تومان</span>${window.HNUI.cart.renderControls(item)}</div></div></div>${cartOptionsMarkup(item)}</div>`;
         })
         .join(""),
     );
@@ -1487,17 +1494,16 @@
     const $button = $(this);
     const $row = $button.closest("[data-cart-id]");
     const item = cart.find(
-      (product) => String(product.id) === String($row.attr("data-cart-id")) &&
-        product.salesPlanId === String($row.attr("data-sales-plan-id") || "regular"),
+      (product) => window.HNUI.cart.identity(product) === String($row.attr("data-cart-line-key") || ""),
     );
     if (!item) return;
     if ($button.data("action") === "plus")
-      window.HNUI.cart.update(item.id, item.quantity + 1, item.salesPlanId, item.variantId);
+      window.HNUI.cart.update(item.id, item.quantity + 1, item.salesPlanId, item.variantId, window.HNUI.cart.identity(item));
     if ($button.data("action") === "minus")
-      window.HNUI.cart.update(item.id, item.quantity - 1, item.salesPlanId, item.variantId);
+      window.HNUI.cart.update(item.id, item.quantity - 1, item.salesPlanId, item.variantId, window.HNUI.cart.identity(item));
     if ($button.data("action") === "remove") {
       event.stopPropagation();
-      window.HNUI.cart.remove(item.id, item.salesPlanId, item.variantId);
+      window.HNUI.cart.remove(item.id, item.salesPlanId, item.variantId, window.HNUI.cart.identity(item));
       setCartOpen(true);
     }
   });
@@ -2085,9 +2091,10 @@
 
   const openQuickView = (product) => {
     activeProduct = product;
-    const rawStock = product.stockQuantity ?? product.inventoryCount ?? product.quantityInStock ?? product.availableQuantity ?? product.stock;
+    const rawStock = window.HNProductCard?.availableStock(product) ?? product.stockQuantity ?? product.inventoryCount ?? product.quantityInStock ?? product.availableQuantity ?? product.stock;
     const stock = rawStock === "" || rawStock === null || rawStock === undefined ? Number.NaN : Number(rawStock);
-    const unavailable = Number.isFinite(stock) && stock >= 0 ? stock === 0 : product.inStock === false;
+    const price = currentProductPrice(product);
+    const unavailable = price == null || (Number.isFinite(stock) && stock >= 0 ? stock < 1 : product.inStock === false);
     const $quickAdd = $(".quick-add-cart");
     $quickAdd
       .prop("disabled", unavailable)
@@ -2110,7 +2117,7 @@
     $("#quickViewCode").text(
       `${product.brand ? `${product.brand} Â· ` : ""}${product.code}`,
     );
-    $("#quickViewPrice").text(`${faNumber(product.price)} تومان`);
+    $("#quickViewPrice").text(productPriceText(price));
     $(".quick-description").text(
       product.detail?.highlights?.[0] || product.detail?.intro || "مشخصات این مدل را بررسی کنید.",
     );

@@ -346,20 +346,15 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
         host.innerHTML = watches.map((watch, index) => {
             const product = window.HNCatalog?.find(watch.productId);
             const productName = product?.name || `محصول ${watch.productId || "نامشخص"}`;
-            const priceOptions = salesPlanData.priceOptions?.[Number(watch.productId)] || [];
-            const variants = watch.scope === "variant" && watch.variants && typeof watch.variants === "object"
-                ? Object.entries(watch.variants).map(([key, value]) => {
-                    const feature = priceOptions.find((item) => item.key === key);
-                    const option = feature?.values?.find((item) => item.key === value);
-                    return `${feature?.label || key}: ${option?.label || value}`;
-                }).join("، ")
-                : "";
-            const hasVariants = priceOptions.some((feature) => Array.isArray(feature?.values) && feature.values.length);
+            const inventoryVariants = (salesPlanData.inventoryVariants || []).filter((variant) => Number(variant.productId) === Number(watch.productId));
+            const selectedVariant = inventoryVariants.find((variant) => Number(variant.variantId) === Number(watch.variants?.variantId));
+            const variants = selectedVariant?.name || "";
+            const hasVariants = inventoryVariants.length > 0;
             const scopeLabel = watch.scope === "variant"
-                ? (variants || "ویژگی انتخاب‌شده")
+                ? (variants || "تنوع انتخاب‌شده")
                 : hasVariants
-                    ? "همهٔ قیمت‌های محصول"
-                    : "بدون ویژگی";
+                    ? "همهٔ تنوع‌های کالا"
+                    : "قیمت پایهٔ کالا";
             const scopeIcon = watch.scope === "variant"
                 ? "sliders"
                 : hasVariants

@@ -79,8 +79,7 @@
                 <button class="btn btn-primary" type="submit">اعمال فیلتر</button><button class="btn btn-default" type="reset">پاک‌کردن</button>
                 <span class="admin-record-count ms-auto small text-muted" data-offer-count aria-live="polite"></span>
             </form>
-            <p class="small text-muted">فیلتر تاریخ فقط پیشنهادهایی را نشان می‌دهد که قیمت آن‌ها ثبت شده است. برای مدیریت قیمت ویژگی‌ها در طرح عادی، یک کالا را در فیلتر انتخاب کنید.</p>
-            <button type="button" class="btn btn-default mb-3" data-option-prices-selected>قیمت ویژگی‌های کالای انتخاب‌شده</button>
+            <p class="small text-muted">فیلتر تاریخ فقط پیشنهادهایی را نشان می‌دهد که قیمت آن‌ها ثبت شده است. قیمت تنوع‌های انبار از بخش قیمت تنوع‌ها مدیریت می‌شود.</p>
             <div class="admin-data-status small text-muted" data-offer-status role="status" aria-live="polite">در حال بارگذاری…</div>
             <div class="table-responsive">
                 <table class="table table-striped table-hover align-middle"
@@ -166,13 +165,6 @@
 </div>
 @if (promotionSection == "offers")
 {
-<div class="modal fade" id="option-prices-modal" tabindex="-1" aria-labelledby="option-prices-title" aria-hidden="true">
-    <div class="modal-dialog modal-lg"><div class="modal-content">
-        <div class="modal-header"><h2 class="modal-title fs-5" id="option-prices-title">قیمت ویژگی‌های کالا</h2><button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="بستن"></button></div>
-        <div class="modal-body"><p data-option-prices-name></p><label for="option-prices-plan" class="form-label">طرح فروش</label><select id="option-prices-plan" class="form-select mb-3" data-option-prices-plan></select><p class="small text-muted">مبلغ هر مقدار ویژگی برای طرح انتخاب‌شده مستقل است؛ کاهش قیمت را با انتخاب «کاهش» ثبت کنید.</p><div data-option-prices-status role="status" aria-live="polite"></div><div class="table-responsive"><table class="table align-middle"><thead><tr><th scope="col">ویژگی</th><th scope="col">مقدار</th><th scope="col">اثر بر قیمت</th><th scope="col">مبلغ (تومان)</th><th scope="col">عملیات</th></tr></thead><tbody data-option-prices-rows></tbody></table></div></div>
-        <div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">بستن</button></div>
-    </div></div>
-</div>
 <div class="modal fade" id="offer-specifications-modal" tabindex="-1" aria-labelledby="offer-specifications-title" aria-hidden="true">
     <div class="modal-dialog modal-lg"><form class="modal-content" data-offer-specifications-form data-admin-confirm="مشخصات نمایشی پیشنهاد ذخیره شود؟">
         <div class="modal-header"><h2 class="modal-title fs-5" id="offer-specifications-title">مشخصات نمایشی پیشنهاد</h2><button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="بستن"></button></div>

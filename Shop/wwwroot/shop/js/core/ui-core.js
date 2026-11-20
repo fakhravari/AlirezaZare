@@ -150,7 +150,6 @@
       variantId: item.variantId || null,
       quantity: Number(item.quantity),
       salesPlanId: String(item.salesPlanId || "regular"),
-      optionValueIds: (item.options?.priceOptions || []).map((option) => Number(option.id)).filter((id) => Number.isSafeInteger(id) && id > 0),
       accessoryIds: (item.options?.accessories || []).filter((accessory) => accessory.selected !== false).map((accessory) => Number(accessory.productAccessoryId)).filter((id) => Number.isSafeInteger(id) && id > 0),
     })).filter((item) => Number.isSafeInteger(item.productId) && item.productId > 0);
     void api.request("account/cart", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ items }) })
@@ -497,24 +496,11 @@
     try { salesPlanData = JSON.parse(document.querySelector("#storeSalesPlans")?.textContent || "{}"); } catch { salesPlanData = {}; }
     salesPlanId ||= salesPlanData.plans?.find((plan) => plan.isDefault)?.id || "regular";
     const inventoryVariants = (salesPlanData.inventoryVariants || []).filter((variant) => Number(variant.productId) === Number(productId));
-    const configuredPriceOptions = salesPlanData.priceOptions?.[Number(productId)] || [];
-    const selectedPriceOptions = configuredPriceOptions.flatMap (feature => {
-      const option = feature.values?.[0];
-      return option ? [{
-        id: Number(option.id) || 0,
-        key: feature.key,
-        label: feature.label,
-        value: option.label,
-        productValue: option.key,
-        priceDelta: Number(option.priceBySalesPlan?.[salesPlanId] ?? option.priceDelta) / 1000000 || 0,
-      }] : [];
-    });
     const defaultInventoryVariant = inventoryVariants.find((variant) => variant.isDefault);
     if (inventoryVariants.length && !defaultInventoryVariant) {
       showToast("برای این کالا تنوع پیش‌فرض ثبت نشده است؛ مدیر فروشگاه باید آن را تعیین کند.", "warning");
       return;
     }
-    const priceOptions = Object.fromEntries(selectedPriceOptions.map((option) => [option.key, option.productValue]));
     const accessoryIds = (product.accessories || []).filter((item) => item.required).map((item) => item.id);
     let salesPlanSnapshot = null;
     {
@@ -527,7 +513,7 @@
         const response = await api.request("store/sales-plans/quote", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ productId: Number(productId), salesPlanId, quantity: 1, variantId: defaultInventoryVariant?.variantId ?? null, priceOptions, accessoryIds }),
+          body: JSON.stringify({ productId: Number(productId), salesPlanId, quantity: 1, variantId: defaultInventoryVariant?.variantId ?? null, accessoryIds }),
         });
         const quote = await response.json().catch(() => ({}));
         if (!response.ok) {
@@ -536,6 +522,7 @@
             "insufficient-stock": "افزودن به سبد انجام نشد: موجودی کافی از این کالا یا تنوع باقی نمانده است.",
             "inventory-variant-required": "افزودن به سبد انجام نشد: تنوع انبار انتخاب نشده یا در دسترس نیست.",
             "product-variant-unavailable": "افزودن به سبد انجام نشد: تنوع انتخاب‌شده دیگر قابل فروش نیست.",
+            "variant-price-unavailable": "افزودن به سبد انجام نشد: برای این تنوع در طرح فروش قیمت ثبت نشده است.",
             "purchase-limit": "افزودن به سبد انجام نشد: تعداد از سقف مجاز خرید بیشتر است.",
             "offer-disabled": "افزودن به سبد انجام نشد: این پیشنهاد فروش غیرفعال است.",
             "inactive-plan": "افزودن به سبد انجام نشد: مهلت این طرح فروش تمام شده یا هنوز آغاز نشده است.",
@@ -586,7 +573,6 @@
         variantId: defaultInventoryVariant?.variantId ?? null,
         options: {
           inventoryVariant: defaultInventoryVariant ? { id: defaultInventoryVariant.variantId, name: defaultInventoryVariant.name, attributes: defaultInventoryVariant.attributes || [] } : null,
-          priceOptions: selectedPriceOptions,
           accessories: selectedAccessoryItems.map((item) => ({ id: item.id, productAccessoryId: Number(item.productAccessoryId) || 0, name: item.name, price: Number(salesPlanSnapshot?.accessoryPriceAmounts?.[item.id] ?? item.price) / (salesPlanSnapshot?.accessoryPriceAmounts?.[item.id] != null ? 1000000 : 1), required: true })),
         },
         salesPlanSnapshot,

@@ -19,7 +19,6 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
     {
         "companies" => await GetCompaniesAsync(cancellationToken),
         "warehouses" => await GetWarehousesAsync(cancellationToken),
-        "warehouse-types" => Ok(await db.WarehouseTypes.AsNoTracking().OrderBy(x => x.Name).ToListAsync(cancellationToken)),
         "document-types" => Ok(await db.WarehouseDocumentTypes.AsNoTracking().OrderBy(x => x.Name)
             .Select(x => new { x.Id, x.Code, x.Name, x.Direction, x.AffectsStock, x.IsActive }).ToListAsync(cancellationToken)),
         "references" => await GetReferencesAsync(cancellationToken),
@@ -160,11 +159,21 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
         if (!await db.SalesPlanReferences.AnyAsync(x => x.Id == input.SalesPlanId && x.IsActive, cancellationToken))
             return ValidationProblem(detail: "طرح فروش انتخاب‌شده فعال نیست.", statusCode: 400);
 
-        if (!await db.WarehouseStockOwners.AnyAsync(x => x.IdWarehouse == input.WarehouseId && x.IdStockOwner == input.SalesPlanId, cancellationToken))
+        await using var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
+        var links = await db.WarehouseStockOwners.Where(x => x.IdWarehouse == input.WarehouseId).ToListAsync(cancellationToken);
+        var selected = links.SingleOrDefault(x => x.IdStockOwner == input.SalesPlanId);
+        if (selected is null)
         {
-            db.WarehouseStockOwners.Add(new WarehouseStockOwner { IdWarehouse = input.WarehouseId, IdStockOwner = input.SalesPlanId });
-            await db.SaveChangesAsync(cancellationToken);
+            selected = new WarehouseStockOwner { IdWarehouse = input.WarehouseId, IdStockOwner = input.SalesPlanId };
+            db.WarehouseStockOwners.Add(selected);
         }
+        if (input.IsDefault || !links.Any(x => x.IsDefault))
+        {
+            foreach (var link in links) link.IsDefault = false;
+            selected.IsDefault = true;
+        }
+        await db.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
 
         return Ok(new { message = "مالک به انبار اختصاص یافت." });
     }
@@ -180,10 +189,20 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
         if (link is null) return NotFound();
 
         if (await db.WarehouseStockOwners.CountAsync(x => x.IdWarehouse == warehouseId, cancellationToken) <= 1
-            || await db.Warehouses.AnyAsync(x => x.Id == warehouseId && x.IdOwnerSalesPlanReference == ownerId, cancellationToken)
+            || link.IsDefault
             || await db.WarehouseDocuments.AnyAsync(x => x.IdWarehouse == warehouseId && x.IdSalesPlanReference == ownerId, cancellationToken)
-            || await db.StockBalances.AnyAsync(x => x.IdWarehouse == warehouseId && x.IdSalesPlanReference == ownerId, cancellationToken))
-            return Conflict(new { detail = "اتصال آخر، مالک پیش‌فرض یا مالک دارای سند و مانده قابل حذف نیست." });
+            || await db.WarehouseDocumentLines.AnyAsync(x => x.IdSalesPlanReference == ownerId
+                && db.WarehouseDocuments.Any(document => document.Id == x.IdDocument && document.IdWarehouse == warehouseId), cancellationToken)
+            || await db.WarehouseStockMovements.AnyAsync(x => x.IdWarehouse == warehouseId && x.IdSalesPlanReference == ownerId, cancellationToken))
+            return Conflict(new { detail = "آخرین اتصال، مالک پیش‌فرض یا مالکی که سند یا گردش انبار دارد قابل حذف نیست." });
+
+        var balances = await db.StockBalances
+            .Where(x => x.IdWarehouse == warehouseId && x.IdSalesPlanReference == ownerId)
+            .ToListAsync(cancellationToken);
+        if (balances.Any(x => x.Quantity != 0))
+            return Conflict(new { detail = "مالک دارای ماندهٔ غیرصفر است و اتصال آن قابل حذف نیست." });
+
+        db.StockBalances.RemoveRange(balances);
 
         db.WarehouseStockOwners.Remove(link);
         await db.SaveChangesAsync(cancellationToken);
@@ -191,6 +210,23 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
         await transaction.CommitAsync(cancellationToken);
 
         return Ok(new { message = "اتصال مالک حذف شد." });
+    }
+
+    [HttpPut("sales-plan-mapping/{warehouseId:long}/{ownerId:long}/default")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> SetDefaultMapping(long warehouseId, long ownerId, CancellationToken cancellationToken)
+    {
+        if (!User.IsInRole("system.full-access")) return Forbid();
+        await using var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
+        var target = await db.WarehouseStockOwners.SingleOrDefaultAsync(x => x.IdWarehouse == warehouseId && x.IdStockOwner == ownerId, cancellationToken);
+        if (target is null) return NotFound();
+        await db.WarehouseStockOwners.Where(x => x.IdWarehouse == warehouseId && x.IsDefault)
+            .ExecuteUpdateAsync(update => update.SetProperty(x => x.IsDefault, false), cancellationToken);
+        await db.Entry(target).ReloadAsync(cancellationToken);
+        target.IsDefault = true;
+        await db.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
+        return Ok(new { message = "مالک پیش‌فرض انبار تغییر کرد." });
     }
 
     [HttpPost("{section}/{id:long}/deactivate")]
@@ -291,10 +327,11 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                     if (input is null || !ValidCodeName(input.Code, input.DisplayName, 64, 200) || input.IdStockOwnerType is not (1 or 2))
                         return ValidationProblem(detail: "کد، نام و نوع مالک معتبر الزامی است.", statusCode: 400);
 
-                    if (!id.HasValue && !System.Text.RegularExpressions.Regex.IsMatch(input.Code.Trim(), "^[a-z0-9]+(?:-[a-z0-9]+)*$"))
+                    if (!System.Text.RegularExpressions.Regex.IsMatch(input.Code.Trim(), "^[a-z0-9]+(?:-[a-z0-9]+)*$"))
                         return ValidationProblem(detail: "کد باید با حروف کوچک انگلیسی، عدد و خط تیره باشد.", statusCode: 400);
 
-                    if (!id.HasValue && await db.SalesPlanReferences.AnyAsync(x => x.StoreSalesPlanKey == input.Code.Trim() || x.Code == input.Code.Trim(), cancellationToken))
+                    if (await db.SalesPlanReferences.AnyAsync(x => x.Id != id &&
+                        (x.StoreSalesPlanKey == input.Code.Trim() || x.Code == input.Code.Trim()), cancellationToken))
                         return Conflict(new { detail = "این کد قبلاً ثبت شده است." });
 
                     SalesPlanReference? entity = id.HasValue ? await db.SalesPlanReferences.SingleOrDefaultAsync(x => x.Id == id, cancellationToken) : new();
@@ -303,9 +340,6 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                     if (id.HasValue && entity.IdStockOwnerType != input.IdStockOwnerType)
                         return Conflict(new { detail = "نوع مالک موجود قابل تغییر نیست." });
 
-                    if (id.HasValue && entity.Code != input.Code.Trim())
-                        return Conflict(new { detail = "کد مالک موجود قابل تغییر نیست؛ مالک جدید تعریف کنید." });
-
                     if (id.HasValue && !input.IsActive && (entity.IsRegular ||
                         await db.WarehouseStockOwners.AnyAsync(x => x.IdStockOwner == id.Value, cancellationToken)))
                         return Conflict(new { detail = "طرح عادی یا مالک متصل به انبار قابل غیرفعال‌سازی نیست." });
@@ -313,10 +347,10 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                     if (!id.HasValue)
                     {
                         entity.StoreSalesPlanKey = input.Code.Trim();
-                        entity.Code = input.Code.Trim();
                         entity.IdStockOwnerType = input.IdStockOwnerType;
                         entity.PlanType = input.IdStockOwnerType == 1 ? input.Code.Trim() : "owner";
                     }
+                    entity.Code = input.Code.Trim();
                     entity.DisplayName = input.DisplayName.Trim();
                     entity.IsActive = input.IsActive;
 
@@ -354,37 +388,11 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
 
                     return Ok(new { entity.Id, message = "شرکت ذخیره شد." });
                 }
-            case "warehouse-types":
-                {
-                    if (!User.IsInRole("system.full-access")) return Forbid();
-
-                    WarehouseTypeInput? input = Parse<WarehouseTypeInput>(payload);
-                    string name = input?.Name?.Trim() ?? "";
-                    if (name.Length is < 1 or > 200) return ValidationProblem(detail: "نام انبار را وارد کنید.", statusCode: 400);
-
-                    await using var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
-                    if (await db.WarehouseTypes.AnyAsync(x => x.Name == name && (!id.HasValue || x.Id != id.Value), cancellationToken)) return Conflict(new { detail = "این نام انبار قبلاً ثبت شده است." });
-
-                    WarehouseType? type = id.HasValue ? await db.WarehouseTypes.SingleOrDefaultAsync(x => x.Id == id, cancellationToken) : new WarehouseType();
-                    if (type is null) return NotFound();
-
-                    type.Name = name;
-                    if (!id.HasValue) db.WarehouseTypes.Add(type);
-                    else foreach (var warehouse in await db.Warehouses.Where(x => x.IdWarehouseType == id.Value).ToListAsync(cancellationToken)) warehouse.Name = name;
-                    await db.SaveChangesAsync(cancellationToken);
-
-                    await transaction.CommitAsync(cancellationToken);
-
-                    return Ok(new { type.Id, message = "نام انبار ذخیره شد." });
-                }
             case "warehouses":
                 {
                     WarehouseInput? input = Parse<WarehouseInput>(payload);
-                    if (input is null || input.CompanyId < 1 || input.WarehouseTypeId < 1 || string.IsNullOrWhiteSpace(input.Code) || input.Code.Trim().Length > 50)
+                    if (input is null || input.CompanyId < 1 || string.IsNullOrWhiteSpace(input.Name) || input.Name.Trim().Length > 400 || string.IsNullOrWhiteSpace(input.Code) || input.Code.Trim().Length > 50)
                         return ValidationProblem(detail: "شرکت، کد و نام انبار را درست وارد کنید.", statusCode: 400);
-
-                    WarehouseType? warehouseType = await db.WarehouseTypes.SingleOrDefaultAsync(x => x.Id == input.WarehouseTypeId, cancellationToken);
-                    if (warehouseType is null) return ValidationProblem(detail: "نوع انبار پیدا نشد.", statusCode: 400);
 
                     if (id.HasValue && !await CanAccessWarehouseAsync(id.Value, cancellationToken)) return Forbid();
 
@@ -435,8 +443,8 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                         return Conflict(new { detail = "انبار فروش فعلی به سایت متصل است؛ ابتدا اتصال سایت را به انبار فروش دیگری منتقل کنید." });
 
                     await using var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
-                    if (await db.Warehouses.AnyAsync(x => x.IdCompany == input.CompanyId && x.IdWarehouseType == input.WarehouseTypeId && (!id.HasValue || x.Id != id.Value), cancellationToken))
-                        return Conflict(new { detail = "این نوع انبار قبلاً به شرکت تخصیص داده شده است." });
+                    if (await db.Warehouses.AnyAsync(x => x.IdCompany == input.CompanyId && x.Name == input.Name.Trim() && (!id.HasValue || x.Id != id.Value), cancellationToken))
+                        return Conflict(new { detail = "این نام انبار قبلاً برای شرکت ثبت شده است." });
 
                     if (previousSalesWarehouse is not null)
                     {
@@ -445,20 +453,23 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
 
                     entity.IdCompany = input.CompanyId;
                     entity.Code = input.Code.Trim();
-                    entity.Name = warehouseType.Name;
-                    entity.IdWarehouseType = warehouseType.Id;
+                    entity.Name = input.Name.Trim();
                     entity.IsSalesWarehouse = input.IsSalesWarehouse;
-                    entity.IdOwnerSalesPlanReference = input.OwnerSalesPlanId;
                     entity.IsActive = input.IsActive;
 
                     if (!id.HasValue) db.Warehouses.Add(entity);
                     await db.SaveChangesAsync(cancellationToken);
 
-                    if (!await db.WarehouseStockOwners.AnyAsync(x => x.IdWarehouse == entity.Id && x.IdStockOwner == input.OwnerSalesPlanId, cancellationToken))
+                    var ownerLinks = await db.WarehouseStockOwners.Where(x => x.IdWarehouse == entity.Id).ToListAsync(cancellationToken);
+                    foreach (var ownerLink in ownerLinks) ownerLink.IsDefault = false;
+                    var selectedOwnerLink = ownerLinks.SingleOrDefault(x => x.IdStockOwner == input.OwnerSalesPlanId);
+                    if (selectedOwnerLink is null)
                     {
-                        db.WarehouseStockOwners.Add(new WarehouseStockOwner { IdWarehouse = entity.Id, IdStockOwner = input.OwnerSalesPlanId!.Value });
-                        await db.SaveChangesAsync(cancellationToken);
+                        selectedOwnerLink = new WarehouseStockOwner { IdWarehouse = entity.Id, IdStockOwner = input.OwnerSalesPlanId!.Value };
+                        db.WarehouseStockOwners.Add(selectedOwnerLink);
                     }
+                    selectedOwnerLink.IsDefault = true;
+                    await db.SaveChangesAsync(cancellationToken);
                     if (input.IsSiteWarehouse && !await SetSiteWarehouseAsync(entity.Id, cancellationToken))
                         return Conflict(new { detail = "تنظیمات سایت پیدا نشد." });
 
@@ -749,20 +760,20 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
         long? siteWarehouseId = await db.StoreSiteIdentities.AsNoTracking().Where(x => x.Id == 1) .Select(x => x.IdWarehouse).SingleOrDefaultAsync(cancellationToken);
         var query = from warehouse in db.Warehouses.AsNoTracking()
                     join company in db.Companies.AsNoTracking() on warehouse.IdCompany equals company.Id
-                    join plan in db.SalesPlanReferences.AsNoTracking() on warehouse.IdOwnerSalesPlanReference equals plan.Id
-                        into plans
+                    join ownerLink in db.WarehouseStockOwners.AsNoTracking().Where(x => x.IsDefault) on warehouse.Id equals ownerLink.IdWarehouse into defaultLinks
+                    from ownerLink in defaultLinks.DefaultIfEmpty()
+                    join plan in db.SalesPlanReferences.AsNoTracking() on ownerLink.IdStockOwner equals plan.Id into plans
                     from plan in plans.DefaultIfEmpty()
                     orderby company.Name, warehouse.Name
                     select new
                     {
                         warehouse.Id,
                         warehouse.IdCompany,
-                        warehouse.IdWarehouseType,
                         CompanyName = company.Name,
                         warehouse.Code,
                         warehouse.Name,
                         warehouse.IsSalesWarehouse,
-                        warehouse.IdOwnerSalesPlanReference,
+                        OwnerSalesPlanId = ownerLink == null ? (long?)null : ownerLink.IdStockOwner,
                         OwnerSalesPlan = plan == null ? null : plan.DisplayName,
                         warehouse.IsActive,
                         IsSiteWarehouse = warehouse.Id == siteWarehouseId
@@ -813,7 +824,7 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
         long? siteId = await db.StoreSiteIdentities.AsNoTracking().Where(x => x.Id == 1).Select(x => x.IdWarehouse).SingleOrDefaultAsync(cancellationToken);
         var companies = await db.Companies.AsNoTracking().Where(x => x.IsActive).OrderBy(x => x.Name) .Select(x => new { x.Id, x.Name }).ToListAsync(cancellationToken);
         var warehouses = await db.Warehouses.AsNoTracking().Where(x => x.IsActive)
-            .OrderBy(x => x.Name).Select(x => new { x.Id, x.IdCompany, x.Name, x.Code, x.IdOwnerSalesPlanReference }).ToListAsync(cancellationToken);
+            .OrderBy(x => x.Name).Select(x => new { x.Id, x.IdCompany, x.Name, x.Code, DefaultOwnerSalesPlanId = db.WarehouseStockOwners.Where(link => link.IdWarehouse == x.Id && link.IsDefault).Select(link => (long?)link.IdStockOwner).FirstOrDefault() }).ToListAsync(cancellationToken);
         var plans = await db.SalesPlanReferences.AsNoTracking().Where(x => x.IsActive).OrderBy(x => x.DisplayName)
             .Select(x => new { x.Id, x.DisplayName, x.StoreSalesPlanKey }).ToListAsync(cancellationToken);
         var links = await db.WarehouseStockOwners.AsNoTracking().ToListAsync(cancellationToken);
@@ -846,7 +857,7 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                                  warehouse.Code,
                                  warehouse.Name,
                                  warehouse.IsSalesWarehouse,
-                                 warehouse.IdOwnerSalesPlanReference,
+                                 DefaultOwnerSalesPlanId = db.WarehouseStockOwners.Where(link => link.IdWarehouse == warehouse.Id && link.IsDefault).Select(link => (long?)link.IdStockOwner).FirstOrDefault(),
                                  warehouse.IsActive
                              };
         if (!User.IsInRole("system.full-access"))
@@ -929,12 +940,10 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
 
     private sealed record CompanyInput(string Code, string Name, string? Phone, string? Address, string? Description, bool IsActive);
 
-    private sealed record WarehouseTypeInput(string Name);
-
     private sealed record WarehouseInput(
         long CompanyId,
         string Code,
-        long WarehouseTypeId,
+        string Name,
         bool IsSalesWarehouse,
         long? OwnerSalesPlanId,
         bool IsActive,
@@ -975,5 +984,5 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
 
     private sealed record VariantAttributeInput(long AttributeId, long ValueId);
 
-    public sealed record SalesPlanMappingInput(long CompanyId, long WarehouseId, long SalesPlanId);
+    public sealed record SalesPlanMappingInput(long CompanyId, long WarehouseId, long SalesPlanId, bool IsDefault = false);
 }

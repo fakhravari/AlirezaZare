@@ -22,7 +22,6 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
     public DbSet<WarehouseDocumentLineRecord> WarehouseDocumentLines => Set<WarehouseDocumentLineRecord>();
     public DbSet<WarehouseStockMovement> WarehouseStockMovements => Set<WarehouseStockMovement>();
     public DbSet<WarehouseDocumentAudit> WarehouseDocumentAudits => Set<WarehouseDocumentAudit>();
-    public DbSet<WarehouseType> WarehouseTypes => Set<WarehouseType>();
     public DbSet<Warehouse> Warehouses => Set<Warehouse>();
     public DbSet<Company> Companies => Set<Company>();
     public DbSet<SalesPlanReference> SalesPlanReferences => Set<SalesPlanReference>();
@@ -121,7 +120,6 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
         modelBuilder.Entity<StoreProductCollectionItem>().Property(x => x.IdProductCollection).HasColumnName("IdCollection");
         modelBuilder.Entity<StoreProductSalesPlanOfferAccessory>().Property(x => x.IdProductSalesPlanOffer).HasColumnName("IdOffer");
         modelBuilder.Entity<StoreProductSalesPlanOfferSpecificationOverride>().Property(x => x.IdProductSalesPlanOffer).HasColumnName("IdOffer");
-        modelBuilder.Entity<Warehouse>().Property(x => x.IdWarehouseType).HasColumnName("IdType");
         modelBuilder.Entity<StoreSlider>(entity =>
         {
             entity.ToTable("Slider", "Store");
@@ -331,15 +329,8 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.ToTable("Warehouse", "Warehouse");
             entity.HasKey(x => x.Id);
             entity.HasOne(x => x.Company).WithMany(x => x.Warehouses).HasForeignKey(x => x.IdCompany);
-            entity.HasOne<WarehouseType>().WithMany().HasForeignKey(x => x.IdWarehouseType);
-            entity.HasIndex(x => new { x.IdCompany, x.IdWarehouseType }).IsUnique();
-        });
-        modelBuilder.Entity<WarehouseType>(entity =>
-        {
-            entity.ToTable("WarehouseType", "Warehouse");
-            entity.HasKey(x => x.Id);
-            entity.Property(x => x.Name).HasMaxLength(200).IsRequired();
-            entity.HasIndex(x => x.Name).IsUnique();
+            entity.Property(x => x.Name).HasMaxLength(400).IsRequired();
+            entity.HasIndex(x => new { x.IdCompany, x.Name }).IsUnique().HasDatabaseName("UX_Warehouse_Company_Name");
         });
         modelBuilder.Entity<Company>(entity =>
         {
@@ -440,7 +431,7 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.HasIndex(x => new { x.WarehouseId, x.OccurredAtUtc, x.Id });
         });
         modelBuilder.Entity<SalesPlanReference>(entity => { entity.ToTable("SalesPlanReference", "Warehouse"); entity.HasKey(x => x.Id); });
-        modelBuilder.Entity<WarehouseStockOwner>(entity => { entity.ToTable("WarehouseStockOwner", "Warehouse"); entity.HasKey(x => new { x.IdWarehouse, x.IdStockOwner }); });
+        modelBuilder.Entity<WarehouseStockOwner>(entity => { entity.ToTable("WarehouseStockOwner", "Warehouse"); entity.HasKey(x => new { x.IdWarehouse, x.IdStockOwner }); entity.Property(x => x.IsDefault).HasDefaultValue(false); entity.HasIndex(x => x.IdWarehouse).IsUnique().HasFilter("[IsDefault] = 1").HasDatabaseName("UX_WarehouseStockOwner_OneDefaultPerWarehouse"); });
         modelBuilder.Entity<StockBalance>(entity =>
         {
             entity.ToTable("StockBalance", "Warehouse", table => table.UseSqlOutputClause(false));

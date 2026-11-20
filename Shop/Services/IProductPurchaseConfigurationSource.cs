@@ -7,15 +7,6 @@ public interface IProductPurchaseConfigurationSource
 
 public sealed record ProductPurchaseConfiguration(
     int MaxPurchaseQuantity,
-    IReadOnlyList<ProductPurchaseOption> Options,
     IReadOnlyList<ProductAccessory> Accessories);
-
-public sealed record ProductPurchaseOption(string Key, IReadOnlyList<ProductPurchaseOptionValue> Values);
-
-public sealed record ProductPurchaseOptionValue(string Key, decimal PriceDelta)
-{
-    public long Id { get; init; }
-    public long PriceVersionId { get; init; }
-}
 
 public sealed record ProductAccessory(string Key, bool IsRequired);

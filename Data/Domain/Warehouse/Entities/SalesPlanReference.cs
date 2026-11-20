@@ -21,4 +21,5 @@ public sealed class WarehouseStockOwner
 {
     public long IdWarehouse { get; set; }
     public long IdStockOwner { get; set; }
+    public bool IsDefault { get; set; }
 }

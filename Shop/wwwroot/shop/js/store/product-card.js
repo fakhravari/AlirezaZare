@@ -24,19 +24,21 @@
     const data = getSalesPlanData();
     const planId = options.salesPlanId || options.id || data?.plans?.find((plan) => plan.isDefault)?.id;
     const offer = data?.offers?.find((item) => Number(item.productId) === Number(product.id) && item.salesPlanId === planId);
-    const variant = data?.inventoryVariants?.find((item) => Number(item.productId) === Number(product.id) && item.isDefault);
+    const productVariants = data?.inventoryVariants?.filter((item) => Number(item.productId) === Number(product.id)) || [];
+    const variant = productVariants.find((item) => item.isDefault);
     const variantAmount = variant?.priceBySalesPlan?.[planId];
     const hasAmount = (amount) => amount !== null && amount !== undefined && Number.isFinite(Number(amount));
+    if (productVariants.length && (!variant || !hasAmount(variantAmount))) return { current: null, list: null, discount: 0, adjustments: 0, priceUnavailable: true };
     const baseAmount = hasAmount(variantAmount) ? Number(variantAmount) : hasAmount(offer?.priceAmount) ? Number(offer.priceAmount) : hasAmount(options.priceAmount) ? Number(options.priceAmount) : null;
     const discount = hasAmount(variantAmount) ? Number(variant.discountBySalesPlan?.[planId]) || 0 : Number(offer?.discountPercent ?? options.discountPercent ?? product.discountPercent) || 0;
     const baseCurrent = baseAmount === null ? Math.round(Number(product.price) * 1000000) : Math.round(baseAmount * (100 - discount) / 100);
-    const optionAmount = (data?.priceOptions?.[Number(product.id)] || []).reduce((sum, feature) => sum + (Number(feature.values?.[0]?.priceBySalesPlan?.[planId] ?? feature.values?.[0]?.priceDelta) || 0), 0);
     const accessoryAmount = (product.accessories || []).filter((item) => item.required).reduce((sum, item) => sum + (Number(offer?.accessoryPriceAmounts?.[item.id] ?? Number(item.price) * 1000000) || 0), 0);
-    const adjustments = optionAmount + accessoryAmount + (Number(options.priceAdjustmentAmount) || 0);
+    const adjustments = accessoryAmount;
     return { current: baseCurrent + adjustments, list: baseAmount ?? Math.round(baseCurrent / (1 - discount / 100)), discount, adjustments };
   };
   const currentPrice = (product, options = {}) => priceDetails(product, options).current;
   const availableStock = (product, options = {}) => {
+    const hasAmount = (amount) => amount !== null && amount !== undefined && Number.isFinite(Number(amount));
     const data = getSalesPlanData();
     if (!Array.isArray(data?.plans) || !Array.isArray(data?.offers) || !Array.isArray(data?.inventoryVariants)) return null;
     const planId = options.salesPlanId || data.plans.find((plan) => plan.isDefault)?.id;
@@ -46,12 +48,14 @@
     const variants = data.inventoryVariants.filter((item) => Number(item.productId) === Number(product.id));
     if (variants.length) {
       const variant = variants.find((item) => item.isDefault);
-      stock = Math.min(stock, Number(variant?.stockBySalesPlan?.[planId] ?? 0));
+      if (!variant || !hasAmount(variant.priceBySalesPlan?.[planId])) return 0;
+      stock = Math.min(stock, Number(variant.stockBySalesPlan?.[planId] ?? 0));
     }
     return Number.isFinite(stock) ? Math.max(0, stock) : 0;
   };
   const price = (product, options = {}) => {
-    const { current, list, discount: percent, adjustments } = priceDetails(product, options);
+    const { current, list, discount: percent, adjustments, priceUnavailable } = priceDetails(product, options);
+    if (priceUnavailable || current == null) return '<strong class="product-price-current">قیمت تنوع ثبت نشده</strong>';
     const discounted = percent > 0 && percent < 100;
     const listAmount = list + adjustments;
     return `<strong class="product-price-current">${fa(current)} <small>تومان</small></strong>${discounted

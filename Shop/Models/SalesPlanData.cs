@@ -15,9 +15,6 @@ public sealed record SalesPlanCatalog(
 {
     public IReadOnlyList<ProductInventoryVariant> InventoryVariants { get; init; } = [];
 
-    public IReadOnlyDictionary<int, IReadOnlyList<SalesPlanPriceOption>> PriceOptions { get; init; } =
-        new Dictionary<int, IReadOnlyList<SalesPlanPriceOption>>();
-
     public const int CurrentSchemaVersion = 1;
     public static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
@@ -196,21 +193,6 @@ public sealed record SalesPlanCatalog(
             }
         }
 
-        foreach ((int productId, IReadOnlyList<SalesPlanPriceOption> options) in PriceOptions)
-        {
-            if (!productIds.Contains(productId) || options is null ||
-                options.Select(option => option.Key).Distinct(StringComparer.Ordinal).Count() != options.Count ||
-                options.Any(option => option is null || string.IsNullOrWhiteSpace(option.Key) ||
-                                      string.IsNullOrWhiteSpace(option.Label) || option.Values is null ||
-                                      option.Values.Count == 0 ||
-                                      option.Values.Select(value => value.Key).Distinct(StringComparer.Ordinal).Count() != option.Values.Count ||
-                                      option.Values.Any(value =>
-                                          string.IsNullOrWhiteSpace(value.Key) ||
-                                          string.IsNullOrWhiteSpace(value.Label) ||
-                                          value.PriceDelta != decimal.Truncate(value.PriceDelta))))
-                throw new InvalidDataException("Invalid store price options.");
-        }
-
         string defaultPlanId = Plans.Single(plan => plan.IsDefault).Id;
         foreach (int productId in productIds)
             if (!offerKeys.Contains($"{productId}:{defaultPlanId}"))
@@ -263,16 +245,6 @@ public sealed record ProductInventoryVariant(
     IReadOnlyDictionary<string, decimal> PriceBySalesPlan,
     IReadOnlyDictionary<string, decimal> DiscountBySalesPlan)
 {
-    public IReadOnlyDictionary<string, long> PriceVersionIdsBySalesPlan { get; init; } = new Dictionary<string, long>();
-}
-
-public sealed record SalesPlanPriceOption(string Key, string Label, IReadOnlyList<SalesPlanPriceOptionValue> Values);
-
-public sealed record SalesPlanPriceOptionValue(string Key, string Label, decimal PriceDelta)
-{
-    public long Id { get; init; }
-    public long PriceVersionId { get; init; }
-    public IReadOnlyDictionary<string, decimal> PriceBySalesPlan { get; init; } = new Dictionary<string, decimal>();
     public IReadOnlyDictionary<string, long> PriceVersionIdsBySalesPlan { get; init; } = new Dictionary<string, long>();
 }
 

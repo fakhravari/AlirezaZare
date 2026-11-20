@@ -756,22 +756,11 @@
   }
   function cartOptionsMarkup(item) {
     const escape = window.HNUI?.escapeHtml || ((value) => String(value || ""));
-    const priceOptions = Array.isArray(item.options?.priceOptions)
-      ? item.options.priceOptions
-      : [];
     const accessories = Array.isArray(item.options?.accessories)
       ? item.options.accessories
       : [];
     const inventoryVariant = item.options?.inventoryVariant;
-    if (!priceOptions.length && !accessories.length && !inventoryVariant) return "";
-    const variantMarkup = priceOptions.length
-      ? `<div class="cart-item-option-group"><small class="cart-item-option-label">گزینه‌های قیمت</small><div class="cart-item-option-list cart-item-option-list--variants">${priceOptions
-          .map(
-            (option) =>
-              `<span class="cart-item-option-chip"><small>${escape(option.label)}</small><strong>${escape(option.value)}</strong>${Number(option.priceDelta) ? `<small class="cart-item-option-price">${Number(option.priceDelta) > 0 ? "+" : "−"} ${fa(Math.abs(Number(option.priceDelta)) * 1000000)} تومان</small>` : ""}</span>`,
-          )
-          .join("")}</div></div>`
-      : "";
+    if (!accessories.length && !inventoryVariant) return "";
     const accessoryMarkup = accessories.length
       ? `<div class="cart-item-option-group"><small class="cart-item-option-label">متعلقات و خدمات</small><div class="cart-item-option-list cart-item-option-list--accessories">${accessories
           .map(
@@ -783,7 +772,7 @@
     const inventoryMarkup = inventoryVariant?.name
       ? `<div class="cart-item-option-group"><small class="cart-item-option-label">تنوع موجودی انبار</small><div class="cart-item-option-list"><span class="cart-item-option-chip"><strong>${escape(inventoryVariant.name)}</strong></span></div></div>`
       : "";
-    return `<div class="cart-item-options" aria-label="تنوع انبار، گزینه‌های قیمت و متعلقات انتخاب‌شده">${inventoryMarkup}${variantMarkup}${accessoryMarkup}</div>`;
+    return `<div class="cart-item-options" aria-label="تنوع انبار و متعلقات انتخاب‌شده">${inventoryMarkup}${accessoryMarkup}</div>`;
   }
   function updateCartCount() {
     const cart = readCart(),

@@ -5,21 +5,6 @@ public sealed record StoreSalesPlanSnapshot(
     IReadOnlyList<StoreSalesOfferRow> Offers,
     IReadOnlyList<StoreInventoryVariantRow> InventoryVariants)
 {
-    public IReadOnlyList<StoreProductPriceOptionRow> PriceOptions { get; init; } = [];
-}
-
-public sealed record StoreProductPriceOptionRow(
-    int ProductId,
-    string Key,
-    string Label,
-    IReadOnlyList<StoreProductPriceOptionValueRow> Values);
-
-public sealed record StoreProductPriceOptionValueRow(string Key, string Label, decimal PriceDelta)
-{
-    public long Id { get; init; }
-    public long PriceVersionId { get; init; }
-    public IReadOnlyDictionary<string, decimal> PriceBySalesPlan { get; init; } = new Dictionary<string, decimal>();
-    public IReadOnlyDictionary<string, long> PriceVersionIdsBySalesPlan { get; init; } = new Dictionary<string, long>();
 }
 
 public sealed record StoreInventoryVariantRow(

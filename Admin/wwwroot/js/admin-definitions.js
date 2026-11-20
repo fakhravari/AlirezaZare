@@ -9,7 +9,7 @@
     const configs = {
         "stock-owners": { fields: [["code", "کد", "text", true], ["displayName", "نام", "text", true], ["idStockOwnerType", "نوع", "select", true, [["1", "طرح فروش"], ["2", "مالک"]]]], columns: [["code", "کد"], ["displayName", "نام"], ["idStockOwnerType", "نوع"], ["isActive", "وضعیت", "active"]] },
         companies: { fields: [["code", "کد شرکت", "text", true], ["name", "نام شرکت", "text", true], ["phone", "تلفن", "text"], ["address", "آدرس", "textarea"], ["description", "توضیحات", "textarea"]], columns: [["code", "کد"], ["name", "شرکت"], ["phone", "تلفن"], ["address", "آدرس"], ["description", "توضیحات"], ["isActive", "وضعیت", "active"]] },
-        warehouses: { fields: [["companyId", "شرکت", "companies", true], ["code", "کد انبار", "text", true], ["warehouseTypeId", "نام انبار", "warehouse-types", true], ["isSalesWarehouse", "انبار فروش است", "checkbox"], ["ownerSalesPlanId", "طرح مالک انبار فروش", "plans"], ["isSiteWarehouse", "منبع موجودی سایت", "checkbox"]], columns: [["warehouseLabel", "شرکت / انبار"], ["isSalesWarehouse", "انبار فروش", "affects"], ["isSiteWarehouse", "منبع موجودی سایت", "siteWarehouse"], ["ownerSalesPlan", "طرح مالک"], ["isActive", "وضعیت", "active"]] },
+        warehouses: { fields: [["companyId", "شرکت", "companies", true], ["code", "کد انبار", "text", true], ["name", "نام انبار", "text", true], ["isSalesWarehouse", "انبار فروش است", "checkbox"], ["ownerSalesPlanId", "مالک پیش‌فرض انبار", "plans"], ["isSiteWarehouse", "منبع موجودی سایت", "checkbox"]], columns: [["warehouseLabel", "شرکت / انبار"], ["isSalesWarehouse", "انبار فروش", "affects"], ["isSiteWarehouse", "منبع موجودی سایت", "siteWarehouse"], ["ownerSalesPlan", "مالک پیش‌فرض"], ["isActive", "وضعیت", "active"]] },
         references: { fields: [["name", "نام مرجع", "text", true], ["partyType", "نوع مرجع", "select", true, [["Person", "شخص"], ["Organization", "سازمان"], ["Warehouse", "انبار"], ["Other", "سایر"]]], ["warehouseId", "انبار مرتبط", "warehouses"], ["externalPartyKey", "شناسهٔ بیرونی", "text"]], columns: [["name", "نام"], ["partyType", "نوع"], ["idWarehouse", "شناسهٔ انبار"], ["isActive", "وضعیت", "active"]] },
         units: { fields: [["parentId", "گروه والد", "unit-groups", true], ["nameFa", "نام فارسی", "text", true], ["nameEn", "نام انگلیسی", "text"], ["isActive", "واحد فعال است", "checkbox"]], columns: [["parentName", "گروه والد"], ["nameFa", "نام فارسی"], ["nameEn", "نام انگلیسی"], ["isActive", "وضعیت", "active"]] },
         "document-types": { fields: [["code", "کد نوع سند", "text", true], ["name", "نام سند", "text", true], ["direction", "جهت سند", "select", true, [["R", "رسید"], ["I", "حواله"]]], ["affectsStock", "بر موجودی اثر دارد", "checkbox" ]], columns: [["code", "کد"], ["name", "نوع سند"], ["direction", "جهت", "direction"], ["affectsStock", "اثر موجودی", "affects"], ["isActive", "وضعیت", "active"]] }
@@ -359,7 +359,7 @@
             const check = element("input", null, "form-check-input"); check.type = "checkbox"; ui.initStatusSwitch(check); check.name = key; check.checked = Boolean(data[key]); check.id = `definition-${key}`;
             const caption = element("label", label, "form-check-label"); caption.htmlFor = check.id; wrap.className = "form-check mb-3"; wrap.append(check, caption);
         } else {
-            const control = ["select", "warehouses", "products", "units", "companies", "plans", "warehouse-types", "unit-groups"].includes(type) ? element("select", null, "form-select") : type === "textarea" ? element("textarea", null, "form-control") : element("input", null, "form-control");
+            const control = ["select", "warehouses", "products", "units", "companies", "plans", "unit-groups"].includes(type) ? element("select", null, "form-select") : type === "textarea" ? element("textarea", null, "form-control") : element("input", null, "form-control");
             if (type === "product-fixed") {
                 const product = (lookups.products || []).find(item => String(item.id) === String(data[key] ?? ""));
                 control.id = `definition-${key}`;
@@ -373,7 +373,7 @@
                 const empty = element("option", "انتخاب کنید"); empty.value = ""; control.append(empty);
                 for (const [value, name] of choices) { const option = element("option", name); option.value = value; control.append(option); }
             }
-            if (["warehouses", "products", "units", "companies", "plans", "warehouse-types", "unit-groups"].includes(type)) {
+            if (["warehouses", "products", "units", "companies", "plans", "unit-groups"].includes(type)) {
                 const choices = type === "warehouses" ? lookups.warehouses : (lookups[type] || []);
                 const empty = element("option", type === "warehouses" ? "بدون انبار مرتبط" : "انتخاب کنید"); empty.value = ""; control.append(empty);
                 for (const row of choices.filter(row => row.isActive !== false || String(row.id) === String(data[key] ?? ""))) { const option = element("option", `${row.name || row.displayName}${row.isActive === false ? " (غیرفعال)" : ""}`); option.value = row.id; control.append(option); }
@@ -381,7 +381,7 @@
             if (type === "text") control.type = "text";
             if (type === "textarea") control.rows = 4;
             if (type === "number") { control.type = "number"; control.min = key === "conversionFactor" ? "0.000000001" : "1"; control.step = key === "conversionFactor" ? "any" : "1"; if (key === "conversionFactor") control.max = "999999999.999999999"; }
-            if (type === "select" || ["warehouses", "products", "units", "companies", "plans", "warehouse-types", "unit-groups"].includes(type)) control.value = data[key] == null ? "" : String(data[key]);
+            if (type === "select" || ["warehouses", "products", "units", "companies", "plans", "unit-groups"].includes(type)) control.value = data[key] == null ? "" : String(data[key]);
             else control.value = data[key] ?? (key === "conversionFactor" ? "1" : "");
             const caption = element("label", label, "form-label"); caption.htmlFor = control.id; wrap.append(caption, control);
         }
@@ -422,7 +422,7 @@
         const sequence = (formRequests.get(page) || 0) + 1;
         formRequests.set(page, sequence);
         const form = document.querySelector("[data-definition-form]"), host = form.querySelector("[data-definition-fields]");
-        if (data && page.dataset.definitionSection === "warehouses") data = { ...data, companyId: data.idCompany, warehouseTypeId: data.idWarehouseType, ownerSalesPlanId: data.idOwnerSalesPlanReference };
+        if (data && page.dataset.definitionSection === "warehouses") data = { ...data, companyId: data.idCompany, ownerSalesPlanId: data.defaultOwnerSalesPlanId };
         if (data && page.dataset.definitionSection === "references") data = { ...data, warehouseId: data.idWarehouse };
         if (data && page.dataset.definitionSection === "product-units") data = { ...data, productId: data.idProduct, unitId: data.idUnit };
         if (data && page.dataset.definitionSection === "units") data = { ...data, parentId: data.idParent };
@@ -432,7 +432,6 @@
         let variantTree = [];
         if (page.dataset.definitionSection === "variants" && data?.productId)
             variantTree = await request(page, `${page.dataset.api}/variant-options/${encodeURIComponent(data.productId)}${data.id ? `?variantId=${encodeURIComponent(data.id)}` : ""}`);
-        if (page.dataset.definitionSection === "warehouses") lookups["warehouse-types"] = await request(page, page.dataset.api + "/warehouse-types");
         if (page.dataset.definitionSection === "units") lookups["unit-groups"] = await request(page, page.dataset.api + "/unit-groups");
         if (!page.isConnected || formRequests.get(page) !== sequence) return;
         host.replaceChildren(); form.reset(); form.elements.id.value = data?.id || "";
@@ -479,62 +478,49 @@
         const fillWarehouses = () => fill(warehouse, data.warehouses.filter(item => item.idCompany === Number(company.value)), item => `${item.companyName || data.companies.find(companyItem => companyItem.id === item.idCompany)?.name || "—"} / ${item.name} (${item.code})`);
         company.onchange = fillWarehouses; fillWarehouses();
         fill(form.elements.salesPlanId, data.plans, item => item.displayName);
-        const rows = page.querySelector("[data-mapping-rows]");
-        ui.destroyDataTable(page.querySelector("[data-admin-datatable]"));
-        rows.replaceChildren();
-        for (const link of data.links) {
-            const warehouseRow = data.warehouses.find(item => item.id === link.idWarehouse);
-            const planRow = data.plans.find(item => item.id === link.idStockOwner);
-            if (!warehouseRow || !planRow) continue;
-            const companyRow = data.companies.find(item => item.id === warehouseRow.idCompany);
-            const row = element("tr");
-            row.append(element("td", `${companyRow?.name || "—"} / ${warehouseRow.name} (${warehouseRow.code})`), element("td", planRow.displayName));
-            const actions = element("td"), remove = actionButton("حذف اتصال", "fa-link-slash", "btn btn-sm btn-outline-danger");
-            remove.dataset.adminConfirm = "اتصال این مالک به انبار حذف شود؟";
-            remove.addEventListener("click", async () => {
-                if (remove.disabled) return;
-                remove.disabled = true;
-                try { const result = await request(page, `${page.dataset.api}/sales-plan-mapping/${link.idWarehouse}/${link.idStockOwner}`, "DELETE", {}); ui.notify(result.message, "success"); await loadMapping(page); }
-                catch (error) { ui.notify(error.message, "danger"); }
-                finally { remove.disabled = false; }
-            });
-            actions.append(remove); row.append(actions);
-            rows.append(row);
+        const rows = page.querySelector("[data-mapping-rows]"), warehouseFilter = page.querySelector("[data-mapping-warehouse-filter]");
+        const selectedWarehouse = warehouseFilter.value;
+        warehouseFilter.replaceChildren(element("option", "همهٔ انبارها"));
+        warehouseFilter.options[0].value = "";
+        for (const item of data.warehouses) {
+            const companyName = item.companyName || data.companies.find(companyItem => companyItem.id === item.idCompany)?.name || "—";
+            const option = element("option", `${companyName} / ${item.name} (${item.code})`);
+            option.value = item.id;
+            warehouseFilter.append(option);
         }
-        ui.refreshDataTable(page.querySelector("[data-admin-datatable]"));
-        if (data.siteWarehouseId) { const selected = data.warehouses.find(item => item.id === data.siteWarehouseId); if (selected) { company.value = String(selected.idCompany); fillWarehouses(); warehouse.value = String(selected.id); } }
-    }
-    async function loadWarehouseTypes(page) {
-        const types = await request(page, `${page.dataset.api}/warehouse-types`);
-        const list = page.querySelector("[data-warehouse-types]");
-        list.replaceChildren();
-        for (const item of types) {
-            const row = element("li", null, "list-group-item d-flex justify-content-between align-items-center gap-2");
-            row.append(element("span", item.name));
-            if (page.dataset.fullAccess === "true" && page.dataset.canEdit === "true") {
-                const edit = actionButton("ویرایش", "fa-pen-to-square", "btn btn-sm btn-default");
-                edit.setAttribute("aria-label", `ویرایش نام ${item.name}`);
-                edit.addEventListener("click", () => {
-                    const form = page.querySelector("[data-warehouse-type-form]");
-                    form.hidden = false;
-                    form.dataset.editingId = String(item.id);
-                    form.dataset.adminConfirm = "نام انبار و همهٔ تخصیص‌های مرتبط تغییر کند؟";
-                    form.elements.name.value = item.name;
-                    form.querySelector('[type="submit"]').textContent = "ذخیرهٔ نام انبار";
-                    form.querySelector("[data-warehouse-type-cancel]").hidden = false;
-                    form.elements.name.focus();
+        warehouseFilter.value = data.warehouses.some(item => String(item.id) === selectedWarehouse) ? selectedWarehouse : "";
+        const renderRows = () => {
+            rows.replaceChildren();
+            for (const link of data.links) {
+                if (warehouseFilter.value && String(link.idWarehouse) !== warehouseFilter.value) continue;
+                const warehouseRow = data.warehouses.find(item => item.id === link.idWarehouse);
+                const planRow = data.plans.find(item => item.id === link.idStockOwner);
+                if (!warehouseRow || !planRow) continue;
+                const companyRow = data.companies.find(item => item.id === warehouseRow.idCompany);
+                const row = element("tr");
+                row.append(element("td", `${companyRow?.name || "—"} / ${warehouseRow.name} (${warehouseRow.code})`), element("td", planRow.displayName), element("td", link.isDefault ? "پیش‌فرض" : ""));
+                const actions = element("td"), remove = actionButton("حذف اتصال", "fa-link-slash", "btn btn-sm btn-outline-danger");
+                remove.dataset.adminConfirm = "اتصال این مالک به انبار حذف شود؟";
+                remove.addEventListener("click", async () => {
+                    if (remove.disabled) return;
+                    remove.disabled = true;
+                    try { const result = await request(page, `${page.dataset.api}/sales-plan-mapping/${link.idWarehouse}/${link.idStockOwner}`, "DELETE", {}); ui.notify(result.message, "success"); await loadMapping(page); }
+                    catch (error) { ui.notify(error.message, "danger"); }
+                    finally { remove.disabled = false; }
                 });
-                row.append(edit);
+                if (!link.isDefault) { const makeDefault = actionButton("پیش‌فرض‌کردن", "fa-star", "btn btn-sm btn-outline-primary me-2"); makeDefault.addEventListener("click", async () => { try { const result = await request(page, `${page.dataset.api}/sales-plan-mapping/${link.idWarehouse}/${link.idStockOwner}/default`, "PUT", {}); ui.notify(result.message, "success"); await loadMapping(page); } catch (error) { ui.notify(error.message, "danger"); } }); actions.append(makeDefault); }
+                actions.append(remove); row.append(actions);
+                rows.append(row);
             }
-            list.append(row);
-        }
-        if (!types.length) list.append(element("li", "نام انباری ثبت نشده است.", "list-group-item text-muted"));
+        };
+        warehouseFilter.onchange = renderRows;
+        renderRows();
+        if (data.siteWarehouseId) { const selected = data.warehouses.find(item => item.id === data.siteWarehouseId); if (selected) { company.value = String(selected.idCompany); fillWarehouses(); warehouse.value = String(selected.id); } }
     }
     async function load(page) {
         const section = page.dataset.definitionSection;
         if (section === "sales-plan-mapping") { await loadMapping(page); setStatus(page, ""); return; }
         const config = configs[section];
-        if (section === "warehouses") await loadWarehouseTypes(page);
         if (section === "units") {
             const [groups, units] = await Promise.all([
                 request(page, `${page.dataset.api}/unit-groups`),
@@ -555,34 +541,8 @@
         try {
             if (section === "sales-plan-mapping") {
                 const mapping = page.querySelector("[data-mapping-form]");
-                mapping.addEventListener("submit", async event => { event.preventDefault(); if (mapping.dataset.saving === "true") return; const submit = mapping.querySelector('[type="submit"]'); mapping.dataset.saving = "true"; submit.disabled = true; try { const result = await request(page, `${page.dataset.api}/sales-plan-mapping`, "PUT", { companyId: Number(mapping.elements.companyId.value), warehouseId: Number(mapping.elements.warehouseId.value), salesPlanId: Number(mapping.elements.salesPlanId.value) }); ui.notify(result.message, "success"); await loadMapping(page); } catch (error) { ui.notify(error.message, "danger"); } finally { mapping.dataset.saving = "false"; submit.disabled = false; } });
+                mapping.addEventListener("submit", async event => { event.preventDefault(); if (mapping.dataset.saving === "true") return; const submit = mapping.querySelector('[type="submit"]'); mapping.dataset.saving = "true"; submit.disabled = true; try { const result = await request(page, `${page.dataset.api}/sales-plan-mapping`, "PUT", { companyId: Number(mapping.elements.companyId.value), warehouseId: Number(mapping.elements.warehouseId.value), salesPlanId: Number(mapping.elements.salesPlanId.value), isDefault: mapping.elements.isDefault.checked }); ui.notify(result.message, "success"); await loadMapping(page); } catch (error) { ui.notify(error.message, "danger"); } finally { mapping.dataset.saving = "false"; submit.disabled = false; } });
             } else {
-                if (section === "warehouses") {
-                    const typeForm = page.querySelector("[data-warehouse-type-form]");
-                    const resetTypeForm = () => {
-                        typeForm.reset();
-                        delete typeForm.dataset.editingId;
-                        typeForm.dataset.adminConfirm = "نام انبار ذخیره شود؟";
-                        typeForm.querySelector('[type="submit"]').textContent = "افزودن نام انبار";
-                        typeForm.querySelector("[data-warehouse-type-cancel]").hidden = true;
-                        typeForm.hidden = page.dataset.fullAccess !== "true" || page.dataset.canCreate !== "true";
-                    };
-                    resetTypeForm();
-                    typeForm.querySelector("[data-warehouse-type-cancel]").addEventListener("click", resetTypeForm);
-                    typeForm.addEventListener("submit", async event => {
-                        event.preventDefault();
-                        const button = typeForm.querySelector('[type="submit"]');
-                        if (button.disabled) return;
-                        const id = typeForm.dataset.editingId;
-                        if (page.dataset.fullAccess !== "true" || (id ? page.dataset.canEdit !== "true" : page.dataset.canCreate !== "true")) return;
-                        const name = typeForm.elements.name.value.trim();
-                        if (!name) { ui.notify("نام انبار را وارد کنید.", "danger"); typeForm.elements.name.focus(); return; }
-                        button.disabled = true;
-                        try { const result = await request(page, page.dataset.api + `/warehouse-types${id ? `/${encodeURIComponent(id)}` : ""}`, id ? "PUT" : "POST", { name }); ui.notify(result.message, "success"); resetTypeForm(); await load(page); }
-                        catch (error) { ui.notify(error.message, "danger"); }
-                        finally { button.disabled = false; }
-                    });
-                }
                 if (section === "units") {
                     const groupForm = page.querySelector("[data-unit-group-form]");
                     const resetGroupForm = () => {
@@ -623,7 +583,7 @@
                     const values = new FormData(form), id = values.get("id"); const body = {};
                     for (const [key, , type] of config.fields) {
                         if (type === "attributes") continue;
-                        body[key] = type === "checkbox" ? Boolean(form.elements.namedItem(key)?.checked) : (key === "idStockOwnerType" || ["number", "products", "product-fixed", "units", "companies", "plans", "warehouse-types", "unit-groups"].includes(type) ? Number(values.get(key)) || null : values.get(key));
+                        body[key] = type === "checkbox" ? Boolean(form.elements.namedItem(key)?.checked) : (key === "idStockOwnerType" || ["number", "products", "product-fixed", "units", "companies", "plans", "unit-groups"].includes(type) ? Number(values.get(key)) || null : values.get(key));
                     }
                     if (section === "variants") {
                         const rows = [...form.querySelectorAll("[data-variant-attribute]")];

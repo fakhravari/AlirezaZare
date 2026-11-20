@@ -430,6 +430,18 @@
   line-height: 1.6;
 }
 
+#productView .product-configuration-group + .product-configuration-group {
+  border-top: 1px solid var(--product-color-border);
+}
+
+#productView .product-configuration-group-title {
+  margin: 0;
+  padding: var(--product-space-3) 0 0;
+  color: var(--product-color-heading);
+  font-size: var(--product-type-control);
+  font-weight: 900;
+}
+
 #productView .product-variant-field {
   padding-inline: 0;
 }

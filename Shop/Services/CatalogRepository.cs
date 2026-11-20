@@ -292,7 +292,6 @@ public sealed record CatalogSnapshot(
             {
                 if (!values.Add(Text(option, "value"))) throw new InvalidDataException("Duplicate variant value.");
                 _ = Text(option, "label");
-                if (option.TryGetProperty("priceDelta", out JsonElement delta)) _ = delta.GetDecimal();
             }
 
             if (values.Count == 0) throw new InvalidDataException("A variant needs an option.");

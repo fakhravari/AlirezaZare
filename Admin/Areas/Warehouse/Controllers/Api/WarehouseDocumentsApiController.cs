@@ -65,7 +65,7 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db, IWarehouse
         var warehouseQuery = db.Warehouses.AsNoTracking().Where(x => x.IsActive);
         if (!User.IsInRole("system.full-access")) warehouseQuery = warehouseQuery.Where(x => allowed.Contains(x.Id));
         var warehouses = await warehouseQuery.OrderBy(x => x.Company.Name).ThenBy(x => x.Name)
-            .Select(x => new { x.Id, x.Code, x.Name, x.IdCompany, CompanyName = x.Company.Name, x.IsSalesWarehouse, x.IdOwnerSalesPlanReference }).ToListAsync(cancellationToken);
+            .Select(x => new { x.Id, x.Code, x.Name, x.IdCompany, CompanyName = x.Company.Name, x.IsSalesWarehouse, DefaultOwnerSalesPlanId = db.WarehouseStockOwners.Where(link => link.IdWarehouse == x.Id && link.IsDefault).Select(link => (long?)link.IdStockOwner).FirstOrDefault() }).ToListAsync(cancellationToken);
         var types = await db.WarehouseDocumentTypes.AsNoTracking().Where(x => x.IsActive && x.Code != SalesDispatchTypeCode).OrderBy(x => x.Name)
             .Select(x => new { x.Id, x.Code, x.Name, x.Direction, x.AffectsStock }).ToListAsync(cancellationToken);
         var partyQuery = db.WarehouseParties.AsNoTracking().Where(x => x.IsActive);
@@ -101,6 +101,18 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db, IWarehouse
                                VariantName = x.ProductVariant == null ? null : x.ProductVariant.Name,
                                IdBaseUnit = baseUnit.IdUnit
                            }).OrderBy(x => x.ProductName).ThenBy(x => x.VariantName).ToListAsync(cancellationToken);
+        long[] variantIds = items.Where(item => item.IdProductVariant.HasValue)
+            .Select(item => item.IdProductVariant!.Value).Distinct().ToArray();
+        var variantAttributes = await (from link in db.ProductVariantAttributeValues.AsNoTracking()
+                                       join value in db.ProductAttributeValues.AsNoTracking() on link.IdProductAttributeValue equals value.Id
+                                       join attribute in db.ProductAttributes.AsNoTracking() on value.IdProductAttribute equals attribute.Id
+                                       where variantIds.Contains(link.IdProductVariant)
+                                       orderby attribute.SortOrder, attribute.Id
+                                       select new { link.IdProductVariant, attribute.Label, value.DisplayValue })
+            .ToListAsync(cancellationToken);
+        var attributesByVariant = variantAttributes.GroupBy(item => item.IdProductVariant)
+            .ToDictionary(group => group.Key,
+                group => group.Select(item => new { label = item.Label, value = item.DisplayValue }).ToArray());
         var inventoryItems = items.Select(item => new
         {
             item.Id,
@@ -108,6 +120,9 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db, IWarehouse
             item.IdProductVariant,
             item.ProductName,
             item.VariantName,
+            VariantAttributes = item.IdProductVariant.HasValue
+                ? attributesByVariant.GetValueOrDefault(item.IdProductVariant.Value) ?? []
+                : [],
             item.IdBaseUnit,
             Units = unitGroups.GetValueOrDefault(item.IdProduct) ?? []
         });

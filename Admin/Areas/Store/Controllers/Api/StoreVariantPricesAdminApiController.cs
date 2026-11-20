@@ -199,7 +199,7 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
                           await db.StoreProductVariantSalesPlanOffers.AnyAsync(x => x.IdSalesPlan == id, cancellationToken) ||
                           await db.StockBalances.AnyAsync(x => x.IdSalesPlanReference == id, cancellationToken) ||
                           await db.WarehouseDocuments.AnyAsync(x => x.IdSalesPlanReference == id, cancellationToken) ||
-                          await db.Warehouses.AnyAsync(x => x.IdOwnerSalesPlanReference == id, cancellationToken);
+                          await db.WarehouseStockOwners.AnyAsync(x => x.IdStockOwner == id && x.IsDefault, cancellationToken);
         if (referenced) return Conflict(new { message = "این طرح سابقه یا اتصال دارد؛ برای حفظ سابقه آن را غیرفعال کنید." });
 
         await using var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
@@ -267,7 +267,7 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
         string query = paging.Search;
         var rows = from variant in db.ProductVariants.AsNoTracking()
                    join product in db.Products.AsNoTracking() on variant.IdProduct equals product.Id
-                   from plan in db.SalesPlanReferences.AsNoTracking().Where(x => x.IdStockOwnerType == 1)
+                   from plan in db.SalesPlanReferences.AsNoTracking().Where(x => x.IdStockOwnerType == 1 && x.IsActive)
                    join offer in db.StoreProductVariantSalesPlanOffers.AsNoTracking() on new { VariantId = variant.Id, PlanId = plan.Id } equals new { VariantId = offer.IdProductVariant, PlanId = offer.IdSalesPlan } into offers
                    from offer in offers.DefaultIfEmpty()
                    where variant.IsActive && product.IsStoreEnabled &&
@@ -331,20 +331,6 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
         await transaction.CommitAsync(cancellationToken);
 
         return Ok(new { saved = true, priceVersionId, message = "قیمت تنوع و طرح فروش ذخیره شد." });
-    }
-
-    [HttpDelete("{variantId:long}/{salesPlanId}")]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Clear(long variantId, string salesPlanId, CancellationToken cancellationToken)
-    {
-        if (!CanManage()) return Forbid();
-
-        if (variantId < 1 || string.IsNullOrWhiteSpace(salesPlanId) || salesPlanId.Length > 64) return ValidationProblem(detail: "تنوع یا طرح فروش معتبر نیست.", statusCode: 400);
-
-        var plan = await db.SalesPlanReferences.SingleOrDefaultAsync(x => x.StoreSalesPlanKey == salesPlanId, cancellationToken);
-        if (plan is not null) { var offer = await db.StoreProductVariantSalesPlanOffers.SingleOrDefaultAsync(x => x.IdProductVariant == variantId && x.IdSalesPlan == plan.Id, cancellationToken); if (offer is not null) { db.StoreProductVariantSalesPlanOffers.Remove(offer); var productId = await db.ProductVariants.Where(x => x.Id == variantId).Select(x => x.IdProduct).SingleAsync(cancellationToken); await priceVersions.DeactivateAsync(productId, plan.Id, variantId, null, null, cancellationToken); await db.SaveChangesAsync(cancellationToken); } }
-
-        return Ok(new { saved = true, message = "قیمت اختصاصی حذف شد و قیمت پایهٔ کالا/طرح اعمال می‌شود." });
     }
 
     private static bool TryDateRange(DateOnly? from, DateOnly? to, out DateTime? start, out DateTime? end)
@@ -437,7 +423,6 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
 
         var offer = await db.StoreProductSalesPlanOffers.SingleOrDefaultAsync(x => x.IdProduct == productId && x.IdSalesPlan == plan.Id, cancellationToken);
         List<(long AccessoryId, decimal PriceAmount)> newAccessoryPrices = [];
-        List<(long OptionId, decimal PriceAmount)> newOptionPrices = [];
         if (offer is null)
         {
             offer = new Shop.Data.Domain.Store.Entities.StoreProductSalesPlanOffer { IdProduct = productId, IdSalesPlan = plan.Id, MaxPurchaseQuantity = input.MaxPurchaseQuantity, IsEnabled = input.IsEnabled, CreatedAtUtc = DateTime.UtcNow };
@@ -447,15 +432,6 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
             if (accessorySeed.Any(x => !x.PriceAmount.HasValue)) return Conflict(new { title = "قیمت عادی متعلقه ثبت نشده است." });
             db.StoreProductSalesPlanOfferAccessories.AddRange(accessorySeed.Select(x => new Shop.Data.Domain.Store.Entities.StoreProductSalesPlanOfferAccessory { IdProductSalesPlanOffer = offer.Id, IdAccessory = x.IdAccessory, IsIncludedByDefault = x.IsRequired, IsAllowed = true }));
             newAccessoryPrices = accessorySeed.Select(x => (x.IdAccessory, x.PriceAmount!.Value)).ToList();
-            var optionSeed = await (from option in db.StoreProductPurchaseOptions
-                                    join value in db.StoreProductPurchaseOptionValues on option.Id equals value.IdProductPurchaseOption
-                                    where option.IdProduct == productId && !db.StorePriceVersions.Any(v => v.IdOptionValue == value.Id && v.IdSalesPlan == plan.Id && v.IsActive)
-                                    select new { value.Id, PriceAmount = (from version in db.StorePriceVersions
-                                        join regular in db.SalesPlanReferences on version.IdSalesPlan equals regular.Id
-                                        where version.IdOptionValue == value.Id && version.IsActive && regular.IsRegular && regular.IdStockOwnerType == 1
-                                        select (decimal?)version.PriceAmount).FirstOrDefault() }).ToListAsync(cancellationToken);
-            if (optionSeed.Any(x => !x.PriceAmount.HasValue)) return Conflict(new { code = "missing-regular-option-price" });
-            newOptionPrices = optionSeed.Select(x => (x.Id, x.PriceAmount!.Value)).ToList();
         }
         else { offer.MaxPurchaseQuantity = input.MaxPurchaseQuantity; offer.IsEnabled = input.IsEnabled; offer.UpdatedAtUtc = DateTime.UtcNow; }
         await db.SaveChangesAsync(cancellationToken);
@@ -463,52 +439,10 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
         long priceVersionId = await priceVersions.AppendAsync(productId, plan.Id, null, null, null, input.PriceAmount, input.DiscountPercent, long.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value), cancellationToken);
         foreach (var accessory in newAccessoryPrices)
             await priceVersions.AppendAsync(productId, plan.Id, null, null, accessory.AccessoryId, accessory.PriceAmount, 0, long.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value), cancellationToken);
-        foreach (var option in newOptionPrices)
-            await priceVersions.AppendAsync(productId, plan.Id, null, option.OptionId, null, option.PriceAmount, 0, long.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value), cancellationToken);
         await transaction.CommitAsync(cancellationToken);
 
         return Ok(new { priceVersionId, message = "پیشنهاد کالا در طرح ذخیره شد." });
     }
-
-    [HttpGet("products/{productId:long}/option-prices")]
-    public async Task<IActionResult> OptionPrices(long productId, CancellationToken cancellationToken)
-    {
-        if (!CanManage()) return Forbid();
-        var product = await db.Products.AsNoTracking().Where(x => x.Id == productId)
-            .Select(x => new { x.Id, x.Name }).SingleOrDefaultAsync(cancellationToken);
-        if (product is null) return NotFound();
-        var plans = await db.SalesPlanReferences.AsNoTracking()
-            .Where(plan => plan.IdStockOwnerType == 1 && (plan.IsRegular || db.StoreProductSalesPlanOffers.Any(offer => offer.IdProduct == productId && offer.IdSalesPlan == plan.Id)))
-            .OrderByDescending(plan => plan.IsRegular).ThenBy(plan => plan.DisplayName).ThenBy(plan => plan.Id)
-            .Select(plan => new { plan.Id, plan.StoreSalesPlanKey, plan.DisplayName, plan.IsRegular }).ToListAsync(cancellationToken);
-        var options = await (from option in db.StoreProductPurchaseOptions.AsNoTracking()
-                             join value in db.StoreProductPurchaseOptionValues.AsNoTracking() on option.Id equals value.IdProductPurchaseOption
-                             where option.IdProduct == productId
-                             orderby option.SortOrder, option.Id, value.SortOrder, value.Id
-                             select new { value.Id, OptionLabel = option.Label, ValueLabel = value.Label }).ToListAsync(cancellationToken);
-        var prices = await db.StorePriceVersions.AsNoTracking()
-            .Where(x => x.IdProduct == productId && x.IdOptionValue != null && x.IsActive)
-            .Select(x => new { x.IdOptionValue, x.IdSalesPlan, x.PriceAmount }).ToListAsync(cancellationToken);
-        return Ok(new { product, plans, options, prices });
-    }
-
-    [HttpPut("products/{productId:long}/options/{optionValueId:long}/plans/{salesPlanId}")]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> SaveOptionPrice(long productId, long optionValueId, string salesPlanId, [FromBody] OptionPriceInput input, CancellationToken cancellationToken)
-    {
-        if (!CanManage()) return Forbid();
-        if (input.PriceAmount < -9007199254740991m || input.PriceAmount > 9007199254740991m || input.PriceAmount != decimal.Truncate(input.PriceAmount)) return BadRequest();
-        await using var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
-        var plan = await db.SalesPlanReferences.SingleOrDefaultAsync(x => x.StoreSalesPlanKey == salesPlanId && x.IdStockOwnerType == 1, cancellationToken);
-        bool optionExists = await (from option in db.StoreProductPurchaseOptions join value in db.StoreProductPurchaseOptionValues on option.Id equals value.IdProductPurchaseOption where option.IdProduct == productId && value.Id == optionValueId select value.Id).AnyAsync(cancellationToken);
-        if (plan is null || !optionExists) return NotFound();
-        if (!plan.IsRegular && !await db.StoreProductSalesPlanOffers.AnyAsync(x => x.IdProduct == productId && x.IdSalesPlan == plan.Id, cancellationToken)) return NotFound();
-        long id = await priceVersions.AppendAsync(productId, plan.Id, null, optionValueId, null, input.PriceAmount, 0, long.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value), cancellationToken);
-        await transaction.CommitAsync(cancellationToken);
-        return Ok(new { priceVersionId = id });
-    }
-
-    public sealed record OptionPriceInput(decimal PriceAmount);
 
     public sealed class ProductOfferRow
     {

@@ -31,7 +31,6 @@ public sealed class SalesPlansController(
             productId,
             currency = data.Currency,
             inventoryVariants = data.InventoryVariants.Where(variant => variant.ProductId == productId),
-            priceOptions = data.PriceOptions.GetValueOrDefault(productId, []),
             plans = data.Plans.Select(plan => new
             {
                 plan.Id,
@@ -52,7 +51,7 @@ public sealed class SalesPlansController(
 
     [HttpGet("products/{productId:int}/price-history")]
     public async Task<IActionResult> ProductPriceHistory(int productId, [FromQuery] string? salesPlanId,
-        [FromQuery] long[]? optionPriceVersionIds, [FromQuery] long? variantId, CancellationToken cancellationToken)
+        [FromQuery] long? variantId, CancellationToken cancellationToken)
     {
         if (productId < 1 || string.IsNullOrWhiteSpace(salesPlanId))
             return BadRequest(new { code = "invalid-request" });
@@ -74,19 +73,7 @@ public sealed class SalesPlansController(
             : null;
         if (variantId.HasValue && inventoryVariant is null)
             return BadRequest(new { code = "invalid-price-history-scope" });
-        long? pricedVariantId = inventoryVariant?.PriceBySalesPlan.ContainsKey(salesPlanId) == true ? variantId : null;
-
-        long[] selectedOptionIds = optionPriceVersionIds ?? [];
-        if (selectedOptionIds.Length > 10 || selectedOptionIds.Any(id => id <= 0) ||
-            selectedOptionIds.Distinct().Count() != selectedOptionIds.Length)
-            return BadRequest(new { code = "invalid-price-history-scope" });
-
-        var selectedOptions = selectedOptionIds.Length == 0
-            ? []
-            : await db.StorePriceVersions.AsNoTracking().Where(item => selectedOptionIds.Contains(item.Id) && item.IdProduct == productId && item.IdSalesPlan == databasePlanId.Value &&
-                               item.IdOptionValue.HasValue && item.IdProductVariant == null && item.IdAccessory == null && item.IsActive).Select(item => new { item.Id, item.IdOptionValue }).ToListAsync(cancellationToken);
-        if (selectedOptions.Count != selectedOptionIds.Length)
-            return BadRequest(new { code = "invalid-price-history-scope" });
+        long? pricedVariantId = inventoryVariant is null ? null : variantId;
 
         var productVersions = await db.StorePriceVersions.AsNoTracking()
             .Where(item => item.IdProduct == productId && item.IdSalesPlan == databasePlanId.Value &&
@@ -96,15 +83,7 @@ public sealed class SalesPlansController(
             .ToListAsync(cancellationToken);
         if (productVersions.Count == 0)
             return Ok(new { productId, salesPlanId, currency = catalog.Currency, history = Array.Empty<object>() });
-        long[] optionValueIds = selectedOptions.Select(item => item.IdOptionValue!.Value).ToArray();
-        var optionVersions = optionValueIds.Length == 0
-            ? []
-            : await db.StorePriceVersions.AsNoTracking().Where(item => item.IdSalesPlan == databasePlanId.Value && item.IdOptionValue.HasValue && optionValueIds.Contains(item.IdOptionValue.Value))
-                .OrderBy(item => item.CreatedAtUtc).ThenBy(item => item.Id)
-                .Select(item => new { item.Id, item.IdOptionValue, item.IdProductVariant, item.IdAccessory, item.PriceAmount, item.DiscountPercent, item.IsActive, item.CreatedAtUtc })
-                .ToListAsync(cancellationToken);
-
-        var versions = productVersions.Concat(optionVersions).OrderBy(item => item.CreatedAtUtc).ThenBy(item => item.Id).Select(item => new
+        var versions = productVersions.Select(item => new
             {
                 item.Id,
                 item.IdOptionValue,
@@ -170,9 +149,10 @@ public sealed class SalesPlansController(
             decimal baseUnitAmount = quote.UnitAmount;
             ProductInventoryVariant? selectedInventoryVariant = data.InventoryVariants.SingleOrDefault(variant =>
                 variant.ProductId == request.ProductId && variant.VariantId == request.VariantId);
-            if (selectedInventoryVariant is not null &&
-                selectedInventoryVariant.PriceBySalesPlan.TryGetValue(selectedPlanId, out decimal variantPrice))
+            if (selectedInventoryVariant is not null)
             {
+                if (!selectedInventoryVariant.PriceBySalesPlan.TryGetValue(selectedPlanId, out decimal variantPrice))
+                    throw new SalesPlanUnavailableException("variant-price-unavailable");
                 listUnitAmount = variantPrice;
                 discountPercent = selectedInventoryVariant.DiscountBySalesPlan.GetValueOrDefault(selectedPlanId);
                 baseUnitAmount = decimal.Round(variantPrice * (100m - discountPercent) / 100m, 0, MidpointRounding.AwayFromZero);
@@ -224,7 +204,7 @@ public sealed class SalesPlansController(
         foreach (CartLineRequest line in request.Lines)
         {
             IActionResult quoteResult = await Quote(new QuoteRequest(line.ProductId, line.SalesPlanId,
-                line.Quantity, line.VariantId, line.PriceOptions, line.AccessoryIds), cancellationToken);
+                line.Quantity, line.VariantId, line.AccessoryIds), cancellationToken);
             if (quoteResult is not OkObjectResult { Value: { } value }) return quoteResult;
 
             result.Add(new { line.ProductId, line.SalesPlanId, line.Quantity, quote = value });
@@ -240,20 +220,6 @@ public sealed class SalesPlansController(
         if (product is null) throw new InvalidDataException();
         decimal adjustments = 0m;
         Dictionary<string, decimal> accessoryAmounts = new(StringComparer.Ordinal);
-        HashSet<string> acceptedVariantKeys = new(StringComparer.Ordinal);
-        foreach (ProductPurchaseOption feature in product.Options)
-        {
-            acceptedVariantKeys.Add(feature.Key);
-            if (request.PriceOptions is null || !request.PriceOptions.TryGetValue(feature.Key, out string? value))
-                throw new InvalidDataException();
-            ProductPurchaseOptionValue? option = feature.Values.FirstOrDefault(item => item.Key == value);
-            if (option is null) throw new InvalidDataException();
-            adjustments += option.PriceDelta;
-        }
-
-        if (request.PriceOptions is not null &&
-            request.PriceOptions.Keys.Any(key => !acceptedVariantKeys.Contains(key)))
-            throw new InvalidDataException();
         int maxQuantity = product.MaxPurchaseQuantity;
         maxQuantity = Math.Clamp(maxQuantity, 1, 99);
         if (request.AccessoryIds is { } accessoryIds &&
@@ -283,7 +249,6 @@ public sealed class SalesPlansController(
         string? SalesPlanId,
         int Quantity,
         long? VariantId,
-        Dictionary<string, string>? PriceOptions,
         IReadOnlyList<string>? AccessoryIds);
 
     public sealed record CartValidationRequest(IReadOnlyList<CartLineRequest>? Lines);
@@ -293,6 +258,5 @@ public sealed class SalesPlansController(
         string SalesPlanId,
         int Quantity,
         long? VariantId,
-        Dictionary<string, string>? PriceOptions,
         IReadOnlyList<string>? AccessoryIds);
 }

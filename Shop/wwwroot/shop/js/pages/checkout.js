@@ -79,7 +79,6 @@
         const lines = currentItems.map((item) => ({
             productId: Number(item.id), salesPlanId: item.salesPlanId || "regular", quantity: item.quantity,
             variantId: item.variantId || null,
-            priceOptions: Object.fromEntries((item.options?.priceOptions || []).map((option) => [option.key, option.productValue || option.value])),
             accessoryIds: (item.options?.accessories || []).filter((item) => item.selected !== false).map((item) => item.id),
         }));
         if (!lines.length) {
@@ -371,7 +370,6 @@
                     salesPlanId: item.salesPlanId || "regular",
                     quantity: item.quantity,
                     variantId: item.variantId || null,
-                    optionValueIds: (item.options?.priceOptions || []).map((option) => Number(option.id)).filter((id) => Number.isSafeInteger(id) && id > 0),
                     accessoryIds: (item.options?.accessories || []).filter((accessory) => accessory.selected !== false).map((accessory) => Number(accessory.productAccessoryId)).filter((id) => Number.isSafeInteger(id) && id > 0),
                 }));
                 const saveResponse = await ui.api.request("account/cart", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ items }) });

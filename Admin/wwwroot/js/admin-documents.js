@@ -159,7 +159,7 @@
         const select = form.elements.salesPlanId;
         fillSelect(select, owners, "انتخاب مالک کالا", item => item.displayName, item => item.id);
         const warehouse = lookups.warehouses.find(item => item.id === warehouseId);
-        const preferred = warehouse?.isSalesWarehouse ? owners.find(plan => plan.isRegular)?.id : warehouse?.idOwnerSalesPlanReference;
+        const preferred = warehouse?.isSalesWarehouse ? owners.find(plan => plan.isRegular)?.id : warehouse?.defaultOwnerSalesPlanId;
         const selected = selectedId ?? preferred ?? (owners.length === 1 ? owners[0].id : null);
         setSelect(select, selected);
         form.querySelectorAll("[data-document-line-plan]").forEach(lineSelect => {
@@ -210,8 +210,11 @@
         itemSelect.setAttribute("aria-label", "کالا یا تنوع قلم سند");
         itemSelect.dataset.documentItem = "";
         option(itemSelect, "", "انتخاب کالا / تنوع");
-        for (const item of lookups.inventoryItems)
-            option(itemSelect, item.id, item.variantName ? `${item.productName} — ${item.variantName}` : item.productName);
+        for (const item of lookups.inventoryItems) {
+            const attributes = (item.variantAttributes || []).map(attribute => `${attribute.label}: ${attribute.value}`).join("، ");
+            const variant = [item.variantName, attributes].filter(Boolean).join(" — ");
+            option(itemSelect, item.id, variant ? `${item.productName} — ${variant}` : item.productName);
+        }
         itemCell.append(itemSelect);
         const planCell = node("td");
         const planSelect = node("select", null, "form-select");
