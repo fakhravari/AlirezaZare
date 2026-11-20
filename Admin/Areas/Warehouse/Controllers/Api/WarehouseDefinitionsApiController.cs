@@ -297,6 +297,12 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                     if (variant is null) return NotFound();
                     if (variant.IsDefault)
                         return Conflict(new { detail = "تنوع پیش‌فرض قابل غیرفعال‌سازی نیست؛ ابتدا تنوع فعال دیگری را پیش‌فرض کنید." });
+                    bool hasStock = await (from balance in db.StockBalances
+                                           join item in db.InventoryItems on balance.IdInventoryItem equals item.Id
+                                           where item.IdProductVariant == id && balance.Quantity != 0
+                                           select balance.Id).AnyAsync(cancellationToken);
+                    if (hasStock)
+                        return Conflict(new { detail = "این تنوع موجودی دارد؛ ابتدا از بخش گردش انبار موجودی آن را صفر کنید، سپس دوباره برای غیرفعال‌سازی اقدام کنید." });
                     variant.IsActive = false;
                     variant.UpdatedAtUtc = DateTime.UtcNow;
                     var inventoryItem = await db.InventoryItems.SingleOrDefaultAsync(x => x.IdProductVariant == id, cancellationToken);
