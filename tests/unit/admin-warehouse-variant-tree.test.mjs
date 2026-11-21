@@ -15,7 +15,7 @@ test('variant editor fixes the product and saves attributes selected from its tr
       getJson: async (url, options = {}) => {
         window.requests.push({url, method: options.method || 'GET', body: options.body ? JSON.parse(options.body) : null});
         if (url.endsWith('/variant-names')) return [{id:1,idParent:null,name:'رنگ',isActive:true},{id:11,idParent:1,name:'آبی',isActive:true}];
-        if (url.endsWith('/variants')) return [{id: 21, idProduct: 10, productName: 'کالای نمونه', name: 'آبی', idVariantName: 11, isDefault: true, isActive: true, attributes: [{attributeId: 5, valueId: 8, key: 'color', label: 'رنگ', value: 'black', display: 'مشکی'}]}];
+        if (url.endsWith('/variants')) return [{id: 21, idProduct: 10, productName: 'کالای نمونه', productCode: 'az-123', name: 'آبی', idVariantName: 11, isDefault: true, isActive: true, attributes: [{attributeId: 5, valueId: 8, key: 'color', label: 'رنگ', value: 'black', display: 'مشکی'}]}];
         if (url.endsWith('/lookups')) return {warehouses: [], products: [{id: 10, name: 'کالای نمونه'}]};
         if (url.includes('/variant-options/10')) return [{id: 5, key: 'color', label: 'رنگ', values: [{id: 8, key: 'black', label: 'مشکی'}, {id: 9, key: 'white', label: 'سفید'}]}];
         return {id: 21, message: 'ذخیره شد'};
@@ -24,6 +24,9 @@ test('variant editor fixes the product and saves attributes selected from its tr
   });
   await page.addScriptTag({path: 'Admin/wwwroot/js/admin-definitions.js'});
   await page.evaluate(() => window.AdminDefinitions.initialize(document));
+  const productCell = page.locator('[data-definition-rows] tr').first().locator('td').first();
+  assert.equal(await productCell.locator('span').textContent(), 'کالای نمونه');
+  assert.equal(await productCell.locator('small').textContent(), 'کد: az-123');
   await page.getByRole('button', {name: 'ویرایش'}).click();
 
   const product = page.locator('[data-definition-fields] input[readonly]');
@@ -48,7 +51,7 @@ test('shared variant name tree creates children and edits existing nodes', {skip
   const browser = await chromium.launch({headless: true});
   t.after(() => browser.close());
   const page = await browser.newPage();
-  await page.setContent(`<div data-admin-definitions data-api="/api" data-definition-section="variants" data-can-create="true" data-can-edit="true" data-can-deactivate="false"><form data-variant-name-form><input name="id"><select name="idParent"></select><input name="name"><button type="submit">ثبت نام</button><button type="button" data-variant-name-cancel hidden>انصراف</button></form><ul data-variant-name-tree></ul><div data-definition-status></div><button data-definition-create></button><table data-admin-datatable><thead data-definition-head></thead><tbody data-definition-rows></tbody></table></div><div id="admin-definition-modal"><h2 id="admin-definition-title"></h2><form data-definition-form><input name="id"><div data-definition-fields></div><button type="submit">ذخیره</button></form></div>`);
+  await page.setContent(`<div data-admin-definitions data-api="/api" data-definition-section="variant-names" data-can-create="true" data-can-edit="true" data-can-deactivate="false"><form data-variant-name-form><input name="id"><select name="idParent"></select><input name="name"><button type="submit">ثبت نام</button><button type="button" data-variant-name-cancel hidden>انصراف</button></form><ul data-variant-name-tree></ul><div data-definition-status></div></div><div id="admin-definition-modal"><h2 id="admin-definition-title"></h2><form data-definition-form><input name="id"><div data-definition-fields></div><button type="submit">ذخیره</button></form></div>`);
   await page.evaluate(() => {
     window.requests = [];
     window.AdminUI = {destroyDataTable() {}, refreshDataTable() {}, notify() {}, initStatusSwitch() {}, getJson: async (url, options = {}) => {
@@ -76,4 +79,33 @@ test('shared variant name tree creates children and edits existing nodes', {skip
   const saved = await page.evaluate(() => window.requests.find(r => r.method === 'PUT'));
   assert.equal(saved.url, '/api/variant-names/2');
   assert.deepEqual(saved.body, {name: 'لاجوردی', idParent: 1});
+});
+
+test('unused variants can be deleted while variants with references stay blocked', {skip: !existsSync(chromium.executablePath())}, async t => {
+  const browser = await chromium.launch({headless: true});
+  t.after(() => browser.close());
+  const page = await browser.newPage();
+  await page.setContent(`<div data-admin-definitions data-api="/api" data-definition-section="variants" data-can-create="false" data-can-edit="false" data-can-deactivate="false" data-can-delete="true"><div data-definition-status></div><button data-definition-create></button><table data-admin-datatable><thead data-definition-head></thead><tbody data-definition-rows></tbody></table></div><div id="admin-definition-modal"><h2 id="admin-definition-title"></h2><form data-definition-form><input name="id"><div data-definition-fields></div><button type="submit">ذخیره</button></form></div>`);
+  await page.evaluate(() => {
+    window.requests = [];
+    window.AdminUI = {destroyDataTable() {}, refreshDataTable() {}, notify() {}, initStatusSwitch() {}, getJson: async (url, options = {}) => {
+      const method = options.method || 'GET'; window.requests.push({url, method});
+      if (url.endsWith('/variant-names')) return [];
+      if (url.endsWith('/variants')) return [
+        {id: 21, idProduct: 10, productName: 'کالای نمونه', name: 'آبی - XL', isDefault: false, isActive: false, canDelete: true, attributes: []},
+        {id: 22, idProduct: 10, productName: 'کالای نمونه', name: 'مشکی - XXL', isDefault: false, isActive: false, canDelete: false, deleteBlockReason: 'در سفارش استفاده شده.', attributes: []}
+      ];
+      return {message: 'حذف شد'};
+    }};
+  });
+  await page.addScriptTag({path: 'Admin/wwwroot/js/admin-definitions.js'});
+  await page.evaluate(() => window.AdminDefinitions.initialize(document));
+  const deleteButtons = page.locator('button').filter({hasText: 'حذف'});
+  assert.equal(await deleteButtons.count(), 2);
+  assert.equal(await deleteButtons.nth(0).isEnabled(), true);
+  assert.equal(await deleteButtons.nth(1).isEnabled(), false);
+  assert.match(await deleteButtons.nth(1).getAttribute('title'), /در سفارش استفاده شده/);
+  await deleteButtons.nth(0).click();
+  await page.waitForFunction(() => window.requests.some(request => request.method === 'DELETE'));
+  assert.equal((await page.evaluate(() => window.requests.find(request => request.method === 'DELETE'))).url, '/api/variants/21');
 });

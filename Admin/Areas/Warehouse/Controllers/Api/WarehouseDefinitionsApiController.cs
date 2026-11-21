@@ -63,7 +63,21 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
         var variants = await (from variant in db.ProductVariants.AsNoTracking()
                               join product in db.Products.AsNoTracking() on variant.IdProduct equals product.Id
                               orderby variant.CreatedAtUtc descending, variant.Id descending
-                              select new { variant.Id, variant.IdProduct, ProductName = product.Name, variant.IdVariantName, Name = variant.VariantName.Name, variant.IsDefault, variant.IsActive, variant.CreatedAtUtc })
+                              select new
+                              {
+                                  variant.Id, variant.IdProduct, ProductName = product.Name, ProductCode = product.ProductKey, variant.IdVariantName,
+                                  Name = variant.VariantName.Name, variant.IsDefault, variant.IsActive, variant.CreatedAtUtc,
+                                  HasNonZeroStock = db.InventoryItems.Any(item => item.IdProductVariant == variant.Id &&
+                                      db.StockBalances.Any(balance => balance.IdInventoryItem == item.Id && balance.Quantity != 0)),
+                                  HasWarehouseHistory = db.InventoryItems.Any(item => item.IdProductVariant == variant.Id &&
+                                      (db.WarehouseDocumentLines.Any(line => line.IdInventoryItem == item.Id) ||
+                                       db.WarehouseStockMovements.Any(movement => movement.IdInventoryItem == item.Id))),
+                                  HasStoreHistory = db.StorePriceVersions.Any(price => price.IdProductVariant == variant.Id) ||
+                                      db.StoreProductVariantSalesPlanOffers.Any(offer => offer.IdProductVariant == variant.Id) ||
+                                      db.AccountCartItems.Any(cart => cart.IdProductVariant == variant.Id) ||
+                                      db.StoreCustomerOrderItems.Any(order => order.IdProductVariant == variant.Id),
+                                  HasOtherActiveVariant = db.ProductVariants.Any(other => other.IdProduct == variant.IdProduct && other.Id != variant.Id && other.IsActive)
+                              })
             .ToListAsync(cancellationToken);
         long[] ids = variants.Select(x => x.Id).ToArray();
         var attributes = await (from link in db.StoreVariantCatalogFeatureValues.AsNoTracking()
@@ -77,7 +91,14 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
             x => x.Select(a => new { attributeId = a.Id, valueId = a.ValueId, label = a.AttributeLabel, display = a.DisplayValue }).ToArray());
         return Ok(variants.Select(x => new
         {
-            x.Id, x.IdProduct, x.ProductName, x.IdVariantName, x.Name, x.IsDefault, x.IsActive, x.CreatedAtUtc,
+            x.Id, x.IdProduct, x.ProductName, x.ProductCode, x.IdVariantName, x.Name, x.IsDefault, x.IsActive, x.CreatedAtUtc,
+            CanDelete = !x.HasNonZeroStock && !x.HasWarehouseHistory && !x.HasStoreHistory && !x.IsDefault && (!x.IsActive || x.HasOtherActiveVariant),
+            DeleteBlockReason = x.IsDefault ? "تنوع پیش‌فرض را حذف نکنید؛ ابتدا تنوع دیگری را پیش‌فرض کنید."
+                : x.IsActive && !x.HasOtherActiveVariant ? "آخرین تنوع فعال کالا قابل حذف نیست."
+                : x.HasNonZeroStock ? "تنوع موجودی غیرصفر دارد؛ ابتدا موجودی را از گردش انبار صفر کنید."
+                : x.HasWarehouseHistory ? "تنوع سابقهٔ سند یا گردش انبار دارد و قابل حذف نیست."
+                : x.HasStoreHistory ? "تنوع در قیمت، پیشنهاد فروش، سبد یا سفارش استفاده شده و قابل حذف نیست."
+                : null,
             Attributes = byVariant.GetValueOrDefault(x.Id) ?? []
         }));
     }
@@ -85,7 +106,7 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
     [HttpGet("variant-names")]
     public async Task<IActionResult> GetVariantNames(CancellationToken cancellationToken)
     {
-        if (!CanAccessVariants("variants")) return Forbid();
+        if (!CanAccessVariantNames() && !CanAccessVariants("variants")) return Forbid();
         return Ok(await db.VariantNames.AsNoTracking().OrderBy(x => x.Name).ThenBy(x => x.Id)
             .Select(x => new { x.Id, x.IdParent, x.Name, x.IsActive }).ToListAsync(cancellationToken));
     }
@@ -102,7 +123,7 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
 
     private async Task<IActionResult> SaveVariantName(long? id, VariantNameInput input, CancellationToken cancellationToken)
     {
-        if (!CanAccessVariants("variants")) return Forbid();
+        if (!CanAccessVariantNames()) return Forbid();
         string name = input.Name?.Trim() ?? "";
         if (name.Length is < 1 or > 300 || input.IdParent == id && id.HasValue)
             return ValidationProblem(detail: "نام و والد مرجع تنوع معتبر نیست.", statusCode: 400);
@@ -192,6 +213,55 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
         await db.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
         return Ok(new { message = section == "units" ? "واحد حذف شد." : "گروه واحد حذف شد." });
+    }
+
+    [HttpDelete("variants/{id:long}")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteUnusedVariant(long id, CancellationToken cancellationToken)
+    {
+        if (!CanAccessVariants("variants")) return Forbid();
+        if (!User.IsInRole("system.full-access")) return Forbid();
+
+        await using var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
+        var variant = await db.ProductVariants.SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
+        if (variant is null) return NotFound();
+
+        bool hasOtherActiveVariant = await db.ProductVariants.AnyAsync(x => x.IdProduct == variant.IdProduct && x.Id != id && x.IsActive, cancellationToken);
+        bool hasNonZeroStock = await (from item in db.InventoryItems
+                                      join balance in db.StockBalances on item.Id equals balance.IdInventoryItem
+                                      where item.IdProductVariant == id && balance.Quantity != 0
+                                      select balance.Id).AnyAsync(cancellationToken);
+        bool hasWarehouseHistory = await (from item in db.InventoryItems
+                                          where item.IdProductVariant == id &&
+                                                (db.WarehouseDocumentLines.Any(line => line.IdInventoryItem == item.Id) ||
+                                                 db.WarehouseStockMovements.Any(movement => movement.IdInventoryItem == item.Id))
+                                          select item.Id).AnyAsync(cancellationToken);
+        bool hasStoreHistory = await db.StorePriceVersions.AnyAsync(x => x.IdProductVariant == id, cancellationToken) ||
+                               await db.StoreProductVariantSalesPlanOffers.AnyAsync(x => x.IdProductVariant == id, cancellationToken) ||
+                               await db.AccountCartItems.AnyAsync(x => x.IdProductVariant == id, cancellationToken) ||
+                               await db.StoreCustomerOrderItems.AnyAsync(x => x.IdProductVariant == id, cancellationToken);
+
+        if (variant.IsDefault || (variant.IsActive && !hasOtherActiveVariant) || hasNonZeroStock || hasWarehouseHistory || hasStoreHistory)
+            return Conflict(new { detail = variant.IsDefault ? "تنوع پیش‌فرض را حذف نکنید؛ ابتدا تنوع دیگری را پیش‌فرض کنید."
+                : variant.IsActive && !hasOtherActiveVariant ? "آخرین تنوع فعال کالا قابل حذف نیست."
+                : hasNonZeroStock ? "تنوع موجودی غیرصفر دارد؛ ابتدا موجودی را از گردش انبار صفر کنید."
+                : hasWarehouseHistory ? "تنوع سابقهٔ سند یا گردش انبار دارد و قابل حذف نیست."
+                : "تنوع در قیمت، پیشنهاد فروش، سبد یا سفارش استفاده شده و قابل حذف نیست." });
+
+        var inventoryItems = await db.InventoryItems.Where(x => x.IdProductVariant == id).ToListAsync(cancellationToken);
+        if (inventoryItems.Count > 0)
+        {
+            var inventoryItemIds = inventoryItems.Select(x => x.Id).ToArray();
+            var zeroBalances = await db.StockBalances.Where(x => inventoryItemIds.Contains(x.IdInventoryItem) && x.Quantity == 0).ToListAsync(cancellationToken);
+            db.StockBalances.RemoveRange(zeroBalances);
+            db.InventoryItems.RemoveRange(inventoryItems);
+        }
+        var catalogValues = await db.StoreVariantCatalogFeatureValues.Where(x => x.IdProductVariant == id).ToListAsync(cancellationToken);
+        db.StoreVariantCatalogFeatureValues.RemoveRange(catalogValues);
+        db.ProductVariants.Remove(variant);
+        await db.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
+        return Ok(new { message = "تنوع استفاده‌نشده حذف شد." });
     }
 
     [HttpPut("sales-plan-mapping")]
@@ -841,6 +911,9 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
 
     private bool CanAccessVariants(string section) => !string.Equals(section, "variants", StringComparison.OrdinalIgnoreCase) ||
         User.IsInRole("system.full-access") || User.HasClaim("admin_permission", "Warehouse:Features:Index:variants");
+
+    private bool CanAccessVariantNames() =>
+        User.IsInRole("system.full-access") || User.HasClaim("admin_permission", "Warehouse:Features:Index:variant-names");
 
     private async Task SaveVariantAttributesAsync(ProductVariant variant, IReadOnlyCollection<VariantAttributeInput> input,
         CancellationToken cancellationToken)

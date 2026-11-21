@@ -58,6 +58,13 @@
             const row = document.createElement("tr");
             for (const [key, , format] of config.columns) {
                 let value = item[key];
+                if (key === "productName" && page.dataset.definitionSection === "variants") {
+                    const cell = element("td");
+                    cell.append(element("span", esc(value), "d-block"));
+                    if (item.productCode) cell.append(element("small", `کد: ${item.productCode}`, "text-muted d-block"));
+                    row.append(cell);
+                    continue;
+                }
                 if (key === "warehouseLabel") value = `${item.companyName} / ${item.name} (${item.code})`;
                 if (format === "active") value = active(value);
                 if (format === "date") value = value ? ui.formatDateTime(value) : "—";
@@ -112,6 +119,27 @@
                 });
                 actions.append(deactivate);
                 }
+            }
+            if (page.dataset.definitionSection === "variants" && page.dataset.canDelete === "true") {
+                const remove = actionButton("حذف", "fa-trash", "btn btn-sm btn-outline-danger ms-1");
+                remove.disabled = item.canDelete !== true;
+                if (!item.canDelete) {
+                    remove.title = item.deleteBlockReason || "این تنوع استفاده شده و قابل حذف نیست.";
+                    remove.setAttribute("aria-label", remove.title);
+                } else {
+                    remove.dataset.adminConfirm = `تنوع «${item.name}» از کالای «${item.productName}» برای همیشه حذف شود؟`;
+                    remove.addEventListener("click", async () => {
+                        if (remove.disabled) return;
+                        remove.disabled = true;
+                        try {
+                            const result = await request(page, `${page.dataset.api}/variants/${item.id}`, "DELETE");
+                            ui.notify(result.message, "success");
+                            await load(page);
+                        } catch (error) { ui.notify(error.message, "danger"); }
+                        finally { if (remove.isConnected) remove.disabled = false; }
+                    });
+                }
+                actions.append(remove);
             }
             row.append(actions); body.append(row);
         }
@@ -585,6 +613,7 @@
     async function load(page) {
         const section = page.dataset.definitionSection;
         if (section === "sales-plan-mapping") { await loadMapping(page); setStatus(page, ""); return; }
+        if (section === "variant-names") { await loadVariantNames(page); setStatus(page, ""); return; }
         const config = configs[section];
         if (section === "units") {
             const [groups, units] = await Promise.all([
@@ -642,8 +671,8 @@
                         finally { groupForm.dataset.saving = "false"; button.disabled = false; }
                     });
                 }
-                if (section === "variants") {
-                    await loadVariantNames(page);
+                if (section === "variants") await loadVariantNames(page);
+                if (section === "variant-names") {
                     const nameForm = page.querySelector("[data-variant-name-form]");
                     if (nameForm) {
                         nameForm.hidden = page.dataset.canCreate !== "true" && page.dataset.canEdit !== "true";
@@ -656,22 +685,23 @@
                             const button = nameForm.querySelector('[type="submit"]'); button.disabled = true;
                             try {
                                 const result = await request(page, `${page.dataset.api}/variant-names${id ? `/${id}` : ""}`, id ? "PUT" : "POST", { name, idParent: Number(nameForm.elements.idParent.value) || null });
-                                ui.notify(result.message, "success"); reset(); await loadVariantNames(page); await load(page);
+                                ui.notify(result.message, "success"); reset(); await load(page);
                             } catch (error) { ui.notify(error.message || "ذخیرهٔ نام تنوع ناموفق بود.", "danger"); }
                             finally { button.disabled = false; }
                         });
                     }
                 }
-                const config = configs[section];
-                page.querySelector("[data-reference-type-filter]")?.addEventListener("change", () => void load(page));
-                for (const filter of page.querySelectorAll("[data-variant-product-filter], [data-variant-status-filter]"))
-                    filter.addEventListener("change", () => renderTable(page, variantRows.get(page) || [], config));
-                const createButton = page.querySelector("[data-definition-create]");
-                if (createButton) {
-                    createButton.hidden = page.dataset.canCreate !== "true";
-                    createButton.addEventListener("click", () => void openForm(page, null, config).catch(error => ui.notify(error.message || "بازکردن فرم ناموفق بود.", "danger")));
-                }
-                form.addEventListener("submit", async event => {
+                else {
+                    const config = configs[section];
+                    page.querySelector("[data-reference-type-filter]")?.addEventListener("change", () => void load(page));
+                    for (const filter of page.querySelectorAll("[data-variant-product-filter], [data-variant-status-filter]"))
+                        filter.addEventListener("change", () => renderTable(page, variantRows.get(page) || [], config));
+                    const createButton = page.querySelector("[data-definition-create]");
+                    if (createButton) {
+                        createButton.hidden = page.dataset.canCreate !== "true";
+                        createButton.addEventListener("click", () => void openForm(page, null, config).catch(error => ui.notify(error.message || "بازکردن فرم ناموفق بود.", "danger")));
+                    }
+                    form.addEventListener("submit", async event => {
                     event.preventDefault();
                     if (form.dataset.saving === "true") return;
                     for (const [key, label, type, required] of config.fields) {
@@ -698,7 +728,8 @@
                     try { const result = await request(page, `${page.dataset.api}/${section}${id ? `/${id}` : ""}`, id ? "PUT" : "POST", body); ui.notify(result.message, "success"); window.bootstrap?.Modal?.getInstance(document.getElementById("admin-definition-modal"))?.hide(); await load(page); }
                     catch (error) { ui.notify(error.message, "danger"); }
                     finally { form.dataset.saving = "false"; submit.disabled = false; }
-                });
+                    });
+                }
             }
             await load(page);
         } catch (error) { setStatus(page, error.message || "بارگذاری ناموفق بود.", true); }

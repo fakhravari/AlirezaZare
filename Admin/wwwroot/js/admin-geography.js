@@ -69,7 +69,9 @@
         }
         function render() {
             ui.destroyDataTable(page.querySelector("[data-admin-datatable]"));
-            page.querySelector("[data-admin-datatable]").dataset.adminPageLength = kind === "countries" ? "20" : "25";
+            page.querySelector("[data-admin-datatable]").dataset.adminPageLength = kind === "provinces" || kind === "cities"
+                ? String(Math.max(data[kind].length, 1))
+                : kind === "countries" ? "20" : "25";
             const columns = {
                 countries: [["شناسه", "id"], ["پرچم", "flagUrl"], ["نام فارسی", "nameFa"], ["نام انگلیسی", "nameEn"], ["کد کشور", "code"]],
                 provinces: [["شناسه", "id"], ["نام فارسی", "nameFa"], ["نام انگلیسی", "nameEn"], ["کشور", "parentName"], ["شناسه کشور", "countryId"], ["عرض جغرافیایی", "latitude"], ["طول جغرافیایی", "longitude"]],

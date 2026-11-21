@@ -41,7 +41,7 @@
     }
     else
     {
-        @if (Model.FeatureId == "variants")
+        @if (Model.FeatureId == "variant-names")
         {
             <section class="panel panel-inverse">
                 <div class="panel-heading"><h2 class="panel-title">مرجع درختی نام تنوع</h2></div>
@@ -66,6 +66,8 @@
                 </div>
             </section>
         }
+        @if (Model.FeatureId != "variant-names")
+        {
         <section class="panel panel-inverse">
             <div class="panel-heading">
                 <h2 class="panel-title">@(Model.FeatureId == "warehouses" ? "تخصیص انبار به شرکت" : Model.FeatureId == "references" ? "مراجع ثبت‌شده" : Model.FeatureId == "units" ? "درخت گروه‌های واحد و واحدها" : "فهرست تعریف‌ها")</h2>
@@ -131,6 +133,7 @@
                 }
             </div>
         </section>
+        }
     }
 </div>
 <div class="modal fade" id="admin-definition-modal" tabindex="-1" aria-labelledby="admin-definition-title" aria-hidden="true">

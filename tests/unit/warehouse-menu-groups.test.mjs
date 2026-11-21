@@ -25,3 +25,20 @@ test('warehouse movement reports have separate menu routes with the existing per
   assert.ok(view.includes('data-mode="@ViewData["MovementSection"]"'));
   assert.doesNotMatch(view, /data-movement-mode=/);
 });
+
+test('variant name reference and variant definitions have separate pages and permissions', async () => {
+  const sidebar = await readFile('Admin/Views/Shared/_AdminSidebar.cshtml', 'utf8');
+  assert.match(sidebar, /asp-route-feature="variant-names"[\s\S]*?مرجع درختی نام تنوع/);
+  assert.match(sidebar, /Warehouse:Features:Index:variant-names/);
+  assert.match(sidebar, /asp-route-feature="variants"[\s\S]*?فهرست تعریف‌ها/);
+  assert.match(sidebar, /Warehouse:Features:Index:variants/);
+  const view = await readFile('Admin/Areas/Warehouse/Views/Features/Definitions.cshtml', 'utf8');
+  assert.match(view, /Model\.FeatureId == "variant-names"[\s\S]*data-variant-name-tree/);
+  assert.match(view, /Model\.FeatureId != "variant-names"[\s\S]*data-admin-datatable/);
+  const api = await readFile('Admin/Areas/Warehouse/Controllers/Api/WarehouseDefinitionsApiController.cs', 'utf8');
+  assert.match(api, /private async Task<IActionResult> SaveVariantName[\s\S]*?if \(!CanAccessVariantNames\(\)\) return Forbid\(\)/);
+  assert.match(api, /private bool CanAccessVariantNames\(\)[\s\S]*Warehouse:Features:Index:variant-names/);
+  const migration = await readFile('Shop/Features/Store/Database/Migrations/143-split-variant-definition-pages.sql', 'utf8');
+  assert.match(migration, /warehouse\.variant-names/);
+  assert.match(migration, /@VariantRoles/);
+});
