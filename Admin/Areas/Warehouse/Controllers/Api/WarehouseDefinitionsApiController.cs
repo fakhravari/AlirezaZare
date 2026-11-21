@@ -20,7 +20,7 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
         "companies" => await GetCompaniesAsync(cancellationToken),
         "warehouses" => await GetWarehousesAsync(cancellationToken),
         "document-types" => Ok(await db.WarehouseDocumentTypes.AsNoTracking().OrderBy(x => x.Name)
-            .Select(x => new { x.Id, x.Code, x.Name, x.Direction, x.AffectsStock, x.IsActive }).ToListAsync(cancellationToken)),
+            .Select(x => new { x.Id, x.Name, x.Direction, x.AffectsStock, x.IsReturn, x.IsSystemSalesDispatch, x.IsActive }).ToListAsync(cancellationToken)),
         "references" => await GetReferencesAsync(cancellationToken),
         "unit-groups" => Ok(await db.WarehouseUnits.AsNoTracking().Where(x => x.IdParent == null)
             .OrderBy(x => x.SortOrder).ThenBy(x => x.NameFa)
@@ -537,9 +537,9 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
             case "document-types":
                 {
                     DocumentTypeInput? input = Parse<DocumentTypeInput>(payload);
-                    if (input is null || !ValidCodeName(input.Code, input.Name, 50, 150) ||
+                    if (input is null || string.IsNullOrWhiteSpace(input.Name) || input.Name.Trim().Length > 150 ||
                         input.Direction is not ("R" or "I"))
-                        return ValidationProblem(detail: "کد، نام و جهت سند را درست وارد کنید.", statusCode: 400);
+                        return ValidationProblem(detail: "نام و جهت سند را درست وارد کنید.", statusCode: 400);
 
                     WarehouseDocumentType entity = id.HasValue
                         ? await db.WarehouseDocumentTypes.SingleOrDefaultAsync(x => x.Id == id, cancellationToken) ?? null!
@@ -547,13 +547,16 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                     if (id.HasValue && entity is null) return NotFound();
 
                     if (id.HasValue && await db.WarehouseDocuments.AnyAsync(x => x.IdDocumentType == id)
-                                    && (entity.Direction != input.Direction || entity.AffectsStock != input.AffectsStock))
-                        return Conflict(new { detail = "جهت و اثر موجودی نوع سندی که سابقه دارد قابل تغییر نیست؛ آن را غیرفعال و نوع تازه تعریف کنید." });
+                                    && (entity.Direction != input.Direction || entity.AffectsStock != input.AffectsStock || entity.IsReturn != input.IsReturn))
+                        return Conflict(new { detail = "جهت، اثر موجودی و نوع مرجوعی سندی که سابقه دارد قابل تغییر نیست؛ آن را غیرفعال و نوع تازه تعریف کنید." });
 
-                    entity.Code = input.Code.Trim();
+                    if (entity.IsSystemSalesDispatch && (input.Direction != "I" || !input.AffectsStock || input.IsReturn))
+                        return Conflict(new { detail = "حوالهٔ سیستمی فروش باید خروجی و مؤثر بر موجودی باشد و نمی‌تواند مرجوعی باشد." });
+
                     entity.Name = input.Name.Trim();
                     entity.Direction = input.Direction;
                     entity.AffectsStock = input.AffectsStock;
+                    entity.IsReturn = input.IsReturn;
                     entity.IsActive = input.IsActive;
                     entity.UpdatedAtUtc = DateTime.UtcNow;
 
@@ -1038,10 +1041,10 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
         bool IsSiteWarehouse);
 
     private sealed record DocumentTypeInput(
-        string Code,
         string Name,
         string Direction,
         bool AffectsStock,
+        bool IsReturn,
         bool IsActive);
 
     private sealed record PartyInput(

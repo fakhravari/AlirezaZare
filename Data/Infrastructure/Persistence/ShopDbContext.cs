@@ -334,12 +334,10 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
         {
             entity.ToTable("DocumentType", "Warehouse");
             entity.HasKey(x => x.Id);
-            entity.Property(x => x.Code).HasMaxLength(50).IsRequired();
             entity.Property(x => x.Name).HasMaxLength(150).IsRequired();
             entity.Property(x => x.Direction).HasColumnType("char(1)").IsRequired();
             entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
             entity.Property(x => x.UpdatedAtUtc).HasPrecision(3);
-            entity.HasIndex(x => x.Code).IsUnique();
         });
         modelBuilder.Entity<WarehouseUnit>(entity =>
         {

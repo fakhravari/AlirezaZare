@@ -1,0 +1,6 @@
+@model long
+<div class="admin-page admin-product-details" data-admin-page="product-details" data-product-id="@Model">
+    @await Html.PartialAsync("_AdminPageIntro", ("جزئیات کامل کالا", "اطلاعات ثبت‌شدهٔ کالا را مشاهده کنید."))
+    <div class="admin-data-status small text-muted" data-product-details-status role="status" aria-live="polite">در حال دریافت اطلاعات کالا…</div>
+    <div class="admin-record-product admin-product-details-record" data-product-details-record></div>
+</div>

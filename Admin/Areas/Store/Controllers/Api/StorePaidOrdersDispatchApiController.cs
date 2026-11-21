@@ -104,7 +104,7 @@ public sealed class StorePaidOrdersDispatchApiController(ShopDbContext db, IWare
             long[] planIds = orderItems.Select(x => x.IdSalesPlan).Distinct().ToArray();
             var settings = await db.StoreSiteIdentities.AsNoTracking().SingleOrDefaultAsync(x => x.Id == 1, cancellationToken);
             var warehouse = settings?.IdWarehouse is long warehouseId ? await db.Warehouses.SingleOrDefaultAsync(x => x.Id == warehouseId && x.IsActive, cancellationToken) : null;
-            var type = await db.WarehouseDocumentTypes.SingleOrDefaultAsync(x => x.Code == "SALES-DISPATCH" && x.IsActive && x.Direction == "I", cancellationToken);
+            var type = await db.WarehouseDocumentTypes.SingleOrDefaultAsync(x => x.IsSystemSalesDispatch && x.IsActive && x.Direction == "I", cancellationToken);
             var party = await db.WarehouseParties.SingleOrDefaultAsync(x => x.ExternalPartyKey == "STORE-SALES" && x.IsActive, cancellationToken);
             if (warehouse is null || type is null || party is null)
                 return Conflict(new { detail = "انبار فروش، نوع حواله یا مرجع آن تنظیم نشده است." });

@@ -14,10 +14,7 @@
         const token = () => page.querySelector('[name="__RequestVerificationToken"]')?.value || "";
         const endpoint = page.dataset.api;
         const status = (message, error = false) => {
-            const node = page.querySelector("[data-home-testimonial-status]");
-            node.textContent = message;
-            node.classList.toggle("text-danger", error);
-            node.classList.toggle("text-muted", !error);
+            ui.setStatus(page.querySelector("[data-home-testimonial-status]"), message, error);
         };
         const request = (url, method = "GET", body, headers = {}) => ui.getJson(url, {
             method, headers: { RequestVerificationToken: token(), ...headers }, ...(body ? { body } : {})

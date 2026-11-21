@@ -5,8 +5,8 @@
     let pageNumber = 1, serial = 0;
     const labels = { order: "پیگیری سفارش", consultation: "مشاوره پیش از خرید", "after-sales": "خدمات پس از فروش", business: "همکاری سازمانی", other: "سایر درخواست‌ها" };
     const states = { new: "جدید", read: "خوانده‌شده", closed: "بسته‌شده" };
-    const el = (tag, value, cls) => { const node = document.createElement(tag); if (value != null) node.textContent = value; if (cls) node.className = cls; return node; };
-    function message(page, value, error = false) { const target = page.querySelector("[data-contact-status]"); target.textContent = value; target.classList.toggle("text-danger", error); target.classList.toggle("text-muted", !error); }
+    const el = ui.createElement;
+    function message(page, value, error = false) { ui.setStatus(page.querySelector("[data-contact-status]"), value, error); }
     function token() { return document.querySelector('[data-admin-contact-messages] input[name="__RequestVerificationToken"]')?.value || ""; }
     async function load(page) {
         const requestId = ++serial, query = new URLSearchParams(new FormData(page.querySelector("[data-contact-filter]"))); query.set("page", String(pageNumber));

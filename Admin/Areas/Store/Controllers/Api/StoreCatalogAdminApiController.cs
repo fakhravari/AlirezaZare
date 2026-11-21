@@ -203,12 +203,16 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
             x.Id, x.Name, x.IsDefault, x.IsActive, x.CreatedAtUtc, x.UpdatedAtUtc,
             Attributes = attributesByVariant.GetValueOrDefault(x.Id) ?? []
         }).ToList();
+        bool fullAccess = User.IsInRole("system.full-access");
+        long[] allowedWarehouseIds = User.FindAll("admin_warehouse")
+            .Select(claim => long.TryParse(claim.Value, out long warehouseId) ? warehouseId : 0)
+            .Where(warehouseId => warehouseId > 0).ToArray();
         var inventory = await (from balance in db.StockBalances.AsNoTracking()
                                join item in db.InventoryItems.AsNoTracking() on balance.IdInventoryItem equals item.Id
                                join warehouse in db.Warehouses.AsNoTracking() on balance.IdWarehouse equals warehouse.Id
                                join company in db.Companies.AsNoTracking() on warehouse.IdCompany equals company.Id
                                join plan in db.SalesPlanReferences.AsNoTracking() on balance.IdSalesPlanReference equals plan.Id
-                               where item.IdProduct == id
+                               where item.IdProduct == id && (fullAccess || allowedWarehouseIds.Contains(balance.IdWarehouse))
                                orderby company.Name, warehouse.Name, plan.DisplayName
                                select new
                                {
@@ -216,6 +220,7 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
                                    WarehouseName = warehouse.Name,
                                    WarehouseCode = warehouse.Code,
                                    SalesPlanName = plan.DisplayName,
+                                   VariantName = item.ProductVariant == null ? null : item.ProductVariant!.VariantName.Name,
                                    balance.Quantity,
                                    balance.MinimumQuantity,
                                    balance.UpdatedAtUtc
@@ -229,8 +234,41 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
         var assets = await db.StoreProductAssets.AsNoTracking().Where(x => x.IdProduct == id).OrderBy(x => x.SortOrder).ThenBy(x => x.Id).ToListAsync(cancellationToken);
         var documents = assets.Where(x => x.IdMediaType == ProductMediaTypes.Document).OrderByDescending(x => x.CreatedAtUtc).Select(x => new { x.Title, x.Path, x.CreatedAtUtc }).ToList();
         var media = assets.FirstOrDefault(x => x.IdMediaType == ProductMediaTypes.Image && x.IsDefault);
-        var imageList = assets.Where(x => x.IdMediaType == ProductMediaTypes.Image).Select(x => new { src = x.Path, thumbnail = x.ThumbnailPath }).ToList();
+        var imageList = assets.Where(x => x.IdMediaType == ProductMediaTypes.Image && !x.IsDefault).Select(x => new { src = x.Path, thumbnail = x.ThumbnailPath }).ToList();
         var videoList = assets.Where(x => x.IdMediaType == ProductMediaTypes.Video).Select(x => x.Path).ToList();
+
+        object? accessories = null, unitHistory = null, attributeDefinitions = null, currentPlanPrices = null, priceHistory = null, salesOffers = null;
+        if (fullAccess)
+        {
+            accessories = await (from link in db.StoreProductAccessories.AsNoTracking()
+                                 join accessory in db.StoreAccessories.AsNoTracking() on link.IdAccessory equals accessory.Id
+                                 where link.IdProduct == id orderby link.SortOrder, link.Id
+                                 select new { accessory.Name, accessory.Description, accessory.IsActive, link.IsRequired, link.DisplayDiscountPercent, link.SortOrder }).ToListAsync(cancellationToken);
+            unitHistory = await (from link in db.WarehouseProductUnits.AsNoTracking()
+                                 join unit in db.WarehouseUnits.AsNoTracking() on link.IdUnit equals unit.Id
+                                 where link.IdProduct == id && !link.IsActive
+                                 orderby unit.NameFa
+                                 select new { UnitName = unit.NameFa, link.ConversionFactor, link.IsBaseUnit }).ToListAsync(cancellationToken);
+            var attributeRows = await db.ProductAttributes.AsNoTracking().Where(x => x.IdProduct == id)
+                .OrderBy(x => x.SortOrder).ThenBy(x => x.Id).Select(x => new { x.Id, x.Label, x.Key, x.IsActive }).ToListAsync(cancellationToken);
+            var attributeValues = await db.ProductAttributeValues.AsNoTracking().Where(x => x.IdProduct == id)
+                .OrderBy(x => x.Id).Select(x => new { x.IdProductAttribute, x.Label, x.DisplayValue, x.ValueKey, x.IsActive }).ToListAsync(cancellationToken);
+            attributeDefinitions = attributeRows.Select(x => new { x.Label, x.Key, x.IsActive, Values = attributeValues.Where(v => v.IdProductAttribute == x.Id).Select(v => new { v.Label, v.DisplayValue, v.ValueKey, v.IsActive }).ToArray() }).ToArray();
+            salesOffers = await (from offer in db.StoreProductSalesPlanOffers.AsNoTracking()
+                                 join plan in db.SalesPlanReferences.AsNoTracking() on offer.IdSalesPlan equals plan.Id
+                                 where offer.IdProduct == id orderby plan.DisplayName
+                                 select new { SalesPlanName = plan.DisplayName, offer.IsEnabled, offer.MaxPurchaseQuantity }).ToListAsync(cancellationToken);
+            var prices = from version in db.StorePriceVersions.AsNoTracking()
+                         join plan in db.SalesPlanReferences.AsNoTracking() on version.IdSalesPlan equals plan.Id
+                         join variant in db.ProductVariants.AsNoTracking() on version.IdProductVariant equals (long?)variant.Id into variantGroup
+                         from variant in variantGroup.DefaultIfEmpty()
+                         join accessory in db.StoreAccessories.AsNoTracking() on version.IdAccessory equals (long?)accessory.Id into accessoryGroup
+                         from accessory in accessoryGroup.DefaultIfEmpty()
+                         where version.IdProduct == id
+                         select new { version.Id, SalesPlanName = plan.DisplayName, VariantName = variant == null ? null : variant.VariantName.Name, AccessoryName = accessory == null ? null : accessory.Name, PriceVersionAmount = version.PriceAmount, version.DiscountPercent, version.IsActive, version.CreatedAtUtc, version.IdChangedBy, version.ChangeReason };
+            currentPlanPrices = await prices.Where(x => x.IsActive).OrderBy(x => x.SalesPlanName).ToListAsync(cancellationToken);
+            priceHistory = await prices.OrderByDescending(x => x.CreatedAtUtc).ThenByDescending(x => x.Id).Take(200).ToListAsync(cancellationToken);
+        }
 
         return Ok(new
         {
@@ -256,15 +294,21 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
             product.CreatedAtUtc,
             product.UpdatedAtUtc,
             Variants = variants,
+            Accessories = accessories,
+            UnitHistory = unitHistory,
+            AttributeDefinitions = attributeDefinitions,
+            SalesOffers = salesOffers,
+            CurrentPlanPrices = currentPlanPrices,
+            PriceHistory = priceHistory,
             StockByWarehouseAndPlan = inventory,
             Benefits = benefits,
             Specifications = specifications,
             Documents = documents,
-            Media = media is null ? null : new
+            Media = media is null && imageList.Count == 0 && videoList.Count == 0 ? null : new
             {
-                MainPath = media.Path,
-                media.CardPath,
-                media.ThumbnailPath,
+                MainPath = media?.Path,
+                CardPath = media?.CardPath,
+                ThumbnailPath = media?.ThumbnailPath,
                 ImageList = JsonSerializer.Serialize(imageList),
                 VideoList = JsonSerializer.Serialize(videoList)
             }

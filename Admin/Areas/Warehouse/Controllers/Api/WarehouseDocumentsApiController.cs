@@ -15,8 +15,6 @@ namespace Shop.Admin.Areas.Warehouse.Controllers.Api;
 [Route("api/admin/warehouse/documents")]
 public sealed class WarehouseDocumentsApiController(ShopDbContext db, IWarehouseStockLedger stockLedger) : ControllerBase
 {
-    private const string SalesDispatchTypeCode = "SALES-DISPATCH";
-
     [HttpGet]
     public async Task<IActionResult> List([FromQuery] long? warehouseId, [FromQuery] string? status,
         [FromQuery] string? q,
@@ -66,8 +64,8 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db, IWarehouse
         if (!User.IsInRole("system.full-access")) warehouseQuery = warehouseQuery.Where(x => allowed.Contains(x.Id));
         var warehouses = await warehouseQuery.OrderBy(x => x.Company.Name).ThenBy(x => x.Name)
             .Select(x => new { x.Id, x.Code, x.Name, x.IdCompany, CompanyName = x.Company.Name, x.IsSalesWarehouse, DefaultOwnerSalesPlanId = db.WarehouseStockOwners.Where(link => link.IdWarehouse == x.Id && link.IsDefault).Select(link => (long?)link.IdStockOwner).FirstOrDefault() }).ToListAsync(cancellationToken);
-        var types = await db.WarehouseDocumentTypes.AsNoTracking().Where(x => x.IsActive && x.Code != SalesDispatchTypeCode).OrderBy(x => x.Name)
-            .Select(x => new { x.Id, x.Code, x.Name, x.Direction, x.AffectsStock }).ToListAsync(cancellationToken);
+        var types = await db.WarehouseDocumentTypes.AsNoTracking().Where(x => x.IsActive && !x.IsSystemSalesDispatch).OrderBy(x => x.Name)
+            .Select(x => new { x.Id, x.Name, x.Direction, x.AffectsStock, x.IsReturn, x.IsSystemSalesDispatch }).ToListAsync(cancellationToken);
         var partyQuery = db.WarehouseParties.AsNoTracking().Where(x => x.IsActive);
         if (!User.IsInRole("system.full-access"))
             partyQuery = partyQuery.Where(x => x.IdWarehouse == null || allowed.Contains(x.IdWarehouse.Value));
@@ -366,12 +364,11 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db, IWarehouse
             return Forbid();
 
         var selectedType = await db.WarehouseDocumentTypes.AsNoTracking().Where(x => x.Id == input.DocumentTypeId)
-            .Select(x => new { x.Code, x.Name }).SingleAsync(cancellationToken);
-        if (string.Equals(selectedType.Code, SalesDispatchTypeCode, StringComparison.OrdinalIgnoreCase))
+            .Select(x => new { x.IsSystemSalesDispatch, x.IsReturn }).SingleAsync(cancellationToken);
+        if (selectedType.IsSystemSalesDispatch)
             return ValidationProblem(detail: "حوالهٔ فروش فقط از صفحهٔ تأیید سفارش‌های پرداخت‌شده صادر می‌شود.", statusCode: 400);
 
-        if ((selectedType.Code.Contains("return", StringComparison.OrdinalIgnoreCase) ||
-             selectedType.Name.Contains("مرجوع"))
+        if (selectedType.IsReturn
             && (string.IsNullOrWhiteSpace(input.ExternalReference)
                 || !await db.WarehouseParties.AnyAsync(x => x.Id == input.PartyId && x.IsActive
                     && (x.PartyType == "Person" || x.PartyType == "Organization"), cancellationToken)))

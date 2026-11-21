@@ -3,10 +3,11 @@ namespace Shop.Data.Domain.Warehouse.Entities;
 public sealed class WarehouseDocumentType
 {
     public long Id { get; set; }
-    public string Code { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
     public string Direction { get; set; } = "R";
     public bool AffectsStock { get; set; }
+    public bool IsReturn { get; set; }
+    public bool IsSystemSalesDispatch { get; set; }
     public bool IsActive { get; set; }
     public DateTime CreatedAtUtc { get; set; }
     public DateTime? UpdatedAtUtc { get; set; }

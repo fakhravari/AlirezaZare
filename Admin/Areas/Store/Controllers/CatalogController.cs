@@ -7,6 +7,15 @@ public sealed class CatalogController : Controller
 {
     public IActionResult Products() => CatalogPage("products", "محصولات", "کالاها و وضعیت پایهٔ کاتالوگ فروشگاه.");
 
+    public IActionResult ProductDetails(long id)
+    {
+        if (id < 1) return NotFound();
+        ViewData["Title"] = "جزئیات کامل کالا";
+        ViewData["AreaTitle"] = "مدیریت فروشگاه";
+        ViewData["FeatureId"] = "products";
+        return View(id);
+    }
+
     public IActionResult Categories() =>
         CatalogPage("categories", "دسته‌بندی‌ها", "ساختار درختی دسته‌بندی‌های کاتالوگ.");
 

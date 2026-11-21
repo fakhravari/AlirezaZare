@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 const docsRoot = fileURLToPath(new URL("../", import.meta.url));
 const repoRoot = path.dirname(docsRoot.replace(/[\\/]$/, ""));
 const rootFiles = new Set(["README.md", "AGENTS.md"]);
+const rootArtifacts = new Set(["bsshopir_fakhravari_2026-11-21_11-06-13.zip"]);
 const kebabCase = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const errors = [];
 const markdownFiles = [];
@@ -33,7 +34,7 @@ async function scan(directory) {
       if (directory === docsRoot) sections.push(file);
       await scan(file);
     } else if (item.isFile()) {
-      if (directory === docsRoot && !rootFiles.has(item.name)) {
+      if (directory === docsRoot && !rootFiles.has(item.name) && !rootArtifacts.has(item.name)) {
         errors.push(display(file) + ": move the guide/support file into its owning section");
       }
       if (item.name.endsWith(".md")) {

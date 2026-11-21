@@ -4,9 +4,9 @@
     if (!ui) return;
     let pageNumber = 1, serial = 0, customers = [];
     const categoryLabels = { notice: "اطلاعیه", support: "پشتیبانی", orders: "سفارش", products: "محصولات" };
-    const el = (tag, value, cls) => { const node = document.createElement(tag); if (value != null) node.textContent = value; if (cls) node.className = cls; return node; };
+    const el = ui.createElement;
     const token = page => page.querySelector('input[name="__RequestVerificationToken"]')?.value || "";
-    function status(page, value, error = false) { const node = page.querySelector("[data-account-message-load-status]"); node.textContent = value; node.classList.toggle("text-danger", error); node.classList.toggle("text-muted", !error); }
+    function status(page, value, error = false) { ui.setStatus(page.querySelector("[data-account-message-load-status]"), value, error); }
     async function load(page) {
         const id = ++serial, params = new URLSearchParams(new FormData(page.querySelector("[data-account-message-filter]"))); params.set("page", String(pageNumber)); status(page, "در حال دریافت پیام‌ها…");
         try {

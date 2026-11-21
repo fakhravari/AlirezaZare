@@ -68,10 +68,10 @@
 
     function filteredTypes(page) {
         const feature = page.dataset.documentFeature;
-        let types = lookups.types.filter(type => type.code.toUpperCase() !== "SALES-DISPATCH");
+        let types = lookups.types.filter(type => !type.isSystemSalesDispatch);
         if (feature === "receipts") types = types.filter(type => type.direction === "R");
         if (feature === "dispatches") types = types.filter(type => type.direction === "I");
-        if (feature === "returns") types = types.filter(type => type.code.toLowerCase().includes("return") || type.name.includes("مرجوع"));
+        if (feature === "returns") types = types.filter(type => type.isReturn);
         return types;
     }
 

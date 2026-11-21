@@ -261,6 +261,15 @@ public sealed class AdminPermissionFilter : IAsyncAuthorizationFilter
             feature = "order-confirmation";
         }
         if (string.Equals(area, "Store", StringComparison.OrdinalIgnoreCase) &&
+            (string.Equals(controller, "Catalog", StringComparison.OrdinalIgnoreCase) ||
+             string.Equals(controller, "StoreCatalogAdminApi", StringComparison.OrdinalIgnoreCase)) &&
+            string.Equals(action, "ProductDetails", StringComparison.OrdinalIgnoreCase))
+        {
+            controller = "Catalog";
+            action = "Products";
+            feature = null;
+        }
+        if (string.Equals(area, "Store", StringComparison.OrdinalIgnoreCase) &&
             string.Equals(controller, "StoreProductBadgesApi", StringComparison.OrdinalIgnoreCase))
         {
             controller = "Catalog";
@@ -280,9 +289,15 @@ public sealed class AdminPermissionFilter : IAsyncAuthorizationFilter
 
         string required = AdminAuthentication.RoutePermission(area, controller, action, feature);
         ClaimsPrincipal user = context.HttpContext.User;
+        bool productListAccess = string.Equals(area, "Store", StringComparison.OrdinalIgnoreCase)
+            && string.Equals(controller, "StoreCatalogAdminApi", StringComparison.OrdinalIgnoreCase)
+            && string.Equals(action, "GetSection", StringComparison.OrdinalIgnoreCase)
+            && string.Equals(Convert.ToString(route.GetValueOrDefault("section")), "products", StringComparison.OrdinalIgnoreCase)
+            && user.FindAll("admin_permission").Any(claim => string.Equals(claim.Value,
+                AdminAuthentication.RoutePermission("Store", "Catalog", "Products"), StringComparison.OrdinalIgnoreCase));
 
         if (user.Identity?.IsAuthenticated == true
-            && (user.IsInRole("system.full-access") || user.FindAll("admin_permission").Any(claim =>
+            && (productListAccess || user.IsInRole("system.full-access") || user.FindAll("admin_permission").Any(claim =>
                 string.Equals(claim.Value, required, StringComparison.OrdinalIgnoreCase))))
             return Task.CompletedTask;
 

@@ -16,10 +16,7 @@
 
         const token = () => page.querySelector('[name="__RequestVerificationToken"]')?.value || "";
         const setStatus = (message, isError = false) => {
-            const target = page.querySelector("[data-newsletter-load-status]");
-            target.textContent = message;
-            target.classList.toggle("text-danger", isError);
-            target.classList.toggle("text-muted", !isError);
+            ui.setStatus(page.querySelector("[data-newsletter-load-status]"), message, isError);
         };
 
         async function load() {

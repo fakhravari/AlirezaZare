@@ -144,6 +144,22 @@
         if (event.target.closest("[data-admin-page-reload]")) window.location.reload();
     });
 
+    function createElement(tag, text, className) {
+        const node = document.createElement(tag);
+        if (text != null) node.textContent = text;
+        if (className) node.className = className;
+        return node;
+    }
+
+    function setStatus(target, message, error = false, options = {}) {
+        if (!target) return;
+        target.textContent = message;
+        target.classList.toggle("text-danger", error);
+        target.classList.toggle("text-muted", !error);
+        if (options.compact) target.classList.add("small");
+        if (options.hideEmpty) target.classList.toggle("d-none", !message);
+    }
+
     const numberFormat = new Intl.NumberFormat("fa-IR");
     const labels = {
         id: "شناسه", code: "کد", name: "نام", englishName: "نام لاتین", brandName: "برند", logoPath: "مسیر لوگو", logoUrl: "نشانی لوگو",
@@ -161,7 +177,10 @@
         feature: "عنوان مشخصه", value: "مقدار", documents: "فایل‌های کالا", media: "رسانهٔ کالا",
         mainPath: "مسیر تصویر اصلی", cardPath: "مسیر تصویر کارت", thumbnailPath: "مسیر تصویر بندانگشتی",
         imageList: "تصاویر تکمیلی", videoList: "ویدئوها", detail: "توضیح", icon: "آیکن", sortOrder: "ترتیب",
-        isDefault: "تنوع پیش‌فرض", title: "عنوان", path: "مسیر فایل", src: "مسیر تصویر", thumbnail: "مسیر بندانگشتی"
+        isDefault: "تنوع پیش‌فرض", title: "عنوان", path: "مسیر فایل", src: "مسیر تصویر", thumbnail: "مسیر بندانگشتی",
+        accessories: "متعلقات", description: "توضیح", isRequired: "اجباری", displayDiscountPercent: "درصد تخفیف نمایشی",
+        unitHistory: "واحدهای غیرفعال", isBaseUnit: "واحد پایه", attributeDefinitions: "ویژگی‌ها", label: "عنوان", key: "کلید", values: "مقادیر", displayValue: "مقدار نمایشی", valueKey: "کلید مقدار",
+        salesOffers: "پیشنهادهای فروش", isEnabled: "فعال", currentPlanPrices: "قیمت‌های جاری", priceHistory: "سابقهٔ قیمت", priceVersionAmount: "مبلغ ثبت‌شده پیش از تخفیف (تومان)", accessoryName: "متعلقه", idChangedBy: "شناسهٔ کاربر", changeReason: "دلیل تغییر"
     };
 
     function notify(message, kind = "info") {
@@ -376,17 +395,7 @@
         }).format(date);
     }
 
-    function showRecord(title, record, options = {}) {
-        const modal = document.getElementById("admin-record-modal");
-        const body = modal?.querySelector("[data-admin-record-body]");
-        const heading = modal?.querySelector("#admin-record-title");
-        if (!modal || !body || !window.bootstrap?.Modal) {
-            notify("ابزار نمایش جزئیات در دسترس نیست.", "danger");
-            return;
-        }
-
-        modal.classList.toggle("admin-record-product", options.layout === "product");
-        heading.textContent = title;
+    function renderRecord(body, record, options = {}) {
         body.replaceChildren();
         const entries = Object.entries(record || {});
         if (!entries.length) {
@@ -394,7 +403,6 @@
             empty.className = "admin-record-empty";
             empty.textContent = "اطلاعاتی برای این رکورد ثبت نشده است.";
             body.append(empty);
-            window.bootstrap.Modal.getOrCreateInstance(modal).show();
             return;
         }
 
@@ -478,7 +486,9 @@
                     return ["http:", "https:"].includes(url.protocol) ? url.href : null;
                 } catch { return null; }
             };
-            const appendMedia = (path, label, video = false) => {
+            const primaryMedia = document.createElement("div"); primaryMedia.className = "admin-record-media-primary";
+            const additionalMedia = document.createElement("div"); additionalMedia.className = "admin-record-media-additional";
+            const appendMedia = (host, path, label, video = false) => {
                 if (!path) return;
                 const card = document.createElement("figure");
                 card.className = "admin-record-media-card";
@@ -498,19 +508,21 @@
                     const message = document.createElement("span"); message.textContent = "نشانی فایل معتبر نیست.";
                     card.append(message);
                 }
-                card.append(caption); gallery.append(card);
+                card.append(caption); host.append(card);
             };
-            appendMedia(media.mainPath, "تصویر اصلی");
-            appendMedia(media.cardPath, "تصویر کارت");
-            appendMedia(media.thumbnailPath, "تصویر بندانگشتی");
+            appendMedia(primaryMedia, media.mainPath, "تصویر اصلی");
+            appendMedia(primaryMedia, media.cardPath, "تصویر کارت");
+            appendMedia(primaryMedia, media.thumbnailPath, "تصویر بندانگشتی");
             if (Array.isArray(media.imageList)) media.imageList.forEach((image, index) => {
                 const path = typeof image === "string" ? image : image?.src || image?.Src || image?.path || image?.Path;
-                appendMedia(path, `تصویر تکمیلی ${numberFormat.format(index + 1)}`);
+                appendMedia(additionalMedia, path, `تصویر تکمیلی ${numberFormat.format(index + 1)}`);
             });
             if (Array.isArray(media.videoList)) media.videoList.forEach((video, index) => {
                 const path = typeof video === "string" ? video : video?.src || video?.Src || video?.path || video?.Path;
-                appendMedia(path, `ویدئو ${numberFormat.format(index + 1)}`, true);
+                appendMedia(additionalMedia, path, `ویدئو ${numberFormat.format(index + 1)}`, true);
             });
+            if (primaryMedia.childElementCount) gallery.append(primaryMedia);
+            if (additionalMedia.childElementCount) gallery.append(additionalMedia);
             if ((media.imageList && !Array.isArray(media.imageList)) || (media.videoList && !Array.isArray(media.videoList))) {
                 const message = document.createElement("p"); message.textContent = "فهرست رسانه‌های تکمیلی قابل خواندن نیست."; gallery.append(message);
             }
@@ -525,10 +537,11 @@
         const consumed = new Set();
         const appendSection = (sectionTitle, sectionEntries, compact = false) => {
             if (!sectionEntries.length) return;
-            const section = document.createElement("section"); section.className = "admin-record-section";
+            const section = document.createElement(options.accordion ? "details" : "section"); section.className = "admin-record-section";
+            if (options.accordion) section.open = true;
             if (compact) section.classList.add("admin-record-section-compact");
             if (options.layout === "product" && sectionEntries.some(([, value]) => value && typeof value === "object")) section.classList.add("admin-record-section-wide");
-            const sectionHeading = document.createElement("h3"); sectionHeading.className = "admin-record-section-title"; sectionHeading.textContent = sectionTitle;
+            const sectionHeading = document.createElement(options.accordion ? "summary" : "h3"); sectionHeading.className = "admin-record-section-title"; sectionHeading.textContent = sectionTitle;
             const productLayout = options.layout === "product";
             const grid = document.createElement(productLayout ? "table" : "dl");
             grid.className = productLayout ? "admin-record-table" : "admin-record-grid";
@@ -586,6 +599,19 @@
             appendSection(group.title, sectionEntries, group.compact);
         }
         appendSection("اطلاعات تکمیلی", entries.filter(([key]) => !consumed.has(key)));
+    }
+
+    function showRecord(title, record, options = {}) {
+        const modal = document.getElementById("admin-record-modal");
+        const body = modal?.querySelector("[data-admin-record-body]");
+        const heading = modal?.querySelector("#admin-record-title");
+        if (!modal || !body || !window.bootstrap?.Modal) {
+            notify("ابزار نمایش جزئیات در دسترس نیست.", "danger");
+            return;
+        }
+        modal.classList.toggle("admin-record-product", options.layout === "product");
+        heading.textContent = title;
+        renderRecord(body, record, options);
         window.bootstrap.Modal.getOrCreateInstance(modal).show();
     }
 
@@ -759,10 +785,13 @@
     });
 
     window.AdminUI = Object.freeze({
+        createElement,
+        setStatus,
         getJson,
         confirm: confirmAction,
         notify,
         showRecord,
+        renderRecord,
         getDataTable,
         destroyDataTable,
         refreshDataTable,

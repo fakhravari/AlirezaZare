@@ -26,6 +26,8 @@
 
 پنل MVC در `Admin/` از Areas استفاده می‌کند. Views و routeها را زیر `Admin/Areas/**/Controllers/` و `Views/` بیابید؛ APIهای JSON در `Admin/Areas/Store/Controllers/Api/` و `Admin/Areas/Warehouse/Controllers/Api/` کنار کنترلرهای همان حوزه قرار دارند؛ کنترلرهای مشترک به‌صورت مستقل در `Admin/Controllers/` می‌مانند. برای یافتن صفحه از منو/Controller و سپس manifest مالکیت UI استفاده کنید. فهرست حوزه‌ها در [admin README](../admin/README.md) است.
 
+جزئیات فقط‌خواندنی کالا در `/Store/Catalog/ProductDetails/{id}` با مجوز صفحهٔ محصولات باز می‌شود و داده را از API جزئیات کاتالوگ با همان مجوز دریافت می‌کند. این مجوز برای دریافت فهرست محصولات نیز کافی است؛ جزئیات داده و محدودیت دسترسی در [راهنمای مدیریت](../admin/README.md) است.
+
 مدیریت پیام‌های فرم تماس از `Store/Features?feature=contact-messages` و APIهای `/api/admin/store/contact-messages` عبور می‌کند؛ مجوزها به صفحهٔ `Store:Features:Index:contact-messages` و endpointهای همان API متصل‌اند.
 
 ارسال پیام مدیر به حساب مشتری در `Store/Features?feature=account-messages` و API `/api/admin/store/account-messages` انجام می‌شود. مالک پیام از هویت نشست مشتری در `/api/account/messages` تعیین می‌شود و مشتری در `/Profile/Messages` پیام‌های خودش را می‌بیند.

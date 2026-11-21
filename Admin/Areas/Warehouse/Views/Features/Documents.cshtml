@@ -61,7 +61,7 @@
                 <div class="row g-3">
                     <div class="col-md-6 col-xl-4">
                         <label class="form-label" for="document-type">نوع سند</label><select id="document-type" name="documentTypeId" class="form-select" required data-document-types></select>
-                        <small class="form-text" data-document-types-help hidden>ابتدا نوع سند مناسب را در <a href="/Warehouse/Features?feature=document-types">تعریف انواع اسناد</a> اضافه یا فعال کنید.@if (Model.FeatureId == "returns") { <text> نام نوع مرجوعی باید شامل «مرجوع» یا کد آن شامل return باشد.</text> }</small>
+                        <small class="form-text" data-document-types-help hidden>ابتدا نوع سند مناسب را در <a href="/Warehouse/Features?feature=document-types">تعریف انواع اسناد</a> اضافه یا فعال کنید.@if (Model.FeatureId == "returns") { <text> گزینهٔ «سند مرجوعی است» را برای آن فعال کنید.</text> }</small>
                     </div>
                     <div class="col-md-6 col-xl-4">
                         <label class="form-label" for="document-warehouse">انبار</label><select id="document-warehouse" name="warehouseId" class="form-select" required data-document-warehouse></select>

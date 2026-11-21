@@ -842,6 +842,32 @@ input[type="checkbox"][data-admin-switch]:disabled { cursor: not-allowed; opacit
     background: #fff;
 }
 
+.admin-category-node-row {
+    flex-wrap: wrap;
+    padding: .5rem;
+}
+
+.admin-category-node-info {
+    flex: 1 1 14rem;
+    min-width: 0;
+}
+
+.admin-category-node-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .25rem .75rem;
+    color: #647683;
+    font-size: .75rem;
+    overflow-wrap: anywhere;
+}
+
+.admin-category-node-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .35rem;
+    margin-inline-start: auto;
+}
+
 .admin-category-tree-wrap .table {
     margin: 0;
 }
@@ -1198,8 +1224,9 @@ input[type="checkbox"][data-admin-switch]:disabled { cursor: not-allowed; opacit
 }
 
 .modal#admin-record-modal.admin-record-product .modal-dialog {
-    max-width: min(1440px, calc(100vw - 2rem));
-    height: 75vh;
+    width: min(1600px, calc(100% - 2rem));
+    max-width: min(1600px, calc(100vw - 2rem));
+    height: 80vh;
 }
 
 #admin-record-modal.admin-record-product .modal-body {
@@ -1209,6 +1236,27 @@ input[type="checkbox"][data-admin-switch]:disabled { cursor: not-allowed; opacit
 
 .admin-record-product .admin-record-section {
     min-width: 0;
+}
+
+.admin-product-details-record {
+    display: grid;
+    gap: 1rem;
+}
+
+.admin-product-details-record .admin-record-section {
+    padding: 1rem;
+    border: 1px solid #dce5eb;
+    border-radius: .7rem;
+    background: #fff;
+}
+
+.admin-product-details-record .admin-record-section-title {
+    cursor: pointer;
+    padding: .25rem;
+}
+
+.admin-product-details-record .admin-record-section:not([open]) .admin-record-section-title {
+    margin-bottom: 0;
 }
 
 .admin-record-product .admin-record-table-scroll {
@@ -1257,8 +1305,22 @@ input[type="checkbox"][data-admin-switch]:disabled { cursor: not-allowed; opacit
 
 .admin-record-product .admin-record-media-gallery {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 175px), 1fr));
     gap: .75rem;
+}
+
+.admin-record-product .admin-record-media-primary,
+.admin-record-product .admin-record-media-additional {
+    display: grid;
+    gap: .75rem;
+    min-width: 0;
+}
+
+.admin-record-product .admin-record-media-primary {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.admin-record-product .admin-record-media-additional {
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 175px), 1fr));
 }
 
 .admin-record-product .admin-record-media-card {

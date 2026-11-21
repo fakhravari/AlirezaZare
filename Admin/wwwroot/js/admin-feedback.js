@@ -3,9 +3,9 @@
     const ui = window.AdminUI, initialized = new WeakSet(), number = new Intl.NumberFormat("fa-IR");
     if (!ui) return;
     let pageNumber = 1, requestSerial = 0;
-    const el = (tag, text, cls) => { const node = document.createElement(tag); if (text != null) node.textContent = text; if (cls) node.className = cls; return node; };
+    const el = ui.createElement;
     const statusText = value => ({ pending: "در انتظار بررسی", approved: "تأییدشده", rejected: "ردشده" })[value] || value;
-    function setStatus(page, message, error = false) { const target = page.querySelector("[data-feedback-status]"); target.textContent = message; target.classList.toggle("text-danger", error); target.classList.toggle("text-muted", !error); target.classList.add("small"); target.classList.toggle("d-none", !message); }
+    function setStatus(page, message, error = false) { ui.setStatus(page.querySelector("[data-feedback-status]"), message, error, { compact: true, hideEmpty: true }); }
     function token() { return document.querySelector('[data-feedback-form] [name="__RequestVerificationToken"]')?.value || ""; }
     async function request(url, method = "GET", body) { return ui.getJson(url, { method, headers: body ? { "Content-Type": "application/json", RequestVerificationToken: token() } : {}, ...(body ? { body: JSON.stringify(body) } : {}) }); }
     function openModal(item, page) {

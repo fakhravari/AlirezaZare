@@ -471,10 +471,17 @@
             const actions = document.createElement("td");
             actions.className = "admin-row-actions";
             if (page.dataset.adminSection !== "payment-institutions") {
-                const details = document.createElement("button");
-                details.type = "button";
+                const productDetails = page.dataset.adminSection === "products";
+                const details = document.createElement(productDetails ? "a" : "button");
+                if (productDetails) {
+                    details.href = `/Store/Catalog/ProductDetails/${encodeURIComponent(item.id)}`;
+                    details.target = "_blank";
+                    details.rel = "noopener noreferrer";
+                } else {
+                    details.type = "button";
+                    details.dataset.adminRecord = String(index);
+                }
                 details.className = "btn btn-xs btn-default";
-                details.dataset.adminRecord = String(index);
                 details.innerHTML = '<i class="fa fa-eye" aria-hidden="true"></i><span class="visually-hidden">نمایش جزئیات</span>';
                 details.setAttribute("aria-label", "نمایش جزئیات رکورد");
                 actions.append(details);
@@ -712,12 +719,11 @@
     }
 
     function renderCategoryTree(page, allRows, search = "") {
-        const body = page.querySelector("[data-admin-results]");
+        const tree = page.querySelector("[data-admin-results]");
         const empty = page.querySelector("[data-admin-empty]");
-        if (!body) return;
-
+        if (!tree) return;
         const byId = new Map(allRows.map(item => [String(item.id), item]));
-        const normalizedSearch = search.toLocaleLowerCase();
+        const normalizedSearch = search.trim().toLocaleLowerCase();
         const matches = new Set(allRows.filter(item => !normalizedSearch ||
             [item.id, item.name, item.englishName, item.slug].some(value => String(value || "").toLocaleLowerCase().includes(normalizedSearch)))
             .map(item => String(item.id)));
@@ -727,97 +733,86 @@
                 let parentId = byId.get(id)?.parentId;
                 const visited = new Set([id]);
                 while (parentId && byId.has(String(parentId)) && !visited.has(String(parentId))) {
-                    included.add(String(parentId));
-                    visited.add(String(parentId));
-                    parentId = byId.get(String(parentId)).parentId;
+                    const parent = String(parentId);
+                    included.add(parent); visited.add(parent);
+                    parentId = byId.get(parent).parentId;
                 }
             }
-        } else {
-            for (const item of allRows) included.add(String(item.id));
         }
-
         const childrenByParent = new Map();
         for (const item of allRows) {
             const id = String(item.id);
             if (!included.has(id)) continue;
-            const parentId = included.has(String(item.parentId)) ? String(item.parentId) : "";
-            if (!childrenByParent.has(parentId)) childrenByParent.set(parentId, []);
-            childrenByParent.get(parentId).push(item);
+            const parent = included.has(String(item.parentId)) ? String(item.parentId) : "";
+            if (!childrenByParent.has(parent)) childrenByParent.set(parent, []);
+            childrenByParent.get(parent).push(item);
         }
-        if (!page.__adminCategoryExpanded) {
-            page.__adminCategoryExpanded = new Set((childrenByParent.get("") || [])
-                .filter(item => (childrenByParent.get(String(item.id)) || []).length)
-                .map(item => String(item.id)));
-        }
-        if (normalizedSearch) {
+        page.__adminCategoryExpanded ||= new Set();
+        if (normalizedSearch && normalizedSearch !== page.__adminCategorySearch) {
             for (const id of matches) {
                 let parentId = byId.get(id)?.parentId;
-                while (parentId && byId.has(String(parentId))) {
-                    page.__adminCategoryExpanded.add(String(parentId));
-                    parentId = byId.get(String(parentId)).parentId;
+                const visited = new Set([id]);
+                while (parentId && byId.has(String(parentId)) && !visited.has(String(parentId))) {
+                    const parent = String(parentId);
+                    page.__adminCategoryExpanded.add(parent); visited.add(parent);
+                    parentId = byId.get(parent).parentId;
                 }
             }
         }
-
-        const flattened = [];
-        const seen = new Set();
-        const visit = (item, depth) => {
-            const id = String(item.id);
-            if (seen.has(id)) return;
-            seen.add(id);
-            const children = childrenByParent.get(id) || [];
-            flattened.push({ item, depth, hasChildren: children.length > 0 });
-            if (children.length && page.__adminCategoryExpanded.has(id))
-                children.forEach(child => visit(child, depth + 1));
+        page.__adminCategorySearch = normalizedSearch;
+        page.__adminRows = [];
+        tree.replaceChildren();
+        const visited = new Set();
+        const createList = () => {
+            const list = document.createElement("ul");
+            list.className = "admin-permission-list";
+            list.setAttribute("role", "group");
+            return list;
         };
-        (childrenByParent.get("") || []).forEach(item => visit(item, 0));
-        for (const item of allRows) if (included.has(String(item.id)) && !seen.has(String(item.id))) visit(item, 0);
-
-        page.__adminRows = flattened.map(entry => entry.item);
-        ui.destroyDataTable(page.querySelector("[data-admin-datatable]"));
-        body.replaceChildren();
-        flattened.forEach(({ item, depth, hasChildren }, index) => {
-            const row = document.createElement("tr");
-            row.className = "admin-category-row";
-            row.setAttribute("aria-level", String(depth + 1));
+        const appendNode = (item, list) => {
             const id = String(item.id);
-            if (hasChildren) row.setAttribute("aria-expanded", String(page.__adminCategoryExpanded.has(id)));
-
-            const idCell = document.createElement("td"); idCell.textContent = item.id;
-            const nameCell = document.createElement("td");
-            const label = document.createElement("div"); label.className = "admin-category-tree-label";
-            label.style.paddingInlineStart = `${depth * 1.35}rem`;
-            if (hasChildren) {
+            if (visited.has(id)) return;
+            visited.add(id);
+            const index = page.__adminRows.push(item) - 1;
+            const node = document.createElement("li");
+            node.className = "admin-permission-node";
+            node.setAttribute("role", "treeitem");
+            const row = document.createElement("div");
+            row.className = "admin-permission-row admin-category-node-row";
+            const children = (childrenByParent.get(id) || []).filter(child => !visited.has(String(child.id)));
+            const childList = children.length ? createList() : null;
+            if (childList) {
                 const toggle = document.createElement("button");
-                toggle.type = "button"; toggle.className = "admin-category-toggle";
-                toggle.setAttribute("aria-expanded", String(page.__adminCategoryExpanded.has(id)));
-                toggle.setAttribute("aria-label", `${page.__adminCategoryExpanded.has(id) ? "بستن" : "بازکردن"} زیرشاخه‌های ${item.name}`);
-                toggle.append(Object.assign(document.createElement("span"), { className: "admin-category-chevron", textContent: "›" }));
+                toggle.type = "button"; toggle.className = "admin-permission-toggle";
+                const updateToggle = () => {
+                    const open = page.__adminCategoryExpanded.has(id);
+                    toggle.setAttribute("aria-expanded", String(open));
+                    toggle.setAttribute("aria-label", `${open ? "بستن" : "بازکردن"} زیرشاخه‌های ${item.name}`);
+                    node.setAttribute("aria-expanded", String(open));
+                    childList.hidden = !open;
+                };
+                const chevron = document.createElement("span"); chevron.className = "admin-permission-chevron"; chevron.textContent = "›"; toggle.append(chevron);
                 toggle.addEventListener("click", () => {
                     if (page.__adminCategoryExpanded.has(id)) page.__adminCategoryExpanded.delete(id);
                     else page.__adminCategoryExpanded.add(id);
-                    renderCategoryTree(page, page.__adminCategoryData || allRows, queryValue(page.querySelector("[data-admin-filter]"), "q"));
+                    updateToggle();
                 });
-                label.append(toggle);
+                updateToggle(); row.append(toggle);
             } else {
-                label.append(Object.assign(document.createElement("span"), { className: "admin-category-toggle-spacer" }));
+                const spacer = document.createElement("span"); spacer.className = "admin-permission-toggle-spacer"; row.append(spacer);
             }
-            label.append(Object.assign(document.createElement("span"), { className: "admin-category-name", textContent: item.name || "—" }));
-            nameCell.append(label);
-
-            const cells = [idCell, nameCell, item.englishName, item.parentId, item.slug, item.isActive ? "منتشر" : "پیش‌نویس"];
-            for (const value of cells.slice(2)) {
-                const cell = document.createElement("td");
-                cell.textContent = value == null || value === "" ? "—" : String(value);
-                row.append(cell);
+            const info = document.createElement("div"); info.className = "admin-category-node-info";
+            const name = document.createElement("strong"); name.className = "admin-permission-name"; name.textContent = item.name || "—";
+            const meta = document.createElement("div"); meta.className = "admin-category-node-meta";
+            for (const value of [item.id, item.englishName, item.slug, item.isActive ? "منتشر" : "پیش‌نویس"]) {
+                if (!value) continue;
+                const part = document.createElement("span"); part.textContent = value; meta.append(part);
             }
-            row.prepend(idCell, nameCell);
-
-            const actions = document.createElement("td"); actions.className = "admin-row-actions";
+            info.append(name, meta); row.append(info);
+            const actions = document.createElement("div"); actions.className = "admin-row-actions admin-category-node-actions";
             const details = document.createElement("button"); details.type = "button"; details.className = "btn btn-xs btn-default";
-            details.dataset.adminRecord = String(index); details.setAttribute("aria-label", "نمایش جزئیات رکورد");
-            details.innerHTML = '<i class="fa fa-eye" aria-hidden="true"></i><span class="visually-hidden">نمایش جزئیات</span>';
-            actions.append(details);
+            details.dataset.adminRecord = String(index); details.setAttribute("aria-label", `نمایش جزئیات ${item.name}`);
+            details.innerHTML = '<i class="fa fa-eye" aria-hidden="true"></i><span class="visually-hidden">نمایش جزئیات</span>'; actions.append(details);
             if (page.dataset.canEditCategory === "true") {
                 const content = document.createElement("button"); content.type = "button"; content.className = "btn btn-xs btn-default ms-1";
                 content.dataset.categoryContent = String(index); content.textContent = "محتوای دسته"; ui.withIcon(content, "fa-file-lines"); actions.append(content);
@@ -826,20 +821,22 @@
                 const edit = document.createElement("button"); edit.type = "button"; edit.className = "btn btn-xs btn-default ms-1";
                 edit.dataset.categoryEdit = String(index); setIconAction(edit, "ویرایش دسته", "fa-pen-to-square"); actions.append(edit);
                 const statusButton = document.createElement("button"); statusButton.type = "button"; statusButton.className = "btn btn-xs btn-default ms-1";
-                statusButton.dataset.catalogStatus = String(index);
-                statusButton.dataset.adminConfirm = `دستهٔ «${item.name}» ${item.isActive ? "از انتشار خارج" : "منتشر"} شود؟`;
-                setIconAction(statusButton, item.isActive ? "خروج از انتشار" : "انتشار", item.isActive ? "fa-eye-slash" : "fa-paper-plane");
-                actions.append(statusButton);
+                statusButton.dataset.catalogStatus = String(index); statusButton.dataset.adminConfirm = `دستهٔ «${item.name}» ${item.isActive ? "از انتشار خارج" : "منتشر"} شود؟`;
+                setIconAction(statusButton, item.isActive ? "خروج از انتشار" : "انتشار", item.isActive ? "fa-eye-slash" : "fa-paper-plane"); actions.append(statusButton);
             }
-            row.append(actions);
-            body.append(row);
-        });
-        empty?.classList.toggle("d-none", flattened.length > 0);
+            row.append(actions); node.append(row);
+            if (childList) { children.forEach(child => appendNode(child, childList)); if (childList.children.length) node.append(childList); }
+            list.append(node);
+        };
+        const root = createList();
+        (childrenByParent.get("") || []).forEach(item => appendNode(item, root));
+        for (const item of allRows) if (included.has(String(item.id)) && !visited.has(String(item.id))) appendNode(item, root);
+        tree.append(root);
+        empty?.classList.toggle("d-none", included.size > 0);
         const pagination = page.querySelector("[data-admin-pagination]");
         if (pagination) pagination.hidden = true;
         const count = page.querySelector("[data-admin-count]");
-        if (count) count.textContent = `نمایش ${ui.formatNumber(flattened.length)} از ${ui.formatNumber(allRows.length)} دسته`;
-        ui.refreshDataTable(page.querySelector("[data-admin-datatable]"));
+        if (count) count.textContent = `${ui.formatNumber(included.size)} از ${ui.formatNumber(allRows.length)} دسته`;
     }
 
     function attributeGroup(item) {
@@ -1439,6 +1436,51 @@
         if (page.dataset.adminPage === "orders") return loadOrders(page, Number(page.dataset.adminPageNumber || "1"), announce);
     }
 
+    async function loadProductDetails(page) {
+        const status = page.querySelector("[data-product-details-status]");
+        const body = page.querySelector("[data-product-details-record]");
+        try {
+            const product = await ui.getJson(`/api/admin/store/catalog/products/${encodeURIComponent(page.dataset.productId)}/details`);
+            if (!page.isConnected) return;
+            const parseJson = value => {
+                if (!value || typeof value !== "string") return value || null;
+                try { return JSON.parse(value); } catch { return value; }
+            };
+            const variants = (product.variants || []).map(variant => ({ ...variant, attributes: variant.attributes || [] }));
+            const media = product.media ? { ...product.media, imageList: parseJson(product.media.imageList), videoList: parseJson(product.media.videoList) } : null;
+            const record = { ...product, variants, media };
+            for (const key of ["accessories", "unitHistory", "attributeDefinitions", "salesOffers", "currentPlanPrices", "priceHistory"])
+                if (record[key] == null) delete record[key];
+            ui.renderRecord(body, record, {
+                layout: "product", accordion: true,
+                groups: [
+                    { title: "مشخصات کالا", keys: ["name", "englishName", "code", "productKey", "brandName", "categoryName", "unitName", "slug", "badge"] },
+                    { title: "واحدهای فرعی و ضرایب تبدیل", keys: ["secondaryUnits"] },
+                    { title: "قیمت و شرایط خرید", keys: ["priceAmount", "discountPercent", "maxPurchaseQuantity"] },
+                    { title: "وضعیت و زمان", keys: ["isStoreEnabled", "isWarehouseEnabled", "createdAtUtc", "updatedAtUtc"] },
+                    { title: "تنوع‌های کالا", keys: ["variants"] },
+                    { title: "ویژگی‌ها و مقادیر قابل انتخاب", keys: ["attributeDefinitions"] },
+                    { title: "متعلقات و خدمات", keys: ["accessories"] },
+                    { title: "پیشنهادهای طرح فروش", keys: ["salesOffers"] },
+                    { title: "قیمت‌های جاری طرح‌های فروش", keys: ["currentPlanPrices"] },
+                    { title: "تاریخچهٔ قیمت (۲۰۰ مورد اخیر)", keys: ["priceHistory"] },
+                    { title: "تاریخچهٔ واحدهای غیرفعال", keys: ["unitHistory"] },
+                    { title: "موجودی انبار و طرح فروش", keys: ["stockByWarehouseAndPlan"] },
+                    { title: "مشخصات فنی", keys: ["specifications"] },
+                    { title: "مزیت‌های کالا", keys: ["benefits"] },
+                    { title: "رسانه و تصاویر", keys: ["media"] },
+                    { title: "فایل‌های کالا", keys: ["documents"] },
+                    { title: "شناسه‌های سیستمی", keys: ["id", "idBrand", "idCategory", "idBaseUnit"] }
+                ]
+            });
+            status.textContent = "";
+        } catch (error) {
+            if (!page.isConnected) return;
+            status.textContent = error.message || "دریافت جزئیات کالا ناموفق بود.";
+            status.classList.add("text-danger");
+        }
+    }
+
     function initialize(root = document) {
         root.querySelectorAll("[data-media-library]").forEach(page => {
             if (page.dataset.mediaLibraryInitialized === "true") return;
@@ -1450,6 +1492,7 @@
             if (page.dataset.adminInitialized === "true") return;
             page.dataset.adminInitialized = "true";
             if (page.dataset.adminPage === "catalog") void loadCatalog(page, 1, false);
+            else if (page.dataset.adminPage === "product-details") void loadProductDetails(page);
             else if (page.dataset.adminPage === "warehouses") void loadWarehouses(page, false);
             else if (page.dataset.adminPage === "stock") void loadStock(page, 1, false);
             else if (page.dataset.adminPage === "orders") void loadOrders(page, 1, false);
@@ -1895,41 +1938,6 @@
                         "تاریخچهٔ ارسال": history.map(entry => `${entry.PreviousStatus} ← ${entry.NewStatus}، مدیر ${entry.ActorUserKey}، ${ui.formatDateTime(entry.ChangedAtUtc)}`).join(" ؛ ") || "تغییری ثبت نشده است"
                     });
                 }).catch(error => ui.notify(error.message || "دریافت جزئیات سفارش ناموفق بود.", "danger"))
-                    .finally(() => { detailButton.disabled = false; });
-            } else if (item && page.dataset.adminSection === "products") {
-                detailButton.disabled = true;
-                void ui.getJson(`/api/admin/store/catalog/products/${encodeURIComponent(item.id)}/details`).then(product => {
-                    if (!page.isConnected) return;
-                    const parseJson = value => {
-                        if (!value) return null;
-                        try { return JSON.parse(value); } catch { return value; }
-                    };
-                    const variants = (product.variants || []).map(variant => ({
-                        ...variant,
-                        attributes: variant.attributes || []
-                    }));
-                    const media = product.media ? {
-                        ...product.media,
-                        imageList: parseJson(product.media.imageList),
-                        videoList: parseJson(product.media.videoList)
-                    } : null;
-                    ui.showRecord("جزئیات کامل کالا", { ...product, variants, media }, {
-                        layout: "product",
-                        groups: [
-                            { title: "مشخصات کالا", compact: true, keys: ["name", "englishName", "code", "productKey", "brandName", "categoryName", "unitName", "slug", "badge"] },
-                            { title: "واحدهای فرعی و ضرایب تبدیل", keys: ["secondaryUnits"] },
-                            { title: "قیمت و شرایط خرید", compact: true, keys: ["priceAmount", "discountPercent", "maxPurchaseQuantity"] },
-                            { title: "وضعیت و زمان", compact: true, keys: ["isStoreEnabled", "isWarehouseEnabled", "createdAtUtc", "updatedAtUtc"] },
-                            { title: "تنوع‌های کالا", keys: ["variants"] },
-                            { title: "موجودی انبار و طرح فروش", keys: ["stockByWarehouseAndPlan"] },
-                            { title: "مشخصات فنی", keys: ["specifications"] },
-                            { title: "مزیت‌های کالا", keys: ["benefits"] },
-                            { title: "رسانه و تصاویر", keys: ["media"] },
-                            { title: "فایل‌های کالا", keys: ["documents"] },
-                            { title: "شناسه‌های سیستمی", compact: true, keys: ["id", "idBrand", "idCategory", "idBaseUnit"] }
-                        ]
-                    });
-                }).catch(error => ui.notify(error.message || "دریافت جزئیات کالا ناموفق بود.", "danger"))
                     .finally(() => { detailButton.disabled = false; });
             } else if (item && page.dataset.adminPage === "customers") {
                 detailButton.disabled = true;
