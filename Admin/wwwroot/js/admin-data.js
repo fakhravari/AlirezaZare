@@ -1531,7 +1531,18 @@
                 form.reset(); form.elements.originalKey.value = category?.categoryKey || "";
                 form.elements.key.value = category?.categoryKey || ""; form.elements.key.readOnly = !!category;
                 form.elements.nameFa.value = category?.nameFa || ""; form.elements.nameEn.value = category?.nameEn || "";
-                form.elements.parentId.replaceChildren(new Option("بدون والد", ""), ...nodes.map(node => new Option(JSON.parse(node.pathJson).join(" / "), String(node.id))));
+                const nodesById = new Map(nodes.map(node => [String(node.id), node]));
+                const categoryPath = node => {
+                    const names = [], visited = new Set();
+                    let current = node;
+                    while (current && !visited.has(String(current.id))) {
+                        visited.add(String(current.id));
+                        names.push(current.nameFa);
+                        current = nodesById.get(String(current.idParentCategory));
+                    }
+                    return names.reverse().join(" / ");
+                };
+                form.elements.parentId.replaceChildren(new Option("بدون والد", ""), ...nodes.map(node => new Option(categoryPath(node), String(node.id))));
                 form.elements.parentId.value = category?.idParentCategory == null ? "" : String(category.idParentCategory);
                 form.elements.parentId.disabled = !!category;
                 window.bootstrap?.Modal?.getOrCreateInstance(document.getElementById("category-editor-modal")).show();
