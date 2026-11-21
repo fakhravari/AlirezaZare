@@ -226,11 +226,12 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
                                    balance.UpdatedAtUtc
                                }).ToListAsync(cancellationToken);
         var benefits = await db.StoreProductBenefits.AsNoTracking().Where(x => x.IdProduct == id).OrderBy(x => x.SortOrder).ThenBy(x => x.Id).Select(x => new { x.Title, x.Detail, x.Icon, x.SortOrder, x.IsActive }).ToListAsync(cancellationToken);
-        var specifications = await (from value in db.StoreProductSpecificationValues.AsNoTracking()
-                                    join feature in db.StoreSpecificationFeatures.AsNoTracking() on value.IdSpecificationFeature equals feature.Id
-                                    where value.IdProduct == id
-                                    orderby feature.SortOrder
-                                    select new { Feature = feature.Label, value.Value }).ToListAsync(cancellationToken);
+        var specifications = await (from selected in db.StoreProductCatalogFeatureValues.AsNoTracking()
+                                    join feature in db.StoreCatalogFeatures.AsNoTracking() on selected.IdFeature equals feature.Id
+                                    join value in db.StoreCatalogFeatureValues.AsNoTracking() on selected.IdFeatureValue equals value.Id
+                                    where selected.IdProduct == id && feature.IsActive && value.IsActive
+                                    orderby feature.Name, value.Name
+                                    select new { Feature = feature.Name, Value = value.Name }).ToListAsync(cancellationToken);
         var assets = await db.StoreProductAssets.AsNoTracking().Where(x => x.IdProduct == id).OrderBy(x => x.SortOrder).ThenBy(x => x.Id).ToListAsync(cancellationToken);
         var documents = assets.Where(x => x.IdMediaType == ProductMediaTypes.Document).OrderByDescending(x => x.CreatedAtUtc).Select(x => new { x.Title, x.Path, x.CreatedAtUtc }).ToList();
         var media = assets.FirstOrDefault(x => x.IdMediaType == ProductMediaTypes.Image && x.IsDefault);
@@ -338,6 +339,19 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
 
         var product = await db.Products.SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
         if (product is null) return NotFound();
+        if (product.IdCategory != input.CategoryId)
+        {
+            var nodes = await db.StoreCategories.AsNoTracking().Select(x => new { x.Id, x.IdParentCategory }).ToDictionaryAsync(x => x.Id, cancellationToken);
+            var ancestors = new HashSet<long>();
+            long? current = input.CategoryId;
+            while (current is long categoryId && nodes.TryGetValue(categoryId, out var node) && ancestors.Add(categoryId)) current = node.IdParentCategory;
+            if (current is not null) return Conflict(new { title = "ساختار دستهٔ انتخاب‌شده معتبر نیست." });
+            var allowed = (await db.StoreCategoryCatalogFeatures.Where(x => ancestors.Contains(x.IdCategory)).Select(x => x.IdFeature).Distinct().ToListAsync(cancellationToken)).ToHashSet();
+            var displayFeatures = await db.StoreProductCatalogFeatureValues.Where(x => x.IdProduct == id).Select(x => x.IdFeature).ToListAsync(cancellationToken);
+            var variantFeatures = await (from selection in db.StoreVariantCatalogFeatureValues join variant in db.ProductVariants on selection.IdProductVariant equals variant.Id where variant.IdProduct == id select selection.IdFeature).ToListAsync(cancellationToken);
+            if (displayFeatures.Concat(variantFeatures).Any(featureId => !allowed.Contains(featureId)))
+                return Conflict(new { title = "دستهٔ جدید باید همهٔ ویژگی‌های ثبت‌شدهٔ کالا و تنوع‌های آن را داشته باشد." });
+        }
         var unitLinks = await db.WarehouseProductUnits.Where(x => x.IdProduct == id).ToListAsync(cancellationToken);
         long? currentBaseUnitId = unitLinks.Where(x => x.IsBaseUnit && x.IsActive).Select(x => (long?)x.IdUnit).SingleOrDefault();
         if (!currentBaseUnitId.HasValue) return Conflict(new { title = "واحد پایهٔ فعال برای کالا تعریف نشده است." });

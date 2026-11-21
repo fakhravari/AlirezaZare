@@ -13,6 +13,195 @@
     let accessoryRequest = 0;
     let productUnitConversionRowId = 0;
 
+    async function loadCatalogFeatureManager(page) {
+        const host = page.querySelector("[data-catalog-feature-manager]");
+        if (!host) return;
+        const status = host.querySelector("[data-feature-manager-status]");
+        status.textContent = "در حال دریافت مرجع ویژگی‌ها…";
+        try {
+            const features = await ui.getJson("/api/admin/store/catalog-features");
+            for (const kind of [1, 2]) {
+                const list = host.querySelector(`[data-reference-feature-list="${kind}"]`);
+                list.replaceChildren();
+                const rows = features.filter(feature => feature.kind === kind);
+                if (!rows.length) { const empty = document.createElement("p"); empty.className = "text-muted small"; empty.textContent = "هنوز ویژگی‌ای تعریف نشده است."; list.append(empty); }
+                for (const feature of rows) {
+                    const card = document.createElement("article"); card.className = "border rounded p-2";
+                    const header = document.createElement("div"); header.className = "d-flex align-items-center justify-content-between gap-2";
+                    const title = document.createElement("strong"); title.textContent = feature.name;
+                    const rename = document.createElement("button"); rename.type = "button"; rename.className = "btn btn-sm btn-outline-secondary";
+                    rename.dataset.referenceRenameFeature = String(feature.id); rename.dataset.currentName = feature.name; rename.textContent = "ویرایش نام";
+                    header.append(title, rename); card.append(header);
+                    const values = document.createElement("div"); values.className = "d-flex flex-wrap gap-1 my-2";
+                    for (const value of feature.values || []) {
+                        const edit = document.createElement("button"); edit.type = "button"; edit.className = "btn btn-sm btn-light";
+                        edit.dataset.referenceRenameValue = String(value.id); edit.dataset.referenceFeatureId = String(feature.id);
+                        edit.dataset.currentName = value.name; edit.textContent = value.isActive ? value.name : `${value.name} (غیرفعال)`; edit.disabled = !value.isActive;
+                        values.append(edit);
+                    }
+                    if (!(feature.values || []).length) { const emptyValues = document.createElement("span"); emptyValues.className = "text-muted small"; emptyValues.textContent = "مقداری ثبت نشده است."; values.append(emptyValues); }
+                    card.append(values);
+                    if (feature.isActive) {
+                        const form = document.createElement("form"); form.className = "d-flex gap-2"; form.dataset.referenceValueCreate = String(feature.id);
+                        const input = document.createElement("input"); input.className = "form-control form-control-sm"; input.name = "name"; input.maxLength = kind === 1 ? 100 : 300; input.placeholder = "مقدار جدید"; input.required = true;
+                        const button = document.createElement("button"); button.className = "btn btn-sm btn-outline-primary text-nowrap"; button.type = "submit"; button.textContent = "افزودن مقدار";
+                        form.append(input, button); card.append(form);
+                    }
+                    list.append(card);
+                }
+            }
+            status.textContent = "مرجع ویژگی‌ها به‌روز است.";
+        } catch (error) { status.textContent = error.message || "دریافت مرجع ویژگی‌ها ناموفق بود."; status.classList.add("text-danger"); }
+    }
+
+    async function loadCategoryFeatures(form, preserveSelection = false) {
+        const host = form.querySelector("[data-category-features]");
+        if (!host) return;
+        const previous = preserveSelection ? new Set([...host.querySelectorAll("[data-feature-choice]:checked")].filter(input => !input.disabled || input.dataset.featureDirect === "true").map(input => input.value)) : null;
+        const key = form.elements.key.value;
+        const request = host.__featureRequest = (host.__featureRequest || 0) + 1;
+        const message = host.querySelector("[data-feature-message]");
+        const save = host.querySelector("[data-feature-save]");
+        save.disabled = true;
+        message.textContent = "در حال دریافت ویژگی‌ها...";
+        try {
+            const [features, assigned] = await Promise.all([
+                ui.getJson("/api/admin/store/catalog-features"),
+                ui.getJson(`/api/admin/store/catalog-features/categories/${encodeURIComponent(key)}`)
+            ]);
+            if (request !== host.__featureRequest || form.elements.key.value !== key) return;
+            const direct = previous || new Set(assigned.direct.map(String));
+            const inherited = new Set(assigned.inherited.map(String));
+            const groups = host.querySelector("[data-feature-groups]");
+            const select = host.querySelector("[data-feature-value-owner]");
+            groups.replaceChildren(); select.replaceChildren(new Option("انتخاب ویژگی", ""));
+            for (const [kind, title] of [[1, "تنوع قیمتی"], [2, "ویژگی نمایشی"]]) {
+                const section = document.createElement("section"); section.className = "border rounded p-2 mb-2";
+                const heading = document.createElement("h4"); heading.className = "fs-6"; heading.textContent = title; section.append(heading);
+                for (const feature of features.filter(item => item.kind === kind && item.isActive)) {
+                    const id = String(feature.id);
+                    select.append(new Option(`${title} — ${feature.name}`, id));
+                    const row = document.createElement("div"); row.className = "d-block mb-2";
+                    const input = document.createElement("input"); input.type = "checkbox"; input.className = "form-check-input ms-2";
+                    input.dataset.featureChoice = ""; input.value = id; input.checked = direct.has(id) || inherited.has(id); input.disabled = inherited.has(id);
+                    input.dataset.featureDirect = String(direct.has(id));
+                    const name = document.createElement("label"); name.htmlFor = `category-feature-${id}`; input.id = name.htmlFor; name.textContent = feature.name + (inherited.has(id) ? " (ارث‌برده از دستهٔ والد)" : "");
+                    const values = document.createElement("small"); values.className = "text-muted d-block";
+                    const rename = document.createElement("button"); rename.type = "button"; rename.className = "btn btn-xs btn-outline-secondary me-2";
+                    rename.dataset.featureRename = id; rename.dataset.featureCurrentName = feature.name; rename.textContent = "ویرایش نام";
+                    const activeValues = (feature.values || []).filter(value => value.isActive);
+                    if (!activeValues.length) values.textContent = "هنوز مقداری ثبت نشده است.";
+                    for (const value of activeValues) {
+                        const editValue = document.createElement("button"); editValue.type = "button"; editValue.className = "btn btn-xs btn-outline-secondary m-1";
+                        editValue.dataset.featureRenameValue = String(value.id); editValue.dataset.featureOwner = id;
+                        editValue.dataset.featureCurrentName = value.name; editValue.textContent = `ویرایش ${value.name}`; values.append(editValue);
+                    }
+                    row.append(input, name, rename, values); section.append(row);
+                }
+                groups.append(section);
+            }
+            message.textContent = ""; save.disabled = false;
+        } catch (error) {
+            if (request !== host.__featureRequest || form.elements.key.value !== key) return;
+            host.querySelector("[data-feature-groups]").replaceChildren();
+            message.textContent = error.message || "دریافت ویژگی‌ها ناموفق بود.";
+        }
+    }
+
+    document.addEventListener("click", event => {
+        const productButton = event.target.closest("[data-product-features]");
+        if (productButton) {
+            const page = productButton.closest('[data-admin-section="products"]');
+            const product = page?.__adminRows?.[Number(productButton.dataset.productFeatures)];
+            const form = document.querySelector("[data-product-features-form]");
+            if (!product || !form) return;
+            const id = String(product.id);
+            form.elements.productId.value = id;
+            form.querySelector("[data-product-features-name]").textContent = product.name;
+            const status = form.querySelector("[data-product-features-status]");
+            const choices = form.querySelector("[data-product-features-choices]");
+            const save = form.querySelector('[type="submit"]');
+            choices.replaceChildren(); save.disabled = true; status.textContent = "در حال دریافت ویژگی‌ها...";
+            window.bootstrap?.Modal?.getOrCreateInstance(document.getElementById("product-features-modal")).show();
+            void Promise.all([ui.getJson("/api/admin/store/catalog-features"), ui.getJson(`/api/admin/store/catalog-features/products/${encodeURIComponent(id)}`)])
+                .then(([features, productData]) => {
+                    if (form.elements.productId.value !== id) return;
+                    const allowed = new Set(productData.featureIds.map(String));
+                    const selected = new Set(productData.selections.map(item => `${item.idFeature}:${item.idFeatureValue}`));
+                    for (const feature of features.filter(item => item.kind === 2 && item.isActive && allowed.has(String(item.id)))) {
+                        const fieldset = document.createElement("fieldset"); fieldset.className = "border rounded p-2 mb-2";
+                        const legend = document.createElement("legend"); legend.className = "float-none w-auto px-1 fs-6"; legend.textContent = feature.name; fieldset.append(legend);
+                        for (const value of feature.values.filter(item => item.isActive)) {
+                            const label = document.createElement("label"); label.className = "d-block";
+                            const input = document.createElement("input"); input.type = "checkbox"; input.className = "form-check-input ms-2";
+                            input.dataset.productFeature = String(feature.id); input.value = String(value.id);
+                            input.checked = selected.has(`${feature.id}:${value.id}`);
+                            label.append(input, document.createTextNode(value.name)); fieldset.append(label);
+                        }
+                        choices.append(fieldset);
+                    }
+                    status.textContent = choices.children.length ? "" : "برای دستهٔ کالا ویژگی نمایشی تعریف نشده است.";
+                    save.disabled = false;
+                }).catch(error => { if (form.elements.productId.value === id) status.textContent = error.message || "دریافت ویژگی‌های کالا ناموفق بود."; });
+            return;
+        }
+        const button = event.target.closest("[data-feature-create], [data-feature-value-create], [data-feature-save], [data-feature-rename], [data-feature-rename-value]");
+        if (!button) return;
+        const form = button.closest("[data-category-content-form]");
+        const host = button.closest("[data-category-features]");
+        if (!form || !host || button.disabled) return;
+        const token = form.querySelector('[name="__RequestVerificationToken"]')?.value || "";
+        let url = "/api/admin/store/catalog-features";
+        let method = "POST";
+        let body;
+        if (button.hasAttribute("data-feature-rename") || button.hasAttribute("data-feature-rename-value")) {
+            const name = window.prompt("نام جدید را وارد کنید:", button.dataset.featureCurrentName || "");
+            if (name === null) return;
+            body = { name: name.trim() };
+            if (!body.name) { ui.notify("نام را وارد کنید.", "danger"); return; }
+            const id = button.dataset.featureRename || button.dataset.featureOwner;
+            url += `/${encodeURIComponent(id)}`;
+            if (button.dataset.featureRenameValue) url += `/values/${encodeURIComponent(button.dataset.featureRenameValue)}`;
+            method = "PUT";
+        } else if (button.hasAttribute("data-feature-create")) {
+            body = { name: host.querySelector("[data-feature-name]").value.trim(), kind: Number(host.querySelector("[data-feature-kind]").value) };
+            if (!body.name) { ui.notify("نام ویژگی را وارد کنید.", "danger"); return; }
+        } else if (button.hasAttribute("data-feature-value-create")) {
+            const id = host.querySelector("[data-feature-value-owner]").value;
+            body = { name: host.querySelector("[data-feature-value-name]").value.trim() };
+            if (!id || !body.name) { ui.notify("ویژگی و نام مقدار را وارد کنید.", "danger"); return; }
+            url += `/${encodeURIComponent(id)}/values`;
+        } else {
+            url += `/categories/${encodeURIComponent(form.elements.key.value)}`; method = "PUT";
+            body = { featureIds: [...host.querySelectorAll("[data-feature-choice]:checked")].filter(input => !input.disabled || input.dataset.featureDirect === "true").map(input => Number(input.value)) };
+        }
+        button.disabled = true;
+        void ui.getJson(url, { method, headers: { "Content-Type": "application/json", RequestVerificationToken: token }, body: JSON.stringify(body) })
+            .then(async () => {
+                if (button.hasAttribute("data-feature-create")) host.querySelector("[data-feature-name]").value = "";
+                if (button.hasAttribute("data-feature-value-create")) host.querySelector("[data-feature-value-name]").value = "";
+                ui.notify("اطلاعات ویژگی ذخیره شد.", "success");
+                await loadCategoryFeatures(form, !button.hasAttribute("data-feature-save"));
+            }).catch(error => ui.notify(error.message || "ذخیرهٔ ویژگی ناموفق بود.", "danger"))
+            .finally(() => { button.disabled = false; });
+    });
+
+    document.addEventListener("submit", event => {
+        const form = event.target.closest("[data-product-features-form]");
+        if (!form) return;
+        event.preventDefault();
+        const button = form.querySelector('[type="submit"]');
+        if (button.disabled) return;
+        const id = form.elements.productId.value;
+        const selections = [...form.querySelectorAll("[data-product-feature]:checked")].map(input => ({ featureId: Number(input.dataset.productFeature), valueId: Number(input.value) }));
+        const token = form.querySelector('[name="__RequestVerificationToken"]')?.value || "";
+        button.disabled = true;
+        void ui.getJson(`/api/admin/store/catalog-features/products/${encodeURIComponent(id)}`, { method: "PUT", headers: { "Content-Type": "application/json", RequestVerificationToken: token }, body: JSON.stringify({ selections }) })
+            .then(result => { ui.notify(result.message, "success"); window.bootstrap?.Modal?.getInstance(document.getElementById("product-features-modal"))?.hide(); })
+            .catch(error => ui.notify(error.message || "ذخیرهٔ ویژگی‌های کالا ناموفق بود.", "danger"))
+            .finally(() => { button.disabled = false; });
+    });
+
     function updateProductUnitConversionOptions(form) {
         const state = form.__productUnitConversionState;
         if (!state) return;
@@ -531,6 +720,10 @@
                 edit.type = "button"; edit.className = "btn btn-xs btn-default";
                 edit.dataset.productEdit = String(index); setIconAction(edit, "ویرایش کالا", "fa-pen-to-square");
                 actions.append(edit);
+                const features = document.createElement("button");
+                features.type = "button"; features.className = "btn btn-xs btn-default ms-1";
+                features.dataset.productFeatures = String(index); setIconAction(features, "ویژگی‌های نمایشی کالا", "fa-list-check");
+                actions.append(features);
                 const benefits = document.createElement("button");
                 benefits.type = "button"; benefits.className = "btn btn-xs btn-default ms-1";
                 benefits.dataset.productBenefits = String(index); setIconAction(benefits, "مدیریت مزیت‌های کالا", "fa-gift");
@@ -1491,7 +1684,10 @@
         pages.forEach(page => {
             if (page.dataset.adminInitialized === "true") return;
             page.dataset.adminInitialized = "true";
-            if (page.dataset.adminPage === "catalog") void loadCatalog(page, 1, false);
+            if (page.dataset.adminPage === "catalog") {
+                void loadCatalog(page, 1, false);
+                if (page.dataset.adminSection === "attributes") void loadCatalogFeatureManager(page);
+            }
             else if (page.dataset.adminPage === "product-details") void loadProductDetails(page);
             else if (page.dataset.adminPage === "warehouses") void loadWarehouses(page, false);
             else if (page.dataset.adminPage === "stock") void loadStock(page, 1, false);
@@ -1505,6 +1701,28 @@
     }
 
     document.addEventListener("click", event => {
+        const manager = event.target.closest("[data-catalog-feature-manager]");
+        const refreshFeatures = event.target.closest("[data-feature-manager-refresh]");
+        if (refreshFeatures) { const page = refreshFeatures.closest("[data-admin-page]"); if (page) void loadCatalogFeatureManager(page); return; }
+        const renameFeature = event.target.closest("[data-reference-rename-feature]");
+        const renameValue = event.target.closest("[data-reference-rename-value]");
+        if (renameFeature || renameValue) {
+            if (!manager) return;
+            const button = renameFeature || renameValue;
+            const name = window.prompt("نام جدید را وارد کنید:", button.dataset.currentName || "");
+            if (name === null || !name.trim()) return;
+            const featureId = renameFeature?.dataset.referenceRenameFeature || renameValue?.dataset.referenceFeatureId;
+            const valueId = renameValue?.dataset.referenceRenameValue;
+            const suffix = valueId ? `/${encodeURIComponent(valueId)}` : "";
+            const token = manager.querySelector('[name="__RequestVerificationToken"]')?.value || "";
+            button.disabled = true;
+            void ui.getJson(`/api/admin/store/catalog-features/${encodeURIComponent(featureId)}${suffix}`, {
+                method: "PUT", headers: { "Content-Type": "application/json", RequestVerificationToken: token }, body: JSON.stringify({ name: name.trim() })
+            }).then(() => loadCatalogFeatureManager(manager.closest("[data-admin-page]")))
+                .catch(error => ui.notify(error.message || "تغییر نام ناموفق بود.", "danger"))
+                .finally(() => { button.disabled = false; });
+            return;
+        }
         const addUnitConversion = event.target.closest("[data-add-unit-conversion]");
         if (addUnitConversion) {
             const form = document.querySelector(addUnitConversion.dataset.addUnitConversion === "edit" ? "[data-product-editor]" : "[data-product-create-form]");
@@ -1880,9 +2098,10 @@
                 .then(data => {
                     form.elements.key.value = item.id; form.elements.intro.value = data.intro || "";
                     form.elements.highlights.value = JSON.parse(data.highlights || "[]").join("\n");
-                    form.elements.specs.value = JSON.parse(data.specs || "[]").map(pair => pair.join(" | ")).join("\n");
+                    form.elements.specs.value = data.specs || "[]";
                     form.querySelector("[data-category-content-name]").textContent = item.name;
                     window.bootstrap?.Modal?.getOrCreateInstance(document.getElementById("category-content-modal")).show();
+                    void loadCategoryFeatures(form);
                 }).catch(error => ui.notify(error.message || "دریافت محتوای دسته ناموفق بود.", "danger"))
                 .finally(() => { categoryButton.disabled = false; });
             return;
@@ -1984,6 +2203,28 @@
             }
             return;
         }
+    });
+
+    document.addEventListener("submit", event => {
+        const featureForm = event.target.closest("[data-reference-feature-create]");
+        const valueForm = event.target.closest("[data-reference-value-create]");
+        if (!featureForm && !valueForm) return;
+        event.preventDefault();
+        const form = featureForm || valueForm;
+        const page = form.closest("[data-admin-page]");
+        const manager = page?.querySelector("[data-catalog-feature-manager]");
+        const name = form.elements.name.value.trim();
+        if (!page || !manager || !name) return;
+        const token = manager.querySelector('[name="__RequestVerificationToken"]')?.value || "";
+        const kind = featureForm ? Number(form.elements.kind.value) : null;
+        const featureId = valueForm?.dataset.referenceValueCreate;
+        const url = featureForm ? "/api/admin/store/catalog-features" : `/api/admin/store/catalog-features/${encodeURIComponent(featureId)}/values`;
+        const body = featureForm ? { name, kind } : { name };
+        const button = form.querySelector('[type="submit"]'); button.disabled = true;
+        void ui.getJson(url, { method: "POST", headers: { "Content-Type": "application/json", RequestVerificationToken: token }, body: JSON.stringify(body) })
+            .then(() => { form.reset(); return loadCatalogFeatureManager(page); })
+            .catch(error => ui.notify(error.message || "ثبت ویژگی یا مقدار ناموفق بود.", "danger"))
+            .finally(() => { button.disabled = false; });
     });
 
     document.addEventListener("submit", event => {
@@ -2236,12 +2477,8 @@
         if (categoryForm) {
             event.preventDefault();
             const lines = value => value.split(/\r?\n/).map(line => line.trim()).filter(Boolean);
-            const specs = lines(categoryForm.elements.specs.value).map(line => line.split("|").map(part => part.trim()));
-            if (specs.some(pair => pair.length !== 2 || pair.some(value => !value))) {
-                ui.notify("هر مشخصه باید یک عنوان و مقدار با جداکنندهٔ | داشته باشد.", "danger"); return;
-            }
             const token = categoryForm.querySelector('[name="__RequestVerificationToken"]')?.value || "";
-            const body = { intro: categoryForm.elements.intro.value, highlights: JSON.stringify(lines(categoryForm.elements.highlights.value)), specs: JSON.stringify(specs) };
+            const body = { intro: categoryForm.elements.intro.value, highlights: JSON.stringify(lines(categoryForm.elements.highlights.value)), specs: categoryForm.elements.specs.value };
             const save = categoryForm.querySelector('[type="submit"]'); save.disabled = true;
             void ui.getJson(`/api/admin/store/category-content/${encodeURIComponent(categoryForm.elements.key.value)}`, { method: "PUT", headers: { "Content-Type": "application/json", RequestVerificationToken: token }, body: JSON.stringify(body) })
                 .then(result => { ui.notify(result.message, "success"); window.bootstrap?.Modal?.getInstance(document.getElementById("category-content-modal"))?.hide(); })

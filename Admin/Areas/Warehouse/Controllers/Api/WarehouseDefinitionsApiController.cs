@@ -2,6 +2,7 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Shop.Data.Domain.Warehouse.Entities;
+using Shop.Data.Domain.Store.Entities;
 using Shop.Data.Infrastructure.Persistence;
 using WarehouseEntity = Shop.Data.Domain.Warehouse.Entities.Warehouse;
 
@@ -65,15 +66,15 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                               select new { variant.Id, variant.IdProduct, ProductName = product.Name, variant.IdVariantName, Name = variant.VariantName.Name, variant.IsDefault, variant.IsActive, variant.CreatedAtUtc })
             .ToListAsync(cancellationToken);
         long[] ids = variants.Select(x => x.Id).ToArray();
-        var attributes = await (from link in db.ProductVariantAttributeValues.AsNoTracking()
-                                join value in db.ProductAttributeValues.AsNoTracking() on link.IdProductAttributeValue equals value.Id
-                                join attribute in db.ProductAttributes.AsNoTracking() on value.IdProductAttribute equals attribute.Id
+        var attributes = await (from link in db.StoreVariantCatalogFeatureValues.AsNoTracking()
+                                join value in db.StoreCatalogFeatureValues.AsNoTracking() on link.IdFeatureValue equals value.Id
+                                join attribute in db.StoreCatalogFeatures.AsNoTracking() on link.IdFeature equals attribute.Id
                                 where ids.Contains(link.IdProductVariant)
-                                orderby attribute.SortOrder, attribute.Id
-                                select new { link.IdProductVariant, attribute.Id, AttributeKey = attribute.Key, AttributeLabel = attribute.Label, ValueId = value.Id, value.ValueKey, value.DisplayValue, value.Swatch })
+                                orderby attribute.Id
+                                select new { link.IdProductVariant, attribute.Id, AttributeLabel = attribute.Name, ValueId = value.Id, DisplayValue = value.Name })
             .ToListAsync(cancellationToken);
         var byVariant = attributes.GroupBy(x => x.IdProductVariant).ToDictionary(x => x.Key,
-            x => x.Select(a => new { attributeId = a.Id, valueId = a.ValueId, key = a.AttributeKey, label = a.AttributeLabel, value = a.ValueKey, display = a.DisplayValue, swatch = a.Swatch }).ToArray());
+            x => x.Select(a => new { attributeId = a.Id, valueId = a.ValueId, label = a.AttributeLabel, display = a.DisplayValue }).ToArray());
         return Ok(variants.Select(x => new
         {
             x.Id, x.IdProduct, x.ProductName, x.IdVariantName, x.Name, x.IsDefault, x.IsActive, x.CreatedAtUtc,
@@ -136,17 +137,21 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
         if (!CanAccessVariants("variants")) return Forbid();
         if (!await db.Products.AnyAsync(x => x.Id == productId && x.IsWarehouseEnabled, cancellationToken)) return NotFound();
         if (variantId.HasValue && !await db.ProductVariants.AnyAsync(x => x.Id == variantId && x.IdProduct == productId, cancellationToken)) return NotFound();
-        var rows = await (from attribute in db.ProductAttributes.AsNoTracking()
-                          join value in db.ProductAttributeValues.AsNoTracking() on attribute.Id equals value.IdProductAttribute
-                          where attribute.IdProduct == productId && value.IdProduct == productId &&
-                                (attribute.IsActive && value.IsActive || variantId.HasValue && db.ProductVariantAttributeValues.Any(link => link.IdProductVariant == variantId && link.IdProductAttribute == attribute.Id && link.IdProductAttributeValue == value.Id))
-                          orderby attribute.SortOrder, attribute.Id, value.Id
-                          select new { attribute.Id, attribute.Key, attribute.Label, ValueId = value.Id, value.ValueKey, ValueLabel = value.DisplayValue, value.Swatch })
+        var categoryId = await db.Products.Where(x => x.Id == productId).Select(x => x.IdCategory).SingleAsync(cancellationToken);
+        var categoryIds = new List<long>();
+        var categories = await db.StoreCategories.AsNoTracking().Select(x => new { x.Id, x.IdParentCategory }).ToDictionaryAsync(x => x.Id, cancellationToken);
+        while (categoryId is long current && categories.TryGetValue(current, out var category) && !categoryIds.Contains(current)) { categoryIds.Add(current); categoryId = category.IdParentCategory; }
+        var rows = await (from attribute in db.StoreCatalogFeatures.AsNoTracking()
+                          join value in db.StoreCatalogFeatureValues.AsNoTracking() on attribute.Id equals value.IdFeature
+                          where attribute.Kind == StoreCatalogFeatureKinds.PriceVariant && attribute.IsActive && value.IsActive &&
+                                db.StoreCategoryCatalogFeatures.Any(link => categoryIds.Contains(link.IdCategory) && link.IdFeature == attribute.Id)
+                          orderby attribute.Name, value.Name
+                          select new { attribute.Id, Label = attribute.Name, ValueId = value.Id, ValueLabel = value.Name })
             .ToListAsync(cancellationToken);
-        return Ok(rows.GroupBy(x => new { x.Id, x.Key, x.Label }).Select(group => new
+        return Ok(rows.GroupBy(x => new { x.Id, x.Label }).Select(group => new
         {
-            id = group.Key.Id, key = group.Key.Key, label = group.Key.Label,
-            values = group.Select(x => new { id = x.ValueId, key = x.ValueKey, label = x.ValueLabel, swatch = x.Swatch }).ToArray()
+            id = group.Key.Id, label = group.Key.Label,
+            values = group.Select(x => new { id = x.ValueId, label = x.ValueLabel }).ToArray()
         }).ToArray());
     }
 
@@ -793,7 +798,10 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                     await db.SaveChangesAsync(cancellationToken);
 
                     if (input.Attributes is not null)
+                    {
                         await SaveVariantAttributesAsync(entity, input.Attributes, cancellationToken);
+                        await db.SaveChangesAsync(cancellationToken);
+                    }
 
                     if (!id.HasValue &&
                         !await db.InventoryItems.AnyAsync(x => x.IdProduct == productId && x.IdProductVariant == entity.Id,
@@ -818,13 +826,16 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
         if (attributes is null) return true;
         if (attributes.Count > 12) return false;
         if (attributes.Any(x => x is null || x.AttributeId < 1 || x.ValueId < 1) || attributes.Select(x => x.AttributeId).Distinct().Count() != attributes.Count) return false;
+        var categoryId = await db.Products.Where(x => x.Id == productId).Select(x => x.IdCategory).SingleAsync(cancellationToken);
+        var categoryIds = new List<long>();
+        var categories = await db.StoreCategories.AsNoTracking().Select(x => new { x.Id, x.IdParentCategory }).ToDictionaryAsync(x => x.Id, cancellationToken);
+        while (categoryId is long current && categories.TryGetValue(current, out var category) && !categoryIds.Contains(current)) { categoryIds.Add(current); categoryId = category.IdParentCategory; }
         foreach (VariantAttributeInput item in attributes)
-            if (!await db.ProductAttributeValues.AnyAsync(value => value.Id == item.ValueId && value.IdProduct == productId &&
-                    value.IdProductAttribute == item.AttributeId && value.Attribute.IdProduct == productId &&
-                    ((value.IsActive && value.Attribute.IsActive) || (variantId.HasValue &&
-                        db.ProductVariantAttributeValues.Any(link => link.IdProductVariant == variantId.Value &&
-                            link.IdProduct == productId && link.IdProductAttribute == item.AttributeId &&
-                            link.IdProductAttributeValue == item.ValueId))), cancellationToken)) return false;
+            if (!await (from value in db.StoreCatalogFeatureValues
+                        join feature in db.StoreCatalogFeatures on value.IdFeature equals feature.Id
+                        where value.Id == item.ValueId && feature.Id == item.AttributeId && feature.Kind == StoreCatalogFeatureKinds.PriceVariant &&
+                              feature.IsActive && value.IsActive && db.StoreCategoryCatalogFeatures.Any(link => categoryIds.Contains(link.IdCategory) && link.IdFeature == feature.Id)
+                        select value.Id).AnyAsync(cancellationToken)) return false;
         return true;
     }
 
@@ -835,14 +846,45 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
         CancellationToken cancellationToken)
     {
         var currentLinks = await db.ProductVariantAttributeValues.Where(x => x.IdProductVariant == variant.Id).ToListAsync(cancellationToken);
+        var oldValues = await (from link in db.ProductVariantAttributeValues.AsNoTracking()
+                               join value in db.ProductAttributeValues.AsNoTracking() on link.IdProductAttributeValue equals value.Id
+                               join attribute in db.ProductAttributes.AsNoTracking() on value.IdProductAttribute equals attribute.Id
+                               where link.IdProductVariant == variant.Id
+                               select new { attribute.Label, value.DisplayValue, ValueId = value.Id }).ToListAsync(cancellationToken);
         db.ProductVariantAttributeValues.RemoveRange(currentLinks);
-        if (currentLinks.Count != 0) await db.SaveChangesAsync(cancellationToken);
+        var catalogLinks = await db.StoreVariantCatalogFeatureValues.Where(x => x.IdProductVariant == variant.Id).ToListAsync(cancellationToken);
+        db.StoreVariantCatalogFeatureValues.RemoveRange(catalogLinks);
+        if (currentLinks.Count != 0 || catalogLinks.Count != 0) await db.SaveChangesAsync(cancellationToken);
         if (input.Count == 0) return;
 
         foreach (VariantAttributeInput item in input)
         {
-            ProductAttributeValue value = await db.ProductAttributeValues.SingleAsync(x => x.Id == item.ValueId && x.IdProductAttribute == item.AttributeId && x.IdProduct == variant.IdProduct, cancellationToken);
+            var feature = await db.StoreCatalogFeatures.SingleAsync(x => x.Id == item.AttributeId, cancellationToken);
+            var selected = await db.StoreCatalogFeatureValues.SingleAsync(x => x.Id == item.ValueId && x.IdFeature == feature.Id, cancellationToken);
+            var oldValue = oldValues.FirstOrDefault(x => x.Label == feature.Name && x.DisplayValue == selected.Name);
+            if (oldValue is not null)
+            {
+                var preserved = await db.ProductAttributeValues.SingleAsync(x => x.Id == oldValue.ValueId, cancellationToken);
+                db.ProductVariantAttributeValues.Add(new ProductVariantAttributeValue { IdProduct = variant.IdProduct, ProductVariant = variant, AttributeValue = preserved });
+                db.StoreVariantCatalogFeatureValues.Add(new StoreVariantCatalogFeatureValue { IdProductVariant = variant.Id, IdFeature = feature.Id, IdFeatureValue = selected.Id });
+                continue;
+            }
+            string attributeKey = $"catalog-{feature.Id}";
+            string valueKey = $"catalog-{selected.Id}";
+            var attribute = await db.ProductAttributes.SingleOrDefaultAsync(x => x.IdProduct == variant.IdProduct && x.Key == attributeKey, cancellationToken);
+            if (attribute is null)
+            {
+                attribute = new ProductAttribute { IdProduct = variant.IdProduct, Key = attributeKey, Label = feature.Name, IsActive = true };
+                db.ProductAttributes.Add(attribute); await db.SaveChangesAsync(cancellationToken);
+            }
+            var value = await db.ProductAttributeValues.SingleOrDefaultAsync(x => x.IdProductAttribute == attribute.Id && x.ValueKey == valueKey, cancellationToken);
+            if (value is null)
+            {
+                value = new ProductAttributeValue { IdProduct = variant.IdProduct, IdProductAttribute = attribute.Id, ValueKey = valueKey, Label = selected.Name, DisplayValue = selected.Name, IsActive = true };
+                db.ProductAttributeValues.Add(value); await db.SaveChangesAsync(cancellationToken);
+            }
             db.ProductVariantAttributeValues.Add(new ProductVariantAttributeValue { IdProduct = variant.IdProduct, ProductVariant = variant, AttributeValue = value });
+            db.StoreVariantCatalogFeatureValues.Add(new StoreVariantCatalogFeatureValue { IdProductVariant = variant.Id, IdFeature = feature.Id, IdFeatureValue = selected.Id });
         }
     }
 

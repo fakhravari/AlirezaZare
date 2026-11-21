@@ -16,8 +16,17 @@
       const plan = plans.get(offer.salesPlanId);
       if (!product || !plan || plan.isDefault || plan.isEnabled === false || offer.isEnabled === false || Number(offer.stockQuantity) <= 0) return [];
       if ((plan.startsAtUtc && now < Date.parse(plan.startsAtUtc)) || (plan.endsAtUtc && now >= Date.parse(plan.endsAtUtc))) return [];
+      const overrides = offer.specificationOverrides || {};
+      const normalizeLabel = value => String(value || "").trim().toLocaleLowerCase("fa").replace(/[يى]/g, "ی").replace(/ك/g, "ک").replace(/[\u200c\u200f\s]+/g, " ");
+      const overrideLabels = new Set(Object.keys(overrides).map(normalizeLabel));
+      const offerFeatures = (product.catalogFeatures || []).filter(item => item.kind !== 2 || !overrideLabels.has(normalizeLabel(item.featureName)));
+      for (const [label, value] of Object.entries(overrides)) {
+        const option = (window.HNCatalog?.catalogFeatureOptions || []).find(item => item.kind === 2 && normalizeLabel(item.featureName) === normalizeLabel(label) && normalizeLabel(item.valueName) === normalizeLabel(value));
+        if (option) offerFeatures.push(option);
+      }
       return [{
         ...product,
+        catalogFeatures: offerFeatures,
         _salesPlanListing: {
           id: plan.id,
           code: plan.code,
@@ -29,6 +38,7 @@
           discountPercent: Number(offer.discountPercent) || 0,
           stockQuantity: Number(offer.stockQuantity),
           maxPurchaseQuantity: Number(offer.maxPurchaseQuantity) || 99,
+          specificationOverrides: overrides,
         },
       }];
     });
@@ -55,6 +65,14 @@
     sort: "recommended",
     visible: 15,
   };
+  const featureFilters = new Map();
+  for (const product of listings) for (const item of product.catalogFeatures || []) {
+    if (item.kind !== 2) continue;
+    const featureId = String(item.featureId), valueId = String(item.valueId);
+    if (!/^\d+$/.test(featureId) || !/^\d+$/.test(valueId) || !item.featureName || !item.valueName) continue;
+    if (!featureFilters.has(featureId)) featureFilters.set(featureId, { name: item.featureName, values: new Map(), selected: new Set() });
+    featureFilters.get(featureId).values.set(valueId, item.valueName);
+  }
   let searchRenderTimer = 0;
   const attributeDefinitions = window.HNCatalog?.attributeDefinitions || {};
   const filterFields = {
@@ -67,6 +85,7 @@
   const isFilterable = (key) => attributeDefinitions[filterFields[key]?.attributeId]?.is_filterable === true;
   const hasActiveFilters = () =>
     ["brand", "type", "color", "salesPlan"].some((key) => state[key].size) ||
+    [...featureFilters.values()].some(feature => feature.selected.size) ||
     state.availability !== "all" ||
     state.discountOnly ||
     state.minPrice > 0 ||
@@ -189,6 +208,7 @@
   function syncUrl() {
     if (restoringUrl) return;
     const params = new URLSearchParams();
+    for (const [id, feature] of featureFilters) for (const value of feature.selected) params.append(`feature-${id}`, value);
     Object.entries(filterOptions).forEach(([key, options]) => {
       if (key === "type") return;
       Object.entries(options).forEach(([id, label]) => {
@@ -218,6 +238,10 @@
     restoringUrl = true;
     state.type.clear();
     const params = new URLSearchParams(location.search);
+    for (const [id, feature] of featureFilters) {
+      feature.selected.clear();
+      for (const value of params.getAll(`feature-${id}`)) if (feature.values.has(value)) feature.selected.add(value);
+    }
     Object.keys(filterConfig).forEach((key) => {
       if (key !== "type") state[key].clear();
       const values = [
@@ -303,6 +327,7 @@
     if (state.brand.size) openFilterSlugs.add("brand");
     if (state.type.size) openFilterSlugs.add("product-group");
     if (state.salesPlan.size) openFilterSlugs.add("sales-plan");
+    for (const [id, feature] of featureFilters) if (feature.selected.size) openFilterSlugs.add(`feature-${id}`);
     if (state.availability !== "all") openFilterSlugs.add("availability");
     $$(".filter-group").forEach((group) => {
       const open = openFilterSlugs.has(group.dataset.filterSlug);
@@ -365,6 +390,24 @@
           )
           .join("");
     });
+    const priceGroup = document.querySelector('[data-filter-slug="price-range"]');
+    if (!priceGroup) return;
+    for (const [id, feature] of featureFilters) {
+      const group = document.createElement("div"); group.className = "filter-group"; group.dataset.filterSlug = `feature-${id}`;
+      const button = document.createElement("button"); button.type = "button"; button.setAttribute("aria-expanded", "false");
+      const title = document.createElement("span"); title.className = "filter-group-title"; title.textContent = feature.name;
+      const arrow = document.createElement("span"); arrow.className = "filter-group-arrow"; arrow.setAttribute("aria-hidden", "true");
+      const icon = document.createElement("i"); icon.className = "bi bi-chevron-down"; arrow.append(icon); button.append(title, arrow);
+      const options = document.createElement("div"); options.className = "filter-options";
+      for (const [valueId, label] of feature.values) {
+        const wrapper = document.createElement("label"); wrapper.className = "filter-option";
+        const input = document.createElement("input"); input.type = "checkbox"; input.value = valueId; input.dataset.catalogFeature = id;
+        input.addEventListener("change", () => { input.checked ? feature.selected.add(valueId) : feature.selected.delete(valueId); render(true, true); });
+        const name = document.createElement("span"); name.className = "filter-option-label"; name.textContent = label;
+        wrapper.append(input, name); options.append(wrapper);
+      }
+      group.append(button, options); priceGroup.before(group); feature.element = group;
+    }
   }
   function syncExclusiveFilterInputs() {
     $$('input[name="availability"]').forEach((input) => {
@@ -376,6 +419,17 @@
   }
   function syncCategoryFilters() {
     const facets = window.HNCatalog.categoryFacets(state.type);
+    const scope = listings.filter(product => !state.type.size || [...state.type].some(type => window.HNCatalog.categoryContains(type, product.categoryId)));
+    for (const [id, feature] of featureFilters) {
+      const allowed = new Set(scope.flatMap(product => (product.catalogFeatures || []).filter(item => String(item.featureId) === id).map(item => String(item.valueId))));
+      for (const value of feature.selected) if (!allowed.has(value)) feature.selected.delete(value);
+      if (!feature.element) continue;
+      feature.element.hidden = !allowed.size;
+      feature.element.querySelectorAll("input[data-catalog-feature]").forEach(input => {
+        input.disabled = !allowed.has(input.value); input.checked = feature.selected.has(input.value);
+        input.closest(".filter-option").hidden = input.disabled;
+      });
+    }
     for (const key of ['brand', 'type', 'color']) {
       const container = $(`#${key}Filters`);
       const allowed = new Set(facets[key]);
@@ -422,8 +476,10 @@
           window.HNCatalog?.categoryContains?.(type, p.categoryId))) &&
         (!state.color.size ||
           (p.colors || []).some((color) => state.color.has(color.slug))) &&
+        [...featureFilters.entries()].every(([id, feature]) => !feature.selected.size ||
+          (p.catalogFeatures || []).some(item => String(item.featureId) === id && feature.selected.has(String(item.valueId)))) &&
         (!state.query ||
-          normalizeFilterSearch(`${p.name} ${p.brand} ${p.type} ${p.englishName || ""} ${p._salesPlanListing?.name || ""} ${p._salesPlanListing?.label || ""} ${p._salesPlanListing?.code || ""}`)
+          normalizeFilterSearch([window.HNCatalog.searchText(p), ...Object.entries(p._salesPlanListing?.specificationOverrides || {}).flat()].join(" "))
             .includes(normalizeFilterSearch(state.query))) &&
         (!state.salesPlan.size || state.salesPlan.has(p._salesPlanListing?.id || "regular")),
     );
@@ -587,11 +643,17 @@
         '<button class="filter-chip" data-key="discounted">کالاهای تخفیف‌دار ×</button>',
       );
     $("#activeChips").innerHTML = chips.join("");
-    const count = chips.length;
+    for (const [id, feature] of featureFilters) for (const value of feature.selected) {
+      const chip = document.createElement("button"); chip.className = "filter-chip"; chip.type = "button";
+      chip.textContent = `${feature.name}: ${feature.values.get(value)} ×`;
+      chip.addEventListener("click", () => { feature.selected.delete(value); render(true, true); });
+      $("#activeChips").append(chip);
+    }
+    const count = $("#activeChips").children.length;
     $("#activeFilterCount").textContent = fa(count);
     $("#clearFilterCount").textContent = fa(count);
     $("#clearFilterCount").setAttribute("aria-label", `${fa(count)} فیلتر فعال`);
-    $$(".filter-chip").forEach(
+    $$(".filter-chip[data-key]").forEach(
       (chip) =>
         (chip.onclick = () => {
           if (chip.dataset.key === "price") {
@@ -627,6 +689,7 @@
   function clearAll() {
     window.clearTimeout(searchRenderTimer);
     ["brand", "type", "color", "salesPlan"].forEach((key) => state[key].clear());
+    for (const feature of featureFilters.values()) feature.selected.clear();
     state.availability = "all";
     state.discountOnly = false;
     state.minPrice = 0;

@@ -154,6 +154,14 @@
   };
   const normalizeLabel = (value) => String(value ?? "").trim().toLocaleLowerCase("fa").replace(/[يى]/g, "ی").replace(/ك/g, "ک").replace(/[\u200c\u200f\s]+/g, " ");
   const unusableAttributeValue = (value) => /وابسته به|بر اساس مدل|بررسی .* پیش از|اقلام.*متفاوت/i.test(value);
+  let inventoryVariants = [];
+  try { inventoryVariants = JSON.parse(document.querySelector("#storeSalesPlans")?.textContent || "{}").inventoryVariants || []; } catch { inventoryVariants = []; }
+  const variantsByProduct = new Map();
+  for (const variant of Array.isArray(inventoryVariants) ? inventoryVariants : []) {
+    const productId = Number(variant.productId);
+    if (!variantsByProduct.has(productId)) variantsByProduct.set(productId, []);
+    variantsByProduct.get(productId).push(variant);
+  }
   const ids = new Set();
   const products = data.products.map((product) => {
     if (!Number.isSafeInteger(product.id) || product.id < 1 || ids.has(product.id))
@@ -176,6 +184,13 @@
         ...normalizeSpecGroups(product.specGroups),
         ...resolveSpecificationValues(product.specificationValues || []),
       ];
+      const managedSpecs = new Map();
+      for (const item of product.catalogFeatures || []) {
+        if (item.kind !== 2 || !item.featureName || !item.valueName) continue;
+        if (!managedSpecs.has(item.featureName)) managedSpecs.set(item.featureName, new Set());
+        managedSpecs.get(item.featureName).add(item.valueName);
+      }
+      if (managedSpecs.size) productSpecGroups.push({title: "ویژگی‌های کالا", specs: [...managedSpecs].map(([label, values]) => [label, [...values].join("، ")])});
       return {...sharedDetail, specs: mergeSpecs(sharedDetail.specs), sharedSpecGroups, productSpecGroups};
     })();
     const resolvedSpecs = mergeSpecs(
@@ -210,10 +225,8 @@
       attributeValues.push({key, label, icon: definition.icon, value, filterKey: "",
         is_filterable: definition.is_filterable === true, is_highlight: true});
     };
+    const warehouseVariants = variantsByProduct.get(Number(product.id)) || [];
     if (variantDefinition?.is_highlight) {
-      let salesPlanData = {};
-      try { salesPlanData = JSON.parse(document.querySelector("#storeSalesPlans")?.textContent || "{}"); } catch { salesPlanData = {}; }
-      const warehouseVariants = (salesPlanData.inventoryVariants || []).filter((variant) => Number(variant.productId) === Number(product.id));
       const groupedAttributes = new Map();
       warehouseVariants.forEach((variant) => (Array.isArray(variant.attributes) ? variant.attributes : []).forEach((attribute) => {
         if (!groupedAttributes.has(attribute.key)) groupedAttributes.set(attribute.key, { label: attribute.label, values: new Set() });
@@ -230,11 +243,21 @@
       ...product, brand: brand.name, brandFa: brand.fa, brandLogo: brand.logo,
       brandCountryCode: brand.countryCode, type: category.fa, categorySlug: category.slug,
       categoryPath: [...resolvedCategory.path],
-      colors, attributeValues, detail, image: media.card,
+      colors, attributeValues, detail,
+      searchableAttributes: [
+        ...resolvedSpecs.flatMap(([label, value]) => [label, value]),
+        ...(product.catalogFeatures || []).flatMap(feature => [feature.featureName, feature.valueName]),
+        ...warehouseVariants.flatMap(variant => (Array.isArray(variant.attributes) ? variant.attributes : [])
+          .flatMap(attribute => [attribute.label, attribute.display || attribute.value]).filter(Boolean))
+      ],
+      image: media.card,
       mainImage: media.main, thumbnailImage: media.thumbnail, images: media.images, videos: media.videos,
     });
   });
   const byId = new Map(products.map((product) => [String(product.id), product]));
+  const searchText = product => [product.name, product.brand, product.type, product.englishName,
+    ...(product.searchableAttributes || []), product._salesPlanListing?.name,
+    product._salesPlanListing?.label, product._salesPlanListing?.code].filter(Boolean).join(" ");
   // Facet choices depend on the selected branch, independently of other filters.
   const categoryFacets = (selectedCategories = []) => {
     const selected = [...selectedCategories];
@@ -265,9 +288,10 @@
   window.HNProductUrl = productUrl;
   window.HNCatalog = Object.freeze({schemaVersion: data.schemaVersion, products: window.HNProducts,
     brands: freeze(data.brands), categories: freeze(data.categories), attributeDefinitions: freeze(attributeDefinitions),
+    catalogFeatureOptions: freeze(data.catalogFeatureOptions || []),
     specificationGroups: freeze(specificationGroups), specificationCategories: freeze(specificationCategories),
     specificationFeatures: freeze(specificationFeatures), collections: freeze(data.collections),
-    find: (id) => byId.get(String(id)) || null, url: productUrl,
+    find: (id) => byId.get(String(id)) || null, url: productUrl, searchText,
     categoryUrl, categoryUrlForLabels, categoryForSlug, categoryForLabel, categoryContains, categoryMatchesPath,
     categoryFacets});
 })(window, document);

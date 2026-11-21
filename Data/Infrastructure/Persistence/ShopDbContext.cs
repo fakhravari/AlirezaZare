@@ -64,6 +64,11 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
     public DbSet<StoreSpecificationGroup> StoreSpecificationGroups => Set<StoreSpecificationGroup>();
     public DbSet<StoreSpecificationCategory> StoreSpecificationCategories => Set<StoreSpecificationCategory>();
     public DbSet<StoreSpecificationFeature> StoreSpecificationFeatures => Set<StoreSpecificationFeature>();
+    public DbSet<StoreCatalogFeature> StoreCatalogFeatures => Set<StoreCatalogFeature>();
+    public DbSet<StoreCatalogFeatureValue> StoreCatalogFeatureValues => Set<StoreCatalogFeatureValue>();
+    public DbSet<StoreCategoryCatalogFeature> StoreCategoryCatalogFeatures => Set<StoreCategoryCatalogFeature>();
+    public DbSet<StoreProductCatalogFeatureValue> StoreProductCatalogFeatureValues => Set<StoreProductCatalogFeatureValue>();
+    public DbSet<StoreVariantCatalogFeatureValue> StoreVariantCatalogFeatureValues => Set<StoreVariantCatalogFeatureValue>();
     public DbSet<StoreProductColor> StoreProductColors => Set<StoreProductColor>();
     public DbSet<StoreProductSpecificationValue> StoreProductSpecificationValues => Set<StoreProductSpecificationValue>();
     public DbSet<StoreProductCollection> StoreProductCollections => Set<StoreProductCollection>();
@@ -808,6 +813,43 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
         modelBuilder.Entity<StoreSpecificationGroup>(entity => { entity.ToTable("SpecificationGroup", "Store"); entity.HasKey(x => x.Id); entity.Property(x => x.GroupKey).HasMaxLength(100).IsRequired(); entity.Property(x => x.Name).HasMaxLength(200).IsRequired(); entity.HasIndex(x => x.GroupKey).IsUnique(); });
         modelBuilder.Entity<StoreSpecificationCategory>(entity => { entity.ToTable("SpecificationCategory", "Store"); entity.HasKey(x => x.Id); entity.Property(x => x.CategoryKey).HasMaxLength(100).IsRequired(); entity.Property(x => x.Name).HasMaxLength(200).IsRequired(); entity.HasIndex(x => x.CategoryKey).IsUnique(); });
         modelBuilder.Entity<StoreSpecificationFeature>(entity => { entity.ToTable("SpecificationFeature", "Store"); entity.HasKey(x => x.Id); entity.Property(x => x.FeatureKey).HasMaxLength(100).IsRequired(); entity.Property(x => x.Label).HasMaxLength(200).IsRequired(); entity.HasIndex(x => x.FeatureKey).IsUnique(); });
+        modelBuilder.Entity<StoreCatalogFeature>(entity =>
+        {
+            entity.ToTable("CatalogFeature", "Store"); entity.HasKey(x => x.Id);
+            entity.Property(x => x.Name).HasMaxLength(200).IsRequired();
+            entity.Property(x => x.IsActive).HasDefaultValue(true);
+            entity.HasAlternateKey(x => new { x.Id, x.Kind });
+            entity.HasIndex(x => new { x.Kind, x.Name }).IsUnique();
+        });
+        modelBuilder.Entity<StoreCatalogFeatureValue>(entity =>
+        {
+            entity.ToTable("CatalogFeatureValue", "Store"); entity.HasKey(x => x.Id);
+            entity.Property(x => x.Name).HasMaxLength(300).IsRequired();
+            entity.Property(x => x.IsActive).HasDefaultValue(true);
+            entity.HasAlternateKey(x => new { x.Id, x.IdFeature });
+            entity.HasIndex(x => new { x.IdFeature, x.Name }).IsUnique();
+            entity.HasOne<StoreCatalogFeature>().WithMany().HasForeignKey(x => x.IdFeature).OnDelete(DeleteBehavior.Restrict);
+        });
+        modelBuilder.Entity<StoreCategoryCatalogFeature>(entity =>
+        {
+            entity.ToTable("CategoryCatalogFeature", "Store"); entity.HasKey(x => new { x.IdCategory, x.IdFeature });
+            entity.HasOne<StoreCategory>().WithMany().HasForeignKey(x => x.IdCategory).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<StoreCatalogFeature>().WithMany().HasForeignKey(x => x.IdFeature).OnDelete(DeleteBehavior.Restrict);
+        });
+        modelBuilder.Entity<StoreProductCatalogFeatureValue>(entity =>
+        {
+            entity.ToTable("ProductCatalogFeatureValue", "Store"); entity.HasKey(x => new { x.IdProduct, x.IdFeature, x.IdFeatureValue });
+            entity.HasOne<WarehouseProduct>().WithMany().HasForeignKey(x => x.IdProduct).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<StoreCatalogFeature>().WithMany().HasForeignKey(x => new { x.IdFeature, x.Kind }).HasPrincipalKey(x => new { x.Id, x.Kind }).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<StoreCatalogFeatureValue>().WithMany().HasForeignKey(x => new { x.IdFeatureValue, x.IdFeature }).HasPrincipalKey(x => new { x.Id, x.IdFeature }).OnDelete(DeleteBehavior.Restrict);
+        });
+        modelBuilder.Entity<StoreVariantCatalogFeatureValue>(entity =>
+        {
+            entity.ToTable("VariantCatalogFeatureValue", "Store"); entity.HasKey(x => new { x.IdProductVariant, x.IdFeature });
+            entity.HasOne<ProductVariant>().WithMany().HasForeignKey(x => x.IdProductVariant).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<StoreCatalogFeature>().WithMany().HasForeignKey(x => new { x.IdFeature, x.Kind }).HasPrincipalKey(x => new { x.Id, x.Kind }).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<StoreCatalogFeatureValue>().WithMany().HasForeignKey(x => new { x.IdFeatureValue, x.IdFeature }).HasPrincipalKey(x => new { x.Id, x.IdFeature }).OnDelete(DeleteBehavior.Restrict);
+        });
         modelBuilder.Entity<StoreProductColor>(entity => { entity.ToTable("ProductColor", "Store"); entity.HasKey(x => x.Id); entity.HasIndex(x => new { x.IdProduct, x.IdColor }).IsUnique(); });
         modelBuilder.Entity<StoreProductSpecificationValue>(entity => { entity.ToTable("ProductSpecificationValue", "Store"); entity.HasKey(x => x.Id); entity.Property(x => x.Value).HasMaxLength(1000).IsRequired(); entity.HasIndex(x => new { x.IdProduct, x.IdSpecificationFeature }).IsUnique(); });
         modelBuilder.Entity<StoreProductCollection>(entity => { entity.ToTable("ProductCollection", "Store"); entity.HasKey(x => x.Id); entity.Property(x => x.CollectionKey).HasMaxLength(100).IsRequired(); entity.Property(x => x.Name).HasMaxLength(150).IsRequired(); entity.HasIndex(x => x.CollectionKey).IsUnique(); });

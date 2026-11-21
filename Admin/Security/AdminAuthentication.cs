@@ -276,6 +276,13 @@ public sealed class AdminPermissionFilter : IAsyncAuthorizationFilter
             action = "Badges";
             feature = null;
         }
+        if (string.Equals(area, "Store", StringComparison.OrdinalIgnoreCase) &&
+            string.Equals(controller, "StoreCatalogFeaturesApi", StringComparison.OrdinalIgnoreCase))
+        {
+            controller = "Catalog";
+            action = "Attributes";
+            feature = null;
+        }
         if (string.Equals(area, "Warehouse", StringComparison.OrdinalIgnoreCase) &&
             string.Equals(controller, "WarehouseDefinitionsApi", StringComparison.OrdinalIgnoreCase))
         {

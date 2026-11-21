@@ -4,6 +4,31 @@
 }
 <div class="admin-page" data-admin-page="catalog" data-admin-section="@catalogSection" data-admin-api="@apiUrl" data-can-upload-image="@(User.IsInRole("system.full-access") ? "true" : "false")" data-can-edit-category="@(User.IsInRole("system.full-access") || (User.HasClaim("admin_permission", "Store:StoreCategoryContentApi:Get") && User.HasClaim("admin_permission", "Store:StoreCategoryContentApi:Update")) ? "true" : "false")">
     @await Html.PartialAsync("_AdminPageIntro", ((string)ViewData["Title"]!, (string)ViewData["Description"]!))
+    @if (catalogSection == "attributes" && (User.IsInRole("system.full-access") || User.HasClaim("admin_permission", "Store:Catalog:Attributes")))
+    {
+        <section class="panel panel-inverse mb-3" data-catalog-feature-manager>
+            <div class="panel-heading"><h2 class="panel-title">مرجع ویژگی‌های کالا</h2><button class="btn btn-xs btn-icon btn-default" type="button" data-feature-manager-refresh aria-label="بارگذاری دوبارهٔ مرجع ویژگی‌ها"><i class="fa fa-rotate" aria-hidden="true"></i></button></div>
+            <div class="panel-body">
+                @Html.AntiForgeryToken()
+                <p class="text-muted">نام و مقدار ویژگی‌ها در یک مرجع نگهداری می‌شوند؛ سپس در دسته‌ها تخصیص می‌یابند و ویژگی‌های دستهٔ والد به زیر‌دسته ارث می‌رسد.</p>
+                <div class="small text-muted mb-3" data-feature-manager-status role="status" aria-live="polite">در حال دریافت مرجع ویژگی‌ها…</div>
+                <div class="row g-3">
+                    @foreach (var kind in new[] { (Id: 1, Title: "تنوع قیمتی"), (Id: 2, Title: "ویژگی نمایشی و جست‌وجو") })
+                    {
+                        <div class="col-lg-6"><section class="border rounded p-3 h-100" data-reference-feature-kind="@kind.Id">
+                            <h3 class="h5">@kind.Title</h3>
+                            <div class="d-grid gap-2 mb-3" data-reference-feature-list="@kind.Id"></div>
+                            <form class="row g-2 align-items-end" data-reference-feature-create>
+                                <input type="hidden" name="kind" value="@kind.Id" />
+                                <div class="col"><label class="form-label" for="reference-feature-name-@kind.Id">نام ویژگی جدید</label><input id="reference-feature-name-@kind.Id" name="name" class="form-control" maxlength="200" required /></div>
+                                <div class="col-auto"><button class="btn btn-outline-primary" type="submit">افزودن ویژگی</button></div>
+                            </form>
+                        </section></div>
+                    }
+                </div>
+            </div>
+        </section>
+    }
     @if (catalogSection == "products" && User.IsInRole("system.full-access"))
     {
         <div class="nav nav-pills gap-2 mb-3" role="group" aria-label="بخش‌های کالا">
@@ -192,6 +217,14 @@
             </div><div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button type="submit" class="btn btn-primary"><i class="fa fa-file-circle-plus me-1" aria-hidden="true"></i>ساخت پیش‌نویس</button></div>
         </form></div>
     </div>
+    <div class="modal fade" id="product-features-modal" tabindex="-1" aria-labelledby="product-features-title" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable"><form class="modal-content" data-product-features-form>
+            @Html.AntiForgeryToken()<input type="hidden" name="productId" />
+            <div class="modal-header"><h2 class="modal-title fs-5" id="product-features-title">ویژگی‌های نمایشی کالا</h2><button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="بستن"></button></div>
+            <div class="modal-body"><p data-product-features-name></p><p class="text-muted">ویژگی‌های دسته و والدهای آن در اینجا قابل انتخاب‌اند.</p><p data-product-features-status role="status"></p><div data-product-features-choices></div></div>
+            <div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button type="submit" class="btn btn-primary" disabled>ذخیرهٔ ویژگی‌ها</button></div>
+        </form></div>
+    </div>
     <div class="modal fade" id="product-accessories-modal" tabindex="-1" aria-labelledby="product-accessories-title" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-scrollable"><div class="modal-content" data-product-accessories-manager>
             <div class="modal-header"><h2 class="modal-title fs-5" id="product-accessories-title">متعلقات کالا</h2><button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="بستن"></button></div>
@@ -340,10 +373,28 @@
             <div class="modal-header"><h2 class="modal-title fs-5" id="category-content-title">محتوای مشترک دسته</h2><button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="بستن"></button></div>
             <div class="modal-body">
                 <p data-category-content-name></p>
-                <p class="text-muted">این محتوا فقط برای کالاهای متصل به همین دسته نمایش داده می‌شود و به زیردسته‌ها منتقل نمی‌شود.</p>
+                <p class="text-muted">معرفی و نکات فقط برای کالاهای همین دسته نمایش داده می‌شوند. ویژگی‌ها به زیردسته‌ها ارث می‌رسند.</p>
                 <label for="category-intro" class="form-label">معرفی</label><textarea id="category-intro" name="intro" class="form-control mb-3" rows="4" maxlength="10000"></textarea>
                 <label for="category-highlights" class="form-label">نکات برجسته، هر مورد در یک خط</label><textarea id="category-highlights" name="highlights" class="form-control mb-3" rows="4"></textarea>
-                <label for="category-specs" class="form-label">مشخصات عمومی، هر خط به شکل «عنوان | مقدار»</label><textarea id="category-specs" name="specs" class="form-control" rows="5"></textarea>
+                <input type="hidden" name="specs" />
+                @if (User.IsInRole("system.full-access"))
+                {
+                    <section class="border rounded p-3 mt-3" data-category-features>
+                        <h3 class="fs-6">ویژگی‌های دسته</h3>
+                        <p class="text-muted">ویژگی‌های دستهٔ والد به این دسته ارث می‌رسند.</p>
+                        <div data-feature-message class="text-muted" role="status"></div>
+                        <div data-feature-groups></div>
+                        <div class="row g-2 mt-2">
+                            <div class="col-md-4"><label class="form-label" for="category-feature-name">نام ویژگی جدید</label><input id="category-feature-name" class="form-control" maxlength="200" data-feature-name /></div>
+                            <div class="col-md-4"><label class="form-label" for="category-feature-kind">نوع ویژگی</label><select id="category-feature-kind" class="form-select" data-feature-kind><option value="1">تنوع قیمتی</option><option value="2">ویژگی نمایشی</option></select></div>
+                            <div class="col-md-4 d-flex align-items-end"><button type="button" class="btn btn-outline-primary" data-feature-create>افزودن ویژگی</button></div>
+                            <div class="col-md-4"><label class="form-label" for="category-feature-value-owner">ویژگی</label><select id="category-feature-value-owner" class="form-select" data-feature-value-owner></select></div>
+                            <div class="col-md-4"><label class="form-label" for="category-feature-value-name">مقدار جدید</label><input id="category-feature-value-name" class="form-control" maxlength="300" data-feature-value-name /></div>
+                            <div class="col-md-4 d-flex align-items-end"><button type="button" class="btn btn-outline-primary" data-feature-value-create>افزودن مقدار</button></div>
+                        </div>
+                        <button type="button" class="btn btn-primary mt-3" data-feature-save disabled>ذخیرهٔ ویژگی‌های دسته</button>
+                    </section>
+                }
             </div>
             <div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button type="submit" class="btn btn-primary"><i class="fa fa-floppy-disk me-1" aria-hidden="true"></i>ذخیره</button></div>
         </form></div>

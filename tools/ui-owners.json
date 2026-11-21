@@ -87,7 +87,9 @@
             "Data/Domain/Store/Entities/StoreBrand.cs",
             "Data/Domain/Store/Entities/StoreCategory.cs",
             "Data/Domain/Store/Entities/GeoCountry.cs",
-            "Data/Infrastructure/Persistence/ShopDbContext.cs"
+            "Data/Infrastructure/Persistence/ShopDbContext.cs",
+            "Admin/Areas/Store/Controllers/Api/StoreCatalogFeaturesApiController.cs",
+            "Admin/Areas/Warehouse/Controllers/Api/WarehouseDefinitionsApiController.cs"
           ]
         },
         "admin-dashboards": {
@@ -240,7 +242,9 @@
           "data": [
             "Data/Application/Store/Contracts/IStoreRuntimeDatasetRepository.cs",
             "Data/Infrastructure/Persistence/Repositories/StoreRuntimeDatasetRepository.cs",
-            "Data/Domain/Store/Entities/StoreProductBenefit.cs"
+            "Data/Domain/Store/Entities/StoreProductBenefit.cs",
+            "Data/Domain/Store/Entities/StoreCatalogFeature.cs",
+            "Data/Infrastructure/Persistence/ShopDbContext.cs"
           ],
           "server": [
             "Shop/Services/CatalogRepository.cs",
@@ -274,7 +278,8 @@
           ],
           "js": [
             "Shop/wwwroot/shop/js/pages/search.js",
-            "Shop/wwwroot/shop/js/layout/main.js"
+            "Shop/wwwroot/shop/js/layout/main.js",
+            "Shop/wwwroot/shop/js/store/catalog.js"
           ],
           "css": [
             "Shop/wwwroot/shop/css/pages/search.css",

@@ -35,10 +35,21 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext, IMedi
                                      group balance.Quantity by inventory.IdProduct into grouped
                                      select new { IdProduct = grouped.Key, Quantity = grouped.Sum() }).ToDictionaryAsync(x => x.IdProduct, x => x.Quantity, cancellationToken);
         var productColors = await dbContext.StoreProductColors.AsNoTracking().Where(x => productIds.Contains(x.IdProduct)).ToListAsync(cancellationToken);
-        var productSpecs = await (from value in dbContext.StoreProductSpecificationValues.AsNoTracking()
-                                  join feature in dbContext.StoreSpecificationFeatures.AsNoTracking() on value.IdSpecificationFeature equals feature.Id
-                                  where productIds.Contains(value.IdProduct)
-                                  select new { value.IdProduct, feature.FeatureKey, value.Value }).ToListAsync(cancellationToken);
+        var catalogFeatureValues = await (from assignment in dbContext.StoreProductCatalogFeatureValues.AsNoTracking()
+                                          join feature in dbContext.StoreCatalogFeatures.AsNoTracking() on assignment.IdFeature equals feature.Id
+                                          join value in dbContext.StoreCatalogFeatureValues.AsNoTracking() on assignment.IdFeatureValue equals value.Id
+                                          where productIds.Contains(assignment.IdProduct) && feature.IsActive && value.IsActive
+                                          select new { assignment.IdProduct, FeatureId = feature.Id, FeatureName = feature.Name, ValueId = value.Id, ValueName = value.Name }).ToListAsync(cancellationToken);
+        var variantFeatureValues = await (from assignment in dbContext.StoreVariantCatalogFeatureValues.AsNoTracking()
+                                          join variant in dbContext.ProductVariants.AsNoTracking() on assignment.IdProductVariant equals variant.Id
+                                          join feature in dbContext.StoreCatalogFeatures.AsNoTracking() on assignment.IdFeature equals feature.Id
+                                          join value in dbContext.StoreCatalogFeatureValues.AsNoTracking() on assignment.IdFeatureValue equals value.Id
+                                          where productIds.Contains(variant.IdProduct) && variant.IsActive && feature.IsActive && value.IsActive
+                                          select new { variant.IdProduct, FeatureId = feature.Id, FeatureName = feature.Name, ValueId = value.Id, ValueName = value.Name }).ToListAsync(cancellationToken);
+        var catalogFeatureOptions = await (from feature in dbContext.StoreCatalogFeatures.AsNoTracking()
+                                           join value in dbContext.StoreCatalogFeatureValues.AsNoTracking() on feature.Id equals value.IdFeature
+                                           where feature.IsActive && value.IsActive
+                                           select new { FeatureId = feature.Id, FeatureName = feature.Name, ValueId = value.Id, ValueName = value.Name, feature.Kind }).ToListAsync(cancellationToken);
         var productAccessories = await (from link in dbContext.StoreProductAccessories.AsNoTracking()
                                         join accessory in dbContext.StoreAccessories.AsNoTracking() on link.IdAccessory equals accessory.Id
                                         where productIds.Contains(link.IdProduct) && accessory.IsActive
@@ -66,6 +77,7 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext, IMedi
         var specCategoryById = specCategories.ToDictionary(x => x.Id);
 
         var root = new JsonObject { ["schemaVersion"] = 2 };
+        root["catalogFeatureOptions"] = new JsonArray(catalogFeatureOptions.Select(x => (JsonNode?)new JsonObject { ["featureId"] = x.FeatureId, ["featureName"] = x.FeatureName, ["valueId"] = x.ValueId, ["valueName"] = x.ValueName, ["kind"] = x.Kind }).ToArray());
         root["specificationGroups"] = new JsonArray(groups.Select(x => (JsonNode?)new JsonObject { ["id"] = x.GroupKey, ["name"] = x.Name, ["order"] = x.SortOrder }).ToArray());
         root["specificationCategories"] = new JsonArray(specCategories.Select(x => (JsonNode?)new JsonObject { ["id"] = x.CategoryKey, ["groupId"] = groupKeyById.GetValueOrDefault(x.IdSpecificationGroup), ["name"] = x.Name, ["order"] = x.SortOrder }).ToArray());
         root["specificationFeatures"] = new JsonArray(features.Select(x => (JsonNode?)new JsonObject { ["id"] = x.FeatureKey, ["categoryId"] = specCategoryById.GetValueOrDefault(x.IdSpecificationCategory)?.CategoryKey, ["label"] = x.Label, ["order"] = x.SortOrder }).ToArray());
@@ -82,7 +94,7 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext, IMedi
         root["categories"] = new JsonArray(activeCategories.Select(x => (JsonNode?)new JsonObject { ["id"] = x.CategoryKey, ["parentId"] = x.IdParentCategory.HasValue ? categoryKeyById.GetValueOrDefault(x.IdParentCategory.Value) : null, ["en"] = x.NameEn, ["fa"] = x.NameFa, ["slug"] = x.CategoryKey, ["path"] = ParseJsonValue(x.PathJson) }).ToArray());
         root["colors"] = new JsonArray(colors.Select(x => (JsonNode?)new JsonObject { ["id"] = x.ColorKey, ["en"] = x.NameEn, ["fa"] = x.NameFa, ["hex"] = x.HexCode }).ToArray());
         root["countries"] = new JsonArray(countries.Select(x => (JsonNode?)new JsonObject { ["id"] = x.CountryCode, ["name"] = x.NameFa, ["fa"] = x.NameFa, ["en"] = x.NameEn, ["flag"] = x.FlagPath }).ToArray());
-        root["details"] = new JsonArray(activeCategories.Select(x => { var o = new JsonObject { ["id"] = x.CategoryKey }; AddOptional(o, "intro", x.ProductIntro); if (x.ProductHighlightsJson is not null) o["highlights"] = ParseJsonValue(x.ProductHighlightsJson); if (x.ProductSpecsJson is not null) o["specs"] = ParseJsonValue(x.ProductSpecsJson); return (JsonNode?)o; }).ToArray());
+        root["details"] = new JsonArray(activeCategories.Select(x => { var o = new JsonObject { ["id"] = x.CategoryKey }; AddOptional(o, "intro", x.ProductIntro); if (x.ProductHighlightsJson is not null) o["highlights"] = ParseJsonValue(x.ProductHighlightsJson); return (JsonNode?)o; }).ToArray());
         root["media"] = new JsonArray(products.Select(product =>
         {
             var images = assets.Where(x => x.IdProduct == product.Id && x.IdMediaType == ProductMediaTypes.Image).ToArray();
@@ -100,7 +112,9 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext, IMedi
             var regularPrice = regularPriceByProduct.GetValueOrDefault(product.Id);
             var o = new JsonObject { ["id"] = checked((int)product.Id), ["name"] = product.Name, ["englishName"] = product.EnglishName ?? product.Name, ["code"] = product.ProductKey, ["slug"] = product.Slug, ["brandId"] = brandKey, ["categoryId"] = categoryKey, ["detailId"] = categoryKey, ["mediaId"] = "product-" + product.ProductKey, ["price"] = regularPrice is null ? 0m : decimal.Round(regularPrice.PriceAmount * (100m - regularPrice.DiscountPercent) / 100m, 0, MidpointRounding.AwayFromZero) / 1_000_000m, ["stockQuantity"] = stockQty, ["maxCartQuantity"] = product.MaxPurchaseQuantity ?? 99, ["discountPercent"] = regularPrice?.DiscountPercent ?? 0m, ["badge"] = badge?.Title, ["badgeColor"] = badge?.BackgroundColor, ["badgeTextColor"] = badge?.TextColor, ["badgeBorderColor"] = badge?.BorderColor };
             o["colorIds"] = new JsonArray(productColors.Where(x => x.IdProduct == product.Id).Select(x => (JsonNode?)JsonValue.Create(colorKeyById.GetValueOrDefault(x.IdColor))).ToArray());
-            o["specificationValues"] = new JsonArray(productSpecs.Where(x => x.IdProduct == product.Id).Select(x => (JsonNode?)new JsonObject { ["featureId"] = x.FeatureKey, ["value"] = x.Value }).ToArray());
+            o["specificationValues"] = new JsonArray();
+            o["catalogFeatures"] = new JsonArray(catalogFeatureValues.Where(x => x.IdProduct == product.Id).Select(x => (JsonNode?)new JsonObject { ["featureId"] = x.FeatureId, ["featureName"] = x.FeatureName, ["valueId"] = x.ValueId, ["valueName"] = x.ValueName, ["kind"] = 2 }).Concat(
+                variantFeatureValues.Where(x => x.IdProduct == product.Id).Select(x => (JsonNode?)new JsonObject { ["featureId"] = x.FeatureId, ["featureName"] = x.FeatureName, ["valueId"] = x.ValueId, ["valueName"] = x.ValueName, ["kind"] = 1 })).ToArray());
             o["includedBenefits"] = new JsonArray(productBenefits.Where(x => x.IdProduct == product.Id).Select(x => (JsonNode?)new JsonObject
             {
                 ["id"] = x.Id,
