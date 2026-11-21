@@ -29,6 +29,7 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
     public DbSet<StockBalance> StockBalances => Set<StockBalance>();
     public DbSet<InventoryItem> InventoryItems => Set<InventoryItem>();
     public DbSet<ProductVariant> ProductVariants => Set<ProductVariant>();
+    public DbSet<VariantName> VariantNames => Set<VariantName>();
     public DbSet<ProductAttribute> ProductAttributes => Set<ProductAttribute>();
     public DbSet<ProductAttributeValue> ProductAttributeValues => Set<ProductAttributeValue>();
     public DbSet<ProductVariantAttributeValue> ProductVariantAttributeValues => Set<ProductVariantAttributeValue>();
@@ -464,19 +465,25 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.Property(x => x.BorderColor).HasMaxLength(7).IsUnicode(false).IsRequired();
             entity.HasIndex(x => x.Title).IsUnique();
         });
+        modelBuilder.Entity<VariantName>(entity =>
+        {
+            entity.ToTable("VariantName", "Warehouse");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.Name).HasMaxLength(300).IsRequired();
+            entity.HasOne(x => x.Parent).WithMany().HasForeignKey(x => x.IdParent).OnDelete(DeleteBehavior.Restrict);
+        });
         modelBuilder.Entity<ProductVariant>(entity =>
         {
             entity.ToTable("ProductVariant", "Warehouse");
             entity.HasKey(x => x.Id);
             entity.HasAlternateKey(x => new { x.Id, x.IdProduct });
             entity.HasAlternateKey(x => new { x.IdProduct, x.Id });
-            entity.Property(x => x.Code).HasMaxLength(100);
-            entity.Property(x => x.Name).HasMaxLength(300).IsRequired();
             entity.Property(x => x.IsDefault).HasDefaultValue(false).IsRequired();
             entity.HasIndex(x => x.IdProduct).IsUnique().HasFilter("[IsDefault] = 1");
             entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
             entity.Property(x => x.UpdatedAtUtc).HasPrecision(3);
             entity.HasOne(x => x.Product).WithMany().HasForeignKey(x => x.IdProduct);
+            entity.HasOne(x => x.VariantName).WithMany().HasForeignKey(x => x.IdVariantName).OnDelete(DeleteBehavior.Restrict);
         });
         modelBuilder.Entity<ProductAttribute>(entity =>
         {

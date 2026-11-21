@@ -71,11 +71,11 @@ public sealed class WarehouseReadRepository(ShopDbContext dbContext) : IWarehous
             query = query.Where(x => x.inventoryItem.Product.Name.Contains(search)
                                      || x.inventoryItem.Product.ProductKey.Contains(search)
                                      || (x.inventoryItem.ProductVariant != null &&
-                                         x.inventoryItem.ProductVariant.Name.Contains(search)));
+                                         x.inventoryItem.ProductVariant.VariantName.Name.Contains(search)));
         if (lowStockOnly)
             query = query.Where(x => x.plan.IsRegular && x.balance != null && x.balance.MinimumQuantity > 0 && x.balance.Quantity <= x.balance.MinimumQuantity);
 
-        return await query.OrderBy(x => x.warehouse.Name).ThenBy(x => x.inventoryItem.Product.Name).ThenBy(x => x.inventoryItem.ProductVariant == null ? string.Empty : x.inventoryItem.ProductVariant.Name).ThenBy(x => x.plan.StoreSalesPlanKey).Skip((page - 1) * pageSize).Take(pageSize).Select(x => new WarehouseStockItem(
+        return await query.OrderBy(x => x.warehouse.Name).ThenBy(x => x.inventoryItem.Product.Name).ThenBy(x => x.inventoryItem.ProductVariant == null ? string.Empty : x.inventoryItem.ProductVariant.VariantName.Name).ThenBy(x => x.plan.StoreSalesPlanKey).Skip((page - 1) * pageSize).Take(pageSize).Select(x => new WarehouseStockItem(
                 x.warehouse.Id,
                 x.inventoryItem.Id,
                 x.plan.Id,
@@ -86,7 +86,7 @@ public sealed class WarehouseReadRepository(ShopDbContext dbContext) : IWarehous
                 x.inventoryItem.Product.ProductKey,
                 x.inventoryItem.Product.Name,
                 x.inventoryItem.IdProductVariant,
-                x.inventoryItem.ProductVariant == null ? null : x.inventoryItem.ProductVariant.Name,
+                x.inventoryItem.ProductVariant == null ? null : x.inventoryItem.ProductVariant.VariantName.Name,
                 x.plan.StoreSalesPlanKey,
                 x.plan.DisplayName,
                 x.unit.NameFa,

@@ -271,20 +271,18 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
                    join offer in db.StoreProductVariantSalesPlanOffers.AsNoTracking() on new { VariantId = variant.Id, PlanId = plan.Id } equals new { VariantId = offer.IdProductVariant, PlanId = offer.IdSalesPlan } into offers
                    from offer in offers.DefaultIfEmpty()
                    where variant.IsActive && product.IsStoreEnabled &&
-                         (query == "" || product.Name.Contains(query) || product.ProductKey.Contains(query) || variant.Name.Contains(query) ||
-                          (variant.Code ?? "").Contains(query) || (plan.DisplayName ?? "").Contains(query))
+                         (query == "" || product.Name.Contains(query) || product.ProductKey.Contains(query) || variant.VariantName.Name.Contains(query) || (plan.DisplayName ?? "").Contains(query))
                    select new { variant, product, plan, offer };
         if (productIds is { Length: > 0 }) rows = rows.Where(x => productIds.Contains(x.product.Id));
         if (start.HasValue) rows = rows.Where(x => x.offer != null && x.offer.CreatedAtUtc >= start.Value);
         if (end.HasValue) rows = rows.Where(x => x.offer != null && x.offer.CreatedAtUtc < end.Value);
         int total = await rows.CountAsync(cancellationToken);
-        var items = await rows.OrderBy(x => x.product.Name).ThenBy(x => x.variant.Name).ThenBy(x => x.plan.Code)
+        var items = await rows.OrderBy(x => x.product.Name).ThenBy(x => x.variant.VariantName.Name).ThenBy(x => x.plan.Code)
             .ThenBy(x => x.variant.Id).ThenBy(x => x.plan.Id).Skip(paging.Offset).Take(paging.PageSize).Select(x => new VariantPlanPriceRow
             {
                 VariantId = x.variant.Id,
                 ProductName = x.product.Name,
-                VariantName = x.variant.Name,
-                Code = x.variant.Code,
+                VariantName = x.variant.VariantName.Name,
                 SalesPlanId = x.plan.StoreSalesPlanKey,
                 SalesPlanName = x.plan.DisplayName,
                 PriceAmount = db.StorePriceVersions.Where(v => v.IdProduct == x.product.Id && v.IdProductVariant == x.variant.Id && v.IdSalesPlan == x.plan.Id && v.IsActive).Select(v => (decimal?)v.PriceAmount).FirstOrDefault(),

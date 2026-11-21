@@ -1237,13 +1237,13 @@ input[type="checkbox"][data-admin-switch]:disabled { cursor: not-allowed; opacit
     font-weight: 600;
 }
 
-.admin-record-product .admin-record-section > .admin-record-table {
-    table-layout: fixed;
+.admin-record-product .admin-record-section > .admin-record-table-scroll > .admin-record-table {
+    width: max-content;
+    min-width: 100%;
 }
 
-.admin-record-product .admin-record-section > .admin-record-table > tbody > tr > th {
-    width: 22%;
-    min-width: 110px;
+.admin-record-product .admin-record-section > .admin-record-table-scroll > .admin-record-table > thead > tr > th {
+    white-space: nowrap;
 }
 
 .admin-record-product .admin-record-table-nested {

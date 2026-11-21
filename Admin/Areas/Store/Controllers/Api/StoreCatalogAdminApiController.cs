@@ -185,8 +185,8 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
             categoryPath = string.Join(" / ", segments);
         }
 
-        var variantRows = await db.ProductVariants.AsNoTracking().Where(x => x.IdProduct == id).OrderByDescending(x => x.IsDefault).ThenBy(x => x.Name)
-            .Select(x => new { x.Id, x.Code, x.Name, x.IsDefault, x.IsActive, x.CreatedAtUtc, x.UpdatedAtUtc })
+        var variantRows = await db.ProductVariants.AsNoTracking().Where(x => x.IdProduct == id).OrderByDescending(x => x.IsDefault).ThenBy(x => x.VariantName.Name)
+            .Select(x => new { x.Id, Name = x.VariantName.Name, x.IsDefault, x.IsActive, x.CreatedAtUtc, x.UpdatedAtUtc })
             .ToListAsync(cancellationToken);
         long[] variantIds = variantRows.Select(x => x.Id).ToArray();
         var variantAttributes = await (from link in db.ProductVariantAttributeValues.AsNoTracking()
@@ -200,7 +200,7 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
             x => x.Select(a => new { key = a.Key, label = a.Label, value = a.ValueKey, display = a.DisplayValue, swatch = a.Swatch }).ToArray());
         var variants = variantRows.Select(x => new
         {
-            x.Id, x.Code, x.Name, x.IsDefault, x.IsActive, x.CreatedAtUtc, x.UpdatedAtUtc,
+            x.Id, x.Name, x.IsDefault, x.IsActive, x.CreatedAtUtc, x.UpdatedAtUtc,
             Attributes = attributesByVariant.GetValueOrDefault(x.Id) ?? []
         }).ToList();
         var inventory = await (from balance in db.StockBalances.AsNoTracking()

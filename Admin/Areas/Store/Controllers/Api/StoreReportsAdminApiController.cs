@@ -322,7 +322,7 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
                 warehouseLabel = x.Warehouse.Company.Name + " / " + x.Warehouse.Name + " (" + x.Warehouse.Code + ")",
                 productCode = x.InventoryItem.Product.ProductKey,
                 productName = x.InventoryItem.Product.Name,
-                variantName = x.InventoryItem.ProductVariant == null ? "—" : x.InventoryItem.ProductVariant.Name,
+                variantName = x.InventoryItem.ProductVariant == null ? "—" : x.InventoryItem.ProductVariant.VariantName.Name,
                 planName = x.SalesPlanReference.DisplayName,
                 quantity = x.Quantity,
                 minimumQuantity = x.MinimumQuantity,

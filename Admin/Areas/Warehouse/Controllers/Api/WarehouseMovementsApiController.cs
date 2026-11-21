@@ -141,7 +141,7 @@ public sealed class WarehouseMovementsApiController(ShopDbContext db) : Controll
         if (warehouseId.HasValue) query = query.Where(x => x.movement.IdWarehouse == warehouseId.Value);
         if (productId.HasValue) query = query.Where(x => x.item.IdProduct == productId.Value);
         if (!string.IsNullOrEmpty(search)) query = query.Where(x => x.item.Product.Name.Contains(search)
-            || x.item.Product.ProductKey.Contains(search) || (x.item.ProductVariant != null && x.item.ProductVariant.Name.Contains(search)));
+            || x.item.Product.ProductKey.Contains(search) || (x.item.ProductVariant != null && x.item.ProductVariant.VariantName.Name.Contains(search)));
         if (!string.IsNullOrEmpty(salesPlan)) query = query.Where(x => x.plan.DisplayName.Contains(salesPlan) || x.plan.StoreSalesPlanKey.Contains(salesPlan));
         if (to.HasValue) query = query.Where(x => x.document.DocumentDate <= to.Value);
 
@@ -153,7 +153,7 @@ public sealed class WarehouseMovementsApiController(ShopDbContext db) : Controll
             ItemId = x.item.Id,
             Product = x.item.Product.Name,
             ProductKey = x.item.Product.ProductKey,
-            Variant = x.item.ProductVariant == null ? null : x.item.ProductVariant.Name,
+            Variant = x.item.ProductVariant == null ? null : x.item.ProductVariant.VariantName.Name,
             PlanId = x.plan.Id,
             SalesPlan = x.plan.DisplayName,
             Unit = x.unit.NameFa

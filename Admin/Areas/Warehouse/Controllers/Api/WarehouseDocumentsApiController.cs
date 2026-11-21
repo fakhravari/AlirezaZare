@@ -98,7 +98,7 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db, IWarehouse
                                x.IdProduct,
                                x.IdProductVariant,
                                ProductName = x.Product.Name,
-                               VariantName = x.ProductVariant == null ? null : x.ProductVariant.Name,
+                               VariantName = x.ProductVariant == null ? null : x.ProductVariant.VariantName.Name,
                                IdBaseUnit = baseUnit.IdUnit
                            }).OrderBy(x => x.ProductName).ThenBy(x => x.VariantName).ToListAsync(cancellationToken);
         long[] variantIds = items.Where(item => item.IdProductVariant.HasValue)
@@ -404,7 +404,7 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db, IWarehouse
         CancellationToken cancellationToken)
     {
         var itemIds = input.Select(x => x.InventoryItemId).ToArray();
-        var inventoryItems = await db.InventoryItems.AsNoTracking().Include(x => x.Product).Include(x => x.ProductVariant).Where(x => itemIds.Contains(x.Id) && x.IsActive && x.Product.IsWarehouseEnabled &&
+        var inventoryItems = await db.InventoryItems.AsNoTracking().Include(x => x.Product).Include(x => x.ProductVariant).ThenInclude(x => x!.VariantName).Where(x => itemIds.Contains(x.Id) && x.IsActive && x.Product.IsWarehouseEnabled &&
                         (x.ProductVariant == null || x.ProductVariant.IsActive)).ToDictionaryAsync(x => x.Id, cancellationToken);
         var productIds = inventoryItems.Values.Select(x => x.IdProduct).Distinct().ToArray();
         var selectedUnits = await (from productUnit in db.WarehouseProductUnits.AsNoTracking()
@@ -426,7 +426,7 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db, IWarehouse
             if (quantity <= 0 || baseQuantity <= 0 || baseQuantity > 999999999999999.999m) return [];
 
             result.Add(new PreparedLine(item.Id, unit.IdUnit, line.SalesPlanId, quantity, unit.ConversionFactor, baseQuantity,
-                item.Product.Name, item.ProductVariant?.Name, unit.NameFa));
+                item.Product.Name, item.ProductVariant?.VariantName.Name, unit.NameFa));
         }
 
         return result.ToArray();

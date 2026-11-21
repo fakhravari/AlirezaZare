@@ -533,10 +533,12 @@
             const grid = document.createElement(productLayout ? "table" : "dl");
             grid.className = productLayout ? "admin-record-table" : "admin-record-grid";
             const rows = productLayout ? document.createElement("tbody") : grid;
+            const headerRow = productLayout ? document.createElement("tr") : null;
+            const valueRow = productLayout ? document.createElement("tr") : null;
             for (const [key, value] of sectionEntries) {
-                const field = document.createElement(productLayout ? "tr" : "div"); if (!productLayout) field.className = "admin-record-field";
+                const field = productLayout ? null : document.createElement("div"); if (field) field.className = "admin-record-field";
                 const term = document.createElement(productLayout ? "th" : "dt"); term.className = "admin-record-label"; term.textContent = labelFor(key);
-                if (productLayout) term.scope = "row";
+                if (productLayout) term.scope = "col";
                 const description = document.createElement(productLayout ? "td" : "dd"); description.className = "admin-record-data";
                 if (options.layout === "product" && key === "media") {
                     description.append(makeProductMedia(value));
@@ -565,10 +567,17 @@
                         description.append(preview);
                     }
                 } else description.append(makeValue(value, key));
-                field.append(term, description); rows.append(field); consumed.add(key);
+                if (productLayout) { headerRow.append(term); valueRow.append(description); }
+                else { field.append(term, description); rows.append(field); }
+                consumed.add(key);
             }
-            if (productLayout) grid.append(rows);
-            section.append(sectionHeading, grid); body.append(section);
+            if (productLayout) {
+                const head = document.createElement("thead"); head.append(headerRow);
+                rows.append(valueRow); grid.append(head, rows);
+                const wrapper = document.createElement("div"); wrapper.className = "admin-record-table-scroll";
+                wrapper.append(grid); section.append(sectionHeading, wrapper);
+            } else section.append(sectionHeading, grid);
+            body.append(section);
         };
         for (const group of groups) {
             const sectionEntries = Array.isArray(group.keys)

@@ -15,15 +15,21 @@ test('product details use tables and retain media previews without changing othe
   await page.addStyleTag({path: 'Admin/wwwroot/css/admin-ui.css'});
   await page.addScriptTag({path: 'Admin/wwwroot/js/admin-ui.js'});
   await page.evaluate(() => window.AdminUI.showRecord('کالا', {
-    name: 'کالای نمونه', variants: [{name: 'آبی', price: 10}, {name: 'قرمز', price: 20}],
+    name: 'کالای نمونه', englishName: 'Sample', variants: [{name: 'آبی', price: 10}, {name: 'قرمز', price: 20}],
     media: {mainPath: 'https://example.com/image.jpg', videoList: ['https://example.com/video.mp4']}
-  }, {layout: 'product', groups: [{title: 'مشخصات', keys: ['name']}, {title: 'تنوع', keys: ['variants']}, {title: 'رسانه', keys: ['media']}]}));
-  assert.equal(await page.locator('.admin-record-section > table').count(), 3);
+  }, {layout: 'product', groups: [{title: 'مشخصات', keys: ['name', 'englishName']}, {title: 'تنوع', keys: ['variants']}, {title: 'رسانه', keys: ['media']}]}));
+  assert.equal(await page.locator('.admin-record-section > .admin-record-table-scroll > table').count(), 3);
+  const details = page.locator('.admin-record-section').first();
+  assert.equal(await details.locator('> .admin-record-table-scroll > table > thead th[scope="col"]').count(), 2);
+  assert.deepEqual(await details.locator('> .admin-record-table-scroll > table > tbody > tr > td').allTextContents(), ['کالای نمونه', 'Sample']);
   assert.equal(await page.locator('.admin-record-table-nested tbody tr').count(), 2);
   assert.equal(await page.locator('.admin-record-media-gallery img').count(), 1);
   assert.equal(await page.locator('.admin-record-media-gallery video[controls]').count(), 1);
-  assert.equal(await page.locator('.admin-record-section > table th[scope="row"]').count(), 3);
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
+  await page.setViewportSize({width: 1440, height: 900});
+  const headers = await details.locator('> .admin-record-table-scroll > table > thead th').evaluateAll(cells => cells.map(cell => ({x: cell.getBoundingClientRect().x, y: cell.getBoundingClientRect().y})));
+  assert.equal(headers[0].y, headers[1].y);
+  assert.notEqual(headers[0].x, headers[1].x);
   await page.evaluate(() => window.AdminUI.showRecord('سفارش', {name: 'سفارش نمونه'}));
   assert.equal(await page.locator('.admin-record-section > dl').count(), 1);
   assert.equal(await page.locator('#admin-record-modal').evaluate(node => node.classList.contains('admin-record-product')), false);

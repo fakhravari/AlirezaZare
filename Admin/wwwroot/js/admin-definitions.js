@@ -4,6 +4,8 @@
     if (!ui) return;
     const initialized = new WeakSet();
     const formRequests = new WeakMap();
+    const variantRows = new WeakMap();
+    const variantNames = new WeakMap();
     const fmt = new Intl.NumberFormat("fa-IR");
     const conversionFmt = new Intl.NumberFormat("fa-IR", { maximumFractionDigits: 9 });
     const configs = {
@@ -14,7 +16,7 @@
         units: { fields: [["parentId", "گروه والد", "unit-groups", true], ["nameFa", "نام فارسی", "text", true], ["nameEn", "نام انگلیسی", "text"], ["isActive", "واحد فعال است", "checkbox"]], columns: [["parentName", "گروه والد"], ["nameFa", "نام فارسی"], ["nameEn", "نام انگلیسی"], ["isActive", "وضعیت", "active"]] },
         "document-types": { fields: [["code", "کد نوع سند", "text", true], ["name", "نام سند", "text", true], ["direction", "جهت سند", "select", true, [["R", "رسید"], ["I", "حواله"]]], ["affectsStock", "بر موجودی اثر دارد", "checkbox" ]], columns: [["code", "کد"], ["name", "نوع سند"], ["direction", "جهت", "direction"], ["affectsStock", "اثر موجودی", "affects"], ["isActive", "وضعیت", "active"]] }
         ,"product-units": { fields: [["productId", "کالا", "products", true], ["unitId", "واحد", "units", true], ["conversionFactor", "ضریب تبدیل به واحد اصلی", "number", true], ["isBaseUnit", "واحد اصلی کالا", "checkbox"]], columns: [["productName", "کالا"], ["unitName", "واحد"], ["conversionFactor", "ضریب تبدیل"], ["isBaseUnit", "اصلی", "base"], ["isActive", "وضعیت", "active"]] },
-        variants: { fields: [["productId", "کالا", "products", true], ["name", "نام تنوع", "text", true], ["code", "کد تنوع", "text"], ["attributes", "ویژگی‌های تنوع", "attributes"], ["isDefault", "تنوع پیش‌فرض", "checkbox"]], columns: [["productName", "کالا"], ["name", "تنوع"], ["code", "کد"], ["attributes", "ویژگی‌ها", "attributes"], ["isDefault", "پیش‌فرض", "default"], ["isActive", "وضعیت", "active"]] }
+        variants: { fields: [["productId", "کالا", "products", true], ["variantNameId", "نام تنوع", "variant-names", true], ["attributes", "ویژگی‌های تنوع", "attributes"], ["isDefault", "تنوع پیش‌فرض", "checkbox"]], columns: [["productName", "کالا"], ["name", "تنوع"], ["attributes", "ویژگی‌ها", "attributes"], ["createdAtUtc", "تاریخ ثبت", "date"], ["isDefault", "پیش‌فرض", "default"], ["isActive", "وضعیت", "active"]] }
     };
     const esc = value => value == null || value === "" ? "—" : String(value);
     function setStatus(page, message, error = false) {
@@ -41,9 +43,12 @@
     function renderTable(page, rows, config) {
         const head = page.querySelector("[data-definition-head]"), body = page.querySelector("[data-definition-rows]");
         const referenceType = page.querySelector("[data-reference-type-filter]")?.value;
-        const visibleRows = page.dataset.definitionSection === "references" && referenceType
-            ? rows.filter(item => item.partyType === referenceType)
-            : rows;
+        const productFilter = page.querySelector("[data-variant-product-filter]")?.value || "";
+        const statusFilter = page.querySelector("[data-variant-status-filter]")?.value || "";
+        const visibleRows = rows.filter(item =>
+            (page.dataset.definitionSection !== "references" || !referenceType || item.partyType === referenceType) &&
+            (page.dataset.definitionSection !== "variants" || ((!productFilter || String(item.idProduct) === productFilter) &&
+                (!statusFilter || item.isActive === (statusFilter === "active")))));
         ui.destroyDataTable(page.querySelector("[data-admin-datatable]"));
         head.replaceChildren(); body.replaceChildren();
         const tr = document.createElement("tr");
@@ -55,6 +60,7 @@
                 let value = item[key];
                 if (key === "warehouseLabel") value = `${item.companyName} / ${item.name} (${item.code})`;
                 if (format === "active") value = active(value);
+                if (format === "date") value = value ? ui.formatDateTime(value) : "—";
                 if (format === "default") value = value ? "پیش‌فرض" : "خیر";
                 if (format === "direction") value = value === "R" ? "رسید" : "حواله";
                 if (format === "affects") value = value ? "دارد" : "ندارد";
@@ -88,6 +94,13 @@
                 }
                 if (page.dataset.canDeactivate === "true" && page.dataset.definitionSection !== "stock-owners") {
                 const deactivate = actionButton("غیرفعال‌سازی", "fa-toggle-off", "btn btn-sm btn-outline-danger");
+                if (page.dataset.definitionSection === "variants" && (item.isDefault || !rows.some(other => other.idProduct === item.idProduct && other.id !== item.id && other.isActive))) {
+                    deactivate.disabled = true;
+                    deactivate.title = item.isDefault
+                        ? "تنوع پیش‌فرض قابل غیرفعال‌سازی نیست؛ ابتدا تنوع فعال دیگری را پیش‌فرض کنید."
+                        : "کالای دارای تنوع باید حداقل یک تنوع فعال داشته باشد.";
+                    deactivate.setAttribute("aria-label", deactivate.title);
+                }
                 deactivate.dataset.adminConfirm = "این تعریف غیرفعال شود؟ سابقهٔ گردش‌ها حفظ می‌شود.";
                 deactivate.addEventListener("click", async () => {
                     if (deactivate.disabled) return;
@@ -102,7 +115,7 @@
             row.append(actions); body.append(row);
         }
         ui.refreshDataTable(page.querySelector("[data-admin-datatable]"));
-        setStatus(page, visibleRows.length ? "" : (referenceType ? "مرجعی با این نوع پیدا نشد." : "موردی ثبت نشده است."));
+        setStatus(page, visibleRows.length ? "" : (referenceType ? "مرجعی با این نوع پیدا نشد." : (productFilter || statusFilter) ? "تنوعی با این فیلترها پیدا نشد." : "موردی ثبت نشده است."));
     }
     function renderProductUnitTree(page, rows, config) {
         const tree = page.querySelector("[data-product-unit-tree]");
@@ -355,6 +368,16 @@
             host.append(wrap);
             return;
         }
+        if (type === "variant-names") {
+            const control = element("select", null, "form-select");
+            control.name = key; control.id = `definition-${key}`; control.required = required;
+            control.append(new Option("انتخاب نام تنوع", ""));
+            for (const item of lookups.variantNames || []) if (item.isActive || String(item.id) === String(data[key] ?? ""))
+                control.add(new Option(variantNamePath(lookups.variantNames, item.id), String(item.id)));
+            control.value = data[key] == null ? "" : String(data[key]);
+            const caption = element("label", label, "form-label"); caption.htmlFor = control.id; wrap.append(caption, control);
+            host.append(wrap); return;
+        }
         if (type === "checkbox") {
             const check = element("input", null, "form-check-input"); check.type = "checkbox"; ui.initStatusSwitch(check); check.name = key; check.checked = Boolean(data[key]); check.id = `definition-${key}`;
             const caption = element("label", label, "form-check-label"); caption.htmlFor = check.id; wrap.className = "form-check mb-3"; wrap.append(check, caption);
@@ -426,9 +449,10 @@
         if (data && page.dataset.definitionSection === "references") data = { ...data, warehouseId: data.idWarehouse };
         if (data && page.dataset.definitionSection === "product-units") data = { ...data, productId: data.idProduct, unitId: data.idUnit };
         if (data && page.dataset.definitionSection === "units") data = { ...data, parentId: data.idParent };
-        if (data && page.dataset.definitionSection === "variants") data = { ...data, productId: data.idProduct };
+        if (data && page.dataset.definitionSection === "variants") data = { ...data, productId: data.idProduct, variantNameId: data.idVariantName };
         let lookups = { warehouses: [] };
         if (["references", "product-units", "variants", "warehouses"].includes(page.dataset.definitionSection)) lookups = await request(page, `${page.dataset.api}/lookups`);
+        if (page.dataset.definitionSection === "variants") lookups.variantNames = variantNames.get(page) || [];
         let variantTree = [];
         if (page.dataset.definitionSection === "variants" && data?.productId)
             variantTree = await request(page, `${page.dataset.api}/variant-options/${encodeURIComponent(data.productId)}${data.id ? `?variantId=${encodeURIComponent(data.id)}` : ""}`);
@@ -517,6 +541,46 @@
         renderRows();
         if (data.siteWarehouseId) { const selected = data.warehouses.find(item => item.id === data.siteWarehouseId); if (selected) { company.value = String(selected.idCompany); fillWarehouses(); warehouse.value = String(selected.id); } }
     }
+    function variantNamePath(nodes, id) {
+        const byId = new Map(nodes.map(node => [String(node.id), node]));
+        const parts = [], seen = new Set();
+        let node = byId.get(String(id));
+        while (node && !seen.has(String(node.id))) {
+            seen.add(String(node.id)); parts.unshift(node.name);
+            node = node.idParent == null ? null : byId.get(String(node.idParent));
+        }
+        return parts.join(" / ");
+    }
+    async function loadVariantNames(page) {
+        const nodes = await request(page, `${page.dataset.api}/variant-names`);
+        variantNames.set(page, nodes);
+        const form = page.querySelector("[data-variant-name-form]"), tree = page.querySelector("[data-variant-name-tree]");
+        if (!form || !tree) return;
+        const parent = form.elements.idParent, selected = parent.value;
+        parent.replaceChildren(new Option("ریشه", ""));
+        for (const node of nodes) if (node.isActive) parent.add(new Option(variantNamePath(nodes, node.id), node.id));
+        parent.value = nodes.some(node => String(node.id) === selected) ? selected : "";
+        window.jQuery?.(parent).trigger("change.select2");
+        tree.replaceChildren();
+        const appendBranch = (parentId, host) => {
+            for (const node of nodes.filter(item => item.idParent === parentId)) {
+                const li = element("li", null, "list-group-item");
+                const heading = element("div", null, "d-flex align-items-center justify-content-between gap-2");
+                heading.append(element("span", node.name));
+                if (page.dataset.canEdit === "true") {
+                    const edit = actionButton("ویرایش", "fa-pen-to-square", "btn btn-sm btn-default");
+                    edit.addEventListener("click", () => { form.elements.id.value = node.id; form.elements.name.value = node.name; parent.value = node.idParent ?? ""; window.jQuery?.(parent).trigger("change.select2"); form.querySelector("[data-variant-name-cancel]").hidden = false; form.elements.name.focus(); });
+                    heading.append(edit);
+                }
+                li.append(heading);
+                const children = element("ul", null, "list-group mt-2");
+                appendBranch(node.id, children);
+                if (children.childElementCount) li.append(children);
+                host.append(li);
+            }
+        };
+        appendBranch(null, tree);
+    }
     async function load(page) {
         const section = page.dataset.definitionSection;
         if (section === "sales-plan-mapping") { await loadMapping(page); setStatus(page, ""); return; }
@@ -530,6 +594,18 @@
             return;
         }
         const rows = await request(page, `${page.dataset.api}/${section}`);
+        if (section === "variants") {
+            variantRows.set(page, rows);
+            const product = page.querySelector("[data-variant-product-filter]");
+            if (product) {
+                const selected = product.value;
+                const products = new Map(rows.map(item => [String(item.idProduct), item.productName]));
+                product.replaceChildren(new Option("همهٔ کالاها", ""));
+                for (const [id, name] of [...products].sort((a, b) => a[1].localeCompare(b[1], "fa"))) product.add(new Option(name, id));
+                if (products.has(selected)) product.value = selected;
+                window.jQuery?.(product).trigger("change.select2");
+            }
+        }
         if (section === "product-units") renderProductUnitTree(page, rows.filter(item => item.isActive === false), config);
         else renderTable(page, rows, config);
     }
@@ -565,11 +641,35 @@
                         finally { groupForm.dataset.saving = "false"; button.disabled = false; }
                     });
                 }
+                if (section === "variants") {
+                    await loadVariantNames(page);
+                    const nameForm = page.querySelector("[data-variant-name-form]");
+                    if (nameForm) {
+                        nameForm.hidden = page.dataset.canCreate !== "true" && page.dataset.canEdit !== "true";
+                        const reset = () => { nameForm.reset(); nameForm.elements.id.value = ""; nameForm.querySelector("[data-variant-name-cancel]").hidden = true; window.jQuery?.(nameForm.elements.idParent).trigger("change.select2"); };
+                        nameForm.querySelector("[data-variant-name-cancel]").addEventListener("click", reset);
+                        nameForm.addEventListener("submit", async event => {
+                            event.preventDefault();
+                            const id = nameForm.elements.id.value, name = nameForm.elements.name.value.trim();
+                            if (!name || (id ? page.dataset.canEdit !== "true" : page.dataset.canCreate !== "true")) return;
+                            const button = nameForm.querySelector('[type="submit"]'); button.disabled = true;
+                            try {
+                                const result = await request(page, `${page.dataset.api}/variant-names${id ? `/${id}` : ""}`, id ? "PUT" : "POST", { name, idParent: Number(nameForm.elements.idParent.value) || null });
+                                ui.notify(result.message, "success"); reset(); await loadVariantNames(page); await load(page);
+                            } catch (error) { ui.notify(error.message || "ذخیرهٔ نام تنوع ناموفق بود.", "danger"); }
+                            finally { button.disabled = false; }
+                        });
+                    }
+                }
                 const config = configs[section];
                 page.querySelector("[data-reference-type-filter]")?.addEventListener("change", () => void load(page));
+                for (const filter of page.querySelectorAll("[data-variant-product-filter], [data-variant-status-filter]"))
+                    filter.addEventListener("change", () => renderTable(page, variantRows.get(page) || [], config));
                 const createButton = page.querySelector("[data-definition-create]");
-                createButton.hidden = page.dataset.canCreate !== "true";
-                createButton.addEventListener("click", () => void openForm(page, null, config).catch(error => ui.notify(error.message || "بازکردن فرم ناموفق بود.", "danger")));
+                if (createButton) {
+                    createButton.hidden = page.dataset.canCreate !== "true";
+                    createButton.addEventListener("click", () => void openForm(page, null, config).catch(error => ui.notify(error.message || "بازکردن فرم ناموفق بود.", "danger")));
+                }
                 form.addEventListener("submit", async event => {
                     event.preventDefault();
                     if (form.dataset.saving === "true") return;
@@ -583,7 +683,7 @@
                     const values = new FormData(form), id = values.get("id"); const body = {};
                     for (const [key, , type] of config.fields) {
                         if (type === "attributes") continue;
-                        body[key] = type === "checkbox" ? Boolean(form.elements.namedItem(key)?.checked) : (key === "idStockOwnerType" || ["number", "products", "product-fixed", "units", "companies", "plans", "unit-groups"].includes(type) ? Number(values.get(key)) || null : values.get(key));
+                        body[key] = type === "checkbox" ? Boolean(form.elements.namedItem(key)?.checked) : (key === "idStockOwnerType" || ["number", "products", "product-fixed", "units", "companies", "plans", "unit-groups", "variant-names"].includes(type) ? Number(values.get(key)) || null : values.get(key));
                     }
                     if (section === "variants") {
                         const rows = [...form.querySelectorAll("[data-variant-attribute]")];

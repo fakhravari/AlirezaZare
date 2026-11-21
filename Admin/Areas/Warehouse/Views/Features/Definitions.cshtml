@@ -41,6 +41,21 @@
     }
     else
     {
+        @if (Model.FeatureId == "variants")
+        {
+            <section class="panel panel-inverse">
+                <div class="panel-heading"><h2 class="panel-title">مرجع درختی نام تنوع</h2></div>
+                <div class="panel-body">
+                    <form class="row g-2 align-items-end mb-3" data-variant-name-form>
+                        <input type="hidden" name="id" />
+                        <div class="col-12 col-md-4"><label class="form-label" for="variant-name-parent">والد</label><select class="form-select" id="variant-name-parent" name="idParent"><option value="">ریشه</option></select></div>
+                        <div class="col-12 col-md-4"><label class="form-label" for="variant-name-label">نام</label><input class="form-control" id="variant-name-label" name="name" maxlength="300" required /></div>
+                        <div class="col-12 col-md-4 d-flex gap-2"><button type="submit" class="btn btn-primary">ذخیرهٔ نام</button><button type="button" class="btn btn-default" data-variant-name-cancel hidden>انصراف</button></div>
+                    </form>
+                    <ul class="list-group" data-variant-name-tree aria-label="درخت مرجع نام تنوع"></ul>
+                </div>
+            </section>
+        }
         @if (Model.FeatureId == "references")
         {
             <section class="panel panel-inverse">
@@ -55,7 +70,7 @@
             <div class="panel-heading">
                 <h2 class="panel-title">@(Model.FeatureId == "warehouses" ? "تخصیص انبار به شرکت" : Model.FeatureId == "references" ? "مراجع ثبت‌شده" : Model.FeatureId == "units" ? "درخت گروه‌های واحد و واحدها" : "فهرست تعریف‌ها")</h2>
                 <div class="panel-heading-btn">
-                    @if (Model.FeatureId != "references")
+                    @if (Model.FeatureId != "references" && Model.FeatureId != "product-units")
                     {
                         <button type="button" class="btn btn-primary btn-sm" data-definition-create><i class="fa fa-plus me-1" aria-hidden="true"></i>@(Model.FeatureId == "warehouses" ? "افزودن تخصیص" : Model.FeatureId == "units" ? "افزودن واحد" : "افزودن")</button>
                     }
@@ -72,6 +87,17 @@
                             <option value="Organization">سازمان</option>
                             <option value="Warehouse">انبار</option>
                             <option value="Other">سایر</option>
+                        </select>
+                    </div>
+                }
+                @if (Model.FeatureId == "variants")
+                {
+                    <div class="admin-filter-bar d-flex flex-wrap align-items-center gap-2 mb-3">
+                        <label class="visually-hidden" for="variant-product-filter">فیلتر کالا</label>
+                        <select class="form-select" id="variant-product-filter" data-variant-product-filter><option value="">همهٔ کالاها</option></select>
+                        <label class="visually-hidden" for="variant-status-filter">فیلتر وضعیت</label>
+                        <select class="form-select" id="variant-status-filter" data-variant-status-filter>
+                            <option value="">همهٔ وضعیت‌ها</option><option value="active">فعال</option><option value="inactive">غیرفعال</option>
                         </select>
                     </div>
                 }
