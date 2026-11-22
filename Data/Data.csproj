@@ -7,9 +7,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
   <ItemGroup>
-	  <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.14" />
+	  <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
 	  <FrameworkReference Include="Microsoft.AspNetCore.App" />
-    <PackageReference Include="FluentFTP" Version="55.1.0" />
-    <PackageReference Include="System.Security.Cryptography.Pkcs" Version="11.0.0" />
+    <PackageReference Include="FluentFTP" />
+    <PackageReference Include="System.Security.Cryptography.Pkcs" />
   </ItemGroup>
 </Project>

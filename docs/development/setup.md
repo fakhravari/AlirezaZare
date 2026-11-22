@@ -17,6 +17,8 @@ dotnet run --project Shop/Shop.csproj --artifacts-path C:\AlirezaZare-build-arti
 
 پروفایل اجرا، پورت و environment را از `Shop/Properties/launchSettings.json` بررسی کنید. پنل مستقل است و با پروژهٔ `Admin/Admin.csproj` اجرا می‌شود. هر دو به SQL Server و `Data/Data.csproj` وابسته‌اند؛ اتصال را از تنظیمات environment/User Secrets بگیرید و مقدار secret را در سند یا خروجی ترمینال ثبت نکنید. خروجی و intermediateهای .NET باید با `--artifacts-path` زیر `C:\AlirezaZare-build-artifacts\` باشند؛ در Visual Studio ساخت محلی را به این مسیر هدایت کنید و از مسیر پیش‌فرض `bin/obj` استفاده نکنید.
 
+نسخهٔ همهٔ بسته‌های NuGet در `Directory.Packages.props` ریشهٔ مخزن نگهداری می‌شود. پروژه‌ها فقط `PackageReference` بدون نسخه تعریف می‌کنند؛ برای افزودن بسته، نسخه را در فایل مرکزی ثبت و سپس ارجاع پروژه را بدون ویژگی `Version` اضافه کنید. بستهٔ `FluentFTP` تنها در پروژهٔ Data مصرف می‌شود.
+
 ## حفظ نشست پس از انتشار
 
 کوکی‌های Shop و Admin با ASP.NET Core Data Protection محافظت می‌شوند. اگر کلیدهای رمزنگاری با جایگزینی برنامه پاک شوند، در حساب کاربری سرویس ذخیره نشوند یا مسیر برنامه و در نتیجه شناسهٔ برنامه تغییر کند، نسخهٔ جدید نمی‌تواند نشست پیشین را بخواند. پیش از تغییر، محل واقعی key ring و شناسهٔ برنامه را در محیط میزبان بررسی و از کلیدهای موجود نسخهٔ پشتیبان امن تهیه کنید؛ علت خروج در یک سرور مشخص باید از تنظیمات و log همان سرور تأیید شود.

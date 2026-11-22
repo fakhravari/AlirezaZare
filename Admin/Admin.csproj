@@ -8,8 +8,7 @@
 	</PropertyGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\Data\Data.csproj" />
-		<PackageReference Include="FluentFTP" Version="55.1.0" />
-		<PackageReference Include="Magick.NET-Q8-AnyCPU" Version="15.1.0" />
+		<PackageReference Include="Magick.NET-Q8-AnyCPU" />
 	</ItemGroup>
 	<ItemGroup>
 		<Content Include="App_Data\keys\key-bc131190-ad22-4ff5-b111-76aedae129d0.xml">

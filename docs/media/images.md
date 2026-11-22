@@ -1,6 +1,6 @@
 # تصویرها و رسانه‌های فروشگاه
 
-assetهای ثابت رابط در `Shop/wwwroot/` و محتوای بارگذاری‌شده از مسیرهای مدیریت رسانه/CDN تأمین می‌شوند. درخواست‌های upload پنل از `Admin/Areas/Store/Controllers/Api/StoreMediaUploadApiController.cs` و تصاویر محصول از `StoreProductImageApiController.cs` عبور می‌کنند؛ اتصال FTP و خواندن/ارتقای تنظیمات رمز در `Data/Infrastructure/Ftp/FtpMediaUploadService.cs` است. برای هر نوع فایل، قبل از تغییر storage path تنظیمات محیط و API را بررسی کنید.
+assetهای ثابت رابط در `Shop/wwwroot/` و محتوای بارگذاری‌شده از مسیرهای مدیریت رسانه/CDN تأمین می‌شوند. درخواست‌های upload پنل از `Admin/Areas/Store/Controllers/Api/StoreMediaUploadApiController.cs` و تصاویر محصول از `StoreProductImageApiController.cs` عبور می‌کنند؛ اتصال FTP و خواندن/ارتقای تنظیمات رمز در `Data/Infrastructure/Ftp/FtpMediaUploadService.cs` است. نسخهٔ `FluentFTP` در فایل مرکزی `Directory.Packages.props` تعریف شده و فقط Data آن را مستقیم مصرف می‌کند. برای هر نوع فایل، قبل از تغییر storage path تنظیمات محیط و API را بررسی کنید.
 
 ## ترتیب رسانهٔ محصول
 
