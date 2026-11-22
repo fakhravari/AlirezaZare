@@ -11,16 +11,11 @@ DECLARE @ProfileId BIGINT = 90;
         ci.IdVariant AS IdProductVariant,
         ci.IdSalesPlan,
         ci.Quantity,
-        COALESCE(vp.PriceAmount, pp.PriceAmount, 0) AS BaseAmount,
-        COALESCE(vp.DiscountPercent, pp.DiscountPercent, 0) AS DiscountPercent
+        CASE WHEN ci.IdVariant IS NULL THEN pp.PriceAmount ELSE vp.PriceAmount END AS BaseAmount,
+        CASE WHEN ci.IdVariant IS NULL THEN pp.DiscountPercent ELSE vp.DiscountPercent END AS DiscountPercent
     FROM Account.Cart AS c
     JOIN Account.CartItem AS ci ON ci.IdCart = c.Id
-    JOIN Warehouse.Product AS p ON p.Id = ci.IdProduct
-       AND p.IsStoreEnabled = 1
-    JOIN Warehouse.SalesPlanReference AS sp ON sp.Id = ci.IdSalesPlan
-       AND sp.IsEnabled = 1
-       AND (sp.StartsAtUtc IS NULL OR sp.StartsAtUtc <= SYSUTCDATETIME())
-       AND (sp.EndsAtUtc IS NULL OR sp.EndsAtUtc > SYSUTCDATETIME())
+    LEFT JOIN Warehouse.Product AS p ON p.Id = ci.IdProduct
     OUTER APPLY
     (
         SELECT TOP (1) version.PriceAmount, version.DiscountPercent
@@ -29,7 +24,8 @@ DECLARE @ProfileId BIGINT = 90;
           AND version.IdProduct = ci.IdProduct
           AND version.IdSalesPlan = ci.IdSalesPlan
           AND version.IdVariant IS NULL
-          AND version.IdAccessory IS NULL        ORDER BY version.Id DESC
+          AND version.IdAccessory IS NULL
+        ORDER BY version.Id DESC
     ) AS pp
     OUTER APPLY
     (
@@ -39,21 +35,10 @@ DECLARE @ProfileId BIGINT = 90;
           AND version.IdProduct = ci.IdProduct
           AND version.IdSalesPlan = ci.IdSalesPlan
           AND version.IdVariant = ci.IdVariant
-          AND EXISTS (SELECT 1 FROM Store.ProductVariantSalesPlanOffer AS variantOffer WHERE variantOffer.IdVariant = ci.IdVariant AND variantOffer.IdSalesPlan = ci.IdSalesPlan AND variantOffer.IsEnabled = 1)
-          AND version.IdAccessory IS NULL        ORDER BY version.Id DESC
+          AND version.IdAccessory IS NULL
+        ORDER BY version.Id DESC
     ) AS vp
     WHERE c.IdProfile = @ProfileId
-      AND
-      (
-          ci.IdVariant IS NULL OR EXISTS
-          (
-              SELECT 1
-              FROM Warehouse.ProductVariant AS activeVariant
-              WHERE activeVariant.Id = ci.IdVariant
-                AND activeVariant.IdProduct = ci.IdProduct
-                AND activeVariant.IsActive = 1
-          )
-      )
 ),
 Components AS
 (
@@ -91,7 +76,7 @@ Components AS
         CONVERT(DECIMAL(5, 2), 0) AS DiscountPercent
     FROM CartRows AS cr
     JOIN Store.ProductAccessory AS pa ON pa.IdProduct = cr.IdProduct
-    JOIN Store.Accessory AS accessory ON accessory.Id = pa.IdAccessory AND accessory.IsActive = 1
+    LEFT JOIN Store.Accessory AS accessory ON accessory.Id = pa.IdAccessory
     LEFT JOIN Account.CartItemAccessory AS selected ON selected.IdCartItem = cr.IdCartItem AND selected.IdProductAccessory = pa.Id
     OUTER APPLY
     (
@@ -120,9 +105,10 @@ SELECT
     ComponentName,
     BaseAmount,
     DiscountPercent,
-    CONVERT(DECIMAL(19, 0), ROUND(BaseAmount * DiscountPercent / 100.0, 0)) AS DiscountAmount,
-    CONVERT(DECIMAL(19, 0), BaseAmount - ROUND(BaseAmount * DiscountPercent / 100.0, 0)) AS FinalUnitAmount,
-    CONVERT(DECIMAL(19, 0), (BaseAmount - ROUND(BaseAmount * DiscountPercent / 100.0, 0)) * Quantity) AS LineTotal
+    CASE WHEN BaseAmount IS NULL THEN N'missing-price' ELSE N'price-found' END AS PriceStatus,
+    CONVERT(DECIMAL(19, 0), BaseAmount - ROUND(BaseAmount * (100 - DiscountPercent) / 100.0, 0)) AS DiscountAmount,
+    CONVERT(DECIMAL(19, 0), ROUND(BaseAmount * (100 - DiscountPercent) / 100.0, 0)) AS FinalUnitAmount,
+    CONVERT(DECIMAL(19, 0), (ROUND(BaseAmount * (100 - DiscountPercent) / 100.0, 0)) * Quantity) AS LineTotal
 FROM Components
 ORDER BY
     IdProfile,

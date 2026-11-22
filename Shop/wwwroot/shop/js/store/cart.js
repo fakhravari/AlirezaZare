@@ -269,12 +269,7 @@
     groupBySalesPlan,
     salesPlanName,
     identity(item) {
-      const options = item?.options || {};
-      const accessories = (Array.isArray(options.accessories) ? options.accessories : [])
-        .filter((accessory) => accessory.selected !== false)
-        .map((accessory) => Number(accessory.productAccessoryId || accessory.id) || String(accessory.id || ""))
-        .sort((left, right) => String(left).localeCompare(String(right)));
-      return JSON.stringify([String(item?.id || ""), Number(item?.variantId) || null, String(item?.salesPlanId || "regular"), accessories]);
+      return JSON.stringify([String(item?.id || ""), String(item?.salesPlanId || "regular")]);
     },
     renderControls(item, index = null) {
       const attribute = (action) => index === null
@@ -311,11 +306,8 @@
     restoreAccountLines(lines) {
       accountReady = true;
       const restored = [];
-      const known = new Set();
       const salesPlanData = getSalesPlanData();
       for (const line of Array.isArray(lines) ? lines : []) {
-        const identity = this.identity(line);
-        if (known.has(identity)) continue;
         const product = (window.HNProducts || []).find((candidate) => String(candidate.id) === String(line.id));
         if (!product) continue;
         const salesPlanId = String(line.salesPlanId || "regular");
@@ -341,7 +333,6 @@
         }
         if (!hasAllAccessoryPrices) continue;
         restored.push({ ...product, id: String(line.id), variantId: line.variantId ?? null, quantity: Number(line.quantity), salesPlanId, price: unitAmount, salesPlanSnapshot: { id: salesPlanId, unitAmount, accessoryPriceAmounts: accessoryAmounts }, options: line.options || {} });
-        known.add(identity);
       }
       restoringAccount = true;
       try { return this.write(restored); }

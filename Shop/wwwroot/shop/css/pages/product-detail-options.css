@@ -1848,11 +1848,11 @@
   width: 92px;
   min-width: 92px;
   min-height: 67px;
-  grid-template-rows: 42px 22px;
+  grid-template-rows: auto auto;
   justify-items: center;
   align-items: start;
   vertical-align: top;
-  gap: 3px;
+  gap: 7px;
 }
 
 #productView .product-variant-choices {

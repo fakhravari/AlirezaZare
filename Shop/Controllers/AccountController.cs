@@ -461,9 +461,7 @@ public sealed class AccountController(
         var duplicate = request.Items.GroupBy(i => new
         {
             i.ProductId,
-            i.SalesPlanId,
-            i.VariantId,
-            Accessories = string.Join(",", (i.AccessoryIds ?? []).OrderBy(id => id))
+            i.SalesPlanId
         }).Any(g => g.Count() > 1);
         if (duplicate) return BadRequest(new { code = "duplicate-cart-line" });
 
