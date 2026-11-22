@@ -141,7 +141,11 @@ test('plan and variant filters send product and dates to their endpoints', {skip
   for (const path of ['/api/prices/plans', '/api/prices']) {
     const url = requests.filter(item => item.pathname === path).at(-1);
     assert.equal(url.searchParams.get('q'), '123');
-    if (path === '/api/prices') assert.deepEqual(url.searchParams.getAll('productIds'), ['12', '34']);
+    if (path === '/api/prices') {
+      assert.deepEqual(url.searchParams.getAll('productIds'), ['12', '34']);
+      assert.equal(url.searchParams.get('all'), 'true');
+      assert.equal(url.searchParams.has('page'), false);
+    }
     assert.equal(url.searchParams.get('from'), '2024-03-20');
     assert.equal(url.searchParams.get('to'), '2024-03-21');
   }

@@ -34,15 +34,44 @@
         });
         form.addEventListener("reset", () => { clearTimeout(timer); setTimeout(reload, 0); });
     }
-    function updatePager(page, kind, current, total) {
-        const prefix = kind === "offer" ? "offer" : "price";
-        const pager = page.querySelector(`[data-${prefix}-pagination]`);
+    function updatePager(page, current, total) {
+        const pager = page.querySelector("[data-offer-pagination]");
         if (!pager) return;
         const pages = Math.max(1, Math.ceil(total / pageSize));
-        ui.renderNumberedPagination(pager, current, pages, target => {
-            if (kind === "offer") void loadOffers(page, target);
-            else void load(page, target);
-        }, kind === "offer" ? "صفحه‌بندی پیشنهادها" : "صفحه‌بندی قیمت‌ها");
+        ui.renderNumberedPagination(pager, current, pages, target => void loadOffers(page, target), "صفحه‌بندی پیشنهادها");
+    }
+    function updateSaveAll(page) {
+        const button = page.querySelector("[data-price-save-all]");
+        if (button) button.disabled = page.dataset.canEdit !== "true" || page._variantPriceBulkSaving || page._variantPriceSaving.size > 0 || page._variantPriceDrafts.size === 0;
+    }
+    function pricePayload(amount, discount, active) {
+        if (!amount.value.trim()) throw new Error("برای فروش این تنوع، قیمت آن را در این طرح فروش ثبت کنید.");
+        const priceAmount = ui.priceValue(amount), discountPercent = Number(discount.value || 0);
+        if (!Number.isSafeInteger(priceAmount) || priceAmount < 0 || !Number.isFinite(discountPercent) || discountPercent < 0 || discountPercent >= 100 || !discount.validity.valid) throw new Error("قیمت صحیح و تخفیف تا دو رقم اعشار و کمتر از ۱۰۰ وارد کنید.");
+        return { priceAmount, discountPercent, isEnabled: active };
+    }
+    async function saveAll(page) {
+        if (page._variantPriceBulkSaving || page._variantPriceSaving.size || !page._variantPriceDrafts.size) return;
+        const message = page.querySelector("[data-price-save-all-status]"), entries = [];
+        for (const [key, draft] of page._variantPriceDrafts) {
+            const amount = document.createElement("input"), discount = document.createElement("input");
+            amount.type = "text"; ui.setPriceValue(amount, draft.amount);
+            discount.type = "number"; discount.min = "0"; discount.max = "99.99"; discount.step = "0.01"; discount.value = draft.discount;
+            try { entries.push({ key, item: draft.item, payload: pricePayload(amount, discount, draft.active) }); }
+            catch (error) { message.textContent = `${draft.item.productName}، ${draft.item.variantName}، ${draft.item.salesPlanName}: ${error.message}`; return; }
+        }
+        page._variantPriceBulkSaving = true; render(page);
+        let saved = 0; const failures = [];
+        for (const entry of entries) {
+            message.textContent = `در حال ذخیرهٔ ${number.format(saved + failures.length + 1)} از ${number.format(entries.length)}…`;
+            try {
+                await request(page, `${page.dataset.api}/${entry.item.variantId}/${encodeURIComponent(entry.item.salesPlanId)}`, "PUT", entry.payload);
+                page._variantPriceDrafts.delete(entry.key); saved++;
+            } catch (error) { failures.push(`${entry.item.productName}، ${entry.item.variantName}، ${entry.item.salesPlanName}: ${error.message || "ذخیره ناموفق بود."}`); }
+        }
+        await load(page);
+        page._variantPriceBulkSaving = false; render(page);
+        message.textContent = `${number.format(saved)} ردیف ذخیره شد.${failures.length ? ` ${number.format(failures.length)} ردیف ذخیره نشد: ${failures.join("؛ ")}` : ""}`;
     }
     function render(page) {
         const rows = page._variantPriceRows;
@@ -62,46 +91,38 @@
             discount.value = draft?.discount ?? (item.discountPercent == null ? "0" : String(item.discountPercent)); discount.disabled = page.dataset.canEdit !== "true"; discountCell.append(discount); row.append(discountCell);
             const activeCell = document.createElement("td"), activeLabel = document.createElement("label"), active = document.createElement("input"), activeText = document.createElement("span");
             active.type = "checkbox"; ui.initStatusSwitch(active); active.checked = draft?.active ?? (item.isEnabled !== false); active.disabled = page.dataset.canEdit !== "true"; activeText.textContent = " فعال"; activeLabel.append(active, activeText); activeCell.append(activeLabel); row.append(activeCell);
-            const rememberDraft = () => page._variantPriceDrafts.set(key, { amount: amount.value, discount: discount.value, active: active.checked });
+            const rememberDraft = () => { page._variantPriceDrafts.set(key, { item, amount: amount.value, discount: discount.value, active: active.checked }); updateSaveAll(page); };
             amount.addEventListener("input", rememberDraft); discount.addEventListener("input", rememberDraft); active.addEventListener("change", rememberDraft);
             const actions = document.createElement("td"), save = document.createElement("button"); actions.className = "admin-pricing-row-actions"; save.type = "button"; save.className = "btn btn-sm btn-primary"; save.textContent = "ذخیره"; save.dataset.adminConfirm = "قیمت و وضعیت طرح برای این تنوع ذخیره شود؟"; save.disabled = page.dataset.canEdit !== "true";
             ui.withIcon(save, "fa-floppy-disk");
-            const setBusy = busy => { if (busy) page._variantPriceSaving.add(key); else page._variantPriceSaving.delete(key); const disabled = busy || page.dataset.canEdit !== "true"; save.disabled = disabled; amount.disabled = disabled; discount.disabled = disabled; active.disabled = disabled; };
+            const setBusy = busy => { if (busy) page._variantPriceSaving.add(key); else page._variantPriceSaving.delete(key); const disabled = busy || page._variantPriceBulkSaving || page.dataset.canEdit !== "true"; save.disabled = disabled; amount.disabled = disabled; discount.disabled = disabled; active.disabled = disabled; updateSaveAll(page); };
             save.addEventListener("click", async () => {
                 if (save.disabled) return;
                 setBusy(true);
                 try {
-                    if (!amount.value.trim()) throw new Error("برای فروش این تنوع، قیمت آن را در این طرح فروش ثبت کنید.");
-                    const priceAmount = ui.priceValue(amount), discountPercent = Number(discount.value || 0);
-                    if (!Number.isSafeInteger(priceAmount) || priceAmount < 0 || !Number.isFinite(discountPercent) || discountPercent < 0 || discountPercent >= 100 || !discount.validity.valid) throw new Error("قیمت صحیح و تخفیف تا دو رقم اعشار و کمتر از ۱۰۰ وارد کنید.");
-                    await request(page, `${page.dataset.api}/${item.variantId}/${encodeURIComponent(item.salesPlanId)}`, "PUT", { priceAmount, discountPercent, isEnabled: active.checked });
+                    await request(page, `${page.dataset.api}/${item.variantId}/${encodeURIComponent(item.salesPlanId)}`, "PUT", pricePayload(amount, discount, active.checked));
                     page._variantPriceDrafts.delete(key); ui.notify("قیمت طرح ذخیره شد.", "success"); await load(page);
                 } catch (error) { ui.notify(error.message || "ذخیرهٔ قیمت ناموفق بود.", "danger"); }
                 finally { setBusy(false); render(page); }
             });
             actions.append(save);
-            if (page._variantPriceSaving.has(key)) setBusy(true);
+            if (page._variantPriceSaving.has(key) || page._variantPriceBulkSaving) { const disabled = true; save.disabled = disabled; amount.disabled = disabled; discount.disabled = disabled; active.disabled = disabled; }
             row.append(actions); body.append(row);
         }
-        const first = page._priceTotal ? (page._pricePage - 1) * pageSize + 1 : 0;
-        const last = rows.length ? first + rows.length - 1 : 0;
-        page.querySelector("[data-price-count]").textContent =
-            `نمایش ${number.format(first)} تا ${number.format(last)} از ${number.format(page._priceTotal)} ردیف`;
+        page.querySelector("[data-price-count]").textContent = `${number.format(rows.length)} ردیف`;
+        updateSaveAll(page);
         ui.refreshDataTable(table);
         if (!rows.length) status(page, "موردی با این جست‌وجو پیدا نشد."); else status(page, "");
     }
-    async function load(page, pageNumber = page._pricePage || 1) {
+    async function load(page) {
         const serial = (requests.get(page) || 0) + 1; requests.set(page, serial);
         status(page, "در حال دریافت قیمت‌ها…");
         try {
             const url = filterUrl(page, "", "[data-price-filter]");
-            url.searchParams.set("page", String(pageNumber)); url.searchParams.set("pageSize", String(pageSize));
+            url.searchParams.set("all", "true");
             const result = await request(page, url);
             if (requests.get(page) !== serial || !page.isConnected) return;
-            const lastPage = Math.max(1, Math.ceil((result.total || 0) / pageSize));
-            if (pageNumber > lastPage) return void await load(page, lastPage);
-            page._pricePage = result.page || pageNumber; page._priceTotal = result.total || 0;
-            page._variantPriceRows = result.items || []; render(page); updatePager(page, "price", page._pricePage, page._priceTotal);
+            page._variantPriceRows = result.items || []; render(page);
         }
         catch (error) { if (requests.get(page) === serial) status(page, error.message || "دریافت قیمت‌ها ناموفق بود.", true); }
     }
@@ -116,7 +137,7 @@
             const lastPage = Math.max(1, Math.ceil((result.total || 0) / pageSize));
             if (pageNumber > lastPage) return void await loadOffers(page, lastPage);
             page._offerPage = result.page || pageNumber; page._offerTotal = result.total || 0;
-            page._offers = result.items || []; renderOffers(page); updatePager(page, "offer", page._offerPage, page._offerTotal);
+            page._offers = result.items || []; renderOffers(page); updatePager(page, page._offerPage, page._offerTotal);
         } catch (error) { if (page.isConnected && page._offerSerial === serial) message.textContent = error.message || "دریافت پیشنهادها ناموفق بود."; }
     }
     async function loadHistory(page) {
@@ -279,7 +300,6 @@
         page._variantPriceRows = [];
         page._variantPriceDrafts = new Map();
         page._variantPriceSaving = new Set();
-        page._pricePage = 1; page._priceTotal = 0;
         page._offers = []; page._offerDrafts = new Map(); page._offerSaving = new Set(); page._offerPage = 1; page._offerTotal = 0;
         const offerFilter = page.querySelector("[data-offer-filter]");
         if (offerFilter) {
@@ -339,7 +359,8 @@
         }
         const priceFilter = page.querySelector("[data-price-filter]");
         if (priceFilter) {
-            bindFilter(priceFilter, () => void load(page, 1));
+            bindFilter(priceFilter, () => void load(page));
+            page.querySelector("[data-price-save-all]")?.addEventListener("click", () => void saveAll(page));
             page.querySelector("[data-price-refresh]")?.addEventListener("click", () => void load(page));
             void load(page);
         }

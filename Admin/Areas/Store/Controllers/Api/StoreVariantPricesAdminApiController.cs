@@ -255,6 +255,7 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
         [FromQuery] long[]? productIds,
         [FromQuery] DateOnly? from,
         [FromQuery] DateOnly? to,
+        [FromQuery] bool all = false,
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = AdminListQuery.DefaultPageSize,
         CancellationToken cancellationToken = default)
@@ -277,8 +278,10 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
         if (start.HasValue) rows = rows.Where(x => x.offer != null && x.offer.CreatedAtUtc >= start.Value);
         if (end.HasValue) rows = rows.Where(x => x.offer != null && x.offer.CreatedAtUtc < end.Value);
         int total = await rows.CountAsync(cancellationToken);
-        var items = await rows.OrderBy(x => x.product.Name).ThenBy(x => x.variant.VariantName.Name).ThenBy(x => x.plan.Code)
-            .ThenBy(x => x.variant.Id).ThenBy(x => x.plan.Id).Skip(paging.Offset).Take(paging.PageSize).Select(x => new VariantPlanPriceRow
+        var orderedRows = rows.OrderBy(x => x.product.Name).ThenBy(x => x.variant.VariantName.Name).ThenBy(x => x.plan.Code)
+            .ThenBy(x => x.variant.Id).ThenBy(x => x.plan.Id);
+        var selectedRows = all ? orderedRows : orderedRows.Skip(paging.Offset).Take(paging.PageSize);
+        var items = await selectedRows.Select(x => new VariantPlanPriceRow
             {
                 VariantId = x.variant.Id,
                 ProductName = x.product.Name,
