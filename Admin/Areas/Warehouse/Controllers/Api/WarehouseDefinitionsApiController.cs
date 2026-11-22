@@ -25,10 +25,10 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
         "references" => await GetReferencesAsync(cancellationToken),
         "unit-groups" => Ok(await db.WarehouseUnits.AsNoTracking().Where(x => x.IdParent == null)
             .OrderBy(x => x.SortOrder).ThenBy(x => x.NameFa)
-            .Select(x => new { x.Id, Name = x.NameFa, x.NameEn, x.IdParent, x.IsActive, x.SortOrder,
+            .Select(x => new { x.Id, Name = x.NameFa, x.NameEn, x.IdParent, x.TreePathIds, x.TreePathNames, x.IsActive, x.SortOrder,
                 CanDelete = !db.WarehouseUnits.Any(child => child.IdParent == x.Id) }).ToListAsync(cancellationToken)),
         "units" => Ok(await db.WarehouseUnits.AsNoTracking().Where(x => x.IdParent != null).OrderBy(x => x.NameFa)
-            .Select(x => new { x.Id, x.NameFa, x.NameEn, x.IdParent, ParentName = db.WarehouseUnits.Where(parent => parent.Id == x.IdParent).Select(parent => parent.NameFa).FirstOrDefault(), x.IsActive,
+            .Select(x => new { x.Id, x.NameFa, x.NameEn, x.IdParent, x.TreePathIds, x.TreePathNames, ParentName = db.WarehouseUnits.Where(parent => parent.Id == x.IdParent).Select(parent => parent.NameFa).FirstOrDefault(), x.IsActive,
                 CanDelete = !db.WarehouseUnits.Any(child => child.IdParent == x.Id) &&
                             !db.WarehouseProductUnits.Any(link => link.IdUnit == x.Id) &&
                             !db.WarehouseDocumentLines.Any(line => line.IdUnit == x.Id) })
@@ -114,12 +114,12 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
     {
         if (!CanAccessVariantNames() && !CanAccessVariants("variants")) return Forbid();
         var nodes = await db.VariantNames.AsNoTracking().OrderBy(x => x.Name).ThenBy(x => x.Id)
-            .Select(x => new { x.Id, x.IdParent, x.Name, x.IsActive }).ToListAsync(cancellationToken);
+            .Select(x => new { x.Id, x.IdParent, x.Name, x.TreePathIds, x.TreePathNames, x.IsActive }).ToListAsync(cancellationToken);
         long[] referencedNames = await db.ProductVariants.AsNoTracking().Select(x => x.IdVariantName).Distinct().ToArrayAsync(cancellationToken);
         long[] activeVariantNames = await db.ProductVariants.AsNoTracking().Where(x => x.IsActive).Select(x => x.IdVariantName).Distinct().ToArrayAsync(cancellationToken);
         return Ok(nodes.Select(node => new
         {
-            node.Id, node.IdParent, node.Name, node.IsActive,
+            node.Id, node.IdParent, node.Name, node.TreePathIds, node.TreePathNames, node.IsActive,
             CanDelete = !nodes.Any(child => child.IdParent == node.Id) &&
                         !referencedNames.Contains(node.Id),
             CanDeactivate = node.IsActive && !nodes.Any(child => child.IdParent == node.Id && child.IsActive) &&

@@ -161,16 +161,17 @@
         for (const selected of data.permissions.filter(item => effectivePermissions.has(item.id)))
             includeDescendants(selected.permissionKey);
         const inputsByPermissionKey = new Map();
-        const appendChildren = parentKey => {
+        const appendChildren = (parentKey, ancestorNames = []) => {
             const list = document.createElement("ul");
             list.className = "admin-permission-list";
             list.setAttribute("role", "group");
             for (const permission of children(parentKey)) {
+                const path = [...ancestorNames, permission.name].join(" / ");
                 const descendants = children(permission.permissionKey);
                 const node = el("li", null, "admin-permission-node");
                 node.setAttribute("role", "treeitem");
                 const row = el("div", null, "admin-permission-row");
-                const childList = descendants.length ? appendChildren(permission.permissionKey) : null;
+                const childList = descendants.length ? appendChildren(permission.permissionKey, [...ancestorNames, permission.name]) : null;
                 const expanded = false;
                 if (childList) {
                     const toggle = el("button", null, "admin-permission-toggle");
@@ -230,6 +231,7 @@
                 label.append(input, el("span", permission.name, "admin-permission-name"));
                 row.append(label);
                 node.append(row);
+                node.append(el("small", `مسیر: ${path}`, "small text-muted d-block ms-4 mb-1"));
                 if (childList) node.append(childList);
                 list.append(node);
             }

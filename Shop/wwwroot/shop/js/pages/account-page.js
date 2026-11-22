@@ -234,6 +234,7 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
         }
         const total = document.querySelector("#ordersTotal");
         if (total) total.textContent = `${ui.formatNumber(orders.length)} سفارش`;
+        document.dispatchEvent(new CustomEvent("hn:orders-change"));
     };
     const hydrateAccount = async () => {
         if (!ui.auth.isLoggedIn()) return;
@@ -536,10 +537,19 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
             invoiceDialog.querySelector("[data-invoice-status]").textContent = order.dataset.orderStatus;
             invoiceDialog.querySelector("[data-invoice-delivery]").textContent = order.dataset.orderDelivery;
             invoiceDialog.querySelector("[data-invoice-count]").textContent = ui.formatNumber(order.dataset.orderCount);
-            invoiceDialog.querySelector("[data-invoice-amount]").textContent = formatToman(order.dataset.orderAmount);
             invoiceDialog.querySelector("[data-invoice-total]").textContent = formatToman(order.dataset.orderAmount);
             const details = order._orderDetails || {};
+            invoiceDialog.querySelector("[data-invoice-amount]").textContent = formatToman(details.subtotalAmount ?? details.totalAmount);
             invoiceDialog.querySelector("[data-invoice-subtotal]").textContent = formatToman(details.subtotalAmount ?? details.totalAmount);
+            const mismatchNotice = invoiceDialog.querySelector("[data-invoice-amount-mismatch]");
+            if (mismatchNotice) {
+                const items = details.items || [];
+                const amounts = items.map(item => Number(item.unitAmount) * Number(item.quantity));
+                const itemSubtotal = amounts.reduce((sum, amount) => sum + amount, 0);
+                const recordedSubtotal = Number(details.subtotalAmount);
+                mismatchNotice.hidden = !items.length || !amounts.every(Number.isSafeInteger) ||
+                    !Number.isSafeInteger(itemSubtotal) || !Number.isSafeInteger(recordedSubtotal) || itemSubtotal === recordedSubtotal;
+            }
             const couponRow = invoiceDialog.querySelector("[data-invoice-coupon-row]");
             if (couponRow) {
                 couponRow.hidden = !(details.couponCode && Number(details.couponDiscountAmount) > 0);
@@ -551,9 +561,10 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
             for (const item of details.items || []) {
                 const row = document.createElement("div"); row.className = "order-invoice-row"; row.setAttribute("role", "row");
                 const description = document.createElement("span"); description.setAttribute("role", "cell");
-                const componentLabels = { product: "کالا", accessory: "متعلقه", option: "گزینه", variant: "تنوع", "order-snapshot": "ثبت سفارش" };
-                const refs = (item.priceReferences || []).map(ref => `نسخهٔ قیمت #${ref.priceVersionId} (${componentLabels[ref.component] || ref.component}): ${formatToman(ref.calculatedUnitAmount)}`).join("، ");
-                description.textContent = refs ? `${item.name} — ${refs}` : item.name;
+                const componentLabels = { product: "قیمت کالا", accessory: "متعلق", variant: "قیمت تنوع" };
+                const refs = (item.priceReferences || []).map(ref => `${componentLabels[ref.component] || "قیمت"}${ref.component === "accessory" && ref.name ? ` ${ref.name}` : ""}: ${formatToman(ref.calculatedUnitAmount)}`).join("، ");
+                const itemName = `${item.name}${item.variantName ? ` — ${item.variantName}` : ""}`;
+                description.textContent = refs ? `${itemName} — ${refs}` : itemName;
                 const quantity = document.createElement("span"); quantity.setAttribute("role", "cell"); quantity.textContent = ui.formatNumber(item.quantity);
                 const amount = document.createElement("strong"); amount.setAttribute("role", "cell"); amount.textContent = formatToman(item.unitAmount);
                 row.append(description, quantity, amount); lines?.append(row);

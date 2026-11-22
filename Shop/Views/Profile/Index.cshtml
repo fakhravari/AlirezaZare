@@ -65,31 +65,36 @@
                 <i class="bi bi-bag-check"></i>
                 <span>
                     <strong>سفارش‌های من</strong>
-                </span><b class="account-tab-badge" data-account-count="orders" aria-label="تعداد سفارش‌های موفق">۰</b><i class="bi bi-chevron-left"></i>
+                    <b class="account-tab-badge" data-account-count="orders" aria-label="تعداد سفارش‌های موفق">۰</b>
+                </span><i class="bi bi-chevron-left"></i>
             </a>
             <a asp-controller="Profile" asp-action="Addresses" aria-current="@(profileSection == "addresses" ? "page" : null)">
                 <i class="bi bi-geo-alt"></i>
                 <span>
                     <strong>آدرس‌های من</strong>
-                </span><b class="account-tab-badge" data-account-count="addresses" aria-label="تعداد آدرس‌های فعال">۰</b><i class="bi bi-chevron-left"></i>
+                    <b class="account-tab-badge" data-account-count="addresses" aria-label="تعداد آدرس‌های فعال">۰</b>
+                </span><i class="bi bi-chevron-left"></i>
             </a>
             <a asp-controller="Profile" asp-action="Favorites" aria-current="@(profileSection == "favorites" ? "page" : null)">
                 <i class="bi bi-heart"></i>
                 <span>
                     <strong>علاقه‌مندی‌ها</strong>
-                </span><b class="account-tab-badge" data-account-count="favorites" aria-label="تعداد علاقه‌مندی‌ها">۰</b><i class="bi bi-chevron-left"></i>
+                    <b class="account-tab-badge" data-account-count="favorites" aria-label="تعداد علاقه‌مندی‌ها">۰</b>
+                </span><i class="bi bi-chevron-left"></i>
             </a>
             <a asp-controller="Profile" asp-action="Coupons" aria-current="@(profileSection == "coupons" ? "page" : null)">
                 <i class="bi bi-ticket-perforated"></i>
                 <span>
                     <strong>کدهای تخفیف</strong>
-                </span><b class="account-tab-badge" data-account-count="coupons" aria-label="تعداد کدهای تخفیف فعال">۰</b><i class="bi bi-chevron-left"></i>
+                    <b class="account-tab-badge" data-account-count="coupons" aria-label="تعداد کدهای تخفیف فعال">۰</b>
+                </span><i class="bi bi-chevron-left"></i>
             </a>
             <a class="account-tab-pricealerts" asp-controller="Profile" asp-action="PriceAlerts" aria-current="@(profileSection == "pricealerts" ? "page" : null)">
                 <i class="bi bi-bell"></i>
                 <span>
                     <strong>پیگیری قیمت و موجودی</strong>
-                </span><b class="account-tab-badge" data-account-count="pricealerts" aria-label="تعداد پیگیری‌های فعال">۰</b><i class="bi bi-chevron-left"></i>
+                    <b class="account-tab-badge" data-account-count="pricealerts" aria-label="تعداد پیگیری‌های فعال">۰</b>
+                </span><i class="bi bi-chevron-left"></i>
             </a>
             <a asp-controller="Profile" asp-action="Messages" aria-current="@(profileSection == "messages" ? "page" : null)">
                 <i class="bi bi-envelope"></i>

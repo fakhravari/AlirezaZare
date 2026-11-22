@@ -160,14 +160,13 @@ public sealed class StoreOrderShipmentTrackingHistory
 public sealed class StoreCustomerOrderItem
 {
     public long Id { get; set; }
-    public long IdCustomerOrder { get; set; }
+    public long IdOrder { get; set; }
     public long IdProduct { get; set; }
     public long? IdProductVariant { get; set; }
-    public string ProductNameSnapshot { get; set; } = "";
     public long IdSalesPlan { get; set; }
     public int Quantity { get; set; }
-    public decimal UnitAmount { get; set; }
-    public string OptionsJson { get; set; } = "{}";
+    public long IdPriceVersion { get; set; }
+    public StorePriceVersion PriceVersion { get; set; } = null!;
     public ICollection<StoreOrderItemPriceReference> PriceReferences { get; set; } = new List<StoreOrderItemPriceReference>();
 }
 

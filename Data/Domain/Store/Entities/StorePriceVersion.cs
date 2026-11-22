@@ -34,3 +34,10 @@ public sealed class StoreOrderItemPriceReference
     public long IdPriceVersion { get; set; }
     public StorePriceVersion PriceVersion { get; set; } = null!;
 }
+
+/// <summary>Order line unit amount calculated from its price version references.</summary>
+public sealed class StoreOrderItemAmount
+{
+    public long IdOrderItem { get; set; }
+    public decimal UnitAmount { get; set; }
+}

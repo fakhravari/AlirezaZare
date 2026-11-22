@@ -17,13 +17,14 @@ test('category tree nests branches, keeps actions mapped and searches ancestors'
   await page.evaluate(() => { window.AdminUI = {...AdminUI, getJson: async () => ({items: [
     {id:'root', name:'ابزار', parentId:null, isActive:true},
     {id:'child', name:'برقی', parentId:'root', isActive:true},
-    {id:'leaf', name:'دریل', parentId:'child', isActive:false},
+    {id:'leaf', name:'دریل', parentId:'child', isActive:false, treePathIds:'01 / 02 / 03', treePathNames:'ذخیره‌شده / مسیر / دسته'},
     {id:'second', name:'دیگر', parentId:null, isActive:true}
   ], total:4, hasNext:false})}; });
   await page.addScriptTag({path: 'Admin/wwwroot/js/admin-data.js'});
   await page.evaluate(() => AdminPages.initialize(document));
   const tree = page.locator('[role=tree]');
   await tree.getByText('ابزار', {exact:true}).waitFor();
+  assert.equal(await tree.locator('small').filter({hasText:'ذخیره‌شده / مسیر / دسته'}).count(), 1);
   assert.equal(await tree.getByText('برقی', {exact:true}).isVisible(), false);
   await tree.getByRole('button', {name:'بازکردن زیرشاخه‌های ابزار'}).click();
   assert.equal(await tree.getByText('برقی', {exact:true}).isVisible(), true);

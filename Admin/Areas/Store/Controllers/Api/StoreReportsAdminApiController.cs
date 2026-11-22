@@ -193,23 +193,26 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
         CancellationToken cancellationToken)
     {
         var sold = from item in db.StoreCustomerOrderItems.AsNoTracking()
-                   join order in PaidOrders() on item.IdCustomerOrder equals order.Id
+                   join order in PaidOrders() on item.IdOrder equals order.Id
+                   join product in db.Products.AsNoTracking() on item.IdProduct equals product.Id
+                   join amount in db.StoreOrderItemAmounts.AsNoTracking() on item.Id equals amount.IdOrderItem
                    where order.OrderedAtUtc >= start && order.OrderedAtUtc < end
-                   group item by new { item.IdProduct, item.ProductNameSnapshot } into g
+                   group new { item, UnitAmount = amount.UnitAmount } by new { item.IdProduct, ProductName = product.Name } into g
                    select new
                    {
                        ProductId = g.Key.IdProduct,
-                       ProductName = g.Key.ProductNameSnapshot,
-                       Quantity = g.Sum(x => x.Quantity),
-                       Revenue = g.Sum(x => x.UnitAmount * x.Quantity),
-                       OrderCount = g.Select(x => x.IdCustomerOrder).Distinct().Count()
+                       ProductName = g.Key.ProductName,
+                       Quantity = g.Sum(x => x.item.Quantity),
+                       Revenue = g.Sum(x => x.UnitAmount * x.item.Quantity),
+                       OrderCount = g.Select(x => x.item.IdOrder).Distinct().Count()
                    };
         int total = await sold.Select(x => x.ProductId).Distinct().CountAsync(cancellationToken);
         var previous = await (from item in db.StoreCustomerOrderItems.AsNoTracking()
-                              join order in PaidOrders() on item.IdCustomerOrder equals order.Id
+                              join order in PaidOrders() on item.IdOrder equals order.Id
+                              join amount in db.StoreOrderItemAmounts.AsNoTracking() on item.Id equals amount.IdOrderItem
                               where order.OrderedAtUtc >= start.AddDays(-((end - start).Days)) && order.OrderedAtUtc < start
-                              group item by 1 into g
-                              select g.Sum(x => x.UnitAmount * x.Quantity)).SingleOrDefaultAsync(cancellationToken);
+                              group new { item, UnitAmount = amount.UnitAmount } by 1 into g
+                              select g.Sum(x => x.UnitAmount * x.item.Quantity)).SingleOrDefaultAsync(cancellationToken);
         var values = await sold.OrderByDescending(x => x.Revenue).ThenBy(x => x.ProductName) .Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
 
         HashSet<long> allowed = AllowedWarehouseIds();
@@ -225,7 +228,7 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
         decimal revenue = values.Sum(x => x.Revenue);
         decimal totalRevenue = await sold.Select(x => x.Revenue).SumAsync(cancellationToken);
         int totalQuantity = await (from item in db.StoreCustomerOrderItems.AsNoTracking()
-                                   join order in PaidOrders() on item.IdCustomerOrder equals order.Id
+                                   join order in PaidOrders() on item.IdOrder equals order.Id
                                    where order.OrderedAtUtc >= start && order.OrderedAtUtc < end
                                    select item.Quantity).SumAsync(cancellationToken);
 
@@ -378,10 +381,11 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
         CancellationToken cancellationToken)
     {
         var query = from order in PaidOrders().Where(x => x.OrderedAtUtc >= start && x.OrderedAtUtc < end)
-                    join item in db.StoreCustomerOrderItems.AsNoTracking().Where(x => x.IdProduct == productId) on order.Id equals item.IdCustomerOrder
+                    join item in db.StoreCustomerOrderItems.AsNoTracking().Where(x => x.IdProduct == productId) on order.Id equals item.IdOrder
                     join profile in db.AccountProfiles.AsNoTracking() on order.IdProfile equals profile.Id
+                    join amount in db.StoreOrderItemAmounts.AsNoTracking() on item.Id equals amount.IdOrderItem
                     orderby order.OrderedAtUtc descending
-                    select new { order.OrderNumber, order.OrderedAtUtc, Customer = (profile.FirstName + " " + profile.LastName).Trim(), item.Quantity, Amount = item.UnitAmount * item.Quantity };
+                    select new { order.OrderNumber, order.OrderedAtUtc, Customer = (profile.FirstName + " " + profile.LastName).Trim(), item.Quantity, Amount = amount.UnitAmount * item.Quantity };
         int total = await query.CountAsync(cancellationToken);
         var rows = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
 

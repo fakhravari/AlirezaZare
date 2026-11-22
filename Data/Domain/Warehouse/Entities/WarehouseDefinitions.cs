@@ -16,6 +16,8 @@ public sealed class WarehouseDocumentType
 public sealed class WarehouseUnit
 {
     public long Id { get; set; }
+    public string TreePathIds { get; set; } = string.Empty;
+    public string TreePathNames { get; set; } = string.Empty;
     public long? IdParent { get; set; }
     public string NameFa { get; set; } = string.Empty;
     public string? NameEn { get; set; }

@@ -59,7 +59,7 @@ test('shared variant name tree creates children and edits existing nodes', {skip
       if (method !== 'GET') return {message: 'ذخیره شد'};
       if (url.endsWith('/variant-names')) return [
         {id: 1, idParent: null, name: 'رنگ', isActive: true, canDelete: false, canDeactivate: false, deleteBlockReason: 'گروه دارای فرزند است.'},
-        {id: 2, idParent: 1, name: 'آبی', isActive: true, canDelete: false, canDeactivate: false, deleteBlockReason: 'به کالا وصل است.'},
+        {id: 2, idParent: 1, name: 'آبی', treePathIds: '01 / 02', treePathNames: 'مسیر ذخیره‌شده / رنگ آبی', isActive: true, canDelete: false, canDeactivate: false, deleteBlockReason: 'به کالا وصل است.'},
         {id: 3, idParent: 1, name: 'سبز', isActive: false, canDelete: true, canDeactivate: false}
       ];
       if (url.endsWith('/variants')) return [];
@@ -70,6 +70,7 @@ test('shared variant name tree creates children and edits existing nodes', {skip
   await page.evaluate(() => window.AdminDefinitions.initialize(document));
   const form = page.locator('[data-variant-name-form]');
   assert.equal(await page.locator('[data-variant-name-tree]').getAttribute('role'), 'tree');
+  assert.equal(await page.locator('[data-variant-name-tree] small').filter({hasText:'مسیر: مسیر ذخیره‌شده / رنگ آبی'}).count(), 1);
   assert.equal(await page.locator('[data-variant-name-tree] .admin-permission-list').count(), 2);
   assert.equal(await form.locator('[name=idParent] option[value="2"]').count(), 0);
   assert.equal(await form.locator('[name=idParent] option[value="1"]').textContent(), 'رنگ');

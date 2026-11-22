@@ -170,19 +170,8 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
         string? categoryPath = null;
         if (product.IdCategory is long categoryId)
         {
-            var categories = await db.StoreCategories.AsNoTracking().Select(x => new { x.Id, x.IdParentCategory, x.NameFa }).ToListAsync(cancellationToken);
-            var categoriesById = categories.ToDictionary(x => x.Id);
-            var segments = new List<string>();
-            var visited = new HashSet<long>();
-            long currentId = categoryId;
-            while (visited.Add(currentId) && categoriesById.TryGetValue(currentId, out var category))
-            {
-                segments.Add(category.NameFa);
-                if (category.IdParentCategory is not long parentId) break;
-                currentId = parentId;
-            }
-            segments.Reverse();
-            categoryPath = string.Join(" / ", segments);
+            categoryPath = await db.StoreCategories.AsNoTracking().Where(x => x.Id == categoryId)
+                .Select(x => x.TreePathNames).SingleOrDefaultAsync(cancellationToken);
         }
 
         var variantRows = await db.ProductVariants.AsNoTracking().Where(x => x.IdProduct == id).OrderByDescending(x => x.IsDefault).ThenBy(x => x.VariantName.Name)
@@ -568,25 +557,11 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
 
     private async Task<List<EditorOption>> GetLeafCategoryOptions(CancellationToken cancellationToken)
     {
-        var nodes = await db.StoreCategories.AsNoTracking().Where(x => x.IsActive) .Select(x => new { x.Id, x.NameFa, x.IdParentCategory }).ToListAsync(cancellationToken);
-        var byId = nodes.ToDictionary(x => x.Id);
+        var nodes = await db.StoreCategories.AsNoTracking().Where(x => x.IsActive).Select(x => new { x.Id, x.NameFa, x.IdParentCategory, x.TreePathNames }).ToListAsync(cancellationToken);
         var parentIds = nodes.Where(x => x.IdParentCategory.HasValue).Select(x => x.IdParentCategory!.Value).ToHashSet();
-
-        return nodes.Where(x => !parentIds.Contains(x.Id)).Select(node =>
-        {
-            var segments = new List<string>();
-            var visited = new HashSet<long>();
-            var currentId = node.Id;
-            while (visited.Add(currentId) && byId.TryGetValue(currentId, out var current))
-            {
-                segments.Add(current.NameFa);
-                if (current.IdParentCategory is not long parentId) break;
-                currentId = parentId;
-            }
-            segments.Reverse();
-
-            return new EditorOption { Id = node.Id, Name = string.Join(" / ", segments) };
-        }).OrderBy(x => x.Name, StringComparer.CurrentCulture).ToList();
+        return nodes.Where(x => !parentIds.Contains(x.Id))
+            .Select(node => new EditorOption { Id = node.Id, Name = node.TreePathNames })
+            .OrderBy(x => x.Name, StringComparer.CurrentCulture).ToList();
     }
 
     [HttpGet("products/drafts")]
@@ -845,7 +820,7 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
         if (!User.IsInRole("system.full-access")) return Forbid();
 
         return Ok(await db.StoreCategories.AsNoTracking().Where(x => x.IsActive).OrderBy(x => x.NameFa)
-            .Select(x => new CategoryOption(x.Id, x.CategoryKey, x.NameFa, x.NameEn, x.IdParentCategory)).ToListAsync(cancellationToken));
+            .Select(x => new CategoryOption(x.Id, x.CategoryKey, x.NameFa, x.NameEn, x.IdParentCategory, x.TreePathIds, x.TreePathNames)).ToListAsync(cancellationToken));
     }
 
     [HttpPost("categories/manage")]
@@ -943,7 +918,7 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
     }
 
     public sealed record CategoryInput(string? Key, string? NameFa, string? NameEn, long? ParentId);
-    public sealed record CategoryOption(long Id, string CategoryKey, string NameFa, string NameEn, long? IdParentCategory);
+    public sealed record CategoryOption(long Id, string CategoryKey, string NameFa, string NameEn, long? IdParentCategory, string TreePathIds, string TreePathNames);
 
     [HttpGet("attributes/manage/{key}")]
     public async Task<IActionResult> AttributeEditor(string key, CancellationToken cancellationToken)
@@ -1134,7 +1109,7 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
             var all = await source.OrderBy(x => x.SortOrder).ThenBy(x => x.Id).Skip(paging.Offset).Take(paging.PageSize).ToListAsync(cancellationToken);
             var parents = await db.StoreCategories.AsNoTracking().ToDictionaryAsync(x => x.Id, x => x.CategoryKey, cancellationToken);
             var rows = all.Select(x => new CategoryRow(x.CategoryKey, x.NameFa, x.NameEn, x.CategoryKey,
-                x.IdParentCategory is long parentId && parents.TryGetValue(parentId, out string? parentKey) ? parentKey : "", x.IsActive)).ToArray();
+                x.IdParentCategory is long parentId && parents.TryGetValue(parentId, out string? parentKey) ? parentKey : "", x.IsActive, x.TreePathIds, x.TreePathNames)).ToArray();
 
             return Ok(AdminListQuery.CreateResult(rows, total, paging));
         }
@@ -1221,7 +1196,7 @@ public sealed class StoreCatalogAdminApiController(ShopDbContext db, IMediaCdnBa
         int StockQuantity,
         decimal DiscountPercent);
 
-    private sealed record CategoryRow(string Id, string Name, string EnglishName, string Slug, string ParentId, bool IsActive);
+    private sealed record CategoryRow(string Id, string Name, string EnglishName, string Slug, string ParentId, bool IsActive, string TreePathIds, string TreePathNames);
 
     private sealed record BrandRow(string Id, string Name, string EnglishName, string CountryCode, string? LogoPath, bool IsActive, bool ShowInStore)
     {

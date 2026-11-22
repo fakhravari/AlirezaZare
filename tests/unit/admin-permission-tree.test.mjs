@@ -30,6 +30,7 @@ test('permission tree preserves explicit parent grants and sends only permission
   await page.evaluate(() => window.AdminUsers.initialize(document));
   const parent = page.locator('input[value="1"]');
   await parent.waitFor();
+  assert.equal(await page.locator('[data-permission-tree] small').filter({hasText:'مسیر: parent / a'}).count(), 1);
   assert.equal(await parent.isChecked(), false);
   assert.equal(await parent.evaluate(input => input.indeterminate), true);
   await page.locator('[data-role-save]').click();

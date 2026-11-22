@@ -7,6 +7,8 @@ public sealed class StoreCategory
     public string NameEn { get; set; } = string.Empty;
     public string NameFa { get; set; } = string.Empty;
     public string PathJson { get; set; } = "[]";
+    public string TreePathIds { get; set; } = string.Empty;
+    public string TreePathNames { get; set; } = string.Empty;
     public long? IdParentCategory { get; set; }
     public int SortOrder { get; set; }
     public bool IsActive { get; set; } = true;

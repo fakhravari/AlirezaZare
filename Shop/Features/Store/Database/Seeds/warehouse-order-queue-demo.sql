@@ -6,7 +6,7 @@ BEGIN TRY
         JOIN [Account].[Profile] p ON p.Id = o.IdProfile
         WHERE p.Email = N'demo-orders-20261112@invalid.example' AND o.PaymentMethod = N'demo'
           AND o.ExternalOrderKey LIKE N'demo-order-fixture-20261112-%'
-          AND EXISTS (SELECT 1 FROM [Store].[OrderItem] i WHERE i.IdCustomerOrder = o.Id)
+          AND EXISTS (SELECT 1 FROM [Store].[OrderItem] i WHERE i.IdOrder = o.Id)
         ORDER BY o.Id);
     IF @source IS NULL THROW 51101, 'The existing demo order fixture is required.', 1;
     DECLARE @n INT = 1, @newId BIGINT, @key NVARCHAR(100), @number NVARCHAR(32);
@@ -21,9 +21,17 @@ BEGIN TRY
                    DATEADD(MINUTE, -@n, SYSUTCDATETIME()), AddressSnapshotJson
             FROM [Store].[Order] WHERE Id = @source;
             SET @newId = SCOPE_IDENTITY();
-            INSERT [Store].[OrderItem] (IdCustomerOrder, IdProduct, IdProductVariant, ProductNameSnapshot, IdSalesPlan, Quantity, UnitAmount, OptionsJson)
-            SELECT @newId, IdProduct, IdProductVariant, ProductNameSnapshot, IdSalesPlan, Quantity, UnitAmount, OptionsJson
-            FROM [Store].[OrderItem] WHERE IdCustomerOrder = @source;
+            DECLARE @itemMap TABLE (OldId bigint NOT NULL, NewId bigint NOT NULL);
+            MERGE [Store].[OrderItem] AS target
+            USING (SELECT Id, IdProduct, IdVariant, IdSalesPlan, Quantity, IdPriceVersion FROM [Store].[OrderItem] WHERE IdOrder = @source) AS source
+            ON 1 = 0
+            WHEN NOT MATCHED THEN INSERT (IdOrder, IdProduct, IdVariant, IdSalesPlan, Quantity, IdPriceVersion)
+                VALUES (@newId, source.IdProduct, source.IdVariant, source.IdSalesPlan, source.Quantity, source.IdPriceVersion)
+            OUTPUT source.Id, inserted.Id INTO @itemMap (OldId, NewId);
+            INSERT [Store].[OrderItemPriceReference] (IdOrderItem, IdPriceVersion)
+            SELECT mapping.NewId, reference.IdPriceVersion FROM @itemMap mapping
+            JOIN [Store].[OrderItemPriceReference] reference ON reference.IdOrderItem = mapping.OldId;
+            DELETE FROM @itemMap;
         END
     SET @n += 1;
     END;

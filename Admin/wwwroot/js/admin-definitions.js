@@ -39,6 +39,18 @@
         button.append(icon, document.createTextNode(label));
         return button;
     }
+    function appendAction(actions, button) {
+        if (button.disabled && button.title) {
+            const tooltip = element("span", null, "d-inline-block");
+            tooltip.title = button.title;
+            tooltip.setAttribute("aria-label", button.title);
+            tooltip.tabIndex = 0;
+            tooltip.append(button);
+            actions.append(tooltip);
+            return;
+        }
+        actions.append(button);
+    }
     function active(value) { return value ? "فعال" : "غیرفعال"; }
     function renderTable(page, rows, config) {
         const head = page.querySelector("[data-definition-head]"), body = page.querySelector("[data-definition-rows]");
@@ -97,6 +109,7 @@
             }
             if (item.isActive === false && page.dataset.definitionSection === "variants" && page.dataset.canEdit === "true") {
                 const activate = actionButton("فعال‌سازی", "fa-toggle-on", "btn btn-sm btn-outline-success");
+                activate.title = `فعال‌سازی دوبارهٔ تنوع «${item.name}» برای کالای «${item.productName}».`;
                 activate.addEventListener("click", async () => {
                     activate.disabled = true;
                     try { const result = await request(page, `${page.dataset.api}/variants/${item.id}/activate`, "POST", {}); ui.notify(result.message, "success"); await load(page); }
@@ -107,7 +120,9 @@
             }
             if (item.isActive !== false) {
                 if (page.dataset.canEdit === "true") {
-                    const edit = actionButton("ویرایش", "fa-pen-to-square", "btn btn-sm btn-default me-1"); edit.addEventListener("click", () => void openForm(page, item, config).catch(error => ui.notify(error.message || "بازکردن فرم ناموفق بود.", "danger")));
+                    const edit = actionButton("ویرایش", "fa-pen-to-square", "btn btn-sm btn-default me-1");
+                    if (page.dataset.definitionSection === "variants") edit.title = `ویرایش مشخصات تنوع «${item.name}» برای کالای «${item.productName}».`;
+                    edit.addEventListener("click", () => void openForm(page, item, config).catch(error => ui.notify(error.message || "بازکردن فرم ناموفق بود.", "danger")));
                     actions.append(edit);
                 }
                 if (page.dataset.canDeactivate === "true" && page.dataset.definitionSection !== "stock-owners") {
@@ -117,6 +132,7 @@
                     deactivate.title = item.deactivateBlockReason || "این تنوع قابل غیرفعال‌سازی نیست.";
                     deactivate.setAttribute("aria-label", deactivate.title);
                 } else if (page.dataset.definitionSection === "variants") {
+                    deactivate.title = `غیرفعال‌سازی تنوع «${item.name}». سوابق آن حفظ می‌شود.`;
                     deactivate.dataset.adminConfirm = `تنوع «${item.name}» از کالای «${item.productName}» غیرفعال شود؟ سابقه حفظ می‌شود.`;
                 }
                 deactivate.addEventListener("click", async () => {
@@ -126,7 +142,8 @@
                     catch (error) { ui.notify(error.message, "danger"); }
                     finally { deactivate.disabled = false; }
                 });
-                actions.append(deactivate);
+                if (page.dataset.definitionSection === "variants") appendAction(actions, deactivate);
+                else actions.append(deactivate);
                 }
             }
             if (page.dataset.definitionSection === "variants" && page.dataset.canDelete === "true") {
@@ -136,6 +153,7 @@
                     remove.title = item.deleteBlockReason || "این تنوع استفاده شده و قابل حذف نیست.";
                     remove.setAttribute("aria-label", remove.title);
                 } else {
+                    remove.title = `حذف دائمی تنوع «${item.name}» از کالای «${item.productName}».`;
                     remove.dataset.adminConfirm = `تنوع «${item.name}» از کالای «${item.productName}» برای همیشه حذف شود؟`;
                     remove.addEventListener("click", async () => {
                         if (remove.disabled) return;
@@ -148,7 +166,7 @@
                         finally { if (remove.isConnected) remove.disabled = false; }
                     });
                 }
-                actions.append(remove);
+                appendAction(actions, remove);
             }
             row.append(actions); body.append(row);
         }
@@ -175,6 +193,7 @@
                 const node = element("li", null, "list-group-item d-flex flex-wrap align-items-center justify-content-between gap-2");
                 const description = element("div", null, "d-flex flex-column");
                 description.append(element("span", item.unitName || "واحد نامشخص", "fw-semibold"));
+                description.append(element("small", `مسیر: ${product.name || `کالا ${fmt.format(productId)}`} / ${item.unitName || "واحد نامشخص"}`, "small text-muted"));
                 description.append(element("span", item.isBaseUnit
                     ? "واحد پایه · ضریب ۱"
                     : `ضریب ثبت‌شده: ${conversionFmt.format(Number(item.conversionFactor))}`, "small text-muted"));
@@ -226,6 +245,17 @@
             unitsByParent.get(key).push(unit);
         }
         const groupById = new Map(groups.map(group => [String(group.id), group]));
+        const unitGroupPath = id => {
+            const stored = groupById.get(String(id))?.treePathNames;
+            if (stored) return stored.split(" / ");
+            const names = [], seen = new Set();
+            let current = groupById.get(String(id));
+            while (current && !seen.has(String(current.id))) {
+                seen.add(String(current.id)); names.unshift(current.name);
+                current = current.idParent == null ? null : groupById.get(String(current.idParent));
+            }
+            return names;
+        };
         const updateGroupAvailability = group => {
             const node = [...tree.querySelectorAll("[data-unit-group-id]")].find(item => item.dataset.unitGroupId === String(group.id));
             if (!node) return;
@@ -246,7 +276,7 @@
             else delete status.dataset.adminConfirm;
             if (warning) { warning.textContent = reason; warning.hidden = !reason; }
         };
-        const makeRow = (parent, label, active, toggleLabel, toggleUrl, toggleBody, canToggle, editHandler = null, disabledReason = "", displayLabel = () => label, onStatusChange = null, statusDataAttribute = "", deleteOptions = null) => {
+        const makeRow = (parent, label, active, toggleLabel, toggleUrl, toggleBody, canToggle, editHandler = null, disabledReason = "", displayLabel = () => label, onStatusChange = null, statusDataAttribute = "", deleteOptions = null, path = "") => {
             const row = element("div", null, "admin-permission-row");
             const children = parent.querySelector(":scope > ul[role=group]");
             if (children) {
@@ -318,6 +348,7 @@
                 row.append(remove);
             }
             const childList = parent.querySelector(":scope > ul[role=group]");
+            if (path) parent.append(element("small", `مسیر: ${path}`, "small text-muted d-block ms-4 mb-1"));
             if (childList) parent.insertBefore(row, childList);
             else parent.append(row);
         };
@@ -347,7 +378,7 @@
                     form.elements.name.focus();
                 } : null, blockedMessage, groupLabel,
                 isActive => { group.isActive = isActive; updateGroupAvailability(group); }, "data-unit-group-status",
-                { canDelete: group.canDelete, url: `${page.dataset.api}/unit-groups/${group.id}`, confirmMessage: `گروه «${group.name}» برای همیشه حذف شود؟`, onDelete: () => { const index = groups.indexOf(group); if (index >= 0) groups.splice(index, 1); } });
+                { canDelete: group.canDelete, url: `${page.dataset.api}/unit-groups/${group.id}`, confirmMessage: `گروه «${group.name}» برای همیشه حذف شود؟`, onDelete: () => { const index = groups.indexOf(group); if (index >= 0) groups.splice(index, 1); } }, unitGroupPath(group.id).join(" / "));
             updateGroupAvailability(group);
             for (const childGroup of childGroups) appendGroup(childGroup, children);
             for (const unit of members) appendUnit(unit, children);
@@ -372,7 +403,7 @@
                     const allIndex = units.indexOf(unit); if (allIndex >= 0) units.splice(allIndex, 1);
                     const parentGroup = groupById.get(String(unit.idParent));
                     if (parentGroup) updateGroupAvailability(parentGroup);
-                } });
+                } }, unit.treePathNames || "");
             container.append(node);
         };
         const roots = element("ul", null, "admin-permission-list"); roots.setAttribute("role", "group");
@@ -581,6 +612,8 @@
     }
     function variantNamePath(nodes, id) {
         const byId = new Map(nodes.map(node => [String(node.id), node]));
+        const stored = byId.get(String(id))?.treePathNames;
+        if (stored) return stored;
         const parts = [], seen = new Set();
         let node = byId.get(String(id));
         while (node && !seen.has(String(node.id))) {
@@ -643,6 +676,7 @@
                     li.append(row);
                 }
                 row.append(element("span", node.name, "admin-permission-name"));
+                li.append(element("small", `مسیر: ${variantNamePath(nodes, node.id)}`, "small text-muted d-block ms-4 mb-1"));
                 if (!node.isActive) row.append(element("span", "غیرفعال", "badge text-bg-secondary ms-2"));
                 if (node.isActive && page.dataset.canEdit === "true") {
                     const edit = actionButton("ویرایش", "fa-pen-to-square", "btn btn-sm btn-default");
@@ -672,7 +706,7 @@
                             finally { deactivate.disabled = false; }
                         });
                     }
-                    row.append(deactivate);
+                    appendAction(row, deactivate);
                 }
                 if (page.dataset.canDelete === "true") {
                     const remove = actionButton("حذف", "fa-trash", "btn btn-sm btn-outline-danger");
@@ -687,7 +721,7 @@
                             finally { remove.disabled = false; }
                         });
                     }
-                    row.append(remove);
+                    appendAction(row, remove);
                 }
                 host.append(li);
             }

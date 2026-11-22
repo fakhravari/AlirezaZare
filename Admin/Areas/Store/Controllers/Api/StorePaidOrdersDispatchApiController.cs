@@ -45,7 +45,7 @@ public sealed class StorePaidOrdersDispatchApiController(ShopDbContext db, IWare
                               (!(order.PaymentMethod == "demo" && order.ExternalOrderKey != null && order.ExternalOrderKey.StartsWith("demo-order-")) &&
                                db.StorePaymentAttempts.Any(payment => payment.IdOrder == order.Id && payment.Status == "verified" &&
                                    payment.Amount == order.TotalAmount && payment.PaidAtUtc != null))) &&
-                             db.StoreCustomerOrderItems.Any(item => item.IdCustomerOrder == order.Id)
+                             db.StoreCustomerOrderItems.Any(item => item.IdOrder == order.Id)
                        select new { order, profile };
         if (paging.Search.Length > 0)
             eligible = eligible.Where(x => x.order.OrderNumber.Contains(paging.Search) || (x.profile.FirstName + " " + x.profile.LastName).Contains(paging.Search));
@@ -93,12 +93,12 @@ public sealed class StorePaidOrdersDispatchApiController(ShopDbContext db, IWare
 
             var orderIds = orders.Select(x => x.Id).ToArray();
             var payments = await db.StorePaymentAttempts.Where(x => orderIds.Contains(x.IdOrder) && x.Status == "verified" && x.PaidAtUtc != null) .ToListAsync(cancellationToken);
-            var orderItems = await db.StoreCustomerOrderItems.AsNoTracking().Where(x => orderIds.Contains(x.IdCustomerOrder)).ToListAsync(cancellationToken);
+            var orderItems = await db.StoreCustomerOrderItems.AsNoTracking().Where(x => orderIds.Contains(x.IdOrder)).ToListAsync(cancellationToken);
             if (orders.Any(order => order.Status != "payment-confirmed" ||
                     order.IdWarehouseDocument is not null ||
                     (!(order.PaymentMethod == "demo" && order.ExternalOrderKey?.StartsWith("demo-order-") == true) &&
                      !payments.Any(payment => payment.IdOrder == order.Id && payment.Amount == order.TotalAmount)) ||
-                    !orderItems.Any(item => item.IdCustomerOrder == order.Id)))
+                    !orderItems.Any(item => item.IdOrder == order.Id)))
                 return Conflict(new { detail = "وضعیت یکی از سفارش‌ها تغییر کرده است؛ فهرست را دوباره بارگذاری کنید." });
 
             long[] planIds = orderItems.Select(x => x.IdSalesPlan).Distinct().ToArray();
@@ -114,6 +114,8 @@ public sealed class StorePaidOrdersDispatchApiController(ShopDbContext db, IWare
                 return Conflict(new { detail = "طرح یکی از اقلام به انبار فروش متصل نیست." });
 
             long[] productIds = orderItems.Select(x => x.IdProduct).Distinct().ToArray();
+            var productNames = await db.Products.AsNoTracking().Where(x => productIds.Contains(x.Id))
+                .ToDictionaryAsync(x => x.Id, x => x.Name, cancellationToken);
             long[] variantIds = orderItems.Where(x => x.IdProductVariant.HasValue).Select(x => x.IdProductVariant!.Value).Distinct().ToArray();
             var baseUnits = await db.WarehouseProductUnits.AsNoTracking()
                 .Where(x => productIds.Contains(x.IdProduct) && x.IsBaseUnit && x.IsActive)
@@ -131,21 +133,22 @@ public sealed class StorePaidOrdersDispatchApiController(ShopDbContext db, IWare
             foreach (var line in orderItems)
             {
                 var key = (line.IdProduct, line.IdProductVariant);
-                if (!baseUnitByProduct.TryGetValue(line.IdProduct, out long baseUnitId) ||
+                if (!productNames.TryGetValue(line.IdProduct, out string? productName) ||
+                    !baseUnitByProduct.TryGetValue(line.IdProduct, out long baseUnitId) ||
                     !unitNames.TryGetValue(baseUnitId, out string? unitName) ||
                     !inventoryByProductVariant.TryGetValue(key, out var matches) || matches.Length != 1)
                     return Conflict(new { detail = "برای یکی از اقلام سفارش، کالا یا واحد انبار متناظر یکتا پیدا نشد." });
 
                 lineDetails.Add(new DispatchLineDetail
                 {
-                    IdCustomerOrder = line.IdCustomerOrder,
+                    IdOrder = line.IdOrder,
                     IdInventoryItem = matches[0].Id,
                     IdUnit = baseUnitId,
                     IdSalesPlanReference = line.IdSalesPlan,
                     Quantity = line.Quantity,
                     ConversionFactor = 1,
                     BaseQuantity = line.Quantity,
-                    ProductName = line.ProductNameSnapshot,
+                    ProductName = productName,
                     VariantName = line.IdProductVariant is long variantId ? variantNames.GetValueOrDefault(variantId) : null,
                     UnitName = unitName
                 });
@@ -234,7 +237,7 @@ public sealed class StorePaidOrdersDispatchApiController(ShopDbContext db, IWare
 
     private sealed class DispatchLineDetail
     {
-        public long IdCustomerOrder { get; init; }
+        public long IdOrder { get; init; }
         public long IdInventoryItem { get; init; }
         public long IdUnit { get; init; }
         public long IdSalesPlanReference { get; init; }

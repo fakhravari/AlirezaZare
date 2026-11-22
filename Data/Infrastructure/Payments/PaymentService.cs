@@ -23,8 +23,14 @@ public sealed class PaymentService(ShopDbContext db, IPaymentGateway gateway, IL
             if (order.Status != "pending-payment" || order.TotalAmount <= 0 || order.PaymentMethod != "zarinpal" ||
                 order.Bank is not { Code: "zarinpal", IsActive: true }) return new("invalid-order");
 
-            bool hasItems = await db.StoreCustomerOrderItems.AnyAsync(x => x.IdCustomerOrder == orderId, ct);
+            bool hasItems = await db.StoreCustomerOrderItems.AnyAsync(x => x.IdOrder == orderId, ct);
             if (!hasItems) return new("invalid-order");
+
+            decimal itemSubtotal = await (from item in db.StoreCustomerOrderItems
+                                          join price in db.StoreOrderItemAmounts on item.Id equals price.IdOrderItem
+                                          where item.IdOrder == orderId
+                                          select price.UnitAmount * item.Quantity).SumAsync(ct);
+            if (itemSubtotal != order.SubtotalAmount) return new("amount-mismatch");
 
             bool active = await db.StorePaymentAttempts.AnyAsync(x => x.IdOrder == orderId && (x.Status == "initiated" || x.Status == "awaiting"), ct);
             if (active) return new("already-started");
@@ -99,7 +105,7 @@ public sealed class PaymentService(ShopDbContext db, IPaymentGateway gateway, IL
         var order = await db.StoreCustomerOrders.SingleOrDefaultAsync(x => x.Id == locked.IdOrder, ct);
         if (order is null || order.Status != "pending-payment" || order.TotalAmount != locked.Amount) return "order-conflict";
 
-        var items = await db.StoreCustomerOrderItems.Where(x => x.IdCustomerOrder == order.Id).ToListAsync(ct);
+        var items = await db.StoreCustomerOrderItems.Where(x => x.IdOrder == order.Id).ToListAsync(ct);
         if (items.Count == 0) return "order-conflict";
 
         DateTime now = DateTime.UtcNow;

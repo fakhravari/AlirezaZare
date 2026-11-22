@@ -82,6 +82,7 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
     public DbSet<StoreProductSalesPlanOfferSpecificationOverride> StoreProductSalesPlanOfferSpecificationOverrides => Set<StoreProductSalesPlanOfferSpecificationOverride>();
     public DbSet<StorePriceVersion> StorePriceVersions => Set<StorePriceVersion>();
     public DbSet<StoreOrderItemPriceReference> StoreOrderItemPriceReferences => Set<StoreOrderItemPriceReference>();
+    public DbSet<StoreOrderItemAmount> StoreOrderItemAmounts => Set<StoreOrderItemAmount>();
     public DbSet<GeoCountry> GeoCountries => Set<GeoCountry>();
     public DbSet<GeoProvince> GeoProvinces => Set<GeoProvince>();
     public DbSet<GeoCity> GeoCities => Set<GeoCity>();
@@ -350,6 +351,8 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.HasKey(x => x.Id);
             entity.Property(x => x.NameFa).HasMaxLength(100).IsRequired();
             entity.Property(x => x.NameEn).HasMaxLength(100);
+            entity.Property(x => x.TreePathIds).HasMaxLength(4000).IsUnicode().IsRequired();
+            entity.Property(x => x.TreePathNames).HasMaxLength(4000).IsUnicode().IsRequired();
             entity.HasIndex(x => x.IdParent);
             entity.HasOne<WarehouseUnit>().WithMany().HasForeignKey(x => x.IdParent).OnDelete(DeleteBehavior.Restrict);
             entity.Property(x => x.SortOrder).IsRequired();
@@ -473,6 +476,8 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.ToTable("VariantName", "Warehouse");
             entity.HasKey(x => x.Id);
             entity.Property(x => x.Name).HasMaxLength(300).IsRequired();
+            entity.Property(x => x.TreePathIds).HasMaxLength(4000).IsUnicode().IsRequired();
+            entity.Property(x => x.TreePathNames).HasMaxLength(4000).IsUnicode().IsRequired();
             entity.HasOne(x => x.Parent).WithMany().HasForeignKey(x => x.IdParent).OnDelete(DeleteBehavior.Restrict);
         });
         modelBuilder.Entity<ProductVariant>(entity =>
@@ -612,7 +617,7 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.Property(x => x.ShippingTrackingCode).HasMaxLength(100);
             entity.Property(x => x.OrderedAtUtc).HasPrecision(3);
             entity.Property(x => x.AddressSnapshotJson).HasColumnType("nvarchar(max)").IsRequired();
-            entity.HasMany(x => x.Items).WithOne().HasForeignKey(x => x.IdCustomerOrder).OnDelete(DeleteBehavior.Cascade);
+            entity.HasMany(x => x.Items).WithOne().HasForeignKey(x => x.IdOrder).OnDelete(DeleteBehavior.Cascade);
         });
         modelBuilder.Entity<StoreNewsletterSubscriber>(entity =>
         {
@@ -642,11 +647,9 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
         });
         modelBuilder.Entity<StoreCustomerOrderItem>(entity =>
         {
-            entity.ToTable("OrderItem", "Store");
+            entity.ToTable("OrderItem", "Store", table => table.UseSqlOutputClause(false));
             entity.HasKey(x => x.Id);
-            entity.Property(x => x.ProductNameSnapshot).HasMaxLength(300).IsRequired();
-            entity.Property(x => x.UnitAmount).HasPrecision(19, 0);
-            entity.Property(x => x.OptionsJson).HasColumnType("nvarchar(max)").IsRequired();
+            entity.HasOne(x => x.PriceVersion).WithMany().HasForeignKey(x => x.IdPriceVersion).OnDelete(DeleteBehavior.Restrict);
             entity.HasMany(x => x.PriceReferences).WithOne().HasForeignKey(x => x.IdOrderItem).OnDelete(DeleteBehavior.Cascade);
         });
         modelBuilder.Entity<StorePriceVersion>(entity =>
@@ -665,9 +668,15 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.HasOne<ProductVariant>().WithMany().HasForeignKey(x => new { x.IdProductVariant, x.IdProduct }).HasPrincipalKey(x => new { x.Id, x.IdProduct }).OnDelete(DeleteBehavior.Restrict);
             entity.HasOne<StoreAccessory>().WithMany().HasForeignKey(x => x.IdAccessory).OnDelete(DeleteBehavior.Restrict);
         });
+        modelBuilder.Entity<StoreOrderItemAmount>(entity =>
+        {
+            entity.HasNoKey();
+            entity.ToView("OrderItemAmount", "Store");
+            entity.Property(x => x.UnitAmount).HasPrecision(19, 0);
+        });
         modelBuilder.Entity<StoreOrderItemPriceReference>(entity =>
         {
-            entity.ToTable("OrderItemPriceReference", "Store");
+            entity.ToTable("OrderItemPriceReference", "Store", table => table.UseSqlOutputClause(false));
             entity.HasKey(x => new { x.IdOrderItem, x.IdPriceVersion });
             entity.HasOne(x => x.PriceVersion).WithMany().HasForeignKey(x => x.IdPriceVersion).OnDelete(DeleteBehavior.Restrict);
         });
@@ -891,6 +900,8 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.Property(x => x.NameEn).HasMaxLength(200).IsRequired();
             entity.Property(x => x.NameFa).HasMaxLength(200).IsRequired();
             entity.Property(x => x.PathJson).HasColumnType("nvarchar(max)").IsRequired();
+            entity.Property(x => x.TreePathIds).HasMaxLength(4000).IsUnicode().IsRequired();
+            entity.Property(x => x.TreePathNames).HasMaxLength(4000).IsUnicode().IsRequired();
             entity.Property(x => x.ProductIntro).HasMaxLength(10000);
             entity.Property(x => x.ProductHighlightsJson).HasColumnType("nvarchar(max)");
             entity.Property(x => x.ProductSpecsJson).HasColumnType("nvarchar(max)");

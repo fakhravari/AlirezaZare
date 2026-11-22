@@ -2,6 +2,8 @@
 
 ورود/ثبت‌نام و endpointهای احراز را از `Shop/Controllers/AccountController.cs`، `EmailVerificationController.cs` و `PasswordLoginController.cs` دنبال کنید. صفحهٔ حساب در `ProfileController.cs` و `Shop/Views/Profile/` است. سمت مرورگر، projection حساب در `Shop/wwwroot/shop/js/store/account-data.js` و صفحه در `js/pages/account-page.js` مصرف می‌شود. کد پنجرهٔ ویرایش پروفایل و ثبت اطلاعات در `js/pages/profile-edit.js` قرار دارد و پس از اسکریپت‌های صفحه بارگذاری می‌شود.
 
+تعداد سفارش‌ها، نشانی‌ها، علاقه‌مندی‌ها، کدهای تخفیف و پیگیری‌های قیمت در منوی حساب با `data-account-count` به‌روزرسانی می‌شود. badge هر تعداد درون عنوان همان گزینه قرار دارد تا در چیدمان دو ستونهٔ موبایل نیز کنار عنوان بماند؛ استایل آن در `Shop/wwwroot/shop/css/pages/account-page.css` است.
+
 ورود با کد ایمیل در `EmailVerificationController` از `IEmailVerificationCodeStore` در `Data/Application/Account/Contracts` برای چرخهٔ کد و از قرارداد مشترک `Data/Application/Email/Contracts/IEmailSender` برای ارسال استفاده می‌کند. پیاده‌سازی SQL در `Data/Infrastructure/Identity/DatabaseEmailVerificationCodeStore.cs` است. مدت اعتبار و فاصلهٔ ارسال دوباره از `Store.SiteSetting.EmailVerificationCodeLifetimeMinutes` خوانده می‌شود و مدیر در بخش «ارسال ایمیل» تنظیمات سایت آن را تغییر می‌دهد؛ مقدار پیش‌فرض ۱۵ و بازهٔ مجاز ۱ تا ۱۴۴۰ دقیقه است. hash کد و شمارندهٔ حداکثر پنج تلاش در `Account.EmailVerificationCode` ذخیره می‌شود؛ کد خام ذخیره نمی‌شود. رکورد منقضی هنگام تأیید ناموفق یا پاک‌سازی فرصت‌طلبانه در درخواست کد بعدی حذف می‌شود؛ شکست ارسال هم رکورد را پاک می‌کند. جزئیات جدول در [راهنمای دیتابیس](../architecture/database.md) است.
 
 خبرنامهٔ صفحهٔ اصلی به `POST /api/store/newsletter` می‌فرستد. کاربر واردشده با شناسهٔ نشست در `Account.Profile.NewsletterEnabled` ثبت می‌شود؛ برای مهمان، ایمیل lowercase-normalized در `Store.NewsletterSubscriber` ذخیره می‌شود. تکرار ایمیل مهمان پاسخ موفقِ ازقبل‌ثبت‌شده می‌گیرد. کنترل پروفایل هم از `PUT /api/account/profile` ترجیح خبرنامه را ذخیره می‌کند. پیگیری سفارش عمومی با `POST /api/store/orders/tracking` به کد سفارش و موبایل snapshot نشانی ارسال نیاز دارد؛ درخواست‌ها rate-limit می‌شوند و پاسخ فقط وضعیت، شرکت/کد حمل و تاریخچهٔ ارسال را شامل می‌شود.
@@ -20,7 +22,7 @@ Controller/API → `IAccountDataSource` و implementation ثبت‌شده در `
 
 نشانی‌های محلی ایران و جغرافیا را تا API و جدول‌های `Geo` ردیابی کنید. هنگام تغییر کشور استان یا جابه‌جایی شهر در مدیریت، شناسه‌های جغرافیایی نشانی‌های وابسته نیز مطابق [راهنمای مدیریت](../admin/README.md) به‌روز می‌شوند. دادهٔ sample را با تاریخچهٔ واقعی سفارش اشتباه نگیرید. کارت‌ها و پیگیری‌های قیمت ممکن است snapshot یا state متفاوت داشته باشند؛ مرجع مسیر هرکدام در [سبد](../store/cart.md) و [قیمت محصول](../store/product.md) است.
 
-فاکتور سفارش مبلغ پیش از تخفیف، کد کوپن، مبلغ تخفیف و مبلغ قابل پرداخت را از snapshot سفارش نمایش می‌دهد؛ محاسبه و ثبت آن در checkout مستند شده در [راهنمای سبد](../store/cart.md).
+فاکتور سفارش نام کالا و تنوع، قیمت واحد و اجزای قیمت کالا یا تنوع و متعلقات را از رابطه‌های سفارش نشان می‌دهد. جمع پیش از تخفیف، کد کوپن، مبلغ تخفیف و مبلغ قابل پرداخت از سرسفارش خوانده می‌شوند. اگر جمع جزئیات با مبلغ پیش از تخفیف متفاوت باشد، فاکتور پیام تماس با پشتیبانی نشان می‌دهد؛ علت اختلاف برخی سفارش‌های قدیمی در [دیتابیس](../architecture/database.md) و محاسبه و ثبت سفارش در [راهنمای سبد](../store/cart.md) آمده است.
 
 ## بررسی
 

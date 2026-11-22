@@ -916,6 +916,16 @@
         const empty = page.querySelector("[data-admin-empty]");
         if (!tree) return;
         const byId = new Map(allRows.map(item => [String(item.id), item]));
+        const categoryPath = item => {
+            if (item.treePathNames) return item.treePathNames;
+            const names = [], seen = new Set();
+            let current = item;
+            while (current && !seen.has(String(current.id))) {
+                seen.add(String(current.id)); names.unshift(current.name);
+                current = current.parentId == null ? null : byId.get(String(current.parentId));
+            }
+            return names.join(" / ");
+        };
         const normalizedSearch = search.trim().toLocaleLowerCase();
         const matches = new Set(allRows.filter(item => !normalizedSearch ||
             [item.id, item.name, item.englishName, item.slug].some(value => String(value || "").toLocaleLowerCase().includes(normalizedSearch)))
@@ -1001,7 +1011,8 @@
                 if (!value) continue;
                 const part = document.createElement("span"); part.textContent = value; meta.append(part);
             }
-            info.append(name, meta); row.append(info);
+            const path = document.createElement("small"); path.className = "small text-muted d-block"; path.textContent = `مسیر: ${categoryPath(item)}`;
+            info.append(name, path, meta); row.append(info);
             const actions = document.createElement("div"); actions.className = "admin-row-actions admin-category-node-actions";
             const details = document.createElement("button"); details.type = "button"; details.className = "btn btn-xs btn-default";
             details.dataset.adminRecord = String(index); details.setAttribute("aria-label", `نمایش جزئیات ${item.name}`);
@@ -1070,7 +1081,7 @@
             groupRow.setAttribute("aria-level", "1");
             groupRow.setAttribute("aria-expanded", String(expanded));
             const groupCell = document.createElement("td");
-            groupCell.colSpan = 7;
+            groupCell.colSpan = 8;
             const toggle = document.createElement("button");
             toggle.type = "button";
             toggle.className = "admin-category-toggle admin-attribute-group-toggle";
@@ -1101,6 +1112,7 @@
                 const values = [
                     item.key,
                     item.label,
+                    `${group.label} / ${item.label}`,
                     item.sourceKey,
                     item.filterKey,
                     item.isFilterable ? "بله" : "خیر",
@@ -1751,6 +1763,7 @@
                 form.elements.nameFa.value = category?.nameFa || ""; form.elements.nameEn.value = category?.nameEn || "";
                 const nodesById = new Map(nodes.map(node => [String(node.id), node]));
                 const categoryPath = node => {
+                    if (node.treePathNames) return node.treePathNames;
                     const names = [], visited = new Set();
                     let current = node;
                     while (current && !visited.has(String(current.id))) {
@@ -2161,10 +2174,13 @@
                         "شماره سفارش": order.orderNumber, "دادهٔ نمونه": order.isSample ? "بله" : "خیر", "مشتری": order.customerName,
                         "وضعیت": order.status === "simulated-payment-confirmed" ? "پرداخت آزمایشی تأیید شده" : order.status === "pending-payment" ? "در انتظار پرداخت" : order.status,
                         "مبلغ تومان": order.totalAmount,
+                        "جمع ثبت‌شده پیش از تخفیف": order.subtotalAmount,
+                        "جمع محاسبه‌شده از نسخه‌های قیمت": order.calculatedItemSubtotal,
+                        ...(order.hasItemSubtotalMismatch ? { "هشدار مبلغ": "جمع اقلام با مبلغ ثبت‌شده سفارش یکسان نیست؛ قبل از اقدام، سوابق سفارش را بررسی کنید." } : {}),
                         "شناسه حواله": order.idWarehouseDocument || "ثبت نشده",
                         "شرکت حمل": order.shippingCarrier || "ثبت نشده", "کد رهگیری": order.shippingTrackingCode || "ثبت نشده",
                         "نشانی ثبت‌شده": Object.values(address).filter(value => typeof value === "string" && value).join("، "),
-                        "اقلام": items.map(line => `${line.name}، ${ui.formatNumber(line.quantity)} عدد، مبلغ واحد ${ui.formatNumber(line.unitAmount)} تومان، طرح ${line.salesPlan}${line.priceReferences?.length ? `، نسخه‌های قیمت: ${line.priceReferences.map(ref => `#${ref.priceVersionId} ${ref.component}=${ui.formatNumber(ref.calculatedUnitAmount)} تومان`).join("، ")}` : "، مرجع نسخهٔ قیمت ثبت نشده"}`).join(" ؛ ") || "جزئیات اقلام ثبت نشده است",
+                        "اقلام": items.map(line => `${line.name}${line.variantName ? ` — ${line.variantName}` : ""}، ${ui.formatNumber(line.quantity)} عدد، مبلغ واحد ${ui.formatNumber(line.unitAmount)} تومان، طرح ${line.salesPlan}${line.priceReferences?.length ? `، نسخه‌های قیمت: ${line.priceReferences.map(ref => `#${ref.priceVersionId} ${ref.name || ref.component}=${ui.formatNumber(ref.calculatedUnitAmount)} تومان`).join("، ")}` : "، مرجع نسخهٔ قیمت ثبت نشده"}`).join(" ؛ ") || "جزئیات اقلام ثبت نشده است",
                         "تاریخچهٔ ارسال": history.map(entry => `${entry.PreviousStatus} ← ${entry.NewStatus}، مدیر ${entry.ActorUserKey}، ${ui.formatDateTime(entry.ChangedAtUtc)}`).join(" ؛ ") || "تغییری ثبت نشده است"
                     });
                 }).catch(error => ui.notify(error.message || "دریافت جزئیات سفارش ناموفق بود.", "danger"))

@@ -164,6 +164,7 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
                                BankName = o.Bank == null ? null : o.Bank.NameFa,
                                ItemCount = o.ItemCount,
                                TotalAmount = o.TotalAmount,
+                               SubtotalAmount = o.SubtotalAmount,
                                OrderedAtUtc = o.OrderedAtUtc,
                                IsSample = o.PaymentMethod == "demo" && o.ExternalOrderKey != null && o.ExternalOrderKey.StartsWith("demo-order-"),
                                CustomerName = (p.FirstName + " " + p.LastName).Trim(),
@@ -174,28 +175,32 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
                            }).SingleOrDefaultAsync(cancellationToken);
         if (order is not null)
         {
-            var itemRows = await (from i in db.StoreCustomerOrderItems.AsNoTracking().Where(x => x.IdCustomerOrder == id)
+            var itemRows = await (from i in db.StoreCustomerOrderItems.AsNoTracking().Where(x => x.IdOrder == id)
                                   join s in db.SalesPlanReferences.AsNoTracking() on i.IdSalesPlan equals s.Id
+                                  join product in db.Products.AsNoTracking() on i.IdProduct equals product.Id
                                   orderby i.Id
-                                  select new { i.Id, i.ProductNameSnapshot, i.Quantity, i.UnitAmount, s.StoreSalesPlanKey, i.OptionsJson })
+                                  select new { i.Id, ProductName = product.Name, VariantName = db.ProductVariants.Where(v => v.Id == i.IdProductVariant).Select(v => v.VariantName.Name).FirstOrDefault(), i.Quantity, i.IdProductVariant, i.IdPriceVersion, i.PriceVersion.PriceAmount, i.PriceVersion.DiscountPercent, i.PriceVersion.IsActive, i.PriceVersion.CreatedAtUtc, i.PriceVersion.ChangeReason, s.StoreSalesPlanKey })
                 .ToListAsync(cancellationToken);
             var references = await (from r in db.StoreOrderItemPriceReferences.AsNoTracking()
                                     join v in db.StorePriceVersions.AsNoTracking() on r.IdPriceVersion equals v.Id
+                                    join accessory in db.StoreAccessories.AsNoTracking() on v.IdAccessory equals (long?)accessory.Id
                                     where itemRows.Select(i => i.Id).Contains(r.IdOrderItem)
                                     orderby r.IdOrderItem, r.IdPriceVersion
-                                    select new { r.IdOrderItem, r.IdPriceVersion, v.IdProductVariant, v.IdAccessory, v.PriceAmount, v.DiscountPercent, v.IsActive, v.CreatedAtUtc, v.ChangeReason })
+                                    select new { r.IdOrderItem, r.IdPriceVersion, v.IdProductVariant, v.IdAccessory, v.PriceAmount, v.DiscountPercent, v.IsActive, v.CreatedAtUtc, v.ChangeReason, AccessoryName = accessory.Name })
                 .ToListAsync(cancellationToken);
             var items = itemRows.Select(i => new
             {
-                name = i.ProductNameSnapshot,
+                name = i.ProductName,
+                variantName = i.VariantName,
                 quantity = i.Quantity,
-                unitAmount = i.UnitAmount,
+                unitAmount = decimal.Round(i.PriceAmount * (100m - i.DiscountPercent) / 100m, 0, MidpointRounding.AwayFromZero) + references.Where(r => r.IdOrderItem == i.Id).Sum(r => r.PriceAmount),
                 salesPlan = i.StoreSalesPlanKey,
-                options = JsonDocument.Parse(i.OptionsJson).RootElement.Clone(),
+                options = new { accessories = references.Where(r => r.IdOrderItem == i.Id).Select(r => new { id = r.IdAccessory?.ToString(), selected = true }).ToArray() },
                 priceReferences = references.Where(r => r.IdOrderItem == i.Id).Select(r => new
                 {
                     priceVersionId = r.IdPriceVersion,
                     component = StorePriceVersionReference.GetComponent(r.IdProductVariant, r.IdAccessory),
+                    name = r.AccessoryName,
                     calculatedUnitAmount = StorePriceVersionReference.AppliesDiscount(r.IdAccessory)
                         ? decimal.Round(r.PriceAmount * (100m - r.DiscountPercent) / 100m, 0, MidpointRounding.AwayFromZero)
                         : r.PriceAmount,
@@ -204,8 +209,10 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
                     isCurrent = r.IsActive,
                     recordedAtUtc = r.CreatedAtUtc,
                     reason = r.ChangeReason
-                }).ToArray()
+                }).Prepend(new { priceVersionId = i.IdPriceVersion, component = i.IdProductVariant.HasValue ? "variant" : "product", name = i.VariantName ?? i.ProductName, calculatedUnitAmount = decimal.Round(i.PriceAmount * (100m - i.DiscountPercent) / 100m, 0, MidpointRounding.AwayFromZero), recordedPriceAmount = i.PriceAmount, discountPercent = i.DiscountPercent, isCurrent = i.IsActive, recordedAtUtc = i.CreatedAtUtc, reason = i.ChangeReason }).ToArray()
             }).ToList();
+            order.CalculatedItemSubtotal = items.Sum(item => item.unitAmount * item.quantity);
+            order.HasItemSubtotalMismatch = items.Count > 0 && order.CalculatedItemSubtotal != order.SubtotalAmount;
             var history = await db.StoreOrderShippingHistories.AsNoTracking().Where(x => x.IdOrder == id)
                 .OrderByDescending(x => x.Id).Select(x => new { x.PreviousStatus, x.NewStatus, x.ActorUserKey, x.ChangedAtUtc })
                 .ToListAsync(cancellationToken);
@@ -233,6 +240,9 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
 
     public sealed class OrderDetailsRow : OrderRow
     {
+        public decimal SubtotalAmount { get; set; }
+        public decimal CalculatedItemSubtotal { get; set; }
+        public bool HasItemSubtotalMismatch { get; set; }
         public long? IdWarehouseDocument { get; set; }
         public string? ShippingCarrier { get; set; }
         public string? ShippingTrackingCode { get; set; }

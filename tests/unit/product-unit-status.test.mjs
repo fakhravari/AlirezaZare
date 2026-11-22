@@ -18,8 +18,8 @@ test('unit status is submitted from the definition form', {skip: !existsSync(chr
     window.bootstrap = {Modal: {getOrCreateInstance: () => ({show() {}}), getInstance: () => ({hide() {}})}};
     window.AdminUI = {initStatusSwitch() {}, destroyDataTable() {}, refreshDataTable() {}, notify() {}, getJson: async (url, options) => {
       if (options.method === 'GET') {
-        if (url.endsWith('/unit-groups')) return [{id: 1, name: 'جرم', idParent: null, isActive: true, sortOrder: 0, canDelete: false}];
-        if (url.endsWith('/units')) { window.unitReadCount += 1; return [{id: 10, idParent: 1, parentName: 'جرم', nameFa: 'کیلوگرم', nameEn: 'Kilogram', isActive: true, canDelete: true}]; }
+        if (url.endsWith('/unit-groups')) return [{id: 1, name: 'جرم', idParent: null, treePathIds: '01', treePathNames: 'مسیر ذخیره‌شده / جرم', isActive: true, sortOrder: 0, canDelete: false}];
+        if (url.endsWith('/units')) { window.unitReadCount += 1; return [{id: 10, idParent: 1, treePathIds: '01 / 10', treePathNames: 'مسیر ذخیره‌شده / جرم / کیلوگرم', parentName: 'جرم', nameFa: 'کیلوگرم', nameEn: 'Kilogram', isActive: true, canDelete: true}]; }
         return [];
       }
       if (options.method === 'DELETE') { window.unitActions.push(url); return {message: 'deleted'}; }
@@ -35,10 +35,12 @@ test('unit status is submitted from the definition form', {skip: !existsSync(chr
   assert.match(await page.locator('[data-unit-tree]').textContent(), /کیلوگرم/);
   assert.match(await page.locator('[data-unit-tree]').textContent(), /Kilogram/);
   const group = page.locator('[data-unit-tree] [role=treeitem]').first();
+  assert.equal(await group.locator(':scope > small').textContent(), 'مسیر: مسیر ذخیره‌شده / جرم');
   assert.equal(await group.locator(':scope > .admin-permission-row [role=checkbox]').isDisabled(), true);
   assert.match(await group.innerText(), /برای غیرفعال‌کردن گروه، ۱ واحد فعال/u);
   await group.getByRole('button', {name: 'بازکردن جرم'}).click();
   const unit = page.locator('[data-unit-tree] [role=treeitem]').nth(1);
+  assert.equal(await unit.locator(':scope > small').textContent(), 'مسیر: مسیر ذخیره‌شده / جرم / کیلوگرم');
   assert.equal(await unit.getByRole('checkbox').getAttribute('aria-checked'), 'true');
   await unit.getByRole('button', {name: 'ویرایش'}).click();
   assert.equal(await page.locator('[data-definition-fields] [name=parentId]').inputValue(), '1');
@@ -118,6 +120,24 @@ test('warehouse units expose Persian and English names without a code field', as
   assert.match(schemaMigration, /sp_rename N'Warehouse\.Unit\.Name', N'NameFa'/);
   assert.match(schemaMigration, /DROP COLUMN \[Code\]/);
   assert.match(translationMigration, /WHEN 73 THEN N'Milliliter'/);
+});
+
+test('tree path IDs and names are stored and rebuilt by SQL triggers', async () => {
+  const migration = await read('Shop/Features/Store/Database/Migrations/150-tree-path-columns.sql', 'utf8');
+  const model = await read('Data/Infrastructure/Persistence/ShopDbContext.cs', 'utf8');
+  const api = await read('Admin/Areas/Warehouse/Controllers/Api/WarehouseDefinitionsApiController.cs', 'utf8');
+  for (const table of ['Store.Category', 'Warehouse.Unit', 'Warehouse.VariantName']) {
+    assert.ok(migration.includes(table));
+    assert.match(migration, /TreePathIds nvarchar\(4000\)/);
+    assert.match(migration, /TreePathNames nvarchar\(4000\)/);
+  }
+  assert.match(migration, /CREATE OR ALTER TRIGGER Store\.TR_Category_TreePath/);
+  assert.match(migration, /CREATE OR ALTER TRIGGER Warehouse\.TR_Unit_TreePath/);
+  assert.match(migration, /CREATE OR ALTER TRIGGER Warehouse\.TR_VariantName_TreePath/);
+  assert.match(migration, /AFTER INSERT, UPDATE/);
+  assert.match(model, /Property\(x => x\.TreePathIds\)/);
+  assert.match(model, /Property\(x => x\.TreePathNames\)/);
+  assert.match(api, /x\.TreePathIds, x\.TreePathNames/);
 });
 
 test('unused units and empty unit groups can be deleted only by full-access administrators', async () => {
