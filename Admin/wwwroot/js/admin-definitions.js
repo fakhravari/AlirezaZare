@@ -95,6 +95,16 @@
                 activate.addEventListener("click", () => void openForm(page, item, config).catch(error => ui.notify(error.message || "بازکردن فرم ناموفق بود.", "danger")));
                 actions.append(activate);
             }
+            if (item.isActive === false && page.dataset.definitionSection === "variants" && page.dataset.canEdit === "true") {
+                const activate = actionButton("فعال‌سازی", "fa-toggle-on", "btn btn-sm btn-outline-success");
+                activate.addEventListener("click", async () => {
+                    activate.disabled = true;
+                    try { const result = await request(page, `${page.dataset.api}/variants/${item.id}/activate`, "POST", {}); ui.notify(result.message, "success"); await load(page); }
+                    catch (error) { ui.notify(error.message, "danger"); }
+                    finally { activate.disabled = false; }
+                });
+                actions.append(activate);
+            }
             if (item.isActive !== false) {
                 if (page.dataset.canEdit === "true") {
                     const edit = actionButton("ویرایش", "fa-pen-to-square", "btn btn-sm btn-default me-1"); edit.addEventListener("click", () => void openForm(page, item, config).catch(error => ui.notify(error.message || "بازکردن فرم ناموفق بود.", "danger")));
@@ -102,14 +112,13 @@
                 }
                 if (page.dataset.canDeactivate === "true" && page.dataset.definitionSection !== "stock-owners") {
                 const deactivate = actionButton("غیرفعال‌سازی", "fa-toggle-off", "btn btn-sm btn-outline-danger");
-                if (page.dataset.definitionSection === "variants" && (item.isDefault || !rows.some(other => other.idProduct === item.idProduct && other.id !== item.id && other.isActive))) {
+                if (page.dataset.definitionSection === "variants" && item.canDeactivate !== true) {
                     deactivate.disabled = true;
-                    deactivate.title = item.isDefault
-                        ? "تنوع پیش‌فرض قابل غیرفعال‌سازی نیست؛ ابتدا تنوع فعال دیگری را پیش‌فرض کنید."
-                        : "کالای دارای تنوع باید حداقل یک تنوع فعال داشته باشد.";
+                    deactivate.title = item.deactivateBlockReason || "این تنوع قابل غیرفعال‌سازی نیست.";
                     deactivate.setAttribute("aria-label", deactivate.title);
+                } else if (page.dataset.definitionSection === "variants") {
+                    deactivate.dataset.adminConfirm = `تنوع «${item.name}» از کالای «${item.productName}» غیرفعال شود؟ سابقه حفظ می‌شود.`;
                 }
-                deactivate.dataset.adminConfirm = "این تعریف غیرفعال شود؟ سابقهٔ گردش‌ها حفظ می‌شود.";
                 deactivate.addEventListener("click", async () => {
                     if (deactivate.disabled) return;
                     deactivate.disabled = true;
@@ -634,10 +643,51 @@
                     li.append(row);
                 }
                 row.append(element("span", node.name, "admin-permission-name"));
-                if (page.dataset.canEdit === "true") {
+                if (!node.isActive) row.append(element("span", "غیرفعال", "badge text-bg-secondary ms-2"));
+                if (node.isActive && page.dataset.canEdit === "true") {
                     const edit = actionButton("ویرایش", "fa-pen-to-square", "btn btn-sm btn-default");
                     edit.addEventListener("click", () => { form.elements.id.value = node.id; form.elements.name.value = node.name; parent.value = node.idParent ?? ""; window.jQuery?.(parent).trigger("change.select2"); form.querySelector("[data-variant-name-cancel]").hidden = false; form.elements.name.focus(); });
                     row.append(edit);
+                }
+                if (!node.isActive && page.dataset.canEdit === "true") {
+                    const activate = actionButton("فعال‌سازی", "fa-toggle-on", "btn btn-sm btn-outline-success");
+                    activate.addEventListener("click", async () => {
+                        activate.disabled = true;
+                        try { const result = await request(page, `${page.dataset.api}/variant-names/${node.id}/activate`, "POST", {}); ui.notify(result.message, "success"); await loadVariantNames(page); }
+                        catch (error) { ui.notify(error.message, "danger"); }
+                        finally { activate.disabled = false; }
+                    });
+                    row.append(activate);
+                }
+                if (node.isActive && page.dataset.canDeactivate === "true") {
+                    const deactivate = actionButton("غیرفعال‌سازی", "fa-toggle-off", "btn btn-sm btn-outline-danger");
+                    deactivate.disabled = node.canDeactivate !== true;
+                    if (deactivate.disabled) { deactivate.title = node.deactivateBlockReason || "این نام هنوز در استفاده است."; deactivate.setAttribute("aria-label", deactivate.title); }
+                    else {
+                        deactivate.dataset.adminConfirm = `نام «${node.name}» غیرفعال شود؟ سوابق حفظ می‌شوند.`;
+                        deactivate.addEventListener("click", async () => {
+                            deactivate.disabled = true;
+                            try { const result = await request(page, `${page.dataset.api}/variant-names/${node.id}/deactivate`, "POST", {}); ui.notify(result.message, "success"); await loadVariantNames(page); }
+                            catch (error) { ui.notify(error.message, "danger"); }
+                            finally { deactivate.disabled = false; }
+                        });
+                    }
+                    row.append(deactivate);
+                }
+                if (page.dataset.canDelete === "true") {
+                    const remove = actionButton("حذف", "fa-trash", "btn btn-sm btn-outline-danger");
+                    remove.disabled = node.canDelete !== true;
+                    if (remove.disabled) { remove.title = node.deleteBlockReason || "این نام هنوز در استفاده است."; remove.setAttribute("aria-label", remove.title); }
+                    else {
+                        remove.dataset.adminConfirm = `نام «${node.name}» برای همیشه حذف شود؟`;
+                        remove.addEventListener("click", async () => {
+                            remove.disabled = true;
+                            try { const result = await request(page, `${page.dataset.api}/variant-names/${node.id}`, "DELETE"); ui.notify(result.message, "success"); await loadVariantNames(page); }
+                            catch (error) { ui.notify(error.message, "danger"); }
+                            finally { remove.disabled = false; }
+                        });
+                    }
+                    row.append(remove);
                 }
                 host.append(li);
             }

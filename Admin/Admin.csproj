@@ -12,10 +12,14 @@
     <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="15.1.0" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Remove="wwwroot\**" />
     <Content Remove="keys/**/*" />
+    <Content Remove="wwwroot\**" />
     <None Remove="keys/**/*" />
     <Content Remove="App_Data/keys/**/*" />
+    <EmbeddedResource Remove="wwwroot\**" />
     <None Remove="App_Data/keys/**/*" />
+    <None Remove="wwwroot\**" />
     <!-- Keep the supplied demo library in source control without putting every demo/plugin in the app asset manifest. -->
     <Content Remove="wwwroot/color_admin/pages/**/*" />
     <Content Remove="wwwroot/color_admin/assets/plugins/**/*" />
@@ -26,23 +30,50 @@
     <Content Include="App_Data\keys\key-bc131190-ad22-4ff5-b111-76aedae129d0.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="wwwroot\css\admin-dashboards.css" />
+    <Content Include="wwwroot\css\admin-home-testimonials.css" />
+    <Content Include="wwwroot\css\admin-sales-plans.css" />
+    <Content Include="wwwroot\css\admin-ui.css" />
+    <Content Include="wwwroot\lib\persian-datetimepicker\mds.bs.datetimepicker.style.css" />
     <!-- DataTables is required by the shared admin table renderer. -->
-    <Content Include="wwwroot/color_admin/assets/plugins/datatables.net/js/dataTables.min.js" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
-    <Content Include="wwwroot/color_admin/assets/plugins/datatables.net-bs5/js/dataTables.bootstrap5.min.js" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
-    <Content Include="wwwroot/color_admin/assets/plugins/datatables.net-bs5/css/dataTables.bootstrap5.min.css" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
-    <Content Include="wwwroot/color_admin/assets/plugins/select2/dist/css/select2.min.css" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
-    <Content Include="wwwroot/color_admin/assets/plugins/select2/dist/js/select2.min.js" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
-    <Content Include="wwwroot/color_admin/assets/plugins/select2/dist/js/i18n/fa.js" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="wwwroot\js\admin-account-messages.js" />
+    <None Include="wwwroot\js\admin-contact-messages.js" />
+    <None Include="wwwroot\js\admin-data.js" />
+    <None Include="wwwroot\js\admin-definitions.js" />
+    <None Include="wwwroot\js\admin-documents.js" />
+    <None Include="wwwroot\js\admin-feedback.js" />
+    <None Include="wwwroot\js\admin-geography.js" />
+    <None Include="wwwroot\js\admin-home-testimonials.js" />
+    <None Include="wwwroot\js\admin-movements.js" />
+    <None Include="wwwroot\js\admin-newsletter-subscribers.js" />
+    <None Include="wwwroot\js\admin-paid-orders-dispatch.js" />
+    <None Include="wwwroot\js\admin-persian-datetime.js" />
+    <None Include="wwwroot\js\admin-product-badges.js" />
+    <None Include="wwwroot\js\admin-rich-editor.js" />
+    <None Include="wwwroot\js\admin-selects.js" />
+    <None Include="wwwroot\js\admin-shell.js" />
+    <None Include="wwwroot\js\admin-store-reports.js" />
+    <None Include="wwwroot\js\admin-ui.js" />
+    <None Include="wwwroot\js\admin-users.js" />
+    <None Include="wwwroot\js\admin-variant-prices.js" />
+    <None Include="wwwroot\lib\bootstrap\bootstrap.bundle.min.js" />
+    <None Include="wwwroot\lib\persian-datetimepicker\mds.bs.datetimepicker.js" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="wwwroot\content\brands\" />
     <Folder Include="wwwroot\content\countries\flags\" />
+    <Folder Include="wwwroot\content\data\" />
     <Folder Include="wwwroot\content\identity\" />
-    <Folder Include="wwwroot\content\payments\" />
+    <Folder Include="wwwroot\content\payments\payments\" />
     <Folder Include="wwwroot\content\products\files\" />
     <Folder Include="wwwroot\content\products\images\card\" />
     <Folder Include="wwwroot\content\products\images\main\" />
     <Folder Include="wwwroot\content\products\images\thumbnail\" />
     <Folder Include="wwwroot\content\products\videos\" />
+    <Folder Include="wwwroot\content\sliders\mobile\" />
+    <Folder Include="wwwroot\content\testimonials\" />
+    <Folder Include="wwwroot\content\trust\" />
   </ItemGroup>
 </Project>

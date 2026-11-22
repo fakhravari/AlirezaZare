@@ -51,13 +51,17 @@ test('shared variant name tree creates children and edits existing nodes', {skip
   const browser = await chromium.launch({headless: true});
   t.after(() => browser.close());
   const page = await browser.newPage();
-  await page.setContent(`<div data-admin-definitions data-api="/api" data-definition-section="variant-names" data-can-create="true" data-can-edit="true" data-can-deactivate="false"><form data-variant-name-form><input name="id"><select name="idParent"></select><input name="name"><button type="submit">ثبت نام</button><button type="button" data-variant-name-cancel hidden>انصراف</button></form><div class="admin-permission-tree" data-variant-name-tree></div><div data-definition-status></div></div><div id="admin-definition-modal"><h2 id="admin-definition-title"></h2><form data-definition-form><input name="id"><div data-definition-fields></div><button type="submit">ذخیره</button></form></div>`);
+  await page.setContent(`<div data-admin-definitions data-api="/api" data-definition-section="variant-names" data-can-create="true" data-can-edit="true" data-can-deactivate="true" data-can-delete="true"><form data-variant-name-form><input name="id"><select name="idParent"></select><input name="name"><button type="submit">ثبت نام</button><button type="button" data-variant-name-cancel hidden>انصراف</button></form><div class="admin-permission-tree" data-variant-name-tree></div><div data-definition-status></div></div><div id="admin-definition-modal"><h2 id="admin-definition-title"></h2><form data-definition-form><input name="id"><div data-definition-fields></div><button type="submit">ذخیره</button></form></div>`);
   await page.evaluate(() => {
     window.requests = [];
     window.AdminUI = {destroyDataTable() {}, refreshDataTable() {}, notify() {}, initStatusSwitch() {}, getJson: async (url, options = {}) => {
       const method = options.method || 'GET'; window.requests.push({url, method, body: options.body ? JSON.parse(options.body) : null});
       if (method !== 'GET') return {message: 'ذخیره شد'};
-      if (url.endsWith('/variant-names')) return [{id: 1, idParent: null, name: 'رنگ', isActive: true}, {id: 2, idParent: 1, name: 'آبی', isActive: true}];
+      if (url.endsWith('/variant-names')) return [
+        {id: 1, idParent: null, name: 'رنگ', isActive: true, canDelete: false, canDeactivate: false, deleteBlockReason: 'گروه دارای فرزند است.'},
+        {id: 2, idParent: 1, name: 'آبی', isActive: true, canDelete: false, canDeactivate: false, deleteBlockReason: 'به کالا وصل است.'},
+        {id: 3, idParent: 1, name: 'سبز', isActive: false, canDelete: true, canDeactivate: false}
+      ];
       if (url.endsWith('/variants')) return [];
       return {warehouses: [], products: []};
     }};
@@ -69,12 +73,15 @@ test('shared variant name tree creates children and edits existing nodes', {skip
   assert.equal(await page.locator('[data-variant-name-tree] .admin-permission-list').count(), 2);
   assert.equal(await form.locator('[name=idParent] option[value="2"]').count(), 0);
   assert.equal(await form.locator('[name=idParent] option[value="1"]').textContent(), 'رنگ');
+  assert.equal(await page.locator('[data-variant-name-tree] button[title="گروه دارای فرزند است."]').isEnabled(), false);
+  await page.getByRole('button', {name: 'فعال‌سازی', exact: true}).click();
+  await page.waitForFunction(() => window.requests.some(r => r.url === '/api/variant-names/3/activate'));
   await form.locator('[name=idParent]').selectOption('1');
   await form.locator('[name=name]').fill('سبز');
   await form.locator('[type=submit]').click();
-  await page.waitForFunction(() => window.requests.some(r => r.method === 'POST'));
-  assert.deepEqual((await page.evaluate(() => window.requests.find(r => r.method === 'POST'))).body, {name: 'سبز', idParent: 1});
-  await page.locator('[data-variant-name-tree] button').last().click();
+  await page.waitForFunction(() => window.requests.some(r => r.body?.name === 'سبز'));
+  assert.deepEqual((await page.evaluate(() => window.requests.find(r => r.body?.name === 'سبز'))).body, {name: 'سبز', idParent: 1});
+  await page.getByRole('button', {name: 'ویرایش'}).last().click();
   assert.equal(await form.locator('[name=name]').inputValue(), 'آبی');
   await form.locator('[name=name]').fill('لاجوردی');
   await form.locator('[type=submit]').click();
@@ -88,7 +95,7 @@ test('unused variants can be deleted while variants with references stay blocked
   const browser = await chromium.launch({headless: true});
   t.after(() => browser.close());
   const page = await browser.newPage();
-  await page.setContent(`<div data-admin-definitions data-api="/api" data-definition-section="variants" data-can-create="false" data-can-edit="false" data-can-deactivate="false" data-can-delete="true"><div data-definition-status></div><button data-definition-create></button><table data-admin-datatable><thead data-definition-head></thead><tbody data-definition-rows></tbody></table></div><div id="admin-definition-modal"><h2 id="admin-definition-title"></h2><form data-definition-form><input name="id"><div data-definition-fields></div><button type="submit">ذخیره</button></form></div>`);
+  await page.setContent(`<div data-admin-definitions data-api="/api" data-definition-section="variants" data-can-create="false" data-can-edit="true" data-can-deactivate="false" data-can-delete="true"><div data-definition-status></div><button data-definition-create></button><table data-admin-datatable><thead data-definition-head></thead><tbody data-definition-rows></tbody></table></div><div id="admin-definition-modal"><h2 id="admin-definition-title"></h2><form data-definition-form><input name="id"><div data-definition-fields></div><button type="submit">ذخیره</button></form></div>`);
   await page.evaluate(() => {
     window.requests = [];
     window.AdminUI = {destroyDataTable() {}, refreshDataTable() {}, notify() {}, initStatusSwitch() {}, getJson: async (url, options = {}) => {
@@ -108,6 +115,8 @@ test('unused variants can be deleted while variants with references stay blocked
   assert.equal(await deleteButtons.nth(0).isEnabled(), true);
   assert.equal(await deleteButtons.nth(1).isEnabled(), false);
   assert.match(await deleteButtons.nth(1).getAttribute('title'), /در سفارش استفاده شده/);
+  await page.getByRole('button', {name: 'فعال‌سازی'}).first().click();
+  await page.waitForFunction(() => window.requests.some(request => request.url === '/api/variants/21/activate'));
   await deleteButtons.nth(0).click();
   await page.waitForFunction(() => window.requests.some(request => request.method === 'DELETE'));
   assert.equal((await page.evaluate(() => window.requests.find(request => request.method === 'DELETE'))).url, '/api/variants/21');

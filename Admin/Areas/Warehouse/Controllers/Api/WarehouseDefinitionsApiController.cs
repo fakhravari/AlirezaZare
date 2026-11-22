@@ -93,6 +93,12 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
         {
             x.Id, x.IdProduct, x.ProductName, x.ProductCode, x.IdVariantName, x.Name, x.IsDefault, x.IsActive, x.CreatedAtUtc,
             CanDelete = !x.HasNonZeroStock && !x.HasWarehouseHistory && !x.HasStoreHistory && !x.IsDefault && (!x.IsActive || x.HasOtherActiveVariant),
+            CanDeactivate = x.IsActive && !x.IsDefault && x.HasOtherActiveVariant && !x.HasNonZeroStock,
+            DeactivateBlockReason = !x.IsActive ? null
+                : x.IsDefault ? "تنوع پیش‌فرض است؛ ابتدا یک تنوع فعال دیگر را پیش‌فرض کنید."
+                : !x.HasOtherActiveVariant ? "آخرین تنوع فعال این کالا است؛ دست‌کم یک تنوع باید فعال بماند."
+                : x.HasNonZeroStock ? "این تنوع موجودی غیرصفر دارد؛ ابتدا موجودی آن را از گردش انبار صفر کنید."
+                : null,
             DeleteBlockReason = x.IsDefault ? "تنوع پیش‌فرض را حذف نکنید؛ ابتدا تنوع دیگری را پیش‌فرض کنید."
                 : x.IsActive && !x.HasOtherActiveVariant ? "آخرین تنوع فعال کالا قابل حذف نیست."
                 : x.HasNonZeroStock ? "تنوع موجودی غیرصفر دارد؛ ابتدا موجودی را از گردش انبار صفر کنید."
@@ -107,8 +113,24 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
     public async Task<IActionResult> GetVariantNames(CancellationToken cancellationToken)
     {
         if (!CanAccessVariantNames() && !CanAccessVariants("variants")) return Forbid();
-        return Ok(await db.VariantNames.AsNoTracking().OrderBy(x => x.Name).ThenBy(x => x.Id)
-            .Select(x => new { x.Id, x.IdParent, x.Name, x.IsActive }).ToListAsync(cancellationToken));
+        var nodes = await db.VariantNames.AsNoTracking().OrderBy(x => x.Name).ThenBy(x => x.Id)
+            .Select(x => new { x.Id, x.IdParent, x.Name, x.IsActive }).ToListAsync(cancellationToken);
+        long[] referencedNames = await db.ProductVariants.AsNoTracking().Select(x => x.IdVariantName).Distinct().ToArrayAsync(cancellationToken);
+        long[] activeVariantNames = await db.ProductVariants.AsNoTracking().Where(x => x.IsActive).Select(x => x.IdVariantName).Distinct().ToArrayAsync(cancellationToken);
+        return Ok(nodes.Select(node => new
+        {
+            node.Id, node.IdParent, node.Name, node.IsActive,
+            CanDelete = !nodes.Any(child => child.IdParent == node.Id) &&
+                        !referencedNames.Contains(node.Id),
+            CanDeactivate = node.IsActive && !nodes.Any(child => child.IdParent == node.Id && child.IsActive) &&
+                            !activeVariantNames.Contains(node.Id),
+            DeleteBlockReason = nodes.Any(child => child.IdParent == node.Id) ? "این نام گروه والد است و ابتدا باید فرزندهایش حذف شوند."
+                : referencedNames.Contains(node.Id) ? "این نام به تنوع کالا متصل است و قابل حذف نیست."
+                : null,
+            DeactivateBlockReason = nodes.Any(child => child.IdParent == node.Id && child.IsActive) ? "ابتدا فرزندهای فعال این گروه را غیرفعال کنید."
+                : activeVariantNames.Contains(node.Id) ? "ابتدا تنوع‌های فعال متصل به این نام را غیرفعال کنید."
+                : null
+        }).ToArray());
     }
 
     [HttpPost("variant-names")]
@@ -120,6 +142,39 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
     [ValidateAntiForgeryToken]
     public Task<IActionResult> UpdateVariantName(long id, [FromBody] VariantNameInput input, CancellationToken cancellationToken) =>
         SaveVariantName(id, input, cancellationToken);
+
+    [HttpPost("variant-names/{id:long}/activate")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ActivateVariantName(long id, CancellationToken cancellationToken)
+    {
+        if (!CanAccessVariantNames()) return Forbid();
+        if (!User.IsInRole("system.full-access") && !User.HasClaim("admin_permission", "Warehouse:DefinitionsApi:Save")) return Forbid();
+        var node = await db.VariantNames.SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
+        if (node is null) return NotFound();
+        if (node.IdParent.HasValue && !await db.VariantNames.AnyAsync(x => x.Id == node.IdParent && x.IsActive && x.IdParent == null, cancellationToken))
+            return Conflict(new { detail = "برای فعال‌سازی فرزند، ابتدا گروه ریشهٔ آن را فعال کنید." });
+        node.IsActive = true;
+        await db.SaveChangesAsync(cancellationToken);
+        return Ok(new { message = "نام تنوع فعال شد." });
+    }
+
+    [HttpDelete("variant-names/{id:long}")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteUnusedVariantName(long id, CancellationToken cancellationToken)
+    {
+        if (!CanAccessVariantNames()) return Forbid();
+        if (!User.IsInRole("system.full-access")) return Forbid();
+        await using var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
+        var node = await db.VariantNames.SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
+        if (node is null) return NotFound();
+        if (await db.VariantNames.AnyAsync(x => x.IdParent == id, cancellationToken) ||
+            await db.ProductVariants.AnyAsync(x => x.IdVariantName == id, cancellationToken))
+            return Conflict(new { detail = "نامی که فرزند یا اتصال تنوع کالا دارد قابل حذف نیست؛ در صورت نیاز آن را غیرفعال کنید." });
+        db.VariantNames.Remove(node);
+        await db.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
+        return Ok(new { message = "نام تنوع استفاده‌نشده حذف شد." });
+    }
 
     private async Task<IActionResult> SaveVariantName(long? id, VariantNameInput input, CancellationToken cancellationToken)
     {
@@ -417,9 +472,26 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                     return Conflict(new { detail = "واحد اصلی کالا را غیرفعال نکنید؛ ابتدا واحد اصلی دیگری انتخاب کنید." });
                 productUnit.IsActive = false;
                 break;
+            case "variant-names":
+                if (!CanAccessVariantNames()) return Forbid();
+                if (!User.IsInRole("system.full-access") && !User.HasClaim("admin_permission", "Warehouse:DefinitionsApi:Deactivate")) return Forbid();
+                await using (var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken))
+                {
+                    var node = await db.VariantNames.SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
+                    if (node is null) return NotFound();
+                    if (await db.VariantNames.AnyAsync(x => x.IdParent == id && x.IsActive, cancellationToken))
+                        return Conflict(new { detail = "ابتدا فرزندهای فعال این گروه را غیرفعال کنید." });
+                    if (await db.ProductVariants.AnyAsync(x => x.IdVariantName == id && x.IsActive, cancellationToken))
+                        return Conflict(new { detail = "ابتدا تنوع‌های فعال متصل به این نام را غیرفعال کنید." });
+                    node.IsActive = false;
+                    await db.SaveChangesAsync(cancellationToken);
+                    await transaction.CommitAsync(cancellationToken);
+                    return Ok(new { message = "نام تنوع غیرفعال شد؛ سابقه حفظ شده است." });
+                }
             case "variants":
                 await using (var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken))
                 {
+                    if (!User.IsInRole("system.full-access") && !User.HasClaim("admin_permission", "Warehouse:DefinitionsApi:Deactivate")) return Forbid();
                     ProductVariant? variant = await db.ProductVariants.SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
                     if (variant is null) return NotFound();
                     if (variant.IsActive && !await db.ProductVariants.AnyAsync(x => x.IdProduct == variant.IdProduct && x.Id != variant.Id && x.IsActive, cancellationToken))
@@ -447,6 +519,41 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
         await db.SaveChangesAsync(cancellationToken);
 
         return Ok(new { message = "رکورد غیرفعال شد و سابقه حفظ شد." });
+    }
+
+    [HttpPost("variants/{id:long}/activate")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ActivateVariant(long id, CancellationToken cancellationToken)
+    {
+        if (!CanAccessVariants("variants")) return Forbid();
+        if (!User.IsInRole("system.full-access") && !User.HasClaim("admin_permission", "Warehouse:DefinitionsApi:Save")) return Forbid();
+        await using var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
+        ProductVariant? variant = await db.ProductVariants.SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
+        if (variant is null) return NotFound();
+        if (variant.IsActive) return Ok(new { message = "تنوع از قبل فعال است." });
+        if (!await db.VariantNames.AnyAsync(x => x.Id == variant.IdVariantName && x.IsActive, cancellationToken))
+            return Conflict(new { detail = "نام مرجع این تنوع غیرفعال است؛ ابتدا نام مرجع را فعال کنید." });
+        if (!await db.Products.AnyAsync(x => x.Id == variant.IdProduct && x.IsWarehouseEnabled, cancellationToken))
+            return Conflict(new { detail = "کالای فعال پیدا نشد." });
+        bool hasOtherActive = await db.ProductVariants.AnyAsync(x => x.IdProduct == variant.IdProduct && x.Id != id && x.IsActive, cancellationToken);
+        if (!hasOtherActive)
+        {
+            bool hasUnvariedDocuments = await (from line in db.WarehouseDocumentLines join item in db.InventoryItems on line.IdInventoryItem equals item.Id
+                where item.IdProduct == variant.IdProduct && item.IdProductVariant == null select line.Id).AnyAsync(cancellationToken);
+            bool hasUnvariedMovements = await (from movement in db.WarehouseStockMovements join item in db.InventoryItems on movement.IdInventoryItem equals item.Id
+                where item.IdProduct == variant.IdProduct && item.IdProductVariant == null select movement.IdInventoryItem).AnyAsync(cancellationToken);
+            bool hasUnvariedBalance = await (from balance in db.StockBalances join item in db.InventoryItems on balance.IdInventoryItem equals item.Id
+                where item.IdProduct == variant.IdProduct && item.IdProductVariant == null && balance.Quantity != 0 select balance.IdInventoryItem).AnyAsync(cancellationToken);
+            if (hasUnvariedDocuments || hasUnvariedMovements || hasUnvariedBalance)
+                return Conflict(new { detail = "برای این کالا سند انبار یا موجودی بدون تنوع ثبت شده است؛ ابتدا اتصال موجودی را بررسی کنید." });
+        }
+        variant.IsActive = true;
+        variant.UpdatedAtUtc = DateTime.UtcNow;
+        var inventoryItem = await db.InventoryItems.SingleOrDefaultAsync(x => x.IdProductVariant == id, cancellationToken);
+        if (inventoryItem is not null) inventoryItem.IsActive = true;
+        await db.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
+        return Ok(new { message = "تنوع فعال شد." });
     }
 
     private async Task<IActionResult> SaveCoreAsync(string section, long? id, JsonElement payload,
