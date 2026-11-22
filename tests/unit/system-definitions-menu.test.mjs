@@ -7,7 +7,7 @@ test('warehouse definition pages are grouped under system management with their 
   const systemStart = sidebar.indexOf('<summary class="menu-header">مدیریت سامانه</summary>');
   const systemEnd = sidebar.indexOf('</details>', systemStart);
   const system = sidebar.slice(systemStart, systemEnd);
-  assert.ok(system.includes('تعاریف و دسترسی'));
+  assert.ok(system.includes('تعاریف پایهٔ انبار'));
   for (const feature of ['companies', 'references', 'units', 'product-units', 'variants', 'stock-owners', 'sales-plan-mapping', 'document-types']) {
     assert.ok(system.includes(`asp-route-feature="${feature}"`), `missing ${feature} under system management`);
     assert.ok(system.includes(`Warehouse:Features:Index:${feature}`), `missing existing permission for ${feature}`);

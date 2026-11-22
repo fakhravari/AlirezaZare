@@ -366,7 +366,7 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db, IWarehouse
         var selectedType = await db.WarehouseDocumentTypes.AsNoTracking().Where(x => x.Id == input.DocumentTypeId)
             .Select(x => new { x.IsSystemSalesDispatch, x.IsReturn }).SingleAsync(cancellationToken);
         if (selectedType.IsSystemSalesDispatch)
-            return ValidationProblem(detail: "حوالهٔ فروش فقط از صفحهٔ تأیید سفارش‌های پرداخت‌شده صادر می‌شود.", statusCode: 400);
+            return ValidationProblem(detail: "حوالهٔ فروش فقط از صفحهٔ صدور حوالهٔ سفارش‌های پرداخت‌شده صادر می‌شود.", statusCode: 400);
 
         if (selectedType.IsReturn
             && (string.IsNullOrWhiteSpace(input.ExternalReference)

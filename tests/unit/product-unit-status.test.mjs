@@ -137,8 +137,8 @@ test('warehouse definition pages rely on the sidebar instead of repeating the lo
   assert.doesNotMatch(view, /aria-label="تعریف‌های واحد و تنوع"/);
   assert.match(view, /data-unit-tree/);
   assert.match(view, /data-product-unit-tree/);
-  assert.match(sidebar, /<span class="menu-text">واحدها<\/span>/);
-  assert.match(catalog, /\["units"\] = new\("مدیریت انبار", "units", "واحدها"/);
+  assert.match(sidebar, /<span class="menu-text">واحدهای اندازه‌گیری<\/span>/);
+  assert.match(catalog, /\["units"\] = new\("مدیریت انبار", "units", "واحدهای اندازه‌گیری"/);
 });
 
 test('editor locks a documented product unit, sends it on save, and unlocks the next product', {skip: !existsSync(chromium.executablePath())}, async t => {

@@ -3,7 +3,7 @@
     ViewData["AreaTitle"] = "مدیریت سامانه";
 }
 <div class="admin-page" data-admin-users data-admin-users-page="roles" data-api="/api/admin/users">
-    @await Html.PartialAsync("_AdminPageIntro", ("نقش‌های کاربران پنل", "نقش‌ها را تعریف و نام و وضعیت آن‌ها را مدیریت کنید؛ تنظیم مجوزها در صفحهٔ جداگانهٔ درخت مجوز نقش‌ها انجام می‌شود."))
+    @await Html.PartialAsync("_AdminPageIntro", ("نقش‌های کاربران پنل", "نقش‌ها را تعریف و نام و وضعیت آن‌ها را مدیریت کنید؛ مجوزهای هر نقش را در صفحهٔ جداگانهٔ مجوزهای نقش‌ها تنظیم کنید."))
     @Html.AntiForgeryToken()
     <section class="panel panel-inverse mt-4">
         <div class="panel-heading d-flex align-items-center justify-content-between">

@@ -5,7 +5,7 @@ namespace Shop.Admin.Areas.Store.Controllers;
 [Area("Store")]
 public sealed class CatalogController : Controller
 {
-    public IActionResult Products() => CatalogPage("products", "محصولات", "کالاها و وضعیت پایهٔ کاتالوگ فروشگاه.");
+    public IActionResult Products() => CatalogPage("products", "کالاها و پیش‌نویس‌ها", "کالاهای منتشرشده و پیش‌نویس‌های کاتالوگ فروشگاه.");
 
     public IActionResult ProductDetails(long id)
     {
@@ -27,13 +27,13 @@ public sealed class CatalogController : Controller
         ViewData["FeatureId"] = "badges";
         return View();
     }
-    public IActionResult Attributes() => CatalogPage("attributes", "ویژگی‌ها", "تعریف ویژگی‌های فیلتر و مشخصات کالا.");
+    public IActionResult Attributes() => CatalogPage("attributes", "ویژگی‌های کالا", "تعریف ویژگی‌های فیلتر و مشخصات کالا.");
     public IActionResult PaymentInstitutions()
     {
-        ViewData["Title"] = "درگاه‌های پرداخت";
+        ViewData["Title"] = "مؤسسه‌های پرداخت";
         ViewData["AreaTitle"] = "مدیریت فروشگاه";
         ViewData["FeatureId"] = "payment-institutions";
-        ViewData["Description"] = "نام و لوگوی درگاه‌های نمایش‌داده‌شده در فروشگاه.";
+        ViewData["Description"] = "نام و نشان مؤسسه‌های پرداخت معرفی‌شده در فروشگاه؛ این فهرست به‌معنی اتصال عملیاتی درگاه نیست.";
         ViewData["Section"] = "payment-institutions";
         ViewData["ApiUrl"] = "/api/admin/store/payment-institutions";
 

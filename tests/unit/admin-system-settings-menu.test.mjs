@@ -18,7 +18,7 @@ test('geography appears in the system menu only for full-access users', async ()
   const sidebar = await readFile('Admin/Views/Shared/_AdminSidebar.cshtml', 'utf8');
   const systemHeader = sidebar.indexOf('<summary class="menu-header">مدیریت سامانه</summary>');
   const storeHeader = sidebar.indexOf('<summary class="menu-header">مدیریت فروشگاه</summary>');
-  const geography = sidebar.indexOf('<span class="menu-text">مناطق جغرافیایی</span>');
+  const geography = sidebar.indexOf('<span class="menu-text">کشورها، استان‌ها و شهرها</span>');
   assert.ok(systemHeader >= 0 && systemHeader < geography && geography < storeHeader);
   const systemMenu = sidebar.slice(systemHeader, storeHeader);
   assert.match(systemMenu, /@if \(User\.IsInRole\("system\.full-access"\)\)[\s\S]*?asp-route-feature="geography"/);

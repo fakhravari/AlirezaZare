@@ -6,7 +6,7 @@ test('warehouse stock belongs to reports and retains independent permission and 
   const sidebar = await readFile('Admin/Views/Shared/_AdminSidebar.cshtml', 'utf8');
   const structure = sidebar.slice(sidebar.indexOf('<div id="system-definitions"'), sidebar.indexOf('<div class="menu-item has-sub @(reportsOpen'));
   const reports = sidebar.slice(sidebar.indexOf('<div id="warehouse-reports"'), sidebar.indexOf('<div class="menu-item has-sub @(operationsOpen'));
-  assert.match(sidebar, /menu-text">تعاریف و دسترسی</);
+  assert.match(sidebar, /menu-text">تعاریف پایهٔ انبار</);
   assert.doesNotMatch(structure, /asp-controller="Stock"/);
   assert.match(reports, /Can\("Warehouse:Stock:Index"\)[\s\S]*asp-controller="Stock"/);
   assert.match(sidebar, /bool canWarehouseReports = Can\("Warehouse:Features:Index:movements"\) \|\| Can\("Warehouse:Stock:Index"\)/);
@@ -28,9 +28,9 @@ test('warehouse movement reports have separate menu routes with the existing per
 
 test('variant name reference and variant definitions have separate pages and permissions', async () => {
   const sidebar = await readFile('Admin/Views/Shared/_AdminSidebar.cshtml', 'utf8');
-  assert.match(sidebar, /asp-route-feature="variant-names"[\s\S]*?مرجع درختی نام تنوع/);
+  assert.match(sidebar, /asp-route-feature="variant-names"[\s\S]*?تنوع محصول/);
   assert.match(sidebar, /Warehouse:Features:Index:variant-names/);
-  assert.match(sidebar, /asp-route-feature="variants"[\s\S]*?فهرست تعریف‌ها/);
+  assert.match(sidebar, /asp-route-feature="variants"[\s\S]*?اتصال تنوع به محصول/);
   assert.match(sidebar, /Warehouse:Features:Index:variants/);
   const view = await readFile('Admin/Areas/Warehouse/Views/Features/Definitions.cshtml', 'utf8');
   assert.match(view, /Model\.FeatureId == "variant-names"[\s\S]*data-variant-name-tree/);
