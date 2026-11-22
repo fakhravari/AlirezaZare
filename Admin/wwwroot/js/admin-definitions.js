@@ -585,30 +585,66 @@
         variantNames.set(page, nodes);
         const form = page.querySelector("[data-variant-name-form]"), tree = page.querySelector("[data-variant-name-tree]");
         if (!form || !tree) return;
-        const parent = form.elements.idParent, selected = parent.value;
+        const parent = form.elements.idParent, selected = parent.value, editingId = form.elements.id.value;
         parent.replaceChildren(new Option("ریشه", ""));
-        for (const node of nodes) if (node.isActive) parent.add(new Option(variantNamePath(nodes, node.id), node.id));
-        parent.value = nodes.some(node => String(node.id) === selected) ? selected : "";
+        for (const node of nodes) if (node.isActive && node.idParent == null && String(node.id) !== String(editingId)) parent.add(new Option(node.name, node.id));
+        parent.value = nodes.some(node => String(node.id) === selected && node.idParent == null) ? selected : "";
         window.jQuery?.(parent).trigger("change.select2");
         tree.replaceChildren();
+        tree.setAttribute("role", "tree");
+        tree.setAttribute("aria-label", "درخت تنوع محصول");
+        const childrenByParent = new Map();
+        for (const node of nodes) {
+            const parentKey = node.idParent == null ? "" : String(node.idParent);
+            if (!childrenByParent.has(parentKey)) childrenByParent.set(parentKey, []);
+            childrenByParent.get(parentKey).push(node);
+        }
+        const roots = element("ul", null, "admin-permission-list");
+        roots.setAttribute("role", "group");
         const appendBranch = (parentId, host) => {
-            for (const node of nodes.filter(item => item.idParent === parentId)) {
-                const li = element("li", null, "list-group-item");
-                const heading = element("div", null, "d-flex align-items-center justify-content-between gap-2");
-                heading.append(element("span", node.name));
+            const parentKey = parentId == null ? "" : String(parentId);
+            for (const node of childrenByParent.get(parentKey) || []) {
+                const childNodes = childrenByParent.get(String(node.id)) || [];
+                const li = element("li", null, "admin-permission-node");
+                li.setAttribute("role", "treeitem");
+                const row = element("div", null, "admin-permission-row");
+                const expanded = parentId == null && childNodes.length > 0;
+                if (childNodes.length) {
+                    li.setAttribute("aria-expanded", String(expanded));
+                    const toggle = element("button", null, "admin-permission-toggle");
+                    toggle.type = "button";
+                    toggle.setAttribute("aria-expanded", String(expanded));
+                    toggle.setAttribute("aria-label", `${expanded ? "بستن" : "بازکردن"} ${node.name}`);
+                    toggle.append(element("span", "›", "admin-permission-chevron"));
+                    const childList = element("ul", null, "admin-permission-list");
+                    childList.setAttribute("role", "group");
+                    childList.hidden = !expanded;
+                    toggle.addEventListener("click", () => {
+                        const open = toggle.getAttribute("aria-expanded") !== "true";
+                        toggle.setAttribute("aria-expanded", String(open));
+                        toggle.setAttribute("aria-label", `${open ? "بستن" : "بازکردن"} ${node.name}`);
+                        li.setAttribute("aria-expanded", String(open));
+                        childList.hidden = !open;
+                    });
+                    row.append(toggle);
+                    li.append(row, childList);
+                    appendBranch(node.id, childList);
+                } else {
+                    row.append(element("span", null, "admin-permission-toggle-spacer"));
+                    li.append(row);
+                }
+                row.append(element("span", node.name, "admin-permission-name"));
                 if (page.dataset.canEdit === "true") {
                     const edit = actionButton("ویرایش", "fa-pen-to-square", "btn btn-sm btn-default");
                     edit.addEventListener("click", () => { form.elements.id.value = node.id; form.elements.name.value = node.name; parent.value = node.idParent ?? ""; window.jQuery?.(parent).trigger("change.select2"); form.querySelector("[data-variant-name-cancel]").hidden = false; form.elements.name.focus(); });
-                    heading.append(edit);
+                    row.append(edit);
                 }
-                li.append(heading);
-                const children = element("ul", null, "list-group mt-2");
-                appendBranch(node.id, children);
-                if (children.childElementCount) li.append(children);
                 host.append(li);
             }
         };
-        appendBranch(null, tree);
+        appendBranch(null, roots);
+        if (roots.childElementCount) tree.append(roots);
+        else tree.append(element("p", "نام تنوعی ثبت نشده است.", "text-muted mb-0"));
     }
     async function load(page) {
         const section = page.dataset.definitionSection;

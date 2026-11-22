@@ -51,7 +51,7 @@ test('shared variant name tree creates children and edits existing nodes', {skip
   const browser = await chromium.launch({headless: true});
   t.after(() => browser.close());
   const page = await browser.newPage();
-  await page.setContent(`<div data-admin-definitions data-api="/api" data-definition-section="variant-names" data-can-create="true" data-can-edit="true" data-can-deactivate="false"><form data-variant-name-form><input name="id"><select name="idParent"></select><input name="name"><button type="submit">ثبت نام</button><button type="button" data-variant-name-cancel hidden>انصراف</button></form><ul data-variant-name-tree></ul><div data-definition-status></div></div><div id="admin-definition-modal"><h2 id="admin-definition-title"></h2><form data-definition-form><input name="id"><div data-definition-fields></div><button type="submit">ذخیره</button></form></div>`);
+  await page.setContent(`<div data-admin-definitions data-api="/api" data-definition-section="variant-names" data-can-create="true" data-can-edit="true" data-can-deactivate="false"><form data-variant-name-form><input name="id"><select name="idParent"></select><input name="name"><button type="submit">ثبت نام</button><button type="button" data-variant-name-cancel hidden>انصراف</button></form><div class="admin-permission-tree" data-variant-name-tree></div><div data-definition-status></div></div><div id="admin-definition-modal"><h2 id="admin-definition-title"></h2><form data-definition-form><input name="id"><div data-definition-fields></div><button type="submit">ذخیره</button></form></div>`);
   await page.evaluate(() => {
     window.requests = [];
     window.AdminUI = {destroyDataTable() {}, refreshDataTable() {}, notify() {}, initStatusSwitch() {}, getJson: async (url, options = {}) => {
@@ -65,7 +65,10 @@ test('shared variant name tree creates children and edits existing nodes', {skip
   await page.addScriptTag({path: 'Admin/wwwroot/js/admin-definitions.js'});
   await page.evaluate(() => window.AdminDefinitions.initialize(document));
   const form = page.locator('[data-variant-name-form]');
-  assert.equal(await form.locator('[name=idParent] option[value="2"]').textContent(), 'رنگ / آبی');
+  assert.equal(await page.locator('[data-variant-name-tree]').getAttribute('role'), 'tree');
+  assert.equal(await page.locator('[data-variant-name-tree] .admin-permission-list').count(), 2);
+  assert.equal(await form.locator('[name=idParent] option[value="2"]').count(), 0);
+  assert.equal(await form.locator('[name=idParent] option[value="1"]').textContent(), 'رنگ');
   await form.locator('[name=idParent]').selectOption('1');
   await form.locator('[name=name]').fill('سبز');
   await form.locator('[type=submit]').click();

@@ -96,9 +96,11 @@ Migration `142-group-variant-names-by-category.sql` ریشهٔ مبهم «نام
 
 Migration `143-split-variant-definition-pages.sql` مجوز مستقل صفحهٔ «تنوع محصول» را به درخت مجوزهای مدیریت سامانه اضافه می‌کند و نقش‌هایی را که پیش از آن به فهرست تنوع دسترسی مؤثر داشتند، برای صفحهٔ تنوع محصول نیز مجاز نگه می‌دارد. دسترسی مؤثر قبلی routeها را کنترل می‌کند و در صورت تغییر مجوز دیگری rollback می‌شود. این migration در ۲۲ نوامبر ۲۰۲۶ روی پایگاه اصلی `bsshopir_fakhravari` اجرا شد؛ marker آن ثبت شد و هر دو صفحه برای دو نقش دسترسی مؤثر دارند. برای پایگاه‌های دیگر باید migration جداگانه اجرا شود.
 
-Migration `144-rename-variant-name-permission.sql` نام نمایشی مجوز `warehouse.variant-names` را به «تنوع محصول» تغییر می‌دهد؛ کلید مجوز و دسترسی مؤثر نقش‌ها ثابت می‌مانند. وجود فایل به معنی اجرای آن روی پایگاه مقصد نیست.
+Migration `144-rename-variant-name-permission.sql` نام نمایشی مجوز `warehouse.variant-names` را به «تنوع محصول» تغییر می‌دهد؛ این migration در ۲۲ نوامبر ۲۰۲۶ روی `bsshopir_fakhravari` اجرا و marker آن ثبت شد؛ مجوز فعال و دو واگذاری مستقیم نقش حفظ شدند.
 
-Migration `145-rename-variant-definition-permission.sql` نام نمایشی مجوز `warehouse.variants` را به «اتصال تنوع به محصول» تغییر می‌دهد؛ کلید مجوز و دسترسی مؤثر نقش‌ها ثابت می‌مانند. وجود فایل به معنی اجرای آن روی پایگاه مقصد نیست.
+Migration `145-rename-variant-definition-permission.sql` نام نمایشی مجوز `warehouse.variants` را به «اتصال تنوع به محصول» تغییر می‌دهد؛ این migration در ۲۲ نوامبر ۲۰۲۶ روی `bsshopir_fakhravari` اجرا و marker آن ثبت شد؛ مجوز فعال و دو واگذاری مستقیم نقش حفظ شدند.
+
+Migration `146-group-warehouse-permissions.sql` صفحه‌های انبار را در گروه «مدیریت انبار» زیر «تعاریف و دسترسی سامانه» قرار داد؛ روی `bsshopir_fakhravari` اجرا شد و دسترسی مؤثر نقش‌ها تغییری نکرد. در پی درخواست چیدمان درخت نام‌ها، migration `147-restore-warehouse-permission-placement.sql` این جابه‌جایی را برگرداند؛ marker ثبت شد، دو مجوز تنوع مستقیماً زیر `system.definitions.group` قرار گرفتند و دسترسی مؤثر مسیرها حفظ شد.
 
 برای آزمایش ویژگی‌های رابطه‌ای، در همان پایگاه اصلی در ۱۹ نوامبر ۲۰۲۶ دو تنوع آزمایشی کالای ۱ به «آبی / XL» با swatch `#0000FF` و «مشکی / XXL» با swatch `#000000` تغییر داده شدند. وضعیت قبلی حفظ شد: تنوع ۳۹ فعال و تنوع ۴۰ غیرفعال است؛ این دادهٔ نمونه به پایگاه‌های دیگر منتقل نشده است.
 

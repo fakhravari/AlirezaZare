@@ -138,8 +138,11 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
             if (parentId == id || !visited.Add(parentId.Value)) return Conflict(new { detail = "والد انتخاب‌شده باعث چرخه در درخت می‌شود." });
             var parent = parents.Find(x => x.Id == parentId.Value);
             if (parent is null || !parent.IsActive) return ValidationProblem(detail: "والد انتخاب‌شده فعال نیست.", statusCode: 400);
+            if (parent.IdParent.HasValue) return ValidationProblem(detail: "والد باید یک گروه ریشه باشد؛ درخت تنوع محصول فقط دو سطح دارد.", statusCode: 400);
             parentId = parent.IdParent;
         }
+        if (input.IdParent.HasValue && id.HasValue && await db.VariantNames.AnyAsync(x => x.IdParent == id, cancellationToken))
+            return ValidationProblem(detail: "گروهی که فرزند دارد نمی‌تواند خودش فرزند گروه دیگری شود.", statusCode: 400);
         if (await db.VariantNames.AnyAsync(x => x.Id != (id ?? 0) && x.IdParent == input.IdParent && x.Name == name, cancellationToken))
             return Conflict(new { detail = "این نام در شاخهٔ انتخاب‌شده وجود دارد." });
         node.Name = name;
