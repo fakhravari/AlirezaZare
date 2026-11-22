@@ -27,11 +27,16 @@ public sealed class StorePriceVersion
     public StorePriceVersion? PreviousVersion { get; set; }
 }
 
-/// <summary>The exact price versions and applied components captured on an order line.</summary>
-public sealed class StoreOrderItemPriceReference
+/// <summary>Accessory selections shared by all lines of one order, product and sales plan.</summary>
+public sealed class StoreOrderAccessory
 {
-    public long IdOrderItem { get; set; }
+    public long IdOrder { get; set; }
+    public long IdProduct { get; set; }
+    public long IdSalesPlan { get; set; }
+    public long IdAccessory { get; set; }
     public long IdPriceVersion { get; set; }
+    public string AccessoryNameSnapshot { get; set; } = "";
+    public decimal UnitAmountSnapshot { get; set; }
     public StorePriceVersion PriceVersion { get; set; } = null!;
 }
 

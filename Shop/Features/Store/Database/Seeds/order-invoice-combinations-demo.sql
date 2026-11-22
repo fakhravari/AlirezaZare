@@ -50,7 +50,7 @@ BEGIN TRY
         SET @total =
             2 * (SELECT CONVERT(decimal(19,0), ROUND(PriceAmount*(100-DiscountPercent)/100,0)) FROM Store.PriceVersion WHERE Id=@plainPrice)
           + 1 * (SELECT CONVERT(decimal(19,0), ROUND(PriceAmount*(100-DiscountPercent)/100,0)) FROM Store.PriceVersion WHERE Id=@variantPrice)
-          + 2 * (SELECT CONVERT(decimal(19,0), ROUND(variantPrice.PriceAmount*(100-variantPrice.DiscountPercent)/100,0) + accessoryPrice.PriceAmount)
+          + 3 * (SELECT CONVERT(decimal(19,0), ROUND(variantPrice.PriceAmount*(100-variantPrice.DiscountPercent)/100,0) + accessoryPrice.PriceAmount)
                  FROM Store.PriceVersion variantPrice CROSS JOIN Store.PriceVersion accessoryPrice
                  WHERE variantPrice.Id=@variantPrice AND accessoryPrice.Id=@accessoryPrice);
 
@@ -60,16 +60,16 @@ BEGIN TRY
         FROM Store.[Order] WHERE Id=@source;
         SET @newOrder=SCOPE_IDENTITY();
 
-        -- Plain product, variant without accessory, and the same variant with an accessory.
+        -- Plain product and two lines sharing the same product, plan and accessory selection.
         INSERT Store.OrderItem (IdOrder,IdProduct,IdVariant,IdSalesPlan,Quantity,IdPriceVersion)
         VALUES (@newOrder,@plainProduct,NULL,@plan,2,@plainPrice),
                (@newOrder,@product,@variant,@plan,1,@variantPrice),
                (@newOrder,@product,@variant,@plan,2,@variantPrice);
 
-        SELECT @variantWithAccessoryItem=MAX(Id)
-        FROM Store.OrderItem WHERE IdOrder=@newOrder AND IdProduct=@product AND IdVariant=@variant AND Quantity=2;
-        INSERT Store.OrderItemPriceReference (IdOrderItem,IdPriceVersion)
-        VALUES (@variantWithAccessoryItem,@accessoryPrice);
+        INSERT Store.OrderAccessory (IdOrder,IdProduct,IdSalesPlan,IdAccessory,IdPriceVersion,AccessoryNameSnapshot,UnitAmountSnapshot)
+        SELECT @newOrder,@product,@plan,price.IdAccessory,price.Id,accessory.Name,price.PriceAmount
+        FROM Store.PriceVersion price JOIN Store.Accessory accessory ON accessory.Id=price.IdAccessory
+        WHERE price.Id=@accessoryPrice;
     END;
 
     COMMIT TRANSACTION;

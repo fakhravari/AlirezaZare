@@ -18,7 +18,7 @@ BEGIN TRY
             THROW 51500, 'Demo source and active product, variant and accessory prices are required.', 1;
         DECLARE @total decimal(19,0) = (SELECT SUM(CASE WHEN IdAccessory IS NULL THEN ROUND(PriceAmount*(100-DiscountPercent)/100,0) ELSE PriceAmount END)
             FROM Store.PriceVersion WHERE Id IN (@productPrice,@variantPrice,@accessoryPrice));
-        DECLARE @newOrder bigint, @variantItem bigint;
+        DECLARE @newOrder bigint;
         INSERT Store.[Order] (IdProfile, OrderNumber, ExternalOrderKey, Status, PaymentMethod, IdBank, ItemCount, TotalAmount, SubtotalAmount, CouponDiscountAmount, OrderedAtUtc, AddressSnapshotJson)
         SELECT IdProfile, N'DEMO-PRICE-COMPONENTS-20261122', N'demo-order-price-components-20261122', N'pending-payment', N'demo', IdBank, 2, @total, @total, 0, SYSUTCDATETIME(), AddressSnapshotJson
         FROM Store.[Order] WHERE Id=@source;
@@ -27,8 +27,10 @@ BEGIN TRY
         VALUES (@newOrder,@unvariedProduct,NULL,@plan,1,@productPrice);
         INSERT Store.OrderItem (IdOrder,IdProduct,IdVariant,IdSalesPlan,Quantity,IdPriceVersion)
         VALUES (@newOrder,@product,@variant,@plan,1,@variantPrice);
-        SET @variantItem=SCOPE_IDENTITY();
-        INSERT Store.OrderItemPriceReference (IdOrderItem,IdPriceVersion) VALUES (@variantItem,@accessoryPrice);
+        INSERT Store.OrderAccessory (IdOrder,IdProduct,IdSalesPlan,IdAccessory,IdPriceVersion,AccessoryNameSnapshot,UnitAmountSnapshot)
+        SELECT @newOrder,@product,@plan,IdAccessory,Id,Name,PriceAmount
+        FROM Store.PriceVersion JOIN Store.Accessory ON Accessory.Id=PriceVersion.IdAccessory
+        WHERE PriceVersion.Id=@accessoryPrice;
     END;
     COMMIT TRANSACTION;
 END TRY

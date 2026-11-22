@@ -167,7 +167,6 @@ public sealed class StoreCustomerOrderItem
     public int Quantity { get; set; }
     public long IdPriceVersion { get; set; }
     public StorePriceVersion PriceVersion { get; set; } = null!;
-    public ICollection<StoreOrderItemPriceReference> PriceReferences { get; set; } = new List<StoreOrderItemPriceReference>();
 }
 
 public sealed class StorePaymentAttempt

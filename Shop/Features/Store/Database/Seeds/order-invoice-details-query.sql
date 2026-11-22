@@ -50,10 +50,9 @@ SELECT
             UNION ALL
             SELECT N'accessory', accessory.Name, accessoryPrice.Id, accessoryPrice.PriceAmount,
                    accessoryPrice.DiscountPercent, accessoryPrice.PriceAmount
-            FROM Store.OrderItemPriceReference reference
+            FROM Store.OrderAccessory reference
             JOIN Store.PriceVersion accessoryPrice ON accessoryPrice.Id=reference.IdPriceVersion
-            JOIN Store.Accessory accessory ON accessory.Id=accessoryPrice.IdAccessory
-            WHERE reference.IdOrderItem=i.Id
+            WHERE reference.IdOrder=o.Id AND reference.IdProduct=i.IdProduct AND reference.IdSalesPlan=i.IdSalesPlan
         ) components
         FOR JSON PATH
     )) AS PriceComponentsJson,

@@ -81,7 +81,7 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
     public DbSet<StoreProductSalesPlanOfferAccessory> StoreProductSalesPlanOfferAccessories => Set<StoreProductSalesPlanOfferAccessory>();
     public DbSet<StoreProductSalesPlanOfferSpecificationOverride> StoreProductSalesPlanOfferSpecificationOverrides => Set<StoreProductSalesPlanOfferSpecificationOverride>();
     public DbSet<StorePriceVersion> StorePriceVersions => Set<StorePriceVersion>();
-    public DbSet<StoreOrderItemPriceReference> StoreOrderItemPriceReferences => Set<StoreOrderItemPriceReference>();
+    public DbSet<StoreOrderAccessory> StoreOrderAccessories => Set<StoreOrderAccessory>();
     public DbSet<StoreOrderItemAmount> StoreOrderItemAmounts => Set<StoreOrderItemAmount>();
     public DbSet<GeoCountry> GeoCountries => Set<GeoCountry>();
     public DbSet<GeoProvince> GeoProvinces => Set<GeoProvince>();
@@ -650,7 +650,6 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.ToTable("OrderItem", "Store", table => table.UseSqlOutputClause(false));
             entity.HasKey(x => x.Id);
             entity.HasOne(x => x.PriceVersion).WithMany().HasForeignKey(x => x.IdPriceVersion).OnDelete(DeleteBehavior.Restrict);
-            entity.HasMany(x => x.PriceReferences).WithOne().HasForeignKey(x => x.IdOrderItem).OnDelete(DeleteBehavior.Cascade);
         });
         modelBuilder.Entity<StorePriceVersion>(entity =>
         {
@@ -674,11 +673,17 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.ToView("OrderItemAmount", "Store");
             entity.Property(x => x.UnitAmount).HasPrecision(19, 0);
         });
-        modelBuilder.Entity<StoreOrderItemPriceReference>(entity =>
+        modelBuilder.Entity<StoreOrderAccessory>(entity =>
         {
-            entity.ToTable("OrderItemPriceReference", "Store", table => table.UseSqlOutputClause(false));
-            entity.HasKey(x => new { x.IdOrderItem, x.IdPriceVersion });
+            entity.ToTable("OrderAccessory", "Store", table => table.UseSqlOutputClause(false));
+            entity.HasKey(x => new { x.IdOrder, x.IdProduct, x.IdSalesPlan, x.IdAccessory });
             entity.HasOne(x => x.PriceVersion).WithMany().HasForeignKey(x => x.IdPriceVersion).OnDelete(DeleteBehavior.Restrict);
+            entity.Property(x => x.AccessoryNameSnapshot).HasMaxLength(300).IsRequired();
+            entity.Property(x => x.UnitAmountSnapshot).HasPrecision(19, 0);
+            entity.HasOne<StoreCustomerOrderReference>().WithMany().HasForeignKey(x => x.IdOrder).OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne<WarehouseProduct>().WithMany().HasForeignKey(x => x.IdProduct).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<SalesPlanReference>().WithMany().HasForeignKey(x => x.IdSalesPlan).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<StoreAccessory>().WithMany().HasForeignKey(x => x.IdAccessory).OnDelete(DeleteBehavior.Restrict);
         });
         modelBuilder.Entity<StoreOrderShippingHistory>(entity =>
         {

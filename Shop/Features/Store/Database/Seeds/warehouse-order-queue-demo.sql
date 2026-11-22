@@ -28,9 +28,12 @@ BEGIN TRY
             WHEN NOT MATCHED THEN INSERT (IdOrder, IdProduct, IdVariant, IdSalesPlan, Quantity, IdPriceVersion)
                 VALUES (@newId, source.IdProduct, source.IdVariant, source.IdSalesPlan, source.Quantity, source.IdPriceVersion)
             OUTPUT source.Id, inserted.Id INTO @itemMap (OldId, NewId);
-            INSERT [Store].[OrderItemPriceReference] (IdOrderItem, IdPriceVersion)
-            SELECT mapping.NewId, reference.IdPriceVersion FROM @itemMap mapping
-            JOIN [Store].[OrderItemPriceReference] reference ON reference.IdOrderItem = mapping.OldId;
+            INSERT [Store].[OrderAccessory] (IdOrder, IdProduct, IdSalesPlan, IdAccessory, IdPriceVersion, AccessoryNameSnapshot, UnitAmountSnapshot)
+            SELECT @newId, reference.IdProduct, reference.IdSalesPlan, reference.IdAccessory, reference.IdPriceVersion, reference.AccessoryNameSnapshot, reference.UnitAmountSnapshot
+            FROM [Store].[OrderAccessory] reference
+            WHERE reference.IdOrder = @source
+              AND NOT EXISTS (SELECT 1 FROM [Store].[OrderAccessory] existing WHERE existing.IdOrder=@newId
+                  AND existing.IdProduct=reference.IdProduct AND existing.IdSalesPlan=reference.IdSalesPlan AND existing.IdAccessory=reference.IdAccessory);
             DELETE FROM @itemMap;
         END
     SET @n += 1;
