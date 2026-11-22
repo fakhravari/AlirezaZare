@@ -33,7 +33,8 @@
             "Admin/Areas/Warehouse/Views/Features/Documents.cshtml",
             "Admin/Areas/Warehouse/Views/Features/Movements.cshtml",
             "Admin/Areas/Store/Controllers/CatalogController.cs",
-            "Admin/Areas/Store/Views/Features/Reports.cshtml"
+            "Admin/Areas/Store/Views/Features/Reports.cshtml",
+            "Admin/Areas/Admin/Views/SystemProblems/Index.cshtml"
           ],
           "js": [
             "Admin/wwwroot/lib/bootstrap/bootstrap.bundle.min.js",
@@ -89,7 +90,8 @@
             "Data/Domain/Store/Entities/GeoCountry.cs",
             "Data/Infrastructure/Persistence/ShopDbContext.cs",
             "Admin/Areas/Store/Controllers/Api/StoreCatalogFeaturesApiController.cs",
-            "Admin/Areas/Warehouse/Controllers/Api/WarehouseDefinitionsApiController.cs"
+            "Admin/Areas/Warehouse/Controllers/Api/WarehouseDefinitionsApiController.cs",
+            "Admin/Areas/Admin/Controllers/SystemProblemsController.cs"
           ]
         },
         "admin-dashboards": {

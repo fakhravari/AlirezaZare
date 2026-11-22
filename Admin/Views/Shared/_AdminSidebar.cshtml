@@ -31,7 +31,8 @@
     bool systemDefinitionsOpen = inWarehouse && (warehouseStructureOpen || new[] { "references", "units", "product-units", "variant-names", "variants", "document-types", "sales-plan-mapping", "stock-owners" }.Contains(feature ?? "", StringComparer.OrdinalIgnoreCase));
     bool reportsOpen = inWarehouse && (IsFeature("movements") || string.Equals(controller, "Stock", StringComparison.OrdinalIgnoreCase));
     bool systemAccessOpen = string.Equals(controller, "Users", StringComparison.OrdinalIgnoreCase);
-    bool systemMenuOpen = systemAccessOpen || systemDefinitionsOpen;
+    bool systemProblemsOpen = string.Equals(controller, "SystemProblems", StringComparison.OrdinalIgnoreCase);
+    bool systemMenuOpen = systemAccessOpen || systemDefinitionsOpen || systemProblemsOpen;
     bool canAdminUsers = Can("Admin:Users:Index:users");
     bool canAdminRoles = Can("Admin:Users:Index:roles");
     bool canAdminPermissions = Can("Admin:Users:Index:permissions");
@@ -93,6 +94,7 @@
 
 @if (User.IsInRole("system.full-access"))
 {
+    <div class="menu-item @(systemProblemsOpen ? "active" : "")"><a class="menu-link" asp-area="Admin" asp-controller="SystemProblems" asp-action="Index" data-admin-nav><span class="menu-icon"><i class="fa fa-triangle-exclamation" aria-hidden="true"></i></span><span class="menu-text">مشکلات سیستمی</span></a></div>
     <div class="menu-item @(siteSettingsOpen && string.Equals(action, "Index", StringComparison.OrdinalIgnoreCase) ? "active" : "")">
         <a class="menu-link" asp-area="Admin" asp-controller="SiteSettings" asp-action="Index" data-admin-nav>
             <span class="menu-icon"><i class="fa fa-sliders" aria-hidden="true"></i></span><span class="menu-text">تنظیمات عمومی</span>

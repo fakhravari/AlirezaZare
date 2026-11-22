@@ -44,6 +44,61 @@ input[type="checkbox"][data-admin-switch]:disabled { cursor: not-allowed; opacit
     input[type="checkbox"][data-admin-switch]::before { content: none; }
 }
 
+/* One loading treatment for status messages across every Admin page. */
+#content [role="status"][data-admin-loading="true"],
+#content [data-admin-status][data-admin-loading="true"] {
+    display: inline-flex;
+    align-items: center;
+    gap: .65rem;
+    width: fit-content;
+    max-width: 100%;
+    min-height: 2.55rem;
+    padding: .55rem .9rem;
+    border: 1px solid rgba(34, 133, 157, .2);
+    border-inline-start: 3px solid #e0ad27;
+    border-radius: .8rem;
+    background: linear-gradient(105deg, #f9fcfd 14%, #eaf8f8 43%, #fff8e4 56%, #f9fcfd 86%);
+    background-size: 220% 100%;
+    box-shadow: 0 .35rem 1rem rgba(27, 54, 73, .07);
+    animation: admin-status-shimmer 2.4s ease-in-out infinite;
+}
+
+#content [role="status"][data-admin-loading="true"]::before,
+#content [data-admin-status][data-admin-loading="true"]::before {
+    content: "";
+    flex: 0 0 1.05rem;
+    width: 1.05rem;
+    height: 1.05rem;
+    border: 2px solid rgba(26, 132, 157, .18);
+    border-block-start-color: #168fa7;
+    border-inline-end-color: #e0ad27;
+    border-radius: 50%;
+    animation: admin-status-spin .8s linear infinite;
+}
+
+@keyframes admin-status-spin { to { transform: rotate(1turn); } }
+@keyframes admin-status-shimmer {
+    0%, 100% { background-position: 100% 0; }
+    50% { background-position: 0 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #content [role="status"][data-admin-loading="true"],
+    #content [data-admin-status][data-admin-loading="true"],
+    #content [role="status"][data-admin-loading="true"]::before,
+    #content [data-admin-status][data-admin-loading="true"]::before { animation: none; }
+}
+
+@media (forced-colors: active) {
+    #content [role="status"][data-admin-loading="true"],
+    #content [data-admin-status][data-admin-loading="true"] { border-color: CanvasText; background: Canvas; }
+    #content [role="status"][data-admin-loading="true"]::before,
+    #content [data-admin-status][data-admin-loading="true"]::before {
+        border-color: CanvasText;
+        border-block-start-color: Highlight;
+    }
+}
+
 /* Top-level sidebar groups use native details so they start closed. */
 .app-sidebar .menu .admin-sidebar-group > summary.menu-header {
     display: flex;
@@ -162,6 +217,33 @@ input[type="checkbox"][data-admin-switch]:disabled { cursor: not-allowed; opacit
 .admin-document-lines th:nth-child(2),
 .admin-document-lines td:nth-child(2) {
     min-width: 160px;
+}
+
+/* Receipt and dispatch editor needs room for its multi-column item table. */
+#admin-document-modal .modal-dialog {
+    width: min(96vw, 1500px);
+    max-width: none;
+    height: calc(100vh - 1.5rem);
+    height: calc(100dvh - 1.5rem);
+    margin: .75rem auto;
+}
+
+#admin-document-modal .modal-content {
+    height: 100%;
+}
+
+#admin-document-modal .modal-body {
+    min-height: 0;
+    overflow-y: auto;
+}
+
+@media (max-width: 575.98px) {
+    #admin-document-modal .modal-dialog {
+        width: calc(100% - .5rem);
+        height: calc(100vh - .5rem);
+        height: calc(100dvh - .5rem);
+        margin: .25rem auto;
+    }
 }
 
 .dt-container .dt-search input,

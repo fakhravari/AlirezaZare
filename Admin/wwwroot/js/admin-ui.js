@@ -158,7 +158,38 @@
         target.classList.toggle("text-muted", !error);
         if (options.compact) target.classList.add("small");
         if (options.hideEmpty) target.classList.toggle("d-none", !message);
+        syncLoadingStatus(target);
     }
+
+    const statusSelector = '[role="status"], [data-admin-status]';
+    function syncLoadingStatus(status) {
+        if (!(status instanceof HTMLElement) || !status.matches(statusSelector)) return;
+        const text = (status.textContent || "").replace(/\s+/gu, " ").trim();
+        const loading = /^(?:در\s*حال(?:\s|…|$)|loading(?:\s|…|$))/iu.test(text);
+        if (loading) {
+            status.dataset.adminLoading = "true";
+            status.setAttribute("aria-busy", "true");
+        } else if (status.dataset.adminLoading === "true") {
+            delete status.dataset.adminLoading;
+            if (status.getAttribute("aria-busy") === "true") status.removeAttribute("aria-busy");
+        }
+    }
+
+    function syncLoadingStatuses(root) {
+        if (!(root instanceof Element)) return;
+        if (root.matches(statusSelector)) syncLoadingStatus(root);
+        root.querySelectorAll(statusSelector).forEach(syncLoadingStatus);
+    }
+
+    syncLoadingStatuses(document.documentElement);
+    new MutationObserver(records => {
+        for (const record of records) {
+            const target = record.target instanceof Element ? record.target : record.target.parentElement;
+            const status = target?.matches(statusSelector) ? target : target?.closest(statusSelector);
+            if (status) syncLoadingStatus(status);
+            record.addedNodes.forEach(syncLoadingStatuses);
+        }
+    }).observe(document.documentElement, { subtree: true, childList: true, characterData: true });
 
     const numberFormat = new Intl.NumberFormat("fa-IR");
     const labels = {

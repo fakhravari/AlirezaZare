@@ -56,7 +56,7 @@
   };
   const price = (product, options = {}) => {
     const { current, list, discount: percent, adjustments, priceUnavailable } = priceDetails(product, options);
-    if (priceUnavailable || current == null) return '<strong class="product-price-current">قیمت تنوع ثبت نشده</strong>';
+    if (priceUnavailable || current == null) return '<span class="product-price-unavailable">قیمت تنوع ثبت نشده</span>';
     const discounted = percent > 0 && percent < 100;
     const listAmount = list + adjustments;
     return `<strong class="product-price-current">${fa(current)} <small>تومان</small></strong>${discounted
