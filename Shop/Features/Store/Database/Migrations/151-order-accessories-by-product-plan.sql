@@ -1,5 +1,12 @@
 SET NOCOUNT ON;
 SET XACT_ABORT ON;
+SET ANSI_NULLS ON;
+SET ANSI_PADDING ON;
+SET ANSI_WARNINGS ON;
+SET ARITHABORT ON;
+SET CONCAT_NULL_YIELDS_NULL ON;
+SET QUOTED_IDENTIFIER ON;
+SET NUMERIC_ROUNDABORT OFF;
 BEGIN TRY
     BEGIN TRANSACTION;
     IF OBJECT_ID(N'Store.SchemaMigration', N'U') IS NULL
@@ -11,6 +18,34 @@ BEGIN TRY
            OR OBJECT_ID(N'Store.OrderItem', N'U') IS NULL
            OR OBJECT_ID(N'Store.PriceVersion', N'U') IS NULL
             THROW 51511, 'Expected migration 149 order price schema is missing.', 1;
+
+        -- This known demo fixture predates the shared-selection rule. Normalize only this demo order,
+        -- then recalculate its demo totals from the existing per-line amount view.
+        DECLARE @InvoiceDemoOrderId bigint =
+            (SELECT Id FROM Store.[Order] WHERE ExternalOrderKey=N'demo-order-invoice-combinations-20261122' AND PaymentMethod=N'demo');
+        IF @InvoiceDemoOrderId IS NOT NULL
+        BEGIN
+            INSERT Store.OrderItemPriceReference (IdOrderItem, IdPriceVersion)
+            SELECT DISTINCT target.Id, sourceReference.IdPriceVersion
+            FROM Store.OrderItem target
+            JOIN Store.OrderItem source ON source.IdOrder=target.IdOrder AND source.IdProduct=target.IdProduct
+                AND source.IdSalesPlan=target.IdSalesPlan AND source.Id<>target.Id
+            JOIN Store.OrderItemPriceReference sourceReference ON sourceReference.IdOrderItem=source.Id
+            JOIN Store.PriceVersion sourcePrice ON sourcePrice.Id=sourceReference.IdPriceVersion
+            WHERE target.IdOrder=@InvoiceDemoOrderId
+              AND NOT EXISTS (SELECT 1 FROM Store.OrderItemPriceReference existing
+                  JOIN Store.PriceVersion existingPrice ON existingPrice.Id=existing.IdPriceVersion
+                  WHERE existing.IdOrderItem=target.Id AND existingPrice.IdAccessory=sourcePrice.IdAccessory);
+
+            UPDATE o
+            SET SubtotalAmount=totals.SubtotalAmount,
+                TotalAmount=totals.SubtotalAmount-o.CouponDiscountAmount
+            FROM Store.[Order] o
+            CROSS APPLY (SELECT CONVERT(decimal(19,0),SUM(amount.UnitAmount*item.Quantity)) AS SubtotalAmount
+                FROM Store.OrderItem item JOIN Store.OrderItemAmount amount ON amount.IdOrderItem=item.Id
+                WHERE item.IdOrder=o.Id) totals
+            WHERE o.Id=@InvoiceDemoOrderId AND totals.SubtotalAmount IS NOT NULL;
+        END;
 
         IF EXISTS (
             SELECT 1
