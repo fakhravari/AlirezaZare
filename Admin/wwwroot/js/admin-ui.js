@@ -444,7 +444,7 @@
             if (typeof value === "string" && /(?:date|time|at(?:utc)?|utc)$/i.test(key) && /^\d{4}-\d{2}-\d{2}/.test(value)) {
                 container.textContent = formatDateTime(value); return container;
             }
-            if (options.layout === "product" && value && typeof value === "object" && (!Array.isArray(value) || value.length)) {
+            if (["product", "order"].includes(options.layout) && value && typeof value === "object" && (!Array.isArray(value) || value.length)) {
                 const items = Array.isArray(value) ? value : [value];
                 if (items.every(item => item && typeof item === "object" && !Array.isArray(item))) {
                     const keys = [...new Set(items.flatMap(item => Object.keys(item)))];
@@ -573,7 +573,7 @@
             if (compact) section.classList.add("admin-record-section-compact");
             if (options.layout === "product" && sectionEntries.some(([, value]) => value && typeof value === "object")) section.classList.add("admin-record-section-wide");
             const sectionHeading = document.createElement(options.accordion ? "summary" : "h3"); sectionHeading.className = "admin-record-section-title"; sectionHeading.textContent = sectionTitle;
-            const productLayout = options.layout === "product";
+            const productLayout = ["product", "order"].includes(options.layout);
             const grid = document.createElement(productLayout ? "table" : "dl");
             grid.className = productLayout ? "admin-record-table" : "admin-record-grid";
             const rows = productLayout ? document.createElement("tbody") : grid;
@@ -641,6 +641,7 @@
             return;
         }
         modal.classList.toggle("admin-record-product", options.layout === "product");
+        modal.classList.toggle("admin-record-order", options.layout === "order");
         heading.textContent = title;
         renderRecord(body, record, options);
         window.bootstrap.Modal.getOrCreateInstance(modal).show();

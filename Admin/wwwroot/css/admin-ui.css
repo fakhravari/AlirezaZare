@@ -1515,6 +1515,68 @@ input[type="checkbox"][data-admin-switch]:disabled { cursor: not-allowed; opacit
     object-fit: contain;
 }
 
+/* Order details use a wider reading surface for the line-item and price history tables. */
+#admin-record-modal.admin-record-order .modal-dialog {
+    width: min(1240px, calc(100vw - 2rem));
+    max-width: min(1240px, calc(100vw - 2rem));
+}
+
+#admin-record-modal.admin-record-order .modal-content {
+    max-height: min(88vh, 960px);
+    display: flex;
+    flex-direction: column;
+}
+
+#admin-record-modal.admin-record-order .modal-header {
+    flex: 0 0 auto;
+    background: linear-gradient(120deg, #f2f8f8, #fff 72%);
+}
+
+#admin-record-modal.admin-record-order .modal-body {
+    display: block;
+    overflow: auto;
+    overscroll-behavior: contain;
+    padding: clamp(.85rem, 2vw, 1.4rem);
+}
+
+#admin-record-modal.admin-record-order .admin-record-section {
+    margin-bottom: 1.1rem;
+    padding: 1rem;
+    border: 1px solid #e0e8ec;
+    border-radius: .85rem;
+    background: #fff;
+    box-shadow: 0 .25rem .9rem rgb(31 55 68 / 4%);
+}
+
+#admin-record-modal.admin-record-order .admin-record-section:last-child { margin-bottom: 0; }
+#admin-record-modal.admin-record-order .admin-record-section-title { margin-bottom: .85rem; }
+#admin-record-modal.admin-record-order .admin-record-section:nth-child(1) .admin-record-grid {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 175px), 1fr));
+}
+
+#admin-record-modal.admin-record-order .admin-record-field { padding: .8rem .9rem; }
+#admin-record-modal.admin-record-order .admin-record-table-scroll { max-width: 100%; overflow: auto; }
+#admin-record-modal.admin-record-order .admin-record-table { min-width: 100%; border-collapse: separate; border-spacing: 0; }
+#admin-record-modal.admin-record-order .admin-record-table th,
+#admin-record-modal.admin-record-order .admin-record-table td {
+    min-width: 7rem;
+    padding: .65rem .75rem;
+    border-inline-end: 1px solid #e4ebef;
+    border-bottom: 1px solid #e4ebef;
+    vertical-align: top;
+}
+#admin-record-modal.admin-record-order .admin-record-table th { white-space: nowrap; background: #f3f7f8; color: #52677b; }
+#admin-record-modal.admin-record-order .admin-record-table tbody tr:nth-child(even) { background: #fafcfc; }
+#admin-record-modal.admin-record-order .admin-record-table-nested { width: max-content; min-width: 100%; }
+#admin-record-modal.admin-record-order .admin-record-nested-grid { grid-template-columns: minmax(5.5rem, auto) minmax(0, 1fr); }
+
+@media (max-width: 575.98px) {
+    #admin-record-modal.admin-record-order .modal-dialog { width: calc(100vw - 1rem); max-width: none; margin: .5rem auto; }
+    #admin-record-modal.admin-record-order .modal-content { max-height: calc(100dvh - 1rem); }
+    #admin-record-modal.admin-record-order .modal-body { padding: .65rem; }
+    #admin-record-modal.admin-record-order .admin-record-section { padding: .75rem; }
+}
+
 .admin-record-logo-unavailable {
     display: block;
     margin-top: .5rem;

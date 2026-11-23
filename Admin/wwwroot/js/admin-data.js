@@ -2172,27 +2172,63 @@
                     const items = JSON.parse(order.itemsJson || "[]");
                     const components = JSON.parse(order.componentsJson || "[]");
                     const history = JSON.parse(order.shippingHistoryJson || "[]");
-                    const componentSummary = components.map(component => {
-                        const displayName = component.componentType === "متعلقه"
-                            ? `${component.productName} ← ${component.accessoryName || "متعلقه"}`
-                            : `${component.productName}${component.treePathNames ? ` ← ${component.treePathNames}` : ""}`;
-                        const requirement = component.accessoryRequirement ? `، ${component.accessoryRequirement}` : "";
-                        return `${displayName} (${component.componentType}${requirement}، شناسه ${component.componentId})، طرح ${component.salesPlan}، تعداد ${ui.formatNumber(component.quantity)}، پایه ${ui.formatNumber(component.baseAmount)}، تخفیف ${ui.formatNumber(component.discountPercent)}٪ / ${ui.formatNumber(component.discountAmount)}، نهایی واحد ${ui.formatNumber(component.finalUnitAmount)}، جمع ${ui.formatNumber(component.lineTotal)} تومان`;
-                    }).join(" ؛ ");
+                    const componentsTotal = components.reduce((sum, component) => sum + Number(component.lineTotal || 0), 0);
+                    const componentsTotalAfterCoupon = componentsTotal - Number(order.couponDiscountAmount || 0);
                     ui.showRecord("جزئیات سفارش", {
                         "شماره سفارش": order.orderNumber, "دادهٔ نمونه": order.isSample ? "بله" : "خیر", "مشتری": order.customerName,
                         "وضعیت": order.status === "simulated-payment-confirmed" ? "پرداخت آزمایشی تأیید شده" : order.status === "pending-payment" ? "در انتظار پرداخت" : order.status,
                         "مبلغ تومان": order.totalAmount,
                         "جمع ثبت‌شده پیش از تخفیف": order.subtotalAmount,
+                        "جمع اجزا": componentsTotal,
+                        "تخفیف کوپن": order.couponDiscountAmount,
+                        "جمع اجزا پس از کوپن": componentsTotalAfterCoupon,
+                        "کنترل جمع اجزا": componentsTotal === Number(order.subtotalAmount) ? "مطابق جمع ثبت‌شده" : `اختلاف ${ui.formatNumber(componentsTotal - Number(order.subtotalAmount))} تومان`,
+                        "کنترل مبلغ نهایی": Math.abs(componentsTotalAfterCoupon - Number(order.totalAmount)) < 0.01 ? "مطابق مبلغ نهایی فاکتور" : `اختلاف ${ui.formatNumber(componentsTotalAfterCoupon - Number(order.totalAmount))} تومان`,
                         "جمع محاسبه‌شده از نسخه‌های قیمت": order.calculatedItemSubtotal,
                         ...(order.hasItemSubtotalMismatch ? { "هشدار مبلغ": "جمع اقلام با مبلغ ثبت‌شده سفارش یکسان نیست؛ قبل از اقدام، سوابق سفارش را بررسی کنید." } : {}),
                         "شناسه حواله": order.idWarehouseDocument || "ثبت نشده",
                         "شرکت حمل": order.shippingCarrier || "ثبت نشده", "کد رهگیری": order.shippingTrackingCode || "ثبت نشده",
                         "نشانی ثبت‌شده": Object.values(address).filter(value => typeof value === "string" && value).join("، "),
-                        "اقلام": items.map(line => `${line.name}${line.variantName ? ` — ${line.variantName}` : ""}، ${ui.formatNumber(line.quantity)} عدد، مبلغ واحد ${ui.formatNumber(line.unitAmount)} تومان، طرح ${line.salesPlan}${line.priceReferences?.length ? `، نسخه‌های قیمت: ${line.priceReferences.map(ref => `#${ref.priceVersionId} ${ref.name || ref.component}=${ui.formatNumber(ref.calculatedUnitAmount)} تومان`).join("، ")}` : "، مرجع نسخهٔ قیمت ثبت نشده"}`).join(" ؛ ") || "جزئیات اقلام ثبت نشده است",
-                        "اقلام به تفکیک کالا، تنوع و متعلقات": componentSummary || "جزئیات اقلام ثبت نشده است",
-                        "تاریخچهٔ ارسال": history.map(entry => `${entry.PreviousStatus} ← ${entry.NewStatus}، مدیر ${entry.ActorUserKey}، ${ui.formatDateTime(entry.ChangedAtUtc)}`).join(" ؛ ") || "تغییری ثبت نشده است"
-                    });
+                        "اقلام": items.map(line => ({
+                            "نام کالا": line.name,
+                            "تنوع": line.variantName || "—",
+                            "تعداد": line.quantity,
+                            "مبلغ واحد (تومان)": line.unitAmount,
+                            "طرح فروش": line.salesPlan,
+                            "نسخه‌های قیمت": (line.priceReferences || []).map(ref => ({
+                                "نسخه": `#${ref.priceVersionId}`,
+                                "جزء": ref.name || ref.component,
+                                "مبلغ محاسبه‌شده (تومان)": ref.calculatedUnitAmount
+                            }))
+                        })),
+                        "اجزای قیمت‌گذاری": components.map(component => ({
+                            "کالا": component.productName,
+                            "متعلقه": component.accessoryName || "—",
+                            "الزام متعلقه": component.accessoryRequirement || "—",
+                            "مسیر تنوع": component.treePathNames || "—",
+                            "نوع جزء": component.componentType,
+                            "شناسه جزء": component.componentId,
+                            "طرح فروش": component.salesPlan,
+                            "تعداد": component.quantity,
+                            "مبلغ پایه (تومان)": component.baseAmount,
+                            "درصد تخفیف": component.discountPercent,
+                            "مبلغ تخفیف (تومان)": component.discountAmount,
+                            "قیمت نهایی واحد (تومان)": component.finalUnitAmount,
+                            "جمع ردیف (تومان)": component.lineTotal
+                        })),
+                        "تاریخچهٔ ارسال": history.map(entry => ({
+                            "وضعیت قبلی": entry.PreviousStatus,
+                            "وضعیت جدید": entry.NewStatus,
+                            "مدیر": entry.ActorUserKey,
+                            "زمان": ui.formatDateTime(entry.ChangedAtUtc)
+                        }))
+                    }, { layout: "order", groups: [
+                        { title: "خلاصه سفارش", keys: ["شماره سفارش", "دادهٔ نمونه", "مشتری", "وضعیت", "مبلغ تومان", "جمع ثبت‌شده پیش از تخفیف", "جمع اجزا", "تخفیف کوپن", "جمع اجزا پس از کوپن", "جمع محاسبه‌شده از نسخه‌های قیمت", "کنترل جمع اجزا", "کنترل مبلغ نهایی", "هشدار مبلغ"] },
+                        { title: "تحویل و نشانی", keys: ["شناسه حواله", "شرکت حمل", "کد رهگیری", "نشانی ثبت‌شده"] },
+                        { title: "اقلام سفارش", keys: ["اقلام"] },
+                        { title: "جزئیات قیمت هر جزء", keys: ["اجزای قیمت‌گذاری"] },
+                        { title: "تاریخچه ارسال", keys: ["تاریخچهٔ ارسال"] }
+                    ] });
                 }).catch(error => ui.notify(error.message || "دریافت جزئیات سفارش ناموفق بود.", "danger"))
                     .finally(() => { detailButton.disabled = false; });
             } else if (item && page.dataset.adminPage === "customers") {

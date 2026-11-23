@@ -330,6 +330,9 @@
   font-size: 13px;
 }
 .selected-address-card {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   padding: 13px 15px;
   border: 1px solid #c9dccb;
   border-radius: 13px;
@@ -358,10 +361,19 @@ body .selected-address-card-heading > strong {
   color: #173653;
 }
 .selected-address-card > p {
+  max-width: 100%;
   margin: 7px 0 3px;
   color: #365a46;
   text-align: right;
   text-align-last: right;
+  overflow-wrap: anywhere;
+}
+.cart-address-slot,
+.cart-address-slot > .cart-address-section,
+.cart-address-slot > .cart-address-section .address-preview {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 .selected-address-card > small {
   color: #62806b;

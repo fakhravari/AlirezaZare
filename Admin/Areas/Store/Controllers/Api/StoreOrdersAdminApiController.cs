@@ -165,6 +165,7 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
                                ItemCount = o.ItemCount,
                                TotalAmount = o.TotalAmount,
                                SubtotalAmount = o.SubtotalAmount,
+                               CouponDiscountAmount = o.CouponDiscountAmount,
                                OrderedAtUtc = o.OrderedAtUtc,
                                IsSample = o.PaymentMethod == "demo" && o.ExternalOrderKey != null && o.ExternalOrderKey.StartsWith("demo-order-"),
                                CustomerName = (p.FirstName + " " + p.LastName).Trim(),
@@ -287,6 +288,7 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
     public sealed class OrderDetailsRow : OrderRow
     {
         public decimal SubtotalAmount { get; set; }
+        public decimal CouponDiscountAmount { get; set; }
         public decimal CalculatedItemSubtotal { get; set; }
         public bool HasItemSubtotalMismatch { get; set; }
         public long? IdWarehouseDocument { get; set; }
