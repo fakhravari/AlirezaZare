@@ -74,7 +74,7 @@ public sealed class StoreHomeTestimonialsAdminApiController(
         db.ProductFeedback.Add(feedback);
         db.StoreHomeTestimonials.Add(new StoreHomeTestimonial { Feedback = feedback, IsActive = input.IsActive, SortOrder = input.SortOrder, UpdatedAtUtc = DateTime.UtcNow });
         await db.SaveChangesAsync(cancellationToken);
-        return Ok(new { message = "دیدگاه نمونه ثبت شد." });
+        return Ok(new { id = feedback.Id, message = "دیدگاه نمونه ثبت شد." });
     }
 
     [HttpPut("{id:long}/review")]

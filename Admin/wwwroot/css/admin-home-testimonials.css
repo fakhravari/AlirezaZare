@@ -5,11 +5,23 @@
     object-fit: cover;
 }
 
-.home-testimonial-order {
-    width: 5.5rem;
+.home-testimonial-text {
+    max-width: 26rem;
+    white-space: normal;
+    overflow-wrap: anywhere;
 }
 
-.home-testimonial-text {
-    max-width: 32rem;
-    white-space: normal;
+.home-testimonial-review {
+    min-width: 15rem;
+}
+
+.home-testimonial-actions {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: .5rem;
+}
+
+.home-testimonial-actions .btn {
+    flex: 0 0 auto;
+    white-space: nowrap;
 }

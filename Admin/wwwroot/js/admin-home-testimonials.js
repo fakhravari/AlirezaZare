@@ -26,16 +26,7 @@
             body.replaceChildren();
             for (const item of items) {
                 const row = document.createElement("tr");
-                const activeCell = document.createElement("td");
-                const active = document.createElement("input");
-                active.type = "checkbox"; active.className = "form-check-input"; ui.initStatusSwitch(active); active.checked = item.isActive;
-                active.setAttribute("aria-label", `نمایش دیدگاه ${item.displayName} در صفحهٔ نخست`);
-                activeCell.append(active); row.append(activeCell);
-
-                const orderCell = document.createElement("td");
-                const order = document.createElement("input"); order.type = "number"; order.min = "0"; order.max = "9999";
-                order.value = String(item.sortOrder || 0); order.className = "form-control form-control-sm home-testimonial-order";
-                order.setAttribute("aria-label", "ترتیب نمایش"); orderCell.append(order); row.append(orderCell);
+                row.append(cell(item.isActive ? "فعال" : "غیرفعال"));
 
                 const imageCell = document.createElement("td");
                 if (item.imageUrl) {
@@ -45,35 +36,24 @@
                 row.append(imageCell);
 
                 const reviewCell = document.createElement("td");
+                reviewCell.className = "home-testimonial-review";
                 const name = document.createElement("strong"); name.textContent = `${item.displayName} · ${new Intl.NumberFormat("fa-IR").format(item.rating || 0)} از ۵${item.isSample ? " · نمونه" : ""}`;
-                const text = document.createElement("p"); text.className = "small text-muted mb-0 home-testimonial-text"; text.textContent = item.feedbackText;
-                reviewCell.append(name, text); row.append(reviewCell);
+                const text = document.createElement("p"); text.className = "small text-muted mb-0 home-testimonial-text";
+                const characters = Array.from(item.feedbackText || "");
+                text.textContent = characters.length > 140 ? `${characters.slice(0, 140).join("")}…` : characters.join("");
+                reviewCell.append(name, text);
+                if (characters.length > 140) {
+                    const details = document.createElement("details");
+                    const summary = document.createElement("summary"); summary.textContent = "نمایش متن کامل";
+                    const fullText = document.createElement("p"); fullText.className = "small mb-0 home-testimonial-text"; fullText.textContent = item.feedbackText;
+                    details.append(summary, fullText); reviewCell.append(details);
+                }
+                row.append(reviewCell);
                 row.append(cell(`${item.productName} (${item.productKey})`));
                 row.append(cell(window.AdminUI.formatDateTime(item.createdAtUtc)));
 
                 const actions = document.createElement("td");
-                const upload = document.createElement("input"); upload.type = "file"; upload.accept = "image/jpeg,image/png,image/webp";
-                upload.className = "visually-hidden";
-                const uploadButton = button(item.imageUrl ? "تعویض تصویر" : "بارگذاری تصویر", "btn btn-sm btn-default");
-                uploadButton.dataset.adminConfirm = "تصویر این دیدگاه بارگذاری یا جایگزین شود؟";
-                uploadButton.addEventListener("click", () => upload.click());
-                upload.addEventListener("change", async () => {
-                    if (!upload.files?.length) return;
-                    const data = new FormData(); data.append("file", upload.files[0]);
-                    try { await request(`${endpoint.split("?")[0]}/${item.id}/image?feature=testimonials`, "POST", data); await load(); }
-                    catch (error) { ui.notify(error.message || "بارگذاری تصویر ناموفق بود.", "danger"); }
-                });
-                const save = button("ذخیره", "btn btn-sm btn-primary");
-                save.dataset.adminConfirm = "تنظیم نمایش و ترتیب این دیدگاه ذخیره شود؟";
-                save.addEventListener("click", async () => {
-                    save.disabled = true;
-                    try {
-                        const result = await request(`${endpoint.split("?")[0]}/${item.id}?feature=testimonials`, "PUT",
-                            JSON.stringify({ isActive: active.checked, sortOrder: Number(order.value) || 0 }), { "Content-Type": "application/json" });
-                        ui.notify(result.message, "success"); await load();
-                    } catch (error) { ui.notify(error.message || "ذخیره تنظیمات دیدگاه انجام نشد.", "danger"); save.disabled = false; }
-                });
-                actions.append(upload, uploadButton);
+                const actionGroup = document.createElement("div"); actionGroup.className = "home-testimonial-actions";
                 if (editor) {
                     const edit = button("ویرایش", "btn btn-sm btn-default");
                     edit.addEventListener("click", async () => {
@@ -85,22 +65,16 @@
                         editor.elements.rating.value = String(item.rating || 1);
                         editor.elements.sortOrder.value = String(item.sortOrder || 0);
                         editor.elements.isActive.checked = item.isActive;
+                        editor.elements.image.value = "";
+                        editor.elements.removeImage.checked = false;
+                        editor.querySelector("[data-home-testimonial-remove-image]").hidden = !item.imageUrl;
                         editor.querySelector("[data-home-testimonial-submit]").textContent = "ذخیره ویرایش";
                         editor.scrollIntoView({ behavior: "smooth", block: "start" });
                         editor.elements.productId.focus();
                     });
-                    actions.append(edit);
+                    actionGroup.append(edit);
                 }
-                if (item.imageUrl) {
-                    const remove = button("حذف تصویر", "btn btn-sm btn-danger");
-                    remove.dataset.adminConfirm = "تصویر این دیدگاه از FTP حذف شود؟";
-                    remove.addEventListener("click", async () => {
-                        try { const result = await request(`${endpoint.split("?")[0]}/${item.id}/image?feature=testimonials`, "DELETE"); ui.notify(result.message, "success"); await load(); }
-                        catch (error) { ui.notify(error.message || "حذف تصویر ناموفق بود.", "danger"); }
-                    });
-                    actions.append(remove);
-                }
-                actions.append(save); row.append(actions); body.append(row);
+                actions.append(actionGroup); row.append(actions); body.append(row);
             }
         }
 
@@ -130,7 +104,7 @@
                 submit.disabled = false;
             }).catch(error => { ui.notify(error.message || "دریافت محصولات ناموفق بود.", "danger"); throw error; });
             productsReady.catch(() => {});
-            editor.addEventListener("reset", () => { editingId = null; editor.querySelector("[data-home-testimonial-submit]").textContent = "افزودن دیدگاه"; });
+            editor.addEventListener("reset", () => { editingId = null; editor.querySelector("[data-home-testimonial-submit]").textContent = "افزودن دیدگاه"; editor.querySelector("[data-home-testimonial-remove-image]").hidden = true; });
             editor.addEventListener("submit", async event => {
                 event.preventDefault();
                 const submit = editor.querySelector("[data-home-testimonial-submit]");
@@ -138,9 +112,34 @@
                 const payload = { productId: Number(editor.elements.productId.value), displayName: editor.elements.displayName.value,
                     feedbackText: editor.elements.feedbackText.value, rating: Number(editor.elements.rating.value),
                     sortOrder: Number(editor.elements.sortOrder.value), isActive: editor.elements.isActive.checked };
+                const image = editor.elements.image.files?.[0];
+                if (image && editor.elements.removeImage.checked) {
+                    ui.notify("برای حذف یا جایگزینی تصویر، فقط یکی را انتخاب کنید.", "danger"); submit.disabled = false; return;
+                }
+                if (image && image.size > 10000000) {
+                    ui.notify("حجم تصویر باید حداکثر ۱۰ مگابایت باشد.", "danger"); submit.disabled = false; return;
+                }
                 try {
                     const url = editingId === null ? endpoint : `${endpoint.split("?")[0]}/${editingId}/review?feature=testimonials`;
                     const result = await request(url, editingId === null ? "POST" : "PUT", JSON.stringify(payload), { "Content-Type": "application/json" });
+                    if (editingId === null) editingId = result.id;
+                    if (image) {
+                        const data = new FormData(); data.append("file", image);
+                        try { await request(`${endpoint.split("?")[0]}/${editingId}/image?feature=testimonials`, "POST", data); }
+                        catch (error) {
+                            submit.textContent = "ذخیره ویرایش";
+                            ui.notify(`دیدگاه ذخیره شد اما تصویر بارگذاری نشد: ${error.message || "دوباره تلاش کنید."}`, "danger");
+                            await load(); return;
+                        }
+                    }
+                    if (editor.elements.removeImage.checked) {
+                        try { await request(`${endpoint.split("?")[0]}/${editingId}/image?feature=testimonials`, "DELETE"); }
+                        catch (error) {
+                            submit.textContent = "ذخیره ویرایش";
+                            ui.notify(`دیدگاه ذخیره شد اما تصویر حذف نشد: ${error.message || "دوباره تلاش کنید."}`, "danger");
+                            await load(); return;
+                        }
+                    }
                     ui.notify(result.message, "success"); editor.reset(); await load();
                 } catch (error) { ui.notify(error.message || "ذخیره دیدگاه ناموفق بود.", "danger"); }
                 finally { submit.disabled = false; }
