@@ -696,10 +696,13 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                 const quantityKnown = Number.isFinite(quantity) && quantity >= 0;
                 const offerUnavailable = !currentOffer?.isEnabled;
                 const selectedVariant = selectedInventoryVariant();
+                const variantDisabled = selectedVariant?.disabledSalesPlanIds?.includes(selectedSalesPlanId) === true;
                 const variantPriceUnavailable = Boolean(inventoryVariants.length && selectedVariant && !hasInventoryVariantPrice(selectedVariant));
-                const available = !offerUnavailable && !variantPriceUnavailable && (quantityKnown ? quantity >= 1 : (!inventoryVariants.length && p.inStock === true));
-                const unavailable = offerUnavailable || variantPriceUnavailable || (quantityKnown ? quantity < 1 : (!inventoryVariants.length && p.inStock === false));
-                const message = offerUnavailable
+                const available = !offerUnavailable && !variantDisabled && !variantPriceUnavailable && (quantityKnown ? quantity >= 1 : (!inventoryVariants.length && p.inStock === true));
+                const unavailable = offerUnavailable || variantDisabled || variantPriceUnavailable || (quantityKnown ? quantity < 1 : (!inventoryVariants.length && p.inStock === false));
+                const message = variantDisabled
+                    ? "این تنوع در طرح فروش غیرفعال است"
+                    : offerUnavailable
                     ? "این طرح فروش اکنون قابل خرید نیست"
                     : variantPriceUnavailable
                     ? "قیمت این تنوع برای این طرح فروش ثبت نشده است"
@@ -733,14 +736,15 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                         button.setAttribute("aria-disabled", String(unavailable));
                         button.setAttribute(
                             "aria-label",
-                            offerUnavailable ? "طرح فروش در دسترس نیست" : variantPriceUnavailable ? "قیمت تنوع ثبت نشده" : unavailable ? "ناموجود" : "افزودن به سبد خرید",
+                            variantDisabled ? "این تنوع در طرح فروش غیرفعال است" : offerUnavailable ? "طرح فروش در دسترس نیست" : variantPriceUnavailable ? "قیمت تنوع ثبت نشده" : unavailable ? "ناموجود" : "افزودن به سبد خرید",
                         );
-                        button.title = offerUnavailable
-                            ? "این طرح فروش اکنون قابل خرید نیست"
+                        button.title = variantDisabled
+                            ? "این تنوع در طرح فروش غیرفعال است"
+                            : offerUnavailable ? "این طرح فروش اکنون قابل خرید نیست"
                             : variantPriceUnavailable ? "قیمت این تنوع در مدیریت قیمت تنوع‌ها ثبت نشده است"
                             : unavailable ? "موجودی این کالا تمام شده است" : "افزودن به سبد خرید";
                         button.classList.toggle("is-out-of-stock", unavailable);
-                        button.innerHTML = `<i class="bi ${unavailable ? "bi-bag-x" : "bi-bag-plus"}" aria-hidden="true"></i> ${offerUnavailable ? "طرح غیرفعال" : variantPriceUnavailable ? "قیمت ثبت نشده" : unavailable ? "ناموجود" : "افزودن به سبد خرید"}`;
+                        button.innerHTML = `<i class="bi ${unavailable ? "bi-bag-x" : "bi-bag-plus"}" aria-hidden="true"></i> ${variantDisabled ? "تنوع غیرفعال" : offerUnavailable ? "طرح غیرفعال" : variantPriceUnavailable ? "قیمت ثبت نشده" : unavailable ? "ناموجود" : "افزودن به سبد خرید"}`;
                     });
             };
             productView.querySelectorAll('a[href^="Product?id="]').forEach((link) => {
@@ -1628,7 +1632,7 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                     const amount = listAmount === null || listAmount === undefined || !Number.isFinite(Number(listAmount))
                         ? null
                         : Math.round(Number(listAmount) * (100 - (Number(variant.discountBySalesPlan?.[selectedSalesPlanId]) || 0)) / 100);
-                    label.textContent = variant ? amount === null ? "بدون قیمت" : money(amount) : "ناموجود";
+                    label.textContent = variant ? variant.disabledSalesPlanIds?.includes(selectedSalesPlanId) ? "غیرفعال در طرح" : amount === null ? "بدون قیمت" : money(amount) : "ناموجود";
                     button.setAttribute("aria-label", `${button.dataset.optionLabel || "تنوع"}، ${label.textContent}`);
                 });
                 const value = calculateVariantPrice();
@@ -1636,7 +1640,9 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                 const baseAmount = currentPlanBaseAmount();
                 const inventoryVariant = selectedInventoryVariant();
                 const selectionRequired = inventoryVariants.length > 0 && !inventoryVariant;
-                if (basePriceLabel) basePriceLabel.textContent = selectionRequired ? "ابتدا تنوع را انتخاب کنید" : baseAmount == null ? "قیمت این تنوع ثبت نشده" : money(baseAmount);
+                const variantDisabled = inventoryVariant?.disabledSalesPlanIds?.includes(selectedSalesPlanId) === true;
+                const unavailablePriceText = variantDisabled ? "این تنوع در طرح فروش غیرفعال است" : "قیمت این تنوع ثبت نشده";
+                if (basePriceLabel) basePriceLabel.textContent = selectionRequired ? "ابتدا تنوع را انتخاب کنید" : baseAmount == null ? unavailablePriceText : money(baseAmount);
                 const variantListAmount = inventoryVariant?.priceBySalesPlan?.[selectedSalesPlanId];
                 const hasVariantPrice = variantListAmount !== null && variantListAmount !== undefined && Number.isFinite(Number(variantListAmount));
                 const offer = selectedOffer();
@@ -1651,9 +1657,9 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                     if (amountLabel && item) amountLabel.innerHTML = accessoryPriceMarkup(item);
                 });
                 const desktopPrice = productView.querySelector("#productFinalPrice");
-                if (desktopPrice) desktopPrice.innerHTML = value == null ? `<span>${selectionRequired ? "ابتدا تنوع را انتخاب کنید" : "قیمت این تنوع ثبت نشده"}</span>` : `<span>${fa(value)}</span><small class="detail-price-unit">تومان</small>`;
+                if (desktopPrice) desktopPrice.innerHTML = value == null ? `<span>${selectionRequired ? "ابتدا تنوع را انتخاب کنید" : unavailablePriceText}</span>` : `<span>${fa(value)}</span><small class="detail-price-unit">تومان</small>`;
                 const specialPrice = planSummary?.querySelector(".product-special-sale-price strong");
-                if (specialPrice) specialPrice.textContent = value == null ? (selectionRequired ? "پس از انتخاب تنوع" : "قیمت تنوع ثبت نشده") : money(value);
+                if (specialPrice) specialPrice.textContent = value == null ? (selectionRequired ? "پس از انتخاب تنوع" : unavailablePriceText) : money(value);
                 const addonsPrice = productView.querySelector("#productAddonsPrice");
                 const accessoryAmount = Math.round(availableAccessories
                     .filter((item) => selectedAccessories.has(item.id))

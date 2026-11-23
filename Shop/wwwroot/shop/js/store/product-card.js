@@ -28,7 +28,7 @@
     const variant = productVariants.find((item) => item.isDefault);
     const variantAmount = variant?.priceBySalesPlan?.[planId];
     const hasAmount = (amount) => amount !== null && amount !== undefined && Number.isFinite(Number(amount));
-    if (productVariants.length && (!variant || !hasAmount(variantAmount))) return { current: null, list: null, discount: 0, adjustments: 0, priceUnavailable: true };
+    if (productVariants.length && (!variant || !hasAmount(variantAmount))) return { current: null, list: null, discount: 0, adjustments: 0, priceUnavailable: true, variantDisabled: variant?.disabledSalesPlanIds?.includes(planId) === true };
     if (Array.isArray(data?.offers) && !hasAmount(offer?.priceAmount) && !hasAmount(options.priceAmount) && !hasAmount(variantAmount)) return { current: null, list: null, discount: 0, adjustments: 0, priceUnavailable: true };
     const baseAmount = hasAmount(variantAmount) ? Number(variantAmount) : hasAmount(offer?.priceAmount) ? Number(offer.priceAmount) : hasAmount(options.priceAmount) ? Number(options.priceAmount) : null;
     const discount = hasAmount(variantAmount) ? Number(variant.discountBySalesPlan?.[planId]) || 0 : Number(offer?.discountPercent ?? options.discountPercent ?? product.discountPercent) || 0;
@@ -56,8 +56,8 @@
     return Number.isFinite(stock) ? Math.max(0, stock) : 0;
   };
   const price = (product, options = {}) => {
-    const { current, list, discount: percent, adjustments, priceUnavailable } = priceDetails(product, options);
-    if (priceUnavailable || current == null) return '<span class="product-price-unavailable">قیمت تنوع ثبت نشده</span>';
+    const { current, list, discount: percent, adjustments, priceUnavailable, variantDisabled } = priceDetails(product, options);
+    if (priceUnavailable || current == null) return `<span class="product-price-unavailable">${variantDisabled ? "این تنوع در طرح فروش غیرفعال است" : "قیمت تنوع ثبت نشده"}</span>`;
     const discounted = percent > 0 && percent < 100;
     const listAmount = list + adjustments;
     return `<strong class="product-price-current">${fa(current)} <small>تومان</small></strong>${discounted
@@ -83,15 +83,18 @@
     const badge = regularPlan ? (options.badge ?? product.badge) : null;
     const stock = rawStock === "" || rawStock === null || rawStock === undefined ? Number.NaN : Number(rawStock);
     const priceUnavailable = current == null || !Number.isFinite(Number(current));
+    const variantDisabled = priceDetails(product, options).variantDisabled === true;
     const unavailable = priceUnavailable || (Number.isFinite(stock) && stock >= 0 ? stock < 1 : product.inStock === false);
-    const actionLabel = priceUnavailable
+    const actionLabel = variantDisabled
+      ? '<span class="add-cart-label">تنوع غیرفعال</span>'
+      : priceUnavailable
       ? '<span class="add-cart-label">قیمت ناموجود</span>'
       : unavailable
       ? search ? '<span class="add-cart-label search-page-card-action-label">ناموجود</span><span class="search-page-card-action-compact">ناموجود</span>' : '<span class="add-cart-label">ناموجود</span>'
       : search ? '<span class="add-cart-label search-page-card-action-label">افزودن</span><span class="search-page-card-action-compact">افزودن</span>' : '<span class="add-cart-label">افزودن به سبد</span>';
     const action = favorite
       ? `<button class="list-remove-button" type="button" data-unlike="${esc(product.id)}" aria-label="حذف ${esc(product.name)} از علاقه‌مندی‌ها"><i class="bi bi-trash3" aria-hidden="true"></i><span>حذف از علاقه‌مندی‌ها</span></button>`
-      : `<button class="add-cart${search ? " search-add-cart search-page-card-action" : ""}${unavailable ? " is-out-of-stock" : ""}" type="button" data-id="${esc(product.id)}" data-name="${esc(product.name)}" data-price="${current ?? ""}" data-image="${esc(product.image)}"${options.salesPlanId ? ` data-sales-plan-id="${esc(options.salesPlanId)}" data-stock-quantity="${Math.max(0, Number(options.stockQuantity) || 0)}" data-max-purchase-quantity="${Math.max(1, Number(options.maxPurchaseQuantity) || 99)}"` : ""}${options.salesPlanName ? ` data-sales-plan-name="${esc(options.salesPlanName)}"` : ""}${options.salesPlanCode ? ` data-sales-plan-code="${esc(options.salesPlanCode)}"` : ""}${options.salesPlanLabel ? ` data-sales-plan-label="${esc(options.salesPlanLabel)}"` : ""}${unavailable ? priceUnavailable ? ' disabled aria-disabled="true" aria-label="قیمت ناموجود" title="قیمت این کالا ثبت نشده است"' : ' disabled aria-disabled="true" aria-label="ناموجود" title="موجودی این کالا تمام شده است"' : ""}><i class="bi ${unavailable ? "bi-bag-x" : "bi-bag-plus"}" aria-hidden="true"></i>${actionLabel}</button>`;
+      : `<button class="add-cart${search ? " search-add-cart search-page-card-action" : ""}${unavailable ? " is-out-of-stock" : ""}" type="button" data-id="${esc(product.id)}" data-name="${esc(product.name)}" data-price="${current ?? ""}" data-image="${esc(product.image)}"${options.salesPlanId ? ` data-sales-plan-id="${esc(options.salesPlanId)}" data-stock-quantity="${Math.max(0, Number(options.stockQuantity) || 0)}" data-max-purchase-quantity="${Math.max(1, Number(options.maxPurchaseQuantity) || 99)}"` : ""}${options.salesPlanName ? ` data-sales-plan-name="${esc(options.salesPlanName)}"` : ""}${options.salesPlanCode ? ` data-sales-plan-code="${esc(options.salesPlanCode)}"` : ""}${options.salesPlanLabel ? ` data-sales-plan-label="${esc(options.salesPlanLabel)}"` : ""}${unavailable ? variantDisabled ? ' disabled aria-disabled="true" aria-label="تنوع غیرفعال" title="این تنوع در طرح فروش غیرفعال است"' : priceUnavailable ? ' disabled aria-disabled="true" aria-label="قیمت ناموجود" title="قیمت این کالا ثبت نشده است"' : ' disabled aria-disabled="true" aria-label="ناموجود" title="موجودی این کالا تمام شده است"' : ""}><i class="bi ${unavailable ? "bi-bag-x" : "bi-bag-plus"}" aria-hidden="true"></i>${actionLabel}</button>`;
     const hasSalesPlanBadge = Boolean(options.salesPlanName && options.salesPlanId && !regularPlan);
     const imageBadge = hasSalesPlanBadge
       ? `<span class="product-sales-plan-badge product-sales-plan-badge--overlay"><i class="bi bi-lightning-charge-fill" aria-hidden="true"></i>${esc(options.salesPlanName)}</span>`

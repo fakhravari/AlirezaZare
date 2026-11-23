@@ -88,6 +88,12 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
                 variant.StockBySalesPlan[stock.StoreSalesPlanKey] = variant.StockBySalesPlan.GetValueOrDefault(stock.StoreSalesPlanKey) + stock.Quantity;
 
         var variantById = inventoryVariants.Values.ToDictionary(item => item.VariantId);
+        var disabledVariantPlans = await (from offer in dbContext.StoreProductVariantSalesPlanOffers.AsNoTracking()
+                                          join plan in dbContext.SalesPlanReferences.AsNoTracking() on offer.IdSalesPlan equals plan.Id
+                                          where !offer.IsEnabled && plan.IdStockOwnerType == 1 && eligibleVariantIds.Contains(offer.IdProductVariant)
+                                          select new { offer.IdProductVariant, plan.StoreSalesPlanKey }).ToListAsync(cancellationToken);
+        foreach (var row in disabledVariantPlans)
+            if (variantById.TryGetValue(row.IdProductVariant, out var variant)) variant.DisabledSalesPlanIds.Add(row.StoreSalesPlanKey);
         foreach (var row in variantOfferRows)
         {
             if (!variantById.TryGetValue(row.IdProductVariant, out var variant)) continue;
@@ -214,9 +220,10 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
         public Dictionary<string, decimal> DiscountBySalesPlan { get; } = new(StringComparer.Ordinal);
         public Dictionary<string, decimal> FinalPriceBySalesPlan { get; } = new(StringComparer.Ordinal);
         public Dictionary<string, long> PriceVersionIdsBySalesPlan { get; } = new(StringComparer.Ordinal);
+        public List<string> DisabledSalesPlanIds { get; } = [];
 
         public StoreInventoryVariantRow Build() => new(ProductId, VariantId, Name, Code, Attributes, IsDefault,
             StockBySalesPlan, PriceBySalesPlan, DiscountBySalesPlan)
-        { PriceVersionIdsBySalesPlan = PriceVersionIdsBySalesPlan, FinalPriceBySalesPlan = FinalPriceBySalesPlan };
+        { PriceVersionIdsBySalesPlan = PriceVersionIdsBySalesPlan, FinalPriceBySalesPlan = FinalPriceBySalesPlan, DisabledSalesPlanIds = DisabledSalesPlanIds };
     }
 }

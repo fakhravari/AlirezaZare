@@ -20,6 +20,7 @@ public sealed record StoreInventoryVariantRow(
 {
     public IReadOnlyDictionary<string, decimal> FinalPriceBySalesPlan { get; init; } = new Dictionary<string, decimal>();
     public IReadOnlyDictionary<string, long> PriceVersionIdsBySalesPlan { get; init; } = new Dictionary<string, long>();
+    public IReadOnlyList<string> DisabledSalesPlanIds { get; init; } = [];
 }
 
 public sealed record StoreSalesPlanRow(

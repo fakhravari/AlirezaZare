@@ -160,7 +160,8 @@ public sealed record SalesPlanCatalog(
                 variant.VariantId <= 0 || !inventoryVariantIds.Add((variant.ProductId, variant.VariantId)) ||
                 string.IsNullOrWhiteSpace(variant.Name) || variant.Name.Length > 300 ||
                 variant.StockBySalesPlan is null || variant.PriceBySalesPlan is null ||
-                variant.DiscountBySalesPlan is null ||
+                variant.DiscountBySalesPlan is null || variant.DisabledSalesPlanIds is null ||
+                variant.DisabledSalesPlanIds.Any(planId => !planIds.Contains(planId)) ||
                 variant.StockBySalesPlan.Any(stock =>
                     !planIds.Contains(stock.Key) || stock.Value < 0 ||
                     stock.Value != decimal.Truncate(stock.Value * 1000m) / 1000m) ||
@@ -247,6 +248,7 @@ public sealed record ProductInventoryVariant(
 {
     public IReadOnlyDictionary<string, decimal> FinalPriceBySalesPlan { get; init; } = new Dictionary<string, decimal>();
     public IReadOnlyDictionary<string, long> PriceVersionIdsBySalesPlan { get; init; } = new Dictionary<string, long>();
+    public IReadOnlyList<string> DisabledSalesPlanIds { get; init; } = [];
 }
 
 public sealed record SalesPlan(

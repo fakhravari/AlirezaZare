@@ -33,7 +33,7 @@ public sealed class DatabaseSalesPlanSource(IStoreSalesPlanRepository repository
                 variant.ProductId, variant.VariantId, variant.Name, variant.Code,
                 variant.Attributes, variant.IsDefault, variant.StockBySalesPlan,
                 variant.PriceBySalesPlan, variant.DiscountBySalesPlan)
-            { PriceVersionIdsBySalesPlan = variant.PriceVersionIdsBySalesPlan, FinalPriceBySalesPlan = variant.FinalPriceBySalesPlan }).ToArray(),
+            { PriceVersionIdsBySalesPlan = variant.PriceVersionIdsBySalesPlan, FinalPriceBySalesPlan = variant.FinalPriceBySalesPlan, DisabledSalesPlanIds = variant.DisabledSalesPlanIds }).ToArray(),
         };
     }
 

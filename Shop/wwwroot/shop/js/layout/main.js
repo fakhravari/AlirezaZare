@@ -14,7 +14,7 @@
   const faNumber = (number) => window.HNUI.formatNumber(number);
   const escapeHtml = (value) => window.HNUI.escapeHtml(value);
   const currentProductPrice = (product, options = {}) => window.HNProductCard?.currentPrice(product, options) ?? null;
-  const productPriceText = (amount) => amount !== null && amount !== undefined && Number.isFinite(Number(amount)) ? `${faNumber(amount)} تومان` : "قیمت تنوع ثبت نشده";
+  const productPriceText = (amount) => amount !== null && amount !== undefined && Number.isFinite(Number(amount)) ? `${faNumber(amount)} تومان` : "قیمت در دسترس نیست";
   const cartOptionsMarkup = (item) => window.HNUI.cart.renderOptions(item);
   const searchProducts = Array.isArray(window.HNProducts)
     ? window.HNProducts
@@ -760,7 +760,7 @@
       const unavailable = price == null || stock === 0;
       $card
         .find(".featured-price, .featured-buy strong")
-        .text(productPriceText(price));
+        .text(window.HNProductCard?.priceDetails(product).variantDisabled ? "این تنوع در طرح فروش غیرفعال است" : productPriceText(price));
       $card.find(".add-cart").attr({
         "data-id": String(product.id),
         "data-name": product.name,
@@ -2094,20 +2094,21 @@
     const rawStock = window.HNProductCard?.availableStock(product) ?? product.stockQuantity ?? product.inventoryCount ?? product.quantityInStock ?? product.availableQuantity ?? product.stock;
     const stock = rawStock === "" || rawStock === null || rawStock === undefined ? Number.NaN : Number(rawStock);
     const price = currentProductPrice(product);
+    const variantDisabled = window.HNProductCard?.priceDetails(product).variantDisabled === true;
     const unavailable = price == null || (Number.isFinite(stock) && stock >= 0 ? stock < 1 : product.inStock === false);
     const $quickAdd = $(".quick-add-cart");
     $quickAdd
       .prop("disabled", unavailable)
       .attr("aria-disabled", String(unavailable))
-      .attr("aria-label", unavailable ? "ناموجود" : "افزودن به سبد خرید")
-      .attr("title", unavailable ? "موجودی این کالا تمام شده است" : "افزودن به سبد خرید")
+      .attr("aria-label", variantDisabled ? "تنوع غیرفعال" : unavailable ? "ناموجود" : "افزودن به سبد خرید")
+      .attr("title", variantDisabled ? "این تنوع در طرح فروش غیرفعال است" : unavailable ? "موجودی این کالا تمام شده است" : "افزودن به سبد خرید")
       .toggleClass("is-out-of-stock", unavailable)
       .html(`<i class="bi ${unavailable ? "bi-bag-x" : "bi-bag-plus"}" aria-hidden="true"></i> ${unavailable ? "ناموجود" : "افزودن به سبد خرید"}`);
     $(".stock-note > span").html(
       `<i aria-hidden="true"></i> ${unavailable ? "ناموجود" : "موجود در انبار"}`,
     );
     $(".stock-note > small").text(
-      unavailable ? "موجودی این کالا تمام شده است." : "زمان ارسال بر اساس مقصد و سفارش اعلام می‌شود.",
+      variantDisabled ? "این تنوع در طرح فروش غیرفعال است." : unavailable ? "موجودی این کالا تمام شده است." : "زمان ارسال بر اساس مقصد و سفارش اعلام می‌شود.",
     );
     $("#quickViewImage").attr({
       src: product.image,
@@ -2117,7 +2118,7 @@
     $("#quickViewCode").text(
       `${product.brand ? `${product.brand} Â· ` : ""}${product.code}`,
     );
-    $("#quickViewPrice").text(productPriceText(price));
+    $("#quickViewPrice").text(variantDisabled ? "این تنوع در طرح فروش غیرفعال است" : productPriceText(price));
     $(".quick-description").text(
       product.detail?.highlights?.[0] || product.detail?.intro || "مشخصات این مدل را بررسی کنید.",
     );
