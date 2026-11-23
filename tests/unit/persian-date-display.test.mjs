@@ -9,7 +9,7 @@ test('Shop and Admin display Persian dates consistently in Tehran time', {skip: 
   const page = await browser.newPage({timezoneId: 'America/New_York'});
   await page.route('https://example.test/', route => route.fulfill({contentType: 'text/html', body: ''}));
   await page.goto('https://example.test/');
-  await page.setContent('<div id="admin-record-modal"><h2 id="admin-record-title"></h2><div data-admin-record-body></div></div>');
+  await page.setContent('<div id="admin-record-modal"><h2 id="admin-record-title"></h2><div data-admin-record-body></div></div><time data-admin-date datetime="2024-03-20"></time>');
   await page.evaluate(() => { window.bootstrap = {Modal: {getOrCreateInstance: () => ({show() {}})}}; });
   await page.addScriptTag({path: 'Admin/wwwroot/js/admin-ui.js'});
   await page.addScriptTag({path: 'Shop/wwwroot/shop/js/core/storage.js'});
@@ -30,4 +30,8 @@ test('Shop and Admin display Persian dates consistently in Tehran time', {skip: 
   assert.equal(actual.admin[4], '—');
   assert.equal(actual.shop[4], '');
   assert.equal(actual.record.split(actual.admin[0]).length - 1, 2);
+  assert.match(await page.locator('time[data-admin-date]').textContent(), /۱۴۰۳\/۱\/۱/);
+  await page.evaluate(() => { document.body.insertAdjacentHTML('beforeend', '<time data-admin-date datetime="2024-03-20T21:00:00Z"></time>'); });
+  await page.waitForFunction(() => document.querySelectorAll('time[data-admin-date]')[1].textContent.includes('۱۴۰۳'));
+  assert.match(await page.locator('time[data-admin-date]').nth(1).textContent(), /۱۴۰۳\/۱\/۲/);
 });

@@ -1318,8 +1318,10 @@ body .selected-address-card-heading > strong {
   border-top: 1px solid color-mix(in srgb, var(--industrial-yellow) 14%, white);
 }
 .invoice-page #savedOrderItems .cart-product-header .cart-product-unit-price {
-  margin-top: 32px;
+  margin-top: 10px;
 }
+.invoice-page #savedOrderItems .checkout-order-meta { margin: 6px 0 0; color: var(--industrial-steel); line-height: 1.8; }
+.invoice-page #savedOrderItems .order-price-components { margin-top: 12px; }
 .invoice-page #savedOrderItems .cart-product-header .cart-product-unit-price > span {
   margin-left: 10px;
 }

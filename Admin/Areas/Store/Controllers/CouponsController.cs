@@ -30,6 +30,7 @@ public sealed class CouponsController(ShopDbContext db) : Controller
             _ => query
         };
         int total = await query.CountAsync(cancellationToken);
+        page = Math.Min(page, Math.Max(1, (int)Math.Ceiling(total / 25d)));
         int uses = await db.StoreCouponUsages.CountAsync(usage => query.Any(item => item.Id == usage.IdCoupon), cancellationToken);
         decimal discount = await db.StoreCustomerOrders.Where(order => order.IdCoupon != null && query.Any(item => item.Id == order.IdCoupon))
             .SumAsync(order => (decimal?)order.CouponDiscountAmount, cancellationToken) ?? 0;

@@ -167,7 +167,8 @@ input[type="checkbox"][data-admin-switch]:disabled { cursor: not-allowed; opacit
     gap: .35rem;
 }
 
-.dt-container table.dataTable {
+.dt-container table.dataTable,
+.admin-table-wrap > table.admin-styled-table {
     direction: rtl;
     text-align: right;
     border: 1px solid #cbd5df;
@@ -178,7 +179,9 @@ input[type="checkbox"][data-admin-switch]:disabled { cursor: not-allowed; opacit
 }
 
 .dt-container table.dataTable thead th,
-.dt-container table.dataTable tbody td {
+.dt-container table.dataTable tbody td,
+.admin-table-wrap > table.admin-styled-table thead th,
+.admin-table-wrap > table.admin-styled-table tbody td {
     border: 0;
     border-block-end: 1px solid #d8e0e7;
     border-inline-start: 1px solid #d8e0e7;
@@ -186,21 +189,25 @@ input[type="checkbox"][data-admin-switch]:disabled { cursor: not-allowed; opacit
     vertical-align: middle;
 }
 
-.dt-container table.dataTable tr > :first-child {
+.dt-container table.dataTable tr > :first-child,
+.admin-table-wrap > table.admin-styled-table tr > :first-child {
     border-inline-start: 0;
 }
 
-.dt-container table.dataTable tbody tr:last-child > * {
+.dt-container table.dataTable tbody tr:last-child > *,
+.admin-table-wrap > table.admin-styled-table tbody tr:last-child > * {
     border-block-end: 0;
 }
 
-.dt-container table.dataTable thead th {
+.dt-container table.dataTable thead th,
+.admin-table-wrap > table.admin-styled-table thead th {
     background: #f3f6f8;
     color: #253746;
     font-weight: 700;
 }
 
-.dt-container table.dataTable tbody tr:hover > * {
+.dt-container table.dataTable tbody tr:hover > *,
+.admin-table-wrap > table.admin-styled-table tbody tr:hover > * {
     background-color: #f4f9fb;
 }
 

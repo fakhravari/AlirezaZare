@@ -4,10 +4,8 @@ window.HNUI.mount("core-form-validation", document, () => {
   const customForms = new Set([
     "contactForm",
     "profileEditModalForm",
-    "loginEmailForm",
     "registerEmailForm",
     "forgotPasswordForm",
-    "emailOtpForm",
   ]);
   const prepareForm = (form) => {
     if (form instanceof HTMLFormElement) form.noValidate = true;

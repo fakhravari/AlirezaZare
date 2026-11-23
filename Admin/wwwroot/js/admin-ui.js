@@ -426,6 +426,17 @@
         }).format(date);
     }
 
+    function formatDates(root) {
+        if (root.matches?.("time[data-admin-date]")) root.textContent = formatDateTime(root.dateTime);
+        root.querySelectorAll?.("time[data-admin-date]").forEach(element => { element.textContent = formatDateTime(element.dateTime); });
+    }
+
+    formatDates(document);
+    new MutationObserver(records => {
+        for (const record of records) for (const node of record.addedNodes)
+            if (node instanceof Element) formatDates(node);
+    }).observe(document.body, { childList: true, subtree: true });
+
     function renderRecord(body, record, options = {}) {
         body.replaceChildren();
         const entries = Object.entries(record || {});

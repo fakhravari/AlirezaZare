@@ -440,10 +440,10 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                 const specialPrice = focusedOffer
                     ? `<div class="product-special-sale-price"><span>قیمت در این طرح</span><strong>پس از انتخاب تنوع</strong></div>`
                     : "";
-                const countdown = focusedPlan.endsAtUtc
-                    ? `<time datetime="${esc(focusedPlan.endsAtUtc)}" data-plan-countdown="${esc(focusedPlan.endsAtUtc)}" aria-label="مهلت باقی‌ماندهٔ طرح"></time>`
-                    : `<strong class="product-special-sale-open">فعال</strong>`;
-                planSummary.innerHTML = `<header class="product-special-sale-heading"><span class="product-special-sale-mark"><i class="bi ${isDigiAf ? "bi-patch-check-fill" : "bi-lightning-charge-fill"}" aria-hidden="true"></i></span><span class="product-special-sale-name"><small>نوع فروش فعال</small><strong>${esc(focusedPlan.name)}</strong></span></header><p>${esc(focusedPlan.label || "قیمت ویژهٔ این طرح را با مهلت محدود تهیه کنید.")}</p><div class="product-special-sale-countdown"><span><i class="bi bi-hourglass-split" aria-hidden="true"></i> فرصت باقی‌مانده</span>${countdown}</div>${specialPrice}`;
+                const countdown = focusedPlan.showCountdown === true && focusedPlan.endsAtUtc && Number.isFinite(Date.parse(focusedPlan.endsAtUtc))
+                    ? `<div class="product-special-sale-countdown"><span><i class="bi bi-hourglass-split" aria-hidden="true"></i> فرصت باقی‌مانده</span><time datetime="${esc(focusedPlan.endsAtUtc)}" data-plan-countdown="${esc(focusedPlan.endsAtUtc)}" aria-label="مهلت باقی‌ماندهٔ طرح"></time></div>`
+                    : "";
+                planSummary.innerHTML = `<header class="product-special-sale-heading"><span class="product-special-sale-mark"><i class="bi ${isDigiAf ? "bi-patch-check-fill" : "bi-lightning-charge-fill"}" aria-hidden="true"></i></span><span class="product-special-sale-name"><small>نوع فروش فعال</small><strong>${esc(focusedPlan.name)}</strong></span></header><p>${esc(focusedPlan.label || "قیمت ویژهٔ این طرح را مشاهده کنید.")}</p>${countdown}${specialPrice}`;
             }
             const priceHeading = productView.querySelector(
                 ".product-detail-price > .detail-price-heading",

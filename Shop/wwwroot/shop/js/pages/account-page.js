@@ -226,7 +226,20 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
             const paymentButton = order.status === "pending-payment" && Number.isSafeInteger(order.id) && order.id > 0
                 ? `<button type="button" data-pay-order="${order.id}">ادامهٔ پرداخت</button>` : "";
             const tracking = order.shippingCarrier && order.shippingTrackingCode ? `<p>شرکت حمل: ${ui.escapeHtml(order.shippingCarrier)}، کد رهگیری: <bdi>${ui.escapeHtml(order.shippingTrackingCode)}</bdi></p>` : "";
-            card.innerHTML = `<header><div><span class="order-status is-${ui.escapeHtml(order.status)}">${ui.escapeHtml(label)}</span><strong>سفارش ${ui.escapeHtml(order.number)}</strong></div><time datetime="${card.dataset.orderDatetime}">${ui.escapeHtml(dateLabel)}</time></header><div class="order-body order-invoice-summary"><div class="order-products"><span class="order-product-icon"><i class="bi bi-receipt-cutoff"></i></span><div><strong>خلاصهٔ فاکتور</strong><small>${ui.formatNumber(order.itemCount)} کالا</small></div></div><div class="order-total"><small>مبلغ سفارش</small><strong>${ui.formatNumber(order.totalAmount)} تومان</strong></div></div>${tracking}<footer><span>${ui.escapeHtml(label)}</span><div class="order-card-actions">${paymentButton}<a href="/Tracking"><i class="bi bi-truck"></i> پیگیری سفارش</a><button type="button" data-open-order-invoice>مشاهدهٔ فاکتور</button></div></footer>`;
+            const planTotals = new Map();
+            for (const item of Array.isArray(order.items) ? order.items : []) {
+                const key = item.salesPlanId ? `id:${item.salesPlanId}` : `name:${item.salesPlanName || ""}`;
+                const plan = planTotals.get(key) || { name: item.salesPlanName || item.salesPlanId || "نامشخص", quantity: 0, amount: 0, valid: true };
+                const quantity = Number(item.quantity);
+                const amount = Number(item.unitAmount);
+                if (item.quantity == null || item.unitAmount == null || !Number.isSafeInteger(quantity) || quantity < 0 || !Number.isSafeInteger(amount) || amount < 0 || !Number.isSafeInteger(plan.quantity + quantity) || !Number.isSafeInteger(quantity * amount) || !Number.isSafeInteger(plan.amount + quantity * amount)) plan.valid = false;
+                else { plan.quantity += quantity; plan.amount += quantity * amount; }
+                planTotals.set(key, plan);
+            }
+            const money = (value) => value !== null && value !== undefined && Number.isSafeInteger(Number(value)) && Number(value) >= 0 ? `${ui.formatNumber(Number(value))} تومان` : "—";
+            const plans = [...planTotals.values()].map(plan => `<li><span>${ui.escapeHtml(plan.name)}</span><strong>${plan.valid ? money(plan.amount) : "—"}</strong><small>${plan.valid ? `${ui.formatNumber(plan.quantity)} کالا` : ""}</small></li>`).join("");
+            const planSummary = plans ? `<div class="order-plan-summary"><span>جمع به تفکیک طرح فروش</span><ul>${plans}</ul></div>` : "";
+            card.innerHTML = `<header><div><span class="order-status is-${ui.escapeHtml(order.status)}">${ui.escapeHtml(label)}</span><strong>سفارش ${ui.escapeHtml(order.number)}</strong></div><time datetime="${ui.escapeHtml(card.dataset.orderDatetime)}">${ui.escapeHtml(dateLabel)}</time></header><div class="order-body order-invoice-summary"><div class="order-products"><span class="order-product-icon" aria-hidden="true"><i class="bi bi-receipt-cutoff"></i></span><div><strong>خلاصهٔ فاکتور</strong><small>${ui.formatNumber(order.itemCount)} کالا</small></div></div><dl class="order-summary-metrics"><div><dt>جمع اقلام</dt><dd>${money(order.subtotalAmount)}</dd></div><div><dt>تخفیف کد</dt><dd>${money(order.couponDiscountAmount)}</dd></div><div class="order-summary-metrics__total"><dt>مبلغ سفارش</dt><dd>${money(order.totalAmount)}</dd></div></dl></div>${planSummary}${tracking}<footer><span>${ui.escapeHtml(label)}</span><div class="order-card-actions">${paymentButton}<a href="/Tracking"><i class="bi bi-truck"></i> پیگیری سفارش</a><button type="button" data-open-order-invoice>مشاهدهٔ فاکتور</button></div></footer>`;
             host.append(card);
         }
         const total = document.querySelector("#ordersTotal");
@@ -549,22 +562,40 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
             }
             const couponRow = invoiceDialog.querySelector("[data-invoice-coupon-row]");
             if (couponRow) {
-                couponRow.hidden = !(details.couponCode && Number(details.couponDiscountAmount) > 0);
-                invoiceDialog.querySelector("[data-invoice-coupon-code]").textContent = details.couponCode || "";
-                invoiceDialog.querySelector("[data-invoice-discount]").textContent = `− ${formatToman(details.couponDiscountAmount)}`;
+                couponRow.hidden = false;
+                invoiceDialog.querySelector("[data-invoice-coupon-code]").textContent = details.couponCode || "استفاده نشده";
+                invoiceDialog.querySelector("[data-invoice-discount]").textContent = Number(details.couponDiscountAmount) > 0 ? `− ${formatToman(details.couponDiscountAmount)}` : formatToman(0);
             }
             const lines = invoiceDialog.querySelector("[data-invoice-lines]");
             lines?.replaceChildren();
+            const planGroups = new Map();
             for (const item of details.items || []) {
+                const planKey = item.salesPlanId ? `id:${item.salesPlanId}` : `name:${item.salesPlanName || ""}`;
+                let group = planGroups.get(planKey);
+                if (!group) {
+                    const planName = item.salesPlanName || item.salesPlanId || "نامشخص";
+                    const section = document.createElement("section"); section.className = "order-invoice-plan";
+                    const heading = document.createElement("h4"); heading.className = "order-invoice-plan-title"; heading.textContent = `طرح فروش: ${planName}`;
+                    const table = document.createElement("div"); table.className = "order-invoice-table"; table.setAttribute("role", "table"); table.setAttribute("aria-label", `اقلام طرح فروش ${planName}`);
+                    const tableHeading = document.createElement("div"); tableHeading.className = "order-invoice-row order-invoice-table-heading"; tableHeading.setAttribute("role", "row");
+                    for (const label of ["شرح", "تعداد", "مبلغ واحد", "جمع ردیف"]) {
+                        const cell = document.createElement("span"); cell.setAttribute("role", "columnheader"); cell.textContent = label; tableHeading.append(cell);
+                    }
+                    group = document.createElement("div"); group.className = "order-invoice-lines";
+                    table.append(tableHeading, group); section.append(heading, table); lines?.append(section); planGroups.set(planKey, group);
+                }
                 const row = document.createElement("div"); row.className = "order-invoice-row"; row.setAttribute("role", "row");
-                const description = document.createElement("span"); description.setAttribute("role", "cell");
-                const componentLabels = { product: "قیمت کالا", accessory: "متعلق", variant: "قیمت تنوع" };
-                const refs = (item.priceReferences || []).map(ref => `${componentLabels[ref.component] || "قیمت"}${ref.component === "accessory" && ref.name ? ` ${ref.name}` : ""}: ${formatToman(ref.calculatedUnitAmount)}`).join("، ");
-                const itemName = `${item.name}${item.variantName ? ` — ${item.variantName}` : ""}`;
-                description.textContent = refs ? `${itemName} — ${refs}` : itemName;
-                const quantity = document.createElement("span"); quantity.setAttribute("role", "cell"); quantity.textContent = ui.formatNumber(item.quantity);
-                const amount = document.createElement("strong"); amount.setAttribute("role", "cell"); amount.textContent = formatToman(item.unitAmount);
-                row.append(description, quantity, amount); lines?.append(row);
+                const description = document.createElement("div"); description.className = "order-invoice-item"; description.setAttribute("role", "cell");
+                const name = document.createElement("strong"); name.className = "order-invoice-item__name"; name.textContent = item.name; description.append(name);
+                if (item.variantName) {
+                    const variant = document.createElement("div"); variant.className = "order-invoice-item__variant"; variant.textContent = `تنوع انتخاب‌شده: ${item.variantName}`; description.append(variant);
+                }
+                const components = window.HNOrderPriceComponents.render(item, ui);
+                if (components) description.append(components);
+                const quantity = document.createElement("span"); quantity.className = "order-invoice-quantity"; quantity.setAttribute("role", "cell"); quantity.textContent = ui.formatNumber(item.quantity);
+                const amount = document.createElement("strong"); amount.className = "order-invoice-unit-amount"; amount.setAttribute("role", "cell"); amount.textContent = formatToman(item.unitAmount);
+                const lineTotal = document.createElement("strong"); lineTotal.className = "order-invoice-line-total"; lineTotal.setAttribute("role", "cell"); lineTotal.textContent = formatToman(Number(item.unitAmount) * Number(item.quantity));
+                row.append(description, quantity, amount, lineTotal); group.append(row);
             }
             const history = invoiceDialog.querySelector("[data-invoice-history]"); history?.replaceChildren();
             const events = [

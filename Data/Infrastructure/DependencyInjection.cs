@@ -11,7 +11,7 @@ using Shop.Data.Infrastructure.Email;
 using Shop.Data.Infrastructure.Identity;
 using Shop.Data.Infrastructure.Persistence;
 using Shop.Data.Infrastructure.Persistence.Repositories;
-using Shop.Data.Infrastructure.Stock;
+using Shop.Data.Infrastructure.Warehouse;
 
 namespace Shop.Data.Infrastructure;
 

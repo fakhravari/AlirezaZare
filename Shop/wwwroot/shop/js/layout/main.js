@@ -1120,12 +1120,15 @@
     $("#loginPasswordLabel, #loginPasswordField")
       .toggleClass("d-none", !usesPassword)
       .prop("hidden", !usesPassword);
-    $("#loginPassword").prop("required", usesPassword).attr("tabindex", usesPassword ? "0" : "-1");
+    $("#loginPassword").prop("required", usesPassword).prop("disabled", !usesPassword).attr("tabindex", usesPassword ? "0" : "-1");
+    document.querySelector("#loginPassword")?.dispatchEvent(new Event("input", { bubbles: true }));
     $("#loginSubmitLabel").text(usesPassword ? "ورود به حساب" : "دریافت کد ورود");
-    $loginEmailError.empty();
+    window.HNUI.setMessage($loginEmailError[0], "");
   };
   $("#loginOtpMethod").on("click", () => setLoginMethod("otp"));
   $("#loginPasswordMethod").on("click", () => setLoginMethod("password"));
+  $("#loginEmail, #loginPassword").on("input", () => window.HNUI.setMessage($loginEmailError[0], ""));
+  $emailOtpInput.on("input", () => window.HNUI.setMessage($emailOtpError[0], ""));
 
   const requestEmailCode = async (email) => {
     const $submit = $("#loginEmailForm button[type='submit']");
@@ -1306,24 +1309,12 @@
     event.preventDefault();
     const emailInput = $("#loginEmail")[0];
     const email = emailInput.value.trim();
-    if (!email || !emailInput.validity.valid) {
-      window.HNUI.setMessage(
-        $loginEmailError[0],
-        "ایمیل معتبر وارد کنید.",
-        "error",
-      );
-      return;
-    }
     window.HNUI.setMessage($loginEmailError[0], "");
     if (loginMethod === "otp") {
       void requestEmailCode(email);
       return;
     }
     const password = $("#loginPassword").val();
-    if (password.length < 1) {
-      window.HNUI.setMessage($loginEmailError[0], "رمز عبور را وارد کنید.", "error");
-      return;
-    }
     const $submit = $("#loginEmailForm button[type='submit']").prop("disabled", true);
     try {
       const response = await window.HNUI.api.request("auth/password", {
@@ -1350,14 +1341,6 @@
   $("#emailOtpForm").on("submit", async (event) => {
     event.preventDefault();
     const code = window.HNUI.toEnglishDigits($emailOtpInput.val().trim());
-    if (!/^\d{6}$/.test(code)) {
-      window.HNUI.setMessage(
-        $emailOtpError[0],
-        "کد شش‌رقمی را کامل وارد کنید.",
-        "error",
-      );
-      return;
-    }
     window.HNUI.setMessage($emailOtpError[0], "");
     const $submit = $("#emailOtpForm button[type='submit']").prop("disabled", true);
     try {
@@ -1392,6 +1375,8 @@
     ).each(function () {
       this.reset();
     });
+    window.HNUI.setMessage($loginEmailError[0], "");
+    window.HNUI.setMessage($emailOtpError[0], "");
     $("#sentEmail").empty();
     $emailOtpInput.val("");
     $loginEmailStep.removeClass("d-none").prop("hidden", false);

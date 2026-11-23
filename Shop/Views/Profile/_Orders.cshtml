@@ -85,33 +85,31 @@
                         <dt>وضعیت تحویل</dt><dd data-invoice-delivery></dd>
                     </div>
                 </dl>
+                <h4 class="order-invoice-totals-title">جمع‌بندی پرداخت</h4>
+                <div class="order-invoice-payable">
+                    <span>جمع اقلام پس از تخفیف طرح فروش</span><strong data-invoice-subtotal></strong>
+                </div>
+                <div class="order-invoice-payable" data-invoice-coupon-row>
+                    <span>تخفیف کد <bdi data-invoice-coupon-code dir="ltr"></bdi></span><strong data-invoice-discount></strong>
+                </div>
+                <div class="order-invoice-payable">
+                    <span>مبلغ قابل پرداخت</span><strong data-invoice-total></strong>
+                </div>
+                <p class="order-invoice-demo-note" data-invoice-amount-mismatch hidden>جمع جزئیات این سفارش با مبلغ ثبت‌شده در فاکتور اختلاف دارد. برای بررسی با پشتیبانی تماس بگیرید.</p>
             </section>
             <section class="order-invoice-detail" aria-label="اقلام و مبالغ فاکتور">
                 <h3><i class="bi bi-receipt" aria-hidden="true"></i> ریز فاکتور</h3>
-                <div class="order-invoice-table" role="table" aria-label="اقلام فاکتور">
-                    <div class="order-invoice-row order-invoice-table-heading" role="row">
-                        <span role="columnheader">شرح</span><span role="columnheader">تعداد</span><span role="columnheader">مبلغ واحد</span>
-                    </div>
-                    <div class="order-invoice-lines" data-invoice-lines></div>
+                <div class="order-invoice-plan-groups" data-invoice-lines></div>
+                <div class="order-invoice-table" role="table" aria-label="جمع اقلام فاکتور">
                     <div class="order-invoice-row order-invoice-row-summary" role="row">
-                        <span role="cell">کالاهای این سفارش</span><span data-invoice-count role="cell"></span><strong data-invoice-amount role="cell"></strong>
+                        <span role="cell">جمع اقلام پیش از کد تخفیف</span><span data-invoice-count role="cell"></span><span role="cell">—</span><strong data-invoice-amount role="cell"></strong>
                     </div>
                 </div>
                 <section class="order-invoice-history" aria-label="تاریخچهٔ وضعیت و رهگیری سفارش">
                     <h4>تاریخچهٔ وضعیت و رهگیری</h4>
                     <ol data-invoice-history></ol>
                 </section>
-                <div class="order-invoice-payable">
-                    <span>جمع قبل از تخفیف</span><strong data-invoice-subtotal></strong>
-                </div>
-                <div class="order-invoice-payable" data-invoice-coupon-row hidden>
-                    <span>کد تخفیف <bdi data-invoice-coupon-code dir="ltr"></bdi></span><strong data-invoice-discount></strong>
-                </div>
-                <div class="order-invoice-payable">
-                    <span>مبلغ قابل پرداخت</span><strong data-invoice-total></strong>
-                </div>
-                <p class="order-invoice-demo-note">مبلغ واحد هر کالا شامل قیمت کالا یا تنوع انتخاب‌شده و متعلقات آن است.</p>
-                <p class="order-invoice-demo-note" data-invoice-amount-mismatch hidden>جمع جزئیات این سفارش با مبلغ ثبت‌شده در فاکتور اختلاف دارد. برای بررسی با پشتیبانی تماس بگیرید.</p>
+                <p class="order-invoice-demo-note">مبلغ واحد از مجموع قیمت کالا یا تنوع انتخاب‌شده و متعلقات آن محاسبه می‌شود. جمع اقلام، مبلغ واحد را در تعداد ضرب می‌کند.</p>
             </section>
         </div>
     </dialog>

@@ -7,6 +7,7 @@
         "admin-shell": {
           "markup": [
             "Admin/Views/Shared/_Layout.cshtml",
+            "Admin/Views/Shared/_AdminHeader.cshtml",
             "Admin/Views/Shared/_AdminSidebar.cshtml",
             "Admin/Areas/Admin/Views/Users/Index.cshtml",
             "Admin/Areas/Admin/Views/Users/Permissions.cshtml",
@@ -15,6 +16,7 @@
             "Admin/Areas/Store/Views/Catalog/Index.cshtml",
             "Admin/Areas/Store/Views/HomeCollection/Index.cshtml",
             "Admin/Areas/Store/Views/Coupons/Index.cshtml",
+            "Admin/Areas/Store/Views/Coupons/_CouponEditor.cshtml",
             "Admin/Areas/Store/Views/Coupons/Report.cshtml",
             "Admin/Areas/Store/Views/Catalog/ProductDetails.cshtml",
             "Admin/Areas/Store/Views/Catalog/Badges.cshtml",
@@ -401,6 +403,10 @@
           "data": [
             "Shop/wwwroot/shop/js/core/storage.js"
           ]
+        },
+        "order-price-components": {
+          "js": ["Shop/wwwroot/shop/js/store/order-price-components.js"],
+          "css": ["Shop/wwwroot/shop/css/store/order-price-components.css"]
         },
         "cart": {
           "markup": [

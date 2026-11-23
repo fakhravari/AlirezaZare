@@ -28,7 +28,7 @@
             </a>
         </div>
         <div class="navbar-item navbar-user dropdown">
-            <button type="button" class="navbar-link dropdown-toggle d-flex align-items-center admin-header-profile" data-bs-toggle="dropdown" aria-expanded="false" aria-label="حساب @displayName">
+            <button type="button" class="navbar-link dropdown-toggle d-flex align-items-center admin-header-profile" data-bs-toggle="dropdown" aria-expanded="false" aria-label="منوی حساب @displayName">
                 <span class="admin-header-profile__avatar" aria-hidden="true">@avatarInitial</span>
                 <span class="d-none d-sm-inline">@displayName</span>
             </button>
@@ -38,7 +38,7 @@
                     <small class="text-muted">حساب مدیریت</small>
                 </div>
                 <div class="dropdown-divider"></div>
-                <form asp-controller="Auth" asp-action="Logout" method="post">
+                <form asp-area="" asp-controller="Auth" asp-action="Logout" method="post">
                     @Html.AntiForgeryToken()
                     <button class="dropdown-item text-danger" type="submit">
                         <i class="fa fa-arrow-right-from-bracket ms-2" aria-hidden="true"></i>

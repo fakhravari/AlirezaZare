@@ -1,0 +1,6 @@
+.order-price-components { display: grid; gap: 0; margin: 2px 0 0; padding: 0; list-style: none; border: 1px solid #edf0f2; border-radius: 9px; background: #fafbfc; }
+.order-price-components li { padding: 8px 10px; color: var(--industrial-steel); line-height: 1.8; }
+.order-price-components li + li { border-top: 1px solid #edf0f2; }
+.order-price-components__heading, .order-price-components__breakdown { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 16px; }
+.order-price-components__breakdown, .order-price-components__line { margin-top: 4px; font-size: 12px; line-height: 1.9; }
+.order-price-components li strong { color: var(--industrial-navy); white-space: nowrap; }

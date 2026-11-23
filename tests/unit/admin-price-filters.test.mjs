@@ -122,7 +122,8 @@ test('plan and variant filters send product and dates to their endpoints', {skip
   await page.setContent(`<div data-store-variant-prices data-api="/api/prices" data-can-edit="true">
     <form data-plan-filter><input name="q"><input name="from" type="date"><input name="to" type="date"><button>اعمال</button></form>
     <form data-plan-create><button></button></form>
-    <form data-plan-settings><select name="id"></select><input name="code"><input name="displayName"><input name="planType"><input name="startsAtUtc"><input name="endsAtUtc"><input name="label"><input name="showCountdown" type="checkbox"><button type="button" data-plan-details-save></button><button type="button" data-plan-delete></button><button type="button" data-plan-publish></button><button type="button" data-plan-unpublish></button><button type="submit"></button><span data-plan-status></span></form>
+    <span data-plan-count></span><div data-plan-list></div><span data-plan-status></span>
+    <form data-plan-settings><select name="id"></select><span data-plan-selection></span><fieldset data-plan-fields><input name="code"><input name="displayName"><input name="planType"><input name="startsAtUtc"><input name="endsAtUtc"><input name="label"><input name="showCountdown" type="checkbox"><button type="button" data-plan-details-save></button><button type="button" data-plan-delete></button><button type="button" data-plan-publish></button><button type="button" data-plan-unpublish></button><button type="submit"></button></fieldset></form>
     <form data-price-filter><input name="q"><select name="productIds" multiple><option value="12" selected>الف</option><option value="34" selected>ب</option></select><input name="from" type="date"><input name="to" type="date"><button>اعمال</button></form>
     <span data-price-count></span><div data-price-status></div><table><tbody data-price-rows></tbody></table>
   </div>`);
@@ -149,4 +150,29 @@ test('plan and variant filters send product and dates to their endpoints', {skip
     assert.equal(url.searchParams.get('from'), '2024-03-20');
     assert.equal(url.searchParams.get('to'), '2024-03-21');
   }
+});
+
+test('plan grid opens the selected plan in the editor modal', {skip: !existsSync(chromium.executablePath())}, async t => {
+  const browser = await chromium.launch({headless: true});
+  t.after(() => browser.close());
+  const page = await browser.newPage();
+  await page.route('https://example.test/**', route => route.fulfill({json: [
+    {id: 1, displayName: 'طرح اول', code: 'one', planType: 'special', isActive: false},
+    {id: 2, displayName: 'طرح دوم', code: 'two', planType: 'special', isActive: true}
+  ]}));
+  await page.goto('https://example.test/');
+  await page.setContent(`<div data-store-variant-prices data-api="/api/prices" data-can-edit="true">
+    <form data-plan-filter></form><form data-plan-create><button type="submit"></button></form>
+    <span data-plan-count></span><table><tbody data-plan-list></tbody></table><span data-plan-status></span>
+    <div id="plan-settings-modal"><form data-plan-settings><select name="id"></select><span data-plan-selection></span><span data-plan-publication></span><fieldset data-plan-fields>
+    <input name="code"><input name="displayName"><input name="planType"><input name="startsAtUtc"><input name="endsAtUtc"><input name="label"><input name="showCountdown" type="checkbox">
+    <button type="button" data-plan-details-save></button><button type="button" data-plan-delete></button><button type="button" data-plan-publish></button><button type="button" data-plan-unpublish></button><button type="submit"></button></fieldset></form></div></div>`);
+  await page.evaluate(() => { window.bootstrap = {Modal: {getOrCreateInstance: element => ({show: () => { element.dataset.open = 'true'; }})}}; });
+  await page.addScriptTag({path: 'Admin/wwwroot/js/admin-ui.js'});
+  await page.addScriptTag({path: 'Admin/wwwroot/js/admin-variant-prices.js'});
+  await page.evaluate(() => window.AdminVariantPrices.initialize(document));
+  await page.getByRole('button', {name: 'ویرایش طرح دوم'}).click();
+  assert.equal(await page.locator('#plan-settings-modal').getAttribute('data-open'), 'true');
+  assert.equal(await page.locator('[data-plan-settings] [name=code]').inputValue(), 'two');
+  assert.match(await page.locator('[data-plan-publication]').textContent(), /منتشرشده/);
 });

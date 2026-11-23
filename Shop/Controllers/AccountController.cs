@@ -176,8 +176,9 @@ public sealed class AccountController(
                     item.IdProductVariant,
                     item.IdSalesPlan,
                     ProductName = product.Name,
-                    VariantName = db.ProductVariants.Where(v => v.Id == item.IdProductVariant).Select(v => v.VariantName.Name).FirstOrDefault(),
+                    VariantName = db.ProductVariants.Where(v => v.Id == item.IdProductVariant).Select(v => v.VariantName.TreePathNames).FirstOrDefault(),
                     plan.StoreSalesPlanKey,
+                    SalesPlanName = plan.DisplayName,
                     item.Quantity,
                     item.IdPriceVersion,
                     PriceAmount = item.PriceVersion.PriceBeforeDiscountAmount,
@@ -188,7 +189,7 @@ public sealed class AccountController(
         var orderPriceReferences = orderItemIds.Length == 0 ? [] : await (from reference in db.StoreOrderAccessories.AsNoTracking()
                                                                           join version in db.StorePriceVersions.AsNoTracking() on reference.IdPriceVersion equals version.Id
                                                                           where orderIds.Contains(reference.IdOrder)
-                                                                          select new { reference.IdOrder, reference.IdProduct, reference.IdSalesPlan, reference.IdPriceVersion, version.IdProductVariant, reference.IdAccessory, PriceAmount = reference.UnitAmountSnapshot, version.DiscountPercent, version.FinalPriceAmount, AccessoryName = reference.AccessoryNameSnapshot })
+                                                                          select new { reference.IdOrder, reference.IdProduct, reference.IdSalesPlan, reference.IdPriceVersion, version.IdProductVariant, reference.IdAccessory, PriceAmount = reference.UnitAmountSnapshot, version.PriceBeforeDiscountAmount, version.DiscountPercent, version.FinalPriceAmount, AccessoryName = reference.AccessoryNameSnapshot })
             .ToListAsync(ct);
         var orderItemsById = orderItemRows.GroupBy(x => x.IdOrder).ToDictionary(group => group.Key, group => group.ToArray());
         var trackingHistory = orderIds.Length == 0 ? [] : await db.StoreOrderShipmentTrackingHistories.AsNoTracking()
@@ -289,6 +290,7 @@ public sealed class AccountController(
                     name = item.ProductName,
                     variantName = item.VariantName,
                     salesPlanId = item.StoreSalesPlanKey,
+                    salesPlanName = item.SalesPlanName,
                     item.Quantity,
                     unitAmount = item.FinalPriceAmount + orderPriceReferences.Where(reference => reference.IdOrder == item.IdOrder && reference.IdProduct == item.IdProduct && reference.IdSalesPlan == item.IdSalesPlan).Sum(reference => reference.PriceAmount),
                     options = new { accessories = orderPriceReferences.Where(reference => reference.IdOrder == item.IdOrder && reference.IdProduct == item.IdProduct && reference.IdSalesPlan == item.IdSalesPlan).Select(reference => new { id = reference.IdAccessory.ToString(), selected = true }).ToArray() },
@@ -297,8 +299,10 @@ public sealed class AccountController(
                         priceVersionId = reference.IdPriceVersion,
                         component = StorePriceVersionReference.GetComponent(reference.IdProductVariant, reference.IdAccessory),
                         name = reference.AccessoryName,
-                        calculatedUnitAmount = reference.PriceAmount
-                    }).Prepend(new { priceVersionId = item.IdPriceVersion, component = item.IdProductVariant.HasValue ? "variant" : "product", name = item.VariantName ?? item.ProductName, calculatedUnitAmount = item.FinalPriceAmount }).ToArray()
+                        calculatedUnitAmount = reference.PriceAmount,
+                        priceBeforeDiscountAmount = reference.FinalPriceAmount == reference.PriceAmount ? (decimal?)reference.PriceBeforeDiscountAmount : null,
+                        discountPercent = reference.FinalPriceAmount == reference.PriceAmount ? (decimal?)reference.DiscountPercent : null
+                    }).Prepend(new { priceVersionId = item.IdPriceVersion, component = item.IdProductVariant.HasValue ? "variant" : "product", name = item.VariantName ?? item.ProductName, calculatedUnitAmount = item.FinalPriceAmount, priceBeforeDiscountAmount = (decimal?)item.PriceAmount, discountPercent = (decimal?)item.DiscountPercent }).ToArray()
                 }).ToArray(),
                 trackingHistory = trackingHistory.Where(entry => entry.IdOrder == order.Id).Select(entry => new { entry.Carrier, entry.TrackingCode, changedAtUtc = AsUtc(entry.ChangedAtUtc) }).ToArray()
             }).ToArray()

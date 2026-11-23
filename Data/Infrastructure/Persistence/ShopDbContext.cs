@@ -3,6 +3,7 @@ using Shop.Data.Domain.Admin.Entities;
 using Shop.Data.Domain.Account.Entities;
 using Shop.Data.Domain.Store.Entities;
 using Shop.Data.Domain.Warehouse.Entities;
+using WarehouseEntity = Shop.Data.Domain.Warehouse.Entities.Warehouse;
 
 namespace Shop.Data.Infrastructure.Persistence;
 
@@ -22,7 +23,7 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
     public DbSet<WarehouseDocumentLineRecord> WarehouseDocumentLines => Set<WarehouseDocumentLineRecord>();
     public DbSet<WarehouseStockMovement> WarehouseStockMovements => Set<WarehouseStockMovement>();
     public DbSet<WarehouseDocumentAudit> WarehouseDocumentAudits => Set<WarehouseDocumentAudit>();
-    public DbSet<Warehouse> Warehouses => Set<Warehouse>();
+    public DbSet<WarehouseEntity> Warehouses => Set<WarehouseEntity>();
     public DbSet<Company> Companies => Set<Company>();
     public DbSet<SalesPlanReference> SalesPlanReferences => Set<SalesPlanReference>();
     public DbSet<WarehouseStockOwner> WarehouseStockOwners => Set<WarehouseStockOwner>();
@@ -325,7 +326,7 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
         });
         modelBuilder.Entity<AdminUserWarehouseAccess>(entity => { entity.ToTable("SystemUserWarehouseAccess", "Admin"); entity.HasKey(x => new { x.IdUser, x.IdWarehouse }); });
 
-        modelBuilder.Entity<Warehouse>(entity =>
+        modelBuilder.Entity<WarehouseEntity>(entity =>
         {
             entity.ToTable("Warehouse", "Warehouse");
             entity.HasKey(x => x.Id);
@@ -374,7 +375,7 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.Property(x => x.Name).HasMaxLength(200).IsRequired();
             entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
             entity.Property(x => x.UpdatedAtUtc).HasPrecision(3);
-            entity.HasOne<Warehouse>().WithMany().HasForeignKey(x => x.IdWarehouse);
+            entity.HasOne<WarehouseEntity>().WithMany().HasForeignKey(x => x.IdWarehouse);
         });
         modelBuilder.Entity<WarehouseProductUnit>(entity =>
         {

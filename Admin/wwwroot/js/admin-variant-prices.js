@@ -32,7 +32,7 @@
             if (event.target.name !== "q") return;
             clearTimeout(timer); timer = setTimeout(reload, 300);
         });
-        form.addEventListener("reset", () => { clearTimeout(timer); setTimeout(reload, 0); });
+        form.addEventListener("reset", () => { clearTimeout(timer); if (!form._skipResetReload) setTimeout(reload, 0); });
     }
     function updatePager(page, current, total) {
         const pager = page.querySelector("[data-offer-pagination]");
@@ -273,26 +273,61 @@
     async function loadPlanSettings(page, selectedId) {
         const form = page.querySelector("[data-plan-settings]");
         if (!form) return;
-        const message = form.querySelector("[data-plan-status]");
+        const message = page.querySelector("[data-plan-status]");
         const serial = (page._planSerial || 0) + 1; page._planSerial = serial;
         try {
             const plans = await request(page, filterUrl(page, "/plans", "[data-plan-filter]"));
             if (!page.isConnected || serial !== page._planSerial) return;
             page._planSettings = plans;
-            form.elements.id.replaceChildren(...plans.map(plan => new Option(`${plan.displayName} (${plan.code})`, String(plan.id))));
+            form.elements.id.replaceChildren(new Option("انتخاب طرح", ""), ...plans.map(plan => new Option(`${plan.displayName} (${plan.code})`, String(plan.id))));
             if (selectedId && plans.some(plan => String(plan.id) === selectedId)) form.elements.id.value = selectedId;
+            const selectedIndex = selectedId ? plans.findIndex(plan => String(plan.id) === selectedId) : -1;
+            if (selectedIndex >= 0) page._planPage = Math.floor(selectedIndex / pageSize) + 1;
+            renderPlanRows(page);
+            page.querySelector("[data-plan-count]").textContent = `${plans.length.toLocaleString("fa-IR")} طرح`;
             showPlanSettings(page);
             message.textContent = plans.length ? "" : "طرح فروشی یافت نشد.";
-            form.querySelector('[type="submit"]').disabled = !plans.length;
         } catch (error) {
             if (!page.isConnected || serial !== page._planSerial) return;
             message.textContent = error.message || "دریافت طرح‌ها ناموفق بود.";
-            form.querySelector('[type="submit"]').disabled = true;
+            page._planSettings = []; page.querySelector("[data-plan-list]").replaceChildren();
+            page.querySelector("[data-plan-count]").textContent = "";
+            const pager = page.querySelector("[data-plan-pagination]"); if (pager) pager.hidden = true;
+            form.elements.id.replaceChildren(new Option("انتخاب طرح", "")); showPlanSettings(page);
         }
+    }
+    function renderPlanRows(page) {
+        const form = page.querySelector("[data-plan-settings]"), plans = page._planSettings || [];
+        const pages = Math.max(1, Math.ceil(plans.length / pageSize));
+        page._planPage = Math.min(pages, Math.max(1, page._planPage || 1));
+        const list = page.querySelector("[data-plan-list]");
+        list.replaceChildren(...plans.slice((page._planPage - 1) * pageSize, page._planPage * pageSize).map(plan => {
+                const row = document.createElement("tr");
+                const utcDate = value => value ? `${new Date(value).toISOString().slice(0, 16).replace("T", " ")}` : "بدون محدودیت";
+                row.append(cell(plan.displayName), cell(plan.code), cell(plan.planType || "—"), cell(utcDate(plan.startsAtUtc)), cell(utcDate(plan.endsAtUtc)));
+                const status = document.createElement("span"); status.className = "admin-sales-plans__badge";
+                status.dataset.active = String(plan.isActive);
+                status.textContent = plan.isRegular ? "فروش عادی" : plan.isActive ? "منتشرشده" : "غیرفعال / پیش‌نویس";
+                const statusCell = document.createElement("td"); statusCell.append(status); row.append(statusCell);
+                const action = document.createElement("td");
+                if (!plan.isRegular) {
+                    const button = document.createElement("button");
+                    button.type = "button"; button.className = "btn btn-default btn-sm"; button.textContent = "ویرایش";
+                    button.setAttribute("aria-label", `ویرایش ${plan.displayName}`);
+                    button.addEventListener("click", () => { form.elements.id.value = String(plan.id); showPlanSettings(page); window.bootstrap?.Modal?.getOrCreateInstance(page.querySelector("#plan-settings-modal")).show(); });
+                    action.append(button);
+                }
+                row.append(action);
+                return row;
+            }));
+        ui.renderNumberedPagination(page.querySelector("[data-plan-pagination]"), page._planPage, pages,
+            target => { page._planPage = target; renderPlanRows(page); }, "صفحه‌بندی طرح‌های فروش");
     }
     function showPlanSettings(page) {
         const form = page.querySelector("[data-plan-settings]");
         const plan = page._planSettings?.find(item => String(item.id) === form.elements.id.value);
+        form.querySelector("[data-plan-fields]").disabled = !plan;
+        form.querySelector("[data-plan-selection]").textContent = plan ? `طرح انتخاب‌شده: ${plan.displayName} (${plan.code})${plan.isRegular ? " — تنظیمات طرح عادی محدود است." : ""}` : "از فهرست بالا یک طرح انتخاب کنید.";
         const publication = form.querySelector("[data-plan-publication]");
         if (publication) {
             publication.hidden = !plan;
@@ -339,27 +374,27 @@
         const planForm = page.querySelector("[data-plan-settings]");
         if (planForm) {
             const refreshPlans = selected => loadPlanSettings(page, selected);
-            bindFilter(page.querySelector("[data-plan-filter]"), () => void refreshPlans());
+            bindFilter(page.querySelector("[data-plan-filter]"), () => { page._planPage = 1; void refreshPlans(); });
             page.querySelector("[data-plan-create]").addEventListener("submit", async event => {
                 event.preventDefault(); const form = event.currentTarget, button = form.querySelector('[type="submit"]'); button.disabled = true;
-                try { const result = await request(page, `${page.dataset.api}/plans`, "POST", Object.fromEntries(new FormData(form))); ui.notify(result.message, "success"); form.reset(); await refreshPlans(String(result.id)); }
+                try { const result = await request(page, `${page.dataset.api}/plans`, "POST", Object.fromEntries(new FormData(form))); ui.notify(result.message, "success"); form.reset(); const filter = page.querySelector("[data-plan-filter]"); filter._skipResetReload = true; filter.reset(); filter._skipResetReload = false; await refreshPlans(String(result.id)); const createModal = page.querySelector("#plan-create-modal"); const modal = createModal && window.bootstrap?.Modal?.getInstance(createModal); if (modal) { createModal.addEventListener("hidden.bs.modal", () => { if (planForm.elements.id.value) window.bootstrap?.Modal?.getOrCreateInstance(page.querySelector("#plan-settings-modal")).show(); }, { once: true }); modal.hide(); } }
                 catch (error) { ui.notify(error.message || "ساخت طرح ناموفق بود.", "danger"); } finally { button.disabled = false; }
             });
             planForm.elements.id.addEventListener("change", () => showPlanSettings(page));
             planForm.querySelector("[data-plan-details-save]").addEventListener("click", async event => {
                 const button = event.currentTarget, id = planForm.elements.id.value; button.disabled = true;
                 try { const result = await request(page, `${page.dataset.api}/plans/${encodeURIComponent(id)}/details`, "PUT", { code: planForm.elements.code.value, displayName: planForm.elements.displayName.value, planType: planForm.elements.planType.value }); ui.notify(result.message, "success"); await refreshPlans(id); }
-                catch (error) { ui.notify(error.message || "ذخیرهٔ مشخصات ناموفق بود.", "danger"); } finally { button.disabled = false; }
+                catch (error) { ui.notify(error.message || "ذخیرهٔ مشخصات ناموفق بود.", "danger"); button.disabled = false; }
             });
             for (const [selector, active] of [["[data-plan-publish]", true], ["[data-plan-unpublish]", false]]) planForm.querySelector(selector).addEventListener("click", async event => {
                 const button = event.currentTarget, id = planForm.elements.id.value; button.disabled = true;
                 try { const result = await request(page, `${page.dataset.api}/plans/${encodeURIComponent(id)}/publication`, "PUT", { isActive: active }); ui.notify(result.message, "success"); await refreshPlans(id); }
-                catch (error) { ui.notify(error.message || "تغییر وضعیت طرح ناموفق بود.", "danger"); } finally { button.disabled = false; }
+                catch (error) { ui.notify(error.message || "تغییر وضعیت طرح ناموفق بود.", "danger"); button.disabled = false; }
             });
             planForm.querySelector("[data-plan-delete]").addEventListener("click", async event => {
                 const button = event.currentTarget, id = planForm.elements.id.value; if (!id) return; button.disabled = true;
-                try { const result = await request(page, `${page.dataset.api}/plans/${encodeURIComponent(id)}`, "DELETE"); ui.notify(result.message, "success"); await refreshPlans(); }
-                catch (error) { ui.notify(error.message || "حذف طرح ناموفق بود.", "danger"); } finally { button.disabled = false; }
+                try { const result = await request(page, `${page.dataset.api}/plans/${encodeURIComponent(id)}`, "DELETE"); ui.notify(result.message, "success"); window.bootstrap?.Modal?.getInstance(page.querySelector("#plan-settings-modal"))?.hide(); await refreshPlans(); }
+                catch (error) { ui.notify(error.message || "حذف طرح ناموفق بود.", "danger"); button.disabled = false; }
             });
             planForm.addEventListener("submit", async event => {
                 event.preventDefault();

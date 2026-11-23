@@ -402,11 +402,18 @@ window.HNUI.ready(() => window.HNUI.mount("checkout", document, () => {
                     const unitPrice = document.createElement("p");
                     unitPrice.className = "cart-product-unit-price";
                     const unitLabel = document.createElement("span");
-                    unitLabel.textContent = item.variantName ? `تنوع: ${item.variantName}` : "قیمت واحد";
+                    unitLabel.textContent = "مبلغ واحد";
                     const unitAmount = document.createElement("strong");
                     unitAmount.textContent = amount(item.unitAmount);
                     unitPrice.append(unitLabel, unitAmount);
-                    copy.append(name, unitPrice);
+                    copy.append(name);
+                    if (item.variantName) {
+                        const variant = document.createElement("p"); variant.className = "checkout-order-meta"; variant.textContent = `تنوع انتخاب‌شده: ${item.variantName}`; copy.append(variant);
+                    }
+                    if (item.salesPlanName || item.salesPlanId) {
+                        const plan = document.createElement("p"); plan.className = "checkout-order-meta"; plan.textContent = `طرح فروش: ${item.salesPlanName || item.salesPlanId}`; copy.append(plan);
+                    }
+                    copy.append(unitPrice);
                     identity.append(copy);
                     header.append(identity);
 
@@ -415,7 +422,7 @@ window.HNUI.ready(() => window.HNUI.mount("checkout", document, () => {
                     const lineTotal = document.createElement("p");
                     lineTotal.className = "cart-product-line-total";
                     const lineLabel = document.createElement("span");
-                    lineLabel.textContent = "جمع کالا";
+                    lineLabel.textContent = "جمع ردیف";
                     const lineAmount = document.createElement("strong");
                     lineAmount.textContent = amount(Number(item.unitAmount) * Number(item.quantity));
                     lineTotal.append(lineLabel, lineAmount);
@@ -426,33 +433,8 @@ window.HNUI.ready(() => window.HNUI.mount("checkout", document, () => {
 
                     const details = document.createElement("div");
                     details.className = "cart-product-copy cart-product-details";
-                    const accessories = (item.priceReferences || []).filter((component) => component.component === "accessory");
-                    if (accessories.length) {
-                        const options = document.createElement("div");
-                        options.className = "cart-item-options";
-                        const group = document.createElement("div");
-                        group.className = "cart-item-option-group";
-                        const label = document.createElement("strong");
-                        label.className = "cart-item-option-label";
-                        label.textContent = "متعلقات";
-                        const list = document.createElement("div");
-                        list.className = "cart-item-option-list cart-item-option-list--accessories";
-                        for (const component of accessories) {
-                            const chip = document.createElement("span");
-                            chip.className = "cart-item-option-chip cart-item-option-chip--accessory";
-                            const chipName = document.createElement("strong");
-                            chipName.className = "cart-item-option-name";
-                            chipName.textContent = component.name || "متعلقه";
-                            const chipPrice = document.createElement("span");
-                            chipPrice.className = "cart-item-option-price";
-                            chipPrice.textContent = amount(component.calculatedUnitAmount);
-                            chip.append(chipName, chipPrice);
-                            list.append(chip);
-                        }
-                        group.append(label, list);
-                        options.append(group);
-                        details.append(options);
-                    }
+                    const components = window.HNOrderPriceComponents.render(item, ui);
+                    if (components) details.append(components);
                     row.append(header, toolbar, details);
                     itemList.append(row);
                 }
@@ -465,7 +447,7 @@ window.HNUI.ready(() => window.HNUI.mount("checkout", document, () => {
                 summaryHeading.innerHTML = '<span class="cart-summary-icon"><i class="bi bi-receipt" aria-hidden="true"></i></span><h2>خلاصهٔ سفارش</h2>';
                 const summaryLines = document.createElement("div");
                 summaryLines.className = "cart-summary-lines";
-                for (const [label, value] of [["شماره سفارش", savedOrder.number], ["جمع محصولات", amount(savedOrder.subtotalAmount)], ["تخفیف", amount(savedOrder.couponDiscountAmount)], ["مبلغ قابل پرداخت", amount(savedOrder.totalAmount)]]) {
+                for (const [label, value] of [["شماره سفارش", savedOrder.number], ["جمع اقلام پس از تخفیف طرح فروش", amount(savedOrder.subtotalAmount)], ["کد تخفیف", savedOrder.couponCode || "استفاده نشده"], ["مبلغ تخفیف کد", amount(savedOrder.couponDiscountAmount)], ["مبلغ قابل پرداخت", amount(savedOrder.totalAmount)]]) {
                     const row = document.createElement("div");
                     row.className = `flow-total${label === "مبلغ قابل پرداخت" ? " flow-payable" : ""}`;
                     const title = document.createElement("span"); title.textContent = label;
@@ -473,6 +455,14 @@ window.HNUI.ready(() => window.HNUI.mount("checkout", document, () => {
                     row.append(title, valueNode); summaryLines.append(row);
                 }
                 summary.append(summaryHeading, summaryLines);
+                const lineAmounts = (savedOrder.items || []).map(item => Number(item.unitAmount) * Number(item.quantity));
+                const itemSubtotal = lineAmounts.reduce((sum, value) => sum + value, 0);
+                const recordedSubtotal = Number(savedOrder.subtotalAmount);
+                if (lineAmounts.length && lineAmounts.every(Number.isSafeInteger) && Number.isSafeInteger(itemSubtotal) && Number.isSafeInteger(recordedSubtotal) && itemSubtotal !== recordedSubtotal) {
+                    const warning = document.createElement("p"); warning.className = "invoice-demo-note";
+                    warning.textContent = "جمع جزئیات این سفارش با مبلغ ثبت‌شده اختلاف دارد. برای بررسی با پشتیبانی تماس بگیرید.";
+                    summary.append(warning);
+                }
                 let address = null;
                 try { address = JSON.parse(savedOrder.addressSnapshotJson || "null"); } catch { /* Older orders may not have a readable snapshot. */ }
                 checkoutPreview.replaceChildren();

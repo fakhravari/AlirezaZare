@@ -3,7 +3,7 @@ using Shop.Data.Application.Warehouse.Contracts;
 using Shop.Data.Domain.Warehouse.Entities;
 using Shop.Data.Infrastructure.Persistence;
 
-namespace Shop.Data.Infrastructure.Stock;
+namespace Shop.Data.Infrastructure.Warehouse;
 
 public sealed class WarehouseStockLedger(ShopDbContext db) : IWarehouseStockLedger
 {

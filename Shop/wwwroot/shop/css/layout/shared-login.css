@@ -155,6 +155,10 @@
   color: var(--color-navy);
   transform: scale(1.06);
 }
+.login-modal .login-input:has(input.is-invalid) {
+  border-color: var(--industrial-danger);
+  box-shadow: 0 0 0 2px rgba(185, 73, 73, 0.055);
+}
 .shared-login-modal .login-input input:focus,
 .shared-login-modal .login-input input:focus-visible,
 .login-modal .login-input input:focus,
