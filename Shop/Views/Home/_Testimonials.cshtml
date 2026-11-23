@@ -73,8 +73,8 @@
                                 }
                             </span>
                             <div>
-                                <strong>@review.DisplayName</strong>
-                                <small>خریدار @review.ProductName</small>
+                                <strong>@review.DisplayName @if (review.IsSample) { <span>(نمونه)</span> }</strong>
+                                <small>@(review.IsSample ? "محصول" : "خریدار") @review.ProductName</small>
                             </div>
                         </div>
                     </article>

@@ -1,6 +1,7 @@
 using FluentFTP;
 using ImageMagick;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Shop.Data.Application.Store;
 using Shop.Data.Application.Store.Contracts;
@@ -21,12 +22,8 @@ public sealed class StoreHomeTestimonialsAdminApiController(
     ILogger<StoreHomeTestimonialsAdminApiController> logger) : ControllerBase
 {
     [HttpGet]
-    public async Task<IActionResult> List([FromQuery] string? search, [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 25, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> List(CancellationToken cancellationToken = default)
     {
-        if (!AdminListQuery.TryCreate(page, pageSize, search, out AdminPageRequest paging))
-            return ValidationProblem(detail: "جست‌وجو یا صفحه‌بندی معتبر نیست.", statusCode: 400);
-
         var query = from feedback in db.ProductFeedback.AsNoTracking()
                     join product in db.Products.AsNoTracking() on feedback.IdProduct equals product.Id
                     join featured in db.StoreHomeTestimonials.AsNoTracking() on feedback.Id equals featured.IdProductFeedback into featuredRows
@@ -35,9 +32,11 @@ public sealed class StoreHomeTestimonialsAdminApiController(
                     select new
                     {
                         feedback.Id,
+                        feedback.IdProduct,
                         feedback.DisplayName,
                         feedback.FeedbackText,
                         feedback.Rating,
+                        feedback.IsSample,
                         feedback.CreatedAtUtc,
                         ProductName = product.Name,
                         ProductKey = product.ProductKey,
@@ -45,23 +44,68 @@ public sealed class StoreHomeTestimonialsAdminApiController(
                         SortOrder = featured == null ? 0 : featured.SortOrder,
                         ImagePath = featured == null ? null : featured.ImagePath
                     };
-        if (paging.Search.Length > 0)
-        {
-            string term = paging.Search;
-            query = query.Where(x => x.DisplayName.Contains(term) || x.FeedbackText.Contains(term) || x.ProductName.Contains(term) || x.ProductKey.Contains(term));
-        }
-
-        int total = await query.CountAsync(cancellationToken);
-        var items = await query.OrderByDescending(x => x.IsActive).ThenBy(x => x.SortOrder).ThenByDescending(x => x.CreatedAtUtc).ThenByDescending(x => x.Id).Skip(paging.Offset).Take(paging.PageSize).ToListAsync(cancellationToken);
+        var items = await query.OrderByDescending(x => x.IsActive).ThenBy(x => x.SortOrder).ThenByDescending(x => x.CreatedAtUtc).ThenByDescending(x => x.Id).ToListAsync(cancellationToken);
         string cdnBaseUrl = await mediaCdn.GetBaseUrlAsync(cancellationToken);
         var result = items.Select(item => new
         {
-            item.Id, item.DisplayName, item.FeedbackText, item.Rating, item.CreatedAtUtc,
+            item.Id, item.IdProduct, item.DisplayName, item.FeedbackText, item.Rating, item.IsSample, item.CreatedAtUtc,
             item.ProductName, item.ProductKey, item.IsActive, item.SortOrder, item.ImagePath,
             ImageUrl = string.IsNullOrWhiteSpace(item.ImagePath) ? null : ContentCdn.ToUrl(item.ImagePath, cdnBaseUrl)
         }).ToArray();
 
-        return Ok(AdminListQuery.CreateResult(result, total, paging));
+        return Ok(new { items = result });
+    }
+
+    [HttpGet("products")]
+    [Authorize(Roles = "system.full-access")]
+    public async Task<IActionResult> Products(CancellationToken cancellationToken) => Ok(await db.Products.AsNoTracking()
+        .OrderBy(x => x.Name).ThenBy(x => x.Id)
+        .Select(x => new { x.Id, x.Name, x.ProductKey, x.IsStoreEnabled }).ToListAsync(cancellationToken));
+
+    [HttpPost]
+    [Authorize(Roles = "system.full-access")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Create([FromBody] HomeTestimonialReviewInput input, CancellationToken cancellationToken)
+    {
+        var error = await ValidateReviewAsync(input, cancellationToken);
+        if (error is not null) return BadRequest(new { title = error });
+        var feedback = new ProductFeedback { IdProduct = input.ProductId, FeedbackType = "reviews", DisplayName = input.DisplayName.Trim(),
+            FeedbackText = input.FeedbackText.Trim(), Rating = (byte)input.Rating, IsSample = true, Status = "approved", CreatedAtUtc = DateTime.UtcNow };
+        db.ProductFeedback.Add(feedback);
+        db.StoreHomeTestimonials.Add(new StoreHomeTestimonial { Feedback = feedback, IsActive = input.IsActive, SortOrder = input.SortOrder, UpdatedAtUtc = DateTime.UtcNow });
+        await db.SaveChangesAsync(cancellationToken);
+        return Ok(new { message = "دیدگاه نمونه ثبت شد." });
+    }
+
+    [HttpPut("{id:long}/review")]
+    [Authorize(Roles = "system.full-access")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> EditReview(long id, [FromBody] HomeTestimonialReviewInput input, CancellationToken cancellationToken)
+    {
+        var error = await ValidateReviewAsync(input, cancellationToken);
+        if (error is not null) return BadRequest(new { title = error });
+        var feedback = await db.ProductFeedback.SingleOrDefaultAsync(x => x.Id == id && x.FeedbackType == "reviews" && x.Status == "approved", cancellationToken);
+        if (feedback is null) return NotFound();
+        feedback.IdProduct = input.ProductId;
+        feedback.DisplayName = input.DisplayName.Trim();
+        feedback.FeedbackText = input.FeedbackText.Trim();
+        feedback.Rating = (byte)input.Rating;
+        var item = await db.StoreHomeTestimonials.SingleOrDefaultAsync(x => x.IdProductFeedback == id, cancellationToken);
+        if (item is null) { item = new StoreHomeTestimonial { IdProductFeedback = id }; db.StoreHomeTestimonials.Add(item); }
+        item.IsActive = input.IsActive;
+        item.SortOrder = input.SortOrder;
+        item.UpdatedAtUtc = DateTime.UtcNow;
+        await db.SaveChangesAsync(cancellationToken);
+        return Ok(new { message = "دیدگاه و تنظیمات نمایش ذخیره شد." });
+    }
+
+    private async Task<string?> ValidateReviewAsync(HomeTestimonialReviewInput input, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(input.DisplayName) || input.DisplayName.Trim().Length > 80 ||
+            string.IsNullOrWhiteSpace(input.FeedbackText) || input.FeedbackText.Trim().Length > 800 ||
+            input.Rating is < 1 or > 5 || input.SortOrder is < 0 or > 9999)
+            return "نام، متن، امتیاز یا ترتیب معتبر نیست.";
+        return await db.Products.AnyAsync(x => x.Id == input.ProductId, cancellationToken) ? null : "کالا پیدا نشد.";
     }
 
     [HttpPut("{id:long}")]
@@ -208,3 +252,4 @@ public sealed class StoreHomeTestimonialsAdminApiController(
 }
 
 public sealed record HomeTestimonialInput(bool IsActive, int SortOrder);
+public sealed record HomeTestimonialReviewInput(long ProductId, string DisplayName, string FeedbackText, int Rating, bool IsActive, int SortOrder);

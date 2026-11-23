@@ -3,14 +3,15 @@
 
     const ui = window.AdminUI;
     const initialized = new WeakSet();
-    const pageSize = 25;
 
     function initialize(root) {
         const page = root.querySelector?.("[data-admin-home-testimonials]");
         if (!page || initialized.has(page) || !ui) return;
         initialized.add(page);
-        let pageNumber = 1;
         let requestId = 0;
+        let editingId = null;
+        const editor = page.querySelector("[data-home-testimonial-editor]");
+        let productsReady = Promise.resolve();
         const token = () => page.querySelector('[name="__RequestVerificationToken"]')?.value || "";
         const endpoint = page.dataset.api;
         const status = (message, error = false) => {
@@ -44,7 +45,7 @@
                 row.append(imageCell);
 
                 const reviewCell = document.createElement("td");
-                const name = document.createElement("strong"); name.textContent = `${item.displayName} · ${new Intl.NumberFormat("fa-IR").format(item.rating || 0)} از ۵`;
+                const name = document.createElement("strong"); name.textContent = `${item.displayName} · ${new Intl.NumberFormat("fa-IR").format(item.rating || 0)} از ۵${item.isSample ? " · نمونه" : ""}`;
                 const text = document.createElement("p"); text.className = "small text-muted mb-0 home-testimonial-text"; text.textContent = item.feedbackText;
                 reviewCell.append(name, text); row.append(reviewCell);
                 row.append(cell(`${item.productName} (${item.productKey})`));
@@ -73,6 +74,23 @@
                     } catch (error) { ui.notify(error.message || "ذخیره تنظیمات دیدگاه انجام نشد.", "danger"); save.disabled = false; }
                 });
                 actions.append(upload, uploadButton);
+                if (editor) {
+                    const edit = button("ویرایش", "btn btn-sm btn-default");
+                    edit.addEventListener("click", async () => {
+                        try { await productsReady; } catch { return; }
+                        editingId = item.id;
+                        editor.elements.productId.value = String(item.idProduct);
+                        editor.elements.displayName.value = item.displayName;
+                        editor.elements.feedbackText.value = item.feedbackText;
+                        editor.elements.rating.value = String(item.rating || 1);
+                        editor.elements.sortOrder.value = String(item.sortOrder || 0);
+                        editor.elements.isActive.checked = item.isActive;
+                        editor.querySelector("[data-home-testimonial-submit]").textContent = "ذخیره ویرایش";
+                        editor.scrollIntoView({ behavior: "smooth", block: "start" });
+                        editor.elements.productId.focus();
+                    });
+                    actions.append(edit);
+                }
                 if (item.imageUrl) {
                     const remove = button("حذف تصویر", "btn btn-sm btn-danger");
                     remove.dataset.adminConfirm = "تصویر این دیدگاه از FTP حذف شود؟";
@@ -91,22 +109,43 @@
 
         async function load() {
             const current = ++requestId;
-            const query = new URLSearchParams(new FormData(page.querySelector("[data-home-testimonial-filter]")));
-            query.set("page", String(pageNumber)); query.set("pageSize", String(pageSize)); query.set("feature", "testimonials");
             status("در حال دریافت دیدگاه‌ها…");
             try {
-                const result = await request(`${endpoint.split("?")[0]}?${query}`);
+                const result = await request(endpoint);
                 if (current !== requestId) return;
                 render(result.items || []);
                 status(result.items?.length ? "" : "دیدگاه تأییدشده‌ای پیدا نشد.");
-                ui.renderNumberedPagination(page.querySelector("[data-home-testimonial-pagination]"), pageNumber,
-                    Math.ceil((result.total || 0) / (result.pageSize || pageSize)), target => { pageNumber = target; void load(); }, "صفحه‌بندی دیدگاه‌های صفحهٔ نخست");
             } catch (error) { if (current === requestId) status(error.message || "دریافت دیدگاه‌ها ناموفق بود.", true); }
         }
 
-        const filter = page.querySelector("[data-home-testimonial-filter]");
-        filter.addEventListener("submit", event => { event.preventDefault(); pageNumber = 1; void load(); });
-        filter.addEventListener("reset", () => { pageNumber = 1; setTimeout(load, 0); });
+        if (editor) {
+            const submit = editor.querySelector("[data-home-testimonial-submit]");
+            submit.disabled = true;
+            productsReady = request(`${endpoint.split("?")[0]}/products?feature=testimonials`).then(products => {
+                for (const product of products) {
+                    const option = document.createElement("option"); option.value = String(product.id);
+                    option.textContent = `${product.name} (${product.productKey})${product.isStoreEnabled ? "" : " - غیرفعال در فروشگاه"}`;
+                    editor.elements.productId.append(option);
+                }
+                submit.disabled = false;
+            }).catch(error => { ui.notify(error.message || "دریافت محصولات ناموفق بود.", "danger"); throw error; });
+            productsReady.catch(() => {});
+            editor.addEventListener("reset", () => { editingId = null; editor.querySelector("[data-home-testimonial-submit]").textContent = "افزودن دیدگاه"; });
+            editor.addEventListener("submit", async event => {
+                event.preventDefault();
+                const submit = editor.querySelector("[data-home-testimonial-submit]");
+                submit.disabled = true;
+                const payload = { productId: Number(editor.elements.productId.value), displayName: editor.elements.displayName.value,
+                    feedbackText: editor.elements.feedbackText.value, rating: Number(editor.elements.rating.value),
+                    sortOrder: Number(editor.elements.sortOrder.value), isActive: editor.elements.isActive.checked };
+                try {
+                    const url = editingId === null ? endpoint : `${endpoint.split("?")[0]}/${editingId}/review?feature=testimonials`;
+                    const result = await request(url, editingId === null ? "POST" : "PUT", JSON.stringify(payload), { "Content-Type": "application/json" });
+                    ui.notify(result.message, "success"); editor.reset(); await load();
+                } catch (error) { ui.notify(error.message || "ذخیره دیدگاه ناموفق بود.", "danger"); }
+                finally { submit.disabled = false; }
+            });
+        }
         void load();
     }
 

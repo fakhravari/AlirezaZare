@@ -36,17 +36,18 @@ public sealed class HomeController : PageController
         var magazine = await _magazine.ReadIndexAsync(HttpContext.RequestAborted);
         ViewData["HomeBrands"] = (await _catalog.ReadAsync(HttpContext.RequestAborted)).Brands;
         var approvedReviews = _db.ProductFeedback.AsNoTracking().Where(x => x.FeedbackType == "reviews" && x.Status == "approved");
-        int reviewCount = await approvedReviews.CountAsync(HttpContext.RequestAborted);
-        double reviewAverage = reviewCount == 0 ? 0 : await approvedReviews.AverageAsync(x => (double?)(x.Rating ?? 0), HttpContext.RequestAborted) ?? 0;
+        var customerReviews = approvedReviews.Where(x => !x.IsSample);
+        int reviewCount = await customerReviews.CountAsync(HttpContext.RequestAborted);
+        double reviewAverage = reviewCount == 0 ? 0 : await customerReviews.AverageAsync(x => (double?)(x.Rating ?? 0), HttpContext.RequestAborted) ?? 0;
         var reviewItems = await (from featured in _db.StoreHomeTestimonials.AsNoTracking()
             join feedback in approvedReviews on featured.IdProductFeedback equals feedback.Id
             where featured.IsActive
             orderby featured.SortOrder, feedback.CreatedAtUtc descending, feedback.Id descending
-            select new { feedback.DisplayName, ProductName = feedback.Product.Name, feedback.FeedbackText,
+            select new { feedback.DisplayName, ProductName = feedback.Product.Name, feedback.FeedbackText, feedback.IsSample,
                 Rating = feedback.Rating ?? 0, feedback.CreatedAtUtc, featured.ImagePath }).ToListAsync(HttpContext.RequestAborted);
         string cdnBaseUrl = await _mediaCdn.GetBaseUrlAsync(HttpContext.RequestAborted);
         var reviews = reviewItems.Select(x => new HomeReviewCard(x.DisplayName, x.ProductName, x.FeedbackText,
-            x.Rating, x.CreatedAtUtc, string.IsNullOrWhiteSpace(x.ImagePath) ? null : ContentCdn.ToUrl(x.ImagePath, cdnBaseUrl))).ToArray();
+            x.Rating, x.CreatedAtUtc, string.IsNullOrWhiteSpace(x.ImagePath) ? null : ContentCdn.ToUrl(x.ImagePath, cdnBaseUrl), x.IsSample)).ToArray();
         ViewData["HomeSliders"] = await _db.StoreSliders.AsNoTracking().Where(x => x.ShowOnMobile || x.ShowOnDesktop).OrderBy(x => x.Id).ToListAsync(HttpContext.RequestAborted);
         ViewData["HomeReviews"] = reviews;
         ViewData["HomeReviewAverage"] = Math.Round(reviewAverage, 1);
@@ -56,4 +57,4 @@ public sealed class HomeController : PageController
     }
 }
 
-public sealed record HomeReviewCard(string DisplayName, string ProductName, string Text, int Rating, DateTime CreatedAtUtc, string? ImageUrl);
+public sealed record HomeReviewCard(string DisplayName, string ProductName, string Text, int Rating, DateTime CreatedAtUtc, string? ImageUrl, bool IsSample);
