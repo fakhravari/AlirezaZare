@@ -7,6 +7,9 @@
 		<UserSecretsId>AlirezaZare-Shop-Admin-Local</UserSecretsId>
 	</PropertyGroup>
 	<ItemGroup>
+		<Content Remove="wwwroot\color_admin\**" />
+	</ItemGroup>
+	<ItemGroup>
 		<ProjectReference Include="..\Data\Data.csproj" />
 		<PackageReference Include="Magick.NET-Q8-AnyCPU" />
 	</ItemGroup>
