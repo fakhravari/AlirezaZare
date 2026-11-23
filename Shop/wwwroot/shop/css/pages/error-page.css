@@ -1,0 +1,88 @@
+.error-page {
+    background: #f5f7f9;
+    padding: clamp(3rem, 7vw, 6rem) 0;
+}
+
+.error-page-card {
+    max-width: 660px;
+    margin: auto;
+    padding: clamp(2rem, 5vw, 3.5rem);
+    border: 1px solid #e2e8ee;
+    border-radius: 22px;
+    background: #fff;
+    box-shadow: 0 16px 45px rgb(16 42 65 / 7%);
+    text-align: center;
+}
+
+.error-page-icon {
+    display: grid;
+    place-items: center;
+    width: 76px;
+    height: 76px;
+    margin: 0 auto 1.4rem;
+    border-radius: 22px;
+    background: #fff5cf;
+    color: #a57900;
+    font-size: 2rem;
+}
+
+.error-page-label {
+    display: inline-block;
+    padding: .4rem .85rem;
+    border-radius: 99px;
+    background: #f4f7f9;
+    color: #52697c;
+    font-size: .82rem;
+    font-weight: 700;
+}
+
+.error-page-card h1 {
+    margin: 1.2rem 0 .8rem;
+    color: #102c46;
+    font-size: clamp(1.45rem, 3vw, 2rem);
+    font-weight: 800;
+    line-height: 1.6;
+}
+
+.error-page-card p {
+    margin: 0 auto;
+    color: #5b6f80;
+    line-height: 2;
+}
+
+.error-page-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: .75rem;
+    margin-top: 2rem;
+}
+
+.error-page-actions a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    min-height: 48px;
+    padding: .7rem 1.25rem;
+    border: 1px solid #d7e0e7;
+    border-radius: 11px;
+    color: #173a58;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.error-page-actions .error-page-home {
+    border-color: #ffca16;
+    background: #ffca16;
+    color: #102c46;
+}
+
+.error-page-actions a:hover {
+    filter: brightness(.95);
+}
+
+.error-page-actions a:focus-visible {
+    outline: 3px solid #2470a0;
+    outline-offset: 3px;
+}

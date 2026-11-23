@@ -1,5 +1,28 @@
 @model PageModel
-<main class="container py-5">
-    <h1>@Model.Seo.Title</h1>
-    <p>@Model.Seo.Description</p><a asp-controller="Home" asp-action="Index">بازگشت به صفحه اصلی</a>
+@using Microsoft.AspNetCore.Diagnostics
+@{
+    var isNotFound = Context.Response.StatusCode == 404;
+    var originalPath = Context.Features.Get<IExceptionHandlerPathFeature>()?.Path
+        ?? Context.Features.Get<IStatusCodeReExecuteFeature>()?.OriginalPath;
+    var retryPath = Url.IsLocalUrl(originalPath) ? originalPath : null;
+}
+<main class="error-page">
+    <div class="container">
+        <section class="error-page-card" aria-labelledby="error-page-title">
+            <div class="error-page-icon" aria-hidden="true"><i class="bi @(isNotFound ? "bi-search" : "bi-exclamation-triangle")"></i></div>
+            <span class="error-page-label">@(isNotFound ? "صفحه پیدا نشد" : "خطا در پردازش درخواست")</span>
+            <h1 id="error-page-title">@(isNotFound ? "صفحه‌ای که دنبالش بودید پیدا نشد" : "متأسفانه مشکلی پیش آمد")</h1>
+            <p>@Model.Seo.Description</p>
+            <div class="error-page-actions">
+                <a class="error-page-home" asp-controller="Home" asp-action="Index"><i class="bi bi-house-door" aria-hidden="true"></i> بازگشت به صفحه اصلی</a>
+                @if (retryPath is not null && !isNotFound)
+                {
+                    <a class="error-page-retry" href="@retryPath"><i class="bi bi-arrow-clockwise" aria-hidden="true"></i> تلاش دوباره</a>
+                }
+            </div>
+        </section>
+    </div>
 </main>
+@section Styles {
+    <link rel="stylesheet" href="~/shop/css/pages/error-page.css" asp-append-version="true" />
+}

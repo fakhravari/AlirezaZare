@@ -797,6 +797,9 @@
         "error-page": {
           "markup": [
             "Shop/Views/Error/Index.cshtml"
+          ],
+          "css": [
+            "Shop/wwwroot/shop/css/pages/error-page.css"
           ]
         },
         "purchase-benefits": {

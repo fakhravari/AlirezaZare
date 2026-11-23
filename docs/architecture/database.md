@@ -1,6 +1,6 @@
 # مدل و زیرساخت پایگاه داده
 
-Migration `167-coupon-profile-assignment.sql` ستون nullable به نام `Store.Coupon.IdProfile`، کلید خارجی به `Account.Profile` و نمایهٔ آن را اضافه می‌کند؛ مقدار null کوپن عمومی و شناسهٔ پروفایل کوپن اختصاصی است و کوپن‌های موجود عمومی می‌مانند. این migration در checkout موجود است اما اجرای آن در محیط مقصد تأیید نشده است؛ برنامهٔ جدید به این ستون نیاز دارد.
+Migration `167-coupon-profile-assignment.sql` ستون nullable به نام `Store.Coupon.IdProfile`، کلید خارجی به `Account.Profile` و نمایهٔ آن را اضافه می‌کند؛ مقدار null کوپن عمومی و شناسهٔ پروفایل کوپن اختصاصی است. این migration در ۲۳ نوامبر ۲۰۲۶ روی پایگاه `bsshopir_fakhravari` اجرا شد؛ marker، ستون، کلید خارجی فعال و trusted و نمایه تأیید شدند و هر ۱۲ کوپن موجود عمومی ماندند. پیش از اجرا پشتیبان COPY_ONLY با checksum در مسیر سرور `C:\Program Files\Microsoft SQL Server\MSSQL16.SQLSERVER2022\MSSQL\Backup\bsshopir-before-coupon-167-20261123-230010.bak` ساخته شد؛ `RESTORE VERIFYONLY` به‌دلیل نبود مجوز CREATE DATABASE اجرا نشد و بازیابی آن بررسی نشده است.
 
 همهٔ migrationهای ۱۵۴ تا ۱۶۶ در ۲۳ نوامبر ۲۰۲۶ روی پایگاه اصلی ثبت شدند. پیش از اجرای migrationهای باقی‌مانده، پشتیبان COPY_ONLY با checksum در مسیر سرور `C:\Program Files\Microsoft SQL Server\MSSQL16.SQLSERVER2022\MSSQL\Backup\bsshopir-before-remaining-migrations-20261123-115441.bak` گرفته شد؛ بازیابی آن تأیید نشده است. استقرار برنامه در این نوبت انجام نشد و نسخهٔ نصب‌شده ممکن است با ساختار جدید ناسازگار باشد.
 

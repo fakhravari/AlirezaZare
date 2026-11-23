@@ -86,7 +86,10 @@
                 <i class="bi bi-ticket-perforated"></i>
                 <span>
                     <strong>کدهای تخفیف</strong>
-                    <b class="account-tab-badge" data-account-count="coupons" aria-label="تعداد کدهای تخفیف فعال">۰</b>
+                    @if (profileSection != "orders")
+                    {
+                        <b class="account-tab-badge" data-account-count="coupons" aria-label="تعداد کدهای تخفیف فعال">۰</b>
+                    }
                 </span><i class="bi bi-chevron-left"></i>
             </a>
             <a class="account-tab-pricealerts" asp-controller="Profile" asp-action="PriceAlerts" aria-current="@(profileSection == "pricealerts" ? "page" : null)">
