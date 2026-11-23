@@ -17,6 +17,10 @@ namespace Shop.Admin.Areas.Store.Controllers.Api;
 [Route("api/admin/store/orders")]
 public sealed class StoreOrdersAdminApiController(ShopDbContext db) : ControllerBase
 {
+    [HttpGet("statuses")]
+    public async Task<IActionResult> Statuses(CancellationToken cancellationToken) =>
+        Ok(await db.OrderStatuses.AsNoTracking().OrderBy(x => x.Code).Select(x => new { x.Id, x.Code, x.NameFa, x.NameEn }).ToListAsync(cancellationToken));
+
     [HttpPut("{id:long}/tracking")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> UpdateTracking(long id, [FromBody] TrackingInput input, CancellationToken cancellationToken)
@@ -31,9 +35,9 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
         if (actor.Length > 256) return BadRequest(new { title = "شناسهٔ مدیر نامعتبر است." });
 
         await using var transaction = await db.Database.BeginTransactionAsync(cancellationToken);
-        var order = await db.StoreCustomerOrders.SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
-        if (order is null || order.Status is not ("warehouse-confirmed" or "in-transit" or "shipped-to-post" or "delivered") ||
-            order.IdWarehouseDocument is null || (order.PaymentMethod == "demo" && order.ExternalOrderKey?.StartsWith("demo-order-") == true) ||
+        var order = await db.StoreCustomerOrders.Include(x => x.StatusReference).SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
+        if (order is null || order.StatusReference.Code is not ("warehouse-confirmed" or "in-transit" or "shipped-to-post" or "delivered") ||
+            order.IdWarehouseDocument is null ||
             !await db.StorePaymentAttempts.AnyAsync(p => p.IdOrder == id && p.Status == "verified" && p.Amount == order.TotalAmount, cancellationToken) ||
             order.ShippingCarrier != input.ExpectedCarrier || order.ShippingTrackingCode != input.ExpectedTrackingCode)
             return Conflict(new { title = "اطلاعات سفارش تغییر کرده یا سفارش شرایط ثبت رهگیری را ندارد." });
@@ -67,25 +71,15 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
               (input.ExpectedStatus is "in-transit" or "shipped-to-post" && input.Status == "delivered")))
             return BadRequest(new { title = "تغییر وضعیت ارسال مجاز نیست." });
 
-        string actor = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.Identity?.Name ?? "system";
-        if (actor.Length > 256) return BadRequest(new { title = "شناسهٔ مدیر نامعتبر است." });
-
         await using var transaction = await db.Database.BeginTransactionAsync(cancellationToken);
-        var order = await db.StoreCustomerOrders.SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
-        if (order is null || order.Status != input.ExpectedStatus || order.IdWarehouseDocument is null ||
-            (order.PaymentMethod == "demo" && order.ExternalOrderKey?.StartsWith("demo-order-") == true) ||
+        var order = await db.StoreCustomerOrders.Include(x => x.StatusReference).SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
+        if (order is null || order.StatusReference.Code != input.ExpectedStatus || order.IdWarehouseDocument is null ||
             !await db.StorePaymentAttempts.AnyAsync(p => p.IdOrder == id && p.Status == "verified" && p.Amount == order.TotalAmount, cancellationToken))
             return Conflict(new { title = "وضعیت سفارش تغییر کرده یا پرداخت و حوالهٔ معتبر ندارد." });
 
-        order.Status = input.Status;
-        db.StoreOrderShippingHistories.Add(new StoreOrderShippingHistory
-        {
-            IdOrder = id,
-            PreviousStatus = input.ExpectedStatus,
-            NewStatus = input.Status,
-            ActorUserKey = actor,
-            ChangedAtUtc = DateTime.UtcNow
-        });
+        var nextStatus = await db.OrderStatuses.SingleOrDefaultAsync(x => x.Code == input.Status, cancellationToken);
+        if (nextStatus is null) return BadRequest(new { title = "وضعیت سفارش در جدول مرجع پیدا نشد." });
+        order.IdStatus = nextStatus.Id;
         await db.SaveChangesAsync(cancellationToken);
 
         await transaction.CommitAsync(cancellationToken);
@@ -104,7 +98,7 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
 
         string normalizedStatus = status?.Trim() ?? "";
         if (normalizedStatus.Length > 40 || normalizedStatus.Any(char.IsControl) ||
-            normalizedStatus != "" && normalizedStatus is not ("pending-payment" or "simulated-payment-confirmed" or
+            normalizedStatus != "" && normalizedStatus is not ("pending-payment" or
                 "payment-confirmed" or "warehouse-confirmed" or "in-transit" or "shipped-to-post" or "delivered" or "cancelled"))
             return ValidationProblem(detail: "وضعیت سفارش معتبر نیست.", statusCode: 400);
 
@@ -123,22 +117,23 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
         var query = from o in db.StoreCustomerOrders.AsNoTracking()
                           join p in db.AccountProfiles.AsNoTracking() on o.IdProfile equals p.Id
                           where (q == "" || o.OrderNumber.Contains(q) || (p.FirstName + " " + p.LastName).Contains(q))
-                              && (normalizedStatus == "" || o.Status == normalizedStatus)
+                              && (normalizedStatus == "" || o.StatusReference.Code == normalizedStatus)
                               && (!fromUtc.HasValue || o.OrderedAtUtc >= fromUtc.Value)
                               && (!untilUtc.HasValue || o.OrderedAtUtc < untilUtc.Value)
                           orderby o.Id descending
                           select new OrderRow
                           {
                               Id = o.Id,
+                              IdStatus = o.IdStatus,
                               OrderNumber = o.OrderNumber,
-                              Status = o.Status,
+                              Status = o.StatusReference.Code,
+                              StatusName = o.StatusReference.NameFa,
                               PaymentMethod = o.PaymentMethod,
                               IdBank = o.IdBank,
                               BankName = o.Bank == null ? null : o.Bank.NameFa,
                               ItemCount = o.ItemCount,
                               TotalAmount = o.TotalAmount,
                               OrderedAtUtc = o.OrderedAtUtc,
-                              IsSample = o.PaymentMethod == "demo" && o.ExternalOrderKey != null && o.ExternalOrderKey.StartsWith("demo-order-"),
                               CustomerName = (p.FirstName + " " + p.LastName).Trim()
                           };
         int total = await query.CountAsync(cancellationToken);
@@ -157,8 +152,10 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
                            select new OrderDetailsRow
                            {
                                Id = o.Id,
+                               IdStatus = o.IdStatus,
                                OrderNumber = o.OrderNumber,
-                               Status = o.Status,
+                               Status = o.StatusReference.Code,
+                               StatusName = o.StatusReference.NameFa,
                                PaymentMethod = o.PaymentMethod,
                                IdBank = o.IdBank,
                                BankName = o.Bank == null ? null : o.Bank.NameFa,
@@ -167,7 +164,6 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
                                SubtotalAmount = o.SubtotalAmount,
                                CouponDiscountAmount = o.CouponDiscountAmount,
                                OrderedAtUtc = o.OrderedAtUtc,
-                               IsSample = o.PaymentMethod == "demo" && o.ExternalOrderKey != null && o.ExternalOrderKey.StartsWith("demo-order-"),
                                CustomerName = (p.FirstName + " " + p.LastName).Trim(),
                                IdWarehouseDocument = o.IdWarehouseDocument,
                                ShippingCarrier = o.ShippingCarrier,
@@ -180,7 +176,7 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
                                   join s in db.SalesPlanReferences.AsNoTracking() on i.IdSalesPlan equals s.Id
                                   join product in db.Products.AsNoTracking() on i.IdProduct equals product.Id
                                   orderby i.Id
-                                  select new { i.Id, i.IdOrder, i.IdProduct, i.IdSalesPlan, ProductName = product.Name, VariantName = db.ProductVariants.Where(v => v.Id == i.IdProductVariant).Select(v => v.VariantName.TreePathNames).FirstOrDefault(), i.Quantity, i.IdProductVariant, i.IdPriceVersion, PriceAmount = i.PriceVersion.PriceBeforeDiscountAmount, i.PriceVersion.DiscountPercent, i.PriceVersion.FinalPriceAmount, i.PriceVersion.IsActive, i.PriceVersion.CreatedAtUtc, i.PriceVersion.ChangeReason, s.StoreSalesPlanKey })
+                                  select new { i.Id, i.IdOrder, i.IdProduct, i.IdSalesPlan, ProductName = product.Name, VariantName = db.ProductVariants.Where(v => v.Id == i.IdProductVariant).Select(v => v.VariantName.TreePathNames).FirstOrDefault(), i.Quantity, i.IdProductVariant, i.IdPriceVersion, PriceAmount = i.PriceVersion.PriceBeforeDiscountAmount, i.PriceVersion.DiscountPercent, i.PriceVersion.FinalPriceAmount, i.PriceVersion.IsActive, i.PriceVersion.CreatedAtUtc, i.PriceVersion.ChangeReason, SalesPlanName = s.DisplayName })
                 .ToListAsync(cancellationToken);
             var references = await (from r in db.StoreOrderAccessories.AsNoTracking()
                                     join v in db.StorePriceVersions.AsNoTracking() on r.IdPriceVersion equals v.Id
@@ -203,9 +199,10 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
                     componentType = item.IdProductVariant.HasValue ? "تنوع" : "کالا",
                     accessoryRequirement = (string?)null,
                     componentId = item.IdProductVariant ?? item.IdProduct,
+                    priceVersionId = item.IdPriceVersion,
                     treePathNames = item.IdProductVariant.HasValue ? item.VariantName : null,
                     accessoryName = (string?)null,
-                    salesPlan = item.StoreSalesPlanKey,
+                    salesPlan = item.SalesPlanName,
                     quantity = item.Quantity,
                     baseAmount = item.PriceAmount,
                     discountPercent = item.DiscountPercent,
@@ -225,9 +222,10 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
                     componentType = "متعلقه",
                     accessoryRequirement = hasRequirement ? isRequired ? "الزامی (تعریف فعلی)" : "اختیاری (تعریف فعلی)" : null,
                     componentId = accessory.Key.IdAccessory,
+                    priceVersionId = accessoryPrice.IdPriceVersion,
                     treePathNames = (string?)null,
                     accessoryName = accessoryPrice.AccessoryName,
-                    salesPlan = matchingItems.FirstOrDefault()?.StoreSalesPlanKey,
+                    salesPlan = matchingItems.FirstOrDefault()?.SalesPlanName,
                     quantity = matchingItems.Sum(item => item.Quantity),
                     baseAmount = accessoryPrice.BaseAmount,
                     discountPercent = accessoryPrice.DiscountPercent,
@@ -242,7 +240,7 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
                 variantName = i.VariantName,
                 quantity = i.Quantity,
                 unitAmount = i.FinalPriceAmount + references.Where(r => r.IdOrder == i.IdOrder && r.IdProduct == i.IdProduct && r.IdSalesPlan == i.IdSalesPlan).Sum(r => r.PriceAmount),
-                salesPlan = i.StoreSalesPlanKey,
+                salesPlan = i.SalesPlanName,
                 options = new { accessories = references.Where(r => r.IdOrder == i.IdOrder && r.IdProduct == i.IdProduct && r.IdSalesPlan == i.IdSalesPlan).Select(r => new { id = r.IdAccessory.ToString(), selected = true }).ToArray() },
                 priceReferences = references.Where(r => r.IdOrder == i.IdOrder && r.IdProduct == i.IdProduct && r.IdSalesPlan == i.IdSalesPlan).Select(r => new
                 {
@@ -259,12 +257,8 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
             }).ToList();
             order.CalculatedItemSubtotal = items.Sum(item => item.unitAmount * item.quantity);
             order.HasItemSubtotalMismatch = items.Count > 0 && order.CalculatedItemSubtotal != order.SubtotalAmount;
-            var history = await db.StoreOrderShippingHistories.AsNoTracking().Where(x => x.IdOrder == id)
-                .OrderByDescending(x => x.Id).Select(x => new { x.PreviousStatus, x.NewStatus, x.ActorUserKey, x.ChangedAtUtc })
-                .ToListAsync(cancellationToken);
             order.ItemsJson = System.Text.Json.JsonSerializer.Serialize(items);
             order.ComponentsJson = System.Text.Json.JsonSerializer.Serialize(components);
-            order.ShippingHistoryJson = System.Text.Json.JsonSerializer.Serialize(history);
         }
 
         return order is null ? NotFound() : Ok(order);
@@ -273,8 +267,10 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
     public class OrderRow
     {
         public long Id { get; set; }
+        public int IdStatus { get; set; }
         public string OrderNumber { get; set; } = "";
         public string Status { get; set; } = "";
+        public string StatusName { get; set; } = "";
         public string PaymentMethod { get; set; } = "";
         public long IdBank { get; set; }
         public string? BankName { get; set; }
@@ -282,7 +278,6 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
         public decimal TotalAmount { get; set; }
         public DateTime OrderedAtUtc { get; set; }
         public string CustomerName { get; set; } = "";
-        public bool IsSample { get; set; }
     }
 
     public sealed class OrderDetailsRow : OrderRow
@@ -297,7 +292,6 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
         public string AddressSnapshotJson { get; set; } = "{}";
         public string ItemsJson { get; set; } = "[]";
         public string ComponentsJson { get; set; } = "[]";
-        public string ShippingHistoryJson { get; set; } = "[]";
     }
     public sealed record ShippingStatusInput(string? ExpectedStatus, string? Status);
     public sealed record TrackingInput(string? Carrier, string? TrackingCode, string? ExpectedCarrier, string? ExpectedTrackingCode);

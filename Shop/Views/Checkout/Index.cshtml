@@ -9,19 +9,13 @@
                         <i class="bi bi-house-door" aria-hidden="true"></i><span>خانه</span>
                     </a>
                 </li>
-                <li>
-                    <i class="bi bi-chevron-left" aria-hidden="true"></i>
-                    <a href="Cart">
-                        <i class="bi bi-bag" aria-hidden="true"></i><span>سبد خرید</span>
-                    </a>
-                </li>
                 <li class="cart-breadcrumb-current">
-                    <i class="bi bi-chevron-left" aria-hidden="true"></i><span aria-current="page"><i class="bi bi-receipt" aria-hidden="true"></i>ثبت فاکتور</span>
+                    <i class="bi bi-chevron-left" aria-hidden="true"></i><span aria-current="page"><i class="bi bi-receipt" aria-hidden="true"></i>پرداخت سفارش</span>
                 </li>
             </ol>
         </nav>
-        <h1>بررسی پیش‌فاکتور و ثبت نهایی</h1>
-        <p>اقلام و آدرس را بررسی کنید؛ ثبت نهایی فاکتور را ذخیره می‌کند و پرداخت فعلاً انجام نمی‌شود.</p>
+        <h1>پرداخت سفارش</h1>
+        <p>سفارش شما ثبت شده است؛ اطلاعات آن را بررسی و پرداخت کنید.</p>
         <div class="hero-trail" aria-label="مراحل سفارش">
             <span>بررسی اقلام</span>
             <span>تأیید آدرس</span>
@@ -37,7 +31,7 @@
                 <i class="bi bi-geo-alt"></i>
                 <div>
                     <h2>آدرس انتخابی</h2>
-                    <p>پیش‌نمایش اطلاعات تحویل ثبت‌شده در سبد خرید</p>
+                    <p>نشانی ثبت‌شده برای سفارش</p>
                 </div>
             </div>
             <div id="checkoutAddressPreview" class="address-preview checkout-address-preview" aria-live="polite"></div>
@@ -50,46 +44,24 @@
             </div>
             <div class="invoice-section-title invoice-products-title">
                 <i class="bi bi-bag-check"></i>
-                <h2>اقلام پیش‌فاکتور</h2>
+                <h2>اقلام سفارش</h2>
             </div>
-            <div id="invoiceItems">
-                <p class="flow-empty">هنوز کالایی در پیش‌فاکتور نیست. ابتدا محصولات را به سبد خرید اضافه کنید.</p>
+            <div id="savedOrderItems">
+                <p class="flow-empty">در حال دریافت سفارش...</p>
             </div>
-            <a class="ui-inline-action cart-continue-link" href="Cart">
-                <i class="bi bi-pencil-square" aria-hidden="true"></i>
-                <span>ویرایش سبد خرید</span>
-                <i class="bi bi-arrow-left" aria-hidden="true"></i>
-            </a>
         </section>
         <aside class="flow-card cart-summary">
-            <div id="orderSummary">
+            <div id="savedOrderSummary">
                 <div class="cart-summary-heading">
-                    <h2>خلاصهٔ پیش‌فاکتور</h2>
+                    <h2>خلاصهٔ سفارش</h2>
                 </div>
-                <p>پس از افزودن کالا، جمع قیمت محصولات اینجا نمایش داده می‌شود.</p>
+                <p>در حال دریافت مبلغ سفارش...</p>
             </div>
-            <p class="cart-shipping-note">هزینه ارسال پس از تأیید فروشگاه مشخص می‌شود.</p><button id="finalPayment" type="button" class="flow-button cart-checkout-link" disabled>ثبت نهایی و صدور فاکتور <i class="bi bi-arrow-left" aria-hidden="true"></i></button>
-            <p class="invoice-demo-note">با ثبت نهایی، فاکتور در حساب شما ذخیره می‌شود. درگاه پرداخت هنوز فعال نیست و در این مرحله وجهی دریافت نمی‌شود.</p>
+            <p class="cart-shipping-note">هزینه ارسال پس از تأیید فروشگاه مشخص می‌شود.</p><button id="finalPayment" type="button" class="flow-button cart-checkout-link" disabled>پرداخت سفارش <i class="bi bi-arrow-left" aria-hidden="true"></i></button>
+            <p class="invoice-demo-note">در صورت در دسترس نبودن درگاه، سفارش در حساب شما در انتظار پرداخت باقی می‌ماند.</p>
             <p id="paymentStatus" role="status"></p>
         </aside>
     </div>
-    <section id="orderConfirmation" class="flow-card" hidden aria-labelledby="orderConfirmationTitle" aria-live="polite">
-        <div class="invoice-section-title">
-            <i class="bi bi-receipt-cutoff" aria-hidden="true"></i>
-            <div>
-                <h2 id="orderConfirmationTitle" tabindex="-1">فاکتور سفارش ثبت شد</h2>
-                <p>پرداختی انجام نشده است؛ درگاه آنلاین هنوز فعال نیست.</p>
-            </div>
-        </div>
-        <dl class="invoice-confirmation-details">
-            <div><dt>شماره فاکتور</dt><dd><bdi id="confirmedOrderNumber" dir="ltr"></bdi></dd></div>
-            <div><dt>جمع پیش از تخفیف</dt><dd id="confirmedSubtotal"></dd></div>
-            <div id="confirmedCouponRow" hidden><dt>تخفیف <bdi id="confirmedCouponCode" dir="ltr"></bdi></dt><dd id="confirmedDiscount"></dd></div>
-            <div><dt>مبلغ نهایی فاکتور</dt><dd id="confirmedTotal"></dd></div>
-            <div><dt>وضعیت پرداخت</dt><dd>پرداخت‌نشده</dd></div>
-        </dl>
-        <a class="ui-inline-action" href="/Profile/Orders"><i class="bi bi-person-lines-fill" aria-hidden="true"></i><span>مشاهدهٔ فاکتور در سفارش‌های حساب</span></a>
-    </section>
 
 </main>
 

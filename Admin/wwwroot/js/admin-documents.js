@@ -45,6 +45,12 @@
         const result = await send(`${page.dataset.api}/lookups`);
         if (!page.isConnected) return false;
         lookups = result;
+        const filterStatus = page.querySelector('[data-document-filter] select[name="status"]');
+        const formStatus = document.querySelector('[data-document-form] select[name="status"]');
+        const selectedStatus = filterStatus.value;
+        filterStatus.replaceChildren(new Option("همهٔ وضعیت‌ها", ""), ...lookups.statuses.map(item => new Option(item.nameFa, item.code)));
+        filterStatus.value = selectedStatus;
+        formStatus.replaceChildren(...lookups.statuses.map(item => new Option(item.nameFa, item.code)));
         const filterWarehouse = page.querySelector("[data-document-warehouses]");
         const formWarehouse = document.querySelector("[data-document-warehouse]");
         filterWarehouse.replaceChildren();
@@ -112,7 +118,7 @@
             const row = document.createElement("tr");
             [format.format(item.number), ui.formatDateTime(item.date), item.type, item.warehouse, item.salesPlan, item.party].forEach(value => row.append(node("td", value)));
             const state = node("td");
-            state.append(node("span", item.status === "F" ? "قطعی" : "موقت", `badge ${item.status === "F" ? "bg-success" : "bg-warning"}`));
+            state.append(node("span", item.statusName || item.status, `badge ${item.status === "F" ? "bg-success" : "bg-warning"}`));
             row.append(state, node("td", item.affectsStock && item.status === "F" ? "دارد" : "ندارد"));
             const actions = node("td", null, "text-nowrap");
             const edit = node("button", "ویرایش", "btn btn-sm btn-default me-1");

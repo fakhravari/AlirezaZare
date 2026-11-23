@@ -1517,12 +1517,13 @@ input[type="checkbox"][data-admin-switch]:disabled { cursor: not-allowed; opacit
 
 /* Order details use a wider reading surface for the line-item and price history tables. */
 #admin-record-modal.admin-record-order .modal-dialog {
-    width: min(1240px, calc(100vw - 2rem));
-    max-width: min(1240px, calc(100vw - 2rem));
+    width: min(1600px, calc(100vw - 2rem));
+    max-width: min(1600px, calc(100vw - 2rem));
+    height: min(92dvh, 1100px);
 }
 
 #admin-record-modal.admin-record-order .modal-content {
-    max-height: min(88vh, 960px);
+    max-height: 100%;
     display: flex;
     flex-direction: column;
 }
@@ -1571,7 +1572,7 @@ input[type="checkbox"][data-admin-switch]:disabled { cursor: not-allowed; opacit
 #admin-record-modal.admin-record-order .admin-record-nested-grid { grid-template-columns: minmax(5.5rem, auto) minmax(0, 1fr); }
 
 @media (max-width: 575.98px) {
-    #admin-record-modal.admin-record-order .modal-dialog { width: calc(100vw - 1rem); max-width: none; margin: .5rem auto; }
+    #admin-record-modal.admin-record-order .modal-dialog { width: calc(100vw - 1rem); max-width: none; height: calc(100dvh - 1rem); margin: .5rem auto; }
     #admin-record-modal.admin-record-order .modal-content { max-height: calc(100dvh - 1rem); }
     #admin-record-modal.admin-record-order .modal-body { padding: .65rem; }
     #admin-record-modal.admin-record-order .admin-record-section { padding: .75rem; }

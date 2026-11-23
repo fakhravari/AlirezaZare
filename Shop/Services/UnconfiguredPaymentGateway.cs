@@ -4,7 +4,7 @@ namespace Shop.Services;
 
 public sealed class UnconfiguredPaymentGateway : IPaymentGateway
 {
-    public Task<PaymentGatewayRequestResult> RequestAsync(Guid attemptId, decimal amountToman,
+    public Task<PaymentGatewayRequestResult> RequestAsync(decimal attemptId, decimal amountToman,
         CancellationToken cancellationToken)
     {
         // TODO: Implement the selected bank's server-to-server payment request and callback URL here.

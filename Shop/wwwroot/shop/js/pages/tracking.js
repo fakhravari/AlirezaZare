@@ -5,16 +5,6 @@ window.HNUI.mount("pages-order-tracking", document, () => {
   const status = document.getElementById("trackingStatus");
   const resultHost = document.getElementById("trackingResult");
   const button = form.querySelector('button[type="submit"]') || form.querySelector("button");
-  const labels = {
-    "pending-payment": "در انتظار پرداخت",
-    "simulated-payment-confirmed": "پرداخت آزمایشی تأیید شد",
-    "payment-confirmed": "پرداخت تأیید شد",
-    "warehouse-confirmed": "تأیید و آماده‌سازی سفارش",
-    "in-transit": "در حال ارسال",
-    "shipped-to-post": "تحویل به پست",
-    delivered: "تحویل‌شده",
-    cancelled: "لغوشده",
-  };
 
   const setStatus = (message, type = "") => {
     if (status) window.HNUI.setMessage(status, message, type);
@@ -44,29 +34,11 @@ window.HNUI.mount("pages-order-tracking", document, () => {
     const fields = document.createElement("div");
     fields.className = "tracking-result-fields";
     addField(fields, "کد سفارش", data.orderNumber, "ltr");
-    addField(fields, "وضعیت", labels[data.status] || data.status || "ثبت‌شده");
+    addField(fields, "وضعیت", data.statusName || data.status || "ثبت‌شده");
     addField(fields, "زمان ثبت", formatDate(data.orderedAtUtc));
     addField(fields, "شرکت حمل", data.shippingCarrier);
     addField(fields, "کد رهگیری", data.shippingTrackingCode, "ltr");
     resultHost.append(heading, fields);
-
-    const events = Array.isArray(data.statusHistory) ? data.statusHistory : [];
-    if (events.length) {
-      const historyHeading = document.createElement("h4");
-      historyHeading.textContent = "تاریخچهٔ وضعیت ارسال";
-      const list = document.createElement("ol");
-      list.className = "tracking-history-list";
-      events.forEach((item) => {
-        const entry = document.createElement("li");
-        const state = document.createElement("strong");
-        state.textContent = labels[item.newStatus] || item.newStatus || "به‌روزرسانی سفارش";
-        const time = document.createElement("time");
-        time.textContent = formatDate(item.changedAtUtc);
-        entry.append(state, time);
-        list.append(entry);
-      });
-      resultHost.append(historyHeading, list);
-    }
 
     const trackingEvents = Array.isArray(data.trackingHistory) ? data.trackingHistory : [];
     if (trackingEvents.length) {

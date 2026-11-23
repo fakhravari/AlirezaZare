@@ -46,11 +46,11 @@
             <span>
                 <i class="bi bi-clock"></i> @Model.Data.ReadTime
             </span>
-            <span class="article-hero-stat" data-article-comment-count aria-label="۳ نظر">
-                <i class="bi bi-chat-left-text" aria-hidden="true"></i> <span data-article-comment-value>۳</span> نظر
+            <span class="article-hero-stat" data-article-comment-count aria-label="۰ نظر در حساب شما">
+                <i class="bi bi-chat-left-text" aria-hidden="true"></i> <span data-article-comment-value>۰</span> نظر شما
             </span>
-            <span class="article-hero-stat" data-article-rating aria-label="امتیاز ۴٫۷ از ۵">
-                <i class="bi bi-star-fill" aria-hidden="true"></i> <span data-article-rating-value>۴٫۷</span>
+            <span class="article-hero-stat" data-article-rating aria-label="امتیازی در حساب شما ثبت نشده است">
+                <i class="bi bi-star-fill" aria-hidden="true"></i> <span data-article-rating-value>—</span>
             </span>
             <span class="article-hero-stat article-like-stat" data-article-like-count aria-label="@articleMetrics.Likes پسند">
                 <i class="bi bi-heart-fill" aria-hidden="true"></i> <span data-article-like-value>@articleMetrics.Likes.ToString("N0", persianCulture)</span> پسند
@@ -203,7 +203,7 @@
                             </button>
                         </div>
                         <div class="article-feedback-summary">
-                            <strong><i class="bi bi-star-fill" aria-hidden="true"></i> <span data-feedback-average>—</span> از ۵</strong><span data-feedback-count>۰ نظر</span>
+                            <strong><i class="bi bi-star-fill" aria-hidden="true"></i> <span data-feedback-average>—</span> از ۵</strong><span data-feedback-count>۰ نظر شما</span>
                         </div>
                         <div class="article-feedback-columns">
                             <form class="article-feedback-form" data-feedback-form>
@@ -222,7 +222,7 @@
                                 <p role="status" aria-live="polite" data-feedback-status></p>
                             </form>
                             <section class="article-feedback-reviews" aria-labelledby="articleFeedbackListTitle">
-                                <h3 id="articleFeedbackListTitle">نظرهای ثبت‌شده</h3>
+                                <h3 id="articleFeedbackListTitle">نظرهای ثبت‌شدهٔ شما</h3>
                                 <div class="article-feedback-list" data-feedback-list aria-live="polite"></div>
                                 <nav class="article-feedback-pagination" data-feedback-pagination aria-label="صفحه‌بندی دیدگاه‌ها" hidden></nav>
                             </section>

@@ -148,8 +148,7 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
         var previous = await PaidOrders().Where(x => x.OrderedAtUtc >= previousStart && x.OrderedAtUtc < start)
             .GroupBy(_ => 1).Select(group => new { Revenue = group.Sum(x => x.TotalAmount) }).SingleOrDefaultAsync(cancellationToken);
         int ordersWithoutVerifiedPayment = await db.StoreCustomerOrders.CountAsync(order =>
-            order.OrderedAtUtc >= start && order.OrderedAtUtc < end && SalesStatuses.Contains(order.Status)
-            && !(order.PaymentMethod == "demo" && order.ExternalOrderKey != null && order.ExternalOrderKey.StartsWith("demo-order-"))
+            order.OrderedAtUtc >= start && order.OrderedAtUtc < end && SalesStatuses.Contains(order.StatusReference.Code)
             && !db.StorePaymentAttempts.Any(payment => payment.IdOrder == order.Id
                 && payment.Status == "verified" && payment.Amount == order.TotalAmount), cancellationToken);
 
@@ -405,7 +404,7 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
         CancellationToken cancellationToken)
     {
         var query = PaidOrders().Where(x => x.IdProfile == customerId && x.OrderedAtUtc >= start && x.OrderedAtUtc < end)
-            .OrderByDescending(x => x.OrderedAtUtc).Select(x => new { x.OrderNumber, x.OrderedAtUtc, x.Status, x.TotalAmount });
+            .OrderByDescending(x => x.OrderedAtUtc).Select(x => new { x.OrderNumber, x.OrderedAtUtc, Status = x.StatusReference.NameFa, x.TotalAmount });
         int total = await query.CountAsync(cancellationToken);
         var rows = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
 
@@ -450,8 +449,7 @@ public sealed class StoreReportsAdminApiController(ShopDbContext db) : Controlle
         };
     }
 
-    private IQueryable<StoreCustomerOrderReference> PaidOrders() => db.StoreCustomerOrders.AsNoTracking().Where(order => SalesStatuses.Contains(order.Status)
-            && !(order.PaymentMethod == "demo" && order.ExternalOrderKey != null && order.ExternalOrderKey.StartsWith("demo-order-"))
+    private IQueryable<StoreCustomerOrderReference> PaidOrders() => db.StoreCustomerOrders.AsNoTracking().Where(order => SalesStatuses.Contains(order.StatusReference.Code)
             && db.StorePaymentAttempts.Any(payment => payment.IdOrder == order.Id && payment.Status == "verified" && payment.Amount == order.TotalAmount));
 
     private HashSet<long> AllowedWarehouseIds() => User.FindAll("admin_warehouse").Select(claim => long.TryParse(claim.Value, out long id) ? id : 0).Where(id => id > 0).ToHashSet();

@@ -13,14 +13,15 @@ public sealed class PaymentService(ShopDbContext db, IPaymentGateway gateway, IL
     {
         if (orderId < 1 || profileId < 1) return new("not-found");
 
-        Guid attemptId = Guid.NewGuid();
+        decimal attemptId;
         decimal amount;
+        StorePaymentAttempt paymentAttempt;
         await using (var transaction = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct))
         {
-            var order = await db.StoreCustomerOrders.Include(x => x.Bank).SingleOrDefaultAsync(x => x.Id == orderId && x.IdProfile == profileId, ct);
+            var order = await db.StoreCustomerOrders.Include(x => x.Bank).Include(x => x.StatusReference).SingleOrDefaultAsync(x => x.Id == orderId && x.IdProfile == profileId, ct);
             if (order is null) return new("not-found");
 
-            if (order.Status != "pending-payment" || order.TotalAmount <= 0 || order.PaymentMethod != "zarinpal" ||
+            if (order.StatusReference.Code != "pending-payment" || order.TotalAmount <= 0 || order.PaymentMethod != "zarinpal" ||
                 order.Bank is not { Code: "zarinpal", IsActive: true }) return new("invalid-order");
 
             bool hasItems = await db.StoreCustomerOrderItems.AnyAsync(x => x.IdOrder == orderId, ct);
@@ -37,16 +38,17 @@ public sealed class PaymentService(ShopDbContext db, IPaymentGateway gateway, IL
 
             amount = order.TotalAmount;
             DateTime now = DateTime.UtcNow;
-            db.StorePaymentAttempts.Add(new StorePaymentAttempt
+            paymentAttempt = new StorePaymentAttempt
             {
-                Id = attemptId,
                 IdOrder = orderId,
                 Amount = amount,
                 Status = "initiated",
                 CreatedAtUtc = now,
                 UpdatedAtUtc = now
-            });
+            };
+            db.StorePaymentAttempts.Add(paymentAttempt);
             await db.SaveChangesAsync(ct);
+            attemptId = paymentAttempt.Id;
 
             await transaction.CommitAsync(ct);
         }
@@ -72,7 +74,7 @@ public sealed class PaymentService(ShopDbContext db, IPaymentGateway gateway, IL
         return updated == 1 ? new("redirect", redirect) : new("request-unknown");
     }
 
-    public async Task<string> VerifyAsync(Guid attemptId,
+    public async Task<string> VerifyAsync(decimal attemptId,
         IReadOnlyDictionary<string, IReadOnlyList<string>> callback, CancellationToken ct)
     {
         var attempt = await db.StorePaymentAttempts.AsNoTracking().Where(x => x.Id == attemptId).Select(x => new PaymentAttemptRow
@@ -102,15 +104,15 @@ public sealed class PaymentService(ShopDbContext db, IPaymentGateway gateway, IL
 
         if (locked.Status != "awaiting" || !PaymentVerificationRules.Matches(locked.Amount, locked.GatewayReference, verification)) return "not-ready";
 
-        var order = await db.StoreCustomerOrders.SingleOrDefaultAsync(x => x.Id == locked.IdOrder, ct);
-        if (order is null || order.Status != "pending-payment" || order.TotalAmount != locked.Amount) return "order-conflict";
+        var order = await db.StoreCustomerOrders.Include(x => x.StatusReference).SingleOrDefaultAsync(x => x.Id == locked.IdOrder, ct);
+        if (order is null || order.StatusReference.Code != "pending-payment" || order.TotalAmount != locked.Amount) return "order-conflict";
 
         var items = await db.StoreCustomerOrderItems.Where(x => x.IdOrder == order.Id).ToListAsync(ct);
         if (items.Count == 0) return "order-conflict";
 
         DateTime now = DateTime.UtcNow;
         DateTime paidAtUtc = verification.PaidAtUtc!.Value.UtcDateTime;
-        order.Status = "payment-confirmed";
+        order.IdStatus = await db.OrderStatuses.Where(x => x.Code == "payment-confirmed").Select(x => x.Id).SingleAsync(ct);
         locked.Status = "verified";
         locked.ReceiptReference = verification.ReceiptReference;
         locked.PaidAtUtc = paidAtUtc;
@@ -122,7 +124,7 @@ public sealed class PaymentService(ShopDbContext db, IPaymentGateway gateway, IL
         return "verified";
     }
 
-    public sealed class PaymentAttemptRow { public Guid Id { get; set; } public long IdOrder { get; set; } public decimal Amount { get; set; } public string Status { get; set; } = ""; public string? GatewayReference { get; set; } }
+    public sealed class PaymentAttemptRow { public decimal Id { get; set; } public long IdOrder { get; set; } public decimal Amount { get; set; } public string Status { get; set; } = ""; public string? GatewayReference { get; set; } }
 }
 
 public static class PaymentVerificationRules

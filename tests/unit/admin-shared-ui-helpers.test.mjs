@@ -27,18 +27,21 @@ test('contact messages render and report loading errors through shared helpers',
   t.after(() => browser.close());
   const page = await browser.newPage();
   await page.setContent(`<section data-admin-contact-messages data-api="/messages">
-    <form data-contact-filter></form><div data-contact-status></div><span data-contact-count></span>
+    <form data-contact-filter><select name="status"><option value="">همهٔ وضعیت‌ها</option></select></form><div data-contact-status></div><span data-contact-count></span>
     <div data-contact-empty></div><table><tbody data-contact-rows></tbody></table><div data-contact-pagination></div>
     <button data-contact-refresh></button></section>`);
   await page.addScriptTag({path: 'Admin/wwwroot/js/admin-ui.js'});
-  await page.evaluate(() => { window.AdminUI = {...AdminUI, getJson: async () => {
+  await page.evaluate(() => { window.AdminUI = {...AdminUI, getJson: async url => {
     if (window.fail) throw Error('خطای آزمایشی');
-    return {items: [{id: 1, createdAtUtc: '2026-11-21', name: '<نام>', phone: '123', subjectKey: 'other', message: 'متن پیام', status: 'new'}], total: 1, pageSize: 50};
+    if (String(url).endsWith('/statuses')) return [{code: 'new', nameFa: 'جدید', nameEn: 'New'}];
+    return {items: [{id: 1, createdAtUtc: '2026-11-21', name: '<نام>', phone: '123', subjectKey: 'other', message: 'متن پیام', status: 'new', statusName: 'جدید'}], total: 1, pageSize: 50};
   }}; });
   await page.addScriptTag({path: 'Admin/wwwroot/js/admin-contact-messages.js'});
   await page.evaluate(() => AdminContactMessages.initialize(document));
   await page.getByText('<نام>', {exact: true}).waitFor();
   assert.equal(await page.locator('[data-contact-rows] tr').count(), 1);
+  assert.equal(await page.locator('[data-contact-rows] td').nth(5).textContent(), 'جدید');
+  assert.equal(await page.locator('[data-contact-filter] option[value="new"]').textContent(), 'جدید');
   assert.equal(await page.locator('[data-contact-rows] td').nth(1).locator('*').count(), 0);
   await page.evaluate(() => { window.fail = true; });
   await page.locator('[data-contact-refresh]').click();

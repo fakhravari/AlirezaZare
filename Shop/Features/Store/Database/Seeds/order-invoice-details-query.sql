@@ -5,7 +5,7 @@ SELECT
     o.Id AS OrderId,
     o.OrderNumber,
     o.OrderedAtUtc,
-    o.Status,
+    status.Code AS Status,
     o.PaymentMethod,
     o.IdBank,
     bank.NameFa AS BankName,
@@ -57,13 +57,6 @@ SELECT
         FOR JSON PATH
     )) AS PriceComponentsJson,
     JSON_QUERY((
-        SELECT history.PreviousStatus, history.NewStatus, history.ChangedAtUtc
-        FROM Store.OrderShippingHistory history
-        WHERE history.IdOrder=o.Id
-        ORDER BY history.Id
-        FOR JSON PATH
-    )) AS ShippingHistoryJson,
-    JSON_QUERY((
         SELECT history.Carrier, history.TrackingCode, history.ChangedAtUtc
         FROM Store.OrderShipmentTrackingHistory history
         WHERE history.IdOrder=o.Id
@@ -71,6 +64,7 @@ SELECT
         FOR JSON PATH
     )) AS TrackingHistoryJson
 FROM Store.[Order] o
+JOIN Store.OrderStatus status ON status.Id = o.IdStatus
 JOIN Account.Profile customer ON customer.Id=o.IdProfile
 JOIN Store.Bank bank ON bank.Id=o.IdBank
 JOIN Store.OrderItem i ON i.IdOrder=o.Id

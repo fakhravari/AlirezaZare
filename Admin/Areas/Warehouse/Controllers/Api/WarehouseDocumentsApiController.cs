@@ -48,7 +48,7 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db, IWarehouse
         int total = await query.CountAsync(cancellationToken);
         var items = await query.OrderByDescending(x => x.document.DocumentDate).ThenByDescending(x => x.document.DocumentNumber).Skip(paging.Offset).Take(paging.PageSize).Select(x => new DocumentListItem(x.document.Id, x.document.IdWarehouse, x.document.IdDocumentType,
                 x.document.IdParty, x.document.IdSalesPlanReference, x.document.DocumentNumber, x.document.DocumentDate,
-                x.document.Status, x.warehouse.Company.Name + " / " + x.warehouse.Name + " (" + x.warehouse.Code + ")",
+                x.document.Status, x.document.StatusReference.NameFa, x.warehouse.Company.Name + " / " + x.warehouse.Name + " (" + x.warehouse.Code + ")",
                 x.type.Name, x.type.Direction, x.type.AffectsStock,
                 x.party.Name, x.plan.DisplayName, x.document.Reason, x.document.ExternalReference,
                 x.document.CustomerOrderKey)).ToListAsync(cancellationToken);
@@ -127,7 +127,8 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db, IWarehouse
         long[] warehouseIds = warehouses.Select(w => w.Id).ToArray();
         var ownerLinks = await db.WarehouseStockOwners.AsNoTracking().Where(x => warehouseIds.Contains(x.IdWarehouse)).ToListAsync(cancellationToken);
 
-        return Ok(new { warehouses, types, parties, plans, inventoryItems, ownerLinks });
+        var statuses = await db.WarehouseDocumentStatuses.AsNoTracking().OrderBy(x => x.Code).Select(x => new { x.Code, x.NameFa, x.NameEn }).ToListAsync(cancellationToken);
+        return Ok(new { warehouses, types, parties, plans, inventoryItems, ownerLinks, statuses });
     }
 
     [HttpGet("{id:long}")]
@@ -532,6 +533,7 @@ public sealed class WarehouseDocumentsApiController(ShopDbContext db, IWarehouse
         long Number,
         DateOnly Date,
         string Status,
+        string StatusName,
         string Warehouse,
         string Type,
         string Direction,

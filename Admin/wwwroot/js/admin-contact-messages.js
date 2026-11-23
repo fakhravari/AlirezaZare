@@ -4,7 +4,6 @@
     if (!ui) return;
     let pageNumber = 1, serial = 0;
     const labels = { order: "پیگیری سفارش", consultation: "مشاوره پیش از خرید", "after-sales": "خدمات پس از فروش", business: "همکاری سازمانی", other: "سایر درخواست‌ها" };
-    const states = { new: "جدید", read: "خوانده‌شده", closed: "بسته‌شده" };
     const el = ui.createElement;
     function message(page, value, error = false) { ui.setStatus(page.querySelector("[data-contact-status]"), value, error); }
     function token() { return document.querySelector('[data-admin-contact-messages] input[name="__RequestVerificationToken"]')?.value || ""; }
@@ -12,15 +11,19 @@
         const requestId = ++serial, query = new URLSearchParams(new FormData(page.querySelector("[data-contact-filter]"))); query.set("page", String(pageNumber));
         message(page, "در حال دریافت پیام‌ها…");
         try {
-            const result = await ui.getJson(`${page.dataset.api}?${query}`); if (requestId !== serial) return;
+            const [result, statuses] = await Promise.all([ui.getJson(`${page.dataset.api}?${query}`), ui.getJson(`${page.dataset.api}/statuses`)]); if (requestId !== serial) return;
+            const filter = page.querySelector('[data-contact-filter] select[name="status"]');
+            const selected = filter.value;
+            filter.replaceChildren(new Option("همهٔ وضعیت‌ها", ""), ...statuses.map(item => new Option(item.nameFa, item.code)));
+            filter.value = selected;
             const body = page.querySelector("[data-contact-rows]"); body.replaceChildren();
             for (const item of result.items || []) {
                 const row = document.createElement("tr");
-                [window.AdminUI.formatDateTime(item.createdAtUtc), item.name, item.phone, labels[item.subjectKey] || item.subjectKey, item.message.length > 100 ? `${item.message.slice(0, 100)}…` : item.message, states[item.status] || item.status].forEach(value => row.append(el("td", value)));
+                [window.AdminUI.formatDateTime(item.createdAtUtc), item.name, item.phone, labels[item.subjectKey] || item.subjectKey, item.message.length > 100 ? `${item.message.slice(0, 100)}…` : item.message, item.statusName || item.status].forEach(value => row.append(el("td", value)));
                 const actions = el("td"), detail = el("button", "نمایش", "btn btn-sm btn-default me-1"); detail.type = "button";
                 detail.addEventListener("click", () => { page.dataset.contactId = item.id; page.querySelector("[data-contact-sender]").textContent = `${item.name} · ${item.phone}${item.email ? ` · ${item.email}` : ""} · ${labels[item.subjectKey] || item.subjectKey}`; page.querySelector("[data-contact-body]").textContent = item.message; page.querySelector("[data-contact-reply]").value = item.adminReply || ""; page.querySelector("[data-contact-reply-status]").textContent = item.replyEmailSentAtUtc ? "ایمیل پاسخ قبلاً ارسال شده است." : ""; window.bootstrap?.Modal?.getOrCreateInstance(document.getElementById("contact-message-modal")).show(); });
                 const next = item.status === "new" ? "read" : item.status === "read" ? "closed" : "new";
-                const update = el("button", next === "read" ? "خوانده شد" : next === "closed" ? "بستن پیام" : "بازگشایی", "btn btn-sm btn-primary"); update.type = "button"; update.dataset.adminConfirm = `وضعیت پیام ${item.name} تغییر کند؟`;
+                const update = el("button", next === "read" ? "شروع بررسی" : next === "closed" ? "اتمام بررسی" : "بازگشایی", "btn btn-sm btn-primary"); update.type = "button"; update.dataset.adminConfirm = `وضعیت پیام ${item.name} تغییر کند؟`;
                 update.addEventListener("click", async () => { update.disabled = true; try { const result = await ui.getJson(`${page.dataset.api}/${item.id}/status`, { method: "PUT", headers: { "Content-Type": "application/json", RequestVerificationToken: token() }, body: JSON.stringify({ status: next }) }); ui.notify(result.message, "success"); await load(page); } catch (error) { ui.notify(error.message || "ذخیرهٔ وضعیت ناموفق بود.", "danger"); update.disabled = false; } });
                 actions.append(detail, update); row.append(actions); body.append(row);
             }

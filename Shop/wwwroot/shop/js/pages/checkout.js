@@ -1,4 +1,4 @@
-﻿window.HNUI.ready(() => window.HNUI.mount("checkout", document, () => {
+window.HNUI.ready(() => window.HNUI.mount("checkout", document, () => {
     const ui = window.HNUI;
     const mediaCdnBaseUrl = document.querySelector('meta[name="media-cdn-base-url"]')?.content || "";
     const addressKey = "hn-delivery-addresses";
@@ -11,9 +11,9 @@
     let addresses = [];
     const checkoutPage = document.querySelector(".invoice-page");
     let selectedPaymentMethod = checkoutPage?.dataset.paymentMethod || "zarinpal";
-    let salesPlansValid = false;
-    let validationAttempt = 0;
     let checkoutPending = false;
+    let savedOrder = null;
+    const checkoutKeyStorage = "hn-pending-checkout-key";
     const purchaseErrorText = (code) => ({
         "insufficient-stock": "موجودی کافی از این کالا باقی نمانده است؛ تعداد یا تنوع را در سبد اصلاح کنید.",
         "inventory-variant-required": "برای یکی از کالاها تنوع انبار را انتخاب کنید.",
@@ -73,48 +73,6 @@
             return [];
         }
     };
-    const validateSalesPlanCart = async () => {
-        const attempt = ++validationAttempt;
-        const currentItems = ui.cart.read();
-        const lines = currentItems.map((item) => ({
-            productId: Number(item.id), salesPlanId: item.salesPlanId || "regular", quantity: item.quantity,
-            variantId: item.variantId || null,
-            accessoryIds: (item.options?.accessories || []).filter((item) => item.selected !== false).map((item) => item.id),
-        }));
-        if (!lines.length) {
-            salesPlansValid = false;
-            ui.setMessage(document.querySelector("#paymentStatus"), "");
-            syncPayment();
-            return;
-        }
-        salesPlansValid = false;
-        syncPayment();
-        let valid = false;
-        let validationMessage = "پیش‌فاکتور تأیید نشد؛ ارتباط با فروشگاه را بررسی و دوباره تلاش کنید.";
-        try {
-            const response = await window.HNUI.api.request("store/sales-plans/validate-cart", {
-                method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ lines }),
-            });
-            if (attempt !== validationAttempt) return;
-            const result = await response.json().catch(() => ({}));
-            if (!response.ok) validationMessage = `پیش‌فاکتور تأیید نشد: ${purchaseErrorText(result.code)}`;
-            if (response.ok) {
-                valid = result.valid === true && Array.isArray(result.lines) &&
-                    result.lines.length === currentItems.length && result.lines.every((line, index) =>
-                        line.productId === Number(currentItems[index].id) &&
-                        line.salesPlanId === currentItems[index].salesPlanId &&
-                        Number(line.quote?.variantId || 0) === Number(currentItems[index].variantId || 0) &&
-                        Number(line.quote?.unitAmount) === Number(currentItems[index].price));
-            }
-        } catch { /* A failed validation leaves this attempt invalid. */ }
-        if (attempt !== validationAttempt) return;
-        salesPlansValid = valid;
-        syncPayment();
-        const message = document.querySelector("#paymentStatus");
-        if (!salesPlansValid && message) ui.setMessage(message, validationMessage === "پیش‌فاکتور تأیید نشد؛ ارتباط با فروشگاه را بررسی و دوباره تلاش کنید."
-            ? "پیش‌فاکتور تأیید نشد: قیمت، موجودی یا انتخاب‌های یکی از کالاها با اطلاعات فعلی مطابقت ندارد؛ سبد را بازبینی و در صورت نیاز کالا را دوباره اضافه کنید."
-            : validationMessage, "warning");
-    };
     if (!Object.hasOwn(paymentMethods, selectedPaymentMethod)) {
         selectedPaymentMethod = "zarinpal";
     }
@@ -163,9 +121,7 @@
                     : "ابتدا نحوه پرداخت را انتخاب کنید";
         }
         if (!payment) return;
-        payment.disabled =
-            checkoutPending || !ui.cart.read().length || !selectedAddress() || !selectedPaymentMethod || !salesPlansValid;
-        if (salesPlansValid) ui.setMessage(document.querySelector("#paymentStatus"), "");
+        payment.disabled = checkoutPending || !savedOrder || savedOrder.status !== "pending-payment";
     }
 
     function renderPaymentMethod() {
@@ -201,7 +157,7 @@
             preview.hidden = !address;
             if (address) preview.append(addressMarkup(address));
         }
-        if (checkoutPreview) {
+        if (checkoutPreview && !checkoutPage) {
             checkoutPreview.replaceChildren();
             if (address) checkoutPreview.append(addressMarkup(address));
             else {
@@ -303,24 +259,60 @@
             renderAddresses();
             dialog.close();
         });
-        document.addEventListener("click", (event) => {
+        document.addEventListener("click", async (event) => {
             const link = event.target.closest("#cartView .cart-checkout-link");
             if (!link) return;
+            event.preventDefault();
+            if (checkoutPending) return;
             if (link.getAttribute("aria-disabled") !== "true") {
-                event.preventDefault();
-                const form = document.createElement("form");
-                form.method = "post";
-                form.action = link.href;
-                for (const [name, value] of [["addressId", selected], ["paymentMethod", selectedPaymentMethod]]) {
-                    const input = document.createElement("input");
-                    input.type = "hidden"; input.name = name; input.value = value;
-                    form.append(input);
+                if (!ui.auth.isLoggedIn()) { ui.auth.requireLogin(() => link.click()); return; }
+                checkoutPending = true;
+                link.setAttribute("aria-disabled", "true");
+                try {
+                    const confirmed = window.confirmFormSubmission
+                        ? await window.confirmFormSubmission({
+                            title: "تأیید ثبت سفارش",
+                            message: "پس از ثبت سفارش، اقلام و نشانی این سفارش قابل ویرایش نیستند. آیا از اطلاعات سفارش اطمینان دارید؟",
+                            confirmText: "تأیید و ادامه",
+                        })
+                        : window.confirm("پس از ثبت سفارش، اقلام و نشانی این سفارش قابل ویرایش نیستند. آیا ادامه می‌دهید؟");
+                    if (!confirmed) {
+                        checkoutPending = false;
+                        syncPayment();
+                        return;
+                    }
+                    let checkoutKey = sessionStorage.getItem(checkoutKeyStorage);
+                    if (!checkoutKey) {
+                        checkoutKey = crypto.randomUUID();
+                        sessionStorage.setItem(checkoutKeyStorage, checkoutKey);
+                    }
+                    const items = ui.cart.read().map((item) => ({
+                        productId: Number(String(item.id).replace(/:.*$/, "")),
+                        salesPlanId: item.salesPlanId || "regular", quantity: item.quantity,
+                        variantId: item.variantId || null,
+                        accessoryIds: (item.options?.accessories || []).filter((accessory) => accessory.selected !== false).map((accessory) => Number(accessory.productAccessoryId)).filter((id) => Number.isSafeInteger(id) && id > 0),
+                    }));
+                    const saveResponse = await ui.api.request("account/cart", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ items }) });
+                    if (!saveResponse.ok) {
+                        const error = await saveResponse.json().catch(() => ({}));
+                        throw new Error(checkoutErrorText(error.code));
+                    }
+                    const couponCode = String(ui.storage.get("hn-coupon-code", ui.storage.get("hn-demo-coupon", ""))).trim().toUpperCase();
+                    const response = await ui.api.request("account/checkout", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ addressId: Number(selected), paymentMethod: selectedPaymentMethod, couponCode: couponCode || null, checkoutKey }) });
+                    const result = await response.json().catch(() => ({}));
+                    if (!response.ok || !result.id) throw new Error(checkoutErrorText(result.code));
+                    ui.storage.remove("hn-coupon-code");
+                    ui.storage.remove("hn-demo-coupon");
+                    ui.cart.write([]);
+                    sessionStorage.removeItem(checkoutKeyStorage);
+                    window.location.assign(`${link.href.split("?")[0]}?orderId=${encodeURIComponent(result.id)}`);
+                } catch (error) {
+                    checkoutPending = false;
+                    syncPayment();
+                    ui.setMessage(document.querySelector("#paymentMethodStatus"), `ثبت سفارش انجام نشد: ${error.message || "ارتباط با فروشگاه برقرار نشد."}`, "error");
                 }
-                document.body.append(form);
-                form.submit();
                 return;
             }
-            event.preventDefault();
             const needsAddress = !selectedAddress();
             const target = needsAddress
                 ? document.querySelector(".cart-address-section")
@@ -361,67 +353,87 @@
         payment.addEventListener("click", async () => {
             syncPayment();
             if (payment.disabled) return;
-            if (!ui.auth.isLoggedIn()) { ui.auth.requireLogin(() => payment.click()); return; }
             checkoutPending = true;
             payment.disabled = true;
             try {
-                const items = ui.cart.read().map((item) => ({
-                    productId: Number(String(item.id).replace(/:.*$/, "")),
-                    salesPlanId: item.salesPlanId || "regular",
-                    quantity: item.quantity,
-                    variantId: item.variantId || null,
-                    accessoryIds: (item.options?.accessories || []).filter((accessory) => accessory.selected !== false).map((accessory) => Number(accessory.productAccessoryId)).filter((id) => Number.isSafeInteger(id) && id > 0),
-                }));
-                const saveResponse = await ui.api.request("account/cart", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ items }) });
-                if (!saveResponse.ok) {
-                    const saveError = await saveResponse.json().catch(() => ({}));
-                    throw new Error(`ذخیرهٔ سبد برای ثبت فاکتور انجام نشد: ${checkoutErrorText(saveError.code)}`);
-                }
-                const couponCode = String(ui.storage.get("hn-coupon-code", ui.storage.get("hn-demo-coupon", ""))).trim().toUpperCase();
-                const response = await ui.api.request("account/checkout", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ addressId: Number(selected), paymentMethod: selectedPaymentMethod, couponCode: couponCode || null }) });
-                const result = await response.json().catch(() => ({}));
-                if (!response.ok) {
-                    if (result.code === "price-or-stock-changed") {
-                        validationAttempt++;
-                        salesPlansValid = false;
-                    }
-                    throw new Error(`ثبت فاکتور انجام نشد: ${checkoutErrorText(result.code)}`);
-                }
-                ui.storage.remove("hn-coupon-code");
-                ui.storage.remove("hn-demo-coupon");
-                ui.cart.write([]);
-                const amountText = (amount) => `${ui.formatNumber(Number(amount) || 0)} تومان`;
-                document.querySelector("#confirmedOrderNumber").textContent = result.number || String(result.id || "");
-                document.querySelector("#confirmedSubtotal").textContent = amountText(result.subtotalAmount ?? result.totalAmount);
-                document.querySelector("#confirmedTotal").textContent = amountText(result.totalAmount);
-                const couponDiscount = Number(result.couponDiscountAmount) || 0;
-                const couponRow = document.querySelector("#confirmedCouponRow");
-                couponRow.hidden = !(result.couponCode && couponDiscount > 0);
-                document.querySelector("#confirmedCouponCode").textContent = result.couponCode || "";
-                document.querySelector("#confirmedDiscount").textContent = `− ${amountText(couponDiscount)}`;
-                document.querySelector("#checkoutPanel").hidden = true;
-                document.querySelector("#orderConfirmation").hidden = false;
-                payment.textContent = "فاکتور ثبت شد";
-                document.querySelector("#orderConfirmationTitle").focus?.();
+                const url = await ui.payment.start(Number(savedOrder.id));
+                window.location.assign(url);
             } catch (error) {
                 checkoutPending = false;
                 syncPayment();
-                const message = error.message === "Failed to fetch"
-                    ? "ثبت فاکتور انجام نشد؛ ارتباط با فروشگاه برقرار نشد. اتصال را بررسی و دوباره تلاش کنید."
-                    : error.message || "ثبت فاکتور انجام نشد؛ اطلاعات سبد و نشانی را بررسی کنید.";
-                ui.setMessage(document.querySelector("#paymentStatus"), message, "error");
+                ui.setMessage(document.querySelector("#paymentStatus"), error.message || "درگاه پرداخت در دسترس نیست؛ سفارش در انتظار پرداخت است.", "error");
             }
         });
+        const loadOrder = async () => {
+            const orderId = Number(new URLSearchParams(window.location.search).get("orderId"));
+            if (!Number.isSafeInteger(orderId) || orderId < 1) {
+                ui.setMessage(document.querySelector("#paymentStatus"), "سفارش مشخص نشده است؛ سفارش‌های خود را در حساب کاربری مشاهده کنید.", "error");
+                return;
+            }
+            try {
+                const response = await ui.api.request("account/state");
+                if (!response.ok) throw new Error("دریافت سفارش انجام نشد؛ وارد حساب کاربری شوید.");
+                const account = await response.json();
+                savedOrder = (account.orders || []).find((order) => Number(order.id) === orderId) || null;
+                if (!savedOrder) throw new Error("سفارش در حساب شما پیدا نشد.");
+                const amount = (value) => `${ui.formatNumber(Number(value) || 0)} تومان`;
+                const items = document.querySelector("#savedOrderItems");
+                items.replaceChildren();
+                for (const item of savedOrder.items || []) {
+                    const row = document.createElement("article");
+                    row.className = "flow-row cart-product-row";
+                    const name = document.createElement("strong");
+                    name.textContent = item.name;
+                    const details = document.createElement("p");
+                    details.textContent = [item.variantName, `تعداد: ${ui.formatNumber(item.quantity)}`, `جمع: ${amount(item.unitAmount * item.quantity)}`].filter(Boolean).join(" · ");
+                    row.append(name, details);
+                    for (const component of item.priceReferences || []) {
+                        if (component.component !== "accessory") continue;
+                        const accessory = document.createElement("p");
+                        accessory.textContent = `${component.name}: ${amount(component.calculatedUnitAmount)}`;
+                        row.append(accessory);
+                    }
+                    items.append(row);
+                }
+                const summary = document.querySelector("#savedOrderSummary");
+                summary.replaceChildren();
+                for (const [label, value] of [["شماره سفارش", savedOrder.number], ["جمع محصولات", amount(savedOrder.subtotalAmount)], ["تخفیف", amount(savedOrder.couponDiscountAmount)], ["مبلغ قابل پرداخت", amount(savedOrder.totalAmount)]]) {
+                    const row = document.createElement("div");
+                    row.className = "flow-total";
+                    const title = document.createElement("span"); title.textContent = label;
+                    const valueNode = document.createElement("strong"); valueNode.textContent = value;
+                    row.append(title, valueNode); summary.append(row);
+                }
+                let address = null;
+                try { address = JSON.parse(savedOrder.addressSnapshotJson || "null"); } catch { /* Older orders may not have a readable snapshot. */ }
+                checkoutPreview.replaceChildren();
+                if (address) checkoutPreview.append(addressMarkup(address));
+                else checkoutPreview.textContent = "نشانی ثبت‌شده در دسترس نیست.";
+                selectedPaymentMethod = savedOrder.paymentMethod;
+                renderPaymentMethod();
+                if (savedOrder.status !== "pending-payment") ui.setMessage(document.querySelector("#paymentStatus"), "این سفارش در وضعیت انتظار پرداخت نیست.", "warning");
+                syncPayment();
+            } catch (error) {
+                ui.setMessage(document.querySelector("#paymentStatus"), error.message || "دریافت سفارش انجام نشد.", "error");
+            }
+        };
+        void loadOrder();
     }
     document.addEventListener("hn:cart-change", () => {
         syncPayment();
-        if (payment) validateSalesPlanCart();
     });
 
     renderAddresses();
     if (ui.auth.isLoggedIn()) void ui.api.request("account/state").then(async (response) => {
         if (!response.ok) return;
         const account = await response.json();
+        const pendingKey = select && sessionStorage.getItem(checkoutKeyStorage);
+        const pendingOrder = pendingKey && (account.orders || []).find((order) => order.checkoutKey === `checkout-${pendingKey}`);
+        if (pendingOrder) {
+            sessionStorage.removeItem(checkoutKeyStorage);
+            window.location.assign(`Checkout?orderId=${encodeURIComponent(pendingOrder.id)}`);
+            return;
+        }
         if (Array.isArray(account.addresses)) addresses = account.addresses;
         if (!selected) selected = String(account.checkout?.selectedAddressId || "");
         ui.storage.hydrate(addressKey, JSON.stringify(addresses));
@@ -438,6 +450,5 @@
             renderAddresses(); renderPaymentMethod();
         }).catch(() => {});
     });
-    if (payment) validateSalesPlanCart();
     renderPaymentMethod();
 }));

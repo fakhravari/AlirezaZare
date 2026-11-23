@@ -2,7 +2,7 @@ namespace Shop.Data.Application.Store.Contracts;
 
 public interface IPaymentGateway
 {
-    Task<PaymentGatewayRequestResult> RequestAsync(Guid attemptId, decimal amountToman,
+    Task<PaymentGatewayRequestResult> RequestAsync(decimal attemptId, decimal amountToman,
         CancellationToken cancellationToken);
 
     Task<PaymentGatewayVerification> VerifyAsync(string gatewayReference, decimal amountToman,

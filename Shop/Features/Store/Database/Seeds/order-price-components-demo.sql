@@ -19,9 +19,9 @@ BEGIN TRY
         DECLARE @total decimal(19,0) = (SELECT SUM(FinalPriceAmount)
             FROM Store.PriceVersion WHERE Id IN (@productPrice,@variantPrice,@accessoryPrice));
         DECLARE @newOrder bigint;
-        INSERT Store.[Order] (IdProfile, OrderNumber, ExternalOrderKey, Status, PaymentMethod, IdBank, ItemCount, TotalAmount, SubtotalAmount, CouponDiscountAmount, OrderedAtUtc, AddressSnapshotJson)
-        SELECT IdProfile, N'DEMO-PRICE-COMPONENTS-20261122', N'demo-order-price-components-20261122', N'pending-payment', N'demo', IdBank, 2, @total, @total, 0, SYSUTCDATETIME(), AddressSnapshotJson
-        FROM Store.[Order] WHERE Id=@source;
+        INSERT Store.[Order] (IdProfile, OrderNumber, ExternalOrderKey, IdStatus, PaymentMethod, IdBank, ItemCount, TotalAmount, SubtotalAmount, CouponDiscountAmount, OrderedAtUtc, AddressSnapshotJson)
+        SELECT source.IdProfile, N'DEMO-PRICE-COMPONENTS-20261122', N'demo-order-price-components-20261122', status.Id, N'demo', source.IdBank, 2, @total, @total, 0, SYSUTCDATETIME(), source.AddressSnapshotJson
+        FROM Store.[Order] source CROSS JOIN Store.OrderStatus status WHERE source.Id=@source AND status.Code=N'pending-payment';
         SET @newOrder=SCOPE_IDENTITY();
         INSERT Store.OrderItem (IdOrder,IdProduct,IdVariant,IdSalesPlan,Quantity,IdPriceVersion)
         VALUES (@newOrder,@unvariedProduct,NULL,@plan,1,@productPrice);

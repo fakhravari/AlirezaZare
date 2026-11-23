@@ -14,13 +14,17 @@ namespace Shop.Admin.Areas.Store.Controllers.Api;
 [Route("api/admin/store/contact-messages")]
 public sealed class StoreContactMessagesAdminApiController(ShopDbContext db, IEmailSender emailSender, ILogger<StoreContactMessagesAdminApiController> logger) : ControllerBase
 {
+    [HttpGet("statuses")]
+    public async Task<IActionResult> Statuses(CancellationToken cancellationToken) =>
+        Ok(await db.ContactMessageStatuses.AsNoTracking().OrderBy(x => x.Code).Select(x => new { x.Code, x.NameFa, x.NameEn }).ToListAsync(cancellationToken));
+
     [HttpGet]
     public async Task<IActionResult> List([FromQuery] string? status, [FromQuery] string? q,
         [FromQuery] int page = 1, [FromQuery] int pageSize = AdminListQuery.DefaultPageSize,
         CancellationToken cancellationToken = default)
     {
         if (!AdminListQuery.TryCreate(page, pageSize, q, out AdminPageRequest paging)
-            || status is not (null or "" or "new" or "read" or "closed"))
+            || (!string.IsNullOrEmpty(status) && !await db.ContactMessageStatuses.AnyAsync(x => x.Code == status, cancellationToken)))
             return ValidationProblem(detail: "فیلتر یا صفحه‌بندی معتبر نیست.", statusCode: 400);
 
         var query = db.StoreContactMessages.AsNoTracking().AsQueryable();
@@ -28,7 +32,7 @@ public sealed class StoreContactMessagesAdminApiController(ShopDbContext db, IEm
         if (paging.Search.Length > 0) query = query.Where(x => x.Name.Contains(paging.Search) || x.Phone.Contains(paging.Search) || (x.Email != null && x.Email.Contains(paging.Search)) || x.Message.Contains(paging.Search));
         int total = await query.CountAsync(cancellationToken);
         var items = await query.OrderByDescending(x => x.CreatedAtUtc).ThenByDescending(x => x.Id).Skip(paging.Offset).Take(paging.PageSize)
-            .Select(x => new { x.Id, x.Name, x.Phone, x.Email, x.SubjectKey, x.Message, x.Status, x.AdminReply, x.RepliedAtUtc, x.ReplyEmailSentAtUtc, x.CreatedAtUtc }).ToListAsync(cancellationToken);
+            .Select(x => new { x.Id, x.Name, x.Phone, x.Email, x.SubjectKey, x.Message, x.Status, StatusName = x.StatusReference.NameFa, x.AdminReply, x.RepliedAtUtc, x.ReplyEmailSentAtUtc, x.CreatedAtUtc }).ToListAsync(cancellationToken);
 
         return Ok(AdminListQuery.CreateResult(items, total, paging));
     }
@@ -37,7 +41,8 @@ public sealed class StoreContactMessagesAdminApiController(ShopDbContext db, IEm
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> UpdateStatus(long id, [FromBody] ContactMessageStatusInput input, CancellationToken cancellationToken)
     {
-        if (input.Status is not ("new" or "read" or "closed")) return ValidationProblem(detail: "وضعیت پیام معتبر نیست.", statusCode: 400);
+        if (string.IsNullOrWhiteSpace(input.Status) || !await db.ContactMessageStatuses.AnyAsync(x => x.Code == input.Status, cancellationToken))
+            return ValidationProblem(detail: "وضعیت پیام معتبر نیست.", statusCode: 400);
 
         var item = await db.StoreContactMessages.SingleOrDefaultAsync(x => x.Id == id, cancellationToken); if (item is null) return NotFound();
 

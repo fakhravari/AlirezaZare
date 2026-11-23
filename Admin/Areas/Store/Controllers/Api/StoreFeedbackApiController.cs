@@ -104,7 +104,7 @@ public sealed class StoreFeedbackApiController(ShopDbContext db) : ControllerBas
             }).ToArray();
 
         var paged = AdminListQuery.CreateResult(result, total, paging);
-        var statuses = await db.ProductFeedbackStatuses.AsNoTracking().OrderBy(x => x.Id).Select(x => new { x.Id, x.Name }).ToListAsync(cancellationToken);
+        var statuses = await db.ProductFeedbackStatuses.AsNoTracking().OrderBy(x => x.Id).Select(x => new { x.Id, x.Name, x.NameEn }).ToListAsync(cancellationToken);
         return Ok(new { paged.Items, paged.Total, paged.Page, paged.PageSize, paged.HasNext, Statuses = statuses });
     }
 

@@ -6,7 +6,7 @@
         <div class="panel-body">
             @if (ViewData["WarehouseOrderQueue"] is true)
             {
-                <div class="alert alert-info" role="status">سفارش‌های واقعی پس از تأیید پرداخت در این صف نمایش داده می‌شوند. سفارش‌های نمونه بدون پرداخت واقعی مشخص شده‌اند؛ صدور حواله برای آن‌ها موجودی واقعی انبار را تغییر می‌دهد.</div>
+                <div class="alert alert-info" role="status">سفارش‌ها پس از تأیید پرداخت و تطبیق مبلغ در این صف نمایش داده می‌شوند.</div>
             }
             <form data-dispatch-form data-admin-confirm="برای سفارش‌های انتخاب‌شده حوالهٔ قطعی صادر و از موجودی واقعی انبار کسر شود؟">
                 @Html.AntiForgeryToken()

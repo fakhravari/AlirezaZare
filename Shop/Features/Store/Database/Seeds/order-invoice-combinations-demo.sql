@@ -55,9 +55,9 @@ BEGIN TRY
                  WHERE variantPrice.Id=@variantPrice AND accessoryPrice.Id=@accessoryPrice);
 
         INSERT Store.[Order]
-            (IdProfile,OrderNumber,ExternalOrderKey,Status,PaymentMethod,IdBank,ItemCount,TotalAmount,SubtotalAmount,CouponDiscountAmount,OrderedAtUtc,AddressSnapshotJson)
-        SELECT IdProfile,N'DEMO-INVOICE-20261122',N'demo-order-invoice-combinations-20261122',N'pending-payment',N'demo',IdBank,5,@total,@total,0,SYSUTCDATETIME(),AddressSnapshotJson
-        FROM Store.[Order] WHERE Id=@source;
+            (IdProfile,OrderNumber,ExternalOrderKey,IdStatus,PaymentMethod,IdBank,ItemCount,TotalAmount,SubtotalAmount,CouponDiscountAmount,OrderedAtUtc,AddressSnapshotJson)
+        SELECT source.IdProfile,N'DEMO-INVOICE-20261122',N'demo-order-invoice-combinations-20261122',status.Id,N'demo',source.IdBank,5,@total,@total,0,SYSUTCDATETIME(),source.AddressSnapshotJson
+        FROM Store.[Order] source CROSS JOIN Store.OrderStatus status WHERE source.Id=@source AND status.Code=N'pending-payment';
         SET @newOrder=SCOPE_IDENTITY();
 
         -- Plain product and two lines sharing the same product, plan and accessory selection.

@@ -21,7 +21,6 @@ public sealed class AccountController(
     ShopDbContext db,
     ISalesPlanSource plans,
     IProductPurchaseConfigurationSource purchaseConfigurations,
-    IWebHostEnvironment environment,
     IPasswordHasher<string> passwordHasher) : ControllerBase
 {
 
@@ -132,6 +131,7 @@ public sealed class AccountController(
                 text = entry.FeedbackText,
                 entry.Rating,
                 entry.Status,
+                StatusName = entry.StatusReference.NameFa,
                 entry.CreatedAtUtc
             }).ToListAsync(ct);
 
@@ -141,10 +141,12 @@ public sealed class AccountController(
             {
                 x.Id,
                 x.OrderNumber,
-                x.Status,
+                Status = x.StatusReference.Code,
+                StatusName = x.StatusReference.NameFa,
                 x.ShippingCarrier,
                 ShippingTrackingCode = x.ShippingTrackingCode,
                 x.PaymentMethod,
+                x.AddressSnapshotJson,
                 x.ExternalOrderKey,
                 x.OrderedAtUtc,
                 x.ItemCount,
@@ -189,8 +191,6 @@ public sealed class AccountController(
                                                                           select new { reference.IdOrder, reference.IdProduct, reference.IdSalesPlan, reference.IdPriceVersion, version.IdProductVariant, reference.IdAccessory, PriceAmount = reference.UnitAmountSnapshot, version.DiscountPercent, version.FinalPriceAmount, AccessoryName = reference.AccessoryNameSnapshot })
             .ToListAsync(ct);
         var orderItemsById = orderItemRows.GroupBy(x => x.IdOrder).ToDictionary(group => group.Key, group => group.ToArray());
-        var shippingHistory = orderIds.Length == 0 ? [] : await db.StoreOrderShippingHistories.AsNoTracking()
-            .Where(x => orderIds.Contains(x.IdOrder)).OrderBy(x => x.Id).Select(x => new { x.IdOrder, x.PreviousStatus, x.NewStatus, x.ChangedAtUtc }).ToListAsync(ct);
         var trackingHistory = orderIds.Length == 0 ? [] : await db.StoreOrderShipmentTrackingHistories.AsNoTracking()
             .Where(x => orderIds.Contains(x.IdOrder)).OrderBy(x => x.Id).Select(x => new { x.IdOrder, x.Carrier, x.TrackingCode, x.ChangedAtUtc }).ToListAsync(ct);
 
@@ -204,7 +204,6 @@ public sealed class AccountController(
             ["idGender"] = profile.IdGender,
             ["newsletter"] = profile.NewsletterEnabled,
             ["hasPassword"] = profile.Password is not null,
-            ["simulationAvailable"] = environment.IsDevelopment(),
             ["cart"] = cartRows.Select(item => new
             {
                 id = item.IdProduct,
@@ -262,6 +261,7 @@ public sealed class AccountController(
                 entry.text,
                 entry.Rating,
                 entry.Status,
+                entry.StatusName,
                 createdAt = AsUtc(entry.CreatedAtUtc)
             }).ToArray(),
             ["checkout"] = checkout,
@@ -270,10 +270,12 @@ public sealed class AccountController(
                 id = order.Id,
                 number = order.OrderNumber,
                 order.Status,
+                order.StatusName,
+                order.PaymentMethod,
+                order.AddressSnapshotJson,
+                checkoutKey = order.ExternalOrderKey,
                 order.ShippingCarrier,
                 shippingTrackingCode = order.ShippingTrackingCode,
-                isSample = order.PaymentMethod == "demo" && order.ExternalOrderKey?.StartsWith(
-                    "demo-order-", StringComparison.OrdinalIgnoreCase) == true,
                 orderedAtUtc = AsUtc(order.OrderedAtUtc),
                 order.ItemCount,
                 order.TotalAmount,
@@ -298,7 +300,6 @@ public sealed class AccountController(
                         calculatedUnitAmount = reference.PriceAmount
                     }).Prepend(new { priceVersionId = item.IdPriceVersion, component = item.IdProductVariant.HasValue ? "variant" : "product", name = item.VariantName ?? item.ProductName, calculatedUnitAmount = item.FinalPriceAmount }).ToArray()
                 }).ToArray(),
-                shippingHistory = shippingHistory.Where(entry => entry.IdOrder == order.Id).Select(entry => new { entry.PreviousStatus, entry.NewStatus, changedAtUtc = AsUtc(entry.ChangedAtUtc) }).ToArray(),
                 trackingHistory = trackingHistory.Where(entry => entry.IdOrder == order.Id).Select(entry => new { entry.Carrier, entry.TrackingCode, changedAtUtc = AsUtc(entry.ChangedAtUtc) }).ToArray()
             }).ToArray()
         };
@@ -708,6 +709,17 @@ public sealed class AccountController(
             request.PaymentMethod != "zarinpal") return BadRequest(new { code = "invalid-checkout" });
 
         await using var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, ct);
+        string? checkoutKey = Guid.TryParse(request.CheckoutKey, out var parsedKey) ? $"checkout-{parsedKey:D}" : null;
+        if (request.CheckoutKey is not null && checkoutKey is null)
+            return BadRequest(new { code = "invalid-checkout" });
+        if (checkoutKey is not null)
+        {
+            var existing = await db.StoreCustomerOrders.AsNoTracking()
+                .Where(order => order.IdProfile == ProfileId && order.ExternalOrderKey == checkoutKey)
+                .Select(order => new { order.Id, number = order.OrderNumber })
+                .SingleOrDefaultAsync(ct);
+            if (existing is not null) return Ok(existing);
+        }
         var storedCartRows = await (
             from cart in db.AccountCarts.AsNoTracking()
             join item in db.AccountCartItems.AsNoTracking() on cart.Id equals item.IdCart
@@ -901,7 +913,7 @@ public sealed class AccountController(
             return Conflict(new { code = "order-amount-out-of-range" });
 
         int count = priced.Sum(x => x.Line.Quantity);
-        string number = $"ND{DateTime.UtcNow:yyMMddHHmmss}{Random.Shared.Next(1000, 9999)}";
+        string number = $"TMP-{Guid.NewGuid():N}"[..32];
         string[] checkoutPlanKeys = priced.Select(x => x.Line.SalesPlanId).Distinct(StringComparer.Ordinal).ToArray();
         var checkoutPlanIds = await db.SalesPlanReferences.AsNoTracking()
             .Where(x => checkoutPlanKeys.Contains(x.StoreSalesPlanKey) && x.IdStockOwnerType == 1 && x.IsActive)
@@ -913,12 +925,14 @@ public sealed class AccountController(
         if (paymentBank is null || paymentBank.Code != "zarinpal")
             return Conflict(new { code = "payment-method-unavailable" });
 
+        int pendingPaymentStatusId = await db.OrderStatuses.Where(x => x.Code == "pending-payment").Select(x => x.Id).SingleAsync(ct);
         var order = new StoreCustomerOrderReference
         {
             IdProfile = ProfileId,
+            ExternalOrderKey = checkoutKey,
             IdAddress = request.AddressId,
             OrderNumber = number,
-            Status = "pending-payment",
+            IdStatus = pendingPaymentStatusId,
             PaymentMethod = request.PaymentMethod,
             IdBank = paymentBank.Id,
             ItemCount = count,
@@ -939,6 +953,10 @@ public sealed class AccountController(
         };
         db.StoreCustomerOrders.Add(order);
         await db.AccountCartItems.Where(item => db.AccountCarts.Any(cart => cart.Id == item.IdCart && cart.IdProfile == ProfileId)).ExecuteDeleteAsync(ct);
+        await db.SaveChangesAsync(ct);
+
+        number = $"AZ-{order.Id:D10}";
+        order.OrderNumber = number;
         await db.SaveChangesAsync(ct);
 
         var accessoryIdsForSnapshots = priced.SelectMany(item => item.Accessories).Select(item => item.IdAccessory).Distinct().ToArray();
@@ -988,8 +1006,7 @@ public sealed class AccountController(
             couponCode = appliedCoupon?.Code,
             couponDiscountAmount,
             orderedAtUtc = DateTimeOffset.UtcNow,
-            message = "سفارش ثبت شد و در انتظار پرداخت است.",
-            simulatedPaymentUrl = environment.IsDevelopment() ? Url.Action("Index", "SimulatedPayment", new { id = order.Id }) : null
+            message = "سفارش ثبت شد و در انتظار پرداخت است."
         });
     }
 
@@ -1255,7 +1272,7 @@ public sealed class AccountController(
         long? VariantId = null,
         IReadOnlyList<long>? AccessoryIds = null);
 
-    public sealed record CheckoutRequest(long AddressId, string PaymentMethod, string? CouponCode = null);
+    public sealed record CheckoutRequest(long AddressId, string PaymentMethod, string? CouponCode = null, string? CheckoutKey = null);
 
     public sealed record CouponRequest(string? Code);
 

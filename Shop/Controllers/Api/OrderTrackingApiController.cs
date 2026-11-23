@@ -24,12 +24,13 @@ public sealed class OrderTrackingApiController(ShopDbContext db) : ControllerBas
             phone.Length != 11 || !phone.StartsWith("09", StringComparison.Ordinal))
             return BadRequest(new { code = "invalid-tracking-request", message = "کد سفارش یا شمارهٔ همراه معتبر نیست." });
 
-        var candidates = await db.StoreCustomerOrders.AsNoTracking().Where(x => x.OrderNumber == orderNumber &&
-                        !(x.PaymentMethod == "demo" && x.ExternalOrderKey != null && x.ExternalOrderKey.StartsWith("demo-order-"))).Select(x => new
+        var candidates = await db.StoreCustomerOrders.AsNoTracking().Where(x => x.OrderNumber == orderNumber ||
+            db.StoreOrderPreviousNumbers.Any(previous => previous.IdOrder == x.Id && previous.PreviousNumber == orderNumber)).Select(x => new
             {
                 x.Id,
                 x.OrderNumber,
-                x.Status,
+                Status = x.StatusReference.Code,
+                StatusName = x.StatusReference.NameFa,
                 x.OrderedAtUtc,
                 x.ShippingCarrier,
                 x.ShippingTrackingCode,
@@ -39,19 +40,17 @@ public sealed class OrderTrackingApiController(ShopDbContext db) : ControllerBas
         if (order is null)
             return NotFound(new { code = "order-not-found", message = "سفارشی با این کد و شمارهٔ همراه پیدا نشد." });
 
-        var statusRows = await db.StoreOrderShippingHistories.AsNoTracking().Where(x => x.IdOrder == order.Id).OrderBy(x => x.ChangedAtUtc).Select(x => new { x.PreviousStatus, x.NewStatus, x.ChangedAtUtc }).ToListAsync(ct);
         var trackingRows = await db.StoreOrderShipmentTrackingHistories.AsNoTracking().Where(x => x.IdOrder == order.Id).OrderBy(x => x.ChangedAtUtc).Select(x => new { x.Carrier, x.TrackingCode, x.ChangedAtUtc }).ToListAsync(ct);
-        var statusHistory = statusRows.Select(x => new { x.PreviousStatus, x.NewStatus, changedAtUtc = DateTime.SpecifyKind(x.ChangedAtUtc, DateTimeKind.Utc) }).ToArray();
         var trackingHistory = trackingRows.Select(x => new { x.Carrier, x.TrackingCode, changedAtUtc = DateTime.SpecifyKind(x.ChangedAtUtc, DateTimeKind.Utc) }).ToArray();
 
         return Ok(new
         {
             orderNumber = order.OrderNumber,
             status = order.Status,
+            statusName = order.StatusName,
             orderedAtUtc = DateTime.SpecifyKind(order.OrderedAtUtc, DateTimeKind.Utc),
             shippingCarrier = order.ShippingCarrier,
             shippingTrackingCode = order.ShippingTrackingCode,
-            statusHistory,
             trackingHistory
         });
     }

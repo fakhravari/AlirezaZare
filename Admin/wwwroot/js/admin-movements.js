@@ -13,7 +13,7 @@
             const product = item.variantNameSnapshot ? `${item.productNameSnapshot} — ${item.variantNameSnapshot}` : item.productNameSnapshot;
             const quantity = `${number.format(item.quantity)} ${item.unitNameSnapshot} × ${factor.format(item.conversionFactor)} = ${number.format(item.baseQuantity)}`;
             const delta = item.affectsStock ? number.format(item.quantityDelta) : "بدون اثر بر موجودی";
-            [ui.formatDateTime(item.documentDate), number.format(item.documentNumber), item.documentType, item.warehouse, item.salesPlan, product, quantity, delta, number.format(item.balanceAfter), item.status === "F" ? "قطعی" : "موقت", item.reason].forEach(value => row.append(el("td", value || "—")));
+            [ui.formatDateTime(item.documentDate), number.format(item.documentNumber), item.documentType, item.warehouse, item.salesPlan, product, quantity, delta, number.format(item.balanceAfter), item.statusName || item.status, item.reason].forEach(value => row.append(el("td", value || "—")));
             body.append(row);
         }
         ui.refreshDataTable(page.querySelector("[data-admin-datatable]"));

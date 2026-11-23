@@ -10,23 +10,6 @@ window.HNUI.mount("pages-article-details", document, () => {
   if (feedback) {
     const slug = page.dataset.articleSlug;
     const metrics = { likes: Number(page.dataset.articleLikes) || 0 };
-    const seed = [
-      { name: "خوانندهٔ مجله", text: "راهنما خلاصه و کاربردی بود؛ نکته‌های انتخاب ابزار کمک‌کننده است.", rating: 5, reply: "خوشحالیم که راهنما برای انتخاب ابزار به شما کمک کرده است." },
-      { name: "کاربر کارگاهی", text: "مقایسهٔ نیاز و مشخصات دستگاه، انتخاب را ساده‌تر کرد.", rating: 4, reply: "ممنون از بازخوردتان؛ بررسی نیاز کارگاه پیش از انتخاب، نکتهٔ مهمی است." },
-      { name: "بازدیدکننده", text: "بخش نکات ایمنی مفید بود، اما توضیح بعضی مراحل می‌توانست کامل‌تر باشد.", rating: 3 },
-      { name: "خواننده", text: "ترتیب مراحل روشن است و برای شروع کار راهنمای خوبی به حساب می‌آید.", rating: 5 },
-      { name: "مخاطب مجله", text: "پیشنهاد بررسی مشخصات دستگاه پیش از خرید برایم مفید بود.", rating: 4, reply: "از همراهی شما سپاسگزاریم. مشخصات هر مدل را در صفحهٔ محصول می‌توانید بررسی کنید." },
-      { name: "کاربر ابزار", text: "موضوع خوب توضیح داده شده، ولی چند نکتهٔ فنی برایم مبهم ماند.", rating: 2 },
-      { name: "خوانندهٔ راهنما", text: "مطالب کوتاه و قابل استفاده بودند؛ مخصوصاً بخش نگهداری ابزار.", rating: 5 },
-      { name: "بازدیدکنندهٔ سایت", text: "راهنمای مناسبی است و مثال‌های بیشتری می‌تواند آن را بهتر کند.", rating: 3 },
-      { name: "کاربر مجله", text: "نکته‌های انتخاب با نیاز کارگاهی من هم‌خوانی داشت.", rating: 4 },
-      { name: "خوانندهٔ سایت", text: "موضوع اصلی را پوشش می‌دهد و توضیحاتش روان است.", rating: 5 },
-    ].map((item, index) => ({
-      ...item,
-      sample: true,
-      createdAt: new Date(Date.now() - (index + 1) * 86400000).toISOString(),
-      ...(item.reply ? { replyAt: new Date(Date.now() - (index + 1) * 86400000 + 3600000).toISOString() } : {}),
-    }));
     const pageSize = 5;
     let reviewPage = 1;
     let saved = [];
@@ -36,7 +19,7 @@ window.HNUI.mount("pages-article-details", document, () => {
       return window.HNUI.formatDateTime(value) || "زمان ثبت نامشخص";
     };
     const renderFeedback = () => {
-      const entries = [...saved, ...seed].sort(
+      const entries = [...saved].sort(
         (first, second) =>
           new Date(second.createdAt || 0).getTime() -
           new Date(first.createdAt || 0).getTime(),
@@ -48,6 +31,11 @@ window.HNUI.mount("pages-article-details", document, () => {
         reviewPage * pageSize,
       );
       list.replaceChildren();
+      if (!entries.length) {
+        const empty = document.createElement("p");
+        empty.textContent = "دیدگاهی در حساب شما برای این مقاله ثبت نشده است.";
+        list.append(empty);
+      }
       visibleEntries.forEach((item) => {
         const card = document.createElement("article");
         card.className = "article-feedback-card";
@@ -56,13 +44,13 @@ window.HNUI.mount("pages-article-details", document, () => {
         heading.className = "article-feedback-card-heading";
         const name = document.createElement("strong");
         name.textContent = item.name;
-        if (item.status === "pending" && !item.sample) {
+        if (item.status === "pending") {
           const pending = document.createElement("span");
           pending.className = "article-feedback-pending";
           const pendingIcon = document.createElement("i");
           pendingIcon.className = "bi bi-hourglass-split";
           pendingIcon.setAttribute("aria-hidden", "true");
-          pending.append(pendingIcon, document.createTextNode("در انتظار تأیید"));
+          pending.append(pendingIcon, document.createTextNode(item.statusName || "در انتظار تأیید"));
           heading.append(name, pending);
         } else {
           heading.append(name);
@@ -134,20 +122,21 @@ window.HNUI.mount("pages-article-details", document, () => {
           block: "start",
         });
       }, "صفحه‌بندی دیدگاه‌های مقاله");
-      const ratedEntries = [...saved, ...seed].filter((item) => Number(item.rating) >= 1 && Number(item.rating) <= 5);
-      const all = [...saved, ...seed];
+      const ratedEntries = [...saved].filter((item) => Number(item.rating) >= 1 && Number(item.rating) <= 5);
+      const all = [...saved];
       const average = ratedEntries.length
         ? ratedEntries.reduce((sum, item) => sum + Number(item.rating), 0) / ratedEntries.length
         : 0;
-      feedback.querySelector("[data-feedback-average]").textContent = average.toLocaleString("fa-IR", { maximumFractionDigits: 1 });
-      feedback.querySelector("[data-feedback-count]").textContent = `${all.length.toLocaleString("fa-IR")} نظر`;
+      feedback.querySelector("[data-feedback-average]").textContent = ratedEntries.length ? average.toLocaleString("fa-IR", { maximumFractionDigits: 1 }) : "—";
+      feedback.querySelector("[data-feedback-count]").textContent = `${all.length.toLocaleString("fa-IR")} نظر شما`;
       const commentStat = document.querySelector("[data-article-comment-count]");
       const ratingStat = document.querySelector("[data-article-rating]");
       commentStat?.querySelector("[data-article-comment-value]")?.replaceChildren(document.createTextNode(all.length.toLocaleString("fa-IR")));
-      commentStat?.setAttribute("aria-label", `${all.length.toLocaleString("fa-IR")} نظر`);
-      if (ratingStat && ratedEntries.length) {
-        ratingStat.querySelector("[data-article-rating-value]")?.replaceChildren(document.createTextNode(average.toLocaleString("fa-IR", { maximumFractionDigits: 1 })));
-        ratingStat.setAttribute("aria-label", `امتیاز ${average.toLocaleString("fa-IR", { maximumFractionDigits: 1 })} از ۵`);
+      commentStat?.setAttribute("aria-label", `${all.length.toLocaleString("fa-IR")} نظر شما`);
+      if (ratingStat) {
+        const rating = ratedEntries.length ? average.toLocaleString("fa-IR", { maximumFractionDigits: 1 }) : "—";
+        ratingStat.querySelector("[data-article-rating-value]")?.replaceChildren(document.createTextNode(rating));
+        ratingStat.setAttribute("aria-label", ratedEntries.length ? `امتیاز دیدگاه‌های حساب شما ${rating} از ۵` : "امتیازی در حساب شما ثبت نشده است");
       }
     };
     let likes = Number(metrics.likes) || 0;
@@ -177,6 +166,7 @@ window.HNUI.mount("pages-article-details", document, () => {
       const response = await window.HNUI.api.request("account/state");
       if (!response.ok) return;
       const account = await response.json();
+      if (!window.HNUI.auth.isLoggedIn()) return;
       const interactions = account.articleInteractions || [];
       liked = interactions.some((item) => item.slug === slug && item.type === "like");
       paintLikes();
@@ -184,7 +174,14 @@ window.HNUI.mount("pages-article-details", document, () => {
       renderFeedback();
     };
     if (window.HNUI.auth.isLoggedIn()) void hydrateFeedback().catch(() => {});
-    document.addEventListener("hn:auth-change", (event) => { if (event.detail) void hydrateFeedback().catch(() => {}); });
+    document.addEventListener("hn:auth-change", (event) => {
+      if (event.detail) { void hydrateFeedback().catch(() => {}); return; }
+      saved = [];
+      liked = false;
+      reviewPage = 1;
+      renderFeedback();
+      paintLikes();
+    });
     document.addEventListener("hn:legacy-data-imported", () => { void hydrateFeedback().catch(() => {}); });
     feedback.querySelector("[data-feedback-form]").addEventListener("submit", async (event) => {
       event.preventDefault();

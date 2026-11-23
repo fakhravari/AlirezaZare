@@ -40,11 +40,9 @@ public sealed class StorePaidOrdersDispatchApiController(ShopDbContext db, IWare
 
         var eligible = from order in db.StoreCustomerOrders.AsNoTracking()
                        join profile in db.AccountProfiles.AsNoTracking() on order.IdProfile equals profile.Id
-                       where order.Status == "payment-confirmed" && order.IdWarehouseDocument == null &&
-                             ((warehouseQueue && order.PaymentMethod == "demo" && order.ExternalOrderKey != null && order.ExternalOrderKey.StartsWith("demo-order-")) ||
-                              (!(order.PaymentMethod == "demo" && order.ExternalOrderKey != null && order.ExternalOrderKey.StartsWith("demo-order-")) &&
-                               db.StorePaymentAttempts.Any(payment => payment.IdOrder == order.Id && payment.Status == "verified" &&
-                                   payment.Amount == order.TotalAmount && payment.PaidAtUtc != null))) &&
+                       where order.StatusReference.Code == "payment-confirmed" && order.IdWarehouseDocument == null &&
+                             db.StorePaymentAttempts.Any(payment => payment.IdOrder == order.Id && payment.Status == "verified" &&
+                                   payment.Amount == order.TotalAmount && payment.PaidAtUtc != null) &&
                              db.StoreCustomerOrderItems.Any(item => item.IdOrder == order.Id)
                        select new { order, profile };
         if (paging.Search.Length > 0)
@@ -54,7 +52,6 @@ public sealed class StorePaidOrdersDispatchApiController(ShopDbContext db, IWare
             {
                 x.order,
                 x.profile,
-                IsSample = x.order.PaymentMethod == "demo" && x.order.ExternalOrderKey != null && x.order.ExternalOrderKey.StartsWith("demo-order-"),
                 PaidAtUtc = db.StorePaymentAttempts.AsNoTracking().Where(payment => payment.IdOrder == x.order.Id && payment.Status == "verified" &&
                         payment.Amount == x.order.TotalAmount && payment.PaidAtUtc != null)
                     .OrderBy(payment => payment.PaidAtUtc).Select(payment => payment.PaidAtUtc).FirstOrDefault() ?? x.order.OrderedAtUtc
@@ -65,8 +62,7 @@ public sealed class StorePaidOrdersDispatchApiController(ShopDbContext db, IWare
                 TotalAmount = x.order.TotalAmount,
                 ItemCount = x.order.ItemCount,
                 PaidAtUtc = x.PaidAtUtc,
-                CustomerName = (x.profile.FirstName + " " + x.profile.LastName).Trim(),
-                IsSample = x.IsSample
+                CustomerName = (x.profile.FirstName + " " + x.profile.LastName).Trim()
             }).ToListAsync(cancellationToken);
 
         return Ok(AdminListQuery.CreateResult(rows, total, paging));
@@ -88,16 +84,15 @@ public sealed class StorePaidOrdersDispatchApiController(ShopDbContext db, IWare
         try
         {
             long[] ids = input.OrderIds;
-            var orders = await db.StoreCustomerOrders.Where(x => ids.Contains(x.Id)).ToListAsync(cancellationToken);
+            var orders = await db.StoreCustomerOrders.Include(x => x.StatusReference).Where(x => ids.Contains(x.Id)).ToListAsync(cancellationToken);
             if (orders.Count != ids.Length) return Conflict(new { detail = "وضعیت یکی از سفارش‌ها تغییر کرده است." });
 
             var orderIds = orders.Select(x => x.Id).ToArray();
             var payments = await db.StorePaymentAttempts.Where(x => orderIds.Contains(x.IdOrder) && x.Status == "verified" && x.PaidAtUtc != null) .ToListAsync(cancellationToken);
             var orderItems = await db.StoreCustomerOrderItems.AsNoTracking().Where(x => orderIds.Contains(x.IdOrder)).ToListAsync(cancellationToken);
-            if (orders.Any(order => order.Status != "payment-confirmed" ||
+            if (orders.Any(order => order.StatusReference.Code != "payment-confirmed" ||
                     order.IdWarehouseDocument is not null ||
-                    (!(order.PaymentMethod == "demo" && order.ExternalOrderKey?.StartsWith("demo-order-") == true) &&
-                     !payments.Any(payment => payment.IdOrder == order.Id && payment.Amount == order.TotalAmount)) ||
+                    !payments.Any(payment => payment.IdOrder == order.Id && payment.Amount == order.TotalAmount) ||
                     !orderItems.Any(item => item.IdOrder == order.Id)))
                 return Conflict(new { detail = "وضعیت یکی از سفارش‌ها تغییر کرده است؛ فهرست را دوباره بارگذاری کنید." });
 
@@ -191,10 +186,11 @@ public sealed class StorePaidOrdersDispatchApiController(ShopDbContext db, IWare
 
             await stockLedger.RebuildDocumentAsync(document.Id, cancellationToken);
 
+            int warehouseConfirmedStatusId = await db.OrderStatuses.Where(x => x.Code == "warehouse-confirmed").Select(x => x.Id).SingleAsync(cancellationToken);
             foreach (var order in orders)
             {
                 order.IdWarehouseDocument = document.Id;
-                order.Status = "warehouse-confirmed";
+                order.IdStatus = warehouseConfirmedStatusId;
             }
             db.WarehouseDocumentAudits.Add(new WarehouseDocumentAudit
             {
@@ -231,7 +227,6 @@ public sealed class StorePaidOrdersDispatchApiController(ShopDbContext db, IWare
         public int ItemCount { get; set; }
         public decimal TotalAmount { get; set; }
         public DateTime PaidAtUtc { get; set; }
-        public bool IsSample { get; set; }
     }
     public sealed record DispatchInput(long[]? OrderIds);
 

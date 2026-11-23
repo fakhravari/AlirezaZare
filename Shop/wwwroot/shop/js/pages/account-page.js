@@ -212,24 +212,21 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
         renderCoupons();
     }
 
-    const renderAccountOrders = (orders, simulationAvailable = false) => {
+    const renderAccountOrders = (orders) => {
         const host = document.querySelector(".profile-order-list");
         if (!host || !Array.isArray(orders)) return;
-        const labels = { "pending-payment": "در انتظار پرداخت", "simulated-payment-confirmed": "پرداخت آزمایشی تأیید شد", "payment-confirmed": "پرداخت تأیید شد", "warehouse-confirmed": "تأیید انبار", "in-transit": "در حال ارسال", "shipped-to-post": "ارسال به پست", delivered: "تحویل‌شده", cancelled: "لغوشده" };
         host.replaceChildren();
         for (const order of orders) {
-            const label = labels[order.status] || "نامشخص";
+            const label = order.statusName || "نامشخص";
             const dateLabel = formatPersianDate(order.orderedAtUtc);
             const card = document.createElement("article");
             card.className = "profile-order-card";
             card._orderDetails = order;
             Object.assign(card.dataset, { orderNumber: order.number, orderStatus: label, orderDate: dateLabel, orderDatetime: order.orderedAtUtc || "", orderCount: String(order.itemCount), orderAmount: String(order.totalAmount), orderDelivery: label });
-            const simulationLink = simulationAvailable && order.status === "pending-payment" && Number.isSafeInteger(order.id) && order.id > 0
-                ? `<a href="/payment/simulated/${order.id}">ادامهٔ پرداخت آزمایشی</a>` : "";
-            const paymentButton = !simulationAvailable && !order.isSample && order.status === "pending-payment" && Number.isSafeInteger(order.id) && order.id > 0
+            const paymentButton = order.status === "pending-payment" && Number.isSafeInteger(order.id) && order.id > 0
                 ? `<button type="button" data-pay-order="${order.id}">ادامهٔ پرداخت</button>` : "";
             const tracking = order.shippingCarrier && order.shippingTrackingCode ? `<p>شرکت حمل: ${ui.escapeHtml(order.shippingCarrier)}، کد رهگیری: <bdi>${ui.escapeHtml(order.shippingTrackingCode)}</bdi></p>` : "";
-            card.innerHTML = `<header><div><span class="order-status is-${ui.escapeHtml(order.status)}">${ui.escapeHtml(label)}</span><strong>سفارش ${ui.escapeHtml(order.number)}</strong></div><time datetime="${card.dataset.orderDatetime}">${ui.escapeHtml(dateLabel)}</time></header><div class="order-body order-invoice-summary"><div class="order-products"><span class="order-product-icon"><i class="bi bi-receipt-cutoff"></i></span><div><strong>خلاصهٔ فاکتور</strong><small>${ui.formatNumber(order.itemCount)} کالا</small></div></div><div class="order-total"><small>مبلغ سفارش</small><strong>${ui.formatNumber(order.totalAmount)} تومان</strong></div></div>${tracking}<footer><span>${ui.escapeHtml(label)}</span><div class="order-card-actions">${simulationLink}${paymentButton}<a href="/Tracking"><i class="bi bi-truck"></i> پیگیری سفارش</a><button type="button" data-open-order-invoice>مشاهدهٔ فاکتور</button></div></footer>`;
+            card.innerHTML = `<header><div><span class="order-status is-${ui.escapeHtml(order.status)}">${ui.escapeHtml(label)}</span><strong>سفارش ${ui.escapeHtml(order.number)}</strong></div><time datetime="${card.dataset.orderDatetime}">${ui.escapeHtml(dateLabel)}</time></header><div class="order-body order-invoice-summary"><div class="order-products"><span class="order-product-icon"><i class="bi bi-receipt-cutoff"></i></span><div><strong>خلاصهٔ فاکتور</strong><small>${ui.formatNumber(order.itemCount)} کالا</small></div></div><div class="order-total"><small>مبلغ سفارش</small><strong>${ui.formatNumber(order.totalAmount)} تومان</strong></div></div>${tracking}<footer><span>${ui.escapeHtml(label)}</span><div class="order-card-actions">${paymentButton}<a href="/Tracking"><i class="bi bi-truck"></i> پیگیری سفارش</a><button type="button" data-open-order-invoice>مشاهدهٔ فاکتور</button></div></footer>`;
             host.append(card);
         }
         const total = document.querySelector("#ordersTotal");
@@ -246,7 +243,7 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
             if (Array.isArray(account.favorites)) ui.storage.hydrate("hn-favorites", JSON.stringify(account.favorites.map((item) => String(item.id))));
             if (Array.isArray(account.compare)) ui.storage.hydrate("hn-compare", JSON.stringify(account.compare.map((item) => String(item.id))));
             if (Array.isArray(account.priceAlerts)) ui.storage.hydrate(priceWatchKey, JSON.stringify(account.priceAlerts));
-            renderAddresses(); renderAccountOrders(account.orders, account.simulationAvailable === true); renderOverview();
+            renderAddresses(); renderAccountOrders(account.orders); renderOverview();
         } catch { }
     };
     document.addEventListener("hn:auth-change", (event) => { if (event.detail) void hydrateAccount(); });
@@ -570,9 +567,7 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
                 row.append(description, quantity, amount); lines?.append(row);
             }
             const history = invoiceDialog.querySelector("[data-invoice-history]"); history?.replaceChildren();
-            const statusLabels = { "pending-payment": "در انتظار پرداخت", "payment-confirmed": "پرداخت تأیید شد", "warehouse-confirmed": "تأیید انبار", "shipped-to-post": "تحویل به پست", "in-transit": "در حال ارسال", delivered: "تحویل‌شده", cancelled: "لغوشده" };
             const events = [
-                ...(details.shippingHistory || []).map(entry => ({ when: entry.changedAtUtc, text: `${statusLabels[entry.previousStatus] || entry.previousStatus} ← ${statusLabels[entry.newStatus] || entry.newStatus}` })),
                 ...(details.trackingHistory || []).map(entry => ({ when: entry.changedAtUtc, text: `رهگیری: ${entry.carrier}، ${entry.trackingCode}` }))
             ].sort((a, b) => new Date(a.when) - new Date(b.when));
             for (const entry of events) { const li = document.createElement("li"); li.textContent = `${ui.formatDateTime(entry.when)} — ${entry.text}`; history?.append(li); }

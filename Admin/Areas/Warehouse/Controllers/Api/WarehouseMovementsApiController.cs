@@ -53,6 +53,7 @@ public sealed class WarehouseMovementsApiController(ShopDbContext db) : Controll
                         document.DocumentNumber,
                         document.DocumentDate,
                         document.Status,
+                        StatusName = document.StatusReference.NameFa,
                         ProductId = inventoryItem.IdProduct,
                         DocumentType = type.Name,
                         type.Direction,

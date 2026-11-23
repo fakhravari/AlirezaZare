@@ -16,10 +16,11 @@ BEGIN TRY
         SET @number = CONCAT(N'DEMO-WH-QUEUE-', RIGHT(CONCAT(N'00', @n), 2));
         IF NOT EXISTS (SELECT 1 FROM [Store].[Order] WHERE ExternalOrderKey = @key)
         BEGIN
-            INSERT [Store].[Order] (IdProfile, OrderNumber, ExternalOrderKey, Status, PaymentMethod, IdBank, ItemCount, TotalAmount, SubtotalAmount, CouponDiscountAmount, OrderedAtUtc, AddressSnapshotJson)
-            SELECT IdProfile, @number, @key, N'payment-confirmed', N'demo', IdBank, ItemCount, TotalAmount, TotalAmount, 0,
+            INSERT [Store].[Order] (IdProfile, OrderNumber, ExternalOrderKey, IdStatus, PaymentMethod, IdBank, ItemCount, TotalAmount, SubtotalAmount, CouponDiscountAmount, OrderedAtUtc, AddressSnapshotJson)
+            SELECT source.IdProfile, @number, @key, status.Id, N'demo', source.IdBank, source.ItemCount, source.TotalAmount, source.TotalAmount, 0,
                    DATEADD(MINUTE, -@n, SYSUTCDATETIME()), AddressSnapshotJson
-            FROM [Store].[Order] WHERE Id = @source;
+            FROM [Store].[Order] source CROSS JOIN Store.OrderStatus status
+            WHERE source.Id = @source AND status.Code = N'payment-confirmed';
             SET @newId = SCOPE_IDENTITY();
             DECLARE @itemMap TABLE (OldId bigint NOT NULL, NewId bigint NOT NULL);
             MERGE [Store].[OrderItem] AS target

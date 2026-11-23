@@ -40,20 +40,28 @@ test('selecting an address enables checkout and sends the selected address', {sk
   const browser = await chromium.launch({headless: true});
   t.after(() => browser.close());
   const page = await browser.newPage();
-  await page.goto('about:blank');
+  await page.route('https://example.test/', route => route.fulfill({body: '', contentType: 'text/html'}));
+  await page.goto('https://example.test/');
   await page.setContent(`<div class="cart-address-section" dir="rtl"><div class="address-select-wrap"><select id="addressSelect"></select></div><div id="addressPreview" hidden></div><p id="addressStatus"></p><button id="newAddress"></button></div>
     <div class="cart-payment-section"><input type="radio" name="paymentMethod" value="zarinpal"><p id="paymentMethodStatus"></p></div>
     <div id="cartView"><a class="cart-checkout-link" href="https://example.test/Checkout">پیش‌فاکتور</a></div>
     <dialog id="addressDialog"></dialog><button id="closeAddress"></button><form id="addressForm"><label><input name="phone"></label><label><input name="postal"></label></form><div id="addressFormStatus"><i></i><span class="address-form-status-message"></span></div>`);
   await page.evaluate(() => {
     const addresses = [{id: '42', title: 'خانه', recipient: 'مشتری', phone: '09120000000', province: 'تهران', city: 'تهران', street: 'خیابان اول', postal: '1234567890'}];
+    window.confirmCheckout = false;
+    window.confirmFormSubmission = async options => { window.confirmOptions = options; return window.confirmCheckout; };
     window.HNUI = {
       ready: callback => callback(), mount: (_name, _root, callback) => callback(),
       storage: {get: key => key === 'hn-delivery-addresses' ? JSON.stringify(addresses) : '', hydrate() {}},
       cart: {read: () => [{id: '1', quantity: 1, price: 100}]},
-      auth: {isLoggedIn: () => false}, setMessage() {}, setMessageType() {}
+      auth: {isLoggedIn: () => true}, setMessage(node, message) { if (node) node.textContent = message; }, setMessageType() {},
+      api: {request: async (url, options) => {
+        if (url === 'account/state') return {ok: true, json: async () => ({addresses})};
+        if (url === 'account/cart') return {ok: true, json: async () => ({})};
+        window.checkoutSubmission = JSON.parse(options.body);
+        return {ok: false, json: async () => ({code: 'insufficient-stock'})};
+      }}
     };
-    HTMLFormElement.prototype.submit = function () { window.checkoutSubmission = Object.fromEntries(new FormData(this)); };
   });
   await page.addScriptTag({path: 'Shop/wwwroot/shop/vendor/jquery/jquery.min.js'});
   await page.addScriptTag({path: 'Shop/wwwroot/shop/vendor/jquery/jquery-migrate.min.js'});
@@ -67,5 +75,15 @@ test('selecting an address enables checkout and sends the selected address', {sk
   assert.equal(await page.locator('.cart-checkout-link').getAttribute('aria-disabled'), 'false');
   assert.match(await page.locator('#addressPreview').innerText(), /خیابان اول/);
   await page.locator('.cart-checkout-link').click();
-  assert.deepEqual(await page.evaluate(() => window.checkoutSubmission), {addressId: '42', paymentMethod: 'zarinpal'});
+  assert.match(await page.evaluate(() => window.confirmOptions.message), /قابل ویرایش نیستند/);
+  assert.equal(await page.evaluate(() => window.checkoutSubmission), undefined);
+  assert.equal(await page.locator('.cart-checkout-link').getAttribute('aria-disabled'), 'false');
+  await page.evaluate(() => { window.confirmCheckout = true; });
+  await page.locator('.cart-checkout-link').click();
+  await page.waitForFunction(() => window.checkoutSubmission);
+  const submission = await page.evaluate(() => window.checkoutSubmission);
+  assert.match(submission.checkoutKey, /^[0-9a-f-]{36}$/);
+  assert.deepEqual({...submission, checkoutKey: undefined}, {addressId: 42, paymentMethod: 'zarinpal', couponCode: null, checkoutKey: undefined});
+  await page.waitForFunction(() => document.querySelector('#paymentMethodStatus').textContent.includes('موجودی کافی'));
+  assert.equal(await page.locator('.cart-checkout-link').getAttribute('aria-disabled'), 'false');
 });

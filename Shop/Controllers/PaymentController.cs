@@ -36,8 +36,8 @@ public sealed class PaymentController(PaymentService payments, IAntiforgery anti
     }
 
     [AllowAnonymous]
-    [HttpGet("callback/{attemptId:guid}")]
-    public async Task<IActionResult> Callback(Guid attemptId, CancellationToken ct)
+    [HttpGet("callback/{attemptId:decimal}")]
+    public async Task<IActionResult> Callback(decimal attemptId, CancellationToken ct)
     {
         IReadOnlyDictionary<string, IReadOnlyList<string>> callback = Request.Query.ToDictionary(
             item => item.Key,

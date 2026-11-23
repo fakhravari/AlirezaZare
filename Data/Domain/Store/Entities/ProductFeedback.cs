@@ -26,6 +26,8 @@ public sealed class ProductFeedbackStatus
     public const int Pending = 1;
     public const int Approved = 2;
     public const int Rejected = 3;
+    public const int Deleted = 4;
     public int Id { get; set; }
     public string Name { get; set; } = "";
+    public string NameEn { get; set; } = "";
 }

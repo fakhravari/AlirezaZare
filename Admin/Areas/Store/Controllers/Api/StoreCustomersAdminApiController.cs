@@ -82,10 +82,9 @@ public sealed class StoreCustomersAdminApiController(ShopDbContext db) : Control
             var orders = await db.StoreCustomerOrders.AsNoTracking().Where(o => o.IdProfile == id).OrderByDescending(o => o.Id).Take(50).Select(o => new
                 {
                     o.OrderNumber,
-                    o.Status,
+                    Status = o.StatusReference.NameFa,
                     o.TotalAmount,
-                    o.OrderedAtUtc,
-                    IsSample = o.PaymentMethod == "demo" && o.ExternalOrderKey != null && o.ExternalOrderKey.StartsWith("demo-order-")
+                    o.OrderedAtUtc
                 }).ToListAsync(cancellationToken);
             var feedback = await db.ProductFeedback.AsNoTracking().Where(f => f.IdProfile == id).OrderByDescending(f => f.Id)
                 .Take(50).Select(f => new { f.FeedbackType, f.FeedbackText, Status = f.Status.Name, f.CreatedAtUtc, ProductName = f.Product.Name })

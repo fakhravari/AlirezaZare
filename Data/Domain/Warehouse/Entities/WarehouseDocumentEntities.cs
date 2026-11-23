@@ -1,3 +1,5 @@
+using Shop.Data.Domain.Store.Entities;
+
 namespace Shop.Data.Domain.Warehouse.Entities;
 
 public sealed class WarehouseDocumentRecord
@@ -10,6 +12,7 @@ public sealed class WarehouseDocumentRecord
     public long DocumentNumber { get; set; }
     public DateOnly DocumentDate { get; set; }
     public string Status { get; set; } = "D";
+    public WarehouseDocumentStatusReference StatusReference { get; set; } = null!;
     public string? CustomerOrderKey { get; set; }
     public string? ExternalReference { get; set; }
     public string? Reason { get; set; }

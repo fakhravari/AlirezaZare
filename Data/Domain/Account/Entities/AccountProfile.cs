@@ -108,7 +108,14 @@ public sealed class AccountArticleFeedback
     public string FeedbackText { get; set; } = "";
     public byte? Rating { get; set; }
     public string Status { get; set; } = "";
+    public ArticleFeedbackStatusReference StatusReference { get; set; } = null!;
     public DateTime CreatedAtUtc { get; set; }
+}
+
+public sealed class StoreOrderPreviousNumber
+{
+    public long IdOrder { get; set; }
+    public string PreviousNumber { get; set; } = string.Empty;
 }
 
 public sealed class StoreCustomerOrderReference
@@ -116,7 +123,8 @@ public sealed class StoreCustomerOrderReference
     public long Id { get; set; }
     public long IdProfile { get; set; }
     public string OrderNumber { get; set; } = string.Empty;
-    public string Status { get; set; } = string.Empty;
+    public int IdStatus { get; set; }
+    public OrderStatusReference StatusReference { get; set; } = null!;
     public decimal TotalAmount { get; set; }
     public decimal SubtotalAmount { get; set; }
     public long? IdCoupon { get; set; }
@@ -133,16 +141,6 @@ public sealed class StoreCustomerOrderReference
     public string AddressSnapshotJson { get; set; } = "{}";
     public long? IdWarehouseDocument { get; set; }
     public ICollection<StoreCustomerOrderItem> Items { get; set; } = new List<StoreCustomerOrderItem>();
-}
-
-public sealed class StoreOrderShippingHistory
-{
-    public long Id { get; set; }
-    public long IdOrder { get; set; }
-    public string PreviousStatus { get; set; } = "";
-    public string NewStatus { get; set; } = "";
-    public string ActorUserKey { get; set; } = "";
-    public DateTime ChangedAtUtc { get; set; }
 }
 
 public sealed class StoreOrderShipmentTrackingHistory
@@ -171,10 +169,11 @@ public sealed class StoreCustomerOrderItem
 
 public sealed class StorePaymentAttempt
 {
-    public Guid Id { get; set; }
+    public decimal Id { get; set; }
     public long IdOrder { get; set; }
     public decimal Amount { get; set; }
     public string Status { get; set; } = "";
+    public PaymentAttemptStatusReference StatusReference { get; set; } = null!;
     public string? GatewayReference { get; set; }
     public string? ReceiptReference { get; set; }
     public DateTime? PaidAtUtc { get; set; }

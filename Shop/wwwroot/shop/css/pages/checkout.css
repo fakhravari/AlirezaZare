@@ -981,6 +981,10 @@ body .selected-address-card-heading > strong {
     0 4px 12px rgba(15, 39, 70, 0.045),
     inset 0 1px rgba(255, 255, 255, 0.9);
 }
+#cartView .cart-address-section {
+  overflow: visible;
+  z-index: 2;
+}
 #cartView .cart-address-section::before,
 #cartView .cart-payment-section::before,
 #cartView .cart-products-panel::before,
