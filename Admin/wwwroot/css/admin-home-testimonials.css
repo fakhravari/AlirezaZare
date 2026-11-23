@@ -15,9 +15,15 @@
     min-width: 15rem;
 }
 
+.home-testimonial-table td.admin-row-actions {
+    display: table-cell;
+    vertical-align: middle;
+}
+
 .home-testimonial-actions {
     display: flex;
     flex-wrap: nowrap;
+    justify-content: center;
     gap: .5rem;
 }
 
