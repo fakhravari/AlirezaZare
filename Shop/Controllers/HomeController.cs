@@ -36,9 +36,6 @@ public sealed class HomeController : PageController
         var magazine = await _magazine.ReadIndexAsync(HttpContext.RequestAborted);
         ViewData["HomeBrands"] = (await _catalog.ReadAsync(HttpContext.RequestAborted)).Brands;
         var approvedReviews = _db.ProductFeedback.AsNoTracking().Where(x => x.FeedbackType == "reviews" && x.Status == "approved");
-        var customerReviews = approvedReviews.Where(x => !x.IsSample);
-        int reviewCount = await customerReviews.CountAsync(HttpContext.RequestAborted);
-        double reviewAverage = reviewCount == 0 ? 0 : await customerReviews.AverageAsync(x => (double?)(x.Rating ?? 0), HttpContext.RequestAborted) ?? 0;
         var reviewItems = await (from featured in _db.StoreHomeTestimonials.AsNoTracking()
             join feedback in approvedReviews on featured.IdProductFeedback equals feedback.Id
             where featured.IsActive
@@ -50,8 +47,6 @@ public sealed class HomeController : PageController
             x.Rating, x.CreatedAtUtc, string.IsNullOrWhiteSpace(x.ImagePath) ? null : ContentCdn.ToUrl(x.ImagePath, cdnBaseUrl), x.IsSample)).ToArray();
         ViewData["HomeSliders"] = await _db.StoreSliders.AsNoTracking().Where(x => x.ShowOnMobile || x.ShowOnDesktop).OrderBy(x => x.Id).ToListAsync(HttpContext.RequestAborted);
         ViewData["HomeReviews"] = reviews;
-        ViewData["HomeReviewAverage"] = Math.Round(reviewAverage, 1);
-        ViewData["HomeReviewCount"] = reviewCount;
 
         return await PageAsync(new PageModel<MagazineIndexViewModel>(magazine, model.Seo, IsHome: true));
     }

@@ -2,8 +2,6 @@
 @using System.Globalization
 @{
     var reviews = ViewData["HomeReviews"] as IReadOnlyList<HomeReviewCard> ?? [];
-    var average = ViewData["HomeReviewAverage"] as double? ?? 0;
-    var reviewCount = ViewData["HomeReviewCount"] as int? ?? 0;
     var persianCulture = CultureInfo.GetCultureInfo("fa-IR");
     var tehranTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Asia/Tehran");
     var cdnBaseUrl = ViewData["MediaCdnBaseUrl"] as string ?? "";
@@ -18,24 +16,9 @@
             </div>
             <div class="testimonial-tools">
                 <div class="rating-summary">
-                    <div class="rating-score">@(reviewCount == 0 ? "—" : average.ToString("0.0", CultureInfo.InvariantCulture))</div>
                     <div>
-                        <div class="rating-stars" role="img" aria-label="امتیاز میانگین @average از ۵">
-                            @for (var star = 0; star < 5; star++)
-                            {
-                                <i class="bi @(star < Math.Round(average) ? "bi-star-fill" : "bi-star")" aria-hidden="true"></i>
-                            }
-                        </div>
-                        @if (reviewCount > 0)
-                        {
-                            <strong>بر پایهٔ @reviewCount نظر تأییدشده</strong>
-                            <span>کیفیت، اصالت و همراهی تا انتخاب نهایی</span>
-                        }
-                        else
-                        {
-                            <strong>هنوز نظری تأیید نشده است</strong>
-                            <span>پس از تأیید دیدگاه‌ها، نظر خریداران اینجا نمایش داده می‌شود.</span>
-                        }
+                        <strong>انتخاب آگاهانه، خرید مطمئن</strong>
+                        <span>پیش از خرید، مشخصات کالا و دیدگاه‌های دیگران را بررسی کنید.</span>
                     </div>
                 </div>
             </div>
@@ -73,7 +56,7 @@
                                 }
                             </span>
                             <div>
-                                <strong>@review.DisplayName @if (review.IsSample) { <span>(نمونه)</span> }</strong>
+                                <strong>@review.DisplayName</strong>
                                 <small>@(review.IsSample ? "محصول" : "خریدار") @review.ProductName</small>
                             </div>
                         </div>
