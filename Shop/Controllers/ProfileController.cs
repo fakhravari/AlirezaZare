@@ -2,6 +2,7 @@ using Shop.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Shop.Data.Infrastructure.Persistence;
+using System.Security.Claims;
 
 namespace Shop.Controllers;
 
@@ -45,9 +46,16 @@ public sealed class ProfileController(Shop.Services.IAccountDataSource accountDa
     private async Task<IActionResult> ProfilePage(string section, string title, string description, string icon)
     {
         var account = await accountDataSource.ReadAsync(HttpContext.RequestAborted);
+        long.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out long profileId);
+        var assignedCoupons = profileId > 0
+            ? await db.AccountCoupons.AsNoTracking().Where(coupon => coupon.IdProfile == profileId)
+                .Select(coupon => new { coupon.CouponKey, coupon.Code, coupon.DiscountPercent, coupon.Enabled, coupon.ExpiresOn, coupon.UsageLimit })
+                .ToListAsync(HttpContext.RequestAborted)
+            : [];
         var ordersById = account.Orders.ToDictionary(order => order.Id, StringComparer.Ordinal);
         DateOnly today = DateOnly.FromDateTime(DateTime.UtcNow);
-        var coupons = account.Coupons.Select(coupon => new ProfileCouponViewModel(
+        var accountCoupons = account.Coupons.Concat(assignedCoupons.Select(coupon => new Shop.Models.AccountCoupon(coupon.CouponKey, coupon.Code, coupon.DiscountPercent, coupon.Enabled, coupon.ExpiresOn, coupon.UsageLimit, Array.Empty<string>())));
+        var coupons = accountCoupons.Select(coupon => new ProfileCouponViewModel(
                 coupon.Id,
                 coupon.Code,
                 coupon.DiscountPercent,

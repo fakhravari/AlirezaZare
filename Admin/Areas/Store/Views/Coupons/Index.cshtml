@@ -21,13 +21,14 @@
             </form>
             <p class="small text-muted">@Model.Total.ToString("N0") کد · @Model.Uses.ToString("N0") مصرف · @Model.Discount.ToString("N0") تومان تخفیف ثبت‌شده در همهٔ وضعیت‌های سفارش</p>
             <div class="table-responsive admin-table-wrap"><table class="table table-striped table-hover align-middle mb-0 admin-styled-table">
-                <thead><tr><th scope="col">کد تخفیف</th><th scope="col">درصد</th><th scope="col">مصرف / سقف</th><th scope="col">تاریخ انقضا</th><th scope="col">وضعیت</th><th scope="col">تخفیف ثبت‌شده</th><th scope="col">عملیات</th></tr></thead><tbody>
+                <thead><tr><th scope="col">کد تخفیف</th><th scope="col">مخاطب</th><th scope="col">درصد</th><th scope="col">مصرف / سقف</th><th scope="col">تاریخ انقضا</th><th scope="col">وضعیت</th><th scope="col">تخفیف ثبت‌شده</th><th scope="col">عملیات</th></tr></thead><tbody>
                 @foreach (var coupon in Model.Coupons)
                 {
                     string status = !coupon.Enabled ? "غیرفعال" : coupon.ExpiresOn < Model.Today ? "منقضی" : coupon.Uses >= coupon.UsageLimit ? "ظرفیت تکمیل" : "قابل استفاده";
                     string statusClass = status == "قابل استفاده" ? "bg-success" : "bg-secondary";
                     <tr>
                         <td><strong><bdi dir="ltr">@coupon.Code</bdi></strong></td>
+                        <td>@if (coupon.IdProfile is null) { <span>عمومی</span> } else { <span>اختصاصی: <bdi dir="ltr">@coupon.CustomerEmail</bdi></span> }</td>
                         <td>@coupon.DiscountPercent٪</td><td>@coupon.Uses.ToString("N0") / @coupon.UsageLimit.ToString("N0")</td>
                         <td><time data-admin-date datetime="@coupon.ExpiresOn.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture)" dir="ltr">@coupon.ExpiresOn.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture)</time></td>
                         <td><span class="badge @statusClass">@status</span></td><td>@coupon.Discount.ToString("N0") تومان</td>
@@ -42,7 +43,7 @@
                         </div></td>
                     </tr>
                 }
-                @if (Model.Coupons.Count == 0) { <tr><td colspan="7" class="text-center text-muted p-4">کدی در این صفحه یافت نشد.</td></tr> }
+                @if (Model.Coupons.Count == 0) { <tr><td colspan="8" class="text-center text-muted p-4">کدی در این صفحه یافت نشد.</td></tr> }
                 </tbody></table></div>
                 <form method="get" asp-action="Index" class="admin-pagination mt-3" role="navigation" aria-label="صفحه‌بندی کدهای تخفیف">
                     <input type="hidden" name="q" value="@Model.Query" /><input type="hidden" name="status" value="@Model.Status" />
@@ -60,7 +61,7 @@
         </div>
     </section>
 </div>
-@await Html.PartialAsync("_CouponEditor", new Shop.Admin.Areas.Store.Controllers.CouponRow(0, "", 0, 1, true, default, 0, 0, false))
+@await Html.PartialAsync("_CouponEditor", new Shop.Admin.Areas.Store.Controllers.CouponRow(0, "", 0, 1, true, default, 0, 0, false, null, null))
 @foreach (var coupon in Model.Coupons)
 {
     @await Html.PartialAsync("_CouponEditor", coupon)

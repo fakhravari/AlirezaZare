@@ -569,6 +569,7 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.ToTable("Coupon", "Store"); entity.HasKey(x => x.Id);
             entity.Property(x => x.CouponKey).HasMaxLength(100).IsRequired(); entity.Property(x => x.Code).HasMaxLength(32).IsRequired();
             entity.HasIndex(x => x.CouponKey).IsUnique(); entity.HasIndex(x => x.Code).IsUnique();
+            entity.HasOne<AccountProfile>().WithMany().HasForeignKey(x => x.IdProfile).OnDelete(DeleteBehavior.Restrict);
         });
         modelBuilder.Entity<StoreCouponUsage>(entity =>
         {

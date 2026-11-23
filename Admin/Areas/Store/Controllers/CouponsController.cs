@@ -38,7 +38,8 @@ public sealed class CouponsController(ShopDbContext db) : Controller
             .Select(item => new CouponRow(item.Id, item.Code, item.DiscountPercent, item.UsageLimit, item.Enabled, item.ExpiresOn,
                 db.StoreCouponUsages.Count(usage => usage.IdCoupon == item.Id),
                 db.StoreCustomerOrders.Where(order => order.IdCoupon == item.Id).Sum(order => (decimal?)order.CouponDiscountAmount) ?? 0,
-                db.StoreCustomerOrders.Any(order => order.IdCoupon == item.Id))).ToListAsync(cancellationToken);
+                db.StoreCustomerOrders.Any(order => order.IdCoupon == item.Id), item.IdProfile,
+                db.AccountProfiles.Where(profile => profile.Id == item.IdProfile).Select(profile => profile.Email).FirstOrDefault())).ToListAsync(cancellationToken);
         return View(new CouponIndexModel(coupons, q, status, page, total, uses, discount, today));
     }
 
@@ -88,17 +89,30 @@ public sealed class CouponsController(ShopDbContext db) : Controller
     }
 
     [HttpPost, ValidateAntiForgeryToken]
-    public async Task<IActionResult> Save(long? id, string? code, int discountPercent, int usageLimit, DateOnly expiresOn, bool enabled, CancellationToken cancellationToken)
+    public async Task<IActionResult> Save(long? id, string? code, int discountPercent, int usageLimit, DateOnly expiresOn, bool enabled, string? audience, string? customerEmail, CancellationToken cancellationToken)
     {
         code = (code ?? "").Trim().ToUpperInvariant();
         if (!ModelState.IsValid || id is <= 0 || code.Length is < 1 or > 32 || code.Any(character => !char.IsAsciiLetterOrDigit(character)) ||
-            discountPercent is < 1 or > 99 || usageLimit < 1 || expiresOn == default)
+            discountPercent is < 1 or > 99 || usageLimit < 1 || expiresOn == default || audience is not ("public" or "personal"))
         {
             TempData["CouponError"] = "کد انگلیسی و عددی، درصد ۱ تا ۹۹، سقف مثبت و تاریخ معتبر وارد کنید.";
             return RedirectToAction(nameof(Index));
         }
 
         await using var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
+        long? profileId = null;
+        if (audience == "personal")
+        {
+            string email = (customerEmail ?? "").Trim().ToLowerInvariant();
+            profileId = email.Length is > 0 and <= 254
+                ? await db.AccountProfiles.Where(profile => profile.Email == email).Select(profile => (long?)profile.Id).SingleOrDefaultAsync(cancellationToken)
+                : null;
+            if (profileId is null)
+            {
+                TempData["CouponError"] = "کاربری با ایمیل واردشده پیدا نشد.";
+                return RedirectToAction(nameof(Index));
+            }
+        }
         var item = id is null ? null : await db.AccountCoupons.SingleOrDefaultAsync(coupon => coupon.Id == id, cancellationToken);
         if (id is not null && item is null) return NotFound();
         if (await db.AccountCoupons.AnyAsync(coupon => coupon.Code == code && coupon.Id != id, cancellationToken))
@@ -123,6 +137,7 @@ public sealed class CouponsController(ShopDbContext db) : Controller
             db.AccountCoupons.Add(item);
         }
         item.Code = code;
+        item.IdProfile = profileId;
         item.DiscountPercent = discountPercent;
         item.UsageLimit = usageLimit;
         item.ExpiresOn = expiresOn;
@@ -134,7 +149,7 @@ public sealed class CouponsController(ShopDbContext db) : Controller
     }
 }
 
-public sealed record CouponRow(long Id, string Code, int DiscountPercent, int UsageLimit, bool Enabled, DateOnly ExpiresOn, int Uses, decimal Discount, bool HasOrders);
+public sealed record CouponRow(long Id, string Code, int DiscountPercent, int UsageLimit, bool Enabled, DateOnly ExpiresOn, int Uses, decimal Discount, bool HasOrders, long? IdProfile, string? CustomerEmail);
 public sealed record CouponIndexModel(List<CouponRow> Coupons, string Query, string Status, int Page, int Total, int Uses, decimal Discount, DateOnly Today);
 public sealed record CouponOrderRow(long Id, string OrderNumber, string Customer, string Status, DateTime OrderedAtUtc, decimal Subtotal, decimal Discount, decimal Total);
 public sealed record CouponReportModel(long Id, string Code, int UsageLimit, int Uses, decimal Subtotal, decimal Discount, decimal Total, int Page, List<CouponOrderRow> Orders);

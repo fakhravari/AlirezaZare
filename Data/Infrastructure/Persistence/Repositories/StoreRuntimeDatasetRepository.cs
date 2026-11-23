@@ -215,7 +215,7 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext, IMedi
 
     public async Task<string?> ReadAccountJsonAsync(CancellationToken cancellationToken)
     {
-        var coupons = await dbContext.AccountCoupons.AsNoTracking().OrderBy(x => x.Id)
+        var coupons = await dbContext.AccountCoupons.AsNoTracking().Where(x => x.IdProfile == null).OrderBy(x => x.Id)
             .Select(x => new { id = x.CouponKey, x.Code, x.DiscountPercent, x.UsageLimit, enabled = x.Enabled, x.ExpiresOn, orderIds = Array.Empty<string>() })
             .ToListAsync(cancellationToken);
 

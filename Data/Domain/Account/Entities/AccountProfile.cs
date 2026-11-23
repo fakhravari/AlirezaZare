@@ -184,6 +184,7 @@ public sealed class StorePaymentAttempt
 public sealed class AccountCoupon
 {
     public long Id { get; set; }
+    public long? IdProfile { get; set; }
     public string CouponKey { get; set; } = "";
     public string Code { get; set; } = "";
     public int DiscountPercent { get; set; }

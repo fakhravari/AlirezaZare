@@ -605,7 +605,7 @@ public sealed class AccountController(
             return BadRequest(new { code = "invalid-coupon" });
 
         var coupon = await db.AccountCoupons.AsNoTracking().SingleOrDefaultAsync(item => item.Code == code, ct);
-        if (coupon is null || !coupon.Enabled || coupon.ExpiresOn < DateOnly.FromDateTime(DateTime.UtcNow))
+        if (coupon is null || !coupon.Enabled || (coupon.IdProfile.HasValue && coupon.IdProfile != ProfileId) || coupon.ExpiresOn < DateOnly.FromDateTime(DateTime.UtcNow))
             return NotFound(new { code = "coupon-unavailable" });
 
         int uses = await db.StoreCouponUsages.CountAsync(item => item.IdCoupon == coupon.Id, ct);
@@ -899,7 +899,7 @@ public sealed class AccountController(
                 return BadRequest(new { code = "invalid-coupon" });
 
             appliedCoupon = await db.AccountCoupons.SingleOrDefaultAsync(item => item.Code == couponCode, ct);
-            if (appliedCoupon is null || !appliedCoupon.Enabled ||
+            if (appliedCoupon is null || !appliedCoupon.Enabled || (appliedCoupon.IdProfile.HasValue && appliedCoupon.IdProfile != ProfileId) ||
                 appliedCoupon.ExpiresOn < DateOnly.FromDateTime(DateTime.UtcNow))
                 return Conflict(new { code = "coupon-unavailable" });
 
