@@ -14,6 +14,8 @@
             "Admin/Areas/Admin/Views/SiteSettings/Index.cshtml",
             "Admin/Areas/Store/Views/Catalog/Index.cshtml",
             "Admin/Areas/Store/Views/HomeCollection/Index.cshtml",
+            "Admin/Areas/Store/Views/Coupons/Index.cshtml",
+            "Admin/Areas/Store/Views/Coupons/Report.cshtml",
             "Admin/Areas/Store/Views/Catalog/ProductDetails.cshtml",
             "Admin/Areas/Store/Views/Catalog/Badges.cshtml",
             "Admin/Areas/Store/Views/Features/Faq.cshtml",

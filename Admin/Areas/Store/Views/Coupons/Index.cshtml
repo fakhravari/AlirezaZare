@@ -1,0 +1,63 @@
+@model Shop.Admin.Areas.Store.Controllers.CouponIndexModel
+
+<div class="admin-page">
+    @await Html.PartialAsync("_AdminPageIntro", ("کدهای تخفیف", "ساخت و مدیریت کدهای تخفیف فروشگاه"))
+    @if (TempData["CouponMessage"] is string message) { <div class="alert alert-success" role="status">@message</div> }
+    @if (TempData["CouponError"] is string error) { <div class="alert alert-danger" role="alert">@error</div> }
+    <section class="panel panel-inverse">
+        <div class="panel-heading"><h2 class="panel-title">تعریف کد تخفیف</h2></div>
+        <div class="panel-body">
+            <p>تاریخ انقضا میلادی است و کد تا پایان آن روز بر اساس UTC معتبر می‌ماند. تخفیف فقط به اقلام واجد شرایط سبد اعمال می‌شود. کد مصرف‌شده قابل تغییر نیست.</p>
+            <form asp-action="Save" method="post" class="d-flex flex-wrap gap-2 align-items-end">
+                <div><label for="new-code" class="form-label">کد انگلیسی و عددی</label><input id="new-code" name="code" class="form-control" dir="ltr" maxlength="32" pattern="[A-Za-z0-9]+" required /></div>
+                <div><label for="new-percent" class="form-label">درصد تخفیف</label><input id="new-percent" name="discountPercent" type="number" min="1" max="99" class="form-control" required /></div>
+                <div><label for="new-limit" class="form-label">سقف کل استفاده</label><input id="new-limit" name="usageLimit" type="number" min="1" class="form-control" required /></div>
+                <div><label for="new-expiry" class="form-label">انقضا (میلادی)</label><input id="new-expiry" name="expiresOn" type="date" class="form-control" required /></div>
+                <label><input type="checkbox" name="enabled" value="true" checked /> فعال</label>
+                <button type="submit" class="btn btn-primary">ثبت کد</button>
+            </form>
+        </div>
+    </section>
+    <section class="panel panel-inverse">
+        <div class="panel-heading"><h2 class="panel-title">کدهای ثبت‌شده</h2></div>
+        <div class="panel-body">
+            <form method="get" asp-action="Index" class="d-flex flex-wrap gap-2 align-items-end mb-3">
+                <div><label for="coupon-search" class="form-label">جست‌وجوی کد</label><input id="coupon-search" name="q" value="@Model.Query" maxlength="32" dir="ltr" class="form-control" /></div>
+                <div><label for="coupon-status" class="form-label">وضعیت</label><select id="coupon-status" name="status" class="form-select">
+                    <option value="" selected="@(Model.Status == "")">همه</option><option value="active" selected="@(Model.Status == "active")">قابل استفاده</option><option value="disabled" selected="@(Model.Status == "disabled")">غیرفعال</option><option value="expired" selected="@(Model.Status == "expired")">منقضی</option><option value="exhausted" selected="@(Model.Status == "exhausted")">ظرفیت تکمیل</option>
+                </select></div>
+                <button class="btn btn-primary" type="submit">جست‌وجو</button><a asp-action="Index" class="btn btn-default">پاک‌کردن فیلتر</a>
+            </form>
+            <p>نتایج: @Model.Total کد · تعداد مصرف ثبت‌شده: @Model.Uses · جمع تخفیف سفارش‌ها: @Model.Discount.ToString("N0") تومان</p>
+            <p class="small text-muted">جمع‌ها شامل همهٔ وضعیت‌های سفارش هستند و به معنی فروش پرداخت‌شده نیستند.</p>
+            @if (Model.Coupons.Count == 0) { <p>کدی در این صفحه یافت نشد.</p> }
+            @foreach (var coupon in Model.Coupons)
+            {
+                string status = !coupon.Enabled ? "غیرفعال" : coupon.ExpiresOn < Model.Today ? "منقضی" : coupon.Uses >= coupon.UsageLimit ? "ظرفیت تکمیل" : "قابل استفاده";
+                <hr />
+                <p><strong><bdi dir="ltr">@coupon.Code</bdi></strong> · @status · مصرف @coupon.Uses از @coupon.UsageLimit · تخفیف ثبت‌شده @coupon.Discount.ToString("N0") تومان · <a asp-action="Report" asp-route-id="@coupon.Id">گزارش سفارش‌ها</a></p>
+                <form asp-action="Save" method="post" class="d-flex flex-wrap gap-2 align-items-end mb-3">
+                    <input type="hidden" name="id" value="@coupon.Id" />
+                    <div><label for="code-@coupon.Id" class="form-label">کد</label><input id="code-@coupon.Id" name="code" value="@coupon.Code" class="form-control" dir="ltr" maxlength="32" pattern="[A-Za-z0-9]+" required /></div>
+                    <div><label for="percent-@coupon.Id" class="form-label">درصد</label><input id="percent-@coupon.Id" name="discountPercent" value="@coupon.DiscountPercent" type="number" min="1" max="99" class="form-control" required /></div>
+                    <div><label for="limit-@coupon.Id" class="form-label">سقف استفاده</label><input id="limit-@coupon.Id" name="usageLimit" value="@coupon.UsageLimit" type="number" min="1" class="form-control" required /></div>
+                    <div><label for="expiry-@coupon.Id" class="form-label">انقضا (میلادی)</label><input id="expiry-@coupon.Id" name="expiresOn" value="@coupon.ExpiresOn.ToString("yyyy-MM-dd")" type="date" class="form-control" required /></div>
+                    <label><input type="checkbox" name="enabled" value="true" checked="@coupon.Enabled" /> فعال</label>
+                    <button type="submit" class="btn btn-primary btn-sm">ذخیره</button>
+                </form>
+                @if (coupon.Uses == 0 && !coupon.HasOrders)
+                {
+                    <form asp-action="Delete" method="post" data-admin-confirm="این کد تخفیف بدون سابقه حذف شود؟">
+                        <input type="hidden" name="id" value="@coupon.Id" /><button type="submit" class="btn btn-danger btn-sm">حذف کد</button>
+                    </form>
+                }
+                else { <p class="small text-muted">به‌دلیل وجود سابقه، حذف امکان‌پذیر نیست؛ برای توقف استفاده، کد را غیرفعال کنید.</p> }
+            }
+            <nav aria-label="صفحه‌بندی کدهای تخفیف" class="d-flex gap-3 mt-3">
+                @if (Model.Page > 1) { <a asp-action="Index" asp-route-q="@Model.Query" asp-route-status="@Model.Status" asp-route-page="@(Model.Page - 1)">صفحهٔ قبل</a> }
+                <span>صفحهٔ @Model.Page</span>
+                @if ((long)Model.Page * 25 < Model.Total) { <a asp-action="Index" asp-route-q="@Model.Query" asp-route-status="@Model.Status" asp-route-page="@(Model.Page + 1)">صفحهٔ بعد</a> }
+            </nav>
+        </div>
+    </section>
+</div>

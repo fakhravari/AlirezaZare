@@ -1,0 +1,26 @@
+@model Shop.Admin.Areas.Store.Controllers.CouponReportModel
+
+<div class="admin-page">
+    @await Html.PartialAsync("_AdminPageIntro", ("گزارش مصرف کد تخفیف", "سفارش‌هایی که مصرف این کد در آن‌ها ثبت شده است."))
+    <section class="panel panel-inverse">
+        <div class="panel-heading"><h2 class="panel-title">گزارش <bdi dir="ltr">@Model.Code</bdi></h2></div>
+        <div class="panel-body">
+            <p>تعداد مصرف: @Model.Uses از @Model.UsageLimit · ظرفیت باقی‌مانده: @Math.Max(0, Model.UsageLimit - Model.Uses)</p>
+            <p>جمع پیش از کوپن: @Model.Subtotal.ToString("N0") تومان · تخفیف کوپن: @Model.Discount.ToString("N0") تومان · مبلغ سفارش‌ها: @Model.Total.ToString("N0") تومان</p>
+            <p class="small text-muted">این گزارش همهٔ وضعیت‌های سفارش را شامل می‌شود و معادل فروش پرداخت‌شده نیست. زمان‌ها UTC هستند.</p>
+            <div class="table-responsive"><table class="table table-striped align-middle"><thead><tr><th>شماره سفارش</th><th>مشتری</th><th>وضعیت سفارش</th><th>زمان ثبت (UTC)</th><th>پیش از کوپن (تومان)</th><th>تخفیف (تومان)</th><th>مبلغ سفارش (تومان)</th></tr></thead><tbody>
+                @foreach (var order in Model.Orders)
+                {
+                    <tr><td><bdi dir="ltr">@order.OrderNumber</bdi></td><td>@order.Customer</td><td>@order.Status</td><td><time datetime="@order.OrderedAtUtc.ToString("yyyy-MM-ddTHH:mm:ss")Z" dir="ltr">@order.OrderedAtUtc.ToString("yyyy-MM-dd HH:mm")</time></td><td>@order.Subtotal.ToString("N0")</td><td>@order.Discount.ToString("N0")</td><td>@order.Total.ToString("N0")</td></tr>
+                }
+                @if (Model.Orders.Count == 0) { <tr><td colspan="7">مصرفی در این صفحه ثبت نشده است.</td></tr> }
+            </tbody></table></div>
+            <nav aria-label="صفحه‌بندی گزارش" class="d-flex gap-3">
+                @if (Model.Page > 1) { <a asp-action="Report" asp-route-id="@Model.Id" asp-route-page="@(Model.Page - 1)">صفحهٔ قبل</a> }
+                <span>صفحهٔ @Model.Page</span>
+                @if ((long)Model.Page * 25 < Model.Uses) { <a asp-action="Report" asp-route-id="@Model.Id" asp-route-page="@(Model.Page + 1)">صفحهٔ بعد</a> }
+            </nav>
+            <a asp-action="Index" class="btn btn-default mt-3">بازگشت به کدها</a>
+        </div>
+    </section>
+</div>
