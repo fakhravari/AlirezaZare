@@ -35,16 +35,12 @@ public sealed class HomeController : PageController
 
         var magazine = await _magazine.ReadIndexAsync(HttpContext.RequestAborted);
         ViewData["HomeBrands"] = (await _catalog.ReadAsync(HttpContext.RequestAborted)).Brands;
-        var approvedReviews = _db.ProductFeedback.AsNoTracking().Where(x => x.FeedbackType == "reviews" && x.Status == "approved");
-        var reviewItems = await (from featured in _db.StoreHomeTestimonials.AsNoTracking()
-            join feedback in approvedReviews on featured.IdProductFeedback equals feedback.Id
-            where featured.IsActive
-            orderby featured.SortOrder, feedback.CreatedAtUtc descending, feedback.Id descending
-            select new { feedback.DisplayName, ProductName = feedback.Product.Name, feedback.FeedbackText, feedback.IsSample,
-                Rating = feedback.Rating ?? 0, feedback.CreatedAtUtc, featured.ImagePath }).ToListAsync(HttpContext.RequestAborted);
+        var reviewItems = await _db.StoreHomeTestimonials.AsNoTracking().Where(x => x.IsActive)
+            .OrderBy(x => x.SortOrder).ThenByDescending(x => x.CreatedAtUtc).ThenByDescending(x => x.Id)
+            .Select(x => new { x.DisplayName, ProductName = x.Product.Name, x.FeedbackText, x.Rating, x.CreatedAtUtc, x.ImagePath }).ToListAsync(HttpContext.RequestAborted);
         string cdnBaseUrl = await _mediaCdn.GetBaseUrlAsync(HttpContext.RequestAborted);
         var reviews = reviewItems.Select(x => new HomeReviewCard(x.DisplayName, x.ProductName, x.FeedbackText,
-            x.Rating, x.CreatedAtUtc, string.IsNullOrWhiteSpace(x.ImagePath) ? null : ContentCdn.ToUrl(x.ImagePath, cdnBaseUrl), x.IsSample)).ToArray();
+            x.Rating, x.CreatedAtUtc, string.IsNullOrWhiteSpace(x.ImagePath) ? null : ContentCdn.ToUrl(x.ImagePath, cdnBaseUrl))).ToArray();
         ViewData["HomeSliders"] = await _db.StoreSliders.AsNoTracking().Where(x => x.ShowOnMobile || x.ShowOnDesktop).OrderBy(x => x.Id).ToListAsync(HttpContext.RequestAborted);
         ViewData["HomeReviews"] = reviews;
 
@@ -52,4 +48,4 @@ public sealed class HomeController : PageController
     }
 }
 
-public sealed record HomeReviewCard(string DisplayName, string ProductName, string Text, int Rating, DateTime CreatedAtUtc, string? ImageUrl, bool IsSample);
+public sealed record HomeReviewCard(string DisplayName, string ProductName, string Text, int Rating, DateTime CreatedAtUtc, string? ImageUrl);

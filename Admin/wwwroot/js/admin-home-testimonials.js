@@ -37,7 +37,7 @@
 
                 const reviewCell = document.createElement("td");
                 reviewCell.className = "home-testimonial-review";
-                const name = document.createElement("strong"); name.textContent = `${item.displayName} · ${new Intl.NumberFormat("fa-IR").format(item.rating || 0)} از ۵${item.isSample ? " · نمونه" : ""}`;
+                const name = document.createElement("strong"); name.textContent = `${item.displayName} · ${new Intl.NumberFormat("fa-IR").format(item.rating || 0)} از ۵`;
                 const text = document.createElement("p"); text.className = "small text-muted mb-0 home-testimonial-text";
                 const characters = Array.from(item.feedbackText || "");
                 text.textContent = characters.length > 140 ? `${characters.slice(0, 140).join("")}…` : characters.join("");
@@ -88,7 +88,7 @@
                 const result = await request(endpoint);
                 if (current !== requestId) return;
                 render(result.items || []);
-                status(result.items?.length ? "" : "دیدگاه تأییدشده‌ای پیدا نشد.");
+                status(result.items?.length ? "" : "دیدگاهی برای ویترین ثبت نشده است.");
             } catch (error) { if (current === requestId) status(error.message || "دریافت دیدگاه‌ها ناموفق بود.", true); }
         }
 

@@ -15,21 +15,21 @@ public sealed class StoreProductFeedbackRepository(ShopDbContext dbContext) : IP
         long? idProduct = await ActiveProductIdAsync(productId, cancellationToken);
         if (idProduct is null) return null;
 
-        IQueryable<ProductFeedback> approved = dbContext.ProductFeedback.AsNoTracking() .Where(x => x.IdProduct == idProduct && x.FeedbackType == type && x.Status == "approved");
+        IQueryable<ProductFeedback> approved = dbContext.ProductFeedback.AsNoTracking() .Where(x => x.IdProduct == idProduct && x.FeedbackType == type && x.IdStatus == ProductFeedbackStatus.Approved);
         long totalCount = await approved.LongCountAsync(cancellationToken);
         decimal? averageRating = type == "reviews" ? await approved.Where(x => x.Rating.HasValue).Select(x => (decimal?)x.Rating!.Value).AverageAsync(cancellationToken) : null;
 
         List<ProductFeedback> rows = await dbContext.ProductFeedback.AsNoTracking().Where(x => x.IdProduct == idProduct && x.FeedbackType == type &&
-                        (x.Status == "approved" ||
-                         (x.Status == "pending" && profileId.HasValue && x.IdProfile == profileId)))
+                        (x.IdStatus == ProductFeedbackStatus.Approved ||
+                         (x.IdStatus == ProductFeedbackStatus.Pending && profileId.HasValue && x.IdProfile == profileId)))
             .OrderByDescending(x => x.CreatedAtUtc).ThenByDescending(x => x.Id).Take(500).ToListAsync(cancellationToken);
 
         ProductFeedbackItem[] items = rows.Select(x => new ProductFeedbackItem(
-            x.Id, x.DisplayName, x.FeedbackText, x.Rating, x.Status, x.AdminReply,
+            x.Id, x.DisplayName, x.FeedbackText, x.Rating, x.IdStatus, x.AdminReply,
             new DateTimeOffset(DateTime.SpecifyKind(x.CreatedAtUtc, DateTimeKind.Utc)),
             x.RepliedAtUtc is DateTime repliedAt
                 ? new DateTimeOffset(DateTime.SpecifyKind(repliedAt, DateTimeKind.Utc))
-                : null, x.IsSample)).ToArray();
+                : null)).ToArray();
 
         return new ProductFeedbackSnapshot(items, totalCount, averageRating);
     }
@@ -48,7 +48,7 @@ public sealed class StoreProductFeedbackRepository(ShopDbContext dbContext) : IP
             DisplayName = name,
             FeedbackText = text,
             Rating = rating,
-            Status = "pending",
+            IdStatus = ProductFeedbackStatus.Pending,
             CreatedAtUtc = DateTime.UtcNow
         };
         dbContext.ProductFeedback.Add(feedback);
@@ -89,7 +89,7 @@ public sealed class StoreProductFeedbackRepository(ShopDbContext dbContext) : IP
                 DisplayName = item.Name,
                 FeedbackText = item.Text,
                 Rating = type == "reviews" ? item.Rating : null,
-                Status = "pending",
+                IdStatus = ProductFeedbackStatus.Pending,
                 CreatedAtUtc = createdAt
             };
             imported.Add(feedback);

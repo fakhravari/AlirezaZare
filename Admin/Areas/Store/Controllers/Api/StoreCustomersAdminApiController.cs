@@ -88,8 +88,42 @@ public sealed class StoreCustomersAdminApiController(ShopDbContext db) : Control
                     IsSample = o.PaymentMethod == "demo" && o.ExternalOrderKey != null && o.ExternalOrderKey.StartsWith("demo-order-")
                 }).ToListAsync(cancellationToken);
             var feedback = await db.ProductFeedback.AsNoTracking().Where(f => f.IdProfile == id).OrderByDescending(f => f.Id)
-                .Take(50).Select(f => new { f.FeedbackType, f.FeedbackText, f.Status, f.CreatedAtUtc, f.IsSample, ProductName = f.Product.Name })
+                .Take(50).Select(f => new { f.FeedbackType, f.FeedbackText, Status = f.Status.Name, f.CreatedAtUtc, ProductName = f.Product.Name })
                 .ToListAsync(cancellationToken);
+            var cartItems = await (from cart in db.AccountCarts.AsNoTracking()
+                                   join item in db.AccountCartItems.AsNoTracking() on cart.Id equals item.IdCart
+                                   join product in db.Products.AsNoTracking() on item.IdProduct equals product.Id
+                                   join plan in db.SalesPlanReferences.AsNoTracking() on item.IdSalesPlan equals plan.Id
+                                   where cart.IdProfile == id
+                                   orderby item.Id
+                                   select new
+                                   {
+                                       item.Id,
+                                       ProductName = product.Name,
+                                       item.IdProductVariant,
+                                       VariantPath = db.ProductVariants.Where(variant => variant.Id == item.IdProductVariant)
+                                           .Select(variant => variant.VariantName.TreePathNames).FirstOrDefault(),
+                                       SalesPlanName = plan.DisplayName,
+                                       item.IdSalesPlan,
+                                       item.Quantity
+                                   }).ToListAsync(cancellationToken);
+            long[] cartItemIds = cartItems.Select(item => item.Id).ToArray();
+            var cartAccessories = cartItemIds.Length == 0 ? [] : await (
+                from selected in db.AccountCartItemAccessories.AsNoTracking()
+                join link in db.StoreProductAccessories.AsNoTracking() on selected.IdProductAccessory equals link.Id
+                join accessory in db.StoreAccessories.AsNoTracking() on link.IdAccessory equals accessory.Id
+                where cartItemIds.Contains(selected.IdCartItem)
+                orderby selected.IdCartItem, link.SortOrder, link.Id
+                select new { selected.IdCartItem, accessory.Name, link.IsRequired }).ToListAsync(cancellationToken);
+            customer.CartJson = JsonSerializer.Serialize(cartItems.Select(item => new
+            {
+                item.ProductName,
+                item.VariantPath,
+                item.IdSalesPlan,
+                item.Quantity,
+                Accessories = cartAccessories.Where(accessory => accessory.IdCartItem == item.Id)
+                    .Select(accessory => new { accessory.Name, accessory.IsRequired })
+            }));
             customer.AddressesJson = JsonSerializer.Serialize(addresses);
             customer.OrdersJson = JsonSerializer.Serialize(orders);
             customer.FeedbackJson = JsonSerializer.Serialize(feedback);
@@ -206,6 +240,7 @@ public sealed class StoreCustomersAdminApiController(ShopDbContext db) : Control
         public string AddressesJson { get; set; } = "[]";
         public string OrdersJson { get; set; } = "[]";
         public string FeedbackJson { get; set; } = "[]";
+        public string CartJson { get; set; } = "[]";
         public int FavoriteCount { get; set; }
         public int PriceAlertCount { get; set; }
         public int ArticleInteractionCount { get; set; }

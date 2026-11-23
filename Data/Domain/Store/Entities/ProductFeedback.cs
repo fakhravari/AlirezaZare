@@ -12,11 +12,20 @@ public sealed class ProductFeedback
     public string DisplayName { get; set; } = string.Empty;
     public string FeedbackText { get; set; } = string.Empty;
     public byte? Rating { get; set; }
-    public bool IsSample { get; set; }
-    public string Status { get; set; } = "pending";
+    public int IdStatus { get; set; } = ProductFeedbackStatus.Pending;
+    public ProductFeedbackStatus Status { get; set; } = null!;
     public string? AdminReply { get; set; }
     public DateTime CreatedAtUtc { get; set; }
     public DateTime? RepliedAtUtc { get; set; }
     public WarehouseProduct Product { get; set; } = null!;
     public AccountProfile? Profile { get; set; }
+}
+
+public sealed class ProductFeedbackStatus
+{
+    public const int Pending = 1;
+    public const int Approved = 2;
+    public const int Rejected = 3;
+    public int Id { get; set; }
+    public string Name { get; set; } = "";
 }

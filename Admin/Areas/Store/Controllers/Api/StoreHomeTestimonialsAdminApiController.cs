@@ -24,31 +24,27 @@ public sealed class StoreHomeTestimonialsAdminApiController(
     [HttpGet]
     public async Task<IActionResult> List(CancellationToken cancellationToken = default)
     {
-        var query = from feedback in db.ProductFeedback.AsNoTracking()
-                    join product in db.Products.AsNoTracking() on feedback.IdProduct equals product.Id
-                    join featured in db.StoreHomeTestimonials.AsNoTracking() on feedback.Id equals featured.IdProductFeedback into featuredRows
-                    from featured in featuredRows.DefaultIfEmpty()
-                    where feedback.FeedbackType == "reviews" && feedback.Status == "approved"
+        var query = from featured in db.StoreHomeTestimonials.AsNoTracking()
+                    join product in db.Products.AsNoTracking() on featured.IdProduct equals product.Id
                     select new
                     {
-                        feedback.Id,
-                        feedback.IdProduct,
-                        feedback.DisplayName,
-                        feedback.FeedbackText,
-                        feedback.Rating,
-                        feedback.IsSample,
-                        feedback.CreatedAtUtc,
+                        featured.Id,
+                        featured.IdProduct,
+                        featured.DisplayName,
+                        featured.FeedbackText,
+                        featured.Rating,
+                        featured.CreatedAtUtc,
                         ProductName = product.Name,
                         ProductKey = product.ProductKey,
-                        IsActive = featured != null && featured.IsActive,
-                        SortOrder = featured == null ? 0 : featured.SortOrder,
-                        ImagePath = featured == null ? null : featured.ImagePath
+                        featured.IsActive,
+                        featured.SortOrder,
+                        featured.ImagePath
                     };
         var items = await query.OrderByDescending(x => x.IsActive).ThenBy(x => x.SortOrder).ThenByDescending(x => x.CreatedAtUtc).ThenByDescending(x => x.Id).ToListAsync(cancellationToken);
         string cdnBaseUrl = await mediaCdn.GetBaseUrlAsync(cancellationToken);
         var result = items.Select(item => new
         {
-            item.Id, item.IdProduct, item.DisplayName, item.FeedbackText, item.Rating, item.IsSample, item.CreatedAtUtc,
+            item.Id, item.IdProduct, item.DisplayName, item.FeedbackText, item.Rating, item.CreatedAtUtc,
             item.ProductName, item.ProductKey, item.IsActive, item.SortOrder, item.ImagePath,
             ImageUrl = string.IsNullOrWhiteSpace(item.ImagePath) ? null : ContentCdn.ToUrl(item.ImagePath, cdnBaseUrl)
         }).ToArray();
@@ -69,12 +65,12 @@ public sealed class StoreHomeTestimonialsAdminApiController(
     {
         var error = await ValidateReviewAsync(input, cancellationToken);
         if (error is not null) return BadRequest(new { title = error });
-        var feedback = new ProductFeedback { IdProduct = input.ProductId, FeedbackType = "reviews", DisplayName = input.DisplayName.Trim(),
-            FeedbackText = input.FeedbackText.Trim(), Rating = (byte)input.Rating, IsSample = true, Status = "approved", CreatedAtUtc = DateTime.UtcNow };
-        db.ProductFeedback.Add(feedback);
-        db.StoreHomeTestimonials.Add(new StoreHomeTestimonial { Feedback = feedback, IsActive = input.IsActive, SortOrder = input.SortOrder, UpdatedAtUtc = DateTime.UtcNow });
+        var item = new StoreHomeTestimonial { IdProduct = input.ProductId, DisplayName = input.DisplayName.Trim(),
+            FeedbackText = input.FeedbackText.Trim(), Rating = (byte)input.Rating, CreatedAtUtc = DateTime.UtcNow,
+            IsActive = input.IsActive, SortOrder = input.SortOrder };
+        db.StoreHomeTestimonials.Add(item);
         await db.SaveChangesAsync(cancellationToken);
-        return Ok(new { id = feedback.Id, message = "دیدگاه نمونه ثبت شد." });
+        return Ok(new { id = item.Id, message = "دیدگاه ویترین ثبت شد." });
     }
 
     [HttpPut("{id:long}/review")]
@@ -84,17 +80,14 @@ public sealed class StoreHomeTestimonialsAdminApiController(
     {
         var error = await ValidateReviewAsync(input, cancellationToken);
         if (error is not null) return BadRequest(new { title = error });
-        var feedback = await db.ProductFeedback.SingleOrDefaultAsync(x => x.Id == id && x.FeedbackType == "reviews" && x.Status == "approved", cancellationToken);
-        if (feedback is null) return NotFound();
-        feedback.IdProduct = input.ProductId;
-        feedback.DisplayName = input.DisplayName.Trim();
-        feedback.FeedbackText = input.FeedbackText.Trim();
-        feedback.Rating = (byte)input.Rating;
-        var item = await db.StoreHomeTestimonials.SingleOrDefaultAsync(x => x.IdProductFeedback == id, cancellationToken);
-        if (item is null) { item = new StoreHomeTestimonial { IdProductFeedback = id }; db.StoreHomeTestimonials.Add(item); }
+        var item = await db.StoreHomeTestimonials.SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
+        if (item is null) return NotFound();
+        item.IdProduct = input.ProductId;
+        item.DisplayName = input.DisplayName.Trim();
+        item.FeedbackText = input.FeedbackText.Trim();
+        item.Rating = (byte)input.Rating;
         item.IsActive = input.IsActive;
         item.SortOrder = input.SortOrder;
-        item.UpdatedAtUtc = DateTime.UtcNow;
         await db.SaveChangesAsync(cancellationToken);
         return Ok(new { message = "دیدگاه و تنظیمات نمایش ذخیره شد." });
     }
@@ -114,18 +107,10 @@ public sealed class StoreHomeTestimonialsAdminApiController(
     {
         if (input.SortOrder is < 0 or > 9999) return BadRequest(new { title = "ترتیب باید بین صفر و ۹۹۹۹ باشد." });
 
-        if (!await db.ProductFeedback.AnyAsync(x => x.Id == id && x.FeedbackType == "reviews" && x.Status == "approved", cancellationToken))
-            return NotFound(new { title = "فقط دیدگاه تأییدشده قابل نمایش در صفحهٔ نخست است." });
-
-        StoreHomeTestimonial? item = await db.StoreHomeTestimonials.SingleOrDefaultAsync(x => x.IdProductFeedback == id, cancellationToken);
-        if (item is null)
-        {
-            item = new StoreHomeTestimonial { IdProductFeedback = id };
-            db.StoreHomeTestimonials.Add(item);
-        }
+        StoreHomeTestimonial? item = await db.StoreHomeTestimonials.SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
+        if (item is null) return NotFound();
         item.IsActive = input.IsActive;
         item.SortOrder = input.SortOrder;
-        item.UpdatedAtUtc = DateTime.UtcNow;
         await db.SaveChangesAsync(cancellationToken);
 
         return Ok(new { message = "تنظیم نمایش دیدگاه ذخیره شد." });
@@ -139,8 +124,8 @@ public sealed class StoreHomeTestimonialsAdminApiController(
         if (file is null || file.Length is <= 0 or > 10_000_000)
             return BadRequest(new { title = "تصویر باید حداکثر ۱۰ مگابایت باشد." });
 
-        if (!await db.ProductFeedback.AnyAsync(x => x.Id == id && x.FeedbackType == "reviews" && x.Status == "approved", cancellationToken))
-            return NotFound(new { title = "دیدگاه تأییدشده پیدا نشد." });
+        if (!await db.StoreHomeTestimonials.AnyAsync(x => x.Id == id, cancellationToken))
+            return NotFound(new { title = "دیدگاه ویترین پیدا نشد." });
 
         byte[] sourceBytes;
         await using (var input = new MemoryStream())
@@ -183,15 +168,10 @@ public sealed class StoreHomeTestimonialsAdminApiController(
                 || await ftp.UploadBytes(thumbBytes, "/" + thumbnailPath, FtpRemoteExists.Skip, true, null, cancellationToken) != FtpStatus.Success)
                 throw new IOException("Testimonial image upload failed.");
 
-            StoreHomeTestimonial? item = await db.StoreHomeTestimonials.SingleOrDefaultAsync(x => x.IdProductFeedback == id, cancellationToken);
-            if (item is null)
-            {
-                item = new StoreHomeTestimonial { IdProductFeedback = id, IsActive = false };
-                db.StoreHomeTestimonials.Add(item);
-            }
+            StoreHomeTestimonial? item = await db.StoreHomeTestimonials.SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
+            if (item is null) return NotFound();
             string? previousPath = item.ImagePath;
             item.ImagePath = imagePath;
-            item.UpdatedAtUtc = DateTime.UtcNow;
             await db.SaveChangesAsync(cancellationToken);
 
             try { await DeleteStoredImageAsync(ftp, previousPath, cancellationToken); }
@@ -219,7 +199,7 @@ public sealed class StoreHomeTestimonialsAdminApiController(
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteImage(long id, CancellationToken cancellationToken)
     {
-        StoreHomeTestimonial? item = await db.StoreHomeTestimonials.SingleOrDefaultAsync(x => x.IdProductFeedback == id, cancellationToken);
+        StoreHomeTestimonial? item = await db.StoreHomeTestimonials.SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
         if (item is null || string.IsNullOrWhiteSpace(item.ImagePath)) return NotFound();
 
         try
@@ -227,7 +207,6 @@ public sealed class StoreHomeTestimonialsAdminApiController(
             using AsyncFtpClient ftp = await storage.ConnectAsync(cancellationToken);
             await DeleteStoredImageAsync(ftp, item.ImagePath, cancellationToken);
             item.ImagePath = null;
-            item.UpdatedAtUtc = DateTime.UtcNow;
             await db.SaveChangesAsync(cancellationToken);
 
             return Ok(new { message = "تصویر دیدگاه حذف شد." });

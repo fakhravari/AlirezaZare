@@ -1845,9 +1845,10 @@
 /* Keep color choices compact and show only real price increases below the swatch. */
 #productView .product-variant-choice-wrap {
   display: inline-grid;
-  width: 92px;
+  width: max-content;
   min-width: 92px;
   min-height: 67px;
+  flex: 0 0 auto;
   grid-template-rows: auto auto;
   justify-items: center;
   align-items: start;

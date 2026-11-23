@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Shop.Data.Application.Store.Contracts;
 using Shop.Data.Application.Store.Models;
+using Shop.Data.Domain.Store.Entities;
 
 namespace Shop.Controllers.Api;
 
@@ -43,7 +44,7 @@ public sealed class ProductFeedbackApiController(IProductFeedbackRepository feed
         long? id = await feedback.AddAsync(productId, ProfileId, type, name, text, request.Rating, cancellationToken);
         if (!id.HasValue) return NotFound();
 
-        var item = new ProductFeedbackItem(id.Value, name, text, request.Rating, "pending", null, DateTimeOffset.UtcNow, null);
+        var item = new ProductFeedbackItem(id.Value, name, text, request.Rating, ProductFeedbackStatus.Pending, null, DateTimeOffset.UtcNow, null);
 
         return Ok(new { saved = true, item });
     }

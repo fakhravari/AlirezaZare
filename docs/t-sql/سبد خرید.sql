@@ -1,98 +1,181 @@
 DECLARE @ProfileId BIGINT = 90;
 
-;WITH CartRows AS
+;WITH CartItems AS
 (
     SELECT
-        c.IdProfile,
-        ci.IdCart,
-        ci.Id AS IdCartItem,
-        ci.IdProduct,
-        p.NameFa AS ProductName,
-        ci.IdVariant AS IdProductVariant,
-        ci.IdSalesPlan,
-        ci.Quantity,
-        CASE WHEN ci.IdVariant IS NULL THEN pp.PriceBeforeDiscountAmount ELSE vp.PriceBeforeDiscountAmount END AS BaseAmount,
-        CASE WHEN ci.IdVariant IS NULL THEN pp.DiscountPercent ELSE vp.DiscountPercent END AS DiscountPercent,
-        CASE WHEN ci.IdVariant IS NULL THEN pp.FinalPriceAmount ELSE vp.FinalPriceAmount END AS FinalUnitAmount
-    FROM Account.Cart AS c
-    JOIN Account.CartItem AS ci ON ci.IdCart = c.Id
-    LEFT JOIN Warehouse.Product AS p ON p.Id = ci.IdProduct
-    OUTER APPLY
-    (
-        SELECT TOP (1) version.PriceBeforeDiscountAmount, version.DiscountPercent, version.FinalPriceAmount
-        FROM Store.PriceVersion AS version
-        WHERE version.IsActive = 1
-          AND version.IdProduct = ci.IdProduct
-          AND version.IdSalesPlan = ci.IdSalesPlan
-          AND version.IdVariant IS NULL
-          AND version.IdAccessory IS NULL
-        ORDER BY version.Id DESC
-    ) AS pp
-    OUTER APPLY
-    (
-        SELECT TOP (1) version.PriceBeforeDiscountAmount, version.DiscountPercent, version.FinalPriceAmount
-        FROM Store.PriceVersion AS version
-        WHERE version.IsActive = 1
-          AND version.IdProduct = ci.IdProduct
-          AND version.IdSalesPlan = ci.IdSalesPlan
-          AND version.IdVariant = ci.IdVariant
-          AND version.IdAccessory IS NULL
-        ORDER BY version.Id DESC
-    ) AS vp
-    WHERE c.IdProfile = @ProfileId
+        cart.IdProfile,
+        cart.Id AS IdCart,
+        item.Id AS IdCartItem,
+        item.IdProduct,
+        product.NameFa AS ProductName,
+        item.IdVariant AS IdProductVariant,
+        item.IdSalesPlan,
+        item.Quantity
+    FROM Account.Cart AS cart
+    INNER JOIN Account.CartItem AS item
+        ON item.IdCart = cart.Id
+    INNER JOIN Warehouse.Product AS product
+        ON product.Id = item.IdProduct
+    WHERE cart.IdProfile = @ProfileId
 ),
-Components AS
+CartLines AS
 (
+    -- کالای ساده؛ قیمت فعال برای محصول و طرح فروش
     SELECT
-        cr.IdProfile,
-        cr.IdCart,
-        cr.IdCartItem,
-        cr.IdProduct,
-        cr.ProductName,
-        cr.IdProductVariant,
-        cr.IdSalesPlan,
-        cr.Quantity,
-        N'کالا' AS RowType,
-        CONVERT(BIGINT, cr.IdProduct) AS ComponentId,
-        cr.ProductName AS ComponentName,
-        CONVERT(DECIMAL(19, 0), cr.BaseAmount) AS BaseAmount,
-        CONVERT(DECIMAL(5, 2), cr.DiscountPercent) AS DiscountPercent,
-        cr.FinalUnitAmount
-    FROM CartRows AS cr
+        cartItem.IdProfile,
+        cartItem.IdCart,
+        cartItem.IdCartItem,
+        cartItem.IdProduct,
+        cartItem.ProductName,
+        cartItem.IdProductVariant,
+        cartItem.IdSalesPlan,
+        cartItem.Quantity,
+        price.PriceBeforeDiscountAmount AS BaseAmount,
+        price.DiscountPercent,
+        price.FinalPriceAmount AS FinalUnitAmount
+    FROM CartItems AS cartItem
+    INNER JOIN Store.PriceVersion AS price
+        ON price.IdProduct = cartItem.IdProduct
+       AND price.IdSalesPlan = cartItem.IdSalesPlan
+       AND price.IdVariant IS NULL
+       AND price.IdAccessory IS NULL
+       AND price.IsActive = 1
+    WHERE cartItem.IdProductVariant IS NULL
 
     UNION ALL
 
+    -- تنوع؛ قیمت فعال اختصاصی همان تنوع و طرح فروش
     SELECT
-        cr.IdProfile,
-        cr.IdCart,
-        cr.IdCartItem,
-        cr.IdProduct,
-        cr.ProductName,
-        cr.IdProductVariant,
-        cr.IdSalesPlan,
-        cr.Quantity,
-        N'متعلقه' AS RowType,
-        CONVERT(BIGINT, pa.Id) AS ComponentId,
-        accessory.Name AS ComponentName,
-        CONVERT(DECIMAL(19, 0), accessoryVersion.PriceBeforeDiscountAmount) AS BaseAmount,
-        CONVERT(DECIMAL(5, 2), accessoryVersion.DiscountPercent) AS DiscountPercent,
-        accessoryVersion.FinalPriceAmount AS FinalUnitAmount
-    FROM CartRows AS cr
-    JOIN Store.ProductAccessory AS pa ON pa.IdProduct = cr.IdProduct
-    LEFT JOIN Store.Accessory AS accessory ON accessory.Id = pa.IdAccessory
-    LEFT JOIN Account.CartItemAccessory AS selected ON selected.IdCartItem = cr.IdCartItem AND selected.IdProductAccessory = pa.Id
-    OUTER APPLY
-    (
-        SELECT TOP (1) version.PriceBeforeDiscountAmount, version.DiscountPercent, version.FinalPriceAmount
-        FROM Store.PriceVersion AS version
-        WHERE version.IsActive = 1
-          AND version.IdProduct = cr.IdProduct
-          AND version.IdSalesPlan = cr.IdSalesPlan
-          AND version.IdAccessory = pa.IdAccessory
-          AND version.IdVariant IS NULL
-        ORDER BY version.Id DESC
-    ) AS accessoryVersion
-    WHERE pa.IsRequired = 1 OR selected.Id IS NOT NULL
+        cartItem.IdProfile,
+        cartItem.IdCart,
+        cartItem.IdCartItem,
+        cartItem.IdProduct,
+        cartItem.ProductName,
+        cartItem.IdProductVariant,
+        cartItem.IdSalesPlan,
+        cartItem.Quantity,
+        price.PriceBeforeDiscountAmount AS BaseAmount,
+        price.DiscountPercent,
+        price.FinalPriceAmount AS FinalUnitAmount
+    FROM CartItems AS cartItem
+    INNER JOIN Store.PriceVersion AS price
+        ON price.IdProduct = cartItem.IdProduct
+       AND price.IdSalesPlan = cartItem.IdSalesPlan
+       AND price.IdVariant = cartItem.IdProductVariant
+       AND price.IdAccessory IS NULL
+       AND price.IsActive = 1
+    WHERE cartItem.IdProductVariant IS NOT NULL
+),
+CartAccessories AS
+(
+    -- یک ردیف متعلقه برای هر محصول، طرح فروش و متعلق؛ مطابق OrderAccessory
+    SELECT
+        line.IdProfile,
+        line.IdCart,
+        MIN(line.IdCartItem) AS SortCartItemId,
+        line.IdProduct,
+        MAX(line.ProductName) AS ProductName,
+        line.IdSalesPlan,
+        SUM(line.Quantity) AS Quantity,
+        selectedAccessory.IdProductAccessory
+    FROM CartLines AS line
+    INNER JOIN Account.CartItemAccessory AS selectedAccessory
+        ON selectedAccessory.IdCartItem = line.IdCartItem
+    GROUP BY
+        line.IdProfile,
+        line.IdCart,
+        line.IdProduct,
+        line.IdSalesPlan,
+        selectedAccessory.IdProductAccessory
+),
+CartComponents AS
+(
+    -- کالای ساده
+    SELECT
+        line.IdProfile,
+        line.IdCart,
+        line.IdCartItem,
+        line.IdCartItem AS SortCartItemId,
+        line.IdProduct,
+        line.ProductName,
+        line.IdProductVariant,
+        line.IdSalesPlan,
+        line.Quantity,
+        N'کالا' AS ComponentType,
+        CAST(NULL AS NVARCHAR(10)) AS AccessoryRequirement,
+        CONVERT(BIGINT, line.IdProduct) AS ComponentId,
+        CAST(NULL AS NVARCHAR(4000)) AS TreePathNames,
+        CAST(NULL AS NVARCHAR(4000)) AS AccessoryName,
+        line.BaseAmount,
+        line.DiscountPercent,
+        line.FinalUnitAmount
+    FROM CartLines AS line
+    WHERE line.IdProductVariant IS NULL
+
+    UNION ALL
+
+    -- تنوع
+    SELECT
+        line.IdProfile,
+        line.IdCart,
+        line.IdCartItem,
+        line.IdCartItem AS SortCartItemId,
+        line.IdProduct,
+        line.ProductName,
+        line.IdProductVariant,
+        line.IdSalesPlan,
+        line.Quantity,
+        N'تنوع' AS ComponentType,
+        CAST(NULL AS NVARCHAR(10)) AS AccessoryRequirement,
+        CONVERT(BIGINT, variant.Id) AS ComponentId,
+        variantName.TreePathNames AS TreePathNames,
+        CAST(NULL AS NVARCHAR(4000)) AS AccessoryName,
+        line.BaseAmount,
+        line.DiscountPercent,
+        line.FinalUnitAmount
+    FROM CartLines AS line
+    INNER JOIN Warehouse.ProductVariant AS variant
+        ON variant.Id = line.IdProductVariant
+    LEFT JOIN Warehouse.VariantName AS variantName
+        ON variantName.Id = variant.IdVariantName
+    WHERE line.IdProductVariant IS NOT NULL
+
+    UNION ALL
+
+    -- متعلقهٔ الزامی یا اختیاریِ انتخاب‌شده
+    SELECT
+        accessoryGroup.IdProfile,
+        accessoryGroup.IdCart,
+        CAST(NULL AS BIGINT) AS IdCartItem,
+        accessoryGroup.SortCartItemId,
+        accessoryGroup.IdProduct,
+        accessoryGroup.ProductName,
+        CAST(NULL AS BIGINT) AS IdProductVariant,
+        accessoryGroup.IdSalesPlan,
+        accessoryGroup.Quantity,
+        N'متعلقه' AS ComponentType,
+        CASE
+            WHEN productAccessory.IsRequired = 1 THEN N'الزامی'
+            ELSE N'اختیاری'
+        END AS AccessoryRequirement,
+        CONVERT(BIGINT, productAccessory.IdAccessory) AS ComponentId,
+        CAST(NULL AS NVARCHAR(4000)) AS TreePathNames,
+        accessory.Name AS AccessoryName,
+        price.PriceBeforeDiscountAmount AS BaseAmount,
+        price.DiscountPercent,
+        price.FinalPriceAmount AS FinalUnitAmount
+    FROM CartAccessories AS accessoryGroup
+    INNER JOIN Store.ProductAccessory AS productAccessory
+        ON productAccessory.Id = accessoryGroup.IdProductAccessory
+       AND productAccessory.IdProduct = accessoryGroup.IdProduct
+    INNER JOIN Store.Accessory AS accessory
+        ON accessory.Id = productAccessory.IdAccessory
+    INNER JOIN Store.PriceVersion AS price
+        ON price.IdProduct = accessoryGroup.IdProduct
+       AND price.IdSalesPlan = accessoryGroup.IdSalesPlan
+       AND price.IdAccessory = productAccessory.IdAccessory
+       AND price.IdVariant IS NULL
+       AND price.IsActive = 1
 )
 SELECT
     IdProfile,
@@ -103,22 +186,23 @@ SELECT
     IdProductVariant,
     IdSalesPlan,
     Quantity,
-    RowType,
+    ComponentType,
+    AccessoryRequirement,
     ComponentId,
-    ComponentName,
+    TreePathNames,
+    AccessoryName,
     BaseAmount,
     DiscountPercent,
-    CASE WHEN BaseAmount IS NULL THEN N'missing-price' ELSE N'price-found' END AS PriceStatus,
-    CONVERT(DECIMAL(19, 0), BaseAmount - FinalUnitAmount) AS DiscountAmount,
+    CONVERT(DECIMAL(19, 0), BaseAmount - FinalUnitAmount) AS PriceDifferencePerUnit,
     FinalUnitAmount,
     CONVERT(DECIMAL(19, 0), FinalUnitAmount * Quantity) AS LineTotal
-FROM Components
+FROM CartComponents
 ORDER BY
-    IdProfile,
-    IdCart,
-    IdCartItem,
-    CASE RowType
+    SortCartItemId,
+    CASE ComponentType
         WHEN N'کالا' THEN 1
-            ELSE 2
+        WHEN N'تنوع' THEN 2
+        ELSE 3
     END,
+    AccessoryRequirement,
     ComponentId;

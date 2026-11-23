@@ -51,6 +51,7 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
     public DbSet<StoreContentPageSection> StoreContentPageSections => Set<StoreContentPageSection>();
     public DbSet<StoreFaqItem> StoreFaqItems => Set<StoreFaqItem>();
     public DbSet<ProductFeedback> ProductFeedback => Set<ProductFeedback>();
+    public DbSet<ProductFeedbackStatus> ProductFeedbackStatuses => Set<ProductFeedbackStatus>();
     public DbSet<StoreHomeTestimonial> StoreHomeTestimonials => Set<StoreHomeTestimonial>();
     public DbSet<StoreAttributeDefinition> StoreAttributeDefinitions => Set<StoreAttributeDefinition>();
     public DbSet<StoreProductMediaType> StoreProductMediaTypes => Set<StoreProductMediaType>();
@@ -119,7 +120,6 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
         modelBuilder.Entity<StorePriceVersion>().Property(x => x.IdProductVariant).HasColumnName("IdVariant");
         modelBuilder.Entity<InventoryItem>().Property(x => x.IdProductVariant).HasColumnName("IdVariant");
         modelBuilder.Entity<StoreProductVariantSalesPlanOffer>().Property(x => x.IdProductVariant).HasColumnName("IdVariant");
-        modelBuilder.Entity<StoreHomeTestimonial>().Property(x => x.IdProductFeedback).HasColumnName("IdFeedback");
         modelBuilder.Entity<StoreProductCollectionItem>().Property(x => x.IdProductCollection).HasColumnName("IdCollection");
         modelBuilder.Entity<StoreProductSalesPlanOfferAccessory>().Property(x => x.IdProductSalesPlanOffer).HasColumnName("IdOffer");
         modelBuilder.Entity<StoreProductSalesPlanOfferSpecificationOverride>().Property(x => x.IdProductSalesPlanOffer).HasColumnName("IdOffer");
@@ -736,22 +736,31 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.Property(x => x.FeedbackType).HasMaxLength(20).IsRequired();
             entity.Property(x => x.DisplayName).HasMaxLength(80).IsRequired();
             entity.Property(x => x.FeedbackText).HasMaxLength(800).IsRequired();
-            entity.Property(x => x.Status).HasMaxLength(20).IsRequired();
             entity.Property(x => x.AdminReply).HasMaxLength(1000);
             entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
             entity.Property(x => x.RepliedAtUtc).HasPrecision(3);
-            entity.HasIndex(x => new { x.IdProduct, x.FeedbackType, x.Status, x.CreatedAtUtc });
+            entity.HasIndex(x => new { x.IdProduct, x.FeedbackType, x.IdStatus, x.CreatedAtUtc });
             entity.HasIndex(x => new { x.IdProfile, x.IdProduct, x.FeedbackType });
             entity.HasOne(x => x.Product).WithMany().HasForeignKey(x => x.IdProduct).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(x => x.Status).WithMany().HasForeignKey(x => x.IdStatus).OnDelete(DeleteBehavior.Restrict);
             entity.HasOne(x => x.Profile).WithMany(x => x.ProductFeedback).HasForeignKey(x => x.IdProfile).OnDelete(DeleteBehavior.SetNull);
+        });
+        modelBuilder.Entity<ProductFeedbackStatus>(entity =>
+        {
+            entity.ToTable("ProductFeedbackStatus", "Store");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.Id).ValueGeneratedNever();
+            entity.Property(x => x.Name).HasMaxLength(80).IsRequired();
         });
         modelBuilder.Entity<StoreHomeTestimonial>(entity =>
         {
             entity.ToTable("HomeTestimonial", "Store");
-            entity.HasKey(x => x.IdProductFeedback);
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.DisplayName).HasMaxLength(80).IsRequired();
+            entity.Property(x => x.FeedbackText).HasMaxLength(800).IsRequired();
             entity.Property(x => x.ImagePath).HasMaxLength(500);
-            entity.Property(x => x.UpdatedAtUtc).HasPrecision(3);
-            entity.HasOne(x => x.Feedback).WithMany().HasForeignKey(x => x.IdProductFeedback).OnDelete(DeleteBehavior.Cascade);
+            entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
+            entity.HasOne(x => x.Product).WithMany().HasForeignKey(x => x.IdProduct).OnDelete(DeleteBehavior.Restrict);
         });
         modelBuilder.Entity<StoreAttributeDefinition>(entity =>
         {

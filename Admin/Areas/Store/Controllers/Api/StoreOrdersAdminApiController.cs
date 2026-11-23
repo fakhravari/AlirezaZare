@@ -179,14 +179,62 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
                                   join s in db.SalesPlanReferences.AsNoTracking() on i.IdSalesPlan equals s.Id
                                   join product in db.Products.AsNoTracking() on i.IdProduct equals product.Id
                                   orderby i.Id
-                                  select new { i.Id, i.IdOrder, i.IdProduct, i.IdSalesPlan, ProductName = product.Name, VariantName = db.ProductVariants.Where(v => v.Id == i.IdProductVariant).Select(v => v.VariantName.Name).FirstOrDefault(), i.Quantity, i.IdProductVariant, i.IdPriceVersion, PriceAmount = i.PriceVersion.PriceBeforeDiscountAmount, i.PriceVersion.DiscountPercent, i.PriceVersion.FinalPriceAmount, i.PriceVersion.IsActive, i.PriceVersion.CreatedAtUtc, i.PriceVersion.ChangeReason, s.StoreSalesPlanKey })
+                                  select new { i.Id, i.IdOrder, i.IdProduct, i.IdSalesPlan, ProductName = product.Name, VariantName = db.ProductVariants.Where(v => v.Id == i.IdProductVariant).Select(v => v.VariantName.TreePathNames).FirstOrDefault(), i.Quantity, i.IdProductVariant, i.IdPriceVersion, PriceAmount = i.PriceVersion.PriceBeforeDiscountAmount, i.PriceVersion.DiscountPercent, i.PriceVersion.FinalPriceAmount, i.PriceVersion.IsActive, i.PriceVersion.CreatedAtUtc, i.PriceVersion.ChangeReason, s.StoreSalesPlanKey })
                 .ToListAsync(cancellationToken);
             var references = await (from r in db.StoreOrderAccessories.AsNoTracking()
                                     join v in db.StorePriceVersions.AsNoTracking() on r.IdPriceVersion equals v.Id
                                     where r.IdOrder == id
                                     orderby r.IdProduct, r.IdSalesPlan, r.IdAccessory
-                                    select new { r.IdOrder, r.IdProduct, r.IdSalesPlan, r.IdPriceVersion, v.IdProductVariant, r.IdAccessory, PriceAmount = r.UnitAmountSnapshot, v.DiscountPercent, v.FinalPriceAmount, v.IsActive, v.CreatedAtUtc, v.ChangeReason, AccessoryName = r.AccessoryNameSnapshot })
+                                    select new { r.IdOrder, r.IdProduct, r.IdSalesPlan, r.IdPriceVersion, v.IdProductVariant, r.IdAccessory, PriceAmount = r.UnitAmountSnapshot, BaseAmount = v.PriceBeforeDiscountAmount, v.DiscountPercent, v.FinalPriceAmount, v.IsActive, v.CreatedAtUtc, v.ChangeReason, AccessoryName = r.AccessoryNameSnapshot })
                 .ToListAsync(cancellationToken);
+            var accessoryProductIds = references.Select(reference => reference.IdProduct).Distinct().ToArray();
+            var accessoryIds = references.Select(reference => reference.IdAccessory).Distinct().ToArray();
+            var accessoryRequirementRows = accessoryIds.Length == 0 ? [] : await db.StoreProductAccessories.AsNoTracking()
+                .Where(link => accessoryProductIds.Contains(link.IdProduct) && accessoryIds.Contains(link.IdAccessory))
+                .Select(link => new { link.IdProduct, link.IdAccessory, link.IsRequired }).ToListAsync(cancellationToken);
+            var accessoryRequirements = accessoryRequirementRows.ToDictionary(link => (link.IdProduct, link.IdAccessory), link => link.IsRequired);
+            var components = new List<object>();
+            foreach (var item in itemRows)
+            {
+                components.Add(new
+                {
+                    productName = item.ProductName,
+                    componentType = item.IdProductVariant.HasValue ? "تنوع" : "کالا",
+                    accessoryRequirement = (string?)null,
+                    componentId = item.IdProductVariant ?? item.IdProduct,
+                    treePathNames = item.IdProductVariant.HasValue ? item.VariantName : null,
+                    accessoryName = (string?)null,
+                    salesPlan = item.StoreSalesPlanKey,
+                    quantity = item.Quantity,
+                    baseAmount = item.PriceAmount,
+                    discountPercent = item.DiscountPercent,
+                    discountAmount = item.PriceAmount - item.FinalPriceAmount,
+                    finalUnitAmount = item.FinalPriceAmount,
+                    lineTotal = item.FinalPriceAmount * item.Quantity
+                });
+            }
+            foreach (var accessory in references.GroupBy(reference => new { reference.IdProduct, reference.IdSalesPlan, reference.IdAccessory }))
+            {
+                var matchingItems = itemRows.Where(item => item.IdProduct == accessory.Key.IdProduct && item.IdSalesPlan == accessory.Key.IdSalesPlan).ToArray();
+                var accessoryPrice = accessory.First();
+                var hasRequirement = accessoryRequirements.TryGetValue((accessory.Key.IdProduct, accessory.Key.IdAccessory), out bool isRequired);
+                components.Add(new
+                {
+                    productName = matchingItems.FirstOrDefault()?.ProductName,
+                    componentType = "متعلقه",
+                    accessoryRequirement = hasRequirement ? isRequired ? "الزامی (تعریف فعلی)" : "اختیاری (تعریف فعلی)" : null,
+                    componentId = accessory.Key.IdAccessory,
+                    treePathNames = (string?)null,
+                    accessoryName = accessoryPrice.AccessoryName,
+                    salesPlan = matchingItems.FirstOrDefault()?.StoreSalesPlanKey,
+                    quantity = matchingItems.Sum(item => item.Quantity),
+                    baseAmount = accessoryPrice.BaseAmount,
+                    discountPercent = accessoryPrice.DiscountPercent,
+                    discountAmount = accessoryPrice.BaseAmount - accessoryPrice.PriceAmount,
+                    finalUnitAmount = accessoryPrice.PriceAmount,
+                    lineTotal = accessoryPrice.PriceAmount * matchingItems.Sum(item => item.Quantity)
+                });
+            }
             var items = itemRows.Select(i => new
             {
                 name = i.ProductName,
@@ -214,6 +262,7 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
                 .OrderByDescending(x => x.Id).Select(x => new { x.PreviousStatus, x.NewStatus, x.ActorUserKey, x.ChangedAtUtc })
                 .ToListAsync(cancellationToken);
             order.ItemsJson = System.Text.Json.JsonSerializer.Serialize(items);
+            order.ComponentsJson = System.Text.Json.JsonSerializer.Serialize(components);
             order.ShippingHistoryJson = System.Text.Json.JsonSerializer.Serialize(history);
         }
 
@@ -245,6 +294,7 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
         public string? ShippingTrackingCode { get; set; }
         public string AddressSnapshotJson { get; set; } = "{}";
         public string ItemsJson { get; set; } = "[]";
+        public string ComponentsJson { get; set; } = "[]";
         public string ShippingHistoryJson { get; set; } = "[]";
     }
     public sealed record ShippingStatusInput(string? ExpectedStatus, string? Status);

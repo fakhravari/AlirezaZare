@@ -2170,7 +2170,15 @@
                 void ui.getJson(`/api/admin/store/orders/${encodeURIComponent(item.id)}`).then(order => {
                     const address = JSON.parse(order.addressSnapshotJson || "{}");
                     const items = JSON.parse(order.itemsJson || "[]");
+                    const components = JSON.parse(order.componentsJson || "[]");
                     const history = JSON.parse(order.shippingHistoryJson || "[]");
+                    const componentSummary = components.map(component => {
+                        const displayName = component.componentType === "متعلقه"
+                            ? `${component.productName} ← ${component.accessoryName || "متعلقه"}`
+                            : `${component.productName}${component.treePathNames ? ` ← ${component.treePathNames}` : ""}`;
+                        const requirement = component.accessoryRequirement ? `، ${component.accessoryRequirement}` : "";
+                        return `${displayName} (${component.componentType}${requirement}، شناسه ${component.componentId})، طرح ${component.salesPlan}، تعداد ${ui.formatNumber(component.quantity)}، پایه ${ui.formatNumber(component.baseAmount)}، تخفیف ${ui.formatNumber(component.discountPercent)}٪ / ${ui.formatNumber(component.discountAmount)}، نهایی واحد ${ui.formatNumber(component.finalUnitAmount)}، جمع ${ui.formatNumber(component.lineTotal)} تومان`;
+                    }).join(" ؛ ");
                     ui.showRecord("جزئیات سفارش", {
                         "شماره سفارش": order.orderNumber, "دادهٔ نمونه": order.isSample ? "بله" : "خیر", "مشتری": order.customerName,
                         "وضعیت": order.status === "simulated-payment-confirmed" ? "پرداخت آزمایشی تأیید شده" : order.status === "pending-payment" ? "در انتظار پرداخت" : order.status,
@@ -2182,6 +2190,7 @@
                         "شرکت حمل": order.shippingCarrier || "ثبت نشده", "کد رهگیری": order.shippingTrackingCode || "ثبت نشده",
                         "نشانی ثبت‌شده": Object.values(address).filter(value => typeof value === "string" && value).join("، "),
                         "اقلام": items.map(line => `${line.name}${line.variantName ? ` — ${line.variantName}` : ""}، ${ui.formatNumber(line.quantity)} عدد، مبلغ واحد ${ui.formatNumber(line.unitAmount)} تومان، طرح ${line.salesPlan}${line.priceReferences?.length ? `، نسخه‌های قیمت: ${line.priceReferences.map(ref => `#${ref.priceVersionId} ${ref.name || ref.component}=${ui.formatNumber(ref.calculatedUnitAmount)} تومان`).join("، ")}` : "، مرجع نسخهٔ قیمت ثبت نشده"}`).join(" ؛ ") || "جزئیات اقلام ثبت نشده است",
+                        "اقلام به تفکیک کالا، تنوع و متعلقات": componentSummary || "جزئیات اقلام ثبت نشده است",
                         "تاریخچهٔ ارسال": history.map(entry => `${entry.PreviousStatus} ← ${entry.NewStatus}، مدیر ${entry.ActorUserKey}، ${ui.formatDateTime(entry.ChangedAtUtc)}`).join(" ؛ ") || "تغییری ثبت نشده است"
                     });
                 }).catch(error => ui.notify(error.message || "دریافت جزئیات سفارش ناموفق بود.", "danger"))
@@ -2193,14 +2202,16 @@
                     const addresses = JSON.parse(customer.addressesJson || "[]");
                     const orders = JSON.parse(customer.ordersJson || "[]");
                     const feedback = JSON.parse(customer.feedbackJson || "[]");
+                    const cart = JSON.parse(customer.cartJson || "[]");
                     ui.showRecord("جزئیات مشتری", {
                         "نام": `${customer.firstName} ${customer.lastName}`.trim(), "ایمیل": customer.email,
+                        "سبد خرید فعلی": cart.map(line => `${line.ProductName}${line.VariantPath ? ` (${line.VariantPath})` : ""}، طرح ${line.SalesPlanName}، ${ui.formatNumber(line.Quantity)} عدد${line.Accessories?.length ? `، متعلقات: ${line.Accessories.map(a => `${a.Name} (${a.IsRequired ? "الزامی" : "اختیاری"})`).join("، ")}` : ""}`).join(" ؛ ") || "سبد خرید خالی است",
                         "تلفن": customer.phone, "تعداد سفارش": customer.orderCount,
                         "نشانی‌ها": addresses.map(a => [a.Title, a.Recipient, a.Phone, a.Country, a.Province, a.City, a.Street, a.PostalCode, a.IsDefault ? "پیش‌فرض" : ""].filter(Boolean).join("، ")).join(" ؛ ") || "نشانی ثبت نشده است",
                         "۵۰ سفارش اخیر": orders.map(o => `${o.OrderNumber}${o.IsSample ? " (نمونه)" : ""}، ${o.Status}، ${ui.formatNumber(o.TotalAmount)} تومان`).join(" ؛ ") || "سفارشی ثبت نشده است",
                         "تعداد علاقه‌مندی‌ها": customer.favoriteCount, "تعداد پیگیری قیمت": customer.priceAlertCount,
                         "تعداد تعامل‌های مجله": customer.articleInteractionCount,
-                        "۵۰ بازخورد اخیر": feedback.map(f => `${f.ProductName}، ${f.FeedbackType}، ${f.Status}${f.IsSample ? " (نمونه)" : ""}: ${f.FeedbackText}`).join(" ؛ ") || "بازخوردی ثبت نشده است"
+                        "۵۰ بازخورد اخیر": feedback.map(f => `${f.ProductName}، ${f.FeedbackType}، ${f.Status}: ${f.FeedbackText}`).join(" ؛ ") || "بازخوردی ثبت نشده است"
                     });
                 }).catch(error => ui.notify(error.message || "دریافت جزئیات مشتری ناموفق بود.", "danger"))
                     .finally(() => { detailButton.disabled = false; });

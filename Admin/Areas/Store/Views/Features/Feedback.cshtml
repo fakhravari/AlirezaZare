@@ -2,7 +2,7 @@
 @{
     string type = Model.FeatureId == "questions" ? "questions" : "reviews";
 }
-<div class="admin-page" data-admin-feedback data-api="/api/admin/store/feedback/@type" data-feedback-type="@type" data-can-moderate="@(User.HasClaim("admin_permission", type == "reviews" ? "Store:StoreFeedbackApi:ModerateReview" : "Store:StoreFeedbackApi:ModerateQuestion") ? "true" : "false")">
+<div class="admin-page" data-admin-feedback data-api="/api/admin/store/feedback/@type" data-feedback-type="@type" data-can-moderate="@(User.IsInRole("system.full-access") || User.HasClaim("admin_permission", type == "reviews" ? "Store:StoreFeedbackApi:ModerateReview" : "Store:StoreFeedbackApi:ModerateQuestion") ? "true" : "false")">
     @await Html.PartialAsync("_AdminPageIntro", (Model.Title, Model.Description))
     <section class="panel panel-inverse">
         <div class="panel-heading">
@@ -11,8 +11,8 @@
         <div class="panel-body">
             <form class="admin-filter-bar d-flex flex-wrap align-items-center gap-2 mb-3" data-feedback-filter>
                 <label class="visually-hidden" for="feedback-search">جست‌وجو</label><input class="form-control" id="feedback-search" name="search" type="search" placeholder="نام یا کد محصول، نام کاربر یا متن"/><label class="visually-hidden" for="feedback-status">وضعیت</label>
-                <select class="form-select" id="feedback-status" name="status">
-                    <option value="">همهٔ وضعیت‌ها</option><option value="pending">در انتظار بررسی</option><option value="approved">تأییدشده</option><option value="rejected">ردشده</option>
+                <select class="form-select" id="feedback-status" name="statusId">
+                    <option value="">همهٔ وضعیت‌ها</option>
                 </select>
                 @if (type == "reviews")
                 {
@@ -48,8 +48,7 @@
             </div>
             <div class="modal-body admin-feedback-modal-body">
                 <p data-feedback-text class="border rounded p-3 bg-light text-break" style="white-space:pre-wrap"></p>
-                <div class="admin-modal-field"><label class="form-label" for="feedback-review-status">وضعیت</label><select class="form-select" name="status" id="feedback-review-status">
-                    <option value="pending">در انتظار بررسی</option><option value="approved">تأییدشده</option><option value="rejected">ردشده</option>
+                <div class="admin-modal-field"><label class="form-label" for="feedback-review-status">وضعیت</label><select class="form-select" name="statusId" id="feedback-review-status">
                 </select></div>
                 <div class="admin-modal-field admin-feedback-reply-field">
                     <label class="form-label" for="feedback-reply">پاسخ مدیر</label>

@@ -10,8 +10,7 @@ public sealed record ProductFeedbackItem(
     string Name,
     string Text,
     byte? Rating,
-    string Status,
+    int StatusId,
     string? Reply,
     DateTimeOffset CreatedAt,
-    DateTimeOffset? ReplyAt,
-    bool IsSample = false);
+    DateTimeOffset? ReplyAt);

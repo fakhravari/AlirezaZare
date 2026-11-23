@@ -4,15 +4,14 @@
     if (!ui) return;
     let pageNumber = 1, requestSerial = 0;
     const el = ui.createElement;
-    const statusText = value => ({ pending: "در انتظار بررسی", approved: "تأییدشده", rejected: "ردشده" })[value] || value;
     function setStatus(page, message, error = false) { ui.setStatus(page.querySelector("[data-feedback-status]"), message, error, { compact: true, hideEmpty: true }); }
     function token() { return document.querySelector('[data-feedback-form] [name="__RequestVerificationToken"]')?.value || ""; }
     async function request(url, method = "GET", body) { return ui.getJson(url, { method, headers: body ? { "Content-Type": "application/json", RequestVerificationToken: token() } : {}, ...(body ? { body: JSON.stringify(body) } : {}) }); }
     function openModal(item, page) {
         const form = document.querySelector("[data-feedback-form]"); form.elements.id.value = item.id;
-        form.elements.status.value = item.status; window.AdminRichEditor?.setValue(form.elements.adminReply, item.adminReply || "");
-        document.querySelector("[data-feedback-text]").textContent = `${item.displayName}${item.isSample ? " (نمونه)" : ""} · ${item.productName} (${item.storeProductKey})\n${item.feedbackText}`;
-        form.elements.status.disabled = page.dataset.canModerate !== "true";
+        form.elements.statusId.value = String(item.idStatus); window.AdminRichEditor?.setValue(form.elements.adminReply, item.adminReply || "");
+        document.querySelector("[data-feedback-text]").textContent = `${item.displayName} · ${item.productName} (${item.storeProductKey})\n${item.feedbackText}`;
+        form.elements.statusId.disabled = page.dataset.canModerate !== "true";
         form.elements.adminReply.disabled = page.dataset.canModerate !== "true";
         form.querySelector("[data-feedback-save]").hidden = page.dataset.canModerate !== "true";
         window.bootstrap?.Modal?.getOrCreateInstance(document.getElementById("admin-feedback-modal")).show();
@@ -21,8 +20,8 @@
         const body = page.querySelector("[data-feedback-rows]"); ui.destroyDataTable(page.querySelector("[data-admin-datatable]")); body.replaceChildren();
         for (const item of items) {
             const row = document.createElement("tr");
-            [item.isSample ? "—" : window.AdminUI.formatDateTime(item.createdAtUtc), `${item.productName} (${item.storeProductKey})`, item.isSample ? `${item.displayName} (نمونه)` : item.displayName, item.feedbackText,
-                item.rating == null ? "—" : number.format(item.rating), statusText(item.status)].forEach(value => row.append(el("td", value)));
+            [window.AdminUI.formatDateTime(item.createdAtUtc), `${item.productName} (${item.storeProductKey})`, item.displayName, item.feedbackText,
+                item.rating == null ? "—" : number.format(item.rating), item.statusName].forEach(value => row.append(el("td", value)));
             const reply = el("td");
             reply.innerHTML = item.adminReply || "—";
             row.append(reply);
@@ -35,7 +34,15 @@
         const query = new URLSearchParams(new FormData(page.querySelector("[data-feedback-filter]"))); query.set("page", String(pageNumber));
         setStatus(page, "در حال دریافت بازخوردها…");
         try {
-            const result = await request(`${page.dataset.api}?${query}`); if (serial !== requestSerial) return; render(page, result.items || []);
+            const result = await request(`${page.dataset.api}?${query}`); if (serial !== requestSerial) return;
+            for (const select of [page.querySelector('[name="statusId"]'), document.querySelector('[data-feedback-form] [name="statusId"]')]) {
+                const selected = select.value;
+                select.replaceChildren();
+                if (select.closest("[data-feedback-filter]")) select.add(new Option("همهٔ وضعیت‌ها", ""));
+                for (const item of result.statuses || []) select.add(new Option(item.name, String(item.id)));
+                select.value = selected;
+            }
+            render(page, result.items || []);
             setStatus(page, result.items?.length ? "" : "موردی با این فیلتر پیدا نشد.");
             ui.renderNumberedPagination(page.querySelector("[data-feedback-pagination]"), pageNumber,
                 Math.ceil((result.total || 0) / (result.pageSize || 50)), target => { pageNumber = target; void load(page); }, "صفحه‌بندی بازخوردها");
@@ -52,7 +59,7 @@
             form.dataset.saving = "true"; submit.disabled = true;
             try {
                 const adminReply = window.AdminRichEditor?.getValue(form.elements.adminReply) ?? form.elements.adminReply.value;
-                const result = await request(`${page.dataset.api}/${id}`, "PUT", { status: form.elements.status.value, adminReply: adminReply || null });
+                const result = await request(`${page.dataset.api}/${id}`, "PUT", { statusId: Number(form.elements.statusId.value), adminReply: adminReply || null });
                 ui.notify(result.message, "success"); window.bootstrap?.Modal?.getInstance(document.getElementById("admin-feedback-modal"))?.hide(); await load(page);
             } catch (error) { ui.notify(error.message || "ذخیرهٔ بررسی ناموفق بود.", "danger"); }
             finally { form.dataset.saving = "false"; submit.disabled = false; }

@@ -2,10 +2,14 @@ namespace Shop.Data.Domain.Store.Entities;
 
 public sealed class StoreHomeTestimonial
 {
-    public long IdProductFeedback { get; set; }
+    public long Id { get; set; }
+    public long IdProduct { get; set; }
+    public string DisplayName { get; set; } = "";
+    public string FeedbackText { get; set; } = "";
+    public byte Rating { get; set; }
+    public DateTime CreatedAtUtc { get; set; }
     public string? ImagePath { get; set; }
     public int SortOrder { get; set; }
     public bool IsActive { get; set; }
-    public DateTime UpdatedAtUtc { get; set; }
-    public ProductFeedback Feedback { get; set; } = null!;
+    public Shop.Data.Domain.Warehouse.Entities.WarehouseProduct Product { get; set; } = null!;
 }

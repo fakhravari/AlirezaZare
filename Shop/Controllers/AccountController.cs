@@ -67,7 +67,7 @@ public sealed class AccountController(
             }).ToListAsync(ct);
         var cartVariantRows = cartRows.Where(item => item.IdProductVariant.HasValue).Select(item => item.IdProductVariant!.Value).Distinct().ToArray();
         var cartVariants = cartVariantRows.Length == 0 ? [] : await db.ProductVariants.AsNoTracking().Where(variant => cartVariantRows.Contains(variant.Id))
-            .Select(variant => new { variant.Id, Name = variant.VariantName.Name }).ToListAsync(ct);
+            .Select(variant => new { variant.Id, Name = variant.VariantName.TreePathNames }).ToListAsync(ct);
         var cartVariantAttributes = cartVariantRows.Length == 0 ? [] : await (from link in db.ProductVariantAttributeValues.AsNoTracking()
             join value in db.ProductAttributeValues.AsNoTracking() on link.IdProductAttributeValue equals value.Id
             join attribute in db.ProductAttributes.AsNoTracking() on value.IdProductAttribute equals attribute.Id

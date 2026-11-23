@@ -14,18 +14,18 @@ namespace Shop.Admin.Areas.Store.Controllers.Api;
 public sealed class StoreFeedbackApiController(ShopDbContext db) : ControllerBase
 {
     [HttpGet("reviews")]
-    public Task<IActionResult> Reviews([FromQuery] string? status, [FromQuery] string? search,
+    public Task<IActionResult> Reviews([FromQuery] int? statusId, [FromQuery] string? search,
         [FromQuery] int page = 1, [FromQuery] int pageSize = AdminListQuery.DefaultPageSize,
         [FromQuery] DateOnly? from = null, [FromQuery] DateOnly? to = null,
         CancellationToken cancellationToken = default) =>
-        ListAsync("reviews", status, search, page, pageSize, from, to, cancellationToken);
+        ListAsync("reviews", statusId, search, page, pageSize, from, to, cancellationToken);
 
     [HttpGet("questions")]
-    public Task<IActionResult> Questions([FromQuery] string? status, [FromQuery] string? search,
+    public Task<IActionResult> Questions([FromQuery] int? statusId, [FromQuery] string? search,
         [FromQuery] int page = 1, [FromQuery] int pageSize = AdminListQuery.DefaultPageSize,
         [FromQuery] DateOnly? from = null, [FromQuery] DateOnly? to = null,
         CancellationToken cancellationToken = default) =>
-        ListAsync("questions", status, search, page, pageSize, from, to, cancellationToken);
+        ListAsync("questions", statusId, search, page, pageSize, from, to, cancellationToken);
 
     [HttpPut("reviews/{id:long}")]
     [ValidateAntiForgeryToken]
@@ -39,12 +39,12 @@ public sealed class StoreFeedbackApiController(ShopDbContext db) : ControllerBas
         CancellationToken cancellationToken) =>
         ModerateAsync(id, "questions", input, cancellationToken);
 
-    private async Task<IActionResult> ListAsync(string type, string? status, string? search, int page, int pageSize,
+    private async Task<IActionResult> ListAsync(string type, int? statusId, string? search, int page, int pageSize,
         DateOnly? from, DateOnly? to,
         CancellationToken cancellationToken)
     {
         if (!AdminListQuery.TryCreate(page, pageSize, search, out AdminPageRequest paging)
-            || status is not (null or "pending" or "approved" or "rejected"))
+            || (statusId.HasValue && !await db.ProductFeedbackStatuses.AnyAsync(x => x.Id == statusId, cancellationToken)))
             return ValidationProblem(detail: "فیلتر یا صفحه‌بندی معتبر نیست.", statusCode: 400);
 
         if (from.HasValue && to.HasValue && from.Value > to.Value)
@@ -70,13 +70,13 @@ public sealed class StoreFeedbackApiController(ShopDbContext db) : ControllerBas
                         feedback.DisplayName,
                         feedback.FeedbackText,
                         feedback.Rating,
-                        feedback.Status,
+                        feedback.IdStatus,
+                        StatusName = feedback.Status.Name,
                         feedback.AdminReply,
-                        feedback.IsSample,
                         feedback.CreatedAtUtc,
                         feedback.RepliedAtUtc
                     };
-        if (status is not null) query = query.Where(x => x.Status == status);
+        if (statusId.HasValue) query = query.Where(x => x.IdStatus == statusId.Value);
         if (fromUtc.HasValue) query = query.Where(x => x.CreatedAtUtc >= fromUtc.Value);
         if (untilUtc.HasValue) query = query.Where(x => x.CreatedAtUtc < untilUtc.Value);
         if (paging.Search.Length > 0)
@@ -96,26 +96,28 @@ public sealed class StoreFeedbackApiController(ShopDbContext db) : ControllerBas
                 item.DisplayName,
                 item.FeedbackText,
                 item.Rating,
-                item.Status,
+                item.IdStatus,
+                item.StatusName,
                 AdminReply = item.AdminReply is null ? null : StoreHtmlSanitizer.Sanitize(item.AdminReply),
-                item.IsSample,
                 item.CreatedAtUtc,
                 item.RepliedAtUtc
             }).ToArray();
 
-        return Ok(AdminListQuery.CreateResult(result, total, paging));
+        var paged = AdminListQuery.CreateResult(result, total, paging);
+        var statuses = await db.ProductFeedbackStatuses.AsNoTracking().OrderBy(x => x.Id).Select(x => new { x.Id, x.Name }).ToListAsync(cancellationToken);
+        return Ok(new { paged.Items, paged.Total, paged.Page, paged.PageSize, paged.HasNext, Statuses = statuses });
     }
 
     private async Task<IActionResult> ModerateAsync(long id, string type, FeedbackModerationInput input,
         CancellationToken cancellationToken)
     {
-        if (input.Status is not ("pending" or "approved" or "rejected") || (input.AdminReply?.Length ?? 0) > 1000)
+        if ((input.AdminReply?.Length ?? 0) > 1000 || !await db.ProductFeedbackStatuses.AnyAsync(x => x.Id == input.StatusId, cancellationToken))
             return ValidationProblem(detail: "وضعیت یا متن پاسخ معتبر نیست.", statusCode: 400);
 
         ProductFeedback? feedback = await db.ProductFeedback.SingleOrDefaultAsync(x => x.Id == id && x.FeedbackType == type, cancellationToken);
         if (feedback is null) return NotFound();
 
-        feedback.Status = input.Status;
+        feedback.IdStatus = input.StatusId;
         feedback.AdminReply = string.IsNullOrWhiteSpace(input.AdminReply) ? null : StoreHtmlSanitizer.Sanitize(input.AdminReply).Trim();
         feedback.RepliedAtUtc = feedback.AdminReply is null ? null : DateTime.UtcNow;
         await db.SaveChangesAsync(cancellationToken);
@@ -124,4 +126,4 @@ public sealed class StoreFeedbackApiController(ShopDbContext db) : ControllerBas
     }
 }
 
-public sealed record FeedbackModerationInput(string Status, string? AdminReply);
+public sealed record FeedbackModerationInput(int StatusId, string? AdminReply);

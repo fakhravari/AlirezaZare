@@ -147,7 +147,7 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
             };
             const isInventorySelectionComplete = () => inventoryAttributeGroups.every((group) => Boolean(inventorySelections[group.key]));
             const inventoryVariantMarkup = inventoryVariants.length
-                ? `<div class="product-configuration-group product-inventory-variant-options"><h3 class="product-configuration-group-title">تنوع قابل انتخاب از انبار</h3>${inventoryAttributeGroups.map((group) => {
+                ? `<div class="product-configuration-group product-inventory-variant-options"><h3 class="product-configuration-group-title">تنوع قابل انتخاب</h3>${inventoryAttributeGroups.map((group) => {
                     const options = group.key === "__warehouseVariant"
                         ? inventoryVariants.map((variant) => ({ value: String(variant.variantId), label: variant.name }))
                         : [...new Map([
@@ -365,8 +365,8 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                         .map((item) => {
                             const name = esc(item.name?.trim() || "کاربر مهمان");
                             const isReview = type === "reviews";
-                            const registeredAt = item.isSample ? "" : feedbackDateMarkup(item.createdAt);
-                            const replyAt = item.isSample ? "" : feedbackDateMarkup(
+                            const registeredAt = feedbackDateMarkup(item.createdAt);
+                            const replyAt = feedbackDateMarkup(
                                 item.replyAt,
                                 "product-feedback-admin-datetime",
                             );
@@ -377,10 +377,10 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                                     : "",
                                 registeredAt,
                             ].join("");
-                            const pendingBadge = item.status === "pending"
+                            const pendingBadge = item.statusId === 1
                                 ? '<span class="product-feedback-pending"><i class="bi bi-hourglass-split" aria-hidden="true"></i>در انتظار تأیید</span>'
                                 : "";
-                            return `<article class="product-feedback-card"><div class="product-feedback-meta"><img class="product-feedback-avatar" src="shop/images/guest-avatar.svg" alt="" loading="lazy"><strong title="${name}">${name}</strong>${item.isSample ? "<span>نمونه</span>" : ""}${pendingBadge}<span class="product-feedback-meta-details">${details}</span></div><p class="${type === "questions" ? "product-question-user-text" : "product-feedback-user-text"}">${esc(item.text)}</p>${item.reply ? `<aside class="product-feedback-admin-reply"><div class="product-feedback-admin-meta"><span><i class="bi bi-patch-check-fill" aria-hidden="true"></i>${item.isSample ? "پاسخ نمونه" : "پاسخ مدیر فروشگاه"}</span>${replyAt}${item.isSample ? "" : "<small>پاسخ رسمی</small>"}</div><p>${esc(item.reply)}</p></aside>` : ""}</article>`;
+                            return `<article class="product-feedback-card"><div class="product-feedback-meta"><img class="product-feedback-avatar" src="shop/images/guest-avatar.svg" alt="" loading="lazy"><strong title="${name}">${name}</strong>${pendingBadge}<span class="product-feedback-meta-details">${details}</span></div><p class="${type === "questions" ? "product-question-user-text" : "product-feedback-user-text"}">${esc(item.text)}</p>${item.reply ? `<aside class="product-feedback-admin-reply"><div class="product-feedback-admin-meta"><span><i class="bi bi-patch-check-fill" aria-hidden="true"></i>پاسخ مدیر فروشگاه</span>${replyAt}<small>پاسخ رسمی</small></div><p>${esc(item.reply)}</p></aside>` : ""}</article>`;
                         })
                         .join("")
                     : `<div class="product-feedback-empty empty-state-card"><i class="bi ${type === "reviews" ? "bi-chat-square-heart" : "bi-question-circle"}" aria-hidden="true"></i><strong>${type === "reviews" ? "هنوز دیدگاهی برای این محصول ثبت نشده است." : "هنوز پرسشی دربارهٔ این محصول ثبت نشده است."}</strong><span>${type === "reviews" ? "تجربهٔ استفاده‌تان را با خریداران دیگر به اشتراک بگذارید." : "سؤال خود را ثبت کنید تا اطلاعات این کالا کامل‌تر شود."}</span></div>`;
@@ -1586,7 +1586,7 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                                 text: item.text,
                                 rating: type === "reviews" ? Number(item.rating) || 5 : null,
                                 createdAt: item.createdAt || new Date().toISOString(),
-                                status: "pending",
+                                statusId: 1,
                                 sample: false,
                             }));
                             ui.storage.remove(key);
@@ -1605,7 +1605,7 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                     const result = await response.json();
                     const combined = [
                         ...(Array.isArray(result.items) ? result.items : []),
-                        ...serverFeedback[type].filter((item) => item.status === "pending"),
+                        ...serverFeedback[type].filter((item) => item.statusId === 1),
                         ...migratedItems,
                     ];
                     serverFeedback[type] = combined.filter((item, index, all) =>
