@@ -336,8 +336,6 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
 
         var variant = await db.ProductVariants.SingleOrDefaultAsync(v => v.Id == variantId && v.IsActive && db.Products.Any(p => p.Id == v.IdProduct && p.IsStoreEnabled), cancellationToken);
         if (variant is null) return NotFound(new { code = "variant-or-plan-not-found" });
-        if (!input.IsEnabled && variant.IsDefault && (plan.IsRegular || await db.StoreProductSalesPlanOffers.AnyAsync(o => o.IdProduct == variant.IdProduct && o.IdSalesPlan == plan.Id && o.IsEnabled, cancellationToken)))
-            return Conflict(new { detail = "تنوع پیش‌فرض را در طرح فعال کالا نمی‌توان غیرفعال کرد؛ ابتدا تنوع دیگری را پیش‌فرض کنید یا پیشنهاد کالا را از طرح خارج کنید." });
 
         var offer = await db.StoreProductVariantSalesPlanOffers.SingleOrDefaultAsync(x => x.IdProductVariant == variantId && x.IdSalesPlan == plan.Id, cancellationToken);
         if (offer is null) db.StoreProductVariantSalesPlanOffers.Add(new Shop.Data.Domain.Store.Entities.StoreProductVariantSalesPlanOffer { IdProductVariant = variantId, IdSalesPlan = plan.Id, IsEnabled = input.IsEnabled, CreatedAtUtc = DateTime.UtcNow });

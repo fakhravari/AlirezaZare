@@ -38,6 +38,7 @@ public sealed class SystemProblemsController(ShopDbContext db) : Controller
         var defaultSale = from pair in productPlans
                           join variant in db.ProductVariants.AsNoTracking() on pair.product.Id equals variant.IdProduct
                           where variant.IsActive && variant.IsDefault
+                              && !db.StoreProductVariantSalesPlanOffers.Any(o => o.IdProductVariant == variant.Id && o.IdSalesPlan == pair.plan.Id && !o.IsEnabled)
                               && (!db.InventoryItems.Any(i => i.IdProductVariant == variant.Id && i.IsActive)
                                   || !db.StoreProductVariantSalesPlanOffers.Any(o => o.IdProductVariant == variant.Id && o.IdSalesPlan == pair.plan.Id && o.IsEnabled)
                                   || !db.StorePriceVersions.Any(p => p.IdProductVariant == variant.Id && p.IdSalesPlan == pair.plan.Id && p.IsActive))
@@ -50,7 +51,7 @@ public sealed class SystemProblemsController(ShopDbContext db) : Controller
                             select new SystemProblemRow { Id = pair.product.Id, Subject = pair.product.Name, Context = "کالای بدون تنوع فعال", Plan = pair.plan.DisplayName, Detail = "قیمت فعال کالا ثبت نشده" };
 
         var defaultVariants = from product in products
-                              where db.ProductVariants.Any(v => v.IdProduct == product.Id)
+                              where db.ProductVariants.Any(v => v.IdProduct == product.Id && v.IsActive)
                                   && !db.ProductVariants.Any(v => v.IdProduct == product.Id && v.IsActive && v.IsDefault)
                               select new SystemProblemRow { Id = product.Id, Subject = product.Name, Plan = "", Detail = "تنوع پیش‌فرض فعال ندارد" };
 
@@ -82,7 +83,9 @@ public sealed class SystemProblemsController(ShopDbContext db) : Controller
                                     Detail = "قیمت فعال یا مجوز متعلقهٔ اجباری در طرح موجود نیست" };
 
         var negativeStock = from stock in db.StockBalances.AsNoTracking()
-                            where stock.Quantity < 0
+                            where stock.Quantity < 0 && stock.Warehouse.IsActive && stock.InventoryItem.IsActive &&
+                                stock.InventoryItem.Product.IsWarehouseEnabled && stock.SalesPlanReference.IsActive &&
+                                (!stock.InventoryItem.IdProductVariant.HasValue || stock.InventoryItem.ProductVariant!.IsActive)
                             select new SystemProblemRow { Id = stock.Id, Subject = stock.InventoryItem.Product.Name,
                                 Context = stock.InventoryItem.ProductVariant != null ? stock.InventoryItem.ProductVariant.VariantName.Name : "بدون تنوع",
                                 Plan = stock.Warehouse.Name, Detail = "ماندهٔ موجودی منفی است؛ گردش انبار بررسی شود" };
@@ -108,14 +111,14 @@ public sealed class SystemProblemsController(ShopDbContext db) : Controller
         {
             new("configuration", "تنظیمات اصلی فروش", "انبار فروش سایت و طرح عادی فعال و جاری", null, configuration),
             new("variant-prices", "قیمت و اتصال تنوع", "تنوع‌های فعال در طرح‌های جاری؛ اتصال عمداً غیرفعال گزارش نمی‌شود", variantPrices),
-            new("default-sale", "تنوع پیش‌فرض قابل عرضه", "تنوع پیش‌فرض باید در طرح جاری قلم موجودی، اتصال و قیمت فعال داشته باشد؛ اتصال غیرفعال نیز گزارش می‌شود", defaultSale),
+            new("default-sale", "تنوع پیش‌فرض قابل عرضه", "تنوع پیش‌فرض فعال در طرح جاری باید قلم موجودی، اتصال و قیمت فعال داشته باشد؛ اتصال غیرفعال بررسی نمی‌شود", defaultSale),
             new("product-prices", "قیمت کالای بدون تنوع", "قیمت فعال کالا در طرح‌های جاری", productPrices),
-            new("default-variant", "تنوع پیش‌فرض", "کالای فروشگاهی دارای سابقهٔ تنوع باید پیش‌فرض فعال داشته باشد", defaultVariants),
+            new("default-variant", "تنوع پیش‌فرض", "کالای فروشگاهی دارای تنوع فعال باید پیش‌فرض فعال داشته باشد", defaultVariants),
             new("variant-inventory", "قلم موجودی تنوع", "تنوع فعال فروشگاهی باید قلم موجودی فعال داشته باشد", variantInventory),
             new("product-inventory", "قلم موجودی کالا", "کالای فروشگاهی بدون تنوع فعال باید قلم موجودی فعال داشته باشد", productInventory),
             new("base-unit", "واحد پایهٔ کالا", "کالای فعال باید دقیقاً یک واحد پایهٔ فعال با ضریب یک و مرجع واحد فعال داشته باشد", baseUnits),
             new("required-accessory", "متعلقهٔ اجباری", "قیمت فعال و مجاز بودن متعلقه در طرح جاری", requiredAccessories),
-            new("negative-stock", "موجودی منفی", "مانده‌های منفی انبار در تمام طرح‌ها", negativeStock),
+            new("negative-stock", "موجودی منفی", "مانده‌های منفی اقلام، انبارها و طرح‌های فعال", negativeStock),
             new("order-subtotal", "جمع اقلام سفارش", "مقایسهٔ جمع اقلام قیمت‌گذاری‌شده با مبلغ اقلام ثبت‌شده", orderAmounts)
         };
         foreach (var item in checks)

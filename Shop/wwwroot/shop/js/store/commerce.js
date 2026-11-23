@@ -93,7 +93,25 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
         if (!p) productView.innerHTML = empty("محصول پیدا نشد");
         else {
             const planOffers = (salesPlans.offers || []).filter((offer) => offer.productId === p.id);
-            const inventoryVariants = (salesPlans.inventoryVariants || []).filter((variant) => variant.productId === p.id)
+            const plansForProduct = (salesPlans.plans || []).filter((plan) => plan.isDefault || planOffers.some((offer) => offer.salesPlanId === plan.id));
+            const planIsActive = (plan) => plan.isEnabled !== false && (!plan.startsAtUtc || Date.now() >= new Date(plan.startsAtUtc).getTime()) && (!plan.endsAtUtc || Date.now() < new Date(plan.endsAtUtc).getTime());
+            const offerForPlan = (plan) => planOffers.find((offer) => offer.salesPlanId === plan.id);
+            const planIsSelectable = (plan) => {
+                if (plan.isDefault) return planIsActive(plan);
+                const offer = offerForPlan(plan);
+                return planIsActive(plan) && Boolean(offer?.isEnabled) && Number(offer?.stockQuantity) > 0;
+            };
+            const requestedPlanId = new URLSearchParams(location.search).get("salesPlanId");
+            const requestedPlan = plansForProduct.find((plan) => plan.id === requestedPlanId);
+            const defaultPlan = plansForProduct.find((plan) => plan.isDefault);
+            const fallbackPlan = plansForProduct.find(planIsSelectable) || defaultPlan;
+            const unavailableSpecialPlan = Boolean(requestedPlan && !requestedPlan.isDefault && !planIsSelectable(requestedPlan));
+            const selectedSalesPlanId = unavailableSpecialPlan
+                ? defaultPlan?.id || "regular"
+                : requestedPlanId || (defaultPlan && planIsSelectable(defaultPlan) ? defaultPlan.id : fallbackPlan?.id || "regular");
+            const allInventoryVariants = (salesPlans.inventoryVariants || []).filter((variant) => variant.productId === p.id);
+            const hasWarehouseVariants = allInventoryVariants.length > 0;
+            const inventoryVariants = allInventoryVariants.filter((variant) => !variant.disabledSalesPlanIds?.includes(selectedSalesPlanId))
                 .sort((left, right) => Number(right.isDefault === true) - Number(left.isDefault === true));
             const inventorySelections = {};
             const inventoryVariantAttributes = (variant) => Array.isArray(variant.attributes) ? variant.attributes : [];
@@ -103,7 +121,7 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                 : [];
             if (inventoryVariants.length && (!inventoryAttributeGroups.length || hasUnattributedInventoryVariants))
                 inventoryAttributeGroups.unshift({ key: "__warehouseVariant", label: "مدل موجودی" });
-            const defaultInventoryVariant = inventoryVariants.find((variant) => variant.isDefault) || inventoryVariants[0];
+            const defaultInventoryVariant = window.HNProductCard.selectVariant(inventoryVariants, selectedSalesPlanId) || inventoryVariants[0];
             if (defaultInventoryVariant) {
                 for (const group of inventoryAttributeGroups) {
                     if (group.key === "__warehouseVariant") {
@@ -115,7 +133,8 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                 }
             }
             const inventoryPriceGroupKey = inventoryAttributeGroups[inventoryAttributeGroups.length - 1]?.key;
-            const selectedInventoryVariant = () => inventoryVariants.find((variant) =>
+            const selectedInventoryVariant = () => {
+                const matchingVariants = inventoryVariants.filter((variant) =>
                 inventoryAttributeGroups.every((group) => {
                     const selected = inventorySelections[group.key];
                     if (!selected) return false;
@@ -124,6 +143,8 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                         ? !inventoryVariantAttributes(variant).some((attribute) => attribute.key === group.key)
                         : inventoryVariantAttributes(variant).some((attribute) => attribute.key === group.key && String(attribute.value) === selected);
                 }));
+                return window.HNProductCard.selectVariant(matchingVariants, selectedSalesPlanId) || matchingVariants[0];
+            };
             const isInventorySelectionComplete = () => inventoryAttributeGroups.every((group) => Boolean(inventorySelections[group.key]));
             const inventoryVariantMarkup = inventoryVariants.length
                 ? `<div class="product-configuration-group product-inventory-variant-options"><h3 class="product-configuration-group-title">تنوع قابل انتخاب از انبار</h3>${inventoryAttributeGroups.map((group) => {
@@ -142,22 +163,6 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                     }).join("")}</div></fieldset>`;
                 }).join("")}</div>`
                 : "";
-            const plansForProduct = (salesPlans.plans || []).filter((plan) => plan.isDefault || planOffers.some((offer) => offer.salesPlanId === plan.id));
-            const planIsActive = (plan) => plan.isEnabled !== false && (!plan.startsAtUtc || Date.now() >= new Date(plan.startsAtUtc).getTime()) && (!plan.endsAtUtc || Date.now() < new Date(plan.endsAtUtc).getTime());
-            const offerForPlan = (plan) => planOffers.find((offer) => offer.salesPlanId === plan.id);
-            const planIsSelectable = (plan) => {
-                if (plan.isDefault) return planIsActive(plan);
-                const offer = offerForPlan(plan);
-                return planIsActive(plan) && Boolean(offer?.isEnabled) && Number(offer?.stockQuantity) > 0;
-            };
-            const requestedPlanId = new URLSearchParams(location.search).get("salesPlanId");
-            const requestedPlan = plansForProduct.find((plan) => plan.id === requestedPlanId);
-            const defaultPlan = plansForProduct.find((plan) => plan.isDefault);
-            const fallbackPlan = plansForProduct.find(planIsSelectable) || defaultPlan;
-            const unavailableSpecialPlan = Boolean(requestedPlan && !requestedPlan.isDefault && !planIsSelectable(requestedPlan));
-            const selectedSalesPlanId = unavailableSpecialPlan
-                ? defaultPlan?.id || "regular"
-                : requestedPlanId || (defaultPlan && planIsSelectable(defaultPlan) ? defaultPlan.id : fallbackPlan?.id || "regular");
             const focusedPlan = requestedPlan && planIsSelectable(requestedPlan) && requestedPlan.id !== "regular"
                 ? requestedPlan
                 : null;
@@ -170,13 +175,13 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
             const priceForInventoryVariant = (inventoryVariant) => {
                 const offer = selectedOffer();
                 const variantPrice = inventoryVariant?.priceBySalesPlan?.[selectedSalesPlanId];
-                if (inventoryVariants.length && !inventoryVariant) return null;
+                if (hasWarehouseVariants && !inventoryVariant) return null;
                 if (variantPrice !== null && variantPrice !== undefined && Number.isFinite(Number(variantPrice))) {
                     const finalPrice = inventoryVariant.finalPriceBySalesPlan?.[selectedSalesPlanId];
                     if (finalPrice !== null && finalPrice !== undefined && Number.isFinite(Number(finalPrice))) return Number(finalPrice);
                     return null;
                 }
-                if (inventoryVariants.length) return null;
+                if (hasWarehouseVariants) return null;
                 return offer?.finalPriceAmount != null && Number.isFinite(Number(offer.finalPriceAmount)) ? Number(offer.finalPriceAmount) : null;
             };
             const currentPlanBaseAmount = () => priceForInventoryVariant(selectedInventoryVariant());
@@ -686,7 +691,7 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
             const updateInventoryStatus = () => {
                 let quantity = inventoryQuantity;
                 const currentOffer = selectedOffer?.();
-                if (inventoryVariants.length) {
+                if (hasWarehouseVariants) {
                     const variant = selectedInventoryVariant();
                     quantity = variant ? Number(variant.stockBySalesPlan?.[selectedSalesPlanId] ?? 0) : Number.NaN;
                     if (currentOffer) quantity = Math.min(quantity, Number(currentOffer.stockQuantity));
@@ -697,10 +702,13 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                 const offerUnavailable = !currentOffer?.isEnabled;
                 const selectedVariant = selectedInventoryVariant();
                 const variantDisabled = selectedVariant?.disabledSalesPlanIds?.includes(selectedSalesPlanId) === true;
-                const variantPriceUnavailable = Boolean(inventoryVariants.length && selectedVariant && !hasInventoryVariantPrice(selectedVariant));
-                const available = !offerUnavailable && !variantDisabled && !variantPriceUnavailable && (quantityKnown ? quantity >= 1 : (!inventoryVariants.length && p.inStock === true));
-                const unavailable = offerUnavailable || variantDisabled || variantPriceUnavailable || (quantityKnown ? quantity < 1 : (!inventoryVariants.length && p.inStock === false));
-                const message = variantDisabled
+                const noAvailableVariants = hasWarehouseVariants && inventoryVariants.length === 0;
+                const variantPriceUnavailable = Boolean(hasWarehouseVariants && selectedVariant && !hasInventoryVariantPrice(selectedVariant));
+                const available = !offerUnavailable && !noAvailableVariants && !variantDisabled && !variantPriceUnavailable && (quantityKnown ? quantity >= 1 : (!hasWarehouseVariants && p.inStock === true));
+                const unavailable = offerUnavailable || noAvailableVariants || variantDisabled || variantPriceUnavailable || (quantityKnown ? quantity < 1 : (!hasWarehouseVariants && p.inStock === false));
+                const message = noAvailableVariants
+                    ? "تنوع قابل عرضه‌ای در این طرح موجود نیست"
+                    : variantDisabled
                     ? "این تنوع در طرح فروش غیرفعال است"
                     : offerUnavailable
                     ? "این طرح فروش اکنون قابل خرید نیست"
@@ -710,7 +718,7 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                     ? unavailable
                         ? "۰ عدد · ناموجود"
                         : `${fa(quantity)} عدد در انبار`
-                    : inventoryVariants.length && !selectedInventoryVariant()
+                    : hasWarehouseVariants && !selectedInventoryVariant()
                         ? isInventorySelectionComplete() ? "این ترکیب در انبار تعریف نشده است" : "ابتدا تنوع موجودی را انتخاب کنید"
                     : unavailable
                         ? "در حال حاضر ناموجود"
@@ -1628,10 +1636,10 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                             ? !inventoryVariantAttributes(candidate).some((attribute) => attribute.key === group.key)
                             : inventoryVariantAttributes(candidate).some((attribute) => attribute.key === group.key && String(attribute.value) === selected);
                     }));
-                    const listAmount = variant?.priceBySalesPlan?.[selectedSalesPlanId];
-                    const amount = listAmount === null || listAmount === undefined || !Number.isFinite(Number(listAmount))
+                    const finalAmount = variant?.finalPriceBySalesPlan?.[selectedSalesPlanId];
+                    const amount = finalAmount === null || finalAmount === undefined || !Number.isFinite(Number(finalAmount))
                         ? null
-                        : Math.round(Number(listAmount) * (100 - (Number(variant.discountBySalesPlan?.[selectedSalesPlanId]) || 0)) / 100);
+                        : Number(finalAmount);
                     label.textContent = variant ? variant.disabledSalesPlanIds?.includes(selectedSalesPlanId) ? "غیرفعال در طرح" : amount === null ? "بدون قیمت" : money(amount) : "ناموجود";
                     button.setAttribute("aria-label", `${button.dataset.optionLabel || "تنوع"}، ${label.textContent}`);
                 });
@@ -1639,16 +1647,17 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                 const basePriceLabel = productView.querySelector("#productBasePrice");
                 const baseAmount = currentPlanBaseAmount();
                 const inventoryVariant = selectedInventoryVariant();
-                const selectionRequired = inventoryVariants.length > 0 && !inventoryVariant;
+                const selectionRequired = hasWarehouseVariants && !inventoryVariant;
                 const variantDisabled = inventoryVariant?.disabledSalesPlanIds?.includes(selectedSalesPlanId) === true;
                 const unavailablePriceText = variantDisabled ? "این تنوع در طرح فروش غیرفعال است" : "قیمت این تنوع ثبت نشده";
-                if (basePriceLabel) basePriceLabel.textContent = selectionRequired ? "ابتدا تنوع را انتخاب کنید" : baseAmount == null ? unavailablePriceText : money(baseAmount);
+                const selectionMessage = inventoryVariants.length ? "ابتدا تنوع را انتخاب کنید" : "تنوع قابل عرضه موجود نیست";
+                if (basePriceLabel) basePriceLabel.textContent = selectionRequired ? selectionMessage : baseAmount == null ? unavailablePriceText : money(baseAmount);
                 const variantListAmount = inventoryVariant?.priceBySalesPlan?.[selectedSalesPlanId];
                 const hasVariantPrice = variantListAmount !== null && variantListAmount !== undefined && Number.isFinite(Number(variantListAmount));
                 const offer = selectedOffer();
-                const variantPriceUnavailable = Boolean(inventoryVariants.length && (!inventoryVariant || !hasVariantPrice));
-                const listAmount = inventoryVariant ? Number(variantListAmount) : inventoryVariants.length ? Number.NaN : Number(offer?.priceAmount);
-                const discount = inventoryVariant ? Number(inventoryVariant.discountBySalesPlan?.[selectedSalesPlanId]) || 0 : inventoryVariants.length ? 0 : Number(offer?.discountPercent) || 0;
+                const variantPriceUnavailable = Boolean(hasWarehouseVariants && (!inventoryVariant || !hasVariantPrice));
+                const listAmount = inventoryVariant ? Number(variantListAmount) : hasWarehouseVariants ? Number.NaN : Number(offer?.priceAmount);
+                const discount = inventoryVariant ? Number(inventoryVariant.discountBySalesPlan?.[selectedSalesPlanId]) || 0 : hasWarehouseVariants ? 0 : Number(offer?.discountPercent) || 0;
                 if (saleMeta) saleMeta.innerHTML = !variantPriceUnavailable && discount > 0 && discount < 100 && Number.isFinite(listAmount)
                     ? `<del class="price-old">${money(listAmount)}</del><span class="product-price-discount">٪${fa(discount)} تخفیف کالا</span>` : "";
                 productView.querySelectorAll("[data-accessory-id]").forEach((input) => {
@@ -1657,9 +1666,9 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                     if (amountLabel && item) amountLabel.innerHTML = accessoryPriceMarkup(item);
                 });
                 const desktopPrice = productView.querySelector("#productFinalPrice");
-                if (desktopPrice) desktopPrice.innerHTML = value == null ? `<span>${selectionRequired ? "ابتدا تنوع را انتخاب کنید" : unavailablePriceText}</span>` : `<span>${fa(value)}</span><small class="detail-price-unit">تومان</small>`;
+                if (desktopPrice) desktopPrice.innerHTML = value == null ? `<span>${selectionRequired ? selectionMessage : unavailablePriceText}</span>` : `<span>${fa(value)}</span><small class="detail-price-unit">تومان</small>`;
                 const specialPrice = planSummary?.querySelector(".product-special-sale-price strong");
-                if (specialPrice) specialPrice.textContent = value == null ? (selectionRequired ? "پس از انتخاب تنوع" : unavailablePriceText) : money(value);
+                if (specialPrice) specialPrice.textContent = value == null ? (selectionRequired ? inventoryVariants.length ? "پس از انتخاب تنوع" : selectionMessage : unavailablePriceText) : money(value);
                 const addonsPrice = productView.querySelector("#productAddonsPrice");
                 const accessoryAmount = Math.round(availableAccessories
                     .filter((item) => selectedAccessories.has(item.id))
@@ -1716,7 +1725,7 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
             const addProductToCart = async (button) => {
                 const productStatus = productView.querySelector("#productStatus");
                 ui.setMessage(productStatus, "");
-                if (inventoryVariants.length && !selectedInventoryVariant()) {
+                if (hasWarehouseVariants && !selectedInventoryVariant()) {
                     const status = productStatus;
                     ui.setMessage(status, isInventorySelectionComplete() ? "این ترکیب موجودی تعریف نشده است؛ ترکیب دیگری انتخاب کنید." : "لطفاً تنوع موجودی کالا را انتخاب کنید.", "warning");
                     productView.querySelector(".product-inventory-variant-options")?.scrollIntoView({ behavior: "smooth", block: "center" });

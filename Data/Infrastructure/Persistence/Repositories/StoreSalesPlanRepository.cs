@@ -20,7 +20,9 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
                                join inventory in dbContext.InventoryItems.AsNoTracking() on balance.IdInventoryItem equals inventory.Id
                                join plan in dbContext.SalesPlanReferences.AsNoTracking() on balance.IdSalesPlanReference equals plan.Id
                                where siteWarehouseIds.Contains(balance.IdWarehouse) && inventory.IsActive && inventory.Product.IsWarehouseEnabled &&
-                                   ((inventory.IdProductVariant.HasValue && dbContext.ProductVariants.Any(v => v.Id == inventory.IdProductVariant.Value && v.IsActive)) ||
+                                   ((inventory.IdProductVariant.HasValue && dbContext.ProductVariants.Any(v => v.Id == inventory.IdProductVariant.Value && v.IsActive) &&
+                                     dbContext.StoreProductVariantSalesPlanOffers.Any(o => o.IdProductVariant == inventory.IdProductVariant && o.IdSalesPlan == plan.Id && o.IsEnabled) &&
+                                     dbContext.StorePriceVersions.Any(v => v.IdProductVariant == inventory.IdProductVariant && v.IdSalesPlan == plan.Id && v.IsActive)) ||
                                     (!inventory.IdProductVariant.HasValue && !dbContext.ProductVariants.Any(v => v.IdProduct == inventory.IdProduct && v.IsActive)))
                                group balance.Quantity by new { inventory.IdProduct, balance.IdSalesPlanReference } into grouped
                                select new { grouped.Key.IdProduct, grouped.Key.IdSalesPlanReference, Quantity = grouped.Sum() }).ToListAsync(cancellationToken);
@@ -80,7 +82,9 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
         var inventoryStock = await (from inventory in dbContext.InventoryItems.AsNoTracking()
                                     join balance in dbContext.StockBalances.AsNoTracking() on inventory.Id equals balance.IdInventoryItem
                                     join plan in dbContext.SalesPlanReferences.AsNoTracking() on balance.IdSalesPlanReference equals plan.Id
-                                    where inventory.IsActive && inventory.Product.IsWarehouseEnabled && inventory.IdProductVariant.HasValue && siteWarehouseIds.Contains(balance.IdWarehouse) && plan.IdStockOwnerType == 1
+                                    where inventory.IsActive && inventory.Product.IsWarehouseEnabled && inventory.IdProductVariant.HasValue && siteWarehouseIds.Contains(balance.IdWarehouse) && plan.IdStockOwnerType == 1 &&
+                                        dbContext.StoreProductVariantSalesPlanOffers.Any(o => o.IdProductVariant == inventory.IdProductVariant && o.IdSalesPlan == plan.Id && o.IsEnabled) &&
+                                        dbContext.StorePriceVersions.Any(v => v.IdProductVariant == inventory.IdProductVariant && v.IdSalesPlan == plan.Id && v.IsActive)
                                     select new { inventory.IdProductVariant, inventory.IdProduct, plan.StoreSalesPlanKey, balance.Quantity }).ToListAsync(cancellationToken);
         var productByVariantId = eligibleVariants.GroupBy(x => x.VariantId).ToDictionary(x => x.Key, x => checked((int)x.First().ProductId));
         foreach (var stock in inventoryStock)

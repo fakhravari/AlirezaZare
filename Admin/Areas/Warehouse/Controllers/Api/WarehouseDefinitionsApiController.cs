@@ -961,13 +961,6 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
                     if (!makeDefault && entity.IsDefault)
                         return ValidationProblem(detail: "برای هر کالا باید یک تنوع پیش‌فرض فعال باقی بماند.", statusCode: 400);
 
-                    if (makeDefault && id.HasValue && !entity.IsDefault && product.IsStoreEnabled && await (from offer in db.StoreProductVariantSalesPlanOffers
-                        join plan in db.SalesPlanReferences on offer.IdSalesPlan equals plan.Id
-                        where offer.IdProductVariant == entity.Id && !offer.IsEnabled && plan.IdStockOwnerType == 1 && plan.IsActive &&
-                            (plan.IsRegular || db.StoreProductSalesPlanOffers.Any(productOffer => productOffer.IdProduct == productId && productOffer.IdSalesPlan == plan.Id && productOffer.IsEnabled))
-                        select offer.Id).AnyAsync(cancellationToken))
-                        return Conflict(new { detail = "اتصال این تنوع در یک طرح فعال کالا غیرفعال است؛ ابتدا اتصال آن را فعال کنید و سپس تنوع را پیش‌فرض کنید." });
-
                     if (makeDefault)
                         await db.ProductVariants.Where(x => x.IdProduct == productId && x.Id != (id ?? 0) && x.IsDefault)
                             .ExecuteUpdateAsync(setters => setters.SetProperty(x => x.IsDefault, false), cancellationToken);

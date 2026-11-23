@@ -496,9 +496,9 @@
     try { salesPlanData = JSON.parse(document.querySelector("#storeSalesPlans")?.textContent || "{}"); } catch { salesPlanData = {}; }
     salesPlanId ||= salesPlanData.plans?.find((plan) => plan.isDefault)?.id || "regular";
     const inventoryVariants = (salesPlanData.inventoryVariants || []).filter((variant) => Number(variant.productId) === Number(productId));
-    const defaultInventoryVariant = inventoryVariants.find((variant) => variant.isDefault);
+    const defaultInventoryVariant = window.HNProductCard?.selectVariant(inventoryVariants, salesPlanId);
     if (inventoryVariants.length && !defaultInventoryVariant) {
-      showToast("برای این کالا تنوع پیش‌فرض ثبت نشده است؛ مدیر فروشگاه باید آن را تعیین کند.", "warning");
+      showToast("تنوع قابل عرضه‌ای برای این کالا در طرح انتخاب‌شده موجود نیست.", "warning");
       return;
     }
     const accessoryIds = (product.accessories || []).filter((item) => item.required).map((item) => item.id);

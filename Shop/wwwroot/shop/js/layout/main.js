@@ -760,7 +760,7 @@
       const unavailable = price == null || stock === 0;
       $card
         .find(".featured-price, .featured-buy strong")
-        .text(window.HNProductCard?.priceDetails(product).variantDisabled ? "این تنوع در طرح فروش غیرفعال است" : productPriceText(price));
+        .text(window.HNProductCard?.priceDetails(product).variantDisabled ? "تنوع قابل عرضه موجود نیست" : productPriceText(price));
       $card.find(".add-cart").attr({
         "data-id": String(product.id),
         "data-name": product.name,
@@ -2100,15 +2100,15 @@
     $quickAdd
       .prop("disabled", unavailable)
       .attr("aria-disabled", String(unavailable))
-      .attr("aria-label", variantDisabled ? "تنوع غیرفعال" : unavailable ? "ناموجود" : "افزودن به سبد خرید")
-      .attr("title", variantDisabled ? "این تنوع در طرح فروش غیرفعال است" : unavailable ? "موجودی این کالا تمام شده است" : "افزودن به سبد خرید")
+      .attr("aria-label", unavailable ? "ناموجود" : "افزودن به سبد خرید")
+      .attr("title", variantDisabled ? "تنوع قابل عرضه موجود نیست" : unavailable ? "موجودی این کالا تمام شده است" : "افزودن به سبد خرید")
       .toggleClass("is-out-of-stock", unavailable)
       .html(`<i class="bi ${unavailable ? "bi-bag-x" : "bi-bag-plus"}" aria-hidden="true"></i> ${unavailable ? "ناموجود" : "افزودن به سبد خرید"}`);
     $(".stock-note > span").html(
       `<i aria-hidden="true"></i> ${unavailable ? "ناموجود" : "موجود در انبار"}`,
     );
     $(".stock-note > small").text(
-      variantDisabled ? "این تنوع در طرح فروش غیرفعال است." : unavailable ? "موجودی این کالا تمام شده است." : "زمان ارسال بر اساس مقصد و سفارش اعلام می‌شود.",
+      variantDisabled ? "تنوع قابل عرضه موجود نیست." : unavailable ? "موجودی این کالا تمام شده است." : "زمان ارسال بر اساس مقصد و سفارش اعلام می‌شود.",
     );
     $("#quickViewImage").attr({
       src: product.image,
@@ -2118,7 +2118,7 @@
     $("#quickViewCode").text(
       `${product.brand ? `${product.brand} Â· ` : ""}${product.code}`,
     );
-    $("#quickViewPrice").text(variantDisabled ? "این تنوع در طرح فروش غیرفعال است" : productPriceText(price));
+    $("#quickViewPrice").text(variantDisabled ? "تنوع قابل عرضه موجود نیست" : productPriceText(price));
     $(".quick-description").text(
       product.detail?.highlights?.[0] || product.detail?.intro || "مشخصات این مدل را بررسی کنید.",
     );

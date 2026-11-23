@@ -20,15 +20,26 @@
     }
     return salesPlanData;
   };
+  const selectVariant = (variants, planId) => {
+    const eligible = variants.filter((variant) => {
+      const amount = variant.priceBySalesPlan?.[planId];
+      const finalAmount = variant.finalPriceBySalesPlan?.[planId];
+      return !variant.disabledSalesPlanIds?.includes(planId) && amount != null && finalAmount != null && Number.isFinite(Number(amount)) && Number.isFinite(Number(finalAmount));
+    }).sort((left, right) => Number(right.isDefault === true) - Number(left.isDefault === true) || Number(left.variantId) - Number(right.variantId));
+    return eligible.find((variant) => Number(variant.stockBySalesPlan?.[planId] || 0) > 0) || eligible[0] || null;
+  };
   const priceDetails = (product, options = {}) => {
     const data = getSalesPlanData();
     const planId = options.salesPlanId || options.id || data?.plans?.find((plan) => plan.isDefault)?.id;
     const offer = data?.offers?.find((item) => Number(item.productId) === Number(product.id) && item.salesPlanId === planId);
+    const plan = data?.plans?.find((item) => item.id === planId);
+    if (plan?.isEnabled === false || (plan?.startsAtUtc && Date.now() < Date.parse(plan.startsAtUtc)) || (plan?.endsAtUtc && Date.now() >= Date.parse(plan.endsAtUtc)) || offer?.isEnabled === false)
+      return { current: null, list: null, discount: 0, adjustments: 0, priceUnavailable: true };
     const productVariants = data?.inventoryVariants?.filter((item) => Number(item.productId) === Number(product.id)) || [];
-    const variant = productVariants.find((item) => item.isDefault);
+    const variant = selectVariant(productVariants, planId);
     const variantAmount = variant?.priceBySalesPlan?.[planId];
     const hasAmount = (amount) => amount !== null && amount !== undefined && Number.isFinite(Number(amount));
-    if (productVariants.length && (!variant || !hasAmount(variantAmount))) return { current: null, list: null, discount: 0, adjustments: 0, priceUnavailable: true, variantDisabled: variant?.disabledSalesPlanIds?.includes(planId) === true };
+    if (productVariants.length && (!variant || !hasAmount(variantAmount))) return { current: null, list: null, discount: 0, adjustments: 0, priceUnavailable: true, variantDisabled: productVariants.every((item) => item.disabledSalesPlanIds?.includes(planId) === true) };
     if (Array.isArray(data?.offers) && !hasAmount(offer?.priceAmount) && !hasAmount(options.priceAmount) && !hasAmount(variantAmount)) return { current: null, list: null, discount: 0, adjustments: 0, priceUnavailable: true };
     const baseAmount = hasAmount(variantAmount) ? Number(variantAmount) : hasAmount(offer?.priceAmount) ? Number(offer.priceAmount) : hasAmount(options.priceAmount) ? Number(options.priceAmount) : null;
     const discount = hasAmount(variantAmount) ? Number(variant.discountBySalesPlan?.[planId]) || 0 : Number(offer?.discountPercent ?? options.discountPercent ?? product.discountPercent) || 0;
@@ -44,12 +55,14 @@
     const data = getSalesPlanData();
     if (!Array.isArray(data?.plans) || !Array.isArray(data?.offers) || !Array.isArray(data?.inventoryVariants)) return null;
     const planId = options.salesPlanId || data.plans.find((plan) => plan.isDefault)?.id;
+    const plan = data.plans.find((item) => item.id === planId);
+    if (!plan || plan.isEnabled === false || (plan.startsAtUtc && Date.now() < Date.parse(plan.startsAtUtc)) || (plan.endsAtUtc && Date.now() >= Date.parse(plan.endsAtUtc))) return 0;
     const offer = data.offers.find((item) => Number(item.productId) === Number(product.id) && item.salesPlanId === planId);
     if (!offer || !offer.isEnabled) return 0;
     let stock = Number(offer.stockQuantity);
     const variants = data.inventoryVariants.filter((item) => Number(item.productId) === Number(product.id));
     if (variants.length) {
-      const variant = variants.find((item) => item.isDefault);
+      const variant = selectVariant(variants, planId);
       if (!variant || !hasAmount(variant.priceBySalesPlan?.[planId])) return 0;
       stock = Math.min(stock, Number(variant.stockBySalesPlan?.[planId] ?? 0));
     }
@@ -57,7 +70,7 @@
   };
   const price = (product, options = {}) => {
     const { current, list, discount: percent, adjustments, priceUnavailable, variantDisabled } = priceDetails(product, options);
-    if (priceUnavailable || current == null) return `<span class="product-price-unavailable">${variantDisabled ? "این تنوع در طرح فروش غیرفعال است" : "قیمت تنوع ثبت نشده"}</span>`;
+    if (priceUnavailable || current == null) return `<span class="product-price-unavailable">${variantDisabled ? "تنوع قابل عرضه موجود نیست" : "قیمت تنوع ثبت نشده"}</span>`;
     const discounted = percent > 0 && percent < 100;
     const listAmount = list + adjustments;
     return `<strong class="product-price-current">${fa(current)} <small>تومان</small></strong>${discounted
@@ -86,7 +99,7 @@
     const variantDisabled = priceDetails(product, options).variantDisabled === true;
     const unavailable = priceUnavailable || (Number.isFinite(stock) && stock >= 0 ? stock < 1 : product.inStock === false);
     const actionLabel = variantDisabled
-      ? '<span class="add-cart-label">تنوع غیرفعال</span>'
+      ? '<span class="add-cart-label">ناموجود</span>'
       : priceUnavailable
       ? '<span class="add-cart-label">قیمت ناموجود</span>'
       : unavailable
@@ -94,7 +107,7 @@
       : search ? '<span class="add-cart-label search-page-card-action-label">افزودن</span><span class="search-page-card-action-compact">افزودن</span>' : '<span class="add-cart-label">افزودن به سبد</span>';
     const action = favorite
       ? `<button class="list-remove-button" type="button" data-unlike="${esc(product.id)}" aria-label="حذف ${esc(product.name)} از علاقه‌مندی‌ها"><i class="bi bi-trash3" aria-hidden="true"></i><span>حذف از علاقه‌مندی‌ها</span></button>`
-      : `<button class="add-cart${search ? " search-add-cart search-page-card-action" : ""}${unavailable ? " is-out-of-stock" : ""}" type="button" data-id="${esc(product.id)}" data-name="${esc(product.name)}" data-price="${current ?? ""}" data-image="${esc(product.image)}"${options.salesPlanId ? ` data-sales-plan-id="${esc(options.salesPlanId)}" data-stock-quantity="${Math.max(0, Number(options.stockQuantity) || 0)}" data-max-purchase-quantity="${Math.max(1, Number(options.maxPurchaseQuantity) || 99)}"` : ""}${options.salesPlanName ? ` data-sales-plan-name="${esc(options.salesPlanName)}"` : ""}${options.salesPlanCode ? ` data-sales-plan-code="${esc(options.salesPlanCode)}"` : ""}${options.salesPlanLabel ? ` data-sales-plan-label="${esc(options.salesPlanLabel)}"` : ""}${unavailable ? variantDisabled ? ' disabled aria-disabled="true" aria-label="تنوع غیرفعال" title="این تنوع در طرح فروش غیرفعال است"' : priceUnavailable ? ' disabled aria-disabled="true" aria-label="قیمت ناموجود" title="قیمت این کالا ثبت نشده است"' : ' disabled aria-disabled="true" aria-label="ناموجود" title="موجودی این کالا تمام شده است"' : ""}><i class="bi ${unavailable ? "bi-bag-x" : "bi-bag-plus"}" aria-hidden="true"></i>${actionLabel}</button>`;
+      : `<button class="add-cart${search ? " search-add-cart search-page-card-action" : ""}${unavailable ? " is-out-of-stock" : ""}" type="button" data-id="${esc(product.id)}" data-name="${esc(product.name)}" data-price="${current ?? ""}" data-image="${esc(product.image)}"${options.salesPlanId ? ` data-sales-plan-id="${esc(options.salesPlanId)}" data-stock-quantity="${Math.max(0, Number(options.stockQuantity) || 0)}" data-max-purchase-quantity="${Math.max(1, Number(options.maxPurchaseQuantity) || 99)}"` : ""}${options.salesPlanName ? ` data-sales-plan-name="${esc(options.salesPlanName)}"` : ""}${options.salesPlanCode ? ` data-sales-plan-code="${esc(options.salesPlanCode)}"` : ""}${options.salesPlanLabel ? ` data-sales-plan-label="${esc(options.salesPlanLabel)}"` : ""}${unavailable ? variantDisabled ? ' disabled aria-disabled="true" aria-label="ناموجود" title="تنوع قابل عرضه موجود نیست"' : priceUnavailable ? ' disabled aria-disabled="true" aria-label="قیمت ناموجود" title="قیمت این کالا ثبت نشده است"' : ' disabled aria-disabled="true" aria-label="ناموجود" title="موجودی این کالا تمام شده است"' : ""}><i class="bi ${unavailable ? "bi-bag-x" : "bi-bag-plus"}" aria-hidden="true"></i>${actionLabel}</button>`;
     const hasSalesPlanBadge = Boolean(options.salesPlanName && options.salesPlanId && !regularPlan);
     const imageBadge = hasSalesPlanBadge
       ? `<span class="product-sales-plan-badge product-sales-plan-badge--overlay"><i class="bi bi-lightning-charge-fill" aria-hidden="true"></i>${esc(options.salesPlanName)}</span>`
@@ -102,5 +115,5 @@
     const html = `<article class="${classes}" data-product-id="${esc(product.id)}" data-product-card="v1"${options.salesPlanId ? ` data-sales-plan-id="${esc(options.salesPlanId)}" data-sales-plan-name="${esc(options.salesPlanName || "")}" data-sales-plan-code="${esc(options.salesPlanCode || "")}" data-sales-plan-label="${esc(options.salesPlanLabel || "")}"` : ""}><div class="product-image${search ? " search-page-card-media" : ""}"><a href="${esc(productUrl)}" aria-label="مشاهده ${esc(product.name)}"><img src="${esc(options.image || product.image)}" alt="${esc(product.name)}" width="800" height="800" loading="lazy" decoding="async"></a><div class="product-card-actions" role="group" aria-label="عملیات محصول"><button class="favorite" type="button" data-product-id="${esc(product.id)}" aria-label="افزودن به علاقه‌مندی‌ها" aria-pressed="false"><i class="bi bi-heart" aria-hidden="true"></i></button><button class="compare-trigger" type="button" data-product-id="${esc(product.id)}" aria-label="افزودن به مقایسه" aria-pressed="false"><i class="bi bi-arrow-left-right" aria-hidden="true"></i></button></div>${imageBadge}</div><div class="${bodyClass}">${slider ? title : `<div${search ? ' class="search-page-card-heading"' : ""}>${title}</div>`}<p class="${slider ? "product-card-sale-price" : search ? "search-product-price search-page-card-price" : favorite ? "favorite-item-price" : "product-card-price"} ${priceDetails(product, options).discount > 0 ? "has-discount" : "is-regular"}">${price(product, options)}</p>${slider ? action : ""}</div>${slider ? "" : action}</article>`;
     return slider ? `<div class="showcase-slide">${html}</div>` : html;
   };
-  window.HNProductCard = Object.freeze({ render, price, priceDetails, currentPrice, availableStock });
+  window.HNProductCard = Object.freeze({ render, price, priceDetails, currentPrice, availableStock, selectVariant });
 })(window);
