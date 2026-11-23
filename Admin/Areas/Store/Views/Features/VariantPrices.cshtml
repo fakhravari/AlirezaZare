@@ -123,6 +123,8 @@
             <form class="admin-filter-bar mb-3 d-flex flex-wrap align-items-center gap-2 mb-3" data-price-filter>
                 <label class="visually-hidden" for="variant-price-search">جست‌وجو</label>
                 <select class="form-select" id="variant-price-search" name="productIds" multiple data-product-filter aria-label="انتخاب کالا با نام یا کد"></select>
+                <label for="variant-price-plan">طرح فروش</label>
+                <select class="form-select" id="variant-price-plan" name="salesPlanId" data-price-plan-filter><option value="">همهٔ طرح‌ها</option></select>
                 <label for="variant-price-from">از تاریخ ثبت قیمت</label><input id="variant-price-from" class="form-control" type="date" name="from" />
                 <label for="variant-price-to">تا تاریخ ثبت قیمت</label><input id="variant-price-to" class="form-control" type="date" name="to" />
                 <button class="btn btn-primary" type="submit">اعمال فیلتر</button><button class="btn btn-default" type="reset">پاک‌کردن</button>

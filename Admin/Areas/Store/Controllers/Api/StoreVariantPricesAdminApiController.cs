@@ -50,6 +50,18 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
             }).ToListAsync(cancellationToken));
     }
 
+    [HttpGet("price-plans")]
+    public async Task<IActionResult> PricePlans(CancellationToken cancellationToken)
+    {
+        if (!CanManage()) return Forbid();
+
+        return Ok(await db.SalesPlanReferences.AsNoTracking()
+            .Where(x => x.IdStockOwnerType == 1 && x.IsActive)
+            .OrderBy(x => x.DisplayName).ThenBy(x => x.Id)
+            .Select(x => new { x.Id, x.DisplayName, x.Code })
+            .ToListAsync(cancellationToken));
+    }
+
     [HttpGet("products")]
     public async Task<IActionResult> Products([FromQuery] string? q, [FromQuery] int page = 1, CancellationToken cancellationToken = default)
     {
@@ -253,6 +265,7 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
     public async Task<IActionResult> List(
         [FromQuery] string? q,
         [FromQuery] long[]? productIds,
+        [FromQuery] long? salesPlanId,
         [FromQuery] DateOnly? from,
         [FromQuery] DateOnly? to,
         [FromQuery] bool all = false,
@@ -275,6 +288,7 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
                          (query == "" || product.Name.Contains(query) || product.ProductKey.Contains(query) || variant.VariantName.Name.Contains(query) || (plan.DisplayName ?? "").Contains(query))
                    select new { variant, product, plan, offer };
         if (productIds is { Length: > 0 }) rows = rows.Where(x => productIds.Contains(x.product.Id));
+        if (salesPlanId.HasValue) rows = rows.Where(x => x.plan.Id == salesPlanId.Value);
         if (start.HasValue) rows = rows.Where(x => x.offer != null && x.offer.CreatedAtUtc >= start.Value);
         if (end.HasValue) rows = rows.Where(x => x.offer != null && x.offer.CreatedAtUtc < end.Value);
         int total = await rows.CountAsync(cancellationToken);

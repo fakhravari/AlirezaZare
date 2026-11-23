@@ -115,6 +115,16 @@
         }
     }
 
+    content.addEventListener("submit", event => {
+        const form = event.target;
+        if (event.defaultPrevented || !form.matches("[data-system-problems-refresh]")) return;
+        const page = form.closest("[data-system-problems]");
+        page.querySelectorAll("[data-system-problems-results]").forEach(result => result.remove());
+        page.querySelector("[data-system-problems-time]").remove();
+        page.querySelector("[data-system-problems-status]").textContent = "در حال بررسی مجدد همهٔ موارد…";
+        form.querySelector('button[type="submit"]').disabled = true;
+    });
+
     document.addEventListener("click", event => {
         const link = event.target.closest("a[data-admin-nav]");
         if (!link || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || link.target === "_blank") return;

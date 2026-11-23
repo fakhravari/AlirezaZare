@@ -17,7 +17,7 @@
         if (!form) return url;
         const from = form.elements.from?.value || "", to = form.elements.to?.value || "";
         if (from && to && from > to) throw new Error("تاریخ شروع نباید بعد از تاریخ پایان باشد.");
-        for (const name of ["q", "from", "to"]) {
+        for (const name of ["q", "from", "to", "salesPlanId"]) {
             const value = form.elements[name]?.value.trim();
             if (value) url.searchParams.set(name, value);
         }
@@ -126,6 +126,22 @@
             page._variantPriceRows = result.items || []; render(page);
         }
         catch (error) { if (requests.get(page) === serial) status(page, error.message || "دریافت قیمت‌ها ناموفق بود.", true); }
+    }
+    async function loadPricePlans(page) {
+        const select = page.querySelector("[data-price-plan-filter]");
+        select.disabled = true;
+        try {
+            const plans = await request(page, `${page.dataset.api}/price-plans`);
+            if (!page.isConnected) return;
+            for (const plan of plans) {
+                const option = document.createElement("option");
+                option.value = String(plan.id); option.textContent = plan.displayName || plan.code;
+                select.append(option);
+            }
+            select.disabled = false;
+        } catch (error) {
+            if (page.isConnected) ui.notify(error.message || "دریافت طرح‌های فروش ناموفق بود.", "danger");
+        }
     }
     async function loadOffers(page, pageNumber = page._offerPage || 1) {
         const serial = (page._offerSerial || 0) + 1; page._offerSerial = serial;
@@ -362,6 +378,7 @@
         const priceFilter = page.querySelector("[data-price-filter]");
         if (priceFilter) {
             bindFilter(priceFilter, () => void load(page));
+            void loadPricePlans(page);
             page.querySelector("[data-price-save-all]")?.addEventListener("click", () => void saveAll(page));
             page.querySelector("[data-price-refresh]")?.addEventListener("click", () => void load(page));
             void load(page);

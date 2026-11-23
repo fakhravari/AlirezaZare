@@ -38,6 +38,7 @@ public sealed class SystemProblemsController(ShopDbContext db) : Controller
         var defaultSale = from pair in productPlans
                           join variant in db.ProductVariants.AsNoTracking() on pair.product.Id equals variant.IdProduct
                           where variant.IsActive && variant.IsDefault
+                              && !db.StoreProductVariantSalesPlanOffers.Any(o => o.IdProductVariant == variant.Id && o.IdSalesPlan == pair.plan.Id && !o.IsEnabled)
                               && (!db.InventoryItems.Any(i => i.IdProductVariant == variant.Id && i.IsActive)
                                   || !db.StoreProductVariantSalesPlanOffers.Any(o => o.IdProductVariant == variant.Id && o.IdSalesPlan == pair.plan.Id && o.IsEnabled)
                                   || !db.StorePriceVersions.Any(p => p.IdProductVariant == variant.Id && p.IdSalesPlan == pair.plan.Id && p.IsActive))
@@ -108,7 +109,7 @@ public sealed class SystemProblemsController(ShopDbContext db) : Controller
         {
             new("configuration", "تنظیمات اصلی فروش", "انبار فروش سایت و طرح عادی فعال و جاری", null, configuration),
             new("variant-prices", "قیمت و اتصال تنوع", "تنوع‌های فعال در طرح‌های جاری؛ اتصال عمداً غیرفعال گزارش نمی‌شود", variantPrices),
-            new("default-sale", "تنوع پیش‌فرض قابل عرضه", "تنوع پیش‌فرض باید در طرح جاری قلم موجودی، اتصال و قیمت فعال داشته باشد؛ غیرفعال‌سازی عمدی نیز برای بررسی نمایش داده می‌شود", defaultSale),
+            new("default-sale", "تنوع پیش‌فرض قابل عرضه", "تنوع پیش‌فرض باید در طرح جاری قلم موجودی، اتصال و قیمت فعال داشته باشد؛ اتصال غیرفعال گزارش نمی‌شود", defaultSale),
             new("product-prices", "قیمت کالای بدون تنوع", "قیمت فعال کالا در طرح‌های جاری", productPrices),
             new("default-variant", "تنوع پیش‌فرض", "کالای فروشگاهی دارای سابقهٔ تنوع باید پیش‌فرض فعال داشته باشد", defaultVariants),
             new("variant-inventory", "قلم موجودی تنوع", "تنوع فعال فروشگاهی باید قلم موجودی فعال داشته باشد", variantInventory),
