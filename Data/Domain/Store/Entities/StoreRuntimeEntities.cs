@@ -23,3 +23,4 @@ public sealed class StoreProductColor { public long Id { get; set; } public long
 public sealed class StoreProductSpecificationValue { public long Id { get; set; } public long IdProduct { get; set; } public long IdSpecificationFeature { get; set; } public string Value { get; set; } = ""; }
 public sealed class StoreProductCollection { public long Id { get; set; } public string CollectionKey { get; set; } = ""; public string Name { get; set; } = ""; }
 public sealed class StoreProductCollectionItem { public long Id { get; set; } public long IdProductCollection { get; set; } public long IdProduct { get; set; } public int SortOrder { get; set; } }
+public sealed class StoreHomeCategoryTab { public long Id { get; set; } public long IdCategory { get; set; } public int SortOrder { get; set; } public bool IsActive { get; set; } = true; }

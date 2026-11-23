@@ -23,7 +23,7 @@
     bool canWarehouseStructure = Can("Warehouse:Warehouses:Index") || Can("Warehouse:Features:Index:companies");
     bool canWarehouseReports = Can("Warehouse:Features:Index:movements") || Can("Warehouse:Stock:Index");
     bool canWarehouse = Can("Warehouse:Dashboard:Index") || Can("Warehouse:Features:Index:order-confirmation") || Can("Warehouse:Features:Index:movements") || canWarehouseOperations || Can("Warehouse:Stock:Index");
-    bool catalogOpen = inStore && string.Equals(controller, "Catalog", StringComparison.OrdinalIgnoreCase);
+    bool catalogOpen = inStore && (string.Equals(controller, "Catalog", StringComparison.OrdinalIgnoreCase) || string.Equals(controller, "HomeCollection", StringComparison.OrdinalIgnoreCase));
     bool salesOpen = inStore && (string.Equals(controller, "Orders", StringComparison.OrdinalIgnoreCase) || IsFeature("orders") || IsFeature("paid-orders-dispatch"));
     bool promotionsOpen = inStore && IsFeature("promotions");
     bool operationsOpen = inWarehouse && new[] { "order-confirmation", "receipts", "dispatches", "transfers", "returns", "stocktake", "adjustments" }.Contains(feature ?? "", StringComparer.OrdinalIgnoreCase);
@@ -142,6 +142,11 @@
         <span class="menu-caret"></span>
     </a>
     <div id="store-catalog" class="menu-submenu">
+        <div class="menu-item @(IsFeature("home-collection") ? "active" : "")" hidden="@(!User.IsInRole("system.full-access"))">
+            <a class="menu-link" asp-area="Store" asp-controller="HomeCollection" asp-action="Index" data-admin-nav>
+                <span class="menu-icon"><i class="fa fa-star" aria-hidden="true"></i></span><span class="menu-text">محصولات منتخب صفحهٔ اصلی</span>
+            </a>
+        </div>
         <div class="menu-item @(IsFeature("categories") ? "active" : "")" hidden="@(!Can("Store:Catalog:Categories"))">
             <a class="menu-link" asp-area="Store" asp-controller="Catalog" asp-action="Categories" data-admin-nav>
                 <span class="menu-icon"><i class="fa fa-sitemap" aria-hidden="true"></i></span><span class="menu-text">دسته‌بندی‌ها</span>

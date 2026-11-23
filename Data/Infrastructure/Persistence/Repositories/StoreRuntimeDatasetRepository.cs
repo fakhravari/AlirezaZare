@@ -63,6 +63,17 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext, IMedi
         var regularAccessoryPriceByTarget = regularAccessoryPrices.GroupBy(x => (x.IdProduct, x.IdAccessory!.Value)).ToDictionary(x => x.Key, x => x.First().FinalPriceAmount);
         var productBenefits = await dbContext.StoreProductBenefits.AsNoTracking().Where(x => productIds.Contains(x.IdProduct) && x.IsActive).OrderBy(x => x.SortOrder).ThenBy(x => x.Id).ToListAsync(cancellationToken);
         var collections = await dbContext.StoreProductCollections.AsNoTracking().OrderBy(x => x.Id).ToListAsync(cancellationToken);
+        bool homeTabsReady = await dbContext.Database.SqlQueryRaw<int>("SELECT CASE WHEN OBJECT_ID(N'Store.HomeCategoryTab', N'U') IS NULL THEN 0 ELSE 1 END AS [Value]").SingleAsync(cancellationToken) == 1;
+        var homeCategoryTabs = homeTabsReady
+            ? await (from tab in dbContext.StoreHomeCategoryTabs.AsNoTracking()
+                     join category in dbContext.StoreCategories.AsNoTracking() on tab.IdCategory equals category.Id
+                     where tab.IsActive && category.IsActive
+                     orderby tab.SortOrder, tab.Id
+                     select new { category.CategoryKey, category.NameFa }).ToListAsync(cancellationToken)
+            : new[] { "ابزار برقی", "ابزار اندازه‌گیری", "لحیم‌کاری و تعمیر برد", "روشنایی و لامپ" }
+                .Select(name => categories.FirstOrDefault(category => category.IsActive && category.NameFa == name))
+                .Where(category => category is not null)
+                .Select(category => new { category!.CategoryKey, category.NameFa }).ToList();
         var collectionIds = collections.Select(x => x.Id).ToArray();
         var collectionItems = await (from item in dbContext.StoreProductCollectionItems.AsNoTracking()
                                      join product in dbContext.Products.AsNoTracking() on item.IdProduct equals product.Id
@@ -77,6 +88,7 @@ public sealed class StoreRuntimeDatasetRepository(ShopDbContext dbContext, IMedi
         var specCategoryById = specCategories.ToDictionary(x => x.Id);
 
         var root = new JsonObject { ["schemaVersion"] = 2 };
+        root["homeCategoryTabs"] = new JsonArray(homeCategoryTabs.Select(tab => (JsonNode?)new JsonObject { ["id"] = tab.CategoryKey, ["name"] = tab.NameFa }).ToArray());
         root["catalogFeatureOptions"] = new JsonArray(catalogFeatureOptions.Select(x => (JsonNode?)new JsonObject { ["featureId"] = x.FeatureId, ["featureName"] = x.FeatureName, ["valueId"] = x.ValueId, ["valueName"] = x.ValueName, ["kind"] = x.Kind }).ToArray());
         root["specificationGroups"] = new JsonArray(groups.Select(x => (JsonNode?)new JsonObject { ["id"] = x.GroupKey, ["name"] = x.Name, ["order"] = x.SortOrder }).ToArray());
         root["specificationCategories"] = new JsonArray(specCategories.Select(x => (JsonNode?)new JsonObject { ["id"] = x.CategoryKey, ["groupId"] = groupKeyById.GetValueOrDefault(x.IdSpecificationGroup), ["name"] = x.Name, ["order"] = x.SortOrder }).ToArray());

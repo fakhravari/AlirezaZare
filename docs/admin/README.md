@@ -1,5 +1,7 @@
 # پنل مدیریت فروشگاه و انبار
 
+صفحهٔ «فروشگاه ← کاتالوگ ← محصولات منتخب صفحهٔ اصلی» برای مدیر کامل سامانه، انتخاب و ترتیب کالاها و دسته‌های فیلتر را مدیریت می‌کند. منبع داده و پیش‌نیاز migration در [راهنمای کاتالوگ](../store/catalog.md#محصولات-منتخب-صفحهٔ-اصلی) توضیح داده شده است.
+
 پنل وب مستقل `Admin/` به پروژهٔ `Data/` متصل است. صفحه‌ها در `Admin/Areas/Store/Views/` و `Admin/Areas/Warehouse/Views/`، endpointها در `Admin/Areas/Store/Controllers/Api/` و `Admin/Areas/Warehouse/Controllers/Api/` و رفتار مرورگر در `Admin/wwwroot/js/` قرار دارند. برای یافتن owner رابط، `tools/ui-owners.json` را جست‌وجو کنید.
 
 `Admin/Program.cs` با فراخوانی `AddShopDatabase` سرویس مشترک ایمیل `Shop.Data.Application.Email.Contracts.IEmailSender` را از لایهٔ `Data` دریافت می‌کند؛ پیاده‌سازی SMTP تنظیمات فرستنده را از شناسهٔ ۱ در `StoreSiteIdentity` می‌خواند. این سرویس در DI ادمین در دسترس است و برای هر فرایند مدیریتی با نیاز ارسال ایمیل قابل تزریق است.

@@ -290,7 +290,7 @@
     brands: freeze(data.brands), categories: freeze(data.categories), attributeDefinitions: freeze(attributeDefinitions),
     catalogFeatureOptions: freeze(data.catalogFeatureOptions || []),
     specificationGroups: freeze(specificationGroups), specificationCategories: freeze(specificationCategories),
-    specificationFeatures: freeze(specificationFeatures), collections: freeze(data.collections),
+    specificationFeatures: freeze(specificationFeatures), collections: freeze(data.collections), homeCategoryTabs: freeze(data.homeCategoryTabs || []),
     find: (id) => byId.get(String(id)) || null, url: productUrl, searchText,
     categoryUrl, categoryUrlForLabels, categoryForSlug, categoryForLabel, categoryContains, categoryMatchesPath,
     categoryFacets});

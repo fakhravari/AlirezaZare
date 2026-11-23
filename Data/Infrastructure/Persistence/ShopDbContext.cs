@@ -73,6 +73,7 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
     public DbSet<StoreProductSpecificationValue> StoreProductSpecificationValues => Set<StoreProductSpecificationValue>();
     public DbSet<StoreProductCollection> StoreProductCollections => Set<StoreProductCollection>();
     public DbSet<StoreProductCollectionItem> StoreProductCollectionItems => Set<StoreProductCollectionItem>();
+    public DbSet<StoreHomeCategoryTab> StoreHomeCategoryTabs => Set<StoreHomeCategoryTab>();
     public DbSet<StoreCategory> StoreCategories => Set<StoreCategory>();
     public DbSet<StoreProductSalesPlanOffer> StoreProductSalesPlanOffers => Set<StoreProductSalesPlanOffer>();
     public DbSet<StoreProductVariantSalesPlanOffer> StoreProductVariantSalesPlanOffers => Set<StoreProductVariantSalesPlanOffer>();
@@ -870,6 +871,7 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
         modelBuilder.Entity<StoreProductSpecificationValue>(entity => { entity.ToTable("ProductSpecificationValue", "Store"); entity.HasKey(x => x.Id); entity.Property(x => x.Value).HasMaxLength(1000).IsRequired(); entity.HasIndex(x => new { x.IdProduct, x.IdSpecificationFeature }).IsUnique(); });
         modelBuilder.Entity<StoreProductCollection>(entity => { entity.ToTable("ProductCollection", "Store"); entity.HasKey(x => x.Id); entity.Property(x => x.CollectionKey).HasMaxLength(100).IsRequired(); entity.Property(x => x.Name).HasMaxLength(150).IsRequired(); entity.HasIndex(x => x.CollectionKey).IsUnique(); });
         modelBuilder.Entity<StoreProductCollectionItem>(entity => { entity.ToTable("ProductCollectionItem", "Store"); entity.HasKey(x => x.Id); entity.HasIndex(x => new { x.IdProductCollection, x.IdProduct }).IsUnique(); });
+        modelBuilder.Entity<StoreHomeCategoryTab>(entity => { entity.ToTable("HomeCategoryTab", "Store"); entity.HasKey(x => x.Id); entity.HasIndex(x => x.IdCategory).IsUnique(); entity.HasOne<StoreCategory>().WithMany().HasForeignKey(x => x.IdCategory).OnDelete(DeleteBehavior.Restrict); });
         modelBuilder.Entity<StoreBrandEditorial>(entity =>
         {
             entity.ToTable("BrandEditorial", "Store"); entity.HasKey(x => x.Id);

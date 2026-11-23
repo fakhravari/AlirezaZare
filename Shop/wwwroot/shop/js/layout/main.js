@@ -769,11 +769,18 @@
       }).prop("disabled", unavailable).attr("aria-disabled", String(unavailable));
     });
   }
-  const categoryFilters = {"ابزار برقی": "power-tools", "ابزار اندازه‌گیری": "measurement", "لحیم‌کاری و تعمیر برد": "electronics", "روشنایی و لامپ": "lighting"};
+  const productTabs = document.querySelector("#productTabs");
+  if (productTabs) for (const category of window.HNCatalog.homeCategoryTabs) {
+    if (!window.HNCatalog.categoryForSlug(category.id)) continue;
+    const item = document.createElement("li"), button = document.createElement("button"), icon = document.createElement("i");
+    button.type = "button"; button.dataset.filter = category.id;
+    icon.className = "bi bi-grid"; icon.setAttribute("aria-hidden", "true");
+    button.append(icon, document.createTextNode(` ${category.name}`)); item.append(button); productTabs.append(item);
+  }
   const grid = document.querySelector("#productGrid");
   if (grid) grid.innerHTML = (window.HNCatalog.collections.selected || []).map((id) => {
     const product = window.HNCatalog.find(id);
-    return product ? '<div class="col-md-6 col-lg-3 col-xxl-2 product-col" data-category="' + (categoryFilters[product.categoryPath[1]] || "all") + '">' + window.HNProductCard.render(product) + '</div>' : "";
+    return product ? '<div class="col-md-6 col-lg-3 col-xxl-2 product-col" data-category="' + escapeHtml(product.categoryId || "") + '">' + window.HNProductCard.render(product) + '</div>' : "";
   }).join("");
   const amazingProducts = [
     ...catalogProducts.filter(
@@ -1745,7 +1752,7 @@
       const $item = $(this);
       $item.toggleClass(
         "d-none",
-        filter !== "all" && !$item.data("category").includes(filter),
+        filter !== "all" && !window.HNCatalog.categoryContains(filter, $item.attr("data-category")),
       );
     });
   };
