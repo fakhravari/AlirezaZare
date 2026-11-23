@@ -16,7 +16,7 @@ BEGIN TRY
         SELECT TOP (1) @accessoryPrice=Id FROM Store.PriceVersion WHERE IdProduct=@product AND IdSalesPlan=@plan AND IdAccessory IS NOT NULL AND IsActive=1 ORDER BY Id;
         IF @source IS NULL OR @variantPrice IS NULL OR @productPrice IS NULL OR @accessoryPrice IS NULL
             THROW 51500, 'Demo source and active product, variant and accessory prices are required.', 1;
-        DECLARE @total decimal(19,0) = (SELECT SUM(CASE WHEN IdAccessory IS NULL THEN ROUND(PriceAmount*(100-DiscountPercent)/100,0) ELSE PriceAmount END)
+        DECLARE @total decimal(19,0) = (SELECT SUM(FinalPriceAmount)
             FROM Store.PriceVersion WHERE Id IN (@productPrice,@variantPrice,@accessoryPrice));
         DECLARE @newOrder bigint;
         INSERT Store.[Order] (IdProfile, OrderNumber, ExternalOrderKey, Status, PaymentMethod, IdBank, ItemCount, TotalAmount, SubtotalAmount, CouponDiscountAmount, OrderedAtUtc, AddressSnapshotJson)
@@ -28,7 +28,7 @@ BEGIN TRY
         INSERT Store.OrderItem (IdOrder,IdProduct,IdVariant,IdSalesPlan,Quantity,IdPriceVersion)
         VALUES (@newOrder,@product,@variant,@plan,1,@variantPrice);
         INSERT Store.OrderAccessory (IdOrder,IdProduct,IdSalesPlan,IdAccessory,IdPriceVersion,AccessoryNameSnapshot,UnitAmountSnapshot)
-        SELECT @newOrder,@product,@plan,IdAccessory,Id,Name,PriceAmount
+        SELECT @newOrder,@product,@plan,IdAccessory,Id,Name,FinalPriceAmount
         FROM Store.PriceVersion JOIN Store.Accessory ON Accessory.Id=PriceVersion.IdAccessory
         WHERE PriceVersion.Id=@accessoryPrice;
     END;

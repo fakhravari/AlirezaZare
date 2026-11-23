@@ -172,11 +172,12 @@ window.HNUI.ready(() => window.HNUI.mount("commerce", document, () => {
                 const variantPrice = inventoryVariant?.priceBySalesPlan?.[selectedSalesPlanId];
                 if (inventoryVariants.length && !inventoryVariant) return null;
                 if (variantPrice !== null && variantPrice !== undefined && Number.isFinite(Number(variantPrice))) {
-                    const discount = Number(inventoryVariant.discountBySalesPlan?.[selectedSalesPlanId] || 0);
-                    return Math.round(Number(variantPrice) * (100 - discount) / 100);
+                    const finalPrice = inventoryVariant.finalPriceBySalesPlan?.[selectedSalesPlanId];
+                    if (finalPrice !== null && finalPrice !== undefined && Number.isFinite(Number(finalPrice))) return Number(finalPrice);
+                    return null;
                 }
                 if (inventoryVariants.length) return null;
-                return offer ? Math.round(Number(offer.priceAmount) * (100 - Number(offer.discountPercent)) / 100) : null;
+                return offer?.finalPriceAmount != null && Number.isFinite(Number(offer.finalPriceAmount)) ? Number(offer.finalPriceAmount) : null;
             };
             const currentPlanBaseAmount = () => priceForInventoryVariant(selectedInventoryVariant());
             const availableAccessories = (p.accessories || []).filter((item) =>

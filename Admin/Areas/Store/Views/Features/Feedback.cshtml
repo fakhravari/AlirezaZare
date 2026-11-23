@@ -17,9 +17,9 @@
                 @if (type == "reviews")
                 {
                     <label class="visually-hidden" for="feedback-date-from">از تاریخ</label>
-                    <input class="form-control" id="feedback-date-from" name="from" type="date" aria-label="از تاریخ" />
+                    <input class="form-control" id="feedback-date-from" name="from" type="date" aria-label="از تاریخ" value="@DateTime.Today.AddDays(-15).ToString("yyyy-MM-dd")" />
                     <label class="visually-hidden" for="feedback-date-to">تا تاریخ</label>
-                    <input class="form-control" id="feedback-date-to" name="to" type="date" aria-label="تا تاریخ" />
+                    <input class="form-control" id="feedback-date-to" name="to" type="date" aria-label="تا تاریخ" value="@DateTime.Today.ToString("yyyy-MM-dd")" />
                 }
                 <button class="btn btn-primary" type="submit">اعمال فیلتر</button><button class="btn btn-default" type="reset" data-feedback-reset>پاک‌کردن</button>
             </form>

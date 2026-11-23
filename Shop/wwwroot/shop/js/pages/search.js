@@ -462,14 +462,15 @@
       (p) =>
         (() => {
           const offer = p._salesPlanListing;
-          const price = (offer
+          const amount = (offer
             ? window.HNProductCard.currentPrice(p, {salesPlanId: offer.id, priceAmount: offer.priceAmount, discountPercent: offer.discountPercent})
-            : window.HNProductCard.currentPrice(p)) / 1000000;
+            : window.HNProductCard.currentPrice(p));
+          const price = amount == null ? null : amount / 1000000;
           const discounted = isProductDiscounted(p);
           const available = isProductAvailable(p);
           return isPlanListingActive(offer) &&
             (state.availability === "all" || (state.availability === "in-stock" ? available : !available)) &&
-            (!state.discountOnly || discounted) && price >= state.minPrice && (state.maxPrice === 60 || price <= state.maxPrice);
+            (!state.discountOnly || discounted) && (price == null ? state.minPrice === 0 && state.maxPrice === 60 : price >= state.minPrice && (state.maxPrice === 60 || price <= state.maxPrice));
         })() &&
         (!state.brand.size || state.brand.has(p.brand)) &&
         (!selectedTypes.length || selectedTypes.some((type) =>
@@ -483,9 +484,12 @@
             .includes(normalizeFilterSearch(state.query))) &&
         (!state.salesPlan.size || state.salesPlan.has(p._salesPlanListing?.id || "regular")),
     );
-    const listingPrice = (item) => window.HNProductCard.currentPrice(item, item._salesPlanListing || {}) / 1000000;
-    if (state.sort === "low") list.sort((a, b) => listingPrice(a) - listingPrice(b));
-    if (state.sort === "high") list.sort((a, b) => listingPrice(b) - listingPrice(a));
+    const listingPrice = (item) => window.HNProductCard.currentPrice(item, item._salesPlanListing || {});
+    if (state.sort === "low" || state.sort === "high") list.sort((a, b) => {
+      const first = listingPrice(a), second = listingPrice(b);
+      if (first == null || second == null) return first == null ? (second == null ? 0 : 1) : -1;
+      return state.sort === "low" ? first - second : second - first;
+    });
     if (state.sort === "newest") list.sort((a, b) => a.newest - b.newest);
     return list;
   }

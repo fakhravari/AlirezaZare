@@ -218,7 +218,7 @@ public sealed record SalesPlanCatalog(
         if (offer.StockQuantity < quantity) throw new SalesPlanUnavailableException("insufficient-stock");
         if (offer.MaxPurchaseQuantity < quantity) throw new SalesPlanUnavailableException("purchase-limit");
 
-        decimal unitPrice = decimal.Round( offer.PriceAmount * (100m - offer.DiscountPercent) / 100m, 0, MidpointRounding.AwayFromZero);
+        decimal unitPrice = offer.FinalPriceAmount;
 
         return new(productId, plan.Id, plan.Code, quantity, offer.PriceAmount, offer.DiscountPercent, unitPrice, checked(unitPrice * quantity), Currency, nowUtc);
     }
@@ -245,6 +245,7 @@ public sealed record ProductInventoryVariant(
     IReadOnlyDictionary<string, decimal> PriceBySalesPlan,
     IReadOnlyDictionary<string, decimal> DiscountBySalesPlan)
 {
+    public IReadOnlyDictionary<string, decimal> FinalPriceBySalesPlan { get; init; } = new Dictionary<string, decimal>();
     public IReadOnlyDictionary<string, long> PriceVersionIdsBySalesPlan { get; init; } = new Dictionary<string, long>();
 }
 
@@ -269,6 +270,8 @@ public sealed record ProductSalesOffer(
     int MaxPurchaseQuantity,
     bool IsEnabled)
 {
+    public decimal PriceBeforeDiscountAmount => PriceAmount;
+    public decimal FinalPriceAmount { get; init; }
     public IReadOnlyDictionary<string, decimal> AccessoryPriceAmounts { get; init; } =
         new Dictionary<string, decimal>();
 

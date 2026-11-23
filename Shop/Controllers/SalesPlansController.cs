@@ -79,7 +79,7 @@ public sealed class SalesPlansController(
             .Where(item => item.IdProduct == productId && item.IdSalesPlan == databasePlanId.Value &&
                            item.IdProductVariant == pricedVariantId && item.IdAccessory == null)
             .OrderBy(item => item.CreatedAtUtc).ThenBy(item => item.Id)
-            .Select(item => new { item.Id, item.IdProductVariant, item.IdAccessory, item.PriceAmount, item.DiscountPercent, item.IsActive, item.CreatedAtUtc })
+            .Select(item => new { item.Id, item.IdProductVariant, item.IdAccessory, PriceAmount = item.PriceBeforeDiscountAmount, item.DiscountPercent, item.FinalPriceAmount, item.IsActive, item.CreatedAtUtc })
             .ToListAsync(cancellationToken);
         if (productVersions.Count == 0)
             return Ok(new { productId, salesPlanId, currency = catalog.Currency, history = Array.Empty<object>() });
@@ -90,6 +90,7 @@ public sealed class SalesPlansController(
                 item.IdAccessory,
                 item.PriceAmount,
                 item.DiscountPercent,
+                item.FinalPriceAmount,
                 item.IsActive,
                 item.CreatedAtUtc
             }).ToArray();
@@ -106,8 +107,9 @@ public sealed class SalesPlansController(
                 targetId = item.IdProductVariant ?? item.IdAccessory,
                 item.PriceAmount,
                 item.DiscountPercent,
-                finalAmount = decimal.Round(item.PriceAmount * (100m - item.DiscountPercent) / 100m, 0,
-                    MidpointRounding.AwayFromZero),
+                priceBeforeDiscountAmount = item.PriceAmount,
+                finalAmount = item.FinalPriceAmount,
+                finalPriceAmount = item.FinalPriceAmount,
                 item.IsActive,
                 createdAtUtc = DateTime.SpecifyKind(item.CreatedAtUtc, DateTimeKind.Utc)
             }).ToArray()
@@ -154,7 +156,8 @@ public sealed class SalesPlansController(
                     throw new SalesPlanUnavailableException("variant-price-unavailable");
                 listUnitAmount = variantPrice;
                 discountPercent = selectedInventoryVariant.DiscountBySalesPlan.GetValueOrDefault(selectedPlanId);
-                baseUnitAmount = decimal.Round(variantPrice * (100m - discountPercent) / 100m, 0, MidpointRounding.AwayFromZero);
+                if (!selectedInventoryVariant.FinalPriceBySalesPlan.TryGetValue(selectedPlanId, out baseUnitAmount))
+                    throw new SalesPlanUnavailableException("variant-price-unavailable");
             }
 
             decimal adjustedUnit = checked(baseUnitAmount + adjustments);
@@ -167,8 +170,10 @@ public sealed class SalesPlansController(
                 quote.SalesPlanCode,
                 quote.Quantity,
                 listUnitAmount,
+                priceBeforeDiscountAmount = listUnitAmount,
                 discountPercent,
                 unitAmount = adjustedUnit,
+                finalPriceAmount = adjustedUnit,
                 totalAmount = checked(adjustedUnit * quote.Quantity),
                 quote.Currency,
                 quote.QuotedAtUtc,

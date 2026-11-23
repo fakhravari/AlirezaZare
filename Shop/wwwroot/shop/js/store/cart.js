@@ -324,7 +324,10 @@
           ...(product.accessories || []).filter((accessory) => accessory.required).map((accessory) => String(accessory.id)),
           ...((line.options?.accessories || []).filter((accessory) => accessory.selected !== false).map((accessory) => String(accessory.id))),
         ]);
-        let unitAmount = Math.round(Number(priceAmount) * (100 - discountPercent) / 100);
+        const savedFinalPrice = variants.length ? selectedVariant.finalPriceBySalesPlan?.[salesPlanId] : offer.finalPriceAmount;
+        if (savedFinalPrice == null || !Number.isFinite(Number(savedFinalPrice))) continue;
+        const finalPrice = Number(savedFinalPrice);
+        let unitAmount = finalPrice;
         let hasAllAccessoryPrices = true;
         for (const accessoryId of selectedAccessoryIds) {
           const amount = accessoryAmounts[accessoryId];

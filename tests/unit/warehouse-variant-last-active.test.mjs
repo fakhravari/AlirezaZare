@@ -8,10 +8,10 @@ test('last active variant action is disabled using all variants, even when filte
   const page = await browser.newPage();
   await page.setContent(`<div data-admin-definitions data-api="/api" data-definition-section="variants" data-can-create="true" data-can-edit="false" data-can-deactivate="true"><select data-variant-product-filter><option value="">همه</option></select><select data-variant-status-filter><option value="">همه</option><option value="active">فعال</option><option value="inactive">غیرفعال</option></select><div data-definition-status></div><button data-definition-create></button><table data-admin-datatable><thead data-definition-head></thead><tbody data-definition-rows></tbody></table></div><div id="admin-definition-modal"><form data-definition-form><input name="id"><div data-definition-fields></div></form></div>`);
   await page.evaluate(() => { window.AdminUI = {destroyDataTable(){},refreshDataTable(){},notify(){},getJson:async url => url.endsWith('/variant-names') ? [] : [
-    {id:1,idProduct:10,productName:'الف',name:'تنها فعال',isActive:true},
+    {id:1,idProduct:10,productName:'الف',name:'تنها فعال',isActive:true,canDeactivate:false,deactivateBlockReason:'حداقل یک تنوع فعال باید باقی بماند'},
     {id:2,idProduct:10,productName:'الف',name:'غیرفعال',isActive:false},
-    {id:3,idProduct:20,productName:'ب',name:'اول',isActive:true,isDefault:true},
-    {id:4,idProduct:20,productName:'ب',name:'دوم',isActive:true}
+    {id:3,idProduct:20,productName:'ب',name:'اول',isActive:true,isDefault:true,canDeactivate:false,deactivateBlockReason:'تنوع پیش‌فرض است'},
+    {id:4,idProduct:20,productName:'ب',name:'دوم',isActive:true,canDeactivate:true}
   ]}; });
   await page.addScriptTag({path:'Admin/wwwroot/js/admin-definitions.js'});
   await page.evaluate(() => window.AdminDefinitions.initialize(document));

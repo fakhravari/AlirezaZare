@@ -11,14 +11,15 @@ DECLARE @ProfileId BIGINT = 90;
         ci.IdVariant AS IdProductVariant,
         ci.IdSalesPlan,
         ci.Quantity,
-        CASE WHEN ci.IdVariant IS NULL THEN pp.PriceAmount ELSE vp.PriceAmount END AS BaseAmount,
-        CASE WHEN ci.IdVariant IS NULL THEN pp.DiscountPercent ELSE vp.DiscountPercent END AS DiscountPercent
+        CASE WHEN ci.IdVariant IS NULL THEN pp.PriceBeforeDiscountAmount ELSE vp.PriceBeforeDiscountAmount END AS BaseAmount,
+        CASE WHEN ci.IdVariant IS NULL THEN pp.DiscountPercent ELSE vp.DiscountPercent END AS DiscountPercent,
+        CASE WHEN ci.IdVariant IS NULL THEN pp.FinalPriceAmount ELSE vp.FinalPriceAmount END AS FinalUnitAmount
     FROM Account.Cart AS c
     JOIN Account.CartItem AS ci ON ci.IdCart = c.Id
     LEFT JOIN Warehouse.Product AS p ON p.Id = ci.IdProduct
     OUTER APPLY
     (
-        SELECT TOP (1) version.PriceAmount, version.DiscountPercent
+        SELECT TOP (1) version.PriceBeforeDiscountAmount, version.DiscountPercent, version.FinalPriceAmount
         FROM Store.PriceVersion AS version
         WHERE version.IsActive = 1
           AND version.IdProduct = ci.IdProduct
@@ -29,7 +30,7 @@ DECLARE @ProfileId BIGINT = 90;
     ) AS pp
     OUTER APPLY
     (
-        SELECT TOP (1) version.PriceAmount, version.DiscountPercent
+        SELECT TOP (1) version.PriceBeforeDiscountAmount, version.DiscountPercent, version.FinalPriceAmount
         FROM Store.PriceVersion AS version
         WHERE version.IsActive = 1
           AND version.IdProduct = ci.IdProduct
@@ -55,7 +56,8 @@ Components AS
         CONVERT(BIGINT, cr.IdProduct) AS ComponentId,
         cr.ProductName AS ComponentName,
         CONVERT(DECIMAL(19, 0), cr.BaseAmount) AS BaseAmount,
-        CONVERT(DECIMAL(5, 2), cr.DiscountPercent) AS DiscountPercent
+        CONVERT(DECIMAL(5, 2), cr.DiscountPercent) AS DiscountPercent,
+        cr.FinalUnitAmount
     FROM CartRows AS cr
 
     UNION ALL
@@ -72,15 +74,16 @@ Components AS
         N'متعلقه' AS RowType,
         CONVERT(BIGINT, pa.Id) AS ComponentId,
         accessory.Name AS ComponentName,
-        CONVERT(DECIMAL(19, 0), accessoryVersion.PriceAmount) AS BaseAmount,
-        CONVERT(DECIMAL(5, 2), 0) AS DiscountPercent
+        CONVERT(DECIMAL(19, 0), accessoryVersion.PriceBeforeDiscountAmount) AS BaseAmount,
+        CONVERT(DECIMAL(5, 2), accessoryVersion.DiscountPercent) AS DiscountPercent,
+        accessoryVersion.FinalPriceAmount AS FinalUnitAmount
     FROM CartRows AS cr
     JOIN Store.ProductAccessory AS pa ON pa.IdProduct = cr.IdProduct
     LEFT JOIN Store.Accessory AS accessory ON accessory.Id = pa.IdAccessory
     LEFT JOIN Account.CartItemAccessory AS selected ON selected.IdCartItem = cr.IdCartItem AND selected.IdProductAccessory = pa.Id
     OUTER APPLY
     (
-        SELECT TOP (1) version.PriceAmount
+        SELECT TOP (1) version.PriceBeforeDiscountAmount, version.DiscountPercent, version.FinalPriceAmount
         FROM Store.PriceVersion AS version
         WHERE version.IsActive = 1
           AND version.IdProduct = cr.IdProduct
@@ -106,9 +109,9 @@ SELECT
     BaseAmount,
     DiscountPercent,
     CASE WHEN BaseAmount IS NULL THEN N'missing-price' ELSE N'price-found' END AS PriceStatus,
-    CONVERT(DECIMAL(19, 0), BaseAmount - ROUND(BaseAmount * (100 - DiscountPercent) / 100.0, 0)) AS DiscountAmount,
-    CONVERT(DECIMAL(19, 0), ROUND(BaseAmount * (100 - DiscountPercent) / 100.0, 0)) AS FinalUnitAmount,
-    CONVERT(DECIMAL(19, 0), (ROUND(BaseAmount * (100 - DiscountPercent) / 100.0, 0)) * Quantity) AS LineTotal
+    CONVERT(DECIMAL(19, 0), BaseAmount - FinalUnitAmount) AS DiscountAmount,
+    FinalUnitAmount,
+    CONVERT(DECIMAL(19, 0), FinalUnitAmount * Quantity) AS LineTotal
 FROM Components
 ORDER BY
     IdProfile,

@@ -4,8 +4,10 @@ import {readFile} from 'node:fs/promises';
 
 test('warehouse stock belongs to reports and retains independent permission and active state', async () => {
   const sidebar = await readFile('Admin/Views/Shared/_AdminSidebar.cshtml', 'utf8');
-  const structure = sidebar.slice(sidebar.indexOf('<div id="system-definitions"'), sidebar.indexOf('<div class="menu-item has-sub @(reportsOpen'));
-  const reports = sidebar.slice(sidebar.indexOf('<div id="warehouse-reports"'), sidebar.indexOf('<div class="menu-item has-sub @(operationsOpen'));
+  const structureStart = sidebar.indexOf('<div id="system-definitions"');
+  const reportsStart = sidebar.indexOf('<div id="warehouse-reports"');
+  const structure = sidebar.slice(structureStart, sidebar.indexOf('</details>', structureStart));
+  const reports = sidebar.slice(reportsStart, sidebar.indexOf('</details>', reportsStart));
   assert.match(sidebar, /menu-text">تعاریف پایهٔ انبار</);
   assert.doesNotMatch(structure, /asp-controller="Stock"/);
   assert.match(reports, /Can\("Warehouse:Stock:Index"\)[\s\S]*asp-controller="Stock"/);
@@ -17,7 +19,8 @@ test('warehouse stock belongs to reports and retains independent permission and 
 
 test('warehouse movement reports have separate menu routes with the existing permission', async () => {
   const sidebar = await readFile('Admin/Views/Shared/_AdminSidebar.cshtml', 'utf8');
-  const reports = sidebar.slice(sidebar.indexOf('<div id="warehouse-reports"'), sidebar.indexOf('<div class="menu-item has-sub @(operationsOpen'));
+  const reportsStart = sidebar.indexOf('<div id="warehouse-reports"');
+  const reports = sidebar.slice(reportsStart, sidebar.indexOf('</details>', reportsStart));
   for (const mode of ['stock', 'summary', 'audit']) assert.ok(reports.includes('movementSection == "' + mode + '"'));
   for (const mode of ['summary', 'audit']) assert.ok(reports.includes('asp-route-section="' + mode + '"'));
   assert.equal((reports.match(/Can\("Warehouse:Features:Index:movements"\)/g) || []).length, 3);

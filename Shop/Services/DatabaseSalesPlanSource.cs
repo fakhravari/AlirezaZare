@@ -24,6 +24,7 @@ public sealed class DatabaseSalesPlanSource(IStoreSalesPlanRepository repository
                 AccessoryPriceAmounts = offer.AccessoryPriceAmounts,
                 AccessoryIds = offer.AccessoryIds,
                 SpecificationOverrides = offer.SpecificationOverrides,
+                FinalPriceAmount = offer.FinalPriceAmount,
                 PriceVersionId = offer.PriceVersionId,
                 AccessoryPriceVersionIds = offer.AccessoryPriceVersionIds
             }).ToArray())
@@ -32,7 +33,7 @@ public sealed class DatabaseSalesPlanSource(IStoreSalesPlanRepository repository
                 variant.ProductId, variant.VariantId, variant.Name, variant.Code,
                 variant.Attributes, variant.IsDefault, variant.StockBySalesPlan,
                 variant.PriceBySalesPlan, variant.DiscountBySalesPlan)
-            { PriceVersionIdsBySalesPlan = variant.PriceVersionIdsBySalesPlan }).ToArray(),
+            { PriceVersionIdsBySalesPlan = variant.PriceVersionIdsBySalesPlan, FinalPriceBySalesPlan = variant.FinalPriceBySalesPlan }).ToArray(),
         };
     }
 

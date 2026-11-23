@@ -1922,6 +1922,7 @@
                         ? "پس از تغییر واحد پایه، واحدهای فرعی باید دوباره تنظیم شوند."
                         : "وضعیت اسناد مشخص نیست؛ تغییر واحد پایه ممکن نیست.";
                 ui.setPriceValue(form.elements.priceAmount, product.priceAmount ?? ""); form.elements.discountPercent.value = product.discountPercent ?? 0;
+                form.elements.finalPricePreview.value = product.finalPriceAmount == null ? "" : ui.formatNumber(product.finalPriceAmount);
                 form.elements.maxPurchaseQuantity.value = product.maxPurchaseQuantity ?? 99;
                 window.bootstrap?.Modal?.getOrCreateInstance(document.getElementById("product-editor-modal")).show();
             }).catch(error => ui.notify(error.message || "دریافت اطلاعات کالا ناموفق بود.", "danger"))

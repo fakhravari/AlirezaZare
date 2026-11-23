@@ -2,6 +2,8 @@
 
 صفحه‌های مجله از `Shop/Controllers/MagazineController.cs` و `Shop/Views/Magazine/` عبور می‌کنند؛ صفحات FAQ، تماس، درباره، قوانین، ارسال و خدمات controllerهای مستقل در `Shop/Controllers/` دارند و برخی محتواها از `PageController`/entityهای Store خوانده می‌شوند.
 
+رابطهٔ مقاله‌های مرتبط در `Mag.MagazineArticleRelated` فقط شناسهٔ مقاله‌ها و ترتیب را نگه می‌دارد؛ عنوان، دسته و تصویر از مقالهٔ مقصد و دستهٔ آن خوانده می‌شوند.
+
 ## مسیر تغییر
 
 در پنل مدیریت، منوی «مدیریت محتوا» سه صفحهٔ مجزا دارد: `/Store/Features/Index?feature=content&section=faq` برای پرسش‌های متداول، `section=magazine` برای مقاله‌ها و `section=pages` برای صفحه‌های خدماتی. نشانی قدیمی بدون section به پرسش‌های متداول هدایت می‌شود. هر صفحه فقط ویرایشگر و API حوزهٔ خود را بارگذاری می‌کند؛ دسترسی هر سه همچنان به نقش `system.full-access` محدود است.

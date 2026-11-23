@@ -34,7 +34,7 @@ SELECT
     salesPlan.DisplayName AS SalesPlanName,
     salesPlan.StoreSalesPlanKey AS SalesPlanKey,
     i.IdPriceVersion AS MainPriceVersionId,
-    mainPrice.PriceAmount AS MainPriceBeforeDiscount,
+    mainPrice.PriceBeforeDiscountAmount AS MainPriceBeforeDiscount,
     mainPrice.DiscountPercent AS MainPriceDiscountPercent,
     i.Quantity,
     amount.UnitAmount,
@@ -44,12 +44,12 @@ SELECT
         FROM (
             SELECT CASE WHEN mainPrice.IdVariant IS NULL THEN N'product' ELSE N'variant' END AS component,
                    COALESCE(variantName.Name, product.NameFa) AS name,
-                   mainPrice.Id AS priceVersionId, mainPrice.PriceAmount AS recordedPriceAmount,
+                   mainPrice.Id AS priceVersionId, mainPrice.PriceBeforeDiscountAmount AS recordedPriceAmount,
                    mainPrice.DiscountPercent AS discountPercent,
-                   CONVERT(decimal(19,0), ROUND(mainPrice.PriceAmount * (100-mainPrice.DiscountPercent) / 100, 0)) AS calculatedUnitAmount
+                   mainPrice.FinalPriceAmount AS calculatedUnitAmount
             UNION ALL
-            SELECT N'accessory', accessory.Name, accessoryPrice.Id, accessoryPrice.PriceAmount,
-                   accessoryPrice.DiscountPercent, accessoryPrice.PriceAmount
+            SELECT N'accessory', reference.AccessoryNameSnapshot, accessoryPrice.Id, accessoryPrice.PriceBeforeDiscountAmount,
+                   accessoryPrice.DiscountPercent, reference.UnitAmountSnapshot
             FROM Store.OrderAccessory reference
             JOIN Store.PriceVersion accessoryPrice ON accessoryPrice.Id=reference.IdPriceVersion
             WHERE reference.IdOrder=o.Id AND reference.IdProduct=i.IdProduct AND reference.IdSalesPlan=i.IdSalesPlan

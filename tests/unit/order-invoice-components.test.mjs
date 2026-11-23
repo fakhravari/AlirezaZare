@@ -41,3 +41,14 @@ test("invoice displays variant and accessory prices and the pre-discount subtota
   openInvoice();
   assert.equal(elements.get("[data-invoice-amount-mismatch]").hidden, true);
 });
+
+test("order components use the saved accessory amount", async () => {
+  const account = await readFile("Shop/Controllers/AccountController.cs", "utf8");
+  const admin = await readFile("Admin/Areas/Store/Controllers/Api/StoreOrdersAdminApiController.cs", "utf8");
+  const query = await readFile("Shop/Features/Store/Database/Seeds/order-invoice-details-query.sql", "utf8");
+  assert.match(account, /PriceAmount = reference\.UnitAmountSnapshot/);
+  assert.match(account, /calculatedUnitAmount = reference\.PriceAmount/);
+  assert.match(admin, /PriceAmount = r\.UnitAmountSnapshot/);
+  assert.match(admin, /calculatedUnitAmount = r\.PriceAmount/);
+  assert.match(query, /reference\.AccessoryNameSnapshot[\s\S]*?reference\.UnitAmountSnapshot/);
+});

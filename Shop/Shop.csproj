@@ -6,9 +6,10 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
   <ItemGroup>
-    <Content Include="App_Data\keys\key-8f28200b-941a-404c-a205-71b9ead71c9c.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    <Content Remove="keys/**/*" />
+    <None Remove="keys/**/*" />
+    <Content Remove="App_Data/keys/**/*" />
+    <None Remove="App_Data/keys/**/*" />
     <ProjectReference Include="..\Data\Data.csproj" />
     <Folder Include="wwwroot\content\" />
   </ItemGroup>

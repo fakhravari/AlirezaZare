@@ -48,9 +48,9 @@ BEGIN TRY
             THROW 51510, 'Demo source and active plain, variant and accessory prices are required.', 1;
 
         SET @total =
-            2 * (SELECT CONVERT(decimal(19,0), ROUND(PriceAmount*(100-DiscountPercent)/100,0)) FROM Store.PriceVersion WHERE Id=@plainPrice)
-          + 1 * (SELECT CONVERT(decimal(19,0), ROUND(PriceAmount*(100-DiscountPercent)/100,0)) FROM Store.PriceVersion WHERE Id=@variantPrice)
-          + 3 * (SELECT CONVERT(decimal(19,0), ROUND(variantPrice.PriceAmount*(100-variantPrice.DiscountPercent)/100,0) + accessoryPrice.PriceAmount)
+            2 * (SELECT FinalPriceAmount FROM Store.PriceVersion WHERE Id=@plainPrice)
+          + 1 * (SELECT FinalPriceAmount FROM Store.PriceVersion WHERE Id=@variantPrice)
+          + 3 * (SELECT CONVERT(decimal(19,0), variantPrice.FinalPriceAmount + accessoryPrice.FinalPriceAmount)
                  FROM Store.PriceVersion variantPrice CROSS JOIN Store.PriceVersion accessoryPrice
                  WHERE variantPrice.Id=@variantPrice AND accessoryPrice.Id=@accessoryPrice);
 
@@ -67,7 +67,7 @@ BEGIN TRY
                (@newOrder,@product,@variant,@plan,2,@variantPrice);
 
         INSERT Store.OrderAccessory (IdOrder,IdProduct,IdSalesPlan,IdAccessory,IdPriceVersion,AccessoryNameSnapshot,UnitAmountSnapshot)
-        SELECT @newOrder,@product,@plan,price.IdAccessory,price.Id,accessory.Name,price.PriceAmount
+        SELECT @newOrder,@product,@plan,price.IdAccessory,price.Id,accessory.Name,price.FinalPriceAmount
         FROM Store.PriceVersion price JOIN Store.Accessory accessory ON accessory.Id=price.IdAccessory
         WHERE price.Id=@accessoryPrice;
     END;

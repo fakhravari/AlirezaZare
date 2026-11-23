@@ -179,20 +179,20 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
                                   join s in db.SalesPlanReferences.AsNoTracking() on i.IdSalesPlan equals s.Id
                                   join product in db.Products.AsNoTracking() on i.IdProduct equals product.Id
                                   orderby i.Id
-                                  select new { i.Id, i.IdOrder, i.IdProduct, i.IdSalesPlan, ProductName = product.Name, VariantName = db.ProductVariants.Where(v => v.Id == i.IdProductVariant).Select(v => v.VariantName.Name).FirstOrDefault(), i.Quantity, i.IdProductVariant, i.IdPriceVersion, i.PriceVersion.PriceAmount, i.PriceVersion.DiscountPercent, i.PriceVersion.IsActive, i.PriceVersion.CreatedAtUtc, i.PriceVersion.ChangeReason, s.StoreSalesPlanKey })
+                                  select new { i.Id, i.IdOrder, i.IdProduct, i.IdSalesPlan, ProductName = product.Name, VariantName = db.ProductVariants.Where(v => v.Id == i.IdProductVariant).Select(v => v.VariantName.Name).FirstOrDefault(), i.Quantity, i.IdProductVariant, i.IdPriceVersion, PriceAmount = i.PriceVersion.PriceBeforeDiscountAmount, i.PriceVersion.DiscountPercent, i.PriceVersion.FinalPriceAmount, i.PriceVersion.IsActive, i.PriceVersion.CreatedAtUtc, i.PriceVersion.ChangeReason, s.StoreSalesPlanKey })
                 .ToListAsync(cancellationToken);
             var references = await (from r in db.StoreOrderAccessories.AsNoTracking()
                                     join v in db.StorePriceVersions.AsNoTracking() on r.IdPriceVersion equals v.Id
                                     where r.IdOrder == id
                                     orderby r.IdProduct, r.IdSalesPlan, r.IdAccessory
-                                    select new { r.IdOrder, r.IdProduct, r.IdSalesPlan, r.IdPriceVersion, v.IdProductVariant, r.IdAccessory, PriceAmount = r.UnitAmountSnapshot, v.DiscountPercent, v.IsActive, v.CreatedAtUtc, v.ChangeReason, AccessoryName = r.AccessoryNameSnapshot })
+                                    select new { r.IdOrder, r.IdProduct, r.IdSalesPlan, r.IdPriceVersion, v.IdProductVariant, r.IdAccessory, PriceAmount = r.UnitAmountSnapshot, v.DiscountPercent, v.FinalPriceAmount, v.IsActive, v.CreatedAtUtc, v.ChangeReason, AccessoryName = r.AccessoryNameSnapshot })
                 .ToListAsync(cancellationToken);
             var items = itemRows.Select(i => new
             {
                 name = i.ProductName,
                 variantName = i.VariantName,
                 quantity = i.Quantity,
-                unitAmount = decimal.Round(i.PriceAmount * (100m - i.DiscountPercent) / 100m, 0, MidpointRounding.AwayFromZero) + references.Where(r => r.IdOrder == i.IdOrder && r.IdProduct == i.IdProduct && r.IdSalesPlan == i.IdSalesPlan).Sum(r => r.PriceAmount),
+                unitAmount = i.FinalPriceAmount + references.Where(r => r.IdOrder == i.IdOrder && r.IdProduct == i.IdProduct && r.IdSalesPlan == i.IdSalesPlan).Sum(r => r.PriceAmount),
                 salesPlan = i.StoreSalesPlanKey,
                 options = new { accessories = references.Where(r => r.IdOrder == i.IdOrder && r.IdProduct == i.IdProduct && r.IdSalesPlan == i.IdSalesPlan).Select(r => new { id = r.IdAccessory.ToString(), selected = true }).ToArray() },
                 priceReferences = references.Where(r => r.IdOrder == i.IdOrder && r.IdProduct == i.IdProduct && r.IdSalesPlan == i.IdSalesPlan).Select(r => new
@@ -200,15 +200,13 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
                     priceVersionId = r.IdPriceVersion,
                     component = StorePriceVersionReference.GetComponent(r.IdProductVariant, r.IdAccessory),
                     name = r.AccessoryName,
-                    calculatedUnitAmount = StorePriceVersionReference.AppliesDiscount(r.IdAccessory)
-                        ? decimal.Round(r.PriceAmount * (100m - r.DiscountPercent) / 100m, 0, MidpointRounding.AwayFromZero)
-                        : r.PriceAmount,
+                    calculatedUnitAmount = r.PriceAmount,
                     recordedPriceAmount = r.PriceAmount,
                     discountPercent = r.DiscountPercent,
                     isCurrent = r.IsActive,
                     recordedAtUtc = r.CreatedAtUtc,
                     reason = r.ChangeReason
-                }).Prepend(new { priceVersionId = i.IdPriceVersion, component = i.IdProductVariant.HasValue ? "variant" : "product", name = i.VariantName ?? i.ProductName, calculatedUnitAmount = decimal.Round(i.PriceAmount * (100m - i.DiscountPercent) / 100m, 0, MidpointRounding.AwayFromZero), recordedPriceAmount = i.PriceAmount, discountPercent = i.DiscountPercent, isCurrent = i.IsActive, recordedAtUtc = i.CreatedAtUtc, reason = i.ChangeReason }).ToArray()
+                }).Prepend(new { priceVersionId = i.IdPriceVersion, component = i.IdProductVariant.HasValue ? "variant" : "product", name = i.VariantName ?? i.ProductName, calculatedUnitAmount = i.FinalPriceAmount, recordedPriceAmount = i.PriceAmount, discountPercent = i.DiscountPercent, isCurrent = i.IsActive, recordedAtUtc = i.CreatedAtUtc, reason = i.ChangeReason }).ToArray()
             }).ToList();
             order.CalculatedItemSubtotal = items.Sum(item => item.unitAmount * item.quantity);
             order.HasItemSubtotalMismatch = items.Count > 0 && order.CalculatedItemSubtotal != order.SubtotalAmount;

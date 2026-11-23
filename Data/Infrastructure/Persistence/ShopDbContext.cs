@@ -154,7 +154,7 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
         });
         modelBuilder.Entity<MagazineArticleSource>(entity => { entity.ToTable("MagazineArticleSource", "Mag"); entity.HasKey(x => x.Id); entity.Property(x => x.Title).HasMaxLength(300).IsRequired(); entity.Property(x => x.Url).HasMaxLength(2000).IsRequired(); });
         modelBuilder.Entity<MagazineArticleTag>(entity => { entity.ToTable("MagazineArticleTag", "Mag"); entity.HasKey(x => x.Id); entity.Property(x => x.Label).HasMaxLength(300).IsRequired(); entity.Property(x => x.Filter).HasMaxLength(160).IsRequired(); });
-        modelBuilder.Entity<MagazineArticleRelated>(entity => { entity.ToTable("MagazineArticleRelated", "Mag"); entity.HasKey(x => x.Id); entity.Property(x => x.Category).HasMaxLength(150).IsRequired(); entity.Property(x => x.Title).HasMaxLength(300).IsRequired(); entity.Property(x => x.ImagePath).HasMaxLength(1000).IsRequired(); entity.HasOne<MagazineArticle>().WithMany().HasForeignKey(x => x.IdRelatedArticle); });
+        modelBuilder.Entity<MagazineArticleRelated>(entity => { entity.ToTable("MagazineArticleRelated", "Mag"); entity.HasKey(x => x.Id); entity.HasOne<MagazineArticle>().WithMany().HasForeignKey(x => x.IdRelatedArticle); });
         modelBuilder.Entity<MagazineArticleMetric>(entity => { entity.ToTable("MagazineArticleMetric", "Mag"); entity.HasKey(x => x.IdMagazineArticle); entity.Property(x => x.AverageRating).HasPrecision(5, 2); });
         modelBuilder.Entity<MagazineArticleCategory>(entity => { entity.ToTable("ArticleCategory", "Mag"); entity.HasKey(x => x.Id); entity.Property(x => x.CategoryKey).HasMaxLength(300).IsRequired(); entity.HasIndex(x => x.CategoryKey).IsUnique(); });
         modelBuilder.Entity<MagazineArticleBranch>(entity => { entity.ToTable("ArticleBranch", "Mag"); entity.HasKey(x => x.Id); entity.Property(x => x.BranchKey).HasMaxLength(160).IsRequired(); entity.HasIndex(x => x.BranchKey).IsUnique(); });
@@ -323,7 +323,8 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.ToTable("Warehouse", "Warehouse");
             entity.HasKey(x => x.Id);
             entity.HasOne(x => x.Company).WithMany(x => x.Warehouses).HasForeignKey(x => x.IdCompany);
-            entity.Property(x => x.Name).HasMaxLength(400).IsRequired();
+            entity.Property(x => x.Code).HasMaxLength(50).IsRequired();
+            entity.Property(x => x.Name).HasMaxLength(200).IsRequired();
             entity.HasIndex(x => new { x.IdCompany, x.Name }).IsUnique().HasDatabaseName("UX_Warehouse_Company_Name");
         });
         modelBuilder.Entity<Company>(entity =>
@@ -424,7 +425,7 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.HasIndex(x => new { x.DocumentId, x.OccurredAtUtc, x.Id });
             entity.HasIndex(x => new { x.WarehouseId, x.OccurredAtUtc, x.Id });
         });
-        modelBuilder.Entity<SalesPlanReference>(entity => { entity.ToTable("SalesPlanReference", "Warehouse"); entity.HasKey(x => x.Id); });
+        modelBuilder.Entity<SalesPlanReference>(entity => { entity.ToTable("SalesPlanReference", "Warehouse"); entity.HasKey(x => x.Id); entity.Property(x => x.StoreSalesPlanKey).HasMaxLength(128).IsRequired(); entity.Property(x => x.DisplayName).HasMaxLength(200).IsRequired(); entity.Property(x => x.Code).HasMaxLength(64).IsRequired(); entity.Property(x => x.PlanType).HasMaxLength(30).IsRequired(); entity.Property(x => x.Label).HasMaxLength(100); });
         modelBuilder.Entity<WarehouseStockOwner>(entity => { entity.ToTable("WarehouseStockOwner", "Warehouse"); entity.HasKey(x => new { x.IdWarehouse, x.IdStockOwner }); entity.Property(x => x.IsDefault).HasDefaultValue(false); entity.HasIndex(x => x.IdWarehouse).IsUnique().HasFilter("[IsDefault] = 1").HasDatabaseName("UX_WarehouseStockOwner_OneDefaultPerWarehouse"); });
         modelBuilder.Entity<StockBalance>(entity =>
         {
@@ -549,7 +550,7 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.Property(x => x.FtpHost).HasMaxLength(255);
             entity.Property(x => x.FtpUsername).HasMaxLength(320);
             entity.Property(x => x.FtpPassword).HasMaxLength(1024);
-            entity.Property(x => x.FtpPasswordProtected).HasMaxLength(2048);
+            entity.Property(x => x.FtpPasswordProtected).HasColumnType("nvarchar(max)");
             entity.Property(x => x.UpdatedByUserKey).HasMaxLength(128);
             entity.Property(x => x.UpdatedAtUtc).HasColumnName("IdentityUpdatedAtUtc").HasPrecision(3);
             entity.Property(x => x.SettingsUpdatedAtUtc).HasColumnName("UpdatedAtUtc").HasPrecision(3);
@@ -655,8 +656,9 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
         {
             entity.ToTable("PriceVersion", "Store");
             entity.HasKey(x => x.Id);
-            entity.Property(x => x.PriceAmount).HasPrecision(19, 0);
+            entity.Property(x => x.PriceBeforeDiscountAmount).HasPrecision(19, 0);
             entity.Property(x => x.DiscountPercent).HasPrecision(5, 2);
+            entity.Property(x => x.FinalPriceAmount).HasPrecision(19, 0);
             entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
             entity.HasOne<AdminSystemUser>().WithMany().HasForeignKey(x => x.IdChangedBy).OnDelete(DeleteBehavior.Restrict);
             entity.Property(x => x.ChangeReason).HasMaxLength(300);
@@ -871,7 +873,7 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
         modelBuilder.Entity<StoreBrandEditorial>(entity =>
         {
             entity.ToTable("BrandEditorial", "Store"); entity.HasKey(x => x.Id);
-            entity.Property(x => x.Established).HasMaxLength(40); entity.Property(x => x.OfficialUrl).HasMaxLength(1000);
+            entity.Property(x => x.Established).HasMaxLength(200); entity.Property(x => x.OfficialUrl).HasMaxLength(1000);
             entity.Property(x => x.Specialization).HasColumnType("nvarchar(max)"); entity.Property(x => x.FeaturedProducts).HasColumnType("nvarchar(max)");
             entity.Property(x => x.Audience).HasColumnType("nvarchar(max)"); entity.Property(x => x.ShoppingAdvice).HasColumnType("nvarchar(max)");
             entity.Property(x => x.CompanyIntroductionsJson).HasColumnType("nvarchar(max)"); entity.Property(x => x.ProductFamiliesJson).HasColumnType("nvarchar(max)"); entity.Property(x => x.StrengthsJson).HasColumnType("nvarchar(max)");

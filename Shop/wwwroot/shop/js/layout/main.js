@@ -255,7 +255,7 @@
         .map(({ product, plan, priceAmount, discountPercent, currentPrice }) => ({
           product,
           plan,
-          currentPrice: currentPrice ?? (plan ? Math.round(priceAmount * (100 - discountPercent) / 100) : null),
+          currentPrice,
           listPrice: plan && discountPercent > 0 ? priceAmount : null,
         }))
         .filter((listing) => listing.currentPrice != null);

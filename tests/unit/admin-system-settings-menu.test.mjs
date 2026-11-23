@@ -37,9 +37,10 @@ test('slider appears in the content submenu and opens it on its page', async () 
   assert.equal(sidebar.split('asp-action="Slider"').length - 1, 1);
 });
 
-test('top-level sidebar groups are collapsible and initially closed', async () => {
+test('system sidebar opens for its active section', async () => {
   const sidebar = await readFile('Admin/Views/Shared/_AdminSidebar.cshtml', 'utf8');
   const groups = [...sidebar.matchAll(/<details class="admin-sidebar-group"([^>]*)>\s*<summary class="menu-header">([^<]+)<\/summary>/g)];
   assert.deepEqual(groups.map(group => group[2]), ['مدیریت سامانه', 'مدیریت فروشگاه', 'محتوا', 'مدیریت انبار']);
-  for (const group of groups) assert.doesNotMatch(group[1], /\sopen(?:\s|=|$)/);
+  assert.match(groups[0][1], /\sopen="@systemMenuOpen"/);
+  for (const group of groups.slice(1)) assert.doesNotMatch(group[1], /\sopen(?:\s|=|$)/);
 });

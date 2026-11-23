@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {existsSync} from 'node:fs';
 import {chromium} from '@playwright/test';
 
-test('quick add records the selected plan option price with the server quote', {skip: !existsSync(chromium.executablePath())}, async t => {
+test('quick add records the selected plan and server quote without legacy price options', {skip: !existsSync(chromium.executablePath())}, async t => {
   const browser = await chromium.launch({headless: true});
   t.after(() => browser.close());
   const page = await browser.newPage();
@@ -26,8 +26,8 @@ test('quick add records the selected plan option price with the server quote', {
   await page.locator('.add-cart').click();
   await page.waitForFunction(() => !!window.savedProduct);
   assert.equal(quoteRequest.salesPlanId, 'special');
-  assert.deepEqual(quoteRequest.priceOptions, {color: 'red'});
+  assert.equal(quoteRequest.priceOptions, undefined);
   const product = await page.evaluate(() => window.savedProduct);
   assert.equal(product.salesPlanSnapshot.unitAmount, 2000000);
-  assert.equal(product.options.priceOptions[0].priceDelta, -0.25);
+  assert.equal(product.options?.priceOptions, undefined);
 });

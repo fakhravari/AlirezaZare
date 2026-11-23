@@ -18,6 +18,7 @@ public sealed record StoreInventoryVariantRow(
     IReadOnlyDictionary<string, decimal> PriceBySalesPlan,
     IReadOnlyDictionary<string, decimal> DiscountBySalesPlan)
 {
+    public IReadOnlyDictionary<string, decimal> FinalPriceBySalesPlan { get; init; } = new Dictionary<string, decimal>();
     public IReadOnlyDictionary<string, long> PriceVersionIdsBySalesPlan { get; init; } = new Dictionary<string, long>();
 }
 
@@ -45,6 +46,7 @@ public sealed record StoreSalesOfferRow(
     IReadOnlyList<string> AccessoryIds,
     IReadOnlyDictionary<string, string> SpecificationOverrides)
 {
+    public decimal FinalPriceAmount { get; init; }
     public long PriceVersionId { get; init; }
     public IReadOnlyDictionary<string, long> AccessoryPriceVersionIds { get; init; } = new Dictionary<string, long>();
 }

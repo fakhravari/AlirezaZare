@@ -89,6 +89,7 @@
             discount.type = "number"; discount.min = "0"; discount.max = "99.99"; discount.step = "0.01"; discount.className = "form-control form-control-sm";
             discount.setAttribute("aria-label", `درصد تخفیف ${item.productName}، ${item.variantName}، ${item.salesPlanName}`);
             discount.value = draft?.discount ?? (item.discountPercent == null ? "0" : String(item.discountPercent)); discount.disabled = page.dataset.canEdit !== "true"; discountCell.append(discount); row.append(discountCell);
+            const finalCell = cell(item.finalPriceAmount == null ? "—" : number.format(item.finalPriceAmount)); row.append(finalCell);
             const activeCell = document.createElement("td"), activeLabel = document.createElement("label"), active = document.createElement("input"), activeText = document.createElement("span");
             active.type = "checkbox"; ui.initStatusSwitch(active); active.checked = draft?.active ?? (item.isEnabled !== false); active.disabled = page.dataset.canEdit !== "true"; activeText.textContent = " فعال"; activeLabel.append(active, activeText); activeCell.append(activeLabel); row.append(activeCell);
             const rememberDraft = () => { page._variantPriceDrafts.set(key, { item, amount: amount.value, discount: discount.value, active: active.checked }); updateSaveAll(page); };
@@ -151,7 +152,7 @@
             for (const item of rows) {
                 const row = document.createElement("tr");
                 const target = ({ option: "ویژگی", accessory: "متعلقه", variant: "تنوع", product: "کالا" })[item.targetType] || item.targetType;
-                row.append(cell(`#${item.id}`), cell(item.productName || `#${item.idProduct}`), cell(item.salesPlanName || `#${item.idSalesPlan}`), cell(`${target}${item.targetId ? ` #${item.targetId}` : ""}`), cell(number.format(item.priceAmount)), cell(item.isActive ? "فعال" : "سابقه"), cell(window.AdminUI.formatDateTime(item.createdAtUtc)), cell(item.idPreviousVersion ? `#${item.idPreviousVersion}` : "—"), cell(item.idChangedBy ? `#${item.idChangedBy}` : "—"), cell(item.changeReason || "—"));
+                row.append(cell(`#${item.id}`), cell(item.productName || `#${item.idProduct}`), cell(item.salesPlanName || `#${item.idSalesPlan}`), cell(`${target}${item.targetId ? ` #${item.targetId}` : ""}`), cell(number.format(item.priceAmount)), cell(item.discountPercent == null ? "—" : number.format(item.discountPercent)), cell(item.finalPriceAmount == null ? "—" : number.format(item.finalPriceAmount)), cell(item.isActive ? "فعال" : "سابقه"), cell(window.AdminUI.formatDateTime(item.createdAtUtc)), cell(item.idPreviousVersion ? `#${item.idPreviousVersion}` : "—"), cell(item.idChangedBy ? `#${item.idChangedBy}` : "—"), cell(item.changeReason || "—"));
                 body.append(row);
             }
             ui.refreshDataTable(table);
@@ -171,6 +172,7 @@
             };
             const amount = makeNumber("قیمت", draft?.amount ?? (item.priceAmount == null ? "" : String(item.priceAmount)), "0", "9007199254740991", "1");
             const discount = makeNumber("تخفیف", draft?.discount ?? String(item.discountPercent ?? 0), "0", "99.99", "0.01");
+            const finalCell = cell(item.finalPriceAmount == null ? "—" : number.format(item.finalPriceAmount)); row.append(finalCell);
             const limit = makeNumber("سقف خرید", draft?.limit ?? String(item.maxPurchaseQuantity ?? 99), "1", "99", "1");
             const activeCell = document.createElement("td"), activeLabel = document.createElement("label"), active = document.createElement("input");
             active.type = "checkbox"; ui.initStatusSwitch(active); active.checked = draft?.active ?? (item.isEnabled ?? true); activeLabel.append(active, document.createTextNode(" فعال")); activeCell.append(activeLabel); row.append(activeCell);

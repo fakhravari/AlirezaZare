@@ -633,7 +633,7 @@ public sealed class WarehouseDefinitionsApiController(ShopDbContext db) : Contro
             case "warehouses":
                 {
                     WarehouseInput? input = Parse<WarehouseInput>(payload);
-                    if (input is null || input.CompanyId < 1 || string.IsNullOrWhiteSpace(input.Name) || input.Name.Trim().Length > 400 || string.IsNullOrWhiteSpace(input.Code) || input.Code.Trim().Length > 50)
+                    if (input is null || input.CompanyId < 1 || string.IsNullOrWhiteSpace(input.Name) || input.Name.Trim().Length > 200 || string.IsNullOrWhiteSpace(input.Code) || input.Code.Trim().Length > 50)
                         return ValidationProblem(detail: "شرکت، کد و نام انبار را درست وارد کنید.", statusCode: 400);
 
                     if (id.HasValue && !await CanAccessWarehouseAsync(id.Value, cancellationToken)) return Forbid();

@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 
 test('cart replaces selections within a product and plan, and keeps plans separate', () => {
-  const plans = { plans: [{ id: 'regular', isDefault: true }, { id: 'sale' }], offers: ['regular', 'sale'].map(salesPlanId => ({ productId: 1, salesPlanId, isEnabled: true, stockQuantity: 10, accessoryPriceAmounts: { '21': 500000 } })), inventoryVariants: [11, 12].map(variantId => ({ productId: 1, variantId, stockBySalesPlan: { regular: 10, sale: 10 }, priceBySalesPlan: { regular: 1000000, sale: 1000000 } })) };
+  const plans = { plans: [{ id: 'regular', isDefault: true }, { id: 'sale' }], offers: ['regular', 'sale'].map(salesPlanId => ({ productId: 1, salesPlanId, isEnabled: true, stockQuantity: 10, accessoryPriceAmounts: { '21': 500000 }, finalPriceAmount: 1000000 })), inventoryVariants: [11, 12].map(variantId => ({ productId: 1, variantId, stockBySalesPlan: { regular: 10, sale: 10 }, priceBySalesPlan: { regular: 1000000, sale: 1000000 }, finalPriceBySalesPlan: { regular: 1000000, sale: 1000000 } })) };
   const document = { querySelector: selector => selector === '#storeSalesPlans' ? { textContent: JSON.stringify(plans) } : null };
   const product = { id: 1, name: 'Item', image: 'images/item.jpg', price: 1, maxCartQuantity: 10, accessories: [{ id: '21', productAccessoryId: 31, name: 'Extra', price: .5 }] };
   const window = { HNProducts: [product] };

@@ -53,12 +53,12 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
                 planProductPrices.TryGetValue((product.Id, plan.Id), out var priceVersion);
                 if (priceVersion is null && !variantOnlyOfferKeys.Contains((product.Id, plan.Id))) continue;
                 decimal discount = priceVersion?.DiscountPercent ?? 0;
-                decimal price = priceVersion?.PriceAmount ?? 0;
+                decimal price = priceVersion?.PriceBeforeDiscountAmount ?? 0;
                 decimal stock = siteStock.GetValueOrDefault((product.Id, plan.Id));
                 int stockQuantity = stock >= int.MaxValue ? int.MaxValue : checked((int)Math.Floor(stock));
                 int maxQuantity = custom?.MaxPurchaseQuantity ?? product.MaxPurchaseQuantity ?? 99;
                 bool enabled = (custom?.IsEnabled ?? true) && product.IsStoreEnabled && plan.IsActive;
-                offers[(checked((int)product.Id), plan.StoreSalesPlanKey)] = new(checked((int)product.Id), plan.StoreSalesPlanKey, price, discount, stockQuantity, maxQuantity, enabled, priceVersion?.Id ?? 0);
+                offers[(checked((int)product.Id), plan.StoreSalesPlanKey)] = new(checked((int)product.Id), plan.StoreSalesPlanKey, price, discount, stockQuantity, maxQuantity, enabled, priceVersion?.Id ?? 0, priceVersion?.FinalPriceAmount ?? 0m);
             }
 
         Dictionary<(int ProductId, long VariantId), InventoryVariantBuilder> inventoryVariants = [];
@@ -93,8 +93,9 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
             if (!variantById.TryGetValue(row.IdProductVariant, out var variant)) continue;
             variantPrices.TryGetValue((row.IdProductVariant, row.PlanId), out var priceVersion);
             if (priceVersion is null) continue;
-            variant.PriceBySalesPlan[row.StoreSalesPlanKey] = priceVersion.PriceAmount;
+            variant.PriceBySalesPlan[row.StoreSalesPlanKey] = priceVersion.PriceBeforeDiscountAmount;
             variant.DiscountBySalesPlan[row.StoreSalesPlanKey] = priceVersion.DiscountPercent;
+            variant.FinalPriceBySalesPlan[row.StoreSalesPlanKey] = priceVersion.FinalPriceAmount;
 
             variant.PriceVersionIdsBySalesPlan[row.StoreSalesPlanKey] = priceVersion.Id;
         }
@@ -127,7 +128,7 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
                 string accessoryId = accessory.IdAccessory.ToString(System.Globalization.CultureInfo.InvariantCulture);
                 pair.Value.AccessoryPriceVersionIds[accessoryId] = accessoryVersion.Id;
                 pair.Value.AccessoryIds.Add(accessoryId);
-                pair.Value.AccessoryPriceAmounts[accessoryId] = accessoryVersion.PriceAmount;
+                pair.Value.AccessoryPriceAmounts[accessoryId] = accessoryVersion.FinalPriceAmount;
             }
         }
 
@@ -174,7 +175,8 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
         int stockQuantity,
         int maxPurchaseQuantity,
         bool isEnabled,
-        long priceVersionId)
+        long priceVersionId,
+        decimal finalPriceAmount)
     {
         public bool IsEnabled { get; private set; } = isEnabled;
         public Dictionary<string, decimal> AccessoryPriceAmounts { get; } = new(StringComparer.Ordinal);
@@ -184,7 +186,7 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
 
         public StoreSalesOfferRow Build() => new(productId, salesPlanId, priceAmount, discountPercent,
             stockQuantity, maxPurchaseQuantity, IsEnabled, AccessoryPriceAmounts, AccessoryIds, SpecificationOverrides)
-        { PriceVersionId = priceVersionId, AccessoryPriceVersionIds = AccessoryPriceVersionIds };
+        { PriceVersionId = priceVersionId, FinalPriceAmount = finalPriceAmount, AccessoryPriceVersionIds = AccessoryPriceVersionIds };
 
         public void Disable() => IsEnabled = false;
     }
@@ -210,10 +212,11 @@ public sealed class StoreSalesPlanRepository(ShopDbContext dbContext) : IStoreSa
         public Dictionary<string, decimal> StockBySalesPlan { get; } = new(StringComparer.Ordinal);
         public Dictionary<string, decimal> PriceBySalesPlan { get; } = new(StringComparer.Ordinal);
         public Dictionary<string, decimal> DiscountBySalesPlan { get; } = new(StringComparer.Ordinal);
+        public Dictionary<string, decimal> FinalPriceBySalesPlan { get; } = new(StringComparer.Ordinal);
         public Dictionary<string, long> PriceVersionIdsBySalesPlan { get; } = new(StringComparer.Ordinal);
 
         public StoreInventoryVariantRow Build() => new(ProductId, VariantId, Name, Code, Attributes, IsDefault,
             StockBySalesPlan, PriceBySalesPlan, DiscountBySalesPlan)
-        { PriceVersionIdsBySalesPlan = PriceVersionIdsBySalesPlan };
+        { PriceVersionIdsBySalesPlan = PriceVersionIdsBySalesPlan, FinalPriceBySalesPlan = FinalPriceBySalesPlan };
     }
 }

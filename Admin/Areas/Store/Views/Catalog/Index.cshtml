@@ -212,9 +212,10 @@
                 </fieldset>
                 <div class="admin-modal-field admin-product-category"><label class="form-label" for="new-product-category">دستهٔ برگ</label><select class="form-select" id="new-product-category" name="categoryId" required></select></div>
                 <div class="admin-modal-field admin-product-brand"><label class="form-label" for="new-product-brand">برند</label><select class="form-select" id="new-product-brand" name="brandId" required></select></div>
-                <div class="admin-modal-field admin-product-price"><label class="form-label" for="new-product-price">قیمت فروش عادی (تومان)</label><input class="form-control" id="new-product-price" name="priceAmount" type="text" inputmode="numeric" dir="ltr" data-admin-price max="9007199254740991" required /></div>
-                <div class="admin-modal-field admin-product-discount"><label class="form-label" for="new-product-discount">درصد تخفیف نمایشی</label><input class="form-control" id="new-product-discount" name="discountPercent" type="number" min="0" max="99.99" step="0.01" value="0" required /></div>
+                <div class="admin-modal-field admin-product-price"><label class="form-label" for="new-product-price">مبلغ پیش از تخفیف (تومان)</label><input class="form-control" id="new-product-price" name="priceAmount" type="text" inputmode="numeric" dir="ltr" data-admin-price max="9007199254740991" required /></div>
+                <div class="admin-modal-field admin-product-discount"><label class="form-label" for="new-product-discount">درصد تخفیف واقعی</label><input class="form-control" id="new-product-discount" name="discountPercent" type="number" min="0" max="99.99" step="0.01" value="0" required /></div>
                 <div class="admin-modal-field admin-product-limit"><label class="form-label" for="new-product-limit">حداکثر تعداد خرید</label><input class="form-control" id="new-product-limit" name="maxPurchaseQuantity" type="number" min="1" max="99" step="1" value="99" required /></div>
+                <div class="admin-modal-field admin-modal-field-wide"><label class="form-label" for="new-product-final-price">مبلغ نهایی فروش (تومان)</label><input class="form-control" id="new-product-final-price" name="finalPricePreview" type="text" placeholder="پس از ثبت تعیین می‌شود" readonly /></div>
             </div><div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button type="submit" class="btn btn-primary"><i class="fa fa-file-circle-plus me-1" aria-hidden="true"></i>ساخت پیش‌نویس</button></div>
         </form></div>
     </div>
@@ -271,10 +272,11 @@
                 </fieldset>
                 <div class="admin-modal-field admin-product-category"><label for="product-edit-category" class="form-label">دستهٔ برگ</label><select id="product-edit-category" name="categoryId" class="form-select" required></select></div>
                 <div class="admin-modal-field admin-product-brand"><label for="product-edit-brand" class="form-label">برند</label><select id="product-edit-brand" name="brandId" class="form-select" required></select></div>
-                <div class="admin-modal-field admin-product-price"><label for="product-edit-price" class="form-label">قیمت نهایی فروش عادی (تومان)</label><input id="product-edit-price" name="priceAmount" type="text" inputmode="numeric" dir="ltr" data-admin-price max="9007199254740991" class="form-control" required /></div>
-                <div class="admin-modal-field admin-product-discount"><label for="product-edit-discount" class="form-label">درصد تخفیف نمایشی</label><input id="product-edit-discount" name="discountPercent" type="number" min="0" max="99.99" step="0.01" class="form-control" required /></div>
+                <div class="admin-modal-field admin-product-price"><label for="product-edit-price" class="form-label">مبلغ پیش از تخفیف (تومان)</label><input id="product-edit-price" name="priceAmount" type="text" inputmode="numeric" dir="ltr" data-admin-price max="9007199254740991" class="form-control" required /></div>
+                <div class="admin-modal-field admin-product-discount"><label for="product-edit-discount" class="form-label">درصد تخفیف واقعی</label><input id="product-edit-discount" name="discountPercent" type="number" min="0" max="99.99" step="0.01" class="form-control" required /></div>
                 <div class="admin-modal-field admin-product-limit"><label for="product-edit-limit" class="form-label">حداکثر تعداد خرید</label><input id="product-edit-limit" name="maxPurchaseQuantity" type="number" min="1" max="99" step="1" class="form-control" required /></div>
-                <p class="admin-modal-field-wide text-muted mb-0">قیمت نهایی فروش عادی وارد می‌شود؛ قیمت اختصاصی تنوع یا طرح جداگانه تنظیم می‌شود.</p>
+                <div class="admin-modal-field admin-modal-field-wide"><label for="product-edit-final-price" class="form-label">آخرین مبلغ نهایی ثبت‌شده (تومان)</label><input id="product-edit-final-price" name="finalPricePreview" type="text" class="form-control" readonly /></div>
+                <p class="admin-modal-field-wide text-muted mb-0">مبلغ نهایی جدید پس از ذخیره ثبت می‌شود؛ قیمت اختصاصی تنوع یا طرح جداگانه تنظیم می‌شود.</p>
             </div>
             <div class="modal-footer"><button type="button" class="btn btn-default" data-bs-dismiss="modal">انصراف</button><button type="submit" class="btn btn-primary"><i class="fa fa-floppy-disk me-1" aria-hidden="true"></i>ذخیره</button></div>
         </form></div>

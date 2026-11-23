@@ -88,7 +88,7 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
                 targetType = x.IdAccessory.HasValue ? "accessory" : x.IdProductVariant.HasValue ? "variant" : "product",
                 targetId = x.IdProductVariant ?? x.IdAccessory,
                 x.IdProductVariant, x.IdAccessory,
-                x.PriceAmount, x.DiscountPercent, x.IsActive, x.CreatedAtUtc, x.IdChangedBy, x.ChangeReason, x.IdPreviousVersion
+                PriceAmount = x.PriceBeforeDiscountAmount, x.DiscountPercent, x.FinalPriceAmount, x.IsActive, x.CreatedAtUtc, x.IdChangedBy, x.ChangeReason, x.IdPreviousVersion
             }).ToListAsync(cancellationToken));
     }
 
@@ -288,8 +288,9 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
                 VariantName = x.variant.VariantName.Name,
                 SalesPlanId = x.plan.StoreSalesPlanKey,
                 SalesPlanName = x.plan.DisplayName,
-                PriceAmount = db.StorePriceVersions.Where(v => v.IdProduct == x.product.Id && v.IdProductVariant == x.variant.Id && v.IdSalesPlan == x.plan.Id && v.IsActive).Select(v => (decimal?)v.PriceAmount).FirstOrDefault(),
+                PriceAmount = db.StorePriceVersions.Where(v => v.IdProduct == x.product.Id && v.IdProductVariant == x.variant.Id && v.IdSalesPlan == x.plan.Id && v.IsActive).Select(v => (decimal?)v.PriceBeforeDiscountAmount).FirstOrDefault(),
                 DiscountPercent = db.StorePriceVersions.Where(v => v.IdProduct == x.product.Id && v.IdProductVariant == x.variant.Id && v.IdSalesPlan == x.plan.Id && v.IsActive).Select(v => (decimal?)v.DiscountPercent).FirstOrDefault(),
+                FinalPriceAmount = db.StorePriceVersions.Where(v => v.IdProduct == x.product.Id && v.IdProductVariant == x.variant.Id && v.IdSalesPlan == x.plan.Id && v.IsActive).Select(v => (decimal?)v.FinalPriceAmount).FirstOrDefault(),
                 IsEnabled = x.offer == null ? null : x.offer.IsEnabled
             }).ToListAsync(cancellationToken);
         long[] variantIds = items.Select(x => x.VariantId).Distinct().ToArray();
@@ -358,6 +359,7 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
         public string SalesPlanName { get; set; } = "";
         public decimal? PriceAmount { get; set; }
         public decimal? DiscountPercent { get; set; }
+        public decimal? FinalPriceAmount { get; set; }
         public bool? IsEnabled { get; set; }
     }
 
@@ -400,8 +402,9 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
                 ProductName = x.product.Name,
                 SalesPlanId = x.plan.StoreSalesPlanKey,
                 SalesPlanName = x.plan.DisplayName,
-                PriceAmount = db.StorePriceVersions.Where(v => v.IdProduct == x.product.Id && v.IdSalesPlan == x.plan.Id && v.IsActive && v.IdProductVariant == null && v.IdAccessory == null).Select(v => (decimal?)v.PriceAmount).FirstOrDefault(),
+                PriceAmount = db.StorePriceVersions.Where(v => v.IdProduct == x.product.Id && v.IdSalesPlan == x.plan.Id && v.IsActive && v.IdProductVariant == null && v.IdAccessory == null).Select(v => (decimal?)v.PriceBeforeDiscountAmount).FirstOrDefault(),
                 DiscountPercent = db.StorePriceVersions.Where(v => v.IdProduct == x.product.Id && v.IdSalesPlan == x.plan.Id && v.IsActive && v.IdProductVariant == null && v.IdAccessory == null).Select(v => (decimal?)v.DiscountPercent).FirstOrDefault(),
+                FinalPriceAmount = db.StorePriceVersions.Where(v => v.IdProduct == x.product.Id && v.IdSalesPlan == x.plan.Id && v.IsActive && v.IdProductVariant == null && v.IdAccessory == null).Select(v => (decimal?)v.FinalPriceAmount).FirstOrDefault(),
                 MaxPurchaseQuantity = x.offer == null ? null : x.offer.MaxPurchaseQuantity,
                 IsEnabled = x.offer == null ? null : x.offer.IsEnabled
             }).ToListAsync(cancellationToken);
@@ -429,7 +432,7 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
             offer = new Shop.Data.Domain.Store.Entities.StoreProductSalesPlanOffer { IdProduct = productId, IdSalesPlan = plan.Id, MaxPurchaseQuantity = input.MaxPurchaseQuantity, IsEnabled = input.IsEnabled, CreatedAtUtc = DateTime.UtcNow };
             db.StoreProductSalesPlanOffers.Add(offer); await db.SaveChangesAsync(cancellationToken);
 
-            var accessorySeed = await (from pa in db.StoreProductAccessories join accessory in db.StoreAccessories on pa.IdAccessory equals accessory.Id where pa.IdProduct == productId && accessory.IsActive select new { pa.IdAccessory, pa.IsRequired, PriceAmount = (from version in db.StorePriceVersions join regular in db.SalesPlanReferences on version.IdSalesPlan equals (long?)regular.Id where version.IdProduct == productId && version.IdAccessory == pa.IdAccessory && version.IsActive && regular.IsRegular && regular.IdStockOwnerType == 1 orderby regular.Id select (decimal?)version.PriceAmount).FirstOrDefault() }).ToListAsync(cancellationToken);
+            var accessorySeed = await (from pa in db.StoreProductAccessories join accessory in db.StoreAccessories on pa.IdAccessory equals accessory.Id where pa.IdProduct == productId && accessory.IsActive select new { pa.IdAccessory, pa.IsRequired, PriceAmount = (from version in db.StorePriceVersions join regular in db.SalesPlanReferences on version.IdSalesPlan equals (long?)regular.Id where version.IdProduct == productId && version.IdAccessory == pa.IdAccessory && version.IsActive && regular.IsRegular && regular.IdStockOwnerType == 1 orderby regular.Id select (decimal?)version.FinalPriceAmount).FirstOrDefault() }).ToListAsync(cancellationToken);
             if (accessorySeed.Any(x => !x.PriceAmount.HasValue)) return Conflict(new { title = "قیمت عادی متعلقه ثبت نشده است." });
             db.StoreProductSalesPlanOfferAccessories.AddRange(accessorySeed.Select(x => new Shop.Data.Domain.Store.Entities.StoreProductSalesPlanOfferAccessory { IdProductSalesPlanOffer = offer.Id, IdAccessory = x.IdAccessory, IsIncludedByDefault = x.IsRequired, IsAllowed = true }));
             newAccessoryPrices = accessorySeed.Select(x => (x.IdAccessory, x.PriceAmount!.Value)).ToList();
@@ -454,6 +457,7 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
         public string SalesPlanName { get; set; } = "";
         public decimal? PriceAmount { get; set; }
         public decimal? DiscountPercent { get; set; }
+        public decimal? FinalPriceAmount { get; set; }
         public int? MaxPurchaseQuantity { get; set; }
         public bool? IsEnabled { get; set; }
     }
@@ -476,8 +480,8 @@ public sealed class StoreVariantPricesAdminApiController(ShopDbContext db, IStor
                           where pa.IdProduct == productId && accessory.IsActive
                           orderby pa.SortOrder, accessory.Name
                           select new OfferAccessoryRow { AccessoryId = accessory.Id, Name = accessory.Name, IsRequired = pa.IsRequired,
-                              BasePriceAmount = (from version in db.StorePriceVersions join regular in db.SalesPlanReferences on version.IdSalesPlan equals (long?)regular.Id where version.IdProduct == productId && version.IdAccessory == accessory.Id && version.IsActive && regular.IsRegular && regular.IdStockOwnerType == 1 orderby regular.Id select (decimal?)version.PriceAmount).FirstOrDefault() ?? 0m,
-                              PriceAmount = (from version in db.StorePriceVersions join plan in db.SalesPlanReferences on version.IdSalesPlan equals (long?)plan.Id where version.IdProduct == productId && version.IdAccessory == accessory.Id && version.IsActive && plan.StoreSalesPlanKey == salesPlanId select (decimal?)version.PriceAmount).FirstOrDefault(), IsAllowed = oa != null && oa.IsAllowed }).ToListAsync(cancellationToken);
+                              BasePriceAmount = (from version in db.StorePriceVersions join regular in db.SalesPlanReferences on version.IdSalesPlan equals (long?)regular.Id where version.IdProduct == productId && version.IdAccessory == accessory.Id && version.IsActive && regular.IsRegular && regular.IdStockOwnerType == 1 orderby regular.Id select (decimal?)version.FinalPriceAmount).FirstOrDefault() ?? 0m,
+                              PriceAmount = (from version in db.StorePriceVersions join plan in db.SalesPlanReferences on version.IdSalesPlan equals (long?)plan.Id where version.IdProduct == productId && version.IdAccessory == accessory.Id && version.IsActive && plan.StoreSalesPlanKey == salesPlanId select (decimal?)version.FinalPriceAmount).FirstOrDefault(), IsAllowed = oa != null && oa.IsAllowed }).ToListAsync(cancellationToken);
 
         return Ok(rows);
     }
