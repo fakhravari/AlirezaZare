@@ -12,7 +12,15 @@ BEGIN TRY
             THROW 51551, 'Unexpected testimonial or feedback schema.', 1;
         IF EXISTS (SELECT 1 FROM Store.HomeTestimonial h LEFT JOIN Store.ProductFeedback f ON f.Id = h.IdFeedback WHERE f.Id IS NULL)
             THROW 51552, 'A testimonial references a missing feedback row.', 1;
-        CREATE TABLE Store.HomeTestimonial_Independent (
+        SELECT f.IdProduct, f.DisplayName, f.FeedbackText, COALESCE(f.Rating, 0) AS Rating,
+               f.CreatedAtUtc, h.ImagePath, h.SortOrder,
+               CASE WHEN f.FeedbackType = N'reviews' AND f.Status = N'approved' THEN h.IsActive ELSE 0 END AS IsActive
+        INTO #HomeTestimonialTransfer
+        FROM Store.HomeTestimonial h JOIN Store.ProductFeedback f ON f.Id = h.IdFeedback;
+        IF (SELECT COUNT_BIG(*) FROM #HomeTestimonialTransfer) <> (SELECT COUNT_BIG(*) FROM Store.HomeTestimonial)
+            THROW 51553, 'Testimonial transfer count mismatch.', 1;
+        DROP TABLE Store.HomeTestimonial;
+        CREATE TABLE Store.HomeTestimonial (
             Id bigint IDENTITY(1,1) NOT NULL CONSTRAINT PK_HomeTestimonial_Independent PRIMARY KEY,
             IdProduct bigint NOT NULL,
             DisplayName nvarchar(80) NOT NULL,
@@ -24,14 +32,11 @@ BEGIN TRY
             IsActive bit NOT NULL,
             CONSTRAINT FK_HomeTestimonial_Independent_Product FOREIGN KEY (IdProduct) REFERENCES Warehouse.Product(Id)
         );
-        INSERT Store.HomeTestimonial_Independent (IdProduct, DisplayName, FeedbackText, Rating, CreatedAtUtc, ImagePath, SortOrder, IsActive)
-        SELECT f.IdProduct, f.DisplayName, f.FeedbackText, COALESCE(f.Rating, 0), f.CreatedAtUtc, h.ImagePath, h.SortOrder,
-               CASE WHEN f.FeedbackType = N'reviews' AND f.Status = N'approved' THEN h.IsActive ELSE 0 END
-        FROM Store.HomeTestimonial h JOIN Store.ProductFeedback f ON f.Id = h.IdFeedback;
-        IF (SELECT COUNT_BIG(*) FROM Store.HomeTestimonial_Independent) <> (SELECT COUNT_BIG(*) FROM Store.HomeTestimonial)
+        INSERT Store.HomeTestimonial (IdProduct, DisplayName, FeedbackText, Rating, CreatedAtUtc, ImagePath, SortOrder, IsActive)
+        SELECT IdProduct, DisplayName, FeedbackText, Rating, CreatedAtUtc, ImagePath, SortOrder, IsActive
+        FROM #HomeTestimonialTransfer;
+        IF (SELECT COUNT_BIG(*) FROM Store.HomeTestimonial) <> (SELECT COUNT_BIG(*) FROM #HomeTestimonialTransfer)
             THROW 51553, 'Testimonial transfer count mismatch.', 1;
-        DROP TABLE Store.HomeTestimonial;
-        EXEC sys.sp_rename N'Store.HomeTestimonial_Independent', N'HomeTestimonial';
         DECLARE @defaultName sysname;
         SELECT @defaultName = d.name FROM sys.default_constraints d
         JOIN sys.columns c ON c.object_id = d.parent_object_id AND c.column_id = d.parent_column_id

@@ -13,6 +13,9 @@ BEGIN TRY
             THROW 51562, 'Unexpected product feedback status schema.', 1;
         IF EXISTS (SELECT 1 FROM Store.ProductFeedback WHERE Status IS NULL OR Status COLLATE Latin1_General_100_BIN2 NOT IN (N'pending', N'approved', N'rejected'))
             THROW 51563, 'Unknown product feedback status; migration stopped.', 1;
+        -- The original schema has this known status constraint; the new foreign key replaces it.
+        IF EXISTS (SELECT 1 FROM sys.check_constraints WHERE parent_object_id = OBJECT_ID(N'Store.ProductFeedback') AND name = N'CK_Store_ProductFeedback_Status')
+            ALTER TABLE Store.ProductFeedback DROP CONSTRAINT CK_Store_ProductFeedback_Status;
         IF EXISTS (SELECT 1 FROM sys.sql_expression_dependencies d JOIN sys.columns c ON c.object_id = d.referenced_id AND c.column_id = d.referenced_minor_id
             WHERE d.referenced_id = OBJECT_ID(N'Store.ProductFeedback') AND c.name = N'Status')
             THROW 51564, 'A SQL module references ProductFeedback.Status; review it first.', 1;
