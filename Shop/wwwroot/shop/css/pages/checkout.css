@@ -1317,13 +1317,13 @@ body .selected-address-card-heading > strong {
   padding: 18px 0 12px;
   border-top: 1px solid color-mix(in srgb, var(--industrial-yellow) 14%, white);
 }
-.invoice-page #invoiceItems .cart-product-header .cart-product-unit-price {
+.invoice-page #savedOrderItems .cart-product-header .cart-product-unit-price {
   margin-top: 32px;
 }
-.invoice-page #invoiceItems .cart-product-header .cart-product-unit-price > span {
+.invoice-page #savedOrderItems .cart-product-header .cart-product-unit-price > span {
   margin-left: 10px;
 }
-.invoice-page #invoiceItems .invoice-item-quantity {
+.invoice-page #savedOrderItems .invoice-item-quantity {
   display: inline-flex;
   min-height: 32px;
   align-items: center;
@@ -1349,7 +1349,7 @@ body .selected-address-card-heading > strong {
   .invoice-page > .flow-grid > .flow-card {
     border-radius: var(--radius-panel-compact, 14px);
   }
-  .invoice-page #invoiceItems .invoice-item-quantity {
+  .invoice-page #savedOrderItems .invoice-item-quantity {
     min-height: 30px;
     padding-inline: 8px;
     font-size: 12px;

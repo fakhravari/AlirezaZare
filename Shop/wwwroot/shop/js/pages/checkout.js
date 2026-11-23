@@ -379,31 +379,100 @@ window.HNUI.ready(() => window.HNUI.mount("checkout", document, () => {
                 const amount = (value) => `${ui.formatNumber(Number(value) || 0)} تومان`;
                 const items = document.querySelector("#savedOrderItems");
                 items.replaceChildren();
+                const itemList = document.createElement("div");
+                itemList.className = "cart-items-list";
                 for (const item of savedOrder.items || []) {
                     const row = document.createElement("article");
                     row.className = "flow-row cart-product-row";
-                    const name = document.createElement("strong");
-                    name.textContent = item.name;
-                    const details = document.createElement("p");
-                    details.textContent = [item.variantName, `تعداد: ${ui.formatNumber(item.quantity)}`, `جمع: ${amount(item.unitAmount * item.quantity)}`].filter(Boolean).join(" · ");
-                    row.append(name, details);
-                    for (const component of item.priceReferences || []) {
-                        if (component.component !== "accessory") continue;
-                        const accessory = document.createElement("p");
-                        accessory.textContent = `${component.name}: ${amount(component.calculatedUnitAmount)}`;
-                        row.append(accessory);
+                    const header = document.createElement("div");
+                    header.className = "cart-product-header";
+                    const identity = document.createElement("div");
+                    identity.className = "cart-product-identity";
+                    if (item.image) {
+                        const image = document.createElement("img");
+                        image.src = item.image;
+                        image.alt = item.name || "";
+                        image.loading = "lazy";
+                        identity.append(image);
                     }
-                    items.append(row);
+                    const copy = document.createElement("div");
+                    copy.className = "cart-product-copy";
+                    const name = document.createElement("strong");
+                    name.textContent = item.name || "کالا";
+                    const unitPrice = document.createElement("p");
+                    unitPrice.className = "cart-product-unit-price";
+                    const unitLabel = document.createElement("span");
+                    unitLabel.textContent = item.variantName ? `تنوع: ${item.variantName}` : "قیمت واحد";
+                    const unitAmount = document.createElement("strong");
+                    unitAmount.textContent = amount(item.unitAmount);
+                    unitPrice.append(unitLabel, unitAmount);
+                    copy.append(name, unitPrice);
+                    identity.append(copy);
+                    header.append(identity);
+
+                    const toolbar = document.createElement("div");
+                    toolbar.className = "cart-product-toolbar";
+                    const lineTotal = document.createElement("p");
+                    lineTotal.className = "cart-product-line-total";
+                    const lineLabel = document.createElement("span");
+                    lineLabel.textContent = "جمع کالا";
+                    const lineAmount = document.createElement("strong");
+                    lineAmount.textContent = amount(Number(item.unitAmount) * Number(item.quantity));
+                    lineTotal.append(lineLabel, lineAmount);
+                    const quantity = document.createElement("span");
+                    quantity.className = "invoice-item-quantity";
+                    quantity.textContent = `تعداد: ${ui.formatNumber(item.quantity)}`;
+                    toolbar.append(lineTotal, quantity);
+
+                    const details = document.createElement("div");
+                    details.className = "cart-product-copy cart-product-details";
+                    const accessories = (item.priceReferences || []).filter((component) => component.component === "accessory");
+                    if (accessories.length) {
+                        const options = document.createElement("div");
+                        options.className = "cart-item-options";
+                        const group = document.createElement("div");
+                        group.className = "cart-item-option-group";
+                        const label = document.createElement("strong");
+                        label.className = "cart-item-option-label";
+                        label.textContent = "متعلقات";
+                        const list = document.createElement("div");
+                        list.className = "cart-item-option-list cart-item-option-list--accessories";
+                        for (const component of accessories) {
+                            const chip = document.createElement("span");
+                            chip.className = "cart-item-option-chip cart-item-option-chip--accessory";
+                            const chipName = document.createElement("strong");
+                            chipName.className = "cart-item-option-name";
+                            chipName.textContent = component.name || "متعلقه";
+                            const chipPrice = document.createElement("span");
+                            chipPrice.className = "cart-item-option-price";
+                            chipPrice.textContent = amount(component.calculatedUnitAmount);
+                            chip.append(chipName, chipPrice);
+                            list.append(chip);
+                        }
+                        group.append(label, list);
+                        options.append(group);
+                        details.append(options);
+                    }
+                    row.append(header, toolbar, details);
+                    itemList.append(row);
                 }
+                if (itemList.childElementCount) items.append(itemList);
+                else items.innerHTML = "<p>اقلام سفارش در دسترس نیست.</p>";
                 const summary = document.querySelector("#savedOrderSummary");
                 summary.replaceChildren();
+                const summaryHeading = document.createElement("div");
+                summaryHeading.className = "cart-summary-heading";
+                summaryHeading.innerHTML = '<span class="cart-summary-icon"><i class="bi bi-receipt" aria-hidden="true"></i></span><h2>خلاصهٔ سفارش</h2>';
+                const summaryLines = document.createElement("div");
+                summaryLines.className = "cart-summary-lines";
                 for (const [label, value] of [["شماره سفارش", savedOrder.number], ["جمع محصولات", amount(savedOrder.subtotalAmount)], ["تخفیف", amount(savedOrder.couponDiscountAmount)], ["مبلغ قابل پرداخت", amount(savedOrder.totalAmount)]]) {
                     const row = document.createElement("div");
-                    row.className = "flow-total";
+                    row.className = `flow-total${label === "مبلغ قابل پرداخت" ? " flow-payable" : ""}`;
                     const title = document.createElement("span"); title.textContent = label;
                     const valueNode = document.createElement("strong"); valueNode.textContent = value;
-                    row.append(title, valueNode); summary.append(row);
+                    row.append(title, valueNode); summaryLines.append(row);
                 }
+                summary.append(summaryHeading, summaryLines);
                 let address = null;
                 try { address = JSON.parse(savedOrder.addressSnapshotJson || "null"); } catch { /* Older orders may not have a readable snapshot. */ }
                 checkoutPreview.replaceChildren();
