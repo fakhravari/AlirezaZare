@@ -87,7 +87,7 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
 
                 if (ui.auth.isLoggedIn() && /^\d+$/.test(String(addressId))) {
                     const response = await ui.api.request(`account/addresses/${addressId}`, { method: "DELETE" });
-                    if (!response.ok) { ui.setMessage(status, "حذف نشانی از حساب انجام نشد.", "error"); return; }
+                    if (!response.ok) { ui.setMessage(status, response.status === 409 ? "این نشانی در سفارش ثبت شده است و قابل حذف نیست." : "حذف نشانی از حساب انجام نشد.", "error"); return; }
                 }
 
                 const currentAddresses = read(addressKey);
@@ -218,11 +218,11 @@ window.HNUI.ready(() => window.HNUI.mount("account", document, () => {
         host.replaceChildren();
         for (const order of orders) {
             const label = order.statusName || "نامشخص";
-            const dateLabel = formatPersianDate(order.orderedAtUtc);
+            const dateLabel = formatPersianDate(order.createdAtUtc);
             const card = document.createElement("article");
             card.className = "profile-order-card";
             card._orderDetails = order;
-            Object.assign(card.dataset, { orderNumber: order.number, orderStatus: label, orderDate: dateLabel, orderDatetime: order.orderedAtUtc || "", orderCount: String(order.itemCount), orderAmount: String(order.totalAmount), orderDelivery: label });
+            Object.assign(card.dataset, { orderNumber: order.number, orderStatus: label, orderDate: dateLabel, orderDatetime: order.createdAtUtc || "", orderCount: String(order.itemCount), orderAmount: String(order.totalAmount), orderDelivery: label });
             const paymentButton = order.status === "pending-payment" && Number.isSafeInteger(order.id) && order.id > 0
                 ? `<button type="button" data-pay-order="${order.id}">ادامهٔ پرداخت</button>` : "";
             const tracking = order.shippingCarrier && order.shippingTrackingCode ? `<p>شرکت حمل: ${ui.escapeHtml(order.shippingCarrier)}، کد رهگیری: <bdi>${ui.escapeHtml(order.shippingTrackingCode)}</bdi></p>` : "";

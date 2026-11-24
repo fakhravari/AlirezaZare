@@ -129,14 +129,13 @@ public sealed class StoreCustomerOrderReference
     public decimal SubtotalAmount { get; set; }
     public long? IdCoupon { get; set; }
     public decimal CouponDiscountAmount { get; set; }
-    public long? IdAddress { get; set; }
+    public long IdAddress { get; set; }
     public string PaymentMethod { get; set; } = "";
     public long IdBank { get; set; }
     public StoreBank Bank { get; set; } = null!;
-    public string? ExternalOrderKey { get; set; }
     public string? ShippingCarrier { get; set; }
     public string? ShippingTrackingCode { get; set; }
-    public DateTime OrderedAtUtc { get; set; }
+    public DateTime CreatedAtUtc { get; set; }
     public int ItemCount { get; set; }
     public string AddressSnapshotJson { get; set; } = "{}";
     public long? IdVoucher { get; set; }

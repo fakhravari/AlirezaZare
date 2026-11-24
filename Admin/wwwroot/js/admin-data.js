@@ -1374,7 +1374,7 @@
 
             renderRows(page, rows, item => [item.orderNumber, item.customerName, item.statusName || item.status,
                 item.paymentMethod, ui.formatNumber(item.itemCount), ui.formatNumber(item.totalAmount),
-                ui.formatDateTime(item.orderedAtUtc)]);
+                ui.formatDateTime(item.createdAtUtc)]);
             updateCount(page, 0, rows.length, false);
             updatePagination(page, result.page, result.hasNext, Math.ceil((result.total ?? 0) / (result.pageSize ?? pageSize)), target => loadOrders(page, target));
             status(page, "سفارش‌ها از دیتابیس دریافت شدند.");

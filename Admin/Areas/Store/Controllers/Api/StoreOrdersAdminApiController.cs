@@ -118,8 +118,8 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
                           join p in db.AccountProfiles.AsNoTracking() on o.IdProfile equals p.Id
                           where (q == "" || o.OrderNumber.Contains(q) || (p.FirstName + " " + p.LastName).Contains(q))
                               && (normalizedStatus == "" || o.StatusReference.Code == normalizedStatus)
-                              && (!fromUtc.HasValue || o.OrderedAtUtc >= fromUtc.Value)
-                              && (!untilUtc.HasValue || o.OrderedAtUtc < untilUtc.Value)
+                              && (!fromUtc.HasValue || o.CreatedAtUtc >= fromUtc.Value)
+                              && (!untilUtc.HasValue || o.CreatedAtUtc < untilUtc.Value)
                           orderby o.Id descending
                           select new OrderRow
                           {
@@ -133,7 +133,7 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
                               BankName = o.Bank == null ? null : o.Bank.NameFa,
                               ItemCount = o.ItemCount,
                               TotalAmount = o.TotalAmount,
-                              OrderedAtUtc = o.OrderedAtUtc,
+                              CreatedAtUtc = o.CreatedAtUtc,
                               CustomerName = (p.FirstName + " " + p.LastName).Trim()
                           };
         int total = await query.CountAsync(cancellationToken);
@@ -163,7 +163,7 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
                                TotalAmount = o.TotalAmount,
                                SubtotalAmount = o.SubtotalAmount,
                                CouponDiscountAmount = o.CouponDiscountAmount,
-                               OrderedAtUtc = o.OrderedAtUtc,
+                               CreatedAtUtc = o.CreatedAtUtc,
                                CustomerName = (p.FirstName + " " + p.LastName).Trim(),
                                IdVoucher = o.IdVoucher,
                                ShippingCarrier = o.ShippingCarrier,
@@ -276,7 +276,7 @@ public sealed class StoreOrdersAdminApiController(ShopDbContext db) : Controller
         public string? BankName { get; set; }
         public int ItemCount { get; set; }
         public decimal TotalAmount { get; set; }
-        public DateTime OrderedAtUtc { get; set; }
+        public DateTime CreatedAtUtc { get; set; }
         public string CustomerName { get; set; } = "";
     }
 

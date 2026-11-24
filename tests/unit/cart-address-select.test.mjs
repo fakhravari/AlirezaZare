@@ -82,8 +82,7 @@ test('selecting an address enables checkout and sends the selected address', {sk
   await page.locator('.cart-checkout-link').click();
   await page.waitForFunction(() => window.checkoutSubmission);
   const submission = await page.evaluate(() => window.checkoutSubmission);
-  assert.match(submission.checkoutKey, /^[0-9a-f-]{36}$/);
-  assert.deepEqual({...submission, checkoutKey: undefined}, {addressId: 42, paymentMethod: 'zarinpal', couponCode: null, checkoutKey: undefined});
+  assert.deepEqual(submission, {addressId: 42, paymentMethod: 'zarinpal', couponCode: null});
   await page.waitForFunction(() => document.querySelector('#paymentMethodStatus').textContent.includes('موجودی کافی'));
   assert.equal(await page.locator('.cart-checkout-link').getAttribute('aria-disabled'), 'false');
 });

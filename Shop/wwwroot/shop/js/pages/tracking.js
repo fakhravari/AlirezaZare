@@ -35,7 +35,7 @@ window.HNUI.mount("pages-order-tracking", document, () => {
     fields.className = "tracking-result-fields";
     addField(fields, "کد سفارش", data.orderNumber, "ltr");
     addField(fields, "وضعیت", data.statusName || data.status || "ثبت‌شده");
-    addField(fields, "زمان ثبت", formatDate(data.orderedAtUtc));
+    addField(fields, "زمان ثبت", formatDate(data.createdAtUtc));
     addField(fields, "شرکت حمل", data.shippingCarrier);
     addField(fields, "کد رهگیری", data.shippingTrackingCode, "ltr");
     resultHost.append(heading, fields);

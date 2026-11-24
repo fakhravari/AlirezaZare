@@ -58,12 +58,12 @@ public sealed class CouponsController(ShopDbContext db) : Controller
                      join orderStatus in db.OrderStatuses.AsNoTracking() on order.IdStatus equals orderStatus.Id
                      where usage.IdCoupon == id
                      select new CouponOrderRow(order.Id, order.OrderNumber, profile.FirstName + " " + profile.LastName,
-                         orderStatus.NameFa, order.OrderedAtUtc, order.SubtotalAmount, order.CouponDiscountAmount, order.TotalAmount);
+                         orderStatus.NameFa, order.CreatedAtUtc, order.SubtotalAmount, order.CouponDiscountAmount, order.TotalAmount);
         int total = await orders.CountAsync(cancellationToken);
         decimal discount = await orders.SumAsync(order => (decimal?)order.Discount, cancellationToken) ?? 0;
         decimal subtotal = await orders.SumAsync(order => (decimal?)order.Subtotal, cancellationToken) ?? 0;
         decimal payable = await orders.SumAsync(order => (decimal?)order.Total, cancellationToken) ?? 0;
-        var rows = await orders.OrderByDescending(order => order.OrderedAtUtc).ThenByDescending(order => order.Id)
+        var rows = await orders.OrderByDescending(order => order.CreatedAtUtc).ThenByDescending(order => order.Id)
             .Skip((page - 1) * 25).Take(25).ToListAsync(cancellationToken);
         return View(new CouponReportModel(coupon.Id, coupon.Code, coupon.UsageLimit, total, subtotal, discount, payable, page, rows));
     }
@@ -151,5 +151,5 @@ public sealed class CouponsController(ShopDbContext db) : Controller
 
 public sealed record CouponRow(long Id, string Code, int DiscountPercent, int UsageLimit, bool Enabled, DateOnly ExpiresOn, int Uses, decimal Discount, bool HasOrders, long? IdProfile, string? CustomerEmail);
 public sealed record CouponIndexModel(List<CouponRow> Coupons, string Query, string Status, int Page, int Total, int Uses, decimal Discount, DateOnly Today);
-public sealed record CouponOrderRow(long Id, string OrderNumber, string Customer, string Status, DateTime OrderedAtUtc, decimal Subtotal, decimal Discount, decimal Total);
+public sealed record CouponOrderRow(long Id, string OrderNumber, string Customer, string Status, DateTime CreatedAtUtc, decimal Subtotal, decimal Discount, decimal Total);
 public sealed record CouponReportModel(long Id, string Code, int UsageLimit, int Uses, decimal Subtotal, decimal Discount, decimal Total, int Page, List<CouponOrderRow> Orders);

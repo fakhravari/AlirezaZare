@@ -5,19 +5,17 @@ BEGIN TRY
     DECLARE @source BIGINT = (SELECT TOP (1) o.Id FROM [Store].[Order] o
         JOIN [Account].[Profile] p ON p.Id = o.IdProfile
         WHERE p.Email = N'demo-orders-20261112@invalid.example' AND o.PaymentMethod = N'demo'
-          AND o.ExternalOrderKey LIKE N'demo-order-fixture-20261112-%'
           AND EXISTS (SELECT 1 FROM [Store].[OrderItem] i WHERE i.IdOrder = o.Id)
         ORDER BY o.Id);
     IF @source IS NULL THROW 51101, 'The existing demo order fixture is required.', 1;
-    DECLARE @n INT = 1, @newId BIGINT, @key NVARCHAR(100), @number NVARCHAR(32);
+    DECLARE @n INT = 1, @newId BIGINT, @number NVARCHAR(32);
     WHILE @n <= 5
     BEGIN
-        SET @key = CONCAT(N'demo-order-warehouse-queue-', RIGHT(CONCAT(N'00', @n), 2));
         SET @number = CONCAT(N'DEMO-WH-QUEUE-', RIGHT(CONCAT(N'00', @n), 2));
-        IF NOT EXISTS (SELECT 1 FROM [Store].[Order] WHERE ExternalOrderKey = @key)
+        IF NOT EXISTS (SELECT 1 FROM [Store].[Order] WHERE OrderNumber = @number)
         BEGIN
-            INSERT [Store].[Order] (IdProfile, OrderNumber, ExternalOrderKey, IdStatus, PaymentMethod, IdBank, ItemCount, TotalAmount, SubtotalAmount, CouponDiscountAmount, OrderedAtUtc, AddressSnapshotJson)
-            SELECT source.IdProfile, @number, @key, status.Id, N'demo', source.IdBank, source.ItemCount, source.TotalAmount, source.TotalAmount, 0,
+            INSERT [Store].[Order] (IdProfile, OrderNumber, IdStatus, PaymentMethod, IdBank, ItemCount, TotalAmount, SubtotalAmount, CouponDiscountAmount, CreatedAtUtc, AddressSnapshotJson)
+            SELECT source.IdProfile, @number, status.Id, N'demo', source.IdBank, source.ItemCount, source.TotalAmount, source.TotalAmount, 0,
                    DATEADD(MINUTE, -@n, SYSUTCDATETIME()), AddressSnapshotJson
             FROM [Store].[Order] source CROSS JOIN Store.OrderStatus status
             WHERE source.Id = @source AND status.Code = N'payment-confirmed';

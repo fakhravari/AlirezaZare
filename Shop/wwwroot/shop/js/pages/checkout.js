@@ -13,7 +13,6 @@ window.HNUI.ready(() => window.HNUI.mount("checkout", document, () => {
     let selectedPaymentMethod = checkoutPage?.dataset.paymentMethod || "zarinpal";
     let checkoutPending = false;
     let savedOrder = null;
-    const checkoutKeyStorage = "hn-pending-checkout-key";
     const purchaseErrorText = (code) => ({
         "insufficient-stock": "موجودی کافی از این کالا باقی نمانده است؛ تعداد یا تنوع را در سبد اصلاح کنید.",
         "inventory-variant-required": "برای یکی از کالاها تنوع انبار را انتخاب کنید.",
@@ -281,11 +280,6 @@ window.HNUI.ready(() => window.HNUI.mount("checkout", document, () => {
                         syncPayment();
                         return;
                     }
-                    let checkoutKey = sessionStorage.getItem(checkoutKeyStorage);
-                    if (!checkoutKey) {
-                        checkoutKey = crypto.randomUUID();
-                        sessionStorage.setItem(checkoutKeyStorage, checkoutKey);
-                    }
                     const items = ui.cart.read().map((item) => ({
                         productId: Number(String(item.id).replace(/:.*$/, "")),
                         salesPlanId: item.salesPlanId || "regular", quantity: item.quantity,
@@ -298,13 +292,12 @@ window.HNUI.ready(() => window.HNUI.mount("checkout", document, () => {
                         throw new Error(checkoutErrorText(error.code));
                     }
                     const couponCode = String(ui.storage.get("hn-coupon-code", ui.storage.get("hn-demo-coupon", ""))).trim().toUpperCase();
-                    const response = await ui.api.request("account/checkout", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ addressId: Number(selected), paymentMethod: selectedPaymentMethod, couponCode: couponCode || null, checkoutKey }) });
+                    const response = await ui.api.request("account/checkout", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ addressId: Number(selected), paymentMethod: selectedPaymentMethod, couponCode: couponCode || null }) });
                     const result = await response.json().catch(() => ({}));
                     if (!response.ok || !result.id) throw new Error(checkoutErrorText(result.code));
                     ui.storage.remove("hn-coupon-code");
                     ui.storage.remove("hn-demo-coupon");
                     ui.cart.write([]);
-                    sessionStorage.removeItem(checkoutKeyStorage);
                     window.location.assign(`${link.href.split("?")[0]}?orderId=${encodeURIComponent(result.id)}`);
                 } catch (error) {
                     checkoutPending = false;
@@ -486,13 +479,6 @@ window.HNUI.ready(() => window.HNUI.mount("checkout", document, () => {
     if (ui.auth.isLoggedIn()) void ui.api.request("account/state").then(async (response) => {
         if (!response.ok) return;
         const account = await response.json();
-        const pendingKey = select && sessionStorage.getItem(checkoutKeyStorage);
-        const pendingOrder = pendingKey && (account.orders || []).find((order) => order.checkoutKey === `checkout-${pendingKey}`);
-        if (pendingOrder) {
-            sessionStorage.removeItem(checkoutKeyStorage);
-            window.location.assign(`Checkout?orderId=${encodeURIComponent(pendingOrder.id)}`);
-            return;
-        }
         if (Array.isArray(account.addresses)) addresses = account.addresses;
         if (!selected) selected = String(account.checkout?.selectedAddressId || "");
         ui.storage.hydrate(addressKey, JSON.stringify(addresses));

@@ -4,7 +4,7 @@ DECLARE @OrderNumber nvarchar(32) = N'DEMO-INVOICE-20261122';
 SELECT
     o.Id AS OrderId,
     o.OrderNumber,
-    o.OrderedAtUtc,
+    o.CreatedAtUtc,
     status.Code AS Status,
     o.PaymentMethod,
     o.IdBank,

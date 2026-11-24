@@ -31,7 +31,7 @@ public sealed class OrderTrackingApiController(ShopDbContext db) : ControllerBas
                 x.OrderNumber,
                 Status = x.StatusReference.Code,
                 StatusName = x.StatusReference.NameFa,
-                x.OrderedAtUtc,
+                x.CreatedAtUtc,
                 x.ShippingCarrier,
                 x.ShippingTrackingCode,
                 x.AddressSnapshotJson
@@ -48,7 +48,7 @@ public sealed class OrderTrackingApiController(ShopDbContext db) : ControllerBas
             orderNumber = order.OrderNumber,
             status = order.Status,
             statusName = order.StatusName,
-            orderedAtUtc = DateTime.SpecifyKind(order.OrderedAtUtc, DateTimeKind.Utc),
+            createdAtUtc = DateTime.SpecifyKind(order.CreatedAtUtc, DateTimeKind.Utc),
             shippingCarrier = order.ShippingCarrier,
             shippingTrackingCode = order.ShippingTrackingCode,
             trackingHistory

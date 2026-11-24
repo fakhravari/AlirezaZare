@@ -11,7 +11,7 @@
             <div class="table-responsive"><table class="table table-striped align-middle"><thead><tr><th>شماره سفارش</th><th>مشتری</th><th>وضعیت سفارش</th><th>زمان ثبت (تهران)</th><th>پیش از کوپن (تومان)</th><th>تخفیف (تومان)</th><th>مبلغ سفارش (تومان)</th></tr></thead><tbody>
                 @foreach (var order in Model.Orders)
                 {
-                    <tr><td><bdi dir="ltr">@order.OrderNumber</bdi></td><td>@order.Customer</td><td>@order.Status</td><td><time data-admin-date datetime="@(order.OrderedAtUtc.ToString("yyyy-MM-ddTHH:mm:ss", System.Globalization.CultureInfo.InvariantCulture))Z" dir="ltr">@order.OrderedAtUtc.ToString("yyyy-MM-dd HH:mm", System.Globalization.CultureInfo.InvariantCulture) UTC</time></td><td>@order.Subtotal.ToString("N0")</td><td>@order.Discount.ToString("N0")</td><td>@order.Total.ToString("N0")</td></tr>
+                    <tr><td><bdi dir="ltr">@order.OrderNumber</bdi></td><td>@order.Customer</td><td>@order.Status</td><td><time data-admin-date datetime="@(order.CreatedAtUtc.ToString("yyyy-MM-ddTHH:mm:ss", System.Globalization.CultureInfo.InvariantCulture))Z" dir="ltr">@order.CreatedAtUtc.ToString("yyyy-MM-dd HH:mm", System.Globalization.CultureInfo.InvariantCulture) UTC</time></td><td>@order.Subtotal.ToString("N0")</td><td>@order.Discount.ToString("N0")</td><td>@order.Total.ToString("N0")</td></tr>
                 }
                 @if (Model.Orders.Count == 0) { <tr><td colspan="7">مصرفی در این صفحه ثبت نشده است.</td></tr> }
             </tbody></table></div>

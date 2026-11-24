@@ -628,10 +628,9 @@ public sealed class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbC
             entity.HasOne<AccountCoupon>().WithMany().HasForeignKey(x => x.IdCoupon).OnDelete(DeleteBehavior.Restrict);
             entity.Property(x => x.PaymentMethod).HasMaxLength(40).IsRequired();
             entity.HasOne(x => x.Bank).WithMany().HasForeignKey(x => x.IdBank).IsRequired().OnDelete(DeleteBehavior.Restrict);
-            entity.Property(x => x.ExternalOrderKey).HasMaxLength(100);
             entity.Property(x => x.ShippingCarrier).HasMaxLength(100);
             entity.Property(x => x.ShippingTrackingCode).HasMaxLength(100);
-            entity.Property(x => x.OrderedAtUtc).HasPrecision(3);
+            entity.Property(x => x.CreatedAtUtc).HasPrecision(3);
             entity.Property(x => x.AddressSnapshotJson).HasColumnType("nvarchar(max)").IsRequired();
             entity.HasMany(x => x.Items).WithOne().HasForeignKey(x => x.IdOrder).OnDelete(DeleteBehavior.Cascade);
         });

@@ -54,7 +54,7 @@ public sealed class StorePaidOrdersDispatchApiController(ShopDbContext db, IWare
                 x.profile,
                 PaidAtUtc = db.StorePaymentAttempts.AsNoTracking().Where(payment => payment.IdOrder == x.order.Id && payment.StatusReference.Code == "verified" &&
                         payment.Amount == x.order.TotalAmount && payment.PaidAtUtc != null)
-                    .OrderBy(payment => payment.PaidAtUtc).Select(payment => payment.PaidAtUtc).FirstOrDefault() ?? x.order.OrderedAtUtc
+                    .OrderBy(payment => payment.PaidAtUtc).Select(payment => payment.PaidAtUtc).FirstOrDefault() ?? x.order.CreatedAtUtc
             }).OrderBy(x => x.PaidAtUtc).ThenBy(x => x.order.Id).Skip(paging.Offset).Take(paging.PageSize).Select(x => new PaidOrderRow
             {
                 Id = x.order.Id,

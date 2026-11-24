@@ -1,10 +1,10 @@
-﻿SET NOCOUNT ON;
+SET NOCOUNT ON;
 SET XACT_ABORT ON;
 BEGIN TRY
     BEGIN TRANSACTION;
-    IF NOT EXISTS (SELECT 1 FROM Store.[Order] WHERE ExternalOrderKey=N'demo-order-price-components-20261122')
+    IF NOT EXISTS (SELECT 1 FROM Store.[Order] WHERE OrderNumber=N'DEMO-PRICE-COMPONENTS-20261122')
     BEGIN
-        DECLARE @source bigint = (SELECT TOP (1) Id FROM Store.[Order] WHERE PaymentMethod=N'demo' AND ExternalOrderKey LIKE N'demo-order-fixture-%' ORDER BY Id);
+        DECLARE @source bigint = (SELECT TOP (1) o.Id FROM Store.[Order] o WHERE o.PaymentMethod=N'demo' AND EXISTS (SELECT 1 FROM Store.OrderItem i WHERE i.IdOrder=o.Id) ORDER BY o.Id);
         DECLARE @variantPrice bigint, @productPrice bigint, @accessoryPrice bigint, @product bigint, @unvariedProduct bigint, @variant bigint, @plan bigint;
         SELECT TOP (1) @variantPrice=v.Id, @product=v.IdProduct, @variant=v.IdVariant, @plan=v.IdSalesPlan
         FROM Store.PriceVersion v
@@ -19,8 +19,8 @@ BEGIN TRY
         DECLARE @total decimal(19,0) = (SELECT SUM(FinalPriceAmount)
             FROM Store.PriceVersion WHERE Id IN (@productPrice,@variantPrice,@accessoryPrice));
         DECLARE @newOrder bigint;
-        INSERT Store.[Order] (IdProfile, OrderNumber, ExternalOrderKey, IdStatus, PaymentMethod, IdBank, ItemCount, TotalAmount, SubtotalAmount, CouponDiscountAmount, OrderedAtUtc, AddressSnapshotJson)
-        SELECT source.IdProfile, N'DEMO-PRICE-COMPONENTS-20261122', N'demo-order-price-components-20261122', status.Id, N'demo', source.IdBank, 2, @total, @total, 0, SYSUTCDATETIME(), source.AddressSnapshotJson
+        INSERT Store.[Order] (IdProfile, OrderNumber, IdStatus, PaymentMethod, IdBank, ItemCount, TotalAmount, SubtotalAmount, CouponDiscountAmount, CreatedAtUtc, AddressSnapshotJson)
+        SELECT source.IdProfile, N'DEMO-PRICE-COMPONENTS-20261122', status.Id, N'demo', source.IdBank, 2, @total, @total, 0, SYSUTCDATETIME(), source.AddressSnapshotJson
         FROM Store.[Order] source CROSS JOIN Store.OrderStatus status WHERE source.Id=@source AND status.Code=N'pending-payment';
         SET @newOrder=SCOPE_IDENTITY();
         INSERT Store.OrderItem (IdOrder,IdProduct,IdVariant,IdSalesPlan,Quantity,IdPriceVersion)

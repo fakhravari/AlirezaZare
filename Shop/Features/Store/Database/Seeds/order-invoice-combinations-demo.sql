@@ -4,9 +4,9 @@ SET XACT_ABORT ON;
 BEGIN TRY
     BEGIN TRANSACTION;
 
-    IF NOT EXISTS (SELECT 1 FROM Store.[Order] WHERE ExternalOrderKey=N'demo-order-invoice-combinations-20261122')
+    IF NOT EXISTS (SELECT 1 FROM Store.[Order] WHERE OrderNumber=N'DEMO-INVOICE-20261122')
     BEGIN
-        DECLARE @source bigint = (SELECT TOP (1) Id FROM Store.[Order] WHERE PaymentMethod=N'demo' AND ExternalOrderKey LIKE N'demo-order-fixture-%' ORDER BY Id);
+        DECLARE @source bigint = (SELECT TOP (1) o.Id FROM Store.[Order] o WHERE o.PaymentMethod=N'demo' AND EXISTS (SELECT 1 FROM Store.OrderItem i WHERE i.IdOrder=o.Id) ORDER BY o.Id);
         DECLARE @plan bigint, @product bigint, @variant bigint, @plainProduct bigint;
         DECLARE @plainPrice bigint, @variantPrice bigint, @accessoryPrice bigint;
         DECLARE @total decimal(19,0), @newOrder bigint, @variantWithAccessoryItem bigint;
@@ -55,8 +55,8 @@ BEGIN TRY
                  WHERE variantPrice.Id=@variantPrice AND accessoryPrice.Id=@accessoryPrice);
 
         INSERT Store.[Order]
-            (IdProfile,OrderNumber,ExternalOrderKey,IdStatus,PaymentMethod,IdBank,ItemCount,TotalAmount,SubtotalAmount,CouponDiscountAmount,OrderedAtUtc,AddressSnapshotJson)
-        SELECT source.IdProfile,N'DEMO-INVOICE-20261122',N'demo-order-invoice-combinations-20261122',status.Id,N'demo',source.IdBank,5,@total,@total,0,SYSUTCDATETIME(),source.AddressSnapshotJson
+            (IdProfile,OrderNumber,IdStatus,PaymentMethod,IdBank,ItemCount,TotalAmount,SubtotalAmount,CouponDiscountAmount,CreatedAtUtc,AddressSnapshotJson)
+        SELECT source.IdProfile,N'DEMO-INVOICE-20261122',status.Id,N'demo',source.IdBank,5,@total,@total,0,SYSUTCDATETIME(),source.AddressSnapshotJson
         FROM Store.[Order] source CROSS JOIN Store.OrderStatus status WHERE source.Id=@source AND status.Code=N'pending-payment';
         SET @newOrder=SCOPE_IDENTITY();
 

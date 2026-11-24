@@ -147,8 +147,7 @@ public sealed class AccountController(
                 ShippingTrackingCode = x.ShippingTrackingCode,
                 x.PaymentMethod,
                 x.AddressSnapshotJson,
-                x.ExternalOrderKey,
-                x.OrderedAtUtc,
+                x.CreatedAtUtc,
                 x.ItemCount,
                 x.TotalAmount,
                 x.SubtotalAmount,
@@ -274,10 +273,9 @@ public sealed class AccountController(
                 order.StatusName,
                 order.PaymentMethod,
                 order.AddressSnapshotJson,
-                checkoutKey = order.ExternalOrderKey,
                 order.ShippingCarrier,
                 shippingTrackingCode = order.ShippingTrackingCode,
-                orderedAtUtc = AsUtc(order.OrderedAtUtc),
+                createdAtUtc = AsUtc(order.CreatedAtUtc),
                 order.ItemCount,
                 order.TotalAmount,
                 order.SubtotalAmount,
@@ -713,17 +711,6 @@ public sealed class AccountController(
             request.PaymentMethod != "zarinpal") return BadRequest(new { code = "invalid-checkout" });
 
         await using var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, ct);
-        string? checkoutKey = Guid.TryParse(request.CheckoutKey, out var parsedKey) ? $"checkout-{parsedKey:D}" : null;
-        if (request.CheckoutKey is not null && checkoutKey is null)
-            return BadRequest(new { code = "invalid-checkout" });
-        if (checkoutKey is not null)
-        {
-            var existing = await db.StoreCustomerOrders.AsNoTracking()
-                .Where(order => order.IdProfile == ProfileId && order.ExternalOrderKey == checkoutKey)
-                .Select(order => new { order.Id, number = order.OrderNumber })
-                .SingleOrDefaultAsync(ct);
-            if (existing is not null) return Ok(existing);
-        }
         var storedCartRows = await (
             from cart in db.AccountCarts.AsNoTracking()
             join item in db.AccountCartItems.AsNoTracking() on cart.Id equals item.IdCart
@@ -933,7 +920,6 @@ public sealed class AccountController(
         var order = new StoreCustomerOrderReference
         {
             IdProfile = ProfileId,
-            ExternalOrderKey = checkoutKey,
             IdAddress = request.AddressId,
             OrderNumber = number,
             IdStatus = pendingPaymentStatusId,
@@ -945,7 +931,7 @@ public sealed class AccountController(
             IdCoupon = appliedCoupon?.Id,
             CouponDiscountAmount = couponDiscountAmount,
             AddressSnapshotJson = addressSnapshot,
-            OrderedAtUtc = DateTime.UtcNow,
+            CreatedAtUtc = DateTime.UtcNow,
             Items = priced.Select(item => new StoreCustomerOrderItem
             {
                 IdProduct = item.Line.ProductId,
@@ -1009,7 +995,7 @@ public sealed class AccountController(
             subtotalAmount = subtotal,
             couponCode = appliedCoupon?.Code,
             couponDiscountAmount,
-            orderedAtUtc = DateTimeOffset.UtcNow,
+            createdAtUtc = new DateTimeOffset(DateTime.SpecifyKind(order.CreatedAtUtc, DateTimeKind.Utc)),
             message = "سفارش ثبت شد و در انتظار پرداخت است."
         });
     }
@@ -1025,9 +1011,10 @@ public sealed class AccountController(
     [HttpDelete("addresses/{id:long}")]
     public async Task<IActionResult> DeleteAddress(long id, CancellationToken ct)
     {
-        await using var transaction = await db.Database.BeginTransactionAsync(ct);
-        await db.StoreCustomerOrders.Where(x => x.IdProfile == ProfileId && x.IdAddress == id) .ExecuteUpdateAsync(update => update.SetProperty(x => x.IdAddress, (long?)null), ct);
+        await using var transaction = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, ct);
         var address = await db.AccountAddresses.SingleOrDefaultAsync(x => x.Id == id && x.IdProfile == ProfileId, ct);
+        if (address is not null && await db.StoreCustomerOrders.AnyAsync(x => x.IdAddress == id, ct))
+            return Conflict(new { code = "address-has-orders" });
         if (address is not null) db.AccountAddresses.Remove(address);
         await db.SaveChangesAsync(ct);
 
@@ -1276,7 +1263,7 @@ public sealed class AccountController(
         long? VariantId = null,
         IReadOnlyList<long>? AccessoryIds = null);
 
-    public sealed record CheckoutRequest(long AddressId, string PaymentMethod, string? CouponCode = null, string? CheckoutKey = null);
+    public sealed record CheckoutRequest(long AddressId, string PaymentMethod, string? CouponCode = null);
 
     public sealed record CouponRequest(string? Code);
 
